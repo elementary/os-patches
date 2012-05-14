@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# checks if any imports should be performed and performs them
+# accepts package names as command-line parameters
+
+if [ -z "$@" ]; then
+    echo "No packages specified. Nothing to do." > /dev/stderr
+    exit 0
+fi
+
+# don't let l10n interfere with our grepping
+export LC_ALL=C
+
+# export something different from your shell to override this value
+export bzr_branch_prefix=${bzr_branch_prefix:-'lp:~elementary-os/ubuntu-package-imports/'}
+
+# check if any source repos are enabled
+if ! grep -E --silent '^ *deb-src' /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+echo "You don't have any source code repositories enabled.
+Please enable them via software-center or by uncommenting lines starting with
+'deb-src' in sources.list and sources.list.d/" > /dev/stderr 
+exit 1
+fi
+
+# update info about available packages
+# try to use aptdcon which doesn't propmt for sudo password and fall back to apt
+aptdcon --refresh || sudo apt-get update || echo "Failed to update package version information.
+Continuing anyway, but imported packages may be outdated."
+
+get_latest_package_version() {
+package="$1"
+apt-cache policy "$package" \
+ | grep 'Candidate' \
+ | sed --regexp-extended 's/^.*Candidate: //'
+}
+
+package_version_already_imported() {
+package="$1"
+version="$2"
+rm -r "$package"
+bzr branch "$bzr_branch_prefix""$package" &&
+grep --silent "$version" "$package"/debian/changelog
+}
+
+# main cycle
+while ! [ -z "$1" ]; do
+    package="$1"
+    latest_version="$(get_latest_package_version $package)"
+    if ! package_version_already_imported "$package" "$latest_version" ; then
+        rm -r "$package"*
+        apt-get source "$package" || {
+echo "Failed to download source code package $package" > /dev/stderr 
+exit 1
+}
+
+        cd "$package"-* || { echo "Failed to cd to the downloaded source code directory.
+Most likely this is a bug in the script.
+Please report this failure at:
+https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
+exit 1
+}
+
+        if bzr branch "$bzr_branch_prefix""$package"; then
+            # branching succeeded
+            cp -r ../"$package"/.bzr .bzr
+            bzr add
+            debcommit
+        else
+            # branching failed; assuming the branch doesn't exist, which means
+            # this is the first import of this package
+            bzr init
+            bzr add
+            bzr commit -m "Initial import, version $latest_version"
+        fi
+
+        bzr push "$bzr_branch_prefix""$package" || {
+echo "Failed to upload the code to the bazaar branch.
+Either your internet connection suddently went out, or it's caused by a bug.
+If your internet connection is okay, please report this failure at:
+https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
+exit 1
+}
+    fi
+    shift
+done
+
+exit 0
