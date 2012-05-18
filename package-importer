@@ -3,11 +3,13 @@
 # checks if any imports should be performed and performs them
 # accepts package names as command-line parameters
 # if none given, downloads the lists from a bzr branch
-# Defaunt branch is lp:ubuntu-package-imports/elementary-import-list
+# Defaunt branch is lp:ubuntu-package-imports/elementary-import-list-distroversion
 # export LISTS_BRANCH variable from your shell to override it
 
+distro_version=$(lsb_release -cs)
+
 if [ -z "$@" ]; then
-    LISTS_BRANCH=${LISTS_BRANCH:-'lp:ubuntu-package-imports/elementary-import-list'}
+    LISTS_BRANCH=${LISTS_BRANCH:-"lp:ubuntu-package-imports/elementary-import-list-$distro_version"}
     target_folder=$(echo "$LISTS_BRANCH" | rev | cut -d '/' -f 1 | rev )
     echo "No packages specificed on command line.
 Using package list from $LISTS_BRANCH" > /dev/stderr 
@@ -47,9 +49,9 @@ apt-cache policy "$package" \
 package_version_already_imported() {
 package="$1"
 version="$2"
-rm -r "$package"
-bzr branch "$bzr_branch_prefix""$package" &&
-grep --silent "$version" "$package"/debian/changelog
+rm -r "$package-$distro_version"
+bzr branch "$bzr_branch_prefix""$package-$distro_version" &&
+grep --silent "$version" "$package-$distro_version"/debian/changelog
 }
 
 # main cycle
@@ -69,9 +71,9 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
 exit 1
 }
 
-        if bzr branch "$bzr_branch_prefix""$package" ../"$package"; then
+        if bzr branch "$bzr_branch_prefix""$package-$distro_version" ../"$package-$distro_version"; then
             # branching succeeded
-            cp -r ../"$package"/.bzr .bzr
+            cp -r ../"$package-$distro_version"/.bzr .bzr
             bzr add
             debcommit
         else
@@ -82,10 +84,10 @@ exit 1
             bzr commit -m "Initial import, version $latest_version"
         fi
 
-        bzr push "$bzr_branch_prefix""$package" || {
+        bzr push "$bzr_branch_prefix""$package-$distro_version" || {
 echo "Failed to upload the code to the bazaar branch.
 Either your internet connection suddently went out, or it's caused by a bug.
-If your internet connection is okay, please report this failure at:
+If your internet connection works, please report this failure at:
 https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
 exit 1
 }
