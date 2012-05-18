@@ -60,7 +60,7 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
 exit 1
 }
 
-        if bzr branch "$bzr_branch_prefix""$package"; then
+        if bzr branch "$bzr_branch_prefix""$package" ../"$package"; then
             # branching succeeded
             cp -r ../"$package"/.bzr .bzr
             bzr add
