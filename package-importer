@@ -2,10 +2,20 @@
 
 # checks if any imports should be performed and performs them
 # accepts package names as command-line parameters
+# if none given, downloads the lists from a bzr branch
+# Defaunt branch is lp:ubuntu-package-imports/elementary-import-list
+# export LISTS_BRANCH variable from your shell to override it
 
 if [ -z "$@" ]; then
-    echo "No packages specified. Nothing to do." > /dev/stderr
-    exit 0
+    LISTS_BRANCH=${LISTS_BRANCH:-'lp:ubuntu-package-imports/elementary-import-list'}
+    target_folder=$(echo "$LISTS_BRANCH" | rev | cut -d '/' -f 1 | rev )
+    echo "No packages specificed on command line.
+Using package list from $LISTS_BRANCH" > /dev/stderr 
+    rm -r "$target_folder"
+    bzr branch "$LISTS_BRANCH"
+    package_list="$(cat $target_folder/packages_to_import)"
+else
+    package_list="$@"
 fi
 
 # don't let l10n interfere with our grepping
@@ -43,8 +53,7 @@ grep --silent "$version" "$package"/debian/changelog
 }
 
 # main cycle
-while ! [ -z "$1" ]; do
-    package="$1"
+for package in $package_list; do
     latest_version="$(get_latest_package_version $package)"
     if ! package_version_already_imported "$package" "$latest_version" ; then
         rm -r "$package"*
@@ -81,7 +90,6 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
 exit 1
 }
     fi
-    shift
 done
 
 exit 0
