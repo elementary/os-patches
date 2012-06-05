@@ -34,9 +34,9 @@ Please enable them via software-center or by uncommenting lines starting with
 exit 1
 fi
 
-# update info about available packages
+# update info about available packages, unless --no-apt-update is given
 # try to use aptdcon which doesn't propmt for sudo password and fall back to apt
-aptdcon --refresh || sudo apt-get update || echo "Failed to update package version information.
+echo "$@" | grep '-no-apt-update' || --no-apt-update aptdcon --refresh ||  apt-get update || echo "Failed to update package version information.
 Continuing anyway, but imported packages may be outdated."
 
 get_latest_package_version() {
