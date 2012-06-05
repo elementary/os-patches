@@ -11,7 +11,7 @@ distro_version=$(lsb_release -cs)
 if (echo "$1" | grep no-apt-update); then
     no_apt_update=true
     shift
-done 
+fi
 
 if [ -z "$@" ]; then
     LISTS_BRANCH=${LISTS_BRANCH:-"lp:ubuntu-package-imports/elementary-import-list-$distro_version"}
