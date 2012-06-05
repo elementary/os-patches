@@ -8,6 +8,11 @@
 
 distro_version=$(lsb_release -cs)
 
+if (echo "$1" | grep no-apt-update); then
+    no_apt_update=true
+    shift
+done 
+
 if [ -z "$@" ]; then
     LISTS_BRANCH=${LISTS_BRANCH:-"lp:ubuntu-package-imports/elementary-import-list-$distro_version"}
     target_folder=$(echo "$LISTS_BRANCH" | rev | cut -d '/' -f 1 | rev )
@@ -36,8 +41,10 @@ fi
 
 # update info about available packages, unless --no-apt-update is given
 # try to use aptdcon which doesn't propmt for sudo password and fall back to apt
-echo "$@" | grep '-no-apt-update' || --no-apt-update aptdcon --refresh ||  apt-get update || echo "Failed to update package version information.
+if ! [ "$no_apt_update" = true ]; then
+aptdcon --refresh ||  apt-get update || echo "Failed to update package version information.
 Continuing anyway, but imported packages may be outdated."
+fi
 
 get_latest_package_version() {
 package="$1"
