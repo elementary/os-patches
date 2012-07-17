@@ -66,15 +66,16 @@ for package in $package_list; do
     if ! package_version_already_imported "$package" "$latest_version" ; then
         rm -r "$package"*
         apt-get source "$package" || {
-echo "Failed to download source code package $package" > /dev/stderr 
-exit 1
+            echo "Failed to download source code package $package" > /dev/stderr 
+            exit 1
 }
 
-        cd "$package"-* || { echo "Failed to cd to the downloaded source code directory.
+        cd "$package"-* || { 
+            echo "Failed to cd to the downloaded source code directory.
 Most likely this is a bug in the script.
 Please report this failure at:
 https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
-exit 1
+            exit 1
 }
 
         if bzr branch "$bzr_branch_prefix""$package-$distro_version" ../"$package-$distro_version"; then
@@ -88,15 +89,14 @@ exit 1
             bzr init
             bzr add
             bzr commit -m "Initial import, version $latest_version"
-        fi
-
-        bzr push "$bzr_branch_prefix""$package-$distro_version" || {
-echo "Failed to upload the code to the bazaar branch.
+            bzr push "$bzr_branch_prefix""$package-$distro_version" || {
+                echo "Failed to upload the code to the bazaar branch.
 Either your internet connection suddently went out, or it's caused by a bug.
 If your internet connection works, please report this failure at:
 https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
-exit 1
+                exit 1
 }
+        fi
     fi
 done
 
