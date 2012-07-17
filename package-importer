@@ -21,7 +21,7 @@ if [ -z "$@" ]; then
     echo "No packages specificed on command line.
 Using package list from $LISTS_BRANCH" > /dev/stderr 
     rm -r "$target_folder"
-    bzr ckeckout --lightweight "$LISTS_BRANCH"
+    bzr checkout --lightweight "$LISTS_BRANCH"
     package_list="$(cat $target_folder/packages_to_import)"
 else
     package_list="$@"
@@ -56,7 +56,7 @@ package_version_already_imported() {
 package="$1"
 version="$2"
 rm -r "$package-$distro_version"
-bzr ckeckout --lightweight "$bzr_branch_prefix""$package-$distro_version" &&
+bzr checkout --lightweight "$bzr_branch_prefix""$package-$distro_version" &&
 grep --silent "$version" "$package-$distro_version"/debian/changelog
 }
 
@@ -78,11 +78,11 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
             exit 1
             }
 
-        if bzr ckeckout --lightweight "$bzr_branch_prefix""$package-$distro_version" ../"$package-$distro_version"; then
+        if bzr checkout --lightweight "$bzr_branch_prefix""$package-$distro_version" ../"$package-$distro_version"; then
             # checkout succeeded
             cp -r ../"$package-$distro_version"/.bzr .bzr
             bzr add
-            debcommit || {
+            debcommit -m "updated to version $latest_version" || {
                 echo "Failed to commit the changes or upload the code to the bazaar branch.
 Either your internet connection suddently went out, or it's caused by a bug.
 If your internet connection works, please report this failure at:
