@@ -76,7 +76,7 @@ Most likely this is a bug in the script.
 Please report this failure at:
 https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
             exit 1
-}
+            }
 
         if bzr ckeckout --lightweight "$bzr_branch_prefix""$package-$distro_version" ../"$package-$distro_version"; then
             # checkout succeeded
@@ -88,6 +88,7 @@ Either your internet connection suddently went out, or it's caused by a bug.
 If your internet connection works, please report this failure at:
 https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
                 exit 1
+                }
         else
             # checkout failed; assuming the branch doesn't exist, which means
             # this is the first import of this package
@@ -100,7 +101,7 @@ Either your internet connection suddently went out, or it's caused by a bug.
 If your internet connection works, please report this failure at:
 https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
                 exit 1
-}
+                }
         fi
     fi
 done
