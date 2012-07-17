@@ -6,7 +6,9 @@
 # Defaunt branch is lp:ubuntu-package-imports/elementary-import-list-distroversion
 # export LISTS_BRANCH variable from your shell to override it
 
-distro_version=$(lsb_release -cs)
+# export something different from your shell to override these values
+export bzr_branch_prefix=${bzr_branch_prefix:-'lp:~elementary-os/ubuntu-package-imports/'}
+export distro_version=${distro_version:-$(lsb_release -cs)}
 
 if (echo "$1" | grep no-apt-update); then
     no_apt_update=true
@@ -27,9 +29,6 @@ fi
 
 # don't let l10n interfere with our grepping
 export LC_ALL=C
-
-# export something different from your shell to override this value
-export bzr_branch_prefix=${bzr_branch_prefix:-'lp:~elementary-os/ubuntu-package-imports/'}
 
 # check if any source repos are enabled
 if ! grep -E --silent '^ *deb-src' /etc/apt/sources.list /etc/apt/sources.list.d/*; then
