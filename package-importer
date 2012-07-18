@@ -19,7 +19,8 @@ if [ -z "$@" ]; then
     LISTS_BRANCH=${LISTS_BRANCH:-"lp:ubuntu-package-imports/elementary-import-list-$distro_version"}
     target_folder=$(echo "$LISTS_BRANCH" | rev | cut -d '/' -f 1 | rev )
     echo "No packages specificed on command line.
-Using package list from $LISTS_BRANCH" > /dev/stderr 
+Using package list from $LISTS_BRANCH
+You can override this by exporting LISTS_BRANCH variable from your shell." > /dev/stderr 
     rm -r "$target_folder"
     bzr checkout --lightweight "$LISTS_BRANCH"
     package_list="$(cat $target_folder/packages_to_import)"
