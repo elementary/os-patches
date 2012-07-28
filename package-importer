@@ -4,7 +4,7 @@
 # accepts package names as command-line parameters
 # if none given, downloads the lists from a bzr branch
 # Defaunt branch is lp:ubuntu-package-imports/elementary-import-list-distroversion
-# export LISTS_BRANCH variable from your shell to override it
+# The default value is overideable, see below
 
 # export something different from your shell to override these values
 export bzr_branch_prefix=${bzr_branch_prefix:-'lp:~elementary-os/ubuntu-package-imports/'}
@@ -64,6 +64,12 @@ grep --silent "$version" "$package-$distro_version"/debian/changelog
 # main cycle
 for package in $package_list; do
     latest_version="$(get_latest_package_version $package)"
+    # safeguard against importing a patched version
+    if ( echo "$latest_version" | grep -q ${patched_version_suffix:-elementary} ); then
+        echo "ERROR: looks like the version you're trying to import is already patched.
+Aborted."
+    exit 1
+    fi
     if ! package_version_already_imported "$package" "$latest_version" ; then
         rm -r "$package"*
         apt-get source "$package" || {
