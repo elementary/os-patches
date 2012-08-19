@@ -31,7 +31,7 @@ fi
 # don't let l10n interfere with our grepping
 export LC_ALL=C
 
-# check if any source repos are enabled
+# check if any source arepos are enabled
 if ! grep -E --silent '^ *deb-src' /etc/apt/sources.list /etc/apt/sources.list.d/*; then
 echo "You don't have any source code repositories enabled.
 Please enable them via software-center or by uncommenting lines starting with
@@ -73,7 +73,7 @@ package="$1"
 version="$2"
 rm -r "$package-$distro_version"
 bzr checkout --lightweight "$bzr_branch_prefix""$package-$distro_version" &&
-grep --silent "$version" "$package-$distro_version"/debian/changelog
+grep --silent " ($version) " "$package-$distro_version"/debian/changelog
 }
 
 # main cycle
