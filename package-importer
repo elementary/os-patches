@@ -46,11 +46,26 @@ aptdcon --refresh ||  apt-get update || echo "Failed to update package version i
 Continuing anyway, but imported packages may be outdated."
 fi
 
+find_greatest_version() {
+# returns the greatest version from the given list of versions
+# usage: find_greatest_version version1 [version2...]
+greatest_version="$1"
+while true; do
+    shift || break
+    if ( dpkg --compare-versions "$1" '>>' "$greatest_version" ); then
+        greatest_version="$1"
+    fi
+done
+echo "$greatest_version"
+}
+
 get_latest_package_version() {
+# gets latest version of a source package available on the system
 package="$1"
-apt-cache policy "$package" \
- | grep 'Candidate' \
- | sed --regexp-extended 's/^.*Candidate: //'
+version_list=$( apt-cache showsrc "$package" \
+              | grep '^Version:' \
+              | sed --regexp-extended 's/Version: //' )
+find_greatest_version $version_list
 }
 
 package_version_already_imported() {
