@@ -33,17 +33,17 @@ export LC_ALL=C
 
 # check if any source arepos are enabled
 if ! grep -E --silent '^ *deb-src' /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-echo "You don't have any source code repositories enabled.
-Please enable them via software-center or by uncommenting lines starting with
-'deb-src' in sources.list and sources.list.d/" > /dev/stderr 
-exit 1
+    echo "You don't have any source code repositories enabled.
+    Please enable them via software-center or by uncommenting lines starting with
+    'deb-src' in sources.list and sources.list.d/" > /dev/stderr 
+    exit 1
 fi
 
 # update info about available packages, unless --no-apt-update is given
 # try to use aptdcon which doesn't propmt for sudo password and fall back to apt
 if ! [ "$no_apt_update" = true ]; then
-aptdcon --refresh ||  apt-get update || echo "Failed to update package version information.
-Continuing anyway, but imported packages may be outdated."
+    aptdcon --refresh ||  apt-get update || echo "Failed to update package version information.
+    Continuing anyway, but imported packages may be outdated."
 fi
 
 find_greatest_version() {
