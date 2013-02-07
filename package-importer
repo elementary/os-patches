@@ -16,6 +16,12 @@ for package in $dependency_list; do
 dpkg -L "$package" >/dev/null 2>&1 || missing_dependencies="$missing_dependencies $package"
 done
 
+if [ "$missing_dependencies" != "" ]; then
+    echo "Missing dependencies! Please install these packages to proceed:
+$missing_dependencies" > /dev/stderr
+    exit 1
+fi
+
 if (echo "$1" | grep no-apt-update); then
     no_apt_update=true
     shift
