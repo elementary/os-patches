@@ -31,6 +31,13 @@ fi
 tmp_dir=$(mktemp -d)
 cd $tmp_dir
 
+# make sure temporary directory gets removed afterward
+cleanup() {
+rm -r $tmp_dir
+}
+
+trap cleanup EXIT
+
 if [ -z "$@" ]; then
     LISTS_BRANCH=${LISTS_BRANCH:-"lp:ubuntu-package-imports/elementary-import-list-$distro_version"}
     target_folder=$(echo "$LISTS_BRANCH" | rev | cut -d '/' -f 1 | rev )
@@ -145,11 +152,5 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
         fi
     fi
 done
-
-cleanup() {
-rm -r $tmp_dir
-}
-
-trap cleanup EXIT INT TERM
 
 exit 0
