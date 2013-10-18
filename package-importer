@@ -27,6 +27,10 @@ if (echo "$1" | grep no-apt-update); then
     shift
 fi
 
+# create and enter temporary directory
+tmp_dir=$(mktemp -d)
+cd $tmp_dir
+
 if [ -z "$@" ]; then
     LISTS_BRANCH=${LISTS_BRANCH:-"lp:ubuntu-package-imports/elementary-import-list-$distro_version"}
     target_folder=$(echo "$LISTS_BRANCH" | rev | cut -d '/' -f 1 | rev )
@@ -141,5 +145,11 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
         fi
     fi
 done
+
+cleanup() {
+rm -r $tmp_dir
+}
+
+trap cleanup EXIT INT TERM
 
 exit 0
