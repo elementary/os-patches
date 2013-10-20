@@ -27,6 +27,17 @@ if (echo "$1" | grep no-apt-update); then
     shift
 fi
 
+# create and enter temporary directory
+tmp_dir=$(mktemp -d)
+cd $tmp_dir
+
+# make sure temporary directory gets removed afterward
+cleanup() {
+rm -r $tmp_dir
+}
+
+trap cleanup EXIT
+
 if [ -z "$@" ]; then
     LISTS_BRANCH=${LISTS_BRANCH:-"lp:ubuntu-package-imports/elementary-import-list-$distro_version"}
     target_folder=$(echo "$LISTS_BRANCH" | rev | cut -d '/' -f 1 | rev )
@@ -88,6 +99,14 @@ bzr checkout --lightweight "$bzr_branch_prefix""$package-$distro_version" &&
 grep --silent " ($version) " "$package-$distro_version"/debian/changelog
 }
 
+failed_to_upload() {
+echo "Failed to commit the changes or upload the code to the bazaar branch.
+Either your internet connection suddenly went out, or it's caused by a bug.
+If your internet connection works, please report this failure at:
+https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
+exit 1
+}
+
 # main cycle
 for package in $package_list; do
     latest_version="$(get_latest_package_version $package)"
@@ -122,26 +141,14 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
             # checkout succeeded
             cp -r ../"$package-$distro_version"/.bzr .bzr
             bzr add
-            debcommit -m "updated to version $latest_version" || {
-                echo "Failed to commit the changes or upload the code to the bazaar branch.
-Either your internet connection suddently went out, or it's caused by a bug.
-If your internet connection works, please report this failure at:
-https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
-                exit 1
-                }
+            debcommit -m "updated to version $latest_version" || failed_to_upload
         else
             # checkout failed; assuming the branch doesn't exist, which means
             # this is the first import of this package
             bzr init
             bzr add
             bzr commit -m "Initial import, version $latest_version"
-            bzr push "$bzr_branch_prefix""$package-$distro_version" || {
-                echo "Failed to upload the code to the bazaar branch.
-Either your internet connection suddently went out, or it's caused by a bug.
-If your internet connection works, please report this failure at:
-https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
-                exit 1
-                }
+            bzr push "$bzr_branch_prefix""$package-$distro_version" || failed_to_upload
         fi
     fi
 done
