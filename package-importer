@@ -65,7 +65,7 @@ fi
 # update info about available packages, unless --no-apt-update is given
 # try to use aptdcon which doesn't propmt for sudo password and fall back to apt
 if ! [ "$no_apt_update" = true ]; then
-    aptdcon --refresh ||  apt-get update || echo "Failed to update package version information.
+    aptdcon --refresh > /dev/null 2>&1 || apt-get update || echo "Failed to update package version information.
     Continuing anyway, but imported packages may be outdated."
 fi
 
