@@ -33,7 +33,7 @@ cd $tmp_dir
 
 # make sure temporary directory gets removed afterward
 cleanup() {
-rm -r $tmp_dir
+rm -rf $tmp_dir
 }
 
 trap cleanup EXIT
@@ -44,7 +44,7 @@ if [ -z "$@" ]; then
     echo "No packages specificed on command line.
 Using package list from $LISTS_BRANCH
 You can override this by exporting LISTS_BRANCH variable from your shell." > /dev/stderr 
-    rm -r "$target_folder"
+    rm -rf "$target_folder"
     bzr checkout --lightweight "$LISTS_BRANCH"
     package_list="$(cat $target_folder/packages_to_import)"
 else
@@ -94,7 +94,7 @@ find_greatest_version $version_list
 package_version_already_imported() {
 package="$1"
 version="$2"
-rm -r "$package-$distro_version"
+rm -rf "$package-$distro_version"
 bzr checkout --lightweight "$bzr_branch_prefix""$package-$distro_version" &&
 grep --silent " ($version) " "$package-$distro_version"/debian/changelog
 }
@@ -117,13 +117,13 @@ Aborted."
     exit 1
     fi
     if ! package_version_already_imported "$package" "$latest_version" ; then
-        rm -r "$package"*
+        rm -rf "$package"*
         apt-get source "$package" || {
             echo "Failed to download source code package $package" > /dev/stderr 
             exit 1
 }
 
-        rm -R "$package"-*
+        rm -Rf "$package"-*
         dpkg-source -x --skip-patches --no-preparation "$package"_*.dsc
 
         cd "$package"-* || { 
