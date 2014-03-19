@@ -1,73 +1,52 @@
 #!/bin/bash
 
 # checks if any imports should be performed and performs them
-# accepts package names as command-line parameters
-# if none given, downloads the lists from a bzr branch
-# Defaunt branch is lp:ubuntu-package-imports/elementary-import-list-distroversion
-# The default value is overideable, see below
+# accepts branch with package lists as command-line parameter
+# Defaunt branch is lp:ubuntu-package-imports/elementary-import-lists
 
-# export something different from your shell to override these values
-export bzr_branch_prefix=${bzr_branch_prefix:-'lp:~elementary-os/ubuntu-package-imports/'}
-export distro_version=${distro_version:-$(lsb_release -cs)}
+# In the code, UPPERCASE variables are the ones defined externally and
+# lowecase variables are those hardcoded in this script
+
+# export these variables from your shell to override these default values
+export BZR_BRANCH_PREFIX=${BZR_BRANCH_PREFIX:-'lp:~elementary-os/ubuntu-package-imports/'}
+export BASE_TMP_DIR=${BASE_TMP_DIR:-"$(pwd)"}
+
+set -e
+
+if [ -z "$@" ]; then
+    LISTS_BRANCH="lp:~elementary-os/ubuntu-package-imports/elementary-import-lists"
+else
+    LISTS_BRANCH="$1"
+fi
 
 # check for dependencies
 dependency_list='devscripts dpkg-dev build-essential bzr quilt lsb-release'
 for package in $dependency_list; do
-dpkg -L "$package" >/dev/null 2>&1 || missing_dependencies="$missing_dependencies $package"
+    dpkg -L "$package" >/dev/null 2>&1 || missing_dependencies="$missing_dependencies $package"
 done
-
 if [ "$missing_dependencies" != "" ]; then
     echo "Missing dependencies! Please install these packages to proceed:
 $missing_dependencies" > /dev/stderr
     exit 1
 fi
 
-if (echo "$1" | grep no-apt-update); then
-    no_apt_update=true
-    shift
-fi
+# create and enter a temporary directory in BASE_TMP_DIR
+tmp_dir="$(mktemp --tmpdir="$BASE_TMP_DIR" -d)"
+cd "$tmp_dir"
 
-# create and enter temporary directory
-tmp_dir=$(mktemp -d)
-cd $tmp_dir
-
-# make sure temporary directory gets removed afterward
+# make sure temporary directory gets removed afterwards
 cleanup() {
-rm -rf $tmp_dir
+rm -rf "$tmp_dir"
 }
 
 trap cleanup EXIT
 
-if [ -z "$@" ]; then
-    LISTS_BRANCH=${LISTS_BRANCH:-"lp:ubuntu-package-imports/elementary-import-list-$distro_version"}
-    target_folder=$(echo "$LISTS_BRANCH" | rev | cut -d '/' -f 1 | rev )
-    echo "No packages specificed on command line.
-Using package list from $LISTS_BRANCH
-You can override this by exporting LISTS_BRANCH variable from your shell." > /dev/stderr 
-    rm -rf "$target_folder"
-    bzr checkout --lightweight "$LISTS_BRANCH"
-    package_list="$(cat $target_folder/packages_to_import)"
-else
-    package_list="$@"
-fi
+echo "Using package lists from $LISTS_BRANCH
+You can override this by passing the desired branch as a command-line argument." > /dev/stderr 
+bzr export "$tmp_dir/import-lists" "$LISTS_BRANCH"
 
 # don't let l10n interfere with our grepping
 export LC_ALL=C
-
-# check if any source arepos are enabled
-if ! grep -E --silent '^ *deb-src' /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-    echo "You don't have any source code repositories enabled.
-    Please enable them via software-center or by uncommenting lines starting with
-    'deb-src' in sources.list and sources.list.d/" > /dev/stderr 
-    exit 1
-fi
-
-# update info about available packages, unless --no-apt-update is given
-# try to use aptdcon which doesn't propmt for sudo password and fall back to apt
-if ! [ "$no_apt_update" = true ]; then
-    aptdcon --refresh > /dev/null 2>&1 || apt-get update || echo "Failed to update package version information.
-    Continuing anyway, but imported packages may be outdated."
-fi
 
 find_greatest_version() {
 # returns the greatest version from the given list of versions
@@ -85,7 +64,7 @@ echo "$greatest_version"
 get_latest_package_version() {
 # gets latest version of a source package available on the system
 package="$1"
-version_list=$( apt-cache showsrc "$package" \
+version_list=$( apt-cache $apt_options showsrc "$package" \
               | grep '^Version:' \
               | sed --regexp-extended 's/Version: //' )
 find_greatest_version $version_list
@@ -95,62 +74,109 @@ package_version_already_imported() {
 package="$1"
 version="$2"
 rm -rf "$package-$distro_version"
-bzr checkout --lightweight "$bzr_branch_prefix""$package-$distro_version" &&
+bzr checkout -q --lightweight "$BZR_BRANCH_PREFIX""$package-$distro_version" &&
 grep --silent " ($version) " "$package-$distro_version"/debian/changelog
 }
 
 failed_to_upload() {
 echo "Failed to commit the changes or upload the code to the bazaar branch.
-Either your internet connection suddenly went out, or it's caused by a bug.
-If your internet connection works, please report this failure at:
+Either you don't have the required permissions, or your internet connection
+ suddenly went out, or it's caused by a bug in this script.
+If your internet connection works and you have the required permissions for
+writing to branches at $BZR_BRANCH_PREFIX, please report this failure at:
 https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
 exit 1
 }
 
-# main cycle
-for package in $package_list; do
-    latest_version="$(get_latest_package_version $package)"
-    # safeguard against importing a patched version
-    if ( echo "$latest_version" | grep -q ${patched_version_suffix:-elementary} ); then
-        echo "ERROR: looks like the version you're trying to import is already patched.
-Aborted."
-    exit 1
+# per-distro-version cycle
+for distro_version in $(ls -1 "$tmp_dir/import-lists"); do
+
+    # Sugary variables
+    data_folder="$tmp_dir/import-lists/$distro_version"
+    package_list="$(cat $data_folder/packages_to_import)"
+    sources_list_file="$data_folder/sources.list"
+
+    # check if any source repos are enabled
+    if ! grep -E --silent '^ *deb-src' "$sources_list_file"; then
+        echo "You don't have any source code repositories enabled in $sources_list_file
+        Please enable them by uncommenting lines starting with 'deb-src'" > /dev/stderr 
+        exit 1
     fi
-    if ! package_version_already_imported "$package" "$latest_version" ; then
-        rm -rf "$package"*
-        apt-get source "$package" || {
-            echo "Failed to download source code package $package" > /dev/stderr 
-            exit 1
-}
 
-        rm -Rf "$package"-*
-        dpkg-source -x --skip-patches --no-preparation "$package"_*.dsc
+    # Create and enter per-distro-version temporary directory
+    distro_tmp_dir="$(mktemp --tmpdir="$tmp_dir" -d)"
+    cd "$distro_tmp_dir"
 
-        cd "$package"-* || { 
-            echo "Failed to cd to the downloaded source code directory.
-Most likely this is a bug in the script.
-Please report this failure at:
-https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
-            exit 1
+    # Prepare the required directories for "sandboxed" apt
+    mkdir apt dpkg apt_state
+    touch dpkg/status
+
+    # Define apt "sandboxing" options for independence from host system
+    # Multi-line for readability; tr strips out the line breaks
+    apt_options=$( echo "
+        -o Dir::Etc::SourceList="$sources_list_file"
+        -o Dir::Etc::SourceParts=None 
+        -o Dir::Etc::Main=None 
+        -o Dir::Etc::Parts=None 
+        -o Dir::Etc::Preferences=None 
+        -o Dir::Etc::PreferencesParts=None 
+        -o Dir::Cache="$distro_tmp_dir"/apt
+        -o Dir::State="$distro_tmp_dir"/apt_state
+        -o Dir::State::Status="$distro_tmp_dir"/dpkg/status" \
+    | tr -d '\n' )
+
+    apt-get $apt_options update
+
+    # per-package cycle
+    for package in $package_list; do
+        latest_version="$(get_latest_package_version $package)"
+        # safeguard against importing a patched version
+        if ( echo "$latest_version" | grep -q ${patched_version_suffix:-elementary} ); then
+            echo "ERROR: looks like the version you're trying to import is already patched.
+Aborted."
+        exit 1
+        fi
+        if ! package_version_already_imported "$package" "$latest_version" ; then
+            rm -rf "$package"*
+            apt-get $apt_options source "$package" || {
+                echo "Failed to download source code package $package" > /dev/stderr 
+                exit 1
             }
 
-        quilt pop -a || true
-        rm -rf .pc
+            rm -rf "$package"-*
+            dpkg-source -x --skip-patches --no-preparation "$package"_*.dsc
 
-        if bzr checkout --lightweight "$bzr_branch_prefix""$package-$distro_version" ../"$package-$distro_version"; then
-            # checkout succeeded
-            cp -r ../"$package-$distro_version"/.bzr .bzr
-            bzr add
-            debcommit -m "updated to version $latest_version" || failed_to_upload
+            cd "$package"-* || { 
+                echo "Failed to cd to the downloaded source code directory.
+Most likely this is caused by a bug in the script.
+Please report this failure at:
+https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
+                exit 1
+                }
+
+            quilt pop -a || true
+            rm -rf .pc
+
+            if bzr checkout -q --lightweight "$BZR_BRANCH_PREFIX""$package-$distro_version" ../"$package-$distro_version"; then
+                # checkout succeeded
+                cp -r ../"$package-$distro_version"/.bzr .bzr
+                bzr add
+                debcommit -m "updated to version $latest_version" || failed_to_upload
+            else
+                # checkout failed; assuming the branch doesn't exist, which means
+                # this is the first import of this package
+                bzr init
+                bzr add
+                bzr commit -m "Initial import, version $latest_version"
+                bzr push -q "$BZR_BRANCH_PREFIX""$package-$distro_version" || failed_to_upload
+            fi
         else
-            # checkout failed; assuming the branch doesn't exist, which means
-            # this is the first import of this package
-            bzr init
-            bzr add
-            bzr commit -m "Initial import, version $latest_version"
-            bzr push "$bzr_branch_prefix""$package-$distro_version" || failed_to_upload
+            echo "$package in $distro_version is already up to date."
         fi
-    fi
+    done
+
+    # Return back to where we were before entering the per-distro loop
+    cd "$tmp_dir"
 done
 
 exit 0
