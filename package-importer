@@ -74,8 +74,17 @@ package_version_already_imported() {
 package="$1"
 version="$2"
 rm -rf "$package-$distro_version"
-bzr checkout -q --lightweight "$BZR_BRANCH_PREFIX""$package-$distro_version" &&
-grep --silent " ($version) " "$package-$distro_version"/debian/changelog
+if bzr export "$package-$distro_version" "$BZR_BRANCH_PREFIX""$package-$distro_version" 2> bzr_errors; then
+    grep --silent " ($version) " "$package-$distro_version"/debian/changelog
+    return $?
+elif grep 'bzr: ERROR: Not a branch:' bzr_errors; then
+    # This is the first import of this package
+    return false
+else
+    echo "Failed to download branch $BZR_BRANCH_PREFIX""$package-$distro_version"
+    cat bzr_errors
+    exit 1
+fi
 }
 
 failed_to_upload() {
