@@ -79,7 +79,7 @@ if bzr export "$package-$distro_version" "$BZR_BRANCH_PREFIX""$package-$distro_v
     return $?
 elif grep 'bzr: ERROR: Not a branch:' bzr_errors; then
     # This is the first import of this package
-    return false
+    return 1
 else
     echo "Failed to download branch $BZR_BRANCH_PREFIX""$package-$distro_version"
     cat bzr_errors
