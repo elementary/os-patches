@@ -144,7 +144,7 @@ Aborted."
             }
 
             rm -rf "$package"-*
-            dpkg-source -x --skip-patches --no-preparation "$package"_*.dsc
+            dpkg-source -x --skip-patches --no-preparation --require-valid-signature "$package"_*.dsc
 
             cd "$package"-* || { 
                 echo "Failed to cd to the downloaded source code directory.
