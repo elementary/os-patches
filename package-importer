@@ -138,12 +138,11 @@ Aborted."
         fi
         if ! package_version_already_imported "$package" "$latest_version" ; then
             rm -rf "$package"*
-            apt-get $apt_options source "$package" || {
+            apt-get $apt_options source --download-only "$package" || {
                 echo "Failed to download source code package $package" > /dev/stderr 
                 exit 1
             }
 
-            rm -rf "$package"-*
             dpkg-source -x --skip-patches --no-preparation --require-valid-signature "$package"_*.dsc
 
             cd "$package"-* || { 
