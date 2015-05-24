@@ -47,6 +47,14 @@ bzr export "$tmp_dir/import-lists" "$LISTS_BRANCH"
 # don't let l10n interfere with our grepping
 export LC_ALL=C
 
+get_sha256_for_file() {
+    sha256sum "$1" | cut --only-delimited -d ' ' -f 1
+}
+
+get_file_size() {
+    stat --format='%s' "$1"
+}
+
 find_greatest_version() {
 # returns the greatest version from the given list of versions
 # usage: find_greatest_version version1 [version2...]
@@ -130,17 +138,18 @@ for distro_version in $(ls -1 "$tmp_dir/import-lists"); do
     echo "Verifying signatures of *_Release files"
     release_files=$(echo apt_state/lists/*_Release)
     for release_file in $release_files; do
-        if ! gpg --keyring /etc/apt/trusted.gpg --verify "$release_file.gpg" "$release_file"; then
+        gpg --keyring /etc/apt/trusted.gpg --verify "$release_file.gpg" "$release_file" || {
             echo "Could not verify signature on $release_file" > /dev/stderr 
             exit 1
+        }
     done
 
     # having verified Release files, verify Sources files based on Release files
     echo "Verifying hashes of *_Sources files"
     sources_files=$(echo apt_state/lists/*_Sources)
     for sources_file in $sources_files; do
-        sources_file_hash=$(sha256sum "$sources_file" | cut --only-delimited -d ' ' -f 1)
-        sources_file_size=$(stat --format='%s' "$sources_file")
+        sources_file_hash=$(get_sha256_for_file "$sources_file")
+        sources_file_size=$(get_file_size "$sources_file")
         sources_file_server_filename=$(echo "$sources_file" | cut -d '_' -f '6-' | tr '_' '/')
         corresponding_release_file=$(echo "$sources_file" | cut -d '_' -f '-5')_Release
         grep -E -m 1 "^[[:blank:]]*$sources_file_hash[[:blank:]]*$sources_file_size[[:blank:]]*$sources_file_server_filename$" "$corresponding_release_file"
@@ -157,12 +166,22 @@ Aborted."
         fi
         if ! package_version_already_imported "$package" "$latest_version" ; then
             rm -rf "$package"*
-            apt-get $apt_options source "$package" || {
+            apt-get $apt_options --download-only source "$package" || {
                 echo "Failed to download source code package $package" > /dev/stderr 
                 exit 1
             }
 
-            rm -rf "$package"-*
+            # Verify source code authenticity
+            for file in "$package"*; do
+                file_hash=$(get_sha256_for_file "$file")
+                file_size=$(get_file_size "$file")
+                grep -E -m 1 "^[[:blank:]]*$file_hash[[:blank:]]*$file_size[[:blank:]]*$file$" <(cat $sources_files) || {
+                    echo "Failed to verify authenticity of package $package" > /dev/stderr
+                    exit 1
+                }
+            done
+
+            # All good, extract the source code
             dpkg-source -x --skip-patches --no-preparation "$package"_*.dsc
 
             cd "$package"-* || { 
