@@ -40,8 +40,8 @@ rm -rf "$tmp_dir"
 
 trap cleanup EXIT
 
-echo "Using package lists from $LISTS_BRANCH
-You can override this by passing the desired branch as a command-line argument." > /dev/stderr 
+echo "Using package lists from $LISTS_BRANCH"  > /dev/stderr
+[ -z "$@" ] && echo "You can override this by passing the desired branch as a command-line argument." > /dev/stderr
 bzr export "$tmp_dir/import-lists" "$LISTS_BRANCH"
 
 # don't let l10n interfere with our grepping
