@@ -193,6 +193,7 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
                 }
 
             quilt pop -a || true
+            # Work around https://bugs.launchpad.net/launchpad-buildd/+bug/1089615
             rm -rf .pc
 
             if bzr checkout -q --lightweight "$BZR_BRANCH_PREFIX""$package-$distro_version" ../"$package-$distro_version"; then
