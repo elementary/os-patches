@@ -175,8 +175,11 @@ Aborted."
             for file in "$package"*; do
                 file_hash=$(get_sha256_for_file "$file")
                 file_size=$(get_file_size "$file")
-                grep -E -m 1 "^[[:blank:]]*$file_hash[[:blank:]]*$file_size[[:blank:]]*$file$" <(cat $sources_files) || {
-                    echo "Failed to verify authenticity of package $package" > /dev/stderr
+                grep -E -m 1 "^[[:blank:]]*$file_hash[[:blank:]]*$file_size[[:blank:]]*$file$" $sources_files || {
+                    echo "Failed to verify authenticity of package $package:
+Downloaded $file has size $file_size and sha256 $file_hash
+Closest authentic packages are:" > /dev/stderr
+grep "$package" $sources_files > /dev/stderr
                     exit 1
                 }
             done
