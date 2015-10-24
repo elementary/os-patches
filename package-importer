@@ -134,6 +134,25 @@ for distro_version in $(ls -1 "$tmp_dir/import-lists"); do
 
     apt-get $apt_options update
 
+    # XXX GROSS HACK WARNING
+    # apt sometimes fetches only InRelease files which, according to man gpg,
+    # cannot be reliably verified:
+    # "...but there are other pitfalls with this format as well"
+    # The proper solution would be to force apt to download Release files always
+    # instead of InRelease, but I haven't found a way to do that.
+    # So we detect all the InRelease files and fetch the appropriate Release
+    # and Release.gpg files and then verify them.
+    # Unfortunately Ubuntu's security Release files are not timestamped,
+    # so a replay attack would ruin us (and Ubuntu) either way.
+    echo "Begrudgingly fetching Release files where apt fetched InRelease"
+    for InRelease_file in apt_state/lists/*_InRelease; do
+        Release_file=${InRelease_file%InRelease}Release
+        Release_file_URL='http://'$(basename "$Release_file" | tr '_' '/')
+        wget -q --output-document="$Release_file" "$Release_file_URL"
+        wget -q --output-document="$Release_file".gpg "$Release_file_URL".gpg
+    done
+    # XXX END OF GROSS HACK
+
     # verify signatures on the Release files so we can verify source code integrity later on
     echo "Verifying signatures of *_Release files"
     release_files=$(echo apt_state/lists/*_Release)
