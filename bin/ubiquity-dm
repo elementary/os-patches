@@ -530,7 +530,7 @@ EndSection
                     stdin=null, stdout=logfile, stderr=logfile,
                     preexec_fn=self.drop_privileges))
 
-            if os.path.exists('/usr/lib/ubiquity/panel'):
+            if os.path.exists('/usr/lib/wingpanel'):
                 if ("openbox-lubuntu" not in wm_cmd and
                         "openbox" not in wm_cmd and
                         "gnome-shell" not in wm_cmd):
@@ -548,7 +548,7 @@ EndSection
                             'indicator-power/indicator-power-service',
                         )]))
                     extras.append(subprocess.Popen(
-                        ['/usr/lib/ubiquity/panel'],
+                        ['/usr/lib/wingpanel'],
                         stdin=null, stdout=logfile, stderr=logfile,
                         preexec_fn=self.drop_privileges))
                     for indicator in indicators:
