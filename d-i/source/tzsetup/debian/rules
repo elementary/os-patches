@@ -1,0 +1,9 @@
+#! /usr/bin/make -f
+%:
+	dh $@
+
+override_dh_installdebconf:
+	dh_installdebconf
+	# Merge in all templates.
+	echo >> debian/tzsetup-udeb/DEBIAN/templates
+	po2debconf debian/common.templates >> debian/tzsetup-udeb/DEBIAN/templates

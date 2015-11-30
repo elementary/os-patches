@@ -1,0 +1,29 @@
+#! /usr/bin/make -f
+%:
+	dh $@
+
+DEB_BUILD_GNU_TYPE := $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+
+ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+CROSS :=
+else
+CROSS := CC=$(DEB_HOST_GNU_TYPE)-gcc STRIP=$(DEB_HOST_GNU_TYPE)-strip
+endif
+
+override_dh_auto_build:
+ifeq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	$(MAKE) small $(CROSS)
+else
+	$(MAKE) DEBUG=1 $(CROSS)
+endif
+
+# Of very limited use, and probably doesn't work well in chroots.
+override_dh_auto_test:
+
+override_dh_install:
+	dh_install
+	install -m755 partconf debian/partconf.postinst
+	#install -m755 mkfstab debian/partconf-mkfstab.postinst
+	install -m644 fstab-common \
+		debian/partconf-mkfstab/var/lib/partconf/fstab.d/common

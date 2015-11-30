@@ -1,0 +1,23 @@
+Source: choose-mirror
+Section: debian-installer
+Priority: extra
+Maintainer: Ubuntu Installer Team <ubuntu-installer@lists.ubuntu.com>
+XSBC-Original-Maintainer: Debian Install System Team <debian-boot@lists.debian.org>
+Uploaders: Christian Perrier <bubulle@debian.org>, Colin Watson <cjwatson@debian.org>, Cyril Brulebois <kibi@debian.org>
+Build-Depends: debhelper (>= 9), libdebconfclient0-dev, wget, po-debconf, libdebian-installer4-dev, locales, iso-codes, isoquery
+XS-Debian-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=d-i/choose-mirror.git
+XS-Debian-Vcs-Git: git://anonscm.debian.org/d-i/choose-mirror.git
+Vcs-Bzr: http://bazaar.launchpad.net/~ubuntu-core-dev/choose-mirror/ubuntu
+
+Package: choose-mirror
+Package-Type: udeb
+Architecture: all
+Depends: ${misc:Depends}, configured-network, choose-mirror-bin
+XB-Installer-Menu-Item: 2300
+Description: Choose mirror to install from (menu item)
+
+Package: choose-mirror-bin
+Package-Type: udeb
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Choose mirror to install from (program)

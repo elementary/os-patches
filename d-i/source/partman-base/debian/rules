@@ -1,0 +1,37 @@
+#! /usr/bin/make -f
+%:
+	dh $@ --with autoreconf,d-i
+
+DEB_HOST_ARCH_OS := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+DEFAULT_FS=ext4
+endif
+ifeq ($(DEB_HOST_ARCH_OS),kfreebsd)
+DEFAULT_FS=ufs
+endif
+ifeq ($(DEB_HOST_ARCH_OS),hurd)
+DEFAULT_FS=ext2
+endif
+
+PROVIDES=made-filesystems, mounted-partitions, partitioned-harddrives, created-fstab
+
+MENUITEMNUM=4200
+
+export DEB_CFLAGS_MAINT_APPEND := -Wall -Os
+
+override_dh_auto_configure:
+	dh_auto_configure -- --prefix=/
+
+override_dh_install:
+	dh_install --fail-missing
+
+override_dh_installdebconf:
+	dh_installdebconf
+	sed -i '/^Template: partman\/default_filesystem/,/^$$/s/^Default: .*/Default: $(DEFAULT_FS)/' \
+		debian/partman-base/DEBIAN/templates
+
+# TODO: This is a bit gratuitous since all the "variables" are constant
+# right now. Do we still need this flexibility?
+override_dh_gencontrol:
+	dh_gencontrol -- -Vmenuitemnum=$(MENUITEMNUM) -Vprovides='$(PROVIDES)'

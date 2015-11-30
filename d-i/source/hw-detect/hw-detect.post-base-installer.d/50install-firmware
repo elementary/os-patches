@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+. /usr/share/debconf/confmodule
+
+# copy any loose firmware files to /target (incl. subdirs)
+if [ -d /lib/firmware ]; then
+	for f in /lib/firmware/*; do
+		if [ -e "$f" ]; then
+			mkdir -p /target/lib/firmware/
+			cp -a "$f" /target/lib/firmware/
+		fi
+	done
+fi
+
+# enable non-free repository if any firmware / injected drivers are
+# detected.
+if [ -n "/var/cache/firmware/*.deb" ]; then
+	db_set apt-setup/non-free true
+fi

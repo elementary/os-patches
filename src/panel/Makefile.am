@@ -1,0 +1,6 @@
+AM_CPPFLAGS = $(PANEL_CFLAGS) -DINDICATOR_DIR=\"${INDICATOR_DIR}\"
+AM_LDFLAGS = $(PANEL_LIBS)
+
+pkglibexec_PROGRAMS = panel
+
+panel_SOURCES = panel.c

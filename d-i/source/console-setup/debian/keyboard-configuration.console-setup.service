@@ -1,0 +1,9 @@
+[Unit]
+Description=Set console keymap
+Documentation=man:loadkeys(1)
+DefaultDependencies=no
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/loadkeys /etc/console-setup/cached.kmap.gz
