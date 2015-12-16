@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/autoreconf.mk
+include /usr/share/cdbs/1/class/gnome.mk
+include /usr/share/gnome-pkg-tools/1/rules/uploaders.mk
+-include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+include /usr/share/gnome-pkg-tools/1/rules/make-compat-desktop-file.mk
+
+LDFLAGS += -Wl,-z,defs -Wl,-O1 -Wl,--as-needed
+
+DEB_DH_AUTORECONF_ARGS = --as-needed
+
+DEB_MK_COMPAT_DESKTOP_file-roller := $(CURDIR)/debian/file-roller/usr/share/applications/org.gnome.FileRoller.desktop $(CURDIR)/debian/file-roller/usr/share/applications/file-roller.desktop
+
+DEB_CONFIGURE_EXTRA_FLAGS += --enable-magic
+
+DEB_DH_MAKESHLIBS_ARGS += --no-act
+
+binary-install/file-roller::
+	rm -f debian/file-roller/usr/lib/nautilus/extensions-*/*.a
+	rm -f debian/file-roller/usr/lib/nautilus/extensions-*/*.la

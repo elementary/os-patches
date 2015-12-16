@@ -1,0 +1,49 @@
+# Description: let file-roller open clicks
+# Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=752133
+# Bug-Ubuntu: https://launchpad.net/bugs/1439640
+From 8151875ce2b2d91f1027e0a7010067336c2caf8a Mon Sep 17 00:00:00 2001
+From: Alan Bell <alanbell@ubuntu.com>
+Date: Thu, 2 Apr 2015 18:14:18 +0100
+Subject: [PATCH] add .click support
+
+---
+ README        | 1 +
+ src/fr-init.c | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/README b/README
+index 1ce5348..2ed6d99 100644
+--- a/README
++++ b/README
+@@ -21,6 +21,7 @@
+     * Cabinet File (.cab)
+     * UNIX CPIO Archive (.cpio)
+     * Debian Linux Package (.deb) [Read-only mode]
++    * Ubuntu Click Package (.click) [Read-only mode]
+     * ISO-9660 CD Disc Image (.iso) [Read-only mode]
+     * Java Archive (.jar)
+     * Java Enterprise archive (.ear)
+diff --git a/src/fr-init.c b/src/fr-init.c
+index db9aba8..deec329 100644
+--- a/src/fr-init.c
++++ b/src/fr-init.c
+@@ -78,6 +78,7 @@ FrMimeTypeDescription mime_type_desc[] = {
+ 	{ "application/x-compressed-tar",       ".tar.gz",   0 },
+ 	{ "application/x-cpio",                 ".cpio",     0 },
+ 	{ "application/x-deb",                  ".deb",      0 },
++	{ "application/x-deb",                  ".click",    0 },
+ 	{ "application/x-ear",                  ".ear",      0 },
+ 	{ "application/x-ms-dos-executable",    ".exe",      0 },
+ 	{ "application/x-gzip",                 ".gz",       0 },
+@@ -122,6 +123,7 @@ FrExtensionType file_ext_type[] = {
+ 	{ ".cbz", "application/x-cbz" },
+ 	{ ".cpio", "application/x-cpio" },
+ 	{ ".deb", "application/x-deb" },
++	{ ".click", "application/x-deb" },
+ 	{ ".ear", "application/x-ear" },
+ 	{ ".exe", "application/x-ms-dos-executable" },
+ 	{ ".gz", "application/x-gzip" },
+-- 
+2.1.4
+
+
