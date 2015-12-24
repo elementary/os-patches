@@ -1,3 +1,47 @@
+partman-partitioning (110ubuntu1) xenial; urgency=medium
+
+  * Resynchronise with Debian.  Remaining changes:
+    - Add PATH, RAWMINSIZE, RAWPREFSIZE, and RAWMAXSIZE substitutions to
+      partman-partitioning/new_size in support of ubiquity's resize widget.
+    - Check that minimum filesystem sizes reported by tune2fs and ntfsresize
+      are between the minimum partition size and the current partition size;
+      if not, refuse to resize the partition at all.
+    - Save the swap size for ubiquity.
+    - On systems with only GPT disks, check that an EFI System Partition or
+      a BIOS Boot Partition exists, as appropriate.
+    - Detect "fsl" subarch for powerpc and set partition map to GPT.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Tue, 22 Dec 2015 16:06:54 -0500
+
+partman-partitioning (110) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Turkish (tr.po) by Mert Dirik
+
+ -- Christian Perrier <bubulle@debian.org>  Mon, 10 Aug 2015 12:50:08 +0200
+
+partman-partitioning (109) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Turkish (tr.po) by Mert Dirik
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 12 Jul 2015 09:17:47 +0200
+
+partman-partitioning (108) unstable; urgency=low
+
+  * Drop cruft files from an unclean git copy:
+    - active_partition/copy/choices
+    - active_partition/copy/do_option
+
+ -- Christian Perrier <bubulle@debian.org>  Tue, 10 Mar 2015 18:37:07 +0100
+
+partman-partitioning (107) unstable; urgency=low
+
+  [ Updated translations ]
+  * Danish (da.po) by Joe Hansen
+
+ -- Christian Perrier <bubulle@debian.org>  Mon, 09 Mar 2015 06:56:31 +0100
+
 partman-partitioning (106ubuntu1) vivid; urgency=medium
 
   * Resynchronise with Debian.  Remaining changes:
@@ -2720,6 +2764,3 @@ partman-parted-partitioning (1) unstable; urgency=low
 
  -- Anton Zinoviev <zinoviev@debian.org>  Wed, 27 Aug 2003 07:03:28 +0200
 
-Local Variables:
-coding: utf-8
-End:

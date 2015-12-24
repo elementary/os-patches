@@ -130,6 +130,7 @@ class TestFrontend(unittest.TestCase):
                 'ubi_question_dialog', 'question_label',
                 # Calculated error string
                 'label_global_error',
+                'warning_password_label', 'label1', 'secureboot_label',
             ]
             deb_host_arch = subprocess.Popen(
                 ['dpkg-architecture', '-qDEB_HOST_ARCH'],

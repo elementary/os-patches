@@ -429,6 +429,11 @@ fi
 kfile_suffix=$(get_kfile_suffix "$kfile")
 
 if ! check_supported "$machine"; then
+	# do nothing if an unsupported platform is booted from EFI
+	if [ -d /sys/firmware/efi ]; then
+		echo "Unsupported platform on EFI system, doing nothing."
+		exit 0
+	fi
 	error "Unsupported platform."
 fi
 

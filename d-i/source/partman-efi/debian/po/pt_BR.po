@@ -7,6 +7,7 @@
 # This file is distributed under the same license as debian-installer.
 #
 # Felipe Augusto van de Wiel (faw) <faw@debian.org>, 2008-2012.
+# Adriano Rafael Gomes <adrianorg@arg.eti.br>, 2010-2015.
 #
 # Translations from iso-codes:
 #   Alastair McKinstry <mckinstry@computer.org>, 2001-2002.
@@ -22,8 +23,8 @@ msgstr ""
 "Project-Id-Version: debian-installer\n"
 "Report-Msgid-Bugs-To: partman-efi@packages.debian.org\n"
 "POT-Creation-Date: 2014-11-13 22:01+0000\n"
-"PO-Revision-Date: 2012-06-27 01:39-0300\n"
-"Last-Translator: Felipe Augusto van de Wiel (faw) <faw@debian.org>\n"
+"PO-Revision-Date: 2015-05-15 15:49-0300\n"
+"Last-Translator: Adriano Rafael Gomes <adrianorg@arg.eti.br>\n"
 "Language-Team: Brazilian Portuguese <debian-l10n-portuguese@lists.debian."
 "org>\n"
 "Language: pt_BR\n"
@@ -45,7 +46,7 @@ msgid ""
 msgstr ""
 "Para que seja possível iniciar seu novo sistema, o firmware em seu sistema "
 "Itanium carrega o carregador de inicialização de sua partição EFI privada no "
-"disco rígido. Daí, o carregador de inicialização carrega o sistema "
+"disco rígido. O carregador de inicialização então carrega o sistema "
 "operacional da mesma partição. Uma partição EFI possui um sistema de "
 "arquivos formatado como FAT16 e a \"flag\" de inicialização definida. A "
 "maioria das instalações colocam a partição EFI na primeira partição primária "
@@ -58,9 +59,8 @@ msgstr ""
 #. Description
 #. :sl5:
 #: ../partman-efi.templates:2001 ../partman-efi.templates:4001
-#, fuzzy
 msgid "EFI System Partition"
-msgstr "Partição de inicialização EFI"
+msgstr "Partição de Sistema EFI"
 
 #. Type: boolean
 #. Description
@@ -83,7 +83,7 @@ msgstr "Nenhuma partição EFI foi encontrada."
 #. Up to 10 character positions
 #: ../partman-efi.templates:5001
 msgid "ESP"
-msgstr ""
+msgstr "ESP"
 
 #. Type: text
 #. Description
@@ -103,22 +103,20 @@ msgstr "Partição EFI muito pequena"
 #. Description
 #. :sl5:
 #: ../partman-efi.templates:8001
-#, fuzzy
 msgid ""
 "EFI System Partitions on this architecture cannot be created with a size "
 "less than 35 MB. Please make the EFI System Partition larger."
 msgstr ""
-"Partições EFI de inicialização nesta arquitetura não podem ser criada com "
-"menos do que 35 MB de tamanho. Por favor, aumente o tamanho da partição EFI "
-"de inicialização."
+"Partições de Sistema EFI nesta arquitetura não podem ser criadas com menos "
+"do que 35 MB de tamanho. Por favor, aumente o tamanho da Partição de Sistema "
+"EFI."
 
 #. Type: boolean
 #. Description
 #. :sl5:
 #: ../partman-efi.templates:9001
-#, fuzzy
 msgid "Force UEFI installation?"
-msgstr "Abortar a instalação"
+msgstr "Forçar a instalação UEFI?"
 
 #. Type: boolean
 #. Description
@@ -131,6 +129,11 @@ msgid ""
 "might be difficult to reboot the machine into any BIOS-mode operating "
 "systems later."
 msgstr ""
+"O firmware desta máquina iniciou o instalador no modo UEFI, mas parece que "
+"podem existir sistemas operacionais já instalados usando o \"modo de "
+"compatibilidade BIOS\". Se você continuar a instalar o Debian no modo UEFI, "
+"poderá ser difícil reinicializar a máquina em quaisquer sistemas "
+"operacionais no modo BIOS posteriormente."
 
 #. Type: boolean
 #. Description
@@ -142,3 +145,8 @@ msgid ""
 "If you wish to keep the option to boot an existing operating system, you "
 "should choose NOT to force UEFI installation here."
 msgstr ""
+"Se você deseja instalar no modo UEFI e não se importa sobre manter a "
+"habilidade de inicializar um dos sistemas existentes, você tem a opção de "
+"forçar isso aqui. Se você deseja manter a opção de inicializar um sistema "
+"operacional existente, você deverá escolher NÃO forçar a instalação UEFI "
+"aqui."

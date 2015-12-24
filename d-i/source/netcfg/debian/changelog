@@ -1,3 +1,91 @@
+netcfg (1.135ubuntu1) xenial; urgency=medium
+
+  * Resynchronise with Debian.  Remaining changes:
+    - Set default hostname to 'ubuntu'.
+    - Set priority for get_domain to high for static configurations.
+    - Set priority for get_domain to medium for non-static configurations.
+    - Use 'auto <interface>' for all interfaces, dropping allow-hotplug
+      which doesn't work with current udev.
+    - Set DHCP and DHCPv6 timeout to 30s.
+    - Use isc-dhcp-client-udeb on all architectures.
+    - Flush all addresses and routes before configuring interfaces
+      (LP: #848072)
+    - Don't copy /etc/resolv.conf to target if resolvconf is installed.  (We
+      already write resolvconf configuration to /etc/network/interfaces.)
+    - Add a post-base-install hook to detect resolvconf and copy
+      /run/resolvconf/resolv.conf to outside the target so that when /run is
+      bind-mounted DNS resolving continues to work. (LP: #926447)
+    - Apply patch from Alec Warner making netcfg respect
+      netcfg/dhcpv6_timeout and running dhclient in one-shot mode (-1).
+      (LP: #917905)
+    - Fix FTBFS by checking the return value of fgets and fscanf.
+    - Fix nm-conf to generate a valid NetworkManager static configuration
+      file.
+    - Always allow fe80::/64 for the default gateway. (LP: #1382295)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 26 Nov 2015 15:51:04 -0500
+
+netcfg (1.135) unstable; urgency=medium
+
+  [ Philipp Kern ]
+  * ethtool-lite: read the kernel's carrier detection result from sysfs
+    on Linux (Closes: #591012)
+  * Default wireless_security_type to WPA. (Closes: #798373)
+
+ -- Christian Perrier <bubulle@debian.org>  Tue, 03 Nov 2015 14:03:53 +0100
+
+netcfg (1.134) unstable; urgency=medium
+
+  * Fix is_layer3_qeth on s390x to avoid bailing out if the network
+    driver is not qeth. (Closes: #798376)
+  * Link against libsubunit to resolve a FTBFS.
+
+ -- Philipp Kern <pkern@debian.org>  Mon, 17 Aug 2015 17:12:10 +0200
+
+netcfg (1.133) unstable; urgency=medium
+
+  [ Samuel Thibault ]
+  * Work around bug #769189: make isc-dhcp only try to release the lease once,
+    otherwise it loops in the ipv6 code.
+
+ -- Christian Perrier <bubulle@debian.org>  Wed, 01 Jul 2015 07:25:29 +0200
+
+netcfg (1.132) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Portuguese (Brazil) (pt_BR.po) by Adriano Rafael Gomes
+  * Turkish (tr.po) by Mert Dirik
+
+ -- Christian Perrier <bubulle@debian.org>  Thu, 25 Jun 2015 15:11:32 +0200
+
+netcfg (1.131) unstable; urgency=medium
+
+  * Kill the DHCP client on Linux again and keep it running on kFreeBSD.
+    This unbreaks network configuration on Linux when a DHCPv6 server is
+    present on the network segment. However it also means that the
+    DHCPv4 lease is no longer being refreshed (not a regression over
+    stable). (Closes: #768188)
+
+ -- Philipp Kern <pkern@debian.org>  Tue, 24 Mar 2015 21:48:00 +0100
+
+netcfg (1.130) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Don't build the compilation date and time into the binary.  This made
+    the build unreproducible.
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 14 Mar 2015 08:34:09 +0100
+
+netcfg (1.129) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Pacify GCC 5 misdetecting link_waits as uninitialised (closes: #778023).
+
+  [ Updated translations ]
+  * Danish (da.po) by Joe Hansen
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 08 Mar 2015 07:53:02 +0100
+
 netcfg (1.127ubuntu1) vivid; urgency=medium
 
   [ Mathieu Trudel-Lapierre ]

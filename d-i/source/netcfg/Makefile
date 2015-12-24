@@ -1,5 +1,4 @@
 NETCFG_VERSION := $(shell dpkg-parsechangelog | grep ^Version: |sed 's/Version: //')
-NETCFG_BUILD_DATE := $(shell date '+%Y%m%d-%H%M')
 DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 
@@ -7,7 +6,7 @@ CC		?= gcc
 TARGETS		?= netcfg-static netcfg
 
 LDOPTS		= -ldebconfclient -ldebian-installer
-CFLAGS		= -W -Wall -Werror -DNDEBUG -DNETCFG_VERSION="\"$(NETCFG_VERSION)\"" -DNETCFG_BUILD_DATE="\"$(NETCFG_BUILD_DATE)\"" -I.
+CFLAGS		= -W -Wall -Werror -DNDEBUG -DNETCFG_VERSION="\"$(NETCFG_VERSION)\"" -I.
 COMMON_OBJS	= netcfg-common.o wireless.o write_interface.o ipv6.o
 NETCFG_O   	= netcfg.o dhcp.o static.o ethtool-lite.o wpa.o wpa_ctrl.o rdnssd.o autoconfig.o
 NETCFG_STATIC_O	= netcfg-static.o static.o ethtool-lite.o

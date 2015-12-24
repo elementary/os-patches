@@ -1,3 +1,27 @@
+ubiquity (2.21.40) xenial; urgency=medium
+
+  * Automatic update of included source packages: partman-auto
+    131ubuntu1, partman-basicfilesystems 120ubuntu1, partman-crypto
+    86ubuntu1, partman-efi 71ubuntu1, partman-partitioning 110ubuntu1.
+  * debian/control: build ubiquity-frontend-gtk only for the architectures
+    we might actually want to use it on, while being extremely generous:
+    this leads to building on x86, arm*, and ppc*, but not on s390x.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 23 Dec 2015 11:42:48 -0500
+
+ubiquity (2.21.39) xenial; urgency=medium
+
+  * Automatic update of included source packages: partman-efi 62ubuntu3,
+    partman-ext3 84ubuntu2, partman-xfs 57, preseed 1.64ubuntu4, apt-setup
+    1:0.104ubuntu1, flash-kernel 3.0~rc.4ubuntu57, hw-detect 1.114ubuntu1,
+    netcfg 1.135ubuntu1, partman-btrfs 18ubuntu1, preseed 1.68ubuntu1,
+    user-setup 1.63ubuntu1, base-installer 1.158ubuntu1, grub-installer
+    1.128ubuntu1, partman-target 98ubuntu1, yaboot-installer 1.1.36ubuntu1,
+    choose-mirror 2.65ubuntu2.
+  * Add support for disabling Secure Boot in prepare screen.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 21 Dec 2015 16:41:39 -0500
+
 ubiquity (2.21.38) xenial; urgency=medium
 
   * d-i/sources.list: switch to xenial.

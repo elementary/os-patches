@@ -60,7 +60,6 @@ for dev in $DEVICES/*; do
 			# rather than the device.
 			if [ -s loop ]; then
 				device="$(cat loop)"
-				force=-F
 			fi
 			options=''
 			db_get partman-ext3/lazy_itable_init
@@ -68,7 +67,7 @@ for dev in $DEVICES/*; do
 				options='-E lazy_itable_init'
 			fi
 			if log-output -t partman --pass-stdout \
-			   mkfs.$filesystem $options $force "$device" $usage >/dev/null; then
+			   mkfs.$filesystem -F $options "$device" $usage >/dev/null; then
 				sync
 				status=OK
 			else

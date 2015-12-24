@@ -23,8 +23,8 @@ import os
 import subprocess
 import sys
 
-from ubiquity import i18n, misc, osextras, plugin, upower
-
+from ubiquity import i18n, misc, osextras, plugin, upower, validation
+from ubiquity.install_misc import archdetect, is_secure_boot
 
 NAME = 'prepare'
 AFTER = 'wireless'
@@ -39,6 +39,9 @@ OEM = False
 
 class PreparePageBase(plugin.PluginUI):
     plugin_title = 'ubiquity/text/prepare_heading_label'
+
+    def __init__(self, *args, **kwargs):
+        plugin.PluginUI.__init__(self)
 
     def plugin_set_online_state(self, state):
         self.prepare_network_connection.set_state(state)
@@ -71,24 +74,34 @@ class PageGtk(PreparePageBase):
             self.page = None
             return
         self.controller = controller
-        from gi.repository import Gtk
-        builder = Gtk.Builder()
+        from ubiquity.gtkwidgets import Builder
+        builder = Builder()
         self.controller.add_builder(builder)
         builder.add_from_file(os.path.join(
             os.environ['UBIQUITY_GLADE'], 'stepPrepare.ui'))
         builder.connect_signals(self)
+
         self.page = builder.get_object('stepPrepare')
-        self.prepare_download_updates = builder.get_object(
-            'prepare_download_updates')
-        self.prepare_nonfree_software = builder.get_object(
-            'prepare_nonfree_software')
-        self.prepare_sufficient_space = builder.get_object(
-            'prepare_sufficient_space')
-        self.prepare_foss_disclaimer = builder.get_object(
-            'prepare_foss_disclaimer')
-        self.prepare_foss_disclaimer_extra = builder.get_object(
-            'prepare_foss_disclaimer_extra_label')
-        self.prepare_power_source = builder.get_object('prepare_power_source')
+
+        # Get all objects + add internal child(s)
+        all_widgets = builder.get_object_ids()
+        for wdg in all_widgets:
+            setattr(self, wdg, builder.get_object(wdg))
+
+        self.password_strength_pages = {
+            'empty': 0,
+            'too_short': 1,
+            'weak': 2,
+            'fair': 3,
+            'good': 4,
+            'strong': 5,
+        }
+        self.password_match_pages = {
+            'empty': 0,
+            'mismatch': 1,
+            'ok': 2,
+        }
+
         if upower.has_battery():
             upower.setup_power_watch(self.prepare_power_source)
         else:
@@ -96,6 +109,14 @@ class PageGtk(PreparePageBase):
         self.prepare_network_connection = builder.get_object(
             'prepare_network_connection')
         self.plugin_widgets = self.page
+
+        self.using_secureboot = False
+        self.secureboot_title = 'UEFI Secure Boot'
+        self.secureboot_msg = 'Secure Boot'
+
+    def set_using_secureboot(self, secureboot):
+        self.using_secureboot = secureboot
+        self.on_nonfree_toggled(None)
 
     def enable_download_updates(self, val):
         self.prepare_download_updates.set_sensitive(val)
@@ -131,6 +152,61 @@ class PageGtk(PreparePageBase):
             text = i18n.get_string(Gtk.Buildable.get_name(widget), lang)
             text = text.replace('${RELEASE}', release.name)
             widget.set_label(text)
+
+        sb_title_template = 'ubiquity/text/efi_secureboot'
+        sb_info_template = 'ubiquity/text/efi_secureboot_info'
+        self.secureboot_title = self.controller.get_string(sb_title_template)
+        self.secureboot_msg = self.controller.get_string(sb_info_template)
+
+    def on_nonfree_toggled(self, widget):
+        if self.using_secureboot:
+            enabled = self.get_use_nonfree()
+            if enabled:
+                self.secureboot_box.show()
+            else:
+                self.secureboot_box.hide()
+            self.info_loop(None)
+
+    def info_loop(self, unused_widget):
+        complete = True
+        passw = self.password.get_text()
+        vpassw = self.verified_password.get_text()
+
+        if passw != vpassw or (passw and len(passw) < 8):
+            complete = False
+            self.password_match.set_current_page(
+                self.password_match_pages['empty'])
+            if passw and (not passw.startswith(vpassw) or
+                          len(vpassw) / len(passw) > 0.8):
+                self.password_match.set_current_page(
+                    self.password_match_pages['mismatch'])
+        else:
+            self.password_match.set_current_page(
+                self.password_match_pages['ok'])
+
+        if passw:
+            txt = validation.human_password_strength(passw)[0]
+            self.password_strength.set_current_page(
+                self.password_strength_pages[txt])
+        else:
+            self.password_strength.set_current_page(
+                self.password_strength_pages['empty'])
+
+        self.controller.allow_go_forward(complete)
+        return complete
+
+    def get_secureboot_key(self):
+        return self.password.get_text()
+
+    def show_learn_more(self, unused):
+        from gi.repository import Gtk
+        dialog = Gtk.MessageDialog(
+            self.page.get_toplevel(), Gtk.DialogFlags.MODAL,
+            Gtk.MessageType.INFO, Gtk.ButtonsType.CLOSE, None)
+        dialog.set_title(self.secureboot_title)
+        dialog.set_markup(self.secureboot_msg)
+        dialog.run()
+        dialog.destroy()
 
 
 class PageKde(PreparePageBase):
@@ -227,6 +303,11 @@ class Page(plugin.Plugin):
             use_nonfree = self.db.get('ubiquity/use_nonfree') == 'true'
             self.ui.set_use_nonfree(use_nonfree)
 
+        arch, subarch = archdetect()
+        if 'efi' in subarch:
+            if is_secure_boot():
+                self.ui.set_using_secureboot(True)
+
         download_updates = self.db.get('ubiquity/download_updates') == 'true'
         self.ui.set_download_updates(download_updates)
         self.setup_sufficient_space()
@@ -260,8 +341,11 @@ class Page(plugin.Plugin):
     def ok_handler(self):
         download_updates = self.ui.get_download_updates()
         use_nonfree = self.ui.get_use_nonfree()
+        secureboot_key = self.ui.get_secureboot_key()
         self.preseed_bool('ubiquity/use_nonfree', use_nonfree)
         self.preseed_bool('ubiquity/download_updates', download_updates)
+        if self.ui.using_secureboot and secureboot_key:
+            self.preseed('ubiquity/secureboot_key', secureboot_key, seen=True)
         if use_nonfree:
             with misc.raised_privileges():
                 # Install ubuntu-restricted-addons.

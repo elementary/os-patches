@@ -614,6 +614,9 @@ int netcfg_activate_dhcp (struct debconfclient *client, struct netcfg_interface 
                 netcfg_write_loopback();
                 netcfg_write_interface(interface);
                 netcfg_write_resolv(domain, interface);
+#if !defined(__FreeBSD_kernel__)
+                kill_dhcp_client();
+#endif
                 stop_rdnssd();
 
                 return 0;
