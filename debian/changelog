@@ -1,3 +1,16 @@
+ubiquity (2.21.41) xenial; urgency=medium
+
+  * Pass "-term linux" when running setterm from start-ubiquity-dm, as
+    without TERM set it otherwise refuses to do anything.
+  * Set "Before=plymouth-quit.service plymouth-quit-wait.service" in
+    ubiquity.service, so that plymouth isn't told to quit while we're busy
+    starting up on its VT (LP: #1527353).
+  * Automatic update of included source packages: apt-setup 1:0.104ubuntu2,
+    clock-setup 0.126ubuntu1, debian-installer-utils 1.113ubuntu1, tzsetup
+    1:0.81ubuntu1.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 31 Dec 2015 00:07:05 +0000
+
 ubiquity (2.21.40) xenial; urgency=medium
 
   * Automatic update of included source packages: partman-auto
