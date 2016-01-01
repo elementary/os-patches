@@ -1,0 +1,13 @@
+Index: b/subst.c
+===================================================================
+--- a/subst.c
++++ b/subst.c
+@@ -7160,7 +7160,7 @@
+       (sindex == t_index - 1 && string[sindex] == '!' && VALID_INDIR_PARAM (string[t_index])))
+     {
+       t_index++;
+-      temp1 = string_extract (string, &t_index, "#%:-=?+/}", 0);
++      temp1 = string_extract (string, &t_index, "#%:-=?+/}", SX_VARNAME);
+       name = (char *)xrealloc (name, 3 + (strlen (temp1)));
+       *name = string[sindex];
+       if (string[sindex] == '!')

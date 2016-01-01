@@ -1,0 +1,29 @@
+Index: b/doc/bash.1
+===================================================================
+--- a/doc/bash.1
++++ b/doc/bash.1
+@@ -3633,6 +3633,10 @@
+ Redirections using file descriptors greater than 9 should be used with
+ care, as they may conflict with file descriptors the shell uses
+ internally.
++.PP
++Note that the
++.B exec
++builtin command can make redirections take effect in the current shell.
+ .SS Redirecting Input
+ .PP
+ Redirection of input causes the file whose name results from
+Index: b/doc/bashref.texi
+===================================================================
+--- a/doc/bashref.texi
++++ b/doc/bashref.texi
+@@ -2555,6 +2555,9 @@
+ care, as they may conflict with file descriptors the shell uses
+ internally.
+ 
++Note that the @code{exec} builtin command can make redirections take
++effect in the current shell.
++
+ @subsection Redirecting Input
+ Redirection of input causes the file whose name results from
+ the expansion of @var{word}
