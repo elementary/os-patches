@@ -1,0 +1,27 @@
+Source: base-files
+Section: admin
+Priority: required
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Santiago Vila <sanvila@debian.org>
+Standards-Version: 3.9.5
+
+Package: base-files
+Provides: base
+Architecture: any
+Pre-Depends: awk
+Essential: yes
+Priority: required
+Replaces: base, miscutils, dpkg (<= 1.15.0)
+Breaks: initscripts (<< 2.88dsf-13.3), sendfile (<< 2.1b.20080616-5.2~)
+Multi-Arch: foreign
+Description: Debian base system miscellaneous files
+ This package contains the basic filesystem hierarchy of a Debian system, and
+ several important miscellaneous files, such as /etc/debian_version,
+ /etc/host.conf, /etc/issue, /etc/motd, /etc/profile, and others,
+ and the text of several common licenses in use on Debian systems.
+
+Package: lsb-release-udeb
+Section: debian-installer
+Architecture: all
+Priority: extra
+Description: LSB release information
