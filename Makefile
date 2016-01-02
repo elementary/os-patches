@@ -85,7 +85,7 @@ install-debian: install install-doc
 	rm $(DOCDIR)/sample*
 
 deb_destdir=$(BUILDDIR)/dist
-TARBALL=$(deb_destdir)/$(RELEASE_STRING).tar.gz
+TARBALL=$(RELEASE_STRING).tar.gz
 tarball: $(TARBALL)
 
 $(TARBALL):
