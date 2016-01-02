@@ -225,7 +225,8 @@ endif
 	ln -sf bash $(d)/bin/rbash
 
 	: # skeleton files
-	$(ID) debian/etc.bash.bashrc $(d)/etc/bash.bashrc
+	$(ID) debian/etc.bash.bashrc $(d)/etc/bash.bashrc	
+	$(ID) debian/etc.bash_preexec $(d)/etc/bash_preexec
 	$(ID) debian/skel.bashrc $(d)/etc/skel/.bashrc
 	$(ID) debian/skel.profile $(d)/etc/skel/.profile
 	$(ID) debian/skel.bash_logout $(d)/etc/skel/.bash_logout
