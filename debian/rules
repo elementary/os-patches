@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+TARBALL_EXT=tar.gz
+GNOME_DOWNLOAD_URL = http://user-dirs.freedesktop.org/releases/$(GNOME_TARBALL)
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+include /usr/share/gnome-pkg-tools/1/rules/uploaders.mk
+-include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+LDFLAGS+=-Wl,-z,defs -Wl,-O1 -Wl,--as-needed
+
+export NO_PKG_MANGLE=1
+
+binary-post-install/xdg-user-dirs::
+	mkdir -p debian/xdg-user-dirs/etc/X11/Xsession.d
+	cp debian/xdg-user-dirs-Xsession \
+		debian/xdg-user-dirs/etc/X11/Xsession.d/60xdg-user-dirs-update
+
+build/xdg-user-dirs::
+	cd po; intltool-update --pot
+	make -C po update-gmo
+
+clean::
+	rm -f po/*.gmo

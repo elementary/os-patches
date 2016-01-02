@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+]>
+<refentry id="xdg-user-dir">
+
+<refentryinfo>
+  <title>xdg-user-dir</title>
+  <productname>XDG</productname>
+  <authorgroup>
+    <author>
+      <contrib>Developer</contrib>
+      <firstname>Alexander</firstname>
+      <surname>Larsson</surname>
+      <email>alexl@redhat.com</email>
+    </author>
+  </authorgroup>
+</refentryinfo>
+
+<refmeta>
+  <refentrytitle>xdg-user-dir</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="manual">User Commands</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+  <refname>xdg-user-dir</refname>
+  <refpurpose>Find an XDG user dir</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>xdg-user-dir</command> <arg>NAME</arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para><command>xdg-user-dir</command> looks up the current path for one
+of the special XDG user dirs.</para>
+<para>This command expects the name of an XDG user dir as argument.
+The possible names are:
+<simplelist>
+    <member>DESKTOP</member>
+    <member>DOWNLOAD</member>
+    <member>TEMPLATES</member>
+    <member>PUBLICSHARE</member>
+    <member>DOCUMENTS</member>
+    <member>MUSIC</member>
+    <member>PICTURES</member>
+    <member>VIDEOS</member>
+</simplelist></para>
+</refsect1>
+
+<refsect1><title>Files</title>
+  <para>The values are looked up in the <filename>user-dirs.dir</filename>
+  file. This file is created by the xdg-user-dirs-update utility.</para>
+</refsect1>
+
+<refsect1><title>Environment</title>
+  <para>The <envar>XDG_CONFIG_HOME</envar> environment variable determines
+  where the <filename>user-dirs.dirs</filename> file is located.</para>
+</refsect1>
+
+<refsect1><title>See Also</title>
+  <para>
+    <citerefentry><refentrytitle>xdg-user-dirs-update</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+  </para>
+</refsect1>
+
+</refentry>
