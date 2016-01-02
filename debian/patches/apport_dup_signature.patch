@@ -1,0 +1,34 @@
+From c7e7b969a05db19e72f69f3a39aef1c33b5cc5fd Mon Sep 17 00:00:00 2001
+From: Martin Pitt <martinpitt@gnome.org>
+Date: Thu, 2 May 2013 15:35:45 -0700
+Subject: [PATCH] apport hook: Trim duplicate signature
+
+Don't use the whole DKMS build log as duplicate signature, this is way too
+long. Just use the first actual compiler error, together with the package name
+and version.
+
+https://bugs.launchpad.net/dkms/+bug/1175785
+---
+ dkms_apport.py | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+Index: dkms-2.2.0.3/dkms_apport.py
+===================================================================
+--- dkms-2.2.0.3.orig/dkms_apport.py	2013-05-02 15:39:01.839557409 -0700
++++ dkms-2.2.0.3/dkms_apport.py	2013-05-02 15:39:01.835557409 -0700
+@@ -87,12 +87,10 @@
+     if 'Segmentation fault' in report['DKMSBuildLog']:
+         sys.stderr.write('ERROR (dkms apport): There was a segmentation fault when trying to build the module\n')
+         sys.exit(1)
+-    dupe_sig = ''
+     for line in report['DKMSBuildLog'].split('\n'):
+-        if line.endswith(this_year):
+-            continue
+-        dupe_sig += line + '\n'
+-    report['DuplicateSignature'] = dupe_sig
++        if ': error:' in line:
++            report['DuplicateSignature'] = 'dkms:%s:%s:%s' % (package, version, line.strip())
++            break
+ 
+ if options.kernel:
+     report['DKMSKernelVersion'] = options.kernel
