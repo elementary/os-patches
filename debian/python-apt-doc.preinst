@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+# Remove files that remained
+if [ "$1" = "upgrade" ]; then
+    if test -d /usr/share/doc/python-apt/html; then
+        rm -r /usr/share/doc/python-apt/html
+    fi
+
+    if test -d /usr/share/doc/python-apt/examples; then
+        rm -r /usr/share/doc/python-apt/examples
+    fi
+fi
+
+#DEBHELPER#

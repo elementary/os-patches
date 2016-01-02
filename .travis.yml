@@ -1,0 +1,19 @@
+# This provides integration into the travis-ci.org CI system. For a overview
+# check http://about.travis-ci.org/docs/user/getting-started/
+# 
+# Some notes:
+# - language is "C" because the travis chroot for python installs a non-repo
+#   python3.3 from a PPA
+# - we need to add the current stable ubuntu (or even the current development
+#   ubuntu because we need a recent version of apt to build the python-apt
+# - we use ubuntu instead of debian because the travis chroot is ubuntu based
+# - ./debian/rules build-arch will build the package and run the tests
+language: c
+before_install:
+ - sudo apt-get update -q
+ - sudo apt-get install distro-info
+ - echo "deb http://archive.ubuntu.com/ubuntu $(distro-info --stable) main"|sudo tee -a /etc/apt/sources.list.d/added.list
+ - sudo apt-get update -q
+ - sudo apt-get install -q --no-install-recommends gdebi-core
+ - sudo apt-get install -q build-essential $(gdebi -q --apt-line ./debian/control)
+script: ./debian/rules build-arch
