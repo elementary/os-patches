@@ -167,7 +167,7 @@ class DistInfo(object):
 
         if not dist:
             try:
-                dist = Popen(["lsb_release", "-i", "-s"],
+                dist = Popen(["lsb_release", "-u", "-i", "-s"],
                              stdout=PIPE).communicate()[0].strip()
             except OSError as exc:
                 if exc.errno != errno.ENOENT:
