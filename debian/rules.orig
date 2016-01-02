@@ -54,7 +54,6 @@ binary-arch: build
 	ln -s README $(docdir)/FAQ
 	install -p -m 644 etc/* debian/tmp/etc
 	install -p -m 755 debian/update-motd.d/* debian/tmp/etc/update-motd.d
-	install -p -m 644 upstream-release/* debian/tmp/etc/upstream-release
 ifeq ($(DEB_HOST_GNU_SYSTEM),gnu)
 	rmdir debian/tmp/sys
 endif

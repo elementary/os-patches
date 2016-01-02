@@ -20,7 +20,13 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-printf "\n"
-printf " * Documentation:  https://help.ubuntu.com\n"
-printf " * Management:     https://landscape.canonical.com\n"
-printf " * Support:        https://ubuntu.com/advantage\n"
+[ -r /etc/lsb-release ] && . /etc/lsb-release
+
+if [ -z "$DISTRIB_RELEASE" ] && [ -x /usr/bin/lsb_release ]; then
+	# Fall back to using the very slow lsb_release utility
+	DISTRIB_RELEASE=$(lsb_release -sr)
+fi
+
+URL="http://elementary.io/"
+
+printf "\n * Website:  %s\n" "$URL"
