@@ -1,0 +1,58 @@
+Description: Ditch special handling of desktop folder
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ xdg-user-dirs-gtk (0.9-0ubuntu1) precise; urgency=low
+ .
+   * New upstream version:
+     - Port to Gtk 3
+     - Add Unity and LXDE to desktop file OnlyShowIn
+   * debian/control.in: build-depends on gtk3
+   * debian/patches/onlyshowin_unity.patch:
+   * debian/patches/gtk_init_only_when_required.patch:
+     - dropped, the fixes are in the new version
+   * debian/sources/format: use v3
+   * debian/watch: use xz
+Author: Sebastien Bacher <seb128@ubuntu.com>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: http://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: <YYYY-MM-DD>
+
+--- xdg-user-dirs-gtk-0.9.orig/update.c
++++ xdg-user-dirs-gtk-0.9/update.c
+@@ -272,7 +272,6 @@ int
+ main (int argc, char *argv[])
+ {
+   XdgDirEntry *old_entries, *new_entries, *entry;
+-  XdgDirEntry *desktop_entry;
+   GtkBookmark *bookmark;
+   GList *bookmarks, *l;
+   char *old_locale;
+@@ -319,13 +318,11 @@ main (int argc, char *argv[])
+ 	NULL};
+       /* No previous bookmarks. Generate standard ones */
+ 
+-      desktop_entry = find_dir_entry (new_entries, "DESKTOP");
+       for (i = 0; make_bm_for[i] != NULL; i++)
+ 	{
+ 	  entry = find_dir_entry (new_entries, make_bm_for[i]);
+ 	  
+-	  if (entry && strcmp (entry->path, g_get_home_dir ()) != 0 &&
+-	      (desktop_entry == NULL || strcmp (entry->path, desktop_entry->path) != 0))
++	  if (entry && strcmp (entry->path, g_get_home_dir ()) != 0)
+ 	    {
+ 	      uri = g_filename_to_uri (entry->path, NULL, NULL);
+ 	      if (uri)
