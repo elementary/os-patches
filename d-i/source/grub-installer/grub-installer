@@ -808,7 +808,7 @@ select_bootdev() {
 	debug "select_bootdev: arg='$1'"
 
 	local dev_list dev_descr grubdev devices disk_id dev descr
-	local default_choice chosen result
+	local default_choice priority chosen result
 
 	result=""
 	default_choice="$1"
@@ -839,15 +839,20 @@ select_bootdev() {
 
 	db_subst grub-installer/choose_bootdev DEVICES_LIST "$dev_list"
 	db_subst grub-installer/choose_bootdev DESCRIPTIONS "$dev_descr"
+	priority=high
 	# set initial selection
 	if [ -n "$default_choice" ] ; then
 		chosen="$(readlink -f "$default_choice")"
 		if [ -n "$chosen" ] ;then
 			db_set grub-installer/choose_bootdev "$chosen"
 		fi
+	elif [ "$(echo "$devices" | wc -l)" = 1 ]; then
+		# only one likely choice
+		db_set grub-installer/choose_bootdev "$dev_list"
+		priority=low
 	fi
 
-	db_input high grub-installer/choose_bootdev || true
+	db_input "$priority" grub-installer/choose_bootdev || true
 	if ! db_go; then
 		log "Returning to menu"
 		db_progress STOP
