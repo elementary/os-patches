@@ -1,0 +1,61 @@
+xdg-user-dirs-gtk (0.10-1ubuntu1) saucy; urgency=low
+
+  * Resynchronize on Debian, remaining changes
+  * nodisplay_autostart.patch: Don't show in "Startup Applications"
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 03 Jul 2013 11:07:03 +0200
+
+xdg-user-dirs-gtk (0.10-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add Vcs-* fields.
+  * Bump Standards-Version to 3.9.4. No further changes.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 29 Jun 2013 18:04:50 +0200
+
+xdg-user-dirs-gtk (0.9-1) unstable; urgency=low
+
+  * New upstream release.
+  * Use track tar.xz upstream tarballs.
+  * Switch to 3.0 (quilt) source format and update debhelper compat level.
+  * Build-depend on GTK+3 now instead of GTK+2.
+
+ -- Sebastian Dröge <slomo@debian.org>  Wed, 04 Apr 2012 13:58:18 +0200
+
+xdg-user-dirs-gtk (0.8-1) unstable; urgency=low
+
+  * New upstream bugfix release.
+  * debian/control.in:
+    + Line-wrap control fields.
+    + Build depend on intltool.
+    + Update Standards-Version to 3.8.0, no additional changes needed.
+
+ -- Sebastian Dröge <slomo@debian.org>  Sat, 07 Mar 2009 20:53:29 +0100
+
+xdg-user-dirs-gtk (0.7-1) unstable; urgency=low
+
+  * New upstream bugfix release with many translation updates:
+    + debian/patches/01_no_desktop_bookmark.patch,
+      debian/patches/90_from_svn_handle_en_us_variants.patch:
+      - Dropped, merged upstream.
+  * debian/control.in:
+    + Update Standards-Version to 3.7.3, no additional changes needed.
+    + Move homepage to the Homepage field and fix the URL.
+  * debian/rules:
+    + Add -Wl,-z,defs to LDFLAGS and actually append.
+
+ -- Sebastian Dröge <slomo@debian.org>  Tue, 12 Feb 2008 15:02:40 +0100
+
+xdg-user-dirs-gtk (0.6-1) unstable; urgency=low
+
+  * Initial version (Closes: #413955).
+  * debian/patches/01_no_desktop_bookmark.patch:
+    + Don't bookmark the desktop directory since it's already handled
+      as a special case by the GNOME desktop applications (LP: #122602)
+      Patch taken from Ubuntu.
+  * debian/patches/90_from_svn_handle_en_us_variants.patch:
+    + patch from SVN, handle en_US variants correctly. Patch taken from
+      Ubuntu.
+
+ -- Sebastian Dröge <slomo@debian.org>  Thu,  8 Mar 2007 07:16:00 +0100
+

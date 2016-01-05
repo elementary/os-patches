@@ -1,0 +1,13 @@
+Description: Clean up Startup Applications dialog by hiding default apps
+Author: Michael Terry <michael.terry@canonical.com>
+Bug-Ubuntu: https://launchpad.net/bugs/803917
+Forwarded: not-needed
+
+diff -Nur -x '*.orig' -x '*~' xdg-user-dirs-gtk-0.8//user-dirs-update-gtk.desktop.in xdg-user-dirs-gtk-0.8.new//user-dirs-update-gtk.desktop.in
+--- xdg-user-dirs-gtk-0.8//user-dirs-update-gtk.desktop.in	2008-09-06 01:55:20.000000000 +0100
++++ xdg-user-dirs-gtk-0.8.new//user-dirs-update-gtk.desktop.in	2011-07-01 13:50:50.642726777 +0100
+@@ -8,3 +8,4 @@
+ Type=Application
+ StartupNotify=false
+ X-KDE-autostart-after=panel
++NoDisplay=true
