@@ -29,6 +29,9 @@ def main():
     parser.add_option('-v', '--version', dest='version', action='store_true',
                       default=False,
                       help="show LSB modules this system supports")
+    parser.add_option('-u', '--upstream', dest='upstream', action='store_true',
+                      default=False,
+                      help="show upstream LSB data")
     parser.add_option('-i', '--id', dest='id', action='store_true',
                       default=False,
                       help="show distributor ID")
@@ -47,7 +50,7 @@ def main():
     parser.add_option('-s', '--short', dest='short',
                       action='store_true', default=False,
                       help="show requested information in short format")
-    
+
     (options, args) = parser.parse_args()
     if args:
         parser.error("No arguments are permitted")
@@ -56,7 +59,7 @@ def main():
     none = not (options.all or options.version or options.id or
                 options.description or options.codename or options.release)
 
-    distinfo = lsb_release.get_distro_information()
+    distinfo = lsb_release.get_distro_information(options.upstream)
 
     if none or options.all or options.version:
         verinfo = lsb_release.check_modules_installed()
