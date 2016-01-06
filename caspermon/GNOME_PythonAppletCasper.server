@@ -1,0 +1,30 @@
+<oaf_info>
+
+<oaf_server iid="OAFIID:GNOME_PythonAppletCasper_Factory"
+            type="exe"
+            location="/usr/share/casper-applet/casper-applet.py">
+
+        <oaf_attribute name="repo_ids" type="stringv">
+                <item value="IDL:Bonobo/GenericFactory:1.0"/>
+                <item value="IDL:Bonobo/Unknown:1.0"/>
+        </oaf_attribute>
+        <oaf_attribute name="name" type="string" value="PythonAppletCasper"/>
+        <oaf_attribute name="description" type="string" value="Python Applet CAsper"/>
+</oaf_server>
+
+<oaf_server iid="OAFIID:GNOME_PythonAppletCasper"
+            type="factory" 
+            location="OAFIID:GNOME_PythonAppletCasper_Factory">
+
+        <oaf_attribute name="repo_ids" type="stringv">
+                <item value="IDL:GNOME/Vertigo/PanelAppletShell:1.0"/>
+                <item value="IDL:Bonobo/Control:1.0"/>
+                <item value="IDL:Bonobo/Unknown:1.0"/>
+        </oaf_attribute>
+        <oaf_attribute name="name" type="string" value="PythonAppletCasper"/>
+        <oaf_attribute name="description" type="string" value="Python Applet Casper"/>
+        <oaf_attribute name="panel:category" type="string" value="Utility"/>
+        <oaf_attribute name="panel:icon" type="string" value="bug-buddy.png"/>
+</oaf_server>
+
+</oaf_info>
