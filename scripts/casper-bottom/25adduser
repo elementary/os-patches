@@ -81,8 +81,6 @@ fi
 for file in /usr/share/applications/ubiquity.desktop /usr/share/applications/kde4/ubiquity-kdeui.desktop; do
     if [ -f "/root/$file" ]; then
         sed -i "s/RELEASE/$RELEASE/" "/root$file"
-        chroot /root install -d -o $USERNAME -g $USERNAME /home/$USERNAME/Desktop
-        chroot /root install -D -o $USERNAME -g $USERNAME $file /home/$USERNAME/Desktop/$(basename "$file")
         break
     fi
 done
