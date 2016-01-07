@@ -2,7 +2,7 @@
 
 . /usr/share/debconf/confmodule
 
-if CODENAME="$(lsb_release -cs)"; then
+if CODENAME="$(lsb_release -ucs)"; then
 	# TODO cjwatson 2006-04-07: wrong for Debian, I think
 	db_set mirror/suite "$CODENAME"
 	db_set mirror/codename "$CODENAME"
