@@ -107,7 +107,7 @@ fi
 # If not set, using defaults
 [ -z "$PPAHOST" ] && PPAHOST="ppa.launchpad.net"
 [ -z "$PPANAME" ] && PPANAME="ppa"
-[ -z "$DIST" ] && DIST=$(lsb_release -c -s)
+[ -z "$DIST" ] && DIST=$(lsb_release -c -s -u)
 
 if [ "$(id -u)" != "0" ]; then
 	warn "This script would need superuser privileges, use sudo"
