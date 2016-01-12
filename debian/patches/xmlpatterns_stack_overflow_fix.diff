@@ -1,0 +1,60 @@
+commit d1b17740ed4d9b1e3c3ad5898bb8259969dc77df
+Author: Kamil Rojewski <kamil.rojewski@gmail.com>
+Date:   Wed Aug 13 10:38:38 2014 +0200
+
+    fix for stack overflow
+    
+    Recursion in item mapping iterator caused a stack
+    overflow for large datasets.
+    
+    Task-number: QTBUG-40153
+    Change-Id: I693798de0ecfd3a920a3dd270172ce7ec3c13d8d
+    Reviewed-by: Jędrzej Nowacki <jedrzej.nowacki@digia.com>
+
+Index: qt4-x11/src/xmlpatterns/iterators/qitemmappingiterator_p.h
+===================================================================
+--- qt4-x11.orig/src/xmlpatterns/iterators/qitemmappingiterator_p.h	2014-09-04 11:47:43.979391542 -0500
++++ qt4-x11/src/xmlpatterns/iterators/qitemmappingiterator_p.h	2014-09-04 11:47:43.975391542 -0500
+@@ -117,24 +117,28 @@
+          */
+         virtual TResult next()
+         {
+-            const TSource sourceItem(m_it->next());
+-
+-            if(qIsForwardIteratorEnd(sourceItem))
++            while (true)
+             {
+-                m_current = TResult();
+-                m_position = -1;
+-                return TResult();
+-            }
+-            else
+-            {
+-                m_current = m_mapper->mapToItem(sourceItem, m_context);
+-                if(qIsForwardIteratorEnd(m_current))
+-                    return next(); /* The mapper returned null, so continue with the next in the source. */
+-                else
++                const TSource &sourceItem = m_it->next();
++                if (qIsForwardIteratorEnd(sourceItem))
+                 {
+-                    ++m_position;
++                    m_current = TResult();
++                    m_position = -1;
+                     return m_current;
+                 }
++                else
++                {
++                    m_current = m_mapper->mapToItem(sourceItem, m_context);
++                    if (qIsForwardIteratorEnd(m_current))
++                    {
++                        continue; /* The mapper returned null, so continue with the next in the source. */
++                    }
++                    else
++                    {
++                        ++m_position;
++                        return m_current;
++                    }
++                }
+             }
+         }
+ 

@@ -1,0 +1,27 @@
+Description: There should be no reason to disable stack protector unless one
+ is building with an ancient version of GCC.
+Author: Kees Cook <kees@ubuntu.com>
+Bug-Ubuntu: https://launchpad.net/bugs/538237
+Forwarded: no
+
+---
+ src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri |    8 --------
+ 1 file changed, 8 deletions(-)
+
+--- a/src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri
++++ b/src/3rdparty/javascriptcore/JavaScriptCore/JavaScriptCore.pri
+@@ -58,14 +58,6 @@ contains(JAVASCRIPTCORE_JIT,no) {
+     DEFINES+=ENABLE_YARR=0
+ }
+ 
+-# Rules when JIT enabled (not disabled)
+-!contains(DEFINES, ENABLE_JIT=0) {
+-    linux*-g++*:greaterThan(QT_GCC_MAJOR_VERSION,3):greaterThan(QT_GCC_MINOR_VERSION,0) {
+-        QMAKE_CXXFLAGS += -fno-stack-protector
+-        QMAKE_CFLAGS += -fno-stack-protector
+-    }
+-}
+-
+ wince* {
+     INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/ce-compat
+     SOURCES += $$QT_SOURCE_TREE/src/3rdparty/ce-compat/ce_time.c

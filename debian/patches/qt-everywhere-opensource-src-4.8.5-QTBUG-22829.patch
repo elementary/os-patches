@@ -1,0 +1,22 @@
+Description: fix moc in 4.x tripping over BOOST
+Origin: http://pkgs.fedoraproject.org/cgit/qt.git/plain/qt-everywhere-opensource-src-4.8.5-QTBUG-22829.patch?id=e41de7f53a97dd68f1bd13fe64b6d84cf945397a
+Bug: https://bugreports.qt-project.org/browse/QTBUG-22829
+Bug-Debian: http://bugs.debian.org/704045
+Bug-RedHat: https://bugzilla.redhat.com/756395
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/qt4-x11/+bug/1119656
+Applied-Upstream: Qt5 has proper parsing support.
+
+diff -up qt-everywhere-opensource-src-4.8.5/src/tools/moc/main.cpp.QTBUG-22829 qt-everywhere-opensource-src-4.8.5/src/tools/moc/main.cpp
+--- qt-everywhere-opensource-src-4.8.5/src/tools/moc/main.cpp.QTBUG-22829	2013-06-09 17:04:02.762459323 -0500
++++ qt-everywhere-opensource-src-4.8.5/src/tools/moc/main.cpp	2013-06-09 17:08:20.409680813 -0500
+@@ -188,8 +188,9 @@ int runMoc(int _argc, char **_argv)
+     pp.macros["Q_MOC_RUN"];
+     pp.macros["__cplusplus"];
+ 
+-    // Workaround a bug while parsing the boost/type_traits/has_operator.hpp header. See QTBUG-22829
++    // Workaround a bugs while parsing some boost headers. See QTBUG-22829 
+     pp.macros["BOOST_TT_HAS_OPERATOR_HPP_INCLUDED"];
++    pp.macros["BOOST_LEXICAL_CAST_INCLUDED"];
+ 
+     QByteArray filename;
+     QByteArray output;

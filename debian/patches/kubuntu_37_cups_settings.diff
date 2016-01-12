@@ -1,0 +1,92 @@
+Description: use CUPS settings in print dialog
+Bug: https://bugreports.qt-project.org/browse/QTBUG-25372
+Bug-KDE: https://bugs.kde.org/180051
+Bug-Ubuntu: https://launchpad.net/bugs/905147
+Forwarded: no
+
+Index: precise-updates-qt4-x11/src/gui/dialogs/qprintdialog_unix.cpp
+===================================================================
+--- precise-updates-qt4-x11.orig/src/gui/dialogs/qprintdialog_unix.cpp	2012-07-25 17:06:19.586211000 +0200
++++ precise-updates-qt4-x11/src/gui/dialogs/qprintdialog_unix.cpp	2012-07-25 17:18:27.612092214 +0200
+@@ -579,6 +579,32 @@
+ void QPrintDialogPrivate::selectPrinter(QCUPSSupport *cups)
+ {
+     options.duplex->setEnabled(cups && cups->ppdOption("Duplex"));
++
++    if (cups) {
++        const ppd_option_t* duplex = cups->ppdOption("Duplex");
++        if (duplex) {
++            // copy default ppd duplex to qt dialog
++            if (qstrcmp(duplex->defchoice, "DuplexTumble") == 0)
++                options.duplexShort->setChecked(true);
++            else if (qstrcmp(duplex->defchoice, "DuplexNoTumble") == 0)
++                options.duplexLong->setChecked(true);
++            else
++                options.noDuplex->setChecked(true);
++        }
++
++        if (cups->currentPPD()) {
++            // set default color
++            if (cups->currentPPD()->color_device)
++                options.color->setChecked(true);
++            else
++                options.grayscale->setChecked(true);
++        }
++
++        // set collation
++        const ppd_option_t *collate = cups->ppdOption("Collate");
++        if (collate)
++            options.collate->setChecked(qstrcmp(collate->defchoice, "True")==0);
++    }
+ }
+ #endif
+ 
+Index: precise-updates-qt4-x11/src/gui/painting/qprinter.cpp
+===================================================================
+--- precise-updates-qt4-x11.orig/src/gui/painting/qprinter.cpp	2012-07-25 17:06:19.586211000 +0200
++++ precise-updates-qt4-x11/src/gui/painting/qprinter.cpp	2012-07-25 17:18:27.612092214 +0200
+@@ -609,6 +609,44 @@
+                && d_ptr->paintEngine->type() != QPaintEngine::MacPrinter) {
+         setOutputFormat(QPrinter::PdfFormat);
+     }
++
++#if !defined(QT_NO_CUPS) && !defined(QT_NO_LIBRARY)
++    // fill in defaults from ppd file
++    QCUPSSupport cups;
++
++    int printernum = -1;
++    for (int i = 0; i < cups.availablePrintersCount(); i++) {
++        if (printerName().toLocal8Bit() == cups.availablePrinters()[i].name)
++            printernum = i;
++    }
++    if (printernum >= 0) {
++        cups.setCurrentPrinter(printernum);
++
++        const ppd_option_t* duplex = cups.ppdOption("Duplex");
++        if (duplex) {
++            // copy default ppd duplex to qt dialog
++            if (qstrcmp(duplex->defchoice, "DuplexTumble") == 0)
++                setDuplex(DuplexShortSide);
++            else if (qstrcmp(duplex->defchoice, "DuplexNoTumble") == 0)
++                setDuplex(DuplexLongSide);
++            else
++                setDuplex(DuplexNone);
++        }
++
++        if (cups.currentPPD()) {
++            // set default color
++            if (cups.currentPPD()->color_device)
++                setColorMode(Color);
++            else
++                setColorMode(GrayScale);
++        }
++
++        // set collation
++        const ppd_option_t *collate = cups.ppdOption("Collate");
++        if (collate)
++            setCollateCopies(qstrcmp(collate->defchoice, "True")==0);
++    }
++#endif
+ }
+ 
+ /*!

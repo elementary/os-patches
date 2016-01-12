@@ -1,0 +1,392 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+export QTDIR := $(shell pwd)
+export PATH := $(QTDIR)/bin:$(PATH)
+export CFLAGS := $(shell dpkg-buildflags --get CFLAGS) $(shell dpkg-buildflags --get CPPFLAGS)
+export CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS) $(shell dpkg-buildflags --get CPPFLAGS)
+export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
+# workaround to use lrelease.
+export LD_LIBRARY_PATH := $(QTDIR)/lib:$(LD_LIBRARY_PATH)
+# workaround to use qhelpgenerator.
+export QT_PLUGIN_PATH := $(QTDIR)/plugins
+
+# Packages with own debug package
+pkgs_dbg := $(shell dh_listpackages | grep dbg | sed -e '/libqt4-dbg/d; s|-dbg||')
+# Packages whose debug symbols belong to qt4-bin-dbg
+pkgs_dbgbin := libqt4-dev-bin $(filter-out %-dbg lib% $(pkgs_dbg),$(shell dh_listpackages))
+# Library package list for override_dh_makeshlibs, excludes libqt4-phonon
+pkgs_lib := $(filter-out %-dev %-dbg libqt4-phonon libqt4-dev-bin,$(filter lib%,$(shell dh_listpackages)))
+# Upstream changelog
+upstream_changes := $(wildcard changes-*)
+# Current debian version (e.g.: 4:4.5.2-1)
+current_version := $(shell dpkg-parsechangelog | sed -n 's/^Version: //p')
+# Specific shlibs version (e.g.: 4:4.5.2)
+shlibs_version := $(shell dpkg-parsechangelog | sed -n 's/^Version: //p' | cut -f1 -d '-')
+# libqt4-phonon shlibs. Minimum libphonon4 version may need adjusting for new
+# Qt upstream release
+libqt4phonon_shlibs := libphonon4 (>= 4:4.6.0) | libqt4-phonon (= $(current_version))
+# Distribution vendor
+vendor := $(shell dpkg-vendor --query Vendor)
+
+ifneq (,$(filter %-sql-ibase,$(shell dh_listpackages)))
+	extra_configure_opts += -plugin-sql-ibase
+else
+	extra_configure_opts += -no-sql-ibase
+endif
+
+ifneq (,$(filter %-sql-sqlite2,$(shell dh_listpackages)))
+	extra_configure_opts += -plugin-sql-sqlite2
+else
+	extra_configure_opts += -no-sql-sqlite2
+endif
+
+ifeq ($(DEB_HOST_ARCH),arm)
+	extra_configure_opts += -DQT_QLOCALE_USES_FCVT
+endif
+
+armv6_architectures := armhf
+ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(armv6_architectures)))
+	extra_configure_opts += -arch armv6
+endif
+
+ifeq ($(vendor),Ubuntu)
+gles2_architectures := armel armhf
+else
+gles2_architectures := none_for_now
+endif
+ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(gles2_architectures)))
+	extra_configure_opts += -opengl es2 -no-neon
+else
+	extra_configure_opts += -opengl desktop \
+	                        -no-egl
+endif
+
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+  ifneq (,$(filter $(DEB_HOST_ARCH),alpha ia64 mips64 mips64el))
+	platform_arg = linux-g++
+  else ifeq ($(DEB_HOST_ARCH),arm64)
+	# arm64 does not uses -m64, so avoid linux-g++-64.
+	platform_arg = linux-g++
+  else ifeq ($(DEB_HOST_ARCH_BITS),64)
+	platform_arg = linux-g++-64
+  else
+	platform_arg = linux-g++
+  endif
+else
+  ifeq ($(DEB_HOST_ARCH_OS),hurd)
+	platform_arg = hurd-g++
+  else
+	platform_arg = glibc-g++
+  endif
+endif
+
+no_pch_architectures := arm64 armhf ia64 powerpc ppc64 ppc64el
+ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH), $(no_pch_architectures)))
+	extra_configure_opts += -no-pch
+endif
+
+%:
+	dh $@ --parallel --with pkgkde_symbolshelper
+
+override_dh_auto_configure:
+	# Test broken hppa kernel with glibc >= 2.5
+ifeq ($(DEB_HOST_ARCH),hppa)
+	mkdir -p debian/hppa-tmp
+	echo "Testing whether getdents kernel bug is present on this buildd - see #433768"
+	gcc -o debian/hppa-tmp/hppa-test-program debian/readdir-hppa-test.c
+	cd $(CURDIR)/doc/src/images && $(CURDIR)/debian/hppa-tmp/hppa-test-program | sort > $(CURDIR)/debian/hppa-tmp/readdir_r-out
+	cd $(CURDIR)/doc/src/images && ls -a | sort > $(CURDIR)/debian/hppa-tmp/ls-a-out
+	@if ! diff -q $(CURDIR)/debian/hppa-tmp/readdir_r-out $(CURDIR)/debian/hppa-tmp/ls-a-out ; \
+		then \
+		echo "Kernel bug present. This will misbuild qt4 if proceeding. Failing" ; \
+		echo "Please update kernel and test again" ; \
+		exit 5 ; \
+	fi
+endif
+
+	# Create mkspecs/glibc-g++ from mkspecs/linux-g++, needed by GNU/kFreeBSD
+	# we cannot use directly linux-g++ due to src/corelib/io/io.pri
+	rm -rfv mkspecs/glibc-g++
+	cp -a mkspecs/linux-g++ mkspecs/glibc-g++
+
+	# Remove include directory. Then ./configure will take care of calling
+	# syncqt and regenerating it.
+	rm -rfv include
+
+	./configure -confirm-license \
+	            -prefix "/usr" \
+	            -bindir "/usr/lib/$(DEB_HOST_MULTIARCH)/qt4/bin" \
+	            -libdir "/usr/lib/$(DEB_HOST_MULTIARCH)" \
+	            -docdir "/usr/share/qt4/doc" \
+	            -headerdir "/usr/include/qt4" \
+	            -datadir "/usr/share/qt4" \
+	            -plugindir "/usr/lib/$(DEB_HOST_MULTIARCH)/qt4/plugins" \
+	            -importdir "/usr/lib/$(DEB_HOST_MULTIARCH)/qt4/imports" \
+	            -translationdir "/usr/share/qt4/translations" \
+	            -sysconfdir "/etc/xdg" \
+	            -demosdir "/usr/lib/qt4/demos" \
+	            -examplesdir "/usr/lib/qt4/examples" \
+	            -opensource \
+	            -fast \
+	            -plugin-sql-mysql \
+	            -plugin-sql-odbc \
+	            -plugin-sql-psql \
+	            -plugin-sql-sqlite \
+	            -plugin-sql-tds \
+	            -system-sqlite \
+	            -xmlpatterns \
+	            -no-multimedia \
+	            -audio-backend \
+	            -no-phonon \
+	            -no-phonon-backend \
+	            -svg \
+	            -no-webkit \
+	            -script \
+	            -scripttools \
+	            -platform $(platform_arg) \
+	            -system-zlib \
+	            -system-libtiff \
+	            -system-libpng \
+	            -system-libjpeg \
+	            -no-rpath \
+	            -optimized-qmake \
+	            -dbus-linked \
+	            -reduce-relocations \
+	            -no-separate-debug-info \
+	            -verbose \
+	            -gtkstyle \
+	            -system-nas-sound \
+	            -no-openvg \
+	            -lfontconfig \
+	            -I/usr/include/freetype2 \
+	            -qvfb \
+	            -icu \
+	            $(extra_configure_opts)
+
+override_dh_auto_build:
+	dh_auto_build
+	# Build documentations
+ifneq (,$(filter qt4-doc, $(shell dh_listpackages)))
+	# Build documentations
+	dh_auto_build -Smakefile -- docs
+endif
+	# Build translations
+	dh_auto_build -Smakefile -- -C translations ts-all
+	# Workaround: It's a known qmake limitation.
+	# It can't generate install rules for files that don't exist yet like docs.
+	./config.status
+
+override_dh_auto_clean:
+	[ ! -f Makefile ] || $(MAKE) confclean distclean
+
+	# Extra stuff missed by confclean/distclean
+
+	# Misc. files
+	rm -fv \
+	  .qmake.vars \
+	  config.status \
+	  config.tests/.qmake.cache \
+	  examples/dbus/*/Makefile.* \
+	  mkspecs/qconfig.pri \
+	  src/corelib/global/qconfig.* \
+	  src/tools/uic/qclass_lib_map.h \
+	;
+
+	# Misc. directories
+	rm -rfv \
+	  doc-build/ \
+	  doc/html/ \
+	  doc/qch/ \
+	  examples/tools/plugandpaint/plugins/ \
+	  examples/tools/styleplugin/styles/ \
+	  include/ \
+	  lib/ \
+	  mkspecs/glibc-g++/ \
+	  plugins/ \
+	;
+
+	# hppa test directory
+	rm -rfv debian/hppa-tmp
+
+	# Leftover dirs
+	find -depth -type d \( -false \
+	  -o -name debug-shared \
+	  -o -name debug-static \
+	  -o -name \*.gch \
+	  -o -name .moc\* \
+	  -o -name .obj\* \
+	  -o -name .pch \
+	  -o -name pkgconfig \
+	  -o -name .rcc \
+	  -o -name release-shared \
+	  -o -name release-static \
+	  -o -name .uic \
+	\) -print0 | xargs -0 rm -rfv
+
+	# Leftover files and all symlinks
+	find \( -false \
+	  -o -name \*.a \
+	  -o -name Makefile.Debug \
+	  -o -name Makefile.Release \
+	  -o -name \*.o \
+	  -o -name \*.prl \
+	  -o -name \*.so \
+	  -o -name \*.so.debug \
+	  -o -type l \
+	\) -print0 | xargs -0 rm -rfv
+
+	# Delete all Makefiles, excluding some from src/3rdparty
+	find $(CURDIR) -name Makefile \
+	  ! -path $(CURDIR)/src/3rdparty/Makefile \
+	  ! -path $(CURDIR)/src/3rdparty/freetype/\* \
+	  ! -path $(CURDIR)/src/3rdparty/zlib/\* \
+	  ! -path $(CURDIR)/src/3rdparty/ptmalloc/Makefile \
+	-print0 | xargs -0 rm -rfv
+
+	# Any remaining executables
+	find $(CURDIR) -type f -perm /u+x,g+x,o+x -exec file -i '{}' \; \
+	| grep -e application/x-executable \
+	| cut -d ':' -f 1 | xargs rm -fv
+
+	# Generated on build
+	rm -fv debian/shlibs.local
+	rm -fv debian/stamp-makefile-build-tools
+
+override_dh_auto_install:
+	dh_auto_install -Smakefile -- INSTALL_ROOT=$(CURDIR)/debian/tmp/
+
+	# Remove libtool-like files
+	rm -fv debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/*.la
+
+	# Fix wrong path in pkgconfig files
+	find $(CURDIR)/debian/tmp/usr/lib/*/pkgconfig -type f -name '*.pc' \
+		-exec perl -pi -e "s, -L$(CURDIR)/?\S+,,g" {} \;
+	# Fix wrong path in prl files
+	find $(CURDIR)/debian/tmp/usr/lib -type f -name '*.prl' \
+		-exec sed -i -e "/^QMAKE_PRL_BUILD_DIR/d;s/\(QMAKE_PRL_LIBS =\).*/\1/" {} \;
+
+	# Add symlinks for the -qt4 binaries still used by some
+	for links_file in debian/libqt4-dev-bin.links debian/qt4-designer.links debian/qt4-dev-tools.links debian/qt4-linguist-tools.links debian/qt4-qmake.links debian/qt4-qtconfig.links ; do \
+		cat $$links_file.in > $$links_file ; \
+		sed -i 's/MULTIARCH/$(DEB_HOST_MULTIARCH)/' $$links_file ; \
+	done
+
+	install -D -p -m0644 debian/collection/qtdemo.qhc \
+		debian/qt4-demos/usr/lib/qt4/demos/qtdemo/qtdemo.qhc
+
+	install -D -p -m0644 debian/desktop/designer-qt4.desktop \
+		debian/qt4-designer/usr/share/applications/designer-qt4.desktop
+	install -D -p -m0644 debian/desktop/designer.png \
+		debian/qt4-designer/usr/share/pixmaps/designer-qt4.png
+
+	install -D -p -m0644 debian/desktop/assistant-qt4.desktop \
+		debian/qt4-dev-tools/usr/share/applications/assistant-qt4.desktop
+	install -D -p -m0644 debian/desktop/linguist-qt4.desktop \
+		debian/qt4-dev-tools/usr/share/applications/linguist-qt4.desktop
+	install -D -p -m0644 debian/desktop/assistant.png \
+		debian/qt4-dev-tools/usr/share/pixmaps/assistant-qt4.png
+	install -D -p -m0644 debian/desktop/linguist.png \
+		debian/qt4-dev-tools/usr/share/pixmaps/linguist-qt4.png
+
+	install -D -p -m0644 debian/desktop/qtconfig-qt4.desktop \
+		debian/qt4-qtconfig/usr/share/applications/qtconfig-qt4.desktop
+	install -D -p -m0644 debian/desktop/qtconfig.png \
+		debian/qt4-qtconfig/usr/share/pixmaps/qtconfig-qt4.png
+
+	# QTBUG-12159 workaround
+	rm -fv debian/tmp//usr/share/qt4/mkspecs/modules/qt_webkit_version.pri
+
+	# Remove phonon development files
+	rm -fv debian/tmp/usr/lib/*/libphonon.la
+	rm -fv debian/tmp/usr/lib/*/libphonon.prl
+	rm -fv debian/tmp/usr/lib/*/libphonon.so
+	rm -fv debian/tmp/usr/lib/*/pkgconfig/phonon.pc
+	rm -rfv debian/tmp/usr/include/qt4/phonon
+	# And the gstreamer backend.
+	rm -fv debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/qt4/plugins/phonon_backend/libphonon_gstreamer.so
+
+	# Remove the embedded jquery library. We will later link to the one provided
+	# by the libjs-jquery package.
+	rm -fv debian/tmp/usr/share/qt4/doc/html/scripts/jquery.js
+
+	# Add a configuration for qtchooser
+	mkdir -p $(CURDIR)/debian/tmp/usr/share/qtchooser
+	echo "/usr/lib/$(DEB_HOST_MULTIARCH)/qt4/bin" > $(CURDIR)/debian/tmp/usr/share/qtchooser/qt4-$(DEB_HOST_MULTIARCH).conf
+	echo "/usr/lib/$(DEB_HOST_MULTIARCH)" >> $(CURDIR)/debian/tmp/usr/share/qtchooser/qt4-$(DEB_HOST_MULTIARCH).conf
+
+	# Ship 4.conf and qt4.conf for this arch, and a default.conf.
+	# 4.conf makes calling qtchooser prettier.
+	mkdir -p $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/qtchooser
+	ln -s /usr/share/qtchooser/qt4-$(DEB_HOST_MULTIARCH).conf $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/qtchooser/4.conf
+	ln -s /usr/share/qtchooser/qt4-$(DEB_HOST_MULTIARCH).conf $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/qtchooser/qt4.conf
+	ln -s /usr/share/qtchooser/qt4-$(DEB_HOST_MULTIARCH).conf $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/qtchooser/default.conf
+
+	# As a special case to avoid FTBFSs for current Qt4 packages, ship a second
+	# default.conf which will be searched by qtchooser. Only Qt4 should ship this.
+	mkdir -p $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/qt-default/qtchooser
+	ln -s /usr/share/qtchooser/qt4-$(DEB_HOST_MULTIARCH).conf $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/qt-default/qtchooser/default.conf
+
+	# Remove leftover directories
+	find $(CURDIR)/debian/tmp/usr/lib/qt4 -depth -type d \( -false \
+	  -o -name .moc\* \
+	  -o -name .obj\* \
+	  -o -name .pch \
+	  -o -name .rcc \
+	\) -print0 | xargs -0 rm -rfv
+
+	# Remove bogus exec bits from some data files in mkspecs, docs, examples
+	# and demos
+	find debian/tmp/usr/share/qt4/ debian/tmp/usr/lib/qt4/ \
+		-perm /u+x,g+x,o+x -type f \
+		-regex '.*\.\(app\|conf\|cpp\|h\|js\|php\|png\|pro\|xml\|xsl\)$$' \
+		-exec chmod a-x {} \;
+
+override_dh_install:
+	dh_install --fail-missing
+
+override_dh_installdocs:
+	dh_installdocs --all LGPL_EXCEPTION.txt
+
+override_dh_installchangelogs:
+	dh_installchangelogs $(upstream_changes)
+
+override_dh_strip:
+	$(foreach pkg,$(pkgs_dbg),dh_strip -p$(pkg) --dbg-package=$(pkg)-dbg;)
+	dh_strip $(foreach pkg,$(pkgs_dbgbin),-p$(pkg)) --dbg-package=qt4-bin-dbg
+	dh_strip --remaining-packages --dbg-package=libqt4-dbg
+
+override_dh_makeshlibs:
+	# Specific shlibs version (e.g.: 4:4.5.2)
+	$(foreach pkg,$(pkgs_lib),dh_makeshlibs -p$(pkg) -V '$(pkg) (>= $(shlibs_version))' -- -c0;)
+	# Generate shlibs local files
+	for pkg in $(pkgs_lib); do \
+		if test -e debian/$${pkg}/DEBIAN/shlibs ; then \
+			sed 's/>=[^)]*/= $(current_version)/' debian/$${pkg}/DEBIAN/shlibs >> debian/shlibs.local ;\
+		fi \
+	done
+
+override_dh_shlibdeps:
+	# Exclude phonon deps from libqt4-phonon itself (they get injected there somehow)
+	dh_shlibdeps -plibqt4-phonon -- -xlibphonon4 -xlibqt4-phonon
+	dh_shlibdeps --remaining-packages
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz
+
+prune-nonfree:
+	# Delete RFCs.
+	find \( -name rfc????.txt \) -print -delete
+	# Delete files that contain minified javascript libs without source
+	# In it's preferred form of modification.
+	rm -fv tests/benchmarks/script/sunspider/tests/string-unpack-code.js
+	rm -fv doc/html/scripts/jquery.js
+	rm -fv doc/src/template/scripts/jquery.js
+	rm -fv tools/qdoc3/doc/config/scripts/jquery.js
+	rm -fv examples/webkit/fancybrowser/jquery.min.js
+
+.PHONY: override_dh_auto_test

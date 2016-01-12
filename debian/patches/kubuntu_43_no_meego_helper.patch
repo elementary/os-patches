@@ -1,0 +1,21 @@
+Description: do not build QtMeegoGraphicsSystemHelper library
+Author: Dmitry Shachnev <mitya57@ubuntu.com>
+Forwarded: no
+Last-Update: 2014-11-04
+
+--- a/tools/tools.pro
++++ b/tools/tools.pro
+@@ -50,5 +50,3 @@
+ QTDIR_build:REQUIRES = "contains(QT_CONFIG, full-config)"
+ 
+ !win32:!embedded:!mac:!symbian:CONFIG += x11
+-
+-x11:contains(QT_CONFIG, opengles2):contains(QT_CONFIG, egl):SUBDIRS += qmeegographicssystemhelper
+--- a/src/plugins/graphicssystems/graphicssystems.pro
++++ b/src/plugins/graphicssystems/graphicssystems.pro
+@@ -11,5 +11,3 @@
+ }
+ 
+ !win32:!embedded:!mac:!symbian:CONFIG += x11
+-
+-x11:contains(QT_CONFIG, opengles2):contains(QT_CONFIG, egl):SUBDIRS += meego

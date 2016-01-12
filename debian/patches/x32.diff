@@ -1,0 +1,33 @@
+--- a/configure
++++ b/configure
+@@ -3330,6 +3330,12 @@ if [ -z "${CFG_HOST_ARCH}" ]; then
+         fi
+         CFG_HOST_ARCH=sh
+         ;;
++    *:*:x32)
++        if [ "$OPT_VERBOSE" = "yes" ]; then
++            echo "    32-bit AMD 80x86 (x32)"
++        fi
++        CFG_HOST_ARCH=x32
++        ;;
+     *:*:*)
+         if [ "$OPT_VERBOSE" = "yes" ]; then
+             echo "    Trying '$UNAME_MACHINE'..."
+--- a/src/corelib/arch/qatomic_arch.h
++++ b/src/corelib/arch/qatomic_arch.h
+@@ -92,6 +92,8 @@ QT_BEGIN_HEADER
+ #  include "QtCore/qatomic_sh.h"
+ #elif defined(QT_ARCH_SH4A)
+ #  include "QtCore/qatomic_sh4a.h"
++#elif defined(QT_ARCH_X32)
++#  include "QtCore/qatomic_i386.h"
+ #elif defined(QT_ARCH_NACL)
+ #  include "QtCore/qatomic_generic.h"
+ #elif defined(QT_ARCH_AARCH64)
+--- /dev/null
++++ b/src/corelib/arch/x32/arch.pri
+@@ -0,0 +1,4 @@
++#
++# X32 architecture
++#
++# nothing special needed here

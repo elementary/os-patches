@@ -1,0 +1,25 @@
+Description: remove commented out AddSense script from static webpage
+ Even if the script is commented out and so not functional lintian
+ would find it and complain.
+ I could also override lintian, but some people might not find that enough.
+Author: Lisandro Damián Nicanor Pérez Meyer <lisandro@debian.org>
+Forwarded: not-needed
+
+--- a/examples/webkit/webkit-guide/_index.html
++++ b/examples/webkit/webkit-guide/_index.html
+@@ -308,15 +308,5 @@ entered (localStorage), but credit-card
+   <div id="blurpage">
+   </div>
+   <script src="scripts/functions.js" type="text/javascript"></script>
+-  <!-- <script type="text/javascript">
+-  var _gaq = _gaq || [];
+-  _gaq.push(['_setAccount', 'UA-4457116-5']);
+-  _gaq.push(['_trackPageview']);
+-  (function() {
+-  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+-  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+-  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+-  })();
+-  </script> -->
+ </body>
+ </html>

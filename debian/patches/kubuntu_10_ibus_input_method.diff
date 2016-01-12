@@ -1,0 +1,44 @@
+Description: change default input method from xim to ibus for kubuntu
+ Probably neeeds a more invasive change to go upstream.
+Author: Jonathan Riddell <jriddell@ubuntu.com>
+Forwarded: no
+Last-Update: 2009-12-23
+---
+ src/gui/kernel/qapplication_x11.cpp                        |    2 +-
+ src/plugins/inputmethods/imsw-multi/qmultiinputcontext.cpp |    2 +-
+ tools/qtconfig/mainwindow.cpp                              |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+--- a/src/gui/kernel/qapplication_x11.cpp
++++ b/src/gui/kernel/qapplication_x11.cpp
+@@ -1089,7 +1089,7 @@
+         X11->default_im = QLatin1String("imsw-multi");
+     } else {
+         X11->default_im = settings.value(QLatin1String("DefaultInputMethod"),
+-                                         QLatin1String("xim")).toString();
++                                         QLatin1String("ibus")).toString();
+     }
+ #endif //QT_NO_IM
+     settings.endGroup(); // Qt
+--- a/src/plugins/inputmethods/imsw-multi/qmultiinputcontext.cpp
++++ b/src/plugins/inputmethods/imsw-multi/qmultiinputcontext.cpp
+@@ -79,7 +79,7 @@
+     if (def.isEmpty()) {
+         QSettings settings(QSettings::UserScope, QLatin1String("Trolltech"));
+         settings.beginGroup(QLatin1String("Qt"));
+-        def = settings.value(QLatin1String("DefaultInputMethod"), QLatin1String("xim")).toString();
++        def = settings.value(QLatin1String("DefaultInputMethod"), QLatin1String("ibus")).toString();
+     }
+     current = keys.indexOf(def);
+     if (current < 0)
+--- a/tools/qtconfig/mainwindow.cpp
++++ b/tools/qtconfig/mainwindow.cpp
+@@ -397,7 +397,7 @@
+ #if defined(Q_WS_X11) && !defined(QT_NO_XIM)
+     QStringList inputMethodCombo = QInputContextFactory::keys();
+     int inputMethodComboIndex = -1;
+-    QString defaultInputMethod = settings.value(QLatin1String("DefaultInputMethod"), QLatin1String("xim")).toString();
++    QString defaultInputMethod = settings.value(QLatin1String("DefaultInputMethod"), QLatin1String("ibus")).toString();
+     for (int i = inputMethodCombo.size()-1; i >= 0; --i) {
+         const QString &im = inputMethodCombo.at(i);
+         if (im.contains(QLatin1String("imsw"))) {

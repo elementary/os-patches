@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    upgrade)
+        if dpkg --compare-versions $2 "<<" 4:4.8.5
+        then
+            update-alternatives --remove moc "/usr/bin/moc-qt4"
+            update-alternatives --remove uic "/usr/bin/uic-qt4"
+        fi ;;
+esac
+
+#DEBHELPER#

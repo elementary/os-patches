@@ -1,0 +1,37 @@
+Index: qt4-x11-4.8.6-64-g5dc8b2b/src/declarative/qml/qdeclarativeengine.cpp
+===================================================================
+--- qt4-x11-4.8.6-64-g5dc8b2b.orig/src/declarative/qml/qdeclarativeengine.cpp
++++ qt4-x11-4.8.6-64-g5dc8b2b/src/declarative/qml/qdeclarativeengine.cpp
+@@ -2567,4 +2567,10 @@ bool QDeclarative_isFileCaseCorrect(cons
+     return true;
+ }
+ 
++QDeclarativeAccessibilityUpdater *QDeclarativeEnginePrivate::getAccessibilityUpdater(QDeclarativeEngine *e)
++{
++    static QDeclarativeAccessibilityUpdater accessibilityUpdater;
++    return &accessibilityUpdater;
++}
++
+ QT_END_NAMESPACE
+Index: qt4-x11-4.8.6-64-g5dc8b2b/src/declarative/qml/qdeclarativeengine_p.h
+===================================================================
+--- qt4-x11-4.8.6-64-g5dc8b2b.orig/src/declarative/qml/qdeclarativeengine_p.h
++++ qt4-x11-4.8.6-64-g5dc8b2b/src/declarative/qml/qdeclarativeengine_p.h
+@@ -238,8 +238,6 @@ public:
+ 
+     mutable QMutex mutex;
+ 
+-    QDeclarativeAccessibilityUpdater accessibilityUpdater;
+-
+     QDeclarativeTypeLoader typeLoader;
+     QDeclarativeImportDatabase importDatabase;
+ 
+@@ -314,7 +312,7 @@ public:
+     static QScriptValue formatTime(QScriptContext*, QScriptEngine*);
+     static QScriptValue formatDateTime(QScriptContext*, QScriptEngine*);
+ #endif
+-    static QDeclarativeAccessibilityUpdater *getAccessibilityUpdater(QDeclarativeEngine *e) { return &e->d_func()->accessibilityUpdater; }
++    static QDeclarativeAccessibilityUpdater *getAccessibilityUpdater(QDeclarativeEngine *e);
+     static QScriptEngine *getScriptEngine(QDeclarativeEngine *e) { if (!e) return 0; return &e->d_func()->scriptEngine; }
+     static QDeclarativeEngine *getEngine(QScriptEngine *e) { return static_cast<QDeclarativeScriptEngine*>(e)->p->q_func(); }
+     static QDeclarativeEnginePrivate *get(QDeclarativeEngine *e) { return e->d_func(); }

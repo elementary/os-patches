@@ -1,0 +1,903 @@
+Description: Add multitouch support through preliminary XInput 2.1
+Author: Chase Douglas <chase.douglas@ubuntu.com>
+Fowarded: no
+---
+ config.tests/x11/xinput2/xinput2.cpp        |   75 +++++
+ config.tests/x11/xinput2/xinput2.pro        |    4 
+ configure                                   |   46 +++
+ examples/touch/fingerpaint/scribblearea.cpp |    2 
+ src/gui/kernel/kernel.pri                   |    1 
+ src/gui/kernel/qapplication_p.h             |   29 ++
+ src/gui/kernel/qapplication_x11.cpp         |  361 +++++++++++++++++++++++++++-
+ src/gui/kernel/qevent.h                     |    1 
+ src/gui/kernel/qt_x11_p.h                   |   27 +-
+ src/gui/kernel/qwidget.cpp                  |    2 
+ src/gui/kernel/qwidget_p.h                  |    1 
+ src/gui/kernel/qwidget_x11.cpp              |   39 ++-
+ 12 files changed, 566 insertions(+), 22 deletions(-)
+
+--- /dev/null
++++ b/config.tests/x11/xinput2/xinput2.cpp
+@@ -0,0 +1,75 @@
++/****************************************************************************
++**
++** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
++** All rights reserved.
++** Contact: Nokia Corporation (qt-info@nokia.com)
++**
++** This file is part of the config.tests of the Qt Toolkit.
++**
++** $QT_BEGIN_LICENSE:LGPL$
++** No Commercial Usage
++** This file contains pre-release code and may not be distributed.
++** You may use this file in accordance with the terms and conditions
++** contained in the Technology Preview License Agreement accompanying
++** this package.
++**
++** GNU Lesser General Public License Usage
++** Alternatively, this file may be used under the terms of the GNU Lesser
++** General Public License version 2.1 as published by the Free Software
++** Foundation and appearing in the file LICENSE.LGPL included in the
++** packaging of this file.  Please review the following information to
++** ensure the GNU Lesser General Public License version 2.1 requirements
++** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
++**
++** In addition, as a special exception, Nokia gives you certain additional
++** rights.  These rights are described in the Nokia Qt LGPL Exception
++** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
++**
++** If you have questions regarding the use of this file, please contact
++** Nokia at qt-info@nokia.com.
++**
++**
++**
++**
++**
++**
++**
++**
++** $QT_END_LICENSE$
++**
++****************************************************************************/
++
++#include <X11/Xlib.h>
++#include <X11/extensions/XInput2.h>
++#include <X11/extensions/Xge.h>
++
++#if XI_2_Major < 2 || XI_2_Minor < 2
++#  error "Missing XInput 2.2 or later"
++#endif
++
++int main(int, char **)
++{
++    // need XGenericEventCookie for XInput2 to work
++    Display *dpy = 0;
++    XEvent xevent;
++    if (XGetEventData(dpy, &xevent.xcookie)) {
++        XFreeEventData(dpy, &xevent.xcookie);
++    }
++
++    XIEvent *xievent;
++    xievent = 0;
++
++    XIDeviceEvent *xideviceevent;
++    xideviceevent = 0;
++
++    XIHierarchyEvent *xihierarchyevent;
++    xihierarchyevent = 0;
++
++    int deviceid = 0;
++    int len = 0;
++    Atom *atoms = XIListProperties(dpy, deviceid, &len);
++    if (atoms)
++        XFree(atoms);
++
++    return 0;
++}
+--- /dev/null
++++ b/config.tests/x11/xinput2/xinput2.pro
+@@ -0,0 +1,4 @@
++CONFIG += x11
++CONFIG -= qt
++LIBS += -lXi
++SOURCES = xinput2.cpp
+--- a/configure
++++ b/configure
+@@ -882,6 +882,7 @@
+ CFG_DECORATION_ON="${CFG_DECORATION_AVAILABLE}" # all on by default
+ CFG_DECORATION_PLUGIN_AVAILABLE=
+ CFG_DECORATION_PLUGIN=
++CFG_XINPUT2=auto
+ CFG_XINPUT=runtime
+ CFG_XKB=auto
+ CFG_NIS=auto
+@@ -1191,7 +1192,7 @@
+         VAL=no
+         ;;
+     #Qt style yes options
+-    -incremental|-qvfb|-profile|-shared|-static|-sm|-xinerama|-xshape|-xsync|-xinput|-egl|-reduce-exports|-pch|-separate-debug-info|-stl|-freetype|-xcursor|-xfixes|-xrandr|-xrender|-mitshm|-fontconfig|-xkb|-nis|-qdbus|-dbus|-dbus-linked|-glib|-gstreamer|-gtkstyle|-cups|-iconv|-largefile|-h|-help|-v|-verbose|-debug|-release|-fast|-accessibility|-confirm-license|-gnumake|-framework|-qt3support|-debug-and-release|-exceptions|-cocoa|-carbon|-universal|-harfbuzz|-prefix-install|-silent|-armfpa|-optimized-qmake|-dwarf2|-reduce-relocations|-sse|-openssl|-openssl-linked|-ptmalloc|-xmlpatterns|-phonon|-phonon-backend|-multimedia|-audio-backend|-svg|-declarative|-declarative-debug|-javascript-jit|-script|-scripttools|-rpath|-force-pkg-config|-s60|-usedeffiles|-icu)
++    -incremental|-qvfb|-profile|-shared|-static|-sm|-xinerama|-xshape|-xsync|-xinput|-xinput2|-egl|-reduce-exports|-pch|-separate-debug-info|-stl|-freetype|-xcursor|-xfixes|-xrandr|-xrender|-mitshm|-fontconfig|-xkb|-nis|-qdbus|-dbus|-dbus-linked|-glib|-gstreamer|-gtkstyle|-cups|-iconv|-largefile|-h|-help|-v|-verbose|-debug|-release|-fast|-accessibility|-confirm-license|-gnumake|-framework|-qt3support|-debug-and-release|-exceptions|-cocoa|-carbon|-universal|-harfbuzz|-prefix-install|-silent|-armfpa|-optimized-qmake|-dwarf2|-reduce-relocations|-sse|-openssl|-openssl-linked|-ptmalloc|-xmlpatterns|-phonon|-phonon-backend|-multimedia|-audio-backend|-svg|-declarative|-declarative-debug|-javascript-jit|-script|-scripttools|-rpath|-force-pkg-config|-s60|-usedeffiles|-icu)
+         VAR=`echo $1 | sed "s,^-\(.*\),\1,"`
+         VAL=yes
+         ;;
+@@ -1882,6 +1883,13 @@
+             UNKNOWN_OPT=yes
+         fi
+         ;;
++     xinput2)
++        if [ "$VAL" = "yes" ] || [ "$VAL" = "no" ]; then
++            CFG_XINPUT2="$VAL"
++        else
++            UNKNOWN_OPT=yes
++        fi
++        ;;
+     xinput)
+         if [ "$VAL" = "yes" ] || [ "$VAL" = "no" ] || [ "$VAL" = "runtime" ]; then
+             CFG_XINPUT="$VAL"
+@@ -4311,6 +4319,13 @@
+         XMY="*"
+         XMN=" "
+     fi
++    if [ "$CFG_XINPUT2" = "no" ]; then
++        X2Y=" "
++        X2N="*"
++    else
++        X2Y="*"
++        X2N=" "
++    fi
+     if [ "$CFG_XINPUT" = "no" ]; then
+         XIY=" "
+         XIN="*"
+@@ -4415,7 +4430,10 @@
+                          Requires fontconfig/fontconfig.h, libfontconfig,
+                          freetype.h and libfreetype.
+ 
+- $XIN  -no-xinput ......... Do not compile Xinput support.
++ $X2N  -no-xinput2......... Do not compile XInput2 support.
++ $X2Y  -xinput2............ Compile XInput2 support.
++
++ $XIN  -no-xinput.......... Do not compile Xinput support.
+  $XIY  -xinput ............ Compile Xinput support. This also enabled tablet support
+                          which requires IRIX with wacom.h and libXi or
+                          XFree86 with X11/extensions/XInput.h and libXi.
+@@ -6420,7 +6438,22 @@
+ 	fi
+     fi
+ 
+-    # auto-detect Xinput support
++    # auto-detect XInput2/Xinput support
++    if [ "$CFG_XINPUT2" != "no" ]; then
++        if "$unixtests/compile.test" "$XQMAKESPEC" "$QMAKE_CONFIG" $OPT_VERBOSE "$relpath" "$outpath" config.tests/x11/xinput2 "XInput2" $L_FLAGS $I_FLAGS $l_FLAGS $X11TESTS_FLAGS; then
++	    CFG_XINPUT2=yes
++        else
++            if [ "$CFG_XINPUT2" = "yes" ] && [ "$CFG_CONFIGURE_EXIT_ON_ERROR" = "yes" ]; then
++                echo "XInput2 support cannot be enabled due to functionality tests!"
++                echo " Turn on verbose messaging (-v) to $0 to see the final report."
++                echo " If you believe this message is in error you may use the continue"
++                echo " switch (-continue) to $0 to continue."
++                exit 101
++            else
++                CFG_XINPUT2=no
++            fi
++        fi
++    fi
+     if [ "$CFG_XINPUT" != "no" ]; then
+         if compileTest x11/xinput "XInput" $X11TESTS_FLAGS; then
+ 	    if [ "$CFG_XINPUT" != "runtime" ]; then
+@@ -7645,9 +7678,12 @@
+     if [ "$CFG_FONTCONFIG" = "yes" ]; then
+         QT_CONFIG="$QT_CONFIG fontconfig"
+     fi
+-    if [ "$CFG_XINPUT" = "yes" ]; then
++    if [ "$CFG_XINPUT2" = "yes" -o "$CFG_XINPUT" = "yes" ]; then
+ 	QMakeVar set QMAKE_LIBS_X11 '-lXi $$QMAKE_LIBS_X11'
+     fi
++    if [ "$CFG_XINPUT2" = "yes" ]; then
++	QT_CONFIG="$QT_CONFIG xinput2"
++    fi
+     if [ "$CFG_XINPUT" = "yes" ]; then
+         QT_CONFIG="$QT_CONFIG xinput tablet"
+     fi
+@@ -8576,6 +8612,7 @@
+     [ "$CFG_XVIDEO" = "no" ]     && QCONFIG_FLAGS="$QCONFIG_FLAGS QT_NO_XVIDEO"
+     [ "$CFG_XSYNC" = "no" ]     && QCONFIG_FLAGS="$QCONFIG_FLAGS QT_NO_XSYNC"
+     [ "$CFG_XINPUT" = "no" ]     && QCONFIG_FLAGS="$QCONFIG_FLAGS QT_NO_XINPUT QT_NO_TABLET"
++    [ "$CFG_XINPUT2" = "no" ]    && QCONFIG_FLAGS="$QCONFIG_FLAGS QT_NO_XINPUT2"
+ 
+     [ "$CFG_XCURSOR" = "runtime" ]   && QCONFIG_FLAGS="$QCONFIG_FLAGS QT_RUNTIME_XCURSOR"
+     [ "$CFG_XINERAMA" = "runtime" ]  && QCONFIG_FLAGS="$QCONFIG_FLAGS QT_RUNTIME_XINERAMA"
+@@ -9149,6 +9186,7 @@
+     echo "Xfixes support ......... $CFG_XFIXES"
+     echo "Xrandr support ......... $CFG_XRANDR"
+     echo "Xrender support ........ $CFG_XRENDER"
++    echo "XInput2 support ........ $CFG_XINPUT2"
+     echo "Xi support ............. $CFG_XINPUT"
+     echo "MIT-SHM support ........ $CFG_MITSHM"
+     echo "FontConfig support ..... $CFG_FONTCONFIG"
+--- a/examples/touch/fingerpaint/scribblearea.cpp
++++ b/examples/touch/fingerpaint/scribblearea.cpp
+@@ -186,7 +186,9 @@
+                     QRectF rect = touchPoint.rect();
+                     if (rect.isEmpty()) {
+                         qreal diameter = qreal(50) * touchPoint.pressure();
++                        QPointF center = rect.center();
+                         rect.setSize(QSizeF(diameter, diameter));
++                        rect.moveCenter(center);
+                     }
+ 
+                     QPainter painter(&image);
+--- a/src/gui/kernel/kernel.pri
++++ b/src/gui/kernel/kernel.pri
+@@ -140,6 +140,7 @@
+ unix:x11 {
+ 	INCLUDEPATH += ../3rdparty/xorg
+ 	HEADERS += \
++                kernel/qt_x11_p.h \
+ 		kernel/qx11embed_x11.h \
+ 		kernel/qx11info_x11.h \
+         kernel/qkde_p.h
+--- a/src/gui/kernel/qapplication_p.h
++++ b/src/gui/kernel/qapplication_p.h
+@@ -638,6 +638,35 @@
+     bool useTranslucentEGLSurfaces;
+ #endif
+ 
++#if defined(Q_WS_X11) && !defined(QT_NO_XINPUT2)
++    struct TouchDeviceInfo {
++        int deviceid;
++        int maxTouches;
++        bool directTouch;
++        int numValuators;
++        struct Valuator {
++            int number;
++            unsigned long label; // Atom
++            qreal min;
++            qreal max;
++            quint32 resolution;
++        };
++        Valuator xivPosX;
++        Valuator xivPosY;
++        Valuator xivTouchMajor;
++        Valuator xivTouchMinor;
++        Valuator xivOrientation;
++    };
++    QHash<int, TouchDeviceInfo> touchDevices;
++    QList<QTouchEvent::TouchPoint> appTouchPoints;
++    QTouchEvent::DeviceType activeDeviceType;
++    QMap<int, QPointF> touchedPos; // initial value of X and Y valuators for indirect touch
++    QMap<int, QSizeF> touchedSize; // major => height, minor => width
++    QMap<int, qreal> touchedOrientation; // -1 => point to left, 0 => point up, 1 => point to right
++    QTouchEvent::TouchPoint unsentAppTouchPoint; // sequence that was not delivered to a widget yet
++    void x11GetTouchDeviceInfo();
++#endif
++
+ private:
+ #ifdef Q_WS_QWS
+     QMap<const QScreen*, QRect> maxWindowRects;
+--- a/src/gui/kernel/qapplication_x11.cpp
++++ b/src/gui/kernel/qapplication_x11.cpp
+@@ -86,6 +86,7 @@
+ #include <private/qgraphicssystemfactory_p.h>
+ #include "qguiplatformplugin_p.h"
+ #include "qkde_p.h"
++#include "qmath.h"
+ 
+ #if !defined (QT_NO_TABLET)
+ extern "C" {
+@@ -125,9 +126,6 @@
+ 
+ #define XK_MISCELLANY
+ #include <X11/keysymdef.h>
+-#if !defined(QT_NO_XINPUT)
+-#include <X11/extensions/XI.h>
+-#endif
+ 
+ #include <stdlib.h>
+ #include <string.h>
+@@ -327,6 +325,13 @@
+     "STYLUS\0"
+     "ERASER\0"
+     "TABLET\0"
++
++    // XInput 2.1 touch
++    "Abs MT Touch Major\0"
++    "Abs MT Touch Minor\0"
++    "Abs MT Orientation\0"
++    "Abs MT Position X\0"
++    "Abs MT Position Y\0"
+ };
+ 
+ Q_GUI_EXPORT QX11Data *qt_x11Data = 0;
+@@ -577,6 +582,10 @@
+ #endif
+     bool translatePropertyEvent(const XEvent *);
+ 
++#if !defined(QT_NO_XINPUT2)
++    bool translateXI2Event(const XIEvent *);
++#endif
++
+     void doDeferredMap()
+     {
+         Q_ASSERT(testAttribute(Qt::WA_WState_Created));
+@@ -699,7 +708,7 @@
+ 
+     default:
+ #if !defined(QT_NO_XINPUT)
+-        if (err->request_code == X11->xinput_major
++        if (err->request_code == X11->xinput_opcode
+             && err->error_code == (X11->xinput_errorbase + XI_BadDevice)
+             && err->minor_code == 3 /* X_OpenDevice */) {
+             return 0;
+@@ -730,7 +739,7 @@
+             extensionName = "RENDER";
+         else if (err->request_code == X11->xrandr_major)
+             extensionName = "RANDR";
+-        else if (err->request_code == X11->xinput_major)
++        else if (err->request_code == X11->xinput_opcode)
+             extensionName = "XInputExtension";
+         else if (err->request_code == X11->mitshm_major)
+             extensionName = "MIT-SHM";
+@@ -1709,9 +1718,14 @@
+ 
+     // XInputExtension
+     X11->use_xinput = false;
+-    X11->xinput_major = 0;
++    X11->use_xinput2 = false;
++    X11->xinput_opcode = 0;
+     X11->xinput_eventbase = 0;
+     X11->xinput_errorbase = 0;
++#if !defined(QT_NO_XINPUT2)
++    X11->xideviceinfo = 0;
++    X11->xitouchclassinfo = 0;
++#endif
+ 
+     X11->use_xkb = false;
+     X11->xkb_major = 0;
+@@ -2174,14 +2188,26 @@
+ #endif // QT_RUNTIME_XINERAMA
+ #endif // QT_NO_XINERAMA
+ 
+-#ifndef QT_NO_XINPUT
++#if !defined(QT_NO_XINPUT2)
++        X11->use_xinput2 = XQueryExtension(X11->display, "XInputExtension", &X11->xinput_opcode,
++                                          &X11->xinput_eventbase, &X11->xinput_errorbase);
++        if (X11->use_xinput2) {
++            // we want XInput2
++            int ximajor = 2, ximinor = 1;
++            if (XIQueryVersion(X11->display, &ximajor, &ximinor) == BadRequest) {
++                // XInput2 not available
++                X11->use_xinput2 = false;
++            }
++        }
++#endif
++#if !defined(QT_NO_XINPUT)
+         // See if Xinput is supported on the connected display
+         X11->ptrXCloseDevice = 0;
+         X11->ptrXListInputDevices = 0;
+         X11->ptrXOpenDevice = 0;
+         X11->ptrXFreeDeviceList = 0;
+         X11->ptrXSelectExtensionEvent = 0;
+-        X11->use_xinput = XQueryExtension(X11->display, "XInputExtension", &X11->xinput_major,
++        X11->use_xinput = XQueryExtension(X11->display, "XInputExtension", &X11->xinput_opcode,
+                                           &X11->xinput_eventbase, &X11->xinput_errorbase);
+         if (X11->use_xinput) {
+             X11->ptrXCloseDevice = XINPUT_LOAD(XCloseDevice);
+@@ -3246,6 +3272,10 @@
+     Q_D(QApplication);
+     QScopedLoopLevelCounter loopLevelCounter(d->threadData);
+ 
++#if !defined(QT_NO_XINPUT2)
++    bool isXI2Event = false;
++#endif
++
+ #ifdef ALIEN_DEBUG
+     //qDebug() << "QApplication::x11ProcessEvent:" << event->type;
+ #endif
+@@ -3276,6 +3306,16 @@
+     case SelectionClear:
+         X11->time = event->xselectionclear.time;
+         break;
++#if !defined(QT_NO_XINPUT2)
++    case GenericEvent:
++        if (X11->use_xinput2
++                && XGetEventData(X11->display, &event->xcookie)
++                && event->xcookie.extension == X11->xinput_opcode) {
++            // remember for later
++            isXI2Event = true;
++        }
++        break;
++#endif
+     default:
+         break;
+     }
+@@ -3289,7 +3329,43 @@
+     }
+ #endif
+ 
+-    QETWidget *widget = (QETWidget*)QWidget::find((WId)event->xany.window);
++    QETWidget *widget = 0;
++#if !defined(QT_NO_XINPUT2)
++    if (isXI2Event) {
++        // event->xany.window is not usable for these events
++        // look up widget based on the type of event we received
++        switch (event->xcookie.evtype) {
++        case XI_TouchBegin:
++        case XI_TouchEnd:
++        case XI_TouchUpdate:
++            // all of these events send XIDeviceEvents
++            widget = (QETWidget *) QWidget::find(((XIDeviceEvent *) event->xcookie.data)->event);
++            break;
++        default:
++            break;
++        }
++    } else
++#endif // !defined(QT_NO_XINPUT2)
++    {
++        widget = (QETWidget*)QWidget::find((WId)event->xany.window);
++    }
++
++#if !defined(QT_NO_XINPUT2)
++    // make sure XFreeEventData() is called at every return point
++    class CallXFreeEventData
++    {
++        Display *display;
++        XGenericEventCookie *cookie;
++    public:
++        CallXFreeEventData(Display *display, XGenericEventCookie *cookie)
++            : display(display), cookie(cookie)
++        { }
++        ~CallXFreeEventData()
++        {
++            XFreeEventData(display, cookie);
++        }
++    } instance(X11->display, &event->xcookie);
++#endif
+ 
+     if (wPRmapper) {                                // just did a widget reparent?
+         if (widget == 0) {                        // not in std widget mapper
+@@ -3301,6 +3377,15 @@
+             case XKeyRelease:
+                 widget = qPRFindWidget(event->xany.window);
+                 break;
++#if !defined(QT_NO_XINPUT2)
++            case GenericEvent:
++                // as above, event->xany.window is unusable for these events
++                if (isXI2Event) {
++                    widget = qPRFindWidget(((XIDeviceEvent *) event->xcookie.data)->event);
++                    break;
++                }
++                break;
++#endif
+             }
+         }
+         else if (widget->testAttribute(Qt::WA_WState_Reparented))
+@@ -3935,6 +4020,13 @@
+         }
+         break;
+ 
++#if !defined(QT_NO_XINPUT2)
++    case GenericEvent:
++        if (isXI2Event)
++            widget->translateXI2Event((XIEvent *)event->xcookie.data);
++        break;
++#endif
++
+     default:
+         break;
+     }
+@@ -5166,6 +5258,191 @@
+     return true;
+ }
+ 
++#if !defined(QT_NO_XINPUT2)
++bool QETWidget::translateXI2Event(const XIEvent *event)
++{
++    const XIDeviceEvent *dev = (const XIDeviceEvent *)event;
++    QApplicationPrivate *qAppPriv = QApplicationPrivate::instance();
++    const QApplicationPrivate::TouchDeviceInfo &tdi = qAppPriv->touchDevices[dev->sourceid];
++    const int trackingId = dev->detail;
++    QTouchEvent::TouchPoint *tp = 0;
++    Qt::TouchPointStates primary = Qt::TouchPointPrimary;
++
++    if (!(dev->flags & XIPointerEmulated))
++        primary = (Qt::TouchPointStates)0;
++
++    switch (event->evtype) {
++    case XI_TouchBegin: {
++        Q_ASSERT(qAppPriv->touchDevices.contains(dev->sourceid));
++
++        QWidget *w = childAt(QPoint(dev->event_x, dev->event_y));
++        if (!w)
++            return false;
++
++        if (tdi.directTouch) {
++            qAppPriv->appTouchPoints.append(QTouchEvent::TouchPoint(trackingId));
++            tp = &qAppPriv->appTouchPoints.last();
++        } else {
++            // touch pad
++            if (qAppPriv->appTouchPoints.isEmpty()) {
++                if (!w->testAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents)) {
++                    if (qAppPriv->unsentAppTouchPoint.id() == -1) {
++                        // do not send first TouchBegin from touchpad to a widget
++                        qAppPriv->unsentAppTouchPoint = QTouchEvent::TouchPoint(trackingId);
++                        tp = &qAppPriv->unsentAppTouchPoint;
++                    } else {
++                        // second touch on a touchpad
++                        qAppPriv->unsentAppTouchPoint.setState(Qt::TouchPointPressed | primary);
++                        qAppPriv->appTouchPoints.append(qAppPriv->unsentAppTouchPoint);
++                        qAppPriv->unsentAppTouchPoint = QTouchEvent::TouchPoint();
++                    }
++                }
++            }
++        }
++        if (!tp) {
++            qAppPriv->appTouchPoints.append(QTouchEvent::TouchPoint(trackingId));
++            tp = &qAppPriv->appTouchPoints.last();
++        }
++        break;
++    }
++
++    case XI_TouchEnd:
++    case XI_TouchUpdate: {
++        Q_ASSERT(qAppPriv->touchDevices.contains(dev->sourceid));
++
++        // find the touchpoint
++        for (int i = 0; i < qAppPriv->appTouchPoints.size(); ++i) {
++            QTouchEvent::TouchPoint &touchPoint = qAppPriv->appTouchPoints[i];
++            if (touchPoint.id() == trackingId)
++                tp = &touchPoint;
++            else
++                touchPoint.setState(Qt::TouchPointStationary | primary);
++        }
++        if (!tp && qAppPriv->unsentAppTouchPoint.id() == trackingId)
++            tp = &qAppPriv->unsentAppTouchPoint;
++        if (!tp) {
++            qWarning("Got touch without getting TouchBegin for id %d", trackingId);
++            return false;
++        }
++        break;
++    }
++    default:
++        qWarning() << "translateXI2Event: unknown XI2 event:" << event->evtype;
++        return false;
++    }
++
++    double *values = dev->valuators.values;
++    for (int i = 0; i < qMin(dev->valuators.mask_len * 8, tdi.numValuators); ++i) {
++        if (XIMaskIsSet(dev->valuators.mask, i)) {
++            if (tdi.xivPosX.number == i) {
++                qreal value = (*values++ - tdi.xivPosX.min) / (tdi.xivPosX.max - tdi.xivPosX.min);
++                qreal screenValue;
++                if (tdi.directTouch) {
++                    screenValue = dev->root_x;
++                } else {
++                    if (qAppPriv->appTouchPoints.size() > 1) {
++                        // non-first touch point, make it relative to the first one
++                        const int firstId = qAppPriv->appTouchPoints.first().id();
++                        screenValue = dev->root_x + (value - qAppPriv->touchedPos[firstId].x()) * 300;
++                        if (event->evtype == XI_TouchBegin)
++                            qAppPriv->touchedPos[trackingId].rx() = qAppPriv->touchedPos[firstId].x();
++                    } else {
++                        screenValue = dev->root_x;
++                        if (event->evtype == XI_TouchBegin)
++                            qAppPriv->touchedPos[trackingId].rx() = value;
++                    }
++                }
++                tp->d->screenRect.moveCenter(QPointF(screenValue, tp->d->screenRect.center().y()));
++                tp->d->normalizedPos.setX(value);
++            } else if (tdi.xivPosY.number == i) {
++                qreal value = (*values++ - tdi.xivPosY.min) / (tdi.xivPosY.max - tdi.xivPosY.min);
++                qreal screenValue;
++                if (tdi.directTouch) {
++                    screenValue = dev->root_y;
++                } else {
++                    if (qAppPriv->appTouchPoints.size() > 1) {
++                        // non-first touch point, make it relative to the first one
++                        const int firstId = qAppPriv->appTouchPoints.first().id();
++                        screenValue = dev->root_y + (value - qAppPriv->touchedPos[firstId].y()) * 300;
++                        if (event->evtype == XI_TouchBegin)
++                            qAppPriv->touchedPos[trackingId].ry() = qAppPriv->touchedPos[firstId].y();
++                    } else {
++                        screenValue = dev->root_y;
++                        if (event->evtype == XI_TouchBegin)
++                            qAppPriv->touchedPos[trackingId].ry() = value;
++                    }
++                }
++                tp->d->screenRect.moveCenter(QPointF(tp->d->screenRect.center().x(), screenValue));
++                tp->d->normalizedPos.setY(value);
++            } else if (tdi.xivTouchMajor.number == i) {
++                qreal value = (*values++ - tdi.xivTouchMajor.min) / (tdi.xivTouchMajor.max - tdi.xivTouchMajor.min);
++                qAppPriv->touchedSize[trackingId].rheight() = value;
++            } else if (tdi.xivTouchMinor.number == i) {
++                qreal value = (*values++ - tdi.xivTouchMinor.min) / (tdi.xivTouchMinor.max - tdi.xivTouchMinor.min);
++                qAppPriv->touchedSize[trackingId].rwidth() = value;
++            } else if (tdi.xivOrientation.number == i) {
++                qreal value = (*values++ - tdi.xivOrientation.min) / (tdi.xivOrientation.max - tdi.xivOrientation.min);
++                qAppPriv->touchedOrientation[trackingId] = value * M_PI_2;
++            } else
++                ++values;
++        }
++    }
++
++    qreal angle = qAppPriv->touchedOrientation[trackingId];
++    qreal width = qAppPriv->touchedSize[trackingId].height() * qFabs(qFastSin(angle)) +
++                  qAppPriv->touchedSize[trackingId].width() * qFabs(qFastCos(angle));
++    qreal height = qAppPriv->touchedSize[trackingId].width() * qFabs(qFastSin(angle)) +
++                   qAppPriv->touchedSize[trackingId].height() * qFabs(qFastCos(angle));
++    width *= tdi.directTouch ? 500 : 25;
++    height *= tdi.directTouch ? 500 : 25;
++    QPointF center = tp->d->screenRect.center();
++    tp->d->screenRect = QRectF(center.x() - width/2, center.y() - height/2, width, height);
++
++    bool send = true;
++    QList<QTouchEvent::TouchPoint> oldTouchPoints;
++    if (event->evtype == XI_TouchBegin) {
++        tp->setState(Qt::TouchPointPressed | primary);
++        if (qAppPriv->appTouchPoints.isEmpty())
++            send = false;
++    } else if (event->evtype == XI_TouchUpdate) {
++        tp->setState(Qt::TouchPointMoved | primary);
++        QWidget *w = childAt(QPoint(dev->event_x, dev->event_y));
++        if (!w || (!tdi.directTouch && qAppPriv->appTouchPoints.size() == 1 && !w->testAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents)))
++            send = false;
++    } else if (event->evtype == XI_TouchEnd) {
++        oldTouchPoints = qAppPriv->appTouchPoints;
++        for (int i = 0; i < qAppPriv->appTouchPoints.size(); ++i) {
++            if (qAppPriv->appTouchPoints[i].id() == trackingId) {
++                qAppPriv->appTouchPoints.removeAt(i);
++                break;
++            }
++        }
++
++        tp->setState(Qt::TouchPointReleased | primary);
++
++        if (oldTouchPoints.isEmpty())
++            send = false;
++
++        if (qAppPriv->unsentAppTouchPoint.id() == trackingId)
++            qAppPriv->unsentAppTouchPoint = QTouchEvent::TouchPoint();
++        if (qAppPriv->appTouchPoints.isEmpty()) {
++            qAppPriv->touchedPos.clear();
++            qAppPriv->touchedSize.clear();
++            qAppPriv->touchedOrientation.clear();
++        }
++    }
++
++    if (send) {
++        qAppPriv->activeDeviceType = tdi.directTouch ? QTouchEvent::TouchScreen : QTouchEvent::TouchPad;
++        if (event->evtype != XI_TouchEnd)
++            QApplicationPrivate::translateRawTouchEvent(0, qAppPriv->activeDeviceType, qAppPriv->appTouchPoints);
++        else
++            QApplicationPrivate::translateRawTouchEvent(0, qAppPriv->activeDeviceType, oldTouchPoints);
++    }
++
++    return true;
++}
++#endif
+ 
+ //
+ // Paint event translation
+@@ -6313,11 +6590,77 @@
+ 
+ #else // !QT_RX71_MULTITOUCH
+ 
++#if !defined(QT_NO_XINPUT2)
++static inline void copy(QApplicationPrivate::TouchDeviceInfo::Valuator &dst,
++                        const XIValuatorClassInfo &src)
++{
++    dst.number = src.number;
++    dst.label = src.label;
++    dst.min = src.min;
++    dst.max = src.max;
++    dst.resolution = src.resolution;
++}
++
++void QApplicationPrivate::x11GetTouchDeviceInfo()
++{
++    int count = 0;
++    XIDeviceInfo *devices = XIQueryDevice(X11->display, XIAllDevices, &count);
++    if (devices) {
++        for (int i = 0; i < count; ++i) {
++            if (!devices[i].enabled)
++                continue;
++
++            bool is_touch = false;
++            QApplicationPrivate::TouchDeviceInfo tdi;
++
++            for (int k = 0; k < devices[i].num_classes; ++k) {
++                XIAnyClassInfo *xiclassinfo = devices[i].classes[k];
++                if (xiclassinfo->type == XITouchClass) {
++                    is_touch = true;
++                    XITouchClassInfo *t = (XITouchClassInfo *)xiclassinfo;
++                    tdi.deviceid = devices[i].deviceid;
++                    tdi.directTouch = t->mode == XIDirectTouch;
++                    tdi.maxTouches = t->num_touches;
++                } else if (xiclassinfo->type == XIValuatorClass) {
++                    XIValuatorClassInfo *v = (XIValuatorClassInfo *)xiclassinfo;
++                    tdi.numValuators++;
++                    if (v->label == ATOM(XAbsMTTouchMajor))
++                        copy(tdi.xivTouchMajor, *v);
++                    else if (v->label == ATOM(XAbsMTTouchMinor))
++                        copy(tdi.xivTouchMinor, *v);
++                    else if (v->label == ATOM(XAbsMTOrientation))
++                        copy(tdi.xivOrientation, *v);
++                    else if (v->label == ATOM(XAbsMTPositionX))
++                        copy(tdi.xivPosX, *v);
++                    else if (v->label == ATOM(XAbsMTPositionY))
++                        copy(tdi.xivPosY, *v);
++                }
++            }
++
++            if (is_touch)
++                touchDevices[devices[i].deviceid] = tdi;
++        }
++        XIFreeDeviceInfo(devices);
++    }
++}
++
++void QApplicationPrivate::initializeMultitouch_sys()
++{
++    x11GetTouchDeviceInfo();
++}
++void QApplicationPrivate::cleanupMultitouch_sys()
++{
++}
++
++#else
++
+ void QApplicationPrivate::initializeMultitouch_sys()
+ { }
+ void QApplicationPrivate::cleanupMultitouch_sys()
+ { }
+ 
++#endif
++
+ #endif // QT_RX71_MULTITOUCH
+ 
+ QT_END_NAMESPACE
+--- a/src/gui/kernel/qevent.h
++++ b/src/gui/kernel/qevent.h
+@@ -800,6 +800,7 @@
+         QTouchEventTouchPointPrivate *d;
+         friend class QApplication;
+         friend class QApplicationPrivate;
++        friend class QETWidget;
+     };
+ 
+     enum DeviceType {
+--- a/src/gui/kernel/qt_x11_p.h
++++ b/src/gui/kernel/qt_x11_p.h
+@@ -98,13 +98,15 @@
+ #  include <X11/extensions/shape.h>
+ #endif // QT_NO_SHAPE
+ 
+-
++#if !defined(QT_NO_XINPUT2)
++#  include <X11/extensions/XInput2.h>
++#endif
+ #if !defined (QT_NO_TABLET)
+ #  include <X11/extensions/XInput.h>
+-#if defined (Q_OS_IRIX)
+-#  include <X11/extensions/SGIMisc.h>
+-#  include <wacom.h>
+-#endif
++#  if defined (Q_OS_IRIX)
++#    include <X11/extensions/SGIMisc.h>
++#    include <wacom.h>
++#  endif
+ #endif // QT_NO_TABLET
+ 
+ 
+@@ -438,11 +440,16 @@
+     bool use_mitshm_pixmaps;
+     int mitshm_major;
+ 
+-    // true if Qt is compiled w/ Tablet support and we have a tablet.
++    // true if Qt is compiled w/ XInput2 or Tablet support and we have a tablet.
+     bool use_xinput;
+-    int xinput_major;
++    bool use_xinput2;
++    int xinput_opcode;
+     int xinput_eventbase;
+     int xinput_errorbase;
++#if !defined(QT_NO_XINPUT2)
++    XIDeviceInfo *xideviceinfo;
++    XITouchClassInfo *xitouchclassinfo;
++#endif
+ 
+     // for XKEYBOARD support
+     bool use_xkb;
+@@ -690,6 +697,12 @@
+         XTabletEraser,
+         XTablet,
+ 
++        XAbsMTTouchMajor,
++        XAbsMTTouchMinor,
++        XAbsMTOrientation,
++        XAbsMTPositionX,
++        XAbsMTPositionY,
++
+         NPredefinedAtoms,
+ 
+         _QT_SETTINGS_TIMESTAMP = NPredefinedAtoms,
+--- a/src/gui/kernel/qwidget.cpp
++++ b/src/gui/kernel/qwidget.cpp
+@@ -11020,7 +11020,7 @@
+ #endif
+         break;
+     case Qt::WA_AcceptTouchEvents:
+-#if defined(Q_WS_WIN) || defined(Q_WS_MAC) || defined(Q_OS_SYMBIAN)
++#if defined(Q_WS_WIN) || defined(Q_WS_MAC) || defined(Q_OS_SYMBIAN) || defined(Q_WS_X11)
+         if (on)
+             d->registerTouchWindow();
+ #endif
+--- a/src/gui/kernel/qwidget_p.h
++++ b/src/gui/kernel/qwidget_p.h
+@@ -791,6 +791,7 @@
+     void updateX11AcceptFocus();
+     QPoint mapToGlobal(const QPoint &pos) const;
+     QPoint mapFromGlobal(const QPoint &pos) const;
++    void registerTouchWindow();
+ #elif defined(Q_WS_WIN) // <--------------------------------------------------------- WIN
+     uint noPaintOnScreen : 1; // see qwidget_win.cpp ::paintEngine()
+ #ifndef QT_NO_GESTURES
+--- a/src/gui/kernel/qwidget_x11.cpp
++++ b/src/gui/kernel/qwidget_x11.cpp
+@@ -879,7 +879,13 @@
+ //         else
+         XSelectInput(dpy, id, stdDesktopEventMask);
+     } else if (q->internalWinId()) {
+-        XSelectInput(dpy, id, stdWidgetEventMask);
++        uint eventmask = stdWidgetEventMask;
++
++        if (q->testAttribute(Qt::WA_AcceptTouchEvents))
++            registerTouchWindow();
++
++        XSelectInput(dpy, id, eventmask);
++
+ #if !defined (QT_NO_TABLET)
+         QTabletDeviceDataList *tablet_list = qt_tablet_devices();
+         if (X11->ptrXSelectExtensionEvent) {
+@@ -955,6 +961,9 @@
+             surface->flush(q, q->rect(), q->mapTo(surface->window(), QPoint()));
+     }
+ 
++    if (q->testAttribute(Qt::WA_AcceptTouchEvents))
++        registerTouchWindow();
++
+ #ifdef ALIEN_DEBUG
+     qDebug() << "QWidgetPrivate::create_sys END:" << q;
+ #endif
+@@ -3149,4 +3158,32 @@
+         XFree((char *)h);
+ }
+ 
++void QWidgetPrivate::registerTouchWindow()
++{
++#if !defined(QT_NO_XINPUT2)
++    Q_Q(QWidget);
++
++    if (!q->testAttribute(Qt::WA_WState_Created) || q->windowType() == Qt::Desktop)
++        return;
++
++    if (X11->use_xinput2) {
++        XIEventMask xieventmask;
++
++        const int mask_len = XIMaskLen(XI_LASTEVENT);
++        QVector<uchar> mask_vector(mask_len, 0);
++        uchar *bitmask = mask_vector.data();
++
++        xieventmask.deviceid = XIAllMasterDevices;
++        xieventmask.mask = bitmask;
++        xieventmask.mask_len = mask_len;
++
++        XISetMask(bitmask, XI_TouchBegin);
++        XISetMask(bitmask, XI_TouchEnd);
++        XISetMask(bitmask, XI_TouchUpdate);
++
++        XISelectEvents(X11->display, q->effectiveWinId(), &xieventmask, 1);
++    }
++#endif
++}
++
+ QT_END_NAMESPACE

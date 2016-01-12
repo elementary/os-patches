@@ -1,0 +1,35 @@
+Description: Delays with QClipboard and "useEventLoop" 
+ If LibreOffice is running with KDE integration and KFileDialog is
+ open, if clipboard contents are held by LO (i.e. Ctrl+C in LO before
+ the dialog is opened), then there is a visible delay when moving the
+ mouse over the dialog contents. This is because KFileDialog
+ repeatedly checks clipboard contents and these checks take visibly
+ long (and there's not so few of them).
+ .
+ LO/Qt integration needs to set QClipboard to "useEventLoop" mode. The
+ code there adds 50ms delay to every single clipboard data fetch,
+ presumably to avoid busy-looping, but it's quite long and often
+ needless.
+ .
+ The attached patch avoids any visible delay in the KFileDialog in this case.
+Author: Luboš Luňák
+Origin: other>, see bug
+Bug: https://bugreports.qt-project.org/browse/QTBUG-38585
+Forwarded: see bug
+Applied-Upstream: not yet
+Reviewed-by: Jonathan Riddell
+Last-Update: 2014-11-22
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- qt/src/gui/kernel/qclipboard_x11.cpp.sav	2014-04-25 09:52:03.855693228 +0200
++++ qt/src/gui/kernel/qclipboard_x11.cpp	2014-04-25 09:51:58.038693777 +0200
+@@ -548,7 +548,8 @@ bool QX11Data::clipboardWaitForEvent(Win
+                 return false;
+ 
+             XSync(X11->display, false);
+-            usleep(50000);
++            if (!XPending(X11->display))
++                usleep(5000);
+ 
+             now.start();
+ 

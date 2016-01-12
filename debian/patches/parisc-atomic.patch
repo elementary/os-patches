@@ -1,0 +1,249 @@
+Description: Revise PARISC atomic support to use GCC atomic builtins
+  The current atomic support for PARISC uses a four word object
+  to dynamically address the alignment requirements of the ldcw
+  instruction.  Unfortunately, the current implementation breaks
+  the smokeqt package build <http://bugs.debian.org/708200>.
+  This change uses the GCC atomic builtin support available on
+  linux for qt4-x11 atomic operations.  It is derived from the
+  AVR32 implementation.  This allows atomic operations on integer
+  objects. 
+Author: John David Anglin <dave.anglin@bell.net>
+Bug-Debian: http://bugs.debian.org/741190
+Forwarded: not-needed
+Last-Update: <2014-05-03>
+
+--- qt4-x11-4.8.6+dfsg.orig/src/corelib/arch/parisc/arch.pri
++++ qt4-x11-4.8.6+dfsg/src/corelib/arch/parisc/arch.pri
+@@ -1,5 +1,3 @@
+ #
+ # HP PA-RISC architecture
+ #
+-SOURCES += $$QT_ARCH_CPP/q_ldcw.s \
+-	   $$QT_ARCH_CPP/qatomic_parisc.cpp
+--- qt4-x11-4.8.6+dfsg.orig/src/corelib/arch/qatomic_parisc.h
++++ qt4-x11-4.8.6+dfsg/src/corelib/arch/qatomic_parisc.h
+@@ -101,41 +101,19 @@ template <typename T>
+ Q_INLINE_TEMPLATE bool QBasicAtomicPointer<T>::isFetchAndAddWaitFree()
+ { return false; }
+ 
+-extern "C" {
+-    Q_CORE_EXPORT void q_atomic_lock(int *lock);
+-    Q_CORE_EXPORT void q_atomic_unlock(int *lock);
+-}
+-
+-// Reference counting
+-
+ inline bool QBasicAtomicInt::ref()
+ {
+-    q_atomic_lock(_q_lock);
+-    bool ret = (++_q_value != 0);
+-    q_atomic_unlock(_q_lock);
+-    return ret;
++    return __sync_add_and_fetch(&_q_value, 1);
+ }
+ 
+ inline bool QBasicAtomicInt::deref()
+ {
+-    q_atomic_lock(_q_lock);
+-    bool ret = (--_q_value != 0);
+-    q_atomic_unlock(_q_lock);
+-    return ret;
++    return __sync_sub_and_fetch(&_q_value, 1);
+ }
+ 
+-// Test-and-set for integers
+-
+ inline bool QBasicAtomicInt::testAndSetOrdered(int expectedValue, int newValue)
+ {
+-    q_atomic_lock(_q_lock);
+-    if (_q_value == expectedValue) {
+-        _q_value = newValue;
+-        q_atomic_unlock(_q_lock);
+-        return true;
+-    }
+-    q_atomic_unlock(_q_lock);
+-    return false;
++    return __sync_bool_compare_and_swap(&_q_value, expectedValue, newValue);
+ }
+ 
+ inline bool QBasicAtomicInt::testAndSetRelaxed(int expectedValue, int newValue)
+@@ -153,15 +131,9 @@ inline bool QBasicAtomicInt::testAndSetR
+     return testAndSetOrdered(expectedValue, newValue);
+ }
+ 
+-// Fetch-and-store for integers
+-
+ inline int QBasicAtomicInt::fetchAndStoreOrdered(int newValue)
+ {
+-    q_atomic_lock(_q_lock);
+-    int returnValue = _q_value;
+-    _q_value = newValue;
+-    q_atomic_unlock(_q_lock);
+-    return returnValue;
++    return __sync_lock_test_and_set(&_q_value, newValue);
+ }
+ 
+ inline int QBasicAtomicInt::fetchAndStoreRelaxed(int newValue)
+@@ -179,15 +151,9 @@ inline int QBasicAtomicInt::fetchAndStor
+     return fetchAndStoreOrdered(newValue);
+ }
+ 
+-// Fetch-and-add for integers
+-
+ inline int QBasicAtomicInt::fetchAndAddOrdered(int valueToAdd)
+ {
+-    q_atomic_lock(_q_lock);
+-    int originalValue = _q_value;
+-    _q_value += valueToAdd;
+-    q_atomic_unlock(_q_lock);
+-    return originalValue;
++    return __sync_fetch_and_add(&_q_value, valueToAdd);
+ }
+ 
+ inline int QBasicAtomicInt::fetchAndAddRelaxed(int valueToAdd)
+@@ -205,19 +171,10 @@ inline int QBasicAtomicInt::fetchAndAddR
+     return fetchAndAddOrdered(valueToAdd);
+ }
+ 
+-// Test and set for pointers
+-
+ template <typename T>
+ Q_INLINE_TEMPLATE bool QBasicAtomicPointer<T>::testAndSetOrdered(T *expectedValue, T *newValue)
+ {
+-    q_atomic_lock(_q_lock);
+-    if (_q_value == expectedValue) {
+-        _q_value = newValue;
+-        q_atomic_unlock(_q_lock);
+-        return true;
+-    }
+-    q_atomic_unlock(_q_lock);
+-    return false;
++    return __sync_bool_compare_and_swap(&_q_value, expectedValue, newValue);
+ }
+ 
+ template <typename T>
+@@ -238,16 +195,10 @@ Q_INLINE_TEMPLATE bool QBasicAtomicPoint
+     return testAndSetOrdered(expectedValue, newValue);
+ }
+ 
+-// Fetch and store for pointers
+-
+ template <typename T>
+ Q_INLINE_TEMPLATE T *QBasicAtomicPointer<T>::fetchAndStoreOrdered(T *newValue)
+ {
+-    q_atomic_lock(_q_lock);
+-    T *returnValue = (_q_value);
+-    _q_value = newValue;
+-    q_atomic_unlock(_q_lock);
+-    return returnValue;
++    return __sync_lock_test_and_set(&_q_value, newValue);
+ }
+ 
+ template <typename T>
+@@ -268,16 +219,10 @@ Q_INLINE_TEMPLATE T *QBasicAtomicPointer
+     return fetchAndStoreOrdered(newValue);
+ }
+ 
+-// Fetch and add for pointers
+-
+ template <typename T>
+ Q_INLINE_TEMPLATE T *QBasicAtomicPointer<T>::fetchAndAddOrdered(qptrdiff valueToAdd)
+ {
+-    q_atomic_lock(_q_lock);
+-    T *returnValue = (_q_value);
+-    _q_value += valueToAdd;
+-    q_atomic_unlock(_q_lock);
+-    return returnValue;
++    return __sync_fetch_and_add(&_q_value, valueToAdd * sizeof(T));
+ }
+ 
+ template <typename T>
+--- qt4-x11-4.8.6+dfsg.orig/src/corelib/thread/qatomic.h
++++ qt4-x11-4.8.6+dfsg/src/corelib/thread/qatomic.h
+@@ -57,16 +57,10 @@ class Q_CORE_EXPORT QAtomicInt : public
+ public:
+     inline QAtomicInt(int value = 0)
+     {
+-#ifdef QT_ARCH_PARISC
+-        this->_q_lock[0] = this->_q_lock[1] = this->_q_lock[2] = this->_q_lock[3] = -1;
+-#endif
+         _q_value = value;
+     }
+     inline QAtomicInt(const QAtomicInt &other)
+     {
+-#ifdef QT_ARCH_PARISC
+-        this->_q_lock[0] = this->_q_lock[1] = this->_q_lock[2] = this->_q_lock[3] = -1;
+-#endif
+         _q_value = other._q_value;
+     }
+ 
+@@ -127,16 +121,10 @@ class QAtomicPointer : public QBasicAtom
+ public:
+     inline QAtomicPointer(T *value = 0)
+     {
+-#ifdef QT_ARCH_PARISC
+-        this->_q_lock[0] = this->_q_lock[1] = this->_q_lock[2] = this->_q_lock[3] = -1;
+-#endif
+         QBasicAtomicPointer<T>::_q_value = value;
+     }
+     inline QAtomicPointer(const QAtomicPointer<T> &other)
+     {
+-#ifdef QT_ARCH_PARISC
+-        this->_q_lock[0] = this->_q_lock[1] = this->_q_lock[2] = this->_q_lock[3] = -1;
+-#endif
+         QBasicAtomicPointer<T>::_q_value = other._q_value;
+     }
+ 
+--- qt4-x11-4.8.6+dfsg.orig/src/corelib/thread/qbasicatomic.h
++++ qt4-x11-4.8.6+dfsg/src/corelib/thread/qbasicatomic.h
+@@ -53,9 +53,6 @@ QT_MODULE(Core)
+ class Q_CORE_EXPORT QBasicAtomicInt
+ {
+ public:
+-#ifdef QT_ARCH_PARISC
+-    int _q_lock[4];
+-#endif
+ #if defined(QT_ARCH_WINDOWS) || defined(QT_ARCH_WINDOWSCE)
+     union { // needed for Q_BASIC_ATOMIC_INITIALIZER
+         volatile long _q_value;
+@@ -87,9 +84,6 @@ public:
+ 
+     inline QBasicAtomicInt &operator=(int value)
+     {
+-#ifdef QT_ARCH_PARISC
+-        this->_q_lock[0] = this->_q_lock[1] = this->_q_lock[2] = this->_q_lock[3] = -1;
+-#endif
+         _q_value = value;
+         return *this;
+     }
+@@ -131,9 +125,6 @@ template <typename T>
+ class QBasicAtomicPointer
+ {
+ public:
+-#ifdef QT_ARCH_PARISC
+-    int _q_lock[4];
+-#endif
+ #if defined(QT_ARCH_WINDOWS) || defined(QT_ARCH_WINDOWSCE)
+     union {
+         T * volatile _q_value;
+@@ -176,9 +167,6 @@ public:
+ 
+     inline QBasicAtomicPointer<T> &operator=(T *value)
+     {
+-#ifdef QT_ARCH_PARISC
+-        this->_q_lock[0] = this->_q_lock[1] = this->_q_lock[2] = this->_q_lock[3] = -1;
+-#endif
+         _q_value = value;
+         return *this;
+     }
+@@ -210,9 +198,7 @@ public:
+     T *fetchAndAddOrdered(qptrdiff valueToAdd);
+ };
+ 
+-#ifdef QT_ARCH_PARISC
+-#  define Q_BASIC_ATOMIC_INITIALIZER(a) {{-1,-1,-1,-1},(a)}
+-#elif defined(QT_ARCH_WINDOWS) || defined(QT_ARCH_WINDOWSCE)
++#if defined(QT_ARCH_WINDOWS) || defined(QT_ARCH_WINDOWSCE)
+ #  define Q_BASIC_ATOMIC_INITIALIZER(a) { {(a)} }
+ #else
+ #  define Q_BASIC_ATOMIC_INITIALIZER(a) { (a) }
