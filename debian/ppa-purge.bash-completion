@@ -1,0 +1,80 @@
+# /usr/share/bash-completion/completions/ppa-purge
+# Debian ppa-purge(1) completion -*- shell-script -*-
+
+_update_server(){
+    local i
+    for (( i=1; i < ${#words[@]}-1; i++)) ; do
+        case "${words[i]}" in
+            -s)
+                SERVER=${words[i+1]}
+                ;;
+            *)
+            ;;
+        esac
+    done
+}
+
+_update_owner(){
+    local i
+    for (( i=1; i < ${#words[@]}-1; i++)) ; do
+        case "${words[i]}" in
+            -o)
+                OWNER=${words[i+1]}
+                ;;
+            *)
+            ;;
+        esac
+    done
+}
+
+_ppa_names(){
+    _update_server
+    _update_owner
+    grep -hs "^deb\ .*$SERVER" /etc/apt/sources.list.d/*.list | grep "$OWNER" | command sed "s#.*$SERVER\/.*\/\(.*\)\/.*#\1#"
+}
+
+_ppa_host(){
+    grep -hs "^deb\ .*tp\:\/\/.*\/.*\/.*" /etc/apt/sources.list.d/*.list | command sed "s#^deb.*\:\/\/\(.*\)\/.*\/.*/.*#\1#" | uniq
+}
+
+_ppa_owner(){
+    _update_server
+    grep -hs "^deb\ .*$SERVER" /etc/apt/sources.list.d/*.list | command sed "s#.*$SERVER\/\(.*\)\/.*\/.*#\1#"
+}
+
+_ppa_list(){
+    _update_server
+    _update_owner
+    grep -hs "^deb\ .*$SERVER" /etc/apt/sources.list.d/*.list | grep "$OWNER" | command sed "s#.*$SERVER\/\(.*\/.*\)\/.*#\1#" 
+
+}
+_ppa_purge(){
+    OWNER=""
+    SERVER="ppa.launchpad.net"
+    local cur prev words cword opts
+    _init_completion || return
+
+    opts="-p -s -o -d -y -i -h"
+
+    case "${prev}" in
+        -p)
+            COMPREPLY=( $( compgen -W "$(_ppa_names)" -- $cur ) )
+            return 0
+            ;;
+        -s)
+            COMPREPLY=( $( compgen -W "$(_ppa_host)" -- $cur ) )
+            return 0
+            ;;
+        -o)
+            COMPREPLY=( $( compgen -W "$(_ppa_owner)" -- $cur ) )
+            return 0
+            ;;
+        *)
+        ;;
+    esac
+    
+    COMPREPLY=( $( compgen -W '${opts} $(_ppa_list)' -- "$cur" ) )
+
+   return 0
+} &&
+complete -F _ppa_purge ppa-purge

@@ -1,0 +1,33 @@
+.TH ppa-purge 1 2010-08-23 "ppa-purge"
+.SH NAME
+ppa-purge \- disables a PPA and reverts to official packages
+
+.SH SYNOPSIS
+.B ppa-purge [-h | [-d <distribution>] [-s <host>] [-p <ppaname>] <ppa:<ppaowner[/ppaname>]>]
+
+.SH DESCRIPTION
+This script provides a bash shell script capable of automatically downgrading all packages in a given PPA back to the ubuntu versions.
+
+.PP
+You have to run it using root privileges because of the package manager.
+
+.SH OPTIONS
+
+.TP
+.B -h
+Display usage help. 
+.TP
+
+.TP
+.B -p\fR \fIPPA name\fR
+Name of the PPA to be reset, the default value is ppa.
+.TP
+
+.B -s\fR \fIPPA host\fR
+Address of the repository server, the default value is ppa.launchpad.net.
+
+.SH COPYRIGHT
+This manual page is Copyright 2010 Lorenzo De Liso <blackz@ubuntu.com>.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU General Public License, Version 3 or any later
+version published by the Free Software Foundation.
