@@ -1,0 +1,53 @@
+Description: Not always require zenity
+Bug-Ubuntu: https://launchpad.net/bugs/1450147
+Forwarded: https://bugs.debian.org/804067
+Author: Gunnar Hjalmarsson <gunnarhj@ubuntu.com>
+
+--- a/im-config
++++ b/im-config
+@@ -101,6 +101,22 @@
+     shift
+ done
+ #############################################################
++# Check number of installed input methods (10-89)
++IM_CONFIG_NUMBER=0
++IM_CONFIG_AVAIL=""
++for IM_CONFIG_PATH in $IM_CONFIG_DATA/[12345678][0123456789]_*.rc ; do
++    IM_CONFIG_NAME=$(name_im $IM_CONFIG_PATH)
++    if ( $IM_CONFIG_ALL || avail_menu $IM_CONFIG_NAME ) && [ $IM_CONFIG_NAME != "none" ]; then
++        IM_CONFIG_NUMBER="$(($IM_CONFIG_NUMBER + 1))"
++        IM_CONFIG_AVAIL="$IM_CONFIG_AVAIL $IM_CONFIG_NAME"
++    fi
++done
++#############################################################
++if $IM_CONFIG_LIST ; then
++echo "$IM_CONFIG_AVAIL"
++exit
++fi
++#############################################################
+ # Sanity check
+ #############################################################
+ if [ $IM_CONFIG_DIALOG = "X" ]; then
+@@ -127,22 +143,6 @@
+     fi
+ fi
+ #############################################################
+-# Check number of installed input methods (10-89)
+-IM_CONFIG_NUMBER=0
+-IM_CONFIG_AVAIL=""
+-for IM_CONFIG_PATH in $IM_CONFIG_DATA/[12345678][0123456789]_*.rc ; do
+-    IM_CONFIG_NAME=$(name_im $IM_CONFIG_PATH)
+-    if ( $IM_CONFIG_ALL || avail_menu $IM_CONFIG_NAME ) && [ $IM_CONFIG_NAME != "none" ]; then
+-        IM_CONFIG_NUMBER="$(($IM_CONFIG_NUMBER + 1))"
+-        IM_CONFIG_AVAIL="$IM_CONFIG_AVAIL $IM_CONFIG_NAME"
+-    fi
+-done
+-#############################################################
+-if $IM_CONFIG_LIST ; then
+-echo "$IM_CONFIG_AVAIL"
+-exit
+-fi
+-#############################################################
+ # Do not run im-config if "$IM_CONFIG_ACTIVE" = "custom"
+ #############################################################
+ if [ "$IM_CONFIG_ACTIVE" = "custom" ]; then

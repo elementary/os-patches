@@ -1,0 +1,26 @@
+description "Launch and configure input method"
+author "Stéphane Graber <stgraber@ubuntu.com>"
+
+start on starting xsession-init and started dbus
+
+pre-start script
+    . /etc/X11/Xsession.d/70im-config_launch
+
+    if [ "$IM_CONFIG_PHASE" = 1 ]; then
+        IM_CONFIG_PHASE=2
+        # initialize all im-config common functions and parameters
+        . /usr/share/im-config/xinputrc.common
+        # source the first found configuration file
+        if [ -r "$IM_CONFIG_XINPUTRC_USR" ]; then
+            . $IM_CONFIG_XINPUTRC_USR
+        elif [ -r "$IM_CONFIG_XINPUTRC_SYS" ]; then
+            . $IM_CONFIG_XINPUTRC_SYS
+        fi
+
+        initctl set-env -gr XMODIFIERS=$XMODIFIERS
+        initctl set-env -gr GTK_IM_MODULE=$GTK_IM_MODULE
+        initctl set-env -gr QT_IM_MODULE=$QT_IM_MODULE
+        initctl set-env -gr QT4_IM_MODULE=$QT4_IM_MODULE
+        initctl set-env -gr CLUTTER_IM_MODULE=$CLUTTER_IM_MODULE
+    fi
+end script

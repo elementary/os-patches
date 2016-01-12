@@ -1,0 +1,27 @@
+Description: Modify the system default
+ While the upstream default "auto" is believed to work best together with the
+ "Text Entry" tab in unity-control-center, "cjkv" makes sure on non-Unity
+ desktops that IBus or fcitx is not started by default for all users.
+Bug-Ubuntu: https://launchpad.net/bugs/1481025
+Author: Gunnar Hjalmarsson <gunnarhj@ubuntu.com>
+Forwarded: not-needed
+
+--- a/default/im-config
++++ b/default/im-config
+@@ -1,9 +1,12 @@
+ # Default im-config mode (see im-config(8))
+ 
+-# Always start best input method
+-IM_CONFIG_DEFAULT_MODE=auto
+-# Start best input method only if CJKV environment
+-#IM_CONFIG_DEFAULT_MODE=cjkv
++if [ -n "$XDG_CURRENT_DESKTOP" -a "$XDG_CURRENT_DESKTOP" = 'Unity' ]; then
++    # Start best input method unless overridden below
++    IM_CONFIG_DEFAULT_MODE=auto
++else
++    # Start best input method only if CJKV environment and not overridden below
++    IM_CONFIG_DEFAULT_MODE=cjkv
++fi
+ 
+ # Set locale dependent preferred IM over standard auto mode
+ IM_CONFIG_PREFERRED_RULE="zh_CN,fcitx:zh_TW,fcitx:zh_HK,fcitx:zh_SG,fcitx:ja_JP,fcitx:ko_KR,fcitx:vi_VN,fcitx"
