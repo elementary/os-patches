@@ -1,0 +1,35 @@
+From: Michael Biebl <biebl@debian.org>
+Date: Tue, 1 Apr 2014 15:53:35 +0200
+Subject: Don't hard-code gnome-bluetooth plugin directory
+
+---
+ configure.ac                    | 2 ++
+ src/gnome-bluetooth/Makefile.am | 2 +-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index c25c41a..fa69621 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -146,6 +146,8 @@ case "${with_bluetooth}" in
+ 				  gnome-bluetooth-1.0 < 3.11.0
+ 				  libnm-util libnm-glib,
+ 				  have_gbt=yes, have_gbt=no)
++		GNOME_BLUETOOTH_PLUGIN_DIR="`$PKG_CONFIG --variable=libdir gnome-bluetooth-1.0`/gnome-bluetooth/plugins"
++		AC_SUBST(GNOME_BLUETOOTH_PLUGIN_DIR)
+ 		;;
+ esac
+ 
+diff --git a/src/gnome-bluetooth/Makefile.am b/src/gnome-bluetooth/Makefile.am
+index 940aeba..2649d2e 100644
+--- a/src/gnome-bluetooth/Makefile.am
++++ b/src/gnome-bluetooth/Makefile.am
+@@ -16,7 +16,7 @@ BT_WIDGET_SOURCES = \
+ 	nma-bt-device.h
+ 
+ if HAVE_GBT
+-plugindir = $(libdir)/gnome-bluetooth/plugins
++plugindir = $(GNOME_BLUETOOTH_PLUGIN_DIR)
+ 
+ plugin_LTLIBRARIES = libnma.la
+ 

@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@includedir@
+libdir=@libdir@
+nmversion=0.9.10
+
+Name: libnm-gtk
+Description: NetworkManager Gtk+ dialogs
+Version: @PACKAGE_VERSION@
+Requires: NetworkManager >= ${nmversion} libnm-util >= ${nmversion} libnm-glib >= ${nmversion} gtk+-3.0 >= 3.4
+Requires.private: dbus-glib-1
+Cflags: -I${includedir}/libnm-gtk
+Libs: -L${libdir} -lnm-gtk

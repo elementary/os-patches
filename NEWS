@@ -1,0 +1,190 @@
+=======================================================
+network-manager-applet-1.0.10
+Overview of changes since network-manager-applet-1.0.8
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Bluetooth page in connection editor is now populated with available Bluetooth
+  devices
+* Fix a possible agent crash when cancelling the secrets request
+* Added Icelandic translation
+* Updated Brazilian Portuguese, Czech, Finnish and Polish translations
+
+=======================================================
+network-manager-applet-1.0.8
+Overview of changes since network-manager-applet-1.0.6
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Added hotspot support to the editor
+* Password widgets now emits a signal for secret flag changes
+* The connection validation errors are now communicated in a tooltip
+* The editor is now able to edit the VLAN flags
+* Several bug fixes
+* Updates to Finnish, Finnish, Hungarian, Italian, Portuguese, Polish,
+  Brazilian Portuguese and German translations
+
+=======================================================
+network-manager-applet-1.0.6
+Overview of changes since network-manager-applet-1.0.4
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Added option to set MTU of Team devices.
+
+* Added AppData for nm-connection-editor.
+
+* Build fixes.
+
+* Updated Czech, Polish and Hungarian translations.
+
+=======================================================
+network-manager-applet-1.0.4
+Overview of changes since network-manager-applet-1.0.2
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Setting MTU for a bond device is now supported.
+
+* Connecting to a wireless network from the NetworkManager applet no longer
+    results in an attempt to create system-wide connections.  This fixes the
+    ability to connect to a wireless network for non-privileged user.
+
+* The master interface name is used instead of master connection UUID for
+   slave connections created with nm-connection-editor.  This fixes
+   compatibility of the ifcfg configuration files with the legacy network
+   service.
+
+* It is now possible to specify an interface name instead of a MAC address
+    when editing a connection using nm-connection-editor.
+
+* The WWAN connections now have IPv6 enabled by default.
+
+* libnm-gtk includes functions for password storage selection, which eases
+    implementation of password GUI for VPN plugins and other users.
+
+=======================================================
+network-manager-applet-1.0.2
+Overview of changes since network-manager-applet-1.0.0
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* The applet is no longer started in GNOME 3
+* STP controls are no longer displayed if STP is disabled
+* Improved accessibility for screen reader users
+* Multiple bugs fixed, including crashes
+* Updated translations
+
+=======================================================
+network-manager-applet-1.0
+Overview of changes since network-manager-applet-0.9.10
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Added support for editing Bluetooth mobile broadband connections
+* Added support for IPv6 mobile broadband connections
+* Allow IPv6-only configuration for more connection types
+* The applet and editor are no longer shown in GNOME 3, which has its own
+    network indicator and control panel
+
+
+=======================================================
+network-manager-applet-0.9.10
+Overview of changes since network-manager-applet-0.9.8
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Added controls for IPv6 privacy extensions
+* Added support for VPN hints for new/additional secrets during connection
+* Added support for Data Center Bridging and FibreChannel over Ethernet configuration
+* Improved connections to new hidden WiFi networks
+* Allow slaves VLANs/slaves of more device types
+* Added support for changing password flags
+* Passwords/secrets now default to user-agent storage instead of system-wide storage
+* Added support for editing Team connections
+* Rework CA certificate warnings to be less annoying
+
+
+=======================================================
+network-manager-applet-0.9.8
+Overview of changes since network-manager-applet-0.9.6
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Rework connection editor main UI to better support different connection types
+* Add connection editor support for WiMAX, Infiniband, Bond, and VLAN connections
+* Suggest "seen BSSIDs" for WiFi BSSID entry
+* Add connection editor support for autoconnect VPN connections
+* Add a "General" page to the connection editor and move general options to it
+* Fix GNOME Bluetooth plugin for recent versions of GNOME Bluetooth and the
+    GNOME Control Center
+* Add LTE and HSPA+ icons to the applet
+* Fix connection editor command-line passing to already-running instance
+* Suppress nm-applet notifications when GNOME Shell is running
+* Ensure 802.1x passwords default to "agent owned" and not system-wide
+* Default to using system CA certificates for new connections
+* Add support for ModemManager 0.7/0.8
+* Fix a crash when editing IP addresses with the XIM input framework
+* Fix handling of connection Zone when firewalld is active
+* Fix saving a connection when ignoring a missing CA certificate
+
+
+=======================================================
+network-manager-applet-0.9.6
+Overview of changes since network-manager-applet-0.9.4
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Fixed UI mnemonics
+* Various crash and stability fixes
+* Allow appending DNS servers and domains in automatic addressing mode
+* Fix defaults for PPP echo values
+* Show IPv6 addressing page for VPN plugins that support it
+* Port to GSettings and split out 0.8 -> 0.9 migration code into standalone tool
+* Recognize PKCS#12 certificates imported from Firefox
+* Pre-fill CDMA username/password in the mobile broadband wizard
+* Only handle VPN secrets for GNOME Shell 3.3 and lower
+
+
+=======================================================
+network-manager-applet-0.9.4
+Overview of changes since network-manager-applet-0.9.2
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Fix interaction of single-connection edit mode with PolicyKit
+* Add EAP-FAST support
+* Make editor connection list sortable
+* Ensure mobile broadband provider list is sensitized correctly
+* More flexible build-time warnings with --enable-more-warnings=[yes|no|error]
+* Removed unused PolicyKit configure check
+* Lazily initialize the notification service for faster startup
+* Fix various memory leaks
+* Warn user if CA certificate is left blank in the editor for 802.1x
+* Disabled creation of WPA-protected Ad-Hoc WiFi networks due to kernel bugs
+
+
+=======================================================
+network-manager-applet-0.9.2
+Overview of changes since network-manager-applet-0.9.0
+=======================================================
+
+This is a new stable release of network-manager-applet.  Notable changes include:
+
+* New private library for wireless and mobile dialogs
+* iso-codes package used for translated country names in the mobile broadband wizard
+* Select user's home directory by default for VPN import
+* Show VPN details in the Connection Information dialog
+* Allow auto-unlocking of GSM modems
+* Fix crash of Bluetooth widget after pairing
+

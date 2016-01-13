@@ -1,0 +1,70 @@
+#!/usr/bin/make -f
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,--as-needed
+
+%:
+	dh $@ --with autoreconf,translations,gir
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--libexecdir=/usr/lib/NetworkManager \
+		--disable-more-warnings \
+		--disable-migration \
+		--enable-introspection \
+		--with-modem-manager-1 \
+		--enable-indicator
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f icons/22/*-secure.png icons/22/nm-active-device.png
+
+override_dh_auto_build:
+	dh_auto_build
+	cp -rf $(CURDIR)/debian/icons/22 icons/
+
+override_dh_install:
+	dh_install -X.la -X.a --fail-missing
+	# workaround for icon-changes
+	# natty fallback icons
+	cp -f debian/icons/22/nm-device-wired-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/
+	cp -f debian/icons/22/nm-signal-00-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/
+	ln -snf nm-signal-00.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-none.png
+	ln -snf nm-signal-00-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-none-secure.png
+	cp -f debian/icons/22/nm-signal-25-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/
+	ln -snf nm-signal-25.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-low.png
+	ln -snf nm-signal-25-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-low-secure.png
+	cp -f debian/icons/22/nm-signal-50-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/
+	ln -snf nm-signal-50.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-medium.png
+	ln -snf nm-signal-50-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-medium-secure.png
+	cp -f debian/icons/22/nm-signal-75-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/
+	ln -snf nm-signal-75.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-high.png
+	ln -snf nm-signal-75-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-high-secure.png
+	cp -f debian/icons/22/nm-signal-100-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/
+	ln -snf nm-signal-100.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-full.png
+	ln -snf nm-signal-100-secure.png \
+		debian/network-manager-gnome/usr/share/icons/hicolor/22x22/apps/gsm-3g-full-secure.png
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz
+
+override_dh_auto_test:

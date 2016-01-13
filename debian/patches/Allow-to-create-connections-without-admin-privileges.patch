@@ -1,0 +1,683 @@
+From: Michael Biebl <biebl@debian.org>
+Date: Tue, 18 Mar 2014 10:49:13 +0100
+Subject: Allow to create connections without admin privileges
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Set passwords as agent-owned when they need to, to allow users without
+root permissions to easily configure their connections.
+The logic is:
+- Bluetooth, CDMA and GSM connections: always user-owned
+- WEP/WPA connections: system-owned if user has the permissions
+  (with NM’s config, that is netdev or sudo membership), user-owned
+  otherwise. The password is stored in the keyring for WPA, not for
+  WEP.
+- WiMax / Wired connections: always system-owned (with 802.1x
+  passwords in the keyring).
+
+Closes: #696256
+---
+ src/applet-device-wifi.c                   | 25 +++++++++++++++++++++++++
+ src/connection-editor/ce-page.h            |  1 +
+ src/connection-editor/connection-helpers.c |  2 ++
+ src/connection-editor/page-bond.c          |  1 +
+ src/connection-editor/page-bond.h          |  1 +
+ src/connection-editor/page-bridge.c        |  1 +
+ src/connection-editor/page-bridge.h        |  1 +
+ src/connection-editor/page-dsl.c           |  1 +
+ src/connection-editor/page-dsl.h           |  1 +
+ src/connection-editor/page-ethernet.c      |  1 +
+ src/connection-editor/page-ethernet.h      |  1 +
+ src/connection-editor/page-infiniband.c    |  1 +
+ src/connection-editor/page-infiniband.h    |  1 +
+ src/connection-editor/page-mobile.c        | 11 +++++++++++
+ src/connection-editor/page-mobile.h        |  1 +
+ src/connection-editor/page-team.c          |  1 +
+ src/connection-editor/page-team.h          |  1 +
+ src/connection-editor/page-vlan.c          |  1 +
+ src/connection-editor/page-vlan.h          |  1 +
+ src/connection-editor/page-vpn.c           | 11 +++++++++++
+ src/connection-editor/page-vpn.h           |  2 ++
+ src/connection-editor/page-wifi.c          | 14 ++++++++++++++
+ src/connection-editor/page-wifi.h          |  1 +
+ src/connection-editor/page-wimax.c         |  1 +
+ src/connection-editor/page-wimax.h         |  1 +
+ src/gnome-bluetooth/nma-bt-device.c        |  5 +++++
+ src/libnm-gtk/nm-wifi-dialog.c             |  4 ++++
+ src/mobile-helpers.c                       |  3 +++
+ src/utils/utils.c                          |  7 +++++++
+ src/utils/utils.h                          |  3 +++
+ src/wireless-security/ws-wep-key.c         |  7 +++++++
+ src/wireless-security/ws-wpa-psk.c         |  5 +++++
+ 32 files changed, 118 insertions(+)
+
+diff --git a/src/applet-device-wifi.c b/src/applet-device-wifi.c
+index 0ae44ad..dc7fbc8 100644
+--- a/src/applet-device-wifi.c
++++ b/src/applet-device-wifi.c
+@@ -386,6 +386,7 @@ _do_new_auto_connection (NMApplet *applet,
+ 	NMSettingWirelessSecurity *s_wsec = NULL;
+ 	NMSetting8021x *s_8021x = NULL;
+ 	const GByteArray *ssid;
++	NM80211ApFlags flags;
+ 	NM80211ApSecurityFlags wpa_flags, rsn_flags;
+ 	GtkWidget *dialog;
+ 	MoreInfo *more_info;
+@@ -417,6 +418,7 @@ _do_new_auto_connection (NMApplet *applet,
+ 	/* If the AP is WPA[2]-Enterprise then we need to set up a minimal 802.1x
+ 	 * setting and ask the user for more information.
+ 	 */
++	flags = nm_access_point_get_flags (ap);
+ 	rsn_flags = nm_access_point_get_rsn_flags (ap);
+ 	wpa_flags = nm_access_point_get_wpa_flags (ap);
+ 	if (   (rsn_flags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)
+@@ -445,6 +447,29 @@ _do_new_auto_connection (NMApplet *applet,
+ 		nm_connection_add_setting (connection, NM_SETTING (s_8021x));
+ 	}
+ 
++	if (utils_default_to_private_connection (applet->nm_client)) {
++		if (!s_con) {
++			s_con = (NMSettingConnection *) nm_setting_connection_new ();
++			nm_connection_add_setting (connection, NM_SETTING (s_con));
++		}
++		nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++
++		if ((rsn_flags & NM_802_11_AP_SEC_KEY_MGMT_PSK) ||
++		    (wpa_flags & NM_802_11_AP_SEC_KEY_MGMT_PSK)) {
++			if (!s_wsec) {
++				s_wsec = (NMSettingWirelessSecurity *) nm_setting_wireless_security_new ();
++				nm_connection_add_setting (connection, NM_SETTING (s_wsec));
++			}
++			g_object_set (s_wsec, NM_SETTING_WIRELESS_SECURITY_PSK_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED, NULL);
++		} else if (flags & NM_802_11_AP_FLAGS_PRIVACY) {
++			if (!s_wsec) {
++				s_wsec = (NMSettingWirelessSecurity *) nm_setting_wireless_security_new ();
++				nm_connection_add_setting (connection, NM_SETTING (s_wsec));
++			}
++			g_object_set (s_wsec, NM_SETTING_WIRELESS_SECURITY_WEP_KEY_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED, NULL);
++		}
++	}
++
+ 	/* If it's an 802.1x connection, we need more information, so pop up the
+ 	 * Dialog Of Doom.
+ 	 */
+diff --git a/src/connection-editor/ce-page.h b/src/connection-editor/ce-page.h
+index cda5978..8a3cae2 100644
+--- a/src/connection-editor/ce-page.h
++++ b/src/connection-editor/ce-page.h
+@@ -49,6 +49,7 @@ typedef void (*PageNewConnectionFunc) (GtkWindow *parent,
+                                        const char *detail,
+                                        NMRemoteSettings *settings,
+                                        PageNewConnectionResultFunc result_func,
++                                       NMClient *client,
+                                        gpointer user_data);
+ 
+ #define CE_TYPE_PAGE            (ce_page_get_type ())
+diff --git a/src/connection-editor/connection-helpers.c b/src/connection-editor/connection-helpers.c
+index 69da25c..b638530 100644
+--- a/src/connection-editor/connection-helpers.c
++++ b/src/connection-editor/connection-helpers.c
+@@ -380,6 +380,7 @@ new_connection_of_type (GtkWindow *parent_window,
+                         gpointer user_data)
+ {
+ 	NewConnectionData *ncd;
++	NMConnectionList *list = user_data;
+ 
+ 	ncd = g_slice_new (NewConnectionData);
+ 	ncd->parent_window = parent_window;
+@@ -391,6 +392,7 @@ new_connection_of_type (GtkWindow *parent_window,
+ 	          detail,
+ 	          settings,
+ 	          new_connection_result,
++	          list->nm_client,
+ 	          ncd);
+ }
+ 
+diff --git a/src/connection-editor/page-bond.c b/src/connection-editor/page-bond.c
+index 0dffd9d..45a86d0 100644
+--- a/src/connection-editor/page-bond.c
++++ b/src/connection-editor/page-bond.c
+@@ -611,6 +611,7 @@ bond_connection_new (GtkWindow *parent,
+                      const char *detail,
+                      NMRemoteSettings *settings,
+                      PageNewConnectionResultFunc result_func,
++                     NMClient *client,
+                      gpointer user_data)
+ {
+ 	NMConnection *connection;
+diff --git a/src/connection-editor/page-bond.h b/src/connection-editor/page-bond.h
+index fdaa97e..c77ad44 100644
+--- a/src/connection-editor/page-bond.h
++++ b/src/connection-editor/page-bond.h
+@@ -57,6 +57,7 @@ void bond_connection_new (GtkWindow *parent,
+                           const char *detail,
+                           NMRemoteSettings *settings,
+                           PageNewConnectionResultFunc result_func,
++                          NMClient *client,
+                           gpointer user_data);
+ 
+ #endif  /* __PAGE_BOND_H__ */
+diff --git a/src/connection-editor/page-bridge.c b/src/connection-editor/page-bridge.c
+index a159993..9ab6640 100644
+--- a/src/connection-editor/page-bridge.c
++++ b/src/connection-editor/page-bridge.c
+@@ -296,6 +296,7 @@ bridge_connection_new (GtkWindow *parent,
+                      const char *detail,
+                      NMRemoteSettings *settings,
+                      PageNewConnectionResultFunc result_func,
++                     NMClient *client,
+                      gpointer user_data)
+ {
+ 	NMConnection *connection;
+diff --git a/src/connection-editor/page-bridge.h b/src/connection-editor/page-bridge.h
+index 1fe4e5f..4ad1991 100644
+--- a/src/connection-editor/page-bridge.h
++++ b/src/connection-editor/page-bridge.h
+@@ -57,6 +57,7 @@ void bridge_connection_new (GtkWindow *parent,
+                             const char *detail,
+                             NMRemoteSettings *settings,
+                             PageNewConnectionResultFunc result_func,
++                            NMClient *client,
+                             gpointer user_data);
+ 
+ #endif  /* __PAGE_BRIDGE_H__ */
+diff --git a/src/connection-editor/page-dsl.c b/src/connection-editor/page-dsl.c
+index c06dfff..21e2897 100644
+--- a/src/connection-editor/page-dsl.c
++++ b/src/connection-editor/page-dsl.c
+@@ -223,6 +223,7 @@ dsl_connection_new (GtkWindow *parent,
+                     const char *detail,
+                     NMRemoteSettings *settings,
+                     PageNewConnectionResultFunc result_func,
++                    NMClient *client,
+                     gpointer user_data)
+ {
+ 	NMConnection *connection;
+diff --git a/src/connection-editor/page-dsl.h b/src/connection-editor/page-dsl.h
+index f3b0b30..74e3734 100644
+--- a/src/connection-editor/page-dsl.h
++++ b/src/connection-editor/page-dsl.h
+@@ -59,6 +59,7 @@ void dsl_connection_new (GtkWindow *parent,
+                          const char *detail,
+                          NMRemoteSettings *settings,
+                          PageNewConnectionResultFunc callback,
++                         NMClient *client,
+                          gpointer user_data);
+ 
+ #endif  /* __PAGE_DSL_H__ */
+diff --git a/src/connection-editor/page-ethernet.c b/src/connection-editor/page-ethernet.c
+index d10e2ae..db50e19 100644
+--- a/src/connection-editor/page-ethernet.c
++++ b/src/connection-editor/page-ethernet.c
+@@ -379,6 +379,7 @@ ethernet_connection_new (GtkWindow *parent,
+                          const char *detail,
+                          NMRemoteSettings *settings,
+                          PageNewConnectionResultFunc result_func,
++                         NMClient *client,
+                          gpointer user_data)
+ {
+ 	NMConnection *connection;
+diff --git a/src/connection-editor/page-ethernet.h b/src/connection-editor/page-ethernet.h
+index edc331d..1cf6ad1 100644
+--- a/src/connection-editor/page-ethernet.h
++++ b/src/connection-editor/page-ethernet.h
+@@ -59,6 +59,7 @@ void ethernet_connection_new (GtkWindow *parent,
+                               const char *detail,
+                               NMRemoteSettings *settings,
+                               PageNewConnectionResultFunc result_func,
++                              NMClient *client,
+                               gpointer user_data);
+ 
+ #endif  /* __PAGE_ETHERNET_H__ */
+diff --git a/src/connection-editor/page-infiniband.c b/src/connection-editor/page-infiniband.c
+index a3c8a32..5688556 100644
+--- a/src/connection-editor/page-infiniband.c
++++ b/src/connection-editor/page-infiniband.c
+@@ -255,6 +255,7 @@ infiniband_connection_new (GtkWindow *parent,
+                            const char *detail,
+                            NMRemoteSettings *settings,
+                            PageNewConnectionResultFunc result_func,
++                           NMClient *client,
+                            gpointer user_data)
+ {
+ 	NMConnection *connection;
+diff --git a/src/connection-editor/page-infiniband.h b/src/connection-editor/page-infiniband.h
+index af6d7aa..9a90fcb 100644
+--- a/src/connection-editor/page-infiniband.h
++++ b/src/connection-editor/page-infiniband.h
+@@ -57,6 +57,7 @@ void infiniband_connection_new (GtkWindow *parent,
+                                 const char *detail,
+                                 NMRemoteSettings *settings,
+                                 PageNewConnectionResultFunc result_func,
++                                NMClient *client,
+                                 gpointer user_data);
+ 
+ #endif  /* __PAGE_INFINIBAND_H__ */
+diff --git a/src/connection-editor/page-mobile.c b/src/connection-editor/page-mobile.c
+index 541a364..da0d404 100644
+--- a/src/connection-editor/page-mobile.c
++++ b/src/connection-editor/page-mobile.c
+@@ -454,6 +454,7 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
+ 	NMConnection *connection = NULL;
+ 
+ 	if (!canceled && method) {
++		NMSettingConnection *s_con;
+ 		NMSetting *type_setting;
+ 		const char *ctype = NULL;
+ 		char *detail = NULL;
+@@ -467,6 +468,7 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
+ 			              NM_SETTING_GSM_NUMBER, "*99#",
+ 			              NM_SETTING_GSM_USERNAME, method->username,
+ 			              NM_SETTING_GSM_PASSWORD, method->password,
++			              NM_SETTING_GSM_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 			              NM_SETTING_GSM_APN, method->gsm_apn,
+ 			              NULL);
+ 			break;
+@@ -478,6 +480,7 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
+ 			              NM_SETTING_CDMA_NUMBER, "#777",
+ 			              NM_SETTING_GSM_USERNAME, method->username,
+ 			              NM_SETTING_GSM_PASSWORD, method->password,
++			              NM_SETTING_GSM_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 			              NULL);
+ 			break;
+ 		default:
+@@ -492,6 +495,13 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
+ 		connection = ce_page_new_connection (detail, ctype, FALSE, info->settings, info->user_data);
+ 		g_free (detail);
+ 
++		s_con = nm_connection_get_setting_connection (connection);
++		if (!s_con) {
++			s_con = (NMSettingConnection *) nm_setting_connection_new ();
++			nm_connection_add_setting (connection, NM_SETTING (s_con));
++		}
++		nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++
+ 		nm_connection_add_setting (connection, type_setting);
+ 		nm_connection_add_setting (connection, nm_setting_ppp_new ());
+ 	}
+@@ -516,6 +526,7 @@ mobile_connection_new (GtkWindow *parent,
+                        const char *detail,
+                        NMRemoteSettings *settings,
+                        PageNewConnectionResultFunc result_func,
++                       NMClient *client,
+                        gpointer user_data)
+ {
+ 	NMAMobileWizard *wizard;
+diff --git a/src/connection-editor/page-mobile.h b/src/connection-editor/page-mobile.h
+index d370ca4..3196d87 100644
+--- a/src/connection-editor/page-mobile.h
++++ b/src/connection-editor/page-mobile.h
+@@ -59,6 +59,7 @@ void mobile_connection_new (GtkWindow *parent,
+                             const char *detail,
+                             NMRemoteSettings *settings,
+                             PageNewConnectionResultFunc result_func,
++                            NMClient *client,
+                             gpointer user_data);
+ 
+ #endif  /* __PAGE_MOBILE_H__ */
+diff --git a/src/connection-editor/page-team.c b/src/connection-editor/page-team.c
+index 700f87d..742f1e9 100644
+--- a/src/connection-editor/page-team.c
++++ b/src/connection-editor/page-team.c
+@@ -369,6 +369,7 @@ team_connection_new (GtkWindow *parent,
+                      const char *detail,
+                      NMRemoteSettings *settings,
+                      PageNewConnectionResultFunc result_func,
++                     NMClient *client,
+                      gpointer user_data)
+ {
+ 	NMConnection *connection;
+diff --git a/src/connection-editor/page-team.h b/src/connection-editor/page-team.h
+index e3cb133..f637459 100644
+--- a/src/connection-editor/page-team.h
++++ b/src/connection-editor/page-team.h
+@@ -56,6 +56,7 @@ void team_connection_new (GtkWindow *parent,
+                           const char *detail,
+                           NMRemoteSettings *settings,
+                           PageNewConnectionResultFunc result_func,
++                          NMClient *client,
+                           gpointer user_data);
+ 
+ #endif  /* __PAGE_TEAM_H__ */
+diff --git a/src/connection-editor/page-vlan.c b/src/connection-editor/page-vlan.c
+index 3f24fc7..e733cd4 100644
+--- a/src/connection-editor/page-vlan.c
++++ b/src/connection-editor/page-vlan.c
+@@ -698,6 +698,7 @@ vlan_connection_new (GtkWindow *parent,
+                      const char *detail,
+                      NMRemoteSettings *settings,
+                      PageNewConnectionResultFunc result_func,
++                     NMClient *client,
+                      gpointer user_data)
+ {
+ 	NMConnection *connection;
+diff --git a/src/connection-editor/page-vlan.h b/src/connection-editor/page-vlan.h
+index 80c73c0..2e46230 100644
+--- a/src/connection-editor/page-vlan.h
++++ b/src/connection-editor/page-vlan.h
+@@ -57,6 +57,7 @@ void vlan_connection_new (GtkWindow *parent,
+                           const char *detail,
+                           NMRemoteSettings *settings,
+                           PageNewConnectionResultFunc result_func,
++                          NMClient *client,
+                           gpointer user_data);
+ 
+ #endif  /* __PAGE_VLAN_H__ */
+diff --git a/src/connection-editor/page-vpn.c b/src/connection-editor/page-vpn.c
+index 6596c0e..faeb3d7 100644
+--- a/src/connection-editor/page-vpn.c
++++ b/src/connection-editor/page-vpn.c
+@@ -255,6 +255,7 @@ vpn_connection_import (GtkWindow *parent,
+                        const char *detail,
+                        NMRemoteSettings *settings,
+                        PageNewConnectionResultFunc result_func,
++                       NMClient *client,
+                        gpointer user_data)
+ {
+ 	NewVpnInfo *info;
+@@ -289,9 +290,11 @@ vpn_connection_new (GtkWindow *parent,
+                     const char *detail,
+                     NMRemoteSettings *settings,
+                     PageNewConnectionResultFunc result_func,
++                    NMClient *client,
+                     gpointer user_data)
+ {
+ 	NMConnection *connection;
++	NMSettingConnection *s_con;
+ 	NMSetting *s_vpn;
+ 
+ 	if (!detail) {
+@@ -317,6 +320,14 @@ vpn_connection_new (GtkWindow *parent,
+ 	                                     FALSE,
+ 	                                     settings,
+ 	                                     user_data);
++
++	s_con = nm_connection_get_setting_connection (connection);
++	if (!s_con) {
++		s_con = (NMSettingConnection *) nm_setting_connection_new ();
++		nm_connection_add_setting (connection, NM_SETTING (s_con));
++	}
++	nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++
+ 	s_vpn = nm_setting_vpn_new ();
+ 	g_object_set (s_vpn, NM_SETTING_VPN_SERVICE_TYPE, detail, NULL);
+ 	nm_connection_add_setting (connection, s_vpn);
+diff --git a/src/connection-editor/page-vpn.h b/src/connection-editor/page-vpn.h
+index 7d74930..bc14dee 100644
+--- a/src/connection-editor/page-vpn.h
++++ b/src/connection-editor/page-vpn.h
+@@ -61,12 +61,14 @@ void vpn_connection_new (GtkWindow *parent,
+                          const char *detail,
+                          NMRemoteSettings *settings,
+                          PageNewConnectionResultFunc result_func,
++                         NMClient *client,
+                          gpointer user_data);
+ 
+ void vpn_connection_import (GtkWindow *parent,
+                             const char *detail,
+                             NMRemoteSettings *settings,
+                             PageNewConnectionResultFunc result_func,
++                            NMClient *client,
+                             gpointer user_data);
+ 
+ #endif  /* __PAGE_VPN_H__ */
+diff --git a/src/connection-editor/page-wifi.c b/src/connection-editor/page-wifi.c
+index ac7cad2..36da755 100644
+--- a/src/connection-editor/page-wifi.c
++++ b/src/connection-editor/page-wifi.c
+@@ -34,6 +34,8 @@
+ #include <nm-utils.h>
+ 
+ #include "nm-connection-editor.h"
++#include "utils.h"
++
+ #include "page-wifi.h"
+ 
+ G_DEFINE_TYPE (CEPageWifi, ce_page_wifi, CE_TYPE_PAGE)
+@@ -629,6 +631,7 @@ wifi_connection_new (GtkWindow *parent,
+                      const char *detail,
+                      NMRemoteSettings *settings,
+                      PageNewConnectionResultFunc result_func,
++                     NMClient *client,
+                      gpointer user_data)
+ {
+ 	NMConnection *connection;
+@@ -639,6 +642,17 @@ wifi_connection_new (GtkWindow *parent,
+ 	                                     TRUE,
+ 	                                     settings,
+ 	                                     user_data);
++
++	if (utils_default_to_private_connection (client)) {
++		NMSettingConnection *s_con;
++		s_con = nm_connection_get_setting_connection (connection);
++		if (!s_con) {
++			s_con = (NMSettingConnection *) nm_setting_connection_new ();
++			nm_connection_add_setting (connection, NM_SETTING (s_con));
++		}
++		nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++	}
++
+ 	s_wifi = nm_setting_wireless_new ();
+ 	g_object_set (s_wifi, NM_SETTING_WIRELESS_MODE, "infrastructure", NULL);
+ 	nm_connection_add_setting (connection, s_wifi);
+diff --git a/src/connection-editor/page-wifi.h b/src/connection-editor/page-wifi.h
+index eee167c..7a502a5 100644
+--- a/src/connection-editor/page-wifi.h
++++ b/src/connection-editor/page-wifi.h
+@@ -63,6 +63,7 @@ void wifi_connection_new (GtkWindow *parent,
+                           const char *detail,
+                           NMRemoteSettings *settings,
+                           PageNewConnectionResultFunc result_func,
++                          NMClient *client,
+                           gpointer user_data);
+ 
+ #endif  /* __PAGE_WIFI_H__ */
+diff --git a/src/connection-editor/page-wimax.c b/src/connection-editor/page-wimax.c
+index ff88013..2be1c65 100644
+--- a/src/connection-editor/page-wimax.c
++++ b/src/connection-editor/page-wimax.c
+@@ -220,6 +220,7 @@ wimax_connection_new (GtkWindow *parent,
+                       const char *detail,
+                       NMRemoteSettings *settings,
+                       PageNewConnectionResultFunc result_func,
++                      NMClient *client,
+                       gpointer user_data)
+ {
+ 	NMConnection *connection;
+diff --git a/src/connection-editor/page-wimax.h b/src/connection-editor/page-wimax.h
+index 4a40048..b2aa2a8 100644
+--- a/src/connection-editor/page-wimax.h
++++ b/src/connection-editor/page-wimax.h
+@@ -57,6 +57,7 @@ void wimax_connection_new (GtkWindow *parent,
+                            const char *detail,
+                            NMRemoteSettings *settings,
+                            PageNewConnectionResultFunc result_func,
++                           NMClient *client,
+                            gpointer user_data);
+ 
+ #endif  /* __PAGE_WIMAX_H__ */
+diff --git a/src/gnome-bluetooth/nma-bt-device.c b/src/gnome-bluetooth/nma-bt-device.c
+index 870d2be..cd4103d 100644
+--- a/src/gnome-bluetooth/nma-bt-device.c
++++ b/src/gnome-bluetooth/nma-bt-device.c
+@@ -342,6 +342,7 @@ dun_new_cdma (NMAMobileWizardAccessMethod *method)
+ 	              NM_SETTING_CDMA_NUMBER, "#777",
+ 	              NM_SETTING_CDMA_USERNAME, method->username,
+ 	              NM_SETTING_CDMA_PASSWORD, method->password,
++	              NM_SETTING_CDMA_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 	              NULL);
+ 	nm_connection_add_setting (connection, setting);
+ 
+@@ -368,6 +369,7 @@ dun_new_cdma (NMAMobileWizardAccessMethod *method)
+ 	              NULL);
+ 	g_free (uuid);
+ 	g_free (id);
++	nm_setting_connection_add_permission ((NMSettingConnection *) setting, "user", g_get_user_name (), NULL);
+ 	nm_connection_add_setting (connection, setting);
+ 
+ 	return connection;
+@@ -387,6 +389,7 @@ dun_new_gsm (NMAMobileWizardAccessMethod *method)
+ 	              NM_SETTING_GSM_NUMBER, "*99#",
+ 	              NM_SETTING_GSM_USERNAME, method->username,
+ 	              NM_SETTING_GSM_PASSWORD, method->password,
++	              NM_SETTING_GSM_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 	              NM_SETTING_GSM_APN, method->gsm_apn,
+ 	              NULL);
+ 	nm_connection_add_setting (connection, setting);
+@@ -414,6 +417,7 @@ dun_new_gsm (NMAMobileWizardAccessMethod *method)
+ 	              NULL);
+ 	g_free (uuid);
+ 	g_free (id);
++	nm_setting_connection_add_permission ((NMSettingConnection *) setting, "user", g_get_user_name (), NULL);
+ 	nm_connection_add_setting (connection, setting);
+ 
+ 	return connection;
+@@ -978,6 +982,7 @@ add_pan_connection (NmaBtDevice *self)
+ 	              NULL);
+ 	g_free (id);
+ 	g_free (uuid);
++	nm_setting_connection_add_permission ((NMSettingConnection *) setting, "user", g_get_user_name (), NULL);
+ 	nm_connection_add_setting (connection, setting);
+ 
+ 	/* The Bluetooth settings */
+diff --git a/src/libnm-gtk/nm-wifi-dialog.c b/src/libnm-gtk/nm-wifi-dialog.c
+index 396217b..36f3443 100644
+--- a/src/libnm-gtk/nm-wifi-dialog.c
++++ b/src/libnm-gtk/nm-wifi-dialog.c
+@@ -39,6 +39,7 @@
+ #include "wireless-security.h"
+ #include "nm-ui-utils.h"
+ #include "eap-method.h"
++#include "utils.h"
+ 
+ G_DEFINE_TYPE (NMAWifiDialog, nma_wifi_dialog, GTK_TYPE_DIALOG)
+ 
+@@ -1232,6 +1233,9 @@ nma_wifi_dialog_get_connection (NMAWifiDialog *self,
+ 			      NM_SETTING_CONNECTION_UUID, uuid,
+ 			      NULL);
+ 		g_free (uuid);
++		if (utils_default_to_private_connection (priv->client)) {
++			nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++		}
+ 		nm_connection_add_setting (connection, (NMSetting *) s_con);
+ 
+ 		s_wireless = (NMSettingWireless *) nm_setting_wireless_new ();
+diff --git a/src/mobile-helpers.c b/src/mobile-helpers.c
+index daa422e..903537f 100644
+--- a/src/mobile-helpers.c
++++ b/src/mobile-helpers.c
+@@ -179,6 +179,7 @@ mobile_wizard_done (NMAMobileWizard *wizard,
+ 			              NM_SETTING_CDMA_NUMBER, "#777",
+ 			              NM_SETTING_CDMA_USERNAME, method->username,
+ 			              NM_SETTING_CDMA_PASSWORD, method->password,
++			              NM_SETTING_CDMA_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 			              NULL);
+ 			nm_connection_add_setting (connection, setting);
+ 		} else if (method->devtype == NM_DEVICE_MODEM_CAPABILITY_GSM_UMTS) {
+@@ -189,6 +190,7 @@ mobile_wizard_done (NMAMobileWizard *wizard,
+ 			              NM_SETTING_GSM_USERNAME, method->username,
+ 			              NM_SETTING_GSM_PASSWORD, method->password,
+ 			              NM_SETTING_GSM_APN, method->gsm_apn,
++			              NM_SETTING_GSM_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 			              NULL);
+ 			nm_connection_add_setting (connection, setting);
+ 		} else
+@@ -219,6 +221,7 @@ mobile_wizard_done (NMAMobileWizard *wizard,
+ 		                                      "user", g_get_user_name (), NULL);
+ 		g_free (uuid);
+ 		g_free (id);
++		nm_setting_connection_add_permission ((NMSettingConnection *) setting, "user", g_get_user_name (), NULL);
+ 		nm_connection_add_setting (connection, setting);
+ 	}
+ 
+diff --git a/src/utils/utils.c b/src/utils/utils.c
+index 61d6a9e..8d52ef1 100644
+--- a/src/utils/utils.c
++++ b/src/utils/utils.c
+@@ -286,3 +286,10 @@ utils_filter_editable_on_insert_text (GtkEditable *editable,
+ 	return count > 0;
+ }
+ 
++gboolean
++utils_default_to_private_connection (NMClient *client)
++{
++	NMClientPermissionResult perms;
++	perms = nm_client_get_permission_result (client, NM_CLIENT_PERMISSION_SETTINGS_MODIFY_SYSTEM);
++	return (perms != NM_CLIENT_PERMISSION_RESULT_YES);
++}
+diff --git a/src/utils/utils.h b/src/utils/utils.h
+index 1abff65..714fe3d 100644
+--- a/src/utils/utils.h
++++ b/src/utils/utils.h
+@@ -27,6 +27,7 @@
+ #include <gtk/gtk.h>
+ #include <nm-connection.h>
+ #include <nm-device.h>
++#include <nm-client.h>
+ #include <net/ethernet.h>
+ #include <nm-access-point.h>
+ 
+@@ -85,6 +86,8 @@ void utils_show_error_dialog (const char *title,
+                               gboolean modal,
+                               GtkWindow *parent);
+ 
++gboolean utils_default_to_private_connection (NMClient *client);
++
+ #define NMA_ERROR (g_quark_from_static_string ("nma-error-quark"))
+ 
+ typedef enum  {
+diff --git a/src/wireless-security/ws-wep-key.c b/src/wireless-security/ws-wep-key.c
+index 0309042..402915f 100644
+--- a/src/wireless-security/ws-wep-key.c
++++ b/src/wireless-security/ws-wep-key.c
+@@ -160,6 +160,7 @@ static void
+ fill_connection (WirelessSecurity *parent, NMConnection *connection)
+ {
+ 	WirelessSecurityWEPKey *sec = (WirelessSecurityWEPKey *) parent;
++	NMSettingConnection *s_con;
+ 	NMSettingWirelessSecurity *s_wsec;
+ 	NMSettingSecretFlags secret_flags;
+ 	GtkWidget *widget, *passwd_entry;
+@@ -186,6 +187,12 @@ fill_connection (WirelessSecurity *parent, NMConnection *connection)
+ 	              NM_SETTING_WIRELESS_SECURITY_WEP_KEY_TYPE, sec->type,
+ 	              NULL);
+ 
++	s_con = nm_connection_get_setting_connection (connection);
++
++	/* If the connection is user-owned, mark the secrets as agent-owned */
++	if (s_con && nm_setting_connection_get_num_permissions (s_con))
++		g_object_set (s_wsec, NM_SETTING_WIRELESS_SECURITY_WEP_KEY_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED, NULL);
++
+ 	for (i = 0; i < 4; i++) {
+ 		if (strlen (sec->keys[i]))
+ 			nm_setting_wireless_security_set_wep_key (s_wsec, i, sec->keys[i]);
+diff --git a/src/wireless-security/ws-wpa-psk.c b/src/wireless-security/ws-wpa-psk.c
+index 1495707..f45ab1c 100644
+--- a/src/wireless-security/ws-wpa-psk.c
++++ b/src/wireless-security/ws-wpa-psk.c
+@@ -104,12 +104,14 @@ fill_connection (WirelessSecurity *parent, NMConnection *connection)
+ 	WirelessSecurityWPAPSK *wpa_psk = (WirelessSecurityWPAPSK *) parent;
+ 	GtkWidget *widget, *passwd_entry;
+ 	const char *key;
++	NMSettingConnection *s_con;
+ 	NMSettingWireless *s_wireless;
+ 	NMSettingWirelessSecurity *s_wireless_sec;
+ 	NMSettingSecretFlags secret_flags;
+ 	const char *mode;
+ 	gboolean is_adhoc = FALSE;
+ 
++	s_con = nm_connection_get_setting_connection (connection);
+ 	s_wireless = nm_connection_get_setting_wireless (connection);
+ 	g_assert (s_wireless);
+ 
+@@ -125,6 +127,9 @@ fill_connection (WirelessSecurity *parent, NMConnection *connection)
+ 	passwd_entry = widget;
+ 	key = gtk_entry_get_text (GTK_ENTRY (widget));
+ 	g_object_set (s_wireless_sec, NM_SETTING_WIRELESS_SECURITY_PSK, key, NULL);
++	/* If the connection is user-owned, mark the secrets as agent-owned */
++	if (s_con && nm_setting_connection_get_num_permissions (s_con))
++		g_object_set (s_wireless_sec, NM_SETTING_WIRELESS_SECURITY_PSK_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED, NULL);
+ 
+ 	/* Save PSK_FLAGS to the connection */
+ 	secret_flags = nma_utils_menu_to_secret_flags (passwd_entry);
