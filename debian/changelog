@@ -1,20 +1,12 @@
-lsb (9.20150917ubuntu1) xenial; urgency=medium
+lsb (9.20160110) unstable; urgency=medium
 
-  * Merge from Debian unstable, remaining changes:
-    - Add 01-upstart-lsb hook, to make executing rc.d scripts no-op if
-    there is an upstart job for that script.
+  * Merge the last Ubuntu diff
 
-  * Dropped changes, merged upstream:
-    - Drop pyshared usage, well, dist-packages symlinks are in place.
-    - lsb-$foo packages are gone, hence dependencies/m-a changes are
-    irrelevant now.
-    - python3 port is accepted in Debian, and used by default.
-    - tests pass under Ubuntu
-    - status_of_proc operations are correct in Debian now too. However,
-    mostly irrelevant to us, as on most systems systemd determines status
-    for us anyway.
+  [ Stéphane Graber & Dimitri John Ledkov ]
+  * Add 01-upstart-lsb from the upstart package, and make executing rc.d
+    scripts no-op if there is an upstart job for that script
 
- -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 19 Nov 2015 23:27:48 +0000
+ -- Didier Raboud <odyx@debian.org>  Sun, 10 Jan 2016 12:32:59 +0100
 
 lsb (9.20150917) unstable; urgency=medium
 
@@ -105,85 +97,6 @@ lsb (4.1+Debian12) unstable; urgency=low
 
  -- Didier Raboud <odyx@debian.org>  Wed, 05 Jun 2013 12:30:53 +0200
 
-lsb (4.1+Debian11ubuntu8) utopic; urgency=medium
-
-  * Modify 01-upstart-lsb hook, to make executing rc.d scripts no-op if
-    there is an upstart job for that script.
-
- -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 30 May 2014 11:38:47 +0200
-
-lsb (4.1+Debian11ubuntu7) utopic; urgency=medium
-
-  * Add 01-upstart-lsb from the upstart package.
-
- -- Stéphane Graber <stgraber@ubuntu.com>  Tue, 27 May 2014 16:18:04 +0200
-
-lsb (4.1+Debian11ubuntu6) trusty; urgency=medium
-
-  * Don't hardcode pyshared in the install files.
-
- -- Matthias Klose <doko@ubuntu.com>  Sun, 23 Feb 2014 17:06:48 +0100
-
-lsb (4.1+Debian11ubuntu5) trusty; urgency=medium
-
-  * Rebuild to drop files installed into /usr/share/pyshared.
-
- -- Matthias Klose <doko@ubuntu.com>  Sun, 23 Feb 2014 13:48:36 +0000
-
-lsb (4.1+Debian11ubuntu4) saucy; urgency=low
-
-  * Allow lsb-printing to depend on cups-filters | ghostscript-cups.
-
- -- Adam Conrad <adconrad@ubuntu.com>  Mon, 09 Sep 2013 10:17:15 -0400
-
-lsb (4.1+Debian11ubuntu3) saucy; urgency=low
-
-  * Use open() rather than file() in initdutils.py, for Python 3
-    compatibility (see LP #1035136).
-  * Test fileob and strob against None in RFC822Parser.__init__ rather than
-    testing their truth value, to avoid a misleading error in the case of a
-    file with no LSB headers.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Mon, 01 Jul 2013 12:36:13 +0100
-
-lsb (4.1+Debian11ubuntu2) saucy; urgency=low
-
-  * Only run the tests under python3, correcting a build failure due to
-    mismatched test expectations.
-  * test/test_lsb_release.py: also, make lsb_release ignore dpkg origins
-    for the test, otherwise the test fails on Ubuntu.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 19 May 2013 05:52:09 +0000
-
-lsb (4.1+Debian11ubuntu1) saucy; urgency=low
-
-  * Merge from Debian unstable, remaining changes:
-    - Mark lsb-core Multi-Arch: foreign.
-    - Use python3 instead of python2.
-    - Fix status_of_proc returning incorrect error code; and when a pidfile
-      is specified, return "unknown" if it exists but isn't readable (as
-      would be the case for non-root with a root-only pidfile), and return
-      "not running" if the pidfile otherwise doesn't provide a useful PID.
-      This issue may also be fixed now in the Debian version, but someone
-      needs to compare the differing implementations to verify before this
-      delta can be dropped.
-    - Prefer mailx (main) over mailutils (universe)
-    - Depend directly on libnss3 and libnspr4 rather than via the
-      transitional packages libnss3-1d and libnspr4-0d.
-  * Changes included in Debian:
-    - lsb_release: Add -Es to #! line for Python.
-    - Correct duplicate reference to log_action_end_msg_post in
-      debian/lsb-base.README.Debian.
-    - Fix debian/copyright to list the correct Canonical copyright for the
-      Ubuntu logging functions.
-    - Revert use of /bin/echo for echo-n.
-    - Port initdutils.py to python3 so that the tests will pass at build
-      time.
-    - Fix build failure when only building architecture-dependent packages
-      on Ubuntu.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 18 May 2013 20:54:45 -0700
-
 lsb (4.1+Debian11) unstable; urgency=low
 
   [ Steve Langasek ]
@@ -216,82 +129,6 @@ lsb (4.1+Debian10) unstable; urgency=low
   * Compress source with xz
 
  -- Didier Raboud <odyx@debian.org>  Wed, 15 May 2013 11:06:44 +0200
-
-lsb (4.1+Debian9ubuntu4) saucy; urgency=low
-
-  * Depend directly on libnss3 and libnspr4 rather than via the transitional
-    packages libnss3-1d and libnspr4-0d.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Thu, 16 May 2013 14:48:45 +0100
-
-lsb (4.1+Debian9ubuntu3) saucy; urgency=low
-
-  * Prefer mailx over mailutils; this apparently was a deliberate (but
-    undocumented) delta in Ubuntu.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 15 May 2013 17:49:45 +0000
-
-lsb (4.1+Debian9ubuntu2) saucy; urgency=low
-
-  * Fix build failure when only building architecture-dependent packages.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 15 May 2013 04:22:58 -0500
-
-lsb (4.1+Debian9ubuntu1) saucy; urgency=low
-
-  * Merge from Debian unstable:
-    - lsb-desktop no longer depends on transitional libqt4-gui.  LP: #339501.
-    - lsb-invalid-mta includes /usr/lib/sendmail as a symlink.  LP: #580914.
-    - fixes a typo in the package description.  LP: #1177473.
-  * Remaining changes:
-    - Mark lsb-core Multi-Arch: foreign.
-    - Use python3 instead of python2.
-    - Fix status_of_proc returning incorrect error code; and when a pidfile
-      is specified, return "unknown" if it exists but isn't readable (as
-      would be the case for non-root with a root-only pidfile), and return
-      "not running" if the pidfile otherwise doesn't provide a useful PID.
-      This issue may also be fixed now in the Debian version, but someone
-      needs to compare the differing implementations to verify before this
-      delta can be dropped.
-    - Correct duplicate reference to log_action_end_msg_post in
-      debian/lsb-base.README.Debian.
-    - lsb_release: Add -Es to #! line for Python.
-  * Dropped changes, included in Debian:
-    - Mark lsb-release and lsb-base Multi-Arch: foreign.
-    - Drop Qt3 from lsb-desktop depends and add lsb-desktop.NEWS to explain
-      its absence
-    - Depend on libgl1-mesa-glx rather than libgl1-mesa as preferred libgl1
-      alternative.
-    - Use dpkg --print-architecture rather than
-      --print-installation-architecture.
-    - Use $DPKG_MAINTSCRIPT_ARCH in the maintainer scripts to decide the
-      correct symlinks to set up, instead of going by the dpkg built-in
-      architecture.
-    - Don't conflict with python (>= 2.6).
-    - Use dh_python2
-    - lsb_release.py: Ensure that files are closed promptly; Python 3.2
-      prints ResourceWarning noise otherwise.
-    - Skip calling apt-cache if /etc/lsb-release contains everything we need.
-    - sendmail, debian/control, debian/rules, debian/lsb-invalid-mta.dirs:
-      include new "lsb-invalid-mta" package.
-    - Remove /usr/lib/pymodules/python2.6/lsb_release.py on upgrades; this
-      was a karmic-only upgrade issue that we could have removed the
-      handling for back in maverick, better late than never.
-    - Add Ubuntu logging functions.
-    - Added ghostscript-cups dependency.
-    - Made lsb-printing required by the lsb package, not just suggested.
-  * lsb-languages must depend on python, not on python3, as /usr/bin/python is
-    the interface guaranteed by this submodule.
-  * Fix debian/copyright to list the correct Canonical copyright for the
-    Ubuntu logging functions.
-  * Revert wrongheaded calls to /bin/echo whenever -n is used; 'echo -n' is
-    guaranteed by Debian policy, we don't want a bunch of extra forks here
-    for no reason.
-  * Port initdutils.py to python3 so that the tests will pass at build time.
-  * Call 2to3 correctly so that the scripts in /usr/lib/lsb are usable under
-    python3.  LP: #798192.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 15 May 2013 04:07:27 -0500
 
 lsb (4.1+Debian9) unstable; urgency=low
 
@@ -640,226 +477,6 @@ lsb (3.2-23.1) unstable; urgency=low
 
  -- Jakub Wilk <jwilk@debian.org>  Sun, 21 Mar 2010 15:39:47 +0100
 
-lsb (4.0-0ubuntu27) raring; urgency=low
-
-  * lsb_release: Add -Es to #! line for Python so that it will ignore
-    the $PYTHON* environment variables, and not add the user's site
-    directory to sys.path.  Both of these are general recommendations that
-    should apply to all system scripts, but in this case fixes LP: #938869
-
- -- Barry Warsaw <barry@ubuntu.com>  Tue, 23 Oct 2012 18:48:21 -0400
-
-lsb (4.0-0ubuntu26) quantal; urgency=low
-
-  * When a pidfile is specified, but fails to produce a PID to test,
-    return "unknown" if it exists but isn't readable (as would be
-    the case for non-root with a root-only pidfile), and return "not
-    running" if the pidfile otherwise doesn't provide a useful PID.
-
- -- Adam Conrad <adconrad@ubuntu.com>  Wed, 10 Oct 2012 11:21:48 -0600
-
-lsb (4.0-0ubuntu25) quantal; urgency=low
-
-  * Fix regression from 4.0-0ubuntu23 that would cause status_of_proc
-    to return success if asked to find a service by pidfile, while an
-    entirely different copy (chroot, different user, etc) was running 
-
- -- Adam Conrad <adconrad@ubuntu.com>  Wed, 10 Oct 2012 10:20:42 -0600
-
-lsb (4.0-0ubuntu24) quantal; urgency=low
-
-  * Drop Qt3 from lsb-desktop depends and add lsb-desktop.NEWS to explain its
-    absence (following Debian) (LP: #1029476)
-    - Needed for Qt3 removal
-
- -- Scott Kitterman <scott@kitterman.com>  Fri, 28 Sep 2012 20:32:15 -0400
-
-lsb (4.0-0ubuntu23) quantal; urgency=low
-
-  * Fix status_of_proc returning incorrect error code (LP: #683640)
-
- -- Adam Stokes <adam.stokes@canonical.com>  Tue, 24 Jul 2012 13:26:54 -0700
-
-lsb (4.0-0ubuntu22) quantal; urgency=low
-
-  * Use python3 instead of python2 (again).
-
- -- Matthias Klose <doko@ubuntu.com>  Wed, 25 Apr 2012 12:49:32 +0200
-
-lsb (4.0-0ubuntu20) precise; urgency=low
-
-  * Revert back to using python 2, in a desperate act to get the CDs back in
-    size by dropping Python 3. My special condolences to Barry!
-
- -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 24 Feb 2012 17:52:31 +0100
-
-lsb (4.0-0ubuntu19) precise; urgency=low
-
-  * Mark lsb-base Multi-Arch: foreign (LP: #904013).
-
- -- Colin Watson <cjwatson@ubuntu.com>  Thu, 19 Jan 2012 16:59:48 +0000
-
-lsb (4.0-0ubuntu18) precise; urgency=low
-
-  * lsb_release.py: Ensure that files are closed promptly; Python 3.2 prints
-    ResourceWarning noise otherwise.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Thu, 19 Jan 2012 16:53:06 +0000
-
-lsb (4.0-0ubuntu17) precise; urgency=low
-
-  * Use python3 instead of python2.
-
- -- Matthias Klose <doko@ubuntu.com>  Thu, 01 Dec 2011 14:58:09 +0100
-
-lsb (4.0-0ubuntu16) oneiric; urgency=low
-
-  * Cherry-pick from Debian 3.2-28 (LP: #837745):
-    - Fix symlinks for AMD64.  (Closes: #638450)
-
- -- Colin Watson <cjwatson@ubuntu.com>  Mon, 19 Sep 2011 10:20:31 +0100
-
-lsb (4.0-0ubuntu15) oneiric; urgency=low
-
-  * Use python (2.x) again for the scripts.
-
- -- Matthias Klose <doko@ubuntu.com>  Thu, 25 Aug 2011 17:01:44 +0200
-
-lsb (4.0-0ubuntu14) oneiric; urgency=low
-
-  * Use $DPKG_MAINTSCRIPT_ARCH in the maintainer scripts to decide the correct
-    symlinks to set up, instead of going by the dpkg built-in architecture.
-  * Mark lsb-release Multi-Arch: foreign.
-  * Mark lsb-core as Multi-Arch: foreign.  This is *incorrect*, because a
-    given package needs the libraries of the corresponding architecture; but
-    the common case is i386+amd64, where an amd64 lsb-core actually does
-    guarantee that the i386 dependencies are satisfied via biarch, so we do
-    this so we can have things like googleearth installable instead of having
-    to worry about libncurses5 for oneiric.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 15 Aug 2011 18:43:56 -0700
-
-lsb (4.0-0ubuntu13) oneiric; urgency=low
-
-  * Use python3 instead of python2.
-
- -- Matthias Klose <doko@ubuntu.com>  Fri, 10 Jun 2011 14:42:43 +0200
-
-lsb (4.0-0ubuntu12) oneiric; urgency=low
-
-  * switch from python-central to dh_python2
-  * add "python" manually as a dependency for lsb-core, this used
-    to get add by ${python:Depends} but its missing now
-
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 10 Jun 2011 13:41:04 +0200
-
-lsb (4.0-0ubuntu11) natty; urgency=low
-
-  * Make sure LOG_DAEMON_MSG is set to avoid init scripts crashing when
-    running with -u (LP: #770381)
-
- -- Stéphane Graber <stgraber@ubuntu.com>  Mon, 25 Apr 2011 13:13:07 -0400
-
-lsb (4.0-0ubuntu10) natty; urgency=low
-
-  * Make lsb-base-logging-ubuntu.sh plymouth-aware (LP: #752393)
-    When booting with plymouth running, log_daemon_msg now stores its output
-    in a variable until log_end_msg is called. Avoid buffering issue.
-
- -- Stéphane Graber <stgraber@ubuntu.com>  Mon, 11 Apr 2011 14:05:55 -0400
-
-lsb (4.0-0ubuntu9) natty; urgency=low
-
-  * Rebuild to add support for python 2.7.
-
- -- Matthias Klose <doko@ubuntu.com>  Fri, 03 Dec 2010 00:04:26 +0000
-
-lsb (4.0-0ubuntu8) lucid; urgency=low
-
-  * sendmail, debian/control, debian/rules, debian/lsb-invalid-mta.dirs:
-    Added new binary package "lsb-invalid-mta" containing a fake
-    /usr/sbin/sendmail so that the installation of LSB packages does not
-    pull in an MTA any more, which once adds awkward configuration questions
-    to the installation process and second adds an often unnneeded daemon to
-    the system (LP: #141641).
-
-  * debian/control: The LSB requires the printing environment already
-    since version 3.2. Made lsb-printing required by the "lsb" package
-    not only suggested (LP: #386128).
-
- -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 22 Feb 2010 23:50:49 +0100
-
-lsb (4.0-0ubuntu7) lucid; urgency=low
-
-  * Remove /usr/lib/pymodules/python2.6/lsb_release.py on upgrades; this might
-    have stayed behind due to using python-support in intermediate karmic
-    development versions; LP: #418017.
-
- -- Loïc Minier <loic.minier@ubuntu.com>  Fri, 18 Dec 2009 15:34:25 +0100
-
-lsb (4.0-0ubuntu6) lucid; urgency=low
-
-  * lsb-base-logging-ubuntu.sh: Remove the log_to_console madness, it doesn't
-    work with Plymouth anyway.
-
- -- Scott James Remnant <scott@ubuntu.com>  Fri, 04 Dec 2009 11:46:53 +0000
-
-lsb (4.0-0ubuntu5) karmic; urgency=low
-
-  * lsb-base-logging-ubuntu.sh: Honour CONSOLE environment variable and use
-    it for output instead of /dev/console if it's set (LP: #440871).
-
- -- Colin Watson <cjwatson@ubuntu.com>  Thu, 08 Oct 2009 19:53:53 +0100
-
-lsb (4.0-0ubuntu4) karmic; urgency=low
-
-  * Merge 3.2-23 from Debian, fixing TERM handling in log_use_fancy_output
-    (LP: #418461).
-  * Use dpkg --print-architecture rather than
-    --print-installation-architecture (LP: #403316).
-
- -- Colin Watson <cjwatson@ubuntu.com>  Thu, 10 Sep 2009 12:42:03 +0100
-
-lsb (4.0-0ubuntu3) karmic; urgency=low
-
-  * rebuild using python-central and DH_PYCENTRAL=include-links
-    (LP: #383697)
-  * debian/control: 
-    - set XS-Python-Version to "all"
-    - depend on python-central
-  * debian/lsb-release.dirs, debian/rules:
-    - install into usr/share/pyshared/
-
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 21 Aug 2009 16:44:13 +0200
-
-lsb (4.0-0ubuntu2) karmic; urgency=low
-
-  * debian/control: Added ghostscript-cups dependency (LP: #385606).
-
- -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 11 Jun 2009 23:43:49 +0200
-
-lsb (4.0-0ubuntu1) karmic; urgency=low
-
-  * Merge from Debian unstable, remaining changes:
-    - lsb-base-logging-ubuntu.sh: change log_{success,warning,failure}_msg()
-      to use usplash_write "TEXT" instead of "STATUS" to avoid unreadable
-      line-wrapping when using usplash in verbose mode.
-    - Don't conflict with python (>= 2.6).
-    - Depend on postfix rather than exim4 as preferred mail-transport-agent
-      alternative.
-    - Depend on libgl1-mesa-glx rather than libgl1-mesa as preferred libgl1
-      alternative.
-    - Since /etc/lsb-release overrides detected information, there's no
-      need to try and detect that information if lsb-release contains
-      everything we need.  This saves us calling the hugely expensive
-      apt-cache.
-    - Add Ubuntu logging functions.
-
-  [ Jeff Licquia ]
-  * Upgrade to support LSB 4.0.
-
- -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 02 Jun 2009 20:20:07 +0000
-
 lsb (3.2-23) unstable; urgency=low
 
   * Fix tests for $TERM in log_use_fancy_output().  (Closes: #537112, #536190)
@@ -899,49 +516,6 @@ lsb (3.2-21) unstable; urgency=low
   * Demote lsb to a suggestion by lsb-release.  (Closes: #509611)
 
  -- Chris Lawrence <lawrencc@debian.org>  Thu, 19 Mar 2009 16:29:25 -0500
-
-lsb (3.2-20ubuntu4) jaunty; urgency=low
-
-  * Replace the deprecated Python sets module with the builtin set type,
-    if it is available (python >= 2.4), to avoid spewing warnings for
-    python >= 2.6.  (LP: #336436)
-
- -- Anders Kaseorg <andersk@mit.edu>  Mon, 02 Mar 2009 03:35:14 -0500
-
-lsb (3.2-20ubuntu3) jaunty; urgency=low
-
-  * lsb-base-logging-ubuntu.sh: change log_{success,warning,failure}_msg()
-    to use usplash_write "TEXT" instead of "STATUS" to avoid unreadable
-    line-wrapping when using usplash in verbose mode (LP: #291543).
-
- -- Kees Cook <kees@ubuntu.com>  Sat, 07 Feb 2009 14:22:19 -0800
-
-lsb (3.2-20ubuntu2) jaunty; urgency=low
-
-  * Since /etc/lsb-release overrides detected information, there's no
-    need to try and detect that information if lsb-release contains
-    everything we need.  This saves us calling the hugely expensive
-    apt-cache.   LP: #262050.
-
- -- Scott James Remnant <scott@ubuntu.com>  Thu, 15 Jan 2009 21:24:13 +0000
-
-lsb (3.2-20ubuntu1) jaunty; urgency=low
-
-  * Resynchronise with Debian (cups dependency change fixes LP: #279345).
-    Remaining changes:
-    - Don't conflict with python (>= 2.6).
-    - Depend on postfix rather than exim4 as preferred mail-transport-agent
-      alternative.
-    - Depend on libgl1-mesa-glx rather than libgl1-mesa as preferred libgl1
-      alternative.
-    - Add Ubuntu logging functions.
-  * Revert some apparently unintentional dependency changes on the Ubuntu
-    side of the merge: move libncurses5 and libpam0g dependencies back from
-    lsb-base to lsb-core; set lsb's dependencies on lsb-printing,
-    lsb-multimedia, and lsb-languages back to suggestions; and remove lsb's
-    suggestion of lsb-qt4.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Sun, 02 Nov 2008 23:48:49 +0000
 
 lsb (3.2-20) unstable; urgency=low
 
@@ -993,30 +567,6 @@ lsb (3.2-15) unstable; urgency=low
 
  -- Chris Lawrence <lawrencc@debian.org>  Wed, 16 Jul 2008 14:24:44 -0500
 
-lsb (3.2-14ubuntu2) intrepid; urgency=low
-
-  * Backport from Debian:
-    - Fix log_action_end_msg_pre function definition (_post was defined
-      twice). (LP: #262680)
-
- -- Colin Watson <cjwatson@ubuntu.com>  Tue, 16 Sep 2008 13:44:44 +0100
-
-lsb (3.2-14ubuntu1) intrepid; urgency=low
-
-  * Merge from debian unstable (LP: #249059), remaining changes:
-    - debian/control:
-      + Remove python from conflicts
-      + Keep Ubuntu's Depends and Suggests
-      + Update maintainer
-    - debian/rules:
-      + copy lsb-base-logging-ubuntu.sh
-    - lsb-base-logging-ubuntu.sh:
-      + logging functions suitable for Ubuntu
-  * Dropped changes
-    - Debian has accepted all of the status_of_proc() functionality
-
- -- Dustin Kirkland <kirkland@ubuntu.com>  Wed, 16 Jul 2008 08:56:28 -0500
-
 lsb (3.2-14) unstable; urgency=low
 
   * Update pidofproc(), status_of_proc() to sync with Ubuntu.
@@ -1043,37 +593,6 @@ lsb (3.2-13) unstable; urgency=low
     "the Regents," who didn't author any of init-functions.
 
  -- Chris Lawrence <lawrencc@debian.org>  Tue, 08 Jul 2008 22:03:10 -0500
-
-lsb (3.2-12ubuntu3) intrepid; urgency=low
-
-  * init-functions: 
-    - In pidofproc(), if the kill -0 fails, use ps to detect if
-      the proc is running.
-    - Revert status_of_proc() functionality *back* to using pidofproc() 
-      now that it can run as non-root (LP: #246735). 
-    - Add support for passing a -p $pidfile parameter.
-
- -- Dustin Kirkland <kirkland@ubuntu.com>  Wed, 09 Jul 2008 16:15:05 -0500
-
-lsb (3.2-12ubuntu2) intrepid; urgency=low
-
-  * init-functions: Replace pidofproc() call in status_of_proc() with a
-    /bin/pidof call, to allow any user to query service status (LP: #246735).
-
- -- Dustin Kirkland <kirkland@ubuntu.com>  Tue, 08 Jul 2008 15:38:55 -0500
-
-lsb (3.2-12ubuntu1) intrepid; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - init-functions:
-      + Debian has a "return 0" that should be "return 3" per LSB spec
-      + Make pidof call "set -e safe", LP: #204594
-      + Add status_of_proc() function, LP: #203169
-    - debian/control:
-      + Remove python from conflicts
-      + Keep Ubuntu's Depends and Suggests
-
- -- Dustin Kirkland <kirkland@ubuntu.com>  Wed, 04 Jun 2008 13:18:56 -0500
 
 lsb (3.2-12) unstable; urgency=medium
 
@@ -1146,20 +665,6 @@ lsb (3.2-5) unstable; urgency=low
 
  -- Chris Lawrence <lawrencc@debian.org>  Wed, 26 Mar 2008 10:26:53 -0500
 
-lsb (3.2-4ubuntu1) hardy; urgency=low
-
-  * Merge with Debian; remaining changes:
-    - Depend on postfix rather than exim4 as preferred mail-transport-agent
-      alternative.
-    - Depend on libgl1-mesa-glx rather than libgl1-mesa as preferred libgl1
-      alternative.
-    - Add Ubuntu logging functions.
-    - lsb: Drop the optional lsb-qt4 module to a suggests.
-    - Maintainer field set to Ubuntu.
-  * init-functions: Make functions safe to use with sh -e.
-
- -- Matthias Klose <doko@ubuntu.com>  Mon, 10 Mar 2008 18:48:17 +0000
-
 lsb (3.2-4) unstable; urgency=high
 
   * Reverse test in killproc().  (Closes: #469404)
@@ -1199,25 +704,6 @@ lsb (3.2-1) unstable; urgency=low
 
  -- Chris Lawrence <lawrencc@debian.org>  Sun, 02 Mar 2008 02:13:58 -0600
 
-lsb (3.1-24ubuntu2) hardy; urgency=low
-
-  * lsb-cxx: Drop dependency on libstdc++5, not needed by LSB-3.1.
-
- -- Matthias Klose <doko@ubuntu.com>  Wed, 23 Jan 2008 15:46:09 +0000
-
-lsb (3.1-24ubuntu1) hardy; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - Depend on postfix rather than exim4 as preferred mail-transport-agent
-      alternative.
-    - Depend on libgl1-mesa-glx rather than libgl1-mesa as preferred libgl1
-      alternative.
-    - Add Ubuntu logging functions.
-    - Drop the optional lsb-qt4 module to a suggests.
-    - maintainer field set to ubuntu
-
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 19 Nov 2007 11:37:25 +0100
-
 lsb (3.1-24) unstable; urgency=low
 
   * Acknowledge NMU by Christian Perrier.
@@ -1247,32 +733,6 @@ lsb (3.1-24) unstable; urgency=low
 
  -- Chris Lawrence <lawrencc@debian.org>  Wed, 25 Jul 2007 08:56:44 -0500
 
-lsb (3.1-23.1ubuntu3) gutsy; urgency=low
-
-  * Trigger rebuild for hppa
-
- -- LaMont Jones <lamont@ubuntu.com>  Thu, 04 Oct 2007 12:12:31 -0600
-
-lsb (3.1-23.1ubuntu2) gutsy; urgency=low
-
-  * Apply patch from Todd Brandt to handle "tput cols" returning negative
-    values by then assuming we're on a 80 character wide terminal.
-
- -- Tollef Fog Heen <tfheen@ubuntu.com>  Thu, 06 Sep 2007 19:43:00 +0200
-
-lsb (3.1-23.1ubuntu1) gutsy; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - Depend on postfix rather than exim4 as preferred mail-transport-agent
-      alternative.
-    - Depend on libgl1-mesa-glx rather than libgl1-mesa as preferred libgl1
-      alternative.
-    - Add Ubuntu logging functions.
-    - Drop the optional lsb-qt4 module to a suggests.
-    - maintainer field set to ubuntu
-
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 21 May 2007 08:26:51 +0200
-
 lsb (3.1-23.1) unstable; urgency=low
 
   * Non-maintainer upload to fix pending l10n issues.
@@ -1293,34 +753,6 @@ lsb (3.1-23) unstable; urgency=low
     (Closes: #403421, #403527)
 
  -- Chris Lawrence <lawrencc@debian.org>  Sat, 20 Jan 2007 21:58:36 -0600
-
-lsb (3.1-22ubuntu3) feisty; urgency=low
-
-  * Don't fail if we can't log to /dev/console, it may not be openable.
-    LP: #104371.
-
- -- Scott James Remnant <scott@ubuntu.com>  Tue, 10 Apr 2007 14:25:17 +0100
-
-lsb (3.1-22ubuntu2) feisty; urgency=low
-
-  * lsb-core: Remove conflict with python (<< 2.5).
-
- -- Matthias Klose <doko@ubuntu.com>  Sat, 13 Jan 2007 16:09:53 +0100
-
-lsb (3.1-22ubuntu1) feisty; urgency=low
-
-  * Resynchronise with Debian. Remaining changes:
-    - Depend on postfix rather than exim4 as preferred mail-transport-agent
-      alternative.
-    - Depend on libgl1-mesa-glx rather than libgl1-mesa as preferred libgl1
-      alternative.
-    - Add Ubuntu logging functions.
-    - Drop the optional lsb-qt4 module to a suggests.
-  * Make log_action_end_msg always return zero, per
-    debian/lsb-base.README.Debian.
-  * "ok" -> "OK" (closes: Malone #19245).
-
- -- Colin Watson <cjwatson@ubuntu.com>  Tue, 21 Nov 2006 11:18:27 +0000
 
 lsb (3.1-22) unstable; urgency=low
 
@@ -1444,37 +876,6 @@ lsb (3.1-11) unstable; urgency=low
 
  -- Chris Lawrence <lawrencc@debian.org>  Sun,  6 Aug 2006 18:18:08 -0500
 
-lsb (3.1-10ubuntu4) edgy; urgency=low
-
-  * Make log_to_console compatible with 'set -u' (closes: Malone #61688).
-  * Avoid duplicate usplash_write calls via log_to_console.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Thu, 21 Sep 2006 18:13:03 +0100
-
-lsb (3.1-10ubuntu3) edgy; urgency=low
-
-  * Write copies of the log messages to the console if QUIET is not yes.
-
- -- Scott James Remnant <scott@ubuntu.com>  Thu, 21 Sep 2006 03:10:31 +0100
-
-lsb (3.1-10ubuntu2) edgy; urgency=low
-
-  * Depend on libgl1-mesa-glx rather than libgl1-mesa as preferred libgl1
-    alternative.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Thu, 27 Jul 2006 14:05:53 +0100
-
-lsb (3.1-10ubuntu1) edgy; urgency=low
-
-  * Merge from debian unstable, remaining changes:
-    - exim4 suggested mta,
-    - depend on libgl1-mesa instead of xlibmesa3-gl,
-    - lsb-qt4 reduced to a suggests,
-    - ubuntu init message functions,
-    - ubuntu-style distribution description.
-
- -- Scott James Remnant <scott@ubuntu.com>  Thu,  6 Jul 2006 10:36:51 +0100
-
 lsb (3.1-10) unstable; urgency=low
 
   * Quote tests of $specified.  (Closes: #370256)
@@ -1507,19 +908,6 @@ lsb (3.1-6) unstable; urgency=low
   * Use pidof only if pid file is not specified.  (Closes: #365736)
 
  -- Chris Lawrence <lawrencc@debian.org>  Thu,  1 Jun 2006 14:20:24 -0400
-
-lsb (3.1-5ubuntu2) dapper; urgency=low
-
-  * Drop the optional lsb-qt4 module to a suggests so it can stay in
-    universe.
-
- -- Scott James Remnant <scott@ubuntu.com>  Thu, 18 May 2006 10:42:44 +0100
-
-lsb (3.1-5ubuntu1) dapper; urgency=low
-
-  * Resynchronise with Debian.
-
- -- Jeff Bailey <jbailey@ubuntu.com>  Thu, 18 May 2006 01:00:59 -0400
 
 lsb (3.1-5) unstable; urgency=high
 
@@ -1609,26 +997,6 @@ lsb (3.0-13) unstable; urgency=medium
 
  -- Chris Lawrence <lawrencc@debian.org>  Thu, 29 Dec 2005 03:50:44 -0500
 
-lsb (3.0-12ubuntu3) dapper; urgency=low
-
-  * lsb-base-logging-ubuntu.sh: 
-    - only use tput if it is actually available in log_end_msg() 
-      (ubuntu: #23388)
-
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 27 Feb 2006 13:32:26 +0100
-
-lsb (3.0-12ubuntu2) dapper; urgency=low
-
-  * change lsb-graphics dependency from xlibs to libx11-6 
-
- -- Oliver Grawert <ogra@ubuntu.com>  Sat, 11 Feb 2006 13:47:23 +0100
-
-lsb (3.0-12ubuntu1) dapper; urgency=low
-
-  * Resynchronise with Debian.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Tue,  6 Dec 2005 16:47:29 +0000
-
 lsb (3.0-12) unstable; urgency=low
 
   * Remove the pidfile in killproc().  (Closes: #321271)
@@ -1637,21 +1005,6 @@ lsb (3.0-12) unstable; urgency=low
   * Add sv.po.  (Closes: #333595)
 
  -- Chris Lawrence <lawrencc@debian.org>  Tue, 29 Nov 2005 23:01:38 -0500
-
-lsb (3.0-11ubuntu2) dapper; urgency=low
-
-  * Fix lsb_release failure if /etc/debian_version is missing (closes:
-    Launchpad #4912).
-
- -- Colin Watson <cjwatson@ubuntu.com>  Fri,  2 Dec 2005 14:59:02 +0000
-
-lsb (3.0-11ubuntu1) dapper; urgency=low
-
-  * Resynchronise with Debian.
-  * Initial version of lsb-base-logging.sh approximately corresponding to
-    current Ubuntu logging practice. log_action_* in particular may change.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Wed,  9 Nov 2005 14:42:27 -0500
 
 lsb (3.0-11) unstable; urgency=low
 
@@ -1764,61 +1117,6 @@ lsb (3.0-2) experimental; urgency=low
 
  -- Chris Lawrence <lawrencc@debian.org>  Mon,  1 Aug 2005 22:45:41 -0500
 
-lsb (3.0-1ubuntu8) breezy; urgency=low
-
-  * init scripts sometimes print messages even when successful, in
-    practice.  It is better to cope with this without corruption, than
-    to have the colour-coded asterisk.
-
- -- Ian Jackson <iwj@ubuntu.com>  Fri, 23 Sep 2005 15:16:13 +0100
-
-lsb (3.0-1ubuntu7) breezy; urgency=low
-
-  * init-functions log message writing now copes much better if the init
-    script prints some errors to stderr while it's working.  (Assuming
-    thatr the init script doesn't print errors to stderr and then succeed;
-    init scripts should not do that.)
-
- -- Ian Jackson <iwj@ubuntu.com>  Tue, 20 Sep 2005 18:18:43 +0100
-
-lsb (3.0-1ubuntu6) breezy; urgency=low
-
-  * Use "$*" rather than "$@" when calling usplash_write, since it requires
-    a single argument (part of Ubuntu #15403).
-
- -- Colin Watson <cjwatson@ubuntu.com>  Wed, 14 Sep 2005 11:31:22 +0100
-
-lsb (3.0-1ubuntu5) breezy; urgency=low
-
-  * Use 'type' in place of 'which'
-
- -- Matt Zimmerman <mdz@ubuntu.com>  Tue, 30 Aug 2005 08:29:50 -0700
-
-lsb (3.0-1ubuntu4) breezy; urgency=low
-
-  * Basic usplash integration
-
- -- Matt Zimmerman <mdz@ubuntu.com>  Mon, 29 Aug 2005 11:20:00 -0700
-
-lsb (3.0-1ubuntu3) breezy; urgency=low
-
-  * And switch us from libgl1-xorg to libgl1-mesa, completing the transition.
-
- -- Adam Conrad <adconrad@ubuntu.com>  Sun, 21 Aug 2005 03:16:25 +1000
-
-lsb (3.0-1ubuntu2) breezy; urgency=low
-
-  * Depend on libgl1-xorg rather than xlibmesa3-gl as preferred libgl1
-    alternative.
-
- -- Colin Watson <cjwatson@ubuntu.com>  Mon,  8 Aug 2005 01:25:32 +0100
-
-lsb (3.0-1ubuntu1) breezy; urgency=low
-
-  * Resynchronise with Debian, closing Ubuntu bugs #11406 and #10584
-
- -- Adam Conrad <adconrad@ubuntu.com>  Wed, 29 Jun 2005 07:56:43 +0000
-
 lsb (3.0-1) unstable; urgency=low
 
   * lsb-cxx now depends on libstdc++6 as well as libstdc++5, necessitated
@@ -1826,18 +1124,6 @@ lsb (3.0-1) unstable; urgency=low
   * Don't create /lib64 on AMD64.  (Closes: #308220)
 
  -- Chris Lawrence <lawrencc@debian.org>  Sun,  8 May 2005 19:11:45 -0500
-
-lsb (2.0-7ubuntu2) breezy; urgency=low
-
-  * Depend: postfix | mail-transport-agent
-
- -- LaMont Jones <lamont@ubuntu.com>  Mon,  2 May 2005 19:26:23 -0600
-
-lsb (2.0-7ubuntu1) breezy; urgency=low
-
-  * Merged Debian changes (#9470).
-
- -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 15 Apr 2005 10:23:09 +0200
 
 lsb (2.0-7) unstable; urgency=high
 
@@ -1889,18 +1175,6 @@ lsb (2.0-2) experimental; urgency=low
 
  -- Chris Lawrence <lawrencc@debian.org>  Mon, 20 Sep 2004 21:38:36 -0500
 
-lsb (2.0-1ubuntu2) hoary; urgency=low
-
-  * Fix build-depends
-
- -- LaMont Jones <lamont@canonical.com>  Fri, 29 Oct 2004 22:08:06 -0600
-
-lsb (2.0-1ubuntu1) hoary; urgency=low
-
-  * Resynchronise with Debian, resolved remaining merge conflicts.
-
- -- Martin Pitt <mpitt@debian.org>  Fri, 29 Oct 2004 00:39:01 +0200
-
 lsb (2.0-1) unstable; urgency=high
 
   * Add lsb-core-{noarch,[arch]} Provides.
@@ -1909,63 +1183,6 @@ lsb (2.0-1) unstable; urgency=high
   * Depend on ia32-libs on amd64.  (Closes: #259976)
 
  -- Chris Lawrence <lawrencc@debian.org>  Sun, 19 Sep 2004 18:01:07 -0500
-
-lsb (1.3-9ubuntu7) warty; urgency=low
-
-  * prerm, postinst: Add support for amd64. (closes: #1354)
-
- -- Tollef Fog Heen <tfheen@raw.no>  Mon, 20 Sep 2004 09:29:54 +0200
-
-lsb (1.3-9ubuntu6) warty; urgency=low
-
-  * init-functions: fix a bashism on line #76 (closes #1325)
-  * debian-control: added sed as a dependency just to be safe
-
- -- Nathaniel McCallum <npmccallum@canonical.com>  Thu, 16 Sep 2004 22:52:18 -0400
-
-lsb (1.3-9ubuntu5) warty; urgency=low
-
-  * init-functions: check for tput on each function call that requires it,
-    closes (#1044)
-
- -- Nathaniel McCallum <npmccallum@canonical.com>  Tue,  7 Sep 2004 12:00:16 -0400
-
-lsb (1.3-9ubuntu4) warty; urgency=low
-
-  * init-functions: checks for the needed binaries (in /usr)
-  * init-functions: fallbacks if binaries aren't available
-  * init-functions: fallbacks if tput can't handle the current TERM
-
- -- Nathaniel McCallum <npmccallum@canonical.com>  Fri,  3 Sep 2004 21:17:24 -0400
-
-lsb (1.3-9ubuntu3) warty; urgency=low
-
-  * init-functions: made log_end_msg return the same exitstatus it is passed 
-
- -- Nathaniel McCallum <npmccallum@gentoo.org>  Mon, 30 Aug 2004 18:44:03 -0400
-
-lsb (1.3-9ubuntu2) warty; urgency=low
-
-  * init-functions: added two more ourput functions and a function to get lsb info
-  * init-functions: fixed a path problem
-
- -- Nathaniel McCallum <npmccallum@gentoo.org>  Mon, 30 Aug 2004 17:23:42 -0400
-
-lsb (1.3-9ubuntu1) warty; urgency=low
-
-  * Modified init-functions to provide cleaner (simpler) output
-  * Splitting init-functions into a second package with less depends:
-    . debian/config -> debian/lsb.config
-    . debian/dirs -> debian/lsb.dirs
-    . debian/postinst -> debian/lsb.postinst
-    . debian/prerm -> debian/lsb.prerm
-    . debian/templates -> debian/lsb.templates
-    . debian/rules: install init-functions to lsb-base
-    . debian/lsb.dirs: removed lib/lsb
-    . debian/lsb-base.dirs: added lib/lsb
-    . debian/control: added new package (lsb-base)
-
- -- Nathaniel McCallum <npmccallum@gentoo.org>  Mon, 16 Aug 2004 06:17:52 -0400
 
 lsb (1.3-9) unstable; urgency=low
 
@@ -2226,4 +1443,3 @@ lsb (1.1.0-1) unstable; urgency=low
   * Initial Release.  (Closes: #134658)
 
  -- Chris Lawrence <lawrencc@debian.org>  Sun, 17 Feb 2002 14:07:32 -0600
-
