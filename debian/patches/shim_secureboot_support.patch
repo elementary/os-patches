@@ -1,0 +1,100 @@
+From: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+Subject: Add support for UEFI Secure Boot validation toggling through shim
+Last-Update: 2016-01-11
+
+This allows one to install third-party drivers and still have their system
+work (albeit without full Secure Boot validation), automatizing the step
+of disabling validation in shim.
+
+Users still have the possibility to notice this and skip the step, thus
+not disabling Secure Boot (but then, they will not be able to load the
+dkms drivers that were added).
+
+---
+ dkms_common.postinst |   69 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 69 insertions(+)
+
+Index: b/dkms_common.postinst
+===================================================================
+--- a/dkms_common.postinst
++++ b/dkms_common.postinst
+@@ -6,6 +6,8 @@
+ 
+ set -e
+ 
++. /usr/share/debconf/confmodule
++
+ uname_s=$(uname -s)
+ 
+ _get_kernel_dir() {
+@@ -293,3 +295,70 @@ for KERNEL in $KERNELS; do
+     fi
+ done
+ 
++efivars=/sys/firmware/efi/efivars
++secureboot_var=SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c
++moksb_var=MokSB-605dab50-e046-4300-abb6-3dd810dd8b23
++moksbstatert_var=MokSBStateRT-605dab50-e046-4300-abb6-3dd810dd8b23
++if [ -d $efivars ] && [ -f $efivars/$secureboot_var ]; then
++    sb_enabled=$(od -An -t u1 $efivars/$secureboot_var | awk '{ print $NF; }')
++    moksb=0
++    moksbstatert=0
++    if [ -f $efivars/$moksb_var ]; then
++        # if MokSB exists we've likely already run mokutil since last boot
++        moksb=1
++    fi
++    if [ -f $efivars/$moksbstatert_var ]; then
++        # MokSBStateRT set to 1 means validation is disabled
++        moksbstatert=$(od -An -t u1 $efivars/$moksbstatert_var | \
++                       awk '{ print $NF; }')
++    fi
++    if [ $sb_enabled -eq 1 ]; then
++        if [ $moksb -eq 0 ] && [ $moksbstatert -eq 0 ]; then
++            db_capb backup
++            STATE=1
++            db_settitle dkms/title/secureboot
++            while true; do
++                case "$STATE" in
++                1)
++                    # Allow the user to skip disabling Secure Boot.
++                    db_input high dkms/disable_secureboot || true
++                    ;;
++                2)
++                    db_get dkms/disable_secureboot
++                    if [ "$RET" = "false" ]; then
++                        break
++                    fi
++
++                    db_input high dkms/secureboot_key || true
++                    ;;
++                3)
++                    db_get dkms/secureboot_key
++                    length=`echo $RET | wc -c`
++                    if [ $length -lt 8 ] || [ $length -gt 16 ]; then
++                        db_fset dkms/text/bad_secureboot_key seen false
++                        db_input critical dkms/text/bad_secureboot_key
++                        STATE=$(($STATE - 2))
++                    elif [ $length -ne 0 ]; then
++                        echo "${RET}\n${RET}" | mokutil --disable-validation >/dev/null 2>&1
++                    fi
++
++                    # Always clear secureboot key.
++                    db_set dkms/secureboot_key ''
++                    db_fset dkms/secureboot_key seen false
++                    ;;
++                *)
++                    break
++                    ;;
++                esac;
++
++                if db_go; then
++                    STATE=$(($STATE + 1))
++                else
++                    STATE=$(($STATE - 1))
++                fi
++            done
++            db_capb
++        fi
++    fi
++fi
++

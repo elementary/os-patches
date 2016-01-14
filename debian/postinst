@@ -2,6 +2,8 @@
 
 set -e
 
+. /usr/share/debconf/confmodule
+
 if dpkg --compare-versions "$2" lt-nl "2.0.21.1-1~" ; then
 	if [ -e "/etc/modprobe.d/dkms" ]; then
 		md5sum=$(md5sum /etc/modprobe.d/dkms | sed -e 's/ .*//')
