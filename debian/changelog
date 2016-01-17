@@ -1,0 +1,598 @@
+unity-control-center (15.04.0+16.04.20151214-0ubuntu1) xenial; urgency=medium
+
+  [ Lars Uebernickel ]
+  * datetime: use libgeonames for city completion
+
+  [ Sebastien Bacher ]
+  * really stop using gnome-control-center binaries
+
+  [ William Hua ]
+  * Fix FTBFS due to non-deterministic compilation of non-static inline
+    functions.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 14 Dec 2015 10:09:39 +0000
+
+unity-control-center (15.04.0+16.04.20151112-0ubuntu1) xenial; urgency=medium
+
+  [ Robert Ancell ]
+  * Update system information logo for Xenial Xerus
+
+  [ Sebastien Bacher ]
+  * Import user-accounts faces image and ship in a new binary, that way
+    unity-control-center doesn't have to depends on gnome-control-center
+    which means that one can be moved to universe (LP: #1512435)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 12 Nov 2015 09:05:27 +0000
+
+unity-control-center (15.04.0+16.04.20151026-0ubuntu2) xenial; urgency=medium
+
+  * No-change rebuild against new gnome libraries
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Mon, 02 Nov 2015 15:40:56 +0000
+
+unity-control-center (15.04.0+16.04.20151026-0ubuntu1) xenial; urgency=medium
+
+  * backport upstream change from gnome-bluetooth
+  * backport upstream gnome-bluetooth commit to fix build warnings
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 26 Oct 2015 16:03:05 +0000
+
+unity-control-center (15.04.0+15.10.20150923-0ubuntu1) wily; urgency=medium
+
+  * [bluetooth] restore the ssp pairing signature fix which was applied
+    to our gnome-bluetooth package but got discarded by error when
+    updating ucc to the new bluez version (LP: #1492443)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 23 Sep 2015 06:52:32 +0000
+
+unity-control-center (15.04.0+15.10.20150915-0ubuntu1) wily; urgency=medium
+
+  [ Bastien Nocera ]
+  * network: Also work with NM 1.0 Remove the NetworkManager version
+    checking altogether. The code was made to check for now very old
+    versions of NetworkManager, and anything newer than ancient should
+    degrade gracefully if we support newer features. (LP: #1496028)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 15 Sep 2015 17:17:13 +0000
+
+unity-control-center (15.04.0+15.10.20150902-0ubuntu1) wily; urgency=medium
+
+  [ Bastien Nocera ]
+  * Take upstream commit e0260ac5de221e0829085467ff0305b72fd8e854 by
+    Bastien Nocera. (LP: #1381056)
+
+  [ William Hua ]
+  * Take upstream commit e0260ac5de221e0829085467ff0305b72fd8e854 by
+    Bastien Nocera. (LP: #1381056)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 02 Sep 2015 15:38:33 +0000
+
+unity-control-center (15.04.0+15.10.20150818-0ubuntu1) wily; urgency=medium
+
+  [ Rui Matos ]
+  * Cherry-pick upstream changes for relocated peripheral settings (LP:
+    #1475949)
+
+  [ Tim Lunn ]
+  * Cherry-pick upstream changes for relocated peripheral settings (LP:
+    #1475949)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 18 Aug 2015 12:10:59 +0000
+
+unity-control-center (15.04.0+15.10.20150814-0ubuntu1) wily; urgency=medium
+
+  [ Dmitry Shachnev ]
+  * Bump gnome-bluetooth Breaks/Replaces to 3.11.3, to resolve file
+    conflict. (LP: #1484658)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 14 Aug 2015 09:38:24 +0000
+
+unity-control-center (15.04.0+15.10.20150813-0ubuntu1) wily; urgency=medium
+
+  [ Lars Uebernickel ]
+  * Some tweaks for the new bluez changes include libgnome-bluetooth lib
+    in the deb refresh translatable sources list updated build-depends
+  * bluetooth: make compatible with bluez5
+
+  [ Sebastien Bacher ]
+  * Some tweaks for the new bluez changes include libgnome-bluetooth lib
+    in the deb refresh translatable sources list updated build-depends
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 13 Aug 2015 15:43:59 +0000
+
+unity-control-center (15.04.0+15.10.20150805-0ubuntu1) wily; urgency=medium
+
+  [ Robert Ancell ]
+  * Update system information logo for Wily Werewolf (LP: #1470840)
+
+  [ Yu Ning ]
+  * Trigger the "value-changed" signal outside set_is_muted() when
+    necessary. (LP: #1396464)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 05 Aug 2015 09:44:44 +0000
+
+unity-control-center (15.04.0+15.04.20150410-0ubuntu1) vivid; urgency=medium
+
+  [ Yu Ning ]
+  * Block power callback unless it's triggered by the user. (LP:
+    #1248720)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 10 Apr 2015 14:09:49 +0000
+
+unity-control-center (15.04.0+15.04.20150408-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ William Hua ]
+  * Don't free the Fcitx config proxy if we haven't ever initialized it.
+    (LP: #1431811)
+  * Fix deprecation warnings in region panel.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 08 Apr 2015 15:13:52 +0000
+
+unity-control-center (15.04.0+15.04.20150313-0ubuntu1) vivid; urgency=medium
+
+  [ William Hua ]
+  * Remove fcitx-data from Recommends and check if the required file,
+    config.desc, is available at runtime. Trying to dist-upgrade
+    currently pulls in the fcitx-bin which is higher priority than ibus.
+    (LP: #1430971)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 13 Mar 2015 12:53:31 +0000
+
+unity-control-center (15.04.0+15.04.20150310-0ubuntu1) vivid; urgency=medium
+
+  [ William Hua ]
+  * Basic Fcitx support. (LP: #1363150)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 10 Mar 2015 17:22:20 +0000
+
+unity-control-center (15.04.0+15.04.20150203.2-0ubuntu1) vivid; urgency=medium
+
+  [ Sebastien Bacher ]
+  * shell: don't use deprecated properties, avoid runtime warnings
+
+  [ Jian-Ding Chen (timchen119) ]
+  * Set higher priority of glxinfo's result then Xorg's log for
+    "Details" -> "Overview" -> "Graphics" info in control center. (LP:
+    #1417034) (LP: #1417034)
+
+  [ Dan Winship ]
+  * network: update for nma-wifi-dialog renaming
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 03 Feb 2015 12:26:36 +0000
+
+unity-control-center (15.04.0+15.04.20141217-0ubuntu2) vivid; urgency=medium
+
+  * Switch gnome-icon-theme to adwaita-icon-theme, which is its
+    successor. (LP: #1414613)
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Mon, 26 Jan 2015 17:41:14 +0000
+
+unity-control-center (15.04.0+15.04.20141217-0ubuntu1) vivid; urgency=low
+
+  [ Lars Uebernickel ]
+  * appearance: don't set overlay-scrollbar setting overlay-scrollbars
+    now does this itself based on a key in index.theme.
+  * shell.ui: set .primary-toolbar instead of .menubar on the primary
+    toolbar
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 17 Dec 2014 17:13:35 +0000
+
+unity-control-center (15.04.0+15.04.20141212-0ubuntu1) vivid; urgency=low
+
+  [ David Henningsson ]
+  * When the treeview is programmatically updated, the treeview fires a
+    signal that the active item has changed. To distinguish this from a
+    user click, we check the active flag. This was done for output but
+    not for input. (LP: #1376776) (LP: #1376776)
+
+  [ Huan Peng ]
+  * show desktop could not restore to default (LP: #1372868)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 12 Dec 2014 15:33:22 +0000
+
+unity-control-center (15.04.0+15.04.20141105-0ubuntu1) vivid; urgency=low
+
+  [ Sebastien Bacher ]
+  * Update version number
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Nov 2014 08:32:29 +0000
+
+unity-control-center (15.04.0+15.04.20141030-0ubuntu1) vivid; urgency=medium
+
+  * Port to upower 0.99 (LP: #1330037)
+
+ -- Tim Lunn <tim@feathertop.org>  Thu, 30 Oct 2014 17:27:40 +0100
+
+unity-control-center (14.10.0+14.10.20140922-0ubuntu2) utopic; urgency=medium
+
+  * No change rebuild for gnome-desktop 3.12
+
+ -- Tim Lunn <tim@feathertop.org>  Mon, 29 Sep 2014 22:14:24 +1000
+
+unity-control-center (14.10.0+14.10.20140922-0ubuntu1) utopic; urgency=low
+
+  [ Robert Ancell ]
+  * Fix Vcs-Bzr link that was pointing to gnome-control-center packaging
+  *  Use libunity-settings-daemon to replace functionality that is being
+    changed/removed in libgnome-desktop (LP: #1372240)
+
+  [ David Henningsson ]
+  * Make sure selecting a bluetooth input works even when the headset is
+    in A2DP mode, and make sure the correct levels are shown in the
+    level bar (Bug 1367693) (LP: #1367693)
+
+  [ Mathieu Trudel-Lapierre ]
+  * Deactivate the wired device when wired is switched off. (LP:
+    #1354987)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 22 Sep 2014 11:36:24 +0000
+
+unity-control-center (14.10.0+14.10.20140702.1-0ubuntu3) utopic; urgency=medium
+
+  * Actually do a no change rebuild against new libgtop
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 20 Aug 2014 15:31:05 +1200
+
+unity-control-center (14.10.0+14.10.20140702.1-0ubuntu2) utopic; urgency=medium
+
+  * No change rebuild against new libgtop
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Tue, 19 Aug 2014 14:01:28 +1200
+
+unity-control-center (14.10.0+14.10.20140702.1-0ubuntu1) utopic; urgency=low
+
+  [ Robert Ancell ]
+  * Add symbols that were added in revision 12731
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Iain Lane ]
+  * [appearance] Fix a g_object_unref on a GSettingsSchema to be
+    g_settings_schema_unref (LP: #1335438)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 02 Jul 2014 12:28:57 +0000
+
+unity-control-center (14.10.0+14.10.20140604-0ubuntu1) utopic; urgency=low
+
+  [ Robert Ancell ]
+  * Build depend on libkrb5-dev - fixes FTBFS (LP: #1324538)
+
+  [ Eric Chaskes ]
+  * Updated um-password-dialog.c to removed users to change password
+    mode to regular when locking the account (LP: #1314886)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 04 Jun 2014 14:25:58 +0000
+
+unity-control-center (14.10.0+14.10.20140424-0ubuntu1) utopic; urgency=medium
+
+  * Update system information logo for Utopic Unicorn.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 24 Apr 2014 00:22:54 +0100
+
+unity-control-center (14.04.3+14.04.20140410-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * shell: set XDG_CURRENT_DESKTOP to Unity so the correct list of
+    panels is included in the grid. The gnome-menus api respects
+    OnlyShowIn, without that we end up missing most of the panels in
+    other environment (e.g ubiquity). We can't change the .desktop keys
+    since that would lead to wrong behaviour in e.g the Unity dash
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 10 Apr 2014 14:27:11 +0000
+
+unity-control-center (14.04.3+14.04.20140407-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * user-accounts: Mark some strings as translatable
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 07 Apr 2014 14:10:58 +0000
+
+unity-control-center (14.04.3+14.04.20140404.2-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * Conflicts/Replaces/Provides gnome-control-center-unity (LP:
+    #1301156)
+  * Depends on the indicators which are controlled by the settings,
+    since gsettings abort on missing schemas. Note that the depends
+    could be lowered to a recommends or suggest if somebody was to make
+    the code handling those cases. (LP: #1295557)
+
+  [ Eleni Maria Stea ]
+  * When the u-c-c starts the UI scale is clamped to a reasonable value
+    in order to make sure that the user can always see the slider. (LP:
+    #1296978)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 04 Apr 2014 12:37:52 +0000
+
+unity-control-center (14.04.3+14.04.20140328-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * Allow the UI scale to be controlled by the keyboard (LP: #1296966)
+
+  [ Marco Trevisan (Treviño) ]
+  * Display: Use 2-columns style (Monitor/General options), add more UI
+    scaling options (LP: #1297053)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 28 Mar 2014 12:58:07 +0000
+
+unity-control-center (14.04.3+14.04.20140324-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * Recommends new gnome-control-center-shared-data for user icons (LP:
+    #1291608)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 24 Mar 2014 16:59:43 +0000
+
+unity-control-center (14.04.3+14.04.20140322-0ubuntu1) trusty; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * UniversalAccess: use unity interface settings to define the text
+    scaling
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Sat, 22 Mar 2014 01:29:06 +0000
+
+unity-control-center (14.04.3+14.04.20140319-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * users: set the change password button to inactive by default (LP:
+    #1290808)
+  * users: don't make accountsservice calls when not needed (LP:
+    #1293705)
+  * users: don't display the ecryptfs-verify output on stdout
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 19 Mar 2014 14:43:40 +0000
+
+unity-control-center (14.04.3+14.04.20140317-0ubuntu2) trusty; urgency=low
+
+  * Disable the input/output bar when no input/output devices (LP: #1291862)
+
+ -- Bin Li <bin.li@canonical.com>  Mon, 18 Mar 2014 12:11:03 +0800
+
+unity-control-center (14.04.3+14.04.20140317-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * Only allow icons sizes to be even numbers because odd sizes look
+    blurry. (LP: #991310)
+
+  [ Sebastien Bacher ]
+  * Backport some leak fixes from upstream, those were leading to
+    dialogs not closing when they should (e.g when exiting the panel
+    they belong to), hitting a segfault when used then. (LP: #1292038)
+  * Use the correct naming for the "Text Entry" settings
+  * handle pa_stream_peek returning null (LP: #1197029)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 17 Mar 2014 13:46:59 +0000
+
+unity-control-center (14.04.3+14.04.20140313-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * Don't dim labels, that creates the impression that those options
+    can't be changed by the user. We create a new class rather for those
+    which is not used yet, but that let the option to update the theme
+    later. (LP: #1289530)
+  * don't list pts sessions in the user login history
+
+  [ Lars Uebernickel ]
+  * Don't use .view style class for the item view
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 13 Mar 2014 10:13:40 +0000
+
+unity-control-center (14.04.3+14.04.20140310-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * In the datetime panel's 'Time & Date' tab, update the time spinner
+    every second. (LP: #1086486)
+
+  [ Sebastien Bacher ]
+  * Tweak some strings to match the design recommendations (LP:
+    #1283150)
+
+  [ William Hua ]
+  * Write IBus settings directly to dconf. (LP: #1288717)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 10 Mar 2014 15:42:21 +0000
+
+unity-control-center (14.04.3+14.04.20140305.1-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Add "Show sound volume in the menu bar" check box (LP: #829648)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Mar 2014 12:48:43 +0000
+
+unity-control-center (14.04.3+14.04.20140303-0ubuntu1) trusty; urgency=low
+
+  [ Luke Yelavich ]
+  * Improve the accessibility of the appearance and sound panels by
+    adding atk relationships between widgets, and making widgets
+    focusable with the keyboard. (LP: #1266291)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 03 Mar 2014 10:33:31 +0000
+
+unity-control-center (14.04.3+14.04.20140226-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * Compile with unity-settings-daemon instead of gnome-settings-daemon
+    (LP: #1277585)
+
+  [ Sebastien Bacher ]
+  * shell: backport fixes from gnome-3-8. Those include some tweaks to
+    the command line options, improvements to the keyboard navigation in
+    the icons grid, and support for bash completion
+  * shell: don't set a secondary icon, GtkSearchEntry already has one
+  * Backport some bugfixes and small improvements (LP: #1280742)
+
+  [ Eleni Maria Stea ]
+  * In display add_dict_entry: replaced the gvariant arrays with
+    gvariant builder to simplify the code
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 26 Feb 2014 20:01:37 +0000
+
+unity-control-center (14.04.3+14.04.20140225-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * update to the GNOME 3.8 codebase, remove quite some custom code to
+    use libaccountsservice. The update also includes a view of the login
+    history informations and bugfixes.
+
+  [ Eleni Maria Stea ]
+  * fixed race condition when the monitor is not detected correctly (and
+    the monitor name is null) added a mark in 1.0 (default value) (LP:
+    #1283297)
+
+  [ Lars Uebernickel ]
+  * sound/gvc-{balance,channel}-bar: let scales use all the available
+    space
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 25 Feb 2014 09:34:37 +0000
+
+unity-control-center (14.04.3+14.04.20140224-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * Use new sound key, avoid depending on indicator-sound
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 24 Feb 2014 14:36:20 +0000
+
+unity-control-center (14.04.3+14.04.20140221-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * bluetooth: let hide the bluetooth indicator, thanks Charles Kerr
+    (LP: #829690)
+
+  [ Dimitri John Ledkov ]
+  * Regenerate versioned logo.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 21 Feb 2014 18:46:27 +0000
+
+unity-control-center (14.04.3+14.04.20140220.2-0ubuntu1) trusty; urgency=low
+
+  [ William Hua ]
+  * Support legacy method of launching IBus setup panels.
+  * Fix incorrect unref which was causing a critical on the region
+    panel.
+
+  [ Lars Uebernickel ]
+  * sound: various UI tweaks Most importantly, add a "allow louder than
+    100%" checkbox (feeding from a key in com.canonical.indicator.sound)
+    that controls whether output volume can be amplified.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 20 Feb 2014 21:18:01 +0000
+
+unity-control-center (14.04.3+14.04.20140220.1-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * info: backport fixes and cleanings from gnome-3-8
+  * [bluetooth] backport some upstream changes
+
+  [ Iain Lane ]
+  * gsettings-ubuntu-schemas should be in Depends, not Build Depends
+
+  [ Marco Trevisan (Treviño) ]
+  * Appearance: Add Application Menu settings to Unity behaviour tab
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 20 Feb 2014 18:22:53 +0000
+
+unity-control-center (14.04.3+14.04.20140220-0ubuntu1) trusty; urgency=low
+
+  [ Eleni Maria Stea ]
+  * Add a slider that can change the fonts-scale-factor gsetting (per
+    monitor text scaling factor)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 20 Feb 2014 10:43:50 +0000
+
+unity-control-center (14.04.3+14.04.20140219-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * Fix various compile warnings.
+  * Stop using deprecated GtkStock.
+  * Stop using deprecated GdkColor.
+  * Use appropriate GSettings API for checking existence of schemas.
+  * Backport Wacom panel from GNOME Control Center 3.8
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 19 Feb 2014 10:42:13 +0000
+
+unity-control-center (14.04.3-0ubuntu1) trusty; urgency=medium
+
+  * Add option to toggle username in session indicator (LP: #1116497)
+
+  [ Sebastian Bacher ]
+  * debian/control.in:
+    - Build-Depends on dh-migrations
+  * debian/unity-control-center.migrations, debian/ucc-unity-launcher.py:
+    - script to migration the g-c-c Unity's launcher entry to u-c-c
+  * debian/rules:
+    - clean some leftover references to g-c-c
+    - use dh_migrations.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Tue, 18 Feb 2014 12:12:04 +1300
+
+unity-control-center (14.04.2-0ubuntu1) trusty; urgency=medium
+
+  * Merge in datetime panel from indicator-datetime
+  * Backport commit to fix notebook spacing issues.
+  * Let the launcher icons be scaled down to 16. (LP: #1168409).
+  * keyboard: wrap information label in the shortcuts panel. (LP: #1276119).             
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Fri, 14 Feb 2014 14:28:24 +1300
+
+unity-control-center (14.04.1-0ubuntu5) trusty; urgency=medium
+
+  * debian/control:
+    - Run with either gnome-settings-daemon or unity-settings-daemon
+      (LP: #1277487)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Fri, 07 Feb 2014 16:22:09 +0000
+
+unity-control-center (14.04.1-0ubuntu4) trusty; urgency=medium
+
+  * don't set the alignment of a frame that doesn't exist, fixes a warning
+  * run "cd po; make update-po" to refresh the strings lists
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 31 Jan 2014 11:50:16 +0100
+
+unity-control-center (14.04.1-0ubuntu3) trusty; urgency=medium
+
+  * Imported the current g-c-c translations from launchpad, those include 
+    the Ubuntu specific strings
+
+  [ Robert Ancell ]
+  * Rename unity-slideshow-* icons to ucc-slideshow-* so we don't conflict
+    with gnome-control-center-unity anymore
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 30 Jan 2014 16:15:17 +0100
+
+unity-control-center (14.04.1-0ubuntu2) trusty; urgency=medium
+
+  * debian/source_unity-control-center.py:
+    - updated with the recent fixes from gnome-control-center
+  * debian/unity-control-center.links: 
+    - drop old symlink that was used to add a system-settings entry to 
+      indicator-session, that's deprecated
+  * po/POTFILES.in: 
+    - updated list of files to translate
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 24 Jan 2014 16:01:06 +0100
+
+unity-control-center (14.04.1-0ubuntu1) trusty; urgency=medium
+
+  * Copy icons for sound, display and power panel from GNOME and Humanity themes
+    so they show as before now the icon names have changed.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 09 Jan 2014 15:43:13 +1300
+
+unity-control-center (14.04.0-0ubuntu1) trusty; urgency=medium
+
+  * debian/control:
+    - Use updated gnome-control-center version to conflict with
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 09 Jan 2014 10:57:38 +1300
+
+unity-control-center (14.04.0) trusty; urgency=low
+
+  * Fork gnome-control-center so we can maintain it for Unity 7 until it is
+    replaced by the Unity 8 equivalent.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 08 Jan 2014 16:29:18 +1300

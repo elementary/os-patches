@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/utils.mk
+include /usr/share/cdbs/1/class/gnome.mk
+include /usr/share/gnome-pkg-tools/1/rules/gnome-version.mk
+include /usr/share/gnome-pkg-tools/1/rules/clean-la.mk
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,-O1 -Wl,--as-needed
+include /usr/share/dpkg/buildflags.mk
+
+DEB_CONFIGURE_SCRIPT := ./autogen.sh
+DEB_CONFIGURE_EXTRA_FLAGS += --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
+                             --disable-update-mimedb
+
+DEB_DH_MAKESHLIBS_ARGS_unity-control-center = --no-act
+DEB_DH_MAKESHLIBS_ARGS_libunity-control-center1 += -- -c4
+
+binary-post-install/unity-control-center::
+	dh_migrations -p$(cdbs_curpkg)
+	./panels/info/logo-generator --logo panels/info/UbuntuLogoBlank.png --text "ubuntu 16.04 LTS" --output debian/unity-control-center/usr/share/unity-control-center/ui/UbuntuLogo.png
+
+common-binary-post-install-arch:: list-missing
