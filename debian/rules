@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with autoreconf
+
+override_dh_autoreconf:
+	# "aclocal" fails without "m4" directory
+	[ -d "m4" ] || mkdir m4
+	dh_autoreconf
+	rmdir m4
+
+override_dh_auto_configure:
+	dh_auto_configure -- --disable-silent-rules
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz
