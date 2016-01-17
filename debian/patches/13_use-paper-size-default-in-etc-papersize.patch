@@ -1,0 +1,27 @@
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.2.3+20100723//cupshelpers/cupshelpers.py system-config-printer-1.2.3+20100723.new//cupshelpers/cupshelpers.py
+--- system-config-printer-1.2.3+20100723//cupshelpers/cupshelpers.py	2010-07-23 11:35:25.000000000 -0400
++++ system-config-printer-1.2.3+20100723.new//cupshelpers/cupshelpers.py	2010-10-29 12:50:35.731061356 -0400
+@@ -654,6 +654,23 @@
+     for each in letter:
+         if language == each:
+             size = 'Letter'
++
++    # Use setting in /etc/papersize if available
++    try:
++        f = open ("/etc/papersize")
++        for line in f:
++            if line.startswith("#"):
++                continue
++            if line.strip().lower().startswith("a4"):
++                size = 'A4'
++            elif line.strip().lower().startswith("letter"):
++                size = 'Letter'
++            elif line.strip() != "":
++                break
++        f.close()
++    except:
++        pass
++
+     try:
+         ppd.markOption ('PageSize', size)
+         _debugprint ("set PageSize = %s" % size)

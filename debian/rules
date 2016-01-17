@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses cdbs.  Originaly written by Robert Millan.
+# This file is public domain.
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+include /usr/share/cdbs/1/class/gnome.mk
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
+include /usr/share/cdbs/1/rules/autoreconf.mk
+
+DEB_DH_AUTORECONF_ARGS := ./bootstrap
+DEB_CONFIGURE_EXTRA_FLAGS := --sbindir=/usr/bin --with-udev-rules
+DEB_MAKE_INSTALL_TARGET := install DESTDIR=$(DEB_DESTDIR) udevrulesdir=/lib/udev/rules.d udevhelperdir=/lib/udev
+
+binary-install/python-cupshelpers::
+	dh_python3 -ppython3-cupshelpers

@@ -1,0 +1,12 @@
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.5.7+20150819/printerproperties.py system-config-printer-1.5.7+20150819.new/printerproperties.py
+--- system-config-printer-1.5.7+20150819/printerproperties.py	2015-10-04 09:19:42.427396035 -0300
++++ system-config-printer-1.5.7+20150819.new/printerproperties.py	2015-10-04 09:20:29.790591536 -0300
+@@ -1449,7 +1449,7 @@
+         for option in self.printer.attributes.keys ():
+             if option in self.server_side_options:
+                 continue
+-            if option == "output-mode":
++            if option == "output-mode" or option == "media-col":
+                 # Not settable
+                 continue
+             value = self.printer.attributes[option]

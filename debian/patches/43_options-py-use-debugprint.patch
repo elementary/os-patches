@@ -1,0 +1,34 @@
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.5.7+20150819/options.py system-config-printer-1.5.7+20150819.new/options.py
+--- system-config-printer-1.5.7+20150819/options.py	2015-08-19 00:11:18.000000000 -0300
++++ system-config-printer-1.5.7+20150819.new/options.py	2015-10-04 09:23:28.159345917 -0300
+@@ -19,6 +19,7 @@
+ ## along with this program; if not, write to the Free Software
+ ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ 
++from debug import *
+ from gi.repository import Gtk
+ import cups
+ import ppdippstr
+@@ -140,7 +141,7 @@
+ 
+         if (type(self.widget) == Gtk.ComboBox and
+             self.widget.get_model () == None):
+-            print("No ComboBox model for %s" % self.name)
++            debugprint("No ComboBox model for %s" % self.name)
+             model = Gtk.ListStore (str)
+             self.widget.set_model (model)
+ 
+@@ -419,10 +420,10 @@
+         if selected is not None:
+             self.selector.set_active(selected)
+         else:
+-            print("Unknown value for %s: %s" % (name, value))
+-            print("Choices:", supported)
++            debugprint("Unknown value for %s: %s" % (name, value))
++            debugprint("Choices:", supported)
+             if len(supported) > 0:
+-                print("Selecting from choices:", supported[0])
++                debugprint("Selecting from choices:", supported[0])
+                 self.selector.set_active(0)
+         self.selector.connect("changed", self.changed)
+ 

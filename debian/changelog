@@ -1,0 +1,3900 @@
+system-config-printer (1.5.7+20150819-0ubuntu5) xenial; urgency=medium
+
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install, debian/control:
+    Moved scp-dbus-service.py and monitor.py from the
+    system-config-printer-common binary package to the
+    system-config-printer-gnome binary package as they depend on files
+    in system-config-printer-gnome (LP: #1496860).
+  * debian/rules: Updated dh_python... call for Python 3 (LP: #1513424).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri,  6 Nov 2015 11:09:25 -0200
+
+system-config-printer (1.5.7+20150819-0ubuntu4) wily; urgency=medium
+
+  * debian/patches/40_do-not-show-media-col-option.patch: Suppress
+    the display of the "media-col" attribute under the job options,
+    this is not a user-settable option (LP: #1070002).
+  * debian/patches/43_options-py-use-debugprint.patch,
+    debian/patches/45_ppds-py-use-debugprint.patch: Silence console
+    output.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun,  4 Oct 2015 09:28:25 -0300
+
+system-config-printer (1.5.7+20150819-0ubuntu3) wily; urgency=medium
+
+  * debian/patches/37_command-file-buffering.patch: Fixed buffering
+    problem which prevented command jobs (head cleaning, nozzle check
+    page, ...) from being sent correctly to CUPS (LP: #1500636).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat,  3 Oct 2015 09:17:25 -0300
+
+system-config-printer (1.5.7+20150819-0ubuntu2) wily; urgency=medium
+
+  * debian/patches/35_snmp-non-utf-8-output-workaround.patch: Added
+    workaround for the problem of the "snmp" CUPS backend returning
+    output in ISO 8859-1 encoding instead of UTF-8 (Upstream GitHub
+    issue #18).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 10 Sep 2015 17:15:25 -0300
+
+system-config-printer (1.5.7+20150819-0ubuntu1) wily; urgency=medium
+
+  * New upstream release
+     o GIT 1.5.x snapshot from 19 Aug 2015
+     o Fixed Device sorting (bug #1210733).
+     o Fixed shbang line in udev/udev-add-printer (trac bug #244).
+     o Increase bus settle time for usb_modeswitch devices (Red Hat bug
+       #1206808).
+     o Set use_underline=True for previously-stock buttons (Red Hat bug
+       #1210859).
+     o Fixed traceback (Red Hat bug #1213136).
+  * debian/patches/25_install-smbclient-if-smb-backend-is-missing.patch,
+    debian/patches/33_ipp-over-usb-support.patch: Updated to apply to the
+    new source code.
+  * debian/rules: Override the call of autoreconf, replacing it by the
+    "bootstrap" which comes with system-config-printer. autoreconf
+    requires the presence of README and ChangeLog files.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 19 Aug 2015 00:55:25 -0300
+
+system-config-printer (1.5.6+20150318-0ubuntu5) wily; urgency=medium
+
+  * debian/control: To make ippusbxd getting installed, recommend the
+    new separate "ippusbxd" binary package and not "cups-filters-ippusbxd"
+    any more.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 12 Aug 2015 21:07:47 -0300
+
+system-config-printer (1.5.6+20150318-0ubuntu4) wily; urgency=medium
+
+  * debian/patches/33_ipp-over-usb-support.patch: Improvements and fixes
+    for the IPP-over-USB support:
+     - When shutting down or disconnecting the printer we kill ippusbxd as
+       it often does not stop by itself. To kill the correct ippusbxd process
+       we track the process ID in the printer device URI of the CUPS queue.
+     - We do not use a random port but try port 60000 now and if it is
+       taken the following ports, and if there is already a queue we use the
+       port which we had used before, if it is not taken.
+     - We add the process ID of udev-configure-printer to the syslog entries,
+       so we can see whether the entries are of the same or of different
+       processes.
+  * debian/local/70-printers.rules,
+    debian/local/udev-configure-printer@.service: Let systemd do the
+    UDEV-triggered call of udev-configure-printer in a way so that systemd
+    does not kill ippusbxd after some minutes.
+  * debian/control: Recommend the new ippusbxd with -P option and
+    process ID reporting (cups-filters-ippusbxd 1.0.71-1ubuntu1 or newer).
+  * debian/system-config-printer-udev.install: Install new
+    /lib/systemd/system/udev-configure-printer@.service file.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue,  7 Jul 2015 23:45:47 -0300
+
+system-config-printer (1.5.6+20150318-0ubuntu3) wily; urgency=medium
+
+  * debian/patches/33_ipp-over-usb-support.patch: Fixes on IPP-over-USB support,
+    to make auto-setup of print queues work correctly again, for both
+    devices supporting and not supporting IPP-over-USB (LP: #1455212).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 14 May 2015 17:02:47 -0300
+
+system-config-printer (1.5.6+20150318-0ubuntu2) vivid; urgency=medium
+
+  * debian-control: Added udev to the build dependencies to have the
+    /lib/udev directory in the system so that "make install" installs
+    the UDEV stuff.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue,  7 Apr 2015 21:57:47 -0300
+
+system-config-printer (1.5.6+20150318-0ubuntu1) vivid; urgency=medium
+
+  * New upstream bug fix release
+     o GIT 1.5.x snapshot from 18 March 2015
+     o Consider version suffices in PPD Nickname for Canon drivers.
+     o Refresh job-printer-uri when updating job, to fix job auth.
+     o Traceback fix (Red Hat bug #1171469).
+     o Handle non-UTF8 PPD files (LP: #1400232).
+     o Fixed typo preventing retrieve/reprint from working.
+     o Handle missing 'licensetext'/'functionality' fields for
+       downloadable drivers.
+     o Parse serial device URIs correctly (Red Hat bug #1186475).
+     o Fixed callback race (Red Hat bug #1176443).
+     o Don't try decoding already-decoded Unicode (Red Hat bug #1195974).
+     o Fixed display of downloadable drivers (Red Hat bug #1167978).
+     o Fixes for CMD matching (Red Hat bug #1167978, Red Hat bug #1171874).
+     o Fixed artifacts when compositing emblems (Red Hat bug #1200375).
+     o Don't show traceback messages for missing probe helpers (Red Hat bug
+       #1194101).
+     o Don't try writing bytecache when running udev-add-printer
+       (Red Hat bug #1196183).
+     o Fixed 'Apply' sensitivity when downloading driver (trac #238).
+     o Avoid deprecated things.
+     o Some fixes for the New Printer dialog.
+     o Don't install an OpenPrinting driver if the license is not
+       accepted (trac #240).
+  * debian/patches/35_install-printerdriver-ignore-refresh-cache-failure.patch:
+    Removed, included upstream.
+  * debian/system-config-printer-common.install: Added new file killtimer.py.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 18 Mar 2015 00:40:47 +0100
+
+system-config-printer (1.5.5+20150211-0ubuntu1) vivid; urgency=medium
+
+  * New upstream release
+     o GIT 1.5.x snapshot from 11 February 2015
+     o No longer requires gnome-icon-theme (Red Hat bug #1163928).
+     o Fixed race condition when fetching devices (Red Hat bug #1176443).
+     o Fixed typo preventing retrieve/reprint from working.
+     o Driver installation fixes.
+     o Various other fixes.
+  * debian/patches/35_fix-driver-package-installation-with-install-printerdriver.patch,
+    debian/patches/37_do-not-crash-on-licensetext-being-none.patch,
+    debian/patches/40_support-licensetext-in-separate-url.patch: Removed,
+    included upstream.
+  * debian/patches/35_install-printerdriver-ignore-refresh-cache-failure.patch:
+    Let the install-printerdriver helper script ignore errors of the cache
+    refreshing step. In most cases the newly added repository gets loaded
+    but the error is caused by another repository.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 11 Feb 2015 09:42:48 -0200
+
+system-config-printer (1.5.4+20141212-0ubuntu3) vivid; urgency=medium
+
+  * Switch gnome-icon-theme to adwaita-icon-theme, which is its
+    successor. (LP: #1414613)
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Mon, 26 Jan 2015 14:54:19 +0000
+
+system-config-printer (1.5.4+20141212-0ubuntu2) vivid; urgency=medium
+
+  * debian/patches/35_fix-driver-package-installation-with-install-printerdriver.patch:
+    Simplified communication between system-config-printer and
+    install-printerdriver helper script (LP: #1412722).
+  * debian/patches/37_do-not-crash-on-licensetext-being-none.patch: Crash
+    guard for displaying OpenPrinting driver record where the licensetext
+    field is None (LP: #1412729).
+  * debian/patches/40_support-licensetext-in-separate-url.patch: Added support
+    for OpenPrinting driver records with license text linked from separate
+    download URL (LP: #1412729).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 20 Jan 2015 11:56:08 +0100
+
+system-config-printer (1.5.4+20141212-0ubuntu1) vivid; urgency=medium
+
+  * New upstream release
+     o GIT 1.5.x snapshot from 12 December 2014
+     o Fixed all problems which prevented the automatic download of printer
+       driver packages (LP: #1401835).
+     o Handle non-UTF8 PPD files (LP: #1400232).
+     o Use 'with' when dealing with temporary files.
+     o troubleshoot: get logs from cups.service, not just cupsd
+     o Avoid traceback (Red Hat bug #1171469).
+     o Fixed 'Search' button icon.
+     o Debug output showing DBus exception message.
+     o Fixed display of downloadable drivers (Red Hat bug #1167978).
+     o Prevent backtrace (Red Hat bug #1167978).
+     o Refresh job-printer-uri in update_job
+     o Consider version suffixes in Nickname for PPDs from Canon drivers
+       (fedorahosted.org bug #235).
+     o Extract hostname from hp:/net/...?hostname= URIs when grouping by
+       physical device (Red Hat bug #1154686).
+     o Codec fix for AuthDialog.get_auth_info (Red Hat bug #1060453).
+     o Catch IPPError when writing server settings (Red Hat bug #1159584).
+     o OpenPrintingRequest lock handling fixes
+     o Never set SMB Verify button sensitive without checking pysmb is
+       available
+     o PackageKit-based installation of smb backend on demand is now fixed
+     o Ubuntu fix for on demand installation of libsane-hpaio
+     o HP MFP devices that cannot scan are now properly detected
+     o ppdcache: handle errors more gracefully
+     o Don't try to remove gobject sources that are already removed
+     o A Python 3 fix when dealing with HPLIP fax devices
+     o Fixed physical device grouping by using the cupshelpers.ppds
+       'normalize' function for comparisons
+     o Cancel deferred timer on quit (possible fix for Red Hat bug #1145388)
+     o Don't use deprecated GTK+ widgets and properties
+     o React to button-press-event for Move To submenu in jobviewer
+       (LP: #1388601)
+  * debian/patches/35_package-download-fixes.patch: Removed, included upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 12 Dec 2014 19:41:08 +0100
+
+system-config-printer (1.5.3+20141029-0ubuntu3) vivid; urgency=medium
+
+  * debian/local/70-printers.rules: Fixed UDEV rules so that UDEV supplies
+    the path of the device and not of the device's interface to
+    udev-configure-printer. Thanks to Daniel Dressler for the fix
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 10 Dec 2014 15:50:26 +0100
+
+system-config-printer (1.5.3+20141029-0ubuntu2) vivid; urgency=medium
+
+  * debian/patches/35_package-download-fixes.patch: Fixed several bugs to
+    make automatic printer driver download working again:
+     o Use pyrequests instead of pycurl for secure (verified certificate)
+       downloads. pycurl stopped working after the OpenPrinting web server
+       has moved from Ubuntu 10.04 to 12.04.
+     o In the install-printerdriver script improved the check for the
+       necessity of adfding the driver's Debian repository and added a
+       workaround for a bug in aptdaemon interpreting PackageKit's package
+       IDs wrongly when installing a package (LP: #1397750).
+     o Bugs in the outsourcing of the OpenPrinting request code into
+       from newprinter.py into the new OpenPrintingRequest.py
+     o Python3 transition bugs
+  * debian/patches/07_driver-auto-download-configuration.patch: The variables
+    for auto-download configuration have moved from newprinter.py to the new
+    config.py file.
+  * debian/control: Depend on python-requests instead of on python-pycurl.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu,  4 Dec 2014 23:32:26 +0100
+
+system-config-printer (1.5.3+20141029-0ubuntu1) vivid; urgency=medium
+
+  * New upstream release
+     o GIT 1.5.x snapshot from 29 October 2014
+     o Tell user how to retrieve journal entries as root (Red Hat bug #1157253).
+     o Timed Operations: Don't try to remove sources that are already removed.
+     o Fixed parsing of HPLIP fax type, as implicit conversion from string to
+       int does not work any more (LP: #1369789).
+     o Fixed physical device identification. The MFG and MDL names were being
+       compared too strictly.
+     o Codec fix for AuthDialog.get_auth_info (Red Hat bug #1060453).
+     o Don't treat CUPS IPP conformance failure state reasons as errors.
+     o Don't try installing the smb backend a second time when performing an
+       OpenPrinting ID-based search.
+     o jobviewer: Always fetch auth-info-required attribute (LP #1380514).
+  * debian/patches/35_fix-hp-fax-type-parsing.patch: Removed the, applied
+    upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 29 Oct 2014 19:46:26 +0100
+
+system-config-printer (1.5.3+20141027-0ubuntu1) vivid; urgency=medium
+
+  * New upstream release
+     o GIT 1.5.x snapshot from 27 October 2014
+     o Document retrieval is fixed
+     o Openprinting requests are performed from the main loop, no inner loop
+       required
+     o Nested classes are not allowed
+     o gpk-install-package-name is no longer used, direct D-Bus PackageKit
+       access instead.
+     o With PackageKit-based utility installation working again, fixed some
+       additional, overlooked bugs to get it actually working
+     o The manufacturer name for Kyocera has been fixed
+     o Fixed infinite loop generating millions of links in /tmp when PPD file
+       requested from a print queue is not readable (LP: #1156398,
+       Closes: #764253).
+     o Translation update and clean-up
+     o Various other bug-fixes
+     o Some Python 3 fixes
+  * debian/patches/25_install-smbclient-if-smb-backend-is-missing.patch: When
+    the "smb" CUPS backend is missing, do not try to install "samba-client"
+    but "smbclient". The PackageKit which comes with Ubuntu is not able to
+    install packages via "Provides:" entries.
+  * debian/patches/30_scp-dbus-service-driver-download-hang-fixes.patch:
+    Removed, fixed upstream in another form.
+  * debian/patches/33_ipp-over-usb-support.patch: Updated patch to apply
+    to new upstream code.
+  * debian/patches/35_more-debugging-output.patch,
+    debian/patches/37_debugging-tidy-ups.patch
+    debian/patches/40_monitor-only-run-one-timer-at-a-time.patch,
+    debian/patches/43_dont-ask-packagekit-to-look-for-drivers-for-empty-device-ids.patch,
+    debian/patches/45_use-items-instead-of-iteritems-in-groupphysicaldevicesrequests-group.patch,
+    debian/patches/47_fix-for-automatically-adding-bluetooth-printers.patch,
+    debian/patches/50_dont-run-gpk-install-package-name-directly-use-installpackage-module.patch,
+    debian/patches/53_make-installpackage-a-stub-only.patch: Removed the
+    patches backported from upstream.
+  * debian/patches/35_fix-hp-fax-type-parsing.patch: Fix parsing of the HPLIP
+    fax type (LP: #1369789).
+  * debian/system-config-printer-gnome.install: Added new module
+    "OpenPrintingRequest".
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 27 Oct 2014 20:13:28 +0100
+
+system-config-printer (1.5.1+20141010-0ubuntu2) utopic; urgency=medium
+
+  * debian/patches/35_more-debugging-output.patch,
+    debian/patches/37_debugging-tidy-ups.patch: Additional debug output
+    in the "--debug" modes of system-config-printer and scp-dbus-service
+    (backported from upstream GIT).
+  * debian/patches/40_monitor-only-run-one-timer-at-a-time.patch: monitor:
+    only run one timer at a a time, avoids 'Source ID ... was not found'
+    warnings (backported from upstream GIT).
+  * debian/patches/43_dont-ask-packagekit-to-look-for-drivers-for-empty-device-ids.patch:
+    Don't ask PackageKit to look for drivers for empty device IDs (backported
+    from upstream GIT).
+  * debian/patches/45_use-items-instead-of-iteritems-in-groupphysicaldevicesrequests-group.patch:
+    Use items() instead of iteritems() with Python 3 dicts, especially use
+    items() instead of iteritems() in GroupPhysicalDevicesRequest's _group()
+    (backported from upstream GIT).
+  * debian/patches/47_fix-for-automatically-adding-bluetooth-printers.patch:
+    Fix for automatically adding Bluetooth printers. devpath could have been
+    NULL at this point. Found with static analysis (backported from upstream
+    GIT).
+  * debian/patches/50_dont-run-gpk-install-package-name-directly-use-installpackage-module.patch:
+    Don't run gpk-install-package-name directly, use installpackage module
+    (backported from upstream GIT).
+  * debian/patches/53_make-installpackage-a-stub-only.patch: Make
+    installpackage a stub only. gpk-install-* executables no longer exist
+    (backported from upstream GIT, LP: #1366756).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 14 Oct 2014 21:46:36 +0200
+
+system-config-printer (1.5.1+20141010-0ubuntu1) utopic; urgency=medium
+
+  * New upstream release
+     o GIT 1.5.x snapshot from 10 October 2014
+     o Don't try nested classes, as CUPS forbids it (Red Hat bug #1140627).
+     o Fixed LPD/LPR Probe (LP: #1372213).
+     o Improve some Gtk+ 3 stuff.
+     o Python 3 has removed message attribute from built-in exceptions.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 10 Oct 2014 17:25:36 +0200
+
+system-config-printer (1.5.1+20140911-0ubuntu1) utopic; urgency=medium
+
+  * New upstream release
+     o GIT 1.5.x snapshot from 11 September 2014
+     o More Python 3 fixes (LP: #1367368).
+  * debian/control: Added dependency on python3-cairo (LP: #1353880).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 11 Sep 2014 17:02:50 +0200
+
+system-config-printer (1.5.1+20140906-0ubuntu1) utopic; urgency=medium
+
+  * New upstream bug fix release
+     o GIT 1.5.x snapshot from 6 September 2014
+     o StateReason: Fixed __cmp__ conversion to rich comparisons (LP: #1364196)
+     o This release has some Python3 fixes, as well as some fixes to
+       udev-configure-printer and a fix for a D-Bus service hang.
+     o In the 1.5.1 upstream release scp-dbus-service crashes immediately after
+       starting. This is fixed in this snapshot.
+  * debian/patches/33_ipp-over-usb-support.patch: Bug fix update of the patch
+    from Daniel Dressler.
+  * debian/patchs/30_scp-dbus-service-driver-download-hang-fixes.patch:
+    Updated to apply to current source code.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat, 06 Sep 2014 14:27:59 +0200
+
+system-config-printer (1.5.0+20140805-0ubuntu4) utopic; urgency=medium
+
+  * debian/patches/33_ipp-over-usb-support.patch: Added support for
+    IPP-over-USB printers via ippusbxd. Thanks to Daniel Dressler for
+    having developed this patch and ippusbxd itself as a Google Summer
+    of Code 2014 project.
+  * debian/control: Let system-config-printer-udev recommend the
+    cups-filters-ippusbxd, as we support IPP-over-USB printers with ippusbxd
+    now.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 19 Aug 2014 23:44:59 +0200
+
+system-config-printer (1.5.0+20140805-0ubuntu3) utopic; urgency=medium
+
+  * debian/control, debian/python-cupshelpers.install,
+    debian/python3-cupshelpers.install: Completed Python 3 switchover
+    replacing all Python library dependencies of the binary packages
+    by the appropriate Python 3 counterparts and renamed the
+    python-cupshelpers binary package to python3-cupshelpers.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 06 Aug 2014 14:42:59 +0200
+
+system-config-printer (1.5.0+20140805-0ubuntu2) utopic; urgency=medium
+
+  * debian/control: Build-depend on Python 3 (python3-all-dev).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 05 Aug 2014 23:59:59 +0200
+
+system-config-printer (1.5.0+20140805-0ubuntu1) utopic; urgency=medium
+
+  * New upstream release
+     o GIT 1.5.x snapshot from 5 August 2014
+     o Switchover to Python 3.
+  * 30_scp-dbus-service-driver-download-hang-fixes.patch: Several fixes against
+    deadlocks on driver download out of the D-Bus service (Upstream GIT branch
+    'dbus-fixes', Red Hat bug #1052203).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 05 Aug 2014 22:22:39 +0200
+
+system-config-printer (1.4.5+20140706-0ubuntu1) utopic; urgency=medium
+
+  * New upstream release
+     o GIT 1.4.x snapshot from 6 July 2014
+     o Some codec fixes
+     o Traceback fixes
+     o IPv6 address entry fix
+     o Auth info saving improvement
+     o Some loop/hang bug fixes
+     o Use LockButton for fewer auth dialogs
+  * 30_newprinter-driver-download-override-false-error-alarm.patch,
+    33_dont-use-hp-makeuri-with-non-hp-printers.patch:
+    Removed, included upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 06 Jul 2014 09:41:43 +0200
+
+system-config-printer (1.4.4-0ubuntu1) utopic; urgency=medium
+
+  * New upstream release.
+
+ -- Jackson Doak <noskcaj@ubuntu.com>  Fri, 20 Jun 2014 14:27:40 +1000
+
+system-config-printer (1.4.3+20140219-0ubuntu3) utopic; urgency=low
+
+  * debian/patches/33_dont-use-hp-makeuri-with-non-hp-printers.patch:
+    Before calling "hp-makeuri" to determine whether a network printer is
+    supported by HPLIP and to get its HPLIP URI if so, check whether the
+    printer is actually an HP printer before, as hp-makeuri can hang on
+    non-HP printers (LP: #1313157).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 28 Apr 2014 23:21:52 +0200
+
+system-config-printer (1.4.3+20140219-0ubuntu2) trusty; urgency=low
+
+  * debian/patches/30_newprinter-driver-download-override-false-error-alarm.patch:
+    Fix for the infinite loop fix of 1.4.2+20130920-0ubuntu3: Now the loop
+    is terminated when install-printerdriver outputs "done" but perhaps
+    somewhat early (race condition?) as this causes a false alarm of an error
+    exit of install-printerdriver, telling to the caller that the driver was
+    not installed, letting the caller not reload the system's PPD list and so
+    the freshly installed driver does not get found by the subsequent print
+    queue setup. With this we should have a working fix for LP: #1248303).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 14 Mar 2014 17:06:52 +0100
+
+system-config-printer (1.4.3+20140219-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release
+     o GIT 1.4.x snapshot from 19 February 2014
+     o Incorporated nearly all Ubuntu patches
+  * debian/patches/30_cupshelpers-debugging.patch,
+    debian/patches/33_openprinting-debugprint.patch,
+    debian/patches/40_scp-dbus-service-fix-dbus-signature-typo.patch,
+    debian/patches/43_newprinter-fix-crash-and-infinite-loop-at-driver-download.patch:
+    Removed, included upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 19 Feb 2014 10:25:52 +0100
+
+system-config-printer (1.4.2+20130920-0ubuntu4) trusty; urgency=low
+
+  * debian/patches/05_menu_entries.patch:
+    - Show in both GNOME control center and Unity control center (LP: #1257505)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 15 Jan 2014 16:59:34 +1300
+
+system-config-printer (1.4.2+20130920-0ubuntu3) trusty; urgency=low
+
+  * debian/patches/43_newprinter-fix-crash-and-infinite-loop-at-driver-download.patch:
+    Fixed a crash and an infinite loop which happens when it comes to a drivcer
+    download from OpenPrinting (LP: #1248303).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat,  4 Jan 2014 20:47:12 +0100
+
+system-config-printer (1.4.2+20130920-0ubuntu2) trusty; urgency=low
+
+  * debian/patches/40_scp-dbus-service-fix-dbus-signature-typo.patch: Fixed
+    typo in a D-Bus method signature (LP: #1232947).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 24 Oct 2013 13:15:12 +0200
+
+system-config-printer (1.4.2+20130920-0ubuntu1) saucy; urgency=low
+
+  * New upstream release
+     o GIT 1.4.x snapshot from 20 September 2013
+     o Incorporated nearly all Ubuntu patches
+  * debian/patches/37_driver-autodownload-out-of-scp-dbus-service.patch,
+    debian/patches/40_driver-autodownload-support-signed-ppd-packages-plus-more-fixes.patch,
+    debian/patches/47_prioritize-postscript-against-hpcups.patch,
+    debian/patches/50_physicaldevice-drop-bogus-queeus-on-cups-server.patch,
+    debian/patches/67_no-misleading-prompt-and-root-default-in-auth-dialogs.patch,
+    debian/patches/70_extra-debugprint-lines-for-driver-assignment.patch,
+    debian/patches/73_do-not-go-through-openprinting-query-and-user-interaction-with-exact-cmd-match.patch,
+    debian/patches/75_assign-driver-type-pdf-before-driver-type-exact-cmd.patch:
+    Removed, included upstream.
+  * debian/patches/30_cupshelpers-debugging.patch: Activate "debugprint"
+    output in all components of the cupshelpers library when
+    system-config-printer is running in debug mode ("--debug" option). Same
+    if the newprinter.py file is run standalone in its testing mode.
+  * debian/patches/33_openprinting-debugprint.patch: More debug output
+    for the OpenPrinting database query module.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 20 Sep 2013 22:07:12 +0200
+
+system-config-printer (1.4.2+20130910-0ubuntu1) saucy; urgency=low
+
+  * New upstream bug fix release
+     o GIT 1.4.x snapshot from 10 September 2013
+     o State of 1.4.2 release plus bug fixes
+     o Fixed arguments for tree selection function (LP: #1220066).
+     o Fix one gtk -> Gtk occurrence (Red Hat bug #1004753).
+     o probe_printer.py: socket.getaddrinfo() can throw socket.error
+       (Red Hat bug #1003219).
+     o Spot missing foomatic device IDs.
+  * debian/patches/75_assign-driver-type-pdf-before-driver-type-exact-cmd.patch:
+    Assign the driver type "pdf" with higher priority than the driver type
+    "exact-cmd". This prevents the experimental PDF PPD for the HP Color
+    LaserJet CM3530 MFP (from cups-filters) being chosen.
+  * debian/patches/73_do-not-go-through-openprinting-query-and-user-interaction-with-exact-cmd-match.patch:
+    If a PPD is an exact match by make/model (MFG/MDL) and matches the command
+    set (CMD) in addition, consider this also an exact match in the further
+    path of the wizard, not querying OpenPrinting and not asking the user to
+    confirm the driver choice.
+  * debian/patches/70_extra-debugprint-lines-for-driver-assignment.patch:
+    Added debugprint() calls to more easily debug problems of driver assignment
+    and priorities.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 10 Sep 2013 22:57:44 +0200
+
+system-config-printer (1.4.2-0ubuntu2) saucy; urgency=low
+
+  * debian/control: Let system-config-printer-gnome depend on gir1.2-notify-0.7
+    (LP: #1221219).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu,  5 Sep 2013 17:23:59 +0200
+
+system-config-printer (1.4.2-0ubuntu1) saucy; urgency=low
+
+  * New upstream release
+  * debian/patches/37_driver-autodownload-out-of-scp-dbus-service.patch:
+    Updated to apply to new upstream source code.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 28 Aug 2013 10:23:59 +0200
+
+system-config-printer (1.4.1-0ubuntu1) saucy; urgency=low
+
+  * New upstream release
+     o 1.4.1 release
+     o Use gi.repository throughout
+     o Removed old bits (gtk_label_autowrap and gtkspinner)
+     o Some locking fixes
+     o Bug fixes
+  * debian/patches/43_system-config-printer-py-fix-typo.patch,
+    debian/patches/45_system-config-printer-py-fixed-codec-issue.patch:
+    Removed, fixed upstream.
+  * debian/patches/06_rename_settings_panel.patch,
+    debian/patches/37_driver-autodownload-out-of-scp-dbus-service.patch:
+    Updated to apply to new upstream source code.
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install: Updated for removed and
+    renamed files.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 27 Aug 2013 17:50:57 +0200
+
+system-config-printer (1.3.12+20130308-0ubuntu4) raring; urgency=low
+
+  * debian/patches/50_physicaldevice-drop-bogus-queeus-on-cups-server.patch:
+    The dnssd CUPS backend finds bogus LPD queues on remote CUPS servers which
+    once, do not work, and second, mess up the presentation of a remote CUPS
+    server by system-config-printers. Therefore we suppress such entries now.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 15 Apr 2013 22:29:29 +0200
+
+system-config-printer (1.3.12+20130308-0ubuntu3) raring; urgency=low
+
+  * debian/patches/47_prioritize-postscript-against-hpcups.patch: If a printer
+    is a PostScript and PCL printer, PostScript should be preferred and not
+    the hpcups PCL driver.
+  * debian/patches/45_system-config-printer-py-fixed-codec-issue.patch: Fixed
+    codec issue (LP: #1158158).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 22 Mar 2013 14:13:29 +0100
+
+system-config-printer (1.3.12+20130308-0ubuntu2) raring; urgency=low
+
+  * debian/patches/05_menu_entries.patch: Re-introduce GNOME Control Center
+    icon integration since we stay with system-config-printer as default
+    printer setup tool in Raring.
+  * debian/patches/06_rename_settings_panel.patch: Re-introduced as we
+    let system-config-printer being called out of GNOME Control Center
+    again in Raring. The new printer setup GUI of GNOME does not yet
+    support sharing printers.
+  * debian/patches/43_system-config-printer-py-fix-typo.patch: Fixed
+    typo in upstream code (LP: #1153341).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 19 Mar 2013 17:04:29 +0100
+
+system-config-printer (1.3.12+20130308-0ubuntu1b1) raring; urgency=low
+
+  * No-change rebuild against libudev1
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 13 Mar 2013 07:02:14 +0000
+
+system-config-printer (1.3.12+20130308-0ubuntu1) raring; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 8 March 2013
+     o State of 1.3.12 release plus further development
+     o Updated translations
+     o Driver auto-download via OpenPrinting
+     o GTK-less PolicyKit-only authentication in scp-dbus-service
+     o Suppression of discontinued CUPS Feature in "Server Settings"
+     o Don't rely on document-count being present (LP: #1041613)
+     o Fixed layout of Ink/Toner Levels page (LP: #1108860)
+     o Many other bug fixes.
+  * debian/patches/07_driver-auto-download-configuration.patch: Configuration
+    for driver auto-download via OpenPrinting: Allow installing packages and
+    also non-free software.
+  * debian/patches/40_driver-autodownload-support-signed-ppd-packages-plus-more-fixes.patch:
+    Updated to apply to new upstream source code.
+  * debian/patches/15_cupshelpers-openprinting-query-fingerprint-support.patch,
+    debian/patches/30_driver-autodownload.patch,
+    debian/patches/33_scp-dbus-service-policy-kit-only-auth-on-non-gtk-systems.patch,
+    debian/patches/35_server-settings-dont-show-widgets-of-obsolete-cups-features.patch:
+    Removed, included upstream.
+  * debian/local/70-printers.rules, debian/system-config-printer-udev.install:
+    Use old non-systemd UDEV rules.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 08 Mar 2013 12:22:29 +0100
+
+system-config-printer (1.3.11+20120807-0ubuntu14) raring; urgency=low
+
+  * debian/patches/40_driver-autodownload-support-signed-ppd-packages-plus-more-fixes.patch:
+    Improvements and fixes on automatic driver download via OpenPrinting:
+    Added support for download of signed PPD-only packages; Debug output
+    to stderr by the install-printerdriver script; Support for introduction
+    of package signing on the server and for change of keys; Fix for
+    downloading unsigned PPD-only packages.
+  * debian/control: Added dependency on packagekit-system-interface, this is
+    needed for the automatic download of printer drivers.
+  * debian/patches/06_rename_settings_panel.patch: Removed to rename
+    the system-config-printer desktop icon from "Printers" back to the
+    original "Print Settings", to make the icons in the Dash distinguishable
+    (LP: #1125190).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed,  6 Mar 2013 21:26:18 +0100
+
+system-config-printer (1.3.11+20120807-0ubuntu13) raring; urgency=low
+
+  * debian/patches/30_driver-autodownload.patch: Use the full 40-character
+    key fingerprint instead of the 8-character key ID as key ID when retreiving
+    the signature key from a keyserver to verify auto-downloaded printer
+    driver packages (LP: #1116503).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu,  7 Feb 2013 19:31:18 +0100
+
+system-config-printer (1.3.11+20120807-0ubuntu12) raring; urgency=low
+
+  * debian/patches/37_driver-autodownload-out-of-scp-dbus-service.patch: Allow
+    calling the new printer wizard for driver download from OpenPrinting only
+    (dialog mode "download_driver", requires devid) and add support for driver
+    auto-download in scp-dbus-service, especially in the GetBestDrivers D-Bus
+    method. This makes the printer setup tool of GNOME Control Center doing
+    printer aito-download.
+  * debian/control: Let system-config-printer-gnome depend on
+    gir1.2-packagekitglib-1.0. This is needed for the automatic driver
+    download.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon,  4 Feb 2013 18:18:18 +0100
+
+system-config-printer (1.3.11+20120807-0ubuntu11) raring; urgency=low
+
+  * debian/patches/05_menu_entries.patch: drop the control-center icon
+    integration since we will use the upstream u.i this cycle
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 21 Nov 2012 19:13:44 +0100
+
+system-config-printer (1.3.11+20120807-0ubuntu10) quantal; urgency=low
+
+  * debian/patches/30_driver-autodownload.patch: Fixed typos.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue,  9 Sep 2012 14:18:00 +0200
+
+system-config-printer (1.3.11+20120807-0ubuntu9) quantal; urgency=low
+
+  * debian/patches/35_server-settings-dont-show-widgets-of-obsolete-cups-features.patch:
+    With the dropping of the CUPS Browsing feature from CUPS 1.6.x some
+    configurable settings supported by the "Server Settings" dialog do not
+    exist any more. This patch makes them disappear if the CUPS version in use
+    is 1.6.x or newer (LP: #1052897).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 26 Sep 2012 23:01:00 +0200
+
+system-config-printer (1.3.11+20120807-0ubuntu8) quantal; urgency=low
+
+  * Use "Printers" not "Print Settings" to be more consistent with other
+    System Settings panels and the GNOME printer panel (LP: #1053189) 
+
+ -- Benjamin Kerensa <bkerensa@ubuntu.com>  Thu, 20 Sep 2012 17:45:48 -0400
+
+system-config-printer (1.3.11+20120807-0ubuntu7) quantal; urgency=low
+
+  * debian/patches/33_scp-dbus-service-policy-kit-only-auth-on-non-gtk-systems.patch:
+    Made asyncconn.py and asyncpk1.py working also without GTK, so that
+    scp-dbus-service can be used on GTK-less systems like Kubuntu. Note that
+    this requires authentication via PolicyKit and so scp-dbus-service can
+    only run under conditions where PolicyKit is supported, which means that
+    it must run as a non-root user and accessing a local CUPS daemon, via
+    "localhost" or socket (LP: #902762).
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install,
+    debian/control: Moved asyncconn.py and asyncpk1.py from
+    system-config-printer-gnome to system-config-printer-common
+    (LP: #902762).
+  * debian/patches/27_disable-policy-kit-support.patch: Removed, as
+    cups-pk-helper is fixed now (See LP: #807261).
+  * debian/patches/07_allow-also-nonfree-ppds-for-single-ppd-download.patch:
+    Removed, as it is not needed any more. The patch
+    30_driver-autodownload.patch overrides the onlyfree setting in
+    the cupshelpers::openprinting module.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 12 Sep 2012 15:57:00 +0200
+
+system-config-printer (1.3.11+20120807-0ubuntu6) quantal; urgency=low
+
+  * debian/patches/30_driver-autodownload.patch: Make driver auto-download
+    also working when changing the driver of an existing print queue, minor
+    bug fixes.
+  * debian/patches/30_driver-autodownload.patch,
+    debian/local/install-printerdriver,
+    debian/system-config-printer-gnome.install: Integrated install-printerdriver
+    helper script into the upstream build system.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 31 Aug 2012 13:12:00 +0200
+
+system-config-printer (1.3.11+20120807-0ubuntu5) quantal; urgency=low
+
+  * debian/patches/30_driver-autodownload.patch: Added possibility to skip
+    automatically offered driver download, fixed display of boolean and
+    numeric properties of downloadable drivers.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 28 Aug 2012 14:47:00 +0200
+
+system-config-printer (1.3.11+20120807-0ubuntu4) quantal; urgency=low
+
+  * debian/patches/30_driver-autodownload.patch: Fix of GUI race condition
+    problems, made wait window of package installation working correctly.
+  * debian/local/install-printerdriver: Create correct progress output
+    for the package installation.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 28 Aug 2012 00:54:00 +0200
+
+system-config-printer (1.3.11+20120807-0ubuntu3) quantal; urgency=low
+
+  * debian/patches/30_driver-autodownload.patch: Fixes for various bugs
+    found while testing.
+  * debian/local/install-printerdriver: Support package installation for
+    unsigned packages (for example PPD-only packages).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 24 Aug 2012 22:30:00 +0200
+
+system-config-printer (1.3.11+20120807-0ubuntu2) quantal; urgency=low
+
+  * debian/patches/30_driver-autodownload.patch: Added support for automatic
+    driver package download from OpenPrinting without needing Jockey.
+  * debian/local/install-printerdriver: Helper script for printer driver
+    download via PackageKit.
+  * debian/control: Added dependency on python-pycurl.
+  * debian/system-config-printer-gnome.install: Install install-printerdriver.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 23 Aug 2012 19:00:00 +0200
+
+system-config-printer (1.3.11+20120807-0ubuntu1) quantal; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 7 August 2012
+     o State of 1.3.1 release
+     o Updated translations
+     o Changed application name in desktop file
+     o Handle Unicode URL-encoded smb URIs
+     o Removed use of obsolete udev_get_sys_path()
+     o Use IPP API accessors (CUPS 1.6)
+     o libusb 1.0.x support in udev-configure-printer
+     o Avoid usblp requirement in udev-configure-printer
+     o Various other udev-configure-printer enhancements
+     o More robust XML parsing of OpenPrinting responses
+     o Allow test pages for remote CUPS queues
+     o Support for PPD files for native PDF printers
+     o Suppress cups-remote-... notification messages
+     o Recommended driver tweak for HP LaserJet 12xx/13xx
+     o Added --show-jobs command line option
+     o Improved device list sorting
+     o Use cups-config to determine serverbin directory at build time
+
+  * debian/patches/30_cupshelpers-Fix-XML-parsing-crash-on-invalid-UTF-8.patch,
+    debian/patches/33_udev-configure-printer-enhancements.patch,
+    debian/patches/37_allow-printing-test-page-on-remote-printer-without-ppd.patch,
+    debian/patches/40_pdf-printer-support.patch,
+    debian/patches/43_allow-test-page-printing-for-remote-cups-queues-via-dnssd.patch,
+    debian/patches/47_suppress-misleading-notifications.patch,
+    debian/patches/70_use-hpcups-instead-of-ps-with-hp-laserjet-12xx-13xx.patch,
+    debian/patches/80-add-show-jobs-cmdline-arg.patch,
+    debian/patches/83_improved-sorting-of-device-lists.patch: Removed,
+    incorporated upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 07 Aug 2012 19:08:42 +0200
+
+system-config-printer (1.3.9+20120706-0ubuntu1) quantal; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 6 July 2012
+     o State of 1.3.9 + 2 additional fixes
+     o Updated translations.
+     o Improved output from check-device-ids script.
+     o Don't warn about changed cupsGetPPD3 behaviour in CUPS 1.5.3.
+     o Avoid temporary file leaks.
+     o Handle file disappearances when caching PPDs (Red Hat bug #786232).
+     o Fixed several debugprints (Red Hat bug #785581, LP: #924407,
+       LP: #924553).
+     o smburi: handle URL-encoded URIs containing Unicode.
+     o udev: replace udev_get_sys_path() with hard-coded "/sys" (Upstream bug
+       #223).
+  * debian/patches/35_ensure-utf8-smb-uris.patch: Removed, incorporated
+    upstream.
+  * debian/patches/33_udev-configure-printer-enhancements.patch: Refreshed.
+  * debian/control, debian/rules: Added build dependency on dh-autoreconf
+    and "include /usr/share/cdbs/1/rules/autoreconf.mk" to make the CDBS
+    packaging rebuild the build system, as the build system is patched
+    from 1.3.8+20120201-0ubuntu10 on.
+  * debian/patches/34_udev-configure-printer-enhancements-build-system.patch:
+    Removed temporary build system rebuild.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri,  6 Jul 2012 11:21:00 +0200
+
+system-config-printer (1.3.8+20120201-0ubuntu11) quantal; urgency=low
+
+  * debian/patches/34_udev-configure-printer-enhancements-build-system.patch:
+    Build system rebuild after the build system changes in
+    33_udev-configure-printer-enhancements.patch.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri,  6 Jul 2012 09:17:00 +0200
+
+system-config-printer (1.3.8+20120201-0ubuntu10) quantal; urgency=low
+
+  * debian/patches/33_udev-configure-printer-make-error-on-claiming-interface-0-non-fatal.patch,
+    debian/patches/33_udev-configure-printer-enhancements.patch:
+    Replaced patch on udev-configure-printer (Plug'n'Print via UDEV) to add
+    more enhancements:
+     - Use libusb 1.0.x instead of 0.1.x to determine the device ID when
+       the usblp kernel module is not attached to the device. libusb 0.1.x is
+       not maintained upstream any more.
+     - Do not trigger udev-configure-printer on the UDEV signal emitted by
+       the printer detection through the usblp kernel module any more. There
+       is already a UDEV signal on the detection of the corresponding
+       low-level USB device and through this one can also access all needed
+       information and this way we avoid the devices being detected twice,
+       triggering udev-configure-printer twice. Also the detaching and
+       re-attaching of the usblp kernel module by the new libusb-1.0-based
+       USB CUPS backend does not trigger udev-configure-printer any more.
+     - Gather all needed printer information through the UDEV entry of the
+       low-level USB devices, independent of the presence or absence of the
+       usblp kernel module. This way we do not need to handle the UDEV
+       signals of the usblp kernel module.
+     - When scanning the USB devices with libusb, do not seLect the correct
+       device only by the USB vendor and product IDs but also by the serial
+       number. There are many (older) Epson printers with the same USB vendor
+       and product IDs but different models with different IEEE-1284 device
+       IDs.
+     - Make error on claiming interface 0 non-fatal (from the old patch,
+       LP: #936155).
+     - Let actions on the print queue always be performed only once, even
+       if more than one of the URIs of the detected device matches a
+       particular print queue.
+     - Eliminate duplicate messages in the syslog.
+  * debian/control: Build-depend on libusb-1.0-0-dev instead of libusb-dev.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu,  5 Jul 2012 19:00:00 +0200
+
+system-config-printer (1.3.8+20120201-0ubuntu9) quantal; urgency=low
+
+  * debian/patches/83_improved-sorting-of-device-lists.patch: Improved sort
+    order of device entries, so that in the "Connections" list of a detected
+    network printer "AppSocket/JetDirect" always has highest priority and
+    "IPP" has lowest. This way we avoid that network printers get set up
+    with IPP connection, as many printers do not conform to the IPP
+    standards. "AppSocket/JetDirect" is a very simple protocol which usually
+    works (Works around LP: #945028, LP: #973270, LP: #990734, LP: #992468,
+    LP: #992982).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 29 May 2012 19:26:31 +0200
+
+system-config-printer (1.3.8+20120201-0ubuntu8) precise; urgency=low
+
+  * debian/patches/40_pdf-printer-support.patch: Support for PPD files for
+    native PDF printers. Set priority lower than for the PostScript PPD file
+    as native PDF printing is still experimental. Without this patch it is not
+    determined whether the PDF or PostScript PPD file gets used.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 22 Mar 2012 20:31:31 +0100
+
+system-config-printer (1.3.8+20120201-0ubuntu7) precise; urgency=low
+
+  * debian/patches/05_menu_entries.patch: Replaced "X-GNOME-Keywords"
+    by "Keywords" in system-config-printer.desktop (LP: #949849).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 22 Mar 2012 20:31:31 +0100
+
+system-config-printer (1.3.8+20120201-0ubuntu6) precise; urgency=low
+
+  * debian/patches/35_ensure-utf8-smb-uris.patch: Make sure that passed in
+    URIs are always converted to an utf-8 encoded string (LP: #447027).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 22 Mar 2012 13:27:31 +0100
+
+system-config-printer (1.3.8+20120201-0ubuntu5) precise; urgency=low
+
+  * remove debian/local/testpage-{a4,banner}.ps to make system-config-printer
+    use the test page supplied by CUPS (LP: #31504)
+
+ -- Lars Uebernickel <lars.uebernickel@ubuntu.com>  Tue, 21 Feb 2012 15:56:55 +0100
+
+system-config-printer (1.3.8+20120201-0ubuntu4) precise; urgency=low
+
+  * debian/patches/33_udev-configure-printer-make-error-on-claiming-interface-0-non-fatal.patch:
+    udev-configure-printer does not only claim the interface on which it
+    discovered the printer but also interface 0, whereas the "usb" backend
+    of CUPS only claims the discovered interface. Therfore make failures
+    on claiming interface 0 non-fatal (LP: #936155).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 20 Feb 2012 17:33:31 +0100
+
+system-config-printer (1.3.8+20120201-0ubuntu3) precise; urgency=low
+
+  * debian/patches/30_cupshelpers-Fix-XML-parsing-crash-on-invalid-UTF-8.patch:
+    cupshelpers: Filter encoding problems from XML answers of OpenPrinting's
+    web API to prevent crashes of the XML parser. This avoids failure of
+    automatic driver download when the manufacturer's license and description
+    texts contain wrong characters.
+  * debian/patches/23_applet-also-do-not-autostart-on-unity-and-gnome.patch:
+    Do not auto-start the applet if the desktop is Unity or GNOME.
+  * debian/system-config-printer-gnome.install, debian/control: Revert
+    removal of the system-config-printer applet. For non-Uniti/GNOME desktops
+    the applet can still be useful.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 16 Feb 2012 16:47:31 +0100
+
+system-config-printer (1.3.8+20120201-0ubuntu2) precise; urgency=low
+
+  * debian/system-config-printer-gnome.install: Do not install applet.py.
+  * debian/control: As we do not install the applet, do not mention it in
+    the package descriptions.
+  * debian/patches/80-add-show-jobs-cmdline-arg.patch: Add "--show-jobs
+    <printer>" command line option to system-config-printer. This opens
+    the job viewer for the specified print queue.
+
+ -- Lars Uebernickel <lars.uebernickel@canonical.com>  Wed, 15 Feb 2012 19:42:31 +0100
+
+system-config-printer (1.3.8+20120201-0ubuntu1) precise; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 1 February 2012
+     o Fixed several debugprints (Red Hat bug #785581, LP: #924407,
+       LP: #924553).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 01 Feb 2012 19:23:31 +0100
+
+system-config-printer (1.3.8+20120130-0ubuntu1) precise; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 30 January 2012
+     o State of 1.3.8 + 1 additional fix
+     o Fixed typo in troubleshooter.
+     o Avoid AttributeError in on_btnNPApply_clicked() (Red Hat bug #772112).
+     o Added debugging when jobviewer not found (Red Hat bug #757520).
+     o Applied patch from Till Kamppeter to use pycurl 'https' support
+       for openprinting (CVE-2011-4405).
+     o Always use a sequence as args for timedops.TimedSubprocess()
+       (patch from Vincent Untz).
+     o Added some firewall debugging for Red Hat bug #755913.
+     o Fixed typo (LP: #844976).
+     o Run probe_printer.py with an argument to run PrinterFinder by hand.
+     o More debugging output in PrinterFinder.
+     o Really fix SMB probing in PrinterFinder.
+     o LpdServer class: spot when we can't connect, and give up (likewise
+       in PrinterFinder).
+     o Ignore ' All-in-one' suffix for printer model names when comparing
+       them (Red Hat bug #751610).
+     o Handle HTTP errors from openprinting.org (seen in Red Hat bug #743446).
+     o Don't re-open PPD when already available, just to localize marker
+       names.
+     o Use the monitor's PPD cache in the properties dialog.
+     o monitor: provide method for sharing the monitor's PPD cache.
+     o cupshelpers: avoid re-opening PPD when not needed (not a leak).
+     o Fixed file descriptor leak in PPDCache (LP: #874445).
+     o Fixed typo in check-device-ids.py when looking for ID-less
+       matches.
+     o Require newer pycups; drop compatibility code.
+     o Do not connect to CUPS with an empty user name.
+     o On asynchronous IPP connections make sure that the password dialog
+       is repeated if a wrong password is entered (LP: #653132).
+     o Several fixes on credential caching for IPP authentication
+       (LP: #653132).
+     o Don't penalise pxlmono now that Red Hat bug #661814 is fixed in
+       Ghostscript-9.04.
+     o Handle new CUPS 1.5 IPP error response IPP_AUTHENTICATION_CANCELED
+       (LP: #653132).
+     o Show private job attributes for "my jobs" (Red Hat bug #742279).
+     o Enable Test Page button when application/postscript is supported.
+     o Some preferreddrivers.xml fixes (LP: #855412).
+     o Handle errors saving troubleshoot.txt (LP: #789602).
+     o Removed some stale code.
+     o Make connections list more easily accessible (LP: #842092).
+     o Improved handling of remote CUPS queues via DNS-SD, and IPP devices.
+     o Better display of CUPS servers from "Find Network Printer".
+     o Fixed SMB method for printer finder.
+     o Don't handle tooltips during mainloop recursion (Red Hat bug #664044,
+       Red Hat bug #739734).
+     o Fixed bold print of tab labels on option conflicts.
+     o Preserve installable options on driver change.
+     o Update printer properties dialog correctly when PPD changed.
+     o Fixed typo triggered by private job attributes (LP: #827573).
+     o Marked some translatable strings that weren't (Red Hat bug #734313).
+  * debian/patches/23_unblock-pxlmono-driver.patch,
+    debian/patches/24_expand_connections_list.patch,
+    debian/patches/30_improve-handling-of-ipp-printer-devices.patch,
+    debian/patches/33_probe-printer-remove-debug-code.patch,
+    debian/patches/35_do-not-label-cups-servers-by-the-first-printer-found.patch,
+    debian/patches/40_improve-handling-of-remote-cups-queues-via-dnssd.patch,
+    debian/patches/45_make-connections-list-easily-accessible.patch,
+    debian/patches/50_preferreddrivers-xml-fix-drivertype-recognition.patch,
+    debian/patches/53_handle-new-cups-1.5-ipp-error-response-ipp-authentication-canceled-authconn.patch,
+    debian/patches/55_handle-new-cups-1.5-ipp-error-response-ipp-authentication-canceled-asyncipp.patch,
+    debian/patches/57_fix-broken-setting-of-ipp-auth-canceled-constant.patch,
+    debian/patches/60_fix-password-cache.patch,
+    debian/patches/63_repeat-authorization-when-try-as-root-fails-asyncipp.patch,
+    debian/patches/65_do-not-connect-to-cups-with-empty-username.patch,
+    debian/patches/73_fix_file_descriptor_leak_in_ppdcache.patch,
+    debian/patches/74_CVE-2011-4405.patch: Removed, applied upstream.
+  * debian/patches/37_allow-printing-test-page-on-remote-printer-without-ppd.patch:
+    Regenerated.
+  * debian/control: Depend on python-cups 1.9.60.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 30 Jan 2012 15:05:01 +0100
+
+system-config-printer (1.3.6+20110831-0ubuntu11) precise; urgency=low
+
+  * SECURITY UPDATE: MITM via unencrypted metadata download (LP: #882553)
+    - debian/patches/74_CVE-2011-4405.patch: use https link, and switch to
+      pycurl to perform openprinting database lookups.
+    - debian/control: add python-pycurl to python-cupshelpers Depends.
+    - CVE-2011-4405
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 17 Nov 2011 19:30:24 +0100
+
+system-config-printer (1.3.6+20110831-0ubuntu10) precise; urgency=low
+
+  * debian/patches/73_fix_file_descriptor_leak_in_ppdcache.patch: Fixed
+    file descriptor leak in PPD cache (LP: #874445).
+  * debian/patches/70_use-hpcups-instead-of-ps-with-hp-laserjet-12xx-13xx.patch:
+    Use the PCL-5e driver (HPLIP's hpcups) instead of PostScript as recommended
+    driver on the HP LaserJet 12xx and 13xx as they do not come with enough
+    memory for PostScript. The PostScript driver options are still listed for
+    manual selection so that users with a memory extension in the printer can
+    use them (LP: #872991).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 21 Oct 2011 16:06:24 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu9.1) oneiric-proposed; urgency=low
+
+  * debian/control: Depend on python-cups 1.5.59 (LP: #653132).
+  * debian/patches/67_no-misleading-prompt-and-root-default-in-auth-dialogs.patch:
+    Do not show the misleading prompt 'Password for "root" on localhost', as
+    under Ubuntu you do not log in as root. Also do not pre-fill "root" as
+    default user name (LP: #653132).
+  * debian/patches/65_do-not-connect-to-cups-with-empty-username.patch: Do not
+    connect to CUPS with an empty user name (LP: #653132).
+  * debian/patches/63_repeat-authorization-when-try-as-root-fails-asyncipp.patch:
+    On asynchronous IPP connections make sure that the password dialog is
+    repeated if a wrong password is entered (LP: #653132).
+  * debian/patches/60_fix-password-cache.patch: Fixes in caching the entered
+    password, to assure that only one password prompt happens during the whole
+    system-config-printer session (LP: #653132).
+  * debian/patches/57_fix-broken-setting-of-ipp-auth-canceled-constant.patch:
+    Upstream uses a constant of python-cups 1.5.60 and has a fallback to an
+    explicit definition when an older python-cups is used. This fallback
+    mechanism is broken and this patch works around it.
+  * debian/patches/55_handle-new-cups-1.5-ipp-error-response-ipp-authentication-canceled-asyncipp.patch:
+    Fix to distinguish canceling of authentication from entering an empty
+    password (asynchronous IPP connections, #653132).
+  * debian/patches/53_handle-new-cups-1.5-ipp-error-response-ipp-authentication-canceled-authconn.patch:
+    Fix from upstream to distinguish canceling of authentication from entering
+    an empty password (synchronous IPP connections, #653132).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun,  9 Oct 2011 01:32:24 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu9) oneiric; urgency=low
+
+  * debian/patches/50_preferreddrivers-xml-fix-drivertype-recognition.patch:
+    Fixed the rules for recognition of driver types. Now the types
+    "foomatic-recommended-hpijs", "foomatic-hpijs", and
+    "foomatic-recommended-postscript" are recognized correctly (LP: #855412).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 23 Sep 2011 23:46:24 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu8) oneiric; urgency=low
+
+  * debian/patches/47_suppress-misleading-notifications.patch:
+    Suppress notification messages for the new "cups-remote-..." state
+    reasons of CUPS 1.5.x. As they do not have human-readable text, the
+    notifications look like errors, which is misleading (LP: #855379).
+    NOTE: This patch is not intended for upstream. It is only a workaround,
+    the real patch is updating the message list and improving the wording.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 21 Sep 2011 18:46:24 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu7) oneiric; urgency=low
+
+  * debian/patches/45_make-connections-list-easily-accessible.patch:
+    Make the connections list on the device page of the add-printer wizard
+    more easily usable: Really expand it by default and explicitly define its
+    default size so that it gets larger (~ 3 visible lines). This actually
+    fixes LP: #842092.
+  * debian/patches/43_allow-test-page-printing-for-remote-cups-queues-via-dnssd.patch:
+    As 37_allow-printing-test-page-on-remote-printer-without-ppd.patch, but
+    now for remote CUPS queues accessed via DNS-SD. CUPS does not mark these
+    queues as remote, therefore the additional patch is needed to recognize
+    the queue by its device URI.
+  * debian/patches/40_improve-handling-of-remote-cups-queues-via-dnssd.patch:
+    A CUPS server can also broadcast its queues vis DNS-SD and not via IPP
+    (like Mac OS X machines with shared printers do). In this case the queues
+    are not made available automatically on the client, but the broadcasted
+    queues can be selected in the add-printer wizard under the auto-detected
+    network devices. This patch improves the labeling so that the server is
+    listed with its name or IP (and not with the description of its first
+    queue) and in the "Connection" menu of the server the queues are shown
+    with their descriptions (and not all undistinguishable with "Remote CUPS
+    printer via DNS-SD").
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 21 Sep 2011 12:40:24 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu6) oneiric; urgency=low
+
+  * debian/patches/37_allow-printing-test-page-on-remote-printer-without-ppd.patch:
+    If a queue pointing to a remote CUPS queue (for example on a server which
+    does not broadcast) is created, this queue is usually created as a raw
+    queue so that the driver on the server gets used. Due to the fact that the
+    queue is raw, system-config-printer does not allow to print a test page
+    on it and therefore does nothing when clicking on the test page button in
+    the properties dialog. This patch allows printing a test page on such queues
+    (no PPD file, remote queue, not a discovered queue). In addition, the user
+    is also asked whether he wants to print a test page when he creates such
+    queues, and for queues on which one really cannot print a test page (local
+    raw queues or discovered remote raw queues) the test page button is not
+    shown.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 20 Sep 2011 20:06:24 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu5) oneiric; urgency=low
+
+  * debian/patches/35_do-not-label-cups-servers-by-the-first-printer-found.patch:
+    If one enters the host name or IP of a CUPS server into the "Find Network
+    Printer" field, the server gets labeled with the description of the first
+    printer found on the server. This patch makes the server being listed with
+    its host name or IP.
+  * debian/patches/33_probe-printer-remove-debug-code.patch: Removed some
+    forgotten debug code.
+  * debian/patches/30_improve-handling-of-ipp-printer-devices.patch: Improve
+    handling of IPP devices found when adding a printer: Make recognition
+    whether a found IPP device is a remote CUPS queue actually work, show
+    queue name of the IPP device in "Connection" list, make reading out
+    device URI of IPP device more reliable.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 20 Sep 2011 00:12:24 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu4) oneiric; urgency=low
+
+  * debian/patches/27_disable-policy-kit-support.patch: Disable the support
+    for PolicyKit, as it leads to a password prompt dialog when doing any
+    administrative action, even if the calling user is in the "lpadmin"
+    group (LP: #807261). Note that this is a temporary solution for
+    Oneiric only.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 12 Sep 2011 15:41:24 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu3) oneiric; urgency=low
+
+  * debian/patches/24_expand_connections_list.patch:
+    - Expand connections list (LP: #842092)
+
+ -- Rodrigo Moya <rodrigo.moya@canonical.com>  Wed, 07 Sep 2011 13:11:17 +0200
+
+system-config-printer (1.3.6+20110831-0ubuntu2) oneiric; urgency=low
+
+  * Change system-config-printer.desktop.in from OnlyShowIn:Unity
+    to NotShowIn:KDE so it works for Xubuntu, GNOME, etc. (LP: #841817)
+
+ -- Mackenzie Morgan <maco.m@ubuntu.com>  Tue, 06 Sep 2011 12:17:12 -0400
+
+system-config-printer (1.3.6+20110831-0ubuntu1) oneiric; urgency=low
+
+  * New upstream bug fix release
+     o GIT 1.3.x snapshot from 31 August 2011
+     o Incorporates the most recent patches and/or replaces them by
+       upstream's fixes.
+  * debian/patches/25_fix-key-error-in-get-notifications-job-originating-user-name.patch,
+    debian/patches/27_update-properties-dialog-on-driver-change.patch,
+    debian/patches/30_save-installable-options-changes-on-driver-change.patch,
+    debian/patches/33_fix-bold-print-of-tab-labels-on-option-conflicts.patch:
+    Removed, incorporated upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 31 Aug 2011 16:35:20 +0200
+
+system-config-printer (1.3.6+20110824-0ubuntu2) oneiric; urgency=low
+
+  * debian/patches/27_update-properties-dialog-on-driver-change.patch: Update
+    the printer properties dialog only if the driver got changed, not on other
+    properties changes (a change of the printer's status is already considered
+    a properties channge). The unneeded redrawing of the dialog caused a
+    traceback when using the printer maintenance buttons (Clean heads, nozzle
+    test page).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 30 Aug 2011 12:51:24 +0200
+
+system-config-printer (1.3.6+20110824-0ubuntu1) oneiric; urgency=low
+
+  * New upstream bug fix release
+     o GIT 1.3.x snapshot from 24 August 2011
+     o State of 1.3.6
+     o IPPAuthConnection: if semantic attribute is referenced after destroy,
+       don't fail (LP: #828030).
+     o Allow entering @,?,=,& characters in Device URI text field (LP: #826958).
+  * debian/patches/25_fix-key-error-in-get-notifications-job-originating-user-name.patch:
+    Fixed a KeyError crash in get_notifications() (LP: #827573).
+  * debian/patches/27_update-properties-dialog-on-driver-change.patch:
+    When changing the driver/PPD file ("Make and Model" on first tab of the
+    printer properties dialog) the options tabs of the dialog did not get
+    updated to the options of the new PPD file. One had to close the properties
+    dialog and open it again to configure the settings of the new driver.
+  * debian/patches/30_save-installable-options-changes-on-driver-change.patch:
+    When changing the driver and the PPD of the new driver has an "Installable
+    Options" group, the wizard shows a page to set these options. This patch
+    makes the changes here actually being saved.
+  * debian/patches/33_fix-bold-print-of-tab-labels-on-option-conflicts.patch:
+    If there are conflicting option settings on the tabs "Printer Options"
+    and/or "Installable Options" of the printer properties dialog, the tab
+    names at the left of the dialogs should be shown in bold. This patch makes
+    this working correctly in all situations, especially after changing the
+    driver/PPD for a print queue.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 24 Aug 2011 16:53:24 +0200
+
+system-config-printer (1.3.5+20110801-0ubuntu2) oneiric; urgency=low
+
+  * debian/patches/23_unblock-pxlmono-driver.patch: Due to a bug
+    in Ghostscript producing huge output files when using the PCL-XL driver
+    ("pxlmono"/"pxlcolor") the "pxlmono" driver got set to a very low
+    priority in system-config-printer so that PCL-5e drivers get preferred.
+    This is not needed any more as the Ghostscript bug is fixed in version
+    9.04. So we remove this priority exception now. In addition, this
+    caused problems with printers which had only a PCL-XL driver assigned
+    but not a PCL-5c/e driver (LP: #821818).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 07 Aug 2011 16:31:19 +0200
+
+system-config-printer (1.3.5+20110801-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 1 August 2011
+     o Deactivate OK button of the printer properties dialog only if there are
+       conflicts between settings (LP: #444280).
+     o Make PackageKit optional in cupshelpers (Red Hat bug #726996,
+       LP: #819000, LP: #819267).
+  * debian/control: Removed dependency on python-packagekit again, as this
+    package is in Universe (LP: #819267).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 01 Aug 2011 16:43:19 +0200
+
+system-config-printer (1.3.5+20110731-0ubuntu2) oneiric; urgency=low
+
+  * debian/control: Added dependency on python-packagekit (LP: #818977,
+    LP: #819000).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 31 Jul 2011 22:25:22 +0200
+
+system-config-printer (1.3.5+20110731-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 31 July 2011
+     o State of 1.3.5 + 1 additional fix
+     o D-Bus service for access to the algorithmic parts of s-c-p:
+        - Now all parts which are useful fo all kinds of printer setup tools
+          (especially the new tool in GNOME) are exposed via D-Bus: Driver
+          selection, missing executables checking, and physical device grouping
+	  (https://blueprints.launchpad.net/ubuntu/+spec/desktop-o-system-config-printer-vs-gnome-3-control-center)
+     o udev/Plug'n'Print:
+        - Don't rely on retriggering printers; enumerate them from systemd
+          instead.
+        - Don't complain about missing/invalid device ID for devices we've
+          already handled.
+     o UI:
+        - Removed unused Printer Groups feature.
+        - Don't show "No printers configured" page if the printers are filtered
+          in any way.
+        - URL-quote URIs when using "Find Network Printer" (LP: #808137).
+        - Downloadable drivers: don't display printers for which there are no
+          drivers (Red Hat bug #668154).
+        - Kerberos support for the SMB 'Verify' button (requires new enough
+          pycups).
+        - Removed IPP/HTTP device screen in favour of "Enter URI" (Red Hat bug
+          #685091).
+        - Converted ComboBoxEntry widgets to Entry+EntryCompletion in
+          NewPrinterWindow.ui.
+        - Robustness in ppdsloader in the face of errors (LP: #766818).
+        - Changed Make/Model/State labels into GtkEntry widgets so contents are
+          always fully selectable (Red Hat bug #719217).
+        - Convert iters to paths before comparing (Red Hat bug #717062, LP:
+          #791690, upstream bug #221).
+        - Set translation domain in D-Bus service (LP: #783967).
+        - Ensure consistency in jobviewer if add_job fails (Red Hat bug #693055,
+	  Red Hat bug #632551).
+     o Driver preferences:
+        - Avoid PostScript for HP LaserJet 2100 Series (Red Hat bug #710231).
+        - Raised priority for SpliX driver (LP: #793741).
+     o Other:
+        - Fixed cupsFilter search in missing executables check.
+        - Use PackageKit to resolve missing executable filenames to packages,
+          instead of having a static mapping in the source code.
+        - Fixed DNSSD hostname resolution.
+        - Fixed LPD probing (Red Hat #726383).
+        - Use "hostname" instead of "IP address" when asking for names of browse
+          servers (Red Hat bug #726134).
+        - Updated translations.
+        - Updated Free Software Foundation (FSF) address.
+        - Adjusted test code in asyncpk1.py so it doesn't look like a tempfile
+          vulnerability.
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install: Updated for removed files.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 31 Jul 2011 13:06:22 +0200
+
+system-config-printer (1.3.3+20110712-0ubuntu2) oneiric; urgency=low
+
+  [ Till Kamppeter ]
+  * debian/control: Versioned build dependency on desktop-file-utils, because of
+    LP: #814034.
+
+  [ Rodrigo Moya ]
+  * debian/patches/05_menu_entries.patch:
+    - Add .desktop magic to have s-c-p show up on the new gnome-control-center
+      (LP: #787694)
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 21 Jul 2011 13:24:14 +0200
+
+system-config-printer (1.3.3+20110712-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 12 July 2011
+     o URL-quote URIs when using "Find Network Printer" (LP: #808137).
+     o Downloadable drivers: don't display printers for which there are no
+       drivers (LP: #695199, Red Hat bug #668154).
+     o Kerberos support for the SMB 'Verify' button.
+     o Removed IPP/HTTP device screen in favour of "Enter URI" (Red Hat bug
+       #685091).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 12 Jul 2011 17:24:12 +0200
+
+system-config-printer (1.3.3+20110709-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 9 July 2011
+     o Converted ComboBoxEntry widgets to Entry+EntryCompletion in
+       NewPrinterWindow.ui.
+     o Robustness in ppdsloader in the face of errors (LP: #766818).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat, 09 Jul 2011 14:20:41 +0200
+
+system-config-printer (1.3.3+20110707-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 7 July 2011
+     o Changed Make/Model and State labels into a GtkEntry so contents are
+       always fully selectable.
+     o udev: don't rely on retriggering printers, enumerate them instead.
+       (As Ubuntu uses Upstart and not systemd we need to update
+       /etc/init/cups.conf to make use of the new functionality).
+     o Convert iters to paths before comparing (Red Hat bug #717062,
+       LP: #791690, Upstream bug #221). Tree iters cannot be compared, but
+       paths can.
+     o Set translation domain in D-Bus service (LP: #783967).
+     o Driver preferencess: Avoid PostScript for HP LaserJet 2100 Series
+       (Red Hat bug #710231). Avoid non-manufacturer PostScript drivers in
+       this case. Some other drivertype names changed to avoid conflicts and
+       mistaken matches.
+     o Ensure consistency in jobviewer if add_job fails (Red Hat bugs #693055
+       and #632551).
+     o Raised the priority of the SpliX driver for Samsung laser printers, so
+       that it is used as the default driver for these printers, and not
+       "Foomatic/gdi" any more (LP: #793741).
+     o Adjusted test code in asyncpk1.py so it doesn't look like a tempfile
+       vulnerability.
+  * debian/patches/20_priority-for-splix.patch: Removed, applied upstream.
+  * debian/patches/10_do-not-show-firewall-dialog.patch: Removed, problem of the
+    firewall dialog appearing is solved upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 07 Jul 2011 19:09:44 +0200
+
+system-config-printer (1.3.3+20110602-0ubuntu3) oneiric; urgency=low
+
+  * debian/patches/21_nodisplay_autostart.patch:
+    - Don't show in "Startup Applications" (LP: #803917)
+
+ -- Michael Terry <mterry@ubuntu.com>  Fri, 01 Jul 2011 15:31:56 +0100
+
+system-config-printer (1.3.3+20110602-0ubuntu2) oneiric; urgency=low
+
+  * debian/patches/20_priority-for-splix.patch: Raised the priority of the
+    SpliX driver for Samsung laser printers, so that it is used as the default
+    driver for these printers, and not "Foomatic/gdi" any more (LP: #793741).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 07 Jun 2011 14:16:41 +0200
+
+system-config-printer (1.3.3+20110602-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 2 June 2011
+     o State of 1.3.3 release
+     o Main application
+        - Set translation domain for ServerSettingsDialog (LP: #777188).
+        - scp-dbus-service: Ignore setlocale() errors (LP: #748964).
+        - Allow % character in SMB URI (LP: #747400).
+        - More error handling (LP: #744783).
+        - Avoid traceback if printer duplication fails (Red Hat bug #694629).
+        - Fixed off-by-one error in monitor.
+        - Fixed printer renaming (LP: #726954).
+        - Set connected state when connecting to server fails (Red Hat bug
+	  #685098).
+        - Handle the situation where cupsd has died/restarted more gracefully.
+     o Printer Properties dialog:
+        - Added PrinterModified D-Bus signal to printer properties interface.
+        - More robustness for printer properties dialog when printer removed
+          (LP: #741987).
+        - Just hide Printer Properties dialog on delete-event (LP: #729966).
+        - Extra job options: print-quality, printer-resolution, output-bin.
+        - Automatically show horizontal scrollbar in job options screen.
+        - Ignore "output-mode-default" attribute as it is not settable.
+        - Handle IPP_TAG_RESOLUTION types (requires pycups-1.9.55).
+        - Don't traceback if option value cannot be handled.
+        - Fixed traceback in options.py (Red Hat bug #679103).
+     o New Printer dialog
+        - Fixed PPDs loader when using CUPS remotely or when DBus not available
+          (Red Hat bug #693515).
+        - Handle failure to load PPDs more gracefully (LP: #742409).
+        - Avoid traceback when cancelling New Printer dialog after failure.
+        - Make sure everything is ready before handlers might be called (Red
+	  Hat bug #689336).
+        - Handle URIs in Find Network Printer entry, and use 'Enter URI'
+	  instead of 'Other' (Red Hat bug #685091).
+        - Use "Do It Later" instead of "Cancel" for adjust firewall dialog
+	  (Upstream bug #213).
+        - Fixed an instance where NewPrinterGUI might not have self.printers
+	  set (Red Hat bug #680683).
+        - IPPHostname can contain colon (to specify port).
+        - Fixed automatic driver installation when changing the driver.
+        - Removed stale code left over from conversion to gobjects.
+        - Ensure all uses of ppdsloader supply the Device ID.
+        - Fixed some small typos in newprinter --help output.
+        - Prevent traceback after 2nd drivers search dialog is cancelled (Red
+	  Hat bug #680288).
+     o Driver handling:
+        - Activated and fixed testing mode for device ID/driver association
+        - Match HP-Fax2/3/... PPDs, as well as Ubuntu/Debian hpijs-ppds
+          packages.
+        - preferreddrivers.xml: Identify hpcups and hpijs fax PPDs.
+        - Match native hpijs driver (drv:///hp/hpijs.drv/...) as "hpijs".
+        - Handle Ubuntu locations of hpcups.drv and hpijs.drv.
+        - preferreddrivers.xml: match OpenPrinting gutenprint PPD names as
+          gutenprint.
+        - Removed DES field check altogether.
+        - xmldriverprefs.test: show order more clearly.
+        - Make xmldriverprefs.test() debugging optional.
+        - More debugging during PPD selection.
+        - Prefer foomatic PostScript drivers before PCL drivers (except
+          foomatic-recommended ones).
+     o Job Viewer
+        - Ensure consistency in jobviewer if add_job fails (Red Hat bug
+	  #693055, Red Hat bug #632551).
+        - Be defensive against CUPS returning incorrect job IDs (LP: #721051).
+        - Job viewer's attribute window: Convert job numbers and attribute
+          values to strings (LP: #733088).
+     o Other bits
+        - More uses of check-device-ids.py.
+        - udev-configure-printer: be more defensive when parsing CUPS response
+          (LP: #760661).
+  * debian/patches/17_add-debug-mode-for-printer-driver-association.patch,
+    debian/patches/20_printer-properties-window-on-delete-just-hide.patch,
+    debian/patches/23_reconnect-automatically-on-cups-restart.patch,
+    debian/patches/25_newprinter-assure-that-ppdsloader-is-always-supplied-with-device-id.patch.
+    debian/patches/27_ppd-change-submit-scheme-in-ascii-to-cups-get-device.patch,
+    debian/patches/30_colon-in-ipp-hostname.patch,
+    debian/patches/33_newprintergui-fix-traceback-with-self-printers-not-set.patch,
+    debian/patches/35_set-connected-state-when-connecting-to-server-fails.patch,
+    debian/patches/37_jobviewer-attributes-window-convert-numbers-to-strings.patch,
+    debian/patches/40_fix-traceback-on-renaming-printers.patch,
+    debian/patches/43_traceback-on-printer-deletion.patch,
+    debian/patches/45_monitor-py-be-defensive-on-wrong-job-ids-from-cups.patch,
+    debian/patches/47_monitor-py-off-by-one-error.patch,
+    debian/patches/50_avoid-traceback-when-cancelling-new-printer-dialog-after-failure.patch,
+    debian/patches/53_handle-ppd-load-failure-gracefully.patch,
+    debian/patches/55_fix-ppd-load-with-remote-cups-or-without-dbus.patch,
+    debian/patches/57_make-sure-everything-is-ready-before-handlers-might-be-called.patch,
+    debian/patches/60_ensure-consistency-in-jobviewer-if-add-job-fails.patch,
+    debian/patches/63_more-error-handling-in-scp-dbus-service.patch,
+    debian/patches/65_correct-listings-of-ui-files-in-potfiles-in.patch,
+    debian/patches/67_scp-dbus-service-py-do-not-fail-on-bad-locale.patch,
+    debian/patches/70_udev-configure-printer-dont-crash-on-bad-ipp-answer.patch,
+    debian/patches/73_server-settings-set-translation-domain.patch:
+    Removed, applied upstream.
+  * debian/control: Depends on python-cups 1.9.55.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 03 Jun 2011 11:41:41 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu18) oneiric; urgency=low
+
+  * debian/rules: Use cdbs gnome.mk (which will call dh_translations) instead
+    of the dropped langpack.mk.
+  * debian/control, debian/rules: Move from obsolete pysupport to dh_python2.
+  * debian/control: Drop transitional hal-cups-utils package, it was already
+    transitional in lucid.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 17 May 2011 15:34:00 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu17) oneiric; urgency=low
+
+  * debian/patches/73_server-settings-set-translation-domain.patch: Server
+    settings dialog did not appear translated (LP: #777188).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri,  6 May 2011 18:55:00 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu16.2) natty-proposed; urgency=low
+
+  * debian/patches/70_udev-configure-printer-dont-crash-on-bad-ipp-answer.patch:
+    Be more defensive when parsing CUPS responses (LP: #760661).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 27 Apr 2011 10:35:00 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu16.1) natty; urgency=low
+
+  * debian/rules: include langpacks.mk to update the translations template
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 19 Apr 2011 11:11:56 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu16) natty; urgency=low
+
+  * debian/patches/67_scp-dbus-service-py-do-not-fail-on-bad-locale.patch:
+    Ignore errors of locale.selocale() function calls (LP: #748964).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 18 Apr 2011 15:33:00 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu15) natty; urgency=low
+
+  * debian/patches/65_correct-listings-of-ui-files-in-potfiles-in.patch:
+    Added missing "[type: gettext/glade]" prefixes to the lines for the .ui
+    files in POTFILES.in. The text did not appear translated any more
+    (LP: #759811).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 13 Apr 2011 17:14:00 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu14) natty; urgency=low
+
+  * debian/patches/63_more-error-handling-in-scp-dbus-service.patch:
+    More error handling in scp-dbus-service.py (LP: #744783).
+  * debian/patches/60_ensure-consistency-in-jobviewer-if-add-job-fails.patc:
+    Ensure consistency in jobviewer if add-job fails (LP: #748366, Red Hat
+    bugs #693055 and #632551).
+  * debian/patches/57_make-sure-everything-is-ready-before-handlers-might-be-called.patch:
+    Make sure everything is ready before handlers might be called.
+    The NPTNetworkHostname entry widget seems to be emitting 'changed'
+    (and the handler is called) immediately as it is initialised to the
+    empty string.  Make sure our handler is ready for that (LP: #749762,
+    Red Hat bug #689336).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 13 Apr 2011 12:55:00 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu13) natty; urgency=low
+
+  * debian/patches/53_handle-ppd-load-failure-gracefully.patch,
+    debian/patches/55_fix-ppd-load-with-remote-cups-or-without-dbus.patch:
+    Upstream fixes on loading the PPD files (LP: #742409).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed,  6 Apr 2011 02:56:00 -0700
+
+system-config-printer (1.3.1+20110222-0ubuntu12) natty; urgency=low
+
+  * debian/patches/50_avoid-traceback-when-cancelling-new-printer-dialog-after-failure.patch:
+    Avoid traceback when cancelling New Printer dialog after failure.
+  * debian/patches/47_monitor-py-off-by-one-error.patch: Fixed off-by-one error
+    in monitor (probably also needed to fix LP: #721051).
+  * debian/patches/45_monitor-py-be-defensive-on-wrong-job-ids-from-cups.patch:
+    Be defensive against CUPS returning incorrect job IDs (LP: #721051).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 28 Mar 2011 18:11:00 +0200
+
+system-config-printer (1.3.1+20110222-0ubuntu11) natty; urgency=low
+
+  * debian/patches/43_traceback-on-printer-deletion.patch: When creating a
+    printer, opening its "Properties" dialog, closing the dialog again, and
+    deleting the printer a traceback happens (LP: #741449).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 25 Mar 2011 14:00:00 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu10) natty; urgency=low
+
+  * debian/patches/40_fix-traceback-on-renaming-printers.patch:
+    Renaming print queues caused a traceback and the queue with the old name
+    did not get removed (LP: #726954).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 23 Mar 2011 15:43:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu9) natty; urgency=low
+
+  * debian/patches/37_jobviewer-attributes-window-convert-numbers-to-strings.patch:
+    In the code for the job attributes window in the job viewer (right-click a
+    job and choose "View Attributes") on two points arguments have to be
+    converted to strings. Once for the notebook page labels as the job IDs
+    are numbers, and second for the attribute values, they can be numbers
+    or even data structures (LP: #733088).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 21 Mar 2011 23:09:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu8) natty; urgency=low
+
+  * debian/patches/35_set-connected-state-when-connecting-to-server-fails.patch:
+    Set the "connected" state after a failure of connecting to CUPS, to
+    avoid a runtime error (Red Hat bug 685098).
+  * debian/patches/33_newprintergui-fix-traceback-with-self-printers-not-set.patch:
+    New printer wizard crashes when adding a network (AppSocket/JetDirect)
+    printer manually (LP: #734968, Red Hat bug #680683).
+  * debian/patches/23_wait-for-cups-daemon-to-listen-after-sighup.patch,
+    debian/patches/23_reconnect-automatically-on-cups-restart.patch:
+    Replaced the patch to handle restarts of the CUPS daemon by the solution
+    provided by upstream
+    (https://fedorahosted.org/system-config-printer/ticket/219). Instead
+    of waiting for the CUPS daemon coming back listening for a fixed timeout
+    and only after that timeout showing the interface to handle the lost
+    CUPS service, we show this screen immediately but in the background we
+    listen to D-Bus signals of CUPS. If an appropriate signal appears, we
+    cancel this interface immediately and show the CUPS queues again. So we
+    can both manually switch to another CUPS server immediately in case of
+    a total loss of the original CUPS server and do nothing and wait for
+    the original server to come back.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 16 Mar 2011 23:09:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu7) natty; urgency=low
+
+  * debian/patches/30_colon-in-ipp-hostname.patch: When setting up an IPP
+    printer it was not possible to enter a colon into the field for the
+    host name, for example to specify an alternative port (LP: #734898).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 14 Mar 2011 19:33:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu6) natty; urgency=low
+
+  * debian/patches/27_ppd-change-submit-scheme-in-ascii-to-cups-get-device.patch:
+    When changing the PPD file of an existing print queue ("Make and Model" in
+    "Properties" dialog) the cupshelpers.getDevices() function is called with
+    the scheme of the device URI to find the printer's device ID. The scheme
+    needs to be supplied as ASCII string and not as UniCode, otherwise the
+    scheme is not recognized and the appropriate CUPS backend does not get
+    called. The device ID is needed to  suggest the correct drivers and to
+    trigger automatic driver downloads.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat, 12 Mar 2011 18:25:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu5) natty; urgency=low
+
+  * debian/patches/25_newprinter-assure-that-ppdsloader-is-always-supplied-with-device-id.patch:
+    Synced with upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 11 Mar 2011 18:25:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu4) natty; urgency=low
+
+  * debian/patches/25_newprinter-assure-that-ppdsloader-is-always-supplied-with-device-id.patch:
+    Assured that on all uses of the ppdsloader class the device ID of the
+    detected or selected printer is supplied. With this we assure that the
+    most suitable driver gets found and automatic driver downloads are done
+    if needed.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 11 Mar 2011 16:41:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu3) natty; urgency=low
+
+  * debian/patches/23_wait-for-cups-daemon-to-listen-after-sighup.patch:
+    system-config-printer freezes when CUPS is reinitialized via a HUP
+    signal. This happens because system-config-printer already accesses the
+    CUPS daemon again while it is not yet listening. The patch adds a wait
+    loop so that this does not happen.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed,  9 Mar 2011 21:46:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu2) natty; urgency=low
+
+  * debian/patches/20_printer-properties-window-on-delete-just-hide.patch:
+    Fixed crash when printer properties dialog got closed by the Delete button
+    of the window manager and afterwards opened again for the same printer
+    (LP: #729966).
+  * debian/patches/17_add-debug-mode-for-printer-driver-association.patch:
+    Added/fixed debug mode to run only the new-printer wizard with a given
+    printer device URI, to test whether the correct driver gets selected and,
+    if needed, a correct automatic download of a driver package performed.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue,  8 Mar 2011 16:17:52 +0100
+
+system-config-printer (1.3.1+20110222-0ubuntu1) natty; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 22 February 2011
+     o Identify HPLIP PPDs which require HP's proprietary plugin for HPLIP.
+  * debian/patches/30_hp-fax-and-hpijs-ppd-identification.patch: Removed,
+    applied upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 22 Feb 2011 13:47:52 +0100
+
+system-config-printer (1.3.1+20110218-0ubuntu1) natty; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 18 February 2011
+     o Several fixes in identification of driver types and prioritarization
+       of drivers.
+  * debian/patches/02_install_layout.patch,
+    debian/patches/03_install_layout.patch,
+    debian/patches/10_menu_entries.patch,
+    debian/patches/05_menu_entries.patch,
+    debian/patches/27_allow-also-nonfree-ppds-for-single-ppd-download.patch,
+    debian/patches/07_allow-also-nonfree-ppds-for-single-ppd-download.patch,
+    debian/patches/43_do-not-show-firewall-dialog.patch,
+    debian/patches/10_do-not-show-firewall-dialog.patch,
+    debian/patches/77_use-paper-size-default-in-etc-papersize.patch,
+    debian/patches/13_use-paper-size-default-in-etc-papersize.patch,
+    debian/patches/93_cupshelpers-openprinting-query-fingerprint-support.patch,
+    debian/patches/15_cupshelpers-openprinting-query-fingerprint-support.patch:
+    Renumbered the patches.
+  * debian/patches/30_hp-fax-and-hpijs-ppd-identification.patch: Fix
+    identification of HPLIP PPD files, to cover all fax PPDs and also the
+    ready-made HPIJS PPDs of the hpijs-ppds package.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 18 Feb 2011 22:13:13 +0100
+
+system-config-printer (1.3.1+20110217-0ubuntu1) natty; urgency=low
+
+  * New upstream release
+     o Now really use the tarball of system-config-printer 1.3.1.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 17 Feb 2011 19:28:47 +0100
+
+system-config-printer (1.3.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release
+     o GIT 1.3.x snapshot from 17 February 2011
+     o State of 1.3.1 release
+     o Only show maintenance buttons when capable (Red Hat bug #658564).
+     o Compare printer make/model names only by words and numbers (like they
+       sound).
+     o XML-based driver preference rules.
+     o Don't use status icon when notification server supports persistence.
+     o Fetch Device ID for existing device when changing PPD, allowing a more
+       complete choice of drivers.
+     o Include generic drivers as candidates whenever CMD field is available.
+     o Show all ID-matched drivers when adding a new printer.
+     o Speed-ups in cupshelpers.ppds.ppdMakeModelSplit.
+     o PPDs: Use ppd-product values to add to make/model list.
+     o Show number of processing / pending jobs (Red Hat bug #606868).
+     o PPDs are now cached, with support for If-Modified-Since.
+     o Start CUPS service if not already started (Red Hat bug #577226).
+  * debian/patches/53_printer-ppd-association-take-into-account-product-lines.patch
+    debian/patches/67_improve-make-model-driver-list.patch,
+    debian/patches/70_improve-select-ppd-by-command-set.patch,
+    debian/patches/83_match-make-model-names-only-by-letters-numbers-and-words.patch,
+    debian/patches/91_use-letter-number-words-only-matching-also-to-find-printer-in-gui-list.patch:
+    Removed, applied upstream.
+  * debian/patches/10_menu_entries.patch,
+    debian/patches/43_do-not-show-firewall-dialog.patch: Regenerated for new
+    upstream source code.
+  * debian/python-cupshelpers.install: Added new /etc/cupshelpers/ directory
+    with the XML rules for driver selection.
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install: Updated for new, removed,
+    and renamed files.
+  * debian/system-config-printer.install: Removed obsolete file.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 17 Feb 2011 17:49:27 +0100
+
+system-config-printer (1.2.7+20110216-0ubuntu1) natty; urgency=low
+
+  * New upstream release
+     o GIT 1.2.x snapshot from 16 February 2011
+     o Fixed DNS-SD resolution for Mac-OS-X shared printers with non-ASCII
+       characters in the share names (LP: #716357).
+     o Eliminated duplicate check whether a detected network printer is
+       supported by HPLIP. This caused a delay when selecting an HP network
+       printer from the list of detected printers.
+     o Translation updates.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 16 Feb 2011 12:48:41 +0100
+
+system-config-printer (1.2.6+20110208-0ubuntu1) natty; urgency=low
+
+  * New upstream release
+     o GIT 1.2.x snapshot from 8 February 2011
+     o Full support for DNS-SD-based network printer discovery via the "dnssd"
+       CUPS backend.
+  * debian/patches/55_fix-dnssdresolve.patch,
+    debian/patches/57_dnssd-backend-explicit-support.patch,
+    debian/patches/60_dnssdresolve-save-hostname.patch,
+    debian/patches/63_physicaldevice-dnssd-enhancements.patch: Removed,
+    changes included upstream now.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue,  8 Feb 2011 22:44:29 +0100
+
+system-config-printer (1.2.6+20110127-0ubuntu4) natty; urgency=low
+
+  * debian/patches/10_menu_entries.patch: updated to hide "Manage Print Jobs"
+    from "Accessories" menu. There is a "View Print Queue" menu entry in
+    System > Administration > Printing to show all print jobs of a printer and
+    the users print jobs can be viewed by clicking the tray icon that appears
+    after printing something (LP: #204732).
+
+ -- Pascal De Vuyst <pascal.devuyst@gmail.com>  Sat, 05 Feb 2011 19:26:48 +0100
+
+system-config-printer (1.2.6+20110127-0ubuntu3) natty; urgency=low
+
+  * debian/patches/55_fix-dnssdresolve.patch: Fixed the upstream approach of
+    DNS-SD service name resolving: Expanded "%<hex>" encodings in the dnssd
+    device URIs before sending the service name to Avahi and let
+    PhysicalDevice check the resolved IP addresses.
+  * debian/patches/57_dnssd-backend-explicit-support.patch: Explicit support
+    for the "dnssd" CUPS backend. This way entries in the list of discovered
+    printers coming from the "dnssd" CUPS backend appear with nice descriptions
+    instead of custom URIs.
+  * debian/patches/60_dnssdresolve-save-hostname.patch: Svae not also the
+    IP but also the host name in the device record when resolving a DNS-SD
+    service name. With the host name we can create host-name-based HPLIP
+    URIs which are stable against routers which do not keep always the same IP
+    for each network device.
+  * debian/patches/63_physicaldevice-dnssd-enhancements.patch: Enhancements
+    of the PhysicalDevice class for the CUPS "dnssd" backend, to improve
+    association of DNS-SD- and SNMP-discovered printers, and to add IP
+    and host name information to the list of discovered devices, so that
+    printers can also be identified easily if two or more of the same model
+    are in the network.
+  * debian/patches/45_dnssd-backends-support.patch: Removed. The still needed
+    parts of it are in the newly added patches now.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu,  3 Feb 2011 08:53:29 +0100
+
+system-config-printer (1.2.6+20110127-0ubuntu2) natty; urgency=low
+
+  * debian/patches/53_printer-ppd-association-take-into-account-product-lines.patch:
+    Fixed typo which leads to a traceback when no printer is detected (manually
+    entered URI).
+  * debian/patches/67_improve-make-model-driver-list.patch: Updated.
+  * Removed noise introduced into source package by the previous upload.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 31 Jan 2011 12:07:29 +0100
+
+system-config-printer (1.2.6+20110127-0ubuntu1) natty; urgency=low
+
+  * New upstream release
+     o GIT 1.2.x snapshot from 27 January 2011
+  * debian/patches/55_avoid-connecting-to-cups-twice-in-ppdsloader.patch,
+    debian/patches/57_catch-key-error-from-lookup-cached-by-name.patch,\
+    debian/patches/60_correct-python-shebang.patch,
+    debian/patches/63_list-of-jockey-installed-files-is-array-not-set.patch,
+    debian/patches/65_udev-configure-printer-bluetooth-support.patch,
+    debian/patches/73_mark-selection-of-best-fitting-ppd.patch,
+    debian/patches/75_do-not-list-duplicate-ppd-nicknames.patch,
+    debian/patches/80_do-not-prioritize-gutenprint-for-ps-and-pcl-printers.patch,
+    debian/patches/85_search-for-ppd-only-once.patch,
+    debian/patches/87_refresh-list-after-deleting-a-printer.patch,
+    debian/patches/90_remove-debug-line-in-rename-printer.patch: Removed,
+    applied upstream.
+  * debian/patches/67_improve-make-model-driver-list.patch,
+    debian/patches/83_match-make-model-names-only-by-letters-numbers-and-words.patch:
+    Regenerated.
+  * debian/patches/70_select-ppd-by-command-set.patch,
+    debian/patches/70_improve-select-ppd-by-command-set.patch: Replaced patch
+    by a new one which contains only the parts which did not get adopted
+    upstream.
+  * debian/system-config-printer-common.install: Updated for file
+    installdriver.py which moved to cupshelpers/.
+  * debian/patches/45_dnssd-backends-support.patch: Re-introduce support
+    for the dnssd CUPS backend and association of printers discovered by
+    DNS-SD (host names) and SNMP (IP addresses).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 30 Jan 2011 23:15:29 +0100
+
+system-config-printer (1.2.3+20100723-0ubuntu13) natty; urgency=low
+
+  * debian/patches/93_cupshelpers-openprinting-query-fingerprint-support.patch:
+    When reading out a driver dataset from the OpenPrinting web site, also
+    read out the signature key fingerprint URL for downloadable driver
+    packages.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue,  4 Jan 2011 15:19:06 +0100
+
+system-config-printer (1.2.3+20100723-0ubuntu12) natty; urgency=low
+
+  * debian/patches/92_do-not-create-queue-name-with-trailing-dash.patch: Do
+    not generate print queue names with a dash at the end.
+
+  * debian/patches/90_remove-debug-line-in-rename-printer.patch: Removed a
+    debugging line from the code for renaming printers.
+
+  * debian/patches/87_refresh-list-after-deleting-a-printer.patch: Refresh
+    the list of existing print queues after deleting one, so that the deleted
+    printer actually disappears from the main window.
+
+  * debian/patches/85_search-for-ppd-only-once.patch: Search the best PPD file
+    for the given device ID only once. The PPD file was always searched twice,
+    which is not necessary.
+
+  * debian/patches/83_match-make-model-names-only-by-letters-numbers-and-words.patch,
+    debian/patches/91_use-letter-number-words-only-matching-also-to-find-printer-in-gui-list.patch:
+    Do matching of make and model names only considering letters, numbers,
+    and words, ignoring all non-alphanumeric characters (like dashes). This
+    makes names sounding the same but written differently considered equal.
+    This overcomes the problem that if the IEEE-1284 device ID is not known
+    that not correctly written model names in the (non-manufacturer) PPD
+    files still match. For example "Epson PM-A820", "EPSON PM A820", and
+    "Epson PM A 820" match each other (LP: #669308).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed,  3 Nov 2010 19:05:06 +0100
+
+system-config-printer (1.2.3+20100723-0ubuntu11) natty; urgency=low
+
+  * debian/patches/80_do-not-prioritize-gutenprint-for-ps-and-pcl-printers.patch:
+    For PostScript and PCL printers without manufacturer-supplied PPDs and
+    with explicit support by Gutenprint, the (inferior) Gutenprint PCL driver
+    got selected. Demoted Gutenprint to make Foomatic/Postscript and HPIJS
+    preferred (LP: #669152).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue,  2 Nov 2010 12:57:06 +0100
+
+system-config-printer (1.2.3+20100723-0ubuntu10) natty; urgency=low
+
+  * debian/patches/77_use-paper-size-default-in-etc-papersize.patch: Let
+    the default setting for the paper size (A4 or Letter) of the
+    /etc/papersize file (libpaper) being used.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 29 Oct 2010 12:53:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu9) natty; urgency=low
+
+  * debian/control: Updated dependencies of system-config-printer-gnome.
+    Removed obsolete python-glade2 and python-gnome2 and added
+    python-gnomekeyring.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 15 Oct 2010 16:25:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu8) maverick; urgency=low
+
+  * debian/patches/70_select-ppd-by-command-set.patch: If a PPD does not have
+    a device ID or if it has a device ID without CMD: field, do not give a
+    lower priority to it. Give only lower priorities if the PPD has a CMD:
+    field without any matching PDL. This avoids that Foomatic PPDs with full
+    device ID are prioritized against HP's original PostScript printer PPDs
+    without device ID at all (LP: #653814).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue,  5 Oct 2010 12:33:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu7) maverick; urgency=low
+
+  * debian/patches/70_select-ppd-by-command-set.patch: Updated the patch so
+    that a PPD is prioritized if already one of the PDLs listed in its device
+    ID matches a PDL in the printer's device ID (comment #2 in Red Hat bug
+    #630058).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 16 Sep 2010 14:43:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu6) maverick; urgency=low
+
+  * debian/patches/75_do-not-list-duplicate-ppd-nicknames.patch: Avoid
+    duplicate listings of the same PPD file. According to the Adobe specs
+    different PPDs have to have different NickName entries. Therefore
+    we suppress repeated listing of the same NickName.
+  * debian/patches/73_mark-selection-of-best-fitting-ppd.patch: After
+    searching the best matching PPD for the detected printer only make
+    and model got saved not the actually best matching PPD, making
+    the patch to select PPDs by command set (CMD:) useless.
+  * debian/patches/70_select-ppd-by-command-set.patch: Updated the
+    patch to not selecting PPDs by exactly matching the content of the
+    CMD: field of the device ID, but instead, select the PPDs whose device
+    ID definitions contain only PDLs (page description languages) which the
+    detected printer reports in its device ID (Red Hat bug #630058).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 15 Sep 2010 16:36:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu5) maverick; urgency=low
+
+  * debian/patches/67_improve-make-model-driver-list.patch: Improved and
+    cleaned the way how make/model/driver combos get listed and also fixed
+    the default driver selection for many printers:
+     o Of some printer model names (like "Epson PX V500") parts of the name
+       were considered a PPD version number and cut off.
+     o Removed "Printer" from Apollo printer model names to reduce duplicates
+     o Generally removed "PS" from the end of printer model names, so that
+       the printer with and without an optional PostScript add-on is considered
+       the same model (see especially the printers from Sharp).
+     o Invalidated bogus model names which came in from the "*Product:" fields
+       of some PPD files, like "CUPS" or "GPL Ghostscript".
+     o If a printer is supported by manufacturer-supplied PPD files for both
+       PostScript and PCL, the PCL file will be selected preferably, so that
+       the printer will work also if an optional PostScript add-on is not
+       installed (see printers from Gestetner, Infotec, Infoprint, Lanier, NRG,
+       Ricoh, Savin).
+     o Recognize Foomatic-generated PPDs as such also after the packaging
+       change from Foomatic-XML data (foomatic-db) to a compressed PPD archive
+       (foomatic-db-compressed-ppds).
+     o Make Foomatic driver recommendations be taken into account also if the
+       printer's manufacturer name is "Generic".
+     o Do not do model name clean-up on PPDs which are supplied with CUPS or
+       Ghostscript. These names get crippled otherwise.
+     o Avoid applying model name clean-up twice.
+  * debian/patches/70_select-ppd-by-command-set.patch: If both the detected
+    device ID and the device ID in the PPD ("*1284DeviceID: ...") have a CMD
+    field, exact matches of the CMD field prioritize the PPD file. This way
+    especially for printers with optional PostScript add-on the correct PPD
+    gets selected (requested by Ricoh).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 10 Sep 2010 14:07:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu4) maverick; urgency=low
+
+  * All Fixes backported from system-config-printer 1.2.4.
+  * debian/patches/55_avoid-connecting-to-cups-twice-in-ppdsloader.patch:
+    Avoid that two connections to CUPS are done to obtain a list of the
+    locally available PPD files/drivers. This makes finding the driver for
+    a detected printer significantly faster.
+  * debian/patches/57_catch-key-error-from-lookup-cached-by-name.patch:
+    Avoid a traceback source in the job viewer.
+  * debian/patches/60_correct-python-shebang.patch: Make sure that always
+    the system's Python interpreter (/usr/bin/python) and never a locally
+    added one (like /usr/local/bin/python) is used.
+  * debian/patches/63_list-of-jockey-installed-files-is-array-not-set.patch:
+    Fixed an obvious typo.
+  * debian/patches/65_udev-configure-printer-bluetooth-support.patch:
+    Bluetooth printer support for udev-configure-printer.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu,  9 Sep 2010 14:41:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu3) maverick; urgency=low
+
+  * debian/control: Changed section from python to gnome to not show up
+    inappropriately in Python Category in Software Center (LP: #554174).
+
+ -- K. Vishnoo Charan Reddy <vish@ubuntu.com>  Wed, 28 Jul 2010 14:50:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu2) maverick; urgency=low
+
+  * debian/patches/53_printer-ppd-association-take-into-account-product-lines.patch:
+    Fixed patch because many drivers/PPDs did not get listed, especially
+    all Foomatic PPDs and LSB-based packages issued by OpenPrinting
+    (LP: #610428).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 27 Jul 2010 22:34:06 +0200
+
+system-config-printer (1.2.3+20100723-0ubuntu1) maverick; urgency=low
+
+  * New upstream release
+     o GIT 1.2.x snapshot from 23 July 2010
+     o Applied one year's collection of patches upstream
+     o Minor bug fixes and translation updates
+  * debian/patches/01_delay_autostart.patch,
+    debian/patches/44_no-runtime-error-on-missing-firewall.patch,
+    debian/patches/45_access-openprinting-with-redirect-support.patch,
+    debian/patches/47_make-multithreaded-driver-package-search-via-jockey-work.patch,
+    debian/patches/50_give-priority-to-hpcups.patch,
+    debian/patches/55_silence_printerdriversinstaller_errors.patch,
+    debian/patches/57_backend-integration-bluetooth.patch,
+    debian/patches/67_udev_configure_printer_match_usblp_libusb_and_hplip_uris.patch,
+    debian/patches/77_dnssd-backend-has-priority-against-ip-based-backends.patch,
+    debian/patches/80_probe-printer-py-import-gobject.patch,
+    debian/patches/84_cache-also-device-id-in-network-printer-search.patch,
+    debian/patches/86_fill-lpd-queue-list.patch,
+    debian/patches/90_physicaldevice-clean-socket-uris.patch,
+    debian/patches/92_do-not-search-driver-for-remote-cups-queues-with-driver.patch,
+    debian/patches/95_dnssd-device-identification.patch,
+    debian/patches/96_new-printer-setup-check-for-local-drivers-first.patch:
+    Removed, incorporated upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 23 Jul 2010 17:43:06 +0200
+
+system-config-printer (1.2.3+20100713-0ubuntu2) maverick; urgency=low
+
+  * debian/patches/53_printer-ppd-association-take-into-account-product-lines.patch:
+    If a PPD contains one or more "*Product:" lines, take these into account
+    as alternative model names when associating PPDs with detected printer
+    models. Some PPDs, especially from HP are for various different printer
+    models which are listed in "*Product:" lines. Up to now, no printer setup
+    tools made use of these lines. Especially the PostScript PPD file for the
+    HP Color LaserJet CM 1312 series mentions taht it supports also the
+    CM1312nfi only in one of many "*Product:" lines and therefore this printer
+    gets automatically installed in PCL mode, as for PCL there are PPDs having
+    this printer in "*ModelName:" (LP: #561264).
+
+  * debian-control: Require version 1.9.51-0ubuntu2 or newer of python-cups.
+
+  * debian/patches/57_backend-integration-dnssd-bluetooth.patch,
+    debian/patches/75_use-dnssd-uris-for-hplip.patch,
+    debian/patches/88_physicaldevice-get-make-model-also-from-makeandmodel.patch,
+    debian/patches/94_cache-and-timeout-for-avahi-browse.patch,
+    debian/patches/57_backend-integration-blueto  oth.patch,
+    debian/patches/95_dnssd-device-identification.patch: Reorganized patches to
+    avoid overlapping of the changes.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 21 Jul 2010 15:33:33 +0200
+
+system-config-printer (1.2.3+20100713-0ubuntu1) maverick; urgency=low
+
+  * New upstream release
+     o GIT 1.2.x snapshot from 13 July 2010
+     o Version 1.2.3 plus some additional fixes and translations
+     o Plug'n'Print also for Bluetooth printers now.
+     o Do not automatically set up a print queue if a driver executable is
+       missing.
+     o Improvements on device ID handling: Discovery via SNMP, non-UTF-8
+       environments, ignore the deprecated hal backend.
+     o Avoid Yes/No buttons (Upstream bug #204).
+     o Re-introduced and added keyboard accelerators for system-config-printer
+       itself and for the job viewer.
+     o New HIG-compliant job viewer UI. Thanks to Sergey Nizovtsev for the
+       patch (LP: #555213, upstream bug #205).
+     o Attempt to translate backend device-info strings and other fixes
+       on the translation mechanism (LP: #557199).
+     o Fixed markup in error pop-ups (LP: #567324).
+     o Made width of "Verify" button in New Printer Wizard adapt to the length
+       of the actual translation of "Verify" (LP: #575048).
+     o Make Kyocera detected if it reports only the model name (Upstreamized
+       LP: #564633).
+     o Removed doubled-up 'translatable' attribute in UI file (LP: #571662).
+     o Handle IPP failure fetching printer attrs for completed jobs
+       (LP: #561082).
+     o Many more bug fixes and UI improvements.
+     o Translation updates.
+  * debian/patches/57_backend-integration-dnssd-bluetooth.patch,
+    debian/patches/67_udev_configure_printer_match_usblp_libusb_and_hplip_uris.patch,
+    debian/patches/75_use-dnssd-uris-for-hplip.patch,
+    debian/patches/94_cache-and-timeout-for-avahi-browse.patch
+    debian/patches/96_new-printer-setup-check-for-local-drivers-first.patch:
+    Regenerated to work with new upstream code.
+  * debian/patches/97_add-missing-make-name-kyocera-mita.patch: Removed
+    patches for upstream fixes.
+  * debian/patches/57_backend-integration-dnssd-bluetooth.patch: To check for
+    HP fax devices do not do an exact match of "Fax" with the model name but
+    check whether the model name begins with "Fax".
+  * debian/patches/44_no-runtime-error-on-missing-firewall.patch: Let the
+    firewall functions exit silently if there is no firewall service on the
+    D-Bus.
+  * debian/patches/50_give-priority-to-hpcups.patch: Prioritize hpcups against
+    HPIJS again. It should have matured enough now.
+  * debian/system-config-printer-common.install: Added new dnssdresolve.py
+    file.
+  * debian/rules: Added directory settings for UDEV rules and scripts to the
+    "make install" command line.
+  * debian/control: Added libglib2.0-dev as build dependency, needed for the
+    Bluetooth Plug'n'Print support.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 13 Jul 2010 13:21:33 +0200
+
+system-config-printer (1.2.0+20100408-0ubuntu5.2) lucid-proposed; urgency=low
+
+  * debian/patches/97_add-missing-make-name-kyocera-mita.patch:
+    Let system-config-printer add the manufacturer name "Kyocera Mita"
+    if a detected Kyocera (Mita) printer only reports the model name
+    (LP: #564633).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon,  3 May 2010 12:48:50 +0200
+
+system-config-printer (1.2.0+20100408-0ubuntu5.1) lucid-proposed; urgency=low
+
+  * debian/patches/96_new-printer-setup-check-for-local-drivers-first.patch:
+    Let system-config-printer always first look for locally installed drivers
+    before searching driver on the internet (LP: #564633).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 26 Apr 2010 18:51:50 +0200
+
+system-config-printer (1.2.0+20100408-0ubuntu5) lucid; urgency=low
+
+  * debian/control: Moved avahi-utils from Depends to Recommends, to get it
+    installed on standard installations but keep it removable for users who
+    do not want to use DNS-SD/mDNS (LP: #559780).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat, 10 Apr 2010 19:59:50 +0200
+
+system-config-printer (1.2.0+20100408-0ubuntu4) lucid; urgency=low
+
+  * debian/patches/50_give-priority-to-hpcups.patch: Removed. hpcups has still
+    problems, so we continue with HPIJS as default (LP: #553573, LP: #539708,
+    LP: #538031, LP: #405116).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri,  9 Apr 2010 22:36:50 +0200
+
+system-config-printer (1.2.0+20100408-0ubuntu3) lucid; urgency=low
+
+  * debian/patches/55_silence_printerdriversinstaller_errors.patch: Fixed
+    indentation error introduced when commentinmg out unwished lines
+    (LP: #559431).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri,  9 Apr 2010 21:45:50 +0200
+
+system-config-printer (1.2.0+20100408-0ubuntu2) lucid; urgency=low
+
+  * debian/patches/94_cache-and-timeout-for-avahi-browse.patch:
+    For finding out which discovered network printer URIs belong to the same
+    printer avahi-browse is used to resolve the IP's of printers discovered
+    via DNS-SD. avahi-browse was called several times for each discovered
+    printer and sometimes took several seconds to complete or even did not
+    terminate at all. This froze system-config-printer very often. Now we
+    call avahi-browse only once and cache the output. In addition, we kill
+    it when it takes more than 2 seconds. This way the avahi-browse process
+    gets invisible for the user and still does its job (Should really fix
+    LP: #552398).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri,  9 Apr 2010 20:41:50 +0200
+
+system-config-printer (1.2.0+20100408-0ubuntu1) lucid; urgency=low
+
+  [ Till Kamppeter ]
+  * New upstream release
+     o GIT master snapshot from 08 April 2010
+     o For the last update from upstream we accidentally downloaded the
+       master branch from GIT and not 1.1.x, so that upstream version from
+       Lucid Feature Freeze is 1.1.91 in reality and not 1.1.17 as advertized.
+       To fix the bugs of 1.1.91 (an unstable test release) we go now forward
+       to 1.2.0 + bug fixes + translation updates.
+     o No feature additions expected.
+     o This release fixes especially LP: #557199 and LP: #552398
+     o Possibly more bugs fixed.
+     o Translations updated.
+  * debian/patches/53_fix-async-ipp-traceback.patch,
+    debian/patches/70_more-async-traceback-fixes.patch,
+    debian/patches/73_finally-fixed-race-condition-in-asyncipp.patch: Removed
+    patches for upstream fixes.
+  * debian/patches/10_menu_entries.patch,
+    debian/patches/55_silence_printerdriversinstaller_errors.patch:
+    Regenerated to work with new upstream code.
+  * debian/system-config-printer-common.install: Added new check-device-ids.py
+    file (debug tool, not used by the rest of system-config-printer).
+  * debian/system-config-printer-gnome.install: Added man pages.
+  * debian/local/testpage-a4.ps, debian/local/testpage-letter.ps: Replaced
+    Ubuntu logo by the current one (LP: #542975).
+  * debian/patches/84_cache-also-device-id-in-network-printer-search.patch:
+    When doing a network printer search on a given IP, cache not only the
+    make-and-model string but also the device ID for subsequent connection
+    types.
+  * debian/patches/86_fill-lpd-queue-list.patch: When probing an IP address
+    whether it is an LPD printer and which the valid queue names are, the
+    list of valid queue names did not get filled.
+  * debian/patches/88_physicaldevice-get-make-model-also-from-makeandmodel.patch:
+    Let make and model for a network device also be determined by the
+    make-and-model string and not only the device ID (which is often missing
+    for detected network printers).
+  * debian/patches/90_physicaldevice-clean-socket-uris.patch: When several
+    detected network printers are identified as one physical device, remove
+    the default port 9100 from socket URIs, to avoid saving entries with
+    duplicate URIs.
+  * debian/patches/92_do-not-search-driver-for-remote-cups-queues-with-driver.patch:
+    If a queue to be set up with "ipp://..." URI points to a remote CUPS queue
+    which has already a PPD on the server, we do not need to (and should not)
+    search for a PPD/driver to set up locally. Now really recognize such queues
+    and suppress driver configuration.
+  * debian/patches/57_backend-integration-dnssd-bluetooth.patch: Let Bluetooth
+    printers get searched together with network printers, as the search takes
+    longer. So USB and parallel printers and also network printer search
+    methods appear nearly instantly. In the listing of network printers let
+    not only IP addresses but also DNS-SD names appear.
+
+  [ Julien Lavergne ]
+  * debian/patches/10_menu_entries.patch: Update to not launch the applet in
+    LXDE, until bug 323322 is fixed. (LP: #529472)
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu,  8 Apr 2010 20:13:50 +0200
+
+system-config-printer (1.1.17+20100217-0ubuntu12) lucid; urgency=low
+
+  * debian/patches/80_probe-printer-py-import-gobject.patch: Added missing
+    "import gobject".
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 30 Mar 2010 10:41:50 +0200
+
+system-config-printer (1.1.17+20100217-0ubuntu11) lucid; urgency=low
+
+  * debian/patches/77_dnssd-backend-has-priority-against-ip-based-backends.patch:
+    Let entries for the "dnssd" CUPS backend be listed before entries for the
+    "socket", "lpd", and "ipp" backends in the list of connections for a
+    network printer. This way users will set up printers preferably with URIs
+    using DNS-SD/mDNS hostnames and not IPs. This way the printers also work
+    reliably if the DHCP router assigns always a different IP to the printer
+    when the printer is turned on.
+  * debian/patches/75_use-dnssd-uris-for-hplip.patch: Fixed check whether two
+    network devices are the same printer. The check in the previous version of
+    the patch always failed and made all detected devices get listed as
+    separate printers (LP: #551106).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 29 Mar 2010 23:24:50 +0200
+
+system-config-printer (1.1.17+20100217-0ubuntu10) lucid; urgency=low
+
+  * debian/patches/75_use-dnssd-uris-for-hplip.patch: When setting up a
+    network printer with an HPLIP URI, use an URI based on the DNS-SD
+    host name and not on the IP, as on many DHCP routers the IPs are not
+    kept constant (LP: #545737).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 28 Mar 2010 15:48:50 +0200
+
+system-config-printer (1.1.17+20100217-0ubuntu9) lucid; urgency=low
+
+  * debian/control: Added dependency on avahi-utils, needed to determine
+    the IP of DNS-SD-advertized printers, so that one can find out which
+    results of the network scan come from the same printer. Should solve
+    the problems described in LP: #545737.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 26 Mar 2010 20:36:50 +0100
+
+system-config-printer (1.1.17+20100217-0ubuntu8) lucid; urgency=low
+
+  * debian/patches/73_finally-fixed-race-condition-in-asyncipp.patch:
+    Finally fixed race condition in asyncipp (LP: #520466).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 26 Mar 2010 19:30:50 +0100
+
+system-config-printer (1.1.17+20100217-0ubuntu7) lucid; urgency=low
+
+  * debian/patches/70_more-async-traceback-fixes.patch: Fixed several
+    tracebacks in the async code (LP: #520466).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 26 Mar 2010 17:50:50 +0100
+
+system-config-printer (1.1.17+20100217-0ubuntu6) lucid; urgency=low
+
+  * debian/patches/55_silence_printerdriversinstaller_errors.patch:
+    Silence error messages concerning the PrinterDriversInstaller which is
+    not part of Ubuntu (LP: #530218).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 25 Mar 2010 19:12:50 +0100
+
+system-config-printer (1.1.17+20100217-0ubuntu5) lucid; urgency=low
+
+  * debian/patches/67_udev_configure_printer_match_usblp_libusb_and_hplip_uris.patch:
+    Updated patch for additional NULL checks to avoid a segmentation fault.
+    (LP: #546965).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 25 Mar 2010 18:26:50 +0100
+
+system-config-printer (1.1.17+20100217-0ubuntu4) lucid; urgency=low
+
+  * debian/patches/53_fix-async-ipp-traceback.patch: Fixed traceback in
+    asyncipp (LP: #520466).
+
+  * debian/patches/67_udev_configure_printer_match_usblp_libusb_and_hplip_uris.patch:
+    Updated patch to make udev-configure-printer also match queues with
+    non-standard CUPS backends using URIs with /dev/usb/lp* as device reference
+    with detected printers. With this we avoid that additional queues with
+    standard backends get auto-created.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 25 Mar 2010 12:32:50 +0100
+
+system-config-printer (1.1.17+20100217-0ubuntu3) lucid; urgency=low
+
+  * debian/patches/57_backend-integration-dnssd-bluetooth.patch: Fixed the
+    patch, it reverted debian/patches/43_do-not-show-firewall-dialog.patch
+    (LP: #534526).
+
+  * debian/patches/67_match-usb-uris-of-usblp-and-libusb.patch,
+    debian/patches/67_udev_configure_printer_match_usblp_libusb_and_hplip_uris.patch:
+    udev-configure-printer: Replaced patch to add also the functionality that
+    a discovered printer is also considered as already set up if it is
+    discovered with only a USB URI and the existing queue has an HPLIP URI or
+    vice versa.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 24 Mar 2010 21:12:50 +0100
+
+system-config-printer (1.1.17+20100217-0ubuntu2) lucid; urgency=low
+
+  * debian/patches/45_access-openprinting-with-redirect-support.patch:
+    Let system-config-printer be available to access the web query API of
+    the OpenPrinting server even if the URLs get redirected to new URLS, to
+    be prepared for software changes on the OpenPrinting web site.
+  * debian/patches/47_make-multithreaded-driver-package-search-via-jockey-work.patch:
+    Corrections in the call of Jockey via D-Bus in the new multithreaded
+    code for finding the driver for a detected printer.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 25 Feb 2010 22:44:50 +0100
+
+system-config-printer (1.1.17+20100217-0ubuntu1) lucid; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 17 February 2010
+     o Do not reposition selection cursor in device list when new devices
+       appear after the user has selected a device.
+     o Use stock 'add' icon for new-printer button (LP: #394071).
+  * debian/patches/53_change-new-with-add-icon.patch: Removed, applied
+    upstream.
+
+ -- Till Kampeter <till.kamppeter@gmail.com>  Wed, 17 Feb 2010 08:54:50 +0100
+
+system-config-printer (1.1.16+git20100209-0ubuntu1) lucid; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 09 February 2010
+     o my-default-printer utility removed
+     o Improved multi-threading
+     o Removed loading of the proprietary plug-in for HPLIP
+     o Tons of bug fixes
+  * debian/patches/53_fix-model-list-sorting.patch,
+    debian/patches/55_turboprint-with-cups-1.4.patch,
+    debian/patches/60_conserve-device-id-for-search-and-queue-name.patch,
+    debian/patches/63_use-make-model-when-device-id-missing.patch,
+    debian/patches/65_separate-suffix-number-in-printer-name-with-dash.patch,
+    debian/patches/70_dont-assume-stdout.patch,
+    debian/patches/73_dont-display-properties-dialog-for-first-test-page.patch:
+    Removed, applied upstream.
+  * debian/patches/10_menu_entries.patch,
+    debian/patches/57_backend-integration-dnssd-bluetooth.patch: Regenerated.
+  * debian/patches/77_dont-crash-on-dns-sd-broadcasted-mac-os-x-queues-with-utf8-chatracters.patch:
+    Merged into 57_backend-integration-dnssd-bluetooth.patch, as it patches
+    only code added by this patch.
+  * debian/patches/25_enable-hplip-plugin-support,
+    debian/patches/35_udev-add-printer-support-hplip-plugin.patch:
+    system-config-printer has dropped support for the proprietary driver
+    plugins of HPLIP. To get an upstream-supported solution we remove these
+    patches and move the functionality into the HPLIP package.
+  * debian/patches/50_give-priority-to-hpcups.patch: Now the new hpcups driver
+    of HPLIP is mature enough for daily use, give priority to it.
+  * debian/patches/53_change-new-with-add-icon.patch: Change 'gtk-new' with
+    'gtk-add' in MenuToolButton (LP: #394071). Thanks to Sergio Zanchetta
+    (primes2h at ubuntu dot com) for the patch.
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install,
+    debian/system-config-printer-udev.install: Updated file lists to match
+    the actual files of the current version.
+
+ -- Till Kampeter <till.kamppeter@gmail.com>  Tue, 09 Feb 2010 13:08:43 +0100
+
+system-config-printer (1.1.12+git20090826-0ubuntu11) lucid; urgency=low
+
+  * 10_menu_entries.patch: Update to apply after the previous change.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 01 Feb 2010 16:11:36 -0800
+
+system-config-printer (1.1.12+git20090826-0ubuntu10) lucid; urgency=low
+
+  * debian/patches/01_delay_autostart.patch: Drop shell/sleep command, use the
+    new X-GNOME-Autostart-Delay instead.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 01 Feb 2010 15:32:48 -0800
+
+system-config-printer (1.1.12+git20090826-0ubuntu9) lucid; urgency=low
+
+  * debian/patches/75_give-priority-to-hpijs.patch: Removed temporary
+    patch as HP has fixed the problems of hpcups.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 29 Dec 2009 12:58:09 +0100
+
+system-config-printer (1.1.12+git20090826-0ubuntu8) karmic; urgency=low
+
+  * debian/patches/77_dont-crash-on-dns-sd-broadcasted-mac-os-x-queues-with-utf8-chatracters.patch:
+    Prevent a crash when listing discovered printer devices in the new
+    printer wizard. The crash happened when their are CUPS queues from
+    Mac OS X systems with UTF-8 characters broadcasted via DNS-SD and
+    picked up by the local dnssd CUPS backend. This made setting up
+    print queues impossible whenthere was a Mac somewhere in the network.
+    (LP: #437997).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 19 Oct 2009 16:32:09 +0200
+
+system-config-printer (1.1.12+git20090826-0ubuntu7) karmic; urgency=low
+
+  * debian/patches/75_give-priority-to-hpijs.patch: Temporary workaround for
+    the regressions in the new hpcups driver of HPLIP. As long as the
+    problems are not fixed, we prioritize the old hpijs by this patch
+    (LP: #452532).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 15 Oct 2009 22:57:09 +0200
+
+system-config-printer (1.1.12+git20090826-0ubuntu6) karmic; urgency=low
+
+  * debian/patches/67_match-usb-uris-of-usblp-and-libusb.patch: Let the
+    udev callout not only match absolutely identical URIs but also USB
+    URIs being for the same device but obtained via access through the
+    usblp kernel module or via low-level USB (libusb). This avoids creation
+    of new print queues when the kernel module is loaded or unloaded
+    (LP: #448583).
+
+  * debian/patches/73_dont-display-properties-dialog-for-first-test-page.patch:
+    Do not display the printer properties dialog when printing a test page
+    right after creating a new print queue (LP: #444280).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 13 Oct 2009 23:38:09 +0200
+
+system-config-printer (1.1.12+git20090826-0ubuntu5) karmic; urgency=low
+
+  * debian/patches/70_dont-assume-stdout: Fix crash if unable to print to
+    stdout by cherry-picking commit 311761f0 from upstream (LP: #435505).
+
+ -- Evan Broder <broder@mit.edu>  Sat, 03 Oct 2009 16:35:17 -0400
+
+system-config-printer (1.1.12+git20090826-0ubuntu4) karmic; urgency=low
+
+  * debian/patches/57_backend-integration-dnssd-bluetooth.patch: Fixed crash
+    which prevents from changing of make/model/driver/PPD of an existing print
+    queue (LP: #436218).
+  * debian/patches/60_conserve-device-id-for-search-and-queue-name.patch:
+    Fixed crash which prevents setting up a network printer (LP: #435740).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 25 Sep 2009 18:38:09 +0200
+
+system-config-printer (1.1.12+git20090826-0ubuntu3) karmic; urgency=low
+
+  * debian/patches/57_backend-integration-dnssd-bluetooth.patch: Improved the
+    patch to not suppress polling make and model of a network printer via SNMP 
+    if the make-and-model entry is set to "Unknown".
+  * debian/patches/60_conserve-device-id-for-search-and-queue-name.patch: Make
+    sure that the discovered device ID is saved into the data structure
+    representing the printer, so that it is used for pre-filling the search
+    field for PPD download (it got often pre-filled with "Generic text-only
+    printer" before) and also for generating the default print queue name.
+  * debian/patches/63_use-make-model-when-device-id-missing.patch: If there is
+    no device ID for a discovered printer, use the make-and-model string to
+    determine make and model for auto-selecting the PPD/driver.
+  * debian/patches/65_separate-suffix-number-in-printer-name-with-dash.patch:
+    If a printer is created and there is already a queue with the suggested
+    name, add a dash and a number to the new name, not only a number. This
+    makes it more readable if the original name ends with a digit.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 23 Sep 2009 16:38:09 +0200
+
+system-config-printer (1.1.12+git20090826-0ubuntu2) karmic; urgency=low
+
+  * debian/patches/57_backend-integration-dnssd-bluetooth.patch: Integration of
+    the "dnssd" and "bluetooth" CUPS backends. This assures that for each
+    printer there is only one entry under the discovered printers. Make also 
+    sure that for all discovered printers either the serial number or the IP
+    address is shown. This allows distinguishing of multiple printers of the
+    same model.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 22 Sep 2009 19:42:09 +0200
+
+system-config-printer (1.1.12+git20090826-0ubuntu1) karmic; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 25 August 2009
+     o Proper fix for LP: #416014.
+  * debian/patches/50_on-tvNPDeviceURIs-cursor-changed-no-crash.patch: Removed,
+    problem got fixed upstream.
+  * debian/system-config-printer-common.install: Removed file
+    postscriptdriver.prov again, as "make install" does not install it any
+    more.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 26 Aug 2009 17:48:09 +0200
+
+system-config-printer (1.1.11+git20090825-0ubuntu1) karmic; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 25 August 2009
+  * debian/system-config-printer-common.install: Added new file
+    postscriptdriver.prov.
+  * debian/patches/50_on-tvNPDeviceURIs-cursor-changed-no-crash.patch: Prevent
+    on_tvNPDeviceURIs_cursor_changed() callback function from crashing
+    (LP: #416014).
+  * debian/patches/53_fix-model-list-sorting.patch: Model lists from CUPS
+    1.4.x seem to be a mixture of Unicode and conventional strings, let
+    the sorting procedure handle this.
+  * debian/patches/55_turboprint-with-cups-1.4.patch: Fix cleaning of
+    TurboPrint PPD listings of CUPS 1.4.x to get assigned to the correct
+    printer model.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 25 Aug 2009 10:44:16 +0200
+
+system-config-printer (1.1.11+git20090820-0ubuntu1) karmic; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 20 August 2009
+     o Incorporated patches
+  * debian/system-config-printer-gnome.install: File removed from the new
+    upstream package.
+  * debian/patches/50_fix-bluetooth-device-ids.patch,
+    debian/patches/53_do-not-consider-dash-as-executable-name.patch: Removed,
+    applied upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 20 Aug 2009 13:15:29 +0200
+
+system-config-printer (1.1.10+git20090731-0ubuntu4) karmic; urgency=low
+
+  * debian/control: Introduced transitional package to automatically replace
+    hal-cups-utils by system-config-printer-udev.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 19 Aug 2009 23:32:04 +0200
+
+system-config-printer (1.1.10+git20090731-0ubuntu3) karmic; urgency=low
+
+  * debian/patches/53_do-not-consider-dash-as-executable-name.patch: When
+    checking whether the CUPS filter specified in the PPD file is installed,
+    do not consider '-' as an executable name. '-' stands for no filter
+    (LP: #411376).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 11 Aug 2009 11:32:04 +0200
+
+system-config-printer (1.1.10+git20090731-0ubuntu2) karmic; urgency=low
+
+  * debian/patches/50_fix-bluetooth-device-ids.patch: HP's Bluetooth printers
+    return a model name with added "_BT" in their device ID. This breaks PPD
+    file matching. This patch removes this suffix before comparing model names. 
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 10 Aug 2009 23:20:04 +0200
+
+system-config-printer (1.1.10+git20090731-0ubuntu1) karmic; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 31 July 2009
+     o Incorporized most of the patches of -0ubuntu2 and -0ubuntu4
+  * debian/patches/30_case-insensitive-model-name-cleaning.patch,
+    debian/patches/33_physicaldevice-treat-hplip-network-uris-correctly.patch,
+    debian/patches/37_correct-hp-info-command-line.patch,
+    debian/patches/40_updated-hplip-plugin-installation.patch,
+    debian/patches/47_turboprint-ppd-support-fix.patch,
+    debian/patches/50_enter-uri-fields-fix.patch: Removed, applied upstream.
+  * debian/patches/45_improve-hplip-fax-queue-name.patch: Removed. 
+    Not accepted upstream but not so important that it should be kept in the
+    Ubuntu package.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 31 Jul 2009 09:10:04 +0200
+
+system-config-printer (1.1.10+git20090725-0ubuntu4) karmic; urgency=low
+
+  * debian/patches/47_turboprint-ppd-support-fix.patch: Made extracting make
+    and model from the NickName of TurboPrint PPDs working again.
+
+  * debian/patches/50_enter-uri-fields-fix.patch: Made the field for freely
+    typing in an URI actually work. Especially one can create queues for the
+    cups-pdf backend now.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 27 Jul 2009 00:36:42 +0200
+
+system-config-printer (1.1.10+git20090725-0ubuntu3) karmic; urgency=low
+
+  * debian/patches/45_improve-hplip-fax-queue-name.patch: Let HPLIP fax
+    queues get names based on manufacturer and model name of the printer
+    instead of ugly names like "Fax" oe "Fax-2".
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 26 Jul 2009 01:03:42 +0200
+ 
+system-config-printer (1.1.10+git20090725-0ubuntu2) karmic; urgency=low
+
+  * debian/patches/30_case-insensitive-model-name-cleaning.patch: Use
+    case-insensitive matching when cleaning up the PPD nick names to
+    get the model names for the make/model/driver list.
+
+  * debian/patches/33_physicaldevice-treat-hplip-network-uris-correctly.patch:
+    Parse HPLIP URIs correctly to extract the host name/IP from them.
+
+  * debian/patches/35_udev-add-printer-support-hplip-plugin.patch: Do not
+    automatically create queue for printers which require the proprietary
+    plug-in for HPLIP.
+
+  * debian/patches/37_correct-hp-info-command-line.patch: Updated the
+    "hp-info" call to check fax capability of an HP printer.
+
+  * debian/patches/40_updated-hplip-plugin-installation.patch: Updated
+    the function for installing the HPLIP plug-in to work with the current
+    HPLIP.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat, 25 Jul 2009 16:46:42 +0200
+ 
+system-config-printer (1.1.10+git20090725-0ubuntu1) karmic; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 25 July 2009
+     o udev-based Plug'n'Print, replaces hal-cups-utils
+  * debian/system-config-printer-udev.install, debian/control, debian/rules: 
+    New system-config-printer-udev package with udev rules and callouts to
+    implement Plug'n'Print (automatic print queue setup) and automatic
+    disabling and re-enabling of print queues when the printer is
+    disconnected and reconnected. This replaces hal_lpadmin of the
+    hal-cups-utils package. The migration to udev is done because HAL
+    got deprecated.
+  * debian/system-config-printer-gnome.install: New file in the new upstream
+    package.
+  * debian/control: python-cups 1.9.46 (or newer) is required now.
+  * 26_notification.patch,
+    30_new-printer-unboundlocalerror.patch,
+    33_system-config-printer-crash-on-rename.patch,
+    35_appplet-fix-strftime-call.patch,
+    37_newprinternotification-conf-new-dbus-defaults.patch,
+    40_ppds-py-improved-printer-identification.patch,
+    45_fix-right-click-menu-shared-command.patch,
+    47_fix-name-error-in-update-job.patch,
+    50_work-around-broken-device-ids-in-hplip-ppds-match-model-case-insensitive.patch,
+    53_plugin-autoinstall-with-hplip-3.9.2.patch,
+    55_locale-independent-lower-without-setlocale.patch,
+    57_fix-applet-menu-translation.patch,
+    60_hp-plugin-with-hplip-3.9.2.patch,
+    63_compare-make-model-case-insensitive-fix-queue-name-default.patch:
+    Removed, applied upstream.
+  * debian/patches/27_allow-also-nonfree-ppds-for-single-ppd-download.patch:
+    Allow also downloads of single PPDs from OpenPrinting if they are not
+    under a free license.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat, 25 Jul 2009 11:32:42 +0200
+
+system-config-printer (1.1.3+git20090218-0ubuntu20) karmic; urgency=low
+
+  * debian/patches/63_compare-make-model-case-insensitive-fix-queue-name-default.patch:
+    Compare make and model names case-insensitively when positioning the cursor in the make/model selection list (LP: #365329).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 29 Apr 2009 17:35:59 +0200
+
+system-config-printer (1.1.3+git20090218-0ubuntu19.1) jaunty-proposed; urgency=low
+
+  * debian/patches/60_hp-plugin-with-hplip-3.9.2.patch: Make call of
+    hp-plugin both with and without python-qt4 also work with HPLIP 3.9.2
+    (LP: #363522).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 20 Apr 2009 14:21:59 +0200
+
+system-config-printer (1.1.3+git20090218-0ubuntu19) jaunty; urgency=low
+
+  * debian/patches/57_fix-applet-menu-translation.patch: Let right-click
+    menu of printer applet tray icon appear translated (LP: #360621).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 14 Apr 2009 13:02:59 +0200
+
+system-config-printer (1.1.3+git20090218-0ubuntu18) jaunty; urgency=low
+
+  * debian/patches/55_locale-independent-lower-without-setlocale.patch:
+    Do not use locale.setlocale() to only convert uppercase to lowercase
+    letters in pure ASCII text. With many locales Python bugs get be triggered 
+    by that. Define a simple case-conversion function which does not use any
+    locale-dependent constant or function (LP: #340932).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed,  1 Apr 2009 16:22:59 +0200
+
+system-config-printer (1.1.3+git20090218-0ubuntu17) jaunty; urgency=low
+
+  * debian/patches/26_notification.patch:
+    - Check notification daemon capabilities to determine if actions are
+      supported rather than check $GDMSESSION (LP: #339847)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 31 Mar 2009 09:54:27 -0400
+
+system-config-printer (1.1.3+git20090218-0ubuntu16) jaunty; urgency=low
+
+   * Yet another no-change upload to _really_ build against current
+     pkgbinarymangler. (LP: #348225)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 31 Mar 2009 12:23:52 +0200
+
+system-config-printer (1.1.3+git20090218-0ubuntu15) jaunty; urgency=low
+
+  * No-change upload to strip translations from .desktop files. (LP: #348225)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 30 Mar 2009 12:59:03 +0200
+
+system-config-printer (1.1.3+git20090218-0ubuntu14) jaunty; urgency=low
+
+  * debian/patches/50_work-around-broken-device-ids-in-hplip-ppds-match-model-case-insensitive.patch: 
+    The device IDs in the PPDs of HPLIP 3.9.2 are completely broken and it
+    happens also that some printers report an all-uppercase device ID. Made
+    system-config-printer find the correct PPD/driver also in these cases.
+    Upstream fix (LP: #298701, LP: #306301).
+
+  * debian/patches/53_plugin-autoinstall-with-hplip-3.9.2.patch: Upstream
+    fix to update check whether proprietary HPLIP plugin is already installed
+    so that it also works with HPLIP 3.9.2 (LP: #347839, LP: #289410).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 25 Mar 2009 23:59:59 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu13) jaunty; urgency=low
+
+  * debian/patches/47_fix-name-error-in-update-job.patch: Upstream fix for 
+    crash in job viewer (LP: #343156).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 19 Mar 2009 11:05:47 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu12) jaunty; urgency=low
+
+  * Removed temporary file which got into the last upload.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 19 Mar 2009 00:29:47 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu11) jaunty; urgency=low
+
+  * debian/patches/02_install_layout.patch: Use "--root" instead of
+    "--prefix" when calling setup.py, the latter does not work together
+    with "--install-layout=deb". Otherwise we get a FTBFS.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 18 Mar 2009 23:59:47 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu10) jaunty; urgency=low
+
+  * debian/local/source_system-config-printer.py: Add apport hooks for
+    system-config-printer packages.
+
+ -- Steve Beattie <sbeattie@ubuntu.com>  Wed, 18 Mar 2009 23:45:18 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu9) jaunty; urgency=low
+
+  * debian/patches/45_fix-right-click-menu-shared-command.patch: Upstream fix
+    for a crash which prevented from making a printer shared or not shared
+    via the right-click menu on the printer icons in the main window
+    (LP: #324012).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 18 Mar 2009 23:05:47 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu8) jaunty; urgency=low
+
+  * debian/patches/01_delay_autostart.patch: Redirect also stderr of the system
+    tray applet to /dev/null, as a second approach to fix LP: #153610.
+
+  * debian/patches/40_ppds-py-improved-printer-identification.patch: Upstream
+    patch to improve identification of printers, especially for the situation
+    of incomplete device IDs reported for network printers. Also made the list
+    of printer models more readable for PPDs of HPLIP 3.9.2 and of Turboprint.
+
+  * debian/patches/43_do-not-show-firewall-dialog.patch: Do not pop up the
+    dialog to remember to deactivate the firewall when activating printer
+    sharing. The dialog is Red Hat/Fedora-specific (LP: #274179).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 17 Mar 2009 09:52:47 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu7) jaunty; urgency=low
+
+  * debian/patches/37_newprinternotification-conf-new-dbus-defaults.patch:
+    Upstream patch to adapt the D-Bus policy to the new D-Bus defaults
+    (LP: #318776).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 10 Mar 2009 16:01:47 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu6) jaunty; urgency=low
+
+  * debian/patches/33_system-config-printer-crash-on-rename.patch: Upstream fix
+    for crash on printer renaming (LP: #333260).
+
+  * debian/patches/35_appplet-fix-strftime-call.patch: Upstream fix for crash
+    in job viewer (LP: #334859).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon,  9 Mar 2009 12:18:47 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu5) jaunty; urgency=low
+
+  * debian/patches/01_delay_autostart.patch: Redirect stdout of the system
+    tray applet to /dev/null, as otherwise it comes to crashes (LP: #153610).
+
+  * debian/patches/30_new-printer-unboundlocalerror.patch: Upstream fix
+    for crash when adding new printer (LP: #333727).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon,  9 Mar 2009 10:10:47 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu4) jaunty; urgency=low
+
+  [ Ken VanDine ]
+  * Add 26_notification.patch: don't use actions in notifications unless using
+    the gnome-stracciatella session (LP: #328604)
+
+  [ Martin Pitt ]
+  * Add 02_install_layout.patch: --install-layout=deb to "setup.py install"
+    call in Makefile.{am,in}. This makes the package install correctly with
+    Python 2.6.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 04 Mar 2009 23:55:00 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu3) jaunty; urgency=low
+
+  * Build for all python versions >= 2.5.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 24 Feb 2009 23:19:11 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu2) jaunty; urgency=low
+
+  * Add python-libxml2 on system-config-printer-gnome Depends
+    field (LP: #327169).
+
+ -- Alessio Treglia <quadrispro@ubuntu.com>  Sat, 21 Feb 2009 13:36:44 +0100
+
+system-config-printer (1.1.3+git20090218-0ubuntu1) jaunty; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 18 February 2009
+     o This gets all from one GIT branch again, without the ugly patch which
+       takes one file from another branch.
+     o Minor bug fixes and translation updates.
+  * debian/patches/20_fax-as-new-connection.patch: Removed, merged upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 18 Feb 2009 14:17:47 +0100
+
+system-config-printer (1.1.3+git20090217-0ubuntu2) jaunty; urgency=low
+
+  * debian/control: Depends on python-smbc.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 18 Feb 2009 12:00:38 +0100
+
+system-config-printer (1.1.3+git20090217-0ubuntu1) jaunty; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 17 February 2009
+     o Support for proprietary plugin of HPLIP (firmware, ...)
+     o If hal-cups-utils does not find an exact driver match, it does
+       not set up queues any more. Added special mode for this case.
+     o When creating a new print queue and an exact driver match is found,
+       the make/model/driver selection steps are skipped (driver can be
+       changed on the existing queue though).
+     o Vastly improved device selection screen in New Printer wizard. No
+       questions in pop-up dialogs any more.
+  * debian/patches/20_fax-as-new-connection.patch: Fax support for network
+    printers from HP without pop-up question. Taken from hplip-fax-connection
+    GIT branch.
+  * debian/patches/25_enable-hplip-plugin-support.patch: Actually enabled
+    support for automatically installing the HPLIP plugin.
+  * debian/system-config-printer-gnome.install: added a new file.
+  * debian/control: Depends on python-cups 1.9.42 or newer.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 18 Feb 2009 05:19:38 +0100
+
+system-config-printer (1.1.2+git20090125-0ubuntu4) jaunty; urgency=low
+
+  * 01_delay_autostart.patch: Add missing "exec", to avoid having the
+    wrapping dash run forever.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 03 Feb 2009 17:08:31 +0100
+
+system-config-printer (1.1.2+git20090125-0ubuntu3) jaunty; urgency=low
+
+  * Add 01_delay_autostart.patch: Defer the autostart desktop by 30
+    seconds, since this is the only Python process in the GNOME
+    startup sequence, and contributes to slow startup.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 03 Feb 2009 12:24:00 +0100
+
+system-config-printer (1.1.2+git20090125-0ubuntu2) jaunty; urgency=low
+
+  * Add debian/system-config-printer-gnome.preinst: Remove obsolete
+    conffile /etc/xdg/autostart/redhat-print-applet.desktop on
+    upgrades, to avoid starting the applet twice. (LP: #323014)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Sun, 01 Feb 2009 23:47:09 +0100
+
+system-config-printer (1.1.2+git20090125-0ubuntu1) jaunty; urgency=low
+
+  * New upstream release
+     o GIT 1.1.x snapshot from 25 January 2009
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install: Updated file lists
+    for the new version.
+  * debian/patches/10_menu_entries.patch: Regenerated.
+  * debian/patches/11_no_kde_autostart.diff,
+    debian/patches/20_jockey-printer-driver-auto-download.patch,
+    debian/patches/25_openprinting-query-missingfields.patch,
+    debian/patches/30_better-downloadable-driver-properties.patch,
+    debian/patches/35_gray-out-settings-menu-entry-when-cups-not-running.patch,
+    debian/patches/40_do-not-crash-on-deleted-printer.patch: Removed,
+    applied upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 25 Jan 2009 18:42:39 +0100
+
+system-config-printer (1.0.5+git20080819-0ubuntu6) intrepid; urgency=low
+
+  * debian/patches/40_do-not-crash-on-deleted-printer.patch: Fix crashes
+    when printers get deleted while editing their properties (LP: #284444).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 19 Oct 2008 16:41:26 +0200
+
+system-config-printer (1.0.5+git20080819-0ubuntu5) intrepid; urgency=low
+
+  * debian/patches/35_gray-out-settings-menu-entry-when-cups-not-running.patch:
+    Gray out the "Server" -> "Setttings" menu entry whenthere is no connection
+    to a CUPS daemon. Calling the Settings dialog in such a situation causes a
+    crash (LP: 267964).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu,  9 Oct 2008 17:41:26 +0200
+
+system-config-printer (1.0.5+git20080819-0ubuntu4) intrepid; urgency=low
+
+  * debian/patches/30_better-downloadable-driver-properties.patch: For
+    PPD download from OpenPrinting in the New Printer wizard let the license
+    text be displayed always if it is present in the driver entry, but let
+    the user be asked whether he agrees only in case of non-free drivers or
+    patent issues. Also let the "from manufacturer" and "free software" bits
+    be shown.
+  * debian/patches/jockey-printer-driver-auto-download.patch,
+    debian/patches/openprinting-query-missingfields.patch,
+    debian/patches/20_jockey-printer-driver-auto-download.patch,
+    debian/patches/25_openprinting-query-missingfields.patch: Renamed the
+    patches to assure that they get applied in the correct order.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon,  6 Oct 2008 11:20:26 +0200
+    
+system-config-printer (1.0.5+git20080819-0ubuntu3) intrepid; urgency=low
+
+  * debian/patches/openprinting-query-missingfields.patch:
+    Added some missing fields to the data structure for queried printer
+    driver records (LP: #269454).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 25 Sep 2008 22:20:26 +0200
+
+system-config-printer (1.0.5+git20080819-0ubuntu2) intrepid; urgency=low
+
+  * debian/patches/jockey-printer-driver-auto-download.patch:
+    Added support for automatic driver download via Jockey.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 24 Sep 2008 23:50:26 +0200
+
+system-config-printer (1.0.5+git20080819-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release
+     o GIT 1.0.x snapshot from 19 August 2008
+     o Improvements and fixes on job authentication
+     o Distinguish whether downloadable driver or PPD is free or non-free
+       software.
+  * debian/patches/12_oki_instead_of_okidata.patch: Removed, applied upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 19 Aug 2008 16:30:26 +0200
+
+system-config-printer (1.0.5+git20080812-0ubuntu2) intrepid; urgency=low
+
+  * debian/patches/12_oki_instead_of_okidata.patch: Use "Oki" instead of
+    "Okidata".
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 19 Aug 2008 10:05:00 +0200
+
+system-config-printer (1.0.5+git20080812-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release
+     o GIT 1.0.x snapshot from 12 August 2008
+     o Ungray the "Apply" button when typing a value into an input field with
+       spin button (Upstream bug #83).
+     o Do not load the PPD list when creating an explicit print queue pointing
+       to a remote CUPS queue (Upstream bug #72).
+     o Show printer state reasons near the printer state display in the printer
+       properties dialog (Upstream bug #85).
+     o Check whether renaming of a printer is possible and show an error if
+       not (Upstream bug #78).
+     o Improved input of Samba URIs and scanning for SMB printers (Upstream
+       bug #66).
+  * debian/patches/12_case_insensitive_model_sort.patch: Removed, applied 
+    upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 12 Aug 2008 11:05:00 +0200
+
+system-config-printer (1.0.4+git20080730-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release
+     o GIT 1.0.x snapshot from 30 July 2008
+     o Switched to 1.0.x GIT branch, as the head branch needs Samba 3.2.x for
+       full functionality
+     o Fixes several upstream bugs reported on the GIT snapshot from July 23
+       (Upstream bugs #75, #76, #78, #80).
+  * debian/system-config-printer-gnome.install: Re-introduced contextmenu.py,
+    applet.glade, system-config-printer.glade, removed subdirectory glade,
+    file glade.py.
+  * debian/patches/12_case_insensitive_model_sort.patch: Case-insensitive
+    sorting of printer model names.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 30 Jul 2008 10:35:46 +0200
+
+system-config-printer (1.0.2+git20080723-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release
+     o GIT snapshot from 23 July 2008
+     o Let Ctrl+N directly call the add-printer wizard
+     o Let internal OpenPrinting database download facility only download
+       PPDs, not packages.
+     o Use distutils for python-cupshelpers package
+     o Printer properties dialog: "Close" button for printers which
+       appear from broadcasts, "Apply"/"Cancel"/"OK" for locally defined
+       printers.
+     o Fixed pre-fill of "Location" field.
+     o Improved searching of the OpenPrinting database (Upstream bug #25).
+     o Bug fixes and improvements on the troubleshooting utility.
+     o When adding an IPP printer, pre-fill the info and location fields
+       from the remote queue (Upstream bug #37).
+     o New Advanced Server Settings dialog.
+     o SMB handling fixes/improvements.
+  * debian/system-config-printer-gnome.install: Removed file
+    contextmenu.py, added file AdvancedServerSettings.py.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 23 Jul 2008 16:13:19 +0200
+
+system-config-printer (1.0.2+git20080702-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release
+     o GIT snapshot from  2 July 2008
+     o Pre-fill domain in SMB auth dialog (Upstream bug #30)
+     o Don't strip " Printer" from the end of the ppd-make-and-model string
+       (Upstream bug #33)
+     o Moved modules interesting for other apps into the standard Python
+       path (Upstream bug #34)
+     o Prevent hp-info from starting systray applet.
+     o Limit the initial size of the main window (Upstream bug #53).
+     o Added 'Apply' button to printer properties dialog (Upstream bug #54).
+     o More bug fixes
+  * debian/system-config-printer-gnome.install: Renamed ui/ subdirectory to
+    glade/.
+  * debian/control, debian/rules, debian/python-cupshelpers.install: New 
+    package "python-cupshelpers" for general printing-related Python modules.
+  * debian/control, debian/rules: Restrict byte-compilation of Python modules
+    in "python-cupshelpers" to the current Python version. They do not
+    byte-compile with Python 2.4.
+  * debian/system-config-printer-common.install,
+    debian/python-cupshelpers.install: Moved general printing-related
+    modules into the "python-cupshelpers" package.
+  * debian/patches/01_no_rhpl.patch: Removed. Not needed any more.
+  
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 02 Jul 2008 19:26:49 +0200
+
+system-config-printer (1.0.2+git20080620-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release
+     o GIT snapshot from 20 June 2008
+  * debian/system-config-printer-gnome.install: Added new files glade.py and
+    userdefault.py, adapted to new layout of *.glade files.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 20 Jun 2008 12:25:54 +0200
+
+system-config-printer (1.0.0+git20080609-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release
+     o GIT snapshot from 09 June 2008
+     o Fixed crash bugs: LP: #222494, LP: #222616, LP: #224021, LP: #225241.
+     o Fixed missing title bar icon (LP: #234750)
+     o Fixed system-config-printer not starting on unknown locale (LP: #236858)
+  * debian/system-config-printer-gnome.install: Added new file errordialogs.py
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 09 Jun 2008 11:57:59 +0100
+
+system-config-printer (0.9.90+svn2385-0ubuntu2) intrepid; urgency=low
+
+  * Add conflicts to system-printer-config-kde in debian/control,
+    LP: #229016.
+  * Update debian/copyright:
+    + remove boilerplate comments
+    + update years of copyright
+
+ -- Stefan Potyra <sistpoty@ubuntu.com>  Sat, 10 May 2008 23:06:32 +0200
+
+system-config-printer (0.9.90+svn2385-0ubuntu1) intrepid; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r2385
+     o New main window layout, like gnome-cups-manager
+     o Lots more of troubleshooting functionality
+     o More on automatic driver download from OpenPrinting
+     o Handle unknown locales gracefully (LP: #225532)
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install: Added new files.
+  * debian/patches/30_dont_blank_jetdirect_hostname.patch,
+    debian/patches/27_crashbug_211867.patch, 
+    debian/patches/28_crashbug_213624.patch,
+    debian/patches/29_crashbug_214579.patch,
+    debian/patches/26_crashbug_195508.patch,
+    debian/patches/24_crashbug_207338.patch,
+    debian/patches/23_crashbug_203818.patch, 
+    debian/patches/25_crashbug_208305.patch,
+    debian/patches/15_hpfax_queue_for_network_printer_and_hpfax2.patch,
+    debian/patches/17_model-name-cleanup-improvements.patch,
+    debian/patches/20_laserjet-1200-1300-no-postscript.patch: Removed
+    all upstream patches introduced after Hardy's Feature Freeze, as we
+    are returning to use the current SVN snapshots.
+    
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 02 May 2008 10:05:29 +0200
+
+system-config-printer (0.7.81+svn1976-0ubuntu9) hardy; urgency=low
+
+  * debian/patches/30_dont_blank_jetdirect_hostname.patch: Fixed host name
+    field being empty when a discovered JetDirect/Socket printer is the first
+    entry in the list of devices in the New Printer wizard (LP: #220041).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 21 Apr 2008 17:01:37 +0200
+
+system-config-printer (0.7.81+svn1976-0ubuntu8) hardy; urgency=low
+
+  * debian/patches/27_crashbug_211867.patch, 
+    debian/patches/25_crashbug_213624.patch
+    debian/patches/29_crashbug_214579.patch: Fixed traceback bugs, patches
+    from upstream (LP: #211867, LP: #213624, LP: #214579).
+
+  [ Kjell Braden ]
+  * debian/patches/26_crashbug_195508.patch: fix another crasher, thanks
+    Jeffrey Baker for the patch (LP: #195508)
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 16 Apr 2008 16:01:37 +0200
+
+system-config-printer (0.7.81+svn1976-0ubuntu7) hardy; urgency=low
+
+  * debian/control: Added missing dependency: python-dbus (LP: #214515).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed,  9 Apr 2008 14:01:37 -0500
+
+system-config-printer (0.7.81+svn1976-0ubuntu6) hardy; urgency=low
+
+  * debian/patches/23_crashbug_207338.patch: Another crasher fix from upstream
+    (LP: #207338).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sat,  5 Apr 2008 23:01:37 +0100
+
+system-config-printer (0.7.81+svn1976-0ubuntu5) hardy; urgency=low
+
+  * debian/patches/23_crashbug_203818.patch, 
+    debian/patches/25_crashbug_208305.patch: Fixes traceback bugs
+    (LP: #203818, LP: #208305).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed,  2 Apr 2008 23:59:37 +0100
+
+system-config-printer (0.7.81+svn1976-0ubuntu4) hardy; urgency=low
+
+  * debian/patches/15_hpfax_queue_for_network_printer_and_hpfax2.patch:
+    system-config-printer was not able any more to create fax queues
+    for network-connected HP multi-function devices after fixing
+    LP: #165197. This is fixed by this patch. The patch also removes
+    the newline character from the end of HPLIP URIs for network
+    print and fax queues and it also adds support for HP's new fax
+    device class "HP Fax 2" (HP LaserJet M2727),
+  * debian/patches/17_model-name-cleanup-improvements.patch: Fixed and
+    improved filtering of driver information from printer model names
+    to clean list of printer models. Now more types of version numbers
+    are removed and model names are not so easily broken, like for
+    example "PSC" was converted to "C" (LP: #205107).
+  * debian/patches/20_laserjet-1200-1300-no-postscript.patch: For HP LaserJet
+    12xx/13xx prefer HPIJS over PostScript, as they do not have enough
+    memory to render complex graphics with their on-board PostScript
+    interpreter. This is a workaround for the time being until HP fixes
+    this in the HPLIP-generated PPDs (LP: #172550).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Sun, 23 Mar 2008 23:59:37 +0100
+
+system-config-printer (0.7.81+svn1976-0ubuntu3) hardy; urgency=low
+
+  * Add 11_no_kde_autostart.diff to not autostart in KDE (we have
+    system-config-printer-applet-kde now)
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Wed, 12 Mar 2008 15:49:45 +0000
+
+system-config-printer (0.7.81+svn1976-0ubuntu2) hardy; urgency=low
+
+  * Drop dependency on python-xml.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 27 Feb 2008 12:55:53 +0000
+
+system-config-printer (0.7.81+svn1976-0ubuntu1) hardy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1799
+     o Several improvements on the new troubleshooting function
+     o Minor fixes
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 14 Feb 2008 01:30:37 +0100
+
+system-config-printer (0.7.80+svn1942-0ubuntu2) hardy; urgency=low
+
+  * debian/system-config-printer-common.install,
+    debian/system-config-printer-gnome.install: Added missing files to the
+    lists.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 06 Feb 2008 23:40:14 +0100
+
+system-config-printer (0.7.80+svn1942-0ubuntu1) hardy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1799
+     o Added infrastructure for automatic printer driver download from
+       the OpenPrinting web site.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 05 Feb 2008 14:20:14 +0100
+
+system-config-printer (0.7.78+svn1799-0ubuntu2) hardy; urgency=low
+
+  * Arrange for a second frontend, split package into -common and
+    -gnome, -kde is a separate source for now but will be included in
+    the future
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Thu, 24 Jan 2008 11:24:13 +0000
+
+system-config-printer (0.7.78+svn1799-0ubuntu1) hardy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1799
+     o Made assignment of PPDs to auto-detected printers more reliable,
+       especially for Bluetooth and network printers. This is done by
+       supporting weird auto-detection output of CUPS backends, as
+       "Unknown" for make and model but useful info field, device ID
+       for Bluetooth not identical with device ID for USB/parallel, no
+       manufacturer name in make-and-model field, case-insensitive search
+       when cleaning model name.
+     o Handle the manufacturer name "KONICA MINOLTA" correctly (LP: #64046).
+     o If the OpenPrinting database (foomatic-db) recommends a non-PostScript
+       driver, use this driver, even if there is a vendor PPD for the
+       PostScript mode (HP LaserJet 12xx/13xx, LP: #172550).
+     o Allow listing of all files in file chooser dialog for selecting a
+       custom PPD file (LP: #153585).
+  * debian/control: Added missing dependencies: python-gnome2 and
+    gnome-icon-theme (LP: #176929).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 07 Jan 2008 16:44:22 +0000
+
+system-config-printer (0.7.78+svn1792-0ubuntu1) hardy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1792
+     o Fixed crasher bugs: LP: #149393, LP: #159212, LP: #173115, LP: #175500.
+     o Behave gracefully if CUPS is not running.
+     o Do not force waiting windows to be on top of other application's
+       windows (LP: #175766).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 21 Dec 2007 15:21:48 +0000
+
+system-config-printer (0.7.78+svn1771-0ubuntu1) hardy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1771
+     o Added support for setting up queues pointing to Mac OS X printers,
+       detected with the dnssd CUPS backend.
+     o Allow deleting of remote queues, so that queues pointing to Mac OS X
+       printers can get deleted again.
+     o Fixed handling of auto-detected IPP queues in the "New printer" wizard.
+     o Fixed traceback when creating a raw queue.
+     o Fixed "New Printer" notifications after they got broken by the icon 
+       hiding changes for LP: #151360 and LP: #156816.
+     o For C/POSIX locale, show only English PPDs.
+     o Include PPD language in driver description (LP: #161037).
+     o If there are no jobs but there is a printer warning/error indicated
+       by the tray icon, set the icon tooltip to the reason description.
+     o In the printer status window fix columns so that the full printer name
+       can be seen.
+     o Set printer icon in "Connect" dialog.
+     o Set AboutDialog logo by icon name, set URL and email hooks, set icon
+       (LP: #165101).
+     o In the printer status window set Ctrl+R accelerator for Refresh menu 
+       entry (LP: #137984).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 03 Dec 2007 21:40:08 +0000
+
+system-config-printer (0.7.78+svn1751-0ubuntu1) hardy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1751
+     o Performance improvements for detecting printers in the "New Printer"
+       wizard.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 27 Nov 2007 16:54:24 +0000
+
+system-config-printer (0.7.78+svn1740-0ubuntu1) hardy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1740
+     o Do not require PNG format for desktop icons (LP: #152634)
+     o Applet: Throttle the rate of checking for jobs or error messages when in
+       start-up mode. This prevents the applet being a nuisance when a large
+       number of CUPS administration operations are performed in a batch.
+     o Be more tolerant on failures to obtain printer info from CUPS.
+     o Better check for whether the CUPS server is local.
+     o Better methods to find default printer.
+     o Applet: Allow the tray icon to reappear on the next print job when the
+       user has hidden the applet icon with right-click -> "Hide" (LP: #156816).
+     o Applet: Hide icon automatically when print job ends (LP: #151360).
+  * debian/patches/10_menu_entries.patch: Regenerated.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 22 Nov 2007 17:02:25 +0000
+
+system-config-printer (0.7.77+svn1699-0ubuntu1) hardy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1699
+     o Fix job manager appearing untrunslated (LP: #149572)
+     o system-config-printer did not respect the user configuration for the
+       appearance of the toolbar (LP: #135844)
+     o Use standard icon for menus and system tray, so that they get themable
+       and scalable (LP: #152634)
+     o Tooltips for the button bar
+     o Improvements of layout for IPP and TCP/Socket devices in New Printer
+       wizard
+  * debian/patches/20_match_more_printers.patch: Removed, fixed upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 08 Nov 2007 00:53:16 -0700
+
+system-config-printer (0.7.75+svn1653-0ubuntu2) gutsy; urgency=low
+
+  * debian/patches/10_menu_entries.patch: Let menu entry for displaying
+    queued jobs appear in the "Accessories" menu and not under "Systemn
+    Tools". "Systemn Tools" is KDE-specific (LP: #149529).
+  * debian/patches/20_match_more_printers.patch: Do best match by
+    "most important word" case-insensitive. This matches especially
+    the Canon printers correctly with the Gutenprint PPDs (LP: #149264).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri,  5 Oct 2007 18:46:02 +0100
+
+system-config-printer (0.7.75+svn1653-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1653
+     o Set sensitivity of the 'Allow printing from the Internet' checkbox
+       in the server settings correctly (LP: #146471).
+     o Fixed typo (LP: #148022).
+     o Wrap explanation text for 'Other Options' on the 'Job options' tab 
+       (LP: #148010).
+     o Fixed traceback (LP: #139192).
+     o Disable the Set Default button when there are no printers available
+       (LP: #146925).
+     o Disable the Connect button when the server name is empty (LP: #147450).
+     o Make 'Default Printer' tool appearing translated (LP: #147788).
+  * debian/patches/10_menu_entries.patch: Let menu entries appearing
+    translated (LP: #147782) and let menu entry for displaying the jobs
+    in the print queues appear (LP: #144113).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 03 Oct 2007 12:46:02 +0100
+
+system-config-printer (0.7.75+svn1628-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1628
+     o Convert floating point values to strings in a locale-safe manner
+       (Fixes LP: #145693)
+     o Let entry for the raw queue appear under the "Generic" printers.
+     o Just selecting printer type headings should not expand or collapse the
+       list, but activating them (double-clicking) should (LP: #144106).
+     o Do not allow test pages for raw queues (LP: #145098).
+     o ppds.py (PPDs._findBestMatchPPDs): Rather than just looking for
+       the longest initial match in model order, sort our model name into
+       the available models and look at the immediate neighbours.  Pick
+       the longest initial match from them (LP: #137580).
+     o Fixed foomatic recommended driver discovery
+     o Additional small fixes.
+  * debian/patches/01_no_rhpl.patch: Updated.
+  * debian/patches/03_makefile.patch: Removed, not needed any more.
+  * debian/control: Added missing dependency on python-gobject (Fixes
+    LP: #144592)
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 01 Oct 2007 10:19:28 +0100
+
+system-config-printer (0.7.75+svn1566-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1566
+     o Fixed crash when clicking on option reset buttons (LP: #135321)
+     o Made it possible to remove the "Orientatian" setting completely
+       by clicking its reset button (LP: #140887)
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 19 Sep 2007 19:17:50 +0100
+
+system-config-printer (0.7.75+svn1557-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1557
+     o Let IPP_TAG_NOVALUE attributes have Python value None instead of a
+       string (Fixes LP: #140887).
+     o Handle IPP_TAG_NOVALUE by translating it to a valid default value.
+  * debian/control: Updated "Maintainer:" field.
+  * debian/control: Require at least python-cups 1.9.27, so that
+    IPP_TAG_NOVALUE attributes get handled correctly.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 19 Sep 2007 14:36:40 +0100
+
+system-config-printer (0.7.75-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1549 - Release 0.7.75
+     o Fixed automatic driver selection, now for HP's PostScript printers
+       the appropriate PostScript PPDs get correctly selected when
+       automatically creating queues with hal-cups-utils. The workaround
+       in hal-cups-utils can get removed.
+     o When changing PPDs for a queue overtaking of the option settings
+       used with the former PPD is the default now.
+     o I18n update.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 18 Sep 2007 18:16:32 +0100
+
+system-config-printer (0.7.74+svn1539-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1539
+     o When a class is removed on the server, remove it from the user interface.
+     o Fixes on creating SMB print queues (queues pointing to Windows or Samba
+       server)
+     o Add "Installed Options" step to the add-printer wizard so that when
+       creating a print queue the user also configures the optional hardware
+       accessories (like extra trays, duplex unit, finishers, ...) correctly.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 18 Sep 2007 00:24:48 +0100
+
+system-config-printer (0.7.74+svn1504-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1504
+     o Let "make install" also install the new file gtk_treeviewtooltips.py
+       (Fixes LP: #138881).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 11 Sep 2007 15:10:18 +0100
+
+system-config-printer (0.7.74+svn1502-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1502
+     o Samba settings get saved into the URI now after editing the printer 
+       location (Fixes LP: #138226)
+     o Ignore OS error in my-default-printer (Fixes LP: #136403)
+     o SMB scan on demand in separate dialog (to avoide delay when selecting
+       SMB server in add-printer wizard if there are many Windows boxes in the 
+       network)
+     o Fixes several GUI inconsistencies
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 10 Sep 2007 13:41:39 +0100
+
+system-config-printer (0.7.73+svn1429-0ubuntu2) gutsy; urgency=low
+
+  * debian/control: Remove Conflicts/Replaces to gnome-cups-manager again.
+    update-manager now takes care of this, and the Conflicts: leads to
+    upgrading troubles (removing ubuntu-desktop). (LP: #107766)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 10 Sep 2007 07:36:55 +0200
+
+system-config-printer (0.7.73+svn1429-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1429
+     o Fixed display of warning message that a shared printer is not really
+       published due to the CUPS server settings. The message was not removed
+       when turning on printer sharing in the CUPS server setting. Fixes
+       LP: 132735
+     o Set decent default selection in the main window when
+       system-config-printer is started without options. Fixes LP: #132652
+     o Removed superfluous scrolledwindow+viewport set around the printer list.
+       Fixes: LP: #134427
+  * debian/control: Added "Depends: python-notify". Fixes LP: #129222
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 27 Aug 2007 10:20:22 +0100
+
+system-config-printer (0.7.71+-svn1418-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1418
+     o Search all SMB servers for a given domain via "nmblookup -R '<DOMAIN>'".
+       The former "smbclient -N -L //<DOMAIN IP>" is used as a fallback. Fixes
+       LP: #127152
+     o Made sure that all items in the tree list of SMB domains/servers/shares
+       have the little triangle to show the sub-item list, even before the
+       sub-items were scanned. Fixes LP: #127152
+     o Quote/Unquote all elements of the SMB device URIs, as spaces are
+       also allowed in SMB host and share names. Fixes LP: #128261
+     o Handle exceptions raised by the browse_smb_hosts() function if it
+       is called before the add-printer wizard window is open. Fixes
+       LP: #133573
+     o Scan SMB host list when in the main window the "Change" button for
+       the URI is clicked and the URI is an SMB URI. This way the list
+       of SMB domains/servers/shares in the dialog for setting the URI
+       does not stay empty.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 23 Aug 2007 09:27:43 +0100
+
+system-config-printer (0.7.71+-svn1415-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1415
+     o Search for SMB servers not only via "nmblookup -M -- -" but also with
+       "nmblookup '*'" (LP: #127152).
+     o Take into account that SMB share names can have spaces when scanning
+       network for SMB-provided printers (LP: #128261).
+     o Make sure that in case of the detected printer being unknown always
+       the text-only printer is pre-selected (LP: #102389).
+     o Let the generic PostScript PPD coming with CUPS have a higher priority
+       than the generic PostScript PPD of Foomatic.
+     o Fixed a traceback when trying to find a PPD for a printer with no
+       digits in the model name and where the model name does not match
+       any of the PPDs exactly.
+  * debian/control: Added "Recommends: hal-cups-utils" (LP: #132994).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 21 Aug 2007 17:51:44 +0100
+
+system-config-printer (0.7.71+-svn1410-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1410
+     o Allow textonly.ppd and postscript.ppd (for fallback on
+       unknown printer models) to be at any arbitrary place in the PPD
+       file directories
+     o Fall back to postscript.ppd if no textonly.ppd is available.
+     o If no match is found at all, try searching for the model ID word,
+       with decreasing significant figures (fixes LP: #131990).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Thu, 16 Aug 2007 17:05:09 +0100
+
+system-config-printer (0.7.71+-svn1406-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1406
+     o Fixes: LP: #131848 LP: #132227
+     o Redraw issues fixed and "Please wait" messages added for the device
+       scanning and PPD list reading
+     o Improved model matching by ignoring "Series" in model names
+     o Allow custom test pages
+     o Make system-config-printer also working on systems without local
+       CUPS daemon
+  * debian/patches/04_custom_test_pages.patch,
+    debian/patches/20_support_cups_nonroot.patch: Removed, merged upstream.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 15 Aug 2007 16:06:42 +0100
+
+system-config-printer (0.7.71+-svn1399-0ubuntu2) gutsy; urgency=low
+
+  * Resurrect debian/patches/20_support_cups_nonroot.patch: It is still useful
+    for talking to remote cups servers without starting s-c-p as root.
+  * Add debian/patches/04_custom_test_pages.patch: Read the paper size from
+    current PPD and if there is a file /usr/share/s-c-p/testpage-<papersize.ps>,
+    use that as a test page. Otherwise fall back to cups' default one.
+  * Add debian/local/testpage-{a4,letter}.ps: Ubuntu specific test pages
+    (taken from gnome-cups-manager). Fixed the A4 version to actually be A4.
+  * Add debian/system-config-printer.install: Install the test pages.
+  * debian/control: Conflicts:/Replaces: to gnome-cups-manager, so that we do
+    not end up with two configuration UIs on upgrades. This is harsh and
+    blunt, but *shrug*. (LP: #107766)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 15 Aug 2007 16:30:31 +0200
+
+system-config-printer (0.7.71+-svn1399-0ubuntu1) gutsy; urgency=low
+
+  [ Till Kamppeter ]
+  * New upstream release
+     o Subversion snapshot r1399
+     o GUI improvements on add-printer wizard
+  * debian/patches/66_os_environ.patch: Removed, merged upstream
+  * debian/patches/20_support_cups_nonroot.patch: Rediff
+
+  [ Martin Pitt ]
+  * Drop 20_support_cups_nonroot.patch. Our cups runs as root now, so this is
+    not necessary any more.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 15 Aug 2007 13:14:17 +0200
+
+system-config-printer (0.7.71+-svn1371-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Subversion snapshot r1371
+  * debian/patches/50_my_default_printer_fix_system_default.patch,
+    debian/patches/60_device_handling_improvements.patch,
+    debian/patches/65_device_entry_sorting.patch: Removed (merhed upstream)
+  * debian/patches/66_os_environ.patch: Replaced a wrong "sys.environ()" by
+    the correct "os.environ" call.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon, 06 Aug 2007 18:58:14 +0100
+
+system-config-printer (0.7.71-0ubuntu2) gutsy; urgency=low
+
+  * debian/patches/60_device_handling_improvements.patch,
+    debian/patches/65_device_entry_sorting.patch:
+    Vastly improved handling of detected devices
+     o If an auto-detected device (USB, network) is supported by HPLIP
+       only the HPLIP URIs are shown, to assure that the user gets it
+       correctly set up to get access to the complete functionality
+     o For auto-detected network MF devices from HP also an entry
+       for setting up the fax queue is shown
+     o Make and model info of auto-detected network printers is used to
+       direct the user to the correct PPD/driver
+     o For manually entered printers make and model are determined via
+       SNMP. It is also checked whether the printer is supported by HPLIP
+     o No "HP Fax" entry any more when no Fax-capable HP printer is
+       connected.
+     o When selecting an auto-detected non-HPLIP network printer the
+       fields of the form on the right are correctly prefilled now.
+     o Improved sorting of the device list entries.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 03 Aug 2007 19:31:52 +0100
+
+system-config-printer (0.7.71-0ubuntu1) gutsy; urgency=low
+
+  * New upstream release
+     o Merged patches 10_ppd_init_make_model_list.patch,
+       30_return_default_ppd.patch and
+       40_improve_ppd_driver_selection.patch upstream.
+     o Handle "socket://..." URIs in a better way (LP: #127074)
+     o Moved default printer label below make-default button because some
+       translation strings are very long (LP: #128263)
+     o my-default-printer: Catch exceptions and error out (LP: #129901)
+  * Removed patches which were merged upstream.
+  * 50_my_default_printer_fix_system_default.patch: Fixed "System Default"
+    button in my-default-printer.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Fri, 03 Aug 2007 19:31:52 +0100
+
+system-config-printer (0.7.70-1ubuntu4) gutsy; urgency=low
+
+  * debian/patches/40_improve_ppd_driver_selection.patch: Added missing
+    variable initialization.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed,  1 Aug 2007 19:05:20 +0100
+
+system-config-printer (0.7.70-1ubuntu3) gutsy; urgency=low
+
+  * debian/patches/40_improve_ppd_driver_selection.patch: Improved the
+    automatic selection of the preferred printer driver/PPD file. This is
+    especially important for the non-interactive automatic printer setup
+    via hal-cups-utils.
+
+    One important change (besides driver type priority changes) is that
+    now both PPDs assigned via IEEE-1284 device ID and PPDs assigned by
+    simple make/model matching are treated in the same level. With this
+    HP's PostScript PPDs (do not contain device IDs) can be preferred
+    against HP's HPIJS (PCL 5c/e) PPDs.
+
+    Improvements:
+     o HP PostScript printers are set up with HP's PostScript PPDs and
+       not with the HPIJS PPDs (PCL 5c/e).
+     o The HP LaserJet 1022 is now set up with "foo2zjs" as recommended
+       by OpenPrinting, not with HPIJS. Als other HP printers where a
+       non-HPIJS driver is recommended are set up correctly now.
+     o Samsung SPL2 printers are set up with SpliX and not with the "gdi"
+       (SPL1) driver now.
+     o The recognition of drivers which came with CUPS is adapted to
+       Ubuntu Linux now.
+     o There was no distinction between the full-feature and simplified
+       Gutenprint drivers of the CUPS raster type.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 30 Jul 2007 19:05:20 +0100
+
+system-config-printer (0.7.70-1ubuntu2) gutsy; urgency=low
+
+  * debian/patches/30_return_default_ppd.patch: Fix output of a default
+    PPD file if the /usr/lib/hal-cups-utils/hal_lpadmin script (triggered
+    by HAL, from hal-cups-utils package) is supplying auto-detection data
+    of an unknown printer.
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 24 Jul 2007 21:49:20 +0100
+
+system-config-printer (0.7.70-1ubuntu1) gutsy; urgency=low
+
+  * Merged with Debian unstable.
+  * debian/control: Added "xmlto" to the "Build-Depends:" line.
+  * debian/patches/10_ppd_init_make_model_list.patch: Fixed missing
+    initialization of make/model list (bug in upstream code)
+  * debian/patches/20_support_cups_nonroot.patch: Added support for CUPS
+    running as non-root user
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 24 Jul 2007 12:59:20 +0100
+
+system-config-printer (0.7.70-1) unstable; urgency=low
+
+  * New Upstream Version
+
+ -- Otavio Salvador <otavio@ossystems.com.br>  Sun, 15 Jul 2007 20:47:12 -0300
+
+system-config-printer (0.7.69-1) unstable; urgency=low
+
+  * New Upstream Version
+  * debian/watch: Use git-import-orig instead of uupdate so it integrates
+    better with our git repository.
+  * debian/rules: Drop the code to fix the executable permissions on
+    /usr/share since it's being done properly on upstream tarball.
+
+ -- Otavio Salvador <otavio@ossystems.com.br>  Wed, 04 Jul 2007 12:42:36 -0300
+
+system-config-printer (0.7.66-1) unstable; urgency=low
+
+  [ This package has been done using 0.7.62-0ubuntu1 sources as
+    base. Thanks to Jani Monoses <jani@ubuntu.com> by his work on it ]
+
+  * debian/copyright: Update download URI.
+  * debian/watch: Add to allow easier upgrade of package version.
+  * debian/control: Remove versioned dependency of python-cups.
+  * debian/rules, debian/control: Move from python-central to python-support.
+  * debian/rules: Fix, by hard, wrong executable permissions on /usr/share.
+
+ -- Otavio Salvador <otavio@ossystems.com.br>  Wed, 04 Jul 2007 12:33:01 -0300
+
+system-config-printer (0.7.62-0ubuntu1) feisty; urgency=low
+
+  * New upstream release
+     fixes bugs, in particular crash on browsing SMB (LP #65834)
+  * debian/patches/02_interpreter_path.patch
+    debian/patches/05_desktop_file.patch: drop them, fixed upstream
+
+ -- Jani Monoses <jani@ubuntu.com>  Tue,  3 Apr 2007 20:07:37 +0300
+
+system-config-printer (0.7.60-0ubuntu2) feisty; urgency=low
+
+  * debian/rules:
+     Use langpack.mk to integrate with Rosetta 
+
+ -- Jani Monoses <jani@ubuntu.com>  Tue, 27 Mar 2007 20:54:07 +0300
+
+system-config-printer (0.7.60-0ubuntu1) feisty; urgency=low
+
+  * New upstream release
+     add notification area icon for jobs
+     fix various bugs inlcuding LP #95629
+  * debian/control:
+     depend on python-cups 1.9.19
+  * debian/patches/06_tmpfile_remove_crasher.patch:
+     drop, part of the release
+  * merge existing patches
+
+ -- Jani Monoses <jani@ubuntu.com>  Tue, 27 Mar 2007 20:15:03 +0300
+
+system-config-printer (0.7.56-0ubuntu1) feisty; urgency=low
+
+  * New upstream release
+     bugfixes, including LP #87115
+     support new job options
+  * debian/control:
+     require python-cups 1.9.18
+  * debian/patches/06_tmpfile_remove_crasher.patch:
+     patch from upstream CVS to fix crash (LP #92914)
+
+ -- Jani Monoses <jani@ubuntu.com>  Wed, 21 Mar 2007 16:46:38 +0200
+
+system-config-printer (0.7.55-0ubuntu1) feisty; urgency=low
+
+  * New upstream release in sync with FC7
+     bugfixes including crasher (LP #86554 and duplicates)
+     add GUI for more printer options
+  * debian/patches/01_no_rhpl.patch:
+     drop a few hunks that were taken upstream  
+  * debian/patches/05_desktop_file.patch:
+     change to icon to printer.png from cupsprinter.png in desktop file (LP #85652)
+
+ -- Jani Monoses <jani@ubuntu.com>  Mon, 12 Mar 2007 16:13:31 +0200
+
+system-config-printer (0.7.51-0ubuntu1) feisty; urgency=low
+
+  * New upstream release:
+     fix crash when setting network printer as default (LP #84842)
+  * debian/control:
+     add dependency on python-glade2
+
+ -- Jani Monoses <jani@ubuntu.com>  Tue, 13 Feb 2007 07:33:28 +0200
+
+system-config-printer (0.7.49-0ubuntu1) feisty; urgency=low
+
+  * New upstream release in sync with Fedora Core 6 updates
+  * debian/control:
+      depend on python-cups (>= 1.9.17)
+
+ -- Jani Monoses <jani@ubuntu.com>  Wed, 24 Jan 2007 10:08:24 +0200
+
+system-config-printer (0.7.39-0ubuntu1) feisty; urgency=low
+
+  * New upstream release
+  * debian/patches/04_cvs_fix_password_entry.patch: dropped.
+  * debian/control:
+      depend on python-cups (>= 1.9.15)
+      fix typo caught by lintian: depend on debhelper (>= 5.0.37.2)
+      not (>= 5.0.32.7) for Python policy support
+                     
+ -- Jani Monoses <jani@ubuntu.com>  Thu, 23 Nov 2006 16:41:52 +0200
+
+system-config-printer (0.7.32-0ubuntu2) edgy; urgency=low
+
+  * debian/patches/04_cvs_fix_password_entry.patch:
+     Fix invisible char in password dialog, patch from upstream CVS
+  * Install to /usr/bin not /usr/sbin.
+  * Add categories to desktop file
+
+ -- Jani Monoses <jani@ubuntu.com>  Wed, 11 Oct 2006 18:57:21 +0300
+
+system-config-printer (0.7.32-0ubuntu1) edgy; urgency=low
+
+  * New upstream tracking Fedora Core 6 package, fixes several upstream bugs
+  * debian/control: bump python-cups dependency version to 1.9.13
+
+ -- Jani Monoses <jani@ubuntu.com>  Tue, 10 Oct 2006 14:29:39 +0300
+
+system-config-printer (0.7.27-0ubuntu1) edgy; urgency=low
+
+  * Initial package of Fedora Core 6 printer config tool
+  * debian/01_no_rhpl.patch:
+         - drop in copy of Conf.py from the RHPL library used by all
+           Fedora config tools as we do not have it packaged yet.
+         - use standard gettext module instead of rhpl.translate throughout
+  * debian/02_interpreter_path.patch:
+         - replace occurences of '#!/bin/env python' with '#!/usr/bin/python'
+  * debian/03_makefile.patch:
+         - change Makefile.in to include Conf.py in the install targets, and
+           to drop some categories passed to desktop-file-install which make
+           it fail on Ubuntu. (Did not change Makefile.am and autoreconf as it's
+           much cleaner this way, the diff being very small)
+
+ -- Jani Monoses <jani@ubuntu.com>  Fri,  8 Sep 2006 12:08:23 +0300
+

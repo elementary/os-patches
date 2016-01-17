@@ -1,0 +1,25 @@
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.3.0+20110216//print-applet.desktop.in system-config-printer-1.3.0+20110216.new//print-applet.desktop.in
+--- system-config-printer-1.3.0+20110216//print-applet.desktop.in	2011-02-16 23:25:01.000000000 +0100
++++ system-config-printer-1.3.0+20110216.new//print-applet.desktop.in	2011-02-17 00:46:18.808862944 +0100
+@@ -6,6 +6,7 @@
+ Terminal=false
+ Type=Application
+ Icon=printer
+-NotShowIn=KDE;
++NotShowIn=KDE;LXDE;
+ StartupNotify=false
+ X-GNOME-Autostart-Delay=30
++X-Ubuntu-Gettext-Domain=system-config-printer
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.3.0+20110216//system-config-printer.desktop.in system-config-printer-1.3.0+20110216.new//system-config-printer.desktop.in
+--- system-config-printer-1.3.0+20110216//system-config-printer.desktop.in	2011-02-16 23:25:01.000000000 +0100
++++ system-config-printer-1.3.0+20110216.new//system-config-printer.desktop.in	2011-02-17 00:46:18.808862944 +0100
+@@ -7,3 +7,9 @@
+ Type=Application
+ Icon=printer
+ StartupNotify=true
++NotShowIn=KDE;GNOME;
++X-Ubuntu-Gettext-Domain=system-config-printer
++Categories=GNOME;GTK;Settings;HardwareSettings;X-GNOME-Settings-Panel;X-Unity-Settings-Panel;
++X-GNOME-Settings-Panel=printing
++X-Unity-Settings-Panel=printing
++Keywords=Printer;Queue;Print;Paper;Ink;Toner;

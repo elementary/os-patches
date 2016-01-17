@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.4"
+before_install:
+  - "sudo apt-get update -qq"
+install:
+  - "sudo apt-get install -y intltool xmlto desktop-file-utils libcups2-dev"
+script: ./bootstrap && ./configure && make && make check && make distcheck
+notifications:
+  email: false

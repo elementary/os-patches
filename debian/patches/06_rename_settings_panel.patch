@@ -1,0 +1,22 @@
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.4.1/system-config-printer.desktop.in system-config-printer-1.4.1.new/system-config-printer.desktop.in
+--- system-config-printer-1.4.1/system-config-printer.desktop.in	2013-08-27 18:13:51.148268964 +0200
++++ system-config-printer-1.4.1.new/system-config-printer.desktop.in	2013-08-27 18:18:45.132267517 +0200
+@@ -1,5 +1,5 @@
+ [Desktop Entry]
+-_Name=Print Settings
++_Name=Printers
+ _Comment=Configure printers
+ Exec=system-config-printer
+ Terminal=false
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.4.1/system-config-printer.py system-config-printer-1.4.1.new/system-config-printer.py
+--- system-config-printer-1.4.1/system-config-printer.py	2013-05-09 13:10:45.000000000 +0200
++++ system-config-printer-1.4.1.new/system-config-printer.py	2013-08-27 18:17:14.140267965 +0200
+@@ -664,7 +664,7 @@
+         connected = bool(self.cups)
+ 
+         host = CUPS_server_hostname ()
+-        self.PrintersWindow.set_title(_("Print Settings - %s") % host)
++        self.PrintersWindow.set_title(_("Printers - %s") % host)
+ 
+         if connected:
+             status_msg = _("Connected to %s") % host

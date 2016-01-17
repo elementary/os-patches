@@ -1,0 +1,51 @@
+Source: system-config-printer
+Section: gnome
+Priority: optional
+Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Otavio Salvador <otavio@ossystems.com.br>
+Build-Depends: cdbs (>= 0.4.43), debhelper (>= 5.0.37.2), dh-autoreconf, python3-all-dev (>= 3.0.0), libxml-parser-perl, desktop-file-utils (>= 0.18-0ubuntu7), xmlto, libusb-1.0-0-dev, libudev-dev, libcups2-dev, libglib2.0-dev, udev
+Standards-Version: 3.7.2
+X-Python-Version: >= 3.0
+
+Package: system-config-printer-common
+Architecture: all
+Depends: ${shlibs:Depends}, ${python3:Depends}, python3-cups (>= 1.9.60), python3-smbc, python3-dbus, python3-cupshelpers
+Recommends: system-config-printer-udev, avahi-utils
+Conflicts: system-config-printer, system-config-printer-kde (< 0.09ubuntu1)
+Replaces: system-config-printer, system-config-printer-gnome (<< 1.3.11+20120807-0ubuntu7)
+Description: Printer configuration GUI
+ A CUPS printer configuration tool and status applet.
+ .
+ This package provides common files used by both frontends.
+
+Package: system-config-printer-udev
+Architecture: any
+Depends: ${shlibs:Depends}, ${python3:Depends}, python3-cups (>= 1.9.55), python3-dbus, python3-cupshelpers
+Recommends: ippusbxd
+Description: Printer auto-configuration facility based on udev
+ A CUPS printer configuration tool and status applet.
+ .
+ This package provides udev rules and callouts for auto-setup of
+ print queues (Plug'n'Print) and for automatic disabling and
+ re-enabling print queues when the printer gets disconnected and
+ reconnected.
+
+Package: system-config-printer-gnome
+Architecture: all
+Depends: ${shlibs:Depends}, ${python3:Depends}, system-config-printer-common (>= 1.3.11+20120807-0ubuntu7), python3-gi, adwaita-icon-theme, python3-lxml, python3-requests, python3-cairo, gir1.2-notify-0.7, gir1.2-gdkpixbuf-2.0, gir1.2-glib-2.0, gir1.2-packagekitglib-1.0, gir1.2-gnomekeyring-1.0, gir1.2-gtk-3.0, gir1.2-notify-0.7, gir1.2-pango-1.0, packagekit-system-interface
+Conflicts: system-config-printer
+Breaks: system-config-printer-common (<< 1.5.7+20150819-0ubuntu5)
+Replaces: system-config-printer, system-config-printer-common (<< 1.5.7+20150819-0ubuntu5)
+Description: Printer configuration GUI
+ A CUPS printer configuration tool and status applet.
+ .
+ This package provides the GTK frontend.
+
+Package: python3-cupshelpers
+Architecture: all
+Depends: ${shlibs:Depends}, ${python3:Depends}, python3-requests
+Replaces: python-cupshelpers (<< 1.5.0+20140805-0ubuntu3)
+Breaks: python-cupshelpers (<< 1.5.0+20140805-0ubuntu3)
+Description: Python modules for printer configuration with CUPS
+ Python modules for printer configuration with CUPS. The modules have no GUI
+ and can therefore also be used on headless servers or by background processes.

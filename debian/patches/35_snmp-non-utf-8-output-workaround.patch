@@ -1,0 +1,17 @@
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.5.7+20150819/newprinter.py system-config-printer-1.5.7+20150819.new/newprinter.py
+--- system-config-printer-1.5.7+20150819/newprinter.py	2015-09-10 17:04:23.498491971 -0300
++++ system-config-printer-1.5.7+20150819.new/newprinter.py	2015-09-10 17:07:39.160310495 -0300
+@@ -2181,7 +2181,12 @@
+                 pass
+ 
+             if stdout != None:
+-                line = stdout.decode ().strip ()
++                try:
++                    line = stdout.decode ('utf-8').strip ()
++                except UnicodeDecodeError:
++                    # Work-around snmp backend output encoded as iso-8859-1 (despire RFC 2571).
++                    # If it's neither iso-8859-1, make a best guess by ignoring problematic bytes.
++                    line = stdout.decode (encoding='iso-8859-1', errors='ignore').strip ()
+                 words = probe_printer.wordsep (line)
+                 n = len (words)
+                 if n < 4:

@@ -1,0 +1,14 @@
+[Unit]
+Description=Automatic USB/Bluetooth printer setup (%i)
+
+[Service]
+#Type=simple
+Type=forking
+GuessMainPID=true
+ExecStart=/lib/udev/udev-configure-printer add %I
+# This ExecStop would be useful to disable the print queue when ippusbxd
+# crashes or gets killed, but in the case that ippusbxd does not get started
+# at all during the process run by ExecStart (printer does not support
+# IPP-over-USB) ExecStop gets run immediately making a printer getting
+# disabled again right after it getting enabled or set up
+# ExecStop=/lib/udev/udev-configure-printer remove %I

@@ -1,0 +1,12 @@
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.5.7+20150819/newprinter.py system-config-printer-1.5.7+20150819.new/newprinter.py
+--- system-config-printer-1.5.7+20150819/newprinter.py	2015-08-19 00:11:18.000000000 -0300
++++ system-config-printer-1.5.7+20150819.new/newprinter.py	2015-08-19 01:30:15.882567557 -0300
+@@ -1420,7 +1420,7 @@
+             try:
+                 pk = installpackage.PackageKit ()
+                 # The following call means a blocking, synchronous, D-Bus call
+-                pk.InstallPackageName (0, 0, "samba-client")
++                pk.InstallPackageName (0, 0, "smbclient")
+             except:
+                 nonfatalException ()
+ 
