@@ -1,11 +1,54 @@
-grub2 (2.02~beta2-32ubuntu1) xenial; urgency=medium
+grub2 (2.02~beta2-35) unstable; urgency=medium
 
+  * Apply the arm64 -mpc-relative-literal-loads workaround in configure
+    rather than in debian/rules, to cope with toolchains that don't have the
+    relevant patch applied.
+
+ -- Colin Watson <cjwatson@debian.org>  Fri, 22 Jan 2016 11:02:10 +0000
+
+grub2 (2.02~beta2-34) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Remove duplicate Replaces on grub-ieee1275 (<< 2.00-4) from
+    grub2-common.
+  * Refer to /usr/share/common-licenses/GPL-3 rather than
+    /usr/share/common-licenses/GPL.
+  * Cherry-pick upstream patches to add more ACPI opcodes to acpihalt
+    (closes: #766853, LP: #1530648).
+  * Drop build-dependency on libusb-dev, since it was currently unused in
+    any case; also explicitly configure with --disable-grub-emu-usb to avoid
+    possible future ambiguity (closes: #810421).
+  * Use dpkg-maintscript-helper to convert directories to symlinks in
+    various upgrade cases, in place of hand-coded equivalents.
+  * Change versioned Conflicts from grub-common and grub2-common into Breaks
+    or Breaks+Replaces as appropriate.
+  * Remove pragmas related to -Wunreachable-code (closes: #812047).
+  * Temporarily work around arm64 build failure with gcc-5 >= 5.3.1-4 using
+    -mpc-relative-literal-loads.
+  * Backport various ZFS improvements from trunk (closes: #706415, #772797;
+    LP: #1451476, #1530457).
+
+  [ Didier Roche ]
+  * Use new plymouth theme path to set grub theme configuration.
+
+ -- Colin Watson <cjwatson@debian.org>  Fri, 22 Jan 2016 10:03:00 +0000
+
+grub2 (2.02~beta2-33) unstable; urgency=high
+
+  [ Mathieu Trudel-Lapierre ]
   * Cherry-picks to better handle TFTP timeouts on some arches: (LP: #1521612)
     - (7b386b7) efidisk: move device path helpers in core for efinet
     - (c52ae40) efinet: skip virtual IP devices when enumerating cards
     - (f348aee) efinet: enable hardware filters when opening interface
 
- -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 03 Dec 2015 15:03:46 -0500
+  [ Lee Trager ]
+  * Add raid5rec and raid6rec to signed EFI images (closes: #807385).
+
+  [ Colin Watson ]
+  * CVE-2015-8370: Fix authentication bypass via backspace integer underflow
+    (closes: #808122).
+
+ -- Colin Watson <cjwatson@debian.org>  Wed, 16 Dec 2015 09:46:22 +0000
 
 grub2 (2.02~beta2-32) unstable; urgency=medium
 
