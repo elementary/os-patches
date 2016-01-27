@@ -1,3 +1,13 @@
+console-setup (1.108ubuntu10) xenial; urgency=medium
+
+  * debian/rules: Drop obsolete and no-op dh_installinit --upstart-only
+    option. (LP: #1519228)
+  * Add debian/keyboard-configuration.links to (statically) enable
+    console-setup.service. It is not being pulled in by plymouth any more, and
+  * console-setup.service: Set RemainAfterExit.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 11 Jan 2016 15:02:09 +0100
+
 console-setup (1.108ubuntu9) wily; urgency=medium
 
   * Cherry-pick fix from git for udpkg/Hurd noise in keyboard-configuration.

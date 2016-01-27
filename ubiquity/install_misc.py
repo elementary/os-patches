@@ -476,14 +476,21 @@ def archdetect():
 
 
 def is_secure_boot():
-    secureboot_efivar = subprocess.Popen(
-        ['od', '-An', '-t', 'u1',
-         os.path.join('/sys/firmware/efi/efivars',
-                      'SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c')],
-        stdout=subprocess.PIPE, universal_newlines=True)
-    answer = secureboot_efivar.communicate()[0].strip()
-    secureboot = answer.split(' ')[-1]
-    return (int(secureboot) == 1)
+    try:
+        secureboot = ''
+        secureboot_efivar = subprocess.Popen(
+            ['od', '-An', '-t', 'u1',
+             os.path.join('/sys/firmware/efi/efivars',
+                          'SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c')],
+            stdout=subprocess.PIPE, universal_newlines=True)
+        answer = secureboot_efivar.communicate()[0].strip()
+        if answer is not None:
+            secureboot = answer.split(' ')[-1]
+        if len(secureboot) > 0:
+            return (int(secureboot) == 1)
+        return False
+    except:
+        return False
 
 
 # TODO this can probably go away now.
