@@ -1,9 +1,16 @@
-grub2 (2.02~beta2-35ubuntu1) xenial; urgency=medium
+grub2 (2.02~beta2-36) unstable; urgency=medium
 
-  * debian/postinst.in, debian/kernel/zz-update-grub: Call systemd-detect-virt
-    instead of the Ubuntu specific running-in-container wrapper. (LP: #1539016)
+  [ Colin Watson ]
+  * Use HTTPS for Vcs-Git URL.
+  * Add zfs, zfscrypt, and zfsinfo to signed EFI images (LP: #1542358).
 
- -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 28 Jan 2016 14:25:14 +0100
+  [ Martin Pitt ]
+  * debian/postinst.in, debian/kernel/zz-update-grub: Call
+    systemd-detect-virt (which works under any init system, despite the
+    name) instead of the Ubuntu specific running-in-container wrapper.
+    (LP: #1539016)
+
+ -- Colin Watson <cjwatson@debian.org>  Fri, 05 Feb 2016 15:41:05 +0000
 
 grub2 (2.02~beta2-35) unstable; urgency=medium
 
