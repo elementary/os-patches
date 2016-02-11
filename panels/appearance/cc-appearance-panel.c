@@ -116,6 +116,7 @@ enum
 #define UNITY_LAUNCHER_GSETTINGS_SCHEMA "com.canonical.Unity.Launcher"
 #define UNITY_FAVORITES_KEY "favorites"
 #define UNITY_INTEGRATED_MENUS_KEY "integrated-menus"
+#define UNITY_ALWAYS_SHOW_MENUS_KEY "always-show-menus"
 #define SHOW_DESKTOP_UNITY_FAVORITE_STR "unity://desktop-icon"
 
 #define MIN_ICONSIZE 16.0
@@ -1682,7 +1683,6 @@ on_enable_showdesktop_changed (GtkToggleButton *button, gpointer user_data)
   g_ptr_array_add (newfavorites, NULL);
   g_settings_set_strv (priv->unity_launcher_settings, UNITY_FAVORITES_KEY, (const gchar **)newfavorites->pdata);
   g_ptr_array_free (newfavorites, TRUE);
-  
 }
 
 static gboolean
@@ -1712,8 +1712,9 @@ menulocation_widget_refresh (CcAppearancePanel *self)
   CcAppearancePanelPrivate *priv = self->priv;
 
   gboolean has_setting = unity_own_setting_exists (self, UNITY_INTEGRATED_MENUS_KEY);
-  gtk_widget_set_visible (WID ("unity_menus_box"), has_setting);
-  gtk_widget_set_visible (WID ("menu_separator"), has_setting);
+  gboolean has_menu_settings = has_setting && unity_own_setting_exists (self, UNITY_ALWAYS_SHOW_MENUS_KEY);
+  gtk_widget_set_visible (WID ("unity_menus_location_box"), has_setting);
+  gtk_widget_set_visible (WID ("unity_menus_box"), has_menu_settings);
 
   if (!has_setting)
     return;
@@ -1746,6 +1747,46 @@ on_menulocation_changed (GtkToggleButton *button, gpointer user_data)
 }
 
 static void
+menuvisibility_widget_refresh (CcAppearancePanel *self)
+{
+  CcAppearancePanelPrivate *priv = self->priv;
+
+  gboolean has_setting = unity_own_setting_exists (self, UNITY_ALWAYS_SHOW_MENUS_KEY);
+  gboolean has_menu_settings = has_setting && unity_own_setting_exists (self, UNITY_INTEGRATED_MENUS_KEY);
+  gtk_widget_set_visible (WID ("unity_menus_location_box"), has_setting);
+  gtk_widget_set_visible (WID ("unity_menus_box"), has_menu_settings);
+
+  if (!has_setting)
+    return;
+
+  gboolean value = g_settings_get_boolean (priv->unity_own_settings, UNITY_ALWAYS_SHOW_MENUS_KEY);
+
+  if (value)
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (WID ("unity_always_show_menus")), TRUE);
+  else
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (WID ("unity_auto_hide_menus")), TRUE);
+}
+
+static void
+ext_menuvisibility_changed_callback (GSettings* settings,
+                                   guint key,
+                                   gpointer user_data)
+{
+  menuvisibility_widget_refresh (CC_APPEARANCE_PANEL (user_data));
+}
+
+static void
+on_menuvisibility_changed (GtkToggleButton *button, gpointer user_data)
+{
+  CcAppearancePanel *self = CC_APPEARANCE_PANEL (user_data);
+  CcAppearancePanelPrivate *priv = self->priv;
+  gboolean always_show_menus = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (WID ("unity_always_show_menus")));
+
+  g_settings_set_boolean (priv->unity_own_settings, UNITY_ALWAYS_SHOW_MENUS_KEY, always_show_menus);
+  menuvisibility_widget_refresh (self);
+}
+
+static void
 on_restore_defaults_page2_clicked (GtkButton *button, gpointer user_data)
 {
   CcAppearancePanel *self = CC_APPEARANCE_PANEL (user_data);
@@ -1760,6 +1801,9 @@ on_restore_defaults_page2_clicked (GtkButton *button, gpointer user_data)
 
   if (unity_own_setting_exists (self, UNITY_INTEGRATED_MENUS_KEY))
     g_settings_reset (priv->unity_own_settings, UNITY_INTEGRATED_MENUS_KEY);
+
+  if (unity_own_setting_exists (self, UNITY_ALWAYS_SHOW_MENUS_KEY))
+    g_settings_reset (priv->unity_own_settings, UNITY_ALWAYS_SHOW_MENUS_KEY);
 
   GtkToggleButton *showdesktop = GTK_TOGGLE_BUTTON (WID ("check_showdesktop_in_launcher"));
   gtk_toggle_button_set_active(showdesktop, TRUE);
@@ -1913,6 +1957,15 @@ setup_unity_settings (CcAppearancePanel *self)
   g_signal_connect (WID ("unity_local_menus"), "toggled",
                      G_CALLBACK (on_menulocation_changed), self);
   menulocation_widget_refresh (self);
+
+  /* Menu visibility */
+  g_signal_connect (priv->unity_own_settings, "changed::" UNITY_ALWAYS_SHOW_MENUS_KEY,
+                    G_CALLBACK (ext_menuvisibility_changed_callback), self);
+  g_signal_connect (WID ("unity_always_show_menus"), "toggled",
+                     G_CALLBACK (on_menuvisibility_changed), self);
+  g_signal_connect (WID ("unity_auto_hide_menus"), "toggled",
+                     G_CALLBACK (on_menuvisibility_changed), self);
+  menuvisibility_widget_refresh (self);
 
   /* Restore defaut on second page */
   g_signal_connect (WID ("button-restore-unitybehavior"), "clicked",
