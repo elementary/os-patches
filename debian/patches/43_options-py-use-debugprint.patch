@@ -1,6 +1,6 @@
-diff -Nur -x '*.orig' -x '*~' system-config-printer-1.5.7+20150819/options.py system-config-printer-1.5.7+20150819.new/options.py
---- system-config-printer-1.5.7+20150819/options.py	2015-08-19 00:11:18.000000000 -0300
-+++ system-config-printer-1.5.7+20150819.new/options.py	2015-10-04 09:23:28.159345917 -0300
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.5.7+20160212/options.py system-config-printer-1.5.7+20160212.new/options.py
+--- system-config-printer-1.5.7+20160212/options.py	2016-02-12 23:12:30.000000000 -0200
++++ system-config-printer-1.5.7+20160212.new/options.py	2016-02-13 00:34:44.605281818 -0200
 @@ -19,6 +19,7 @@
  ## along with this program; if not, write to the Free Software
  ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -12,7 +12,7 @@ diff -Nur -x '*.orig' -x '*~' system-config-printer-1.5.7+20150819/options.py sy
 @@ -140,7 +141,7 @@
  
          if (type(self.widget) == Gtk.ComboBox and
-             self.widget.get_model () == None):
+             self.widget.get_model () is None):
 -            print("No ComboBox model for %s" % self.name)
 +            debugprint("No ComboBox model for %s" % self.name)
              model = Gtk.ListStore (str)
