@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="id">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Bertukar antara <app>penilik dokumen</app> dan <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Andika Triwidada</mal:name>
+      <mal:email>andika@gmail.com</mal:email>
+      <mal:years>2012, 2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Mencari dengan SyncTeX</title>
+<p>Setelah Anda <link xref="synctex-compile">mengkompail berkas TeX Anda dengan SyncTeX</link>, Anda akan dapat mencari. SyncTeX bahkan mendukung pencarian maju dan mundur dari suatu berkas yang disertakan.</p>
+
+<section id="forward-search">
+    <title>Pencarian maju: dari TeX ke PDF (dari <app>gedit</app> ke <app>penilik dokumen</app>)</title>
+     <p>Pencarian maju memungkinkan Anda mengklik pada seksi tertentu dari kode sumber TeX, dan melompat ke posisi terkait dalam PDF. Untuk melakukan pencarian maju:</p>
+<steps>
+<item>
+<p>Klik pada suatu baris dalam berkas TeX.</p>
+</item>
+<item>
+<p>Dalam <app>gedit</app>, klik <guiseq><gui>Alat</gui> <gui>Pencarian Maju</gui></guiseq>. Baris yang terkait dalam PDF akan dikelilingi rangka berwarna merah.</p>
+<p>Sebagai alternatif, Anda dapat menekan <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq>, atau <keyseq><key>Ctrl</key>klik kiri</keyseq>. Baris yang terkait dalam PDF akan dikelilingi rangka berwarna merah.</p>
+</item>
+</steps>
+<note>
+<p>Bila berkas PDF yang terkait tidak terbuka, melakukan pencarian maju akan membuka PDF dalam <app>penilik dokumen</app>.</p>
+</note>
+<p>Bila Anda memiliki suatu projek kompleks dengan beberapa berkas TeX Anda dapat meletakkan</p>
+<code>% mainfile: mainfile.tex</code>
+<p>pada baris pertama atau tiga baris terakhir dari setiap berkas TeX yang disertaka, maka pencarian maju akan bekerja. Pencarian mundur mesti selalu bekerja, bahkan bila Anda tak menambah baris mode.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Pencarian mundur: dari PDF ke TeX (dari<app>penilik dokumen</app> ke  <app>gedit</app>)</title>
+     <p>Pencarian mundur memungkinkan Anda mengklik pada baris tertentu dalam berkas PDF, dan melompat ke posisi terkait dalam kode sumber TeX.</p>
+<p>
+You can perform a backward search by pressing <keyseq><key>Ctrl</key>left click</keyseq> in the <app>document viewer</app>. The corresponding line in the TeX source code will be highlighted.
+     </p>
+</section>
+
+</page>

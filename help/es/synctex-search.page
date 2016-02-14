@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="es">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Alternar entre el <app>Visor de documentos</app> y <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Mustieles</mal:name>
+      <mal:email>daniel.mustieles@gmail.com</mal:email>
+      <mal:years>2012 - 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Jorge González</mal:name>
+      <mal:email>jorgegonz@svn.gnome.org</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Buscar con SyncTex</title>
+<p>Después de <link xref="synctex-compile">compilar su archivo TeX con SyncTex</link> podrá buscar. SyncTex soporta búsquedas hacia adelante y hacia atrás en un archivo incluido.</p>
+
+<section id="forward-search">
+    <title>Búsqueda hacia adelante: de TeX a PDF (de <app>gedit</app> al <app>Visor de documentos</app>)</title>
+     <p>La búsqueda hacia adelante le permite pulsar en una sección específica de un código fuente en TeX y saltar a la posición asociada en el PDF. Para realizar una búsqueda hacia adelante:</p>
+<steps>
+<item>
+<p>Pulse sobre una línea en el archivo TeX.</p>
+</item>
+<item>
+<p>En <app>gedit</app> pulse <guiseq><gui>Herramientas</gui><gui>Búsqueda hacia adelante</gui></guiseq>. Se resaltará en rojo la línea correspondiente en el PDF.</p>
+<p>Alternativamente, puede pulsar <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq>, o <key>Ctrl</key>+pulsación izquierda. Se subrayará en rojo la línea correspondiente del PDF.</p>
+</item>
+</steps>
+<note>
+<p>Si el archivo PDF correspondiente no está abierto, se abrirá en el <app>Visor de documentos</app> al realizar una búsqueda hacia adelante.</p>
+</note>
+<p>Si tiene un proyecto complejo con varios archivos TeX puede poner</p>
+<code>% mainfile: archivo_principal.tex</code>
+<p>ya sea en las tres primeras o tres últimas líneas de cada archivo TeX incluido y la búsqueda hacia adelante funcionará. La búsqueda hacia atrás siempre debería funcionar, incluso si no añade el modo de línea.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Búsqueda hacia atrás: de PDF a TeX (del <app>Visor de documentos</app> a <app>gedit</app>)</title>
+     <p>La búsqueda hacia atrás le permite pulsar en una línea específica en el archivo PDF y saltar a la línea asociada en el código fuente TeX.</p>
+<p>Puede realizar una búsqueda hacia atrás pulsando<keyseq><key>Ctrl</key>+pulsación izquierda</keyseq> en el <app>Visor de documentos</app>. Se resaltará la correspondiente línea en el código fuente TeX.</p>
+</section>
+
+</page>

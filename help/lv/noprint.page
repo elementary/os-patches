@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="lv">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Autors var būt uzlicis drukāšanas aizliegumus dokumentam.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0 licence</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Viesturs Ružāns</mal:name>
+      <mal:email>viesty@exs.lv</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Rūdolfs Mazurs</mal:name>
+      <mal:email>rudolfs.mazurs@gmail.com</mal:email>
+      <mal:years>2012, 2013</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Es nevaru izdrukāt dokumentu</title>
+<section id="why">
+ <title>Iespējamie iemesli problēmām drukājot</title>
+<p>Dokuments var netikt izdrukāts dēļ:</p>
+ <list>
+  <item><p>Printera problēmām, vai</p></item>
+  <item><p>PDF drukāšanas aizliegumiem.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Printera problēmas</title>
+  <p>Ir vairāki iemesli kāpēc printeris varētu nestrādāt. Piemēram, tam varētu vairs nebūs tintes vai papīra, tas varētu būt atvienots vai sabojāts.</p>
+
+  <p>Lai pārbaudītu, vai tavs printeris drukā pareizi:</p>
+  <steps>
+   <item><p>Spied uz sava vārda augšējā joslā un izvēlies <gui>Sistēmas iestatījumi</gui>.</p></item>
+   <item><p>Spied uz sava printera sarakstā.</p></item>
+   <item><p>Spiediet uz <gui>Izdrukāt testa lappusi</gui>. Vajadzētu tikt izdrukātai lapai.</p>
+<note>
+ <p>Ja tas neizdodas, lasi <link href="help:gnome-help/printing">Drukāšanas palīdzību</link>. Kā arī varētu noderēt printera pamācības izlasīšana.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>PDF drukāšanas ierobežojumi</title>
+  <p>Dažiem PDF dokumentiem ir iestatījumi, kuri aizliedz tev tos izdrukāt. Autori var uzstādīt šo aizliegumu, rakstot dokumentu. <app>Dokumentu skatītāja</app> pēc noklusējuma to ignorē, taču jums vajadzētu pārbaudīt, ka tas nav deaktivēts:</p>
+
+  <steps>
+    <item>
+      <p>Nospied <keyseq><key>Alt</key><key>F2</key></keyseq>, lai atvēru lietotņu palaišanas logu.</p>
+    </item>
+    <item>
+      <p>Ievadi <input>dconf-editor</input> teksta laukā un spied <gui>Palaist</gui>. Tiks atvērts konfigurācijas redaktors.</p>
+    </item>
+    <item><p>Aizej uz <sys>/org/gnome/evince</sys>, izmantojot sānu paneli.</p></item>
+    <item>
+      <p>Pārliecinies, ka <gui>override_restrictions</gui> opcija ir atzīmēta.</p>
+    </item>
+    <item>
+      <p>Ej atpakaļ uz <app>dokumentu skatītāju</app> un mēģini vēlreiz izdrukāt dokumentu.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

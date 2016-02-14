@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="es">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Línea de comandos</title>
+    <desc>El comando <cmd>evince</cmd> puede abrir cualquier número de archivos, en páginas específicas y de varias formas.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Mustieles</mal:name>
+      <mal:email>daniel.mustieles@gmail.com</mal:email>
+      <mal:years>2012 - 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Jorge González</mal:name>
+      <mal:email>jorgegonz@svn.gnome.org</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  </info>
+
+<title>La línea de comandos</title>
+<p>Para iniciar el <app>Visor de documentos</app> desde la línea de comandos, escriba <cmd>evince</cmd>. Puede especificar un archivo escribiendo el nombre del archivo después del comando «evince»:</p>
+
+<screen>evince archivo.pdf</screen>
+<p>Puede abrir varios archivos escribiendo los nombres de los archivos después del comando de evince, separándolos por un espacio:</p>
+<screen>evince archivo1.pdf archivo2.pdf</screen>
+<p>El <app>Visor de documentos</app> también soporta gestión de archivos en la web. Por ejemplo, después del comando «evince» puede proporcionar la ubicación de un archivo en la web:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Abrir un documento por una página específica</title>
+    <p>Puede usar la opción <cmd>--page-label</cmd> para abrir un documento por la página especificada. Por ejemplo, para abrir la página 3 de un documento, escriba:</p>
+    <screen>evince --page-label=3 archivo.pdf</screen>
+    <p>La etiqueta de la página debería estar en el mismo formato que el número de página mostrado en la barra de herramientas del <app>Visor de documentos</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Abrir un documento en modo a pantalla completa</title>
+    <screen>evince --fullscreen archivo.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Abrir un documento en modo presentación</title>
+    <screen>evince --presentation archivo.pdf</screen>
+</section>
+<section id="preview">
+    <title>Abrir un documento en modo de vista previa</title>
+    <screen>evince --preview archivo.pdf</screen>
+</section>
+</page>

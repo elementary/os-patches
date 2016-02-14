@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="es">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>¿Qué editor puede usar para editar su archivo TEX?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Mustieles</mal:name>
+      <mal:email>daniel.mustieles@gmail.com</mal:email>
+      <mal:years>2012 - 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Jorge González</mal:name>
+      <mal:email>jorgegonz@svn.gnome.org</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Editores soportados</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>Tanto la <link xref="synctex-search#forward-search">Búsqueda hacia adelante</link> (de <app>gedit</app> al <app>Visor de documentos</app>) como la <link xref="synctex-search#backward-search">Búsqueda hacia atrás</link> (del <app>Visor de documentos</app> a <app>Gedit</app>) están soportadas.</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>El complemento de <app>gedit</app> contiene un script en python (evince_dbus.py) que se puede usar para que Synctex funcione con Vim. Para usar vim-latex junto con el <app>Visor de documentos</app> debe seguir los siguientes pasos:</p>
+<steps>
+ <item>
+  <p>Copie el archivo evince_dbus.py a alguna carpeta de su ruta y otórguele permisos +x.</p>
+ </item>
+ <item>
+  <p>Modifique su archivo ~/.vimrc y añada las siguientes líneas.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Ahora puede usar la búsqueda hacia adelante desde vim-latex escribiendo \ls. La búsqueda hacia atrás aún no está soportada.</p>
+  </item>
+</steps>
+</section>
+</page>

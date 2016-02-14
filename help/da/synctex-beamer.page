@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-beamer" xml:lang="da">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="sixth"/>
+    <desc>Brug af SyncTex med LaTeX Beamer-klassen.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>Beamer med SyncTex</title>
+<p>Beamer er en LaTeX-klasse til at oprette dias til præsentationer.</p>
+<p>Man kan udføre forlæns og baglæns søgning i en <em>Beamer-LaTeX</em>-præsentation på samme måde som i <link xref="synctex-search">søgning</link> i andre filer, der er kompileret med SyncTeX. Søgningen bringer en til den tilsvarende ramme (dias), ikke nødvendigvis til den tilsvarende tekstlinje. Forskellen beskrives i detaljer nedenfor.</p>
+<section id="forward-search">
+    <title>Forlæns søgning: fra Beamer-LaTeX-kilden til PDF (<app>Gedit</app> til <app>Dokumentfremviser</app>)</title>
+    <p>Med <link xref="synctex-search#forward-search">forlæns søgning</link> kan man klikke på en nærmere bestemt linje i Beamer-LaTeX-kildekoden. <em>toppen</em> af det pågældende dias i PDF-filen markeres med rødt. Det vil ofte være <em>rammetitlen</em>.</p>
+</section>
+
+<section id="backward-search">
+
+    <title>Baglæns søgning: fra PDF til Beamer-LaTex-kilden (<app>Dokumentfremviser</app> til <app>Gedit</app>)</title>
+     <p>Med <link xref="synctex-search#backward-search">baglæns søgning</link> kan man klikke på et stykke tekst i en ramme, hvorved den tilsvarende linje i LaTeX-koden, som afslutter denne ramme, markeres. Det vil normalt være linjen:</p>
+ <code>\end{frame}</code>
+<p>svarende til den ramme, som du klikkede på.</p>
+
+
+</section>
+
+
+</page>

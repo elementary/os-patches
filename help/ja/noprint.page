@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="ja">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>作者がドキュメントの印刷を制限している場合もあります。</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>ドキュメントを印刷できない場合</title>
+<section id="why">
+ <title>印刷に失敗する場合の考えられる原因</title>
+<p>ドキュメントが印刷できない原因には、次のものがあります。</p>
+ <list>
+  <item><p>プリンターの問題</p></item>
+  <item><p>PDF の印刷制限</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>プリンターの問題</title>
+  <p>プリンターが機能しない理由は、たくさん考えられます。たとえば、用紙やインクが切れていたり、プリンターが接続されていなかったり、故障している場合などです。</p>
+
+  <p>プリンターが正常に印刷しているか確認する方法は次のとおりです。</p>
+  <steps>
+   <item><p>トップバーにあるユーザー名をクリックし、<gui>システム設定</gui>を選択します。</p></item>
+   <item><p>一覧から、該当するプリンターをクリックします。</p></item>
+   <item><p><gui>テストページを印刷</gui>をクリックします。テストページが、プリンターへ送信されます。</p>
+<note>
+ <p>これが失敗した場合、<link href="help:gnome-help/printing">Printing help</link>を参照してください。このほかにもプリンターのマニュアルも参照する必要がある場合もあります。</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>PDF の印刷制限</title>
+  <p>PDF ドキュメントによっては、印刷を制限するように設定されています。作者は、ドキュメントを書く時に印刷制限を設定することができます。デフォルトでは、<app>ドキュメントビューアー</app>はこの制限を無視しますが、これが無効になっていないかを確認したい場合は以下の手順を踏みます。</p>
+
+  <steps>
+    <item>
+      <p><keyseq><key>Alt</key><key>F2</key></keyseq> を押して、アプリケーションの実行というウィンドウを開きます。</p>
+    </item>
+    <item>
+      <p>テキストボックスに <input>dconf-editor</input> と入力して<gui>実行</gui>をクリックします。Configuration Editor が開きます。</p>
+    </item>
+    <item><p>サイドペインから <sys>/org/gnome/evince</sys> を表示します。</p></item>
+    <item>
+      <p><gui>override_restrictions</gui> というオプションがチェックされていることを確認します。</p>
+    </item>
+    <item>
+      <p><app>ドキュメントビューアー</app>へ戻り、再度、ドキュメントの印刷を試みます。</p>
+    </item>
+  </steps>
+</section>
+
+</page>

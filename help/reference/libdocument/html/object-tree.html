@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Evince Document Library Reference Manual: Object Hierarchy</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="index.html" title="Evince Document Library Reference Manual">
+<link rel="up" href="index.html" title="Evince Document Library Reference Manual">
+<link rel="prev" href="libevdocument-ev-backends-manager.html" title="ev-backends-manager">
+<link rel="next" href="api-index-full.html" title="API Index">
+<meta name="generator" content="GTK-Doc V1.21.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><img src="up-insensitive.png" width="16" height="16" border="0"></td>
+<td><a accesskey="p" href="libevdocument-ev-backends-manager.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="api-index-full.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="object-tree"></a>Object Hierarchy</h1></div></div></div>
+<pre class="screen">
+    GObject
+    <span class="lineart">├──</span> <a class="link" href="EvAnnotation.html" title="EvAnnotationText">EvAnnotation</a>
+    <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="EvAnnotation.html#EvAnnotationAttachment">EvAnnotationAttachment</a>
+    <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="EvAnnotation.html#EvAnnotationText">EvAnnotationText</a>
+    <span class="lineart">├──</span> <a class="link" href="EvAttachment.html" title="EvAttachment">EvAttachment</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocument.html" title="EvDocument">EvDocument</a>
+    <span class="lineart">├──</span> <a class="link" href="EvFormField.html" title="EvFormFieldSignature">EvFormField</a>
+    <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="EvFormField.html#EvFormFieldButton">EvFormFieldButton</a>
+    <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="EvFormField.html#EvFormFieldChoice">EvFormFieldChoice</a>
+    <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="EvFormField.html#EvFormFieldSignature">EvFormFieldSignature</a>
+    <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="EvFormField.html#EvFormFieldText">EvFormFieldText</a>
+    <span class="lineart">├──</span> <a class="link" href="EvImage.html" title="EvImage">EvImage</a>
+    <span class="lineart">├──</span> <a class="link" href="EvLayer.html" title="EvLayer">EvLayer</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-link-action.html#EvLinkAction">EvLinkAction</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-link-dest.html#EvLinkDest">EvLinkDest</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-link.html#EvLink">EvLink</a>
+    <span class="lineart">├──</span> <a class="link" href="EvPage.html" title="EvPage">EvPage</a>
+    <span class="lineart">├──</span> <a class="link" href="EvRenderContext.html" title="EvRenderContext">EvRenderContext</a>
+    <span class="lineart">╰──</span> <a class="link" href="libevdocument-ev-transition-effect.html#EvTransitionEffect">EvTransitionEffect</a>
+    GInterface
+    <span class="lineart">├──</span> <a class="link" href="EvAnnotation.html#EvAnnotationMarkup">EvAnnotationMarkup</a>
+    <span class="lineart">├──</span> <a class="link" href="EvAsyncRenderer.html" title="EvAsyncRenderer">EvAsyncRenderer</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentAnnotations.html" title="EvDocumentAnnotations">EvDocumentAnnotations</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentAttachments.html" title="EvDocumentAttachments">EvDocumentAttachments</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentFind.html" title="EvDocumentFind">EvDocumentFind</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentFonts.html" title="EvDocumentFonts">EvDocumentFonts</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentForms.html" title="EvDocumentForms">EvDocumentForms</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentImages.html" title="EvDocumentImages">EvDocumentImages</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentLayers.html" title="EvDocumentLayers">EvDocumentLayers</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentLinks.html" title="EvDocumentLinks">EvDocumentLinks</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentPrint.html" title="EvDocumentPrint">EvDocumentPrint</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentSecurity.html" title="EvDocumentSecurity">EvDocumentSecurity</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentText.html" title="EvDocumentText">EvDocumentText</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentTransition.html" title="EvDocumentTransition">EvDocumentTransition</a>
+    <span class="lineart">├──</span> <a class="link" href="EvFileExporter.html" title="EvFileExporter">EvFileExporter</a>
+    <span class="lineart">╰──</span> <a class="link" href="EvSelection.html" title="EvSelection">EvSelection</a>
+    GFlags
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentAnnotations.html#EvAnnotationsSaveMask" title="enum EvAnnotationsSaveMask">EvAnnotationsSaveMask</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentInfo.html#EvDocumentInfoFields" title="enum EvDocumentInfoFields">EvDocumentInfoFields</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocument.html#EvDocumentLoadFlags" title="enum EvDocumentLoadFlags">EvDocumentLoadFlags</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentInfo.html#EvDocumentPermissions" title="enum EvDocumentPermissions">EvDocumentPermissions</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentInfo.html#EvDocumentUIHints" title="enum EvDocumentUIHints">EvDocumentUIHints</a>
+    <span class="lineart">├──</span> <a class="link" href="EvFileExporter.html#EvFileExporterCapabilities" title="enum EvFileExporterCapabilities">EvFileExporterCapabilities</a>
+    <span class="lineart">╰──</span> <a class="link" href="EvDocumentFind.html#EvFindOptions" title="enum EvFindOptions">EvFindOptions</a>
+    GEnum
+    <span class="lineart">├──</span> <a class="link" href="EvAnnotation.html#EvAnnotationTextIcon" title="enum EvAnnotationTextIcon">EvAnnotationTextIcon</a>
+    <span class="lineart">├──</span> <a class="link" href="EvAnnotation.html#EvAnnotationType" title="enum EvAnnotationType">EvAnnotationType</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-file-helpers.html#EvCompressionType" title="enum EvCompressionType">EvCompressionType</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocument.html#EvDocumentError" title="enum EvDocumentError">EvDocumentError</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentInfo.html#EvDocumentLayout" title="enum EvDocumentLayout">EvDocumentLayout</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentInfo.html#EvDocumentMode" title="enum EvDocumentMode">EvDocumentMode</a>
+    <span class="lineart">├──</span> <a class="link" href="EvFileExporter.html#EvFileExporterFormat" title="enum EvFileExporterFormat">EvFileExporterFormat</a>
+    <span class="lineart">├──</span> <a class="link" href="EvFormField.html#EvFormFieldButtonType" title="enum EvFormFieldButtonType">EvFormFieldButtonType</a>
+    <span class="lineart">├──</span> <a class="link" href="EvFormField.html#EvFormFieldChoiceType" title="enum EvFormFieldChoiceType">EvFormFieldChoiceType</a>
+    <span class="lineart">├──</span> <a class="link" href="EvFormField.html#EvFormFieldTextType" title="enum EvFormFieldTextType">EvFormFieldTextType</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-link-action.html#EvLinkActionType" title="enum EvLinkActionType">EvLinkActionType</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-link-dest.html#EvLinkDestType" title="enum EvLinkDestType">EvLinkDestType</a>
+    <span class="lineart">├──</span> <a class="link" href="EvSelection.html#EvSelectionStyle" title="enum EvSelectionStyle">EvSelectionStyle</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-transition-effect.html#EvTransitionEffectAlignment" title="enum EvTransitionEffectAlignment">EvTransitionEffectAlignment</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-transition-effect.html#EvTransitionEffectDirection" title="enum EvTransitionEffectDirection">EvTransitionEffectDirection</a>
+    <span class="lineart">╰──</span> <a class="link" href="libevdocument-ev-transition-effect.html#EvTransitionEffectType" title="enum EvTransitionEffectType">EvTransitionEffectType</a>
+    GBoxed
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentInfo.html" title="ev-document-info">EvDocumentInfo</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocumentInfo.html#EvDocumentLicense">EvDocumentLicense</a>
+    <span class="lineart">├──</span> <a class="link" href="libevdocument-ev-mapping.html#EvMappingList">EvMappingList</a>
+    <span class="lineart">├──</span> <a class="link" href="EvDocument.html#EvRectangle">EvRectangle</a>
+    <span class="lineart">╰──</span> <a class="link" href="EvDocument.html#EvSourceLink">EvSourceLink</a>
+</pre>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.21.1</div>
+</body>
+</html>

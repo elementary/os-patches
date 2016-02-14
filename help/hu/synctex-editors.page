@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="hu">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Melyik szerkesztővel szerkesztheti a TeX fájljait?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hammer Attila</mal:name>
+      <mal:email>hammera at pickup dot hu</mal:email>
+      <mal:years>2014.</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Kelemen Gábor</mal:name>
+      <mal:email>kelemeng at gnome dot hu</mal:email>
+      <mal:years>2011, 2012, 2013, 2014, 2015.</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Támogatott szerkesztők</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>Az <link xref="synctex-search#forward-search">előre keresés</link> (<app>geditből</app> a <app>dokumentummegjelenítőbe</app>) és a <link xref="synctex-search#backward-search">hátra keresés</link> (a <app>dokumentummegjelenítőből</app> a <app>geditbe</app>) egyaránt támogatott.</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>A <app>gedit</app> bővítmény tartalmaz egy Python parancsfájlt (evince_dbus.py), amelynek segítségével a SyncTeX használható Vimből. A vim-latex és a <app>dokumentummegjelenítő</app> együttes használatához tegye a következőket:</p>
+<steps>
+ <item>
+  <p>Másolja az evince_dbus.py fájlt a keresési útvonalon lévő valamelyik könyvtárba, és adjon rá +x (futtatható) jogosultságot.</p>
+ </item>
+ <item>
+  <p>Módosítsa a ~/.vimrc fájlt, és adja hozzá a következő sorokat.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Ezután használhatja az előre keresést a vim-latex-ből a \ls beírásával. A hátra keresés még nem támogatott.</p>
+  </item>
+</steps>
+</section>
+</page>

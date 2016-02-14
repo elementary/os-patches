@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="duplex-npage" xml:lang="ru">
+
+  <info>
+    <link type="guide" xref="print-booklet#doubleSided"/>
+
+    <desc>Печать буклета свыше 16 страниц.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Тифани Антопольски (Tiffany Antopolski)</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>Буклет на n страниц</title>
+ <note style="important">
+  <p><em>n</em> кратно 4.</p>
+ </note>
+
+ <p>Если количество страниц документа PDF не кратно 4, необходимо добавить соответствующее количество пустых страниц (1, 2 или 3), чтобы оно стало кратно 4. Чтобы это сделать, можно:</p>
+ <steps>
+ <item>
+  <p>Создать пустой PDF с помощью <app>LibreOffice Writer</app>.</p>
+ </item>
+ <item>
+  <p>Объединить пустые страницы с документом PDF с помощью приложения <app>PDF-Shuffler</app>, поместив в конец пустые страницы.</p>
+ </item>
+</steps>
+
+
+<steps>
+ <item>
+  <p>Выберите <guiseq><gui>Файл</gui><gui>Печать</gui></guiseq>.</p>
+ </item>
+ <item>
+  <p>Выберите вкладку <gui>Общие</gui>.</p>
+  <p>Под <em>Диапазоном</em> выберите <gui>Страницы</gui>.</p>
+  <tree>
+   <item>
+   Type the numbers of the pages in this order:
+       <item>n, 1, 2, n-1, n-2, 3, 4, n-3, n-4, 5, 6, n-5, n-6, 7, 8, n-7, n-8, 9, 10, n-9, n-10, 11, 12, n-11...</item>
+      <item>...until you have typed n-number of pages.</item>
+    </item>
+  </tree>
+ </item>
+ <item>
+  <p>Выберите вкладку <gui>Параметры страницы</gui>.</p>
+  <p>Под <em>Размещением</em> в меню <gui>С двух сторон</gui> выберите <gui>По короткой стороне</gui>.</p>
+  <p>В параметре <gui>Страниц на сторону</gui> выберите <gui>2</gui>.</p>
+  <p>В меню <gui>Порядок страниц</gui> выберите <gui>Слева направо</gui>.</p>
+ </item>
+ <item>
+  <p>Нажмите <gui>Печать</gui>.</p>
+ </item>
+</steps>
+</page>

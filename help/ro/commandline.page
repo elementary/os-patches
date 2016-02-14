@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="ro">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Command line</title>
+    <desc>Comanda <cmd>evince</cmd> poate deschide orice număr de fișiere, la anumite pagini și în diverse moduri.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Atribuire - Distribuire în condiţii identice 3.0</p>
+    </license>
+  </info>
+
+<title>The command line</title>
+<p>
+To start the <app>Document Viewer</app> from the command line, type <cmd>evince</cmd>. You
+can open a specific file by typing the filename after the evince command:
+</p>
+
+<screen>evince fișier.pdf</screen>
+<p>Aveți posibilitatea să deschideți mai multe fișiere prin tastarea numelor de fișiere după comanda evince, separând numele fișierelor cu un spațiu:</p>
+<screen>evince fișier1.pdf fișier2.pdf</screen>
+<p>
+The <app>document viewer</app> also supports the handling of files on the web.  For example, after the evince command you can give the location of a file on the web:
+</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Opening a document at a specific page</title>
+    <p>Puteți utiliza comutatorul <cmd>--page-label</cmd> pentru a deschide un document la o anumită pagină. De exemplu, pentru a deschide un document la pagina 3, ar trebui să tastați:</p>
+    <screen>evince --page-label=3 file.pdf</screen>
+    <p>
+    The page label should be in the same format as the page number displayed in
+    the <app>Document Viewer</app> toolbar.
+    </p>
+</section>
+<section id="fullsreen">
+    <title>Opening a document in fullscreen mode</title>
+    <screen>evince --fullscreen fișier.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Opening a document in presentation mode</title>
+    <screen>evince --presentation fișier.pdf</screen>
+</section>
+<section id="preview">
+    <title>Opening a document in preview mode</title>
+    <screen>evince --preview fișier.pdf</screen>
+</section>
+</page>

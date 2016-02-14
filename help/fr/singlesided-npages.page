@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="singlesided-npage" xml:lang="fr">
+
+  <info>
+    <link type="guide" xref="print-booklet#singleSided"/>
+
+    <desc>Imprimer un livret de plus de 20 pages.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Jonathan Ernst</mal:name>
+      <mal:email>jonathan@ernstfamily.ch</mal:email>
+      <mal:years>2006, 2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Claude Paroz</mal:name>
+      <mal:email>claude@2xlibre.net</mal:email>
+      <mal:years>2006-2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Bruno Brouard</mal:name>
+      <mal:email>annoa.b@gmail.com</mal:email>
+      <mal:years>2011-2012</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mickael Albertus</mal:name>
+      <mal:email>mickael.albertus@gmail.com</mal:email>
+      <mal:years>2012-2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Michael Scherer</mal:name>
+      <mal:email>misc@zarb.org</mal:email>
+      <mal:years>2014</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Leonor Palazzo</mal:name>
+      <mal:email>leonor.palazzo@gmail.com</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Livret de n pages</title>
+ <note style="important">
+  <p><em>n</em> est multiple de 4.</p>
+ </note>
+ <p>Si le nombre de pages dans votre document PDF n'est pas un multiple de 4, vous devez ajouter le nombre correct de pages blanches (1, 2 ou 3) pour que ce nombre soit un multiple de 4. Pour cela, vous pouvez :</p>
+ <steps>
+ <item>
+  <p>Créer un PDF vide en utilisant <app>LibreOffice Writer</app>.</p>
+ </item>
+ <item>
+  <p>Fusionner les pages blanches avec votre document PDF en utilisant l'application <app>PDF-Shuffler</app> en plaçant les pages blanches à la fin.</p>
+ </item>
+</steps>
+
+ <p>Pour imprimer :</p>
+  <steps>
+ <item>
+  <p>Cliquez sur <guiseq><gui>Fichier</gui><gui>Imprimer</gui></guiseq>.</p>
+ </item>
+ <item>
+  <p>Sélectionnez l'onglet <gui>Général</gui>.</p>
+  <p>Sous <em>Plage</em>, sélectionnez <gui>Pages</gui>.</p>
+  <tree>
+   <item>Saisissez le numéro des pages dans cet ordre : <item>n, 1, 2, n-1, n-2, 3, 4, n-3, n-4, 5, 6, n-5, n-6, 7, 8, n-7, n-8, 9, 10, n-9, n-10, 11, 12, n-11...</item> <item>... jusqu'à ce que vous ayez saisi un nombre n de pages.</item></item>
+  </tree>
+ </item>
+ <item>
+  <p>Sélectionnez l'onglet <gui>Mise en page</gui>.</p>
+  <p>Sous <em>Mise en page</em>, dans le menu <gui>Recto verso</gui>, choisissez <gui>Recto</gui>.</p>
+  <p>Dans le menu <gui>Pages par côté</gui>, sélectionnez <gui>2</gui>.</p>
+  <p>Dans le menu <gui>Ordre des pages</gui>, sélectionnez <gui>Gauche à droite</gui>.</p>
+  <p>Dans le menu <gui>Imprimer seulement</gui>, sélectionnez <gui>Pages impaires</gui>.</p>
+ </item>
+ <item>
+  <p>Cliquez sur <gui>Imprimer</gui>.</p>
+ </item>
+   <item>
+    <p>Quand toutes les pages sont imprimées, retournez les pages et replacez-les dans l'imprimante.</p>
+   </item>
+   <item>
+    <p>Cliquez sur <guiseq><gui>Fichier</gui><gui>Imprimer</gui></guiseq>.</p>
+   </item>
+   <item>
+    <p>Sélectionnez l'onglet <gui>Mise en page</gui>.</p>
+     <p>Dans le menu <gui>Imprimer seulement</gui>, sélectionnez <gui>Pages paires</gui>.</p>
+   </item>
+   <item>
+    <p>Cliquez sur <gui>Imprimer</gui>.</p>
+   </item>
+  </steps>
+</page>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="singlesided-npage" xml:lang="zh-CN">
+
+  <info>
+    <link type="guide" xref="print-booklet#singleSided"/>
+
+    <desc>打印超过 20 页的小册子。</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>n 页的小册子</title>
+ <note style="important">
+  <p>n 是 4 的倍数。</p>
+ </note>
+ <p>如果您的 PDF 文档的页数不是 4 的倍数，您应该加入适当数量(1，2 或 3)的空白页以使页数成为 4 的倍数。要做此，您可以：</p>
+ <steps>
+ <item>
+  <p>使用 <app>LibreOffice Write</app> 创建一个空白的 PDF。</p>
+ </item>
+ <item>
+  <p>使用 <app>PDF-Shuffler</app> 将空白页合并到您的 PDF 文档末尾。</p>
+ </item>
+</steps>
+
+ <p>要打印文档：</p>
+  <steps>
+ <item>
+  <p>单击 <guiseq><gui>文件</gui><gui>打印</gui></guiseq>。</p>
+ </item>
+ <item>
+  <p>选择 <gui>常规</gui> 标签页。</p>
+  <p>在 <em>范围</em> 中，选择 <gui>页面</gui>。</p>
+  <tree>
+   <item>
+   Type the numbers of the pages in this order:
+       <item>n, 1, 2, n-1, n-2, 3, 4, n-3, n-4, 5, 6, n-5, n-6, 7, 8, n-7, n-8, 9, 10, n-9, n-10, 11, 12, n-11...</item>
+      <item>...until you have typed n-number of pages.</item>
+    </item>
+  </tree>
+ </item>
+ <item>
+  <p>选择 <gui>页面设置</gui> 标签页。</p>
+  <p>在 <em>布局</em> 下，<gui>双面</gui> 菜单中，选择 <gui>单面</gui>。</p>
+  <p>在 <gui>每面页数</gui> 菜单中，选择 <gui>2</gui>。</p>
+  <p>在 <gui>页面顺序</gui> 菜单中，选择 <gui>从左到右</gui>。</p>
+  <p>在 <gui>打印</gui> 菜单中，选择 <gui>奇数页</gui>。</p>
+ </item>
+ <item>
+  <p>单击 <gui>打印</gui>。</p>
+ </item>
+   <item>
+    <p>当所有的页都被打印后，将页面翻转然后放回打印机。</p>
+   </item>
+   <item>
+    <p>单击 <guiseq><gui>文件</gui><gui>打印</gui></guiseq>。</p>
+   </item>
+   <item>
+    <p>选择 <gui>页面设置</gui> 标签页。</p>
+     <p>在 <gui>打印</gui> 菜单中，选择 <gui>偶数页</gui>。</p>
+   </item>
+   <item>
+    <p>单击 <gui>打印</gui>。</p>
+   </item>
+  </steps>
+</page>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-beamer" xml:lang="zh-CN">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="sixth"/>
+    <desc>同 LaTeX 的 Beamer 类一起使用 SyncTeX。</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>Beamer 和 SyncTeX</title>
+<p>Beamer 是一个用于创建放映幻灯片的LaTeX类。</p>
+<p>您可以在一个 <em>Beamer-LaTeX</em> 演示文档中执行与对其他使用 SyncTex 一起编译的 TeX 文件 <link xref="synctex-search">搜索</link> 相类似的向前和向后搜索。然而该搜索将会把您带到相关的框架(幻灯片)，而不是相当的文本行。详细的区别如下。</p>
+<section id="forward-search">
+    <title>向前搜索：从 Beamer-LaTeX 源代码到 PDF(<app>gedit</app> 到 <app>文档查看器</app>)</title>
+    <p>使用 <link xref="synctex-search#forward-search">向前搜索</link>，您可以在 Beamer-LaTeX 源代码的特定行上点击，然后 PDF 中相关的幻灯片的 <em>顶部</em> 将会以红色表示。通常这会是 <em>框架标题</em>。</p>
+</section>
+
+<section id="backward-search">
+
+    <title>向后搜索：从 PDF 到 Beamer-LaTeX 源代码(从 <app>文档查看器</app> 到 <app>Gedit</app>)</title>
+     <p>使用 <link xref="synctex-search#backward-search">向后搜索</link>，您可以在一个框架的文本上点击，然后 LaTeX 源代码中的结束相应框架的对应行将会被高亮。通常是这一行：</p>
+ <code>\end{frame}</code>
+<p>对应于您点击的框架</p>
+
+
+</section>
+
+
+</page>

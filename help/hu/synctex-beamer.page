@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-beamer" xml:lang="hu">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="sixth"/>
+    <desc>A SyncTeX használata a LaTeX Beamer osztállyal.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hammer Attila</mal:name>
+      <mal:email>hammera at pickup dot hu</mal:email>
+      <mal:years>2014.</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Kelemen Gábor</mal:name>
+      <mal:email>kelemeng at gnome dot hu</mal:email>
+      <mal:years>2011, 2012, 2013, 2014, 2015.</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Beamer és SyncTeX</title>
+<p>A Beamer egy LaTeX osztály diák készítéséhez bemutatókhoz.</p>
+<p>Az előre és hátra keresést a <em>Beamer-LaTeX</em> prezentációban a SyncTeX-hel fordított más TeX fájlokban való <link xref="synctex-search">kereséshez</link> hasonlóan végezheti el. A keresés azonban a megfelelő diához, és nem feltétlenül a megfelelő szövegsorhoz viszi. A különbség részletesen alább látható.</p>
+<section id="forward-search">
+    <title>Előre keresés: Beamer-LaTeX forrásból PDF-be (<app>geditből</app> a <app>dokumentummegjelenítőbe</app>)</title>
+    <p>Az <link xref="synctex-search#forward-search">előre kereséskor</link> a Beamer-LaTeX forráskód egy adott sorára kattinthat. A PDF-ben a megfelelő dia <em>teteje</em> vörössel kerül kiemelésre. Ez gyakran a <em>frametitle</em> elem.</p>
+</section>
+
+<section id="backward-search">
+
+    <title>Hátra keresés: PDF-ből Beamer-LaTeX forrásba (<app>dokumentummegjelenítőből</app> a <app>geditbe</app>)</title>
+     <p>A <link xref="synctex-search#backward-search">hátra kereséskor</link> a dia szövegére kattint, és az adott diát befejező LaTeX kód megfelelő sora kiemelésre kerül. Ez általában a következő sor lesz:</p>
+ <code>\end{frame}</code>
+<p>amely megfelel annak a diának, amelyre kattintott.</p>
+
+
+</section>
+
+
+</page>

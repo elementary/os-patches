@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="ko">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">명령줄</title>
+    <desc><cmd>evince</cmd> 명령은 많은 파일, 지정한 페이지 등 다양한 상태로 열 수 있습니다.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>크리에이티브 커먼즈 동일조건변경허락 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>조성호</mal:name>
+      <mal:email>darkcircle.0426@gmail.com</mal:email>
+      <mal:years>2012, 2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>류창우</mal:name>
+      <mal:email>cwryu@debian.org</mal:email>
+      <mal:years>2014-2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>명령줄</title>
+<p><app>문서 보기</app>를 명령줄에서 시작하려면, <cmd>evince</cmd>를 입력합니다. evince 명령 다음에 파일 이름을 입력해서 지정한 파일을 열 수 있습니다:</p>
+
+<screen>evince file.pdf</screen>
+<p>evince 명령 다음 공백문자로 구분한 여러 파일 이름을 입력해서 여러 파일을 열 수 있습니다:</p>
+<screen>evince file1.pdf file2.pdf</screen>
+<p><app>문서 보기</app>는 웹에 있는 파일도 처리할 수 있습니다. 예를 들어 evince 명령 다음에 웹에 있는 파일의 위치를 쓸 수 있습니다:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>지정한 페이지에서 문서를 엽니다</title>
+    <p>정해진 페이지 위치로 문서를 열려면 <cmd>--page-label</cmd>을 사용할 수 있습니다. 예를 들어 문서 3번 페이지를 열려면 다음과 같이 입력합니다:</p>
+    <screen>evince --page-label=3 file.pdf</screen>
+    <p>페이지 레이블은 <app>문서 보기</app> 도구 모음에 표시한 페이지 숫자처럼 동일한 형식이어야 합니다.</p>
+</section>
+<section id="fullsreen">
+    <title>전체 화면 모드로 문서를 엽니다</title>
+    <screen>evince --fullscreen file.pdf</screen>
+</section>
+<section id="presentation">
+    <title>프리젠테이션 모드로 문서를 엽니다</title>
+    <screen>evince --presentation file.pdf</screen>
+</section>
+<section id="preview">
+    <title>미리 보기 모드로 문서를 엽니다</title>
+    <screen>evince --preview file.pdf</screen>
+</section>
+</page>

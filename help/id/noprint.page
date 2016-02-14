@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="id">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Pengarang mungkin telah memasang pembatasan pencetakan pada dokumen.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Andika Triwidada</mal:name>
+      <mal:email>andika@gmail.com</mal:email>
+      <mal:years>2012, 2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Saya tak bisa mencetak dokumen</title>
+<section id="why">
+ <title>Kemungkinan alasan kegagalan mencetak</title>
+<p>Suatu dokumen mungkin tak dapat dicetak karena:</p>
+ <list>
+  <item><p>Masalah printer, atau</p></item>
+  <item><p>Pembatasan pencetakan PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Masalah pencetak</title>
+  <p>Ada banyak alasan kenapa pencetak Anda mungkin tak bekerja. Sebagai contoh, mungkin itu kehabisan kertas atau tinta, atau tercabut, atau rusak.</p>
+
+  <p>Untuk memeriksa apakah pencetak Anda mencetak dengan benar:</p>
+  <steps>
+   <item><p>Klik nama Anda pada bilah puncak dan pilih <gui>Pengaturan Sistem</gui>.</p></item>
+   <item><p>Klik pada pencetak Anda dalam daftar.</p></item>
+   <item><p>Klik pada <gui>Cetak Halaman Uji</gui>. Suatu halaman mesti dikirim ke pencetak Anda.</p>
+<note>
+ <p>Bila ini gagal, lihat <link href="help:gnome-help/printing">Bantuan pencetakan</link>. Anda mungkin juga perlu membaca manual pencetak Anda untuk melihat apa lagi yang dapat Anda kerjakan.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Pembatasan pencetakan PDF</title>
+  <p>Beberapa dokumen PDF memiliki pengaturan yang mencegah Anda mencetak mereka. Pengarang dapat mengatur pembatasan pencetakan ini ketika mereka menulis dokumen. <app>Penilik dokumen</app> menganulir pembatasan ini secara baku, tapi Anda mungkin ingin memeriksa bahwa itu belum dinonaktifkan:</p>
+
+  <steps>
+    <item>
+      <p>Tekan <keyseq><key>Alt</key><key>F2</key></keyseq> untuk membuka jendela Jalankan Aplikasi.</p>
+    </item>
+    <item>
+      <p>Ketikkan <input>dconf-editor</input> ke dalam kotak teks dan klik <gui>Jalankan</gui>. Penyunting Konfigurasi akan membuka.</p>
+    </item>
+    <item><p>Ramban ke <sys>/org/gnome/evince</sys> memakai panel sisi.</p></item>
+    <item>
+      <p>Pastikan bahwa opsi <gui>override_restrictions</gui> dicontreng.</p>
+    </item>
+    <item>
+      <p>Kembali ke <app>Penilik Dokumen</app> dan coba mencetak dokumen itu lagi.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

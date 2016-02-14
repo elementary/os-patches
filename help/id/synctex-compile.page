@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-compile" xml:lang="id">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="third"/>
+    <desc>Bagaimana mengkompail dokumen TeX Anda dengan SyncTeX</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Andika Triwidada</mal:name>
+      <mal:email>andika@gmail.com</mal:email>
+      <mal:years>2012, 2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Mengkompail TeX dengan SyncTeX</title>
+<p>Menambahkan baris <em>\synctex=1</em> dalam preambul dari berkas TeX Anda akan memicu penyelarasan dengan SyncTeX.</p>
+<code>
+\documentclass{article}
+\synctex=1
+\usepackage{fullpage}
+\begin{document}
+...
+\end{document}
+</code>
+<p>Sebagai alternatif, Anda dapat menjalankan perintah pdflatex dengan opsi <em>-synctex=1</em>:</p>
+<screen>pdflatex -synctex=1 yourFile.tex</screen>
+</page>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="sl">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Kateri urejevalnik lahko uporabite za urejanje svojih datotek TEX?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Dovoljenje Creative Commons - priznanje avtorstva - deljenje pod istimi pogoji 3.0</p>
+    </license>
+
+  </info>
+
+<title>Podprti urejevalniki</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>Podprta sta tako <link xref="synctex-search#forward-search">Iskanje naprej</link> (iz <app>Gedit</app> v <app>pregledovalnik dokumentov</app>) in <link xref="synctex-search#backward-search">Iskanje</link> (iz <app>pregledovalnika dokumentov</app> v <app>Gedit</app>).</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>Vstavek <app>Gedit</app> vsebuje skript python (evince_dbus.py), ki ga lahko uporabite, da začne Synctex delovati z Vim. Da lahko vim-latex uporabite skupaj s <app>pregledovalnikom dokumentov</app>, boste morali izvesti naslednje korake:</p>
+<steps>
+ <item>
+  <p>Kopirajte evince_dbus.py v mapo na vaši poti in ji dajte dovoljenja +x. </p>
+ </item>
+ <item>
+  <p>Spremenite svojo datoteko ~/.vimrc in dodajte naslednje vrstice.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Sedaj lahko uporabljate iskanje naprej iz vim-latex s tipkanjem \ls. Iskanje nazaj še ni podprto.</p>
+  </item>
+</steps>
+</section>
+</page>

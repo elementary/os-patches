@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="ca">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Canvieu entre el <app>Visualitzador de documents</app> i el <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Carles Ferrando Garcia</mal:name>
+      <mal:email>carles.ferrando@gmail.com</mal:email>
+      <mal:years>2010</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Xavier Roijals</mal:name>
+      <mal:email>xavier.roijals@gmail.com</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Gil Forcada</mal:name>
+      <mal:email>gilforcada@guifi.net</mal:email>
+      <mal:years>2013</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Cerqueu amb SyncTeX</title>
+<p>Després de <link xref="synctex-compile">compilar el fitxer TeX amb el SyncTeX</link>, hauríeu de ser capaç de cercar. El SyncTeX fins i tot permet cerques cap endavant i cap enrere des d'un fitxer inclòs.</p>
+
+<section id="forward-search">
+    <title>Cerca cap endavant: des de TeX a PDF (des del <app>gedit</app> cap al <app>Visualitzador de documents</app>).</title>
+     <p>La cerca cap endavant us permet fer clic en una secció específica del codi font TeX i saltar cap a la posició associada al PDF. Per realitzar una cerca cap endavant:</p>
+<steps>
+<item>
+<p>Feu clic en una línia del fitxer TeX.</p>
+</item>
+<item>
+<p>Al <app>gedit</app>, feu clic a <guiseq><gui>Eines</gui><gui>Cerca cap endavant</gui></guiseq>. La línia coincident al PDF es ressaltarà en vermell.</p>
+<p>També podeu prémer <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq> o <keyseq><key>Ctrl</key>clic principal</keyseq>. La línia coincident al PDF es ressaltarà en vermell.</p>
+</item>
+</steps>
+<note>
+<p>Si el fitxer PDF corresponent no està obert, en realitzar una cerca cap endavant obrirà el PDF al <app>Visualitzador de documents</app>.</p>
+</note>
+<p>Si teniu un projecte complex amb molts fitxers TeX podeu posar</p>
+<code>% mainfile: mainfile.tex</code>
+<p>a les tres primeres o les tres últimes línies cada fitxer TeX perquè la cerca cap endavant funcioni. La cerca cap enrere també hauria de funcionar, fins i tot si no heu afegit aquest modeline.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Cerca cap enrere: des del PDF a TeX (des del <app>Visualitzador de documents</app> cap a l'editor de text <app>gedit</app>)</title>
+     <p>La cerca cap enrere us permet fer clic en una línia del fitxer PDF i saltar cap a la línia corresponent del fitxer TeX.</p>
+<p>
+You can perform a backward search by pressing <keyseq><key>Ctrl</key>left click</keyseq> in the <app>document viewer</app>. The corresponding line in the TeX source code will be highlighted.
+     </p>
+</section>
+
+</page>

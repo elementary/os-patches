@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="de">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Wechseln Sie zwischen dem <app>Dokumentenbetrachter</app> und <app>Gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mario Blättermann</mal:name>
+      <mal:email>mario.blaettermann@gmail.com</mal:email>
+      <mal:years>2008-2009, 2011-2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Christian Kirbach</mal:name>
+      <mal:email>Christian.Kirbach@gmail.com</mal:email>
+      <mal:years>2011, 2014, 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Wolfgang Stöggl</mal:name>
+      <mal:email>c72578@yahoo.de</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Gabor Karsay</mal:name>
+      <mal:email>gabor.karsay@gmx.at</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Benjamin Steinwender</mal:name>
+      <mal:email>b@stbe.at</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Suchen mit SyncTeX</title>
+<p>Nachdem Sie Ihre <link xref="synctex-compile">TeX-Datei mit SyncTeX kompiliert haben</link>, können Sie nun suchen. SyncTeX unterstützt selbst Vorwärts- und Rückwärtssuche in einer eingebundenen Datei.</p>
+
+<section id="forward-search">
+    <title>Vorwärtssuche: Von TeX nach PDF (von <app>Gedit</app> zum <app>Dokumentenbetrachter</app>)</title>
+     <p>Vorwärtssuche ermöglicht es, einen bestimmten Abschnitt im TeX-Quellcode auszuwählen und sofort zur entsprechenden Position im PDF-Dokument zu springen. So führen Sie eine Vorwärtssuche aus:</p>
+<steps>
+<item>
+<p>Klicken Sie auf eine Zeile in der TeX-Datei.</p>
+</item>
+<item>
+<p>Klicken Sie in <app>Gedit</app> auf <guiseq><gui>Werkzeuge</gui><gui>Vorwärtssuche</gui></guiseq>. Die entsprechende Zeile im PDF-Dokument wird rot umrandet.</p>
+<p>Alternativ können Sie auch <keyseq><key>Strg</key><key>Alt</key><key>F</key></keyseq> drücken oder mit der Maus <key>Strg</key>+Linksklick ausführen. Die entsprechende Zeile im PDF-Dokument wird daraufhin rot umrandet.</p>
+</item>
+</steps>
+<note>
+<p>Wenn das entsprechende PDF-Dokument nicht geöffnet ist, so wird beim Durchführen einer Vorwärtssuche das PDF im <app>Dokumentenbetrachter</app> geöffnet.</p>
+</note>
+<p>Wenn Sie ein komplexes Projekt mit mehreren TeX-Dateien haben, so können Sie</p>
+<code>% mainfile: mainfile.tex</code>
+<p>entweder in den ersten oder letzten drei Zeilen jeder eingebundenen TeX-Datei angeben, damit die Vorwärtssuche funktioniert. Rückwärtssuche sollte immer funktionieren, selbst wenn Sie die Zeile nicht hinzufügen.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Rückwärtssuche: Von PDF nach TeX (vom <app>Dokumentenbetrachter</app> nach <app>Gedit</app>)</title>
+     <p>Rückwärtssuche ermöglicht es, eine bestimmte Zeile in der PDF-Datei auszuwählen und sofort zur entsprechenden Zeile im TeX-Quellcode zu springen.</p>
+<p>Sie können eine Rückwärtssuche durch Ausführen von <keyseq><key>Strg</key><key>Linksklick</key></keyseq> im <app>Dokumentenbetrachter</app> starten. Die entsprechende Zeile wird im TeX-Quellcode hervorgehoben.</p>
+</section>
+
+</page>

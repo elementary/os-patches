@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="de">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Befehlszeile</title>
+    <desc>Der Befehl <cmd>evince</cmd> kann eine beliebige Anzahl Dateien auf spezifischen Seiten in verschiedenen Modi öffnen.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mario Blättermann</mal:name>
+      <mal:email>mario.blaettermann@gmail.com</mal:email>
+      <mal:years>2008-2009, 2011-2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Christian Kirbach</mal:name>
+      <mal:email>Christian.Kirbach@gmail.com</mal:email>
+      <mal:years>2011, 2014, 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Wolfgang Stöggl</mal:name>
+      <mal:email>c72578@yahoo.de</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Gabor Karsay</mal:name>
+      <mal:email>gabor.karsay@gmx.at</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Benjamin Steinwender</mal:name>
+      <mal:email>b@stbe.at</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Die Befehlszeile</title>
+<p>Um den <app>Dokumentenbetrachter</app> in einer Befehlszeile zu starten, geben Sie <cmd>evince</cmd> ein. Sie können durch Anfügen eines Dateinamens an den Evince-Befehl eine bestimmte Datei öffnen lassen:</p>
+
+<screen>evince Datei.pdf</screen>
+<p>Sie können mehrere Dateien öffnen, indem Sie die Dateinamen nach dem Befehl »evince« eingeben. Dateinamen werden durch Kommata getrennt:</p>
+<screen>evince Datei1.pdf Datei2.pdf</screen>
+<p>Der <app>Dokumentenbetrachter</app> unterstützt auch die Verarbeitung von Dateien im Netz. Beispielsweise können Sie nach dem evince-Befehl eine Adresse einer Datei im Web angeben:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Ein Dokument auf einer bestimmten Seite öffnen</title>
+    <p>Sie können mit dem Schalter <cmd>--page-label</cmd> ein Dokument auf einer bestimmten Seite öffnen. Wenn Sie beispielsweise die Seite 3 eines Dokuments öffnen wollen, geben Sie Folgendes ein:</p>
+    <screen>evince --page-label=3 file.pdf</screen>
+    <p>Die Seitenbezeichnung sollte im gleichen Format sein wie die in der Werkzeugleiste des <app>Dokumentenbetrachters</app> angezeigte Seitennummer.</p>
+</section>
+<section id="fullsreen">
+    <title>Ein Dokument im Vollbildmodus öffnen</title>
+    <screen>evince --fullscreen Datei.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Ein Dokument im Präsentationsmodus öffnen</title>
+    <screen>evince --presentation Datei.pdf</screen>
+</section>
+<section id="preview">
+    <title>Ein Dokument im Vorschaumodus öffnen</title>
+    <screen>evince --preview Datei.pdf</screen>
+</section>
+</page>

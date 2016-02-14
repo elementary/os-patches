@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+include /usr/share/cdbs/1/rules/autoreconf.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/gnome.mk
+include /usr/share/cdbs/1/rules/utils.mk
+include /usr/share/gnome-pkg-tools/1/rules/uploaders.mk
+include /usr/share/gnome-pkg-tools/1/rules/gnome-version.mk
+include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,-O1 -Wl,--as-needed
+include /usr/share/dpkg/buildflags.mk
+
+DEB_CONFIGURE_EXTRA_FLAGS += --enable-djvu \
+                             --enable-dvi \
+                             --enable-xps \
+                             --enable-comics \
+                             --enable-introspection \
+                             --enable-gtk-doc
+
+DEB_DH_MAKESHLIBS_ARGS += -X /usr/lib/nautilus/ \
+                          -X /usr/lib/evince/ \
+                          -V -- -c4
+
+DEB_DH_SHLIBDEPS_ARGS += -X /usr/lib/nautilus/
+
+install/evince-common::
+	cp debian/apparmor-profile debian/evince-common/etc/apparmor.d/usr.bin.evince
+	cp debian/apparmor-profile.abstraction debian/evince-common/etc/apparmor.d/abstractions/evince
+	cp debian/evince.apport debian/evince-common/usr/share/apport/package-hooks/source_evince.py
+	dh_apparmor --profile-name=usr.bin.evince -pevince-common
+	cd po; intltool-update --pot --verbose

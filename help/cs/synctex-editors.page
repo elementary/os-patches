@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="cs">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Které editory můžete použít k úpravě svého souboru TEX?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Martin Picek</mal:name>
+      <mal:email>picek.martin@gnome-cesko.cz</mal:email>
+      <mal:years>2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Marek Černocký</mal:name>
+      <mal:email>marek@manet.cz.</mal:email>
+      <mal:years>2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Podporované editory</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>Je podporováno jak <link xref="synctex-search#forward-search">dopředné hledání</link> (z <app>gedit</app> do <app>prohlížeče dokumentů</app>), tak <link xref="synctex-search#backward-search">zpětné hledání</link> (z <app>prohlížeče dokumentů</app> do <app>gedit</app>).</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>Zásuvný modul aplikace <app>gedit</app> obsahuje skript v jazyce Python (evince_dbus.py), který lze použít ke zprovoznění SyncTeX spolu s editorem Vim. Aby vim-latex fungoval dohromady s <app>prohlížečem dokumentů</app>, musíte provést následující kroky:</p>
+<steps>
+ <item>
+  <p>Nakopírovat evince_dbus.py do nějaké složky, která je v prohledávaných cestách a přidělit mu práva +x.</p>
+ </item>
+ <item>
+  <p>Upravte svůj soubor ~/.vimrc a přidejte následující řádky.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Nyní můžete používat dopředné hledání z vim-latext napsáním \ls. Zpětné hledání není zatím podporováno.</p>
+  </item>
+</steps>
+</section>
+</page>

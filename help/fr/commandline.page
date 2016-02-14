@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="fr">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Ligne de commande</title>
+    <desc>La commande <cmd>evince</cmd> peut ouvrir n'importe quel nombre de fichiers, à la page désirée et dans divers modes.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Jonathan Ernst</mal:name>
+      <mal:email>jonathan@ernstfamily.ch</mal:email>
+      <mal:years>2006, 2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Claude Paroz</mal:name>
+      <mal:email>claude@2xlibre.net</mal:email>
+      <mal:years>2006-2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Bruno Brouard</mal:name>
+      <mal:email>annoa.b@gmail.com</mal:email>
+      <mal:years>2011-2012</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mickael Albertus</mal:name>
+      <mal:email>mickael.albertus@gmail.com</mal:email>
+      <mal:years>2012-2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Michael Scherer</mal:name>
+      <mal:email>misc@zarb.org</mal:email>
+      <mal:years>2014</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Leonor Palazzo</mal:name>
+      <mal:email>leonor.palazzo@gmail.com</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>La ligne de commande</title>
+<p>Pour lancer le <app>Visionneur de documents</app> à partir de la ligne de commande, saisissez <cmd>evince</cmd>. Vous pouvez ouvrir un fichier spécifique en saisissant le nom du fichier après la commande <cmd>evince</cmd> :</p>
+
+<screen>evince fichier.pdf</screen>
+<p>Vous pouvez ouvrir plusieurs fichiers en saisissant les noms des fichiers après la commande <cmd>evince</cmd>, en les séparant par un espace :</p>
+<screen>evince fichier1.pdf fichier2.pdf</screen>
+<p>Le <app>Visionneur de documents</app> prend également en charge les fichiers sur le Web. Par exemple, après la commande <cmd>evince</cmd> vous pouvez fournir l'emplacement d'un fichier sur le Web :</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Ouverture d'un document à une page précise</title>
+    <p>Vous pouvez utiliser l'option <cmd>--page-label</cmd> pour ouvrir un document à une page précise. Par exemple, pour ouvrir un document à la page 3, vous devez saisir :</p>
+    <screen>evince --page-label=3 fichier.pdf</screen>
+    <p>Le numéro de page doit être dans le même format que le numéro affiché dans la barre d'outils du <app>Visionneur de documents</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Ouverture d'un document en mode plein écran</title>
+    <screen>evince --fullscreen fichier.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Ouverture d'un document en mode présentation</title>
+    <screen>evince --presentation fichier.pdf</screen>
+</section>
+<section id="preview">
+    <title>Ouverture d'un document en mode prévisualisation</title>
+    <screen>evince --preview fichier.pdf</screen>
+</section>
+</page>

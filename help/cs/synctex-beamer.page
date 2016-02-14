@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-beamer" xml:lang="cs">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="sixth"/>
+    <desc>Používání SyncTeX spolu se třídou LaTeX Beamer.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Martin Picek</mal:name>
+      <mal:email>picek.martin@gnome-cesko.cz</mal:email>
+      <mal:years>2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Marek Černocký</mal:name>
+      <mal:email>marek@manet.cz.</mal:email>
+      <mal:years>2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Beamer se SyncTeX</title>
+<p>Beamer je LaTeXová třída pro vytváření snímků do prezentací.</p>
+<p>Můžete provádět dopředné i zpětné hledání v prezentaci <em>Beamer-LaTeX</em> podobným způsobem, jako při <link xref="synctex-search">hledání</link> přes jiné soubory TeX přeložené pomocí SyncTeX. Akorát vás hledání přenese na odpovídající snímek prezentaci, ne však nutně na odpovídající řádek textu. Tento rozdíl je podrobněji rozveden níže.</p>
+<section id="forward-search">
+    <title>Dopředné hledání: z kódu Beamer-LaTeX do PDF (z <app>gedit</app> do <app>prohlížeče dokumentů</app>)</title>
+    <p>Díky <link xref="synctex-search#forward-search">dopřednému hledání</link> můžete kliknout na konkrétní řádek ve zdrojovém kódu LaTeX. <em>Horní</em> část odpovídajícího snímku v prezentaci PDF se červeně orámuje. Nějčastěji to bývá <em>nadpis</em> snímku.</p>
+</section>
+
+<section id="backward-search">
+
+    <title>Zpětné hledání: z PDF do kódu Beamer-LaTeX (z <app>prohlížeče dokumentů</app> do <app>gedit</app>)</title>
+     <p>Díky <link xref="synctex-search#backward-search">zpětnému hledání</link> můžete kliknout na libovolný text ve snímku prezentace PDF a odpovídající řádek v kódu LaTeX, který zakončuje tento snímek, se zvýrazní. Obvykle to bude řádek:</p>
+ <code>\end{frame}</code>
+<p>odpovídající snímku, na který jste klikli.</p>
+
+
+</section>
+
+
+</page>

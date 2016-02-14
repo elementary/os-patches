@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-beamer" xml:lang="ko">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="sixth"/>
+    <desc>SyncTeX의 LaTeX Beamer 클래스 사용하기.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>크리에이티브 커먼즈 동일조건변경허락 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>조성호</mal:name>
+      <mal:email>darkcircle.0426@gmail.com</mal:email>
+      <mal:years>2012, 2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>류창우</mal:name>
+      <mal:email>cwryu@debian.org</mal:email>
+      <mal:years>2014-2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>SyncTeX의 Beamer</title>
+<p>Beamer는 프리젠테이션용 슬라이드를 만드는 LaTeX 클래스입니다.</p>
+<p><em>Beamer-LaTeX</em> 프리젠테이션 안에서는, SyncTeX으로 컴파일한 다른 TeX 파일에 대해 <link xref="synctex-search">검색</link>과 비슷한 방식으로 전방 후방 검색을 진행할 수 있습니다. 하지만 검색된 해당 프레임(슬라이드)까지는 가도 해당 텍스트 줄까지 가지는 않습니다. 차이점을 아래에 자세히 설명합니다.</p>
+<section id="forward-search">
+    <title>전방 검색: Beamer-LaTeX 소스코드로부터 PDF에 대한 검색(<app>지에디트</app>에서 <app>문서 보기</app>에 대해 검색)</title>
+    <p><link xref="synctex-search#forward-search">전방 검색</link>을 통해 Beamer-LaTeX 소스코드의 특정 줄을 누를 수 있습니다. PDF의 해당 슬라이드 <em>맨 위</em>에 빨간 줄이 쳐집니다. 이 부분은 보통 <em>프레임 제목</em>입니다.</p>
+</section>
+
+<section id="backward-search">
+
+    <title>후방 검색: PDF로부터 Beamer-LaTeX 소스코드에 대한 검색(<app>문서 보기</app>에서 <app>gedit</app>에 대한 검색)</title>
+     <p><link xref="synctex-search#backward-search">후방 검색</link>을 사용해서 프레임의 텍스트를 누르면, 해당 프레임을 끝내는 LaTeX 코드 줄이 반전됩니다. 보통 다음과 같습니다:</p>
+ <code>\end{frame}</code>
+<p>누른 프레임에 따라 다릅니다.</p>
+
+
+</section>
+
+
+</page>

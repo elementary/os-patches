@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="cs">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Příkazový řádek</title>
+    <desc>Příkaz <cmd>evince</cmd> umí otevřít libovolný počet souborů na určených stránkách a v různých režimech.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Martin Picek</mal:name>
+      <mal:email>picek.martin@gnome-cesko.cz</mal:email>
+      <mal:years>2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Marek Černocký</mal:name>
+      <mal:email>marek@manet.cz.</mal:email>
+      <mal:years>2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Příkazový řádek</title>
+<p>Pro spuštění <app>prohlížeče dokumentů</app> z příkazového řádku napište <cmd>evince</cmd>. Můžete také otevřít konkrétní soubor zadáním jeho názvu za příkaz evince:</p>
+
+<screen>evince soubor.pdf</screen>
+<p>Abyste otevřeli více souborů, zadejte zadejte za příkaz evince jejich názvy oddělené pomocí mezer:</p>
+<screen>evince soubor1.pdf soubor2.pdf</screen>
+<p><app>Prohlížeč dokumentů</app> podporuje také práci se soubory z webu. Můžete napříkaz za příkaz evince zadat umístění souboru na webu:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Otevření dokumentu na konkrétní stránce</title>
+    <p>Pro otevření dokumentu na konkrétní stránce použijte přepínač <cmd>--page-label</cmd>. Například pro otevření dokumentu na straně 3 byste zadali:</p>
+    <screen>evince --page-label=3 soubor.pdf</screen>
+    <p>Parametr --page-label by měl být ve stejném formátu jako číslo stránky zobrazené na nástrojové liště v <app>prohlížeči dokumentů</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Otevření dokumentu v režimu celé obrazovky</title>
+    <screen>evince --fullscreen soubor.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Otevření dokumentu v režimu prezentace</title>
+    <screen>evince --presentation soubor.pdf</screen>
+</section>
+<section id="preview">
+    <title>Otevření dokumentu v režimu náhledu</title>
+    <screen>evince --preview soubor.pdf</screen>
+</section>
+</page>

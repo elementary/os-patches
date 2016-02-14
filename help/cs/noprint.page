@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="cs">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Autor dokumentu může omezit možnosti tisku.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Martin Picek</mal:name>
+      <mal:email>picek.martin@gnome-cesko.cz</mal:email>
+      <mal:years>2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Marek Černocký</mal:name>
+      <mal:email>marek@manet.cz.</mal:email>
+      <mal:years>2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Nemůžu vytisknout dokument</title>
+<section id="why">
+ <title>Možné důvody selhání tisku</title>
+<p>Dokument se možná nevytiskl, protože:</p>
+ <list>
+  <item><p>je problém s tiskárnou nebo</p></item>
+  <item><p>je omezen tisk PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Problémy s tiskárnou</title>
+  <p>Existuje řada důvodů, proč tiskárna nemusí fungovat. Například ji mohl dojít papír nebo inkoust/toner, může být odpojená nebo poškozená.</p>
+
+  <p>Zkontrolujte, jestli tiskárna správně tiskne:</p>
+  <steps>
+   <item><p>Klikněte na své jméno na hlavní liště a vyberte <gui>Nastavení systému</gui>.</p></item>
+   <item><p>V seznamu klikněte na svoji tiskárnu</p></item>
+   <item><p>Klikněte na <gui>Tisk testovací stránky</gui>. Stránka by se měla odeslat do vaší tiskárny.</p>
+<note>
+ <p>Pokud tisk selže, podívejte na <link href="help:gnome-help/printing">nápovědu k tisku</link>. Možná se také budete potřebovat podívat do příručky své tiskárny, co dalšího by se dalo udělat.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Omezení tisku PDF</title>
+  <p>Některé dokumenty PDF mají nastavení, kterými můžete omezit jejich tisk. Autor může tato omezení tisku nastavit při vytváření dokumentu. <app>Prohlížeč dokumentů</app> tato omezení ve výchozím stavu nebere v úvahu, ale možná budete chtít zkontrolovat, zda toto chování nebylo vypnuto:</p>
+
+  <steps>
+    <item>
+      <p>Zmáčknutím <keyseq><key>Alt</key><key>F2</key></keyseq> otevřete okno Spuštění aplikace.</p>
+    </item>
+    <item>
+      <p>Do textového pole vepište <input>dconf-editor</input> a klikněte na <gui>Spustit</gui>. Otevře se editor nastavení.</p>
+    </item>
+    <item><p>V postranním panelu přejděte na <sys>/org/gnome/evince</sys>.</p></item>
+    <item>
+      <p>Ujistěte se, že volba <gui>override_restrictions</gui> je zaškrtnutá.</p>
+    </item>
+    <item>
+      <p>Vraťte se do <app>prohlížeče dokumentů</app> a zkuste dokument znovu vytisknout.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

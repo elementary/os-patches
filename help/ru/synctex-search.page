@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="ru">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Переключение между <app>приложением для просмотра документов</app> и <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Тифани Антопольски (Tiffany Antopolski)</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>Поиск с помощью SyncTeX</title>
+<p>После того, как вы <link xref="synctex-compile">скомпилировали файл TeX с SyncTeX</link>, вы можете выполнить поиск. SyncTeX поддерживает прямой и обратный поиск даже из подключённого файла.</p>
+
+<section id="forward-search">
+    <title>Прямой поиск: из TeX в PDF (из <app>gedit</app> в <app>приложении для просмотра документов</app>)</title>
+     <p>При использовании прямого поиска вы щёлкаете мышью на определённом разделе исходного кода TeX и переходите к соответствующему месте в PDF. Чтобы выполнить прямой поиск:</p>
+<steps>
+<item>
+<p>Щёлкните мышью по строке в файле TeX.</p>
+</item>
+<item>
+<p>
+  In <app>gedit</app>, click <guiseq><gui>Tools</gui> <gui>Forward Search</gui></guiseq>. The corresponding line in the PDF will be outlined in red.
+</p>
+<p>Или нажмите <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq> или <keyseq><key>Ctrl</key>+левая кнопка мыши</keyseq>. Соответствующая строка в PDF выделится красным цветом.</p>
+</item>
+</steps>
+<note>
+<p>Если соответствующий файл PDF не был открыт, выполнение прямого поиска приведёт к открытию файла PDF в <app>приложении для просмотра документов</app>.</p>
+</note>
+<p>При наличии общего проекта с несколькими файлами TeX можно добавить</p>
+<code>% mainfile: mainfile.tex</code>
+<p>либо в первую, либо в последние три строки каждого подключённого файла TeX, после этого начнёт работать прямой поиск. Обратный поиск должен работать всегда, даже если вы не добавляли modeline.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Обратный поиск: из PDF в TeX (из <app>приложения для просмотра документов</app> в <app>gedit</app>)</title>
+     <p>При использовании обратного поиска вы щёлкаете мышью на определённой строке файла PDF и переходите к соответствующей строке исходного кода TeX.</p>
+<p>
+You can perform a backward search by pressing <keyseq><key>Ctrl</key>left click</keyseq> in the <app>document viewer</app>. The corresponding line in the TeX source code will be highlighted.
+     </p>
+</section>
+
+</page>

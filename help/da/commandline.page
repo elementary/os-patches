@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="da">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Kommandolinje</title>
+    <desc>Kommandoen <cmd>evince</cmd> kan åbne en lang række filer på forudbestemte sider og i forskellige tilstande.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>Kommandolinjen</title>
+<p>Start <app>dokumentfremviseren</app> fra kommandolinjen ved at skrive <cmd>evince</cmd>. Man kan åbne en bestemt fil ved at skrive filnavnet efter evince-kommandoen:</p>
+
+<screen>evince fil.pdf</screen>
+<p>Man kan åbne flere filer ved at skrive filnavnene efter kommandoen evince, idet man adskiller filnavnene med et mellemrum:</p>
+<screen>evince fil1.pdf fil2.pdf</screen>
+<p>Med <app>Dokumentfremviser</app> kan man også håndtere filer på internettet. Man kan for eksempel efter kommandoen evince angive en filplacering på nettet:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Åbn et dokument på en bestemt side</title>
+    <p>Man kan bruge tilføjelsen <cmd>--page-label</cmd> for at åbne et dokument på en bestemt side. Man åbner for eksempel et dokument på side 3 ved at skrive:</p>
+    <screen>evince --page-label=3 fil.pdf</screen>
+    <p>Sidemærket skal være i samme format som det sidetal der vises i <app>dokumentfremviserens</app> værktøjslinje.</p>
+</section>
+<section id="fullsreen">
+    <title>Åbn et dokument i fuldskærmstilstand</title>
+    <screen>evince --fullscreen fil.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Åbn et dokument i præsentationstilstand</title>
+    <screen>evince --presentation fil.pdf</screen>
+</section>
+<section id="preview">
+    <title>Åbn et dokument i forhåndsvisningstilstand</title>
+    <screen>evince --preview fil.pdf</screen>
+</section>
+</page>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="el">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Γραμμή εντολών</title>
+    <desc>Η εντολή <cmd>evince</cmd> μπορεί να ανοίξει οποιοδήποτε αριθμό αρχείων, σε συγκεκριμένες σελίδες σε ποικίλες καταστάσεις.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Ελληνική μεταφραστική ομάδα GNOME</mal:name>
+      <mal:email>team@gnome.gr</mal:email>
+      <mal:years>2005-2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Στυλιανός Παπαναστασίου</mal:name>
+      <mal:email>stelios@dcs.gla.ac.uk</mal:email>
+      <mal:years>2005</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Μιχάλης Κοτσαρίνης</mal:name>
+      <mal:email>mk73628@gmail.com</mal:email>
+      <mal:years>2010</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Δημήτρης Σπίγγος</mal:name>
+      <mal:email>dmtrs32@gmail.com</mal:email>
+      <mal:years>2012, 2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Θάνος Τρυφωνίδης</mal:name>
+      <mal:email>tomtryf@gmail.com</mal:email>
+      <mal:years>2014, 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mαρία Μαυρίδου</mal:name>
+      <mal:email>mavridou@gmail.com</mal:email>
+      <mal:years>2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Η γραμμή εντολών</title>
+<p>Για να εκκινήσετε την <app>Προβολή εγγράφων</app> από τη γραμμή εντολών, πληκτρολογήστε <cmd>evince</cmd>. Μπορείτε να ανοίξετε ένα συγκεκριμένο αρχείο πληκτρολογώντας το όνομά του μετά την εντολή evince:</p>
+
+<screen>evince file.pdf</screen>
+<p>Μπορείτε να ανοίξετε πολλαπλά αρχεία πληκτρολογώντας τα ονόματά τους μετά την εντολή evince, διαχωρίζοντάς τα με ένα κενό διάστημα:</p>
+<screen>evince file1.pdf file2.pdf</screen>
+<p>Η <app>προβολή εγγράφων</app> υποστηρίζει επίσης το χειρισμό αρχείων στον ιστό. Για παράδειγμα, μετά την εντολή evince μπορείτε να δώσετε την τοποθεσία ενός αρχείου στον ιστό:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Άνοιγμα εγγράφου σε συγκεκριμένη σελίδα</title>
+    <p>Μπορείτε να χρησιμοποιήσετε το διακόπτη <cmd>--page-label</cmd> για να ανοίξετε ένα έγγραφο σε συγκεκριμένη σελίδα. Για παράδειγμα, να ανοίξετε ένα έγγραφο στη σελίδα 3, θα πληκτρολογούσατε:</p>
+    <screen>evince --page-label=3 file.pdf</screen>
+    <p>Η ετικέτα σελίδας θα πρέπει να είναι της ίδιας μορφής με τον εμφανιζόμενο αριθμό σελίδας στην εργαλειοθήκη της <app>Προβολής εγγράφων</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Άνοιγμα εγγράφου σε κατάσταση πλήρους οθόνης</title>
+    <screen>evince --fullscreen file.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Άνοιγμα εγγράφου σε κατάσταση παρουσίασης</title>
+    <screen>evince --presentation file.pdf</screen>
+</section>
+<section id="preview">
+    <title>Άνοιγμα εγγράφου σε κατάσταση προεπισκόπησης</title>
+    <screen>evince --preview file.pdf</screen>
+</section>
+</page>

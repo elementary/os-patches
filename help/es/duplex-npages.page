@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="duplex-npage" xml:lang="es">
+
+  <info>
+    <link type="guide" xref="print-booklet#doubleSided"/>
+
+    <desc>Imprimir un folleto de 16 páginas.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Mustieles</mal:name>
+      <mal:email>daniel.mustieles@gmail.com</mal:email>
+      <mal:years>2012 - 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Jorge González</mal:name>
+      <mal:email>jorgegonz@svn.gnome.org</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Folleto de n páginas</title>
+ <note style="important">
+  <p><em>n</em> es múltiplo de 4.</p>
+ </note>
+
+ <p>Si el número de páginas de su documento PDF no es múltiplo de 4, debe añadir el número de páginas en blanco adecuado (1, 2 o 3) para que sea múltiplo de 4. Para hacerlo, puede:</p>
+ <steps>
+ <item>
+  <p>Crear un PDF vacío usando el <app>Procesador de textos de LibreOffice</app>.</p>
+ </item>
+ <item>
+  <p>Combinar las páginas en blanco con su documento PDF usando <app>PDF-Shuffler</app>, situando las páginas en blanco al final.</p>
+ </item>
+</steps>
+
+
+<steps>
+ <item>
+  <p>Pulse <guiseq><gui>Archivo</gui><gui>Imprimir</gui></guiseq>.</p>
+ </item>
+ <item>
+  <p>Elija la pestaña <gui>General</gui>.</p>
+  <p>En <em>Rango</em>, elija <gui>Páginas</gui>.</p>
+  <tree>
+   <item>Escriba el número de páginas en este orden: <item>n, 1, 2, n-1, n-2, 3, 4, n-3, n-4, 5, 6, n-5, n-6, 7, 8, n-7, n-8, 9, 10, n-9, n-10, 11, 12, n-11…</item> <item>... hasta que haya escrito un número n de páginas.</item></item>
+  </tree>
+ </item>
+ <item>
+  <p>Elija la pestaña <gui>Configuración de página</gui>.</p>
+  <p>En <em>Diseño</em>, en el menú <gui>Doble cara</gui>, seleccione <gui>Margen corto (girar)</gui>.</p>
+  <p>En la opción <gui>Páginas por hoja</gui>, elija <gui>2</gui>.</p>
+  <p>En el menú<gui>Ordenación de páginas</gui>, elija <gui>De izquierda a derecha</gui>.</p>
+ </item>
+ <item>
+  <p>Pulse <gui>Imprimir</gui>.</p>
+ </item>
+</steps>
+</page>

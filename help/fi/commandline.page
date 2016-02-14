@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="fi">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Komentorivi</title>
+    <desc><cmd>evince</cmd>-komennolla voi avata useita tiedostoja valitulle sivulle halutussa tilassa.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Sami Jaktholm</mal:name>
+      <mal:email>sjakthol@outlook.com</mal:email>
+      <mal:years>2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Timo Jyrinki</mal:name>
+      <mal:email>timo.jyrinki@iki.fi</mal:email>
+      <mal:years>2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Tommi Vainikainen</mal:name>
+      <mal:email>thv@iki.fi</mal:email>
+      <mal:years>2006</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Flammie Pirinen</mal:name>
+      <mal:email>flammie@iki.fi</mal:email>
+      <mal:years>2006</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Komentorivin käyttö</title>
+<p><app>Asiakirjakatselin</app> käynnistyy komentoriviltä komennolla <cmd>evince</cmd>. Tietty tiedosto voidaan avata kirjoittamalla tiedoston nimi evince-komenon jälkeen:</p>
+
+<screen>evince tiedosto.pdf</screen>
+<p>Useita tiedostoja voi avata kerralla kirjoittamalla tiedostonimet evince-komennon perään välilyönnillä erotettuna:</p>
+<screen>evince tiedosto1.pdf tiedosto2.pdf</screen>
+<p><app>Asiakirjakatselin</app> tukee myös verkkotiedostojen avaamista. Evince-komennon perään voi kirjoittaa tiedoston verkko-osoitteen:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Asiakirjan avaaminen tietyltä sivulta</title>
+    <p>Valintaa <cmd>--page-label</cmd> voi käyttää asiakirjan avaamiseen tietyltä sivulta. Esimerkiksi seuraava komento avaa asiakirjan kolmannen sivun:</p>
+    <screen>evince --page-label=3 tiedosto.pdf</screen>
+    <p>Sivunumero tulee antaa samassa muodossa, kuin se on esitetty <app>Asiakirjakatselimen</app> työkalupalkissa.</p>
+</section>
+<section id="fullsreen">
+    <title>Asiakirjan avaaminen kokoruututilassa</title>
+    <screen>evince --fullscreen tiedosto.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Asiakirjan avaaminen esitystilassa</title>
+    <screen>evince --presentation tiedosto.pdf</screen>
+</section>
+<section id="preview">
+    <title>Asiakirjan avaaminen esikatselutilassa</title>
+    <screen>evince --preview tiedosto.pdf</screen>
+</section>
+</page>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="ru">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Автор мог наложить ограничения на печать документа</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Фил Бул (Phil Bull)</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>Не удаётся напечатать документ</title>
+<section id="why">
+ <title>Возможные причины при отказе печати</title>
+<p>Причины, по которым не удаётся напечатать документ:</p>
+ <list>
+  <item><p>Проблемы с принтером</p></item>
+  <item><p>Ограничения на печать PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Проблемы, связанные с принтером</title>
+  <p>Есть множество причин, по которым ваш принтер может не работать. Например, в нём могла закончиться бумага или чернила, возможно, принтер не подключён или поломан.</p>
+
+  <p>Чтобы проверить, правильно ли печатает принтер:</p>
+  <steps>
+   <item><p>Щёлкните по своему имени в верхней панели и выберите <gui>Системные параметры</gui>.</p></item>
+   <item><p>Выберите из списка свой принтер.</p></item>
+   <item><p>Нажмите кнопку <gui>Печать пробной страницы</gui>. После этого страница должна быть отправлена на принтер.</p>
+<note>
+ <p>
+If this fails, see <link href="help:gnome-help/printing">Printing help</link>.  You may also need to see your printer's manual to see what else you can do.
+</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Ограничения на печать PDF</title>
+  <p>Некоторые документы PDF используют параметр, который запрещает печать этого документа. Автора документа могут устанавливать это ограничение при создании документа. По умолчанию <app>приложение для просмотра документов</app> игнорирует это ограничение, вы можете проверить, не отключено ли игнорирование:</p>
+
+  <steps>
+    <item>
+      <p>Нажмите <keyseq><key>Alt</key><key>F2</key></keyseq>. Откроется диалоговое окно для запуска приложений.</p>
+    </item>
+    <item>
+      <p>Введите в текстовое поле <input>dconf-editor</input> и нажмите <gui>Запустить</gui>. Откроется «Редактор конфигурации».</p>
+    </item>
+    <item><p>Откройте в боковой панели <sys>/org/gnome/evince</sys>.</p></item>
+    <item>
+      <p>Убедитесь, что параметр <gui>override_restrictions</gui> включён.</p>
+    </item>
+    <item>
+      <p>Вернитесь к <app>приложению для просмотра документов</app> и снова попробуйте напечатать документ.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

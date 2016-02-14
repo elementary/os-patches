@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="gl">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Liña de ordes</title>
+    <desc>A orde <cmd>evince</cmd> pode abrir calquera número de ficheiros, en páxinas específicas e de varias formas.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Fran Diéguez</mal:name>
+      <mal:email>frandieguez@ubuntu.com</mal:email>
+      <mal:years>2010-2012</mal:years>
+    </mal:credit>
+  </info>
+
+<title>A liña de ordes</title>
+<p>Para iniciar o <app>Visor de documentos</app> desde a liña de ordes escriba <cmd>evince</cmd>. Pode abrir un ficheiro escribindo o nome do ficheiro xusto despois da orde de evince:</p>
+
+<screen>evince ficheiro.pdf</screen>
+<p>Pode abrir varios ficheiros escribindo os nomes de ficheiros despois da orde de evince, separando cada un dos nomes por un espacio:</p>
+<screen>evince ficheiro1.pdf ficheiro2.pdf</screen>
+<p>O <app>visor de documentos</app> tamén é compatíbel coa xestión de ficheiros na rede. Por exemplo, logo de orde evince pode escribir un enderezo dun ficheiro na rede:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Abrir un documento nunha páxina específica</title>
+    <p>Vostede pode usar o modificador <cmd>--page-label</cmd> para abrir un documento nunha páxina específica. Por exemplo, para abrir un documento na páxina 3 escriba:</p>
+    <screen>evince --page-label=3 ficheiro.pdf</screen>
+    <p>A etiqueta da páxina debería estar no mesmo formato que o número de páxina mostrado na barra de ferramentas do <app>Visor de documentos</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Abrir un documento en modo a pantalla completa</title>
+    <screen>evince --fullscreen ficheiro.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Abrir un documento en modo Presentación</title>
+    <screen>evince --presentation ficheiro.pdf</screen>
+</section>
+<section id="preview">
+    <title>Abrir un documento no modo de previsualización</title>
+    <screen>evince --preview ficheiro.pdf</screen>
+</section>
+</page>

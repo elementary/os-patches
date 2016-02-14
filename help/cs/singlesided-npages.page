@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="singlesided-npage" xml:lang="cs">
+
+  <info>
+    <link type="guide" xref="print-booklet#singleSided"/>
+
+    <desc>Jak vytisknout více než 20stránkovou brožuru.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Martin Picek</mal:name>
+      <mal:email>picek.martin@gnome-cesko.cz</mal:email>
+      <mal:years>2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Marek Černocký</mal:name>
+      <mal:email>marek@manet.cz.</mal:email>
+      <mal:years>2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>n-stránková brožura</title>
+ <note style="important">
+  <p><em>n</em> je násobkem 4.</p>
+ </note>
+ <p>V případě, že počet stránek ve vašem dokumentu PDF není násobkem 4, měli byste přidat příslušný počet stránek (1, 2 nebo 3), aby násobkem 4 byl. To můžete udělat tak, že:</p>
+ <steps>
+ <item>
+  <p>V aplikaci <app>LibreOffice Writer</app> vytvořte prázdný dokument PDF.</p>
+ </item>
+ <item>
+  <p>Spojte prázdné stránky se svým dokumentem PDF pomocí aplikace <app>PDF-Shuffler</app> a to tak, že je přidáte na konec.</p>
+ </item>
+</steps>
+
+ <p>Tisk:</p>
+  <steps>
+ <item>
+  <p>Klikněte na <guiseq><gui>Soubor</gui><gui>Tisk</gui></guiseq>.</p>
+ </item>
+ <item>
+  <p>Zvolte kartu <gui>Obecné</gui>.</p>
+  <p>V <em>Rozsah</em> vyberte možnost <gui>Stránky</gui>.</p>
+  <tree>
+   <item>Pište čísla stránek v tomto pořadí: <item>n, 1, 2, n-1, n-2, 3, 4, n-3, n-4, 5, 6, n-5, n-6, 7, 8, n-7, n-8, 9, 10, n-9, n-10, 11, 12, n-11…</item> <item>…dokud nenapíšete n čísel stránek.</item></item>
+  </tree>
+ </item>
+ <item>
+  <p>Přejděte na kartu <gui>Nastavení stránky</gui>.</p>
+  <p>Pod <em>Rozvržením</em> v nabídce <gui>Oboustranné</gui> vyberte <gui>Jednostranné</gui>.</p>
+  <p>V nabídce <gui>Stránek na stranu papíru</gui> vyberte <gui>2</gui>.</p>
+  <p>V nabídce <gui>Řazení stránek</gui> vyberte <gui>Zleva doprava</gui>.</p>
+  <p>V nabídce <gui>Tisknout pouze</gui> vyberte <gui>Liché listy</gui>.</p>
+ </item>
+ <item>
+  <p>Klikněte na <gui>Tisk</gui>.</p>
+ </item>
+   <item>
+    <p>Po vytisknutí všech stránek je otočte vzhůru nohama a vraťte zpět do podavače tiskárny.</p>
+   </item>
+   <item>
+    <p>Klikněte na <guiseq><gui>Soubor</gui><gui>Tisk</gui></guiseq>.</p>
+   </item>
+   <item>
+    <p>Přejděte na kartu <gui>Nastavení stránky</gui>.</p>
+     <p>V nabídce <gui>Tisknout pouze</gui> vyberte <gui>Sudé listy</gui>.</p>
+   </item>
+   <item>
+    <p>Klikněte na <gui>Tisk</gui>.</p>
+   </item>
+  </steps>
+</page>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="da">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Forfatteren kan have lagt begrænsninger i dokumentet hvad angår udskrivning.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>Jeg kan ikke udskrive et dokument</title>
+<section id="why">
+ <title>Mulige årsager til at udskrivning mislykkes</title>
+<p>Hvis et dokument ikke kan udskrives, kan det skyldes:</p>
+ <list>
+  <item><p>Printerproblemer eller</p></item>
+  <item><p>Begrænsninger i udskriften af PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Printerproblemer</title>
+  <p>Der kan være mange grunde til at din printer ikke fungerer. Den kan for eksempel mangle papir eller blæk. Eller den kan være i stykker, eller måske er den ikke tilsluttet.</p>
+
+  <p>For at finde ud af om din printer udskriver korrekt:</p>
+  <steps>
+   <item><p>Klik på dit navn i toppanelet og vælg <gui>Systemindstillinger</gui>.</p></item>
+   <item><p>Klik på din printer i listen.</p></item>
+   <item><p>Klik på <gui>Udskriv prøveside</gui>. Der sendes en side til din printer.</p>
+<note>
+ <p>Hvis dette mislykkes, så se <link href="help:gnome-help/printing">Hjælp til udskrivning</link>. Måske skal du også se i din printerhåndbog hvad du ellers kan gøre.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Begrænsninger i udskriften af PDF</title>
+  <p>Nogle PDF-dokumenter har en indstilling, der forhindrer at de kan udskrives. Under oprettelsen af et dokument kan forfatteren lægge denne begrænsning på udskrivningen. Som standard tilsidesætter <app>Dokumentfremviser</app> begrænsningen, men du kan undersøge om dette er blevet deaktiveret:</p>
+
+  <steps>
+    <item>
+      <p>Tryk på <keyseq><key>Alt</key><key>F2</key></keyseq> for at åbne vinduet kør program.</p>
+    </item>
+    <item>
+      <p>Skriv <input>dconf-editor</input> i tekstboksen og klik på <gui>Kør</gui>. Så åbner konfigurationsredigeringen.</p>
+    </item>
+    <item><p>Naviger frem til <sys>/org/gnome/evince</sys> ved hjælp af sidepanelet.</p></item>
+    <item>
+      <p>Sørg for at der er sat hak ved <gui>tilsidesæt begrænsninger</gui>.</p>
+    </item>
+    <item>
+      <p>Vend tilbage til <app>dokumentfremviseren</app> og prøv igen at udskrive dokumentet.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

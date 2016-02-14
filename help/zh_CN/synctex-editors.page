@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="zh-CN">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>您可以使用哪些编辑器来编辑 TeX 文件？</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>支持的编辑器</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p><link xref="synctex-search#forward-search">向前搜索</link>(从 <app>gedit</app> 到 <app>文档查看器</app>)和 <link xref="synctex-search#backward-search">向后搜索</link>(从 <app>文档查看器</app> 到 <app>gedit</app>)都支持。</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p><app>gedit</app> 的插件包含一个可以使 SyncTeX 与 Vim 一起工作的 python 脚本(evince_dbus.py)。为了同 <app>文档查看器</app> 一起使用 vim-latex，您需要遵循下列步骤：</p>
+<steps>
+ <item>
+  <p>将 evince_dbus.py 复制到某个在您的可执行文件路径中的目录并给它可执行权限。</p>
+ </item>
+ <item>
+  <p>编辑您的 ~/.vimrc 文件并加入以下几行。</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>现在您可以在 vim-latex 中通过键入 \ls 来使用向前搜索。向后搜索目前还没有被支持。</p>
+  </item>
+</steps>
+</section>
+</page>

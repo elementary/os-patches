@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="ko">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>저작자가 문서에 인쇄 제한을 걸어 두었을지도 모릅니다.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>크리에이티브 커먼즈 동일조건변경허락 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>조성호</mal:name>
+      <mal:email>darkcircle.0426@gmail.com</mal:email>
+      <mal:years>2012, 2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>류창우</mal:name>
+      <mal:email>cwryu@debian.org</mal:email>
+      <mal:years>2014-2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>문서를 인쇄할 수 없습니다.</title>
+<section id="why">
+ <title>인쇄를 실패하는데 가능한 이유</title>
+<p>다음의 이유로 문서를 인쇄하지 못할 수 있습니다:</p>
+ <list>
+  <item><p>프린터 문제이거나,</p></item>
+  <item><p>PDF에서 인쇄를 제한해서입니다.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>프린터 문제</title>
+  <p>프린터가 동작하지 않는 이유는 여러가지가 있습니다. 예를 들어 종이나 잉크가 떨어졌거나, 선이 빠졌거나 손상되었을 수도 있습니다.</p>
+
+  <p>프린터가 올바르게 인쇄하는지 확인하려면:</p>
+  <steps>
+   <item><p>상위 표시줄에 이름을 누르고, <gui>시스템 설정</gui>을 선택합니다.</p></item>
+   <item><p>목록에 있는 프린터를 누릅니다.</p></item>
+   <item><p><gui>시험 페이지 인쇄</gui>를 누릅니다. 프린터에 페이지를 보냅니다.</p>
+<note>
+ <p>실패할 경우 <link href="help:gnome-help/printing">인쇄 도움말</link>을 참고하십시오. 또 프린터 설명서를 보면 이 밖에 할 수 있는 일이 쓰여 있을 수도 있습니다.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>PDF 인쇄 제한</title>
+  <p>어떤 PDF 문서는 인쇄 막는 설정이 들어있기도 합니다. 글쓴이가 문서를 작성할 때 인쇄 제한을 설정할 수 있습니다. <app>문서 보기</app> 프로그램은 기본으로 이 제한을 무시하게 설정되어 있지만, 그렇지 않은지 설정을 확인해 볼 수 있습니다:</p>
+
+  <steps>
+    <item>
+      <p><keyseq><key>Alt</key><key>F2</key></keyseq>키를 눌러 프로그램 실행 창을 엽니다.</p>
+    </item>
+    <item>
+      <p><input>dconf-editor</input>를 입력하고 <gui>실행</gui>을 누르면 설정 편집기가 열립니다.</p>
+    </item>
+    <item><p>가장자리 창에서 <sys>/org/gnome/evince</sys> 항목을 찾아 들어갑니다.</p></item>
+    <item>
+      <p><gui>override_restrictions</gui>옵션이 표시되어 있는지 확인합니다.</p>
+    </item>
+    <item>
+      <p><app>문서 보기</app>로 되돌아가서 문서를 다시 인쇄해 봅니다.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

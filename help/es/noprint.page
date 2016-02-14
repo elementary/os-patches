@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="es">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>El autor puede haber añadido restricciones de impresión al documento.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Mustieles</mal:name>
+      <mal:email>daniel.mustieles@gmail.com</mal:email>
+      <mal:years>2012 - 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Jorge González</mal:name>
+      <mal:email>jorgegonz@svn.gnome.org</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  </info>
+
+<title>No puedo imprimir un documento</title>
+<section id="why">
+ <title>Posibles razones para un fallo al imprimir</title>
+<p>Un documento puede no imprimirse por:</p>
+ <list>
+  <item><p>Problemas con la impresora o,</p></item>
+  <item><p>restricciones de impresión del PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Problemas con la impresora</title>
+  <p>Hay varias razones por las que su impresora puede no estar funcionando. Por ejemplo, puede haberse quedado sin papel, estar desenchufada o estropeada.</p>
+
+  <p>Para comprobar si su impresora imprime correctamente:</p>
+  <steps>
+   <item><p>Pulse sobre su nombre en la barra superior y seleccione <gui>Configuración del sistema</gui>.</p></item>
+   <item><p>Doble pulsación en su impresora en la lista.</p></item>
+   <item><p>Pulse en <gui>Imprimir página de prueba</gui>. Se debería enviar una página a su impresora.</p>
+<note>
+ <p>Si esto falla, consulte la <link href="help:gnome-help/printing">ayuda sobre impresión</link>. También puede necesitar ver el manual de su impresora para ver qué otra cosa puede hacer.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Restricciones de impresión del PDF</title>
+  <p>Algunos documentos PDF tienen restricciones que impiden que pueda imprimirlos. Los autores puede configurar esta restricción de impresión cuando escriben el documento. De manera predeterminada, el <app>Visor de documentos</app> omite esta restricción, pero puede querer comprobar que no se ha desactivado.</p>
+
+  <steps>
+    <item>
+      <p>Pulse <keyseq><key>Alt</key><key>F2</key></keyseq> para abrir la ventana «Ejecutar aplicación».</p>
+    </item>
+    <item>
+      <p>Escriba <input>gconf-editor</input> en la caja de texto y pulse <gui>Ejecutar</gui>. Se abrirá el editor de configuración.</p>
+    </item>
+    <item><p>Navegue hasta <sys>/org/gnome/evince</sys> usando el panel lateral.</p></item>
+    <item>
+      <p>Asegúrese de que la opción <gui>Saltarse las restricciones</gui> está marcada.</p>
+    </item>
+    <item>
+      <p>Regrese al <app>Visor de documentos</app> e intente imprimir el documento de nuevo.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

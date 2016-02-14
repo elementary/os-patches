@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="gl">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Troque entre o <app>Visor de documentos</app> e <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Fran Diéguez</mal:name>
+      <mal:email>frandieguez@ubuntu.com</mal:email>
+      <mal:years>2010-2012</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Buscar con SyncTex</title>
+<p>Despois de <link xref="synctex-compile">compilar o ficheiro TeX con SyncTex</link> poderá buscar nel. SyncTex admite buscas cara adiante e cara atrás nun ficheiro incluído.</p>
+
+<section id="forward-search">
+    <title>Busca cara adiante: de TeX a PDF (<app>gedit</app> a <app>visor de documentos</app>)</title>
+     <p>A busca cara adiante permítelle premer nunha sección específica do código fonte TeX, e saltar á posición asociada no PDF. Para levar a cabo unha busca cara adiante:</p>
+<steps>
+<item>
+<p>Prema sobre unha liña no ficheiro TeX.</p>
+</item>
+<item>
+<p>En <app>gedit</app>, prema <guiseq><gui>Ferramentas</gui> <gui>Busca cara adiante</gui></guiseq>. Realzarase en vermello a liña correspondente no PDF.</p>
+<p>De forma alternativa, vostede pode premer <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq>, ou <keyseq><key>Ctrl</key>+Clic esquerdo</keyseq>. Realzarase en vermello a liña correspondente no PDF.</p>
+</item>
+</steps>
+<note>
+<p>Se o ficheiro PDF correspondente non está aberto, ao levar a cabo unha busca cara adiante abrirá o PDF en <app>Visor de documentos</app>.</p>
+</note>
+<p>Se ten un proxecto complexo con varios ficheiros TeX vostede pode poñer</p>
+<code>% mainfile: mainfile.tex</code>
+<p>xa sexa nas primeiras ou últimas tres liñas de cada ficheiro TeX incluído a busca cara adiante funcionará. A busca cara atrás sempre debería funcionar, incluso se non engade o modo de liña.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>A busca cara atrás: de PDF a TeX (do <app>Visor de documentos</app> a <app>gedit</app>)</title>
+     <p>A busca cara atrás permítelle premer nunha liña específica no ficheiro PDF e saltar á liña asociada no código fonte TeX.</p>
+<p>
+You can perform a backward search by pressing <keyseq><key>Ctrl</key>left click</keyseq> in the <app>document viewer</app>. The corresponding line in the TeX source code will be highlighted.
+     </p>
+</section>
+
+</page>

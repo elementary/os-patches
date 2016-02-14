@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="de">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Der Verfasser hat eventuell Druckbeschränkungen für das Dokument festgelegt.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mario Blättermann</mal:name>
+      <mal:email>mario.blaettermann@gmail.com</mal:email>
+      <mal:years>2008-2009, 2011-2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Christian Kirbach</mal:name>
+      <mal:email>Christian.Kirbach@gmail.com</mal:email>
+      <mal:years>2011, 2014, 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Wolfgang Stöggl</mal:name>
+      <mal:email>c72578@yahoo.de</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Gabor Karsay</mal:name>
+      <mal:email>gabor.karsay@gmx.at</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Benjamin Steinwender</mal:name>
+      <mal:email>b@stbe.at</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Ich kann ein Dokument nicht drucken</title>
+<section id="why">
+ <title>Mögliche Gründe für Druckprobleme</title>
+<p>Ein Dokument kann eventuell nicht gedruckt werden, wegen:</p>
+ <list>
+  <item><p>Problemen mit dem Drucker, oder</p></item>
+  <item><p>Druckbeschränkungen durch PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Probleme beim Drucken</title>
+  <p>Es gibt viele Gründe, warum Ihr Drucker nicht funktionieren könnte. Zum Beispiel könnte das Papier oder die Tinte ausgegangen sein, oder der Drucker ist beschädigt oder nicht angeschlossen.</p>
+
+  <p>So prüfen Sie, ob Ihr Drucker ordnungsgemäß drucken kann:</p>
+  <steps>
+   <item><p>Klicken Sie auf Ihren Namen im oberen Panel und wählen Sie <gui>Systemeinstellungen</gui>.</p></item>
+   <item><p>Klicken Sie auf Ihren Drucker in der Liste.</p></item>
+   <item><p>Klicken Sie auf <gui>Testseite drucken</gui>. Eine Seite sollte nun ausgedruckt werden.</p>
+<note>
+ <p>Falls dies fehl schlägt, finden Sie möglicherweise in der <link href="help:gnome-help?printing">Hilfe zum Drucken</link> weitere Informationen, oder lesen Sie bitte im Handbuch zu Ihrem Drucker, was Sie sonst noch tun können.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Druckbeschränkungen durch PDF</title>
+  <p>Einige PDF-Dokumente haben Einstellungen hinterlegt, die ein Ausdrucken untersagen. Verfasser können Druckeinschränkungen beim Erstellen des Dokuments festlegen. Der <app>Dokumentenbetrachter</app> ignoriert diese Beschränkungen per Voreinstellung, aber eventuell wollen Sie prüfen, ob dies nicht deaktiviert wurde:</p>
+
+  <steps>
+    <item>
+      <p>Drücken Sie <keyseq><key>Alt</key><key>F2</key></keyseq>, um den Dialog »Anwendung ausführen« zu öffnen.</p>
+    </item>
+    <item>
+      <p>Geben Sie <input>gconf-editor</input> in das Textfeld ein und klicken Sie auf <gui>Ausführen</gui>. Der Konfigurationseditor wird geöffnet.</p>
+    </item>
+    <item><p>Suchen Sie <sys>/org/gnome/evince</sys> in der Seitenleiste.</p></item>
+    <item>
+      <p>Stellen Sie sicher, dass die Option <gui>override_restrictions</gui> aktiviert ist.</p>
+    </item>
+    <item>
+      <p>Kehren Sie zum <app>Dokumentenbetrachter</app> zurück und versuchen Sie erneut, das Dokument zu drucken.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

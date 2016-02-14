@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="id">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Penyunting mana yang dapat dipakai untuk menyunting berkas TEX?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Andika Triwidada</mal:name>
+      <mal:email>andika@gmail.com</mal:email>
+      <mal:years>2012, 2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Penyunting yang didukung</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p><link xref="synctex-search#forward-search">Pencarian maju</link> (dari <app>gedit</app> ke <app>penilik dokumen</app>) dan <link xref="synctex-search#backward-search">Pencarian mundur</link> (dari <app>penilik dokumen</app> ke <app>gedit</app>) keduanya didukung.</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>Plugin <app>gedit</app> memuat skrip python (evince_dbus.py) yang dapat dipakai agar SyncTeX bekerja dengan Vim. Untuk memakai vim-latex bersama dengan <app>peniliki dokumen</app> Anda perlu mengikut langkah-langkah berikut:</p>
+<steps>
+ <item>
+  <p>Salin evince_dbus.py ke salah satu direktori pada path Anda dan berikan hak akses +x.</p>
+ </item>
+ <item>
+  <p>Ubah berkas ~/.vimr Anda dan tambahkan baris berikut.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Kini Anda dapat memakai Pencarian maju dari vim-latex dengan mengetikkan \ls. Pencarian mundur belum didukung.</p>
+  </item>
+</steps>
+</section>
+</page>
