@@ -40,7 +40,7 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 
-#include <webkit/webkit.h>
+#include <webkit2/webkit2.h>
 
 #include "hostname-helper.h"
 #include "gsd-disk-space-helper.h"
@@ -733,38 +733,51 @@ on_section_changed (GtkTreeSelection  *selection,
   gtk_tree_path_free (path);
 }
 
-static gboolean            
-url_nav_callback (WebKitWebView             *web_view,
-              WebKitWebFrame            *frame,
-              WebKitNetworkRequest      *request,
-              WebKitWebNavigationAction *navigation_action,
-              WebKitWebPolicyDecision   *decision,
-              gpointer                   user_data)
+static gboolean
+on_decide_policy (WebKitWebView             *web_view,
+                  WebKitPolicyDecision      *decision,
+                  WebKitPolicyDecisionType   decision_type,
+                  gpointer                   user_data)
 {
-    gtk_show_uri (gtk_widget_get_screen (user_data),
-                  webkit_network_request_get_uri (request),
-                  GDK_CURRENT_TIME, NULL);
-    return TRUE;
+    WebKitNavigationPolicyDecision *navigation_decision;
+    WebKitNavigationAction *navigation_action;
+    WebKitNavigationType navigation_type;
+    WebKitURIRequest *request;
+    const gchar *uri;
+
+    switch (decision_type)
+    {
+        case WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION:
+            navigation_decision = WEBKIT_NAVIGATION_POLICY_DECISION(decision);
+            navigation_action = webkit_navigation_policy_decision_get_navigation_action (navigation_decision);
+            request = webkit_navigation_action_get_request (navigation_action);
+            navigation_type = webkit_navigation_action_get_navigation_type (navigation_action);
+
+            if (navigation_type == WEBKIT_NAVIGATION_TYPE_LINK_CLICKED)
+            {
+                uri = webkit_uri_request_get_uri (request);
+
+                webkit_policy_decision_ignore (decision);
+
+                gtk_show_uri (gtk_widget_get_screen (GTK_WIDGET (web_view)),
+                              uri, GDK_CURRENT_TIME, NULL);
+                return TRUE;
+            }
+        default:
+            return FALSE;
+    }
 }
 
 static void
 info_panel_setup_notice (CcInfoPanel  *self)
 {
-  GtkWidget *sw;
-  
-  sw = gtk_scrolled_window_new (NULL, NULL);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
-                                  GTK_POLICY_AUTOMATIC,
-                                  GTK_POLICY_AUTOMATIC);
-
-  WebKitWebView *webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
+  WebKitWebView *webView = WEBKIT_WEB_VIEW (webkit_web_view_new());
   webkit_web_view_load_uri(webView, "file:///usr/share/unity-control-center/searchingthedashlegalnotice.html");
-  g_signal_connect (G_OBJECT (webView), "navigation-policy-decision-requested",
-                    G_CALLBACK (url_nav_callback), sw);
+  g_signal_connect (G_OBJECT (webView), "decide-policy",
+                    G_CALLBACK (on_decide_policy), NULL);
 
-  gtk_container_add (GTK_CONTAINER (sw), GTK_WIDGET (webView));
-  gtk_notebook_append_page (GTK_NOTEBOOK (WID ("notebook")), sw, NULL);
-  gtk_widget_show_all(sw);
+  gtk_notebook_append_page (GTK_NOTEBOOK (WID ("notebook")), GTK_WIDGET (webView), NULL);
+  gtk_widget_show_all (GTK_WIDGET (webView));
 }
 
 static void

@@ -140,7 +140,7 @@ PKG_CHECK_MODULES(DATETIME_PANEL, $COMMON_MODULES timezonemap geonames
                   polkit-gobject-1 >= $POLKIT_REQUIRED_VERSION)
 PKG_CHECK_MODULES(DISPLAY_PANEL, $COMMON_MODULES libunity-settings-daemon x11)
 PKG_CHECK_MODULES(INFO_PANEL, $COMMON_MODULES libgtop-2.0 gl x11
-		  polkit-gobject-1 >= $POLKIT_REQUIRED_VERSION webkitgtk-3.0)
+		  polkit-gobject-1 >= $POLKIT_REQUIRED_VERSION webkit2gtk-4.0)
 PKG_CHECK_MODULES(KEYBOARD_PANEL, $COMMON_MODULES
                   gnome-desktop-3.0 >= $GNOME_DESKTOP_REQUIRED_VERSION
                   x11)
@@ -229,7 +229,7 @@ AC_ARG_WITH([cheese],
             with_cheese=auto)
 
 if test x"$with_cheese" != x"no" ; then
-   PKG_CHECK_MODULES(CHEESE, gstreamer-1.0 cheese-gtk >= 3.5.91 cheese clutter-gtk-1.0, [have_cheese=yes], [have_cheese=no])
+   PKG_CHECK_MODULES(CHEESE, cheese-gtk >= 3.5.91 cheese clutter-gtk-1.0, [have_cheese=yes], [have_cheese=no])
    if test x${have_cheese} = xyes; then
      AC_DEFINE(HAVE_CHEESE, 1, [Define to 1 to enable cheese webcam support])
    fi
@@ -455,6 +455,8 @@ panels/sound/data/icons/32x32/status/Makefile
 panels/sound/data/icons/48x48/Makefile
 panels/sound/data/icons/48x48/apps/Makefile
 panels/sound/data/icons/48x48/devices/Makefile
+panels/sound/data/icons/256x256/Makefile
+panels/sound/data/icons/256x256/apps/Makefile
 panels/sound/data/icons/scalable/Makefile
 panels/sound/data/icons/scalable/devices/Makefile
 panels/screen/Makefile

@@ -34,10 +34,6 @@
 #include <polkit/polkit.h>
 #include <act/act.h>
 
-#ifdef HAVE_CHEESE
-#include <gst/gst.h>
-#endif /* HAVE_CHEESE */
-
 #include "shell/cc-editable-entry.h"
 
 #include "um-editable-button.h"
