@@ -1,3 +1,24 @@
+apt-setup (1:0.104ubuntu4) xenial; urgency=medium
+
+  * Now that we have CC.ports.ubuntu.com, fix generators/91security to
+    stop assuming all ports work off ports.ubuntu.com. Instead, correctly
+    mangle the templates to have the right per-arch
+    apt-setup/security_host default.
+  * Add release-files for archive.canonical.com xenial-proposed, and
+    ports.ubuntu.com/xenial-*
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 10 Feb 2016 12:20:48 +0000
+
+apt-setup (1:0.104ubuntu3) xenial; urgency=high
+
+  * Fix apt-setup/enable-source-repositories in security & overlay
+    generators.
+  * Set apt-setup/enable-source-repositories default to false. LP: #74747
+  * For freedom, set apt-setup/enable-source-repositoreis=true. I'm open
+    to be overruled by a technical board decision.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 28 Jan 2016 20:40:54 +0000
+
 apt-setup (1:0.104ubuntu2) xenial; urgency=medium
 
   * Fix mismerge that caused us not to disable the CD at the end of

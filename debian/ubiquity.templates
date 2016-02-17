@@ -1128,10 +1128,21 @@ Template: ubiquity/text/prepare_best_results
 Type: text
 _Description: For best results, please ensure that this computer:
 
-Template: ubiquity/text/prepare_sufficient_space
+Template: ubiquity/text/sorry
+Type: text
+_Description:
+ Sorry
+
+Template: ubiquity/text/required_space
 Type: text
 # SIZE is a variable substituted into this string, and may be '3.7 GB'
-_Description: has at least ${SIZE} available drive space
+# RELEASE is a variable substituted into this string, the Ubuntu flavor'
+_Description: You need at least ${SIZE} disk space to install ${RELEASE}.
+
+Template: ubiquity/text/free_space
+Type: text
+# SIZE is a variable substituted into this string, and may be '3.7 GB'
+_Description: This computer has only ${SIZE}.
 
 Template: ubiquity/text/prepare_power_source
 Type: text
@@ -1143,12 +1154,8 @@ _Description: is connected to the Internet
 
 Template: ubiquity/text/prepare_foss_disclaimer
 Type: text
-# RELEASE is a variable substituted into this string, and may be 'Ubuntu'
 _Description:
- ${RELEASE} uses third-party software to play Flash, MP3 and other media, and
- to work with some graphics and wi-fi hardware. Some of this software is
- proprietary. The software is subject to license terms included with its
- documentation.
+ This software is subject to license terms included with its documentation. Some is proprietary. 
 
 Template: ubiquity/text/prepare_foss_disclaimer_extra_label
 Type: text
@@ -1159,12 +1166,27 @@ _Description:
 Template: ubiquity/text/prepare_nonfree_software
 Type: text
 _Description:
- Install this third-party software
+ Install third-party software for graphics and Wi-Fi hardware, Flash, MP3 and other media
 
 Template: ubiquity/text/prepare_download_updates
 Type: text
 _Description:
- Download updates while installing
+ Download updates while installing ${RELEASE}
+
+Template: ubiquity/text/label_download_updates
+Type: text
+_Description:
+ This saves time after installation.
+
+Template: ubiquity/text/label_download_updates_na
+Type: text
+_Description:
+ Not available because there is no Internet connection.
+
+Template: ubiquity/text/secureboot_label
+Type: text
+_Description:
+ Installing third-party drivers requires turning off Secure Boot. To do this, you need to choose a security key now, and enter it when the system restarts.
 
 Template: ubiquity/force_failsafe_graphics
 Type: boolean

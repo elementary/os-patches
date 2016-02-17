@@ -687,10 +687,31 @@ static int set_country(void) {
 	return 0;
 }
 
+static char *get_localized_archive(char *archive) {
+	char *countryarchive;
+	int i;
+
+	debconf_get(debconf, DEBCONF_BASE "country");
+
+	/* archive should always be preceded by a dot. */
+	countryarchive=malloc(strlen(country) +
+			      strlen(archive) + 1);
+
+	if (debconf_get(debconf, "debian-installer/locale") == 0 &&
+	    debconf->value != NULL && strcmp(debconf->value, "C") == 0)
+		strcpy(countryarchive, archive + 1);
+	else {
+		for (i = 0; country[i]; ++i)
+			countryarchive[i] = tolower((unsigned char) country[i]);
+		strcpy(countryarchive + i, archive);
+	}
+
+	return countryarchive;
+}
+
 static int choose_mirror(void) {
 	char *list;
 	char *countryarchive;
-	int i;
 
 	debconf_get(debconf, DEBCONF_BASE "country");
 #ifndef WITH_FTP_MANUAL
@@ -705,28 +726,26 @@ static int choose_mirror(void) {
 	if (! manual_entry) {
 		char *mir = add_protocol("mirror");
 
-		countryarchive=malloc(strlen(country) +
-				      strlen(".archive.ubuntu.com") + 1);
-		if (debconf_get(debconf, "debian-installer/locale") == 0 &&
-		    debconf->value != NULL && strcmp(debconf->value, "C") == 0)
-			strcpy(countryarchive, "archive.ubuntu.com");
-		else {
-			for (i = 0; country[i]; ++i)
-				countryarchive[i] = tolower((unsigned char) country[i]);
-			strcpy(countryarchive + i, ".archive.ubuntu.com");
-		}
-
 		/* Prompt for mirror in selected country. */
 		list = debconf_list(mirrors_in(country));
 		debconf_subst(debconf, mir, "mirrors", list);
 		if ((debconf_get(debconf, mir) == 0 &&
 		     strcmp(debconf->value, "CC.archive.ubuntu.com") == 0) ||
 		    debconf_fget(debconf, mir, "seen") != 0 ||
-		    strcmp(debconf->value, "true") != 0)
+		    strcmp(debconf->value, "true") != 0) {
+			countryarchive = get_localized_archive(".archive.ubuntu.com");
 			if (mirror_root(countryarchive))
 				debconf_set(debconf, mir, countryarchive);
+			free(countryarchive);
+		}
+		if (debconf_get(debconf, mir) == 0 &&
+		    strcmp(debconf->value, "CC.ports.ubuntu.com") == 0) {
+			countryarchive = get_localized_archive(".ports.ubuntu.com");
+			if (mirror_root(countryarchive))
+				debconf_set(debconf, mir, countryarchive);
+			free(countryarchive);
+		}
 		free(list);
-		free(countryarchive);
 
 		debconf_input(debconf, base_on_cd ? "medium" : "high", mir);
 		free(mir);

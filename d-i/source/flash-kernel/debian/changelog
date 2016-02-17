@@ -1,3 +1,42 @@
+flash-kernel (3.0~rc.4ubuntu62) xenial; urgency=medium
+
+  * Adjust the size of uboot.env based on empirical results on the rpi2.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 13 Feb 2016 23:25:39 -0800
+
+flash-kernel (3.0~rc.4ubuntu61) xenial; urgency=medium
+
+  * Adjust the uboot.env.rpi2 to use the one Paolo Pisati has tested,
+    instead of trying to base on the Snappy one, which is failing to boot.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 12 Feb 2016 11:44:45 -0800
+
+flash-kernel (3.0~rc.4ubuntu60) xenial; urgency=medium
+
+  * Extend support for the RPi2 to actually install the kernel/initramfs
+    on the fat partition, and provide a uboot boot script based on the one
+    used for Snappy images.
+  * Extend functions to support generating uboot.env images, as an
+    alternative to boot.scr and uEnv.txt, and use this for RPi2 as well.
+  * Cherry-pick fixes from Debian to support copying kernel/initrd to
+    destination.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 11 Feb 2016 17:09:53 -0800
+
+flash-kernel (3.0~rc.4ubuntu59) xenial; urgency=medium
+
+  * Add support for the Raspberry Pi2; thanks to Paolo Pisati
+  * <paolo.pisati@canonical.com>.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 09 Feb 2016 22:35:28 -0800
+
+flash-kernel (3.0~rc.4ubuntu58) xenial; urgency=medium
+
+  * Call systemd-detect-virt instead of the Ubuntu specific
+    running-in-container wrapper. (LP: #1539016)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 28 Jan 2016 14:22:57 +0100
+
 flash-kernel (3.0~rc.4ubuntu57) xenial; urgency=medium
 
   * Cherry pick from Debian: Succeed but do nothing when run on an

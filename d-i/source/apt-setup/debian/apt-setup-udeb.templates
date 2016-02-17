@@ -60,13 +60,13 @@ _Description: Downloading local repository key failed:
 
 Template: apt-setup/security_host
 Type: string
-Default: security.ubuntu.com
+Default: @SECURITYHOST@
 Description: for internal use; can be preseeded
  Host to use for security updates
 
 Template: apt-setup/security_path
 Type: string
-Default: /ubuntu
+Default: @SECURITYPATH@
 Description: for internal use; can be preseeded
  Path to use for security updates
 
@@ -113,7 +113,7 @@ _Description: Services to use:
 
 Template: apt-setup/enable-source-repositories
 Type: boolean
-Default: true
+Default: false
 # :sl3:
 _Description: Enable source repositories in APT?
  By default source repositories are listed in /etc/apt/sources.list (with
