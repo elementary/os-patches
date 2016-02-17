@@ -1,3 +1,75 @@
+ubiquity (2.21.44) xenial; urgency=medium
+
+  [ Iain Lane ]
+  * Port the slideshow screen to WebKit 2 (LP: #1469221)
+  * Automatic update of included source packages: apt-setup
+    1:0.104ubuntu3, bterm-unifont 1.4, choose-mirror 2.65ubuntu4, flash-
+    kernel 3.0~rc.4ubuntu58, partconf 1.49, partman-basicmethods 61,
+    partman-lvm 112, partman-newworld 34, partman-xfs 58.
+
+  [ Mathieu Trudel-Lapierre ]
+  * Automatic update of included source packages: apt-setup 1:0.104ubuntu4,
+    choose-mirror 2.65ubuntu5, flash-kernel 3.0~rc.4ubuntu62,
+    partman-partitioning 110ubuntu3, partman-jfs 47.
+  * Redesign the prepare screen for less clutter.
+  * Unbreak the Kubuntu installer with respect to Secure Boot.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Tue, 16 Feb 2016 06:10:51 -0500
+
+ubiquity (2.21.43) xenial; urgency=medium
+
+  * ubiquity/install_misc.py: be extra careful retrieving the state of the
+    SecureBoot variable the system if booted in EFI, to avoid invalid data.
+    (LP: #1531779)
+  * Automatic update of included source packages: base-installer
+    1.158ubuntu2, console-setup 1.108ubuntu10.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Tue, 26 Jan 2016 19:23:41 -0500
+
+ubiquity (2.21.42) xenial; urgency=medium
+
+  * Automatic update of included source packages: grub-installer
+    1.128ubuntu2.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 04 Jan 2016 16:27:15 +0000
+
+ubiquity (2.21.41) xenial; urgency=medium
+
+  * Pass "-term linux" when running setterm from start-ubiquity-dm, as
+    without TERM set it otherwise refuses to do anything.
+  * Set "Before=plymouth-quit.service plymouth-quit-wait.service" in
+    ubiquity.service, so that plymouth isn't told to quit while we're busy
+    starting up on its VT (LP: #1527353).
+  * Automatic update of included source packages: apt-setup 1:0.104ubuntu2,
+    clock-setup 0.126ubuntu1, debian-installer-utils 1.113ubuntu1, tzsetup
+    1:0.81ubuntu1.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 31 Dec 2015 00:07:05 +0000
+
+ubiquity (2.21.40) xenial; urgency=medium
+
+  * Automatic update of included source packages: partman-auto
+    131ubuntu1, partman-basicfilesystems 120ubuntu1, partman-crypto
+    86ubuntu1, partman-efi 71ubuntu1, partman-partitioning 110ubuntu1.
+  * debian/control: build ubiquity-frontend-gtk only for the architectures
+    we might actually want to use it on, while being extremely generous:
+    this leads to building on x86, arm*, and ppc*, but not on s390x.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 23 Dec 2015 11:42:48 -0500
+
+ubiquity (2.21.39) xenial; urgency=medium
+
+  * Automatic update of included source packages: partman-efi 62ubuntu3,
+    partman-ext3 84ubuntu2, partman-xfs 57, preseed 1.64ubuntu4, apt-setup
+    1:0.104ubuntu1, flash-kernel 3.0~rc.4ubuntu57, hw-detect 1.114ubuntu1,
+    netcfg 1.135ubuntu1, partman-btrfs 18ubuntu1, preseed 1.68ubuntu1,
+    user-setup 1.63ubuntu1, base-installer 1.158ubuntu1, grub-installer
+    1.128ubuntu1, partman-target 98ubuntu1, yaboot-installer 1.1.36ubuntu1,
+    choose-mirror 2.65ubuntu2.
+  * Add support for disabling Secure Boot in prepare screen.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 21 Dec 2015 16:41:39 -0500
+
 ubiquity (2.21.38) xenial; urgency=medium
 
   * d-i/sources.list: switch to xenial.

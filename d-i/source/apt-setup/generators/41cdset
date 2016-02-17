@@ -46,7 +46,7 @@ fi
 
 get_label() {
 	LC_ALL=C $logoutput --pass-stdout $chroot $ROOT \
-		apt-cdrom ident | grep "^Stored label:" | head -n1 | \
+		apt-cdrom ident < /dev/null | grep "^Stored label:" | head -n1 | \
 		sed "s/^[^:]*: //"
 }
 

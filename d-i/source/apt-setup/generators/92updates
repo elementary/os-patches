@@ -69,8 +69,14 @@ else
 	fi
 fi
 
+deb_src="deb-src"
+db_get apt-setup/enable-source-repositories
+if [ "$RET" = false ]; then
+	deb_src="# deb-src"
+fi
+
 if [ -n "$protocol" ] && [ -n "$host" ]; then
-	echo "deb-src $protocol://${host}${directory} ${codename}-updates $dists" >> $file
+	echo "$deb_src $protocol://${host}${directory} ${codename}-updates $dists" >> $file
 else
 	echo "# deb-src http://ftp.debian.org/debian/ ${codename}-updates $dists" >> $file
 fi

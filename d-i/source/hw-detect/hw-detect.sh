@@ -506,8 +506,6 @@ case "$(udpkg --print-architecture)" in
 		# sparc v9 or v9b
 		if grep -q '^cpu.*: .*UltraSparc III' /proc/cpuinfo; then
 			apt-install libc6-sparcv9b || true
-		else
-			apt-install libc6-sparcv9 || true
 		fi
 	fi
 	;;

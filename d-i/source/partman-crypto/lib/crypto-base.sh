@@ -210,8 +210,9 @@ setup_luks () {
 	device=$2
 	cipher=$3
 	iv=$4
-	size=$5
-	pass=$6
+	hash=$5
+	size=$6
+	pass=$7
 
 	[ -x /sbin/cryptsetup ] || return 1
 
@@ -219,7 +220,7 @@ setup_luks () {
 	[ "${iv%xts-*}" = "${iv}" ] || size="$(($size * 2))"
 
 	log-output -t partman-crypto \
-	/sbin/cryptsetup -c $cipher-$iv -s $size luksFormat $device $pass
+	/sbin/cryptsetup -c $cipher-$iv -h $hash -s $size luksFormat $device $pass
 	if [ $? -ne 0 ]; then
 		log "luksFormat failed"
 		return 2
@@ -262,7 +263,7 @@ setup_cryptdev () {
 			fi
 		fi
 		if [ $keytype = passphrase ]; then
-			setup_luks $cryptdev $realdev $cipher $ivalgorithm $keysize $keyfile || return 1
+			setup_luks $cryptdev $realdev $cipher $ivalgorithm $keyhash $keysize $keyfile || return 1
 		elif [ $keytype = random ]; then
 			setup_dmcrypt $cryptdev $realdev $cipher $ivalgorithm plain $keysize /dev/urandom || return 1
 		else
@@ -574,11 +575,16 @@ crypto_set_defaults () {
 
 	case $type in
 	    dm-crypt)
-		echo aes > $part/cipher
-		echo 256 > $part/keysize
-		echo xts-plain64 > $part/ivalgorithm
-		echo passphrase > $part/keytype
-		echo sha256 > $part/keyhash
+		db_get partman-crypto/cipher
+		echo ${RET:-aes} > $part/cipher
+		db_get partman-crypto/keysize
+		echo ${RET:-256} > $part/keysize
+		db_get partman-crypto/ivalgorithm
+		echo ${RET:-xts-plain64} > $part/ivalgorithm
+		db_get partman-crypto/keytype
+		echo ${RET:-passphrase} > $part/keytype
+		db_get partman-crypto/keyhash
+		echo ${RET:-sha256} > $part/keyhash
 		;;
 	esac
 	touch $part/skip_erase

@@ -99,10 +99,10 @@ install-main: build
 	dh_install -pconsole-setup Keyboard/pc105.tree \
 		usr/share/console-setup
 	dh_installinit -pconsole-setup \
-		--no-start --upstart-only --name console-font
+		--no-start --name console-font
 ifneq (,$(filter console-setup-linux, $(shell dh_listpackages)))
 	dh_installinit -pconsole-setup-linux \
-		--no-start --upstart-only --name setvtrgb
+		--no-start --name setvtrgb
 	install -m 644 debian/vtrgb debian/console-setup-linux/etc/console-setup/
 	install -m 644 debian/vtrgb.vga debian/console-setup-linux/etc/console-setup/
 endif

@@ -17,16 +17,6 @@ addfstab () {
 		"$(escape "$1")" "$(escape "$2")" \
 		"$(escape "$3")" "$(escape "$4")" \
 		"$5" "$6"
-	if [ "$OS" = hurd ] ;
-	then
-		if [ -x /target/hurd/"$3" ]
-		then
-			settrans -pk "/target/$2" /hurd/"$3" "$1"
-		elif [ -x /target/hurd/"$3fs" ]
-		then
-			settrans -pk "/target/$2" /hurd/"$3fs" "$1"
-		fi
-	fi
 }
 
 db_get partman/mount_style

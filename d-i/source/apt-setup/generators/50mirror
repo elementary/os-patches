@@ -186,6 +186,9 @@ while true; do
 			fi
 		fi
 		;;
+	    3)
+		db_input low apt-setup/enable-source-repositories || true
+		;;
 	    *)
 		break
 		;;
@@ -252,4 +255,10 @@ while [ ! "$done" ]; do
 	fi
 done
 
-echo "deb-src $protocol://$hostname$directory $codename $dists" >> $file
+deb_src="deb-src"
+db_get apt-setup/enable-source-repositories
+if [ "$RET" = false ]; then
+	deb_src="# deb-src"
+fi
+
+echo "$deb_src $protocol://$hostname$directory $codename $dists" >> $file

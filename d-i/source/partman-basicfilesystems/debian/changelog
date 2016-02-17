@@ -1,3 +1,104 @@
+partman-basicfilesystems (120ubuntu1) xenial; urgency=medium
+
+  * Resynchronise with Debian.  Remaining changes:
+    - If partman/automount is preseeded to true, automatically mount
+      partitions with usefully-mountable filesystems on subdirectories of
+      /media.
+    - Mount FAT filesystems at boot (fstab pass 1).
+    - Mount FAT (other than EFI System Partitions) and NTFS with
+      umask=007,gid=46 (static group plugdev).
+    - When formatting over the top of an existing swap partition, preserve
+      its UUID to avoid leaving systems that use UUIDs in /etc/fstab without
+      swap.
+    - Special case loopmounted filesystems as it's safer to format the
+      underlying file, not the device.
+    - Allow armel/omap to use FAT for /boot, since the problems with it can
+      be worked around while it's difficult to use anything else given uboot
+      limitations.
+    - Disable existing swap partitions before formatting them.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Tue, 22 Dec 2015 15:57:42 -0500
+
+partman-basicfilesystems (120) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Hebrew (he.po) by Lior Kaplan
+
+ -- Christian Perrier <bubulle@debian.org>  Fri, 21 Aug 2015 08:21:31 +0200
+
+partman-basicfilesystems (119) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Turkish (tr.po) by Mert Dirik
+
+ -- Christian Perrier <bubulle@debian.org>  Mon, 10 Aug 2015 09:15:42 +0200
+
+partman-basicfilesystems (118) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Turkish (tr.po) by Mert Dirik
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 25 Jul 2015 22:02:58 +0200
+
+partman-basicfilesystems (117) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Portuguese (Brazil) (pt_BR.po) by Adriano Rafael Gomes
+  * Turkish (tr.po) by Mert Dirik
+
+ -- Christian Perrier <bubulle@debian.org>  Thu, 02 Jul 2015 17:44:28 +0200
+
+partman-basicfilesystems (116) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Portuguese (Brazil) (pt_BR.po) by Adriano Rafael Gomes
+
+ -- Christian Perrier <bubulle@debian.org>  Tue, 19 May 2015 19:20:13 +0200
+
+partman-basicfilesystems (115) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Tamil (ta.po) by Dr.T.Vasudevan
+
+ -- Christian Perrier <bubulle@debian.org>  Tue, 12 May 2015 13:54:54 +0200
+
+partman-basicfilesystems (114) unstable; urgency=medium
+
+  [ Samuel Thibault ]
+  * hurd-i386: Do not set up passive translators any more, now that mount -a
+    is run at boot.
+
+ -- Christian Perrier <bubulle@debian.org>  Thu, 07 May 2015 11:24:47 +0200
+
+partman-basicfilesystems (113) unstable; urgency=low
+
+  [ Updated translations ]
+  * Romanian (ro.po) by Ioan Eugen Stan
+
+ -- Christian Perrier <bubulle@debian.org>  Fri, 10 Apr 2015 10:54:02 +0200
+
+partman-basicfilesystems (112) unstable; urgency=low
+
+  [ Updated translations ]
+  * Catalan (ca.po) by Jordi Mallach
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 05 Apr 2015 12:50:07 +0200
+
+partman-basicfilesystems (111) unstable; urgency=low
+
+  [ Updated translations ]
+  * Romanian (ro.po) by Bradut Boghita
+
+ -- Christian Perrier <bubulle@debian.org>  Wed, 25 Mar 2015 06:59:37 +0100
+
+partman-basicfilesystems (110) unstable; urgency=low
+
+  [ Updated translations ]
+  * Danish (da.po) by Joe Hansen
+  * Vietnamese (vi.po) by Hai-Nam Nguyen
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 08 Mar 2015 16:35:45 +0100
+
 partman-basicfilesystems (109ubuntu1) vivid; urgency=medium
 
   * Resynchronise with Debian.  Remaining changes:
@@ -2869,6 +2970,3 @@ partman-basicfilesystems (2) never released; urgency=low
 
  -- Anton Zinoviev <zinoviev@debian.org>  Wed, 12 Nov 2003 16:55:08 +0200
 
-Local Variables:
-coding: utf-8
-End:

@@ -9,7 +9,7 @@ ARCH="$(archdetect)"
 modprobe efivars >/dev/null 2>&1 || true
 
 in_efi_mode() {
-	[ -d /proc/efi ] || [ -d /sys/firmware/efi ]
+    [ -d /proc/efi ] || [ -d /sys/firmware/efi ]
 }
 
 if in_efi_mode; then

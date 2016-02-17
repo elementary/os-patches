@@ -1,5 +1,6 @@
 #! /bin/sh
 
+# export DEBCONF_DEBUG=5
 set -e
 . /usr/share/debconf/confmodule
 #set -x
@@ -30,6 +31,10 @@ error() {
 
 info() {
 	log "info: $@"
+}
+
+debug () {
+	[ -z "${DEBCONF_DEBUG}" ] || log "debug: $@"
 }
 
 ARCH="$(archdetect)"
@@ -170,7 +175,7 @@ hurd_convert () {
 # This should probably be rewritten using udevadm or similar.
 device_to_disk () {
 	echo "$1" | \
-		sed 's:\(/dev/\(cciss\|ida\|rs\)/c[0-9]d[0-9][0-9]*\|/dev/mmcblk[0-9]\|/dev/nvme[0-9]n[0-9]\|/dev/\(ad\|da\)[0-9]\+\|/dev/[hms]d[0-9]\+\|/dev/[a-z]\+\).*:\1:'
+		sed 's:\(/dev/\(cciss\|ida\|rs\)/c[0-9]d[0-9][0-9]*\|/dev/mmcblk[0-9]\|/dev/nvme[0-9][0-9]*n[0-9][0-9]*\|/dev/\(ad\|ada\|da\|vtbd\|xbd\)[0-9]\+\|/dev/[hms]d[0-9]\+\|/dev/[a-z]\+\).*:\1:'
 }
 
 # Run update-grub in $ROOT
@@ -294,15 +299,16 @@ devices_to_ids()
 
 rootfs=$(findfs /)
 bootfs=$(findfs /boot)
-bootfstype=$(findfstype /boot)
-if [ -d "$bootfs" ] && [ "$bootfstype" = "none" ]; then
-    bootfs=$rootfs
-    bootfstype=$(findfstype /)
-fi
-[ -n "$bootfstype" ] || bootfstype="$(findfstype /)"
 [ -n "$bootfs" ] || bootfs="$rootfs"
 
+
+bootfstype=$(findfstype /boot)
+rootfstype="$(findfstype /)"
+[ -n "$bootfstype" ] || bootfstype=$rootfstype
+
 case $ARCH in
+    powerpc/chrp|powerpc/chrp_rs6k|powerpc/chrp_ibm|powerpc/cell)
+    ;;
     powerpc/*)
       offs=$(findfs /boot/grub)
       [ -n "$offs" ] || error "GRUB requires that the OF partition is mounted in /boot/grub" 1>&2
@@ -324,7 +330,7 @@ case $prefix in
     /dev/loop)
 	disc_offered_devfs="$bootfs"
 	;;
-    /dev/[hmsv]d[a-z0-9]*|/dev/xvd[a-z]|/dev/cciss/c[0-9]d[0-9]*|/dev/ida/c[0-9]d[0-9]*|/dev/rs/c[0-9]d[0-9]*|/dev/mmcblk[0-9]|/dev/ad[0-9]*|/dev/da[0-9]*|/dev/fio[a-z]|/dev/nvme[0-9]n[0-9])
+    /dev/[hmsv]d[a-z0-9]*|/dev/xvd[a-z]|/dev/cciss/c[0-9]d[0-9]*|/dev/ida/c[0-9]d[0-9]*|/dev/rs/c[0-9]d[0-9]*|/dev/mmcblk[0-9]|/dev/nvme[0-9]*n[0-9]*|/dev/ad[0-9]*|/dev/da[0-9]*|/dev/fio[a-z])
 	disc_offered_devfs="$prefix"
 	;;
     *)
@@ -434,25 +440,37 @@ case $ARCH in
 	if [ -d /sys/firmware/efi ]; then
 		# This point can't be reached (yet).  See debian/isinstallable.
 		grub_package="grub-efi"
-		experimental_arch
 	else
 		grub_package="grub-pc"
 	fi
 	;;
     i386/efi|amd64/efi)
-	if [ "$ARCH" = amd64/efi ]; then
-		grub_package="grub-efi-amd64-signed"
+	if [ -f /var/lib/partman/ignore_uefi ]; then
+		grub_package="grub-pc"
 	else
 		grub_package="grub-efi"
+		# Override the package choice if we can figure out the
+		# right package to use directly
+		if [ -f /sys/firmware/efi/fw_platform_size ] ; then
+			SIZE=$(cat /sys/firmware/efi/fw_platform_size)
+			if [ $SIZE -eq 64 ] ; then
+				grub_package="grub-efi-amd64-signed"
+			elif [ $SIZE -eq 32 ] ; then
+				grub_package="grub-efi-ia32"
+			fi
+		fi
+		if [ ! -d /target/boot/efi ]; then
+			# No EFI System Partition, so presumably the partitioner
+			# believed this to be unnecessary, perhaps because we're
+			# installing on a pre-existing MBR partition table or
+			# perhaps because there's a BIOS Boot Partition.  In either
+			# case, the right answer is to fall back to grub-pc.
+			grub_package="grub-pc"
+		fi
 	fi
-	if [ ! -d /target/boot/efi ]; then
-		# No EFI System Partition, so presumably the partitioner
-		# believed this to be unnecessary, perhaps because we're
-		# installing on a pre-existing MBR partition table or
-		# perhaps because there's a BIOS Boot Partition.  In either
-		# case, the right answer is to fall back to grub-pc.
-		grub_package="grub-pc"
-	fi
+	;;
+    i386/*|amd64/*)
+	grub_package="grub-pc"
 	;;
     powerpc/*)
 	grub_package="grub-ieee1275"
@@ -726,23 +744,8 @@ if db_get cdrom-detect/hybrid; then
 fi
 case $ARCH:$grub_package in
     *:grub|*:grub-pc|sparc:grub-ieee1275)
-	if [ "$(device_to_disk "$cdsrc")" = "$default_bootdev" ] || \
-	   ([ -n "$hdsrc" ] && [ "$(device_to_disk "$hdsrc")" = "$default_bootdev" ]) || \
-	   ([ "$default_bootdev" = '(hd0)' ] && \
-	    (([ -n "$cdfs" ] && [ "$cdfs" != "iso9660" ]) || \
-	     [ "$hybrid" = true ])) || \
-	   ([ "$default_bootdev" != '(hd0)' ] && \
-	    ! partmap "$default_bootdev" >/dev/null && \
-	    ! grub_probe -t fs -d "$default_bootdev" >/dev/null); then
-		db_fget grub-installer/bootdev seen
-		if [ "$RET" != true ]; then
-			bootfs=$(findfs /boot)
-			[ "$bootfs" ] || bootfs="$(findfs /)"
-			disk=$(device_to_disk "$bootfs")
-			db_set grub-installer/bootdev "$disk"
-			state=2
-		fi
-	elif [ "$grub_version" = grub2 ] && [ "$frtype" = mdadm ]; then
+	if [ "$grub_version" = grub2 ] && \
+	    ([ "$frtype" = mdadm ] || [ "$frtype" = multipath ]); then
 		# Check whether any of the RAIDed devices is a partition, and if so
 		# install to the corresponding disk instead, as GRUB 2 doesn't like
 		# installing to a RAID device composed of partitions.
@@ -768,9 +771,23 @@ case $ARCH:$grub_package in
 			default_bootdev="$bootfs_nodevfs"
 		fi
 		db_set grub-installer/bootdev "$default_bootdev"
-	elif [ "$frdev" ]; then
-		default_bootdev="$frdev"
-		db_set grub-installer/bootdev "$default_bootdev"
+		state=3
+	elif [ "$(device_to_disk "$cdsrc")" = "$default_bootdev" ] || \
+	   ([ -n "$hdsrc" ] && [ "$(device_to_disk "$hdsrc")" = "$default_bootdev" ]) || \
+	   ([ "$default_bootdev" = '(hd0)' ] && \
+	    (([ -n "$cdfs" ] && [ "$cdfs" != "iso9660" ]) || \
+	     [ "$hybrid" = true ])) || \
+	   ([ "$default_bootdev" != '(hd0)' ] && \
+	    ! partmap "$default_bootdev" >/dev/null && \
+	    ! grub_probe -t fs -d "$default_bootdev" >/dev/null); then
+		db_fget grub-installer/bootdev seen
+		if [ "$RET" != true ]; then
+			bootfs=$(findfs /boot)
+			[ "$bootfs" ] || bootfs="$(findfs /)"
+			disk=$(device_to_disk "$bootfs")
+			db_set grub-installer/bootdev "$disk"
+			state=2
+		fi
 	fi
 	;;
     ppc64el/*:grub-ieee1275)
@@ -787,10 +804,91 @@ esac
 db_progress STEP 1
 db_progress INFO grub-installer/progress/step_bootdev
 
+select_bootdev() {
+	debug "select_bootdev: arg='$1'"
+
+	local dev_list dev_descr grubdev devices disk_id dev descr
+	local default_choice priority chosen result
+
+	result=""
+	default_choice="$1"
+
+	# /dev/disk/by-id has multiple links for the same physical disk.
+	# Let's trust grub-mkdevicemap to select the most suitable ones
+	# and correctly handle systems with no /dev/disk/by-id.
+	# Use disk id string as a shortcut way to describe it.
+	# FIXME switch to grub-pc's far more elegant disk_descriptions()
+	dev_list=
+	dev_descr=
+	devices="$($chroot $ROOT grub-mkdevicemap --no-floppy -m - | cut -f2)"
+	for grubdev in $devices; do
+		disk_id="$(device_to_id $grubdev)"
+		dev="$(readlink -f "$disk_id")"
+		dev_list="${dev_list:+$dev_list, }$dev"
+		descr="$(echo $disk_id |sed -e 's+^.*/++' |sed -e 's+,+\\,+g')"
+		if [ "$dev" = "$disk_id" ]; then
+			dev_descr="${dev_descr:+$dev_descr, }$dev"
+		else
+			#/dev/sdX (id)
+			dev_descr="${dev_descr:+$dev_descr, }$dev  ($descr)"
+		fi
+	done
+
+	debug "Bootdev Choices: '$dev_list'"
+	debug "Bootdev Descriptions: '$dev_descr'"
+
+	db_subst grub-installer/choose_bootdev DEVICES_LIST "$dev_list"
+	db_subst grub-installer/choose_bootdev DESCRIPTIONS "$dev_descr"
+	priority=high
+	# set initial selection
+	if [ -n "$default_choice" ] ; then
+		chosen="$(readlink -f "$default_choice")"
+		if [ -n "$chosen" ] ;then
+			db_set grub-installer/choose_bootdev "$chosen"
+		fi
+	elif [ "$(echo "$devices" | wc -l)" = 1 ]; then
+		# only one likely choice
+		db_set grub-installer/choose_bootdev "$dev_list"
+		priority=low
+	fi
+
+	db_input "$priority" grub-installer/choose_bootdev || true
+	if ! db_go; then
+		log "Returning to menu"
+		db_progress STOP
+		exit 10
+	fi
+
+	db_get grub-installer/choose_bootdev || true
+	# Choices-C (not shown to user) can be set to 'manual'
+	if [ "$RET" = "manual" ] ; then
+		result=""
+	else
+		result="$(echo "$RET" | cut -d' ' -f1)"
+	fi
+
+	debug "select_bootdev: result='$result'"
+	echo "$result"
+}
+
+if [ "$bootdev" != "dummy" ] && [ ! "$frdev" ]; then
+	# check for a preseeded value
+	db_get grub-installer/bootdev || true
+	if [ -n "$RET" ] ; then
+		bootdev="$RET"
+	fi
+fi
+
 while : ; do
+
+	debug "q='$q' state='$state' defbd='$default_bootdev' bd='$bootdev'"
 	db_fget grub-installer/bootdev seen
 	if [ "$RET" = true ] && db_get grub-installer/bootdev && [ "$RET" ] ; then
-		bootdev=$RET
+		if [ "$RET" = "default" ]; then
+			bootdev=$default_bootdev
+		else
+			bootdev=$RET
+		fi
 		break
 	elif [ "$state" = 1 ]; then
 		if [ "$frdev" ]; then
@@ -815,10 +913,20 @@ while : ; do
 					mkdir -p "$(dirname "$device_map")"
 					echo "(hd0) $bootremovable" > "$device_map"
 				fi
-			else
-				bootdev="$default_bootdev"
 			fi
-			break
+
+			# default_bootdev can be guessed incorrectly.
+			# If the user supplied a value for bootdev,
+			# ask them to resolve any conflict.
+			if [ "$bootdev" != "$default_bootdev" ] ; then
+				bootdev="$(select_bootdev "$bootdev")"
+				previous_state=1
+			fi
+			if [ -e "$bootdev" ] ; then
+			    break
+			else
+			    state=2
+			fi
 		else
 			# Exit to menu if /boot is on SATA RAID/multipath; we
 			# don't support device selection in that case
@@ -829,7 +937,15 @@ while : ; do
 			state=2
 		fi
 	elif [ "$state" = 2 ]; then
-		db_input critical grub-installer/bootdev || true
+
+		if [ "$previous_state" != "1" ]; then
+			bootdev="$(select_bootdev "$bootdev")"
+			unset previous_state
+		fi
+
+		if [ ! -e "$bootdev" ]; then
+		    db_input critical grub-installer/bootdev || true
+		fi
 		if ! db_go; then
 			if [ "$q" ]; then
 				state=1
@@ -899,6 +1015,20 @@ if [ -z "$frdisk" ] || [ "$grub_version" = grub2 ]; then
 			fi
 		fi
 
+		# Should we force a copy of grub-efi to be installed
+		# to the removable media path too? Ask at low
+		# priority, or can also be pre-seeded of course
+		db_input low grub-installer/force-efi-extra-removable || [ $? -eq 30 ]
+		db_go || exit 10
+		db_get grub-installer/force-efi-extra-removable
+		if [ "$RET" = true ]; then
+			grub_install_params="$grub_install_params --force-extra-removable"
+			# Make sure this happens on upgrades too
+			$chroot $ROOT 'debconf-set-selections' <<EOF
+$grub_package grub2/force_efi_extra_removable boolean true
+EOF
+		fi
+
 		if [ "$ARCH" = "powerpc/chrp_pegasos" ] ; then
 			# nvram is broken here
 			grub_install_params="$grub_install_params --no-nvram"
@@ -913,7 +1043,7 @@ if [ -z "$frdisk" ] || [ "$grub_version" = grub2 ]; then
 
 		CODE=0
 		case $ARCH:$grub_package in
-		    *:grub|*:grub-pc|sparc:grub-ieee1275|ppc64el/*:grub-ieee1275)
+		    *:grub|*:grub-pc|*:grub-efi*|sparc:grub-ieee1275|ppc64el/*:grub-ieee1275)
 			info "Running $chroot $ROOT grub-install $grub_install_params \"$bootdev\""
 			log-output -t grub-installer $chroot $ROOT grub-install $grub_install_params "$bootdev" || CODE=$?
 			;;
@@ -926,7 +1056,7 @@ if [ -z "$frdisk" ] || [ "$grub_version" = grub2 ]; then
 			info "grub-install ran successfully"
 		else
 			case $ARCH:$grub_package in
-			    *:grub|*:grub-pc|sparc:grub-ieee1275|ppc64el/*:grub-ieee1275)
+			    *:grub|*:grub-pc|*:grub-efi*|sparc:grub-ieee1275|ppc64el/*:grub-ieee1275)
 				error "Running 'grub-install $grub_install_params \"$bootdev\"' failed."
 				;;
 			    *)
@@ -996,7 +1126,7 @@ split_device () {
 			part="$(echo "$1" | sed 's,/dev/mmcblk[0-9]\+p\([0-9]\+\),\1,')"
 			[ "$part" != "$1" ] || part=
 			;;
-		/dev/nvme*n*)
+		/dev/nvme*n*p*)
 			disk="$(echo "$1" | sed 's,\(/dev/nvme[0-9]\+n[0-9]\+\).*,\1,')"
 			part="$(echo "$1" | sed 's,/dev/nvme[0-9]\+n[0-9]\+p\([0-9]\+\),\1,')"
 			[ "$part" != "$1" ] || part=
@@ -1104,7 +1234,7 @@ fi
 db_progress STEP 1
 db_progress INFO grub-installer/progress/step_config_loader
 
-if [ "$bootfstype" = "zfs" ]; then
+if [ "$bootfstype" = "zfs" ] || [ "$rootfstype" = "zfs" ] ; then
 	# Required by update-grub on ZFS
 	mkdir -p $ROOT/boot/zfs
 	cp /boot/zfs/zpool.cache $ROOT/boot/zfs/
@@ -1290,7 +1420,7 @@ if [ "$serial" ] ; then
 		) >$ROOT/boot/grub/$menu_file.new
 		mv $ROOT/boot/grub/$menu_file.new $ROOT/boot/grub/$menu_file
 		;;
-	    grub-pc)
+	    grub-pc|grub-efi*)
 		if grep -q "^GRUB_TERMINAL=" $ROOT/etc/default/grub; then
 			sed -i $ROOT/etc/default/grub -e "s/^\(GRUB_TERMINAL\)=.*/\1=serial/g"
 		else

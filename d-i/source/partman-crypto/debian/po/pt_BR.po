@@ -7,6 +7,7 @@
 # This file is distributed under the same license as debian-installer.
 #
 # Felipe Augusto van de Wiel (faw) <faw@debian.org>, 2008-2012.
+# Adriano Rafael Gomes <adrianorg@arg.eti.br>, 2010-2015.
 #
 # Translations from iso-codes:
 #   Alastair McKinstry <mckinstry@computer.org>, 2001-2002.
@@ -22,8 +23,8 @@ msgstr ""
 "Project-Id-Version: debian-installer\n"
 "Report-Msgid-Bugs-To: partman-crypto@packages.debian.org\n"
 "POT-Creation-Date: 2013-10-30 22:04+0000\n"
-"PO-Revision-Date: 2012-06-27 01:39-0300\n"
-"Last-Translator: Felipe Augusto van de Wiel (faw) <faw@debian.org>\n"
+"PO-Revision-Date: 2015-06-06 10:16-0300\n"
+"Last-Translator: Adriano Rafael Gomes <adrianorg@arg.eti.br>\n"
 "Language-Team: Brazilian Portuguese <debian-l10n-portuguese@lists.debian."
 "org>\n"
 "Language: pt_BR\n"
@@ -249,18 +250,13 @@ msgstr "Realmente apagar os dados em ${DEVICE}?"
 #. Description
 #. :sl3:
 #: ../partman-crypto.templates:22001
-#, fuzzy
-#| msgid ""
-#| "The data on ${DEVICE} will be overwritten with random data. It can no "
-#| "longer be recovered after this step has completed. This is the last "
-#| "opportunity to abort the erase."
 msgid ""
 "The data on ${DEVICE} will be overwritten with zeroes. It can no longer be "
 "recovered after this step has completed. This is the last opportunity to "
 "abort the erase."
 msgstr ""
-"Os dados em ${DEVICE} serão sobrescritos com dados aleatórios. Os mesmos não "
-"poderão ser recuperados após este passo ter sido finalizado. Esta é a última "
+"Os dados em ${DEVICE} serão sobrescritos com zeros. Os mesmos não poderão "
+"ser recuperados após este passo ter sido finalizado. Esta é a última "
 "oportunidade de abortar o processo que apagará os dados."
 
 #. Type: text
@@ -281,6 +277,8 @@ msgid ""
 "The installer is now overwriting ${DEVICE} with zeroes to delete its "
 "previous contents. This step may be skipped by cancelling this action."
 msgstr ""
+"O instalador está agora sobrescrevendo ${DEVICE} com zeros para excluir o "
+"seu conteúdo anterior. Esse passo pode ser pulado ao cancelar essa ação."
 
 #. Type: error
 #. Description
@@ -296,16 +294,12 @@ msgstr "Falha ao apagar dados em ${DEVICE}"
 #. Description
 #. :sl3:
 #: ../partman-crypto.templates:25001
-#, fuzzy
-#| msgid ""
-#| "An error occurred trying to erase the data on ${DEVICE}. The data has not "
-#| "been erased."
 msgid ""
 "An error occurred while trying to overwrite the data on ${DEVICE} with "
 "zeroes. The data has not been erased."
 msgstr ""
-"Um erro ocorreu durante a tentativa de apagar os dados em ${DEVICE}. Os "
-"dados não foram apagados."
+"Um erro ocorreu durante a tentativa de sobrescrever os dados em ${DEVICE} "
+"com zeros. Os dados não foram apagados."
 
 #. Type: boolean
 #. Description
@@ -330,6 +324,10 @@ msgid ""
 "cancelling this action, albeit at the expense of a slight reduction of the "
 "quality of the encryption."
 msgstr ""
+"O instalador está agora sobrescrevendo ${DEVICE} com dados aleatórios para "
+"prevenir vazamentos de metainformação do volume criptografado. Esse passo "
+"pode ser pulado ao cancelar essa ação, embora ao custo de uma leve redução "
+"na qualidade da criptografia."
 
 #. Type: error
 #. Description
@@ -340,6 +338,9 @@ msgid ""
 "Recovery of the device's previous contents is possible and meta-information "
 "of its new contents may be leaked."
 msgstr ""
+"Um erro ocorreu ao tentar sobrescrever ${DEVICE} com dados aleatórios. A "
+"recuperação do conteúdo anterior do dispositivo é possível e a "
+"metainformação do seu novo conteúdo pode ser vazada."
 
 #. Type: text
 #. Description
@@ -1009,6 +1010,3 @@ msgstr ""
 #: ../partman-crypto.templates:63001
 msgid "If you don't enter anything, the volume will not be activated."
 msgstr ""
-
-#~ msgid "Loopback (loop-AES)"
-#~ msgstr "Loopback (loop-AES)"

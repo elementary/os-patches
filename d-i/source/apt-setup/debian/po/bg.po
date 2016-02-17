@@ -8,18 +8,10 @@
 # Copyright (C) 2003 Software in the Public Interest, Inc.
 # This file is distributed under the same license as debian-installer.
 #
-# Ognyan Kulev <ogi@fmi.uni-sofia.bg>, 2004, 2005, 2006.
-# Nikola Antonov <nikola@linux-bg.org>, 2004.
 #
 #
 # Translations from iso-codes:
-#   Tobias Quathamer <toddy@debian.org>, 2007.
 #     Translations taken from ICU SVN on 2007-09-09
-#   Free Software Foundation, Inc., 2004.
-#   Georgi Georgiev <assenov_g@operamail.com>, 2001, 2004.
-#   Alastair McKinstry <mckinstry@computer.org>, 2001.
-#   Ognyan Kulev <ogi@fmi.uni-sofia.bg>, 2004.
-#   Damyan Ivanov <dmn@debian.org>, 2006, 2007, 2008, 2009, 2010.
 # Copyright (C)
 #   (translations from drakfw)
 #   - further translations from ICU-3.9
@@ -27,17 +19,26 @@
 # Copyright (C) 2010 Free Software Foundation, Inc.
 #
 # Copyright (C)
+#
+# Ognyan Kulev <ogi@fmi.uni-sofia.bg>, 2004, 2005, 2006.
+# Nikola Antonov <nikola@linux-bg.org>, 2004.
+#   Tobias Quathamer <toddy@debian.org>, 2007.
+#   Free Software Foundation, Inc., 2004.
+#   Georgi Georgiev <assenov_g@operamail.com>, 2001, 2004.
+#   Alastair McKinstry <mckinstry@computer.org>, 2001.
+#   Ognyan Kulev <ogi@fmi.uni-sofia.bg>, 2004.
+#   Damyan Ivanov <dmn@debian.org>, 2006, 2007, 2008, 2009, 2010.
 #   Roumen Petrov <transl@roumenpetrov.info>, 2010.
-# Damyan Ivanov <dmn@debian.org>, 2006, 2007, 2008, 2009, 2010, 2011, 2012.
+# Damyan Ivanov <dmn@debian.org>, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: bg\n"
 "Report-Msgid-Bugs-To: apt-setup@packages.debian.org\n"
 "POT-Creation-Date: 2015-01-11 23:02+0000\n"
-"PO-Revision-Date: 2012-06-17 08:59+0300\n"
+"PO-Revision-Date: 2015-11-21 18:11+0200\n"
 "Last-Translator: Damyan Ivanov <dmn@debian.org>\n"
-"Language-Team: Български <dict@fsa-bg.org>\n"
+"Language-Team: Bulgarian <dict@ludost.net>\n"
 "Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -191,7 +192,7 @@ msgstr "обновявания по сигурността (от ${SEC_HOST})"
 #. :sl1:
 #: ../apt-setup-udeb.templates:11001
 msgid "release updates"
-msgstr "бързи обновявания"
+msgstr "обновявания на изданието"
 
 #. Type: multiselect
 #. Description
@@ -785,7 +786,7 @@ msgstr ""
 #. :sl2:
 #: ../apt-mirror-setup.templates-ubuntu:5001
 msgid "Use backported software?"
-msgstr "Използване на софтуер backport?"
+msgstr "Използване на бързи обновявания?"
 
 #. Type: boolean
 #. Description
@@ -798,34 +799,42 @@ msgid ""
 "testing as that contained in the release, it includes newer versions of some "
 "applications which may provide useful features."
 msgstr ""
-"Има софтуер, които е прехвърлен обратно (backported) от разработваното "
-"течение, така че да работи с това издание. Въпреки че този софтуер не е "
-"преминал през толкова пълно тестване, колкото това издание, той включва по-"
-"нови версии на някои приложения, които могат да предоставят полезни свойства."
+"Архивът с бързи обновявания съдържа пакети, които са прехвърлени от "
+"тестовата дистрибуция и са адаптирани за стабилното издание. Пакетите са "
+"тествани по-малко в сравнение с останалите в стабилното издание, но включват "
+"поправки и нови функции."
 
-#, fuzzy
-#~ msgid "extras archive (from ${EXTRAS_HOST})"
-#~ msgstr "обновявания по сигурността (от ${SEC_HOST})"
+#~ msgid "Scanning the backports repository..."
+#~ msgstr "Сканиране за хранилището с бързи обновявания…"
 
-#, fuzzy
+#~ msgid "backported software"
+#~ msgstr "бързи обновявания"
+
 #~ msgid ""
-#~ "The extras archive contains free software offered by third-party "
-#~ "application developers who want to ship their latest software."
+#~ "Backported software are adapted from the development version to work with "
+#~ "this release. Although this software has not gone through such complete "
+#~ "testing as that contained in the release, it includes newer versions of "
+#~ "some applications which may provide useful features. Enabling backports "
+#~ "here does not cause any of them to be installed by default; it only "
+#~ "allows you to manually select backports to use."
 #~ msgstr ""
-#~ "Компонентата „partner“ на хранилището на Canonical съдържа допълнителен "
-#~ "софтуер. Той не е част от Убунту, но се предлага от Canonical и "
-#~ "съответните доставчици в услуга на потребителите на Убунту."
+#~ "Архивът с бързи обновявания съдържа пакети, които са прехвърлени от "
+#~ "тестовата дистрибуция и адаптирани да работят със стабилното издание. "
+#~ "Пакетите не са тествани колкото тези в стабилното издание, но включват по-"
+#~ "нови версии на някои приложения с нови и подобрени функции. Разрешаването "
+#~ "на архива с бързи обновявания не води до автоматично инсталиране на "
+#~ "пакети от него. Прехвърлените пакети трябва да се изберат ръчно."
 
-#, fuzzy
-#~ msgid "Use software from the \"extras\" repository?"
-#~ msgstr "Използване на софтуер от компонентата „partner“?"
+#~ msgid "Enable source repositories in APT?"
+#~ msgstr "Включване на хранилищата за изходен код в APT?"
 
-#, fuzzy
 #~ msgid ""
-#~ "Additional software is available from the Ubuntu \"extras\" repository. "
-#~ "This software is not part of Ubuntu, but is offered by third-party "
-#~ "developers who want to ship their latest software."
+#~ "By default source repositories are listed in /etc/apt/sources.list (with "
+#~ "appropriate \"deb-src\" lines) so that \"apt-get source\" works. However, "
+#~ "if you don't need this feature, you can disable those entries and save "
+#~ "some bandwidth during \"apt-get update\" operations."
 #~ msgstr ""
-#~ "Компонентата „partner“ на хранилището на Canonical съдържа допълнителен "
-#~ "софтуер. Той не е част от Убунту, но се предлага от Canonical и "
-#~ "съответните доставчици в услуга на потребителите на Убунту."
+#~ "По подразбиране хранилищата за изходен код са описани в /etc/apt/sources."
+#~ "list (с подходящи редове, започващи с deb-src), така че командата „apt-"
+#~ "get source“ да работи. Ако нямате нужда от това, можете да деактивирате "
+#~ "тези редове и да спестите малко трафик при изпълнение на „apt-get update“."

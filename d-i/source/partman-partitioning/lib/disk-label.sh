@@ -120,7 +120,7 @@ default_disk_label () {
 	    ppc64el)
 		echo gpt;;
 	    s390|s390x)
-		echo msdos;;
+		echo dasd;;
 	    sh4)
 		echo msdos;;
 	    sparc|sparc64)

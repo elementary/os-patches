@@ -15,11 +15,13 @@ case $ARCH in
 		exit 1
 	fi
 	;;
-    powerpc/chrp_pegasos)
+    powerpc/chrp|powerpc/chrp_rs6k|powerpc/chrp_ibm|powerpc/cell)
 	;;
     powerpc/*)
-	log "GRUB not yet usable on PowerPC systems other than Pegasos/Efika"
-	exit 1
+	mount | grep "on /target/boot/grub" 1>&2 || {
+		log "GRUB requires OF bootable partition mounted at /boot/grub on PowerPC systems"
+		exit 1
+	}
 	;;
     mipsel/loongson-2f)
 	;;

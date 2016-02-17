@@ -294,6 +294,17 @@ mkimage_multi() {
 	echo "done." >&2
 }
 
+mkimage_env() {
+	local esize="$1"
+	local edata="$2"
+	local escript="$3"
+
+	# FIXME: should leverage gen_ubootenv
+	printf "Generating u-boot environment image... " >&2
+	mkenvimage -r -s "$esize" -o "$escript" "$edata"
+	echo "done." >&2
+}
+
 backup_and_install() {
 	local source="$1"
 	local dest="$2"
@@ -429,6 +440,11 @@ fi
 kfile_suffix=$(get_kfile_suffix "$kfile")
 
 if ! check_supported "$machine"; then
+	# do nothing if an unsupported platform is booted from EFI
+	if [ -d /sys/firmware/efi ]; then
+		echo "Unsupported platform on EFI system, doing nothing."
+		exit 0
+	fi
 	error "Unsupported platform."
 fi
 
@@ -452,6 +468,9 @@ uiaddr="$(get_machine_field "$machine" "U-Boot-Initrd-Address")" || :
 umaddr="$(get_machine_field "$machine" "U-Boot-Multi-Address")" || :
 usaddr="$(get_machine_field "$machine" "U-Boot-Script-Address")" || :
 usname="$(get_machine_field "$machine" "U-Boot-Script-Name")" || :
+# FIXME: currently hard coded because only RPi2 uses this; let's not define
+# new fields without consulting with Debian.
+ussize=16384
 boot_device="$(get_machine_field "$machine" "Boot-Device")" || :
 boot_kernel_path="$(get_machine_field "$machine" "Boot-Kernel-Path")" || :
 boot_initrd_path="$(get_machine_field "$machine" "Boot-Initrd-Path")" || :
@@ -572,13 +591,11 @@ case "$method" in
 		if [ -n "$boot_kernel_path" ]; then
 			boot_kernel_path="$boot_mnt_dir/$boot_kernel_path"
 			# don't mv the original kernel
-			if [ "$kernel" != "$kfile" ]; then
-				backup_and_install "$kernel" \
-					"$boot_kernel_path"
-			else
-				# TODO add support for kernel symlink
-				:
+			if [ "$kernel" = "$kfile" ]; then
+				cp "$kernel" "$tmpdir/kernel"
+				kernel="$tmpdir/kernel"
 			fi
+			backup_and_install "$kernel" "$boot_kernel_path"
 		elif [ -n "$kmtd" ]; then
 			flash_kernel "$tmpdir/uImage" "$kmtd" ""
 			rm -f "$tmpdir/uImage"
@@ -602,13 +619,11 @@ case "$method" in
 		if [ -n "$boot_initrd_path" ]; then
 			boot_initrd_path="$boot_mnt_dir/$boot_initrd_path"
 			# don't mv the original initrd
-			if [ "$initrd" != "$ifile" ]; then
-				backup_and_install "$initrd" \
-					"$boot_initrd_path"
-			else
-				# TODO add support for initrd symlink
-				:
+			if [ "$initrd" = "$ifile" ]; then
+				cp "$initrd" "$tmpdir/initrd"
+				initrd="$tmpdir/initrd"
 			fi
+			backup_and_install "$initrd" "$boot_initrd_path"
 		elif [ -n "$imtd" ]; then
 			ipad=0
 			# padding isn't needed for U-Boot images
@@ -626,6 +641,14 @@ case "$method" in
 					mkimage_script "$usaddr" "boot script" "$boot_script" \
 						"$tmpdir/boot.scr"
 					boot_script="$tmpdir/boot.scr"
+					backup_and_install "$boot_script" "$boot_script_path"
+				;;
+				uboot.env*)
+					boot_script_path="$boot_mnt_dir/$boot_script_path"
+					boot_script="$BOOTSCRIPTS_DIR/$usname"
+					mkimage_env "$ussize" "$boot_script" \
+						"$tmpdir/uboot.env"
+					boot_script="$tmpdir/uboot.env"
 					backup_and_install "$boot_script" "$boot_script_path"
 				;;
 				uEnvtxt*)

@@ -293,11 +293,11 @@ int is_layer3_qeth(const char *iface)
         goto out;
     }
 
-    buf[slen + 1] = '\0';
+    buf[slen] = '\0';
 
     driver = strrchr(buf, '/') + 1;
     if (strcmp(driver, "qeth") != 0) {
-        di_error("no qeth found: %s", driver);
+        di_info("no qeth found: %s", driver);
         goto out;
     }
 
