@@ -12,15 +12,31 @@ TARGET_USERNAME="$RET"
 
 copy_orca_config()
 {
-	if [ -f /home/$USERNAME/.local/share/orca/user-settings.conf ]; then
-		mkdir -p /target/home/$TARGET_USERNAME/.local/share
-		mkdir -p /target/var/lib/lightdm/.local/share
-		cp -r /home/$USERNAME/.local/share/orca /target/home/$TARGET_USERNAME/.local/share
-		cp -r /home/$USERNAME/.local/share/orca /target/var/lib/lightdm/.local/share
-		chroot /target chown -R $TARGET_USERNAME.$TARGET_USERNAME /home/$TARGET_USERNAME/.local
-		chroot /target chown -R lightdm.lightdm /var/lib/lightdm/.local
-		chmod 755 /target/home/$TARGET_USERNAME/.local/share/orca
-		chmod 755 /target/var/lib/lightdm/.local/share/orca
+	mkdir -p /target/tmp/ugtr-a11y-dconf.d
+	sudo -u $USERNAME /usr/bin/dconf dump /org/gnome/orca/ > /home/$USERNAME/01-orca-settings
+	cp /home/$USERNAME/01-orca-settings /target/tmp/user-a11y-dconf.d
+	mv /home/$USERNAME/01-orca-settings /target/tmp/ugtr-a11y-dconf.d
+	chroot /target /usr/bin/dconf compile /tmp/dconf.lightdm /tmp/ugtr-a11y-dconf.d
+	mkdir -p /target/var/lib/lightdm/.config/dconf
+	mv /target/tmp/dconf.lightdm /target/var/lib/lightdm/.config/dconf/user
+	chroot /target chown lightdm.lightdm -R /var/lib/lightdm/.config
+	rm -r /target/tmp/ugtr-a11y-dconf.d
+}
+
+# Args: $1 - The profile name
+setup_profile()
+{
+	if [ -d /target/usr/share/a11y-profile-manager/profiles/$1 ] &&
+	   [ -x /usr/bin/a11y-profile-manager ] &&
+	   [ -x /usr/bin/dconf ] &&
+	   [ -x /target/usr/bin/dconf ]; then
+		mkdir -p /target/tmp/user-a11y-dconf.d
+		/usr/bin/a11y-profile-manager -s $1 -D /tmp/user-a11y-dconf.d/01-profile
+		chroot /target /usr/bin/dconf compile /tmp/dconf.$TARGET_USERNAME /tmp/user-a11y-dconf.d
+		mkdir -p /target/home/$TARGET_USERNAME/.config/dconf
+		mv /target/tmp/dconf.$TARGET_USERNAME /target/home/$TARGET_USERNAME/.config/dconf/user
+		chroot /target chown $TARGET_USERNAME.$TARGET_USERNAME -R /home/$TARGET_USERNAME/.config
+		rm -r /target/tmp/user-a11y-dconf.d
 	fi
 }
 
@@ -28,69 +44,74 @@ for x in $(cat /proc/cmdline); do
 	case $x in
 		# Lesser Visual Impairment
 		access=v1)
-			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf high-contrast
+			setup_profile high-contrast
 			exit
                         ;;
 		# Moderate Visual Impairment
 		access=v2)
-			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf magnifier
+			setup_profile magnifier
 			exit
                         ;;
 		# Blindness
 		access=v3)
+			setup_profile blindness
 			copy_orca_config
-			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf blindness
 			exit
                         ;;
 		# Braille
 		braille=ask)
+			setup_profile braille
 			copy_orca_config
-			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf braille
 			exit
                         ;;
 		# Minor Motor Difficulties
 		access=m1)
-			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf keyboard-modifiers
+			setup_profile keyboard-modifiers
 			exit
                         ;;
 		# Motor Difficulties - pointing devices
 		access=m2)
-			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf onscreen-keyboard
+			setup_profile onscreen-keyboard
 			exit
                         ;;
 		esac
 done
 
-if [ -z "$UBIQUITY_A11Y_PROFILE" ] && [ -f /tmp/casper-a11y.conf ]; then
-	. /tmp/casper-a11y.conf
-fi
+# Check the live user GSettings for the active profile if any.
+A11Y_PROFILE="$(sudo -u $USERNAME gsettings get com.canonical.a11y-profile-manager active-profile)"
 
-case "$UBIQUITY_A11Y_PROFILE" in
+case "$A11Y_PROFILE" in
 	# Lesser Visual Impairment
 	high-contrast)
-		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf high-contrast
+		setup_profile high-contrast
+		exit
 		;;
 	# Moderate Visual Impairment
 	magnifier)
-		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf magnifier
+		setup_profile magnifier
+		exit
 		;;
 	# Blindness
 	screen-reader)
 		copy_orca_config
-		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf blindness
+		setup_profile screen-reader
+		exit
 		;;
 	# Braille
 	braille)
 		copy_orca_config
-		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf braille
+		setup_profile braille
+		exit
 		;;
 	# Minor Motor Difficulties
 	keyboard-modifiers)
-		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf keyboard-modifiers
+		setup_profile keyboard-modifiers
+		exit
 		;;
 	# Motor Difficulties - pointing devices
 	onscreen-keyboard)
-		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -dconf onscreen-keyboard
+		setup_profile onscreen-keyboard
+		exit
 		;;
 esac
 

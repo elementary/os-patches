@@ -1,3 +1,15 @@
+casper (1.367) xenial; urgency=medium
+
+  Replacement of a11y profile handling code with liba11y-profile-manager:
+  * bin/casper-a11y-enable: Removed, ported profile code to the new a11y
+    profile management library
+  * scripts/casper-bottom/30accessibility, ubiquity-hooks/30accessibility:
+    - Adjust to use a11y-profile-manager, using dconf compile to update
+      user and login manager dconf/gsettings configuration with profile
+      settings.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Wed, 17 Feb 2016 18:48:54 +1100
+
 casper (1.366) xenial; urgency=medium
 
   * scripts/casper-bottom/15autologin, 25adduser: Update paths to gdm3 (LP: #1518478)

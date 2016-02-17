@@ -10,6 +10,22 @@ prereqs()
 	echo "$PREREQ"
 }
 
+# Args: $1 - The profile name
+setup_profile()
+{
+	if [ -d /root/usr/share/a11y-profile-manager/profiles/$1 ] &&
+	   [ -x /root/usr/bin/a11y-profile-manager ] &&
+	   [ -x /root/usr/bin/dconf ]; then
+		mkdir -p /root/tmp/a11y-profile-casper.d
+		chroot /root /usr/bin/a11y-profile-manager -s $1 -D /tmp/a11y-profile-casper.d/01-profile
+		chroot /root /usr/bin/dconf compile /tmp/dconf.$USERNAME /tmp/a11y-profile-casper.d
+		mkdir -p /root/home/$USERNAME/.config/dconf
+		mv /root/tmp/dconf.$USERNAME /root/home/$USERNAME/.config/dconf/user
+		chroot /root chown $USERNAME.$USERNAME -R /home/$USERNAME/.config
+		rmdir /root/tmp/a11y-profile-casper.d
+	fi
+}
+
 case $1 in
 # get pre-requisites
 	prereqs)
@@ -26,28 +42,28 @@ for x in $(cat /proc/cmdline); do
 	case $x in
 		# Lesser Visual Impairment
 		access=v1)
-			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -dconf high-contrast
+			setup_profile high-contrast
                         ;;
 		# Moderate Visual Impairment
 		access=v2)
-			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -dconf magnifier
+			setup_profile magnifier
                         ;;
 		# Blindness
 		access=v3)
 			NO_A11Y_DESKTOP_FILE=1
-			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -dconf blindness
+			setup_profile blindness
                         ;;
 		# Braille
 		braille=ask)
-			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -dconf braille
+			setup_profile braille
                         ;;
 		# Minor Motor Difficulties
 		access=m1)
-			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -dconf keyboard-modifiers
+			setup_profile keyboard-modifiers
                         ;;
 		# Motor Difficulties - pointing devices
 		access=m2)
-			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -dconf onscreen-keyboard
+			setup_profile onscreen-keyboard
                         ;;
 	esac
 done
@@ -57,16 +73,17 @@ done
 # is enabled if the user launches orca with a shortcut key. We don't want
 # to write out the file if the user is running oem-config, or boots directly
 # into ubiquity, where there is code to deal with the setting of the profile.
-if [ -z "$NO_A11Y_DESKTOP_FILE" ]; then
+if [ -z "$NO_A11Y_DESKTOP_FILE" ] &&
+   [ -x /root/usr/bin/a11y-profile-manager ]; then
 	cat <<EOF > /root/etc/xdg/autostart/screen-reader-profile.desktop
 [Desktop Entry]
 Type=Application
 Name=Screen Reader Accessibility Profile
-Exec=/usr/bin/casper-a11y-enable blindness
+Exec=/usr/bin/a11y-profile-manager -s blindness
 NoDisplay=true
 AutostartCondition=GSettings org.gnome.desktop.a11y.applications screen-reader-enabled
 X-GNOME-AutoRestart=false
-OnlyShowIn=GNOME;Unity;
+OnlyShowIn=Unity;
 EOF
 fi
 log_end_msg
