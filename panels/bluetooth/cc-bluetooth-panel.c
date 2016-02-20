@@ -56,7 +56,6 @@ struct CcBluetoothPanelPrivate {
 	gboolean             debug;
 	GHashTable          *connecting_devices;
 	GCancellable        *cancellable;
-	GSettings           *indicator_settings;
 
 	gulong               power_callback_handler_id;
 };
@@ -108,7 +107,6 @@ cc_bluetooth_panel_finalize (GObject *object)
 	g_clear_object (&self->priv->builder);
 	g_clear_object (&self->priv->killswitch);
 	g_clear_object (&self->priv->client);
-	g_clear_object (&self->priv->indicator_settings);
 
 	g_clear_pointer (&self->priv->connecting_devices, g_hash_table_destroy);
 	g_clear_pointer (&self->priv->selected_bdaddr, g_free);
@@ -857,12 +855,6 @@ cc_bluetooth_panel_init (CcBluetoothPanel *self)
 	g_signal_connect (G_OBJECT (self->priv->killswitch), "state-changed",
 			  G_CALLBACK (killswitch_changed), self);
 	cc_bluetooth_panel_update_power (self);
-
-	/* Set up the menubar visibility toggle */
-	self->priv->indicator_settings = g_settings_new ("com.canonical.indicator.bluetooth");
-	g_settings_bind (self->priv->indicator_settings, "visible",
-	                 WID("menubar_visibility_toggle"), "active",
-	                 G_SETTINGS_BIND_DEFAULT);
 
 	gtk_widget_show_all (GTK_WIDGET (self));
 }
