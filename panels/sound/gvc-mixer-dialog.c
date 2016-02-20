@@ -88,7 +88,6 @@ struct GvcMixerDialogPrivate
         GtkWidget       *selected_input_label;
         GtkWidget       *test_output_button;
         GSettings       *sound_settings;
-        GSettings       *indicator_settings;
 
         gdouble          last_input_peak;
         guint            num_apps;
@@ -1786,7 +1785,6 @@ gvc_mixer_dialog_constructor (GType                  type,
         GtkTreeSelection *selection;
         GtkWidget        *mute_check;
         GtkWidget        *allow_amplify_check;
-        GtkWidget        *indicator_visible_check;
         AtkObject        *output_bar_atk;
         AtkObject        *output_bar_label_atk;
         AtkObject        *output_bar_mute_atk;
@@ -2122,11 +2120,6 @@ gvc_mixer_dialog_constructor (GType                  type,
                             self->priv->no_apps_label,
                             TRUE, TRUE, 0);
 
-        indicator_visible_check = gtk_check_button_new_with_label (_("Show sound volume in the menu bar"));
-        g_settings_bind (self->priv->indicator_settings, "visible",
-                         indicator_visible_check, "active", G_SETTINGS_BIND_DEFAULT);
-        gtk_box_pack_start (GTK_BOX (main_vbox), indicator_visible_check, FALSE, TRUE, 0);
-
         gtk_widget_show_all (main_vbox);
 
         g_signal_connect (self->priv->mixer_control,
@@ -2162,7 +2155,6 @@ gvc_mixer_dialog_dispose (GObject *object)
         GvcMixerDialog *dialog = GVC_MIXER_DIALOG (object);
 
         g_clear_object (&dialog->priv->sound_settings);
-        g_clear_object (&dialog->priv->indicator_settings);
 
         if (dialog->priv->mixer_control != NULL) {
                 g_signal_handlers_disconnect_by_func (dialog->priv->mixer_control,
@@ -2231,7 +2223,6 @@ gvc_mixer_dialog_init (GvcMixerDialog *dialog)
         dialog->priv->bars = g_hash_table_new (NULL, NULL);
         dialog->priv->size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
         dialog->priv->sound_settings = g_settings_new ("com.ubuntu.sound");
-        dialog->priv->indicator_settings = g_settings_new ("com.canonical.indicator.sound");
 }
 
 static void
