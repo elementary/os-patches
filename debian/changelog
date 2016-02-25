@@ -1,3 +1,27 @@
+ubiquity (2.21.46) xenial; urgency=medium
+
+  * ubiquity/upower.py: Revert commit 6376, blank "except:" is wrong.
+  * ubiquity/upower.py: Actually specify the correct D-Bus interface name
+    instead of the object path name when querying the OnBattery property.
+    (LP: #1547956)
+  * debian/rules: Build under C.UTF-8 locale. grep 2.23 causes broken debconf
+    templates to be built under the C locale.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 24 Feb 2016 16:02:19 +0100
+
+ubiquity (2.21.45) xenial; urgency=medium
+
+  [ Luke Yelavich ]
+  * Rework the accessibility profile code to use the accessibility profile
+    manager if available
+
+  [ Mathieu Trudel-Lapierre ]
+  * Don't crash if we can't reach the DBus interface for UPower.
+  * Automatic update of included source packages: hw-detect
+    1.114ubuntu2.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 22 Feb 2016 17:37:59 -0500
+
 ubiquity (2.21.44) xenial; urgency=medium
 
   [ Iain Lane ]

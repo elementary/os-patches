@@ -123,6 +123,13 @@ EOF
 	fi
 }
 
+# Load SCSI device handlers before SCSI low-level device drivers.
+# (attached on SCSI scan; handle some I/O errors more gracefully)
+depmod -a >/dev/null 2>&1
+for mod in $(list_modules_dir /lib/modules/*/kernel/drivers/scsi/device_handler); do
+	module_probe "$mod"
+done
+
 if ! hw-detect disk-detect/detect_progress_title; then
 	log "hw-detect exited nonzero"
 fi

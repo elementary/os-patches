@@ -1,47 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
-  <object class="GtkMenu" id="a11y_indicator_menu">
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkMenuItem" id="a11y_high_contrast">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">_High Contrast</property>
-        <property name="use_underline">True</property>
-        <accelerator key="H" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-        <signal name="activate" handler="a11y_profile_high_contrast_activate" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="a11y_screen_reader">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">_Screen Reader</property>
-        <property name="use_underline">True</property>
-        <accelerator key="S" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-        <signal name="activate" handler="a11y_profile_screen_reader_activate" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="a11y_keyboard_modifiers">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">_Keyboard Modifiers</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="a11y_profile_keyboard_modifiers_activate" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="a11y_onscreen_keyboard">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">_On-screen Keyboard</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="a11y_profile_onscreen_keyboard_activate" swapped="no"/>
-      </object>
-    </child>
-  </object>
   <object class="GtkDialog" id="bootloader_fail_dialog">
     <property name="can_focus">True</property>
     <property name="border_width">5</property>
