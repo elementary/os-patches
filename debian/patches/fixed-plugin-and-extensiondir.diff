@@ -1,0 +1,26 @@
+Index: b/properties/Makefile.am
+===================================================================
+--- a/properties/Makefile.am
++++ b/properties/Makefile.am
+@@ -15,7 +15,7 @@ libevproperties_la_CFLAGS = \
+ 
+ if ENABLE_NAUTILUS
+ 
+-nautilusextensiondir=$(libdir)/$(NAUTILUS_EXTENSION_DIR)
++nautilusextensiondir=$(prefix)/lib/$(NAUTILUS_EXTENSION_DIR)
+ nautilusextension_LTLIBRARIES = libevince-properties-page.la
+ 
+ libevince_properties_page_la_SOURCES = 	\
+Index: b/configure.ac
+===================================================================
+--- a/configure.ac
++++ b/configure.ac
+@@ -483,7 +483,7 @@ if test x$enable_browser_plugin = "xyes"
+   PKG_CHECK_MODULES([BROWSER_PLUGIN],[gtk+-3.0 >= $GTK_REQUIRED gthread-2.0 gio-2.0 >= $GLIB_REQUIRED])
+ 
+   if test -z "${BROWSER_PLUGIN_DIR}"; then
+-    BROWSER_PLUGIN_DIR="\${libdir}/mozilla/plugins"
++    BROWSER_PLUGIN_DIR="\${prefix}/lib/mozilla/plugins"
+   fi
+   AC_ARG_VAR([BROWSER_PLUGIN_DIR],[Where to install the plugin to])
+ fi

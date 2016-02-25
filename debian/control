@@ -7,7 +7,7 @@ Section: gnome
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
-Uploaders: Andreas Henriksson <andreas@fatal.se>, Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>, Michael Biebl <biebl@debian.org>
+Uploaders: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
 Build-Depends: cdbs (>= 0.4.90),
                debhelper (>= 9),
                dpkg-dev (>= 1.16.1),
@@ -117,9 +117,11 @@ Description: Document (PostScript, PDF) viewer - common files
 
 Package: libevdocument3-4
 Architecture: any
+Multi-Arch: same
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends}
+Breaks: evince-hwp (<< 0.1.1-2ubuntu1)
 Description: Document (PostScript, PDF) rendering library
  This package contains libevdocument, which performs the rendering of the
  documents.
@@ -128,6 +130,7 @@ Description: Document (PostScript, PDF) rendering library
 
 Package: libevview3-3
 Architecture: any
+Multi-Arch: same
 Section: libs
 Depends: ${shlibs:Depends},
          ${misc:Depends},
@@ -138,6 +141,7 @@ Description: Document (PostScript, PDF) rendering library - Gtk+ widgets
 
 Package: libevince-dev
 Architecture: any
+Multi-Arch: same
 Section: libdevel
 Depends: libevdocument3-4 (= ${binary:Version}),
          libevview3-3 (= ${binary:Version}),
@@ -158,6 +162,7 @@ Description: Document (PostScript, PDF) rendering library - development files
 Package: gir1.2-evince-3.0
 Section: introspection
 Architecture: any
+Multi-Arch: same
 Depends: ${gir:Depends},
          ${shlibs:Depends},
          ${misc:Depends}

@@ -18,10 +18,11 @@ DEB_CONFIGURE_EXTRA_FLAGS += --enable-djvu \
                              --enable-xps \
                              --enable-comics \
                              --enable-introspection \
-                             --enable-gtk-doc
+                             --enable-gtk-doc \
+                             --libdir="\$${prefix}/lib/$(DEB_HOST_MULTIARCH)"
 
 DEB_DH_MAKESHLIBS_ARGS += -X /usr/lib/nautilus/ \
-                          -X /usr/lib/evince/ \
+                          -X /usr/lib/$(DEB_HOST_MULTIARCH)/evince/ \
                           -V -- -c4
 
 DEB_DH_SHLIBDEPS_ARGS += -X /usr/lib/nautilus/
