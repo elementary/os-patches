@@ -1,3 +1,21 @@
+ubiquity (2.21.47) xenial; urgency=medium
+
+  [ Marc Deslauriers ]
+  * scripts/plugininstall.py: Write initial random seed to systemd
+    location (LP: #1523199)
+
+  [ Jonathan Riddell ]
+  * kde_ui.py: strip any quotes from the lsb-release values
+  * Allow for alternate logos
+
+  [ Mathieu Trudel-Lapierre ]
+  * ubi-prepare: when non-free is disabled, drop the foss_disclaimer_extra
+    widget, and make the whole nonfree_vbox invisible (third-party drivers and
+    such are non-free, and disabling Secure Boot is unnecessary if you don't
+    install any non-free drivers). (LP: #1549816)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 25 Feb 2016 14:41:41 -0500
+
 ubiquity (2.21.46) xenial; urgency=medium
 
   * ubiquity/upower.py: Revert commit 6376, blank "except:" is wrong.

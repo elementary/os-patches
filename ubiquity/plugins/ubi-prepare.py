@@ -147,8 +147,7 @@ class PageGtk(PreparePageBase):
     def set_allow_nonfree(self, allow):
         if not allow:
             self.prepare_nonfree_software.set_active(False)
-            self.prepare_nonfree_software.set_property('visible', False)
-            self.prepare_foss_disclaimer_extra.set_property('visible', False)
+            self.nonfree_vbox.set_property('visible', False)
 
     def set_use_nonfree(self, val):
         if osextras.find_on_path('ubuntu-drivers'):

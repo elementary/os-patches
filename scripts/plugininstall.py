@@ -1725,7 +1725,7 @@ class Install(install_misc.InstallBase):
             return
         if not stat.S_ISCHR(st.st_mode):
             return
-        if not os.path.isdir(self.target_file("var/lib/urandom")):
+        if not os.path.isdir(self.target_file("var/lib/systemd")):
             return
 
         poolbytes = 512
@@ -1740,7 +1740,7 @@ class Install(install_misc.InstallBase):
         old_umask = os.umask(0o077)
         try:
             with open("/dev/urandom", "rb") as urandom:
-                with open(self.target_file("var/lib/urandom/random-seed"),
+                with open(self.target_file("var/lib/systemd/random-seed"),
                           "wb") as seed:
                     seed.write(urandom.read(poolbytes))
         except IOError:
