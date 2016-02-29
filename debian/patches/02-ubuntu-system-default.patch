@@ -1,8 +1,8 @@
 Description: Modify the system default
- While the upstream default "auto" is believed to work best together with the
- "Text Entry" tab in unity-control-center, "cjkv" makes sure on non-Unity
- desktops that IBus or fcitx is not started by default for all users.
-Bug-Ubuntu: https://launchpad.net/bugs/1481025
+ While the upstream default "auto" is believed to work best on Unity and
+ MATE, "cjkv" makes sure on other desktops that IBus or fcitx is not
+ started by default for all users.
+Bug-Ubuntu: https://launchpad.net/bugs/1481025, https://launchpad.net/bugs/1550325
 Author: Gunnar Hjalmarsson <gunnarhj@ubuntu.com>
 Forwarded: not-needed
 
@@ -15,7 +15,7 @@ Forwarded: not-needed
 -IM_CONFIG_DEFAULT_MODE=auto
 -# Start best input method only if CJKV environment
 -#IM_CONFIG_DEFAULT_MODE=cjkv
-+if [ -n "$XDG_CURRENT_DESKTOP" -a "$XDG_CURRENT_DESKTOP" = 'Unity' ]; then
++if [ "$XDG_CURRENT_DESKTOP" = 'Unity' -o "$XDG_CURRENT_DESKTOP" = 'MATE' ]; then
 +    # Start best input method unless overridden below
 +    IM_CONFIG_DEFAULT_MODE=auto
 +else
