@@ -1,3 +1,18 @@
+system-config-printer (1.5.7+20160212-0ubuntu2) xenial; urgency=medium
+
+  * debian/patches/50_newprinter-support-smb-printer-setup-without-samba-installed.patch:
+    Allow the setup of SMB printers also when no Samba client software is
+    installed. Install the software as soon as it is needed for browsing
+    the network and using the printer.
+  * debian/patches/47_installpackage-return-only-if-installation-complete.patch:
+    When installing a package via installpackage.py let the installing
+    methods only exit when the package is completely installed.
+  * debian/control: Demoted python3-smbc from Depends: to Suggests:,
+    it pulls in the Python2 stack, as Samba is not yet fully migrated
+    to Python3 (LP: #1552868).
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Mon,  7 Mar 2016 22:06:14 -0300
+
 system-config-printer (1.5.7+20160212-0ubuntu1) xenial; urgency=medium
 
   * New upstream release

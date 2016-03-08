@@ -1,0 +1,21 @@
+diff -Nur -x '*.orig' -x '*~' system-config-printer-1.5.7+20160212/installpackage.py system-config-printer-1.5.7+20160212.new/installpackage.py
+--- system-config-printer-1.5.7+20160212/installpackage.py	2016-02-12 23:12:30.000000000 -0200
++++ system-config-printer-1.5.7+20160212.new/installpackage.py	2016-03-07 21:57:57.774894711 -0300
+@@ -44,7 +44,7 @@
+         try:
+             if self.iface is not None:
+                 self.iface.InstallPackageNames(xid, [name],
+-                                           "hide-finished,show-warnings",
++                                           "show-progress,show-finished,show-warning",
+                                            timeout = 999999)
+         except dbus.exceptions.DBusException:
+             pass
+@@ -53,7 +53,7 @@
+         try:
+             if self.iface is not None:
+                 self.iface.InstallProvideFiles(xid, [filename],
+-                                               "hide-finished,show-warnings",
++                                               "show-progress,show-finished,show-warning",
+                                                timeout = 999999)
+         except dbus.exceptions.DBusException:
+             pass
