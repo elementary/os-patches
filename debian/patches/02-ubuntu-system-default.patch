@@ -1,8 +1,8 @@
 Description: Modify the system default
- While the upstream default "auto" is believed to work best on Unity and
- MATE, "cjkv" makes sure on other desktops that IBus or fcitx is not
- started by default for all users.
-Bug-Ubuntu: https://launchpad.net/bugs/1481025, https://launchpad.net/bugs/1550325
+ While the upstream default "auto" is believed to work best on Unity,
+ MATE and Ubuntu GNOME, "cjkv" makes sure on other desktops that IBus
+ or fcitx is not started by default for all users.
+Bug-Ubuntu: https://launchpad.net/bugs/1481025, https://launchpad.net/bugs/1550325, https://launchpad.net/bugs/1551283
 Author: Gunnar Hjalmarsson <gunnarhj@ubuntu.com>
 Forwarded: not-needed
 
@@ -15,7 +15,7 @@ Forwarded: not-needed
 -IM_CONFIG_DEFAULT_MODE=auto
 -# Start best input method only if CJKV environment
 -#IM_CONFIG_DEFAULT_MODE=cjkv
-+if [ "$XDG_CURRENT_DESKTOP" = 'Unity' -o "$XDG_CURRENT_DESKTOP" = 'MATE' ]; then
++if [ "$XDG_CURRENT_DESKTOP" = 'Unity' -o "$XDG_CURRENT_DESKTOP" = 'MATE' -o "${XDG_CURRENT_DESKTOP##*:}" = 'GNOME' ]; then
 +    # Start best input method unless overridden below
 +    IM_CONFIG_DEFAULT_MODE=auto
 +else
@@ -24,4 +24,4 @@ Forwarded: not-needed
 +fi
  
  # Set locale dependent preferred IM over standard auto mode
- IM_CONFIG_PREFERRED_RULE="zh_CN,fcitx:zh_TW,fcitx:zh_HK,fcitx:zh_SG,fcitx:ja_JP,fcitx:ko_KR,fcitx:vi_VN,fcitx"
+ if [ "${XDG_CURRENT_DESKTOP##*:}" != 'GNOME' -a "${XDG_CURRENT_DESKTOP%%:*}" != 'GNOME-Flashback' ]; then
