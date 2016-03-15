@@ -1,3 +1,13 @@
+dkms (2.2.0.3-2ubuntu10) xenial; urgency=medium
+
+  * debian/patches/shim_secureboot_support.path: mokutil is annoying in that
+    it's not quite handling non-interactiveness correctly; better make the
+    package postinst succeed even if mokutil reports an error, since we
+    already check for the password length, etc.; and mokutil failing should
+    not constitute in itself a good reason to make apt unhappy.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 14 Mar 2016 13:05:38 -0400
+
 dkms (2.2.0.3-2ubuntu9) xenial; urgency=medium
 
   * debian/patches/shim_secureboot_support.patch: add support for disabling

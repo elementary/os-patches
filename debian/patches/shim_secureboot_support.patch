@@ -75,7 +75,7 @@ Index: b/dkms_common.postinst
 +                        db_input critical dkms/text/bad_secureboot_key
 +                        STATE=$(($STATE - 2))
 +                    elif [ $length -ne 0 ]; then
-+                        echo "${RET}\n${RET}" | mokutil --disable-validation >/dev/null 2>&1
++                        echo "${RET}\n${RET}" | mokutil --disable-validation >/dev/null || true
 +                    fi
 +
 +                    # Always clear secureboot key.
