@@ -287,14 +287,6 @@ device_added_cb (GdkDeviceManager *manager,
 	update_current_page (self);
 }
 
-static gboolean
-link_activated (GtkLinkButton *button,
-		CcWacomPanel  *self)
-{
-	cc_wacom_panel_switch_to_panel (self, "bluetooth");
-	return TRUE;
-}
-
 void
 cc_wacom_panel_switch_to_panel (CcWacomPanel *self,
 				const char   *panel)
@@ -375,9 +367,6 @@ cc_wacom_panel_init (CcWacomPanel *self)
 	widget = WID ("main-box");
 	enbiggen_label (GTK_LABEL (WID ("advice-label1")));
 	gtk_notebook_append_page (notebook, widget, NULL);
-
-	g_signal_connect (G_OBJECT (WID ("linkbutton")), "activate-link",
-			  G_CALLBACK (link_activated), self);
 
 	priv->devices = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, g_object_unref);
 	priv->pages = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
