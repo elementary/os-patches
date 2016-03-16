@@ -1415,13 +1415,10 @@ info_panel_setup_selector (CcInfoPanel  *self)
                       _("Removable Media"),
                       -1);
 
-  if (!g_strcmp0 (g_getenv ("XDG_CURRENT_DESKTOP"), "Unity"))
-    {
-      gtk_list_store_append (model, &iter);
-      gtk_list_store_set (model, &iter, section_name_column,
-                          _("Legal Notice"),
-                          -1);
-    }
+  gtk_list_store_append (model, &iter);
+  gtk_list_store_set (model, &iter, section_name_column,
+                      _("Legal Notice"),
+                      -1);
 
   g_signal_connect (selection, "changed",
                     G_CALLBACK (on_section_changed), self);
@@ -1947,8 +1944,7 @@ cc_info_panel_init (CcInfoPanel *self)
   info_panel_setup_overview (self);
   info_panel_setup_default_apps (self);
   info_panel_setup_media (self);
-  if (!g_strcmp0 (g_getenv ("XDG_CURRENT_DESKTOP"), "Unity"))
-    info_panel_setup_notice (self);
+  info_panel_setup_notice (self);
 }
 
 void

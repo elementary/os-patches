@@ -168,10 +168,7 @@ on_lock_settings_changed (GSettings     *settings,
 static const char *
 cc_power_panel_get_help_uri (CcPanel *panel)
 {
-  if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-    return "help:ubuntu-help/power";
-  else
-    return "help:gnome-help/power";
+  return "help:ubuntu-help/power";
 }
 
 static void
