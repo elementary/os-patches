@@ -621,13 +621,8 @@ um_password_dialog_new (void)
 
         widget = (GtkWidget *) gtk_builder_get_object (builder, "password-normal-strength-hints-label");
         old_label = gtk_label_get_label (GTK_LABEL (widget));
-        if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-            label = g_strdup_printf ("<a href=\"%s\">%s</a>",
+        label = g_strdup_printf ("<a href=\"%s\">%s</a>",
                                  "help:ubuntu-help/user-goodpassword",
-                                  old_label);
-        else
-            label = g_strdup_printf ("<a href=\"%s\">%s</a>",
-                                  "help:gnome-help/user-goodpassword",
                                   old_label);
         gtk_label_set_markup (GTK_LABEL (widget), label);
         g_free (label);

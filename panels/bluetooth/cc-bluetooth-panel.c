@@ -76,10 +76,7 @@ launch_command (const char *command)
 static const char *
 cc_bluetooth_panel_get_help_uri (CcPanel *panel)
 {
-  if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-    return "help:ubuntu-help/bluetooth";
-  else
-    return "help:gnome-help/bluetooth";
+  return "help:ubuntu-help/bluetooth";
 }
 
 static void

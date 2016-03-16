@@ -7,6 +7,7 @@ SUBDIRS = \
 	24x24		\
 	32x32		\
 	48x48		\
+	256x256		\
 	$(NULL)
 
 -include $(top_srcdir)/git.mk

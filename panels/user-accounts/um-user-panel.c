@@ -34,10 +34,6 @@
 #include <polkit/polkit.h>
 #include <act/act.h>
 
-#ifdef HAVE_CHEESE
-#include <gst/gst.h>
-#endif /* HAVE_CHEESE */
-
 #include "shell/cc-editable-entry.h"
 
 #include "um-editable-button.h"
@@ -1540,10 +1536,7 @@ cc_user_panel_get_permission (CcPanel *panel)
 static const char *
 cc_user_panel_get_help_uri (CcPanel *panel)
 {
- if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-   return "help:ubuntu-help/user-accounts";
- else
- return "help:gnome-help/user-accounts";
+ return "help:ubuntu-help/user-accounts";
 }
 
 static void

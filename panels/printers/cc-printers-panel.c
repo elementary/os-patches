@@ -251,10 +251,7 @@ cc_printers_panel_get_permission (CcPanel *panel)
 static const char *
 cc_printers_panel_get_help_uri (CcPanel *panel)
 {
-  if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-    return "help:ubuntu-help/printing";
-  else
-    return "help:gnome-help/printing";
+  return "help:ubuntu-help/printing";
 }
 
 static void

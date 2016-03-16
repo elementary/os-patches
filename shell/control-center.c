@@ -181,14 +181,9 @@ help_activated (GSimpleAction *action,
 
   if (panel)
     uri = cc_panel_get_help_uri (panel);
-    if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-      gtk_show_uri (gtk_widget_get_screen (window),
-                uri ? uri : "help:ubuntu-help/prefs",
-                GDK_CURRENT_TIME, NULL);
-    else
-      gtk_show_uri (gtk_widget_get_screen (window),
-                uri ? uri : "help:gnome-help/prefs",
-                GDK_CURRENT_TIME, NULL);
+    gtk_show_uri (gtk_widget_get_screen (window),
+                  uri ? uri : "help:ubuntu-help/prefs",
+                  GDK_CURRENT_TIME, NULL);
 }
 
 static void
@@ -199,14 +194,9 @@ contents_activated (GSimpleAction *action,
   GnomeControlCenter *shell = user_data;
   GtkWidget *window = cc_shell_get_toplevel (CC_SHELL (shell));
   
-  if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-    gtk_show_uri (gtk_widget_get_screen (window),
-                  "help:ubuntu-help/prefs",
-                  GDK_CURRENT_TIME, NULL);
-  else
-    gtk_show_uri (gtk_widget_get_screen (window),
-                  "help:gnome-help/prefs",
-                  GDK_CURRENT_TIME, NULL);
+  gtk_show_uri (gtk_widget_get_screen (window),
+                "help:ubuntu-help/prefs",
+                GDK_CURRENT_TIME, NULL);
 }
 
 static void
@@ -266,38 +256,22 @@ application_startup_cb (GApplication       *application,
   g_action_map_add_action (G_ACTION_MAP (application), action);
   g_signal_connect (action, "activate", G_CALLBACK (quit_activated), shell);
 
-  if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-  {
-    menubar = g_menu_new ();
-    menu = g_menu_new ();
+  menubar = g_menu_new ();
+  menu = g_menu_new ();
 
-    section = g_menu_new ();
-    g_menu_append (section, _("Contents"), "app.contents");
-    g_menu_append_section (menu, NULL, G_MENU_MODEL (section));
+  section = g_menu_new ();
+  g_menu_append (section, _("Contents"), "app.contents");
+  g_menu_append_section (menu, NULL, G_MENU_MODEL (section));
 
-    g_menu_append (menu, _("Quit"), "app.quit");
+  g_menu_append (menu, _("Quit"), "app.quit");
 
-    g_menu_append_submenu (menubar, _("Help"), G_MENU_MODEL (menu));
+  g_menu_append_submenu (menubar, _("Help"), G_MENU_MODEL (menu));
 
-    gtk_application_set_menubar (GTK_APPLICATION (application),
-                                 G_MENU_MODEL (menubar));
+  gtk_application_set_menubar (GTK_APPLICATION (application),
+                               G_MENU_MODEL (menubar));
 
-    g_signal_connect (shell, "notify::active-panel",
-                      G_CALLBACK (active_panel_changed_cb), section);
-  }
-  else
-  {
-    menu = g_menu_new ();
-
-    section = g_menu_new ();
-    g_menu_append (section, _("Help"), "app.help");
-    g_menu_append (section, _("Quit"), "app.quit");
-
-    g_menu_append_section (menu, NULL, G_MENU_MODEL (section));
-
-    gtk_application_set_app_menu (GTK_APPLICATION (application),
-                                  G_MENU_MODEL (menu));
-  }
+  g_signal_connect (shell, "notify::active-panel",
+                    G_CALLBACK (active_panel_changed_cb), section);
 
   gtk_application_add_accelerator (GTK_APPLICATION (application),
                                    "F1", "app.help", NULL);
@@ -329,7 +303,7 @@ main (int argc, char **argv)
   gtk_icon_size_register ("cc-sidebar-list", 24, 24);
 
   notify_init ("gnome-control-center");
-  g_setenv ("XDG_CURRENT_DESKTOP", "Unity", TRUE);
+  g_setenv ("XDG_CURRENT_DESKTOP", "Unity", FALSE);
 
   shell = gnome_control_center_new ();
 

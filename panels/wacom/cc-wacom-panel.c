@@ -124,10 +124,7 @@ cc_wacom_panel_dispose (GObject *object)
 static const char *
 cc_wacom_panel_get_help_uri (CcPanel *panel)
 {
-  if (!g_strcmp0(g_getenv("XDG_CURRENT_DESKTOP"), "Unity"))
-    return "help:ubuntu-help/wacom";
-  else
-    return "help:gnome-help/wacom";
+  return "help:ubuntu-help/wacom";
 }
 
 static void
