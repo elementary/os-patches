@@ -138,7 +138,7 @@ fi
 db_get open-iscsi/targets || RET=
 if [ "$RET" ]; then
 	if ! pidof iscsid >/dev/null; then
-		iscsi-start
+		iscsi_start
 	fi
 	for portal in $RET; do
 		iscsi_discovery "$portal" -l
@@ -149,7 +149,7 @@ fi
 if db_fget partman-iscsi/login/address seen && [ "$RET" = true ] && \
    db_get partman-iscsi/login/address && [ "$RET" ]; then
 	if ! pidof iscsid >/dev/null; then
-		iscsi-start
+		iscsi_start
 	fi
 	db_capb backup
 	iscsi_login
@@ -184,7 +184,7 @@ while ! disk_found; do
 			exit 0
 		elif [ "$RET" = iscsi ]; then
 			if ! pidof iscsid >/dev/null; then
-				iscsi-start
+				iscsi_start
 			fi
 			db_capb backup
 			iscsi_login

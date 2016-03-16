@@ -1,9 +1,18 @@
+console-setup (1.108ubuntu11) xenial; urgency=medium
+
+  * Add ConditionPathExists=/dev/tty0 to the console-setup.service, to
+    avoid running the unit on platforms without virtual consoles,
+    e.g. s390x. LP: #1552733
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 03 Mar 2016 14:41:05 +0000
+
 console-setup (1.108ubuntu10) xenial; urgency=medium
 
   * debian/rules: Drop obsolete and no-op dh_installinit --upstart-only
     option. (LP: #1519228)
   * Add debian/keyboard-configuration.links to (statically) enable
     console-setup.service. It is not being pulled in by plymouth any more, and
+    doing so was brittle and unexpected. (LP: #1531442)
   * console-setup.service: Set RemainAfterExit.
 
  -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 11 Jan 2016 15:02:09 +0100

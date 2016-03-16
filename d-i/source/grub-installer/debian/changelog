@@ -1,3 +1,27 @@
+grub-installer (1.128ubuntu5) xenial; urgency=medium
+
+  [ Mauricio Faria de Oliveira ]
+  * grub-installer [ppc64el]: generalize the regex for multiple PReP
+    partitions (rather than append 'p' just for NVMe :) for any /dev
+    entry, but without trailing partition numbers (matches the shell
+    parameter expansion in the subsequent grep). (LP: #1550448)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 14 Mar 2016 16:05:57 -0400
+
+grub-installer (1.128ubuntu4) xenial; urgency=medium
+
+  * Fix installing grub to a PReP partition over RAID which would be supported
+    by NVME or other types of devices than [hsv]d drives.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 29 Feb 2016 10:48:37 -0500
+
+grub-installer (1.128ubuntu3) xenial; urgency=medium
+
+  * grub-installer [ppc64el]: support multiple PReP partitions on component
+    devices of a MD/mdadm device. (LP: #1550448)
+
+ -- Mauricio Faria de Oliveira <mauricfo@linux.vnet.ibm.com>  Fri, 26 Feb 2016 15:14:21 -0500
+
 grub-installer (1.128ubuntu2) xenial; urgency=medium
 
   * If grub-installer/choose_bootdev only has one non-manual choice, default
