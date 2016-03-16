@@ -1,3 +1,20 @@
+grub2 (2.02~beta2-36ubuntu1) xenial; urgency=medium
+
+  [ Debconf translations ]
+  * [ja] Japanese (Takuma Yamada; closes: #815203, #817084).
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/postinst.in: add MOK validation support; so that it's possible on
+    upgrade to disable validation in shim if the user has dkms packages
+    installed.
+  * debian/control: add mokutil to grub-efi-$arch packages to deal with
+    toggling MOK validation.
+
+  [ dann frazier ]
+  * Cherry-pick fix for slow timer events on ARM/UEFI (LP: #1553390).
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Tue, 15 Mar 2016 12:57:08 -0400
+
 grub2 (2.02~beta2-36) unstable; urgency=medium
 
   [ Colin Watson ]
