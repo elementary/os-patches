@@ -1,3 +1,18 @@
+dkms (2.2.0.3-2ubuntu11) xenial; urgency=medium
+
+  * debian/patches/shim_secureboot_support.patch: (LP: #1558438)
+    - fix quoting variables for setup_mok_validation() to account for passwords
+      that might have special characters.
+    - use printf rather than straight echo to pass values to mokutil.
+    - ask the user to confirm password; not just write it once, this will avoid
+      issues with typos in the Secure Boot keys.
+  * debian/templates:
+    - rename dkms/text/bad_secureboot_key to dkms/error/bad_secureboot_key.
+    - add dkms/text/secureboot_key_mismatch.
+    - add dkms/secureboot_key_again.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Fri, 18 Mar 2016 20:54:11 -0400
+
 dkms (2.2.0.3-2ubuntu10) xenial; urgency=medium
 
   * debian/patches/shim_secureboot_support.path: mokutil is annoying in that

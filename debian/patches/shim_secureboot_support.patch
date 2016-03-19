@@ -11,8 +11,8 @@ not disabling Secure Boot (but then, they will not be able to load the
 dkms drivers that were added).
 
 ---
- dkms_common.postinst |   69 +++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 69 insertions(+)
+ dkms_common.postinst |   82 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 82 insertions(+)
 
 Index: b/dkms_common.postinst
 ===================================================================
@@ -27,7 +27,7 @@ Index: b/dkms_common.postinst
  uname_s=$(uname -s)
  
  _get_kernel_dir() {
-@@ -293,3 +295,70 @@ for KERNEL in $KERNELS; do
+@@ -293,3 +295,83 @@ for KERNEL in $KERNELS; do
      fi
  done
  
@@ -66,21 +66,34 @@ Index: b/dkms_common.postinst
 +                    fi
 +
 +                    db_input high dkms/secureboot_key || true
++                    db_input high dkms/secureboot_key_again || true
 +                    ;;
 +                3)
 +                    db_get dkms/secureboot_key
-+                    length=`echo $RET | wc -c`
-+                    if [ $length -lt 8 ] || [ $length -gt 16 ]; then
-+                        db_fset dkms/text/bad_secureboot_key seen false
-+                        db_input critical dkms/text/bad_secureboot_key
++                    key="$RET"
++                    db_get dkms/secureboot_key_again
++                    again="$RET"
++
++                    if [ "$key" != "$again" ]; then
++                        db_fset dkms/error/secureboot_key_mismatch seen false
++                        db_input critical dkms/error/secureboot_key_mismatch
 +                        STATE=$(($STATE - 2))
-+                    elif [ $length -ne 0 ]; then
-+                        echo "${RET}\n${RET}" | mokutil --disable-validation >/dev/null || true
++                    else
++                        length=`echo "$key" | wc -c`
++                        if [ $length -lt 8 ] || [ $length -gt 16 ]; then
++                            db_fset dkms/error/bad_secureboot_key seen false
++                            db_input critical dkms/error/bad_secureboot_key
++                            STATE=$(($STATE - 2))
++                        elif [ $length -ne 0 ]; then
++                            printf '%s\n%s\n' "$RET" "$RET" | mokutil --disable-validation >/dev/null || true
++                        fi
 +                    fi
 +
 +                    # Always clear secureboot key.
 +                    db_set dkms/secureboot_key ''
 +                    db_fset dkms/secureboot_key seen false
++                    db_set dkms/secureboot_key_again ''
++                    db_fset dkms/secureboot_key_again seen false
 +                    ;;
 +                *)
 +                    break

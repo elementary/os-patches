@@ -2,8 +2,8 @@ Template: dkms/title/secureboot
 Type: text
 _Description: Configuring Secure Boot
 
-Template: dkms/text/bad_secureboot_key
-Type: text
+Template: dkms/error/bad_secureboot_key
+Type: error
 _Description: Invalid password
  The Secure Boot key you've entered is not valid. The password used must be
  between 8 and 16 characters.
@@ -30,3 +30,12 @@ _Description: Password:
  Please enter a password for disabling Secure Boot. It will be asked again
  after a reboot.
 
+Template: dkms/secureboot_key_again
+Type: password
+_Description: Re-enter password to verify:
+ Please enter the same password again to verify you have typed it correctly.
+
+Template: dkms/error/secureboot_key_mismatch
+Type: error
+_Description: Password input error
+ The two passwords you entered were not the same. Please try again.
