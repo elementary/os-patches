@@ -1,3 +1,14 @@
+grub2 (2.02~beta2-36ubuntu2) xenial; urgency=medium
+
+  * debian/postinst.in: (LP: #1558438)
+    - fix quoting variables for setup_mok_validation() to account for passwords
+      that might have special characters.
+    - use printf rather than straight echo to pass values to mokutil.
+    - ask the user to confirm password; not just write it once, this will avoid
+      issues with typos in the Secure Boot keys.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Fri, 18 Mar 2016 21:35:50 -0400
+
 grub2 (2.02~beta2-36ubuntu1) xenial; urgency=medium
 
   [ Debconf translations ]

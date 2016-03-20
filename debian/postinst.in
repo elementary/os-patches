@@ -352,21 +352,34 @@ setup_mok_validation()
                         fi
 
                         db_input high dkms/secureboot_key || true
+                        db_input high dkms/secureboot_key_again || true
                         ;;
                     3)
                         db_get dkms/secureboot_key
-                        length=`echo $RET | wc -c`
-                        if [ $length -lt 8 ] || [ $length -gt 16 ]; then
-                            db_fset dkms/text/bad_secureboot_key seen false
-                            db_input critical dkms/text/bad_secureboot_key
+                        key="$RET"
+                        db_get dkms/secureboot_key_again
+                        again="$RET"
+
+                        if [ "$key" != "$again" ]; then
+                            db_fset dkms/error/secureboot_key_mismatch seen false
+                            db_input critical dkms/error/secureboot_key_mismatch
                             STATE=$(($STATE - 2))
-                        elif [ $length -ne 0 ]; then
-                            echo "${RET}\n${RET}" | mokutil --disable-validation >/dev/null || true
+                        else
+                            length=`echo "$key" | wc -c`
+                            if [ $length -lt 8 ] || [ $length -gt 16 ]; then
+                                db_fset dkms/error/bad_secureboot_key seen false
+                                db_input critical dkms/error/bad_secureboot_key
+                                STATE=$(($STATE - 2))
+                            elif [ $length -ne 0 ]; then
+                                printf '%s\n%s\n' "$RET" "$RET" | mokutil --disable-validation >/dev/null || true
+                            fi
                         fi
 
                         # Always clear secureboot key.
                         db_set dkms/secureboot_key ''
                         db_fset dkms/secureboot_key seen false
+                        db_set dkms/secureboot_key_again ''
+                        db_fset dkms/secureboot_key_again seen false
                         ;;
                     *)
                         break
