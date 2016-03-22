@@ -275,7 +275,8 @@ class Install(install_misc.InstallBase):
                 keep.add('grub-efi-amd64-signed')
                 keep.add('shim-signed')
                 keep.add('mokutil')
-                keep.add('fwupdate-%s-signed' % arch)
+                keep.add('fwupdate-signed')
+                install_misc.record_installed(['fwupdate-signed'])
                 try:
                     altmeta = self.db.get(
                         'base-installer/kernel/altmeta')

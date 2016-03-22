@@ -936,6 +936,11 @@ class Install(install_misc.InstallBase):
                     'popularity-contest',
                     'libpaper1',
                     'ssl-cert']
+        arch, subarch = install_misc.archdetect()
+
+        # this postinst installs EFI application and cleans old entries
+        if arch in ('amd64', 'i386') and subarch == 'efi':
+            packages.append('fwupdate')
 
         try:
             for package in packages:
@@ -1456,7 +1461,7 @@ class Install(install_misc.InstallBase):
         if arch in ('amd64', 'i386'):
             for pkg in ('grub', 'grub-pc', 'grub-efi', 'grub-efi-amd64',
                         'grub-efi-amd64-signed', 'shim-signed', 'mokutil',
-                        'fwupdate-%s-signed' % arch, 'lilo'):
+                        'lilo'):
                 if pkg not in keep:
                     difference.add(pkg)
 

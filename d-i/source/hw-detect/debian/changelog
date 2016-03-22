@@ -1,3 +1,15 @@
+hw-detect (1.114ubuntu4) xenial; urgency=medium
+
+  [ Mauricio Faria de Oliveira ]
+  * disk-detect.sh: multipath: reload udev rules before re-add devices
+    to guarantee all devices may get new udev properties (LP: #1549456)
+  * disk-detect.sh: multipath: deactivate LVM volumes before multipath
+    discovery to unlock individual paths (LP: #1549504)
+  * disk-detect.sh: multipath: deactivate md arrays before multipath
+    discovery to unlock individual paths (LP: #1549506)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 21 Mar 2016 14:24:03 -0400
+
 hw-detect (1.114ubuntu3) xenial; urgency=medium
 
   * disk-detect.sh: use iscsi-start wrapper in partman-iscsi to be able to set
