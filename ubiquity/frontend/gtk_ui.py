@@ -903,6 +903,7 @@ class Wizard(BaseFrontend):
         import gi
         gi.require_version("Vte", "2.91")
         from gi.repository import Vte, Pango
+        misc.drop_privileges_save()
         self.vte = Vte.Terminal()
         self.install_details_sw.add(self.vte)
         tail_cmd = [
@@ -913,6 +914,7 @@ class Wizard(BaseFrontend):
         fontdesc = Pango.font_description_from_string("Ubuntu Mono 8")
         self.vte.set_font(fontdesc)
         self.vte.show()
+        misc.regain_privileges_save()
         # FIXME shrink the window horizontally instead of locking the window
         # size.
         self.live_installer.set_resizable(False)
