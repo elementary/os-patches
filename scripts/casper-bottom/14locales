@@ -54,7 +54,7 @@ if [ "${set_locale}" ]; then
     LANG=$(grep "^${locale}" /root/usr/share/i18n/SUPPORTED | grep UTF-8 |sed -e 's, .*,,' -e q)
     printf 'LANG="%s"\n' "${LANG}" > /root/etc/default/locale
     printf '%s UTF-8\n' "${LANG}" > /root/etc/locale.gen
-    chroot /root /usr/sbin/locale-gen "${LANG}"
+    chroot /root /usr/sbin/locale-gen --keep-existing
 fi
 
 log_end_msg

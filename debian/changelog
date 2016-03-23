@@ -1,3 +1,16 @@
+casper (1.368) xenial; urgency=medium
+
+  * scripts/casper-bottom/14locales: Call "locale-gen --keep-existing",
+    without passing the language. As of glibc 2.23, locale-gen will remove all
+    locales (apart from the passed argument, if it exists in
+    /var/lib/locales/supported.d) from the system if you pass an argument at
+    the end of locale-gen without "--keep-existing". If called as "locale-gen
+    --keep-existing" with no arguments, then all locales in
+    /var/lib/locale/supported.d/ and /etc/locale.gen are generated if they
+    weren't already generated. This is what we want.
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Tue, 22 Mar 2016 17:03:40 +0000
+
 casper (1.367) xenial; urgency=medium
 
   Replacement of a11y profile handling code with liba11y-profile-manager:
