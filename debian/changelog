@@ -1,3 +1,17 @@
+casper (1.369) xenial; urgency=medium
+
+  * ubiquity-hooks/30accessibility:
+    - Re-add accidentally dropped functionality to set up the greeter with
+      settings relevant to the selected accessibility profile
+    - Use su instead of sudo so that gsettings works properly
+    - Properly clean up after settings are applied
+    - Remove references to the magnifier profile, we do not have a magnifier
+      on the Ubuntu desktop
+    - Use correct profile names
+    - Deal with quotes from gsettings output
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Thu, 24 Mar 2016 12:27:23 +1100
+
 casper (1.368) xenial; urgency=medium
 
   * scripts/casper-bottom/14locales: Call "locale-gen --keep-existing",
