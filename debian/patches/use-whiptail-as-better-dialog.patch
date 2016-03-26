@@ -1,0 +1,371 @@
+Index: im-config-0.29/im-config
+===================================================================
+--- im-config-0.29.orig/im-config
++++ im-config-0.29/im-config
+@@ -136,8 +136,8 @@ if [ $IM_CONFIG_DIALOG = "X" ]; then
+         exit 1
+     fi
+ else
+-    if [ ! -x /usr/bin/dialog ]; then
+-        eval_gettext "E: dialog must be installed." >&2
++    if [ ! -x /usr/bin/whiptail ]; then
++        eval_gettext "E: whiptail must be installed." >&2
+         echo >&2
+         exit 1
+     fi
+Index: im-config-0.29/po/en_AU.po
+===================================================================
+--- im-config-0.29.orig/po/en_AU.po
++++ im-config-0.29/po/en_AU.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-12-27 15:29+0000\n"
++"PO-Revision-Date: 2016-03-25 11:07+0800\n"
+ "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+ "Language-Team: English (Australia) <en_AU@li.org>\n"
+ "Language: \n"
+@@ -79,8 +79,8 @@ msgstr "E: X server must be available."
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: dialog must be installed."
++msgid "E: whiptail must be installed."
++msgstr "E: whiptail must be installed."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/en_GB.po
+===================================================================
+--- im-config-0.29.orig/po/en_GB.po
++++ im-config-0.29/po/en_GB.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-04-16 12:21+0000\n"
++"PO-Revision-Date: 2016-03-25 11:08+0800\n"
+ "Last-Translator: Anthony Harrington <untaintableangel@ubuntu.com>\n"
+ "Language-Team: English (United Kingdom) <en_GB@li.org>\n"
+ "Language: \n"
+@@ -79,8 +79,8 @@ msgstr "E: X server must be available."
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: dialogue must be installed."
++msgid "E: whiptail must be installed."
++msgstr "E: whiptail must be installed."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/es.po
+===================================================================
+--- im-config-0.29.orig/po/es.po
++++ im-config-0.29/po/es.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-08-03 06:12+0000\n"
++"PO-Revision-Date: 2016-03-25 11:08+0800\n"
+ "Last-Translator: nat6091 <Unknown>\n"
+ "Language-Team: Spanish <es@li.org>\n"
+ "Language: es\n"
+@@ -80,8 +80,8 @@ msgid "E: X server must be available."
+ msgstr "E: El servidor X debe estar disponible."
+ 
+ #: im-config:124
+-#, sh-format
+-msgid "E: dialog must be installed."
++#, fuzzy, sh-format
++msgid "E: whiptail must be installed."
+ msgstr "E: el diálogo debe estar instalado."
+ 
+ #: im-config:149
+Index: im-config-0.29/po/im-config.pot
+===================================================================
+--- im-config-0.29.orig/po/im-config.pot
++++ im-config-0.29/po/im-config.pot
+@@ -69,7 +69,7 @@ msgstr ""
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
++msgid "E: whiptail must be installed."
+ msgstr ""
+ 
+ #: im-config:149
+Index: im-config-0.29/po/it.po
+===================================================================
+--- im-config-0.29.orig/po/it.po
++++ im-config-0.29/po/it.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-05-07 20:07+0000\n"
++"PO-Revision-Date: 2016-03-25 11:08+0800\n"
+ "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+ "Language-Team: Italian <it@li.org>\n"
+ "Language: it\n"
+@@ -81,8 +81,8 @@ msgstr "E: X server deve essere disponib
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: dialog deve essere installato."
++msgid "E: whiptail must be installed."
++msgstr "E: whiptail deve essere installato."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/ja.po
+===================================================================
+--- im-config-0.29.orig/po/ja.po
++++ im-config-0.29/po/ja.po
+@@ -6,7 +6,7 @@ msgstr ""
+ "Project-Id-Version: im-config 0.9\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2015-03-22 00:41+0900\n"
++"PO-Revision-Date: 2016-03-25 11:08+0800\n"
+ "Last-Translator: Osamu Aoki <osamu@debian.org>\n"
+ "Language-Team: Japanese <JAPANESE@example.org>\n"
+ "Language: ja\n"
+@@ -77,8 +77,8 @@ msgstr "E: X サーバーが使用でき
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: dialog がインストールされなければいけません。"
++msgid "E: whiptail must be installed."
++msgstr "E: whiptail がインストールされなければいけません。"
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/ko.po
+===================================================================
+--- im-config-0.29.orig/po/ko.po
++++ im-config-0.29/po/ko.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-09-18 13:36+0000\n"
++"PO-Revision-Date: 2016-03-25 11:08+0800\n"
+ "Last-Translator: Kim Boram <boramism@gmail.com>\n"
+ "Language-Team: Korean <ko@li.org>\n"
+ "Language: ko\n"
+@@ -80,8 +80,8 @@ msgid "E: X server must be available."
+ msgstr "오류: 반드시 X 서버를 설지해야 합니다."
+ 
+ #: im-config:124
+-#, sh-format
+-msgid "E: dialog must be installed."
++#, fuzzy, sh-format
++msgid "E: whiptail must be installed."
+ msgstr "오류: 반드시 다이얼로그를 설치해야 합니다."
+ 
+ #: im-config:149
+Index: im-config-0.29/po/ms.po
+===================================================================
+--- im-config-0.29.orig/po/ms.po
++++ im-config-0.29/po/ms.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-06-09 13:03+0000\n"
++"PO-Revision-Date: 2016-03-25 11:09+0800\n"
+ "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+ "Language-Team: Malay <ms@li.org>\n"
+ "Language: ms\n"
+@@ -80,8 +80,8 @@ msgstr "E: pelayan X mesti tersedia."
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: dialog mesti dipasang."
++msgid "E: whiptail must be installed."
++msgstr "E: whiptail mesti dipasang."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/nb.po
+===================================================================
+--- im-config-0.29.orig/po/nb.po
++++ im-config-0.29/po/nb.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-07-18 10:11+0000\n"
++"PO-Revision-Date: 2016-03-25 11:09+0800\n"
+ "Last-Translator: Åka Sikrom <Unknown>\n"
+ "Language-Team: Norwegian Bokmal <nb@li.org>\n"
+ "Language: nb\n"
+@@ -79,8 +79,8 @@ msgstr "E: en X-tjener må være tilgjen
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: «dialog» må være installert."
++msgid "E: whiptail must be installed."
++msgstr "E: «whiptail» må være installert."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/pt_BR.po
+===================================================================
+--- im-config-0.29.orig/po/pt_BR.po
++++ im-config-0.29/po/pt_BR.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-09-11 11:47+0000\n"
++"PO-Revision-Date: 2016-03-25 11:09+0800\n"
+ "Last-Translator: Juliano Fischer Naves <julianofischer@gmail.com>\n"
+ "Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
+ "Language: pt_BR\n"
+@@ -81,8 +81,8 @@ msgstr "E: servidor X deve estar dispon�
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: dialog deve ser instalado."
++msgid "E: whiptail must be installed."
++msgstr "E: whiptail deve ser instalado."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/ru.po
+===================================================================
+--- im-config-0.29.orig/po/ru.po
++++ im-config-0.29/po/ru.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-04-14 10:05+0000\n"
++"PO-Revision-Date: 2016-03-25 11:09+0800\n"
+ "Last-Translator: Vassili Platonov <Unknown>\n"
+ "Language-Team: Russian <ru@li.org>\n"
+ "Language: ru\n"
+@@ -79,8 +79,8 @@ msgstr "E: должен быть дос�
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: должен быть установлен dialog."
++msgid "E: whiptail must be installed."
++msgstr "E: должен быть установлен whiptail."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/sl.po
+===================================================================
+--- im-config-0.29.orig/po/sl.po
++++ im-config-0.29/po/sl.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-10-07 12:08+0000\n"
++"PO-Revision-Date: 2016-03-25 11:09+0800\n"
+ "Last-Translator: Sasa Batistic <Unknown>\n"
+ "Language-Team: Slovenian <sl@li.org>\n"
+ "Language: sl\n"
+@@ -80,8 +80,8 @@ msgstr "E: strežnik X mora biti nameš�
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: dialog mora biti nameščen"
++msgid "E: whiptail must be installed."
++msgstr "E: whiptail mora biti nameščen"
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/tr.po
+===================================================================
+--- im-config-0.29.orig/po/tr.po
++++ im-config-0.29/po/tr.po
+@@ -8,7 +8,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-08-05 10:53+0000\n"
++"PO-Revision-Date: 2016-03-25 11:10+0800\n"
+ "Last-Translator: Yiğit Anıl <yigitan@gmail.com>\n"
+ "Language-Team: Turkish <tr@li.org>\n"
+ "Language: tr\n"
+@@ -78,8 +78,8 @@ msgstr "E: X sunucu kullanılabilir olma
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: dialog kurulmalı."
++msgid "E: whiptail must be installed."
++msgstr "E: whiptail kurulmalı."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/po/uk.po
+===================================================================
+--- im-config-0.29.orig/po/uk.po
++++ im-config-0.29/po/uk.po
+@@ -7,7 +7,7 @@ msgstr ""
+ "Project-Id-Version: im-config\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2015-03-22 00:24+0900\n"
+-"PO-Revision-Date: 2013-04-25 19:20+0000\n"
++"PO-Revision-Date: 2016-03-25 11:10+0800\n"
+ "Last-Translator: Stuartlittle1970@gmail.com <Stuartlittle1970@gmail.com>\n"
+ "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
+ "Language: uk\n"
+@@ -76,8 +76,8 @@ msgstr "E: має бути доступ�
+ 
+ #: im-config:124
+ #, sh-format
+-msgid "E: dialog must be installed."
+-msgstr "E: має бути встановлений dialog."
++msgid "E: whiptail must be installed."
++msgstr "E: має бути встановлений whiptail."
+ 
+ #: im-config:149
+ #, sh-format
+Index: im-config-0.29/share/im-config.common
+===================================================================
+--- im-config-0.29.orig/share/im-config.common
++++ im-config-0.29/share/im-config.common
+@@ -134,7 +134,7 @@ write_config () {
+ msgbox () {
+     if [ $IM_CONFIG_DIALOG = "console" ]; then
+         # console
+-        dialog --title "$IM_CONFIG_ID" --msgbox "$1" 15 76
++        whiptail --title "$IM_CONFIG_ID" --msgbox "$1" 15 76
+     else
+         if [ "$KDE_FULL_SESSION" = true ] && [ -x /usr/bin/kdialog ]; then
+             # KDE GUI
+@@ -153,7 +153,7 @@ msgbox () {
+ yesno () {
+     if [ $IM_CONFIG_DIALOG = "console" ]; then
+         # console
+-        dialog --title "$IM_CONFIG_ID" --yesno "$1" 20 76
++        whiptail --title "$IM_CONFIG_ID" --yesno "$1" 20 76
+     else
+         if [ "$KDE_FULL_SESSION" = true ] && [ -x /usr/bin/kdialog ]; then
+             # KDE GUI
+@@ -173,7 +173,7 @@ yesno () {
+ menulist_init () {
+     if [ $IM_CONFIG_DIALOG = "console" ]; then
+         # console
+-        printf "%s" "dialog --title \"$IM_CONFIG_ID\" --radiolist \"$1\" 23 76 18"
++        printf "%s" "whiptail --title \"$IM_CONFIG_ID\" --radiolist \"$1\" 23 76 18"
+     else
+         # GTK GUI
+         printf "%s" "zenity --title=\"$IM_CONFIG_ID\" --width=600 --height=400 --text=\"$1\" --list --radiolist --column \"$2\" --column \"$3\" --column \"$4\""
