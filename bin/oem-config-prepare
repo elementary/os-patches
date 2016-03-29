@@ -28,6 +28,10 @@ if [ "$(id -u)" = 0 ]; then
 	# Potentially sensitive.
 	rm -f /home/oem/.ssh/known_hosts
 
+	cp -a /usr/lib/oem-config/oem-config.service /lib/systemd/system
+	cp -a /usr/lib/oem-config/oem-config.target /lib/systemd/system
+	/bin/systemctl enable oem-config.service
+	/bin/systemctl enable oem-config.target
 	/bin/systemctl set-default oem-config.target
 else
 	pkexec "$0" ${quiet:---quiet} "$@"

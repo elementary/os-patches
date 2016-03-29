@@ -1,3 +1,16 @@
+ubiquity (2.21.53) xenial; urgency=medium
+
+  * debian/oem-config.install: install systemd units to /usr/lib/oem-config
+    instead of the systemd paths. (LP: #1552621)
+  * bin/oem-config-prepare: install systemd job from our copy in
+    /usr/lib/oem-config.
+  * bin/oem-config-wrapper: remove our special systemd units after oem config
+    is completed.
+  * debian/oem-config.target: Wants= network-manager.service too; so we can
+    get online and possibly do NTP, downloads, etc. (LP: #1508865)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 28 Mar 2016 22:53:30 -0400
+
 ubiquity (2.21.52) xenial; urgency=medium
 
   * Automatic update of included source packages: console-setup
