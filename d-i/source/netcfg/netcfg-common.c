@@ -1577,10 +1577,11 @@ int netcfg_parse_cidr_address(const char *address, struct netcfg_interface *inte
     struct in_addr addr;
     struct in6_addr addr6;
     int ok;
-    char *maskptr, addrstr[NETCFG_ADDRSTRLEN];
+    char *maskptr, *addrstr, addrbuf[NETCFG_ADDRSTRLEN];
     int i;
     
-    strncpy(addrstr, address, NETCFG_ADDRSTRLEN);
+    strncpy(addrbuf, address, NETCFG_ADDRSTRLEN);
+    addrstr = strtrim(addrbuf);
     
     if ((maskptr = strchr(addrstr, '/'))) {
         /* Houston, we have a netmask; split it into bits */
@@ -1739,7 +1740,24 @@ void rtrim(char *s)
 	
 	n = strlen(s) - 1;
 	
-	while (isspace(s[n])) {
+	while (n >= 0 && isspace(s[n])) {
 		s[n] = '\0';
+		n--;
 	}
+}
+
+char *strtrim(char *s)
+{
+	size_t len;
+
+	len = strlen(s);
+	if (!len)
+		return s;
+
+	rtrim(s);
+
+	while (*s && isspace(*s))
+		s++;
+
+	return s;
 }

@@ -28,7 +28,7 @@ WIRELESS	= 0
 endif
 
 ifneq ($(WIRELESS),0)
-LDOPTS		+= -liw
+LDOPTS		+= -liw -lm
 CFLAGS		+= -DWIRELESS
 endif
 ifneq ($(NM),0)

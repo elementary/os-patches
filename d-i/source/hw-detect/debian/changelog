@@ -1,3 +1,73 @@
+hw-detect (1.117ubuntu1) xenial; urgency=low
+
+  * Merge 1.117 from debian to pick up fix for LP: #1559193.
+
+  * Resynchronise with Debian.  Remaining changes:
+    - Add an 'archdetect-deb' package, containing /usr/bin/archdetect.  Add
+      an archdetect(1) manual page.
+    - Add support for activating fakeraid devices with mdadm.
+    - disk-detect.sh: Do not check the kernel command line for any option
+      to enable dmraid support. If functional dmraid arrays are found, the
+      user will be asked if they wish to activate them.
+    - 'dmraid -c -s' changed its output format; cope with both old and new.
+    - Make dmraid logging a bit neater.
+    - Offer iSCSI targets for preseeding if partman-iscsi is available and
+      no disk devices are found.
+    - disk-detect.sh: Use mpath[a-z] now rather than mpath[0-9] to identify
+      multipath devices and thus know to install partman-multipath.
+    - disk-detect.sh: run update-dev after installing multipath and sg3.
+    - debian/control: Depends on multipath-udeb (>= 0.5.0), which introduces
+      the multipath device naming changes above.
+    - Remove dm-emc from the multipath modules, since it's gone since
+      2.6.27.
+    - Improve checks for dm-* drivers being present to avoid relying on them
+      being built as modules.
+    - Bump question to load driver injection disk from medium to high, and
+      raise driver-injection-disk package priority to standard. Thus the
+      udeb will be loaded by default, but before installing any debs from
+      the OEMDRV a confirmation question will be asked (default true, can be
+      pre-seeded)
+    - Drop priorities of a couple of ethdetect questions to medium.
+    - Exit zero if you continue all the way through ethdetect's errors about
+      having no network interfaces.
+    - Remove FireWire Ethernet support.
+    - disk-detect.sh: multipath: reload udev rules before re-add devices
+      to guarantee all devices may get new udev properties
+    - disk-detect.sh: multipath: deactivate LVM volumes before multipath
+      discovery to unlock individual paths
+    - disk-detect.sh: multipath: deactivate md arrays before multipath
+      discovery to unlock individual paths
+    - disk-detect.sh: use iscsi-start wrapper in partman-iscsi to be able to set
+      a custom iSCSI initiatorName from the installer.
+    - disk-detect.sh: load SCSI device handlers before SCSI low-level
+      device drivers.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Mon, 04 Apr 2016 14:37:02 +0100
+
+hw-detect (1.117) unstable; urgency=medium
+
+  * Team upload
+
+  [ Hendrik Brueckner ]
+  * Improve and split harddrive detection into DASD and SCSI dependency
+    on s390x (Closes: #818586)
+
+ -- Philipp Kern <pkern@debian.org>  Sun, 03 Apr 2016 11:40:24 +0200
+
+hw-detect (1.116) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Use HTTPS for Vcs-* URLs, and link to cgit rather than gitweb.
+
+ -- Christian Perrier <bubulle@debian.org>  Tue, 02 Feb 2016 07:04:13 +0100
+
+hw-detect (1.115) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Compress devnames-static.gz using "gzip -n" (Lintian).
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 17 Jan 2016 21:31:03 +0100
+
 hw-detect (1.114ubuntu4) xenial; urgency=medium
 
   [ Mauricio Faria de Oliveira ]
@@ -4995,3 +5065,4 @@ ddetect (0.03) unstable; urgency=low
   * Initial Release.
 
  -- David Whedon <dwhedon@gordian.com>  Mon, 13 Nov 2000 23:46:39 -0800
+

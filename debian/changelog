@@ -1,3 +1,19 @@
+ubiquity (2.21.54) xenial; urgency=medium
+
+  * ubiquity/frontends/gtk_ui.py:
+    - Extend keyboard shortcut code for accessibility profiles to work with
+      flavours other than Ubuntu/Unity (LP: #1546317)
+    - Disable the screen reader activation keyboard shortcut in Unity, GNOME,
+      and Mate flavours. In almost all cases, the settings daemon catches the
+      keystroke before Ubiquity gets it, and was preventing the blindness
+      profile from being properly activated
+  * Drop unused profile set method that was missed previously
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu13, hw-detect 1.117ubuntu1, netcfg 1.135ubuntu2,
+    choose-mirror 2.65ubuntu6.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Wed, 06 Apr 2016 14:07:33 +1000
+
 ubiquity (2.21.53) xenial; urgency=medium
 
   * debian/oem-config.install: install systemd units to /usr/lib/oem-config

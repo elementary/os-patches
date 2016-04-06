@@ -249,6 +249,7 @@ extern void preseed_hostname_from_fqdn(struct debconfclient *client, char *fqdn)
 extern int netcfg_dhcp(struct debconfclient *client, struct netcfg_interface *interface);
 
 extern void rtrim(char *);
+extern char *strtrim(char *s);
 
 /* ipv6.c */
 extern void nc_v6_wait_for_complete_configuration(const struct netcfg_interface *interface);

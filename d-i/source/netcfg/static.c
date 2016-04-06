@@ -39,6 +39,7 @@ static int netcfg_get_pointopoint(struct debconfclient *client, struct netcfg_in
 {
     int ret, ok = 0;
     union inX_addr addr;
+    char *ptr;
     
     while (!ok) {
         debconf_input(client, "critical", "netcfg/get_pointopoint");
@@ -48,13 +49,14 @@ static int netcfg_get_pointopoint(struct debconfclient *client, struct netcfg_in
             return ret;
 
         debconf_get(client, "netcfg/get_pointopoint");
+        ptr = strtrim(client->value);
 
-        if (empty_str(client->value)) {           /* No P-P is ok */
+        if (empty_str(ptr)) {           /* No P-P is ok */
             interface->pointopoint[0] = '\0';
             return 0;
         }
 
-        ok = inet_pton (interface->address_family, client->value, &addr);
+        ok = inet_pton (interface->address_family, ptr, &addr);
 
         if (!ok) {
             debconf_capb(client);
@@ -72,12 +74,14 @@ static int netcfg_get_netmask(struct debconfclient *client, struct netcfg_interf
 {
     int ret, ok = 0;
     union inX_addr addr;
+    char *ptr;
 
     /* Preseed a vaguely sensible looking default netmask if one wasn't
      * provided.
      */
     debconf_get (client, "netcfg/get_netmask");
-    if (empty_str(client->value)) {
+    ptr = strtrim(client->value);
+    if (empty_str(ptr)) {
         if (interface->address_family == AF_INET) {
             debconf_set(client, "netcfg/get_netmask", "255.255.255.0");
         } else if (interface->address_family == AF_INET6) {
@@ -94,7 +98,8 @@ static int netcfg_get_netmask(struct debconfclient *client, struct netcfg_interf
 
         debconf_get (client, "netcfg/get_netmask");
 
-        ok = inet_pton (interface->address_family, client->value, &addr);
+        ptr = strtrim(client->value);
+        ok = inet_pton (interface->address_family, ptr, &addr);
 
         if (!ok) {
             debconf_capb(client);
@@ -104,7 +109,7 @@ static int netcfg_get_netmask(struct debconfclient *client, struct netcfg_interf
         }
     }
 
-    inet_ptom(interface->address_family, client->value, &(interface->masklen));
+    inet_ptom(interface->address_family, ptr, &(interface->masklen));
     return 0;
 }
 
@@ -163,7 +168,7 @@ static int netcfg_get_gateway(struct debconfclient *client, struct netcfg_interf
             return ret;
 
         debconf_get(client, "netcfg/get_gateway");
-        ptr = client->value;
+        ptr = strtrim(client->value);
 
         if (empty_str(ptr) || /* No gateway, that's fine */
             (strcmp(ptr, "none") == 0)) /* special case for preseeding */ {

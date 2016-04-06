@@ -110,4 +110,4 @@ archdetect.o: %.o:%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFLAGS_ARCH) -c $<
 
 devnames-static.gz: devnames-static.txt
-	grep -v '^#' $< | gzip -9c > $@
+	grep -v '^#' $< | gzip -9cn > $@

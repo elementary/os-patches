@@ -530,6 +530,31 @@ class Wizard(BaseFrontend):
 
         gsettings.set(gs_schema, gs_key, gs_value)
 
+    def disable_screen_reader(self):
+        gs_key = 'screenreader'
+        for gs_schema in 'org.gnome.settings-daemon.plugins.media-keys', \
+                         'org.mate.SettingsDaemon.plugins.media-keys':
+            gs_previous = '%s/%s' % (gs_schema, gs_key)
+            if gs_previous in self.gsettings_previous:
+                return
+
+            gs_value = gsettings.get(gs_schema, gs_key)
+            self.gsettings_previous[gs_previous] = gs_value
+
+            if gs_value:
+                gsettings.set(gs_schema, gs_key, '')
+
+        atexit.register(self.enable_screen_reader)
+
+    def enable_screen_reader(self):
+        gs_key = 'screenreader'
+        for gs_schema in 'org.gnome.settings-daemon.plugins.media-keys', \
+                         'org.mate.SettingsDaemon.plugins.media-keys':
+            gs_previous = '%s/%s' % (gs_schema, gs_key)
+            gs_value = self.gsettings_previous[gs_previous]
+
+            gsettings.set(gs_schema, gs_key, gs_value)
+
     def disable_screensaver(self):
         gs_schema = 'org.gnome.desktop.screensaver'
         gs_key = 'idle-activation-enabled'
@@ -662,10 +687,12 @@ class Wizard(BaseFrontend):
 
             for line in subp.stdout:
                 value = line.rstrip('\n')
-                if value == 'high-contrast':
+                if value.endswith('high-contrast'):
                     hc_profile_found = True
-                if value == 'blindness':
+                    self.hc_profile_name = value
+                if value.endswith('blindness'):
                     sr_profile_found = True
+                    self.sr_profile_name = value
 
             if (hc_profile_found is True and event.state &
                 Gdk.ModifierType.CONTROL_MASK and
@@ -682,14 +709,11 @@ class Wizard(BaseFrontend):
                       "active-profile", value)
 
     def a11y_profile_high_contrast_activate(self):
-        self.a11y_profile_set("high-contrast")
+        self.a11y_profile_set(self.hc_profile_name)
 
     def a11y_profile_screen_reader_activate(self, widget=None):
-        self.a11y_profile_set("blindness")
+        self.a11y_profile_set(self.sr_profile_name)
         os.environ['UBIQUITY_A11Y_PROFILE'] = 'screen-reader'
-
-    def a11y_profile_onscreen_keyboard_activate(self, widget=None):
-        self.a11y_profile_set("onscreen-keyboard")
 
     def run(self):
         """run the interface."""
@@ -706,6 +730,7 @@ class Wizard(BaseFrontend):
         self.disable_volume_manager()
         self.disable_screensaver()
         self.disable_powermgr()
+        self.disable_screen_reader()
 
         if 'UBIQUITY_ONLY' in os.environ:
             self.disable_logout_indicator()
