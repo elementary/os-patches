@@ -39,4 +39,8 @@ chroot /root dpkg-divert --add --rename --quiet \
 	/usr/lib/ubuntu-release-upgrader/check-new-release-gtk
 ln -sf /bin/true /root/usr/lib/ubuntu-release-upgrader/check-new-release-gtk
 
+#we don't want gnome-software's service to offer updates on the livecd for
+#anything it's plugins support
+rm -f /root/etc/xdg/autostart/gnome-software-service.desktop
+
 log_end_msg
