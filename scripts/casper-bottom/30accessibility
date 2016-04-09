@@ -75,15 +75,16 @@ done
 # into ubiquity, where there is code to deal with the setting of the profile.
 if [ -z "$NO_A11Y_DESKTOP_FILE" ] &&
    [ -x /root/usr/bin/a11y-profile-manager ]; then
+	PROFILE_NAME=$(basename /root/usr/share/a11y-profile-manager/profiles/*blindness)
 	cat <<EOF > /root/etc/xdg/autostart/screen-reader-profile.desktop
 [Desktop Entry]
 Type=Application
 Name=Screen Reader Accessibility Profile
-Exec=/usr/bin/a11y-profile-manager -s blindness
+Exec=/usr/bin/a11y-profile-manager -s $PROFILE_NAME
 NoDisplay=true
 AutostartCondition=GSettings org.gnome.desktop.a11y.applications screen-reader-enabled
 X-GNOME-AutoRestart=false
-OnlyShowIn=Unity;
+OnlyShowIn=GNOME;MATE;Unity;
 EOF
 fi
 log_end_msg

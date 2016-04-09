@@ -32,6 +32,9 @@ setup_profile()
 screen-reader=true
 EOF
 				cp /home/$USERNAME/02-orca /target/tmp/greeter-a11y-profile-settings.d
+			elif [ -x /target/usr/sbin/lightdm-gtk-greeter ]; then
+				mkdir -p /target/tmp/greeter-a11y-profile-settings.d
+				cp /home/$USERNAME/02-orca /target/tmp/greeter-a11y-profile-settings.d
 			fi
 		fi
 
@@ -42,6 +45,17 @@ EOF
 [com/canonical/unity-greeter]
 $UG_SETTING=true
 EOF
+		fi
+
+		if [ -n "$LGTK_VAR" ] &&
+		   [ -x /target/usr/sbin/lightdm-gtk-greeter ]; then
+			# If there is a better way to do this, I'm not currently aware of it.
+			mkdir -p /target/var/lib/lightdm/.cache/lightdm-gtk-greeter
+			cat <<EOF > /target/var/lib/lightdm/.cache/lightdm-gtk-greeter/state
+[a11y-states]
+$LGTK_VAR=true
+EOF
+			chroot /target chown -R lightdm.lightdm /var/lib/lightdm/.cache
 		fi
 
 		chroot /target /usr/bin/dconf compile /tmp/dconf.user /tmp/user-a11y-profile-settings.d
@@ -111,40 +125,45 @@ for x in $(cat /proc/cmdline); do
 done
 
 # Check the live user GSettings for the active profile if any.
-A11Y_PROFILE="$(su -c 'gsettings get com.canonical.a11y-profile-manager active-profile' $USERNAME)"
+A11Y_PROFILE="$(su -c 'gsettings get com.canonical.a11y-profile-manager active-profile' $USERNAME \
+		| sed -e s/\'//g)"
 
 case "$A11Y_PROFILE" in
 	# Lesser Visual Impairment
-	\'high-contrast\')
-		PROFILE_NAME=high-contrast
+	*high-contrast)
+		PROFILE_NAME=$A11Y_PROFILE
 		UG_SETTING=high-contrast
+		LGTK_VAR=contrast
 		setup_profile
 		exit
 		;;
 	# Blindness
-	\'blindness\')
-		PROFILE_NAME=blindness
+	*blindness)
+		PROFILE_NAME=$A11Y_PROFILE
 		COPY_ORCA_CONFIG=true
+		LGTK_VAR=reader
 		setup_profile
 		exit
 		;;
 	# Braille
-	\'braille\')
-		PROFILE_NAME=braille
+	*braille)
+		PROFILE_NAME=$A11Y_PROFILE
 		COPY_ORCA_CONFIG=true
+		LGTK_VAR=reader
 		setup_profile
 		exit
 		;;
 	# Minor Motor Difficulties
-	\'motor-difficulties\')
-		PROFILE_NAME=motor-difficulties
+	*motor-difficulties)
+		PROFILE_NAME=$A11Y_PROFILE
 		setup_profile
 		exit
 		;;
 	# Motor Difficulties - pointing devices
-	\'onscreen-keyboard\')
-		PROFILE_NAME=onscreen_keyboard
+	*onscreen-keyboard)
+		PROFILE_NAME=$A11Y_PROFILE
 		UG_SETTING=onscreen-keyboard
+		LGTK_VAR=keyboard
 		setup_profile
 		exit
 		;;
