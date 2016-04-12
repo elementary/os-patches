@@ -17,8 +17,10 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2011 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
+
+#include "nm-default.h"
 
 #include <netinet/in.h>
 #include <sys/types.h>
@@ -28,9 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib/gi18n.h>
 
-#include <nm-utils.h>
+#include <NetworkManager.h>
 
 #include "ppp-auth-methods-dialog.h"
 

@@ -17,7 +17,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2009 - 2012 Red Hat, Inc.
+ * Copyright 2009 - 2014444 Red Hat, Inc.
  */
 
 #ifndef __CE_POLKIT_BUTTON_H__
@@ -25,7 +25,7 @@
 
 #include <gtk/gtk.h>
 
-#include <nm-client.h>
+#include <NetworkManager.h>
 
 #define CE_TYPE_POLKIT_BUTTON            (ce_polkit_button_get_type ())
 #define CE_POLKIT_BUTTON(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), CE_TYPE_POLKIT_BUTTON, CEPolkitButton))

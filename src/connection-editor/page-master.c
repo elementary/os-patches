@@ -15,17 +15,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Copyright 2012 Red Hat, Inc.
+ * Copyright 2012 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <stdlib.h>
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
 
-#include <nm-setting-connection.h>
-#include <nm-utils.h>
+#include <NetworkManager.h>
 
 #include "page-master.h"
 #include "nm-connection-editor.h"
@@ -99,7 +96,7 @@ dispose (GObject *object)
 	CEPageMasterPrivate *priv = CE_PAGE_MASTER_GET_PRIVATE (self);
 	GtkTreeIter iter;
 
-	g_signal_handlers_disconnect_matched (CE_PAGE (self)->settings, G_SIGNAL_MATCH_DATA,
+	g_signal_handlers_disconnect_matched (CE_PAGE (self)->client, G_SIGNAL_MATCH_DATA,
 	                                      0, 0, NULL, NULL, self);
 
 	if (gtk_tree_model_get_iter_first (priv->connections_model, &iter)) {
@@ -148,7 +145,9 @@ find_connection (CEPageMaster *self, NMRemoteConnection *connection, GtkTreeIter
 }
 
 static void
-connection_removed (NMRemoteConnection *connection, gpointer user_data)
+connection_removed (NMClient *client,
+                    NMRemoteConnection *connection,
+                    gpointer user_data)
 {
 	CEPageMaster *self = CE_PAGE_MASTER (user_data);
 	CEPageMasterPrivate *priv = CE_PAGE_MASTER_GET_PRIVATE (self);
@@ -164,7 +163,7 @@ connection_removed (NMRemoteConnection *connection, gpointer user_data)
 }
 
 static void
-connection_updated (NMRemoteConnection *connection, gpointer user_data)
+connection_changed (NMRemoteConnection *connection, gpointer user_data)
 {
 	CEPageMaster *self = CE_PAGE_MASTER (user_data);
 	CEPageMasterPrivate *priv = CE_PAGE_MASTER_GET_PRIVATE (self);
@@ -195,7 +194,7 @@ get_device_for_connection (NMClient *client, NMConnection *conn)
 	/* Make sure the connection is actually locked to a specific device */
 	s_con = nm_connection_get_setting_connection (conn);
 	if (   !nm_setting_connection_get_interface_name (s_con)
-	       && !nm_connection_get_virtual_iface_name (conn)) {
+	       && !nm_connection_get_interface_name (conn)) {
 		NMSetting *s_hw;
 		GByteArray *mac_address;
 
@@ -270,7 +269,7 @@ check_new_slave_physical_port (CEPageMaster *self, NMConnection *conn)
 }
 
 static void
-connection_added (NMRemoteSettings *settings,
+connection_added (NMClient *client,
                   NMRemoteConnection *connection,
                   gpointer user_data)
 {
@@ -297,8 +296,8 @@ connection_added (NMRemoteSettings *settings,
 	if (!master)
 		return;
 
-	interface_name = nm_connection_get_virtual_iface_name (CE_PAGE (self)->connection);
-	if (strcmp (master, interface_name) != 0 && strcmp (master, priv->uuid) != 0)
+	interface_name = nm_connection_get_interface_name (CE_PAGE (self)->connection);
+	if (g_strcmp0 (master, interface_name) != 0 && g_strcmp0 (master, priv->uuid) != 0)
 		return;
 
 	check_new_slave_physical_port (self, NM_CONNECTION (connection));
@@ -310,10 +309,10 @@ connection_added (NMRemoteSettings *settings,
 	                    -1);
 	ce_page_changed (CE_PAGE (self));
 
-	g_signal_connect (connection, NM_REMOTE_CONNECTION_REMOVED,
+	g_signal_connect (client, NM_CLIENT_CONNECTION_REMOVED,
 	                  G_CALLBACK (connection_removed), self);
-	g_signal_connect (connection, NM_REMOTE_CONNECTION_UPDATED,
-	                  G_CALLBACK (connection_updated), self);
+	g_signal_connect (connection, NM_CONNECTION_CHANGED,
+	                  G_CALLBACK (connection_changed), self);
 
 	g_signal_emit (self, signals[CONNECTION_ADDED], 0, connection);
 }
@@ -380,7 +379,7 @@ add_connection (NMConnection *connection,
 
 	iface_name = gtk_entry_get_text (priv->interface_name);
 	if (!*iface_name)
-		iface_name = nm_connection_get_virtual_iface_name (connection);
+		iface_name = nm_connection_get_interface_name (connection);
 	if (!iface_name || !nm_utils_iface_valid_name (iface_name))
 		iface_name = nm_connection_get_id (connection);
 	name = g_strdup_printf (_("%s slave %d"), iface_name,
@@ -398,8 +397,7 @@ add_connection (NMConnection *connection,
 
 	editor = nm_connection_editor_new (priv->toplevel,
 	                                   connection,
-	                                   CE_PAGE (self)->client,
-	                                   CE_PAGE (self)->settings);
+	                                   CE_PAGE (self)->client);
 	if (!editor) {
 		g_object_unref (connection);
 		return;
@@ -468,8 +466,7 @@ edit_clicked (GtkButton *button, gpointer user_data)
 
 	editor = nm_connection_editor_new (priv->toplevel,
 	                                   NM_CONNECTION (connection),
-	                                   CE_PAGE (self)->client,
-	                                   CE_PAGE (self)->settings);
+	                                   CE_PAGE (self)->client);
 	if (!editor)
 		return;
 
@@ -520,19 +517,20 @@ populate_ui (CEPageMaster *self)
 	CEPageMasterPrivate *priv = CE_PAGE_MASTER_GET_PRIVATE (self);
 	NMSettingConnection *s_con;
 	const char *iface;
-	GSList *connections, *c;
+	const GPtrArray *connections;
+	int i;
 
 	s_con = nm_connection_get_setting_connection (CE_PAGE (self)->connection);
 	g_return_if_fail (s_con != NULL);
 
 	/* Interface name */
-	iface = nm_connection_get_virtual_iface_name (CE_PAGE (self)->connection);
+	iface = nm_connection_get_interface_name (CE_PAGE (self)->connection);
 	gtk_entry_set_text (priv->interface_name, iface ? iface : "");
 
 	/* Slave connections */
-	connections = nm_remote_settings_list_connections (CE_PAGE (self)->settings);
-	for (c = connections; c; c = c->next)
-		connection_added (CE_PAGE (self)->settings, c->data, self);
+	connections = nm_client_get_connections (CE_PAGE (self)->client);
+	for (i = 0; i < connections->len; i++)
+		connection_added (CE_PAGE (self)->client, connections->pdata[i], self);
 }
 
 static void
@@ -570,7 +568,7 @@ finish_setup (CEPageMaster *self, gpointer unused, GError *error, gpointer user_
 
 	populate_ui (self);
 
-	g_signal_connect (CE_PAGE (self)->settings, NM_REMOTE_SETTINGS_NEW_CONNECTION,
+	g_signal_connect (CE_PAGE (self)->client, NM_CLIENT_CONNECTION_ADDED,
 	                  G_CALLBACK (connection_added), self);
 
 	g_signal_connect (priv->interface_name, "changed", G_CALLBACK (stuff_changed), self);
@@ -591,20 +589,14 @@ ui_to_setting (CEPageMaster *self)
 {
 	CEPageMasterPrivate *priv = CE_PAGE_MASTER_GET_PRIVATE (self);
 	NMSettingConnection *s_con;
-	const char *connection_type;
-	NMSetting *setting;
 	const char *interface_name;
 
-	/* Find the "toplevel" NMSetting for this connection */
-	s_con = nm_connection_get_setting_connection (CE_PAGE (self)->connection);
-	connection_type = nm_setting_connection_get_connection_type (s_con);
-	setting = nm_connection_get_setting_by_name (CE_PAGE (self)->connection, connection_type);
-
 	/* Interface name */
+	s_con = nm_connection_get_setting_connection (CE_PAGE (self)->connection);
 	interface_name = gtk_entry_get_text (priv->interface_name);
-	g_object_set (setting,
-	              "interface-name", interface_name,
-	              NULL);
+	if (!*interface_name)
+		interface_name = NULL;
+	g_object_set (s_con, "interface-name", interface_name, NULL);
 
 	/* Slaves are updated as they're edited, so nothing to do */
 }
@@ -656,7 +648,7 @@ last_update (CEPage *page, NMConnection *connection, GError **error)
 			    && g_strcmp0 (interface_name, tmp) != 0) {
 				s_con = nm_connection_get_setting_connection (NM_CONNECTION (rcon));
 				g_object_set (s_con, NM_SETTING_CONNECTION_MASTER, interface_name, NULL);
-				nm_remote_connection_commit_changes (rcon, NULL, NULL);
+				nm_remote_connection_commit_changes_async (rcon, TRUE, NULL, NULL, NULL);
 			}
 			g_object_unref (rcon);
 		} while (gtk_tree_model_iter_next (priv->connections_model, &iter));
@@ -693,8 +685,7 @@ ce_page_master_class_init (CEPageMasterClass *master_class)
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_FIRST,
 		              G_STRUCT_OFFSET (CEPageMasterClass, create_connection),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__OBJECT,
+		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 1,
 		              NM_TYPE_CONNECTION);
 
@@ -703,8 +694,7 @@ ce_page_master_class_init (CEPageMasterClass *master_class)
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_FIRST,
 		              G_STRUCT_OFFSET (CEPageMasterClass, connection_added),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__OBJECT,
+		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 1,
 		              NM_TYPE_CONNECTION);
 
@@ -713,8 +703,7 @@ ce_page_master_class_init (CEPageMasterClass *master_class)
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_FIRST,
 		              G_STRUCT_OFFSET (CEPageMasterClass, connection_removed),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__OBJECT,
+		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 1,
 		              NM_TYPE_CONNECTION);
 }

@@ -16,13 +16,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Copyright (C) 2011 Red Hat, Inc.
+ * Copyright 2011 - 2014 Red Hat, Inc.
  */
 
 #ifndef _APPLET_AGENT_H_
 #define _APPLET_AGENT_H_
 
-#include <nm-secret-agent.h>
+#include <NetworkManager.h>
+#include <nm-secret-agent-old.h>
 
 #define APPLET_TYPE_AGENT            (applet_agent_get_type ())
 #define APPLET_AGENT(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), APPLET_TYPE_AGENT, AppletAgent))
@@ -35,16 +36,16 @@
 #define APPLET_AGENT_CANCEL_SECRETS "cancel-secrets"
 
 typedef struct {
-	NMSecretAgent parent;
+	NMSecretAgentOld parent;
 } AppletAgent;
 
 typedef void (*AppletAgentSecretsCallback) (AppletAgent *self,
-                                            GHashTable *secrets,
+                                            GVariant *secrets,
                                             GError *error,
                                             gpointer user_data);
 
 typedef struct {
-	NMSecretAgentClass parent_class;
+	NMSecretAgentOldClass parent_class;
 
 	void (*get_secrets)        (AppletAgent *self,
 	                            void *request_id,
@@ -62,7 +63,7 @@ typedef struct {
 
 GType applet_agent_get_type (void) G_GNUC_CONST;
 
-AppletAgent *applet_agent_new (void);
+AppletAgent *applet_agent_new (GError **error);
 
 void applet_agent_handle_vpn_only (AppletAgent *agent, gboolean vpn_only);
 

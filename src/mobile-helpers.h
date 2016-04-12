@@ -28,8 +28,8 @@
 #include <libsecret/secret.h>
 
 #include "applet.h"
-#include "nm-mobile-wizard.h"
-#include "nm-mobile-providers.h"
+#include "nma-mobile-wizard.h"
+#include "nma-mobile-providers.h"
 
 enum {
 	MB_STATE_UNKNOWN = 0,
@@ -53,7 +53,6 @@ enum {
 	MB_TECH_HSPA,
 	MB_TECH_HSPA_PLUS,
 	MB_TECH_LTE,
-	MB_TECH_WIMAX,
 };
 
 GdkPixbuf *mobile_helper_get_status_pixbuf (guint32 quality,

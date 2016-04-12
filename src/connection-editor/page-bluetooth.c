@@ -20,21 +20,15 @@
  * Copyright 2014 - 2015 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
 
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <nm-setting-connection.h>
-#include <nm-setting-bluetooth.h>
-#include <nm-device-bt.h>
-#include <nm-utils.h>
+#include <NetworkManager.h>
 
 #include "page-bluetooth.h"
 #include "nm-connection-editor.h"
-#include "nm-mobile-wizard.h"
+#include "nma-mobile-wizard.h"
 
 G_DEFINE_TYPE (CEPageBluetooth, ce_page_bluetooth, CE_TYPE_PAGE)
 
@@ -79,12 +73,12 @@ populate_ui (CEPageBluetooth *self, NMConnection *connection)
 {
 	CEPageBluetoothPrivate *priv = CE_PAGE_BLUETOOTH_GET_PRIVATE (self);
 	NMSettingBluetooth *setting = priv->setting;
-	const GByteArray *bdaddr;
+	const char *bdaddr;
 
 	bdaddr = nm_setting_bluetooth_get_bdaddr (setting);
 	ce_page_setup_device_combo (CE_PAGE (self), GTK_COMBO_BOX (priv->bdaddr),
 	                            NM_TYPE_DEVICE_BT, NULL,
-	                            bdaddr, ARPHRD_ETHER, NM_DEVICE_BT_HW_ADDRESS, TRUE);
+	                            bdaddr, NM_DEVICE_BT_HW_ADDRESS, TRUE);
 	g_signal_connect_swapped (priv->bdaddr, "changed", G_CALLBACK (ce_page_changed), self);
 }
 
@@ -113,7 +107,6 @@ ce_page_bluetooth_new (NMConnectionEditor *editor,
                        NMConnection *connection,
                        GtkWindow *parent_window,
                        NMClient *client,
-                       NMRemoteSettings *settings,
                        const char **out_secrets_setting_name,
                        GError **error)
 {
@@ -125,7 +118,6 @@ ce_page_bluetooth_new (NMConnectionEditor *editor,
 	                          connection,
 	                          parent_window,
 	                          client,
-	                          settings,
 	                          UIDIR "/ce-page-bluetooth.ui",
 	                          "BluetoothPage",
 	                          _("Bluetooth")));
@@ -155,17 +147,16 @@ ui_to_setting (CEPageBluetooth *self)
 {
 	CEPageBluetoothPrivate *priv = CE_PAGE_BLUETOOTH_GET_PRIVATE (self);
 	GtkWidget *entry;
-	GByteArray *bdaddr = NULL;
+	char *bdaddr = NULL;
 
 	entry = gtk_bin_get_child (GTK_BIN (priv->bdaddr));
 	if (entry)
 		ce_page_device_entry_get (GTK_ENTRY (entry), ARPHRD_ETHER, FALSE, NULL, &bdaddr, NULL, NULL);
 
 	g_object_set (priv->setting,
-	              NM_SETTING_BLUETOOTH_BDADDR, bdaddr,
+	              NM_SETTING_BLUETOOTH_BDADDR, bdaddr && *bdaddr ? bdaddr : NULL,
 	              NULL);
-	if (bdaddr)
-		g_byte_array_free (bdaddr, TRUE);
+	g_free (bdaddr);
 }
 
 static gboolean
@@ -174,26 +165,19 @@ ce_page_validate_v (CEPage *page, NMConnection *connection, GError **error)
 	CEPageBluetooth *self = CE_PAGE_BLUETOOTH (page);
 	CEPageBluetoothPrivate *priv = CE_PAGE_BLUETOOTH_GET_PRIVATE (self);
 	GtkWidget *entry;
-	GByteArray *bdaddr = NULL;
-	char *str_addr;
+	char *bdaddr = NULL;
 
 	entry = gtk_bin_get_child (GTK_BIN (priv->bdaddr));
 	if (entry) {
 		ce_page_device_entry_get (GTK_ENTRY (entry), ARPHRD_ETHER, FALSE, NULL, &bdaddr, NULL, NULL);
-		if (!bdaddr || !utils_ether_addr_valid ((struct ether_addr *)bdaddr->data)) {
-			if (bdaddr)
-				str_addr = nm_utils_hwaddr_ntoa (bdaddr->data, ARPHRD_ETHER);
-			else
-				str_addr = g_strdup ("null");
+		if (!bdaddr || !nm_utils_hwaddr_valid (bdaddr, nm_utils_hwaddr_len (ARPHRD_ETHER))) {
 			g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC,
-			             _("invalid Bluetooth device (%s)"), str_addr);
-			g_free (str_addr);
-			if (bdaddr)
-				g_byte_array_free (bdaddr, TRUE);
+			             _("invalid Bluetooth device (%s)"),
+			             bdaddr ? bdaddr : "null");
+			g_free (bdaddr);
 			return FALSE;
 		}
-		if (bdaddr)
-			g_byte_array_free (bdaddr, TRUE);
+		g_free (bdaddr);
 	}
 
 	ui_to_setting (self);
@@ -218,7 +202,7 @@ ce_page_bluetooth_class_init (CEPageBluetoothClass *bluetooth_class)
 }
 
 typedef struct {
-	NMRemoteSettings *settings;
+	NMClient *client;
 	PageNewConnectionResultFunc result_func;
 	gpointer user_data;
 	const gchar *type;
@@ -275,7 +259,7 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
 	connection = ce_page_new_connection (detail,
 	                                     NM_SETTING_BLUETOOTH_SETTING_NAME,
 	                                     FALSE,
-	                                     info->settings,
+	                                     info->client,
 	                                     user_data);
 	g_free (detail);
 	nm_connection_add_setting (connection, nm_setting_bluetooth_new ());
@@ -293,14 +277,14 @@ out:
 	if (wizard)
 		nma_mobile_wizard_destroy (wizard);
 
-	g_object_unref (info->settings);
+	g_object_unref (info->client);
 	g_free (info);
 }
 
 void
 bluetooth_connection_new (GtkWindow *parent,
                           const char *detail,
-                          NMRemoteSettings *settings,
+                          NMClient *client,
                           PageNewConnectionResultFunc result_func,
                           gpointer user_data)
 {
@@ -311,7 +295,7 @@ bluetooth_connection_new (GtkWindow *parent,
 
 	info = g_malloc0 (sizeof (WizardInfo));
 	info->result_func = result_func;
-	info->settings = g_object_ref (settings);
+	info->client = g_object_ref (client);
 	info->user_data = user_data;
 	info->type = NM_SETTING_BLUETOOTH_TYPE_PANU;
 

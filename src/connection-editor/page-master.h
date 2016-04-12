@@ -15,13 +15,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Copyright 2012 Red Hat, Inc.
+ * Copyright 2012 - 2014 Red Hat, Inc.
  */
 
 #ifndef __PAGE_MASTER_H__
 #define __PAGE_MASTER_H__
-
-#include <nm-connection.h>
 
 #include <glib.h>
 #include <glib-object.h>

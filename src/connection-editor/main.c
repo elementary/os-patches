@@ -17,30 +17,21 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Copyright (C) 2004 - 2013 Red Hat, Inc.
+ * Copyright 2004 - 2014 Red Hat, Inc.
  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include "nm-default.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
 
-#include <dbus/dbus.h>
-#include <gtk/gtk.h>
-#include <glib/gi18n-lib.h>
-#include <glib.h>
-#include <glib-object.h>
-#include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-lowlevel.h>
+#include <glib-unix.h>
 
-#include <nm-setting-wired.h>
-#include <nm-setting-gsm.h>
-#include <nm-setting-cdma.h>
+#include "gsystem-local-alloc.h"
 #include "nm-connection-list.h"
 #include "nm-connection-editor.h"
+#include "nm-dbus-compat.h"
 
 gboolean nm_ce_keep_above;
 
@@ -51,89 +42,10 @@ static GMainLoop *loop = NULL;
 #define ARG_SHOW      "show"
 #define ARG_UUID      "uuid"
 
-#define DBUS_TYPE_G_MAP_OF_VARIANT    (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_VALUE))
+#define NM_CE_DBUS_SERVICE   "org.gnome.nm_connection_editor"
+#define NM_CE_DBUS_INTERFACE "org.gnome.nm_connection_editor"
 
-#define NM_CE_DBUS_SERVICE_NAME       "org.gnome.nm_connection_editor"
-
-/*************************************************/
-
-#define NM_TYPE_CE_SERVICE            (nm_ce_service_get_type ())
-#define NM_CE_SERVICE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), NM_TYPE_CE_SERVICE, NMCEService))
-#define NM_CE_SERVICE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), NM_TYPE_CE_SERVICE, NMCEServiceClass))
-#define NM_IS_CE_SERVICE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NM_TYPE_CE_SERVICE))
-#define NM_IS_CE_SERVICE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), NM_TYPE_CE_SERVICE))
-#define NM_CE_SERVICE_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), NM_TYPE_CE_SERVICE, NMCEServiceClass))
-
-typedef struct {
-	GObject parent;
-	NMConnectionList *list;
-} NMCEService;
-
-typedef struct {
-	GObjectClass parent;
-} NMCEServiceClass;
-
-GType nm_ce_service_get_type (void);
-
-G_DEFINE_TYPE (NMCEService, nm_ce_service, G_TYPE_OBJECT)
-
-static gboolean impl_start (NMCEService *self, GHashTable *args, GError **error);
-
-#include "nm-connection-editor-service-glue.h"
-
-static NMCEService *
-nm_ce_service_new (DBusGConnection *bus, DBusGProxy *proxy, NMConnectionList *list)
-{
-	GObject *object;
-	DBusConnection *connection;
-	GError *err = NULL;
-	guint32 result;
-
-	g_return_val_if_fail (bus != NULL, NULL);
-	g_return_val_if_fail (proxy != NULL, NULL);
-
-	object = g_object_new (NM_TYPE_CE_SERVICE, NULL);
-	if (!object)
-		return NULL;
-
-	NM_CE_SERVICE (object)->list = list;
-
-	dbus_connection_set_change_sigpipe (TRUE);
-	connection = dbus_g_connection_get_connection (bus);
-	dbus_connection_set_exit_on_disconnect (connection, FALSE);
-
-	/* Register our single-instance service.  Don't care if it fails. */
-	if (!dbus_g_proxy_call (proxy, "RequestName", &err,
-	                        G_TYPE_STRING, NM_CE_DBUS_SERVICE_NAME,
-	                        G_TYPE_UINT, DBUS_NAME_FLAG_DO_NOT_QUEUE,
-	                        G_TYPE_INVALID,
-	                        G_TYPE_UINT, &result,
-	                        G_TYPE_INVALID)) {
-		g_warning ("Could not acquire the connection editor service.\n"
-		           "  Message: '%s'", err->message);
-		g_error_free (err);
-		return (NMCEService *) object;
-	}
-
-	if (result == DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) {
-		/* success; grab the bus name */
-		dbus_g_connection_register_g_object (bus, "/", object);
-	}
-
-	return (NMCEService *) object;
-}
-
-static void
-nm_ce_service_init (NMCEService *self)
-{
-}
-
-static void
-nm_ce_service_class_init (NMCEServiceClass *service_class)
-{
-	dbus_g_object_type_install_info (G_TYPE_FROM_CLASS (service_class),
-	                                 &dbus_glib_nm_connection_editor_service_object_info);
-}
+static GDBusNodeInfo *introspection_data = NULL;
 
 /*************************************************/
 
@@ -171,7 +83,7 @@ handle_arguments (NMConnectionList *list,
 		type = NM_SETTING_WIRED_SETTING_NAME;
 
 	/* Grab type to create or show */
-	ctype = nm_connection_lookup_setting_type (type);
+	ctype = nm_setting_lookup_type (type);
 	if (ctype == 0) {
 		g_warning ("Unknown connection type '%s'", type);
 		g_free (type_tmp);
@@ -212,147 +124,168 @@ handle_arguments (NMConnectionList *list,
 	return show_list;
 }
 
-static gboolean
-impl_start (NMCEService *self, GHashTable *table, GError **error)
+static void
+handle_method_call (GDBusConnection       *connection,
+                    const gchar           *sender,
+                    const gchar           *object_path,
+                    const gchar           *interface_name,
+                    const gchar           *method_name,
+                    GVariant              *parameters,
+                    GDBusMethodInvocation *invocation,
+                    gpointer               user_data)
 {
-	GValue *value;
-	const char *type = NULL;
-	const char *uuid = NULL;
-	gboolean create = FALSE;
-	gboolean show = FALSE;
-	gboolean show_list;
+	NMConnectionList *list = NM_CONNECTION_LIST (user_data);
+	char *type = NULL, *uuid = NULL;
+	gboolean create = FALSE, show = FALSE;
 
-	value = g_hash_table_lookup (table, ARG_TYPE);
-	if (value && G_VALUE_HOLDS_STRING (value)) {
-		type = g_value_get_string (value);
-		g_assert (type);
+	if (g_strcmp0 (method_name, "Start") == 0) {
+		if (g_variant_is_of_type (parameters, (const GVariantType *) "(a{sv})")) {
+			gs_unref_variant GVariant *dict = NULL;
+
+			g_variant_get (parameters, "(@a{sv})", &dict);
+			g_variant_lookup (dict, ARG_TYPE, "s", &type);
+			g_variant_lookup (dict, ARG_UUID, "s", &uuid);
+			g_variant_lookup (dict, ARG_CREATE, "b", &create);
+			g_variant_lookup (dict, ARG_SHOW, "b", &show);
+			if (handle_arguments (list, type, create, show, uuid, FALSE))
+				nm_connection_list_present (list);
+
+			g_dbus_method_invocation_return_value (invocation, NULL);
+		} else {
+			g_dbus_method_invocation_return_error (invocation,
+			                                       G_DBUS_ERROR,
+			                                       G_DBUS_ERROR_INVALID_ARGS,
+			                                       "Invalid argument type (not a dict)");
+		}
 	}
+}
 
-	value = g_hash_table_lookup (table, ARG_UUID);
-	if (value && G_VALUE_HOLDS_STRING (value)) {
-		uuid = g_value_get_string (value);
-		g_assert (uuid);
-	}
+static const GDBusInterfaceVTable interface_vtable = {
+	handle_method_call, NULL, NULL
+};
 
-	value = g_hash_table_lookup (table, ARG_CREATE);
-	if (value && G_VALUE_HOLDS_BOOLEAN (value))
-		create = g_value_get_boolean (value);
+static guint
+start_service (GDBusConnection *bus,
+               NMConnectionList *list,
+               guint *out_registration_id)
+{
+	static const gchar introspection_xml[] =
+		"<node>"
+		"  <interface name='org.gnome.nm_connection_editor'>"
+		"    <method name='Start'>"
+		"      <arg type='a{sv}' name='args' direction='in'/>"
+		"    </method>"
+		"  </interface>"
+		"</node>";
 
-	value = g_hash_table_lookup (table, ARG_SHOW);
-	if (value && G_VALUE_HOLDS_BOOLEAN (value))
-		show = g_value_get_boolean (value);
+	introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, NULL);
+	g_assert (introspection_data != NULL);
 
-	show_list = handle_arguments (self->list, type, create, show, uuid, FALSE);
-	if (show_list)
-		nm_connection_list_present (self->list);
+	*out_registration_id = g_dbus_connection_register_object (bus,
+	                                                          "/",
+	                                                          introspection_data->interfaces[0],
+	                                                          &interface_vtable,
+	                                                          list,  /* user_data */
+	                                                          NULL,  /* user_data_free_func */
+	                                                          NULL); /* GError** */
 
-	return TRUE;
+	return g_bus_own_name_on_connection (bus,
+	                                     NM_CE_DBUS_SERVICE,
+	                                     G_BUS_NAME_OWNER_FLAGS_NONE,
+	                                     NULL,
+	                                     NULL,
+	                                     NULL,
+	                                     NULL);
 }
 
 static gboolean
-try_existing_instance (DBusGConnection *bus,
-                       DBusGProxy *proxy,
+try_existing_instance (GDBusConnection *bus,
                        const char *type,
                        gboolean create,
                        gboolean show,
                        const char *uuid)
 {
-	gboolean has_owner = FALSE;
-	DBusGProxy *instance;
-	GHashTable *args;
-	GValue type_value = { 0, };
-	GValue create_value = { 0, };
-	GValue show_value = { 0, };
-	GValue uuid_value = { 0, };
-	gboolean success = FALSE;
-	GError *error = NULL;
+	gs_free char *owner = NULL;
+	gs_free_error GError *error = NULL;
+	gs_unref_variant GVariant *reply = NULL;
+	GVariantBuilder builder;
 
-	if (!dbus_g_proxy_call (proxy, "NameHasOwner", NULL,
-	                        G_TYPE_STRING, NM_CE_DBUS_SERVICE_NAME, G_TYPE_INVALID,
-	                        G_TYPE_BOOLEAN, &has_owner, G_TYPE_INVALID))
+	g_assert (bus);
+
+	reply = g_dbus_connection_call_sync (bus,
+	                                     DBUS_SERVICE_DBUS,
+	                                     DBUS_PATH_DBUS,
+	                                     DBUS_INTERFACE_DBUS,
+	                                     "GetNameOwner",
+	                                     g_variant_new ("(s)", NM_CE_DBUS_SERVICE),
+	                                     G_VARIANT_TYPE ("(s)"),
+	                                     G_DBUS_CALL_FLAGS_NONE,
+	                                     -1,           /* timeout */
+	                                     NULL,
+	                                     &error);
+	if (!reply) {
+		if (!g_error_matches (error, G_DBUS_ERROR, G_DBUS_ERROR_NAME_HAS_NO_OWNER))
+			g_warning ("Failed to get editor name owner: %s", error->message);
+		return FALSE;
+	}
+
+	g_variant_get (reply, "(s)", &owner);
+	if (!owner)
 		return FALSE;
 
-	if (!has_owner)
+	g_variant_unref (reply);
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
+	if (type)
+		g_variant_builder_add (&builder, "{sv}", ARG_TYPE, g_variant_new_string (type));
+	if (create)
+		g_variant_builder_add (&builder, "{sv}", ARG_CREATE, g_variant_new_boolean (TRUE));
+	if (show)
+		g_variant_builder_add (&builder, "{sv}", ARG_SHOW, g_variant_new_boolean (TRUE));
+	if (uuid)
+		g_variant_builder_add (&builder, "{sv}", ARG_UUID, g_variant_new_string (uuid));
+
+	reply = g_dbus_connection_call_sync (bus,
+	                                     NM_CE_DBUS_SERVICE,
+	                                     "/",
+	                                     NM_CE_DBUS_INTERFACE,
+	                                     "Start",
+	                                     g_variant_new ("(@a{sv})", g_variant_builder_end (&builder)),
+	                                     NULL,
+	                                     G_DBUS_CALL_FLAGS_NONE,
+	                                     -1,           /* timeout */
+	                                     NULL,
+	                                     &error);
+	if (!reply) {
+		g_warning ("Failed to send arguments to existing editor instance: %s", error->message);
 		return FALSE;
-
-	/* Send arguments to existing process */
-	instance = dbus_g_proxy_new_for_name (bus,
-	                                      NM_CE_DBUS_SERVICE_NAME,
-	                                      "/",
-	                                      NM_CE_DBUS_SERVICE_NAME);
-	if (!instance)
-		return FALSE;
-
-	args = g_hash_table_new (g_str_hash, g_str_equal);
-	if (type) {
-		g_value_init (&type_value, G_TYPE_STRING);
-		g_value_set_static_string (&type_value, type);
-		g_hash_table_insert (args, ARG_TYPE, &type_value);
-	}
-	if (create) {
-		g_value_init (&create_value, G_TYPE_BOOLEAN);
-		g_value_set_boolean (&create_value, TRUE);
-		g_hash_table_insert (args, ARG_CREATE, &create_value);
-	}
-	if (show) {
-		g_value_init (&show_value, G_TYPE_BOOLEAN);
-		g_value_set_boolean (&show_value, TRUE);
-		g_hash_table_insert (args, ARG_SHOW, &show_value);
-	}
-	if (uuid) {
-		g_value_init (&uuid_value, G_TYPE_STRING);
-		g_value_set_static_string (&uuid_value, uuid);
-		g_hash_table_insert (args, ARG_UUID, &uuid_value);
 	}
 
-	if (dbus_g_proxy_call (instance, "Start", &error,
-	                       DBUS_TYPE_G_MAP_OF_VARIANT, args, G_TYPE_INVALID,
-	                       G_TYPE_INVALID))
-		success = TRUE;
-	else
-		g_warning ("%s: error calling start: %s", __func__, error->message);
-
-	g_hash_table_destroy (args);
-	g_object_unref (instance);
-	return success;
+	return TRUE;
 }
 
-static void
-signal_handler (int signo)
+static gboolean
+signal_handler (gpointer user_data)
 {
-	if (signo == SIGINT || signo == SIGTERM)
-		g_main_loop_quit (loop);
-}
+	int signo = GPOINTER_TO_INT (user_data);
 
-static void
-setup_signals (void)
-{
-	struct sigaction action;
-	sigset_t mask;
+	g_message ("Caught signal %d, shutting down...", signo);
+	g_main_loop_quit (loop);
 
-	sigemptyset (&mask);
-	action.sa_handler = signal_handler;
-	action.sa_mask = mask;
-	action.sa_flags = 0;
-	sigaction (SIGTERM,  &action, NULL);
-	sigaction (SIGINT,  &action, NULL);
+	return G_SOURCE_REMOVE;
 }
 
 int
 main (int argc, char *argv[])
 {
-	GOptionContext *opt_ctx;
+	GOptionContext *opt_ctx = NULL;
 	GError *error = NULL;
-	NMConnectionList *list;
-	DBusGConnection *bus;
-	char *type = NULL;
-	gboolean create = FALSE;
-	gboolean show = FALSE;
-	gboolean success;
-	char *uuid = NULL;
-	NMCEService *service = NULL;
-	DBusGProxy *proxy = NULL;
-	gboolean show_list;
+	NMConnectionList *list = NULL;
+	guint owner_id = 0, registration_id = 0;
+	GDBusConnection *bus = NULL;
+	gs_free char *type = NULL, *uuid = NULL;
+	gboolean create = FALSE, show = FALSE;
+	int ret = 1;
 
 	GOptionEntry entries[] = {
 		{ ARG_TYPE,   't', 0, G_OPTION_ARG_STRING, &type,   "Type of connection to show or create", NM_SETTING_WIRED_SETTING_NAME },
@@ -373,34 +306,28 @@ main (int argc, char *argv[])
 	opt_ctx = g_option_context_new (NULL);
 	g_option_context_set_summary (opt_ctx, "Allows users to view and edit network connection settings");
 	g_option_context_add_main_entries (opt_ctx, entries, NULL);
-	success = g_option_context_parse (opt_ctx, &argc, &argv, &error);
-	g_option_context_free (opt_ctx);
-
-	if (!success) {
-		g_warning ("%s\n", error->message);
-		g_error_free (error);
-		return 1;
+	if (!g_option_context_parse (opt_ctx, &argc, &argv, &error)) {
+		g_warning ("Failed to parse options: %s", error->message);
+		goto out;
 	}
 
 	/* Just one page for both CDMA & GSM, handle that here */
-	if (type && g_strcmp0 (type, NM_SETTING_CDMA_SETTING_NAME) == 0)
-		type = (char *) NM_SETTING_GSM_SETTING_NAME;
+	if (g_strcmp0 (type, NM_SETTING_CDMA_SETTING_NAME) == 0) {
+		g_free (type);
+		type = g_strdup (NM_SETTING_GSM_SETTING_NAME);
+	}
 
-	/* Inits the dbus-glib type system too */
-	bus = dbus_g_bus_get (DBUS_BUS_SESSION, NULL);
+	bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
 	if (bus) {
-		proxy = dbus_g_proxy_new_for_name (bus,
-		                                   "org.freedesktop.DBus",
-		                                   "/org/freedesktop/DBus",
-		                                   "org.freedesktop.DBus");
-		g_assert (proxy);
-
 		/* Check for an existing instance on the bus, and if there
 		 * is one, send the arguments to it and exit instead of opening
 		 * a second instance of the connection editor.
 		 */
-		if (try_existing_instance (bus, proxy, type, create, show, uuid))
-			return 0;
+		if (try_existing_instance (bus, type, create, show, uuid)) {
+			/* success */
+			ret = 0;
+			goto out;
+		}
 	}
 
 	loop = g_main_loop_new (NULL, FALSE);
@@ -408,33 +335,34 @@ main (int argc, char *argv[])
 	list = nm_connection_list_new ();
 	if (!list) {
 		g_warning ("Failed to initialize the UI, exiting...");
-		return 1;
+		goto out;
 	}
 	g_signal_connect_swapped (list, "done", G_CALLBACK (g_main_loop_quit), loop);
 
-	/* Create our single-instance-app service if we can */
-	if (proxy)
-		service = nm_ce_service_new (bus, proxy, list);
-
-	/* Show the dialog */
-	g_signal_connect_swapped (list, "done", G_CALLBACK (g_main_loop_quit), loop);
+	owner_id = start_service (bus, list, &registration_id);
 
 	/* Figure out what page or editor window we'll show initially */
-	show_list = handle_arguments (list, type, create, show, uuid, (create || show || uuid));
-	if (show_list)
+	if (handle_arguments (list, type, create, show, uuid, (create || show || uuid)))
 		nm_connection_list_present (list);
 
-	setup_signals ();
-	g_main_loop_run (loop);
+	g_unix_signal_add (SIGTERM, signal_handler, GINT_TO_POINTER (SIGTERM));
+	g_unix_signal_add (SIGINT, signal_handler, GINT_TO_POINTER (SIGINT));
 
-	/* Cleanup */
-	g_object_unref (list);
-	if (service)
-		g_object_unref (service);
-	if (proxy)
-		g_object_unref (proxy);
-	if (bus)
-		dbus_g_connection_unref (bus);
-	return 0;
+	g_main_loop_run (loop);
+	ret = 0;
+
+out:
+	if (owner_id)
+		g_bus_unown_name (owner_id);
+	if (registration_id)
+		g_dbus_connection_unregister_object (bus, registration_id);
+	if (introspection_data)
+		g_dbus_node_info_unref (introspection_data);
+	g_clear_error (&error);
+	if (opt_ctx)
+		g_option_context_free (opt_ctx);
+	g_clear_object (&list);
+	g_clear_object (&bus);
+	return ret;
 }
 

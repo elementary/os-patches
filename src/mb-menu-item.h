@@ -36,11 +36,11 @@
 #define NM_MB_MENU_ITEM_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), NM_TYPE_MB_MENU_ITEM, NMMbMenuItemClass))
 
 typedef struct {
-	GtkImageMenuItem image_item;
+	GtkMenuItem image_item;
 } NMMbMenuItem;
 
 typedef struct {
-	GtkImageMenuItemClass parent_class;
+	GtkMenuItemClass parent_class;
 } NMMbMenuItemClass;
 
 

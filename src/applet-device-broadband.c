@@ -18,24 +18,16 @@
  * (C) Copyright 2012 Aleksander Morgado <aleksander@gnu.org>
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "nm-default.h"
 
 #include <ctype.h>
 
-#include <glib/gi18n.h>
-#include <gtk/gtk.h>
-
-#include <nm-device.h>
-#include <nm-device-modem.h>
-#include <nm-utils.h>
+#include <NetworkManager.h>
 
 #include "applet.h"
 #include "applet-device-broadband.h"
 #include "applet-dialogs.h"
 #include "mobile-helpers.h"
-#include "nm-ui-utils.h"
 #include "mb-menu-item.h"
 
 typedef struct {
@@ -81,14 +73,16 @@ typedef struct {
 } ConnectNetworkInfo;
 
 static void
-add_and_activate_connection_done (NMClient *client,
-                                  NMActiveConnection *active,
-                                  const char *connection_path,
-                                  GError *error,
+add_and_activate_connection_done (GObject *client,
+                                  GAsyncResult *result,
                                   gpointer user_data)
 {
-	if (error)
+	GError *error = NULL;
+
+	if (!nm_client_add_and_activate_connection_finish (NM_CLIENT (client), result, &error)) {
 		g_warning ("Failed to add/activate connection: (%d) %s", error->code, error->message);
+		g_error_free (error);
+	}
 }
 
 static void
@@ -105,12 +99,13 @@ wizard_done (NMConnection *connection,
 		/* Ask NM to add the new connection and activate it; NM will fill in the
 		 * missing details based on the specific object and the device.
 		 */
-		nm_client_add_and_activate_connection (info->applet->nm_client,
-		                                       connection,
-		                                       info->device,
-		                                       "/",
-		                                       add_and_activate_connection_done,
-		                                       info->applet);
+		nm_client_add_and_activate_connection_async (info->applet->nm_client,
+		                                             connection,
+		                                             info->device,
+		                                             "/",
+		                                             NULL,
+		                                             add_and_activate_connection_done,
+		                                             info->applet);
 	}
 
 	g_object_unref (info->device);
@@ -318,7 +313,7 @@ unlock_dialog_new (NMDevice *device,
 	}
 
 	info->dialog = applet_mobile_pin_dialog_new (unlock_required,
-	                                             nma_utils_get_device_description (device));
+	                                             nm_device_get_description (device));
 
 	g_object_set_data (G_OBJECT (info->dialog), "unlock-code", GUINT_TO_POINTER (lock));
 	g_signal_connect (info->dialog, "response", G_CALLBACK (unlock_dialog_response), info);
@@ -464,7 +459,7 @@ get_secrets (SecretsRequest *req,
 	if (!device) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): failed to find device for active connection.",
 		             __FILE__, __LINE__, __func__);
 		return FALSE;
@@ -479,7 +474,7 @@ get_secrets (SecretsRequest *req,
 	if (!devinfo) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): ModemManager is not available for modem at %s",
 		             __FILE__, __LINE__, __func__,
 		             nm_device_get_udi (device));
@@ -634,6 +629,9 @@ get_icon (NMDevice *device,
 {
 	BroadbandDeviceInfo *info;
 
+	g_return_if_fail (out_icon_name && !*out_icon_name);
+	g_return_if_fail (tip && !*tip);
+
 	if (!applet->mm1) {
 		g_warning ("ModemManager is not available for modem at %s", nm_device_get_udi (device));
 		return;
@@ -712,7 +710,7 @@ add_connection_item (NMDevice *device,
 static void
 add_menu_item (NMDevice *device,
                gboolean multiple_devices,
-               GSList *connections,
+               const GPtrArray *connections,
                NMConnection *active,
                GtkWidget *menu,
                NMApplet *applet)
@@ -720,7 +718,7 @@ add_menu_item (NMDevice *device,
 	BroadbandDeviceInfo *info;
 	char *text;
 	GtkWidget *item;
-	GSList *iter;
+	int i;
 
 	info = g_object_get_data (G_OBJECT (device), "devinfo");
 	if (!info) {
@@ -732,7 +730,7 @@ add_menu_item (NMDevice *device,
 	if (multiple_devices) {
 		const char *desc;
 
-		desc = nma_utils_get_device_description (device);
+		desc = nm_device_get_description (device);
 		text = g_strdup_printf (_("Mobile Broadband (%s)"), desc);
 	} else {
 		text = g_strdup (_("Mobile Broadband"));
@@ -786,12 +784,12 @@ add_menu_item (NMDevice *device,
 
 	/* Add the default / inactive connection items */
 	if (!nma_menu_device_check_unusable (device)) {
-		if ((!active && g_slist_length (connections)) || (active && g_slist_length (connections) > 1))
+		if ((!active && connections->len) || (active && connections->len > 1))
 			applet_menu_item_add_complex_separator_helper (menu, applet, _("Available"));
 
-		if (g_slist_length (connections)) {
-			for (iter = connections; iter; iter = g_slist_next (iter)) {
-				NMConnection *connection = NM_CONNECTION (iter->data);
+		if (connections->len) {
+			for (i = 0; i < connections->len; i++) {
+				NMConnection *connection = NM_CONNECTION (connections->pdata[i]);
 
 				if (connection != active) {
 					item = applet_new_menu_item_helper (connection, NULL, FALSE);
@@ -828,6 +826,7 @@ signal_quality_updated (GObject *object,
                         BroadbandDeviceInfo *info)
 {
 	applet_schedule_update_icon (info->applet);
+	applet_schedule_update_menu (info->applet);
 }
 
 static void
@@ -836,6 +835,7 @@ access_technologies_updated (GObject *object,
                              BroadbandDeviceInfo *info)
 {
 	applet_schedule_update_icon (info->applet);
+	applet_schedule_update_menu (info->applet);
 }
 
 static void
@@ -945,6 +945,9 @@ modem_state_changed (MMModem *object,
 	if ((old < MM_MODEM_STATE_REGISTERED &&
 	     new >= MM_MODEM_STATE_REGISTERED)) {
 		guint32 mb_state;
+		const char *signal_strength_icon;
+
+		signal_strength_icon = mobile_helper_get_quality_icon_name (mm_modem_get_signal_quality(info->mm_modem, NULL));
 
 		/* Notify about new registration info */
 		mb_state = broadband_state_to_mb_state (info);
@@ -952,13 +955,13 @@ modem_state_changed (MMModem *object,
 			applet_do_notify_with_pref (info->applet,
 			                            _("Mobile Broadband network."),
 			                            _("You are now registered on the home network."),
-			                            "nm-signal-100",
+			                            signal_strength_icon,
 			                            PREF_DISABLE_CONNECTED_NOTIFICATIONS);
 		} else if (mb_state == MB_STATE_ROAMING) {
 			applet_do_notify_with_pref (info->applet,
 			                            _("Mobile Broadband network."),
 			                            _("You are now registered on a roaming network."),
-			                            "nm-signal-100",
+			                            signal_strength_icon,
 			                            PREF_DISABLE_CONNECTED_NOTIFICATIONS);
 		}
 	}

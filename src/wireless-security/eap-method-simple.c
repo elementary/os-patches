@@ -17,20 +17,18 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2007 - 2011 Red Hat, Inc.
+ * Copyright 2007 - 2014 Red Hat, Inc.
  */
+
+#include "nm-default.h"
 
 #include <ctype.h>
 #include <string.h>
-#include <glib/gi18n.h>
-
-#include <nm-setting-8021x.h>
-#include <nm-setting-connection.h>
 
 #include "eap-method.h"
 #include "wireless-security.h"
 #include "helpers.h"
-#include "nm-ui-utils.h"
+#include "nma-ui-utils.h"
 #include "utils.h"
 
 struct _EAPMethodSimple {

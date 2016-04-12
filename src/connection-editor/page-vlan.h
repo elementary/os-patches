@@ -15,13 +15,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2011 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
 #ifndef __PAGE_VLAN_H__
 #define __PAGE_VLAN_H__
-
-#include <nm-connection.h>
 
 #include <glib.h>
 #include <glib-object.h>
@@ -49,13 +47,12 @@ CEPage *ce_page_vlan_new (NMConnectionEditor *editor,
                           NMConnection *connection,
                           GtkWindow *parent,
                           NMClient *client,
-                          NMRemoteSettings *settings,
                           const char **out_secrets_setting_name,
                           GError **error);
 
 void vlan_connection_new (GtkWindow *parent,
                           const char *detail,
-                          NMRemoteSettings *settings,
+                          NMClient *client,
                           PageNewConnectionResultFunc result_func,
                           gpointer user_data);
 

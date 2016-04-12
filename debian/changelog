@@ -1,3 +1,100 @@
+network-manager-applet (1.1.93-1ubuntu1) xenial; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * Merge with Debian; remaining changes:
+    - lp341684_device_sensitive_disconnect_notify.patch: show correct
+      notification messages for disconnect events, to be in line with the other
+      *connect*text patches.
+    - lp460144_correctly_update_notification.patch: cleaner notification
+      messages, and allow for messages to be updated instead of cleared.
+    - applet-wifi-menu-before-vpn.patch: show Create New and Connect to Hidden
+      wifi menu items with the other Wifi items, rather than separated by
+      the VPN menus.
+    - position_dialogs_to_center_of_the_screen.patch: position dialogs to the
+      center of the screen.
+    - make_menu_items_insensitive_based_on_permissions.patch,
+      hide_policy_items_env_var.patch: provide a method to desensitize or hide
+      menu items which are useless given the current policykit policy level of
+      the user.
+    - applet_adhoc_use_wpa_rsn_part1.patch: enable Ad-Hoc using WPA RSN.
+    - debian/rules: ship extra icons, use --enable-indicators, export
+      translations for Launchpad and fail if any files are missing from
+      .install files, or not being installed.
+    - debian/control: Build-Depend on dh-translations, libappindicator3-dev,
+      update package descriptions, add Breaks against gnome-bluetooth (<< 3.0),
+      switch gnome-icon-theme to adwaita-icon-theme
+  * Refreshed patches.
+  * debian/rules: configure with --with-indicator, rather than --enable-...
+    since we're using the merged code from upstream now for indicator support.
+  * debian/patches/reorder-indicator-items.patch: make sure devices show
+    before networking toggles again.
+  * debian/patches/indicator-by-default.patch: have the indicator enabled by
+    default.
+  * debian/patches/ubuntu-vpn-icon-name.patch: use '-secure'-suffixed icons
+    when connected to the VPN, since we can't composit icons on the fly.
+
+  [ Sebastien Bacher ]
+  * debian/control,
+    debian/patches/lower_dbusmenu_requirement.patch:
+    - use libdbusmenu but a version matching the archive one
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 08 Apr 2016 16:36:42 -0400
+
+network-manager-applet (1.1.93-1) unstable; urgency=medium
+
+  * New upstream release (1.2 rc1).
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 06 Apr 2016 01:06:03 +0200
+
+network-manager-applet (1.1.92-1) unstable; urgency=medium
+
+  * New upstream release (1.2 beta3).
+  * Drop dependency on libdbus-glib-1-dev.
+  * Rebase patches.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 31 Mar 2016 00:35:34 +0200
+
+network-manager-applet (1.1.91-1) unstable; urgency=medium
+
+  * New upstream release (1.2 beta2).
+  * Rebase patches.
+  * Fix build system to run tests on "make check".
+  * Dump the contents of test-suite.log to stdout when the test suite fails.
+  * Skip the test suite if "nocheck" is set via DEB_BUILD_OPTIONS.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 02 Mar 2016 01:30:35 +0100
+
+network-manager-applet (1.1.90-3) unstable; urgency=medium
+
+  * Upload to unstable.
+  * Bump Standards-Version to 3.9.7.
+  * Fix test suite failure for non-C locales. Patch cherry-picked from
+    upstream Git.
+  * Fix fix macro name GLIB_GSETTINGS in configure.ac. Patch cherry-picked
+    from upstream Git.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 04 Feb 2016 06:19:15 +0100
+
+network-manager-applet (1.1.90-2) experimental; urgency=medium
+
+  * Update debian/copyright.
+  * Run test suite during build.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 22 Jan 2016 04:38:01 +0100
+
+network-manager-applet (1.1.90-1) experimental; urgency=medium
+
+  * New upstream release (1.2 beta1).
+  * Bump dependency on network-manager and related dev packages to (>= 1.1).
+  * Update configure switches. The gnome-bluetooth plugin and the migration
+    tool were dropped upstream, the --with-modem-manager-1 configure switch
+    was renamed to --with-wwan.
+  * Rebase patches.
+  * Install AppData file for nm-connection-editor.
+  * Add packages for new libnma library.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 20 Jan 2016 23:49:18 +0100
+
 network-manager-applet (1.0.10-1ubuntu1) xenial; urgency=low
 
   [ Łukasz 'sil2100' Zemczak ]

@@ -17,22 +17,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2013 Red Hat, Inc.
+ * Copyright 2013 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <NetworkManager.h>
-#include <nm-setting-connection.h>
-#include <nm-setting-dcb.h>
-#include <nm-utils.h>
 
 #include "page-dcb.h"
 
@@ -112,6 +104,8 @@ uint_entries_validate (GtkBuilder *builder, const char *fmt, gint max, gboolean 
 	gboolean valid = TRUE;
 	GdkRGBA bgcolor;
 
+	gdk_rgba_parse (&bgcolor, "red3");
+
 	for (i = 0; i < 8; i++) {
 		tmp = g_strdup_printf (fmt, i);
 		entry = GTK_ENTRY (gtk_builder_get_object (builder, tmp));
@@ -124,17 +118,20 @@ uint_entries_validate (GtkBuilder *builder, const char *fmt, gint max, gboolean 
 			num = strtol (text, NULL, 10);
 			if (errno || num < 0 || num > max) {
 				/* FIXME: only sets highlight color? */
-				gdk_rgba_parse (&bgcolor, "red3");
-				gtk_widget_override_background_color (GTK_WIDGET (entry), GTK_STATE_FLAG_NORMAL, &bgcolor);
+				utils_override_bg_color (GTK_WIDGET (entry), &bgcolor);
 				valid = FALSE;
 			} else
-				gtk_widget_override_background_color (GTK_WIDGET (entry), GTK_STATE_FLAG_NORMAL, NULL);
+				utils_override_bg_color (GTK_WIDGET (entry), NULL);
 
 			total += (guint) num;
+			if (sum && total > 100)
+				utils_override_bg_color (GTK_WIDGET (entry), &bgcolor);
 		}
 	}
-	if (sum && total != 100)
+	if (sum && total != 100) {
+		utils_override_bg_color (GTK_WIDGET (entry), &bgcolor);
 		valid = FALSE;
+	}
 
 	return valid;
 }
@@ -143,10 +140,11 @@ static void
 pg_dialog_valid_func (GtkBuilder *builder)
 {
 	GtkDialog *dialog;
-	gboolean valid = FALSE;
+	gboolean b1, b2, valid = FALSE;
 
-	valid = uint_entries_validate (builder, "pg_pgpct%u_entry", 100, TRUE) &&
-	            uint_entries_validate (builder, "pg_uppct%u_entry", 100, FALSE);
+	b1 = uint_entries_validate (builder, "pg_pgpct%u_entry", 100, TRUE);
+	b2 = uint_entries_validate (builder, "pg_uppct%u_entry", 100, FALSE);
+	valid = b1 && b2;
 
 	dialog = GTK_DIALOG (gtk_builder_get_object (builder, "pg_dialog"));
 	gtk_dialog_set_response_sensitive (dialog, GTK_RESPONSE_OK, valid);
@@ -587,7 +585,6 @@ ce_page_dcb_new (NMConnectionEditor *editor,
                  NMConnection *connection,
                  GtkWindow *parent_window,
                  NMClient *client,
-                 NMRemoteSettings *settings,
                  const char **out_secrets_setting_name,
                  GError **error)
 {
@@ -601,7 +598,6 @@ ce_page_dcb_new (NMConnectionEditor *editor,
 	                                 connection,
 	                                 parent_window,
 	                                 client,
-	                                 settings,
 	                                 UIDIR "/ce-page-dcb.ui",
 	                                 "DcbPage",
 	                                 _("DCB")));

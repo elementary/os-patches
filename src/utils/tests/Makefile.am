@@ -4,14 +4,15 @@ test_utils_SOURCES = test-utils.c
 
 test_utils_CPPFLAGS = \
 	-I $(top_srcdir)/src/utils \
+	-DLIBNM_BUILD \
 	$(GTK_CFLAGS) \
-	$(NMA_CFLAGS)
+	$(LIBNM_CFLAGS) \
+	"-I${top_srcdir}/shared/"
 
 test_utils_LDADD = \
-	${top_builddir}/src/utils/libutils.la \
+	${top_builddir}/src/utils/libutils-libnm.la \
 	$(GTK_LIBS) \
-	$(NMA_LIBS)
+	$(LIBNM_LIBS)
 
-check-local: test-utils
-	$(abs_builddir)/test-utils
+TESTS = $(noinst_PROGRAMS)
 

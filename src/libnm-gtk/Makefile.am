@@ -26,9 +26,9 @@ libnm_gtk_la_SOURCES = \
 
 libnm_gtk_la_CFLAGS = \
 	$(GTK_CFLAGS) \
-	$(NMA_CFLAGS) \
-	$(DBUS_CFLAGS) \
+	$(LIBNM_GLIB_CFLAGS) \
 	$(GUDEV_CFLAGS) \
+	-DLIBNM_GLIB_BUILD \
 	-DICONDIR=\""$(datadir)/icons"\" \
 	-DUIDIR=\""$(uidir)"\" \
 	-DBINDIR=\""$(bindir)"\" \
@@ -38,17 +38,16 @@ libnm_gtk_la_CFLAGS = \
 	-DAUTOSTARTDIR=\""$(sysconfdir)/xdg/autostart"\" \
 	-DVPN_NAME_FILES_DIR=\""$(sysconfdir)/NetworkManager/VPN"\" \
 	-DNMALOCALEDIR=\"$(datadir)/locale\" \
-	$(DISABLE_DEPRECATED) \
-	-I${top_builddir}/src/marshallers \
+	-DNETWORKMANAGER_COMPILATION=NM_NETWORKMANAGER_COMPILATION_LIB_LEGACY \
+	"-I${top_srcdir}/shared/" \
 	-I${top_srcdir}/src/utils \
 	-I${top_srcdir}/src/wireless-security
 
 libnm_gtk_la_LIBADD = \
 	$(GTK_LIBS) \
-	$(NMA_LIBS) \
+	$(LIBNM_GLIB_LIBS) \
 	$(GUDEV_LIBS) \
-	$(top_builddir)/src/marshallers/libmarshallers.la \
-	$(top_builddir)/src/wireless-security/libwireless-security.la
+	$(top_builddir)/src/wireless-security/libwireless-security-libnm-glib.la
 
 EXTRA_libnm_gtk_la_DEPENDENCIES = $(srcdir)/libnm-gtk.ver
 

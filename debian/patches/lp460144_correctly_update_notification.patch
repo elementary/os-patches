@@ -2,11 +2,11 @@
  src/applet.c |   38 +++++++++++++++++---------------------
  1 file changed, 17 insertions(+), 21 deletions(-)
 
-Index: network-manager-applet-1.0.4/src/applet.c
+Index: network-manager-applet-1.1.93/src/applet.c
 ===================================================================
---- network-manager-applet-1.0.4.orig/src/applet.c
-+++ network-manager-applet-1.0.4/src/applet.c
-@@ -839,17 +839,6 @@ applet_menu_item_create_device_item_help
+--- network-manager-applet-1.1.93.orig/src/applet.c
++++ network-manager-applet-1.1.93/src/applet.c
+@@ -635,17 +635,6 @@ applet_menu_item_create_device_item_help
  	return item;
  }
  
@@ -24,7 +24,7 @@ Index: network-manager-applet-1.0.4/src/applet.c
  static gboolean
  applet_notify_server_has_actions (void)
  {
-@@ -900,19 +889,28 @@ applet_do_notify (NMApplet *applet,
+@@ -703,19 +692,28 @@ applet_do_notify (NMApplet *applet,
  	if (!applet->agent)
  		return;
  
@@ -61,7 +61,7 @@ Index: network-manager-applet-1.0.4/src/applet.c
  
  #if HAVE_LIBNOTIFY_07
  	notify_notification_set_hint (notify, "transient", g_variant_new_boolean (TRUE));
-@@ -3550,7 +3548,6 @@ status_icon_activate_cb (GtkStatusIcon *
+@@ -3192,7 +3190,6 @@ status_icon_activate_cb (GtkStatusIcon *
  	/* Have clicking on the applet act also as acknowledgement
  	 * of the notification. 
  	 */
@@ -69,7 +69,7 @@ Index: network-manager-applet-1.0.4/src/applet.c
  
  	/* Kill any old menu */
  	if (applet->menu)
-@@ -3580,7 +3577,6 @@ status_icon_popup_menu_cb (GtkStatusIcon
+@@ -3222,7 +3219,6 @@ status_icon_popup_menu_cb (GtkStatusIcon
  	/* Have clicking on the applet act also as acknowledgement
  	 * of the notification. 
  	 */

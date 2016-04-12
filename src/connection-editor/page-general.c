@@ -15,29 +15,24 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Copyright 2012 Red Hat, Inc.
+ * Copyright 2012 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
-
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <nm-setting-connection.h>
+#include "nm-default.h"
 
 #include "page-general.h"
-#include "nm-glib-compat.h"
 
 G_DEFINE_TYPE (CEPageGeneral, ce_page_general, CE_TYPE_PAGE)
 
 #define CE_PAGE_GENERAL_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), CE_TYPE_PAGE_GENERAL, CEPageGeneralPrivate))
 
 typedef struct {
-	NMRemoteSettings *remote_settings;
 	NMSettingConnection *setting;
 
 	gboolean is_vpn;
 
+	GDBusProxy *fw_proxy;
+	GCancellable *cancellable;
 	GtkComboBoxText *firewall_zone;
 	char **zones;
 	gboolean got_zones;
@@ -66,54 +61,69 @@ enum {
 static void populate_firewall_zones_ui (CEPageGeneral *self);
 
 static void
-zones_reply (DBusGProxy *proxy, DBusGProxyCall *call, gpointer user_data)
+get_zones_cb (GDBusProxy *proxy, GAsyncResult *result, gpointer user_data)
 {
-	CEPageGeneral *self = user_data;
-	CEPageGeneralPrivate *priv = CE_PAGE_GENERAL_GET_PRIVATE (self);
+	CEPageGeneral *self;
+	CEPageGeneralPrivate *priv;
+	GVariant *variant = NULL;
 	GError *error = NULL;
 
-	if (!dbus_g_proxy_end_call (proxy, call, &error,
-	                            G_TYPE_STRV, &priv->zones,
-	                            G_TYPE_INVALID)) {
-		g_warning ("Failed to get zones from FirewallD: (%d) %s", error->code, error->message);
+	variant = g_dbus_proxy_call_finish (proxy, result, &error);
+	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+		g_clear_error (&error);
+		return;
 	}
 
-	priv->got_zones = TRUE;
+	self = CE_PAGE_GENERAL (user_data);
+	priv = CE_PAGE_GENERAL_GET_PRIVATE (self);
 
+	if (variant) {
+		if (g_variant_is_of_type (variant, G_VARIANT_TYPE ("(as)")))
+			g_variant_get (variant, "(^as)", &priv->zones);
+		else {
+			g_warning ("Failed to get zones from FirewallD: invalid reply type '%s'",
+			           g_variant_get_type_string (variant));
+		}
+		g_variant_unref (variant);
+	} else if (!g_error_matches (error, G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN))
+		g_warning ("Failed to get zones from FirewallD: %s", error->message);
+
+	priv->got_zones = TRUE;
 	if (priv->setup_finished)
 		populate_firewall_zones_ui (self);
 
 	g_clear_error (&error);
-	g_object_unref (proxy);
+	g_clear_object (&priv->cancellable);
+	g_clear_object (&priv->fw_proxy);
 }
 
-/* Get FirewallD zones */
 static void
-get_zones_from_firewall (CEPageGeneral *self)
+on_fw_proxy_acquired (GObject *object, GAsyncResult *result, gpointer user_data)
 {
-	CEPageGeneralPrivate *priv = CE_PAGE_GENERAL_GET_PRIVATE (self);
-	DBusGConnection *bus;
-	DBusGProxy *proxy;
+	CEPageGeneral *self;
+	CEPageGeneralPrivate *priv;
+	GError *error = NULL;
+	GDBusProxy *proxy;
 
-	/* Initialize got_zones to TRUE for cases there's no FirewallD */
-	priv->got_zones = TRUE;
-
-	bus = dbus_g_bus_get (DBUS_BUS_SYSTEM, NULL);
-	if (bus) {
-		proxy = dbus_g_proxy_new_for_name (bus,
-		                                   "org.fedoraproject.FirewallD1",
-		                                   "/org/fedoraproject/FirewallD1",
-		                                   "org.fedoraproject.FirewallD1.zone");
-		/* Call getZones to get list of available FirewallD zones */
-		if (proxy) {
-			dbus_g_proxy_begin_call (proxy, "getZones",
-			                         zones_reply, self, NULL,
-			                         G_TYPE_INVALID);
-			priv->got_zones = FALSE;
-		}
-
-		dbus_g_connection_unref (bus);
+	proxy = g_dbus_proxy_new_for_bus_finish (result, &error);
+	if (!proxy) {
+		g_warning ("Failed to get FirewallD proxy: %s", error->message);
+		g_clear_error (&error);
+		return;
 	}
+
+	self = CE_PAGE_GENERAL (user_data);
+	priv = CE_PAGE_GENERAL_GET_PRIVATE (self);
+
+	priv->fw_proxy = proxy;
+	g_dbus_proxy_call (priv->fw_proxy,
+	                   "getZones",
+	                   NULL,
+	                   G_DBUS_CALL_FLAGS_NONE,
+	                   -1,
+	                   priv->cancellable,
+	                   (GAsyncReadyCallback) get_zones_cb,
+	                   self);
 }
 
 static void
@@ -121,7 +131,7 @@ general_private_init (CEPageGeneral *self)
 {
 	CEPageGeneralPrivate *priv = CE_PAGE_GENERAL_GET_PRIVATE (self);
 	GtkBuilder *builder;
-	GtkWidget *align;
+	GtkWidget *vbox;
 	GtkLabel *label;
 
 	builder = CE_PAGE (self)->builder;
@@ -129,12 +139,21 @@ general_private_init (CEPageGeneral *self)
 	/*-- Firewall zone --*/
 	priv->firewall_zone = GTK_COMBO_BOX_TEXT (gtk_combo_box_text_new ());
 
-	align = GTK_WIDGET (gtk_builder_get_object (builder, "firewall_zone_alignment"));
-	gtk_container_add (GTK_CONTAINER (align), GTK_WIDGET (priv->firewall_zone));
+	vbox = GTK_WIDGET (gtk_builder_get_object (builder, "firewall_zone_vbox"));
+	gtk_container_add (GTK_CONTAINER (vbox), GTK_WIDGET (priv->firewall_zone));
 	gtk_widget_show_all (GTK_WIDGET (priv->firewall_zone));
 
 	/* Get zones from FirewallD */
-	get_zones_from_firewall (self);
+	priv->cancellable = g_cancellable_new ();
+	g_dbus_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
+	                          G_DBUS_PROXY_FLAGS_NONE,
+	                          NULL,
+	                          "org.fedoraproject.FirewallD1",
+	                          "/org/fedoraproject/FirewallD1",
+	                          "org.fedoraproject.FirewallD1.zone",
+	                          priv->cancellable,
+	                          (GAsyncReadyCallback) on_fw_proxy_acquired,
+	                          self);
 
 	/* Set mnemonic widget for device Firewall zone label */
 	label = GTK_LABEL (gtk_builder_get_object (builder, "firewall_zone_label"));
@@ -154,7 +173,12 @@ dispose (GObject *object)
 {
 	CEPageGeneralPrivate *priv = CE_PAGE_GENERAL_GET_PRIVATE (object);
 
-	g_clear_object (&priv->remote_settings);
+	if (priv->cancellable) {
+		g_cancellable_cancel (priv->cancellable);
+		g_clear_object (&priv->cancellable);
+	}
+	g_clear_object (&priv->fw_proxy);
+
 	g_clear_pointer (&priv->zones, g_strfreev);
 
 	G_OBJECT_CLASS (ce_page_general_parent_class)->dispose (object);
@@ -221,7 +245,8 @@ populate_ui (CEPageGeneral *self)
 	NMSettingConnection *setting = priv->setting;
 	const char *vpn_uuid;
 	guint32 combo_idx = 0, idx;
-	GSList *con_list, *l;
+	const GPtrArray *con_list;
+	int i;
 	GtkTreeIter iter;
 	gboolean global_connection = TRUE;
 
@@ -231,12 +256,13 @@ populate_ui (CEPageGeneral *self)
 
 	/* Secondary UUID (VPN) */
 	vpn_uuid = nm_setting_connection_get_secondary (setting, 0);
-	con_list = nm_remote_settings_list_connections (priv->remote_settings);
-	for (l = con_list, idx = 0, combo_idx = 0; l; l = l->next) {
-		const char *uuid = nm_connection_get_uuid (l->data);
-		const char *id = nm_connection_get_id (l->data);
+	con_list = nm_client_get_connections (CE_PAGE (self)->client);
+	for (i = 0, idx = 0, combo_idx = 0; i < con_list->len; i++) {
+		NMConnection *conn = con_list->pdata[i];
+		const char *uuid = nm_connection_get_uuid (conn);
+		const char *id = nm_connection_get_id (conn);
 
-		if (!nm_connection_is_type (l->data, NM_SETTING_VPN_SETTING_NAME))
+		if (!nm_connection_is_type (conn, NM_SETTING_VPN_SETTING_NAME))
 			continue;
 
 		gtk_list_store_append (priv->dependent_vpn_store, &iter);
@@ -245,7 +271,6 @@ populate_ui (CEPageGeneral *self)
 			combo_idx = idx;
 		idx++;
 	}
-	g_slist_free (con_list);
 	gtk_combo_box_set_active (GTK_COMBO_BOX (priv->dependent_vpn), combo_idx);
 
 	/* We don't support multiple VPNs at the moment, so hide secondary
@@ -306,7 +331,6 @@ ce_page_general_new (NMConnectionEditor *editor,
                      NMConnection *connection,
                      GtkWindow *parent_window,
                      NMClient *client,
-                     NMRemoteSettings *settings,
                      const char **out_secrets_setting_name,
                      GError **error)
 {
@@ -318,7 +342,6 @@ ce_page_general_new (NMConnectionEditor *editor,
 	                                     connection,
 	                                     parent_window,
 	                                     client,
-	                                     settings,
 	                                     UIDIR "/ce-page-general.ui",
 	                                     "GeneralPage",
 	                                     _("General")));
@@ -330,8 +353,6 @@ ce_page_general_new (NMConnectionEditor *editor,
 
 	general_private_init (self);
 	priv = CE_PAGE_GENERAL_GET_PRIVATE (self);
-
-	priv->remote_settings = g_object_ref (settings);
 
 	priv->setting = nm_connection_get_setting_connection (connection);
 	if (!priv->setting) {

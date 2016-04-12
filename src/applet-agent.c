@@ -16,30 +16,18 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Copyright (C) 2011 Red Hat, Inc.
+ * Copyright 2011 - 2014 Red Hat, Inc.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "nm-default.h"
 
-#include <glib/gi18n.h>
 #include <string.h>
-#include <dbus/dbus-glib.h>
-#include <nm-setting-connection.h>
-#include <nm-setting-8021x.h>
-#include <nm-setting-vpn.h>
-#include <nm-setting-wireless.h>
-#include <nm-setting-wireless-security.h>
-#include <nm-setting-wired.h>
-#include <nm-setting-pppoe.h>
 
 #define SECRET_API_SUBJECT_TO_CHANGE
 #include <libsecret/secret.h>
 
 #include "applet-agent.h"
 #include "utils.h"
-#include "nma-marshal.h"
 
 #define KEYRING_UUID_TAG "connection-uuid"
 #define KEYRING_SN_TAG "setting-name"
@@ -56,7 +44,7 @@ static const SecretSchema network_manager_secret_schema = {
 	}
 };
 
-G_DEFINE_TYPE (AppletAgent, applet_agent, NM_TYPE_SECRET_AGENT);
+G_DEFINE_TYPE (AppletAgent, applet_agent, NM_TYPE_SECRET_AGENT_OLD);
 
 #define APPLET_AGENT_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), APPLET_TYPE_AGENT, AppletAgentPrivate))
 
@@ -77,20 +65,18 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 /*******************************************************/
 
-#define DBUS_TYPE_G_MAP_OF_STRING (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_STRING))
-
 typedef struct {
 	guint id;
 
-	NMSecretAgent *agent;
+	NMSecretAgentOld *agent;
 	NMConnection *connection;
 	char *path;
 	char *setting_name;
 	char **hints;
 	guint32 flags;
-	NMSecretAgentGetSecretsFunc get_callback;
-	NMSecretAgentSaveSecretsFunc save_callback;
-	NMSecretAgentDeleteSecretsFunc delete_callback;
+	NMSecretAgentOldGetSecretsFunc get_callback;
+	NMSecretAgentOldSaveSecretsFunc save_callback;
+	NMSecretAgentOldDeleteSecretsFunc delete_callback;
 	gpointer callback_data;
 
 	GCancellable *cancellable;
@@ -98,15 +84,15 @@ typedef struct {
 } Request;
 
 static Request *
-request_new (NMSecretAgent *agent,
+request_new (NMSecretAgentOld *agent,
              NMConnection *connection,
              const char *connection_path,
              const char *setting_name,
              const char **hints,
              guint32 flags,
-             NMSecretAgentGetSecretsFunc get_callback,
-             NMSecretAgentSaveSecretsFunc save_callback,
-             NMSecretAgentDeleteSecretsFunc delete_callback,
+             NMSecretAgentOldGetSecretsFunc get_callback,
+             NMSecretAgentOldSaveSecretsFunc save_callback,
+             NMSecretAgentOldDeleteSecretsFunc delete_callback,
              gpointer callback_data)
 {
 	static guint32 counter = 1;
@@ -150,7 +136,7 @@ request_free (Request *r)
 /*******************************************************/
 
 static void
-get_save_cb (NMSecretAgent *agent,
+get_save_cb (NMSecretAgentOld *agent,
              NMConnection *connection,
              GError *error,
              gpointer user_data)
@@ -160,7 +146,7 @@ get_save_cb (NMSecretAgent *agent,
 
 static void
 get_secrets_cb (AppletAgent *self,
-                GHashTable *secrets,
+                GVariant *secrets,
                 GError *error,
                 gpointer user_data)
 {
@@ -179,21 +165,21 @@ get_secrets_cb (AppletAgent *self,
 		 */
 		if (secrets && (r->flags != NM_SECRET_AGENT_GET_SECRETS_FLAG_NONE)) {
 			NMConnection *dupl;
-			GHashTableIter iter;
+			GVariantIter iter;
 			const char *setting_name;
 
 			/* Copy the existing connection and update its secrets */
-			dupl = nm_connection_duplicate (r->connection);
-			g_hash_table_iter_init (&iter, secrets);
-			while (g_hash_table_iter_next (&iter, (gpointer) &setting_name, NULL))
+			dupl = nm_simple_connection_new_clone (r->connection);
+			g_variant_iter_init (&iter, secrets);
+			while (g_variant_iter_next (&iter, "{&s@a{sv}}", (gpointer) &setting_name, NULL))
 				nm_connection_update_secrets (dupl, setting_name, secrets, NULL);
 
 			/* And save updated secrets to the keyring */
-			nm_secret_agent_save_secrets (NM_SECRET_AGENT (self), dupl, get_save_cb, NULL);
+			nm_secret_agent_old_save_secrets (NM_SECRET_AGENT_OLD (self), dupl, get_save_cb, NULL);
 			g_object_unref (dupl);
 		}
 
-		r->get_callback (NM_SECRET_AGENT (r->agent), r->connection, secrets, error, r->callback_data);
+		r->get_callback (NM_SECRET_AGENT_OLD (r->agent), r->connection, secrets, error, r->callback_data);
 	}
 	request_free (r);
 }
@@ -283,24 +269,6 @@ is_connection_always_ask (NMConnection *connection)
 	return FALSE;
 }
 
-static GValue *
-string_to_gvalue (const char *str)
-{
-	GValue *val;
-
-	val = g_slice_new0 (GValue);
-	g_value_init (val, G_TYPE_STRING);
-	g_value_set_string (val, str);
-	return val;
-}
-
-static void
-destroy_gvalue (gpointer data)
-{
-	g_value_unset ((GValue *) data);
-	g_slice_free (GValue, data);
-}
-
 static void
 keyring_find_secrets_cb (GObject *source,
                          GAsyncResult *result,
@@ -310,7 +278,8 @@ keyring_find_secrets_cb (GObject *source,
 	GError *error = NULL;
 	GError *search_error = NULL;
 	const char *connection_id = NULL;
-	GHashTable *secrets = NULL, *settings = NULL;
+	GVariantBuilder builder_setting, builder_connection;
+	GVariant *settings = NULL;
 	GList *list = NULL;
 	GList *iter;
 	gboolean hint_found = FALSE, ask = FALSE;
@@ -333,7 +302,7 @@ keyring_find_secrets_cb (GObject *source,
 		goto done;
 	} else if (search_error) {
 		error = g_error_new (NM_SECRET_AGENT_ERROR,
-		                     NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		                     NM_SECRET_AGENT_ERROR_FAILED,
 		                     "%s.%d - failed to read secrets from keyring (%s)",
 		                     __FILE__, __LINE__, search_error->message);
 		g_error_free (search_error);
@@ -351,7 +320,7 @@ keyring_find_secrets_cb (GObject *source,
 		return;
 	}
 
-	secrets = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, destroy_gvalue);
+	g_variant_builder_init (&builder_setting, NM_VARIANT_TYPE_SETTING);
 
 	/* Extract the secrets from the list of matching keyring items */
 	for (iter = list; iter != NULL; iter = g_list_next (iter)) {
@@ -370,8 +339,8 @@ keyring_find_secrets_cb (GObject *source,
 				continue;
 			}
 
-			g_hash_table_insert (secrets, g_strdup (key_name),
-			                     string_to_gvalue (secret_value_get (secret, NULL)));
+			g_variant_builder_add (&builder_setting, "{sv}", key_name,
+			                       g_variant_new_string (secret_value_get (secret, NULL)));
 
 			/* See if this property matches a given hint */
 			if (r->hints && r->hints[0]) {
@@ -402,47 +371,46 @@ keyring_find_secrets_cb (GObject *source,
 	/* Returned secrets are a{sa{sv}}; this is the outer a{s...} hash that
 	 * will contain all the individual settings hashes.
 	 */
-	settings = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_hash_table_destroy);
-	g_hash_table_insert (settings, g_strdup (r->setting_name), secrets);
+	g_variant_builder_init (&builder_connection, NM_VARIANT_TYPE_CONNECTION);
+	g_variant_builder_add (&builder_connection, "{sa{sv}}", r->setting_name, &builder_setting);
+	settings = g_variant_builder_end (&builder_connection);
 
 done:
 	g_list_free_full (list, g_object_unref);
 	if (ask) {
-		GHashTableIter hash_iter;
+		GVariantIter dict_iter;
 		const char *setting_name;
-		GHashTable *setting_hash;
+		GVariant *setting_dict;
 
 		/* Stuff all the found secrets into the connection for the UI to use */
-		g_hash_table_iter_init (&hash_iter, settings);
-		while (g_hash_table_iter_next (&hash_iter,
-		                               (gpointer *) &setting_name,
-		                               (gpointer *) &setting_hash)) {
+		g_variant_iter_init (&dict_iter, settings);
+		while (g_variant_iter_next (&dict_iter, "{sa{sv}}", &setting_name, &setting_dict)) {
 			nm_connection_update_secrets (r->connection,
-				                          setting_name,
-				                          setting_hash,
-				                          NULL);
+			                              setting_name,
+			                              setting_dict,
+			                              NULL);
 		}
 
 		ask_for_secrets (r);
 	} else {
 		/* Otherwise send the secrets back to NetworkManager */
-		r->get_callback (NM_SECRET_AGENT (r->agent), r->connection, error ? NULL : settings, error, r->callback_data);
+		r->get_callback (NM_SECRET_AGENT_OLD (r->agent), r->connection, error ? NULL : settings, error, r->callback_data);
 		request_free (r);
 	}
 
 	if (settings)
-		g_hash_table_destroy (settings);
+		g_variant_unref (settings);
 	g_clear_error (&error);
 }
 
 static void
-get_secrets (NMSecretAgent *agent,
+get_secrets (NMSecretAgentOld *agent,
              NMConnection *connection,
              const char *connection_path,
              const char *setting_name,
              const char **hints,
              guint32 flags,
-             NMSecretAgentGetSecretsFunc callback,
+             NMSecretAgentOldGetSecretsFunc callback,
              gpointer callback_data)
 {
 	AppletAgentPrivate *priv = APPLET_AGENT_GET_PRIVATE (agent);
@@ -519,7 +487,7 @@ get_secrets (NMSecretAgent *agent,
 /*******************************************************/
 
 static void
-cancel_get_secrets (NMSecretAgent *agent,
+cancel_get_secrets (NMSecretAgentOld *agent,
                     const char *connection_path,
                     const char *setting_name)
 {
@@ -544,7 +512,7 @@ cancel_get_secrets (NMSecretAgent *agent,
 			/* cancel outstanding keyring operations */
 			g_cancellable_cancel (r->cancellable);
 
-			r->get_callback (NM_SECRET_AGENT (r->agent), r->connection, NULL, error, r->callback_data);
+			r->get_callback (NM_SECRET_AGENT_OLD (r->agent), r->connection, NULL, error, r->callback_data);
 			g_hash_table_remove (priv->requests, GUINT_TO_POINTER (r->id));
 			g_signal_emit (r->agent, signals[CANCEL_SECRETS], 0, GUINT_TO_POINTER (r->id));
 		}
@@ -563,7 +531,7 @@ save_request_try_complete (Request *r)
 	 */
 	if (r->keyring_calls == 0) {
 		if (!g_cancellable_is_cancelled (r->cancellable))
-			r->save_callback (NM_SECRET_AGENT (r->agent), r->connection, NULL, r->callback_data);
+			r->save_callback (NM_SECRET_AGENT_OLD (r->agent), r->connection, NULL, r->callback_data);
 		request_free (r);
 	}
 }
@@ -687,12 +655,10 @@ write_one_secret_to_keyring (NMSetting *setting,
 		return;
 
 	if (NM_IS_SETTING_VPN (setting) && (g_strcmp0 (key, NM_SETTING_VPN_SECRETS) == 0)) {
-		g_return_if_fail (type == DBUS_TYPE_G_MAP_OF_STRING);
+		g_return_if_fail (type == G_TYPE_HASH_TABLE);
 
 		/* Process VPN secrets specially since it's a hash of secrets, not just one */
-		nm_setting_vpn_foreach_secret (NM_SETTING_VPN (setting),
-		                               vpn_secret_iter_cb,
-		                               r);
+		nm_setting_vpn_foreach_secret (NM_SETTING_VPN (setting), vpn_secret_iter_cb, r);
 	} else {
 		/* FIXME: password-raw is not string */
 		if (!g_strcmp0 (key, NM_SETTING_802_1X_PASSWORD_RAW))
@@ -705,7 +671,7 @@ write_one_secret_to_keyring (NMSetting *setting,
 }
 
 static void
-save_delete_cb (NMSecretAgent *agent,
+save_delete_cb (NMSecretAgentOld *agent,
                 NMConnection *connection,
                 GError *error,
                 gpointer user_data)
@@ -723,10 +689,10 @@ save_delete_cb (NMSecretAgent *agent,
 }
 
 static void
-save_secrets (NMSecretAgent *agent,
+save_secrets (NMSecretAgentOld *agent,
               NMConnection *connection,
               const char *connection_path,
-              NMSecretAgentSaveSecretsFunc callback,
+              NMSecretAgentOldSaveSecretsFunc callback,
               gpointer callback_data)
 {
 	AppletAgentPrivate *priv = APPLET_AGENT_GET_PRIVATE (agent);
@@ -736,7 +702,7 @@ save_secrets (NMSecretAgent *agent,
 	g_hash_table_insert (priv->requests, GUINT_TO_POINTER (r->id), r);
 
 	/* First delete any existing items in the keyring */
-	nm_secret_agent_delete_secrets (agent, connection, save_delete_cb, r);
+	nm_secret_agent_old_delete_secrets (agent, connection, save_delete_cb, r);
 }
 
 /*******************************************************/
@@ -760,7 +726,7 @@ delete_find_items_cb (GObject *source,
 	secret_password_clear_finish (result, &secret_error);
 	if (secret_error != NULL) {
 		error = g_error_new (NM_SECRET_AGENT_ERROR,
-		                     NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		                     NM_SECRET_AGENT_ERROR_FAILED,
 		                     "The request could not be completed (%s)",
 		                     secret_error->message);
 		g_error_free (secret_error);
@@ -771,10 +737,10 @@ delete_find_items_cb (GObject *source,
 }
 
 static void
-delete_secrets (NMSecretAgent *agent,
+delete_secrets (NMSecretAgentOld *agent,
                 NMConnection *connection,
                 const char *connection_path,
-                NMSecretAgentDeleteSecretsFunc callback,
+                NMSecretAgentOldDeleteSecretsFunc callback,
                 gpointer callback_data)
 {
 	AppletAgentPrivate *priv = APPLET_AGENT_GET_PRIVATE (agent);
@@ -809,19 +775,20 @@ applet_agent_handle_vpn_only (AppletAgent *agent, gboolean vpn_only)
 /*******************************************************/
 
 AppletAgent *
-applet_agent_new (void)
+applet_agent_new (GError **error)
 {
-	return (AppletAgent *) g_object_new (APPLET_TYPE_AGENT,
-	                                     NM_SECRET_AGENT_IDENTIFIER, "org.freedesktop.nm-applet",
-	                                     NM_SECRET_AGENT_CAPABILITIES, NM_SECRET_AGENT_CAPABILITY_VPN_HINTS,
-	                                     NULL);
-}
+	AppletAgent *agent;
 
-static void
-agent_registration_result_cb (NMSecretAgent *agent, GError *error, gpointer user_data)
-{
-	if (error)
-		g_warning ("Failed to register as an agent: (%d) %s", error->code, error->message);
+	agent = g_object_new (APPLET_TYPE_AGENT,
+	                      NM_SECRET_AGENT_OLD_IDENTIFIER, "org.freedesktop.nm-applet",
+	                      NM_SECRET_AGENT_OLD_CAPABILITIES, NM_SECRET_AGENT_CAPABILITY_VPN_HINTS,
+	                      NULL);
+	if (!g_initable_init (G_INITABLE (agent), NULL, error)) {
+		g_object_unref (agent);
+		return NULL;
+	}
+
+	return agent;
 }
 
 static void
@@ -830,9 +797,6 @@ applet_agent_init (AppletAgent *self)
 	AppletAgentPrivate *priv = APPLET_AGENT_GET_PRIVATE (self);
 
 	priv->requests = g_hash_table_new (g_direct_hash, g_direct_equal);
-
-	g_signal_connect (self, NM_SECRET_AGENT_REGISTRATION_RESULT,
-	                  G_CALLBACK (agent_registration_result_cb), NULL);
 }
 
 static void
@@ -861,7 +825,7 @@ static void
 applet_agent_class_init (AppletAgentClass *agent_class)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (agent_class);
-	NMSecretAgentClass *parent_class = NM_SECRET_AGENT_CLASS (agent_class);
+	NMSecretAgentOldClass *parent_class = NM_SECRET_AGENT_OLD_CLASS (agent_class);
 
 	g_type_class_add_private (agent_class, sizeof (AppletAgentPrivate));
 
@@ -878,8 +842,7 @@ applet_agent_class_init (AppletAgentClass *agent_class)
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_FIRST,
 		              G_STRUCT_OFFSET (AppletAgentClass, get_secrets),
-		              NULL, NULL,
-		              _nma_marshal_VOID__POINTER_POINTER_STRING_POINTER_UINT_POINTER_POINTER,
+		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 7,
 		              G_TYPE_POINTER, G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_UINT, G_TYPE_POINTER, G_TYPE_POINTER);
 
@@ -888,8 +851,7 @@ applet_agent_class_init (AppletAgentClass *agent_class)
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_FIRST,
 		              G_STRUCT_OFFSET (AppletAgentClass, cancel_secrets),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__POINTER,
+		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 

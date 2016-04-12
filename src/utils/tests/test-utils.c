@@ -20,10 +20,13 @@
  * (C) Copyright 2009 Red Hat, Inc.
  */
 
-#include <glib.h>
+#include "nm-default.h"
+
 #include <string.h>
 
 #include "utils.h"
+
+#include "nm-test-utils.h"
 
 typedef struct {
 	char *foobar_infra_open;
@@ -49,17 +52,12 @@ typedef struct {
 	char *asdf11_adhoc_wpa_rsn;
 } TestData;
 
-static GByteArray *
+static GBytes *
 string_to_ssid (const char *str)
 {
-	GByteArray *ssid;
-
 	g_assert (str != NULL);
 
-	ssid = g_byte_array_sized_new (strlen (str));
-	g_assert (ssid != NULL);
-	g_byte_array_append (ssid, (const guint8 *) str, strlen (str));
-	return ssid;
+	return g_bytes_new (str, strlen (str));
 }
 
 static char *
@@ -69,7 +67,7 @@ make_hash (const char *str,
            guint32 wpa_flags,
            guint32 rsn_flags)
 {
-	GByteArray *ssid;
+	GBytes *ssid;
 	char *hash, *hash2;
 
 	ssid = string_to_ssid (str);
@@ -83,7 +81,7 @@ make_hash (const char *str,
 	/* Make sure they are the same each time */
 	g_assert (!strcmp (hash, hash2));
 
-	g_byte_array_free (ssid, TRUE);
+	g_bytes_unref (ssid);
 	return hash;
 }
 
@@ -413,13 +411,15 @@ test_ap_hash_foobar_asdf11_adhoc_wpa_rsn (TestData *d)
 	g_assert (strcmp (d->foobar_adhoc_wpa_rsn, d->asdf11_adhoc_wpa_rsn));
 }
 
+NMTST_DEFINE ();
+
 int
 main (int argc, char **argv)
 {
 	gint result;
 	TestData *data;
 
-	g_test_init (&argc, &argv, NULL);
+	nmtst_init (&argc, &argv, TRUE);
 
 	data = test_data_new ();
 

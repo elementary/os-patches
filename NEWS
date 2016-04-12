@@ -1,84 +1,44 @@
-=======================================================
-network-manager-applet-1.0.10
-Overview of changes since network-manager-applet-1.0.8
-=======================================================
+======================================================
+network-manager-applet-1.2
+Overview of changes since network-manager-applet-1.0.0
+======================================================
 
 This is a new stable release of network-manager-applet.  Notable changes include:
+
+* Ported to libnm, GDBus
+* Added new libnm-based client library (libnma)
+* Add support for libappindicator
+* Translation updates
+* Numerous crasher and memory leak bugs were fixed
+
+The following features were backported to 1.0.x releases from 1.0.0 to 1.0.10
+are also present in network-manager-applet-1.2:
 
 * Bluetooth page in connection editor is now populated with available Bluetooth
   devices
-* Fix a possible agent crash when cancelling the secrets request
-* Added Icelandic translation
-* Updated Brazilian Portuguese, Czech, Finnish and Polish translations
-
-=======================================================
-network-manager-applet-1.0.8
-Overview of changes since network-manager-applet-1.0.6
-=======================================================
-
-This is a new stable release of network-manager-applet.  Notable changes include:
-
 * Added hotspot support to the editor
 * Password widgets now emits a signal for secret flag changes
 * The connection validation errors are now communicated in a tooltip
 * The editor is now able to edit the VLAN flags
-* Several bug fixes
-* Updates to Finnish, Finnish, Hungarian, Italian, Portuguese, Polish,
-  Brazilian Portuguese and German translations
-
-=======================================================
-network-manager-applet-1.0.6
-Overview of changes since network-manager-applet-1.0.4
-=======================================================
-
-This is a new stable release of network-manager-applet.  Notable changes include:
-
-* Added option to set MTU of Team devices.
-
-* Added AppData for nm-connection-editor.
-
-* Build fixes.
-
-* Updated Czech, Polish and Hungarian translations.
-
-=======================================================
-network-manager-applet-1.0.4
-Overview of changes since network-manager-applet-1.0.2
-=======================================================
-
-This is a new stable release of network-manager-applet.  Notable changes include:
-
-* Setting MTU for a bond device is now supported.
-
+* Added option to set MTU of Team devices
+* Added AppData for nm-connection-editor
+* Setting MTU for a bond device is now supported
 * Connecting to a wireless network from the NetworkManager applet no longer
     results in an attempt to create system-wide connections.  This fixes the
-    ability to connect to a wireless network for non-privileged user.
-
+    ability to connect to a wireless network for non-privileged user
 * The master interface name is used instead of master connection UUID for
    slave connections created with nm-connection-editor.  This fixes
    compatibility of the ifcfg configuration files with the legacy network
-   service.
-
+   service
 * It is now possible to specify an interface name instead of a MAC address
-    when editing a connection using nm-connection-editor.
-
-* The WWAN connections now have IPv6 enabled by default.
-
+    when editing a connection using nm-connection-editor
+* The WWAN connections now have IPv6 enabled by default
 * libnm-gtk includes functions for password storage selection, which eases
-    implementation of password GUI for VPN plugins and other users.
-
-=======================================================
-network-manager-applet-1.0.2
-Overview of changes since network-manager-applet-1.0.0
-=======================================================
-
-This is a new stable release of network-manager-applet.  Notable changes include:
-
+    implementation of password GUI for VPN plugins and other users
 * The applet is no longer started in GNOME 3
 * STP controls are no longer displayed if STP is disabled
 * Improved accessibility for screen reader users
-* Multiple bugs fixed, including crashes
-* Updated translations
+
 
 =======================================================
 network-manager-applet-1.0

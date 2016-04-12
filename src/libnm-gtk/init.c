@@ -18,10 +18,9 @@
  * Copyright 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <libintl.h>
-#include <glib/gi18n-lib.h>
 
 static void __attribute__((constructor))
 _libnm_gtk_init (void)

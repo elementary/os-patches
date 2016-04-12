@@ -17,24 +17,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2011 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
-#include <config.h>
+#include "nm-default.h"
 
 #include <net/ethernet.h>
 #include <netinet/ether.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <glib/gi18n.h>
-
-#include <nm-setting-connection.h>
-#include <nm-utils.h>
-#include <nm-device-bt.h>
-
 #include "ce-page.h"
-#include "nma-marshal.h"
 
 G_DEFINE_ABSTRACT_TYPE (CEPage, ce_page, G_TYPE_OBJECT)
 
@@ -174,61 +167,6 @@ ce_page_inter_page_change (CEPage *self)
 	return ret;
 }
 
-static int
-hwaddr_binary_len (const char *asc)
-{
-	int octets = 1;
-
-	if (!*asc)
-		return 0;
-
-	for (; *asc; asc++) {
-		if (*asc == ':' || *asc == '-')
-			octets++;
-	}
-	return octets;
-}
-
-static gboolean
-_hwaddr_matches (const char *addr1, const char *addr2, int type)
-{
-	GByteArray *mac1, *mac2;
-	guint8 *ptr1, *ptr2;
-	int addr1_len, addr2_len, len;
-	int ret;
-
-	if (!addr1 || !addr2)
-		return FALSE;
-
-	addr1_len = hwaddr_binary_len (addr1);
-	addr2_len = hwaddr_binary_len (addr2);
-	if (addr1_len == 0 || addr2_len == 0)
-		return FALSE;
-	if (addr1_len != addr2_len)
-		return FALSE;
-
-	mac1 = nm_utils_hwaddr_atoba (addr1, type);
-	if (!mac1)
-		return FALSE;
-	mac2 = nm_utils_hwaddr_atoba (addr2, type);
-	if (!mac2)
-		return FALSE;
-
-	ptr1 = mac1->data;
-	ptr2 = mac2->data;
-	len = mac1->len;
-	if (type == ARPHRD_INFINIBAND) {
-		ptr1 = ptr1 + 20 - 8;
-		ptr2 = ptr2 + 20 - 8;
-		len = 8;
-	}
-	ret = memcmp (ptr1, ptr2, len);
-	g_byte_array_free (mac1, TRUE);
-	g_byte_array_free (mac2, TRUE);
-
-	return ret == 0;
-}
-
 static void
 _set_active_combo_item (GtkComboBox *combo, const char *item,
                         const char *combo_item, int combo_idx)
@@ -277,41 +215,19 @@ ce_page_setup_data_combo (CEPage *self, GtkComboBox *combo,
 /* Combo box storing MAC addresses only */
 void
 ce_page_setup_mac_combo (CEPage *self, GtkComboBox *combo,
-                         const GByteArray *mac, int type, char **mac_list)
+                         const char *mac, char **mac_list)
 {
 	char **iter, *active_mac = NULL;
 	int i, active_idx = -1;
-	char *mac_str;
-
-	mac_str = mac ? nm_utils_hwaddr_ntoa (mac->data, type) : NULL;
 
 	for (iter = mac_list, i = 0; iter && *iter; iter++, i++) {
 		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), *iter);
-		if (mac_str && *iter && _hwaddr_matches (mac_str, *iter, type)) {
+		if (mac && *iter && nm_utils_hwaddr_matches (mac, -1, *iter, -1)) {
 			active_mac = *iter;
 			active_idx = i;
 		}
 	}
-	_set_active_combo_item (combo, mac_str, active_mac, active_idx);
-	g_free (mac_str);
-}
-
-static gboolean
-_mac_is_valid (const char *mac, int type)
-{
-	GByteArray *array;
-	gboolean valid;
-
-	array = nm_utils_hwaddr_atoba (mac, type);
-	if (!array)
-		return FALSE;
-
-	valid = TRUE;
-	if (type == ARPHRD_ETHER && !utils_ether_addr_valid ((struct ether_addr *)array->data))
-		valid = FALSE;
-
-	g_byte_array_free (array, TRUE);
-	return valid;
+	_set_active_combo_item (combo, mac, active_mac, active_idx);
 }
 
 gboolean
@@ -322,60 +238,24 @@ ce_page_mac_entry_valid (GtkEntry *entry, int type, const char *property_name, G
 	g_return_val_if_fail (GTK_IS_ENTRY (entry), FALSE);
 
 	mac = gtk_entry_get_text (entry);
-	if (    mac && *mac
-	    &&  !_mac_is_valid (mac, type)) {
-		const char *addr_type;
+	if (mac && *mac) {
+		if (!nm_utils_hwaddr_valid (mac, nm_utils_hwaddr_len (type))) {
+			const char *addr_type;
 
-		addr_type = type == ARPHRD_ETHER ? _("MAC address") : _("HW address");
-		if (property_name) {
-			g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC,
-			             _("invalid %s for %s (%s)"),
-			             addr_type, property_name, mac);
-		} else {
-			g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC,
-			             _("invalid %s (%s)"),
-			             addr_type, mac);
+			addr_type = type == ARPHRD_ETHER ? _("MAC address") : _("HW address");
+			if (property_name) {
+				g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC,
+				             _("invalid %s for %s (%s)"),
+				             addr_type, property_name, mac);
+			} else {
+				g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC,
+				             _("invalid %s (%s)"),
+				             addr_type, mac);
+			}
+			return FALSE;
 		}
-		return FALSE;
 	}
 	return TRUE;
-}
-
-void
-ce_page_mac_to_entry (const GByteArray *mac, int type, GtkEntry *entry)
-{
-	char *str_addr;
-
-	g_return_if_fail (entry != NULL);
-	g_return_if_fail (GTK_IS_ENTRY (entry));
-
-	if (!mac || !mac->len)
-		return;
-
-	if (mac->len != nm_utils_hwaddr_len (type))
-		return;
-
-	str_addr = nm_utils_hwaddr_ntoa (mac->data, type);
-	gtk_entry_set_text (entry, str_addr);
-	g_free (str_addr);
-}
-
-GByteArray *
-ce_page_entry_to_mac (GtkEntry *entry, int type, gboolean *invalid)
-{
-	const char *temp;
-
-	g_return_val_if_fail (entry != NULL, NULL);
-	g_return_val_if_fail (GTK_IS_ENTRY (entry), NULL);
-
-	if (invalid)
-		g_return_val_if_fail (*invalid == FALSE, NULL);
-
-	temp = gtk_entry_get_text (entry);
-	if (!temp || !*temp)
-		return NULL;
-
-	return nm_utils_hwaddr_atoba (temp, type);
 }
 
 gboolean
@@ -417,7 +297,7 @@ _get_device_list (CEPage *self,
 
 	interfaces = g_ptr_array_new ();
 	devices = nm_client_get_devices (self->client);
-	for (i = 0; devices && (i < devices->len); i++) {
+	for (i = 0; i < devices->len; i++) {
 		NMDevice *dev = g_ptr_array_index (devices, i);
 		const char *ifname;
 		char *mac = NULL;
@@ -480,7 +360,7 @@ _device_entry_parse (const char *entry_text, char **first, char **second)
 }
 
 static gboolean
-_device_entries_match (const char *ifname, const char *mac, int type, const char *entry)
+_device_entries_match (const char *ifname, const char *mac, const char *entry)
 {
 	char *first, *second;
 	gboolean ifname_match = FALSE, mac_match = FALSE;
@@ -498,8 +378,8 @@ _device_entries_match (const char *ifname, const char *mac, int type, const char
 		ifname_match = TRUE;
 
 	if (   mac
-	    && (   (first && _hwaddr_matches (mac, first, type))
-	        || (second && _hwaddr_matches (mac, second, type))))
+	    && (   (first && nm_utils_hwaddr_matches (mac, -1, first, -1))
+	        || (second && nm_utils_hwaddr_matches (mac, -1, second, -1))))
 		mac_match = TRUE;
 
 	g_free (first);
@@ -521,8 +401,7 @@ ce_page_setup_device_combo (CEPage *self,
                             GtkComboBox *combo,
                             GType device_type,
                             const char *ifname,
-                            const GByteArray *mac,
-                            int mac_type,
+                            const char *mac,
                             const char *mac_property,
                             gboolean ifname_first)
 {
@@ -530,35 +409,32 @@ ce_page_setup_device_combo (CEPage *self,
 	int i, active_idx = -1;
 	char **device_list;
 	char *item;
-	char *mac_str;
 
-	mac_str = mac ? nm_utils_hwaddr_ntoa (mac->data, mac_type) : NULL;
 	device_list = _get_device_list (self, device_type, TRUE, mac_property, ifname_first);
 
-	if (ifname && mac_str)
-		item = g_strdup_printf ("%s (%s)", ifname, mac_str);
-	else if (!ifname && !mac_str)
+	if (ifname && mac)
+		item = g_strdup_printf ("%s (%s)", ifname, mac);
+	else if (!ifname && !mac)
 		item = NULL;
 	else
-		item = g_strdup (ifname ? ifname : mac_str);
+		item = g_strdup (ifname ? ifname : mac);
 
 	for (iter = device_list, i = 0; iter && *iter; iter++, i++) {
 		gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), *iter);
-		if (_device_entries_match (ifname, mac_str, mac_type, *iter)) {
+		if (_device_entries_match (ifname, mac, *iter)) {
 			active_item = *iter;
 			active_idx = i;
 		}
 	}
 	_set_active_combo_item (combo, item, active_item, active_idx);
 
-	g_free (mac_str);
 	g_free (item);
 	g_strfreev (device_list);
 }
 
 gboolean
 ce_page_device_entry_get (GtkEntry *entry, int type, gboolean check_ifname,
-                          char **ifname, GByteArray **mac, const char *device_name, GError **error)
+                          char **ifname, char **mac, const char *device_name, GError **error)
 {
 	char *first, *second;
 	const char *ifname_tmp = NULL, *mac_tmp = NULL;
@@ -573,7 +449,7 @@ ce_page_device_entry_get (GtkEntry *entry, int type, gboolean check_ifname,
 	valid = _device_entry_parse (str, &first, &second);
 
 	if (first) {
-		if (_mac_is_valid (first, type))
+		if (nm_utils_hwaddr_valid (first, nm_utils_hwaddr_len (type)))
 			mac_tmp = first;
 		else if (!check_ifname || nm_utils_iface_valid_name (first))
 			ifname_tmp = first;
@@ -581,7 +457,7 @@ ce_page_device_entry_get (GtkEntry *entry, int type, gboolean check_ifname,
 			valid = FALSE;
 	}
 	if (second) {
-		if (_mac_is_valid (second, type)) {
+		if (nm_utils_hwaddr_valid (second, nm_utils_hwaddr_len (type))) {
 			if (!mac_tmp)
 				mac_tmp = second;
 			else
@@ -597,9 +473,8 @@ ce_page_device_entry_get (GtkEntry *entry, int type, gboolean check_ifname,
 
 	if (ifname)
 		*ifname = g_strdup (ifname_tmp);
-	if (mac) {
-		*mac = mac_tmp ? nm_utils_hwaddr_atoba (mac_tmp, type) : NULL;
-	}
+	if (mac)
+		*mac = g_strdup (mac_tmp);
 
 	g_free (first);
 	g_free (second);
@@ -615,22 +490,22 @@ ce_page_device_entry_get (GtkEntry *entry, int type, gboolean check_ifname,
 }
 
 char *
-ce_page_get_next_available_name (GSList *connections, const char *format)
+ce_page_get_next_available_name (const GPtrArray *connections, const char *format)
 {
 	GSList *names = NULL, *iter;
 	char *cname = NULL;
 	int i = 0;
 
-	for (iter = connections; iter; iter = g_slist_next (iter)) {
+	for (i = 0; i < connections->len; i++) {
 		const char *id;
 
-		id = nm_connection_get_id (NM_CONNECTION (iter->data));
+		id = nm_connection_get_id (connections->pdata[i]);
 		g_assert (id);
 		names = g_slist_append (names, (gpointer) id);
 	}
 
 	/* Find the next available unique connection name */
-	while (!cname && (i++ < 10000)) {
+	for (i = 1; !cname && i < 10000; i++) {
 		char *temp;
 		gboolean found = FALSE;
 
@@ -661,23 +536,30 @@ emit_initialized (CEPage *self, GError *error)
 void
 ce_page_complete_init (CEPage *self,
                        const char *setting_name,
-                       GHashTable *secrets,
+                       GVariant *secrets,
                        GError *error)
 {
 	GError *update_error = NULL;
-	GHashTable *setting_hash;
+	GVariant *setting_dict;
+	char *dbus_err;
+	gboolean ignore_error = FALSE;
 
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (CE_IS_PAGE (self));
 
+	if (error) {
+		dbus_err = g_dbus_error_get_remote_error (error);
+		ignore_error =    !g_strcmp0 (dbus_err, "org.freedesktop.NetworkManager.Settings.InvalidSetting")
+		               || !g_strcmp0 (dbus_err, "org.freedesktop.NetworkManager.Settings.Connection.SettingNotFound")
+		               || !g_strcmp0 (dbus_err, "org.freedesktop.NetworkManager.AgentManager.NoSecrets");
+		g_free (dbus_err);
+	}
+
 	/* Ignore missing settings errors */
-	if (   error
-	    && !dbus_g_error_has_name (error, "org.freedesktop.NetworkManager.Settings.InvalidSetting")
-	    && !dbus_g_error_has_name (error, "org.freedesktop.NetworkManager.Settings.Connection.SettingNotFound")
-	    && !dbus_g_error_has_name (error, "org.freedesktop.NetworkManager.AgentManager.NoSecrets")) {
+	if (error && !ignore_error) {
 		emit_initialized (self, error);
 		return;
-	} else if (!setting_name || !secrets || !g_hash_table_size (secrets)) {
+	} else if (!setting_name || !secrets || g_variant_n_children (secrets) == 0) {
 		/* Success, no secrets */
 		emit_initialized (self, NULL);
 		return;
@@ -686,12 +568,13 @@ ce_page_complete_init (CEPage *self,
 	g_assert (setting_name);
 	g_assert (secrets);
 
-	setting_hash = g_hash_table_lookup (secrets, setting_name);
-	if (!setting_hash) {
+	setting_dict = g_variant_lookup_value (secrets, setting_name, NM_VARIANT_TYPE_SETTING);
+	if (!setting_dict) {
 		/* Success, no secrets */
 		emit_initialized (self, NULL);
 		return;
 	}
+	g_variant_unref (setting_dict);
 
 	/* Update the connection with the new secrets */
 	if (nm_connection_update_secrets (self->connection,
@@ -725,7 +608,6 @@ dispose (GObject *object)
 
 	g_clear_object (&self->page);
 	g_clear_object (&self->builder);
-	g_clear_object (&self->proxy);
 	g_clear_object (&self->connection);
 
 	G_OBJECT_CLASS (ce_page_parent_class)->dispose (object);
@@ -854,8 +736,7 @@ ce_page_class_init (CEPageClass *page_class)
 	                      G_OBJECT_CLASS_TYPE (object_class),
 	                      G_SIGNAL_RUN_FIRST,
 	                      G_STRUCT_OFFSET (CEPageClass, changed),
-	                      NULL, NULL,
-	                      g_cclosure_marshal_VOID__VOID,
+	                      NULL, NULL, NULL,
 	                      G_TYPE_NONE, 0);
 
 	signals[INITIALIZED] = 
@@ -863,8 +744,7 @@ ce_page_class_init (CEPageClass *page_class)
 	                      G_OBJECT_CLASS_TYPE (object_class),
 	                      G_SIGNAL_RUN_FIRST,
 	                      G_STRUCT_OFFSET (CEPageClass, initialized),
-	                      NULL, NULL,
-	                      g_cclosure_marshal_VOID__POINTER,
+	                      NULL, NULL, NULL,
 	                      G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
@@ -873,24 +753,23 @@ NMConnection *
 ce_page_new_connection (const char *format,
                         const char *ctype,
                         gboolean autoconnect,
-                        NMRemoteSettings *settings,
+                        NMClient *client,
                         gpointer user_data)
 {
 	NMConnection *connection;
 	NMSettingConnection *s_con;
 	char *uuid, *id;
-	GSList *connections;
+	const GPtrArray *connections;
 
-	connection = nm_connection_new ();
+	connection = nm_simple_connection_new ();
 
 	s_con = NM_SETTING_CONNECTION (nm_setting_connection_new ());
 	nm_connection_add_setting (connection, NM_SETTING (s_con));
 
 	uuid = nm_utils_uuid_generate ();
 
-	connections = nm_remote_settings_list_connections (settings);
+	connections = nm_client_get_connections (client);
 	id = ce_page_get_next_available_name (connections, format);
-	g_slist_free (connections);
 
 	g_object_set (s_con,
 	              NM_SETTING_CONNECTION_UUID, uuid,
@@ -911,7 +790,6 @@ ce_page_new (GType page_type,
              NMConnection *connection,
              GtkWindow *parent_window,
              NMClient *client,
-             NMRemoteSettings *settings,
              const char *ui_file,
              const char *widget_name,
              const char *title)
@@ -929,7 +807,6 @@ ce_page_new (GType page_type,
 	                              NULL));
 	self->title = g_strdup (title);
 	self->client = client;
-	self->settings = settings;
 	self->editor = editor;
 
 	if (ui_file) {

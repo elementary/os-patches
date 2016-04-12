@@ -17,22 +17,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2011 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
-
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <NetworkManager.h>
-#include <nm-setting-connection.h>
-#include <nm-setting-wireless.h>
-#include <nm-setting-wireless-security.h>
-#include <nm-setting-8021x.h>
-#include <nm-utils.h>
 
 #include "wireless-security.h"
 #include "page-wifi.h"
@@ -410,7 +400,6 @@ ce_page_wifi_security_new (NMConnectionEditor *editor,
                            NMConnection *connection,
                            GtkWindow *parent_window,
                            NMClient *client,
-                           NMRemoteSettings *settings,
                            const char **out_secrets_setting_name,
                            GError **error)
 {
@@ -430,7 +419,6 @@ ce_page_wifi_security_new (NMConnectionEditor *editor,
 	                                           connection,
 	                                           parent_window,
 	                                           client,
-	                                           settings,
 	                                           UIDIR "/ce-page-wifi-security.ui",
 	                                           "WifiSecurityPage",
 	                                           _("Wi-Fi Security")));
@@ -508,7 +496,7 @@ ce_page_validate_v (CEPage *page, NMConnection *connection, GError **error)
 
 	sec = wireless_security_combo_get_active (self);
 	if (sec) {
-		const GByteArray *ssid = nm_setting_wireless_get_ssid (s_wireless);
+		GBytes *ssid = nm_setting_wireless_get_ssid (s_wireless);
 
 		if (ssid) {
 			valid = wireless_security_validate (sec, error);

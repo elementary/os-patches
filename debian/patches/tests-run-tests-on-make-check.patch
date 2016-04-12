@@ -1,0 +1,36 @@
+From: Michael Biebl <biebl@debian.org>
+Date: Tue, 1 Mar 2016 20:33:02 +0100
+Subject: tests: run tests on "make check"
+
+Fix a regression introduced by aa69f9c7cd441e1b091bf4c400182b27b0fb8314.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=762944
+---
+ src/libnm-gtk/tests/Makefile.am | 2 +-
+ src/utils/tests/Makefile.am     | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/libnm-gtk/tests/Makefile.am b/src/libnm-gtk/tests/Makefile.am
+index 6349d93..518d799 100644
+--- a/src/libnm-gtk/tests/Makefile.am
++++ b/src/libnm-gtk/tests/Makefile.am
+@@ -17,7 +17,7 @@ test_mobile_providers_LDADD = \
+ 	$(top_builddir)/src/libnm-gtk/libnm-gtk.la \
+ 	$(LIBNM_GLIB_LIBS)
+ 
+-TESTS: test-mobile-providers
++TESTS = $(noinst_PROGRAMS)
+ 
+ EXTRA_DIST = \
+ 	iso3166-test.xml \
+diff --git a/src/utils/tests/Makefile.am b/src/utils/tests/Makefile.am
+index 2741c48..eafaf4a 100644
+--- a/src/utils/tests/Makefile.am
++++ b/src/utils/tests/Makefile.am
+@@ -14,5 +14,5 @@ test_utils_LDADD = \
+ 	$(GTK_LIBS) \
+ 	$(LIBNM_LIBS)
+ 
+-TESTS: test-utils
++TESTS = $(noinst_PROGRAMS)
+ 

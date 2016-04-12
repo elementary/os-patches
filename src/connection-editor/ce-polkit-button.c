@@ -17,13 +17,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2009 Red Hat, Inc.
+ * Copyright 2009 - 2014 Red Hat, Inc.
  */
 
-#include <string.h>
+#include "nm-default.h"
 
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
+#include <string.h>
 
 #include "ce-polkit-button.h"
 
@@ -250,16 +249,14 @@ ce_polkit_button_class_init (CEPolkitButtonClass *pb_class)
 	                                    G_OBJECT_CLASS_TYPE (object_class),
 	                                    G_SIGNAL_RUN_FIRST,
 	                                    G_STRUCT_OFFSET (CEPolkitButtonClass, actionable),
-	                                    NULL, NULL,
-	                                    g_cclosure_marshal_VOID__BOOLEAN,
+	                                    NULL, NULL, NULL,
 	                                    G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
 
 	signals[AUTHORIZED] = g_signal_new ("authorized",
 	                                    G_OBJECT_CLASS_TYPE (object_class),
 	                                    G_SIGNAL_RUN_FIRST,
 	                                    G_STRUCT_OFFSET (CEPolkitButtonClass, authorized),
-	                                    NULL, NULL,
-	                                    g_cclosure_marshal_VOID__BOOLEAN,
+	                                    NULL, NULL, NULL,
 	                                    G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
 }
 

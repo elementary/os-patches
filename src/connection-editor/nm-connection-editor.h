@@ -15,8 +15,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2007 Rodrigo Moya <rodrigo@gnome-db.org>
- * (C) Copyright 2007 - 2010 Red Hat, Inc.
+ * Copyright 2007 Rodrigo Moya <rodrigo@gnome-db.org>
+ * Copyright 2007 - 2014 Red Hat, Inc.
  */
 
 #ifndef NM_CONNECTION_EDITOR_H
@@ -24,8 +24,8 @@
 
 #include <glib-object.h>
 
-#include <nm-client.h>
-#include <nm-remote-settings.h>
+#include <NetworkManager.h>
+
 #include "utils.h"
 
 #define NM_TYPE_CONNECTION_EDITOR    (nm_connection_editor_get_type ())
@@ -41,7 +41,6 @@ typedef struct {
 	GtkWindow *parent_window;
 	NMClient *client;
 	guint permission_id;
-	NMRemoteSettings *settings;
 
 	/* private data */
 	NMConnection *connection;
@@ -86,8 +85,7 @@ typedef enum {
 GType               nm_connection_editor_get_type (void);
 NMConnectionEditor *nm_connection_editor_new (GtkWindow *parent_window,
                                               NMConnection *connection,
-                                              NMClient *client,
-                                              NMRemoteSettings *settings);
+                                              NMClient *client);
 NMConnectionEditor *nm_connection_editor_get (NMConnection *connection);
 NMConnectionEditor *nm_connection_editor_get_master (NMConnection *slave);
 

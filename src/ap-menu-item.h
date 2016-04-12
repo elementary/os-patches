@@ -39,50 +39,32 @@
 typedef struct _NMNetworkMenuItem	    NMNetworkMenuItem;
 typedef struct _NMNetworkMenuItemClass  NMNetworkMenuItemClass;
 
-struct _NMNetworkMenuItem
-{
-	GtkImageMenuItem image_item;
-
-	/*< private >*/
-	GtkWidget * ssid;
-	char      * ssid_string;
-	GtkWidget * strength;
-	guint32     int_strength;
-	GtkWidget * detail;
-	GtkWidget * hbox;
-	gchar *     hash;
-	gboolean    destroyed;
-	GSList *    dupes;
-	gboolean    has_connections;
-	gboolean    is_adhoc;
-	gboolean    is_encrypted;
+struct _NMNetworkMenuItem {
+	GtkMenuItem parent;
 };
 
-struct _NMNetworkMenuItemClass
-{
-	GtkImageMenuItemClass parent_class;
+struct _NMNetworkMenuItemClass {
+	GtkMenuItemClass parent_class;
 };
 
 
 GType	   nm_network_menu_item_get_type (void) G_GNUC_CONST;
-GtkWidget* nm_network_menu_item_new (const char *hash, gboolean has_connections);
+GtkWidget* nm_network_menu_item_new (NMAccessPoint *ap,
+                                     guint32 dev_caps,
+                                     const char *hash,
+                                     gboolean has_connections,
+                                     NMApplet *applet);
 
-void       nm_network_menu_item_set_ssid (NMNetworkMenuItem *item,
-                                          GByteArray *ssid);
 const char *nm_network_menu_item_get_ssid (NMNetworkMenuItem *item);
 
 gboolean   nm_network_menu_item_get_is_adhoc (NMNetworkMenuItem *item);
 gboolean   nm_network_menu_item_get_is_encrypted (NMNetworkMenuItem *item);
 
 guint32    nm_network_menu_item_get_strength (NMNetworkMenuItem *item);
-void       nm_network_menu_item_best_strength (NMNetworkMenuItem *item,
-                                               guint8 strength,
-                                               NMApplet *applet);
+void       nm_network_menu_item_set_strength (NMNetworkMenuItem *item,
+                                              guint8 strength,
+                                              NMApplet *applet);
 const char *nm_network_menu_item_get_hash (NMNetworkMenuItem * item);
-void       nm_network_menu_item_set_detail (NMNetworkMenuItem * item,
-                                            NMAccessPoint * ap,
-                                            GdkPixbuf * adhoc_icon,
-                                            guint32 dev_caps);
 
 gboolean   nm_network_menu_item_find_dupe (NMNetworkMenuItem *item,
                                            NMAccessPoint *ap);

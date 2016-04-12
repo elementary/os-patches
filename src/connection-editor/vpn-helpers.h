@@ -17,7 +17,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
 #ifndef _VPN_HELPERS_H_
@@ -25,14 +25,12 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <nm-connection.h>
 
-#define NM_VPN_API_SUBJECT_TO_CHANGE
-#include <nm-vpn-plugin-ui-interface.h>
+#include <NetworkManager.h>
 
-GHashTable *vpn_get_plugins (GError **error);
+GSList *vpn_get_plugins (void);
 
-NMVpnPluginUiInterface *vpn_get_plugin_by_service (const char *service);
+NMVpnEditorPlugin *vpn_get_plugin_by_service (const char *service);
 
 typedef void (*VpnImportSuccessCallback) (NMConnection *connection, gpointer user_data);
 void vpn_import (VpnImportSuccessCallback callback, gpointer user_data);

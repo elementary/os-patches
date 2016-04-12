@@ -17,19 +17,13 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 Novell, Inc.
- * (C) Copyright 2008 - 2011 Red Hat, Inc.
+ * Copyright 2008 Novell, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "nm-default.h"
 
-#include <glib/gi18n.h>
-#include <nm-setting-connection.h>
-#include <nm-setting-8021x.h>
-#include <nm-setting-wireless.h>
-#include <nm-utils.h>
+
 #include "ethernet-dialog.h"
 #include "wireless-security.h"
 #include "applet-dialogs.h"
@@ -142,7 +136,7 @@ nma_ethernet_dialog_get_connection (GtkWidget *dialog)
 	/* Here's a nice hack to work around the fact that ws_802_1x_fill_connection()
 	 * needs a wireless setting and a connection setting for various things.
 	 */
-	tmp_connection = nm_connection_new ();
+	tmp_connection = nm_simple_connection_new ();
 
 	/* Add the fake connection setting (mainly for the UUID for cert ignore checking) */
 	s_con = nm_connection_get_setting (connection, NM_TYPE_SETTING_CONNECTION);

@@ -1,7 +1,5 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /*
- * Copyright (C) 2013 Jiri Pirko <jiri@resnulli.us>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -15,18 +13,14 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Copyright 2013 Jiri Pirko <jiri@resnulli.us>
+ * Copyright 2013 - 2014  Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
-
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <nm-setting-connection.h>
-#include <nm-setting-team-port.h>
-#include <nm-utils.h>
 
 #include "page-team-port.h"
 
@@ -138,7 +132,6 @@ ce_page_team_port_new (NMConnectionEditor *editor,
                        NMConnection *connection,
                        GtkWindow *parent_window,
                        NMClient *client,
-                       NMRemoteSettings *settings,
                        const char **out_secrets_setting_name,
                        GError **error)
 {
@@ -150,7 +143,6 @@ ce_page_team_port_new (NMConnectionEditor *editor,
 	                                       connection,
 	                                       parent_window,
 	                                       client,
-	                                       settings,
 	                                       UIDIR "/ce-page-team-port.ui",
 	                                       "TeamPortPage",
 	                                       /* Translators: a "Team Port" is a network

@@ -9,23 +9,24 @@ Build-Depends: debhelper (>= 9),
                dh-autoreconf,
                gnome-common,
                intltool,
-               libdbus-glib-1-dev (>= 0.74),
                libsecret-1-dev,
                libgtk-3-dev (>= 3.4),
                libglib2.0-dev (>= 2.32),
                libnotify-dev (>= 0.7),
-               libnm-util-dev (>= 1.0.0),
-               libnm-glib-dev (>= 1.0.0),
-               libnm-glib-vpn-dev (>= 1.0.0),
-               network-manager-dev (>= 1.0.0),
+               libnm-util-dev (>= 1.1),
+               libnm-glib-dev (>= 1.1),
+               libnm-glib-vpn-dev (>= 1.1),
+               network-manager-dev (>= 1.1),
+               libnm-dev (>= 1.1),
                libmm-glib-dev,
                libgudev-1.0-dev (>= 147),
                iso-codes,
                libgirepository1.0-dev,
                dh-translations,
                libappindicator3-dev,
+               libdbusmenu-gtk3-dev (>= 12.10.3+16.04.20160223.1-0ubuntu1),
                gobject-introspection
-Standards-Version: 3.9.6
+Standards-Version: 3.9.7
 Vcs-Bzr: https://code.launchpad.net/~network-manager/network-manager-applet/ubuntu
 Homepage: https://www.gnome.org/projects/NetworkManager/
 
@@ -35,8 +36,8 @@ Section: gnome
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         libnm-gtk0 (= ${binary:Version}),
-         network-manager (>= 1.0.0),
+         libnma0 (= ${binary:Version}),
+         network-manager (>= 1.1),
          policykit-1-gnome,
          adwaita-icon-theme,
          dbus-x11
@@ -72,13 +73,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          libnm-gtk-common (= ${source:Version})
 Breaks: network-manager-gnome (<< 0.9.10.0)
-Description: network management framework (GNOME dialogs for wifi and mobile)
- NetworkManager is a system network service that manages your network devices
- and connections, attempting to keep active network connectivity when
- available. It manages ethernet, WiFi, mobile broadband (WWAN), and PPPoE
- devices, and provides VPN integration with a variety of different VPN
- services.
- .
+Description: library for wireless and mobile dialogs (libnm-glib version)
  This library provides Gtk+ dialogs for NetworkManager.
 
 Package: libnm-gtk-common
@@ -86,12 +81,8 @@ Architecture: all
 Multi-Arch: foreign
 Section: libs
 Depends: ${misc:Depends}
-Description: network management framework (common files for wifi and mobile)
- NetworkManager is a system network service that manages your network devices
- and connections, attempting to keep active network connectivity when
- available. It manages ethernet, WiFi, mobile broadband (WWAN), and PPPoE
- devices, and provides VPN integration with a variety of different VPN
- services.
+Description: library for wireless and mobile dialogs - common files
+ The libnm-gtk library provides Gtk+ dialogs for NetworkManager.
  .
  This package contains data files used by libnm-gtk.
 
@@ -106,17 +97,11 @@ Depends: ${shlibs:Depends},
          network-manager-dev (>= 1.0.0),
          libnm-util-dev (>= 1.0.0),
          libnm-glib-dev (>= 1.0.0),
-         libgtk-3-dev,
-         libdbus-glib-1-dev
-Description: network management framework (dialogs development libraries)
- NetworkManager is a system network service that manages your network devices
- and connections, attempting to keep active network connectivity when
- available. It manages ethernet, WiFi, mobile broadband (WWAN), and PPPoE
- devices, and provides VPN integration with a variety of different VPN
- services.
+         libgtk-3-dev
+Description: library for wireless and mobile dialogs - development files
+ The libnm-gtk library provides Gtk+ dialogs for NetworkManager.
  .
- This package contains development libraries to use when building applications
- that need to display dialogs for wireless or mobile connections.
+ This package contains the development files.
 
 Package: gir1.2-nmgtk-1.0
 Section: introspection
@@ -126,13 +111,59 @@ Depends: ${gir:Depends},
          ${shlibs:Depends},
          ${misc:Depends}
 Description: GObject introspection data for libnm-gtk
- NetworkManager is a system network service that manages your network devices
- and connections, attempting to keep active network connectivity when
- available. It manages ethernet, WiFi, mobile broadband (WWAN), and PPPoE
- devices, and provides VPN integration with a variety of different VPN
- services.
+ The libnm-gtk library provides Gtk+ dialogs for NetworkManager.
  .
  This package contains introspection data for libnm-gtk.
+ .
+ It can be used by packages using the GIRepository format to generate
+ dynamic bindings.
+
+Package: libnma0
+Architecture: linux-any
+Multi-Arch: same
+Section: libs
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libnma-common (= ${source:Version})
+Description: library for wireless and mobile dialogs (libnm version)
+ This library provides Gtk+ dialogs for NetworkManager.
+
+Package: libnma-common
+Architecture: all
+Multi-Arch: foreign
+Section: libs
+Depends: ${misc:Depends}
+Description: library for wireless and mobile dialogs - common files
+ The libnm-gtk library provides Gtk+ dialogs for NetworkManager.
+ .
+ This package contains data files used by libnm-gtk.
+
+Package: libnma-dev
+Architecture: linux-any
+Multi-Arch: same
+Section: libdevel
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libnma0 (= ${binary:Version}),
+         gir1.2-nma-1.0 (= ${binary:Version}),
+         libnm-dev (>= 1.0.0)
+Description: library for wireless and mobile dialogs - development files
+ The libnm-gtk library provides Gtk+ dialogs for NetworkManager.
+ .
+ This package contains the development files.
+
+Package: gir1.2-nma-1.0
+Section: introspection
+Architecture: linux-any
+Multi-Arch: same
+Depends: ${gir:Depends},
+         ${shlibs:Depends},
+         ${misc:Depends}
+Description: GObject introspection data for libnma
+ The libnma library provides Gtk+ dialogs for NetworkManager.
+ .
+ This package contains introspection data for libnma.
  .
  It can be used by packages using the GIRepository format to generate
  dynamic bindings.

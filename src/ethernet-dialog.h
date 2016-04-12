@@ -17,15 +17,16 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 Novell, Inc.
- * (C) Copyright 2008 - 2011 Red Hat, Inc.
+ * Copyright 2008 Novell, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
 #ifndef ETHERNET_DIALOG_H
 #define ETHERNET_DIALOG_H
 
 #include <gtk/gtk.h>
-#include <nm-connection.h>
+
+#include <NetworkManager.h>
 
 GtkWidget *nma_ethernet_dialog_new (NMConnection *connection);
 

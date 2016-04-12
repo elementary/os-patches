@@ -20,15 +20,10 @@
  * Copyright 2007 - 2015 Red Hat, Inc.
  */
 
-#include <config.h>
+#include "nm-default.h"
+
 #include <string.h>
 #include <netinet/ether.h>
-#include <glib.h>
-#include <glib/gi18n.h>
-#include <gtk/gtk.h>
-
-#include <nm-setting-connection.h>
-#include <nm-utils.h>
 
 #include "utils.h"
 
@@ -63,12 +58,17 @@ utils_ether_addr_valid (const struct ether_addr *test_addr)
 
 	if (test_addr->ether_addr_octet[0] & 1)			/* Multicast addresses */
 		return FALSE;
-	
+
 	return TRUE;
 }
 
 char *
-utils_hash_ap (const GByteArray *ssid,
+utils_hash_ap (
+#ifdef LIBNM_BUILD
+               GBytes *ssid,
+#else
+               const GByteArray *ssid,
+#endif
                NM80211Mode mode,
                guint32 flags,
                guint32 wpa_flags,
@@ -78,8 +78,13 @@ utils_hash_ap (const GByteArray *ssid,
 
 	memset (&input[0], 0, sizeof (input));
 
-	if (ssid)
+	if (ssid) {
+#ifdef LIBNM_BUILD
+		memcpy (input, g_bytes_get_data (ssid, NULL), g_bytes_get_size (ssid));
+#else
 		memcpy (input, ssid->data, ssid->len);
+#endif
+	}
 
 	if (mode == NM_802_11_MODE_INFRA)
 		input[32] |= (1 << 0);
@@ -284,5 +289,84 @@ utils_filter_editable_on_insert_text (GtkEditable *editable,
 	g_free (result);
 
 	return count > 0;
+}
+
+/**
+ * utils_override_bg_color:
+ *
+ * The function can be used to set background color for a widget.
+ * There are functions for that in Gtk2 [1] and Gtk3 [2]. Unfortunately, they
+ * have been deprecated, and moreover gtk_widget_override_background_color()
+ * stopped working at some point for some Gtk themes, including the default
+ * Adwaita theme.
+ * [1] gtk_widget_modify_bg() or gtk_widget_modify_base()
+ * [2] gtk_widget_override_background_color()
+ *
+ * Related links:
+ * https://bugzilla.gnome.org/show_bug.cgi?id=656461
+ * https://mail.gnome.org/archives/gtk-list/2015-February/msg00053.html
+ */
+void
+utils_override_bg_color (GtkWidget *widget, GdkRGBA *rgba)
+{
+	GtkCssProvider *provider;
+	char *css;
+
+	provider = (GtkCssProvider *) g_object_get_data (G_OBJECT (widget), "our-css-provider");
+	if (G_UNLIKELY (!provider)) {
+		provider = gtk_css_provider_new ();
+		gtk_style_context_add_provider (gtk_widget_get_style_context (widget),
+		                                GTK_STYLE_PROVIDER (provider),
+		                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		g_object_set_data_full (G_OBJECT (widget), "our-css-provider",
+		                        provider, (GDestroyNotify) g_object_unref);
+	}
+
+	if (rgba) {
+		css = g_strdup_printf ("* { background-color: %s; background-image: none; }",
+		                       gdk_rgba_to_string (rgba));
+		gtk_css_provider_load_from_data (provider, css, -1, NULL);
+		g_free (css);
+	} else
+		gtk_css_provider_load_from_data (provider, "", -1, NULL);
+}
+
+void
+utils_set_cell_background (GtkCellRenderer *cell,
+                           const char *color,
+                           const char *value)
+{
+	if (color) {
+		if (!value || !*value) {
+			g_object_set (G_OBJECT (cell),
+			              "cell-background-set", TRUE,
+			              "cell-background", color,
+			              NULL);
+		} else {
+			char *markup;
+			markup = g_markup_printf_escaped ("<span background='%s'>%s</span>",
+			                                  color, value);
+			g_object_set (G_OBJECT (cell), "markup", markup, NULL);
+			g_free (markup);
+			g_object_set (G_OBJECT (cell), "cell-background-set", FALSE, NULL);
+		}
+	} else
+		g_object_set (G_OBJECT (cell), "cell-background-set", FALSE, NULL);
+}
+
+/* Change key in @event to 'Enter' key. */
+void
+utils_fake_return_key (GdkEventKey *event)
+{
+	GdkKeymapKey *keys = NULL;
+	gint n_keys;
+
+	/* Get hardware keycode for GDK_KEY_Return */
+	if (gdk_keymap_get_entries_for_keyval (gdk_keymap_get_default (), GDK_KEY_Return, &keys, &n_keys)) {
+		event->keyval = GDK_KEY_Return;
+		event->hardware_keycode = keys[0].keycode;
+		event->state = 0;
+	}
+	g_free (keys);
 }
 

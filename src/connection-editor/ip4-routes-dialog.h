@@ -17,7 +17,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
 #ifndef IP4_ROUTES_DIALOG_H
@@ -26,10 +26,12 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <NetworkManager.h>
+
 #include "nm-setting-ip4-config.h"
 
-GtkWidget *ip4_routes_dialog_new (NMSettingIP4Config *s_ip4, gboolean automatic);
+GtkWidget *ip4_routes_dialog_new (NMSettingIPConfig *s_ip4, gboolean automatic);
 
-void ip4_routes_dialog_update_setting (GtkWidget *dialog, NMSettingIP4Config *s_ip4);
+void ip4_routes_dialog_update_setting (GtkWidget *dialog, NMSettingIPConfig *s_ip4);
 
 #endif /* IP4_ROUTES_DIALOG_H */

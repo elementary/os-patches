@@ -17,30 +17,15 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2012 Red Hat, Inc.
- * (C) Copyright 2008 Novell, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
+ * Copyright 2008 Novell, Inc.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <glib/gi18n.h>
-#include <gtk/gtk.h>
-
-#include <nm-device.h>
-#include <nm-setting-connection.h>
-#include <nm-setting-bluetooth.h>
-#include <nm-setting-cdma.h>
-#include <nm-setting-gsm.h>
-#include <nm-device-bt.h>
-#include <nm-utils.h>
-#include <nm-secret-agent.h>
+#include "nm-default.h"
 
 #include "applet.h"
 #include "applet-device-bt.h"
 #include "applet-dialogs.h"
-#include "nm-ui-utils.h"
 
 static gboolean
 bt_new_auto_connection (NMDevice *device,
@@ -56,7 +41,7 @@ bt_new_auto_connection (NMDevice *device,
 static void
 bt_add_menu_item (NMDevice *device,
                   gboolean multiple__devices,
-                  GSList *connections,
+                  const GPtrArray *connections,
                   NMConnection *active,
                   GtkWidget *menu,
                   NMApplet *applet)
@@ -66,7 +51,7 @@ bt_add_menu_item (NMDevice *device,
 
 	text = nm_device_bt_get_name (NM_DEVICE_BT (device));
 	if (!text)
-		text = nma_utils_get_device_description (device);
+		text = nm_device_get_description (device);
 
 	item = applet_menu_item_create_device_item_helper (device, applet, text);
 
@@ -74,7 +59,7 @@ bt_add_menu_item (NMDevice *device,
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 	gtk_widget_show (item);
 
-	if (g_slist_length (connections))
+	if (connections->len)
 		applet_add_connection_items (device, connections, TRUE, active, NMA_ADD_ACTIVE, menu, applet);
 
 	/* Notify user of unmanaged or unavailable device */
@@ -86,7 +71,7 @@ bt_add_menu_item (NMDevice *device,
 
 	if (!nma_menu_device_check_unusable (device)) {
 		/* Add menu items for existing bluetooth connections for this device */
-		if (g_slist_length (connections)) {
+		if (connections->len) {
 			applet_menu_item_add_complex_separator_helper (menu, applet, _("Available"));
 			applet_add_connection_items (device, connections, TRUE, active, NMA_ADD_INACTIVE, menu, applet);
 		}
@@ -116,6 +101,9 @@ bt_get_icon (NMDevice *device,
 {
 	NMSettingConnection *s_con;
 	const char *id;
+
+	g_return_if_fail (out_icon_name && !*out_icon_name);
+	g_return_if_fail (tip && !*tip);
 
 	id = nm_device_get_iface (NM_DEVICE (device));
 	if (connection) {
@@ -191,14 +179,14 @@ get_bt_secrets_cb (GtkDialog *dialog,
 		} else {
 			g_set_error (&error,
 				         NM_SECRET_AGENT_ERROR,
-				         NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+				         NM_SECRET_AGENT_ERROR_FAILED,
 				         "%s.%d (%s): unhandled setting '%s'",
 				         __FILE__, __LINE__, __func__, req->setting_name);
 		}
 	} else {
 		g_set_error (&error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): canceled",
 		             __FILE__, __LINE__, __func__);
 	}
@@ -220,7 +208,7 @@ bt_get_secrets (SecretsRequest *req, GError **error)
 	if (!req->hints || !g_strv_length (req->hints)) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): missing secrets hints.",
 		             __FILE__, __LINE__, __func__);
 		return FALSE;
@@ -233,7 +221,7 @@ bt_get_secrets (SecretsRequest *req, GError **error)
 	else {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): unknown secrets hint '%s'.",
 		             __FILE__, __LINE__, __func__, info->secret_name);
 		return FALSE;
@@ -244,7 +232,7 @@ bt_get_secrets (SecretsRequest *req, GError **error)
 	if (!widget || !secret_entry) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): error asking for CDMA secrets.",
 		             __FILE__, __LINE__, __func__);
 		return FALSE;

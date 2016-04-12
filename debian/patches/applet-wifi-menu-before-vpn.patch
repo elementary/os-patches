@@ -2,20 +2,20 @@
  src/applet.c |    6 ++----
  1 file changed, 2 insertions(+), 4 deletions(-)
 
-Index: network-manager-applet-1.0.4/src/applet.c
+Index: network-manager-applet-1.1.93/src/applet.c
 ===================================================================
---- network-manager-applet-1.0.4.orig/src/applet.c
-+++ network-manager-applet-1.0.4/src/applet.c
-@@ -1793,8 +1793,6 @@ nma_menu_add_vpn_submenu (GtkWidget *men
- 	GSList *list, *iter;
- 	int num_vpn_active = 0;
+--- network-manager-applet-1.1.93.orig/src/applet.c
++++ network-manager-applet-1.1.93/src/applet.c
+@@ -1453,8 +1453,6 @@ nma_menu_add_vpn_submenu (GtkWidget *men
+ 	GPtrArray *list;
+ 	int i, num_vpn_active = 0;
  
 -	nma_menu_add_separator_item (menu);
 -
  	vpn_menu = GTK_MENU (gtk_menu_new ());
  
  	item = GTK_MENU_ITEM (gtk_menu_item_new_with_mnemonic (_("_VPN Connections")));
-@@ -1984,14 +1982,14 @@ static void nma_menu_show_cb (GtkWidget
+@@ -1633,14 +1631,14 @@ static void nma_menu_show_cb (GtkWidget
  	}
  
  	nma_menu_add_devices (menu, applet);
@@ -30,5 +30,5 @@ Index: network-manager-applet-1.0.4/src/applet.c
  	}
 +	nma_menu_add_vpn_submenu (menu, applet);
  
- 	gtk_widget_show_all (menu);
- 
+ 	if (!INDICATOR_ENABLED (applet))
+ 		gtk_widget_show_all (menu);

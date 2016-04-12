@@ -1,13 +1,13 @@
 AC_PREREQ([2.63])
 AC_INIT([nm-applet],
-        [1.0.10],
+        [1.1.93],
         [https://bugzilla.gnome.org/enter_bug.cgi?product=NetworkManager],
         [network-manager-applet])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.11 subdir-objects no-dist-gzip dist-bzip2 -Wno-portability])
+AM_INIT_AUTOMAKE([1.11 subdir-objects no-dist-gzip dist-xz -Wno-portability])
 AM_MAINTAINER_MODE([enable])
 AM_SILENT_RULES([yes])
 
@@ -73,50 +73,23 @@ else
     AC_DEFINE_UNQUOTED([ISO_CODES_PREFIX],["$prefix"],[ISO codes prefix])
 fi
 
-PKG_CHECK_MODULES(GOBJECT, gobject-2.0)
-
-PKG_CHECK_MODULES(NMA,
-		[dbus-glib-1 >= 0.74
-		 gio-2.0 >= 2.32
-		 NetworkManager >= 1.0.0
-		 libnm-glib >= 1.0.0
-		 libnm-util >= 1.0.0
-		 libnm-glib-vpn >= 1.0.0
+PKG_CHECK_MODULES(LIBNM_GLIB,
+		[gio-2.0 >= 2.32
+		 NetworkManager >= 1.1
+		 libnm-glib >= 1.1
+		 libnm-util >= 1.1
+		 libnm-glib-vpn >= 1.1
 		 gmodule-export-2.0])
+LIBNM_GLIB_CFLAGS="$LIBNM_GLIB_CFLAGS -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_32"
+LIBNM_GLIB_CFLAGS="$LIBNM_GLIB_CFLAGS -DNM_VERSION_MIN_REQUIRED=NM_VERSION_1_2"
+LIBNM_GLIB_CFLAGS="$LIBNM_GLIB_CFLAGS -DNM_VERSION_MAX_ALLOWED=NM_VERSION_1_2"
 
-NMA_CFLAGS="$NMA_CFLAGS -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_32"
-
-AC_MSG_CHECKING([whether to build nm-applet-migration-tool])
-AC_ARG_ENABLE([migration],
-	      [AS_HELP_STRING([--disable-migration], [Don't build migration tool for NM <= 0.8 settings])],
-	      [enable_migration="$enableval"],
-	      [if test "$UNDER_JHBUILD" = "true"; then
-	           enable_migration=no
-	       else
-	           enable_migration=yes
-	       fi])
-AC_MSG_RESULT([$enable_migration])
-if test "$enable_migration" = "yes"; then
-	PKG_CHECK_MODULES(MIGRATION, [gconf-2.0 gnome-keyring-1], :,
-			  [AC_MSG_ERROR([
-Could not find devel files needed for nm-applet-migration-tool:
-
-$MIGRATION_PKG_ERRORS
-
-You can configure with --disable-migration if you want to build
-without the code to migrate GConf settings from older (< 0.9)
-nm-applet releases.])])
-
-	AC_SUBST(MIGRATION_CFLAGS)
-	AC_SUBST(MIGRATION_LIBS)
-
-	AC_DEFINE(BUILD_MIGRATION_TOOL, 1, [Define when building nm-applet-migration-tool])
-fi
-AM_CONDITIONAL(BUILD_MIGRATION_TOOL, test "$enable_migration" = "yes")
+PKG_CHECK_MODULES(LIBNM, [libnm gio-2.0 >= 2.32 gmodule-export-2.0])
+LIBNM_CFLAGS="$LIBNM_CFLAGS -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_32"
+LIBNM_CFLAGS="$LIBNM_CFLAGS -DNM_VERSION_MIN_REQUIRED=NM_VERSION_1_2"
+LIBNM_CFLAGS="$LIBNM_CFLAGS -DNM_VERSION_MAX_ALLOWED=NM_VERSION_1_2"
 
 PKG_CHECK_MODULES(LIBSECRET, [libsecret-unstable])
-AC_SUBST(LIBSECRET_CFLAGS)
-AC_SUBST(LIBSECRET_LIBS)
 
 # Check for libnotify >= 0.7
 PKG_CHECK_MODULES(LIBNOTIFY_07, [libnotify >= 0.7], [have_libnotify_07=yes],[have_libnotify_07=no])
@@ -124,76 +97,70 @@ if test x"$have_libnotify_07" = "xyes"; then
 	AC_DEFINE(HAVE_LIBNOTIFY_07, 1, [Define if you have libnotify 0.7 or later])
 fi
 PKG_CHECK_MODULES(NOTIFY, [libnotify >= 0.4.3])
-AC_SUBST(NOTIFY_CFLAGS)
-AC_SUBST(NOTIFY_LIBS)
 
 PKG_CHECK_MODULES(GTK, gtk+-3.0 >= 3.4)
-AC_SUBST(GTK_CFLAGS)
-AC_SUBST(GTK_LIBS)
 GTK_CFLAGS="$GTK_CFLAGS -DGDK_VERSION_MIN_REQUIRED=GDK_VERSION_3_4"
 
-dnl Check for gnome-bluetooth
-AC_ARG_WITH([bluetooth],
-	    AS_HELP_STRING([--with-bluetooth|--without-bluetooth], [Enable Bluetooth support]),
-	    with_bluetooth="$withval",with_bluetooth=yes)
-have_gbt=no
-case "${with_bluetooth}" in
-	no)	AC_MSG_NOTICE(Bluetooth support disabled)
-		;;
-	*)
-		PKG_CHECK_MODULES(GNOME_BLUETOOTH,
-				  gnome-bluetooth-1.0 >= 2.27.6
-				  gnome-bluetooth-1.0 < 3.11.0
-				  libnm-util libnm-glib,
-				  have_gbt=yes, have_gbt=no)
-		;;
-esac
+AC_ARG_WITH([appindicator], AS_HELP_STRING([--with-appindicator|--without-appindicator], [Build with libappindicator support instead of xembed systray support.]))
+if test "$with_appindicator" == "yes"; then
+	PKG_CHECK_MODULES(APPINDICATOR, appindicator3-0.1)
+	PKG_CHECK_MODULES(DBUSMENU, dbusmenu-gtk3-0.4 >= 16.04.0)
+	AC_DEFINE([WITH_APPINDICATOR], 1, [Enable using libappindicator])
+fi
 
 AM_CONDITIONAL(HAVE_GBT, test x"$have_gbt" = "xyes")
 
-dnl ModemManager1 with libmm-glib
-AC_ARG_WITH(modem-manager-1, AS_HELP_STRING([--with-modem-manager-1], [Enable new ModemManager1 interface support]),,[with_modem_manager_1=auto])
-if (test "${with_modem_manager_1}" != "no"); then
+dnl ModemManager1 with libmm-glib for WWAN support
+AC_ARG_WITH(wwan, AS_HELP_STRING([--with-wwan], [Enable WWAN support]),,[with_wwan=auto])
+if (test "${with_wwan}" != "no"); then
     PKG_CHECK_MODULES(MM_GLIB,
                       [mm-glib],
                       [have_libmm_glib=yes],
                       [have_libmm_glib=no])
-    AC_SUBST(MM_GLIB_CFLAGS)
-    AC_SUBST(MM_GLIB_LIBS)
 
     if (test "${have_libmm_glib}" = "no"); then
-        if (test "${with_modem_manager_1}" = "yes"); then
+        if (test "${with_wwan}" = "yes"); then
             AC_MSG_ERROR([Couldn't find libmm-glib])
         fi
     else
-        with_modem_manager_1="yes"
+        with_wwan="yes"
     fi
 fi
 
-if (test "${with_modem_manager_1}" = "yes"); then
-    AC_DEFINE(WITH_MODEM_MANAGER_1, 1, [Define if you have ModemManager1 support])
+if (test "${with_wwan}" = "yes"); then
+    AC_DEFINE(WITH_WWAN, 1, [Define if you have ModemManager/WWAN support])
 else
-	AC_DEFINE(WITH_MODEM_MANAGER_1, 0, [Define if you have ModemManager1 support])
+	AC_DEFINE(WITH_WWAN, 0, [Define if you have ModemManager/WWAN support])
 fi
-AM_CONDITIONAL(WITH_MODEM_MANAGER_1, test "${with_modem_manager_1}" = "yes")
+AM_CONDITIONAL(WITH_WWAN, test "${with_wwan}" = "yes")
 
 dnl Check for gudev
 PKG_CHECK_MODULES(GUDEV, gudev-1.0 >= 147)
-AC_SUBST(GUDEV_CFLAGS)
-AC_SUBST(GUDEV_LIBS)
 
 dnl Check for gobject introspection
 GOBJECT_INTROSPECTION_CHECK([0.9.6])
 
 GLIB_CONFIG_NMA
-GLIB_SETTINGS
+GLIB_GSETTINGS
 
 dnl
 dnl Compiler flags
 dnl
 NM_COMPILER_WARNINGS
-# Use --enable-maintainer-mode to disabled deprecated symbols
-GNOME_MAINTAINER_MODE_DEFINES
+
+
+AC_ARG_WITH(more-asserts,
+            AS_HELP_STRING([--with-more-asserts=level], [Enable more assertions for debugging (default: 0)]),
+            [more_asserts=${with_more_asserts}],
+            [more_asserts=no])
+if test "${more_asserts}" = "no"; then
+    more_asserts=0
+else
+    if test "${more_asserts}" = "yes"; then
+        more_asserts=100
+    fi
+fi
+AC_DEFINE_UNQUOTED(NM_MORE_ASSERTS, $more_asserts, [Define if more asserts are enabled])
 
 
 AC_CONFIG_FILES([
@@ -203,14 +170,12 @@ src/libnm-gtk/Makefile
 src/libnm-gtk/tests/Makefile
 src/libnm-gtk/examples/Makefile
 src/libnm-gtk/libnm-gtk.pc
-src/marshallers/Makefile
+src/libnma/Makefile
+src/libnma/libnma.pc
 src/utils/Makefile
 src/utils/tests/Makefile
-src/gconf-helpers/Makefile
-src/gconf-helpers/tests/Makefile
 src/wireless-security/Makefile
 src/connection-editor/Makefile
-src/gnome-bluetooth/Makefile
 icons/Makefile
 icons/16/Makefile
 icons/22/Makefile
@@ -221,6 +186,7 @@ po/Makefile.in
 man/Makefile
 man/nm-applet.1
 man/nm-connection-editor.1
+shared/Makefile
 org.gnome.nm-applet.gschema.xml
 ])
 AC_OUTPUT

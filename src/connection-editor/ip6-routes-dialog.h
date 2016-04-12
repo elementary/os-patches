@@ -17,7 +17,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
 #ifndef IP6_ROUTES_DIALOG_H
@@ -26,10 +26,12 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <NetworkManager.h>
+
 #include "nm-setting-ip6-config.h"
 
-GtkWidget *ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic);
+GtkWidget *ip6_routes_dialog_new (NMSettingIPConfig *s_ip6, gboolean automatic);
 
-void ip6_routes_dialog_update_setting (GtkWidget *dialog, NMSettingIP6Config *s_ip6);
+void ip6_routes_dialog_update_setting (GtkWidget *dialog, NMSettingIPConfig *s_ip6);
 
 #endif /* IP6_ROUTES_DIALOG_H */

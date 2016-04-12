@@ -10,11 +10,11 @@ supports WPA2/RSN in Ad-Hoc/IBSS mode.
  src/wireless-security/ws-wpa-psk.c         |   15 +++++++--------
  4 files changed, 10 insertions(+), 19 deletions(-)
 
-Index: network-manager-applet-1.0.4/src/applet-dialogs.c
+Index: network-manager-applet-1.1.93/src/applet-dialogs.c
 ===================================================================
---- network-manager-applet-1.0.4.orig/src/applet-dialogs.c
-+++ network-manager-applet-1.0.4/src/applet-dialogs.c
-@@ -239,8 +239,6 @@ create_info_label_security (NMConnection
+--- network-manager-applet-1.1.93.orig/src/applet-dialogs.c
++++ network-manager-applet-1.1.93/src/applet-dialogs.c
+@@ -225,8 +225,6 @@ create_info_label_security (NMConnection
  
  			if (!strcmp (key_mgmt, "none"))
  				label = g_strdup (_("WEP"));
@@ -23,11 +23,11 @@ Index: network-manager-applet-1.0.4/src/applet-dialogs.c
  			else if (!strcmp (key_mgmt, "wpa-psk"))
  				label = g_strdup (_("WPA/WPA2"));
  			else
-Index: network-manager-applet-1.0.4/src/connection-editor/page-wifi-security.c
+Index: network-manager-applet-1.1.93/src/connection-editor/page-wifi-security.c
 ===================================================================
---- network-manager-applet-1.0.4.orig/src/connection-editor/page-wifi-security.c
-+++ network-manager-applet-1.0.4/src/connection-editor/page-wifi-security.c
-@@ -85,8 +85,7 @@ get_default_type_for_security (NMSetting
+--- network-manager-applet-1.1.93.orig/src/connection-editor/page-wifi-security.c
++++ network-manager-applet-1.1.93/src/connection-editor/page-wifi-security.c
+@@ -76,8 +76,7 @@ get_default_type_for_security (NMSetting
  		return NMU_SEC_DYNAMIC_WEP;
  	}
  
@@ -37,7 +37,7 @@ Index: network-manager-applet-1.0.4/src/connection-editor/page-wifi-security.c
  		if (find_proto (sec, "rsn"))
  			return NMU_SEC_WPA2_PSK;
  		else if (find_proto (sec, "wpa"))
-@@ -342,7 +341,7 @@ finish_setup (CEPageWifiSecurity *self,
+@@ -355,7 +354,7 @@ finish_setup (CEPageWifiSecurity *self,
  		ws_wpa_psk = ws_wpa_psk_new (connection, FALSE);
  		if (ws_wpa_psk) {
  			add_security_item (self, WIRELESS_SECURITY (ws_wpa_psk), sec_model,
@@ -46,7 +46,7 @@ Index: network-manager-applet-1.0.4/src/connection-editor/page-wifi-security.c
  			if ((active < 0) && ((default_type == NMU_SEC_WPA_PSK) || (default_type == NMU_SEC_WPA2_PSK)))
  				active = item;
  			item++;
-@@ -469,10 +468,6 @@ validate (CEPage *page, NMConnection *co
+@@ -482,10 +481,6 @@ ce_page_validate_v (CEPage *page, NMConn
  	s_wireless = nm_connection_get_setting_wireless (connection);
  	g_assert (s_wireless);
  
@@ -57,11 +57,11 @@ Index: network-manager-applet-1.0.4/src/connection-editor/page-wifi-security.c
  	mode = nm_setting_wireless_get_mode (s_wireless);
  	if (g_strcmp0 (mode, NM_SETTING_WIRELESS_MODE_ADHOC) == 0)
  		priv->mode = NM_802_11_MODE_ADHOC;
-Index: network-manager-applet-1.0.4/src/libnm-gtk/nm-wifi-dialog.c
+Index: network-manager-applet-1.1.93/src/libnm-gtk/nm-wifi-dialog.c
 ===================================================================
---- network-manager-applet-1.0.4.orig/src/libnm-gtk/nm-wifi-dialog.c
-+++ network-manager-applet-1.0.4/src/libnm-gtk/nm-wifi-dialog.c
-@@ -691,8 +691,7 @@ get_default_type_for_security (NMSetting
+--- network-manager-applet-1.1.93.orig/src/libnm-gtk/nm-wifi-dialog.c
++++ network-manager-applet-1.1.93/src/libnm-gtk/nm-wifi-dialog.c
+@@ -716,8 +716,7 @@ get_default_type_for_security (NMSetting
  		return NMU_SEC_DYNAMIC_WEP;
  	}
  
@@ -71,11 +71,11 @@ Index: network-manager-applet-1.0.4/src/libnm-gtk/nm-wifi-dialog.c
  		if (!have_ap || (ap_flags & NM_802_11_AP_FLAGS_PRIVACY)) {
  			if (find_proto (sec, "rsn"))
  				return NMU_SEC_WPA2_PSK;
-Index: network-manager-applet-1.0.4/src/wireless-security/ws-wpa-psk.c
+Index: network-manager-applet-1.1.93/src/wireless-security/ws-wpa-psk.c
 ===================================================================
---- network-manager-applet-1.0.4.orig/src/wireless-security/ws-wpa-psk.c
-+++ network-manager-applet-1.0.4/src/wireless-security/ws-wpa-psk.c
-@@ -132,14 +132,13 @@ fill_connection (WirelessSecurity *paren
+--- network-manager-applet-1.1.93.orig/src/wireless-security/ws-wpa-psk.c
++++ network-manager-applet-1.1.93/src/wireless-security/ws-wpa-psk.c
+@@ -143,14 +143,13 @@ fill_connection (WirelessSecurity *paren
  	wireless_security_clear_ciphers (connection);
  	if (is_adhoc) {
  		/* Ad-Hoc settings as specified by the supplicant */
@@ -96,7 +96,7 @@ Index: network-manager-applet-1.0.4/src/wireless-security/ws-wpa-psk.c
  	} else {
  		g_object_set (s_wireless_sec, NM_SETTING_WIRELESS_SECURITY_KEY_MGMT, "wpa-psk", NULL);
  
-@@ -179,7 +178,7 @@ ws_wpa_psk_new (NMConnection *connection
+@@ -190,7 +189,7 @@ ws_wpa_psk_new (NMConnection *connection
  	if (!parent)
  		return NULL;
  

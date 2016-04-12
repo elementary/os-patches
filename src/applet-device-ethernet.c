@@ -17,29 +17,15 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2012 Red Hat, Inc.
- * (C) Copyright 2008 Novell, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
+ * Copyright 2008 Novell, Inc.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <glib/gi18n.h>
-#include <gtk/gtk.h>
-
-#include <nm-device.h>
-#include <nm-setting-connection.h>
-#include <nm-setting-wired.h>
-#include <nm-setting-8021x.h>
-#include <nm-setting-pppoe.h>
-#include <nm-device-ethernet.h>
-#include <nm-utils.h>
+#include "nm-default.h"
 
 #include "applet.h"
 #include "applet-device-ethernet.h"
 #include "ethernet-dialog.h"
-#include "nm-ui-utils.h"
 
 #define DEFAULT_ETHERNET_NAME _("Auto Ethernet")
 
@@ -54,7 +40,7 @@ ethernet_new_auto_connection (NMDevice *device,
 	NMSettingConnection *s_con;
 	char *uuid;
 
-	connection = nm_connection_new ();
+	connection = nm_simple_connection_new ();
 
 	s_wired = NM_SETTING_WIRED (nm_setting_wired_new ());
 	nm_connection_add_setting (connection, NM_SETTING (s_wired));
@@ -78,7 +64,7 @@ ethernet_new_auto_connection (NMDevice *device,
 static void
 ethernet_add_menu_item (NMDevice *device,
                         gboolean multiple_devices,
-                        GSList *connections,
+                        const GPtrArray *connections,
                         NMConnection *active,
                         GtkWidget *menu,
                         NMApplet *applet)
@@ -90,14 +76,14 @@ ethernet_add_menu_item (NMDevice *device,
 	if (multiple_devices) {
 		const char *desc;
 
-		desc = nma_utils_get_device_description (device);
+		desc = nm_device_get_description (device);
 
-		if (g_slist_length (connections) > 1)
+		if (connections->len > 1)
 			text = g_strdup_printf (_("Ethernet Networks (%s)"), desc);
 		else
 			text = g_strdup_printf (_("Ethernet Network (%s)"), desc);
 	} else {
-		if (g_slist_length (connections) > 1)
+		if (connections->len > 1)
 			text = g_strdup (_("Ethernet Networks"));
 		else
 			text = g_strdup (_("Ethernet Network"));
@@ -116,7 +102,7 @@ ethernet_add_menu_item (NMDevice *device,
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 	gtk_widget_show (item);
 
-	if (g_slist_length (connections))
+	if (connections->len)
 		applet_add_connection_items (device, connections, carrier, active, NMA_ADD_ACTIVE, menu, applet);
 
 	/* Notify user of unmanaged or unavailable device */
@@ -127,10 +113,10 @@ ethernet_add_menu_item (NMDevice *device,
 	}
 
 	if (!nma_menu_device_check_unusable (device)) {
-		if ((!active && g_slist_length (connections)) || (active && g_slist_length (connections) > 1))
+		if ((!active && connections->len) || (active && connections->len > 1))
 			applet_menu_item_add_complex_separator_helper (menu, applet, _("Available"));
 
-		if (g_slist_length (connections))
+		if (connections->len)
 			applet_add_connection_items (device, connections, carrier, active, NMA_ADD_INACTIVE, menu, applet);
 		else
 			applet_add_default_connection_item (device, DEFAULT_ETHERNET_NAME, carrier, menu, applet);
@@ -161,6 +147,9 @@ ethernet_get_icon (NMDevice *device,
 	NMSettingConnection *s_con;
 	const char *id;
 
+	g_return_if_fail (out_icon_name && !*out_icon_name);
+	g_return_if_fail (tip && !*tip);
+
 	id = nm_device_get_iface (NM_DEVICE (device));
 	if (connection) {
 		s_con = nm_connection_get_setting_connection (connection);
@@ -181,7 +170,7 @@ ethernet_get_icon (NMDevice *device,
 		*tip = g_strdup_printf (_("Requesting an ethernet network address for '%s'..."), id);
 		break;
 	case NM_DEVICE_STATE_ACTIVATED:
-		*out_icon_name = g_strdup_printf ("nm-device-wired");
+		*out_icon_name = "nm-device-wired";
 		*tip = g_strdup_printf (_("Ethernet network connection '%s' active"), id);
 		break;
 	default:
@@ -222,7 +211,7 @@ pppoe_verify (GtkEditable *editable, gpointer user_data)
 }
 
 static void
-pppoe_update_setting (NMSettingPPPOE *pppoe, NMPppoeInfo *info)
+pppoe_update_setting (NMSettingPppoe *pppoe, NMPppoeInfo *info)
 {
 	const char *s;
 
@@ -231,16 +220,16 @@ pppoe_update_setting (NMSettingPPPOE *pppoe, NMPppoeInfo *info)
 		s = NULL;
 
 	g_object_set (pppoe,
-				  NM_SETTING_PPPOE_USERNAME, gtk_entry_get_text (info->username_entry),
-				  NM_SETTING_PPPOE_PASSWORD, gtk_entry_get_text (info->password_entry),
-				  NM_SETTING_PPPOE_SERVICE, s,
-				  NULL);
+	              NM_SETTING_PPPOE_USERNAME, gtk_entry_get_text (info->username_entry),
+	              NM_SETTING_PPPOE_PASSWORD, gtk_entry_get_text (info->password_entry),
+	              NM_SETTING_PPPOE_SERVICE, s,
+	              NULL);
 }
 
 static void
 pppoe_update_ui (NMConnection *connection, NMPppoeInfo *info)
 {
-	NMSettingPPPOE *s_pppoe;
+	NMSettingPppoe *s_pppoe;
 	const char *s;
 
 	g_return_if_fail (NM_IS_CONNECTION (connection));
@@ -278,9 +267,8 @@ get_pppoe_secrets_cb (GtkDialog *dialog, gint response, gpointer user_data)
 {
 	SecretsRequest *req = user_data;
 	NMPppoeInfo *info = (NMPppoeInfo *) req;
-	NMSettingPPPOE *setting;
-	GHashTable *settings = NULL;
-	GHashTable *secrets;
+	NMSettingPppoe *setting;
+	GVariant *secrets = NULL;
 	GError *error = NULL;
 
 	if (response != GTK_RESPONSE_OK) {
@@ -295,27 +283,21 @@ get_pppoe_secrets_cb (GtkDialog *dialog, gint response, gpointer user_data)
 	setting = nm_connection_get_setting_pppoe (req->connection);
 	pppoe_update_setting (setting, info);
 
-	secrets = nm_setting_to_hash (NM_SETTING (setting), NM_SETTING_HASH_FLAG_ONLY_SECRETS);
+	secrets = nm_connection_to_dbus (req->connection, NM_CONNECTION_SERIALIZE_ONLY_SECRETS);
 	if (!secrets) {
 		g_set_error (&error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 					 "%s.%d (%s): failed to hash setting " NM_SETTING_PPPOE_SETTING_NAME,
 					 __FILE__, __LINE__, __func__);
-	} else {
-		/* Returned secrets are a{sa{sv}}; this is the outer a{s...} hash that
-		 * will contain all the individual settings hashes.
-		 */
-		settings = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, (GDestroyNotify) g_hash_table_destroy);
-		g_hash_table_insert (settings, NM_SETTING_PPPOE_SETTING_NAME, secrets);
 	}
 
 done:
-	applet_secrets_request_complete (req, settings, error);
+	applet_secrets_request_complete (req, secrets, error);
 	applet_secrets_request_free (req);
 
-	if (settings)
-		g_hash_table_destroy (settings);
+	if (secrets)
+		g_variant_unref (secrets);
 }
 
 static void
@@ -342,7 +324,7 @@ pppoe_get_secrets (SecretsRequest *req, GError **error)
 	if (!gtk_builder_add_from_file (builder, UIDIR "/ce-page-dsl.ui", &tmp_error)) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 					 "%s.%d (%s): couldn't display secrets UI: %s",
 		             __FILE__, __LINE__, __func__, tmp_error->message);
 		g_error_free (tmp_error);
@@ -426,7 +408,7 @@ get_8021x_secrets_cb (GtkDialog *dialog, gint response, gpointer user_data)
 	if (!connection) {
 		g_set_error (&error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): couldn't get connection from ethernet dialog.",
 		             __FILE__, __LINE__, __func__);
 		goto done;
@@ -438,7 +420,7 @@ get_8021x_secrets_cb (GtkDialog *dialog, gint response, gpointer user_data)
 	} else {
 		g_set_error (&error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 					 "%s.%d (%s): requested setting '802-1x' didn't"
 					 " exist in the connection.",
 					 __FILE__, __LINE__, __func__);
@@ -461,7 +443,7 @@ nm_8021x_get_secrets (SecretsRequest *req, GError **error)
 	if (!info->dialog) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): couldn't display secrets UI",
 		             __FILE__, __LINE__, __func__);
 		return FALSE;
@@ -500,7 +482,7 @@ ethernet_get_secrets (SecretsRequest *req, GError **error)
 	else {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): unhandled ethernet connection type '%s'",
 		             __FILE__, __LINE__, __func__, ctype);
 	}

@@ -13,10 +13,14 @@
  * Copyright (C) 2012 Aleksander Morgado <aleksander@gnu.org>
  */
 
+#include "nm-default.h"
+
 #include <locale.h>
 #include <string.h>
 
 #include "nm-mobile-providers.h"
+
+#include "nm-test-utils.h"
 
 #if defined TEST_DATA_DIR
 #  define COUNTRY_CODES_FILE     TEST_DATA_DIR "/iso3166-test.xml"
@@ -317,7 +321,7 @@ ensure_movistar (NMAMobileProvider *provider)
 	}
 
 	/* Check access method name, APN and type */
-	g_assert_cmpstr (nma_mobile_access_method_get_name (method), ==, "Default");
+	g_assert_cmpstr (nma_mobile_access_method_get_name (method), !=, NULL);
 	g_assert_cmpint (nma_mobile_access_method_get_family (method), ==, NMA_MOBILE_FAMILY_3GPP);
 	g_assert_cmpstr (nma_mobile_access_method_get_3gpp_apn (method), ==, "movistar.es");
 
@@ -486,12 +490,13 @@ split_mccmnc_error_4 (void)
 
 /******************************************************************************/
 
+NMTST_DEFINE ();
+
 int main (int argc, char **argv)
 {
 	setlocale (LC_ALL, "");
 
-	g_type_init ();
-	g_test_init (&argc, &argv, NULL);
+	nmtst_init (&argc, &argv, TRUE);
 
 	g_test_add_func ("/MobileProvidersDatabase/new-sync",  new_sync);
 	g_test_add_func ("/MobileProvidersDatabase/new-async", new_async);

@@ -17,27 +17,22 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2004 - 2012 Red Hat, Inc.
+ * Copyright 2004 - 2014 Red Hat, Inc.
  */
 
-#include <config.h>
+#include "nm-default.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <glib.h>
 #include <unistd.h>
 #include <errno.h>
 
-#include <glib-object.h>
+#include <NetworkManager.h>
 
 #include "applet-vpn-request.h"
-#include "nma-marshal.h"
-#include <nm-connection.h>
-#include <nm-setting-connection.h>
-#include <nm-setting-vpn.h>
-#include <nm-secret-agent.h>
 
 #define APPLET_TYPE_VPN_REQUEST            (applet_vpn_request_get_type ())
 #define APPLET_VPN_REQUEST(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), APPLET_TYPE_VPN_REQUEST, AppletVpnRequest))
@@ -87,8 +82,6 @@ typedef struct {
 	AppletVpnRequest *vpn;
 } VpnSecretsInfo;
 
-#define DBUS_TYPE_G_MAP_OF_STRING (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_STRING))
-
 static void 
 child_finished_cb (GPid pid, gint status, gpointer user_data)
 {
@@ -97,22 +90,15 @@ child_finished_cb (GPid pid, gint status, gpointer user_data)
 	AppletVpnRequest *self = info->vpn;
 	AppletVpnRequestPrivate *priv = APPLET_VPN_REQUEST_GET_PRIVATE (self);
 	GError *error = NULL;
-	GHashTable *settings = NULL;
+	GVariant *settings = NULL;
+	GVariantBuilder settings_builder, vpn_builder, secrets_builder;
 
 	if (status == 0) {
-		GHashTable *vpn, *secrets;
-		GValue val = { 0 };
 		GSList *iter;
 
-		settings = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, (GDestroyNotify) g_hash_table_destroy);
-
-		vpn = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, (GDestroyNotify) g_value_unset);
-		g_hash_table_insert (settings, NM_SETTING_VPN_SETTING_NAME, vpn);
-
-		secrets = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
-		g_value_init (&val, DBUS_TYPE_G_MAP_OF_STRING);
-		g_value_take_boxed (&val, secrets);
-		g_hash_table_insert (vpn, NM_SETTING_VPN_SECRETS, &val);
+		g_variant_builder_init (&settings_builder, NM_VARIANT_TYPE_CONNECTION);
+		g_variant_builder_init (&vpn_builder, NM_VARIANT_TYPE_SETTING);
+		g_variant_builder_init (&secrets_builder, G_VARIANT_TYPE ("a{ss}"));
 
 		/* The length of 'lines' must be divisible by 2 since it must contain
 		 * key:secret pairs with the key on one line and the associated secret
@@ -121,9 +107,17 @@ child_finished_cb (GPid pid, gint status, gpointer user_data)
 		for (iter = priv->lines; iter; iter = g_slist_next (iter)) {
 			if (!iter->next)
 				break;
-			g_hash_table_insert (secrets, (char *) iter->data, (char *) iter->next->data);
+			g_variant_builder_add (&secrets_builder, "{ss}", iter->data, iter->next->data);
 			iter = iter->next;
 		}
+
+		g_variant_builder_add (&vpn_builder, "{sv}",
+		                       NM_SETTING_VPN_SECRETS,
+                                       g_variant_builder_end (&secrets_builder));
+		g_variant_builder_add (&settings_builder, "{sa{sv}}",
+		                       NM_SETTING_VPN_SETTING_NAME,
+		                       &vpn_builder);
+		settings = g_variant_builder_end (&settings_builder);
 	} else {
 		error = g_error_new (NM_SECRET_AGENT_ERROR,
 		                     NM_SECRET_AGENT_ERROR_USER_CANCELED,
@@ -135,7 +129,7 @@ child_finished_cb (GPid pid, gint status, gpointer user_data)
 	applet_secrets_request_free (req);
 
 	if (settings)
-		g_hash_table_destroy (settings);
+		g_variant_unref (settings);
 	g_clear_error (&error);
 }
 
@@ -184,7 +178,7 @@ find_auth_dialog_binary (const char *service,
 	if (!dir) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "Failed to open VPN plugin file configuration directory " VPN_NAME_FILES_DIR);
 		return NULL;
 	}
@@ -217,7 +211,7 @@ find_auth_dialog_binary (const char *service,
 	if (prog == NULL) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "Could not find the authentication dialog for VPN connection type '%s'",
 		             service);
 	} else if (!g_path_is_absolute (prog)) {
@@ -272,7 +266,7 @@ write_item (int fd, const char *item, GError **error)
 	if (write (fd, item, item_len) != item_len) {
 		g_set_error (error,
 			         NM_SECRET_AGENT_ERROR,
-			         NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+			         NM_SECRET_AGENT_ERROR_FAILED,
 			         "Failed to write connection to VPN UI: errno %d", errno);
 		return FALSE;
 	}
@@ -310,14 +304,14 @@ write_one_key_val (const char *key, const char *value, gpointer user_data)
 static gboolean
 write_connection_to_child (int fd, NMConnection *connection, GError **error)
 {
-	NMSettingVPN *s_vpn;
+	NMSettingVpn *s_vpn;
 	WriteItemInfo info = { .fd = fd, .secret = FALSE, .error = error };
 
 	s_vpn = nm_connection_get_setting_vpn (connection);
 	if (!s_vpn) {
 		g_set_error_literal (error,
 		                     NM_SECRET_AGENT_ERROR,
-		                     NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		                     NM_SECRET_AGENT_ERROR_FAILED,
 		                     "Connection had no VPN setting");
 		return FALSE;
 	}
@@ -351,7 +345,7 @@ applet_vpn_request_get_secrets (SecretsRequest *req, GError **error)
 	VpnSecretsInfo *info = (VpnSecretsInfo *) req;
 	AppletVpnRequestPrivate *priv;
 	NMSettingConnection *s_con;
-	NMSettingVPN *s_vpn;
+	NMSettingVpn *s_vpn;
 	const char *connection_type;
 	const char *service_type;
 	char *bin_path;
@@ -384,7 +378,7 @@ applet_vpn_request_get_secrets (SecretsRequest *req, GError **error)
 	if (!info->vpn) {
 		g_set_error_literal (error,
 		                     NM_SECRET_AGENT_ERROR,
-		                     NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		                     NM_SECRET_AGENT_ERROR_FAILED,
 		                     "Could not create VPN secrets request object");
 		goto out;
 	}

@@ -8,18 +8,20 @@ instead of an offline icon.
 
 Closes: #471191
 ---
- src/applet.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ src/applet.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/src/applet.c b/src/applet.c
-index 7a79622..69e9870 100644
+index 0fe14e7..bc95ad2 100644
 --- a/src/applet.c
 +++ b/src/applet.c
-@@ -2952,6 +2952,10 @@ applet_update_icon (gpointer user_data)
- 		break;
- 	default:
- 		applet_get_device_icon_for_state (applet, &pixbuf, &icon_name, &dev_tip);
-+		if (!pixbuf && state == NM_STATE_CONNECTED) {
+@@ -2619,6 +2619,12 @@ applet_update_icon (gpointer user_data)
+ 		applet_get_device_icon_for_state (applet, &pixbuf, &icon_name_free, &dev_tip_free);
+ 		icon_name = icon_name_free;
+ 		dev_tip = dev_tip_free;
++		if (!pixbuf && (   state == NM_STATE_CONNECTED_LOCAL
++		                || state == NM_STATE_CONNECTED_SITE
++		                || state == NM_STATE_CONNECTED_GLOBAL)) {
 +			icon_name = g_strdup ("nm-device-wired");
 +			pixbuf = g_object_ref (nma_icon_check_and_load (icon_name, applet));
 +		}

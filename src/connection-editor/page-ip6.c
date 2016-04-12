@@ -17,35 +17,21 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2012 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-
-#include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <glib/gi18n.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include <nm-setting-connection.h>
-#include <nm-setting-ip6-config.h>
-#include <nm-setting-wired.h>
-#include <nm-setting-wireless.h>
-#include <nm-setting-gsm.h>
-#include <nm-setting-cdma.h>
-#include <nm-setting-pppoe.h>
-#include <nm-setting-vpn.h>
-#include <nm-utils.h>
-
 #include "page-ip6.h"
 #include "ip6-routes-dialog.h"
-#include "nm-glib-compat.h"
 
 G_DEFINE_TYPE (CEPageIP6, ce_page_ip6, CE_TYPE_PAGE)
 
@@ -57,7 +43,7 @@ G_DEFINE_TYPE (CEPageIP6, ce_page_ip6, CE_TYPE_PAGE)
 #define COL_LAST COL_GATEWAY
 
 typedef struct {
-	NMSettingIP6Config *setting;
+	NMSettingIPConfig *setting;
 	char *connection_id;
 	GType connection_type;
 
@@ -137,7 +123,7 @@ ip6_private_init (CEPageIP6 *self, NMConnection *connection)
 	connection_type = nm_setting_connection_get_connection_type (s_con);
 	g_assert (connection_type);
 
-	priv->connection_type = nm_connection_lookup_setting_type (connection_type);
+	priv->connection_type = nm_setting_lookup_type (connection_type);
 
 	if (priv->connection_type == NM_TYPE_SETTING_VPN) {
 		str_auto = _("Automatic (VPN)");
@@ -355,7 +341,7 @@ static void
 populate_ui (CEPageIP6 *self)
 {
 	CEPageIP6Private *priv = CE_PAGE_IP6_GET_PRIVATE (self);
-	NMSettingIP6Config *setting = priv->setting;
+	NMSettingIPConfig *setting = priv->setting;
 	GtkListStore *store;
 	GtkTreeIter model_iter;
 	int method = IP6_METHOD_AUTO;
@@ -368,7 +354,7 @@ populate_ui (CEPageIP6 *self)
 
 	/* Method */
 	gtk_combo_box_set_active (priv->method, 0);
-	str_method = nm_setting_ip6_config_get_method (setting);
+	str_method = nm_setting_ip_config_get_method (setting);
 	if (str_method) {
 		if (!strcmp (str_method, NM_SETTING_IP6_CONFIG_METHOD_IGNORE))
 			method = IP6_METHOD_IGNORE;
@@ -384,7 +370,7 @@ populate_ui (CEPageIP6 *self)
 			method = IP6_METHOD_SHARED;
 	}
 
-	if (method == IP6_METHOD_AUTO && nm_setting_ip6_config_get_ignore_auto_dns (setting))
+	if (method == IP6_METHOD_AUTO && nm_setting_ip_config_get_ignore_auto_dns (setting))
 		method = IP6_METHOD_AUTO_ADDRESSES;
 
 	info.method = method;
@@ -393,33 +379,24 @@ populate_ui (CEPageIP6 *self)
 
 	/* Addresses */
 	store = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-	for (i = 0; i < nm_setting_ip6_config_get_num_addresses (setting); i++) {
-		NMIP6Address *addr = nm_setting_ip6_config_get_address (setting, i);
-		const struct in6_addr *tmp_addr;
-		char buf[INET6_ADDRSTRLEN + 1];
+	for (i = 0; i < nm_setting_ip_config_get_num_addresses (setting); i++) {
+		NMIPAddress *addr = nm_setting_ip_config_get_address (setting, i);
+		char buf[32];
 
 		if (!addr) {
 			g_warning ("%s: empty IP6 Address structure!", __func__);
 			continue;
 		}
 
+		snprintf (buf, sizeof (buf), "%u", nm_ip_address_get_prefix (addr));
+
 		gtk_list_store_append (store, &model_iter);
-
-		/* Address */
-		tmp_addr = nm_ip6_address_get_address (addr);
-		(void) inet_ntop (AF_INET6, tmp_addr, &buf[0], sizeof (buf));
-		gtk_list_store_set (store, &model_iter, COL_ADDRESS, buf, -1);
-
-		/* Prefix */
-		snprintf (buf, sizeof (buf), "%u", nm_ip6_address_get_prefix (addr));
-		gtk_list_store_set (store, &model_iter, COL_PREFIX, buf, -1);
-
-		/* Gateway */
-		tmp_addr = nm_ip6_address_get_gateway (addr);
-		if (tmp_addr && !IN6_IS_ADDR_UNSPECIFIED (tmp_addr)) {
-			(void) inet_ntop (AF_INET6, tmp_addr, &buf[0], sizeof (buf));
-			gtk_list_store_set (store, &model_iter, COL_GATEWAY, buf, -1);
-		}
+		gtk_list_store_set (store, &model_iter,
+		                    COL_ADDRESS, nm_ip_address_get_address (addr),
+		                    COL_PREFIX, buf,
+		                    /* FIXME */
+		                    COL_GATEWAY, i == 0 ? nm_setting_ip_config_get_gateway (setting) : NULL,
+		                    -1);
 	}
 
 	gtk_tree_view_set_model (priv->addr_list, GTK_TREE_MODEL (store));
@@ -429,34 +406,32 @@ populate_ui (CEPageIP6 *self)
 
 	/* DNS servers */
 	string = g_string_new ("");
-	for (i = 0; i < nm_setting_ip6_config_get_num_dns (setting); i++) {
-		const struct in6_addr *tmp_addr;
-		char buf[INET6_ADDRSTRLEN + 1];
+	for (i = 0; i < nm_setting_ip_config_get_num_dns (setting); i++) {
+		const char *dns;
 
-		tmp_addr = nm_setting_ip6_config_get_dns (setting, i);
-		if (!tmp_addr)
+		dns = nm_setting_ip_config_get_dns (setting, i);
+		if (!dns)
 			continue;
 
-		(void) inet_ntop (AF_INET6, tmp_addr, &buf[0], sizeof (buf));
 		if (string->len)
 			g_string_append (string, ", ");
-		g_string_append (string, buf);
+		g_string_append (string, dns);
 	}
 	gtk_entry_set_text (priv->dns_servers, string->str);
 	g_string_free (string, TRUE);
 
 	/* DNS searches */
 	string = g_string_new ("");
-	for (i = 0; i < nm_setting_ip6_config_get_num_dns_searches (setting); i++) {
+	for (i = 0; i < nm_setting_ip_config_get_num_dns_searches (setting); i++) {
 		if (string->len)
 			g_string_append (string, ", ");
-		g_string_append (string, nm_setting_ip6_config_get_dns_search (setting, i));
+		g_string_append (string, nm_setting_ip_config_get_dns_search (setting, i));
 	}
 	gtk_entry_set_text (priv->dns_searches, string->str);
 	g_string_free (string, TRUE);
 
 	/* IPv6 privacy extensions */
-	ip6_privacy = nm_setting_ip6_config_get_ip6_privacy (setting);
+	ip6_privacy = nm_setting_ip6_config_get_ip6_privacy (NM_SETTING_IP6_CONFIG (setting));
 	switch (ip6_privacy) {
 	case NM_SETTING_IP6_CONFIG_PRIVACY_DISABLED:
 		ip6_privacy_idx = IP6_PRIVACY_DISABLED;
@@ -475,7 +450,38 @@ populate_ui (CEPageIP6 *self)
 
 	/* IPv6 required */
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->ip6_required),
-	                              !nm_setting_ip6_config_get_may_fail (setting));
+	                              !nm_setting_ip_config_get_may_fail (setting));
+}
+
+static gboolean
+is_prefix_valid (const char *prefix_str, guint32 *out_prefix)
+{
+	guint32 prefix;
+	char *end;
+
+	if (!prefix_str || !*prefix_str)
+		return FALSE;
+
+	prefix = strtoul (prefix_str, &end, 10);
+	if (!end || *end || prefix == 0 || prefix > 128)
+		return FALSE;
+	else {
+		if (out_prefix)
+			*out_prefix = prefix;
+		return TRUE;
+	}
+}
+
+static gboolean
+is_address_unspecified (const char *str)
+{
+	struct in6_addr addr;
+
+	if (!str)
+		return FALSE;
+
+	return (   inet_pton (AF_INET6, str, &addr) == 1
+	        && IN6_IS_ADDR_UNSPECIFIED (&addr));
 }
 
 static void
@@ -589,6 +595,9 @@ cell_editing_canceled (GtkCellRenderer *renderer, gpointer user_data)
 	priv->last_column = -1;
 }
 
+#define DO_NOT_CYCLE_TAG "do-not-cycle"
+#define DIRECTION_TAG    "direction"
+
 static void
 cell_edited (GtkCellRendererText *cell,
              const gchar *path_string,
@@ -602,6 +611,9 @@ cell_edited (GtkCellRendererText *cell,
 	GtkTreeIter iter;
 	guint32 column;
 	GtkTreeViewColumn *next_col;
+	GtkCellRenderer *next_cell;
+	gboolean can_cycle;
+	int direction, tmp;
 
 	/* Free auxiliary stuff */
 	g_free (priv->last_edited);
@@ -614,10 +626,22 @@ cell_edited (GtkCellRendererText *cell,
 	gtk_tree_model_get_iter (GTK_TREE_MODEL (store), &iter, path);
 	gtk_list_store_set (store, &iter, column, new_text, -1);
 
-	/* Move focus to the next column */
-	column = (column >= COL_LAST) ? 0 : column + 1;
+	/* Move focus to the next/previous column */
+	can_cycle = g_object_get_data (G_OBJECT (cell), DO_NOT_CYCLE_TAG) == NULL;
+	direction = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (cell), DIRECTION_TAG));
+	g_object_set_data (G_OBJECT (cell), DIRECTION_TAG, NULL);
+	g_object_set_data (G_OBJECT (cell), DO_NOT_CYCLE_TAG, NULL);
+	if (direction == 0)  /* Move forward by default */
+		direction = 1;
+
+	tmp = column + direction;
+	if (can_cycle)
+		column = tmp < 0 ? COL_LAST : tmp > COL_LAST ? 0 : tmp;
+	else
+		column = tmp;
 	next_col = gtk_tree_view_get_column (priv->addr_list, column);
-	gtk_tree_view_set_cursor_on_cell (priv->addr_list, path, next_col, priv->addr_cells[column], TRUE);
+	next_cell = column <= COL_LAST ? priv->addr_cells[column] : NULL;
+	gtk_tree_view_set_cursor_on_cell (priv->addr_list, path, next_col, next_cell, TRUE);
 
 	gtk_tree_path_free (path);
 	ce_page_changed (CE_PAGE (self));
@@ -688,72 +712,147 @@ delete_text_cb (GtkEditable *editable,
 }
 
 static gboolean
+gateway_matches_address (const char *gw_str, const char *addr_str, guint32 prefix)
+{
+	struct in6_addr gw, addr;
+	guint32 x, y, mask;
+	int i;
+
+	if (!gw_str || inet_pton (AF_INET6, gw_str, &gw) != 1)
+		return FALSE;
+	if (!addr_str || inet_pton (AF_INET6, addr_str, &addr) != 1)
+		return FALSE;
+
+	x = prefix / 32;
+	y = prefix % 32;
+	mask = ~htonl (0xFFFFFFFF >> y);
+	for (i = 0; i < x; i++) {
+		if (addr.s6_addr32[i] != gw.s6_addr32[i])
+			return FALSE;
+	}
+	if ((addr.s6_addr32[i] & mask) != (gw.s6_addr32[i] & mask))
+		return FALSE;
+	return TRUE;
+}
+
+static gboolean
+possibly_wrong_gateway (GtkTreeModel *model, GtkTreeIter *iter, const char *gw_str)
+{
+	char *addr_str, *prefix_str;
+	gboolean addr_valid;
+	guint32 prefix;
+
+	gtk_tree_model_get (model, iter, COL_ADDRESS, &addr_str, -1);
+	gtk_tree_model_get (model, iter, COL_PREFIX, &prefix_str, -1);
+	addr_valid =   addr_str && *addr_str && nm_utils_ipaddr_valid (AF_INET6, addr_str) && !is_address_unspecified (addr_str)
+	            && is_prefix_valid (prefix_str, &prefix);
+
+	if (addr_valid && !gateway_matches_address (gw_str, addr_str, prefix))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+typedef struct {
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	guint column;
+} AddressLineInfo;
+
+static gboolean
 cell_changed_cb (GtkEditable *editable,
                  gpointer user_data)
 {
+	AddressLineInfo *info = (AddressLineInfo *) user_data;
 	char *cell_text;
-	guint column;
 	GdkRGBA rgba;
 	gboolean value_valid = FALSE;
 	const char *colorname = NULL;
 
 	cell_text = gtk_editable_get_chars (editable, 0, -1);
 
-	/* The Prefix column is 0..128 */
-	column = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (user_data), "column"));
-	if (column == COL_PREFIX) {
-		guint32 prefix;
-		char *end;
-
-		prefix = strtoul (cell_text, &end, 10);
-		if (!end || *end || prefix == 0 || prefix > 128)
-			value_valid = FALSE;
-		else
-			value_valid = TRUE;
-	} else {
+	/* The Prefix column is 1..128 */
+	if (info->column == COL_PREFIX)
+		value_valid = is_prefix_valid (cell_text, NULL);
+	else {
 		struct in6_addr tmp_addr;
 
 		if (inet_pton (AF_INET6, cell_text, &tmp_addr))
+			value_valid = TRUE;
+
+		/* :: is not accepted for address */
+		if (info->column == COL_ADDRESS && IN6_IS_ADDR_UNSPECIFIED (&tmp_addr))
+                        value_valid = FALSE;
+		/* Consider empty gateway as valid */
+		if (!*cell_text && info->column == COL_GATEWAY)
 			value_valid = TRUE;
 	}
 
 	/* Change cell's background color while editing */
 	colorname = value_valid ? "lightgreen" : "red";
 
+	/* Check gateway against address and prefix */
+	if (   info->column == COL_GATEWAY
+	    && value_valid
+	    && possibly_wrong_gateway (info->model, &info->iter, cell_text))
+		colorname = "yellow";
+
 	gdk_rgba_parse (&rgba, colorname);
-	gtk_widget_override_background_color (GTK_WIDGET (editable), GTK_STATE_FLAG_NORMAL, &rgba);
+	utils_override_bg_color (GTK_WIDGET (editable), &rgba);
 
 	g_free (cell_text);
 	return FALSE;
 }
 
 static gboolean
-key_pressed_cb (GtkWidget *widget,
-                GdkEvent *event,
-                gpointer user_data)
+key_pressed_cb (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
-	GdkKeymapKey *keys = NULL;
-	gint n_keys;
+	GdkModifierType modifiers;
+	GtkCellRenderer *cell = (GtkCellRenderer *) user_data;
+
+	modifiers = event->state & gtk_accelerator_get_default_mod_mask ();
 
 	/*
-	 * Tab should behave the same way as Enter (cycling on cells).
+	 * Change some keys so that they work properly:
+	 * We want:
+	 *   - Tab should behave the same way as Enter (cycling on cells),
+	 *   - Shift-Tab should move in backwards direction.
+	 *   - Down arrow moves as Enter, but we have to handle Down arrow on
+	 *     key pad.
+	 *   - Up arrow should move backwards and we also have to handle Up arrow
+	 *     on key pad.
+	 *   - Enter should end editing when pressed on last column.
 	 *
-	 * Previously, we had finished cell editing, which appeared to work:
-	 *   gtk_cell_editable_editing_done (GTK_CELL_EDITABLE (widget));
-	 * But unfortunately, it showed up crash occurred with XIM input (GTK_IM_MODULE=xim).
+	 * Note: gtk_cell_editable_editing_done (GTK_CELL_EDITABLE (widget)) cannot be called
+	 * in this function, because it would crash with XIM input (GTK_IM_MODULE=xim), see
 	 * https://bugzilla.redhat.com/show_bug.cgi?id=747368
 	 */
-	if (event->type == GDK_KEY_PRESS && event->key.keyval == GDK_KEY_Tab) {
-		/* Get hardware keycode for GDK_KEY_Return */
-		if (gdk_keymap_get_entries_for_keyval (gdk_keymap_get_default (), GDK_KEY_Return, &keys, &n_keys)) {
-			/* Change 'Tab' to 'Enter' key */
-			event->key.keyval = GDK_KEY_Return;
-			event->key.hardware_keycode = keys[0].keycode;
-		}
-		g_free (keys);
-	}
 
-	return FALSE;
+	if (event->keyval == GDK_KEY_Tab && modifiers == 0) {
+		/* Tab */
+		g_object_set_data (G_OBJECT (cell), DIRECTION_TAG, GINT_TO_POINTER (1));
+		utils_fake_return_key (event);
+	} else if (event->keyval == GDK_KEY_ISO_Left_Tab && modifiers == GDK_SHIFT_MASK) {
+		/* Shift-Tab */
+		g_object_set_data (G_OBJECT (cell), DIRECTION_TAG, GINT_TO_POINTER (-1));
+		utils_fake_return_key (event);
+	} else if (event->keyval == GDK_KEY_KP_Down)
+		event->keyval = GDK_KEY_Down;
+	else if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_KP_Up) {
+		event->keyval = GDK_KEY_Up;
+		g_object_set_data (G_OBJECT (cell), DIRECTION_TAG, GINT_TO_POINTER (-1));
+	} else if (   event->keyval == GDK_KEY_Return
+	           || event->keyval == GDK_KEY_ISO_Enter
+	           || event->keyval == GDK_KEY_KP_Enter)
+		g_object_set_data (G_OBJECT (cell), DO_NOT_CYCLE_TAG, GUINT_TO_POINTER (TRUE));
+
+	return FALSE; /* Allow default handler to be called */
+}
+
+static void
+address_line_info_destroy (AddressLineInfo *info)
+{
+	g_slice_free (AddressLineInfo, info);
 }
 
 static void
@@ -765,6 +864,9 @@ cell_editing_started (GtkCellRenderer *cell,
 	CEPageIP6 *self = CE_PAGE_IP6 (user_data);
 	CEPageIP6Private *priv = CE_PAGE_IP6_GET_PRIVATE (self);
 	guint column;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	AddressLineInfo *info;
 
 	if (!GTK_IS_ENTRY (editable)) {
 		g_warning ("%s: Unexpected cell editable type.", __func__);
@@ -792,14 +894,21 @@ cell_editing_started (GtkCellRenderer *cell,
 	                        user_data);
 
 	/* Set up handler for value verifying and changing cell background */
-	g_signal_connect (G_OBJECT (editable), "changed",
-	                  (GCallback) cell_changed_cb,
-	                  cell);
+	model = gtk_tree_view_get_model (priv->addr_list);
+	gtk_tree_model_get_iter_from_string (model, &iter, priv->last_path);
+	info = g_slice_new0 (AddressLineInfo);
+	info->model = model;
+	info->iter = iter;
+	info->column = priv->last_column;
+	g_signal_connect_data (G_OBJECT (editable), "changed",
+	                       (GCallback) cell_changed_cb,
+	                       info,
+	                       (GClosureNotify) address_line_info_destroy, 0);
 
 	/* Set up key pressed handler - need to handle Tab key */
 	g_signal_connect (G_OBJECT (editable), "key-press-event",
 	                  (GCallback) key_pressed_cb,
-	                  user_data);
+	                  cell);
 }
 
 static void
@@ -835,7 +944,7 @@ routes_button_clicked_cb (GtkWidget *button, gpointer user_data)
 	toplevel = gtk_widget_get_toplevel (CE_PAGE (self)->page);
 	g_return_if_fail (gtk_widget_is_toplevel (toplevel));
 
-	method = nm_setting_ip6_config_get_method (priv->setting);
+	method = nm_setting_ip_config_get_method (priv->setting);
 	if (!method || !strcmp (method, NM_SETTING_IP6_CONFIG_METHOD_AUTO))
 		automatic = TRUE;
 
@@ -897,6 +1006,40 @@ tree_view_button_pressed_cb (GtkWidget *widget,
 }
 
 static void
+cell_error_data_func (GtkTreeViewColumn *tree_column,
+                      GtkCellRenderer *cell,
+                      GtkTreeModel *tree_model,
+                      GtkTreeIter *iter,
+                      gpointer data)
+{
+	guint32 col = GPOINTER_TO_UINT (data);
+	char *value = NULL;
+	const char *color = NULL;
+	gboolean invalid = FALSE;
+
+	gtk_tree_model_get (tree_model, iter, col, &value, -1);
+
+	if (col == COL_ADDRESS)
+		invalid =    !value || !*value || !nm_utils_ipaddr_valid (AF_INET6, value)
+		          || is_address_unspecified (value);
+	else if (col == COL_PREFIX)
+		invalid = !is_prefix_valid (value, NULL);
+	else if (col == COL_GATEWAY) {
+		invalid = value && *value && !nm_utils_ipaddr_valid (AF_INET6, value);
+
+		/* Check gateway against address and prefix */
+		if (!invalid && possibly_wrong_gateway (tree_model, iter, value))
+			color = "#DDC000"; /* darker than "yellow", else selected text is hard to read */
+	} else
+		g_warn_if_reached ();
+
+	if (invalid)
+		color = "red";
+	utils_set_cell_background (cell, color, color ? value : NULL);
+	g_free (value);
+}
+
+static void
 finish_setup (CEPageIP6 *self, gpointer unused, GError *error, gpointer user_data)
 {
 	CEPageIP6Private *priv = CE_PAGE_IP6_GET_PRIVATE (self);
@@ -926,6 +1069,8 @@ finish_setup (CEPageIP6 *self, gpointer unused, GError *error, gpointer user_dat
 	column = gtk_tree_view_get_column (GTK_TREE_VIEW (priv->addr_list), offset - 1);
 	gtk_tree_view_column_set_expand (GTK_TREE_VIEW_COLUMN (column), TRUE);
 	gtk_tree_view_column_set_clickable (GTK_TREE_VIEW_COLUMN (column), TRUE);
+	gtk_tree_view_column_set_cell_data_func (column, renderer, cell_error_data_func,
+	                                         GUINT_TO_POINTER (COL_ADDRESS), NULL);
 
 	/* Prefix column */
 	renderer = gtk_cell_renderer_text_new ();
@@ -943,6 +1088,8 @@ finish_setup (CEPageIP6 *self, gpointer unused, GError *error, gpointer user_dat
 	column = gtk_tree_view_get_column (GTK_TREE_VIEW (priv->addr_list), offset - 1);
 	gtk_tree_view_column_set_expand (GTK_TREE_VIEW_COLUMN (column), TRUE);
 	gtk_tree_view_column_set_clickable (GTK_TREE_VIEW_COLUMN (column), TRUE);
+	gtk_tree_view_column_set_cell_data_func (column, renderer, cell_error_data_func,
+	                                         GUINT_TO_POINTER (COL_PREFIX), NULL);
 
 	/* Gateway column */
 	renderer = gtk_cell_renderer_text_new ();
@@ -960,6 +1107,8 @@ finish_setup (CEPageIP6 *self, gpointer unused, GError *error, gpointer user_dat
 	column = gtk_tree_view_get_column (GTK_TREE_VIEW (priv->addr_list), offset - 1);
 	gtk_tree_view_column_set_expand (GTK_TREE_VIEW_COLUMN (column), TRUE);
 	gtk_tree_view_column_set_clickable (GTK_TREE_VIEW_COLUMN (column), TRUE);
+	gtk_tree_view_column_set_cell_data_func (column, renderer, cell_error_data_func,
+	                                         GUINT_TO_POINTER (COL_GATEWAY), NULL);
 
 	g_signal_connect (priv->addr_list, "button-press-event", G_CALLBACK (tree_view_button_pressed_cb), self);
 
@@ -989,7 +1138,6 @@ ce_page_ip6_new (NMConnectionEditor *editor,
                  NMConnection *connection,
                  GtkWindow *parent_window,
                  NMClient *client,
-                 NMRemoteSettings *settings,
                  const char **out_secrets_setting_name,
                  GError **error)
 {
@@ -1002,7 +1150,6 @@ ce_page_ip6_new (NMConnectionEditor *editor,
 	                                 connection,
 	                                 parent_window,
 	                                 client,
-	                                 settings,
 	                                 UIDIR "/ce-page-ip6.ui",
 	                                 "IP6Page",
 	                                 _("IPv6 Settings")));
@@ -1021,10 +1168,7 @@ ce_page_ip6_new (NMConnectionEditor *editor,
 	priv->connection_id = g_strdup (nm_setting_connection_get_id (s_con));
 
 	priv->setting = nm_connection_get_setting_ip6_config (connection);
-	if (!priv->setting) {
-		priv->setting = NM_SETTING_IP6_CONFIG (nm_setting_ip6_config_new ());
-		nm_connection_add_setting (connection, NM_SETTING (priv->setting));
-	}
+	g_assert (priv->setting);
 
 	g_signal_connect (self, "initialized", G_CALLBACK (finish_setup), NULL);
 
@@ -1039,6 +1183,7 @@ ui_to_setting (CEPageIP6 *self, GError **error)
 	GtkTreeIter tree_iter;
 	int int_method = IP6_METHOD_AUTO;
 	const char *method;
+	char *gateway = NULL;
 	gboolean valid = FALSE, iter_valid;
 	const char *text;
 	gboolean ignore_auto_dns = FALSE;
@@ -1078,71 +1223,74 @@ ui_to_setting (CEPageIP6 *self, GError **error)
 
 	g_object_freeze_notify (G_OBJECT (priv->setting));
 	g_object_set (priv->setting,
-	              NM_SETTING_IP6_CONFIG_METHOD, method,
-	              NM_SETTING_IP6_CONFIG_IGNORE_AUTO_DNS, ignore_auto_dns,
+	              NM_SETTING_IP_CONFIG_METHOD, method,
+	              NM_SETTING_IP_CONFIG_IGNORE_AUTO_DNS, ignore_auto_dns,
 	              NULL);
 
 	/* IP addresses */
-	nm_setting_ip6_config_clear_addresses (priv->setting);
+	nm_setting_ip_config_clear_addresses (priv->setting);
 	model = gtk_tree_view_get_model (priv->addr_list);
 	iter_valid = gtk_tree_model_get_iter_first (model, &tree_iter);
 	while (iter_valid) {
-		char *item = NULL, *end;
-		struct in6_addr tmp_addr, tmp_gw;
-		gboolean have_gw = FALSE;
-		NMIP6Address *addr;
+		char *addr_str = NULL, *prefix_str = NULL, *addr_gw_str = NULL;
+		NMIPAddress *addr;
 		guint32 prefix;
 
-		/* IP address */
-		gtk_tree_model_get (model, &tree_iter, COL_ADDRESS, &item, -1);
-		if (!item || !inet_pton (AF_INET6, item, &tmp_addr)) {
-			g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC, _("IPv6 address \"%s\" invalid"), item ? item : "");
-			g_free (item);
+		gtk_tree_model_get (model, &tree_iter,
+		                    COL_ADDRESS, &addr_str,
+		                    COL_PREFIX, &prefix_str,
+		                    COL_GATEWAY, &addr_gw_str,
+		                    -1);
+
+		if (   !addr_str
+		    || !nm_utils_ipaddr_valid (AF_INET6, addr_str)
+		    || is_address_unspecified (addr_str)) {
+			g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC, _("IPv6 address \"%s\" invalid"), addr_str ? addr_str : "");
+			g_free (addr_str);
+			g_free (prefix_str);
+			g_free (addr_gw_str);
 			goto out;
 		}
-		g_free (item);
 
-		/* Prefix */
-		gtk_tree_model_get (model, &tree_iter, COL_PREFIX, &item, -1);
-		if (!item) {
-			g_set_error_literal (error, NMA_ERROR, NMA_ERROR_GENERIC, _("IPv6 prefix \"%s\" missing"));
+		if (!is_prefix_valid (prefix_str, &prefix)) {
+			g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC, _("IPv6 prefix \"%s\" invalid"), prefix_str ? prefix_str : "");
+			g_free (addr_str);
+			g_free (prefix_str);
+			g_free (addr_gw_str);
 			goto out;
 		}
 
-		prefix = strtoul (item, &end, 10);
-		if (!end || *end || prefix == 0 || prefix > 128) {
-			g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC, _("IPv6 prefix \"%s\" invalid"), item);
-			g_free (item);
+		/* Gateway is optional... */
+		if (addr_gw_str && *addr_gw_str && !nm_utils_ipaddr_valid (AF_INET6, addr_gw_str)) {
+			g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC, _("IPv6 gateway \"%s\" invalid"), addr_gw_str);
+			g_free (addr_str);
+			g_free (prefix_str);
+			g_free (addr_gw_str);
 			goto out;
 		}
-		g_free (item);
 
-		/* Gateway */
-		gtk_tree_model_get (model, &tree_iter, COL_GATEWAY, &item, -1);
-		if (item && strlen (item)) {
-			if (!inet_pton (AF_INET6, item, &tmp_gw)) {
-				g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC, _("IPv6 gateway \"%s\" invalid"), item);
-				g_free (item);
-				goto out;
-			}
-			if (!IN6_IS_ADDR_UNSPECIFIED (&tmp_gw))
-				have_gw = TRUE;
+		addr = nm_ip_address_new (AF_INET6, addr_str, prefix, NULL);
+		nm_setting_ip_config_add_address (priv->setting, addr);
+		nm_ip_address_unref (addr);
+
+		if (nm_setting_ip_config_get_num_addresses (priv->setting) == 1 && addr_gw_str && *addr_gw_str) {
+			gateway = addr_gw_str;
+			addr_gw_str = NULL;
 		}
-		g_free (item);
 
-		addr = nm_ip6_address_new ();
-		nm_ip6_address_set_address (addr, &tmp_addr);
-		nm_ip6_address_set_prefix (addr, prefix);
-		if (have_gw)
-			nm_ip6_address_set_gateway (addr, &tmp_gw);
-		nm_setting_ip6_config_add_address (priv->setting, addr);
-		nm_ip6_address_unref (addr);
+		g_free (addr_str);
+		g_free (prefix_str);
+		g_free (addr_gw_str);
 
 		iter_valid = gtk_tree_model_iter_next (model, &tree_iter);
 	}
 
+	g_object_set (G_OBJECT (priv->setting),
+	              NM_SETTING_IP_CONFIG_GATEWAY, gateway,
+	              NULL);
+
 	/* DNS servers */
-	nm_setting_ip6_config_clear_dns (priv->setting);
+	nm_setting_ip_config_clear_dns (priv->setting);
 	text = gtk_entry_get_text (GTK_ENTRY (priv->dns_servers));
 	if (text && strlen (text)) {
 		items = g_strsplit_set (text, ", ;", 0);
@@ -1154,7 +1302,7 @@ ui_to_setting (CEPageIP6 *self, GError **error)
 				continue;
 
 			if (inet_pton (AF_INET6, stripped, &tmp_addr)) {
-				nm_setting_ip6_config_add_dns (priv->setting, &tmp_addr);
+				nm_setting_ip_config_add_dns (priv->setting, stripped);
 			} else {
 				g_set_error (error, NMA_ERROR, NMA_ERROR_GENERIC, _("IPv6 DNS server \"%s\" invalid"), stripped);
 				g_strfreev (items);
@@ -1165,7 +1313,7 @@ ui_to_setting (CEPageIP6 *self, GError **error)
 	}
 
 	/* Search domains */
-	nm_setting_ip6_config_clear_dns_searches (priv->setting);
+	nm_setting_ip_config_clear_dns_searches (priv->setting);
 	text = gtk_entry_get_text (GTK_ENTRY (priv->dns_searches));
 	if (text && strlen (text)) {
 		items = g_strsplit_set (text, ", ;:", 0);
@@ -1173,7 +1321,7 @@ ui_to_setting (CEPageIP6 *self, GError **error)
 			char *stripped = g_strstrip (*iter);
 
 			if (strlen (stripped))
-				nm_setting_ip6_config_add_dns_search (priv->setting, stripped);
+				nm_setting_ip_config_add_dns_search (priv->setting, stripped);
 		}
 		g_strfreev (items);
 	}
@@ -1196,7 +1344,7 @@ ui_to_setting (CEPageIP6 *self, GError **error)
 
 	may_fail = !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->ip6_required));
 	g_object_set (G_OBJECT (priv->setting),
-	              NM_SETTING_IP6_CONFIG_MAY_FAIL, may_fail,
+	              NM_SETTING_IP_CONFIG_MAY_FAIL, may_fail,
 	              NM_SETTING_IP6_CONFIG_IP6_PRIVACY, ip6_privacy,
 	              NULL);
 

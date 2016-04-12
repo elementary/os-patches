@@ -2,9 +2,10 @@ bin_PROGRAMS = nm-connection-editor
 
 nm_connection_editor_CPPFLAGS = \
 	$(GTK_CFLAGS) \
-	$(NMA_CFLAGS) \
-	-DNM_VERSION_MIN_REQUIRED=NM_VERSION_1_0 \
-	-DNM_VERSION_MAX_ALLOWED=NM_VERSION_1_0 \
+	$(LIBNM_CFLAGS) \
+	-DLIBNM_BUILD \
+	-DNM_VERSION_MIN_REQUIRED=NM_VERSION_1_2 \
+	-DNM_VERSION_MAX_ALLOWED=NM_VERSION_1_2 \
 	-DICONDIR=\""$(datadir)/icons"\" \
 	-DUIDIR=\""$(uidir)"\" \
 	-DBINDIR=\""$(bindir)"\" \
@@ -12,12 +13,10 @@ nm_connection_editor_CPPFLAGS = \
 	-DLIBDIR=\""$(libdir)"\" \
 	-DDATADIR=\""$(datadir)"\" \
 	-DNMALOCALEDIR=\"$(datadir)/locale\" \
-	$(DBUS_CFLAGS) \
-	$(DISABLE_DEPRECATED) \
+	"-I${top_srcdir}/shared/" \
 	-I${top_srcdir}/src/utils \
 	-I${top_srcdir}/src/wireless-security \
-	-I${top_srcdir}/src/libnm-gtk \
-	-I${top_builddir}/src/marshallers
+	-I${top_srcdir}/src/libnma
 
 nm_connection_editor_SOURCES = \
 	nm-connection-editor.c \
@@ -37,8 +36,6 @@ nm_connection_editor_SOURCES = \
 	page-wifi.c \
 	page-wifi-security.h \
 	page-wifi-security.c \
-	page-wimax.h \
-	page-wimax.c \
 	page-infiniband.h \
 	page-infiniband.c \
 	page-ip4.h \
@@ -84,16 +81,12 @@ nm_connection_editor_SOURCES = \
 	connection-helpers.c \
 	connection-helpers.h
 
-nm-connection-editor-service-glue.h: $(top_srcdir)/src/connection-editor/nm-connection-editor-service.xml
-	$(AM_V_GEN) dbus-binding-tool --prefix=nm_connection_editor_service --mode=glib-server --output=$@ $<
-
 nm_connection_editor_LDADD = \
-	${top_builddir}/src/wireless-security/libwireless-security.la \
-	${top_builddir}/src/utils/libutils.la \
-	${top_builddir}/src/marshallers/libmarshallers.la \
-	${top_builddir}/src/libnm-gtk/libnm-gtk.la \
+	${top_builddir}/src/wireless-security/libwireless-security-libnm.la \
+	${top_builddir}/src/utils/libutils-libnm.la \
+	${top_builddir}/src/libnma/libnma.la \
 	$(GTK_LIBS) \
-	$(NMA_LIBS) \
+	$(LIBNM_LIBS) \
 	-lm
 
 uidir = $(datadir)/nm-applet
@@ -104,7 +97,6 @@ ui_DATA = \
 	ce-page-ethernet.ui \
 	ce-page-wifi.ui \
 	ce-page-wifi-security.ui \
-	ce-page-wimax.ui \
 	ce-page-infiniband.ui \
 	ce-page-bond.ui \
 	ce-page-team.ui \
@@ -123,9 +115,5 @@ ui_DATA = \
 	ce-page-vlan.ui \
 	ce-page-dcb.ui
 
-BUILT_SOURCES = nm-connection-editor-service-glue.h
-
-CLEANFILES = *.bak $(BUILT_SOURCES)
-
-EXTRA_DIST = $(ui_DATA) nm-connection-editor-service.xml
+EXTRA_DIST = $(ui_DATA)
 

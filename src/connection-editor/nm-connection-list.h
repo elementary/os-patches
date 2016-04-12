@@ -17,7 +17,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2004-2009 Red Hat, Inc.
+ * Copyright 2004 - 2014 Red Hat, Inc.
  */
 
 #ifndef NM_CONNECTION_LIST_H
@@ -26,8 +26,8 @@
 #include <glib-object.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
-#include <nm-client.h>
-#include <nm-remote-settings.h>
+
+#include <NetworkManager.h>
 
 #define NM_TYPE_CONNECTION_LIST    (nm_connection_list_get_type ())
 #define NM_IS_CONNECTION_LIST(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), NM_TYPE_CONNECTION_LIST))
@@ -43,14 +43,12 @@ typedef struct {
 	GtkTreeSortable *sortable;
 	GType displayed_type;
 
-	NMClient *nm_client;
-	NMRemoteSettings *settings;
+	NMClient *client;
 
 	GtkBuilder *gui;
 	GtkWidget *dialog;
 
 	gboolean signals_connected;
-	gboolean connections_available;
 } NMConnectionList;
 
 typedef struct {

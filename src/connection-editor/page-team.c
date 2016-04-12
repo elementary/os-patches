@@ -15,17 +15,14 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Copyright 2013 Jiri Pirko <jiri@resnulli.us>
+ * Copyright 2013 - 2014  Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <stdlib.h>
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <nm-setting-connection.h>
-#include <nm-setting-team.h>
-#include <nm-utils.h>
 
 #include "page-team.h"
 #include "page-infiniband.h"
@@ -223,13 +220,13 @@ add_slave (CEPageMaster *master, NewConnectionResultFunc result_func)
 	if (priv->slave_arptype == ARPHRD_INFINIBAND) {
 		new_connection_of_type (priv->toplevel,
 		                        NULL,
-		                        CE_PAGE (self)->settings,
+		                        CE_PAGE (self)->client,
 		                        infiniband_connection_new,
 		                        result_func,
 		                        master);
 	} else {
 		new_connection_dialog (priv->toplevel,
-		                       CE_PAGE (self)->settings,
+		                       CE_PAGE (self)->client,
 		                       connection_type_filter,
 		                       result_func,
 		                       master);
@@ -254,7 +251,6 @@ ce_page_team_new (NMConnectionEditor *editor,
                   NMConnection *connection,
                   GtkWindow *parent_window,
                   NMClient *client,
-                  NMRemoteSettings *settings,
                   const char **out_secrets_setting_name,
                   GError **error)
 {
@@ -266,7 +262,6 @@ ce_page_team_new (NMConnectionEditor *editor,
 	                                  connection,
 	                                  parent_window,
 	                                  client,
-	                                  settings,
 	                                  UIDIR "/ce-page-team.ui",
 	                                  "TeamPage",
 	                                  _("Team")));
@@ -333,7 +328,7 @@ ce_page_validate_v (CEPage *page, NMConnection *connection, GError **error)
 		return FALSE;
 
 	ui_to_setting (self);
-	return nm_setting_verify (NM_SETTING (priv->setting), NULL, error);
+	return nm_setting_verify (NM_SETTING (priv->setting), connection, error);
 }
 
 static void
@@ -367,37 +362,34 @@ ce_page_team_class_init (CEPageTeamClass *team_class)
 void
 team_connection_new (GtkWindow *parent,
                      const char *detail,
-                     NMRemoteSettings *settings,
+                     NMClient *client,
                      PageNewConnectionResultFunc result_func,
                      gpointer user_data)
 {
 	NMConnection *connection;
-	int team_num, num;
-	GSList *connections, *iter;
+	NMSettingConnection *s_con;
+	int team_num, num, i;
+	const GPtrArray *connections;
 	NMConnection *conn2;
-	NMSettingTeam *s_team;
 	const char *iface;
 	char *my_iface;
 
 	connection = ce_page_new_connection (_("Team connection %d"),
 	                                     NM_SETTING_TEAM_SETTING_NAME,
 	                                     TRUE,
-	                                     settings,
+	                                     client,
 	                                     user_data);
 	nm_connection_add_setting (connection, nm_setting_team_new ());
 
 	/* Find an available interface name */
 	team_num = 0;
-	connections = nm_remote_settings_list_connections (settings);
-	for (iter = connections; iter; iter = iter->next) {
-		conn2 = iter->data;
+	connections = nm_client_get_connections (client);
+	for (i = 0; i < connections->len; i++) {
+		conn2 = connections->pdata[i];
 
 		if (!nm_connection_is_type (conn2, NM_SETTING_TEAM_SETTING_NAME))
 			continue;
-		s_team = nm_connection_get_setting_team (conn2);
-		if (!s_team)
-			continue;
-		iface = nm_setting_team_get_interface_name (s_team);
+		iface = nm_connection_get_interface_name (conn2);
 		if (!iface || strncmp (iface, "team", 4) != 0 || !g_ascii_isdigit (iface[4]))
 			continue;
 
@@ -405,12 +397,11 @@ team_connection_new (GtkWindow *parent,
 		if (team_num <= num)
 			team_num = num + 1;
 	}
-	g_slist_free (connections);
 
+	s_con = nm_connection_get_setting_connection (connection);
 	my_iface = g_strdup_printf ("team%d", team_num);
-	s_team = nm_connection_get_setting_team (connection);
-	g_object_set (G_OBJECT (s_team),
-	              NM_SETTING_TEAM_INTERFACE_NAME, my_iface,
+	g_object_set (G_OBJECT (s_con),
+	              NM_SETTING_CONNECTION_INTERFACE_NAME, my_iface,
 	              NULL);
 	g_free (my_iface);
 

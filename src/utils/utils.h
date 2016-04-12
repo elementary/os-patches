@@ -17,7 +17,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2007 - 2015 Red Hat, Inc.
+ * Copyright 2007 - 2015 Red Hat, Inc.
  */
 
 #ifndef UTILS_H
@@ -25,54 +25,34 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+
+#include <net/ethernet.h>
+
+#if defined (LIBNM_BUILD)
+#include <NetworkManager.h>
+#elif defined (LIBNM_GLIB_BUILD)
 #include <nm-connection.h>
 #include <nm-device.h>
-#include <net/ethernet.h>
 #include <nm-access-point.h>
-
-
-#if defined (__GNUC__)
-#define _NM_PRAGMA_WARNING_DO(warning)       G_STRINGIFY(GCC diagnostic ignored warning)
-#elif defined (__clang__)
-#define _NM_PRAGMA_WARNING_DO(warning)       G_STRINGIFY(clang diagnostic ignored warning)
-#endif
-
-/* you can only suppress a specific warning that the compiler
- * understands. Otherwise you will get another compiler warning
- * about invalid pragma option.
- * It's not that bad however, because gcc and clang often have the
- * same name for the same warning. */
-
-#if defined (__GNUC__)
-#define NM_PRAGMA_WARNING_DISABLE(warning) \
-        _Pragma("GCC diagnostic push"); \
-        _Pragma(_NM_PRAGMA_WARNING_DO(warning))
-#elif defined (__clang__)
-#define NM_PRAGMA_WARNING_DISABLE(warning) \
-        _Pragma("clang diagnostic push"); \
-        _Pragma(_NM_PRAGMA_WARNING_DO(warning))
 #else
-#define NM_PRAGMA_WARNING_DISABLE(warning)
+#error neither LIBNM_BUILD nor LIBNM_GLIB_BUILD defined
 #endif
-
-#if defined (__GNUC__)
-#define NM_PRAGMA_WARNING_REENABLE \
-    _Pragma("GCC diagnostic pop")
-#elif defined (__clang__)
-#define NM_PRAGMA_WARNING_REENABLE \
-    _Pragma("clang diagnostic pop")
-#else
-#define NM_PRAGMA_WARNING_REENABLE
-#endif
-
 
 gboolean utils_ether_addr_valid (const struct ether_addr *test_addr);
 
+#ifdef LIBNM_BUILD
+char *utils_hash_ap (GBytes *ssid,
+                     NM80211Mode mode,
+                     guint32 flags,
+                     guint32 wpa_flags,
+                     guint32 rsn_flags);
+#else
 char *utils_hash_ap (const GByteArray *ssid,
                      NM80211Mode mode,
                      guint32 flags,
                      guint32 wpa_flags,
                      guint32 rsn_flags);
+#endif
 
 char *utils_escape_notify_message (const char *src);
 
@@ -106,6 +86,13 @@ gboolean utils_filter_editable_on_insert_text (GtkEditable *editable,
                                                void *user_data,
                                                UtilsFilterGtkEditableFunc validate_character,
                                                gpointer block_func);
+
+void utils_override_bg_color (GtkWidget *widget, GdkRGBA *rgba);
+void utils_set_cell_background (GtkCellRenderer *cell,
+                                const char *color,
+                                const char *value);
+
+void utils_fake_return_key (GdkEventKey *event);
 
 #endif /* UTILS_H */
 

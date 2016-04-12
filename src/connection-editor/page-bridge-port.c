@@ -17,19 +17,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2011 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
-
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <nm-setting-connection.h>
-#include <nm-setting-bridge-port.h>
-#include <nm-utils.h>
 
 #include "page-bridge-port.h"
 
@@ -96,7 +89,6 @@ ce_page_bridge_port_new (NMConnectionEditor *editor,
                          NMConnection *connection,
                          GtkWindow *parent_window,
                          NMClient *client,
-                         NMRemoteSettings *settings,
                          const char **out_secrets_setting_name,
                          GError **error)
 {
@@ -108,7 +100,6 @@ ce_page_bridge_port_new (NMConnectionEditor *editor,
 	                                         connection,
 	                                         parent_window,
 	                                         client,
-	                                         settings,
 	                                         UIDIR "/ce-page-bridge-port.ui",
 	                                         "BridgePortPage",
 	                                         /* Translators: a "Bridge Port" is a network

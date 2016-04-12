@@ -17,22 +17,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2007 - 2012 Red Hat, Inc.
+ * Copyright 2007 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
-
-#include <glib.h>
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <nm-setting-connection.h>
-#include <nm-setting-wired.h>
-#include <nm-setting-wireless.h>
-#include <nm-setting-wireless-security.h>
-#include <nm-setting-8021x.h>
 
 #include "wireless-security.h"
 #include "eap-method.h"
@@ -78,7 +68,7 @@ wireless_security_validate (WirelessSecurity *sec, GError **error)
 
 	g_assert (sec->validate);
 	result = (*(sec->validate)) (sec, error);
-	if (!result && error && !error)
+	if (!result && error && !*error)
 		g_set_error_literal (error, NMA_ERROR, NMA_ERROR_GENERIC, _("Unknown error validating 802.1x security"));
 	return result;
 }

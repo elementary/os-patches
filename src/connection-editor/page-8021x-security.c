@@ -17,22 +17,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2012 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
-
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-
-#include <NetworkManager.h>
-#include <nm-setting-connection.h>
-#include <nm-setting-wired.h>
-#include <nm-setting-8021x.h>
-#include <nm-setting-wireless.h>
-#include <nm-utils.h>
 
 #include "wireless-security.h"
 #include "page-ethernet.h"
@@ -102,7 +92,6 @@ ce_page_8021x_security_new (NMConnectionEditor *editor,
                             NMConnection *connection,
                             GtkWindow *parent_window,
                             NMClient *client,
-                            NMRemoteSettings *settings,
                             const char **out_secrets_setting_name,
                             GError **error)
 {
@@ -115,7 +104,6 @@ ce_page_8021x_security_new (NMConnectionEditor *editor,
 	                                            connection,
 	                                            parent_window,
 	                                            client,
-	                                            settings,
 	                                            NULL,
 	                                            NULL,
 	                                            _("802.1x Security")));
@@ -159,7 +147,7 @@ ce_page_validate_v (CEPage *page, NMConnection *connection, GError **error)
 			NMSetting *s_con;
 
 			/* Here's a nice hack to work around the fact that ws_802_1x_fill_connection needs wireless setting. */
-			tmp_connection = nm_connection_new ();
+			tmp_connection = nm_simple_connection_new ();
 			nm_connection_add_setting (tmp_connection, nm_setting_wireless_new ());
 
 			/* temp connection needs a 'connection' setting too, since most of

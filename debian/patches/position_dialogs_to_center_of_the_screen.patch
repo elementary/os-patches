@@ -6,11 +6,11 @@ Subject: Always center dialogs on the screen
  src/utils/utils.c    |    2 ++
  2 files changed, 6 insertions(+)
 
-Index: network-manager-applet-1.0.4/src/applet-dialogs.c
+Index: network-manager-applet-1.1.93/src/applet-dialogs.c
 ===================================================================
---- network-manager-applet-1.0.4.orig/src/applet-dialogs.c
-+++ network-manager-applet-1.0.4/src/applet-dialogs.c
-@@ -55,6 +55,7 @@ info_dialog_show_error (const char *err)
+--- network-manager-applet-1.1.93.orig/src/applet-dialogs.c
++++ network-manager-applet-1.1.93/src/applet-dialogs.c
+@@ -39,6 +39,7 @@ info_dialog_show_error (const char *err)
  
  	dialog = gtk_message_dialog_new_with_markup (NULL, 0, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
  			"<span weight=\"bold\" size=\"larger\">%s</span>\n\n%s", _("Error displaying connection information:"), err);
@@ -18,7 +18,7 @@ Index: network-manager-applet-1.0.4/src/applet-dialogs.c
  	gtk_window_present (GTK_WINDOW (dialog));
  	g_signal_connect_swapped (dialog, "response", G_CALLBACK (gtk_widget_destroy), dialog);
  }
-@@ -1072,6 +1073,7 @@ applet_info_dialog_show (NMApplet *apple
+@@ -973,6 +974,7 @@ applet_info_dialog_show (NMApplet *apple
  	g_signal_connect (dialog, "delete-event", G_CALLBACK (gtk_widget_hide_on_delete), dialog);
  	g_signal_connect_swapped (dialog, "response", G_CALLBACK (gtk_widget_hide), dialog);
  	gtk_widget_realize (dialog);
@@ -26,7 +26,7 @@ Index: network-manager-applet-1.0.4/src/applet-dialogs.c
  	gtk_window_present_with_time (GTK_WINDOW (dialog),
  		gdk_x11_get_server_time (gtk_widget_get_window (dialog)));
  }
-@@ -1126,6 +1128,7 @@ applet_mobile_password_dialog_new (NMCon
+@@ -1027,6 +1029,7 @@ applet_mobile_password_dialog_new (NMCon
  
  	dialog = GTK_DIALOG (gtk_dialog_new ());
  	gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
@@ -34,7 +34,7 @@ Index: network-manager-applet-1.0.4/src/applet-dialogs.c
  	gtk_window_set_title (GTK_WINDOW (dialog), _("Mobile broadband network password"));
  
  	gtk_dialog_add_button (dialog, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
-@@ -1462,6 +1465,7 @@ applet_mobile_pin_dialog_new (const char
+@@ -1364,6 +1367,7 @@ applet_mobile_pin_dialog_new (const char
  	} else
  		g_assert_not_reached ();
  
@@ -42,11 +42,11 @@ Index: network-manager-applet-1.0.4/src/applet-dialogs.c
  	gtk_window_set_title (GTK_WINDOW (dialog), title);
  
  	widget = GTK_WIDGET (gtk_builder_get_object (builder, "header_label"));
-Index: network-manager-applet-1.0.4/src/utils/utils.c
+Index: network-manager-applet-1.1.93/src/utils/utils.c
 ===================================================================
---- network-manager-applet-1.0.4.orig/src/utils/utils.c
-+++ network-manager-applet-1.0.4/src/utils/utils.c
-@@ -192,6 +192,8 @@ utils_show_error_dialog (const char *tit
+--- network-manager-applet-1.1.93.orig/src/utils/utils.c
++++ network-manager-applet-1.1.93/src/utils/utils.c
+@@ -197,6 +197,8 @@ utils_show_error_dialog (const char *tit
  	                                     "%s",
  	                                     text1);
  

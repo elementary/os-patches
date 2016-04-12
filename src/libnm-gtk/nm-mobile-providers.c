@@ -22,13 +22,11 @@
  * Copyright (C) 2012 Lanedo GmbH
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-
-#include <glib/gi18n-lib.h>
 
 #include "nm-mobile-providers.h"
 

@@ -94,9 +94,10 @@ subdir = src/connection-editor
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/compiler_warnings.m4 \
 	$(top_srcdir)/m4/glib-makefile.m4 $(top_srcdir)/m4/intltool.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/introspection.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -116,7 +117,6 @@ am_nm_connection_editor_OBJECTS =  \
 	nm_connection_editor-page-8021x-security.$(OBJEXT) \
 	nm_connection_editor-page-wifi.$(OBJEXT) \
 	nm_connection_editor-page-wifi-security.$(OBJEXT) \
-	nm_connection_editor-page-wimax.$(OBJEXT) \
 	nm_connection_editor-page-infiniband.$(OBJEXT) \
 	nm_connection_editor-page-ip4.$(OBJEXT) \
 	nm_connection_editor-page-ip6.$(OBJEXT) \
@@ -141,12 +141,10 @@ am_nm_connection_editor_OBJECTS =  \
 	nm_connection_editor-connection-helpers.$(OBJEXT)
 nm_connection_editor_OBJECTS = $(am_nm_connection_editor_OBJECTS)
 am__DEPENDENCIES_1 =
-nm_connection_editor_DEPENDENCIES =  \
-	${top_builddir}/src/wireless-security/libwireless-security.la \
-	${top_builddir}/src/utils/libutils.la \
-	${top_builddir}/src/marshallers/libmarshallers.la \
-	${top_builddir}/src/libnm-gtk/libnm-gtk.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+nm_connection_editor_DEPENDENCIES = ${top_builddir}/src/wireless-security/libwireless-security-libnm.la \
+	${top_builddir}/src/utils/libutils-libnm.la \
+	${top_builddir}/src/libnma/libnma.la $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -245,6 +243,8 @@ ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+APPINDICATOR_CFLAGS = @APPINDICATOR_CFLAGS@
+APPINDICATOR_LIBS = @APPINDICATOR_LIBS@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -259,9 +259,10 @@ CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
+DBUSMENU_CFLAGS = @DBUSMENU_CFLAGS@
+DBUSMENU_LIBS = @DBUSMENU_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DISABLE_DEPRECATED = @DISABLE_DEPRECATED@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -280,10 +281,6 @@ GLIB_MAKEFILE = @GLIB_MAKEFILE@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
-GNOME_BLUETOOTH_CFLAGS = @GNOME_BLUETOOTH_CFLAGS@
-GNOME_BLUETOOTH_LIBS = @GNOME_BLUETOOTH_LIBS@
-GOBJECT_CFLAGS = @GOBJECT_CFLAGS@
-GOBJECT_LIBS = @GOBJECT_LIBS@
 GREP = @GREP@
 GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@
 GTK_CFLAGS = @GTK_CFLAGS@
@@ -317,6 +314,10 @@ ISO_CODES_CFLAGS = @ISO_CODES_CFLAGS@
 ISO_CODES_LIBS = @ISO_CODES_LIBS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBNM_CFLAGS = @LIBNM_CFLAGS@
+LIBNM_GLIB_CFLAGS = @LIBNM_GLIB_CFLAGS@
+LIBNM_GLIB_LIBS = @LIBNM_GLIB_LIBS@
+LIBNM_LIBS = @LIBNM_LIBS@
 LIBNOTIFY_07_CFLAGS = @LIBNOTIFY_07_CFLAGS@
 LIBNOTIFY_07_LIBS = @LIBNOTIFY_07_LIBS@
 LIBOBJS = @LIBOBJS@
@@ -331,8 +332,6 @@ LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
-MIGRATION_CFLAGS = @MIGRATION_CFLAGS@
-MIGRATION_LIBS = @MIGRATION_LIBS@
 MKDIR_P = @MKDIR_P@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MM_GLIB_CFLAGS = @MM_GLIB_CFLAGS@
@@ -341,8 +340,6 @@ MSGFMT = @MSGFMT@
 MSGFMT_OPTS = @MSGFMT_OPTS@
 MSGMERGE = @MSGMERGE@
 NM = @NM@
-NMA_CFLAGS = @NMA_CFLAGS@
-NMA_LIBS = @NMA_LIBS@
 NMEDIT = @NMEDIT@
 NOTIFY_CFLAGS = @NOTIFY_CFLAGS@
 NOTIFY_LIBS = @NOTIFY_LIBS@
@@ -430,9 +427,10 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 nm_connection_editor_CPPFLAGS = \
 	$(GTK_CFLAGS) \
-	$(NMA_CFLAGS) \
-	-DNM_VERSION_MIN_REQUIRED=NM_VERSION_1_0 \
-	-DNM_VERSION_MAX_ALLOWED=NM_VERSION_1_0 \
+	$(LIBNM_CFLAGS) \
+	-DLIBNM_BUILD \
+	-DNM_VERSION_MIN_REQUIRED=NM_VERSION_1_2 \
+	-DNM_VERSION_MAX_ALLOWED=NM_VERSION_1_2 \
 	-DICONDIR=\""$(datadir)/icons"\" \
 	-DUIDIR=\""$(uidir)"\" \
 	-DBINDIR=\""$(bindir)"\" \
@@ -440,12 +438,10 @@ nm_connection_editor_CPPFLAGS = \
 	-DLIBDIR=\""$(libdir)"\" \
 	-DDATADIR=\""$(datadir)"\" \
 	-DNMALOCALEDIR=\"$(datadir)/locale\" \
-	$(DBUS_CFLAGS) \
-	$(DISABLE_DEPRECATED) \
+	"-I${top_srcdir}/shared/" \
 	-I${top_srcdir}/src/utils \
 	-I${top_srcdir}/src/wireless-security \
-	-I${top_srcdir}/src/libnm-gtk \
-	-I${top_builddir}/src/marshallers
+	-I${top_srcdir}/src/libnma
 
 nm_connection_editor_SOURCES = \
 	nm-connection-editor.c \
@@ -465,8 +461,6 @@ nm_connection_editor_SOURCES = \
 	page-wifi.c \
 	page-wifi-security.h \
 	page-wifi-security.c \
-	page-wimax.h \
-	page-wimax.c \
 	page-infiniband.h \
 	page-infiniband.c \
 	page-ip4.h \
@@ -513,12 +507,11 @@ nm_connection_editor_SOURCES = \
 	connection-helpers.h
 
 nm_connection_editor_LDADD = \
-	${top_builddir}/src/wireless-security/libwireless-security.la \
-	${top_builddir}/src/utils/libutils.la \
-	${top_builddir}/src/marshallers/libmarshallers.la \
-	${top_builddir}/src/libnm-gtk/libnm-gtk.la \
+	${top_builddir}/src/wireless-security/libwireless-security-libnm.la \
+	${top_builddir}/src/utils/libutils-libnm.la \
+	${top_builddir}/src/libnma/libnma.la \
 	$(GTK_LIBS) \
-	$(NMA_LIBS) \
+	$(LIBNM_LIBS) \
 	-lm
 
 uidir = $(datadir)/nm-applet
@@ -529,7 +522,6 @@ ui_DATA = \
 	ce-page-ethernet.ui \
 	ce-page-wifi.ui \
 	ce-page-wifi-security.ui \
-	ce-page-wimax.ui \
 	ce-page-infiniband.ui \
 	ce-page-bond.ui \
 	ce-page-team.ui \
@@ -548,11 +540,8 @@ ui_DATA = \
 	ce-page-vlan.ui \
 	ce-page-dcb.ui
 
-BUILT_SOURCES = nm-connection-editor-service-glue.h
-CLEANFILES = *.bak $(BUILT_SOURCES)
-EXTRA_DIST = $(ui_DATA) nm-connection-editor-service.xml
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+EXTRA_DIST = $(ui_DATA)
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -674,7 +663,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nm_connection_editor-page-vpn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nm_connection_editor-page-wifi-security.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nm_connection_editor-page-wifi.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nm_connection_editor-page-wimax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nm_connection_editor-ppp-auth-methods-dialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nm_connection_editor-vpn-helpers.Po@am__quote@
 
@@ -827,20 +815,6 @@ nm_connection_editor-page-wifi-security.obj: page-wifi-security.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='page-wifi-security.c' object='nm_connection_editor-page-wifi-security.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nm_connection_editor_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nm_connection_editor-page-wifi-security.obj `if test -f 'page-wifi-security.c'; then $(CYGPATH_W) 'page-wifi-security.c'; else $(CYGPATH_W) '$(srcdir)/page-wifi-security.c'; fi`
-
-nm_connection_editor-page-wimax.o: page-wimax.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nm_connection_editor_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nm_connection_editor-page-wimax.o -MD -MP -MF $(DEPDIR)/nm_connection_editor-page-wimax.Tpo -c -o nm_connection_editor-page-wimax.o `test -f 'page-wimax.c' || echo '$(srcdir)/'`page-wimax.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/nm_connection_editor-page-wimax.Tpo $(DEPDIR)/nm_connection_editor-page-wimax.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='page-wimax.c' object='nm_connection_editor-page-wimax.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nm_connection_editor_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nm_connection_editor-page-wimax.o `test -f 'page-wimax.c' || echo '$(srcdir)/'`page-wimax.c
-
-nm_connection_editor-page-wimax.obj: page-wimax.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nm_connection_editor_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nm_connection_editor-page-wimax.obj -MD -MP -MF $(DEPDIR)/nm_connection_editor-page-wimax.Tpo -c -o nm_connection_editor-page-wimax.obj `if test -f 'page-wimax.c'; then $(CYGPATH_W) 'page-wimax.c'; else $(CYGPATH_W) '$(srcdir)/page-wimax.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/nm_connection_editor-page-wimax.Tpo $(DEPDIR)/nm_connection_editor-page-wimax.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='page-wimax.c' object='nm_connection_editor-page-wimax.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nm_connection_editor_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o nm_connection_editor-page-wimax.obj `if test -f 'page-wimax.c'; then $(CYGPATH_W) 'page-wimax.c'; else $(CYGPATH_W) '$(srcdir)/page-wimax.c'; fi`
 
 nm_connection_editor-page-infiniband.o: page-infiniband.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nm_connection_editor_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT nm_connection_editor-page-infiniband.o -MD -MP -MF $(DEPDIR)/nm_connection_editor-page-infiniband.Tpo -c -o nm_connection_editor-page-infiniband.o `test -f 'page-infiniband.c' || echo '$(srcdir)/'`page-infiniband.c
@@ -1260,15 +1234,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
+check: check-am
 all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(uidir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -1290,7 +1262,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -1299,7 +1270,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -1370,7 +1340,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-uiDATA
 
-.MAKE: all check install install-am install-strip
+.MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libtool cscopelist-am \
@@ -1389,9 +1359,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-uiDATA
 
 .PRECIOUS: Makefile
 
-
-nm-connection-editor-service-glue.h: $(top_srcdir)/src/connection-editor/nm-connection-editor-service.xml
-	$(AM_V_GEN) dbus-binding-tool --prefix=nm_connection_editor_service --mode=glib-server --output=$@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -19,43 +19,18 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2007 - 2011 Red Hat, Inc.
- * (C) Copyright 2007 - 2008 Novell, Inc.
+ * Copyright 2007 - 2014 Red Hat, Inc.
+ * Copyright 2007 - 2008 Novell, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include <gtk/gtk.h>
 #include <gdk/gdkx.h>
-#include <glib/gi18n.h>
-
-#include <nm-setting-connection.h>
-#include <nm-setting-ip4-config.h>
-#include <nm-setting-ip6-config.h>
-#include <nm-setting-wired.h>
-#include <nm-setting-8021x.h>
-#include <nm-setting-wireless.h>
-#include <nm-setting-wireless-security.h>
-#include <nm-setting-vpn.h>
-#include <nm-setting-pppoe.h>
-#include <nm-setting-ppp.h>
-#include <nm-setting-gsm.h>
-#include <nm-setting-cdma.h>
-#include <nm-setting-wimax.h>
-#include <nm-setting-infiniband.h>
-#include <nm-setting-bond.h>
-#include <nm-setting-team.h>
-#include <nm-setting-bridge.h>
-#include <nm-utils.h>
-
-#include <nm-remote-connection.h>
 
 #include "nm-connection-editor.h"
-#include "nma-marshal.h"
 
 #include "ce-page.h"
 #include "page-general.h"
@@ -70,7 +45,6 @@
 #include "page-bluetooth.h"
 #include "page-ppp.h"
 #include "page-vpn.h"
-#include "page-wimax.h"
 #include "page-infiniband.h"
 #include "page-bond.h"
 #include "page-team.h"
@@ -340,7 +314,8 @@ dispose (GObject *object)
 		goto out;
 	editor->disposed = TRUE;
 
-	g_hash_table_remove (active_editors, editor->orig_connection);
+	if (active_editors)
+		g_hash_table_remove (active_editors, editor->orig_connection);
 
 	g_slist_foreach (editor->initializing_pages, (GFunc) g_object_unref, NULL);
 	g_slist_free (editor->initializing_pages);
@@ -390,8 +365,6 @@ dispose (GObject *object)
 	g_signal_handler_disconnect (editor->client, editor->permission_id);
 	g_object_unref (editor->client);
 
-	g_object_unref (editor->settings);
-
 	g_clear_pointer (&editor->last_validation_error, g_free);
 
 	g_hash_table_destroy (editor->inter_page_hash);
@@ -414,16 +387,14 @@ nm_connection_editor_class_init (NMConnectionEditorClass *klass)
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_FIRST,
 		              G_STRUCT_OFFSET (NMConnectionEditorClass, done),
-		              NULL, NULL,
-		              _nma_marshal_VOID__ENUM,
+		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 1, GTK_TYPE_RESPONSE_TYPE);
 }
 
 NMConnectionEditor *
 nm_connection_editor_new (GtkWindow *parent_window,
                           NMConnection *connection,
-                          NMClient *client,
-                          NMRemoteSettings *settings)
+                          NMClient *client)
 {
 	NMConnectionEditor *editor;
 	GtkWidget *hbox;
@@ -432,12 +403,11 @@ nm_connection_editor_new (GtkWindow *parent_window,
 
 	g_return_val_if_fail (NM_IS_CONNECTION (connection), NULL);
 
-	is_new = !nm_remote_settings_get_connection_by_uuid (settings, nm_connection_get_uuid (connection));
+	is_new = !nm_client_get_connection_by_uuid (client, nm_connection_get_uuid (connection));
 
 	editor = g_object_new (NM_TYPE_CONNECTION_EDITOR, NULL);
 	editor->parent_window = parent_window ? g_object_ref (parent_window) : NULL;
 	editor->client = g_object_ref (client);
-	editor->settings = g_object_ref (settings);
 	editor->is_new_connection = is_new;
 
 	editor->can_modify = nm_client_get_permission_result (client, NM_CLIENT_PERMISSION_SETTINGS_MODIFY_SYSTEM);
@@ -509,7 +479,7 @@ nm_connection_editor_get_master (NMConnection *slave)
 	while (g_hash_table_iter_next (&iter, &connection, &editor)) {
 		if (!g_strcmp0 (master, nm_connection_get_uuid (connection)))
 			return editor;
-		if (!g_strcmp0 (master, nm_connection_get_virtual_iface_name (connection)))
+		if (!g_strcmp0 (master, nm_connection_get_interface_name (connection)))
 			return editor;
 	}
 
@@ -648,18 +618,22 @@ page_initialized (CEPage *page, GError *error, gpointer user_data)
 static void request_secrets (GetSecretsInfo *info);
 
 static void
-get_secrets_cb (NMRemoteConnection *connection,
-                GHashTable *secrets,
-                GError *error,
+get_secrets_cb (GObject *object,
+                GAsyncResult *result,
                 gpointer user_data)
 {
+	NMRemoteConnection *connection = NM_REMOTE_CONNECTION (object);
 	GetSecretsInfo *info = user_data;
 	NMConnectionEditor *self;
+	GVariant *secrets;
+	GError *error = NULL;
 
 	if (info->canceled) {
 		get_secrets_info_free (info);
 		return;
 	}
+
+	secrets = nm_remote_connection_get_secrets_finish (connection, result, &error);
 
 	self = info->self;
 
@@ -686,10 +660,8 @@ request_secrets (GetSecretsInfo *info)
 {
 	g_return_if_fail (info != NULL);
 
-	nm_remote_connection_get_secrets (NM_REMOTE_CONNECTION (info->self->orig_connection),
-	                                  info->setting_name,
-	                                  get_secrets_cb,
-	                                  info);
+	nm_remote_connection_get_secrets_async (NM_REMOTE_CONNECTION (info->self->orig_connection),
+	                                        info->setting_name, NULL, get_secrets_cb, info);
 }
 
 static void
@@ -739,8 +711,7 @@ add_page (NMConnectionEditor *editor,
 	g_return_val_if_fail (func != NULL, FALSE);
 	g_return_val_if_fail (connection != NULL, FALSE);
 
-	page = (*func) (editor, connection, GTK_WINDOW (editor->window),
-	                editor->client, editor->settings,
+	page = (*func) (editor, connection, GTK_WINDOW (editor->window), editor->client,
 	                &secrets_setting_name, error);
 	if (page) {
 		g_object_set_data_full (G_OBJECT (page),
@@ -776,7 +747,7 @@ nm_connection_editor_set_connection (NMConnectionEditor *editor,
 	if (editor->connection)
 		g_object_unref (editor->connection);
 
-	editor->connection = nm_connection_duplicate (orig_connection);
+	editor->connection = nm_simple_connection_new_clone (orig_connection);
 
 	editor->orig_connection = g_object_ref (orig_connection);
 	nm_connection_editor_update_title (editor);
@@ -831,9 +802,6 @@ nm_connection_editor_set_connection (NMConnectionEditor *editor,
 			if (!add_page (editor, ce_page_ppp_new, editor->connection, error))
 				goto out;
 		}
-	} else if (!strcmp (connection_type, NM_SETTING_WIMAX_SETTING_NAME)) {
-		if (!add_page (editor, ce_page_wimax_new, editor->connection, error))
-			goto out;
 	} else if (!strcmp (connection_type, NM_SETTING_INFINIBAND_SETTING_NAME)) {
 		if (!add_page (editor, ce_page_infiniband_new, editor->connection, error))
 			goto out;
@@ -862,10 +830,10 @@ nm_connection_editor_set_connection (NMConnectionEditor *editor,
 			goto out;
 	}
 
-	if (   connection_supports_ip4 (editor->connection)
+	if (   nm_connection_get_setting_ip4_config (editor->connection)
 	    && !add_page (editor, ce_page_ip4_new, editor->connection, error))
 		goto out;
-	if (   connection_supports_ip6 (editor->connection)
+	if (   nm_connection_get_setting_ip6_config (editor->connection)
 	    && !add_page (editor, ce_page_ip6_new, editor->connection, error))
 		goto out;
 
@@ -938,22 +906,25 @@ editor_closed_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 }
 
 static void
-added_connection_cb (NMRemoteSettings *settings,
-                     NMRemoteConnection *connection,
-                     GError *error,
+added_connection_cb (GObject *client,
+                     GAsyncResult *result,
                      gpointer user_data)
 {
 	NMConnectionEditor *self = user_data;
+	NMRemoteConnection *connection;
+	GError *error = NULL;
 
 	nm_connection_editor_set_busy (self, FALSE);
 
+	connection = nm_client_add_connection_finish (NM_CLIENT (client), result, &error);
 	if (error) {
 		nm_connection_editor_error (self->parent_window, _("Connection add failed"),
 		                            "%s", error->message);
-
 		/* Leave the editor open */
 		return;
 	}
+	g_clear_object (&connection);
+	g_clear_error (&error);
 
 	g_signal_emit (self, editor_signals[EDITOR_DONE], 0, GTK_RESPONSE_OK);
 }
@@ -966,9 +937,15 @@ update_complete (NMConnectionEditor *self, GError *error)
 }
 
 static void
-updated_connection_cb (NMRemoteConnection *connection, GError *error, gpointer user_data)
+updated_connection_cb (GObject *connection,
+                       GAsyncResult *result,
+                       gpointer user_data)
 {
 	NMConnectionEditor *self = NM_CONNECTION_EDITOR (user_data);
+	GError *error = NULL;
+
+	nm_remote_connection_commit_changes_finish (NM_REMOTE_CONNECTION (connection),
+	                                            result, &error);
 
 	/* Clear secrets so they don't lay around in memory; they'll get requested
 	 * again anyway next time the connection is edited.
@@ -976,39 +953,30 @@ updated_connection_cb (NMRemoteConnection *connection, GError *error, gpointer u
 	nm_connection_clear_secrets (NM_CONNECTION (connection));
 
 	update_complete (self, error);
+	g_clear_error (&error);
 }
 
 static void
 ok_button_clicked_save_connection (NMConnectionEditor *self)
 {
-	GError *error = NULL;
-
 	/* Copy the modified connection to the original connection */
-	if (!nm_connection_replace_settings_from_connection (self->orig_connection,
-	                                                     self->connection,
-	                                                     &error)) {
-		nm_connection_editor_error (GTK_WINDOW (self->window),
-		                            _("Error saving connection"),
-		                            _("The property '%s' / '%s' is invalid: %d"),
-		                            g_type_name (nm_connection_lookup_setting_type_by_quark (error->domain)),
-		                            error->message, error->code);
-		g_error_free (error);
-		return;
-	}
-
+	nm_connection_replace_settings_from_connection (self->orig_connection,
+	                                                self->connection);
 	nm_connection_editor_set_busy (self, TRUE);
 
 	/* Save new CA cert ignore values to GSettings */
 	eap_method_ca_cert_ignore_save (self->connection);
 
 	if (self->is_new_connection) {
-		nm_remote_settings_add_connection (self->settings,
-		                                   self->orig_connection,
-		                                   added_connection_cb,
-		                                   self);
+		nm_client_add_connection_async (self->client,
+		                                self->orig_connection,
+		                                TRUE,
+		                                NULL,
+		                                added_connection_cb,
+		                                self);
 	} else {
-		nm_remote_connection_commit_changes (NM_REMOTE_CONNECTION (self->orig_connection),
-		                                     updated_connection_cb, self);
+		nm_remote_connection_commit_changes_async (NM_REMOTE_CONNECTION (self->orig_connection),
+		                                           TRUE, NULL, updated_connection_cb, self);
 	}
 }
 
@@ -1035,24 +1003,31 @@ ok_button_clicked_cb (GtkWidget *widget, gpointer user_data)
 }
 
 static void
-vpn_export_get_secrets_cb (NMRemoteConnection *connection,
-                           GHashTable *secrets,
-                           GError *error,
+vpn_export_get_secrets_cb (GObject *object,
+                           GAsyncResult *result,
                            gpointer user_data)
 {
 	NMConnection *tmp;
+	GVariant *secrets;
+	GError *error = NULL;
+
+	secrets = nm_remote_connection_get_secrets_finish (NM_REMOTE_CONNECTION (object),
+	                                                   result, &error);
 
 	/* We don't really care about errors; if the user couldn't authenticate
 	 * then just let them export everything except secrets.  Duplicate the
 	 * connection so that we don't let secrets sit around in the original
 	 * one.
 	 */
-	tmp = nm_connection_duplicate (NM_CONNECTION (connection));
+	tmp = nm_simple_connection_new_clone (NM_CONNECTION (object));
 	g_assert (tmp);
 	if (secrets)
 		nm_connection_update_secrets (tmp, NM_SETTING_VPN_SETTING_NAME, secrets, NULL);
 	vpn_export (tmp);
 	g_object_unref (tmp);
+	if (secrets)
+		g_variant_ref (secrets);
+	g_clear_error (&error);
 }
 
 static void
@@ -1062,10 +1037,11 @@ export_button_clicked_cb (GtkWidget *widget, gpointer user_data)
 
 	if (NM_IS_REMOTE_CONNECTION (self->orig_connection)) {
 		/* Grab secrets if we can */
-		nm_remote_connection_get_secrets (NM_REMOTE_CONNECTION (self->orig_connection),
-		                                  NM_SETTING_VPN_SETTING_NAME,
-		                                  vpn_export_get_secrets_cb,
-		                                  self);
+		nm_remote_connection_get_secrets_async (NM_REMOTE_CONNECTION (self->orig_connection),
+		                                        NM_SETTING_VPN_SETTING_NAME,
+		                                        NULL,
+		                                        vpn_export_get_secrets_cb,
+		                                        self);
 	} else
 		vpn_export (self->connection);
 }

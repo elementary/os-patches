@@ -17,10 +17,10 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2008 - 2013 Red Hat, Inc.
+ * Copyright 2008 - 2014 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <netinet/in.h>
 #include <sys/types.h>
@@ -30,10 +30,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
 
-#include <nm-utils.h>
+#include <NetworkManager.h>
 
 #include "ip6-routes-dialog.h"
 #include "utils.h"
@@ -56,15 +55,19 @@ get_one_int (GtkTreeModel *model,
              int column,
              guint32 max_value,
              gboolean fail_if_missing,
-             guint *out)
+             guint *out,
+             char **out_raw)
 {
 	char *item = NULL;
 	gboolean success = FALSE;
 	long int tmp_int;
 
 	gtk_tree_model_get (model, iter, column, &item, -1);
+	if (out_raw)
+		*out_raw = item;
 	if (!item || !strlen (item)) {
-		g_free (item);
+		if (!out_raw)
+			g_free (item);
 		return fail_if_missing ? FALSE : TRUE;
 	}
 
@@ -77,7 +80,8 @@ get_one_int (GtkTreeModel *model,
 	success = TRUE;
 
 out:
-	g_free (item);
+	if (!out_raw)
+		g_free (item);
 	return success;
 }
 
@@ -86,22 +90,32 @@ get_one_addr (GtkTreeModel *model,
               GtkTreeIter *iter,
               int column,
               gboolean fail_if_missing,
-              struct in6_addr *out)
+              char **out,
+              char **out_raw)
 {
 	char *item = NULL;
-	gboolean success = FALSE;
+	struct in6_addr tmp_addr;
 
 	gtk_tree_model_get (model, iter, column, &item, -1);
+	if (out_raw)
+		*out_raw = item;
 	if (!item || !strlen (item)) {
-		g_free (item);
+		if (!out_raw)
+			g_free (item);
 		return fail_if_missing ? FALSE : TRUE;
 	}
 
-	if (inet_pton (AF_INET6, item, out) > 0)
-		success = TRUE;
+	if (inet_pton (AF_INET6, item, &tmp_addr) == 0)
+		return FALSE;
 
-	g_free (item);
-	return success;
+	if (IN6_IS_ADDR_UNSPECIFIED (&tmp_addr)) {
+		if (!out_raw)
+			g_free (item);
+		return fail_if_missing ? FALSE : TRUE;
+	}
+
+	*out = item;
+	return TRUE;
 }
 
 static void
@@ -124,23 +138,26 @@ validate (GtkWidget *dialog)
 	iter_valid = gtk_tree_model_get_iter_first (model, &tree_iter);
 
 	while (iter_valid) {
-		struct in6_addr dest, next_hop;
+		char *dest = NULL, *next_hop = NULL;
 		guint prefix = 0, metric = 0;
 
 		/* Address */
-		if (!get_one_addr (model, &tree_iter, COL_ADDRESS, TRUE, &dest))
+		if (!get_one_addr (model, &tree_iter, COL_ADDRESS, TRUE, &dest, NULL))
 			goto done;
+		g_free (dest);
 
 		/* Prefix */
-		if (!get_one_int (model, &tree_iter, COL_PREFIX, 128, TRUE, &prefix))
+		if (   !get_one_int (model, &tree_iter, COL_PREFIX, 128, TRUE, &prefix, NULL)
+		    || prefix == 0)
 			goto done;
 
 		/* Next hop (optional) */
-		if (!get_one_addr (model, &tree_iter, COL_NEXT_HOP, FALSE, &next_hop))
+		if (!get_one_addr (model, &tree_iter, COL_NEXT_HOP, FALSE, &next_hop, NULL))
 			goto done;
+		g_free (next_hop);
 
 		/* Metric (optional) */
-		if (!get_one_int (model, &tree_iter, COL_METRIC, G_MAXUINT32, FALSE, &metric))
+		if (!get_one_int (model, &tree_iter, COL_METRIC, G_MAXUINT32, FALSE, &metric, NULL))
 			goto done;
 
 		iter_valid = gtk_tree_model_iter_next (model, &tree_iter);
@@ -264,6 +281,9 @@ cell_editing_canceled (GtkCellRenderer *renderer, gpointer user_data)
 	validate (GTK_WIDGET (gtk_builder_get_object (builder, "ip6_routes_dialog")));
 }
 
+#define DO_NOT_CYCLE_TAG "do-not-cycle"
+#define DIRECTION_TAG    "direction"
+
 static void
 cell_edited (GtkCellRendererText *cell,
              const gchar *path_string,
@@ -278,6 +298,8 @@ cell_edited (GtkCellRendererText *cell,
 	guint32 column;
 	GtkTreeViewColumn *next_col;
 	GtkCellRenderer *next_cell;
+	gboolean can_cycle;
+	int direction, tmp;
 
 	/* Free auxiliary stuff */
 	g_free (last_edited);
@@ -294,8 +316,19 @@ cell_edited (GtkCellRendererText *cell,
 	gtk_tree_model_get_iter (GTK_TREE_MODEL (store), &iter, path);
 	gtk_list_store_set (store, &iter, column, new_text, -1);
 
-	/* Move focus to the next column */
-	column = (column >= COL_LAST) ? 0 : column + 1;
+	/* Move focus to the next/previous column */
+	can_cycle = g_object_get_data (G_OBJECT (cell), DO_NOT_CYCLE_TAG) == NULL;
+	direction = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (cell), DIRECTION_TAG));
+	g_object_set_data (G_OBJECT (cell), DIRECTION_TAG, NULL);
+	g_object_set_data (G_OBJECT (cell), DO_NOT_CYCLE_TAG, NULL);
+	if (direction == 0)  /* Move forward by default */
+		direction = 1;
+
+	tmp = column + direction;
+	if (can_cycle)
+		column = tmp < 0 ? COL_LAST : tmp > COL_LAST ? 0 : tmp;
+	else
+		column = tmp;
 	next_col = gtk_tree_view_get_column (GTK_TREE_VIEW (widget), column);
 	dialog = GTK_WIDGET (gtk_builder_get_object (builder, "ip6_routes_dialog"));
 	next_cell = g_slist_nth_data (g_object_get_data (G_OBJECT (dialog), "renderers"), column);
@@ -372,7 +405,7 @@ cell_changed_cb (GtkEditable *editable,
 
 		errno = 0;
 		tmp_int = strtol (cell_text, NULL, 10);
-		if (errno || tmp_int < 0 || tmp_int > 128)
+		if (!*cell_text || errno || tmp_int < 1 || tmp_int > 128)
 			value_valid = FALSE;
 		else
 			value_valid = TRUE;
@@ -390,45 +423,68 @@ cell_changed_cb (GtkEditable *editable,
 
 		if (inet_pton (AF_INET6, cell_text, &tmp_addr) > 0)
 			value_valid = TRUE;
+
+		/* :: is not accepted for address */
+		if (column == COL_ADDRESS && IN6_IS_ADDR_UNSPECIFIED (&tmp_addr))
+			value_valid = FALSE;
+		/* Consider empty next_hop as valid */
+		if (!*cell_text && column == COL_NEXT_HOP)
+			value_valid = TRUE;
 	}
 
 	/* Change cell's background color while editing */
 	colorname = value_valid ? "lightgreen" : "red";
 
 	gdk_rgba_parse (&rgba, colorname);
-	gtk_widget_override_background_color (GTK_WIDGET (editable), GTK_STATE_FLAG_NORMAL, &rgba);
+	utils_override_bg_color (GTK_WIDGET (editable), &rgba);
 
 	g_free (cell_text);
 	return FALSE;
 }
 
 static gboolean
-key_pressed_cb (GtkWidget *widget,
-                GdkEvent *event,
-                gpointer user_data)
+key_pressed_cb (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
-	GdkKeymapKey *keys = NULL;
-	gint n_keys;
+	GdkModifierType modifiers;
+	GtkCellRenderer *cell = (GtkCellRenderer *) user_data;
+
+	modifiers = event->state & gtk_accelerator_get_default_mod_mask ();
 
 	/*
-	 * Tab should behave the same way as Enter (cycling on cells).
+	 * Change some keys so that they work properly:
+	 * We want:
+	 *   - Tab should behave the same way as Enter (cycling on cells),
+	 *   - Shift-Tab should move in backwards direction.
+	 *   - Down arrow moves as Enter, but we have to handle Down arrow on
+	 *     key pad.
+	 *   - Up arrow should move backwards and we also have to handle Up arrow
+	 *     on key pad.
+	 *   - Enter should end editing when pressed on last column.
 	 *
-	 * Previously, we had finished cell editing, which appeared to work:
-	 *   gtk_cell_editable_editing_done (GTK_CELL_EDITABLE (widget));
-	 * But unfortunately, it showed up crash occurred with XIM input (GTK_IM_MODULE=xim).
+	 * Note: gtk_cell_editable_editing_done (GTK_CELL_EDITABLE (widget)) cannot be called
+	 * in this function, because it would crash with XIM input (GTK_IM_MODULE=xim), see
 	 * https://bugzilla.redhat.com/show_bug.cgi?id=747368
 	 */
-	if (event->type == GDK_KEY_PRESS && event->key.keyval == GDK_KEY_Tab) {
-		/* Get hardware keycode for GDK_KEY_Return */
-		if (gdk_keymap_get_entries_for_keyval (gdk_keymap_get_default (), GDK_KEY_Return, &keys, &n_keys)) {
-			/* Change 'Tab' to 'Enter' key */
-			event->key.keyval = GDK_KEY_Return;
-			event->key.hardware_keycode = keys[0].keycode;
-		}
-		g_free (keys);
-	}
 
-	return FALSE;
+	if (event->keyval == GDK_KEY_Tab && modifiers == 0) {
+		/* Tab */
+		g_object_set_data (G_OBJECT (cell), DIRECTION_TAG, GINT_TO_POINTER (1));
+		utils_fake_return_key (event);
+	} else if (event->keyval == GDK_KEY_ISO_Left_Tab && modifiers == GDK_SHIFT_MASK) {
+		/* Shift-Tab */
+		g_object_set_data (G_OBJECT (cell), DIRECTION_TAG, GINT_TO_POINTER (-1));
+		utils_fake_return_key (event);
+	} else if (event->keyval == GDK_KEY_KP_Down)
+		event->keyval = GDK_KEY_Down;
+	else if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_KP_Up) {
+		event->keyval = GDK_KEY_Up;
+		g_object_set_data (G_OBJECT (cell), DIRECTION_TAG, GINT_TO_POINTER (-1));
+	} else if (   event->keyval == GDK_KEY_Return
+	           || event->keyval == GDK_KEY_ISO_Enter
+	           || event->keyval == GDK_KEY_KP_Enter)
+		g_object_set_data (G_OBJECT (cell), DO_NOT_CYCLE_TAG, GUINT_TO_POINTER (TRUE));
+
+	return FALSE; /* Allow default handler to be called */
 }
 
 static void
@@ -466,7 +522,7 @@ ip6_cell_editing_started (GtkCellRenderer *cell,
 	/* Set up key pressed handler - need to handle Tab key */
 	g_signal_connect (G_OBJECT (editable), "key-press-event",
 	                  (GCallback) key_pressed_cb,
-	                  user_data);
+	                  cell);
 }
 
 static void
@@ -531,7 +587,7 @@ uint_cell_editing_started (GtkCellRenderer *cell,
 	/* Set up key pressed handler - need to handle Tab key */
 	g_signal_connect (G_OBJECT (editable), "key-press-event",
 	                  (GCallback) key_pressed_cb,
-	                  user_data);
+	                  cell);
 }
 
 static gboolean
@@ -569,8 +625,41 @@ tree_view_button_pressed_cb (GtkWidget *widget,
 	return FALSE;
 }
 
+static void
+cell_error_data_func (GtkTreeViewColumn *tree_column,
+                      GtkCellRenderer *cell,
+                      GtkTreeModel *tree_model,
+                      GtkTreeIter *iter,
+                      gpointer data)
+{
+	guint32 col = GPOINTER_TO_UINT (data);
+	char *value = NULL;
+	char *addr, *next_hop;
+	guint32 prefix, metric;
+	const char *color = "red";
+	gboolean invalid = FALSE;
+
+	if (col == COL_ADDRESS)
+		invalid = !get_one_addr (tree_model, iter, COL_ADDRESS, TRUE, &addr, &value);
+	else if (col == COL_PREFIX)
+		invalid =    !get_one_int (tree_model, iter, COL_PREFIX, 128, TRUE, &prefix, &value)
+		          || prefix == 0;
+	else if (col == COL_NEXT_HOP)
+		invalid = !get_one_addr (tree_model, iter, COL_NEXT_HOP, FALSE, &next_hop, &value);
+	else if (col == COL_METRIC)
+		invalid = !get_one_int (tree_model, iter, COL_METRIC, G_MAXUINT32, FALSE, &metric, &value);
+	else
+		g_warn_if_reached ();
+
+	if (invalid)
+		utils_set_cell_background (cell, color, value);
+	else
+		utils_set_cell_background (cell, NULL, NULL);
+	g_free (value);
+}
+
 GtkWidget *
-ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic)
+ip6_routes_dialog_new (NMSettingIPConfig *s_ip6, gboolean automatic)
 {
 	GtkBuilder *builder;
 	GtkWidget *dialog, *widget, *ok_button;
@@ -616,37 +705,28 @@ ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic)
 	store = gtk_list_store_new (4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
 	/* Add existing routes */
-	for (i = 0; i < nm_setting_ip6_config_get_num_routes (s_ip6); i++) {
-		NMIP6Route *route = nm_setting_ip6_config_get_route (s_ip6, i);
-		const struct in6_addr *tmp_addr;
-		char ip_string[INET6_ADDRSTRLEN];
-		char *tmp;
+	for (i = 0; i < nm_setting_ip_config_get_num_routes (s_ip6); i++) {
+		NMIPRoute *route = nm_setting_ip_config_get_route (s_ip6, i);
+		char prefix[32], metric[32];
 
 		if (!route) {
 			g_warning ("%s: empty IP6 route structure!", __func__);
 			continue;
 		}
 
+		g_snprintf (prefix, sizeof (prefix), "%u", nm_ip_route_get_prefix (route));
+
+		/* FIXME */
+		g_snprintf (metric, sizeof (metric), "%u",
+		            (guint32) MIN (0, nm_ip_route_get_metric (route)));
+
 		gtk_list_store_append (store, &model_iter);
-
-		tmp_addr = nm_ip6_route_get_dest (route);
-		if (inet_ntop (AF_INET6, tmp_addr, ip_string, sizeof (ip_string)))
-			gtk_list_store_set (store, &model_iter, COL_ADDRESS, ip_string, -1);
-
-		tmp = g_strdup_printf ("%u", nm_ip6_route_get_prefix (route));
-		gtk_list_store_set (store, &model_iter, COL_PREFIX, tmp, -1);
-		g_free (tmp);
-
-		tmp_addr = nm_ip6_route_get_next_hop (route);
-		if (tmp_addr && !IN6_IS_ADDR_UNSPECIFIED (tmp_addr) &&
-			inet_ntop (AF_INET6, tmp_addr, ip_string, sizeof (ip_string)))
-			gtk_list_store_set (store, &model_iter, COL_NEXT_HOP, ip_string, -1);
-
-		if (nm_ip6_route_get_metric (route)) {
-			tmp = g_strdup_printf ("%u", nm_ip6_route_get_metric (route));
-			gtk_list_store_set (store, &model_iter, COL_METRIC, tmp, -1);
-			g_free (tmp);
-		}
+		gtk_list_store_set (store, &model_iter,
+		                    COL_ADDRESS, nm_ip_route_get_dest (route),
+		                    COL_PREFIX, prefix,
+		                    COL_NEXT_HOP, nm_ip_route_get_next_hop (route),
+		                    COL_METRIC, metric,
+		                    -1);
 	}
 
 	widget = GTK_WIDGET (gtk_builder_get_object (builder, "ip6_routes"));
@@ -669,6 +749,8 @@ ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic)
 	column = gtk_tree_view_get_column (GTK_TREE_VIEW (widget), offset - 1);
 	gtk_tree_view_column_set_expand (GTK_TREE_VIEW_COLUMN (column), TRUE);
 	gtk_tree_view_column_set_clickable (GTK_TREE_VIEW_COLUMN (column), TRUE);
+	gtk_tree_view_column_set_cell_data_func (column, renderer, cell_error_data_func,
+	                                         GUINT_TO_POINTER (COL_ADDRESS), NULL);
 
 	/* Prefix column */
 	renderer = gtk_cell_renderer_text_new ();
@@ -686,6 +768,8 @@ ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic)
 	column = gtk_tree_view_get_column (GTK_TREE_VIEW (widget), offset - 1);
 	gtk_tree_view_column_set_expand (GTK_TREE_VIEW_COLUMN (column), TRUE);
 	gtk_tree_view_column_set_clickable (GTK_TREE_VIEW_COLUMN (column), TRUE);
+	gtk_tree_view_column_set_cell_data_func (column, renderer, cell_error_data_func,
+	                                         GUINT_TO_POINTER (COL_PREFIX), NULL);
 
 	/* Gateway column */
 	renderer = gtk_cell_renderer_text_new ();
@@ -703,6 +787,8 @@ ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic)
 	column = gtk_tree_view_get_column (GTK_TREE_VIEW (widget), offset - 1);
 	gtk_tree_view_column_set_expand (GTK_TREE_VIEW_COLUMN (column), TRUE);
 	gtk_tree_view_column_set_clickable (GTK_TREE_VIEW_COLUMN (column), TRUE);
+	gtk_tree_view_column_set_cell_data_func (column, renderer, cell_error_data_func,
+	                                         GUINT_TO_POINTER (COL_NEXT_HOP), NULL);
 
 	/* Metric column */
 	renderer = gtk_cell_renderer_text_new ();
@@ -720,6 +806,8 @@ ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic)
 	column = gtk_tree_view_get_column (GTK_TREE_VIEW (widget), offset - 1);
 	gtk_tree_view_column_set_expand (GTK_TREE_VIEW_COLUMN (column), TRUE);
 	gtk_tree_view_column_set_clickable (GTK_TREE_VIEW_COLUMN (column), TRUE);
+	gtk_tree_view_column_set_cell_data_func (column, renderer, cell_error_data_func,
+	                                         GUINT_TO_POINTER (COL_METRIC), NULL);
 
 	g_object_set_data_full (G_OBJECT (dialog), "renderers", renderers, (GDestroyNotify) g_slist_free);
 
@@ -739,12 +827,12 @@ ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic)
 
 	widget = GTK_WIDGET (gtk_builder_get_object (builder, "ip6_ignore_auto_routes"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget),
-	                              nm_setting_ip6_config_get_ignore_auto_routes (s_ip6));
+	                              nm_setting_ip_config_get_ignore_auto_routes (s_ip6));
 	gtk_widget_set_sensitive (widget, automatic);
 
 	widget = GTK_WIDGET (gtk_builder_get_object (builder, "ip6_never_default"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget),
-	                              nm_setting_ip6_config_get_never_default (s_ip6));
+	                              nm_setting_ip_config_get_never_default (s_ip6));
 
 	/* Update initial validity */
 	validate (dialog);
@@ -753,7 +841,7 @@ ip6_routes_dialog_new (NMSettingIP6Config *s_ip6, gboolean automatic)
 }
 
 void
-ip6_routes_dialog_update_setting (GtkWidget *dialog, NMSettingIP6Config *s_ip6)
+ip6_routes_dialog_update_setting (GtkWidget *dialog, NMSettingIPConfig *s_ip6)
 {
 	GtkBuilder *builder;
 	GtkWidget *widget;
@@ -772,57 +860,57 @@ ip6_routes_dialog_update_setting (GtkWidget *dialog, NMSettingIP6Config *s_ip6)
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW (widget));
 	iter_valid = gtk_tree_model_get_iter_first (model, &tree_iter);
 
-	nm_setting_ip6_config_clear_routes (s_ip6);
+	nm_setting_ip_config_clear_routes (s_ip6);
 
 	while (iter_valid) {
-		struct in6_addr dest, next_hop;
+		char *dest = NULL, *next_hop = NULL;
 		guint prefix = 0, metric = 0;
-		NMIP6Route *route;
+		NMIPRoute *route;
 
 		/* Address */
-		if (!get_one_addr (model, &tree_iter, COL_ADDRESS, TRUE, &dest)) {
+		if (!get_one_addr (model, &tree_iter, COL_ADDRESS, TRUE, &dest, NULL)) {
 			g_warning ("%s: IPv6 address missing or invalid!", __func__);
 			goto next;
 		}
 
 		/* Prefix */
-		if (!get_one_int (model, &tree_iter, COL_PREFIX, 128, TRUE, &prefix)) {
+		if (   !get_one_int (model, &tree_iter, COL_PREFIX, 128, TRUE, &prefix, NULL)
+		    || prefix == 0) {
 			g_warning ("%s: IPv6 prefix missing or invalid!", __func__);
+			g_free (dest);
 			goto next;
 		}
 
 		/* Next hop (optional) */
-		memset (&next_hop, 0, sizeof (struct in6_addr));
-		if (!get_one_addr (model, &tree_iter, COL_NEXT_HOP, FALSE, &next_hop)) {
+		if (!get_one_addr (model, &tree_iter, COL_NEXT_HOP, FALSE, &next_hop, NULL)) {
 			g_warning ("%s: IPv6 next hop invalid!", __func__);
+			g_free (dest);
 			goto next;
 		}
 
 		/* Metric (optional) */
-		if (!get_one_int (model, &tree_iter, COL_METRIC, G_MAXUINT32, FALSE, &metric)) {
+		if (!get_one_int (model, &tree_iter, COL_METRIC, G_MAXUINT32, FALSE, &metric, NULL)) {
 			g_warning ("%s: IPv6 metric invalid!", __func__);
+			g_free (dest);
+			g_free (next_hop);
 			goto next;
 		}
 
-		route = nm_ip6_route_new ();
-		nm_ip6_route_set_dest (route, &dest);
-		nm_ip6_route_set_prefix (route, prefix);
-		nm_ip6_route_set_next_hop (route, &next_hop);
-		nm_ip6_route_set_metric (route, metric);
-		nm_setting_ip6_config_add_route (s_ip6, route);
-		nm_ip6_route_unref (route);
+		route = nm_ip_route_new (AF_INET6, dest, prefix, next_hop, metric, NULL);
+		nm_setting_ip_config_add_route (s_ip6, route);
+		nm_ip_route_unref (route);
 
 	next:
 		iter_valid = gtk_tree_model_iter_next (model, &tree_iter);
 	}
 
 	widget = GTK_WIDGET (gtk_builder_get_object (builder, "ip6_ignore_auto_routes"));
-	g_object_set (s_ip6, NM_SETTING_IP6_CONFIG_IGNORE_AUTO_ROUTES,
+	g_object_set (s_ip6, NM_SETTING_IP_CONFIG_IGNORE_AUTO_ROUTES,
 	              gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)),
 	              NULL);
 
 	widget = GTK_WIDGET (gtk_builder_get_object (builder, "ip6_never_default"));
-	g_object_set (s_ip6, NM_SETTING_IP6_CONFIG_NEVER_DEFAULT,
+	g_object_set (s_ip6, NM_SETTING_IP_CONFIG_NEVER_DEFAULT,
 	              gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)),
 	              NULL);
 }

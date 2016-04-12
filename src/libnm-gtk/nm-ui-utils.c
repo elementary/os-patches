@@ -18,13 +18,10 @@
  * Copyright 2007 - 2015 Red Hat, Inc.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "nm-default.h"
 
 #include <string.h>
 
-#include <glib/gi18n-lib.h>
 #include <gudev/gudev.h>
 
 #include <nm-device.h>
@@ -328,8 +325,6 @@ nma_utils_get_device_type_name (NMDevice *device)
 		return _("Bluetooth");
 	case NM_DEVICE_TYPE_OLPC_MESH:
 		return _("OLPC Mesh");
-	case NM_DEVICE_TYPE_WIMAX:
-		return _("WiMAX");
 	case NM_DEVICE_TYPE_MODEM:
 		return _("Mobile Broadband");
 	case NM_DEVICE_TYPE_INFINIBAND:

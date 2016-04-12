@@ -17,12 +17,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * (C) Copyright 2010 Red Hat, Inc.
+ * Copyright 2010 - 2014 Red Hat, Inc.
  */
 
+#include "nm-default.h"
+
 #include <ctype.h>
-#include <glib/gi18n.h>
-#include <nm-utils.h>
 
 #define SECRET_API_SUBJECT_TO_CHANGE
 #include <libsecret/secret.h>
@@ -38,9 +38,7 @@ mobile_helper_get_status_pixbuf (guint32 quality,
                                  guint32 access_tech,
                                  NMApplet *applet)
 {
-	GdkPixbuf *pixbuf, *qual_pixbuf, *wwan_pixbuf, *tmp;
-
-	wwan_pixbuf = nma_icon_check_and_load ("nm-wwan-tower", applet);
+	GdkPixbuf *pixbuf, *qual_pixbuf, *tmp;
 
 	if (!quality_valid)
 		quality = 0;
@@ -48,35 +46,42 @@ mobile_helper_get_status_pixbuf (guint32 quality,
 
 	pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
 	                         TRUE,
-	                         gdk_pixbuf_get_bits_per_sample (qual_pixbuf),
-	                         gdk_pixbuf_get_width (qual_pixbuf),
-	                         gdk_pixbuf_get_height (qual_pixbuf));
+	                         qual_pixbuf ? gdk_pixbuf_get_bits_per_sample (qual_pixbuf) : 8,
+	                         qual_pixbuf ? gdk_pixbuf_get_width (qual_pixbuf) : 22,
+	                         qual_pixbuf ? gdk_pixbuf_get_height (qual_pixbuf) : 22);
 	gdk_pixbuf_fill (pixbuf, 0xFFFFFF00);
 
 	/* Composite the tower icon into the final icon at the bottom layer */
-	gdk_pixbuf_composite (wwan_pixbuf, pixbuf,
-	                      0, 0,
-	                      gdk_pixbuf_get_width (wwan_pixbuf),
-						  gdk_pixbuf_get_height (wwan_pixbuf),
-						  0, 0, 1.0, 1.0,
-						  GDK_INTERP_BILINEAR, 255);
+	tmp = nma_icon_check_and_load ("nm-wwan-tower", applet);
+	if (tmp) {
+		gdk_pixbuf_composite (tmp, pixbuf,
+		                      0, 0,
+		                      gdk_pixbuf_get_width (tmp),
+		                      gdk_pixbuf_get_height (tmp),
+		                      0, 0, 1.0, 1.0,
+		                      GDK_INTERP_BILINEAR, 255);
+	}
 
 	/* Composite the signal quality onto the icon on top of the WWAN tower */
-	gdk_pixbuf_composite (qual_pixbuf, pixbuf,
-	                      0, 0,
-	                      gdk_pixbuf_get_width (qual_pixbuf),
-						  gdk_pixbuf_get_height (qual_pixbuf),
-						  0, 0, 1.0, 1.0,
-						  GDK_INTERP_BILINEAR, 255);
+	if (qual_pixbuf) {
+		gdk_pixbuf_composite (qual_pixbuf, pixbuf,
+		                      0, 0,
+		                      gdk_pixbuf_get_width (qual_pixbuf),
+		                      gdk_pixbuf_get_height (qual_pixbuf),
+		                      0, 0, 1.0, 1.0,
+		                      GDK_INTERP_BILINEAR, 255);
+	}
 
 	/* And finally the roaming or technology icon */
 	if (state == MB_STATE_ROAMING) {
 		tmp = nma_icon_check_and_load ("nm-mb-roam", applet);
-		gdk_pixbuf_composite (tmp, pixbuf, 0, 0,
-		                      gdk_pixbuf_get_width (tmp),
-							  gdk_pixbuf_get_height (tmp),
-							  0, 0, 1.0, 1.0,
-							  GDK_INTERP_BILINEAR, 255);
+		if (tmp) {
+			gdk_pixbuf_composite (tmp, pixbuf, 0, 0,
+			                      gdk_pixbuf_get_width (tmp),
+			                      gdk_pixbuf_get_height (tmp),
+			                       0, 0, 1.0, 1.0,
+			                      GDK_INTERP_BILINEAR, 255);
+		}
 	} else {
 		const gchar *tech_icon_name;
 
@@ -110,7 +115,7 @@ mobile_helper_get_quality_icon_name (guint32 quality)
 		return "nm-signal-50";
 	else if (quality > 5)
 		return "nm-signal-25";
-	else 
+	else
 		return "nm-signal-00";
 }
 
@@ -136,7 +141,6 @@ mobile_helper_get_tech_icon_name (guint32 tech)
 		return "nm-tech-hspa";
 	case MB_TECH_LTE:
 		return "nm-tech-lte";
-	case MB_TECH_WIMAX:
 	default:
 		return NULL;
 	}
@@ -170,7 +174,7 @@ mobile_wizard_done (NMAMobileWizard *wizard,
 			goto done;
 		}
 
-		connection = nm_connection_new ();
+		connection = nm_simple_connection_new ();
 
 		if (method->devtype == NM_DEVICE_MODEM_CAPABILITY_CDMA_EVDO) {
 			setting_name = NM_SETTING_CDMA_SETTING_NAME;
@@ -196,11 +200,11 @@ mobile_wizard_done (NMAMobileWizard *wizard,
 
 		/* Default to IPv4 & IPv6 'automatic' addressing */
 		setting = nm_setting_ip4_config_new ();
-		g_object_set (setting, "method", NM_SETTING_IP4_CONFIG_METHOD_AUTO, NULL);
+		g_object_set (setting, NM_SETTING_IP_CONFIG_METHOD, NM_SETTING_IP4_CONFIG_METHOD_AUTO, NULL);
 		nm_connection_add_setting (connection, setting);
 
 		setting = nm_setting_ip6_config_new ();
-		g_object_set (setting, "method", NM_SETTING_IP6_CONFIG_METHOD_AUTO, NULL);
+		g_object_set (setting, NM_SETTING_IP_CONFIG_METHOD, NM_SETTING_IP6_CONFIG_METHOD_AUTO, NULL);
 		nm_connection_add_setting (connection, setting);
 
 		nm_connection_add_setting (connection, nm_setting_ppp_new ());
@@ -384,7 +388,7 @@ get_secrets_cb (GtkDialog *dialog,
 				              NULL);
 			} else {
 				error = g_error_new (NM_SECRET_AGENT_ERROR,
-				                     NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+				                     NM_SECRET_AGENT_ERROR_FAILED,
 				                     "%s.%d (%s): no GSM setting",
 				                     __FILE__, __LINE__, __func__);
 			}
@@ -398,7 +402,7 @@ get_secrets_cb (GtkDialog *dialog,
 					              NULL);
 				} else {
 					error = g_error_new (NM_SECRET_AGENT_ERROR,
-					                     NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+					                     NM_SECRET_AGENT_ERROR_FAILED,
 					                     "%s.%d (%s): no CDMA setting",
 					                     __FILE__, __LINE__, __func__);
 				}
@@ -505,7 +509,7 @@ mobile_helper_get_secrets (NMDeviceModemCapabilities capabilities,
 	if (!req->hints || !g_strv_length (req->hints)) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): missing secrets hints.",
 		             __FILE__, __LINE__, __func__);
 		return FALSE;
@@ -523,7 +527,7 @@ mobile_helper_get_secrets (NMDeviceModemCapabilities capabilities,
 	else {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): unknown modem capabilities (0x%X).",
 		             __FILE__, __LINE__, __func__, capabilities);
 		return FALSE;
@@ -537,7 +541,7 @@ mobile_helper_get_secrets (NMDeviceModemCapabilities capabilities,
 	else {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): unknown secrets hint '%s'.",
 		             __FILE__, __LINE__, __func__, info->secret_name);
 		return FALSE;
@@ -548,7 +552,7 @@ mobile_helper_get_secrets (NMDeviceModemCapabilities capabilities,
 	if (!widget || !secret_entry) {
 		g_set_error (error,
 		             NM_SECRET_AGENT_ERROR,
-		             NM_SECRET_AGENT_ERROR_INTERNAL_ERROR,
+		             NM_SECRET_AGENT_ERROR_FAILED,
 		             "%s.%d (%s): error asking for mobile secrets.",
 		             __FILE__, __LINE__, __func__);
 		return FALSE;
@@ -580,6 +584,9 @@ mobile_helper_get_icon (NMDevice *device,
 {
 	NMSettingConnection *s_con;
 	const char *id;
+
+	g_return_if_fail (out_icon_name && !*out_icon_name);
+	g_return_if_fail (tip && !*tip);
 
 	id = nm_device_get_iface (NM_DEVICE (device));
 	if (connection) {

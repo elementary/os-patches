@@ -20,14 +20,9 @@
  * (C) Copyright 2008 - 2012 Red Hat, Inc.
  */
 
-#include "config.h"
+#include "nm-default.h"
 
 #include <stdlib.h>
-
-#include <glib.h>
-#include <glib/gi18n-lib.h>
-
-#include <gtk/gtk.h>
 
 #include <NetworkManager.h>
 #include <nm-setting-gsm.h>

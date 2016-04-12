@@ -15,14 +15,15 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Copyright 2012 Red Hat, Inc.
+ * Copyright 2012 - 2014 Red Hat, Inc.
  */
 
 #ifndef __CONNECTION_HELPERS_H__
 #define __CONNECTION_HELPERS_H__
 
+#include <NetworkManager.h>
+
 #include "ce-page.h"
-#include <nm-remote-settings.h>
 
 typedef struct {
 	const char *name;
@@ -39,12 +40,12 @@ typedef void (*NewConnectionResultFunc) (NMConnection *connection,
                                          gpointer user_data);
 
 void new_connection_dialog      (GtkWindow *parent_window,
-                                 NMRemoteSettings *settings,
+                                 NMClient *client,
                                  NewConnectionTypeFilterFunc type_filter_func,
                                  NewConnectionResultFunc result_func,
                                  gpointer user_data);
 void new_connection_dialog_full (GtkWindow *parent_window,
-                                 NMRemoteSettings *settings,
+                                 NMClient *client,
                                  const char *primary_label,
                                  const char *secondary_label,
                                  NewConnectionTypeFilterFunc type_filter_func,
@@ -53,7 +54,7 @@ void new_connection_dialog_full (GtkWindow *parent_window,
 
 void new_connection_of_type (GtkWindow *parent_window,
                              const char *detail,
-                             NMRemoteSettings *settings,
+                             NMClient *client,
                              PageNewConnectionFunc new_func,
                              NewConnectionResultFunc result_func,
                              gpointer user_data);

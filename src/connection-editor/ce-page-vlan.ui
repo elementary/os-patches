@@ -7,7 +7,7 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="vlan_id_adjustment">
-    <property name="upper">4095</property>
+    <property name="upper">4094</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -37,7 +37,7 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="xalign">0</property>
-        <property name="label" translatable="yes">VLAN interface _name:</property>
+        <property name="label" translatable="yes">VLAN inter_face name:</property>
         <property name="use_underline">True</property>
         <property name="mnemonic_widget">vlan_name_entry</property>
       </object>
@@ -53,7 +53,7 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="xalign">0</property>
-        <property name="label" translatable="yes">_Cloned MAC address:</property>
+        <property name="label" translatable="yes">Cloned MAC _address:</property>
         <property name="use_underline">True</property>
         <property name="mnemonic_widget">vlan_cloned_mac_entry</property>
       </object>
@@ -153,7 +153,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkAlignment" id="vlan_parent_alignment">
+      <object class="GtkVBox" id="vlan_parent_vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
@@ -260,6 +260,21 @@
           </object>
           <packing>
             <property name="left_attach">2</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="mvrp_flag">
+            <property name="label" translatable="yes">M_VRP</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+            <property name="use_underline">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">3</property>
             <property name="top_attach">0</property>
           </packing>
         </child>
