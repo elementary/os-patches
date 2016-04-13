@@ -40,7 +40,11 @@ response_t netcfg_get_method(struct debconfclient *client)
 {
     int iret;
 
+#ifdef __s390__
+    iret = debconf_input(client, "high", "netcfg/use_autoconfig");
+#else
     iret = debconf_input(client, "medium", "netcfg/use_autoconfig");
+#endif
 
     if (debconf_go(client) == CMD_GOBACK)
         return GO_BACK;

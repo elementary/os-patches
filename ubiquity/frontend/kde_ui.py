@@ -633,7 +633,7 @@ class Wizard(BaseFrontend):
             parameters.append('rtl')
         parameters_encoded = '&'.join(parameters)
 
-        slides = 'file://%s# %s' % (slideshow_main, parameters_encoded)
+        slides = 'file://%s#%s' % (slideshow_main, parameters_encoded)
 
         def openLink(qUrl):
             QtGui.QDesktopServices.openUrl(qUrl)

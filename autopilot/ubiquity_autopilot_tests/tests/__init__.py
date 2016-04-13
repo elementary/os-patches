@@ -252,8 +252,11 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
         preparing_page = self.main_window.select_single(
             'GtkAlignment', BuilderName='stepPrepare')
 
-        objList = ['prepare_best_results', 'prepare_foss_disclaimer',
-                   'prepare_download_updates', 'prepare_nonfree_software']
+        objList = [
+            'prepare_foss_disclaimer_license',
+            'prepare_download_updates',
+            'prepare_nonfree_software'
+        ]
         self.check_visible_object_with_label(objList)
 
         if updates:
@@ -267,15 +270,6 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
             thrdprty_checkbutton = preparing_page.select_single(
                 'GtkCheckButton', BuilderName='prepare_nonfree_software')
             self.pointing_device.click_object(thrdprty_checkbutton)
-
-        self._check_preparing_statebox('prepare_network_connection',
-                                       visible=networkConnection)
-        # and sufficient space
-        self._check_preparing_statebox('prepare_sufficient_space',
-                                       visible=sufficientSpace)
-        # and power source
-        self._check_preparing_statebox('prepare_power_source',
-                                       visible=powerSource)
 
         self._check_page_titles()
         self._check_navigation_buttons()
@@ -644,7 +638,7 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
         self._track_install_progress()
         print("First loop complete waiting for pbar to go back to 0")
         self.assertThat(progress_bar.fraction, Eventually(
-            Equals(0.0), timeout=180))
+            Equals(0.0), timeout=260))
         print("Now entering the second loop...........")
         # And now the install progress bar
         self._track_install_progress()
@@ -1001,45 +995,6 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
         #     self.expectThat(current_page_title.visible, Equals(True),
         #                     "[Page:'{0}'] Expect page title to be visible "
         #                     "but it wasn't".format(self.current_step))
-
-    def _check_preparing_statebox(self, stateboxName, visible=True,
-                                  imagestock='gtk-yes'):
-        """ Checks the preparing page statebox's """
-        logger.debug("Running checks on {0} StateBox".format(stateboxName))
-        preparing_page = self.main_window.select_single(
-            'GtkAlignment', BuilderName='stepPrepare')
-        state_box = preparing_page.select_single(
-            'StateBox', BuilderName=stateboxName)
-        logger.debug('check({0}, {1})'.format(visible, imagestock))
-        logger.debug("Running checks.......")
-        if visible:
-            self.expectThat(state_box.visible, Equals(visible),
-                            "StateBox.check(): Expected {0} statebox to be "
-                            "visible but it wasn't"
-                            .format(state_box.name))
-            label = state_box.select_single('GtkLabel')
-            self.expectThat(label.label, NotEquals(u''),
-                            "[Page:'{0}'] Expected {1} Statebox's label to "
-                            "contain text but it didn't"
-                            .format(self.current_step, stateboxName))
-            self.expectThat(label.visible, Equals(visible),
-                            "[Page:'{0}'] Expected {1} Statebox label's "
-                            "visible property to be {2} "
-                            .format(self.current_step, stateboxName,
-                                    str(visible)))
-            self.expectIsInstance(label.label, str,
-                                  "[Page:'{0}'] Expected {1} Statebox's label "
-                                  "to be unicode but it wasn't"
-                                  .format(self.current_step, stateboxName))
-            image = state_box.select_single('GtkImage')
-            self.expectThat(image.stock, Equals(imagestock))
-            self.expectThat(image.visible, Equals(visible))
-
-        else:
-            self.expectThat(state_box.visible, Equals(False),
-                            "[Page:'{0}'] Expected {1} statebox to not be "
-                            "visible but it was"
-                            .format(self.current_step, stateboxName))
 
     def get_distribution(self, ):
         """Returns the name of the running distribution."""
