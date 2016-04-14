@@ -23,7 +23,7 @@ import os
 import subprocess
 import sys
 
-from ubiquity import i18n, misc, osextras, plugin, upower, validation
+from ubiquity import i18n, misc, osextras, plugin, upower
 from ubiquity.install_misc import archdetect, is_secure_boot
 
 NAME = 'prepare'
@@ -84,10 +84,7 @@ class PageGtk(PreparePageBase):
         self.password_strength_pages = {
             'empty': 0,
             'too_short': 1,
-            'weak': 2,
-            'fair': 3,
-            'good': 4,
-            'strong': 5,
+            'good': 2,
         }
         self.password_match_pages = {
             'empty': 0,
@@ -184,29 +181,31 @@ class PageGtk(PreparePageBase):
         self.info_loop(None)
 
     def info_loop(self, unused_widget):
-        complete = True
+        complete = False
         passw = self.password.get_text()
         vpassw = self.verified_password.get_text()
 
+        if len(passw) == 0:
+            self.password_strength.set_current_page(
+                self.password_strength_pages['empty'])
+        elif len(passw) >= 8:
+            self.password_strength.set_current_page(
+                self.password_strength_pages['good'])
+        else:
+            self.password_strength.set_current_page(
+                self.password_strength_pages['too_short'])
+
         if passw != vpassw or (passw and len(passw) < 8):
-            complete = False
             self.password_match.set_current_page(
                 self.password_match_pages['empty'])
-            if passw and (not passw.startswith(vpassw) or
-                          len(vpassw) / len(passw) > 0.8):
+            if len(passw) >= 8 and (not passw.startswith(vpassw) or
+                                    len(vpassw) / len(passw) > 0.6):
                 self.password_match.set_current_page(
                     self.password_match_pages['mismatch'])
         else:
+            complete = True
             self.password_match.set_current_page(
                 self.password_match_pages['ok'])
-
-        if passw:
-            txt = validation.human_password_strength(passw)[0]
-            self.password_strength.set_current_page(
-                self.password_strength_pages[txt])
-        else:
-            self.password_strength.set_current_page(
-                self.password_strength_pages['empty'])
 
         self.controller.allow_go_forward(complete)
         return complete

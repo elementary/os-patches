@@ -34,7 +34,8 @@ if [ "$(id -u)" = 0 ]; then
 	/bin/systemctl enable oem-config.target
 	/bin/systemctl set-default oem-config.target
 else
-	pkexec "$0" ${quiet:---quiet} "$@"
+	pkexec "$0" ${quiet:+--quiet} "$@"
+	exit 0
 fi
 
 if [ -z "$quiet" ]; then
