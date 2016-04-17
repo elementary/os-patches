@@ -100,6 +100,22 @@ fi
 #GDM
 if [ -d /root/etc/gdm3 ]; then
     sed -i '/^[UG]ID_MIN/s/\<1000$/ 999/' /root/etc/login.defs
+
+    #inject a systemd unit to update AccountsService properties during boot
+    if [ -z "${PERSISTENT}" ]; then
+        cat > /root/lib/systemd/system/passwd-del.service << EOF
+[Unit]
+Description=Run passwd -d to ensure AccountsService properties are set correctly
+After=accounts-daemon.service
+Before=display-manager.service
+
+[Service]
+ExecStart=-/usr/bin/dbus-run-session passwd -d $USERNAME
+Type=oneshot
+EOF
+        ln -s /root/lib/systemd/system/passwd-del.service \
+              /root/etc/systemd/system/display-manager.service.wants/
+    fi
 fi
 
 # Kubuntu
