@@ -147,7 +147,7 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
             'GtkLabel', name='page_title')
         self.assertThat(page_title.label,
                         Eventually(NotEquals(self.current_page_title),
-                                   timeout=120))
+                                   timeout=240))
 
     def go_to_progress_page(self, ):
         """ This simply clicks next and goes to the progress page
@@ -637,8 +637,9 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
               "progressbar")
         self._track_install_progress()
         print("First loop complete waiting for pbar to go back to 0")
+        # CI VM infrastructure can be a bit slow, hence long timeout.
         self.assertThat(progress_bar.fraction, Eventually(
-            Equals(0.0), timeout=260))
+            Equals(0.0), timeout=530))
         print("Now entering the second loop...........")
         # And now the install progress bar
         self._track_install_progress()
