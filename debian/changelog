@@ -1,3 +1,13 @@
+casper (1.375) xenial; urgency=medium
+
+  * scripts/casper-bottom/16disable_gpt_auto_mount: Disable systemd's GPT auto
+    generator. We don't want this on a live system that is supposed to not
+    touch your hard disk by default, and particularly we don't want to
+    automatically enable discovered swap partitions. (LP: #1552539)
+  * debian/control: Drop Vcs-Bzr:, which does not exist any more.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 19 Apr 2016 15:53:13 +0200
+
 casper (1.374) xenial; urgency=medium
 
   * scripts/casper-bottom/25adduser:
