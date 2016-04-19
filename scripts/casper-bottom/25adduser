@@ -113,7 +113,7 @@ Before=display-manager.service
 ExecStart=-/usr/bin/dbus-run-session passwd -d $USERNAME
 Type=oneshot
 EOF
-        ln -s /root/lib/systemd/system/passwd-del.service \
+        ln -s /lib/systemd/system/passwd-del.service \
               /root/etc/systemd/system/display-manager.service.wants/
     fi
 fi
