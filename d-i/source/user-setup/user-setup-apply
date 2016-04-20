@@ -259,9 +259,9 @@ if [ "$RET" = true ] && ! is_system_user; then
 			db_get passwd/auto-login-backup
 			BACKUP="${RET:+.$RET}"
 
-			if [ -d "$ROOT/etc/gdm" ]; then
+			if [ -d "$ROOT/etc/gdm3" ]; then
 				# Configure GDM autologin
-				GDMCustomFile=$ROOT/etc/gdm/custom.conf
+				GDMCustomFile=$ROOT/etc/gdm3/custom.conf
 				if [ -e "$GDMCustomFile" ] && [ "$BACKUP" ]; then
 					cp "$GDMCustomFile" "${GDMCustomFile}$BACKUP"
 				fi
