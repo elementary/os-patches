@@ -267,7 +267,7 @@ int is_raw_80211(const char *iface)
 
 #if defined(__s390__)
 // Layer 3 qeth on s390(x) cannot do arping to test gateway reachability.
-int is_layer3_qeth(const char *iface)
+int is_layer3_qeth(const struct netcfg_interface *interface)
 {
     const int bufsize = 1024;
     int retval = 0;
@@ -277,6 +277,12 @@ int is_layer3_qeth(const char *iface)
     ssize_t slen;
     char* driver;
     int fd;
+    char* iface;
+
+    if (interface->parentif)
+        iface = interface->parentif;
+    else
+        iface = interface->name;
 
     // This is sufficient for both /driver and /layer2.
     len = strlen(SYSCLASSNET) + strlen(iface) + strlen("/device/driver") + 1;
@@ -329,7 +335,7 @@ out:
     return retval;
 }
 #else
-int is_layer3_qeth(const char *iface __attribute__((unused)))
+int is_layer3_qeth(const struct netcfg_interface *interface  __attribute__((unused)))
 {
     return 0;
 }
@@ -1338,6 +1344,24 @@ void interface_down (const char *if_name)
     }
 }
 
+void netcfg_interface_up (const struct netcfg_interface *iface)
+{
+	if (iface->parentif)
+		interface_up (iface->parentif);
+
+	if (iface->name)
+		interface_up (iface->name);
+}
+
+void netcfg_interface_down (const struct netcfg_interface *iface)
+{
+	if (iface->name)
+		interface_down (iface->name);
+
+	if (iface->parentif)
+		interface_down (iface->parentif);
+}
+
 void parse_args (int argc, char ** argv)
 {
     if (argc == 2) {
@@ -1528,7 +1552,7 @@ int netcfg_detect_link(struct debconfclient *client, const struct netcfg_interfa
         if (ethtool_lite(if_name) == 1) /* ethtool-lite's CONNECTED */ {
             di_info("Found link on %s", if_name);
 
-            if (!empty_str(gateway) && !is_wireless_iface(if_name) && !is_layer3_qeth(if_name)) {
+            if (!empty_str(gateway) && !is_wireless_iface(if_name) && !is_layer3_qeth(interface)) {
                 for (count = 0; count < gw_tries; count++) {
                     if (di_exec_shell_log(arping) == 0)
                         break;
@@ -1564,6 +1588,8 @@ void netcfg_interface_init(struct netcfg_interface *iface)
     iface->v6_stateless_config = -1;
     iface->loopback = -1;
     iface->mode = MANAGED;
+    iface->parentif = NULL;
+    iface->vlanid = -1;
 }
 
 /* Parse an IP address (v4 or v6), with optional CIDR netmask, into

@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
            GET_METHOD,
            GET_DHCP,
            GET_STATIC,
+           GET_VLAN,
            WCONFIG,
            WCONFIG_ESSID,
            WCONFIG_SECURITY_TYPE,
@@ -249,13 +250,19 @@ int main(int argc, char *argv[])
                 state = BACKUP;
             else if (! interface.name || ! num_interfaces)
                 state = GET_HOSTNAME_ONLY;
-            else {
-                if (is_wireless_iface (interface.name))
-                    state = WCONFIG;
-                else
-                    state = GET_METHOD;
-            }
+            else if (is_wireless_iface (interface.name))
+                state = WCONFIG;
+            else
+                state = GET_VLAN;
             break;
+
+	case GET_VLAN:
+            if (netcfg_set_vlan(client, &interface) == GO_BACK)
+                state = BACKUP;
+            else
+                state = GET_METHOD;
+            break;
+
         case GET_HOSTNAME_ONLY:
             if(netcfg_get_hostname(client, "netcfg/get_hostname", hostname, 0))
                 state = BACKUP;
@@ -264,6 +271,7 @@ int main(int argc, char *argv[])
                 state = QUIT;
             }
             break;
+
         case GET_METHOD:
             if ((res = netcfg_get_method(client)) == GO_BACK)
                 state = (num_interfaces == 1) ? BACKUP : GET_INTERFACE;

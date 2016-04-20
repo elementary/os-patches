@@ -459,7 +459,7 @@ int netcfg_activate_dhcp (struct debconfclient *client, struct netcfg_interface 
     kill_dhcp_client();
     loop_setup();
     
-    interface_up(interface->name);
+    netcfg_interface_up(interface);
 
     for (;;) {
         di_debug("State is now %i", state);

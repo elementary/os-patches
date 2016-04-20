@@ -32,11 +32,17 @@ static void get_uuid(char* target)
 
 static void nm_write_connection(FILE *config_file, nm_connection connection)
 {
+    static char *type = NM_DEFAULT_WIRED;
+    if (connection.type == WIFI) {
+	    type = NM_DEFAULT_WIRELESS;
+    }
+    if (connection.type == VLAN) {
+	    type = NM_DEFAULT_VLAN;
+    }
     fprintf(config_file, "\n%s\n", NM_SETTINGS_CONNECTION);
     fprintf(config_file, "id=%s\n", connection.id);
     fprintf(config_file, "uuid=%s\n", connection.uuid);
-    fprintf(config_file, "type=%s\n", (connection.type == WIFI) ?
-            NM_DEFAULT_WIRELESS : NM_DEFAULT_WIRED);
+    fprintf(config_file, "type=%s\n", type);
 }
 
 #ifdef WIRELESS
@@ -69,6 +75,15 @@ static void nm_write_wired_specific_options(FILE *config_file,
     if (strcmp(wired.mac_addr, "") && nmconf->connection.manual == 1) {
         fprintf(config_file, "mac=%s\n", wired.mac_addr);
     }
+}
+
+static void nm_write_vlan_specific_options(FILE *config_file,
+        struct nm_config_info *nmconf)
+{
+    nm_vlan vlan = nmconf->vlan;
+    fprintf(config_file, "\n%s\n", NM_SETTINGS_VLAN);
+    fprintf(config_file, "parent=%s\n", vlan.parent);
+    fprintf(config_file, "parent=%i\n", vlan.id);
 }
 
 #ifdef WIRELESS
@@ -170,6 +185,9 @@ static void nm_write_connection_type(struct nm_config_info nmconf)
     if (nmconf.connection.type == WIFI) {
         fprintf(f, "connection type: wireless\n");
     }
+    else if (nmconf.connection.type == VLAN) {
+        fprintf(f, "connection type: vlan\n");
+    }
     else {
         fprintf(f, "connection type: wired\n");
     }
@@ -222,6 +240,9 @@ void nm_write_configuration(struct nm_config_info nmconf)
 
     if (nmconf.connection.type == WIRED) {
         nm_write_wired_specific_options(config_file, &nmconf);
+    }
+    else if (nmconf.connection.type == VLAN) {
+        nm_write_vlan_specific_options(config_file, &nmconf);
     }
 #ifdef WIRELESS
     else {
@@ -414,6 +435,15 @@ static void nm_get_ipv6(struct netcfg_interface *niface, nm_ipvX *ipv6)
 
 }
 
+static void nm_get_vlan(struct netcfg_interface *niface, nm_connection *connection, nm_vlan *nmvlan)
+{
+    if (niface->vlanid > 0) {
+	    connection->type = VLAN;
+	    nmvlan->id = niface->vlanid;
+	    nmvlan->parent = niface->parentif;
+    }
+}
+
 /* Extract all configs for a wireless interface, from both global netcfg
  * values and other resources. */
 #ifdef WIRELESS
@@ -438,6 +468,7 @@ static void nm_get_wired_config(struct netcfg_interface *niface, struct nm_confi
     nm_get_wired_specific_options(niface, &(nmconf->wired));
     nm_get_ipv4(niface, &(nmconf->ipv4));
     nm_get_ipv6(niface, &(nmconf->ipv6));
+    nm_get_vlan(niface, &(nmconf->connection), &(nmconf->vlan));
 }
 
 /* Getting configurations for NM relies on netcfrg global variables. */

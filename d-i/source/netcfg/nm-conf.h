@@ -20,6 +20,7 @@
 #define NM_DEFAULT_WIRED_NAME           "Wired connection 1"
 #define NM_DEFAULT_WIRELESS             "802-11-wireless"
 #define NM_DEFAULT_WIRELESS_SECURITY    "802-11-wireless-security"
+#define NM_DEFAULT_VLAN                 "vlan"
 #define NM_DEFAULT_PATH_FOR_MAC         "/sys/class/net/%s/address"
 #define NM_CONFIG_FILE_PATH             "/etc/NetworkManager/system-connections"
 #define NM_CONNECTION_FILE              "/tmp/connection_type"
@@ -30,6 +31,7 @@
 #define NM_SETTINGS_WIRELESS_SECURITY   "["NM_DEFAULT_WIRELESS_SECURITY"]"
 #define NM_SETTINGS_IPV4                "[ipv4]"
 #define NM_SETTINGS_IPV6                "[ipv6]"
+#define NM_SETTINGS_VLAN                "[vlan]"
 
 /* Minimalist structures for storing basic elements in order to write a Network
  * Manager format config file.
@@ -43,7 +45,7 @@ typedef struct nm_connection
 {
     char id[NM_MAX_LEN_ID];
     char uuid[NM_MAX_LEN_UUID];
-    enum {WIRED, WIFI} type;
+    enum {WIRED, WIFI, VLAN} type;
     int manual; /* 1 = true, 0 = false */
 } nm_connection;
 
@@ -86,6 +88,11 @@ typedef struct nm_ipvX
     unsigned int                    masklen;
 }   nm_ipvX;
 
+typedef struct nm_vlan
+{
+    char *                          parent;
+    int                             id;
+}   nm_vlan;
 
 typedef struct nm_config_info
 {
@@ -95,6 +102,7 @@ typedef struct nm_config_info
     nm_wireless_security    wireless_security;
     nm_ipvX                 ipv4;
     nm_ipvX                 ipv6;
+    nm_vlan                 vlan;
 }   nm_config_info;
 
 /* Public functions */

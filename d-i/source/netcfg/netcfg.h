@@ -151,6 +151,11 @@ struct netcfg_interface {
 	/* WPA */
 	wpa_t wpa_supplicant_status;
 	char *passphrase;
+
+	/* VLAN */
+	char *parentif;
+	int vlanid;
+
 };
 
 /* Somewhere we can store both in_addr and in6_addr; convenient for all those
@@ -221,6 +226,9 @@ extern void deconfigure_network(struct netcfg_interface *iface);
 extern void interface_up (const char *if_name);
 extern void interface_down (const char *if_name);
 
+extern void netcfg_interface_up (const struct netcfg_interface *iface);
+extern void netcfg_interface_down (const struct netcfg_interface *iface);
+
 extern void loop_setup(void);
 extern int get_hostname_from_dns(const struct netcfg_interface *interface, char *hostname, const size_t max_hostname_len);
 
@@ -269,5 +277,8 @@ extern void read_rdnssd_nameservers(struct netcfg_interface *interface);
 extern void cleanup_dhcpv6_client(void);
 extern int start_dhcpv6_client(struct debconfclient *client, const struct netcfg_interface *interface);
 extern int netcfg_autoconfig(struct debconfclient *client, struct netcfg_interface *interface);
+
+/* vlan.c */
+extern int netcfg_set_vlan(struct debconfclient *client, struct netcfg_interface *interface);
 
 #endif /* _NETCFG_H_ */

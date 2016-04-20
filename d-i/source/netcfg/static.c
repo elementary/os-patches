@@ -310,7 +310,7 @@ static int netcfg_activate_static_ipv4(struct debconfclient *client,
     deconfigure_network(NULL);
 
     loop_setup();
-    interface_up(interface->name);
+    netcfg_interface_up(interface);
 
     /* Flush all previous addresses, routes */
     snprintf(buf, sizeof(buf), "ifconfig %s inet 0 down", interface->name);
@@ -345,7 +345,7 @@ static int netcfg_activate_static_ipv4(struct debconfclient *client,
     deconfigure_network(NULL);
 
     loop_setup();
-    interface_up(interface->name);
+    netcfg_interface_up(interface);
 
     /* Flush all previous addresses, routes */
     snprintf(buf, sizeof(buf), "ip -f inet addr flush dev %s", interface->name);
@@ -426,7 +426,7 @@ static int netcfg_activate_static_ipv6(struct debconfclient *client,
     deconfigure_network(NULL);
     
     loop_setup();
-    interface_up(interface->name);
+    netcfg_interface_up(interface);
     
     /* Flush all previous addresses, routes */
     snprintf(buf, sizeof(buf), "ifconfig %s inet 0 down", interface->name);
@@ -449,7 +449,7 @@ static int netcfg_activate_static_ipv6(struct debconfclient *client,
     deconfigure_network(NULL);
 
     loop_setup();
-    interface_up(interface->name);
+    netcfg_interface_up(interface);
 
     /* Flush all previous addresses, routes */
     snprintf(buf, sizeof(buf), "ip -f inet6 addr flush dev %s", interface->name);
@@ -461,8 +461,8 @@ static int netcfg_activate_static_ipv6(struct debconfclient *client,
     /* Now down and up the interface, to get LL and SLAAC addresses back,
      * since flushing the addresses and routes gets rid of all that
      * sort of thing. */
-    interface_down(interface->name);
-    interface_up(interface->name);
+    netcfg_interface_down(interface);
+    netcfg_interface_up(interface);
 
     /* Add the new IP address and netmask */
     snprintf(buf, sizeof(buf), "ip addr add %s/%d dev %s",
