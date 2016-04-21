@@ -1,3 +1,217 @@
+ubiquity (2.21.63) xenial; urgency=medium
+
+  * Automatic update of included source packages: user-setup
+    1.63ubuntu4.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 20 Apr 2016 12:11:00 -0400
+
+ubiquity (2.21.62) xenial; urgency=medium
+
+  * Automatic update of included source packages: netcfg 1.135ubuntu4.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Wed, 20 Apr 2016 13:22:40 +0100
+
+ubiquity (2.21.61) xenial; urgency=medium
+
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu15.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 19 Apr 2016 21:25:45 -0400
+
+ubiquity (2.21.60) xenial; urgency=medium
+
+  * Automatic update of included source packages: user-setup
+    1.63ubuntu3.
+  * Don't crash in the Kubuntu prepare page if we're booting in EFI. Try to
+    do the right thing in showing password boxes and all the trimmings for
+    setting a Mok password, using the already-translated strings we have.
+    (LP: #1529450)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 19 Apr 2016 13:11:19 -0400
+
+ubiquity (2.21.59) xenial; urgency=medium
+
+  * New wallpaper path for Ubuntu Studio
+
+ -- Kaj Ailomaa <zequence@mousike.me>  Mon, 18 Apr 2016 11:20:13 -0400
+
+ubiquity (2.21.58) xenial; urgency=medium
+
+  [ Martin Pitt
+  * ubiquity.service: Revert commit 6411.2.2 as this does not/can't fix
+    LP #1567194 but introduces a dependency cycle between getty, plymouth, and
+    ubiquity. (LP: #1570901)
+  * Automatic update of included source packages: hw-detect
+    1.117ubuntu2.
+
+  [ Christopher Lee ]
+  * autopilot-test: Double timeout for CI VM speed.
+  * autopilot-tests: Now storing results as subunit.
+  * autopilot-tests: longer timeout to handle CI VMs.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 18 Apr 2016 13:25:44 +0200
+
+ubiquity (2.21.57) xenial; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * Automatic update of included source packages: localechooser
+    2.65ubuntu4. (LP: #1551285)
+  * scripts/simple-plugins: better handle passing the MokPW key to mokutil
+    and the result from the command -- we explicitly can ignore errors here.
+    (LP: #1567445)
+  * plugin-viewer-gtk.py: fix plugin-viewer-gtk to allow showing most plugins
+    correctly; useful for debugging.
+  * ubiquity/plugins/ubi-prepare.py: rework password validation behavior for
+    MokPW without changing user-visible strings: we only need to show feedback
+    for a "good" password (of the allowable lengths), and correct the behavior
+    for mismatched passwords. Also make it obvious if the chosen password is
+    too short. (LP: #1560940)
+
+  [ Shih-Yuan Lee (FourDollars) ]
+  * Really make oem-config-prepare quiet when started by a non-priviledged
+    user.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 13 Apr 2016 14:36:37 -0400
+
+ubiquity (2.21.56) xenial; urgency=medium
+
+  * Update translations from Launchpad. (LP: #1569232)
+  * debian/ubiquity.ubiquity.service: Start console ttys for debugging during
+    an installation. (LP: #1567194)
+  * data/oem-config.target: also enable console TTYs for the OEM configuration
+    target/service.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 12 Apr 2016 21:42:50 -0400
+
+ubiquity (2.21.55) xenial; urgency=medium
+
+  [ Jean-Baptiste Lallement ]
+  * autopilot: Merged autopilot tests fixes from Chris Lee. Thanks
+
+  [ Timo Jyrinki ]
+  * Fix Kubuntu slideshow not translated, thanks to Lasse Liehu for the 
+    patch (LP: #1512834)
+  * Automatic update of included source packages: netcfg 1.135ubuntu3.
+
+  [ Luke Yelavich ]
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu14.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Wed, 13 Apr 2016 09:38:21 +1000
+
+ubiquity (2.21.54) xenial; urgency=medium
+
+  * ubiquity/frontends/gtk_ui.py:
+    - Extend keyboard shortcut code for accessibility profiles to work with
+      flavours other than Ubuntu/Unity (LP: #1546317)
+    - Disable the screen reader activation keyboard shortcut in Unity, GNOME,
+      and Mate flavours. In almost all cases, the settings daemon catches the
+      keystroke before Ubiquity gets it, and was preventing the blindness
+      profile from being properly activated
+  * Drop unused profile set method that was missed previously
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu13, hw-detect 1.117ubuntu1, netcfg 1.135ubuntu2,
+    choose-mirror 2.65ubuntu6.
+
+ -- Luke Yelavich <themuso@ubuntu.com>  Wed, 06 Apr 2016 14:07:33 +1000
+
+ubiquity (2.21.53) xenial; urgency=medium
+
+  * debian/oem-config.install: install systemd units to /usr/lib/oem-config
+    instead of the systemd paths. (LP: #1552621)
+  * bin/oem-config-prepare: install systemd job from our copy in
+    /usr/lib/oem-config.
+  * bin/oem-config-wrapper: remove our special systemd units after oem config
+    is completed.
+  * debian/oem-config.target: Wants= network-manager.service too; so we can
+    get online and possibly do NTP, downloads, etc. (LP: #1508865)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 28 Mar 2016 22:53:30 -0400
+
+ubiquity (2.21.52) xenial; urgency=medium
+
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu12.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 24 Mar 2016 23:49:54 -0400
+
+ubiquity (2.21.51) xenial; urgency=medium
+
+  * ubiquity/frontend/gtk_ui.py: Drop and restore privs around calling vte.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 22 Mar 2016 16:35:21 -0600
+
+ubiquity (2.21.50) xenial; urgency=medium
+
+  * Adjust code for change of fwupdate-%arch-signed renaming to fwupdate-signed
+  * Automatic update of included source packages: hw-detect
+    1.114ubuntu4.
+
+ -- Mario Limonciello <mario_limonciello@dell.com>  Mon, 21 Mar 2016 19:23:36 +0000
+
+ubiquity (2.21.49) xenial; urgency=medium
+
+  * Make sure to keep fwupdate-$ARCH-signed packages installed when removing
+    extra stuff from the live filesystem if on EFI.
+
+ -- Mario Limonciello <mario_limonciello@dell.com>  Fri, 18 Mar 2016 13:29:15 -0500
+
+ubiquity (2.21.48) xenial; urgency=medium
+
+  * Make sure we keep mokutil files installed when we remove extra stuff from
+    the installed system that was pulled in because of the live filesystem.
+  * debian/control, d-i/update-control: replace pyflakes from Build-Depends
+    with pyflakes3, since the binary for pyflakes3 was moved.
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu11, grub-installer 1.128ubuntu5, hw-detect 1.114ubuntu3,
+    partman-auto 134ubuntu1, partman-base 187ubuntu2, partman-
+    partitioning 110ubuntu4, preseed 1.71ubuntu1, user-setup
+    1.63ubuntu2.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Tue, 15 Mar 2016 14:38:58 -0400
+
+ubiquity (2.21.47) xenial; urgency=medium
+
+  [ Marc Deslauriers ]
+  * scripts/plugininstall.py: Write initial random seed to systemd
+    location (LP: #1523199)
+
+  [ Jonathan Riddell ]
+  * kde_ui.py: strip any quotes from the lsb-release values
+  * Allow for alternate logos
+
+  [ Mathieu Trudel-Lapierre ]
+  * ubi-prepare: when non-free is disabled, drop the foss_disclaimer_extra
+    widget, and make the whole nonfree_vbox invisible (third-party drivers and
+    such are non-free, and disabling Secure Boot is unnecessary if you don't
+    install any non-free drivers). (LP: #1549816)
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 25 Feb 2016 14:41:41 -0500
+
+ubiquity (2.21.46) xenial; urgency=medium
+
+  * ubiquity/upower.py: Revert commit 6376, blank "except:" is wrong.
+  * ubiquity/upower.py: Actually specify the correct D-Bus interface name
+    instead of the object path name when querying the OnBattery property.
+    (LP: #1547956)
+  * debian/rules: Build under C.UTF-8 locale. grep 2.23 causes broken debconf
+    templates to be built under the C locale.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 24 Feb 2016 16:02:19 +0100
+
+ubiquity (2.21.45) xenial; urgency=medium
+
+  [ Luke Yelavich ]
+  * Rework the accessibility profile code to use the accessibility profile
+    manager if available
+
+  [ Mathieu Trudel-Lapierre ]
+  * Don't crash if we can't reach the DBus interface for UPower.
+  * Automatic update of included source packages: hw-detect
+    1.114ubuntu2.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 22 Feb 2016 17:37:59 -0500
+
 ubiquity (2.21.44) xenial; urgency=medium
 
   [ Iain Lane ]

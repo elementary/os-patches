@@ -1,9 +1,48 @@
+console-setup (1.108ubuntu15) xenial; urgency=medium
+
+  * Properly handle settings CODESET and FONSIZE when they equals 'guess' or are unset.
+    - console-setup-tty, debian/console-setup.initramfs-hook,
+      debian/console-setup.initramfs-top
+    (LP: #1565542) 
+
+ -- Evgeniy Yanyuk <eugenenuke@gmail.com>  Tue, 19 Apr 2016 15:22:17 -0400
+
+console-setup (1.108ubuntu14) xenial; urgency=medium
+
+  * keyboard_present.sh: Quiet config/postinst when we have no USB devices.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 12 Apr 2016 13:15:05 -0600
+
+console-setup (1.108ubuntu13) xenial; urgency=medium
+
+  * debian/keyboard-configuration.config: run grep with -a (to deal with files
+    as ASCII data) when searching for keyboard, locale, and layout names.
+    (LP: #1549529)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 04 Apr 2016 13:47:04 -0400
+
+console-setup (1.108ubuntu12) xenial; urgency=medium
+
+  * No-change rebuild to properly generate console-setup-udeb's list of
+    valid keyboard layouts and variants.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 24 Mar 2016 10:50:39 -0400
+
+console-setup (1.108ubuntu11) xenial; urgency=medium
+
+  * Add ConditionPathExists=/dev/tty0 to the console-setup.service, to
+    avoid running the unit on platforms without virtual consoles,
+    e.g. s390x. LP: #1552733
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 03 Mar 2016 14:41:05 +0000
+
 console-setup (1.108ubuntu10) xenial; urgency=medium
 
   * debian/rules: Drop obsolete and no-op dh_installinit --upstart-only
     option. (LP: #1519228)
   * Add debian/keyboard-configuration.links to (statically) enable
     console-setup.service. It is not being pulled in by plymouth any more, and
+    doing so was brittle and unexpected. (LP: #1531442)
   * console-setup.service: Set RemainAfterExit.
 
  -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 11 Jan 2016 15:02:09 +0100

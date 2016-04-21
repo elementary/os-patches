@@ -114,7 +114,7 @@ build_language_template() {
 	rm -f /var/lib/localechooser/langlevel
 
 	IFS="$NL"
-	for line in $(zcat $LANGUAGELISTDATA | grep "^[0-$level]:"); do
+	for line in $(zcat $LANGUAGELISTDATA | grep -a "^[0-$level]:"); do
 		name="$(echo "$line" | cut -d: -f3)"
 		codes="$(choices_add "$codes" \
 			"$(echo "$line" | cut -d: -f2)")"

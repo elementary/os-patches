@@ -4,6 +4,7 @@
 #export DH_VERBOSE=1
 
 export DH_OPTIONS
+export LC_ALL=C.UTF-8
 
 VERSION := $(shell dpkg-parsechangelog | awk '/^Version:/ { print $$2 }')
 EXPECTED_AC_VERSION := $(shell echo "$(VERSION)" | cut -d. -f1,2)

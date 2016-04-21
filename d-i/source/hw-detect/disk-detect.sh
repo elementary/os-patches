@@ -123,6 +123,13 @@ EOF
 	fi
 }
 
+# Load SCSI device handlers before SCSI low-level device drivers.
+# (attached on SCSI scan; handle some I/O errors more gracefully)
+depmod -a >/dev/null 2>&1
+for mod in $(list_modules_dir /lib/modules/*/kernel/drivers/scsi/device_handler); do
+	module_probe "$mod"
+done
+
 if ! hw-detect disk-detect/detect_progress_title; then
 	log "hw-detect exited nonzero"
 fi
@@ -131,7 +138,7 @@ fi
 db_get open-iscsi/targets || RET=
 if [ "$RET" ]; then
 	if ! pidof iscsid >/dev/null; then
-		iscsi-start
+		iscsi_start
 	fi
 	for portal in $RET; do
 		iscsi_discovery "$portal" -l
@@ -142,7 +149,7 @@ fi
 if db_fget partman-iscsi/login/address seen && [ "$RET" = true ] && \
    db_get partman-iscsi/login/address && [ "$RET" ]; then
 	if ! pidof iscsid >/dev/null; then
-		iscsi-start
+		iscsi_start
 	fi
 	db_capb backup
 	iscsi_login
@@ -177,7 +184,7 @@ while ! disk_found; do
 			exit 0
 		elif [ "$RET" = iscsi ]; then
 			if ! pidof iscsid >/dev/null; then
-				iscsi-start
+				iscsi_start
 			fi
 			db_capb backup
 			iscsi_login
@@ -291,7 +298,36 @@ if [ "$RET" = true ]; then
 		log-output -t disk-detect modprobe -v dm-round-robin || true
 
 		# ensure multipath and sg3 udev rules are run before we probe.
+		if [ -x /bin/udevadm ]; then
+			/bin/udevadm control --reload >/dev/null 2>&1
+		fi
 		update-dev >/dev/null
+
+		# LVM: deactivate volumes possibly on individual paths
+		# (reactivated later in udev rules and partman/init.d)
+		if [ -x /sbin/lvm ]; then
+			/sbin/lvm vgchange -an >/dev/null 2>&1
+		fi
+
+		# mdadm: stop arrays possibly on individual paths
+		# (reactivated later in udev rules and partman/init.d)
+		if [ -x /sbin/mdadm ]; then
+			/sbin/mdadm --stop --scan >/dev/null 2>&1
+		fi
+		
+		update-dev --settle >/dev/null 2>&1
+
+		# mdadm: some sysfs entries outlive 'mdadm --stop' and 
+		# 'udevadm settle' for a little while without any udev
+		# information, and it breaks multipath discovery; e.g.,
+		# '/sys/devices/virtual/block/md0: no udev information';
+		# Wait for them to go away.
+		retries=10
+		while [ "$retries" -gt 0 ] \
+		   && ls -1d /sys/devices/virtual/block/md[0-9]* >/dev/null 2>&1; do
+			: $((retries--))
+			sleep 0.5
+		done
 
 		# Look for multipaths...
 		if multipath_probe; then

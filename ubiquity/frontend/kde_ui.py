@@ -85,10 +85,15 @@ class UbiquityUI(QtGui.QMainWindow):
             for line in fp:
                 if "DISTRIB_ID=" in line:
                     name = str.strip(line.split("=")[1], '\n')
+                    if name.startswith('"') and name.endswith('"'):
+                        name = name[1:-1]
                     if name != "Ubuntu":
                         distro_name = name
                 elif "DISTRIB_RELEASE=" in line:
                     distro_release = str.strip(line.split("=")[1], '\n')
+                    if distro_release.startswith('"') and \
+                            distro_release.endswith('"'):
+                        distro_release = distro_release[1:-1]
 
         self.distro_name_label.setText(distro_name)
         self.distro_release_label.setText(distro_release)
@@ -189,7 +194,12 @@ class Wizard(BaseFrontend):
         # and up on the steps to make sure spacing between steps is not
         # awkwardly huge.
         self.icon_widget = SquareSvgWidget(self.ui)
-        self.icon_widget.load("/usr/share/ubiquity/qt/images/branding.svgz")
+        distro = self.ui.distro_name_label.text()
+        logoDirectory = "/usr/share/ubiquity/qt/images/"
+        if os.path.isfile(logoDirectory + distro + ".svgz"):
+            self.icon_widget.load(logoDirectory + distro + ".svgz")
+        else:
+            self.icon_widget.load(logoDirectory + "branding.svgz")
         branding_layout = QtGui.QHBoxLayout()
         branding_layout.addItem(QtGui.QSpacerItem(1, 1,
                                                   QtGui.QSizePolicy.Expanding,
@@ -623,7 +633,7 @@ class Wizard(BaseFrontend):
             parameters.append('rtl')
         parameters_encoded = '&'.join(parameters)
 
-        slides = 'file://%s# %s' % (slideshow_main, parameters_encoded)
+        slides = 'file://%s#%s' % (slideshow_main, parameters_encoded)
 
         def openLink(qUrl):
             QtGui.QDesktopServices.openUrl(qUrl)

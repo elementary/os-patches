@@ -503,20 +503,41 @@ case $ARCH:$grub_package in
 	# By default, use the first PReP partition found (prep-bootdev).
 	# If available, prefer a PReP partition in the same device (disc_offered).
 	# (the matching works on devices with/without disk-partition separator.)
+	# On MD/mdadm devices, each component device may have a PReP partition.
+
+	wipe_bootdevs=""
 	wipe_bootdev="$(/usr/lib/grub-installer/prep-bootdev)"
 	for prep_p in $(/usr/lib/grub-installer/prep-bootdev -l); do
 		if [ "${prep_p%[0-9]*}" = "${disc_offered%[0-9]*}" ]; then
 			wipe_bootdev=$prep_p
 			break
 		fi
+
+		if echo $disc_offered | grep -q '/dev/md[0-9]\+'; then
+			if mdadm --detail --verbose $disc_offered \
+			     | sed -n 's:.*\(/dev/.*[^0-9]\)[0-9]\+$:\1:p' \
+			     | grep "${prep_p%[0-9]*}"; then
+				wipe_bootdevs="$wipe_bootdevs $prep_p"
+			fi
+		fi
 	done
 	unset prep_p
 
-	if [ -n "$wipe_bootdev" ]; then
-		info "Wiping PReP partition $wipe_bootdev"
-		log-output -t grub-installer dd if=/dev/zero of="$wipe_bootdev" bs=512 count="$(blockdev --getsz "$wipe_bootdev")"
-	else
-		info "WARNING: PReP partition not found."
+	if [ -z "$wipe_bootdevs" ]; then
+		wipe_bootdevs="$wipe_bootdev"
+	fi
+
+	for wipe_bootdev in $wipe_bootdevs; do
+		if [ -n "$wipe_bootdev" ] && [ -e "$wipe_bootdev" ]; then
+			info "Wiping PReP partition $wipe_bootdev"
+			log-output -t grub-installer dd if=/dev/zero of="$wipe_bootdev" bs=512 count="$(blockdev --getsz "$wipe_bootdev")"
+		else
+			info "WARNING: PReP partition not found: $wipe_bootdev"
+		fi
+	done
+
+	if [ -z "$wipe_bootdevs" ]; then
+		info "WARNING: no PReP partition found"
 	fi
 	;;
 esac
@@ -997,6 +1018,14 @@ if [ -z "$frdisk" ] || [ "$grub_version" = grub2 ]; then
 
 	# Install grub on each space separated disk in the list
 	bootdevs="$bootdev"
+
+	case $ARCH:$grub_package in
+	    ppc64el/*:grub-ieee1275)
+		# On MD/mdadm devices, each component device may have a PReP partition.
+		bootdevs="$wipe_bootdevs"
+		;;
+	esac
+
 	for bootdev in $bootdevs; do
 		grub_install_params=
 		if ! is_floppy "$bootdev"; then

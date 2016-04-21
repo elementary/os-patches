@@ -120,7 +120,13 @@ default_disk_label () {
 	    ppc64el)
 		echo gpt;;
 	    s390|s390x)
-		echo dasd;;
+		if [ -e ./label ]; then
+		    disklabel=$(cat label)
+		fi
+		if [ "$disklabel" != dasd ]; then
+		    disklabel=msdos
+		fi
+		echo $disklabel;;
 	    sh4)
 		echo msdos;;
 	    sparc|sparc64)

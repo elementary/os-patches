@@ -56,9 +56,10 @@ def generate_config():
         'The software is subject to license terms included with its ' \
         'documentation.'.format(distro_flavor)
     stepPrepare['prepare_download_updates'] = \
-        'Download updates while installing'
+        'Download updates while installing {}'.format(distro_flavor)
     stepPrepare['prepare_nonfree_software'] = \
-        'Install this third-party software'
+        'Install third-party software for graphics and Wi-Fi hardware, ' \
+        'Flash, MP3 and other media'
     stepPrepare['prepare_network_connection'] = \
         'is connected to the Internet'
     stepPrepare['prepare_sufficient_space'] = \

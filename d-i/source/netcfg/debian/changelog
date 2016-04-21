@@ -1,3 +1,33 @@
+netcfg (1.135ubuntu4) xenial; urgency=medium
+
+  * Add vlan support, based on YunQiang Su patch and Philipp Kern's
+    rewrite, with own additions. Closes: #433568
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 20 Apr 2016 13:17:04 +0100
+
+netcfg (1.135ubuntu3) xenial; urgency=medium
+
+  * On s390x ask the user if DHCP network autoconfiguration should be
+    proceeded or not. DHCP should be supported in KVM|MAAS|OpenStack
+    deployements, however at the same time most LPAR|z/VM deployments use
+    static network configuration on s390x. LP: #1567688
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 08 Apr 2016 07:53:27 +0100
+
+netcfg (1.135ubuntu2) xenial; urgency=medium
+
+  Cherrypick commits from debian netcfg master.
+
+  [ Hendrik Brueckner ]
+  * common/ipaddr: remove leading and trailing whitespaces
+  * static: trim user-specified values for IP and other addresses
+  * Closes: #818611, LP: #1541955
+
+  [ Dimitri John Ledkov ]
+  * Makefile: link with -lm to resolve undefined log and other functions
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 31 Mar 2016 13:55:14 +0100
+
 netcfg (1.135ubuntu1) xenial; urgency=medium
 
   * Resynchronise with Debian.  Remaining changes:

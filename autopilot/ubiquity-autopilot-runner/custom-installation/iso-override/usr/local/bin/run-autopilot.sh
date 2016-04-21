@@ -297,9 +297,9 @@ run_tests() {
     tail_logs /var/log/installer/debug
     for testfile in $(ls -d $spooldir/* 2>/dev/null); do
         testname=$(basename $testfile)
-        echo "I: Running autopilot run $testname $AP_OPTS -o $AP_RESULTS/$testname.xml"
+        echo "I: Running autopilot run $testname $AP_OPTS -f subunit -o $AP_RESULTS/$testname.subunit"
         aprc=0
-        timeout -s 9 -k 30 $TIMEOUT ./autopilot run $testname $AP_OPTS -f xml -o $AP_RESULTS/${testname}.xml||aprc=$?
+        timeout -s 9 -k 30 $TIMEOUT ./autopilot run $testname $AP_OPTS -f subunit -o $AP_RESULTS/${testname}.subunit||aprc=$?
         if [ $aprc -gt 0 ]; then
             echo "${testname}: FAIL" >> $AP_SUMMARY
         else

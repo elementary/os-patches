@@ -23,7 +23,7 @@ import os
 import subprocess
 import sys
 
-from ubiquity import i18n, misc, osextras, plugin, upower, validation
+from ubiquity import i18n, misc, osextras, plugin, upower
 from ubiquity.install_misc import archdetect, is_secure_boot
 
 NAME = 'prepare'
@@ -84,10 +84,7 @@ class PageGtk(PreparePageBase):
         self.password_strength_pages = {
             'empty': 0,
             'too_short': 1,
-            'weak': 2,
-            'fair': 3,
-            'good': 4,
-            'strong': 5,
+            'good': 2,
         }
         self.password_match_pages = {
             'empty': 0,
@@ -147,8 +144,7 @@ class PageGtk(PreparePageBase):
     def set_allow_nonfree(self, allow):
         if not allow:
             self.prepare_nonfree_software.set_active(False)
-            self.prepare_nonfree_software.set_property('visible', False)
-            self.prepare_foss_disclaimer_extra.set_property('visible', False)
+            self.nonfree_vbox.set_property('visible', False)
 
     def set_use_nonfree(self, val):
         if osextras.find_on_path('ubuntu-drivers'):
@@ -185,29 +181,31 @@ class PageGtk(PreparePageBase):
         self.info_loop(None)
 
     def info_loop(self, unused_widget):
-        complete = True
+        complete = False
         passw = self.password.get_text()
         vpassw = self.verified_password.get_text()
 
+        if len(passw) == 0:
+            self.password_strength.set_current_page(
+                self.password_strength_pages['empty'])
+        elif len(passw) >= 8:
+            self.password_strength.set_current_page(
+                self.password_strength_pages['good'])
+        else:
+            self.password_strength.set_current_page(
+                self.password_strength_pages['too_short'])
+
         if passw != vpassw or (passw and len(passw) < 8):
-            complete = False
             self.password_match.set_current_page(
                 self.password_match_pages['empty'])
-            if passw and (not passw.startswith(vpassw) or
-                          len(vpassw) / len(passw) > 0.8):
+            if len(passw) >= 8 and (not passw.startswith(vpassw) or
+                                    len(vpassw) / len(passw) > 0.6):
                 self.password_match.set_current_page(
                     self.password_match_pages['mismatch'])
         else:
+            complete = True
             self.password_match.set_current_page(
                 self.password_match_pages['ok'])
-
-        if passw:
-            txt = validation.human_password_strength(passw)[0]
-            self.password_strength.set_current_page(
-                self.password_strength_pages[txt])
-        else:
-            self.password_strength.set_current_page(
-                self.password_strength_pages['empty'])
 
         self.controller.allow_go_forward(complete)
         return complete
@@ -244,11 +242,20 @@ class PageKde(PreparePageBase):
         self.controller = controller
         try:
             from PyQt4 import uic
+            from PyQt4 import QtGui
             self.page = uic.loadUi('/usr/share/ubiquity/qt/stepPrepare.ui')
             self.prepare_download_updates = self.page.prepare_download_updates
             self.prepare_nonfree_software = self.page.prepare_nonfree_software
             self.prepare_foss_disclaimer = self.page.prepare_foss_disclaimer
             self.prepare_sufficient_space = StateBox(self.page)
+            self.secureboot_label = self.page.secureboot_label
+            self.disable_secureboot = self.page.disable_secureboot
+            self.password = self.page.password
+            self.verified_password = self.page.verified_password
+            self.password_extra_label = self.page.password_extra_label
+            self.badPassword = self.page.badPassword
+            self.badPassword.setPixmap(QtGui.QPixmap(
+                "/usr/share/icons/oxygen/16x16/status/dialog-warning.png"))
             # TODO we should set these up and tear them down while on this
             # page.
             try:
@@ -268,16 +275,41 @@ class PageKde(PreparePageBase):
             print("Could not create prepare page:", str(e), file=sys.stderr)
             self.debug('Could not create prepare page: %s', e)
             self.page = None
-        self.using_secureboot = False
+        self.set_using_secureboot(False)
         self.plugin_widgets = self.page
 
     def show_insufficient_space_page(self, required, free):
         return
 
+    def set_using_secureboot(self, secureboot):
+        self.using_secureboot = secureboot
+        self.secureboot_label.setVisible(secureboot)
+        self.disable_secureboot.setVisible(secureboot)
+        self.password.setVisible(secureboot)
+        self.verified_password.setVisible(secureboot)
+        self.password_extra_label.setVisible(secureboot)
+        self.badPassword.hide()
+        if (secureboot):
+            self.password.textChanged.connect(self.verify_password)
+            self.verified_password.textChanged.connect(self.verify_password)
+
+    # show warning if passwords do not match
+    def verify_password(self):
+        complete = False
+
+        if self.password.text() == self.verified_password.text():
+            self.badPassword.hide()
+            complete = True
+        else:
+            self.badPassword.show()
+
+        if not self.password.text():
+            complete = False
+
+        self.controller.allow_go_forward(complete)
+
     def get_secureboot_key(self):
-        # TODO: This needs the controls to set a Secure Boot key.
-        # return str(self.password.text())
-        return ""
+        return str(self.page.password.text())
 
     def enable_download_updates(self, val):
         self.prepare_download_updates.setEnabled(val)

@@ -347,27 +347,18 @@ class Wizard(BaseFrontend):
 
         self.customize_installer()
 
-        # Put up the a11y indicator in *-ubiquity and oemconfig.
-        if osextras.find_on_path('casper-a11y-enable'):
-            with open('/proc/cmdline') as fp:
-                if ('UBIQUITY_GREETER' in os.environ or self.oem_user_config or
-                        'only-ubiquity' in fp.read()):
-                    try:
-                        from gi.repository import AppIndicator3 as AppIndicator
-                        self.indicator = AppIndicator.Indicator.new(
-                            'ubiquity', 'accessibility-directory',
-                            AppIndicator.IndicatorCategory.OTHER)
-                        self.indicator.set_status(
-                            AppIndicator.IndicatorStatus.ACTIVE)
-                        self.indicator.set_menu(
-                            self.builder.get_object('a11y_indicator_menu'))
-                        if osextras.find_on_path('canberra-gtk-play'):
-                            subprocess.Popen(
-                                ['canberra-gtk-play', '--id=system-ready'],
-                                preexec_fn=misc.drop_all_privileges)
-                    except:
-                        print("Unable to set up accessibility profile support",
-                              file=sys.stderr)
+        # Put up the a11y indicator.
+        if osextras.find_on_path('a11y-profile-manager-indicator'):
+            try:
+                subprocess.Popen(['a11y-profile-manager-indicator',
+                                  '-i'], preexec_fn=misc.drop_all_privileges)
+                if osextras.find_on_path('canberra-gtk-play'):
+                    subprocess.Popen(
+                        ['canberra-gtk-play', '--id=system-ready'],
+                        preexec_fn=misc.drop_all_privileges)
+            except:
+                print("Unable to set up accessibility profile support",
+                      file=sys.stderr)
             self.live_installer.connect(
                 'key-press-event', self.a11y_profile_keys)
 
@@ -405,9 +396,6 @@ class Wizard(BaseFrontend):
                 if toplevel.get_name() != 'live_installer':
                     for c in self.all_children(toplevel):
                         widgets.append((c, None))
-        if hasattr(self, "indicator"):
-            for c in self.all_children(self.indicator.get_menu()):
-                widgets.append((c, None))
         self.translate_widgets(lang=lang, widgets=widgets, reget=False)
         self.set_page_title(current_page, lang)
 
@@ -542,6 +530,31 @@ class Wizard(BaseFrontend):
 
         gsettings.set(gs_schema, gs_key, gs_value)
 
+    def disable_screen_reader(self):
+        gs_key = 'screenreader'
+        for gs_schema in 'org.gnome.settings-daemon.plugins.media-keys', \
+                         'org.mate.SettingsDaemon.plugins.media-keys':
+            gs_previous = '%s/%s' % (gs_schema, gs_key)
+            if gs_previous in self.gsettings_previous:
+                return
+
+            gs_value = gsettings.get(gs_schema, gs_key)
+            self.gsettings_previous[gs_previous] = gs_value
+
+            if gs_value:
+                gsettings.set(gs_schema, gs_key, '')
+
+        atexit.register(self.enable_screen_reader)
+
+    def enable_screen_reader(self):
+        gs_key = 'screenreader'
+        for gs_schema in 'org.gnome.settings-daemon.plugins.media-keys', \
+                         'org.mate.SettingsDaemon.plugins.media-keys':
+            gs_previous = '%s/%s' % (gs_schema, gs_key)
+            gs_value = self.gsettings_previous[gs_previous]
+
+            gsettings.set(gs_schema, gs_key, gs_value)
+
     def disable_screensaver(self):
         gs_schema = 'org.gnome.desktop.screensaver'
         gs_key = 'idle-activation-enabled'
@@ -662,51 +675,45 @@ class Wizard(BaseFrontend):
             self.thunar_set_volmanrc(self.thunar_previous)
 
     def a11y_profile_keys(self, window, event):
-        if (event.state & Gdk.ModifierType.CONTROL_MASK and
-                event.keyval == Gdk.keyval_from_name('h')):
-            self.a11y_profile_high_contrast_activate()
-        elif (event.state & Gdk.ModifierType.CONTROL_MASK and
-                event.keyval == Gdk.keyval_from_name('s')):
-            self.a11y_profile_screen_reader_activate()
-        elif (event.state & Gdk.ModifierType.SUPER_MASK and
-                event.state & Gdk.ModifierType.MOD1_MASK and
-                event.keyval == Gdk.keyval_from_name('s')):
-            self.a11y_profile_screen_reader_activate()
+        if osextras.find_on_path('a11y-profile-manager'):
+            hc_profile_found = False
+            sr_profile_found = False
 
-    def a11y_profile_high_contrast_activate(self, widget=None):
-        subprocess.call(['log-output', '-t', 'ubiquity',
-                         '--pass-stdout', 'casper-a11y-enable',
-                         'high-contrast'], preexec_fn=misc.drop_all_privileges)
-        os.environ['UBIQUITY_A11Y_PROFILE'] = 'high-contrast'
+            subp = subprocess.Popen(['a11y-profile-manager',
+                                    '-l'],
+                                    stdout=subprocess.PIPE,
+                                    preexec_fn=misc.drop_all_privileges,
+                                    universal_newlines=True)
+
+            for line in subp.stdout:
+                value = line.rstrip('\n')
+                if value.endswith('high-contrast'):
+                    hc_profile_found = True
+                    self.hc_profile_name = value
+                if value.endswith('blindness'):
+                    sr_profile_found = True
+                    self.sr_profile_name = value
+
+            if (hc_profile_found is True and event.state &
+                Gdk.ModifierType.CONTROL_MASK and
+                    event.keyval == Gdk.keyval_from_name('h')):
+                self.a11y_profile_high_contrast_activate()
+            elif (sr_profile_found is True and event.state &
+                  Gdk.ModifierType.SUPER_MASK and
+                    event.state & Gdk.ModifierType.MOD1_MASK and
+                    event.keyval == Gdk.keyval_from_name('s')):
+                self.a11y_profile_screen_reader_activate()
+
+    def a11y_profile_set(self, value):
+        gsettings.set("com.canonical.a11y-profile-manager",
+                      "active-profile", value)
+
+    def a11y_profile_high_contrast_activate(self):
+        self.a11y_profile_set(self.hc_profile_name)
 
     def a11y_profile_screen_reader_activate(self, widget=None):
-        if self.orca_process and self.orca_process.poll() != 0:
-            return
-
-        subprocess.call(
-            ['log-output', '-t', 'ubiquity', '--pass-stdout',
-             'casper-a11y-enable', 'blindness'],
-            preexec_fn=misc.drop_all_privileges)
+        self.a11y_profile_set(self.sr_profile_name)
         os.environ['UBIQUITY_A11Y_PROFILE'] = 'screen-reader'
-        if osextras.find_on_path('orca'):
-            self.orca_process = subprocess.Popen(
-                ['orca'], preexec_fn=misc.drop_all_privileges)
-
-    def a11y_profile_keyboard_modifiers_activate(self, widget=None):
-        subprocess.call(
-            ['log-output', '-t', 'ubiquity', '--pass-stdout',
-             'casper-a11y-enable', 'keyboard-modifiers'],
-            preexec_fn=misc.drop_all_privileges)
-        os.environ['UBIQUITY_A11Y_PROFILE'] = 'keyboard-modifiers'
-
-    def a11y_profile_onscreen_keyboard_activate(self, widget=None):
-        subprocess.call(
-            ['log-output', '-t', 'ubiquity', '--pass-stdout',
-             'casper-a11y-enable', 'onscreen-keyboard'],
-            preexec_fn=misc.drop_all_privileges)
-        os.environ['UBIQUITY_A11Y_PROFILE'] = 'onscreen-keyboard'
-        if osextras.find_on_path('onboard'):
-            subprocess.Popen(['onboard'], preexec_fn=misc.drop_all_privileges)
 
     def run(self):
         """run the interface."""
@@ -723,6 +730,7 @@ class Wizard(BaseFrontend):
         self.disable_volume_manager()
         self.disable_screensaver()
         self.disable_powermgr()
+        self.disable_screen_reader()
 
         if 'UBIQUITY_ONLY' in os.environ:
             self.disable_logout_indicator()
@@ -920,6 +928,7 @@ class Wizard(BaseFrontend):
         import gi
         gi.require_version("Vte", "2.91")
         from gi.repository import Vte, Pango
+        misc.drop_privileges_save()
         self.vte = Vte.Terminal()
         self.install_details_sw.add(self.vte)
         tail_cmd = [
@@ -930,6 +939,7 @@ class Wizard(BaseFrontend):
         fontdesc = Pango.font_description_from_string("Roboto Mono 10")
         self.vte.set_font(fontdesc)
         self.vte.show()
+        misc.regain_privileges_save()
         # FIXME shrink the window horizontally instead of locking the window
         # size.
         self.live_installer.set_resizable(False)
