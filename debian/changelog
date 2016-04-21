@@ -1,3 +1,17 @@
+casper (1.376) xenial; urgency=medium
+
+  * scripts/casper-bottom/13swap: Don't add detected swap partitions to the
+    live system's fstab, just swapon it. This avoids creating *.swap units for
+    those which automatically trigger whenever partman re-creates swap
+    partitions, as this races with partman's own swapon (while it's
+    indistinguishable from a hotplug/early boot event in systemd). By
+    disabling the fstab entries we disable that automatic start of swap
+    partitions, as a relatively unintrusive bandaid for the final release.
+    (LP: #1552539)
+  * hooks/casper: Copy swapon into the casper initrd for the above.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 20 Apr 2016 16:26:55 +0200
+
 casper (1.375) xenial; urgency=medium
 
   * scripts/casper-bottom/16disable_gpt_auto_mount: Disable systemd's GPT auto

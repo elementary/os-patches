@@ -2,7 +2,6 @@
 
 PREREQ=""
 DESCRIPTION="Setting up swap..."
-FSTAB=/root/etc/fstab
 
 prereqs()
 {
@@ -38,9 +37,7 @@ for device in /dev/[hsv]d[a-z][0-9]*; do
 done
 
 for device in $devices; do
-    cat >> $FSTAB <<EOF
-$device swap swap defaults 0 0
-EOF
+    swapon $device || true
 done
 
 log_end_msg
