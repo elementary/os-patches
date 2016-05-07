@@ -23,6 +23,9 @@ appdatadir = $(datadir)/appdata
 appdata_DATA = $(appdata_in_files:.xml.in=.xml)
 appdata_in_files = org.gnome.FileRoller.appdata.xml.in
 
+contractordir = $(datadir)/contractor
+contractor_DATA = file-roller-compress.contract file-roller-extract-here.contract
+
 @INTLTOOL_XML_RULE@
 
 @INTLTOOL_XML_NOMERGE_RULE@
