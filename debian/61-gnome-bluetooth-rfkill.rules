@@ -1,0 +1,9 @@
+# Set ACLs for console users on /dev/rfkill
+# This is necessary until a daemon can properly handle access to the 
+# kill switch
+# http://bugs.debian.org/563902
+# https://bugzilla.redhat.com/show_bug.cgi?id=514798
+
+# logind
+# https://bugzilla.redhat.com/show_bug.cgi?id=733326
+KERNEL=="rfkill", SUBSYSTEM=="misc", TAG+="uaccess"
