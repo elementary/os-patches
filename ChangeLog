@@ -1,6 +1,454 @@
+commit f60f1115406a1a9644afbeb64c8ea3969cd359f9
+Author: Paolo Bacchilega <paobac@src.gnome.org>
+Date:   2016-04-11
+
+    updated for version 3.16.5
+
+M	NEWS
+M	configure.ac
+
+commit 3c0a97c57c7d47c720975047731c31ca18f286da
+Author: Cédric Valmary <cvalmary@yahoo.fr>
+Date:	2016-04-11
+
+    Updated Occitan translation
+
+M	po/oc.po
+
+commit 5567edda971fa35533324faf8105e4d971334f2e
+Author: Paolo Bacchilega <paobac@src.gnome.org>
+Date:	2015-12-19
+
+    start the object path with a slash
+
+M	src/fr-application.c
+
+commit 2cb57be7cc6457d617fbb88b050d5098180c9526
+Author: Paolo Bacchilega <paobac@src.gnome.org>
+Date:	2015-12-21
+
+    appdata: added kudos
+
+M	data/org.gnome.FileRoller.appdata.xml.in
+
+commit 97337b984a8ca2ad5e6857845e2ecbb264ef5b03
+Author: Dušan Kazik <prescott66@gmail.com>
+Date:	2015-12-14
+
+    Updated Slovak translation
+
+M	po/sk.po
+
+commit 4e7bf9ef88155a77d193017c49655eb7cb97bb28
+Author: David King <dking@redhat.com>
+Date:	2015-07-16
+
+    Fix query_info_ready_for_overwrite_dialog_cb memory leak
+
+    Found with Valgrind:
+
+    ==9376== 65 bytes in 1 blocks are definitely lost in loss record
+    11,501
+    of 17,916
+    ==9376==	at 0x4C2DB9D: realloc (in
+    /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+    ==9376==	by 0x7FB1F9A: vasprintf (in /usr/lib64/libc-2.21.90.so)
+    ==9376==	by 0x74C8E90: g_vasprintf (gprintf.c:316)
+    ==9376==	by 0x74A43CF: g_strdup_vprintf (gstrfuncs.c:507)
+    ==9376==	by 0x74A446B: g_strdup_printf (gstrfuncs.c:533)
+    ==9376==	by 0x446556: query_info_ready_for_overwrite_dialog_cb
+    (fr-window.c:6496)
+    ==9376==	by 0x6EEA4E8: g_task_return_now (gtask.c:1104)
+    ==9376==	by 0x6EEA528: complete_in_idle_cb (gtask.c:1118)
+    ==9376==	by 0x7485C89: g_main_dispatch (gmain.c:3122)
+    ==9376==	by 0x7485C89: g_main_context_dispatch (gmain.c:3737)
+    ==9376==	by 0x7486007: g_main_context_iterate.isra.29
+    (gmain.c:3808)
+    ==9376==	by 0x74860AB: g_main_context_iteration (gmain.c:3869)
+    ==9376==	by 0x6F0F5BB: g_application_run (gapplication.c:2311)
+    ==9376==	by 0x414FE5: main (main.c:38)
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=752476
+
+M	src/fr-window.c
+
+commit b88e85561ac5f9c9436f2ddf5da6236d8ab9eb70
+Author: David King <dking@redhat.com>
+Date:	2015-07-16
+
+    Fix fr_window_construct memory leak
+
+    Found with Valgrind:
+
+    ==9376== 56 (40 direct, 16 indirect) bytes in 1 blocks are definitely
+    lost in loss record 10,629 of 17,916
+    ==9376==	at 0x721CA3A: g_type_create_instance (gtype.c:1849)
+    ==9376==	by 0x71FF0AA: g_object_new_internal (gobject.c:1774)
+    ==9376==	by 0x72008C0: g_object_newv (gobject.c:1921)
+    ==9376==	by 0x72011AB: g_object_new (gobject.c:1614)
+    ==9376==	by 0x5301393: gtk_size_group_new (gtksizegroup.c:425)
+    ==9376==	by 0x441548: fr_window_construct (fr-window.c:5740)
+    ==9376==	by 0x441548: fr_window_new (fr-window.c:5796)
+    ==9376==	by 0x41C490: fr_application_command_line
+    (fr-application.c:588)
+    ==9376==	by 0xC750D2F: ffi_call_unix64 (in
+    /usr/lib64/libffi.so.6.0.2)
+    ==9376==	by 0xC75079A: ffi_call (in /usr/lib64/libffi.so.6.0.2)
+    ==9376==	by 0x71FAB94: g_cclosure_marshal_generic_va
+    (gclosure.c:1594)
+    ==9376==	by 0x71FA0C3: _g_closure_invoke_va (gclosure.c:864)
+    ==9376==	by 0x7213DD8: g_signal_emit_valist (gsignal.c:3246)
+    ==9376==	by 0x72148F1: g_signal_emit (gsignal.c:3393)
+    ==9376==	by 0x6F0CF82: g_application_call_command_line
+    (gapplication.c:953)
+    ==9376==	by 0x6F0F55F: g_application_run (gapplication.c:2292)
+    ==9376==	by 0x414FE5: main (main.c:38)
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=752476
+
+M	src/fr-window.c
+
+commit d72e9eab8de6434a3679b3ac6f9ef8620d86c7a7
+Author: David King <dking@redhat.com>
+Date:	2015-07-16
+
+    Fix fr_window_add_to_recent_list memory leak
+
+    Found with Valgrind:
+
+    ==9376== 19 bytes in 1 blocks are definitely lost in loss record 3,217
+    of 17,916
+    ==9376==	at 0x4C2BC50: malloc (in
+    /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+    ==9376==	by 0x748B689: g_malloc (gmem.c:97)
+    ==9376==	by 0x74A425E: g_strdup (gstrfuncs.c:356)
+    ==9376==	by 0x43C2AF: fr_window_add_to_recent_list
+    (fr-window.c:2679)
+    ==9376==	by 0x4457E0: _archive_operation_completed
+    (fr-window.c:3019)
+    ==9376==	by 0x4480BB: archive_list_ready_cb (fr-window.c:5881)
+    ==9376==	by 0x6ED9ACC: g_simple_async_result_complete
+    (gsimpleasyncresult.c:801)
+    ==9376==	by 0x6ED9B3B: complete_in_idle_cb
+    (gsimpleasyncresult.c:813)
+    ==9376==	by 0x7485C89: g_main_dispatch (gmain.c:3122)
+    ==9376==	by 0x7485C89: g_main_context_dispatch (gmain.c:3737)
+    ==9376==	by 0x7486007: g_main_context_iterate.isra.29
+    (gmain.c:3808)
+    ==9376==	by 0x74860AB: g_main_context_iteration (gmain.c:3869)
+    ==9376==	by 0x6F0F5BB: g_application_run (gapplication.c:2311)
+    ==9376==	by 0x414FE5: main (main.c:38)
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=752476
+
+M	src/fr-window.c
+
+commit 72a46499fe116e354c44616c331be0969ccada64
+Author: David King <dking@redhat.com>
+Date:	2015-07-16
+
+    Fix memory leak in fr_window_change_action_state
+
+    Found with Valgrind:
+
+    ==9376== 81 (40 direct, 41 indirect) bytes in 1 blocks are definitely
+    lost in loss record 12,551 of 17,916
+    ==9376==	at 0x4C2BC50: malloc (in
+    /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+    ==9376==	by 0x748B689: g_malloc (gmem.c:97)
+    ==9376==	by 0x74A24D2: g_slice_alloc (gslice.c:1007)
+    ==9376==	by 0x74C022C: g_variant_alloc (gvariant-core.c:476)
+    ==9376==	by 0x74C022C: g_variant_new_from_bytes
+    (gvariant-core.c:512)
+    ==9376==	by 0x74B9766: g_variant_new_from_trusted (gvariant.c:295)
+    ==9376==	by 0x74B97DE: g_variant_new_boolean (gvariant.c:316)
+    ==9376==	by 0x43CACD: fr_window_change_action_state.constprop.63
+    (fr-window.c:724)
+    ==9376==	by 0x43CC96: fr_window_deactivate_filter
+    (fr-window.c:1712)
+    ==9376==	by 0x43CC96: fr_window_update_current_location
+    (fr-window.c:1738)
+    ==9376==	by 0x441583: fr_window_construct (fr-window.c:5748)
+    ==9376==	by 0x441583: fr_window_new (fr-window.c:5796)
+    ==9376==	by 0x41C490: fr_application_command_line
+    (fr-application.c:588)
+    ==9376==	by 0xC750D2F: ffi_call_unix64 (in
+    /usr/lib64/libffi.so.6.0.2)
+    ==9376==	by 0xC75079A: ffi_call (in /usr/lib64/libffi.so.6.0.2)
+    ==9376==	by 0x71FAB94: g_cclosure_marshal_generic_va
+    (gclosure.c:1594)
+    ==9376==	by 0x71FA0C3: _g_closure_invoke_va (gclosure.c:864)
+    ==9376==	by 0x7213DD8: g_signal_emit_valist (gsignal.c:3246)
+    ==9376==	by 0x72148F1: g_signal_emit (gsignal.c:3393)
+    ==9376==	by 0x6F0CF82: g_application_call_command_line
+    (gapplication.c:953)
+    ==9376==	by 0x6F0F55F: g_application_run (gapplication.c:2292)
+    ==9376==	by 0x414FE5: main (main.c:38)
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=752476
+
+M	src/fr-window.c
+
+commit 6022be011da8802eba04e5afdbb17fecd3267373
+Author: David King <dking@redhat.com>
+Date:	2015-07-16
+
+    Fix fr_application_command_line memory leak
+
+    Found with Valgrind:
+
+    ==9376== 44 (32 direct, 12 indirect) bytes in 1 blocks are definitely
+    lost in loss record 8,792 of 17,916
+    ==9376==	at 0x4C2BC50: malloc (in
+    /usr/lib64/valgrind/vgpreload_memcheck-amd64-linux.so)
+    ==9376==	by 0x748B689: g_malloc (gmem.c:97)
+    ==9376==	by 0x74BAC72: g_variant_dup_bytestring_array
+    (gvariant.c:1992)
+    ==9376==	by 0x6F108B9: g_application_command_line_get_arguments
+    (gapplicationcommandline.c:480)
+    ==9376==	by 0x41C146: fr_application_command_line
+    (fr-application.c:524)
+    ==9376==	by 0xC750D2F: ffi_call_unix64 (in
+    /usr/lib64/libffi.so.6.0.2)
+    ==9376==	by 0xC75079A: ffi_call (in /usr/lib64/libffi.so.6.0.2)
+    ==9376==	by 0x71FAB94: g_cclosure_marshal_generic_va
+    (gclosure.c:1594)
+    ==9376==	by 0x71FA0C3: _g_closure_invoke_va (gclosure.c:864)
+    ==9376==	by 0x7213DD8: g_signal_emit_valist (gsignal.c:3246)
+    ==9376==	by 0x72148F1: g_signal_emit (gsignal.c:3393)
+    ==9376==	by 0x6F0CF82: g_application_call_command_line
+    (gapplication.c:953)
+    ==9376==	by 0x6F0F55F: g_application_run (gapplication.c:2292)
+    ==9376==	by 0x414FE5: main (main.c:38)
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=752476
+
+M	src/fr-application.c
+
+commit 659b782a42e7f0a9d978a07e79eec61659b6aa06
+Author: David King <dking@redhat.com>
+Date:	2015-07-16
+
+    Fix fr_application_register_archive_manager_service memory leak
+
+    Found with Valgrind:
+
+    ==17023== 48 bytes in 1 blocks are possibly lost in loss record 10,459
+    of 17,938
+    ==17023==	 at 0x4C2BC50: malloc (in
+    /usr/lib64/valgrind/vgpreload_memcheck-amd
+    64-linux.so)
+    ==17023==	 by 0x748B689: g_malloc (gmem.c:97)
+    ==17023==	 by 0x74A4297: g_memdup (gstrfuncs.c:384)
+    ==17023==	 by 0x721820C: type_iface_vtable_base_init_Wm
+    (gtype.c:2023)
+    ==17023==	 by 0x72198DE: type_class_init_Wm (gtype.c:2197)
+    ==17023==	 by 0x72198DE: g_type_class_ref (gtype.c:2951)
+    ==17023==	 by 0x7201033: g_object_new_valist (gobject.c:1959)
+    ==17023==	 by 0x7201193: g_object_new (gobject.c:1617)
+    ==17023==	 by 0x6ED6BD4: g_resource_open_stream (gresource.c:385)
+    ==17023==	 by 0x6ED6FA5: g_resources_open_stream (gresource.c:673)
+    ==17023==	 by 0x41D1B2:
+    fr_application_register_archive_manager_service (fr-application.c:418)
+    ==17023==	 by 0x41D1B2: fr_application_startup
+    (fr-application.c:455)
+    ==17023==	 by 0x71FA0C3: _g_closure_invoke_va (gclosure.c:864)
+    ==17023==	 by 0x72142A0: g_signal_emit_valist (gsignal.c:3246)
+    ==17023==	 by 0x72148F1: g_signal_emit (gsignal.c:3393)
+    ==17023==	 by 0x6F0EA99: g_application_register
+    (gapplication.c:2015)
+    ==17023==	 by 0x6F0F545: g_application_run (gapplication.c:2285)
+    ==17023==	 by 0x414F95: main (main.c:38)
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=752476
+
+M	src/fr-application.c
+
+commit 2e5de0b62e60358bf7184998faafb00f9001cff9
+Author: David King <dking@redhat.com>
+Date:	2015-07-16
+
+    Fix _g_file_is_temp_work_dir memory leak
+
+    Found with Valgrind:
+
+    ==9376== 47 bytes in 1 blocks are definitely lost in loss record 8,821
+    of 17,916
+    ==9376==	at 0x4C2BC50: malloc (in
+    /usr/lib64/valgrind/vgpreload_memcheck-amd6
+    4-linux.so)
+    ==9376==	by 0x748B689: g_malloc (gmem.c:97)
+    ==9376==	by 0x74A425E: g_strdup (gstrfuncs.c:356)
+    ==9376==	by 0x41B94E: _g_file_is_temp_work_dir (file-utils.c:575)
+    ==9376==	by 0x41BA2B: _g_file_is_temp_dir (file-utils.c:266)
+    ==9376==	by 0x43C271: fr_window_add_to_recent_list
+    (fr-window.c:2670)
+    ==9376==	by 0x4457E0: _archive_operation_completed
+    (fr-window.c:3019)
+    ==9376==	by 0x4480BB: archive_list_ready_cb (fr-window.c:5881)
+    ==9376==	by 0x6ED9ACC: g_simple_async_result_complete
+    (gsimpleasyncresult.c:801)
+    ==9376==	by 0x6ED9B3B: complete_in_idle_cb
+    (gsimpleasyncresult.c:813)
+    ==9376==	by 0x7485C89: g_main_dispatch (gmain.c:3122)
+    ==9376==	by 0x7485C89: g_main_context_dispatch (gmain.c:3737)
+    ==9376==	by 0x7486007: g_main_context_iterate.isra.29
+    (gmain.c:3808)
+    ==9376==	by 0x74860AB: g_main_context_iteration (gmain.c:3869)
+    ==9376==	by 0x6F0F5BB: g_application_run (gapplication.c:2311)
+    ==9376==	by 0x414FE5: main (main.c:38)
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=752476
+
+M	src/file-utils.c
+
+commit faad8f0429b287a91ce35eed67e42ed506418973
+Author: David King <dking@redhat.com>
+Date:	2015-07-16
+
+    Fix _g_path_get_temp_work_dir memory leak
+
+    Found with Valgrind:
+
+    ==9376== 19 bytes in 1 blocks are definitely lost in loss record 3,218
+    of 17,916
+    ==9376==	at 0x4C2BC50: malloc (in
+    /usr/lib64/valgrind/vgpreload_memcheck-amd6
+    4-linux.so)
+    ==9376==	by 0x748B689: g_malloc (gmem.c:97)
+    ==9376==	by 0x74A425E: g_strdup (gstrfuncs.c:356)
+    ==9376==	by 0x41B8B7: _g_path_get_temp_work_dir (file-utils.c:100)
+    ==9376==	by 0x4294AD: fr_command_cfile_extract
+    (fr-command-cfile.c:350)
+    ==9376==	by 0x4228B0: fr_command_extract (fr-command.c:311)
+    ==9376==	by 0x4229FD: extract_from_archive (fr-command.c:1857)
+    ==9376==	by 0x422C3F: _fr_command_extract (fr-command.c:2131)
+    ==9376==	by 0x4236A3: _fr_command_extract_to_local
+    (fr-command.c:2334)
+    ==9376==	by 0x43E9B7: _fr_window_archive_extract_from_edata
+    (fr-window.c:6395)
+    ==9376==	by 0x446311: _fr_window_ask_overwrite_dialog
+    (fr-window.c:6570)
+    ==9376==	by 0x71FC30A: g_cclosure_marshal_VOID__ENUMv
+    (gmarshal.c:1496)
+    ==9376==	by 0x71FA0C3: _g_closure_invoke_va (gclosure.c:864)
+    ==9376==	by 0x72142A0: g_signal_emit_valist (gsignal.c:3246)
+    ==9376==	by 0x72148F1: g_signal_emit (gsignal.c:3393)
+    ==9376==	by 0x71FA0C3: _g_closure_invoke_va (gclosure.c:864)
+    ==9376==	by 0x72142A0: g_signal_emit_valist (gsignal.c:3246)
+    ==9376==	by 0x72148F1: g_signal_emit (gsignal.c:3393)
+    ==9376==	by 0x516918C: gtk_button_do_release (gtkbutton.c:1899)
+    ==9376==	by 0x51691F7: gtk_real_button_released (gtkbutton.c:2017)
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=752476
+
+M	src/file-utils.c
+
+commit d496cba800c4ca325338c367166c8cd184209433
+Author: Paolo Bacchilega <paobac@src.gnome.org>
+Date:	2015-12-13
+
+    fixed message dialog showing a (null) string
+
+M	src/gtk-utils.c
+
+commit f148596c3fb1c15afab634611dec1e6d36fb16a9
+Author: Daniel Gollub <dgollub@brocade.com>
+Date:	2015-07-23
+
+    application/x-deb off-by-one month file timestamp
+
+M	src/fr-command-dpkg.c
+
+commit 602af901f035e5202886ed1d02c7c142cbbc290a
+Author: Sebastian Pipping <sebastian@pipping.org>
+Date:	2015-12-06
+
+    Stop mis-treating p7zip 15.09 as pre-4.55 (#757793)
+
+M	src/fr-command-7z.c
+
+commit 9ba0e3564b7eb00ed152a8eab900e50e5d9766e5
+Author: Marek Černocký <marek@manet.cz>
+Date:	2015-12-08
+
+    Updated Czech translation
+
+M	help/cs/cs.po
+
+commit 62adada8e2f3b357dc0e4326ca25e37469951b1c
+Author: Christian Kirbach <Christian.Kirbach@gmail.com>
+Date:	2015-12-05
+
+    Updated German translation
+
+M	help/de/de.po
+
+commit 099d4411de4ac7ed8c14b0596d997d7b0f529f25
+Author: Daniel Mustieles <daniel.mustieles@gmail.com>
+Date:	2015-12-02
+
+    Updated Spanish translation
+
+M	help/es/es.po
+
+commit de36b63a21413c95f06d22f622f88e6fc124db6e
+Author: Anders Jonsson <anders.jonsson@norsjovallen.se>
+Date:	2015-11-29
+
+    Fix documentation typos
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=758814
+
+M	help/C/archive-edit.page
+M	help/C/index.page
+
+commit 236539cfe22c80bdb9b990407fdecdf1d8a19968
+Author: GNOME Translation Robot <gnome-sysadmin@gnome.org>
+Date:	2015-11-16
+
+    Updated Scottish Gaelic translation
+
+M	po/gd.po
+
+commit a18612276635235e5123dc0a9c5541312562f57e
+Author: Paolo Bacchilega <paobac@src.gnome.org>
+Date:	2015-09-25
+
+    error extracting files using file-roller with unar with the character
+    [
+
+    [bug #755580]
+
+M	src/fr-command-unarchiver.c
+
+commit d07449ea0e3b7fff657cff239593f4e6a1e10b1b
+Author: Khaled Hosny <khaledhosny@eglug.org>
+Date:	2015-09-24
+
+    Update Arabic translation
+
+M	po/ar.po
+
+commit 6111f3a98cf3a3eb839835a8fceb0eed1f767e9e
+Author: Paolo Bacchilega <paobac@src.gnome.org>
+Date:	2015-09-22
+
+    configure: use ${PKG_CONFIG} instead of pkg-config
+
+M	configure.ac
+
+commit 288c18abec87f5e5db0db97e7e9dd895d469e6a9
+Author: Arash Mousavi <mousavi.arash@gmail.com>
+Date:	2015-09-12
+
+    Update Persian translations
+
+M	po/fa.po
+
 commit 705ba9ef80332b7e14a6b5660afea23a79efcf33
 Author: Paolo Bacchilega <paobac@src.gnome.org>
-Date:   2015-09-01
+Date:	2015-09-01
 
     updated for version 3.16.4
 

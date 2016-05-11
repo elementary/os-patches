@@ -1,7 +1,7 @@
 %define release 6
 %define prefix  /usr
 %define name	file-roller
-%define version 3.16.4
+%define version 3.16.5
 
 Summary:	An archive manager for GNOME.
 Name:		%{name}

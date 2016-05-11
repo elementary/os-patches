@@ -131,7 +131,7 @@ window_progress_cb (FrWindow *window,
 
 	g_dbus_connection_emit_signal (connection,
 				       NULL,
-				       "org/gnome/ArchiveManager1",
+				       "/org/gnome/ArchiveManager1",
 				       "org.gnome.ArchiveManager1",
 				       "Progress",
 				       g_variant_new ("(ds)",
@@ -438,6 +438,7 @@ fr_application_register_archive_manager_service (FrApplication *self)
 
 	g_timeout_add_seconds (SERVICE_TIMEOUT, service_timeout_cb, self);
 
+	_g_object_unref (stream);
 	g_free (buffer);
 }
 
@@ -530,9 +531,11 @@ fr_application_command_line (GApplication            *application,
 		g_critical ("Failed to parse arguments: %s", error->message);
 		g_error_free (error);
 		g_option_context_free (context);
+		g_strfreev (argv);
 
 		return fr_application_command_line_finished (application, EXIT_FAILURE);
 	}
+	g_strfreev (argv);
 	g_option_context_free (context);
 
 	if (remaining_args == NULL) { /* No archive specified. */

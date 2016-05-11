@@ -109,6 +109,7 @@ _g_path_get_temp_work_dir (const char *parent_folder)
 
         template = g_strconcat (best_folder, "/.fr-XXXXXX", NULL);
         result = mkdtemp (template);
+        g_free (best_folder);
 
         if ((result == NULL) || (*result == '\0')) {
                 g_free (template);
@@ -573,8 +574,10 @@ _g_file_is_temp_work_dir (GFile *file)
 	int       i;
 
 	path = g_file_get_path (file);
-	if (path[0] != '/')
+	if (path[0] != '/') {
+		g_free (path);
 		return FALSE;
+	}
 
 	for (i = 0; try_folder[i] != NULL; i++) {
 		const char *folder;
@@ -587,6 +590,8 @@ _g_file_is_temp_work_dir (GFile *file)
 			}
 		}
 	}
+
+	g_free (path);
 
 	return result;
 }

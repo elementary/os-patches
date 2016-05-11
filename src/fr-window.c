@@ -709,6 +709,8 @@ fr_window_change_action_state (FrWindow   *window,
 	new_state = g_variant_new_boolean (value);
 	if ((old_state == NULL) || ! g_variant_equal (old_state, new_state))
 		g_action_change_state (action, new_state);
+	else
+		g_variant_unref (new_state);
 
 	if (old_state != NULL)
 		g_variant_unref (old_state);
@@ -2666,6 +2668,7 @@ fr_window_add_to_recent_list (FrWindow *window,
 		recent_data->app_exec = "file-roller";
 		gtk_recent_manager_add_full (gtk_recent_manager_get_default (), uri, recent_data);
 
+		g_free (recent_data->mime_type);
 		g_free (recent_data);
 	}
 	else
@@ -5726,6 +5729,7 @@ fr_window_construct (FrWindow *window)
 	toolbar_size_group = gtk_size_group_new (GTK_SIZE_GROUP_VERTICAL);
 	gtk_size_group_add_widget (toolbar_size_group, window->priv->location_bar);
 	gtk_size_group_add_widget (toolbar_size_group, window->priv->filter_bar);
+	g_object_unref (toolbar_size_group);
 
 	/**/
 
@@ -6496,7 +6500,9 @@ query_info_ready_for_overwrite_dialog_cb (GObject      *source_object,
 				  odata);
 		gtk_widget_show (d);
 
+		g_free (msg);
 		g_free (parent_name);
+		g_free (details);
 		g_object_unref (parent);
 		g_object_unref (info);
 		g_object_unref (destination);
