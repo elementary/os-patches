@@ -283,6 +283,14 @@ disable_builtin_screensaver (gpointer unused)
         return TRUE;
 }
 
+gboolean
+manage_dpms (void)
+{
+        GSettings *settings;
+        settings = g_settings_new ("org.gnome.settings-daemon.plugins.power");
+        return g_settings_get_boolean (settings, "manage-dpms-defaults");
+}
+
 guint
 gsd_power_enable_screensaver_watchdog (void)
 {
@@ -293,7 +301,7 @@ gsd_power_enable_screensaver_watchdog (void)
          * way. The defaults are now applied in Fedora 20 from
          * being "0" by default to being "600" by default */
         gdk_error_trap_push ();
-        if (DPMSQueryExtension(GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), &dummy, &dummy))
+        if (manage_dpms () && DPMSQueryExtension(GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), &dummy, &dummy))
                 DPMSSetTimeouts (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), 0, 0, 0);
         gdk_error_trap_pop_ignored ();
         id = g_timeout_add_seconds (XSCREENSAVER_WATCHDOG_TIMEOUT,

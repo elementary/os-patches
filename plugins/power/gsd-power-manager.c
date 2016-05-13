@@ -1015,6 +1015,9 @@ backlight_enable (GsdPowerManager *manager)
         gboolean ret;
         GError *error = NULL;
 
+        if (!(manage_dpms ()))
+                return;
+
         iio_proxy_claim_light (manager, TRUE);
         ret = gnome_rr_screen_set_dpms_mode (manager->priv->rr_screen,
                                              GNOME_RR_DPMS_ON,
@@ -1035,6 +1038,9 @@ backlight_disable (GsdPowerManager *manager)
 {
         gboolean ret;
         GError *error = NULL;
+
+        if (!(manage_dpms ()))
+               return;
 
         iio_proxy_claim_light (manager, FALSE);
         ret = gnome_rr_screen_set_dpms_mode (manager->priv->rr_screen,
