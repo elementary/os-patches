@@ -1,0 +1,168 @@
+From 4d13c5025c73f0f4cdc6cefb7c81c40313790623 Mon Sep 17 00:00:00 2001
+From: Tim Lunn <tim@feathertop.org>
+Date: Sat, 13 Sep 2014 11:57:02 +1000
+ Revert gsettings key removals, these are still need by unity-settings-daemon
+
+---
+ ...ings-daemon.peripherals.wacom.gschema.xml.in.in |  5 +++
+ ...gnome.settings-daemon.plugins.gschema.xml.in.in | 13 +++++++
+ ...settings-daemon.plugins.power.gschema.xml.in.in | 40 ++++++++++++++++++++++
+ plugins/power/gsd-power-manager.c                  | 32 +++++++++++++++++
+ 5 files changed, 94 insertions(+)
+
+Index: gnome-settings-daemon-3.18.2/data/org.gnome.settings-daemon.peripherals.wacom.gschema.xml.in.in
+===================================================================
+--- gnome-settings-daemon-3.18.2.orig/data/org.gnome.settings-daemon.peripherals.wacom.gschema.xml.in.in
++++ gnome-settings-daemon-3.18.2/data/org.gnome.settings-daemon.peripherals.wacom.gschema.xml.in.in
+@@ -41,6 +41,16 @@
+       <_summary>Wacom touch feature</_summary>
+       <_description>Enable this to move the cursor when the user touches the tablet.</_description>
+     </key>
++    <key name="tablet-pc-button" type="b">
++      <default>false</default>
++      <_summary>Wacom tablet PC feature</_summary>
++      <_description>Enable this to only report stylus events when the tip is pressed.</_description>
++    </key>
++    <key name="display" type="as">
++      <default>["", "", ""]</default>
++      <_summary>Wacom display mapping</_summary>
++      <_description>EDID information of monitor to map tablet to. Must be in the format [vendor, product, serial]. ["","",""] disables mapping.</_description>
++    </key>
+   </schema>
+   <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gnome.settings-daemon.peripherals.wacom.stylus">
+     <key name="pressurecurve" type="ai">
+Index: gnome-settings-daemon-3.18.2/data/org.gnome.settings-daemon.plugins.gschema.xml.in.in
+===================================================================
+--- gnome-settings-daemon-3.18.2.orig/data/org.gnome.settings-daemon.plugins.gschema.xml.in.in
++++ gnome-settings-daemon-3.18.2/data/org.gnome.settings-daemon.plugins.gschema.xml.in.in
+@@ -14,6 +14,7 @@
+     <child name="background" schema="org.gnome.settings-daemon.plugins.background"/>
+     <child name="clipboard" schema="org.gnome.settings-daemon.plugins.clipboard"/>
+     <child name="color" schema="org.gnome.settings-daemon.plugins.color"/>
++    <child name="cursor" schema="org.gnome.settings-daemon.plugins.cursor"/>
+     <child name="datetime" schema="org.gnome.settings-daemon.plugins.datetime"/>
+     <child name="gsdwacom" schema="org.gnome.settings-daemon.plugins.gsdwacom"/>
+     <child name="housekeeping" schema="org.gnome.settings-daemon.plugins.housekeeping"/>
+@@ -23,6 +24,7 @@
+     <child name="orientation" schema="org.gnome.settings-daemon.plugins.orientation"/>
+     <child name="power" schema="org.gnome.settings-daemon.plugins.power"/>
+     <child name="print-notifications" schema="org.gnome.settings-daemon.plugins.print-notifications"/>
++    <child name="remote-display" schema="org.gnome.settings-daemon.plugins.remote-display"/>
+     <child name="screensaver-proxy" schema="org.gnome.settings-daemon.plugins.screensaver-proxy"/>
+     <child name="sharing" schema="org.gnome.settings-daemon.plugins.sharing"/>
+     <child name="smartcard" schema="org.gnome.settings-daemon.plugins.smartcard"/>
+@@ -79,6 +81,18 @@
+       <_description>Priority to use for this plugin in gnome-settings-daemon startup queue</_description>
+     </key>
+   </schema>
++  <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gnome.settings-daemon.plugins.cursor" path="/org/gnome/settings-daemon/plugins/cursor/">
++    <key name="active" type="b">
++      <default>true</default>
++      <_summary>Activation of this plugin</_summary>
++      <_description>Whether this plugin would be activated by gnome-settings-daemon or not</_description>
++    </key>
++    <key name="priority" type="i">
++      <default>0</default>
++      <_summary>Priority to use for this plugin</_summary>
++      <_description>Priority to use for this plugin in gnome-settings-daemon startup queue</_description>
++    </key>
++  </schema>
+   <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gnome.settings-daemon.plugins.mouse" path="/org/gnome/settings-daemon/plugins/mouse/">
+     <key name="active" type="b">
+       <default>true</default>
+@@ -95,6 +109,18 @@
+     <key name="active" type="b">
+       <default>true</default>
+       <_summary>Activation of this plugin</_summary>
++      <_description>Whether this plugin would be activated by gnome-settings-daemon or not</_description>
++    </key>
++    <key name="priority" type="i">
++      <default>0</default>
++      <_summary>Priority to use for this plugin</_summary>
++      <_description>Priority to use for this plugin in gnome-settings-daemon startup queue</_description>
++    </key>
++  </schema>
++  <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gnome.settings-daemon.plugins.remote-display" path="/org/gnome/settings-daemon/plugins/remote-display/">
++    <key name="active" type="b">
++      <default>true</default>
++      <_summary>Activation of this plugin</_summary>
+       <_description>Whether this plugin would be activated by gnome-settings-daemon or not</_description>
+     </key>
+     <key name="priority" type="i">
+Index: gnome-settings-daemon-3.18.2/data/org.gnome.settings-daemon.plugins.power.gschema.xml.in.in
+===================================================================
+--- gnome-settings-daemon-3.18.2.orig/data/org.gnome.settings-daemon.plugins.power.gschema.xml.in.in
++++ gnome-settings-daemon-3.18.2/data/org.gnome.settings-daemon.plugins.power.gschema.xml.in.in
+@@ -72,5 +72,72 @@
+       <summary>Power button action</summary>
+       <description>The action to take when the system power button is pressed. This action is hard-coded (and the setting ignored) on virtual machines (power off) and tablets (suspend).</description>
+     </key>
++    <!-- Obsolete keys still used by unity-settings-daemon -->
++    <key name="button-suspend" enum="org.gnome.settings-daemon.GsdPowerActionType">
++      <default>'suspend'</default>
++      <summary>Suspend button action</summary>
++      <description>The action to take when the system suspend button is pressed.</description>
++    </key>
++    <key name="button-hibernate" enum="org.gnome.settings-daemon.GsdPowerActionType">
++      <default>'hibernate'</default>
++      <summary>Hibernate button action</summary>
++      <description>The action to take when the system hibernate button is pressed.</description>
++    </key>
++    <key name="button-sleep" enum="org.gnome.settings-daemon.GsdPowerActionType">
++      <default>'hibernate'</default>
++      <summary>Sleep button action</summary>
++      <description>The action to take when the system sleep (non-specific type) button is pressed.</description>
++    </key>
++    <!-- See https://bugzilla.gnome.org/show_bug.cgi?id=652183 for rationale -->
++    <key name="button-power" enum="org.gnome.settings-daemon.GsdPowerActionType">
++      <default>'suspend'</default>
++      <summary>Power button action</summary>
++      <description>The action to take when the system power button is pressed.</description>
++    </key>
++    <key name="critical-battery-action" enum="org.gnome.settings-daemon.GsdPowerActionType">
++      <default>'hibernate'</default>
++      <summary>Battery critical low action</summary>
++      <description>The action to take when the battery is critically low.</description>
++    </key>
++    <key name="percentage-low" type="i">
++      <default>10</default>
++      <_summary>Percentage considered low</_summary>
++      <_description>The percentage of the battery when it is considered low. Only valid when use-time-for-policy is false.</_description>
++    </key>
++    <key name="percentage-critical" type="i">
++      <default>3</default>
++      <_summary>Percentage considered critical</_summary>
++      <_description>The percentage of the battery when it is considered critical. Only valid when use-time-for-policy is false.</_description>
++    </key>
++    <key name="percentage-action" type="i">
++      <default>2</default>
++      <_summary>Percentage action is taken</_summary>
++      <_description>The percentage of the battery when the critical action is performed. Only valid when use-time-for-policy is false.</_description>
++    </key>
++    <key name="time-low" type="i">
++      <default>1200</default>
++      <_summary>The time remaining when low</_summary>
++      <_description>The time remaining in seconds of the battery when it is considered low. Only valid when use-time-for-policy is true.</_description>
++    </key>
++    <key name="time-critical" type="i">
++      <default>300</default>
++      <_summary>The time remaining when critical</_summary>
++      <_description>The time remaining in seconds of the battery when it is considered critical. Only valid when use-time-for-policy is true.</_description>
++    </key>
++    <key name="time-action" type="i">
++      <default>120</default>
++      <_summary>The time remaining when action is taken</_summary>
++      <_description>The time remaining in seconds of the battery when critical action is taken. Only valid when use-time-for-policy is true.</_description>
++    </key>
++    <key name="use-time-for-policy" type="b">
++      <default>true</default>
++      <_summary>Whether to use time-based notifications</_summary>
++      <_description>If time based notifications should be used. If set to false, then the percentage change is used instead, which may fix a broken ACPI BIOS.</_description>
++    </key>
++    <key name="notify-perhaps-recall" type="b">
++      <default>true</default>
++      <_summary>If we should show the recalled battery warning for a broken battery</_summary>
++      <_description>If we should show the recalled battery warning for a broken battery. Set this to false only if you know your battery is okay.</_description>
++    </key>
+   </schema>
+ </schemalist>
