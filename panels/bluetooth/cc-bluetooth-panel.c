@@ -276,7 +276,6 @@ cc_bluetooth_panel_update_properties (CcBluetoothPanel *self)
 	gtk_widget_hide (WID ("keyboard_box"));
 	gtk_widget_hide (WID ("sound_box"));
 	gtk_widget_hide (WID ("mouse_box"));
-	gtk_widget_hide (WID ("browse_box"));
 	gtk_widget_hide (WID ("send_box"));
 
 	bdaddr = bluetooth_chooser_get_selected_device (BLUETOOTH_CHOOSER (self->priv->chooser));
@@ -332,10 +331,10 @@ cc_bluetooth_panel_update_properties (CcBluetoothPanel *self)
 
 			uuids = (const char **) g_value_get_boxed (&value);
 			for (i = 0; uuids && uuids[i] != NULL; i++) {
-				if (g_str_equal (uuids[i], "OBEXObjectPush"))
+				if (g_str_equal (uuids[i], "OBEXObjectPush")) {
 					gtk_widget_show (WID ("send_box"));
-				else if (g_str_equal (uuids[i], "OBEXFileTransfer"))
-					gtk_widget_show (WID ("browse_box"));
+					break;
+				}
 			}
 			g_value_unset (&value);
 		}
