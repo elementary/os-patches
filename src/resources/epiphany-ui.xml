@@ -1,0 +1,55 @@
+<ui>
+	<popup name="EphyNotebookPopup" action="NotebookPopupAction">
+		<placeholder name="TabsMoveGroupENP" position="top">
+			<menuitem name="TabMoveLeftENP" action="TabsMoveLeft"/>
+			<menuitem name="TabMoveRightENP" action="TabsMoveRight"/>
+		</placeholder>
+		<menuitem name="TabCloseENP" action="FileCloseTab"/>
+		<!-- <menuitem name="TabDetachENP" action="TabsDetach"/> -->
+	</popup>
+
+	<popup name="PagePopup" action="PagePopupAction" accelerators="true">
+                <menuitem name="FileNewWindowMenu" action="FileNewWindow"/>
+                <menuitem name="FileNewWindowIncognitoMenu" action="FileNewWindowIncognito"/>
+                <menuitem name="FileNewTabMenu" action="FileNewTab"/>
+                <menuitem name="FileOpenMenu" action="FileOpen"/>
+                <separator name="FileSep1"/>	
+                <menuitem name="FileSaveAsMenu" action="FileSaveAs"/>
+                <menuitem name="FileSaveAsApplicationMenu" action="FileSaveAsApplication"/>
+                <separator name="FileSep2"/>
+                <menuitem name="EditUndoMenu" action="EditUndo"/>
+                <menuitem name="EditRedoMenu" action="EditRedo"/>
+                <separator name="EditSep2"/> 
+                <menuitem name="EditCutMenu" action="EditCut"/>
+                <menuitem name="EditCopyMenu" action="EditCopy"/>
+                <menuitem name="EditPasteMenu" action="EditPaste"/>
+                <separator name="EditSep3"/> 
+                <menuitem name="ViewZoomInMenu" action="ViewZoomIn"/>
+                <menuitem name="ViewZoomOutMenu" action="ViewZoomOut"/>
+                <separator name="EditSep4"/> 
+                <menuitem name="FilePrintMenu" action="FilePrint"/>
+                <menuitem name="EditFindMenu" action="EditFind"/>
+                <menuitem name="EditPreferencesMenu" action="EditPreferences"/>
+                <separator name="FileSep5"/>
+                <menuitem name="HistoryEditMenu" action="EditHistory"/>
+                <menuitem name="BookmarksEditMenu" action="EditBookmarks"/>
+		<menu name="BookmarksMenu" action="Bookmarks">
+			<menuitem name="BookmarksAddBookmarkMenu" action="FileBookmarkPage"/>
+			<separator name="BookmarksSep1"/>
+		</menu>
+                <separator name="FileSep6"/>
+                <menu name="ViewEncodingMenu" action="ViewEncoding">
+                  <placeholder name="ViewEncodingPlaceholder"/>
+                </menu>
+                <menuitem name="ViewPageSourceMenu" action="ViewPageSource"/>
+                <separator name="FileSep7"/>
+                <menuitem name="HelpContentsMenu" action="HelpContents"/>
+                <menuitem name="HelpAboutMenu" action="HelpAbout"/>
+                <menuitem name="FileCloseWindowMenu" action="FileCloseTab"/>
+                <menuitem name="FileQuitMenu" action="FileQuit"/>
+	</popup>
+
+	<accelerator name="AlwaysStopAccel" action="ViewAlwaysStop"/>
+	<accelerator name="BrowseWithCaretAccel" action="BrowseWithCaret"/>
+
+</ui>

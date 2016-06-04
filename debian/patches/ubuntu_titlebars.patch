@@ -1,0 +1,39 @@
+From 716669f8d58efd5391ab7c8c8972615ada294a0f Mon Sep 17 00:00:00 2001
+From: Yosef Or Boczko <yoseforb@gmail.com>
+Date: Thu, 29 Aug 2013 22:34:37 +0300
+Subject: wphy-window: Use the top bar GtkBox as titlebar
+
+The GtkEventBox is to ensure opacity (see
+bug #706045).
+
+https://bugzilla.gnome.org/show_bug.cgi?id=706050
+
+Modified to only show titlebars under non-GNOME sessions
+
+---
+
+
+Index: epiphany-3.18.0/src/ephy-window.c
+===================================================================
+--- epiphany-3.18.0.orig/src/ephy-window.c
++++ epiphany-3.18.0/src/ephy-window.c
+@@ -3286,9 +3286,18 @@ setup_toolbar (EphyWindow *window)
+ 	EphyWindowPrivate *priv = window->priv;
+ 	EphyEmbedShellMode app_mode;
+ 	EphyTitleBox *title_box;
++	const char* session;
+ 
+ 	toolbar = ephy_toolbar_new (window);
+-	gtk_window_set_titlebar (GTK_WINDOW (window), toolbar);
++	session = g_getenv ("XDG_CURRENT_DESKTOP");
++	if (session && strstr (session, "GNOME")) {
++		gtk_window_set_titlebar (GTK_WINDOW (window), toolbar);
++	} else {
++		gtk_box_pack_start (GTK_BOX (priv->main_vbox),
++			            toolbar, FALSE, FALSE, 0);
++		gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (toolbar), FALSE);
++	}
++
+ 	gtk_widget_show (toolbar);
+ 
+ 	app_mode = ephy_embed_shell_get_mode (ephy_embed_shell_get_default ());

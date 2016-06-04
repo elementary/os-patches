@@ -1,0 +1,20 @@
+--- a/src/bookmarks/ephy-bookmark-action.c
++++ b/src/bookmarks/ephy-bookmark-action.c
+@@ -224,6 +224,17 @@
+ 	       gdk_event_free (event);
+        }
+ 
++       /* If we are clicking on the button, activate the entry instead */
++       if (!GTK_IS_EDITABLE (widget))
++       {
++	       GtkWidget *otherwidget = gtk_widget_get_parent (widget);
++	       if (otherwidget)
++		       otherwidget = gtk_widget_get_parent (otherwidget);
++	       if (otherwidget)
++		       otherwidget = GTK_WIDGET (g_object_get_data (G_OBJECT (otherwidget), "entry"));
++	       if (otherwidget)
++ 		       widget = otherwidget;
++       }
+        ephy_bookmark_action_activate
+ 	 (action, widget, (control || ephy_gui_is_middle_click ()) ? EPHY_LINK_NEW_TAB : 0);
+ }

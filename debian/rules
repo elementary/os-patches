@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/autoreconf.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/gnome.mk
+include /usr/share/cdbs/1/rules/utils.mk
+include /usr/share/gnome-pkg-tools/1/rules/uploaders.mk
+include /usr/share/gnome-pkg-tools/1/rules/gnome-version.mk
+include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+GNOME_MODULE := epiphany
+
+LDFLAGS += -Wl,-O1 -Wl,--as-needed
+
+# List any files which are not installed
+include /usr/share/cdbs/1/rules/utils.mk
+DEB_DH_INSTALL_ARGS := --list-missing
+
+DEB_CONFIGURE_EXTRA_FLAGS += \
+		--with-distributor-name=$(shell lsb_release -is)
+
+binary-post-install/epiphany-browser::
+	cd debian/epiphany-browser/usr/bin \
+		&& mv epiphany-browser.sh epiphany-browser
+
+binary-post-install/epiphany-browser-data::
+	sed -e s/@PACKAGEVERSION@/$(DEB_VERSION)/ \
+	    -e s/@DISTROID@/`lsb_release -is`/ \
+	    -e s/@DISTROVERSION@/`lsb_release -rs`/ \
+	    debian/branding.conf.in > debian/epiphany-browser-data/usr/share/epiphany-browser/branding.conf

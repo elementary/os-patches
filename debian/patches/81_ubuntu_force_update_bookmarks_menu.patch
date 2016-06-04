@@ -1,0 +1,24 @@
+Index: epiphany-3.5.4/src/bookmarks/ephy-bookmarks-ui.c
+===================================================================
+--- epiphany-3.5.4.orig/src/bookmarks/ephy-bookmarks-ui.c	2012-06-14 23:08:57.000000000 +1200
++++ epiphany-3.5.4/src/bookmarks/ephy-bookmarks-ui.c	2012-07-18 11:57:35.251652165 +1200
+@@ -119,6 +119,9 @@
+ 	}
+ 
+ 	g_string_truncate (bookmarks_menu_string, 0);
++	// Hack: Update the bookmarks menu with actual data, so that the
++	// Ubuntu global menu can update immediately
++	activate_bookmarks_menu (NULL, window);
+ }
+ 
+ static void
+@@ -233,6 +236,9 @@
+ 	g_signal_connect_object (action, "activate",
+ 				 G_CALLBACK (activate_bookmarks_menu),
+ 				 G_OBJECT (window), 0);
++	
++	// Hack: update the menu immediately, for the Ubuntu bookmarks menu
++	activate_bookmarks_menu (NULL, window);
+ }
+ 
+ void
