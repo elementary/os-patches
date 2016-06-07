@@ -500,13 +500,31 @@ display_pincode_callback (GDBusMethodInvocation *invocation,
 			  const char *pincode,
 			  gpointer user_data)
 {
-	g_debug ("Reject bluetoothd PIN %s", pincode);
+	gchar *text, *label;
 
-	/* Reject all the calls here, so that we'll get asked about the
-	 * pincode instead of being told the pincode */
-	g_dbus_method_invocation_return_dbus_error (invocation,
-						    "org.bluez.Error.Rejected",
-						    "Rejected bluetoothd generated PIN code");
+	display_called = TRUE;
+	gtk_assistant_set_current_page (window_assistant, PAGE_SSP_SETUP);
+
+	replace_target_properties_for_device (device);
+
+	gtk_widget_show (label_ssp_pin);
+
+	if (target_ui_behaviour == PAIRING_UI_KEYBOARD) {
+		label = g_strdup_printf (_("Please enter the following PIN on '%s' and press “Enter” on the keyboard:"), target_name);
+		text = g_strdup_printf("%s⏎", pincode);
+	}
+	else {
+		label = g_strdup_printf (_("Please enter the following PIN on '%s':"), target_name);
+		text = g_strdup_printf("%s", pincode);
+	}
+
+	gtk_label_set_markup(GTK_LABEL(label_ssp_pin_help), label);
+	set_large_label (GTK_LABEL (label_ssp_pin), text);
+
+	g_free(text);
+	g_free(label);
+
+	g_dbus_method_invocation_return_value (invocation, NULL);
 }
 
 static gboolean
