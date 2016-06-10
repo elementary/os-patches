@@ -17,7 +17,7 @@ include /usr/share/cdbs/1/rules/utils.mk
 DEB_DH_INSTALL_ARGS := --list-missing
 
 DEB_CONFIGURE_EXTRA_FLAGS += \
-		--with-distributor-name=$(shell lsb_release -is)
+		--with-distributor-name=$(shell lsb_release -isu)
 
 binary-post-install/epiphany-browser::
 	cd debian/epiphany-browser/usr/bin \
