@@ -1,0 +1,27 @@
+--- a/src/ephy-title-box.c
++++ b/src/ephy-title-box.c
+@@ -170,7 +170,6 @@
+   box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+   gtk_widget_set_valign (box, GTK_ALIGN_CENTER);
+   gtk_widget_show (box);
+-  gtk_stack_add_named (GTK_STACK (title_box), box, "title-bar");
+ 
+   priv->title = gtk_label_new (NULL);
+   gtk_widget_show (priv->title);
+@@ -239,7 +238,6 @@
+   priv->location_disabled = !(chrome & EPHY_WINDOW_CHROME_LOCATION);
+   if (priv->location_disabled) {
+     priv->mode = EPHY_TITLE_BOX_MODE_TITLE;
+-    gtk_stack_set_visible_child_name (GTK_STACK (title_box), "title-bar");
+   } else {
+     priv->mode = EPHY_TITLE_BOX_MODE_LOCATION_ENTRY;
+     gtk_stack_set_visible_child_name (GTK_STACK (title_box), "address-bar");
+@@ -627,7 +625,7 @@
+   priv->mode = mode;
+ 
+   gtk_stack_set_visible_child_name (GTK_STACK (title_box),
+-                                    mode == EPHY_TITLE_BOX_MODE_LOCATION_ENTRY ? "address-bar" : "title-bar");
++                                    mode == "address-bar");
+ 
+   g_object_notify_by_pspec (G_OBJECT (title_box), object_properties[PROP_MODE]);
+ }

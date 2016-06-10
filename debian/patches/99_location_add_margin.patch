@@ -1,0 +1,10 @@
+--- a/src/ephy-title-box.c
++++ b/src/ephy-title-box.c
+@@ -154,6 +154,7 @@
+   EphyTitleBoxPrivate *priv = ephy_title_box_get_instance_private (title_box);
+ 
+   priv->entry = ephy_location_entry_new ();
++  gtk_widget_set_margin_bottom (GTK_ENTRY (priv->entry), 1);
+   gtk_widget_show (priv->entry);
+   gtk_stack_add_named (GTK_STACK (title_box), priv->entry, "address-bar");
+ }

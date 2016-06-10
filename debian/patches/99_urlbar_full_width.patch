@@ -1,0 +1,42 @@
+--- a/src/ephy-title-box.c
++++ b/src/ephy-title-box.c
+@@ -379,7 +379,7 @@
+     *minimum_width = -1;
+ 
+   if (natural_width)
+-    *natural_width = 860;
++    *natural_width = 999999;
+ }
+ 
+ static void
+@@ -489,8 +489,8 @@
+ 
+   return g_object_new (EPHY_TYPE_TITLE_BOX,
+                        "window", window,
+-                       "margin-start", 54,
+-                       "margin-end", 54,
++                       "margin-start", 6,
++                       "margin-end", 6,
+                        "transition-duration", 150,
+                        "transition-type", GTK_STACK_TRANSITION_TYPE_CROSSFADE,
+                        NULL);
+--- a/src/ephy-toolbar.c
++++ b/src/ephy-toolbar.c
+@@ -201,7 +201,7 @@
+   /* Location bar + Title */
+   priv->title_box = ephy_title_box_new (priv->window);
+   priv->entry = ephy_title_box_get_location_entry (priv->title_box);
+-  gtk_header_bar_set_custom_title (GTK_HEADER_BAR (toolbar), GTK_WIDGET (priv->title_box));
++  gtk_header_bar_pack_start (GTK_HEADER_BAR (toolbar), GTK_WIDGET (priv->title_box));
+   gtk_widget_show (GTK_WIDGET (priv->title_box));
+   
+   /* Add Bookmark */
+@@ -217,6 +217,8 @@
+   gtk_image_set_pixel_size (gtk_button_get_image (GTK_BUTTON (button)), 24);
+   gtk_button_set_label (GTK_BUTTON (button), NULL);
+ 
++  gtk_header_bar_set_custom_title (GTK_HEADER_BAR (toolbar), gtk_label_new (NULL));
++
+   /* Page Menu */
+   button = gtk_menu_button_new ();
+   priv->page_menu_button = button;

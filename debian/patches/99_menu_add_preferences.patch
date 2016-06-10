@@ -1,0 +1,28 @@
+--- a/src/resources/epiphany-ui.xml
++++ b/src/resources/epiphany-ui.xml
+@@ -29,7 +29,6 @@
+                 <separator name="EditSep4"/> 
+                 <menuitem name="FilePrintMenu" action="FilePrint"/>
+                 <menuitem name="EditFindMenu" action="EditFind"/>
+-                <menuitem name="EditPreferencesMenu" action="EditPreferences"/>
+                 <separator name="FileSep5"/>
+                 <menuitem name="HistoryEditMenu" action="EditHistory"/>
+ 		<menu name="BookmarksMenu" action="Bookmarks">
+@@ -47,6 +46,7 @@
+                 <menuitem name="HelpAboutMenu" action="HelpAbout"/>
+                 <menuitem name="FileCloseWindowMenu" action="FileCloseTab"/>
+                 <menuitem name="FileQuitMenu" action="FileQuit"/>
++                <menuitem name="EditPreferencesMenu" action="EditPreferences"/>
+ 	</popup>
+ 
+ 	<accelerator name="AlwaysStopAccel" action="ViewAlwaysStop"/>
+--- a/src/ephy-window.c
++++ b/src/ephy-window.c
+@@ -3390,7 +3390,6 @@
+ 
+ static const gchar* app_actions[] = {
+ 	"FileNewWindow",
+-	"EditPreferences",
+ 	"EditHistory",
+ 	"FileQuit",
+ 	"HelpContents",

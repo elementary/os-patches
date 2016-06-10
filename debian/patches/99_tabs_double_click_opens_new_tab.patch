@@ -1,0 +1,24 @@
+--- a/src/ephy-notebook.c
++++ b/src/ephy-notebook.c
+@@ -276,6 +276,21 @@
+ 		 * event. */
+ 		gtk_notebook_set_current_page (GTK_NOTEBOOK (notebook), tab_clicked);
+ 	}
++	
++	/* Open a new tab when double-clicked. */
++
++	if (event->type == GDK_2BUTTON_PRESS &&
++	    event->button == 1 &&
++	    (event->state & gtk_accelerator_get_default_mod_mask ()) == 0)
++	{
++		GtkWindow *window;
++		window = EPHY_WINDOW (gtk_widget_get_toplevel (notebook));
++		GtkActionGroup *action_group;
++		action_group = ephy_window_get_toolbar_action_group (window);
++		GtkAction *action;
++	  action = gtk_action_group_get_action (action_group, "FileNewTab");
++		gtk_action_activate(action);
++	}
+ 
+ 	/* Close the tab if it gets middle clicked */
+ 

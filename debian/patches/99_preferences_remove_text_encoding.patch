@@ -1,0 +1,89 @@
+--- a/src/prefs-dialog.c
++++ b/src/prefs-dialog.c
+@@ -197,7 +197,6 @@
+ 	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, clear_personal_data_button);
+ 
+ 	/* language */
+-	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, default_encoding_combo);
+ 	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, lang_treeview);
+ 	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, lang_add_button);
+ 	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, lang_remove_button);
+--- a/src/resources/prefs-dialog.ui
++++ b/src/resources/prefs-dialog.ui
+@@ -696,76 +696,6 @@
+                 <property name="orientation">vertical</property>
+                 <property name="spacing">18</property>
+                 <child>
+-                  <object class="GtkBox" id="vbox156">
+-                    <property name="visible">True</property>
+-                    <property name="can_focus">False</property>
+-                    <property name="orientation">vertical</property>
+-                    <property name="spacing">6</property>
+-                    <child>
+-                      <object class="GtkLabel" id="label1242">
+-                        <property name="visible">True</property>
+-                        <property name="can_focus">False</property>
+-                        <property name="halign">start</property>
+-                        <property name="label" translatable="yes">Encodings</property>
+-                        <attributes>
+-                          <attribute name="weight" value="bold"/>
+-                        </attributes>
+-                      </object>
+-                      <packing>
+-                        <property name="expand">False</property>
+-                        <property name="fill">False</property>
+-                        <property name="position">0</property>
+-                      </packing>
+-                    </child>
+-                    <child>
+-                      <object class="GtkTable" id="table72">
+-                        <property name="visible">True</property>
+-                        <property name="can_focus">False</property>
+-                        <property name="margin_start">12</property>
+-                        <property name="n_columns">2</property>
+-                        <property name="column_spacing">12</property>
+-                        <property name="row_spacing">6</property>
+-                        <child>
+-                          <object class="GtkLabel" id="default_encoding_label">
+-                            <property name="visible">True</property>
+-                            <property name="can_focus">False</property>
+-                            <property name="halign">start</property>
+-                            <property name="label" translatable="yes">De_fault:</property>
+-                            <property name="use_underline">True</property>
+-                            <property name="justify">center</property>
+-                            <property name="mnemonic_widget">default_encoding_combo</property>
+-                          </object>
+-                          <packing>
+-                            <property name="x_options">GTK_FILL</property>
+-                            <property name="y_options"/>
+-                          </packing>
+-                        </child>
+-                        <child>
+-                          <object class="GtkComboBox" id="default_encoding_combo">
+-                            <property name="visible">True</property>
+-                            <property name="can_focus">False</property>
+-                          </object>
+-                          <packing>
+-                            <property name="left_attach">1</property>
+-                            <property name="right_attach">2</property>
+-                            <property name="y_options">GTK_FILL</property>
+-                          </packing>
+-                        </child>
+-                      </object>
+-                      <packing>
+-                        <property name="expand">False</property>
+-                        <property name="fill">True</property>
+-                        <property name="position">1</property>
+-                      </packing>
+-                    </child>
+-                  </object>
+-                  <packing>
+-                    <property name="expand">False</property>
+-                    <property name="fill">True</property>
+-                    <property name="position">0</property>
+-                  </packing>
+-                </child>
+-                <child>
+                   <object class="GtkBox" id="vbox191">
+                     <property name="visible">True</property>
+                     <property name="can_focus">False</property>

@@ -1,0 +1,11 @@
+--- a/src/ephy-window.c
++++ b/src/ephy-window.c
+@@ -3301,7 +3301,7 @@
+ 
+ 	app_mode = ephy_embed_shell_get_mode (ephy_embed_shell_get_default ());
+ 	if (app_mode == EPHY_EMBED_SHELL_MODE_INCOGNITO)
+-		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "incognito-mode");
++		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "incognito");
+ 
+ 	action = gtk_action_group_get_action (priv->toolbar_action_group,
+ 					      "NavigationBack");

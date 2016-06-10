@@ -1,0 +1,20 @@
+--- a/src/ephy-toolbar.c
++++ b/src/ephy-toolbar.c
+@@ -126,6 +126,8 @@
+   gtk_activatable_set_related_action (GTK_ACTIVATABLE (button),
+                                       action);
+   gtk_button_set_label (GTK_BUTTON (button), NULL);
++  gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (button), FALSE);
++  gtk_button_set_image (GTK_BUTTON (button), gtk_image_new_from_icon_name ("go-previous-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR));
+   gtk_style_context_add_class (gtk_widget_get_style_context (button), "image-button");
+   gtk_container_add (GTK_CONTAINER (box), button);
+ 
+@@ -139,6 +141,8 @@
+   gtk_activatable_set_related_action (GTK_ACTIVATABLE (button),
+                                       action);
+   gtk_button_set_label (GTK_BUTTON (button), NULL);
++  gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (button), FALSE);
++  gtk_button_set_image (GTK_BUTTON (button), gtk_image_new_from_icon_name ("go-next-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR));
+   gtk_style_context_add_class (gtk_widget_get_style_context (button), "image-button");
+   gtk_container_add (GTK_CONTAINER (box), button);
+ 

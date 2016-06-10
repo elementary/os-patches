@@ -1,0 +1,11 @@
+--- a/src/ephy-toolbar.c
++++ b/src/ephy-toolbar.c
+@@ -187,7 +187,7 @@
+   /* Page Menu */
+   button = gtk_menu_button_new ();
+   priv->page_menu_button = button;
+-  gtk_button_set_image (GTK_BUTTON (button), gtk_image_new_from_icon_name ("open-menu-symbolic", GTK_ICON_SIZE_BUTTON));
++  gtk_button_set_image (GTK_BUTTON (button), gtk_image_new_from_icon_name ("open-menu", GTK_ICON_SIZE_LARGE_TOOLBAR));
+   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
+   manager = ephy_window_get_ui_manager (priv->window);
+   menu = gtk_ui_manager_get_widget (manager, "/ui/PagePopup");

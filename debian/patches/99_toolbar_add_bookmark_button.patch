@@ -1,0 +1,63 @@
+--- a/src/ephy-toolbar.c
++++ b/src/ephy-toolbar.c
+@@ -45,6 +45,7 @@
+   GtkWidget *navigation_box;
+   GtkWidget *page_menu_button;
+   GtkWidget *new_tab_button;
++  GtkWidget *bookmark_button;
+ };
+ 
+ static void
+@@ -184,6 +185,19 @@
+   priv->entry = ephy_title_box_get_location_entry (priv->title_box);
+   gtk_header_bar_set_custom_title (GTK_HEADER_BAR (toolbar), GTK_WIDGET (priv->title_box));
+   gtk_widget_show (GTK_WIDGET (priv->title_box));
++  
++  /* Add Bookmark */
++  button = gtk_button_new ();
++  priv->bookmark_button = button;
++  gtk_button_set_image (GTK_BUTTON (button), gtk_image_new_from_icon_name ("bookmark-new", GTK_ICON_SIZE_LARGE_TOOLBAR));
++  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
++  action_group = ephy_window_get_action_group (priv->window);
++  action = gtk_action_group_get_action (action_group, "FileBookmarkPage");
++  gtk_action_set_icon_name(action, "bookmark-new");
++  gtk_activatable_set_related_action (GTK_ACTIVATABLE (button),
++                                      action);
++  gtk_image_set_pixel_size (gtk_button_get_image (GTK_BUTTON (button)), 24);
++  gtk_button_set_label (GTK_BUTTON (button), NULL);
+ 
+   /* Page Menu */
+   button = gtk_menu_button_new ();
+@@ -195,6 +209,7 @@
+   gtk_widget_set_halign (menu, GTK_ALIGN_END);
+   gtk_menu_button_set_popup (GTK_MENU_BUTTON (button), menu);
+   gtk_header_bar_pack_end (GTK_HEADER_BAR (toolbar), button);
++  gtk_header_bar_pack_end (GTK_HEADER_BAR (toolbar), priv->bookmark_button);
+ }
+ 
+ static void
+--- a/src/ephy-window.c
++++ b/src/ephy-window.c
+@@ -3890,6 +3890,22 @@
+ }
+ 
+ /**
++ * ephy_window_get_action_group:
++ * @window: an #EphyWindow
++ * 
++ * Returns the primary #GtkActionGroup for this @window
++ * 
++ * Returns: (transfer none): the #GtkActionGroup for this @window
++ **/
++GtkActionGroup *
++ephy_window_get_action_group (EphyWindow *window)
++{
++	g_return_val_if_fail (EPHY_IS_WINDOW (window), NULL);
++
++	return window->priv->action_group;
++}
++
++/**
+  * ephy_window_get_toolbar_action_group:
+  * @window: an #EphyWindow
+  * 

@@ -1,0 +1,25 @@
+--- a/embed/ephy-embed.c
++++ b/embed/ephy-embed.c
+@@ -158,6 +158,11 @@
+   EphyEmbedPrivate *priv = embed->priv;
+ 
+   nautilus_floating_bar_set_primary_label (NAUTILUS_FLOATING_BAR (priv->floating_bar), label);
++  g_object_set (NAUTILUS_FLOATING_BAR (priv->floating_bar),
++		      "margin-bottom", 3,
++		      "margin-start", 3,
++		      "margin-end", 3,
++		      NULL);
+ 
+   if (label == NULL || label[0] == '\0') {
+     gtk_widget_hide (priv->floating_bar);
+--- a/lib/widgets/nautilus-floating-bar.c
++++ b/lib/widgets/nautilus-floating-bar.c
+@@ -290,7 +290,7 @@
+ 						  NautilusFloatingBarDetails);
+ 
+ 	context = gtk_widget_get_style_context (GTK_WIDGET (self));
+-	gtk_style_context_add_class (context, "floating-bar");
++	gtk_style_context_add_class (context, "overlay-bar");
+ }
+ 
+ static void

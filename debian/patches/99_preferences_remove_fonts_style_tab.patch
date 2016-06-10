@@ -1,0 +1,330 @@
+--- a/src/prefs-dialog.c
++++ b/src/prefs-dialog.c
+@@ -188,15 +188,6 @@
+ 	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, download_button_hbox);
+ 	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, download_button_label);
+ 
+-	/* fonts */
+-	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, use_gnome_fonts_checkbutton);
+-	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, custom_fonts_table);
+-	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, sans_fontbutton);
+-	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, serif_fontbutton);
+-	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, mono_fontbutton);
+-	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, css_checkbox);
+-	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, css_edit_button);
+-
+ 	/* privacy */
+ 	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, always);
+ 	gtk_widget_class_bind_template_child_private (widget_class, PrefsDialog, no_third_party);
+--- a/src/resources/prefs-dialog.ui
++++ b/src/resources/prefs-dialog.ui
+@@ -354,273 +354,6 @@
+               </packing>
+             </child>
+             <child>
+-              <object class="GtkBox" id="fonts_and_colors_page_box">
+-                <property name="visible">True</property>
+-                <property name="can_focus">False</property>
+-                <property name="border_width">12</property>
+-                <property name="orientation">vertical</property>
+-                <property name="spacing">18</property>
+-                <child>
+-                  <object class="GtkBox" id="vbox1">
+-                    <property name="visible">True</property>
+-                    <property name="can_focus">False</property>
+-                    <property name="orientation">vertical</property>
+-                    <child>
+-                      <object class="GtkLabel" id="label1">
+-                        <property name="visible">True</property>
+-                        <property name="can_focus">False</property>
+-                        <property name="halign">start</property>
+-                        <property name="label" translatable="yes">Fonts</property>
+-                        <attributes>
+-                          <attribute name="weight" value="bold"/>
+-                        </attributes>
+-                      </object>
+-                      <packing>
+-                        <property name="expand">False</property>
+-                        <property name="fill">False</property>
+-                        <property name="position">0</property>
+-                      </packing>
+-                    </child>
+-                    <child>
+-                      <object class="GtkBox" id="vbox2">
+-                        <property name="visible">True</property>
+-                        <property name="can_focus">False</property>
+-                        <property name="margin_start">12</property>
+-                        <property name="orientation">vertical</property>
+-                        <property name="spacing">6</property>
+-                        <child>
+-                          <object class="GtkCheckButton" id="use_gnome_fonts_checkbutton">
+-                            <property name="label" translatable="yes">_Use system fonts</property>
+-                            <property name="visible">True</property>
+-                            <property name="can_focus">True</property>
+-                            <property name="receives_default">False</property>
+-                            <property name="use_underline">True</property>
+-                            <property name="xalign">0.5</property>
+-                            <property name="draw_indicator">True</property>
+-                          </object>
+-                          <packing>
+-                            <property name="expand">False</property>
+-                            <property name="fill">True</property>
+-                            <property name="position">1</property>
+-                          </packing>
+-                        </child>
+-                        <child>
+-                          <object class="GtkTable" id="custom_fonts_table">
+-                            <property name="visible">True</property>
+-                            <property name="can_focus">False</property>
+-                            <property name="margin_start">12</property>
+-                            <property name="n_rows">3</property>
+-                            <property name="n_columns">2</property>
+-                            <property name="column_spacing">12</property>
+-                            <property name="row_spacing">6</property>
+-                            <child>
+-                              <object class="GtkFontButton" id="sans_fontbutton">
+-                                <property name="visible">True</property>
+-                                <property name="can_focus">True</property>
+-                                <property name="receives_default">True</property>
+-                                <property name="font">Sans 12</property>
+-                                <property name="use_font">True</property>
+-                              </object>
+-                              <packing>
+-                                <property name="left_attach">1</property>
+-                                <property name="right_attach">2</property>
+-                                <property name="y_options">GTK_FILL</property>
+-                              </packing>
+-                            </child>
+-                            <child>
+-                              <object class="GtkFontButton" id="serif_fontbutton">
+-                                <property name="visible">True</property>
+-                                <property name="can_focus">True</property>
+-                                <property name="receives_default">True</property>
+-                                <property name="font">Sans 12</property>
+-                                <property name="use_font">True</property>
+-                              </object>
+-                              <packing>
+-                                <property name="left_attach">1</property>
+-                                <property name="right_attach">2</property>
+-                                <property name="top_attach">1</property>
+-                                <property name="bottom_attach">2</property>
+-                                <property name="y_options">GTK_FILL</property>
+-                              </packing>
+-                            </child>
+-                            <child>
+-                              <object class="GtkFontButton" id="mono_fontbutton">
+-                                <property name="visible">True</property>
+-                                <property name="can_focus">True</property>
+-                                <property name="receives_default">True</property>
+-                                <property name="font">Sans 12</property>
+-                                <property name="use_font">True</property>
+-                              </object>
+-                              <packing>
+-                                <property name="left_attach">1</property>
+-                                <property name="right_attach">2</property>
+-                                <property name="top_attach">2</property>
+-                                <property name="bottom_attach">3</property>
+-                                <property name="y_options">GTK_FILL</property>
+-                              </packing>
+-                            </child>
+-                            <child>
+-                              <object class="GtkLabel" id="label3">
+-                                <property name="visible">True</property>
+-                                <property name="can_focus">False</property>
+-                                <property name="halign">start</property>
+-                                <property name="label" translatable="yes">Sans serif font:</property>
+-                              </object>
+-                              <packing>
+-                                <property name="x_options">GTK_FILL</property>
+-                                <property name="y_options">GTK_FILL</property>
+-                              </packing>
+-                            </child>
+-                            <child>
+-                              <object class="GtkLabel" id="label4">
+-                                <property name="visible">True</property>
+-                                <property name="can_focus">False</property>
+-                                <property name="halign">start</property>
+-                                <property name="label" translatable="yes">Serif font:</property>
+-                              </object>
+-                              <packing>
+-                                <property name="top_attach">1</property>
+-                                <property name="bottom_attach">2</property>
+-                                <property name="x_options">GTK_FILL</property>
+-                                <property name="y_options">GTK_FILL</property>
+-                              </packing>
+-                            </child>
+-                            <child>
+-                              <object class="GtkLabel" id="label5">
+-                                <property name="visible">True</property>
+-                                <property name="can_focus">False</property>
+-                                <property name="halign">start</property>
+-                                <property name="label" translatable="yes">Monospace font:</property>
+-                              </object>
+-                              <packing>
+-                                <property name="top_attach">2</property>
+-                                <property name="bottom_attach">3</property>
+-                                <property name="x_options">GTK_FILL</property>
+-                                <property name="y_options">GTK_FILL</property>
+-                              </packing>
+-                            </child>
+-                          </object>
+-                          <packing>
+-                            <property name="expand">False</property>
+-                            <property name="fill">True</property>
+-                            <property name="position">2</property>
+-                          </packing>
+-                        </child>
+-                      </object>
+-                      <packing>
+-                        <property name="expand">False</property>
+-                        <property name="fill">True</property>
+-                        <property name="position">1</property>
+-                      </packing>
+-                    </child>
+-                  </object>
+-                  <packing>
+-                    <property name="expand">False</property>
+-                    <property name="fill">True</property>
+-                    <property name="position">0</property>
+-                  </packing>
+-                </child>
+-                <child>
+-                  <object class="GtkBox" id="vbox3">
+-                    <property name="visible">True</property>
+-                    <property name="can_focus">False</property>
+-                    <property name="orientation">vertical</property>
+-                    <child>
+-                      <object class="GtkLabel" id="label2">
+-                        <property name="visible">True</property>
+-                        <property name="can_focus">False</property>
+-                        <property name="halign">start</property>
+-                        <property name="label" translatable="yes">Style</property>
+-                        <attributes>
+-                          <attribute name="weight" value="bold"/>
+-                        </attributes>
+-                      </object>
+-                      <packing>
+-                        <property name="expand">False</property>
+-                        <property name="fill">False</property>
+-                        <property name="position">0</property>
+-                      </packing>
+-                    </child>
+-                    <child>
+-                      <object class="GtkBox" id="css_container">
+-                        <property name="visible">True</property>
+-                        <property name="can_focus">False</property>
+-                        <property name="margin_start">12</property>
+-                        <property name="spacing">24</property>
+-                        <child>
+-                          <object class="GtkCheckButton" id="css_checkbox">
+-                            <property name="label" translatable="yes">Use custom _stylesheet</property>
+-                            <property name="visible">True</property>
+-                            <property name="can_focus">True</property>
+-                            <property name="receives_default">False</property>
+-                            <property name="use_underline">True</property>
+-                            <property name="xalign">0.5</property>
+-                            <property name="draw_indicator">True</property>
+-                          </object>
+-                          <packing>
+-                            <property name="expand">False</property>
+-                            <property name="fill">False</property>
+-                            <property name="position">0</property>
+-                          </packing>
+-                        </child>
+-                        <child>
+-                          <object class="GtkHButtonBox" id="css_edit_box">
+-                            <property name="visible">True</property>
+-                            <property name="can_focus">False</property>
+-                            <property name="layout_style">end</property>
+-                            <child>
+-                              <object class="GtkButton" id="css_edit_button">
+-                                <property name="label" translatable="yes">_Edit Stylesheet…</property>
+-                                <property name="visible">True</property>
+-                                <property name="can_focus">True</property>
+-                                <property name="can_default">True</property>
+-                                <property name="receives_default">True</property>
+-                                <property name="use_underline">True</property>
+-                              </object>
+-                              <packing>
+-                                <property name="expand">False</property>
+-                                <property name="fill">False</property>
+-                                <property name="position">0</property>
+-                              </packing>
+-                            </child>
+-                          </object>
+-                          <packing>
+-                            <property name="expand">True</property>
+-                            <property name="fill">True</property>
+-                            <property name="position">1</property>
+-                          </packing>
+-                        </child>
+-                      </object>
+-                      <packing>
+-                        <property name="expand">False</property>
+-                        <property name="fill">True</property>
+-                        <property name="position">1</property>
+-                      </packing>
+-                    </child>
+-                  </object>
+-                  <packing>
+-                    <property name="expand">False</property>
+-                    <property name="fill">True</property>
+-                    <property name="position">1</property>
+-                  </packing>
+-                </child>
+-              </object>
+-              <packing>
+-                <property name="position">1</property>
+-              </packing>
+-            </child>
+-            <child type="tab">
+-              <object class="GtkLabel" id="label1284">
+-                <property name="visible">True</property>
+-                <property name="can_focus">False</property>
+-                <property name="label" translatable="yes">Fonts &amp; Style</property>
+-              </object>
+-              <packing>
+-                <property name="position">1</property>
+-                <property name="tab_fill">False</property>
+-              </packing>
+-            </child>
+-            <child>
+               <object class="GtkBox" id="privacy_page_box">
+                 <property name="visible">True</property>
+                 <property name="can_focus">False</property>
+@@ -941,7 +674,7 @@
+                 </child>
+               </object>
+               <packing>
+-                <property name="position">2</property>
++                <property name="position">1</property>
+               </packing>
+             </child>
+             <child type="tab">
+@@ -951,7 +684,7 @@
+                 <property name="label" translatable="yes">Privacy</property>
+               </object>
+               <packing>
+-                <property name="position">2</property>
++                <property name="position">1</property>
+                 <property name="tab_fill">False</property>
+               </packing>
+             </child>
+@@ -1222,7 +955,7 @@
+                 </child>
+               </object>
+               <packing>
+-                <property name="position">3</property>
++                <property name="position">2</property>
+               </packing>
+             </child>
+             <child type="tab">
+@@ -1232,7 +965,7 @@
+                 <property name="label" translatable="yes">Language</property>
+               </object>
+               <packing>
+-                <property name="position">3</property>
++                <property name="position">2</property>
+                 <property name="tab_fill">False</property>
+               </packing>
+             </child>

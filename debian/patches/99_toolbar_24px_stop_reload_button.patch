@@ -1,0 +1,10 @@
+--- a/src/ephy-toolbar.c
++++ b/src/ephy-toolbar.c
+@@ -162,6 +162,7 @@
+   action = gtk_action_group_get_action (action_group, "ViewCombinedStopReload");
+   gtk_activatable_set_related_action (GTK_ACTIVATABLE (button),
+                                       action);
++  gtk_image_set_pixel_size (gtk_button_get_image (GTK_BUTTON (button)), 24);
+   gtk_header_bar_pack_start (GTK_HEADER_BAR (toolbar), button);
+ 
+   /* New Tab */
