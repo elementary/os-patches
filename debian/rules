@@ -22,9 +22,3 @@ DEB_CONFIGURE_EXTRA_FLAGS += \
 binary-post-install/epiphany-browser::
 	cd debian/epiphany-browser/usr/bin \
 		&& mv epiphany-browser.sh epiphany-browser
-
-binary-post-install/epiphany-browser-data::
-	sed -e s/@PACKAGEVERSION@/$(DEB_VERSION)/ \
-	    -e s/@DISTROID@/`lsb_release -is`/ \
-	    -e s/@DISTROVERSION@/`lsb_release -rs`/ \
-	    debian/branding.conf.in > debian/epiphany-browser-data/usr/share/epiphany-browser/branding.conf
