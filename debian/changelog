@@ -1,3 +1,25 @@
+network-manager-applet (1.2.0-0ubuntu0.16.04.3) xenial; urgency=medium
+
+  * debian/patches/apple-set-out_icon_name-for-WWAN-connections-for-ind.patch:
+    use available gsm-3g-* icons so that the icon for mobile is different than
+    that used for wifi; to avoid confusing people. (LP: #1571574)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 01 Jun 2016 15:15:49 -0400
+
+network-manager-applet (1.2.0-0ubuntu0.16.04.2) xenial; urgency=medium
+
+  * cherry-pick upstream patches from post 1.2.2:
+    - wireless-security-fix-failed-assertion-in-default_fi.patch:
+      Fix TLS cert authentication (LP: #1575614)
+    - wireless-security-return-error-on-eap_method_validat.patch:
+      Return error on eap_method_validate_filepicker() failure
+    - applet-remove-assert-s_con-from-applet_get_active_vp.patch
+      Remove the assert which lead to many false assertions (LP: #1578962)
+    - apple-set-out_icon_name-for-WWAN-connections-for-ind.patch
+      WWAN icon should appear when the connection is activated (LP: #1571574)
+
+ -- Aron Xu <happyaron@ubuntu.com>  Tue, 24 May 2016 15:30:22 +0800
+
 network-manager-applet (1.2.0-0ubuntu0.16.04.1) xenial; urgency=medium
 
   * Rebase to upstream stable release (lp: #1576726)
@@ -163,7 +185,7 @@ network-manager-applet (1.0.8-1) unstable; urgency=medium
 network-manager-applet (1.0.6-2ubuntu4) xenial; urgency=medium
 
   * debian/control, debian/n-m-g.install, debian/rules:
-    - don't build the migration helper, it's for upgrades from < 0.9 
+    - don't build the migration helper, it's for upgrades from < 0.9
       which was before trusty, clears the depends on gnome-keyring and
       gconf on the way
 
@@ -242,7 +264,7 @@ network-manager-applet (1.0.4-0ubuntu1) xenial; urgency=medium
   * New upstream release (LP: #1467267)
   * debian/control:
     - Bump build-depends on libnm-util-dev, libnm-glib-dev, libnm-glib-vpn-dev,
-      network-manager-dev 
+      network-manager-dev
   * debian/libnm-gtk0.symbols:
     - Updated
   * debian/patches/clear-notification-actions.patch:
@@ -343,8 +365,8 @@ network-manager-applet (0.9.10.1-0ubuntu1) vivid; urgency=medium
   * New upstream release: 0.9.10.1.
   * Resync packaging with Debian:
     - debian/rules: Set DEB_HOST_MULTIARCH, use dh_install exclusions rather
-      than removing .la and .a files separately. 
-    - debian/control: Build-depends: update NM b-deps, 
+      than removing .la and .a files separately.
+    - debian/control: Build-depends: update NM b-deps,
       bump to dh 9, update libgtk/libglib2.0 b-deps versions and make
       libnm-gtk Multi-Arch-aware.
     - debian/*.install: update paths for multi-arch.
@@ -471,7 +493,7 @@ network-manager-applet (0.9.8.8-0ubuntu6) utopic; urgency=medium
 network-manager-applet (0.9.8.8-0ubuntu5) utopic; urgency=medium
 
   * debian/patches/11-user-connections.patch: Unbreak importing VPN
-    connections. (LP: #1294899) 
+    connections. (LP: #1294899)
   * debian/patches/git_use_paths_in_vpn_name_files_4867951.patch: use the paths
     specified in vpn .name files.
 
@@ -635,7 +657,7 @@ network-manager-applet (0.9.8.0-1ubuntu4) saucy; urgency=low
 
 network-manager-applet (0.9.8.0-1ubuntu3) saucy; urgency=low
 
-  * debian/patches/git_dont_autostart_under_GNOME.patch (LP: #1189309) 
+  * debian/patches/git_dont_autostart_under_GNOME.patch (LP: #1189309)
 
  -- Tim <tim@feathertop.org>  Mon, 02 Sep 2013 14:03:33 +1000
 
@@ -949,7 +971,7 @@ network-manager-applet (0.9.6.0~git201207161252.13c6db8-0ubuntu3) quantal; urgen
 
 network-manager-applet (0.9.6.0~git201207161252.13c6db8-0ubuntu2) quantal; urgency=low
 
-  * debian/patches/lp341684_device_sensitive_disconnect_notify.patch: updated 
+  * debian/patches/lp341684_device_sensitive_disconnect_notify.patch: updated
     to respect the "disable-disconnected-notifications" settings. (LP: #445872)
 
  -- Matvey Marinin <matvey.marinin@gmail.com>  Thu, 02 Aug 2012 16:21:04 -0400
@@ -1256,7 +1278,7 @@ network-manager-applet (0.9.1.90-0ubuntu6) oneiric; urgency=low
 network-manager-applet (0.9.1.90-0ubuntu5) oneiric; urgency=low
 
   * debian/patches/04-autostart.patch:
-    - revert: disable autostart when using gnome-shell (LP: #863120) 
+    - revert: disable autostart when using gnome-shell (LP: #863120)
 
  -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Fri, 30 Sep 2011 14:34:44 -0400
 
@@ -1291,7 +1313,7 @@ network-manager-applet (0.9.1.90-0ubuntu1) oneiric; urgency=low
 
   [ Dylan McCall ]
   * debian/patches/04-autostart.patch:
-    - disable autostart when using gnome-shell (LP: #852961) 
+    - disable autostart when using gnome-shell (LP: #852961)
 
   [ Mathieu Trudel-Lapierre ]
   * debian/control: add libnm-gtk0 and libnm-gtk-dev binary packages.
@@ -1353,7 +1375,7 @@ network-manager-applet (0.9.0-0ubuntu3) oneiric; urgency=low
   * debian/patches/clear-notification-actions.patch: clear actions tied to
     notifications being sent; otherwise stacking notifications also causes the
     attached actions to be stacked (resulting in multiple "Don't show this"
-    buttons appearing in the notification bubble. (LP: #606825) 
+    buttons appearing in the notification bubble. (LP: #606825)
   * debian/control: drop gnome-bluetooth to Suggests. (LP: #844027)
   * debian/patches/key-certificate-extensions.patch: allow using a key
     certificate with a .key extension in network security dialogs. (LP: #839864)
@@ -1851,13 +1873,13 @@ network-manager-applet (0.8.1+git.20100809t190028.290dc70-0ubuntu1) maverick; ur
   * refresh the device disconnection notification patch, update to new code base
     - updated debian/patches/lp341684_device_sensitive_disconnect_notify.patch
   * refreshed vpn service name patch, update to new code base
-    - updated debian/patches/20_use_full_vpn_dialog_service_name_path.patch 
+    - updated debian/patches/20_use_full_vpn_dialog_service_name_path.patch
   * delete lazy icon loading patch from seb128, it's applied upstream
     - deleted debian/patches/bgo609134_lazy_icons.patch
-    - updated debian/patches/series 
+    - updated debian/patches/series
   * delete lazy notification capabilities checking from pitti: applied upstream
     - deleted debian/patches/bgo610881_lazy_init_notify_caps.patch
-    - updated debian/patches/series 
+    - updated debian/patches/series
   * bump DEB_AUTO_UPDATE_ACLOCAL and DEB_AUTO_UPDATE_AUTOMAKE to 1.11
     - update debian/rules
   * refreshed the patch to always show the tray icon
@@ -1913,7 +1935,7 @@ network-manager-applet (0.8-0ubuntu3) lucid; urgency=low
 
   [ Mirco Müller (MacSlow) <mirco.mueller@ubuntu.com> ]
   * Make nm-applet correctly update a notification, if the connection-status
-    has changed. This avoids displaying obsolete notifications to the user, 
+    has changed. This avoids displaying obsolete notifications to the user,
     which no longer reflect the correct connection-status. Fixes LP: #460144
     - add debian/patches/lp460144_correctly_update_notification.patch
     - update debian/patches/series
@@ -1991,7 +2013,7 @@ network-manager-applet (0.8~rc2-0ubuntu1) lucid; urgency=low
 
   * upstream 0.8-rc2 release
     - editor: protect against invalid CEPolkitButton objects (rh #549579)
-    - menu: ensure active menu item is valid before trying to use it (rh #546901) 
+    - menu: ensure active menu item is valid before trying to use it (rh #546901)
     - editor: fix bad assignment
     - core: add "Enable Mobile Broadband" menu item
     - applet: escape notification text
@@ -2012,8 +2034,8 @@ network-manager-applet (0.8~rc2-0ubuntu1) lucid; urgency=low
     - add deb/debian/patches/revert_more_networks.patch
     - add deb/debian/patches/revert_disable_notifications.patch
     - add deb/debian/patches/revert_country_not_listed.patch
-    - add deb/debian/patches/revert_cleartext_priv_keys.patch	
-    - add deb/debian/patches/revert_enable_broadband.patch		
+    - add deb/debian/patches/revert_cleartext_priv_keys.patch
+    - add deb/debian/patches/revert_enable_broadband.patch
     - update debian/series
 
  -- Tony Espy <espy@ubuntu.com>  Wed, 20 Jan 2010 10:16:56 -0500
@@ -2021,7 +2043,7 @@ network-manager-applet (0.8~rc2-0ubuntu1) lucid; urgency=low
 network-manager-applet (0.8~a~git.20091014t134532.4033e62-0ubuntu1) karmic; urgency=low
 
   * upstream snapshot for karmic-RC 2009-10-14 13:45:32 (GMT)
-    + 4033e623f7af571d38281f5fb6ab28a77bfe2220 
+    + 4033e623f7af571d38281f5fb6ab28a77bfe2220
     - core: don't crash if we can't get active connection properties from NM (LP: #430535)
     - gconf: restore 0.7 notification behavior defaults (LP: #444561)
 
@@ -2038,14 +2060,14 @@ network-manager-applet (0.8~a~git.20091002t194214.8515a07-0ubuntu1) karmic; urge
     - LP: #439956 - Cannot set manual IP and DNS with nm-connection-editor
     - LP: #438160 - nm-applet loses ipv4 configuration
     - LP: #431265 - Network Manager can't connect to hidden wireless networks
-    - LP: #443049 - MASTER nm-connection-editor crashed with SIGSEGV in get_permissions_cb 
-    - LP: #438374 - Failure to retain edited MTU value 
+    - LP: #443049 - MASTER nm-connection-editor crashed with SIGSEGV in get_permissions_cb
+    - LP: #438374 - Failure to retain edited MTU value
     - LP: #436839 - Disconnect menu option looks like wireless network
 
   [ Tony Espy <espy@ubuntu.com> ]
   * drop wifi toplevel_sort patch that was committed upstream
     - delete debian/patches/wifi_toplevel_ap_sort.patch
-    - update debian/patches/series 
+    - update debian/patches/series
 
   [ Alexander Sack <asac@ubuntu.com> ]
   * drop preview patch that was committed upstream
@@ -2098,7 +2120,7 @@ network-manager-applet (0.8~a~git.20090923t220421.1ac8ffd-0ubuntu2) karmic; urge
 network-manager-applet (0.8~a~git.20090923t220421.1ac8ffd-0ubuntu1) karmic; urgency=low
 
   * upstream snapshot 2009-09-23 22:04:21 (GMT)
-    + 1ac8ffd41a2d162d23713415cec6c3e96fbc3c82 
+    + 1ac8ffd41a2d162d23713415cec6c3e96fbc3c82
     + new upstream UI for beta (prepatched) - LP: #435333
     + mini-abi transition respin for libnm-glib-vpn rename fixes LP: #435888
 
@@ -2184,7 +2206,7 @@ network-manager-applet (0.8~a~git.20090805t131328.d1edfce-0ubuntu1) karmic; urge
     - update patches/lp341684_device_sensitive_disconnect_notify.patch
   * re-work tarball generation code; added get-curr-source to
     grab a specific version; get-orig-source now grabs the tip
-    of new variable GIT_BRANCH; adjusted changelog version to 
+    of new variable GIT_BRANCH; adjusted changelog version to
     new scheme.
     - update rules
 
@@ -2518,7 +2540,7 @@ network-manager-applet (0.7.0-1) experimental; urgency=low
     - The nm-editor tool has been replaced by nm-connection-editor.
       (Closes: #494148, #482107, #485651)
     - Show the correct configuration for WPA Enterprise setups in
-      nm-connection-editor (Closes: #480039)  
+      nm-connection-editor (Closes: #480039)
 
   [ Sjoerd Simons ]
   * debian/patches/02-nm-api-update.patch:
@@ -2600,7 +2622,7 @@ network-manager-applet (0.7.0-1) experimental; urgency=low
     - The nm-editor tool has been replaced by nm-connection-editor.
       (Closes: #494148, #482107, #485651)
     - Show the correct configuration for WPA Enterprise setups in
-      nm-connection-editor (Closes: #480039)  
+      nm-connection-editor (Closes: #480039)
 
   [ Sjoerd Simons ]
   * debian/patches/02-nm-api-update.patch:
@@ -2887,9 +2909,9 @@ network-manager-applet (0.6.6-1) unstable; urgency=low
     - Better handling of VPN and WPA Enterprise security. (Closes: #444977)
   * debian/control
     - The Vcs-* fields are now officially supported, so remove the XS- prefix.
-    - Bump Standards-Version to 3.7.3. No further changes required. 
+    - Bump Standards-Version to 3.7.3. No further changes required.
     - Fix Xfce spelling error in the package description.
-    - Bump Build-Depends on libnm-util-dev and network-manager-dev to 
+    - Bump Build-Depends on libnm-util-dev and network-manager-dev to
       (>= 0.6.6).
   * Removed patches
     - debian/patches/10-po_fr.patch (merged upstream)
@@ -2920,7 +2942,7 @@ network-manager-applet (0.6.5-3) unstable; urgency=low
 network-manager-applet (0.6.5-2) unstable; urgency=low
 
   * debian/patches/30-connection_info_hide_on_delete_event.patch
-    - Patch from Ubuntu. Hide connection info dialog on delete-event. 
+    - Patch from Ubuntu. Hide connection info dialog on delete-event.
       (Closes: #406073)
 
  -- Michael Biebl <biebl@debian.org>  Wed, 19 Sep 2007 22:34:18 +0200
