@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+An interface for communication between the service and indicator.
+
+Copyright 2009 Canonical Ltd.
+
+Authors:
+    Ted Gould <ted@canonical.com>
+
+This program is free software: you can redistribute it and/or modify it 
+under the terms of the GNU General Public License version 3, as published 
+by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but 
+WITHOUT ANY WARRANTY; without even the implied warranties of 
+MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along 
+with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<node name="/">
+	<interface name="com.canonical.indicator.application.service">
+<!-- Properties -->
+		<!-- None currently -->
+
+<!-- Methods -->
+		<method name="GetApplications">
+			<arg type="a(sisossssss)" name="applications" direction="out" />
+		</method>
+		<method name="ApplicationScrollEvent">
+			<arg type="s" name="dbusaddress" direction="in" />
+			<arg type="s" name="dbusobject" direction="in" />
+			<arg type="i" name="delta" direction="in" />
+			<arg type="u" name="direction" direction="in" />
+		</method>
+		<method name="ApplicationSecondaryActivateEvent">
+			<arg type="s" name="dbusaddress" direction="in" />
+			<arg type="s" name="dbusobject" direction="in" />
+			<arg type="u" name="time" direction="in" />
+		</method>
+
+<!-- Signals -->
+		<signal name="ApplicationAdded">
+			<arg type="s" name="iconname" direction="out" />
+			<arg type="i" name="position" direction="out" />
+			<arg type="s" name="dbusaddress" direction="out" />
+			<arg type="o" name="dbusobject" direction="out" />
+			<arg type="s" name="iconpath" direction="out" />
+			<arg type="s" name="label" direction="out" />
+			<arg type="s" name="labelguide" direction="out" />
+			<arg type="s" name="accessibledesc" direction="out" />
+			<arg type="s" name="hint" direction="out" />
+			<arg type="s" name="title" direction="out" />
+		</signal>
+		<signal name="ApplicationRemoved">
+			<arg type="i" name="position" direction="out" />
+		</signal>
+		<signal name="ApplicationIconChanged">
+			<arg type="i" name="position" direction="out" />
+			<arg type="s" name="icon_name" direction="out" />
+			<arg type="s" name="icon_desc" direction="out" />
+		</signal>
+		<signal name="ApplicationIconThemePathChanged">
+			<arg type="i" name="position" direction="out" />
+			<arg type="s" name="icon_theme_path" direction="out" />
+		</signal>
+		<signal name="ApplicationLabelChanged">
+			<arg type="i" name="position" direction="out" />
+			<arg type="s" name="label" direction="out" />
+			<arg type="s" name="guide" direction="out" />
+		</signal>
+		<signal name="ApplicationTitleChanged">
+			<arg type="i" name="position" direction="out" />
+			<arg type="s" name="title" direction="out" />
+		</signal>
+	</interface>
+</node>
