@@ -42,9 +42,6 @@ CC_PANEL_REGISTER (CcBluetoothPanel, cc_bluetooth_panel)
 
 #define WID(s) GTK_WIDGET (gtk_builder_get_object (self->priv->builder, s))
 
-#define KEYBOARD_PREFS		"keyboard"
-#define MOUSE_PREFS		"mouse"
-#define SOUND_PREFS		"sound"
 #define WIZARD			"bluetooth-wizard"
 
 struct CcBluetoothPanelPrivate {
@@ -462,30 +459,6 @@ switch_panel (CcBluetoothPanel *self,
     }
 }
 
-static gboolean
-keyboard_callback (GtkButton        *button,
-		   CcBluetoothPanel *self)
-{
-	switch_panel (self, KEYBOARD_PREFS);
-	return TRUE;
-}
-
-static gboolean
-mouse_callback (GtkButton        *button,
-		CcBluetoothPanel *self)
-{
-	switch_panel (self, MOUSE_PREFS);
-	return TRUE;
-}
-
-static gboolean
-sound_callback (GtkButton        *button,
-		CcBluetoothPanel *self)
-{
-	switch_panel (self, SOUND_PREFS);
-	return TRUE;
-}
-
 static void
 send_callback (GtkButton        *button,
 	       CcBluetoothPanel *self)
@@ -834,12 +807,6 @@ cc_bluetooth_panel_init (CcBluetoothPanel *self)
 
 	/* Set the initial state of the properties */
 	cc_bluetooth_panel_update_properties (self);
-	g_signal_connect (G_OBJECT (WID ("mouse_link")), "activate-link",
-			  G_CALLBACK (mouse_callback), self);
-	g_signal_connect (G_OBJECT (WID ("keyboard_link")), "activate-link",
-			  G_CALLBACK (keyboard_callback), self);
-	g_signal_connect (G_OBJECT (WID ("sound_link")), "activate-link",
-			  G_CALLBACK (sound_callback), self);
 	g_signal_connect (G_OBJECT (WID ("send_button")), "clicked",
 			  G_CALLBACK (send_callback), self);
 	g_signal_connect (G_OBJECT (WID ("switch_connection")), "notify::active",
