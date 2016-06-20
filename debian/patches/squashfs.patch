@@ -1,0 +1,399 @@
+From 0192cc1b180196350439f36c50aa5c84dbfff779 Mon Sep 17 00:00:00 2001
+From: Robert Ancell <robert.ancell@canonical.com>
+Date: Thu, 26 May 2016 15:49:40 +1200
+Subject: [PATCH] Support squashfs filesystems and .snap files
+
+---
+ data/org.gnome.FileRoller.desktop.in.in |   2 +-
+ po/POTFILES.in                          |   2 +
+ src/Makefile.am                         |   2 +
+ src/fr-command-unsquashfs.c             | 245 ++++++++++++++++++++++++++++++++
+ src/fr-command-unsquashfs.h             |  51 +++++++
+ src/fr-init.c                           |   6 +
+ 6 files changed, 307 insertions(+), 1 deletion(-)
+ create mode 100644 src/fr-command-unsquashfs.c
+ create mode 100644 src/fr-command-unsquashfs.h
+
+Index: file-roller-3.16.5/data/org.gnome.FileRoller.desktop.in.in
+===================================================================
+--- file-roller-3.16.5.orig/data/org.gnome.FileRoller.desktop.in.in
++++ file-roller-3.16.5/data/org.gnome.FileRoller.desktop.in.in
+@@ -10,7 +10,7 @@ Type=Application
+ Icon=file-roller
+ Categories=GTK;GNOME;Utility;Archiving;Compression;X-GNOME-Utilities;
+ NotShowIn=KDE;
+-MimeType=application/x-7z-compressed;application/x-7z-compressed-tar;application/x-ace;application/x-alz;application/x-ar;application/x-arj;application/x-bzip;application/x-bzip-compressed-tar;application/x-bzip1;application/x-bzip1-compressed-tar;application/x-cabinet;application/x-cbr;application/x-cbz;application/x-cd-image;application/x-compress;application/x-compressed-tar;application/x-cpio;application/x-deb;application/x-ear;application/x-ms-dos-executable;application/x-gtar;application/x-gzip;application/x-gzpostscript;application/x-java-archive;application/x-lha;application/x-lhz;application/x-lrzip;application/x-lrzip-compressed-tar;application/x-lzip;application/x-lzip-compressed-tar;application/x-lzma;application/x-lzma-compressed-tar;application/x-lzop;application/x-lzop-compressed-tar;application/x-ms-wim;application/x-rar;application/x-rar-compressed;application/x-rpm;application/x-rzip;application/x-rzip-compressed-tar;application/x-tar;application/x-tarz;application/x-stuffit;application/x-war;application/x-xz;application/x-xz-compressed-tar;application/x-zip;application/x-zip-compressed;application/x-zoo;application/zip;application/x-archive;application/vnd.ms-cab-compressed;
++MimeType=application/x-7z-compressed;application/x-7z-compressed-tar;application/x-ace;application/x-alz;application/x-ar;application/x-arj;application/x-bzip;application/x-bzip-compressed-tar;application/x-bzip1;application/x-bzip1-compressed-tar;application/x-cabinet;application/x-cbr;application/x-cbz;application/x-cd-image;application/x-compress;application/x-compressed-tar;application/x-cpio;application/x-deb;application/x-ear;application/x-ms-dos-executable;application/x-gtar;application/x-gzip;application/x-gzpostscript;application/x-java-archive;application/x-lha;application/x-lhz;application/x-lrzip;application/x-lrzip-compressed-tar;application/x-lzip;application/x-lzip-compressed-tar;application/x-lzma;application/x-lzma-compressed-tar;application/x-lzop;application/x-lzop-compressed-tar;application/x-ms-wim;application/x-rar;application/x-rar-compressed;application/x-rpm;application/x-rzip;application/x-rzip-compressed-tar;application/x-tar;application/x-tarz;application/x-stuffit;application/x-war;application/x-xz;application/x-xz-compressed-tar;application/x-zip;application/x-zip-compressed;application/x-zoo;application/zip;application/x-archive;application/vnd.ms-cab-compressed;application/vnd.squashfs;application/vnd.snap;
+ X-GNOME-DocPath=file-roller/file-roller.xml
+ X-GNOME-Bugzilla-Bugzilla=GNOME
+ X-GNOME-Bugzilla-Product=file-roller
+Index: file-roller-3.16.5/po/POTFILES.in
+===================================================================
+--- file-roller-3.16.5.orig/po/POTFILES.in
++++ file-roller-3.16.5/po/POTFILES.in
+@@ -77,6 +77,8 @@ src/fr-command-tar.c
+ src/fr-command-tar.h
+ src/fr-command-unarchiver.c
+ src/fr-command-unarchiver.h
++src/fr-command-unsquashfs.c
++src/fr-command-unsquashfs.h
+ src/fr-command-unstuff.c
+ src/fr-command-unstuff.h
+ src/fr-command-zip.c
+Index: file-roller-3.16.5/src/Makefile.am
+===================================================================
+--- file-roller-3.16.5.orig/src/Makefile.am
++++ file-roller-3.16.5/src/Makefile.am
+@@ -119,6 +119,8 @@ COMMON_SOURCES = 			\
+ 	fr-command-rpm.h		\
+ 	fr-command-tar.c		\
+ 	fr-command-tar.h		\
++	fr-command-unsquashfs.c		\
++	fr-command-unsquashfs.h		\
+ 	fr-command-unstuff.c		\
+ 	fr-command-unstuff.h		\
+ 	fr-command-zip.c		\
+Index: file-roller-3.16.5/src/fr-command-unsquashfs.c
+===================================================================
+--- /dev/null
++++ file-roller-3.16.5/src/fr-command-unsquashfs.c
+@@ -0,0 +1,245 @@
++/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
++
++/*
++ *  File-Roller
++ *
++ *  Copyright (C) 2001 The Free Software Foundation, Inc.
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This program is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <config.h>
++#include <stdlib.h>
++#include <string.h>
++#include <time.h>
++#include <glib.h>
++#include "file-data.h"
++#include "file-utils.h"
++#include "glib-utils.h"
++#include "fr-command.h"
++#include "fr-command-unsquashfs.h"
++
++
++G_DEFINE_TYPE (FrCommandUnsquashfs, fr_command_unsquashfs, FR_TYPE_COMMAND)
++
++typedef struct {
++        FrCommand *command;
++        gboolean read_header;
++} UnsquashfsData;
++
++
++static void
++process_data_line (char     *line,
++                   gpointer  data)
++{
++        FileData       *fdata;
++        UnsquashfsData *d = data;
++        char          **fields;
++        char          **tmfields;
++        struct tm       tm = {0, };
++        const char     *name;
++
++        g_return_if_fail (line != NULL);
++
++        /* Skip header */
++        if (!d->read_header) {
++                if (line[0] == '\0')
++                        d->read_header = TRUE;
++                return;
++        }
++
++        fdata = file_data_new ();
++
++        fields = _g_str_split_line (line, 5);
++        fdata->size = g_ascii_strtoull (fields[2], NULL, 10);
++        tmfields = g_strsplit(fields[3], "-", 3);
++        if (tmfields[2]) {
++                tm.tm_year = atoi (tmfields[0]) - 1900;
++                tm.tm_mon = atoi (tmfields[1]) - 1;
++                tm.tm_mday = atoi (tmfields[2]);
++        }
++        g_strfreev (tmfields);
++        tmfields = g_strsplit (fields[4], ":", 2);
++        if (tmfields[1]) {
++                tm.tm_hour = atoi (tmfields[0]);
++                tm.tm_min = atoi (tmfields[1]);
++        }
++        g_strfreev (tmfields);
++        fdata->modified = mktime (&tm);
++        g_strfreev (fields);
++
++        name = _g_str_get_last_field (line, 6);
++        fields = g_strsplit (name, " -> ", 2);
++
++        fdata->dir = line[0] == 'd';
++        name = fields[0];
++        if (g_str_has_prefix (name, "squashfs-root/")) { /* Should generally be the case */
++                fdata->full_path = g_strdup (name + 13);
++                fdata->original_path = fdata->full_path;
++        } else if (strcmp (name, "squashfs-root") == 0) {
++                fdata->full_path = g_strdup ("/");
++                fdata->original_path = fdata->full_path;
++        } else {
++                fdata->full_path = g_strdup (name);
++                fdata->original_path = fdata->full_path;
++        }
++
++        if (fields[1] != NULL)
++                fdata->link = g_strdup (fields[1]);
++        g_strfreev (fields);
++
++        if (fdata->dir)
++                fdata->name = _g_path_get_dir_name (fdata->full_path);
++        else
++                fdata->name = g_strdup (_g_path_get_basename (fdata->full_path));
++        fdata->path = _g_path_remove_level (fdata->full_path);
++
++        if (*fdata->name == 0)
++                file_data_free (fdata);
++        else
++                fr_archive_add_file (FR_ARCHIVE (d->command), fdata);
++}
++
++
++static gboolean
++fr_command_unsquashfs_list (FrCommand *command)
++{
++        UnsquashfsData *data;
++
++        data = g_new0 (UnsquashfsData, 1);
++        data->command = command;
++
++        fr_process_begin_command (command->process, "unsquashfs");
++        fr_process_add_arg (command->process, "-lls");
++        fr_process_add_arg (command->process, command->filename);
++        fr_process_set_out_line_func (command->process, process_data_line, data);
++        fr_process_set_end_func (command->process, g_free, data);
++        fr_process_end_command (command->process);
++
++        return TRUE;
++}
++
++
++static void
++fr_command_unsquashfs_extract (FrCommand  *command,
++                               const char *from_file,
++                               GList      *file_list,
++                               const char *dest_dir,
++                               gboolean    overwrite,
++                               gboolean    skip_older,
++                               gboolean    junk_paths)
++{
++        GList *scan;
++
++        fr_process_begin_command (command->process, "unsquashfs");
++        fr_process_add_arg (command->process, "-dest");
++        if (dest_dir != NULL) {
++                fr_process_add_arg (command->process, dest_dir);
++        } else {
++                fr_process_add_arg (command->process, ".");
++        }
++        if (overwrite) {
++                fr_process_add_arg (command->process, "-force");
++        }
++        fr_process_add_arg (command->process, command->filename);
++
++        for (scan = file_list; scan; scan = scan->next)
++                fr_process_add_arg (command->process, scan->data);
++
++        fr_process_end_command (command->process);
++}
++
++
++const char *unsquashfs_mime_type[] = { "application/vnd.squashfs",
++                                       "application/vnd.snap",
++                                       NULL };
++
++
++static const char **
++fr_command_unsquashfs_get_mime_types (FrArchive *archive)
++{
++        return unsquashfs_mime_type;
++}
++
++
++static FrArchiveCap
++fr_command_unsquashfs_get_capabilities (FrArchive  *archive,
++                                        const char *mime_type,
++                                        gboolean    check_command)
++{
++        FrArchiveCap capabilities;
++
++        capabilities = FR_ARCHIVE_CAN_STORE_MANY_FILES;
++        if (_g_program_is_available ("unsquashfs", check_command))
++                capabilities |= FR_ARCHIVE_CAN_READ;
++
++        return capabilities;
++}
++
++
++static const char *
++fr_command_unsquashfs_get_packages (FrArchive  *archive,
++                                    const char *mime_type)
++{
++        return PACKAGES ("unsquashfs");
++}
++
++
++static void
++fr_command_unsquashfs_finalize (GObject *object)
++{
++        g_return_if_fail (object != NULL);
++        g_return_if_fail (FR_IS_COMMAND_UNSQUASHFS (object));
++
++        if (G_OBJECT_CLASS (fr_command_unsquashfs_parent_class)->finalize)
++                G_OBJECT_CLASS (fr_command_unsquashfs_parent_class)->finalize (object);
++}
++
++
++static void
++fr_command_unsquashfs_class_init (FrCommandUnsquashfsClass *klass)
++{
++        GObjectClass   *gobject_class;
++        FrArchiveClass *archive_class;
++        FrCommandClass *command_class;
++
++        fr_command_unsquashfs_parent_class = g_type_class_peek_parent (klass);
++
++        gobject_class = G_OBJECT_CLASS (klass);
++        gobject_class->finalize = fr_command_unsquashfs_finalize;
++
++        archive_class = FR_ARCHIVE_CLASS (klass);
++        archive_class->get_mime_types   = fr_command_unsquashfs_get_mime_types;
++        archive_class->get_capabilities = fr_command_unsquashfs_get_capabilities;
++        archive_class->get_packages     = fr_command_unsquashfs_get_packages;
++
++        command_class = FR_COMMAND_CLASS (klass);
++        command_class->list             = fr_command_unsquashfs_list;
++        command_class->extract          = fr_command_unsquashfs_extract;
++}
++
++
++static void
++fr_command_unsquashfs_init (FrCommandUnsquashfs *self)
++{
++        FrArchive *base = FR_ARCHIVE (self);
++
++        base->propAddCanUpdate             = FALSE;
++        base->propAddCanReplace            = FALSE;
++        base->propExtractCanAvoidOverwrite = FALSE;
++        base->propExtractCanSkipOlder      = FALSE;
++        base->propExtractCanJunkPaths      = FALSE;
++        base->propPassword                 = FALSE;
++        base->propTest                     = FALSE;
++}
+Index: file-roller-3.16.5/src/fr-command-unsquashfs.h
+===================================================================
+--- /dev/null
++++ file-roller-3.16.5/src/fr-command-unsquashfs.h
+@@ -0,0 +1,51 @@
++/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
++
++/*
++ *  File-Roller
++ *
++ *  Copyright (C) 2001 The Free Software Foundation, Inc.
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This program is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#ifndef FR_COMMAND_UNSQUASHFS_H
++#define FR_COMMAND_UNSQUASHFS_H
++
++#include <glib.h>
++#include "fr-command.h"
++#include "fr-process.h"
++
++#define FR_TYPE_COMMAND_UNSQUASHFS            (fr_command_unsquashfs_get_type ())
++#define FR_COMMAND_UNSQUASHFS(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), FR_TYPE_COMMAND_UNSQUASHFS, FrCommandUnsquashfs))
++#define FR_COMMAND_UNSQUASHFS_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), FR_TYPE_COMMAND_UNSQUASHFS, FrCommandUnsquashfsClass))
++#define FR_IS_COMMAND_UNSQUASHFS(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), FR_TYPE_COMMAND_UNSQUASHFS))
++#define FR_IS_COMMAND_UNSQUASHFS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), FR_TYPE_COMMAND_UNSQUASHFS))
++#define FR_COMMAND_UNSQUASHFS_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), FR_TYPE_COMMAND_UNSQUASHFS, FrCommandUnsquashfsClass))
++
++typedef struct _FrCommandUnsquashfs       FrCommandUnsquashfs;
++typedef struct _FrCommandUnsquashfsClass  FrCommandUnsquashfsClass;
++
++struct _FrCommandUnsquashfs
++{
++	FrCommand  __parent;
++};
++
++struct _FrCommandUnsquashfsClass
++{
++	FrCommandClass __parent_class;
++};
++
++GType fr_command_unsquashfs_get_type (void);
++
++#endif /* FR_COMMAND_UNSQUASHFS_H */
+Index: file-roller-3.16.5/src/fr-init.c
+===================================================================
+--- file-roller-3.16.5.orig/src/fr-init.c
++++ file-roller-3.16.5/src/fr-init.c
+@@ -46,6 +46,7 @@
+ #if HAVE_JSON_GLIB
+   #include "fr-command-unarchiver.h"
+ #endif
++#include "fr-command-unsquashfs.h"
+ #include "fr-command-unstuff.h"
+ #include "fr-command-zip.h"
+ #include "fr-command-zoo.h"
+@@ -79,6 +80,8 @@ FrMimeTypeDescription mime_type_desc[] =
+ 	{ "application/x-cpio",                 ".cpio",     0 },
+ 	{ "application/x-deb",                  ".deb",      0 },
+ 	{ "application/x-deb",                  ".click",    0 },
++	{ "application/vnd.snap",		".snap",     0 },
++	{ "application/vnd.squashfs",		".sqsh",     0 },
+ 	{ "application/x-ear",                  ".ear",      0 },
+ 	{ "application/x-ms-dos-executable",    ".exe",      0 },
+ 	{ "application/x-gzip",                 ".gz",       0 },
+@@ -139,6 +142,8 @@ FrExtensionType file_ext_type[] = {
+ 	{ ".rpm", "application/x-rpm" },
+ 	{ ".rz", "application/x-rzip" },
+ 	{ ".sit", "application/x-stuffit" },
++	{ ".snap", "application/vnd.snap" },
++	{ ".sqsh", "application/vnd.squashfs" },
+ 	{ ".swm", "application/x-ms-wim" },
+ 	{ ".tar", "application/x-tar" },
+ 	{ ".tar.bz", "application/x-bzip-compressed-tar" },
+@@ -366,6 +371,7 @@ register_archives (void)
+ 	register_archive (FR_TYPE_COMMAND_LHA);
+ 	register_archive (FR_TYPE_COMMAND_RAR);
+ 	register_archive (FR_TYPE_COMMAND_RPM);
++	register_archive (FR_TYPE_COMMAND_UNSQUASHFS);
+ 	register_archive (FR_TYPE_COMMAND_UNSTUFF);
+ 	register_archive (FR_TYPE_COMMAND_ZIP);
+ 	register_archive (FR_TYPE_COMMAND_LRZIP);
