@@ -1,12 +1,36 @@
-lsb for Debian
+lsb for Ubuntu
 --------------
 
-This package used to provide the Linux Standard Base on Debian systems.
-The LSB is a specification for allowing the same binary package to be used
-on multiple distributions.
+This package provides the Linux Standard Base on Ubuntu systems.  The
+LSB is a specification for allowing the same binary package to be used
+on multiple distributions.  
 
-Since version 9.20150826, this package stopped providing the compatibility
-LSB packages and only provides two otherwise important packages:
+INSTALLING LSB PACKAGES
+
+The "alien" package supports LSB packages on Ubuntu.  For example, to
+install an LSB package "lsb-mozilla-1.2-1_i386.rpm", type (as root):
+
+alien -i lsb-mozilla-1.2-1_i386.rpm
+
+Ideally, the package should be converted to an Ubuntu package and then
+installed by dpkg.  If this fails, there may be a problem with either
+the lsb package (most likely) or alien (less likely), and you should
+contact the vendor of the lsb package to resolve the problem.
+
+PACKAGE LAYOUT
+
+The LSB implementation in Ubuntu is currently divided into two
+packages:
+
+* The "lsb-core" package depends on the Ubuntu packages that are
+  required to comply with the LSB-Core 4.1 specification. It also
+  includes some subroutines that are used by LSB-compliant applications
+  when they are being installed or removed.
+
+* The "lsb-printing" package depends on the CUPS libraries (libcups2
+  and libcupsimage2), foomatic-filters, and Ghostscript.
+
+Other modules of the LSB implementation are no longer available in Ubuntu.
 
 * The "lsb-base" package includes a number of functions used by init.d
   scripts in some LSB packages.
@@ -16,3 +40,8 @@ LSB packages and only provides two otherwise important packages:
 
 * The "lsb-release" package includes the lsb_release command, which provides
   information about the installed LSB modules and the underlying distribution.
+
+The LSB module packages are architecture-specific because of
+differences in the requirements of the LSB on various binary
+architectures.  In particular, each package provides
+lsb-{module}-noarch and lsb-{module}-{arch} virtual packages.

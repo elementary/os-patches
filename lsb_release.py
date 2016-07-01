@@ -61,6 +61,11 @@ def lookup_codename(release, unknown=None):
         shortrelease = '%s' % m.group(1)
     return RELEASE_CODENAME_LOOKUP.get(shortrelease, unknown)
 
+# LSB compliance packages... may grow eventually
+PACKAGES = 'lsb-core lsb-cxx lsb-graphics lsb-desktop lsb-languages lsb-multimedia lsb-printing lsb-security'
+
+modnamere = re.compile(r'lsb-(?P<module>[a-z0-9]+)-(?P<arch>[^ ]+)(?: \(= (?P<version>[0-9.]+)\))?')
+
 def valid_lsb_versions(version, module):
     # If a module is ever released that only appears in >= version, deal
     # with that here
@@ -122,7 +127,44 @@ except NameError:
 
 # This is Debian-specific at present
 def check_modules_installed():
-    return []
+    # Find which LSB modules are installed on this system
+    C_env = os.environ.copy(); C_env['LC_ALL'] = 'C'
+    output = subprocess.Popen(['dpkg-query','-f',"${Version} ${Provides}\n",'-W'] + PACKAGES.split(),
+                              env=C_env,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE,
+                              close_fds=True).communicate()[0].decode('utf-8')
+
+    if not output:
+        return []
+
+    modules = set()
+    for line in output.split(os.linesep):
+        if not line:
+           break
+        version, provides = line.split(' ', 1)
+        # Debian package versions can be 3.2-$REV, 3.2+$REV or 3.2~$REV.
+        version = re.split('[-+~]', version, 1)[0]
+        for pkg in provides.split(','):
+            mob = modnamere.search(pkg)
+            if not mob:
+                continue
+
+            mgroups = mob.groupdict()
+            # If no versioned provides...
+            if mgroups.get('version'):
+                module = '%(module)s-%(version)s-%(arch)s' % mgroups
+                modules.add(module)
+            else:
+                module = mgroups['module']
+                for v in valid_lsb_versions(version, module):
+                    mgroups['version'] = v
+                    module = '%(module)s-%(version)s-%(arch)s' % mgroups
+                    modules.add(module)
+
+    modules = list(modules)
+    modules.sort()
+    return modules
 
 longnames = {'v' : 'version', 'o': 'origin', 'a': 'suite',
              'c' : 'component', 'l': 'label'}
