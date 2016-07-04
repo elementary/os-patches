@@ -1,3 +1,22 @@
+bash (4.3-14ubuntu1.1) xenial-proposed; urgency=medium
+
+  * SRU: LP: #1595869.
+  * Apply upstream patches 043 - 046. Fixes:
+    - When the lastpipe option is enabled, the last component can contain
+      nested pipelines and cause a segmentation fault under
+      certain circumstances.
+    - A typo prevents the `compat42' shopt option from working as intended.
+    - If a file open attempted as part of a redirection fails because it is
+      interrupted by a signal, the shell needs to process any pending traps
+      to allow the redirection to be canceled.
+    - An incorrect conversion from an indexed to associative array can result
+      in a core dump.
+  * Add $HOME/.local/bin to PATH, and add the user's home directories
+    unconditionally to the path, so that they are available without
+    a new login. Closes: #820856, LP: #1588562.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 24 Jun 2016 10:20:17 +0200
+
 bash (4.3-14ubuntu1) wily; urgency=medium
 
   * Merge with Debian; remaining changes:
