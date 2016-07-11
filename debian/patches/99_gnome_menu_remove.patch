@@ -1,0 +1,13 @@
+Index: os-patch-epiphany-browser-xenial/src/ephy-shell.c
+===================================================================
+--- os-patch-epiphany-browser-xenial.orig/src/ephy-shell.c
++++ os-patch-epiphany-browser-xenial/src/ephy-shell.c
+@@ -337,8 +337,6 @@ ephy_shell_startup (GApplication* applic
+     gtk_builder_add_from_resource (builder,
+                                    "/org/gnome/epiphany/epiphany-application-menu.ui",
+                                    NULL);
+-    gtk_application_set_app_menu (GTK_APPLICATION (application),
+-                                  G_MENU_MODEL (gtk_builder_get_object (builder, "app-menu")));
+     g_object_unref (builder);
+   }
+ }
