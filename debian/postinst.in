@@ -307,97 +307,6 @@ run_grub_install()
     fi
 }
 
-setup_mok_validation()
-{
-    local sb_enabled moksb moksbstatert
-    local efivars secureboot_var moksb_var moksbstatert_var
-    efivars=/sys/firmware/efi/efivars
-    secureboot_var=SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c
-    moksb_var=MokSB-605dab50-e046-4300-abb6-3dd810dd8b23
-    moksbstatert_var=MokSBStateRT-605dab50-e046-4300-abb6-3dd810dd8b23
-
-    # nothing to do if there is no dkms package installed.
-    if ! dpkg -l dkms | grep -qc ii; then
-	return
-    fi
-
-    if [ -d $efivars ] && [ -f $efivars/$secureboot_var ]; then
-        sb_enabled=$(od -An -t u1 $efivars/$secureboot_var | awk '{ print $NF; }')
-        moksb=0
-        moksbstatert=0
-        if [ -f $efivars/$moksb_var ]; then
-            # if MokSB exists we've likely already run mokutil since last boot
-            moksb=1
-        fi
-        if [ -f $efivars/$moksbstatert_var ]; then
-            # MokSBStateRT set to 1 means validation is disabled
-            moksbstatert=$(od -An -t u1 $efivars/$moksbstatert_var | \
-                           awk '{ print $NF; }')
-        fi
-        if [ $sb_enabled -eq 1 ]; then
-            if [ $moksb -eq 0 ] && [ $moksbstatert -eq 0 ]; then
-                db_capb backup
-                STATE=1
-                db_settitle dkms/title/secureboot
-                while true; do
-                    case "$STATE" in
-                    1)
-                        # Allow the user to skip disabling Secure Boot.
-                        db_input high dkms/disable_secureboot || true
-                        ;;
-                    2)
-                        db_get dkms/disable_secureboot
-                        if [ "$RET" = "false" ]; then
-                            break
-                        fi
-
-                        db_input high dkms/secureboot_key || true
-                        db_input high dkms/secureboot_key_again || true
-                        ;;
-                    3)
-                        db_get dkms/secureboot_key
-                        key="$RET"
-                        db_get dkms/secureboot_key_again
-                        again="$RET"
-
-                        if [ "$key" != "$again" ]; then
-                            db_fset dkms/error/secureboot_key_mismatch seen false
-                            db_input critical dkms/error/secureboot_key_mismatch
-                            STATE=$(($STATE - 2))
-                        else
-                            length=`echo "$key" | wc -c`
-                            if [ $length -lt 8 ] || [ $length -gt 16 ]; then
-                                db_fset dkms/error/bad_secureboot_key seen false
-                                db_input critical dkms/error/bad_secureboot_key
-                                STATE=$(($STATE - 2))
-                            elif [ $length -ne 0 ]; then
-                                printf '%s\n%s\n' "$RET" "$RET" | mokutil --disable-validation >/dev/null || true
-                            fi
-                        fi
-
-                        # Always clear secureboot key.
-                        db_set dkms/secureboot_key ''
-                        db_fset dkms/secureboot_key seen false
-                        db_set dkms/secureboot_key_again ''
-                        db_fset dkms/secureboot_key_again seen false
-                        ;;
-                    *)
-                        break
-                        ;;
-                    esac;
-
-                    if db_go; then
-                        STATE=$(($STATE + 1))
-                    else
-                        STATE=$(($STATE - 1))
-                    fi
-                done
-                db_capb
-            fi
-        fi
-    fi
-}
-
 case "$1" in
   configure)
     . /usr/share/debconf/confmodule
@@ -800,7 +709,9 @@ case "$1" in
           fi
         done
 
-        setup_mok_validation
+        if type update-secureboot-policy >/dev/null 2>&1; then
+          update-secureboot-policy || true
+        fi
       ;;
 
       grub-ieee1275)

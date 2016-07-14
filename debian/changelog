@@ -1,3 +1,12 @@
+grub2 (2.02~beta2-36ubuntu3.1) xenial; urgency=medium
+
+  * debian/postinst.in: replace setup_mok_validation with a call to
+    update-secureboot-policy, a script shipped by shim-signed.
+    (LP: #1574727)
+  * debian/control: drop Depends on mokutil, we're not calling it directly.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 20 May 2016 15:04:00 -0400
+
 grub2 (2.02~beta2-36ubuntu3) xenial; urgency=medium
 
   * No-change rebuild to correctly build our unicode font against libfreetype6.
