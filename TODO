@@ -1,0 +1,43 @@
+QT:
+- detect what lang-packas-{kde,gnome} needs to be installed
+- add LanguageSelectorPkgCache.canInstall() to check during the click
+- move the error detection into generic code
+
+
+* Kinnison points pitti at u-d
+<sabdfl> mvo: there is a nice "mostly" status on a checkbox, that I think is your friend here
+<sabdfl> so when someone checks that, you try to install the packages
+<mvo> sabdfl: the inconsitent state? ok, I'll use this
+<sabdfl> if you don't have all of them, the status becomes "mostly"
+<mvo> ok
+<sabdfl> if you get all of it, then its checked
+<sabdfl> we need to figure out how to prompt for additional packages after install
+<sabdfl> have you worked with mdz on that?
+<sabdfl> i think a text file of needed packages would work
+<sabdfl> along with an update to the notifier that it checks there, and tells the user on login
+<sabdfl> that way, if the additional bits are not on the CD, or on a special archive the user provides, then the user will get prompted to try and install them when they can
+<sabdfl> if the user gets updates normally and the packages are available they should just be installed, no questions
+<Kamion> happy to make the installer integrate with any such facility; shouldn't be hard
+<sabdfl> no special questions
+<sabdfl> Kamion: cool
+
+* speed:
+  - currently _missingTranslationPkgs() is called too often and that means
+    and it iterates over the entire cache too often. it should be changed
+    so that it only goes over the cache *once* by changing it so that it
+    gets a list of translations we are interessted in
+* i18n:
+  - interface  
+  - all language names
+* make it more user friendly:
+  - add a "preview" when pressing "ok"
+  - add a message then the system is completed that you
+    need to login/logout
+
+sebi:
+* error dialogs: Ti si perhepas....
+* Not all transl ...
+* Software proper
+* "Lauch Synaptic" in broken software database
+* The·list·of·available·languages·on·the·system·has·been·updated.
+* lock: who has it
