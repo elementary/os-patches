@@ -1,3 +1,14 @@
+dkms (2.2.0.3-2ubuntu11.1) xenial; urgency=medium
+
+  * debian/patches/shim_secureboot_support.patch: move to using the script
+    update-secureboot-policy, which also has the benefit of being handled via
+    triggers, to avoid prompting users multiple times to disable Secure Boot
+    validation in shim. (LP: #1574727)
+  * debian/templates: remove secureboot templates; no templates left.
+  * debian/postinst: handle cleanup of the previous templates.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 18 May 2016 16:43:40 -0400
+
 dkms (2.2.0.3-2ubuntu11) xenial; urgency=medium
 
   * debian/patches/shim_secureboot_support.patch: (LP: #1558438)

@@ -4,6 +4,15 @@ set -e
 
 . /usr/share/debconf/confmodule
 
+if dpkg --compare-versions "$2" lt-nl "2.2.0.3-2ubuntu12~" ; then
+	db_unregister dkms/title/secureboot || true
+	db_unregister dkms/disable_secureboot || true
+	db_unregister dkms/secureboot_key_again || true
+	db_unregister dkms/secureboot_key || true
+	db_unregister dkms/error/bad_secureboot_key || true
+	db_unregister dkms/error/secureboot_key_mismatch || true
+fi
+
 if dpkg --compare-versions "$2" lt-nl "2.0.21.1-1~" ; then
 	if [ -e "/etc/modprobe.d/dkms" ]; then
 		md5sum=$(md5sum /etc/modprobe.d/dkms | sed -e 's/ .*//')
