@@ -99,7 +99,7 @@ enum
 };
 
 #define UNITY_GSETTINGS_SCHEMA "org.compiz.unityshell"
-#define UNITY_PROFILE_PATH "/org/compiz/profiles/unity/plugins/"
+#define UNITY_PROFILE_PATH "/org/compiz/profiles/%s/plugins/"
 #define UNITY_GSETTINGS_PATH UNITY_PROFILE_PATH"unityshell/"
 #define UNITY_ICONSIZE_KEY "icon-size"
 #define UNITY_LAUNCHERSENSITIVITY_KEY "edge-responsiveness"
@@ -1848,6 +1848,19 @@ on_scale_scroll_event (GtkWidget      *widget,
 
 /* </hacks> */
 
+static gchar *
+compiz_profile_gsettings_path (const gchar *path)
+{
+  const gchar *profile = "unity";
+
+  if (g_strcmp0 (g_getenv ("COMPIZ_CONFIG_PROFILE"), "ubuntu-lowgfx") == 0)
+    {
+      profile = "unity-lowgfx";
+    }
+
+  return g_strdup_printf (path, profile);
+}
+
 static void
 setup_unity_settings (CcAppearancePanel *self)
 {
@@ -1858,6 +1871,7 @@ setup_unity_settings (CcAppearancePanel *self)
   GtkScale* launcher_sensitivity_scale;
   GSettingsSchema *schema;
   GSettingsSchemaSource* source;
+  gchar *settings_path;
 
   source = g_settings_schema_source_get_default ();
   schema = g_settings_schema_source_lookup (source, UNITY_OWN_GSETTINGS_SCHEMA, TRUE);
@@ -1875,14 +1889,18 @@ setup_unity_settings (CcAppearancePanel *self)
   schema = g_settings_schema_source_lookup (source, UNITY_GSETTINGS_SCHEMA, TRUE);
   if (schema)
     {
-      priv->unity_settings = g_settings_new_with_path (UNITY_GSETTINGS_SCHEMA, UNITY_GSETTINGS_PATH);
+      settings_path = compiz_profile_gsettings_path (UNITY_GSETTINGS_PATH);
+      priv->unity_settings = g_settings_new_with_path (UNITY_GSETTINGS_SCHEMA, settings_path);
       g_settings_schema_unref (schema);
+      g_free (settings_path);
     }
   schema = g_settings_schema_source_lookup (source, COMPIZCORE_GSETTINGS_SCHEMA, TRUE);
   if (schema)
     {
-      priv->compizcore_settings = g_settings_new_with_path (COMPIZCORE_GSETTINGS_SCHEMA, COMPIZCORE_GSETTINGS_PATH);
+      settings_path = compiz_profile_gsettings_path (COMPIZCORE_GSETTINGS_PATH);
+      priv->compizcore_settings = g_settings_new_with_path (COMPIZCORE_GSETTINGS_SCHEMA, settings_path);
       g_settings_schema_unref (schema);
+      g_free (settings_path);
     }
 
   if (!priv->unity_settings || !priv->compizcore_settings || !priv->unity_own_settings || !priv->unity_launcher_settings)
