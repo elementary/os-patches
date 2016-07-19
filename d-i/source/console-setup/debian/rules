@@ -76,6 +76,13 @@ install-linux: build
 	dh_prep -p console-setup-linux
 	$(MAKE) etcdir=debian/console-setup-linux/etc \
 		prefix=debian/console-setup-linux/usr install-common-linux
+ifneq (,$(filter console-setup-linux, $(shell dh_listpackages)))
+	dh_installinit -pconsole-setup-linux \
+		--no-start --name setvtrgb -- start 49 S .
+	dh_link -pconsole-setup-linux
+	install -m 644 debian/vtrgb debian/console-setup-linux/etc/console-setup/
+	install -m 644 debian/vtrgb.vga debian/console-setup-linux/etc/console-setup/
+endif
 
 .PHONY : install-freebsd
 install-freebsd: build
@@ -100,12 +107,6 @@ install-main: build
 		usr/share/console-setup
 	dh_installinit -pconsole-setup \
 		--no-start --name console-font
-ifneq (,$(filter console-setup-linux, $(shell dh_listpackages)))
-	dh_installinit -pconsole-setup-linux \
-		--no-start --name setvtrgb
-	install -m 644 debian/vtrgb debian/console-setup-linux/etc/console-setup/
-	install -m 644 debian/vtrgb.vga debian/console-setup-linux/etc/console-setup/
-endif
 	$(MAKE) etcdir=debian/console-setup-mini/etc \
 		prefix=debian/console-setup-mini/usr install-common
 	$(MAKE) etcdir=debian/console-setup-mini/etc \
@@ -132,7 +133,8 @@ endif
 		usr/share/console-setup/
 	dh_link -pkeyboard-configuration usr/share/X11/xkb/rules/xorg.lst \
 		usr/share/doc/keyboard-configuration/xorg.lst
-	# no upstart job for keyboard-setup
+	dh_installinit -pkeyboard-configuration \
+		--no-start --name keyboard-setup -- start 49 S .
 	dh_installinit -pkeyboard-configuration \
 		--no-start --name console-setup -- start 49 S .
 	install -d debian/keyboard-configuration/usr/share/initramfs-tools/hooks \

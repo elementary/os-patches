@@ -1,3 +1,37 @@
+console-setup (1.108ubuntu15.2) xenial; urgency=medium
+
+  * Reorganize and correct console-setup, keyboard-setup and setvtrgb along the
+    lines of the logic in 16.04: (LP: #1591622, #1593156)
+    - debian/console-setup-linux.setvtrgb.service: don't require being run
+      before system-getty.slice.
+    - debian/keyboard-configuration.links: both console-setup and
+      keyboard-setup systemd units should be installed to sysinit.target rather
+      than multi-user.
+    - debian/keyboard-configuration.keyboard-setup.service: move loadkeys call
+      at local-fs-pre.target and in this more suitable location.
+    - debian/keyboard-configuration.console-setup.service: move to running
+      after the screen, keyboard, and filesystems are ready and set up all of
+      what may still need to be done to configure the virtual consoles
+      appropriately: set a final keymap, font, etc. 
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 16 Jun 2016 14:41:19 +0300
+
+console-setup (1.108ubuntu15.1) xenial; urgency=medium
+
+  * debian/console-setup-linux.setvtrgb.service: port the upstart job for
+    applying our preferred color settings to a systemd unit so it gets run.
+    This will fix debconf prompts on console being extra ugly. (LP: #1576893)
+  * debian/console-setup-linux.links: enable our setvtrgb service in sysinit.
+  * debian/keyboard-configuration.links: fix link source for console-setup
+    service. (LP: #1572697)
+  * debian/control: add dh-systemd to Build-Depends.
+  * debian/keyboard-configuration.keyboard-setup.service: also enable
+    keyboard-setup as a systemd service so we can have proper keymaps enabled
+    in VTs. (LP: #1579267)
+  * debian/keyboard-configuration.links: enable keyboard-setup service.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 29 Apr 2016 14:15:07 -0400
+
 console-setup (1.108ubuntu15) xenial; urgency=medium
 
   * Properly handle settings CODESET and FONSIZE when they equals 'guess' or are unset.

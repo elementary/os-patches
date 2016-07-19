@@ -1,3 +1,12 @@
+partman-base (187ubuntu2.1) xenial; urgency=medium
+
+  * On s390[x], Prevent using extended partitions on DASD drives that can
+    only hold 3 partitions. Parted doesn't have special knowledge about
+    that and claims that msdos partition table on DASD drives can hold
+    usual maximum number of partitions types. LP: #1595495.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 23 Jun 2016 12:06:00 +0100
+
 partman-base (187ubuntu2) xenial; urgency=medium
 
   [ Viktor Mihajlovski ]
