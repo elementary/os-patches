@@ -42,7 +42,7 @@ class ImConfig(object):
           or locale.getlocale(locale.LC_CTYPE)[0][:3] in ['zh_', 'ja_', 'ko_', 'vi_']:
             system_default = autoConfig
         else:
-            system_default = 'xim'
+            system_default = 'none'
         if systemConfig == 'default':
             system_conf = system_default
         elif os.path.exists('/etc/X11/xinit/xinputrc'):
