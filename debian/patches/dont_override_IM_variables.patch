@@ -1,0 +1,44 @@
+Description: Don't override IM variables
+ Honor values set by e.g. im-config, and with that give the users
+ the option to use fcitx or other framework.
+Bug: https://launchpad.net/bugs/1594681
+Origin: https://git.gnome.org/browse/gnome-settings-daemon/commit/?id=21a16d25d981f3ce34b764dbc8005dbf8edfbe97
+
+diff --git a/gnome-settings-daemon/gnome-settings-daemon-localeexec.in b/gnome-settings-daemon/gnome-settings-daemon-localeexec.in
+index eed91a4..1edb3d2 100755
+--- a/gnome-settings-daemon/gnome-settings-daemon-localeexec.in
++++ b/gnome-settings-daemon/gnome-settings-daemon-localeexec.in
+@@ -13,8 +13,8 @@ if [ -n "$REGION" ]; then
+ fi
+ 
+ if [ -x @prefix@/bin/ibus-daemon ]; then
+-  export QT_IM_MODULE=ibus
+-  export XMODIFIERS=@im=ibus
++  test -z "$QT_IM_MODULE" && export QT_IM_MODULE=ibus
++  test -z "$XMODIFIERS" && export XMODIFIERS=@im=ibus
+ fi
+ 
+ exec @libexecdir@/gnome-settings-daemon
+diff --git a/gnome-settings-daemon/main.c b/gnome-settings-daemon/main.c
+index 4d1140b..48d4bad 100644
+--- a/gnome-settings-daemon/main.c
++++ b/gnome-settings-daemon/main.c
+@@ -255,9 +255,16 @@ is_program_in_path (const char *binary)
+ static void
+ set_legacy_ibus_env_vars (GDBusProxy *proxy)
+ {
++	const char *p;
+         if (is_program_in_path ("ibus-daemon")) {
+-                set_session_env (proxy, "QT_IM_MODULE", "ibus");
+-                set_session_env (proxy, "XMODIFIERS", "@im=ibus");
++                p = getenv ("QT_IM_MODULE");
++                if (!p || !*p)
++                        p = "ibus";
++                set_session_env (proxy, "QT_IM_MODULE", p);
++                p = getenv ("XMODIFIERS");
++                if (!p || !*p)
++                        p = "@im=ibus";
++                set_session_env (proxy, "XMODIFIERS", p);
+         }
+ }
+ 
