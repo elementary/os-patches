@@ -1,0 +1,827 @@
+# debian/control is generated automatically from control.in by running the clean target
+Source: fcitx
+Section: utils
+Priority: optional
+Maintainer: IME Packaging Team <pkg-ime-devel@lists.alioth.debian.org>
+Uploaders: Aron Xu <aron@debian.org>, YunQiang Su <wzssyqa@gmail.com>
+Build-Depends: cmake,
+               debhelper (>= 9),
+               extra-cmake-modules,
+               gobject-introspection,
+               iso-codes,
+               qtbase5-dev,
+               libcairo2-dev (>= 1.0),
+               libenchant-dev,
+               libgettextpo-dev,
+               libgirepository1.0-dev,
+               libgtk-3-dev,
+               libgtk2.0-dev,
+               libicu-dev,
+               libkvm-dev [kfreebsd-any],
+               liblua5.2-dev | liblua5.1-0-dev,
+               libpango1.0-dev (>= 1.0),
+               libpresage-dev (>= 0.9.1-1.1~),
+               libqt4-dev,
+               libxkbfile-dev,
+               libxkbcommon-dev (>= 0.5.0~),
+               libxml2-dev,
+               x11proto-xinerama-dev
+Standards-Version: 3.9.6
+Homepage: https://github.com/fcitx/fcitx
+Vcs-Git: git://anonscm.debian.org/pkg-ime/fcitx.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-ime/fcitx.git
+
+Package: fcitx
+Architecture: all
+Depends: fcitx-bin, fcitx-data, fcitx-modules, ${misc:Depends}
+Recommends: fcitx-config-gtk | kde-config-fcitx,
+            fcitx-frontend-all | fcitx-frontend-fbterm,
+            fcitx-ui-classic | fcitx-ui-light,
+            im-config (>= 0.5) | im-switch
+Suggests: fcitx-m17n, fcitx-tools
+Description: Flexible Input Method Framework
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This metapackage pulls in a set of components recommended for most desktop
+ users.
+
+Package: fcitx-bin
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Recommends: fcitx-data, fcitx-modules
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Description: Flexible Input Method Framework - essential binaries
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the essential executable binaries. If you are
+ looking for a working input experience, please install the package
+ "fcitx" instead.
+
+Package: fcitx-data
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Recommends: fcitx-bin
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Description: Flexible Input Method Framework - essential data files
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the essential data files. If you are looking for a
+ working input experience, please install the package "fcitx" instead.
+
+Package: fcitx-libs
+Architecture: all
+Section: oldlibs
+Depends: libfcitx-config4 (>= ${source:Version}),
+         libfcitx-core0 (>= ${source:Version}),
+         libfcitx-utils0 (>= ${source:Version}),
+         ${misc:Depends}
+Recommends: libfcitx-gclient0 (>= ${source:Version}),
+            libfcitx-qt0 (>= ${source:Version}),
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
+
+Package: libfcitx-config4
+Architecture: any
+Section: libs
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.8.5-3)
+Breaks: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.8.5-3)
+Description: Flexible Input Method Framework - configuration support library
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package contains the library file:
+  * libfcitx-config - support library for Fcitx configurations
+
+Package: libfcitx-core0
+Architecture: any
+Section: libs
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.8.5-3)
+Breaks: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.8.5-3)
+Description: Flexible Input Method Framework - library of core funtions
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package contains the library file:
+  * libfcitx-core - core functions of Fcitx
+
+Package: libfcitx-utils0
+Architecture: any
+Section: libs
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.8.5-3)
+Breaks: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.8.5-3)
+Description: Flexible Input Method Framework - utility support library
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package contains the library file:
+  * libfcitx-utils - utility support library for Fcitx
+
+Package: fcitx-libs-gclient
+Architecture: all
+Section: oldlibs
+Depends: libfcitx-gclient0 (>= ${source:Version}), ${misc:Depends}
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.7)
+Breaks: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.7)
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
+
+Package: libfcitx-gclient0
+Architecture: any
+Section: libs
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version}),
+          fcitx-libs-gclient (<< 1:4.2.8.5-3)
+Breaks: fcitx (<< ${source:Upstream-Version}),
+        fcitx-libs-gclient (<< 1:4.2.8.5-3)
+Description: Flexible Input Method Framework - D-Bus client library for Glib
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package contains the following library:
+  * libfcitx-gclient - D-Bus client library for Glib
+
+Package: fcitx-libs-qt
+Architecture: all
+Section: oldlibs
+Depends: libfcitx-qt0 (>= ${source:Version}), ${misc:Depends}
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.7)
+Breaks: fcitx (<< ${source:Upstream-Version}), fcitx-libs (<< 1:4.2.7)
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
+
+Package: libfcitx-qt0
+Architecture: any
+Section: libs
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version}), fcitx-libs-qt (<< 1:4.2.8.5-3)
+Breaks: fcitx (<< ${source:Upstream-Version}), fcitx-libs-qt (<< 1:4.2.8.5-3)
+Description: Flexible Input Method Framework - Meta package for Qt library
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package contains the following library:
+  * libfcitx-qt - D-Bus client library for Qt
+
+Package: fcitx-libs-dev
+Architecture: any
+Section: libdevel
+Depends: fcitx-bin (>= ${source:Version}),
+         libfcitx-config4 (= ${binary:Version}),
+         libfcitx-core0 (= ${binary:Version}),
+         libfcitx-gclient0 (= ${binary:Version}),
+         libfcitx-qt0 (= ${binary:Version}),
+         libfcitx-utils0 (= ${binary:Version}),
+         ${misc:Depends}
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Description: Flexible Input Method Framework - library development files
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the library development files.
+
+Package: gir1.2-fcitx-1.0
+Architecture: any
+Section: introspection
+Depends: ${gir:Depends}, ${misc:Depends}
+Suggests: fcitx (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Description: Flexible Input Method Framework - GObject introspection
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package can be used by other packages using the GIRepository format to
+ generate dynamic bindings.
+
+Package: fcitx-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Multi-Arch: same
+Depends: libfcitx-config4 (= ${binary:Version}),
+         libfcitx-core0 (= ${binary:Version}),
+         libfcitx-gclient0 (= ${binary:Version}),
+         libfcitx-qt0 (= ${binary:Version}),
+         libfcitx-utils0 (= ${binary:Version}),
+         ${misc:Depends}
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Description: Flexible Input Method Framework - debugging symbols
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the debugging symbols of the whole Fcitx.
+
+Package: fcitx-ui-classic
+Architecture: any
+Depends: fcitx-module-x11, ${misc:Depends}, ${shlibs:Depends}
+Recommends: fcitx (>= ${source:Upstream-Version}), zenity | kdebase-bin
+Replaces: fcitx (<< ${source:Upstream-Version}),
+          fcitx-hangul (<< 0.3.0),
+          fcitx-unikey (<< 0.2.0)
+Breaks: fcitx (<< ${source:Upstream-Version}),
+        fcitx-hangul (<< 0.3.0),
+        fcitx-unikey (<< 0.2.0)
+Description: Flexible Input Method Framework - Classic user interface
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the classic user interface, which is suitable
+ for most users. It also provides the following skins:
+  * classic: Fcitx 3.x classic skin ported to new infrastructure
+  * dark: the dark skin fits for dark desktop theme
+  * default: the default skin
+
+Package: fcitx-frontend-all
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: fcitx-frontend-gtk2,
+            fcitx-frontend-gtk3,
+            fcitx-frontend-qt4,
+            fcitx-frontend-qt5
+Description: Flexible Input Method Framework - frontends metapackage
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This metapackage pulls in the following frontends:
+  * XIM protocol client
+  * GTK+ 2/3 IM Module
+  * QT 4 IM Module
+
+Package: fcitx-frontend-gtk2
+Architecture: any
+Depends: fcitx-module-dbus, ${misc:Depends}, ${shlibs:Depends}
+Recommends: fcitx-frontend-gtk3
+Description: Flexible Input Method Framework - GTK+ 2 IM Module frontend
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the GTK+ 2 IM Module frontend, which is
+ recommended for all desktop users.
+
+Package: fcitx-frontend-gtk3
+Architecture: any
+Depends: fcitx-module-dbus, ${misc:Depends}, ${shlibs:Depends}
+Recommends: fcitx-frontend-gtk2
+Description: Flexible Input Method Framework - GTK+ 3 IM Module frontend
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the GTK+ 3 IM Module frontend, which is
+ recommended for all desktop users. This is the best solution if you are
+ looking for a better input experience with GTK+ 3 applications.
+
+Package: fcitx-frontend-qt4
+Architecture: any
+Depends: fcitx-module-dbus, ${misc:Depends}, ${shlibs:Depends}
+Description: Flexible Input Method Framework - Qt4 IM Module frontend
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the QT 4 IM Module frontend, which is recommended
+ for KDE4 desktop users.
+
+Package: fcitx-pinyin
+Architecture: any
+Depends: fcitx-bin,
+         fcitx-data (>= ${source:Upstream-Version}),
+         fcitx-modules,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Recommends: fcitx
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Enhances: fcitx-table
+Description: Flexible Input Method Framework - classic Pinyin engine
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the classic Pinyin input method, which features
+ very short responding time by loading the whole dict into RAM during
+ activation.
+
+Package: fcitx-qw
+Architecture: any
+Depends: fcitx-bin,
+         fcitx-data (>= ${source:Upstream-Version}),
+         fcitx-modules,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Recommends: fcitx
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Description: Flexible Input Method Framework - QuWei engine
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the QuWei input method.
+
+Package: fcitx-table
+Architecture: any
+Depends: fcitx-bin,
+         fcitx-data (>= ${source:Upstream-Version}),
+         fcitx-modules,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Recommends: fcitx, fcitx-pinyin (>= ${source:Upstream-Version})
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Suggests: fcitx-table-all
+Description: Flexible Input Method Framework - table engine
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the table engine. By using this engine, Fcitx can
+ support a large number of table-based input methods such as Wubi,
+ WubiPinyin, etc.
+
+Package: fcitx-table-all
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: fcitx-table-bingchan,
+            fcitx-table-cangjie,
+            fcitx-table-dianbaoma,
+            fcitx-table-erbi,
+            fcitx-table-wanfeng,
+            fcitx-table-wbpy,
+            fcitx-table-wubi,
+            fcitx-table-ziranma
+Description: Flexible Input Method Framework - tables metapackage
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This metapackage pulls in tables shipped with Fcitx main program:
+  * Cangjie
+  * Dianbaoma
+  * Erbi
+  * Bingchan
+  * Wanfeng
+  * WubiPinyin
+  * Wubi
+  * Ziranma
+
+Package: fcitx-table-bingchan
+Architecture: all
+Depends: fcitx-table (>= 1:4.2.6), ${misc:Depends}
+Description: Flexible Input Method Framework - Bingchan table
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides Bingchan table used by the Fcitx table engine.
+
+Package: fcitx-table-cangjie
+Architecture: all
+Depends: fcitx-table (>= 1:4.2.6), ${misc:Depends}
+Description: Flexible Input Method Framework - Cangjie table
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides Cangjie table used by the Fcitx table engine.
+
+Package: fcitx-table-dianbaoma
+Architecture: all
+Depends: fcitx-table (>= 1:4.2.6), ${misc:Depends}
+Description: Flexible Input Method Framework - Dianbaoma table
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides Dianbaoma table used by the Fcitx table engine.
+
+Package: fcitx-table-erbi
+Architecture: all
+Depends: fcitx-table (>= 1:4.2.6), ${misc:Depends}
+Description: Flexible Input Method Framework - Erbi table
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides Erbi table used by the Fcitx table engine.
+
+Package: fcitx-table-wanfeng
+Architecture: all
+Depends: fcitx-table (>= 1:4.2.6), ${misc:Depends}
+Description: Flexible Input Method Framework - Wanfeng table
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides Wanfeng table used by the Fcitx table engine.
+
+Package: fcitx-table-wbpy
+Architecture: all
+Depends: fcitx-table (>= 1:4.2.6), ${misc:Depends}
+Description: Flexible Input Method Framework - WubiPinyin table
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides WubiPinyin table used by the Fcitx table engine.
+
+Package: fcitx-table-wubi
+Architecture: all
+Depends: fcitx-table (>= 1:4.2.6), ${misc:Depends}
+Description: Flexible Input Method Framework - Wubi table
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides Wubi table used by the Fcitx table engine.
+
+Package: fcitx-table-ziranma
+Architecture: all
+Depends: fcitx-table (>= 1:4.2.6), ${misc:Depends}
+Description: Flexible Input Method Framework - Ziranma table
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides Ziranma table used by the Fcitx table engine.
+
+Package: fcitx-modules
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}, libpresage1v5 (>= 0.9~)
+Recommends: fcitx,
+            fcitx-module-dbus,
+            fcitx-module-kimpanel,
+            fcitx-module-lua,
+            fcitx-module-x11
+Replaces: fcitx (<< ${source:Upstream-Version}),
+          fcitx-keyboard,
+          fcitx-module-quickphrase-editor (<< 1:4.2.8.3),
+          fcitx-modules-x11 (<< 1:4.2.7)
+Breaks: fcitx (<< ${source:Upstream-Version}),
+        fcitx-keyboard,
+        fcitx-module-quickphrase-editor (<< 1:4.2.8.3),
+        fcitx-modules-x11 (<< 1:4.2.7)
+Provides: fcitx-keyboard
+Description: Flexible Input Method Framework - core modules
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package includes the following common modules:
+  * autoeng: automatically change to English mode while inputing specific string
+  * chttrans: convert Simplified Chinese text to Traditional
+  * fullwidthchar: full-width character input support
+  * punc: punctuation conversion support
+  * quickphrase: conveniently input English or from user-defined simple table
+  * remote: change Fcitx state (deprecated, fcitx-remote uses D-Bus now)
+  * spell: spell check support
+  * keyboard: keyboard layout intergrate.
+
+Package: fcitx-module-dbus
+Architecture: any
+Multi-Arch: foreign
+Depends: fcitx-modules, ${misc:Depends}, ${shlibs:Depends}
+Description: Flexible Input Method Framework - D-Bus module and IPC frontend
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the D-Bus module and IPC interface which are directly
+ used by IM Modules and KIMPanel support for instance.
+
+Package: fcitx-module-x11
+Architecture: any
+Depends: fcitx-modules, ${misc:Depends}, ${shlibs:Depends}
+Description: Flexible Input Method Framework - X11 module and XIM frontend
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the X11 module, X11 utilities used by other addons
+ such as fcitx-ui-classic, and is required for all desktop users. An Xlibs
+ based virtual keyboard module has been also included in this package for
+ it's an obvious feature needed by many desktop users.
+ .
+ XIM frontend (client) is placed in this package too because of its nature
+ of being the basic input protocol supported by X.
+
+Package: fcitx-module-lua
+Architecture: any
+Depends: fcitx-modules, ${misc:Depends}, ${shlibs:Depends}
+Description: Flexible Input Method Framework - Lua module
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the Lua module, which enables users to extend their
+ usage with the Lua programming language.
+
+Package: fcitx-module-kimpanel
+Architecture: any
+Multi-Arch: foreign
+Depends: fcitx-module-dbus, ${misc:Depends}, ${shlibs:Depends}
+Replaces: fcitx (<< ${source:Upstream-Version}), fcitx-ui-kimpanel
+Provides: fcitx-ui-kimpanel
+Breaks: fcitx (<< ${source:Upstream-Version})
+Suggests: kdebase-bin, plasma-widgets-kimpanel
+Description: Flexible Input Method Framework - KIMPanel protocol module
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the KIMPanel protocol module of Fcitx, which
+ implements a protocol to talk with D-Bus and is usually needed by the
+ plugin for environments like KIMPanel/(Q)KIMToy, GNOME Shell and Unity.
+
+Package: fcitx-module-quickphrase-editor
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Suggests: fcitx-config-gtk | fcitx-config-gtk2 | kde-config-fcitx
+Description: Flexible Input Method Framework - Quick Phrase editor module
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the Quick Phrase Editor module for configuration tools
+ including fcitx-config-gtk and kde-config-fcitx.
+
+Package: fcitx-tools
+Architecture: any
+Depends: fcitx-bin (>= ${source:Upstream-Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Suggests: fcitx
+Replaces: fcitx (<< ${source:Upstream-Version})
+Breaks: fcitx (<< ${source:Upstream-Version})
+Description: Flexible Input Method Framework - various tools
+ Fcitx is a input method framework with extension support, which provides
+ an interface for entering characters of different scripts in applications
+ using a variety of mapping systems.
+ .
+ It offers a pleasant and modern experience, with intuitive graphical
+ configuration tools and customizable skins and mapping tables. It is
+ highly modularized and extensible, with GTK+ 2/3 and Qt4 IM Modules, support
+ for UIs based on Fbterm, pure Xlib, GTK+, or KDE, and a developer-friendly
+ API.
+ .
+ This package provides the following tools:
+  * createPYMB: create a Pinyin data file (.mb)
+  * mb2org: convert a .mb data file to .org file
+  * mb2txt: convert a .mb data file to text file
+  * readPYBase: read Pinyin base file
+  * readPYMB: read Pinyin data file (.mb)
+  * scel2org: convert scel data file (Sougou) to .org file
+  * txt2mb: convert text file to .mb data file

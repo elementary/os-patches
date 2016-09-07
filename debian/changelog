@@ -1,0 +1,788 @@
+fcitx (1:4.2.9.1-1ubuntu1) xenial; urgency=medium
+
+  * Install apparmor configuration (LP: #1509829)
+
+ -- Aron Xu <happyaron@ubuntu.com>  Tue, 22 Mar 2016 21:33:56 +0800
+
+fcitx (1:4.2.9.1-1) unstable; urgency=medium
+
+  * Imported Upstream version 4.2.9.1
+
+ -- Aron Xu <aron@debian.org>  Fri, 25 Dec 2015 14:36:11 +0800
+
+fcitx (1:4.2.9-5) unstable; urgency=medium
+
+  * Drop opencc support
+
+ -- Aron Xu <aron@debian.org>  Wed, 16 Dec 2015 01:34:48 +0800
+
+fcitx (1:4.2.9-4) unstable; urgency=medium
+
+  * Sourceful upload for libstdc++ transition of presage
+  * Add kdebase-bin as alternative to zenity (Closes: #792583)
+  * Update upstream homepage link
+
+ -- Aron Xu <aron@debian.org>  Mon, 12 Oct 2015 12:06:10 +0100
+
+fcitx (1:4.2.9-3) unstable; urgency=medium
+
+  * Add conffile handling
+
+ -- Aron Xu <aron@debian.org>  Wed, 23 Sep 2015 22:36:14 +0800
+
+fcitx (1:4.2.9-2) unstable; urgency=medium
+
+  * Move .desktop file to avoid unexpected autostart
+
+ -- Aron Xu <aron@debian.org>  Sun, 20 Sep 2015 17:52:24 +0800
+
+fcitx (1:4.2.9-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Aron Xu <aron@debian.org>  Wed, 03 Jun 2015 04:08:45 +0800
+
+fcitx (1:4.2.8.5-6) experimental; urgency=medium
+
+  * Remove empty lines
+  * Add libpresage1 to Depends of fcitx-modules
+
+ -- Aron Xu <aron@debian.org>  Thu, 12 Feb 2015 15:26:49 +0800
+
+fcitx (1:4.2.8.5-5) experimental; urgency=medium
+
+  * Declare fcitx-libs-* packages as transitional
+  * Move table files to arch:all
+  * Remove NoDisplay patch
+  * Update dep5 link in debian/copyright
+
+ -- Aron Xu <aron@debian.org>  Sun, 08 Feb 2015 22:51:37 +0800
+
+fcitx (1:4.2.8.5-4) experimental; urgency=low
+
+  * Add proper Breaks and Replaces (LP: #1387382)
+
+ -- Aron Xu <aron@debian.org>  Thu, 30 Oct 2014 07:22:35 +0800
+
+fcitx (1:4.2.8.5-3) experimental; urgency=low
+
+  * Add libfcitx-core0, libfcitx-config4, libfcitx-utils0, libfcitx-qt0, and
+    libfcitx-gclient0, existing fcitx-libs-* package are now metapackages.
+  * Update symbols file for libraries.
+  * Detect for GIR MultiArch status (Closes: #762832)
+  * Enable all hardening features.
+  * Enable parallel build.
+  * Disable building of static libraries.
+  * Update copyright file for better standard compliance.
+  * Std-ver: 3.9.5 -> 3.9.6
+
+ -- Aron Xu <aron@debian.org>  Sun, 26 Oct 2014 02:21:19 +0800
+
+fcitx (1:4.2.8.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * 0004-implement-set-im-by-name-if-there-is-no-focused-wind.patch:
+    - Dropped, merged upstream.
+
+ -- Aron Xu <aron@debian.org>  Sat, 20 Sep 2014 05:10:52 +0800
+
+fcitx (1:4.2.8.4-3) unstable; urgency=medium
+
+  * 0004-implement-set-im-by-name-if-there-is-no-focused-wind.patch:
+    - if the focus comes back to the original ic, the im will be set
+      eventually. this can be useful if GUI switcher grab the focus.
+
+ -- Aron Xu <aron@debian.org>  Sat, 23 Aug 2014 13:50:50 +0800
+
+fcitx (1:4.2.8.4-2) unstable; urgency=medium
+
+  * Fix FTBFS with GCC 4.9 (Closes: #746844)
+  * Force to use opencc
+
+ -- Aron Xu <aron@debian.org>  Mon, 02 Jun 2014 00:04:38 +0800
+
+fcitx (1:4.2.8.4-1) unstable; urgency=low
+
+  * New upstream bug fix release
+
+ -- Aron Xu <aron@debian.org>  Thu, 29 May 2014 17:40:38 +0800
+
+fcitx (1:4.2.8.3-3) unstable; urgency=low
+
+  * debian/patches/0004-add-a-context-variable-to-disable-punc.patch:
+    - Add a context variable to disable punc module.
+  * std-ver: 3.9.4 -> 3.9.5, no change required.
+
+ -- Aron Xu <aron@debian.org>  Tue, 11 Mar 2014 00:16:41 +0800
+
+fcitx (1:4.2.8.3-2) unstable; urgency=low
+
+  * fcitx-modules Breaks and Replaces
+     fcitx-module-quickphrase-editor (<< 1:4.2.8.3) (Closes: #729706)
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Sun, 17 Nov 2013 17:25:30 +0800
+
+fcitx (1:4.2.8.3-1) unstable; urgency=low
+
+  * New upstream bugfix release.
+
+ -- Aron Xu <aron@debian.org>  Fri, 15 Nov 2013 14:31:20 +0800
+
+fcitx (1:4.2.8.1-3) unstable; urgency=low
+
+  * Update dependency versions.
+  * fcitx-ui-classic: replaces and breaks fcitx-hangul (<< 0.3.0)
+    (Closes: #718644)
+
+ -- Aron Xu <aron@debian.org>  Sun, 04 Aug 2013 12:26:10 +0800
+
+fcitx (1:4.2.8.1-2) unstable; urgency=low
+
+  * Mark some inline symbols as optional in fcitx-libs-qt.
+  * fcitx-ui-classic: replaces and breaks fcitx-unikey (<< 0.2.0)
+    due to file move (Closes: #718314).
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Wed, 31 Jul 2013 00:31:25 +0800
+
+fcitx (1:4.2.8.1-1) unstable; urgency=low
+
+  * modify d/watch for new download site
+  * Imported Upstream version 4.2.8.1
+  * fcitx-scanner and fcitx-po-parser now installed to
+       usr/lib/*/fcitx/libexec/
+    comp-spell-dict also installed into usr/lib/*/fcitx/libexec
+  * Remove patches included upstream
+     - 0004-Upstream-post-release-changes.patch
+     - 0005-fix-bashism-problems.patch
+  * Update symbols for libs
+  * Install emoji.mb and latex.mb into package
+    fcitx-module-quickphrase-editor
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Mon, 29 Jul 2013 21:46:03 +0800
+
+fcitx (1:4.2.7-2) unstable; urgency=low
+
+  [ Wang Diancheng ]
+  * Disable debug messages, use Release build type
+
+  [ Aron Xu ]
+  * Add Breaks/Replaces to fcitx-libs-gclient (Closes: #700710)
+
+  [ YunQiang Su ]
+  * fix bashism problems (Closes: #701553, #701558)
+  * Remove FcitxQtInputMethodProxy::CreateIC from qt symbols (Closes: #701276)
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Thu, 28 Feb 2013 17:00:35 +0800
+
+fcitx (1:4.2.7-1) unstable; urgency=low
+
+  * New upstream release.
+  * New binary packages:
+    - fcitx-libs-gclient: D-Bus client library for Glib
+    - fcitx-libs-qt: D-Bus client library for Qt
+    - fcitx-module-quickphrase-editor: Quick Phrase editor module
+
+ -- Aron Xu <aron@debian.org>  Sun, 10 Feb 2013 17:03:56 +0800
+
+fcitx (1:4.2.6.1-1) experimental; urgency=low
+
+  * New upstream bug fix release.
+
+ -- Aron Xu <aron@debian.org>  Wed, 03 Oct 2012 22:33:51 +0800
+
+fcitx (1:4.2.6-1) experimental; urgency=low
+
+  * New upstream release. 
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Mon, 24 Sep 2012 20:16:40 +0800
+
+fcitx (1:4.2.5-1~exp) experimental; urgency=low
+
+  * New upstream release.
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Thu, 19 Jul 2012 19:25:18 +0800
+
+fcitx (1:4.2.4.1-3) unstable; urgency=low
+
+  * [UPSTREAM] 0004-fix-hk-dollar-punc.patch:
+    - Fix HK dollar punctuation (Closes: #681070).
+  * [UPSTREAM] 0005-fix-table-exactMatch-and-autocommit.patch:
+    - Fix auto commit of candidate word (Closes: #681071). 
+  * [UPSTREAM] 0006-fix-im-loading.patch:
+    - Fix the loading of input methods.
+  * [UPSTREAM] 0007-fix-message-resending-bug-and-log-format.patch:
+    - Fix resending problem, logging in consistent format.
+  * [UPSTREAM] 0008-fix-getopt_long.patch:
+    - Fix the use of getopt_long to avoid crash.
+
+ -- Aron Xu <aron@debian.org>  Mon, 16 Jul 2012 23:12:43 +0800
+
+fcitx (1:4.2.4.1-2) unstable; urgency=low
+
+  * Upstream patches
+    - icon fallback chain fix
+    - fix a memory overflow
+  * fix the section of gir1.2-fcitx-1.0 to introspection.
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Mon, 18 Jun 2012 17:20:32 +0800
+
+fcitx (1:4.2.4.1-1) unstable; urgency=low
+
+  [ Aron Xu ]
+  * Some small changes.
+  * Remove B-D that does not need to declare.
+
+  [ YunQiang Su ]
+  * Rebase to upstream bugfix release 4.2.4.1
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Mon, 11 Jun 2012 00:49:35 +0800
+
+fcitx (1:4.2.4-2) unstable; urgency=low
+
+  [ Aron Xu ]
+  * Various small changes.
+
+  [ YunQiang Su ]
+  * Disable huge .xsession-errors.
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Sat, 09 Jun 2012 14:39:39 +0800
+
+fcitx (1:4.2.4-1) unstable; urgency=low
+
+  * Import upstream release.
+     - fcitx-keyboard merged into fcitx-module-x11.
+     - Add gir1.2-fcitx-1.0 package.
+     - Install imicon/* to fcitx-data.
+     - Install imselector module to fcitx-modules.
+  * Drop patches merged into upstream: 
+     - 0001-dont-show-dialog-at-first-run.patch
+     - 0004-upstream-post-release-changes.patch
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Fri, 25 May 2012 02:43:02 +0800
+
+fcitx (1:4.2.3-2) unstable; urgency=low
+
+  * debian/patches/0004-upstream-post-release-changes.patch:
+    Add upstream fix for testpinyin, to avoid its segfaults.
+
+ -- Aron Xu <aron@debian.org>  Sat, 12 May 2012 01:37:19 +0800
+
+fcitx (1:4.2.3-1) unstable; urgency=low
+
+  * New upstream release:
+    - Lua extension support.
+    - Surrounding text support.
+    - Super key can be used in shortcuts, again.
+    - Update fcitx-pinyin algorithm.
+    - txt2mb and mb2txt support new English format
+    - Commit input when losing focus.
+    - Bug fixes and classic ui improvements.
+  * Add binary package: fcitx-module-lua
+  * Rename fcitx-ui-kimpanel to fcitx-module-kimpanel, related
+    package descriptions are modified.
+  * Enable Xinerama support for multi-head display.
+  * Improve dependency relations.
+  * Bump std-ver to 3.9.3 from 3.9.2, no change required.
+  * dh_install now called with --fail-missing
+
+ -- Aron Xu <aron@debian.org>  Sun, 06 May 2012 22:37:00 +0000
+
+fcitx (1:4.2.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * rm rec: kdebase-bin, sug: plasma-widgets-addons.
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Sun, 08 Apr 2012 14:46:08 +0800
+
+fcitx (1:4.2.1-2) unstable; urgency=low
+
+  * Install fcitx-quickphrase.desc
+
+ -- Aron Xu <aron@debian.org>  Sun, 25 Mar 2012 23:02:01 +0800
+
+fcitx (1:4.2.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/im-switch/fcitx:
+    - Change to QT_IM_MODULE from QT4_IM_MODULE to work around
+      im-switch bug.
+
+ -- Aron Xu <aron@debian.org>  Sat, 17 Mar 2012 15:59:56 +0800
+
+fcitx (1:4.2.0-1) unstable; urgency=low
+
+  * New upstream release:
+    - New API, with global context support.
+    - Allow first input method to be in Inactive status.
+    - Decrease memory usage of table engine and pinyin engine.
+    - Runtime replacement of existing instance.
+    - Improved table engine.
+  * Full Multi-Arch support:
+    - Co-installable libraries and IM Modules.
+    - Build-time dynamic Multi-Arch path and markup detection.
+
+ -- Aron Xu <aron@debian.org>  Sun, 05 Feb 2012 15:51:12 +0800
+
+fcitx (1:4.1.2-6) unstable; urgency=low
+
+  * debian/rules:
+    - Enable hardening build flags.
+  * debian/control:
+    - Rename fcitx-libs-dbg to fcitx-dbg.
+  * debian/patches:
+    - [UPSTREAM] Cherry-pick bug fixes from upstream master
+      (0010 0011 0012).
+
+ -- Aron Xu <aron@debian.org>  Fri, 03 Feb 2012 04:12:43 +0800
+
+fcitx (1:4.1.2-5) unstable; urgency=low
+
+  * debian/patches/02_dont_show_dialog_first_run.patch:
+    - Don't show dialog about immodules, which will confuse users,
+      while we use im-config.
+  * debian/patches/02_dbus_max_retry_times.patch:
+    -  MAX_RETRY_TIMES to 20 from 5
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Wed, 21 Dec 2011 22:01:57 +0800
+
+fcitx (1:4.1.2-4) unstable; urgency=low
+
+  [ Aron Xu ]
+  * Add NoDisplay=true to fcitx.desktop.in file.
+
+  [ YunQiang Su ]
+  * Improve the descriotion of fcitx-libs-dbg, as it contains
+    all debug symbols of the whole fcitx.
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Fri, 09 Dec 2011 00:09:43 +0800
+
+fcitx (1:4.1.2-3) unstable; urgency=low
+
+  * debian/patches/01-fix_input_percent_sign.patch:
+    - [UPSTREAM] Behave correctly when meet percent sign (%).
+  * debian/patches/01-run_posix_shell_script.patch:
+    - [UPSTREAM] Change from bash to sh.
+  * debian/control:
+    + Recommend to install all available IM Modules.
+    + Improve descriptions (Closes: #643004).
+      Thanks to debian-l10n-en, especially Justin B Rye.
+    + Recommend to install im-config (>= 0.5), since version 0.5
+      has the correct setup for complex situation of IM Modules.
+    - Lower plasma-widget-addons to Suggests for fcitx-ui-kimpanel,
+      in favor of the usage of this module in gnome-shell and unity.
+
+ -- Aron Xu <aron@debian.org>  Sat, 19 Nov 2011 00:23:14 +0800
+
+fcitx (1:4.1.2-2) unstable; urgency=low
+
+  [ YunQiang Su ]
+  * Install usr/share/fcitx/configdesc/fcitx-xim.desc
+    into fcitx-module-x11.
+  * Install usr/share/fcitx/configdesc/fcitx-chttrans.desc
+    into fcitx-modules.
+  * debian/patches/01-fix_wm_class_setting.patch:
+    - [UPSTREAM] Fix wm_class setting to  make it work better with
+      gnome-shell, the tray can displayed as system status icon now.
+
+  [ Aron Xu ]
+  * debian/patches/01-dont_fileter_all_release_events.patch:
+    - [UPSTREAM] Don't filter all release events.
+  * debian/patches/01-fix-duplicate-entry.patch:
+    - [UPSTREAM] Add a return to avoid duplicate entry.
+  * debian/im-switch/fcitx: use QT4_IM_MODULE instead of QT_IM_MODULE.
+  * debian/control: 
+    + Recommends to install both GTK2/3 IM Modules.
+
+ -- YunQiang Su <wzssyqa@gmail.com>  Wed, 05 Oct 2011 19:00:56 +0800
+
+fcitx (1:4.1.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add libkvm-dev [kfreebsd-any] to Build-Depends.
+
+ -- Aron Xu <aron@debian.org>  Sun, 02 Oct 2011 23:45:53 +0800
+
+fcitx (1:4.1.1-1) unstable; urgency=low
+
+  * New upstream major release.
+    - Highly modularized.
+    - Ship with GTK+ 2/3 and QT4 IM Modules. (Closes: #518703)
+  * debian/control:
+    - Use my @debian.org email address.
+    - Remove ygh@debian.org from Uploaders list (Closes: #629019)
+    - Adjust Build-Depends to fit new release.
+    - Reorganize binary packages.
+    - Provide im-config and im-switch compatibility.
+  * debian/compat:
+    - Set compatibility level to 8.
+  * debian/rules:
+    - Adjust to fit new CMake based build system.
+    - Detect Multi-Arch status of GTK2/3 and QT4.
+  * debian/patches:
+    - All removed, merged upstream.
+  * debian/copyright:
+    - Update to current DEP-5 specification, update for new release files.
+  * debian/im-switch/fcitx:
+    - Update to set all supported IM_MODULES to fcitx.
+  * debian/README.*:
+    - Added to describe some detail information about the package.
+
+ -- Aron Xu <aron@debian.org>  Wed, 21 Sep 2011 09:48:38 +0800
+
+fcitx (1:4.0.1-6) unstable; urgency=low
+
+  * debian/control:
+    + Bump std-ver: 3.9.2.
+    + Change VCS-* to new Git repository.
+  * debian/fcitx.install:
+    - Wipe out unneeded *.la / emptying dependency_libs, 
+      per Policy 10.2 (Closes: # 621217).
+  * debian/watch:
+    - Updated to avoid inclusion of versions like "4.0.1_all".
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Sat, 09 Apr 2011 15:03:33 +0800
+
+fcitx (1:4.0.1-5) unstable; urgency=low
+
+  * Correct the priority of xinput.d entries.
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Mon, 21 Mar 2011 18:41:03 +0800
+
+fcitx (1:4.0.1-4) unstable; urgency=low
+
+  * Change fcitx-data from all to any, since this can avoid endianness
+    problems.
+  * Use dh-autoreconf to avoid untidy build directory.
+  * Install xinput.d entry for new locales other than zh_CN:
+     ja_JP fcitx 40
+     ko_KR fcitx 40
+     zh_CN fcitx 80
+     zh_TW fcitx 50
+     zh_HK fcitx 50
+     zh_SG fcitx 80
+    The difference of priorities are set because of user preferences
+    and support status of fcitx to these languages. 
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Thu, 10 Mar 2011 00:42:45 +0800
+
+fcitx (1:4.0.1-3) unstable; urgency=low
+
+  * debian/control:
+    + Add multiple Replaces/Breaks: fcitx (<< 1:4.0.0) (Closes: # 613022)
+  * debian/patches/debian-ftbfs-609776.patch:
+    + Really build on Hurd.
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Sat, 12 Feb 2011 19:03:26 +0800
+
+fcitx (1:4.0.1-2) unstable; urgency=medium
+
+  * debian/patches/debian-ftbfs-609776.patch:
+    - Make it build on kfreebsd and hurd. (Closes: #609776)
+  * debian/rules:
+    - Run autoreconf becore dh_auto_configure, this is a temporary
+      workaround bypassing the libtool error caused by patching
+      configure{,in}, and will be removed in next upstream release.
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Fri, 14 Jan 2011 00:38:27 +0800
+
+fcitx (1:4.0.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control: 
+    - Remove binutils-gold from build-dep, most archs doesn't have it.
+    - Remove automake and autoconf from build-dep, not needed now.
+    - Add DM-Upload-Allowed.
+  * debian/patches/ :
+    - Remove patches because upstream has applied them.
+  * debian/rules:
+    - Get back dh_auto_test.
+    - Don't run autoreconf.
+    - Pass parameter --enable-recording.
+  * debian/fcitx.install and debian/fcitx.doc-base:
+    - Remove fcitx4.pdf since removed from tarball by upstream.
+  * debian/fcitx.doc-base:
+    - Fix doc-base error by listing files in one line.
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Fri, 17 Dec 2010 18:56:00 +0800
+
+fcitx (1:4.0.0-1) unstable; urgency=low
+
+  * New upstream major release:
+    - Get rid of unsafe environment variable usage. (Closes: #430420)
+    - Create config file if not exist; Tray icon refresh background. 
+      (Closes: #571588)
+    - Use utf-8 config file with English options.
+    - Fixe input problem in OpenOffice.org. (LP: #261382, LP: #238309)
+  * debian/control:
+    - Update to a new set of Build-Dep packages.
+    - Improve descriptions.
+    - Remove fonts from Recommends since fcitx can detect system font now.
+      (Closes: #584307, LP: #482564)
+    - Split package into 12. 
+    - Use binutils-gold.
+  * debian/rules: 
+    - Set LDFLAGS="-Wl,--as-needed".
+  * debian/Makefile, debian/Makefile.am, debian/Makefile.in,
+    source.lintian-overrides, README, README.Debian: Remove.
+  * debian/copyright: Rewrite.
+  * debian/patches/binutils-gold.patch: 
+    - Remove, for upstream has accepted it.
+  * debian/patches/1ca5ac8c5b.patch:
+    - Fix desc.po problem and do not distclean tarball files.
+      (Backport from upstream 1ca5ac8c5b commit.)
+  * debian/docs: Install upstream textual files.
+  * debian/clean: Clean autoreconf generated files.
+  * debian/fcitx.doc-base, debian/fcitx-table-wubi.doc-base: 
+    - Add doc-base entries.
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Fri, 25 Nov 2010 21:33:23 +0800
+
+fcitx (1:3.6.4-1) unstable; urgency=low
+
+  [ Aron Xu ]
+  * New upstream release:
+    - Change data/pyPhrase.py to avoid copyright problem.
+  * Change Maintainer field to IME Packaging Team, move original
+    maintainer to Uploaders, add myself to Uploaders.
+  * debian/rules:
+    - Update to use upstream autogen.sh, since autoreconf isn't enough now.
+  * debian/fcitx.doc-base.EX: Removed, will add back in 4.0.0 release.
+  * debian/source.lintian-overrides: Removed.
+
+  [ LI Daobing ]
+  * debian/watch: updated.
+  * debian/control:
+    - add Vcs-* fields.
+    - add wqy fonts to depends (Closes: #584307)
+    - bump standards version to 3.9.1.
+
+ -- Aron Xu <happyaron.xu@gmail.com>  Fri, 19 Nov 2010 14:44:31 +0800
+
+fcitx (1:3.6.3-1) unstable; urgency=low
+
+  * new upstream release.
+  * change to 3.0 (quilt) format.
+  * debian/control:
+    - bump standards version to 3.8.4.
+    - build depends on debhelper > 7.0.50~
+  * debian/patches/binutils-gold.patch: Fix "FTBFS with binutils-gold"
+    (Closes: #554282)
+  * debian/rules: run autoreconf before configure
+  * debian/clean: updated.
+
+ -- LI Daobing <lidaobing@debian.org>  Mon, 22 Feb 2010 21:00:56 +0800
+
+fcitx (1:3.6.2-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Fri, 09 Oct 2009 19:29:06 +0800
+
+fcitx (1:3.6.1-1) unstable; urgency=low
+
+  * new upstream release.
+  * debian/control:
+    - add me to Uploader.
+    - add libxtst-dev to Build-Depends.
+    - bump standards version to 3.8.3.
+  * debian/rules:
+    - updated, no longer need to call autogen.sh
+  * debian/clean: updated.
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 24 Sep 2009 23:03:16 +0800
+
+fcitx (1:3.6.0~rc-0.1) unstable; urgency=low
+
+  * Non-maintainer upload (with the bless of the origin maintainer).
+  * new upstream release.
+  * debian/watch: rewrite.
+  * debian/control:
+    - bump standards version to 3.8.1.
+    - bump debhelper version to 7.
+    - add ${misc:Depends} to depends.
+    - add automake and autoconf to build-depends.
+  * debian/compat:
+    - bump debhelper version to 7.
+  * debian/fcitx.lintian-overrides: added.
+  * debian/source.lintian-overrides: added. 
+  * debian/rules: rewrite with debhelper 7.
+  * debian/clean: added. 
+  * debian/fcitx.install: added, install im-switch.
+  * debian/dirs: remove usr/share/fcitx/xpm.
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 23 Apr 2009 23:21:13 +0800
+
+fcitx (1:3.4.99+svn163-0ubuntu1) jaunty; urgency=low
+
+  * New upstream svn snapshot, upstream will release
+    3.5 soon, so need more feedbacks.
+  * Change Homepage to where the project is being hosted now.
+  * Replace the old arphic fonts in Recommends.
+  * Use QT_IM_MODULE=xim in im-switch conffile.
+
+ -- Zhengpeng Hou <zhengpeng-hou@ubuntu.com>  Sun, 07 Dec 2008 12:30:20 +0000
+
+fcitx (1:3.4.3-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  [ LI Daobing ]
+  * fix lintian error:
+    - build-depends-on-obsolete-package build-depends: x-dev
+    - declares-possibly-conflicting-debhelper-compat-versions rules=5 compat=5
+  * fix im-switch conf file (Closes: #454363)
+  [ Barry deFreese ]
+  * Make clean not ignore errors.
+  * Add copyright holders in debian/copyright.
+  * Add watch file.
+  * Add Homepage in source stanza.
+  * Bump Standards Version to 3.8.0. (No changes needed).
+
+ -- Barry deFreese <bdefreese@debian.org>  Wed, 19 Nov 2008 12:31:10 -0500
+
+fcitx (1:3.4.3-1) unstable; urgency=medium
+
+  * New upstream release
+  * Fixed bad recommends fonts name. (Closes:Bug#379098) 
+  * Fixed wubi crash. Thanks for Bin Tian's report and fix. (Closes:Bug#409999)
+
+ -- Yu Guanghui <ygh@debian.org>  Wed,  7 Feb 2007 14:01:15 +0800
+
+fcitx (1:3.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yu Guanghui <ygh@debian.org>  Fri, 29 Sep 2006 22:12:32 +0800
+
+fcitx (1:3.3.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yu Guanghui <ygh@debian.org>  Thu, 14 Sep 2006 21:12:01 +0800
+
+fcitx (1:3.2.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yu Guanghui <ygh@debian.org>  Thu,  6 Jul 2006 01:13:46 +0800
+
+fcitx (3.2.060108-3) unstable; urgency=low
+
+  * Modify fcitx scrip for Qt/KDE  
+
+ -- Yu Guanghui <ygh@debian.org>  Sun, 30 Apr 2006 13:40:34 +0800
+
+fcitx (3.2.060108-2) unstable; urgency=low
+
+  * Add missing dependency libxpm-dev. Closes: #364670 
+
+ -- Yu Guanghui <ygh@debian.org>  Tue, 25 Apr 2006 12:20:52 +0800
+
+fcitx (3.2.060108-1) unstable; urgency=high
+
+  * New upstream release
+  * Fixed RC bug. Closes: #357551
+  * Add im-switch support. Thank Hou ZhengPeng <zhengpeng.hou@gmail.com>'s
+    patch. Closes: #314743
+  * Move Arphic fonts to Recommanded. Maybe it's time to packages other
+    free chinese fonts. Closes: #293624
+
+ -- Yu Guanghui <ygh@debian.org>  Mon, 24 Apr 2006 22:38:26 +0800
+
+fcitx (3.1.1-1.1) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * High-urgency upload for RC bugfix.
+  * Build-depend on libx11-dev, libxft-dev, and x-dev instead of on the
+    obsolete xlibs-dev; thanks to Justin Pryzby <justinpryzby@users.sf.net>
+    for testing.  Closes: #346744.
+  * Re-run autoconf to pick up a version of AC_PATH_X that doesn't depend on
+    libxt-dev.  Also add AM_MAINTAINER_MODE to configure.in, which seems to
+    have been left out previously.
+
+ -- Steve Langasek <vorlon@debian.org>  Fri, 20 Jan 2006 08:03:06 -0800
+
+fcitx (3.1.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yu Guanghui <ygh@debian.org>  Wed,  6 Apr 2005 16:30:47 +0800
+
+fcitx (3.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yu Guanghui <ygh@debian.org>  Wed, 23 Mar 2005 16:05:18 +0800
+
+fcitx (3.0.3-1) unstable; urgency=low
+
+  * New upstream release (Closes:Bug#285461)
+  * Remove wrong installed file. (Closes:Bug#281718,Bug#284538)
+
+ -- Yu Guanghui <ygh@debian.org>  Sun,  2 Jan 2005 13:50:18 +0800
+
+fcitx (3.0.0-1) unstable; urgency=low
+
+  * New upstream release (Closes:Bug#270422)
+
+ -- Yu Guanghui <ygh@debian.org>  Tue, 7 Sep 2004 21:49:36 +0800
+
+fcitx (2.0.2-3) unstable; urgency=low
+
+  * Sorry, Oops. Forgot one, Fixed again. (Closes:Bug#250423)
+
+ -- Yu Guanghui <ygh@debian.org>  Fri, 11 Jun 2004 01:58:36 +0800
+
+fcitx (2.0.2-2) unstable; urgency=low
+
+  * Fixed 64bit platforms error. Thanks Andreas Jochens <aj at 
+    andaco.de>'s patch. (Closes:Bug#250423)
+
+ -- Yu Guanghui <ygh@debian.org>  Thu, 10 Jun 2004 21:37:04 +0800
+
+fcitx (2.0.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yu Guanghui <ygh@debian.org>  Mon, 10 May 2004 11:14:08 +0800
+
+fcitx (2.0.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Wang WenRui <wangwr@ustc.edu>  Fri,  9 Jan 2004 22:25:38 +0800
+
+fcitx (2.0-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Su Yong <yoyosu@ustc.edu.cn>  Thu,  8 Jan 2004 20:19:34 +0800
+
+fcitx (1.8.5-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yu Guanghui <ygh@debian.org>  Fri, 23 May 2003 00:43:04 +0800
+
+fcitx (1.8.4-3) unstable; urgency=low
+
+  * Fixed build error on arch without SIGUNUSED.
+
+ -- Yu Guanghui <ygh@debian.org>  Thu,  8 May 2003 11:18:28 +0800
+
+fcitx (1.8.4-2) unstable; urgency=low
+
+  * Remove gbk fonts.
+  * minor fixes.
+  * Just found it in wnpp, close it. (Closes:Bug#189271)
+
+ -- Yu Guanghui <ygh@debian.org>  Sat,  3 May 2003 15:56:54 +0800
+
+fcitx (1.8.4-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Yu Guanghui <ygh@debian.org>  Sat,  3 May 2003 14:24:40 +0800
+
+Local variables:
+mode: debian-changelog
+End:

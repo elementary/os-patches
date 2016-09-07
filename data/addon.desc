@@ -1,0 +1,85 @@
+[Addon/Name]
+Type=String
+Description=Name
+
+[Addon/GeneralName]
+Type=I18NString
+Description=Name that can be display in UI
+DefaultValue=
+
+[Addon/Comment]
+Type=I18NString
+Description=Comment
+DefaultValue=
+
+[Addon/Category]
+Type=Enum
+EnumCount=4
+Enum0=InputMethod
+Enum1=Frontend
+Enum2=Module
+Enum3=UI
+Description=Category
+
+[Addon/Enabled]
+Type=Boolean
+DefaultValue=True
+Description=Enabled
+
+[Addon/Library]
+Type=String
+Description=Library
+
+[Addon/Type]
+Type=Enum
+EnumCount=2
+Enum0=SharedLibrary
+Enum1=DBus
+Description=Type
+
+[Addon/Dependency]
+Type=String
+DefaultValue=
+Description=Dependency
+
+[Addon/Priority]
+Type=Integer
+DefaultValue=50
+Description=Priority of addon
+
+[Addon/SubConfig]
+Type=String
+DefaultValue=
+Description=Sub Configuration for Module
+
+[Addon/IMRegisterMethod]
+Type=Enum
+DefaultValue=Self
+Description=Register IM
+EnumCount=3
+Enum0=Self
+Enum1=Exec
+Enum2=ConfigFile
+
+[Addon/IMRegisterArgument]
+Type=String
+DefaultValue=
+Description=Argument for InputMethod Register
+
+[Addon/UIFallback]
+Type=String
+DefaultValue=
+Description=Fallback UI Addon
+
+[Addon/LoadLocal]
+Type=Boolean
+DefaultValue=False
+Description=Use RTLD_LOCAL to load library
+
+[Addon/Advance]
+Type=Boolean
+DefaultValue=False
+Description=Do not show in GUI
+
+[DescriptionFile]
+LocaleDomain=fcitx

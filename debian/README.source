@@ -1,0 +1,12 @@
+fcitx for Debian
+----------------
+
+All .mb files are placed into arch-dependent packages because by generating
+those binary data files on every architecture, we can avoid endianness problems.
+Lintian overrides have been added for packages that lintian says they have
+large /usr/share.
+
+Libraries are placed in a single package because they are going to be used at
+the same time by design, so an override for package name does not match soname
+has been added. Symbols exportation are controled with upstream, another override
+is present for this.

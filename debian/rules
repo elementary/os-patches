@@ -1,0 +1,47 @@
+#!/usr/bin/make -f
+include debian/variables.mk
+include debian/gencontrol.mk
+%:
+	dh $@ --parallel --with gir
+override_dh_auto_clean: gen_control
+	dh_auto_clean
+override_dh_auto_configure: gen_control
+	dh_auto_configure -- \
+	    -DCMAKE_BUILD_TYPE=Release \
+	    -DLIB_INSTALL_DIR=/usr/lib/$(DEB_HOST_MULTIARCH) \
+	    -DSYSCONFDIR=/etc \
+	    -DENABLE_X11=ON \
+	    -DENABLE_GLIB2=ON \
+	    -DENABLE_CAIRO=ON \
+	    -DENABLE_DBUS=ON \
+	    -DENABLE_PANGO=ON \
+	    -DENABLE_LIBXML2=ON \
+	    -DENABLE_DEBUG=OFF \
+	    -DENABLE_PINYIN=ON \
+	    -DENABLE_TABLE=ON \
+	    -DENABLE_GTK2_IM_MODULE=ON \
+	    -DENABLE_GTK3_IM_MODULE=ON \
+	    -DENABLE_QT=ON \
+	    -DENABLE_QT_IM_MODULE=ON \
+	    -DENABLE_QT_GUI=ON \
+	    -DENABLE_LUA=ON \
+	    -DENABLE_STATIC=OFF \
+	    -DENABLE_TEST=ON \
+	    -DENABLE_SNOOPER=ON \
+	    -DENABLE_GIR=ON \
+	    -DENABLE_ENCHANT=ON \
+	    -DENABLE_PRESAGE=ON \
+	    -DENABLE_ICU=ON \
+	    -DENABLE_BACKTRACE=ON \
+	    -DENABLE_XDGAUTOSTART=ON \
+	    -DENABLE_GETTEXT=ON
+override_dh_install:
+	dh_install --fail-missing
+override_dh_makeshlibs:
+	dh_makeshlibs -plibfcitx-core0
+	dh_makeshlibs -plibfcitx-config4
+	dh_makeshlibs -plibfcitx-utils0
+	dh_makeshlibs -plibfcitx-qt0
+	dh_makeshlibs -plibfcitx-gclient0
+override_dh_strip:
+	dh_strip --dbg-package=fcitx-dbg

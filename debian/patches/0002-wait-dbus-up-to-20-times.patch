@@ -1,0 +1,21 @@
+From: YunQiang Su <wzssyqa@gmail.com>
+Date: Fri, 20 Jul 2012 18:00:58 +0800
+Subject: wait dbus up to 20 times
+
+---
+ src/module/dbus/dbusstuff.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/module/dbus/dbusstuff.c b/src/module/dbus/dbusstuff.c
+index 1ff1770..9cdb4b4 100644
+--- a/src/module/dbus/dbusstuff.c
++++ b/src/module/dbus/dbusstuff.c
+@@ -45,7 +45,7 @@ typedef struct _FcitxDBus {
+ } FcitxDBus;
+ 
+ #define RETRY_INTERVAL 2
+-#define MAX_RETRY_TIMES 5
++#define MAX_RETRY_TIMES 20
+ 
+ static void* DBusCreate(FcitxInstance* instance);
+ static void DBusSetFD(void* arg);

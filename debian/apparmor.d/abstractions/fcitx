@@ -1,0 +1,16 @@
+# vim:syntax=apparmor
+# Profile abstraction for allowing fcitx to run in enforced environment
+# Author: Jamie Strandboge <jamie@canonical.com>
+
+# Requires apparmor 2.9
+
+  include <abstractions/dbus-session>
+
+  /usr/bin/fcitx ix,
+  /tmp/fcitx-socket-* rwl,
+  /dev/shm/* rwl,
+
+  /usr/bin/fcitx-qimpanel ix,
+  /usr/bin/sogou-qimpanel-watchdog ix,
+  /usr/bin/sogou-sys-notify ix,
+  /tmp/sogou-qimpanel:* rwl,

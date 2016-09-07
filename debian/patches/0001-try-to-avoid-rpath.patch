@@ -1,0 +1,25 @@
+From: Aron Xu <aron@debian.org>
+Date: Sat, 4 Feb 2012 17:00:58 +0800
+Subject: try to avoid rpath
+
+---
+ CMakeLists.txt | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 54c9ee4..9165f1a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -220,12 +220,6 @@ set(localedir ${CMAKE_INSTALL_PREFIX}/share/locale)
+ 
+ list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${LIB_INSTALL_DIR}" _isSystemPlatformLibDir)
+ list(FIND CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "${LIB_INSTALL_DIR}" _isSystemCxxLibDir)
+-if("${_isSystemPlatformLibDir}" STREQUAL "-1" AND "${_isSystemCxxLibDir}" STREQUAL "-1")
+-    set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+-    set(CMAKE_INSTALL_RPATH "${LIB_INSTALL_DIR}")
+-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+-endif("${_isSystemPlatformLibDir}" STREQUAL "-1" AND "${_isSystemCxxLibDir}" STREQUAL "-1")
+ 
+ # For FcitxMacro
+ set(FCITX4_ADDON_INSTALL_DIR ${addondir})

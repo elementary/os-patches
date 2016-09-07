@@ -1,0 +1,35 @@
+.TH FCITX 1 "2010-12-16"
+.SH NAME
+fcitx-remote \- Tool for control fcitx state via console
+.SH SYNOPSIS
+.B fcitx-remote
+[\fIOPTION\fR]
+.SH OPTIONS
+.TP
+\fB\-c\fR
+inactivate input method
+.TP
+\fB\-o\fR
+activate input method
+.TP
+\fB\-r\fR
+reload fcitx config
+.TP
+\fB\-t\fR
+switch between active/inactive
+.TP
+\fB\-s\fI imname\fR
+switch to the input method uniquely identified by \fIimname\fR
+.TP
+[\fIno option\fR]
+display fcitx state, 0 for close, 1 for inactive, 2 for active
+.TP
+\fB\-h\fR
+display help and exit
+.SH FILES
+fcitx will create socket at \fI/tmp/fcitx-socket-<displayname>\fR, so user must have permission to access \fI/tmp\fR folder.
+.SH SEE ALSO
+Please see the homepage at
+.BR http://www.fcitx.org/
+and
+.BR http://fcitx.googlecode.com/
