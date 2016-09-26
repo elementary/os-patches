@@ -1,0 +1,26 @@
+From 00114cbc0a1f8c0aa5143808205d1a7cc9e58d3b Mon Sep 17 00:00:00 2001
+From: Simone Caronni <negativo17@gmail.com>
+Date: Thu, 18 Sep 2014 13:37:48 +0200
+Subject: [PATCH 01/23] Parallel depmod failure
+
+
+---
+ dkms | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dkms b/dkms
+index f97037b0b30b..e78588933669 100644
+--- a/dkms
++++ b/dkms
+@@ -3241,7 +3241,7 @@ autoinstall() {
+         for mv in "${to_install[@]}"; do
+             IFS=/ read m v <<< "$mv"
+             if [[ -z "${build_depends[$m]}" ]]; then
+-                (module="$m"; module_version="$v"; install_module) &
++                (module="$m"; module_version="$v"; install_module)
+                 installed_modules[${#installed_modules[@]}]="$m"
+                 install_count=$(($install_count +1))
+             else
+-- 
+2.9.0.244.g00fa316
+
