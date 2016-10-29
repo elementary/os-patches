@@ -1,0 +1,26 @@
+Author: Jamie Strandboge <jamie@canonical.com>
+Description: ibus-daemon by default uses a unix socket name of /tmp/dbus-...
+ that is indistinguishable from dbus-daemon abstract sockets. While dbus-daemon
+ has AppArmor mediation, ibus-daemon does not so it is important that its
+ abstract socket not be confused with dbus-daemon's. By modifying ibus-daemon's
+ start arguments to use "--address 'unix:tmpdir=/tmp/ibus'" AppArmor can
+ continue mediating DBus abstract sockets like normal and also mediate access
+ to the ibus-daemon-specific abstract socket via unix rules.
+Bug-Ubuntu: https://launchpad.net/bugs/1580463
+Forwarded: no
+
+Index: im-config-0.29/data/21_ibus.rc
+===================================================================
+--- im-config-0.29.orig/data/21_ibus.rc
++++ im-config-0.29/data/21_ibus.rc
+@@ -2,8 +2,8 @@
+ # vim: set sts=4 expandtab:
+ 
+ if [ "$IM_CONFIG_PHASE" = 2 ]; then
+-# start IBus daemon
+-/usr/bin/ibus-daemon --daemonize --xim
++# start IBus daemon with ibus-specific unix:tmpdir
++/usr/bin/ibus-daemon --daemonize --xim --address 'unix:tmpdir=/tmp/ibus'
+ fi
+ 
+ if [ "$IM_CONFIG_PHASE" = 1 ]; then

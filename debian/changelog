@@ -1,3 +1,14 @@
+im-config (0.29-1ubuntu12.2) xenial-proposed; urgency=medium
+
+  * debian/patches/use-distinguishable-abstract-address.patch: adjust
+    ibus-daemon args to include "--address 'unix:tmpdir=/tmp/ibus'" so it has
+    a mediatable abstract socket path (LP: #1580463)
+  * debian/control: Breaks on apparmor << 2.10.95-0ubuntu2.3 since that
+    adjusts the ibus abstraction to allow applications to communicate with an
+    ibus-daemon started with "--address 'unix:tmpdir=/tmp/ibus'"
+
+ -- Jamie Strandboge <jamie@ubuntu.com>  Fri, 07 Oct 2016 11:37:31 +0000
+
 im-config (0.29-1ubuntu12) xenial; urgency=medium
 
   * debian/control: replace dialog with whiptail (LP: #1561614)
