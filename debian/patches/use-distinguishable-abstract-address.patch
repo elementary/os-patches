@@ -20,7 +20,7 @@ Index: im-config-0.29/data/21_ibus.rc
 -# start IBus daemon
 -/usr/bin/ibus-daemon --daemonize --xim
 +# start IBus daemon with ibus-specific unix:tmpdir
-+/usr/bin/ibus-daemon --daemonize --xim --address 'unix:tmpdir=/tmp/ibus'
++/usr/bin/ibus-daemon --daemonize --xim --panel=disable --address 'unix:tmpdir=/tmp/ibus'
  fi
  
  if [ "$IM_CONFIG_PHASE" = 1 ]; then
