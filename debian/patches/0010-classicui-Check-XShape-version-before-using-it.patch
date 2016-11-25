@@ -1,0 +1,103 @@
+From 7018c686aab1e9c03495c7162c0c091d7afc1e75 Mon Sep 17 00:00:00 2001
+From: Weng Xuetian <wengxt@gmail.com>
+Date: Sun, 16 Oct 2016 08:34:16 -0700
+Subject: [PATCH 2/2] [classicui] Check XShape version before using it
+
+This Fixes #302.
+---
+ src/ui/classic/XlibWindow.c | 38 ++++++++++++++++++++------------------
+ src/ui/classic/classicui.c  |  9 +++++++++
+ src/ui/classic/classicui.h  |  1 +
+ 3 files changed, 30 insertions(+), 18 deletions(-)
+
+diff --git a/src/ui/classic/XlibWindow.c b/src/ui/classic/XlibWindow.c
+index fe72bec..7ea4193 100644
+--- a/src/ui/classic/XlibWindow.c
++++ b/src/ui/classic/XlibWindow.c
+@@ -173,24 +173,26 @@ void FcitxXlibWindowPaintBackground(FcitxXlibWindow* window,
+         cairo_restore(c);
+     } while (0);
+ 
+-    if (overlay
+-        || window->background->clickMarginLeft != 0
+-        || window->background->clickMarginRight != 0
+-        || window->background->clickMarginTop != 0
+-        || window->background->clickMarginBottom != 0) {
+-        XRectangle r[1];
+-        r[0].x = 0;
+-        r[0].y = 0;
+-        r[0].width = backgrondWidth - window->background->clickMarginLeft - window->background->clickMarginRight;
+-        r[0].height = backgrondHeight - window->background->clickMarginTop - window->background->clickMarginBottom;
+-        XShapeCombineRectangles(classicui->dpy, window->wId, ShapeInput,
+-                                offX + window->background->clickMarginLeft,
+-                                offY + window->background->clickMarginTop,
+-                                r, 1, ShapeSet, Unsorted
+-                               );
+-    } else {
+-        XShapeCombineMask(classicui->dpy, window->wId, ShapeInput, 0, 0,
+-                          None, ShapeSet);
++    if (classicui->hasXShape) {
++        if (overlay
++            || window->background->clickMarginLeft != 0
++            || window->background->clickMarginRight != 0
++            || window->background->clickMarginTop != 0
++            || window->background->clickMarginBottom != 0) {
++            XRectangle r[1];
++            r[0].x = 0;
++            r[0].y = 0;
++            r[0].width = backgrondWidth - window->background->clickMarginLeft - window->background->clickMarginRight;
++            r[0].height = backgrondHeight - window->background->clickMarginTop - window->background->clickMarginBottom;
++            XShapeCombineRectangles(classicui->dpy, window->wId, ShapeInput,
++                                    offX + window->background->clickMarginLeft,
++                                    offY + window->background->clickMarginTop,
++                                    r, 1, ShapeSet, Unsorted
++                                   );
++        } else {
++            XShapeCombineMask(classicui->dpy, window->wId, ShapeInput, 0, 0,
++                              None, ShapeSet);
++        }
+     }
+ }
+ 
+diff --git a/src/ui/classic/classicui.c b/src/ui/classic/classicui.c
+index b90aed8..ce6f391 100644
+--- a/src/ui/classic/classicui.c
++++ b/src/ui/classic/classicui.c
+@@ -20,6 +20,7 @@
+ 
+ #include <X11/Xutil.h>
+ #include <X11/extensions/Xrender.h>
++#include <X11/extensions/shape.h>
+ #include <X11/Xatom.h>
+ #include <unistd.h>
+ #include <cairo.h>
+@@ -124,6 +125,14 @@ void* ClassicUICreate(FcitxInstance* instance)
+     if (classicui->dpi <= 0)
+         classicui->dpi = 96;
+ 
++    int dummy1 = 0, dummy2 = 0, major, minor;
++    if (XShapeQueryExtension(classicui->dpy, &dummy1, &dummy2) == True &&
++        XShapeQueryVersion(classicui->dpy, &major, &minor)) {
++        if (major >=1 && minor >= 1) {
++            classicui->hasXShape = true;
++        }
++    }
++
+     if (LoadSkinConfig(&classicui->skin, &classicui->skinType)) {
+         free(classicui);
+         return NULL;
+diff --git a/src/ui/classic/classicui.h b/src/ui/classic/classicui.h
+index 5b4e24c..f4d9fb6 100644
+--- a/src/ui/classic/classicui.h
++++ b/src/ui/classic/classicui.h
+@@ -84,6 +84,7 @@ typedef struct _FcitxClassicUI {
+     boolean isfallback;
+ 
+     int dpi;
++    boolean hasXShape;
+     uint64_t trayTimeout;
+     boolean notificationItemAvailable;
+ 
+-- 
+2.1.4
+

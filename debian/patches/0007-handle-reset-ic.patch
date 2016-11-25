@@ -1,0 +1,63 @@
+From: Weng Xuetian <wengxt@gmail.com>
+Date: Tue, 2 Aug 2016 10:59:08 -0700
+Subject: handle reset ic.
+
+No idea why we didn't do this for such a long time, add the support for
+it. Hopefully it will not break any xim app.
+https://bugs.launchpad.net/ubuntu/+source/fcitx/+bug/1608469
+---
+ src/frontend/xim/xim.c        |  4 ++--
+ src/frontend/xim/ximhandler.c | 11 +++++++++++
+ src/frontend/xim/ximhandler.h |  1 +
+ 3 files changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/src/frontend/xim/xim.c b/src/frontend/xim/xim.c
+index 693994e..8061d64 100644
+--- a/src/frontend/xim/xim.c
++++ b/src/frontend/xim/xim.c
+@@ -319,9 +319,9 @@ Bool XimProtocolHandler(XIMS _ims, IMProtocol * call_data)
+     case XIM_SET_IC_FOCUS:
+         return XIMSetFocusHandler(ximfrontend, (IMChangeFocusStruct *) call_data);
+     case XIM_UNSET_IC_FOCUS:
+-        return XIMUnsetFocusHandler(ximfrontend, (IMChangeICStruct *) call_data);;
++        return XIMUnsetFocusHandler(ximfrontend, (IMChangeICStruct *) call_data);
+     case XIM_RESET_IC:
+-        return True;
++        return XIMResetICHandler(ximfrontend, (IMResetICStruct *) call_data);
+     case XIM_PREEDIT_START_REPLY:
+         return 0;
+     case XIM_PREEDIT_CARET_REPLY:
+diff --git a/src/frontend/xim/ximhandler.c b/src/frontend/xim/ximhandler.c
+index 38d31bf..54fee53 100644
+--- a/src/frontend/xim/ximhandler.c
++++ b/src/frontend/xim/ximhandler.c
+@@ -86,6 +86,17 @@ Bool XIMUnsetFocusHandler(FcitxXimFrontend* xim, IMChangeICStruct * call_data)
+ {
+     FcitxInputContext* ic = FcitxInstanceGetCurrentIC(xim->owner);
+     if (ic && GetXimIC(ic)->id == call_data->icid) {
++        FcitxUICloseInputWindow(xim->owner);
++        FcitxInstanceResetInput(xim->owner);
++    }
++
++    return True;
++}
++
++Bool XIMResetICHandler(FcitxXimFrontend* xim, IMResetICStruct * call_data)
++{
++    FcitxInputContext* ic = FcitxInstanceGetCurrentIC(xim->owner);
++    if (ic && GetXimIC(ic)->id == call_data->icid) {
+         FcitxUICommitPreedit(xim->owner);
+         FcitxUICloseInputWindow(xim->owner);
+         FcitxInstanceSetCurrentIC(xim->owner, NULL);
+diff --git a/src/frontend/xim/ximhandler.h b/src/frontend/xim/ximhandler.h
+index 6266371..85257af 100644
+--- a/src/frontend/xim/ximhandler.h
++++ b/src/frontend/xim/ximhandler.h
+@@ -31,6 +31,7 @@ Bool XIMGetICValuesHandler(FcitxXimFrontend* xim, IMChangeICStruct * call_data);
+ Bool XIMSetICValuesHandler(FcitxXimFrontend* xim, IMChangeICStruct * call_data);
+ Bool XIMSetFocusHandler(FcitxXimFrontend* xim, IMChangeFocusStruct * call_data);
+ Bool XIMUnsetFocusHandler(FcitxXimFrontend* xim, IMChangeICStruct * call_data);
++Bool XIMResetICHandler(FcitxXimFrontend* xim, IMResetICStruct * call_data);
+ Bool XIMCloseHandler(FcitxXimFrontend* xim, IMOpenStruct * call_data);
+ Bool XIMCreateICHandler(FcitxXimFrontend* xim, IMChangeICStruct * call_data);
+ Bool XIMDestroyICHandler(FcitxXimFrontend* xim, IMChangeICStruct * call_data);
