@@ -1,3 +1,19 @@
+netcfg (1.135ubuntu4.1) xenial; urgency=medium
+
+  * With vlan connection type, finish-install.d would decide to purge
+    network configuration and writeout loopback interfaces only, due to
+    the assumption that !wired, must be wireless. Write out loopback only
+    config with wireless only connection type. With this change vlan
+    settings propagate through to the system, after additional
+    network-manager changes were added. LP: #1567687
+
+  * When DHCP is disabled via preseed, do not ask the DHCP question on
+    s390x by propagating the seen flags from preseed-only keys to the
+    interactive question. This is a side-effect / regression from
+    1.135ubuntu3. LP: #1572607
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 19 May 2016 11:34:16 +0100
+
 netcfg (1.135ubuntu4) xenial; urgency=medium
 
   * Add vlan support, based on YunQiang Su patch and Philipp Kern's

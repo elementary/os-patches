@@ -1,3 +1,22 @@
+ubiquity (2.21.63.3) xenial; urgency=medium
+
+  * ubi-prepare.py: default to disabling Secure Boot when third party drivers
+    are being installed, since it's most likely what people will want. This
+    will also avoid people skipping through this important part of the
+    installer without noticing, only to find their systems not all working
+    correctly. (LP: #1606393)
+  * d-i/sources.list: add xenial-updates to sources.list to pick up any SRUs
+    of d-i components that are no longer in flight.
+  * Automatic update of included source packages: apt-setup
+    1:0.104ubuntu4.1, base-installer 1.158ubuntu2.1, netcfg
+    1.135ubuntu4.1. (LP: #1590358)
+  * bin/ubiquity-dm: wait for the DBus signals telling us that xsettings are
+    ready before continuing with preparing ubiquity-dm; this avoids starting
+    too quickly and incorrectly applying scale ratios for HiDPI screens.
+    (LP: #1560162)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 02 Sep 2016 11:17:13 -0400
+
 ubiquity (2.21.63.2) xenial; urgency=high
 
   [ Shih-Yuan Lee (FourDollars) ]

@@ -99,6 +99,60 @@ class MissingProgramError(EnvironmentError):
     pass
 
 
+class SignalWatcher:
+    def __init__(self, owner, program,
+                 interface, object_path,
+                 signal, expected):
+        self.owner = owner
+        self.program = program
+        self.connection = None
+        self.interface = interface
+        self.object_path = object_path
+        self.signal = signal
+        self.expected = expected
+        self.processes = []
+
+        from gi.repository import GLib, Gio
+        owner.drop_privileges()
+        self.loop = GLib.MainLoop()
+        Gio.bus_get(Gio.BusType.SESSION, None,
+                    self.on_got_bus, None)
+
+    def signal_timeout(self, user_data):
+        log("SignalWatcher: signal timed out, continuing with ubiquity-dm")
+        self.loop.quit()
+
+    def on_got_bus(self, source, result, user_data):
+        try:
+            from gi.repository import GLib, Gio
+            self.connection = Gio.bus_get_finish(result)
+            self.connection.signal_subscribe(None, self.interface,
+                                             self.signal,
+                                             self.object_path, None,
+                                             Gio.DBusSignalFlags.NONE,
+                                             self.on_signal, None)
+            self.processes.append(subprocess.Popen(
+                                  [self.program],
+                                  stdin=None, stdout=logfile, stderr=logfile))
+            self.owner.regain_privileges()
+            GLib.timeout_add_seconds(5, self.signal_timeout, None)
+        except Exception:
+            log("failed to ensure xsettings plugin was started:")
+            log(traceback.format_exc())
+            self.loop.quit()
+
+    def on_signal(self, connection, sender, path, interface, signal, params,
+                  user_data):
+        (plugin, ) = params
+        # log ('on_signal: got %s' % plugin)
+        if plugin == "xsettings":
+                self.loop.quit()
+
+    def run(self):
+        self.loop.run()
+        return self.processes
+
+
 class DM:
     def __init__(self, vt, display, default_username):
         self.auth = PAM.pam()
@@ -166,10 +220,13 @@ class DM:
 
     def drop_privileges(self):
         os.setgroups(self.groups)
-        os.setgid(self.gid)
-        os.setegid(self.gid)
-        os.setuid(self.uid)
-        os.seteuid(self.uid)
+        os.setresgid(self.gid, self.gid, 0)
+        os.setresuid(self.uid, self.uid, 0)
+
+    def regain_privileges(self):
+        os.setresuid(0, 0, 0)
+        os.setresgid(0, 0, 0)
+        os.setgroups([])
 
     def server_preexec(self):
         signal.signal(signal.SIGUSR1, signal.SIG_IGN)
@@ -456,9 +513,15 @@ EndSection
                 msd = '/usr/bin/mate-settings-daemon'
 
                 if osextras.find_on_path(usd):
-                    extras.append(subprocess.Popen(
-                        [usd], stdin=null, stdout=logfile, stderr=logfile,
-                        preexec_fn=self.drop_privileges))
+                    xsettings = SignalWatcher(self, usd,
+                                              "org.gnome.SettingsDaemon",
+                                              "/org/gnome/SettingsDaemon",
+                                              "PluginActivated",
+                                              "xsettings")
+                    # the SignalWatcher will run until the signal is seen...
+                    extras.extend(xsettings.run())
+                    # At this point we're sure the usd xsettings plugin is
+                    # available, we can continue setting up the session.
 
                 elif osextras.find_on_path(gsd):
                     extras.append(subprocess.Popen(
