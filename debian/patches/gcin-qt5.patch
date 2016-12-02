@@ -1,0 +1,38 @@
+Description: add gcin Qt5 immodule
+Author: ChangZhuo Chen (陳昌倬) <czchen@debian.org>
+Last-Update: 2015-10-17
+
+--- a/data/26_gcin.conf
++++ b/data/26_gcin.conf
+@@ -4,11 +4,10 @@
+ IM_CONFIG_LONG="$(gettext "Chinese input method (gcin)
+  * Required for all: gcin
+  * Language specific input conversion support:
+-  * Traditional Chinese: gcin-chewing
+   * Japanese: gcin-anthy
+  * Application platform support:
+-  * GNOME/GTK+: gcin-gtk3-immodule
+-  * KDE/Qt: gcin-qt4-immodule")"
++  * GNOME/GTK+: gcin-gtk2-immodule, gcin-gtk3-immodule
++  * KDE/Qt: gcin-qt4-immodule, gcin-qt5-immodule")"
+ 
+ package_auto () {
+     package_status gcin
+--- a/data/26_gcin.rc
++++ b/data/26_gcin.rc
+@@ -44,6 +44,15 @@
+     fi
+ done
+ 
++QT_IM_MODULE=xim
++# use immodule when available for Qt5
++for IM_CONFIG_MARKER in /usr/lib/*/qt5/plugins/platforminputcontexts/libgcinplatforminputcontextplugin.so ; do
++    if [ -e $IM_CONFIG_MARKER ]; then
++        QT_IM_MODULE=gcin
++        break
++    fi
++done
++
+ # gcin has no clutter support, and qt3 immodule is not compiled.
+ CLUTTER_IM_MODULE=xim
+ fi

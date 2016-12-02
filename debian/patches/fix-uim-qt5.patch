@@ -1,0 +1,18 @@
+Description: fix uim Qt5 immodule path
+Author: HIGUCHI Daisuke (VDR dai) <dai@debian.org>
+Bug-Debian: https://bugs.debian.org/792588
+Last-Update: 2015-07-16
+
+diff --git a/data/24_uim.rc b/data/24_uim.rc
+index 2a2067a..60ae29f 100644
+--- a/data/24_uim.rc
++++ b/data/24_uim.rc
+@@ -63,7 +63,7 @@ for IM_CONFIG_MARKER in /usr/lib/*/qt4/plugins/inputmethods/libuiminputcontextpl
+ done
+ QT_IM_MODULE=xim
+ # use immodule when available for Qt5
+-for IM_CONFIG_MARKER in /usr/lib/*/qt5/plugins/inputmethods/libquiminputcontextplugin.so ; do
++for IM_CONFIG_MARKER in /usr/lib/*/qt5/plugins/platforminputcontexts/libuimplatforminputcontextplugin.so ; do
+     if [ -e $IM_CONFIG_MARKER ]; then
+         QT_IM_MODULE=uim
+         break
