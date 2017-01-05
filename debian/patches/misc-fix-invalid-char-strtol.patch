@@ -1,0 +1,31 @@
+From: Michael Chang <mchang@suse.com>
+From: Aaron Miller <aaronmiller@fb.com>
+Subject: [PATCH 1/8] misc: fix invalid character recongition in strto*l
+
+Would previously allow digits larger than the base and didn't check that
+subtracting the difference from 0-9 to lowercase letters for characters
+larger than 9 didn't result in a value lower than 9, which allowed the
+parses: ` = 9, _ = 8, ^ = 7, ] = 6, \ = 5, and [ = 4
+---
+ grub-core/kern/misc.c |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+Index: b/grub-core/kern/misc.c
+===================================================================
+--- a/grub-core/kern/misc.c
++++ b/grub-core/kern/misc.c
+@@ -423,9 +423,13 @@ grub_strtoull (const char *str, char **e
+       if (digit > 9)
+ 	{
+ 	  digit += '0' - 'a' + 10;
+-	  if (digit >= (unsigned long) base)
++	  /* digit <= 9 check is needed to keep chars larger than
++	     '9' but less than 'a' from being read as numbers */
++	  if (digit >= (unsigned long) base || digit <= 9)
+ 	    break;
+ 	}
++      if (digit >= (unsigned long) base)
++	break;
+ 
+       found = 1;
+ 

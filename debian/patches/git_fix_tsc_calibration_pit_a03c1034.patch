@@ -1,0 +1,28 @@
+From a03c1034f6062e69075056c8f31b90e159ce5244 Mon Sep 17 00:00:00 2001
+From: Michael Chang <mchang@suse.com>
+Date: Tue, 01 Dec 2015 15:49:38 +0000
+Subject: i386: fix TSC calibration using PIT
+
+Condition was accidentally reversed, so PIT calibration always failed
+when PIT was present and always succeeded when PIT was missing, but in
+the latter case resulted in absurdly fast clock.
+
+Reported and tested by Vitaly Kuznetsov <vkuznets@redhat.com>
+---
+---
+ grub-core/kern/i386/tsc_pit.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: b/grub-core/kern/i386/tsc_pit.c
+===================================================================
+--- a/grub-core/kern/i386/tsc_pit.c
++++ b/grub-core/kern/i386/tsc_pit.c
+@@ -49,7 +49,7 @@ grub_pit_wait (void)
+ 	     | GRUB_PIT_SPK_TMR2,
+              GRUB_PIT_SPEAKER_PORT);
+ 
+-  if ((grub_inb (GRUB_PIT_SPEAKER_PORT) & GRUB_PIT_SPK_TMR2_LATCH)) {
++  if ((grub_inb (GRUB_PIT_SPEAKER_PORT) & GRUB_PIT_SPK_TMR2_LATCH) == 0x00) {
+     ret = 1;
+     /* Wait.  */
+     while ((grub_inb (GRUB_PIT_SPEAKER_PORT) & GRUB_PIT_SPK_TMR2_LATCH) == 0x00);

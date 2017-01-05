@@ -1,0 +1,157 @@
+From 7c4b6b7bb476963ca7e86f79d32036e7f80d27f6 Mon Sep 17 00:00:00 2001
+From: Michael Chang <mchang@suse.com>
+Date: Tue, 18 Nov 2014 08:03:08 +0000
+Subject: send router solicitation for ipv6 address autoconf v2
+
+Many routers have long router advertisment interval configured by
+default. The Neighbor Discovery protocol (RFC4861) has defined default
+MaxRtrAdvInterval value as 600 seconds and
+MinRtrAdvInterval as 0.33*MaxRtrAdvInterval. This makes
+net_ipv6_autoconf fails more often than not as currently it passively
+listens the RA message to perfom address autoconfiguration.
+
+This patch tries to send router solicitation to overcome the problem of
+long RA interval.
+
+v2:
+use cpu_to_be macro for network byte order conversion
+add missing error handling
+---
+diff --git a/grub-core/net/icmp6.c b/grub-core/net/icmp6.c
+index 796d549..7822394 100644
+--- a/grub-core/net/icmp6.c
++++ b/grub-core/net/icmp6.c
+@@ -72,6 +72,11 @@ struct neighbour_advertise
+   grub_uint64_t target[2];
+ } GRUB_PACKED;
+ 
++struct router_solicit
++{
++  grub_uint32_t reserved;
++} GRUB_PACKED;
++
+ enum
+   {
+     FLAG_SLAAC = 0x40
+@@ -81,6 +86,7 @@ enum
+   {
+     ICMP6_ECHO = 128,
+     ICMP6_ECHO_REPLY = 129,
++    ICMP6_ROUTER_SOLICIT = 133,
+     ICMP6_ROUTER_ADVERTISE = 134,
+     ICMP6_NEIGHBOUR_SOLICIT = 135,
+     ICMP6_NEIGHBOUR_ADVERTISE = 136,
+@@ -533,3 +539,80 @@ grub_net_icmp6_send_request (struct grub_net_network_level_interface *inf,
+   grub_netbuff_free (nb);
+   return err;
+ }
++
++grub_err_t
++grub_net_icmp6_send_router_solicit (struct grub_net_network_level_interface *inf)
++{
++  struct grub_net_buff *nb;
++  grub_err_t err = GRUB_ERR_NONE;
++  grub_net_network_level_address_t multicast;
++  grub_net_link_level_address_t ll_multicast;
++  struct option_header *ohdr;
++  struct router_solicit *sol;
++  struct icmp_header *icmphr;
++
++  multicast.type = GRUB_NET_NETWORK_LEVEL_PROTOCOL_IPV6;
++  multicast.ipv6[0] = grub_cpu_to_be64 (0xff02ULL << 48);
++  multicast.ipv6[1] = grub_cpu_to_be64 (0x02ULL);
++
++  err = grub_net_link_layer_resolve (inf, &multicast, &ll_multicast);
++  if (err)
++    return err;
++
++  nb = grub_netbuff_alloc (sizeof (struct router_solicit)
++			   + sizeof (struct option_header)
++			   + 6
++			   + sizeof (struct icmp_header)
++			   + GRUB_NET_OUR_IPV6_HEADER_SIZE
++			   + GRUB_NET_MAX_LINK_HEADER_SIZE);
++  if (!nb)
++    return grub_errno;
++  err = grub_netbuff_reserve (nb,
++			      sizeof (struct router_solicit)
++			      + sizeof (struct option_header)
++			      + 6
++			      + sizeof (struct icmp_header)
++			      + GRUB_NET_OUR_IPV6_HEADER_SIZE
++			      + GRUB_NET_MAX_LINK_HEADER_SIZE);
++  if (err)
++    goto fail;
++
++  err = grub_netbuff_push (nb, 6);
++  if (err)
++    goto fail;
++
++  grub_memcpy (nb->data, inf->hwaddress.mac, 6);
++
++  err = grub_netbuff_push (nb, sizeof (*ohdr));
++  if (err)
++    goto fail;
++
++  ohdr = (struct option_header *) nb->data;
++  ohdr->type = OPTION_SOURCE_LINK_LAYER_ADDRESS;
++  ohdr->len = 1;
++
++  err = grub_netbuff_push (nb, sizeof (*sol));
++  if (err)
++    goto fail;
++
++  sol = (struct router_solicit *) nb->data;
++  sol->reserved = 0;
++
++  err = grub_netbuff_push (nb, sizeof (*icmphr));
++  if (err)
++    goto fail;
++
++  icmphr = (struct icmp_header *) nb->data;
++  icmphr->type = ICMP6_ROUTER_SOLICIT;
++  icmphr->code = 0;
++  icmphr->checksum = 0;
++  icmphr->checksum = grub_net_ip_transport_checksum (nb,
++						     GRUB_NET_IP_ICMPV6,
++						     &inf->address,
++						     &multicast);
++  err = grub_net_send_ip_packet (inf, &multicast, &ll_multicast, nb,
++				 GRUB_NET_IP_ICMPV6);
++ fail:
++  grub_netbuff_free (nb);
++  return err;
++}
+diff --git a/grub-core/net/net.c b/grub-core/net/net.c
+index 82af3a0..21a4e94 100644
+--- a/grub-core/net/net.c
++++ b/grub-core/net/net.c
+@@ -380,12 +380,14 @@ grub_cmd_ipv6_autoconf (struct grub_command *cmd __attribute__ ((unused)),
+ 
+   for (interval = 200; interval < 10000; interval *= 2)
+     {
+-      /* FIXME: send router solicitation.  */
+       int done = 1;
+       for (j = 0; j < ncards; j++)
+ 	{
+ 	  if (slaacs[j]->slaac_counter)
+ 	    continue;
++	  err = grub_net_icmp6_send_router_solicit (ifaces[j]);
++	  if (err)
++	    err = GRUB_ERR_NONE;
+ 	  done = 0;
+ 	}
+       if (done)
+diff --git a/include/grub/net/ip.h b/include/grub/net/ip.h
+index 7a8e614..dcceaa5 100644
+--- a/include/grub/net/ip.h
++++ b/include/grub/net/ip.h
+@@ -92,4 +92,6 @@ grub_err_t
+ grub_net_icmp6_send_request (struct grub_net_network_level_interface *inf,
+ 			     const grub_net_network_level_address_t *proto_addr);
+ 
++grub_err_t
++grub_net_icmp6_send_router_solicit (struct grub_net_network_level_interface *inf);
+ #endif 
+--
+cgit v0.9.0.2

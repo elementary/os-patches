@@ -1,0 +1,939 @@
+From d43a5ee65143f384357fbfdcace4258e3537c214 Mon Sep 17 00:00:00 2001
+From: Vladimir Serbinenko <phcoder@gmail.com>
+Date: Fri, 13 Nov 2015 15:14:53 +0000
+Subject: tsc: Use alternative delay sources whenever appropriate.
+
+PIT isn't available on some of new hardware including Hyper-V. So
+use pmtimer for calibration. Moreover pmtimer calibration is faster, so
+use it on coreboor where booting time is important.
+
+Based on patch by Michael Chang.
+---
+---
+ grub-core/Makefile.am             |    7 +
+ grub-core/Makefile.core.def       |   19 +++-
+ grub-core/commands/acpi.c         |   12 --
+ grub-core/kern/acpi.c             |   34 ++++++++
+ grub-core/kern/efi/acpi.c         |   59 ++++++++++++++
+ grub-core/kern/i386/efi/tsc.c     |   40 +++++++++
+ grub-core/kern/i386/pc/acpi.c     |   83 +++++++++++++++++++
+ grub-core/kern/i386/tsc.c         |  121 ++++++----------------------
+ grub-core/kern/i386/tsc_pit.c     |   84 +++++++++++++++++++
+ grub-core/kern/i386/tsc_pmtimer.c |  160 ++++++++++++++++++++++++++++++++++++++
+ grub-core/kern/i386/xen/tsc.c     |   40 +++++++++
+ include/grub/acpi.h               |   17 ++--
+ include/grub/i386/tsc.h           |   26 ++++++
+ 13 files changed, 589 insertions(+), 113 deletions(-)
+
+Index: b/grub-core/Makefile.am
+===================================================================
+--- a/grub-core/Makefile.am
++++ b/grub-core/Makefile.am
+@@ -98,6 +98,7 @@ if COND_i386_efi
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/efi.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/disk.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/i386/tsc.h
++KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/acpi.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/pci.h
+ endif
+ 
+@@ -109,10 +110,12 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/gfxterm.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/font.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/bufio.h
++KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/acpi.h
+ endif
+ 
+ if COND_i386_multiboot
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/i386/tsc.h
++KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/acpi.h
+ endif
+ 
+ if COND_i386_qemu
+@@ -151,11 +154,13 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/disk.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/i386/tsc.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/pci.h
++KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/acpi.h
+ endif
+ 
+ if COND_ia64_efi
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/efi.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/disk.h
++KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/acpi.h
+ endif
+ 
+ if COND_mips
+@@ -230,11 +235,13 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/efi.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/disk.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/arm/system.h
++KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/acpi.h
+ endif
+ 
+ if COND_arm64_efi
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/efi.h
+ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/disk.h
++KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/acpi.h
+ endif
+ 
+ if COND_emu
+Index: b/grub-core/Makefile.core.def
+===================================================================
+--- a/grub-core/Makefile.core.def
++++ b/grub-core/Makefile.core.def
+@@ -174,8 +174,20 @@ kernel = {
+   efi = kern/efi/init.c;
+   efi = kern/efi/mm.c;
+   efi = term/efi/console.c;
++  efi = kern/acpi.c;
++  efi = kern/efi/acpi.c;
++  i386_coreboot = kern/i386/pc/acpi.c;
++  i386_multiboot = kern/i386/pc/acpi.c;
++  i386_coreboot = kern/acpi.c;
++  i386_multiboot = kern/acpi.c;
+ 
+   x86 = kern/i386/tsc.c;
++  x86 = kern/i386/tsc_pit.c;
++  i386_efi = kern/i386/efi/tsc.c;
++  x86_64_efi = kern/i386/efi/tsc.c;
++  i386_efi = kern/i386/tsc_pmtimer.c;
++  i386_coreboot = kern/i386/tsc_pmtimer.c;
++  x86_64_efi = kern/i386/tsc_pmtimer.c;
+ 
+   i386_efi = kern/i386/efi/init.c;
+   i386_efi = bus/pci.c;
+@@ -187,6 +199,7 @@ kernel = {
+   x86_64_efi = bus/pci.c;
+ 
+   xen = kern/i386/tsc.c;
++  xen = kern/i386/xen/tsc.c;
+   x86_64_xen = kern/x86_64/xen/hypercall.S;
+   i386_xen = kern/i386/xen/hypercall.S;
+   xen = kern/xen/init.c;
+@@ -685,10 +698,8 @@ module = {
+   name = acpi;
+ 
+   common = commands/acpi.c;
+-  efi = commands/efi/acpi.c;
+-  i386_pc = commands/i386/pc/acpi.c;
+-  i386_coreboot = commands/i386/pc/acpi.c;
+-  i386_multiboot = commands/i386/pc/acpi.c;
++  i386_pc = kern/acpi.c;
++  i386_pc = kern/i386/pc/acpi.c;
+ 
+   enable = efi;
+   enable = i386_pc;
+Index: b/grub-core/commands/acpi.c
+===================================================================
+--- a/grub-core/commands/acpi.c
++++ b/grub-core/commands/acpi.c
+@@ -61,18 +61,6 @@ static const struct grub_arg_option opti
+   {0, 0, 0, 0, 0, 0}
+ };
+ 
+-/* Simple checksum by summing all bytes. Used by ACPI and SMBIOS. */
+-grub_uint8_t
+-grub_byte_checksum (void *base, grub_size_t size)
+-{
+-  grub_uint8_t *ptr;
+-  grub_uint8_t ret = 0;
+-  for (ptr = (grub_uint8_t *) base; ptr < ((grub_uint8_t *) base) + size;
+-       ptr++)
+-    ret += *ptr;
+-  return ret;
+-}
+-
+ /* rev1 is 1 if ACPIv1 is to be generated, 0 otherwise.
+    rev2 contains the revision of ACPIv2+ to generate or 0 if none. */
+ static int rev1, rev2;
+Index: b/grub-core/kern/acpi.c
+===================================================================
+--- /dev/null
++++ b/grub-core/kern/acpi.c
+@@ -0,0 +1,34 @@
++/*
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2012  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/types.h>
++#include <grub/time.h>
++#include <grub/misc.h>
++#include <grub/acpi.h>
++
++/* Simple checksum by summing all bytes. Used by ACPI and SMBIOS. */
++grub_uint8_t
++grub_byte_checksum (void *base, grub_size_t size)
++{
++  grub_uint8_t *ptr;
++  grub_uint8_t ret = 0;
++  for (ptr = (grub_uint8_t *) base; ptr < ((grub_uint8_t *) base) + size;
++       ptr++)
++    ret += *ptr;
++  return ret;
++}
+Index: b/grub-core/kern/efi/acpi.c
+===================================================================
+--- /dev/null
++++ b/grub-core/kern/efi/acpi.c
+@@ -0,0 +1,59 @@
++/* acpi.c - get acpi tables. */
++/*
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2009  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/acpi.h>
++#include <grub/misc.h>
++#include <grub/efi/efi.h>
++#include <grub/efi/api.h>
++
++struct grub_acpi_rsdp_v10 *
++grub_machine_acpi_get_rsdpv1 (void)
++{
++  unsigned i;
++  static grub_efi_packed_guid_t acpi_guid = GRUB_EFI_ACPI_TABLE_GUID;
++
++  for (i = 0; i < grub_efi_system_table->num_table_entries; i++)
++    {
++      grub_efi_packed_guid_t *guid =
++	&grub_efi_system_table->configuration_table[i].vendor_guid;
++
++      if (! grub_memcmp (guid, &acpi_guid, sizeof (grub_efi_packed_guid_t)))
++	return (struct grub_acpi_rsdp_v10 *)
++	  grub_efi_system_table->configuration_table[i].vendor_table;
++    }
++  return 0;
++}
++
++struct grub_acpi_rsdp_v20 *
++grub_machine_acpi_get_rsdpv2 (void)
++{
++  unsigned i;
++  static grub_efi_packed_guid_t acpi20_guid = GRUB_EFI_ACPI_20_TABLE_GUID;
++
++  for (i = 0; i < grub_efi_system_table->num_table_entries; i++)
++    {
++      grub_efi_packed_guid_t *guid =
++	&grub_efi_system_table->configuration_table[i].vendor_guid;
++
++      if (! grub_memcmp (guid, &acpi20_guid, sizeof (grub_efi_packed_guid_t)))
++	return (struct grub_acpi_rsdp_v20 *)
++	  grub_efi_system_table->configuration_table[i].vendor_table;
++    }
++  return 0;
++}
+Index: b/grub-core/kern/i386/efi/tsc.c
+===================================================================
+--- /dev/null
++++ b/grub-core/kern/i386/efi/tsc.c
+@@ -0,0 +1,40 @@
++/* kern/i386/tsc.c - x86 TSC time source implementation
++ * Requires Pentium or better x86 CPU that supports the RDTSC instruction.
++ * This module uses the PIT to calibrate the TSC to
++ * real time.
++ *
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2008  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/types.h>
++#include <grub/time.h>
++#include <grub/misc.h>
++#include <grub/i386/tsc.h>
++#include <grub/efi/efi.h>
++#include <grub/efi/api.h>
++
++int
++grub_tsc_calibrate_from_efi (void)
++{
++  grub_uint64_t start_tsc, end_tsc;
++  /* Use EFI Time Service to calibrate TSC */
++  start_tsc = grub_get_tsc ();
++  efi_call_1 (grub_efi_system_table->boot_services->stall, 1000);
++  end_tsc = grub_get_tsc ();
++  grub_tsc_rate = grub_divmod64 ((1ULL << 32), end_tsc - start_tsc, 0);
++  return 1;
++}
+Index: b/grub-core/kern/i386/pc/acpi.c
+===================================================================
+--- /dev/null
++++ b/grub-core/kern/i386/pc/acpi.c
+@@ -0,0 +1,83 @@
++/* acpi.c - get acpi tables. */
++/*
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2009  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/acpi.h>
++#include <grub/misc.h>
++
++struct grub_acpi_rsdp_v10 *
++grub_machine_acpi_get_rsdpv1 (void)
++{
++  int ebda_len;
++  grub_uint8_t *ebda, *ptr;
++
++  grub_dprintf ("acpi", "Looking for RSDP. Scanning EBDA\n");
++  ebda = (grub_uint8_t *) ((* ((grub_uint16_t *) 0x40e)) << 4);
++  ebda_len = * (grub_uint16_t *) ebda;
++  if (! ebda_len) /* FIXME do we really need this check? */
++    goto scan_bios;
++  for (ptr = ebda; ptr < ebda + 0x400; ptr += 16)
++    if (grub_memcmp (ptr, GRUB_RSDP_SIGNATURE, GRUB_RSDP_SIGNATURE_SIZE) == 0
++	&& grub_byte_checksum (ptr, sizeof (struct grub_acpi_rsdp_v10)) == 0
++	&& ((struct grub_acpi_rsdp_v10 *) ptr)->revision == 0)
++      return (struct grub_acpi_rsdp_v10 *) ptr;
++
++scan_bios:
++  grub_dprintf ("acpi", "Looking for RSDP. Scanning BIOS\n");
++  for (ptr = (grub_uint8_t *) 0xe0000; ptr < (grub_uint8_t *) 0x100000;
++       ptr += 16)
++    if (grub_memcmp (ptr, GRUB_RSDP_SIGNATURE, GRUB_RSDP_SIGNATURE_SIZE) == 0
++	&& grub_byte_checksum (ptr, sizeof (struct grub_acpi_rsdp_v10)) == 0
++	&& ((struct grub_acpi_rsdp_v10 *) ptr)->revision == 0)
++      return (struct grub_acpi_rsdp_v10 *) ptr;
++  return 0;
++}
++
++struct grub_acpi_rsdp_v20 *
++grub_machine_acpi_get_rsdpv2 (void)
++{
++  int ebda_len;
++  grub_uint8_t *ebda, *ptr;
++
++  grub_dprintf ("acpi", "Looking for RSDP. Scanning EBDA\n");
++  ebda = (grub_uint8_t *) ((* ((grub_uint16_t *) 0x40e)) << 4);
++  ebda_len = * (grub_uint16_t *) ebda;
++  if (! ebda_len) /* FIXME do we really need this check? */
++    goto scan_bios;
++  for (ptr = ebda; ptr < ebda + 0x400; ptr += 16)
++    if (grub_memcmp (ptr, GRUB_RSDP_SIGNATURE, GRUB_RSDP_SIGNATURE_SIZE) == 0
++	&& grub_byte_checksum (ptr, sizeof (struct grub_acpi_rsdp_v10)) == 0
++	&& ((struct grub_acpi_rsdp_v10 *) ptr)->revision != 0
++	&& ((struct grub_acpi_rsdp_v20 *) ptr)->length < 1024
++	&& grub_byte_checksum (ptr, ((struct grub_acpi_rsdp_v20 *) ptr)->length)
++	== 0)
++      return (struct grub_acpi_rsdp_v20 *) ptr;
++
++scan_bios:
++  grub_dprintf ("acpi", "Looking for RSDP. Scanning BIOS\n");
++  for (ptr = (grub_uint8_t *) 0xe0000; ptr < (grub_uint8_t *) 0x100000;
++       ptr += 16)
++    if (grub_memcmp (ptr, GRUB_RSDP_SIGNATURE, GRUB_RSDP_SIGNATURE_SIZE) == 0
++	&& grub_byte_checksum (ptr, sizeof (struct grub_acpi_rsdp_v10)) == 0
++	&& ((struct grub_acpi_rsdp_v10 *) ptr)->revision != 0
++	&& ((struct grub_acpi_rsdp_v20 *) ptr)->length < 1024
++	&& grub_byte_checksum (ptr, ((struct grub_acpi_rsdp_v20 *) ptr)->length)
++	== 0)
++      return (struct grub_acpi_rsdp_v20 *) ptr;
++  return 0;
++}
+Index: b/grub-core/kern/i386/tsc_pit.c
+===================================================================
+--- /dev/null
++++ b/grub-core/kern/i386/tsc_pit.c
+@@ -0,0 +1,84 @@
++/* kern/i386/tsc.c - x86 TSC time source implementation
++ * Requires Pentium or better x86 CPU that supports the RDTSC instruction.
++ * This module uses the PIT to calibrate the TSC to
++ * real time.
++ *
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2008  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/types.h>
++#include <grub/time.h>
++#include <grub/misc.h>
++#include <grub/i386/tsc.h>
++#include <grub/i386/pit.h>
++#include <grub/cpu/io.h>
++
++static int
++grub_pit_wait (void)
++{
++  int ret = 0;
++
++  /* Disable timer2 gate and speaker.  */
++  grub_outb (grub_inb (GRUB_PIT_SPEAKER_PORT)
++	     & ~ (GRUB_PIT_SPK_DATA | GRUB_PIT_SPK_TMR2),
++             GRUB_PIT_SPEAKER_PORT);
++
++  /* Set tics.  */
++  grub_outb (GRUB_PIT_CTRL_SELECT_2 | GRUB_PIT_CTRL_READLOAD_WORD,
++	     GRUB_PIT_CTRL);
++  /* 0xffff ticks: 55ms. */
++  grub_outb (0xff, GRUB_PIT_COUNTER_2);
++  grub_outb (0xff, GRUB_PIT_COUNTER_2);
++
++  /* Enable timer2 gate, keep speaker disabled.  */
++  grub_outb ((grub_inb (GRUB_PIT_SPEAKER_PORT) & ~ GRUB_PIT_SPK_DATA)
++	     | GRUB_PIT_SPK_TMR2,
++             GRUB_PIT_SPEAKER_PORT);
++
++  if ((grub_inb (GRUB_PIT_SPEAKER_PORT) & GRUB_PIT_SPK_TMR2_LATCH)) {
++    ret = 1;
++    /* Wait.  */
++    while ((grub_inb (GRUB_PIT_SPEAKER_PORT) & GRUB_PIT_SPK_TMR2_LATCH) == 0x00);
++  }
++
++  /* Disable timer2 gate and speaker.  */
++  grub_outb (grub_inb (GRUB_PIT_SPEAKER_PORT)
++	     & ~ (GRUB_PIT_SPK_DATA | GRUB_PIT_SPK_TMR2),
++             GRUB_PIT_SPEAKER_PORT);
++
++  return ret;
++}
++
++/* Calibrate the TSC based on the RTC.  */
++int
++grub_tsc_calibrate_from_pit (void)
++{
++  /* First calibrate the TSC rate (relative, not absolute time). */
++  grub_uint64_t start_tsc, end_tsc;
++
++  start_tsc = grub_get_tsc ();
++  if (!grub_pit_wait ())
++    return 0;
++  end_tsc = grub_get_tsc ();
++
++  grub_tsc_rate = 0;
++  if (end_tsc > start_tsc)
++    grub_tsc_rate = grub_divmod64 ((55ULL << 32), end_tsc - start_tsc, 0);
++  if (grub_tsc_rate == 0)
++    return 0;
++  return 1;
++}
+Index: b/grub-core/kern/i386/tsc_pmtimer.c
+===================================================================
+--- /dev/null
++++ b/grub-core/kern/i386/tsc_pmtimer.c
+@@ -0,0 +1,160 @@
++/* kern/i386/tsc.c - x86 TSC time source implementation
++ * Requires Pentium or better x86 CPU that supports the RDTSC instruction.
++ * This module uses the PIT to calibrate the TSC to
++ * real time.
++ *
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2008  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/types.h>
++#include <grub/time.h>
++#include <grub/misc.h>
++#include <grub/i386/tsc.h>
++#include <grub/acpi.h>
++#include <grub/cpu/io.h>
++
++static void *
++grub_acpi_rsdt_find_table (struct grub_acpi_table_header *rsdt, const char *sig)
++{
++  grub_size_t s;
++  grub_uint32_t *ptr;
++
++  if (!rsdt)
++    return 0;
++
++  if (grub_memcmp (rsdt->signature, "RSDT", 4) != 0)
++    return 0;
++
++  ptr = (grub_uint32_t *) (rsdt + 1);
++  s = (rsdt->length - sizeof (*rsdt)) / sizeof (grub_uint32_t);
++  for (; s; s--, ptr++)
++    {
++      struct grub_acpi_table_header *tbl;
++      tbl = (struct grub_acpi_table_header *) (grub_addr_t) *ptr;
++      if (grub_memcmp (tbl->signature, sig, 4) == 0)
++	return tbl;
++    }
++  return 0;
++}
++
++static void *
++grub_acpi_xsdt_find_table (struct grub_acpi_table_header *xsdt, const char *sig)
++{
++  grub_size_t s;
++  grub_uint64_t *ptr;
++
++  if (!xsdt)
++    return 0;
++
++  if (grub_memcmp (xsdt->signature, "XSDT", 4) != 0)
++    return 0;
++
++  ptr = (grub_uint64_t *) (xsdt + 1);
++  s = (xsdt->length - sizeof (*xsdt)) / sizeof (grub_uint32_t);
++  for (; s; s--, ptr++)
++    {
++      struct grub_acpi_table_header *tbl;
++#if GRUB_CPU_SIZEOF_VOID_P != 8
++      if (*ptr >> 32)
++	continue;
++#endif
++      tbl = (struct grub_acpi_table_header *) (grub_addr_t) *ptr;
++      if (grub_memcmp (tbl->signature, sig, 4) == 0)
++	return tbl;
++    }
++  return 0;
++}
++
++struct grub_acpi_fadt *
++grub_acpi_find_fadt (void)
++{
++  struct grub_acpi_fadt *fadt = 0;
++  struct grub_acpi_rsdp_v10 *rsdpv1;
++  struct grub_acpi_rsdp_v20 *rsdpv2;
++  rsdpv1 = grub_machine_acpi_get_rsdpv1 ();
++  if (rsdpv1)
++    fadt = grub_acpi_rsdt_find_table ((struct grub_acpi_table_header *)
++				      (grub_addr_t) rsdpv1->rsdt_addr,
++				      GRUB_ACPI_FADT_SIGNATURE);
++  if (fadt)
++    return fadt;
++  rsdpv2 = grub_machine_acpi_get_rsdpv2 ();
++  if (rsdpv2)
++    fadt = grub_acpi_rsdt_find_table ((struct grub_acpi_table_header *)
++				      (grub_addr_t) rsdpv2->rsdpv1.rsdt_addr,
++				      GRUB_ACPI_FADT_SIGNATURE);
++  if (fadt)
++    return fadt;
++  if (rsdpv2
++#if GRUB_CPU_SIZEOF_VOID_P != 8
++      && !(rsdpv2->xsdt_addr >> 32)
++#endif
++      )
++    fadt = grub_acpi_xsdt_find_table ((struct grub_acpi_table_header *)
++				      (grub_addr_t) rsdpv2->xsdt_addr,
++				      GRUB_ACPI_FADT_SIGNATURE);
++  if (fadt)
++    return fadt;
++  return 0;
++}
++
++int
++grub_tsc_calibrate_from_pmtimer (void)
++{
++  grub_uint32_t start;
++  grub_uint32_t last;
++  grub_uint32_t cur, end;
++  struct grub_acpi_fadt *fadt;
++  grub_port_t p;
++  grub_uint64_t start_tsc;
++  grub_uint64_t end_tsc;
++  int num_iter = 0;
++
++  fadt = grub_acpi_find_fadt ();
++  if (!fadt)
++    return 0;
++  p = fadt->pmtimer;
++  if (!p)
++    return 0;
++
++  start = grub_inl (p) & 0xffffff;
++  last = start;
++  /* It's 3.579545 MHz clock. Wait 1 ms.  */
++  end = start + 3580;
++  start_tsc = grub_get_tsc ();
++  while (1)
++    {
++      cur = grub_inl (p) & 0xffffff;
++      if (cur < last)
++	cur |= 0x1000000;
++      num_iter++;
++      if (cur >= end)
++	{
++	  end_tsc = grub_get_tsc ();
++	  grub_tsc_rate = grub_divmod64 ((1ULL << 32), end_tsc - start_tsc, 0);
++	  return 1;
++	}
++      /* Check for broken PM timer.
++	 50000000 TSCs is between 5 ms (10GHz) and 200 ms (250 MHz)
++	 if after this time we still don't have 1 ms on pmtimer, then
++	 pmtimer is broken.
++       */
++      if ((num_iter & 0xffffff) == 0 && grub_get_tsc () - start_tsc > 5000000) {
++	return 0;
++      }
++    }
++}
+Index: b/grub-core/kern/i386/xen/tsc.c
+===================================================================
+--- /dev/null
++++ b/grub-core/kern/i386/xen/tsc.c
+@@ -0,0 +1,40 @@
++/* kern/i386/tsc.c - x86 TSC time source implementation
++ * Requires Pentium or better x86 CPU that supports the RDTSC instruction.
++ * This module uses the PIT to calibrate the TSC to
++ * real time.
++ *
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2008  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/types.h>
++#include <grub/time.h>
++#include <grub/misc.h>
++#include <grub/i386/tsc.h>
++#include <grub/xen.h>
++
++int
++grub_tsc_calibrate_from_xen (void)
++{
++  grub_uint64_t t;
++  t = grub_xen_shared_info->vcpu_info[0].time.tsc_to_system_mul;
++  if (grub_xen_shared_info->vcpu_info[0].time.tsc_shift > 0)
++    t <<= grub_xen_shared_info->vcpu_info[0].time.tsc_shift;
++  else
++    t >>= -grub_xen_shared_info->vcpu_info[0].time.tsc_shift;
++  grub_tsc_rate = grub_divmod64 (t, 1000000, 0);
++  return 1;
++}
+Index: b/include/grub/acpi.h
+===================================================================
+--- a/include/grub/acpi.h
++++ b/include/grub/acpi.h
+@@ -67,10 +67,14 @@ struct grub_acpi_fadt
+   grub_uint32_t dsdt_addr;
+   grub_uint8_t somefields1[20];
+   grub_uint32_t pm1a;
+-  grub_uint8_t somefields2[64];
++  grub_uint8_t somefields2[8];
++  grub_uint32_t pmtimer;
++  grub_uint8_t somefields3[32];
++  grub_uint32_t flags;
++  grub_uint8_t somefields4[16];
+   grub_uint64_t facs_xaddr;
+   grub_uint64_t dsdt_xaddr;
+-  grub_uint8_t somefields3[96];
++  grub_uint8_t somefields5[96];
+ } GRUB_PACKED;
+ 
+ #define GRUB_ACPI_MADT_SIGNATURE "APIC"
+@@ -176,9 +180,9 @@ enum
+ #ifndef GRUB_DSDT_TEST
+ struct grub_acpi_rsdp_v10 *grub_acpi_get_rsdpv1 (void);
+ struct grub_acpi_rsdp_v20 *grub_acpi_get_rsdpv2 (void);
+-struct grub_acpi_rsdp_v10 *grub_machine_acpi_get_rsdpv1 (void);
+-struct grub_acpi_rsdp_v20 *grub_machine_acpi_get_rsdpv2 (void);
+-grub_uint8_t grub_byte_checksum (void *base, grub_size_t size);
++struct grub_acpi_rsdp_v10 *EXPORT_FUNC(grub_machine_acpi_get_rsdpv1) (void);
++struct grub_acpi_rsdp_v20 *EXPORT_FUNC(grub_machine_acpi_get_rsdpv2) (void);
++grub_uint8_t EXPORT_FUNC(grub_byte_checksum) (void *base, grub_size_t size);
+ 
+ grub_err_t grub_acpi_create_ebda (void);
+ 
+@@ -235,4 +239,7 @@ enum
+     GRUB_ACPI_EXTOPCODE_BANK_FIELD_OP = 0x87,
+   };
+ 
++struct grub_acpi_fadt *
++grub_acpi_find_fadt (void);
++
+ #endif /* ! GRUB_ACPI_HEADER */
+Index: b/include/grub/i386/tsc.h
+===================================================================
+--- a/include/grub/i386/tsc.h
++++ b/include/grub/i386/tsc.h
+@@ -20,9 +20,35 @@
+ #define KERNEL_CPU_TSC_HEADER   1
+ 
+ #include <grub/types.h>
++#include <grub/i386/cpuid.h>
+ 
+ void grub_tsc_init (void);
+ /* In ms per 2^32 ticks.  */
+ extern grub_uint32_t EXPORT_VAR(grub_tsc_rate);
++int
++grub_tsc_calibrate_from_xen (void);
++int
++grub_tsc_calibrate_from_efi (void);
++int
++grub_tsc_calibrate_from_pmtimer (void);
++int
++grub_tsc_calibrate_from_pit (void);
++
++/* Read the TSC value, which increments with each CPU clock cycle. */
++static __inline grub_uint64_t
++grub_get_tsc (void)
++{
++  grub_uint32_t lo, hi;
++  grub_uint32_t a,b,c,d;
++
++  /* The CPUID instruction is a 'serializing' instruction, and
++     avoids out-of-order execution of the RDTSC instruction. */
++  grub_cpuid (0,a,b,c,d);
++  /* Read TSC value.  We cannot use "=A", since this would use
++     %rax on x86_64. */
++  __asm__ __volatile__ ("rdtsc":"=a" (lo), "=d" (hi));
++
++  return (((grub_uint64_t) hi) << 32) | lo;
++}
+ 
+ #endif /* ! KERNEL_CPU_TSC_HEADER */
+Index: b/grub-core/kern/i386/tsc.c
+===================================================================
+--- a/grub-core/kern/i386/tsc.c
++++ b/grub-core/kern/i386/tsc.c
+@@ -1,7 +1,6 @@
+ /* kern/i386/tsc.c - x86 TSC time source implementation
+  * Requires Pentium or better x86 CPU that supports the RDTSC instruction.
+- * This module uses the RTC (via grub_get_rtc()) to calibrate the TSC to
+- * real time.
++ * This module calibrates the TSC to real time.
+  *
+  *  GRUB  --  GRand Unified Bootloader
+  *  Copyright (C) 2008  Free Software Foundation, Inc.
+@@ -25,12 +24,6 @@
+ #include <grub/misc.h>
+ #include <grub/i386/tsc.h>
+ #include <grub/i386/cpuid.h>
+-#ifdef GRUB_MACHINE_XEN
+-#include <grub/xen.h>
+-#else
+-#include <grub/i386/pit.h>
+-#endif
+-#include <grub/cpu/io.h>
+ 
+ /* This defines the value TSC had at the epoch (that is, when we calibrated it). */
+ static grub_uint64_t tsc_boot_time;
+@@ -40,26 +33,20 @@ static grub_uint64_t tsc_boot_time;
+    in 32-bit.  */
+ grub_uint32_t grub_tsc_rate;
+ 
+-/* Read the TSC value, which increments with each CPU clock cycle. */
+-static __inline grub_uint64_t
+-grub_get_tsc (void)
++static grub_uint64_t
++grub_tsc_get_time_ms (void)
+ {
+-  grub_uint32_t lo, hi;
+-  grub_uint32_t a,b,c,d;
+-
+-  /* The CPUID instruction is a 'serializing' instruction, and
+-     avoids out-of-order execution of the RDTSC instruction. */
+-  grub_cpuid (0,a,b,c,d);
+-  /* Read TSC value.  We cannot use "=A", since this would use
+-     %rax on x86_64. */
+-  __asm__ __volatile__ ("rdtsc":"=a" (lo), "=d" (hi));
+-
+-  return (((grub_uint64_t) hi) << 32) | lo;
++  grub_uint64_t a = grub_get_tsc () - tsc_boot_time;
++  grub_uint64_t ah = a >> 32;
++  grub_uint64_t al = a & 0xffffffff;
++ 
++  return ((al * grub_tsc_rate) >> 32) + ah * grub_tsc_rate;
+ }
+ 
+ static __inline int
+ grub_cpu_is_tsc_supported (void)
+ {
++#ifndef GRUB_MACHINE_XEN
+   grub_uint32_t a,b,c,d;
+   if (! grub_cpu_is_cpuid_supported ())
+     return 0;
+@@ -67,91 +54,41 @@ grub_cpu_is_tsc_supported (void)
+   grub_cpuid(1,a,b,c,d);
+ 
+   return (d & (1 << 4)) != 0;
+-}
+-
+-#ifndef GRUB_MACHINE_XEN
+-
+-static void
+-grub_pit_wait (grub_uint16_t tics)
+-{
+-  /* Disable timer2 gate and speaker.  */
+-  grub_outb (grub_inb (GRUB_PIT_SPEAKER_PORT)
+-	     & ~ (GRUB_PIT_SPK_DATA | GRUB_PIT_SPK_TMR2),
+-             GRUB_PIT_SPEAKER_PORT);
+-
+-  /* Set tics.  */
+-  grub_outb (GRUB_PIT_CTRL_SELECT_2 | GRUB_PIT_CTRL_READLOAD_WORD,
+-	     GRUB_PIT_CTRL);
+-  grub_outb (tics & 0xff, GRUB_PIT_COUNTER_2);
+-  grub_outb (tics >> 8, GRUB_PIT_COUNTER_2);
+-
+-  /* Enable timer2 gate, keep speaker disabled.  */
+-  grub_outb ((grub_inb (GRUB_PIT_SPEAKER_PORT) & ~ GRUB_PIT_SPK_DATA)
+-	     | GRUB_PIT_SPK_TMR2,
+-             GRUB_PIT_SPEAKER_PORT);
+-
+-  /* Wait.  */
+-  while ((grub_inb (GRUB_PIT_SPEAKER_PORT) & GRUB_PIT_SPK_TMR2_LATCH) == 0x00);
+-
+-  /* Disable timer2 gate and speaker.  */
+-  grub_outb (grub_inb (GRUB_PIT_SPEAKER_PORT)
+-	     & ~ (GRUB_PIT_SPK_DATA | GRUB_PIT_SPK_TMR2),
+-             GRUB_PIT_SPEAKER_PORT);
+-}
++#else
++  return 1;
+ #endif
+-
+-static grub_uint64_t
+-grub_tsc_get_time_ms (void)
+-{
+-  grub_uint64_t a = grub_get_tsc () - tsc_boot_time;
+-  grub_uint64_t ah = a >> 32;
+-  grub_uint64_t al = a & 0xffffffff;
+-
+-  return ((al * grub_tsc_rate) >> 32) + ah * grub_tsc_rate;
+ }
+ 
+-#ifndef GRUB_MACHINE_XEN
+-/* Calibrate the TSC based on the RTC.  */
+-static void
+-calibrate_tsc (void)
++static int
++calibrate_tsc_hardcode (void)
+ {
+-  /* First calibrate the TSC rate (relative, not absolute time). */
+-  grub_uint64_t end_tsc;
+-
+-  tsc_boot_time = grub_get_tsc ();
+-  grub_pit_wait (0xffff);
+-  end_tsc = grub_get_tsc ();
+-
+-  grub_tsc_rate = grub_divmod64 ((55ULL << 32), end_tsc - tsc_boot_time, 0);
++  grub_tsc_rate = 5368;/* 800 MHz */
++  return 1;
+ }
+-#endif
+ 
+ void
+ grub_tsc_init (void)
+ {
+-#ifdef GRUB_MACHINE_XEN
+-  grub_uint64_t t;
+-  tsc_boot_time = grub_get_tsc ();
+-  t = grub_xen_shared_info->vcpu_info[0].time.tsc_to_system_mul;
+-  if (grub_xen_shared_info->vcpu_info[0].time.tsc_shift > 0)
+-    t <<= grub_xen_shared_info->vcpu_info[0].time.tsc_shift;
+-  else
+-    t >>= -grub_xen_shared_info->vcpu_info[0].time.tsc_shift;
+-  grub_tsc_rate = grub_divmod64 (t, 1000000, 0);
+-  grub_install_get_time_ms (grub_tsc_get_time_ms);
+-#else
+-  if (grub_cpu_is_tsc_supported ())
+-    {
+-      calibrate_tsc ();
+-      grub_install_get_time_ms (grub_tsc_get_time_ms);
+-    }
+-  else
++  if (!grub_cpu_is_tsc_supported ())
+     {
+ #if defined (GRUB_MACHINE_PCBIOS) || defined (GRUB_MACHINE_IEEE1275)
+       grub_install_get_time_ms (grub_rtc_get_time_ms);
+ #else
+       grub_fatal ("no TSC found");
+ #endif
++      return;
+     }
++
++  tsc_boot_time = grub_get_tsc ();
++
++#ifdef GRUB_MACHINE_XEN
++  (void) (grub_tsc_calibrate_from_xen () || calibrate_tsc_hardcode());
++#elif defined (GRUB_MACHINE_EFI)
++  (void) (grub_tsc_calibrate_from_pit () || grub_tsc_calibrate_from_pmtimer () || grub_tsc_calibrate_from_efi() || calibrate_tsc_hardcode());
++#elif defined (GRUB_MACHINE_COREBOOT)
++  (void) (grub_tsc_calibrate_from_pmtimer () || grub_tsc_calibrate_from_pit () || calibrate_tsc_hardcode());
++#else
++  (void) (grub_tsc_calibrate_from_pit () || calibrate_tsc_hardcode());
+ #endif
++  grub_install_get_time_ms (grub_tsc_get_time_ms);
+ }

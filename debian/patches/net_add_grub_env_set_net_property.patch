@@ -1,0 +1,179 @@
+From e4dbf247b656eb9577020af653ff37159fc340f2 Mon Sep 17 00:00:00 2001
+From: Paulo Flabiano Smorigo <pfsmorigo@br.ibm.com>
+Date: Tue, 4 Feb 2014 18:41:38 -0200
+Subject: add grub_env_set_net_property function
+
+* grub-core/net/bootp.c: Remove set_env_limn_ro.
+* grub-core/net/net.c: Add grub_env_set_net_property.
+* include/grub/net.h: Likewise.
+---
+ grub-core/net/bootp.c |   63 ++++++++++++--------------------------------------
+ grub-core/net/net.c   |   38 ++++++++++++++++++++++++++++++
+ include/grub/net.h    |    4 +++
+ 3 files changed, 58 insertions(+), 47 deletions(-)
+
+Index: b/grub-core/net/bootp.c
+===================================================================
+--- a/grub-core/net/bootp.c
++++ b/grub-core/net/bootp.c
+@@ -25,41 +25,6 @@
+ #include <grub/net/udp.h>
+ #include <grub/datetime.h>
+ 
+-static char *
+-grub_env_write_readonly (struct grub_env_var *var __attribute__ ((unused)),
+-			 const char *val __attribute__ ((unused)))
+-{
+-  return NULL;
+-}
+-
+-static void
+-set_env_limn_ro (const char *intername, const char *suffix,
+-		 const char *value, grub_size_t len)
+-{
+-  char *varname, *varvalue;
+-  char *ptr;
+-  varname = grub_xasprintf ("net_%s_%s", intername, suffix);
+-  if (!varname)
+-    return;
+-  for (ptr = varname; *ptr; ptr++)
+-    if (*ptr == ':')
+-      *ptr = '_';
+-  varvalue = grub_malloc (len + 1);
+-  if (!varvalue)
+-    {
+-      grub_free (varname);
+-      return;
+-    }
+-
+-  grub_memcpy (varvalue, value, len);
+-  varvalue[len] = 0;
+-  grub_env_set (varname, varvalue);
+-  grub_register_variable_hook (varname, 0, grub_env_write_readonly);
+-  grub_env_export (varname);
+-  grub_free (varname);
+-  grub_free (varvalue);
+-}
+-
+ static void
+ parse_dhcp_vendor (const char *name, const void *vend, int limit, int *mask)
+ {
+@@ -136,20 +101,24 @@ parse_dhcp_vendor (const char *name, con
+ 	  }
+ 	  continue;
+ 	case GRUB_NET_BOOTP_HOSTNAME:
+-	  set_env_limn_ro (name, "hostname", (const char *) ptr, taglength);
+-	  break;
++          grub_env_set_net_property (name, "hostname", (const char *) ptr,
++                                     taglength);
++          break;
+ 
+ 	case GRUB_NET_BOOTP_DOMAIN:
+-	  set_env_limn_ro (name, "domain", (const char *) ptr, taglength);
+-	  break;
++          grub_env_set_net_property (name, "domain", (const char *) ptr,
++                                     taglength);
++          break;
+ 
+ 	case GRUB_NET_BOOTP_ROOT_PATH:
+-	  set_env_limn_ro (name, "rootpath", (const char *) ptr, taglength);
+-	  break;
++          grub_env_set_net_property (name, "rootpath", (const char *) ptr,
++                                     taglength);
++          break;
+ 
+ 	case GRUB_NET_BOOTP_EXTENSIONS_PATH:
+-	  set_env_limn_ro (name, "extensionspath", (const char *) ptr, taglength);
+-	  break;
++          grub_env_set_net_property (name, "extensionspath", (const char *) ptr,
++                                     taglength);
++          break;
+ 
+ 	  /* If you need any other options please contact GRUB
+ 	     development team.  */
+@@ -211,8 +180,8 @@ grub_net_configure_by_dhcp_ack (const ch
+     }
+ 
+   if (size > OFFSET_OF (boot_file, bp))
+-    set_env_limn_ro (name, "boot_file", (char *) bp->boot_file,
+-		     sizeof (bp->boot_file));
++    grub_env_set_net_property (name, "boot_file", bp->boot_file,
++                               sizeof (bp->boot_file));
+   if (is_def)
+     grub_net_default_server = 0;
+   if (is_def && !grub_net_default_server && bp->server_ip)
+@@ -243,8 +212,8 @@ grub_net_configure_by_dhcp_ack (const ch
+   if (size > OFFSET_OF (server_name, bp)
+       && bp->server_name[0])
+     {
+-      set_env_limn_ro (name, "dhcp_server_name", (char *) bp->server_name,
+-		       sizeof (bp->server_name));
++      grub_env_set_net_property (name, "dhcp_server_name", bp->server_name,
++                                 sizeof (bp->server_name));
+       if (is_def && !grub_net_default_server)
+ 	{
+ 	  grub_net_default_server = grub_strdup (bp->server_name);
+Index: b/grub-core/net/net.c
+===================================================================
+--- a/grub-core/net/net.c
++++ b/grub-core/net/net.c
+@@ -1470,6 +1470,44 @@ receive_packets (struct grub_net_card *c
+   grub_print_error ();
+ }
+ 
++static char *
++grub_env_write_readonly (struct grub_env_var *var __attribute__ ((unused)),
++			 const char *val __attribute__ ((unused)))
++{
++  return NULL;
++}
++
++grub_err_t
++grub_env_set_net_property (const char *intername, const char *suffix,
++                           const char *value, grub_size_t len)
++{
++  char *varname, *varvalue;
++  char *ptr;
++
++  varname = grub_xasprintf ("net_%s_%s", intername, suffix);
++  if (!varname)
++    return grub_errno;
++  for (ptr = varname; *ptr; ptr++)
++    if (*ptr == ':')
++      *ptr = '_';
++  varvalue = grub_malloc (len + 1);
++  if (!varvalue)
++    {
++      grub_free (varname);
++      return grub_errno;
++    }
++
++  grub_memcpy (varvalue, value, len);
++  varvalue[len] = 0;
++  grub_err_t ret = grub_env_set (varname, varvalue);
++  grub_register_variable_hook (varname, 0, grub_env_write_readonly);
++  grub_env_export (varname);
++  grub_free (varname);
++  grub_free (varvalue);
++
++  return ret;
++}
++
+ void
+ grub_net_poll_cards (unsigned time, int *stop_condition)
+ {
+Index: b/include/grub/net.h
+===================================================================
+--- a/include/grub/net.h
++++ b/include/grub/net.h
+@@ -503,6 +503,10 @@ grub_net_addr_to_str (const grub_net_net
+ void
+ grub_net_hwaddr_to_str (const grub_net_link_level_address_t *addr, char *str);
+ 
++grub_err_t
++grub_env_set_net_property (const char *intername, const char *suffix,
++                           const char *value, grub_size_t len);
++
+ void
+ grub_net_poll_cards (unsigned time, int *stop_condition);
+ 

@@ -1,3 +1,34 @@
+grub2 (2.02~beta2-36ubuntu3.6) xenial; urgency=medium
+
+  * Fix support for IPv6 PXE booting under UEFI: (LP: #1229458)
+    - grub_add_grub_env_set_net_property.patch: add grub_env_set_net_property.
+    - misc-fix-invalid-char-strtol.patch: fix strto*l methods invalid chars.
+    - net_read_bracketed_ipv6_addr.patch: read bracketed IPv6 addresses.
+    - bootp_new_net_bootp6_command.patch: add new bootp6 commands.
+    - efinet_uefi_ipv6_pxe_support.patch: teach efinet to allow bootp6.
+    - bootp_process_dhcpack_http_boot.patch: process DHCPACK, support HTTP.
+    - efinet_set_network_from_uefi_devpath.patch: configure network from the
+      devpath provided by the UEFI firmware.
+    - efinet_set_dns_from_uefi_proto.patch: set DNS nameservers and search
+      domains from the UEFI protocol. 
+  * Fix booting on Hyper-V gen 2 VMs due to the lack of PIT there; we can deal
+    with this by using other timers when PIT aren't available. (LP: #1519836)
+    - debian/patches/git_tsc_use_alt_delay_sources_d43a5ee6.patch
+    - debian/patches/git_split_pmtimer_wait_tsc_d9a3bfea.patch
+    - debian/patches/git_fix_tsc_calibration_pit_a03c1034.patch
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 15 Sep 2016 13:56:55 -0400
+
+grub2 (2.02~beta2-36ubuntu3.3) xenial; urgency=medium
+
+  * debian/patches/ip6_send_router_solicitation_7c4b6b7b.patch: handle long
+    RA intervals by explicitly sending a SOLICIT.
+  * debian/patches/ip6_fix_routing_eb9f401f.patch: fix IPv6 routing; we should
+    be able to talk to things outside of link-local addresses; to do this,
+    allow specifying a gateway and interface. (LP: #1229458)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 03 Aug 2016 16:46:41 -0400
+
 grub2 (2.02~beta2-36ubuntu3.2) xenial; urgency=medium
 
   * Add loopback and squash4 modules to the signed EFI images.  LP: #1604499.
