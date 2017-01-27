@@ -373,6 +373,15 @@ case "$1" in
           sed -i -e 's/^GRUB_HIDDEN_TIMEOUT=/#&/' "$tmp_default_grub"
         fi
       ;;
+      grub-ieee1275)
+        if grep ^platform /proc/cpuinfo | grep -q PowerNV; then
+		cat <<-EOF >>"$tmp_default_grub"
+
+		# Disable os-prober for ppc64el on the PowerNV platform (for Petitboot)
+		GRUB_DISABLE_OS_PROBER=true
+		EOF
+        fi
+        ;;
     esac
 
     ucf --three-way --debconf-ok --sum-file=/usr/share/grub/default/grub.md5sum ${tmp_default_grub} /etc/default/grub
