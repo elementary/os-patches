@@ -95,6 +95,8 @@ struct _EphyWebViewPrivate {
   GSList *hidden_popups;
   GSList *shown_popups;
 
+  GtkWidget *geolocation_info_bar;
+  GtkWidget *notification_info_bar;
   GtkWidget *password_info_bar;
 
   EphyHistoryService *history_service;
@@ -478,6 +480,26 @@ ephy_web_view_button_press_event (GtkWidget *widget, GdkEventButton *event)
   return GTK_WIDGET_CLASS (ephy_web_view_parent_class)->button_press_event (widget, event);
 }
 
+static void
+ephy_web_view_track_info_bar (GtkWidget  *new_info_bar,
+                              GtkWidget **tracked_info_bar)
+{
+  g_assert (GTK_IS_INFO_BAR (new_info_bar));
+  g_assert (tracked_info_bar);
+  g_assert (!*tracked_info_bar || GTK_IS_INFO_BAR (*tracked_info_bar));
+
+  /* We track info bars so we only ever show one of a kind. */
+  if (*tracked_info_bar) {
+    g_object_remove_weak_pointer (G_OBJECT (*tracked_info_bar),
+                                  (gpointer *)tracked_info_bar);
+    gtk_widget_destroy (*tracked_info_bar);
+  }
+
+  *tracked_info_bar = new_info_bar;
+  g_object_add_weak_pointer (G_OBJECT (new_info_bar),
+                             (gpointer *)tracked_info_bar);
+}
+
 static GtkWidget *
 ephy_web_view_create_form_auth_save_confirmation_info_bar (EphyWebView *web_view,
                                                            const char *hostname,
@@ -513,16 +535,10 @@ ephy_web_view_create_form_auth_save_confirmation_info_bar (EphyWebView *web_view
   gtk_container_add (GTK_CONTAINER (content_area), label);
   gtk_widget_show (label);
 
+  ephy_web_view_track_info_bar (info_bar, &web_view->priv->password_info_bar);
+
   ephy_embed_add_top_widget (EPHY_GET_EMBED_FROM_EPHY_WEB_VIEW (web_view),
                              info_bar, FALSE);
-
-  /* We track the info_bar, so we only ever show one */
-  if (web_view->priv->password_info_bar)
-    gtk_widget_destroy (web_view->priv->password_info_bar);
-
-  web_view->priv->password_info_bar = info_bar;
-  g_object_add_weak_pointer (G_OBJECT (info_bar),
-                             (gpointer *)&web_view->priv->password_info_bar);
 
   return info_bar;
 }
@@ -608,9 +624,6 @@ web_view_check_snapshot (WebKitWebView *web_view)
   GetSnapshotPathAsyncData *data;
 
   view->priv->snapshot_timeout_id = 0;
-
-  if (ephy_snapshot_service_lookup_snapshot_path (service, url))
-    return FALSE;
 
   data = g_new (GetSnapshotPathAsyncData, 1);
   data->url = g_strdup (url);
@@ -751,11 +764,20 @@ ephy_web_view_dispose (GObject *object)
       priv->web_extension = NULL;
     }
 
-  if (priv->password_info_bar)
-    {
-      g_object_remove_weak_pointer (G_OBJECT (priv->password_info_bar), (gpointer *)&priv->password_info_bar);
-      priv->password_info_bar = NULL;
-    }
+  if (priv->geolocation_info_bar) {
+    g_object_remove_weak_pointer (G_OBJECT (priv->geolocation_info_bar), (gpointer *)&priv->geolocation_info_bar);
+    priv->geolocation_info_bar = NULL;
+  }
+
+  if (priv->notification_info_bar) {
+    g_object_remove_weak_pointer (G_OBJECT (priv->notification_info_bar), (gpointer *)&priv->notification_info_bar);
+    priv->notification_info_bar = NULL;
+  }
+
+  if (priv->password_info_bar) {
+    g_object_remove_weak_pointer (G_OBJECT (priv->password_info_bar), (gpointer *)&priv->password_info_bar);
+    priv->password_info_bar = NULL;
+  }
 
   g_signal_handlers_disconnect_by_func (priv->history_service,
                                         ephy_web_view_history_cleared_cb,
@@ -1472,6 +1494,11 @@ permission_request_cb (WebKitWebView           *web_view,
                     G_CALLBACK (decide_on_permission_request),
                     g_object_ref (decision));
 
+  if (WEBKIT_IS_GEOLOCATION_PERMISSION_REQUEST (decision))
+    ephy_web_view_track_info_bar (info_bar, &EPHY_WEB_VIEW (web_view)->priv->geolocation_info_bar);
+  else
+    ephy_web_view_track_info_bar (info_bar, &EPHY_WEB_VIEW (web_view)->priv->notification_info_bar);
+
   ephy_embed_add_top_widget (EPHY_GET_EMBED_FROM_EPHY_WEB_VIEW (web_view),
                              info_bar, TRUE);
 
@@ -1685,15 +1712,13 @@ load_changed_cb (WebKitWebView *web_view,
 
     if (!ephy_web_view_is_history_frozen (view) &&
         ephy_embed_shell_get_mode (ephy_embed_shell_get_default ()) != EPHY_EMBED_SHELL_MODE_INCOGNITO) {
-      if (!ephy_snapshot_service_lookup_snapshot_path (ephy_snapshot_service_get_default (), webkit_web_view_get_uri (web_view))) {
-        /* FIXME: The 1s delay is a workaround to allow time to render the page and get a favicon.
-         * https://bugzilla.gnome.org/show_bug.cgi?id=761065
-         */
-        if (priv->snapshot_timeout_id == 0) {
-          priv->snapshot_timeout_id = g_timeout_add_seconds_full (G_PRIORITY_LOW, 1,
-                                                                  (GSourceFunc)web_view_check_snapshot,
-                                                                  web_view, NULL);
-        }
+      /* FIXME: The 1s delay is a workaround to allow time to render the page and get a favicon.
+       * https://bugzilla.gnome.org/show_bug.cgi?id=761065
+       */
+      if (priv->snapshot_timeout_id == 0) {
+        priv->snapshot_timeout_id = g_timeout_add_seconds_full (G_PRIORITY_LOW, 1,
+                                                                (GSourceFunc)web_view_check_snapshot,
+                                                                web_view, NULL);
       }
     }
 
@@ -1994,15 +2019,12 @@ load_failed_cb (WebKitWebView *web_view,
   priv->load_failed = TRUE;
   ephy_web_view_set_link_message (view, NULL);
 
-  if (error->domain == SOUP_HTTP_ERROR ||
-      error->domain == G_TLS_ERROR) {
+  if (error->domain != WEBKIT_NETWORK_ERROR &&
+      error->domain != WEBKIT_POLICY_ERROR &&
+      error->domain != WEBKIT_PLUGIN_ERROR) {
     ephy_web_view_load_error_page (view, uri, EPHY_WEB_VIEW_ERROR_PAGE_NETWORK_ERROR, error);
     return TRUE;
   }
-
-  g_return_val_if_fail ((error->domain == WEBKIT_NETWORK_ERROR) ||
-                        (error->domain == WEBKIT_POLICY_ERROR) ||
-                        (error->domain == WEBKIT_PLUGIN_ERROR), FALSE);
 
   switch (error->code) {
   case WEBKIT_NETWORK_ERROR_FAILED:
@@ -2225,8 +2247,11 @@ ephy_web_view_new (void)
 GtkWidget *
 ephy_web_view_new_with_related_view (WebKitWebView *related_view)
 {
+  EphyEmbedShell *shell = ephy_embed_shell_get_default ();
+
   return g_object_new (EPHY_TYPE_WEB_VIEW,
                        "related-view", related_view,
+                       "user-content-manager", ephy_embed_shell_get_user_content_manager (shell),
                        "settings", ephy_embed_prefs_get_settings (),
                        NULL);
 }
