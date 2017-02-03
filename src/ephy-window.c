@@ -317,11 +317,7 @@ static const struct
 	 * when NumLock is on they are KP_9/3 and with NumLock and Control+Shift
 	 * They're KP_PageUp/Down again!
 	 */
-	{ GDK_KEY_Left,		GDK_MOD1_MASK /*Alt*/,	"NavigationBack",	TRUE },
-	{ GDK_KEY_KP_Left,	GDK_MOD1_MASK /*Alt*/,	"NavigationBack",	TRUE },
 	{ GDK_KEY_KP_4,		GDK_MOD1_MASK /*Alt*/,	"NavigationBack",	TRUE },
-	{ GDK_KEY_Right,	GDK_MOD1_MASK /*Alt*/,	"NavigationForward",	TRUE },
-	{ GDK_KEY_KP_Right,	GDK_MOD1_MASK /*Alt*/,	"NavigationForward",	TRUE },
 	{ GDK_KEY_KP_6,		GDK_MOD1_MASK /*Alt*/,	"NavigationForward",	TRUE },
 	{ GDK_KEY_KP_Page_Up,	GDK_CONTROL_MASK,	"TabsPrevious",		FALSE },
 	{ GDK_KEY_KP_9,		GDK_CONTROL_MASK,	"TabsPrevious",		FALSE },
@@ -346,7 +342,17 @@ static const struct
 	{ XF86XK_ZoomOut,	0, 			"ViewZoomOut",		FALSE }
 	/* FIXME: what about ScrollUp, ScrollDown, Menu*, Option, LogOff, Save,.. any others? */
 #endif /* HAVE_X11_XF86KEYSYM_H */
-};
+}, navigation_keybindings_ltr [] = {
+	{ GDK_KEY_Left,		GDK_MOD1_MASK /*Alt*/,	"NavigationBack",	TRUE },
+	{ GDK_KEY_KP_Left,	GDK_MOD1_MASK /*Alt*/,	"NavigationBack",	TRUE },
+	{ GDK_KEY_Right,	GDK_MOD1_MASK /*Alt*/,	"NavigationForward",	TRUE },
+	{ GDK_KEY_KP_Right,	GDK_MOD1_MASK /*Alt*/,	"NavigationForward",	TRUE }
+}, navigation_keybindings_rtl [] = {
+	{ GDK_KEY_Left,		GDK_MOD1_MASK /*Alt*/,	"NavigationForward",	TRUE },
+	{ GDK_KEY_KP_Left,	GDK_MOD1_MASK /*Alt*/,	"NavigationForward",	TRUE },
+	{ GDK_KEY_Right,	GDK_MOD1_MASK /*Alt*/,	"NavigationBack",	TRUE },
+	{ GDK_KEY_KP_Right,	GDK_MOD1_MASK /*Alt*/,	"NavigationBack",	TRUE }
+}, *navigation_keybindings_rtl_ltr;
 
 #define SETTINGS_CONNECTION_DATA_KEY	"EphyWindowSettings"
 
@@ -776,76 +782,18 @@ ephy_window_unfullscreen (EphyWindow *window)
 	ephy_embed_leaving_fullscreen (window->priv->active_embed);
 }
 
-static gboolean 
-ephy_window_key_press_event (GtkWidget *widget,
-			     GdkEventKey *event)
+static gboolean
+ephy_window_bound_accels (GtkWidget *widget,
+			  GdkEventKey *event)
 {
 	EphyWindow *window = EPHY_WINDOW (widget);
 	EphyWindowPrivate *priv = window->priv;
-	GtkWidget *focus_widget;
-	gboolean shortcircuit = FALSE, force_chain = FALSE, handled = FALSE;
 	guint modifier = event->state & gtk_accelerator_get_default_mod_mask ();
 	guint i;
 
-	/* In an attempt to get the mozembed playing nice with things like emacs keybindings
-	 * we are passing important events to the focused child widget before letting the window's
-	 * base handler see them. This is *completely against* stated gtk2 policy but the 
-	 * 'correct' behaviour is exceptionally useless. We need to keep an eye out for 
-	 * unexpected consequences of this decision. IME's should be a high concern, but 
-	 * considering that the IME folks complained about the upside-down event propagation
-	 * rules, we might be doing them a favour.
-	 *
-	 * We achieve this by first evaluating the event to see if it's important, and if
-	 * so, we get the focus widget and attempt to get the widget to handle that event.
-	 * If the widget does handle it, we're done (unless force_chain is true, in which
-	 * case the event is handled as normal in addition to being sent to the focus
-	 * widget), otherwise the event follows the normal handling path.
-	 */
+	navigation_keybindings_rtl_ltr = gtk_widget_get_default_direction () == GTK_TEXT_DIR_RTL ?
+					 navigation_keybindings_rtl : navigation_keybindings_ltr;
 
-	if ((event->state & GDK_CONTROL_MASK ||
-	     event->state & GDK_MOD1_MASK ||
-             event->state & GDK_SHIFT_MASK) &&
-             event->length > 0)
-        {
-		/* Pass (CTRL|ALT|SHIFT)+letter characters to the widget */
-		shortcircuit = TRUE;
-        }
-	else if (event->keyval == GDK_KEY_Escape && modifier == 0)
-	{
-		/* Always pass Escape to both the widget, and the parent */
-		shortcircuit = TRUE;
-		force_chain = TRUE;
-	}
-	else if (priv->key_theme_is_emacs && 
-		 (modifier == GDK_CONTROL_MASK) &&
-		 event->length > 0 &&
-		 /* But don't pass Ctrl+Enter twice */
-		 event->keyval != GDK_KEY_Return &&
-		 event->keyval != GDK_KEY_KP_Enter &&
-		 event->keyval != GDK_KEY_ISO_Enter)
-	{
-		/* Pass CTRL+letter characters to the widget */
-		shortcircuit = TRUE;
-	}
-
-	if (shortcircuit)
-	{
-		focus_widget = gtk_window_get_focus (GTK_WINDOW (window));
-
-		if (GTK_IS_WIDGET (focus_widget))
-		{
-			handled = gtk_widget_event (focus_widget,
-						    (GdkEvent*) event);
-		}
-
-		if (handled && !force_chain)
-		{
-			return handled;
-		}
-	}
-
-	/* Handle accelerators that we want bound, but aren't associated with
-	 * an action */
 	for (i = 0; i < G_N_ELEMENTS (extra_keybindings); i++)
 	{
 		if (event->keyval == extra_keybindings[i].keyval &&
@@ -865,7 +813,102 @@ ephy_window_key_press_event (GtkWidget *widget,
 		}
 	}
 
-	return GTK_WIDGET_CLASS (ephy_window_parent_class)->key_press_event (widget, event);
+	for (i = 0; i < G_N_ELEMENTS (navigation_keybindings_rtl); i++)
+	{
+		if (event->keyval == navigation_keybindings_rtl_ltr[i].keyval &&
+		    modifier == navigation_keybindings_rtl_ltr[i].modifier)
+		{
+			GtkAction * action = gtk_action_group_get_action
+				(navigation_keybindings_rtl_ltr[i].fromToolbar ?
+					priv->toolbar_action_group :
+					priv->action_group,
+				navigation_keybindings_rtl_ltr[i].action);
+			if (gtk_action_is_sensitive (action))
+			{
+				gtk_action_activate (action);
+				return TRUE;
+			}
+			break;
+		}
+	}
+
+	return FALSE;
+}
+
+static gboolean
+ephy_window_should_view_receive_key_press_event (EphyWindow  *window,
+                                                 GdkEventKey *event)
+{
+	GdkDisplay *display;
+	GdkKeymap *keymap;
+	guint keyval;
+	GdkModifierType consumed;
+	GdkModifierType state_mask = GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK;
+
+	display = gtk_widget_get_display (GTK_WIDGET (window));
+	keymap = gdk_keymap_get_for_display (display);
+
+	gdk_keymap_translate_keyboard_state (keymap,
+					     event->hardware_keycode,
+					     event->state,
+					     event->group,
+					     &keyval,
+					     NULL,
+					     NULL,
+					     &consumed);
+	state_mask &= ~consumed;
+
+	/* Websites are allowed to override most Epiphany accelerators, but not
+	 * window or tab management accelerators. */
+	if ((event->state & state_mask) == GDK_CONTROL_MASK)
+		return keyval != GDK_KEY_n &&         /* New Window */
+		       keyval != GDK_KEY_q &&         /* Quit */
+		       keyval != GDK_KEY_T &&         /* Reopen Closed Tab */
+		       keyval != GDK_KEY_t &&         /* New Tab */
+		       keyval != GDK_KEY_w &&         /* Close Tab */
+		       keyval != GDK_KEY_Page_Up &&   /* Previous Tab */
+		       keyval != GDK_KEY_KP_9 &&      /* Previous Tab */
+		       keyval != GDK_KEY_Page_Down && /* Next Tab */
+		       keyval != GDK_KEY_KP_3;        /* Next Tab */
+
+	if ((event->state & state_mask) == (GDK_SHIFT_MASK | GDK_CONTROL_MASK))
+		return keyval != GDK_KEY_Page_Up &&   /* Move Tab Left */
+		       keyval != GDK_KEY_KP_9 &&      /* Move Tab Left */
+		       keyval != GDK_KEY_Page_Down && /* Move Tab Right */
+		       keyval != GDK_KEY_KP_3;        /* Move Tab Right */
+
+	if ((event->state & state_mask) == GDK_MOD1_MASK)
+		return keyval != GDK_KEY_Left &&      /* Back */
+		       keyval != GDK_KEY_Right;       /* Forward */
+}
+
+static gboolean
+ephy_window_key_press_event (GtkWidget *widget,
+			     GdkEventKey *event)
+{
+	EphyWebView *view;
+
+	view = ephy_embed_get_web_view (EPHY_WINDOW (widget)->priv->active_embed);
+	if (gtk_window_get_focus (GTK_WINDOW (widget)) != GTK_WIDGET (view)) {
+		if (ephy_window_bound_accels (widget, event))
+			return GDK_EVENT_STOP;
+		return GTK_WIDGET_CLASS (ephy_window_parent_class)->key_press_event (widget, event);
+	}
+
+	/* GtkWindow's key press handler first calls gtk_window_activate_key,
+	 * then gtk_window_propagate_key_event. We want to do the opposite,
+	 * because we want to give webpages the chance to override most
+	 * Epiphany shortcuts. For example, Ctrl+I in Google Docs should
+	 * italicize your text and not open a new incognito window. So:
+	 * first propagate the event to the web view. Next, try
+	 * accelerators only if the web view did not handle the event.
+	 */
+	if (!ephy_window_should_view_receive_key_press_event (EPHY_WINDOW (widget), event) ||
+	    !gtk_window_propagate_key_event (GTK_WINDOW (widget), event)) {
+		if (!gtk_window_activate_key (GTK_WINDOW (widget), event))
+			ephy_window_bound_accels (widget, event);
+	}
+	return GDK_EVENT_STOP;
 }
 
 static gboolean
