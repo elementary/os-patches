@@ -1,0 +1,39 @@
+Description: Fix hime qt5 immodule
+Bug-Ubuntu: https://launchpad.net/bugs/1655036
+Origin: https://anonscm.debian.org/cgit/collab-maint/im-config.git/commit/?id=de33e65fe4fdd30ee0acfa13decf6dd6d4d5256b
+
+diff --git a/data/25_hime.conf b/data/25_hime.conf
+index 5381aee..71c8f86 100644
+--- a/data/25_hime.conf
++++ b/data/25_hime.conf
+@@ -7,8 +7,8 @@ IM_CONFIG_LONG="$(gettext "HIME Input Method Editor (hime)
+   * Traditional Chinese: hime-chewing
+   * Japanese: hime-anthy
+  * Application platform support:
+-  * GNOME/GTK+: hime-gtk3-immodule
+-  * KDE/Qt: hime-qt4-immodule")"
++  * GNOME/GTK+: hime-gtk2-immodule, hime-gtk3-immodule
++  * KDE/Qt: hime-qt4-immodule, hime-qt5-immodule")"
+ 
+ package_auto () {
+     package_status hime && package_status hime-gtk3-immodule && package_status hime-qt4-immodule
+diff --git a/data/25_hime.rc b/data/25_hime.rc
+index bab6959..b5d42d7 100644
+--- a/data/25_hime.rc
++++ b/data/25_hime.rc
+@@ -44,6 +44,15 @@ for IM_CONFIG_MARKER in /usr/lib/*/qt4/plugins/inputmethods/im-hime.so \
+     fi
+ done
+ 
++QT_IM_MODULE=xim
++# use immodule when available for Qt5
++for IM_CONFIG_MARKER in /usr/lib/*/qt5/plugins/platforminputcontexts/im-hime.so ; do
++    if [ -e $IM_CONFIG_MARKER ]; then
++        QT_IM_MODULE=hime
++        break
++    fi
++done
++
+ # hime has no clutter support, and qt3 immodule is not compiled.
+ CLUTTER_IM_MODULE=xim
+ fi
