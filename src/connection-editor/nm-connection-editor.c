@@ -222,7 +222,7 @@ done:
 		editor->last_validation_error = g_strdup (validation_error);
 	}
 	ce_polkit_button_set_validation_error (CE_POLKIT_BUTTON (editor->ok_button), validation_error);
-	gtk_widget_set_sensitive (editor->export_button, !!validation_error);
+	gtk_widget_set_sensitive (editor->export_button, !validation_error);
 
 	update_sensitivity (editor);
 

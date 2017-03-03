@@ -1,3 +1,33 @@
+network-manager-applet (1.2.6-0ubuntu0.16.04.1) xenial; urgency=medium
+
+  * New upstream bug fix release (LP: #1619354)
+    - Import upstream release 1.2.6, bump n-m version to >= 1.2
+    - Update VCS-* link to the current one
+  * Update patches tracking yakkety, rename due to git-pq:
+    - position_dialogs_to_center_of_the_screen.patch
+      => Always-center-dialogs-on-the-screen.patch
+    - make_menu_items_insensitive_based_on_permissions.patch
+      => Make-sure-the-behavior-for-policykit-restricted-acti.patch
+    - hide_policy_items_env_var.patch
+      => Implement-support-for-hiding-rather-than-desensitizi.patch
+    - applet_adhoc_use_wpa_rsn_part1.patch
+      => Allow-to-create-and-connect-to-Ad-Hoc-RSN-networks.patch
+    - indicator-by-default.patch
+      => Have-the-appindicator-enabled-by-default.patch
+    - ubuntu-vpn-icon-name.patch
+      => On-Ubuntu-we-use-premade-icons-for-the-indicator-VPN.patch
+    - lp1579246_fix_handling_8021x_secrets_for_eth.patch => dropped
+    - wireless-security-fix-failed-assertion-in-default_fi.patch => dropped
+    - wireless-security-return-error-on-eap_method_validat.patch => dropped
+    - applet-remove-assert-s_con-from-applet_get_active_vp.patch => dropped
+    - apple-set-out_icon_name-for-WWAN-connections-for-ind.patch => dropped
+  * Add patches showing wwan options after logout/in (LP: #1651019):
+    - device-broadband-use-define-for-devinfo-tag.patch
+    - applet-re-add-broadband-devices-when-MM-becomes-avai.patch
+    - device-broadband-check-that-the-ModemManager-is-actu.patch
+
+ -- Aron Xu <happyaron@ubuntu.com>  Thu, 12 Jan 2017 19:52:56 +0800
+
 network-manager-applet (1.2.0-0ubuntu0.16.04.4) xenial; urgency=medium
 
   * debian/patches/lp1579246_fix_handling_8021x_secrets_for_eth.patch

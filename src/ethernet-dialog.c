@@ -156,6 +156,10 @@ nma_ethernet_dialog_get_connection (GtkWidget *dialog)
 	/* Save new CA cert ignore values to GSettings */
 	eap_method_ca_cert_ignore_save (tmp_connection);
 
+	/* Remove the 8021x setting to prevent the clearing of secrets when the
+	 * simple-connection is destroyed.
+	 */
+	nm_connection_remove_setting (tmp_connection, NM_TYPE_SETTING_802_1X);
 	g_object_unref (tmp_connection);
 
 	return connection;

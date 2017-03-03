@@ -836,10 +836,6 @@ NMConnectionList *
 nm_connection_list_new (void)
 {
 	NMConnectionList *list;
-	GtkTreePath *path;
-	GtkTreeIter iter;
-	const GPtrArray *all_cons;
-	int i;
 	GError *error = NULL;
 	const char *objects[] = { "NMConnectionList", NULL };
 
@@ -872,19 +868,6 @@ nm_connection_list_new (void)
 	list->connection_list = GTK_TREE_VIEW (gtk_builder_get_object (list->gui, "connection_list"));
 	initialize_treeview (list);
 	add_connection_buttons (list);
-
-	/* Fill the treeview initially */
-	all_cons = nm_client_get_connections (list->client);
-	for (i = 0; i < all_cons->len; i++)
-		connection_added (list->client, all_cons->pdata[i], list);
-
-	if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (list->sortable), &iter)) {
-		path = gtk_tree_model_get_path (GTK_TREE_MODEL (list->sortable), &iter);
-		gtk_tree_view_scroll_to_cell (list->connection_list,
-		                              path, NULL,
-		                              FALSE, 0, 0);
-		gtk_tree_path_free (path);
-	}
 
 	list->dialog = GTK_WIDGET (gtk_builder_get_object (list->gui, "NMConnectionList"));
 	if (!list->dialog)
@@ -975,14 +958,31 @@ list_close_cb (GtkDialog *dialog, gpointer user_data)
 void
 nm_connection_list_present (NMConnectionList *list)
 {
+	const GPtrArray *all_cons;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	int i;
+
 	g_return_if_fail (NM_IS_CONNECTION_LIST (list));
 
-	if (!list->signals_connected) {
+	if (!list->populated) {
+		/* Fill the treeview initially */
+		all_cons = nm_client_get_connections (list->client);
+		for (i = 0; i < all_cons->len; i++)
+			connection_added (list->client, all_cons->pdata[i], list);
+		if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (list->sortable), &iter)) {
+			path = gtk_tree_model_get_path (GTK_TREE_MODEL (list->sortable), &iter);
+			gtk_tree_view_scroll_to_cell (list->connection_list,
+			                              path, NULL,
+			                              FALSE, 0, 0);
+			gtk_tree_path_free (path);
+		}
+
 		g_signal_connect (G_OBJECT (list->dialog), "response",
 			              G_CALLBACK (list_response_cb), list);
 		g_signal_connect (G_OBJECT (list->dialog), "close",
 			              G_CALLBACK (list_close_cb), list);
-		list->signals_connected = TRUE;
+		list->populated = TRUE;
 	}
 
 	gtk_window_present (GTK_WINDOW (list->dialog));

@@ -261,6 +261,16 @@ stuff_changed_cb (WirelessSecurity *sec, gpointer user_data)
 	GBytes *ssid = NULL;
 	gboolean free_ssid = TRUE;
 	gboolean valid = FALSE;
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	WirelessSecurity *sel_sec = NULL;
+
+	model = gtk_combo_box_get_model (GTK_COMBO_BOX (priv->sec_combo));
+	if (gtk_combo_box_get_active_iter (GTK_COMBO_BOX (priv->sec_combo), &iter))
+		gtk_tree_model_get (model, &iter, S_SEC_COLUMN, &sel_sec, -1);
+
+	if (sel_sec != sec)
+		return;
 
 	if (priv->connection) {
 		NMSettingWireless *s_wireless;
@@ -750,9 +760,21 @@ get_secrets_cb (GObject *object,
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GError *error = NULL;
+	gboolean current_secrets = FALSE;
 
 	if (info->canceled)
 		goto out;
+
+	priv = NMA_WIFI_DIALOG_GET_PRIVATE (info->self);
+	if (priv->secrets_info == info) {
+		priv->secrets_info = NULL;
+
+		/* Buttons should only be re-enabled if this secrets response is the
+		 * in-progress one.
+		 */
+		_set_response_sensitive (info->self, GTK_RESPONSE_CANCEL, TRUE);
+		current_secrets = TRUE;
+	}
 
 	secrets = nm_remote_connection_get_secrets_finish (connection, result, &error);
 	if (error) {
@@ -763,16 +785,8 @@ get_secrets_cb (GObject *object,
 		goto out;
 	}
 
-	priv = NMA_WIFI_DIALOG_GET_PRIVATE (info->self);
-	if (priv->secrets_info == info) {
-		priv->secrets_info = NULL;
-
-		/* Buttons should only be re-enabled if this secrets response is the
-		 * in-progress one.
-		 */
-		_set_response_sensitive (info->self, GTK_RESPONSE_CANCEL, TRUE);
+	if (current_secrets)
 		_set_response_sensitive (info->self, GTK_RESPONSE_OK, TRUE);
-	}
 
 	/* User might have changed the connection while the secrets call was in
 	 * progress, so don't try to update the wrong connection with the secrets

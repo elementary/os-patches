@@ -1,0 +1,60 @@
+From: Beniamino Galvani <bgalvani@redhat.com>
+Date: Thu, 29 Dec 2016 23:58:39 +0100
+Subject: applet: re-add broadband devices when MM becomes available
+
+Broadband devices stay uninitialized if they are added before the
+ModemManager is running. Call again the device_added method after MM
+becomes available.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=776384
+(cherry picked from commit a2936f0ee5296f97a6c3fb9cba9ac88673c6a33f)
+---
+ src/applet-device-broadband.c |  3 +++
+ src/applet.c                  | 20 ++++++++++++++++++++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/src/applet-device-broadband.c b/src/applet-device-broadband.c
+index 29b404b..e19f082 100644
+--- a/src/applet-device-broadband.c
++++ b/src/applet-device-broadband.c
+@@ -1009,6 +1009,9 @@ device_added (NMDevice *device,
+ 	if (!udi)
+ 		return;
+ 
++	if (g_object_get_data (G_OBJECT (modem), BROADBAND_INFO_TAG))
++		return;
++
+ 	if (!applet->mm1) {
+ 		g_warning ("Cannot grab information for modem at %s: No ModemManager support",
+ 		           nm_device_get_udi (device));
+diff --git a/src/applet.c b/src/applet.c
+index afb2c93..beb7c8f 100644
+--- a/src/applet.c
++++ b/src/applet.c
+@@ -2537,6 +2537,26 @@ mm1_name_owner_changed_cb (GDBusObjectManagerClient *mm1,
+ 	name_owner = g_dbus_object_manager_client_get_name_owner (mm1);
+ 	applet->mm1_running = !!name_owner;
+ 	g_free (name_owner);
++
++	if (applet->mm1_running) {
++		const GPtrArray *devices;
++		NMADeviceClass *dclass;
++		NMDevice *device;
++		int i;
++
++		devices = nm_client_get_devices (applet->nm_client);
++		for (i = 0; devices && (i < devices->len); i++) {
++			device = NM_DEVICE (g_ptr_array_index (devices, i));
++			if (NM_IS_DEVICE_MODEM (device)) {
++				dclass = get_device_class (device, applet);
++				if (dclass && dclass->device_added)
++					dclass->device_added (device, applet);
++
++				applet_schedule_update_icon (applet);
++				applet_schedule_update_menu (applet);
++			}
++		}
++	}
+ }
+ 
+ static void

@@ -1,11 +1,15 @@
+From: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Date: Fri, 20 May 2016 14:28:34 +0800
+Subject: lp460144_correctly_update_notification
+
 ---
- src/applet.c |   38 +++++++++++++++++---------------------
+ src/applet.c | 38 +++++++++++++++++---------------------
  1 file changed, 17 insertions(+), 21 deletions(-)
 
-Index: network-manager-applet-1.1.93/src/applet.c
+Index: ubuntu-applet/src/applet.c
 ===================================================================
---- network-manager-applet-1.1.93.orig/src/applet.c
-+++ network-manager-applet-1.1.93/src/applet.c
+--- ubuntu-applet.orig/src/applet.c
++++ ubuntu-applet/src/applet.c
 @@ -635,17 +635,6 @@ applet_menu_item_create_device_item_help
  	return item;
  }
@@ -61,7 +65,7 @@ Index: network-manager-applet-1.1.93/src/applet.c
  
  #if HAVE_LIBNOTIFY_07
  	notify_notification_set_hint (notify, "transient", g_variant_new_boolean (TRUE));
-@@ -3192,7 +3190,6 @@ status_icon_activate_cb (GtkStatusIcon *
+@@ -3191,7 +3189,6 @@ status_icon_activate_cb (GtkStatusIcon *
  	/* Have clicking on the applet act also as acknowledgement
  	 * of the notification. 
  	 */
@@ -69,7 +73,7 @@ Index: network-manager-applet-1.1.93/src/applet.c
  
  	/* Kill any old menu */
  	if (applet->menu)
-@@ -3222,7 +3219,6 @@ status_icon_popup_menu_cb (GtkStatusIcon
+@@ -3221,7 +3218,6 @@ status_icon_popup_menu_cb (GtkStatusIcon
  	/* Have clicking on the applet act also as acknowledgement
  	 * of the notification. 
  	 */

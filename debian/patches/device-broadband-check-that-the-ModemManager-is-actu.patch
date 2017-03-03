@@ -1,0 +1,25 @@
+From: Beniamino Galvani <bgalvani@redhat.com>
+Date: Fri, 30 Dec 2016 10:20:28 +0100
+Subject: device-broadband: check that the ModemManager is actually running
+
+Previously we only checked the existence of the proxy; we should
+instead verify that MM is actually running.
+
+(cherry picked from commit 7ff89d6fab6fefc02b9148e37831278183563a64)
+---
+ src/applet-device-broadband.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/applet-device-broadband.c b/src/applet-device-broadband.c
+index e19f082..88d8fd0 100644
+--- a/src/applet-device-broadband.c
++++ b/src/applet-device-broadband.c
+@@ -1012,7 +1012,7 @@ device_added (NMDevice *device,
+ 	if (g_object_get_data (G_OBJECT (modem), BROADBAND_INFO_TAG))
+ 		return;
+ 
+-	if (!applet->mm1) {
++	if (!applet->mm1_running) {
+ 		g_warning ("Cannot grab information for modem at %s: No ModemManager support",
+ 		           nm_device_get_udi (device));
+ 		return;

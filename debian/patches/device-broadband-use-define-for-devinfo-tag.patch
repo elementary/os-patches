@@ -1,0 +1,58 @@
+From: Beniamino Galvani <bgalvani@redhat.com>
+Date: Fri, 30 Dec 2016 10:19:24 +0100
+Subject: device-broadband: use define for devinfo tag
+
+(cherry picked from commit 163e6e842267a6e7e6e72f486160179312c44ca9)
+---
+ src/applet-device-broadband.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/src/applet-device-broadband.c b/src/applet-device-broadband.c
+index 64c57c9..29b404b 100644
+--- a/src/applet-device-broadband.c
++++ b/src/applet-device-broadband.c
+@@ -30,6 +30,8 @@
+ #include "mobile-helpers.h"
+ #include "mb-menu-item.h"
+ 
++#define BROADBAND_INFO_TAG "devinfo"
++
+ typedef struct {
+ 	NMApplet *applet;
+ 	NMDevice *device;
+@@ -470,7 +472,7 @@ get_secrets (SecretsRequest *req,
+ 	                                error))
+ 		return FALSE;
+ 
+-	devinfo = g_object_get_data (G_OBJECT (device), "devinfo");
++	devinfo = g_object_get_data (G_OBJECT (device), BROADBAND_INFO_TAG);
+ 	if (!devinfo) {
+ 		g_set_error (error,
+ 		             NM_SECRET_AGENT_ERROR,
+@@ -637,7 +639,7 @@ get_icon (NMDevice *device,
+ 		return;
+ 	}
+ 
+-	info = g_object_get_data (G_OBJECT (device), "devinfo");
++	info = g_object_get_data (G_OBJECT (device), BROADBAND_INFO_TAG);
+ 	if (!info) {
+ 		g_warning ("ModemManager is not available for modem at %s",
+ 		           nm_device_get_udi (device));
+@@ -720,7 +722,7 @@ add_menu_item (NMDevice *device,
+ 	GtkWidget *item;
+ 	int i;
+ 
+-	info = g_object_get_data (G_OBJECT (device), "devinfo");
++	info = g_object_get_data (G_OBJECT (device), BROADBAND_INFO_TAG);
+ 	if (!info) {
+ 		g_warning ("ModemManager is not available for modem at %s",
+ 		           nm_device_get_udi (device));
+@@ -1057,7 +1059,7 @@ device_added (NMDevice *device,
+ 
+ 	/* Store device info */
+ 	g_object_set_data_full (G_OBJECT (modem),
+-	                        "devinfo",
++	                        BROADBAND_INFO_TAG,
+ 	                        info,
+ 	                        (GDestroyNotify)broadband_device_info_free);
+ }

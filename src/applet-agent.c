@@ -384,11 +384,12 @@ done:
 
 		/* Stuff all the found secrets into the connection for the UI to use */
 		g_variant_iter_init (&dict_iter, settings);
-		while (g_variant_iter_next (&dict_iter, "{sa{sv}}", &setting_name, &setting_dict)) {
+		while (g_variant_iter_next (&dict_iter, "{s@a{sv}}", &setting_name, &setting_dict)) {
 			nm_connection_update_secrets (r->connection,
 			                              setting_name,
 			                              setting_dict,
 			                              NULL);
+			g_variant_unref (setting_dict);
 		}
 
 		ask_for_secrets (r);
@@ -513,7 +514,7 @@ cancel_get_secrets (NMSecretAgentOld *agent,
 			g_cancellable_cancel (r->cancellable);
 
 			r->get_callback (NM_SECRET_AGENT_OLD (r->agent), r->connection, NULL, error, r->callback_data);
-			g_hash_table_remove (priv->requests, GUINT_TO_POINTER (r->id));
+			g_hash_table_iter_remove (&iter);
 			g_signal_emit (r->agent, signals[CANCEL_SECRETS], 0, GUINT_TO_POINTER (r->id));
 		}
 	}

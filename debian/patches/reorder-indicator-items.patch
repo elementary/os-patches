@@ -1,12 +1,16 @@
+From: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Date: Fri, 20 May 2016 14:31:26 +0800
+Subject: reorder-indicator-items
+
 ---
- src/applet.c |   11 ++++++-----
+ src/applet.c | 11 ++++++-----
  1 file changed, 6 insertions(+), 5 deletions(-)
 
-Index: network-manager-applet-1.1.93/src/applet.c
+Index: ubuntu-applet/src/applet.c
 ===================================================================
---- network-manager-applet-1.1.93.orig/src/applet.c
-+++ network-manager-applet-1.1.93/src/applet.c
-@@ -1888,15 +1888,15 @@ applet_connection_info_cb (NMApplet *app
+--- ubuntu-applet.orig/src/applet.c
++++ ubuntu-applet/src/applet.c
+@@ -1808,15 +1808,15 @@ applet_connection_info_cb (NMApplet *app
   * Generate the contextual popup menu.
   *
   */
@@ -25,7 +29,7 @@ Index: network-manager-applet-1.1.93/src/applet.c
  
  	if (G_UNLIKELY (icons_shown == FALSE)) {
  		GtkSettings *settings = gtk_widget_get_settings (GTK_WIDGET (menu));
-@@ -2086,9 +2086,10 @@ applet_update_indicator_menu (gpointer u
+@@ -2006,9 +2006,10 @@ applet_update_indicator_menu (gpointer u
  #ifdef WITH_APPINDICATOR
  	GtkWidget *menu;
  
@@ -37,7 +41,7 @@ Index: network-manager-applet-1.1.93/src/applet.c
  	nma_context_menu_update (applet);
  
  	app_indicator_set_menu (applet->app_indicator, GTK_MENU (menu));
-@@ -3327,7 +3328,7 @@ setup_widgets (NMApplet *applet)
+@@ -3254,7 +3255,7 @@ setup_widgets (NMApplet *applet)
  		g_signal_connect (applet->status_icon, "popup-menu",
  				  G_CALLBACK (status_icon_popup_menu_cb), applet);
  

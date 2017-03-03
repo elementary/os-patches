@@ -613,6 +613,9 @@ mobile_helper_get_icon (NMDevice *device,
 		                                               mb_state,
 		                                               mb_tech,
 		                                               applet);
+		*out_icon_name = mobile_helper_get_quality_icon_name (quality_valid ?
+		                                                      quality : 0);
+
 		if ((mb_state != MB_STATE_UNKNOWN) && quality_valid) {
 			gboolean roaming = (mb_state == MB_STATE_ROAMING);
 

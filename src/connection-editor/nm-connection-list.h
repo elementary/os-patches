@@ -48,7 +48,7 @@ typedef struct {
 	GtkBuilder *gui;
 	GtkWidget *dialog;
 
-	gboolean signals_connected;
+	gboolean populated;
 } NMConnectionList;
 
 typedef struct {
