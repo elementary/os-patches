@@ -1,0 +1,56 @@
+From: Iain Lane <iain@orangesquash.org.uk>
+Date: Fri, 3 Mar 2017 12:27:23 +0000
+Subject: applet: Check the user has permission to modify before showing dialog
+
+In most places, we (or NM) check permissions before performing actions.
+One place we don't is when we need more information when connecting to
+and 802.1x network. In that case we pop up a dialog to ask for more
+information before initiaing the connection.
+
+The dialog contains a GTK+ filechooser. We don't want unprivileged users
+to have access to this as it allows opening files.
+
+Check for MODIFY_SYSTEM or MODIFY_OWN before showing the dialog for
+802.1x connections. If the user doesn't have or can't get it, don't show
+the dialog. They wouldn't have been able to create the connection
+anyway.
+---
+ src/applet-device-wifi.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/src/applet-device-wifi.c b/src/applet-device-wifi.c
+index 6fec06c..a796916 100644
+--- a/src/applet-device-wifi.c
++++ b/src/applet-device-wifi.c
+@@ -556,6 +556,15 @@ done:
+ 	gtk_widget_destroy (GTK_WIDGET (dialog));
+ }
+ 
++static gboolean
++can_get_permission (NMApplet *applet, NMClientPermission perm)
++{
++	if (   applet->permissions[perm] == NM_CLIENT_PERMISSION_RESULT_YES
++	    || applet->permissions[perm] == NM_CLIENT_PERMISSION_RESULT_AUTH)
++		return TRUE;
++	return FALSE;
++}
++
+ static void
+ _do_new_auto_connection (NMApplet *applet,
+                          NMDevice *device,
+@@ -657,6 +666,15 @@ _do_new_auto_connection (NMApplet *applet,
+ 	 * Dialog Of Doom.
+ 	 */
+ 	if (s_8021x) {
++		if (!can_get_permission (applet, NM_CLIENT_PERMISSION_SETTINGS_MODIFY_SYSTEM) &&
++		    !can_get_permission (applet, NM_CLIENT_PERMISSION_SETTINGS_MODIFY_OWN)) {
++			const char *text = _("Failed to add new connection");
++			const char *err_text = _("Insufficient privileges.");
++			g_warning ("%s: %s", text, err_text);
++			utils_show_error_dialog (_("Connection failure"), text, err_text, FALSE, NULL);
++                        g_clear_object (&connection);
++			return;
++		}
+ 		more_info = g_malloc0 (sizeof (*more_info));
+ 		more_info->applet = applet;
+ 		more_info->callback = callback;
