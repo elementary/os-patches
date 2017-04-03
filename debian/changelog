@@ -1,3 +1,13 @@
+grub2 (2.02~beta2-36ubuntu3.9) xenial; urgency=medium
+
+  * debian/patches/install_signed.patch: update to use the new names for the
+    shim binary (shim$arch), MokManager (mm$arch) and add fallback (fb$arch).
+    (LP: #1637290)
+  * debian/control: Breaks shim (<< 0.9+1474479173.6c180c6-0ubuntu1~) for the
+    renamed EFI binaries.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 08 Nov 2016 14:42:24 -0500
+
 grub2 (2.02~beta2-36ubuntu3.8) xenial; urgency=medium
 
   * debian/patches/support_initrd-less_boot.patch: Added knobs to allow
