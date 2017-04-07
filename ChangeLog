@@ -1,3 +1,196 @@
+commit 2578255dd1971b1d70321f428d33de810dea495f
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:   Fri Feb 3 13:38:57 2017 -0600
+
+    Prepare 3.18.11
+
+ NEWS         | 8 ++++++++
+ configure.ac | 2 +-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+commit 0f67243b5bba89ee5fa6f762fcc267354e61a615
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:   Fri Feb 3 13:45:01 2017 -0600
+
+    window: Fix missing return value
+
+ src/ephy-window.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 6225374a94c4e6343fc32cb2426f7b5c076164c3
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:   Thu Feb 2 21:31:46 2017 -0600
+
+    Do not run new migrator if the main profile has been migrated
+    
+    This is ephy *profile* migrator. It runs on a per-profile basis. i.e.
+    each web app runs migrators separately. So this migration step could run
+    once for a profile dir, then again far in the future when an old web app
+    is opened. But passwords are global state, not stored in the profile dir,
+    and we want to run this migration only once. This is tricky to fix, but
+    it's easier if we relax the constraint to "never run this migrator if it
+    has been run already for the default profile dir." That's because we don't
+    really care if a couple web app passwords get converted from insecure to
+    secure, which is not a big problem and indicates the user probably never
+    uses Epiphany except for web apps anyway. We just don't want all the user's
+    passwords to get converted mysteriously because he happens to open a web
+    app. So check the migration version for the default profile dir and abort
+    if this migrator has already run there. This way we avoid adding a new flag
+    file to clutter the profile dir just to check if this migrator has run.
+    
+    https://bugzilla.gnome.org/show_bug.cgi?id=752738
+
+ lib/ephy-profile-migrator.c | 22 ++++++++++++++++++++++
+ lib/ephy-profile-utils.c    | 15 ++++++++++++---
+ lib/ephy-profile-utils.h    |  2 ++
+ 3 files changed, 36 insertions(+), 3 deletions(-)
+
+commit b0e4bdf3dbf145d21bb5a2e4c8f27acdb0bf2b36
+Author: Carlos Garcia Campos <cgarcia@igalia.com>
+Date:   Tue Nov 10 08:40:06 2015 +0100
+
+    file-helpers: Add ephy_default_dot_dir()
+    
+    It always returns the main default dot dir, no matter what the current
+    profile is. This is needed because some private profiles could need to
+    use the default dot dir, for example, web applications.
+
+ lib/ephy-file-helpers.c | 17 ++++++++++++++---
+ lib/ephy-file-helpers.h |  1 +
+ 2 files changed, 15 insertions(+), 3 deletions(-)
+
+commit 8c0b67b6b37e7d48f373a27429a91b66fd77e28f
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:   Thu Feb 2 19:51:15 2017 -0600
+
+    form-auth-data: Properly normalize URI when accessing secret service
+    
+    I've mishandled this issue pretty badly. Incredibly, my previous patch,
+    which was intended to ensure we always normalize URIs to security
+    origins when working with form auth data, only fixed use of the form
+    auth data cache. It didn't actually fix any use of the secret service
+    itself. Fix that.
+    
+    This commit notably removes support for mailman passwords, which is
+    making the code way too complicated and conflicts with the goal of
+    storing only security origins and not full URIs in the secret service.
+    
+    Note: this normalization is way better than what we were doing before.
+    In particular, it incidentally fixes odd bugs like the URI framgment,
+    even the empty fragment #, being sufficient to trick our password
+    manager into storing separate passwords, so this should also make the
+    password filling significantly more reliable than it used to be. (Unless
+    you need per-URI passwords without a username, i.e. mailman passwords,
+    in which case you're just out of luck, sorry!)
+    
+    https://bugzilla.gnome.org/show_bug.cgi?id=752738
+
+ lib/ephy-form-auth-data.c | 68 ++++++++++++++---------------------------------
+ 1 file changed, 20 insertions(+), 48 deletions(-)
+
+commit f67485276d134bad40da1a428468433fed7c1844
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:   Wed Feb 1 21:43:01 2017 -0600
+
+    Fix impedance mismatch between web extension and form auth data cache
+    
+    Using just host is not sufficient, we need to have protocol and port as
+    well for matching based on security origin to work properly.
+    
+    Unfortunately the existing code here was full of subtle errors: the
+    parameters named "uri" were actually passed hostnames from the web
+    extension, and not URIs at all. The code only worked as long as that
+    assumption held, but I broke it because I expected the URI parameters to
+    actually contain URIs. So fix this. Really pass URIs and not hostnames,
+    and properly convert them to security origins.
+    
+    Thanks to Hussam for reporting this bug so quickly after it was
+    introduced. (As well as lots of other bugs in the past that I've rarely
+    credited him for in commit messages.)
+    
+    https://bugzilla.gnome.org/show_bug.cgi?id=752738
+
+ embed/web-extension/ephy-web-extension.c | 24 ++++++++++--------------
+ lib/ephy-form-auth-data.c                | 31 +++++++++++++++++--------------
+ 2 files changed, 27 insertions(+), 28 deletions(-)
+
+commit eac0e129624b0b2dbfc35f9f632c8f74ee6b247a
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:   Wed Feb 1 11:32:32 2017 -0600
+
+    Add profile migrator to migrate insecure passwords
+    
+    All previously-saved passwords will now only be available to https://
+    origins. Users will have to manually enter their passwords once again in
+    order to save them separately for an insecure origin.
+    
+    https://bugzilla.gnome.org/show_bug.cgi?id=752738
+
+ lib/ephy-profile-migrator.c | 76 +++++++++++++++++++++++++++++++++++++++++++++
+ lib/ephy-profile-utils.h    |  2 +-
+ lib/ephy-uri-helpers.c      | 24 ++++++++++++++
+ lib/ephy-uri-helpers.h      |  1 +
+ 4 files changed, 102 insertions(+), 1 deletion(-)
+
+commit dc8be0251f9ba61500c1dcc22c45de18b8539001
+Author: Diego Escalante Urrelo <diegoe@igalia.com>
+Date:   Wed Jan 8 10:39:15 2014 -0500
+
+    e-profile-migrator: update web-apps .desktop files Category
+    
+    https://bugzilla.gnome.org/show_bug.cgi?id=672574
+
+ lib/ephy-profile-migrator.c | 36 ++++++++++++++++++++++++++++++++++++
+ lib/ephy-profile-utils.h    |  2 +-
+ 2 files changed, 37 insertions(+), 1 deletion(-)
+
+commit 4f5b3f39adef8a5795180b2d25b0358a7004602c
+Author: Diego Escalante Urrelo <diegoe@igalia.com>
+Date:   Wed Mar 28 04:20:51 2012 -0500
+
+    e-web-app-utils: use Categories in desktop file
+    
+    https://bugzilla.gnome.org/show_bug.cgi?id=672574
+
+ lib/ephy-web-app-utils.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 2961d01934176463520e539e68f63863ad2686cd
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:   Thu Dec 29 19:33:48 2016 -0600
+
+    form-auth: Store passwords for security origins, not hosts
+    
+    This prevents an active MITM attacker from enumerating all your saved
+    passwords. The attacker will now only be able to access passwords saved
+    on http:// sites. That's by design, though; users are now warned when
+    focusing insecure password forms and should think twice before saving
+    such passwords.
+    
+    Unfortunately this does introduce a migration issue, in that no
+    previously-saved passwords will be available on https:// websites
+    anymore, and all previously-saved passwords will still be enumerable by
+    attackers. I'm not sure how to handle migration. We might be able to
+    handle it nicely by using the history service to guess whether a
+    password should be migrated from http:// to https://, but that is not a
+    simple project.
+    
+    https://bugzilla.gnome.org/show_bug.cgi?id=752738
+
+ lib/ephy-form-auth-data.c | 34 +++++++++++++++-------------------
+ src/passwords-dialog.c    | 24 ++++++++++++++----------
+ 2 files changed, 29 insertions(+), 29 deletions(-)
+
+commit b2d9e52c68c44398930741a1cbd8b4624b44a9ea
+Author: Michael Catanzaro <mcatanzaro@gnome.org>
+Date:   Thu Dec 29 12:54:43 2016 -0600
+
+    uri-helpers: Add function to convert URI to security origin
+
+ lib/ephy-uri-helpers.c | 25 ++++++++++++++++++++++++-
+ lib/ephy-uri-helpers.h |  2 ++
+ 2 files changed, 26 insertions(+), 1 deletion(-)
+
 commit 36903a126863e58b2be96bb3c74e7ecfd2352105
 Author: Michael Catanzaro <mcatanzaro@gnome.org>
 Date:   Tue Dec 27 18:39:30 2016 -0600
@@ -5888,142 +6081,3 @@ Date:   Thu Sep 4 12:37:54 2014 +0200
 
  help/es/es.po | 42 ++++++++++++++++++++----------------------
  1 file changed, 20 insertions(+), 22 deletions(-)
-
-commit 48efaae4becce38e1b6609f8b1906f1585393163
-Author: Daniel Mustieles <daniel.mustieles@gmail.com>
-Date:   Wed Sep 3 14:11:19 2014 +0200
-
-    Updated Spanish translation
-
- po/es.po | 185 +++++++++++++++++++++++++++++++++++++++++++++++----------------
- 1 file changed, 138 insertions(+), 47 deletions(-)
-
-commit cccf1f199cbff85c6e974a986f31f44c9e74813d
-Author: Andika Triwidada <andika@gmail.com>
-Date:   Tue Sep 2 13:48:01 2014 +0000
-
-    Updated Indonesian translation
-
- po/id.po | 473 ++++++++++++++++++++++++++++++++++++++++++++-------------------
- 1 file changed, 330 insertions(+), 143 deletions(-)
-
-commit 412453adf1564f2387c3c6a3733ac60640030b7d
-Author: Nilamdyuti Goswami <ngoswami@redhat.com>
-Date:   Tue Sep 2 12:13:05 2014 +0000
-
-    Updated Assamese translation
-
- po/as.po | 66 ++++++++++++++++++++++++++++++----------------------------------
- 1 file changed, 31 insertions(+), 35 deletions(-)
-
-commit 4cdae3b6063a1a1d8918ef6f35e3301a31000f4e
-Author: Michael Catanzaro <mcatanzaro@igalia.com>
-Date:   Mon Sep 1 09:23:35 2014 -0500
-
-    ephy-shell: do not lose a remote startup context
-    
-    When starting epiphany multiple times in quick succession, we would
-    asynchronously call ephy_session_resume() from ephy_shell_activate(),
-    but ephy_session_resume() might not finish until after a subsequent call
-    to ephy_shell_activate(), causing us to lose the commands from a remote
-    instance and execute another's commands multiple times. Instead,
-    distinguish between local and remote startup contexts so that
-    ephy_shell_activate() can know whether we are receiving commands from a
-    remote instance, and not resume the session if so. This allows us to
-    synchronously load the commands before the next call to
-    ephy_shell_before_emit() invalidates the remote startup context.
-    
-    https://bugzilla.gnome.org/show_bug.cgi?id=735577
-
- src/ephy-shell.c | 85 +++++++++++++++++++++++++++-----------------------------
- 1 file changed, 41 insertions(+), 44 deletions(-)
-
-commit 698cf17c83be7a287ade81a5fc15ef8fa32964e4
-Author: Sweta Kothari <swkothar@redhat.com>
-Date:   Mon Sep 1 19:23:02 2014 +0530
-
-    Updated gujarati translations
-
- po/gu.po | 2887 ++++++++++++++++++++++++++++++++++++--------------------------
- 1 file changed, 1676 insertions(+), 1211 deletions(-)
-
-commit df340df6c88c25f642694731e2e8863b6373a10e
-Author: Michael Catanzaro <mcatanzaro@igalia.com>
-Date:   Fri Aug 29 13:56:09 2014 -0500
-
-    ephy-shell: allow multiple open_uris idles
-    
-    We should not silently fail a call to ephy_shell_open_uris(), to handle
-    a race condition where a user clicks on multiple URIs in quick
-    succession.
-    
-    https://bugzilla.gnome.org/show_bug.cgi?id=735577
-
- src/ephy-shell.c | 36 +++++++++++++++++++++++-------------
- 1 file changed, 23 insertions(+), 13 deletions(-)
-
-commit 27867c02a8e40794b3cda74290fb7ad5212e2305
-Author: Michael Catanzaro <mcatanzaro@igalia.com>
-Date:   Sat Aug 30 20:21:37 2014 -0500
-
-    Update location entry address when title box mode changes
-    
-    Otherwise, we get stuck displaying an old address if the page changes
-    while the entry is locked.
-    
-    https://bugzilla.gnome.org/show_bug.cgi?id=734952
-
- src/ephy-location-controller.c | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
-
-commit db37eb4975a4eea351f242f859711b8a2863475e
-Author: Michael Catanzaro <mcatanzaro@igalia.com>
-Date:   Thu Aug 28 08:38:45 2014 -0500
-
-    Let the location controller control the title box address
-    
-    By binding the title box's address directly to the URI property of the
-    web view, we bypass all our custom logic for displaying the URI,
-    sometimes leading to desyncs between the URI shown by the location entry
-    and the URI shown by the title box.
-    
-    Also, with this change the title of the page now changes at the same
-    time the displayed address does, whereas previously we would change the
-    address on the start of load and the title on completion, which looked
-    odd.
-    
-    https://bugzilla.gnome.org/show_bug.cgi?id=732713
-
- src/ephy-location-controller.c | 23 ++++++++++++++-
- src/ephy-title-box.c           | 65 +++++++++++++++++++++---------------------
- src/ephy-title-box.h           |  3 ++
- src/ephy-window.c              |  1 +
- 4 files changed, 58 insertions(+), 34 deletions(-)
-
-commit 0488a874392593bace715c096c1b71695bdcdb67
-Author: Chao-Hsiung Liao <j_h_liau@yahoo.com.tw>
-Date:   Sun Aug 31 15:51:35 2014 +0800
-
-    Updated Traditional Chinese translation(Hong Kong and Taiwan)
-
- po/zh_HK.po | 218 ++++++++++++++++++++++++++++++++++++++++-------------------
- po/zh_TW.po | 220 ++++++++++++++++++++++++++++++++++++++++--------------------
- 2 files changed, 297 insertions(+), 141 deletions(-)
-
-commit ffccdddbf97f6c72160c70cb57e89a6dd116d6a1
-Author: Maria  Mavridou <mavridou@gmail.com>
-Date:   Sat Aug 30 21:54:31 2014 +0000
-
-    Updated Greek translation
-
- po/el.po | 70 ++++++++++++++++++++++++++++++----------------------------------
- 1 file changed, 33 insertions(+), 37 deletions(-)
-
-commit 190b87bfc7a4a019ab4fac49b712de0e036ac243
-Author: Michael Catanzaro <mcatanzaro@igalia.com>
-Date:   Fri Aug 29 18:04:40 2014 -0500
-
-    Fix typo in log message
-
- src/ephy-session.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)

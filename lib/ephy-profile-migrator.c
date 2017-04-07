@@ -39,6 +39,7 @@
 #include "ephy-profile-utils.h"
 #include "ephy-settings.h"
 #include "ephy-sqlite-connection.h"
+#include "ephy-uri-helpers.h"
 #include "ephy-web-app-utils.h"
 #ifdef ENABLE_NSS
 #include "ephy-nss-glue.h"
@@ -954,6 +955,137 @@ migrate_form_passwords_to_libsecret (void)
   g_object_unref (service);
 }
 
+static void
+migrate_app_desktop_file_categories (void)
+{
+  GList *web_apps, *l;
+
+  web_apps = ephy_web_application_get_application_list ();
+
+  for (l = web_apps; l; l = l->next) {
+    EphyWebApplication *app = (EphyWebApplication *) l->data;
+    GKeyFile *file;
+    char *data = NULL;
+    char *app_path;
+    char *desktop_file_path;
+
+    file = g_key_file_new ();
+
+    app_path = ephy_web_application_get_profile_directory (app->name);
+    desktop_file_path = g_build_filename (app_path, app->desktop_file, NULL);
+    g_key_file_load_from_file (file, desktop_file_path, G_KEY_FILE_NONE, NULL);
+
+    LOG ("migrate_app_desktop_file_categories: adding Categories to %s", app->name);
+    g_key_file_set_value (file, "Desktop Entry", "Categories", "Network;GNOME;GTK;");
+
+    data = g_key_file_to_data (file, NULL, NULL);
+    g_file_set_contents (desktop_file_path, data, -1, NULL);
+
+    g_free (app_path);
+    g_free (desktop_file_path);
+    g_free (data);
+    g_key_file_free (file);
+  }
+
+  ephy_web_application_free_application_list (web_apps);
+}
+
+/* https://bugzilla.gnome.org/show_bug.cgi?id=752738 */
+static void
+migrate_insecure_password (SecretItem *item)
+{
+  GHashTable *attributes;
+  SoupURI *soup_uri;
+  const char *original_uri;
+
+  attributes = secret_item_get_attributes (item);
+  original_uri = g_hash_table_lookup (attributes, URI_KEY);
+  soup_uri = soup_uri_new (original_uri);
+  if (soup_uri == NULL) {
+    g_warning ("Failed to convert URI %s to a SoupURI, insecure password will not be migrated", original_uri);
+    g_hash_table_unref (attributes);
+    return;
+  }
+
+  if (soup_uri->scheme == SOUP_URI_SCHEME_HTTP) {
+    char *new_uri;
+    GError *error = NULL;
+
+    new_uri = ephy_uri_to_https_security_origin (original_uri);
+
+    g_hash_table_replace (attributes, g_strdup (URI_KEY), new_uri);
+    secret_item_set_attributes_sync (item, EPHY_FORM_PASSWORD_SCHEMA, attributes, NULL, &error);
+    if (error != NULL) {
+      g_warning ("Failed to convert URI %s to https://, insecure password will not be migrated: %s", original_uri, error->message);
+      g_error_free (error);
+    }
+  }
+
+  g_hash_table_unref (attributes);
+  soup_uri_free (soup_uri);
+}
+
+static void
+migrate_insecure_passwords (void)
+{
+  SecretService *service;
+  GHashTable *attributes;
+  GList *items;
+  int default_profile_migration_version;
+  GError *error = NULL;
+
+  /* This is ephy *profile* migrator. It runs on a per-profile basis. i.e.
+   * each web app runs migrators separately. So this migration step could run
+   * once for a profile dir, then again far in the future when an old web app
+   * is opened. But passwords are global state, not stored in the profile dir,
+   * and we want to run this migration only once. This is tricky to fix, but
+   * it's easier if we relax the constraint to "never run this migrator if it
+   * has been run already for the default profile dir." That's because we don't
+   * really care if a couple web app passwords get converted from insecure to
+   * secure, which is not a big problem and indicates the user probably never
+   * uses Epiphany except for web apps anyway. We just don't want all the user's
+   * passwords to get converted mysteriously because he happens to open a web
+   * app. So check the migration version for the default profile dir and abort
+   * if this migrator has already run there. This way we avoid adding a new flag
+   * file to clutter the profile dir just to check if this migrator has run.
+   */
+  default_profile_migration_version = ephy_profile_utils_get_migration_version_for_profile_dir (ephy_default_dot_dir ());
+  if (default_profile_migration_version >= EPHY_INSECURE_PASSWORDS_MIGRATION_VERSION) {
+    LOG ("Skipping insecure password migration because default profile has already migrated");
+    return;
+  }
+
+  service = secret_service_get_sync (SECRET_SERVICE_LOAD_COLLECTIONS, NULL, &error);
+  if (error != NULL) {
+    g_warning ("Failed to get secret service proxy, insecure passwords will not be migrated: %s", error->message);
+    g_error_free (error);
+    return;
+  }
+
+  attributes = secret_attributes_build (EPHY_FORM_PASSWORD_SCHEMA, NULL);
+
+  items = secret_service_search_sync (service,
+                                      EPHY_FORM_PASSWORD_SCHEMA,
+                                      attributes,
+                                      SECRET_SEARCH_ALL | SECRET_SEARCH_UNLOCK | SECRET_SEARCH_LOAD_SECRETS,
+                                      NULL,
+                                      &error);
+  if (error != NULL) {
+    g_warning ("Failed to search secret service, insecure passwords will not be migrated: %s", error->message);
+    g_error_free (error);
+    goto out;
+  }
+
+  for (GList *l = items; l != NULL; l = l->next)
+    migrate_insecure_password ((SecretItem *)l->data);
+
+  g_list_free_full (items, g_object_unref);
+
+out:
+  g_object_unref (service);
+  g_hash_table_unref (attributes);
+}
+
 const EphyProfileMigrator migrators[] = {
   migrate_cookies,
   migrate_passwords,
@@ -968,6 +1100,8 @@ const EphyProfileMigrator migrators[] = {
   migrate_web_app_links,
   migrate_new_urls_table,
   migrate_form_passwords_to_libsecret,
+  migrate_app_desktop_file_categories,
+  migrate_insecure_passwords,
 };
 
 static gboolean
