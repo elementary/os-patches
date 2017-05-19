@@ -1,0 +1,123 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.3
+Patch-ID:	bash43-047
+
+Bug-Reported-by:	Bernd Dietzel
+Bug-Reference-ID:
+Bug-Reference-URL:	https://bugs.launchpad.net/ubuntu/+source/bash/+bug/1507025
+
+Bug-Description:
+
+Bash performs word expansions on the prompt strings after the special
+escape sequences are expanded.  If a malicious user can modify the system
+hostname or change the name of the bash executable and coerce a user into
+executing it, and the new name contains word expansions (including
+command substitution), bash will expand them in prompt strings containing
+the \h or \H and \s escape sequences, respectively.
+
+Index: bash-4.3/parse.y
+===================================================================
+--- bash-4.3.orig/parse.y	2017-05-16 07:42:30.000000000 -0400
++++ bash-4.3/parse.y	2017-05-16 07:42:52.704766350 -0400
+@@ -5258,7 +5258,7 @@ decode_prompt_string (string)
+ #if defined (PROMPT_STRING_DECODE)
+   int result_size, result_index;
+   int c, n, i;
+-  char *temp, octal_string[4];
++  char *temp, *t_host, octal_string[4];
+   struct tm *tm;  
+   time_t the_time;
+   char timebuf[128];
+@@ -5406,7 +5406,11 @@ decode_prompt_string (string)
+ 
+ 	    case 's':
+ 	      temp = base_pathname (shell_name);
+-	      temp = savestring (temp);
++	      /* Try to quote anything the user can set in the file system */
++	      if (promptvars || posixly_correct)
++		temp = sh_backslash_quote_for_double_quotes (temp);
++	      else
++		temp = savestring (temp);
+ 	      goto add_string;
+ 
+ 	    case 'v':
+@@ -5496,9 +5500,17 @@ decode_prompt_string (string)
+ 
+ 	    case 'h':
+ 	    case 'H':
+-	      temp = savestring (current_host_name);
+-	      if (c == 'h' && (t = (char *)strchr (temp, '.')))
++	      t_host = savestring (current_host_name);
++	      if (c == 'h' && (t = (char *)strchr (t_host, '.')))
+ 		*t = '\0';
++	      if (promptvars || posixly_correct)
++		/* Make sure that expand_prompt_string is called with a
++		   second argument of Q_DOUBLE_QUOTES if we use this
++		   function here. */
++		temp = sh_backslash_quote_for_double_quotes (t_host);
++	      else
++		temp = savestring (t_host);
++	      free (t_host);
+ 	      goto add_string;
+ 
+ 	    case '#':
+Index: bash-4.3/patchlevel.h
+===================================================================
+--- bash-4.3.orig/patchlevel.h	2017-05-16 07:42:30.000000000 -0400
++++ bash-4.3/patchlevel.h	2017-05-16 07:42:52.708766399 -0400
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 46
++#define PATCHLEVEL 47
+ 
+ #endif /* _PATCHLEVEL_H_ */
+Index: bash-4.3/y.tab.c
+===================================================================
+--- bash-4.3.orig/y.tab.c	2017-05-16 07:42:30.000000000 -0400
++++ bash-4.3/y.tab.c	2017-05-16 07:42:52.708766399 -0400
+@@ -7570,7 +7570,7 @@ decode_prompt_string (string)
+ #if defined (PROMPT_STRING_DECODE)
+   int result_size, result_index;
+   int c, n, i;
+-  char *temp, octal_string[4];
++  char *temp, *t_host, octal_string[4];
+   struct tm *tm;  
+   time_t the_time;
+   char timebuf[128];
+@@ -7718,7 +7718,11 @@ decode_prompt_string (string)
+ 
+ 	    case 's':
+ 	      temp = base_pathname (shell_name);
+-	      temp = savestring (temp);
++	      /* Try to quote anything the user can set in the file system */
++	      if (promptvars || posixly_correct)
++		temp = sh_backslash_quote_for_double_quotes (temp);
++	      else
++		temp = savestring (temp);
+ 	      goto add_string;
+ 
+ 	    case 'v':
+@@ -7808,9 +7812,17 @@ decode_prompt_string (string)
+ 
+ 	    case 'h':
+ 	    case 'H':
+-	      temp = savestring (current_host_name);
+-	      if (c == 'h' && (t = (char *)strchr (temp, '.')))
++	      t_host = savestring (current_host_name);
++	      if (c == 'h' && (t = (char *)strchr (t_host, '.')))
+ 		*t = '\0';
++	      if (promptvars || posixly_correct)
++		/* Make sure that expand_prompt_string is called with a
++		   second argument of Q_DOUBLE_QUOTES if we use this
++		   function here. */
++		temp = sh_backslash_quote_for_double_quotes (t_host);
++	      else
++		temp = savestring (t_host);
++	      free (t_host);
+ 	      goto add_string;
+ 
+ 	    case '#':

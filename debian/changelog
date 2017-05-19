@@ -1,3 +1,19 @@
+bash (4.3-14ubuntu1.2) xenial-security; urgency=medium
+
+  * SECURITY UPDATE: word expansions on the prompt strings (LP: #1507025)
+    - debian/patches/bash43-047.diff: add quoting to parse.y, y.tab.c.
+    - CVE-2016-0634
+  * SECURITY UPDATE: code execution via crafted SHELLOPTS and PS4
+    (LP: #1689304)
+    - debian/patches/bash43-048.diff: check for root in variables.c.
+    - CVE-2016-7543
+  * SECURITY UPDATE: restricted shell bypass via use-after-free
+    - debian/patches/bash44-006.diff: check for negative offsets in
+      builtins/pushd.def.
+    - CVE-2016-9401
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 16 May 2017 07:51:45 -0400
+
 bash (4.3-14ubuntu1.1) xenial-proposed; urgency=medium
 
   * SRU: LP: #1595869.
