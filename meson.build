@@ -1,0 +1,26 @@
+project ('gtkcloudproviders', 'c',
+         version: '3.25.1',
+         meson_version: '>=0.40.0',
+         license: 'GPL3+')
+
+add_global_arguments ('-Wno-deprecated-declarations', language:'c')
+
+glib_ver = '>=2.51.2'
+gtk_ver = '>=3.21.6'
+glib = dependency ('glib-2.0', version: glib_ver)
+gtk = dependency ('gtk+-3.0', version: gtk_ver)
+
+prefix = get_option ('prefix')
+libdir = get_option ('libdir')
+bindir = get_option ('bindir')
+datadir = get_option ('datadir')
+servicedir = join_paths (datadir, 'dbus-1', 'services')
+
+
+conf = configuration_data ()
+conf.set_quoted ('VERSION', meson.project_version ())
+conf.set_quoted ('PACKAGE_VERSION', meson.project_version ())
+conf.set_quoted ('GETTEXT_PACKAGE', 'gtkcloudproviders')
+
+subdir ( 'src' )
+subdir ( 'test' )
