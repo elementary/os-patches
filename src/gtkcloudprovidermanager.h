@@ -20,6 +20,10 @@
 
 #include <gio/gio.h>
 
+#define GTK_CLOUD_PROVIDER_MANAGER_DBUS_IFACE "org.freedesktop.CloudProviderManager1"
+#define GTK_CLOUD_PROVIDER_MANAGER_DBUS_NAME  "org.freedesktop.CloudProviderManager"
+#define GTK_CLOUD_PROVIDER_MANAGER_DBUS_PATH  "/org/freedesktop/CloudProviderManager"
+
 G_BEGIN_DECLS
 
 #define GTK_TYPE_CLOUD_PROVIDER_MANAGER             (gtk_cloud_provider_manager_get_type())

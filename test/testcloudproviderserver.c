@@ -95,7 +95,7 @@ static GDBusNodeInfo *introspection_data = NULL;
 /* Introspection data for the service we are exporting */
 static const gchar provider_xml[] =
   "<node>"
-  "  <interface name='org.gtk.CloudProvider'>"
+  "  <interface name='org.freedesktop.CloudProvider1'>"
   "    <method name='GetName'>"
   "      <arg type='s' name='name' direction='out'/>"
   "    </method>"
@@ -113,7 +113,7 @@ static const gchar provider_xml[] =
 
 static const gchar manager_xml[] =
   "<node>"
-  "  <interface name='org.gtk.CloudProviderManager'>"
+  "  <interface name='org.freedesktop.CloudProviderManager1'>"
   "    <method name='CloudProviderChanged'>"
   "    </method>"
   "  </interface>"
@@ -323,7 +323,7 @@ on_bus_acquired (GDBusConnection *connection,
 
   g_debug ("Registering cloud provider server 'MyCloud'\n");
   registration_id = g_dbus_connection_register_object (connection,
-                                                       "/org/gtk/CloudProviderServerExample",
+                                                       "/org/freedesktop/CloudProviderServerExample",
                                                        introspection_data->interfaces[0],
                                                        &interface_vtable,
                                                        cloud_provider,
@@ -331,7 +331,7 @@ on_bus_acquired (GDBusConnection *connection,
                                                        NULL); /* GError** */
   g_assert (registration_id > 0);
   /* Export a menu for our own application */
-  export_menu (connection, "/org/gtk/CloudProviderServerExample");
+  export_menu (connection, "/org/freedesktop/CloudProviderServerExample");
 }
 
 static void
@@ -405,7 +405,7 @@ main (int argc, char *argv[])
   cloud_provider = g_object_new (cloud_provider_get_type (), NULL);
 
   owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                             "org.gtk.CloudProviderServerExample",
+                             "org.freedesktop.CloudProviderServerExample",
                              G_BUS_NAME_OWNER_FLAGS_NONE,
                              on_bus_acquired,
                              on_name_acquired,
@@ -413,15 +413,16 @@ main (int argc, char *argv[])
                              cloud_provider,
                              NULL);
 
+	// FIXME: migrate to gtk_cloud_provider_manager_dup_singleton
   /* Create CloudProviderManager proxy for exporting cloud provider changes */
   proxy_info = g_dbus_node_info_new_for_xml (manager_xml, &error);
-  interface_info = g_dbus_node_info_lookup_interface (proxy_info, "org.gtk.CloudProviderManager");
+  interface_info = g_dbus_node_info_lookup_interface (proxy_info, "org.freedesktop.CloudProviderManager1");
   g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
                             G_DBUS_PROXY_FLAGS_NONE,
                             interface_info,
-                            "org.gtk.CloudProviderManager",
-                            "/org/gtk/CloudProviderManager",
-                            "org.gtk.CloudProviderManager",
+                            "org.freedesktop.CloudProviderManager",
+                            "/org/freedesktop/CloudProviderManager",
+                            "org.freedesktop.CloudProviderManager1",
                             NULL,
                             on_manager_proxy_created,
                             cloud_provider);

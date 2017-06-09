@@ -20,7 +20,7 @@
 
 static const gchar provider_xml[] =
   "<node>"
-  "  <interface name='org.gtk.CloudProvider'>"
+  "  <interface name='org.freedesktop.CloudProvider1'>"
   "    <method name='GetName'>"
   "      <arg type='s' name='name' direction='out'/>"
   "    </method>"
@@ -283,7 +283,7 @@ on_bus_acquired (GObject      *source_object,
   priv = gtk_cloud_provider_get_instance_private (user_data);
   priv->bus = bus;
   proxy_info = g_dbus_node_info_new_for_xml (provider_xml, &error);
-  interface_info = g_dbus_node_info_lookup_interface (proxy_info, "org.gtk.CloudProvider");
+  interface_info = g_dbus_node_info_lookup_interface (proxy_info, "org.freedesktop.CloudProvider1");
   g_clear_object (&priv->cancellable);
   priv->cancellable = g_cancellable_new ();
   g_dbus_proxy_new (priv->bus,
@@ -291,7 +291,7 @@ on_bus_acquired (GObject      *source_object,
                     interface_info,
                     priv->bus_name,
                     priv->object_path,
-                    "org.gtk.CloudProvider",
+                    "org.freedesktop.CloudProvider1",
                     priv->cancellable,
                     on_proxy_created,
                     self);

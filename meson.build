@@ -16,6 +16,7 @@ bindir = get_option ('bindir')
 datadir = get_option ('datadir')
 servicedir = join_paths (datadir, 'dbus-1', 'services')
 
+gnome = import('gnome')
 
 conf = configuration_data ()
 conf.set_quoted ('VERSION', meson.project_version ())

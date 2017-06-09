@@ -43,7 +43,7 @@ static guint gSignals [LAST_SIGNAL];
 
 static const gchar manager_xml[] =
   "<node>"
-  "  <interface name='org.gtk.CloudProviderManager'>"
+  "  <interface name='org.freedesktop.CloudProviderManager1'>"
   "    <method name='CloudProviderChanged'>"
   "    </method>"
   "  </interface>"
@@ -81,7 +81,7 @@ on_bus_acquired (GDBusConnection *connection,
 
   g_debug ("Registering cloud provider server 'MyCloud'\n");
   registration_id = g_dbus_connection_register_object (connection,
-                                                       "/org/gtk/CloudProviderManager",
+                                                       GTK_CLOUD_PROVIDER_MANAGER_DBUS_PATH,
                                                        priv->dbus_node_info->interfaces[0],
                                                        &interface_vtable,
                                                        self,
@@ -129,7 +129,7 @@ gtk_cloud_provider_manager_dup_singleton (void)
       g_assert (priv->dbus_node_info != NULL);
 
       priv->dbus_owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                                            "org.gtk.CloudProviderManager",
+                                            GTK_CLOUD_PROVIDER_MANAGER_DBUS_NAME,
                                             G_BUS_NAME_OWNER_FLAGS_NONE,
                                             on_bus_acquired,
                                             on_name_acquired,
@@ -201,8 +201,6 @@ on_cloud_provider_changed (GtkCloudProvider        *cloud_provider,
   GIcon *icon;
   gchar *name;
   guint status;
-
-  g_print("cloud provider changed in manager");
 
   name = gtk_cloud_provider_get_name (cloud_provider);
   icon = gtk_cloud_provider_get_icon (cloud_provider);
@@ -282,7 +280,7 @@ gtk_cloud_provider_manager_update (GtkCloudProviderManager *manager)
     {
       GFileInfo *info;
 
-      key_files_directory_path = g_build_filename (data_dirs[i], "gtk+", "cloud-providers", NULL);
+      key_files_directory_path = g_build_filename (data_dirs[i], "cloud-providers", NULL);
       key_files_directory_file = g_file_new_for_path (key_files_directory_path);
       file_enumerator = g_file_enumerate_children (key_files_directory_file,
                                                    "standard::name,standard::type",
