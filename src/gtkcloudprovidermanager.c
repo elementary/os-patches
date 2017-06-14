@@ -20,6 +20,7 @@
 #include "gtkcloudprovider.h"
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <gio/gio.h>
 
 #define KEY_FILE_GROUP "Gtk Cloud Provider"
 

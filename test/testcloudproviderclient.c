@@ -4,27 +4,6 @@
 #include <gtkcloudprovidermanager.h>
 
 static void
-print_menu (GtkWidget *menu)
-{
-  GList *children;
-  GList *l;
-  GtkWidget *submenu;
-
-  children = gtk_container_get_children (GTK_CONTAINER (menu));
-  for (l = children; l != NULL; l = l->next)
-    {
-      g_print ("Menu item - %s \n", gtk_menu_item_get_label (l->data));
-      submenu = gtk_menu_item_get_submenu (l->data);
-      if (submenu != NULL)
-        {
-          g_print ("---------\n");
-          print_menu (submenu);
-          g_print ("---------\n");
-        }
-    }
-}
-
-static void
 print_gmenu_model (GMenuModel  *model)
 {
   gint i, n_items;
@@ -65,8 +44,7 @@ on_manager_changed (GtkCloudProviderManager *manager)
   gchar *status_string;
   GIcon *icon;
   gchar *icon_representation;
-  GtkWidget *menu;
-  gchar *path;
+  GMenuModel *menu;
 
   providers = gtk_cloud_provider_manager_get_providers (manager);
   g_print ("Providers data\n");
@@ -107,9 +85,9 @@ on_manager_changed (GtkCloudProviderManager *manager)
 
       g_free (icon_representation);
 
-      menu = gtk_cloud_provider_get_menu (l->data);
+      menu = gtk_cloud_provider_get_menu_model (l->data);
       g_print ("\nMenu\n");
-      print_menu (menu);
+      print_gmenu_model (menu);
     }
   g_print ("\n");
 }

@@ -1,6 +1,8 @@
+gtk = dependency('gtk+-3.0')
+gtkcloudprovidertest_deps = [glib, gio, gio_unix, gtk]
 dep = declare_dependency (link_with: libgtkcloudproviders,
                           include_directories: include_directories('../src/'),
-                          dependencies: libgtkcloudproviders_deps)
+                          dependencies: gtkcloudprovidertest_deps)
 
 executable('testcloudproviderserver', 'testcloudproviderserver.c', dependencies: dep, install: true)
 executable('testcloudproviderclient', 'testcloudproviderclient.c', dependencies: dep, install: true)

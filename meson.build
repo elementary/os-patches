@@ -6,9 +6,9 @@ project ('gtkcloudproviders', 'c',
 add_global_arguments ('-Wno-deprecated-declarations', language:'c')
 
 glib_ver = '>=2.51.2'
-gtk_ver = '>=3.21.6'
 glib = dependency ('glib-2.0', version: glib_ver)
-gtk = dependency ('gtk+-3.0', version: gtk_ver)
+gio = dependency ('gio-2.0', version: glib_ver)
+gio_unix = dependency ('gio-unix-2.0', version: glib_ver)
 
 prefix = get_option ('prefix')
 libdir = get_option ('libdir')

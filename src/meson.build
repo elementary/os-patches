@@ -8,7 +8,7 @@ libgtkcloudproviders_sources = [
   'gtkcloudprovider.c'
 ]
 
-libgtkcloudproviders_deps = [glib, gtk]
+libgtkcloudproviders_deps = [glib, gio, gio_unix]
 
 libgtkcloudproviders = shared_library ('gtkcloudproviders',
                                         libgtkcloudproviders_sources,

@@ -1,7 +1,7 @@
 #include <glib.h>
+#include <gtk/gtk.h>
 #include <stdlib.h>
 #include <gio/gio.h>
-#include <gtk/gtk.h>
 #include <gtkcloudprovider.h>
 
 #define TIMEOUT 2000

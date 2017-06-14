@@ -43,7 +43,6 @@ typedef struct
   gchar *path;
   GtkCloudProviderStatus status;
   GIcon *icon;
-  GtkWidget *menu;
   GMenuModel *menu_model;
   GActionGroup *action_group;
 
@@ -232,10 +231,6 @@ gtk_cloud_provider_update (GtkCloudProvider *self)
       priv->action_group = (GActionGroup*) g_dbus_action_group_get (priv->bus,
                                                                     priv->bus_name,
                                                                     priv->object_path);
-      /* The GMenuModel returned is lazily loaded, so it can't be used as a populated
-       * GMenuModel. To avoid confusion to GtkCloudProvider clients, use a GtkMenu,
-       * which will take care of loading the items */
-      priv->menu = gtk_menu_new_from_model (priv->menu_model);
     }
 }
 
@@ -335,7 +330,6 @@ gtk_cloud_provider_finalize (GObject *object)
   g_free (priv->name);
   g_free (priv->path);
   g_clear_object (&priv->icon);
-  g_clear_object (&priv->menu);
   g_clear_object (&priv->action_group);
   g_clear_object (&priv->bus);
   g_clear_object (&priv->proxy);
@@ -394,14 +388,6 @@ gtk_cloud_provider_get_icon (GtkCloudProvider *self)
   GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
 
   return priv->icon;
-}
-
-GtkWidget*
-gtk_cloud_provider_get_menu (GtkCloudProvider *self)
-{
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
-
-  return priv->menu;
 }
 
 GMenuModel*

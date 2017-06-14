@@ -19,7 +19,6 @@
 #define GTK_CLOUD_PROVIDER_MANAGER_H
 
 #include <gio/gio.h>
-#include <gdk/gdk.h>
 
 G_BEGIN_DECLS
 
@@ -43,13 +42,9 @@ struct _GtkCloudProviderManager
   GObject parent_instance;
 };
 
-GDK_AVAILABLE_IN_3_18
 GType          gtk_cloud_provider_manager_get_type          (void) G_GNUC_CONST;
-GDK_AVAILABLE_IN_3_18
 GtkCloudProviderManager *gtk_cloud_provider_manager_dup_singleton (void);
-GDK_AVAILABLE_IN_3_18
 void gtk_cloud_provider_manager_update (GtkCloudProviderManager *self);
-GDK_AVAILABLE_IN_3_18
 GList *gtk_cloud_provider_manager_get_providers (GtkCloudProviderManager *self);
 
 G_END_DECLS
