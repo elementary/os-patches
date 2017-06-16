@@ -19,6 +19,8 @@
 #define GTK_CLOUD_PROVIDER_MANAGER_H
 
 #include <gio/gio.h>
+#include "gtkcloudprovider.h"
+#include "gtkcloudprovidermanager-generated.h"
 
 #define GTK_CLOUD_PROVIDER_MANAGER_DBUS_IFACE "org.freedesktop.CloudProviderManager1"
 #define GTK_CLOUD_PROVIDER_MANAGER_DBUS_NAME  "org.freedesktop.CloudProviderManager"
@@ -50,7 +52,7 @@ GType          gtk_cloud_provider_manager_get_type          (void) G_GNUC_CONST;
 GtkCloudProviderManager *gtk_cloud_provider_manager_dup_singleton (void);
 void gtk_cloud_provider_manager_update (GtkCloudProviderManager *self);
 GList *gtk_cloud_provider_manager_get_providers (GtkCloudProviderManager *self);
-
+//static void on_cloud_provider_changed (GtkCloudProvider *cloud_provider, GtkCloudProviderManager *self);
 G_END_DECLS
 
 #endif /* GTK_CLOUD_PROVIDER_MANAGER_H */

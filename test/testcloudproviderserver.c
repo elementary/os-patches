@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <gtkcloudprovider.h>
-
+#include <gtkcloudprovidermanager.h>
 #define TIMEOUT 2000
 
 typedef struct _CloudProviderClass CloudProviderClass;
@@ -22,7 +22,7 @@ struct _CloudProvider
   gint status;
   GIcon *icon;
   gchar *path;
-  GDBusProxy *manager_proxy;
+  GtkCloudProviderManager1 *manager_proxy;
   guint timeout_handler;
 };
 
@@ -78,14 +78,10 @@ cloud_provider_set_status (CloudProvider *self,
 {
   /* Inform the manager that the provider changed */
   self->status = status;
-  g_dbus_proxy_call (self->manager_proxy,
-                     "CloudProviderChanged",
-                     g_variant_new ("()"),
-                     G_DBUS_CALL_FLAGS_NONE,
-                     -1,
-                     NULL,
-                     NULL,
-                     NULL);
+  gtk_cloud_provider_manager1_call_cloud_provider_changed(self->manager_proxy,
+							  NULL,
+							  NULL,
+							  NULL);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -93,32 +89,6 @@ cloud_provider_set_status (CloudProvider *self,
 static GDBusNodeInfo *introspection_data = NULL;
 
 /* Introspection data for the service we are exporting */
-static const gchar provider_xml[] =
-  "<node>"
-  "  <interface name='org.freedesktop.CloudProvider1'>"
-  "    <method name='GetName'>"
-  "      <arg type='s' name='name' direction='out'/>"
-  "    </method>"
-  "    <method name='GetStatus'>"
-  "      <arg type='i' name='status' direction='out'/>"
-  "    </method>"
-  "    <method name='GetIcon'>"
-  "      <arg type='v' name='icon' direction='out'/>"
-  "    </method>"
-  "    <method name='GetPath'>"
-  "      <arg type='s' name='path' direction='out'/>"
-  "    </method>"
-  "  </interface>"
-  "</node>";
-
-static const gchar manager_xml[] =
-  "<node>"
-  "  <interface name='org.freedesktop.CloudProviderManager1'>"
-  "    <method name='CloudProviderChanged'>"
-  "    </method>"
-  "  </interface>"
-  "</node>";
-
 static const gchar menu_markup[] =
   "<interface>\n"
   "<menu id='menu'>\n"
@@ -321,14 +291,17 @@ on_bus_acquired (GDBusConnection *connection,
   CloudProvider *cloud_provider = user_data;
   guint registration_id;
 
+
   g_debug ("Registering cloud provider server 'MyCloud'\n");
+
   registration_id = g_dbus_connection_register_object (connection,
                                                        "/org/freedesktop/CloudProviderServerExample",
-                                                       introspection_data->interfaces[0],
+                                                       gtk_cloud_provider1_interface_info(),
                                                        &interface_vtable,
                                                        cloud_provider,
                                                        NULL,  /* user_data_free_func */
                                                        NULL); /* GError** */
+
   g_assert (registration_id > 0);
   /* Export a menu for our own application */
   export_menu (connection, "/org/freedesktop/CloudProviderServerExample");
@@ -376,7 +349,7 @@ on_manager_proxy_created (GObject      *source_object,
   CloudProvider *cloud_provider = user_data;
   GError *error = NULL;
 
-  cloud_provider->manager_proxy = g_dbus_proxy_new_for_bus_finish (res, &error);
+  cloud_provider->manager_proxy = gtk_cloud_provider_manager1_proxy_new_for_bus_finish (res, &error);
   if (error != NULL)
     g_warning ("Error creating proxy for cloud provider manager %s", error->message);
   else
@@ -393,14 +366,6 @@ main (int argc, char *argv[])
   GMainLoop *loop;
   CloudProvider *cloud_provider;
   guint owner_id;
-  GDBusNodeInfo *proxy_info;
-  GDBusInterfaceInfo *interface_info;
-  GError *error = NULL;
-
-  /* Export the interface we listen to, so clients can request properties of
-   * the cloud provider such as name, status or icon */
-  introspection_data = g_dbus_node_info_new_for_xml (provider_xml, NULL);
-  g_assert (introspection_data != NULL);
 
   cloud_provider = g_object_new (cloud_provider_get_type (), NULL);
 
@@ -413,16 +378,11 @@ main (int argc, char *argv[])
                              cloud_provider,
                              NULL);
 
-	// FIXME: migrate to gtk_cloud_provider_manager_dup_singleton
   /* Create CloudProviderManager proxy for exporting cloud provider changes */
-  proxy_info = g_dbus_node_info_new_for_xml (manager_xml, &error);
-  interface_info = g_dbus_node_info_lookup_interface (proxy_info, "org.freedesktop.CloudProviderManager1");
-  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+  gtk_cloud_provider_manager1_proxy_new_for_bus(G_BUS_TYPE_SESSION,
                             G_DBUS_PROXY_FLAGS_NONE,
-                            interface_info,
                             "org.freedesktop.CloudProviderManager",
                             "/org/freedesktop/CloudProviderManager",
-                            "org.freedesktop.CloudProviderManager1",
                             NULL,
                             on_manager_proxy_created,
                             cloud_provider);

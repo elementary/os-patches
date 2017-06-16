@@ -17,24 +17,7 @@
  */
 
 #include "gtkcloudprovider.h"
-
-static const gchar provider_xml[] =
-  "<node>"
-  "  <interface name='org.freedesktop.CloudProvider1'>"
-  "    <method name='GetName'>"
-  "      <arg type='s' name='name' direction='out'/>"
-  "    </method>"
-  "    <method name='GetStatus'>"
-  "      <arg type='i' name='name' direction='out'/>"
-  "    </method>"
-  "    <method name='GetIcon'>"
-  "      <arg type='v' name='icon' direction='out'/>"
-  "    </method>"
-  "    <method name='GetPath'>"
-  "      <arg type='s' name='path' direction='out'/>"
-  "    </method>"
-  "  </interface>"
-  "</node>";
+#include "gtkcloudprovider-generated.h"
 
 
 typedef struct
@@ -47,7 +30,7 @@ typedef struct
   GActionGroup *action_group;
 
   GDBusConnection *bus;
-  GDBusProxy *proxy;
+  GtkCloudProvider1 *proxy;
   gchar *bus_name;
   gchar *object_path;
   GCancellable *cancellable;
@@ -76,13 +59,13 @@ on_get_icon (GObject      *source_object,
 
   g_clear_object (&priv->icon);
 
-  variant_tuple = g_dbus_proxy_call_finish (priv->proxy, res, &error);
-  g_print ("variant tuple %s\n", g_variant_print (variant_tuple, TRUE));
+  gtk_cloud_provider1_call_get_icon_finish (priv->proxy, &variant_tuple, res, &error);
   if (error != NULL)
     {
       g_warning ("Error getting the provider icon %s", error->message);
       goto out;
     }
+  g_print ("variant tuple %s\n", g_variant_print (variant_tuple, TRUE));
 
   variant_dict = g_variant_get_child_value (variant_tuple, 0);
   variant = g_variant_get_child_value (variant_dict, 0);
@@ -103,27 +86,19 @@ on_get_name (GObject      *source_object,
   GtkCloudProvider *self = GTK_CLOUD_PROVIDER (user_data);
   GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
   GError *error = NULL;
-  GVariant *variant_tuple;
-  GVariant *variant;
 
   if (priv->name != NULL)
     g_free (priv->name);
 
-  variant_tuple = g_dbus_proxy_call_finish (priv->proxy, res, &error);
+  gtk_cloud_provider1_call_get_name_finish (priv->proxy, &priv->name, res, &error);
   if (error != NULL)
     {
       g_warning ("Error getting the provider name %s", error->message);
-      goto out;
+      return;
     }
-
-  variant = g_variant_get_child_value (variant_tuple, 0);
-  priv->name = g_variant_dup_string (variant, NULL);
-  g_variant_unref (variant);
-
-out:
-  g_variant_unref (variant_tuple);
   g_signal_emit_by_name (self, "changed");
 }
+
 
 static void
 on_get_path (GObject      *source_object,
@@ -133,25 +108,16 @@ on_get_path (GObject      *source_object,
   GtkCloudProvider *self = GTK_CLOUD_PROVIDER (user_data);
   GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
   GError *error = NULL;
-  GVariant *variant_tuple;
-  GVariant *variant;
 
   if (priv->path != NULL)
     g_free (priv->path);
 
-  variant_tuple = g_dbus_proxy_call_finish (priv->proxy, res, &error);
+  gtk_cloud_provider1_call_get_path_finish (priv->proxy, &priv->path, res, &error);
   if (error != NULL)
     {
-      g_warning ("Error getting the provider path %s", error->message);
-      goto out;
+      g_warning ("Error getting the provider name %s", error->message);
+      return;
     }
-
-  variant = g_variant_get_child_value (variant_tuple, 0);
-  priv->path = g_variant_dup_string (variant, NULL);
-  g_variant_unref (variant);
-
-out:
-  g_variant_unref (variant_tuple);
   g_signal_emit_by_name (self, "changed");
 }
 
@@ -163,22 +129,15 @@ on_get_status (GObject      *source_object,
   GtkCloudProvider *self = GTK_CLOUD_PROVIDER (user_data);
   GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
   GError *error = NULL;
-  GVariant *variant_tuple;
-  GVariant *variant;
+  gint status;
 
-  variant_tuple = g_dbus_proxy_call_finish (priv->proxy, res, &error);
+  gtk_cloud_provider1_call_get_status_finish (priv->proxy, &status, res, &error);
   if (error != NULL)
     {
-      g_warning ("Error getting the provider status %s", error->message);
-      goto out;
+      g_warning ("Error getting the provider name %s", error->message);
+      return;
     }
-
-  variant = g_variant_get_child_value (variant_tuple, 0);
-  priv->status = g_variant_get_int32 (variant);
-  g_variant_unref (variant);
-
-out:
-  g_variant_unref (variant_tuple);
+  priv->status = status;
   g_signal_emit_by_name (self, "changed");
 }
 
@@ -189,41 +148,22 @@ gtk_cloud_provider_update (GtkCloudProvider *self)
 
   if (priv->proxy != NULL)
     {
-      g_dbus_proxy_call (priv->proxy,
-                         "GetName",
-                         g_variant_new ("()"),
-                         G_DBUS_CALL_FLAGS_NONE,
-                         -1,
-                         NULL,
-                         (GAsyncReadyCallback) on_get_name,
-                         self);
-
-      g_dbus_proxy_call (priv->proxy,
-                         "GetStatus",
-                         g_variant_new ("()"),
-                         G_DBUS_CALL_FLAGS_NONE,
-                         -1,
-                         NULL,
-                         (GAsyncReadyCallback) on_get_status,
-                         self);
-
-      g_dbus_proxy_call (priv->proxy,
-                         "GetIcon",
-                         g_variant_new ("()"),
-                         G_DBUS_CALL_FLAGS_NONE,
-                         -1,
-                         NULL,
-                         (GAsyncReadyCallback) on_get_icon,
-                         self);
-
-      g_dbus_proxy_call (priv->proxy,
-                         "GetPath",
-                         g_variant_new ("()"),
-                         G_DBUS_CALL_FLAGS_NONE,
-                         -1,
-                         NULL,
-                         (GAsyncReadyCallback) on_get_path,
-                         self);
+      gtk_cloud_provider1_call_get_name (priv->proxy,
+                                         NULL,
+                                         (GAsyncReadyCallback) on_get_name,
+                                         self);
+      gtk_cloud_provider1_call_get_status (priv->proxy,
+                                         NULL,
+                                         (GAsyncReadyCallback) on_get_status,
+                                         self);
+      gtk_cloud_provider1_call_get_icon (priv->proxy,
+                                         NULL,
+                                         (GAsyncReadyCallback) on_get_icon,
+                                         self);
+      gtk_cloud_provider1_call_get_path (priv->proxy,
+                                         NULL,
+                                         (GAsyncReadyCallback) on_get_path,
+                                         self);
 
       priv->menu_model = (GMenuModel*) g_dbus_menu_model_get (priv->bus,
                                                               priv->bus_name,
@@ -242,9 +182,9 @@ on_proxy_created (GObject      *source_object,
   GError *error = NULL;
   GtkCloudProvider *self;
   GtkCloudProviderPrivate *priv;
-  GDBusProxy *proxy;
+  GtkCloudProvider1 *proxy;
 
-  proxy = g_dbus_proxy_new_for_bus_finish (res, &error);
+  proxy = gtk_cloud_provider1_proxy_new_for_bus_finish (res, &error);
   if (error != NULL)
     {
       if (error->code != G_IO_ERROR_CANCELLED)
@@ -268,8 +208,6 @@ on_bus_acquired (GObject      *source_object,
   GtkCloudProvider *self;
   GDBusConnection *bus;
   GtkCloudProviderPrivate *priv;
-  GDBusInterfaceInfo *interface_info;
-  GDBusNodeInfo *proxy_info;
 
   bus = g_bus_get_finish (res, &error);
   if (error != NULL)
@@ -282,19 +220,15 @@ on_bus_acquired (GObject      *source_object,
   self = GTK_CLOUD_PROVIDER (user_data);
   priv = gtk_cloud_provider_get_instance_private (user_data);
   priv->bus = bus;
-  proxy_info = g_dbus_node_info_new_for_xml (provider_xml, &error);
-  interface_info = g_dbus_node_info_lookup_interface (proxy_info, "org.freedesktop.CloudProvider1");
   g_clear_object (&priv->cancellable);
   priv->cancellable = g_cancellable_new ();
-  g_dbus_proxy_new (priv->bus,
-                    G_DBUS_PROXY_FLAGS_NONE,
-                    interface_info,
-                    priv->bus_name,
-                    priv->object_path,
-                    "org.freedesktop.CloudProvider1",
-                    priv->cancellable,
-                    on_proxy_created,
-                    self);
+  gtk_cloud_provider1_proxy_new (priv->bus,
+                                 G_DBUS_PROXY_FLAGS_NONE,
+                                 priv->bus_name,
+                                 priv->object_path,
+                                 priv->cancellable,
+                                 on_proxy_created,
+                                 self);
 }
 
 GtkCloudProvider*

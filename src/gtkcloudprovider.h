@@ -20,6 +20,7 @@
 #define GTK_CLOUD_PROVIDER_H
 
 #include <gio/gio.h>
+#include "gtkcloudprovider-generated.h"
 
 G_BEGIN_DECLS
 
