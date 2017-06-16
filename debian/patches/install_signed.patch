@@ -14,11 +14,11 @@ Last-Update: 2015-11-19
 
 Patch-Name: install_signed.patch
 ---
- util/grub-install.c | 170 +++++++++++++++++++++++++++++++++++++---------------
- 1 file changed, 123 insertions(+), 47 deletions(-)
+ util/grub-install.c |  181 ++++++++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 134 insertions(+), 47 deletions(-)
 
-diff --git a/util/grub-install.c b/util/grub-install.c
-index 3275209..c15aa8c 100644
+Index: b/util/grub-install.c
+===================================================================
 --- a/util/grub-install.c
 +++ b/util/grub-install.c
 @@ -80,6 +80,7 @@ static char *label_color;
@@ -40,7 +40,7 @@ index 3275209..c15aa8c 100644
    };
  
  static int fs_probe = 1;
-@@ -235,6 +238,14 @@ argp_parser (int key, char *arg, struct argp_state *state)
+@@ -235,6 +238,14 @@ argp_parser (int key, char *arg, struct
        bootloader_id = xstrdup (arg);
        return 0;
  
@@ -215,7 +215,7 @@ index 3275209..c15aa8c 100644
  	{
  	  char *uuid = NULL;
  	  /*  generic method (used on coreboot and ata mod).  */
-@@ -1857,7 +1891,72 @@ main (int argc, char *argv[])
+@@ -1857,7 +1891,60 @@ main (int argc, char *argv[])
      case GRUB_INSTALL_PLATFORM_IA64_EFI:
        {
  	char *dst = grub_util_path_concat (2, efidir, efi_file);
@@ -224,20 +224,17 @@ index 3275209..c15aa8c 100644
 +	  {
 +	    char *shim_signed = NULL;
 +	    char *mok_signed = NULL, *mok_file = NULL;
-+	    char *fb_signed = NULL, *fb_file = NULL;
 +	    char *config_dst;
 +	    FILE *config_dst_f;
 +
 +	    shim_signed = xasprintf ("/usr/lib/shim/shim%s.efi.signed", efi_suffix);
 +	    mok_signed = xasprintf ("mm%s.efi.signed", efi_suffix);
 +	    mok_file = xasprintf ("mm%s.efi", efi_suffix);
-+	    fb_signed = xasprintf ("fb%s.efi.signed", efi_suffix);
-+	    fb_file = xasprintf ("fb%s.efi", efi_suffix);
 +
 +	    if (grub_util_is_regular (shim_signed))
 +	      {
 +		char *chained_base, *chained_dst;
-+		char *mok_src, *mok_dst, *fb_src, *fb_dst;
++		char *mok_src, *mok_dst;
 +		if (!removable)
 +		  {
 +		    free (efi_file);
@@ -263,15 +260,6 @@ index 3275209..c15aa8c 100644
 +					mok_dst, 0);
 +		free (mok_src);
 +		free (mok_dst);
-+
-+		fb_src = grub_util_path_concat (2, "/usr/lib/shim/",
-+						    fb_signed);
-+		fb_dst = grub_util_path_concat (2, efidir,
-+						    fb_file);
-+		grub_install_copy_file (fb_src,
-+					fb_dst, 0);
-+		free (fb_src);
-+		free (fb_dst);
 +
 +	      }
 +	    else

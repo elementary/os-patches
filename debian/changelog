@@ -1,3 +1,19 @@
+grub2 (2.02~beta2-36ubuntu3.11) xenial; urgency=medium
+
+  * Fix syntax error in debian/postinst.in.  (LP #1692181)
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 20 May 2017 12:59:17 -0700
+
+grub2 (2.02~beta2-36ubuntu3.10) xenial; urgency=medium
+
+  * debian/patches/install_signed.patch: don't install fb$arch.efi; it breaks
+    "removable" installs where files are all installed to /EFI/BOOT; and it
+    also doesn't belong in the /EFI/ubuntu path for the default case. Fallback
+    install simply needs more work and isn't ready for SRU. (LP: #1684341)
+  * debian/postinst.in: clean up fb$arch.efi.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 19 May 2017 16:54:14 -0400
+
 grub2 (2.02~beta2-36ubuntu3.9) xenial; urgency=medium
 
   * debian/patches/install_signed.patch: update to use the new names for the
