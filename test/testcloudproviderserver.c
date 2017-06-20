@@ -22,7 +22,7 @@ struct _CloudProvider
   gint status;
   GIcon *icon;
   gchar *path;
-  GtkCloudProviderManager1 *manager_proxy;
+  CloudProviderManager1 *manager_proxy;
   guint timeout_handler;
 };
 
@@ -78,7 +78,7 @@ cloud_provider_set_status (CloudProvider *self,
 {
   /* Inform the manager that the provider changed */
   self->status = status;
-  gtk_cloud_provider_manager1_call_cloud_provider_changed(self->manager_proxy,
+  cloud_provider_manager1_call_cloud_provider_changed(self->manager_proxy,
 							  NULL,
 							  NULL,
 							  NULL);
@@ -296,7 +296,7 @@ on_bus_acquired (GDBusConnection *connection,
 
   registration_id = g_dbus_connection_register_object (connection,
                                                        "/org/freedesktop/CloudProviderServerExample",
-                                                       gtk_cloud_provider1_interface_info(),
+                                                       cloud_provider1_interface_info(),
                                                        &interface_vtable,
                                                        cloud_provider,
                                                        NULL,  /* user_data_free_func */
@@ -349,7 +349,7 @@ on_manager_proxy_created (GObject      *source_object,
   CloudProvider *cloud_provider = user_data;
   GError *error = NULL;
 
-  cloud_provider->manager_proxy = gtk_cloud_provider_manager1_proxy_new_for_bus_finish (res, &error);
+  cloud_provider->manager_proxy = cloud_provider_manager1_proxy_new_for_bus_finish (res, &error);
   if (error != NULL)
     g_warning ("Error creating proxy for cloud provider manager %s", error->message);
   else
@@ -379,7 +379,7 @@ main (int argc, char *argv[])
                              NULL);
 
   /* Create CloudProviderManager proxy for exporting cloud provider changes */
-  gtk_cloud_provider_manager1_proxy_new_for_bus(G_BUS_TYPE_SESSION,
+  cloud_provider_manager1_proxy_new_for_bus(G_BUS_TYPE_SESSION,
                             G_DBUS_PROXY_FLAGS_NONE,
                             "org.freedesktop.CloudProviderManager",
                             "/org/freedesktop/CloudProviderManager",

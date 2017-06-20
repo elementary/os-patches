@@ -11,14 +11,14 @@ libgtkcloudproviders_sources = [
 libgtkcloudproviders_deps = [glib, gio, gio_unix]
 
 gdbus_sources = []
-gdbus_sources += gnome.gdbus_codegen ('gtkcloudprovider-generated',
+gdbus_sources += gnome.gdbus_codegen ('cloudprovider-generated',
                                       join_paths (meson.source_root (), 'data', 'cloudprovider-dbus.xml'),
                                       interface_prefix: 'org.freedesktop',
-                                      namespace: 'Gtk')
-gdbus_sources += gnome.gdbus_codegen ('gtkcloudprovidermanager-generated',
+                                      namespace: '')
+gdbus_sources += gnome.gdbus_codegen ('cloudprovidermanager-generated',
                                       join_paths (meson.source_root (), 'data', 'cloudprovidermanager-dbus.xml'),
                                       interface_prefix: 'org.freedesktop',
-                                      namespace: 'Gtk')
+                                      namespace: '')
 
 libgtkcloudproviders_sources += gdbus_sources
 

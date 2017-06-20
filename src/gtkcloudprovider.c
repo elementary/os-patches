@@ -17,7 +17,7 @@
  */
 
 #include "gtkcloudprovider.h"
-#include "gtkcloudprovider-generated.h"
+#include "cloudprovider-generated.h"
 
 
 typedef struct
@@ -30,7 +30,7 @@ typedef struct
   GActionGroup *action_group;
 
   GDBusConnection *bus;
-  GtkCloudProvider1 *proxy;
+  CloudProvider1 *proxy;
   gchar *bus_name;
   gchar *object_path;
   GCancellable *cancellable;
@@ -59,7 +59,7 @@ on_get_icon (GObject      *source_object,
 
   g_clear_object (&priv->icon);
 
-  gtk_cloud_provider1_call_get_icon_finish (priv->proxy, &variant_tuple, res, &error);
+  cloud_provider1_call_get_icon_finish (priv->proxy, &variant_tuple, res, &error);
   if (error != NULL)
     {
       g_warning ("Error getting the provider icon %s", error->message);
@@ -90,7 +90,7 @@ on_get_name (GObject      *source_object,
   if (priv->name != NULL)
     g_free (priv->name);
 
-  gtk_cloud_provider1_call_get_name_finish (priv->proxy, &priv->name, res, &error);
+  cloud_provider1_call_get_name_finish (priv->proxy, &priv->name, res, &error);
   if (error != NULL)
     {
       g_warning ("Error getting the provider name %s", error->message);
@@ -112,7 +112,7 @@ on_get_path (GObject      *source_object,
   if (priv->path != NULL)
     g_free (priv->path);
 
-  gtk_cloud_provider1_call_get_path_finish (priv->proxy, &priv->path, res, &error);
+  cloud_provider1_call_get_path_finish (priv->proxy, &priv->path, res, &error);
   if (error != NULL)
     {
       g_warning ("Error getting the provider name %s", error->message);
@@ -131,7 +131,7 @@ on_get_status (GObject      *source_object,
   GError *error = NULL;
   gint status;
 
-  gtk_cloud_provider1_call_get_status_finish (priv->proxy, &status, res, &error);
+  cloud_provider1_call_get_status_finish (priv->proxy, &status, res, &error);
   if (error != NULL)
     {
       g_warning ("Error getting the provider name %s", error->message);
@@ -148,19 +148,19 @@ gtk_cloud_provider_update (GtkCloudProvider *self)
 
   if (priv->proxy != NULL)
     {
-      gtk_cloud_provider1_call_get_name (priv->proxy,
+      cloud_provider1_call_get_name (priv->proxy,
                                          NULL,
                                          (GAsyncReadyCallback) on_get_name,
                                          self);
-      gtk_cloud_provider1_call_get_status (priv->proxy,
+      cloud_provider1_call_get_status (priv->proxy,
                                          NULL,
                                          (GAsyncReadyCallback) on_get_status,
                                          self);
-      gtk_cloud_provider1_call_get_icon (priv->proxy,
+      cloud_provider1_call_get_icon (priv->proxy,
                                          NULL,
                                          (GAsyncReadyCallback) on_get_icon,
                                          self);
-      gtk_cloud_provider1_call_get_path (priv->proxy,
+      cloud_provider1_call_get_path (priv->proxy,
                                          NULL,
                                          (GAsyncReadyCallback) on_get_path,
                                          self);
@@ -182,9 +182,9 @@ on_proxy_created (GObject      *source_object,
   GError *error = NULL;
   GtkCloudProvider *self;
   GtkCloudProviderPrivate *priv;
-  GtkCloudProvider1 *proxy;
+  CloudProvider1 *proxy;
 
-  proxy = gtk_cloud_provider1_proxy_new_for_bus_finish (res, &error);
+  proxy = cloud_provider1_proxy_new_for_bus_finish (res, &error);
   if (error != NULL)
     {
       if (error->code != G_IO_ERROR_CANCELLED)
@@ -222,7 +222,7 @@ on_bus_acquired (GObject      *source_object,
   priv->bus = bus;
   g_clear_object (&priv->cancellable);
   priv->cancellable = g_cancellable_new ();
-  gtk_cloud_provider1_proxy_new (priv->bus,
+  cloud_provider1_proxy_new (priv->bus,
                                  G_DBUS_PROXY_FLAGS_NONE,
                                  priv->bus_name,
                                  priv->object_path,

@@ -20,7 +20,7 @@
 
 #include <gio/gio.h>
 #include "gtkcloudprovider.h"
-#include "gtkcloudprovidermanager-generated.h"
+#include "cloudprovidermanager-generated.h"
 
 #define GTK_CLOUD_PROVIDER_MANAGER_DBUS_IFACE "org.freedesktop.CloudProviderManager1"
 #define GTK_CLOUD_PROVIDER_MANAGER_DBUS_NAME  "org.freedesktop.CloudProviderManager"
