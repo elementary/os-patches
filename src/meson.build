@@ -24,11 +24,18 @@ gdbus_sources += gnome.gdbus_codegen ('cloudprovidermanager-generated',
 
 libgtkcloudproviders_sources += gdbus_sources
 
-libgtkcloudproviders = shared_library ('gtkcloudproviders',
+libgtkcloudproviders = shared_library ('cloudproviders',
                                         libgtkcloudproviders_sources,
                                         dependencies: libgtkcloudproviders_deps,
                                         version: meson.project_version (),
                                         install: true)
 
-install_headers( libgtkcloudproviders_headers )
+install_headers( libgtkcloudproviders_headers, subdir: 'cloudproviders')
 
+pkg = import('pkgconfig')
+pkg.generate(libraries : libgtkcloudproviders,
+             subdirs : 'cloudproviders',
+             version : '1.0',
+             name : 'libcloudproviders',
+             filebase: 'cloudproviders',
+             description : 'Cloud providers DBus API library.')

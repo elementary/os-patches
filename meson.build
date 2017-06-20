@@ -1,5 +1,5 @@
-project ('gtkcloudproviders', 'c',
-         version: '3.25.1',
+project ('libcloudproviders', 'c',
+         version: '1.0.0',
          meson_version: '>=0.40.0',
          license: 'GPL3+')
 
