@@ -1,6 +1,8 @@
 libgtkcloudproviders_headers = [
   'gtkcloudprovidermanager.h',
-  'gtkcloudprovider.h'
+  'gtkcloudprovider.h',
+  'cloudprovider-generated.h',
+  'cloudprovidermanager-generated.h'
 ]
 
 libgtkcloudproviders_sources = [

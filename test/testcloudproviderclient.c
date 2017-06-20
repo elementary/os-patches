@@ -1,5 +1,4 @@
 #include <glib.h>
-#include <gtk/gtk.h>
 #include <gtkcloudprovider.h>
 #include <gtkcloudprovidermanager.h>
 
@@ -98,7 +97,7 @@ main (gint   argc,
 {
   GtkCloudProviderManager *manager;
 
-  gtk_init (&argc, &argv);
+  GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
   manager = gtk_cloud_provider_manager_dup_singleton ();
   g_signal_connect (manager, "changed", G_CALLBACK (on_manager_changed), NULL);
@@ -106,7 +105,8 @@ main (gint   argc,
 
   g_print("Waiting for cloud providers\n\n");
 
-  gtk_main ();
+  g_main_loop_run(loop);
+  g_free(loop);
 
   return 0;
 }

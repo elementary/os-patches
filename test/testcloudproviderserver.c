@@ -1,5 +1,4 @@
 #include <glib.h>
-#include <gtk/gtk.h>
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <gtkcloudprovider.h>
@@ -86,53 +85,6 @@ cloud_provider_set_status (CloudProvider *self,
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-static GDBusNodeInfo *introspection_data = NULL;
-
-/* Introspection data for the service we are exporting */
-static const gchar menu_markup[] =
-  "<interface>\n"
-  "<menu id='menu'>\n"
-  "  <section>\n"
-  "    <item>\n"
-  "      <attribute name='label' translatable='yes'>MyCloud website</attribute>\n"
-  "      <attribute name='action'>actions.website</attribute>\n"
-  "    </item>\n"
-  "    <item>\n"
-  "      <attribute name='label' translatable='yes'>MyCloud Photos</attribute>\n"
-  "      <attribute name='action'>actions.photos</attribute>\n"
-  "    </item>\n"
-  "    <item>\n"
-  "      <attribute name='label' translatable='yes'>MyCloud Notes</attribute>\n"
-  "      <attribute name='action'>actions.notes</attribute>\n"
-  "    </item>\n"
-  "  </section>\n"
-  "  <section>\n"
-  "    <item>\n"
-  "      <attribute name='label' translatable='yes'>Allow Synchronization</attribute>\n"
-  "      <attribute name='action'>actions.allow-sync</attribute>\n"
-  "    </item>\n"
-  "    <submenu>\n"
-  "      <attribute name='label' translatable='yes'>Buy Storage</attribute>\n"
-  "      <item>\n"
-  "        <attribute name='label' translatable='yes'>5GB for 200CZK</attribute>\n"
-  "        <attribute name='action'>actions.buy</attribute>\n"
-  "        <attribute name='target'>5</attribute>\n"
-  "      </item>\n"
-  "      <item>\n"
-  "        <attribute name='label' translatable='yes'>10GB for 500CZK</attribute>\n"
-  "        <attribute name='action'>actions.buy</attribute>\n"
-  "        <attribute name='target'>10</attribute>\n"
-  "      </item>\n"
-  "      <item>\n"
-  "        <attribute name='label' translatable='yes'>30GB for 600CZK</attribute>\n"
-  "        <attribute name='action'>actions.buy</attribute>\n"
-  "        <attribute name='target'>30</attribute>\n"
-  "      </item>\n"
-  "    </submenu>\n"
-  "  </section>\n"
-  "</menu>\n"
-  "</interface>\n";
-
 static void
 activate_action (GSimpleAction *action,
                  GVariant      *parameter,
@@ -187,21 +139,51 @@ static GActionEntry actions[] = {
   { "buy",  activate_radio,  "s",  NULL, NULL },
 };
 
+struct menu {
+  GMenu *mainMenu;
+  GMenuItem *website;
+  GMenuItem *photos;
+  GMenuItem *notes;
+  GMenuItem *allowSync;
+  GMenuItem *buy;
+};
+
 static GMenuModel *
 get_model (void)
 {
-  GError *error = NULL;
-  GtkBuilder *builder;
-  GMenuModel *menu;
+  GMenu *section;
+  struct menu *m;
+  GMenuItem *item;
+  GMenu *submenu;
 
-  builder = gtk_builder_new ();
-  gtk_builder_add_from_string (builder, menu_markup, -1, &error);
-  g_assert_no_error (error);
+  m = g_new0(struct menu, 1);
+  m->mainMenu = g_menu_new();
 
-  menu = g_object_ref (gtk_builder_get_object (builder, "menu"));
-  g_object_unref (builder);
+  section = g_menu_new();
+  m->website = g_menu_item_new("MyCloud website", "website");
+  g_menu_append_item(section, m->website);
+  m->photos = g_menu_item_new("MyCloud photos", "photos");
+  g_menu_append_item(section, m->photos);
+  m->notes = g_menu_item_new("MyCloud notes", "notes");
+  g_menu_append_item(section, m->notes);
+  g_menu_append_section(m->mainMenu, NULL, G_MENU_MODEL(section));
 
-  return menu;
+  section = g_menu_new();
+  m->allowSync = g_menu_item_new("Allow Synchronization", "allow-sync");
+  g_menu_append_item(section, m->allowSync);
+
+  submenu = g_menu_new();
+  item = g_menu_item_new("5GB", "5");
+  g_menu_append_item(submenu, item);
+  item = g_menu_item_new("10GB", "10");
+  g_menu_append_item(submenu, item);
+  item = g_menu_item_new("50GB", "50");
+  g_menu_append_item(submenu, item);
+  item = g_menu_item_new_submenu("Buy storage", G_MENU_MODEL(submenu));
+  g_menu_append_item(section, item);
+  g_menu_append_section(m->mainMenu, NULL, G_MENU_MODEL(section));
+
+  return G_MENU_MODEL(m->mainMenu);
 }
 
 static GActionGroup *
@@ -392,8 +374,6 @@ main (int argc, char *argv[])
   g_main_loop_run (loop);
 
   g_bus_unown_name (owner_id);
-
-  g_dbus_node_info_unref (introspection_data);
 
   g_object_unref (cloud_provider);
 
