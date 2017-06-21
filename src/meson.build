@@ -1,16 +1,16 @@
-libgtkcloudproviders_headers = [
-  'gtkcloudprovidermanager.h',
-  'gtkcloudprovider.h',
+libcloudproviders_headers = [
+  'cloudprovidermanager.h',
+  'cloudprovider.h',
   'cloudprovider-generated.h',
   'cloudprovidermanager-generated.h'
 ]
 
-libgtkcloudproviders_sources = [
-  'gtkcloudprovidermanager.c',
-  'gtkcloudprovider.c'
+libcloudproviders_sources = [
+  'cloudprovidermanager.c',
+  'cloudprovider.c'
 ]
 
-libgtkcloudproviders_deps = [glib, gio, gio_unix]
+libcloudproviders_deps = [glib, gio, gio_unix]
 
 gdbus_sources = []
 gdbus_sources += gnome.gdbus_codegen ('cloudprovider-generated',
@@ -22,18 +22,18 @@ gdbus_sources += gnome.gdbus_codegen ('cloudprovidermanager-generated',
                                       interface_prefix: 'org.freedesktop',
                                       namespace: '')
 
-libgtkcloudproviders_sources += gdbus_sources
+libcloudproviders_sources += gdbus_sources
 
-libgtkcloudproviders = shared_library ('cloudproviders',
-                                        libgtkcloudproviders_sources,
-                                        dependencies: libgtkcloudproviders_deps,
+libcloudproviders = shared_library ('cloudproviders',
+                                        libcloudproviders_sources,
+                                        dependencies: libcloudproviders_deps,
                                         version: meson.project_version (),
                                         install: true)
 
-install_headers( libgtkcloudproviders_headers, subdir: 'cloudproviders')
+install_headers( libcloudproviders_headers, subdir: 'cloudproviders')
 
 pkg = import('pkgconfig')
-pkg.generate(libraries : libgtkcloudproviders,
+pkg.generate(libraries : libcloudproviders,
              subdirs : 'cloudproviders',
              version : '1.0',
              name : 'libcloudproviders',

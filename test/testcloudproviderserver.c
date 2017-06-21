@@ -1,19 +1,19 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <gio/gio.h>
-#include <gtkcloudprovider.h>
-#include <gtkcloudprovidermanager.h>
+#include <cloudprovider.h>
+#include <cloudprovidermanager.h>
 #define TIMEOUT 2000
 
-typedef struct _CloudProviderClass CloudProviderClass;
-typedef struct _CloudProvider CloudProvider;
+typedef struct _TestCloudProviderClass TestCloudProviderClass;
+typedef struct _TestCloudProvider TestCloudProvider;
 
-struct _CloudProviderClass
+struct _TestCloudProviderClass
 {
   GObjectClass parent_class;
 };
 
-struct _CloudProvider
+struct _TestCloudProvider
 {
   GObject parent_instance;
 
@@ -26,24 +26,24 @@ struct _CloudProvider
 };
 
 
-static GType cloud_provider_get_type (void);
-G_DEFINE_TYPE (CloudProvider, cloud_provider, G_TYPE_OBJECT);
+static GType test_cloud_provider_get_type (void);
+G_DEFINE_TYPE (TestCloudProvider, test_cloud_provider, G_TYPE_OBJECT);
 
 static void
-cloud_provider_finalize (GObject *object)
+test_cloud_provider_finalize (GObject *object)
 {
-  CloudProvider *self = (CloudProvider*)object;
+  TestCloudProvider *self = (TestCloudProvider*)object;
 
   g_free (self->name);
   g_free (self->path);
   g_clear_object (&self->icon);
   g_clear_object (&self->manager_proxy);
 
-  G_OBJECT_CLASS (cloud_provider_parent_class)->finalize (object);
+  G_OBJECT_CLASS (test_cloud_provider_parent_class)->finalize (object);
 }
 
 static void
-cloud_provider_init (CloudProvider *self)
+test_cloud_provider_init (TestCloudProvider *self)
 {
   GFile *icon_file;
   gchar *current_dir;
@@ -53,7 +53,7 @@ cloud_provider_init (CloudProvider *self)
 
   self->name = "MyCloud";
   self->path = g_strdup (current_dir);
-  self->status = GTK_CLOUD_PROVIDER_STATUS_INVALID;
+  self->status = CLOUD_PROVIDER_STATUS_INVALID;
   uri = g_build_filename (current_dir, "apple-red.png", NULL);
   icon_file = g_file_new_for_uri (uri);
   self->icon = g_file_icon_new (icon_file);
@@ -64,15 +64,15 @@ cloud_provider_init (CloudProvider *self)
 }
 
 static void
-cloud_provider_class_init (CloudProviderClass *class)
+test_cloud_provider_class_init (TestCloudProviderClass *class)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS (class);
 
-  gobject_class->finalize = cloud_provider_finalize;
+  gobject_class->finalize = test_cloud_provider_finalize;
 }
 
 static void
-cloud_provider_set_status (CloudProvider *self,
+test_cloud_provider_set_status (TestCloudProvider *self,
                            gint           status)
 {
   /* Inform the manager that the provider changed */
@@ -235,7 +235,7 @@ handle_method_call (GDBusConnection       *connection,
                     GDBusMethodInvocation *invocation,
                     gpointer               user_data)
 {
-  CloudProvider *cloud_provider = user_data;
+  TestCloudProvider *cloud_provider = user_data;
 
   g_debug ("Handling dbus call in server\n");
   if (g_strcmp0 (method_name, "GetName") == 0)
@@ -307,7 +307,7 @@ on_name_lost (GDBusConnection *connection,
 static gboolean
 change_provider (gpointer user_data)
 {
-  CloudProvider *cloud_provider = (CloudProvider *)user_data;
+  TestCloudProvider *cloud_provider = (TestCloudProvider *)user_data;
   GRand *rand;
   gint new_status;
 
@@ -315,10 +315,10 @@ change_provider (gpointer user_data)
 
   rand = g_rand_new ();
   new_status = g_rand_int_range (rand,
-                                 GTK_CLOUD_PROVIDER_STATUS_IDLE,
-                                 GTK_CLOUD_PROVIDER_STATUS_ERROR + 1);
+                                 CLOUD_PROVIDER_STATUS_IDLE,
+                                 CLOUD_PROVIDER_STATUS_ERROR + 1);
 
-  cloud_provider_set_status (cloud_provider, new_status);
+  test_cloud_provider_set_status (cloud_provider, new_status);
 
   return TRUE;
 }
@@ -328,7 +328,7 @@ on_manager_proxy_created (GObject      *source_object,
                           GAsyncResult *res,
                           gpointer      user_data)
 {
-  CloudProvider *cloud_provider = user_data;
+  TestCloudProvider *cloud_provider = user_data;
   GError *error = NULL;
 
   cloud_provider->manager_proxy = cloud_provider_manager1_proxy_new_for_bus_finish (res, &error);
@@ -349,7 +349,7 @@ main (int argc, char *argv[])
   CloudProvider *cloud_provider;
   guint owner_id;
 
-  cloud_provider = g_object_new (cloud_provider_get_type (), NULL);
+  cloud_provider = g_object_new (test_cloud_provider_get_type (), NULL);
 
   owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
                              "org.freedesktop.CloudProviderServerExample",

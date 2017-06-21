@@ -1,6 +1,7 @@
-/* gtkcloudprovider.c
+/* cloudprovider.c
  *
  * Copyright (C) 2015 Carlos Soriano <csoriano@gnome.org>
+ * Copyright (C) 2017 Julius Haertl <jus@bitgrid.net>
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -16,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gtkcloudprovider.h"
+#include "cloudprovider.h"
 #include "cloudprovider-generated.h"
 
 
@@ -24,7 +25,7 @@ typedef struct
 {
   gchar *name;
   gchar *path;
-  GtkCloudProviderStatus status;
+  CloudProviderStatus status;
   GIcon *icon;
   GMenuModel *menu_model;
   GActionGroup *action_group;
@@ -34,9 +35,9 @@ typedef struct
   gchar *bus_name;
   gchar *object_path;
   GCancellable *cancellable;
-} GtkCloudProviderPrivate;
+} CloudProviderPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GtkCloudProvider, gtk_cloud_provider, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
 
 enum {
   CHANGED,
@@ -50,8 +51,8 @@ on_get_icon (GObject      *source_object,
              GAsyncResult *res,
              gpointer      user_data)
 {
-  GtkCloudProvider *self = GTK_CLOUD_PROVIDER (user_data);
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProvider *self = CLOUD_PROVIDER (user_data);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
   GError *error = NULL;
   GVariant *variant_tuple;
   GVariant *variant_dict;
@@ -83,8 +84,8 @@ on_get_name (GObject      *source_object,
              GAsyncResult *res,
              gpointer      user_data)
 {
-  GtkCloudProvider *self = GTK_CLOUD_PROVIDER (user_data);
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProvider *self = CLOUD_PROVIDER (user_data);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
   GError *error = NULL;
 
   if (priv->name != NULL)
@@ -105,8 +106,8 @@ on_get_path (GObject      *source_object,
              GAsyncResult *res,
              gpointer      user_data)
 {
-  GtkCloudProvider *self = GTK_CLOUD_PROVIDER (user_data);
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProvider *self = CLOUD_PROVIDER (user_data);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
   GError *error = NULL;
 
   if (priv->path != NULL)
@@ -126,8 +127,8 @@ on_get_status (GObject      *source_object,
                GAsyncResult *res,
                gpointer      user_data)
 {
-  GtkCloudProvider *self = GTK_CLOUD_PROVIDER (user_data);
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProvider *self = CLOUD_PROVIDER (user_data);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
   GError *error = NULL;
   gint status;
 
@@ -142,9 +143,9 @@ on_get_status (GObject      *source_object,
 }
 
 void
-gtk_cloud_provider_update (GtkCloudProvider *self)
+cloud_provider_update (CloudProvider *self)
 {
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   if (priv->proxy != NULL)
     {
@@ -180,8 +181,8 @@ on_proxy_created (GObject      *source_object,
                   gpointer      user_data)
 {
   GError *error = NULL;
-  GtkCloudProvider *self;
-  GtkCloudProviderPrivate *priv;
+  CloudProvider *self;
+  CloudProviderPrivate *priv;
   CloudProvider1 *proxy;
 
   proxy = cloud_provider1_proxy_new_for_bus_finish (res, &error);
@@ -191,12 +192,12 @@ on_proxy_created (GObject      *source_object,
         g_warning ("Error creating proxy for cloud provider %s", error->message);
       return;
     }
-  self = GTK_CLOUD_PROVIDER (user_data);
-  priv = gtk_cloud_provider_get_instance_private (self);
+  self = CLOUD_PROVIDER (user_data);
+  priv = cloud_provider_get_instance_private (self);
 
   priv->proxy = proxy;
 
-  gtk_cloud_provider_update (self);
+  cloud_provider_update (self);
 }
 
 static void
@@ -205,9 +206,9 @@ on_bus_acquired (GObject      *source_object,
                  gpointer      user_data)
 {
   GError *error = NULL;
-  GtkCloudProvider *self;
+  CloudProvider *self;
   GDBusConnection *bus;
-  GtkCloudProviderPrivate *priv;
+  CloudProviderPrivate *priv;
 
   bus = g_bus_get_finish (res, &error);
   if (error != NULL)
@@ -217,8 +218,8 @@ on_bus_acquired (GObject      *source_object,
       return;
     }
 
-  self = GTK_CLOUD_PROVIDER (user_data);
-  priv = gtk_cloud_provider_get_instance_private (user_data);
+  self = CLOUD_PROVIDER (user_data);
+  priv = cloud_provider_get_instance_private (user_data);
   priv->bus = bus;
   g_clear_object (&priv->cancellable);
   priv->cancellable = g_cancellable_new ();
@@ -231,20 +232,20 @@ on_bus_acquired (GObject      *source_object,
                                  self);
 }
 
-GtkCloudProvider*
-gtk_cloud_provider_new (const gchar *bus_name,
+CloudProvider*
+cloud_provider_new (const gchar *bus_name,
                         const gchar *object_path)
 {
-  GtkCloudProvider *self;
-  GtkCloudProviderPrivate *priv;
+  CloudProvider *self;
+  CloudProviderPrivate *priv;
 
-  self = g_object_new (GTK_TYPE_CLOUD_PROVIDER, NULL);
-  priv = gtk_cloud_provider_get_instance_private (self);
+  self = g_object_new (TYPE_CLOUD_PROVIDER, NULL);
+  priv = cloud_provider_get_instance_private (self);
 
   priv->bus_name = g_strdup (bus_name);
   priv->object_path = g_strdup (object_path);
   priv->cancellable = g_cancellable_new ();
-  priv->status = GTK_CLOUD_PROVIDER_STATUS_INVALID;
+  priv->status = CLOUD_PROVIDER_STATUS_INVALID;
   g_bus_get (G_BUS_TYPE_SESSION,
              priv->cancellable,
              on_bus_acquired,
@@ -254,10 +255,10 @@ gtk_cloud_provider_new (const gchar *bus_name,
 }
 
 static void
-gtk_cloud_provider_finalize (GObject *object)
+cloud_provider_finalize (GObject *object)
 {
-  GtkCloudProvider *self = (GtkCloudProvider *)object;
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProvider *self = (CloudProvider *)object;
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   g_cancellable_cancel (priv->cancellable);
   g_clear_object (&priv->cancellable);
@@ -270,15 +271,15 @@ gtk_cloud_provider_finalize (GObject *object)
   g_free (priv->bus_name);
   g_free (priv->object_path);
 
-  G_OBJECT_CLASS (gtk_cloud_provider_parent_class)->finalize (object);
+  G_OBJECT_CLASS (cloud_provider_parent_class)->finalize (object);
 }
 
 static void
-gtk_cloud_provider_class_init (GtkCloudProviderClass *klass)
+cloud_provider_class_init (CloudProviderClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->finalize = gtk_cloud_provider_finalize;
+  object_class->finalize = cloud_provider_finalize;
 
   gSignals [CHANGED] =
     g_signal_new ("changed",
@@ -293,57 +294,57 @@ gtk_cloud_provider_class_init (GtkCloudProviderClass *klass)
 }
 
 static void
-gtk_cloud_provider_init (GtkCloudProvider *self)
+cloud_provider_init (CloudProvider *self)
 {
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
-  priv->status = GTK_CLOUD_PROVIDER_STATUS_INVALID;
+  priv->status = CLOUD_PROVIDER_STATUS_INVALID;
 }
 
 gchar*
-gtk_cloud_provider_get_name (GtkCloudProvider *self)
+cloud_provider_get_name (CloudProvider *self)
 {
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   return priv->name;
 }
 
-GtkCloudProviderStatus
-gtk_cloud_provider_get_status (GtkCloudProvider *self)
+CloudProviderStatus
+cloud_provider_get_status (CloudProvider *self)
 {
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   return priv->status;
 }
 
 GIcon*
-gtk_cloud_provider_get_icon (GtkCloudProvider *self)
+cloud_provider_get_icon (CloudProvider *self)
 {
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   return priv->icon;
 }
 
 GMenuModel*
-gtk_cloud_provider_get_menu_model (GtkCloudProvider *self)
+cloud_provider_get_menu_model (CloudProvider *self)
 {
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   return priv->menu_model;
 }
 
 GActionGroup*
-gtk_cloud_provider_get_action_group (GtkCloudProvider *self)
+cloud_provider_get_action_group (CloudProvider *self)
 {
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   return priv->action_group;
 }
 
 gchar *
-gtk_cloud_provider_get_path (GtkCloudProvider *self)
+cloud_provider_get_path (CloudProvider *self)
 {
-  GtkCloudProviderPrivate *priv = gtk_cloud_provider_get_instance_private (self);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   return priv->path;
 }

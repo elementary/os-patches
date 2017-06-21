@@ -1,6 +1,6 @@
 #include <glib.h>
-#include <gtkcloudprovider.h>
-#include <gtkcloudprovidermanager.h>
+#include <cloudprovider.h>
+#include <cloudprovidermanager.h>
 
 static void
 print_gmenu_model (GMenuModel  *model)
@@ -35,7 +35,7 @@ print_gmenu_model (GMenuModel  *model)
 }
 
 static void
-on_manager_changed (GtkCloudProviderManager *manager)
+on_manager_changed (CloudProviderManager *manager)
 {
   GList *providers;
   GList *l;
@@ -45,27 +45,27 @@ on_manager_changed (GtkCloudProviderManager *manager)
   gchar *icon_representation;
   GMenuModel *menu;
 
-  providers = gtk_cloud_provider_manager_get_providers (manager);
+  providers = cloud_provider_manager_get_providers (manager);
   g_print ("Providers data\n");
   g_print ("##############\n");
   for (l = providers; l != NULL; l = l->next)
     {
-      provider_status = gtk_cloud_provider_get_status (GTK_CLOUD_PROVIDER (l->data));
+      provider_status = cloud_provider_get_status (CLOUD_PROVIDER (l->data));
       switch (provider_status)
         {
-        case GTK_CLOUD_PROVIDER_STATUS_INVALID:
+        case CLOUD_PROVIDER_STATUS_INVALID:
           status_string = "invalid";
           break;
 
-        case GTK_CLOUD_PROVIDER_STATUS_IDLE:
+        case CLOUD_PROVIDER_STATUS_IDLE:
           status_string = "idle";
           break;
 
-        case GTK_CLOUD_PROVIDER_STATUS_SYNCING:
+        case CLOUD_PROVIDER_STATUS_SYNCING:
           status_string = "syncing";
           break;
 
-        case GTK_CLOUD_PROVIDER_STATUS_ERROR:
+        case CLOUD_PROVIDER_STATUS_ERROR:
           status_string = "error";
           break;
 
@@ -73,18 +73,18 @@ on_manager_changed (GtkCloudProviderManager *manager)
           g_assert_not_reached ();
         }
 
-      icon = gtk_cloud_provider_get_icon (l->data);
+      icon = cloud_provider_get_icon (l->data);
       icon_representation = g_icon_to_string (icon);
 
       g_print ("Name - %s, Status - %s, Path - %s, Icon - %s\n",
-               gtk_cloud_provider_get_name (GTK_CLOUD_PROVIDER (l->data)),
+               cloud_provider_get_name (CLOUD_PROVIDER (l->data)),
                status_string,
-               gtk_cloud_provider_get_path (GTK_CLOUD_PROVIDER (l->data)),
+               cloud_provider_get_path (CLOUD_PROVIDER (l->data)),
                icon_representation);
 
       g_free (icon_representation);
 
-      menu = gtk_cloud_provider_get_menu_model (l->data);
+      menu = cloud_provider_get_menu_model (l->data);
       g_print ("\nMenu\n");
       print_gmenu_model (menu);
     }
@@ -95,13 +95,13 @@ gint
 main (gint   argc,
       gchar *argv[])
 {
-  GtkCloudProviderManager *manager;
+  CloudProviderManager *manager;
 
   GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
-  manager = gtk_cloud_provider_manager_dup_singleton ();
+  manager = cloud_provider_manager_dup_singleton ();
   g_signal_connect (manager, "changed", G_CALLBACK (on_manager_changed), NULL);
-  gtk_cloud_provider_manager_update (manager);
+  cloud_provider_manager_update (manager);
 
   g_print("Waiting for cloud providers\n\n");
 

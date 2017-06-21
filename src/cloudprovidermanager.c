@@ -1,6 +1,7 @@
-/* gtkcloudprovidermanager.c
+/* cloudprovidermanager.c
  *
  * Copyright (C) 2015 Carlos Soriano <csoriano@gnome.org>
+ * Copyright (C) 2017 Julius Haertl <jus@bitgrid.net>
  *
  * This file is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -16,22 +17,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "gtkcloudprovidermanager.h"
-#include "gtkcloudprovider.h"
+#include "cloudprovidermanager.h"
+#include "cloudprovider.h"
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <gio/gio.h>
 
-#define KEY_FILE_GROUP "Gtk Cloud Provider"
+#define KEY_FILE_GROUP "Cloud Provider"
 
 typedef struct
 {
   GList *providers;
   guint dbus_owner_id;
   GDBusNodeInfo *dbus_node_info;
-} GtkCloudProviderManagerPrivate;
+} CloudProviderManagerPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (GtkCloudProviderManager, gtk_cloud_provider_manager, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderManager, cloud_provider_manager, G_TYPE_OBJECT)
 
 enum
 {
@@ -61,7 +62,7 @@ handle_method_call (GDBusConnection       *connection,
 {
   if (g_strcmp0 (method_name, "CloudProviderChanged") == 0)
     {
-      gtk_cloud_provider_manager_update (GTK_CLOUD_PROVIDER_MANAGER (user_data));
+      cloud_provider_manager_update (CLOUD_PROVIDER_MANAGER (user_data));
     }
 }
 
@@ -75,13 +76,13 @@ on_bus_acquired (GDBusConnection *connection,
                  const gchar     *name,
                  gpointer         user_data)
 {
-  GtkCloudProviderManager *self = user_data;
-  GtkCloudProviderManagerPrivate *priv = gtk_cloud_provider_manager_get_instance_private (self);
+  CloudProviderManager *self = user_data;
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (self);
   guint registration_id;
 
   g_debug ("Registering cloud provider server 'MyCloud'\n");
   registration_id = g_dbus_connection_register_object (connection,
-                                                       GTK_CLOUD_PROVIDER_MANAGER_DBUS_PATH,
+                                                       CLOUD_PROVIDER_MANAGER_DBUS_PATH,
                                                        priv->dbus_node_info->interfaces[0],
                                                        &interface_vtable,
                                                        self,
@@ -90,7 +91,7 @@ on_bus_acquired (GDBusConnection *connection,
   g_assert (registration_id > 0);
 
   /* In case some provider updated before adquiring the bus */
-  gtk_cloud_provider_manager_update (GTK_CLOUD_PROVIDER_MANAGER (user_data));
+  cloud_provider_manager_update (CLOUD_PROVIDER_MANAGER (user_data));
 }
 
 static void
@@ -108,20 +109,20 @@ on_name_lost (GDBusConnection *connection,
 }
 
 /**
- * gtk_cloud_provider_manager_dup_singleton
+ * cloud_provider_manager_dup_singleton
  * Returns: (transfer none): A manager singleton
  */
-GtkCloudProviderManager *
-gtk_cloud_provider_manager_dup_singleton (void)
+CloudProviderManager *
+cloud_provider_manager_dup_singleton (void)
 {
   static GObject *self = NULL;
 
   if (self == NULL)
     {
-      GtkCloudProviderManagerPrivate *priv;
+      CloudProviderManagerPrivate *priv;
 
-      self = g_object_new (GTK_TYPE_CLOUD_PROVIDER_MANAGER, NULL);
-      priv = gtk_cloud_provider_manager_get_instance_private (GTK_CLOUD_PROVIDER_MANAGER (self));
+      self = g_object_new (TYPE_CLOUD_PROVIDER_MANAGER, NULL);
+      priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (self));
 
       /* Export the interface we listen to, so clients can request properties of
        * the cloud provider such as name, status or icon */
@@ -129,14 +130,14 @@ gtk_cloud_provider_manager_dup_singleton (void)
       g_assert (priv->dbus_node_info != NULL);
 
       priv->dbus_owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                                            GTK_CLOUD_PROVIDER_MANAGER_DBUS_NAME,
+                                            CLOUD_PROVIDER_MANAGER_DBUS_NAME,
                                             G_BUS_NAME_OWNER_FLAGS_NONE,
                                             on_bus_acquired,
                                             on_name_acquired,
                                             on_name_lost,
                                             self,
                                             NULL);
-      return GTK_CLOUD_PROVIDER_MANAGER (self);
+      return CLOUD_PROVIDER_MANAGER (self);
     }
   else
     {
@@ -145,24 +146,24 @@ gtk_cloud_provider_manager_dup_singleton (void)
 }
 
 static void
-gtk_cloud_provider_manager_finalize (GObject *object)
+cloud_provider_manager_finalize (GObject *object)
 {
-  GtkCloudProviderManager *self = (GtkCloudProviderManager *)object;
-  GtkCloudProviderManagerPrivate *priv = gtk_cloud_provider_manager_get_instance_private (self);
+  CloudProviderManager *self = (CloudProviderManager *)object;
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (self);
 
   g_list_free_full (priv->providers, g_object_unref);
   g_bus_unown_name (priv->dbus_owner_id);
   g_dbus_node_info_unref (priv->dbus_node_info);
 
-  G_OBJECT_CLASS (gtk_cloud_provider_manager_parent_class)->finalize (object);
+  G_OBJECT_CLASS (cloud_provider_manager_parent_class)->finalize (object);
 }
 
 static void
-gtk_cloud_provider_manager_class_init (GtkCloudProviderManagerClass *klass)
+cloud_provider_manager_class_init (CloudProviderManagerClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->finalize = gtk_cloud_provider_manager_finalize;
+  object_class->finalize = cloud_provider_manager_finalize;
 
   gSignals [CHANGED] =
     g_signal_new ("changed",
@@ -177,52 +178,52 @@ gtk_cloud_provider_manager_class_init (GtkCloudProviderManagerClass *klass)
 }
 
 static void
-gtk_cloud_provider_manager_init (GtkCloudProviderManager *self)
+cloud_provider_manager_init (CloudProviderManager *self)
 {
 }
 
 /**
- * gtk_cloud_provider_manager_get_providers
- * @manager: A GtkCloudProviderManager
+ * cloud_provider_manager_get_providers
+ * @manager: A CloudProviderManager
  * Returns: (transfer none): The list of providers.
  */
 GList*
-gtk_cloud_provider_manager_get_providers (GtkCloudProviderManager *manager)
+cloud_provider_manager_get_providers (CloudProviderManager *manager)
 {
-  GtkCloudProviderManagerPrivate *priv = gtk_cloud_provider_manager_get_instance_private (manager);
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (manager);
 
   return priv->providers;
 }
 
 static void
-on_cloud_provider_changed (GtkCloudProvider        *cloud_provider,
-                           GtkCloudProviderManager *self)
+on_cloud_provider_changed (CloudProvider        *cloud_provider,
+                           CloudProviderManager *self)
 {
   GIcon *icon;
   gchar *name;
   guint status;
 
-  name = gtk_cloud_provider_get_name (cloud_provider);
-  icon = gtk_cloud_provider_get_icon (cloud_provider);
-  status = gtk_cloud_provider_get_status (cloud_provider);
-  if (name == NULL || icon == NULL || status == GTK_CLOUD_PROVIDER_STATUS_INVALID)
+  name = cloud_provider_get_name (cloud_provider);
+  icon = cloud_provider_get_icon (cloud_provider);
+  status = cloud_provider_get_status (cloud_provider);
+  if (name == NULL || icon == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
     return;
 
   g_signal_emit_by_name (self, "changed", NULL);
 }
 
 static void
-load_cloud_provider (GtkCloudProviderManager *self,
+load_cloud_provider (CloudProviderManager *self,
                      GFile                   *file)
 {
-  GtkCloudProviderManagerPrivate *priv = gtk_cloud_provider_manager_get_instance_private (self);
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (self);
   GKeyFile *key_file;
   gchar *path;
   GError *error = NULL;
   gchar *bus_name;
   gchar *object_path;
   gboolean success = FALSE;
-  GtkCloudProvider *cloud_provider;
+  CloudProvider *cloud_provider;
 
   key_file = g_key_file_new ();
   path = g_file_get_path (file);
@@ -241,7 +242,7 @@ load_cloud_provider (GtkCloudProviderManager *self,
     goto out;
 
   g_print ("cloud provider found %s %s\n", bus_name, object_path);
-  cloud_provider = gtk_cloud_provider_new (bus_name, object_path);
+  cloud_provider = cloud_provider_new (bus_name, object_path);
   g_signal_connect (cloud_provider, "changed",
                     G_CALLBACK (on_cloud_provider_changed), self);
   priv->providers = g_list_append (priv->providers, cloud_provider);
@@ -254,13 +255,13 @@ out:
 }
 
 /**
- * gtk_cloud_provider_manager_update
- * @manager: A GtkCloudProviderManager
+ * cloud_provider_manager_update
+ * @manager: A CloudProviderManager
  */
 void
-gtk_cloud_provider_manager_update (GtkCloudProviderManager *manager)
+cloud_provider_manager_update (CloudProviderManager *manager)
 {
-  GtkCloudProviderManagerPrivate *priv = gtk_cloud_provider_manager_get_instance_private (manager);
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (manager);
   const gchar* const *data_dirs;
   gint i;
   gint len;
