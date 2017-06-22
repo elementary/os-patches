@@ -41,6 +41,7 @@ G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
 
 enum {
   CHANGED,
+  CHANGED_NOTIFY,
   LAST_SIGNAL
 };
 
@@ -69,7 +70,7 @@ on_get_icon (GObject      *source_object,
 
   variant_dict = g_variant_get_child_value (variant_tuple, 0);
   variant = g_variant_get_child_value (variant_dict, 0);
-  priv->icon = g_icon_deserialize (variant);
+  priv->icon = g_icon_deserialize (variant_dict);
   g_variant_unref (variant);
   g_variant_unref (variant_dict);
 
@@ -174,6 +175,13 @@ cloud_provider_update (CloudProvider *self)
     }
 }
 
+void
+cloud_provider_notify (CloudProvider *self)
+{
+  g_print("cloud-provider-notify\n");
+  g_signal_emit_by_name (self, "changed-notify");
+}
+
 static void
 on_proxy_created (GObject      *source_object,
                   GAsyncResult *res,
@@ -196,7 +204,8 @@ on_proxy_created (GObject      *source_object,
 
   priv->proxy = proxy;
 
-  cloud_provider_update (self);
+  g_signal_connect_swapped(priv->proxy, "cloud-provider-changed", G_CALLBACK(cloud_provider_update), self);
+  g_signal_connect_swapped(priv->proxy, "notify", G_CALLBACK(cloud_provider_notify), self);
 }
 
 static void
@@ -290,6 +299,16 @@ cloud_provider_class_init (CloudProviderClass *klass)
                   g_cclosure_marshal_generic,
                   G_TYPE_NONE,
                   0);
+  gSignals [CHANGED_NOTIFY] =
+    g_signal_new ("changed-notify",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL,
+                  NULL,
+                  g_cclosure_marshal_generic,
+                  G_TYPE_NONE,
+                  0);
 }
 
 static void
@@ -346,4 +365,26 @@ cloud_provider_get_path (CloudProvider *self)
   CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
 
   return priv->path;
+}
+
+gchar *
+cloud_provider_get_owner (CloudProvider *self)
+{
+   CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+
+   return g_dbus_proxy_get_name_owner (G_DBUS_PROXY(priv->proxy));
+}
+
+gboolean cloud_provider_is_available(CloudProvider *self)
+{
+  GIcon *icon;
+  gchar *name;
+  guint status;
+
+  name = cloud_provider_get_name (self);
+  icon = cloud_provider_get_icon (self);
+  status = cloud_provider_get_status (self);
+  if (name == NULL || icon == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
+	  return FALSE;
+  return TRUE;
 }

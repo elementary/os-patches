@@ -47,18 +47,24 @@ static void
 on_cloud_provider_changed (CloudProvider        *cloud_provider,
                            CloudProviderManager *self)
 {
-  GIcon *icon;
-  gchar *name;
-  guint status;
-
-  name = cloud_provider_get_name (cloud_provider);
-  icon = cloud_provider_get_icon (cloud_provider);
-  status = cloud_provider_get_status (cloud_provider);
-  if (name == NULL || icon == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
-	  return;
-
+  if(!cloud_provider_is_available(cloud_provider))
+    return;
   g_signal_emit_by_name (self, "changed", NULL);
 }
+
+static void
+on_cloud_provider_changed_notify (CloudProvider *cloud_provider, CloudProviderManager *self)
+{
+  if(!cloud_provider_is_available(cloud_provider))
+    return;
+
+  // update manager to remove cloud providers after owner disappeared
+  if(cloud_provider_get_owner(cloud_provider) == NULL) {
+    cloud_provider_manager_update(self);
+    g_signal_emit_by_name (self, "changed", NULL);
+  }
+}
+
 
 static void
 on_bus_acquired (GDBusConnection *connection,
@@ -90,7 +96,10 @@ on_name_lost (GDBusConnection *connection,
               gpointer         user_data)
 {
   CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (user_data));
-  g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(priv->skeleton));
+  if (g_dbus_interface_skeleton_has_connection (G_DBUS_INTERFACE_SKELETON (priv->skeleton), connection))
+    {
+      g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(priv->skeleton));
+    }
 }
 
 /**
@@ -207,6 +216,8 @@ load_cloud_provider (CloudProviderManager *self,
   cloud_provider = cloud_provider_new (bus_name, object_path);
   g_signal_connect (cloud_provider, "changed",
                     G_CALLBACK (on_cloud_provider_changed), self);
+  g_signal_connect (cloud_provider, "changed-notify",
+                    G_CALLBACK (on_cloud_provider_changed_notify), self);
   priv->providers = g_list_append (priv->providers, cloud_provider);
 
   success = TRUE;

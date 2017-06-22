@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <cloudprovider.h>
-#include <cloudprovidermanager.h>
 
 #define TIMEOUT 2000
 
@@ -22,8 +21,8 @@ struct _TestCloudProvider
   gint status;
   GIcon *icon;
   gchar *path;
-  CloudProviderManager1 *manager_proxy;
   guint timeout_handler;
+  GDBusConnection *connection;
 };
 
 
@@ -38,7 +37,6 @@ test_cloud_provider_finalize (GObject *object)
   g_free (self->name);
   g_free (self->path);
   g_clear_object (&self->icon);
-  g_clear_object (&self->manager_proxy);
 
   G_OBJECT_CLASS (test_cloud_provider_parent_class)->finalize (object);
 }
@@ -76,12 +74,7 @@ static void
 test_cloud_provider_set_status (TestCloudProvider *self,
                            gint           status)
 {
-  /* Inform the manager that the provider changed */
   self->status = status;
-  cloud_provider_manager1_call_cloud_provider_changed(self->manager_proxy,
-							  NULL,
-							  NULL,
-							  NULL);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -266,14 +259,42 @@ static const GDBusInterfaceVTable interface_vtable =
   handle_method_call,
 };
 
+static gboolean
+test_cloud_provider_notify_change (gpointer user_data)
+{
+  TestCloudProvider *cloud_provider = (TestCloudProvider *)user_data;
+  GRand *rand;
+  gint new_status;
+
+  g_print("Emit changed signal for cloud provider\n");
+
+  rand = g_rand_new ();
+  new_status = g_rand_int_range (rand,
+                                 CLOUD_PROVIDER_STATUS_IDLE,
+                                 CLOUD_PROVIDER_STATUS_ERROR + 1);
+
+  test_cloud_provider_set_status (cloud_provider, new_status);
+
+  g_dbus_connection_emit_signal (cloud_provider->connection,
+				 NULL,
+				 "/org/freedesktop/CloudProviderServerExample",
+				 "org.freedesktop.CloudProvider1",
+				 "CloudProviderChanged",
+				 NULL,
+				 NULL /*error*/);
+
+  return TRUE;
+}
+
 static void
 on_bus_acquired (GDBusConnection *connection,
                  const gchar     *name,
                  gpointer         user_data)
 {
-  CloudProvider *cloud_provider = user_data;
+  TestCloudProvider *cloud_provider = user_data;
   guint registration_id;
 
+  cloud_provider->connection = connection;
 
   g_debug ("Registering cloud provider server 'MyCloud'\n");
 
@@ -295,6 +316,10 @@ on_name_acquired (GDBusConnection *connection,
                   const gchar     *name,
                   gpointer         user_data)
 {
+  TestCloudProvider *cloud_provider = (TestCloudProvider *)user_data;
+  cloud_provider->timeout_handler = g_timeout_add (TIMEOUT,
+                                                   (GSourceFunc) test_cloud_provider_notify_change,
+                                                   cloud_provider);
 }
 
 static void
@@ -305,49 +330,11 @@ on_name_lost (GDBusConnection *connection,
   exit (1);
 }
 
-static gboolean
-change_provider (gpointer user_data)
-{
-  TestCloudProvider *cloud_provider = (TestCloudProvider *)user_data;
-  GRand *rand;
-  gint new_status;
-
-  g_print("Send change_provider message to bus\n");
-
-  rand = g_rand_new ();
-  new_status = g_rand_int_range (rand,
-                                 CLOUD_PROVIDER_STATUS_IDLE,
-                                 CLOUD_PROVIDER_STATUS_ERROR + 1);
-
-  test_cloud_provider_set_status (cloud_provider, new_status);
-
-  return TRUE;
-}
-
-static void
-on_manager_proxy_created (GObject      *source_object,
-                          GAsyncResult *res,
-                          gpointer      user_data)
-{
-  TestCloudProvider *cloud_provider = user_data;
-  GError *error = NULL;
-
-  cloud_provider->manager_proxy = cloud_provider_manager1_proxy_new_for_bus_finish (res, &error);
-  if (error != NULL)
-    g_warning ("Error creating proxy for cloud provider manager %s", error->message);
-  else
-    g_print ("Manager proxy created for 'MyCloud'\n");
-
-  cloud_provider->timeout_handler = g_timeout_add (TIMEOUT,
-                                                   (GSourceFunc) change_provider,
-                                                   cloud_provider);
-}
-
 int
 main (int argc, char *argv[])
 {
   GMainLoop *loop;
-  CloudProvider *cloud_provider;
+  TestCloudProvider *cloud_provider;
   guint owner_id;
 
   cloud_provider = g_object_new (test_cloud_provider_get_type (), NULL);
@@ -360,16 +347,6 @@ main (int argc, char *argv[])
                              on_name_lost,
                              cloud_provider,
                              NULL);
-
-  /* Create CloudProviderManager proxy for exporting cloud provider changes */
-  cloud_provider_manager1_proxy_new_for_bus(G_BUS_TYPE_SESSION,
-                            G_DBUS_PROXY_FLAGS_NONE,
-                            "org.freedesktop.CloudProviderManager",
-                            "/org/freedesktop/CloudProviderManager",
-                            NULL,
-                            on_manager_proxy_created,
-                            cloud_provider);
-
 
   loop = g_main_loop_new (NULL, FALSE);
   g_main_loop_run (loop);

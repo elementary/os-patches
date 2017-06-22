@@ -52,6 +52,9 @@ on_manager_changed (CloudProviderManager *manager)
   g_print ("##############\n");
   for (l = providers; l != NULL; l = l->next)
     {
+      if(!cloud_provider_is_available(CLOUD_PROVIDER (l->data))) {
+         continue;
+      }
       provider_status = cloud_provider_get_status (CLOUD_PROVIDER (l->data));
       switch (provider_status)
         {

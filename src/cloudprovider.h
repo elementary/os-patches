@@ -64,7 +64,8 @@ GIcon *cloud_provider_get_icon (CloudProvider *self);
 GMenuModel *cloud_provider_get_menu_model (CloudProvider *self);
 GActionGroup* cloud_provider_get_action_group (CloudProvider *self);
 gchar *cloud_provider_get_path (CloudProvider *self);
-
+gchar *cloud_provider_get_owner (CloudProvider *self);
 G_END_DECLS
+gboolean cloud_provider_is_available(CloudProvider *self);
 
 #endif /* CLOUD_PROVIDER_H */
