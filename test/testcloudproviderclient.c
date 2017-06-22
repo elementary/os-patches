@@ -46,6 +46,8 @@ on_manager_changed (CloudProviderManager *manager)
   GMenuModel *menu;
 
   providers = cloud_provider_manager_get_providers (manager);
+  if(providers == NULL)
+    return;
   g_print ("Providers data\n");
   g_print ("##############\n");
   for (l = providers; l != NULL; l = l->next)
@@ -96,11 +98,10 @@ main (gint   argc,
       gchar *argv[])
 {
   CloudProviderManager *manager;
-
   GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
   manager = cloud_provider_manager_dup_singleton ();
-  g_signal_connect (manager, "changed", G_CALLBACK (on_manager_changed), NULL);
+  g_signal_connect (manager, "changed", G_CALLBACK (on_manager_changed), manager);
   cloud_provider_manager_update (manager);
 
   g_print("Waiting for cloud providers\n\n");

@@ -66,7 +66,6 @@ on_get_icon (GObject      *source_object,
       g_warning ("Error getting the provider icon %s", error->message);
       goto out;
     }
-  g_print ("variant tuple %s\n", g_variant_print (variant_tuple, TRUE));
 
   variant_dict = g_variant_get_child_value (variant_tuple, 0);
   variant = g_variant_get_child_value (variant_dict, 0);

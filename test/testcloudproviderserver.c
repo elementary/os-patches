@@ -3,6 +3,7 @@
 #include <gio/gio.h>
 #include <cloudprovider.h>
 #include <cloudprovidermanager.h>
+
 #define TIMEOUT 2000
 
 typedef struct _TestCloudProviderClass TestCloudProviderClass;

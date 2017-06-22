@@ -30,6 +30,7 @@ typedef struct
   GList *providers;
   guint dbus_owner_id;
   GDBusNodeInfo *dbus_node_info;
+  CloudProviderManager1 *skeleton;
 } CloudProviderManagerPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderManager, cloud_provider_manager, G_TYPE_OBJECT)
@@ -42,56 +43,28 @@ enum
 
 static guint gSignals [LAST_SIGNAL];
 
-static const gchar manager_xml[] =
-  "<node>"
-  "  <interface name='org.freedesktop.CloudProviderManager1'>"
-  "    <method name='CloudProviderChanged'>"
-  "    </method>"
-  "  </interface>"
-  "</node>";
-
 static void
-handle_method_call (GDBusConnection       *connection,
-                    const gchar           *sender,
-                    const gchar           *object_path,
-                    const gchar           *interface_name,
-                    const gchar           *method_name,
-                    GVariant              *parameters,
-                    GDBusMethodInvocation *invocation,
-                    gpointer               user_data)
+on_cloud_provider_changed (CloudProvider        *cloud_provider,
+                           CloudProviderManager *self)
 {
-  if (g_strcmp0 (method_name, "CloudProviderChanged") == 0)
-    {
-      cloud_provider_manager_update (CLOUD_PROVIDER_MANAGER (user_data));
-    }
-}
+  GIcon *icon;
+  gchar *name;
+  guint status;
 
-static const GDBusInterfaceVTable interface_vtable =
-{
-  handle_method_call,
-};
+  name = cloud_provider_get_name (cloud_provider);
+  icon = cloud_provider_get_icon (cloud_provider);
+  status = cloud_provider_get_status (cloud_provider);
+  if (name == NULL || icon == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
+	  return;
+
+  g_signal_emit_by_name (self, "changed", NULL);
+}
 
 static void
 on_bus_acquired (GDBusConnection *connection,
                  const gchar     *name,
                  gpointer         user_data)
 {
-  CloudProviderManager *self = user_data;
-  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (self);
-  guint registration_id;
-
-  g_debug ("Registering cloud provider server 'MyCloud'\n");
-  registration_id = g_dbus_connection_register_object (connection,
-                                                       CLOUD_PROVIDER_MANAGER_DBUS_PATH,
-                                                       priv->dbus_node_info->interfaces[0],
-                                                       &interface_vtable,
-                                                       self,
-                                                       NULL,  /* user_data_free_func */
-                                                       NULL); /* GError** */
-  g_assert (registration_id > 0);
-
-  /* In case some provider updated before adquiring the bus */
-  cloud_provider_manager_update (CLOUD_PROVIDER_MANAGER (user_data));
 }
 
 static void
@@ -99,6 +72,16 @@ on_name_acquired (GDBusConnection *connection,
                   const gchar     *name,
                   gpointer         user_data)
 {
+  CloudProviderManager *self = user_data;
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (user_data));
+  g_signal_connect_swapped (priv->skeleton,
+		    "handle-cloud-provider-changed",
+		    G_CALLBACK(cloud_provider_manager_update),
+		    self);
+  g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (priv->skeleton),
+				    connection,
+				    CLOUD_PROVIDER_MANAGER_DBUS_PATH,
+				    NULL);
 }
 
 static void
@@ -106,6 +89,8 @@ on_name_lost (GDBusConnection *connection,
               const gchar     *name,
               gpointer         user_data)
 {
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (user_data));
+  g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(priv->skeleton));
 }
 
 /**
@@ -120,15 +105,8 @@ cloud_provider_manager_dup_singleton (void)
   if (self == NULL)
     {
       CloudProviderManagerPrivate *priv;
-
       self = g_object_new (TYPE_CLOUD_PROVIDER_MANAGER, NULL);
-      priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (self));
-
-      /* Export the interface we listen to, so clients can request properties of
-       * the cloud provider such as name, status or icon */
-      priv->dbus_node_info = g_dbus_node_info_new_for_xml (manager_xml, NULL);
-      g_assert (priv->dbus_node_info != NULL);
-
+      priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER(self));
       priv->dbus_owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
                                             CLOUD_PROVIDER_MANAGER_DBUS_NAME,
                                             G_BUS_NAME_OWNER_FLAGS_NONE,
@@ -137,6 +115,7 @@ cloud_provider_manager_dup_singleton (void)
                                             on_name_lost,
                                             self,
                                             NULL);
+      priv->skeleton = cloud_provider_manager1_skeleton_new ();
       return CLOUD_PROVIDER_MANAGER (self);
     }
   else
@@ -193,23 +172,6 @@ cloud_provider_manager_get_providers (CloudProviderManager *manager)
   CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (manager);
 
   return priv->providers;
-}
-
-static void
-on_cloud_provider_changed (CloudProvider        *cloud_provider,
-                           CloudProviderManager *self)
-{
-  GIcon *icon;
-  gchar *name;
-  guint status;
-
-  name = cloud_provider_get_name (cloud_provider);
-  icon = cloud_provider_get_icon (cloud_provider);
-  status = cloud_provider_get_status (cloud_provider);
-  if (name == NULL || icon == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
-    return;
-
-  g_signal_emit_by_name (self, "changed", NULL);
 }
 
 static void
