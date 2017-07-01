@@ -154,16 +154,16 @@ get_model (void)
   m->mainMenu = g_menu_new();
 
   section = g_menu_new();
-  m->website = g_menu_item_new("MyCloud website", "website");
+  m->website = g_menu_item_new("MyCloud website", "cloudprovider.website");
   g_menu_append_item(section, m->website);
-  m->photos = g_menu_item_new("MyCloud photos", "photos");
+  m->photos = g_menu_item_new("MyCloud photos", "cloudprovider.photos");
   g_menu_append_item(section, m->photos);
-  m->notes = g_menu_item_new("MyCloud notes", "notes");
+  m->notes = g_menu_item_new("MyCloud notes", "cloudprovider.notes");
   g_menu_append_item(section, m->notes);
   g_menu_append_section(m->mainMenu, NULL, G_MENU_MODEL(section));
 
   section = g_menu_new();
-  m->allowSync = g_menu_item_new("Allow Synchronization", "allow-sync");
+  m->allowSync = g_menu_item_new("Allow Synchronization", "cloudprovider.allow-sync");
   g_menu_append_item(section, m->allowSync);
 
   submenu = g_menu_new();
@@ -316,10 +316,11 @@ on_name_acquired (GDBusConnection *connection,
                   const gchar     *name,
                   gpointer         user_data)
 {
-  TestCloudProvider *cloud_provider = (TestCloudProvider *)user_data;
-  cloud_provider->timeout_handler = g_timeout_add (TIMEOUT,
+  TestCloudProvider *self = (TestCloudProvider *)user_data;
+  self->timeout_handler = g_timeout_add (TIMEOUT,
                                                    (GSourceFunc) test_cloud_provider_notify_change,
-                                                   cloud_provider);
+                                                   self);
+  test_cloud_provider_notify_change(self);
 }
 
 static void
