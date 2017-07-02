@@ -30,6 +30,7 @@ typedef struct
   GList *providers;
   guint dbus_owner_id;
   GDBusNodeInfo *dbus_node_info;
+  GHashTable* provider_object_managers;
   CloudProviderManager1 *skeleton;
 } CloudProviderManagerPrivate;
 
@@ -38,6 +39,7 @@ G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderManager, cloud_provider_manager, G_TYPE
 enum
 {
   CHANGED,
+  OWNERS_CHANGED,
   LAST_SIGNAL
 };
 
@@ -62,7 +64,25 @@ on_cloud_provider_changed_notify (CloudProvider *cloud_provider, CloudProviderMa
   if(cloud_provider_get_owner(cloud_provider) == NULL) {
     cloud_provider_manager_update(self);
     g_signal_emit_by_name (self, "changed", NULL);
+    g_signal_emit_by_name (self, "owners-changed", NULL);
   }
+}
+
+static void
+on_cloud_provider_object_manager_notify (
+GObject    *object,
+                      GParamSpec *pspec,
+                      gpointer user_data)
+{
+  GDBusObjectManagerClient *manager = G_DBUS_OBJECT_MANAGER_CLIENT (object);
+  CloudProviderManager *self = CLOUD_PROVIDER_MANAGER(user_data);
+  gchar *name_owner;
+
+  name_owner = g_dbus_object_manager_client_get_name_owner (manager);
+  g_print ("name-owner: %s\n", name_owner);
+  cloud_provider_manager_update(self);
+  g_free (name_owner);
+  g_signal_emit_by_name (self, "changed", NULL);
 }
 
 
@@ -125,6 +145,7 @@ cloud_provider_manager_dup_singleton (void)
                                             self,
                                             NULL);
       priv->skeleton = cloud_provider_manager1_skeleton_new ();
+      priv->provider_object_managers = g_hash_table_new(g_str_hash, g_str_equal);
       return CLOUD_PROVIDER_MANAGER (self);
     }
   else
@@ -155,6 +176,16 @@ cloud_provider_manager_class_init (CloudProviderManagerClass *klass)
 
   gSignals [CHANGED] =
     g_signal_new ("changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL,
+                  NULL,
+                  g_cclosure_marshal_generic,
+                  G_TYPE_NONE,
+                  0);
+ gSignals [OWNERS_CHANGED] =
+    g_signal_new ("owners-changed",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
@@ -213,13 +244,41 @@ load_cloud_provider (CloudProviderManager *self,
     goto out;
 
   g_print ("cloud provider found %s %s\n", bus_name, object_path);
-  cloud_provider = cloud_provider_new (bus_name, object_path);
-  g_signal_connect (cloud_provider, "changed",
-                    G_CALLBACK (on_cloud_provider_changed), self);
-  g_signal_connect (cloud_provider, "changed-notify",
-                    G_CALLBACK (on_cloud_provider_changed_notify), self);
-  priv->providers = g_list_append (priv->providers, cloud_provider);
+  GDBusObjectManager *manager = g_hash_table_lookup(priv->provider_object_managers, bus_name);
+  if(manager == NULL) {
+    manager = object_manager_client_new_for_bus_sync(G_BUS_TYPE_SESSION,
+                                                     G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
+                                                     bus_name,
+                                                     object_path,
+                                                     NULL,
+                                                     &error);
 
+    if (manager == NULL)
+      {
+        g_printerr ("Error getting object manager client: %s", error->message);
+        g_error_free (error);
+        goto out;
+      }
+
+    g_signal_connect(manager, "notify::name-owner", G_CALLBACK(on_cloud_provider_object_manager_notify), self);
+    g_hash_table_insert(priv->provider_object_managers, bus_name, manager);
+  }
+  GList *objects;
+  GList *l;
+
+  g_print ("Object manager at %s\n", g_dbus_object_manager_get_object_path (manager));
+  objects = g_dbus_object_manager_get_objects (manager);
+  for (l = objects; l != NULL; l = l->next)
+    {
+      Object *object = OBJECT(l->data);
+      g_print (" - Object at %s\n", g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
+      cloud_provider = cloud_provider_new (bus_name, g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
+      g_signal_connect (cloud_provider, "changed",
+                    G_CALLBACK (on_cloud_provider_changed), self);
+      g_signal_connect (cloud_provider, "changed-notify",
+                    G_CALLBACK (on_cloud_provider_changed_notify), self);
+      priv->providers = g_list_append (priv->providers, cloud_provider);
+    }
   success = TRUE;
 out:
   if (!success)

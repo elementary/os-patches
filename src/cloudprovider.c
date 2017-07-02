@@ -204,6 +204,8 @@ on_proxy_created (GObject      *source_object,
 
   priv->proxy = proxy;
 
+  cloud_provider_notify(self);
+
   g_signal_connect_swapped(priv->proxy, "cloud-provider-changed", G_CALLBACK(cloud_provider_update), self);
   g_signal_connect_swapped(priv->proxy, "notify", G_CALLBACK(cloud_provider_notify), self);
 }

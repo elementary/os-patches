@@ -16,7 +16,8 @@ gdbus_sources = []
 gdbus_sources += gnome.gdbus_codegen ('cloudprovider-generated',
                                       join_paths (meson.source_root (), 'data', 'cloudprovider-dbus.xml'),
                                       interface_prefix: 'org.freedesktop',
-                                      namespace: '')
+                                      namespace: '',
+                                      object_manager: true)
 gdbus_sources += gnome.gdbus_codegen ('cloudprovidermanager-generated',
                                       join_paths (meson.source_root (), 'data', 'cloudprovidermanager-dbus.xml'),
                                       interface_prefix: 'org.freedesktop',
