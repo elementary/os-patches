@@ -277,7 +277,7 @@ test_cloud_provider_notify_change (gpointer user_data)
 
   g_dbus_connection_emit_signal (cloud_provider->connection,
 				 NULL,
-				 "/org/freedesktop/CloudProviderServerExample",
+				 "/org/freedesktop/CloudProviderServerExample/account1",
 				 "org.freedesktop.CloudProvider1",
 				 "CloudProviderChanged",
 				 NULL,
@@ -299,7 +299,7 @@ on_bus_acquired (GDBusConnection *connection,
   g_debug ("Registering cloud provider server 'MyCloud'\n");
 
   registration_id = g_dbus_connection_register_object (connection,
-                                                       "/org/freedesktop/CloudProviderServerExample",
+                                                       "/org/freedesktop/CloudProviderServerExample/account1",
                                                        cloud_provider1_interface_info(),
                                                        &interface_vtable,
                                                        cloud_provider,
@@ -308,7 +308,19 @@ on_bus_acquired (GDBusConnection *connection,
 
   g_assert (registration_id > 0);
   /* Export a menu for our own application */
-  export_menu (connection, "/org/freedesktop/CloudProviderServerExample");
+  export_menu (connection, "/org/freedesktop/CloudProviderServerExample/account1");
+
+   registration_id = g_dbus_connection_register_object (connection,
+                                                       "/org/freedesktop/CloudProviderServerExample/account2",
+                                                       cloud_provider1_interface_info(),
+                                                       &interface_vtable,
+                                                       cloud_provider,
+                                                       NULL,  /* user_data_free_func */
+                                                       NULL); /* GError** */
+
+  g_assert (registration_id > 0);
+  /* Export a menu for our own application */
+  export_menu (connection, "/org/freedesktop/CloudProviderServerExample/account2");
 }
 
 static void
