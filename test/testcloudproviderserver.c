@@ -337,14 +337,14 @@ on_bus_acquired (GDBusConnection *connection,
 
       export_menu (connection, account_object_name);
       // FIXME: send initial changed signal to notify already running e.g. nautilus
-      g_dbus_connection_emit_signal (connection,
+      /*g_dbus_connection_emit_signal (connection,
 				 NULL,
 				 account_object_name,
 				 "org.freedesktop.CloudProvider1",
 				 "CloudProviderChanged",
 				 NULL,
-				 NULL /*error*/);
-
+				// NULL);
+*/
       g_free(account_object_name);
     }
   g_dbus_object_manager_server_set_connection (self->manager, connection);

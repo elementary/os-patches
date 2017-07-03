@@ -63,10 +63,21 @@ on_cloud_provider_changed_notify (CloudProvider *cloud_provider, CloudProviderMa
   // update manager to remove cloud providers after owner disappeared
   if(cloud_provider_get_owner(cloud_provider) == NULL) {
     cloud_provider_manager_update(self);
-    g_signal_emit_by_name (self, "changed", NULL);
     g_signal_emit_by_name (self, "owners-changed", NULL);
   }
 }
+
+static void
+on_cloud_provider_ready (CloudProvider *cloud_provider, CloudProviderManager *self)
+{
+  g_signal_emit_by_name (self, "owners-changed", NULL);
+  g_print("on_cloud_provider_ready\n");
+  // update manager to remove cloud providers after owner disappeared
+  /*if(cloud_provider_get_owner(cloud_provider) == NULL) {
+    g_signal_emit_by_name (self, "owners-changed", NULL);
+  }*/
+}
+
 
 static void
 on_cloud_provider_object_manager_notify (
@@ -80,9 +91,10 @@ GObject    *object,
 
   name_owner = g_dbus_object_manager_client_get_name_owner (manager);
   g_print ("name-owner: %s\n", name_owner);
+
   cloud_provider_manager_update(self);
   g_free (name_owner);
-  g_signal_emit_by_name (self, "changed", NULL);
+  g_signal_emit_by_name (self, "owners-changed", NULL);
 }
 
 
@@ -272,11 +284,11 @@ load_cloud_provider (CloudProviderManager *self,
     {
       Object *object = OBJECT(l->data);
       g_print (" - Object at %s\n", g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
+      g_print("New cloud provider instance\n");
       cloud_provider = cloud_provider_new (bus_name, g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
-      g_signal_connect (cloud_provider, "changed",
-                    G_CALLBACK (on_cloud_provider_changed), self);
-      g_signal_connect (cloud_provider, "changed-notify",
-                    G_CALLBACK (on_cloud_provider_changed_notify), self);
+      g_signal_connect (cloud_provider, "ready",
+                    G_CALLBACK (on_cloud_provider_ready), self);
+      cloud_provider_update(cloud_provider);
       priv->providers = g_list_append (priv->providers, cloud_provider);
     }
   success = TRUE;

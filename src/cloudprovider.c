@@ -35,6 +35,7 @@ typedef struct
   gchar *bus_name;
   gchar *object_path;
   GCancellable *cancellable;
+  gboolean ready;
 } CloudProviderPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
@@ -42,6 +43,7 @@ G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
 enum {
   CHANGED,
   CHANGED_NOTIFY,
+  READY,
   LAST_SIGNAL
 };
 
@@ -77,6 +79,10 @@ on_get_icon (GObject      *source_object,
 out:
   g_variant_unref (variant_tuple);
   g_signal_emit_by_name (self, "changed");
+  if(cloud_provider_is_available(self) && !priv->ready) {
+    priv->ready = TRUE;
+    g_signal_emit_by_name (self, "ready");
+  }
 }
 
 static void
@@ -98,6 +104,10 @@ on_get_name (GObject      *source_object,
       return;
     }
   g_signal_emit_by_name (self, "changed");
+  if(cloud_provider_is_available(self) && !priv->ready) {
+    priv->ready = TRUE;
+    g_signal_emit_by_name (self, "ready");
+  }
 }
 
 
@@ -120,6 +130,10 @@ on_get_path (GObject      *source_object,
       return;
     }
   g_signal_emit_by_name (self, "changed");
+  if(cloud_provider_is_available(self) && !priv->ready) {
+    priv->ready = TRUE;
+    g_signal_emit_by_name (self, "ready");
+  }
 }
 
 static void
@@ -140,6 +154,10 @@ on_get_status (GObject      *source_object,
     }
   priv->status = status;
   g_signal_emit_by_name (self, "changed");
+  if(cloud_provider_is_available(self) && !priv->ready) {
+    priv->ready = TRUE;
+    g_signal_emit_by_name (self, "ready");
+  }
 }
 
 void
@@ -208,6 +226,8 @@ on_proxy_created (GObject      *source_object,
 
   g_signal_connect_swapped(priv->proxy, "cloud-provider-changed", G_CALLBACK(cloud_provider_update), self);
   g_signal_connect_swapped(priv->proxy, "notify", G_CALLBACK(cloud_provider_notify), self);
+
+  cloud_provider_update(self);
 }
 
 static void
@@ -256,6 +276,7 @@ cloud_provider_new (const gchar *bus_name,
   priv->object_path = g_strdup (object_path);
   priv->cancellable = g_cancellable_new ();
   priv->status = CLOUD_PROVIDER_STATUS_INVALID;
+  priv->ready = FALSE;
   g_bus_get (G_BUS_TYPE_SESSION,
              priv->cancellable,
              on_bus_acquired,
@@ -303,6 +324,16 @@ cloud_provider_class_init (CloudProviderClass *klass)
                   0);
   gSignals [CHANGED_NOTIFY] =
     g_signal_new ("changed-notify",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL,
+                  NULL,
+                  g_cclosure_marshal_generic,
+                  G_TYPE_NONE,
+                  0);
+  gSignals [READY] =
+    g_signal_new ("ready",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
@@ -381,12 +412,14 @@ gboolean cloud_provider_is_available(CloudProvider *self)
 {
   GIcon *icon;
   gchar *name;
+  gchar *path;
   guint status;
 
   name = cloud_provider_get_name (self);
   icon = cloud_provider_get_icon (self);
   status = cloud_provider_get_status (self);
-  if (name == NULL || icon == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
+  path = cloud_provider_get_path (self);
+  if (name == NULL || icon == NULL || path == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
 	  return FALSE;
   return TRUE;
 }
