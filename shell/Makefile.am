@@ -1,3 +1,5 @@
+SUBDIRS = appdata
+
 INCLUDES =					\
 	-I$(top_srcdir)				\
 	$(SHELL_CFLAGS)				\

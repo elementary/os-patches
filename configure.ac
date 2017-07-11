@@ -493,6 +493,7 @@ panels/wacom/Makefile
 panels/wacom/calibrator/Makefile
 panels/wacom/unity-wacom-panel.desktop.in
 po/Makefile.in
+shell/appdata/Makefile
 shell/Makefile
 shell/unity-control-center.desktop.in
 man/Makefile

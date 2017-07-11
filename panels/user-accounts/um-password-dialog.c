@@ -249,11 +249,11 @@ accept_password_dialog (GtkButton        *button,
                                 gdk_window_set_cursor (gtk_widget_get_window (um->dialog), cursor);
                                 gdk_display_flush (display);
                                 g_object_unref (cursor);
-                                return;
+                        } else {
+                                act_user_set_password (um->user, password, hint);
                         }
 
                         act_user_set_password_mode (um->user, ACT_USER_PASSWORD_MODE_REGULAR);
-                        act_user_set_password (um->user, password, hint);
                         break;
 
                 case UM_PASSWORD_DIALOG_MODE_SET_AT_LOGIN:
