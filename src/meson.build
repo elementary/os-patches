@@ -1,13 +1,13 @@
 libcloudproviders_headers = [
   'cloudprovidermanager.h',
-  'cloudprovider.h',
+  'cloudproviderproxy.h',
   'cloudprovider-generated.h',
   'cloudprovidermanager-generated.h'
 ]
 
 libcloudproviders_sources = [
   'cloudprovidermanager.c',
-  'cloudprovider.c'
+  'cloudproviderproxy.c'
 ]
 
 libcloudproviders_deps = [glib, gio, gio_unix]

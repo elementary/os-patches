@@ -20,7 +20,7 @@
 #define CLOUD_PROVIDER_MANAGER_H
 
 #include <gio/gio.h>
-#include "cloudprovider.h"
+#include "cloudproviderproxy.h"
 #include "cloudprovidermanager-generated.h"
 
 #define CLOUD_PROVIDER_MANAGER_DBUS_IFACE "org.freedesktop.CloudProviderManager1"

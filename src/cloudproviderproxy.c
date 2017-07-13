@@ -1,4 +1,4 @@
-/* cloudprovider.c
+/* cloudproviderproxy.c
  *
  * Copyright (C) 2015 Carlos Soriano <csoriano@gnome.org>
  * Copyright (C) 2017 Julius Haertl <jus@bitgrid.net>
@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "cloudprovider.h"
+#include "cloudproviderproxy.h"
 #include "cloudprovider-generated.h"
 
 
@@ -36,9 +36,9 @@ typedef struct
   gchar *object_path;
   GCancellable *cancellable;
   gboolean ready;
-} CloudProviderPrivate;
+} CloudProviderProxyPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderProxy, cloud_provider_proxy, G_TYPE_OBJECT)
 
 enum {
   CHANGED,
@@ -53,8 +53,8 @@ on_get_icon (GObject      *source_object,
              GAsyncResult *res,
              gpointer      user_data)
 {
-  CloudProvider *self = CLOUD_PROVIDER (user_data);
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxy *self = CLOUD_PROVIDER_PROXY (user_data);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
   GError *error = NULL;
   GVariant *variant_tuple;
   GVariant *variant_dict;
@@ -78,7 +78,7 @@ on_get_icon (GObject      *source_object,
 out:
   g_variant_unref (variant_tuple);
   g_signal_emit_by_name (self, "changed");
-  if(cloud_provider_is_available(self) && !priv->ready) {
+  if(cloud_provider_proxy_is_available(self) && !priv->ready) {
     priv->ready = TRUE;
     g_signal_emit_by_name (self, "ready");
   }
@@ -89,8 +89,8 @@ on_get_name (GObject      *source_object,
              GAsyncResult *res,
              gpointer      user_data)
 {
-  CloudProvider *self = CLOUD_PROVIDER (user_data);
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxy *self = CLOUD_PROVIDER_PROXY (user_data);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
   GError *error = NULL;
 
   if (priv->name != NULL)
@@ -103,7 +103,7 @@ on_get_name (GObject      *source_object,
       return;
     }
   g_signal_emit_by_name (self, "changed");
-  if(cloud_provider_is_available(self) && !priv->ready) {
+  if(cloud_provider_proxy_is_available(self) && !priv->ready) {
     priv->ready = TRUE;
     g_signal_emit_by_name (self, "ready");
   }
@@ -115,8 +115,8 @@ on_get_path (GObject      *source_object,
              GAsyncResult *res,
              gpointer      user_data)
 {
-  CloudProvider *self = CLOUD_PROVIDER (user_data);
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxy *self = CLOUD_PROVIDER_PROXY (user_data);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
   GError *error = NULL;
 
   if (priv->path != NULL)
@@ -129,7 +129,7 @@ on_get_path (GObject      *source_object,
       return;
     }
   g_signal_emit_by_name (self, "changed");
-  if(cloud_provider_is_available(self) && !priv->ready) {
+  if(cloud_provider_proxy_is_available(self) && !priv->ready) {
     priv->ready = TRUE;
     g_signal_emit_by_name (self, "ready");
   }
@@ -140,8 +140,8 @@ on_get_status (GObject      *source_object,
                GAsyncResult *res,
                gpointer      user_data)
 {
-  CloudProvider *self = CLOUD_PROVIDER (user_data);
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxy *self = CLOUD_PROVIDER_PROXY (user_data);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
   GError *error = NULL;
   gint status;
 
@@ -153,16 +153,16 @@ on_get_status (GObject      *source_object,
     }
   priv->status = status;
   g_signal_emit_by_name (self, "changed");
-  if(cloud_provider_is_available(self) && !priv->ready) {
+  if(cloud_provider_proxy_is_available(self) && !priv->ready) {
     priv->ready = TRUE;
     g_signal_emit_by_name (self, "ready");
   }
 }
 
 void
-cloud_provider_update (CloudProvider *self)
+cloud_provider_proxy_update (CloudProviderProxy *self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   if (priv->proxy != NULL)
     {
@@ -198,8 +198,8 @@ on_proxy_created (GObject      *source_object,
                   gpointer      user_data)
 {
   GError *error = NULL;
-  CloudProvider *self;
-  CloudProviderPrivate *priv;
+  CloudProviderProxy *self;
+  CloudProviderProxyPrivate *priv;
   CloudProvider1 *proxy;
 
   proxy = cloud_provider1_proxy_new_for_bus_finish (res, &error);
@@ -209,14 +209,14 @@ on_proxy_created (GObject      *source_object,
         g_warning ("Error creating proxy for cloud provider %s", error->message);
       return;
     }
-  self = CLOUD_PROVIDER (user_data);
-  priv = cloud_provider_get_instance_private (self);
+  self = CLOUD_PROVIDER_PROXY (user_data);
+  priv = cloud_provider_proxy_get_instance_private (self);
 
   priv->proxy = proxy;
 
-  g_signal_connect_swapped(priv->proxy, "cloud-provider-changed", G_CALLBACK(cloud_provider_update), self);
+  g_signal_connect_swapped(priv->proxy, "cloud-provider-changed", G_CALLBACK(cloud_provider_proxy_update), self);
 
-  cloud_provider_update(self);
+  cloud_provider_proxy_update(self);
 }
 
 static void
@@ -225,9 +225,9 @@ on_bus_acquired (GObject      *source_object,
                  gpointer      user_data)
 {
   GError *error = NULL;
-  CloudProvider *self;
+  CloudProviderProxy *self;
   GDBusConnection *bus;
-  CloudProviderPrivate *priv;
+  CloudProviderProxyPrivate *priv;
 
   bus = g_bus_get_finish (res, &error);
   if (error != NULL)
@@ -237,8 +237,8 @@ on_bus_acquired (GObject      *source_object,
       return;
     }
 
-  self = CLOUD_PROVIDER (user_data);
-  priv = cloud_provider_get_instance_private (user_data);
+  self = CLOUD_PROVIDER_PROXY (user_data);
+  priv = cloud_provider_proxy_get_instance_private (user_data);
   priv->bus = bus;
   g_clear_object (&priv->cancellable);
   priv->cancellable = g_cancellable_new ();
@@ -251,15 +251,15 @@ on_bus_acquired (GObject      *source_object,
                                  self);
 }
 
-CloudProvider*
-cloud_provider_new (const gchar *bus_name,
+CloudProviderProxy*
+cloud_provider_proxy_new (const gchar *bus_name,
                         const gchar *object_path)
 {
-  CloudProvider *self;
-  CloudProviderPrivate *priv;
+  CloudProviderProxy *self;
+  CloudProviderProxyPrivate *priv;
 
-  self = g_object_new (TYPE_CLOUD_PROVIDER, NULL);
-  priv = cloud_provider_get_instance_private (self);
+  self = g_object_new (TYPE_CLOUD_PROVIDER_PROXY, NULL);
+  priv = cloud_provider_proxy_get_instance_private (self);
 
   priv->bus_name = g_strdup (bus_name);
   priv->object_path = g_strdup (object_path);
@@ -275,10 +275,10 @@ cloud_provider_new (const gchar *bus_name,
 }
 
 static void
-cloud_provider_finalize (GObject *object)
+cloud_provider_proxy_finalize (GObject *object)
 {
-  CloudProvider *self = (CloudProvider *)object;
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxy *self = (CloudProviderProxy *)object;
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   g_cancellable_cancel (priv->cancellable);
   g_clear_object (&priv->cancellable);
@@ -291,15 +291,15 @@ cloud_provider_finalize (GObject *object)
   g_free (priv->bus_name);
   g_free (priv->object_path);
 
-  G_OBJECT_CLASS (cloud_provider_parent_class)->finalize (object);
+  G_OBJECT_CLASS (cloud_provider_proxy_parent_class)->finalize (object);
 }
 
 static void
-cloud_provider_class_init (CloudProviderClass *klass)
+cloud_provider_proxy_class_init (CloudProviderProxyClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->finalize = cloud_provider_finalize;
+  object_class->finalize = cloud_provider_proxy_finalize;
 
   gSignals [CHANGED] =
     g_signal_new ("changed",
@@ -324,80 +324,80 @@ cloud_provider_class_init (CloudProviderClass *klass)
 }
 
 static void
-cloud_provider_init (CloudProvider *self)
+cloud_provider_proxy_init (CloudProviderProxy *self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   priv->status = CLOUD_PROVIDER_STATUS_INVALID;
 }
 
 gchar*
-cloud_provider_get_name (CloudProvider *self)
+cloud_provider_proxy_get_name (CloudProviderProxy *self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   return priv->name;
 }
 
 CloudProviderStatus
-cloud_provider_get_status (CloudProvider *self)
+cloud_provider_proxy_get_status (CloudProviderProxy *self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   return priv->status;
 }
 
 GIcon*
-cloud_provider_get_icon (CloudProvider *self)
+cloud_provider_proxy_get_icon (CloudProviderProxy *self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   return priv->icon;
 }
 
 GMenuModel*
-cloud_provider_get_menu_model (CloudProvider *self)
+cloud_provider_proxy_get_menu_model (CloudProviderProxy *self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   return priv->menu_model;
 }
 
 GActionGroup*
-cloud_provider_get_action_group (CloudProvider *self)
+cloud_provider_proxy_get_action_group (CloudProviderProxy *self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   return priv->action_group;
 }
 
 gchar *
-cloud_provider_get_path (CloudProvider *self)
+cloud_provider_proxy_get_path (CloudProviderProxy *self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   return priv->path;
 }
 
 gchar *
-cloud_provider_get_owner (CloudProvider *self)
+cloud_provider_proxy_get_owner (CloudProviderProxy *self)
 {
-   CloudProviderPrivate *priv = cloud_provider_get_instance_private (self);
+   CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
    return g_dbus_proxy_get_name_owner (G_DBUS_PROXY(priv->proxy));
 }
 
-gboolean cloud_provider_is_available(CloudProvider *self)
+gboolean cloud_provider_proxy_is_available(CloudProviderProxy *self)
 {
   GIcon *icon;
   gchar *name;
   gchar *path;
   guint status;
 
-  name = cloud_provider_get_name (self);
-  icon = cloud_provider_get_icon (self);
-  status = cloud_provider_get_status (self);
-  path = cloud_provider_get_path (self);
+  name = cloud_provider_proxy_get_name (self);
+  icon = cloud_provider_proxy_get_icon (self);
+  status = cloud_provider_proxy_get_status (self);
+  path = cloud_provider_proxy_get_path (self);
   if (name == NULL || icon == NULL || path == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
 	  return FALSE;
   return TRUE;

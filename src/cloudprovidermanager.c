@@ -18,7 +18,7 @@
  */
 
 #include "cloudprovidermanager.h"
-#include "cloudprovider.h"
+#include "cloudproviderproxy.h"
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <gio/gio.h>
@@ -46,11 +46,11 @@ enum
 static guint gSignals [LAST_SIGNAL];
 
 static void
-on_cloud_provider_ready (CloudProvider *cloud_provider, CloudProviderManager *self)
+on_cloud_provider_proxy_ready (CloudProviderProxy *cloud_provider, CloudProviderManager *self)
 {
   // notify clients that cloud provider list has changed
   g_signal_emit_by_name (self, "owners-changed", NULL);
-  g_print("on_cloud_provider_ready\n");
+  g_print("on_cloud_provider_proxy_ready\n");
   // update manager to remove cloud providers after owner disappeared
   /*if(cloud_provider_get_owner(cloud_provider) == NULL) {
     g_signal_emit_by_name (self, "owners-changed", NULL);
@@ -224,7 +224,7 @@ load_cloud_provider (CloudProviderManager *self,
   gchar *bus_name;
   gchar *object_path;
   gboolean success = FALSE;
-  CloudProvider *cloud_provider;
+  CloudProviderProxy*cloud_provider;
 
   key_file = g_key_file_new ();
   path = g_file_get_path (file);
@@ -272,10 +272,10 @@ load_cloud_provider (CloudProviderManager *self,
       Object *object = OBJECT(l->data);
       g_print (" - Object at %s\n", g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
       g_print("New cloud provider instance\n");
-      cloud_provider = cloud_provider_new (bus_name, g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
+      cloud_provider = cloud_provider_proxy_new (bus_name, g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
       g_signal_connect (cloud_provider, "ready",
-                    G_CALLBACK (on_cloud_provider_ready), self);
-      cloud_provider_update(cloud_provider);
+                    G_CALLBACK (on_cloud_provider_proxy_ready), self);
+      cloud_provider_proxy_update(cloud_provider);
       priv->providers = g_list_append (priv->providers, cloud_provider);
     }
   success = TRUE;

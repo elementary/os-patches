@@ -1,5 +1,5 @@
 #include <glib.h>
-#include <cloudprovider.h>
+#include <cloudproviderproxy.h>
 #include <cloudprovidermanager.h>
 
 static void
@@ -52,10 +52,10 @@ on_manager_changed (CloudProviderManager *manager)
   g_print ("##############\n");
   for (l = providers; l != NULL; l = l->next)
     {
-      if(!cloud_provider_is_available(CLOUD_PROVIDER (l->data))) {
+      if(!cloud_provider_proxy_is_available(CLOUD_PROVIDER_PROXY(l->data))) {
          continue;
       }
-      provider_status = cloud_provider_get_status (CLOUD_PROVIDER (l->data));
+      provider_status = cloud_provider_proxy_get_status (CLOUD_PROVIDER_PROXY (l->data));
       switch (provider_status)
         {
         case CLOUD_PROVIDER_STATUS_INVALID:
@@ -78,18 +78,18 @@ on_manager_changed (CloudProviderManager *manager)
           g_assert_not_reached ();
         }
 
-      icon = cloud_provider_get_icon (l->data);
+      icon = cloud_provider_proxy_get_icon (l->data);
       icon_representation = g_icon_to_string (icon);
 
       g_print ("Name - %s, Status - %s, Path - %s, Icon - %s\n",
-               cloud_provider_get_name (CLOUD_PROVIDER (l->data)),
+               cloud_provider_proxy_get_name (CLOUD_PROVIDER_PROXY (l->data)),
                status_string,
-               cloud_provider_get_path (CLOUD_PROVIDER (l->data)),
+               cloud_provider_proxy_get_path (CLOUD_PROVIDER_PROXY (l->data)),
                icon_representation);
 
       g_free (icon_representation);
 
-      menu = cloud_provider_get_menu_model (l->data);
+      menu = cloud_provider_proxy_get_menu_model (l->data);
       g_print ("\nMenu\n");
       print_gmenu_model (menu);
     }
