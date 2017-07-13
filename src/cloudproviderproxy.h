@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLOUD_PROVIDER_H
-#define CLOUD_PROVIDER_H
+#ifndef CLOUD_PROVIDER_PROXY_H
+#define CLOUD_PROVIDER_PROXY_H
 
 #include <gio/gio.h>
 #include "cloudprovider-generated.h"
@@ -70,4 +70,4 @@ void cloud_provider_proxy_update (CloudProviderProxy *self);
 G_END_DECLS
 
 
-#endif /* CLOUD_PROVIDER_H */
+#endif /* CLOUD_PROVIDER_PROXY_H */

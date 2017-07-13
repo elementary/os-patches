@@ -1,10 +1,10 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <gio/gio.h>
-#include <cloudprovider.h>
+#include <cloudproviderproxy.h>
 #include <cloudprovidermanager.h>
 
-#define TIMEOUT 2000
+#define TIMEOUT 800
 #define COUNT_PLACEHOLDER_ACCOUNTS 3
 
 typedef struct _TestCloudProviderClass TestCloudProviderClass;
@@ -259,7 +259,7 @@ change_random_cloud_provider_state (gpointer user_data)
   g_dbus_connection_emit_signal (cloud_provider->connection,
                                  NULL,
                                  account_object_name,
-                                 "org.freedesktop.CloudProvider1",
+                                 "org.freedesktop.CloudProvider.Account1",
                                  "CloudProviderChanged",
                                  NULL,
                                  NULL /*error*/);
@@ -268,7 +268,7 @@ change_random_cloud_provider_state (gpointer user_data)
 
 
 static void
-on_get_name (CloudProvider1          *cloud_provider,
+on_get_name (CloudProviderAccount1          *cloud_provider,
                 GDBusMethodInvocation  *invocation,
                 gpointer                user_data)
 {
@@ -278,7 +278,7 @@ on_get_name (CloudProvider1          *cloud_provider,
 }
 
 static void
-on_get_icon (CloudProvider1          *cloud_provider,
+on_get_icon (CloudProviderAccount1          *cloud_provider,
                 GDBusMethodInvocation  *invocation,
                 gpointer                user_data)
 {
@@ -288,7 +288,7 @@ on_get_icon (CloudProvider1          *cloud_provider,
 }
 
 static void
-on_get_path (CloudProvider1          *cloud_provider,
+on_get_path (CloudProviderAccount1          *cloud_provider,
              GDBusMethodInvocation  *invocation,
              gpointer                user_data)
 {
@@ -298,7 +298,7 @@ on_get_path (CloudProvider1          *cloud_provider,
 }
 
 static void
-on_get_status (CloudProvider1          *cloud_provider,
+on_get_status (CloudProviderAccount1          *cloud_provider,
                 GDBusMethodInvocation  *invocation,
                 gpointer                user_data)
 {
@@ -314,7 +314,7 @@ on_bus_acquired (GDBusConnection *connection,
 {
   TestCloudProvider *self = user_data;
   guint n;
-  ObjectSkeleton *object;
+  CloudProviderObjectSkeleton *object;
   self->connection = connection;
 
   g_debug ("Registering cloud provider server 'MyCloud'\n");
@@ -329,14 +329,14 @@ on_bus_acquired (GDBusConnection *connection,
 
       account_object_name = g_strdup_printf ("/org/freedesktop/CloudProviderServerExample/%03d", n);
       account_name = g_strdup_printf ("MyCloud %d", n);
-      object = object_skeleton_new(account_object_name);
+      object = cloud_provider_object_skeleton_new(account_object_name);
 
-      CloudProvider1 *cloud_provider = cloud_provider1_skeleton_new();
+      CloudProviderAccount1 *cloud_provider = cloud_provider_account1_skeleton_new();
       g_signal_connect(cloud_provider, "handle_get_name", G_CALLBACK (on_get_name), account_name);
       g_signal_connect(cloud_provider, "handle_get_icon", G_CALLBACK (on_get_icon), self);
       g_signal_connect(cloud_provider, "handle_get_path", G_CALLBACK (on_get_path), self);
       g_signal_connect(cloud_provider, "handle_get_status", G_CALLBACK (on_get_status), self);
-      object_skeleton_set_cloud_provider1(object, cloud_provider);
+      cloud_provider_object_skeleton_set_account1(object, cloud_provider);
       g_dbus_object_manager_server_export (self->manager, G_DBUS_OBJECT_SKELETON(object));
 
       export_menu (connection, account_object_name);

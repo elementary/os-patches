@@ -1,8 +1,6 @@
 libcloudproviders_headers = [
   'cloudprovidermanager.h',
-  'cloudproviderproxy.h',
-  'cloudprovider-generated.h',
-  'cloudprovidermanager-generated.h'
+  'cloudproviderproxy.h'
 ]
 
 libcloudproviders_sources = [
@@ -15,13 +13,13 @@ libcloudproviders_deps = [glib, gio, gio_unix]
 gdbus_sources = []
 gdbus_sources += gnome.gdbus_codegen ('cloudprovider-generated',
                                       join_paths (meson.source_root (), 'data', 'cloudprovider-dbus.xml'),
-                                      interface_prefix: 'org.freedesktop',
-                                      namespace: '',
+                                      interface_prefix: 'org.freedesktop.CloudProvider',
+                                      namespace: 'CloudProvider',
                                       object_manager: true)
 gdbus_sources += gnome.gdbus_codegen ('cloudprovidermanager-generated',
                                       join_paths (meson.source_root (), 'data', 'cloudprovidermanager-dbus.xml'),
-                                      interface_prefix: 'org.freedesktop',
-                                      namespace: '')
+                                      interface_prefix: 'org.freedesktop.CloudProvider',
+                                      namespace: 'CloudProvider')
 
 libcloudproviders_sources += gdbus_sources
 

@@ -245,7 +245,7 @@ load_cloud_provider (CloudProviderManager *self,
   g_print ("cloud provider found %s %s\n", bus_name, object_path);
   GDBusObjectManager *manager = g_hash_table_lookup(priv->provider_object_managers, bus_name);
   if(manager == NULL) {
-    manager = object_manager_client_new_for_bus_sync(G_BUS_TYPE_SESSION,
+    manager = cloud_provider_object_manager_client_new_for_bus_sync(G_BUS_TYPE_SESSION,
                                                      G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
                                                      bus_name,
                                                      object_path,
@@ -269,7 +269,7 @@ load_cloud_provider (CloudProviderManager *self,
   objects = g_dbus_object_manager_get_objects (manager);
   for (l = objects; l != NULL; l = l->next)
     {
-      Object *object = OBJECT(l->data);
+      CloudProviderObject *object = CLOUD_PROVIDER_OBJECT(l->data);
       g_print (" - Object at %s\n", g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
       g_print("New cloud provider instance\n");
       cloud_provider = cloud_provider_proxy_new (bus_name, g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
