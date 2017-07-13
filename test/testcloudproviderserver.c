@@ -233,33 +233,36 @@ export_menu (GDBusConnection *bus,
     }
 }
 
+
 static gboolean
-test_cloud_provider_notify_change (gpointer user_data)
+change_random_cloud_provider_state (gpointer user_data)
 {
   TestCloudProvider *cloud_provider = (TestCloudProvider *)user_data;
   GRand *rand;
   gint new_status;
+  gint account_id;
+  gchar *account_object_name;
 
   rand = g_rand_new ();
-
-  g_print("Emit changed signal for cloud providers\n");
-  gchar *account_object_name;
-  account_object_name = g_strdup_printf ("/org/freedesktop/CloudProviderServerExample/%03d",
-                                         g_rand_int_range(rand, 0, COUNT_PLACEHOLDER_ACCOUNTS));
-
+  account_id = g_rand_int_range (rand, 0, COUNT_PLACEHOLDER_ACCOUNTS);
   new_status = g_rand_int_range (rand,
                                  CLOUD_PROVIDER_STATUS_IDLE,
                                  CLOUD_PROVIDER_STATUS_ERROR + 1);
 
+  account_object_name = g_strdup_printf ("/org/freedesktop/CloudProviderServerExample/%03d",
+                                         account_id);
+
   test_cloud_provider_set_status (cloud_provider, new_status);
 
+  g_print ("Change status of %03d to %d\n", account_id, new_status);
+
   g_dbus_connection_emit_signal (cloud_provider->connection,
-				 NULL,
-				 account_object_name,
-				 "org.freedesktop.CloudProvider1",
-				 "CloudProviderChanged",
-				 NULL,
-				 NULL /*error*/);
+                                 NULL,
+                                 account_object_name,
+                                 "org.freedesktop.CloudProvider1",
+                                 "CloudProviderChanged",
+                                 NULL,
+                                 NULL /*error*/);
   return TRUE;
 }
 
@@ -271,7 +274,7 @@ on_get_name (CloudProvider1          *cloud_provider,
 {
     gchar *name = user_data;
     g_dbus_method_invocation_return_value (invocation,
-                                             g_variant_new ("(s)", name));
+                                           g_variant_new ("(s)", name));
 }
 
 static void
@@ -281,17 +284,17 @@ on_get_icon (CloudProvider1          *cloud_provider,
 {
     TestCloudProvider *self = user_data;
     g_dbus_method_invocation_return_value (invocation,
-                                             g_variant_new ("(v)", g_icon_serialize(self->icon)));
+                                           g_variant_new ("(v)", g_icon_serialize(self->icon)));
 }
 
 static void
 on_get_path (CloudProvider1          *cloud_provider,
-                GDBusMethodInvocation  *invocation,
-                gpointer                user_data)
+             GDBusMethodInvocation  *invocation,
+             gpointer                user_data)
 {
     TestCloudProvider *self = user_data;
     g_dbus_method_invocation_return_value (invocation,
-                                             g_variant_new ("(s)", self->path));
+                                           g_variant_new ("(s)", self->path));
 }
 
 static void
@@ -301,7 +304,7 @@ on_get_status (CloudProvider1          *cloud_provider,
 {
     TestCloudProvider *self = user_data;
     g_dbus_method_invocation_return_value (invocation,
-                                             g_variant_new ("(i)", self->status));
+                                           g_variant_new ("(i)", self->status));
 }
 
 static void
@@ -317,6 +320,7 @@ on_bus_acquired (GDBusConnection *connection,
   g_debug ("Registering cloud provider server 'MyCloud'\n");
 
   self->manager = g_dbus_object_manager_server_new ("/org/freedesktop/CloudProviderServerExample");
+  // export multiple accounts as DBus objects to the bus
   for (n = 0; n < COUNT_PLACEHOLDER_ACCOUNTS; n++)
     {
 
@@ -336,15 +340,7 @@ on_bus_acquired (GDBusConnection *connection,
       g_dbus_object_manager_server_export (self->manager, G_DBUS_OBJECT_SKELETON(object));
 
       export_menu (connection, account_object_name);
-      // FIXME: send initial changed signal to notify already running e.g. nautilus
-      /*g_dbus_connection_emit_signal (connection,
-				 NULL,
-				 account_object_name,
-				 "org.freedesktop.CloudProvider1",
-				 "CloudProviderChanged",
-				 NULL,
-				// NULL);
-*/
+
       g_free(account_object_name);
     }
   g_dbus_object_manager_server_set_connection (self->manager, connection);
@@ -361,9 +357,9 @@ on_name_acquired (GDBusConnection *connection,
 {
   TestCloudProvider *self = (TestCloudProvider *)user_data;
   self->timeout_handler = g_timeout_add (TIMEOUT,
-                                                   (GSourceFunc) test_cloud_provider_notify_change,
-                                                   self);
-  test_cloud_provider_notify_change(self);
+                                         (GSourceFunc) change_random_cloud_provider_state,
+                                         self);
+  change_random_cloud_provider_state (self);
 }
 
 static void
@@ -381,9 +377,7 @@ main (int argc, char *argv[])
   TestCloudProvider *test_cloud_provider;
   guint owner_id;
 
-
   test_cloud_provider = g_object_new (test_cloud_provider_get_type (), NULL);
-
 
   owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
                              "org.freedesktop.CloudProviderServerExample",
@@ -398,7 +392,6 @@ main (int argc, char *argv[])
   g_main_loop_run (loop);
 
   g_bus_unown_name (owner_id);
-
   g_object_unref (test_cloud_provider);
 
   return 0;

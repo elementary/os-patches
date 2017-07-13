@@ -42,7 +42,6 @@ G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
 
 enum {
   CHANGED,
-  CHANGED_NOTIFY,
   READY,
   LAST_SIGNAL
 };
@@ -193,13 +192,6 @@ cloud_provider_update (CloudProvider *self)
     }
 }
 
-void
-cloud_provider_notify (CloudProvider *self)
-{
-  g_print("cloud-provider-notify\n");
-  g_signal_emit_by_name (self, "changed-notify");
-}
-
 static void
 on_proxy_created (GObject      *source_object,
                   GAsyncResult *res,
@@ -222,10 +214,7 @@ on_proxy_created (GObject      *source_object,
 
   priv->proxy = proxy;
 
-  cloud_provider_notify(self);
-
   g_signal_connect_swapped(priv->proxy, "cloud-provider-changed", G_CALLBACK(cloud_provider_update), self);
-  g_signal_connect_swapped(priv->proxy, "notify", G_CALLBACK(cloud_provider_notify), self);
 
   cloud_provider_update(self);
 }
@@ -314,16 +303,6 @@ cloud_provider_class_init (CloudProviderClass *klass)
 
   gSignals [CHANGED] =
     g_signal_new ("changed",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL,
-                  NULL,
-                  g_cclosure_marshal_generic,
-                  G_TYPE_NONE,
-                  0);
-  gSignals [CHANGED_NOTIFY] =
-    g_signal_new ("changed-notify",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,

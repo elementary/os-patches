@@ -46,30 +46,9 @@ enum
 static guint gSignals [LAST_SIGNAL];
 
 static void
-on_cloud_provider_changed (CloudProvider        *cloud_provider,
-                           CloudProviderManager *self)
-{
-  if(!cloud_provider_is_available(cloud_provider))
-    return;
-  g_signal_emit_by_name (self, "changed", NULL);
-}
-
-static void
-on_cloud_provider_changed_notify (CloudProvider *cloud_provider, CloudProviderManager *self)
-{
-  if(!cloud_provider_is_available(cloud_provider))
-    return;
-
-  // update manager to remove cloud providers after owner disappeared
-  if(cloud_provider_get_owner(cloud_provider) == NULL) {
-    cloud_provider_manager_update(self);
-    g_signal_emit_by_name (self, "owners-changed", NULL);
-  }
-}
-
-static void
 on_cloud_provider_ready (CloudProvider *cloud_provider, CloudProviderManager *self)
 {
+  // notify clients that cloud provider list has changed
   g_signal_emit_by_name (self, "owners-changed", NULL);
   g_print("on_cloud_provider_ready\n");
   // update manager to remove cloud providers after owner disappeared
@@ -79,6 +58,9 @@ on_cloud_provider_ready (CloudProvider *cloud_provider, CloudProviderManager *se
 }
 
 
+/**
+ * Update provider list if objects are added/removed at object manager.
+ */
 static void
 on_cloud_provider_object_manager_notify (
 GObject    *object,
@@ -226,9 +208,14 @@ cloud_provider_manager_get_providers (CloudProviderManager *manager)
   return priv->providers;
 }
 
+/**
+ * load_cloud_provider
+ * @manager: A CloudProviderManager
+ * @file: A GFile
+ */
 static void
 load_cloud_provider (CloudProviderManager *self,
-                     GFile                   *file)
+                     GFile                *file)
 {
   CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (self);
   GKeyFile *key_file;
