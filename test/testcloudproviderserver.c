@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <cloudproviderproxy.h>
-#include <cloudprovidermanager.h>
 
 #define TIMEOUT 800
 #define COUNT_PLACEHOLDER_ACCOUNTS 3

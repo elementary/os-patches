@@ -1,4 +1,4 @@
-/* cloudprovider.h
+/* cloudproviderproxy.h
  *
  * Copyright (C) 2015 Carlos Soriano <csoriano@gnome.org>
  * Copyright (C) 2017 Julius Haertl <jus@bitgrid.net>

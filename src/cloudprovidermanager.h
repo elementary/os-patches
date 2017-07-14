@@ -51,8 +51,6 @@ struct _CloudProviderManager
 
 GType          cloud_provider_manager_get_type          (void) G_GNUC_CONST;
 CloudProviderManager *cloud_provider_manager_dup_singleton (void);
-void cloud_provider_manager_update (CloudProviderManager *self);
-GList *cloud_provider_manager_get_providers (CloudProviderManager *self);
 //static void on_cloud_provider_changed (CloudProvider *cloud_provider, CloudProviderManager *self);
 G_END_DECLS
 

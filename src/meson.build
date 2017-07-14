@@ -1,11 +1,15 @@
 libcloudproviders_headers = [
   'cloudprovidermanager.h',
-  'cloudproviderproxy.h'
+  'cloudproviderproxy.h',
+  'cloudproviders.h',
+  'cloudprovider-generated.h',
+  'cloudprovidermanager-generated.h'
 ]
 
 libcloudproviders_sources = [
   'cloudprovidermanager.c',
-  'cloudproviderproxy.c'
+  'cloudproviderproxy.c',
+  'cloudproviders.c',
 ]
 
 libcloudproviders_deps = [glib, gio, gio_unix]
@@ -23,11 +27,12 @@ gdbus_sources += gnome.gdbus_codegen ('cloudprovidermanager-generated',
 
 libcloudproviders_sources += gdbus_sources
 
+
 libcloudproviders = shared_library ('cloudproviders',
-                                        libcloudproviders_sources,
-                                        dependencies: libcloudproviders_deps,
-                                        version: meson.project_version (),
-                                        install: true)
+                                    libcloudproviders_sources,
+                                    dependencies: libcloudproviders_deps,
+                                    version: meson.project_version (),
+                                    install: true)
 
 install_headers( libcloudproviders_headers, subdir: 'cloudproviders')
 
@@ -38,3 +43,11 @@ pkg.generate(libraries : libcloudproviders,
              name : 'libcloudproviders',
              filebase: 'cloudproviders',
              description : 'Cloud providers DBus API library.')
+
+
+cloudproviderd_deps = declare_dependency (link_with: libcloudproviders,
+                                          include_directories: include_directories('.'),
+                                          dependencies: libcloudproviders_deps)
+
+executable('cloudproviderd', 'cloudproviderd.c',
+           dependencies: cloudproviderd_deps, install: true)

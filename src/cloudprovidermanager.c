@@ -23,14 +23,13 @@
 #include <glib/gprintf.h>
 #include <gio/gio.h>
 
-#define KEY_FILE_GROUP "Cloud Provider"
-
 typedef struct
 {
   GList *providers;
   guint dbus_owner_id;
   GDBusNodeInfo *dbus_node_info;
-  GHashTable* provider_object_managers;
+  GVariantBuilder *provider_object_managers;
+  GVariant *providers_objects;
   CloudProviderManager1 *skeleton;
 } CloudProviderManagerPrivate;
 
@@ -45,40 +44,121 @@ enum
 
 static guint gSignals [LAST_SIGNAL];
 
-static void
-on_cloud_provider_proxy_ready (CloudProviderProxy *cloud_provider, CloudProviderManager *self)
-{
-  // notify clients that cloud provider list has changed
-  g_signal_emit_by_name (self, "owners-changed", NULL);
-  g_print("on_cloud_provider_proxy_ready\n");
-  // update manager to remove cloud providers after owner disappeared
-  /*if(cloud_provider_get_owner(cloud_provider) == NULL) {
-    g_signal_emit_by_name (self, "owners-changed", NULL);
-  }*/
-}
 
+#define KEY_FILE_GROUP "Cloud Provider"
 
 /**
- * Update provider list if objects are added/removed at object manager.
+ * load_cloud_provider
+ * @manager: A CloudProviders
+ * @file: A GFile
  */
 static void
-on_cloud_provider_object_manager_notify (
-GObject    *object,
-                      GParamSpec *pspec,
-                      gpointer user_data)
+load_cloud_provider (CloudProviderManager *self,
+                     GFile                *file,
+                     GVariantBuilder *builder)
 {
-  GDBusObjectManagerClient *manager = G_DBUS_OBJECT_MANAGER_CLIENT (object);
-  CloudProviderManager *self = CLOUD_PROVIDER_MANAGER(user_data);
-  gchar *name_owner;
+  GKeyFile *key_file;
+  gchar *path;
+  GError *error = NULL;
+  gchar *bus_name;
+  gchar *object_path;
+  gboolean success = FALSE;
 
-  name_owner = g_dbus_object_manager_client_get_name_owner (manager);
-  g_print ("name-owner: %s\n", name_owner);
+  key_file = g_key_file_new ();
+  path = g_file_get_path (file);
+  g_key_file_load_from_file (key_file, path, G_KEY_FILE_NONE, &error);
+  if (error != NULL)
+    goto out;
 
-  cloud_provider_manager_update(self);
-  g_free (name_owner);
-  g_signal_emit_by_name (self, "owners-changed", NULL);
+  if (!g_key_file_has_group (key_file, KEY_FILE_GROUP))
+    goto out;
+
+  bus_name = g_key_file_get_string (key_file, KEY_FILE_GROUP, "BusName", &error);
+  if (error != NULL)
+    goto out;
+  object_path = g_key_file_get_string (key_file, KEY_FILE_GROUP, "ObjectPath", &error);
+  if (error != NULL)
+    goto out;
+
+  g_variant_builder_add(builder, "(so)", bus_name, object_path);
+
+  success = TRUE;
+out:
+  if (!success)
+    g_warning ("Error while loading cloud provider key file at %s", path);
+  g_key_file_free (key_file);
 }
 
+
+void
+cloud_provider_manager_update (CloudProviderManager *manager)
+{
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (manager);
+  const gchar* const *data_dirs;
+  gint i;
+  gint len;
+  gchar *key_files_directory_path;
+  GFile *key_files_directory_file;
+  GError *error = NULL;
+  GFileEnumerator *file_enumerator;
+
+  priv->provider_object_managers = g_variant_builder_new(G_VARIANT_TYPE("a(so)"));
+
+  g_list_free_full (priv->providers, g_object_unref);
+  priv->providers = NULL;
+
+  data_dirs = g_get_system_data_dirs ();
+  len = g_strv_length ((gchar **)data_dirs);
+
+  for (i = 0; i < len; i++)
+    {
+      GFileInfo *info;
+
+      key_files_directory_path = g_build_filename (data_dirs[i], "cloud-providers", NULL);
+      key_files_directory_file = g_file_new_for_path (key_files_directory_path);
+      file_enumerator = g_file_enumerate_children (key_files_directory_file,
+                                                   "standard::name,standard::type",
+                                                   G_FILE_QUERY_INFO_NONE,
+                                                   NULL,
+                                                   &error);
+      if (error)
+        {
+          error = NULL;
+          continue;
+        }
+
+      info = g_file_enumerator_next_file (file_enumerator, NULL, &error);
+      if (error)
+        {
+          g_warning ("Error while enumerating file %s error: %s\n", key_files_directory_path, error->message);
+          error = NULL;
+          continue;
+        }
+      while (info != NULL && error == NULL)
+        {
+           load_cloud_provider (manager, g_file_enumerator_get_child (file_enumerator, info), priv->provider_object_managers);
+           info = g_file_enumerator_next_file (file_enumerator, NULL, &error);
+        }
+    }
+
+    g_free(priv->providers_objects);
+    priv->providers_objects = g_variant_builder_end(priv->provider_object_managers);
+    g_variant_builder_unref (priv->provider_object_managers);
+    g_print("%s\n", g_variant_print(priv->providers_objects, TRUE));
+
+}
+
+
+void
+handle_get_cloud_providers (CloudProviderManager1 *interface,
+                            GDBusMethodInvocation  *invocation,
+                            gpointer                user_data)
+{
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER(user_data));
+  g_variant_ref(priv->providers_objects);
+  g_print("=> %s\n", g_variant_print(priv->providers_objects, TRUE));
+  cloud_provider_manager1_complete_get_cloud_providers (interface, invocation, priv->providers_objects);
+}
 
 static void
 on_bus_acquired (GDBusConnection *connection,
@@ -94,10 +174,10 @@ on_name_acquired (GDBusConnection *connection,
 {
   CloudProviderManager *self = user_data;
   CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (user_data));
-  g_signal_connect_swapped (priv->skeleton,
-		    "handle-cloud-provider-changed",
-		    G_CALLBACK(cloud_provider_manager_update),
-		    self);
+  g_signal_connect (priv->skeleton,
+		    "handle-get-cloud-providers",
+		    G_CALLBACK(handle_get_cloud_providers),
+		    CLOUD_PROVIDER_MANAGER(self));
   g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (priv->skeleton),
 				    connection,
 				    CLOUD_PROVIDER_MANAGER_DBUS_PATH,
@@ -139,7 +219,7 @@ cloud_provider_manager_dup_singleton (void)
                                             self,
                                             NULL);
       priv->skeleton = cloud_provider_manager1_skeleton_new ();
-      priv->provider_object_managers = g_hash_table_new(g_str_hash, g_str_equal);
+      cloud_provider_manager_update (CLOUD_PROVIDER_MANAGER(self));
       return CLOUD_PROVIDER_MANAGER (self);
     }
   else
@@ -193,150 +273,4 @@ cloud_provider_manager_class_init (CloudProviderManagerClass *klass)
 static void
 cloud_provider_manager_init (CloudProviderManager *self)
 {
-}
-
-/**
- * cloud_provider_manager_get_providers
- * @manager: A CloudProviderManager
- * Returns: (transfer none): The list of providers.
- */
-GList*
-cloud_provider_manager_get_providers (CloudProviderManager *manager)
-{
-  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (manager);
-
-  return priv->providers;
-}
-
-/**
- * load_cloud_provider
- * @manager: A CloudProviderManager
- * @file: A GFile
- */
-static void
-load_cloud_provider (CloudProviderManager *self,
-                     GFile                *file)
-{
-  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (self);
-  GKeyFile *key_file;
-  gchar *path;
-  GError *error = NULL;
-  gchar *bus_name;
-  gchar *object_path;
-  gboolean success = FALSE;
-  CloudProviderProxy*cloud_provider;
-
-  key_file = g_key_file_new ();
-  path = g_file_get_path (file);
-  g_key_file_load_from_file (key_file, path, G_KEY_FILE_NONE, &error);
-  if (error != NULL)
-    goto out;
-
-  if (!g_key_file_has_group (key_file, KEY_FILE_GROUP))
-    goto out;
-
-  bus_name = g_key_file_get_string (key_file, KEY_FILE_GROUP, "BusName", &error);
-  if (error != NULL)
-    goto out;
-  object_path = g_key_file_get_string (key_file, KEY_FILE_GROUP, "ObjectPath", &error);
-  if (error != NULL)
-    goto out;
-
-  g_print ("cloud provider found %s %s\n", bus_name, object_path);
-  GDBusObjectManager *manager = g_hash_table_lookup(priv->provider_object_managers, bus_name);
-  if(manager == NULL) {
-    manager = cloud_provider_object_manager_client_new_for_bus_sync(G_BUS_TYPE_SESSION,
-                                                     G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
-                                                     bus_name,
-                                                     object_path,
-                                                     NULL,
-                                                     &error);
-
-    if (manager == NULL)
-      {
-        g_printerr ("Error getting object manager client: %s", error->message);
-        g_error_free (error);
-        goto out;
-      }
-
-    g_signal_connect(manager, "notify::name-owner", G_CALLBACK(on_cloud_provider_object_manager_notify), self);
-    g_hash_table_insert(priv->provider_object_managers, bus_name, manager);
-  }
-  GList *objects;
-  GList *l;
-
-  g_print ("Object manager at %s\n", g_dbus_object_manager_get_object_path (manager));
-  objects = g_dbus_object_manager_get_objects (manager);
-  for (l = objects; l != NULL; l = l->next)
-    {
-      CloudProviderObject *object = CLOUD_PROVIDER_OBJECT(l->data);
-      g_print (" - Object at %s\n", g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
-      g_print("New cloud provider instance\n");
-      cloud_provider = cloud_provider_proxy_new (bus_name, g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
-      g_signal_connect (cloud_provider, "ready",
-                    G_CALLBACK (on_cloud_provider_proxy_ready), self);
-      cloud_provider_proxy_update(cloud_provider);
-      priv->providers = g_list_append (priv->providers, cloud_provider);
-    }
-  success = TRUE;
-out:
-  if (!success)
-    g_warning ("Error while loading cloud provider key file at %s", path);
-  g_key_file_free (key_file);
-}
-
-/**
- * cloud_provider_manager_update
- * @manager: A CloudProviderManager
- */
-void
-cloud_provider_manager_update (CloudProviderManager *manager)
-{
-  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (manager);
-  const gchar* const *data_dirs;
-  gint i;
-  gint len;
-  gchar *key_files_directory_path;
-  GFile *key_files_directory_file;
-  GError *error = NULL;
-  GFileEnumerator *file_enumerator;
-
-
-  g_list_free_full (priv->providers, g_object_unref);
-  priv->providers = NULL;
-
-  data_dirs = g_get_system_data_dirs ();
-  len = g_strv_length ((gchar **)data_dirs);
-
-  for (i = 0; i < len; i++)
-    {
-      GFileInfo *info;
-
-      key_files_directory_path = g_build_filename (data_dirs[i], "cloud-providers", NULL);
-      key_files_directory_file = g_file_new_for_path (key_files_directory_path);
-      file_enumerator = g_file_enumerate_children (key_files_directory_file,
-                                                   "standard::name,standard::type",
-                                                   G_FILE_QUERY_INFO_NONE,
-                                                   NULL,
-                                                   &error);
-      if (error)
-        {
-          error = NULL;
-          continue;
-        }
-
-      info = g_file_enumerator_next_file (file_enumerator, NULL, &error);
-      if (error)
-        {
-          g_warning ("Error while enumerating file %s error: %s\n", key_files_directory_path, error->message);
-          error = NULL;
-          continue;
-        }
-      while (info != NULL && error == NULL)
-        {
-           load_cloud_provider (manager, g_file_enumerator_get_child (file_enumerator, info));
-           info = g_file_enumerator_next_file (file_enumerator, NULL, &error);
-        }
-    }
-
 }

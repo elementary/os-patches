@@ -18,6 +18,8 @@
 -->
 <node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
   <interface name='org.freedesktop.CloudProvider.Manager1'>
-    <method name='CloudProviderChanged'></method>
+    <method name="GetCloudProviders">
+      <arg type="a(so)" name="providers" direction="out" />
+    </method>
   </interface>
 </node>
