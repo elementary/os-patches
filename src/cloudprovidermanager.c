@@ -83,10 +83,14 @@ load_cloud_provider (CloudProviderManager *self,
   g_variant_builder_add(builder, "(so)", bus_name, object_path);
 
   success = TRUE;
+  g_free (bus_name);
+  g_free (object_path);
 out:
   if (!success)
     g_warning ("Error while loading cloud provider key file at %s", path);
   g_key_file_free (key_file);
+  g_object_unref (file);
+  g_free (path);
 }
 
 
@@ -137,15 +141,20 @@ cloud_provider_manager_update (CloudProviderManager *manager)
       while (info != NULL && error == NULL)
         {
            load_cloud_provider (manager, g_file_enumerator_get_child (file_enumerator, info), priv->provider_object_managers);
+           g_object_unref (info);
            info = g_file_enumerator_next_file (file_enumerator, NULL, &error);
         }
+      g_object_unref (file_enumerator);
+      g_free (key_files_directory_path);
+      g_object_unref (key_files_directory_file);
     }
 
     g_free(priv->providers_objects);
     priv->providers_objects = g_variant_builder_end(priv->provider_object_managers);
     g_variant_builder_unref (priv->provider_object_managers);
-    g_print("%s\n", g_variant_print(priv->providers_objects, TRUE));
-
+    gchar *provider_debug = g_variant_print(priv->providers_objects, TRUE);
+    g_print("%s\n", provider_debug);
+    g_free(provider_debug);
 }
 
 
