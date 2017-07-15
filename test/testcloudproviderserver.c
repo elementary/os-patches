@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <cloudprovider.h>
+/* for CLoudProviderStatus enum */
 #include <cloudproviderproxy.h>
 
 
@@ -215,7 +216,7 @@ get_action_group (void)
 static gboolean
 change_random_cloud_provider_state (gpointer user_data)
 {
-  TestCloudProvider *cloud_provider = (TestCloudProvider *)user_data;
+  TestCloudProvider *test_cloud_provider = (TestCloudProvider *)user_data;
   GRand *rand;
   gint new_status;
   gint account_id;
@@ -229,8 +230,8 @@ change_random_cloud_provider_state (gpointer user_data)
 
   account_object_name = g_strdup_printf ("MyCloud%d", account_id);
   g_print ("Change status of %03d to %d\n", account_id, new_status);
-  test_cloud_provider_set_status (cloud_provider, new_status);
-  cloud_provider_emit_changed (cloud_provider->cloud_provider, account_object_name);
+  test_cloud_provider_set_status (test_cloud_provider, new_status);
+  cloud_provider_emit_changed (test_cloud_provider->cloud_provider, account_object_name);
   return TRUE;
 }
 

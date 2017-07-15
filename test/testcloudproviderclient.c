@@ -1,6 +1,7 @@
 #include <glib.h>
 #include <cloudproviderproxy.h>
 #include <cloudprovidermanager.h>
+#include <cloudproviders.h>
 
 static void
 print_gmenu_model (GMenuModel  *model)
@@ -35,7 +36,7 @@ print_gmenu_model (GMenuModel  *model)
 }
 
 static void
-on_manager_changed (CloudProviderManager *manager)
+on_manager_changed (CloudProviders *manager)
 {
   GList *providers;
   GList *l;
@@ -45,7 +46,7 @@ on_manager_changed (CloudProviderManager *manager)
   gchar *icon_representation;
   GMenuModel *menu;
 
-  providers = cloud_provider_manager_get_providers (manager);
+  providers = cloud_providers_get_providers (manager);
   if(providers == NULL)
     return;
   g_print ("Providers data\n");
@@ -100,12 +101,12 @@ gint
 main (gint   argc,
       gchar *argv[])
 {
-  CloudProviderManager *manager;
+  CloudProviders *manager;
   GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
-  manager = cloud_provider_manager_dup_singleton ();
+  manager = cloud_providers_dup_singleton ();
   g_signal_connect (manager, "changed", G_CALLBACK (on_manager_changed), manager);
-  cloud_provider_manager_update (manager);
+  cloud_providers_update (manager);
 
   g_print("Waiting for cloud providers\n\n");
 

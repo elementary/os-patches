@@ -221,10 +221,9 @@ cloud_providers_init (CloudProviders *self)
  * Returns: (transfer none): The list of providers.
  */
 GList*
-cloud_providers_get_providers (CloudProviders *manager)
+cloud_providers_get_providers (CloudProviders *self)
 {
-  CloudProvidersPrivate *priv = cloud_providers_get_instance_private (manager);
-
+  CloudProvidersPrivate *priv = cloud_providers_get_instance_private (self);
   return priv->providers;
 }
 

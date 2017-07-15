@@ -21,6 +21,8 @@
 
 #include <gio/gio.h>
 #include "cloudprovider-generated.h"
+/* for CloudProviderStatus enum */
+#include "cloudproviderproxy.h"
 
 G_BEGIN_DECLS
 
@@ -44,8 +46,6 @@ struct _CloudProvider
 {
   GObject parent_instance;
 };
-
-
 
 void
 cloud_provider_export_account (CloudProvider* cloud_provider,

@@ -32,14 +32,6 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
 
-enum {
-  CHANGED,
-  READY,
-  LAST_SIGNAL
-};
-
-static guint gSignals [LAST_SIGNAL];
-
 void
 cloud_provider_export_account(CloudProvider* cloud_provider,
                               gchar *account_name,
@@ -114,15 +106,14 @@ cloud_provider_emit_changed (CloudProvider *cloud_provider, gchar *account_name)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
-  g_dbus_connection_emit_signal (priv->bus,
-                                 NULL,
-                                 object_path,
-                                 "org.freedesktop.CloudProvider.Account1",
-                                 "CloudProviderChanged",
-                                 NULL,
-                                 NULL /*error*/);
+  GDBusObject *object = g_dbus_object_manager_get_object((GDBusObjectManager*)priv->manager, object_path);
+  CloudProviderAccount1 *account = cloud_provider_object_get_account1 (CLOUD_PROVIDER_OBJECT(object));
+  cloud_provider_account1_emit_cloud_provider_changed (account);
+  g_object_unref (account);
+  g_object_unref (object);
   g_free (object_path);
 }
+
 CloudProvider*
 cloud_provider_new (GDBusConnection *bus,
                     const gchar *bus_name,
@@ -154,6 +145,7 @@ cloud_provider_finalize (GObject *object)
   g_clear_object (&priv->bus);
   g_free (priv->bus_name);
   g_free (priv->object_path);
+  g_object_unref(priv->manager);
 
   G_OBJECT_CLASS (cloud_provider_parent_class)->finalize (object);
 }
@@ -162,29 +154,7 @@ static void
 cloud_provider_class_init (CloudProviderClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
   object_class->finalize = cloud_provider_finalize;
-
-  gSignals [CHANGED] =
-    g_signal_new ("changed",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL,
-                  NULL,
-                  g_cclosure_marshal_generic,
-                  G_TYPE_NONE,
-                  0);
-  gSignals [READY] =
-    g_signal_new ("ready",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL,
-                  NULL,
-                  g_cclosure_marshal_generic,
-                  G_TYPE_NONE,
-                  0);
 }
 
 static void
