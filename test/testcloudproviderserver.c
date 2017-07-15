@@ -1,10 +1,14 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <gio/gio.h>
+#include <cloudprovider.h>
 #include <cloudproviderproxy.h>
+
 
 #define TIMEOUT 800
 #define COUNT_PLACEHOLDER_ACCOUNTS 3
+#define TEST_CLOUD_PROVIDER_BUS_NAME "org.freedesktop.CloudProviderServerExample"
+#define TEST_CLOUD_PROVIDER_OBJECT_PATH "/org/freedesktop/CloudProviderServerExample"
 
 typedef struct _TestCloudProviderClass TestCloudProviderClass;
 typedef struct _TestCloudProvider TestCloudProvider;
@@ -24,6 +28,7 @@ struct _TestCloudProvider
   gchar *path;
   guint timeout_handler;
   GDBusConnection *connection;
+  CloudProvider *cloud_provider;
   GDBusObjectManagerServer *manager;
 };
 
@@ -207,32 +212,6 @@ get_action_group (void)
   return G_ACTION_GROUP (group);
 }
 
-static void
-export_menu (GDBusConnection *bus,
-             gchar *object_path)
-{
-  GMenuModel *model;
-  GActionGroup *action_group;
-  GError *error = NULL;
-
-  model = get_model ();
-  action_group = get_action_group ();
-
-  g_print ("Exporting menus on the bus...\n");
-  if (!g_dbus_connection_export_menu_model (bus, object_path, model, &error))
-    {
-      g_warning ("Menu export failed: %s", error->message);
-      exit (1);
-    }
-  g_print ("Exporting actions on the bus...\n");
-  if (!g_dbus_connection_export_action_group (bus, object_path, action_group, &error))
-    {
-      g_warning ("Action export failed: %s", error->message);
-      exit (1);
-    }
-}
-
-
 static gboolean
 change_random_cloud_provider_state (gpointer user_data)
 {
@@ -248,20 +227,10 @@ change_random_cloud_provider_state (gpointer user_data)
                                  CLOUD_PROVIDER_STATUS_IDLE,
                                  CLOUD_PROVIDER_STATUS_ERROR + 1);
 
-  account_object_name = g_strdup_printf ("/org/freedesktop/CloudProviderServerExample/%03d",
-                                         account_id);
-
-  test_cloud_provider_set_status (cloud_provider, new_status);
-
+  account_object_name = g_strdup_printf ("MyCloud%d", account_id);
   g_print ("Change status of %03d to %d\n", account_id, new_status);
-
-  g_dbus_connection_emit_signal (cloud_provider->connection,
-                                 NULL,
-                                 account_object_name,
-                                 "org.freedesktop.CloudProvider.Account1",
-                                 "CloudProviderChanged",
-                                 NULL,
-                                 NULL /*error*/);
+  test_cloud_provider_set_status (cloud_provider, new_status);
+  cloud_provider_emit_changed (cloud_provider->cloud_provider, account_object_name);
   return TRUE;
 }
 
@@ -313,40 +282,36 @@ on_bus_acquired (GDBusConnection *connection,
 {
   TestCloudProvider *self = user_data;
   guint n;
-  CloudProviderObjectSkeleton *object;
+
   self->connection = connection;
+  self->cloud_provider = cloud_provider_new(self->connection,
+                                            TEST_CLOUD_PROVIDER_BUS_NAME,
+                                            TEST_CLOUD_PROVIDER_OBJECT_PATH);
 
   g_debug ("Registering cloud provider server 'MyCloud'\n");
 
-  self->manager = g_dbus_object_manager_server_new ("/org/freedesktop/CloudProviderServerExample");
   // export multiple accounts as DBus objects to the bus
   for (n = 0; n < COUNT_PLACEHOLDER_ACCOUNTS; n++)
     {
+      gchar *account_object_name = g_strdup_printf ("MyCloud%d", n);
+      gchar *account_name = g_strdup_printf ("MyCloud %d", n);
 
-      gchar *account_object_name;
-      gchar *account_name;
+      CloudProviderAccount1 *cloud_provider_account = cloud_provider_account1_skeleton_new();
+      g_signal_connect(cloud_provider_account, "handle_get_name", G_CALLBACK (on_get_name), account_name);
+      g_signal_connect(cloud_provider_account, "handle_get_icon", G_CALLBACK (on_get_icon), self);
+      g_signal_connect(cloud_provider_account, "handle_get_path", G_CALLBACK (on_get_path), self);
+      g_signal_connect(cloud_provider_account, "handle_get_status", G_CALLBACK (on_get_status), self);
 
-      account_object_name = g_strdup_printf ("/org/freedesktop/CloudProviderServerExample/%03d", n);
-      account_name = g_strdup_printf ("MyCloud %d", n);
-      object = cloud_provider_object_skeleton_new(account_object_name);
-
-      CloudProviderAccount1 *cloud_provider = cloud_provider_account1_skeleton_new();
-      g_signal_connect(cloud_provider, "handle_get_name", G_CALLBACK (on_get_name), account_name);
-      g_signal_connect(cloud_provider, "handle_get_icon", G_CALLBACK (on_get_icon), self);
-      g_signal_connect(cloud_provider, "handle_get_path", G_CALLBACK (on_get_path), self);
-      g_signal_connect(cloud_provider, "handle_get_status", G_CALLBACK (on_get_status), self);
-      cloud_provider_object_skeleton_set_account1(object, cloud_provider);
-      g_dbus_object_manager_server_export (self->manager, G_DBUS_OBJECT_SKELETON(object));
-
-      export_menu (connection, account_object_name);
+      cloud_provider_export_account(self->cloud_provider, account_object_name, cloud_provider_account);
+      cloud_provider_export_menu (self->cloud_provider, account_object_name, get_model ());
+      cloud_provider_export_actions (self->cloud_provider, account_object_name, get_action_group ());
 
       g_free(account_object_name);
     }
-  g_dbus_object_manager_server_set_connection (self->manager, connection);
+
+  cloud_provider_export_objects (self->cloud_provider);
 
   return;
-
-
 }
 
 static void
@@ -379,7 +344,7 @@ main (int argc, char *argv[])
   test_cloud_provider = g_object_new (test_cloud_provider_get_type (), NULL);
 
   owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                             "org.freedesktop.CloudProviderServerExample",
+                             TEST_CLOUD_PROVIDER_BUS_NAME,
                              G_BUS_NAME_OWNER_FLAGS_NONE,
                              on_bus_acquired,
                              on_name_acquired,
