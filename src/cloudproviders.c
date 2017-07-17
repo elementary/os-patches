@@ -211,8 +211,8 @@ cloud_providers_init (CloudProviders *self)
 
 /**
  * cloud_providers_get_providers
- * @manager: A CloudProviders
- * Returns: (transfer none): The list of providers.
+ * @self: A CloudProviders
+ * Returns: (transfer none): A GList* of #CloudProviderProxy objects.
  */
 GList*
 cloud_providers_get_providers (CloudProviders *self)

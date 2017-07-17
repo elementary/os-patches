@@ -25,3 +25,4 @@ conf.set_quoted ('GETTEXT_PACKAGE', 'cloudproviders')
 
 subdir ( 'src' )
 subdir ( 'test' )
+subdir ( 'doc' )
