@@ -70,6 +70,12 @@ on_get_icon (GObject      *source_object,
     }
 
   variant_dict = g_variant_get_child_value (variant_tuple, 0);
+    if (g_variant_is_of_type(variant_dict, G_VARIANT_TYPE_STRING))
+    {
+        priv->icon = g_icon_deserialize (variant_dict);
+        g_variant_unref (variant_dict);
+        goto out;
+    }
   variant = g_variant_get_child_value (variant_dict, 0);
   priv->icon = g_icon_deserialize (variant_dict);
   g_variant_unref (variant);
