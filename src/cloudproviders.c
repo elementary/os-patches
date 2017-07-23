@@ -73,9 +73,6 @@ on_cloud_provider_object_manager_notify (GObject    *object,
 {
   GDBusObjectManagerClient *manager = G_DBUS_OBJECT_MANAGER_CLIENT (object);
   CloudProviders *self = CLOUD_PROVIDERS(user_data);
-  gchar *name_owner;
-  name_owner = g_dbus_object_manager_client_get_name_owner (manager);
-  g_debug ("name-owner: %s\n", name_owner);
   cloud_providers_update(self);
   g_free (name_owner);
 }
@@ -276,6 +273,8 @@ on_get_cloud_providers (GObject      *source_object,
             }
 
           g_signal_connect(manager, "notify::name-owner", G_CALLBACK(on_cloud_provider_object_manager_notify), self);
+          g_signal_connect(manager, "object-added", G_CALLBACK(on_cloud_provider_object_manager_notify), self);
+          g_signal_connect(manager, "object-removed", G_CALLBACK(on_cloud_provider_object_manager_notify), self);
           g_hash_table_insert(priv->provider_object_managers, bus_name, manager);
         }
       objects = g_dbus_object_manager_get_objects (manager);
