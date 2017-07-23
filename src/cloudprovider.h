@@ -19,7 +19,6 @@
 #ifndef CLOUD_PROVIDER_H
 #define CLOUD_PROVIDER_H
 
-#include <gio/gio.h>
 #include "cloudprovider-generated.h"
 /* for CloudProviderStatus enum */
 #include "cloudproviderproxy.h"
@@ -47,26 +46,28 @@ struct _CloudProvider
   GObject parent_instance;
 };
 
+GType
+cloud_provider_get_type (void) G_GNUC_CONST;
 void
 cloud_provider_export_account (CloudProvider* cloud_provider,
-                               gchar *account_name,
+                               const gchar *account_name,
                                CloudProviderAccount1 *account);
 void
 cloud_provider_unexport_account (CloudProvider* cloud_provider,
-                                 gchar *account_name);
+                                 const gchar *account_name);
 guint
 cloud_provider_export_menu (CloudProvider* cloud_provider,
-                            gchar *account_name,
+                            const gchar *account_name,
                             GMenuModel *model);
 guint
 cloud_provider_export_actions(CloudProvider* cloud_provider,
-                              gchar *account_name,
+                              const gchar *account_name,
                               GActionGroup *action_group);
 void
 cloud_provider_export_objects (CloudProvider* cloud_provider);
 
 void
-cloud_provider_emit_changed (CloudProvider *cloud_provider, gchar *account_name);
+cloud_provider_emit_changed (CloudProvider *cloud_provider, const gchar *account_name);
 
 CloudProvider*
 cloud_provider_new (GDBusConnection *bus,

@@ -19,7 +19,7 @@
 
 #include "cloudprovider.h"
 #include "cloudprovider-generated.h"
-
+#include <gio/gio.h>
 
 typedef struct
 {
@@ -34,7 +34,7 @@ G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
 
 void
 cloud_provider_export_account(CloudProvider* cloud_provider,
-                              gchar *account_name,
+                              const gchar *account_name,
                               CloudProviderAccount1 *account)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
@@ -50,7 +50,7 @@ cloud_provider_export_account(CloudProvider* cloud_provider,
 
 void
 cloud_provider_unexport_account(CloudProvider* cloud_provider,
-                                gchar *account_name)
+                                const gchar *account_name)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   gchar *object_path = g_strconcat (priv->object_path, "/", account_name, NULL);
@@ -60,7 +60,7 @@ cloud_provider_unexport_account(CloudProvider* cloud_provider,
 
 guint
 cloud_provider_export_menu(CloudProvider* cloud_provider,
-                           gchar *account_name,
+                           const gchar *account_name,
                            GMenuModel *model)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
@@ -78,7 +78,7 @@ cloud_provider_export_menu(CloudProvider* cloud_provider,
 
 guint
 cloud_provider_export_actions(CloudProvider* cloud_provider,
-                              gchar *account_name,
+                              const gchar *account_name,
                               GActionGroup *action_group)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
@@ -102,7 +102,7 @@ cloud_provider_export_objects(CloudProvider* cloud_provider)
 }
 
 void
-cloud_provider_emit_changed (CloudProvider *cloud_provider, gchar *account_name)
+cloud_provider_emit_changed (CloudProvider *cloud_provider, const gchar *account_name)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);

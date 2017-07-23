@@ -26,6 +26,7 @@ typedef struct
   gchar *name;
   gchar *path;
   CloudProviderStatus status;
+  gchar *status_details;
   GIcon *icon;
   GMenuModel *menu_model;
   GActionGroup *action_group;
@@ -165,6 +166,31 @@ on_get_status (GObject      *source_object,
   }
 }
 
+static void
+on_get_status_details(GObject      *source_object,
+             GAsyncResult *res,
+             gpointer      user_data)
+{
+  CloudProviderProxy *self = CLOUD_PROVIDER_PROXY (user_data);
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
+  GError *error = NULL;
+
+  if (priv->status_details != NULL)
+    g_free (priv->status_details);
+
+  cloud_provider_account1_call_get_status_details_finish (priv->proxy, &priv->status_details, res, &error);
+  if (error != NULL)
+    {
+      g_warning ("Error getting the status details %s", error->message);
+      return;
+    }
+  g_signal_emit_by_name (self, "changed");
+  if(cloud_provider_proxy_is_available(self) && !priv->ready) {
+    priv->ready = TRUE;
+    g_signal_emit_by_name (self, "ready");
+  }
+}
+
 void
 cloud_provider_proxy_update (CloudProviderProxy *self)
 {
@@ -179,6 +205,10 @@ cloud_provider_proxy_update (CloudProviderProxy *self)
       cloud_provider_account1_call_get_status (priv->proxy,
                                          NULL,
                                          (GAsyncReadyCallback) on_get_status,
+                                         self);
+      cloud_provider_account1_call_get_status_details (priv->proxy,
+                                         NULL,
+                                         (GAsyncReadyCallback) on_get_status_details,
                                          self);
       cloud_provider_account1_call_get_icon (priv->proxy,
                                          NULL,
@@ -351,6 +381,14 @@ cloud_provider_proxy_get_status (CloudProviderProxy *self)
   CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
 
   return priv->status;
+}
+
+gchar*
+cloud_provider_proxy_get_status_details (CloudProviderProxy *self)
+{
+  CloudProviderProxyPrivate *priv = cloud_provider_proxy_get_instance_private (self);
+
+  return priv->status_details;
 }
 
 GIcon*

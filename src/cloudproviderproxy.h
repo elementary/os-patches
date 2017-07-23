@@ -60,6 +60,7 @@ CloudProviderProxy *cloud_provider_proxy_new (const gchar *bus_name,
 
 gchar* cloud_provider_proxy_get_name (CloudProviderProxy *self);
 CloudProviderStatus cloud_provider_proxy_get_status (CloudProviderProxy *self);
+gchar* cloud_provider_proxy_get_status_details (CloudProviderProxy *self);
 GIcon *cloud_provider_proxy_get_icon (CloudProviderProxy *self);
 GMenuModel *cloud_provider_proxy_get_menu_model (CloudProviderProxy *self);
 GActionGroup* cloud_provider_proxy_get_action_group (CloudProviderProxy *self);
