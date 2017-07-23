@@ -71,10 +71,8 @@ on_cloud_provider_object_manager_notify (GObject    *object,
                                          GParamSpec *pspec,
                                          gpointer user_data)
 {
-  GDBusObjectManagerClient *manager = G_DBUS_OBJECT_MANAGER_CLIENT (object);
   CloudProviders *self = CLOUD_PROVIDERS(user_data);
   cloud_providers_update(self);
-  g_free (name_owner);
 }
 
 static void
