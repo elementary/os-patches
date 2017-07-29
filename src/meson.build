@@ -3,8 +3,6 @@ libcloudproviders_headers = [
   'cloudproviderproxy.h',
   'cloudproviders.h',
   'cloudprovider.h',
-  'cloudprovider-generated.h',
-  'cloudprovidermanager-generated.h'
 ]
 
 libcloudproviders_sources = [
@@ -16,19 +14,18 @@ libcloudproviders_sources = [
 
 libcloudproviders_deps = [glib, gio, gio_unix]
 
-gdbus_sources = []
-gdbus_sources += gnome.gdbus_codegen ('cloudprovider-generated',
+generated_sources = []
+generated_sources += gnome.gdbus_codegen ('cloudprovider-generated',
                                       join_paths (meson.source_root (), 'data', 'cloudprovider-dbus.xml'),
                                       interface_prefix: 'org.freedesktop.CloudProvider',
                                       namespace: 'CloudProvider',
                                       object_manager: true)
-gdbus_sources += gnome.gdbus_codegen ('cloudprovidermanager-generated',
+generated_sources += gnome.gdbus_codegen ('cloudprovidermanager-generated',
                                       join_paths (meson.source_root (), 'data', 'cloudprovidermanager-dbus.xml'),
                                       interface_prefix: 'org.freedesktop.CloudProvider',
                                       namespace: 'CloudProvider')
 
-libcloudproviders_sources += gdbus_sources
-
+libcloudproviders_sources += generated_sources
 
 libcloudproviders = shared_library ('cloudproviders',
                                     libcloudproviders_sources,
@@ -36,7 +33,8 @@ libcloudproviders = shared_library ('cloudproviders',
                                     version: meson.project_version (),
                                     install: true)
 
-install_headers( libcloudproviders_headers, subdir: 'cloudproviders')
+install_headers ( libcloudproviders_headers, subdir: 'cloudproviders')
+install_headers ( join_paths(meson.current_build_dir(), 'cloudprovider-generated.h'), subdir: 'cloudproviders')
 
 pkg = import('pkgconfig')
 pkg.generate(libraries : libcloudproviders,

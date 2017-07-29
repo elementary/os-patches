@@ -21,7 +21,6 @@
 #define CLOUD_PROVIDER_PROXY_H
 
 #include <gio/gio.h>
-#include "cloudprovider-generated.h"
 
 G_BEGIN_DECLS
 

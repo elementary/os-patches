@@ -21,6 +21,7 @@
 #include "cloudproviderproxy.h"
 #include "cloudprovidermanager.h"
 #include "cloudprovidermanager-generated.h"
+#include "cloudprovider-generated.h"
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <gio/gio.h>
