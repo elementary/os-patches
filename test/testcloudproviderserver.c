@@ -277,6 +277,28 @@ on_get_status (CloudProviderAccount1          *cloud_provider,
 }
 
 static void
+on_get_status_details (CloudProviderAccount1     *cloud_provider,
+                GDBusMethodInvocation  *invocation,
+                gpointer                user_data)
+{
+    gchar *description = "";
+    TestCloudProvider *self = user_data;
+    switch (self->status) {
+      case CLOUD_PROVIDER_STATUS_IDLE:
+        description = "Sync idle";
+        break;
+      case CLOUD_PROVIDER_STATUS_SYNCING:
+        description = "Syncing";
+        break;
+      case CLOUD_PROVIDER_STATUS_ERROR:
+        description = "Error";
+        break;
+    }
+    g_dbus_method_invocation_return_value (invocation,
+                                           g_variant_new ("(s)", description));
+}
+
+static void
 on_bus_acquired (GDBusConnection *connection,
                  const gchar     *name,
                  gpointer         user_data)
@@ -302,6 +324,7 @@ on_bus_acquired (GDBusConnection *connection,
       g_signal_connect(cloud_provider_account, "handle_get_icon", G_CALLBACK (on_get_icon), self);
       g_signal_connect(cloud_provider_account, "handle_get_path", G_CALLBACK (on_get_path), self);
       g_signal_connect(cloud_provider_account, "handle_get_status", G_CALLBACK (on_get_status), self);
+      g_signal_connect(cloud_provider_account, "handle_get_status_details", G_CALLBACK (on_get_status_details), self);
 
       cloud_provider_export_account(self->cloud_provider, account_object_name, cloud_provider_account);
       cloud_provider_export_menu (self->cloud_provider, account_object_name, get_model ());
