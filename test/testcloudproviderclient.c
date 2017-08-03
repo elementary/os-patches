@@ -49,13 +49,13 @@ on_manager_changed (CloudProviders *manager)
   providers = cloud_providers_get_providers (manager);
   if(providers == NULL)
     return;
-  g_print ("Providers data\n");
-  g_print ("##############\n");
   for (l = providers; l != NULL; l = l->next)
     {
       if(!cloud_provider_proxy_is_available(CLOUD_PROVIDER_PROXY(l->data))) {
          continue;
       }
+      g_print ("Providers data\n");
+      g_print ("##############\n");
       provider_status = cloud_provider_proxy_get_status (CLOUD_PROVIDER_PROXY (l->data));
       switch (provider_status)
         {
@@ -82,9 +82,10 @@ on_manager_changed (CloudProviders *manager)
       icon = cloud_provider_proxy_get_icon (l->data);
       icon_representation = g_icon_to_string (icon);
 
-      g_print ("Name - %s, Status - %s, Path - %s, Icon - %s\n",
+      g_print ("Name - %s, Status - %s (%s), Path - %s, Icon - %s\n",
                cloud_provider_proxy_get_name (CLOUD_PROVIDER_PROXY (l->data)),
                status_string,
+               cloud_provider_proxy_get_status_details (CLOUD_PROVIDER_PROXY (l->data)),
                cloud_provider_proxy_get_path (CLOUD_PROVIDER_PROXY (l->data)),
                icon_representation);
 
