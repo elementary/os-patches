@@ -42,7 +42,6 @@ cloud_provider_export_account(CloudProvider* cloud_provider,
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   CloudProviderObjectSkeleton *object;
   gchar *object_path = g_strconcat (priv->object_path, "/", account_name, NULL);
-  g_print("%s\n", object_path);
   object = cloud_provider_object_skeleton_new(object_path);
   cloud_provider_object_skeleton_set_account1(object, account);
   g_dbus_object_manager_server_export (priv->manager,
@@ -56,7 +55,6 @@ cloud_provider_unexport_account(CloudProvider* cloud_provider,
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   gchar *object_path = g_strconcat (priv->object_path, "/", account_name, NULL);
-  g_print(object_path);
   g_dbus_object_manager_server_unexport (priv->manager, object_path);
   guint *export_id;
   export_id = (guint*)g_hash_table_lookup(priv->menuModels, account_name);
@@ -80,7 +78,6 @@ cloud_provider_export_menu(CloudProvider* cloud_provider,
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
   GError *error = NULL;
-  g_print ("Exporting menus on the bus...\n");
   guint *export_id = g_new0(guint, 1);
   *export_id = g_dbus_connection_export_menu_model (priv->bus, object_path, model, &error);
   if (!*export_id)
@@ -102,7 +99,6 @@ cloud_provider_export_actions(CloudProvider* cloud_provider,
   GError *error = NULL;
   guint *export_id = g_new0(guint, 1);
   *export_id = g_dbus_connection_export_action_group (priv->bus, object_path, action_group, &error);
-  g_print ("Exporting actions on the bus...\n");
   if (!*export_id)
     {
       g_warning ("Action export failed: %s", error->message);

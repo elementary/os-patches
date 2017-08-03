@@ -153,7 +153,7 @@ cloud_provider_manager_update (CloudProviderManager *manager)
     priv->providers_objects = g_variant_builder_end(priv->provider_object_managers);
     g_variant_builder_unref (priv->provider_object_managers);
     gchar *provider_debug = g_variant_print(priv->providers_objects, TRUE);
-    g_print("%s\n", provider_debug);
+    g_debug("%s\n", provider_debug);
     g_free(provider_debug);
 }
 
@@ -165,7 +165,6 @@ handle_get_cloud_providers (CloudProviderManager1 *interface,
 {
   CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER(user_data));
   g_variant_ref(priv->providers_objects);
-  g_print("=> %s\n", g_variant_print(priv->providers_objects, TRUE));
   cloud_provider_manager1_complete_get_cloud_providers (interface, invocation, priv->providers_objects);
 }
 
