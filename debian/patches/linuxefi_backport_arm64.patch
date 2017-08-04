@@ -1,0 +1,1189 @@
+---
+ grub-core/Makefile.core.def       |    8 
+ grub-core/lib/fdt.c               |    3 
+ grub-core/loader/arm64/fdt.c      |  185 ++++++++++++++
+ grub-core/loader/arm64/linux.c    |  219 +++-------------
+ grub-core/loader/arm64/xen_boot.c |  499 ++++++++++++++++++++++++++++++++++++++
+ include/grub/arm64/fdtload.h      |   35 ++
+ include/grub/arm64/linux.h        |    7 
+ 7 files changed, 779 insertions(+), 177 deletions(-)
+
+Index: b/grub-core/loader/arm64/linux.c
+===================================================================
+--- a/grub-core/loader/arm64/linux.c
++++ b/grub-core/loader/arm64/linux.c
+@@ -26,6 +26,7 @@
+ #include <grub/mm.h>
+ #include <grub/types.h>
+ #include <grub/cpu/linux.h>
++#include <grub/cpu/fdtload.h>
+ #include <grub/efi/efi.h>
+ #include <grub/efi/pe32.h>
+ #include <grub/i18n.h>
+@@ -33,12 +34,6 @@
+ 
+ GRUB_MOD_LICENSE ("GPLv3+");
+ 
+-#define GRUB_EFI_PAGE_SHIFT	12
+-#define BYTES_TO_PAGES(bytes)   (((bytes) + 0xfff) >> GRUB_EFI_PAGE_SHIFT)
+-#define GRUB_EFI_PE_MAGIC	0x5A4D
+-
+-static grub_efi_guid_t fdt_guid = GRUB_EFI_DEVICE_TREE_GUID;
+-
+ static grub_dl_t my_mod;
+ static int loaded;
+ 
+@@ -51,76 +46,15 @@ static grub_uint32_t cmdline_size;
+ static grub_addr_t initrd_start;
+ static grub_addr_t initrd_end;
+ 
+-static void *loaded_fdt;
+-static void *fdt;
+-
+-static void *
+-get_firmware_fdt (void)
+-{
+-  grub_efi_configuration_table_t *tables;
+-  void *firmware_fdt = NULL;
+-  unsigned int i;
+-
+-  /* Look for FDT in UEFI config tables. */
+-  tables = grub_efi_system_table->configuration_table;
+-
+-  for (i = 0; i < grub_efi_system_table->num_table_entries; i++)
+-    if (grub_memcmp (&tables[i].vendor_guid, &fdt_guid, sizeof (fdt_guid)) == 0)
+-      {
+-	firmware_fdt = tables[i].vendor_table;
+-	grub_dprintf ("linux", "found registered FDT @ 0x%p\n", firmware_fdt);
+-	break;
+-      }
+-
+-  return firmware_fdt;
+-}
+-
+-static void
+-get_fdt (void)
+-{
+-  void *raw_fdt;
+-  grub_size_t size;
+-
+-  if (fdt)
+-    {
+-      size = BYTES_TO_PAGES (grub_fdt_get_totalsize (fdt));
+-      grub_efi_free_pages ((grub_efi_physical_address_t) fdt, size);
+-    }
+-
+-  if (loaded_fdt)
+-    raw_fdt = loaded_fdt;
+-  else
+-    raw_fdt = get_firmware_fdt();
+-
+-  size =
+-    raw_fdt ? grub_fdt_get_totalsize (raw_fdt) : GRUB_FDT_EMPTY_TREE_SZ;
+-  size += 0x400;
+-
+-  grub_dprintf ("linux", "allocating %ld bytes for fdt\n", size);
+-  fdt = grub_efi_allocate_pages (0, BYTES_TO_PAGES (size));
+-  if (!fdt)
+-    return;
+-
+-  if (raw_fdt)
+-    {
+-      grub_memmove (fdt, raw_fdt, size);
+-      grub_fdt_set_totalsize (fdt, size);
+-    }
+-  else
+-    {
+-      grub_fdt_create_empty_tree (fdt, size);
+-    }
+-}
+-
+-static grub_err_t
+-check_kernel (struct grub_arm64_linux_kernel_header *lh)
++grub_err_t
++grub_arm64_uefi_check_image (struct grub_arm64_linux_kernel_header * lh)
+ {
+   if (lh->magic != GRUB_ARM64_LINUX_MAGIC)
+     return grub_error(GRUB_ERR_BAD_OS, "invalid magic number");
+ 
+   if ((lh->code0 & 0xffff) != GRUB_EFI_PE_MAGIC)
+     return grub_error (GRUB_ERR_NOT_IMPLEMENTED_YET,
+-		       N_("plain Image kernel not supported - rebuild with CONFIG_(U)EFI_STUB enabled"));
++		       N_("plain image kernel not supported - rebuild with CONFIG_(U)EFI_STUB enabled"));
+ 
+   grub_dprintf ("linux", "UEFI stub kernel:\n");
+   grub_dprintf ("linux", "text_offset = 0x%012llx\n",
+@@ -131,13 +65,14 @@ check_kernel (struct grub_arm64_linux_ke
+ }
+ 
+ static grub_err_t
+-finalize_params (void)
++finalize_params_linux (void)
+ {
+-  grub_efi_boot_services_t *b;
+-  grub_efi_status_t status;
+   int node, retval;
+ 
+-  get_fdt ();
++  void *fdt;
++
++  fdt = grub_fdt_load (0x400);
++
+   if (!fdt)
+     goto failure;
+ 
+@@ -164,97 +99,26 @@ finalize_params (void)
+ 	goto failure;
+     }
+ 
+-  b = grub_efi_system_table->boot_services;
+-  status = b->install_configuration_table (&fdt_guid, fdt);
+-  if (status != GRUB_EFI_SUCCESS)
++  if (grub_fdt_install() != GRUB_ERR_NONE)
+     goto failure;
+ 
+-  grub_dprintf ("linux", "Installed/updated FDT configuration table @ %p\n",
+-		fdt);
+-
+   return GRUB_ERR_NONE;
+ 
+ failure:
+-  grub_efi_free_pages ((grub_efi_physical_address_t) fdt,
+-		       BYTES_TO_PAGES (grub_fdt_get_totalsize (fdt)));
+-  fdt = NULL;
++  grub_fdt_unload();
+   return grub_error(GRUB_ERR_BAD_OS, "failed to install/update FDT");
+ }
+ 
+-static grub_err_t
+-grub_cmd_devicetree (grub_command_t cmd __attribute__ ((unused)),
+-		     int argc, char *argv[])
+-{
+-  grub_file_t dtb;
+-  void *blob = NULL;
+-  int size;
+-
+-  if (!loaded)
+-    {
+-      grub_error (GRUB_ERR_BAD_ARGUMENT,
+-		  N_("you need to load the kernel first"));
+-      return GRUB_ERR_BAD_OS;
+-    }
+-
+-  if (argc != 1)
+-    return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
+-
+-  if (loaded_fdt)
+-    grub_free (loaded_fdt);
+-  loaded_fdt = NULL;
+-
+-  dtb = grub_file_open (argv[0]);
+-  if (!dtb)
+-    goto out;
+-
+-  size = grub_file_size (dtb);
+-  blob = grub_malloc (size);
+-  if (!blob)
+-    goto out;
+-
+-  if (grub_file_read (dtb, blob, size) < size)
+-    {
+-      if (!grub_errno)
+-	grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"), argv[0]);
+-      goto out;
+-    }
+-
+-  if (grub_fdt_check_header (blob, size) != 0)
+-    {
+-      grub_error (GRUB_ERR_BAD_OS, N_("invalid device tree"));
+-      goto out;
+-    }
+-
+-out:
+-  if (dtb)
+-    grub_file_close (dtb);
+-
+-  if (blob)
+-    {
+-      if (grub_errno == GRUB_ERR_NONE)
+-	loaded_fdt = blob;
+-      else
+-	grub_free (blob);
+-    }
+-
+-  return grub_errno;
+-}
+-
+-static grub_err_t
+-grub_linux_boot (void)
++grub_err_t
++grub_arm64_uefi_boot_image (grub_addr_t addr, grub_size_t size, char *args)
+ {
+   grub_efi_memory_mapped_device_path_t *mempath;
+   grub_efi_handle_t image_handle;
+   grub_efi_boot_services_t *b;
+   grub_efi_status_t status;
+-  grub_err_t retval;
+   grub_efi_loaded_image_t *loaded_image;
+   int len;
+ 
+-  retval = finalize_params();
+-  if (retval != GRUB_ERR_NONE)
+-    return retval;
+-
+   mempath = grub_malloc (2 * sizeof (grub_efi_memory_mapped_device_path_t));
+   if (!mempath)
+     return grub_errno;
+@@ -263,64 +127,71 @@ grub_linux_boot (void)
+   mempath[0].header.subtype = GRUB_EFI_MEMORY_MAPPED_DEVICE_PATH_SUBTYPE;
+   mempath[0].header.length = grub_cpu_to_le16_compile_time (sizeof (*mempath));
+   mempath[0].memory_type = GRUB_EFI_LOADER_DATA;
+-  mempath[0].start_address = (grub_addr_t) kernel_addr;
+-  mempath[0].end_address = (grub_addr_t) kernel_addr + kernel_size;
++  mempath[0].start_address = addr;
++  mempath[0].end_address = addr + size;
+ 
+   mempath[1].header.type = GRUB_EFI_END_DEVICE_PATH_TYPE;
+   mempath[1].header.subtype = GRUB_EFI_END_ENTIRE_DEVICE_PATH_SUBTYPE;
+-  mempath[1].header.length = 0;
++  mempath[1].header.length = sizeof (grub_efi_device_path_t);
+ 
+   b = grub_efi_system_table->boot_services;
+   status = b->load_image (0, grub_efi_image_handle,
+ 			  (grub_efi_device_path_t *) mempath,
+-                          kernel_addr, kernel_size, &image_handle);
++			  (void *) addr, size, &image_handle);
+   if (status != GRUB_EFI_SUCCESS)
+     return grub_error (GRUB_ERR_BAD_OS, "cannot load image");
+ 
+-  grub_dprintf ("linux", "linux command line: '%s'\n", linux_args);
++  grub_dprintf ("linux", "linux command line: '%s'\n", args);
+ 
+   /* Convert command line to UCS-2 */
+   loaded_image = grub_efi_get_loaded_image (image_handle);
+   loaded_image->load_options_size = len =
+-    (grub_strlen (linux_args) + 1) * sizeof (grub_efi_char16_t);
++    (grub_strlen (args) + 1) * sizeof (grub_efi_char16_t);
+   loaded_image->load_options =
+     grub_efi_allocate_pages (0,
+-			     BYTES_TO_PAGES (loaded_image->load_options_size));
++			     GRUB_EFI_BYTES_TO_PAGES (loaded_image->load_options_size));
+   if (!loaded_image->load_options)
+     return grub_errno;
+ 
+   loaded_image->load_options_size =
+     2 * grub_utf8_to_utf16 (loaded_image->load_options, len,
+-			    (grub_uint8_t *) linux_args, len, NULL);
++			    (grub_uint8_t *) args, len, NULL);
+ 
+-  grub_dprintf("linux", "starting image %p\n", image_handle);
++  grub_dprintf ("linux", "starting image %p\n", image_handle);
+   status = b->start_image (image_handle, 0, NULL);
+ 
+   /* When successful, not reached */
+   b->unload_image (image_handle);
+   grub_efi_free_pages ((grub_efi_physical_address_t) loaded_image->load_options,
+-		       BYTES_TO_PAGES (loaded_image->load_options_size));
++		       GRUB_EFI_BYTES_TO_PAGES (loaded_image->load_options_size));
+ 
+   return grub_errno;
+ }
+ 
+ static grub_err_t
++grub_linux_boot (void)
++{
++  if (finalize_params_linux () != GRUB_ERR_NONE)
++    return grub_errno;
++
++  return (grub_arm64_uefi_boot_image((grub_addr_t)kernel_addr,
++                                     kernel_size, linux_args));
++}
++
++static grub_err_t
+ grub_linux_unload (void)
+ {
+   grub_dl_unref (my_mod);
+   loaded = 0;
+   if (initrd_start)
+     grub_efi_free_pages ((grub_efi_physical_address_t) initrd_start,
+-			 BYTES_TO_PAGES (initrd_end - initrd_start));
++			 GRUB_EFI_BYTES_TO_PAGES (initrd_end - initrd_start));
+   initrd_start = initrd_end = 0;
+   grub_free (linux_args);
+   if (kernel_addr)
+     grub_efi_free_pages ((grub_efi_physical_address_t) kernel_addr,
+-			 BYTES_TO_PAGES (kernel_size));
+-  if (fdt)
+-    grub_efi_free_pages ((grub_efi_physical_address_t) fdt,
+-			 BYTES_TO_PAGES (grub_fdt_get_totalsize (fdt)));
+-
++			 GRUB_EFI_BYTES_TO_PAGES (kernel_size));
++  grub_fdt_unload ();
+   return GRUB_ERR_NONE;
+ }
+ 
+@@ -328,7 +199,7 @@ static grub_err_t
+ grub_cmd_initrd (grub_command_t cmd __attribute__ ((unused)),
+ 		 int argc, char *argv[])
+ {
+-  struct grub_linux_initrd_context initrd_ctx;
++  struct grub_linux_initrd_context initrd_ctx = { 0, 0, 0 };
+   int initrd_size, initrd_pages;
+   void *initrd_mem = NULL;
+ 
+@@ -351,7 +222,7 @@ grub_cmd_initrd (grub_command_t cmd __at
+   initrd_size = grub_get_initrd_size (&initrd_ctx);
+   grub_dprintf ("linux", "Loading initrd\n");
+ 
+-  initrd_pages = (BYTES_TO_PAGES (initrd_size));
++  initrd_pages = (GRUB_EFI_BYTES_TO_PAGES (initrd_size));
+   initrd_mem = grub_efi_allocate_pages (0, initrd_pages);
+   if (!initrd_mem)
+     {
+@@ -400,15 +271,15 @@ grub_cmd_linux (grub_command_t cmd __att
+   if (grub_file_read (file, &lh, sizeof (lh)) < (long) sizeof (lh))
+     return grub_errno;
+ 
+-  if (check_kernel (&lh) != GRUB_ERR_NONE)
++  if (grub_arm64_uefi_check_image (&lh) != GRUB_ERR_NONE)
+     goto fail;
+ 
+   grub_loader_unset();
+ 
+   grub_dprintf ("linux", "kernel file size: %lld\n", (long long) kernel_size);
+-  kernel_addr = grub_efi_allocate_pages (0, BYTES_TO_PAGES (kernel_size));
++  kernel_addr = grub_efi_allocate_pages (0, GRUB_EFI_BYTES_TO_PAGES (kernel_size));
+   grub_dprintf ("linux", "kernel numpages: %lld\n",
+-		(long long) BYTES_TO_PAGES (kernel_size));
++		(long long) GRUB_EFI_BYTES_TO_PAGES (kernel_size));
+   if (!kernel_addr)
+     {
+       grub_error (GRUB_ERR_OUT_OF_MEMORY, N_("out of memory"));
+@@ -459,13 +330,13 @@ fail:
+ 
+   if (kernel_addr && !loaded)
+     grub_efi_free_pages ((grub_efi_physical_address_t) kernel_addr,
+-			 BYTES_TO_PAGES (kernel_size));
++			 GRUB_EFI_BYTES_TO_PAGES (kernel_size));
+ 
+   return grub_errno;
+ }
+ 
+ 
+-static grub_command_t cmd_linux, cmd_initrd, cmd_devicetree;
++static grub_command_t cmd_linux, cmd_initrd;
+ 
+ GRUB_MOD_INIT (linux)
+ {
+@@ -473,9 +344,6 @@ GRUB_MOD_INIT (linux)
+ 				     N_("Load Linux."));
+   cmd_initrd = grub_register_command ("initrd", grub_cmd_initrd, 0,
+ 				      N_("Load initrd."));
+-  cmd_devicetree =
+-    grub_register_command ("devicetree", grub_cmd_devicetree, 0,
+-			   N_("Load DTB file."));
+   my_mod = mod;
+ }
+ 
+@@ -483,5 +351,4 @@ GRUB_MOD_FINI (linux)
+ {
+   grub_unregister_command (cmd_linux);
+   grub_unregister_command (cmd_initrd);
+-  grub_unregister_command (cmd_devicetree);
+ }
+Index: b/include/grub/arm64/linux.h
+===================================================================
+--- a/include/grub/arm64/linux.h
++++ b/include/grub/arm64/linux.h
+@@ -23,6 +23,8 @@
+ 
+ #define GRUB_ARM64_LINUX_MAGIC 0x644d5241 /* 'ARM\x64' */
+ 
++#define GRUB_EFI_PE_MAGIC	0x5A4D
++
+ /* From linux/Documentation/arm64/booting.txt */
+ struct grub_arm64_linux_kernel_header
+ {
+@@ -38,4 +40,9 @@ struct grub_arm64_linux_kernel_header
+   grub_uint32_t hdr_offset;	/* Offset of PE/COFF header */
+ };
+ 
++grub_err_t grub_arm64_uefi_check_image (struct grub_arm64_linux_kernel_header
++                                        *lh);
++grub_err_t grub_arm64_uefi_boot_image (grub_addr_t addr, grub_size_t size,
++                                       char *args);
++
+ #endif /* ! GRUB_LINUX_CPU_HEADER */
+Index: b/grub-core/loader/arm64/fdt.c
+===================================================================
+--- /dev/null
++++ b/grub-core/loader/arm64/fdt.c
+@@ -0,0 +1,185 @@
++/*
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2013-2015  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/fdt.h>
++#include <grub/mm.h>
++#include <grub/cpu/fdtload.h>
++#include <grub/err.h>
++#include <grub/dl.h>
++#include <grub/command.h>
++#include <grub/file.h>
++#include <grub/efi/efi.h>
++
++static void *loaded_fdt;
++static void *fdt;
++
++static void *
++get_firmware_fdt (void)
++{
++  grub_efi_configuration_table_t *tables;
++  grub_efi_guid_t fdt_guid = GRUB_EFI_DEVICE_TREE_GUID;
++  void *firmware_fdt = NULL;
++  unsigned int i;
++
++  /* Look for FDT in UEFI config tables. */
++  tables = grub_efi_system_table->configuration_table;
++
++  for (i = 0; i < grub_efi_system_table->num_table_entries; i++)
++    if (grub_memcmp (&tables[i].vendor_guid, &fdt_guid, sizeof (fdt_guid)) == 0)
++      {
++	firmware_fdt = tables[i].vendor_table;
++	grub_dprintf ("linux", "found registered FDT @ %p\n", firmware_fdt);
++	break;
++      }
++
++  return firmware_fdt;
++}
++
++void *
++grub_fdt_load (grub_size_t additional_size)
++{
++  void *raw_fdt;
++  grub_size_t size;
++
++  if (fdt)
++    {
++      size = GRUB_EFI_BYTES_TO_PAGES (grub_fdt_get_totalsize (fdt));
++      grub_efi_free_pages ((grub_efi_physical_address_t) fdt, size);
++    }
++
++  if (loaded_fdt)
++    raw_fdt = loaded_fdt;
++  else
++    raw_fdt = get_firmware_fdt();
++
++  size =
++    raw_fdt ? grub_fdt_get_totalsize (raw_fdt) : GRUB_FDT_EMPTY_TREE_SZ;
++  size += additional_size;
++
++  grub_dprintf ("linux", "allocating %ld bytes for fdt\n", size);
++  fdt = grub_efi_allocate_pages (0, GRUB_EFI_BYTES_TO_PAGES (size));
++  if (!fdt)
++    return NULL;
++
++  if (raw_fdt)
++    {
++      grub_memmove (fdt, raw_fdt, size);
++      grub_fdt_set_totalsize (fdt, size);
++    }
++  else
++    {
++      grub_fdt_create_empty_tree (fdt, size);
++    }
++  return fdt;
++}
++
++grub_err_t
++grub_fdt_install (void)
++{
++  grub_efi_boot_services_t *b;
++  grub_efi_guid_t fdt_guid = GRUB_EFI_DEVICE_TREE_GUID;
++  grub_efi_status_t status;
++
++  b = grub_efi_system_table->boot_services;
++  status = b->install_configuration_table (&fdt_guid, fdt);
++  if (status != GRUB_EFI_SUCCESS)
++    return grub_error (GRUB_ERR_IO, "failed to install FDT");
++
++  grub_dprintf ("fdt", "Installed/updated FDT configuration table @ %p\n",
++		fdt);
++  return GRUB_ERR_NONE;
++}
++
++void
++grub_fdt_unload (void) {
++  if (!fdt) {
++    return;
++  }
++  grub_efi_free_pages ((grub_efi_physical_address_t) fdt,
++		       GRUB_EFI_BYTES_TO_PAGES (grub_fdt_get_totalsize (fdt)));
++  fdt = NULL;
++}
++
++static grub_err_t
++grub_cmd_devicetree (grub_command_t cmd __attribute__ ((unused)),
++		     int argc, char *argv[])
++{
++  grub_file_t dtb;
++  void *blob = NULL;
++  int size;
++
++  if (loaded_fdt)
++    grub_free (loaded_fdt);
++  loaded_fdt = NULL;
++
++  /* No arguments means "use firmware FDT".  */
++  if (argc == 0)
++    {
++      return GRUB_ERR_NONE;
++    }
++
++  dtb = grub_file_open (argv[0]);
++  if (!dtb)
++    goto out;
++
++  size = grub_file_size (dtb);
++  blob = grub_malloc (size);
++  if (!blob)
++    goto out;
++
++  if (grub_file_read (dtb, blob, size) < size)
++    {
++      if (!grub_errno)
++	grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"), argv[0]);
++      goto out;
++    }
++
++  if (grub_fdt_check_header (blob, size) != 0)
++    {
++      grub_error (GRUB_ERR_BAD_OS, N_("invalid device tree"));
++      goto out;
++    }
++
++out:
++  if (dtb)
++    grub_file_close (dtb);
++
++  if (blob)
++    {
++      if (grub_errno == GRUB_ERR_NONE)
++	loaded_fdt = blob;
++      else
++	grub_free (blob);
++    }
++
++  return grub_errno;
++}
++
++static grub_command_t cmd_devicetree;
++
++GRUB_MOD_INIT (fdt)
++{
++  cmd_devicetree =
++    grub_register_command ("devicetree", grub_cmd_devicetree, 0,
++			   N_("Load DTB file."));
++}
++
++GRUB_MOD_FINI (fdt)
++{
++  grub_unregister_command (cmd_devicetree);
++}
+Index: b/grub-core/loader/arm64/xen_boot.c
+===================================================================
+--- /dev/null
++++ b/grub-core/loader/arm64/xen_boot.c
+@@ -0,0 +1,499 @@
++/*
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2014  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <grub/cache.h>
++#include <grub/charset.h>
++#include <grub/command.h>
++#include <grub/err.h>
++#include <grub/file.h>
++#include <grub/fdt.h>
++#include <grub/list.h>
++#include <grub/loader.h>
++#include <grub/misc.h>
++#include <grub/mm.h>
++#include <grub/types.h>
++#include <grub/cpu/fdtload.h>
++#include <grub/cpu/linux.h>
++#include <grub/efi/efi.h>
++#include <grub/efi/pe32.h>	/* required by struct xen_hypervisor_header */
++#include <grub/i18n.h>
++#include <grub/lib/cmdline.h>
++
++GRUB_MOD_LICENSE ("GPLv3+");
++
++#define XEN_HYPERVISOR_NAME  "xen_hypervisor"
++#define MODULE_CUSTOM_COMPATIBLE  "multiboot,module"
++
++/* This maximum size is defined in Power.org ePAPR V1.1
++ * https://www.power.org/documentation/epapr-version-1-1/
++ * 2.2.1.1 Node Name Requirements
++ * node-name@unit-address
++ * 31 + 1(@) + 16(64bit address in hex format) + 1(\0) = 49
++ */
++#define FDT_NODE_NAME_MAX_SIZE  (49)
++
++struct compat_string_struct
++{
++  grub_size_t size;
++  const char *compat_string;
++};
++typedef struct compat_string_struct compat_string_struct_t;
++#define FDT_COMPATIBLE(x) {.size = sizeof(x), .compat_string = (x)}
++
++enum module_type
++{
++  MODULE_IMAGE,
++  MODULE_INITRD,
++  MODULE_XSM,
++  MODULE_CUSTOM
++};
++typedef enum module_type module_type_t;
++
++struct xen_hypervisor_header
++{
++  struct grub_arm64_linux_kernel_header efi_head;
++
++  /* This is always PE\0\0.  */
++  grub_uint8_t signature[GRUB_PE32_SIGNATURE_SIZE];
++  /* The COFF file header.  */
++  struct grub_pe32_coff_header coff_header;
++  /* The Optional header.  */
++  struct grub_pe64_optional_header optional_header;
++};
++
++struct xen_boot_binary
++{
++  struct xen_boot_binary *next;
++  struct xen_boot_binary **prev;
++  int is_hypervisor;
++
++  grub_addr_t start;
++  grub_size_t size;
++  grub_size_t align;
++
++  char *cmdline;
++  int cmdline_size;
++};
++
++static grub_dl_t my_mod;
++
++static int loaded;
++
++static struct xen_boot_binary *xen_hypervisor;
++static struct xen_boot_binary *module_head;
++
++static __inline grub_addr_t
++xen_boot_address_align (grub_addr_t start, grub_size_t align)
++{
++  return (align ? (ALIGN_UP (start, align)) : start);
++}
++
++static grub_err_t
++prepare_xen_hypervisor_params (void *xen_boot_fdt)
++{
++  int chosen_node = 0;
++  int retval;
++
++  chosen_node = grub_fdt_find_subnode (xen_boot_fdt, 0, "chosen");
++  if (chosen_node < 0)
++    chosen_node = grub_fdt_add_subnode (xen_boot_fdt, 0, "chosen");
++  if (chosen_node < 1)
++    return grub_error (GRUB_ERR_IO, "failed to get chosen node in FDT");
++
++  grub_dprintf ("xen_loader",
++		"Xen Hypervisor cmdline : %s @ %p size:%d\n",
++		xen_hypervisor->cmdline, xen_hypervisor->cmdline,
++		xen_hypervisor->cmdline_size);
++
++  retval = grub_fdt_set_prop (xen_boot_fdt, chosen_node, "bootargs",
++			      xen_hypervisor->cmdline,
++			      xen_hypervisor->cmdline_size);
++  if (retval)
++    return grub_error (GRUB_ERR_IO, "failed to install/update FDT");
++
++  return GRUB_ERR_NONE;
++}
++
++static grub_err_t
++prepare_xen_module_params (struct xen_boot_binary *module, void *xen_boot_fdt)
++{
++  int retval, chosen_node = 0, module_node = 0;
++  char module_name[FDT_NODE_NAME_MAX_SIZE];
++
++  retval = grub_snprintf (module_name, FDT_NODE_NAME_MAX_SIZE, "module@%lx",
++			  xen_boot_address_align (module->start,
++						  module->align));
++  grub_dprintf ("xen_loader", "Module node name %s \n", module_name);
++
++  if (retval < (int) sizeof ("module@"))
++    return grub_error (GRUB_ERR_IO, N_("failed to get FDT"));
++
++  chosen_node = grub_fdt_find_subnode (xen_boot_fdt, 0, "chosen");
++  if (chosen_node < 0)
++    chosen_node = grub_fdt_add_subnode (xen_boot_fdt, 0, "chosen");
++  if (chosen_node < 1)
++    return grub_error (GRUB_ERR_IO, "failed to get chosen node in FDT");
++
++  module_node =
++    grub_fdt_find_subnode (xen_boot_fdt, chosen_node, module_name);
++  if (module_node < 0)
++    module_node =
++      grub_fdt_add_subnode (xen_boot_fdt, chosen_node, module_name);
++
++  retval = grub_fdt_set_prop (xen_boot_fdt, module_node, "compatible",
++			      MODULE_CUSTOM_COMPATIBLE, sizeof(MODULE_CUSTOM_COMPATIBLE) - 1);
++  if (retval)
++    return grub_error (GRUB_ERR_IO, "failed to update FDT");
++
++  grub_dprintf ("xen_loader", "Module\n");
++
++  retval = grub_fdt_set_reg64 (xen_boot_fdt, module_node,
++			       xen_boot_address_align (module->start,
++						       module->align),
++			       module->size);
++  if (retval)
++    return grub_error (GRUB_ERR_IO, "failed to update FDT");
++
++  if (module->cmdline && module->cmdline_size > 0)
++    {
++      grub_dprintf ("xen_loader",
++		    "Module cmdline : %s @ %p size:%d\n",
++		    module->cmdline, module->cmdline, module->cmdline_size);
++
++      retval = grub_fdt_set_prop (xen_boot_fdt, module_node, "bootargs",
++				  module->cmdline, module->cmdline_size + 1);
++      if (retval)
++	return grub_error (GRUB_ERR_IO, "failed to update FDT");
++    }
++  else
++    {
++      grub_dprintf ("xen_loader", "Module has no bootargs!\n");
++    }
++
++  return GRUB_ERR_NONE;
++}
++
++static grub_err_t
++finalize_params_xen_boot (void)
++{
++  struct xen_boot_binary *module;
++  void *xen_boot_fdt;
++  grub_size_t additional_size = 0x1000;
++
++  /* Hypervisor.  */
++  additional_size += FDT_NODE_NAME_MAX_SIZE + xen_hypervisor->cmdline_size;
++  FOR_LIST_ELEMENTS (module, module_head)
++  {
++    additional_size += 6 * FDT_NODE_NAME_MAX_SIZE + sizeof(MODULE_CUSTOM_COMPATIBLE) - 1
++      + module->cmdline_size;
++  }
++
++  xen_boot_fdt = grub_fdt_load (additional_size);
++  if (!xen_boot_fdt)
++    return grub_error (GRUB_ERR_IO, "failed to get FDT");
++
++  if (xen_hypervisor)
++    {
++      if (prepare_xen_hypervisor_params (xen_boot_fdt) != GRUB_ERR_NONE)
++	goto fail;
++    }
++  else
++    {
++      grub_dprintf ("xen_loader", "Failed to get Xen Hypervisor info!\n");
++      goto fail;
++    }
++
++  /* Set module params info */
++  FOR_LIST_ELEMENTS (module, module_head)
++  {
++    if (module->start && module->size > 0)
++      {
++	grub_dprintf ("xen_loader", "Module @ 0x%lx size:0x%lx\n",
++		      xen_boot_address_align (module->start, module->align),
++		      module->size);
++	if (prepare_xen_module_params (module, xen_boot_fdt) != GRUB_ERR_NONE)
++	  goto fail;
++      }
++    else
++      {
++	grub_dprintf ("xen_loader", "Module info error!\n");
++	goto fail;
++      }
++  }
++
++  if (grub_fdt_install() == GRUB_ERR_NONE)
++    return GRUB_ERR_NONE;
++
++fail:
++  grub_fdt_unload ();
++
++  return grub_error (GRUB_ERR_IO, "failed to install/update FDT");
++}
++
++
++static grub_err_t
++xen_boot (void)
++{
++  grub_err_t err = finalize_params_xen_boot ();
++  if (err)
++    return err;
++
++  return grub_arm64_uefi_boot_image (xen_hypervisor->start,
++				     xen_hypervisor->size,
++				     xen_hypervisor->cmdline);
++}
++
++static void
++single_binary_unload (struct xen_boot_binary *binary)
++{
++  if (!binary)
++    return;
++
++  if (binary->start && binary->size > 0)
++    {
++      grub_efi_free_pages ((grub_efi_physical_address_t) binary->start,
++			   GRUB_EFI_BYTES_TO_PAGES (binary->size + binary->align));
++    }
++
++  if (binary->cmdline && binary->cmdline_size > 0)
++    {
++      grub_free (binary->cmdline);
++      grub_dprintf ("xen_loader",
++		    "Module cmdline memory free @ %p size: %d\n",
++		    binary->cmdline, binary->cmdline_size);
++    }
++
++  if (!binary->is_hypervisor)
++    grub_list_remove (GRUB_AS_LIST (binary));
++
++  grub_dprintf ("xen_loader",
++		"Module struct memory free @ %p size: 0x%lx\n",
++		binary, sizeof (binary));
++  grub_free (binary);
++
++  return;
++}
++
++static void
++all_binaries_unload (void)
++{
++  struct xen_boot_binary *binary;
++
++  FOR_LIST_ELEMENTS (binary, module_head)
++  {
++    single_binary_unload (binary);
++  }
++
++  if (xen_hypervisor)
++    single_binary_unload (xen_hypervisor);
++
++  return;
++}
++
++static grub_err_t
++xen_unload (void)
++{
++  loaded = 0;
++  all_binaries_unload ();
++  grub_fdt_unload ();
++  grub_dl_unref (my_mod);
++
++  return GRUB_ERR_NONE;
++}
++
++static void
++xen_boot_binary_load (struct xen_boot_binary *binary, grub_file_t file,
++		      int argc, char *argv[])
++{
++  binary->size = grub_file_size (file);
++  grub_dprintf ("xen_loader", "Xen_boot file size: 0x%lx\n", binary->size);
++
++  binary->start
++    = (grub_addr_t) grub_efi_allocate_pages (0,
++					     GRUB_EFI_BYTES_TO_PAGES
++					     (binary->size +
++					      binary->align));
++  if (!binary->start)
++    {
++      grub_error (GRUB_ERR_OUT_OF_MEMORY, N_("out of memory"));
++      return;
++    }
++
++  grub_dprintf ("xen_loader", "Xen_boot numpages: 0x%lx\n",
++	        GRUB_EFI_BYTES_TO_PAGES (binary->size + binary->align));
++
++  if (grub_file_read (file, (void *) xen_boot_address_align (binary->start,
++							     binary->align),
++		      binary->size) != (grub_ssize_t) binary->size)
++    {
++      single_binary_unload (binary);
++      grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"), argv[0]);
++      return;
++    }
++
++  if (argc > 1)
++    {
++      binary->cmdline_size = grub_loader_cmdline_size (argc - 1, argv + 1);
++      binary->cmdline = grub_zalloc (binary->cmdline_size);
++      if (!binary->cmdline)
++	{
++	  single_binary_unload (binary);
++	  grub_error (GRUB_ERR_OUT_OF_MEMORY, N_("out of memory"));
++	  return;
++	}
++      grub_create_loader_cmdline (argc - 1, argv + 1, binary->cmdline,
++				  binary->cmdline_size);
++      grub_dprintf ("xen_loader",
++		    "Xen_boot cmdline @ %p %s, size: %d\n",
++		    binary->cmdline, binary->cmdline, binary->cmdline_size);
++    }
++  else
++    {
++      binary->cmdline_size = 0;
++      binary->cmdline = NULL;
++    }
++
++  grub_errno = GRUB_ERR_NONE;
++  return;
++}
++
++static grub_err_t
++grub_cmd_xen_module (grub_command_t cmd __attribute__((unused)),
++		     int argc, char *argv[])
++{
++
++  struct xen_boot_binary *module = NULL;
++  grub_file_t file = 0;
++
++  if (!argc)
++    {
++      grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
++      goto fail;
++    }
++
++  if (!loaded)
++    {
++      grub_error (GRUB_ERR_BAD_ARGUMENT,
++		  N_("you need to load the Xen Hypervisor first"));
++      goto fail;
++    }
++
++  module =
++    (struct xen_boot_binary *) grub_zalloc (sizeof (struct xen_boot_binary));
++  if (!module)
++    return grub_errno;
++
++  module->is_hypervisor = 0;
++  module->align = 4096;
++
++  grub_dprintf ("xen_loader", "Init module and node info\n");
++
++  file = grub_file_open (argv[0]);
++  if (!file)
++    goto fail;
++
++  xen_boot_binary_load (module, file, argc, argv);
++  if (grub_errno == GRUB_ERR_NONE)
++    grub_list_push (GRUB_AS_LIST_P (&module_head), GRUB_AS_LIST (module));
++
++ fail:
++  if (file)
++    grub_file_close (file);
++  if (grub_errno != GRUB_ERR_NONE)
++    single_binary_unload (module);
++
++  return grub_errno;
++}
++
++static grub_err_t
++grub_cmd_xen_hypervisor (grub_command_t cmd __attribute__ ((unused)),
++			 int argc, char *argv[])
++{
++  struct xen_hypervisor_header sh;
++  grub_file_t file = NULL;
++
++  grub_dl_ref (my_mod);
++
++  if (!argc)
++    {
++      grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
++      goto fail;
++    }
++
++  file = grub_file_open (argv[0]);
++  if (!file)
++    goto fail;
++
++  if (grub_file_read (file, &sh, sizeof (sh)) != (long) sizeof (sh))
++    goto fail;
++  if (grub_arm64_uefi_check_image
++      ((struct grub_arm64_linux_kernel_header *) &sh) != GRUB_ERR_NONE)
++    goto fail;
++  grub_file_seek (file, 0);
++
++  /* if another module has called grub_loader_set,
++     we need to make sure that another module is unloaded properly */
++  grub_loader_unset ();
++
++  xen_hypervisor =
++    (struct xen_boot_binary *) grub_zalloc (sizeof (struct xen_boot_binary));
++  if (!xen_hypervisor)
++    return grub_errno;
++
++  xen_hypervisor->is_hypervisor = 1;
++  xen_hypervisor->align = (grub_size_t) sh.optional_header.section_alignment;
++
++  xen_boot_binary_load (xen_hypervisor, file, argc, argv);
++  if (grub_errno == GRUB_ERR_NONE)
++    {
++      grub_loader_set (xen_boot, xen_unload, 0);
++      loaded = 1;
++    }
++
++fail:
++  if (file)
++    grub_file_close (file);
++  if (grub_errno != GRUB_ERR_NONE)
++    {
++      loaded = 0;
++      all_binaries_unload ();
++      grub_dl_unref (my_mod);
++    }
++
++  return grub_errno;
++}
++
++static grub_command_t cmd_xen_hypervisor;
++static grub_command_t cmd_xen_module;
++
++GRUB_MOD_INIT (xen_boot)
++{
++  cmd_xen_hypervisor =
++    grub_register_command ("xen_hypervisor", grub_cmd_xen_hypervisor, 0,
++			   N_("Load a xen hypervisor."));
++  cmd_xen_module =
++    grub_register_command ("xen_module", grub_cmd_xen_module, 0,
++			   N_("Load a xen module."));
++  my_mod = mod;
++}
++
++GRUB_MOD_FINI (xen_boot)
++{
++  grub_unregister_command (cmd_xen_hypervisor);
++  grub_unregister_command (cmd_xen_module);
++}
+Index: b/include/grub/arm64/fdtload.h
+===================================================================
+--- /dev/null
++++ b/include/grub/arm64/fdtload.h
+@@ -0,0 +1,35 @@
++/*
++ *  GRUB  --  GRand Unified Bootloader
++ *  Copyright (C) 2013-2015  Free Software Foundation, Inc.
++ *
++ *  GRUB is free software: you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation, either version 3 of the License, or
++ *  (at your option) any later version.
++ *
++ *  GRUB is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#ifndef GRUB_FDTLOAD_CPU_HEADER
++#define GRUB_FDTLOAD_CPU_HEADER 1
++
++#include <grub/types.h>
++#include <grub/err.h>
++
++void *
++grub_fdt_load (grub_size_t additional_size);
++void
++grub_fdt_unload (void);
++grub_err_t
++grub_fdt_install (void);
++
++#define GRUB_EFI_PAGE_SHIFT	12
++#define GRUB_EFI_BYTES_TO_PAGES(bytes)   (((bytes) + 0xfff) >> GRUB_EFI_PAGE_SHIFT)
++
++#endif
+Index: b/grub-core/Makefile.core.def
+===================================================================
+--- a/grub-core/Makefile.core.def
++++ b/grub-core/Makefile.core.def
+@@ -1673,13 +1673,19 @@ module = {
+   ia64_efi = loader/ia64/efi/linux.c;
+   arm = loader/arm/linux.c;
+   arm64 = loader/arm64/linux.c;
+-  fdt = lib/fdt.c;
+   common = loader/linux.c;
+   common = lib/cmdline.c;
+   enable = noemu;
+ };
+ 
+ module = {
++  name = fdt;
++  arm64 = loader/arm64/fdt.c;
++  common = lib/fdt.c;
++  enable = fdt;
++};
++
++module = {
+   name = xnu;
+   x86 = loader/xnu_resume.c;
+   x86 = loader/i386/xnu.c;
+Index: b/grub-core/lib/fdt.c
+===================================================================
+--- a/grub-core/lib/fdt.c
++++ b/grub-core/lib/fdt.c
+@@ -19,6 +19,9 @@
+ #include <grub/fdt.h>
+ #include <grub/misc.h>
+ #include <grub/mm.h>
++#include <grub/dl.h>
++
++GRUB_MOD_LICENSE ("GPLv3+");
+ 
+ #define FDT_SUPPORTED_VERSION	17
+ 

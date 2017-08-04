@@ -1,27 +1,27 @@
-From 275e1976bb46405ac6fc7e1da7d769dfebba9576 Mon Sep 17 00:00:00 2001
+From 5cd20151112bfde11cf3ed8b9920797d7cabe325 Mon Sep 17 00:00:00 2001
 From: Matthew Garrett <mjg@redhat.com>
 Date: Mon, 13 Jan 2014 12:13:15 +0000
 Subject: Add "linuxefi" loader which avoids ExitBootServices
 
 Origin: vendor, http://pkgs.fedoraproject.org/cgit/grub2.git/tree/grub2-linuxefi.patch
 Forwarded: no
-Last-Update: 2014-11-18
+Last-Update: 2016-09-19
 
 Patch-Name: linuxefi.patch
 ---
- grub-core/Makefile.core.def       |   8 +
- grub-core/kern/efi/mm.c           |  32 ++++
- grub-core/loader/i386/efi/linux.c | 371 ++++++++++++++++++++++++++++++++++++++
- include/grub/efi/efi.h            |   3 +
- include/grub/i386/linux.h         |   1 +
- 5 files changed, 415 insertions(+)
+ grub-core/Makefile.core.def       |    8 
+ grub-core/kern/efi/mm.c           |   32 +++
+ grub-core/loader/i386/efi/linux.c |  370 ++++++++++++++++++++++++++++++++++++++
+ include/grub/efi/efi.h            |    3 
+ include/grub/i386/linux.h         |    1 
+ 5 files changed, 414 insertions(+)
  create mode 100644 grub-core/loader/i386/efi/linux.c
 
-diff --git a/grub-core/Makefile.core.def b/grub-core/Makefile.core.def
-index c916246..8c246c6 100644
+Index: b/grub-core/Makefile.core.def
+===================================================================
 --- a/grub-core/Makefile.core.def
 +++ b/grub-core/Makefile.core.def
-@@ -1706,6 +1706,14 @@ module = {
+@@ -1731,6 +1731,14 @@ module = {
  };
  
  module = {
@@ -36,11 +36,11 @@ index c916246..8c246c6 100644
    name = chain;
    efi = loader/efi/chainloader.c;
    i386_pc = loader/i386/pc/chainloader.c;
-diff --git a/grub-core/kern/efi/mm.c b/grub-core/kern/efi/mm.c
-index be37afd..ddeca60 100644
+Index: b/grub-core/kern/efi/mm.c
+===================================================================
 --- a/grub-core/kern/efi/mm.c
 +++ b/grub-core/kern/efi/mm.c
-@@ -49,6 +49,38 @@ static grub_efi_uintn_t finish_desc_size;
+@@ -49,6 +49,38 @@ static grub_efi_uintn_t finish_desc_size
  static grub_efi_uint32_t finish_desc_version;
  int grub_efi_is_finished = 0;
  
@@ -79,12 +79,11 @@ index be37afd..ddeca60 100644
  /* Allocate pages. Return the pointer to the first of allocated pages.  */
  void *
  grub_efi_allocate_pages (grub_efi_physical_address_t address,
-diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-new file mode 100644
-index 0000000..ebaf1db
+Index: b/grub-core/loader/i386/efi/linux.c
+===================================================================
 --- /dev/null
 +++ b/grub-core/loader/i386/efi/linux.c
-@@ -0,0 +1,371 @@
+@@ -0,0 +1,370 @@
 +/*
 + *  GRUB  --  GRand Unified Bootloader
 + *  Copyright (C) 2012  Free Software Foundation, Inc.
@@ -307,7 +306,6 @@ index 0000000..ebaf1db
 +  if (! grub_linuxefi_secure_validate (kernel, filelen))
 +    {
 +      grub_error (GRUB_ERR_INVALID_COMMAND, N_("%s has invalid signature"), argv[0]);
-+      grub_free (kernel);
 +      goto fail;
 +    }
 +
@@ -323,7 +321,7 @@ index 0000000..ebaf1db
 +      goto fail;
 +    }
 +
-+  memset (params, 0, 16384);
++  grub_memset (params, 0, 16384);
 +
 +  if (grub_file_read (file, &lh, sizeof (lh)) != sizeof (lh))
 +    {
@@ -411,7 +409,7 @@ index 0000000..ebaf1db
 +      lh.code32_start = (grub_uint32_t)(grub_addr_t) kernel_mem;
 +    }
 +
-+  memcpy(params, &lh, 2 * 512);
++  grub_memcpy (params, &lh, 2 * 512);
 +
 +  params->type_of_loader = 0x21;
 +
@@ -456,11 +454,11 @@ index 0000000..ebaf1db
 +  grub_unregister_command (cmd_linux);
 +  grub_unregister_command (cmd_initrd);
 +}
-diff --git a/include/grub/efi/efi.h b/include/grub/efi/efi.h
-index db2169e..a000c38 100644
+Index: b/include/grub/efi/efi.h
+===================================================================
 --- a/include/grub/efi/efi.h
 +++ b/include/grub/efi/efi.h
-@@ -40,6 +40,9 @@ void EXPORT_FUNC(grub_efi_stall) (grub_efi_uintn_t microseconds);
+@@ -40,6 +40,9 @@ void EXPORT_FUNC(grub_efi_stall) (grub_e
  void *
  EXPORT_FUNC(grub_efi_allocate_pages) (grub_efi_physical_address_t address,
  				      grub_efi_uintn_t pages);
@@ -470,8 +468,8 @@ index db2169e..a000c38 100644
  void EXPORT_FUNC(grub_efi_free_pages) (grub_efi_physical_address_t address,
  				       grub_efi_uintn_t pages);
  int
-diff --git a/include/grub/i386/linux.h b/include/grub/i386/linux.h
-index da0ca3b..fc36bda 100644
+Index: b/include/grub/i386/linux.h
+===================================================================
 --- a/include/grub/i386/linux.h
 +++ b/include/grub/i386/linux.h
 @@ -139,6 +139,7 @@ struct linux_kernel_header

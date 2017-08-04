@@ -1,3 +1,34 @@
+grub2 (2.02~beta2-36ubuntu3.12) xenial; urgency=medium
+
+  * debian/patches: Rework linuxefi/SecureBoot support and sync with upstream
+    SB patch set: (LP: #1696599)
+    - linuxefi_backport_arm64.patch: backport basic arm64 chainload/linux
+      command support from 17.04.
+    - linuxefi_arm_sb_support.patch: add Secure Boot support for arm for its
+      chainloader.
+    - linuxefi_fix_validation_race.patch: Fix a race in validating images.
+    - linuxefi_chainloader_path.patch: honor the starting path for grub, so
+      images do not need to be started from $root.
+    - linuxefi_chainloader_sb.patch: Fix some more issues in chainloader use
+      when Secure Boot is enabled.
+    - linuxefi_loaders_enforce_sb.patch: Enforce Secure Boot policy for all
+      loaders: don't load the commands when Secure Boot is enabled.
+    - linuxefi_re-enable_linux_cmd.patch: Since we rely on the linux and
+      initrd commands to automatically hand-off to linuxefi/initrdefi; re-
+      enable the linux loader.
+    - linuxefi_chainloader_pe_fixes.patch: PE parsing fixes for chainloading
+      "special" PE images, such as Windows'.
+    - linuxefi_rework_non-sb_cases.patch: rework cases where Secure Boot is
+      disabled or shim validation is disabled so loading works as EFI binaries
+      when it is supposed to.
+    - Removed linuxefi_require_shim.patch; superseded by the above.
+      (LP: #1689687)
+  * debian/patches/git_tsc_use_alt_delay_sources_d43a5ee6.patch: refreshed.
+  * debian/patches/arm64-set-correct-length-of-device-path-end-entry.patch:
+    dropped; included in linuxefi_backport_arm64.patch.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 08 Jun 2017 10:16:17 -0700
+
 grub2 (2.02~beta2-36ubuntu3.11) xenial; urgency=medium
 
   * Fix syntax error in debian/postinst.in.  (LP #1692181)

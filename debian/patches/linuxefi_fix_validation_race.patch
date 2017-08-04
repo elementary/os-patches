@@ -1,0 +1,89 @@
+From 93ff3333a3fbd26e07cd425166b7d7fb243f033f Mon Sep 17 00:00:00 2001
+From: Matthew Garrett <mjg59@coreos.com>
+Date: Tue, 14 Jul 2015 16:58:51 -0700
+Subject: [PATCH] Fix race in EFI validation
+
+---
+ grub-core/loader/i386/efi/linux.c |   40 ++++++++------------------------------
+ 1 file changed, 9 insertions(+), 31 deletions(-)
+
+Index: b/grub-core/loader/i386/efi/linux.c
+===================================================================
+--- a/grub-core/loader/i386/efi/linux.c
++++ b/grub-core/loader/i386/efi/linux.c
+@@ -154,7 +154,7 @@ grub_cmd_linux (grub_command_t cmd __att
+   grub_file_t file = 0;
+   struct linux_kernel_header lh;
+   grub_ssize_t len, start, filelen;
+-  void *kernel;
++  void *kernel = NULL;
+ 
+   grub_dl_ref (my_mod);
+ 
+@@ -190,10 +190,6 @@ grub_cmd_linux (grub_command_t cmd __att
+       goto fail;
+     }
+ 
+-  grub_file_seek (file, 0);
+-
+-  grub_free(kernel);
+-
+   params = grub_efi_allocate_pages_max (0x3fffffff, BYTES_TO_PAGES(16384));
+ 
+   if (! params)
+@@ -204,13 +200,7 @@ grub_cmd_linux (grub_command_t cmd __att
+ 
+   grub_memset (params, 0, 16384);
+ 
+-  if (grub_file_read (file, &lh, sizeof (lh)) != sizeof (lh))
+-    {
+-      if (!grub_errno)
+-	grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"),
+-		    argv[0]);
+-      goto fail;
+-    }
++  grub_memcpy (&lh, kernel, sizeof (lh));
+ 
+   if (lh.boot_flag != grub_cpu_to_le16 (0xaa55))
+     {
+@@ -270,26 +260,11 @@ grub_cmd_linux (grub_command_t cmd __att
+       goto fail;
+     }
+ 
+-  if (grub_file_seek (file, start) == (grub_off_t) -1)
+-    {
+-      grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"),
+-		  argv[0]);
+-      goto fail;
+-    }
+-
+-  if (grub_file_read (file, kernel_mem, len) != len && !grub_errno)
+-    {
+-      grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"),
+-		  argv[0]);
+-    }
+-
+-  if (grub_errno == GRUB_ERR_NONE)
+-    {
+-      grub_loader_set (grub_linuxefi_boot, grub_linuxefi_unload, 0);
+-      loaded = 1;
+-      lh.code32_start = (grub_uint32_t)(grub_addr_t) kernel_mem;
+-    }
++  grub_memcpy (kernel_mem, (char *)kernel + start, len);
++  grub_loader_set (grub_linuxefi_boot, grub_linuxefi_unload, 0);
++  loaded=1;
+ 
++  lh.code32_start = (grub_uint32_t)(grub_uint64_t) kernel_mem;
+   grub_memcpy (params, &lh, 2 * 512);
+ 
+   params->type_of_loader = 0x21;
+@@ -299,6 +274,9 @@ grub_cmd_linux (grub_command_t cmd __att
+   if (file)
+     grub_file_close (file);
+ 
++  if (kernel)
++    grub_free (kernel);
++
+   if (grub_errno != GRUB_ERR_NONE)
+     {
+       grub_dl_unref (my_mod);

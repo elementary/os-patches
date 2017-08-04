@@ -29,7 +29,7 @@ Index: b/grub-core/Makefile.am
 ===================================================================
 --- a/grub-core/Makefile.am
 +++ b/grub-core/Makefile.am
-@@ -98,6 +98,7 @@ if COND_i386_efi
+@@ -99,6 +99,7 @@ if COND_i386_efi
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/efi.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/disk.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/i386/tsc.h
@@ -37,7 +37,7 @@ Index: b/grub-core/Makefile.am
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/pci.h
  endif
  
-@@ -109,10 +110,12 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
+@@ -110,10 +111,12 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/gfxterm.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/font.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/bufio.h
@@ -50,7 +50,7 @@ Index: b/grub-core/Makefile.am
  endif
  
  if COND_i386_qemu
-@@ -151,11 +154,13 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
+@@ -152,11 +155,13 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/disk.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/i386/tsc.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/pci.h
@@ -64,7 +64,7 @@ Index: b/grub-core/Makefile.am
  endif
  
  if COND_mips
-@@ -230,11 +235,13 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
+@@ -231,11 +236,13 @@ KERNEL_HEADER_FILES += $(top_srcdir)/inc
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/efi.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/disk.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/arm/system.h
@@ -82,7 +82,7 @@ Index: b/grub-core/Makefile.core.def
 ===================================================================
 --- a/grub-core/Makefile.core.def
 +++ b/grub-core/Makefile.core.def
-@@ -174,8 +174,20 @@ kernel = {
+@@ -174,9 +174,21 @@ kernel = {
    efi = kern/efi/init.c;
    efi = kern/efi/mm.c;
    efi = term/efi/console.c;
@@ -92,6 +92,7 @@ Index: b/grub-core/Makefile.core.def
 +  i386_multiboot = kern/i386/pc/acpi.c;
 +  i386_coreboot = kern/acpi.c;
 +  i386_multiboot = kern/acpi.c;
+   common = kern/efi/sb.c;
  
    x86 = kern/i386/tsc.c;
 +  x86 = kern/i386/tsc_pit.c;
@@ -103,7 +104,7 @@ Index: b/grub-core/Makefile.core.def
  
    i386_efi = kern/i386/efi/init.c;
    i386_efi = bus/pci.c;
-@@ -187,6 +199,7 @@ kernel = {
+@@ -188,6 +200,7 @@ kernel = {
    x86_64_efi = bus/pci.c;
  
    xen = kern/i386/tsc.c;
@@ -111,7 +112,7 @@ Index: b/grub-core/Makefile.core.def
    x86_64_xen = kern/x86_64/xen/hypercall.S;
    i386_xen = kern/i386/xen/hypercall.S;
    xen = kern/xen/init.c;
-@@ -685,10 +698,8 @@ module = {
+@@ -686,10 +699,8 @@ module = {
    name = acpi;
  
    common = commands/acpi.c;
