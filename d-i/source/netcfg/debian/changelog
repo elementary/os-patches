@@ -1,3 +1,36 @@
+netcfg (1.135ubuntu4.5) xenial; urgency=medium
+
+  * Add description for non-PCI platform network interfaces. LP: #1697914
+
+ -- dann frazier <dannf@ubuntu.com>  Wed, 19 Jul 2017 15:15:12 -0600
+
+netcfg (1.135ubuntu4.4) xenial; urgency=medium
+
+  * Fix NTP server name handling in IPv6 autoconfiguration. (LP: #1614514)
+    Thanks to Malcolm Scott for the patch.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 08 Jun 2017 17:33:37 -0700
+
+netcfg (1.135ubuntu4.3) xenial; urgency=medium
+
+  * Don't reap old resolv.conf if resolvconf is in use. Thanks Dariusz Gadomsky 
+    for the patch. (LP: #1646585)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 23 May 2017 11:52:14 -0400
+
+netcfg (1.135ubuntu4.2) xenial; urgency=medium
+
+  * Do now show an empty option 4 when using netcfg, without a wifi-card,
+    and when automatic configuration fails. This is achieved by
+    substituting all choices into the question, from two internal select
+    templates of identical options but wifireconf one. This resolves UX
+    bug without changing translation strings or fuzzing any of the
+    existing translations. LP: #1558271
+  * Also use short stable systemd-udev names to discover descriptions for
+    the network interfaces. LP: #1572620
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 18 Jan 2017 11:45:36 +0000
+
 netcfg (1.135ubuntu4.1) xenial; urgency=medium
 
   * With vlan connection type, finish-install.d would decide to purge

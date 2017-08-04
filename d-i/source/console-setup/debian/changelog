@@ -1,3 +1,14 @@
+console-setup (1.108ubuntu15.3) xenial; urgency=medium
+
+  * debian/console-setup-linux.setvtrgb.service: add condition to only
+    execute when /dev/tty0 exists. This is the same condition as used by
+    getty@.service unit to prevent attempting setting up VT when none are
+    present. This is a common case on serial only architectures and
+    virtual machines. Resolves degraded boots on s390x/ppc64el. LP:
+    #1660598
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 31 Jan 2017 11:47:04 +0000
+
 console-setup (1.108ubuntu15.2) xenial; urgency=medium
 
   * Reorganize and correct console-setup, keyboard-setup and setvtrgb along the

@@ -344,12 +344,11 @@ int poll_dhcp_client (struct debconfclient *client)
 
 int ask_dhcp_options (struct debconfclient *client, const char *if_name)
 {
-    if (is_wireless_iface(if_name)) {
-        debconf_metaget(client, "netcfg/internal-wifireconf", "description");
-        debconf_subst(client, "netcfg/dhcp_options", "wifireconf", client->value);
-    }
+    if (is_wireless_iface(if_name))
+        debconf_metaget(client, "netcfg/internal-wifireconf", "Choices");
     else /* blank from last time */
-        debconf_subst(client, "netcfg/dhcp_options", "wifireconf", "");
+        debconf_metaget(client, "netcfg/internal-nowifi", "Choices");
+    debconf_subst(client, "netcfg/dhcp_options", "choices", client->value);
 
     /* critical, we don't want to enter a loop */
     debconf_input(client, "critical", "netcfg/dhcp_options");
