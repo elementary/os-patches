@@ -89,10 +89,24 @@ cloud_provider_export_menu(CloudProvider* cloud_provider,
   return *export_id;
 }
 
+void
+cloud_provider_unexport_menu(CloudProvider *cloud_provider,
+                             const gchar   *account_name)
+{
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  guint *export_id;
+  export_id = (guint*)g_hash_table_lookup(priv->menuModels, account_name);
+  if(export_id != NULL) {
+    g_dbus_connection_unexport_menu_model(priv->bus, *export_id);
+    g_hash_table_remove (priv->menuModels, account_name);
+    g_free(export_id);
+  }
+}
+
 guint
-cloud_provider_export_actions(CloudProvider* cloud_provider,
-                              const gchar *account_name,
-                              GActionGroup *action_group)
+cloud_provider_export_action_group(CloudProvider* cloud_provider,
+                                   const gchar *account_name,
+                                   GActionGroup *action_group)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
@@ -106,6 +120,20 @@ cloud_provider_export_actions(CloudProvider* cloud_provider,
     }
   g_hash_table_insert(priv->actionGroups, g_strdup(account_name), export_id);
   return *export_id;
+}
+
+void
+cloud_provider_unexport_action_group(CloudProvider *cloud_provider,
+                                     const gchar   *account_name)
+{
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  guint *export_id;
+  export_id = (guint*)g_hash_table_lookup(priv->actionGroups, account_name);
+  if(export_id != NULL) {
+    g_dbus_connection_unexport_action_group(priv->bus, *export_id);
+    g_hash_table_remove (priv->actionGroups, account_name);
+    g_free(export_id);
+  }
 }
 
 void

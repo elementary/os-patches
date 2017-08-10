@@ -183,13 +183,13 @@ on_name_acquired (GDBusConnection *connection,
   CloudProviderManager *self = user_data;
   CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (user_data));
   g_signal_connect (priv->skeleton,
-		    "handle-get-cloud-providers",
-		    G_CALLBACK(handle_get_cloud_providers),
-		    CLOUD_PROVIDER_MANAGER(self));
+                    "handle-get-cloud-providers",
+                    G_CALLBACK(handle_get_cloud_providers),
+                    CLOUD_PROVIDER_MANAGER(self));
   g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (priv->skeleton),
-				    connection,
-				    CLOUD_PROVIDER_MANAGER_DBUS_PATH,
-				    NULL);
+                                    connection,
+                                    CLOUD_PROVIDER_MANAGER_DBUS_PATH,
+                                    NULL);
 }
 
 static void
@@ -202,6 +202,7 @@ on_name_lost (GDBusConnection *connection,
     {
       g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(priv->skeleton));
     }
+  exit(1);
 }
 
 /**

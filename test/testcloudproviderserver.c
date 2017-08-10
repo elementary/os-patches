@@ -328,7 +328,7 @@ on_bus_acquired (GDBusConnection *connection,
 
       cloud_provider_export_account(self->cloud_provider, account_object_name, cloud_provider_account);
       cloud_provider_export_menu (self->cloud_provider, account_object_name, get_model ());
-      cloud_provider_export_actions (self->cloud_provider, account_object_name, get_action_group ());
+      cloud_provider_export_action_group (self->cloud_provider, account_object_name, get_action_group ());
 
       g_free(account_object_name);
     }

@@ -59,10 +59,17 @@ guint
 cloud_provider_export_menu (CloudProvider* cloud_provider,
                             const gchar *account_name,
                             GMenuModel *model);
+void
+cloud_provider_unexport_menu (CloudProvider* cloud_provider,
+			      const gchar *account_name);
 guint
-cloud_provider_export_actions(CloudProvider* cloud_provider,
+cloud_provider_export_action_group (CloudProvider* cloud_provider,
                               const gchar *account_name,
                               GActionGroup *action_group);
+void
+cloud_provider_unexport_action_group (CloudProvider *cloud_provider,
+                                      const gchar   *account_name);
+
 void
 cloud_provider_export_objects (CloudProvider* cloud_provider);
 
