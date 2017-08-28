@@ -1,7 +1,7 @@
 project ('libcloudproviders', 'c',
-         version: '1.0.0',
+         version: '0.1.1',
          meson_version: '>=0.40.0',
-         license: 'GPL3+')
+         license: 'LGPL3+')
 
 add_global_arguments ('-Wno-deprecated-declarations', language:'c')
 
