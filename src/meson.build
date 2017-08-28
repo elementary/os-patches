@@ -34,7 +34,6 @@ libcloudproviders = shared_library ('cloudproviders',
                                     install: true)
 
 install_headers ( libcloudproviders_headers, subdir: 'cloudproviders')
-install_headers ( join_paths(meson.current_build_dir(), 'cloudprovider-generated.h'), subdir: 'cloudproviders')
 
 pkg = import('pkgconfig')
 pkg.generate(libraries : libcloudproviders,
