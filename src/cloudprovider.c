@@ -48,11 +48,11 @@ cloud_provider_add_account (CloudProvider* cloud_provider, CloudProviderAccount 
 }
 
 void
-cloud_provider_export_account(CloudProvider* cloud_provider,
+cloud_provider_export_account(CloudProvider* self,
                               const gchar *account_name,
                               CloudProviderAccount1 *account)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   CloudProviderObjectSkeleton *object;
   gchar *object_path = g_strconcat (priv->object_path, "/", account_name, NULL);
   object = cloud_provider_object_skeleton_new(object_path);
@@ -63,10 +63,10 @@ cloud_provider_export_account(CloudProvider* cloud_provider,
 }
 
 void
-cloud_provider_unexport_account(CloudProvider* cloud_provider,
-                                const gchar *account_name)
+cloud_provider_unexport_account(CloudProvider *self,
+                                const gchar   *account_name)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   gchar *object_path = g_strconcat (priv->object_path, "/", account_name, NULL);
   g_dbus_object_manager_server_unexport (priv->manager, object_path);
   guint *export_id;
@@ -84,11 +84,11 @@ cloud_provider_unexport_account(CloudProvider* cloud_provider,
 }
 
 guint
-cloud_provider_export_menu(CloudProvider* cloud_provider,
-                           const gchar *account_name,
-                           GMenuModel *model)
+cloud_provider_export_menu(CloudProvider *self,
+                           const gchar   *account_name,
+                           GMenuModel    *model)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
   GError *error = NULL;
   guint *export_id = g_new0(guint, 1);
@@ -103,10 +103,10 @@ cloud_provider_export_menu(CloudProvider* cloud_provider,
 }
 
 void
-cloud_provider_unexport_menu(CloudProvider *cloud_provider,
+cloud_provider_unexport_menu(CloudProvider *self,
                              const gchar   *account_name)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   guint *export_id;
   export_id = (guint*)g_hash_table_lookup(priv->menuModels, account_name);
   if(export_id != NULL) {
@@ -117,11 +117,11 @@ cloud_provider_unexport_menu(CloudProvider *cloud_provider,
 }
 
 guint
-cloud_provider_export_action_group(CloudProvider* cloud_provider,
-                                   const gchar *account_name,
-                                   GActionGroup *action_group)
+cloud_provider_export_action_group(CloudProvider *self,
+                                   const gchar   *account_name,
+                                   GActionGroup  *action_group)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
   GError *error = NULL;
   guint *export_id = g_new0(guint, 1);
@@ -136,10 +136,10 @@ cloud_provider_export_action_group(CloudProvider* cloud_provider,
 }
 
 void
-cloud_provider_unexport_action_group(CloudProvider *cloud_provider,
+cloud_provider_unexport_action_group(CloudProvider *self,
                                      const gchar   *account_name)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   guint *export_id;
   export_id = (guint*)g_hash_table_lookup(priv->actionGroups, account_name);
   if(export_id != NULL) {
@@ -150,16 +150,17 @@ cloud_provider_unexport_action_group(CloudProvider *cloud_provider,
 }
 
 void
-cloud_provider_export_objects(CloudProvider* cloud_provider)
+cloud_provider_export_objects(CloudProvider* self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   g_dbus_object_manager_server_set_connection (priv->manager, priv->bus);
 }
 
 void
-cloud_provider_emit_changed (CloudProvider *cloud_provider, const gchar *account_name)
+cloud_provider_emit_changed (CloudProvider *self,
+                             const gchar   *account_name)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
   GDBusObject *object = g_dbus_object_manager_get_object((GDBusObjectManager*)priv->manager, object_path);
   CloudProviderAccount1 *account = cloud_provider_object_get_account1 (CLOUD_PROVIDER_OBJECT(object));
@@ -171,8 +172,8 @@ cloud_provider_emit_changed (CloudProvider *cloud_provider, const gchar *account
 
 CloudProvider*
 cloud_provider_new (GDBusConnection *bus,
-                    const gchar *bus_name,
-                    const gchar *object_path)
+                    const gchar     *bus_name,
+                    const gchar     *object_path)
 {
   CloudProvider *self;
   CloudProviderPrivate *priv;
