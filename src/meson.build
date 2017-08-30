@@ -38,7 +38,7 @@ install_headers ( libcloudproviders_headers, subdir: 'cloudproviders')
 pkg = import('pkgconfig')
 pkg.generate(libraries : libcloudproviders,
              subdirs : 'cloudproviders',
-             version : '1.0',
+             version : meson.project_version(),
              name : 'libcloudproviders',
              filebase: 'cloudproviders',
              description : 'Cloud providers DBus API library.')
