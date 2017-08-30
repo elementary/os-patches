@@ -23,5 +23,6 @@ conf.set_quoted ('VERSION', meson.project_version ())
 conf.set_quoted ('PACKAGE_VERSION', meson.project_version ())
 conf.set_quoted ('GETTEXT_PACKAGE', 'cloudproviders')
 
-subdir ( 'src' )
-subdir ( 'test' )
+subdir ('src')
+subdir ('test')
+subdir ('docs/reference')

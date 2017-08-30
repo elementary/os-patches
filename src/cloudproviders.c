@@ -98,8 +98,6 @@ on_proxy_created (GObject      *source_object,
 
   priv->proxy = proxy;
 
-  //g_signal_connect_swapped(priv->proxy, "cloud-provider-changed", G_CALLBACK(cloud_providers_update), self);
-
   cloud_providers_update(self);
 }
 
@@ -213,8 +211,8 @@ cloud_providers_init (CloudProviders *self)
 
 /**
  * cloud_providers_get_providers
- * @manager: A CloudProviders
- * Returns: (transfer none): The list of providers.
+ * @self: A CloudProviders
+ * Returns: (transfer none): A GList* of #CloudProviderProxy objects.
  */
 GList*
 cloud_providers_get_providers (CloudProviders *self)
