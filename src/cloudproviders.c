@@ -41,6 +41,18 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProviders, cloud_providers, G_TYPE_OBJECT)
 
+/**
+ * SECTION:cloudproviders
+ * @title: CloudProviders
+ * @short_description: Singleton for tracking all providers.
+ * @include: src/cloudproviders.h
+ *
+ * #CloudProviders is a singleton to track all the changes in all providers.
+ * Using a #CloudProviders you can implement integration for all of them at once
+ * and represent them in the UI, track new providers added or removed and their
+ * status.
+ */
+
 enum
 {
   CHANGED,
@@ -134,8 +146,10 @@ on_bus_acquired (GObject      *source_object,
 }
 
 /**
- * cloud_providers_dup_singleton
- * Returns: (transfer none): A manager singleton
+ * cloud_providers_dup_singleton:
+ * Main object to track changes in all providers.
+ *
+ * Returns: (transfer full): A manager singleton
  */
 CloudProviders *
 cloud_providers_dup_singleton (void)

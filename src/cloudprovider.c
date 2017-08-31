@@ -35,6 +35,29 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
 
+/**
+ * SECTION:cloudprovider
+ * @title: CloudProvider
+ * @short_description: Base object for representing a single provider
+ * @include: src/cloudprovider.h
+ *
+ * #CloudProvider is the basic object that interacts with UI and actions that a
+ * provider will present to the user.
+ * list view. Extensions can provide #NautilusColumn by registering a
+ * #NautilusColumnProvider and returning them from
+ * nautilus_column_provider_get_columns(), which will be called by the main
+ * application when creating a view.
+ */
+
+/**
+ * cloud_provider_export_account:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ * @account: The account object
+ *
+ * Each cloud provider can have a variety of account associated with it. Use this
+ * function to export the accounts the user set up.
+ */
 void
 cloud_provider_add_account (CloudProvider* cloud_provider, CloudProviderAccount *account)
 {
@@ -62,6 +85,14 @@ cloud_provider_export_account(CloudProvider* self,
   g_free(object_path);
 }
 
+/**
+ * cloud_provider_unexport_account:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * Each cloud provider can have a variety of account associated with it. Use this
+ * function to remove an already set up account.
+ */
 void
 cloud_provider_unexport_account(CloudProvider *self,
                                 const gchar   *account_name)
@@ -83,6 +114,15 @@ cloud_provider_unexport_account(CloudProvider *self,
   g_free (object_path);
 }
 
+/**
+ * cloud_provider_export_menu:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * One of the benefits of the integration is to display a menu with available
+ * options for an account. Use this function to export a GMenuModel menu to be
+ * displayed by the choosen integration by the desktop environment or application.
+ */
 guint
 cloud_provider_export_menu(CloudProvider *self,
                            const gchar   *account_name,
@@ -102,6 +142,13 @@ cloud_provider_export_menu(CloudProvider *self,
   return *export_id;
 }
 
+/**
+ * cloud_provider_unexport_menu:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * Remove the menu added with cloud_provider_export_menu
+ */
 void
 cloud_provider_unexport_menu(CloudProvider *self,
                              const gchar   *account_name)
@@ -116,6 +163,16 @@ cloud_provider_unexport_menu(CloudProvider *self,
   }
 }
 
+/**
+ * cloud_provider_action_group:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ * @action_group: The GActionGroup to be used by the menu exported by cloud_provider_export_menu
+ *
+ * In order for a menu exported with cloud_provider_export_menu to receive events
+ * that will eventually call your callbacks, it needs the corresponding GAcionGroup.
+ * Use this function to export it.
+ */
 guint
 cloud_provider_export_action_group(CloudProvider *self,
                                    const gchar   *account_name,
@@ -135,6 +192,13 @@ cloud_provider_export_action_group(CloudProvider *self,
   return *export_id;
 }
 
+/**
+ * cloud_provider_unexport_action_group:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * Unexport the GActionGroup exported by cloud_provider_export_action_group
+ */
 void
 cloud_provider_unexport_action_group(CloudProvider *self,
                                      const gchar   *account_name)
@@ -149,6 +213,15 @@ cloud_provider_unexport_action_group(CloudProvider *self,
   }
 }
 
+/**
+ * cloud_provider_export_objects:
+ * @self: The cloud provider
+ *
+ * Export all objects assigned previously with functions like cloud_provider_export_menu
+ * to DBUS.
+ * Use this function after exporting all the required object to avoid multiple signals
+ * being emitted in a short time.
+ */
 void
 cloud_provider_export_objects(CloudProvider* self)
 {
@@ -156,6 +229,14 @@ cloud_provider_export_objects(CloudProvider* self)
   g_dbus_object_manager_server_set_connection (priv->manager, priv->bus);
 }
 
+/**
+ * cloud_provider_emit_changed:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * When an account changes its status, emit a signal to DBUS using this function
+ * so clients are aware of the change.
+ */
 void
 cloud_provider_emit_changed (CloudProvider *self,
                              const gchar   *account_name)

@@ -41,6 +41,18 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderProxy, cloud_provider_proxy, G_TYPE_OBJECT)
 
+/**
+ * SECTION:cloudproviderproxy
+ * @title: CloudProviderProxy
+ * @short_description: Base object for representing a single provider for clients.
+ * @include: src/cloudproviderproxy.h
+ *
+ * #CloudProviderProxy is the basic object used to construct the integrator UI
+ * and actions that a provider will present to the user, from the client side.
+ * Integrators of the cloud providers can use this object to poll the
+ * #CloudProvider menus, status and actions.
+ */
+
 enum {
   CHANGED,
   READY,
