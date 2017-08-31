@@ -50,9 +50,8 @@ G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
  */
 
 /**
- * cloud_provider_export_account:
+ * cloud_provider_add_account:
  * @self: The cloud provider
- * @account_name: The name of the account
  * @account: The account object
  *
  * Each cloud provider can have a variety of account associated with it. Use this
