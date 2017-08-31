@@ -443,6 +443,6 @@ gboolean cloud_provider_proxy_is_available(CloudProviderProxy *self)
   status = cloud_provider_proxy_get_status (self);
   path = cloud_provider_proxy_get_path (self);
   if (name == NULL || icon == NULL || path == NULL || status == CLOUD_PROVIDER_STATUS_INVALID)
-	  return FALSE;
+    return FALSE;
   return TRUE;
 }
