@@ -59,7 +59,8 @@ G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
  * function to export the accounts the user set up.
  */
 void
-cloud_provider_add_account (CloudProvider* cloud_provider, CloudProviderAccount *account)
+cloud_provider_add_account (CloudProvider        *cloud_provider,
+                            CloudProviderAccount *account)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   CloudProviderObjectSkeleton *object;
