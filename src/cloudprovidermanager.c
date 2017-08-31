@@ -22,6 +22,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <gio/gio.h>
+#include <stdlib.h>
 
 typedef struct
 {
@@ -158,7 +159,7 @@ cloud_provider_manager_update (CloudProviderManager *manager)
 }
 
 
-void
+static void
 handle_get_cloud_providers (CloudProviderManager1 *interface,
                             GDBusMethodInvocation  *invocation,
                             gpointer                user_data)

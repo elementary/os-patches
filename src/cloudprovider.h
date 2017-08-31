@@ -62,7 +62,7 @@ cloud_provider_export_menu (CloudProvider* cloud_provider,
                             GMenuModel *model);
 void
 cloud_provider_unexport_menu (CloudProvider* cloud_provider,
-			      const gchar *account_name);
+                              const gchar *account_name);
 guint
 cloud_provider_export_action_group (CloudProvider* cloud_provider,
                               const gchar *account_name,

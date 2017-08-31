@@ -35,8 +35,31 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
 
+/**
+ * SECTION:cloudprovider
+ * @title: CloudProvider
+ * @short_description: Base object for representing a single provider
+ * @include: src/cloudprovider.h
+ *
+ * #CloudProvider is the basic object that interacts with UI and actions that a
+ * provider will present to the user.
+ * list view. Extensions can provide #NautilusColumn by registering a
+ * #NautilusColumnProvider and returning them from
+ * nautilus_column_provider_get_columns(), which will be called by the main
+ * application when creating a view.
+ */
+
+/**
+ * cloud_provider_add_account:
+ * @self: The cloud provider
+ * @account: The account object
+ *
+ * Each cloud provider can have a variety of account associated with it. Use this
+ * function to export the accounts the user set up.
+ */
 void
-cloud_provider_add_account (CloudProvider* cloud_provider, CloudProviderAccount *account)
+cloud_provider_add_account (CloudProvider        *cloud_provider,
+                            CloudProviderAccount *account)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   CloudProviderObjectSkeleton *object;
@@ -48,11 +71,11 @@ cloud_provider_add_account (CloudProvider* cloud_provider, CloudProviderAccount 
 }
 
 void
-cloud_provider_export_account(CloudProvider* cloud_provider,
+cloud_provider_export_account(CloudProvider* self,
                               const gchar *account_name,
                               CloudProviderAccount1 *account)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   CloudProviderObjectSkeleton *object;
   gchar *object_path = g_strconcat (priv->object_path, "/", account_name, NULL);
   object = cloud_provider_object_skeleton_new(object_path);
@@ -62,11 +85,19 @@ cloud_provider_export_account(CloudProvider* cloud_provider,
   g_free(object_path);
 }
 
+/**
+ * cloud_provider_unexport_account:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * Each cloud provider can have a variety of account associated with it. Use this
+ * function to remove an already set up account.
+ */
 void
-cloud_provider_unexport_account(CloudProvider* cloud_provider,
-                                const gchar *account_name)
+cloud_provider_unexport_account(CloudProvider *self,
+                                const gchar   *account_name)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   gchar *object_path = g_strconcat (priv->object_path, "/", account_name, NULL);
   g_dbus_object_manager_server_unexport (priv->manager, object_path);
   guint *export_id;
@@ -83,12 +114,21 @@ cloud_provider_unexport_account(CloudProvider* cloud_provider,
   g_free (object_path);
 }
 
+/**
+ * cloud_provider_export_menu:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * One of the benefits of the integration is to display a menu with available
+ * options for an account. Use this function to export a GMenuModel menu to be
+ * displayed by the choosen integration by the desktop environment or application.
+ */
 guint
-cloud_provider_export_menu(CloudProvider* cloud_provider,
-                           const gchar *account_name,
-                           GMenuModel *model)
+cloud_provider_export_menu(CloudProvider *self,
+                           const gchar   *account_name,
+                           GMenuModel    *model)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
   GError *error = NULL;
   guint *export_id = g_new0(guint, 1);
@@ -102,11 +142,18 @@ cloud_provider_export_menu(CloudProvider* cloud_provider,
   return *export_id;
 }
 
+/**
+ * cloud_provider_unexport_menu:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * Remove the menu added with cloud_provider_export_menu
+ */
 void
-cloud_provider_unexport_menu(CloudProvider *cloud_provider,
+cloud_provider_unexport_menu(CloudProvider *self,
                              const gchar   *account_name)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   guint *export_id;
   export_id = (guint*)g_hash_table_lookup(priv->menuModels, account_name);
   if(export_id != NULL) {
@@ -116,12 +163,22 @@ cloud_provider_unexport_menu(CloudProvider *cloud_provider,
   }
 }
 
+/**
+ * cloud_provider_action_group:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ * @action_group: The GActionGroup to be used by the menu exported by cloud_provider_export_menu
+ *
+ * In order for a menu exported with cloud_provider_export_menu to receive events
+ * that will eventually call your callbacks, it needs the corresponding GAcionGroup.
+ * Use this function to export it.
+ */
 guint
-cloud_provider_export_action_group(CloudProvider* cloud_provider,
-                                   const gchar *account_name,
-                                   GActionGroup *action_group)
+cloud_provider_export_action_group(CloudProvider *self,
+                                   const gchar   *account_name,
+                                   GActionGroup  *action_group)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
   GError *error = NULL;
   guint *export_id = g_new0(guint, 1);
@@ -135,11 +192,18 @@ cloud_provider_export_action_group(CloudProvider* cloud_provider,
   return *export_id;
 }
 
+/**
+ * cloud_provider_unexport_action_group:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * Unexport the GActionGroup exported by cloud_provider_export_action_group
+ */
 void
-cloud_provider_unexport_action_group(CloudProvider *cloud_provider,
+cloud_provider_unexport_action_group(CloudProvider *self,
                                      const gchar   *account_name)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   guint *export_id;
   export_id = (guint*)g_hash_table_lookup(priv->actionGroups, account_name);
   if(export_id != NULL) {
@@ -149,17 +213,35 @@ cloud_provider_unexport_action_group(CloudProvider *cloud_provider,
   }
 }
 
+/**
+ * cloud_provider_export_objects:
+ * @self: The cloud provider
+ *
+ * Export all objects assigned previously with functions like cloud_provider_export_menu
+ * to DBUS.
+ * Use this function after exporting all the required object to avoid multiple signals
+ * being emitted in a short time.
+ */
 void
-cloud_provider_export_objects(CloudProvider* cloud_provider)
+cloud_provider_export_objects(CloudProvider* self)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   g_dbus_object_manager_server_set_connection (priv->manager, priv->bus);
 }
 
+/**
+ * cloud_provider_emit_changed:
+ * @self: The cloud provider
+ * @account_name: The name of the account
+ *
+ * When an account changes its status, emit a signal to DBUS using this function
+ * so clients are aware of the change.
+ */
 void
-cloud_provider_emit_changed (CloudProvider *cloud_provider, const gchar *account_name)
+cloud_provider_emit_changed (CloudProvider *self,
+                             const gchar   *account_name)
 {
-  CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
+  CloudProviderPrivate *priv = cloud_provider_get_instance_private(self);
   gchar *object_path = g_strconcat(priv->object_path, "/", account_name, NULL);
   GDBusObject *object = g_dbus_object_manager_get_object((GDBusObjectManager*)priv->manager, object_path);
   CloudProviderAccount1 *account = cloud_provider_object_get_account1 (CLOUD_PROVIDER_OBJECT(object));
@@ -171,8 +253,8 @@ cloud_provider_emit_changed (CloudProvider *cloud_provider, const gchar *account
 
 CloudProvider*
 cloud_provider_new (GDBusConnection *bus,
-                    const gchar *bus_name,
-                    const gchar *object_path)
+                    const gchar     *bus_name,
+                    const gchar     *object_path)
 {
   CloudProvider *self;
   CloudProviderPrivate *priv;
