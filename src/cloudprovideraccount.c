@@ -81,9 +81,10 @@ on_get_status (CloudProviderAccount   *self,
                gpointer                user_data)
 {
   CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
-  gint status = 0;
-  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT(self), "handle_get_status", &status);
-  cloud_provider_account1_complete_get_status (priv->skeleton, invocation, status);
+  gint *status = g_new0(gint, 1);
+  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT(self), "handle_get_status", status);
+  cloud_provider_account1_complete_get_status (priv->skeleton, invocation, *status);
+  g_free(status);
 }
 
 static void
