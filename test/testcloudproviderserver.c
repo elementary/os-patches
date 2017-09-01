@@ -310,16 +310,16 @@ on_bus_acquired (GDBusConnection *connection,
       gchar *account_object_name = g_strdup_printf ("MyCloud%d", n);
       gchar *account_name = g_strdup_printf ("MyCloud %d", n);
 
-      CloudProviderAccountExporter *cloud_provider_account_exporter = cloud_provider_account_exporter_new(account_object_name);
-      g_signal_connect(cloud_provider_account_exporter, "handle_get_name", G_CALLBACK (on_get_name), account_name);
-      g_signal_connect(cloud_provider_account_exporter, "handle_get_icon", G_CALLBACK (on_get_icon), self);
-      g_signal_connect(cloud_provider_account_exporter, "handle_get_path", G_CALLBACK (on_get_path), self);
-      g_signal_connect(cloud_provider_account_exporter, "handle_get_status", G_CALLBACK (on_get_status), self);
-      g_signal_connect(cloud_provider_account_exporter, "handle_get_status_details", G_CALLBACK (on_get_status_details), self);
+      CloudProviderAccountExporter *account = cloud_provider_account_exporter_new(account_object_name);
+      g_signal_connect (account, "handle_get_name", G_CALLBACK (on_get_name), account_name);
+      g_signal_connect (account, "handle_get_icon", G_CALLBACK (on_get_icon), self);
+      g_signal_connect (account, "handle_get_path", G_CALLBACK (on_get_path), self);
+      g_signal_connect (account, "handle_get_status", G_CALLBACK (on_get_status), self);
+      g_signal_connect (account, "handle_get_status_details", G_CALLBACK (on_get_status_details), self);
+      cloud_provider_account_exporter_add_menu_model (account, get_model ());
+      cloud_provider_account_exporter_add_action_group (account, get_action_group ());
 
-      cloud_provider_exporter_add_account(self->cloud_provider, cloud_provider_account_exporter);
-      cloud_provider_exporter_export_menu (self->cloud_provider, account_object_name, get_model ());
-      cloud_provider_exporter_export_action_group (self->cloud_provider, account_object_name, get_action_group ());
+      cloud_provider_exporter_add_account(self->cloud_provider, account);
 
       g_free(account_object_name);
     }

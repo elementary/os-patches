@@ -29,4 +29,10 @@ cloud_provider_account_exporter_get_skeleton (CloudProviderAccountExporter *self
 gchar *
 cloud_provider_account_exporter_get_object_name (CloudProviderAccountExporter *self);
 
+GMenuModel *
+cloud_provider_account_exporter_get_menu_model (CloudProviderAccountExporter *self);
+
+GActionGroup *
+cloud_provider_account_exporter_get_action_group (CloudProviderAccountExporter *self);
+
 #endif

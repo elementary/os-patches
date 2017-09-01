@@ -51,6 +51,18 @@ cloud_provider_account_exporter_emit_changed (CloudProviderAccountExporter *clou
 CloudProviderAccountExporter*
 cloud_provider_account_exporter_new (const gchar *account_object_name);
 
+void
+cloud_provider_account_exporter_add_menu_model (CloudProviderAccountExporter *self,
+                                                GMenuModel                   *menu_model);
+void
+cloud_provider_account_exporter_remove_menu (CloudProviderAccountExporter *self);
+
+void
+cloud_provider_account_exporter_add_action_group (CloudProviderAccountExporter *self,
+                                                  GActionGroup                 *action_group);
+void
+cloud_provider_account_exporter_remove_action_group (CloudProviderAccountExporter *self);
+
 G_END_DECLS
 
 #endif /* CLOUD_PROVIDER_ACCOUNT_EXPORTER_H */

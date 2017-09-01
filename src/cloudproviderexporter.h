@@ -74,6 +74,10 @@ cloud_provider_exporter_unexport_action_group (CloudProviderExporter *cloud_prov
 void
 cloud_provider_exporter_add_account (CloudProviderExporter        *cloud_provider_exporter,
                                      CloudProviderAccountExporter *account);
+void
+cloud_provider_exporter_remove_account (CloudProviderExporter        *cloud_provider_exporter,
+                                        CloudProviderAccountExporter *account);
+
 
 void
 cloud_provider_exporter_export_objects (CloudProviderExporter *cloud_provider_exporter);
@@ -81,6 +85,9 @@ cloud_provider_exporter_export_objects (CloudProviderExporter *cloud_provider_ex
 void
 cloud_provider_exporter_emit_changed (CloudProviderExporter *cloud_provider_exporter,
                                       const gchar           *account_name);
+void
+cloud_provider_exporter_emit_account_changed (CloudProviderExporter       *cloud_provider_exporter,
+                                              CloudProviderAccountExporter *account);
 
 CloudProviderExporter*
 cloud_provider_exporter_new (GDBusConnection *bus,

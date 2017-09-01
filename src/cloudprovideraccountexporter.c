@@ -24,6 +24,8 @@ typedef struct
 {
   gchar *object_name;
   CloudProviderAccount1 *skeleton;
+  GMenuModel *menu_model;
+  GActionGroup *action_group;
 } CloudProviderAccountExporterPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderAccountExporter, cloud_provider_account_exporter, G_TYPE_OBJECT)
@@ -33,6 +35,20 @@ cloud_provider_account_exporter_get_object_name (CloudProviderAccountExporter *s
 {
   CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
   return priv->object_name;
+}
+
+GMenuModel *
+cloud_provider_account_exporter_get_menu_model (CloudProviderAccountExporter *self)
+{
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
+  return priv->menu_model;
+}
+
+GActionGroup *
+cloud_provider_account_exporter_get_action_group (CloudProviderAccountExporter *self)
+{
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
+  return priv->action_group;
 }
 
 GDBusInterfaceSkeleton*
@@ -118,6 +134,36 @@ cloud_provider_account_exporter_new (const gchar *object_name)
   priv->object_name = g_strdup (object_name);
 
   return self;
+}
+
+void
+cloud_provider_account_exporter_add_menu_model (CloudProviderAccountExporter *self,
+                                                GMenuModel                   *menu_model)
+{
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
+  priv->menu_model = menu_model;
+}
+
+void
+cloud_provider_account_exporter_remove_menu (CloudProviderAccountExporter *self)
+{
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
+  priv->menu_model = NULL;
+}
+
+void
+cloud_provider_account_exporter_add_action_group (CloudProviderAccountExporter *self,
+                                                  GActionGroup                 *action_group)
+{
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
+  priv->action_group = action_group;
+}
+
+void
+cloud_provider_account_exporter_remove_action_group (CloudProviderAccountExporter *self)
+{
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
+  priv->action_group = NULL;
 }
 
 static void
