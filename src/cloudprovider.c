@@ -70,6 +70,15 @@ cloud_provider_add_account (CloudProvider        *cloud_provider,
   g_free(object_path);
 }
 
+/**
+ * cloud_provider_export_account:
+ * @self: The cloud provider
+ * @account_name: The account name
+ * @account: The account object
+ *
+ * Each cloud provider can have a variety of account associated with it. Use this
+ * function to export the accounts the user set up.
+ */
 void
 cloud_provider_export_account(CloudProvider* self,
                               const gchar *account_name,
