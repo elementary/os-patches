@@ -38,3 +38,8 @@ of accounts and can then interact with these though the
 
 An example implementation using libcloudprovider can be found in
 [test/testcloudproviderclient.c](test/testcloudproviderclient.c).
+
+## API Documentation
+
+See the [API documentation](https://csoriano.gitlab.io/libcloudprovidersweb/) for further details.
+
