@@ -25,4 +25,6 @@ conf.set_quoted ('GETTEXT_PACKAGE', 'cloudproviders')
 
 subdir ('src')
 subdir ('test')
-subdir ('docs/reference')
+if get_option ('enable-gtk-doc')
+    subdir ('docs/reference')
+endif
