@@ -22,7 +22,7 @@
 #include "cloudprovider-generated.h"
 /* for CloudProviderStatus enum */
 #include "cloudproviderproxy.h"
-#include "cloudprovideraccount.h"
+#include "cloudprovideraccountexporter.h"
 
 G_BEGIN_DECLS
 
@@ -72,8 +72,8 @@ cloud_provider_unexport_action_group (CloudProvider *cloud_provider,
                                       const gchar   *account_name);
 
 void
-cloud_provider_add_account (CloudProvider* cloud_provider,
-                            CloudProviderAccount *account);
+cloud_provider_add_account (CloudProvider                *cloud_provider,
+                            CloudProviderAccountExporter *account);
 
 void
 cloud_provider_export_objects (CloudProvider* cloud_provider);

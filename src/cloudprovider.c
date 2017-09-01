@@ -18,7 +18,7 @@
  */
 
 #include "cloudprovider.h"
-#include "cloudprovideraccountpriv.h"
+#include "cloudprovideraccountexporterpriv.h"
 #include "cloudprovider-generated.h"
 #include <gio/gio.h>
 
@@ -58,14 +58,14 @@ G_DEFINE_TYPE_WITH_PRIVATE (CloudProvider, cloud_provider, G_TYPE_OBJECT)
  * function to export the accounts the user set up.
  */
 void
-cloud_provider_add_account (CloudProvider        *cloud_provider,
-                            CloudProviderAccount *account)
+cloud_provider_add_account (CloudProvider                *cloud_provider,
+                            CloudProviderAccountExporter *account)
 {
   CloudProviderPrivate *priv = cloud_provider_get_instance_private(cloud_provider);
   CloudProviderObjectSkeleton *object;
-  gchar *object_path = g_strconcat (priv->object_path, "/", cloud_provider_account_get_object_name (account), NULL);
+  gchar *object_path = g_strconcat (priv->object_path, "/", cloud_provider_account_exporter_get_object_name (account), NULL);
   object = cloud_provider_object_skeleton_new(object_path);
-  cloud_provider_object_skeleton_set_account1(object, CLOUD_PROVIDER_ACCOUNT1 (cloud_provider_account_get_skeleton (account)));
+  cloud_provider_object_skeleton_set_account1(object, CLOUD_PROVIDER_ACCOUNT1 (cloud_provider_account_exporter_get_skeleton (account)));
   g_dbus_object_manager_server_export (priv->manager, G_DBUS_OBJECT_SKELETON(object));
   g_free(object_path);
 }

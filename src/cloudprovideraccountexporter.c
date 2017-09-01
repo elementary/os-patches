@@ -1,4 +1,4 @@
-/* cloudprovideraccount.c
+/* cloudprovideraccountexporter.c
  *
  * Copyright (C) 2017 Julius Haertl <jus@bitgrid.net>
  *
@@ -17,95 +17,95 @@
  */
 
 #include <gio/gio.h>
-#include "cloudprovideraccount.h"
+#include "cloudprovideraccountexporter.h"
 #include "cloudprovider-generated.h"
 
 typedef struct
 {
   gchar *object_name;
   CloudProviderAccount1 *skeleton;
-} CloudProviderAccountPrivate;
+} CloudProviderAccountExporterPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderAccount, cloud_provider_account, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderAccountExporter, cloud_provider_account_exporter, G_TYPE_OBJECT)
 
 gchar *
-cloud_provider_account_get_object_name (CloudProviderAccount *self)
+cloud_provider_account_exporter_get_object_name (CloudProviderAccountExporter *self)
 {
-  CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
   return priv->object_name;
 }
 
 GDBusInterfaceSkeleton*
-cloud_provider_account_get_skeleton (CloudProviderAccount *self)
+cloud_provider_account_exporter_get_skeleton (CloudProviderAccountExporter *self)
 {
-  CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
   return G_DBUS_INTERFACE_SKELETON(priv->skeleton);
 }
 
 static void
-on_get_name (CloudProviderAccount   *self,
-             GDBusMethodInvocation  *invocation,
-             gpointer                user_data)
+on_get_name (CloudProviderAccountExporter   *self,
+             GDBusMethodInvocation          *invocation,
+             gpointer                        user_data)
 {
-  CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
   gchar *name;
-  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT(self), "handle_get_name", &name);
+  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT_EXPORTER(self), "handle_get_name", &name);
   cloud_provider_account1_complete_get_name (priv->skeleton, invocation, name);
 }
 
 static void
-on_get_icon (CloudProviderAccount   *self,
-             GDBusMethodInvocation  *invocation,
-             gpointer                user_data)
+on_get_icon (CloudProviderAccountExporter   *self,
+             GDBusMethodInvocation          *invocation,
+             gpointer                        user_data)
 {
-  CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
   GIcon *icon = NULL;
-  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT(self), "handle_get_icon", &icon);
+  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT_EXPORTER(self), "handle_get_icon", &icon);
   cloud_provider_account1_complete_get_icon (priv->skeleton, invocation, g_variant_new("v", g_icon_serialize(icon)));
 }
 
 static void
-on_get_path (CloudProviderAccount   *self,
-             GDBusMethodInvocation  *invocation,
-             gpointer                user_data)
+on_get_path (CloudProviderAccountExporter   *self,
+             GDBusMethodInvocation          *invocation,
+             gpointer                        user_data)
 {
-  CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
   gchar *path = NULL;
-  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT(self), "handle_get_path", &path);
+  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT_EXPORTER(self), "handle_get_path", &path);
   cloud_provider_account1_complete_get_path (priv->skeleton, invocation, path);
 }
 
 static void
-on_get_status (CloudProviderAccount   *self,
-               GDBusMethodInvocation  *invocation,
-               gpointer                user_data)
+on_get_status (CloudProviderAccountExporter   *self,
+               GDBusMethodInvocation          *invocation,
+               gpointer                        user_data)
 {
-  CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
   gint *status = g_new0(gint, 1);
-  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT(self), "handle_get_status", status);
+  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT_EXPORTER(self), "handle_get_status", status);
   cloud_provider_account1_complete_get_status (priv->skeleton, invocation, *status);
   g_free(status);
 }
 
 static void
-on_get_status_details (CloudProviderAccount   *self,
-                       GDBusMethodInvocation  *invocation,
-                       gpointer                user_data)
+on_get_status_details (CloudProviderAccountExporter   *self,
+                       GDBusMethodInvocation          *invocation,
+                       gpointer                        user_data)
 {
-  CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
   gchar *status_details = NULL;
-  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT(self), "handle_get_status_details", &status_details);
+  g_signal_emit_by_name (CLOUD_PROVIDER_ACCOUNT_EXPORTER(self), "handle_get_status_details", &status_details);
   cloud_provider_account1_complete_get_status_details (priv->skeleton, invocation, status_details);
 }
 
-CloudProviderAccount*
-cloud_provider_account_new (const gchar *object_name)
+CloudProviderAccountExporter*
+cloud_provider_account_exporter_new (const gchar *object_name)
 {
-  CloudProviderAccount *self;
-  CloudProviderAccountPrivate *priv;
+  CloudProviderAccountExporter *self;
+  CloudProviderAccountExporterPrivate *priv;
 
-  self = g_object_new (TYPE_CLOUD_PROVIDER_ACCOUNT, NULL);
-  priv = cloud_provider_account_get_instance_private (self);
+  self = g_object_new (TYPE_CLOUD_PROVIDER_ACCOUNT_EXPORTER, NULL);
+  priv = cloud_provider_account_exporter_get_instance_private (self);
 
   priv->skeleton = cloud_provider_account1_skeleton_new ();
 
@@ -121,23 +121,23 @@ cloud_provider_account_new (const gchar *object_name)
 }
 
 static void
-cloud_provider_account_finalize (GObject *object)
+cloud_provider_account_exporter_finalize (GObject *object)
 {
-  CloudProviderAccount *self = (CloudProviderAccount *)object;
-  CloudProviderAccountPrivate *priv = cloud_provider_account_get_instance_private (self);
+  CloudProviderAccountExporter *self = (CloudProviderAccountExporter *)object;
+  CloudProviderAccountExporterPrivate *priv = cloud_provider_account_exporter_get_instance_private (self);
 
   g_free (priv->object_name);
   g_object_unref (priv->skeleton);
 
-  G_OBJECT_CLASS (cloud_provider_account_parent_class)->finalize (object);
+  G_OBJECT_CLASS (cloud_provider_account_exporter_parent_class)->finalize (object);
 }
 
 static void
-cloud_provider_account_class_init (CloudProviderAccountClass *klass)
+cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->finalize = cloud_provider_account_finalize;
+  object_class->finalize = cloud_provider_account_exporter_finalize;
 
   g_signal_new ("handle_get_name",
                   G_TYPE_FROM_CLASS (klass),
@@ -187,6 +187,6 @@ cloud_provider_account_class_init (CloudProviderAccountClass *klass)
 }
 
 static void
-cloud_provider_account_init (CloudProviderAccount *self)
+cloud_provider_account_exporter_init (CloudProviderAccountExporter *self)
 {
 }

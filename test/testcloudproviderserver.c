@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <cloudprovider.h>
-#include <cloudprovideraccount.h>
+#include <cloudprovideraccountexporter.h>
 /* for CLoudProviderStatus enum */
 #include <cloudproviderproxy.h>
 
@@ -238,7 +238,7 @@ change_random_cloud_provider_state (gpointer user_data)
 
 
 static gchar *
-on_get_name (CloudProviderAccount *account,
+on_get_name (CloudProviderAccountExporter *account,
              gpointer              user_data)
 {
   gchar *name = (gchar*)user_data;
@@ -246,7 +246,7 @@ on_get_name (CloudProviderAccount *account,
 }
 
 static GIcon *
-on_get_icon (CloudProviderAccount *account,
+on_get_icon (CloudProviderAccountExporter *account,
              gpointer              user_data)
 {
     TestCloudProvider *self = user_data;
@@ -254,7 +254,7 @@ on_get_icon (CloudProviderAccount *account,
 }
 
 static gchar *
-on_get_path (CloudProviderAccount *account,
+on_get_path (CloudProviderAccountExporter *account,
              gpointer              user_data)
 {
     TestCloudProvider *self = user_data;
@@ -262,7 +262,7 @@ on_get_path (CloudProviderAccount *account,
 }
 
 static guint
-on_get_status (CloudProviderAccount *account,
+on_get_status (CloudProviderAccountExporter *account,
                gpointer              user_data)
 {
     TestCloudProvider *self = user_data;
@@ -270,7 +270,7 @@ on_get_status (CloudProviderAccount *account,
 }
 
 static gchar *
-on_get_status_details (CloudProviderAccount *account,
+on_get_status_details (CloudProviderAccountExporter *account,
                        gpointer              user_data)
 {
     gchar *description = "";
@@ -310,14 +310,14 @@ on_bus_acquired (GDBusConnection *connection,
       gchar *account_object_name = g_strdup_printf ("MyCloud%d", n);
       gchar *account_name = g_strdup_printf ("MyCloud %d", n);
 
-      CloudProviderAccount *cloud_provider_account = cloud_provider_account_new(account_object_name);
-      g_signal_connect(cloud_provider_account, "handle_get_name", G_CALLBACK (on_get_name), account_name);
-      g_signal_connect(cloud_provider_account, "handle_get_icon", G_CALLBACK (on_get_icon), self);
-      g_signal_connect(cloud_provider_account, "handle_get_path", G_CALLBACK (on_get_path), self);
-      g_signal_connect(cloud_provider_account, "handle_get_status", G_CALLBACK (on_get_status), self);
-      g_signal_connect(cloud_provider_account, "handle_get_status_details", G_CALLBACK (on_get_status_details), self);
+      CloudProviderAccountExporter *cloud_provider_account_exporter = cloud_provider_account_exporter_new(account_object_name);
+      g_signal_connect(cloud_provider_account_exporter, "handle_get_name", G_CALLBACK (on_get_name), account_name);
+      g_signal_connect(cloud_provider_account_exporter, "handle_get_icon", G_CALLBACK (on_get_icon), self);
+      g_signal_connect(cloud_provider_account_exporter, "handle_get_path", G_CALLBACK (on_get_path), self);
+      g_signal_connect(cloud_provider_account_exporter, "handle_get_status", G_CALLBACK (on_get_status), self);
+      g_signal_connect(cloud_provider_account_exporter, "handle_get_status_details", G_CALLBACK (on_get_status_details), self);
 
-      cloud_provider_add_account(self->cloud_provider, cloud_provider_account);
+      cloud_provider_add_account(self->cloud_provider, cloud_provider_account_exporter);
       cloud_provider_export_menu (self->cloud_provider, account_object_name, get_model ());
       cloud_provider_export_action_group (self->cloud_provider, account_object_name, get_action_group ());
 
