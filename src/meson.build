@@ -1,6 +1,6 @@
 libcloudproviders_headers = [
   'cloudprovidermanager.h',
-  'cloudproviderproxy.h',
+  'cloudprovideraccount.h',
   'cloudproviders.h',
   'cloudprovider.h',
   'cloudprovideraccountexporter.h',
@@ -8,7 +8,7 @@ libcloudproviders_headers = [
 
 libcloudproviders_sources = [
   'cloudprovidermanager.c',
-  'cloudproviderproxy.c',
+  'cloudprovideraccount.c',
   'cloudproviders.c',
   'cloudprovider.c',
   'cloudprovideraccountexporter.c',

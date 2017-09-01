@@ -20,7 +20,7 @@
 #define CLOUD_PROVIDERS_H
 
 #include <gio/gio.h>
-#include "cloudproviderproxy.h"
+#include "cloudprovideraccount.h"
 
 G_BEGIN_DECLS
 

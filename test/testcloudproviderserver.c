@@ -4,7 +4,7 @@
 #include <cloudprovider.h>
 #include <cloudprovideraccountexporter.h>
 /* for CLoudProviderStatus enum */
-#include <cloudproviderproxy.h>
+#include <cloudprovideraccount.h>
 
 
 #define TIMEOUT 800

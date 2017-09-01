@@ -21,7 +21,7 @@
 
 #include "cloudprovider-generated.h"
 /* for CloudProviderStatus enum */
-#include "cloudproviderproxy.h"
+#include "cloudprovideraccount.h"
 #include "cloudprovideraccountexporter.h"
 
 G_BEGIN_DECLS
