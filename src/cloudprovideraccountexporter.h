@@ -45,9 +45,6 @@ struct _CloudProviderAccountExporter
 GType
 cloud_provider_account_exporter_get_type (void) G_GNUC_CONST;
 
-void
-cloud_provider_account_exporter_emit_changed (CloudProviderAccountExporter *cloud_provider_account);
-
 CloudProviderAccountExporter*
 cloud_provider_account_exporter_new (const gchar *account_object_name);
 

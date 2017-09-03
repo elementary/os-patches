@@ -35,6 +35,30 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderExporter, cloud_provider_exporter, G_TYPE_OBJECT)
 
+
+void
+cloud_provider_exporter_export_account (CloudProviderExporter *cloud_provider_exporter,
+                                        const gchar           *account_name,
+                                        CloudProviderAccount1 *account);
+void
+cloud_provider_exporter_unexport_account (CloudProviderExporter *cloud_provider_exporter,
+                                          const gchar           *account_name);
+guint
+cloud_provider_exporter_export_menu (CloudProviderExporter *cloud_provider_exporter,
+                                     const gchar           *account_name,
+                                     GMenuModel            *model);
+void
+cloud_provider_exporter_unexport_menu (CloudProviderExporter *cloud_provider_exporter,
+                                       const gchar           *account_name);
+guint
+cloud_provider_exporter_export_action_group (CloudProviderExporter *cloud_provider_exporter,
+                                             const gchar           *account_name,
+                                             GActionGroup          *action_group);
+void
+cloud_provider_exporter_unexport_action_group (CloudProviderExporter *cloud_provider_exporter,
+                                               const gchar           *account_name);
+
+
 /**
  * SECTION:cloudproviderexporter
  * @title: CloudProviderExporter
