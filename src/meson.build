@@ -45,10 +45,23 @@ pkg.generate(libraries : libcloudproviders,
              filebase: 'cloudproviders',
              description : 'Cloud providers DBus API library.')
 
+libdir = join_paths(get_option('prefix'),get_option('libdir'))
+libdir = get_option('libdir')
+libexecdir = get_option ('libexecdir')
+unitdir = 'lib/systemd/user'
+service_conf = configuration_data()
+service_conf.set('libexecdir', libexecdir)
+configure_file(input: 'libcloudproviders.service.in',
+               output: 'libcloudproviders.service',
+               configuration: service_conf,
+               install_dir: unitdir)
+
 
 cloudproviderd_deps = declare_dependency (link_with: libcloudproviders,
                                           include_directories: include_directories('.'),
                                           dependencies: libcloudproviders_deps)
 
 executable('cloudproviderd', 'cloudproviderd.c',
-           dependencies: cloudproviderd_deps, install: true)
+           dependencies: cloudproviderd_deps,
+           install: true,
+           install_dir: libexecdir)
