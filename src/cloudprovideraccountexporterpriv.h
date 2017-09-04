@@ -1,4 +1,4 @@
-/* cloudprovideraccountpriv.h
+/* cloudprovideraccountexporterpriv.h
  *
  * Copyright (C) 2017 Julius Haertl <jus@bitgrid.net>
  *
@@ -16,17 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLOUD_PROVIDER_ACCOUNT_PRIV_H
-#define CLOUD_PROVIDER_ACCOUNT_PRIV_H
+#ifndef CLOUD_PROVIDER_ACCOUNT_EXPORTER_PRIV_H
+#define CLOUD_PROVIDER_ACCOUNT_EXPORTER_PRIV_H
 
-#include "cloudprovideraccount.h"
+#include "cloudprovideraccountexporter.h"
 #include <gio/gio.h>
 G_BEGIN_DECLS
 
 GDBusInterfaceSkeleton*
-cloud_provider_account_get_skeleton (CloudProviderAccount *self);
+cloud_provider_account_exporter_get_skeleton (CloudProviderAccountExporter *self);
 
 gchar *
-cloud_provider_account_get_object_name (CloudProviderAccount *self);
+cloud_provider_account_exporter_get_object_name (CloudProviderAccountExporter *self);
+
+GMenuModel *
+cloud_provider_account_exporter_get_menu_model (CloudProviderAccountExporter *self);
+
+GActionGroup *
+cloud_provider_account_exporter_get_action_group (CloudProviderAccountExporter *self);
 
 #endif

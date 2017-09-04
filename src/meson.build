@@ -1,17 +1,20 @@
 libcloudproviders_headers = [
-  'cloudprovidermanager.h',
-  'cloudproviderproxy.h',
   'cloudproviders.h',
-  'cloudprovider.h',
   'cloudprovideraccount.h',
+  'cloudproviderexporter.h',
+  'cloudprovideraccountexporter.h',
 ]
 
 libcloudproviders_sources = [
-  'cloudprovidermanager.c',
-  'cloudproviderproxy.c',
   'cloudproviders.c',
-  'cloudprovider.c',
   'cloudprovideraccount.c',
+  'cloudproviderexporter.c',
+  'cloudprovideraccountexporter.c',
+]
+
+cloudproviderd_sources = [
+  'cloudproviderd.c',
+  'cloudprovidermanager.c',
 ]
 
 libcloudproviders_deps = [glib, gio, gio_unix]
@@ -58,10 +61,9 @@ configure_file(input: 'libcloudproviders.service.in',
 
 
 cloudproviderd_deps = declare_dependency (link_with: libcloudproviders,
-                                          include_directories: include_directories('.'),
                                           dependencies: libcloudproviders_deps)
 
-executable('cloudproviderd', 'cloudproviderd.c',
+executable('cloudproviderd', cloudproviderd_sources,
            dependencies: cloudproviderd_deps,
            install: true,
            install_dir: libexecdir)

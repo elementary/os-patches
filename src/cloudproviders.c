@@ -18,7 +18,7 @@
  */
 
 #include "cloudproviders.h"
-#include "cloudproviderproxy.h"
+#include "cloudprovideraccount.h"
 #include "cloudprovidermanager.h"
 #include "cloudprovidermanager-generated.h"
 #include "cloudprovider-generated.h"
@@ -63,14 +63,14 @@ enum
 static guint gSignals [LAST_SIGNAL];
 
 static void
-on_cloud_provider_proxy_ready (CloudProviderProxy *cloud_provider, CloudProviders *self)
+on_cloud_provider_proxy_ready (CloudProviderAccount *cloud_provider, CloudProviders *self)
 {
   // notify clients that cloud provider list has changed
    g_signal_emit_by_name (self, "owners-changed", NULL);
 }
 
 static void
-on_cloud_provider_changed (CloudProviderProxy *cloud_provider, CloudProviders *self)
+on_cloud_provider_changed (CloudProviderAccount *cloud_provider, CloudProviders *self)
 {
   // notify clients that cloud provider has changed
   g_signal_emit_by_name (self, "changed", NULL);
@@ -226,7 +226,7 @@ cloud_providers_init (CloudProviders *self)
 /**
  * cloud_providers_get_providers
  * @self: A CloudProviders
- * Returns: (transfer none): A GList* of #CloudProviderProxy objects.
+ * Returns: (transfer none): A GList* of #CloudProviderAccount objects.
  */
 GList*
 cloud_providers_get_providers (CloudProviders *self)
@@ -245,7 +245,7 @@ on_get_cloud_providers (GObject      *source_object,
   CloudProvidersPrivate *priv = cloud_providers_get_instance_private (self);
   GError *error = NULL;
   GVariant *foo;
-  CloudProviderProxy*cloud_provider;
+  CloudProviderAccount*cloud_provider;
   gboolean success = FALSE;
   GVariantIter iter;
   gchar *bus_name;
@@ -292,12 +292,12 @@ on_get_cloud_providers (GObject      *source_object,
       for (l = objects; l != NULL; l = l->next)
         {
           CloudProviderObject *object = CLOUD_PROVIDER_OBJECT(l->data);
-          cloud_provider = cloud_provider_proxy_new (bus_name, g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
+          cloud_provider = cloud_provider_account_new (bus_name, g_dbus_object_get_object_path (G_DBUS_OBJECT (object)));
           g_signal_connect (cloud_provider, "ready",
                             G_CALLBACK (on_cloud_provider_proxy_ready), self);
           g_signal_connect (cloud_provider, "changed",
                             G_CALLBACK (on_cloud_provider_changed), self);
-          cloud_provider_proxy_update (cloud_provider);
+          cloud_provider_account_update (cloud_provider);
           priv->providers = g_list_append (priv->providers, cloud_provider);
         }
     }

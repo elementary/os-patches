@@ -1,10 +1,10 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <gio/gio.h>
-#include <cloudprovider.h>
-#include <cloudprovideraccount.h>
+#include <cloudproviderexporter.h>
+#include <cloudprovideraccountexporter.h>
 /* for CLoudProviderStatus enum */
-#include <cloudproviderproxy.h>
+#include <cloudprovideraccount.h>
 
 
 #define TIMEOUT 800
@@ -30,7 +30,7 @@ struct _TestCloudProvider
   gchar *path;
   guint timeout_handler;
   GDBusConnection *connection;
-  CloudProvider *cloud_provider;
+  CloudProviderExporter *cloud_provider;
   GDBusObjectManagerServer *manager;
 };
 
@@ -232,13 +232,13 @@ change_random_cloud_provider_state (gpointer user_data)
   account_object_name = g_strdup_printf ("MyCloud%d", account_id);
   g_print ("Change status of %03d to %d\n", account_id, new_status);
   test_cloud_provider_set_status (test_cloud_provider, new_status);
-  cloud_provider_emit_changed (test_cloud_provider->cloud_provider, account_object_name);
+  cloud_provider_exporter_emit_changed (test_cloud_provider->cloud_provider, account_object_name);
   return TRUE;
 }
 
 
 static gchar *
-on_get_name (CloudProviderAccount *account,
+on_get_name (CloudProviderAccountExporter *account,
              gpointer              user_data)
 {
   gchar *name = (gchar*)user_data;
@@ -246,7 +246,7 @@ on_get_name (CloudProviderAccount *account,
 }
 
 static GIcon *
-on_get_icon (CloudProviderAccount *account,
+on_get_icon (CloudProviderAccountExporter *account,
              gpointer              user_data)
 {
     TestCloudProvider *self = user_data;
@@ -254,7 +254,7 @@ on_get_icon (CloudProviderAccount *account,
 }
 
 static gchar *
-on_get_path (CloudProviderAccount *account,
+on_get_path (CloudProviderAccountExporter *account,
              gpointer              user_data)
 {
     TestCloudProvider *self = user_data;
@@ -262,7 +262,7 @@ on_get_path (CloudProviderAccount *account,
 }
 
 static guint
-on_get_status (CloudProviderAccount *account,
+on_get_status (CloudProviderAccountExporter *account,
                gpointer              user_data)
 {
     TestCloudProvider *self = user_data;
@@ -270,7 +270,7 @@ on_get_status (CloudProviderAccount *account,
 }
 
 static gchar *
-on_get_status_details (CloudProviderAccount *account,
+on_get_status_details (CloudProviderAccountExporter *account,
                        gpointer              user_data)
 {
     gchar *description = "";
@@ -298,9 +298,9 @@ on_bus_acquired (GDBusConnection *connection,
   guint n;
 
   self->connection = connection;
-  self->cloud_provider = cloud_provider_new(self->connection,
-                                            TEST_CLOUD_PROVIDER_BUS_NAME,
-                                            TEST_CLOUD_PROVIDER_OBJECT_PATH);
+  self->cloud_provider = cloud_provider_exporter_new(self->connection,
+                                                     TEST_CLOUD_PROVIDER_BUS_NAME,
+                                                     TEST_CLOUD_PROVIDER_OBJECT_PATH);
 
   g_debug ("Registering cloud provider server 'MyCloud'\n");
 
@@ -310,21 +310,21 @@ on_bus_acquired (GDBusConnection *connection,
       gchar *account_object_name = g_strdup_printf ("MyCloud%d", n);
       gchar *account_name = g_strdup_printf ("MyCloud %d", n);
 
-      CloudProviderAccount *cloud_provider_account = cloud_provider_account_new(account_object_name);
-      g_signal_connect(cloud_provider_account, "handle_get_name", G_CALLBACK (on_get_name), account_name);
-      g_signal_connect(cloud_provider_account, "handle_get_icon", G_CALLBACK (on_get_icon), self);
-      g_signal_connect(cloud_provider_account, "handle_get_path", G_CALLBACK (on_get_path), self);
-      g_signal_connect(cloud_provider_account, "handle_get_status", G_CALLBACK (on_get_status), self);
-      g_signal_connect(cloud_provider_account, "handle_get_status_details", G_CALLBACK (on_get_status_details), self);
+      CloudProviderAccountExporter *account = cloud_provider_account_exporter_new(account_object_name);
+      g_signal_connect (account, "handle_get_name", G_CALLBACK (on_get_name), account_name);
+      g_signal_connect (account, "handle_get_icon", G_CALLBACK (on_get_icon), self);
+      g_signal_connect (account, "handle_get_path", G_CALLBACK (on_get_path), self);
+      g_signal_connect (account, "handle_get_status", G_CALLBACK (on_get_status), self);
+      g_signal_connect (account, "handle_get_status_details", G_CALLBACK (on_get_status_details), self);
+      cloud_provider_account_exporter_add_menu_model (account, get_model ());
+      cloud_provider_account_exporter_add_action_group (account, get_action_group ());
 
-      cloud_provider_add_account(self->cloud_provider, cloud_provider_account);
-      cloud_provider_export_menu (self->cloud_provider, account_object_name, get_model ());
-      cloud_provider_export_action_group (self->cloud_provider, account_object_name, get_action_group ());
+      cloud_provider_exporter_add_account(self->cloud_provider, account);
 
       g_free(account_object_name);
     }
 
-  cloud_provider_export_objects (self->cloud_provider);
+  cloud_provider_exporter_export_objects (self->cloud_provider);
 
   return;
 }
