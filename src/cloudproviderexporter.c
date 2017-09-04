@@ -65,12 +65,9 @@ cloud_provider_exporter_unexport_action_group (CloudProviderExporter *cloud_prov
  * @short_description: Base object for representing a single provider
  * @include: src/cloudproviderexporter.h
  *
- * #CloudProviderExporter is the basic object that interacts with UI and actions that a
- * provider will present to the user.
- * list view. Extensions can provide #NautilusColumn by registering a
- * #NautilusColumnProvider and returning them from
- * nautilus_column_provider_get_columns(), which will be called by the main
- * application when creating a view.
+ * #CloudProviderExporter is the base object representing a single cloud provider.
+ * Multiple #CloudProviderAccountExporter objects can be added with cloud_provider_exporter_add_account()
+ * After adding the initial set of accounts cloud_provider_exporter_export_objects() must be called.
  */
 
 /**
@@ -79,7 +76,7 @@ cloud_provider_exporter_unexport_action_group (CloudProviderExporter *cloud_prov
  * @account: The account object
  *
  * Each cloud provider can have a variety of account associated with it. Use this
- * function to add the accounts the user set up. Calling cloud_provider_exporter_export_objects
+ * function to add the accounts the user set up. Calling cloud_provider_exporter_export_objects()
  * once is required after adding the initial set of accounts.
  */
 void
@@ -119,7 +116,7 @@ cloud_provider_exporter_add_account (CloudProviderExporter        *self,
  * @account: The account object
  *
  * Each cloud provider can have a variety of account associated with it. Use this
- * function to remove the accounts.
+ * function to remove the accounts added by cloud_provider_exporter_add_account().
  */
 void
 cloud_provider_exporter_remove_account (CloudProviderExporter        *self,
@@ -303,10 +300,11 @@ cloud_provider_exporter_unexport_action_group(CloudProviderExporter *self,
  * cloud_provider_exporter_export_objects:
  * @self: The cloud provider
  *
- * Export all objects assigned previously with functions like cloud_provider_exporter_export_account
+ * Export all objects assigned previously with cloud_provider_exporter_add_account()
  * to DBUS.
  * Use this function after adding all the required objects to avoid multiple signals
- * being emitted in a short time.
+ * being emitted in a short time. This function needs to be called only once.
+ * Objects added after the call will be propagated to DBus automatically.
  */
 void
 cloud_provider_exporter_export_objects(CloudProviderExporter * self)
@@ -337,6 +335,12 @@ cloud_provider_exporter_emit_changed (CloudProviderExporter *self,
   g_free (object_path);
 }
 
+/**
+ * cloud_provider_exporter_new:
+ * @bus: A #GDbusConnection to export the objects to
+ * @bus_name: A DBus name to bind to
+ * @object_path: A DBus object path
+ */
 CloudProviderExporter *
 cloud_provider_exporter_new (GDBusConnection *bus,
                              const gchar     *bus_name,
