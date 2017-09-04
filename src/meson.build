@@ -12,8 +12,8 @@ libcloudproviders_sources = [
   'cloudprovideraccountexporter.c',
 ]
 
-cloudproviderd_sources = [
-  'cloudproviderd.c',
+cloudprovidersd_sources = [
+  'cloudprovidersd.c',
   'cloudprovidermanager.c',
 ]
 
@@ -60,10 +60,10 @@ configure_file(input: 'libcloudproviders.service.in',
                install_dir: unitdir)
 
 
-cloudproviderd_deps = declare_dependency (link_with: libcloudproviders,
+cloudprovidersd_deps = declare_dependency (link_with: libcloudproviders,
                                           dependencies: libcloudproviders_deps)
 
-executable('cloudproviderd', cloudproviderd_sources,
-           dependencies: cloudproviderd_deps,
+executable('cloudprovidersd', cloudprovidersd_sources,
+           dependencies: cloudprovidersd_deps,
            install: true,
            install_dir: libexecdir)

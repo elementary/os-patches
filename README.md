@@ -4,9 +4,9 @@ libcloudproviders is a DBus API that allows cloud storage sync clients to expose
 their services. Clients such as file managers and desktop environments can then
 provide integrated access to the cloud providers services.
 
-## cloudproviderd
+## cloudprovidersd
 
-cloudproviderd is a daemon which keeps track of existing cloud providers and their accounts.
+cloudprovidersd is a daemon which keeps track of existing cloud providers and their accounts.
 It provides the `org.freedesktop.CloudProviderManager` DBus object to interact with.
 
 ## libcloudprovider
