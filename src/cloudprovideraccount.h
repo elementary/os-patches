@@ -24,6 +24,15 @@
 
 G_BEGIN_DECLS
 
+/**
+ * CloudProviderStatus:
+ * @CLOUD_PROVIDER_STATUS_INVALID
+ * @CLOUD_PROVIDER_STATUS_IDLE
+ * @CLOUD_PROVIDER_STATUS_SYNCING
+ * @CLOUD_PROVIDER_STATUS_ERROR
+ *
+ * Enum values used to describe the sync status of a cloud providers account
+ **/
 typedef enum {
   CLOUD_PROVIDER_STATUS_INVALID,
   CLOUD_PROVIDER_STATUS_IDLE,

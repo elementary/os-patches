@@ -1,4 +1,4 @@
-/* cloudprovideraccount.h
+/* cloudprovideraccountexporter.h
  *
  * Copyright (C) 2017 Julius Haertl <jus@bitgrid.net>
  *
