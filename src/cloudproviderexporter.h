@@ -50,21 +50,21 @@ GType
 cloud_provider_exporter_get_type (void) G_GNUC_CONST;
 
 void
-cloud_provider_exporter_add_account (CloudProviderExporter        *cloud_provider_exporter,
+cloud_provider_exporter_add_account (CloudProviderExporter        *self,
                                      CloudProviderAccountExporter *account);
 void
-cloud_provider_exporter_remove_account (CloudProviderExporter        *cloud_provider_exporter,
+cloud_provider_exporter_remove_account (CloudProviderExporter        *self,
                                         CloudProviderAccountExporter *account);
 
 
 void
-cloud_provider_exporter_export_objects (CloudProviderExporter *cloud_provider_exporter);
+cloud_provider_exporter_export_objects (CloudProviderExporter *self);
 
 void
-cloud_provider_exporter_emit_changed (CloudProviderExporter *cloud_provider_exporter,
+cloud_provider_exporter_emit_changed (CloudProviderExporter *self,
                                       const gchar           *account_name);
 void
-cloud_provider_exporter_emit_account_changed (CloudProviderExporter       *cloud_provider_exporter,
+cloud_provider_exporter_emit_account_changed (CloudProviderExporter       *self,
                                               CloudProviderAccountExporter *account);
 
 CloudProviderExporter*

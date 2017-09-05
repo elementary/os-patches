@@ -26,10 +26,10 @@ G_BEGIN_DECLS
 
 /**
  * CloudProviderStatus:
- * @CLOUD_PROVIDER_STATUS_INVALID
- * @CLOUD_PROVIDER_STATUS_IDLE
- * @CLOUD_PROVIDER_STATUS_SYNCING
- * @CLOUD_PROVIDER_STATUS_ERROR
+ * @CLOUD_PROVIDER_STATUS_INVALID: Set if the initial state of the account is unknown
+ * @CLOUD_PROVIDER_STATUS_IDLE: Set if the account is in idle mode
+ * @CLOUD_PROVIDER_STATUS_SYNCING: Set if the account is currently synchronizing data
+ * @CLOUD_PROVIDER_STATUS_ERROR: Set if an error occured
  *
  * Enum values used to describe the sync status of a cloud providers account
  **/
@@ -64,7 +64,7 @@ struct _CloudProviderAccount
 
 GType cloud_provider_account_get_type (void) G_GNUC_CONST;
 CloudProviderAccount *cloud_provider_account_new (const gchar *bus_name,
-                                          const gchar *object_path);
+                                                  const gchar *object_path);
 
 gchar* cloud_provider_account_get_name (CloudProviderAccount *self);
 CloudProviderStatus cloud_provider_account_get_status (CloudProviderAccount *self);

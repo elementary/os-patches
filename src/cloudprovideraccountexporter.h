@@ -46,7 +46,7 @@ GType
 cloud_provider_account_exporter_get_type (void) G_GNUC_CONST;
 
 CloudProviderAccountExporter*
-cloud_provider_account_exporter_new (const gchar *account_object_name);
+cloud_provider_account_exporter_new (const gchar *object_name);
 
 void
 cloud_provider_account_exporter_add_menu_model (CloudProviderAccountExporter *self,
