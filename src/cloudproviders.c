@@ -196,6 +196,12 @@ cloud_providers_class_init (CloudProvidersClass *klass)
 
   object_class->finalize = cloud_providers_finalize;
 
+  /**
+   * CloudProviders::changed
+   *
+   * This signal is emitted if any of the cloud provider accounts has changed
+   * their details
+   */
   gSignals [CHANGED] =
     g_signal_new ("changed",
                   G_TYPE_FROM_CLASS (klass),
@@ -206,6 +212,11 @@ cloud_providers_class_init (CloudProvidersClass *klass)
                   g_cclosure_marshal_generic,
                   G_TYPE_NONE,
                   0);
+  /**
+   * CloudProviders::owners-changed
+   *
+   * This signal is emitted if the list of available cloud providers has changed
+   */
   gSignals [OWNERS_CHANGED] =
     g_signal_new ("owners-changed",
                   G_TYPE_FROM_CLASS (klass),

@@ -228,14 +228,14 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
   object_class->finalize = cloud_provider_account_exporter_finalize;
 
   /**
-   * CloudProviderAccountExporter::handle_get_name:
+   * CloudProviderAccountExporter::handle-get-name:
    * @self: The CloudProviderAccountExporter emitting the signal
    *
-   * The ::handle_get_name signal is emitted each time someone tries to get the account name.
+   * This signal is emitted each time someone tries to get the account name.
    *
-   * Returns: Return a #gchar in the signal handler
+   * Returns: Return a #gchar* in the signal handler
    */
-  g_signal_new ("handle_get_name",
+  g_signal_new ("handle-get-name",
                 G_TYPE_FROM_CLASS (klass),
                 G_SIGNAL_RUN_LAST,
                 0,
@@ -246,12 +246,12 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
                 0);
 
   /**
-   * CloudProviderAccountExporter::handle_get_icon
+   * CloudProviderAccountExporter::handle-get-icon
    * @self: The CloudProviderAccountExporter emitting the signal
    *
-   * The ::handle_get_icon signal is emitted each time someone tries to get the account name.
+   * This signal is emitted each time someone tries to get the account name.
    *
-   * Returns: Return a #GIcon in the signal handler
+   * Returns: Return a #GIcon* in the signal handler
    */
   g_signal_new ("handle_get_icon",
                   G_TYPE_FROM_CLASS (klass),
@@ -264,12 +264,12 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
                   0);
 
   /**
-   * CloudProviderAccountExporter::handle_get_path
+   * CloudProviderAccountExporter::handle-get-path
    * @self: The #CloudProviderAccountExporter emitting the signal
    *
-   * The ::handle_get_path signal is emitted each time someone tries to get the path.
+   * This signal is emitted each time someone tries to get the path.
    *
-   * Returns: Return a #gchar in the signal handler
+   * Returns: Return a #gchar* in the signal handler
    */
   g_signal_new ("handle_get_path",
                   G_TYPE_FROM_CLASS (klass),
@@ -282,10 +282,10 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
                   0);
 
   /**
-   * CloudProviderAccountExporter::handle_get_status
+   * CloudProviderAccountExporter::handle-get-status
    * @self: The CloudProviderAccountExporter emitting the signal
    *
-   * The ::handle_get_status signal is emitted each time someone tries to get the status.
+   * This signal is emitted each time someone tries to get the status.
    *
    * Returns: Return a #CloudProviderSyncStatus in the signal handler
    */
@@ -300,12 +300,12 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
                   0);
 
   /**
-   * CloudProviderAccountExporter::handle_get_status_details
+   * CloudProviderAccountExporter::handle-get-status-details
    * @self: The #CloudProviderAccountExporter emitting the signal
    *
-   * The ::handle_get_status_details signal is emitted each time someone tries to get the status details.
+   * This signal is emitted each time someone tries to get the status details.
    *
-   * Returns: Return a #gchar in the signal handler
+   * Returns: Return a #gchar* in the signal handler
    */
   g_signal_new ("handle_get_status_details",
                   G_TYPE_FROM_CLASS (klass),

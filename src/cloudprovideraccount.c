@@ -357,6 +357,12 @@ cloud_provider_account_class_init (CloudProviderAccountClass *klass)
 
   object_class->finalize = cloud_provider_account_finalize;
 
+  /**
+   * CloudProviderAccount::changed
+   *
+   * This signal is emmited by an account if any information has changed.
+   * Any UI elements should be updated after receiving this signal
+   */
   gSignals [CHANGED] =
     g_signal_new ("changed",
                   G_TYPE_FROM_CLASS (klass),
@@ -367,6 +373,13 @@ cloud_provider_account_class_init (CloudProviderAccountClass *klass)
                   g_cclosure_marshal_generic,
                   G_TYPE_NONE,
                   0);
+  /**
+   * CloudProviderAccount::ready
+   *
+   * This signal is emmited by an account if an initial set of information
+   * has been fetched from DBus. Use this to get notified if the account details
+   * are ready to be read after startup.
+   */
   gSignals [READY] =
     g_signal_new ("ready",
                   G_TYPE_FROM_CLASS (klass),
