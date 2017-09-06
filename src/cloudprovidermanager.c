@@ -45,18 +45,17 @@ enum
 
 static guint gSignals [LAST_SIGNAL];
 
-
 #define KEY_FILE_GROUP "Cloud Provider"
 
 /**
  * load_cloud_provider
- * @manager: A CloudProviders
+ * @manager: A CloudProviderManager
  * @file: A GFile
  */
 static void
 load_cloud_provider (CloudProviderManager *self,
                      GFile                *file,
-                     GVariantBuilder *builder)
+                     GVariantBuilder      *builder)
 {
   GKeyFile *key_file;
   gchar *path;
@@ -93,7 +92,6 @@ out:
   g_object_unref (file);
   g_free (path);
 }
-
 
 void
 cloud_provider_manager_update (CloudProviderManager *manager)
@@ -160,7 +158,7 @@ cloud_provider_manager_update (CloudProviderManager *manager)
 
 
 static void
-handle_get_cloud_providers (CloudProviderManager1 *interface,
+handle_get_cloud_providers (CloudProviderManager1  *interface,
                             GDBusMethodInvocation  *invocation,
                             gpointer                user_data)
 {
