@@ -27,7 +27,7 @@
 typedef struct
 {
   GList *providers;
-  guint dbus_owner_id;
+  GDBusConnection *connection;
   GDBusNodeInfo *dbus_node_info;
   GVariantBuilder *provider_object_managers;
   GVariant *providers_objects;
@@ -169,73 +169,37 @@ handle_get_cloud_providers (CloudProviderManager1 *interface,
   cloud_provider_manager1_complete_get_cloud_providers (interface, invocation, priv->providers_objects);
 }
 
-static void
-on_bus_acquired (GDBusConnection *connection,
-                 const gchar     *name,
-                 gpointer         user_data)
+void
+cloud_provider_manager_export (CloudProviderManager *self)
 {
-}
-
-static void
-on_name_acquired (GDBusConnection *connection,
-                  const gchar     *name,
-                  gpointer         user_data)
-{
-  CloudProviderManager *self = user_data;
-  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (user_data));
+  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (self));
   g_signal_connect (priv->skeleton,
                     "handle-get-cloud-providers",
                     G_CALLBACK(handle_get_cloud_providers),
                     CLOUD_PROVIDER_MANAGER(self));
   g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (priv->skeleton),
-                                    connection,
+                                    priv->connection,
                                     CLOUD_PROVIDER_MANAGER_DBUS_PATH,
                                     NULL);
+
+
 }
 
-static void
-on_name_lost (GDBusConnection *connection,
-              const gchar     *name,
-              gpointer         user_data)
-{
-  CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER (user_data));
-  if (g_dbus_interface_skeleton_has_connection (G_DBUS_INTERFACE_SKELETON (priv->skeleton), connection))
-    {
-      g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(priv->skeleton));
-    }
-  exit(1);
-}
-
-/**
- * cloud_provider_manager_dup_singleton
- * Returns: (transfer none): A manager singleton
- */
 CloudProviderManager *
-cloud_provider_manager_dup_singleton (void)
+cloud_provider_manager_new (GDBusConnection *connection)
 {
-  static GObject *self = NULL;
+  CloudProviderManager *self;
+  CloudProviderManagerPrivate *priv;
 
-  if (self == NULL)
-    {
-      CloudProviderManagerPrivate *priv;
-      self = g_object_new (TYPE_CLOUD_PROVIDER_MANAGER, NULL);
-      priv = cloud_provider_manager_get_instance_private (CLOUD_PROVIDER_MANAGER(self));
-      priv->dbus_owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                                            CLOUD_PROVIDER_MANAGER_DBUS_NAME,
-                                            G_BUS_NAME_OWNER_FLAGS_NONE,
-                                            on_bus_acquired,
-                                            on_name_acquired,
-                                            on_name_lost,
-                                            self,
-                                            NULL);
-      priv->skeleton = cloud_provider_manager1_skeleton_new ();
-      cloud_provider_manager_update (CLOUD_PROVIDER_MANAGER(self));
-      return CLOUD_PROVIDER_MANAGER (self);
-    }
-  else
-    {
-      return g_object_ref (self);
-    }
+  self = g_object_new (TYPE_CLOUD_PROVIDER_MANAGER, NULL);
+  priv = cloud_provider_manager_get_instance_private (self);
+
+  priv->connection = connection;
+  priv->providers = NULL;
+  priv->skeleton = cloud_provider_manager1_skeleton_new ();
+  cloud_provider_manager_update (CLOUD_PROVIDER_MANAGER(self));
+
+  return self;
 }
 
 static void
@@ -245,7 +209,6 @@ cloud_provider_manager_finalize (GObject *object)
   CloudProviderManagerPrivate *priv = cloud_provider_manager_get_instance_private (self);
 
   g_list_free_full (priv->providers, g_object_unref);
-  g_bus_unown_name (priv->dbus_owner_id);
   g_dbus_node_info_unref (priv->dbus_node_info);
 
   G_OBJECT_CLASS (cloud_provider_manager_parent_class)->finalize (object);
