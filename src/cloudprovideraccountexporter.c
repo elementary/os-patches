@@ -18,6 +18,7 @@
 
 #include <gio/gio.h>
 #include "cloudprovideraccountexporter.h"
+#include "cloudprovideraccountexporterpriv.h"
 #include "cloudprovider-generated.h"
 
 typedef struct

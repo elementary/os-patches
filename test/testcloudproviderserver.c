@@ -38,7 +38,7 @@ struct _TestCloudProvider
 static GType test_cloud_provider_get_type (void);
 G_DEFINE_TYPE (TestCloudProvider, test_cloud_provider, G_TYPE_OBJECT);
 
-TestCloudProvider*
+static TestCloudProvider*
 test_cloud_provider_new (const gchar *name)
 {
   TestCloudProvider *self;
