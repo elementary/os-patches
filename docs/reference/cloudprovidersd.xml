@@ -1,16 +1,34 @@
-<refentry id="gdbus-codegen" lang="en">
+<refentry id="cloudprovidersd-docs" lang="en">
 
 <refentryinfo>
-  <title>gdbus</title>
-  <productname>cloudproviders</productname>
+  <title>cloudprovidersd</title>
+  <productname>cloudprovidersd</productname>
   <authorgroup>
     <author>
-      <contrib>Developer</contrib>
-      <firstname>David</firstname>
-      <surname>Zeuthen</surname>
-      <email>zeuthen@gmail.com</email>
+      <firstname>Julius</firstname>
+      <surname>Härtl</surname>
+      <affiliation>
+        <address>
+          <email>jus@bitgrid.net</email>
+        </address>
+      </affiliation>
+    </author>
+    <author>
+      <firstname>Carlos</firstname>
+      <surname>Soriano</surname>
+      <affiliation>
+        <address>
+          <email>csoriano@gnome.org</email>
+        </address>
+      </affiliation>
     </author>
   </authorgroup>
+  <copyright>
+    <year>2017</year>
+    <holder>Julius Härtl</holder>
+    <year>2017</year>
+    <holder>Carlos Soriano</holder>
+  </copyright>
 </refentryinfo>
 
 <refmeta>
@@ -20,48 +38,21 @@
 </refmeta>
 
 <refnamediv>
-  <refname>gdbus-codegen</refname>
-  <refpurpose>D-Bus code and documentation generator</refpurpose>
+  <refname>cloudprovidersd</refname>
+  <refpurpose>Service daemon to provide the cloudproviders API</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
   <cmdsynopsis>
-    <command>gdbus-codegen</command>
-    <arg><option>-h</option>, <option>--help</option></arg>
-    <arg><option>--interface-prefix</option> <replaceable>org.project.Prefix</replaceable></arg>
-    <arg><option>--generate-c-code</option> <replaceable>OUTFILES</replaceable></arg>
-    <arg><option>--c-namespace</option> <replaceable>YourProject</replaceable></arg>
-    <arg><option>--c-generate-object-manager</option></arg>
-    <arg><option>--c-generate-autocleanup</option> none|objects|all</arg>
-    <arg><option>--output-directory</option> <replaceable>OUTDIR</replaceable></arg>
-    <arg><option>--generate-docbook</option> <replaceable>OUTFILES</replaceable></arg>
-    <arg><option>--xml-files</option> <replaceable>FILE</replaceable></arg>
-    <group choice="plain" rep="repeat">
-      <arg>
-        <option>--annotate</option>
-        <replaceable>ELEMENT</replaceable>
-        <replaceable>KEY</replaceable>
-        <replaceable>VALUE</replaceable>
-      </arg>
-    </group>
-    <arg choice="plain">FILE</arg>
-    <arg>
-      <arg choice="plain" rep="repeat">FILE</arg>
-    </arg>
+    <command>cloudprovidersd</command>
   </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
   <title>Description</title>
   <para>
-    <command>gdbus-codegen</command> is used to generate code and/or
-    documentation for one or more D-Bus interfaces. The tool reads
-    <ulink
-    url="http://dbus.freedesktop.org/doc/dbus-specification.html#introspection-format">D-Bus
-    Introspection XML</ulink> files and generates output files. The
-    tool currently supports generating C code (via
-    <option>--generate-c-code</option>) and Docbook XML (via
-    <option>--generate-docbook</option>).
+    <command>cloudprovidersd</command> is the service daemon needed by the
+    cloudproviders daemon to agregate existing providers and export them to DBus.
   </para>
 </refsect1>
 

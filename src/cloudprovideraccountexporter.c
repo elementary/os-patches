@@ -30,6 +30,13 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (CloudProviderAccountExporter, cloud_provider_account_exporter, G_TYPE_OBJECT)
 
+/**
+ * SECTION:cloudprovideraccountexporter
+ * @title: CloudProviderAccountExporter
+ * @short_description: Base object for representing a cloud providers account
+ * @include: src/cloudprovideraccountexporter.h
+ */
+
 gchar *
 cloud_provider_account_exporter_get_object_name (CloudProviderAccountExporter *self)
 {
@@ -114,6 +121,13 @@ on_get_status_details (CloudProviderAccountExporter   *self,
   cloud_provider_account1_complete_get_status_details (priv->skeleton, invocation, status_details);
 }
 
+/**
+ * cloud_provider_account_exporter_new:
+ * @object_name: A unique name for the account
+ *               must be a valid DBus object name
+ *
+ * Create a new #CloudProviderAccountExporter object
+ */
 CloudProviderAccountExporter*
 cloud_provider_account_exporter_new (const gchar *object_name)
 {
@@ -136,6 +150,14 @@ cloud_provider_account_exporter_new (const gchar *object_name)
   return self;
 }
 
+/**
+ * cloud_provider_account_exporter_add_menu_model:
+ * @self: The cloud provider account exporter
+ * @menu_model: The g menu model to export
+ *
+ * Add a #GMenuModel to export via DBus which will be shown to the user
+ * for actions with the cloud provider account
+ */
 void
 cloud_provider_account_exporter_add_menu_model (CloudProviderAccountExporter *self,
                                                 GMenuModel                   *menu_model)
@@ -144,6 +166,12 @@ cloud_provider_account_exporter_add_menu_model (CloudProviderAccountExporter *se
   priv->menu_model = menu_model;
 }
 
+/**
+ * cloud_provider_account_exporter_remove_menu:
+ * @self: The cloud provider account exporter
+ *
+ * Remove a menu added with cloud_provider_account_exporter_add_menu_model()
+ */
 void
 cloud_provider_account_exporter_remove_menu (CloudProviderAccountExporter *self)
 {
@@ -151,6 +179,14 @@ cloud_provider_account_exporter_remove_menu (CloudProviderAccountExporter *self)
   priv->menu_model = NULL;
 }
 
+/**
+ * cloud_provider_account_exporter_add_action_group:
+ * @self: The cloud provider account exporter
+ * @action_group: The g action group to export
+ *
+ * Add a #GActionGroup to export via DBus to provide actions for menus exported
+ * with #cloud_provider_account_exporter_add_menu()
+ */
 void
 cloud_provider_account_exporter_add_action_group (CloudProviderAccountExporter *self,
                                                   GActionGroup                 *action_group)
@@ -159,6 +195,12 @@ cloud_provider_account_exporter_add_action_group (CloudProviderAccountExporter *
   priv->action_group = action_group;
 }
 
+/**
+ * cloud_provider_account_exporter_remove_action_group:
+ * @self: The cloud provider account exporter
+ *
+ * Remove an action group added with cloud_provider_account_exporter_add_action_group()
+ */
 void
 cloud_provider_account_exporter_remove_action_group (CloudProviderAccountExporter *self)
 {
@@ -185,15 +227,32 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
 
   object_class->finalize = cloud_provider_account_exporter_finalize;
 
-  g_signal_new ("handle_get_name",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL,
-                  NULL,
-                  g_cclosure_marshal_generic,
-                  G_TYPE_POINTER,
-                  0);
+  /**
+   * CloudProviderAccountExporter::handle-get-name:
+   * @self: The CloudProviderAccountExporter emitting the signal
+   *
+   * This signal is emitted each time someone tries to get the account name.
+   *
+   * Returns: Return a #gchar* in the signal handler
+   */
+  g_signal_new ("handle-get-name",
+                G_TYPE_FROM_CLASS (klass),
+                G_SIGNAL_RUN_LAST,
+                0,
+                NULL,
+                NULL,
+                g_cclosure_marshal_generic,
+                G_TYPE_POINTER,
+                0);
+
+  /**
+   * CloudProviderAccountExporter::handle-get-icon
+   * @self: The CloudProviderAccountExporter emitting the signal
+   *
+   * This signal is emitted each time someone tries to get the account name.
+   *
+   * Returns: Return a #GIcon* in the signal handler
+   */
   g_signal_new ("handle_get_icon",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
@@ -203,6 +262,15 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
                   g_cclosure_marshal_generic,
                   G_TYPE_POINTER,
                   0);
+
+  /**
+   * CloudProviderAccountExporter::handle-get-path
+   * @self: The #CloudProviderAccountExporter emitting the signal
+   *
+   * This signal is emitted each time someone tries to get the path.
+   *
+   * Returns: Return a #gchar* in the signal handler
+   */
   g_signal_new ("handle_get_path",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
@@ -212,6 +280,15 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
                   g_cclosure_marshal_generic,
                   G_TYPE_POINTER,
                   0);
+
+  /**
+   * CloudProviderAccountExporter::handle-get-status
+   * @self: The CloudProviderAccountExporter emitting the signal
+   *
+   * This signal is emitted each time someone tries to get the status.
+   *
+   * Returns: Return a #CloudProviderSyncStatus in the signal handler
+   */
   g_signal_new ("handle_get_status",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
@@ -221,6 +298,15 @@ cloud_provider_account_exporter_class_init (CloudProviderAccountExporterClass *k
                   g_cclosure_marshal_generic,
                   G_TYPE_POINTER,
                   0);
+
+  /**
+   * CloudProviderAccountExporter::handle-get-status-details
+   * @self: The #CloudProviderAccountExporter emitting the signal
+   *
+   * This signal is emitted each time someone tries to get the status details.
+   *
+   * Returns: Return a #gchar* in the signal handler
+   */
   g_signal_new ("handle_get_status_details",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,

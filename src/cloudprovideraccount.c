@@ -299,9 +299,17 @@ on_bus_acquired (GObject      *source_object,
                                  self);
 }
 
+/**
+ * cloud_provider_account_new
+ * @bus_name: DBus bus name
+ * @object_path: Path to export the DBus object to
+ *
+ * A #CloudProviderAccount object are used to fetch details about cloud providers from DBus.
+ * Object are usually fetched from cloud_providers_get_providers() as a list.
+ */
 CloudProviderAccount*
 cloud_provider_account_new (const gchar *bus_name,
-                        const gchar *object_path)
+                            const gchar *object_path)
 {
   CloudProviderAccount *self;
   CloudProviderAccountPrivate *priv;
@@ -349,6 +357,12 @@ cloud_provider_account_class_init (CloudProviderAccountClass *klass)
 
   object_class->finalize = cloud_provider_account_finalize;
 
+  /**
+   * CloudProviderAccount::changed
+   *
+   * This signal is emmited by an account if any information has changed.
+   * Any UI elements should be updated after receiving this signal
+   */
   gSignals [CHANGED] =
     g_signal_new ("changed",
                   G_TYPE_FROM_CLASS (klass),
@@ -359,6 +373,13 @@ cloud_provider_account_class_init (CloudProviderAccountClass *klass)
                   g_cclosure_marshal_generic,
                   G_TYPE_NONE,
                   0);
+  /**
+   * CloudProviderAccount::ready
+   *
+   * This signal is emmited by an account if an initial set of information
+   * has been fetched from DBus. Use this to get notified if the account details
+   * are ready to be read after startup.
+   */
   gSignals [READY] =
     g_signal_new ("ready",
                   G_TYPE_FROM_CLASS (klass),
@@ -379,6 +400,14 @@ cloud_provider_account_init (CloudProviderAccount *self)
   priv->status = CLOUD_PROVIDER_STATUS_INVALID;
 }
 
+/**
+ * cloud_provider_account_get_name:
+ * @self: A cloud provider account
+ *
+ * Get the name of the account
+ *
+ * Returns: The name of the cloud provider account
+ */
 gchar*
 cloud_provider_account_get_name (CloudProviderAccount *self)
 {
@@ -387,6 +416,14 @@ cloud_provider_account_get_name (CloudProviderAccount *self)
   return priv->name;
 }
 
+/**
+ * cloud_provider_account_get_status:
+ * @self: A cloud provider account
+ *
+ * Get the status of the account
+ *
+ * Returns: The status of the cloud provider account
+ */
 CloudProviderStatus
 cloud_provider_account_get_status (CloudProviderAccount *self)
 {
@@ -395,6 +432,14 @@ cloud_provider_account_get_status (CloudProviderAccount *self)
   return priv->status;
 }
 
+/**
+ * cloud_provider_account_get_status_details:
+ * @self: A cloud provider account
+ *
+ * Get the status details of the account
+ *
+ * Returns: The status detail description of the cloud provider account
+ */
 gchar*
 cloud_provider_account_get_status_details (CloudProviderAccount *self)
 {
@@ -403,6 +448,14 @@ cloud_provider_account_get_status_details (CloudProviderAccount *self)
   return priv->status_details;
 }
 
+/**
+ * cloud_provider_account_get_icon:
+ * @self: A cloud provider account
+ *
+ * Get the icon of the account
+ *
+ * Returns: The icon of the cloud provider account
+ */
 GIcon*
 cloud_provider_account_get_icon (CloudProviderAccount *self)
 {
@@ -411,6 +464,14 @@ cloud_provider_account_get_icon (CloudProviderAccount *self)
   return priv->icon;
 }
 
+/**
+ * cloud_provider_account_get_menu_model:
+ * @self: A cloud provider account
+ *
+ * Get the menu model exported for the account
+ *
+ * Returns: The menu model exported by the cloud provider account
+ */
 GMenuModel*
 cloud_provider_account_get_menu_model (CloudProviderAccount *self)
 {
@@ -419,6 +480,15 @@ cloud_provider_account_get_menu_model (CloudProviderAccount *self)
   return priv->menu_model;
 }
 
+/**
+ * cloud_provider_account_get_action_group:
+ * @self: A cloud provider account
+ *
+ * Get the action group exported in addition to the #GMenuModel from
+ * cloud_provider_account_get_menu_model()
+ *
+ * Returns: The action group exported by the cloud provider account
+ */
 GActionGroup*
 cloud_provider_account_get_action_group (CloudProviderAccount *self)
 {
@@ -427,6 +497,14 @@ cloud_provider_account_get_action_group (CloudProviderAccount *self)
   return priv->action_group;
 }
 
+/**
+ * cloud_provider_account_get_path:
+ * @self: A cloud provider account
+ *
+ * Get the directory path of the account
+ *
+ * Returns: The directory path of the cloud provider account
+ */
 gchar *
 cloud_provider_account_get_path (CloudProviderAccount *self)
 {
@@ -443,6 +521,14 @@ cloud_provider_account_get_owner (CloudProviderAccount *self)
    return g_dbus_proxy_get_name_owner (G_DBUS_PROXY(priv->proxy));
 }
 
+/**
+ * cloud_provider_account_is_available:
+ * @self: A cloud provider account
+ *
+ * Check if the account is ready to be used. This will check if name, icon, status
+ * and path are set since it cannot be garantued otherwise during startup of the
+ * cloud provider client.
+ */
 gboolean cloud_provider_account_is_available(CloudProviderAccount *self)
 {
   GIcon *icon;

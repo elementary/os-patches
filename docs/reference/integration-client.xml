@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY version SYSTEM "version.xml">
+]>
+<chapter id="implementing-cps">
+  <title>Integrating with cloud providers</title>
+  <para>
+    Integration with cloud providers can be achieved by fetching a list of exported
+    cloud provider accounts using cloud_providers_get_providers(). This function returns
+    a list of #CloudProviderAccount objects that can then be used to obtain details about
+    the accounts.
+  </para>
+  <para>
+    To get notified about changes of individual accounts, the #CloudProviderAccount::changed
+    signal is being emitted everytime information about an account changes. Any UI elements
+    should be updated after receiving this signal.
+  </para>
+  <para>
+    Besides the account details, cloud providers may also export a #GMenuModel and a #GActionGroup
+    to provide actions that are related with the account. Those can be obtained by calling
+    cloud_provider_account_get_menu_model() and cloud_provider_account_get_action_group()
+  </para>
+</chapter>

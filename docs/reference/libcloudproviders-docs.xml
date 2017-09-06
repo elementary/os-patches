@@ -35,19 +35,26 @@
     </copyright>
   </bookinfo>
 
-  <reference id="libcloudproviders">
+  <part id="libcloudproviders">
     <title>libcloudproviders library</title>
     <partintro>
       <para>
         This part documents libcloudproviders libs.
       </para>
     </partintro>
-    <xi:include href="xml/cloudprovider.xml"/>
+    <xi:include href="xml/cloudproviderexporter.xml"/>
+    <xi:include href="xml/cloudprovideraccountexporter.xml"/>
     <xi:include href="xml/cloudproviders.xml"/>
-    <xi:include href="xml/cloudproviderproxy.xml"/>
-  </reference>
+    <xi:include href="xml/cloudprovideraccount.xml"/>
+  </part>
 
-  <reference id="cloudproviders-dbus">
+  <part id="libcloudproviders-integration">
+    <title>Integrating libcloudproviders</title>
+    <xi:include href="integration-server.xml" />
+    <xi:include href="integration-client.xml" />
+  </part>
+
+  <part id="cloudproviders-dbus">
     <title>DBus Interfaces</title>
     <partintro>
       <para>
@@ -55,6 +62,16 @@
     </partintro>
     <xi:include href="generated-docs-org.freedesktop.CloudProvider.Account1.xml"/>
     <xi:include href="generated-docs-org.freedesktop.CloudProvider.Manager1.xml"/>
-  </reference>
+  </part>
+
+  <part id="cloudprovidersd">
+    <title>cloudproviders daemon</title>
+    <partintro>
+      <para>
+        This part documents cloudproviders service daemon
+      </para>
+    </partintro>
+    <xi:include href="xml/cloudprovidersd.xml"/>
+  </part>
 
 </book>

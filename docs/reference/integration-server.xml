@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY version SYSTEM "version.xml">
+]>
+    <chapter id="implementing-cp">
+      <title>Implementing support as a cloud provider</title>
+      <para>
+        Cloud providers need to create #CloudProviderAccountExporter objects for
+        every account they like to expose to the API. To provide the account details
+        clients need to listen to the signals provided by the exporter and return
+        their information there. All #CloudProviderAccountExporter objects need to
+        be added to the #CloudProviderExporter by calling cloud_provider_exporter_add_account().
+      </para>
+      <para>
+        To register your cloud provider you also need to provide a file in DATADIR/cloud-providers.
+      </para>
+      <example>
+        <title>Example file to register a cloud provider</title>
+        <programlisting>
+          [Cloud Provider]
+          BusName=org.mycloudprovider.CloudProviderServerExample
+          ObjectPath=/org/mycloudprovider/CloudProviderServerExample
+          Version=1
+        </programlisting>
+      </example>
+    </chapter>
