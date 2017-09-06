@@ -13,7 +13,7 @@ run_command('gdbus-codegen', '--generate-docbook', 'generated-docs',
 
 gnome.gtkdoc('libcloudproviders',
              src_dir: join_paths (meson.source_root(), 'src'),
-             dependencies: [cloudprovidersd_deps],
+             dependencies: [libcloudproviders_dep],
              gobject_typesfile: 'libcloudproviders.types',
              main_xml: 'libcloudproviders-docs.xml',
              content_files: ['generated-docs-org.freedesktop.CloudProvider.Account1.xml',
