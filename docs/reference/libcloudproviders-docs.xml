@@ -35,55 +35,26 @@
     </copyright>
   </bookinfo>
 
-  <reference id="libcloudproviders">
+  <part id="libcloudproviders">
     <title>libcloudproviders library</title>
     <partintro>
       <para>
         This part documents libcloudproviders libs.
       </para>
     </partintro>
-
-    <refentry id="libcloudproviders-client" lang="en">
-      <refmeta>
-        <refentrytitle>Implementing support as a cloud provider</refentrytitle>
-      </refmeta>
-      <refnamediv>
-        <refname>Implementing support as a cloud provider</refname>
-      </refnamediv>
-      <refsect1>
-      <para>
-        Cloud providers need to create #CloudProviderAccountExporter objects for
-        every account they like to expose to the API. To provide the account details
-        clients need to listen to the signals provided by the exporter and return
-        their information there.All #CloudProviderAccountExporter objects need to
-        be added to the #CloudProviderExporter by calling cloud_provider_exporter_add_account().
-      </para>
-      </refsect1>
-    </refentry>
     <xi:include href="xml/cloudproviderexporter.xml"/>
     <xi:include href="xml/cloudprovideraccountexporter.xml"/>
-
-    <refentry id="libcloudproviders-integrator" lang="en">
-      <refmeta>
-        <refentrytitle>Integrating cloud providers</refentrytitle>
-      </refmeta>
-      <refnamediv>
-        <refname>Integrating cloud providers</refname>
-      </refnamediv>
-      <refsect1>
-        <para>
-          Integration with cloud providers can be achieved by fetching a list of exported
-          cloud provider accounts using cloud_providers_get_providers(). This function returns
-          a list of #CloudProviderAccount objects that can then be used to obtain details about
-          the accounts.
-        </para>
-      </refsect1>
-    </refentry>
     <xi:include href="xml/cloudproviders.xml"/>
     <xi:include href="xml/cloudprovideraccount.xml"/>
-  </reference>
+  </part>
 
-  <reference id="cloudproviders-dbus">
+  <part id="libcloudproviders-integration">
+    <title>Integrating libcloudproviders</title>
+    <xi:include href="integration-server.xml" />
+    <xi:include href="integration-client.xml" />
+  </part>
+
+  <part id="cloudproviders-dbus">
     <title>DBus Interfaces</title>
     <partintro>
       <para>
