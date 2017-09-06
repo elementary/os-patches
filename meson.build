@@ -1,27 +1,53 @@
 project ('libcloudproviders', 'c',
-         version: '0.1.1',
-         meson_version: '>=0.40.0',
-         license: 'LGPL3+')
+  version: '0.1.1',
+  meson_version: '>=0.40.0',
+  license: 'LGPL3+',
+  default_options: [
+    'c_std=gnu99',
+    'warning_level=2',
+  ]
+)
 
-add_global_arguments ('-Wno-deprecated-declarations', language:'c')
+cc = meson.get_compiler('c')
 
-glib_ver = '>=2.51.2'
+test_cflags = [
+  '-Wno-unused-parameter',
+  '-Wno-missing-field-initializers',
+  '-Wstrict-prototypes',
+  '-Wmissing-prototypes',
+  '-Werror=implicit-function-declaration',
+  '-Werror=pointer-arith',
+  '-Werror=init-self',
+  ['-Werror=format-security','-Werror=format=1'],
+  '-Werror=date-time',
+]
+global_cflags = []
+foreach cflag : test_cflags
+  if cc.has_multi_arguments(cflag)
+    global_cflags += cflag
+  endif
+endforeach
+add_project_arguments(global_cflags, language: 'c')
+
+glib_ver = '>= 2.51.2'
 glib = dependency ('glib-2.0', version: glib_ver)
 gio = dependency ('gio-2.0', version: glib_ver)
 gio_unix = dependency ('gio-unix-2.0', version: glib_ver)
 
+add_project_arguments(
+  '-DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_52',
+  '-DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_52',
+  language: 'c'
+)
+
 prefix = get_option ('prefix')
 libdir = get_option ('libdir')
+libexecdir = get_option ('libexecdir')
 bindir = get_option ('bindir')
 datadir = get_option ('datadir')
 servicedir = join_paths (datadir, 'dbus-1', 'services')
 
 gnome = import('gnome')
-
-conf = configuration_data ()
-conf.set_quoted ('VERSION', meson.project_version ())
-conf.set_quoted ('PACKAGE_VERSION', meson.project_version ())
-conf.set_quoted ('GETTEXT_PACKAGE', 'cloudproviders')
 
 subdir ('src')
 subdir ('test')
