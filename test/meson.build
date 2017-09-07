@@ -1,13 +1,16 @@
 installed = get_option('installed-tests')
-executable('testcloudproviderserver', 'testcloudproviderserver.c',
+executable('testcloudprovidersserver', 'testcloudprovidersserver.c',
   dependencies: libcloudproviders_dep,
   install: installed,
 )
-executable('testcloudproviderclient', 'testcloudproviderclient.c',
+executable('testcloudprovidersclient', 'testcloudprovidersclient.c',
   dependencies: libcloudproviders_dep,
   install: installed,
 )
 
+configure_file(input : 'icon.svg',
+               output : 'icon.svg',
+               configuration : configuration_data())
 
 if installed
   service_conf = configuration_data ()
@@ -19,5 +22,5 @@ if installed
     install_dir: servicedir,
   )
   cloudprovidersdata = join_paths (datadir, 'cloud-providers')
-  install_data('org.freedesktop.CloudProviderServerExample.ini', install_dir : cloudprovidersdata)
+  install_data('org.freedesktop.CloudProviders.ServerExample.ini', install_dir: cloudprovidersdata)
 endif
