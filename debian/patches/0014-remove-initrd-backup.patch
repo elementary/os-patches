@@ -1,0 +1,39 @@
+Description: Remove .old-dkms initrd backup
+Author: Jarno Suni
+Origin: upstream
+Bug: https://github.com/dell/dkms/issues/2
+Bug-Launchpad: https://bugs.launchpad.net/ubuntu/+source/dkms/+bug/1515513
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=717584
+Forwarded: not-needed
+Applied-Upstream: https://github.com/dell/dkms/pull/22
+Last-Update: 2017-09-15
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: dkms-2.2.0.3/kernel_prerm.d_dkms
+===================================================================
+--- dkms-2.2.0.3.orig/kernel_prerm.d_dkms
++++ dkms-2.2.0.3/kernel_prerm.d_dkms
+@@ -3,6 +3,14 @@
+ # We're passed the version of the kernel being installed
+ inst_kern=$1
+ 
++# This is applied from make_initrd function in dkms command, which
++# creates the possible initrd backup file.
++remove_initrd_backup() {
++    for initrd in "initrd-$1.img" "initramfs-$1.img" "initrd.img-$1" "initrd-$1"; do
++        rm -fv /boot/"${initrd}".old-dkms >&2
++    done
++}
++
+ if [ -x /usr/sbin/dkms ]; then
+ while read line; do
+    name=`echo "$line" | awk '{print $1}' | sed 's/,$//'`
+@@ -13,6 +21,8 @@ while read line; do
+ done < <(dkms status -k $inst_kern 2>/dev/null | grep ": installed")
+ fi
+ 
++remove_initrd_backup "$inst_kern"
++
+ rmdir --ignore-fail-on-non-empty \
+ 	"/lib/modules/$inst_kern/updates/dkms" \
+ 	"/lib/modules/$inst_kern/updates" 2>/dev/null
