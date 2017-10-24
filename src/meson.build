@@ -1,42 +1,35 @@
+libcloudproviders_deps = [glib, gio, gio_unix]
+
 libcloudproviders_headers = [
-  'cloudproviders.h',
-  'cloudprovideraccount.h',
-  'cloudproviderexporter.h',
-  'cloudprovideraccountexporter.h',
+  'cloudproviderscollector.h',
+  'cloudprovidersaccount.h',
+  'cloudprovidersaccountexporter.h',
+  'cloudprovidersprovider.h',
+  'cloudprovidersproviderexporter.h',
 ]
 
 libcloudproviders_sources = [
-  'cloudproviders.c',
-  'cloudprovideraccount.c',
-  'cloudproviderexporter.c',
-  'cloudprovideraccountexporter.c',
+  'cloudproviderscollector.c',
+  'cloudprovidersaccount.c',
+  'cloudprovidersaccountexporter.c',
+  'cloudprovidersprovider.c',
+  'cloudprovidersproviderexporter.c',
 ]
 
-cloudprovidersd_sources = [
-  'cloudprovidersd.c',
-  'cloudprovidermanager.c',
-]
-
-libcloudproviders_deps = [glib, gio, gio_unix]
+headers_with_enums = gnome.mkenums_simple('enums', sources : libcloudproviders_headers)
 
 generated_sources = []
 generated_sources += gnome.gdbus_codegen(
-  'cloudprovider-generated', '../data/cloudprovider-dbus.xml',
-  interface_prefix: 'org.freedesktop.CloudProvider',
-  namespace: 'CloudProvider',
+  'cloudproviders-generated', '../data/cloud-providers-dbus.xml',
+  interface_prefix: 'org.freedesktop.CloudProviders',
+  namespace: 'CloudProvidersDbus',
   object_manager: true
-)
-
-generated_sources += gnome.gdbus_codegen(
-  'cloudprovidermanager-generated', '../data/cloudprovidermanager-dbus.xml',
-  interface_prefix: 'org.freedesktop.CloudProvider',
-  namespace: 'CloudProvider'
 )
 
 libcloudproviders_sources += generated_sources
 
 libcloudproviders = shared_library ('cloudproviders',
-  libcloudproviders_sources,
+  libcloudproviders_sources, headers_with_enums,
   dependencies: libcloudproviders_deps,
   version: meson.project_version(),
   install: true
@@ -71,9 +64,3 @@ libcloudproviders_dep = declare_dependency (
   include_directories: include_directories('.')
 )
 
-executable('cloudprovidersd',
-  cloudprovidersd_sources,
-  dependencies: libcloudproviders_dep,
-  install: true,
-  install_dir: libexecdir
-)

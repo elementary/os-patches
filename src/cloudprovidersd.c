@@ -17,10 +17,10 @@
  */
 
 #include <glib.h>
-#include <cloudprovidermanager.h>
+#include <cloudprovidersmanager.h>
 
 static GMainLoop *loop;
-static CloudProviderManager *manager;
+static CloudProvidersManager *manager;
 static guint dbus_owner_id;
 
 static void
@@ -56,17 +56,16 @@ on_name_acquired (GDBusConnection *connection,
 
   g_debug ("Acquired the name %s on the session message bus", name);
 
-  manager = cloud_provider_manager_new (connection);
-  cloud_provider_manager_export (manager);
+  manager = cloud_providers_manager_new (connection);
 }
 
 gint
-main (gint   argc, gchar *argv[])
+main (gint argc, gchar *argv[])
 {
   loop = g_main_loop_new(NULL, FALSE);
 
   dbus_owner_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                                  CLOUD_PROVIDER_MANAGER_DBUS_NAME,
+                                  CLOUD_PROVIDERS_MANAGER_DBUS_NAME,
                                   G_BUS_NAME_OWNER_FLAGS_NONE,
                                   on_bus_acquired,
                                   on_name_acquired,
