@@ -16,8 +16,8 @@ if installed
   service_conf = configuration_data ()
   service_conf.set ('bindir', join_paths (prefix, bindir))
   configure_file(
-    input: 'org.freedesktop.CloudProviderServerExample.service.in',
-    output: 'org.freedesktop.CloudProviderServerExample.service',
+    input: 'org.freedesktop.CloudProviders.ServerExample.service.in',
+    output: 'org.freedesktop.CloudProviders.ServerExample.service',
     configuration: service_conf,
     install_dir: servicedir,
   )
