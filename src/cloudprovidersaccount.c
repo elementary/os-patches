@@ -43,7 +43,7 @@ struct _CloudProvidersAccount
 G_DEFINE_TYPE (CloudProvidersAccount, cloud_providers_account, G_TYPE_OBJECT)
 
 /**
- * SECTION:cloudprovideraccount
+ * SECTION:cloudprovidersaccount
  * @title: CloudProvidersAccount
  * @short_description: Base object for representing a single account for clients.
  * @include: src/cloudprovideraccount.h

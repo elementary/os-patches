@@ -41,6 +41,17 @@ struct _CloudProvidersProvider
 
 G_DEFINE_TYPE (CloudProvidersProvider, cloud_providers_provider, G_TYPE_OBJECT)
 
+/**
+ * SECTION:cloudprovidersprovider
+ * @title: CloudProvidersProvider
+ * @short_description: Base object for representing a single provider for clients.
+ * @include: src/cloudprovidersprovider.h
+ *
+ * #CloudProvidersProvider is the basic object object for client implementators
+ * that contains the properties of the provider such as name, and the accounts
+ * associated with it.
+ */
+
 enum
 {
     PROP_0,

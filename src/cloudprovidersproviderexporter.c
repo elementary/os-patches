@@ -58,7 +58,7 @@ enum
 static GParamSpec *properties [N_PROPS];
 
 /**
- * SECTION:cloudprovidersexporter
+ * SECTION:cloudprovidersproviderexporter
  * @title: CloudProvidersProviderExporter
  * @short_description: Base object for representing a single provider
  * @include: src/cloudprovidersexporter.h
