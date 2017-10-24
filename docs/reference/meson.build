@@ -9,7 +9,6 @@ message ('----------------------------')
 message('Generating DBUS docs…')
 run_command('gdbus-codegen', '--generate-docbook', 'generated-docs',
             join_paths(meson.source_root(), 'data/cloud-providers-account-dbus.xml'),
-            join_paths(meson.source_root(), 'data/cloud-providers-manager-dbus.xml'),
             join_paths(meson.source_root(), 'data/cloud-providers-provider-dbus.xml'),
             '--output-directory', join_paths(meson.source_root(), 'docs/reference'))
 
@@ -19,7 +18,6 @@ gnome.gtkdoc('libcloudproviders',
              gobject_typesfile: 'libcloudproviders.types',
              main_xml: 'libcloudproviders-docs.xml',
              content_files: ['generated-docs-org.freedesktop.CloudProviders.Account1.xml',
-                             'generated-docs-org.freedesktop.CloudProviders.Manager1.xml',
                              'generated-docs-org.freedesktop.CloudProviders.Provider1.xml'],
              install : true,
              scan_args: ['--ignore-headers=cloudprovidersmanager.h',
