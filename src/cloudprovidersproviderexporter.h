@@ -49,13 +49,6 @@ CloudProvidersProviderExporter*
 cloud_providers_provider_exporter_new (GDBusConnection *bus,
                                        const gchar     *bus_name,
                                        const gchar     *object_path);
-// Priv
-const gchar*
-cloud_providers_provider_exporter_get_object_path (CloudProvidersProviderExporter *self);
-
-GDBusConnection*
-cloud_providers_provider_exporter_get_bus (CloudProvidersProviderExporter *self);
-
 
 G_END_DECLS
 

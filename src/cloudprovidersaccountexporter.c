@@ -21,6 +21,7 @@
 #include "cloudprovidersaccountexporter.h"
 #include "cloudprovidersproviderexporter.h"
 #include "cloudprovidersaccountexporterpriv.h"
+#include "cloudprovidersproviderexporterpriv.h"
 #include "cloudproviders-generated.h"
 #include "enums.h"
 

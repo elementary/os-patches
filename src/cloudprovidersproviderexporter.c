@@ -19,6 +19,7 @@
 
 #include "cloudprovidersproviderexporter.h"
 #include "cloudprovidersaccountexporterpriv.h"
+#include "cloudprovidersproviderexporterpriv.h"
 #include "cloudprovidersaccountexporter.h"
 #include "cloudproviders-generated.h"
 #include <gio/gio.h>
