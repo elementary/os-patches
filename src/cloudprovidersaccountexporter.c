@@ -149,20 +149,6 @@ cloud_providers_account_exporter_get_skeleton (CloudProvidersAccountExporter *se
 {
   return self->skeleton;
 }
-#if 0
-GMenuModel *
-cloud_providers_account_exporter_get_menu_model (CloudProvidersAccountExporter *self)
-{
-  return self->menu_model;
-}
-
-GActionGroup *
-cloud_providers_account_exporter_get_action_group (CloudProvidersAccountExporter *self)
-{
-  return self->action_group;
-}
-
-#endif
 
 /**
  * cloud_providers_account_exporter_new:

@@ -68,33 +68,6 @@ static GParamSpec *properties [N_PROPS];
  * After adding the initial set of accounts cloud_providers_provider_exporter_export_objects() must be called.
  */
 
-#if 0
-static void
-update_accounts_in_dbus (CloudProvidersProviderExporter *self)
-{
-    return;
-    g_autoptr (GVariantBuilder) accounts_dbus_objects;
-    GVariant *accounts_variant;
-    GList *l;
-
-    accounts_dbus_objects = g_variant_builder_new (G_VARIANT_TYPE("a(so)"));
-    for (l = self->accounts; l != NULL; l = l->next)
-    {
-        const gchar *object_path;
-
-        object_path = cloud_providers_account_exporter_get_object_path (CLOUD_PROVIDERS_ACCOUNT_EXPORTER (l->data));
-        g_variant_builder_add(accounts_dbus_objects, "(so)", self->provider_bus_name, object_path);
-    }
-
-   accounts_variant = g_variant_builder_end (accounts_dbus_objects);
-
-   g_autofree gchar *provider_debug = g_variant_print(accounts_variant, TRUE);
-   g_debug("Update accounts in dbus: %s\n", provider_debug);
-
-   cloud_providers_dbus_provider_set_accounts (self->skeleton, accounts_variant);
-}
-#endif
-
 static void
 export_provider (CloudProvidersProviderExporter *self)
 {
@@ -176,25 +149,6 @@ cloud_providers_provider_exporter_remove_account (CloudProvidersProviderExporter
     self->accounts = g_list_remove (self->accounts, removed_account);
     g_object_unref (account);
 }
-
-#if 0
-
-/**
- * cloud_providers_provider_exporter_export_objects:
- * @self: The cloud provider
- *
- * Export all objects assigned previously with cloud_providers_provider_exporter_add_account()
- * to DBUS.
- * Use this function after adding all the required objects to avoid multiple signals
- * being emitted in a short time. This function needs to be called only once.
- * Objects added after the call will be propagated to DBus automatically.
- */
-static void
-cloud_providers_provider_exporter_export_objects(CloudProvidersProviderExporter *self)
-{
-}
-
-#endif
 
 static void
 cloud_providers_provider_exporter_get_property (GObject    *object,
@@ -315,10 +269,6 @@ cloud_providers_provider_exporter_constructed (GObject *object)
     self->skeleton = cloud_providers_dbus_provider_skeleton_new ();
     g_dbus_object_manager_server_set_connection (self->manager, self->bus);
     export_provider (self);
-#if 0
-    g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (self->skeleton),
-                                      self->bus, self->bus_path, NULL);
-#endif
 }
 
 static void
