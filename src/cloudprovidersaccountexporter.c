@@ -407,7 +407,6 @@ cloud_providers_account_exporter_finalize (GObject *object)
 {
     CloudProvidersAccountExporter *self = (CloudProvidersAccountExporter *)object;
 
-    g_debug ("finalize account");
     g_free (self->bus_name);
     g_object_unref (self->skeleton);
 

@@ -125,7 +125,6 @@ cloud_providers_provider_exporter_add_account (CloudProvidersProviderExporter *s
                                                CloudProvidersAccountExporter  *account)
 {
   export_account (self, account);
-  //update_accounts_in_dbus (self);
   self->accounts = g_list_append (self->accounts, g_object_ref (account));
 }
 
