@@ -33,9 +33,6 @@ struct _CloudProvidersProviderExporterClass
 };
 
 void
-cloud_providers_provider_exporter_add_account (CloudProvidersProviderExporter *self,
-                                               CloudProvidersAccountExporter  *account);
-void
 cloud_providers_provider_exporter_remove_account (CloudProvidersProviderExporter *self,
                                                   CloudProvidersAccountExporter  *account);
 

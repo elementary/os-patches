@@ -265,8 +265,6 @@ add_accounts (CloudProvidersTestServer *self)
       account = cloud_providers_account_exporter_new (self->exporter,
                                                       account_object_name);
 
-      cloud_providers_provider_exporter_add_account (self->exporter, account);
-
       cloud_providers_account_exporter_set_name (account, account_name);
       cloud_providers_account_exporter_set_icon (account, self->icon);
       cloud_providers_account_exporter_set_path (account, self->path);

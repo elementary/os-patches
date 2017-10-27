@@ -433,6 +433,7 @@ cloud_providers_account_exporter_constructed (GObject *object)
   self->skeleton = cloud_providers_dbus_account_skeleton_new ();
   provider_object_path = cloud_providers_provider_exporter_get_object_path (self->provider);
   self->object_path = g_strconcat (provider_object_path, "/", self->bus_name, NULL);
+  cloud_providers_provider_exporter_add_account (self->provider, self);
 }
 
 static void

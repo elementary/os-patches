@@ -24,6 +24,9 @@
 #include "cloudproviders-generated.h"
 G_BEGIN_DECLS
 
+void
+cloud_providers_provider_exporter_add_account (CloudProvidersProviderExporter *self,
+                                               CloudProvidersAccountExporter  *account);
 const gchar*
 cloud_providers_provider_exporter_get_object_path (CloudProvidersProviderExporter *self);
 
