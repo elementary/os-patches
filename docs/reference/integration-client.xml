@@ -7,18 +7,20 @@
   <title>Integrating with cloud providers</title>
   <para>
     Integration with cloud providers can be achieved by fetching a list of exported
-    cloud provider accounts using cloud_providers_get_providers(). This function returns
-    a list of #CloudProviderAccount objects that can then be used to obtain details about
-    the accounts.
+    cloud provider accounts using <link linkend="cloud_providers_collector_get_providers()">cloud_providers_collector_get_providers()</link>. This function returns
+    a list of #CloudProvidersProvider objects that can then be used to obtain details about
+    the providers. Each #CloudProvidersProvider holds a list of #CloudProvidersAccount
+    that can be query using cloud_providers_provider_get_accounts().
   </para>
   <para>
-    To get notified about changes of individual accounts, the #CloudProviderAccount::changed
-    signal is being emitted everytime information about an account changes. Any UI elements
-    should be updated after receiving this signal.
+    To get notified about changes in either the #CloudProvidersProvider or each of
+      their #CloudProvidersAccount you can connect to the "notify::" signal of
+      each of their properties. Any UI elements should be updated after receiving
+      this signal.
   </para>
   <para>
-    Besides the account details, cloud providers may also export a #GMenuModel and a #GActionGroup
+    Besides the account details, #CloudProvidersAccount may also export a #GMenuModel and a #GActionGroup
     to provide actions that are related with the account. Those can be obtained by calling
-    cloud_provider_account_get_menu_model() and cloud_provider_account_get_action_group()
+    cloud_providers_account_get_menu_model() and cloud_providers_account_get_action_group().
   </para>
 </chapter>

@@ -39,7 +39,11 @@
     <title>libcloudproviders library</title>
     <partintro>
       <para>
-        This part documents libcloudproviders libs.
+          This part documents libcloudproviders library. The library is meant to be used
+          as a C interface with their respective language bindings through introspection.
+          However, it can also be used with raw DBus management. If that's the
+          case, make sure it implements the DBus interfaces explained at
+          <link linkend="cloudproviders-dbus">cloudproviders-dbus</link>.
       </para>
     </partintro>
     <xi:include href="xml/cloudproviderscollector.xml"/>
@@ -59,10 +63,25 @@
     <title>DBus Interfaces</title>
     <partintro>
       <para>
+    cloud provider accounts using <link linkend="cloud_providers_collector_get_providers()">cloud_providers_collector_get_providers()</link>. This function returns
+          cloud-providers-collector-get-providers()
+         #CloudProvidersCollector.signals
+          cloudprovidersprovider
+         <link href="glib-Hash-Tables">Hash Tables</link>
+         <link href="#CloudProvidersProvider.signals">Hash Tables</link>
+         <link href="CloudProvidersCollector.html#cloud-providers-collector-get-providers">Hash Tables</link>
+          The DBus object that is passed to cloud_providers_provider_exporter_new() will implement the <ulink
+          url="http://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-objectmanager">org.freedesktop.DBus.ObjectManager</ulink>
+          interface, and that can be used by clients to discover and query
+          objects like the provider properties itself or the accounts associated
+          with your provider.
       </para>
     </partintro>
     <xi:include href="generated-docs-org.freedesktop.CloudProviders.Account.xml"/>
     <xi:include href="generated-docs-org.freedesktop.CloudProviders.Provider.xml"/>
   </part>
+     <index id="index-all">
+    <title>Index of all symbols</title>
+  </index>
 
 </book>

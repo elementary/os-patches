@@ -152,6 +152,7 @@ cloud_providers_account_exporter_get_skeleton (CloudProvidersAccountExporter *se
 
 /**
  * cloud_providers_account_exporter_new:
+ * @provider: The provider to which it will be associated.
  * @bus_name: A unique name for the account
  *               must be a valid DBus object name
  *

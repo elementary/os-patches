@@ -6,11 +6,13 @@
     <chapter id="implementing-cp">
       <title>Implementing support as a cloud provider</title>
       <para>
-        Cloud providers need to create #CloudProviderAccountExporter objects for
-        every account they like to expose to the API. To provide the account details
-        clients need to listen to the signals provided by the exporter and return
-        their information there. All #CloudProviderAccountExporter objects need to
-        be added to the #CloudProviderExporter by calling cloud_provider_exporter_add_account().
+        Cloud providers need to create #CloudProvidersAccountExporter objects for
+        every account they like to expose to the API and use the #CloudProvidersAccountExporter
+        API to set the properties of the accounts. Also a #CloudProvidersProviderExporter
+        needs to be created in order to hold all the #CloudProvidersAccountExporter objects
+        that will be added to the provider when created.
+        #CloudProvidersProviderExporter also export properties that define the provider
+        that can be set using the #CloudProvidersProviderExporter API.
       </para>
       <para>
         To register your cloud provider you also need to provide a file in DATADIR/cloud-providers.
@@ -19,8 +21,8 @@
         <title>Example file to register a cloud provider</title>
         <programlisting>
           [Cloud Provider]
-          BusName=org.mycloudprovider.CloudProviderServerExample
-          ObjectPath=/org/mycloudprovider/CloudProviderServerExample
+          BusName=org.mycloudprovider.CloudProviders.ServerExample
+          ObjectPath=/org/mycloudprovider/CloudProviders/ServerExample
           Version=1
         </programlisting>
       </example>

@@ -117,8 +117,9 @@ unexport_account(CloudProvidersProviderExporter *self,
  * @account: The account object
  *
  * Each cloud provider can have a variety of account associated with it. Use this
- * function to add the accounts the user set up. Calling cloud_providers_provider_exporter_export_objects()
- * once is required after adding the initial set of accounts.
+ * function to add the accounts the user set up. This function is currently only internal,
+ * as we do automation for hte dbus handling for adding and exporting an account.
+ * This is handled in cloud_providers_account_exporter_new().
  */
 void
 cloud_providers_provider_exporter_add_account (CloudProvidersProviderExporter *self,
@@ -134,7 +135,7 @@ cloud_providers_provider_exporter_add_account (CloudProvidersProviderExporter *s
  * @account: The account object
  *
  * Each cloud provider can have a variety of account associated with it. Use this
- * function to remove the accounts added by cloud_providers_provider_exporter_add_account().
+ * function to remove the accounts that were added when created by cloud_providers_account_exporter_new().
  */
 void
 cloud_providers_provider_exporter_remove_account (CloudProvidersProviderExporter *self,
