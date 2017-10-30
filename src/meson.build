@@ -16,7 +16,9 @@ libcloudproviders_sources = [
   'cloudprovidersproviderexporter.c',
 ]
 
-headers_with_enums = gnome.mkenums_simple('enums', sources : libcloudproviders_headers)
+headers_with_enums = gnome.mkenums_simple('enums',
+                                          sources : libcloudproviders_headers,
+                                          install_header: true)
 
 generated_sources = []
 generated_sources += gnome.gdbus_codegen(
