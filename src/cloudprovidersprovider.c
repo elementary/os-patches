@@ -93,7 +93,10 @@ cloud_providers_provider_finalize (GObject *object)
 
     g_list_free_full (self->accounts, g_object_unref);
     g_free (self->name);
-    g_signal_handlers_disconnect_by_data (self->proxy, self);
+    if (self->proxy != NULL)
+    {
+        g_signal_handlers_disconnect_by_data (self->proxy, self);
+    }
     g_clear_object (&self->proxy);
 
     G_OBJECT_CLASS (cloud_providers_provider_parent_class)->finalize (object);
