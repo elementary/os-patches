@@ -32,8 +32,6 @@ struct _CloudProvidersCollector
     GObject parent;
 
     GList *providers;
-    guint dbus_owner_id;
-    GDBusNodeInfo *dbus_node_info;
     GHashTable* provider_object_managers;
     GDBusConnection *bus;
     GCancellable *cancellable;
@@ -103,9 +101,6 @@ cloud_providers_collector_finalize (GObject *object)
     }
     g_list_free_full (self->providers, g_object_unref);
     g_list_free_full (self->monitors, g_object_unref);
-
-    g_bus_unown_name (self->dbus_owner_id);
-    g_dbus_node_info_unref (self->dbus_node_info);
 
     G_OBJECT_CLASS (cloud_providers_collector_parent_class)->finalize (object);
 }
