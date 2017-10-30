@@ -52,6 +52,5 @@ gnome = import('gnome')
 subdir ('src')
 subdir ('test')
 if get_option ('enable-gtk-doc')
-message ('####Going into docs')
     subdir ('docs/reference')
 endif
