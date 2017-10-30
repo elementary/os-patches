@@ -31,4 +31,6 @@ cloud_providers_account_exporter_get_object_path (CloudProvidersAccountExporter 
 gchar *
 cloud_providers_account_exporter_get_bus_name (CloudProvidersAccountExporter *self);
 
+G_END_DECLS
+
 #endif
