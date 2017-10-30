@@ -20,6 +20,7 @@
 
 #include "cloudprovidersprovider.h"
 #include "cloudprovidersaccount.h"
+#include "cloudprovidersaccountpriv.h"
 #include "cloudproviders-generated.h"
 
 struct _CloudProvidersProvider

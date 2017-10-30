@@ -18,6 +18,7 @@
  */
 
 #include "cloudprovidersaccount.h"
+#include "cloudprovidersaccountpriv.h"
 #include "cloudprovidersprovider.h"
 #include "cloudproviders-generated.h"
 #include "enums.h"
