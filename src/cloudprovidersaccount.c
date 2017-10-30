@@ -107,7 +107,6 @@ on_icon_changed (GObject               *object,
     GError *error = NULL;
 
     self->icon = g_icon_new_for_string (cloud_providers_dbus_account_get_icon (self->proxy), &error);
-    g_print ("setting icon %d", g_icon_hash (self->icon));
     if (error != NULL)
     {
         g_printerr ("Error getting the icon in the client %s", error->message);
