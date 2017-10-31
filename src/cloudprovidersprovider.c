@@ -98,6 +98,11 @@ cloud_providers_provider_finalize (GObject *object)
         g_signal_handlers_disconnect_by_data (self->proxy, self);
     }
     g_clear_object (&self->proxy);
+    if (self->manager)
+    {
+        g_signal_handlers_disconnect_by_data (self->manager, self);
+    }
+    g_clear_object (&self->manager);
 
     G_OBJECT_CLASS (cloud_providers_provider_parent_class)->finalize (object);
 }
@@ -191,7 +196,7 @@ cloud_providers_provider_class_init (CloudProvidersProviderClass *klass)
    *
    * This signal is emmited by a provider when the provider is removed in DBUS.
    */
-  signals [ACCOUNTS_CHANGED] =
+  signals [REMOVED] =
     g_signal_new ("removed",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
@@ -263,9 +268,9 @@ update_cloud_providers_accounts (CloudProvidersProvider *self)
 }
 
 static void
-on_cloud_providers_object_manager_object_added (GObject    *object,
-                                                GParamSpec *pspec,
-                                                gpointer user_data)
+on_cloud_providers_object_manager_object_added (GDBusObjectManager *manager,
+                                                GDBusObject        *object,
+                                                gpointer            user_data)
 {
     CloudProvidersProvider *self;
 
@@ -274,9 +279,9 @@ on_cloud_providers_object_manager_object_added (GObject    *object,
 }
 
 static void
-on_cloud_providers_object_manager_object_removed (GObject    *object,
-                                                  GParamSpec *pspec,
-                                                  gpointer user_data)
+on_cloud_providers_object_manager_object_removed (GDBusObjectManager *manager,
+                                                  GDBusObject        *object,
+                                                  gpointer            user_data)
 {
     CloudProvidersProvider *self;
 

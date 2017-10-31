@@ -99,6 +99,10 @@ cloud_providers_collector_finalize (GObject *object)
     {
         g_signal_handlers_disconnect_by_data (G_OBJECT (l->data), self);
     }
+    for (l = self->providers; l != NULL; l = l->next)
+    {
+        g_signal_handlers_disconnect_by_data (G_OBJECT (l->data), self);
+    }
     g_list_free_full (self->providers, g_object_unref);
     g_list_free_full (self->monitors, g_object_unref);
 
@@ -145,6 +149,12 @@ cloud_providers_collector_get_providers (CloudProvidersCollector *self)
 }
 
 static void
+on_provider_removed (CloudProvidersCollector *self)
+{
+    update_cloud_providers (self);
+}
+
+static void
 load_cloud_provider (CloudProvidersCollector *self,
                      GFile                   *file)
 {
@@ -186,6 +196,8 @@ load_cloud_provider (CloudProvidersCollector *self,
 
     provider = cloud_providers_provider_new (bus_name, object_path);
     self->providers = g_list_append (self->providers, provider);
+    g_signal_connect_swapped (provider, "removed",
+                              G_CALLBACK (on_provider_removed), self);
 
     g_debug("Client loading provider: %s %s\n", bus_name, object_path);
 
@@ -270,6 +282,10 @@ update_cloud_providers (CloudProvidersCollector *self)
     g_cancellable_cancel (self->cancellable);
     self->cancellable = g_cancellable_new ();
     for (l = self->monitors; l != NULL; l = l->next)
+    {
+        g_signal_handlers_disconnect_by_data (G_OBJECT (l->data), self);
+    }
+    for (l = self->providers; l != NULL; l = l->next)
     {
         g_signal_handlers_disconnect_by_data (G_OBJECT (l->data), self);
     }
