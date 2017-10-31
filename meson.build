@@ -46,6 +46,7 @@ libexecdir = get_option ('libexecdir')
 bindir = get_option ('bindir')
 datadir = get_option ('datadir')
 servicedir = join_paths (datadir, 'dbus-1', 'services')
+incdir = join_paths (prefix, 'include', 'cloudproviders')
 
 gnome = import('gnome')
 
