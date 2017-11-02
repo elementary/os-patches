@@ -1,0 +1,97 @@
+From 76ce1de740f202985ffd7b2e980cf34c75a2dac3 Mon Sep 17 00:00:00 2001
+From: Robert Elliott <elliott@hpe.com>
+Date: Thu, 3 Dec 2015 11:38:36 -0600
+Subject: Translate UEFI persistent memory type
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Define
+* GRUB_EFI_PERSISTENT_MEMORY (UEFI memory map type 14) per UEFI 2.5
+* GRUB_MEMORY_PERSISTENT (E820 type 7) per ACPI 3.0
+* GRUB_MEMORY_PERSISTENT_LEGACY (E820 unofficial type 12) per ACPI 3.0
+
+and translate GRUB_EFI_PERSISTENT_MEMORY to GRUB_MEMORY_PERSISTENT in
+grub_efi_mmap_iterate().
+
+Includes
+* adding the E820 names to lsmmap
+* handling the E820 types in make_efi_memtype()
+
+Suggested-by: Vladimir 'φ-coder/phcoder' Serbinenko <phcoder@gmail.com>
+Suggested-by: Andrei Borzenkov <arvidjaar@gmail.com>
+---
+ grub-core/commands/lsmmap.c |    2 ++
+ grub-core/mmap/efi/mmap.c   |   12 ++++++++++++
+ include/grub/efi/api.h      |    1 +
+ include/grub/memory.h       |    2 ++
+ 4 files changed, 17 insertions(+)
+
+Index: b/grub-core/commands/lsmmap.c
+===================================================================
+--- a/grub-core/commands/lsmmap.c
++++ b/grub-core/commands/lsmmap.c
+@@ -37,6 +37,8 @@ static const char *names[] =
+        is required to save accross hibernations.  */
+     [GRUB_MEMORY_NVS] = N_("ACPI non-volatile storage RAM"),
+     [GRUB_MEMORY_BADRAM] = N_("faulty RAM (BadRAM)"),
++    [GRUB_MEMORY_PERSISTENT] = N_("persistent RAM"),
++    [GRUB_MEMORY_PERSISTENT_LEGACY] = N_("persistent RAM (legacy)"),
+     [GRUB_MEMORY_COREBOOT_TABLES] = N_("RAM holding coreboot tables"),
+     [GRUB_MEMORY_CODE] = N_("RAM holding firmware code")
+   };
+Index: b/grub-core/mmap/efi/mmap.c
+===================================================================
+--- a/grub-core/mmap/efi/mmap.c
++++ b/grub-core/mmap/efi/mmap.c
+@@ -118,6 +118,11 @@ grub_efi_mmap_iterate (grub_memory_hook_
+ 		GRUB_MEMORY_NVS, hook_data);
+ 	  break;
+ 
++	case GRUB_EFI_PERSISTENT_MEMORY:
++	  hook (desc->physical_start, desc->num_pages * 4096,
++		GRUB_MEMORY_PERSISTENT, hook_data);
++	break;
++
+ 	default:
+ 	  grub_printf ("Unknown memory type %d, considering reserved\n",
+ 		       desc->type);
+@@ -147,6 +152,13 @@ make_efi_memtype (int type)
+       /* No way to remove a chunk of memory from EFI mmap.
+ 	 So mark it as unusable. */
+     case GRUB_MEMORY_HOLE:
++    /*
++     * AllocatePages() does not support GRUB_EFI_PERSISTENT_MEMORY,
++     * so no translation for GRUB_MEMORY_PERSISTENT or
++     * GRUB_MEMORY_PERSISTENT_LEGACY.
++     */
++    case GRUB_MEMORY_PERSISTENT:
++    case GRUB_MEMORY_PERSISTENT_LEGACY:
+     case GRUB_MEMORY_RESERVED:
+       return GRUB_EFI_UNUSABLE_MEMORY;
+ 
+Index: b/include/grub/efi/api.h
+===================================================================
+--- a/include/grub/efi/api.h
++++ b/include/grub/efi/api.h
+@@ -441,6 +441,7 @@ enum grub_efi_memory_type
+     GRUB_EFI_MEMORY_MAPPED_IO,
+     GRUB_EFI_MEMORY_MAPPED_IO_PORT_SPACE,
+     GRUB_EFI_PAL_CODE,
++    GRUB_EFI_PERSISTENT_MEMORY,
+     GRUB_EFI_MAX_MEMORY_TYPE
+   };
+ typedef enum grub_efi_memory_type grub_efi_memory_type_t;
+Index: b/include/grub/memory.h
+===================================================================
+--- a/include/grub/memory.h
++++ b/include/grub/memory.h
+@@ -30,6 +30,8 @@ typedef enum grub_memory_type
+     GRUB_MEMORY_ACPI = 3,
+     GRUB_MEMORY_NVS = 4,
+     GRUB_MEMORY_BADRAM = 5,
++    GRUB_MEMORY_PERSISTENT = 7,
++    GRUB_MEMORY_PERSISTENT_LEGACY = 12,
+     GRUB_MEMORY_COREBOOT_TABLES = 16,
+     GRUB_MEMORY_CODE = 20,
+     /* This one is special: it's used internally but is never reported

@@ -1,3 +1,21 @@
+grub2 (2.02~beta2-36ubuntu3.14) xenial; urgency=medium
+
+  * Add grub2/update_nvram template to allow users to disable NVRAM
+    updates during package upgrades (LP: #1642298).
+
+ -- dann frazier <dannf@ubuntu.com>  Thu, 14 Sep 2017 16:13:39 -0600
+
+grub2 (2.02~beta2-36ubuntu3.13) xenial; urgency=medium
+
+  * Fix EFIPersistentMemory (PMEM) support; incorrectly handled as "standard"
+    reserved memory without really marking it reserved: (LP: #1716424)
+    - debian/patches/git_pmem_really_mark_mem_reserved_3d2c8048.patch
+    - debian/patches/git_pmem_translate_persistent_type_76ce1de7.patch
+    - debian/patches/git_pmem_mmap_handle_pmem_c79c59f1.patch
+    - debian/patches/git_pmem_efiemu_handle_pmem_ae3b83a4.patch
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Sun, 10 Sep 2017 20:08:16 -0400
+
 grub2 (2.02~beta2-36ubuntu3.12) xenial; urgency=medium
 
   * debian/patches: Rework linuxefi/SecureBoot support and sync with upstream

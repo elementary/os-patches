@@ -1,0 +1,65 @@
+From 3d2c8048da7db334fd6d57b27304ac765fd4cd67 Mon Sep 17 00:00:00 2001
+From: Andrei Borzenkov <arvidjaar@gmail.com>
+Date: Thu, 26 Nov 2015 19:50:42 +0300
+Subject: efi: really mark memory of unknown type as reserved
+
+9be4c45dbe3c877d1f4856e99ee15133c6cd2261 added switch case between
+fall through cases, causing all memory regions of unknown type to be
+marked as available.
+
+Move default case into its own block and add explicit FALLTHROUGH
+annotation.
+
+Reported by Elliott, Robert (Persistent Memory) <elliott@hpe.com>
+---
+ grub-core/mmap/efi/mmap.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/grub-core/mmap/efi/mmap.c b/grub-core/mmap/efi/mmap.c
+index a77efe8..900a4d6 100644
+--- a/grub-core/mmap/efi/mmap.c
++++ b/grub-core/mmap/efi/mmap.c
+@@ -73,6 +73,7 @@ grub_efi_mmap_iterate (grub_memory_hook_t hook, void *hook_data,
+ 		    GRUB_MEMORY_AVAILABLE, hook_data);
+ 	      break;
+ 	    }
++	  /* FALLTHROUGH */
+ 	case GRUB_EFI_RUNTIME_SERVICES_CODE:
+ 	  hook (desc->physical_start, desc->num_pages * 4096,
+ 		GRUB_MEMORY_CODE, hook_data);
+@@ -83,10 +84,6 @@ grub_efi_mmap_iterate (grub_memory_hook_t hook, void *hook_data,
+ 		GRUB_MEMORY_BADRAM, hook_data);
+ 	  break;
+ 
+-	default:
+-	  grub_printf ("Unknown memory type %d, considering reserved\n",
+-		       desc->type);
+-
+ 	case GRUB_EFI_BOOT_SERVICES_DATA:
+ 	  if (!avoid_efi_boot_services)
+ 	    {
+@@ -94,6 +91,7 @@ grub_efi_mmap_iterate (grub_memory_hook_t hook, void *hook_data,
+ 		    GRUB_MEMORY_AVAILABLE, hook_data);
+ 	      break;
+ 	    }
++	  /* FALLTHROUGH */
+ 	case GRUB_EFI_RESERVED_MEMORY_TYPE:
+ 	case GRUB_EFI_RUNTIME_SERVICES_DATA:
+ 	case GRUB_EFI_MEMORY_MAPPED_IO:
+@@ -119,6 +117,13 @@ grub_efi_mmap_iterate (grub_memory_hook_t hook, void *hook_data,
+ 	  hook (desc->physical_start, desc->num_pages * 4096,
+ 		GRUB_MEMORY_NVS, hook_data);
+ 	  break;
++
++	default:
++	  grub_printf ("Unknown memory type %d, considering reserved\n",
++		       desc->type);
++	  hook (desc->physical_start, desc->num_pages * 4096,
++		GRUB_MEMORY_RESERVED, hook_data);
++	  break;
+ 	}
+     }
+ 
+-- 
+cgit v1.0-41-gc330
+

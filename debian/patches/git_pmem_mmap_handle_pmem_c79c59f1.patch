@@ -1,0 +1,179 @@
+From c79c59f1295df8ea660f8a858f9532d76a5f67b7 Mon Sep 17 00:00:00 2001
+From: Robert Elliott <elliott@hpe.com>
+Date: Thu, 17 Dec 2015 10:53:32 -0600
+Subject: lsefimmap: support persistent memory and other UEFI 2.5 features
+
+This should accompany
+	76ce1de740 Translate UEFI persistent memory type
+
+1. Add a string for the EfiPersistentMemory type 14 that was
+added in UEFI 2.5.
+
+2. Decode the memory attributes that were added in UEFI 2.5:
+* NV (non-volatile)
+* MORE_RELIABLE (higher reliable, e.g., mirrored memory in a system
+  with partial memory mirroring)
+* RO (read-only)
+
+3. Use proper IEC binary units (KiB, MiB, etc.) for power-of-two
+values rather than misusing SI power-of-ten units (KB, MB, etc.)
+
+4. The lsmmap command only decodes memory ranges sizes up to GiB scale
+units.  Persistent memory ranges will reach into the TiB scale.
+Since 64-bit size field supports TiB, PiB, and EiB, decode all of
+them for completeness.
+
+5. In the lsefimmap command, rewrite the print statements to
+* avoid rounding
+* avoid a big nested if/else tree.
+
+For example: In the sixth entry below, the value of 309MB implies
+316416KB but is really reporting 316436KB.
+
+Widen the size column to 6 digits to accommodate typical cases.
+The worst case value would require 14 digits; if that happens,
+let the columns get out of sync.
+
+Old format:
+Type      Physical start  - end             #Pages     Size Attributes
+conv-mem  0000000000000000-0000000000092fff 00000093  588KB UC WC WT WB
+reserved  0000000000093000-0000000000093fff 00000001    4KB UC WC WT WB
+conv-mem  0000000000094000-000000000009ffff 0000000c   48KB UC WC WT WB
+conv-mem  0000000000100000-000000000fffffff 0000ff00  255MB UC WC WT WB
+BS-code   0000000010000000-0000000010048fff 00000049  292KB UC WC WT WB
+conv-mem  0000000010049000-000000002354dfff 00013505  309MB UC WC WT WB
+ldr-data  000000002354e000-000000003ecfffff 0001b7b2  439MB UC WC WT WB
+BS-data   000000003ed00000-000000003ed7ffff 00000080  512KB UC WC WT WB
+conv-mem  000000003ed80000-000000006af5ffff 0002c1e0  705MB UC WC WT WB
+reserved  000000006af60000-000000006b55ffff 00000600    6MB UC WC WT WB
+BS-data   000000006b560000-000000006b560fff 00000001    4KB UC WC WT WB
+RT-data   000000006b561000-000000006b5e1fff 00000081  516KB RT UC WC WT WB
+BS-data   000000006b5e2000-000000006ecfafff 00003719   55MB UC WC WT WB
+BS-code   000000006ecfb000-000000006ecfbfff 00000001    4KB UC WC WT WB
+conv-mem  000000006ecfc000-00000000711fafff 000024ff   36MB UC WC WT WB
+BS-data   00000000711fb000-000000007128dfff 00000093  588KB UC WC WT WB
+Unk 0d    0000000880000000-0000000e7fffffff 00600000   24GB UC WC WT WB NV
+reserved  0000001680000000-0000001c7fffffff 00600000   24GB UC WC WT WB NV
+
+New format:
+Type      Physical start  - end             #Pages        Size Attributes
+conv-mem  0000000000000000-0000000000092fff 00000093    588KiB UC WC WT WB
+reserved  0000000000093000-0000000000093fff 00000001      4KiB UC WC WT WB
+conv-mem  0000000000094000-000000000009ffff 0000000c     48KiB UC WC WT WB
+conv-mem  0000000000100000-000000000fffffff 0000ff00    255MiB UC WC WT WB
+BS-code   0000000010000000-0000000010048fff 00000049    292KiB UC WC WT WB
+conv-mem  0000000010049000-000000002354dfff 00013505 316436KiB UC WC WT WB
+ldr-data  000000002354e000-000000003ecfffff 0001b7b2 450248KiB UC WC WT WB
+BS-data   000000003ed00000-000000003ed7ffff 00000080    512KiB UC WC WT WB
+conv-mem  000000003ed80000-000000006af5ffff 0002c1e0 722816KiB UC WC WT WB
+reserved  000000006af60000-000000006b55ffff 00000600      6MiB UC WC WT WB
+BS-data   000000006b560000-000000006b560fff 00000001      4KiB UC WC WT WB
+RT-data   000000006b561000-000000006b5e1fff 00000081    516KiB RT UC WC WT WB
+BS-data   000000006b5e2000-000000006ecfafff 00003719  56420KiB UC WC WT WB
+BS-code   000000006ecfb000-000000006ecfbfff 00000001      4KiB UC WC WT WB
+conv-mem  000000006ecfc000-0000000071222fff 00002527  38044KiB UC WC WT WB
+BS-data   0000000071223000-00000000712ddfff 000000bb    748KiB UC WC WT WB
+persist   0000000880000000-0000000e7fffffff 00600000     24GiB UC WC WT WB NV
+reserved  0000001680000000-0000001c7fffffff 00600000     24GiB UC WC WT WB NV
+---
+ grub-core/commands/efi/lsefimmap.c | 47 +++++++++++++++++++++++++-------------
+ include/grub/efi/api.h             |  3 +++
+ 2 files changed, 34 insertions(+), 16 deletions(-)
+
+diff --git a/grub-core/commands/efi/lsefimmap.c b/grub-core/commands/efi/lsefimmap.c
+index 215b45b..c85ff7f 100644
+--- a/grub-core/commands/efi/lsefimmap.c
++++ b/grub-core/commands/efi/lsefimmap.c
+@@ -51,7 +51,7 @@ grub_cmd_lsefimmap (grub_command_t cmd __attribute__ ((unused)),
+ 
+   grub_printf
+     ("Type      Physical start  - end             #Pages   "
+-     "  Size Attributes\n");
++     "     Size Attributes\n");
+   memory_map_end = ADD_MEMORY_DESCRIPTOR (memory_map, map_size);
+   for (desc = memory_map;
+        desc < memory_map_end;
+@@ -74,7 +74,8 @@ grub_cmd_lsefimmap (grub_command_t cmd __attribute__ ((unused)),
+ 	  "ACPI-nvs",
+ 	  "MMIO    ",
+ 	  "IO-ports",
+-	  "PAL-code"
++	  "PAL-code",
++	  "persist ",
+ 	};
+       if (desc->type < ARRAY_SIZE (types_str))
+ 	grub_printf ("%s ", types_str[desc->type]);
+@@ -87,21 +88,29 @@ grub_cmd_lsefimmap (grub_command_t cmd __attribute__ ((unused)),
+ 		   desc->physical_start + (desc->num_pages << 12) - 1,
+ 		   desc->num_pages);
+ 
+-      size = desc->num_pages;
+-      size <<= (12 - 10);
+-      if (size < 1024)
+-	grub_printf (" %4" PRIuGRUB_UINT64_T "KB", size);
++      size = desc->num_pages << 12;	/* 4 KiB page size */
++      /*
++       * Since size is a multiple of 4 KiB, no need to handle units
++       * of just Bytes (which would use a mask of 0x3ff).
++       *
++       * 14 characters would support the largest possible number of 4 KiB
++       * pages that are not a multiple of larger units (e.g., MiB):
++       * 17592186044415 (0xffffff_fffff000), but that uses a lot of
++       * whitespace for a rare case.  6 characters usually suffices;
++       * columns will be off if not, but this is preferable to rounding.
++       */
++      if (size & 0xfffff)
++	grub_printf (" %6" PRIuGRUB_UINT64_T "KiB", size >> 10);
++      else if (size & 0x3fffffff)
++	grub_printf (" %6" PRIuGRUB_UINT64_T "MiB", size >> 20);
++      else if (size & 0xffffffffff)
++	grub_printf (" %6" PRIuGRUB_UINT64_T "GiB", size >> 30);
++      else if (size & 0x3ffffffffffff)
++	grub_printf (" %6" PRIuGRUB_UINT64_T "TiB", size >> 40);
++      else if (size & 0xfffffffffffffff)
++	grub_printf (" %6" PRIuGRUB_UINT64_T "PiB", size >> 50);
+       else
+-	{
+-	  size /= 1024;
+-	  if (size < 1024)
+-	    grub_printf (" %4" PRIuGRUB_UINT64_T "MB", size);
+-	  else
+-	    {
+-	      size /= 1024;
+-	      grub_printf (" %4" PRIuGRUB_UINT64_T "GB", size);
+-	    }
+-	}
++	grub_printf (" %6" PRIuGRUB_UINT64_T "EiB", size >> 60);
+ 
+       attr = desc->attribute;
+       if (attr & GRUB_EFI_MEMORY_RUNTIME)
+@@ -122,6 +131,12 @@ grub_cmd_lsefimmap (grub_command_t cmd __attribute__ ((unused)),
+ 	grub_printf (" RP");
+       if (attr & GRUB_EFI_MEMORY_XP)
+ 	grub_printf (" XP");
++      if (attr & GRUB_EFI_MEMORY_NV)
++	grub_printf (" NV");
++      if (attr & GRUB_EFI_MEMORY_MORE_RELIABLE)
++	grub_printf (" MR");
++      if (attr & GRUB_EFI_MEMORY_RO)
++	grub_printf (" RO");
+ 
+       grub_printf ("\n");
+     }
+diff --git a/include/grub/efi/api.h b/include/grub/efi/api.h
+index 2bbfe34..c7c9f0e 100644
+--- a/include/grub/efi/api.h
++++ b/include/grub/efi/api.h
+@@ -49,6 +49,9 @@
+ #define GRUB_EFI_MEMORY_WP	0x0000000000001000LL
+ #define GRUB_EFI_MEMORY_RP	0x0000000000002000LL
+ #define GRUB_EFI_MEMORY_XP	0x0000000000004000LL
++#define GRUB_EFI_MEMORY_NV	0x0000000000008000LL
++#define GRUB_EFI_MEMORY_MORE_RELIABLE	0x0000000000010000LL
++#define GRUB_EFI_MEMORY_RO	0x0000000000020000LL
+ #define GRUB_EFI_MEMORY_RUNTIME	0x8000000000000000LL
+ 
+ #define GRUB_EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL	0x00000001
+-- 
+cgit v1.0-41-gc330
+
