@@ -88,7 +88,6 @@ export_menu_model (CloudProvidersAccountExporter *self)
     }
 }
 
-#if 0
 static void
 unexport_menu_model (CloudProvidersAccountExporter *self)
 {
@@ -97,7 +96,6 @@ unexport_menu_model (CloudProvidersAccountExporter *self)
         g_dbus_connection_unexport_menu_model(self->bus, self->menu_model_export_id);
     }
 }
-#endif
 
 static void
 export_action_group(CloudProvidersAccountExporter *self)
@@ -114,14 +112,6 @@ export_action_group(CloudProvidersAccountExporter *self)
     }
 }
 
-#if 0
-/**
- * cloud_providers_account_exporter_unexport_action_group:
- * @self: The cloud provider
- * @account_name: The name of the account
- *
- * Unexport the GActionGroup exported by cloud_providers_account_exporter_export_action_group
- */
 static void
 unexport_action_group(CloudProvidersAccountExporter *self)
 {
@@ -130,7 +120,6 @@ unexport_action_group(CloudProvidersAccountExporter *self)
     g_dbus_connection_unexport_action_group(self->bus, self->action_group_export_id);
   }
 }
-#endif
 
 gchar *
 cloud_providers_account_exporter_get_object_path (CloudProvidersAccountExporter *self)
@@ -407,7 +396,8 @@ static void
 cloud_providers_account_exporter_finalize (GObject *object)
 {
     CloudProvidersAccountExporter *self = (CloudProvidersAccountExporter *)object;
-
+    unexport_menu_model (self);
+    unexport_action_group (self);
     g_free (self->bus_name);
     g_object_unref (self->skeleton);
 

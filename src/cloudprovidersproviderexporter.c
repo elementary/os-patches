@@ -107,7 +107,7 @@ unexport_account(CloudProvidersProviderExporter *self,
     CloudProvidersDbusAccount *account_skeleton;
 
     account_skeleton = cloud_providers_account_exporter_get_skeleton (account);
-    object_path = g_dbus_object_get_object_path (G_DBUS_OBJECT (account_skeleton));
+    object_path = g_dbus_interface_skeleton_get_object_path (G_DBUS_INTERFACE_SKELETON (account_skeleton));
     g_dbus_object_manager_server_unexport (self->manager, object_path);
 }
 
