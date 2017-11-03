@@ -50,6 +50,8 @@ struct _CloudProvidersAccountClass
   GObjectClass parent_class;
 };
 
+CloudProvidersAccount *cloud_providers_account_new (GDBusProxy *proxy);
+
 gchar* cloud_providers_account_get_name (CloudProvidersAccount *self);
 CloudProvidersAccountStatus cloud_providers_account_get_status (CloudProvidersAccount *self);
 gchar* cloud_providers_account_get_status_details (CloudProvidersAccount *self);
