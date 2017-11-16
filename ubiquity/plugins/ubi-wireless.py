@@ -83,7 +83,6 @@ class PageGtk(WirelessPageBase):
         self.nmwidget = builder.get_object('nmwidget')
         self.nmwidget.connect('connection', self.state_changed)
         self.nmwidget.connect('selection_changed', self.selection_changed)
-        self.nmwidget.connect('pw_validated', self.pw_validated)
         self.no_wireless = builder.get_object('no_wireless')
         self.use_wireless = builder.get_object('use_wireless')
         self.use_wireless.connect('toggled', self.wireless_toggled)
@@ -98,10 +97,6 @@ class PageGtk(WirelessPageBase):
 
     def plugin_translate(self, lang):
         get_s = self.controller.get_string
-        label_text = get_s('ubiquity/text/wireless_password_label')
-        display_text = get_s('ubiquity/text/wireless_display_password')
-        self.nmwidget.translate(label_text, display_text)
-
         self.connect_text = get_s('ubiquity/text/connect', lang)
         self.stop_text = get_s('ubiquity/text/stop', lang)
         frontend = self.controller._wizard
@@ -140,7 +135,6 @@ class PageGtk(WirelessPageBase):
             frontend.connecting_spinner.stop()
             frontend.connecting_label.hide()
             frontend.translate_widget(frontend.next)
-            self.nmwidget.hbox.set_sensitive(False)
             self.next_normal = True
             self.controller.allow_go_forward(True)
 
@@ -178,7 +172,6 @@ class PageGtk(WirelessPageBase):
             frontend.connecting_spinner.hide()
             frontend.connecting_spinner.stop()
             frontend.connecting_label.hide()
-            self.controller.allow_go_forward(True)
 
             frontend.translate_widget(frontend.back)
             self.back_normal = True
@@ -194,9 +187,6 @@ class PageGtk(WirelessPageBase):
             self.back_normal = False
             frontend.back.set_sensitive(True)
         self.selection_changed(None)
-
-    def pw_validated(self, unused, validated):
-        self.controller.allow_go_forward(validated)
 
 
 class PageKde(WirelessPageBase):
