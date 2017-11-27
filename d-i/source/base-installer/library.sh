@@ -963,7 +963,8 @@ EOT
 			echo "deb $PROTOCOL://$overlay_host$overlay_directory $DISTRIBUTION $overlay_components" >> $APT_SOURCES
 		fi
 		if db_get apt-setup/local0/repository; then
-		    echo "$RET" >> $APT_SOURCES
+			repository="${RET#deb }"
+			echo "deb $repository" >> $APT_SOURCES
 		fi
 	fi
 }

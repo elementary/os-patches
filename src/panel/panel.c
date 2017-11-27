@@ -255,7 +255,7 @@ on_realize(GtkWidget *win, gpointer data) {
 	width = gdk_screen_width();
 	gtk_window_set_decorated (GTK_WINDOW (win), FALSE);
 	set_strut(GTK_WINDOW(win), width, 0, allocation.height, allocation.height, 0, width);
-	gtk_widget_set_size_request(GTK_WIDGET (win), width, -1);
+	gtk_widget_set_size_request(GTK_WIDGET (win), width, allocation.height);
 	// We don't care about showing the panel on all desktops just yet.
 	gtk_window_stick (GTK_WINDOW (win));
 	gtk_window_set_type_hint(GTK_WINDOW(win), GDK_WINDOW_TYPE_HINT_DOCK);
@@ -294,7 +294,7 @@ on_draw(GtkWidget *widget, cairo_t *cr, gpointer userdata) {
 	}
 	if (pixbuf) {
 		gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
-		cairo_pattern_set_extend(cairo_get_source(cr), CAIRO_EXTEND_REPEAT);
+		cairo_pattern_set_extend(cairo_get_source(cr), CAIRO_EXTEND_PAD);
 		cairo_paint(cr);
 		g_object_unref(pixbuf);
 	} else {

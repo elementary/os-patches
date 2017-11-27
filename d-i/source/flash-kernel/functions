@@ -236,14 +236,30 @@ flash_initrd() {
 	echo "done." >&2
 }
 
+compress_type() {
+    local file="$1"
+    magic="$(od -x -N2 $file | head -1 | cut -d' ' -f2)"
+    case $magic in
+	8b1f)
+	    echo "gzip"
+	    ;;
+	*)
+	    echo "none"
+	    ;;
+    esac
+}
+
 mkimage_kernel() {
 	local kaddr="$1"
 	local kdesc="$2"
 	local kdata="$3"
 	local uimage="$4"
+	local comp
+
+	comp="$(compress_type $kdata)"
 
 	printf "Generating kernel u-boot image... " >&2
-	mkimage -A arm -O linux -T kernel -C none -a "$kaddr" -e "$kaddr" \
+	mkimage -A arm -O linux -T kernel -C $comp -a "$kaddr" -e "$kaddr" \
 		-n "$kdesc" -d "$kdata" "$uimage" >&2 1>/dev/null
 	echo "done." >&2
 }

@@ -123,6 +123,13 @@ default_disk_label () {
 		if [ -e ./label ]; then
 		    disklabel=$(cat label)
 		fi
+		# FBA devices have parted label dasd, but should not use dasd
+		# partition table. Maybe FBA|ECKD type should be exposed by
+		# partman-base and/or parted. LP: #1650300
+		device=$(sed 's|.*/||' ./device)
+		if grep -q "(FBA ).*$device" /proc/dasd/devices; then
+		    disklabel=msdos
+		fi
 		if [ "$disklabel" != dasd ]; then
 		    disklabel=msdos
 		fi

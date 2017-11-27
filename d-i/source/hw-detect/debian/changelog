@@ -1,3 +1,19 @@
+hw-detect (1.117ubuntu2.2) xenial; urgency=medium
+
+  * disk-detect.sh: unconditionally modprobe dm-service-time and
+    dm-queue-length multipath path selector modules alongside dm-round-robin.
+    (LP: #1673350)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 14 Jun 2017 16:15:14 -0400
+
+hw-detect (1.117ubuntu2.1) xenial; urgency=medium
+
+  * {hw-,disk-,net}detect.sh, check-missing-firmware.sh: use 'modprobe -b'
+    in order to honor module blacklisting from kernel cmdline parameters.
+    (LP: #1602717)
+
+ -- Mauricio Faria de Oliveira <mauricfo@linux.vnet.ibm.com>  Thu, 29 Sep 2016 09:52:10 -0400
+
 hw-detect (1.117ubuntu2) xenial; urgency=medium
 
   * Enable disk-detect/multipath/enable by default on s390x.

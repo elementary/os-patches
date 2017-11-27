@@ -1,3 +1,71 @@
+ubiquity (2.21.63.6) xenial; urgency=medium
+
+  * Revert automatic update of console-setup, which is not released to
+    xenial-updates.  LP: #1731526.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 10 Nov 2017 10:09:29 -0800
+
+ubiquity (2.21.63.5) xenial; urgency=medium
+
+  * Cherry-pick support for WPA2 Enterprise. LP: #1107935
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu15.4.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 31 Oct 2017 17:45:29 +0000
+
+ubiquity (2.21.63.4) xenial; urgency=medium
+
+  * src/panel/panel.c: set stricter size/extend rules for the panel so that it
+    looks nicer if its scaling is too great. (LP: #1622686)
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu15.3, flash-kernel 3.0~rc.4ubuntu62.2, grub-installer
+    1.128ubuntu5.1, hw-detect 1.117ubuntu2.1, netcfg 1.135ubuntu4.5,
+    partman-auto 134ubuntu1.1, partman-btrfs 18ubuntu1.1, partman-
+    partitioning 110ubuntu4.1, preseed 1.71ubuntu1.1, hw-detect
+    1.117ubuntu2.2. (LP: #1646585)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 24 Jul 2017 11:36:37 -0400
+
+ubiquity (2.21.63.3) xenial; urgency=medium
+
+  * ubi-prepare.py: default to disabling Secure Boot when third party drivers
+    are being installed, since it's most likely what people will want. This
+    will also avoid people skipping through this important part of the
+    installer without noticing, only to find their systems not all working
+    correctly. (LP: #1606393)
+  * d-i/sources.list: add xenial-updates to sources.list to pick up any SRUs
+    of d-i components that are no longer in flight.
+  * Automatic update of included source packages: apt-setup
+    1:0.104ubuntu4.1, base-installer 1.158ubuntu2.1, netcfg
+    1.135ubuntu4.1. (LP: #1590358)
+  * bin/ubiquity-dm: wait for the DBus signals telling us that xsettings are
+    ready before continuing with preparing ubiquity-dm; this avoids starting
+    too quickly and incorrectly applying scale ratios for HiDPI screens.
+    (LP: #1560162)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 02 Sep 2016 11:17:13 -0400
+
+ubiquity (2.21.63.2) xenial; urgency=high
+
+  [ Shih-Yuan Lee (FourDollars) ]
+  * Some places doesn't have the location information. (LP: #1584417)
+
+  [ Dimitri John Ledkov ]
+  * Fix substitution variables syntax from $() -> ${} in
+    translations. (LP: #1603926)
+  * Automatic update of included source packages: console-setup
+    1.108ubuntu15.2, partman-base 187ubuntu2.1.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Mon, 18 Jul 2016 14:28:29 +0100
+
+ubiquity (2.21.63.1) xenial; urgency=medium
+
+  [ Iain Lane ]
+  * misc.py: Ask for the 'State' property instead of 'state'. Fixes display
+    of wireless page. (LP: #1572793)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 29 Apr 2016 13:40:33 -0400
+
 ubiquity (2.21.63) xenial; urgency=medium
 
   * Automatic update of included source packages: user-setup

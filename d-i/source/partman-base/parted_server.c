@@ -957,6 +957,10 @@ possible_extended_partition(PedDisk *disk, PedPartition *space)
         result = (ped_disk_type_check_feature(disk->type,
                                               PED_DISK_TYPE_EXTENDED)
                   && !has_extended_partition(disk)
+#ifdef __s390__
+                  /* DASD drives can only do 3 partitions */
+                  && strcmp(disk->dev->model, "IBM S390 DASD drive")
+#endif
                   && possible_primary_partition(disk, space));
         activate_exception_handler();
         return result;

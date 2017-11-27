@@ -261,23 +261,40 @@ test_set_machine_id() {
 }
 add_test test_set_machine_id
 
-test_mkimage_kernel() {
+_test_mkimage_kernel() {
+    local kdata="$1"
+    local expected="$2"
     (
         mkimage() {
             saved_args="$@"
         }
         . "$functions"
         saved_args=""
-        mkimage_kernel "0xdeadbeef" "desc" "input" "output" 2>/dev/null
-        expected="-A arm -O linux -T kernel -C none -a 0xdeadbeef -e 0xdeadbeef -n desc -d input output"
+        mkimage_kernel "0xdeadbeef" "desc" "$kdata" "output" 2>/dev/null
         if [ "$expected" != "$saved_args" ]; then
             echo "Expected mkimage_kernel to be called with \"$expected\" but it was called with \"$saved_args\"" >&2
-            exit 1
+            return 1
         fi
     )
 }
+
+test_mkimage_kernel() {
+    local kdata="/dev/zero"
+    local expected="-A arm -O linux -T kernel -C none -a 0xdeadbeef -e 0xdeadbeef -n desc -d $kdata output"
+    _test_mkimage_kernel "$kdata" "$expected" || exit 1
+}
 add_test test_mkimage_kernel
 
+test_mkimage_kernel_gzip() {
+    local kdata="$(mktemp)"
+    gzip < /dev/null > "$kdata"
+
+    local expected="-A arm -O linux -T kernel -C gzip -a 0xdeadbeef -e 0xdeadbeef -n desc -d $kdata output"
+    _test_mkimage_kernel "$kdata" "$expected" || exit 1
+    rm -f "$kdata"
+}
+add_test test_mkimage_kernel_gzip
+ 
 test_mkimage_initrd() {
     (
         mkimage() {

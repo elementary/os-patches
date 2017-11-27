@@ -43,10 +43,10 @@ if [ -z "$RET" ]; then
 	if $NM_IS_INSTALLED; then
 		db_set netcfg/target_network_config $CONFIG_NM
 	else
-		if [ "$NETCFG_CONNECTION_TYPE" = "wired" ]; then
-			db_set netcfg/target_network_config $CONFIG_INTERFACES
-		else # wireless
+		if [ "$NETCFG_CONNECTION_TYPE" = "wireless" ]; then
 			db_set netcfg/target_network_config $CONFIG_LOOPBACK
+		else # vlan/wired
+			db_set netcfg/target_network_config $CONFIG_INTERFACES
 		fi
 	fi
 fi
