@@ -1509,6 +1509,9 @@ on_input_selection_changed (GtkTreeSelection *selection,
         gboolean      active;
         guint         id;
 
+        if (gtk_get_current_event_device () == NULL)
+                return;
+
         if (gtk_tree_selection_get_selected (selection, &model, &iter) == FALSE) {
                 g_debug ("Could not get default input from selection");
                 return;
@@ -1543,6 +1546,9 @@ on_output_selection_changed (GtkTreeSelection *selection,
         GtkTreeIter   iter;
         gboolean      active;
         guint         id;
+
+        if (gtk_get_current_event_device () == NULL)
+                return;
 
         if (gtk_tree_selection_get_selected (selection, &model, &iter) == FALSE) {
                 g_debug ("Could not get default output from selection");
