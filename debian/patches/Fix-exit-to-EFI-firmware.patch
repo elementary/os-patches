@@ -1,0 +1,55 @@
+From c945ca75c3b2b900040b905323b1226cb60a1166 Mon Sep 17 00:00:00 2001
+From: Mark Salter <msalter@redhat.com>
+Date: Fri, 15 Aug 2014 12:22:43 -0400
+Subject: [PATCH] Fix exit to EFI firmware
+
+The current code for EFI grub_exit() calls grub_efi_fini() before
+returning to firmware. In the case of ARM, this leaves a timer
+event running which could lead to a firmware crash. This patch
+changes this so that grub_machine_fini() is called with a NORETURN
+flag. This allows machine-specific shutdown to happen as well
+as the shutdown done by grub_efi_fini().
+
+Signed-off-by: Mark Salter <msalter@redhat.com>
+---
+ grub-core/kern/arm/efi/init.c | 2 +-
+ grub-core/kern/efi/efi.c      | 3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/grub-core/kern/arm/efi/init.c b/grub-core/kern/arm/efi/init.c
+index a6ae034..2572ca8 100644
+--- a/grub-core/kern/arm/efi/init.c
++++ b/grub-core/kern/arm/efi/init.c
+@@ -67,7 +67,7 @@ grub_machine_fini (int flags)
+ 
+   b = grub_efi_system_table->boot_services;
+ 
+-  efi_call_3 (b->set_timer, tmr_evt, GRUB_EFI_TIMER_PERIODIC, 0);
++  efi_call_3 (b->set_timer, tmr_evt, GRUB_EFI_TIMER_CANCEL, 0);
+   efi_call_1 (b->close_event, tmr_evt);
+ 
+   grub_efi_fini ();
+diff --git a/grub-core/kern/efi/efi.c b/grub-core/kern/efi/efi.c
+index 49a1501..2e77834 100644
+--- a/grub-core/kern/efi/efi.c
++++ b/grub-core/kern/efi/efi.c
+@@ -27,6 +27,7 @@
+ #include <grub/term.h>
+ #include <grub/kernel.h>
+ #include <grub/mm.h>
++#include <grub/loader.h>
+ 
+ /* The handle of GRUB itself. Filled in by the startup code.  */
+ grub_efi_handle_t grub_efi_image_handle;
+@@ -156,7 +157,7 @@ grub_efi_get_loaded_image (grub_efi_handle_t image_handle)
+ void
+ grub_exit (void)
+ {
+-  grub_efi_fini ();
++  grub_machine_fini (GRUB_LOADER_FLAG_NORETURN);
+   efi_call_4 (grub_efi_system_table->boot_services->exit,
+               grub_efi_image_handle, GRUB_EFI_SUCCESS, 0, 0);
+   for (;;) ;
+-- 
+2.7.4
+
