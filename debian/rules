@@ -1,0 +1,37 @@
+#!/usr/bin/make -f
+-include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,--as-needed
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@ --with gnome
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
+
+override_dh_auto_configure:
+	dh_auto_configure -- --enable-magic
+
+override_dh_install:
+	dh_install
+	rm -f debian/file-roller/usr/lib/*/nautilus/extensions-*/*.a
+	rm -f debian/file-roller/usr/lib/*/nautilus/extensions-*/*.la
+	/usr/bin/pkg-gnome-compat-desktop-file \
+		debian/file-roller/usr/share/applications/org.gnome.FileRoller.desktop \
+		debian/file-roller/usr/share/applications/file-roller.desktop
+
+override_dh_makeshlibs:
+	dh_makeshlibs --no-act
+
+# p7zip is in Ubuntu "universe"
+override_dh_gencontrol:
+ifeq ($(shell dpkg-vendor --query vendor),Ubuntu)
+	dh_gencontrol -- \
+		-Vzip:Depends='unzip, zip' \
+		-Vzip:Suggests='p7zip-full'
+else
+	dh_gencontrol -- \
+		-Vzip:Depends='p7zip-full' \
+		-Vzip:Suggests='unzip, zip'
+endif
