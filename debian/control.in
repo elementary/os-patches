@@ -1,0 +1,85 @@
+Source: gnome-bluetooth
+Section: gnome
+Priority: optional
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Uploaders: @GNOME_TEAM@
+Build-Depends: debhelper (>= 11),
+               gnome-pkg-tools,
+               gobject-introspection (>= 0.10.2-1~),
+               gtk-doc-tools,
+               libcanberra-gtk3-dev,
+               libgirepository1.0-dev (>= 0.9.5),
+               libglib2.0-dev (>= 2.38.0),
+               libgtk-3-dev (>= 3.12.0),
+               libnotify-dev,
+               libudev-dev,
+               libxml2-utils,
+               meson (>= 0.41.0)
+Standards-Version: 4.1.2
+Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-bluetooth
+Vcs-Git: https://salsa.debian.org/gnome-team/gnome-bluetooth.git
+Homepage: https://wiki.gnome.org/Projects/GnomeBluetooth
+
+Package: gnome-bluetooth
+Architecture: linux-any
+Depends: bluez (>= 5.5),
+         bluez-obexd,
+         udev (>= 154),
+         ${gir:Depends},
+         ${misc:Depends},
+         ${shlibs:Depends}
+Recommends: gnome-control-center | unity-control-center,
+            gvfs-backends
+Breaks: gnome-shell (<< 3.12),
+Conflicts: bluez-gnome
+Description: GNOME Bluetooth tools
+ This package contains tools for managing and manipulating Bluetooth
+ devices using the GNOME desktop.
+
+Package: libgnome-bluetooth13
+Section: libs
+Architecture: linux-any
+Multi-Arch: same
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Description: GNOME Bluetooth tools - support library
+ This package contains tools for managing and manipulating Bluetooth
+ devices using the GNOME desktop.
+ .
+ The libraries included provide support to gnome-bluetooth.
+
+Package: libgnome-bluetooth-dev
+Section: libdevel
+Architecture: linux-any
+Multi-Arch: same
+Depends: gir1.2-gnomebluetooth-1.0 (= ${binary:Version}),
+         libgnome-bluetooth13 (= ${binary:Version}),
+         libglib2.0-dev,
+         libgtk-3-dev,
+         libudev-dev,
+         ${misc:Depends}
+Suggests: pkg-config
+Description: GNOME Bluetooth tools - support library development files
+ This package contains tools for managing and manipulating Bluetooth
+ devices using the GNOME desktop.
+ .
+ The libraries included provide support to gnome-bluetooth.
+ .
+ This package contains the development files for libgnome-bluetooth
+
+Package: gir1.2-gnomebluetooth-1.0
+Section: introspection
+Architecture: linux-any
+Multi-Arch: same
+Depends: ${gir:Depends},
+         ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: gnome-bluetooth (<< 3.8),
+        gnome-shell (<< 3.4.2-9)
+Description: Introspection data for GnomeBluetooth
+ This package contains tools for managing and manipulating Bluetooth
+ devices using the GNOME desktop.
+ .
+ The libraries included provide support to gnome-bluetooth.
+ .
+ This package contains the introspection data for GnomeBluetooth

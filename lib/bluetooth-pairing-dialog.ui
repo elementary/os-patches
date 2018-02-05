@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.18.3 -->
+<interface>
+  <requires lib="gtk+" version="3.12"/>
+  <template class="BluetoothPairingDialog" parent="GtkDialog">
+    <property name="can_focus">False</property>
+    <property name="type_hint">dialog</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog-vbox1">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area1">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="pairing_dialog_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_start">50</property>
+            <property name="margin_end">50</property>
+            <property name="margin_top">24</property>
+            <property name="margin_bottom">30</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel" id="help_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label">Please enter the following PIN on 'Foobar':</property>
+                <property name="justify">center</property>
+                <property name="wrap">True</property>
+                <property name="width_chars">40</property>
+                <property name="max_width_chars">40</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkNotebook" id="pin_notebook">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="no_show_all">True</property>
+                <property name="margin_top">24</property>
+                <property name="show_tabs">False</property>
+                <property name="show_border">False</property>
+                <child>
+                  <object class="GtkAspectFrame" id="aspectframe1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkEntry" id="entry_pin">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="margin_start">25</property>
+                        <property name="margin_end">25</property>
+                        <property name="max_length">6</property>
+                        <property name="activates_default">True</property>
+                        <property name="width_chars">6</property>
+                        <property name="xalign">0.5</property>
+                        <property name="input_purpose">digits</property>
+                        <property name="input_hints">GTK_INPUT_HINT_NO_SPELLCHECK | GTK_INPUT_HINT_NONE</property>
+                        <style>
+                          <class name="pin-entry"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_pin">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label">123456</property>
+                    <style>
+                      <class name="pin-label"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_placeholder">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

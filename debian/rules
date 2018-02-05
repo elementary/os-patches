@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+-include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,--as-needed
+
+# needed with the Ubuntu toolchain to avoid issues
+export DEB_LDFLAGS_MAINT_STRIP := -Wl,-Bsymbolic-functions
+
+%:
+	dh $@ --with gir,gnome --buildsystem=meson
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		-Denable-gtk-doc=true \
+		-Denable-icon-update=true \
+		-Denable-introspection=true
+
+override_dh_missing:
+	dh_missing --fail-missing
+
+override_dh_makeshlibs:
+	dh_makeshlibs -- -c4
+
+override_dh_girepository:
+	dh_girepository -l applet \
+		/usr/lib/$(DEB_HOST_MULTIARCH)/gnome-bluetooth/
+
+override_dh_translations:
+	ninja -C obj-$(DEB_HOST_GNU_TYPE) gnome-bluetooth2-pot
+	dh_translations
