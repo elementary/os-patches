@@ -1,0 +1,27 @@
+Description: install with --install-layout=deb
+Author: Martin Pitt <mpitt@debian.org>
+Forwarded: not-needed
+Last-Update: 2015-09-17
+
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -63,7 +63,7 @@
+ 
+ # Use distutils to install the module.
+ install-exec-local: .stamp-distutils-in-builddir
+-	$(PYTHON) setup.py install --prefix=$(DESTDIR)$(prefix)
++	$(PYTHON) setup.py install --install-layout=deb --root=$(DESTDIR)
+ 
+ # Uninstall the module, crossing our fingers that we know enough
+ # about how distutils works to do this.  Unfortunately, distutils
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -1965,7 +1965,7 @@
+ 
+ # Use distutils to install the module.
+ install-exec-local: .stamp-distutils-in-builddir
+-	$(PYTHON) setup.py install --prefix=$(DESTDIR)$(prefix)
++	$(PYTHON) setup.py install --install-layout=deb --root=$(DESTDIR)
+ 
+ # Uninstall the module, crossing our fingers that we know enough
+ # about how distutils works to do this.  Unfortunately, distutils

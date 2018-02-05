@@ -1,0 +1,25 @@
+Description: Show 'Printers' in Unity's Settings app.
+---
+ print-applet.desktop.in          |    1 +
+ system-config-printer.desktop.in |    6 ++++++
+ 2 files changed, 7 insertions(+)
+
+--- a/print-applet.desktop.in
++++ b/print-applet.desktop.in
+@@ -8,3 +8,4 @@
+ NotShowIn=KDE;GNOME;Cinnamon;LXDE;Unity;
+ StartupNotify=false
+ X-GNOME-Autostart-Delay=30
++X-Ubuntu-Gettext-Domain=system-config-printer
+--- a/system-config-printer.desktop.in
++++ b/system-config-printer.desktop.in
+@@ -6,3 +6,9 @@
+ Type=Application
+ Icon=printer
+ StartupNotify=true
++NotShowIn=KDE;GNOME;
++X-Ubuntu-Gettext-Domain=system-config-printer
++Categories=GNOME;GTK;Settings;HardwareSettings;X-GNOME-Settings-Panel;X-Unity-Settings-Panel;
++X-GNOME-Settings-Panel=printing
++X-Unity-Settings-Panel=printing
++Keywords=Printer;Queue;Print;Paper;Ink;Toner;

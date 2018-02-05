@@ -1,0 +1,24 @@
+From 4450fd4a2ad3c5447118d33ee373e555f0e81ab3 Mon Sep 17 00:00:00 2001
+From: Laurent Bigonville <bigon@bigon.be>
+Date: Thu, 2 Jun 2016 14:41:48 +0200
+Subject: [PATCH] Do not start the applet on GNOME and Cinnamon desktops
+ (Closes: #40)
+
+{gnome,cinnamon}-settings-daemon are also claiming the D-Bus interfaces
+provided by the applet
+Don't launch the applet in LXDE, until bug 323322 is fixed. (LP: #529472)
+Don't autostart the applet in Unity or GNOME either
+---
+ print-applet.desktop.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/print-applet.desktop.in
++++ b/print-applet.desktop.in
+@@ -5,6 +5,6 @@
+ Terminal=false
+ Type=Application
+ Icon=printer
+-NotShowIn=KDE;GNOME;Cinnamon;
++NotShowIn=KDE;GNOME;Cinnamon;LXDE;Unity;
+ StartupNotify=false
+ X-GNOME-Autostart-Delay=30

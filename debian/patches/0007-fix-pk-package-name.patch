@@ -1,0 +1,15 @@
+Description: Fix the package names that PackageKit should try to install
+Author: Laurent Bigonville <bigon@debian.org>
+Forwarded: not-needed
+
+--- a/newprinter.py
++++ b/newprinter.py
+@@ -1416,7 +1416,7 @@
+             try:
+                 pk = installpackage.PackageKit ()
+                 # The following call means a blocking, synchronous, D-Bus call
+-                pk.InstallPackageName (0, 0, "samba-client")
++                pk.InstallPackageName (0, 0, "smbclient")
+             except:
+                 nonfatalException ()
+ 

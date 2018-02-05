@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+GNOME_DOWNLOAD_URL = http://cyberelk.net/tim/data/system-config-printer/$(DEB_UPSTREAM_VERSION_MAJOR_MINOR)/$(GNOME_TARBALL)
+TARBALL_EXT := tar.xz
+
+-include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+%:
+# We need to force the build system to autoconf otherwise for some reasons it
+# tries to run the python_distutils one
+	dh $@ --buildsystem=autoconf --with gnome,python3
+
+override_dh_auto_configure:
+	dh_auto_configure -- --with-udev-rules \
+		             --with-udevdir=/lib/udev \
+		             --with-systemdsystemunitdir=/lib/systemd/system
+
+override_dh_python3:
+	dh_python3 -ppython3-cupshelpers
+	dh_python3 -psystem-config-printer /usr/share/system-config-printer/
+	dh_python3 -psystem-config-printer-common /usr/share/system-config-printer/
+
+override_dh_installdocs:
+	dh_installdocs -A AUTHORS
+
+override_dh_install:
+	dh_install --list-missing
+
+override_dh_autoreconf:
+	dh_autoreconf ./bootstrap

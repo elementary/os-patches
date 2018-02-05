@@ -1,0 +1,20 @@
+--- a/system-config-printer.desktop.in
++++ b/system-config-printer.desktop.in
+@@ -1,5 +1,5 @@
+ [Desktop Entry]
+-_Name=Print Settings
++_Name=Printers
+ _Comment=Configure printers
+ Exec=system-config-printer
+ Terminal=false
+--- a/system-config-printer.py
++++ b/system-config-printer.py
+@@ -750,7 +750,7 @@
+         connected = bool(self.cups)
+ 
+         host = CUPS_server_hostname ()
+-        self.PrintersWindow.set_title(_("Print Settings - %s") % host)
++        self.PrintersWindow.set_title(_("Printers - %s") % host)
+ 
+         if connected:
+             status_msg = _("Connected to %s") % host
