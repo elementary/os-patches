@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="ja">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>TeX ファイル編集に利用可能なエディター。</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>サポートされているエディター</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p><link xref="synctex-search#forward-search">前方検索</link> (<app>gedit</app> から<app>ドキュメントビューアー</app>) および <link xref="synctex-search#backward-search">後方検索</link> (<app>ドキュメントビューアー</app>から <app>gedit</app>) の両方をサポートしています。</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p><app>gedit</app> プラグインには、Vim で SyncTeX を機能させるのに利用できる python スクリプト (evince_dbus.py) が含まれています。vim-latex と<app>ドキュメントビューアー</app>を連携できるようにするには、以下の手順を踏む必要があります。</p>
+<steps>
+ <item>
+  <p>パスが通る任意のフォルダーに evince_dbus.py をコピーし、実行権を与えます。</p>
+ </item>
+ <item>
+  <p>~/.vimrc というファイルを編集し、以下の行を追加します。</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>これで \ls とタイプすることにより、vim-latex から前方検索を利用できるようになります。後方検索は、まだサポートされていません。</p>
+  </item>
+</steps>
+</section>
+</page>

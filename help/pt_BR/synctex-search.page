@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="pt-BR">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Mude entre o <app>Visualizador de documentos</app> e o <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartilhada Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hugo Dória</mal:name>
+      <mal:email>hugodoria@gmail.com</mal:email>
+      <mal:years>2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Pedro de Medeiros</mal:name>
+      <mal:email>pedrovmm+l10n@gmail.com</mal:email>
+      <mal:years>2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel S. Koda</mal:name>
+      <mal:email>danielskoda@gmail.com</mal:email>
+      <mal:years>2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Felipe Braga</mal:name>
+      <mal:email>fbobraga@gmail.com</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Rafael Fontenelle</mal:name>
+      <mal:email>rafaelff@gnome.org</mal:email>
+      <mal:years>2017</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Pesquisas com SyncTeX</title>
+<p>Depois de <link xref="synctex-compile">compilar o arquivo TeX com suporte ao SyncTeX</link>, você poderá fazer as pesquisas. SyncTeX suporta também pesquisas para frente e para trás em arquivos incluídos no fonte TeX.</p>
+
+<section id="forward-search">
+    <title>Pesquisa para frente: do fonte TeX para o arquivo PDF (do <app>gedit</app> para o <app>Visualizador de documentos</app>)</title>
+     <p>A pesquisa para a frente permite que você clique em uma seção específica do código-fonte TeX, e salte para a posição associada no documento PDF. Para executar a pesquisa para frente:</p>
+<steps>
+<item>
+<p>Clique numa linha no arquivo de fonte TeX.</p>
+</item>
+<item>
+<p>No <app>gedit</app>, clique em <guiseq><gui>Ferramentas</gui><gui>Pesquisa para frente</gui></guiseq>. A linha correspondente no PDF será destacada em vermelho.</p>
+<p>Alternativamente, você pode pressionar <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq>, ou <keyseq><key>Ctrl</key>clique esquerdo</keyseq>. A linha correspondente no PDF será destacada em vermelho.</p>
+</item>
+</steps>
+<note>
+<p>Se o arquivo PDF correspondente não estiver aberto, realizar uma pesquisa para frente vai abrir o documento PDF no <app>Visualizador de documentos</app>.</p>
+</note>
+<p>Se você tem um projeto complexo com vários arquivos TeX, você pode colocar:</p>
+<code>% mainfile: arquivoPrincipal.tex</code>
+<p>nas três primeiras ou últimas linhas de cada arquivo incluído TeX, e pesquisar para frente vai funcionar com eles. A pesquisa para trás deve sempre funcionar, mesmo sem isso.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Pesquisa para trás: a partir do o arquivo PDF para o código fonte TeX (do <app>Visualizador de documentos</app> para o <app>gedit</app>)</title>
+     <p>A pesquisa para trás permite que você clique em uma linha específica no arquivo PDF, e salte para a linha associada no código-fonte TeX.</p>
+<p>Você pode realizar uma pesquisa para trás, pressionando <keyseq><key>Ctrl</key>clique esquerdo</keyseq> no <app>Visualizador de documentos</app>. A linha correspondente no código-fonte TeX será selecionada.</p>
+</section>
+
+</page>

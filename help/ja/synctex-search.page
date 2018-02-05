@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="ja">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc><app>ドキュメントビューアー</app>と <app>gedit</app> 間を行ったり来たり。</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>SyncTeX による検索</title>
+<p><link xref="synctex-compile">TeX ファイルを SyncTeX でコンパイル</link>すると検索を行うことができます。SyncTeX は、インクルードファイルからの前方検索および後方検索をサポートしています。</p>
+
+<section id="forward-search">
+    <title>前方検索: TeX から PDF (<app>gedit</app> から<app>ドキュメントビューアー</app>)</title>
+     <p>前方検索では、TeX ソースコードの特定の節をクリックすると PDF の関連する位置へジャンプできます。前方検索を行うには、以下の手順を踏みます。</p>
+<steps>
+<item>
+<p>TeX ファイルの任意の行をクリックします。</p>
+</item>
+<item>
+<p><app>gedit</app> の <guiseq><gui>ツール</gui><gui>Forward Search</gui></guiseq> をクリックします。PDF の対応する行が、赤枠で囲まれます。</p>
+<p>代わりに <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq> を押すか <keyseq><key>Ctrl</key>左クリック</keyseq>も利用できます。PDF の対応する行が、赤枠で囲まれます。</p>
+</item>
+</steps>
+<note>
+<p>対応する PDF ファイルが開かれていない場合、前方検索を実行すると<app>ドキュメントビューアー</app>で PDF を開きます。</p>
+</note>
+<p>複数の TeX ファイルからなる複雑なプロジェクトがある場合、</p>
+<code>% mainfile: mainfile.tex</code>
+<p>という行を TeX の各インクルードファイルの最初か最後の 3 行に含めることで前方検索が機能します。このモードラインを追加しない場合でも後方検索は常に機能します。</p>
+
+</section>
+
+<section id="backward-search">
+    <title>後方検索: PDF から TeX (<app>ドキュメントビューアー</app>から <app>gedit</app>)</title>
+     <p>後方検索では、PDF ファイルの特定の行をクリックすると TeX ソースコードの関連する行へジャンプできます。</p>
+<p>
+You can perform a backward search by pressing <keyseq><key>Ctrl</key>left click</keyseq> in the <app>document viewer</app>. The corresponding line in the TeX source code will be highlighted.
+     </p>
+</section>
+
+</page>

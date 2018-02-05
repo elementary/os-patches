@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="el">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Ποιον επεξεργαστή μπορείτε να χρησιμοποιήσετε για επεξεργασία αρχείου TEX;</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Ελληνική μεταφραστική ομάδα GNOME</mal:name>
+      <mal:email>team@gnome.gr</mal:email>
+      <mal:years>2005-2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Στυλιανός Παπαναστασίου</mal:name>
+      <mal:email>stelios@dcs.gla.ac.uk</mal:email>
+      <mal:years>2005</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Μιχάλης Κοτσαρίνης</mal:name>
+      <mal:email>mk73628@gmail.com</mal:email>
+      <mal:years>2010</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Δημήτρης Σπίγγος</mal:name>
+      <mal:email>dmtrs32@gmail.com</mal:email>
+      <mal:years>2012, 2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Θάνος Τρυφωνίδης</mal:name>
+      <mal:email>tomtryf@gmail.com</mal:email>
+      <mal:years>2014, 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mαρία Μαυρίδου</mal:name>
+      <mal:email>mavridou@gmail.com</mal:email>
+      <mal:years>2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Υποστηριζόμενοι επεξεργαστές</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p><link xref="synctex-search#forward-search">Aναζήτηση προς τα εμπρός</link> (από <app>gedit</app> στην <app>προβολή εγγράφων</app>) και <link xref="synctex-search#backward-search">Αναζήτηση προς τα πίσω</link> (από την <app>προβολή εγγράφων</app> σε <app>gedit</app>) υποστηρίζονται και οι δυο.</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>Το πρόσθετο <app>gedit</app> περιέχει μια δέσμη ενεργειών python (evince_dbus.py) που μπορεί να χρησιμοποιηθεί για λήψη του SyncTeX που δουλεύει με το Vim. Για να χρησιμοποιήσετε το vim-latex μαζί με την <app>προβολή εγγράφων</app> χρειάζεστε να ακολουθήσετε τα επόμενα βήματα:</p>
+<steps>
+ <item>
+  <p>Αντιγράψτε το evince_dbus.py σε κάποιο κατάλογο στη διαδρομή σας και δώστε του δικαιώματα +x.</p>
+ </item>
+ <item>
+  <p>Τροποποιήστε το αρχείο σας ~/.vimrc και προσθέστε τις επόμενες γραμμές.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Τώρα μπορείτε να χρησιμοποιήσετε την αναζήτηση προς τα εμπρός από το vim-latex πληκτρολογώντας \ls. Η αναζήτηση προς τα πίσω δεν υποστηρίζεται ακόμα.</p>
+  </item>
+</steps>
+</section>
+</page>

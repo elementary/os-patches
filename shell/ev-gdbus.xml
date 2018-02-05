@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Introspection 0.1//EN"
+                      "http://www.freedesktop.org/software/dbus/introspection.dtd">
+<node>
+  <interface name='org.gnome.evince.Application'>
+    <annotation name="org.gtk.GDBus.C.Name" value="EvinceApplication" />
+    <method name='Reload'>
+      <arg type='a{sv}' name='args' direction='in'/>
+      <arg type='u' name='timestamp' direction='in'/>
+    </method>
+    <method name='GetWindowList'>
+      <arg type='ao' name='window_list' direction='out'/>
+    </method>
+  </interface>
+  <interface name='org.gnome.evince.Window'>
+    <annotation name="org.gtk.GDBus.C.Name" value="EvinceWindow" />
+    <method name='SyncView'>
+      <arg type='s' name='source_file' direction='in'/>
+      <arg type='(ii)' name='source_point' direction='in'/>
+      <arg type='u' name='timestamp' direction='in'/>
+    </method>
+    <signal name='SyncSource'>
+      <arg type='s' name='source_file' direction='out'/>
+      <arg type='(ii)' name='source_point' direction='out'/>
+      <arg type='u' name='timestamp' direction='out'/>
+    </signal>
+    <signal name='Closed'/>
+    <signal name='DocumentLoaded'>
+      <arg type='s' name='uri' direction='out'/>
+    </signal>
+  </interface>
+</node>

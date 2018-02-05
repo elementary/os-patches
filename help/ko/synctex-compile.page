@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-compile" xml:lang="ko">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="third"/>
+    <desc>TeX 문서를 SyncTeX으로 컴파일하는 방법</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>크리에이티브 커먼즈 동일조건변경허락 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>조성호</mal:name>
+      <mal:email>darkcircle.0426@gmail.com</mal:email>
+      <mal:years>2012, 2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>류창우</mal:name>
+      <mal:email>cwryu@debian.org</mal:email>
+      <mal:years>2014-2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>SyncTeX으로 TeX 컴파일하기</title>
+<p>TeX 파일 처음 부분에 <em>\synctex=1</em> 줄을 추가하면 SyncTex와 동기화를 시작합니다.</p>
+<code>
+\documentclass{article}
+\synctex=1
+\usepackage{fullpage}
+\begin{document}
+...
+\end{document}
+</code>
+<p>대신, <em>-synctex=1</em>옵션으로 pdflatex 명령을 실행할 수 있습니다:</p>
+<screen>pdflatex -synctex=1 yourFile.tex</screen>
+</page>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="hu">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Parancssor</title>
+    <desc>Az <cmd>evince</cmd> paranccsal tetszőleges számú fájlt nyithat meg különböző oldalakon és módokban.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hammer Attila</mal:name>
+      <mal:email>hammera at pickup dot hu</mal:email>
+      <mal:years>2014.</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Kelemen Gábor</mal:name>
+      <mal:email>kelemeng at gnome dot hu</mal:email>
+      <mal:years>2011, 2012, 2013, 2014, 2015.</mal:years>
+    </mal:credit>
+  </info>
+
+<title>A parancssor</title>
+<p>A <app>Dokumentummegjelenítő</app> parancssorból való elindításához írja be az <cmd>evince</cmd> parancsot. Egy adott fájl megnyitásához írja be a fájlnevet az evince parancs után:</p>
+
+<screen>evince fájl.pdf</screen>
+<p>Több fájlt is megnyithat a szóközzel elválasztott fájlnevek beírásával az evince parancs után:</p>
+<screen>evince fájl1.pdf fájl2.pdf</screen>
+<p>A <app>dokumentummegjelenítő</app> támogatja a weben található fájlok kezelését. Az evince parancs után például megadhatja egy fájl helyét a weben:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Dokumentum megnyitása adott oldalon</title>
+    <p>Dokumentum adott oldalon való megnyitására használhatja a <cmd>--page-label</cmd> kapcsolót. Egy dokumentum például a következőképpen nyitható meg a 3. oldalon:</p>
+    <screen>evince --page-label=3 fájl.pdf</screen>
+    <p>Az oldalcímkének azonos formátumúnak kell lennie, mint a <app>Dokumentummegjelenítő</app> eszköztárának megjelenő oldalszámnak.</p>
+</section>
+<section id="fullsreen">
+    <title>Dokumentum megnyitása teljes képernyős módban</title>
+    <screen>evince --fullscreen fájl.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Dokumentum megnyitása bemutató módban</title>
+    <screen>evince --presentation fájl.pdf</screen>
+</section>
+<section id="preview">
+    <title>Dokumentum megnyitása előnézet módban</title>
+    <screen>evince --preview fájl.pdf</screen>
+</section>
+</page>

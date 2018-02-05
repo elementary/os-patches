@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="pt-BR">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Linha de comando</title>
+    <desc>O comando <cmd>evince</cmd> pode abrir qualquer número de arquivos, em páginas específicas e em vários modos.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartilhada Igual 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hugo Dória</mal:name>
+      <mal:email>hugodoria@gmail.com</mal:email>
+      <mal:years>2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Pedro de Medeiros</mal:name>
+      <mal:email>pedrovmm+l10n@gmail.com</mal:email>
+      <mal:years>2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel S. Koda</mal:name>
+      <mal:email>danielskoda@gmail.com</mal:email>
+      <mal:years>2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Felipe Braga</mal:name>
+      <mal:email>fbobraga@gmail.com</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Rafael Fontenelle</mal:name>
+      <mal:email>rafaelff@gnome.org</mal:email>
+      <mal:years>2017</mal:years>
+    </mal:credit>
+  </info>
+
+<title>A linha de comando</title>
+<p>Para iniciar o <app>Visualizador de Documentos</app> da linha de comando, use o comando <cmd>evince</cmd>. Você pode abrir um arquivo, digitando o nome do arquivo após o comando <cmd>evince</cmd>:</p>
+
+<screen>evince arquivo.pdf</screen>
+<p>Você pode abrir vários arquivos, digitando os nomes de arquivos depois do comando <cmd>evince</cmd>, separando os nomes por um espaço:</p>
+<screen>evince arquivo1.pdf arquivo2.pdf</screen>
+<p>O <app>Visualizador de documentos</app> também suporta o processamento de arquivos da web. Por exemplo, após o comando <cmd>evince</cmd> você pode usar a localização de um arquivo na web:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Abrindo um documento numa determinada página</title>
+    <p>Você pode usar o modificador <cmd>--page-label</cmd> para abrir um documento em uma página específica. Por exemplo, para abrir um documento para página 3, você deverá digitar:</p>
+    <screen>evince --page-label=3 arquivo.pdf</screen>
+    <p>O valor do argumento de <cmd>--page-label</cmd> deve ter o mesmo formato que o número da página exibido na barra de ferramentas do <app>Visualizador de documentos</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Abrindo um documento no modo de tela cheia</title>
+    <screen>evince --fullscreen arquivo.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Abrindo um documento no modo de apresentação</title>
+    <screen>evince --presentation arquivo.pdf</screen>
+</section>
+<section id="preview">
+    <title>Abrindo um documento no modo de pré-visualização</title>
+    <screen>evince --preview arquivo.pdf</screen>
+</section>
+</page>

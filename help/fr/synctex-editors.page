@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="fr">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Quel éditeur utiliser pour saisir vos fichiers TeX ?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Jonathan Ernst</mal:name>
+      <mal:email>jonathan@ernstfamily.ch</mal:email>
+      <mal:years>2006, 2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Claude Paroz</mal:name>
+      <mal:email>claude@2xlibre.net</mal:email>
+      <mal:years>2006-2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Bruno Brouard</mal:name>
+      <mal:email>annoa.b@gmail.com</mal:email>
+      <mal:years>2011-2012</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mickael Albertus</mal:name>
+      <mal:email>mickael.albertus@gmail.com</mal:email>
+      <mal:years>2012-2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Michael Scherer</mal:name>
+      <mal:email>misc@zarb.org</mal:email>
+      <mal:years>2014</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Leonor Palazzo</mal:name>
+      <mal:email>leonor.palazzo@gmail.com</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Éditeurs pris en charge</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p><link xref="synctex-search#forward-search">Recherche en avant</link> (de <app>gedit</app> vers le <app>Visionneur de documents</app>) et <link xref="synctex-search#backward-search">Recherche en arrière</link> (du <app>Visionneur de documents</app> vers <app>gedit</app>) sont tous les deux pris en charge.</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>Le greffon <app>gedit</app> contient un script python (evince_dbus.py) qui peut être utilisé pour faire fonctionner SyncTeX avec Vim. Afin d'utiliser vim-latex conjointement avec le <app>Visionneur de documents</app>, vous devez suivre les étapes suivantes :</p>
+<steps>
+ <item>
+  <p>Copiez le fichier evince_dbus.py dans un répertoire contenu dans votre chemin et donnez-lui les permissions +x.</p>
+ </item>
+ <item>
+  <p>Modifiez votre fichier ~/.vimrc et ajoutez les lignes suivantes :</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Vous pouvez maintenant utiliser Recherche en avant à partir de vim-latex en saisissant \ls. La recherche en arrière n'est pas encore prise en charge.</p>
+  </item>
+</steps>
+</section>
+</page>

@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Object Hierarchy: Evince Programmer's Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<link rel="home" href="index.html" title="Evince Programmer's Reference Manual">
+<link rel="up" href="index.html" title="Evince Programmer's Reference Manual">
+<link rel="prev" href="EvPageActionWidget.html" title="EvPageActionWidget">
+<link rel="next" href="api-index-full.html" title="API Index">
+<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><img src="up-insensitive.png" width="16" height="16" border="0"></td>
+<td><a accesskey="p" href="EvPageActionWidget.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="api-index-full.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="object-tree"></a>Object Hierarchy</h1></div></div></div>
+<pre class="screen">
+    GObject
+    <span class="lineart">├──</span> GApplication
+    <span class="lineart">│</span>   <span class="lineart">╰──</span> GtkApplication
+    <span class="lineart">│</span>       <span class="lineart">╰──</span> <a class="link" href="evince-ev-application.html#EvApplication">EvApplication</a>
+    <span class="lineart">├──</span> <a class="link" href="EvFileMonitor.html" title="EvFileMonitor">EvFileMonitor</a>
+    <span class="lineart">├──</span> <a class="link" href="EvHistory.html" title="EvHistory">EvHistory</a>
+    <span class="lineart">├──</span> <a class="link" href="evince-ev-media-player-keys.html#EvMediaPlayerKeys">EvMediaPlayerKeys</a>
+    <span class="lineart">├──</span> GInitiallyUnowned
+    <span class="lineart">│</span>   <span class="lineart">╰──</span> GtkWidget
+    <span class="lineart">│</span>       <span class="lineart">╰──</span> GtkContainer
+    <span class="lineart">│</span>           <span class="lineart">├──</span> GtkBox
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">├──</span> GtkInfoBar
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="EvMessageArea.html" title="EvMessageArea">EvMessageArea</a>
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">│</span>       <span class="lineart">╰──</span> <a class="link" href="EvProgressMessageArea.html" title="EvProgressMessageArea">EvProgressMessageArea</a>
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="evince-ev-properties-fonts.html#EvPropertiesFonts">EvPropertiesFonts</a>
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="evince-ev-properties-license.html#EvPropertiesLicense">EvPropertiesLicense</a>
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="EvSidebarAttachments.html" title="EvSidebarAttachments">EvSidebarAttachments</a>
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="EvSidebar.html" title="EvSidebar">EvSidebar</a>
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="EvSidebarLayers.html" title="EvSidebarLayers">EvSidebarLayers</a>
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="EvSidebarLinks.html" title="EvSidebarLinks">EvSidebarLinks</a>
+    <span class="lineart">│</span>           <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="EvSidebarThumbnails.html" title="EvSidebarThumbnails">EvSidebarThumbnails</a>
+    <span class="lineart">│</span>           <span class="lineart">╰──</span> GtkBin
+    <span class="lineart">│</span>               <span class="lineart">├──</span> GtkToolItem
+    <span class="lineart">│</span>               <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="EvPageActionWidget.html" title="EvPageActionWidget">EvPageActionWidget</a>
+    <span class="lineart">│</span>               <span class="lineart">├──</span> GtkViewport
+    <span class="lineart">│</span>               <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="EvPasswordView.html" title="EvPasswordView">EvPasswordView</a>
+    <span class="lineart">│</span>               <span class="lineart">╰──</span> GtkWindow
+    <span class="lineart">│</span>                   <span class="lineart">├──</span> GtkDialog
+    <span class="lineart">│</span>                   <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="evince-ev-properties-dialog.html#EvPropertiesDialog">EvPropertiesDialog</a>
+    <span class="lineart">│</span>                   <span class="lineart">╰──</span> GtkApplicationWindow
+    <span class="lineart">│</span>                       <span class="lineart">╰──</span> <a class="link" href="EvWindow.html" title="EvWindow">EvWindow</a>
+    <span class="lineart">├──</span> <a class="link" href="evince-ev-metadata.html#EvMetadata">EvMetadata</a>
+    <span class="lineart">╰──</span> GtkAction
+        <span class="lineart">╰──</span> <a class="link" href="EvPageAction.html" title="EvPageAction">EvPageAction</a>
+    <a href="/home/carlos/gnome/share/gtk-doc/html/gobject/GTypeModule.html">GInterface</a>
+    <span class="lineart">╰──</span> <a class="link" href="EvSidebarPage.html" title="EvSidebarPage">EvSidebarPage</a>
+</pre>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.25.1</div>
+</body>
+</html>

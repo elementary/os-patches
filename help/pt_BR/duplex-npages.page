@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="duplex-npage" xml:lang="pt-BR">
+
+  <info>
+    <link type="guide" xref="print-booklet#doubleSided"/>
+
+    <desc>Imprimir um livreto com mais de 16 páginas.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartilhada Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hugo Dória</mal:name>
+      <mal:email>hugodoria@gmail.com</mal:email>
+      <mal:years>2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Pedro de Medeiros</mal:name>
+      <mal:email>pedrovmm+l10n@gmail.com</mal:email>
+      <mal:years>2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel S. Koda</mal:name>
+      <mal:email>danielskoda@gmail.com</mal:email>
+      <mal:years>2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Felipe Braga</mal:name>
+      <mal:email>fbobraga@gmail.com</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Rafael Fontenelle</mal:name>
+      <mal:email>rafaelff@gnome.org</mal:email>
+      <mal:years>2017</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Livreto de N páginas</title>
+ <note style="important">
+  <p><em>N</em> é um múltiplo de 4.</p>
+ </note>
+
+ <p>Se o número de páginas de seu documento PDF não é um múltiplo de 4, você deve adicionar uma quantidade adequada de páginas em branco (1, 2 ou 3) no final de seu documento para fazê-lo ficar com um número de páginas múltiplo de 4. Para fazer isso, você deve:</p>
+ <steps>
+ <item>
+  <p>Criar um documento PDF em branco usando o <app>LibreOffice Writer</app>.</p>
+ </item>
+ <item>
+  <p>Juntar seu documento PDF com o documento em branco gerado no passo anterior no <app>PDF-Shuffler</app>, colocando as páginas em branco no final.</p>
+ </item>
+</steps>
+
+
+<steps>
+ <item>
+  <p>Clique no menu de <gui>Opções do arquivo</gui> no canto superior direito da janela e selecione <gui>Imprimir</gui>.</p>
+ </item>
+ <item>
+  <p>Escolha a aba <gui>Geral</gui>.</p>
+  <p>Em <em>Intervalo</em>, selecione <gui>Páginas</gui>.</p>
+  <tree>
+   <item>Digite os números de páginas nessa ordem: <item>n, 1, 2, n-1, n-2, 3, 4, n-3, n-4, 5, 6, n-5, n-6, 7, 8, n-7, n-8, 9, 10, n-9, n-10, 11, 12, n-11, n-12...</item> <item>...até digitar todos os números de página.</item></item>
+  </tree>
+ </item>
+ <item>
+  <p>Escolha a aba <gui>Configurar página</gui>.</p>
+  <p>Em <em>Layout</em>, na opção <gui>Frente e verso</gui>, selecione <gui>Lado menor (virar)</gui>.</p>
+  <p>Na opção <gui>Páginas por lado</gui>, selecione <gui>2</gui>.</p>
+  <p>Na opção <gui>Ordem das páginas</gui>, selecione <gui>Esquerda para direita</gui>.</p>
+ </item>
+ <item>
+  <p>Clique em <gui>Imprimir</gui>.</p>
+ </item>
+</steps>
+</page>

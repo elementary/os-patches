@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="ca">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Quin editor podeu fer servir per editar fitxers TEX?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartir Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Carles Ferrando Garcia</mal:name>
+      <mal:email>carles.ferrando@gmail.com</mal:email>
+      <mal:years>2010</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Xavier Roijals</mal:name>
+      <mal:email>xavier.roijals@gmail.com</mal:email>
+      <mal:years>2011</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Gil Forcada</mal:name>
+      <mal:email>gilforcada@guifi.net</mal:email>
+      <mal:years>2013</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Editors compatibles</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>També es poden realitzar <link xref="synctex-search#forward-search">Cerca cap endavant</link> (des de l'editor de text <app>gedit</app> al <app>Visualitzador de document</app>) i la <link xref="synctex-search#backward-search">Cerca cap enrere</link> (des del <app>Visualitzador de document</app> cap al <app>gedit</app>).</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>El connector del <app>gedit</app> conté un script de python (evince_dbus.py) que es pot fer servir per fer treballar el SyncTeX amb el Vim. Per tal de fer servir el vim-latex juntament amb el <app>Visualitzador de documents</app> us cal seguir els passos següents:</p>
+<steps>
+ <item>
+  <p>Copieu l'script evince_dbus.py a algun directori que estigui al camí (PATH) i feu que sigui executable (+x).</p>
+ </item>
+ <item>
+  <p>Modifiqueu el fitxer de configuració del Vim (~/.vimrc) i afegiu-hi les línies següents.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Ara ja podeu fer servir la cerca cap endavant amb el vim-latex si teclegeu \ls. La cerca cap enrere encara no està implementada.</p>
+  </item>
+</steps>
+</section>
+</page>

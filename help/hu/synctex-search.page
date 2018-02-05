@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="hu">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Váltás az <app>dokumentummegjelenítő</app> és <app>gedit</app> között.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hammer Attila</mal:name>
+      <mal:email>hammera at pickup dot hu</mal:email>
+      <mal:years>2014.</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Kelemen Gábor</mal:name>
+      <mal:email>kelemeng at gnome dot hu</mal:email>
+      <mal:years>2011, 2012, 2013, 2014, 2015.</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Keresés a SyncTeX-hel</title>
+<p>Miután <link xref="synctex-compile">lefordította a TeX fájlját a SyncTeX-hel</link>, kereshet benne. A SyncTeX még a beágyazott fájlban való előre és hátra keresést is támogatja.</p>
+
+<section id="forward-search">
+    <title>Előre keresés: TeX-ből PDF-be (<app>geditből</app> a <app>dokumentummegjelenítőbe</app>)</title>
+     <p>Az előre keresés lehetővé teszi a TeX forráskód egy adott szakaszára kattintást, majd az ahhoz tartozó pozícióra ugrást a PDF-ben. Előre keresés végrehajtásához:</p>
+<steps>
+<item>
+<p>Kattintson egy sorra a TeX fájlban.</p>
+</item>
+<item>
+<p>A <app>geditben</app> válassza az <guiseq><gui>Eszközök</gui><gui>Keresés előre</gui></guiseq> menüpontot. A PDF-ben megfelelő sor vörös színnel kerül kiemelésre.</p>
+<p>Ennek alternatívájaként megnyomhatja a <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq> kombinációt, vagy a <keyseq><key>Ctrl</key>bal kattintást</keyseq>. A PDF-ben megfelelő sor vörös színnel kerül kiemelésre.</p>
+</item>
+</steps>
+<note>
+<p>Ha a megfelelő PDF-fájl nincs megnyitva, akkor a keresés előre megnyitja a PDF-fájlt a <app>dokumentummegjelenítőben</app>.</p>
+</note>
+<p>Ha a projekt összetett és több TeX-fájlból áll, akkor a</p>
+<code>% mainfile: főfájl.tex</code>
+<p>sor elhelyezésével az egyes beágyazott TeX-fájlok első vagy utolsó három sorában az előre keresés működése biztosítható. A hátra keresés mindig működik, még ha ezt a sort nem is veszi fel.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Hátra keresés: PDF-ből TeX-be (<app>dokumentummegjelenítőből</app> a <app>geditbe</app>)</title>
+     <p>A hátra keresés lehetővé teszi a PDF-fájl adott sorára kattintást, és az ahhoz tartozó sorra ugrást a TeX forráskódban.</p>
+<p>Hátra keresést a <app>dokumentummegjelenítőben</app> a <keyseq><key>Ctrl</key>bal kattintással</keyseq> végezhet. A megfelelő sor a TeX forráskódban kiemelésre kerül.</p>
+</section>
+
+</page>

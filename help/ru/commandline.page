@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="ru">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Command line</title>
+    <desc>С помощью команды <cmd>evince</cmd> можно открыть любое количество файлов на определённых страницах и в различных режимах.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Фил Бул (Phil Bull)</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Тифани Антопольски (Tiffany Antopolski)</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>Командная строка</title>
+<p>Чтобы запустить <app>приложение для просмотра документов</app> из командной строки, введите <cmd>evince</cmd>. Вы можете открыть файл, введя его имя после команды evince:</p>
+
+<screen>evince файл.pdf</screen>
+<p>Вы можете открыть несколько файлов, введя их имена после команды evince, используя пробел в качестве разделителя:</p>
+<screen>evince файл1.pdf файл2.pdf</screen>
+<p><app>Приложение для просмотра документов</app> также поддерживает файлы, находящиеся в Интернете. Например, после команды evince можно указать веб-адрес файла:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Открытие документа на определённой странице</title>
+    <p>Вы можете использовать параметр <cmd>--page-label</cmd>, чтобы открыть документ на определённой странице. Например, чтобы открыть документ на 3-й странице, введите:</p>
+    <screen>evince --page-label=3 файл.pdf</screen>
+    <p>Метка страницы должна иметь такой же формат, что и номер страницы, указанный в панели инструментов <app>приложения для просмотра документов</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Открытие документа в полноэкранном режиме.</title>
+    <screen>evince --fullscreen файл.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Открытие документа в режиме презентации</title>
+    <screen>evince --presentation файл.pdf</screen>
+</section>
+<section id="preview">
+    <title>Открытие документа в режиме предварительного просмотра</title>
+    <screen>evince --preview файл.pdf</screen>
+</section>
+</page>

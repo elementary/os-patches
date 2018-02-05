@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="sv">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Vilken redigerare kan du använda för att redigera din TEX-fil?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons DelaLika 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Nylander</mal:name>
+      <mal:email>po@danielnylander.se</mal:email>
+      <mal:years>2006, 2008, 2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Sebastian Rasmussen</mal:name>
+      <mal:email>sebras@gmail.com</mal:email>
+      <mal:years>2015, 2017</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Redigerare som stöds</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>Både <link xref="synctex-search#forward-search">framåtlänkning</link> (från <app>gedit</app> till <app>Dokumentvisare</app>) och <link xref="synctex-search#backward-search">bakåtlänkning</link> (från <app>Dokumentvisare</app> till <app>gedit</app>) stöds.</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p><app>gedit</app>-insticksmodulen innehåller ett python-skript (evince_dbus.py) som kan användas för att få SyncTeX att fungera med Vim. För att använda vim-latex tillsammans med <app>Dokumentvisare</app> måste du följa dessa steg:</p>
+<steps>
+ <item>
+  <p>Kopiera evince_dbus.py till någon katalog i din sökväg och ge det +x-rättigheter.</p>
+ </item>
+ <item>
+  <p>Modifiera din ~/.vimrc-fil och lägg till följande rader.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Nu kan du använda framåtlänkning från vim-latex genom att skriva \ls. Bakåtlänkning stöds inte än.</p>
+  </item>
+</steps>
+</section>
+</page>

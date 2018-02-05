@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="singlesided-npage" xml:lang="ro">
+
+  <info>
+    <link type="guide" xref="print-booklet#singleSided"/>
+
+    <desc>Tipărește o broșură de peste 20 de pagini.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Atribuire - Distribuire în condiţii identice 3.0</p>
+    </license>
+
+  </info>
+
+<title>n-page booklet</title>
+ <note style="important">
+  <p><em>n</em> este un multiplu de 4.</p>
+ </note>
+ <p>
+   If the number of pages in your PDF document is not a multiple of 4, you should add the appropriate number of blank pages (1, 2 or 3) to make it a multiple of 4.
+ To do so, you can:
+   </p>
+ <steps>
+ <item>
+  <p>
+    Create a blank PDF using <app>LibreOffice Writer</app>.
+  </p>
+ </item>
+ <item>
+  <p>Îmbină paginile goale cu documentul PDF utilizând <app>PDF-Shuffler</app> pentru introducerea de pagini goale la sfârșit.</p>
+ </item>
+</steps>
+
+ <p>Pentru a tipări:</p>
+  <steps>
+ <item>
+  <p>Clic <guiseq><gui>Fișier</gui><gui>Tipărește</gui></guiseq>.</p>
+ </item>
+ <item>
+  <p>Alegeți tabul <gui>General</gui>.</p>
+  <p>Sub <em>Interval</em>, alegeți <gui>Pagini</gui>.</p>
+  <tree>
+   <item>
+   Type the numbers of the pages in this order:
+       <item>n, 1, 2, n-1, n-2, 3, 4, n-3, n-4, 5, 6, n-5, n-6, 7, 8, n-7, n-8, 9, 10, n-9, n-10, 11, 12, n-11...</item>
+      <item>...until you have typed n-number of pages.</item>
+    </item>
+  </tree>
+ </item>
+ <item>
+  <p>Alegeți tabul <gui>Configurare pagină</gui>.</p>
+  <p>Sub <em>Aspect</em>, în meniul <gui>Două fețe</gui>, selectați <gui>O față</gui>.</p>
+  <p>În meniul <gui>Pagini per față</gui>, selectați <gui>2</gui>.</p>
+  <p>În meniul <gui>Ordonarea paginilor</gui>, selectați <gui>De la stânga la dreapta</gui>.</p>
+  <p>În meniul <gui>Doar tipărire</gui>, selectați <gui>Foi impare</gui>.</p>
+ </item>
+ <item>
+  <p>Clic pe <gui>Tipărește</gui>.</p>
+ </item>
+   <item>
+    <p>Când toate paginile s-au tipărit, întoarceți-le și așezați-le înapoi în imprimantă.</p>
+   </item>
+   <item>
+    <p>Clic <guiseq><gui>Fișier</gui><gui>Tipărește</gui></guiseq>.</p>
+   </item>
+   <item>
+    <p>Alegeți tabul <gui>Configurare pagină</gui>.</p>
+     <p>În meniul <gui>Doar tipărire</gui> menu, selectați <gui>Foi pare</gui>.</p>
+   </item>
+   <item>
+    <p>Clic pe <gui>Tipărește</gui>.</p>
+   </item>
+  </steps>
+</page>

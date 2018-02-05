@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="hu">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>A szerző nyomtatási korlátozásokat alkalmazhatott a dokumentumra.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hammer Attila</mal:name>
+      <mal:email>hammera at pickup dot hu</mal:email>
+      <mal:years>2014.</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Kelemen Gábor</mal:name>
+      <mal:email>kelemeng at gnome dot hu</mal:email>
+      <mal:years>2011, 2012, 2013, 2014, 2015.</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Nem tudom kinyomtatni a dokumentumot</title>
+<section id="why">
+ <title>Nyomtatási hiba lehetséges okai</title>
+<p>Egy dokumentum nyomtatása a következők miatt hiúsulhat meg:</p>
+ <list>
+  <item><p>Nyomtatóproblémák, vagy</p></item>
+  <item><p>PDF nyomtatási korlátozások.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Nyomtatóproblémák</title>
+  <p>Számos oka lehet annak, hogy a nyomtató nem nyomtat. Kifogyhatott például a papír vagy a tinta, nincs bedugva a konnektorba, vagy meghibásodott.</p>
+
+  <p>A nyomtató megfelelő működésének ellenőrzéséhez:</p>
+  <steps>
+   <item><p>Kattintson a nevére a felső sávon, és válassza a <gui>Rendszerbeállítások</gui> menüpontot.</p></item>
+   <item><p>Kattintson a nyomtatójára a listában.</p></item>
+   <item><p>Kattintson a <gui>Tesztoldal nyomtatása</gui> gombra. Egy oldal kerül kiküldésre a nyomtatóra.</p>
+<note>
+ <p>Ha ez nem sikerül, nézze meg a <link href="help:gnome-help/printing">nyomtatási súgót</link>. A további lehetőségekkel kapcsolatban nézze meg a nyomtató kézikönyvét is.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>PDF-nyomtatási korlátozások</title>
+  <p>Egyes PDF-dokumentumok rendelkeznek egy, a nyomtatásukat megakadályozó beállítással. A szerzők beállíthatják ezt a nyomtatási korlátozást a dokumentum elkészítésekor. A <app>dokumentummegjelenítő</app> alapesetben felülbírálja ezt a korlátozást, de ellenőrizheti, hogy nincs-e kikapcsolva.</p>
+
+  <steps>
+    <item>
+      <p>Nyomja meg az <keyseq><key>Alt</key><key>F2</key></keyseq> kombinációt az Alkalmazás futtatása ablak megjelenítéséhez.</p>
+    </item>
+    <item>
+      <p>Írja be a <input>dconf-editor</input> parancsot a szövegmezőbe, és nyomja meg a <gui>Futtatás</gui> gombot. Megnyílik a Konfigurációszerkesztő.</p>
+    </item>
+    <item><p>Az oldalsávban nyissa meg az <sys>/org/gnome/evince</sys> elemet.</p></item>
+    <item>
+      <p>Győződjön meg róla, hogy az <gui>override_restrictions</gui> lehetőség be van jelölve.</p>
+    </item>
+    <item>
+      <p>Térjen vissza a <app>Dokumentummegjelenítőhöz</app>, és próbálja meg újra kinyomtatni a dokumentumot.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

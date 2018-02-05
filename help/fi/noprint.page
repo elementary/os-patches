@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="fi">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Tekijä on saattanut asettaa asiakirjalle tulostusrajoituksia.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Sami Jaktholm</mal:name>
+      <mal:email>sjakthol@outlook.com</mal:email>
+      <mal:years>2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Timo Jyrinki</mal:name>
+      <mal:email>timo.jyrinki@iki.fi</mal:email>
+      <mal:years>2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Tommi Vainikainen</mal:name>
+      <mal:email>thv@iki.fi</mal:email>
+      <mal:years>2006</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Flammie Pirinen</mal:name>
+      <mal:email>flammie@iki.fi</mal:email>
+      <mal:years>2006</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Asiakirjan tulostaminen ei onnistu</title>
+<section id="why">
+ <title>Mahdollisia syitä tulostuksen epäonnistumiselle</title>
+<p>Asiakirjaa ei kyetä tulostamaan seuraavista syistä:</p>
+ <list>
+  <item><p>Tulostinongelmat tai,</p></item>
+  <item><p>PDF-tulostusrajoitukset.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Tulostinongelmat</title>
+  <p>Tulostimen toimimattomuudelle on useita mahdollisia syitä. Siitä voi muun muassa loppua muste tai paperi, se voi olla irti seinästä tai vaurioitunut.</p>
+
+  <p>Tulostimen toimivuuden voi tarkistaa seuraavasti:</p>
+  <steps>
+   <item><p>Napsauta nimeäsi yläpalkissa ja valitse <gui>Järjestelmäasetukset</gui>.</p></item>
+   <item><p>Napsauta tulostinta luettelossa.</p></item>
+   <item><p>Napsauta <gui>Tulosta testisivu</gui>. Järjestelmä yrittää tulostaa testisivun.</p>
+<note>
+ <p>Jos tämä epäonnistuu, lue <link href="help:gnome-help/printing">tulostinohje</link> ja tutki tulostimen käyttöohjekirjan ongelmanratkaisuohjeita.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>PDF-asiakirjan tulostusrajoitukset</title>
+  <p>Jotkut PDF-asiakirjat sisältävät asiakirjan tulostamisen estävän valinnan. Asiakirjojen tekijät voivat asettaa asiakirjoilleen tulostusrajoituksia. Vaikka <app>Asiakirjakatselin</app> ohittaa tämän rajoituksen automaattisesti, kannattaa tarkistaa, ettei asetusta ole vaihdettu:</p>
+
+  <steps>
+    <item>
+      <p>Paina <keyseq><key>Alt</key><key>F2</key></keyseq> ja Aja ohjelmia -ikkuna avautuu.</p>
+    </item>
+    <item>
+      <p>Kirjoita <input>dconf-editor</input> tekstikenttään ja napsauta <gui>Aja</gui>. Asetustenmuokkain aukeaa.</p>
+    </item>
+    <item><p>Etsi kohde <sys>/org/gnome/evince</sys> sivupaneelista.</p></item>
+    <item>
+      <p>Varmista, että valintaruutu asetukselle <gui>override_restrictions</gui> on valittuna.</p>
+    </item>
+    <item>
+      <p>Palaa <app>Asiakirjakatselimeen</app> ja yritä tulostusta uudelleen.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

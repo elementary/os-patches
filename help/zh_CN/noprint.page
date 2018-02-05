@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="zh-CN">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>作者也许在该文档中设置了打印限制。</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>我无法打印某个文档</title>
+<section id="why">
+ <title>Possible reasons for printing failure</title>
+<p>无法打印某个文档也许是因为：</p>
+ <list>
+  <item><p>打印机问题，或者</p></item>
+  <item><p>PDF 打印限制。</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>打印机问题</title>
+  <p>您的打印机没有正确工作有很多原因。举个例子，可能是缺纸或者没墨了，也可能是打印机没有连接或已坏。</p>
+
+  <p>要检查您的打印机是否正确打印：</p>
+  <steps>
+   <item><p>在顶栏上点击您的名字并选择 <gui>系统设置</gui>。</p></item>
+   <item><p>在列表中单击您的打印机。</p></item>
+   <item><p>单击 <gui>打印测试页</gui>。应有一张页面发送到您的打印机。</p>
+<note>
+ <p>
+If this fails, see <link href="help:gnome-help/printing">Printing help</link>.  You may also need to see your printer's manual to see what else you can do.
+</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>PDF 打印限制。</title>
+  <p>有些 PDF 文档设置为防止打印。作者能够在编写文档时设置这种打印限制。<app>文档查看器</app> 默认情况下将略过这种限制，但您应当检查下限制是否还没有被禁止：</p>
+
+  <steps>
+    <item>
+      <p>按下 <keyseq><key>Alt</key><key>F2</key></keyseq> 以打开运行程序窗口。</p>
+    </item>
+    <item>
+      <p>在文本框中输入 <input>dconf-editor</input> 并单击 <gui>运行</gui>。将打开配置编辑器。</p>
+    </item>
+    <item><p>使用侧边栏浏览到 <sys>/org/gnome/evince</sys>。</p></item>
+    <item>
+      <p>确保 <gui>override_restrictions</gui> 选项已经选定。</p>
+    </item>
+    <item>
+      <p>
+      Go back to the <app>Document Viewer</app> and try to print the document again.
+      </p>
+    </item>
+  </steps>
+</section>
+
+</page>

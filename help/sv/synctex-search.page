@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="sv">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Växla mellan <app>Dokumentvisare</app> och <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons DelaLika 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Nylander</mal:name>
+      <mal:email>po@danielnylander.se</mal:email>
+      <mal:years>2006, 2008, 2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Sebastian Rasmussen</mal:name>
+      <mal:email>sebras@gmail.com</mal:email>
+      <mal:years>2015, 2017</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Sök med SyncTeX</title>
+<p>Efter att du <link xref="synctex-compile">kompilerat din TeX-fil med SyncTeX</link> kommer du att kunna söka. SyncTeX stöder till och med framåt- och bakåtlänkning från en inkluderad fil.</p>
+
+<section id="forward-search">
+    <title>Framåtlänkning: från TeX till PDF (från <app>gedit</app> till <app>Dokumentvisare</app>)</title>
+     <p>Framåtlänkning låter dig klicka på ett specifikt stycke TeX-källkod och hoppa till motsvarande plats i PDF:en. För att göra en framåtlänkning:</p>
+<steps>
+<item>
+<p>Klicka på en rad i TeX-filen.</p>
+</item>
+<item>
+<p>I <app>gedit</app> klicka på <guiseq><gui>Verktyg</gui> <gui>Framåtlänk</gui></guiseq>. Motsvarande rad i PDF:en kommer att markeras med rött.</p>
+<p>Alternativt kan du trycka <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq>, eller <keyseq><key>Ctrl</key>vänsterklick</keyseq>. Motsvarande rad i PDF:en kommer att markeras med rött.</p>
+</item>
+</steps>
+<note>
+<p>Om motsvarande PDF-fil inte är öppen kommer en framåtlänkning att öppna PDF:en i <app>Dokumentvisare</app>.</p>
+</note>
+<p>Om du har ett komplext projekt med flera TeX-filer kan du placera</p>
+<code>% mainfile: mainfile.tex</code>
+<p>antingen bland de första eller sista tre raderna i varje inkluderad TeX-fil så kommer framåtlänkning att fungera. Bakåtlänkning bör alltid fungera även om du inte lägger till lägesraden.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Bakåtlänkning: från PDF till TeX (från <app>Dokumentvisare</app> till <app>gedit</app>)</title>
+     <p>Bakåtlänkning låter dig klicka på en specifik rad i PDF-filen och hoppa till motsvarande rad i TeX-källkoden.</p>
+<p>Du kan utföra en bakåtlänkning genom att trycka <keyseq><key>Ctrl</key>vänsterklick</keyseq> i <app>Dokumentvisare</app>. Motsvarande rad i TeX-källkoden kommer att markeras.</p>
+</section>
+
+</page>

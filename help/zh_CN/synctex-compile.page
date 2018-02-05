@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-compile" xml:lang="zh-CN">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="third"/>
+    <desc>怎样同 SyncTeX 一起编译您的 TeX 文档</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>同 SyncTeX 一起编译 TeX</title>
+<p>将这一行 <em>\synctex=1</em> 加入到您的 TeX 文件前言部分将会使 SyncTeX 的同步功能生效。</p>
+<code>
+\documentclass{article}
+\synctex=1
+\usepackage{fullpage}
+\begin{document}
+...
+\end{document}
+</code>
+<p>另一种方式是，您可以在运行 pdflatex 命令时加入 <em>-synctex=1</em> 选项：</p>
+<screen>pdflatex -synctex=1 您的文件.tex</screen>
+</page>

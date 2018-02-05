@@ -1,0 +1,5818 @@
+================
+Evince    3.26.0
+================
+
+Translation updates:
+
+    * Lyubomir Vasilev (bg)
+    * David Medina (ca)
+    * Marek Černocký (cs)
+    * Joe Hansen (da)
+    * Daniel Mustieles (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Gabor Kelemen (hu)
+    * Gianvito Cavasoli (it)
+    * Nathan Follens (nl)
+    * Piotr Drąg (pl)
+    * Rafael Fontenelle (pt_BR)
+    * Anders Jonsson (sv)
+    * Sebastian Rasmussen (sv)
+
+================
+Evince   3.25.92
+================
+
+Bug fixes:
+
+    * Do not change the current page when adding or removing bookmarks
+      (#732834, Casey Jao)
+    * Fix unarr build on s390x (#787248, Florian Weimer)
+    * Update LZMA SDK to use lzma1701.7z for unarr (#787035, Bastien
+      Nocera)
+
+Documentation:
+
+    * Add missing close parenthesis in text selection page (#786825,
+      Anders Jonsson)
+
+Translation updates:
+
+    * Yuras Shumovich (be)
+    * David Medina (ca)
+    * Joe Hansen (da)
+    * Daniel Mustieles (es)
+    * Charles Monzat (fr)
+    * Sveinn í Felli (is)
+    * Kyung-Gon Kim (ko)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Rafael Fontenelle (pt_BR)
+    * Trần Ngọc Quân (vi)
+    * Cheng-Chia Tseng (zh_TW)
+
+================
+Evince   3.25.91
+================
+
+New features and improvements:
+
+    * Add support for Adobe Illustrator documents (#311990, Bastien
+      Nocera)
+
+Bug fixes:
+
+    * Fix gnome-settings-daemon MediaKeys API use (#786262, Jeremy
+      Bicha)
+    * Fix infinite loop when removing annotation windows (#785975,
+      Jose Aliste)
+    * Fix rendering of layer state in layers tree sidebar (#786464,
+      Jonas Hahnfeld)
+    * Properly quote arguments when executing dvipdfm in DVI backend
+      (#784947, Tobias Mueller)
+    * Fix runtime warnings on exit (#774833, Caolán McNamara)
+    * Fix debug borders coordinate translation (#785758, astian)
+    * Properly handle errors in comics backend (#784963, Bastien
+      Nocera)
+    * Don't strip filenames when extracting comic documents (#784963,
+      Bastien Nocera)
+
+Documentation:
+
+    * Remove custom-shortcuts section dropped in GTK 3.10 (#758246,
+      Andre Klapper)
+    * Cover F9 shortcut (#783276, Andre Klapper)
+    * Update 'Adding Annotations' to reflect the UI (Andre Klapper)
+    * Update several screenshots (Andre Klapper)
+    * Update custom shortcut instructions (Andre Klapper)
+    * 'Index' dropdown is called 'Outline' now (Andre Klapper)
+    * Fix several typos in documentation (Petr Kovar, Sebastian
+      Rasmussen)
+
+Translation updates:
+
+    * Marek Černocký (cs)
+    * Mario Blättermann (de)
+    * Daniel Mustieles (es)
+    * Jiri Grönroos (fi)
+    * Fabio Tomat (fur)
+    * Fran Dieguez (gl)
+    * gogo (hr)
+    * Gabor Kelemen (hu)
+    * Meskó Balázs (hu)
+    * Andika Triwidada (id)
+    * Baurzhan Muftakhidinov (kk)
+    * Pawan Chitrakar (ne)
+    * Piotr Drąg (pl)
+    * Dušan Kazik (sk)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Anders Jonsson (sv)
+    * Muhammet Kara (tr)
+
+================
+Evince    3.25.4
+================
+
+New features and improvements:
+
+    * The comics backend now uses libarchive and unarr instead of
+      spawning commands (#720742, Bastien Nocera)
+    * Add flag EV_DOCUMENT_LOAD_FLAG_NO_CACHE to not setup the
+      document cache during the load. It will be setup later only if
+      needed (#780210, Bastien Nocera, Carlos Garcia Campos)
+    * Speed up thumbnailing by using EV_DOCUMENT_LOAD_FLAG_NO_CACHE
+      flag (#780210, Bastien Nocera)
+    * Improve performance of the links sidebar (#779614, Benjamin
+      Berg)
+    * Select the active file when open containing folder (#741377,
+      Germán Poo-Caamaño)
+    * Improve performance of scrolling in thumbnails sidebar (#691448,
+      #342110, Nelson Benítez León)
+
+Bug fixes:
+
+    * Fix crash with Orca screen reader (#777992, Jason Crain)
+    * Fix ev_page_accessible_get_range_for_boundary() to ensure the
+      start and end offsets it returns are within the allowed range
+      (#777992, Jason Crain)
+    * Fix toggling layers that are not in the current visible range of
+      pages (#780139, Georges Dupéron)
+    * Don't copy remote files before thumbnailing (#780351, Bastien
+      Nocera)
+    * Fix a crash when opening a second window (#777082, Caolán
+      McNamara)
+    * Do not jump to first thumbnail in sidebar after fullscreen
+      (#783404, Nelson Benítez León)
+    * Remove use of obsolete gnome_desktop_thumbnail_scale_down_pixbuf
+      (#784789, Bastien Nocera)
+
+Translation updates:
+
+    * Yuras Shumovich (be)
+    * Marek Černocký (cs)
+    * Mario Blättermann (de)
+    * Tom Tryfonidis (el)
+    * Daniel Mustieles (es)
+    * Jiri Grönroos (fi)
+    * Fabio Tomat (fur)
+    * Fran Dieguez (gl)
+    * gogo (hr)
+    * Balázs Úr (hu)
+    * Kukuh Syafaat (id)
+    * Baurzhan Muftakhidinov (kk)
+    * Aurimas Černius (lt)
+    * Enrico Nicoletto (pt_BR)
+    * Dušan Kazik (sk)
+    * Matej Urbančič (sl)
+    * Emin Tufan Çetin (tr)
+    * Trần Ngọc Quân (vi)
+
+================
+Evince    3.24.0
+================
+
+New features and improvements:
+
+    * Ask the user before automatically reloading the document when
+      it has been modified (#769123, Jose Aliste)
+    * Use IBEAM cursor for TEXT_MARKUP annotations (#774018, Philipp
+      Raich)
+
+Bug fixes:
+
+    * Hide search bar when entering presentation mode (#775536, Simon
+      Nagl)
+    * Sort bookmarks by page number instead of title (#772277, Felipe
+      Borges)
+    * Sort pages in natural order in comics backend (#770695, Felipe
+      Borges)
+    * Fix a crash due to an invalid access to the height page cache in
+      continuous dual mode (#771612, Tobias Mueller)
+    * Use Unicode in translatable strings (#774005, Piotr Drąg)
+    * Fix incorrect return type (#780206, Bastien Nocera)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * David Medina (ca)
+    * Marek Černocký (cs)
+    * Joe Hansen (da)
+    * Mario Blättermann (de)
+    * Daniel Mustieles (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Jiri Grönroos (fi)
+    * Charles Monzat (fr)
+    * Fabio Tomat (fur)
+    * Fran Dieguez (gl)
+    * gogo (hr)
+    * Gabor Kelemen (hu)
+    * Kukuh Syafaat (id)
+    * Sveinn í Felli (is)
+    * Luca Ferretti (it)
+    * Baurzhan Muftakhidinov (kk)
+    * Seong-ho Cho (ko)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Åka Sikrom (nb)
+    * A S Alam (pa)
+    * Piotr Drąg (pl)
+    * Rafael Fontenelle (pt_BR)
+    * Stas Solovey (ru)
+    * Dušan Kazik (sk)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Anders Jonsson (sv)
+    * Theppitak Karoonboonyanan (th)
+    * Muhammet Kara (tr)
+    * Daniel Korostil (uk)
+    * Trần Ngọc Quân (vi)
+    * Boyuan Yang (zh_CN)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.22.0
+================
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * dooteo (eu)
+    * Leonor Palazzo (fr)
+    * Seong-ho Cho (ko)
+    * Hannie Dumoleyn (nl)
+    * Stas Solovey (ru)
+    * Daniel Korostil (uk)
+
+================
+Evince   3.21.92
+================
+
+New features and improvements:
+
+    * Add application/vnd.comicbook+zip to the list of mime-types
+      supported by the comics backend (#770903, Bastien Nocera)
+
+Bug fixes:
+
+    * Fix mime-type comparisons in commics backend (#770903, Bastien
+      Nocera)
+    * The browser plugin no longer claims to support loading documents in
+      Wayland (Carlos Garcia Campos)
+    * Fix several memory leaks (#770070 and #770069, Eric R. Schulz)
+    * Fix scaling calculation in PostScript backend (#755776, Jason
+      Crain)
+    * Fix a crash when processing button events in EvView (#769700,
+      Marek Kasik)
+    * Fix a crash when opening a copy of a document with annotation
+      popup windows (#760299, Jose Aliste)
+
+Translation updates:
+
+    * David Medina (ca)
+    * Marek Černocký (cs)
+    * Franco Della-Monica (de)
+    * Tom Tryfonidis (el)
+    * David King (en_GB)
+    * Daniel Mustieles (es)
+    * Arash Mousavi (fa)
+    * Jiri Grönroos (fi)
+    * Claude Paroz (fr)
+    * Leonor Palazzo (fr)
+    * Fabio Tomat (fur)
+    * GunChleoc (gd)
+    * Fran Dieguez (gl)
+    * Yosef Or Boczko (he)
+    * Balázs Úr (hu)
+    * Andika Triwidada (id)
+    * Baurzhan Muftakhidinov (kk)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Piotr Drąg (pl)
+    * Gustavo Marques (pt_BR)
+    * Tiago Santos (pt)
+    * Dušan Kazik (sk)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Anders Jonsson (sv)
+    * Trần Ngọc Quân (vi)
+
+================
+Evince    3.21.4
+================
+
+New features and improvements:
+
+    * Improve annotation properties dialog UI (#767895, Trinh Anh Ngoc)
+    * Center sidebar action menu (#767895, Trinh Anh Ngoc)
+    * Make Esc close annotation window (#768448, Christian Gogolin)
+
+Bug fixes:
+
+    * Do not hide the fullscreen toolbar when view or action popover
+      is shown (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Daniel Mustieles (es)
+    * Andika Triwidada (id)
+
+================
+Evince    3.21.3
+================
+
+New features and improvements:
+
+    * Fix style rendering issues with GTK+ 3.20 (#765557, #758793,
+      Felipe Borges, Trinh Anh Ngoc, Carlos Garcia Campos)
+    * Stop using first page thumbnail as window icon (#767747, Cosimo
+      Cecchi)
+    * Scroll pages fitting in the window in non-continuous mode
+      (#562257, Marek Kasik)
+    * Show the document URI on a tooltip for recent view items
+      (#764405, Felipe Borges)
+    * Add Keyboard Shortcuts entry to App Menu (#761803, Hashem
+      Nasarat)
+    * Make the systemd user unit conditional (#755897, Simon McVittie)
+    * Allow to pass URIs to the previewer (#766531, Felipe Borges)
+    * Remove the MimeType association from the previewer desktop file
+      (#744893, Laurent Bigonville)
+
+Bug fixes:
+
+    * Fix build with GCC 6 (Michael Catanzaro)
+    * Fix calculation of the maximum width of page selector (#764771,
+      echo-devi)
+    * Fix typo in zoom in/out gesture shortcuts (#761803, Hashem
+      Nasarat)
+    * Remove X11 dependency of nautilus extension (#766710, Quentin
+      Glidic)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Florian Heiser (de)
+    * Daniel Mustieles (es)
+    * Arash Mousavi (fa)
+    * Fabio Tomat (fur)
+    * GunChleoc (gd)
+    * Meskó Balázs (hu)
+    * Dirgita (id)
+    * Sveinn í Felli (is)
+    * Åka Sikrom (nb)
+    * Cédric Valmary (totenoc.eu) (oc)
+    * Rafael Fontenelle (pt_BR)
+    * Tiago Santos (pt)
+    * Dušan Kazik (sk)
+    * Sebastian Rasmussen (sv)
+    * Theppitak Karoonboonyanan (th)
+
+================
+Evince    3.20.0
+================
+
+Translation updates:
+
+    * scootergrisen (da)
+    * dooteo (eu)
+    * Gabor Kelemen (hu)
+    * Gianvito Cavasoli (it)
+    * Jiro Matsuzawa (ja)
+    * Changwoo Ryu (ko)
+
+================
+Evince   3.19.92
+================
+
+New features and improvements:
+
+    * Use a popover for view and action menus (#760527, Felipe Borges)
+    * Add shortcuts help window (#757828, Felipe Borges)
+    * Add Shift+Space keybinding to go back in presentation mode
+      (#758162, Jaakko Hannikainen)
+    * Rename links sidebar title from Index to Outline (#732547,
+      Germán Poo-Caamaño)
+    * Add missing tooltips to the headerbar (#595467, Germán
+      Poo-Caamaño)
+    * Show the page label instead of page number in find sidebar
+      (#756683, Germán Poo-Caamaño)
+    * Add a systemd user unit corresponding to the D-Bus session
+      service (#755897, Simon McVittie)
+    * Recognize multipage DjVu MIME type (#754467, Marek Kasik)
+    * Add support for utf8 filenames on Mac OS X to comics backend
+      (#761161, Tom Schoonjans)
+
+Bug fixes:
+
+    * Fix text selection on Wayland (#759506, Marek Kasik)
+    * Manually destroy the search popover on toolbar dispose in
+      browser plugin to try to fix a crashes on plugin destruction
+      (#762838, Carlos Garcia Campos)
+    * Check boundaries of accessible pages to avoid crashes when the
+      document is reloaded due to changes in the document file
+      (#735744, Germán Poo-Caamaño)
+    * Fix translations in thumbnailer help message (#760418, Ting-Wei Lan)
+    * Fix text selections in annotation popups (#749727, Giselle Reis)
+    * Fix special characters in path to cbz (#643843, Jürn Brodersen)
+    * Fix css style of loading message (#758356, Germán Poo-Caamaño)
+    * Fix warning with no document loaded (#758596, Bastien Nocera)
+    * Fix unbalanced quote in configure script (Bastien Nocera)
+    * Fix installation of symbolic app icon (Michael Catanzaro)
+    * Fix the position of the zoom action GtkPopover in Wayland
+      (#756976, Germán Poo-Caamaño)
+    * Make the message area work in recent view mode too (#755064,
+      Felipe Borges)
+    * Fix performance regression with recent versions of GTK+ when
+      getting colors from GtkStyleContext for a different state
+      (#755442, Sebastian Keller)
+    * Fix a crash in PDF backend when opening documents containing screen
+      annotations with no actions (#756572, Germán Poo-Caamaño)
+    * Ignore right clicks while adding new annotations (#755619, José Aliste)
+    * Escape bookmark titles to be correctly rendered when they
+      contain characters like & (#66301, José Aliste)
+    * Fix handling of multiple files provided as command line
+      arguments (#755796, Felipe Borges)
+    * Do not crash when the rendering or thumbnail jobs fail (#744049,
+      Marek Kasik)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Alexander Shopov (bg)
+    * Sadia Afroz (bn)
+    * Samir Ribić (bs)
+    * David Medina (ca)
+    * Marek Černocký (cs)
+    * Mario Blättermann (de)
+    * Dawa pemo (dz)
+    * Efstathios Iosifidis (el)
+    * Daniel Mustieles (es)
+    * Inaki Larranaga Murgoitio (eu)
+    * Jiri Grönroos (fi)
+    * Claude Paroz (fr)
+    * GunChleoc (gd)
+    * Fran Dieguez (gl)
+    * Yosef Or Boczko (he)
+    * Meskó Balázs (hu)
+    * Claudio Arseni (it)
+    * Jiro Matsuzawa (ja)
+    * Baurzhan Muftakhidinov (kk)
+    * Khoem Sokhem (km)
+    * Rakesh Pandit (ks)
+    * Erdal Ronahî (ku)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Badral (mn)
+    * Sandeep Shedmake (mr)
+    * Umarzuki Bin Mochlis Moktar (ms)
+    * KYAW MYAT THU (my)
+    * Åka Sikrom (nb)
+    * Nils-Christoph Fiedler (nds)
+    * Narayan Kumar Magar (ne)
+    * Cédric Valmary (totenoc.eu) (oc)
+    * Manoj Kumar Giri (or)
+    * A S Alam (pa)
+    * Piotr Drąg (pl)
+    * Fábio Nogueira (pt_BR)
+    * Pedro Albuquerque (pt)
+    * Daniel Șerbănescu (ro)
+    * Stas Solovey (ru)
+    * Danishka Navin (si)
+    * Dušan Kazik (sk)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Sebastian Rasmussen (sv)
+    * Shantha kumar (ta)
+    * Krishnababu Krothapalli (te)
+    * Victor Ibragimov (tg)
+    * Theppitak Karoonboonyanan (th)
+    * Gheyret Kenji (ug)
+    * Daniel Korostil (uk)
+    * Trần Ngọc Quân (vi)
+    * YunQiang Su (zh_CN)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.18.0
+================
+
+Translation updates:
+
+    * František Zatloukal (cs)
+    * scootergrisen (da)
+    * Christian Kirbach (de)
+    * Tom Tryfonidis (el)
+    * Leonor Palazzo (fr)
+    * Rūdolfs Mazurs (lv)
+    * Piotr Drąg (pl)
+
+================
+Evince   3.17.92
+================
+
+Bug fixes:
+
+    * When copying a file, use the default permissions for the new
+      file instead of copying the ones from the original file
+      (#753019, Marek Kasik)
+
+Translation updates:
+
+    * Daniel (an)
+    * Marek Černocký (cs)
+    * Tom Tryfonidis (el)
+    * Daniel Mustieles (es)
+    * Arash Mousavi (fa)
+    * Alexandre Franke (fr)
+    * Fabio Tomat (fur)
+    * Fran Dieguez (gl)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Sveinn í Felli (is)
+    * Baurzhan Muftakhidinov (kk)
+    * Changwoo Ryu (ko)
+    * Aurimas Černius (lt)
+    * Åka Sikrom (nb)
+    * Piotr Drąg (pl)
+    * Enrico Nicoletto (pt_BR)
+    * Yuri Myasoedov (ru)
+    * Dušan Kazik (sk)
+    * Anders Jonsson (sv)
+    * Muhammet Kara (tr)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.17.4
+================
+
+New features and improvements:
+
+    * The sidebar tab to add new annotations has been removed, and a
+      new annotations toolbar has been added making it easier to
+      discover and more convenient to annotate documents (#649045,
+      Carlos Garcia Campos)
+
+Translation updates:
+
+    * Benjamin Steinwender (de)
+    * Daniel Mustieles (es)
+    * Yosef Or Boczko (he)
+    * Balázs Úr (hu)
+    * Pedro Albuquerque (pt)
+    * Stas Solovey (ru)
+    * Dušan Kazik (sk)
+    * Matej Urbančič (sl)
+    * Victor Ibragimov (tg)
+
+================
+Evince    3.17.3
+================
+
+New features and improvements:
+
+    * Add initial support for adding highlight annotations (#583377,
+      Giselle Machado, Carlos Garcia Campos)
+    * Add support for squiggly hightlight annotations too (#750612,
+      Philipp Reinkemeier)
+    * Add support for moving text annotations (#649043, Philipp
+      Reinkemeier)
+    * Force text annotations to have a fixed size 24x24 (#685334,
+      Philipp Reinkemeier)
+    * Handle GTK_SCROLL_START/GTK_SCROLL_END also in fit-to-page mode
+      (#737996, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Do not loose annotations properties when changing the subtype of
+      a highlight annotation (#750548, Philipp Reinkemeier)
+    * Only try to move the focus to different page when the current
+      page has a focused element to prevent the view from jumping to
+      the first/last page when TAB is pressed and there aren't
+      focusable elements in the document (#741979, Carlos Garcia
+      Campos)
+
+Translation updates:
+
+    * Benjamin Steinwender (de)
+    * Daniel Mustieles (es)
+    * Daniel Șerbănescu (ro)
+    * Muhammet Kara (tr)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.17.2
+================
+
+New features and improvements:
+
+    * Add initial support for PDF multimedia using GStreamer (#573748,
+      Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Add accessible relations between the labels in properties dialog
+      (#749127, Joanmarie Diggs)
+
+Translation updates:
+
+    * David (ca)
+    * Daniel Mustieles (es)
+    * Åka Sikrom (nb)
+    * Cédric Valmary (Tot en òc) (oc)
+    * Antonio Fernandes C. Neto (pt_BR)
+    * Dušan Kazik (sk)
+    * Matej Urbančič (sl)
+    * Victor Ibragimov (tg)
+    * YunQiang Su (zh_CN)
+
+================
+Evince    3.17.1
+================
+
+New features and improvements:
+
+    * Provide a symbolic variant of the app icon (#746844, Jakub Steiner)
+    * Add search support to browser plugin (Carlos Garcia Campos)
+    * Create popup windows for all markup annotation that can have a
+      popup associated (#733603, Philipp Reinkemeier)
+    * Add shortcuts for Continuous and Dual modes (#670964, boisjaune)
+    * Remove custom search bar implementation and use GtkSearchBar
+      instead (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Never save n-copies in the persistent print-settings file
+      (#748549, José Aliste)
+    * Fix the background color of annotation popup windows (#732211,
+      Giselle Machado)
+
+Translation updates:
+
+    * Daniel (an)
+    * Khaled Hosny (ar)
+    * David (ca)
+    * Marek Černocký (cs)
+    * Tom Tryfonidis (el)
+    * Daniel Puentes (eo)
+    * Daniel Mustieles (es)
+    * Yosef Or Boczko (he)
+    * Gabor Kelemen (hu)
+    * Sveinn í Felli (is)
+    * Stas Solovey (ru)
+
+================
+Evince    3.16.0
+================
+
+Translation updates:
+
+     * Benjamin Steinwender (de)
+     * Andika Triwidada (id)
+     * Claudio Arseni (it)
+     * Jiro Matsuzawa (ja)
+
+================
+Evince   3.15.92
+================
+
+Bug fixes:
+
+    * Enable/disable page navigation actions based on current page in
+      previewer (#745840, Robert Roth)
+    * Don't hide the titlebar when the window is maximized (without
+      CSD) (#744601, Simon Steinbeiss)
+
+Translation updates:
+
+    * Alexander Shopov (bg)
+    * Samir Ribić (bs)
+    * Kenneth Nielsen (da)
+    * Benjamin Steinwender (de)
+    * Tom Tryfonidis (el)
+    * Jiri Grönroos (fi)
+    * Guillaume Bernard (fr)
+    * Fran Dieguez (gl)
+    * Gabor Kelemen (hu)
+    * Baurzhan Muftakhidinov (kk)
+    * Changwoo Ryu (ko)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * A S Alam (pa)
+    * Paweł Żołnowski (pl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Daniel Nylander (sv)
+    * Victor Ibragimov (tg)
+    * Daniel Korostil (uk)
+    * Trần Ngọc Quân (vi)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince   3.15.90
+================
+
+New features and improvements:
+
+    * Make Ctrl+mouse wheel zoom pointer-centered instead of
+      window-centered (#731669, Frédéric Moenne-loccoz)
+    * Add = and <Ctrl>= keybindings for zooming in (#738625, Lars
+      Uebernickel)
+
+Bug fixes:
+
+    * Fix printing of landscape document and properly fix printing
+      documents with a manual scale and autocenter (#734788, Leo Wolf,
+      Carlos Garcia Campos)
+    * Disable send to action when nautilus-sendto is not found
+      (#743956, Cameron Norman)
+    * Fix a crash in recent-view when loading password protected
+      documents (#744049, Marek Kasik)
+
+Documentation:
+
+    * Add documentation for page scaling options (#740230, Ekaterina
+      Gerasimova)
+    * Improve documentation about printing (Ekaterina Gerasimova)
+    * Update documentation for removing annotations (#737435, David
+      King)
+    * Add documentation for search filter options (#738025, Ekaterina
+      Gerasimova)
+
+Translation updates:
+
+    * F Wolff (af)
+    * Daniel Martinez (an)
+    * Marek Černocký (cs)
+    * Christian Kirbach (de)
+    * Efstathios Iosifidis (el)
+    * Kristjan SCHMIDT (eo)
+    * Daniel Mustieles (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Yosef Or Boczko (he)
+    * Åka Sikrom (nb)
+    * Reinout van Schouwen (nl)
+    * Rafael Ferreira (pt_BR)
+    * Stas Solovey (ru)
+    * Dušan Kazik (sk)
+    * Matej Urbančič (sl)
+    * Anders Jonsson (sv)
+    * Muhammet Kara (tr)
+
+================
+Evince    3.15.4
+================
+
+New features and improvements:
+
+    * Add document size to the properties dialog (#741057, Tobias
+      Westergaard Kjeldsen)
+    * Add support for bsdtar command in comics backend (#742721, Balló
+      György)
+    * Improve the the sidebar UI (#739836, Trinh Anh Ngoc)
+    * Add support for TextMarkup annotation in read-only mode for now
+      (#583377, Giselle Reis)
+    * Use headerbar and improve spacing and borders in properties
+      dialog (#739836, Trinh Anh Ngoc)
+
+Bug fixes:
+
+    * Fix properties dialog shortcut (#739116, Boris Egorov)
+    * Bring back Open in new window action to the context menu
+      (#739046, Boris Egorov)
+    * Do not save n-copies when saving printing settings (#696203,
+      José Aliste)
+    * Use correct maximum size for thumbnail images in
+      evince-thumbnailer (#740877, Sebastian Keller)
+    * Fix a typo in configure.ac that made configure fail with
+      ligbnome-desktop (#733721, Marek Kasik)
+    * Correctly scroll to the search result selected by user when not
+      in continuous mode (#730252, Marek Kasik)
+    * Fix memory leak when adding new text annotations (Carlos Garcia
+      Campos)
+    * Fix border-radius CSS property of thumbnails (#739836, Trinh Anh
+      Ngoc)
+    * Fix quoting issues in configure.ac (#739226, Alexander Tsoy)
+    * Fix runtime critical warning when starting in fullscreen mode
+      (#737864, Carlos Garcia Campos)
+    * Handle TIFF files reporting a 0 resolution (#646414, Gabor
+      Kelemen)
+    * Disable toggle-find action for documents not supporting find
+      (#738262, Carlos Garcia Campos)
+
+Translation updates:
+
+    * Daniel Martinez (an)
+    * Marek Černocký (cs)
+    * Bernd Homuth (de)
+    * Wolfgang Stoeggl (de)
+    * Tom Tryfonidis (el)
+    * Daniel Mustieles (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Jiri Grönroos (fi)
+    * Yosef Or Boczko (he)
+    * Balázs Úr (hu)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Baurzhan Muftakhidinov (kk)
+    * Aurimas Černius (lt)
+    * Kjartan Maraas (nb)
+    * Rafael Ferreira (pt_BR)
+    * Stas Solovey (ru)
+    * Muhammet Kara (tr)
+    * Trần Ngọc Quân (vi)
+
+================
+Evince    3.14.1
+================
+
+Bug fixes:
+
+    * Use the new support for RTL icons in GtkIconTheme (#737211,
+      Yosef Or Boczko)
+    * Fix a crash in accessibility when opening a document with no
+      pages (#731046, Joanmarie Diggs)
+    * Fix a crash when a new document is added to the window (#737365,
+      Carlos Garcia Campos)
+    * Fix a crash when opening the context menu in a non PDF
+      document. (#737197, José Aliste)
+
+Translation updates:
+
+    * F Wolff (af)
+    * Khaled Hosny (ar)
+    * Saibal Ray (bn_IN)
+    * Efstathios Iosifidis (el)
+    * Arash Mousavi (fa)
+    * Fabio Tomat (fur)
+    * Sweta Kothari (gu)
+    * Claudio Arseni (it)
+    * Baurzhan Muftakhidinov (kk)
+    * Changwoo Ryu (ko)
+    * Rūdolfs Mazurs (lv)
+    * Hannie Dumoleyn (nl)
+    * Pedro Albuquerque (pt)
+    * Krishnababu Krothapalli (te)
+    * Cheng-Chia Tseng (zh_TW)
+
+================
+Evince    3.14.0
+================
+
+Translation updates:
+
+    * Kenneth Nielsen (da)
+    * Tom Tryfonidis (el)
+    * Michael Scherer (fr)
+    * GunChleoc (gd)
+    * rajesh (hi)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Jiro Matsuzawa (ja)
+    * Shankar Prasad (kn)
+    * Paweł Żołnowski (pl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Daniel Korostil (uk)
+    * Yunqiang Su (zh_CN)
+
+================
+Evince   3.13.92
+================
+
+Bug fixes:
+
+    * Fix emission of EvPageCache::page-cached signal (José Aliste)
+    * Use embedded page setup in the print dialog of the browser
+      plugin (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Nilamdyuti Goswami (as)
+    * Ivaylo Valkov (bg)
+    * sray (bn_IN)
+    * Gil Forcada (ca)
+    * Gil Forcada (ca@valencia)
+    * Marek Černocký (cs)
+    * Christian Kirbach (de)
+    * Tom Tryfonidis (el)
+    * Daniel Mustieles (es)
+    * Jiri Grönroos (fi)
+    * Guillaume Bernard (fr)
+    * Fran Dieguez (gl)
+    * Balázs Úr (hu)
+    * Andika Triwidada (id)
+    * Shankar Prasad (kn)
+    * Changwoo Ryu (ko)
+    * Aurimas Černius (lt)
+    * Sandeep Shedmake (mr)
+    * Kjartan Maraas (nb)
+    * A S Alam (pa)
+    * Enrico Nicoletto (pt_BR)
+    * Yuri Myasoedov (ru)
+    * Dušan Kazik (sk)
+    * Matej Urbančič (sl)
+    * Anders Jonsson (sv)
+    * Shantha kumar (ta)
+    * Muhammet Kara (tr)
+
+================
+Evince   3.13.91
+================
+
+New features and improvements:
+
+    * Added a allow-links-change-zoom GSetting to be able to not allow
+      links to change the zoom mode or level (#729249, Eduard Beutel)
+    * Set accessible name for File and View toolbar buttons (#734912,
+      Alejandro Piñeiro)
+    * Add a separator after New Window entry in app menu (Michael
+      Catanzaro)
+    * Remove multi-screen support, since it's currently unsupported by
+      GDK/GTK+ (#701883, Giselle Machado)
+
+Bug fixes:
+
+    * Fix a memory leak in the pixbuf cache when reloading a page while
+      the render job is running (#735758, Giselle Reis)
+    * Initialize EvPageAccessible children once the page has been
+      cached (#733747, Alejandro Piñeiro)
+    * Fix the size of the annotation window icons (#735110, Giselle
+      Reis)
+    * Don't use deprecated gtk_button_new_from_stock (#735562, José
+      Aliste)
+    * Fix runtime critical warning (#735561, José Aliste)
+    * Build fix in C++11 mode (#735466, Ting-Wei Lan)
+
+Translation updates:
+
+    * Nilamdyuti Goswami (as)
+    * Marek Černocký (cs)
+    * Tom Tryfonidis (el)
+    * Daniel Mustieles (es)
+    * Lasse Liehu (fi)
+    * Claude Paroz (fr)
+    * Fran Dieguez (gl)
+    * "Last-Translator: \n"(gu)
+    * Yosef Or Boczko (he)
+    * Andika Triwidada (id)
+    * Jiro Matsuzawa (ja)
+    * Aurimas Černius (lt)
+    * Kjartan Maraas (nb)
+    * Enrico Nicoletto (pt_BR)
+    * Daniel Korostil (uk)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince   3.13.90
+================
+
+New features and improvements:
+
+    * Add support for removing annotations (#649044, José Aliste,
+      Germán Poo-Caamaño, Giselle Machado, Carlos Garcia Campos)
+    * Add pan gesture to switch pages in non-continuous mode (Carlos
+      Garnacho)
+    * Add pinch/zoom gesture to handle document zooming (Carlos
+      Garnacho)
+    * Add initial implementation of a browser plugin (Carlos Garcia
+      Campos)
+    * Show the filename as a subtitle of the headerbar (José Aliste)
+    * Add recent view shown when evince is opened without a document
+      to replace the recetn menu list (#633501, Germán Poo-Caamaño,
+      Carlos Garcia Campos)
+    * Use a GtkPopover for the zoom selector menu (Carlos Garcia Campos)
+    * Move Next-Page and Previous-Page buttons from the heqader bar to
+      the view menu (#732289, José Aliste)
+    * HiDPI support (#723431, Owen W. Taylor, Germán Poo-Caamaño,
+      Carlos Garcia Campos)
+    * Use open-menu-symbolic for the gear menu (Daniel Mustieles)
+    * Improve efficiency of methods to get start and end indices of a
+      EvLinkAccessible (#732340, Joanmarie Diggs)
+    * Make <Ctrl>Home/End scroll to the start/end of the document
+      (#724273, Antia Puentes)
+    * Expose an accessible name for form field push buttons (#733919,
+      Joanmarie Diggs)
+
+Bug fixes:
+
+    * Fix centering of documents when printing with a manual scale
+      (#734788, Carlos Garcia Campos)
+    * Bring back page borders with recent GTK+ (Carlos Garcia Campos)
+    * Emit accessible focused-changed signals for form fields
+      (#733662, Joanmarie Diggs)
+    * Emit accessible state-changed signals for form fields (#733748,
+      Joanmarie Diggs)
+    * Make annotation internal names unique (#649044, Giselle Machado)
+    * Fix several memory leaks (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Nilamdyuti Goswami (as)
+    * Benjamin Steinwender (de)
+    * Efstathios Iosifidis (el)
+    * Tom Tryfonidis (el)
+    * Daniel Mustieles (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Sami Jaktholm (fi)
+    * Michael Scherer (fr)
+    * GunChleoc (gd)
+    * Yosef Or Boczko (he)
+    * Balázs Úr (hu)
+    * Andika Triwidada (id)
+    * Jiro Matsuzawa (ja)
+    * Aurimas Černius (lt)
+    * Åka Sikrom (nb)
+    * Enrico Nicoletto (pt_BR)
+    * Yuri Myasoedov (ru)
+    * Muhammet Kara (tr)
+
+================
+Evince  3.13.3.1
+================
+
+Bug fixes:
+
+    * Fix the MIME type list of desktop files (#732216, Carlos Garcia Campos)
+
+================
+Evince    3.13.3
+================
+
+New features and improvements:
+
+    * Cycle through form fields with tab button (#503706, Andrey
+      Pustovalov, Carlos Garcia Campos)
+    * Port to GMenu (Lars Uebernickel, Carlos Garcia Campos)
+    * Use a GtkHeaderBar instead of a GtkToolbar (#711078, Yosef Or
+      Boczko, Carlos Garcia Campos)
+    * Add appdata files for Evince backends (#731708, Carlos Garcia
+      Campos, Igor Gnatenko)
+    * Add an appdata file for Evince (#708760, Christian Persch)
+    * Make the about dialog non modal and move it to the app menu
+      (Carlos Garcia Campos)
+    * Add keybindings to go back/forward in history (#509029, Anuj Khare)
+    * Expose links, images and form fields as AtkObject children of
+      the page (#728475, Joanmarie Diggs)
+    * Update ATK_STATE_SHOWING when the visible page range changes
+      (#728664, Joanmarie Diggs)
+    * Implement AtkComponent interface for pages (#728673, Joanmarie Diggs)
+    * Expose every page individually to accessibility (#724965,
+      Alejandro Piñeiro)
+    * Show fullscreen toolbar only when moving the mouse to the top of
+      the screen (#696643, Giselle Machado)
+    * Add API to libview to specify rendered output in pixels instead
+      of as a scale (#723431, Owen W. Taylor)
+    * Use cairo surfaces instead of GdkPibufs to render thumbnails
+      (#723431, Owen W. Taylor, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Set the main window was transient parent of the annotation
+      properties dialog (#732114, Giselle Machado)
+    * Use annotation RGBA API instead of the deprecated color API
+      (#732095, Giselle Machado)
+    * Fix rotation direction in DJVU backend (#731786, Marek Kasik)
+    * Update the annotation poup window color and opacity when the annotation is
+      updated (#725571, Giselle Machado)
+    * Prevent jumps to last page when autoscrolling (#725389, Marek Kasik)
+    * Fix centering when shrinking to printable area but not scaling
+      (Carlos Garcia Campos)
+    * Fallback to thumbnails page in sidebar when the current page is
+      no longer supported by the document after a reload, and enable
+      the pages that become supported (#628617, Giselle Machado)
+    * Ensure text is available in page cache when requested by
+      accessibility (#724965, Alejandro Piñeiro)
+    * Update the caret cursor when jumping to a find result (#728996,
+      Joanmarie Diggs)
+    * Fix shift+click text selection (#728189, Joanmarie Diggs)
+    * Fix a crash when saving a copy (#727536, Debarshi Ray)
+    * Fix enable caret navigation question message (#727062, Carlos
+      Garcia Campos)
+    * Fix a crash during the build with introspection enabled
+      (#726812, Gustau Perez)
+    * Fix warning message shown when the requested format is not
+      supported by printer (#724044, Marek Kasik)
+    * Allow printing to all formats supported by backend (#724044,
+      Marek Kasik)
+    * Fix gtk-doc build (#731061, Ting-Wei Lan)
+
+Documentation:
+
+    * Fix documented file formats (#731679, Ekaterina Gerasimova)
+    * Update help for UI changes in 3.12 (#700442, Anna Philips)
+    * Update reading documents help for 3.12 (Ekaterina Gerasimova)
+
+Translation updates:
+
+    * Daniel Martinez (an)
+    * Ibrahim Saed (ar)
+    * Ihar Hrachyshka (be)
+    * Pau Iranzo (ca@valencia)
+    * Marek Černocký (cs)
+    * Kenneth Nielsen (da)
+    * Benjamin Steinwender (de)
+    * Christian Kirbach (de)
+    * Tom Tryfonidis (el)
+    * Kristjan SCHMIDT (eo)
+    * Daniel Mustieles (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Sami Jaktholm (fi)
+    * Michael Scherer (fr)
+    * GunChleoc (gd)
+    * Yosef Or Boczko (he)
+    * Attila Hammer (hu)
+    * Andika Triwidada (id)
+    * Claudio Arseni (it)
+    * Ikuya Awashiro (ja)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Enrico Nicoletto (pt_BR)
+    * Yuri Myasoedov (ru)
+    * Peter Mráz (sk)
+    * Matej Urbančič (sl)
+    * Victor Ibragimov (tg)
+    * Muhammet Kara (tr)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince   3.11.92
+================
+
+Bug fixes:
+
+    * Keep current page thumbnail in visible area when the sidebar is
+      resized (#631050, Carlos Garcia Campos)
+    * Close the window when CTRL+w shortcut is used in presentation
+      mode, instead of turning the screen white (#604834, Carlos
+      Garcia Campos)
+    * Fix some broken aspects EvViewAccessible text support (#725003,
+      Joanmarie Diggs)
+    * Take caret navigation into account when getting AtkHyperlink
+      indices (#726310, Joanmarie Diggs)
+    * Keep the scroll position when switching between continuous and
+      non continuous mode (#554843, Carlos Garcia Campos)
+    * Stop autoscrolling when view looses focus (#541699, Robert Roth,
+      Anuj Khare, Carlos Garcia Campos)
+    * Fix implementation of atk_text_set_caret_offset in
+      EvViewAccessible (#701746, Alejandro Piñeiro)
+    * Emit EvView::cursor-moved signal when caret cursor position is
+      set by accessibility (#701746, Alejandro Piñeiro)
+    * Remove support for deprecated atk_text_get_text_{before,after}_offset
+      (#725162, Joanmarie Diggs)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Pau Iranzo (ca)
+    * Marek Černocký (cs)
+    * Wolfgang Stoeggl (de)
+    * Dimitris Spingos (Δημήτρης Σπίγγος) (el)
+    * Daniel Mustieles (es)
+    * Jiri Grönroos (fi)
+    * Claude Paroz (fr)
+    * Michael Scherer (fr)
+    * GunChleoc (gd)
+    * Fran Dieguez (gl)
+    * Yaron Shahrabani (he)
+    * Attila Hammer (hu)
+    * Andika Triwidada (id)
+    * Baurzhan Muftakhidinov (kk)
+    * Changwoo Ryu (ko)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Kjartan Maraas (nb)
+    * A S Alam (pa)
+    * Paweł Żołnowski (pl)
+    * Antonio Fernandes C. Neto (pt_BR)
+    * Tiago S. (pt)
+    * Yuri Myasoedov (ru)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Victor Ibragimov (tg)
+    * Theppitak Karoonboonyanan (th)
+    * Daniel Korostil (uk)
+    * YunQiang Su (zh_CN)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince   3.11.90
+================
+
+New features and improvements:
+
+    * Set the window title for empty windows to make sure it's exposed
+      to accessibility (#653748, Robert Roth, Carlos Garcia Campos)
+    * Make history buttons insensitive when searching (#724549, Anuj Khare)
+    * Rename Open a Copy action as View in New Window (#688762, Bogdan Petcu)
+    * Add close button to the search bar (#723789, Carlos Garcia Campos)
+    * Move the find toolbar button to the left of the toolbar,
+      together with the navigation actions (#723789, Carlos Garcia Campos)
+    * Add tooltips to toolbar menus (#700697, Ekaterina Gerasimova)
+    * Remove SMClient support (#677981, Christian Persch)
+
+Bug fixes:
+
+    * Scroll to the search result when it's clicked in the find
+      sidebar even if the selection hasn't changed (#703570, Saurav Agarwalla)
+    * Correctly restart the search operation when the document is
+      reloaded (#703595, Saurav Agarwalla)
+    * Make print shortcut work when the sidebar is focused (#705846,
+      Anuj Khare)
+    * Fix potential read-after-free in gsettings use (#723737,
+      Christian Persch)
+    * Fix the margin of toolbar elements in RTL locales (#723110,
+      Yosef Or Boczko)
+    * Use g_debug instead of g_printerr for debug warnings in EvDaemon
+      (#723972, Giovanni Campagna)
+
+Documentation:
+
+    * Remove the SyncTeX video that uses the old UI and the wrong
+      theme (#676496, Ekaterina Gerasimova)
+
+Translation updates:
+
+    * Jorge Pérez Pérez (an)
+    * Khaled Hosny (ar)
+    * Nilamdyuti Goswami (as)
+    * Marek Černocký (cs)
+    * Daniel Mustieles (es)
+    * Timo Jyrinki (fi)
+    * GunChleoc (gd)
+    * Fran Dieguez (gl)
+    * Yosef Or Boczko (he)
+    * Baurzhan Muftakhidinov (kk)
+    * Shankar (kn)
+    * Aurimas Černius (lt)
+    * Kjartan Maraas (nb)
+    * Manoj Kumar Giri (or)
+    * Rafael Ferreira (pt_BR)
+    * Victor Ibragimov (tg)
+    * Theppitak Karoonboonyanan (th)
+    * Daniel Korostil (uk)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.11.3
+================
+
+New features and improvements:
+
+    * Hide window titlebar when maximized (#696254, Robert Roth)
+    * Add AtkDocument implementation to EvViewAccessible (#719507,
+      Alejandro Piñeiro)
+    * Remove the margin of the toolbar buttons and center them
+      vertically (#709005, Yosef Or Boczko, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Disable "Send To" action when there is no mail client
+      available (#701654, Plamena Manolova, Marek Kasik)
+    * Always consider the cursor page as the current page for
+      accessibility when caret navigation is enabled.
+    * Fix the page size reported in the properties dialog for some
+      document backends (#711093, Carlos Garcia Campos)
+
+Documentation:
+
+    * Update toolbar page (#705211, Tiffany Ann Antopolski)
+    * Update information on working with bookmarks (#710107, Tiffany
+      Ann Antopolski)
+
+Translation updates:
+
+    * Dimitris Spingos (Δημήτρης Σπίγγος) (el)
+    * Daniel Mustieles (es)
+    * Andika Triwidada (id)
+    * Rafael Ferreira (pt_BR)
+    * Shantha kumar (ta)
+    * Krishnababu Krothapalli (te)
+    * YunQiang Su (zh_CN)
+
+================
+Evince    3.11.1
+================
+
+New features and improvements:
+
+    * Do not open single page pdfs in dual mode by default (#547098,
+      raama)
+    * Activate current focused element on space/return key press
+      (#706244, Antia Puentes, Carlos Garcia Campos)
+    * Draw focus of links and form fields on mouse press (#706244,
+      Antia Puentes)
+
+Bug fixes:
+
+    * Fix a crash in djvu backend due to a double free (#710977, José
+      Aliste)
+    * Fix annotation window focus change after creation (#668446,
+      Nelson Benitez Leon)
+    * Fix loop when iterating search results (#710778, Carlos Garcia
+      Campos)
+    * Fix content exposed to assistive technologies when document
+      changes in EvView (#709375, Joanmarie Diggs)
+    * Simplify debug code to parse env variables using
+      g_parse_debug_string() (Christian Persch)
+
+Translation updates:
+
+    * Gil Forcada (ca)
+    * Gil Forcada (ca@valencia)
+    * Dimitris Spingos (Δημήτρης Σπίγγος) (el)
+    * Arash Mousavi (fa)
+    * Rūdolfs Mazurs (lv)
+    * Kjartan Maraas (nb)
+    * Hannie Dumoleyn (nl)
+    * Theppitak Karoonboonyanan (th)
+    * Gökhan Gurbetoğlu (tr)
+
+================
+Evince    3.10.0
+================
+
+Bug fixes:
+
+    * Fix a typo in EV_VIEW_PRESENTATION macro definition (Cosimo
+      Cecchi)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Nilamdyuti Goswami (as)
+    * Ihar Hrachyshka (be)
+    * Marek Černocký (cs)
+    * Kenneth Nielsen (da)
+    * Benjamin Steinwender (de)
+    * Ryan Lortie (eo)
+    * Daniel Mustieles (es)
+    * Mattias Põldaru (et)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Jiri Grönroos (fi)
+    * Bruno Brouard (fr)
+    * Seán de Búrca (ga)
+    * Fran Dieguez (gl)
+    * Yosef Or Boczko (he)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Claudio Arseni (it)
+    * Jiro Matsuzawa (ja)
+    * Baurzhan Muftakhidinov (kk)
+    * Changwoo Ryu (ko)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Hannie Dumoleyn (nl)
+    * A S Alam (pa)
+    * Piotr Drąg (pl)
+    * António Lima (pt)
+    * Enrico Nicoletto (pt_BR)
+    * Dmitriy S. Seregin (ru)
+    * Pavol Klačanský (sk)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Victor Ibragimov (tg)
+    * Daniel Korostil (uk)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.9.90
+================
+
+Bug fixes:
+
+    * Unescape the output basename for print to file (#705848, Aakash
+      Goenka)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Gil Forcada (ca)
+    * Daniel Mustieles (es)
+    * Fran Dieguez (gl)
+    * Yaron Shahrabani (he)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Aurimas Černius (lt)
+    * Rafael Ferreira (pt_BR)
+    * Matej Urbančič (sl)
+    * Theppitak Karoonboonyanan (th)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince     3.9.5
+================
+
+New features and improvements:
+
+    * Enable/disable the caret navigation with F7 (#702079, Antia
+      Puentes)
+    * Add 'Automatic' zoom mode to the zoom selector (Carlos Garcia
+      Campos)
+    * Use toggle menu items for zoom modes in zoom selector drop-down
+      menu to make it possible to know the zoom mode currently in use
+      (Carlos Garcia Campos)
+    * Implement text selections in EvViewAccessible (#704335, Antia
+      Puentes)
+    * More performance improvements in text selections (Carlos Garcia
+      Campos)
+    * Implement ATK interfaces to expose text attributes (#639932,
+      Antia Puentes)
+
+Bug fixes:
+
+    * Fix a crash in ev_view_accessible_get_link() when the given
+      link index is out of range (#705155, Antia Puentes)
+    * Clear the cached data in EvViewAccessible when the current page
+      or document are updated (#704621, Antia Puentes)
+    * Update API doc files (Christian Persch)
+    * Fix several compile warnings (Christian Persch)
+    * Fix the index/offset of the links returned by EvViewAccessible
+      (#704616, Joanmarie Diggs)
+    * Cache also the URI and document info when loading from a GFile
+      (#704685, Alessandro Campagni)
+    * Fix selections starting/ending in page margins (Carlos Garcia
+      Campos)
+    * Fix the number of selections returned by EvViewAccessible
+      (#704396, Antia Puentes)
+    * Fix the caret offset returned by EvViewAccessible when caret
+      navigation is enabled (#704396, Antia Puentes)
+    * Update the page number and zoom level when page and zoom
+      selectors are unfocused (#704138, Carlos Garcia Campos)
+    * Use MiB instead of Mb in cache size gsettings documentation
+      (#704155, Carlos Garcia Campos)
+    * Disable history action while history is frozen (#704184, Carlos
+      Garcia Campos)
+
+Translation updates:
+
+    * Marek Černocký (cs)
+    * Benjamin Steinwender (de)
+    * Daniel Mustieles (es)
+    * Kjartan Maraas (nb)
+    * Pavol Klačanský (sk)
+    * Victor Ibragimov (tg)
+    * YunQiang Su (zh_CN)
+
+================
+Evince     3.9.4
+================
+
+New features and improvements:
+
+    * Add a find sidebar to show search results with some more context
+      (#566827, Sergey Pushkin, José Aliste, Carlos Garcia Campos)
+    * Zoom selector has been moved to the right of the toolbar, close
+      to the other view options (#701696, Carlos Garcia Campos)
+    * Implement text selection in djvu backend (#448739, #703108,
+      Jonas Danielsson)
+    * Add 'cursor-moved' signal to notify when the caret cursor has
+      been moved (#702078, Antia Puentes)
+    * Keep the offset inside a line when moving the caret between
+      lines (#702075, Antia Puentes)
+    * Position the caret cursor at beginning/end of the line when
+      clicking outside the line (Carlos Garcia Campos)
+    * Implement text selection with the keyboard when caret navigation
+      is enabled (#702073, Antia Puentes)
+    * Notify about caret navigation errors using the error bell
+      (#702650, Antia Puentes)
+    * Set history button arrow icons according to locale's text
+      direction (#702585, Yosef Or Boczko)
+    * Several performance improvements when selecting text (Carlos
+      Garcia Campos)
+    * Emit the AtkText 'text-caret-moved' and 'text-selection-changed'
+      signals in EvViewAccessible (#701732, Antia Puentes)
+
+Bug fixes:
+
+    * Fix selection of overlapping text (#703024, Jason Crain)
+    * Fix a crash when selecting more than one page (#702874, Carlos
+      Garcia Campos)
+    * Fix a crash due to an infinite loop resolving hyphenations in
+      find results sidebar (Carlos Garcia Campos)
+    * Don't draw the caret cursor when the view is not focused (Carlos
+      Garcia Campos)
+    * Do not show the caret cursor when there are active selections
+      (#702761, Carlos Garcia Campos)
+    * Clear the selection when cursor is moved (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Baurzhan Muftakhidinov (kk)
+    * Kjartan Maraas (nb)
+    * Trần Ngọc Quân (vi)
+
+================
+Evince     3.9.3
+================
+
+New features and improvements:
+
+    * Make the history behave more like a web browser (Christian
+      Persch)
+    * Add a fallback implementation of text selection for backends
+      that implement get_selection_region but not render_selection
+      (#669022, Jason Crain)
+    * Initial implementation of caret navigation added to libview
+      (#638905, #702076, #702068, Antia Puentes, Carlos Garcia Campos)
+    * Add a GSetting to set a custom page cache size (#642683, Jonas
+      Danielsson)
+
+Bug fixes:
+
+    * Fix memory corruption in EvHistory implementation (#697397,
+      Christian Persch)
+    * Fix drag and drop of selected text after zooming with a
+      selection (#702406, Jason Crain)
+    * Fix a crash when searching with a negative current page
+      (#683172, Germán Poo-Caamaño)
+    * Fix race condition in sidebar-thumbnails (#701900, aakash)
+    * Use horzontal/vertical GtkBoxes instead of deprecated
+      GtkHBox/GtkVBox (Christian Persch)
+    * Fix runtime critical warning for links with NULL action
+      (Christian Persch)
+    * Fix -Wstrict-prototypes warnings (Christian Persch)
+    * Remove obsolete g_type_init calls (Christian Persch)
+    * Fix crash on corrupted PDF with no pages (#701302, Germán
+      Poo-Caamaño)
+
+Translation updates:
+
+    * Marek Černocký (cs)
+    * Daniel Mustieles (es)
+    * Fran Dieguez (gl)
+    * OKANO Takayoshi (ja)
+    * Yasumichi Akahoshi (ja)
+
+================
+Evince     3.9.2
+================
+
+New features and improvements:
+
+    * Forward key events received in the toplevel window to the
+      focused widget (#676040, José Aliste)
+    * Use the document filename as output basename when printing to a
+      file (#700466, Jonas Danielsson)
+    * Enable GDK_SMOOTH_SCROLL events for EvView (#674098, Xiao-Long
+      Chen)
+    * Show the document URI in the error message when it fails to open
+      (#697900, Pietro Battiston)
+    * Allow to browse all files from Save Image dialog by adding more
+      filters to the file chooser (#523071, Jonas Danielsson)
+    * Added Shift+Enter shortcut to search backwards (#641797, Ondrej
+      Danko)
+    * Make shortcuts for find next/previous work even when the fin bar
+      is closed (#625225, Jonas Danielsson)
+    * Add support for file identifiers to DJVU backend (#619410, José
+      Aliste)
+    * Add support for page labels to DJVU backend (#619407, José
+      Aliste)
+    * Use ellipsis character in translatable strings (#695597, Gökçen
+      Eraslan)
+
+Bug fixes:
+
+    * Make annotation windows always accept input focus (#668446, José
+      Aliste, Florian Echtler)
+    * Fix capitalization in a menu item (#699108, Adam Dingle)
+    * Fix typo in PostScript printer error message (#695597, Gökçen
+      Eraslan)
+    * Fix zoom and position of FitR link destinations (#695524, Simon
+      Budig)
+    * Update the search string when the document is reloaded (#694143,
+      aakash)
+    * Fix --find command line option to actually show the find bar
+      (#604327, Carlos Garcia Campos)
+    * Forward EvView key events to the focused form field, so that
+      it's possible to move between words with CTRL+Left/Right in text
+      form fields instead of rotating the view (#699630, Carlos Garcia
+      Campos)
+    * Do not update the history while searching to prevent the find
+      bar from begin closed unexpectedly (#697194, Carlos Garcia
+      Campos)
+    * Fix document to view coordinates transformation to take page
+      borders into account. This makes search results, form fields,
+      annotations and other items to be correctly placed on the view
+      (Carlos Garcia Campos)
+
+Documentation:
+
+    * Update gtk-doc API files adding new symbols and removing the
+      ones that no longer exist (#697152, Cosimo Cecchi)
+    * Update the man page (Marek Kasik)
+
+Translation updates:
+
+    * flemming christensen (da)
+    * Christian Kirbach (de)
+    * Bruce Cowan (en_GB)
+    * Daniel Mustieles (es)
+    * Yaron Shahrabani (he)
+    * Gabor Kelemen (hu)
+    * OKANO Takayoshi (ja)
+    * Kjartan Maraas (nb)
+    * Pavol Klačanský (sk)
+    * Matej Urbančič (sl)
+    * tuhaihe (zh_CN)
+
+================
+Evince     3.8.0
+================
+
+New features and improvements:
+
+    * Remove the NoDisplay=true from Evince desktop file (#634245,
+      Kalev Lember)
+
+Bug fixes:
+
+    * Fix desktop file keyword translations (#696310, Kalev Lember)
+
+Translation updates:
+
+    * flemming christensen (da)
+    * Dimitris Spingos (Δημήτρης Σπίγγος) (el)
+    * Mickael Albertus (fr)
+    * Gabor Kelemen (hu)
+    * Shankar Prasad (kn)
+    * Seong-ho Cho (ko)
+    * Ani Peter (ml)
+    * Sandeep Shedmake (mr)
+    * Wouter Bolsterlee (nl)
+    * Manoj Kumar Giri (or)
+    * Dr.T.Vasudevan (ta)
+    * Krishnababu Krothapalli (te)
+    * Daniel Korostil (uk)
+
+================
+Evince    3.7.92
+================
+
+New features and improvements:
+
+    * Use the page frame from the theme instead of our own (#691333,
+      Germán Poo-Caamaño)
+    * Improved the performance of search (#667569, Germán Poo-Caamaño)
+    * Add desktop file for print preview (#694482, William Jon McCann)
+    * Add API to allow changing the page of a presentation (#693749,
+      William Jon McCann)
+
+Bug fixes:
+
+    * Disable view presentation if there is no document (#685591,
+      Lubos Koudelka)
+    * Fixed and improved several API doc comments (Germán Poo-Caamaño)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Nilamdyuti Goswami (as)
+    * Ihar Hrachyshka (be)
+    * Gil Forcada (ca)
+    * Gil Forcada (ca@valencia)
+    * Lucas Lommer (cs)
+    * Kenneth Nielsen (da)
+    * Mario Blättermann (de)
+    * Dimitris Spingos (Δημήτρης Σπίγγος) (el)
+    * Daniel Mustieles (es)
+    * Mattias Põldaru (et)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Arash Mousavi (fa)
+    * Jiri Grönroos (fi)
+    * Bruno Brouard (fr)
+    * Fran Dieguez (gl)
+    * Sweta Kothari (gu)
+    * Yaron Shahrabani (he)
+    * raj (hi)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Claudio Arseni (it)
+    * Jiro Matsuzawa (ja)
+    * Baurzhan Muftakhidinov (kk)
+    * Changwoo Ryu (ko)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Balasankar C (ml)
+    * Kjartan Maraas (nb)
+    * A S Alam (pa)
+    * Piotr Drąg (pl)
+    * Rafael Ferreira (pt_BR)
+    * Duarte Loreto (pt)
+    * Yuri Myasoedov (ru)
+    * Pavol Klačanský (sk)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Dr.T.Vasudevan (ta)
+    * Victor Ibragimov (tg)
+    * Theppitak Karoonboonyanan (th)
+    * Gheyret Kenji (ug)
+    * Nguyễn Thái Ngọc Duy (vi)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.7.90
+================
+
+New features and improvements:
+
+    * Add support for activation actions of form fields (José Aliste)
+    * Add navigation history buttons to the toolbar (#169903, Carlos
+      Garcia Campos)
+    * Show accelerators in the view menu (#692960, Juanjo Marín)
+
+Bug fixes:
+
+    * Show as much text as possible for index tree (#676593, Germán
+      Poo-Caamaño)
+    * Unescape location URI in properties dialog (#693794, Germán
+      Poo-Caamaño)
+    * Fix rendering of editable choice form fields (José Aliste)
+    * Fix rendering of the first visible page while resizing (José
+      Aliste)
+    * Use initial rotation to render pages in DJVU backend (#667266,
+      José Aliste)
+
+Translation updates:
+
+    * Daniel Martinez (an)
+    * Mario Blättermann (de)
+    * Daniel Mustieles (es)
+    * Fran Dieguez (gl)
+    * Aurimas Černius (lt)
+    * Anish A (ml)
+    * A S Alam (pa)
+    * Piotr Drąg (pl)
+    * Pavol Klačanský (sk)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Gheyret Kenji (ug)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince     3.7.5
+================
+
+New features and improvements:
+
+    * Use DPI of pages to compute scaling factor in DJVU documents
+      (#580891, José Aliste)
+    * Show accelerators in gear menu (#692960, Carlos Garcia Campos)
+    * Show the gear menu with F10 (#692909, Carlos Garcia Campos)
+    * Improve the scrolling performance (#692988, Cosimo Cecchi)
+    * Add a lot of missing introspection annotations to libview and
+      libdocument (#691354, Cosimo Cecchi)
+    * Make document links accessible with Orca by implementing the
+      AtkHypertext interface (#639403, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fix a crash when failed to connect to D-BUS daemon (#691672,
+      Brennan Shacklett)
+    * Fix the font color of annotation popup windows (#677471, Carlos
+      Garcia Campos)
+    * Move x11 dependency to xsmp support (#692591, Quentin Glidic)
+    * Add missing include to libdocument main public header (#692778,
+      William Jon McCann)
+    * Make introspection build against the internal libevdocument
+      (#692136, Alban Browaeys)
+    * Several fixes in gtk-doc comments (#691354, Cosimo Cecchi)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Fran Dieguez (gl)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Piotr Drąg (pl)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Theppitak Karoonboonyanan (th)
+    * Gheyret Kenji (ug)
+
+================
+Evince     3.7.4
+================
+
+The UI has been re-designed to follow the GNOME 3 style:
+
+    * The main menu has been removed.
+    * A new toolbar has been added with a gear menu and view menu
+      containing the previous main menu items.
+    * The zoom control has now an entry that always shows the current
+      zoom factor and allows to enter custom zoom factors in addition
+      to the predefined ones.
+    * In the page selector, the entry and the total pages label are
+      linked to look like the same widget.
+    * The find bar has also been re-designed and moved to the top of
+      the main view.
+    * The toolbar in fullscreen mode is now automatically hidden.
+    * The view and thumbnail frames can now be styled with CSS.
+
+New features and improvements:
+
+    * The font properties dialog now shows a message to inform whether
+      any of the non-embedded font is one of the 14 standard fonts
+      (#527222, Alban Crequy)
+    * Migrate from libgnome-keyring to libsecret (#679855, Stef
+      Walter)
+    * Add a new layout mode that automatically determines if dual page
+      mode should be used when the window is large enough. It's not
+      used by Evince yet, but it's available to libview users
+      (#689468, William Jon McCann)
+    * Make EvLink:link-action and EvLinkAction:dest object properties
+      instead of pointers to be properly refcounted (#691214, William
+      Jon McCann)
+    * A new 'Automatic' zoom mode has been added to libview. It's not
+      used by Evince yet, but it's available to libview users
+      (#689468, William Jon McCann)
+    * Best fit mode has been renamed to Fit Page (#689468, William Jon
+      McCann)
+    * Make can-zoom-in and can-zoom-out properties of EvView (#690510,
+      William Jon McCann)
+    * Move the limits on zoom handling to libview (#690510, William
+      Jon McCann)
+    * Set a default value of 50MB for the pixbuf cache in EvView
+      (#689674, William Jon McCann)
+    * Add keywords to the desktop file to make gnome-shell search more
+      pleasant and useful (#687604, Matthias Clasen)
+
+Bug fixes:
+
+    * Fix a11y support by not using AtkFactory to create the
+      EvViewAccessible anymore (#685828, Carlos Garcia Campos, Daniel
+      Garcia )
+    * Fix empty pages in DJVU document to be white instead of black
+      (#669017, José Aliste)
+    * Use new libtool syntax in configure (Javier Jardón)
+    * Remove obsolete autoconf macros (Javier Jardón)
+    * Fix the error message shown when postscript is not supported by
+      the selected printer (#683528, José Aliste)
+    * Fix the computation of the scale factor in fit page mode to make
+      sure scrollbars are never shown (#665856, José Aliste)
+
+Documentation:
+
+    * Added documentation for saving Current Settings as Default in
+      the FAQ section of help pages (#689238, Sindhu S)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Nilamdyuti Goswami (as)
+    * Krasimir Chonov (bg)
+    * Dimitris Spingos (Δημήτρης Σπίγγος) (el)
+    * Daniel Mustieles (es)
+    * Mattias Põldaru (et)
+    * Fran Dieguez (gl)
+    * Yaron Shahrabani (he)
+    * Gabor Kelemen (hu)
+    * Baurzhan Muftakhidinov (kk)
+    * Aurimas Černius (lt)
+    * Kjartan Maraas (nb)
+    * Piotr Drąg (pl)
+    * Florencio Neves (pt_BR)
+    * Aleksej Kabanov (ru)
+    * Matej Urbančič (sl)
+
+================
+Evince     3.7.1
+================
+
+New features and improvements:
+
+    * Add application menu (#674937, Christian Persch)
+    * Set maximum width for page numbers in index to improve the
+      visibility of the table of contents (#660113, Germán
+      Poo-Caamaño)
+    * Use GtkOverlay to show the loading message (Carlos Garcia
+      Campos)
+    * Use custom cell renderers for the thumbnails icon view to fix
+      the huge selection rectangle around thumbnails (#646055, Carlos
+      Garcia Campos)
+    * Hold the application while printing is in progress (Christian
+      Persch)
+    * Add 2DGraphics category to the desktop file (#686062, Alexandre
+      Rostovtsev)
+
+Bug fixes:
+
+    * Show always the offline help using Yelp (#682423, Robert Ancell)
+    * Remove xi:includes referencing obsolete files in documentation
+      (#686060, Alexandre Rostovtsev)
+    * Use custom CSS for EvView to make sure the background is not
+      white as Adwaita currently does, because it breaks the page
+      frames (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Daniel Martinez (an)
+    * Xavier Roijals (ca)
+    * Daniel Mustieles (es)
+    * Khoem Sokhem (km)
+    * Wouter Bolsterlee (nl)
+    * Pavol Klačanský (sk)
+    * Re. (uk)
+
+================
+Evince     3.6.0
+================
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Krasimir Chonov (bg)
+    * Runa Bhattacharjee (bn_IN)
+    * Gil Forcada (ca)
+    * Gil Forcada (ca@valencia)
+    * Tom Tryfonidis (el)
+    * Chris Leonard (en_GB)
+    * Mattias Põldaru (et)
+    * Fran Dieguez (gl)
+    * chandankumar (hi)
+    * Claudio Arseni (it)
+    * Takayuki KUSANO (ja)
+    * Shankar Prasad (kn)
+    * Rūdolfs Mazurs (lv)
+    * Anish A (ml)
+    * A S Alam (pa)
+    * Yuri Myasoedov (ru)
+    * Andrej Žnidaršič (sl)
+    * Dr.T.Vasudevan (ta)
+    * Praveen Illa (te)
+    * YunQiang Su (zh_CN)
+
+================
+Evince    3.5.92
+================
+
+New features and improvements:
+
+    * Add ev_view_find_started() to replace ev_view_find_changed()
+      that is not introspectable (#682875, Gonzalo Odiard)
+    * Add ev_job_links_get_model() to make the links model available
+      to introspection (#682882, Gonzalo Odiard)
+
+Bug fixes:
+
+    * Fix a crash due to zero division (#681546, Petr Pisar)
+    * Fix compiler warnings due to GDK_SCROLL_SMOOTH not handled in
+      switch (Christian Persch)
+
+Translation updates:
+
+    * Nilamdyuti Goswami (as)
+    * Ihar Hrachyshka (be)
+    * Marek Černocký (cs)
+    * flemming christensen (da)
+    * Kenneth Nielsen (da)
+    * Christian Kirbach (de)
+    * Mario Blättermann (de)
+    * Tom Tryfonidis (el)
+    * Chris Leonard (en_GB)
+    * Daniel Mustieles (es)
+    * Arash Mousavi (fa)
+    * Jiri Grönroos (fi)
+    * Bruno Brouard (fr)
+    * Mickael Albertus (fr)
+    * Fran Dieguez (gl)
+    * Sweta Kothari (gu)
+    * Yaron Shahrabani (he)
+    * rajesh (hi)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Yasumichi Akahoshi (ja)
+    * Changwoo Ryu (ko)
+    * Seong-ho Cho (ko)
+    * Aurimas Černius (lt)
+    * Rūdolfs Mazurs (lv)
+    * Sandeep Shedmake (mr)
+    * A S Alam (pa)
+    * Piotr Drąg (pl)
+    * Fábio Nogueira (pt_BR)
+    * Duarte Loreto (pt)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Dr.T.Vasudevan (ta)
+    * Theppitak Karoonboonyanan (th)
+    * Muhammet Kara (tr)
+    * Wylmer Wang (zh_CN)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.5.90
+================
+
+Bug fixes:
+
+    * Disconnect all model signals for EvView before unreffing the
+      EvDocumentModel (#680023, Carlos Garcia Campos)
+
+Documentation:
+
+    * Use new documentation infrastructure (#681606, Javier Jardón)
+
+Translation updates:
+
+    * Tom Tryfonidis (el)
+    * Daniel Mustieles (es)
+    * Leandro Regueiro (gl)
+    * Takayuki KUSANO (ja)
+    * Sandeep Shedmake (mr)
+    * Aleksey Kabanov (ru)
+
+================
+Evince     3.5.5
+================
+
+New features and improvements:
+
+    * Use GtkApplication to inhibit the screensaver (Christian Persch)
+    * Port EvApplication to GtkApplication and make EvWindow a
+      GtkApplicationWindow (Christian Persch)
+    * Port evince daemon to GApplication (Christian Persch)
+    * Use gdbus-codegen for D-Bus interfaces (Christian Persch, Carlos
+      Garcia Campos)
+
+Bug fixes:
+
+    * Fix sent to when filename contains spaces (#681144, Carlos
+      Garcia Campos)
+    * Apply default settings also for documents opened from /tmp
+      (#680145, Carlos Garcia Campos)
+    * Replace GDK_THREADS_ENTER/LEAVE with gdk_threads_enter/leave
+      (#681215, Matthias Clasen)
+
+Translation updates:
+
+    * Dimitris Spingos (Δημήτρης Σπίγγος) (el)
+    * Fran Dieguez (gl)
+    * Sweta Kothari (gu)
+    * Andika Triwidada (id)
+    * OKANO Takayoshi (ja)
+    * Baurzhan Muftakhidinov (kk)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Praveen Illa (te)
+
+================
+Evince     3.5.4
+================
+
+New features and improvements:
+
+    * Store and restore current folder when opening or saving file
+      (Christian Persch)
+    * Fix and modernize GObject introspection generation (#678971,
+      Robert Ancell, Giovanni Campagna)
+
+Bug fixes:
+
+    * Fix saving attachments when the name contains a path (#679354,
+      Justin Willmert)
+
+Documentation:
+
+    * Add missing introspection annotations to ev_document_get_page
+      and ev_document_get_page_size (#679264, Ferdinand Schwenk)
+
+Translation updates:
+
+    * Nilamdyuti Goswami (as)
+    * Ihar Hrachyshka (be)
+    * Krasimir Chonov (bg)
+    * Daniel Mustieles (es)
+    * Yaron Shahrabani (he)
+    * Kjartan Maraas (nb)
+    * Nguyễn Thái Ngọc Duy (vi)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince     3.5.3
+================
+
+New features and improvements:
+
+    * Add find options to the find bar. Find options available depend
+      on every backend. (Carlos Garcia Campos)
+    * Use GResource for data files (Christian Persch)
+    * Add new API to EvAnnotation that uses GdkRGBA (#677983,
+      Christian Persch)
+    * Use G_PARAM_STATIC_STRINGS flag for properties (Christian Persch)
+
+Bug fixes:
+
+    * Fix the build with poppler versions not including the new find
+      options API (#677867, Cosimo Cecchi)
+    * Fix crash due to an invalid free (#678563, José Aliste,
+      Christian Persch)
+
+Documentation:
+
+    * Add missing EvAnnotation API to sections.txt (Christian Persch)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Nilamdyuti Goswami (as)
+    * Tom Tryfonidis (el)
+    * Daniel Mustieles (es)
+    * Fran Dieguez (gl)
+    * Kjartan Maraas (nb)
+    * Yuri Kozlov (ru)
+    * Matej Urbančič (sl)
+
+================
+Evince     3.5.2
+================
+
+New features and improvements:
+
+    * Add API to load EvDocument from GInputStream and GFile. Only
+      implemented by the PDF backend for now (#654832, Christian Persch)
+    * Rework backends management and document factory to make it easy
+      to add a module cache (Christian Persch)
+    * Improve error handling in EvDocumentFactory (Christian Persch)
+    * Include substitute font name and file in font list (Adrian
+      Johnson)
+    * Use primary-toolbar style class in evince-previewer (#675310,
+      Volker Sobek)
+    * Copy document metadata to the new file when saving a copy
+      (#674629, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fix memory leak when document is encrypted (Christian Persch)
+    * Do not remove unexistent files from recent menu (#674188, Carlos
+      Garcia Campos)
+    * Fix underlinking with >=glib-2.32 detected by gold linker
+      (Justin Lecher)
+    * Removed deprecated use of GTK_POLICY_AUTOMATIC (Daniel
+      Mustieles)
+    * Fix a crash when running with Broadway GDK backend (#673664,
+      justin)
+    * Remove remnants of Hildon support from configure (#673679,
+      Adrian Bunk)
+    * Remove old workaround inconfigure to build with deprecated
+      symbols (#673680, Adrian Bunk)
+
+Documentation:
+
+    * Add Get Involved section and legal information to the
+      documentation (Tiffany Antopolski)
+
+Translation updates:
+
+    * Daniel Martinez (an)
+    * Khaled Hosny (ar)
+    * Krasimir Chonov (bg)
+    * Gil Forcada (ca)
+    * Gil Forcada (ca@valencia)
+    * Marek Černocký (cs)
+    * Mario Blättermann (de)
+    * Daniel Mustieles (es)
+    * Alain Lojewski (fr)
+    * Bruno Brouard (fr)
+    * Fran Dieguez (gl)
+    * Yaron Shahrabani (he)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Claudio Arseni (it)
+    * Takayuki KUSANO (ja)
+    * Rūdolfs Mazurs (lv)
+    * Kjartan Maraas (nb)
+    * Piotr Drąg (pl)
+    * Jonh Wendell (pt_BR)
+    * Aleksej Kabanov (ru)
+    * Yuri Kozlov (ru)
+    * Pavol Klačanský (sk)
+    * Andrej Žnidaršič (sl)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Praveen Illa (te)
+
+================
+Evince     3.4.0
+================
+
+Bug fixes:
+
+    * Fix scmclient detection when GDK targets contain more than one
+      backend (#672613, Juan RP)
+
+Translation updates:
+
+    * Kenneth Nielsen (da)
+    * Mario Blättermann (de)
+    * Daniel Mustieles (es)
+    * Bruno Brouard (fr)
+    * Sweta Kothari (gu)
+    * chandankumar(ciypro) (hi)
+    * Gabor Kelemen (hu)
+    * Rūdolfs Mazurs (lv)
+    * Antonio Fernandes C. Neto (pt_BR)
+    * Duarte Loreto (pt)
+    * Yuri Kozlov (ru)
+    * Bhuvan Krishna (te)
+    * Krishnababu Krothapalli (te)
+    * Muhammet Kara (tr)
+
+================
+Evince    3.3.92
+================
+
+Bug fixes:
+
+    * Fix typos in ev-form-field.h (#635055, José Aliste)
+    * Fix the build with mingw (Hib Eris)
+
+Documentation:
+
+    * Fix key sequences in documentation (#672296, Tiffany Antopolski)
+    * Fix several markups in documentation (#672299, #672296,
+      Tiffany Antopolski)
+
+Translation updates:
+
+    * Ibrahim Saed (ar)
+    * Nilamdyuti Goswami (as)
+    * Krasimir Chonov (bg)
+    * Gil Forcada (ca)
+    * Mario Blättermann (de)
+    * Bruce Cowan (en_GB)
+    * Kristjan SCHMIDT (eo)
+    * Mattias Põldaru (et)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Arash Mousavi (fa)
+    * Jiri Grönroos (fi)
+    * Bruno Brouard (fr)
+    * Yaron Shahrabani (he)
+    * Gabor Kelemen (hu)
+    * Claudio Arseni (it)
+    * Ikuya Awashiro (ja)
+    * Baurzhan Muftakhidinov (kk)
+    * Changwoo Ryu (ko)
+    * Žygimantas Beručka (lt)
+    * Anita Reitere (lv)
+    * Hannie Dumoleyn (nl)
+    * A S Alam (pa)
+    * Piotr Drąg (pl)
+    * Duarte Loreto (pt)
+    * Yuri Myasoedov (ru)
+    * Matej Urbančič (sl)
+    * Daniel Nylander (sv)
+    * Dr.T.Vasudevan (ta)
+    * Krishnababu Krothapalli (te)
+    * Muhammet Kara (tr)
+    * Korostil Daniel (uk)
+    * Nguyễn Thái Ngọc Duy (vi)
+    * EL8LatSPQ (zh_CN)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince    3.3.90
+================
+
+New features and improvements:
+
+    * Restore horizontal policy to NEVER for the sidebar's thumbnails
+      (#670375, Gustavo Noronha Silva)
+    * Add a setting to disable auto-reload (#669265, Carlos Garcia
+      Campos)
+    * Split dual mode option into dual mode with odd and even pages on
+      the left (#444587, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fixed several compile warnings (Hib Eris)
+    * Several build fixes for windows (Hib Eris)
+    * Fix typo min gsettings schema file (#670399, Andre Klapper)
+
+Translation updates:
+
+    * Ihar Hrachyshka (be)
+    * Marek Černocký (cs)
+    * Kenneth Nielsen (da)
+    * Daniel Mustieles (es)
+    * Mattias Põldaru (et)
+    * Bruno Brouard (fr)
+    * Fran Dieguez (gl)
+    * Yaron Shahrabani (he)
+    * Baurzhan Muftakhidinov (kk)
+    * Mohammed Sadiq (ml)
+    * Kjartan Maraas (nb)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Daniel Nylander (sv)
+    * Praveen Illa (te)
+    * 朱涛 (zh_CN)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince     3.3.5
+================
+
+New features and improvements:
+
+    * Add Send To action to file menu and toolbar (#569913, Carlos
+      Garcia Campos)
+    * Add --named-dest command line argument (#668749, Ron Yorston)
+
+Bug fixes:
+
+    * Fix a crash when dropping an item to the toolbar (Carlos Garcia
+      Campos)
+    * Fix page index argument when command is spawned (#668736, Ron
+      Yorston)
+    * Use t1 font mapping files in dvi backend (#612298, Marek Kašík)
+    * Fix several memory leaks in comics backend (#667258, Juanjo
+      Marín)
+
+Translation updates:
+
+    * Mario Blättermann (de)
+    * Tiffany Antopolski (en_CA)
+    * Daniel Mustieles (es)
+    * Fran Dieguez (gl)
+    * Kjartan Maraas (nb)
+
+================
+Evince     3.3.4
+================
+
+New features and improvements:
+
+    * Go to next/previous find match with control + Up/Down (#653910,
+      Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Do not show the find bar in presentation mode (#645976, Carlos
+      Garcia Campos)
+    * Save always settings that can be saved as default in metadata
+      (#639003, Carlos Garcia Campos)
+    * Fix several compile warnings (Hib Eris)
+    * Respect prefix when installing nautilus extensions (#505359, Hib
+      Eris)
+
+Documentation:
+
+    * Fix description to print n page booklet using printer allows
+      double-side printing (Yasumichi Akahoshi)
+
+Translation updates:
+
+    * Daniel Mustieles (es)
+    * Bruno Brouard (fr)
+    * Fran Dieguez (gl)
+    * Jovan Naumovski (mk)
+    * Xiaoran Zhao (zh_CN)
+
+================
+Evince   3.3.3.1
+================
+
+Bug fixes:
+
+    * Fix the build making libevdocument link against gmodule-2.0
+      (Frédéric Péters)
+
+Documentation:
+
+    * Fixed validation issues (Tiffany Antopolski)
+
+Translation updates:
+
+    * Misha Shnurapet (ru)
+
+================
+Evince     3.3.3
+================
+
+New features and improvements:
+
+    * Add an option to show odd pages on the left in dual mode. This
+      option has been added to libevince but it's not exposed by the
+      evine UI yet. (#444587, Cyril Soldani)
+    * Add Office category to desktop file (#666346, Carlos Garcia
+      Campos)
+    * Add configure option --disable-viewer (Hib Eris)
+    * Allow compiling with glib < 2.31.0 (Hib Eris)
+
+Bug fixes:
+
+    * Refresh thumbnail only when there's a document loaded (Hib Eris)
+    * Add x-ext-<type> fallback mime-types to fix mime-type detection
+      on windows (Hib Eris)
+    * Fix rotation of tiff documents with different X/Y resolution
+      (Hib Eris)
+    * Close descriptor of temporary files before copying to them. It
+      seems that on Windows, g_file_copy() does not work on files with
+      a file desciptor open (Hib Eris)
+    * Remove use of several deprecated GTK+ API (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Mario Blättermann (de)
+    * Hideki Yamane (ja)
+    * Baurzhan Muftakhidinov (kk)
+    * Yuri Myasoedov (ru)
+    * Matej Urbančič (sl)
+    * Xiaoran Zhao (zh_CN)
+
+================
+Evince     3.3.2
+================
+
+New features and improvements:
+
+    * Improve mime type detection on win32 (Hib Eris)
+
+Bug fixes:
+
+    * Remove use of several deprecated API in GLib and GTK+ (Carlos
+      Garcia Campos)
+    * Update smclient from libegg to fix the application name
+      (#631612, Carlos Garcia Campos)
+    * Update synctex to version 1.17 to fix problems with file paths
+      (José Aliste)
+
+Documentation:
+
+    * Add API documentation to EvAnnotation.
+    * Several fixes and cleanups in user manual (Tiffany Antopolski)
+    * Add introspection annotations to
+      ev_document_factory_get_document() (#635705, José Aliste)
+    * Add introspection annotations to
+      ev_document_model_get_document() (#662720, Cosimo Cecchi)
+
+Translation updates:
+
+    * Ihar Hrachyshka (be)
+    * Gabor Karsay (de)
+    * Daniel Mustieles (es)
+    * Mattias Põldaru (et)
+    * Alexandre Franke (fr)
+    * Bruno Brouard (fr)
+    * Gabor Kelemen (hu)
+    * Umarzuki Bin Mochlis Moktar (ms)
+    * KYAW MYAT THU (my)
+    * Praveen Illa (te)
+    * Nguyễn Thái Ngọc Duy (vi)
+
+================
+Evince     3.2.1
+================
+
+Bug fixes:
+
+    * Make sure page labels are valid utf-8 strings in PostScript
+      backend (#654263, Carlos Garcia Campos)
+
+Documentation:
+
+    * Update and extend man page, Added documentation for the
+      --page-index command line switch, and improved wording a bit at
+      various places (Wouter Bolsterlee)
+    * Small fixes to markup in help pages (Tiffany Antopolski)
+
+Translation updates:
+
+    * Xandru Armesto (ast)
+    * Mario Blättermann (de)
+    * Daniel Mustieles (es)
+    * Gabor Kelemen (hu)
+    * Sasi Bhushan Boddepalli (te)
+
+================
+Evince     3.2.0
+================
+
+Documentation:
+
+    * Several fixes and updated documentation (Tiffany Antopolski)
+
+Translation updates:
+
+    * Daniel Martinez Cucalon (an)
+    * Abdalrahim G. Fakhouri (ar)
+    * Nilamdyuti Goswami (as)
+    * Ihar Hrachyshka (be)
+    * Alexander Shopov (bg)
+    * Gil Forcada (ca)
+    * Gil Forcada (ca@valencia)
+    * Lucas Lommer (cs)
+    * flemming christensen (da)
+    * Kenneth Nielsen (da)
+    * Mario Blättermann (de)
+    * Bruce Cowan (en_GB)
+    * Tiffany Antopolski (eo)
+    * Daniel Mustieles (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Arash Mousavi (fa)
+    * Jiri Grönroos (fi)
+    * Fran Dieguez (gl)
+    * Sweta Kothari (gu)
+    * Yaron Shahrabani (he)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Claudio Arseni (it)
+    * Jiro Matsuzawa (ja)
+    * Changwoo Ryu (ko)
+    * Aurimas Černius (lt)
+    * Rūdofls Mazurs (lv)
+    * Wouter Bolsterlee (nl)
+    * A S Alam (pa)
+    * Antonio Fernandes C. Neto (pt_BR)
+    * Duarte Loreto (pt)
+    * Pavol Klačanský (sk)
+    * Andrej Žnidaršič (sl)
+    * Matej Urbančič (sl)
+    * Miroslav Nikolić (sr@latin)
+    * Мирослав Николић (sr)
+    * Daniel Nylander (sv)
+    * Dr.T.Vasudevan (ta)
+    * Theppitak Karoonboonyanan (th)
+    * Muhammet Kara (tr)
+    * Korostil Daniel (uk)
+    * 朱涛 (zh_CN)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  3.1.90.1
+================
+
+Bug fixes:
+
+    * Fix the build making libevdocument link against -lm and -lz
+      (#657781, Frédéric Péters)
+
+================
+Evince    3.1.90
+================
+
+New Features and UI Improvements:
+
+    * Don't set the current folder while saving a file (#655514,
+      Carlos Garcia Campos)
+    * Fallback mode for cbz files using 7za and 7z (#583499, Juanjo
+      Marín)
+    * Add GoToPage item to Go menu (José Aliste)
+    * Limit thumbnailing time to 15 seconds by default (#651655,
+      Carlos Garcia Campos)
+    * Add shortcut keys for best-fit and fit-width options (#595571,
+      Carlos Garcia Campos)
+    * Add Help button to the toolbar editor (#503638, Tiffany
+      Antopolski)
+    * Use GTK_STOCK_GO_BACK for the history button (#554585, Josselin
+      Mouette)
+
+Bug fixes:
+
+    * Fix saving annotations added to different pages (#628378, Daniel
+      Glöckner)
+    * Add plural form for "cancel print jobs before closing" dialog
+      (José Aliste)
+    * Update toolbar-editor from libegg to fix drag and drop toolbar
+      items (José Aliste)
+    * Disable shortcut 'n' while editing form fields (#654927, Nivaldo
+      Bondanca)
+    * Do not use the C++ template keyword in headers (Murray Cumming)
+    * Update smclient check for gdk targets (Michael Biebl)
+    * Save zoom factor in default settings when sizing mode is free
+      (#653383, Carlos Garcia Campos)
+    * Fix build with --enable-introspection (#643382, Dominique
+      Leuenberger)
+    * Update synctex parser to version 1.16 (#651263, José Aliste)
+
+Documentation:
+
+    * Update man page (#526539, Sven Arvidsson)
+    * Fixed spelling errors, clarified concepts and updated docs
+      (#648254, Tiffany Antopolski)
+
+Translation updates:
+
+    * Ihar Hrachyshka (be)
+    * Alexander Shopov (bg)
+    * Mario Blättermann (de)
+    * Daniel Mustieles (es)
+    * Jorge González (es)
+    * Tommi Vainikainen (fi)
+    * Alexandre Franke (fr)
+    * Fran Diéguez (gl)
+    * Yaron Shahrabani (he)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Rūdofls Mazurs (lv)
+    * Torstein Adolf Winterseth (nb)
+    * Wouter Bolsterlee (nl)
+    * Piotr Drąg (pl)
+    * Yuri Myasoedov (ru)
+    * Pavol Klačanský (sk)
+    * Matej Urbančič (sl)
+    * Daniel Nylander (sv)
+    * Theppitak Karoonboonyanan (th)
+    * Muhammet Kara (tr)
+    * Sahran (ug)
+    * Xiaoran Zhao (zh_CN)
+    * 朱涛 (zh_CN)
+    * Priscilla Mahlangu (zu)
+
+================
+Evince    3.1.2
+================
+
+Bug fixes:
+
+    * Fix goto window in presentation mode (Carlos Garcia Campos)
+    * Don't allow to hide the toolbar when it's being edited (#648056,
+      Carlos Garcia Campos)
+    * Send page dest as integer to other evince instances when '-i'
+      command line switch is used (#647138, Carlos Garcia Campos)
+    * Don't jump to find result when the findbar is shown with search
+      text (#647378, Carlos Garcia Campos)
+    * Fix error processing some malformed TIFF files (#644806, Juanjo
+      Marín)
+    * Clear caches after destroying child widgets (#648365, Marek
+      Kašík)
+    * Fix ev_win32_get_locale_dir() (Hib Eris)
+
+Documentation:
+
+    * Toolbar documentation (#503638, Tiffany Antopolski)
+    * Fix typo (#637512, Tiffany Antopolski)
+    * Change OpenOffice refs to LibreOffice (Tiffany Antopolski)
+
+Translation updates:
+
+    * Daniel Martinez Cucalon (an)
+    * Gil Forcada (ca@valencia)
+    * Mario Blättermann (de)
+    * Kristjan SCHMIDT (eo)
+    * Jorge González (es)
+    * Gabor Kelemen (hu)
+    * Pavol Klačanský (sk)
+    * Praveen Illa (te)
+    * Korostil Daniel (uk)
+    * Pin-hsien Li (zh_HK)
+    * Pin-hsien Li (zh_TW)
+
+================
+Evince    3.0.0
+================
+
+Translation updates:
+
+    * Gil Forcada (ca)
+    * Lucas Lommer (cs)
+    * Kenneth Nielsen (da)
+    * Mario Blättermann (de)
+    * Wolfgang Stoeggl (de)
+    * Sweta Kothari (gu)
+    * Gabor Kelemen (hu)
+    * Claudio Arseni (it)
+    * Jiro Matsuzawa (ja)
+    * Gintautas Miliauskas (lt)
+    * Andrej Žnidaršič (sl)
+    * "Last-Translator: \n"(ta)
+    * Muhammet Kara (tr)
+    * Zeper (ug)
+    * Nguyễn Thái Ngọc Duy (vi)
+
+================
+Evince  2.91.93
+================
+
+This release updates the evince icon including a new hi-res
+version. Designed by Jakub Steiner. (#645594, William Jon McCann)
+
+Translation updates:
+
+    * Jorge González (es)
+    * Shankar Prasad (kn)
+    * Sandeep Shedmake (mr)
+
+================
+Evince  2.91.92
+================
+
+Bug fixes:
+
+    * Save contents of text form fields when they loss the focus
+      (#624921, José Aliste)
+    * Disable "open containing folder" action when no document is
+      loaded (#644613, Carlos Garcia Campos)
+    * Give the keyboard focus to the view when sidebar is closed
+      (#645109, Carlos Garcia Campos)
+    * Fix document loading when filename contains some characters
+      like brackets (#644604, Dennis Sheil)
+    * Another fix for buffer overwrite in dvi-backend (#643882, Scott
+      Reeves)
+    * Use TIFFOpenW on windows (#644928, Hib Eris)
+    * Remove all widgets from the View when reloading the document
+      (#632087, José Aliste)
+    * Use the primary-toolbar style class for the window toolbar
+      (#644118, Cosimo Cecchi)
+    * Add .png extension when saving images using DnD (#643709, Wouter
+      Bolsterlee)
+    * Update totem-screensaver code from totem sources (#642946,
+      Carlos Garcia Campos)
+
+Documentation:
+
+    * Relocate help images to fix documentation build (#645410,
+      Frederic Crozat)
+    * Updated information about opening a document (Tiffany
+      Antopolski)
+
+Translation updates:
+
+    * Michael Kotsarinis (el)
+    * Bruce Cowan (en_GB)
+    * Jorge González (es)
+    * Arash Mousavi (fa)
+    * Fran Diéguez (gl)
+    * Gabor Kelemen (hu)
+    * Changwoo Ryu (ko)
+    * Rudolfs (lv)
+    * Piotr Drąg (pl)
+    * Henrique P. Machado (pt_BR)
+    * Duarte Loreto (pt)
+    * Simion Ruxandra (ro)
+    * Yuri Myaseodov (ru)
+    * Miloš Popović (sr@latin)
+    * Милош Поповић (sr)
+    * Korostil Daniel (uk)
+    * 朱涛 (zh_CN)
+    * 甘露 (Gan Lu) (zh_CN)
+
+================
+Evince  2.91.90
+================
+
+Bug fixes:
+
+    * Fix focus stealing when scrolling with keyboard (#633475,
+      #623829, Carlos Garcia Campos)
+    * Fix another security issue in the dvi-backend (#640923, Vincent
+      Untz)
+    * Check for libICE, needed by eggsmclient (#642509, Emilio Pozuelo
+      Monfort)
+    * Rotate with CTRL+Left/Right in presentation mode too (#641772,
+      Carlos Garcia Campos)
+    * Make the toolbar editor fill its window (#641579, Matthias
+      Clasen)
+
+Translation updates:
+
+    * F Wolff (af)
+    * Gil Forcada (ca)
+    * Kristjan SCHMIDT (eo)
+    * Daniel Mustieles (es)
+    * Claude Paroz (fr)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  2.91.6
+================
+
+New Features and UI Improvements:
+
+    * Add support for external links in presentation mode (#628711,
+      Carlos Garcia Campos)
+
+Documentation:
+
+    * Fix a few minor mistakes in the manual (#640345, Christian
+      Kirbach)
+
+Bug fixes:
+
+    * Move to next/previous page with media keys in presentation mode
+      too (#625560, Carlos Garcia Campos)
+    * Remember the current page when document is reloaded in
+      presentation mode (#637594, Carlos Garcia Campos)
+    * Check all extensions when saving an image to avoid adding the
+      extension twice (#637461, Carlos Garcia Campos)
+    * Prevent the sidebar to get the focus when selected thumbnail
+      changes (#639408, Daniel Garcia)
+    * Make sure a11y is initialized before checking whether it's
+      enabled (#639850, Carlos Garcia Campos, Daniel Garcia)
+    * Call gdk_notify_startup_complete() when acting as remote to
+      prevent a hung startup notification when opening a document for
+      the second time (#640115, David Benjamin)
+    * Fix rendering issue with some fonts in dvi backend (José Aliste)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Krasimir Chonov (bg)
+    * Christian Kirbach (de)
+    * Mario Blättermann (de)
+    * Michael Kotsarinis (el)
+    * Jorge González (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Fran Diéguez (gl)
+    * Torstein Adolf Winterseth (nb)
+    * A S Alam (pa)
+
+================
+Evince  2.91.5
+================
+
+New Features and UI Improvements:
+
+    * Install .thumbnailer file to register the thumbnailer instead of
+      using GConf (#638343, Carlos Garcia Campos)
+    * A context menu has been added to bookmarks sidebar to open,
+      rename and remove bookmarks (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fix return value in g_return_val_if_fail() macro (Daniel Garcia)
+    * Fix several security issues in dvi backend: CVE-2010-2640,
+      CVE-2010-2641, CVE-2010-2642 and CVE-2010-2643 (José Aliste)
+    * Do not use deprecated API: GdkCursor, GtkStyle, size-request
+      (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Daniel Mustieles (es)
+    * Ivar Smolin (et)
+    * Yaron Shahrabani (he)
+    * Andika Triwidada (id)
+    * Baurzhan Muftakhidinov (kk)
+    * Torstein Adolf Winterseth (nb)
+    * Wouter Bolsterlee (nl)
+    * Andrej Žnidaršič (sl)
+    * Matej Urbančič (sl)
+    * Daniel Nylander (sv)
+
+================
+Evince  2.91.4
+================
+
+New Features and UI Improvements:
+
+    * Port to GtkStyleContext (Carlos Garcia Campos)
+    * Use GAppInfo instead of deprecated gdk_spawn methods (Cosimo
+      Cecchi)
+    * Document filename is not shown in the window title (#386292,
+      José Aliste, Wouter Bolsterlee)
+    * Support for interal bookmarks (#590655, Carlos Garcia Campos)
+    * Add support for xz compressed documents (#636481, Christian
+      Persch)
+    * Add support for .wwf files (they are just PDF documents with
+      another file extension (#636415, Bastien Nocera)
+    * The pixbuf backend has been removed. Evince is a document
+      viewer, not an image viewer. Eog does the latter job much better
+      than evince ever could (Christian Persch)
+
+Documentation:
+
+    * Lots of documentation updates (Tiffany Antopolski)
+
+Bug fixes:
+
+    * Stop the GtkSpinner when the loading window is hidden (#637390,
+      Cristian KLEIN)
+    * Fixes crash when printing operation is cancelled (#635619,
+      Carlos Garcia Campos)
+    * Don't draw a resize grip for Annotation Windows (José Aliste)
+
+Translation updates:
+
+    * Daniel Mustieles (es)
+    * Ivar Smolin (et)
+    * Fran Diéguez (gl)
+    * Yaron Shahrabani (he)
+    * Baurzhan Muftakhidinov (kk)
+    * Erdal Ronahî (ku)
+    * Kjartan Maraas (nb)
+    * Matej Urbančič (sl)
+    * Zeper (ug)
+    * Clytie Siddall (vi)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  2.91.3
+================
+
+New Features and UI Improvements:
+
+    * Add timestamp parameter to SyncSource DBus signal (#632313, José
+      Aliste)
+    * Use gtk_paned_new() instead gtk_[h|v]paned_new() (Javier Jardón)
+
+Bug fixes:
+
+    * Add sanity-checks to fix several crashes (#594408, #572061, José
+      Aliste)
+    * Use the URI of the input file instead of the local filename in
+      SyncSource DBus signal (#632317, José Aliste)
+    * Fix a crash when clicking the view before document has been
+      loaded (#630999, Carlos Garcia Campos)
+
+Translation updates:
+
+    * Ville-Pekka Vainio (fi)
+    * Fran Diéguez (gl)
+    * Andrej Žnidaršič (sl)
+    * Zeper (ug)
+
+================
+Evince  2.91.2
+================
+
+New Features and UI Improvements:
+
+    * Migrate to new size request API (#633480, Matthias Clasen)
+    * Implement GtkScrollable interface in EvView (Christian Persch,
+      Carlos Garcia Campos)
+    * Migrate to new combo box APIs (#632640, #632600, Matthias
+      Clasen, Christian Persch)
+
+Bug fixes:
+
+    * Fix drawing glyphs with transparency in dvi backend (#494736,
+      Carlos Rendon)
+    * Fix a typo in pkg-config file (Marek Kasik)
+
+Translation updates:
+
+    * Mario Blättermann (de)
+    * Michael Kotsarinis (el)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Fran Diéguez (gl)
+    * Shushi Kurose (ja)
+    * 朱涛 (zh_CN)
+
+================
+Evince  2.91.1
+================
+
+New Features and UI Improvements:
+
+    * Migrate user config dir to XDG fdo directories spec (#522811,
+      Carlos Garcia Campos)
+
+Documentation:
+
+    * Replace the existing Evince user guide with new topic-based
+      help from the Mallard project (#631371, Phil Bull, Tiffany
+      Antopolski, Ryan Lortie)
+
+Bug fixes:
+
+    * Fix introspection build for library renames (#631360, Owen
+      W. Taylor)
+
+Translation updates:
+
+    * Michael Kotsarinis (el)
+    * Jorge González (es)
+    * Fran Diéguez (gl)
+    * Yaron Shahrabani (he)
+    * Baurzhan Muftakhidinov (kk)
+    * Kjartan Maraas (nb)
+    * Matej Urbančič (sl)
+
+================
+Evince  2.91.0
+================
+
+New Features and UI Improvements:
+
+    * Add timestamp parameter to SyncView D-Bus method (#630576, José
+      Aliste)
+    * Port to gtk3 (Christian Persch)
+    * Layer actions are now supported for PDF document (Carlos Garcia
+      Campos)
+    * Add 'Open Containing Folder' action to the File menu (#627443,
+      Federico Mena Quintero)
+    * Make "Shrink to Printable Area" default option for Page Scaling
+      (Marek Kasik)
+    * Change gsettings schema path from /apps/evince to
+      /org/gnome/evince (Christian Persch)
+    * A D-Bus signal is now emitted when document is loaded (#626561,
+      José Aliste)
+    * XPS Documents are now supported (#321868, Carlos Garcia Campos)
+    * Evince daemon can spawn an evince instance when finding a
+      document (#625971, José Aliste)
+
+Bug fixes:
+
+    * Fix a crash when synctex backward search fails (#630845, José
+      Aliste)
+    * Don't show an empty tooltip for links that don't have tooltip
+      text (Carlos Garcia Campos)
+    * Fix build with --disable-dbus (#629498, Didier Roche)
+    * Fix a crash during selection when evince is built with gtk2
+      (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Damyan Ivanov (bg)
+    * Gil Forcada (ca)
+    * Marek Černocký (cs)
+    * Kenneth Nielsen (da)
+    * Christian Kirbach  (de)
+    * Michael Kotsarinis (el)
+    * Bruce Cowan (en_GB)
+    * Ivar Smolin (et)
+    * Milan Bouchet-Valat (fr)
+    * Gabor Kelemen (hu)
+    * Dirgita (id)
+    * Francesco Marletta (it)
+    * Shushi Kurose (ja)
+    * Baurzhan Muftakhidinov (kk)
+    * Aurimas Černius (lt)
+    * Wouter Bolsterlee (nl)
+    * Piotr Drąg (pl)
+    * Duarte Loreto (pt)
+    * Lucian Adrian Grijincu (ro)
+    * Andrej Žnidaršič (sl)
+    * Miloš Popović (sr@latin)
+    * Милош Поповић (sr)
+    * Dr.T.Vasudevan (ta)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  2.31.90
+================
+
+Bug fixes:
+
+    * Do not jump to link dest when clicking with GDK_CONTROL_MASK
+      (#626407, Carlos Garcia Campos)
+    * Use GDK_BLANK_CURSOR instead of creating our own empty cursor
+      (Carlos Garcia Campos)
+    * Improve findbar message when there are no matches (#626334,
+      Carlos Garcia Campos, José Aliste)
+    * Remove #ifdefs for old cairo versions (#626147, Juanjo Marín)
+
+Translation updates:
+
+    * Paul Seyfert (de)
+    * Jorge González (es)
+    * Fran Dieguez (gl)
+    * Yaron Shahrabani (he)
+    * Torstein Adolf Winterseth (nn)
+    * A S Alam (pa)
+    * Matej Urbančič (sl)
+    * Xhacker Liu (zh_CN)
+
+================
+Evince  2.31.6.1
+================
+
+New Features and UI Improvements:
+
+    * Add --with-gtk=2.0|3.0 configure flag (#626030, Vincent Untz)
+
+Bug fixes:
+
+    * Fix a crash with DVI files and empty glyphs (#600552, Marek Kasik)
+    * Fix a crash when a page is manually entered (#624936, Marek Kasik)
+
+Translation updates:
+
+    * Jorge González (es)
+    * Fran Dieguez (gl)
+    * Yaron Shahrabani (he)
+    * Andika Triwidada (id)
+    * Kjartan Maraas (nb)
+    * Matej Urbančič (sl)
+    * Dr.T.Vasudevan (ta)
+
+================
+Evince  2.31.6
+================
+
+New Features and UI Improvements:
+
+    * Preliminary support for adding new annotations (#168304, Carlos
+      Garcia Campos)
+    * Add confirmation dialog on closing window when document has been
+      modified (Form fields have been filled out or annots have been
+      added/modified) (#168304, Carlos Garcia Campos)
+    * Add an action to edit menu to save current settings as
+      default. Default settings will be used only for new documents
+      that don't have metadata (#620325, Carlos Garcia Campos)
+    * Migrate lockdown to gsettings (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Update synctex parser from TexLive SVN repository (#624532,
+      Marek Kasik)
+    * Fix a crash when loading document with inverted colors enabled
+      (Carlos Garcia Campos)
+    * Several build improvements (Hib Eris)
+    * Fix memory leaks when document is reloaded (Carlos Garcia Campos)
+    * Fix position of window annotations when moved by the user (Jose
+      Aliste, Carlos Garcia Campos)
+    * Fix build with poppler 0.14 (#624904, Carlos Garcia Campos)
+    * Use cairo instead of gdk_draw API (Carlos Garcia Campos)
+    * Only set text and text_layout flags in page cache when a11y
+      might be enabled (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Xandru Armesto (ast)
+    * Mario Blättermann (de)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Fran Diéguez (gl)
+    * Sweta Kothari (gu)
+    * Yaron Shahrabani (he)
+    * Shankar Prasad (kn)
+    * Sandeep Shedmake (mr)
+    * Kjartan Maraas (nb)
+    * Daniel Nylander (sv)
+    * Krishna Babu K (te)
+    * Eleanor Chen (zh_CN)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  2.31.5
+================
+
+New Features and UI Improvements:
+
+    * Add a new sidebar page to show the list of annotations (Carlos
+      Garcia Campos)
+    * Finish DBus API for synctex support (#543503, Jose Aliste)
+    * Switch to GTK+ 3
+
+Bug fixes:
+
+    * Make sure annot popups never show up outside the main window
+    * (#604125, Carlos Garcia Campos)
+    * Set word wrapping mode for text in popup annotations (#623456,
+      gvlat@pochta.ru)
+
+Translation updates:
+
+    * Baurzhan Muftakhidinov (kk)
+    * 朱涛 (zh_CN)
+
+================
+Evince  2.31.4.1
+================
+
+Bug fixes:
+
+    * Fix build when poppler_page_get_text_layout is not available
+      (#623080, Carlos Garcia Campos)
+
+================
+Evince  2.31.4
+================
+
+New Features and UI Improvements:
+
+    * Implement AtkText interface in EvView (#309015, Daniel Garcia)
+    * Add preliminary SyncTex support (#543503, Jose Aliste, Carlos
+      Garcia Campos)
+
+Bug fixes:
+
+    * Don't save print document settings into global file (#530018,
+      Carlos Garcia Campos)
+    * Reload presentation view when document changes (#621750, Carlos
+      Garcia Campos)
+    * Remove hard-coded reason in totem-scrsaver (#621386, Bastien
+      Nocera)
+    * Fix opening cbz files with [] in archive (#619248, Juanjo Marín)
+
+Translation updates:
+
+    * Carles Ferrando Garcia (ca)
+    * Kristjan SCHMIDT (eo)
+    * Fran Diéguez (gl)
+    * Kjartan Maraas (nb)
+    * Matej Urbančič (sl)
+    * 杨章 (zh_CN)
+
+================
+Evince  2.31.3
+================
+
+New Features and UI Improvements:
+
+    * Use a dynamic pixbuf cache size based on document page
+      size. It allows us caching more pages for lower scale factors
+      and increase zoom level by caching fewer pages. (#303365, Carlos
+      Garcia Campos)
+
+Bug fixes:
+
+    * Fix fade animations (#619825, Carlos Garcia Campos)
+    * Fix a crash when starting animation in presentation mode
+      (#619948, Carlos Garcia Campos)
+    * Remove set_focus_on_map and set NOTIFICATION type hint for
+      loading window. It prevents focus stealing and skips taskbar and
+      pager hints (#620548, Carlos Garcia Campos)
+    * Fix build with GSEAL enabled (#605776, Carlos Garcia Campos)
+    * Remove circular dependencies in Makefiles and fix some compiler
+      warnings (Hib Eris)
+
+Translation updates:
+
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Fran Diéguez (gl)
+    * Yaron Shahrabani (he)
+    * Kjartan Maraas (nb)
+    * Sira Nokyoongtong (th)
+    * 甘露(Gan Lu) (zh_CN)
+
+================
+Evince  2.31.2
+================
+
+New Features and UI Improvements:
+
+    * Port to GDBus (Christian Persch, Carlos Garcia Campos)
+    * Do not use the gconf gsettings backend any more (#619335,
+      Matthias Clasen)
+    * Use cairo to draw search results (Carlos Garcia Campos)
+    * Use a loading window to show loading progress information
+      instead of the old 'Loading ...' text rendered on every page
+      (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fix localization on Windows (#610548, Hib Eris)
+    * Convert relative path to absolute path for evince-previewer
+      (Marek Kasik)
+    * Fix opening files with '#' in its name (#616515, Carlos Garcia
+      Campos)
+    * Accept keyboard focus in window annotations (Carlos Garcia
+      Campos)
+    * Fix most of the GSEAL build issues (#605776, Carlos Garcia
+      Campos)
+    * Add .c files to the introspection sources (#617736, Christian
+      Persch)
+
+Translation updates:
+
+    * Thomas Thurman (en@shaw)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Manoj Kumar Giri (or)
+
+================
+Evince  2.31.1
+================
+
+New Features and UI Improvements:
+
+    * Add saved documents with "save a copy" to recent file list
+      (#617580, Carlos Garcia Campos)
+    * Port override_restrictions gconf key to GSettings (Carlos Garcia
+      Campos)
+    * Add icons to the recent items, and always show them in menu
+      (#614400, Christian Persch)
+
+Bug fixes:
+
+    * Invert colors of pages and thumbanils when loading in inverted
+      color mode (#616110, #616111, Juanjo Marín)
+    * Take default settings from last document opened. Fixes
+      regression caused by migration to gio metadata (#606090,
+      Carlos Garcia Campos)
+    * Ellipsise the recent action's label (Christian Persch)
+    * Make inverted colors mode work in presentation mode too
+      (#614693, Carlos Garcia Campos)
+    * Respect GNOME22_USER_DIR env variable (#613637, Ray Strode)
+    * Fix loading of local documents when uri contains a page
+      destination (#616515, Carlos Garcia Campos)
+    * Make gnome-doc-utils optional (Hib Eris)
+    * Update icons to match gnome-icon-theme appearance (#614747,
+      Hylke Bons, Carlos Garcia Campos)
+    * Make sure there's a new valid page range before updating caches
+      (fdo#27599, Carlos Garcia Campos)
+    * Fix .desktop file according to CorrectDesktopFiles GNIOME Goal
+      (#592733, Javier Jardón)
+    * Update FSF address everywhere (#514607, Arun Persaud)
+    * Fix loading of compressed password-protected documents (#613959,
+      Carlos Garcia Campos)
+    * Add command line option to open document at a given page index
+      (#613449, Daniel M. German)
+    * Fix build with GSEAL_ENABLE for libview and libdocument
+      (#605776, Hib Eris, Carlos Garcia Campos)
+    * Close previewer window with control + w (#612972, Carlos Garcia
+      Campos)
+    * Fix keybindings in previewer window (#612972, Carlos Garcia
+      Campos)
+
+Translation updates:
+
+    * Runa Bhattacharjee (bn_IN)
+    * Gil Forcada (ca)
+    * Gil Forcada (ca@valencia)
+    * Jorge González (es)
+    * Fran Diéguez (gl)
+    * Shankar Prasad (kn)
+    * Ani Peter (ml)
+    * Sandeep Shedmake (mr)
+    * Wouter Bolsterlee (nl)
+    * Andrej Žnidaršič (sl)
+
+================
+Evince  2.30.0
+================
+
+Bug fixes:
+
+    * Fix scale calculation on rotated monitors in presentation mode
+      (José Aliste, Carlos Garcia Campos)
+    * Save current page when closing window in presentation mode
+      (#612656, Carlos Garcia Campos)
+    * Fix rendering of documents with non uniform page size when in
+      presentation mode (Carlos Garcia Campos)
+    * Use monitor height instead of screen height to calculate page
+      scale in presentation mode (#608924, Carlos Garcia Campos)
+
+Translation updates:
+
+    * Sadia Afroz (bn)
+    * Lucas Lommer (cs)
+    * Kenneth Nielsen (da)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Tommi Vainikainen (fi)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Francesco Marletta (it)
+    * Changwoo Ryu (ko)
+    * Badral (mn)
+    * Nils-Christoph Fiedler (nds)
+    * Wouter Bolsterlee (nl)
+    * A S Alam (pa)
+    * Duarte Loreto (pt)
+    * Daniel Nylander (sv)
+    * Maxim Dziumanenko (uk)
+
+================
+Evince  2.29.92
+================
+
+Bug fixes:
+
+    * Fix build with gtk+ >= 2.19.7
+
+Translation updates:
+
+    * Gil Forcada (ca)
+    * Bruce Cowan (en_GB)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Gabor Kelemen (hu)
+    * Gintautas Miliauskas (lt)
+    * Anita Reitere (lv)
+    * Umarzuki bin Mochlis Moktar (ms)
+    * Piotr Drąg (pl)
+    * Yuri Kozlov (ru)
+    * Miloš Popović (sr@latin)
+    * Милош Поповић (sr)
+    * Daniel Nylander (sv)
+
+================
+Evince  2.29.91
+================
+
+New Features and UI Improvements:
+
+    * DVI backend support on windows (#602910, Hib Eris)
+
+Documentation fixes:
+
+    * Modernise API docs (Christian Persch)
+
+Bug fixes:
+
+    * Fix dpi calculation (#608586, Juanjo Marín)
+    * Allow adding actions for more than one item in view popup menu
+      (#609497, Carlos Garcia Campos)
+    * Add gconf schemas for comic cbt files (#609501, Carlos Garcia
+      Campos)
+    * Update totem-scrsaver from totem sources (#610173, Carlos Garcia
+      Campos)
+    * Fix linking with pedantic linkers (#609895, Hib Eris)
+    * Do not link evince shell to poppler directly (#608832, Hib Eris)
+    * Several translatable messages fixed (#608698, Philip Withnall)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Krasimir \"Bfaf\" Chonov (bg)
+    * Sadia Afroz (bn)
+    * Christian Kirbach (de)
+    * nikosCharonitakis (el)
+    * Philip Withnall (en_GB)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Claude Paroz (fr)
+    * Fran Diéguez (gl)
+    * Hideki Yamane (Debian-JP) (ja)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Henrique P. Machado (pt_BR)
+    * Adi Roiban (ro)
+    * Matej Urbančič (sl)
+    * Dr,T,Vasudevan (ta)
+    * Theppitak Karoonboonyanan (th)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  2.29.5
+================
+
+New Features and UI Improvements:
+
+    * Make Home/End keys go to first/last page in presentation mode
+      too (#358462, Carlos Garcia Campos)
+    * Allow finish presentation by clicking on end page (#309364,
+      Carlos Garcia Campos)
+    * Add custom print tab to printing dialog with several page scale
+      options (#599468, #599470, #599547, Adrian Johnson)
+    * Add support for remote files in evince thumbnailers (#605218,
+      Carlos Garcia Campos)
+    * Add evince icon to the windows executable (#596401, Hib Eris)
+
+Bug fixes:
+
+    * Fix transition of pages with duration=0 in presentation mode
+      (Carlos Garcia Campos)
+    * Fix vertical white line shown in presentation mode with
+      documents with black background (#438760, Carlos Garcia Campos)
+    * Fix fickering and blank screen issues when changing pages fast
+      in presentation mode (#602738, Carlos Garcia Campos)
+    * Fix printing on Windows (#604705, Hib Eris)
+    * Disable text selection in presentation mode (#605554, Carlos
+      Garcia Campos)
+    * Make comics backend also compile on Windows (#605146, Hib Eris)
+    * Remove comics_regex_quote() in favor of always using
+      g_shell_quote() (#605092, Juanjo Marín)
+    * Properly redrawn properties view when document is reloaded
+      (#605169, Carlos Garcia Campos)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Jorge González (es)
+    * Kjartan Maraas (nb)
+    * Matej Urbančič (sl)
+    * Daniel Nylander (sv)
+    * Theppitak Karoonboonyanan (th)
+    * Maxim Dziumanenko (uk)
+
+================
+Evince  2.29.4
+================
+
+New Features and UI Improvements:
+
+    * Always show rotate icons (#599398, Carlos Garcia Campos)
+    * EvPrintOperation has been moved to libview so that it can
+      be used by EvView users (#604750, Tomeu Vizoso)
+    * Support for cbt comic files (#588266, Juanjo Marín)
+
+Bug fixes:
+
+    * Do not fail to open external uri links that are relative paths
+      (#604716, Carlos Garcia Campos)
+    * Do not hardcode BINDIR on Windows (#605001, Hib Eris)
+    * Fix a crash in djvu backend on windows (#604919, Hib Eris)
+    * Replace mkdtemp with our own _ev_g_mkdtemp to make it portable
+      (#604917, Hib Eris)
+    * Include a copy of some icons from gnome-icon-theme to be used as
+      fallback on platforms like window where gnome-icon-theme is not
+      available (#596400, Hib Eris)
+    * Fix 0x0 page size always shown in properties view (Carlos Garcia
+      Campos)
+    * Do not hide page selector widget on invalid input (#603714,
+      Carlos Garcia Campos)
+    * Split EvPixbufCache into dynamic and static data. Static page
+      data (links, annots, images, text and forms) that don't
+      depend on current scale/rotation, have been moved to EvPageCache
+      and are never removed. (#602405, Carlos Garcia Campos)
+    * Fix a typo in EV_RENDER_CONTEXT macro definition (#603857,
+      Gustavo Carneiro)
+    * Code cleanups and improvements in libview (#603858, Carlos
+      Garcia Campos)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Yaron Shahrabani (he)
+    * Kjartan Maraas (nb)
+    * Matej Urbančič (sl)
+    * Tao Wei (zh_CN)
+
+================
+Evince  2.29.3
+================
+
+New Features and UI Improvements:
+
+    * Add inverted colors view mode (#321823, Juanjo Marín, Carlos
+      Garcia Campos)
+    * Add options to open/save attachment annotations to context menu
+      (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fix infinite loop when scrollbar visibility changes in fit-with
+      mode (Carlos Garcia Campos)
+    * Fix rendering issue in dual/continuous mode (#602742, José
+      Aliste)
+    * Do not resize the window when zoom in/out with CTRL+Scroll
+      (#602798, Carlos Garcia Campos)
+    * Keep scroll position when reloading (#602445, Carlos Garcia
+      Campos)
+    * Make "p" and "n" accels unsensitive while searching (Carlos
+      Garcia Campos)
+
+Translation updates:
+
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Yaron Shahrabani (he)
+    * Nils-Christoph Fiedler (nds)
+    * Matej Urbančič (sl)
+    * Tao Wei (zh_CN)
+
+================
+Evince  2.29.2
+================
+
+New Features and UI Improvements:
+
+    * Add support for PDF File Attachment Annotations (#601839, Carlos
+      Garcia Campos)
+    * Use "n" and "p" keys for page jump (#601217, Carlos Garcia
+      Campos)
+    * Update actions sensitivity when gconf keys change (#568433,
+      Carlos Garcia Campos)
+
+Documentation fixes:
+
+    * Make series ID unique (#599726, Christian Persch)
+
+Bug fixes:
+
+    * Fix saving attachments (Carlos Garcia Campos)
+    * Make sure view is redrawn as soon as current page is rendered
+      (#601433, Carlos Garcia Campos)
+    * Fix documentation of default flag values in configure (Emmanuel
+      Fleury)
+    * Do not mark properties name and desc as translatable (#509824,
+      Carlos Garcia Campos)
+    * Fix build with glib < 2.22.0 (#600338, Christian Spurk)
+    * Disable print page setup options according to lockdown (#568433,
+      Carlos Garcia Campos)
+    * Fix loading of remote files (Carlos Garcia Campos)
+    * Correctly process --with-smclient arguments (#590174, Christian
+      Persch)
+
+Translation updates:
+
+    * Thomas Thurman (en@shaw)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Antón Méixome (gl)
+    * Kjartan Maraas (nb)
+    * Matej Urbančič (sl)
+    * Daniel Nylander (sv)
+    * Dr.T.Vasudevan (ta)
+    * 樊栖江(Fan Qijiang) (zh_CN)
+
+================
+Evince  2.29.1
+================
+
+New Features and UI Improvements:
+
+    * Embed page setup settings in the print dialog (#591551, Marek
+      Kašík, Carlos Garcia Campos)
+    * A new tab has been added to properties dialog to show
+    * information about the document license (#349173, Juanjo Marín,
+      Carlos Garcia Campos)
+    * Use different processes for every document opened. (#583680,
+      #434966, #497388, #524633, #586087, Carlos Garcia Campos)
+    * Use GVFS metadata instead of our own xml based
+      implementation. (#586841, Carlos Garcia Campos)
+    * When scrolling a page, move one screen leaving one line context
+      to help to visually track the document as it moves. (#170871,
+      Carlos Garcia Campos)
+    * Use GtkInfoBar instead of GeditMessageArea for the message area
+      (#592785, Carlos Garcia Campos)
+    * EvPageCache has been splitted up into document part (moved to
+      EvDocument which has been converted into an abstract class
+      instead of an interface) and view part: EvDocumentModel. This
+      allows to have more than one EvView for the same document, so
+      that "Open a Copy" can be implemented without using the symlink
+      hack. (#573641, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Several fixes and cleanups in comics backend (Christian Persch)
+    * Don't exit with non-writable $HOME (Christian Persch)
+    * Clean up temp file handling to make sure we can cope with not
+      being able to create our temp directory (#595372, Christian Persch)
+    * Set page orientation of each page when printing so that
+      documents with mixed portrait/landscape pages print correctly
+      (#599470, Adrian Johnson)
+    * Preserve aspect ratio when scaling page for printing (#599468,
+      Adrian Johnson)
+    * Fix a crash when we don't have a DBUS connection (Christian Persch)
+    * Make sure total_num_bytes > 0 before using it in progress
+      callbacks (#597691, Carlos Garcia Campos)
+    * Escape document URI before showing it in progress area (#597691,
+      Carlos Garcia Campos)
+    * Fix a crash due to an uninitialized variable (#597154, Carlos
+      Garcia Campos)
+    * Fix a crash when there are form field widgets active during
+      rotation (#593316, Carlos Garcia Campos)
+    * Remarks the selected thumbnail after rotation (#595548, Juanjo Marín)
+    * Don't change current page when rotating documents with different
+      page sizes (#595704, Carlos Garcia Campos)
+    * Fix thumbnails rotation when loading a rotated document
+      (#595718, Carlos Garcia Campos)
+    * Save images as png or jpg when the filename has no extensions
+      (#595079, Patrick Ammann)
+    * Populate destination page when reloading the document (#570054,
+      Fernando Herrera)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Astur (ast)
+    * Krasimir \"Bfaf\" Chonov (bg)
+    * Runa Bhattacharjee (bn_IN)
+    * Gil Forcada (ca)
+    * Marek Černocký (cs)
+    * Kenneth Nielsen (da)
+    * Mario Blättermann (de)
+    * Kostas Papadimas (el)
+    * Philip Withnall (en_GB)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Tommi Vainikainen (fi)
+    * Claude Paroz (fr)
+    * Antón Méixome (gl)
+    * Sweta Kothari (gu)
+    * Gabor Kelemen (hu)
+    * Andika Triwidada (id)
+    * Francesco Marletta (it)
+    * Shushi Kurose (ja)
+    * Shankar Prasad (kn)
+    * Changwoo Ryu (ko)
+    * Gintautas Miliauskas (lt)
+    * Sangeeta Kumari (mai)
+    * Ani Peter (ml)
+    * Sandeep Shedmake (mr)
+    * Kjartan Maraas (nb)
+    * Reinout van Schouwen (nl)
+    * Manoj Kumar Giri (or)
+    * A S Alam (pa)
+    * Piotr Drąg (pl)
+    * André Gondim (pt_BR)
+    * Duarte Loreto (pt)
+    * Lucian Adrian Grijincu (ro)
+    * Matej Urbančič (sl)
+    * Miloš Popović (sr@latin)
+    * Милош Поповић (sr)
+    * Daniel Nylander (sv)
+    * Dr.T.Vasudevan (ta)
+    * Krishna Babu K (te)
+    * Theppitak Karoonboonyanan (th)
+    * Baris Cicek (tr)
+    * Maxim Dziumanenko (uk)
+    * Aron Xu (zh_CN)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  2.27.90
+================
+
+Bug fixes:
+
+    * Let scroll wheel change page when in non-continuous best-fit
+      mode (#562257, Philip Langdale)
+    * Show print progress information when using GtkPrintOperation
+    * Don't show crash recovery dialog when requested file is the only
+      one to be recovered (#578894, Carlos Garcia Campos)
+    * Disable crash recovery when D-BUS is disabled (#578894, Carlos
+      Garcia Campos)
+    * Grab focus on view widget after setting metadata (#589300,
+      Nickolay V. Shmyrev)
+    * Fixes segmentation violation when print file format is empty
+      (#589226, Andreas Liebe)
+    * Use AM_V_GEN to make custom commands silent (#585355, Javier Jardón)
+    * Don't install schema files when building without gconf (Nickolay
+      V. Shmyrev)
+
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Maruf Ovee (bn)
+    * Denis (br)
+    * Gil Forcada (ca)
+    * Carles Ferrando Garcia (ca@valencia)
+    * Marek Černocký (cs)
+    * Mario Blättermann (de)
+    * Seán de Búrca (ga)
+    * Antón Méixome (gl)
+    * Kjartan Maraas (nb)
+    * André Gondim (pt_BR)
+    * Daniel Nylander (sv)
+    * Theppitak Karoonboonyanan (th)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+    
+================
+Evince  2.27.4
+================
+
+Bug fixes:
+
+    * Compute selections on button press for word/line selections
+      (#562059, Carlos Garcia Campos)
+    * Fix several even/odd multipage issues (#583429, Bartek Kostrzewa)
+    * Register thumbnailing for gzip/gzip dvi files (#588013, Emilio
+      Pozuelo Monfort)
+    * Get rid of shave with AM_SILENT_RULES automake option (#585355,
+      Javier Jardón)
+    * Make evince output pdf on supported printers (#585442, Johan Brannlund)
+    * Fix build on windows (Fridrich Strba)
+    * Determine data directory on runtime on windows (Fridrich Strba)
+    * Fix build without GConf (Nickolay V. Shmyrev)
+    * Fix several introspection build issues (#585971, Christian Persch)
+
+Translation updates:
+
+    * Giannis Katsampirhs (el)
+    * Jonathan Ernst (fr)
+    * Daniel Nylander (sv)
+    * Maxim Dziumanenko (uk)
+    * Clytie Siddall (vi)
+    * Nguyễn Đình Trung (vi)
+
+================
+Evince  2.27.3
+================
+
+New Features and UI Improvements:
+
+    * Update the hildon port (Christian Persch)
+    * Complete the win32 port (#339172, Hib Eris)
+    * Allow activate the menubar in fullscreen mode (#504243, Carlos
+      Garcia Campos)
+    * Do not create popup window if the annot doesn't have a popup
+      (Carlos Garcia Campos)
+    * Add tests for printer settings (#583976, Bartek Kostrzewa)
+    * Remember and reuse "Save a Copy..." path (#485195, Carlos Garcia Campos)
+    * Support for cb7 using the p7zip commands in comics backend
+      (#565174, Juanjo Marín)
+    * Parse xml metadata to detect PDF/A documents (#582206, Davide Capodaglio)
+
+Bug fixes:
+
+    * Several build fixes and improvements (Christian Persch)
+    * Fix page transitions in presentation mode (#583652, #581881,
+      Carlos Garcia Campos)
+    * Scale according to paper size before rendering for printing
+      (Carlos Garcia Campos)
+    * Fix multipage even/odd printing issues (#583429, #583388, Bartek
+      Kostrzewa)
+    * Gracefully work with FITB destinations and friends (#583276,
+      Matthias Drochner)
+    * Fix double to int conversion in thumbnails_get_dimensions
+      (#581524, Carlos Garcia Campos)
+    * Ohter bugs fixed: #584617, #585497
+
+Translation updates:
+
+    * Runa Bhattacharjee (bn_IN)
+    * Mario Blättermann (de)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Kjartan Maraas (nb)
+    * Vladimir Melo (pt_BR)
+    * Dr.T.Vaasudevan (ta)
+
+================
+Evince  2.27.1
+================
+
+New Features and UI Improvements:
+
+    * Use GtkPrintOperation when printing for the backends that
+      support rendering into a cairo context (#557112, Carlos Garcia Campos)
+    * Recover previous session when running evince after a crash
+      (#578894, Carlos Garcia Campos)
+    * Preliminary annotations support (#315002, Carlos Garcia Campos,
+      Iñigo Martínez)
+    * Rename Print Setup menu entry as Page Setup for consistency with
+      the GTK+ dialog title (#581109, Nickolay V. Shmyrev)
+    * Added F3 as a find-next accelerator key (#579072, Michael J. Chudobiak)
+    * Support the free Gna! unrar tool in comics backend (#552074,
+      Juanjo Marín)
+    * Add evince-previewer as a separate applicaton that implements
+      the printing preview (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fix handling of the tmp folder (#582108, Juanjo Marín)
+    * Abort dnd operations originated in the same Evince window
+      (#582077, Carlos Garcia Campos)
+    * Disable bouncing during scrolling (#533534, Martin Pohlack)
+    * Fix build without gconftool-2 (#581441, Christian Persch)
+    * Fix documentation build (#579671, Nickolay V. Shmyrev)
+    * Fix error handling of broken documents (#580886, Nickolay V. Shmyrev)
+    * Fix several memory leaks in comics backend (#552074, Juanjo Marín)
+    * Escape URIs for display (#581064, Nickolay V. Shmyrev)
+    * Resync with libegg to remove deprecated GTK+ symbols (#580556,
+      Javier Jardón)
+    * Correct check for exit status of commands in comics backend
+      (#579656, Juanjo Marín)
+    * Add -no-undefined flag for Cygwin build (#580058, Yaakov Selkowitz)
+    * Use g_file_make_symbolic_link to create symlinks (#339172, Hib Eris)
+    * Delete the temp symlink created when opening a copy (Carlos
+      Garcia Campos)
+    * Don't redraw again when zoom is set more than once to the same
+      scale factor (Carlos Garcia Campos)
+    * Fix print preview of empty selection (#517735, Juanjo Marín)
+    * Don't prevent unmounting in case the initial cwd is on an
+      external device (#575436, Carlos Garcia Campos)
+    * Create and load the document based on the mime-type provided by
+      nautilus instead of using our own documents factory. (#533917,
+      Carlos Garcia Campos)
+    * Fix endianess issues in dvi and tiff backends (#578433, #509920,
+      Benjamin Berg)
+    * Fix memory leak in tiff backend (#578285, Nickolay V. Shmyrev)
+    * Fix path where accels file is saved (#577500, Nickolay
+      V. Shmyrev)
+    * Fix fading animations (Nickolay V. Shmyrev)
+    * Translate the categories in the nautilus properties tab
+      (#575085, Christian Persch)
+    * Other bugs fixed: #539972, #578436, #582543
+
+Translation updates:
+
+    * Jorge Gonzalez (es)
+    * Manoj Kumar Giri (or)
+    * Ivar Smolin (et)
+    * Vladimir Melo (pt_BR)
+    * Matej Urban (sl)
+    * Khaled Hosny (ar)
+    * Miloš Popović (sr)
+    * Funda Wang (zh_CN)
+    * Amitakhya Phukan (as)
+    * Baris Cicek (tr)
+
+================
+Evince  2.26.0
+================
+
+Bug fixes:
+
+    * Fix compiler warning when building with -Wformat (#574168,
+      Tobias Mueller)
+    * Fix a crash with encrypted documents (Christian Persch)
+
+Translation updates:
+
+    * F Wolff (af)
+    * Martin Picek (cs)
+    * Fotis Tsamis (el)
+    * Ivar Smolin (et)
+    * Suso Baleato (gl)
+    * Yaron Shahrabani (he)
+    * Gabor Kelemen (hu)
+    * Francesco Marletta (it)
+    * Shankar Prasad (kn)
+    * Gintautas Miliauskas (lt)
+    * Sangeeta Kumari (mai)
+    * Ani Peter (ml)
+    * Sandeep Shedmake (mr)
+    * Manoj Kumar Giri (or)
+    * Fabrício Godoy (pt_BR)
+    * Mișu Moldovan (ro)
+    * Yuriy Penkin (ru)
+    * I. Felix (ta)
+    * Krishna Babu K (te)
+    
+================
+Evince  2.25.92
+================
+
+Bug fixes:
+
+    * Show the 'jump to page' window in the right GdkScreen (#560541,
+      Carlos Garcia Campos)
+    * Make our own thumbnail when the provided one doesn't have the
+      needed size (#323198, #307357, Christian Spurk, Carlos Garcia Campos)
+    * Reduce the restriction on the minimum size of thumbnails from 40
+      to 1 (#323198, Christian Spurk)
+    * Use GOption in thumbnailer (Carlos Garcia Campos)
+    * Fix saving a copy of encrypted PDF documents (#566791, Carlos
+      Garcia Campos)
+    * Don't use g_quark_from_static_string in a loadable module
+      (Christian Persch)
+    * Use g_object_unref() instead of gdk_pixbuf_unref() in impress
+      backend (#571707, Thomas H.P. Andersen)
+
+Translation updates:
+
+    * Ihar Hrachyshka (be@latin)
+    * Alexander Shopov (bg)
+    * Gil Forcada (ca)
+    * Petr Kovar (cs)
+    * Christian Kirbach (de)
+    * David Lodge (en_GB)
+    * Juanje Ojeda Croissier (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Ilkka Tuohela (fi)
+    * Claude Paroz (fr)
+    * Sweta Kothari (gu)
+    * Yuval Tanny (he)
+    * Takeshi AIHANA (ja)
+    * Changwoo Ryu (ko)
+    * Kjartan Maraas (nb)
+    * Duarte Loreto (pt)
+    * Daniel Nylander (sv)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  2.25.91
+================
+
+Bug fixes:
+
+    * Fix several memory leaks (Christian Persch)
+    * Fix errors handling and propagation (Christian Persch)
+    * Fix several translation strings in properties dialog (#571787,
+      Nickolay V. Shmyrev)
+    * Do not resize the window on reloading (#571051, #304249, Carlos
+      Garcia Campos)
+    * Experimental introspection support (#569083, Christian Persch)
+    * Use g_set_error_literal() (Christian Persch)
+    * Other firxes for win32 (#339172, Hib Eris)
+    * Make session manager code compile for win32 (#339172, Carlos
+      Garcia Campos)
+    * Update totem-screensaver from totem svn to make it build for
+      win32 (#339172, Hib Eris)
+    * Make use of GConf optional (#339172, Hib Eris, Carlos Garcia Campos)
+    * Fix i18n in libdocument (Christian Persch)
+    * Include gi18n-lib.h instead of gi18n.h in libs and backends
+      (Christian Persch)
+
+Translation updates:
+
+    * Mikel González (ast)
+    * Ihar Hrachyshka (be@latin)
+    * Kenneth Nielsen (da)
+    * Dawa pemo (dz)
+    * Juanje Ojeda Croissier (es)
+    * Ivar Smolin (et)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Gabor Kelemen (hu)
+    * Takeshi AIHANA (ja)
+    * Shankar Prasad (kn)
+    * Arangel Angov (mk)
+    * Wouter Bolsterlee (nl)
+    * Tomasz Dominikowski (pl)
+    * Taylon (pt_BR)
+    * Горан Ракић (sr)
+    * Daniel Nylander (sv)
+    * Theppitak Karoonboonyanan (th)
+    * Clytie Siddall (vi)
+    * Gan Lu (zh_CN)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+
+================
+Evince  2.25.90
+================
+
+Bug fixes:
+
+    * Split API documentation into libdocument, libview and shell
+      (#568465, Carlos Garcia Campos)
+    * Fix symbols conflict in impress backend (#569998, Christian Persch)
+    * Add mnemonics to buttons in search bar (#569212, Carlos Garcia
+      Campos)
+    * Fix a crash when printing (#569328, Carlos Garcia Campos)
+    * Fix --version command line option (#562869, Christian Persch)
+    * Use versioned directory for backends (#569082, Christian Persch)
+    * Add EV_DEFINE_BOXED_TYPE and EV_DEFINE_INTERFACE macros
+      (#568228, Carlos Garcia Campos)
+    * Sync EggToolbarEditor with libegg (Nickolay V. Shmyrev)
+    * Respect directory umask and setgid when saving files (#568593,
+      Michael J. Chudobiak)
+    * Add libtool versioning, pkg-config files and single headers for
+      libdocument and libview (#568224, #568220, #568229, #568227,
+      Christian Persch) 
+    * Remove G_OBJECT casts from g_signal_connect calls (#568386, Hiroyuki
+      Ikezoe)
+    * Install several missing header files of libdocument and libview
+      (#567787, #567790, Tomeu Vizoso)
+    * Other bugs fixed: #569120, #569231, #569327, #570077
+
+Translation updates:    
+    
+    * Hendrik Richter (de)
+    * Ivar Smolin (et)
+    * Gabor Kelemen (hu)
+    * Changwoo Ryu (ko)
+    * Kjartan Maraas (nb)
+    * Daniel Nylander (sv)
+
+================
+Evince  2.25.5
+================
+
+Code changes:
+
+    * Move EvView specific code to a libevview library so that it can
+      be embbeded in other applications (#567751, Tomeu Vizoso, Carlos
+      Garcia Campos)
+    * Other improvements for embbeders (#567785, #567788, #567789,
+      Tomeu Vizoso)
+
+Bug fixes:
+
+    * Fix a minor typo (Michal Vaner)
+    * Fix the API docs build (#568171, Christian Persch)
+    * Simplify drag data handling (#558084, Christian Persch)
+    * Several portability issues (#339172, Hib Eris)
+    * Fix mnemonic conflict (#567937, Carlos Garcia Campos)
+    * Other bugs fixed: #567910
+
+Translation updates:
+
+    * Gil Forcada (ca)
+    * Hendrik Richter (de)
+    * Juanje Ojeda Croissier (es)
+    * Kjartan Maraas (nb)
+    * Gan Lu (zh_CN)
+    
+================
+Evince  2.25.4
+================
+
+New Features and UI Improvements:
+
+    * Show progress information when loading/saving remote files
+      (#370958, Carlos Garcia Campos)
+    * Remember page setup options (#525185, #349102, Carlos Garcia Campos)
+    * Show a confirmation dialog when there are pending print jobs
+      while closing the main window (#480964, Carlos Garcia Campos)
+    * Show progress information when printing (#482770, Carlos Garcia Campos)
+    * Add document URI to properties page (#555376, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Bump glib requirement to fix build with older versions
+      (Christian Spurk)
+    * Fix mime type handling (Hib Eris)
+    * Fix saving images to remote locations (Carlos Garcia Campos)
+    * Do not try to jump to the location of the find result for every
+      match, but only for the first one. It makes searching really
+      faster. (#564774, Michael Hunold)
+    * Fix zip mime-type in comics backend (Juanjo Marín)
+    * Fix several memory leaks (Carlos Garcia Campos)
+
+Translation updates:
+
+    * Ihar Hrachyshka (be@latin)
+    * Juanje Ojeda Croissier (es)
+    * Yuval Tanny (he)
+    * Kjartan Maraas (nb)
+    * Taylon (pt_BR)
+    * Gan Lu (zh_CN)
+
+================
+Evince  2.25.2
+================
+
+New Features and UI Improvements:
+
+    * PDF Optional content (layers) support. (Carlos Garcia Campos)
+    * The password dialog has been reworked in order to make it more
+      hig compliant and consistent (#562496, Carlos Garcia Campos)
+    * Improved keyring support. Password dialog is not shown anymore
+      when the password is already in the keyring (Carlos Garcia Campos)
+    * Support for monitor and reload of remote documents
+      (#555399, Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fix opening comic documents with a wrong but valid extension
+      (#562143, Carlos Garcia Campos)
+    * Fix a crash when searching (#558377, Carlos Garcia Campos)
+    * Fix several crashes when selecting text (#561393, Marek Kašík)
+
+Translation updates:
+
+    * Jorge González (es)
+    * Nguyễn Đình Trung (vi)
+
+================
+Evince  2.25.1
+================
+
+New Features and UI Improvements:
+
+    * Use the message area instead of popup dialogs for any error and
+      warning messages (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Adapt to the new single-include policy (#558064, Christian Persch)
+    * Fix page transition in presentation mode (#516749, Nickolay V. Shmyrev)
+    * Other bugs fixed: (#558066, Christian Persch)
+
+Translation updates:
+
+    * Hendrik Richter (de)
+    
+================
+Evince  2.24.1
+================
+
+Bug fixes:
+
+    * Disable toggle function of F5 when in presentation mode
+      (#556162, Dave Neary)
+    * Create a loading thumbnail for every different page size
+      (#556264, Carlos Garcia Campos)
+    * Fix several memory leaks (Carlos Garcia Campos)
+    * Do not show bad titles like 'Microsoft Word' in the window title
+      bar (#534684, Robin Sonefors and Nickolay V. Shmyrev)
+    * Fix mailto links which were considered as http uris (#555801,
+      Carlos Garcia Campos)
+    * Fix launching external applications (#554500, Carlos Garcia Campos)
+    * Other bugs fixed (#552382, #553369, #555134, Carlos Garcia Campos)
+
+Translation updates:
+
+    * Ihar Hrachyshka (be@latin)
+    * Adrian Guniš (cs)
+    * Kenneth Nielsen (da)
+    * Ivar Smolin (et)
+    * Takeshi AIHANA (ja)
+
+================
+Evince  2.24.0
+================
+
+Bug fixes:
+
+    * Use GdkAppLaunchContext when available to launch external uris
+      (Carlos Garcia Campos)
+    * Use the message area to show errors when lauching external uris
+      instead of a popup window (Carlos Garcia Campos)
+    * Assume invalid uris are http uris (#552071, Carlos Garcia
+      Campos)
+
+Translation updates:
+
+    * Usama Akkad (ar)
+    * Gil Forcada (ca)
+    * Kenneth Nielsen (da)
+    * Hendrik Richter (de)
+    * nikosCharonitakis (el)
+    * Ilkka Tuohela (fi)
+    * Sweta Kothari (gu)
+    * Gabor Kelemen (hu)
+    * Francesco Marletta (it)
+    * Shankar Prasad (kn)
+    * Changwoo Ryu (ko)
+    * Gintautas Miliauskas (lt)
+    * Arangel Angov (mk)
+    * Santhosh Thottingal (ml)
+    * Sandeep Shedmake (mr)
+    * wadim dziedzic (pl)
+    * Mișu Moldovan (ro)
+    * Alexandre Prokoudine (ru)
+    * Горан Ракић (sr)
+    * Dr.T.Vasudevan (ta)
+    * Baris Cicek (tr)
+    * Chao-Hsiung Liao (zh_HK)
+    * Chao-Hsiung Liao (zh_TW)
+    
+================
+Evince  2.23.92
+================
+
+Bug fixes:
+
+    * Allow page scrolling with PageUp/PageDown keys when find bar is
+      active (#529833, Carlos Garcia Campos)
+    * Search in page labels is now case-insensitive (#550136, Michael Lee)
+    * Do not append the file extension twice when saving an image
+      (Carlos Garcia Campos)
+    * Correctly restore the cursor after showing the context menu
+      (Carlos Garcia Campos)
+    * Grab the mediakeys with a low priority so that it doesn't
+      interfere with other applications like a music player
+      (#547164, Eric Piel)
+
+Translation updates:
+
+    * Alexander Shopov (bg)
+    * Petr Kovar (cs)
+    * David Lodge (en_GB)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Robert-André Mauchin (fr)
+    * Ignacio Casal Quinteiro (gl)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Leonardo Ferreira Fontenelle (pt_BR)
+    * Duarte Loreto (pt)
+    * Laurent Dhima (sq)
+    * Daniel Nylander (sv)
+    * Theppitak Karoonboonyanan (th)
+    * Clytie Siddall (vi)
+    * Funda Wang (zh_CN)
+      
+================
+Evince  2.23.91
+================
+
+New Features and UI Improvements:
+
+    * Use EggSMClient from libegg instead of gnome-client and remove
+      libgnome and libgnomeui dependencies (Carlos Garcia Campos)
+    * Implement document_get_page_label in tiff backend (Carlos Garcia
+      Campos)
+      
+Bug fixes:
+
+    * Start up in the right workspace when resuming a previous session
+      (Carlos Garcia Campos)
+    * Fix metacity warnings shown in ~/.xsession-errors (Carlos
+      Garcia Campos)
+    * Fix a crash due to an idle function called with an already
+      destroyed object (#549163, Carlos Garcia Campos)
+    * Fix problems when opening or saving attachments (#548653, Carlos
+      Garcia Campos)
+    * Handle document orientation in tiff backend (#548444, Carlos
+      Garcia Campos)
+    * Fix a crash when adjustment page size is 0 (#547440, Carlos
+      Garcia Campos)
+    * Other bugs fixed: #548462
+
+Translation updates:
+
+    * Runa Bhattacharjee (bn_IN)
+    * Gil Forcada (ca)
+    * Mario Blättermann (de)
+    * Dawa pemo (dz)
+    * Jorge González (es)
+    * Iñaki Larrañaga Murgoitio (eu)
+    * Ilkka Tuohela (fi)
+    * Takeshi AIHANA (ja)
+    * Shankar Prasad (kn)
+    * Gintautas Miliauskas (lt)
+    * Arangel Angov (mk)
+    * Manoj Kumar Giri (or)
+    * Vladimir Melo (pt_BR)
+    * Chao-Hsiung Liao (zh_HK)
+    
+================
+Evince  2.23.6
+================
+
+Bug fixes:
+
+    * Correctly build desktop file (#544237, Götz Waschk)
+
+Other changes:
+
+    * Cleanup #include statements. (Wouter Bolsterlee)
+    * The jobs system has been reworked in order to make it simpler
+      and easier to extend. (Carlos Garcia Campos)
+    * Add a profile mode available when debug is enabled (Carlos
+      Garcia Campos)      
+
+Translation updates:
+
+    * Djihed Afifi (ar)
+    * Adrian Guniš (cs)
+    * Pierre Lemaire (fr)
+    * Duarte Loreto (pt)
+      
+================
+Evince  2.23.5
+================
+
+New Features and UI Improvements:
+
+    * Intercept window manager's fullscreen request in order to
+      run/stop fullscreen mode (#493541, Carlos Garcia Campos)
+    * 7-zip compressed commics support (#532312, Kartik Rustagi)
+    * Add Alt+Left and Alt+Right shortcuts to rotate (#539972, Bastien
+      Nocera)
+    * Media player keys support (#539971, Bastien Nocera)
+
+Bug fixes:
+
+    * Restart the job search when the find bar is opened for the
+      second time (#531956, Carlos Garcia Campos)
+    * Fixes nautilus crash caused by evince properties page extension
+      (#542548, Carlos Garcia Campos)
+    * Fix Solaris build (#542924, Darren Kenny)
+    * Fix endianess bug (#540950, Benjamin Jacobs)
+    * Other bugs fixed: #542001
+
+Translation updates:
+
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Ignacio Casal Quinteiro (gl)
+    * Yuval Tanny (he)
+    * Rakesh Pandit (ks)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Zabeeh Khan (ps)
+    * Daniel Nylander (sv)
+    * Theppitak Karoonboonyanan (th)
+    
+================
+Evince  2.23.4
+================
+
+New Features and UI Improvements:
+
+    * A warning message is shown in the message area when the document
+      has no pages (#171588, Carlos Garcia Campos)
+    * Automaticly reload the document when the file has changed on
+      disk (#304249, Carlos Garcia Campos)
+    * Added Ctrl-Insert keybinding for copying text and Ctrl+N for
+      opening a copy (#526523, #532239, Carlos Garcia Campos)
+    * Save as action has been added as a toolbar button too. (Abhishek Mukherjee)
+    * Primary selection is also updated when copying a link address
+      (#520855, Carlos Garcia Campos)
+    * Added GtkMountOperation, copied from gtk+. (Carlos Garcia Campos)
+    * GS code has been removed, libspectre is now required to build the
+      PostScript backend. (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Fixed a crash when opening documents with no pages
+      (#537574, Carlos Garcia Campos)
+    * Fixed a crash when running in debug mode (Daniel M. German)
+    * Fixed a crash in impress backend (#530852, Hans Petter Jansson)
+    * Improved error handling in djvu backend (#530202, Carlos Garcia Campos)
+    * Do not use the pixbuf backend for rendering tiff documents when
+      the tiff backend is available (#520290, Carlos Garcia Campos)
+    * Fixed T1 font rendering in dvi backend (#536883, Mattias Nissler)
+    * Other bugs fixed: #533323, #533897, #533896, #534493, #537535
+
+Thanks:
+
+    Matthias Drochner, Frederic Peters, Cosimo Cecchi
+
+Translation updates:
+
+    * Djihed Afifi (ar)	
+
+    
+================
+Evince  2.22.1.1
+================
+
+Bug fixes:
+
+    *  Fix build in FreeBSD (#526799, Michael Johnson, Carlos Garcia Campos)
+    *  Fixes djvu backend links (#526517, Carlos Garcia Campos)
+
+===============
+Evince  2.22.1
+===============
+
+Bug fixes:
+
+    * Add compressed dvi to the list of supported mime types
+      (#307087, Ed Catmur)
+    * Fix a crash when printing a range that doesn't specify the start
+      or end page (#524288, Carlos Garcia Campos)
+    * Fix a crash when thumbnail failed to render in PS backend
+      (#525015, Carlos Garcia Campos)
+    * Open default application when launching an external uri
+      (#525009, Emil Soleyman)
+    * Add a configure option to enable/diable DBus (#521797, Rémi Cardona)
+    * Fix printing in documents with rotated pages (#512648, Eugen Dedu)
+    * Do not append file extension twice when saving an image
+      (#523069, Carlos Garcia Campos, Wouter Bolsterlee)
+    * Cancel find operation when the find bar is closed
+      (#508845, Carlos Garcia Campos)
+    * Several printing fixes: collate, reverse and copies were broken
+      (#365332, Eugen Dedu)
+    * Fix selection rendering when poppler is compiled with splash
+      backend (Carlos Garcia Campos).
+    * Other bugs fixed: #521224, #524112
+
+Translation updates:
+
+    * Alexander Nyakhaychyk (be)
+    * Yavor Doganov (bg)
+    * David Lodge (en_GB)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Clytie Siddall (vi)
+
+===============
+Evince  2.22.0
+===============
+
+Bug fixes:
+
+    * Do not print when Escape is pressed to close printing dialog
+      (#495107, Wouter Bolsterlee)
+    * Fix a crash in nautilus properties page (#519679, Carlos Garcia Campos)
+    * Fix a crash with transition effects (#519106, Carlos Garnacho)
+    * Fix document mime type detection (#518874, Carlos Garcia Campos)
+    * Fix a crash in forms (#518831, Carlos Garcia Campos)
+    * Fix images extraction (#516237, Carlos Garcia Campos)
+    
+Translation updates:
+
+    * Djihed Afifi (ar)
+    * Ihar Hrachyshka (be@latin)
+    * Petr Kovar (cs)
+    * Kenneth Nielsen (da)
+    * nikosCharonitakis (el)
+    * David Lodge (en_GB)
+    * Jorge González (es)
+    * Ivar Smolin (et)
+    * Ilkka Tuohela (fi)
+    * Claude Paroz (fr)
+    * Ignacio Casal Quinteiro (gl)
+    * Ankit Patel (gu)
+    * Yuval Tanny (he)
+    * Gabor Kelemen (hu)
+    * Luca Ferretti (it)
+    * Takeshi Aihana (ja)
+    * Shankar Prasad (kn)
+    * Changwoo Ryu (ko)
+    * Gintautas Miliauskas (lt)
+    * Arangel Angov (mk)
+    * Sandeep Shedmake (mr)
+    * Narayan Kumar Magar (ne)
+    * Åsmund Skjæveland (nn)
+    * Yannig Marchegay (Kokoyaya) (oc)
+    * Hugo Doria (pt_BR)
+    * Laurent Dhima (sq)
+    
+===============
+Evince  2.21.91
+===============
+	
+Bug fixes:
+    
+    * gnome-print code has been removed (#512370, Carlos Garcia Campos)
+    * Fix thumbnailer crash (#513934, Matthias Clasen)
+    * Fix djvu rendering (#482720, Carlos Garcia Campos)
+    * Fix mime type detection based on file contents (Cosimo Cecchi, Carlos Garcia Campos)
+    * Other bugs fixed: #512719, #512720, #512718, #512771, #513203
+    
+Translation updates:
+
+    * Khaled Hosny (ar)
+    * Amitakhya Phukan (as)
+    * Hendrik Richter (de)
+    * Jorge González (es)
+    * Kjartan Maraas (nb)
+    * Yannig Marchegay (Kokoyaya) (oc)
+    * Tomasz Dominikowski (pl)
+    * Vladimir Melo (pt_BR)
+    * Duarte Loreto (pt)
+    * Theppitak Karoonboonyanan (th)
+    * Serdar CICEK (tr)
+    * Woodman Tuen (zh_HK)
+
+===============
+Evince  2.21.90
+===============
+
+Important notice for distributors:
+
+    * This release overrides document permissions by default. See
+      http://bugzilla.gnome.org/show_bug.cgi?id=382700 for more information
+      about this.
+    * Ghostscript interface for PostScript documents is now deprecated.
+      Please use libspectre (http://libspectre.freedesktop.org/)
+      instead.
+
+New features and UI improvements:
+
+    * Port to gio and drop gnome-vfs dependency. (#510401, Cosimo Cecchi, Carlos Garcia Campos)
+    * Scroll pages in page entry with mouse wheel (#324122, David Turner)
+    * Automatic scrolling in context menu (#323670, David Turner)
+    * Kinetic scrolling (#461271, David Turner)
+    * New plugin system for backends (#351348, Carlos Garcia Campos)
+    * Allow saving images in formats other than PNG (#500209, Carl-Anton
+      Ingmarsson, Nickolay V. Shmyrev)
+    * Add support for page transitions (#458460, Carlos Garnacho)
+    * Override document restrictions by default (#382700, Wouter Bolsterlee)
+    * Use up/down arrows instead of left/right (#170081, Wouter Bolsterlee)
+
+Bug fixes:
+
+    * Reset cursor correctly (#501603, #509958, Carlos Garcia Campos)
+    * Use GSlice to allocate memory (#475972, Christian Persch)
+    * Do not limit minimum zoom factor in best fit/fit width mode (#503805,
+      Carlos Garcia Campos)
+    * Use libspectre, if available, for the ps backend. (#317106, #499787,
+      #501235, #421879, #445797, #443859, #486547, #386005, #507705, Carlos Garcia Campos)
+    * Put RTL marker in recent file list (#509076, Djihed Afifi)
+    * Put Nautilus extension in right place (#505359, Matthias Clasen, Brian
+      Pepple, Damien Carbery, Wouter Bolsterlee)
+    * Avoid filename quoting issues (#502500, Tom Parker)
+    * Repair horizontal scrolling with shift (#483412, Nickolay V. Shmyrev)
+    * Gnome Keyring is now an optional dependency (#509676, Marcelo Lira)
+    * Reduce memory consumption by rendering images on demand (Carlos Garcia Campos)
+    * Fix printing in dvi backend when filename contains white spaces. (#502839, Carlos Garcia Campos)
+    * Other bugs fixed: #502843, #460658, #504721, #511635
+
+Thanks:
+
+    * Carlos Garcia Campos
+    * Christian Persch
+    * Yaakov Selkowitz
+    * David Turner
+    * Carl-Anton Ingmarsson
+    * Carlos Garnacho
+    * Djihed Afifi
+    * Nickolay V. Shmyrev
+    * Wouter Bolsterlee
+    * Marcelo Lira
+
+Translation updates:
+
+    * Djihed Afifi (ar)
+    * Ihar Hrachyshka (be@latin)
+    * Gil Forcada (ca)
+    * Jorge Gonzalez (es)
+    * Priit Laes (et)
+    * Inaki Larranaga Murgoitio (eu)
+    * Stéphane Raimbault (fr)
+    * Seán de Búrca (ga)
+    * Ignacio Casal Quinteiro (gl)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Thierry Randrianiriana (mg)
+    * Yannig Marchegay (oc)
+    * Leonardo Ferreira Fontenelle, Hugo Doria, Rodrigo Flores (pt_BR)
+    * Daniel Nylander (sv)
+    * Clytie Siddall (vi)
+
+===============
+Evince  2.21.1
+===============
+
+New Features and UI Improvements:
+
+    * Use message area for notification about errors
+    * Some print settings for documents are stored in metadata
+    * Added command line option for search
+    * Expander with a recent documents is added to toolbar
+    * Egg-recent code dropped
+    * Djvu, dvi and comics are enabled by default
+    * Support for links with URI's like mailto (Pascal Terjan)
+    * Removed the shadow of the fullscreen toolbar
+
+Bug fixes:
+
+    * A lot of bug fixes from a stable branch
+
+Thanks:
+ 
+    To Carlos Garcia Campos who did the all the amazing work above :)
+
+Translations:
+
+    Changwoo Ryu (ko)
+    Daniel Nylander (sv)
+    Djihed Afifi (ar)
+    Jorge Gonzalez (es)
+    Francesco Marletta (it)
+    Gabor Kelemen (hu)
+    Gintautas Miliauskas (lt)
+    Ignacio Casal Quinteiro (gl)
+    Ihar Hrachyshka (be@latin)
+    Ilkka Tuohela (fi)
+    Ivar Smolin (et)
+    Jorge González (es)
+    Kjartan Maraas (nb)
+    Matej Urbančič (sl)
+    Peter Bach (da)
+    Yannig Marchegay (Kokoyaya) (oc)
+
+===============
+Evince  2.20.2
+===============
+
+Bug fixes:
+
+    * Tiff documents were rendered with wrong colors (Matthias Clasen)
+    * Fix endless loop when zero pages per sheet is selected (Darren Kenny)
+    * Do not jump to the first page when reloading from command line (Carlos Garcia Campos)
+    * Memory leak fix (Hiroyuki Ikezoe)
+    * Fix printing with poppler splash backend (Carlos Garcia Campos)
+    * Fix a crash when printing with the gnome-print dialog (Carlos Garcia Campos)
+    * Warning fix (Sebastien Bacher)
+
+Translations:
+
+    Matej Urbančič (sl)
+    Youssef Chahibi (ar)
+
+===============
+Evince  2.20.1
+===============
+
+Bug fixes:
+
+    * Printing multiple pages per sheet fixes (Carlos Garcia Campos)
+    * Respect ranges order during print (Carlos Garcia Campos)
+    * Silently ignore unknown form fields (Matthias Drochner)
+    * Do not show the toolbar in fullscreen mode if the main toolbar is not visible (Carlos Garcia Campos)
+    * Give priority to form fields over images (Carlos Garcia Campos)
+    
+Translations:
+
+    Changwoo Ryu (ko)
+    Francesco Marletta (it)
+    Ilkka Tuohela (fi)
+    Peter Bach (da)
+
+===============
+Evince  2.20.0
+===============
+
+Bug fixes:
+
+    * Forms support broken by forgotten ifdef fix (Carlos Garcia Campos)
+    * Issue with making a copy and xfer to different file system (Carlos Garcia Campos)
+    * Desktop file fixes (Götz Waschk)
+
+Translations:
+
+    Youssef Chahibi (ar)
+    Alexander Shopov (bg)
+    Peter Bach (da)
+    Ivar Smolin (et)
+    Ignacio Casal Quinteiro (gl)
+    Francesco Marletta (it)
+    Gintautas Miliauskas (lt)
+    Espen Stefansen (nb)
+    Yannig Marchegay (Kokoyaya) (oc)
+    Mişu Moldovan (ro)
+    Peter Tuhársky (sk)
+    Laurent Dhima (sq)
+    Горан Ракић (sr)
+    Maxim Dziumanenko (uk)
+
+===============
+Evince  2.19.92
+===============
+
+Bug fixes:
+
+    * Bump requirements to poppler 0.6 (Carlos Garcia Campos)
+    * Restart the search when reloading a document with the find bar visible (Carlos Garcia Campos)
+    * Do not jump to the first page when reloading a document from the last page (Carlos Garcia Campos)
+    * Do not update visibility when changing a chrome flag (Carlos Garcia Campos)
+    * Use GTK_UNIT_POINTS instead of GTK_UNIT_PIXEL (Carlos Garcia Campos)
+    * Make sure current-page <= end-page in continuous mode (Carlos Garcia Campos)
+    * Ignore outline items without a title (Carlos Garcia Campos)
+    * Use only drag mouse cursor during a drag operation (Carlos Garcia Campos)
+    * Actually fix printing regressions (Carlos Garcia Campos)
+    * Add support for double and triple click selections (Carlos Garcia Campos)
+
+Translations:
+
+    Gil Forcada (ca)
+
+===============
+Evince   2.19.4
+===============
+
+Bug fixes:
+
+    * Find works when findbar is hidden (Justin Blanchard)
+    * Use directly cairo_surface_get_content (Jeff Muizelaar)
+    * Great speedup by using CAIRO_FORMAT_RGB24 instead of CAIRO_FORMAT_ARGB32 (Jeff Muizelaar)
+    * Fix for embedded thumbnails dimension and rotation (Carlos Garcia Campos)
+    * Avoid ifdefs inside macros (Jens Granseuer)
+    * Memory leak fixes (Justin Blanchard, Hiroyuki Ikezoe)
+    * New icon sizes (Andreas Nilsson)
+    * Invalid read fix (Justin Blanchard)
+    * Fix multihead problems in toolbar editor (Carlos Garcia Campos)
+    * Use the same cairo context for every page in the same expose event (Carlos Garcia Campos)
+
+Translations:
+
+    Adam Weinberger (en_CA)
+    Danishka Navin (si)
+    Duarte Loreto (pt)
+    Hendrik Richter (de)
+    Ihar Hrachyshka (be@latin)
+    Raphael Higino (pt_BR)
+    Stéphane Raimbault (fr)
+    Takeshi Aihana (ja)
+    
+==============
+Evince   0.9.3
+==============
+
+New Features and UI Improvements:
+
+    * Use new GTK+ tootlips (Carlos Garcia Campos)
+    * Printing multiple pages per sheet (Carlos Garcia Campos)
+    * Added UNIX-like key bindings hjkl (Cosimo Cecchi)
+
+Bug fixes:
+
+    * Do not block while enumerating printers in preview mode (Christian Persch)
+    * Show new pages as soon as they are rendered even if other page 
+      elements like forms, images or links are not ready yet (Carlos Garcia Campos)
+    * Provide different options in the print dialog depending on document 
+      type backend capabilities (Carlos Garcia Campos)
+
+Translations:
+
+    Jorge González (es)
+    Iñaki Larrañaga Murgoitio (eu)
+    Ilkka Tuohela (fi)
+    Gabor Kelemen (hu)
+    Arangel Angov (mk)
+    Wouter Bolsterlee (nl)
+    Funda Wang (zh_CN)
+
+==============
+Evince   0.9.2
+==============
+
+New Features and UI Improvements:
+
+    * Forms support (Julien Rebetez, Carlos Garcia Campos)
+    * Toolbar editor icons on dragging (Jaap Haitsma)
+
+Bug fixes:
+
+    * Program description translation issue fixed (Gabor Kelemen)
+    * Do not change page after presentation (Cesar Fernandez)
+
+Translations:
+
+    Ankit Patel (gu)
+    Arangel Angov (mk)
+    Bharat Kumar (te)
+    Clytie Siddall (vi)
+    Daniel Nylander (sv)
+    Dr.T.Vasudevan (ta)
+    Espen Stefansen (nb)
+    Ivar Smolin (et)
+    Takeshi Aihana (ja)
+    Theppitak Karoonboonyanan (th)
+    Tomasz Dominikowski (pl)
+    Tshewang Norbu (dz)
+
+==============
+Evince   0.9.1
+==============
+
+New Features and UI Improvements:
+
+    * Cairo-based renderer for pages and selections of PDF, DVJU and DVI documents (Carlos Garcia Campos)
+    * PDF exporter for printing DVI documents (Alaska Subedi)
+    * Zoom icon artwork (Michael Monreal)
+    * Patch to avoid frequent process wakeup for metadata handling (Bastien Nocera, Arjan van de Ven)
+    * Bumped poppler requirements to 0.5.9 (Carlos Garcia Campos)
+    * Changed sidebar ordering (Wouter Bolsterlee)
+    * Removed extra locking of a main loop to speed up rendering (Carlos Garcia Campos)
+
+Bug fixes:
+
+    * Print job is released quickly (Carlos Garcia Campos)
+    * Update a cursor and tooltips after scrolling (Carlos Garcia Campos)
+    * More safe mkdir_with_parents (Eduardo Lima)
+    * Safe saving of a document copy to a remote location (Carlos Garcia Campos)
+    * Build fix without libgnome (Marc Brockschmidt)
+    * Selections don't disappear after zoom (Carlos Garcia Campos)
+    * Preview button added to the print dialog (Carlos Garcia Campos)
+
+Translations:
+
+    Daniel Nylander (sv)
+    David Lodge (en_GB)
+    Dr.T.Vasudevan (ta)
+    Espen Stefansen (nb)
+    Gil Forcada (ca)
+    Ignacio Casal Quinteiro (gl)
+    Ivar Smolin (et)
+    Jorge González (es)
+    Sonam Pelden (dz)
+    Theppitak Karoonboonyanan (th)
+    Yuval Tanny (he)
+    
+==============
+Evince   0.9.0
+==============
+
+New Features and UI Improvements:
+
+    * Printing support in djvu documents (Alaska Subedi)
+    * Optional drop of libgnome dependency (Ross Burton)
+    * Print button for preview mode (Carlos Garcia Campos)
+    * Remember print settings (Carlos Garcia Campos)
+    * Use gtk+ builtin paper list to identify the document's paper size (Carlos Garcia Campos)
+    * Start rendering pages before any other jobs (Carlos Garcia Campos)
+    * Developer documentation updated. (Iñigo Martínez)
+    * History button improvements (Nickolay Shmyrev)
+
+Bug Fixes:
+
+    * Fixes for issues with fullscreen toolbar (Carlos Garcia Campos)
+    * Open document in empty window with EggRecent (Eduardo Lima)
+    * Compilation fixes for FreeBSD (Roy Marples)
+    * A lot of calls to parent class methos added (Christian Persch)
+    * Update gtk-icon-cache in uninstall hook (Brian Pepple)
+    * Fix for crash in comics backend when filename contains quote (Nickolay Shmyrev)
+    * Always add application-specific icons to the theme (Nickolay Shmyrev)
+
+Translations:
+
+    Jakub Friedl (cs)
+    Dimitris Glezos (el)
+    David Lodge (en_GB)
+    Jorge González (es)
+    Ivar Smolin (et)
+    Francesco Marletta (it)
+    Espen Stefansen (nb)
+    Yannig Marchegay (oc)
+    Washington Lins (pt_BR)
+    Daniel Nylander (sv)
+
+==============
+Evince   0.8.1
+==============
+
+Bug Fixes:
+
+    * Default resolution is used when it's not provided by TIFF
+      document (Carlos Garcia Campos)
+    * Added support for ps, eps and compressed documents 
+      thumbnails (Carlos Garcia Campos)
+    * Implemented font color specials in the DVI backend (Ricardo Markiewicz)
+    * DOCUMENTS folder from xdg-data-dirs is used as default folder when
+      opening a file chooser (Matthias Clasen)
+    * unlink-tempfile is used instead of unlink-temp-file (Carlos Garcia Campos)
+
+Translations:
+
+    Gil Forcada (ca)
+    Ignacio Casal Quinteiro (gl)
+    Iñaki Larrañaga Murgoitio (eu)
+    Jorge González (es)
+    Jakub Friedl (cs)
+    Sonam Pelden (dz)
+
+==============
+Evince   0.8.0
+==============
+
+Features and UI Improvements:
+
+    * Thumbnails for postscript documents (Carlos Garcia Campos)
+    * Copy of compressed document is saved compressed (Carlos Garcia Campos)
+
+Bug Fixes:
+
+    * Properly handle PostScript page orientation (Carlos Garcia Campos)
+    * Do not render thumbnails when sidebar thumbnail page is not visible
+      on startup (Carlos Garcia Campos)
+    * Warning when document has one page (Carlos Garcia Campos)
+    * Djvu backend builds on Mac (Carlos Garcia Campos)
+    * Allow deleting in goto window in presentation mode (Carlos Garcia Campos)
+
+Translations:
+
+    Ankit Patel (gu)
+    Changwoo Ryu (ko)
+    Christian Kintner (de)
+    Clytie Siddall (vi)
+    Daniel Nylander (sv)
+    Djihed Afifi (ar)
+    Duarte Loreto (pt)
+    Erdal Ronahi (ku)
+    Funda Wang (zh_CN)
+    Gabor Kelemen (hu)
+    Gil Forcada (ca)
+    Gintautas Miliauskas (lt)
+    Ihar Hrachyshka (be)
+    Ivar Smolin (et)
+    Kjartan Maraas (nb)
+    Matic Žgur (sl)
+    Maxim Dziumanenko (uk)
+    Mişu Moldovan (ro)
+    Nickolay V. Shmyrev (ru)
+    Raphael Higino (pt_BR)
+    Takeshi Aihana (ja)
+    Thierry Randrianiriana (mg)
+    Wadim Dziedzic (pl)
+    Woodman Tuen (zh_HK)
+    Woodman Tuen (zh_TW)
+    Yuval Tanny (he)
+    Игор Несторовић (sr)
+
+==============
+Evince   0.7.2
+==============
+
+New Features and UI Improvements:
+
+    * Document thumbnail is used as window icon (Carlos Garcia Campos)
+    * Support for gzipped and bzipped 
+      document types (Carlos Garcia Campos)
+    * A lot of new icons (Luca Feretti, Andreas Nilsson)
+    * Finally working history button (Nickolay V. Shmyrev)
+
+Internal Improvements:
+
+    * Developer gtk-doc based documentation (Nickolay V. Shmyrev)
+    * More dogtail tests (Nickolay V. Shmyrev)
+
+Bug Fixes:
+    
+    * Fontconfig lock to avoid crashes (Carlos Garcia Campos)
+    * Critical crash fix by checking return value from 
+      psscan (Tom Parker)
+    * Critical crash fix in nautilus property page and 
+      broken ODF (Tom Parker)
+    * Critical crash fix with multifile djvu 
+      documents (Carlos Garcia Campos)
+    * Multithreaded gtk problems fix by using async 
+      gnome-vfs (Carlos Garcia Campos)
+
+Translations:
+
+    Changwoo Ryu (ko)
+    Clytie Siddall (vi)
+    Daniel Nylander (sv)
+    David Lodge (en_GB)
+    Dimitris Glezos (el)
+    Dorji Tashi (dz)
+    Duarte Loreto (pt)
+    Gabor Kelemen (hu)
+    Ihar Hrachyshka (be)
+    Ilkka Tuohela (fi)
+    Ivar Smolin (et)
+    Jovan Naumovski (mk)
+    Khaled Hosny (ar)
+    Kjartan Maraas (nb)
+    Nickolay V. Shmyrev (ru)
+    Stéphane Raimbault (fr)
+    Theppitak Karoonboonyanan (th)
+    Vladimir Petkov (bg)
+    Wouter Bolsterlee (nl)
+    Yuval Tanny (he)
+
+Thanks:
+
+    Ed Catmur, Esteban Sanchez, Theppitak Karoonboonyanan, Wouter Bolsterlee
+
+==============
+Evince   0.7.1
+==============
+
+New Features:
+
+    * Popup window to jump to another page in presentation mode. (Carlos Garcia Campos)
+    * Page transition support in presentation mode. (Carlos Garcia Campos)
+
+Bug Fixes:
+
+    * Fix random crashes related to threads and Font Config (Carlos Garcia Campos)
+    * Fix icon name in desktop file (Luca Ferretti)
+    * Always use "best fit" zoom in presentation mode (Wouter Bolsterlee)
+    * Don't restore the view on the last page when a document is reopened 
+      (Wouter Bolsterlee)
+    * Fix build due to libxml2 (Elijah Newren)
+
+Translations:
+
+    * Djihed Afifi (ar)
+    * Ales Nyakhaychyk (be)
+    * Alexander Shopov (bg)
+    * Josep Puigdemont i Casamajó (ca)
+    * David Lodge (en_GB)
+    * Francisco Javier F. Serrador (es)
+    * Priit Laes (et)
+    * Raivis Dejus (lv)
+    * Jovan Naumovski (mk)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Matic Žgur (sl)
+    * Daniel Nylander (sv)
+    * Theppitak Karoonboonyanan (th)
+    * Clytie Siddall (vi)
+
+Thanks:
+
+    Damien Carbery, Jens Granseuer, Yevgen Muntyan
+
+==============
+Evince   0.7.0
+==============
+
+New Features:
+
+    * History. Preliminary implementation, not finished yet. (Nickolay V. Shmyrev)
+    * Option to open a copy of the document in a new window. (Carlos Garcia Campos)
+    * Multihead systems support. (Carlos Garcia Campos)
+    * Added paper size field to the properties dialog. (Kasper Svendsen, Wouter Bolsterlee)
+    * Added automated UI tests with dogtail (Nickolay V. Shmyrev)
+
+Bug Fixes:
+
+    * Links support in rotated documents. (Radoslav Dorcik)
+    * Side pane disabled when entering and leaving fullscreen mode. (Nickolay V. Shmyrev)
+    * Fixed crash in DVI backend. (Nickolay V. Shmyrev)
+    * Printing settings scale, copies, collate, reverse, odd/even work again (Carlos Garcia Campos)
+    * Added page setup dialog for printing. (Carlos Garcia Campos)
+    * Support for printing to a PDF file. (Carlos Garcia Campos)
+    * Allow blank screen in presentation mode. (Carlos Garcia Campos)
+    * Added "End of presentation" page in presentation mode. (Carlos Garcia Campos)
+    * Screensaver detection in presentation mode. (Wouter Bolsterlee)
+    * "Loading..." text is not shown in presentation mode. (Wouter Bolsterlee)
+
+Security Fixes:
+
+    * Buffer overflow in PS backend. CVE-2006-5864. (Carlos Garcia Campos)
+
+Translations:
+
+    * Djihed Afifi (ar)
+    * Runa Bhattacharjee (bn_IN)
+    * Gil Forcada (ca)
+    * Jakub Friedl (cs)
+    * Mindu Dorji (dz)
+    * Dimitris Glezos (el)
+    * David Lodge (en_GB)
+    * Francisco Javier F. Serrador (es)
+    * Ilkka Tuohela (fi)
+    * Claude Paroz (fr)
+    * Ankit Patel (gu)
+    * Rajesh Ranjan (hi)
+    * Gabor Kelemen (hu)
+    * Satoru SATOH (ja)
+    * Vladimer Sichinava (ka)
+    * Fano Rajaonarisoa (mg)
+    * Kjartan Maraas (nb)
+    * Wouter Bolsterlee (nl)
+    * Leonardo Ferreira Fontenelle (pt_BR)
+    * Leonid Kanter (ru)
+    * Steve Murphy (rw)
+    * Daniel Nylander (sv)
+    * Theppitak Karoonboonyanan (th)
+    * Baris Cicek (tr)
+
+Thanks:
+
+    Claudio Saavedra, Gabriel Felipe Cornejo, Mathias Hasselmann, Michael Monreal, 
+    Julien Rebetez, P. Henrique Silva, Yevgen Muntyan
+
+==============
+Evince   0.6.1
+==============
+
+Bug Fixes:
+
+    * Current page follows find page
+    * Reopen reloads document
+    * Document size is guessed correctly
+    * Icons are installed in correct folders
+    * Memory leak fixed, etc
+    
+Translations:
+
+    * da dz el en_GB es fa gl it ka nn ro
+    * documentation: fi it sv
+      
+Thanks:     
+
+    Carlos Garcia Campos, Mathias Hasselmann, Wouter Bolsterlee,
+    Christian Persch
+    
+    and especially translators:
+    
+    Alessio Frusciante, Åsmund Skjæveland, David Lodge, 
+    Francisco Javier F. Serrador, Ignacio Casal Quinteiro, Kostas Papadimas,
+    Mugurel Tudorm, Ole Laursen, Pema Geyleg, Roozbeh Pournader,
+    Vladimer Sichinava, Daniel Nylander, Tommi Vainikainen, Luca Ferretti
+        
+==============
+Evince   0.6.0
+==============
+
+Bug Fixes:
+
+    * Links aren't lost while resizing
+    * Tiff backend crash is fixed
+    * Recent code and icons code are screen safe
+    * Crash while handling password-protected documents is fixed
+
+Translations:
+
+    * bg bn bn_IN ca de dz el et fa fi fr gu hi hu ja ko lt lv mk ml 
+      mr nb or pt pt_BR ro ru sl sv th tr vi zh_CN zh_HK zh_TW
+      
+Thanks:     
+
+    Carlos Garcia Campos, Julien Rebetez, Sebastien Bacher, Wouter Bolsterlee
+    
+    and especially translators:
+        
+    Abel Cheung, Alexander Shopov, Ani Peter, Ankit Patel, Baris Cicek,
+    Changwoo Ryu, Chao-Hsiung Liao, Christophe Merlet, Claude Paroz, Clytie
+    Siddall, Daniel Nylander, Duarte Loreto, Funda Wang, Gabor Kelemen,
+    Guntupalli Karunakar, Hendrik Richter, Ilkka Tuohela, Ivar Smolin, Josep
+    Puigdemont i Casamajó, Jovan Naumovski, Khandakar Mujahidul Islam,
+    Kjartan Maraas, Leonardo Ferreira Fontenelle, Leonid Kanter, Lucas
+    Rocha, Matic Žgur, Meelad Zakaria, Mişu Moldovan, Mugurel Tudor, Nikos
+    Charonitakis, Priit Laes, Rahul Bhalerao, Raivis Dejus, Rajesh Ranjan,
+    Roozbeh Pournader, Runa Bhattacharjee, Satoru SATOH, Subhransu Behera,
+    Theppitak Karoonboonyanan, Žygimantas Beručka
+        
+==============
+Evince   0.5.5
+==============
+
+New Features:
+
+    * Evince have preview mode for using with gtk+
+    * New print dialog is used with gtk 2.10
+    * New recent files framework is used
+    
+UI Improvements:
+    
+    * Sidebar is unified with Epiphany
+    * Escape unfocus page entry
+
+Bug Fixes:
+
+    * Automake updates
+    * Link coordinates now used correctly
+    * Desktop file is corrected
+    * Memory leak fixes
+
+Translations:
+
+    * ca cs de dz el es et eu fi fr gu ja ko mk nl ru sl sv th zh_HK zh_TW
+      
+Thanks:     
+
+    Carlos Garcia Campos, Christian Persch, Radoslav Dorcik,
+    Ricardo Markiewicz, Sebastien Bacher, Wouter Bolsterlee
+    
+    and especially translators:
+        
+    Ankit Patel, Arangel Angov, Benoît Dejean, Changwoo Ryu, Chao-Hsiung
+    Liao, Christophe Merlet, Daniel Nylander, Francisco Javier F. Serrador,
+    Guntupalli Karunakar, Hendrik Richter, Ilkka Tuohela, Inaki Larranaga,
+    Jakub Friedl, Josep Puigdemont i Casamajó, Jovan Naumovski, Nikos
+    Charonitakis, Priit Laes, Takeshi Aihana, Theppitak Karoonboonyanan
+        
+==============
+Evince   0.5.4
+==============
+
+New Features:
+
+    * Evince supports impress slides with --enable-impress
+    * URI's with anchors can be opened
+
+Bug Fixes:
+
+    * PAPI printing crash was fixed
+    * Threads-related crash was fixed
+    * Assertion on document types that don't support
+      links don't cause crash now
+    * Reload crash was fixed as loading of
+      password-protected documents
+    * Page-label command line option works again
+
+Translations:
+
+    * be bg bn_IN ca cs de dz es et eu fi fr gl gu he id ko mk nb ne 
+      nl ru ta th vi zh_CN zh_HK zh_TW        
+      
+Thanks:     
+
+    Bastien Nocera, Carlos Garcia Campos, Ghee Teo, Pat Rondon,
+    Ricardo Markiewicz, Wouter Bolsterlee
+    
+    and especially translators:
+        
+    Ahmad Riza H Nst, Ales Nyakhaychyk, Alexander Shopov,  Ankit Patel,
+    Benoît Dejean, Changwoo Ryu, Chao-Hsiung Liao, Clytie Siddall,
+    Francisco Javier F. Serrador, Funda Wang, Hendrik Richter,
+    I. Felix, Ignacio Casal Quinteiro, Ilkka Tuohela, Inaki Larranaga,
+    Jakub Friedl, Jayaradha,  Josep Puigdemont Casamajó,
+    Jovan Naumovski, Kjartan Maraas, Pawan Chitrakar, Pema Geyleg,
+    Priit Laes, Runa Bhattacharjee, Theppitak Karoonboonyanan, 
+    Vincent van Adrighem, Yair Hershkovitz
+        
+==============
+Evince   0.5.3
+==============
+
+New Features:
+
+    * Evince supports attachments in PDF files
+    * We require gtk 2.8 and djvulibre 3.5.17 now
+    * Links system is reworked allowing named links
+
+Interface imporovements:
+
+    * Esc closes properties dialog
+    * Cursor is hidden in presentation mode
+    * Find previous item is added to the menu
+
+Bug Fixes:
+
+    * GOption port and po/LINGUAS work
+    * Fixed mime type detection by file contents
+    * Several memory leaks were found
+    * Crash on exit related to thumbnailer
+    * Current page is selected more intelligently
+    * Work around libtool build bug is created
+
+Translations:
+
+
+    * bg bn br dz es et fi gl gu nb nl nn no ro vi zh_CN zh_HK zh_TW
+        
+Thanks:     
+
+    Michael Plump, Carlos Garcia Campos, Wouter Bolsterlee, Francisco
+    Javier F. Serrador, Kjartan Maraas and especially all translators.
+        
+==============
+Evince   0.5.2
+==============
+
+Bug Fixes:
+
+    * View don't jump on scrolling
+    * In presentation mode we scroll by one page
+
+Translations:
+
+    * bg bn da de et fa fr hi hu ja ka pt pt_BR ro ru sv uk vi
+    
+==============
+Evince   0.5.1
+==============
+
+New Features:
+
+    * Evince can search text in DJVU files
+
+Interface improvements:
+
+    * Odd pages are placed to the right in dual page mode
+
+Bug Fixes:
+
+    * Produce thumbnails for comic books and carefully work with
+      unzip
+    * Correctly interoperate with DBUS 0.60
+    * Ghostscript interpreter is checked in runtime
+    * PS mime types are listed in desktop file
+    * It's possible to add sidebar checkbutton on toolbar
+    * It's possible to print in inverse order
+    * Filechooser now will ask for overwrite confirmation
+    * Search now takes account for scrolling
+    * It's allowed to scroll view from find entry
+    * Evince don't jump to find result if window was scrolled during search
+    * It's now clear what page the toolbar page number applies to
+
+Translations:
+
+    * bg ca cs cy da el en_CA es et eu fi gl gu he hu ja lt nb nl no pl
+      pt_BR pt ru sq sr th vi zh_CN zh_HK zh_TW
+    * Spanish docs are updated and we have Bulgarian translation now
+    
+Thanks:
+
+    Ricardo Markiewicz, Rostislav Raykov, Stanislav Slusny, 
+    Francisco Javier F. Serrador, Antoine Dopffer, Michael Hofmann, 
+    Gary Coady, Luca Ferretti, Carlos Garcia Campos, Eduardo de Barros Lima,
+    Christopher Aillon and all translators.
+
+==============
+Evince   0.5.0
+==============
+
+New Features:
+
+    * Various types of PDF links are now supported
+    * New backend for comic books (CBR/CBZ archives)
+    * Storage of passwords for protected documents in gnome-keyring
+    * Layout settings for new documents are taken from the last used document
+
+Interface Improvements:
+
+    * Statusbar was removed to save space
+    * Notification about page processing is shown on the page
+    * More key bindings
+    * Improved intelligent window title that shouldn't confuse users
+    * Show index by default if available
+    * Tooltips for links
+    * Now we have right click context menu
+
+Bug Fixes:
+
+    * Crashes on reload and window close are fixed
+    * DBus usage cleaned
+    * Printing of multiple copies start to work
+    * Crash on structured ps document
+    * Improved session handling
+    * Vertical and horizontal scrolling on selection
+
+Translations:
+
+    * be, bg, bn, ca, cs, de, en_CA, es, et, eu, fi, fr, gl, gu 
+      hu, it, ku, lt, nb, nl, no, ro, ru, sr, sv, th, vi, zh_CN, zh_HK, zh_TW
+    * nl for documentation.
+
+==============
+Evince   0.4.0
+==============
+
+Bug Fixes:
+
+    * Depend on poppler 0.4.0
+    * Pass in timestamp to to handle opening multiple windows over dbus
+      better (Ryan Lortie)
+    * Really quit when rendering postscript files.
+    * Set textdomain to libglade. 
+    * Fix rotation of thumbnails multiple times
+    * Fix selection for non-continuous case
+    * Disable selection and links for rotated case
+    * findbar fixes
+
+==============
+Evince   0.3.4
+==============
+
+Bug Fixes:
+
+    * Depend on poppler 0.4.0
+    * Convert filenames to utf8 when showing them in the UI
+    * Return focus back to view on escape
+    * Fix compatibility with dbus 0.34.2
+    * Fix some build warnings
+    * Fix dvi backend compilation with t1lib-5.0
+
+==============
+Evince   0.3.3
+==============
+
+New Features:
+
+    * real text selection, complete with theming and I-Beam support
+    * Respect lockdown gconf keys
+    * Metadata support per document
+    * Font properties dialog
+    * dbus support to create a factory
+    * Implement nautilus plugin for properties.
+
+Interface Improvements:
+
+    * HIG Fixes 
+    * Hide menu entry in .desktop file
+    * Get the correct mime types in the open dialog
+
+Bug Fixes:
+
+    * Improved rotation support
+    * Backwards searching
+    * Use unzipped document when printing
+    * Persist the print settings
+    * Support pdf's with 0 pages
+    * Fix find flickering
+    * gnome-doc-utils for manual
+    * Add keypad accelerators for zooming. Fix for bug 308128.
+    * fix mem leaks
+    * MIME Fixes
+    * tiff/djvu backend fixes
+
+Translations:
+
+    * eu, gl, gu, he, hi, ne, pa, pl, sk, sr, st@Latn, tr
+
+==============
+Evince   0.3.2
+==============
+
+New Features:
+
+    * Multi page tiff support
+    * Document properties
+    * Document rotation
+    * Gnome vfs support
+
+Interface Improvements:
+
+    * Faster dvi rendering
+    * More compact layout for documents with different page formats
+    * Stock icons for all toolbar editor items
+    * Multiple selection in the open dialog
+    * Loading progress feedback
+    * Multiple column thumbnails
+    * Expand links when specified by the document
+    * Several new handy keybindings
+    * Ellipsize recent items labels
+
+Bug Fixes:
+
+    * Fix rendering of several postscript documents
+    * Fix reloading of postcript documents
+    * Fix a lot of memory leaks
+    * Fix compilation on gcc 4
+    * Several minor fixes
+
+==============
+Evince   0.3.1
+==============
+
+New Features:
+
+    * Toolbar editor
+    * Middle button scrolling
+    * Support for printing page ranges
+    * Support for printing chapters (from the index)
+
+Interface Improvements:
+
+    * Move best fit items in the toolbar control at the top
+    * In the sidebar make drop down menu as large as the button
+    * Several keybindings improvements
+    * Faster scrolling
+    * Only render the visible thumbnails (less memory usage)
+    * Get rid of confusing Normal size menu
+
+Bug Fixes:
+
+    * Better mime detection
+    * Several minor fixes
+    * Fix printing on LPD printers
+
+==============
+Evince   0.3.0
+==============
+
+New Features:
+
+    * Continous mode
+    * Dual page mode
+    * Control + Scroll does zooming
+    * Shift + Scroll scrolls horizontally
+    * Zoom control in the toolbar
+
+Interface Improvements:
+
+    * If all page labels are numeric show only
+      the page total
+
+Bug Fixes:
+
+    * Fix size of dvi thumbnails
+    * Fix crash on exit
+    * Make thumbnailer schemas translatable
+    * Fix build problems with t1lib
+
+==============
+Evince   0.2.1
+==============
+
+New Features:
+
+    * new backend to support DJVU files.
+    * new backend to support DVI.
+    * Initial implementation of doc metadata.  No UI for this yet,
+      though we respect docs requesting UI changes.
+    * support application/x-gzpostscript
+    * consolidate mime handling code so thumbnailer and main page
+          can use them.  Thumbnail all types we support.
+    * Respect document orientation 
+    * Implement print and save a copy for the ps backend.
+    * Badass completion of the document in the entry.  Only works
+      with GTK+ >= 2.7.1
+    * User docs
+
+Bug Fixes:
+
+    * Faster Zooming
+    * Clean up Schemas
+    * README added.
+    * Small rework of sidebar code. Now sidebar pages should implement
+      EvSidebarPage interface.
+    * lots of small bug fixes
+    * Actually fix the "FIXME: update priority" comment.
+    * Update egg-recent from libegg. This should fix long startup
+          problem.
+
+Interface Improvements:
+
+    * Shift + Space scrolls up.
+    * Removed fullscreen toolbar hard-coded style
+    * Fix normal size zoom. Make zoom in/zoom out unsensitive when
+      they are behyond the limits.
+    * Doesn't show resize grip when maximized
+    * don't draw border in fullscreen
+    * Doesn't show thumbnails if document has 1 page. Make sidebar
+      menu entries sensitive only if if they have sense. 
+    * Work around the Escape conflict (find bar and unfullscreen)
+    * Save accelerators on exit.
+    * Add Edit->Find Next
+
+Translations:
+
+    * Make all toolbar items translatable
+    * ru (Nickolay Shmyrev)
+
+==============
+Evince   0.2.0
+==============
+
+Code changes
+
+    * Use poppler glib api
+
+Interface improvements
+
+    * Rewrite most of the backend code to use threads and make
+      the interface more responsive
+
+New features
+
+    * Use page labels as page numbers (Jonathan)
+
+==============
+Evince   0.1.9
+==============
+
+    * Fix a crash in the nautilus thumbnailer (Fernando Herrera)
+
+==============
+Evince   0.1.8
+==============
+
+BugFixes
+
+    * Fix crash when opening pdf documents with only 1 page
+
+==============
+Evince   0.1.7
+==============
+
+New features
+
+    * Nautilus thumbnailer for pdf (Fernando Herrera)
+
+BugFixes
+
+    * Make code C89 compliant (Jens Granseuer)
+    * Fix some issues in the nautilus thumbnailer (Marco)
+    * Do not read ps defaults from ggv prefs! (Marco)
+
+==============
+Evince   0.1.6
+==============
+
+Code changes
+
+    * Use poppler instead of our own xpdf fork (Kristian Høgsberg)
+
+Interface improvements
+
+    * Use an entry for the page control instead of
+      spin buttons (Marco)
+    * Expand the sidebar selection widget (Carlos)
+
+Bug fixes
+
+    * Fix crash in links loading (Jonathan)
+    * Fix crashes when reloading document (Marco)   
+
+==============
+Evince   0.1.5
+==============
+
+New features
+
+    * Reload menu (Kai Willadsen)
+
+Interface improvements
+    
+    * Support for DnD of files (Carlos Garcia Campos)
+    * Set the "Previous" and "Next" toolbar
+      buttons as important (Vincent Noel)
+    * Make the "best fit" and "fit width"
+      values act as toggle buttons (Jonathan)
+    * Autohide the fullscreen button (Kristian Høgsberg)
+    * Added ellipsis to Print item (Bryan)
+    * Change the fullscreen toolbar to always be in
+          the popup window (Jonathan)
+    * Improved sidebar widget (Carlos Garcia Campos)
+    * Minimal size for the sidebar (Marco)
+    * Hide the sidebar if the type doesn't
+      support thumbnailing and indexing (Jonathan)
+    * Remember the sidebar size (Carlos Garcia Campos)
+
+Bug fixes
+
+    * Fix compilation on non-gcc platforms (Marco)
+    * Fix thumbnails generation (Crispin Flowerday)
+    * Fix best fit size allocation (Martin)
+    * Replace newlines in the title by spaces (Martin)
+    * Get rid of the black flash when resizing the window (Jonathan)
+    * Sync selection with zoom levels (Marco)
+    * Fix clipboard operations (Marco)
+    * Fix a crash when the ps document cannot be opened (Marco)
+    * Fix postcript page selection (Marco)
+    * Fix page sizing to be idempotent (Marco)
+    * Fix page sizing toggle buttons (Marco)
+    * Fix freezing on document with unrecognized links (Marco)
+    * Check ghostscript minimal version (Marco)
+    * Fix rendering of landscape documents (Marco)
+    * Unescape filenames for display (Marco)
+
+==============
+Evince   0.1.4
+==============
+
+Code changes
+
+    * Add debugging/logging helpers (Marco)
+    * Add warnings about unimplemented/unknown link
+          types (Marco)
+
+Interface improvements
+
+    * Epiphany like fullscreen mode (Christian Persch)
+    * Save chromes state between sessions (Christian Persch)
+    * Improve toolbar layout and icons (Luca Ferretti)
+
+Bug fixes
+
+    * Really fix postscript rendering (Marco)
+    * Do not leak gs processes on exit (Marco)
+    * Fix a buffer overflow fix (Marco)
+
+==============
+Evince   0.1.3
+==============
+
+Code changes
+
+    * Beginnings of continuous viewing (Jonathan)
+
+New features
+
+    * Support eps (Marco)
+    * Support gzipped ps (Marco)
+
+Bug fixes
+
+    * Fix a crash with the postscript view (Marco)
+    * Fix image view (Jeff Muizelaar)
+    * Fix a warning when opening documents without
+      thumbnails (Martin)
+    * Fix crashes when searched word is not found (Marco)
+    * Fix a crash when changing page with keys (Marco)
+
+==============
+Evince   0.1.2
+==============
+
+New features
+
+    * Make search really work (Marco)
+
+Interface improvements
+
+    * Show password state in the view (Jonathan)
+    * add GTK_SHADOW_IN to the scrolled window (Martin)
+    * make sure the selected thumbnail stays visible (Martin)
+    * Remove history buttons from the toolbar (Marco)
+
+Bug fixes
+
+    * Fix CID fonts with freetype 2.1.9 (Marco)
+    * Fix inverted up/down buttons (Marco)
+
+==============
+Evince   0.1.1
+==============
+
+New features
+
+    * Actually print PDF files
+    * Navigation history
+    * Support Links
+    * Support encrypted PDFs
+    * A desktop file
+
+Interface improvements
+
+    * Rename Bookmarks sidebar to Index
+    * Use filename as title if the file doesn't have a title (Jeff
+          Muizelaar) or if the title is empty
+    * Make navigation with thumbnails possible (Anders Carlsson)
+    * (De)Sensitize actions as necessary (Dave Malcolm)
+    * Show a wait cursor while the page is rendering
+    * Center the page; draw a page border
+    * Undo selection on page change
+    * Shorter toolbar item labels
+    * Make selection work in any direction
+
+Code changes
+
+    * Render PDFs directly as packed RGB
+    * Update egg-recent code (not used yet)
+    * Update to latest Xpdf patchlevel
+
+Bug fixes
+
+    * PostScript backend fixes
+    * Pixbuf backend fixes (Jeff Muizelaar)
+    * Set page spin button limits correctly (Anders Carlsson)
+    * Fix problem when base fonts are installed as pcf files.
+    * Keep search selection highlighting correct even when
+      zooming/changing window size (Stephane LOEUILLET)
+
+Translation updates
+
+    * cs (Miloslav Trmac)
+    * de (Frank Arnold)
+    * en_CA (Adam Weinberger)
+    * es (Antonio Ognio)
+    * nb (Kjartan Maraas)
+    * nl (Tino Meinen)
+
+evince 0.1.0
+------------
+
+Initial release.

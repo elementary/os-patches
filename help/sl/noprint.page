@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="sl">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Avtor je morda omejil tiskanje dokumenta.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Dovoljenje Creative Commons - priznanje avtorstva - deljenje pod istimi pogoji 3.0</p>
+    </license>
+
+  </info>
+
+<title>Ne morem natisniti dokumenta</title>
+<section id="why">
+ <title>Mogoči vzroki za spodletelo tiskanje</title>
+<p>Dokument se morda ne bo natisnil zaradi:</p>
+ <list>
+  <item><p>Težave s tiskalnikom ali</p></item>
+  <item><p>omejitve tiskanja datotek PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Težave s tiskalnikom</title>
+  <p>Obstaja veliko razlogov zakaj tiskalnik morda ne deluje. Na primer, lahko mu zmanjka papirja ali črnila ali pa je odklopljen ali pokvarjen.</p>
+
+  <p>Preverite, če vaš tiskalnik pravilno tiska:</p>
+  <steps>
+   <item><p>Kliknite na svoje ime v vrhnji vrstici in izberite <gui>Nastavitve sistema</gui>.</p></item>
+   <item><p>Dvokliknite na tiskalnik na seznamu.</p></item>
+   <item><p>Kliknite na <gui>Natisni preizkusno stran</gui>. Stran bi morala biti poslana vašemu tiskalniku.</p>
+<note>
+ <p>V primeru da to spodleti, si oglejte <link href="help:gnome-help/printing">Pomoč tiskanja</link>. Oglejte si tudi priročnik tiskalnika in poglejte, če lahko storite še kaj.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Omejitve tiskanja datotek PDF.</title>
+  <p>Nekateri dokumenti PDF imajo nastavitev, ki vam prepreči njihovo tiskanje. Avtorji lahko omejitev tiskanja omogočijo med pisanjem dokumenta. <app>Pregledovalnik dokumentov</app> to omejitev privzeto prezre, vendar morda želite preveriti, da ni bila onemogočena:  </p>
+
+  <steps>
+    <item>
+      <p>Pritisnite <keyseq><key>Alt</key><key>F2</key></keyseq> za odprtje okna Poženi program.</p>
+    </item>
+    <item>
+      <p>V besedilno polje vpišite <input>dconf-editor</input> in kliknite <gui>Zaženi</gui>. Odprl se bo Urejevalnik nastavitev.</p>
+    </item>
+    <item><p>Brskajte do <sys>/org/gnome/evince</sys> s pomočjo stranskega pladnja.</p></item>
+    <item>
+      <p>Prepričajte se, da je možnost <gui>Prezri omejitve</gui> omogočena.</p>
+    </item>
+    <item>
+      <p>Pojdite nazaj v <app>Pregledovalniku dokumentov</app> in znova poskusite natisniti dokument.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

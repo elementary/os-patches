@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="da">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Skift mellem <app>Dokumentfremviser</app> og <app>Gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>Søg med SyncTex</title>
+<p>Når du har <link xref="synctex-compile">kompileret din TeX-fil med SyncTex</link>, kan du søge. SyncTex understøtter også søgning fra og til en inkluderet fil.</p>
+
+<section id="forward-search">
+    <title>Søgning fremad: Fra TeX til PDF (<app>Gedit</app> til <app>Dokumentfremviser</app>)</title>
+     <p>Ved søgning fremad kan man klikke på en bestemt del af TeX-kildekoden og springe til den tilknyttede position i PDF-filen. For at udføre søgning fremad:</p>
+<steps>
+<item>
+<p>Klik på en linje i TeX-filen.</p>
+</item>
+<item>
+<p>I <app>gedit</app>, skal du klikke på <guiseq><gui>Redskaber</gui><gui>Søg fremad</gui></guiseq>. Den tilsvarende linje i PDF-filen bliver fremhævet med rødt.</p>
+<p>Eller du kan bruge <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq>, eller <keyseq><key>Ctrl</key>venstreklik</keyseq>. Den tilsvarende linje i PDF-filen bliver fremhævet med rødt.</p>
+</item>
+</steps>
+<note>
+<p>Hvis den tilsvarende PDF-fil ikke er åben, vil en forlæns søgning åbne PDF-filen i <app>Dokumentfremviser</app>.</p>
+</note>
+<p>Hvis du tilføjer et komplekst projekt med flere TeX-filer, kan du tilføje</p>
+<code>% mainfile: mainfile.tex</code>
+<p>i enten den første eller de tre sidste linjer i hver af de inkluderede TeX-filer. Så vil forlæns søgning virke. Baglæns søgning burde altid virke, selv om man ikke tilføjer ovenstående linje.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Baglæns søgning: Fra PDF til TeX (<app>Dokumentfremviser</app> til <app>Gedit</app>)</title>
+     <p>Ved baglæns søgning kan du klikke på en bestemt linje i PDF-filen og springe til den tilsvarende linje i TeX-kildekoden.</p>
+<p>
+You can perform a backward search by pressing <keyseq><key>Ctrl</key>left click</keyseq> in the <app>document viewer</app>. The corresponding line in the TeX source code will be highlighted.
+     </p>
+</section>
+
+</page>

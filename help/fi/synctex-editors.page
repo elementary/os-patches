@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="fi">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Millä muokkaimilla voi muokata TeX-tiedostoja?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Sami Jaktholm</mal:name>
+      <mal:email>sjakthol@outlook.com</mal:email>
+      <mal:years>2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Timo Jyrinki</mal:name>
+      <mal:email>timo.jyrinki@iki.fi</mal:email>
+      <mal:years>2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Tommi Vainikainen</mal:name>
+      <mal:email>thv@iki.fi</mal:email>
+      <mal:years>2006</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Flammie Pirinen</mal:name>
+      <mal:email>flammie@iki.fi</mal:email>
+      <mal:years>2006</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Tuetut tekstimuokkaimet</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>Gedit tukee sekä <link xref="synctex-search#forward-search">eteenpäin</link> (<app>geditistä</app> <app>asiakirjakatselimeen</app>) että <link xref="synctex-search#backward-search">taaksepäin</link> (<app>asiakirjakatselimesta</app> <app>geditiin</app>) suuntautuvaa linkitystä.</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p><app>Gedit</app>-lisäosa sisältää python-komentotiedoston (evince_dbus.py), jota voi hyödyntää myös Vim:n kanssa. Vim-latexia voi käyttää <app>asiakirjakatselimen</app> kanssa seuraavasti:</p>
+<steps>
+ <item>
+  <p>Kopioi evince_dbus.py kansioon, joka on suoritettavien ohjelmien polussa ja anna sille suoritusoikeudet (+x).</p>
+ </item>
+ <item>
+  <p>Lisää ~/.vimrc -tiedostoon seuraavat rivit:</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Voit nyt käyttää eteenpäin suuntautuvaa linkitystä vim-latexista kirjoittamalla \ls. Taaksepäin suuntautuvaa linkitystä ei vielä tueta.</p>
+  </item>
+</steps>
+</section>
+</page>

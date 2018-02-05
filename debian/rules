@@ -1,0 +1,47 @@
+#!/usr/bin/make -f
+-include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+include /usr/share/dpkg/buildflags.mk
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,--as-needed
+
+# Mozilla plugins shouldn't be installed in multi-arch path
+export BROWSER_PLUGIN_DIR = /usr/lib/mozilla/plugins
+
+%:
+	dh $@ --with gir,gnome
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--libexecdir=/usr/lib/evince \
+		--enable-djvu \
+		--enable-dvi \
+		--enable-xps \
+		--enable-comics \
+		--enable-introspection \
+		--enable-gtk-doc \
+		--enable-libgnome-desktop
+
+override_dh_makeshlibs:
+	dh_makeshlibs \
+		-X /usr/lib/$(DEB_HOST_MULTIARCH)/nautilus/ \
+		-X /usr/lib/$(DEB_HOST_MULTIARCH)/evince/ \
+		-V -- -c4
+
+override_dh_strip:
+	dh_strip --dbgsym-migration='evince-dbg (<< 3.20.0-2~)'
+
+override_dh_install:
+	find debian/tmp -name '*.a' -print -delete
+	find debian/tmp -name '*.la' -print -delete
+	dh_install
+	install -m 0644 -D debian/apparmor-profile debian/evince/etc/apparmor.d/usr.bin.evince
+	install -m 0644 -D debian/apparmor-profile.abstraction debian/evince/etc/apparmor.d/abstractions/evince
+	install -m 0644 -D debian/evince.apport debian/evince/usr/share/apport/package-hooks/source_evince.py
+	dh_apparmor --profile-name=usr.bin.evince -pevince
+
+override_dh_missing:
+	dh_missing --fail-missing

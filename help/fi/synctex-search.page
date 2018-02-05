@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="fi">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Siirry <app>asiakirjakatselimen</app> ja <app>geditin</app> välillä.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Sami Jaktholm</mal:name>
+      <mal:email>sjakthol@outlook.com</mal:email>
+      <mal:years>2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Timo Jyrinki</mal:name>
+      <mal:email>timo.jyrinki@iki.fi</mal:email>
+      <mal:years>2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Tommi Vainikainen</mal:name>
+      <mal:email>thv@iki.fi</mal:email>
+      <mal:years>2006</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Flammie Pirinen</mal:name>
+      <mal:email>flammie@iki.fi</mal:email>
+      <mal:years>2006</mal:years>
+    </mal:credit>
+  </info>
+
+<title>SyncTeX-linkitys</title>
+<p>Kun <link xref="synctex-compile">TeX-tiedosto käännetään SyncTeX:llä</link>, on mahdollista käyttää linkitystä. SyncTeX tukee sekä lähdekoodista eteenpäin että PDF-tiedostosta taaksepäin suuntautuvaa linkitystä.</p>
+
+<section id="forward-search">
+    <title>Linkki eteenpäin: TeX-lähdekoodista PDF-tiedostoon (<app>geditistä</app> <app>asiakirjakatselimeen</app>)</title>
+     <p>Eteenpäin suuntautuvalla linkillä voi siirtyä TeX-lähdekoodista vastaavaan PDF-tiedoston kohtaan. Tämä onnistuu seuraavasti:</p>
+<steps>
+<item>
+<p>Napsauta riviä TeX-tiedostossa.</p>
+</item>
+<item>
+<p>Napsauta <guiseq><gui>Työkalut</gui> <gui>Linkki eteenpäin</gui></guiseq> <app>geditissä</app>. Vastaava PDF-tiedoston rivi korostetaan punaisella värillä.</p>
+<p>Voit myös painaa <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq> tai <keyseq><key>Ctrl</key>napsautus</keyseq>. Vastaava PDF-tiedoston rivi korostetaan punaisella värillä.</p>
+</item>
+</steps>
+<note>
+<p>Jos vastaava PDF-tiedosto ei ole avoinna, PDF avataan <app>asiakirjakatselimeen</app>.</p>
+</note>
+<p>Jos projekti on laaja, voit lisätä</p>
+<code>% mainfile: mainfile.tex</code>
+<p>jokaiseen projektiin kuuluvan TeX-tiedoston kolmeen ensimmäiseen tai viimeiseen riviin, ja eteenpäin suuntautuva linkitys toimii. Taaksepäin suuntautuvan linkityksen tulisi toimia ilman edellä mainittua lisäystä.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>LInkki taaksepäin: PDF-tiedostosta TeX-lähdekoodiin (<app>asiakirjakatselimesta</app> <app>tekstimuokkaimeen</app>)</title>
+     <p>Taaksepäin suuntautuvalla linkityksellä voi siirtyä PDF-tiedostosta vastaavaan TeX-lähdekoodin kohtaan.</p>
+<p>
+You can perform a backward search by pressing <keyseq><key>Ctrl</key>left click</keyseq> in the <app>document viewer</app>. The corresponding line in the TeX source code will be highlighted.
+     </p>
+</section>
+
+</page>

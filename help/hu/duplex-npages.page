@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="duplex-npage" xml:lang="hu">
+
+  <info>
+    <link type="guide" xref="print-booklet#doubleSided"/>
+
+    <desc>16 oldalnál hosszabb füzet nyomtatása.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hammer Attila</mal:name>
+      <mal:email>hammera at pickup dot hu</mal:email>
+      <mal:years>2014.</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Kelemen Gábor</mal:name>
+      <mal:email>kelemeng at gnome dot hu</mal:email>
+      <mal:years>2011, 2012, 2013, 2014, 2015.</mal:years>
+    </mal:credit>
+  </info>
+
+<title>n-oldalú füzet</title>
+ <note style="important">
+  <p>Az <em>n</em> 4 többszöröse.</p>
+ </note>
+
+ <p>Ha PDF-dokumentumának oldalai száma nem 4 többszöröse, akkor megfelelő számú üres oldalt (1, 2 vagy 3) kell hozzáadnia, hogy 4 többszöröse legyen. Ehhez:</p>
+ <steps>
+ <item>
+  <p>Hozzon létre egy üres PDF-et a <app>LibreOffice Writerrel</app>.</p>
+ </item>
+ <item>
+  <p>Fésülje össze az üres oldalakat a PDF-dokumentummal a <app>PDF-Shuffler</app> segítségével, és helyezze az üres oldalakat a végére.</p>
+ </item>
+</steps>
+
+
+<steps>
+ <item>
+  <p>Válassza a <guiseq><gui>Fájl</gui><gui>Nyomtatás</gui></guiseq> menüpontot.</p>
+ </item>
+ <item>
+  <p>Válassza az <gui>Általános</gui> lapot.</p>
+  <p>A <em>Tartomány</em> alatt válassza az <gui>Oldalak</gui> lehetőséget.</p>
+  <tree>
+   <item>Írja be az oldalak számait a következő sorrendben: <item>n, 1, 2, n-1, n-2, 3, 4, n-3, n-4, 5, 6, n-5, n-6, 7, 8, n-7, n-8, 9, 10, n-9, n-10, 11, 12, n-11…</item> <item>…amíg be nem írta mind az n db oldalt.</item></item>
+  </tree>
+ </item>
+ <item>
+  <p>Válassza az <gui>Oldalbeállítás</gui> lapot.</p>
+  <p>Az <em>Elrendezés</em> alatt a <gui>Kétoldalas</gui> menüben válassza a <gui>Rövid él (fordított)</gui> lehetőséget.</p>
+  <p>A <gui>Lapok oldalanként</gui> beállításnál válassza a <gui>2</gui> értéket.</p>
+  <p>Az <gui>Oldalsorrend</gui> menüben válassza a <gui>Balról jobbra</gui> lehetőséget.</p>
+ </item>
+ <item>
+  <p>Nyomja meg a <gui>Nyomtatás</gui> gombot.</p>
+ </item>
+</steps>
+</page>

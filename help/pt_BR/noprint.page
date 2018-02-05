@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="pt-BR">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>O autor pode ter colocado restrições de impressão no documento.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Compartilhada Igual 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Hugo Dória</mal:name>
+      <mal:email>hugodoria@gmail.com</mal:email>
+      <mal:years>2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Pedro de Medeiros</mal:name>
+      <mal:email>pedrovmm+l10n@gmail.com</mal:email>
+      <mal:years>2007</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel S. Koda</mal:name>
+      <mal:email>danielskoda@gmail.com</mal:email>
+      <mal:years>2008</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Felipe Braga</mal:name>
+      <mal:email>fbobraga@gmail.com</mal:email>
+      <mal:years>2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Rafael Fontenelle</mal:name>
+      <mal:email>rafaelff@gnome.org</mal:email>
+      <mal:years>2017</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Não consigo imprimir um documento</title>
+<section id="why">
+ <title>Razões que impedem a impressão</title>
+<p>A impressão de um documento pode falhar por:</p>
+ <list>
+  <item><p>Problemas na impressora ou,</p></item>
+  <item><p>Restrições de impressão do documento PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Problemas na impressora</title>
+  <p>Há muitas razões pelas quais a impressora pode não estar funcionando. Por exemplo, poderia estar sem papel ou tinta, ou com problemas de conexão ou danificada.</p>
+
+  <p>Para verificar se a impressora está imprimindo corretamente:</p>
+  <steps>
+   <item><p>Abra as <gui>Configurações do sistema</gui> e vá até <gui>Impressoras</gui>.</p></item>
+   <item><p>Selecione sua impressora na lista.</p></item>
+   <item><p>Clique em <gui>Imprimir página de teste</gui>. Uma página deve ser impressa em sua impressora.</p>
+<note>
+ <p>Se não funcionar, consulte a <link href="help:gnome-help/printing">Ajuda de impressão</link>. Você também pode precisar consultar o manual da impressora para ver o que mais pode fazer.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Restrições de impressão do documento PDF</title>
+  <p>Alguns documentos PDF têm configuração que o impede de serem impressos. Os autores do documento podem definir essa restrição de impressão quando eles criam o documento. O <app>Visualizador de documentos</app> ignora essa restrição por padrão, mas esta opção pode ter sido desativada. Para verificá-la:</p>
+
+  <steps>
+    <item>
+      <p>Pressione as teclas <keyseq><key>Alt</key><key>F2</key></keyseq> para abrir a janela de execução de aplicações.</p>
+    </item>
+    <item>
+      <p>Digite <input>dconf-editor</input> na caixa de texto e pressione <key>Enter</key>. Uma janela do <app>Editor do dconf</app> será aberta.</p>
+    </item>
+    <item><p>Vá até o item <sys>/org/gnome/evince</sys> no painel lateral.</p></item>
+    <item>
+      <p>Certifique-se de que a opção <gui>override_restrictions</gui> está marcada.</p>
+    </item>
+    <item>
+      <p>Volte ao <app>Visualizador de documentos</app> e tente imprimir o documento novamente.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

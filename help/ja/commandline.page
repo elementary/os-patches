@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="ja">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Command line</title>
+    <desc><cmd>evince</cmd> コマンドを使えば、任意の複数のファイルを開いたり、指定したページを開いたり、さまざまなモードで開くことができます。</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>コマンドライン</title>
+<p>コマンドラインから<app>ドキュメントビューアー</app>を起動するには、<cmd>evince</cmd> と入力します。evince コマンドの後ろにファイル名を入力することにより、指定したファイルを開くことができます。</p>
+
+<screen>evince file.pdf</screen>
+<p>evince コマンドの後ろに複数のファイル名を空白で区切って入力することにより、複数のファイルを開くことができます。</p>
+<screen>evince file1.pdf file2.pdf</screen>
+<p><app>ドキュメントビューアー</app>は、web 上のファイルの操作もサポートしています。たとえば、evince コマンドの後ろに web 上のファイルの場所を与えることができます。</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>指定したページでドキュメントを開く</title>
+    <p><cmd>--page-label</cmd> というスイッチを使えば、指定したページでドキュメントを開くことができます。たとえば、ドキュメントの 3 ページ目を開くには、次のように入力します。</p>
+    <screen>evince --page-label=3 file.pdf</screen>
+    <p>ページラベルは、<app>ドキュメントビューアー</app>のツールバーに表示されるページ番号と同じ書式である必要があります。</p>
+</section>
+<section id="fullsreen">
+    <title>フルスクリーンモードでドキュメントを開く</title>
+    <screen>evince --fullscreen file.pdf</screen>
+</section>
+<section id="presentation">
+    <title>プレゼンテーションモードでドキュメントを開く</title>
+    <screen>evince --presentation file.pdf</screen>
+</section>
+<section id="preview">
+    <title>プレビューモードでドキュメントを開く</title>
+    <screen>evince --preview file.pdf</screen>
+</section>
+</page>
