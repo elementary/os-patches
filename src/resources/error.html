@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  Copyright © 2010, 2011 Vinicius Depizzol
+  Copyright © 2016 Gabriel Ivascu
+
+  This file is part of Epiphany.
+
+  Epiphany is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Epiphany is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with Epiphany.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!-- Keep in mind that this file is a format template. Each raw % has to be %%. -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="%s" lang="%s" dir="%s">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>%s</title>
+  <style>%s</style>
+  <script type="text/javascript">
+    function buttonAction() {
+      %s
+    }
+    function hiddenButtonAction() {
+      %s
+    }
+    function toggleDetailsBox() {
+      let div = document.getElementById('reveal');
+      if (div.className == "hidden") {
+        div.className = "visible";
+        document.getElementById('pointer').innerHTML = "&#9660;";
+      }
+      else if (div.className == "visible") {
+        div.className = "hidden";
+        document.getElementById('pointer').innerHTML = "&#9658;";
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div id="leftpanel">
+      <img src="ephy-resource:///org/gnome/epiphany/%s"/>
+    </div>
+    <div id="rightpanel">
+      <div id="msg-title" class="%s">
+        %s
+      </div>
+      <div id="msg-body">
+        %s
+      </div>
+      <div id="msg-details" class="%s">
+        <span class="clickable" onclick="javascript:toggleDetailsBox()">
+          <span id="pointer" style="color: black;">&#9658;</span>
+          %s
+        </span>
+        <div id="reveal" class="hidden">
+          %s
+          <button class="btn destructive-action %s" accesskey="%s" onclick="javascript:hiddenButtonAction()">
+            <strong>%s</strong>
+          </button>
+        </div>
+      </div>
+      <div id="footer">
+        <button class="btn suggested-action visible" accesskey="%s" onclick="javascript:buttonAction()">
+          <strong>%s</strong>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

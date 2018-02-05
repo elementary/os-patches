@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="3.10"/>
+  <object class="GtkListStore" id="liststore">
+    <columns>
+      <!-- column-name HOST -->
+      <column type="gchararray"/>
+      <!-- column-name HOST_KEY -->
+      <column type="gchararray"/>
+      <!-- column-name DATA -->
+      <column type="WebKitWebsiteData"/>
+    </columns>
+  </object>
+  <object class="GtkTreeModelFilter" id="treemodelfilter">
+    <property name="child_model">liststore</property>
+  </object>
+  <object class="GtkTreeModelSort" id="treemodelsort">
+    <property name="model">treemodelfilter</property>
+  </object>
+  <template class="EphyCookiesDialog" parent="GtkDialog">
+    <property name="height_request">500</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="default_width">300</property>
+    <property name="default_height">600</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
+    <signal name="key-press-event" handler="gtk_search_bar_handle_event" object="search_bar" swapped="true"/>
+    <child internal-child="headerbar">
+      <object class="GtkHeaderBar">
+        <property name="title" translatable="yes">Cookies</property>
+        <property name="show-close-button">True</property>
+        <child>
+          <object class="GtkButton">
+            <property name="label" translatable="yes">C_lear All</property>
+            <property name="visible">True</property>
+            <property name="use_underline">True</property>
+            <property name="valign">center</property>
+            <property name="action-name">cookies.forget-all</property>
+            <accelerator key="Delete" modifiers="GDK_SHIFT_MASK" signal="clicked"/>
+            <style>
+              <class name="destructive-action"/>
+              <class name="text-button"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkToggleButton" id="search_button">
+            <property name="visible">True</property>
+            <property name="valign">center</property>
+            <accelerator key="F" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
+            <style>
+              <class name="image-button"/>
+            </style>
+            <child internal-child="accessible">
+              <object class="AtkObject">
+                <property name="AtkObject::accessible-name" translatable="yes">Search</property>
+                <property name="AtkObject::accessible-description" translatable="yes">Filter cookies</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="icon-name">edit-find-symbolic</property>
+                <property name="icon-size">1</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="border_width">0</property>
+        <child>
+          <object class="GtkSearchBar" id="search_bar">
+            <property name="visible">True</property>
+            <property name="search-mode-enabled" bind-source="search_button" bind-property="active" bind-flags="bidirectional|sync-create"/>
+            <child>
+              <object class="GtkSearchEntry">
+                <property name="visible">True</property>
+                <property name="width-request">300</property> <!-- looks cool and same as passwords-dialog -->
+                <property name="primary_icon_name">edit-find-symbolic</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">False</property>
+                <property name="placeholder_text" translatable="yes">Search cookies</property>
+                <signal name="search-changed" handler="on_search_entry_changed"/>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="width_request">400</property>
+            <property name="height_request">300</property>
+            <property name="visible">True</property>
+            <property name="expand">True</property>
+            <property name="hscrollbar_policy">never</property>
+            <property name="min_content_width">300</property>
+            <property name="min_content_height">300</property>
+            <child>
+              <object class="GtkTreeView" id="cookies_treeview">
+                <property name="visible">True</property>
+                <property name="model">treemodelsort</property>
+                <property name="enable_search">False</property>
+                <property name="search_column">0</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="tree_selection">
+                    <property name="mode">multiple</property>
+                    <signal name="changed" handler="on_treeview_selection_changed"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn">
+                    <property name="sizing">autosize</property>
+                    <property name="title" translatable="yes">Site</property>
+                    <property name="clickable">True</property>
+                    <property name="reorderable">True</property>
+                    <property name="sort_column_id">0</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkActionBar">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="tooltip_text" translatable="yes">Delete the selected cookies</property>
+                <property name="action-name">cookies.forget</property>
+                <accelerator key="Delete" signal="clicked"/>
+                <accelerator key="KP_Delete" signal="clicked"/>
+                <style>
+                  <class name="image-button"/>
+                </style>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="icon_name">list-remove-symbolic</property>
+                    <property name="icon_size">1</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

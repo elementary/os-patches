@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+
+include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+GNOME_MODULE := epiphany
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-O1 -Wl,--as-needed
+
+%:
+	dh $@ --with gnome --buildsystem=meson
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--libexecdir=/usr/lib \
+		-Ddistributor-name=$(shell lsb_release -is)
+
+override_dh_install-arch:
+	dh_install -a --list-missing
+	cd debian/epiphany-browser/usr/bin \
+		&& mv epiphany-browser.sh epiphany-browser
+
+override_dh_install-indep:
+	dh_install -i --list-missing
+	sed -e s/@PACKAGEVERSION@/$(DEB_VERSION)/ \
+	    -e s/@DISTROID@/`lsb_release -is`/ \
+	    -e s/@DISTROVERSION@/`lsb_release -rs`/ \
+	    debian/branding.conf.in > debian/epiphany-browser-data/usr/share/epiphany-browser/branding.conf
+
+override_dh_auto_test:
+	xvfb-run -a dh_auto_test

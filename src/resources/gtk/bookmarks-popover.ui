@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.16 -->
+  <template class="EphyBookmarksPopover" parent="GtkPopover">
+    <child>
+      <object class="GtkBox">
+        <property name="border-width">18</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <property name="visible">true</property>
+        <child>
+          <object class="GtkStack" id="toplevel_stack">
+            <property name="vhomogeneous">false</property>
+            <property name="interpolate-size">true</property>
+            <property name="transition-type">GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT</property>
+            <property name="visible">true</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <property name="visible">true</property>
+                <child>
+                  <object class="GtkStackSwitcher">
+                    <property name="hexpand">true</property>
+                    <property name="halign">center</property>
+                    <property name="stack">stack</property>
+                    <property name="visible">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStack" id="stack">
+                    <property name="vhomogeneous">false</property>
+                    <property name="interpolate-size">true</property>
+                    <property name="transition-type">GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT</property>
+                    <property name="visible">true</property>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="propagate-natural-height">True</property>
+                        <property name="max-content-height">400</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="visible">true</property>
+                        <child>
+                          <object class="GtkListBox" id="bookmarks_list_box">
+                            <property name="selection-mode">none</property>
+                            <property name="visible">true</property>
+                            <style>
+                              <class name="background"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="name">all</property>
+                        <property name="title" translatable="yes">All</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="propagate-natural-height">True</property>
+                        <property name="max-content-height">400</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="visible">true</property>
+                        <child>
+                          <object class="GtkListBox" id="tags_list_box">
+                            <property name="selection-mode">none</property>
+                            <property name="visible">true</property>
+                            <style>
+                              <class name="background"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="name">tags</property>
+                        <property name="title" translatable="yes">Tags</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="name">default</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <property name="visible">true</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">6</property>
+                    <property name="visible">true</property>
+                    <child>
+                      <object class="GtkButton" id="tag_detail_back_button">
+                        <property name="action-name">popover.tag-detail-back</property>
+                        <property name="visible">true</property>
+                        <style>
+                          <class name="image-button"/>
+                        </style>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="icon-name">go-previous-symbolic</property>
+                            <property name="visible">true</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="pack-type">start</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="tag_detail_label">
+                        <property name="halign">center</property>
+                        <property name="hexpand">true</property>
+                        <property name="visible">true</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="pack-type">start</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="propagate-natural-height">True</property>
+                    <property name="max-content-height">400</property>
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="visible">true</property>
+                    <child>
+                      <object class="GtkListBox" id="tag_detail_list_box">
+                        <property name="selection-mode">none</property>
+                        <property name="visible">true</property>
+                        <style>
+                          <class name="background"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="name">tag_detail</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
+                <property name="visible">true</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">non-starred-symbolic</property>
+                    <property name="pixel-size">64</property>
+                    <property name="visible">true</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="title">
+                    <property name="label" translatable="yes">No bookmarks yet?</property>
+                    <property name="visible">true</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                    <attributes>
+                      <attribute name="scale" value="2"/>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="subtitle">
+                    <property name="label" translatable="yes">Bookmark some webpages to view them here.</property>
+                    <property name="use-markup">true</property>
+                    <property name="visible">true</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="name">empty-state</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

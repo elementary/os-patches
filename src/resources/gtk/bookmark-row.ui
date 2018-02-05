@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.18 -->
+  <template class="EphyBookmarkRow" parent="GtkListBoxRow">
+    <property name="visible">true</property>
+    <style>
+      <class name="bookmarks-row"/>
+    </style>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="spacing">6</property>
+        <property name="visible">true</property>
+        <child>
+          <object class="GtkImage" id="favicon_image">
+            <property name="visible">true</property>
+          </object>
+          <packing>
+            <property name="pack-type">start</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="title_label">
+            <property name="expand">true</property>
+            <property name="halign">start</property>
+            <property name="xalign">0</property>
+            <property name="max-width-chars">35</property>
+            <property name="width-chars">35</property>
+            <property name="ellipsize">end</property>
+            <property name="visible">true</property>
+          </object>
+          <packing>
+            <property name="pack-type">start</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="properties_button">
+            <property name="relief">none</property>
+            <property name="visible">true</property>
+            <child>
+              <object class="GtkImage">
+                <property name="icon-name">emblem-system-symbolic</property>
+                <property name="visible">true</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

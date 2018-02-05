@@ -1,0 +1,43 @@
+Description: Disable test that require compiled gsettings schemas
+Author: Jeremy Bicha <jbicha@ubuntu.com>
+Bug: https://bugzilla.gnome.org/show_bug.cgi?id=782246
+---
+ tests/meson.build |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -14,7 +14,7 @@ if get_option('enable_unit_tests')
+     'ephy-completion-model-test.c',
+     dependencies: ephymain_dep
+   )
+-  test('Completion model test', completion_model_test)
++  # test('Completion model test', completion_model_test)
+ 
+   # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=778153
+   # download_test = executable('test-ephy-download',
+@@ -34,13 +34,13 @@ if get_option('enable_unit_tests')
+     'ephy-embed-utils-test.c',
+     dependencies: ephymain_dep
+   )
+-  test('Embed utils test', embed_utils_test)
++  # test('Embed utils test', embed_utils_test)
+ 
+   encodings_test = executable('test-ephy-encodings',
+     'ephy-encodings-test.c',
+     dependencies: ephymain_dep
+   )
+-  test('Encodings test', encodings_test)
++  # test('Encodings test', encodings_test)
+ 
+   # https://bugzilla.gnome.org/show_bug.cgi?id=786001
+   # file_helpers_test = executable('test-ephy-file-helpers',
+@@ -65,7 +65,7 @@ if get_option('enable_unit_tests')
+     'ephy-migration-test.c',
+     dependencies: ephymain_dep
+   )
+-  test('Migration test', migration_test)
++  # test('Migration test', migration_test)
+ 
+   # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=707220
+   # session_test = executable('test-ephy-session',
