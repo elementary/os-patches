@@ -1,0 +1,16 @@
+Source: partman-auto
+Section: debian-installer
+Priority: standard
+Maintainer: Ubuntu Installer Team <ubuntu-installer@lists.ubuntu.com>
+XSBC-Original-Maintainer: Debian Install System Team <debian-boot@lists.debian.org>
+Uploaders: Christian Perrier <bubulle@debian.org>
+Build-Depends: debhelper (>= 9), dh-di, po-debconf (>= 0.5.0)
+Vcs-Bzr: http://bazaar.launchpad.net/~ubuntu-core-dev/partman-auto/ubuntu
+XS-Debian-Vcs-Browser: https://anonscm.debian.org/cgit/d-i/partman-auto.git
+XS-Debian-Vcs-Git: https://anonscm.debian.org/git/d-i/partman-auto.git
+
+Package: partman-auto
+Package-Type: udeb
+Architecture: any
+Depends: ${misc:Depends}, di-utils, partman-base (>= 129), partman-basicfilesystems, partman-ext3 [linux-any], partman-ufs [kfreebsd-any]
+Description: Automatically partition storage devices (partman)

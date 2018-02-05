@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+. /usr/share/debconf/confmodule
+. /lib/preseed/preseed.sh
+
+# Re-enable locale and kbd selection
+echo 0 >/var/run/auto-install.active
+
+/lib/preseed/auto-install.sh
+
+dhcp_url=$(dhcp_preseed_url)
+if [ -n "$dhcp_url" ]; then
+	preseed_location "$dhcp_url"
+fi
+preseed preseed/url
+
+CURRENT_HOSTNAME=`/bin/hostname`
+if db_get netcfg/hostname && [ "$RET" ]; then
+        if ! echo "$RET" | grep -q 'ubuntu'; then
+		# default hostname is ubuntu; if that's what we have in the
+		# netcfg/hostname template, then netcfg will already have
+		# done the right thing.
+		NETCFG_HOSTNAME="$RET"
+		/bin/sed -i "s/$CURRENT_HOSTNAME/$NETCFG_HOSTNAME/" /etc/hostname
+		/bin/sed -i "s/$CURRENT_HOSTNAME/$NETCFG_HOSTNAME/" /etc/hosts
+		/bin/hostname "$NETCFG_HOSTNAME"
+		/usr/bin/logger -t netcfg "d-i netcfg/hostname $NETCFG_HOSTNAME took precedence"
+	fi
+fi
+
+preseed_command preseed/early_command

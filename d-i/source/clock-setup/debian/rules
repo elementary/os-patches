@@ -1,0 +1,39 @@
+#! /usr/bin/make -f
+%:
+	dh $@
+
+DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_BUILD_GNU_TYPE := $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+
+SET_CLOCK = 1
+# On s390 we're not allowed to change the system clock
+ifeq ($(DEB_HOST_ARCH),s390)
+SET_CLOCK = 0
+endif
+ifeq ($(DEB_HOST_ARCH),s390x)
+SET_CLOCK = 0
+endif
+
+RDATE_DEPENDS =
+ifneq ($(SET_CLOCK),0)
+RDATE_DEPENDS = configured-network, rdate-udeb
+endif
+
+ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+override_dh_auto_build:
+	dh_auto_build -- CC=$(DEB_HOST_GNU_TYPE)-gcc
+endif
+
+override_dh_auto_test:
+	sh -n debian/clock-setup.postinst
+	sh -n finish-install.d/10clock-setup
+
+override_dh_install:
+	dh_install
+ifneq ($(SET_CLOCK),0)
+	dh_install finish-install.d usr/lib
+endif
+
+override_dh_gencontrol:
+	dh_gencontrol -- -Vrdate:Depends="$(RDATE_DEPENDS)"

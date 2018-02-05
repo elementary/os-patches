@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+#
+# Utility script to run pyflakes with the modules we care about and
+# exclude errors we know to be fine.
+
+# Taken from Review Board, MIT license
+
+import os
+import re
+import subprocess
+import sys
+
+
+module_exclusions = [
+    'build',
+    'debian',
+    'djblets',
+    'django_evolution',
+    'dist',
+    'ez_setup.py',
+    'htdocs',
+    'settings_local.py',
+    'ReviewBoard.egg-info',
+]
+
+whitelist = [
+    'bin/oem-config-remove-gtk',
+    'bin/ubiquity',
+    'bin/ubiquity-bluetooth-agent',
+    'bin/ubiquity-dm',
+    'bin/ubiquity-wrapper',
+    'tests/run',
+    'tests/run-frontend',
+    'tests/run-pyflakes',
+]
+
+
+def scan_for_modules():
+    return [entry
+            for entry in os.listdir(os.getcwd())
+            if ((os.path.isdir(entry) or entry.endswith(".py")) and
+                entry not in module_exclusions)] + whitelist
+
+
+def main():
+    cur_dir = os.path.dirname(__file__)
+    os.chdir(os.path.join(cur_dir, ".."))
+    modules = sys.argv[1:]
+
+    if not modules:
+        # The user didn't specify anything specific. Scan for modules.
+        modules = scan_for_modules()
+
+    os.environ['PYFLAKES_NODOCTEST'] = '1'
+    p = subprocess.Popen(['pyflakes3'] + modules,
+                         stderr=subprocess.PIPE,
+                         stdout=subprocess.PIPE,
+                         close_fds=True, universal_newlines=True)
+
+    contents = p.communicate()[0].splitlines()
+
+    # Read in the exclusions file
+    exclusions = {}
+    with open(os.path.join(cur_dir, "pyflakes.exclude"), "r") as fp:
+        for line in fp.readlines():
+            if not line.startswith("#"):
+                exclusions[line.rstrip()] = 1
+
+    # Now filter thin
+    error = False
+    for line in contents:
+        if line.startswith('#'):
+            continue
+
+        line = line.rstrip()
+        test_line = re.sub(r':[0-9]+:', r':*:', line, 1)
+        test_line = re.sub(r'line [0-9]+', r'line *', test_line)
+
+        if test_line not in exclusions:
+            print line
+            error = True
+    if error:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,63 @@
+#! /bin/sh
+set -e
+
+# Try to detect which frontend will be used by looking for a frontend
+# module.
+frontend=
+for f in gtk_ui kde_ui debconf_ui; do
+	if [ -f "/usr/lib/ubiquity/ubiquity/frontend/$f.py" ]; then
+		frontend="$f"
+		break
+	fi
+done
+
+quiet=
+if [ "$1" = --quiet ]; then
+	quiet=1
+	shift
+fi
+
+if [ "$(id -u)" = 0 ]; then
+	# Machine-specific, so remove in case this system is going to be
+	# cloned.  These will be regenerated on the first boot.
+	rm -f /etc/udev/rules.d/70-persistent-cd.rules \
+	      /etc/udev/rules.d/70-persistent-net.rules
+
+	rm -f /etc/NetworkManager/system-connections/*
+
+	# Potentially sensitive.
+	rm -f /home/oem/.ssh/known_hosts
+
+	cp -a /usr/lib/oem-config/oem-config.service /lib/systemd/system
+	cp -a /usr/lib/oem-config/oem-config.target /lib/systemd/system
+	/bin/systemctl enable oem-config.service
+	/bin/systemctl enable oem-config.target
+	/bin/systemctl set-default oem-config.target
+else
+	pkexec "$0" ${quiet:+--quiet} "$@"
+	exit 0
+fi
+
+if [ -z "$quiet" ]; then
+	MESSAGE='oem-config will run the next time the system boots.'
+	case $frontend in
+		gtk_ui)
+			if [ "$DISPLAY" ] && type zenity >/dev/null 2>&1; then
+				# Drop privileges to the oem user so the dialog is not blocked
+				# by wayland
+				sudo -u oem zenity --title oem-config-prepare --info --text \
+					"$MESSAGE"
+				exit 0
+			fi
+			;;
+		kde_ui)
+			if [ "$DISPLAY" ] && type kdialog >/dev/null 2>&1; then
+				kdialog --title oem-config-prepare --msgbox "$MESSAGE"
+				exit 0
+			fi
+			;;
+	esac
+	echo "$MESSAGE"
+fi
+
+exit 0
