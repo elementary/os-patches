@@ -1,0 +1,58 @@
+#!/usr/bin/make -f
+# Should be include-links, but that somehow fails.
+export DEBVER=$(shell dpkg-parsechangelog | sed -n -e 's/^Version: //p')
+export DATETIME:=$(shell dpkg-parsechangelog | sed -n -e 's/^Date: //p')
+export DATE_CMD:=env TZ=UTC LC_ALL=C.UTF-8 date
+export DATE:=$(shell $(DATE_CMD) --date="$(DATETIME)" "+%b %_d %Y")
+export TIME:=$(shell $(DATE_CMD) --date="$(DATETIME)" "+%H:%M:%S")
+export DEB_CFLAGS_MAINT_APPEND=-Wno-write-strings \
+                               -DDATE=\""$(DATE)"\" \
+                               -DTIME=\""$(TIME)"\"
+export PATH := $(CURDIR)/utils:$(PATH)
+export pyversions := $(CURDIR)/utils/pyversions
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all,-pie
+
+%:
+	dh $@ --with python2,python3,sphinxdoc
+
+override_dh_auto_build:
+	dh_auto_build
+
+override_dh_install:
+	dh_movefiles
+	dh_install
+
+override_dh_sphinxdoc:
+	set -e; if [ -z $(filter -a,$(DH_INTERNAL_OPTIONS)) ]; then \
+		dh_sphinxdoc; \
+	fi
+
+override_dh_installdocs:
+	set -e; if [ -z $(filter -a,$(DH_INTERNAL_OPTIONS)) ]; then \
+		python setup.py build_sphinx; \
+		dh_installdirs -ppython-apt-doc usr/share/doc/python-apt; \
+	fi
+	dh_installdirs -ppython-apt-dev usr/share/doc/python-apt
+	dh_installdocs -p python-apt -p python-apt-dbg --link-doc=python-apt
+	dh_installdocs -p python3-apt -p python3-apt-dbg --link-doc=python3-apt
+	dh_installdocs --remaining-packages
+
+override_dh_strip:
+	dh_strip -p python-apt --dbg-package=python-apt-dbg
+	dh_strip -p python3-apt --dbg-package=python3-apt-dbg
+	
+override_dh_compress:
+	dh_compress -X.js -X_static/* -X _sources/* -X_sources/*/* -X.inv
+
+# We ignore failures on hurd, since its locking is broken
+override_dh_auto_test:
+ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
+	set -e; for python in $(shell $(pyversions) -r); do \
+		$$python tests/test_all.py -q || [ "$(DEB_BUILD_ARCH_OS)" = "hurd" ]; \
+	done;
+else
+	@echo "** tests disabled"
+endif
+
+override_dh_python2:
+	dh_python2 -N python-apt-common
