@@ -1,0 +1,324 @@
+From: Michael Biebl <biebl@debian.org>
+Date: Tue, 18 Mar 2014 10:49:13 +0100
+Subject: Allow to create connections without admin privileges
+
+Set passwords as agent-owned when they need to, to allow users without
+root permissions to easily configure their connections.
+The logic is:
+- Bluetooth, CDMA and GSM connections: always user-owned
+- WEP/WPA connections: system-owned if user has the permissions
+  (with NM's config, that is netdev or sudo membership), user-owned
+  otherwise. The password is stored in the keyring for WPA, not for
+  WEP.
+- WiMax / Wired connections: always system-owned (with 802.1x
+  passwords in the keyring).
+
+Closes: #696256
+---
+ src/applet-device-wifi.c            | 27 ++++++++++++++++++++++++++-
+ src/connection-editor/page-mobile.c | 10 ++++++++++
+ src/connection-editor/page-vpn.c    |  8 ++++++++
+ src/connection-editor/page-wifi.c   | 13 +++++++++++++
+ src/libnm-gtk/nm-wifi-dialog.c      |  4 ++++
+ src/mobile-helpers.c                |  3 +++
+ src/utils/utils.c                   |  8 ++++++++
+ src/utils/utils.h                   |  4 ++++
+ src/wireless-security/ws-wep-key.c  |  7 +++++++
+ src/wireless-security/ws-wpa-psk.c  |  5 +++++
+ 10 files changed, 88 insertions(+), 1 deletion(-)
+
+diff --git a/src/applet-device-wifi.c b/src/applet-device-wifi.c
+index d0ea6a1..e0c5dff 100644
+--- a/src/applet-device-wifi.c
++++ b/src/applet-device-wifi.c
+@@ -461,9 +461,10 @@ wifi_new_auto_connection (NMDevice *device,
+ 	NMConnection *connection;
+ 	NMSettingConnection *s_con;
+ 	NMSettingWireless *s_wifi = NULL;
+-	NMSettingWirelessSecurity *s_wsec;
++	NMSettingWirelessSecurity *s_wsec = NULL;
+ 	NMSetting8021x *s_8021x = NULL;
+ 	GBytes *ssid;
++	NM80211ApFlags flags;
+ 	NM80211ApSecurityFlags wpa_flags, rsn_flags;
+ 	GtkWidget *dialog;
+ 	MoreInfo *more_info;
+@@ -499,6 +500,7 @@ wifi_new_auto_connection (NMDevice *device,
+ 	/* If the AP is WPA[2]-Enterprise then we need to set up a minimal 802.1x
+ 	 * setting and ask the user for more information.
+ 	 */
++	flags = nm_access_point_get_flags (ap);
+ 	rsn_flags = nm_access_point_get_rsn_flags (ap);
+ 	wpa_flags = nm_access_point_get_wpa_flags (ap);
+ 	if (   (rsn_flags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)
+@@ -527,6 +529,29 @@ wifi_new_auto_connection (NMDevice *device,
+ 		nm_connection_add_setting (connection, NM_SETTING (s_8021x));
+ 	}
+ 
++	if (utils_default_to_private_connection (applet->nm_client)) {
++		if (!s_con) {
++			s_con = (NMSettingConnection *) nm_setting_connection_new ();
++			nm_connection_add_setting (connection, NM_SETTING (s_con));
++		}
++		nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++
++		if ((rsn_flags & NM_802_11_AP_SEC_KEY_MGMT_PSK) ||
++		    (wpa_flags & NM_802_11_AP_SEC_KEY_MGMT_PSK)) {
++			if (!s_wsec) {
++				s_wsec = (NMSettingWirelessSecurity *) nm_setting_wireless_security_new ();
++				nm_connection_add_setting (connection, NM_SETTING (s_wsec));
++			}
++			g_object_set (s_wsec, NM_SETTING_WIRELESS_SECURITY_PSK_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED, NULL);
++		} else if (flags & NM_802_11_AP_FLAGS_PRIVACY) {
++			if (!s_wsec) {
++				s_wsec = (NMSettingWirelessSecurity *) nm_setting_wireless_security_new ();
++				nm_connection_add_setting (connection, NM_SETTING (s_wsec));
++			}
++			g_object_set (s_wsec, NM_SETTING_WIRELESS_SECURITY_WEP_KEY_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED, NULL);
++		}
++	}
++
+ 	/* If it's an 802.1x connection, we need more information, so pop up the
+ 	 * Dialog Of Doom.
+ 	 */
+diff --git a/src/connection-editor/page-mobile.c b/src/connection-editor/page-mobile.c
+index a9d0a92..fba8d90 100644
+--- a/src/connection-editor/page-mobile.c
++++ b/src/connection-editor/page-mobile.c
+@@ -442,6 +442,7 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
+ 	WizardInfo *info = user_data;
+ 
+ 	if (!canceled && method) {
++		NMSettingConnection *s_con;
+ 		NMSetting *type_setting;
+ 		const char *ctype = NULL;
+ 		char *detail = NULL;
+@@ -455,6 +456,7 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
+ 			              NM_SETTING_GSM_NUMBER, "*99#",
+ 			              NM_SETTING_GSM_USERNAME, method->username,
+ 			              NM_SETTING_GSM_PASSWORD, method->password,
++			              NM_SETTING_GSM_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 			              NM_SETTING_GSM_APN, method->gsm_apn,
+ 			              NULL);
+ 			break;
+@@ -466,6 +468,7 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
+ 			              NM_SETTING_CDMA_NUMBER, "#777",
+ 			              NM_SETTING_GSM_USERNAME, method->username,
+ 			              NM_SETTING_GSM_PASSWORD, method->password,
++			              NM_SETTING_GSM_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 			              NULL);
+ 			break;
+ 		default:
+@@ -486,6 +489,13 @@ new_connection_mobile_wizard_done (NMAMobileWizard *wizard,
+ 		                             info->client);
+ 		g_free (detail);
+ 
++		s_con = nm_connection_get_setting_connection (info->connection);
++		if (!s_con) {
++			s_con = (NMSettingConnection *) nm_setting_connection_new ();
++			nm_connection_add_setting (info->connection, NM_SETTING (s_con));
++		}
++		nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++
+ 		nm_connection_add_setting (info->connection, type_setting);
+ 		nm_connection_add_setting (info->connection, nm_setting_ppp_new ());
+ 	}
+diff --git a/src/connection-editor/page-vpn.c b/src/connection-editor/page-vpn.c
+index ab40700..14d90cc 100644
+--- a/src/connection-editor/page-vpn.c
++++ b/src/connection-editor/page-vpn.c
+@@ -238,6 +238,7 @@ vpn_connection_new (FUNC_TAG_PAGE_NEW_CONNECTION_IMPL,
+                     gpointer user_data)
+ {
+ 	NMSetting *s_vpn;
++	NMSettingConnection *s_con;
+ 	const char *service_type;
+ 	gs_free char *service_type_free = NULL;
+ 	gs_free char *add_detail_key_free = NULL;
+@@ -311,6 +312,13 @@ vpn_connection_new (FUNC_TAG_PAGE_NEW_CONNECTION_IMPL,
+ 		if (!service_type)
+ 			service_type = detail;
+ 
++		s_con = nm_connection_get_setting_connection (connection);
++		if (!s_con) {
++			s_con = (NMSettingConnection *) nm_setting_connection_new ();
++			nm_connection_add_setting (connection, NM_SETTING (s_con));
++		}
++		nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++
+ 		s_vpn = nm_setting_vpn_new ();
+ 		g_object_set (s_vpn, NM_SETTING_VPN_SERVICE_TYPE, service_type, NULL);
+ 
+diff --git a/src/connection-editor/page-wifi.c b/src/connection-editor/page-wifi.c
+index c6948a5..4db5548 100644
+--- a/src/connection-editor/page-wifi.c
++++ b/src/connection-editor/page-wifi.c
+@@ -26,6 +26,8 @@
+ #include <math.h>
+ 
+ #include "nm-connection-editor.h"
++#include "utils.h"
++
+ #include "page-wifi.h"
+ 
+ G_DEFINE_TYPE (CEPageWifi, ce_page_wifi, CE_TYPE_PAGE)
+@@ -618,6 +620,17 @@ wifi_connection_new (FUNC_TAG_PAGE_NEW_CONNECTION_IMPL,
+ 	                             NM_SETTING_WIRELESS_SETTING_NAME,
+ 	                             TRUE,
+ 	                             client);
++
++	if (utils_default_to_private_connection (client)) {
++		NMSettingConnection *s_con;
++		s_con = nm_connection_get_setting_connection (connection);
++		if (!s_con) {
++			s_con = (NMSettingConnection *) nm_setting_connection_new ();
++			nm_connection_add_setting (connection, NM_SETTING (s_con));
++		}
++		nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++	}
++
+ 	s_wifi = nm_setting_wireless_new ();
+ 	g_object_set (s_wifi, NM_SETTING_WIRELESS_MODE, "infrastructure", NULL);
+ 	nm_connection_add_setting (connection, s_wifi);
+diff --git a/src/libnm-gtk/nm-wifi-dialog.c b/src/libnm-gtk/nm-wifi-dialog.c
+index d6786fd..2740ae2 100644
+--- a/src/libnm-gtk/nm-wifi-dialog.c
++++ b/src/libnm-gtk/nm-wifi-dialog.c
+@@ -36,6 +36,7 @@
+ #include "wireless-security.h"
+ #include "nm-ui-utils.h"
+ #include "eap-method.h"
++#include "utils.h"
+ 
+ G_DEFINE_TYPE (NMAWifiDialog, nma_wifi_dialog, GTK_TYPE_DIALOG)
+ 
+@@ -1218,6 +1219,9 @@ nma_wifi_dialog_get_connection (NMAWifiDialog *self,
+ 			      NM_SETTING_CONNECTION_UUID, uuid,
+ 			      NULL);
+ 		g_free (uuid);
++		if (utils_default_to_private_connection (priv->client)) {
++			nm_setting_connection_add_permission (s_con, "user", g_get_user_name (), NULL);
++		}
+ 		nm_connection_add_setting (connection, (NMSetting *) s_con);
+ 
+ 		s_wireless = (NMSettingWireless *) nm_setting_wireless_new ();
+diff --git a/src/mobile-helpers.c b/src/mobile-helpers.c
+index 9c1c965..2fdde7d 100644
+--- a/src/mobile-helpers.c
++++ b/src/mobile-helpers.c
+@@ -182,6 +182,7 @@ mobile_wizard_done (NMAMobileWizard *wizard,
+ 			              NM_SETTING_CDMA_NUMBER, "#777",
+ 			              NM_SETTING_CDMA_USERNAME, method->username,
+ 			              NM_SETTING_CDMA_PASSWORD, method->password,
++			              NM_SETTING_CDMA_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 			              NULL);
+ 			nm_connection_add_setting (connection, setting);
+ 		} else if (method->devtype == NM_DEVICE_MODEM_CAPABILITY_GSM_UMTS) {
+@@ -192,6 +193,7 @@ mobile_wizard_done (NMAMobileWizard *wizard,
+ 			              NM_SETTING_GSM_USERNAME, method->username,
+ 			              NM_SETTING_GSM_PASSWORD, method->password,
+ 			              NM_SETTING_GSM_APN, method->gsm_apn,
++			              NM_SETTING_GSM_PASSWORD_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED,
+ 			              NULL);
+ 			nm_connection_add_setting (connection, setting);
+ 		} else
+@@ -222,6 +224,7 @@ mobile_wizard_done (NMAMobileWizard *wizard,
+ 		                                      "user", g_get_user_name (), NULL);
+ 		g_free (uuid);
+ 		g_free (id);
++		nm_setting_connection_add_permission ((NMSettingConnection *) setting, "user", g_get_user_name (), NULL);
+ 		nm_connection_add_setting (connection, setting);
+ 	}
+ 
+diff --git a/src/utils/utils.c b/src/utils/utils.c
+index c355be3..b77427b 100644
+--- a/src/utils/utils.c
++++ b/src/utils/utils.c
+@@ -578,3 +578,11 @@ utils_key_filter (void)
+ 
+ 	return filter;
+ }
++
++gboolean
++utils_default_to_private_connection (NMClient *client)
++{
++	NMClientPermissionResult perms;
++	perms = nm_client_get_permission_result (client, NM_CLIENT_PERMISSION_SETTINGS_MODIFY_SYSTEM);
++	return (perms != NM_CLIENT_PERMISSION_RESULT_YES);
++}
+diff --git a/src/utils/utils.h b/src/utils/utils.h
+index ccc653f..3611d5b 100644
+--- a/src/utils/utils.h
++++ b/src/utils/utils.h
+@@ -25,6 +25,8 @@
+ 
+ #include <net/ethernet.h>
+ 
++#include <nm-client.h>
++
+ gboolean utils_ether_addr_valid (const struct ether_addr *test_addr);
+ 
+ #if LIBNM_BUILD
+@@ -52,6 +54,8 @@ void utils_show_error_dialog (const char *title,
+                               gboolean modal,
+                               GtkWindow *parent);
+ 
++gboolean utils_default_to_private_connection (NMClient *client);
++
+ #define NMA_ERROR (g_quark_from_static_string ("nma-error-quark"))
+ 
+ typedef enum  {
+diff --git a/src/wireless-security/ws-wep-key.c b/src/wireless-security/ws-wep-key.c
+index c7472ca..cc1cb1e 100644
+--- a/src/wireless-security/ws-wep-key.c
++++ b/src/wireless-security/ws-wep-key.c
+@@ -164,6 +164,7 @@ static void
+ fill_connection (WirelessSecurity *parent, NMConnection *connection)
+ {
+ 	WirelessSecurityWEPKey *sec = (WirelessSecurityWEPKey *) parent;
++	NMSettingConnection *s_con;
+ 	NMSettingWirelessSecurity *s_wsec;
+ 	NMSettingSecretFlags secret_flags;
+ 	GtkWidget *widget, *passwd_entry;
+@@ -190,6 +191,12 @@ fill_connection (WirelessSecurity *parent, NMConnection *connection)
+ 	              NM_SETTING_WIRELESS_SECURITY_WEP_KEY_TYPE, sec->type,
+ 	              NULL);
+ 
++	s_con = nm_connection_get_setting_connection (connection);
++
++	/* If the connection is user-owned, mark the secrets as agent-owned */
++	if (s_con && nm_setting_connection_get_num_permissions (s_con))
++		g_object_set (s_wsec, NM_SETTING_WIRELESS_SECURITY_WEP_KEY_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED, NULL);
++
+ 	for (i = 0; i < 4; i++) {
+ 		if (strlen (sec->keys[i]))
+ 			nm_setting_wireless_security_set_wep_key (s_wsec, i, sec->keys[i]);
+diff --git a/src/wireless-security/ws-wpa-psk.c b/src/wireless-security/ws-wpa-psk.c
+index befe68b..0926859 100644
+--- a/src/wireless-security/ws-wpa-psk.c
++++ b/src/wireless-security/ws-wpa-psk.c
+@@ -106,12 +106,14 @@ fill_connection (WirelessSecurity *parent, NMConnection *connection)
+ 	WirelessSecurityWPAPSK *wpa_psk = (WirelessSecurityWPAPSK *) parent;
+ 	GtkWidget *widget, *passwd_entry;
+ 	const char *key;
++	NMSettingConnection *s_con;
+ 	NMSettingWireless *s_wireless;
+ 	NMSettingWirelessSecurity *s_wireless_sec;
+ 	NMSettingSecretFlags secret_flags;
+ 	const char *mode;
+ 	gboolean is_adhoc = FALSE;
+ 
++	s_con = nm_connection_get_setting_connection (connection);
+ 	s_wireless = nm_connection_get_setting_wireless (connection);
+ 	g_assert (s_wireless);
+ 
+@@ -127,6 +129,9 @@ fill_connection (WirelessSecurity *parent, NMConnection *connection)
+ 	passwd_entry = widget;
+ 	key = gtk_entry_get_text (GTK_ENTRY (widget));
+ 	g_object_set (s_wireless_sec, NM_SETTING_WIRELESS_SECURITY_PSK, key, NULL);
++	/* If the connection is user-owned, mark the secrets as agent-owned */
++	if (s_con && nm_setting_connection_get_num_permissions (s_con))
++		g_object_set (s_wireless_sec, NM_SETTING_WIRELESS_SECURITY_PSK_FLAGS, NM_SETTING_SECRET_FLAG_AGENT_OWNED, NULL);
+ 
+ 	/* Save PSK_FLAGS to the connection */
+ 	secret_flags = nma_utils_menu_to_secret_flags (passwd_entry);

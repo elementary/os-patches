@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<interface>
+  <requires lib="gtk+" version="3.10"/>
+  <object class="GtkAdjustment" id="bridge_ageing_time_adjustment">
+    <property name="upper">4294967296</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="bridge_forward_delay_adjustment">
+    <property name="upper">30</property>
+    <property name="value">15</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">100</property>
+  </object>
+  <object class="GtkAdjustment" id="bridge_group_fwd_mask_adjustment">
+    <property name="upper">65528</property>
+    <property name="step_increment">8</property>
+    <property name="page_increment">256</property>
+  </object>
+  <object class="GtkAdjustment" id="bridge_hello_time_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">10</property>
+    <property name="value">2</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="bridge_max_age_adjustment">
+    <property name="lower">6</property>
+    <property name="upper">40</property>
+    <property name="value">6</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="bridge_priority_adjustment">
+    <property name="upper">65535</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkListStore" id="master_connections_model">
+    <columns>
+      <!-- column-name connection -->
+      <column type="NMConnection"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkGrid" id="BridgePage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="border_width">12</property>
+    <property name="row_spacing">6</property>
+    <property name="column_spacing">12</property>
+    <child>
+      <object class="GtkLabel" id="master_connections_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="label" translatable="yes">Bridged _connections:</property>
+        <property name="use_underline">True</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">1</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkHBox" id="hbox2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolledwindow1">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTreeView" id="master_connections">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="model">master_connections_model</property>
+                <property name="headers_visible">False</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="treeview-selection1"/>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="master_connection_name">
+                    <child>
+                      <object class="GtkCellRendererText" id="master_connection_renderer"/>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox" id="buttonbox1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <property name="layout_style">start</property>
+            <child>
+              <object class="GtkButton" id="master_connection_add">
+                <property name="label" translatable="yes">_Add</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="master_connection_edit">
+                <property name="label" translatable="yes">_Edit</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="master_connection_delete">
+                <property name="label" translatable="yes">_Delete</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">2</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="bridge_prio">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Priority:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">bridge_priority</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">6</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="master_interface_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Interface name:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">master_interface</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="master_interface">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="hexpand">True</property>
+        <property name="invisible_char">●</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="bridge_forward_delay_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Forward delay:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">bridge_forward_delay</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">7</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="bridge_hello_time_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Hello time:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">bridge_hello_time</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">8</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkHBox" id="bridge_forward_delay_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">4</property>
+        <child>
+          <object class="GtkSpinButton" id="bridge_forward_delay">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip_text" translatable="yes">STP forwarding delay, in seconds</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+            <property name="adjustment">bridge_forward_delay_adjustment</property>
+            <property name="snap_to_ticks">True</property>
+            <property name="numeric">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">s</property>
+            <property name="xalign">0</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">7</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkHBox" id="bridge_hello_time_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">4</property>
+        <child>
+          <object class="GtkSpinButton" id="bridge_hello_time">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip_text" translatable="yes">STP hello time, in seconds</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+            <property name="adjustment">bridge_hello_time_adjustment</property>
+            <property name="snap_to_ticks">True</property>
+            <property name="numeric">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">s</property>
+            <property name="xalign">0</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">8</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkCheckButton" id="bridge_mcast_snoop_checkbox">
+        <property name="label" translatable="yes">Enable I_GMP snooping</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">False</property>
+        <property name="tooltip_text" translatable="yes">Controls whether IGMP snooping is enabled for this bridge. Note that if snooping was automatically disabled due to hash collisions, the system may refuse to enable the feature until the collisions are resolved.</property>
+        <property name="use_underline">True</property>
+        <property name="draw_indicator">True</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">4</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkCheckButton" id="bridge_stp_checkbox">
+        <property name="label" translatable="yes">Enable _STP (Spanning Tree Protocol)</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">False</property>
+        <property name="tooltip_text" translatable="yes">Controls whether Spanning Tree Protocol (STP) is enabled for this bridge</property>
+        <property name="use_underline">True</property>
+        <property name="xalign">0</property>
+        <property name="draw_indicator">True</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">5</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSpinButton" id="bridge_priority">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="tooltip_text" translatable="yes">STP priority for this bridge. Lower values are “better”; the lowest priority bridge will be elected the root bridge.</property>
+        <property name="hexpand">True</property>
+        <property name="invisible_char">●</property>
+        <property name="adjustment">bridge_priority_adjustment</property>
+        <property name="numeric">True</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">6</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="bridge_max_age_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Max age:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">bridge_max_age</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">9</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkHBox" id="bridge_max_age_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">4</property>
+        <child>
+          <object class="GtkSpinButton" id="bridge_max_age">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip_text" translatable="yes">STP maximum message age, in seconds</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+            <property name="adjustment">bridge_max_age_adjustment</property>
+            <property name="snap_to_ticks">True</property>
+            <property name="numeric">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">s</property>
+            <property name="xalign">0</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">9</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="bridge_ageing_time_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Aging time:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">bridge_ageing_time</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkHBox" id="bridge_ageing_time_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">4</property>
+        <child>
+          <object class="GtkSpinButton" id="bridge_ageing_time">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="tooltip_text" translatable="yes">The Ethernet MAC address aging time, in seconds</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">●</property>
+            <property name="adjustment">bridge_ageing_time_adjustment</property>
+            <property name="snap_to_ticks">True</property>
+            <property name="numeric">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label4">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">s</property>
+            <property name="xalign">0</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="bridge_group_fwd_mask_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Group _forward mask:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">bridge_group_fwd_mask</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">10</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSpinButton" id="bridge_group_fwd_mask">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="tooltip_text" translatable="yes">A mask of 16 bits, each corresponding to a group address in the range from 01:80:C2:00:00:00 to 01:80:C2:00:00:0F that must be forwarded. The mask can’t have bits 0, 1 or 2 set because they are used for STP, MAC pause frames and LACP.</property>
+        <property name="hexpand">True</property>
+        <property name="invisible_char">●</property>
+        <property name="text">0</property>
+        <property name="adjustment">bridge_group_fwd_mask_adjustment</property>
+        <property name="climb_rate">1</property>
+        <property name="numeric">True</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">10</property>
+      </packing>
+    </child>
+  </object>
+</interface>

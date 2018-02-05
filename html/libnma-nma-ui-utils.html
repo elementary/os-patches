@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>nma-ui-utils: libnma Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libnma Reference Manual">
+<link rel="up" href="api-reference.html" title="libnma API reference">
+<link rel="prev" href="api-reference.html" title="libnma API reference">
+<link rel="next" href="libnma-nma-mobile-wizard.html" title="nma-mobile-wizard">
+<meta name="generator" content="GTK-Doc V1.26 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#libnma-nma-ui-utils.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="api-reference.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="api-reference.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="libnma-nma-mobile-wizard.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="libnma-nma-ui-utils"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libnma-nma-ui-utils.top_of_page"></a>nma-ui-utils</span></h2>
+<p>nma-ui-utils</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="libnma-nma-ui-utils.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libnma-nma-ui-utils.html#nma-utils-setup-password-storage" title="nma_utils_setup_password_storage ()">nma_utils_setup_password_storage</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/usr/share/gtk-doc/html/libnm-util/NMSetting.html#NMSettingSecretFlags"><span class="returnvalue">NMSettingSecretFlags</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libnma-nma-ui-utils.html#nma-utils-menu-to-secret-flags" title="nma_utils_menu_to_secret_flags ()">nma_utils_menu_to_secret_flags</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libnma-nma-ui-utils.html#nma-utils-update-password-storage" title="nma_utils_update_password_storage ()">nma_utils_update_password_storage</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libnma-nma-ui-utils.description"></a><h2>Description</h2>
+</div>
+<div class="refsect1">
+<a name="libnma-nma-ui-utils.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="nma-utils-setup-password-storage"></a><h3>nma_utils_setup_password_storage ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+nma_utils_setup_password_storage (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/gtk3/GtkWidget.html#GtkWidget-struct"><span class="type">GtkWidget</span></a> *passwd_entry</code></em>,
+                                  <em class="parameter"><code><a href="/usr/share/gtk-doc/html/libnm-util/NMSetting.html#NMSettingSecretFlags"><span class="type">NMSettingSecretFlags</span></a> initial_flags</code></em>,
+                                  <em class="parameter"><code><a href="/usr/share/gtk-doc/html/libnm-util/NMSetting.html#NMSetting-struct"><span class="type">NMSetting</span></a> *setting</code></em>,
+                                  <em class="parameter"><code>const <span class="type">char</span> *password_flags_name</code></em>,
+                                  <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> with_not_required</code></em>,
+                                  <em class="parameter"><code><a href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> ask_mode</code></em>);</pre>
+<p>Adds a secondary icon and creates a popup menu for password entry.
+The active menu item is set up according to initial_flags, or
+from <em class="parameter"><code>setting</code></em>
+/<em class="parameter"><code>password_flags_name</code></em>
+ (if they are not NULL).
+If the <em class="parameter"><code>setting</code></em>
+/<em class="parameter"><code>password_flags_name</code></em>
+ are not NULL, secret flags will
+be automatically updated in the setting when menu is changed.</p>
+<div class="refsect3">
+<a name="nma-utils-setup-password-storage.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>passwd_entry</p></td>
+<td class="parameter_description"><p>password <a href="/usr/share/gtk-doc/html/gtk3/GtkEntry.html#GtkEntry-struct"><span class="type">GtkEntry</span></a> which the icon is attached to</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>initial_flags</p></td>
+<td class="parameter_description"><p>initial secret flags to setup password menu from</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>setting</p></td>
+<td class="parameter_description"><p><a href="/usr/share/gtk-doc/html/libnm-util/NMSetting.html#NMSetting-struct"><span class="type">NMSetting</span></a> containing the password, or NULL</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>password_flags_name</p></td>
+<td class="parameter_description"><p>name of the secret flags (like psk-flags), or NULL</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>with_not_required</p></td>
+<td class="parameter_description"><p>whether to include "Not required" menu item</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>ask_mode</p></td>
+<td class="parameter_description"><p><a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the entry is shown in ASK mode. That means,
+while prompting for a password, contrary to being inside the
+editor mode.
+If <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, the entry should be sensivive on selected "always-ask"
+icon (this is e.f. for nm-applet asking for password), otherwise
+not.
+If <a href="/usr/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, it shall not be possible to select a different storage,
+because we only prompt for a password, we cannot change the password
+location.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="nma-utils-menu-to-secret-flags"></a><h3>nma_utils_menu_to_secret_flags ()</h3>
+<pre class="programlisting"><a href="/usr/share/gtk-doc/html/libnm-util/NMSetting.html#NMSettingSecretFlags"><span class="returnvalue">NMSettingSecretFlags</span></a>
+nma_utils_menu_to_secret_flags (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/gtk3/GtkWidget.html#GtkWidget-struct"><span class="type">GtkWidget</span></a> *passwd_entry</code></em>);</pre>
+<p>Returns secret flags corresponding to the selected password storage menu
+in the attached icon</p>
+<div class="refsect3">
+<a name="nma-utils-menu-to-secret-flags.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>passwd_entry</p></td>
+<td class="parameter_description"><p>password <a href="/usr/share/gtk-doc/html/gtk3/GtkEntry.html#GtkEntry-struct"><span class="type">GtkEntry</span></a> which the password icon/menu is attached to</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="nma-utils-menu-to-secret-flags.returns"></a><h4>Returns</h4>
+<p> secret flags corresponding to the active item in password menu</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="nma-utils-update-password-storage"></a><h3>nma_utils_update_password_storage ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+nma_utils_update_password_storage (<em class="parameter"><code><a href="/usr/share/gtk-doc/html/gtk3/GtkWidget.html#GtkWidget-struct"><span class="type">GtkWidget</span></a> *passwd_entry</code></em>,
+                                   <em class="parameter"><code><a href="/usr/share/gtk-doc/html/libnm-util/NMSetting.html#NMSettingSecretFlags"><span class="type">NMSettingSecretFlags</span></a> secret_flags</code></em>,
+                                   <em class="parameter"><code><a href="/usr/share/gtk-doc/html/libnm-util/NMSetting.html#NMSetting-struct"><span class="type">NMSetting</span></a> *setting</code></em>,
+                                   <em class="parameter"><code>const <span class="type">char</span> *password_flags_name</code></em>);</pre>
+<p>Updates secret flags in the password storage popup menu and also
+in the <em class="parameter"><code>setting</code></em>
+ (if <em class="parameter"><code>setting</code></em>
+ and <em class="parameter"><code>password_flags_name</code></em>
+ are not NULL).</p>
+<div class="refsect3">
+<a name="nma-utils-update-password-storage.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>passwd_entry</p></td>
+<td class="parameter_description"><p><a href="/usr/share/gtk-doc/html/gtk3/GtkEntry.html#GtkEntry-struct"><span class="type">GtkEntry</span></a> with the password</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>secret_flags</p></td>
+<td class="parameter_description"><p>secret flags to set</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>setting</p></td>
+<td class="parameter_description"><p><a href="/usr/share/gtk-doc/html/libnm-util/NMSetting.html#NMSetting-struct"><span class="type">NMSetting</span></a> containing the password, or NULL</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>password_flags_name</p></td>
+<td class="parameter_description"><p>name of the secret flags (like psk-flags), or NULL</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="libnma-nma-ui-utils.other_details"></a><h2>Types and Values</h2>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.26</div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+libnm_gtk_1_0_6 {
+global:
+	nma_utils_menu_to_secret_flags;
+	nma_utils_setup_password_storage;
+	nma_utils_update_password_storage;
+	nma_vpn_password_dialog_focus_password_ternary;
+	nma_vpn_password_dialog_get_password_ternary;
+	nma_vpn_password_dialog_set_password_ternary;
+	nma_vpn_password_dialog_set_password_ternary_label;
+	nma_vpn_password_dialog_set_show_password_ternary;
+local:
+	[^n]*;
+	n[^m]*;
+	nm[^a]*;
+	nma[^_]*;
+};
+
+libnm_gtk_1_8_0 {
+global:
+	nma_cert_chooser_add_to_size_group;
+	nma_cert_chooser_get_cert;
+	nma_cert_chooser_get_cert_password;
+	nma_cert_chooser_get_cert_password_flags;
+	nma_cert_chooser_get_cert_uri;
+	nma_cert_chooser_get_key;
+	nma_cert_chooser_get_key_password;
+	nma_cert_chooser_get_key_password_flags;
+	nma_cert_chooser_get_key_uri;
+	nma_cert_chooser_get_type;
+	nma_cert_chooser_new;
+	nma_cert_chooser_set_cert;
+	nma_cert_chooser_set_cert_password;
+	nma_cert_chooser_set_cert_uri;
+	nma_cert_chooser_set_key;
+	nma_cert_chooser_set_key_password;
+	nma_cert_chooser_set_key_uri;
+	nma_cert_chooser_setup_cert_password_storage;
+	nma_cert_chooser_setup_key_password_storage;
+	nma_cert_chooser_update_cert_password_storage;
+	nma_cert_chooser_update_key_password_storage;
+	nma_cert_chooser_validate;
+local:
+	nma_file_cert_chooser_*;
+	nma_cert_chooser_vtable_*;
+} libnm_gtk_1_0_6;

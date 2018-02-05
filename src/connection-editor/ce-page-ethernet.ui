@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<interface>
+  <requires lib="gtk+" version="3.10"/>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">10000</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkListStore" id="model1">
+    <columns>
+      <!-- column-name gchararray -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Automatic</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Twisted Pair (TP)</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Attachment Unit Interface (AUI)</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">BNC</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Media Independent Interface (MII)</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="model2">
+    <columns>
+      <!-- column-name gchararray -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">10 Mb/s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">100 Mb/s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1 Gb/s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">10 Gb/s</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="model3">
+    <columns>
+      <!-- column-name gchararray -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Half</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Full</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="model4">
+    <columns>
+      <!-- column-name gchararray -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Ignore</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Automatic</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Manual</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkGrid" id="EthernetPage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="border_width">12</property>
+    <property name="row_spacing">6</property>
+    <property name="column_spacing">12</property>
+    <child>
+      <object class="GtkLabel" id="ethernet_port_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Port:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">ethernet_port</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkComboBox" id="ethernet_port">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="model">model1</property>
+        <child>
+          <object class="GtkCellRendererText" id="renderer1"/>
+          <attributes>
+            <attribute name="text">0</attribute>
+          </attributes>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="ethernet_device_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Device:</property>
+        <property name="use_underline">True</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkVBox" id="ethernet_device_vbox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label27">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">C_loned MAC address:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">ethernet_cloned_mac</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkComboBoxText" id="ethernet_cloned_mac">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="has_entry">True</property>
+        <property name="active_id">0</property>
+        <child internal-child="entry">
+          <object class="GtkEntry">
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label28">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_MTU:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">ethernet_mtu</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkHBox" id="hbox1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkSpinButton" id="ethernet_mtu">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="adjustment">adjustment1</property>
+            <property name="climb_rate">1</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label29">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">bytes</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label30">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">start</property>
+        <property name="label" translatable="yes">Wake on LAN:</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">4</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkGrid" id="grid1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="resize_mode">immediate</property>
+        <property name="column_spacing">6</property>
+        <child>
+          <object class="GtkCheckButton" id="wol_default">
+            <property name="label" translatable="yes">De_fault</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="margin_right">12</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="wol_ignore">
+            <property name="label" translatable="yes">_Ignore</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="margin_right">12</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="wol_phy">
+            <property name="label" translatable="yes">_Phy</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="wol_unicast">
+            <property name="label" translatable="yes">_Unicast</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="wol_multicast">
+            <property name="label" translatable="yes">Mul_ticast</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">3</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="wol_broadcast">
+            <property name="label" translatable="yes">_Broadcast</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="wol_arp">
+            <property name="label" translatable="yes">_Arp</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="wol_magic">
+            <property name="label" translatable="yes">Ma_gic</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">3</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">4</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label31">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">_Wake on LAN password:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">ethernet_wol_passwd</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">5</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkEntry" id="ethernet_wol_passwd">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="tooltip_text" translatable="yes">Wake-on-LAN password (an Ethernet MAC). It is only valid for magic packets.</property>
+        <property name="hexpand">False</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">5</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="ethernet_linkneg_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Lin_k negotiation:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">ethernet_linkneg</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">6</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkComboBox" id="ethernet_linkneg">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Device link negotiation. If “Manual” is chosen, “Speed” and “Duplex” values will be forced without checking the device compatibility. If unsure, leave here “Ignore” or pick “Automatic”.</property>
+        <property name="hexpand">True</property>
+        <property name="model">model4</property>
+        <child>
+          <object class="GtkCellRendererText" id="renderer4"/>
+          <attributes>
+            <attribute name="text">0</attribute>
+          </attributes>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">6</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="ethernet_speed_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">26</property>
+        <property name="label" translatable="yes">_Speed:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">ethernet_speed</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">7</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkComboBox" id="ethernet_speed">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Speed value for static link negotiation, required only when “Ignore” and “Automatic” options are not selected. Before specifying a speed value be sure your device supports it.</property>
+        <property name="hexpand">True</property>
+        <property name="model">model2</property>
+        <child>
+          <object class="GtkCellRendererText" id="renderer2"/>
+          <attributes>
+            <attribute name="text">0</attribute>
+          </attributes>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">7</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="ethernet_duplex_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">26</property>
+        <property name="label" translatable="yes">Duple_x:</property>
+        <property name="use_underline">True</property>
+        <property name="mnemonic_widget">ethernet_duplex</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">8</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkComboBox" id="ethernet_duplex">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Duplex value for static link negotiation, required only when “Ignore” and “Automatic” options are not selected. Before specifying a duplex mode be sure your device supports it.</property>
+        <property name="hexpand">True</property>
+        <property name="model">model3</property>
+        <child>
+          <object class="GtkCellRendererText" id="renderer3"/>
+          <attributes>
+            <attribute name="text">0</attribute>
+          </attributes>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">8</property>
+      </packing>
+    </child>
+  </object>
+</interface>

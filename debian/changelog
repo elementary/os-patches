@@ -1,0 +1,1156 @@
+network-manager-applet (1.8.10-2ubuntu1) bionic; urgency=medium
+
+  * Sync with Debian. Remaining changes:
+    - debian/icons/, debian/rules, debian/source/include-binaries:
+      + Add "secure" icons
+    - debian/control, debian/rules:
+      + Build appindicator support
+      + Run dh_translations
+    - Add lp341684_device_sensitive_disconnect_notify.patch:
+      + Show correct notification messages for disconnect events, to be in
+        line with the other *connect*text patches.
+    - Add lp460144_correctly_update_notification.patch: cleaner notification
+        messages, and allow for messages to be updated instead of cleared.
+    - Add applet-wifi-menu-before-vpn.patch:
+      + Show Create New and Connect to Hidden wifi menu items with the other
+        Wifi items, rather than separated by the VPN menus.
+    - Allow-to-create-and-connect-to-Ad-Hoc-RSN-networks.patch:
+      + Enable Ad-Hoc using WPA RSN
+    - Have-the-appindicator-enabled-by-default.patch:
+      + Enable the indicator by default
+    - On-Ubuntu-we-use-premade-icons-for-the-indicator-VPN.patch:
+      + use '-secure'-suffixed icons when connected to the VPN, since we
+        can't composit icons on the fly.
+    - Make-sure-the-behavior-for-policykit-restricted-acti.patch,
+      Support-hiding-rather-than-desensitizing-disallowed-items.patch,
+      + provide methods to desensitize and hide menu items which are useless
+        given the current policykit policy level of the user.
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Mon, 22 Jan 2018 13:59:16 -0500
+
+network-manager-applet (1.8.10-2) unstable; urgency=medium
+
+  * shared/compat: Fix memory handling of nm_setting_vpn_get_*_keys
+    (Closes: #885525)
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 16 Jan 2018 16:31:10 +0100
+
+network-manager-applet (1.8.10-1) unstable; urgency=medium
+
+  * New upstream version 1.8.10
+  * Rebase patches
+  * Bump Standards-Version to 4.1.2
+  * Bump debhelper compat level to 11
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 25 Dec 2017 22:42:46 +0100
+
+network-manager-applet (1.8.6-1) unstable; urgency=medium
+
+  * New upstream version 1.8.6
+  * Don't use Unicode in patch header
+  * Bump Build-Depends on libgtk-3-dev to (>= 3.10)
+  * Bump Standards-Version to 4.1.1
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 07 Nov 2017 20:57:13 +0100
+
+network-manager-applet (1.8.4-1ubuntu1) artful; urgency=medium
+
+  * Sync with Debian. Remaining changes:
+    - debian/icons/, debian/rules, debian/source/include-binaries:
+      + Add "secure" icons
+    - debian/control, debian/rules:
+      + Build appindicator support
+      + Run dh_translations
+    - Add lp341684_device_sensitive_disconnect_notify.patch:
+      + Show correct notification messages for disconnect events, to be in
+        line with the other *connect*text patches.
+    - Add lp460144_correctly_update_notification.patch: cleaner notification
+        messages, and allow for messages to be updated instead of cleared.
+    - Add applet-wifi-menu-before-vpn.patch:
+      + Show Create New and Connect to Hidden wifi menu items with the other
+        Wifi items, rather than separated by the VPN menus.
+    - Allow-to-create-and-connect-to-Ad-Hoc-RSN-networks.patch:
+      + Enable Ad-Hoc using WPA RSN
+    - Have-the-appindicator-enabled-by-default.patch:
+      + Enable the indicator by default
+    - On-Ubuntu-we-use-premade-icons-for-the-indicator-VPN.patch:
+      + use '-secure'-suffixed icons when connected to the VPN, since we
+        can't composit icons on the fly.
+    - Make-sure-the-behavior-for-policykit-restricted-acti.patch,
+      Support-hiding-rather-than-desensitizing-disallowed-items.patch,
+      + provide methods to desensitize and hide menu items which are useless
+        given the current policykit policy level of the user.
+  * Refresh patches
+  * Drop patches applied in new release:
+    - reorder-indicator-items.patch
+    - Always-center-dialogs-on-the-screen.patch
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 22 Sep 2017 15:03:15 -0400
+
+network-manager-applet (1.8.4-1) unstable; urgency=medium
+
+  * New upstream version 1.8.4
+  * Update Build-Depends as per configure.ac
+  * Rebase patches
+  * Switch to dh_missing
+  * Bump Standards-Version to 4.1.0
+  * Don't build static libraries
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 20 Sep 2017 22:22:26 +0200
+
+network-manager-applet (1.8.2-1ubuntu1) artful; urgency=medium
+
+  * Sync with Debian. Remaining changes:
+    - debian/icons/, debian/rules, debian/source/include-binaries:
+      + Add "secure" icons
+    - debian/control, debian/rules:
+      + Build appindicator support
+      + Run dh_translations
+    - Add lp341684_device_sensitive_disconnect_notify.patch:
+      + Show correct notification messages for disconnect events, to be in
+        line with the other *connect*text patches.
+    - Add lp460144_correctly_update_notification.patch: cleaner notification
+        messages, and allow for messages to be updated instead of cleared.
+    - Add applet-wifi-menu-before-vpn.patch:
+      + Show Create New and Connect to Hidden wifi menu items with the other
+        Wifi items, rather than separated by the VPN menus.
+    - Always-center-dialogs-on-the-screen.patch:
+      + Position dialogs at the center of the screen
+    - Allow-to-create-and-connect-to-Ad-Hoc-RSN-networks.patch:
+      + Enable Ad-Hoc using WPA RSN
+    - reorder-indicator-items.patch:
+      + Make sure devices show before networking toggles
+    - Have-the-appindicator-enabled-by-default.patch:
+      + Enable the indicator by default
+    - On-Ubuntu-we-use-premade-icons-for-the-indicator-VPN.patch:
+      + use '-secure'-suffixed icons when connected to the VPN, since we
+        can't composit icons on the fly.
+    - Make-sure-the-behavior-for-policykit-restricted-acti.patch,
+      Support-hiding-rather-than-desensitizing-disallowed-items.patch,
+      + provide methods to desensitize and hide menu items which are useless
+        given the current policykit policy level of the user.
+  * Refresh patches
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Sun, 18 Jun 2017 19:06:46 -0400
+
+network-manager-applet (1.8.2-1) unstable; urgency=medium
+
+  * New upstream version 1.8.2
+  * Rebase patches
+  * Drop migration code from pre-wheezy
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 17 Jun 2017 23:29:48 +0200
+
+network-manager-applet (1.8.0-1) experimental; urgency=medium
+
+  * New upstream version 1.8.0
+  * Switch URLs to https
+  * Bump network-manager related (build-)dependencies to >= 1.8
+  * Enable support for adjusting SELinux labels in configuration editor
+  * Enable PKCS#11 capable certificate chooser for EAP-TLS
+  * Drop obsolete Breaks from pre-jessie
+  * Rebase patches
+  * Update symbols file for libnm-gtk and libnma
+  * Use architecture.mk provided by dpkg-dev to retrieve DEB_HOST_MULTIARCH
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 12 May 2017 23:17:47 +0200
+
+network-manager-applet (1.4.6-1) unstable; urgency=medium
+
+  * New upstream version 1.4.6
+  * Rebase patches
+  * Enable and install gtk-doc API documentation for libnma
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 07 Mar 2017 20:32:01 +0100
+
+network-manager-applet (1.4.4-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Bump debhelper compat level to 10.
+  * Update Vcs-* according to the latest recommendation.
+  * Rebase patches.
+  * Drop libnma-common and libnm-gtk-common.
+    The .ui files and icons are now compiled in using GResource.
+  * Bump network-manager related (build-)dependencies to >= 1.6.
+    This enables support for editing the Proxy setting which requires
+    NetworkManager 1.6 or newer.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 25 Jan 2017 21:42:52 +0100
+
+network-manager-applet (1.4.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Drop override for dh_auto_test. We don't explicitly need to dump the log
+    files as dh_auto_test runs with VERBOSE=1 by default.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 04 Oct 2016 17:02:25 +0200
+
+network-manager-applet (1.4.0-2) unstable; urgency=medium
+
+  * Replace Depends: dbus-x11 with Depends: default-dbus-session-bus |
+    dbus-session-bus so that either dbus-user-session or dbus-x11 can be used.
+    (Closes: #836037)
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 30 Aug 2016 12:59:12 +0200
+
+network-manager-applet (1.4.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Rebase patches.
+  * Bump network-manager related (build-)dependencies to >= 1.4.
+  * Enable team and team-port configuration support. Requires Jansson for
+    handling JSON data.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 26 Aug 2016 16:45:48 +0200
+
+network-manager-applet (1.2.4-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Rebase patches.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 04 Aug 2016 08:12:19 +0200
+
+network-manager-applet (1.2.2-2) unstable; urgency=medium
+
+  * Team upload.
+  * debian/control:
+    - Drop gnome-icon-theme dependency, this icon theme is deprecated
+    - Switch from polkit-1-auth-agent to 'policykit-1-gnome |
+      polkit-1-auth-agent', polkit-1-auth-agent is a virtual package
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 05 Jun 2016 13:23:10 +0200
+
+network-manager-applet (1.2.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Rebase patches.
+  * Bump Standards-Versiont to 3.9.8.
+  * Bump network-manager related (build-)dependencies to >= 1.2.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 11 May 2016 18:33:00 +0200
+
+network-manager-applet (1.2.0-2) unstable; urgency=medium
+
+  * Stop using -X for dh_install. Some files were not installed by accident
+    because of that. Instead explicity remove .a and .la files and use
+    --fail-missing while at it.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 26 Apr 2016 16:42:05 +0200
+
+network-manager-applet (1.2.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update debian/copyright.
+  * Bump dependencies of libnm-gtk-dev and libnma-dev on the NetworkManager
+    dev packages to (>= 1.1).
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 22 Apr 2016 17:30:12 +0200
+
+network-manager-applet (1.1.93-1) unstable; urgency=medium
+
+  * New upstream release (1.2 rc1).
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 06 Apr 2016 01:06:03 +0200
+
+network-manager-applet (1.1.92-1) unstable; urgency=medium
+
+  * New upstream release (1.2 beta3).
+  * Drop dependency on libdbus-glib-1-dev.
+  * Rebase patches.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 31 Mar 2016 00:35:34 +0200
+
+network-manager-applet (1.1.91-1) unstable; urgency=medium
+
+  * New upstream release (1.2 beta2).
+  * Rebase patches.
+  * Fix build system to run tests on "make check".
+  * Dump the contents of test-suite.log to stdout when the test suite fails.
+  * Skip the test suite if "nocheck" is set via DEB_BUILD_OPTIONS.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 02 Mar 2016 01:30:35 +0100
+
+network-manager-applet (1.1.90-3) unstable; urgency=medium
+
+  * Upload to unstable.
+  * Bump Standards-Version to 3.9.7.
+  * Fix test suite failure for non-C locales. Patch cherry-picked from
+    upstream Git.
+  * Fix fix macro name GLIB_GSETTINGS in configure.ac. Patch cherry-picked
+    from upstream Git.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 04 Feb 2016 06:19:15 +0100
+
+network-manager-applet (1.1.90-2) experimental; urgency=medium
+
+  * Update debian/copyright.
+  * Run test suite during build.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 22 Jan 2016 04:38:01 +0100
+
+network-manager-applet (1.1.90-1) experimental; urgency=medium
+
+  * New upstream release (1.2 beta1).
+  * Bump dependency on network-manager and related dev packages to (>= 1.1).
+  * Update configure switches. The gnome-bluetooth plugin and the migration
+    tool were dropped upstream, the --with-modem-manager-1 configure switch
+    was renamed to --with-wwan.
+  * Rebase patches.
+  * Install AppData file for nm-connection-editor.
+  * Add packages for new libnma library.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 20 Jan 2016 23:49:18 +0100
+
+network-manager-applet (1.0.10-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Rebase patches.
+  * Use dh_autoreconf --as-needed to avoid unnecessary shlibs dependencies.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 24 Dec 2015 01:18:49 +0100
+
+network-manager-applet (1.0.8-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Refresh patches.
+  * Disable migration tool for NM <= 0.8 settings.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 20 Nov 2015 18:35:54 +0100
+
+network-manager-applet (1.0.6-2) unstable; urgency=medium
+
+  * Fix crash in nm-connection-editor when importing existing VPN config.
+    (Closes: #726935)
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 07 Sep 2015 06:26:02 +0200
+
+network-manager-applet (1.0.6-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Refresh patches.
+  * Update symbols file, the symbols introduced in 1.0.4 now use symbol
+    versioning.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 28 Aug 2015 17:21:30 +0200
+
+network-manager-applet (1.0.4-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Make no-patch-numbers the default for gbp pq to avoid unnecessary noise.
+  * Refresh patches.
+  * Update symbols file for libnm-gtk0.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 29 Jul 2015 01:08:38 +0200
+
+network-manager-applet (1.0.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Rebase patches.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 05 May 2015 23:16:53 +0200
+
+network-manager-applet (1.0.0-3) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 27 Apr 2015 16:43:02 +0200
+
+network-manager-applet (1.0.0-2) experimental; urgency=medium
+
+  * Install typelib files into multiarch paths now that gobject-introspection
+    supports that.
+  * Mark dev and gir packages as Multi-Arch: same.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 09 Feb 2015 00:49:43 +0100
+
+network-manager-applet (1.0.0-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Rebase patches.
+  * Bump dependency on network-manager and related dev packages to (>= 1.0.0).
+  * Bump Standards-Version to 3.9.6. No further changes.
+  * Update Vcs-Browser URL to use cgit and https.
+  * Update Homepage URL to use https.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 02 Feb 2015 13:40:08 +0100
+
+network-manager-applet (0.9.10.0-2) unstable; urgency=medium
+
+  * Disable bluetooth support. The gnome-bluetooth plugin no longer builds
+    with gnome-bluetooth 3.12. But this plugin is really only useful for DUN
+    which with bluez 5 isn't supported (yet).
+    PAN support should still be functional.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 16 Jul 2014 01:31:23 +0200
+
+network-manager-applet (0.9.10.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update Build-Depends as per configure.ac.
+  * Drop obsolete --with-gtkver configure switch.
+  * Refresh patches.
+  * Update symbols file. A few deprecated symbols were dropped which were used
+    in older versions of network-manager-gnome, so add a versioned Breaks.
+  * Exclude libtool .la files and static libraries from list-missing.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 10 Jul 2014 07:32:44 +0200
+
+network-manager-applet (0.9.8.10-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Update patches.
+  * Tighten Build-Depends on libgnome-bluetooth-dev to (<< 3.11.0).
+    The bluetooth widget no longer builds with newer gnome-bluetooth since the
+    plugin API was removed.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 01 May 2014 14:22:42 +0200
+
+network-manager-applet (0.9.8.8-5) unstable; urgency=medium
+
+  * Use valid paths when loading the org.gnome.nm-applet.eap schema.
+    We were missing a trailing '/'. Newer glib versions validate the path more
+    strictly, leading to an assert.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 04 Apr 2014 17:51:38 +0200
+
+network-manager-applet (0.9.8.8-4) unstable; urgency=medium
+
+  * Drop dbus reload from postinst. The dbus package uses a file trigger
+    nowadays to automatically reload its configuration.
+  * Use the paths specified in the VPN .name files.
+    Since LIBDIR of nm-applet and the VPN plugins aren't necessarily the
+    same, use the paths as specified by the VPN plugins and only
+    reconstruct the path if it is not absolute or we fail to load the plugin.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 01 Apr 2014 21:41:36 +0200
+
+network-manager-applet (0.9.8.8-3) unstable; urgency=medium
+
+  * Bump debhelper compatibility level to 9.
+  * Determine gnome-bluetooth plugin directory using libdir from
+    gnome-bluetooth-1.0.pc.
+  * Convert to multi-arch. Mark libnm-gtk0 as M-A: same, libnm-gtk-common as
+    M-A: foreign.
+  * Rely on dh v9 to set flags from dpkg-buildflags.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 01 Apr 2014 16:23:05 +0200
+
+network-manager-applet (0.9.8.8-2) unstable; urgency=medium
+
+  * Enable ModemManager1 interface support. (Closes: #711968)
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 27 Mar 2014 16:50:18 +0100
+
+network-manager-applet (0.9.8.8-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Bump Standards-Version to 3.9.5.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 18 Mar 2014 11:17:48 +0100
+
+network-manager-applet (0.9.8.4-1) unstable; urgency=low
+
+  * New upstream release.
+  * Refresh patches.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 13 Sep 2013 20:07:47 +0200
+
+network-manager-applet (0.9.8.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Refresh patches.
+  * Conversion from libgnome-keyring to libsecret. Add Build-Depends on
+    libsecret-1-dev and keep libgnome-keyring-dev for the migration tool.
+  * Use DEB_LDFLAGS_MAINT_APPEND to properly append our custom build flags.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 08 Jun 2013 02:05:04 +0200
+
+network-manager-applet (0.9.8.0-2) unstable; urgency=low
+
+  * Use gir dh addon instead of calling dh_girepository manually.
+  * Upload to unstable.
+  * Bump Standards-Version to 3.9.4. No further changes.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 06 May 2013 06:33:22 +0200
+
+network-manager-applet (0.9.8.0-1) experimental; urgency=low
+
+  * New upstream release.
+  * Refresh 11-user-connections.patch.
+  * Bump minimum required version of network-manager to (>= 0.9.8).
+  * Install man pages provided by upstream instead of our own.
+  * Enable gobject introspection support for libnm-gtk. The typelib files are
+    shipped in a separate binary package named gir1.2-nmgtk-1.0.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 21 Feb 2013 03:57:27 +0100
+
+network-manager-applet (0.9.7.997-1) experimental; urgency=low
+
+  * New upstream release (0.9.8 beta2).
+    - VPN connections can now be configured as "secondary" connections which
+      are autostarted as soon as the underlying connection is active.
+      (Closes: #589533)
+  * Remove 05-8021x-passwords-user.patch, merged upstream.
+  * Update 11-user-connections.patch for new code base.
+  * Update 12-force-online.patch for the icon name changes.
+  * Update symbols file for libnm-gtk0.
+  * Bump minimum required version of network-manager to (>= 0.9.7.997).
+  * Add Build-Depends on libgudev-1.0-dev and gobject-introspection.
+  * Mark binary packages as linux-any.
+  * Use a strict dependency between network-manager-gnome and libnm-gtk0 to
+    avoid crashes due to missing schema files. (Closes: #699590)
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 09 Feb 2013 21:08:40 +0100
+
+network-manager-applet (0.9.6.4-4) experimental; urgency=low
+
+  * Merge bug fix from unstable branch.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 30 Jan 2013 02:45:10 +0100
+
+network-manager-applet (0.9.6.4-3) experimental; urgency=low
+
+  * Merge changes from unstable branch.
+  * Update debian/patches/11-user-connections.patch again.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 17 Jan 2013 12:02:16 +0100
+
+network-manager-applet (0.9.6.4-2) experimental; urgency=low
+
+  * Merge changes from unstable branch.
+  * Update debian/patches/11-user-connections.patch.
+
+ -- Michael Biebl <biebl@debian.org>  Sun, 06 Jan 2013 10:53:34 +0100
+
+network-manager-applet (0.9.6.4-1) experimental; urgency=low
+
+  * New upstream release.
+  * Use --list-missing to show uninstalled files.
+  * Update symbols file for libnm-gtk.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 26 Oct 2012 22:50:15 +0200
+
+network-manager-applet (0.9.6.2-1) experimental; urgency=low
+
+  * New upstream release.
+  * Bump Build-Depends on libnm-*-dev and network-manager-dev to (>= 0.9.6).
+  * Bump Depends on network-manager to (>= 0.9.6).
+  * debian/patches/01-fix-crash-in-migration-wizard.patch: Removed, merged
+    upstream.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 11 Sep 2012 23:06:31 +0200
+
+network-manager-applet (0.9.5.95-1) experimental; urgency=low
+
+  * New upstream release (0.9.6 rc1).
+  * debian/network-manager-gnome.maintscript: Use versioning scheme as
+    recommended by dpkg-maintscript-helper which better handles local
+    modifications and (bin)NMUs.
+  * Bump Build-Depends on libglib2.0-dev to (>= 2.26).
+  * Bump Build-Depends on libnm-*-dev and network-manager-dev to
+    (>= 0.9.5.95).
+  * Install GSettings schemas, GConf conversion script and the split-off
+    migration wizard nm-applet-migration-tool.
+  * debian/patches/01-format-security.patch: Removed, merged upstream.
+  * debian/patches/01-fix-crash-in-migration-wizard.patch: Fix a crash in
+    g_object_unref() call when running the migration wizard. Patch
+    cherry-picked from upstream Git.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 29 Jun 2012 21:03:59 +0200
+
+network-manager-applet (0.9.4.1-5) unstable; urgency=low
+
+  * debian/patches/11-user-connections.patch: Fix a bug in the check for
+    whether to mark WEP keys as agent-owned.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 30 Jan 2013 02:33:26 +0100
+
+network-manager-applet (0.9.4.1-4) unstable; urgency=low
+
+  * debian/patches/12-force-online.patch: If NM has an active unmanaged device
+    it will forcefully set the online state to CONNECTED_GLOBAL. In that case
+    show a wired connection icon instead of an offline icon. (Closes: #471191)
+  * Recommend gnome-keyring instead of libpam-keyring. The former is what we
+    actually need for storing secrets in the user session. (Closes: #694695)
+  * debian/patches/11-user-connections.patch: Treat WEP keys like WPA secrets
+    and store them in the keyring for user-owned connections.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 17 Jan 2013 10:58:23 +0100
+
+network-manager-applet (0.9.4.1-3) unstable; urgency=low
+
+  [ Michael Biebl ]
+  * Add Build-Depends on gnome-common which is required for autoreconf.
+
+  [ Josselin Mouette ]
+  * debian/patches/05-8021x-passwords-user.patch: patch from upstream git.
+    Correctly set 802.1x passwords as agent-owned, so that they are stored
+    in the user’s keyring.
+  * debian/patches/11-user-connections.patch: new patch. Set passwords as
+    agent-owned when they need to, to allow users without root permissions
+    to easily configure their connections. (Closes: #696256)
+    The logic is:
+    - Bluetooth, CDMA and GSM connections: always user-owned
+    - WEP/WPA connections: system-owned if user has the permissions
+      (with NM’s config, that is netdev or sudo membership), user-owned
+      otherwise. The password is stored in the keyring for WPA, not for
+      WEP.
+    - WiMax / Wired connections: always system-owned (with 802.1x
+      passwords in the keyring).
+
+ -- Michael Biebl <biebl@debian.org>  Sun, 06 Jan 2013 09:57:29 +0100
+
+network-manager-applet (0.9.4.1-2) unstable; urgency=low
+
+  * debian/rules: Use xz compression for binary packages.
+  * debian/control: Add network-manager-openconnect-gnome to Suggests.
+    (Closes: #670724)
+  * debian/patches/02-fix-shell-version-detecting-code.patch,
+    debian/patches/03-dont-handle-VPN-secrets-with-GNOME-Shell-3.4.patch: Fix
+    race condition on session startup when detecting the GNOME Shell version
+    and only handle VPN authentication requests with GNOME Shell < 3.4
+    otherwise nm-applet and the Shell fight over who gets to handle secrets.
+    Patches cherry-picked from upstream Git. (Closes: #680963)
+  * debian/patches/04-gnome-bluetooth-3.4-support.patch: Add support for
+    gnome-bluetooth 3.4 which uses GDBusProxy instead of DBusGProxy. This
+    fixes the timeouts when creating DUN connections. Patch cherry-picked from
+    upstream Git. (Closes: #680866)
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 11 Sep 2012 21:51:03 +0200
+
+network-manager-applet (0.9.4.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Bump Build-Depends on libnm-*-dev and network-manager-dev to (>= 0.9.4).
+  * Drop unused Build-Depends on libpolkit-gobject-1-dev.
+  * Remove patches, all merged upstream:
+    - debian/patches/01-editor-policykit-authentication.patch
+    - debian/patches/02-link-gconf-helper-test-against-gnome-keyring.patch
+    - debian/patches/04-autostart.patch
+  * Update debian/copyright using the machine-readable copyright format 1.0.
+  * Bump Standards-Version to 3.9.3.
+  * debian/patches/01-format-security.patch: Fix format string vulnerability
+    in utils_show_error_dialog().
+  * Bump Depends on network-manager to (>= 0.9.4).
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 24 Mar 2012 22:45:34 +0100
+
+network-manager-applet (0.9.2.0-2) unstable; urgency=low
+
+  * Fix versioned Build-Depends on dpkg-dev.
+    The buildflags.mk snippet was added in version 1.16.1, not 1.6.1.
+  * debian/patches/01-editor-policykit-authentication.patch
+    - Fix interaction of single-edit mode with PolicyKit authentication.
+      Patch cherry-picked from upstream Git. (Closes: #652961)
+  * debian/patches/02-link-gconf-helper-test-against-gnome-keyring.patch
+    - Fix linking with gnome-keyring in a gconf-helpers test program.
+      Patch cherry-picked from upstream Git.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 01 Feb 2012 15:14:40 +0100
+
+network-manager-applet (0.9.2.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * Remove debian/patches/01-export-symbols.patch, merged upstream.
+  * debian/control:
+    - Bump Build-Depends on libnm-*-dev and network-manager-dev to (>= 0.9.2).
+    - Bump Depends on network-manager to (>= 0.9.2).
+    - Update Depends of libnm-gtk-dev according to libnm-gtk.pc.
+  * Enable default hardening options from dpkg-buildflags.
+    - Use buildflags.mk snippet in debian/rules.
+    - Add Build-Depends on dpkg-dev (>= 1.6.1).
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 12 Nov 2011 06:08:08 +0100
+
+network-manager-applet (0.9.1.95-1) experimental; urgency=low
+
+  * New upstream release (0.9.2 rc1).
+  * Provide libnm-gtk as a private library for wireless and mobile dialogs:
+    - Add packages for libnm-gtk0, libnm-gtk-dev and libnm-gtk-common.
+    - Add debian/patches/01-export-symbols.patch to restrict the number of
+      exported symbols.
+    - Use dh-autoreconf to update the build system.
+  * debian/control:
+    - Bump Build-Depends on libnm-*-dev and network-manager-dev to (>= 0.9.1).
+    - Add Build-Depends on iso-codes.
+    - Add Recommends on iso-codes for translated country names in the mobile
+      broadband wizard.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 04 Nov 2011 12:47:42 +0100
+
+network-manager-applet (0.9.0-4) unstable; urgency=low
+
+  * debian/watch: Track .xz tarballs.
+  * Use the new maintscript facility in dh_installdeb to remove the obsolete
+    conffile.
+  * Update the last unfixed version to 0.9.0-3 as we missed to remove the old
+    conffile for users upgrading from 0.8.4-2 or 0.8.4-3. (Closes: #645450)
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 19 Oct 2011 10:37:45 +0200
+
+network-manager-applet (0.9.0-3) unstable; urgency=low
+
+  * Build against GTK 3 and gnome-bluetooth 3. (Closes: #623781)
+  * Add Breaks against gnome-bluetooth (<< 3.0).
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 13 Oct 2011 19:44:10 +0200
+
+network-manager-applet (0.9.0-2) unstable; urgency=low
+
+  * On upgrades tell update-notifier to show a reboot-required notification
+    since older versions of nm-applet will no longer work with network-manager
+    0.9 and need to be restarted.
+  * Upload to unstable.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 17 Sep 2011 21:06:53 +0200
+
+network-manager-applet (0.9.0-1) experimental; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - Bump Build-Depends on libnm-*-dev and network-manager-dev to (>= 0.9).
+    - Bump Build-Depends on libnotify-dev to (>= 0.7).
+    - Bump Depends on network-manager to (>= 0.9).
+    - Restrict Build-Depends on libgnome-bluetooth-dev to (<< 3.0.0).
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 24 Aug 2011 15:00:38 +0200
+
+network-manager-applet (0.8.9997-1) experimental; urgency=low
+
+  * New upstream release (0.9 rc3).
+    - Fixes unused-but-set-variable warnings. (Closes: #625400)
+
+ -- Michael Biebl <biebl@debian.org>  Sun, 29 May 2011 23:02:21 +0200
+
+network-manager-applet (0.8.999-1) experimental; urgency=low
+
+  * New upstream release (0.9 rc2).
+  * Merge changes from unstable branch.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 04 May 2011 23:27:46 +0200
+
+network-manager-applet (0.8.998-1) experimental; urgency=low
+
+  * New major upstream release (0.9 rc1).
+  * debian/control
+    - Bump Build-Depends on libnm-*-dev and network-manager-dev to
+      (>= 0.8.998).
+    - Bump Build-Depends on libgtk2.0-dev to (>= 2.20).
+    - Bump Depends on network-manager to (>= 0.8.998).
+    - Bump Standards-Version to 3.9.2. No further changes.
+  * debian/rules
+    - Build against GTK+ version 2.
+  * User settings are gone.
+    - Drop debian/patches/01-dbus_access_nm_applet.patch, obsolete.
+    - Remove /etc/dbus-1/system.d/nm-applet.conf on upgrades. Use
+      dpkg-maintscript-helper to remove the conffile.
+  * Refresh debian/patches/04-autostart.patch.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 09 Apr 2011 20:18:31 +0200
+
+network-manager-applet (0.8.4-3) unstable; urgency=low
+
+  * debian/rules
+    - Disable additional compiler warnings (including -Werror) as it causes
+      build failures with GCC 4.6. (Closes: #634392)
+
+ -- Michael Biebl <biebl@debian.org>  Sun, 31 Jul 2011 17:00:14 +0200
+
+network-manager-applet (0.8.4-2) unstable; urgency=low
+
+  * debian/patches/0001-applet-fix-possibly-uninitialized-variable.patch
+    - Cherry-pick patch from upstream Git to fix possibly uninitialized
+      variable. (Closes: #625016)
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 03 May 2011 03:09:15 +0200
+
+network-manager-applet (0.8.4-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - Bump Build-Depends on libnm-*-dev and network-manager-dev to (>= 0.8.4).
+    - Bump Standards-Version to 3.9.2. No further changes.
+    - Update package description.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 21 Apr 2011 17:17:22 +0200
+
+network-manager-applet (0.8.3.999-1) unstable; urgency=low
+
+  * New upstream release (0.8.4 rc2).
+  * Update debian/watch, switch to bzip2.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 04 Apr 2011 23:38:51 +0200
+
+network-manager-applet (0.8.3.998-1) unstable; urgency=low
+
+  * New upstream release (0.8.4 rc1).
+    - Show IPv6 information in Connection Information dialog.
+      (Closes: #606929)
+  * debian/control
+    - Drop Build-Depends on libglade2-dev, converted to GtkBuilder.
+    - Bump Build-Depends on libnm-*-dev and network-manager-dev to
+      (>= 0.8.3.995).
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 18 Mar 2011 21:37:12 +0100
+
+network-manager-applet (0.8.2-4) unstable; urgency=low
+
+  * debian/control
+    - Drop Build-Depends on libiw-dev. No longer needed.
+    - Bump Build-Depends on debhelper to (>= 8).
+    - Bump Depends on network-manager to (>= 0.8.2).
+  * Bump debhelper compatibility level to 8.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 07 Mar 2011 01:38:40 +0100
+
+network-manager-applet (0.8.2-3) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 07 Feb 2011 01:07:50 +0100
+
+network-manager-applet (0.8.2-2) experimental; urgency=low
+
+  * Switch from cdbs to dh
+    - Drop Build-Depends on cdbs.
+    - Bump Build-Depends on debhelper to (>= 7.0.50~) for override targets.
+    - Convert debian/rules to use dh.
+    - Add debian/network-manager-gnome.docs.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 22 Dec 2010 04:34:56 +0100
+
+network-manager-applet (0.8.2-1) experimental; urgency=low
+
+  * New upstream release.
+  * Update Vcs-* fields: Move packaging from svn to git.
+  * Remove patches, merged upstream
+    - debian/patches/02-hide-pin-in-pin-puk-dialog-by-default.patch
+    - debian/patches/03-enter-closes-pin-puk-dialog.patch
+  * debian/control
+    - Bump Build-Depends on libnm-* packages to (>= 0.8.2).
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 18 Dec 2010 12:34:37 +0100
+
+network-manager-applet (0.8.1-2) unstable; urgency=low
+
+  * debian/patches/02-hide-pin-in-pin-puk-dialog-by-default.patch
+    - Hide PIN in PIN/PUK dialog by default. (Closes: #592364)
+      Patch cherry-picked from upstream Git.
+  * debian/patches/03-enter-closes-pin-puk-dialog.patch
+    - Ensure Enter closes the PIN/PUK dialog.
+      Patch cherry-picked from upstream Git.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 17 Nov 2010 23:49:29 +0100
+
+network-manager-applet (0.8.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - Bump Build-Depends on libnm-* packages to (>= 0.8.1).
+    - Bump Depends on network-manager to (>= 0.8.1) so the "Enable Networking"
+      option works correctly. (Closes: #588618, #570169)
+    - Bump Standards-Version to 3.9.1. No further changes.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 27 Jul 2010 09:51:13 +0200
+
+network-manager-applet (0.8.0.999-1) unstable; urgency=low
+
+  * New upstream release (0.8.1 rc1).
+  * Switch to source format 3.0 (quilt).
+    - Add debian/source/format.
+    - Drop Build-Depends on quilt.
+    - Remove /usr/share/cdbs/1/rules/patchsys-quilt.mk from debian/rules.
+  * debian/control
+    - Bump Standards-Version to 3.9.0. No further changes.
+    - Bump Build-Depends on libnm-* packages to (>= 0.8.0.999).
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 09 Jul 2010 00:45:16 +0200
+
+network-manager-applet (0.8-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - Bump Build-Depends on libnm-* packages to (>= 0.8).
+    - Bump Standards-Version to 3.8.4. No further changes.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 22 Feb 2010 19:51:55 +0100
+
+network-manager-applet (0.7.999-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 26 Jan 2010 17:33:18 +0100
+
+network-manager-applet (0.7.999-1) experimental; urgency=low
+
+  * New upstream release (0.8 rc3).
+    - Port to PolicyKit 1. (Closes: #549503)
+    - Mobile broadband assisstant.
+    - Bluetooth support integrating with gnome-bluetooth.
+  * debian/control
+    - Bump Build-Depends on libglib2.0-dev to (>= 2.16).
+    - Bump Build-Depends on libnm-* packages to (>= 0.7.999).
+    - Replace Build-Depends on libpolkit-gnome-dev with
+      libpolkit-gobject-1-dev (>= 0.92).
+    - Add Build-Depends on libgnome-bluetooth-dev (>= 2.27.6).
+    - Replace Depends on policykit-gnome with policykit-1-gnome.
+    - Add Recommends on mobile-broadband-provider-info for easier
+      configuration of your mobile broadband service provider.
+    - Add Recommends on gnome-bluetooth which allows to easily setup your
+      mobile phone and make it available for NetworkManager.
+  * debian/rules
+    - Don't install libtool *.la and static library files.
+  * debian/patches/02-CVE-2009-4145_fix_leakage_of_secrets_on_system_bus.patch
+    - Remove, fixed upstream.
+  * debian/patches/03-CVE-2009-4144_fix_ca_cert_handling_after_cert_file_deletion.patch
+    - Remove, fixed upstream.
+  * debian/copyright
+    - Review and update copyright file.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 23 Jan 2010 06:09:46 +0100
+
+network-manager-applet (0.7.2-2) unstable; urgency=low
+
+  * debian/control
+    - Bump Build-Depends on libdbus-glib-1-dev to (>= 0.74).
+    - Bump Build-Depends on libgtk2.0-dev to (>= 2.14).
+  * debian/patches/02-CVE-2009-4145_fix_leakage_of_secrets_on_system_bus.patch
+    - Fix potential leakage of secrets onto the system bus. (Closes: #563371)
+      Patch backported from upstream Git.
+      Fixes: CVE-2009-4145
+  * debian/patches/03-CVE-2009-4144_fix_ca_cert_handling_after_cert_file_deletion.patch
+    - Fix possible connections to spoofed WPA Enterprise networks when
+      certification file is deleted. (Closes: #560067)
+      Patch backported from upstream Git.
+      Fixes: CVE-2009-4144
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 22 Jan 2010 23:33:06 +0100
+
+network-manager-applet (0.7.2-1) unstable; urgency=low
+
+  * New upstream release.
+    - Add support for GTC (WPA2 Enterprise/PEAP). See #543454.
+    - Add gconf schema for applet values. (Closes: #524004)
+  * debian/control
+    - Bump build dependencies on nm packages to (>= 0.7.2).
+    - Bump Standards-Version to 3.7.3. No further changes.
+    - Add dependency on gnome-icon-theme. (Closes: #520437)
+    - Add dependency on dbus-x11. (Closes: #461436)
+  * debian/nm-applet.sgml
+    - Fix references to to other man pages. (Closes: #556427)
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 26 Nov 2009 02:39:25 +0100
+
+network-manager-applet (0.7.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 16 Apr 2009 23:55:05 +0200
+
+network-manager-applet (0.7.0.100-1) unstable; urgency=low
+
+  * New upstream release (0.7.1 rc4).
+  * debian/patches/01-dbus_access_nm_applet.patch
+    - Updated for latest upstream changes.
+  * debian/control
+    - Bump Standards-Version to 3.8.1. No further changes.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 08 Apr 2009 08:04:41 +0200
+
+network-manager-applet (0.7.0.99-1) unstable; urgency=low
+
+  * New upstream release (0.7.1 rc3).
+  * debian/control
+    - Upgrade Recommends on policykit-gnome to Depends which is required for
+      editing system connections. (Closes: #507733)
+    - Bump Build-Depends on libnm-glib-dev to (>= 0.7.0.99).
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 05 Mar 2009 23:11:47 +0100
+
+network-manager-applet (0.7.0.97-1) unstable; urgency=low
+
+  * New upstream release.
+  * Merge experimental branch into unstable. Remaining changes:
+    - Update 01-dbus_access_nm_applet.patch, changes have been merged upstream
+      and we only keep the "netdev" group related diff.
+    - Update 04-autostart.patch, do not start nm-applet in KDE.
+    - Remove 05-fix_bashisms.patch, obsolete.
+    - Remove 06-po_fr.patch, obsolete.
+    - Remove 07-po_pl.patch, merged upstream.
+    - Remove 08-manual_means_always_online.patch, obsolete.
+    - Remove 09-fix_assertion_because_of_unmanaged_devices.patch, obsolete.
+  * debian/control
+    - Bump Build-Depends on libnm-util-dev to (>= 0.7.0.97).
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 25 Feb 2009 10:41:53 +0100
+
+network-manager-applet (0.7.0-2) experimental; urgency=low
+
+  * debian/patches/01-dbus_access_nm_applet.patch
+    - Remove bare send_interface directives to avoid non-deterministic allow
+      messages with no interface. (Closes: #510728)
+    - Do not allow unpriviledged processes to ask for a users' connections.
+    - Allow introspection by default.
+  * debian/control
+    - Wrap build dependencies.
+    - Bump build dependency on debhelper to (>= 7).
+  * debian/compat
+    - Bump to debhelper v7 compat mode.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 14 Feb 2009 16:16:35 +0100
+
+network-manager-applet (0.7.0-1) experimental; urgency=low
+
+  * New upstream release.
+    - Notification popups can be disabled. (Closes: #446963)
+    - Notification applet correctly handles panel restarts. (Closes:# 458332)
+    - The nm-editor tool has been replaced by nm-connection-editor.
+      (Closes: #494148, #482107, #485651)
+    - Show the correct configuration for WPA Enterprise setups in
+      nm-connection-editor (Closes: #480039)  
+
+  [ Sjoerd Simons ]
+  * debian/patches/02-nm-api-update.patch:
+    - Removed. Fixed upstream
+  * debian/control: Tighten build-depends on nm related libraries
+
+  [ Michael Biebl ]
+  * debian/copyright
+    - More updates to the copyright file. The polkit-helper bits are licensed
+      under the LGPL.
+  * debian/control
+    - Add network-manager-pptp-gnome to Suggests.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 16 Dec 2008 06:50:06 +0100
+
+network-manager-applet (0.7.0~svn953-1) experimental; urgency=low
+
+  [ Michael Biebl ]
+  * Switch to quilt patch management system.
+  * debian/rules
+    - Set libexecdir to /usr/lib/NetworkManager, so nm-applet and
+      nm-connection-editor automatically find the VPN GUI plugins.
+  * debian/control:
+    - Bump Standards-Version to 3.8.0. No further changes.
+    - Demote Recommends on VPN plugins to Suggests.
+    - Bump Depends on network-manager to (>= 0.7).
+    - Add Build-Depends on libpolkit-gnome-dev.
+    - Add Recommends on policykit-gnome. This package is required if you want
+      to manage system connections.
+  * debian/patches/01-dbus_access_nm_applet.patch: Updated
+  * Removed obsolete patches:
+    - debian/patches/02-hal_deprecated_keys.patch
+    - debian/patches/03-nm_editor_category.patch
+  * debian/copyright: Revised for the latest changes.
+
+  [ Simon McVittie ]
+  * Newer svn snapshot
+
+  [ Sjoerd Simons ]
+  * debian/patches/02-nm-api-udate.patch
+    - Added. cope with a small NM 0.7 api change
+  * debian/control: Build-Depend on nm-glib dev packages with new api
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sat, 18 Oct 2008 21:40:05 +0100
+
+network-manager-applet (0.6.6-4) unstable; urgency=low
+
+  * debian/patches/08-manual_means_always_online.patch
+    - manual-means-online: If there are interfaces that are not managed by
+      NetworkManager because they have custom configuration in
+      /etc/network/interfaces, we assume to be online and show a wired network
+      icon indicating manual network configuration.
+  * debian/patches/09-fix_assertion_because_of_unmanaged_devices.patch
+    - Fix assertion failures for unmanaged devices.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 14 Jan 2009 08:48:15 +0100
+
+network-manager-applet (0.6.6-3) unstable; urgency=low
+
+  * debian/patches/04-autostart.patch
+    - Allow nm-applet to be started in desktop environments like XFCE or LXDE.
+      Only disable it for KDE, as we have k-n-m there. (Closes: #500119)
+  * debian/patches/05-fix_bashisms.patch
+    - Fix bashisms in nm-disconnect-wireless-on-exit.sh. (Closes: #489638)
+      Thanks Chris Lamb for the patch.
+  * debian/patches/06-po_fr.patch
+    - Fix typos in French translation. (Closes: #506254)
+      Thanks Cyril Brulebois for the patch.
+  * debian/patches/07-po_pl.patch
+    - Improvements to Polish translation. (Closes: #450588)
+      Thanks Radosław Warowny for the patch.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 05 Dec 2008 19:52:02 +0100
+
+network-manager-applet (0.6.6-2) unstable; urgency=low
+
+  * debian/control
+    - Add Build-Depends on pkg-config.
+  * debian/patches/03-nm_editor_category.patch
+    - Don't show nm-editor under Applications->Internet. (Closes: #474544)
+
+ -- Michael Biebl <biebl@debian.org>  Sun, 06 Apr 2008 16:39:07 +0200
+
+network-manager-applet (0.6.6-1) unstable; urgency=low
+
+  * New upstream release.
+    - Better handling of VPN and WPA Enterprise security. (Closes: #444977)
+  * debian/control
+    - The Vcs-* fields are now officially supported, so remove the XS- prefix.
+    - Bump Standards-Version to 3.7.3. No further changes required. 
+    - Fix Xfce spelling error in the package description.
+    - Bump Build-Depends on libnm-util-dev and network-manager-dev to 
+      (>= 0.6.6).
+  * Removed patches
+    - debian/patches/10-po_fr.patch (merged upstream)
+    - debian/patches/11-po_de.patch (merged upstream)
+    - debian/patches/12-po_jp.patch (merged upstream)
+    - debian/patches/20-stable_branch_updates_r98.patch (applied upstream)
+    - debian/patches/30-connection_info_hide_on_delete_event.patch (merged
+      upstream)
+  * debian/patches/02-hal_deprecated_keys.patch
+    - Add support for newer HAL versions where the "net.physical_device" key
+      has been deprecated and replaced by "net.originating_device".
+  * debian/rules
+    - The nm-applet autostart file is now installed into /etc/xdg/autostart by
+      default, so we no longer have to move it around manually.
+  * debian/network-manager-gnome.postinst
+    - Tell dbus to reload its config files.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 03 Apr 2008 21:34:40 +0200
+
+network-manager-applet (0.6.5-3) unstable; urgency=low
+
+  * debian/control
+    - Use the new "Homepage:" field to specify the upstream URL.
+    - Add Recommends: network-manager-openvpn-gnome, network-manager-vpnc-gnome
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 19 Oct 2007 18:23:59 +0200
+
+network-manager-applet (0.6.5-2) unstable; urgency=low
+
+  * debian/patches/30-connection_info_hide_on_delete_event.patch
+    - Patch from Ubuntu. Hide connection info dialog on delete-event. 
+      (Closes: #406073)
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 19 Sep 2007 22:34:18 +0200
+
+network-manager-applet (0.6.5-1) unstable; urgency=low
+
+  * Initial release after the package split.
+  * Imported files from previous network-manager source package
+    - debian/nm-applet.sgml
+    - debian/network-manager-gnome.manpages
+    - debian/network-manager-gnome.README.Debian
+    - debian/patches/01-dbus_access_nm_applet.patch
+    - debian/patches/10-po_fr.patch
+    - debian/patches/11-po_de.patch
+  * debian/patches/12-po_jp.patch
+    - Fixes for the Japanese translation. (Closes: #430672)
+      Patch by Kobayashi Noritada <nori1@dolphin.c.u-tokyo.ac.jp>
+  * debian/patches/20-stable_branch_updates_r98.patch
+    - Pull updates from the stable branch up until revision 98.
+    - Contains various bug fixes and translation updates.
+  * Add debian/watch to track new upstream releases.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 27 Aug 2007 08:03:06 +0200
