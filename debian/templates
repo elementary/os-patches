@@ -1,0 +1,26 @@
+# These templates have been reviewed by the debian-l10n-english
+# team
+#
+# If modifications/additions/rewording are needed, please ask
+# debian-l10n-english@lists.debian.org for advice.
+#
+# Even minor modifications require translation updates and such
+# changes should be coordinated with translators and reviewers.
+
+Template: unattended-upgrades/enable_auto_updates
+Type: boolean
+Default: true
+_Description: Automatically download and install stable updates?
+ Applying updates on a frequent basis is an important part of keeping
+ systems secure. By default, updates need to be applied manually using package 
+ management tools. Alternatively, you can choose to have this system 
+ automatically download and install important updates.
+
+Template: unattended-upgrades/origins_pattern
+Type: string
+Default: "origin=Debian,codename=${distro_codename},label=Debian-Security";
+_Description: Origins-Pattern that packages must match to be upgraded:
+ Please specify a value for the unattended-upgrades Origins-Pattern.
+ .
+ A package will be upgraded only if its metadata values match all the supplied
+ keywords in the origin line.

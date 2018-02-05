@@ -1,0 +1,44 @@
+#!/usr/bin/make -f
+
+PYTHON=python3
+DIST=$(shell dpkg-vendor --query Vendor)
+
+%:
+	dh $@ --with=systemd
+
+override_dh_auto_build:
+	# copy the right template into place
+	cp data/50unattended-upgrades.$(DIST) data/50unattended-upgrades
+	$(PYTHON) setup.py build
+
+override_dh_auto_test:
+	$(MAKE) -C test
+
+override_dh_auto_install:
+	$(PYTHON) setup.py install \
+		--root=$(CURDIR)/debian/unattended-upgrades \
+		--install-layout=deb
+
+override_dh_installinit:
+	# We do not want to run the init script in the postinst/prerm, its
+	# really only useful on shutdown, see Debian bug #645919.
+	dh_installinit $@ -r
+
+override_dh_auto_clean:
+	# Sanity-check before upload.
+	set -e; for f in unattended-upgrade unattended-upgrade-shutdown; do \
+		ln -nsf $$f $$f.py; \
+		py3compile $$f.py; \
+	        pycompile $$f.py; \
+		rm -f $$f.py; \
+	done
+	$(PYTHON) setup.py clean -a
+	rm -rf .coverage \
+		test/.coverage \
+		test/root.*/var/cache/apt/*.bin \
+		test/root.*/var/log \
+		test/root.unused-deps/var/cache/apt/archives/lock \
+		test/root.unused-deps/var/lib/apt/extended_states \
+		test/root.unused-deps/var/lib/dpkg/status \
+		test/root.unused-deps/var/run/unattended-upgrades.progress \
+		test/u-u.lock
