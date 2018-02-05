@@ -1,0 +1,43 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.4
+Patch-ID:	bash44-011
+
+Bug-Reported-by:	Russell King <rmk@armlinux.org.uk>
+Bug-Reference-ID:	<E1cNnFx-0007G2-S2@flint.armlinux.org.uk>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2017-01/msg00000.html
+
+Bug-Description:
+
+Subshells begun to run command and process substitutions may attempt to
+set the terminal's process group to an incorrect value if they receive
+a fatal signal.  This depends on the behavior of the process that starts
+the shell.
+
+Index: b/patchlevel.h
+===================================================================
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 10
++#define PATCHLEVEL 11
+ 
+ #endif /* _PATCHLEVEL_H_ */
+Index: b/sig.c
+===================================================================
+--- a/sig.c
++++ b/sig.c
+@@ -585,7 +585,8 @@ termsig_handler (sig)
+ #if defined (JOB_CONTROL)
+   if (sig == SIGHUP && (interactive || (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB))))
+     hangup_all_jobs ();
+-  end_job_control ();
++  if ((subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB)) == 0)
++    end_job_control ();
+ #endif /* JOB_CONTROL */
+ 
+ #if defined (PROCESS_SUBSTITUTION)

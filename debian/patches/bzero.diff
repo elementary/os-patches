@@ -1,0 +1,13 @@
+--- a/lib/sh/oslib.c
++++ b/lib/sh/oslib.c
+@@ -180,8 +180,8 @@
+ #  endif
+ void
+ bzero (s, n)
+-     char *s;
+-     int n;
++     void *s;
++     size_t n;
+ {
+   register int i;
+   register char *r;

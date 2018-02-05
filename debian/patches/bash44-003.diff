@@ -1,0 +1,52 @@
+Bash-Release:	4.4
+Patch-ID:	bash44-003
+
+Bug-Reported-by:	op7ic \x00 <op7ica@gmail.com>
+Bug-Reference-ID:	<CAFHyJTopWC5Jx+U7WcvxSZKu+KrqSf+_3sHPiRWo=VzXSiPq=w@mail.gmail.com>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2016-11/msg00005.html
+
+Bug-Description:
+
+Specially-crafted input, in this case an incomplete pathname expansion
+bracket expression containing an invalid collating symbol, can cause the
+shell to crash.
+
+Index: b/lib/glob/sm_loop.c
+===================================================================
+--- a/lib/glob/sm_loop.c
++++ b/lib/glob/sm_loop.c
+@@ -330,6 +330,12 @@ PARSE_COLLSYM (p, vp)
+   for (pc = 0; p[pc]; pc++)
+     if (p[pc] == L('.') && p[pc+1] == L(']'))
+       break;
++   if (p[pc] == 0)
++    {
++      if (vp)
++	*vp = INVALID;
++      return (p + pc);
++    }
+    val = COLLSYM (p, pc);
+    if (vp)
+      *vp = val;
+@@ -483,6 +489,9 @@ BRACKMATCH (p, test, flags)
+       c = *p++;
+       c = FOLD (c);
+ 
++      if (c == L('\0'))
++	return ((test == L('[')) ? savep : (CHAR *)0);
++
+       if ((flags & FNM_PATHNAME) && c == L('/'))
+ 	/* [/] can never match when matching a pathname.  */
+ 	return (CHAR *)0;
+Index: b/patchlevel.h
+===================================================================
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 2
++#define PATCHLEVEL 3
+ 
+ #endif /* _PATCHLEVEL_H_ */

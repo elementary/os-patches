@@ -1,0 +1,78 @@
+Bash-Release:	4.4
+Patch-ID:	bash44-004
+
+Bug-Reported-by:	Christian Weisgerber <naddy@mips.inka.de>
+Bug-Reference-ID:	<20161101160302.GB54856@lorvorc.mips.inka.de>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2016-11/msg00004.html
+
+Bug-Description:
+
+There is a race condition that can result in bash referencing freed memory
+when freeing data associated with the last process substitution.
+
+Index: b/jobs.c
+===================================================================
+--- a/jobs.c
++++ b/jobs.c
+@@ -453,6 +453,21 @@ cleanup_the_pipeline ()
+     discard_pipeline (disposer);
+ }
+ 
++void
++discard_last_procsub_child ()
++{
++  PROCESS *disposer;
++  sigset_t set, oset;
++
++  BLOCK_CHILD (set, oset);
++  disposer = last_procsub_child;
++  last_procsub_child = (PROCESS *)NULL;
++  UNBLOCK_CHILD (oset);
++
++  if (disposer)
++    discard_pipeline (disposer);
++}
++
+ struct pipeline_saver *
+ alloc_pipeline_saver ()
+ {
+Index: b/jobs.h
+===================================================================
+--- a/jobs.h
++++ b/jobs.h
+@@ -190,6 +190,7 @@ extern JOB **jobs;
+ extern void making_children __P((void));
+ extern void stop_making_children __P((void));
+ extern void cleanup_the_pipeline __P((void));
++extern void discard_last_procsub_child __P((void));
+ extern void save_pipeline __P((int));
+ extern PROCESS *restore_pipeline __P((int));
+ extern void start_pipeline __P((void));
+Index: b/patchlevel.h
+===================================================================
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 3
++#define PATCHLEVEL 4
+ 
+ #endif /* _PATCHLEVEL_H_ */
+Index: b/subst.c
+===================================================================
+--- a/subst.c
++++ b/subst.c
+@@ -5808,10 +5808,7 @@ process_substitute (string, open_for_rea
+     {
+ #if defined (JOB_CONTROL)
+       if (last_procsub_child)
+-	{
+-	  discard_pipeline (last_procsub_child);
+-	  last_procsub_child = (PROCESS *)NULL;
+-	}
++	discard_last_procsub_child ();
+       last_procsub_child = restore_pipeline (0);
+ #endif
+ 

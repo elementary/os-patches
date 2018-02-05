@@ -1,0 +1,75 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.4
+Patch-ID:	bash44-008
+
+Bug-Reported-by:	Koichi MURASE <myoga.murase@gmail.com>
+Bug-Reference-ID:	<CAFLRLk-V+1AeQ2k=pY7ih6V+MfQ_w8EF3YWL2E+wmLfgKBtzXA@mail.gmail.com>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2016-11/msg00050.html
+
+Bug-Description:
+
+Under certain circumstances, bash will evaluate arithmetic expressions as
+part of reading an expression token even when evaluation is suppressed. This
+happens while evaluating a conditional expression and skipping over the
+failed branch of the expression.
+
+Index: b/expr.c
+===================================================================
+--- a/expr.c
++++ b/expr.c
+@@ -578,24 +578,23 @@ expcond ()
+   rval = cval = explor ();
+   if (curtok == QUES)		/* found conditional expr */
+     {
+-      readtok ();
+-      if (curtok == 0 || curtok == COL)
+-	evalerror (_("expression expected"));
+       if (cval == 0)
+ 	{
+ 	  set_noeval = 1;
+ 	  noeval++;
+ 	}
+ 
++      readtok ();
++      if (curtok == 0 || curtok == COL)
++	evalerror (_("expression expected"));
++
+       val1 = EXP_HIGHEST ();
+ 
+       if (set_noeval)
+ 	noeval--;
+       if (curtok != COL)
+ 	evalerror (_("`:' expected for conditional expression"));
+-      readtok ();
+-      if (curtok == 0)
+-	evalerror (_("expression expected"));
++
+       set_noeval = 0;
+       if (cval)
+  	{
+@@ -603,7 +602,11 @@ expcond ()
+ 	  noeval++;
+  	}
+ 
++      readtok ();
++      if (curtok == 0)
++	evalerror (_("expression expected"));
+       val2 = expcond ();
++
+       if (set_noeval)
+ 	noeval--;
+       rval = cval ? val1 : val2;
+Index: b/patchlevel.h
+===================================================================
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 7
++#define PATCHLEVEL 8
+ 
+ #endif /* _PATCHLEVEL_H_ */
