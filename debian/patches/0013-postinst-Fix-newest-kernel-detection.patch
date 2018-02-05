@@ -1,0 +1,43 @@
+From 9974cebb30a191f59197d845f65a32b93237eef8 Mon Sep 17 00:00:00 2001
+From: Iain Lane <iain@orangesquash.org.uk>
+Date: Thu, 13 Apr 2017 12:14:56 +0100
+Subject: [PATCH] postinst: Fix newest kernel detection
+
+We were passing a list of kernels to get_newest_kernel(), when it
+expected a single kernel as its first argument - the currently running
+kernel. This in turn meant that the sometimes (if the first thing in the
+list was itself the newest kernel), the wrong kernel was passed into
+_get_newest_kernel_debian(). As a result this falsely reported that
+there was no 'newest' kernel available and then didn't build modules for
+it.
+
+Drop the parameter to get_newest_kernel(), and instead rely on
+CURRENT_KERNEL being set to $(uname -r).
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/dkms/+bug/1681566
+Forwarded: https://github.com/dell/dkms/pull/21
+---
+ dkms_common.postinst | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+Index: b/dkms_common.postinst
+===================================================================
+--- a/dkms_common.postinst
++++ b/dkms_common.postinst
+@@ -114,7 +114,6 @@
+     # Try Debian first as rpm can be installed in Debian based distros
+     if [ -e /usr/bin/dpkg ]; then
+         # If DEB based
+-        CURRENT_KERNEL=$1
+         CURRENT_VERSION=${CURRENT_KERNEL%%-*}
+         CURRENT_ABI=${CURRENT_KERNEL#*-}
+         CURRENT_FLAVOUR=${CURRENT_ABI#*-}
+@@ -199,7 +198,7 @@
+ # Here we look for the most recent kernel so that we can
+ # build the module for it (in addition to doing it for the
+ # current kernel.
+-NEWEST_KERNEL=$(get_newest_kernel "$KERNELS")
++NEWEST_KERNEL=$(get_newest_kernel)
+ 
+ if [ -z "$autoinstall_all_kernels" ]; then
+     # If the current kernel is installed on the system or chroot

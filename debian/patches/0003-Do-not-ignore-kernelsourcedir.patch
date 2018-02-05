@@ -1,0 +1,23 @@
+From: Evgeni Golov <evgeni@debian.org>
+Date: Wed, 6 Jul 2016 05:24:48 +0800
+Subject: Do not ignore --kernelsourcedir
+
+===================================================================
+---
+ dkms | 3 +++
+ 1 file changed, 3 insertions(+)
+
+Index: dkms/dkms
+===================================================================
+--- dkms.orig/dkms
++++ dkms/dkms
+@@ -49,6 +49,9 @@ _get_kernel_dir() {
+        Linux)          DIR="/lib/modules/$KVER/build" ;;
+        GNU/kFreeBSD)   DIR="/usr/src/kfreebsd-headers-$KVER/sys" ;;
+     esac
++
++    [ ! -z "$ksourcedir_fromcli" ] && DIR=$kernel_source_dir
++
+     echo $DIR
+ }
+ 

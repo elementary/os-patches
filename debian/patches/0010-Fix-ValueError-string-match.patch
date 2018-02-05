@@ -1,0 +1,23 @@
+From: Brian Murray <brian.murray@canonical.com>
+Date: Tue, 1 Nov 2016 12:30:29 +0800
+Subject: Fix ValueError string match
+
+Apport version 2.5.3 returns the non-existing package name so we need to check
+for that too.
+---
+ dkms_apport.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dkms_apport.py b/dkms_apport.py
+index ebf87fd..774a8b8 100755
+--- a/dkms_apport.py
++++ b/dkms_apport.py
+@@ -52,7 +52,7 @@ if options.kernel:
+     try:
+         supported_kernel = apport.packaging.is_distro_package(kernel_package)
+     except ValueError as e:
+-        if str(e) == 'package does not exist':
++        if str(e) == 'package %s does not exist' % kernel_package:
+             supported_kernel = False
+ 
+     if not supported_kernel:

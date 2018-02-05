@@ -1,0 +1,44 @@
+From: Anders Kaseorg <andersk@mit.edu>
+Date: Thu, 13 Oct 2016 19:18:03 -0400
+Subject: invoke_command: Avoid leaking a sleep process
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+‘kill $progresspid’ was killing the subshell running sleep 3 for each
+progress dot, but not killing the sleep itself.  Although the leaked
+sleep process had no functional effect, it irritated the Debian piuparts
+testing tool (“ERROR: FAIL: Processes are running inside chroot”).
+
+Signed-off-by: Anders Kaseorg <andersk@mit.edu>
+---
+ dkms | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/dkms b/dkms
+index 3949fef..89f6dd3 100644
+--- a/dkms
++++ b/dkms
+@@ -76,10 +76,18 @@ invoke_command()
+     if [[ $3 = background && ! $verbose ]]; then
+         local pid progresspid
+         (eval "$1" >/dev/null 2>&1) & pid=$!
+-        while [ -d /proc/$pid ]; do
+-            sleep 3
+-            echo -en "."
+-        done & progresspid=$!
++        {
++            on_exit() {
++                kill $(jobs -p) 2>/dev/null
++                wait $(jobs -p) 2>/dev/null
++            }
++            trap on_exit EXIT
++            while [ -d /proc/$pid ]; do
++                sleep 3 &
++                wait $!
++                echo -en "."
++            done
++        } & progresspid=$!
+         wait $pid 2>/dev/null
+         exitval=$?
+         kill $progresspid 2>/dev/null

@@ -1,0 +1,45 @@
+From: Dynamic Kernel Modules Support Team
+ <pkg-dkms-maint@lists.alioth.debian.org>
+Date: Wed, 6 Jul 2016 05:24:47 +0800
+Subject: 757758
+
+---
+ dkms | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
+
+Index: dkms/dkms
+===================================================================
+--- dkms.orig/dkms
++++ dkms/dkms
+@@ -1,7 +1,7 @@
+ #!/bin/bash
+ #
+ #  Dynamic Kernel Module Support (DKMS) <dkms-devel@dell.com>
+-#  Copyright (C) 2003-2008 Dell, Inc.
++#  Copyright (C) 2004-2008 Dell, Inc.
+ #  by Gary Lerhaupt, Matt Domsch, & Mario Limonciello
+ #  Copyright (C) 2012 by Darik Horn <dajhorn@vanadac.com>
+ #
+@@ -829,16 +829,17 @@ moduleconfig_update_obsoletes()
+     # Do all the changes at once, record the diffs for posterity
+     for file in "$@"; do
+         [[ $file && -w $file ]] || continue
++	_tmpf="$temp_dir_name/${file##*/}.new"
+         if [[ $file = /etc/sysconfig/kernel ]]; then
+-            sed "${sa_sck_o[*]}" "$file" > "$temp_dir_name/${file##*/}.new"
++	    [ -z "${sa_sck_o[@]}" ] || sed "${sa_sck_o[@]}" "$file" > "$_tmpf"
+         else
+-            sed "${sa_mc_o[*]}" "$file" > "$temp_dir_name/${file##*/}.new"
++	    [ -z "${sa_mc_o[@]}" ] || sed "${sa_mc_o[@]}" "$file" > "$_tmpf"
+         fi
+-        if ! mod_diff=$(diff -u "$temp_dir_name/${file##*/}.new" "$file"); then
++	if [ -f "$_tmpf" ] && ! mod_diff=$(diff -u "$_tmpf" "$file"); then
+             echo $"$file updated to replace obsoleted module references:"
+             echo "$mod_diff"
+-            cp -fp "$temp_dir_name/${file##*/}.new" "$file"
+-            rm -f "$temp_dir_name/${file##*/}.new"
++	    cp -fp "$_tmpf" "$file"
++	    rm -f "$_tmpf"
+         fi
+     done
+ }

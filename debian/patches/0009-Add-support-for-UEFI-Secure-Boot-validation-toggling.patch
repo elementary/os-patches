@@ -1,0 +1,26 @@
+From: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+Date: Wed, 28 Dec 2016 20:03:01 +0800
+Subject: Add support for UEFI Secure Boot validation toggling through shim
+
+This allows one to install third-party drivers and still have their system
+work (albeit without full Secure Boot validation), automatizing the step
+of disabling validation in shim.
+
+Users still have the possibility to notice this and skip the step, thus
+not disabling Secure Boot (but then, they will not be able to load the
+dkms drivers that were added).
+---
+ dkms_common.postinst | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/dkms_common.postinst b/dkms_common.postinst
+index d2ac712..2d3738e 100644
+--- a/dkms_common.postinst
++++ b/dkms_common.postinst
+@@ -290,3 +290,6 @@ for KERNEL in $KERNELS; do
+     fi
+ done
+ 
++if type update-secureboot-policy >/dev/null 2>&1; then
++    update-secureboot-policy || true
++fi

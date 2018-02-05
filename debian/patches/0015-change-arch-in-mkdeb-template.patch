@@ -1,0 +1,22 @@
+Description: Change arch in mkdeb control file
+ The change in patch 0004-mkbmdeb-support-for-lean-binary-package-with-only-th.patch
+ expects DEBIAN_BUILD_ARCH in the control file but the mkdeb control file was not changed.
+Origin: vendor, https://bugs.launchpad.net/ubuntu/+source/dkms/+bug/1729051
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/dkms/+bug/1729051
+Forwarded: no
+Reviewed-by: Brian Murray <brian@ubuntu.com>
+Last-Update: 2017-12-12
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: dkms-2.3/template-dkms-mkdeb/debian/control
+===================================================================
+--- dkms-2.3.orig/template-dkms-mkdeb/debian/control
++++ dkms-2.3/template-dkms-mkdeb/debian/control
+@@ -6,6 +6,6 @@ Build-Depends: debhelper (>= 7), dkms
+ Standards-Version: 3.8.1
+ 
+ Package: DEBIAN_PACKAGE-dkms
+-Architecture: all
++Architecture: DEBIAN_BUILD_ARCH
+ Depends: dkms (>= 1.95), ${misc:Depends}
+ Description: DEBIAN_PACKAGE driver in DKMS format.

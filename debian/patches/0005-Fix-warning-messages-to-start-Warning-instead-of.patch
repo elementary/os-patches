@@ -1,0 +1,22 @@
+From: Anders Kaseorg <andersk@mit.edu>
+Date: Thu, 13 Oct 2016 16:56:51 -0400
+Subject: Fix warning messages to start Warning: instead of :
+
+Signed-off-by: Anders Kaseorg <andersk@mit.edu>
+---
+ dkms | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dkms b/dkms
+index 51d380a..3949fef 100644
+--- a/dkms
++++ b/dkms
+@@ -100,7 +100,7 @@ error() (
+ 
+ warn() (
+     exec >&2
+-    echo -n "$Warning: "
++    echo -n $"Warning: "
+     for s in "$@"; do echo "$s"; done
+ )
+ 

@@ -1,0 +1,20 @@
+From: Adam Conrad <adconrad@ubuntu.com>
+Date: Wed, 28 Dec 2016 19:55:34 +0800
+Subject: Don't assume /boot/config-* exists, test first.
+
+---
+ dkms_common.postinst | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dkms_common.postinst b/dkms_common.postinst
+index d3d2829..d2ac712 100644
+--- a/dkms_common.postinst
++++ b/dkms_common.postinst
+@@ -53,6 +53,7 @@ _get_newest_kernel_debian() {
+     NEWEST_ABI=
+ 
+     for kernel in /boot/config-*; do
++        [ -f "$kernel" ] || continue
+         KERNEL=${kernel#*-}
+         KERNEL_VERSION=${KERNEL%%-*}
+         ABI=${KERNEL#*-}

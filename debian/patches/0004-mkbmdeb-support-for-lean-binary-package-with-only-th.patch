@@ -1,0 +1,274 @@
+From: Thijs Kinkhorst <thijs@debian.org>
+Date: Wed, 6 Jul 2016 05:34:43 +0800
+Subject: mkbmdeb: support for lean binary package with only the built modules
+
+ Creates a Debian binary package containing just the binary modules in the
+ /lib/modules installation path. This package does not depend on dkms and
+ does not require a toolchain to be installed on the target host. Useful
+ if you want to have a package to install on hosts identical to the build
+ system without installing the full toolchain on them.
+Bug-Debian: http://bugs.debian.org/554843
+---
+ Makefile                                   |  4 +++
+ dkms                                       | 21 +++++++++--
+ dkms.8                                     | 12 +++++++
+ template-dkms-mkbmdeb/Makefile             | 18 ++++++++++
+ template-dkms-mkbmdeb/debian/README.Debian |  5 +++
+ template-dkms-mkbmdeb/debian/changelog     |  6 ++++
+ template-dkms-mkbmdeb/debian/compat        |  1 +
+ template-dkms-mkbmdeb/debian/control       | 13 +++++++
+ template-dkms-mkbmdeb/debian/copyright     |  2 ++
+ template-dkms-mkbmdeb/debian/rules         | 57 ++++++++++++++++++++++++++++++
+ 10 files changed, 136 insertions(+), 3 deletions(-)
+ create mode 100644 template-dkms-mkbmdeb/Makefile
+ create mode 100644 template-dkms-mkbmdeb/debian/README.Debian
+ create mode 100644 template-dkms-mkbmdeb/debian/changelog
+ create mode 100644 template-dkms-mkbmdeb/debian/compat
+ create mode 100644 template-dkms-mkbmdeb/debian/control
+ create mode 100644 template-dkms-mkbmdeb/debian/copyright
+ create mode 100644 template-dkms-mkbmdeb/debian/rules
+
+Index: dkms/Makefile
+===================================================================
+--- dkms.orig/Makefile
++++ dkms/Makefile
+@@ -90,6 +90,10 @@ install-debian: install install-doc
+ 	chmod +x $(ETC)/template-dkms-mkdeb/debian/postinst
+ 	chmod +x $(ETC)/template-dkms-mkdeb/debian/prerm
+ 	chmod +x $(ETC)/template-dkms-mkdeb/debian/rules
++	mkdir   -p -m 0755 $(ETC)/template-dkms-mkbmdeb/debian
++	install -p -m 0664 template-dkms-mkbmdeb/Makefile $(ETC)/template-dkms-mkbmdeb/
++	install -p -m 0664 template-dkms-mkbmdeb/debian/* $(ETC)/template-dkms-mkbmdeb/debian/
++	chmod +x $(ETC)/template-dkms-mkbmdeb/debian/rules
+ 	rm $(DOCDIR)/COPYING*
+ 	rm $(DOCDIR)/sample*
+ 
+Index: dkms/dkms
+===================================================================
+--- dkms.orig/dkms
++++ dkms/dkms
+@@ -125,7 +125,7 @@ show_usage()
+ {
+     echo $"Usage: $0 [action] [options]"
+     echo $"  [action]  = { add | remove | build | install | uninstall | match | autoinstall"
+-    echo $"               | mkdriverdisk | mktarball | ldtarball | mkrpm | mkkmp | mkdeb | status }"
++    echo $"               | mkdriverdisk | mktarball | ldtarball | mkrpm | mkkmp | mkdeb | mkbmdeb | status }"
+     echo $"  [options] = [-m module] [-v module-version] [-k kernel-version] [-a arch]"
+     echo $"              [-d distro] [-c dkms.conf-location] [-q] [--force] [--all]"
+     echo $"              [--templatekernel=kernel] [--directive='cli-directive=cli-value']"
+@@ -2973,6 +2973,8 @@ preproc_file()
+     local date_str="$(date -R)"
+     echo "modifying $1..."
+     sed -e "s/DEBIAN_PACKAGE/$debian_package/g" \
++	-e "s/DEBIAN_BUILD_ARCH/$debian_build_arch/g" \
++	-e "s/KERNEL_VERSION/$kernelver/g" \
+         -e "s/MODULE_NAME/$module/g" \
+         -e "s/MODULE_VERSION/$module_version/g" \
+         -e "s/DATE_STAMP/$date_str/" "$1" > "$1.dkms-pp"
+@@ -3035,6 +3037,7 @@ make_debian()
+     make_common_test "mk${create_type}"
+ 
+     debian_package=${module//_/-}
++    debian_build_arch=$(dpkg-architecture -qDEB_BUILD_ARCH)
+ 
+     # Read the conf file
+     read_conf_or_die "$kernelver" "$arch"
+@@ -3107,7 +3110,16 @@ make_debian()
+             die 7 $"There was a problem creating your ${create_type}."
+         echo $""
+         echo $"DKMS: mk${create_type} completed."
+-        invoke_command "mv '$temp_dir/${debian_package}-dkms_${module_version}_all.deb' '$deb_basedir'" "Moving built files to $deb_basedir"
++	invoke_command "mv '$temp_dir/${debian_package}-dkms_${module_version}_${debian_build_arch}.deb' '$deb_basedir'" "Moving built files to $deb_basedir"
++	;;
++    bmdeb)
++	export KVER="$kernelver"
++	export KARCH="$arch"
++	invoke_command "dpkg-buildpackage -rfakeroot -d -b -us -uc 1>/dev/null" "Building binary package" || \
++	    die 7 $"There was a problem creating your ${create_type}."
++	echo $""
++	echo $"DKMS: mk${create_type} completed."
++	invoke_command "mv '$temp_dir/${debian_package}-modules-${kernelver}_${module_version}_${debian_build_arch}.deb' '$deb_basedir'" "Moving built files to $deb_basedir"
+         ;;
+     esac
+     popd > /dev/null 2>&1
+@@ -3634,7 +3646,7 @@ die_is_fatal="yes"
+ [ -x /usr/lib/module-init-tools/weak-modules ] && weak_modules='/usr/lib/module-init-tools/weak-modules'
+ no_depmod=""
+ 
+-action_re='^(remove|(auto|un)?install|match|mk(driverdisk|tarball|rpm|deb|dsc|kmp)|build|add|status|ldtarball)$'
++action_re='^(remove|(auto|un)?install|match|mk(driverdisk|tarball|rpm|deb|bmdeb|dsc|kmp)|build|add|status|ldtarball)$'
+ 
+ # Parse command line arguments
+ while (($# > 0)); do
+@@ -3860,6 +3872,9 @@ for action_to_run in $action; do
+     mkdeb)
+         make_debian "deb"
+         ;;
++    mkbmdeb)
++        make_debian "bmdeb"
++        ;;
+     mkdsc)
+         make_debian "dsc"
+         ;;
+Index: dkms/dkms.8
+===================================================================
+--- dkms.orig/dkms.8
++++ dkms/dkms.8
+@@ -299,6 +299,18 @@ load this tarball, build and install mod
+ not want your debian package to contain any prebuilt binaries, be sure to specify
+ .B \-\-source\-only
+ in the mkdeb command.
++.SY mkbmdeb
++.OP module/module\-version
++.OP -k kernel/arch
++.YS
++.IP "" 4
++Creates a Debian binary package containing just the binary modules in the /lib/modules
++installation path. This package does not depend on dkms and does not require a toolchain
++to be installed on the target host. Useful if you want to have a package to install on
++hosts identical to the build system without installing the full toolchain on them.
++It uses a template debian directory found in
++.I /etc/dkms/template\-dkms\-mkbmdeb
++as the basis for the package.
+ .SY mkdsc
+ .OP module/module\-version
+ .OP -k kernel/arch
+Index: dkms/template-dkms-mkbmdeb/Makefile
+===================================================================
+--- /dev/null
++++ dkms/template-dkms-mkbmdeb/Makefile
+@@ -0,0 +1,18 @@
++#/usr/bin/make
++SRC = $(DESTDIR)/usr/src
++SHARE = $(DESTDIR)/usr/share/$(NAME)-dkms
++
++all:
++
++clean:
++
++install:
++
++#tarball, possibly with binaries
++ifeq ("$(wildcard $(NAME)-$(VERSION).dkms.tar.gz)", "$(NAME)-$(VERSION).dkms.tar.gz")
++	tar zxvf "$(NAME)-$(VERSION).dkms.tar.gz"
++	install -d "$(DESTDIR)/lib/modules/$(KVER)/updates/dkms/"
++	install -m 644 dkms_main_tree/$(KVER)/$(KARCH)/module/*.ko "$(DESTDIR)/lib/modules/$(KVER)/updates/dkms/"
++	rm -rf dkms_main_tree/ dkms_binaries_only/
++endif
++
+Index: dkms/template-dkms-mkbmdeb/debian/README.Debian
+===================================================================
+--- /dev/null
++++ dkms/template-dkms-mkbmdeb/debian/README.Debian
+@@ -0,0 +1,5 @@
++MODULE_NAME DKMS module for Debian
++
++This package was automatically generated by the DKMS system,
++for distribution on Debian based operating systems.
++
+Index: dkms/template-dkms-mkbmdeb/debian/changelog
+===================================================================
+--- /dev/null
++++ dkms/template-dkms-mkbmdeb/debian/changelog
+@@ -0,0 +1,6 @@
++DEBIAN_PACKAGE-dkms-bin (MODULE_VERSION) stable; urgency=low
++
++  * Automatically packaged by DKMS.
++
++ -- Dynamic Kernel Modules Support Team <pkg-dkms-maint@lists.alioth.debian.org>  DATE_STAMP
++
+Index: dkms/template-dkms-mkbmdeb/debian/compat
+===================================================================
+--- /dev/null
++++ dkms/template-dkms-mkbmdeb/debian/compat
+@@ -0,0 +1 @@
++7
+Index: dkms/template-dkms-mkbmdeb/debian/control
+===================================================================
+--- /dev/null
++++ dkms/template-dkms-mkbmdeb/debian/control
+@@ -0,0 +1,14 @@
++Source: DEBIAN_PACKAGE-dkms-bin
++Section: misc
++Priority: optional
++Maintainer: Dynamic Kernel Modules Support Team <pkg-dkms-maint@lists.alioth.debian.org>
++Build-Depends: debhelper (>= 7), dkms
++Standards-Version: 3.8.1
++
++Package: DEBIAN_PACKAGE-modules-KERNEL_VERSION
++Architecture: DEBIAN_BUILD_ARCH
++Depends: ${misc:Depends}, linux-image-KERNEL_VERSION
++Provides: DEBIAN_PACKAGE-modules
++Description: DEBIAN_PACKAGE binary drivers for linux-image-KERNEL_VERSION
++ This package contains DEBIAN_PACKAGE drivers for the KERNEL_VERSION Linux kernel,
++ built from DEBIAN_PACKAGE-dkms for the DEBIAN_BUILD_ARCH architecture.
+Index: dkms/template-dkms-mkbmdeb/debian/copyright
+===================================================================
+--- /dev/null
++++ dkms/template-dkms-mkbmdeb/debian/copyright
+@@ -0,0 +1,2 @@
++
++This copyright has not been completed by the author of this package.
+Index: dkms/template-dkms-mkbmdeb/debian/rules
+===================================================================
+--- /dev/null
++++ dkms/template-dkms-mkbmdeb/debian/rules
+@@ -0,0 +1,58 @@
++#!/usr/bin/make -f
++# -*- makefile -*-
++
++# Uncomment this to turn on verbose mode.
++#export DH_VERBOSE=1
++
++DEB_NAME=DEBIAN_PACKAGE
++NAME=MODULE_NAME
++VERSION=MODULE_VERSION
++KVER=KERNEL_VERSION
++
++configure: configure-stamp
++configure-stamp:
++	dh_testdir
++	touch configure-stamp
++
++
++build: build-stamp
++
++build-stamp: configure-stamp 
++	dh_testdir
++	$(MAKE)
++	touch $@
++
++clean:
++	dh_testdir
++	dh_testroot
++	rm -f build-stamp configure-stamp
++	-$(MAKE) clean
++	dh_clean
++
++install: build
++	dh_testdir
++	dh_testroot
++	dh_prep
++	dh_installdirs
++	$(MAKE) DESTDIR=$(CURDIR)/debian/$(DEB_NAME)-modules-$(KVER) NAME=$(NAME) VERSION=$(VERSION) install
++
++binary-arch: build install
++
++binary-indep: build install
++	dh_testdir
++	dh_testroot
++	dh_link
++	dh_strip
++	dh_compress
++	dh_installmodules
++	dh_installdocs
++	dh_installchangelogs
++	dh_fixperms
++	dh_installdeb
++	dh_shlibdeps
++	dh_gencontrol
++	dh_md5sums
++	dh_builddeb
++
++binary: binary-indep binary-arch
++.PHONY: build clean binary-indep binary-arch binary install configure
