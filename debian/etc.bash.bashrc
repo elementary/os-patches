@@ -77,3 +77,11 @@ fi
 #  done
 #  unset _i
 #fi
+
+if [ -f /etc/bash_preexec ]; then
+    # source preexec and precmd hook functions for Bash
+    # If you have anything that's using the Debug Trap or PROMPT_COMMAND
+    # change it to use preexec or precmd
+    # See also https://github.com/rcaloras/bash-preexec
+    . /etc/bash_preexec
+fi
