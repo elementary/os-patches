@@ -68,6 +68,7 @@ __bp_imported="defined"
 # run interactively by the user; it's set immediately after the prompt hook,
 # and unset as soon as the trace hook is run.
 __bp_preexec_interactive_mode=""
+__bp_last_ret_value=""
 
 __bp_trim_whitespace() {
     local var=$@
@@ -89,7 +90,7 @@ __bp_interactive_mode() {
 __bp_precmd_invoke_cmd() {
 
     # Should be available to each precmd function, should it want it.
-    local ret_value="$?"
+    __bp_last_ret_value="$?"
 
     # For every function defined in our function array. Invoke it.
     local precmd_function
@@ -97,7 +98,7 @@ __bp_precmd_invoke_cmd() {
 
         # Only execute this function if it actually exists.
         if [[ -n $(type -t $precmd_function) ]]; then
-            __bp_set_ret_value $ret_value
+            __bp_set_ret_value $__bp_last_ret_value
             $precmd_function
         fi
     done
