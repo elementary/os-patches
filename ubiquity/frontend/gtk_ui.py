@@ -948,7 +948,7 @@ class Wizard(BaseFrontend):
             '-f', '/var/log/syslog', '-q',
         ]
         self.vte.spawn_sync(0, None, tail_cmd, None, 0, None, None, None)
-        fontdesc = Pango.font_description_from_string("Ubuntu Mono 8")
+        fontdesc = Pango.font_description_from_string("Roboto Mono 10")
         self.vte.set_font(fontdesc)
         self.vte.show()
         misc.regain_privileges_save()
