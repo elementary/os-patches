@@ -583,6 +583,8 @@ EndSection
 
             if osextras.find_on_path('gnome-shell'):
                 wm_cmd = ['gnome-shell', '--sm-disable', '--mode=ubiquity']
+            elif osextras.find_on_path('gala'):
+                wm_cmd = ['gala']
             elif osextras.find_on_path('budgie-wm'):
                 wm_cmd = ['budgie-wm', '--sm-disable']
             elif osextras.find_on_path('marco'):
@@ -631,6 +633,7 @@ EndSection
             if os.path.exists('/usr/lib/ubiquity/panel'):
                 if ("openbox-lubuntu" not in wm_cmd and
                         "openbox" not in wm_cmd and
+                        "gala" not in wm_cmd and
                         "gnome-shell" not in wm_cmd):
                     multiarchdir = os.path.split(
                         sysconfig.get_config_var('multiarchsubdir'))[-1]
