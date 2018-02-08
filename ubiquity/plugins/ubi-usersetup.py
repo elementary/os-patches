@@ -35,7 +35,7 @@ from ubiquity import misc, plugin, validation
 
 
 NAME = 'usersetup'
-AFTER = 'console_setup'
+AFTER = 'timezone'
 WEIGHT = 10
 
 

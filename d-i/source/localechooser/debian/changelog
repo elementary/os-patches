@@ -1,3 +1,77 @@
+localechooser (2.71ubuntu1) bionic; urgency=low
+
+  * Merge with Debian.  Remaining changes:
+    - Add encoding field to languagelist file and use the full SUPPORTED
+      file rather than SUPPORTED-short.
+    - Add a localechooser-data package containing lists useful for packages
+      that create automatic installation scripts.
+    - Drop fallbacks for Norwegian Bokmål and Nynorsk.
+    - If OVERRIDE_SHOW_ALL_LANGUAGES is set in the environment, display all
+      languages regardless of frontend.
+    - localechooser: Use grep -a to make sure grep sees our language list data 
+      as ASCII and not random binary since it contains some glyphs for language
+      name translations. Fixes at least one crash in Ubiquity. 
+    - Always support English, unless preseeded otherwise.
+    - If the language question was already marked as seen and the answer
+      didn't change, then don't recalculate the locale.
+    - Cancel any locale preseeding if the user changes the language.
+    - Simplify use of locale-gen using the new command-line argument
+      facility in Ubuntu's locales package.
+    - For cases where selecting a different location may imply a different
+      dialect of the language, i.e. Portuguese and Chinese, take care to set
+      LANG and LANGUAGE to something reflecting the language and LC_NUMERIC,
+      LC_TIME, LC_MONETARY, LC_PAPER, LC_NAME, LC_ADDRESS, LC_TELEPHONE,
+      LC_MEASUREMENT, and LC_IDENTIFICATION to something reflecting the
+      location.
+    - Better match for commented lines and preseeded values in the list of
+      supported locales.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 07 Nov 2017 14:51:02 -0500
+
+localechooser (2.71) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Greek (el.po) by Sotirios Vrachas
+  * Albanian (sq.po) by Redon Skikuli
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 17 Sep 2017 08:20:22 +0200
+
+localechooser (2.70) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Simplified Chinese (zh_CN.po) by Yangfl
+
+ -- Christian Perrier <bubulle@debian.org>  Mon, 26 Jun 2017 16:43:41 +0200
+
+localechooser (2.69) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Danish (da.po) by Joe Hansen
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 18 Sep 2016 17:59:00 +0200
+
+localechooser (2.68) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Use HTTPS for Vcs-* URLs, and link to cgit rather than gitweb.
+
+ -- Christian Perrier <bubulle@debian.org>  Thu, 11 Feb 2016 18:53:07 +0100
+
+localechooser (2.67) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Turkish (tr.po) by Mert Dirik
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 25 Jul 2015 21:41:08 +0200
+
+localechooser (2.66) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Portuguese (Brazil) (pt_BR.po) by Adriano Rafael Gomes
+  * Turkish (tr.po) by Mert Dirik
+
+ -- Christian Perrier <bubulle@debian.org>  Thu, 25 Jun 2015 11:39:37 +0200
+
 localechooser (2.65ubuntu4) xenial; urgency=medium
 
   * localechooser: Use grep -a to make sure grep sees our language list data

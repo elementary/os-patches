@@ -50,7 +50,7 @@ default_disk_label () {
 		esac;;
 	    mips|mipsel|mips64el)
 		echo msdos;;
-	    powerpc)
+	    powerpc|ppc64)
 		case "$sub" in
 		    apus)
 			echo amiga;;

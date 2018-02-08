@@ -521,7 +521,7 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
     def keyboard_layout_page_tests(self, ):
         self._update_current_step('stepKeyboardConf')
         self._check_navigation_buttons(continue_button=True, back_button=True,
-                                       quit_button=False, skip_button=False)
+                                       quit_button=True, skip_button=False)
         self._update_page_titles()
         logger.debug("run_keyboard_layout_page_tests()")
 
@@ -574,7 +574,7 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
         # TODO: Test detecting keyboard layout
         self._check_page_titles()
         self._check_navigation_buttons(continue_button=True, back_button=True,
-                                       quit_button=False, skip_button=False)
+                                       quit_button=True, skip_button=False)
 
     def user_info_page_tests(self, username, pwd,
                              encrypted=False, autologin=False):

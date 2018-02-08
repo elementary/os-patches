@@ -1,3 +1,99 @@
+debian-installer-utils (1.124ubuntu1) bionic; urgency=low
+
+  * Merge from Debian unstable.  Remaining changes:
+    - Make sure udevd internal state is up-to-date before calling trigger
+    & settle. This insures that newly anna-installed udev rules and kernel
+    modules are loaded by udevd for correct processing of the udev rules.
+    - user-params: Don't propagate vga=*, break=*, *-ubiquity, or
+      noninteractive to installed system.
+    - list-devices:
+      + New "mmc-partition" type for detecting partitions on MMC devices.
+      + Make sure we also detect platform-omap MMCs.
+      + Don't return entries for extended partitions.
+    - Don't include the battery subsystem on calls to udevadm trigger.
+    - log-output: Always install a no-op SIGCHLD handler, in case the
+      subsidiary process starts a daemon which does not fully disconnect its
+      standard file descriptors.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 17 Jan 2018 10:23:13 +0000
+
+debian-installer-utils (1.124) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Nepali (ne.po) by Jeewal Kunwar
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 30 Dec 2017 09:25:28 +0100
+
+debian-installer-utils (1.123) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Esperanto (eo.po) by Felipe Castro
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 10 Dec 2017 18:34:04 +0100
+
+debian-installer-utils (1.122) unstable; urgency=medium
+
+  [ Raphaël Hertzog ]
+  * Fix "list-devices partition" to also report LVM logical volumes.
+    (Closes: #868848)
+
+  [ Updated translations ]
+  * Lithuanian (lt.po) by Rimas Kudelis
+  * Norwegian Nynorsk (nn.po) by Allan Nordhøy
+
+ -- Christian Perrier <bubulle@debian.org>  Wed, 29 Nov 2017 22:03:57 +0100
+
+debian-installer-utils (1.120) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Greek (el.po) by Sotirios Vrachas
+
+ -- Christian Perrier <bubulle@debian.org>  Fri, 24 Nov 2017 06:47:55 +0100
+
+debian-installer-utils (1.119) unstable; urgency=medium
+
+  * fix: propagate dot-containing options to target kernel cmdline
+    (Closes: #853855)
+
+ -- Philip Hands <phil@hands.com>  Sat, 01 Apr 2017 11:56:13 +0200
+
+debian-installer-utils (1.118) unstable; urgency=medium
+
+  [ Josh Triplett ]
+  * fetch-url-methods/http: Set User-Agent to "debian-installer" when calling
+    wget. (Closes: #850800)
+
+ -- Philipp Kern <pkern@debian.org>  Tue, 31 Jan 2017 00:27:25 +0100
+
+debian-installer-utils (1.117) unstable; urgency=medium
+
+  * add checksum verification to fetch-url
+
+ -- Philip Hands <phil@hands.com>  Wed, 23 Nov 2016 22:40:56 +0100
+
+debian-installer-utils (1.116) unstable; urgency=medium
+
+  * Team upload.
+  * vt102-di: Tinker vt102 entry, to avoid using ^J, since various levels of
+    tty may be adding a ^M and thus scrambling the output, use generic escape
+    sequence instead.
+
+ -- Samuel Thibault <sthibault@debian.org>  Sun, 18 Sep 2016 21:53:23 +0200
+
+debian-installer-utils (1.115) unstable; urgency=medium
+
+  * Team upload.
+  * rules: Add screen terminfo for proper screen terminal support.
+
+ -- Samuel Thibault <sthibault@debian.org>  Thu, 15 Sep 2016 02:04:42 +0200
+
+debian-installer-utils (1.114) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Use HTTPS for Vcs-* URLs, and link to cgit rather than gitweb.
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 14 Feb 2016 08:08:37 +0100
+
 debian-installer-utils (1.113ubuntu2) artful; urgency=medium
 
   * Make sure udevd internal state is up-to-date before calling trigger &
@@ -3540,3 +3636,4 @@ debian-installer-utils (0.01) unstable; urgency=low
   * Initial Release.
 
  -- David Whedon <dwhedon@debian.org>  Mon, 12 Feb 2001 21:16:51 -0800
+

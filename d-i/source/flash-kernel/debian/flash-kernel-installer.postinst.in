@@ -24,13 +24,17 @@ findfs () {
 	mount | grep "on /target${1%/} " | tail -n1 | cut -d' ' -f1
 }
 
+tac () {
+	sed '1!G;h;$!d'
+}
+
 # check if live-installer diverted update-initramfs, revert before we move on
 if [ -e /target/usr/sbin/update-initramfs.flash-kernel-diverted ];then
 		rm -f /target/usr/sbin/update-initramfs
 		in-target dpkg-divert --remove --local --rename /usr/sbin/update-initramfs
 fi
 
-machine="$(get_cpuinfo_hardware)"
+get_machine
 
 if machine_uses_flash "$machine"; then
 	db_progress START 0 3 flash-kernel-installer/progress
@@ -41,7 +45,29 @@ db_progress INFO flash-kernel-installer/prepare
 
 # Stop fsck from prompting the user for input since most users don't
 # have a serial console.
-sed -i "s/^FSCKFIX=no$/FSCKFIX=yes/" /target/etc/default/rcS || true
+if [ -e /target/etc/default/rcS ]; then
+	sed -i -e "s/^FSCKFIX=no$/FSCKFIX=yes/" /target/etc/default/rcS || true
+fi
+if [ -e /target/etc/default/fsck ]; then
+	sed -i -e "s/^#FSCKFIX=no$/FSCKFIX=yes/" -e "s/^FSCKFIX=no$/FSCKFIX=yes/" /target/etc/default/fsck || true
+fi
+
+def_params="@DEFAULT_CMDLINE@"
+# reverse them so we prefix them in the right order
+rev_def_params="$(echo $def_params | tr ' ' '\n' | tac)"
+user_params=$(user-params) || true
+kopt_params="$user_params"
+for d_param in $rev_def_params; do
+	# Don't add redundant default params
+	if echo $kopt_params | tr ' ' '\n' | grep -q "^${d_param}$"; then
+		continue
+	else
+		kopt_params="$d_param${kopt_params:+ $kopt_params}"
+	fi
+done
+
+echo flash-kernel flash-kernel/linux_cmdline string $kopt_params | \
+	chroot /target debconf-set-selections
 
 if ! apt-install flash-kernel; then
 	error "apt-install flash-kernel failed"

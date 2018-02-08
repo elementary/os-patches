@@ -1,3 +1,74 @@
+partman-partitioning (120ubuntu1) bionic; urgency=low
+
+  * Merge from Debian unstable.  Remaining changes:
+    - DASD-FBA drives should still use msdos partition table, and not dasd
+      one.
+    - Add PATH, RAWMINSIZE, RAWPREFSIZE, and RAWMAXSIZE substitutions to
+      partman-partitioning/new_size in support of ubiquity's resize widget.
+    - Check that minimum filesystem sizes reported by tune2fs and ntfsresize
+      are between the minimum partition size and the current partition size;
+      if not, refuse to resize the partition at all.
+    - Save the swap size for ubiquity.
+    - On systems with only GPT disks, check that an EFI System Partition or
+      a BIOS Boot Partition exists, as appropriate.
+    - Detect "fsl" subarch for powerpc and set partition map to GPT.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 17 Jan 2018 11:17:38 +0000
+
+partman-partitioning (120) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Icelandic (is.po) by Sveinn í Felli
+  * Panjabi (pa.po) by Aman ALam
+  * Serbian (sr.po) by Filipovic Dragan
+
+ -- Christian Perrier <bubulle@debian.org>  Mon, 15 Jan 2018 06:55:03 +0100
+
+partman-partitioning (119) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Esperanto (eo.po) by Felipe Castro
+  * Lithuanian (lt.po) by Rimas Kudelis
+  * Swedish (sv.po) by Anders Jonsson
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 03 Dec 2017 18:40:53 +0100
+
+partman-partitioning (118) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Greek (el.po) by Sotirios Vrachas
+  * Norwegian Nynorsk (nn.po) by Allan Nordhøy
+  * Swedish (sv.po) by Anders Jonsson
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 26 Nov 2017 19:22:10 +0100
+
+partman-partitioning (117) unstable; urgency=medium
+
+  [ John Paul Adrian Glaubitz ]
+  * Use disk labels for powerpc on ppc64 as well.
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 24 Sep 2017 07:52:29 +0200
+
+partman-partitioning (116) unstable; urgency=medium
+
+  [ Cyril Brulebois ]
+  * Make get_real_device() both simpler and more generic by mimicking
+    the linux kernel's disk_name function, thanks to Ben Hutchings
+    (See: #820818).
+
+  [ Updated translations ]
+  * Simplified Chinese (zh_CN.po) by Yangfl
+
+ -- Cyril Brulebois <kibi@debian.org>  Sat, 24 Jun 2017 20:04:19 +0200
+
+partman-partitioning (115) unstable; urgency=medium
+
+  * Fix resizing an NVMe device, by making sure the “pN” (where N is the
+    partition number) is included in the path of the device to be
+    resized (Closes: #820818).
+
+ -- Cyril Brulebois <kibi@debian.org>  Thu, 09 Mar 2017 19:43:52 +0100
+
 partman-partitioning (114ubuntu2) zesty; urgency=medium
 
   * DASD-FBA drives should still use msdos partition table, and not dasd

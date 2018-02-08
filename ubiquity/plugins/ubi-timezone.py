@@ -33,10 +33,10 @@ import ubiquity.tz
 
 NAME = 'timezone'
 # after partman for default install, but language for oem install
-AFTER = ['partman', 'language']
+AFTER = ['partman', 'console_setup']
 WEIGHT = 10
 
-_geoname_url = 'http://geoname-lookup.ubuntu.com/?query=%s&release=%s'
+_geoname_url = 'https://geoname-lookup.ubuntu.com/?query=%s&release=%s'
 
 
 class PageGtk(plugin.PluginUI):

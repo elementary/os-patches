@@ -1,3 +1,87 @@
+partman-base (192ubuntu1) bionic; urgency=medium
+
+  * Resynchronise with Debian.  Remaining changes:
+    - Ubiquity integration: If PARTMAN_NO_COMMIT is set, then exit rather
+      than running commit.d and finish.d scripts; add a partman-commit
+      script; dump extra information to /var/lib/partman/snoop if
+      PARTMAN_SNOOP is set; check for per-menu 'no_show_choices' file in
+      ask_user and don't reshow the menu if it exists.
+    - Don't skip over dmraid devices if the user chooses not to activate
+      them.
+    - If the only thing mounted on a disk is the installation medium and it
+      uses more or less the whole disk, then silently exclude that disk; if
+      the installation medium is mounted but doesn't use the whole disk,
+      issue a warning that partitioning may be difficult; if anything else
+      is mounted, offer to unmount it. partman/filter_mounted=false disables
+      this.
+    - debian/control: replace harddrive-detection Depends with the specific
+      disk-detect version needed (>= 1.95ubuntu4) to support multipath-tools
+      0.5.0. There are no other harddrive-detection providers yet anyway.
+    - Multipath support: 
+      - lib/base.sh: is_multipath_part(): Use 'p' (not '-part') as multipath
+        disk-partition separator.
+      - lib/base.sh: humandev(): Accept spaces in multipath WWID.
+      - init.d/parted: part_of_multipath(): Update grep expression for more
+        recent output of 'multipath -l'.
+      - lib/base.sh: drop the p separator for multipath partitions
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 27 Jul 2017 08:10:29 +0100
+
+partman-base (192) unstable; urgency=medium
+
+  [ Aurelien Jarno ]
+  * debian/isinstallable: drop support for unsupported mips platforms.
+
+  [ Karsten Merker ]
+  * For systems that are known to have their boot firmware on an mmcblk
+    device, protect the firmware area on all mmcblk devices (and not
+    only on mmcblk0) from being clobbered during guided partitioning
+    and add missing whitespace to the corresponding log output.
+    (Closes: #854822)
+
+ -- Cyril Brulebois <kibi@debian.org>  Mon, 26 Jun 2017 00:11:48 +0200
+
+partman-base (191) unstable; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * init.d/parted: part_of_multipath(): Update grep expression for more
+    recent output of 'multipath -l'.
+  * lib/base.sh: humandev(): Accept spaces in multipath WWID.
+
+  [ Cyril Brulebois ]
+  * Merge Mathieu's work, with apologies for the delay.
+
+ -- Cyril Brulebois <kibi@debian.org>  Fri, 10 Feb 2017 19:24:29 +0100
+
+partman-base (190) unstable; urgency=medium
+
+  [ Viktor Mihajlovski ]
+  * Add disk label type to device directory, such that
+    e.g. partman-partitioning can elect dasd partitioning table for dasd
+    drives.
+
+  [ Dimitri John Ledkov ]
+  * On s390[x], prevent using extended partitions on DASD drives that can
+    only hold 3 partitions. Parted doesn't have special knowledge about
+    that and claims that msdos partition table on DASD drives can hold
+    the usual maximum number of partitions types.
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 13 Nov 2016 07:45:31 +0100
+
+partman-base (189) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Use HTTPS for Vcs-* URLs, and link to cgit rather than gitweb.
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 07 Feb 2016 17:01:43 +0100
+
+partman-base (188) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Thai (th.po) by Theppitak Karoonboonyanan
+
+ -- Christian Perrier <bubulle@debian.org>  Fri, 02 Oct 2015 12:31:01 +0200
+
 partman-base (187ubuntu3) yakkety; urgency=medium
 
   * On s390[x], Prevent using extended partitions on DASD drives that can
@@ -5194,4 +5278,3 @@ partman (1) never-released; urgency=low
   * First version.
 
  -- Anton Zinoviev <zinoviev@debian.org>  Wed, 27 Aug 2003 07:03:28 +0200
-

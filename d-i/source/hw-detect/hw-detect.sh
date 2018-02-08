@@ -491,6 +491,11 @@ if [ -n "$(list-devices cd; list-devices maybe-usb-floppy)" ]; then
 	apt-install eject || true
 fi
 
+# Install opeal-prd for OpenPOWER machines LP: #1555904
+if [ -d /sys/firmware/devicetree/base/ibm,opal/diagnostics ]; then
+	apt-install opal-prd || true
+fi
+
 # Install optimised libc based on CPU type
 case "$(udpkg --print-architecture)" in
     i386)

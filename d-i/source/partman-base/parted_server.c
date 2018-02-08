@@ -1374,9 +1374,9 @@ command_commit()
          * the firmware area, resulting in an unbootable system (see
          * bug #751704).
          */
-        if (is_system_with_firmware_on_disk() && !strcmp(disk->dev->path, "/dev/mmcblk0")) {
+        if (is_system_with_firmware_on_disk() && !strncmp(disk->dev->path, "/dev/mmcblk", 11)) {
                 disk->needs_clobber = 0;
-                log("Sunxi/Freescale/AM33XX detected. Disabling ped_disk_clobber" \
+                log("Sunxi/Freescale/AM33XX detected. Disabling ped_disk_clobber " \
                     "for the boot device %s to protect the firmware " \
                     "area.", disk->dev->path);
         }
