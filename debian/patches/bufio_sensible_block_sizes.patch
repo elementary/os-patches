@@ -1,0 +1,43 @@
+From 18e6620996821d33d36fc71cff2d5862ed24dfd8 Mon Sep 17 00:00:00 2001
+From: Steve Langasek <steve.langasek@ubuntu.com>
+Date: Fri, 2 Feb 2018 10:26:34 -0500
+Subject: Don't use arbitrary file sizes as block sizes in bufio
+
+When grub_bufio_open() is called with a buffer size greater than the size
+of the file being buffered, it clamps the buffer size to the file size.
+This seems sensible on the surface to avoid over-allocating memory, but
+grub_bufio_read() also assumes that ~(block_size-1) gives a sensible
+mask value... which is only true for power of 2 block sizes, not for
+random file sizes.
+If the file we're buffering is on tftp, we get particularly pathological
+results because we wind up seeking backwards which requires re-requesting
+the file from the tftp server - even though the whole file fit in a single
+udp packet much smaller than the default buffer size.
+
+Signed-off-by: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+
+Author: Steve Langasek <steve.langasek@ubuntu.com>
+Forwarded: no
+Last-Update: 2016-11-01
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1743249
+Patch-Name: bufio_sensible_block_sizes.patch
+---
+ grub-core/io/bufio.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/grub-core/io/bufio.c b/grub-core/io/bufio.c
+index 22438277d..99953ccfa 100644
+--- a/grub-core/io/bufio.c
++++ b/grub-core/io/bufio.c
+@@ -57,9 +57,8 @@ grub_bufio_open (grub_file_t io, int size)
+   else if (size > GRUB_BUFIO_MAX_SIZE)
+     size = GRUB_BUFIO_MAX_SIZE;
+ 
+-  if ((size < 0) || ((unsigned) size > io->size))
+-    size = ((io->size > GRUB_BUFIO_MAX_SIZE) ? GRUB_BUFIO_MAX_SIZE :
+-            io->size);
++  if (size < 0)
++    size = GRUB_BUFIO_MAX_SIZE;
+ 
+   bufio = grub_zalloc (sizeof (struct grub_bufio) + size);
+   if (! bufio)

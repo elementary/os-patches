@@ -1,3 +1,20 @@
+grub2 (2.02-2ubuntu6) bionic; urgency=medium
+
+  [ Steve Langasek ]
+  * debian/patches/bufio_sensible_block_sizes.patch: Don't use arbitrary file
+    fizes as block sizes in bufio: this avoids potentially seeking back in
+    the files unnecessarily, which may require re-open files that cannot be
+    seeked into, such as via TFTP. (LP: #1743249)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 05 Feb 2018 11:58:09 -0500
+
+grub2 (2.02-2ubuntu5) bionic; urgency=medium
+
+  * debian/patches/mkconfig_keep_native_term_active.patch: Keep the
+    default EFI console active while enabling gfxterm. (LP: #1743884)
+
+ -- dann frazier <dannf@ubuntu.com>  Wed, 31 Jan 2018 10:51:11 -0700
+
 grub2 (2.02-2ubuntu4) bionic; urgency=medium
 
   * debian/patches/vt_handoff.patch: modify the existing patch to set
