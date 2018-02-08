@@ -1,3 +1,18 @@
+grub2 (2.02~beta2-36ubuntu3.16) xenial; urgency=medium
+
+  [ dann frazier ]
+  * Use EFI_SIMPLE_TEXT_INPUT_EX to support key combinations.
+    (LP: #722950)
+
+  [ Mathieu Trudel-Lapierre ]
+  * util/grub-install.c: Use MokManager EFI binary name without
+    the .signed extension now that shim handles signing via sbsigntool
+    natively. (LP: #1708245)
+    - debian/patches/install_signed.patch
+  * debian/control: Breaks shim << 13 due to the renamed MokManager binary.
+
+ -- dann frazier <dannf@ubuntu.com>  Wed, 10 Jan 2018 17:04:34 -0700
+
 grub2 (2.02~beta2-36ubuntu3.15) xenial; urgency=medium
 
   [ Ike Panhc ]

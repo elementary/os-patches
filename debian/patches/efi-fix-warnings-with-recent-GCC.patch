@@ -1,0 +1,27 @@
+From 5fcde03bf1e8cf74c186bcef6d705734f2d002c5 Mon Sep 17 00:00:00 2001
+From: Andrei Borzenkov <arvidjaar@gmail.com>
+Date: Tue, 27 Oct 2015 23:30:54 +0300
+Subject: [PATCH] efi: fix warnings with recent GCC
+
+../../grub-core/term/efi/console.c:128:32: error: suggest parentheses around '&&' within '||' [-Werror=parentheses]
+   if (key.unicode_char >= 0x20 && key.unicode_char <= 0x7f
+---
+ grub-core/term/efi/console.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/term/efi/console.c b/grub-core/term/efi/console.c
+index 8b2096f..7d31095 100644
+--- a/grub-core/term/efi/console.c
++++ b/grub-core/term/efi/console.c
+@@ -125,7 +125,7 @@ grub_efi_translate_key (grub_efi_input_key_t key)
+   else if (key.scan_code < ARRAY_SIZE (efi_codes))
+     return efi_codes[key.scan_code];
+ 
+-  if (key.unicode_char >= 0x20 && key.unicode_char <= 0x7f
++  if ((key.unicode_char >= 0x20 && key.unicode_char <= 0x7f)
+       || key.unicode_char == '\t' || key.unicode_char == '\b'
+       || key.unicode_char == '\n' || key.unicode_char == '\r')
+     return key.unicode_char;
+-- 
+2.7.4
+
