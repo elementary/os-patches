@@ -57,6 +57,8 @@ extern int errno;
 /* How big to make the_history when we first allocate it. */
 #define DEFAULT_HISTORY_INITIAL_SIZE	502
 
+#define MAX_HISTORY_INITIAL_SIZE	8192
+
 /* The number of slots to increase the_history by. */
 #define DEFAULT_HISTORY_GROW_SIZE 50
 
@@ -277,6 +279,7 @@ add_history (string)
      const char *string;
 {
   HIST_ENTRY *temp;
+  int new_length;
 
   if (history_stifled && (history_length == history_max_entries))
     {
@@ -293,13 +296,9 @@ add_history (string)
 
       /* Copy the rest of the entries, moving down one slot.  Copy includes
 	 trailing NULL.  */
-#if 0
-      for (i = 0; i < history_length; i++)
-	the_history[i] = the_history[i + 1];
-#else
       memmove (the_history, the_history + 1, history_length * sizeof (HIST_ENTRY *));
-#endif
 
+      new_length = history_length;
       history_base++;
     }
   else
@@ -307,11 +306,13 @@ add_history (string)
       if (history_size == 0)
 	{
 	  if (history_stifled && history_max_entries > 0)
-	    history_size = history_max_entries + 2;
+	    history_size = (history_max_entries > MAX_HISTORY_INITIAL_SIZE)
+				? MAX_HISTORY_INITIAL_SIZE
+				: history_max_entries + 2;
 	  else
 	    history_size = DEFAULT_HISTORY_INITIAL_SIZE;
 	  the_history = (HIST_ENTRY **)xmalloc (history_size * sizeof (HIST_ENTRY *));
-	  history_length = 1;
+	  new_length = 1;
 	}
       else
 	{
@@ -321,14 +322,15 @@ add_history (string)
 	      the_history = (HIST_ENTRY **)
 		xrealloc (the_history, history_size * sizeof (HIST_ENTRY *));
 	    }
-	  history_length++;
+	  new_length = history_length + 1;
 	}
     }
 
   temp = alloc_history_entry ((char *)string, hist_inittime ());
 
-  the_history[history_length] = (HIST_ENTRY *)NULL;
-  the_history[history_length - 1] = temp;
+  the_history[new_length] = (HIST_ENTRY *)NULL;
+  the_history[new_length - 1] = temp;
+  history_length = new_length;
 }
 
 /* Change the time stamp of the most recent history entry to STRING. */

@@ -3,12 +3,13 @@ Section: base
 Priority: required
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Matthias Klose <doko@debian.org>
-Standards-Version: 3.9.8
+Standards-Version: 4.1.3
 Build-Depends: autoconf, autotools-dev, bison, libncurses5-dev,
- texinfo, texi2html, debhelper (>= 9), gettext, sharutils,
+ texinfo, texi2html, debhelper (>= 9.20160115~), gettext, sharutils,
  locales <!nocheck>, time <!nocheck>,
- xz-utils, dpkg-dev (>= 1.16.1)
+ xz-utils, dpkg-dev (>= 1.16.1), man2html
 Build-Depends-Indep: texlive-latex-base, ghostscript, texlive-fonts-recommended
+Build-Conflicts: r-base-core
 Homepage: http://tiswww.case.edu/php/chet/bash/bashtop.html
 Vcs-Browser: https://code.launchpad.net/~doko/+junk/pkg-bash-debian
 Vcs-Bzr: http://bazaar.launchpad.net/~doko/+junk/pkg-bash-debian
@@ -16,7 +17,7 @@ Vcs-Bzr: http://bazaar.launchpad.net/~doko/+junk/pkg-bash-debian
 Package: bash
 Architecture: any
 Multi-Arch: foreign
-Pre-Depends: dash (>= 0.5.5.1-2.2), ${shlibs:Pre-Depends}, ${misc:Depends}
+Pre-Depends: ${shlibs:Pre-Depends}, ${misc:Depends}
 Depends: base-files (>= 2.1.12), debianutils (>= 2.15)
 Recommends: bash-completion (>= 20060301-0)
 Conflicts: bash-completion (<< 20060301-0)

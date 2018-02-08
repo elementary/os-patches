@@ -2825,11 +2825,15 @@ list_string (string, separators, quoted)
 
 /* Parse a single word from STRING, using SEPARATORS to separate fields.
    ENDPTR is set to the first character after the word.  This is used by
-   the `read' builtin.  This is never called with SEPARATORS != $IFS;
-   it should be simplified.
+   the `read' builtin.
+   
+   This is never called with SEPARATORS != $IFS, and takes advantage of that.
 
    XXX - this function is very similar to list_string; they should be
 	 combined - XXX */
+
+#define islocalsep(c)	(local_cmap[(unsigned char)(c)] != 0)
+
 char *
 get_word_from_string (stringp, separators, endptr)
      char **stringp, *separators, **endptr;
@@ -2837,6 +2841,7 @@ get_word_from_string (stringp, separators, endptr)
   register char *s;
   char *current_word;
   int sindex, sh_style_split, whitesep, xflags;
+  unsigned char local_cmap[UCHAR_MAX+1];	/* really only need single-byte chars here */
   size_t slen;
 
   if (!stringp || !*stringp || !**stringp)
@@ -2846,20 +2851,23 @@ get_word_from_string (stringp, separators, endptr)
 				 separators[1] == '\t' &&
 				 separators[2] == '\n' &&
 				 separators[3] == '\0';
-  for (xflags = 0, s = ifs_value; s && *s; s++)
+  memset (local_cmap, '\0', sizeof (local_cmap));
+  for (xflags = 0, s = separators; s && *s; s++)
     {
       if (*s == CTLESC) xflags |= SX_NOCTLESC;
       if (*s == CTLNUL) xflags |= SX_NOESCCTLNUL;
+      local_cmap[(unsigned char)*s] = 1;	/* local charmap of separators */
     }
 
   s = *stringp;
   slen = 0;
 
   /* Remove sequences of whitespace at the beginning of STRING, as
-     long as those characters appear in IFS. */
-  if (sh_style_split || !separators || !*separators)
+     long as those characters appear in SEPARATORS.  This happens if
+     SEPARATORS == $' \t\n' or if IFS is unset. */
+  if (sh_style_split || separators == 0)
     {
-      for (; *s && spctabnl (*s) && isifs (*s); s++);
+      for (; *s && spctabnl (*s) && islocalsep (*s); s++);
 
       /* If the string is nothing but whitespace, update it and return. */
       if (!*s)
@@ -2878,9 +2886,9 @@ get_word_from_string (stringp, separators, endptr)
 
      This obeys the field splitting rules in Posix.2. */
   sindex = 0;
-  /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
-     unless multibyte chars are possible. */
-  slen = (MB_CUR_MAX > 1) ? STRLEN (s) : 1;
+  /* Don't need string length in ADVANCE_CHAR unless multibyte chars are
+     possible, but need it in string_extract_verbatim for bounds checking */
+  slen = STRLEN (s);
   current_word = string_extract_verbatim (s, slen, &sindex, separators, xflags);
 
   /* Set ENDPTR to the first character after the end of the word. */
@@ -2899,19 +2907,19 @@ get_word_from_string (stringp, separators, endptr)
 
   /* Now skip sequences of space, tab, or newline characters if they are
      in the list of separators. */
-  while (s[sindex] && spctabnl (s[sindex]) && isifs (s[sindex]))
+  while (s[sindex] && spctabnl (s[sindex]) && islocalsep (s[sindex]))
     sindex++;
 
   /* If the first separator was IFS whitespace and the current character is
      a non-whitespace IFS character, it should be part of the current field
      delimiter, not a separate delimiter that would result in an empty field.
      Look at POSIX.2, 3.6.5, (3)(b). */
-  if (s[sindex] && whitesep && isifs (s[sindex]) && !spctabnl (s[sindex]))
+  if (s[sindex] && whitesep && islocalsep (s[sindex]) && !spctabnl (s[sindex]))
     {
       sindex++;
       /* An IFS character that is not IFS white space, along with any adjacent
 	 IFS white space, shall delimit a field. */
-      while (s[sindex] && spctabnl (s[sindex]) && isifs (s[sindex]))
+      while (s[sindex] && spctabnl (s[sindex]) && islocalsep(s[sindex]))
 	sindex++;
     }
 
@@ -5808,10 +5816,7 @@ process_substitute (string, open_for_read_in_child)
     {
 #if defined (JOB_CONTROL)
       if (last_procsub_child)
-	{
-	  discard_pipeline (last_procsub_child);
-	  last_procsub_child = (PROCESS *)NULL;
-	}
+	discard_last_procsub_child ();
       last_procsub_child = restore_pipeline (0);
 #endif
 
@@ -5901,6 +5906,8 @@ process_substitute (string, open_for_read_in_child)
      parent. */
   expanding_redir = 0;
 
+  remove_quoted_escapes (string);
+
   subshell_level++;
   result = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
   subshell_level--;
@@ -5931,12 +5938,15 @@ read_comsub (fd, quoted, rflag)
   char *istring, buf[128], *bufp, *s;
   int istring_index, istring_size, c, tflag, skip_ctlesc, skip_ctlnul;
   ssize_t bufn;
+  int nullbyte;
 
   istring = (char *)NULL;
   istring_index = istring_size = bufn = tflag = 0;
 
   for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
     skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
+
+  nullbyte = 0;
 
   /* Read the output of the command through the pipe.  This may need to be
      changed to understand multibyte characters in the future. */
@@ -5956,7 +5966,11 @@ read_comsub (fd, quoted, rflag)
       if (c == 0)
 	{
 #if 1
-	  internal_warning ("%s", _("command substitution: ignored null byte in input"));
+	  if (nullbyte == 0)
+	    {
+	      internal_warning ("%s", _("command substitution: ignored null byte in input"));
+	      nullbyte = 1;
+	    }
 #endif
 	  continue;
 	}
@@ -9454,6 +9468,10 @@ add_twochars:
 		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS);	/* affects $@ */
 	      if (word->flags & W_COMPLETE)
 		tword->flags |= W_COMPLETE;	/* for command substitutions */
+	      if (word->flags & W_NOCOMSUB)
+		tword->flags |= W_NOCOMSUB;
+	      if (word->flags & W_NOPROCSUB)
+		tword->flags |= W_NOPROCSUB;
 
 	      temp = (char *)NULL;
 

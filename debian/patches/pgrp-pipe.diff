@@ -1,13 +1,33 @@
 # DP: Define PGRP_PIPE to avoid race condition.
 
-Index: b/config-bot.h
+Index: b/configure
 ===================================================================
---- a/config-bot.h
-+++ b/config-bot.h
-@@ -201,3 +201,6 @@
- 
- /* If you don't want bash to provide a default mail file to check. */
- #undef DEFAULT_MAIL_DIRECTORY
-+
-+/* Bug #224543 */
-+#define PGRP_PIPE 1
+--- a/configure
++++ b/configure
+@@ -16064,10 +16064,8 @@ solaris2.10*)	LOCAL_CFLAGS=-DSOLARIS  ;;
+ solaris2*)	LOCAL_CFLAGS=-DSOLARIS ;;
+ lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
+ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
+-		case "`uname -r`" in
+-		2.[456789]*|[34]*)	$as_echo "#define PGRP_PIPE 1" >>confdefs.h
++		$as_echo "#define PGRP_PIPE 1" >>confdefs.h
+  ;;
+-		esac ;;
+ *qnx6*)		LOCAL_CFLAGS="-Dqnx -Dqnx6" LOCAL_LIBS="-lncurses" ;;
+ *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
+ powerux*)	LOCAL_LIBS="-lgen" ;;
+Index: b/configure.ac
+===================================================================
+--- a/configure.ac
++++ b/configure.ac
+@@ -1092,9 +1092,7 @@ solaris2.10*)	LOCAL_CFLAGS=-DSOLARIS  ;;
+ solaris2*)	LOCAL_CFLAGS=-DSOLARIS ;;
+ lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
+ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
+-		case "`uname -r`" in
+-		2.[[456789]]*|[[34]]*)	AC_DEFINE(PGRP_PIPE) ;;
+-		esac ;;
++		AC_DEFINE(PGRP_PIPE) ;;
+ *qnx6*)		LOCAL_CFLAGS="-Dqnx -Dqnx6" LOCAL_LIBS="-lncurses" ;;
+ *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
+ powerux*)	LOCAL_LIBS="-lgen" ;;

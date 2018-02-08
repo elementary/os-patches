@@ -39,7 +39,7 @@ ifneq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 endif
 
 
-dpkg_buildflags = DEB_CFLAGS_MAINT_APPEND="-Wall -no-pie" dpkg-buildflags
+dpkg_buildflags = DEB_CFLAGS_MAINT_APPEND="-Wall" dpkg-buildflags
 CFLAGS := $(shell $(dpkg_buildflags) --get CFLAGS)
 CPPFLAGS := $(shell $(dpkg_buildflags) --get CPPFLAGS)
 LDFLAGS := $(shell $(dpkg_buildflags) --get LDFLAGS)
@@ -93,6 +93,8 @@ build-arch: build
 build-indep: build
 
 before-build:
+	dh_testdir
+	dh_update_autotools_config
 	mkdir -p stamps
 	: # see #327477, needed to have HAVE_DEV_STDIN defined
 	(test -d /dev/fd && test -r /dev/stdin < /dev/null) \
@@ -135,7 +137,7 @@ static-configure:
 bash-doc-build: stamps/stamp-build-bash-doc
 stamps/stamp-build-bash-doc:
 	rm -f bash/doc/bashref.info
-	$(MAKE) -C build-bash/doc info html
+	$(MAKE) -C build-bash/doc info html MAN2HTML=/usr/bin/man2html
 	$(MAKE) -C build-bash/doc bash.pdf bashref.pdf
 	touch stamps/stamp-build-bash-doc
 

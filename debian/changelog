@@ -1,3 +1,32 @@
+bash (4.4.18-1ubuntu1) bionic; urgency=medium
+
+  * Merge with Debian; remaining changes:
+    - skel.bashrc:
+      - Run lesspipe.
+      - Enable ls aliases.
+      - Set options in ll alias to -alF.
+      - Define an alert alias.
+      - Enabled colored grep aliases.
+    - etc.bash.bashrc:
+      - Add sudo hint.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 06 Feb 2018 13:12:30 +0100
+
+bash (4.4.18-1) unstable; urgency=medium
+
+  * bash 4.4.18 release (bash 4.4 patchlevel 18).
+  * bash: Remove dependency on dash. Closes: #537913.
+  * Update config.guess and config.sub. Closes: #882474.
+  * skel.profile: Add $HOME/.local/bin if it exists. Closes: #839155.
+  * Stop building with -no-pie. Closes: #865599, #859263.
+  * /etc/bash.bashrc: Don't overwrite PS1 if SUDO_PS1 is set. Closes: #789811.
+  * Make the build reproducible. Closes: #806945.
+    - Use the system provided man2html to generate the htm docs.
+    - Set PGRP_PIPE unconditionally on Linux.
+  * Fix typo in German help (Carsten Leonhardt). Closes: #831282.
+
+ -- Matthias Klose <doko@debian.org>  Tue, 06 Feb 2018 12:20:45 +0100
+
 bash (4.4-5ubuntu1) artful; urgency=medium
 
   * Merge with Debian; remaining changes:
