@@ -356,12 +356,15 @@ def guess_debian_release():
     return distinfo
 
 # Whatever is guessed above can be overridden in /etc/lsb-release
-def get_lsb_information():
+def get_lsb_information(upstream=False):
     distinfo = {}
     etc_lsb_release = os.environ.get('LSB_ETC_LSB_RELEASE','/etc/lsb-release')
-    if os.path.exists(etc_lsb_release):
+    path='/etc/lsb-release'
+    if upstream:
+        path='/etc/upstream-release/lsb-release'
+    if os.path.exists(path):
         try:
-            with open(etc_lsb_release) as lsb_release_file:
+            with open(path) as lsb_release_file:
                 for line in lsb_release_file:
                     line = line.strip()
                     if not line:
@@ -377,12 +380,12 @@ def get_lsb_information():
                         if arg: # Ignore empty arguments
                             distinfo[var] = arg.strip()
         except IOError as msg:
-            print('Unable to open ' + etc_lsb_release + ':', str(msg), file=sys.stderr)
-            
+            print('Unable to open ' + path + ':', str(msg), file=sys.stderr)
+
     return distinfo
 
-def get_distro_information():
-    lsbinfo = get_lsb_information()
+def get_distro_information(upstream=False):
+    lsbinfo = get_lsb_information(upstream)
     # OS is only used inside guess_debian_release anyway
     for key in ('ID', 'RELEASE', 'CODENAME', 'DESCRIPTION',):
         if key not in lsbinfo:
