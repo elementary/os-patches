@@ -18,42 +18,53 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Gtranslator 2.91.6\n"
 
-#: ../unattended-upgrade:182
+#: ../unattended-upgrade:189
 #, python-format
 msgid "Progress: %s %% (%s)"
 msgstr "進行状況: %s %% (%s)"
 
-#: ../unattended-upgrade:376 ../unattended-upgrade:393
+#: ../unattended-upgrade:383 ../unattended-upgrade:400
 #, python-format
 msgid "Unable to parse %s."
 msgstr ""
 
-#: ../unattended-upgrade:479 ../unattended-upgrade:577
-#: ../unattended-upgrade-shutdown:182
+#: ../unattended-upgrade:486 ../unattended-upgrade:608
+#: ../unattended-upgrade-shutdown:193
 msgid "All upgrades installed"
 msgstr "全てのアップグレードがインストールされました"
 
-#: ../unattended-upgrade:481 ../unattended-upgrade:569
+#: ../unattended-upgrade:488 ../unattended-upgrade:600
 msgid "Installing the upgrades failed!"
 msgstr "アップグレードのインストールが失敗しました!"
 
-#: ../unattended-upgrade:482 ../unattended-upgrade:570
+#: ../unattended-upgrade:489 ../unattended-upgrade:601
+#: ../unattended-upgrade:755 ../unattended-upgrade:757
+#: ../unattended-upgrade:1432 ../unattended-upgrade:1434
+#: ../unattended-upgrade-shutdown:140
 #, python-format
 msgid "error message: '%s'"
 msgstr "エラーメッセージ: '%s'"
 
-#: ../unattended-upgrade:483 ../unattended-upgrade:571
+#: ../unattended-upgrade:490 ../unattended-upgrade:602
 #, python-format
 msgid "dpkg returned a error! See '%s' for details"
 msgstr "dpkg がエラーを返しました! 詳細は '%s' を参照してください"
 
-#: ../unattended-upgrade:541
+#: ../unattended-upgrade:572
 #, fuzzy, python-format
 #| msgid "Packages that will be upgraded: %s"
 msgid "Some packages can not be upgraded: %s"
 msgstr "アップグレード予定のパッケージ: %s"
 
-#: ../unattended-upgrade:895
+#: ../unattended-upgrade:754 ../unattended-upgrade:756
+#: ../unattended-upgrade:1431 ../unattended-upgrade:1433
+#: ../unattended-upgrade-shutdown:139
+#, fuzzy
+#| msgid "dpkg returned an error! See '%s' for details"
+msgid "Apt returned an error, exiting"
+msgstr "dpkg がエラーを返しました! 詳細は '%s' を参照してください"
+
+#: ../unattended-upgrade:942
 msgid ""
 "No '/usr/bin/mail' or '/usr/sbin/sendmail',can not send mail. You probably "
 "want to install the 'mailx' package."
@@ -61,22 +72,22 @@ msgstr ""
 "'/usr/bin/mail' または '/usr/sbin/sendmail' がないためメールを送信することが"
 "できません。おそらく 'mailx' パッケージをインストールするとよいでしょう。"
 
-#: ../unattended-upgrade:909
+#: ../unattended-upgrade:956
 msgid "[reboot required]"
 msgstr ""
 
-#: ../unattended-upgrade:911
+#: ../unattended-upgrade:958
 msgid "[package on hold]"
 msgstr ""
 
-#: ../unattended-upgrade:914
-#, fuzzy
+#: ../unattended-upgrade:961
+#, fuzzy, python-brace-format
 #| msgid "[reboot required] unattended-upgrades result for '%s': %s"
 msgid ""
 "{hold_flag}{reboot_flag} unattended-upgrades result for '{machine}': {result}"
 msgstr "[再起動が必要] '%s' の自動アップグレード結果: %s"
 
-#: ../unattended-upgrade:918
+#: ../unattended-upgrade:965
 #, python-format
 msgid ""
 "Unattended upgrade returned: %s\n"
@@ -85,7 +96,7 @@ msgstr ""
 "自動アップグレードは以下を返しました: %s\n"
 "\n"
 
-#: ../unattended-upgrade:921
+#: ../unattended-upgrade:968
 msgid ""
 "Warning: A reboot is required to complete this upgrade.\n"
 "\n"
@@ -93,91 +104,91 @@ msgstr ""
 "警告: このアップグレードを完了するために再起動が必要です。\n"
 "\n"
 
-#: ../unattended-upgrade:923
+#: ../unattended-upgrade:970
 msgid "Packages that were upgraded:\n"
 msgstr "アップグレードされたパッケージ:\n"
 
-#: ../unattended-upgrade:925
+#: ../unattended-upgrade:972
 msgid "Packages that attempted to upgrade:\n"
 msgstr "アップグレードしようとしたパッケージ:\n"
 
-#: ../unattended-upgrade:929
+#: ../unattended-upgrade:976
 msgid "Packages with upgradable origin but kept back:\n"
 msgstr "導入元からアップグレード可能ですが、バージョンを維持したパッケージ:\n"
 
-#: ../unattended-upgrade:934
+#: ../unattended-upgrade:981
 msgid "Package installation log:"
 msgstr "パッケージのインストールログ"
 
-#: ../unattended-upgrade:937
+#: ../unattended-upgrade:984
 msgid "Unattended-upgrades log:\n"
 msgstr "Unattended-upgrades ログ:\n"
 
-#: ../unattended-upgrade:965
+#: ../unattended-upgrade:1012
 #, python-format
 msgid "Writing dpkg log to '%s'"
 msgstr "dpkg のログを '%s' に書き込み中"
 
-#: ../unattended-upgrade:1121
+#: ../unattended-upgrade:1168
 #, python-format
 msgid "Found %s, but not rebooting because %s is logged in."
 msgid_plural "Found %s, but not rebooting because %s are logged in."
 msgstr[0] "%s が見つかりましたが、%s がログインしているため再起動しません"
 
-#: ../unattended-upgrade:1175
+#: ../unattended-upgrade:1222
 #, python-format
 msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
 msgstr ""
 "パッケージ '%s' はアップグレード可能ですが、アップグレード予定にできませんで"
 "した (%s)"
 
-#: ../unattended-upgrade:1250
+#: ../unattended-upgrade:1297
 #, python-format
 msgid "Packages that are auto removed: '%s'"
 msgstr "自動削除されたパッケージ: '%s'"
 
-#: ../unattended-upgrade:1256
+#: ../unattended-upgrade:1303
 msgid "Packages were successfully auto-removed"
 msgstr "パッケージの自動削除が成功ました"
 
-#: ../unattended-upgrade:1258
+#: ../unattended-upgrade:1305
 msgid "Auto-removing the packages failed!"
 msgstr "パッケージの自動削除が失敗しました!"
 
-#: ../unattended-upgrade:1259
+#: ../unattended-upgrade:1306
 #, python-format
 msgid "Error message: '%s'"
 msgstr "エラーメッセージ: '%s'"
 
-#: ../unattended-upgrade:1260
+#: ../unattended-upgrade:1307
 #, python-format
 msgid "dpkg returned an error! See '%s' for details"
 msgstr "dpkg がエラーを返しました! 詳細は '%s' を参照してください"
 
-#: ../unattended-upgrade:1320
+#: ../unattended-upgrade:1367
 #, python-format
 msgid "Initial blacklisted packages: %s"
 msgstr "初期状態でブラックリストにあるパッケージ: %s"
 
-#: ../unattended-upgrade:1325
+#: ../unattended-upgrade:1372
 #, python-format
 msgid "Initial whitelisted packages: %s"
 msgstr "初期状態でホワイトリストにあるパッケージ: %s"
 
-#: ../unattended-upgrade:1328
+#: ../unattended-upgrade:1375
 msgid "Starting unattended upgrades script"
 msgstr "自動アップグレードスクリプトを開始します"
 
-#: ../unattended-upgrade:1337
+#: ../unattended-upgrade:1384
 #, python-format
 msgid "Allowed origins are: %s"
 msgstr "許可されているパッケージ導入元: %s"
 
-#: ../unattended-upgrade:1353 ../unattended-upgrade:1354
+#: ../unattended-upgrade:1400 ../unattended-upgrade:1401
 msgid "Unclean dpkg state detected, trying to correct"
 msgstr "未消去の dpkg 状態が検出されたので、修正しようとしています"
 
-#: ../unattended-upgrade:1365
+#: ../unattended-upgrade:1412
 #, python-format
 msgid ""
 "dpkg --configure -a output:\n"
@@ -186,105 +197,109 @@ msgstr ""
 "dpkg --configure -a output:\n"
 "%s"
 
-#: ../unattended-upgrade:1374
+#: ../unattended-upgrade:1421
 msgid "Lock could not be acquired (another package manager running?)"
 msgstr "ロックが取得できませんでした (別のパッケージマネージャが実行中?)"
 
-#: ../unattended-upgrade:1376
+#: ../unattended-upgrade:1423
 msgid "Cache lock can not be acquired, exiting"
 msgstr "キャッシュロックが取得できないので終了します"
 
-#: ../unattended-upgrade:1383 ../unattended-upgrade:1384
-#: ../unattended-upgrade:1573 ../unattended-upgrade:1574
+#: ../unattended-upgrade:1438 ../unattended-upgrade:1439
+#: ../unattended-upgrade:1633 ../unattended-upgrade:1634
 msgid "Cache has broken packages, exiting"
 msgstr "キャッシュに壊れたパッケージがあるので終了します"
 
-#: ../unattended-upgrade:1433
+#: ../unattended-upgrade:1488
 #, python-format
 msgid "GetArchives() failed: '%s'"
 msgstr "GetArchives() が失敗しました: '%s'"
 
-#: ../unattended-upgrade:1446 ../unattended-upgrade:1447
+#: ../unattended-upgrade:1504 ../unattended-upgrade:1505
 #, python-format
 msgid "An error occurred: '%s'"
 msgstr "エラー発生: '%s'"
 
-#: ../unattended-upgrade:1449 ../unattended-upgrade:1451
+#: ../unattended-upgrade:1507 ../unattended-upgrade:1509
 #, python-format
 msgid "The URI '%s' failed to download, aborting"
 msgstr "URI '%s' からダウンロード出来ないので中断します"
 
-#: ../unattended-upgrade:1455
+#: ../unattended-upgrade:1513
 #, python-format
 msgid "Download finished, but file '%s' not there?!?"
 msgstr "ダウンロード完了、しかしファイル '%s' がありません?!?"
 
-#: ../unattended-upgrade:1471 ../unattended-upgrade:1475
+#: ../unattended-upgrade:1529 ../unattended-upgrade:1533
 #, python-format
 msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
 msgstr ""
 "パッケージ '%s' には手動で確認とアップグレードが必要な設定ファイルがあります"
 
-#: ../unattended-upgrade:1503
+#: ../unattended-upgrade:1561
 #, python-format
 msgid "package '%s' not upgraded"
 msgstr "パッケージ '%s' はアップグレードされませんでした"
 
-#: ../unattended-upgrade:1522
+#: ../unattended-upgrade:1580
 msgid ""
 "No packages found that can be upgraded unattended and no pending auto-"
 "removals"
 msgstr "自動更新可能なパッケージおよび保留中の自動削除が見つかりません"
 
-#: ../unattended-upgrade:1550
+#: ../unattended-upgrade:1610
 #, python-format
 msgid "Packages that will be upgraded: %s"
 msgstr "アップグレード予定のパッケージ: %s"
 
-#: ../unattended-upgrade:1647
+#: ../unattended-upgrade:1713
 msgid "print debug messages"
 msgstr "デバッグメッセージを出力"
 
-#: ../unattended-upgrade:1650
+#: ../unattended-upgrade:1716
 msgid "make apt/libapt print verbose debug messages"
 msgstr "apt/libapt の詳細なデバッグメッセージを出力"
 
-#: ../unattended-upgrade:1653
+#: ../unattended-upgrade:1719
 msgid "print info messages"
 msgstr "情報メッセージを出力"
 
-#: ../unattended-upgrade:1656
+#: ../unattended-upgrade:1722
 msgid "Simulation, download but do not install"
 msgstr "シミュレーションで、ダウンロードをしますがインストールはしません"
 
-#: ../unattended-upgrade:1659
+#: ../unattended-upgrade:1725
 #, fuzzy
 #| msgid "Simulation, download but do not install"
 msgid "Only download, do not even try to install."
 msgstr "シミュレーションで、ダウンロードをしますがインストールはしません"
 
-#: ../unattended-upgrade:1662
+#: ../unattended-upgrade:1728
 msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
 msgstr "最小限の手順でアップグレード (SIGTERM で中断できます"
 
-#: ../unattended-upgrade:1671
+#: ../unattended-upgrade:1737
 msgid "You need to be root to run this application"
 msgstr "このアプリケーションは管理者権限で実行する必要があります"
 
 #: ../unattended-upgrade-shutdown:76
-msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
+#, fuzzy
+#| msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
+msgid ""
+"Unattended-upgrade in progress during shutdown, please don't turn off the "
+"computer"
 msgstr "シャットダウン時に進行中の unattended-upgrade、5 秒間スリープします"
 
-#: ../unattended-upgrade-shutdown:139
+#: ../unattended-upgrade-shutdown:150
 msgid "Running unattended-upgrades in shutdown mode"
 msgstr "unattended-upgrades はシャットダウンモードで実行中です"
 
-#: ../unattended-upgrade-shutdown:165
+#: ../unattended-upgrade-shutdown:176
 #, python-format
 msgid "Giving up on lockfile after %s delay"
 msgstr "%s 遅延後にロックファイルをあきらめます"
 
-#: ../unattended-upgrade-shutdown:178
+#: ../unattended-upgrade-shutdown:189
 msgid ""
 "Unattended-upgrades stopped. There may be upgrades left to be installed in "
 "the next run."

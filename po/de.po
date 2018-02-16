@@ -2,14 +2,14 @@
 # Copyright (C) 2005-2009 Canonical Ltd.
 # This file is distributed under the same license as the
 # unattended-upgrades package.
-# Copyright (C) of this file 2012-2014 Chris Leick.
+# Copyright (C) of this file 2012-2017 Chris Leick.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: unattended-upgrades 0.82.3\n"
+"Project-Id-Version: unattended-upgrades 0.98\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-07-02 12:27+0200\n"
-"PO-Revision-Date: 2014-03-16 13:16+0100\n"
+"PO-Revision-Date: 2017-10-10 21:56+0100\n"
 "Last-Translator: Chris Leick <c.leick@vollbio.de>\n"
 "Language-Team: German <debian-l10n-german@lists.debian.org>\n"
 "Language: de\n"
@@ -18,42 +18,52 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../unattended-upgrade:182
+#: ../unattended-upgrade:189
 #, python-format
 msgid "Progress: %s %% (%s)"
 msgstr "Fortschritt: %s %% (%s)"
 
-#: ../unattended-upgrade:376 ../unattended-upgrade:393
+#: ../unattended-upgrade:383 ../unattended-upgrade:400
 #, python-format
 msgid "Unable to parse %s."
-msgstr ""
+msgstr "%s kann nicht ausgewertet werden."
 
-#: ../unattended-upgrade:479 ../unattended-upgrade:577
-#: ../unattended-upgrade-shutdown:182
+#: ../unattended-upgrade:486 ../unattended-upgrade:608
+#: ../unattended-upgrade-shutdown:193
 msgid "All upgrades installed"
 msgstr "alle Upgrades installiert"
 
-#: ../unattended-upgrade:481 ../unattended-upgrade:569
+#: ../unattended-upgrade:488 ../unattended-upgrade:600
 msgid "Installing the upgrades failed!"
 msgstr "Installation der Upgrades fehlgeschlagen!"
 
-#: ../unattended-upgrade:482 ../unattended-upgrade:570
+#: ../unattended-upgrade:489 ../unattended-upgrade:601
+#: ../unattended-upgrade:755 ../unattended-upgrade:757
+#: ../unattended-upgrade:1432 ../unattended-upgrade:1434
+#: ../unattended-upgrade-shutdown:140
 #, python-format
 msgid "error message: '%s'"
 msgstr "Fehlermeldung: »%s«"
 
-#: ../unattended-upgrade:483 ../unattended-upgrade:571
+#: ../unattended-upgrade:490 ../unattended-upgrade:602
 #, python-format
 msgid "dpkg returned a error! See '%s' for details"
 msgstr "Dpkg gab einen Fehler zurück. Siehe »%s« für Einzelheiten"
 
-#: ../unattended-upgrade:541
-#, fuzzy, python-format
-#| msgid "Packages that will be upgraded: %s"
+#: ../unattended-upgrade:572
+#, python-format
 msgid "Some packages can not be upgraded: %s"
-msgstr "Pakete, von denen ein Upgrade durchgeführt wird: %s"
+msgstr "Von einigen Paketen kann kein Upgrade durchgeführt werden: %s"
 
-#: ../unattended-upgrade:895
+#: ../unattended-upgrade:754 ../unattended-upgrade:756
+#: ../unattended-upgrade:1431 ../unattended-upgrade:1433
+#: ../unattended-upgrade-shutdown:139
+#, fuzzy
+#| msgid "dpkg returned an error! See '%s' for details"
+msgid "Apt returned an error, exiting"
+msgstr "Dpkg gab einen Fehler zurück. Siehe »%s« für Einzelheiten"
+
+#: ../unattended-upgrade:942
 msgid ""
 "No '/usr/bin/mail' or '/usr/sbin/sendmail',can not send mail. You probably "
 "want to install the 'mailx' package."
@@ -61,22 +71,24 @@ msgstr ""
 "kein »/usr/bin/mail« oder »/usr/sbin/sendmail«, Mail kann nicht gesandt "
 "werden. Möglicherweise möchten Sie das Paket »mailx« installieren."
 
-#: ../unattended-upgrade:909
+#: ../unattended-upgrade:956
 msgid "[reboot required]"
-msgstr ""
+msgstr "[Neustart erforderlich]"
 
-#: ../unattended-upgrade:911
+#: ../unattended-upgrade:958
 msgid "[package on hold]"
-msgstr ""
+msgstr "[Paket zurückgehalten]"
 
-#: ../unattended-upgrade:914
-#, fuzzy
-#| msgid "[reboot required] unattended-upgrades result for '%s': %s"
+# Variablen heißen im Quelltext so, nicht übersetzen
+#: ../unattended-upgrade:961
+#, python-brace-format
 msgid ""
 "{hold_flag}{reboot_flag} unattended-upgrades result for '{machine}': {result}"
-msgstr "[Neustart erforderlich] Unattended-Upgrades-Ergebnis für »%s«: %s"
+msgstr ""
+"{hold_flag}{reboot_flag} Unattended-Upgrades-Ergebnis für »{machine}«: "
+"{result}"
 
-#: ../unattended-upgrade:918
+#: ../unattended-upgrade:965
 #, python-format
 msgid ""
 "Unattended upgrade returned: %s\n"
@@ -85,7 +97,7 @@ msgstr ""
 "Das unbeaufsichtigte Upgrade gab %s zurück.\n"
 "\n"
 
-#: ../unattended-upgrade:921
+#: ../unattended-upgrade:968
 msgid ""
 "Warning: A reboot is required to complete this upgrade.\n"
 "\n"
@@ -93,101 +105,94 @@ msgstr ""
 "Warnung: Um dieses Upgrade zu komplettieren, ist ein Neustart erforderlich.\n"
 "\n"
 
-#: ../unattended-upgrade:923
+#: ../unattended-upgrade:970
 msgid "Packages that were upgraded:\n"
 msgstr "Pakete, von denen ein Upgrade durchgeführt wurde:\n"
 
-#: ../unattended-upgrade:925
+#: ../unattended-upgrade:972
 msgid "Packages that attempted to upgrade:\n"
 msgstr "Pakete, bei denen versucht wurde, ein Upgrade durchzuführen:\n"
 
-#: ../unattended-upgrade:929
+#: ../unattended-upgrade:976
 msgid "Packages with upgradable origin but kept back:\n"
 msgstr ""
 "Pakete, von deren Ursprung ein Upgrade durchgeführt werden kann, die aber\n"
 "zurückgehalten werden.\n"
 
-#: ../unattended-upgrade:934
+#: ../unattended-upgrade:981
 msgid "Package installation log:"
 msgstr "Paketinstallationsprotokoll:"
 
-#: ../unattended-upgrade:937
+#: ../unattended-upgrade:984
 msgid "Unattended-upgrades log:\n"
 msgstr "Unattended-Upgrades-Protokoll:\n"
 
-#: ../unattended-upgrade:965
+#: ../unattended-upgrade:1012
 #, python-format
 msgid "Writing dpkg log to '%s'"
 msgstr "Dpkg-Protokoll wird nach »%s« geschrieben"
 
-#: ../unattended-upgrade:1121
+#: ../unattended-upgrade:1168
 #, python-format
 msgid "Found %s, but not rebooting because %s is logged in."
 msgid_plural "Found %s, but not rebooting because %s are logged in."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s gefunden, aber kein Neustart, da %s angemeldet ist"
+msgstr[1] "%s gefunden, aber kein Neustart, da %s angemeldet sind"
 
-#: ../unattended-upgrade:1175
+#: ../unattended-upgrade:1222
 #, python-format
 msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
 msgstr ""
 "Von Paket »%s« könnte ein Upgrade durchgeführt werden, es ist jedoch "
 "fehlgeschlagen, dies für das Upgrade zu markieren (%s)"
 
-#: ../unattended-upgrade:1250
+#: ../unattended-upgrade:1297
 #, python-format
 msgid "Packages that are auto removed: '%s'"
 msgstr "Pakete, die automatisch entfernt wurden: »%s«"
 
-#: ../unattended-upgrade:1256
-#, fuzzy
-#| msgid "Packages that are auto removed: '%s'"
+#: ../unattended-upgrade:1303
 msgid "Packages were successfully auto-removed"
-msgstr "Pakete, die automatisch entfernt wurden: »%s«"
+msgstr "Pakete wurden erfolgreich automatisch entfernt"
 
-#: ../unattended-upgrade:1258
-#, fuzzy
-#| msgid "Installing the upgrades failed!"
+#: ../unattended-upgrade:1305
 msgid "Auto-removing the packages failed!"
-msgstr "Installation der Upgrades fehlgeschlagen!"
+msgstr "automatisches Entfernen der Pakete fehlgeschlagen!"
 
-#: ../unattended-upgrade:1259
-#, fuzzy, python-format
-#| msgid "error message: '%s'"
+#: ../unattended-upgrade:1306
+#, python-format
 msgid "Error message: '%s'"
 msgstr "Fehlermeldung: »%s«"
 
-#: ../unattended-upgrade:1260
-#, fuzzy, python-format
-#| msgid "dpkg returned a error! See '%s' for details"
+#: ../unattended-upgrade:1307
+#, python-format
 msgid "dpkg returned an error! See '%s' for details"
 msgstr "Dpkg gab einen Fehler zurück. Siehe »%s« für Einzelheiten"
 
-#: ../unattended-upgrade:1320
+#: ../unattended-upgrade:1367
 #, python-format
 msgid "Initial blacklisted packages: %s"
 msgstr "Pakete, die anfangs auf die schwarzen Liste standen: %s"
 
-#: ../unattended-upgrade:1325
-#, fuzzy, python-format
-#| msgid "Initial blacklisted packages: %s"
+#: ../unattended-upgrade:1372
+#, python-format
 msgid "Initial whitelisted packages: %s"
-msgstr "Pakete, die anfangs auf die schwarzen Liste standen: %s"
+msgstr "Pakete, die anfangs auf der Positivliste standen: %s"
 
-#: ../unattended-upgrade:1328
+#: ../unattended-upgrade:1375
 msgid "Starting unattended upgrades script"
 msgstr "Skript für unbeaufsichtigte Upgrades wird gestartet."
 
-#: ../unattended-upgrade:1337
+#: ../unattended-upgrade:1384
 #, python-format
 msgid "Allowed origins are: %s"
 msgstr "erlaubte Ursprünge sind: %s"
 
-#: ../unattended-upgrade:1353 ../unattended-upgrade:1354
+#: ../unattended-upgrade:1400 ../unattended-upgrade:1401
 msgid "Unclean dpkg state detected, trying to correct"
 msgstr "unsauberer Dpkg-Status entdeckt, es wird versucht dies zu korrigieren"
 
-#: ../unattended-upgrade:1365
+#: ../unattended-upgrade:1412
 #, python-format
 msgid ""
 "dpkg --configure -a output:\n"
@@ -196,117 +201,116 @@ msgstr ""
 "»dpkg --configure -a«-Ausgabe:\n"
 "%s"
 
-#: ../unattended-upgrade:1374
+#: ../unattended-upgrade:1421
 msgid "Lock could not be acquired (another package manager running?)"
 msgstr ""
 "Sperrung konnte nicht erreicht werden (läuft eine weitere Paketverwaltung?)"
 
-#: ../unattended-upgrade:1376
+#: ../unattended-upgrade:1423
 msgid "Cache lock can not be acquired, exiting"
 msgstr "Zwischenspeicher konnte nicht gesperrt werden, wird beendet"
 
-#: ../unattended-upgrade:1383 ../unattended-upgrade:1384
-#: ../unattended-upgrade:1573 ../unattended-upgrade:1574
+#: ../unattended-upgrade:1438 ../unattended-upgrade:1439
+#: ../unattended-upgrade:1633 ../unattended-upgrade:1634
 msgid "Cache has broken packages, exiting"
 msgstr "Zwischenspeicher enthält beschädigte Pakete, wird beendet"
 
-#: ../unattended-upgrade:1433
+#: ../unattended-upgrade:1488
 #, python-format
 msgid "GetArchives() failed: '%s'"
 msgstr "GetArchives() fehlgeschlagen: »%s«"
 
-#: ../unattended-upgrade:1446 ../unattended-upgrade:1447
+#: ../unattended-upgrade:1504 ../unattended-upgrade:1505
 #, python-format
 msgid "An error occurred: '%s'"
 msgstr "Es ist ein Fehler aufgetreten: »%s«"
 
-#: ../unattended-upgrade:1449 ../unattended-upgrade:1451
+#: ../unattended-upgrade:1507 ../unattended-upgrade:1509
 #, python-format
 msgid "The URI '%s' failed to download, aborting"
 msgstr "Herunterladen von der URI »%s« fehlgeschlagen, wird abgebrochen"
 
-#: ../unattended-upgrade:1455
+#: ../unattended-upgrade:1513
 #, python-format
 msgid "Download finished, but file '%s' not there?!?"
 msgstr "Herunterladen beendet, aber Datei »%s« ist nicht dort!?"
 
-#: ../unattended-upgrade:1471 ../unattended-upgrade:1475
+#: ../unattended-upgrade:1529 ../unattended-upgrade:1533
 #, python-format
 msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
 msgstr ""
 "Das Paket »%s« hat eine Conffile-Abfrage und muss einem manuellen Upgrade "
 "unterzogen werden."
 
-#: ../unattended-upgrade:1503
+#: ../unattended-upgrade:1561
 #, python-format
 msgid "package '%s' not upgraded"
 msgstr "Von Paket »%s« wurde kein Upgrade durchgeführt."
 
-#: ../unattended-upgrade:1522
-#, fuzzy
-#| msgid "No packages found that can be upgraded unattended"
+#: ../unattended-upgrade:1580
 msgid ""
 "No packages found that can be upgraded unattended and no pending auto-"
 "removals"
 msgstr ""
 "Es wurden keine Pakete gefunden, von denen ein unbeaufsichtigtes Upgrade "
-"durchgeführt werden kann."
+"durchgeführt werden kann und kein ausstehendes automatisches Entfernen."
 
-#: ../unattended-upgrade:1550
+#: ../unattended-upgrade:1610
 #, python-format
 msgid "Packages that will be upgraded: %s"
 msgstr "Pakete, von denen ein Upgrade durchgeführt wird: %s"
 
-#: ../unattended-upgrade:1647
+#: ../unattended-upgrade:1713
 msgid "print debug messages"
 msgstr "Nachrichten zur Fehlersuche ausgeben"
 
-#: ../unattended-upgrade:1650
+#: ../unattended-upgrade:1716
 msgid "make apt/libapt print verbose debug messages"
 msgstr "APT/LibAPT detaillierte Nachrichten zur Fehlersuche ausgeben lassen"
 
-#: ../unattended-upgrade:1653
+#: ../unattended-upgrade:1719
 msgid "print info messages"
 msgstr "Informationsnachrichten ausgeben"
 
-#: ../unattended-upgrade:1656
+#: ../unattended-upgrade:1722
 msgid "Simulation, download but do not install"
 msgstr "Simulation, herunterladen, aber nicht installieren"
 
-#: ../unattended-upgrade:1659
-#, fuzzy
-#| msgid "Simulation, download but do not install"
+#: ../unattended-upgrade:1725
 msgid "Only download, do not even try to install."
-msgstr "Simulation, herunterladen, aber nicht installieren"
+msgstr "nur herunterladen, aber gar nicht versuchen zu installieren"
 
-#: ../unattended-upgrade:1662
+#: ../unattended-upgrade:1728
 msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
 msgstr "Upgrade in minimalen Schritten (Unterbrechung mit SIGTERM erlaubt)"
 
-#: ../unattended-upgrade:1671
+#: ../unattended-upgrade:1737
 msgid "You need to be root to run this application"
 msgstr "Sie müssen Root sein, um diese Anwendung auszuführen."
 
 #: ../unattended-upgrade-shutdown:76
-msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
+#, fuzzy
+#| msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
+msgid ""
+"Unattended-upgrade in progress during shutdown, please don't turn off the "
+"computer"
 msgstr ""
 "Unattended-Upgrade läuft während des Herunterfahrens weiter, es wird fünf "
 "Sekunden lang gewartet."
 
-#: ../unattended-upgrade-shutdown:139
+#: ../unattended-upgrade-shutdown:150
 msgid "Running unattended-upgrades in shutdown mode"
 msgstr "Unattended-Upgrades im Herunterfahrmodus ausführen"
 
-#: ../unattended-upgrade-shutdown:165
+#: ../unattended-upgrade-shutdown:176
 #, python-format
 msgid "Giving up on lockfile after %s delay"
 msgstr "Sperrdatei, hier wird nach %s Verzögerung aufgegeben."
 
-#: ../unattended-upgrade-shutdown:178
+#: ../unattended-upgrade-shutdown:189
 msgid ""
 "Unattended-upgrades stopped. There may be upgrades left to be installed in "
 "the next run."
 msgstr ""
-
-#~ msgid "unattended-upgrades result for '%s': '%s'"
-#~ msgstr "Unattended-Upgrades-Ergebnis für »%s«: %s"
+"Unattended-Upgrades gestoppt. Es sind möglicherweise Upgrades "
+"übriggeblieben, die im nächsten Durchlauf installiert werden."
