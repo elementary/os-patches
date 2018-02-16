@@ -1,3 +1,17 @@
+grub2 (2.02-2ubuntu7) bionic; urgency=medium
+
+  [ Julian Andres Klode ]
+  * debian/patches/shorter_version_info.patch: Only show the upstream version
+    in menu and console, and hide the package one in a package_version
+    variable. (LP: #1723434)
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/patches/skip_text_gfxpayload_where_not_supported.patch: Skip the
+    'text' payload if it's not supported but present in gfxpayload, such as
+    on EFI systems. (LP: #1711452)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 09 Feb 2018 16:30:45 -0500
+
 grub2 (2.02-2ubuntu6) bionic; urgency=medium
 
   [ Steve Langasek ]

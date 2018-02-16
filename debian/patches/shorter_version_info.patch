@@ -1,0 +1,39 @@
+From 2682d074012bffc6242d607745fafe0bc4d209dc Mon Sep 17 00:00:00 2001
+From: Julian Andres Klode <julian.klode@canonical.com>
+Date: Thu, 8 Feb 2018 10:48:37 +0100
+Subject: Show only upstream version, hide rest in package_version variable
+
+The complete package version can get a bit long, so only show the
+upstream version in the menu and on the top of the console, and
+hide the complete version in a package_version variable.
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1723434
+Last-Updated: 2018-02-08
+
+Patch-Name: shorter_version_info.patch
+---
+ grub-core/normal/main.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/grub-core/normal/main.c b/grub-core/normal/main.c
+index e924f6448..4a6b3bff0 100644
+--- a/grub-core/normal/main.c
++++ b/grub-core/normal/main.c
+@@ -208,7 +208,7 @@ grub_normal_init_page (struct grub_term_output *term,
+  
+   grub_term_cls (term);
+ 
+-  msg_formatted = grub_xasprintf (_("GNU GRUB  version %s"), PACKAGE_VERSION);
++  msg_formatted = grub_xasprintf (_("GNU GRUB  version %s"), VERSION);
+   if (!msg_formatted)
+     return;
+  
+@@ -560,6 +560,8 @@ GRUB_MOD_INIT(normal)
+   grub_env_export ("grub_cpu");
+   grub_env_set ("grub_platform", GRUB_PLATFORM);
+   grub_env_export ("grub_platform");
++  
++  grub_env_set ("package_version", PACKAGE_VERSION);
+ 
+   grub_boot_time ("Normal module prepared");
+ }

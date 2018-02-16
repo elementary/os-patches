@@ -1,0 +1,35 @@
+From 38d9e2f862a96a039ae8ca8b87b8615d154ceda4 Mon Sep 17 00:00:00 2001
+From: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+Date: Fri, 9 Feb 2018 11:14:35 -0500
+Subject: video: skip 'text' gfxpayload if not supported, to fallback to
+ default
+
+On UEFI, 'text' gfxpayload is not supported, but we still reach parse_modespec
+with it, which will obviously fail. Fortunately, whatever gfxpayload is set,
+we still still have the 'auto' default to fall back to. Allow getting to this
+fallback by not trying to parse 'text' as a modespec.
+
+This is because 'text' correctly doesn't parse as a modespec, and ought to have
+been ignored before we got to that point, just like it is immediately picked if
+we're running on a system where 'text' is a supported video mode.
+
+Signed-off-by: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+
+Patch-Name: skip_text_gfxpayload_where_not_supported.patch
+---
+ grub-core/video/video.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/grub-core/video/video.c b/grub-core/video/video.c
+index f252663c1..983424107 100644
+--- a/grub-core/video/video.c
++++ b/grub-core/video/video.c
+@@ -663,6 +663,8 @@ grub_video_set_mode (const char *modestring,
+ 
+ 	      return GRUB_ERR_NONE;
+ 	    }
++	  else
++	    continue;
+ 	}
+ 
+       err = parse_modespec (current_mode, &width, &height, &depth);
