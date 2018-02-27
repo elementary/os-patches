@@ -68,7 +68,7 @@ int main (int argc, char **argv)
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 
-	agent = bluetooth_agent_new();
+	agent = bluetooth_agent_new(NULL);
 
 	bluetooth_agent_set_confirm_func(agent, agent_confirm, NULL);
 

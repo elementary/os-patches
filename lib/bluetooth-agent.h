@@ -54,7 +54,7 @@ struct _BluetoothAgentClass {
 
 GType bluetooth_agent_get_type(void);
 
-BluetoothAgent *bluetooth_agent_new(void);
+BluetoothAgent *bluetooth_agent_new(const char *path);
 
 gboolean bluetooth_agent_setup(BluetoothAgent *agent, const char *path);
 

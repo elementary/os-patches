@@ -1289,24 +1289,16 @@ static gboolean
 remove_selected_device (BluetoothSettingsWidget *self)
 {
 	BluetoothSettingsWidgetPrivate *priv = BLUETOOTH_SETTINGS_WIDGET_GET_PRIVATE (self);
-	char *adapter;
 	GDBusProxy *adapter_proxy;
 	GError *error = NULL;
 	GVariant *ret;
 
-	g_object_get (G_OBJECT (priv->client), "default-adapter", &adapter, NULL);
-	adapter_proxy = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SYSTEM,
-						       G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES | G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
-						       NULL,
-						       BLUEZ_SERVICE,
-						       adapter,
-						       ADAPTER_IFACE,
-						       NULL,
-						       &error);
-	g_free (adapter);
+	g_debug ("About to call RemoveDevice for %s", priv->selected_object_path);
+
+	adapter_proxy = _bluetooth_client_get_default_adapter (priv->client);
+
 	if (adapter_proxy == NULL) {
-		g_warning ("Failed to create a GDBusProxy for the default adapter: %s", error->message);
-		g_error_free (error);
+		g_warning ("Failed to get a GDBusProxy for the default adapter");
 		return FALSE;
 	}
 
@@ -1802,13 +1794,11 @@ setup_pairing_agent (BluetoothSettingsWidget *self)
 {
 	BluetoothSettingsWidgetPrivate *priv = BLUETOOTH_SETTINGS_WIDGET_GET_PRIVATE (self);
 
-	priv->agent = bluetooth_agent_new ();
+	priv->agent = bluetooth_agent_new (AGENT_PATH);
 	if (bluetooth_agent_register (priv->agent) == FALSE) {
 		g_clear_object (&priv->agent);
 		return;
 	}
-
-	g_object_add_weak_pointer (G_OBJECT (priv->agent), (gpointer *) (&priv->agent));
 
 	bluetooth_agent_set_pincode_func (priv->agent, pincode_callback, self);
 	bluetooth_agent_set_passkey_func (priv->agent, passkey_callback, self);
@@ -1818,8 +1808,6 @@ setup_pairing_agent (BluetoothSettingsWidget *self)
 	bluetooth_agent_set_confirm_func (priv->agent, confirm_callback, self);
 	bluetooth_agent_set_authorize_func (priv->agent, authorize_callback, self);
 	bluetooth_agent_set_authorize_service_func (priv->agent, authorize_service_callback, self);
-
-	bluetooth_agent_setup (priv->agent, AGENT_PATH);
 }
 
 static void

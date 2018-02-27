@@ -236,6 +236,50 @@ bluetooth_class_to_type (guint32 class)
 	return 0;
 }
 
+/**
+ * bluetooth_appearance_to_type:
+ * @appearance: a Bluetooth device appearance
+ *
+ * Returns the type of device corresponding to the given @appearance value,
+ * as usually found in the GAP service.
+ *
+ * Return value: a #BluetoothType.
+ **/
+BluetoothType
+bluetooth_appearance_to_type (guint16 appearance)
+{
+	switch ((appearance & 0xffc0) >> 6) {
+	case 0x01:
+		return BLUETOOTH_TYPE_PHONE;
+	case 0x02:
+		return BLUETOOTH_TYPE_COMPUTER;
+	case 0x05:
+		return BLUETOOTH_TYPE_DISPLAY;
+	case 0x0a:
+		return BLUETOOTH_TYPE_OTHER_AUDIO;
+	case 0x0b:
+		return BLUETOOTH_TYPE_SCANNER;
+	case 0x0f: /* HID Generic */
+		switch (appearance & 0x3f) {
+		case 0x01:
+			return BLUETOOTH_TYPE_KEYBOARD;
+		case 0x02:
+			return BLUETOOTH_TYPE_MOUSE;
+		case 0x03:
+		case 0x04:
+			return BLUETOOTH_TYPE_JOYPAD;
+		case 0x05:
+			return BLUETOOTH_TYPE_TABLET;
+		case 0x08:
+			return BLUETOOTH_TYPE_SCANNER;
+		}
+		break;
+	}
+
+	return 0;
+
+}
+
 static const char *
 uuid16_custom_to_string (guint uuid16, const char *uuid)
 {
@@ -291,6 +335,7 @@ uuid16_to_string (guint uuid16, const char *uuid)
 	case BLUETOOTH_UUID_HFP_AG:
 		return "HandsfreeAudioGateway";
 	case BLUETOOTH_UUID_HID:
+	case 0x1812:
 		return "HumanInterfaceDeviceService";
 	case BLUETOOTH_UUID_SAP:
 		return "SIM_Access";

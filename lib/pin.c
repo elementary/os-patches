@@ -40,8 +40,8 @@
 char *
 oui_to_vendor (const char *oui)
 {
-	struct udev *udev;
-	struct udev_hwdb *hwdb;
+	struct udev *udev = NULL;
+	struct udev_hwdb *hwdb = NULL;
 	struct udev_list_entry *list, *l;
 	char *modalias = NULL;
 	char *vendor = NULL;

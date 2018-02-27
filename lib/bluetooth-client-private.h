@@ -56,6 +56,8 @@ void bluetooth_client_dump_device (GtkTreeModel *model,
 
 gboolean bluetooth_client_get_connectable(const char **uuids);
 
+GDBusProxy *_bluetooth_client_get_default_adapter (BluetoothClient *client);
+
 G_END_DECLS
 
 #endif /* __BLUETOOTH_CLIENT_PRIVATE_H */

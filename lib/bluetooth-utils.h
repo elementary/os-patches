@@ -61,6 +61,7 @@ G_BEGIN_DECLS
 #define BLUETOOTH_UUID_VDP_SOURCE	0x1303
 
 BluetoothType  bluetooth_class_to_type         (guint32 class);
+BluetoothType  bluetooth_appearance_to_type    (guint16 appearance);
 const gchar   *bluetooth_type_to_string        (guint type);
 const gchar   *bluetooth_type_to_filter_string (guint type);
 gboolean       bluetooth_verify_address        (const char *bdaddr);

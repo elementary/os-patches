@@ -8,16 +8,13 @@ export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,--as-needed
 export DEB_LDFLAGS_MAINT_STRIP := -Wl,-Bsymbolic-functions
 
 %:
-	dh $@ --with gir,gnome --buildsystem=meson
-
-override_dh_autoreconf:
-	dh_autoreconf --as-needed
+	dh $@ --with gir,gnome
 
 override_dh_auto_configure:
 	dh_auto_configure -- \
-		-Denable-gtk-doc=true \
-		-Denable-icon-update=true \
-		-Denable-introspection=true
+		-Dgtk_doc=true \
+		-Dicon_update=true \
+		-Dintrospection=true
 
 override_dh_missing:
 	dh_missing --fail-missing
@@ -29,6 +26,7 @@ override_dh_girepository:
 	dh_girepository -l applet \
 		/usr/lib/$(DEB_HOST_MULTIARCH)/gnome-bluetooth/
 
+# Needed by Ubuntu
 override_dh_translations:
 	ninja -C obj-$(DEB_HOST_GNU_TYPE) gnome-bluetooth2-pot
 	dh_translations
