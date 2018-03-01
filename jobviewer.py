@@ -96,7 +96,8 @@ class ServiceGet:
     def __init__(self):
         Secret.Service.get(0,
                            None,
-                           self.on_get_service)
+                           self.on_get_service,
+                           None)
 
     def get_service(self):
         return ServiceGet.service
@@ -113,7 +114,9 @@ class ItemSearch:
                               NETWORK_PASSWORD,
                               attrs,
                               Secret.SearchFlags.LOAD_SECRETS,
-                              self.on_search_item)
+                              None,
+                              self.on_search_item,
+                              None)
 
     def get_items(self):
         return ItemSearch.items
@@ -1044,8 +1047,8 @@ class JobViewer (GtkGUI):
                 for keyring_attrs in [identifying_attrs, informational_attrs]:
                     attrs = dict()
                     for key, val in keyring_attrs.items ():
-                        attrs.update (key,
-                                      val)
+                        key_val_dict = {key : val}
+                        attrs.update (key_val_dict)
                     service_obj = ServiceGet()
                     service = service_obj.get_service()
 
@@ -1202,7 +1205,8 @@ class JobViewer (GtkGUI):
                     secret = auth_info[ind]
                     attrs = dict()
                     for key, val in keyring_attrs.items ():
-                        attrs.update(key, val)
+                        key_val_dict = {key : val}
+                        attrs.update (key_val_dict)
                     password_obj = PasswordStore(attrs,
                                                  name,
                                                  secret)

@@ -105,8 +105,8 @@ CONFIG_CLEAN_FILES = system-config-printer \
 	system-config-printer-applet install-printerdriver \
 	dbus/scp-dbus-service udev/configure-printer@.service
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(udevdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(udevdir)" \
+am__installdirs = "$(DESTDIR)$(udevdir)" "$(DESTDIR)$(pkgdatadir)" \
+	"$(DESTDIR)$(bindir)" "$(DESTDIR)$(udevdir)" \
 	"$(DESTDIR)$(man1dir)" "$(DESTDIR)$(appdatadir)" \
 	"$(DESTDIR)$(cupshelpersdir)" "$(DESTDIR)$(dbusdir)" \
 	"$(DESTDIR)$(dbusinterfacesdir)" "$(DESTDIR)$(desktopdir)" \
@@ -153,7 +153,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-SCRIPTS = $(bin_SCRIPTS) $(nobase_pkgdata_SCRIPTS) $(udev_SCRIPTS)
+SCRIPTS = $(nobase_pkgdata_SCRIPTS) $(nodist_bin_SCRIPTS) \
+	$(udev_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -604,7 +605,6 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
-runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -719,7 +719,7 @@ cupshelpersdir = $(sysconfdir)/cupshelpers
 cupshelpers_DATA = \
 	xml/preferreddrivers.xml
 
-bin_SCRIPTS = \
+nodist_bin_SCRIPTS = \
 	system-config-printer			\
 	install-printerdriver			\
 	system-config-printer-applet		\
@@ -768,7 +768,7 @@ autostartdir = $(sysconfdir)/xdg/autostart/
 DESKTOP_VENDOR = @DESKTOPVENDOR@
 DESKTOP_PREFIX = @DESKTOPPREFIX@
 desktop_in_files = $(desktop_DATA:.desktop=.desktop.in)
-appdatadir = $(datadir)/appdata
+appdatadir = $(datadir)/metainfo
 appdata_in_files = system-config-printer.appdata.xml.in
 appdata_DATA = $(appdata_in_files:.xml.in=.xml)
 EXTRA_DIST = \
@@ -914,41 +914,6 @@ udev/udev_udev_configure_printer-udev-configure-printer.$(OBJEXT):  \
 udev/udev-configure-printer$(EXEEXT): $(udev_udev_configure_printer_OBJECTS) $(udev_udev_configure_printer_DEPENDENCIES) $(EXTRA_udev_udev_configure_printer_DEPENDENCIES) udev/$(am__dirstamp)
 	@rm -f udev/udev-configure-printer$(EXEEXT)
 	$(AM_V_CCLD)$(udev_udev_configure_printer_LINK) $(udev_udev_configure_printer_OBJECTS) $(udev_udev_configure_printer_LDADD) $(LIBS)
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n' \
-	    -e 'h;s|.*|.|' \
-	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
-	      if (++n[d] == $(am__install_max)) { \
-		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
-	    else { print "f", d "/" $$4, $$1 } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	     test -z "$$files" || { \
-	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	     } \
-	; done
-
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || exit 0; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	       sed -e 's,.*/,,;$(transform)'`; \
-	dir='$(DESTDIR)$(bindir)'; $(am__uninstall_files_from_dir)
 install-nobase_pkgdataSCRIPTS: $(nobase_pkgdata_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(nobase_pkgdata_SCRIPTS)'; test -n "$(pkgdatadir)" || list=; \
@@ -991,6 +956,41 @@ uninstall-nobase_pkgdataSCRIPTS:
 	files=`$(am__nobase_strip) \
 	       -e 'h;s,.*/,,;$(transform);x;s|[^/]*$$||;G;s,\n,,'`; \
 	dir='$(DESTDIR)$(pkgdatadir)'; $(am__uninstall_files_from_dir)
+install-nodist_binSCRIPTS: $(nodist_bin_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	@list='$(nodist_bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n' \
+	    -e 'h;s|.*|.|' \
+	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
+	      if (++n[d] == $(am__install_max)) { \
+		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
+	    else { print "f", d "/" $$4, $$1 } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	     test -z "$$files" || { \
+	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(bindir)$$dir'"; \
+	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
+	     } \
+	; done
+
+uninstall-nodist_binSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_bin_SCRIPTS)'; test -n "$(bindir)" || exit 0; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	       sed -e 's,.*/,,;$(transform)'`; \
+	dir='$(DESTDIR)$(bindir)'; $(am__uninstall_files_from_dir)
 install-udevSCRIPTS: $(udev_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(udev_SCRIPTS)'; test -n "$(udevdir)" || list=; \
@@ -1624,7 +1624,7 @@ distdir: $(DISTFILES)
 	  ! -type d ! -perm -444 -exec $(install_sh) -c -m a+r {} {} \; \
 	|| chmod -R a+r "$(distdir)"
 dist-gzip: distdir
-	tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
+	tardir=$(distdir) && $(am__tar) | eval GZIP= gzip $(GZIP_ENV) -c >$(distdir).tar.gz
 	$(am__post_remove_distdir)
 dist-bzip2: distdir
 	tardir=$(distdir) && $(am__tar) | BZIP2=$${BZIP2--9} bzip2 -c >$(distdir).tar.bz2
@@ -1648,7 +1648,7 @@ dist-shar: distdir
 	@echo WARNING: "Support for shar distribution archives is" \
 	               "deprecated." >&2
 	@echo WARNING: "It will be removed altogether in Automake 2.0" >&2
-	shar $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).shar.gz
+	shar $(distdir) | eval GZIP= gzip $(GZIP_ENV) -c >$(distdir).shar.gz
 	$(am__post_remove_distdir)
 
 dist-zip: distdir
@@ -1666,7 +1666,7 @@ dist dist-all:
 distcheck: dist
 	case '$(DIST_ARCHIVES)' in \
 	*.tar.gz*) \
-	  GZIP=$(GZIP_ENV) gzip -dc $(distdir).tar.gz | $(am__untar) ;;\
+	  eval GZIP= gzip $(GZIP_ENV) -dc $(distdir).tar.gz | $(am__untar) ;;\
 	*.tar.bz2*) \
 	  bzip2 -dc $(distdir).tar.bz2 | $(am__untar) ;;\
 	*.tar.lz*) \
@@ -1676,7 +1676,7 @@ distcheck: dist
 	*.tar.Z*) \
 	  uncompress -c $(distdir).tar.Z | $(am__untar) ;;\
 	*.shar.gz*) \
-	  GZIP=$(GZIP_ENV) gzip -dc $(distdir).shar.gz | unshar ;;\
+	  eval GZIP= gzip $(GZIP_ENV) -dc $(distdir).shar.gz | unshar ;;\
 	*.zip*) \
 	  unzip $(distdir).zip ;;\
 	esac
@@ -1752,7 +1752,7 @@ check: check-recursive
 all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(MANS) $(DATA) all-local
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(udevdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(udevdir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(appdatadir)" "$(DESTDIR)$(cupshelpersdir)" "$(DESTDIR)$(dbusdir)" "$(DESTDIR)$(dbusinterfacesdir)" "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(dbusservicesdir)" "$(DESTDIR)$(systemdsystemunitdir)" "$(DESTDIR)$(udevrulesdir)"; do \
+	for dir in "$(DESTDIR)$(udevdir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(udevdir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(appdatadir)" "$(DESTDIR)$(cupshelpersdir)" "$(DESTDIR)$(dbusdir)" "$(DESTDIR)$(dbusinterfacesdir)" "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(dbusservicesdir)" "$(DESTDIR)$(systemdsystemunitdir)" "$(DESTDIR)$(udevrulesdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -1824,7 +1824,7 @@ install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
-install-exec-am: install-binSCRIPTS install-exec-local
+install-exec-am: install-exec-local install-nodist_binSCRIPTS
 
 install-html: install-html-recursive
 
@@ -1865,12 +1865,11 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-appdataDATA uninstall-binSCRIPTS \
-	uninstall-cupshelpersDATA uninstall-dbusDATA \
-	uninstall-dbusinterfacesDATA uninstall-desktopDATA \
-	uninstall-local uninstall-man uninstall-nobase_pkgdataDATA \
-	uninstall-nobase_pkgdataSCRIPTS \
-	uninstall-nodist_dbusservicesDATA \
+uninstall-am: uninstall-appdataDATA uninstall-cupshelpersDATA \
+	uninstall-dbusDATA uninstall-dbusinterfacesDATA \
+	uninstall-desktopDATA uninstall-local uninstall-man \
+	uninstall-nobase_pkgdataDATA uninstall-nobase_pkgdataSCRIPTS \
+	uninstall-nodist_binSCRIPTS uninstall-nodist_dbusservicesDATA \
 	uninstall-systemdsystemunitDATA uninstall-udevPROGRAMS \
 	uninstall-udevSCRIPTS uninstall-udevrulesDATA
 
@@ -1887,26 +1886,26 @@ uninstall-man: uninstall-man1
 	distclean-generic distclean-local distclean-tags \
 	distcleancheck distdir distuninstallcheck dvi dvi-am html \
 	html-am info info-am install install-am install-appdataDATA \
-	install-binSCRIPTS install-cupshelpersDATA install-data \
-	install-data-am install-dbusDATA install-dbusinterfacesDATA \
+	install-cupshelpersDATA install-data install-data-am \
+	install-dbusDATA install-dbusinterfacesDATA \
 	install-desktopDATA install-dvi install-dvi-am install-exec \
 	install-exec-am install-exec-local install-html \
 	install-html-am install-info install-info-am install-man \
 	install-man1 install-nobase_pkgdataDATA \
-	install-nobase_pkgdataSCRIPTS install-nodist_dbusservicesDATA \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip install-systemdsystemunitDATA \
-	install-udevPROGRAMS install-udevSCRIPTS install-udevrulesDATA \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	recheck tags tags-am uninstall uninstall-am \
-	uninstall-appdataDATA uninstall-binSCRIPTS \
+	install-nobase_pkgdataSCRIPTS install-nodist_binSCRIPTS \
+	install-nodist_dbusservicesDATA install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip \
+	install-systemdsystemunitDATA install-udevPROGRAMS \
+	install-udevSCRIPTS install-udevrulesDATA installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am recheck tags tags-am \
+	uninstall uninstall-am uninstall-appdataDATA \
 	uninstall-cupshelpersDATA uninstall-dbusDATA \
 	uninstall-dbusinterfacesDATA uninstall-desktopDATA \
 	uninstall-local uninstall-man uninstall-man1 \
 	uninstall-nobase_pkgdataDATA uninstall-nobase_pkgdataSCRIPTS \
-	uninstall-nodist_dbusservicesDATA \
+	uninstall-nodist_binSCRIPTS uninstall-nodist_dbusservicesDATA \
 	uninstall-systemdsystemunitDATA uninstall-udevPROGRAMS \
 	uninstall-udevSCRIPTS uninstall-udevrulesDATA
 

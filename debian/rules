@@ -1,9 +1,10 @@
 #!/usr/bin/make -f
-
-GNOME_DOWNLOAD_URL = http://cyberelk.net/tim/data/system-config-printer/$(DEB_UPSTREAM_VERSION_MAJOR_MINOR)/$(GNOME_TARBALL)
-TARBALL_EXT := tar.xz
-
 -include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+GNOME_DOWNLOAD_URL = https://github.com/zdohnal/system-config-printer/releases/download/$(DEB_UPSTREAM_VERSION)/$(GNOME_TARBALL)
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,--as-needed
 
 %:
 # We need to force the build system to autoconf otherwise for some reasons it
@@ -23,8 +24,9 @@ override_dh_python3:
 override_dh_installdocs:
 	dh_installdocs -A AUTHORS
 
-override_dh_install:
-	dh_install --list-missing
-
 override_dh_autoreconf:
 	dh_autoreconf ./bootstrap
+
+override_dh_clean:
+	dh_clean -O--buildsystem=autoconf
+	rm -f dbus/org.fedoraproject.Config.Printing.service

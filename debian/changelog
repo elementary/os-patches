@@ -1,3 +1,66 @@
+system-config-printer (1.5.11-1ubuntu1) bionic; urgency=low
+
+  * Merge from Debian unstable.  Remaining changes:
+    - debian/control.in:
+      + Have system-config-printer recommend avahi-utils, and have
+        system-config-printer-common only suggest python3-smbc. Also
+        Breaks/Replaces: system-config-printer-gnome in both
+        system-config-printer and system-config-printer-common
+      + Have system-config-printer-udev recommend ippusbxd
+      + Let system-config-printer-gnome be a transitional package.
+    - debian/local/source_system-config-printer.py:
+      + Apport hook
+    - debian/patches/0010-no-start-printer-applet-gnome.patch
+      + Also do not start printer applet with Unity and LXDE.
+    - debian/patches/03_install_layout.patch
+      + Install with --install-layout=deb
+    - debian/patches/05_menu_entries.patch:
+      + Show 'Printers' in Unity Settings app.
+    - debian/patches/06_rename_settings_panel.patch:
+      + Rename app name to 'Printers' for better UI consistency with Unity
+    - debian/patches/07_driver-auto-download-configuration.patch:
+      + Allow installing packages and non-free software via OpenPrinting
+    - debian/patches/33_ipp-over-usb-support.patch:
+      + debian/patches/support for IPP-over-USB printers using ippusbxd
+    - debian/python3-cupshelpers.install:
+      + Install debug.py and smburi.py into python3-cupshelpers package,
+        needed by the patches.
+      + Fixed mask for *.egg-info file.
+    - debian/system-config-printer-common.install:
+      + Install Apport hook.
+  * Refreshed patches with quilt:
+    - 03_install_layout.patch
+    - 0006-use-paper-size-default-in-etc-papersize.patch
+    - 0007-fix-pk-package-name.patch
+    - 05_menu_entries.patch
+  * Manually updated patches:
+    - 06_rename_settings_panel.patch
+
+ -- Till Kamppeter <till.kamppeter@gmail.com>  Wed, 28 Feb 2018 19:59:12 +0100
+
+system-config-printer (1.5.11-1) unstable; urgency=medium
+
+  [ Jeremy Bicha ]
+  * Update Vcs fields for migration to https://salsa.debian.org/
+
+  [ Laurent Bigonville ]
+  * New upstream release.
+    - Drop d/p/0010-no-start-printer-applet-gnome.patch, applied upstream
+    - Use libsecret instead of gnome-keyring (Closes: #867952)
+    - debian/system-config-printer.install: Fix installation of appdata file
+  * debian/rules: Fix the URL to download the orig tarball using get-orig-source
+  * d/p/0003-Use-ValueError-instead-of-ImportError-to-catch-excep.patch: Fix
+    exception handling when importing libsecret, that should made it really
+    optional (Closes: #868039)
+  * d/p/0004-Fix-constructing-the-auth-dialog.patch: Fix constructing the auth
+    dialog, from upstream
+  * d/p/0005-Require-proper-version-of-GDK-and-GTK-in-scp-dbus-se.patch,
+    d/p/0006-Set-programe-name-for-scp-dbus-service-as-well.patch: Require
+    version of GDK and GTK bindings before importing them and properly set the
+    program name even when scp-dbus-service is D-Bus activated.
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 26 Feb 2018 17:16:55 +0100
+
 system-config-printer (1.5.9+20170825-0ubuntu2) bionic; urgency=medium
 
   * debian/system-config-printer-udev.install,
@@ -185,6 +248,46 @@ system-config-printer (1.5.9+20170523-0ubuntu1) artful; urgency=medium
 
  -- Till Kamppeter <till.kamppeter@gmail.com>  Tue, 23 May 2017 23:02:30 -0300
 
+system-config-printer (1.5.9-3) unstable; urgency=medium
+
+  * Update Vcs fields for conversion to git
+  * Add debian/gbp.conf
+  * Bump Standards-Version to 4.1.2
+  * Bump debhelper compat to 11
+
+ -- Jeremy Bicha <jbicha@debian.org>  Sat, 16 Dec 2017 19:36:37 -0500
+
+system-config-printer (1.5.9-2) unstable; urgency=medium
+
+  [ Jeremy Bicha ]
+  * Update debian/watch and Homepage to point to github repo
+  * Update Vcs links
+
+  [ Laurent Bigonville ]
+  * debian/control.in: Make the system-config-printer-common package recommend
+    cups-pk-helper and python3-smbc package instead of system-config-printer,
+    the code using these modules are in that package.
+  * debian/rules: Remove the dbus/org.fedoraproject.Config.Printing.service
+    file during the clean target so it's generated with the proper path
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 21 Jun 2017 14:50:52 +0200
+
+system-config-printer (1.5.9-1) experimental; urgency=medium
+
+  * New upstream release.
+    - Drop debian/patches/0008-fix-device-sorting.patch,
+      debian/patches/0009-fix-udev-add-printer-shbang.patch: Merged upstream
+    - debian/patches/0007-fix-pk-package-name.patch: Refreshed
+  * Switch to dh sequences from cdbs
+  * Do not install smburi.py and debug.py in python3-cupshelpers anymore, this
+    doesn't seem needed anymore
+  * Bump debhelper compatibility to version 10
+  * Drop debian/patches/03_install_layout.patch, this doesn't seem needed
+    anymore and adjust debian/python3-cupshelpers.install
+  * debian/control.in: Add gir1.2-polkit-1.0 to the dependencies
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 23 Feb 2017 22:26:58 +0100
+
 system-config-printer (1.5.7+20160812-0ubuntu9) zesty; urgency=medium
 
   * Do the python3-smbc move for realz.
@@ -310,6 +413,17 @@ system-config-printer (1.5.7+20160812-0ubuntu3) zesty; urgency=medium
       (LP: #1643129)
 
  -- Jeremy Bicha <jbicha@ubuntu.com>  Sat, 19 Nov 2016 14:59:44 -0500
+
+system-config-printer (1.5.7-3) unstable; urgency=medium
+
+  * debian/patches/0010-no-start-printer-applet-gnome.patch: Do not start the
+    printer-applet in GNOME or Cinnamon {gnome,cinnamon}-settings-daemon is
+    already taking care of this.
+  * debian/rules: Move the definition of DEB_PYTHON3_MODULE_PACKAGES before
+    including python-module.mk otherwise cdbs is not calling dh_python3 as
+    expected
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 23 Feb 2017 17:55:32 +0100
 
 system-config-printer (1.5.7-2) unstable; urgency=medium
 
@@ -858,3 +972,4 @@ system-config-printer (0.7.66-1) unstable; urgency=low
   * debian/rules: Fix, by hard, wrong executable permissions on /usr/share.
 
  -- Otavio Salvador <otavio@ossystems.com.br>  Wed, 04 Jul 2007 12:33:01 -0300
+

@@ -1,0 +1,37 @@
+From: Laurent Bigonville <bigon@bigon.be>
+Date: Mon, 26 Feb 2018 13:59:26 +0100
+Subject: Set programe name for scp-dbus-service as well
+
+scp-dbus-service can be D-Bus activated, that means that the program
+name is never set meaning that the icon and the fancy name in the window
+list is never set.
+
+This completes the fix for bug #53
+---
+ scp-dbus-service.py | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/scp-dbus-service.py b/scp-dbus-service.py
+index 3aefc6c..1338836 100644
+--- a/scp-dbus-service.py
++++ b/scp-dbus-service.py
+@@ -20,8 +20,8 @@
+ ## along with this program; if not, write to the Free Software
+ ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ 
+-import dbus.service
+ import gi
++import dbus.service
+ from gi.repository import GObject
+ from gi.repository import GLib
+ gi.require_version('Gdk', '3.0')
+@@ -55,6 +55,9 @@ CONFIG_JOBVIEWER_IFACE=CONFIG_IFACE + ".JobViewer"
+ g_ppds = None
+ g_killtimer = None
+ 
++#set program name
++GLib.set_prgname("system-config-printer")
++
+ class FetchedPPDs(GObject.GObject):
+     __gsignals__ = {
+         'ready': (GObject.SIGNAL_RUN_LAST, None, ()),

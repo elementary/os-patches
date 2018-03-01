@@ -1,0 +1,28 @@
+From: Laurent Bigonville <bigon@bigon.be>
+Date: Mon, 26 Feb 2018 11:17:22 +0100
+Subject: Use ValueError instead of ImportError to catch exception when
+ importing GIR bindings
+
+When importing specific version of GIR bindings, the ValueError
+exception is raised instead of ImportError.
+
+This should make libsecret optional as intended
+
+Fixes: #94
+---
+ jobviewer.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/jobviewer.py b/jobviewer.py
+index 6d9309f..16b2030 100644
+--- a/jobviewer.py
++++ b/jobviewer.py
+@@ -57,7 +57,7 @@ try:
+     gi.require_version('Secret', '1')
+     from gi.repository import Secret
+     USE_SECRET=True
+-except ImportError:
++except ValueError:
+     USE_SECRET=False
+ 
+ import gettext

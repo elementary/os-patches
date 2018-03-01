@@ -1,10 +1,9 @@
 Source: system-config-printer
 Section: gnome
 Priority: optional
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-XSBC-Original-Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
 Uploaders: @GNOME_TEAM@, Guido Günther <agx@sigxcpu.org>
-Build-Depends: debhelper (>= 10),
+Build-Depends: debhelper (>= 11),
                dh-python,
                desktop-file-utils (>= 0.13),
                gnome-pkg-tools,
@@ -16,11 +15,10 @@ Build-Depends: debhelper (>= 10),
                libxml-parser-perl,
                python3,
                xmlto
-Standards-Version: 3.9.8
-Vcs-Svn: svn://anonscm.debian.org/pkg-gnome/attic/system-config-printer
-Vcs-Browser: https://anonscm.debian.org/viewvc/pkg-gnome/attic/system-config-printer
-Homepage: http://cyberelk.net/tim/software/system-config-printer/
-X-Python3-Version: >= 3.0
+Standards-Version: 4.1.2
+Vcs-Browser: https://salsa.debian.org/gnome-team/system-config-printer
+Vcs-Git: https://salsa.debian.org/gnome-team/system-config-printer.git
+Homepage: https://github.com/zdohnal/system-config-printer
 
 Package: system-config-printer
 Architecture: all
@@ -38,12 +36,11 @@ Depends: gir1.2-gdkpixbuf-2.0,
          system-config-printer-common (= ${source:Version}),
          ${misc:Depends},
          ${python3:Depends}
-Recommends: cups-pk-helper,
-            system-config-printer-udev
-Suggests: gnome-software (>= 3.16.5-2),
-          python3-smbc
-Breaks: system-config-printer-gnome (<< 1.5.7+20160812-0ubuntu3~),
-Replaces: system-config-printer-gnome (<< 1.5.7+20160812-0ubuntu3~),
+Recommends: system-config-printer-udev,
+	    avahi-utils
+Suggests: gnome-software (>= 3.16.5-2)
+Breaks: system-config-printer-gnome (<< 1.5.7+20160812-0ubuntu3~)
+Replaces: system-config-printer-gnome (<< 1.5.7+20160812-0ubuntu3~)
 Description: graphical interface to configure the printing system
  System-config-printer is a GUI written in Python using GTK+ to
  configure a CUPS server. Its primary use is to configure the printing
@@ -57,10 +54,8 @@ Package: system-config-printer-common
 Architecture: all
 Depends: gir1.2-gdkpixbuf-2.0,
          gir1.2-glib-2.0,
-         gir1.2-secret-1,
          gir1.2-gtk-3.0,
          gir1.2-notify-0.7,
-         gir1.2-packagekitglib-1.0,
          gir1.2-pango-1.0,
          python3-cairo,
          python3-cups (>= 1.9.60),
@@ -70,15 +65,15 @@ Depends: gir1.2-gdkpixbuf-2.0,
          python3-requests,
          ${misc:Depends},
          ${python3:Depends}
-Recommends: avahi-utils,
+Recommends: cups-pk-helper, 
             gir1.2-secret-1,
             system-config-printer-udev
 Suggests: gnome-software (>= 3.16.5-2),
-          python3-smbc
+	  python3-smbc
 Breaks: system-config-printer (<< 1.5.7-2~),
-        system-config-printer-gnome (<< 1.5.7+20160812-0ubuntu3~),
+        system-config-printer-gnome (<< 1.5.7+20160812-0ubuntu3~)
 Replaces: system-config-printer (<< 1.5.7-2~),
-          system-config-printer-gnome (<< 1.5.7+20160812-0ubuntu3~),
+          system-config-printer-gnome (<< 1.5.7+20160812-0ubuntu3~)
 Description: backend and the translation files for system-config-printer
  System-config-printer is a GUI written in Python using GTK+ to
  configure a CUPS server. Its primary use is to configure the printing

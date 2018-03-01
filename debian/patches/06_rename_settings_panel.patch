@@ -1,15 +1,19 @@
 --- a/system-config-printer.desktop.in
 +++ b/system-config-printer.desktop.in
-@@ -1,5 +1,5 @@
+@@ -1,7 +1,7 @@
  [Desktop Entry]
 -_Name=Print Settings
+-_GenericName=Print Settings
+-_X-GNOME-FullName=Print Settings
 +_Name=Printers
++_GenericName=Printers
++_X-GNOME-FullName=Printers
  _Comment=Configure printers
  Exec=system-config-printer
  Terminal=false
 --- a/system-config-printer.py
 +++ b/system-config-printer.py
-@@ -750,7 +750,7 @@
+@@ -753,7 +753,7 @@
          connected = bool(self.cups)
  
          host = CUPS_server_hostname ()

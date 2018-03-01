@@ -21,8 +21,11 @@ import threading
 import config
 import cups
 import cupspk
+import gi
 from gi.repository import GLib
+gi.require_version('Gdk', '3.0')
 from gi.repository import Gdk
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 import os
 from errordialogs import *
@@ -64,23 +67,27 @@ class AuthDialog(Gtk.Dialog):
         vbox.pack_start (self.prompt_label, False, False, 0)
 
         num_fields = len (auth_info_required)
-        table = Gtk.Table (n_rows=num_fields, n_columns=2)
-        table.set_row_spacings (6)
-        table.set_col_spacings (6)
+        grid = Gtk.Grid()
+        grid.insert_row(num_fields)
+        grid.insert_column(2)
+        grid.set_row_spacing (6)
+        grid.set_column_spacing (6)
 
         self.field_entry = []
         for i in range (num_fields):
             field = auth_info_required[i]
             label = Gtk.Label (label=_(self.AUTH_FIELD.get (field, field)))
             label.set_alignment (0, 0.5)
-            table.attach (label, 0, 1, i, i + 1)
+            grid.attach (label, 0, 1, i, i + 1)
+            grid.attach (label, 0, i, 1, 1)
             entry = Gtk.Entry ()
             entry.set_visibility (field != 'password')
-            table.attach (entry, 1, 2, i, i + 1, 0, 0)
+            grid.attach (entry, 1, 2, i, i + 1, 0, 0)
+            grid.attach (entry, 1, i, 1, 1)
             self.field_entry.append (entry)
 
         self.field_entry[num_fields - 1].set_activates_default (True)
-        vbox.pack_start (table, False, False, 0)
+        vbox.pack_start (grid, False, False, 0)
         hbox.pack_start (vbox, False, False, 0)
         self.vbox.pack_start (hbox, False, False, 0)
 
@@ -301,7 +308,7 @@ class Connection:
         except IndexError:
             msg = _("CUPS server error")
 
-        d = Gtk.MessageDialog (parent=self._parent,
+        d = Gtk.MessageDialog (transient_for=self._parent,
                                modal=True, destroy_with_parent=True,
                                message_type=Gtk.MessageType.ERROR,
                                buttons=Gtk.ButtonsType.NONE,
@@ -442,7 +449,7 @@ class Connection:
     def _show_not_authorized_dialog (self):
         if self._lock:
             Gdk.threads_enter ()
-        d = Gtk.MessageDialog (parent=self._parent,
+        d = Gtk.MessageDialog (transient_for=self._parent,
                                modal=True, destroy_with_parent=True,
                                message_type=Gtk.MessageType.ERROR,
                                buttons=Gtk.ButtonsType.CLOSE)
