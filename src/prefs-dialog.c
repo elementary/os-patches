@@ -83,6 +83,7 @@ struct _PrefsDialog {
   GtkWidget *popups_allow_checkbutton;
   GtkWidget *adblock_allow_checkbutton;
   GtkWidget *enable_plugins_checkbutton;
+  GtkWidget *enable_safe_browsing_checkbutton;
 
   /* fonts */
   GtkWidget *use_gnome_fonts_checkbutton;
@@ -736,6 +737,7 @@ prefs_dialog_class_init (PrefsDialogClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PrefsDialog, popups_allow_checkbutton);
   gtk_widget_class_bind_template_child (widget_class, PrefsDialog, adblock_allow_checkbutton);
   gtk_widget_class_bind_template_child (widget_class, PrefsDialog, enable_plugins_checkbutton);
+  gtk_widget_class_bind_template_child (widget_class, PrefsDialog, enable_safe_browsing_checkbutton);
   gtk_widget_class_bind_template_child (widget_class, PrefsDialog, download_button_hbox);
   gtk_widget_class_bind_template_child (widget_class, PrefsDialog, download_button_label);
 
@@ -864,7 +866,7 @@ language_editor_add (PrefsDialog *pd,
 {
   GtkTreeIter iter;
 
-  g_return_if_fail (code != NULL && desc != NULL);
+  g_assert (code != NULL && desc != NULL);
 
   if (gtk_tree_model_get_iter_first (pd->lang_model, &iter)) {
     do {
@@ -972,7 +974,7 @@ add_lang_dialog_response_cb (GtkWidget   *widget,
   GtkTreeIter iter;
   GList *rows, *r;
 
-  g_return_if_fail (dialog != NULL);
+  g_assert (dialog != NULL);
 
   if (response == GTK_RESPONSE_ACCEPT) {
     selection = gtk_tree_view_get_selection (pd->add_lang_treeview);
@@ -1018,7 +1020,7 @@ get_name_for_lang_code (PrefsDialog *pd,
 
   str = g_strsplit (code, "-", -1);
   len = g_strv_length (str);
-  g_return_val_if_fail (len != 0, NULL);
+  g_assert (len != 0);
 
   langname = (const char *)g_hash_table_lookup (pd->iso_639_table, str[0]);
 
@@ -1729,6 +1731,11 @@ setup_general_page (PrefsDialog *dialog)
   g_settings_bind (web_settings,
                    EPHY_PREFS_WEB_ENABLE_PLUGINS,
                    dialog->enable_plugins_checkbutton,
+                   "active",
+                   G_SETTINGS_BIND_DEFAULT);
+  g_settings_bind (web_settings,
+                   EPHY_PREFS_WEB_ENABLE_SAFE_BROWSING,
+                   dialog->enable_safe_browsing_checkbutton,
                    "active",
                    G_SETTINGS_BIND_DEFAULT);
 

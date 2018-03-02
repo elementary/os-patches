@@ -38,7 +38,6 @@ typedef enum {
   SET_URL_TITLE,
   SET_URL_ZOOM_LEVEL,
   SET_URL_HIDDEN,
-  SET_URL_THUMBNAIL_TIME,
   ADD_VISIT,
   ADD_VISITS,
   DELETE_URLS,
@@ -391,23 +390,6 @@ ephy_history_service_commit_transaction (EphyHistoryService *self)
   }
 }
 
-static void
-ephy_history_service_enable_foreign_keys (EphyHistoryService *self)
-{
-  GError *error = NULL;
-
-  if (self->history_database == NULL)
-    return;
-
-  ephy_sqlite_connection_execute (self->history_database,
-                                  "PRAGMA foreign_keys = ON", &error);
-
-  if (error) {
-    g_warning ("Could not enable foreign keys pragma: %s", error->message);
-    g_error_free (error);
-  }
-}
-
 static gboolean
 ephy_history_service_open_database_connections (EphyHistoryService *self)
 {
@@ -419,8 +401,9 @@ ephy_history_service_open_database_connections (EphyHistoryService *self)
     g_object_unref (self->history_database);
 
   self->history_database = ephy_sqlite_connection_new (self->read_only ? EPHY_SQLITE_CONNECTION_MODE_READ_ONLY
-                                                                       : EPHY_SQLITE_CONNECTION_MODE_READWRITE);
-  ephy_sqlite_connection_open (self->history_database, self->history_filename, &error);
+                                                                       : EPHY_SQLITE_CONNECTION_MODE_READWRITE,
+                                                       self->history_filename);
+  ephy_sqlite_connection_open (self->history_database, &error);
   if (error) {
     g_object_unref (self->history_database);
     self->history_database = NULL;
@@ -434,9 +417,9 @@ ephy_history_service_open_database_connections (EphyHistoryService *self)
     }
     g_error_free (error);
     return FALSE;
+  } else {
+    ephy_sqlite_connection_enable_foreign_keys (self->history_database);
   }
-
-  ephy_history_service_enable_foreign_keys (self);
 
   return self->read_only ||
           (ephy_history_service_initialize_hosts_table (self) &&
@@ -691,8 +674,8 @@ ephy_history_service_add_visit (EphyHistoryService *self, EphyHistoryPageVisit *
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (visit != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (visit != NULL);
 
   message = ephy_history_service_message_new (self, ADD_VISIT,
                                               ephy_history_page_visit_copy (visit),
@@ -706,8 +689,8 @@ ephy_history_service_add_visits (EphyHistoryService *self, GList *visits, GCance
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (visits != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (visits != NULL);
 
   message = ephy_history_service_message_new (self, ADD_VISITS,
                                               ephy_history_page_visit_list_copy (visits),
@@ -721,7 +704,7 @@ ephy_history_service_find_visits_in_time (EphyHistoryService *self, gint64 from,
 {
   EphyHistoryQuery *query;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
 
   query = ephy_history_query_new ();
   query->from = from;
@@ -736,8 +719,8 @@ ephy_history_service_query_visits (EphyHistoryService *self, EphyHistoryQuery *q
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (query != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (query != NULL);
 
   message = ephy_history_service_message_new (self, QUERY_VISITS,
                                               ephy_history_query_copy (query), (GDestroyNotify)ephy_history_query_free, cancellable, callback, user_data);
@@ -759,8 +742,8 @@ ephy_history_service_query_urls (EphyHistoryService *self, EphyHistoryQuery *que
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (query != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (query != NULL);
 
   message = ephy_history_service_message_new (self, QUERY_URLS,
                                               ephy_history_query_copy (query), (GDestroyNotify)ephy_history_query_free,
@@ -776,7 +759,7 @@ ephy_history_service_get_hosts (EphyHistoryService    *self,
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
 
   message = ephy_history_service_message_new (self, GET_HOSTS,
                                               NULL, NULL, cancellable,
@@ -793,7 +776,7 @@ ephy_history_service_query_hosts (EphyHistoryService    *self,
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
 
   message = ephy_history_service_message_new (self, QUERY_HOSTS,
                                               ephy_history_query_copy (query),
@@ -854,10 +837,10 @@ ephy_history_service_set_url_title (EphyHistoryService    *self,
   EphyHistoryURL *url;
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (orig_url != NULL);
-  g_return_if_fail (title != NULL);
-  g_return_if_fail (*title != '\0');
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (orig_url != NULL);
+  g_assert (title != NULL);
+  g_assert (*title != '\0');
 
   url = ephy_history_url_new (orig_url, title, 0, 0, 0);
   message = ephy_history_service_message_new (self, SET_URL_TITLE,
@@ -883,7 +866,7 @@ ephy_history_service_execute_set_url_zoom_level (EphyHistoryService *self,
   host = ephy_history_service_get_host_row_from_url (self, url_string);
   g_free (url_string);
 
-  g_return_val_if_fail (host != NULL, FALSE);
+  g_assert (host != NULL);
 
   host->zoom_level = zoom_level;
   ephy_history_service_update_host_row (self, host);
@@ -902,8 +885,8 @@ ephy_history_service_set_url_zoom_level (EphyHistoryService    *self,
   EphyHistoryServiceMessage *message;
   GVariant *variant;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (url != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (url != NULL);
 
   variant = g_variant_new ("(sd)", url, zoom_level);
 
@@ -946,56 +929,13 @@ ephy_history_service_set_url_hidden (EphyHistoryService    *self,
   EphyHistoryServiceMessage *message;
   EphyHistoryURL *url;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (orig_url != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (orig_url != NULL);
 
   url = ephy_history_url_new (orig_url, NULL, 0, 0, 0);
   url->hidden = hidden;
 
   message = ephy_history_service_message_new (self, SET_URL_HIDDEN,
-                                              url, (GDestroyNotify)ephy_history_url_free,
-                                              cancellable, callback, user_data);
-  ephy_history_service_send_message (self, message);
-}
-
-static gboolean
-ephy_history_service_execute_set_url_thumbnail_time (EphyHistoryService *self,
-                                                     EphyHistoryURL     *url,
-                                                     gpointer           *result)
-{
-  gint64 thumbnail_time;
-
-  if (self->read_only)
-    return FALSE;
-
-  thumbnail_time = url->thumbnail_time;
-
-  if (ephy_history_service_get_url_row (self, NULL, url) == NULL)
-    return FALSE;
-  else {
-    url->thumbnail_time = thumbnail_time;
-    ephy_history_service_update_url_row (self, url);
-    return TRUE;
-  }
-}
-
-void
-ephy_history_service_set_url_thumbnail_time (EphyHistoryService    *self,
-                                             const char            *orig_url,
-                                             gint64                 thumbnail_time,
-                                             GCancellable          *cancellable,
-                                             EphyHistoryJobCallback callback,
-                                             gpointer               user_data)
-{
-  EphyHistoryURL *url;
-  EphyHistoryServiceMessage *message;
-
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (orig_url != NULL);
-
-  url = ephy_history_url_new (orig_url, NULL, 0, 0, 0);
-  url->thumbnail_time = thumbnail_time;
-  message = ephy_history_service_message_new (self, SET_URL_THUMBNAIL_TIME,
                                               url, (GDestroyNotify)ephy_history_url_free,
                                               cancellable, callback, user_data);
   ephy_history_service_send_message (self, message);
@@ -1024,8 +964,8 @@ ephy_history_service_get_url (EphyHistoryService    *self,
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (url != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (url != NULL);
 
   message = ephy_history_service_message_new (self, GET_URL,
                                               g_strdup (url), g_free,
@@ -1041,7 +981,7 @@ ephy_history_service_execute_get_host_for_url (EphyHistoryService *self,
   EphyHistoryHost *host;
 
   host = ephy_history_service_get_host_row_from_url (self, url);
-  g_return_val_if_fail (host != NULL, FALSE);
+  g_assert (host != NULL);
 
   *result = host;
 
@@ -1057,8 +997,8 @@ ephy_history_service_get_host_for_url (EphyHistoryService    *self,
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (url != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (url != NULL);
 
   message = ephy_history_service_message_new (self, GET_HOST_FOR_URL,
                                               g_strdup (url), g_free,
@@ -1145,22 +1085,13 @@ ephy_history_service_execute_clear (EphyHistoryService *self,
                                     gpointer            pointer,
                                     gpointer           *result)
 {
-  char *journal_filename;
-
   if (self->history_database == NULL ||
       self->read_only)
     return FALSE;
 
   ephy_history_service_commit_transaction (self);
   ephy_sqlite_connection_close (self->history_database);
-
-  if (g_unlink (self->history_filename) == -1)
-    g_warning ("Failed to delete %s: %s", self->history_filename, g_strerror (errno));
-
-  journal_filename = g_strdup_printf ("%s-journal", self->history_filename);
-  if (g_unlink (journal_filename) == -1 && errno != ENOENT)
-    g_warning ("Failed to delete %s: %s", journal_filename, g_strerror (errno));
-  g_free (journal_filename);
+  ephy_sqlite_connection_delete_database (self->history_database);
 
   ephy_history_service_open_database_connections (self);
   ephy_history_service_open_transaction (self);
@@ -1177,8 +1108,8 @@ ephy_history_service_delete_urls (EphyHistoryService    *self,
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (urls != NULL);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (urls != NULL);
 
   message = ephy_history_service_message_new (self, DELETE_URLS,
                                               ephy_history_url_list_copy (urls), (GDestroyNotify)ephy_history_url_list_free,
@@ -1208,7 +1139,7 @@ ephy_history_service_clear (EphyHistoryService    *self,
 {
   EphyHistoryServiceMessage *message;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
 
   message = ephy_history_service_message_new (self, CLEAR,
                                               NULL, NULL,
@@ -1232,7 +1163,6 @@ static EphyHistoryServiceMethod methods[] = {
   (EphyHistoryServiceMethod)ephy_history_service_execute_set_url_title,
   (EphyHistoryServiceMethod)ephy_history_service_execute_set_url_zoom_level,
   (EphyHistoryServiceMethod)ephy_history_service_execute_set_url_hidden,
-  (EphyHistoryServiceMethod)ephy_history_service_execute_set_url_thumbnail_time,
   (EphyHistoryServiceMethod)ephy_history_service_execute_add_visit,
   (EphyHistoryServiceMethod)ephy_history_service_execute_add_visits,
   (EphyHistoryServiceMethod)ephy_history_service_execute_delete_urls,
@@ -1299,7 +1229,7 @@ ephy_history_service_find_urls (EphyHistoryService *self,
 {
   EphyHistoryQuery *query;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
 
   query = ephy_history_query_new ();
   query->from = from;
@@ -1327,9 +1257,9 @@ ephy_history_service_visit_url (EphyHistoryService       *self,
 {
   EphyHistoryPageVisit *visit;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
-  g_return_if_fail (url != NULL);
-  g_return_if_fail (visit_time > 0);
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (url != NULL);
+  g_assert (visit_time > 0);
 
   visit = ephy_history_page_visit_new (url, visit_time, visit_type);
   visit->url->sync_id = g_strdup (sync_id);
@@ -1349,7 +1279,7 @@ ephy_history_service_find_hosts (EphyHistoryService *self,
 {
   EphyHistoryQuery *query;
 
-  g_return_if_fail (EPHY_IS_HISTORY_SERVICE (self));
+  g_assert (EPHY_IS_HISTORY_SERVICE (self));
 
   query = ephy_history_query_new ();
 

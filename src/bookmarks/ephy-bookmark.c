@@ -304,7 +304,7 @@ void
 ephy_bookmark_set_time_added (EphyBookmark *self,
                               gint64        time_added)
 {
-  g_return_if_fail (EPHY_IS_BOOKMARK (self));
+  g_assert (EPHY_IS_BOOKMARK (self));
   g_assert (time_added >= 0);
 
   self->time_added = time_added;
@@ -313,7 +313,7 @@ ephy_bookmark_set_time_added (EphyBookmark *self,
 gint64
 ephy_bookmark_get_time_added (EphyBookmark *self)
 {
-  g_return_val_if_fail (EPHY_IS_BOOKMARK (self), 0);
+  g_assert (EPHY_IS_BOOKMARK (self));
 
   return self->time_added;
 }
@@ -322,7 +322,7 @@ ephy_bookmark_get_time_added (EphyBookmark *self)
 void
 ephy_bookmark_set_url (EphyBookmark *self, const char *url)
 {
-  g_return_if_fail (EPHY_IS_BOOKMARK (self));
+  g_assert (EPHY_IS_BOOKMARK (self));
 
   g_free (self->url);
   self->url = g_strdup (url);
@@ -331,7 +331,7 @@ ephy_bookmark_set_url (EphyBookmark *self, const char *url)
 const char *
 ephy_bookmark_get_url (EphyBookmark *self)
 {
-  g_return_val_if_fail (EPHY_IS_BOOKMARK (self), NULL);
+  g_assert (EPHY_IS_BOOKMARK (self));
 
   return self->url;
 }
@@ -339,7 +339,7 @@ ephy_bookmark_get_url (EphyBookmark *self)
 void
 ephy_bookmark_set_title (EphyBookmark *self, const char *title)
 {
-  g_return_if_fail (EPHY_IS_BOOKMARK (self));
+  g_assert (EPHY_IS_BOOKMARK (self));
 
   g_free (self->title);
   self->title = g_strdup (title);
@@ -349,7 +349,7 @@ ephy_bookmark_set_title (EphyBookmark *self, const char *title)
 const char *
 ephy_bookmark_get_title (EphyBookmark *bookmark)
 {
-  g_return_val_if_fail (EPHY_IS_BOOKMARK (bookmark), NULL);
+  g_assert (EPHY_IS_BOOKMARK (bookmark));
 
   return bookmark->title;
 }
@@ -358,8 +358,8 @@ void
 ephy_bookmark_set_id (EphyBookmark *self,
                       const char   *id)
 {
-  g_return_if_fail (EPHY_IS_BOOKMARK (self));
-  g_return_if_fail (id != NULL);
+  g_assert (EPHY_IS_BOOKMARK (self));
+  g_assert (id != NULL);
 
   g_free (self->id);
   self->id = g_strdup (id);
@@ -368,7 +368,7 @@ ephy_bookmark_set_id (EphyBookmark *self,
 const char *
 ephy_bookmark_get_id (EphyBookmark *self)
 {
-  g_return_val_if_fail (EPHY_IS_BOOKMARK (self), NULL);
+  g_assert (EPHY_IS_BOOKMARK (self));
 
   return self->id;
 }
@@ -380,7 +380,7 @@ ephy_bookmark_set_is_uploaded (EphyBookmark *self,
 
   /* FIXME: This is no longer used for Firefox Sync, but bookmarks import/export
    * expects it. We need to delete it and write a migrator for bookmarks. */
-  g_return_if_fail (EPHY_IS_BOOKMARK (self));
+  g_assert (EPHY_IS_BOOKMARK (self));
 }
 
 gboolean
@@ -388,7 +388,7 @@ ephy_bookmark_is_uploaded (EphyBookmark *self)
 {
   /* FIXME: This is no longer used for Firefox Sync, but bookmarks import/export
    * expects it. We need to delete it and write a migrator for bookmarks. */
-  g_return_val_if_fail (EPHY_IS_BOOKMARK (self), FALSE);
+  g_assert (EPHY_IS_BOOKMARK (self));
 
   return FALSE;
 }
@@ -400,8 +400,8 @@ ephy_bookmark_add_tag (EphyBookmark *self,
   GSequenceIter *tag_iter;
   GSequenceIter *prev_tag_iter;
 
-  g_return_if_fail (EPHY_IS_BOOKMARK (self));
-  g_return_if_fail (tag != NULL);
+  g_assert (EPHY_IS_BOOKMARK (self));
+  g_assert (tag != NULL);
 
   tag_iter = g_sequence_search (self->tags,
                                 (gpointer)tag,
@@ -422,8 +422,8 @@ ephy_bookmark_remove_tag (EphyBookmark *self,
 {
   GSequenceIter *tag_iter;
 
-  g_return_if_fail (EPHY_IS_BOOKMARK (self));
-  g_return_if_fail (tag != NULL);
+  g_assert (EPHY_IS_BOOKMARK (self));
+  g_assert (tag != NULL);
 
   tag_iter = g_sequence_lookup (self->tags,
                                 (gpointer)tag,
@@ -441,8 +441,8 @@ ephy_bookmark_has_tag (EphyBookmark *self, const char *tag)
 {
   GSequenceIter *tag_iter;
 
-  g_return_val_if_fail (EPHY_IS_BOOKMARK (self), FALSE);
-  g_return_val_if_fail (tag != NULL, FALSE);
+  g_assert (EPHY_IS_BOOKMARK (self));
+  g_assert (tag != NULL);
 
   tag_iter = g_sequence_lookup (self->tags,
                                 (gpointer)tag,
@@ -455,7 +455,7 @@ ephy_bookmark_has_tag (EphyBookmark *self, const char *tag)
 GSequence *
 ephy_bookmark_get_tags (EphyBookmark *self)
 {
-  g_return_val_if_fail (EPHY_IS_BOOKMARK (self), NULL);
+  g_assert (EPHY_IS_BOOKMARK (self));
 
   return self->tags;
 }

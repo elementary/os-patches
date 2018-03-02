@@ -38,6 +38,7 @@
 #include "ephy-settings.h"
 #include "ephy-snapshot-service.h"
 #include "ephy-tabs-catalog.h"
+#include "ephy-uri-helpers.h"
 #include "ephy-uri-tester-shared.h"
 #include "ephy-web-app-utils.h"
 #include "ephy-web-extension-proxy.h"
@@ -57,6 +58,7 @@
 typedef struct {
   WebKitWebContext *web_context;
   EphyHistoryService *global_history_service;
+  EphyGSBService *global_gsb_service;
   EphyEncodings *encodings;
   GtkPageSetup *page_setup;
   GtkPrintSettings *print_settings;
@@ -72,6 +74,7 @@ typedef struct {
   EphyFiltersManager *filters_manager;
   EphySearchEngineManager *search_engine_manager;
   GCancellable *cancellable;
+  GList *app_origins;
 } EphyEmbedShellPrivate;
 
 enum {
@@ -79,6 +82,7 @@ enum {
   WEB_VIEW_CREATED,
   PAGE_CREATED,
   ALLOW_TLS_CERTIFICATE,
+  ALLOW_UNSAFE_BROWSING,
   FORM_AUTH_DATA_SAVE_REQUESTED,
   SENSITIVE_FORM_FOCUSED,
 
@@ -168,6 +172,7 @@ ephy_embed_shell_dispose (GObject *object)
   g_clear_object (&priv->page_setup);
   g_clear_object (&priv->print_settings);
   g_clear_object (&priv->global_history_service);
+  g_clear_object (&priv->global_gsb_service);
   g_clear_object (&priv->about_handler);
   g_clear_object (&priv->user_content);
   g_clear_object (&priv->downloads_manager);
@@ -176,6 +181,16 @@ ephy_embed_shell_dispose (GObject *object)
   g_clear_object (&priv->dbus_server);
   g_clear_object (&priv->filters_manager);
   g_clear_object (&priv->search_engine_manager);
+
+  G_OBJECT_CLASS (ephy_embed_shell_parent_class)->dispose (object);
+}
+
+static void
+ephy_embed_shell_finalize (GObject *object)
+{
+  EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (EPHY_EMBED_SHELL (object));
+
+  g_list_free_full (priv->app_origins, g_free);
 
   G_OBJECT_CLASS (ephy_embed_shell_parent_class)->dispose (object);
 }
@@ -335,6 +350,17 @@ web_extension_tls_error_page_message_received_cb (WebKitUserContentManager *mana
 }
 
 static void
+web_extension_unsafe_browsing_error_page_message_received_cb (WebKitUserContentManager *manager,
+                                                              WebKitJavascriptResult   *message,
+                                                              EphyEmbedShell           *shell)
+{
+  guint64 page_id;
+
+  page_id = ephy_embed_utils_get_js_result_as_number (message);
+  g_signal_emit (shell, signals[ALLOW_UNSAFE_BROWSING], 0, page_id);
+}
+
+static void
 web_extension_about_apps_message_received_cb (WebKitUserContentManager *manager,
                                               WebKitJavascriptResult   *message,
                                               EphyEmbedShell           *shell)
@@ -461,7 +487,6 @@ delayed_thumbnail_update_cb (DelayedThumbnailUpdateData *data)
 void
 ephy_embed_shell_set_thumbnail_path (EphyEmbedShell *shell,
                                      const char     *url,
-                                     time_t          mtime,
                                      const char     *path)
 {
   EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
@@ -478,30 +503,24 @@ ephy_embed_shell_set_thumbnail_path (EphyEmbedShell *shell,
   }
 }
 
-typedef struct {
-  char *url;
-  time_t mtime;
-} GetSnapshotPathAsyncData;
-
 static void
-got_snapshot_path_for_url_cb (EphySnapshotService      *service,
-                              GAsyncResult             *result,
-                              GetSnapshotPathAsyncData *data)
+got_snapshot_path_for_url_cb (EphySnapshotService *service,
+                              GAsyncResult        *result,
+                              char                *url)
 {
   char *snapshot;
   GError *error = NULL;
 
   snapshot = ephy_snapshot_service_get_snapshot_path_for_url_finish (service, result, &error);
   if (snapshot) {
-    ephy_embed_shell_set_thumbnail_path (ephy_embed_shell_get_default (), data->url, data->mtime, snapshot);
+    ephy_embed_shell_set_thumbnail_path (ephy_embed_shell_get_default (), url, snapshot);
     g_free (snapshot);
   } else {
     /* Bad luck, not something to warn about. */
-    g_info ("Failed to get snapshot for URL %s: %s", data->url, error->message);
+    g_info ("Failed to get snapshot for URL %s: %s", url, error->message);
     g_error_free (error);
   }
-  g_free (data->url);
-  g_free (data);
+  g_free (url);
 }
 
 void
@@ -515,16 +534,13 @@ ephy_embed_shell_schedule_thumbnail_update (EphyEmbedShell *shell,
   snapshot = ephy_snapshot_service_lookup_cached_snapshot_path (service, url->url);
 
   if (snapshot) {
-    ephy_embed_shell_set_thumbnail_path (shell, url->url, url->thumbnail_time, snapshot);
+    ephy_embed_shell_set_thumbnail_path (shell, url->url, snapshot);
   } else {
-    GetSnapshotPathAsyncData *data = g_new (GetSnapshotPathAsyncData, 1);
-
-    data->url = g_strdup (url->url);
-    data->mtime = url->thumbnail_time;
     ephy_snapshot_service_get_snapshot_path_for_url_async (service,
-                                                           url->url, url->thumbnail_time, NULL,
+                                                           url->url,
+                                                           NULL,
                                                            (GAsyncReadyCallback)got_snapshot_path_for_url_cb,
-                                                           data);
+                                                           g_strdup (url->url));
   }
 }
 
@@ -539,7 +555,7 @@ ephy_embed_shell_get_global_history_service (EphyEmbedShell *shell)
 {
   EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
 
-  g_return_val_if_fail (EPHY_IS_EMBED_SHELL (shell), NULL);
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
 
   if (priv->global_history_service == NULL) {
     char *filename;
@@ -554,7 +570,7 @@ ephy_embed_shell_get_global_history_service (EphyEmbedShell *shell)
     filename = g_build_filename (ephy_dot_dir (), EPHY_HISTORY_FILE, NULL);
     priv->global_history_service = ephy_history_service_new (filename, mode);
     g_free (filename);
-    g_return_val_if_fail (priv->global_history_service, NULL);
+    g_assert (priv->global_history_service);
     g_signal_connect (priv->global_history_service, "urls-visited",
                       G_CALLBACK (history_service_urls_visited_cb),
                       shell);
@@ -575,15 +591,35 @@ ephy_embed_shell_get_global_history_service (EphyEmbedShell *shell)
   return priv->global_history_service;
 }
 
-static void
-snapshot_saved_cb (EphySnapshotService *service,
-                   const char          *url,
-                   gint64               mtime,
-                   EphyEmbedShell      *shell)
+/**
+ * ephy_embed_shell_get_global_gsb_service:
+ * @shell: the #EphyEmbedShell
+ *
+ * Return value: (transfer none): the global #EphyGSBService
+ **/
+EphyGSBService *
+ephy_embed_shell_get_global_gsb_service (EphyEmbedShell *shell)
 {
-  ephy_history_service_set_url_thumbnail_time (ephy_embed_shell_get_global_history_service (shell),
-                                               url, mtime,
-                                               NULL, NULL, NULL);
+  EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
+
+  g_return_val_if_fail (EPHY_IS_EMBED_SHELL (shell), NULL);
+
+  if (priv->global_gsb_service == NULL) {
+    char *api_key;
+    char *dot_dir;
+    char *db_path;
+
+    api_key = g_settings_get_string (EPHY_SETTINGS_WEB, EPHY_PREFS_WEB_GSB_API_KEY);
+    dot_dir = ephy_default_dot_dir ();
+    db_path = g_build_filename (dot_dir, EPHY_GSB_FILE, NULL);
+    priv->global_gsb_service = ephy_gsb_service_new (api_key, db_path);
+
+    g_free (api_key);
+    g_free (dot_dir);
+    g_free (db_path);
+  }
+
+  return priv->global_gsb_service;
 }
 
 /**
@@ -597,7 +633,7 @@ ephy_embed_shell_get_encodings (EphyEmbedShell *shell)
 {
   EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
 
-  g_return_val_if_fail (EPHY_IS_EMBED_SHELL (shell), NULL);
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
 
   if (priv->encodings == NULL)
     priv->encodings = ephy_encodings_new ();
@@ -952,6 +988,12 @@ ephy_embed_shell_startup (GApplication *application)
                     shell);
 
   webkit_user_content_manager_register_script_message_handler (priv->user_content,
+                                                               "unsafeBrowsingErrorPage");
+  g_signal_connect (priv->user_content, "script-message-received::unsafeBrowsingErrorPage",
+                    G_CALLBACK (web_extension_unsafe_browsing_error_page_message_received_cb),
+                    shell);
+
+  webkit_user_content_manager_register_script_message_handler (priv->user_content,
                                                                "formAuthData");
   g_signal_connect (priv->user_content, "script-message-received::formAuthData",
                     G_CALLBACK (web_extension_form_auth_data_message_received_cb),
@@ -1124,10 +1166,6 @@ ephy_embed_shell_constructed (GObject *object)
     ephy_embed_shell_create_web_context (shell);
     priv->user_content = webkit_user_content_manager_new ();
   }
-
-  g_signal_connect_object (ephy_snapshot_service_get_default (),
-                           "snapshot-saved", G_CALLBACK (snapshot_saved_cb),
-                           shell, 0);
 }
 
 static void
@@ -1145,6 +1183,7 @@ ephy_embed_shell_class_init (EphyEmbedShellClass *klass)
   GApplicationClass *application_class = G_APPLICATION_CLASS (klass);
 
   object_class->dispose = ephy_embed_shell_dispose;
+  object_class->finalize = ephy_embed_shell_finalize;
   object_class->set_property = ephy_embed_shell_set_property;
   object_class->get_property = ephy_embed_shell_get_property;
   object_class->constructed = ephy_embed_shell_constructed;
@@ -1231,6 +1270,22 @@ ephy_embed_shell_class_init (EphyEmbedShellClass *klass)
                   G_TYPE_UINT64);
 
   /**
+   * EphyEmbedShell::allow-unsafe-browsing:
+   * @shell: the #EphyEmbedShell
+   * @page_id: the identifier of the web page
+   *
+   * Emitted when the web extension requests an exception be
+   * permitted for the unsafe browsing warning on the given page
+   */
+  signals[ALLOW_UNSAFE_BROWSING] =
+    g_signal_new ("allow-unsafe-browsing",
+                  EPHY_TYPE_EMBED_SHELL,
+                  G_SIGNAL_RUN_FIRST,
+                  0, NULL, NULL, NULL,
+                  G_TYPE_NONE, 1,
+                  G_TYPE_UINT64);
+
+  /**
    * EphyEmbedShell::form-auth-data-save-requested:
    * @shell: the #EphyEmbedShell
    * @request_id: the identifier of the request
@@ -1291,7 +1346,7 @@ ephy_embed_shell_set_page_setup (EphyEmbedShell *shell,
   EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
   char *path;
 
-  g_return_if_fail (EPHY_IS_EMBED_SHELL (shell));
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
 
   if (page_setup != NULL)
     g_object_ref (page_setup);
@@ -1318,7 +1373,7 @@ ephy_embed_shell_get_page_setup (EphyEmbedShell *shell)
 {
   EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
 
-  g_return_val_if_fail (EPHY_IS_EMBED_SHELL (shell), NULL);
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
 
   if (priv->page_setup == NULL) {
     GError *error = NULL;
@@ -1354,7 +1409,7 @@ ephy_embed_shell_set_print_settings (EphyEmbedShell   *shell,
   EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
   char *path;
 
-  g_return_if_fail (EPHY_IS_EMBED_SHELL (shell));
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
 
   if (settings != NULL)
     g_object_ref (settings);
@@ -1382,7 +1437,7 @@ ephy_embed_shell_get_print_settings (EphyEmbedShell *shell)
 {
   EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
 
-  g_return_val_if_fail (EPHY_IS_EMBED_SHELL (shell), NULL);
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
 
   if (priv->print_settings == NULL) {
     GError *error = NULL;
@@ -1414,9 +1469,54 @@ ephy_embed_shell_get_mode (EphyEmbedShell *shell)
 {
   EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
 
-  g_return_val_if_fail (EPHY_IS_EMBED_SHELL (shell), EPHY_EMBED_SHELL_MODE_BROWSER);
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
 
   return priv->mode;
+}
+
+/**
+ * ephy_embed_shell_add_app_related_uri:
+ * @shell: an #EphyEmbedShell
+ * @uri: the URI
+ **/
+void
+ephy_embed_shell_add_app_related_uri (EphyEmbedShell *shell, const char *uri)
+{
+  EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
+  char *origin;
+
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
+  g_assert (priv->mode == EPHY_EMBED_SHELL_MODE_APPLICATION);
+
+  origin = ephy_uri_to_security_origin (uri);
+
+  if (!g_list_find_custom (priv->app_origins, origin, (GCompareFunc)g_strcmp0))
+    priv->app_origins = g_list_append (priv->app_origins, origin);
+}
+
+/**
+ * ephy_embed_shell_uri_looks_related_to_application:
+ * @shell: an #EphyEmbedShell
+ * @uri: the URI
+ *
+ * Returns: %TRUE if @uri looks related, %FALSE otherwise
+ **/
+gboolean
+ephy_embed_shell_uri_looks_related_to_app (EphyEmbedShell *shell,
+                                           const char     *uri)
+{
+  EphyEmbedShellPrivate *priv = ephy_embed_shell_get_instance_private (shell);
+
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
+  g_assert (priv->mode == EPHY_EMBED_SHELL_MODE_APPLICATION);
+
+  for (GList *iter = priv->app_origins; iter != NULL; iter = iter->next) {
+    const char *iter_uri = (const char *)iter->data;
+    if (ephy_embed_utils_urls_have_same_origin (iter_uri, uri))
+      return TRUE;
+  }
+
+  return FALSE;
 }
 
 /**
@@ -1442,8 +1542,8 @@ ephy_embed_shell_launch_handler (EphyEmbedShell *shell,
   GList *list = NULL;
   gboolean ret = FALSE;
 
-  g_return_val_if_fail (EPHY_IS_EMBED_SHELL (shell), FALSE);
-  g_return_val_if_fail (file || mime_type, FALSE);
+  g_assert (EPHY_IS_EMBED_SHELL (shell));
+  g_assert (file || mime_type);
 
   if (ephy_is_running_inside_flatpak ()) {
     return ephy_file_launch_file_via_uri_handler (file);

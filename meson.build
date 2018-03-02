@@ -1,7 +1,7 @@
 project('epiphany', 'c',
   license: 'GPL3+',
-  version: '3.26.5.1',
-  meson_version: '>= 0.37.0',
+  version: '3.27.90',
+  meson_version: '>= 0.42.0',
   default_options: ['c_std=gnu11']
 )
 
@@ -31,20 +31,43 @@ conf.set_quoted('LOCALEDIR', localedir)
 conf.set_quoted('PKGDATADIR', pkgdatadir)
 conf.set_quoted('PKGLIBEXECDIR', pkglibexecdir)
 conf.set_quoted('SOURCE_ROOT', meson.source_root())
-conf.set_quoted('VERSION', meson.project_version())
+
+# FIXME: Get rid of this option. This feature should be polished up and enabled unconditionally.
+conf.set10('ENABLE_HTTPS_EVERYWHERE', get_option('https_everywhere'))
 
 conf.set10('DEVELOPER_MODE', get_option('developer_mode'))
-conf.set10('ENABLE_HTTPS_EVERYWHERE', get_option('https_everywhere'))
+
+tech_preview = get_option('tech_preview')
+conf.set10('TECH_PREVIEW', tech_preview)
+
+conf.set_quoted('VERSION', meson.project_version())
 
 configure_file(
   output: 'config.h',
   configuration: conf
 )
 
+if tech_preview
+  vcs_tag(
+    input: 'ephy-vcs-version.h.in',
+    output: 'ephy-vcs-version.h',
+    replace_string: '@VCSVERSION@'
+  )
+else
+  version_conf = configuration_data()
+  version_conf.set('VCSVERSION', meson.project_version())
+
+  configure_file(
+    input: 'ephy-vcs-version.h.in',
+    output: 'ephy-vcs-version.h',
+    configuration: version_conf
+  )
+endif
+
 glib_requirement = '>= 2.52.0'
 gtk_requirement = '>= 3.22.13'
 nettle_requirement = '>= 3.2'
-webkitgtk_requirement = '>= 2.17.4'
+webkitgtk_requirement = '>= 2.19.4'
 
 cairo_dep = dependency('cairo', version: '>= 1.2')
 gcr_dep = dependency('gcr-3', version: '>= 3.5.5')
@@ -53,7 +76,6 @@ gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0', version: '>= 2.36.5')
 gio_dep = dependency('gio-2.0', version: glib_requirement)
 gio_unix_dep = dependency('gio-unix-2.0', version: glib_requirement)
 glib_dep = dependency('glib-2.0', version: glib_requirement)
-gnome_desktop_dep = dependency('gnome-desktop-3.0', version: '>= 2.91.2')
 gtk_dep = dependency('gtk+-3.0', version: gtk_requirement)
 gtk_unix_print_dep = dependency('gtk+-unix-print-3.0', version: gtk_requirement)
 hogweed_dep = dependency('hogweed', version: nettle_requirement)
@@ -75,7 +97,7 @@ gmp_dep = cc.find_library('gmp')
 m_dep = cc.find_library('m', required: false)
 
 if get_option('https_everywhere')
-  httpseverywhere_dep = dependency('httpseverywhere-0.4', version: '>= 0.2.2')
+  httpseverywhere_dep = dependency('httpseverywhere-0.8')
 endif
 
 subdir('data')

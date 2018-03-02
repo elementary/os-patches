@@ -41,6 +41,8 @@ struct _EphyDownload {
   char *destination;
   char *content_type;
 
+  gboolean show_notification;
+
   EphyDownloadActionType action;
   guint32 start_time;
   gboolean finished;
@@ -136,7 +138,7 @@ ephy_download_set_property (GObject      *object,
 const char *
 ephy_download_get_content_type (EphyDownload *download)
 {
-  g_return_val_if_fail (EPHY_IS_DOWNLOAD (download), NULL);
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   return download->content_type;
 }
@@ -270,8 +272,8 @@ void
 ephy_download_set_destination_uri (EphyDownload *download,
                                    const char   *destination)
 {
-  g_return_if_fail (EPHY_IS_DOWNLOAD (download));
-  g_return_if_fail (destination != NULL);
+  g_assert (EPHY_IS_DOWNLOAD (download));
+  g_assert (destination != NULL);
 
   webkit_download_set_destination (download->download, destination);
   g_object_notify_by_pspec (G_OBJECT (download), obj_properties[PROP_DESTINATION]);
@@ -290,7 +292,7 @@ void
 ephy_download_set_action (EphyDownload          *download,
                           EphyDownloadActionType action)
 {
-  g_return_if_fail (EPHY_IS_DOWNLOAD (download));
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   download->action = action;
   g_object_notify_by_pspec (G_OBJECT (download), obj_properties[PROP_ACTION]);
@@ -307,7 +309,7 @@ ephy_download_set_action (EphyDownload          *download,
 WebKitDownload *
 ephy_download_get_webkit_download (EphyDownload *download)
 {
-  g_return_val_if_fail (EPHY_IS_DOWNLOAD (download), NULL);
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   return download->download;
 }
@@ -323,7 +325,7 @@ ephy_download_get_webkit_download (EphyDownload *download)
 const char *
 ephy_download_get_destination_uri (EphyDownload *download)
 {
-  g_return_val_if_fail (EPHY_IS_DOWNLOAD (download), NULL);
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   return webkit_download_get_destination (download->download);
 }
@@ -342,7 +344,7 @@ ephy_download_get_destination_uri (EphyDownload *download)
 EphyDownloadActionType
 ephy_download_get_action (EphyDownload *download)
 {
-  g_return_val_if_fail (EPHY_IS_DOWNLOAD (download), EPHY_DOWNLOAD_ACTION_NONE);
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   return download->action;
 }
@@ -359,7 +361,7 @@ ephy_download_get_action (EphyDownload *download)
 guint32
 ephy_download_get_start_time (EphyDownload *download)
 {
-  g_return_val_if_fail (EPHY_IS_DOWNLOAD (download), 0);
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   return download->start_time;
 }
@@ -373,7 +375,7 @@ ephy_download_get_start_time (EphyDownload *download)
 void
 ephy_download_cancel (EphyDownload *download)
 {
-  g_return_if_fail (EPHY_IS_DOWNLOAD (download));
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   webkit_download_cancel (download->download);
 }
@@ -381,7 +383,7 @@ ephy_download_cancel (EphyDownload *download)
 gboolean
 ephy_download_is_active (EphyDownload *download)
 {
-  g_return_val_if_fail (EPHY_IS_DOWNLOAD (download), FALSE);
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   return !download->finished;
 }
@@ -389,7 +391,7 @@ ephy_download_is_active (EphyDownload *download)
 gboolean
 ephy_download_succeeded (EphyDownload *download)
 {
-  g_return_val_if_fail (EPHY_IS_DOWNLOAD (download), FALSE);
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   return download->finished && !download->error;
 }
@@ -398,7 +400,7 @@ gboolean
 ephy_download_failed (EphyDownload *download,
                       GError      **error)
 {
-  g_return_val_if_fail (EPHY_IS_DOWNLOAD (download), FALSE);
+  g_assert (EPHY_IS_DOWNLOAD (download));
 
   if (download->finished && download->error) {
     if (error)
@@ -602,6 +604,8 @@ ephy_download_init (EphyDownload *download)
   download->action = EPHY_DOWNLOAD_ACTION_NONE;
 
   download->start_time = gtk_get_current_event_time ();
+
+  download->show_notification = TRUE;
 }
 
 static void
@@ -683,6 +687,36 @@ download_created_destination_cb (WebKitDownload *wk_download,
 }
 
 static void
+display_download_finished_notification (WebKitDownload *download)
+{
+  GApplication *application;
+  GtkWindow *toplevel;
+  const char *dest;
+
+  application = G_APPLICATION (ephy_embed_shell_get_default ());
+  toplevel = gtk_application_get_active_window (GTK_APPLICATION (application));
+  dest = webkit_download_get_destination (download);
+
+  if (!gtk_window_is_active (toplevel) && dest != NULL) {
+    char *filename;
+    char *message;
+    GNotification *notification;
+
+    filename = g_filename_display_basename (dest);
+    /* Translators: a desktop notification when a download finishes. */
+    message = g_strdup_printf (_("Finished downloading %s"), filename);
+    /* Translators: the title of the notification. */
+    notification = g_notification_new (_("Download finished"));
+    g_notification_set_body (notification, message);
+    g_application_send_notification (application, "download-finished", notification);
+
+    g_free (filename);
+    g_free (message);
+    g_object_unref (notification);
+  }
+}
+
+static void
 download_finished_cb (WebKitDownload *wk_download,
                       EphyDownload   *download)
 {
@@ -693,6 +727,9 @@ download_finished_cb (WebKitDownload *wk_download,
     ephy_download_do_download_action (download, EPHY_DOWNLOAD_ACTION_OPEN, download->start_time);
   else
     ephy_download_do_download_action (download, download->action, download->start_time);
+
+  if (download->show_notification)
+    display_download_finished_notification (wk_download);
 
   g_signal_emit (download, signals[COMPLETED], 0);
 }
@@ -723,7 +760,7 @@ ephy_download_new (WebKitDownload *download)
 {
   EphyDownload *ephy_download;
 
-  g_return_val_if_fail (WEBKIT_IS_DOWNLOAD (download), NULL);
+  g_assert (WEBKIT_IS_DOWNLOAD (download));
 
   ephy_download = g_object_new (EPHY_TYPE_DOWNLOAD, NULL);
 
@@ -764,11 +801,19 @@ ephy_download_new_for_uri (const char *uri)
   WebKitDownload *download;
   EphyEmbedShell *shell = ephy_embed_shell_get_default ();
 
-  g_return_val_if_fail (uri != NULL, NULL);
+  g_assert (uri != NULL);
 
   download = webkit_web_context_download_uri (ephy_embed_shell_get_web_context (shell), uri);
   ephy_download = ephy_download_new (download);
   g_object_unref (download);
 
   return ephy_download;
+}
+
+void
+ephy_download_disable_desktop_notification (EphyDownload *download)
+{
+  g_assert (EPHY_IS_DOWNLOAD (download));
+
+  download->show_notification = FALSE;
 }

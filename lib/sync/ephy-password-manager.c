@@ -74,7 +74,7 @@ typedef struct {
 typedef struct {
   EphyPasswordManager *manager;
   EphyPasswordRecord  *record;
-} ReplaceRecordAsyncData;
+} ManageRecordAsyncData;
 
 typedef struct {
   EphyPasswordManager                    *manager;
@@ -159,13 +159,13 @@ merge_passwords_async_data_free (MergePasswordsAsyncData *data)
   g_slice_free (MergePasswordsAsyncData, data);
 }
 
-static ReplaceRecordAsyncData *
-replace_record_async_data_new (EphyPasswordManager *manager,
-                               EphyPasswordRecord  *record)
+static ManageRecordAsyncData *
+manage_record_async_data_new (EphyPasswordManager *manager,
+                              EphyPasswordRecord  *record)
 {
-  ReplaceRecordAsyncData *data;
+  ManageRecordAsyncData *data;
 
-  data = g_slice_new (ReplaceRecordAsyncData);
+  data = g_slice_new (ManageRecordAsyncData);
   data->manager = g_object_ref (manager);
   data->record = g_object_ref (record);
 
@@ -173,13 +173,13 @@ replace_record_async_data_new (EphyPasswordManager *manager,
 }
 
 static void
-replace_record_async_data_free (ReplaceRecordAsyncData *data)
+manage_record_async_data_free (ManageRecordAsyncData *data)
 {
   g_assert (data);
 
   g_object_unref (data->manager);
   g_object_unref (data->record);
-  g_slice_free (ReplaceRecordAsyncData, data);
+  g_slice_free (ManageRecordAsyncData, data);
 }
 
 static GHashTable *
@@ -344,47 +344,69 @@ GList *
 ephy_password_manager_get_cached_users (EphyPasswordManager *self,
                                         const char          *origin)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_MANAGER (self), NULL);
-  g_return_val_if_fail (origin, NULL);
+  g_assert (EPHY_IS_PASSWORD_MANAGER (self));
+  g_assert (origin);
 
   return g_hash_table_lookup (self->cache, origin);
 }
 
 static void
-secret_service_store_cb (SecretService *service,
-                         GAsyncResult  *result,
-                         GTask         *task)
+secret_service_store_cb (SecretService         *service,
+                         GAsyncResult          *result,
+                         ManageRecordAsyncData *data)
 {
   GError *error = NULL;
+  const char *origin;
+  const char *username;
+
+  origin = ephy_password_record_get_origin (data->record);
+  username = ephy_password_record_get_username (data->record);
 
   secret_service_store_finish (service, result, &error);
-  if (error)
-    g_task_return_error (task, error);
-  else
-    g_task_return_boolean (task, TRUE);
+  if (error) {
+    g_warning ("Failed to store password record for (%s, %s, %s, %s, %s): %s",
+               origin,
+               ephy_password_record_get_target_origin (data->record),
+               username,
+               ephy_password_record_get_username_field (data->record),
+               ephy_password_record_get_password_field (data->record),
+               error->message);
+    g_error_free (error);
+  } else {
+    ephy_password_manager_cache_add (data->manager, origin, username);
+  }
 
-  g_object_unref (task);
+  manage_record_async_data_free (data);
 }
 
 static void
-store_internal (const char          *password,
-                GHashTable          *attributes,
-                GAsyncReadyCallback  callback,
-                gpointer             user_data)
+ephy_password_manager_store_record (EphyPasswordManager *self,
+                                    EphyPasswordRecord  *record)
 {
+  GHashTable *attributes;
   SecretValue *value;
-  GTask *task;
   const char *origin;
+  const char *target_origin;
   const char *username;
+  const char *password;
+  const char *username_field;
+  const char *password_field;
   char *label;
+  gint64 modified;
 
-  g_assert (password);
-  g_assert (attributes);
+  g_assert (EPHY_IS_PASSWORD_MANAGER (self));
+  g_assert (EPHY_IS_PASSWORD_RECORD (record));
 
-  task = g_task_new (NULL, NULL, callback, user_data);
-  value = secret_value_new (password, -1, "text/plain");
-  origin = g_hash_table_lookup (attributes, ORIGIN_KEY);
-  username = g_hash_table_lookup (attributes, USERNAME_KEY);
+  origin = ephy_password_record_get_origin (record);
+  target_origin = ephy_password_record_get_target_origin (record);
+  username = ephy_password_record_get_username (record);
+  password = ephy_password_record_get_password (record);
+  username_field = ephy_password_record_get_username_field (record);
+  password_field = ephy_password_record_get_password_field (record);
+  modified = ephy_synchronizable_get_server_time_modified (EPHY_SYNCHRONIZABLE (record));
+
+  LOG ("Storing password record for (%s, %s, %s, %s, %s)",
+       origin, target_origin, username, username_field, password_field);
 
   if (username) {
     /* Translators: The first %s is the username and the second one is the
@@ -397,45 +419,19 @@ store_internal (const char          *password,
     label = g_strdup_printf (_("Password in a form in %s"), origin);
   }
 
-  LOG ("Storing password record for (%s, %s, %s, %s)",
-       origin, username,
-       (char *)g_hash_table_lookup (attributes, USERNAME_FIELD_KEY),
-       (char *)g_hash_table_lookup (attributes, PASSWORD_FIELD_KEY));
+  attributes = get_attributes_table (ephy_password_record_get_id (record),
+                                     origin, target_origin, username,
+                                     username_field, password_field,
+                                     modified);
 
+  value = secret_value_new (password, -1, "text/plain");
   secret_service_store (NULL, EPHY_FORM_PASSWORD_SCHEMA,
                         attributes, NULL, label, value, NULL,
                         (GAsyncReadyCallback)secret_service_store_cb,
-                        g_object_ref (task));
+                        manage_record_async_data_new (self, record));
 
   g_free (label);
   secret_value_unref (value);
-  g_object_unref (task);
-}
-
-static void
-ephy_password_manager_store_record (EphyPasswordManager *self,
-                                    EphyPasswordRecord  *record)
-{
-  GHashTable *attributes;
-  const char *origin;
-  const char *username;
-
-  g_assert (EPHY_IS_PASSWORD_MANAGER (self));
-  g_assert (EPHY_IS_PASSWORD_RECORD (record));
-
-  origin = ephy_password_record_get_origin (record);
-  username = ephy_password_record_get_username (record);
-  attributes = get_attributes_table (ephy_password_record_get_id (record),
-                                     origin,
-                                     ephy_password_record_get_target_origin (record),
-                                     username,
-                                     ephy_password_record_get_username_field (record),
-                                     ephy_password_record_get_password_field (record),
-                                     ephy_synchronizable_get_server_time_modified (EPHY_SYNCHRONIZABLE (record)));
-  store_internal (ephy_password_record_get_password (record), attributes, NULL, NULL);
-
-  ephy_password_manager_cache_add (self, origin, username);
-
   g_hash_table_unref (attributes);
 }
 
@@ -473,12 +469,12 @@ ephy_password_manager_save (EphyPasswordManager *self,
   char *id;
   gint64 timestamp;
 
-  g_return_if_fail (EPHY_IS_PASSWORD_MANAGER (self));
-  g_return_if_fail (origin);
-  g_return_if_fail (target_origin);
-  g_return_if_fail (password);
-  g_return_if_fail (!username_field || username);
-  g_return_if_fail (!password_field || password);
+  g_assert (EPHY_IS_PASSWORD_MANAGER (self));
+  g_assert (origin);
+  g_assert (target_origin);
+  g_assert (password);
+  g_assert (!username_field || username);
+  g_assert (!password_field || password);
 
   if (!is_new) {
     LOG ("Updating password for (%s, %s, %s, %s, %s)",
@@ -540,7 +536,7 @@ secret_service_search_cb (SecretService  *service,
     LOG ("Found password record for (%s, %s, %s, %s, %s)",
          origin, target_origin, username, username_field, password_field);
 
-    if (!id || !origin || !target_origin || !password_field || !timestamp) {
+    if (!id || !origin || !target_origin || !timestamp) {
       LOG ("Password record is corrupted, skipping it...");
       goto next;
     }
@@ -581,7 +577,7 @@ ephy_password_manager_query (EphyPasswordManager              *self,
   QueryAsyncData *data;
   GHashTable *attributes;
 
-  g_return_if_fail (EPHY_IS_PASSWORD_MANAGER (self));
+  g_assert (EPHY_IS_PASSWORD_MANAGER (self));
 
   LOG ("Querying password records for (%s, %s, %s, %s)",
        origin, username, username_field, password_field);
@@ -601,39 +597,6 @@ ephy_password_manager_query (EphyPasswordManager              *self,
   g_hash_table_unref (attributes);
 }
 
-void
-ephy_password_manager_store_raw (const char          *origin,
-                                 const char          *username,
-                                 const char          *password,
-                                 const char          *username_field,
-                                 const char          *password_field,
-                                 GAsyncReadyCallback  callback,
-                                 gpointer             user_data)
-{
-  GHashTable *attributes;
-
-  g_return_if_fail (origin);
-  g_return_if_fail (password);
-  g_return_if_fail (!username_field || username);
-  g_return_if_fail (!password_field || password);
-
-  attributes = get_attributes_table (NULL, origin, origin, username,
-                                     username_field, password_field, -1);
-  store_internal (password, attributes, callback, user_data);
-
-  g_hash_table_unref (attributes);
-}
-
-gboolean
-ephy_password_manager_store_finish (GAsyncResult  *result,
-                                    GError       **error)
-{
-  g_return_val_if_fail (!error || !(*error), FALSE);
-  g_return_val_if_fail (g_task_is_valid (result, NULL), FALSE);
-
-  return g_task_propagate_boolean (G_TASK (result), error);
-}
-
 static void
 secret_service_clear_cb (SecretService *service,
                          GAsyncResult  *result,
@@ -649,9 +612,9 @@ secret_service_clear_cb (SecretService *service,
   }
 
   if (user_data) {
-    ReplaceRecordAsyncData *data = (ReplaceRecordAsyncData *)user_data;
+    ManageRecordAsyncData *data = (ManageRecordAsyncData *)user_data;
     ephy_password_manager_store_record (data->manager, data->record);
-    replace_record_async_data_free (data);
+    manage_record_async_data_free (data);
   }
 }
 
@@ -682,7 +645,7 @@ ephy_password_manager_forget_record (EphyPasswordManager *self,
 
   secret_service_clear (NULL, EPHY_FORM_PASSWORD_SCHEMA, attributes, NULL,
                         (GAsyncReadyCallback)secret_service_clear_cb,
-                        replacement ? replace_record_async_data_new (self, replacement) : NULL);
+                        replacement ? manage_record_async_data_new (self, replacement) : NULL);
 
   ephy_password_manager_cache_remove (self,
                                       ephy_password_record_get_origin (record),
@@ -711,8 +674,8 @@ void
 ephy_password_manager_forget (EphyPasswordManager *self,
                               const char          *id)
 {
-  g_return_if_fail (EPHY_IS_PASSWORD_MANAGER (self));
-  g_return_if_fail (id);
+  g_assert (EPHY_IS_PASSWORD_MANAGER (self));
+  g_assert (id);
 
   /* synchronizable-deleted signal needs an EphySynchronizable object,
    * therefore we need to obtain the password record first and then emit
@@ -745,7 +708,7 @@ forget_all_cb (GList    *records,
 void
 ephy_password_manager_forget_all (EphyPasswordManager *self)
 {
-  g_return_if_fail (EPHY_IS_PASSWORD_MANAGER (self));
+  g_assert (EPHY_IS_PASSWORD_MANAGER (self));
 
   /* synchronizable-deleted signal needs an EphySynchronizable object, therefore
    * we need to obtain the password records first and emit the signal for each
@@ -816,7 +779,7 @@ static void
 replace_existing_cb (GList    *records,
                      gpointer  user_data)
 {
-  ReplaceRecordAsyncData *data = (ReplaceRecordAsyncData *)user_data;
+  ManageRecordAsyncData *data = (ManageRecordAsyncData *)user_data;
 
   /* We expect only one matching record here. */
   g_assert (g_list_length (records) == 1);
@@ -824,7 +787,7 @@ replace_existing_cb (GList    *records,
   ephy_password_manager_forget_record (data->manager, records->data, data->record);
 
   g_list_free_full (records, g_object_unref);
-  replace_record_async_data_free (data);
+  manage_record_async_data_free (data);
 }
 
 static void
@@ -837,7 +800,7 @@ ephy_password_manager_replace_existing (EphyPasswordManager *self,
   ephy_password_manager_query (self, ephy_password_record_get_id (record),
                                NULL, NULL, NULL, NULL, NULL,
                                replace_existing_cb,
-                               replace_record_async_data_new (self, record));
+                               manage_record_async_data_new (self, record));
 }
 
 static void

@@ -34,6 +34,7 @@
 #include "ephy-embed-utils.h"
 #include "ephy-file-helpers.h"
 #include "ephy-find-toolbar.h"
+#include "ephy-gsb-utils.h"
 #include "ephy-gui.h"
 #include "ephy-header-bar.h"
 #include "ephy-link.h"
@@ -116,6 +117,9 @@ const struct {
   { "toolbar.reload", { "<Primary>R", "<shift><Primary>R", "F5", "<Primary>F5", "<shift>F5", "<shift><Primary>F5", "Refresh", "Reload", NULL } },
   { "toolbar.combined-stop-reload", { NULL } },
 
+  /* Application mode */
+  { "toolbar.open-in-browser", { NULL } },
+
   /* Tabs */
   { "tab.previous", { "<Primary>Page_Up", "<Primary>KP_9", "<shift><Primary>Tab", NULL } },
   { "tab.next", { "<Primary>Page_Down", "<Primary>KP_3", "<Primary>Tab", NULL } },
@@ -189,8 +193,7 @@ impl_add_child (EphyEmbedContainer *container,
 {
   EphyWindow *window = EPHY_WINDOW (container);
 
-  g_return_val_if_fail (!window->is_popup ||
-                        gtk_notebook_get_n_pages (GTK_NOTEBOOK (window->notebook)) < 1, -1);
+  g_assert (!window->is_popup || gtk_notebook_get_n_pages (GTK_NOTEBOOK (window->notebook)) < 1);
 
   return ephy_notebook_add_tab (EPHY_NOTEBOOK (window->notebook),
                                 child, position, jump_to);
@@ -639,56 +642,11 @@ update_edit_action_sensitivity (EphyWindow *window, const char *action_name, gbo
   g_simple_action_set_enabled (G_SIMPLE_ACTION (action), sensitive || hide);
 }
 
-typedef struct {
-  EphyWindow *window;
-  const char *action_name;
-  gboolean hide;
-} CanEditCommandAsyncData;
-
-static CanEditCommandAsyncData *
-can_edit_command_async_data_new (EphyWindow *window, const gchar *action_name, gboolean hide)
-{
-  CanEditCommandAsyncData *data;
-
-  data = g_slice_new (CanEditCommandAsyncData);
-  data->window = g_object_ref (window);
-  data->action_name = action_name;
-  data->hide = hide;
-
-  return data;
-}
-
-static void
-can_edit_command_async_data_free (CanEditCommandAsyncData *data)
-{
-  if (G_UNLIKELY (!data))
-    return;
-
-  g_object_unref (data->window);
-  g_slice_free (CanEditCommandAsyncData, data);
-}
-
-static void
-can_edit_command_callback (GObject *object, GAsyncResult *result, CanEditCommandAsyncData *data)
-{
-  gboolean sensitive;
-  GError *error = NULL;
-
-  sensitive = webkit_web_view_can_execute_editing_command_finish (WEBKIT_WEB_VIEW (object), result, &error);
-  if (!error) {
-    update_edit_action_sensitivity (data->window, data->action_name, sensitive, data->hide);
-  } else {
-    g_error_free (error);
-  }
-
-  can_edit_command_async_data_free (data);
-}
-
 static void
 update_edit_actions_sensitivity (EphyWindow *window, gboolean hide)
 {
   GtkWidget *widget = gtk_window_get_focus (GTK_WINDOW (window));
-  gboolean can_copy, can_cut, can_undo, can_redo, can_paste;
+  gboolean can_cut, can_copy, can_undo, can_redo, can_paste;
 
   if (GTK_IS_EDITABLE (widget)) {
     EphyTitleWidget *title_widget;
@@ -698,8 +656,8 @@ update_edit_actions_sensitivity (EphyWindow *window, gboolean hide)
 
     has_selection = gtk_editable_get_selection_bounds (GTK_EDITABLE (widget), NULL, NULL);
 
-    can_copy = has_selection;
     can_cut = has_selection;
+    can_copy = has_selection;
     can_paste = TRUE;
     can_undo = EPHY_IS_LOCATION_ENTRY (title_widget) &&
                ephy_location_entry_get_can_undo (EPHY_LOCATION_ENTRY (title_widget));
@@ -708,34 +666,19 @@ update_edit_actions_sensitivity (EphyWindow *window, gboolean hide)
   } else {
     EphyEmbed *embed;
     WebKitWebView *view;
-    CanEditCommandAsyncData *data;
+    WebKitEditorState *state;
 
     embed = window->active_embed;
-    g_return_if_fail (embed != NULL);
+    g_assert (embed != NULL);
 
     view = EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed);
+    state = webkit_web_view_get_editor_state (view);
 
-    data = can_edit_command_async_data_new (window, "copy", hide);
-    webkit_web_view_can_execute_editing_command (view, WEBKIT_EDITING_COMMAND_COPY, NULL,
-                                                 (GAsyncReadyCallback)can_edit_command_callback,
-                                                 data);
-    data = can_edit_command_async_data_new (window, "cut", hide);
-    webkit_web_view_can_execute_editing_command (view, WEBKIT_EDITING_COMMAND_CUT, NULL,
-                                                 (GAsyncReadyCallback)can_edit_command_callback,
-                                                 data);
-    data = can_edit_command_async_data_new (window, "paste", hide);
-    webkit_web_view_can_execute_editing_command (view, WEBKIT_EDITING_COMMAND_PASTE, NULL,
-                                                 (GAsyncReadyCallback)can_edit_command_callback,
-                                                 data);
-    data = can_edit_command_async_data_new (window, "undo", hide);
-    webkit_web_view_can_execute_editing_command (view, WEBKIT_EDITING_COMMAND_UNDO, NULL,
-                                                 (GAsyncReadyCallback)can_edit_command_callback,
-                                                 data);
-    data = can_edit_command_async_data_new (window, "redo", hide);
-    webkit_web_view_can_execute_editing_command (view, WEBKIT_EDITING_COMMAND_REDO, NULL,
-                                                 (GAsyncReadyCallback)can_edit_command_callback,
-                                                 data);
-    return;
+    can_cut = webkit_editor_state_is_cut_available (state);
+    can_copy = webkit_editor_state_is_copy_available (state);
+    can_paste = webkit_editor_state_is_paste_available (state);
+    can_undo = webkit_editor_state_is_undo_available (state);
+    can_redo = webkit_editor_state_is_redo_available (state);
   }
 
   update_edit_action_sensitivity (window, "cut", can_cut, hide);
@@ -825,7 +768,9 @@ static const GActionEntry toolbar_entries [] = {
   { "stop", window_cmd_stop },
   { "reload", window_cmd_reload },
   { "always-stop", window_cmd_stop },
-  { "combined-stop-reload", window_cmd_combined_stop_reload, NULL, "false", ephy_header_bar_change_combined_stop_reload_state }
+  { "combined-stop-reload", window_cmd_combined_stop_reload, NULL, "false", ephy_header_bar_change_combined_stop_reload_state },
+
+  { "open-in-browser", window_cmd_open_in_browser }
 };
 
 static const GActionEntry popup_entries [] = {
@@ -976,6 +921,11 @@ _ephy_window_set_default_actions_sensitive (EphyWindow *window,
                                        "combined-stop-reload");
   ephy_action_change_sensitivity_flags (G_SIMPLE_ACTION (action),
                                         flags, set);
+
+  action = g_action_map_lookup_action (G_ACTION_MAP (action_group),
+                                       "open-in-browser");
+  ephy_action_change_sensitivity_flags (G_SIMPLE_ACTION (action),
+                                        flags, set);
 }
 
 static void
@@ -1011,6 +961,7 @@ sync_tab_zoom (WebKitWebView *web_view, GParamSpec *pspec, EphyWindow *window)
   gboolean can_zoom_in = TRUE, can_zoom_out = TRUE, can_zoom_normal = FALSE;
   double zoom;
   GtkWidget *zoom_level_button;
+  gchar *zoom_level;
 
   if (window->closing)
     return;
@@ -1019,7 +970,9 @@ sync_tab_zoom (WebKitWebView *web_view, GParamSpec *pspec, EphyWindow *window)
 
   zoom_level_button = ephy_header_bar_get_zoom_level_button (EPHY_HEADER_BAR (window->header_bar));
 
-  gtk_button_set_label (GTK_BUTTON (zoom_level_button), ephy_zoom_get_zoom_level_name (zoom));
+  zoom_level = g_strdup_printf ("%2.0f%%", zoom * 100);
+  gtk_button_set_label (GTK_BUTTON (zoom_level_button), zoom_level);
+  g_free (zoom_level);
 
   if (zoom >= ZOOM_MAXIMAL) {
     can_zoom_in = FALSE;
@@ -1173,8 +1126,8 @@ sync_tab_popups_allowed (EphyWebView *view,
   GAction *action;
   gboolean allow;
 
-  g_return_if_fail (EPHY_IS_WEB_VIEW (view));
-  g_return_if_fail (EPHY_IS_WINDOW (window));
+  g_assert (EPHY_IS_WEB_VIEW (view));
+  g_assert (EPHY_IS_WINDOW (window));
 
   action_group = gtk_widget_get_action_group (GTK_WIDGET (window), "win");
   action = g_action_map_lookup_action (G_ACTION_MAP (action_group),
@@ -1388,6 +1341,16 @@ find_spelling_guess_context_menu_items (WebKitContextMenu *context_menu)
   return g_list_reverse (retval);
 }
 
+static gboolean
+should_show_copy_outside_editable (WebKitWebView *view)
+{
+  WebKitEditorState *state;
+
+  state = webkit_web_view_get_editor_state (view);
+
+  return webkit_editor_state_is_copy_available (state);
+}
+
 static void
 parse_context_menu_user_data (WebKitContextMenu *context_menu,
                               const char       **selected_text)
@@ -1503,9 +1466,9 @@ populate_context_menu (WebKitWebView       *web_view,
     update_edit_actions_sensitivity (window, TRUE);
     update_link_actions_sensitivity (window, link_has_web_scheme);
 
+    add_action_to_context_menu (context_menu, popup_action_group,
+                                "open-link-in-new-tab", window);
     if (!app_mode) {
-      add_action_to_context_menu (context_menu, popup_action_group,
-                                  "open-link-in-new-tab", window);
       add_action_to_context_menu (context_menu, popup_action_group,
                                   "open-link-in-new-window", window);
       if (!incognito_mode)
@@ -1514,8 +1477,10 @@ populate_context_menu (WebKitWebView       *web_view,
       webkit_context_menu_append (context_menu,
                                   webkit_context_menu_item_new_separator ());
     }
-    add_action_to_context_menu (context_menu, window_action_group,
-                                "copy", window);
+
+    if (should_show_copy_outside_editable (web_view))
+      add_action_to_context_menu (context_menu, window_action_group,
+                                  "copy", window);
     if (can_search_selection)
       add_action_to_context_menu (context_menu, popup_action_group,
                                   search_selection_action_name, window);
@@ -1592,8 +1557,9 @@ populate_context_menu (WebKitWebView       *web_view,
                                   webkit_context_menu_item_new_separator ());
     }
 
-    add_action_to_context_menu (context_menu, window_action_group,
-                                "copy", window);
+    if (should_show_copy_outside_editable (web_view))
+      add_action_to_context_menu (context_menu, window_action_group,
+                                  "copy", window);
     if (can_search_selection)
       add_action_to_context_menu (context_menu, popup_action_group,
                                   search_selection_action_name, window);
@@ -1654,9 +1620,6 @@ populate_context_menu (WebKitWebView       *web_view,
                     window);
 
   g_free (search_selection_action_name);
-
-  if (app_mode)
-    return FALSE;
 
   if (is_document && !is_image && !is_media) {
     webkit_context_menu_append (context_menu,
@@ -1812,19 +1775,9 @@ web_view_ready_cb (WebKitWebView *web_view,
   using_new_window = window != parent_view_window;
 
   if (using_new_window) {
+    g_assert (ephy_embed_shell_get_mode (ephy_embed_shell_get_default ()) != EPHY_EMBED_SHELL_MODE_APPLICATION);
     ephy_window_configure_for_view (window, web_view);
     g_signal_emit_by_name (parent_web_view, "new-window", web_view);
-  }
-
-  if (ephy_embed_shell_get_mode (ephy_embed_shell_get_default ()) == EPHY_EMBED_SHELL_MODE_APPLICATION &&
-      !webkit_web_view_get_uri (web_view)) {
-    /* Wait until we have a valid URL to decide whether to show the window
-     * or load the URL in the default web browser
-     */
-    g_object_set_data_full (G_OBJECT (window), "referrer",
-                            g_strdup (webkit_web_view_get_uri (parent_web_view)),
-                            g_free);
-    return TRUE;
   }
 
   gtk_widget_show (GTK_WIDGET (window));
@@ -1842,7 +1795,7 @@ create_web_view_cb (WebKitWebView          *web_view,
   EphyNewTabFlags flags;
   EphyWindow *target_window;
 
-  if ((ephy_embed_shell_get_mode (ephy_embed_shell_get_default ()) != EPHY_EMBED_SHELL_MODE_APPLICATION) &&
+  if ((ephy_embed_shell_get_mode (ephy_embed_shell_get_default ()) == EPHY_EMBED_SHELL_MODE_APPLICATION) ||
       (g_settings_get_boolean (EPHY_SETTINGS_MAIN,
                                EPHY_PREFS_NEW_WINDOWS_IN_TABS) ||
        g_settings_get_boolean (EPHY_SETTINGS_LOCKDOWN,
@@ -1873,11 +1826,47 @@ create_web_view_cb (WebKitWebView          *web_view,
   return new_web_view;
 }
 
+typedef struct {
+  EphyWindow               *window;
+  WebKitWebView            *web_view;
+  WebKitPolicyDecision     *decision;
+  WebKitPolicyDecisionType  decision_type;
+  char                     *request_uri;
+} VerifyUrlAsyncData;
+
+static inline VerifyUrlAsyncData *
+verify_url_async_data_new (EphyWindow               *window,
+                           WebKitWebView            *web_view,
+                           WebKitPolicyDecision     *decision,
+                           WebKitPolicyDecisionType  decision_type,
+                           const char               *request_uri)
+{
+  VerifyUrlAsyncData *data = g_slice_new (VerifyUrlAsyncData);
+
+  data->window = g_object_ref (window);
+  data->web_view = g_object_ref (web_view);
+  data->decision = g_object_ref (decision);
+  data->decision_type = decision_type;
+  data->request_uri = g_strdup (request_uri);
+
+  return data;
+}
+
+static inline void
+verify_url_async_data_free (VerifyUrlAsyncData *data)
+{
+  g_object_unref (data->window);
+  g_object_unref (data->web_view);
+  g_object_unref (data->decision);
+  g_free (data->request_uri);
+  g_slice_free (VerifyUrlAsyncData, data);
+}
+
 static gboolean
-decide_policy_cb (WebKitWebView           *web_view,
-                  WebKitPolicyDecision    *decision,
-                  WebKitPolicyDecisionType decision_type,
-                  EphyWindow              *window)
+decide_navigation_policy (WebKitWebView            *web_view,
+                          WebKitPolicyDecision     *decision,
+                          WebKitPolicyDecisionType  decision_type,
+                          EphyWindow               *window)
 {
   WebKitNavigationPolicyDecision *navigation_decision;
   WebKitNavigationAction *navigation_action;
@@ -1886,8 +1875,10 @@ decide_policy_cb (WebKitWebView           *web_view,
   const char *uri;
   EphyEmbed *embed;
 
-  if (decision_type == WEBKIT_POLICY_DECISION_TYPE_RESPONSE)
-    return FALSE;
+  g_assert (WEBKIT_IS_WEB_VIEW (web_view));
+  g_assert (WEBKIT_IS_NAVIGATION_POLICY_DECISION (decision));
+  g_assert (decision_type != WEBKIT_POLICY_DECISION_TYPE_RESPONSE);
+  g_assert (EPHY_IS_WINDOW (window));
 
   navigation_decision = WEBKIT_NAVIGATION_POLICY_DECISION (decision);
   navigation_action = webkit_navigation_policy_decision_get_navigation_action (navigation_decision);
@@ -1930,33 +1921,49 @@ decide_policy_cb (WebKitWebView           *web_view,
   navigation_type = webkit_navigation_action_get_navigation_type (navigation_action);
 
   if (ephy_embed_shell_get_mode (ephy_embed_shell_get_default ()) == EPHY_EMBED_SHELL_MODE_APPLICATION) {
-    if (!gtk_widget_is_visible (GTK_WIDGET (window))) {
-      char *referrer;
-
-      referrer = (char *)g_object_get_data (G_OBJECT (window), "referrer");
-
-      if (ephy_embed_utils_urls_have_same_origin (uri, referrer)) {
-        gtk_widget_show (GTK_WIDGET (window));
-      } else {
-        ephy_file_open_uri_in_default_browser (uri, GDK_CURRENT_TIME,
-                                               gtk_window_get_screen (GTK_WINDOW (window)));
-        webkit_policy_decision_ignore (decision);
-
-        gtk_widget_destroy (GTK_WIDGET (window));
-
-        return TRUE;
-      }
-    }
-
     if (navigation_type == WEBKIT_NAVIGATION_TYPE_LINK_CLICKED) {
-      if (ephy_embed_utils_urls_have_same_origin (uri, webkit_web_view_get_uri (web_view))) {
+      EphyEmbed *new_embed;
+      EphyWebView *new_view;
+
+      if (ephy_embed_shell_uri_looks_related_to_app (ephy_embed_shell_get_default (), uri)) {
+        return FALSE;
+      } else if (!ephy_embed_shell_uri_looks_related_to_app (ephy_embed_shell_get_default (),
+                                                             ephy_web_view_get_last_committed_address (EPHY_WEB_VIEW (web_view)))) {
+        return FALSE;
+      } else if (webkit_navigation_action_is_redirect (navigation_action)) {
+        EphyHeaderBar *header_bar;
+        EphyTitleWidget *title_widget;
+
+        /* If the application's origin does a server redirect to an external origin, it is likely
+         * to be an authentication or authentication mechanism that is a part of the application.
+         */
+        ephy_embed_shell_add_app_related_uri (ephy_embed_shell_get_default (), uri);
+
+        /* The HeaderBar uses the address to decide whether to show some items of its UI.
+         * This new URI being part of the application may make it change its mind.
+         * */
+        header_bar = EPHY_HEADER_BAR (ephy_window_get_header_bar (window));
+        title_widget = ephy_header_bar_get_title_widget (header_bar);
+        g_object_notify (G_OBJECT (title_widget), "address");
         return FALSE;
       }
 
-      ephy_file_open_uri_in_default_browser (uri, GDK_CURRENT_TIME,
-                                             gtk_window_get_screen (GTK_WINDOW (window)));
-      webkit_policy_decision_ignore (decision);
+      /* This does not look like a part of the application itself, so open it in a new tab
+       * which will provide a way of opening in the default browser.
+       */
+      embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
 
+      new_embed = ephy_shell_new_tab_full (ephy_shell_get_default (),
+                                           NULL, NULL,
+                                           window,
+                                           embed,
+                                           EPHY_NEW_TAB_APPEND_AFTER | EPHY_NEW_TAB_JUMP,
+                                           0);
+
+      new_view = ephy_embed_get_web_view (new_embed);
+      ephy_web_view_load_request (new_view, request);
+
+      webkit_policy_decision_ignore (decision);
       return TRUE;
     }
   }
@@ -2029,13 +2036,81 @@ decide_policy_cb (WebKitWebView           *web_view,
 }
 
 static void
+verify_url_cb (EphyGSBService     *service,
+               GAsyncResult       *result,
+               VerifyUrlAsyncData *data)
+{
+  GList *threats = ephy_gsb_service_verify_url_finish (service, result);
+
+  if (threats) {
+    webkit_policy_decision_ignore (data->decision);
+
+    /* Very rarely there are URLs that pose multiple types of threats.
+     * However, inform the user only about the first threat type.
+     */
+    ephy_web_view_load_error_page (EPHY_WEB_VIEW (data->web_view),
+                                   data->request_uri,
+                                   EPHY_WEB_VIEW_ERROR_UNSAFE_BROWSING,
+                                   NULL, threats->data);
+
+    g_list_free_full (threats, g_free);
+  } else {
+    decide_navigation_policy (data->web_view, data->decision,
+                              data->decision_type, data->window);
+  }
+
+  verify_url_async_data_free (data);
+}
+
+static gboolean
+decide_policy_cb (WebKitWebView           *web_view,
+                  WebKitPolicyDecision    *decision,
+                  WebKitPolicyDecisionType decision_type,
+                  EphyWindow              *window)
+{
+  EphyGSBService *service;
+  WebKitNavigationPolicyDecision *navigation_decision;
+  WebKitNavigationAction *navigation_action;
+  WebKitURIRequest *request;
+  const char *request_uri;
+
+  if (decision_type != WEBKIT_POLICY_DECISION_TYPE_NAVIGATION_ACTION &&
+      decision_type != WEBKIT_POLICY_DECISION_TYPE_NEW_WINDOW_ACTION)
+    return FALSE;
+
+  navigation_decision = WEBKIT_NAVIGATION_POLICY_DECISION (decision);
+  navigation_action = webkit_navigation_policy_decision_get_navigation_action (navigation_decision);
+  request = webkit_navigation_action_get_request (navigation_action);
+  request_uri = webkit_uri_request_get_uri (request);
+
+  if (g_settings_get_boolean (EPHY_SETTINGS_WEB, EPHY_PREFS_WEB_ENABLE_SAFE_BROWSING)) {
+    if (ephy_web_view_get_should_bypass_safe_browsing (EPHY_WEB_VIEW (web_view))) {
+      /* This means the user has decided to proceed to an unsafe website. */
+      ephy_web_view_set_should_bypass_safe_browsing (EPHY_WEB_VIEW (web_view), FALSE);
+      return decide_navigation_policy (web_view, decision, decision_type, window);
+    }
+
+    service = ephy_embed_shell_get_global_gsb_service (ephy_embed_shell_get_default ());
+    ephy_gsb_service_verify_url (service, request_uri,
+                                 (GAsyncReadyCallback)verify_url_cb,
+                                 /* Note: this refs the policy decision, so we can complete it asynchronously. */
+                                 verify_url_async_data_new (window, web_view,
+                                                            decision, decision_type,
+                                                            request_uri));
+    return TRUE;
+  }
+
+  return decide_navigation_policy (web_view, decision, decision_type, window);
+}
+
+static void
 ephy_window_connect_active_embed (EphyWindow *window)
 {
   EphyEmbed *embed;
   WebKitWebView *web_view;
   EphyWebView *view;
 
-  g_return_if_fail (window->active_embed != NULL);
+  g_assert (window->active_embed != NULL);
 
   embed = window->active_embed;
   view = ephy_embed_get_web_view (embed);
@@ -2114,7 +2189,7 @@ ephy_window_disconnect_active_embed (EphyWindow *window)
   WebKitWebView *web_view;
   EphyWebView *view;
 
-  g_return_if_fail (window->active_embed != NULL);
+  g_assert (window->active_embed != NULL);
 
   embed = window->active_embed;
   web_view = EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed);
@@ -2172,8 +2247,8 @@ ephy_window_set_active_tab (EphyWindow *window, EphyEmbed *new_embed)
 {
   EphyEmbed *old_embed;
 
-  g_return_if_fail (EPHY_IS_WINDOW (window));
-  g_return_if_fail (gtk_widget_get_toplevel (GTK_WIDGET (new_embed)) == GTK_WIDGET (window));
+  g_assert (EPHY_IS_WINDOW (window));
+  g_assert (gtk_widget_get_toplevel (GTK_WIDGET (new_embed)) == GTK_WIDGET (window));
 
   old_embed = window->active_embed;
 
@@ -2385,7 +2460,7 @@ notebook_page_added_cb (EphyNotebook *notebook,
 {
   LOG ("page-added notebook %p embed %p position %u\n", notebook, embed, position);
 
-  g_return_if_fail (EPHY_IS_EMBED (embed));
+  g_assert (EPHY_IS_EMBED (embed));
 
   g_signal_connect_object (ephy_embed_get_web_view (embed), "download-only-load",
                            G_CALLBACK (download_only_load_cb), window, G_CONNECT_AFTER);
@@ -2409,7 +2484,7 @@ notebook_page_removed_cb (EphyNotebook *notebook,
   if (window->closing)
     return;
 
-  g_return_if_fail (EPHY_IS_EMBED (embed));
+  g_assert (EPHY_IS_EMBED (embed));
 
   g_signal_handlers_disconnect_by_func
     (ephy_embed_get_web_view (embed), G_CALLBACK (download_only_load_cb), window);
@@ -2427,6 +2502,13 @@ ephy_window_close_tab (EphyWindow *window,
   if (gtk_notebook_get_n_pages (window->notebook) == 0) {
     gtk_widget_destroy (GTK_WIDGET (window));
   }
+}
+
+void
+ephy_window_close_active_child (EphyWindow *window)
+{
+  EphyEmbed *embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
+  ephy_window_close_tab (window, embed);
 }
 
 static void
@@ -2501,7 +2583,7 @@ real_get_active_tab (EphyWindow *window, int page_num)
 
   embed = gtk_notebook_get_nth_page (window->notebook, page_num);
 
-  g_return_val_if_fail (EPHY_IS_EMBED (embed), NULL);
+  g_assert (EPHY_IS_EMBED (embed));
 
   return EPHY_EMBED (embed);
 }
@@ -2806,13 +2888,13 @@ allow_popups_notifier (GSettings  *settings,
   GList *tabs;
   EphyEmbed *embed;
 
-  g_return_if_fail (EPHY_IS_WINDOW (window));
+  g_assert (EPHY_IS_WINDOW (window));
 
   tabs = impl_get_children (EPHY_EMBED_CONTAINER (window));
 
   for (; tabs; tabs = g_list_next (tabs)) {
     embed = EPHY_EMBED (tabs->data);
-    g_return_if_fail (EPHY_IS_EMBED (embed));
+    g_assert (EPHY_IS_EMBED (embed));
 
     g_object_notify (G_OBJECT (ephy_embed_get_web_view (embed)), "popups-allowed");
   }
@@ -2912,13 +2994,9 @@ setup_location_controller (EphyWindow    *window,
 }
 
 static const char *disabled_actions_for_app_mode[] = { "open",
-                                                       "save-as",
                                                        "save-as-application",
                                                        "encoding",
                                                        "bookmark-page",
-                                                       "page-source",
-                                                       "toggle-inspector",
-                                                       "new-tab",
                                                        "home" };
 
 static void
@@ -3096,7 +3174,7 @@ ephy_window_constructed (GObject *object)
       ephy_action_change_sensitivity_flags (G_SIMPLE_ACTION (action),
                                             SENS_FLAG_CHROME, TRUE);
     }
-    chrome &= ~(EPHY_WINDOW_CHROME_LOCATION | EPHY_WINDOW_CHROME_MENU | EPHY_WINDOW_CHROME_TABSBAR | EPHY_WINDOW_CHROME_BOOKMARKS);
+    chrome &= ~(EPHY_WINDOW_CHROME_LOCATION | EPHY_WINDOW_CHROME_MENU | EPHY_WINDOW_CHROME_BOOKMARKS);
   } else if (mode == EPHY_EMBED_SHELL_MODE_INCOGNITO) {
     action_group = gtk_widget_get_action_group (GTK_WIDGET (window), "win");
     action = g_action_map_lookup_action (G_ACTION_MAP (action_group), "bookmark-page");
@@ -3186,7 +3264,7 @@ ephy_window_new (void)
 GtkWidget *
 ephy_window_get_notebook (EphyWindow *window)
 {
-  g_return_val_if_fail (EPHY_IS_WINDOW (window), NULL);
+  g_assert (EPHY_IS_WINDOW (window));
 
   return GTK_WIDGET (window->notebook);
 }
@@ -3202,7 +3280,7 @@ ephy_window_get_notebook (EphyWindow *window)
 GtkWidget *
 ephy_window_get_current_find_toolbar (EphyWindow *window)
 {
-  g_return_val_if_fail (EPHY_IS_WINDOW (window), NULL);
+  g_assert (EPHY_IS_WINDOW (window));
 
   return GTK_WIDGET (ephy_embed_get_find_toolbar (window->active_embed));
 }
@@ -3221,7 +3299,7 @@ void
 ephy_window_load_url (EphyWindow *window,
                       const char *url)
 {
-  g_return_if_fail (url != NULL);
+  g_assert (url != NULL);
 
   ephy_link_open (EPHY_LINK (window), url, NULL, 0);
 }
@@ -3262,10 +3340,10 @@ ephy_window_set_zoom (EphyWindow *window,
   double current_zoom = 1.0;
   WebKitWebView *web_view;
 
-  g_return_if_fail (EPHY_IS_WINDOW (window));
+  g_assert (EPHY_IS_WINDOW (window));
 
   embed = window->active_embed;
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   web_view = EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed);
 
@@ -3289,10 +3367,10 @@ ephy_window_change_allow_popup_windows_state (GSimpleAction *action,
   EphyEmbed *embed;
   gboolean allow;
 
-  g_return_if_fail (EPHY_IS_WINDOW (window));
+  g_assert (EPHY_IS_WINDOW (window));
 
   embed = window->active_embed;
-  g_return_if_fail (EPHY_IS_EMBED (embed));
+  g_assert (EPHY_IS_EMBED (embed));
 
   allow = g_variant_get_boolean (state);
 
@@ -3312,7 +3390,7 @@ ephy_window_change_allow_popup_windows_state (GSimpleAction *action,
 EphyEmbedEvent *
 ephy_window_get_context_event (EphyWindow *window)
 {
-  g_return_val_if_fail (EPHY_IS_WINDOW (window), NULL);
+  g_assert (EPHY_IS_WINDOW (window));
 
   return window->context_event;
 }
@@ -3361,7 +3439,7 @@ ephy_window_set_location (EphyWindow *window,
 EphyLocationController *
 ephy_window_get_location_controller (EphyWindow *window)
 {
-  g_return_val_if_fail (EPHY_IS_WINDOW (window), NULL);
+  g_assert (EPHY_IS_WINDOW (window));
 
   return window->location_controller;
 }
@@ -3523,7 +3601,7 @@ ephy_window_close (EphyWindow *window)
 EphyWindowChrome
 ephy_window_get_chrome (EphyWindow *window)
 {
-  g_return_val_if_fail (EPHY_IS_WINDOW (window), EPHY_WINDOW_CHROME_DEFAULT);
+  g_assert (EPHY_IS_WINDOW (window));
 
   return window->chrome;
 }

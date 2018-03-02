@@ -283,7 +283,7 @@ ephy_password_record_new (const char *id,
 const char *
 ephy_password_record_get_id (EphyPasswordRecord *self)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_RECORD (self), NULL);
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   return self->id;
 }
@@ -291,7 +291,7 @@ ephy_password_record_get_id (EphyPasswordRecord *self)
 const char *
 ephy_password_record_get_origin (EphyPasswordRecord *self)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_RECORD (self), NULL);
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   return self->origin;
 }
@@ -299,7 +299,7 @@ ephy_password_record_get_origin (EphyPasswordRecord *self)
 const char *
 ephy_password_record_get_target_origin (EphyPasswordRecord *self)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_RECORD (self), NULL);
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   return self->target_origin;
 }
@@ -307,7 +307,7 @@ ephy_password_record_get_target_origin (EphyPasswordRecord *self)
 const char *
 ephy_password_record_get_username (EphyPasswordRecord *self)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_RECORD (self), NULL);
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   return self->username;
 }
@@ -315,7 +315,7 @@ ephy_password_record_get_username (EphyPasswordRecord *self)
 const char *
 ephy_password_record_get_password (EphyPasswordRecord *self)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_RECORD (self), NULL);
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   return self->password;
 }
@@ -324,7 +324,7 @@ void
 ephy_password_record_set_password (EphyPasswordRecord *self,
                                    const char         *password)
 {
-  g_return_if_fail (EPHY_IS_PASSWORD_RECORD (self));
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   g_free (self->password);
   self->password = g_strdup (password);
@@ -333,7 +333,7 @@ ephy_password_record_set_password (EphyPasswordRecord *self,
 const char *
 ephy_password_record_get_username_field (EphyPasswordRecord *self)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_RECORD (self), NULL);
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   return self->username_field;
 }
@@ -341,7 +341,7 @@ ephy_password_record_get_username_field (EphyPasswordRecord *self)
 const char *
 ephy_password_record_get_password_field (EphyPasswordRecord *self)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_RECORD (self), NULL);
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   return self->password_field;
 }
@@ -349,7 +349,7 @@ ephy_password_record_get_password_field (EphyPasswordRecord *self)
 guint64
 ephy_password_record_get_time_password_changed (EphyPasswordRecord *self)
 {
-  g_return_val_if_fail (EPHY_IS_PASSWORD_RECORD (self), 0);
+  g_assert (EPHY_IS_PASSWORD_RECORD (self));
 
   return self->time_password_changed;
 }
@@ -360,13 +360,11 @@ serializable_serialize_property (JsonSerializable *serializable,
                                  const GValue     *value,
                                  GParamSpec       *pspec)
 {
-  /* Firefox expects null usernames as empty strings. */
-  if (!g_strcmp0 (name, "username") || !g_strcmp0 (name, "usernameField")) {
-    if (g_value_get_string (value) == NULL) {
-      JsonNode *node = json_node_new (JSON_NODE_VALUE);
-      json_node_set_string (node, "");
-      return node;
-    }
+  /* Convert NULL to "", as Firefox expects empty strings for missing fields. */
+  if (G_VALUE_HOLDS_STRING (value) && g_value_get_string (value) == NULL) {
+    JsonNode *node = json_node_new (JSON_NODE_VALUE);
+    json_node_set_string (node, "");
+    return node;
   }
 
   return json_serializable_default_serialize_property (serializable, name, value, pspec);
@@ -379,11 +377,10 @@ serializable_deserialize_property (JsonSerializable *serializable,
                                    GParamSpec       *pspec,
                                    JsonNode         *node)
 {
-  if (!g_strcmp0 (name, "username") || !g_strcmp0 (name, "usernameField")) {
-    if (!g_strcmp0 (json_node_get_string (node), "")) {
-      g_value_set_string (value, NULL);
-      return TRUE;
-    }
+  /* Convert "" back to NULL. */
+  if (G_VALUE_HOLDS_STRING (value) && !g_strcmp0 (json_node_get_string (node), "")) {
+    g_value_set_string (value, NULL);
+    return TRUE;
   }
 
   return json_serializable_default_deserialize_property (serializable, name, value, pspec, node);

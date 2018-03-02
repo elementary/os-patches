@@ -1,50 +1,77 @@
-3.26.5.1 - December 21, 2017
-============================
+3.27.90 - February 12, 2017
+===========================
 
-- Correct logic to avoid corrupting session state
+- Improve handling of zoom (#621067, #792949, Jan-Michael Brummer)
+- Bookmark properties button is now always visible (#772268, Jan-Michael Brummer)
+- Drop gnome-desktop dependency, copying needed thumbnailer code (#778578)
+-- Save snapshot thumbnails under ~/.cache/epiphany instead of global directory
+-- Delete snapshot thumbnails when clearing history
+- Fix profile migrator deleting bookmarks if run multiple times (#792683)
+- Add touch support for address bar icons (#792876, Jan-Michael Brummer)
+- Save Safe Browsing data only once, not once per web app (#792929, Gabriel Ivascu)
+- Fix crash caused by unexpected Safe Browsing data (#792930, Gabriel Ivascu)
+- Fix placement of select element with multiple monitors (#792940, Jan-Michael Brummer)
+- Long press in address bar now selects the text (#793267, Jan-Michael Brummer)
+- Hopefully fix the search provider (Bjørn Lie)
+- Fix password prompt after #742573 (Exalm)
 
-3.26.5 - December 17, 2017
-==========================
+3.27.4 - January 6, 2017
+========================
 
+- Show desktop notification when download finishes (#722142)
+- Expand tag view in bookmarks popover (#778843)
+- Fix downloading blob URLs (#788576)
+- Fix launching WhatsApp web app (#790781)
+- Add protection against IDN homograph attacks (#791168)
 - Fix error in sync migration when migrating from 3.26.2 or earlier
 - Improved logic to avoid corrupting session state
 
-3.26.4 - December 12, 2017
-==========================
-
-- Fix sync failure warnings appearing multiple times (#790094)
-- Fix tab sync and device name on accounts.firefox.com (#790370)
-- Make default sync device name translatable (#790905)
-- Several additional misc. improvements to sync support (including #790819)
-- Flatpak: custom stylesheets are now supported
-- Flatpak: view page source is now supported
-
-3.26.3 - November 23, 2017
+3.27.3 - December 11, 2017
 ==========================
 
 - Don't require gvfsd-http for downloading adblock filters (#776682)
-- Several improvements to Sync support (including #789656, #789786, #790286)
-- Make downloads work when running in flatpak (#785655)
-- Do not add bookmarks to unrelated tag view popovers (#788584)
-- Fix middle click on forward/back buttons (#790017)
-- "Search the Web for ..." context menu option now switches to new tab (#790693)
+- Expand bookmarks popover tag area when there are many tags (#778843)
+- Don't attempt to sync when there's no network connectivity (#790286)
+- "Search the web" context menu item should switch to the new tab (#790693)
+- Revert back to the old address bar dropdown for the time being (#790732)
+- Make default sync device name translatable (#790905)
+- Fix sync failure warnings appearing multiple times (#790094)
+- Remove Epiphany version from user agent (see WebKit #180365)
+- Remove support for vendor user agents (see Debian #883712)
+- Several miscellaneous Firefox Sync fixes
+- Several miscellaneous Google Safe Browsing fixes
+- Flatpak: custom stylesheets are now supported
+- Flatpak: downloading files is now supported
+- Flatpak: view page source is now supported
+- Flatpak: Add Epiphany Tech Preview branding for nightly builds
 
-3.26.2 - October 26, 2017
+3.27.2 - November 13, 2017
+==========================
+
+- Hide Copy from context menu when appropriate (#772106)
+- Hide home page button when appropriate (#783299)
+- Fix multiple issues with the bookmark popover (#788584)
+- Major change: web apps are now more like silos, rather than prisons (#788845)
+- Various fixes for safe browsing implementation (#788899)
+- Fix Firefox Sync crash on 32-bit systems (#789656)
+- Move Firefox Sync settings to the right GSettings path (#789786)
+- Fix middle click on back/forward navigation buttons (#790017)
+- Various fixes for Firefox Sync implementation
+- Restore search engine support
+- Fix incognito mode theme
+
+3.27.1 - October 16, 2017
 =========================
-
-- Do not show home button if home page is set to blank page (#783299)
-- Add support for remote inspector (an advanced developer tool)
-- Various flatpak-related improvements (there's much more remaining to do)
-- Add flatpak manifest
-
-3.26.1 - September 29, 2017
-===========================
 
 - Fix search engine dialog, which has been borked since 3.24.3 (#787458)
 - Allow overriding autofilled username in password forms (#787498)
 - Fix non-HTML/MHTML files being saved as MHTML (#788111)
 - Don't disable navigation actions when history is cleared (#788329)
+- Various improvements to Flatpak support
 - Fix bookmarks import crash when there's no Firefox profile
+- Allow access to web inspector in application mode
+- Add new address bar dropdown using libdazzle
+- Add Google Safe Browsing support
 
 3.26.0 - September 8, 2017
 ==========================

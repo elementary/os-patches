@@ -134,7 +134,7 @@ ephy_location_entry_title_widget_get_address (EphyTitleWidget *widget)
 {
   EphyLocationEntry *entry = EPHY_LOCATION_ENTRY (widget);
 
-  g_return_val_if_fail (entry, NULL);
+  g_assert (entry);
 
   return gtk_entry_get_text (GTK_ENTRY (widget));
 }
@@ -149,7 +149,7 @@ ephy_location_entry_title_widget_set_address (EphyTitleWidget *widget,
   char *effective_text = NULL, *selection = NULL;
   int start, end;
 
-  g_return_if_fail (widget);
+  g_assert (widget);
 
   /* Setting a new text will clear the clipboard. This makes it impossible
    * to copy&paste from the location entry of one tab into another tab, see
@@ -159,7 +159,7 @@ ephy_location_entry_title_widget_set_address (EphyTitleWidget *widget,
   if (gtk_widget_get_realized (GTK_WIDGET (entry))) {
     clipboard = gtk_widget_get_clipboard (GTK_WIDGET (entry),
                                           GDK_SELECTION_PRIMARY);
-    g_return_if_fail (clipboard != NULL);
+    g_assert (clipboard != NULL);
 
     if (gtk_clipboard_get_owner (clipboard) == G_OBJECT (entry) &&
         gtk_editable_get_selection_bounds (GTK_EDITABLE (entry),
@@ -205,7 +205,7 @@ ephy_location_entry_title_widget_get_security_level (EphyTitleWidget *widget)
 {
   EphyLocationEntry *entry = EPHY_LOCATION_ENTRY (widget);
 
-  g_return_val_if_fail (entry, EPHY_SECURITY_LEVEL_TO_BE_DETERMINED);
+  g_assert (entry);
 
   return entry->security_level;
 }
@@ -218,7 +218,7 @@ ephy_location_entry_title_widget_set_security_level (EphyTitleWidget   *widget,
   EphyLocationEntry *entry = EPHY_LOCATION_ENTRY (widget);
   const char *icon_name;
 
-  g_return_if_fail (entry);
+  g_assert (entry);
 
   icon_name = ephy_security_level_to_icon_name (security_level);
   gtk_entry_set_icon_from_icon_name (GTK_ENTRY (widget),
@@ -718,16 +718,14 @@ entry_populate_popup_cb (GtkEntry          *entry,
 }
 
 static gboolean
-icon_button_press_event_cb (GtkWidget           *entry,
-                            GtkEntryIconPosition position,
-                            GdkEventButton      *event,
-                            EphyLocationEntry   *lentry)
+icon_button_icon_press_event_cb (GtkWidget           *entry,
+                                 GtkEntryIconPosition position,
+                                 GdkEventButton      *event,
+                                 EphyLocationEntry   *lentry)
 {
-  guint state = event->state & gtk_accelerator_get_default_mod_mask ();
-
-  if (event->type == GDK_BUTTON_PRESS &&
-      event->button == 1 &&
-      state == 0 /* left */) {
+  if (((event->type == GDK_BUTTON_PRESS &&
+        event->button == 1) ||
+       (event->type == GDK_TOUCH_BEGIN))) {
     if (position == GTK_ENTRY_ICON_PRIMARY) {
       GdkRectangle lock_position;
       gtk_entry_get_icon_area (GTK_ENTRY (entry), GTK_ENTRY_ICON_PRIMARY, &lock_position);
@@ -753,7 +751,7 @@ ephy_location_entry_construct_contents (EphyLocationEntry *lentry)
                                      "non-starred-symbolic");
 
   g_object_connect (entry,
-                    "signal::icon-press", G_CALLBACK (icon_button_press_event_cb), lentry,
+                    "signal::icon-press", G_CALLBACK (icon_button_icon_press_event_cb), lentry,
                     "signal::populate-popup", G_CALLBACK (entry_populate_popup_cb), lentry,
                     "signal::key-press-event", G_CALLBACK (entry_key_press_cb), lentry,
                     "signal::changed", G_CALLBACK (editable_changed_cb), lentry,
@@ -1193,7 +1191,7 @@ ephy_location_entry_set_bookmark_icon_state (EphyLocationEntry                  
 {
   GtkStyleContext *context;
 
-  g_return_if_fail (EPHY_IS_LOCATION_ENTRY (entry));
+  g_assert (EPHY_IS_LOCATION_ENTRY (entry));
 
   context = gtk_widget_get_style_context (GTK_WIDGET (entry));
 
@@ -1245,8 +1243,8 @@ void
 ephy_location_entry_set_add_bookmark_popover (EphyLocationEntry *entry,
                                               GtkPopover        *popover)
 {
-  g_return_if_fail (EPHY_IS_LOCATION_ENTRY (entry));
-  g_return_if_fail (GTK_IS_POPOVER (popover));
+  g_assert (EPHY_IS_LOCATION_ENTRY (entry));
+  g_assert (GTK_IS_POPOVER (popover));
 
   entry->add_bookmark_popover = popover;
 }

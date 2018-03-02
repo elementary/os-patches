@@ -25,6 +25,7 @@
 
 #include "ephy-downloads-manager.h"
 #include "ephy-encodings.h"
+#include "ephy-gsb-service.h"
 #include "ephy-history-service.h"
 #include "ephy-permissions-manager.h"
 #include "ephy-search-engine-manager.h"
@@ -57,6 +58,7 @@ EphyEmbedShell    *ephy_embed_shell_get_default                (void);
 WebKitWebContext  *ephy_embed_shell_get_web_context            (EphyEmbedShell   *shell);
 EphyHistoryService
                   *ephy_embed_shell_get_global_history_service (EphyEmbedShell   *shell);
+EphyGSBService    *ephy_embed_shell_get_global_gsb_service     (EphyEmbedShell   *shell);
 EphyEncodings     *ephy_embed_shell_get_encodings              (EphyEmbedShell   *shell);
 void               ephy_embed_shell_restored_window            (EphyEmbedShell   *shell);
 void               ephy_embed_shell_set_page_setup             (EphyEmbedShell   *shell,
@@ -70,10 +72,13 @@ gboolean           ephy_embed_shell_launch_handler             (EphyEmbedShell  
                                                                 GFile            *file,
                                                                 const char       *mime_type,
                                                                 guint32           user_time);
+void               ephy_embed_shell_add_app_related_uri        (EphyEmbedShell   *shell,
+                                                                const char       *uri);
+gboolean           ephy_embed_shell_uri_looks_related_to_app   (EphyEmbedShell   *shell,
+                                                                const char       *uri);
 void               ephy_embed_shell_clear_cache                (EphyEmbedShell   *shell);
 void               ephy_embed_shell_set_thumbnail_path         (EphyEmbedShell   *shell,
                                                                 const char       *url,
-                                                                time_t            mtime,
                                                                 const char       *path);
 void               ephy_embed_shell_schedule_thumbnail_update  (EphyEmbedShell   *shell,
                                                                 EphyHistoryURL   *url);

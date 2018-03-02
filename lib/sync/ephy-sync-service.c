@@ -701,7 +701,7 @@ ephy_sync_service_forget_secrets (EphySyncService *self)
   g_assert (self->secrets);
 
   user = ephy_sync_utils_get_sync_user ();
-  g_return_if_fail (user);
+  g_assert (user);
 
   attributes = secret_attributes_build (EPHY_SYNC_SECRET_SCHEMA,
                                         EPHY_SYNC_SECRET_ACCOUNT_KEY, user,
@@ -1638,6 +1638,7 @@ ephy_sync_service_schedule_periodical_sync (EphySyncService *self)
   self->source_id = g_timeout_add_seconds (seconds,
                                            (GSourceFunc)ephy_sync_service_sync_internal,
                                            self);
+  g_source_set_name_by_id (self->source_id, "[epiphany] sync_service_sync");
 
   LOG ("Scheduled new sync with frequency %u minutes", seconds / 60);
 }
@@ -2543,12 +2544,12 @@ ephy_sync_service_sign_in (EphySyncService *self,
   guint8 *resp_xor_key;
   char *token_id_hex;
 
-  g_return_if_fail (EPHY_IS_SYNC_SERVICE (self));
-  g_return_if_fail (email);
-  g_return_if_fail (uid);
-  g_return_if_fail (session_token);
-  g_return_if_fail (key_fetch_token);
-  g_return_if_fail (unwrap_kb);
+  g_assert (EPHY_IS_SYNC_SERVICE (self));
+  g_assert (email);
+  g_assert (uid);
+  g_assert (session_token);
+  g_assert (key_fetch_token);
+  g_assert (unwrap_kb);
 
   self->is_signing_in = TRUE;
 
@@ -2627,8 +2628,8 @@ void
 ephy_sync_service_register_manager (EphySyncService           *self,
                                     EphySynchronizableManager *manager)
 {
-  g_return_if_fail (EPHY_IS_SYNC_SERVICE (self));
-  g_return_if_fail (EPHY_IS_SYNCHRONIZABLE_MANAGER (manager));
+  g_assert (EPHY_IS_SYNC_SERVICE (self));
+  g_assert (EPHY_IS_SYNCHRONIZABLE_MANAGER (manager));
 
   if (!g_slist_find (self->managers, manager)) {
     self->managers = g_slist_prepend (self->managers, manager);
@@ -2644,8 +2645,8 @@ void
 ephy_sync_service_unregister_manager (EphySyncService           *self,
                                       EphySynchronizableManager *manager)
 {
-  g_return_if_fail (EPHY_IS_SYNC_SERVICE (self));
-  g_return_if_fail (EPHY_IS_SYNCHRONIZABLE_MANAGER (manager));
+  g_assert (EPHY_IS_SYNC_SERVICE (self));
+  g_assert (EPHY_IS_SYNCHRONIZABLE_MANAGER (manager));
 
   self->managers = g_slist_remove (self->managers, manager);
 
@@ -2740,7 +2741,7 @@ ephy_sync_service_delete_client_record (EphySyncService *self)
 void
 ephy_sync_service_sign_out (EphySyncService *self)
 {
-  g_return_if_fail (EPHY_IS_SYNC_SERVICE (self));
+  g_assert (EPHY_IS_SYNC_SERVICE (self));
 
   ephy_sync_service_stop_periodical_sync (self);
   ephy_sync_service_delete_client_record (self);
@@ -2761,8 +2762,8 @@ ephy_sync_service_sign_out (EphySyncService *self)
 void
 ephy_sync_service_sync (EphySyncService *self)
 {
-  g_return_if_fail (EPHY_IS_SYNC_SERVICE (self));
-  g_return_if_fail (ephy_sync_utils_user_is_signed_in ());
+  g_assert (EPHY_IS_SYNC_SERVICE (self));
+  g_assert (ephy_sync_utils_user_is_signed_in ());
 
   ephy_sync_service_sync_internal (self);
 }
@@ -2770,9 +2771,9 @@ ephy_sync_service_sync (EphySyncService *self)
 void
 ephy_sync_service_start_sync (EphySyncService *self)
 {
-  g_return_if_fail (EPHY_IS_SYNC_SERVICE (self));
-  g_return_if_fail (ephy_sync_utils_user_is_signed_in ());
-  g_return_if_fail (self->sync_periodically);
+  g_assert (EPHY_IS_SYNC_SERVICE (self));
+  g_assert (ephy_sync_utils_user_is_signed_in ());
+  g_assert (self->sync_periodically);
 
   ephy_sync_service_sync_internal (self);
   ephy_sync_service_schedule_periodical_sync (self);

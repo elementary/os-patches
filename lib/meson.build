@@ -4,10 +4,8 @@ types_headers = [
   'history/ephy-history-types.h'
 ]
 
-enums = gnome.mkenums('ephy-lib',
-  sources: types_headers,
-  h_template: 'ephy-lib-type-builtins.h.in',
-  c_template: 'ephy-lib-type-builtins.c.in'
+enums = gnome.mkenums_simple('ephy-lib-type-builtins',
+  sources: types_headers
 )
 
 libephymisc_sources = [
@@ -47,6 +45,9 @@ libephymisc_sources = [
   'history/ephy-history-service-urls-table.c',
   'history/ephy-history-service-visits-table.c',
   'history/ephy-history-types.c',
+  'safe-browsing/ephy-gsb-service.c',
+  'safe-browsing/ephy-gsb-storage.c',
+  'safe-browsing/ephy-gsb-utils.c',
   enums
 ]
 
@@ -56,7 +57,6 @@ libephymisc_deps = [
   gio_dep,
   gio_unix_dep,
   glib_dep,
-  gnome_desktop_dep,
   gtk_dep,
   icu_uc_dep,
   json_glib_dep,
@@ -73,7 +73,8 @@ libephymisc_includes = include_directories(
   '..',
   'contrib',
   'contrib/gvdb',
-  'history'
+  'history',
+  'safe-browsing'
 )
 
 libephymisc = shared_library('ephymisc',

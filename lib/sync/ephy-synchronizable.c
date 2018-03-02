@@ -47,7 +47,7 @@ ephy_synchronizable_get_id (EphySynchronizable *synchronizable)
 {
   EphySynchronizableInterface *iface;
 
-  g_return_val_if_fail (EPHY_IS_SYNCHRONIZABLE (synchronizable), NULL);
+  g_assert (EPHY_IS_SYNCHRONIZABLE (synchronizable));
 
   iface = EPHY_SYNCHRONIZABLE_GET_IFACE (synchronizable);
   return iface->get_id (synchronizable);
@@ -66,7 +66,7 @@ ephy_synchronizable_get_server_time_modified (EphySynchronizable *synchronizable
 {
   EphySynchronizableInterface *iface;
 
-  g_return_val_if_fail (EPHY_IS_SYNCHRONIZABLE (synchronizable), 0);
+  g_assert (EPHY_IS_SYNCHRONIZABLE (synchronizable));
 
   iface = EPHY_SYNCHRONIZABLE_GET_IFACE (synchronizable);
   return iface->get_server_time_modified (synchronizable);
@@ -85,7 +85,7 @@ ephy_synchronizable_set_server_time_modified (EphySynchronizable *synchronizable
 {
   EphySynchronizableInterface *iface;
 
-  g_return_if_fail (EPHY_IS_SYNCHRONIZABLE (synchronizable));
+  g_assert (EPHY_IS_SYNCHRONIZABLE (synchronizable));
 
   iface = EPHY_SYNCHRONIZABLE_GET_IFACE (synchronizable);
   iface->set_server_time_modified (synchronizable, server_time_modified);
@@ -111,8 +111,8 @@ ephy_synchronizable_to_bso (EphySynchronizable  *synchronizable,
 {
   EphySynchronizableInterface *iface;
 
-  g_return_val_if_fail (EPHY_IS_SYNCHRONIZABLE (synchronizable), NULL);
-  g_return_val_if_fail (bundle, NULL);
+  g_assert (EPHY_IS_SYNCHRONIZABLE (synchronizable));
+  g_assert (bundle);
 
   iface = EPHY_SYNCHRONIZABLE_GET_IFACE (synchronizable);
   return iface->to_bso (synchronizable, bundle);
@@ -153,9 +153,9 @@ ephy_synchronizable_from_bso (JsonNode            *bso,
   const char *payload = NULL;
   double server_time_modified;
 
-  g_return_val_if_fail (bso, NULL);
-  g_return_val_if_fail (bundle, NULL);
-  g_return_val_if_fail (is_deleted, NULL);
+  g_assert (bso);
+  g_assert (bundle);
+  g_assert (is_deleted);
 
   json = json_node_get_object (bso);
   if (!json) {
@@ -229,8 +229,8 @@ ephy_synchronizable_default_to_bso (EphySynchronizable  *synchronizable,
   char *serialized;
   char *payload;
 
-  g_return_val_if_fail (EPHY_IS_SYNCHRONIZABLE (synchronizable), NULL);
-  g_return_val_if_fail (bundle, NULL);
+  g_assert (EPHY_IS_SYNCHRONIZABLE (synchronizable));
+  g_assert (bundle);
 
   serialized = json_gobject_to_data (G_OBJECT (synchronizable), NULL);
   payload = ephy_sync_crypto_encrypt_record (serialized, bundle);

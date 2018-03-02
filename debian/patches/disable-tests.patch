@@ -1,13 +1,17 @@
-Description: Disable test that require compiled gsettings schemas
-Author: Jeremy Bicha <jbicha@ubuntu.com>
+From: Jeremy Bicha <jbicha@ubuntu.com>
+Date: Sun, 18 Feb 2018 15:22:45 -0500
+Subject: Disable tests that require compiled gsettings schemas
+
 Bug: https://bugzilla.gnome.org/show_bug.cgi?id=782246
 ---
- tests/meson.build |    8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ tests/meson.build | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
+diff --git a/tests/meson.build b/tests/meson.build
+index 8ced8eb..986bd56 100644
 --- a/tests/meson.build
 +++ b/tests/meson.build
-@@ -14,7 +14,7 @@ if get_option('enable_unit_tests')
+@@ -14,7 +14,7 @@ if get_option('unit_tests')
      'ephy-completion-model-test.c',
      dependencies: ephymain_dep
    )
@@ -16,7 +20,7 @@ Bug: https://bugzilla.gnome.org/show_bug.cgi?id=782246
  
    # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=778153
    # download_test = executable('test-ephy-download',
-@@ -34,13 +34,13 @@ if get_option('enable_unit_tests')
+@@ -34,13 +34,13 @@ if get_option('unit_tests')
      'ephy-embed-utils-test.c',
      dependencies: ephymain_dep
    )
@@ -32,7 +36,16 @@ Bug: https://bugzilla.gnome.org/show_bug.cgi?id=782246
  
    # https://bugzilla.gnome.org/show_bug.cgi?id=786001
    # file_helpers_test = executable('test-ephy-file-helpers',
-@@ -65,7 +65,7 @@ if get_option('enable_unit_tests')
+@@ -53,7 +53,7 @@ if get_option('unit_tests')
+     'ephy-gsb-service-test.c',
+     dependencies: ephymain_dep
+   )
+-  test('GSB service test', gsb_service_test)
++  # test('GSB service test', gsb_service_test)
+ 
+   history_test = executable('test-ephy-history',
+     'ephy-history-test.c',
+@@ -71,7 +71,7 @@ if get_option('unit_tests')
      'ephy-migration-test.c',
      dependencies: ephymain_dep
    )

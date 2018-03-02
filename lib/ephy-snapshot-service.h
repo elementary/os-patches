@@ -52,7 +52,6 @@ const char          *ephy_snapshot_service_lookup_cached_snapshot_path      (Eph
 
 void                 ephy_snapshot_service_get_snapshot_path_for_url_async  (EphySnapshotService *service,
                                                                              const char *url,
-                                                                             time_t mtime,
                                                                              GCancellable *cancellable,
                                                                              GAsyncReadyCallback callback,
                                                                              gpointer user_data);
@@ -63,7 +62,6 @@ char                *ephy_snapshot_service_get_snapshot_path_for_url_finish (Eph
 
 void                 ephy_snapshot_service_get_snapshot_path_async          (EphySnapshotService *service,
                                                                              WebKitWebView *web_view,
-                                                                             time_t mtime,
                                                                              GCancellable *cancellable,
                                                                              GAsyncReadyCallback callback,
                                                                              gpointer user_data);
@@ -71,5 +69,10 @@ void                 ephy_snapshot_service_get_snapshot_path_async          (Eph
 char                *ephy_snapshot_service_get_snapshot_path_finish         (EphySnapshotService *service,
                                                                              GAsyncResult *result,
                                                                              GError **error);
+
+void                 ephy_snapshot_service_delete_snapshot_for_url          (EphySnapshotService *service,
+                                                                             const char          *url);
+
+void                 ephy_snapshot_service_delete_all_snapshots             (EphySnapshotService *service);
 
 G_END_DECLS

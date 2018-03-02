@@ -41,7 +41,7 @@ ephy_history_service_initialize_urls_table (EphyHistoryService *self)
                                   "visit_count INTEGER DEFAULT 0 NOT NULL,"
                                   "typed_count INTEGER DEFAULT 0 NOT NULL,"
                                   "last_visit_time INTEGER,"
-                                  "thumbnail_update_time INTEGER DEFAULT 0,"
+                                  "thumbnail_update_time INTEGER DEFAULT 0," /* this column is legacy, unused */
                                   "hidden_from_overview INTEGER DEFAULT 0)", &error);
 
   if (error) {
@@ -64,15 +64,15 @@ ephy_history_service_get_url_row (EphyHistoryService *self, const char *url_stri
   if (url_string == NULL && url != NULL)
     url_string = url->url;
 
-  g_return_val_if_fail (url_string || url->id != -1, NULL);
+  g_assert (url_string || url->id != -1);
 
   if (url != NULL && url->id != -1) {
     statement = ephy_sqlite_connection_create_statement (self->history_database,
-                                                         "SELECT id, url, title, visit_count, typed_count, last_visit_time, hidden_from_overview, thumbnail_update_time, sync_id FROM urls "
+                                                         "SELECT id, url, title, visit_count, typed_count, last_visit_time, hidden_from_overview, sync_id FROM urls "
                                                          "WHERE id=?", &error);
   } else {
     statement = ephy_sqlite_connection_create_statement (self->history_database,
-                                                         "SELECT id, url, title, visit_count, typed_count, last_visit_time, hidden_from_overview, thumbnail_update_time, sync_id FROM urls "
+                                                         "SELECT id, url, title, visit_count, typed_count, last_visit_time, hidden_from_overview, sync_id FROM urls "
                                                          "WHERE url=?", &error);
   }
 
@@ -116,8 +116,7 @@ ephy_history_service_get_url_row (EphyHistoryService *self, const char *url_stri
   url->typed_count = ephy_sqlite_statement_get_column_as_int (statement, 4),
   url->last_visit_time = ephy_sqlite_statement_get_column_as_int64 (statement, 5);
   url->hidden = ephy_sqlite_statement_get_column_as_int (statement, 6);
-  url->thumbnail_time = ephy_sqlite_statement_get_column_as_int64 (statement, 7);
-  url->sync_id = g_strdup (ephy_sqlite_statement_get_column_as_string (statement, 8));
+  url->sync_id = g_strdup (ephy_sqlite_statement_get_column_as_string (statement, 7));
 
   g_object_unref (statement);
   return url;
@@ -175,7 +174,7 @@ ephy_history_service_update_url_row (EphyHistoryService *self, EphyHistoryURL *u
   g_assert (self->history_database != NULL);
 
   statement = ephy_sqlite_connection_create_statement (self->history_database,
-                                                       "UPDATE urls SET title=?, visit_count=?, typed_count=?, last_visit_time=?, hidden_from_overview=?, thumbnail_update_time=?, sync_id=? "
+                                                       "UPDATE urls SET title=?, visit_count=?, typed_count=?, last_visit_time=?, hidden_from_overview=?, sync_id=? "
                                                        "WHERE id=?", &error);
   if (error) {
     g_warning ("Could not build urls table modification statement: %s", error->message);
@@ -188,9 +187,8 @@ ephy_history_service_update_url_row (EphyHistoryService *self, EphyHistoryURL *u
       ephy_sqlite_statement_bind_int (statement, 2, url->typed_count, &error) == FALSE ||
       ephy_sqlite_statement_bind_int64 (statement, 3, url->last_visit_time, &error) == FALSE ||
       ephy_sqlite_statement_bind_int (statement, 4, url->hidden, &error) == FALSE ||
-      ephy_sqlite_statement_bind_int64 (statement, 5, url->thumbnail_time, &error) == FALSE ||
-      ephy_sqlite_statement_bind_string (statement, 6, url->sync_id, &error) == FALSE ||
-      ephy_sqlite_statement_bind_int (statement, 7, url->id, &error) == FALSE) {
+      ephy_sqlite_statement_bind_string (statement, 5, url->sync_id, &error) == FALSE ||
+      ephy_sqlite_statement_bind_int (statement, 6, url->id, &error) == FALSE) {
     g_warning ("Could not modify URL in urls table: %s", error->message);
     g_error_free (error);
     g_object_unref (statement);
@@ -217,9 +215,8 @@ create_url_from_statement (EphySQLiteStatement *statement)
   url->id = ephy_sqlite_statement_get_column_as_int (statement, 0);
   url->host = ephy_history_host_new (NULL, NULL, 0, 1.0);
   url->hidden = ephy_sqlite_statement_get_column_as_int (statement, 6);
-  url->thumbnail_time = ephy_sqlite_statement_get_column_as_int64 (statement, 7);
-  url->host->id = ephy_sqlite_statement_get_column_as_int (statement, 8);
-  url->sync_id = g_strdup (ephy_sqlite_statement_get_column_as_string (statement, 9));
+  url->host->id = ephy_sqlite_statement_get_column_as_int (statement, 7);
+  url->sync_id = g_strdup (ephy_sqlite_statement_get_column_as_string (statement, 8));
 
   return url;
 }
@@ -241,7 +238,6 @@ ephy_history_service_find_url_rows (EphyHistoryService *self, EphyHistoryQuery *
                                "urls.typed_count, "
                                "urls.last_visit_time, "
                                "urls.hidden_from_overview, "
-                               "urls.thumbnail_update_time, "
                                "urls.host, "
                                "urls.sync_id "
                                "FROM "
@@ -400,7 +396,7 @@ ephy_history_service_delete_url (EphyHistoryService *self, EphyHistoryURL *url)
   g_assert (self->history_thread == g_thread_self ());
   g_assert (self->history_database != NULL);
 
-  g_return_if_fail (url->id != -1 || url->url);
+  g_assert (url->id != -1 || url->url);
 
   if (url->id != -1)
     sql_statement = "DELETE FROM urls WHERE id=?";

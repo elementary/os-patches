@@ -18,17 +18,6 @@
  *  along with Epiphany.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Portions of this file based on Chromium code.
- * License block as follows:
- *
- * Copyright (c) 2009 The Chromium Authors. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- *
- * The LICENSE file from Chromium can be found in the LICENSE.chromium
- * file.
- */
-
 #include "config.h"
 
 #include "ephy-bookmarks-manager.h"
@@ -66,7 +55,6 @@
 static int do_step_n = -1;
 static int migration_version = -1;
 static char *profile_dir = NULL;
-static GMainLoop *loop = NULL;
 
 /*
  * What to do to add new migration steps:
@@ -80,328 +68,6 @@ static gboolean
 profile_dir_exists (void)
 {
   return g_file_test (ephy_dot_dir (), G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR);
-}
-
-static void
-migrate_profile (const char *old_dir,
-                 const char *new_dir)
-{
-  char *parent_dir;
-  char *updated;
-  const char *message;
-
-  if (g_file_test (new_dir, G_FILE_TEST_EXISTS) ||
-      !g_file_test (old_dir, G_FILE_TEST_IS_DIR))
-    return;
-
-  /* Test if we already attempted to migrate first. */
-  updated = g_build_filename (old_dir, "DEPRECATED-DIRECTORY", NULL);
-  message = _("Web 3.6 deprecated this directory and tried migrating "
-              "this configuration to ~/.config/epiphany");
-
-  parent_dir = g_path_get_dirname (new_dir);
-  if (g_mkdir_with_parents (parent_dir, 0700) == 0) {
-    int fd, res;
-
-    /* rename() works fine if the destination directory is empty. */
-    res = g_rename (old_dir, new_dir);
-    if (res == -1 && !g_file_test (updated, G_FILE_TEST_EXISTS)) {
-      fd = g_creat (updated, 0600);
-      if (fd != -1) {
-        res = write (fd, message, strlen (message));
-        close (fd);
-      }
-    }
-  }
-
-  g_free (parent_dir);
-  g_free (updated);
-}
-
-static void
-migrate_profile_gnome2_to_xdg (void)
-{
-  char *old_dir;
-  char *new_dir;
-
-  old_dir = g_build_filename (g_get_home_dir (),
-                              ".gnome2",
-                              "epiphany",
-                              NULL);
-  new_dir = g_build_filename (g_get_user_config_dir (),
-                              "epiphany",
-                              NULL);
-
-  migrate_profile (old_dir, new_dir);
-
-  g_free (new_dir);
-  g_free (old_dir);
-}
-
-static char *
-fix_desktop_file_and_return_new_location (const char *dir)
-{
-  GRegex *regex;
-  char *result, *old_profile_dir, *replacement, *contents, *new_contents;
-  gsize length;
-
-  old_profile_dir = g_build_filename (g_get_home_dir (),
-                                      ".gnome2",
-                                      NULL);
-  replacement = g_build_filename (g_get_user_config_dir (),
-                                  NULL);
-  regex = g_regex_new (old_profile_dir, 0, 0, NULL);
-
-  /* We want to modify both the link destination and the contents of
-   * the .desktop file itself. */
-  result = g_regex_replace (regex, dir, -1,
-                            0, replacement, 0, NULL);
-  g_file_get_contents (result, &contents, &length, NULL);
-  new_contents = g_regex_replace (regex, contents, -1, 0,
-                                  replacement, 0, NULL);
-  g_file_set_contents (result, new_contents, length, NULL);
-
-  g_free (contents);
-  g_free (new_contents);
-  g_free (old_profile_dir);
-  g_free (replacement);
-
-  g_regex_unref (regex);
-
-  return result;
-}
-
-static void
-migrate_web_app_links (void)
-{
-  GList *apps, *p;
-
-  apps = ephy_web_application_get_application_list ();
-  for (p = apps; p; p = p->next) {
-    char *desktop_file, *app_link;
-    EphyWebApplication *app = (EphyWebApplication *)p->data;
-
-    desktop_file = app->desktop_file;
-
-    /* Update the link in applications. */
-    app_link = g_build_filename (g_get_user_data_dir (), "applications", desktop_file, NULL);
-    if (g_file_test (app_link, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_SYMLINK)) {
-      /* Change the link to point to the new profile dir. */
-      GFileInfo *info;
-      const char *target;
-      GFile *file = g_file_new_for_path (app_link);
-
-      info = g_file_query_info (file, G_FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET,
-                                0, NULL, NULL);
-      if (info) {
-        char *new_target;
-
-        target = g_file_info_get_symlink_target (info);
-        new_target = fix_desktop_file_and_return_new_location (target);
-
-        /* FIXME: Updating the file info and setting it again should
-         * work, but it does not? Just delete and create the link
-         * again. */
-        g_file_delete (file, 0, 0);
-        g_object_unref (file);
-
-        file = g_file_new_for_path (app_link);
-        g_file_make_symbolic_link (file, new_target, NULL, NULL);
-
-        g_object_unref (info);
-        g_free (new_target);
-      }
-
-      g_object_unref (file);
-    }
-
-    g_free (app_link);
-  }
-
-  ephy_web_application_free_application_list (apps);
-}
-
-static void
-migrate_new_urls_table (void)
-{
-  EphySQLiteConnection *history_database;
-  char *filename;
-  GError *error = NULL;
-
-  filename = g_build_filename (ephy_dot_dir (), EPHY_HISTORY_FILE, NULL);
-  if (!g_file_test (filename, G_FILE_TEST_EXISTS))
-    return;
-
-  history_database = ephy_sqlite_connection_new (EPHY_SQLITE_CONNECTION_MODE_READWRITE);
-  ephy_sqlite_connection_open (history_database, filename, &error);
-
-  if (error) {
-    g_warning ("Failed to open history database: %s", error->message);
-    g_error_free (error);
-    g_free (filename);
-    return;
-  }
-
-  ephy_sqlite_connection_execute (history_database,
-                                  "ALTER TABLE urls "
-                                  "ADD COLUMN thumbnail_update_time INTEGER DEFAULT 0",
-                                  &error);
-  if (error) {
-    g_warning ("Failed to add new column to table in history backend: %s",
-               error->message);
-    g_error_free (error);
-    error = NULL;
-  }
-  ephy_sqlite_connection_execute (history_database,
-                                  "ALTER TABLE urls "
-                                  "ADD COLUMN hidden_from_overview INTEGER DEFAULT 0",
-                                  &error);
-  if (error) {
-    g_warning ("Failed to add new column to table in history backend: %s",
-               error->message);
-    g_error_free (error);
-    error = NULL;
-  }
-
-  g_object_unref (history_database);
-  g_free (filename);
-}
-
-/* Migrating form password data. */
-
-static int form_passwords_migrating = 0;
-
-
-static void
-password_cleared_cb (SecretService *service,
-                     GAsyncResult  *res,
-                     gpointer       userdata)
-{
-  secret_service_clear_finish (service, res, NULL);
-
-  if (g_atomic_int_dec_and_test (&form_passwords_migrating))
-    g_main_loop_quit (loop);
-}
-
-static void
-store_form_auth_data_cb (GObject      *object,
-                         GAsyncResult *res,
-                         GHashTable   *attributes)
-{
-  GError *error = NULL;
-
-  if (ephy_password_manager_store_finish (res, &error) == FALSE) {
-    g_warning ("Couldn't store a form password: %s", error->message);
-    g_error_free (error);
-    goto out;
-  }
-
-  g_atomic_int_inc (&form_passwords_migrating);
-  secret_service_clear (NULL, NULL,
-                        attributes, NULL, (GAsyncReadyCallback)password_cleared_cb,
-                        NULL);
-
- out:
-  if (g_atomic_int_dec_and_test (&form_passwords_migrating))
-    g_main_loop_quit (loop);
-
-  g_hash_table_unref (attributes);
-}
-
-static void
-load_collection_items_cb (SecretCollection *collection,
-                          GAsyncResult     *res,
-                          gpointer          data)
-{
-  SecretItem *item;
-  SecretValue *secret;
-  GList *l;
-  GHashTable *attributes, *t;
-  const char *server, *username, *username_field, *password_field, *password;
-  char *origin;
-  SoupURI *uri;
-  GError *error = NULL;
-  GList *items;
-
-  secret_collection_load_items_finish (collection, res, &error);
-
-  if (error) {
-    g_warning ("Couldn't retrieve form data: %s", error->message);
-    g_error_free (error);
-    return;
-  }
-  items = secret_collection_get_items (collection);
-
-  for (l = items; l; l = l->next) {
-    item = (SecretItem *)l->data;
-
-    attributes = secret_item_get_attributes (item);
-    server = g_hash_table_lookup (attributes, "server");
-    if (server &&
-        g_strstr_len (server, -1, "form%5Fusername") &&
-        g_strstr_len (server, -1, "form%5Fpassword")) {
-      g_atomic_int_inc (&form_passwords_migrating);
-      /* This is one of the hackish ones that need to be migrated.
-         Fetch the rest of the data and take care of it. */
-      username = g_hash_table_lookup (attributes, "user");
-      uri = soup_uri_new (server);
-      t = soup_form_decode (uri->query);
-      username_field = g_hash_table_lookup (t, USERNAME_FIELD_KEY);
-      password_field = g_hash_table_lookup (t, PASSWORD_FIELD_KEY);
-      soup_uri_set_query (uri, NULL);
-      origin = soup_uri_to_string (uri, FALSE);
-      secret_item_load_secret_sync (item, NULL, NULL);
-      secret = secret_item_get_secret (item);
-      password = secret_value_get (secret, NULL);
-      ephy_password_manager_store_raw (origin,
-                                       username,
-                                       password,
-                                       username_field,
-                                       password_field,
-                                       (GAsyncReadyCallback)store_form_auth_data_cb,
-                                       g_hash_table_ref (attributes));
-      g_free (origin);
-      secret_value_unref (secret);
-      g_hash_table_unref (t);
-      soup_uri_free (uri);
-    }
-    g_hash_table_unref (attributes);
-  }
-
-  /* And decrease here so that we finish eventually. */
-  if (g_atomic_int_dec_and_test (&form_passwords_migrating))
-    g_main_loop_quit (loop);
-
-  g_list_free_full (items, (GDestroyNotify)g_object_unref);
-}
-
-static void
-migrate_form_passwords_to_libsecret (void)
-{
-  SecretService *service;
-  GList *collections, *c;
-  GError *error = NULL;
-
-  service = secret_service_get_sync (SECRET_SERVICE_OPEN_SESSION | SECRET_SERVICE_LOAD_COLLECTIONS, NULL, &error);
-  if (error) {
-    g_warning ("Could not get the secret service: %s", error->message);
-    g_error_free (error);
-    return;
-  }
-
-  collections = secret_service_get_collections (service);
-
-  for (c = collections; c; c = c->next) {
-    g_atomic_int_inc (&form_passwords_migrating);
-    secret_collection_load_items ((SecretCollection *)c->data, NULL, (GAsyncReadyCallback)load_collection_items_cb,
-                                  NULL);
-  }
-
-  loop = g_main_loop_new (NULL, FALSE);
-  g_main_loop_run (loop);
-
-  g_list_free_full (collections, (GDestroyNotify)g_object_unref);
-  g_object_unref (service);
 }
 
 static void
@@ -786,7 +452,7 @@ migrate_adblock_filters (void)
         char *url;
 
         url = g_strstrip (filter_list[i]);
-        if (url[0] != '\0' && !g_str_equal (url, ADBLOCK_DEFAULT_FILTER_URL))
+        if (url[0] != '\0' && strcmp (url, ADBLOCK_DEFAULT_FILTER_URL))
           g_ptr_array_add (filters_array, g_strdup (url));
       }
 
@@ -873,7 +539,7 @@ static gboolean
 is_deprecated_setting (const char *setting)
 {
   for (guint i = 0; i < G_N_ELEMENTS (deprecated_settings); i++) {
-    if (g_str_equal (setting, deprecated_settings[i]))
+    if (!strcmp (setting, deprecated_settings[i]))
       return TRUE;
   }
 
@@ -1090,10 +756,12 @@ migrate_history_to_firefox_sync_history (void)
     goto out;
   }
 
-  history_db = ephy_sqlite_connection_new (EPHY_SQLITE_CONNECTION_MODE_READWRITE);
-  ephy_sqlite_connection_open (history_db, history_filename, &error);
+  history_db = ephy_sqlite_connection_new (EPHY_SQLITE_CONNECTION_MODE_READWRITE,
+                                           history_filename);
+  ephy_sqlite_connection_open (history_db, &error);
   if (error) {
     g_warning ("Failed to open history database: %s", error->message);
+    g_clear_object (&history_db);
     goto out;
   }
 
@@ -1121,8 +789,10 @@ migrate_history_to_firefox_sync_history (void)
 
 out:
   g_free (history_filename);
-  if (history_db)
+  if (history_db) {
+    ephy_sqlite_connection_close (history_db);
     g_object_unref (history_db);
+  }
   if (statement)
     g_object_unref (statement);
   if (error)
@@ -1326,6 +996,9 @@ convert_bookmark_timestamp (GVariant *value)
   const char *id;
   char *tag;
 
+  if (!g_variant_check_format_string (value, "(xssdbas)", FALSE))
+    return NULL;
+
   g_variant_get (value, "(x&s&sdbas)",
                  &time_added, &title, &id,
                  &timestamp_d, &is_uploaded, &iter);
@@ -1396,9 +1069,14 @@ migrate_bookmarks_timestamp (void)
   for (int i = 0; i < length; i++) {
     GVariant *value = gvdb_table_get_value (bookmarks_table_in, urls[i]);
     GVariant *new_value = convert_bookmark_timestamp (value);
-    GvdbItem *item = gvdb_hash_table_insert (bookmarks_table_out, urls[i]);
-    gvdb_item_set_value (item, new_value);
+    if (new_value != NULL) {
+      GvdbItem *item = gvdb_hash_table_insert (bookmarks_table_out, urls[i]);
+      gvdb_item_set_value (item, new_value);
+    }
     g_variant_unref (value);
+
+    if (new_value == NULL)
+      goto out;
   }
 
   gvdb_table_write_contents (root_table_out, filename, FALSE, NULL);
@@ -1526,9 +1204,9 @@ const EphyProfileMigrator migrators[] = {
   /*  4 */ migrate_nothing,
   /*  5 */ migrate_nothing,
   /*  6 */ migrate_nothing,
-  /*  7 */ migrate_web_app_links,
-  /*  8 */ migrate_new_urls_table,
-  /*  9 */ migrate_form_passwords_to_libsecret,
+  /*  7 */ migrate_nothing,
+  /*  8 */ migrate_nothing,
+  /*  9 */ migrate_nothing,
   /* 10 */ migrate_app_desktop_file_categories,
   /* 11 */ migrate_insecure_passwords,
   /* 12 */ migrate_bookmarks,
@@ -1545,6 +1223,7 @@ const EphyProfileMigrator migrators[] = {
   /* 23 */ migrate_sync_device_info,
   /* 24 */ migrate_bookmarks_timestamp,
   /* 25 */ migrate_passwords_timestamp,
+  /* 26 */ migrate_nothing
 };
 
 static gboolean
@@ -1552,10 +1231,6 @@ ephy_migrator (void)
 {
   int latest, i;
   EphyProfileMigrator m;
-
-  /* Always try to migrate the data from the old profile dir at the
-   * very beginning. */
-  migrate_profile_gnome2_to_xdg ();
 
   /* If after this point there's no profile dir, there's no point in
    * running anything because Epiphany has never run in this sytem, so

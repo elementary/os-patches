@@ -52,6 +52,7 @@
 #include "ephy-settings.h"
 #include "ephy-shell.h"
 #include "ephy-string.h"
+#include "ephy-vcs-version.h"
 #include "ephy-web-app-utils.h"
 #include "ephy-zoom.h"
 
@@ -563,8 +564,8 @@ window_cmd_show_about (GSimpleAction *action,
   GKeyFile *key_file;
   GBytes *bytes;
   GError *error = NULL;
-  char **list, **authors, **contributors, **past_authors, **artists, **documenters;
-  gsize n_authors, n_contributors, n_past_authors, n_artists, n_documenters, i, j;
+  char **list, **authors, **maintainers, **past_maintainers, **contributors, **artists, **documenters;
+  gsize n_authors, n_maintainers, n_past_maintainers, n_contributors, n_artists, n_documenters, i, j;
 
   key_file = g_key_file_new ();
   bytes = g_resources_lookup_data ("/org/gnome/epiphany/about.ini", 0, NULL);
@@ -575,12 +576,14 @@ window_cmd_show_about (GSimpleAction *action,
   }
   g_bytes_unref (bytes);
 
-  list = g_key_file_get_string_list (key_file, ABOUT_GROUP, "Authors",
+  list = g_key_file_get_string_list (key_file, ABOUT_GROUP, "Author",
                                      &n_authors, NULL);
+  maintainers = g_key_file_get_string_list (key_file, ABOUT_GROUP, "Maintainers",
+                                            &n_maintainers, NULL);
+  past_maintainers = g_key_file_get_string_list (key_file, ABOUT_GROUP, "PastMaintainers",
+                                                 &n_past_maintainers, NULL);
   contributors = g_key_file_get_string_list (key_file, ABOUT_GROUP, "Contributors",
                                              &n_contributors, NULL);
-  past_authors = g_key_file_get_string_list (key_file, ABOUT_GROUP, "PastAuthors",
-                                             &n_past_authors, NULL);
 
 #define APPEND(_to, _from) \
   _to[i++] = g_strdup (_from);
@@ -596,19 +599,23 @@ window_cmd_show_about (GSimpleAction *action,
   }
 
   authors = g_new (char *, (list ? n_authors : 0) +
-                   (contributors ? n_contributors : 0) +
-                   (past_authors ? n_past_authors : 0) + 7 + 1);
+                   (maintainers ? n_maintainers : 0) +
+                   (past_maintainers ? n_past_maintainers : 0) +
+                   (contributors ? n_contributors : 0) + 9 + 1);
   i = 0;
   APPEND_STRV_AND_FREE (authors, list);
+  APPEND (authors, "");
+  APPEND (authors, _("Current maintainers:"));
+  APPEND_STRV_AND_FREE (authors, maintainers);
   APPEND (authors, "");
   APPEND (authors, _("Contact us at:"));
   APPEND (authors, "<epiphany-list@gnome.org>");
   APPEND (authors, "");
+  APPEND (authors, _("Past maintainers:"));
+  APPEND_STRV_AND_FREE (authors, past_maintainers);
+  APPEND (authors, "");
   APPEND (authors, _("Contributors:"));
   APPEND_STRV_AND_FREE (authors, contributors);
-  APPEND (authors, "");
-  APPEND (authors, _("Past developers:"));
-  APPEND_STRV_AND_FREE (authors, past_authors);
   authors[i++] = NULL;
 
   list = g_key_file_get_string_list (key_file, ABOUT_GROUP, "Artists", &n_artists, NULL);
@@ -640,10 +647,14 @@ window_cmd_show_about (GSimpleAction *action,
                               webkit_get_micro_version ());
 
   gtk_show_about_dialog (window ? GTK_WINDOW (window) : NULL,
+#if !TECH_PREVIEW
                          "program-name", _("Web"),
-                         "version", VERSION,
+#else
+                         "program-name", _("Epiphany Technology Preview"),
+#endif
+                         "version", VCSVERSION,
                          "copyright", "Copyright © 2002–2004 Marco Pesenti Gritti\n"
-                         "Copyright © 2003–2017 The Web Developers",
+                         "Copyright © 2003–2018 The Web Developers",
                          "artists", artists,
                          "authors", authors,
                          "comments", comments,
@@ -659,7 +670,11 @@ window_cmd_show_about (GSimpleAction *action,
                          "translator-credits", _("translator-credits"),
                          "logo-icon-name", "org.gnome.Epiphany",
                          "website", "https://wiki.gnome.org/Apps/Web",
+#if !TECH_PREVIEW
                          "website-label", _("Web Website"),
+#else
+                         "website-label", _("Website"),
+#endif
                          "license-type", GTK_LICENSE_GPL_3_0,
                          "wrap-license", TRUE,
                          NULL);
@@ -699,7 +714,7 @@ window_cmd_navigation (GSimpleAction *action,
   WebKitWebView *web_view;
 
   embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   web_view = EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed);
 
@@ -722,7 +737,7 @@ window_cmd_navigation_new_tab (GSimpleAction *action,
   WebKitWebView *web_view;
 
   embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   web_view = EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed);
 
@@ -775,7 +790,7 @@ window_cmd_stop (GSimpleAction *action,
 
   embed = ephy_embed_container_get_active_child
             (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   gtk_widget_grab_focus (GTK_WIDGET (embed));
 
@@ -816,7 +831,7 @@ window_cmd_reload (GSimpleAction *action,
 
   embed = ephy_embed_container_get_active_child
             (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   gtk_widget_grab_focus (GTK_WIDGET (embed));
 
@@ -917,6 +932,28 @@ window_cmd_open (GSimpleAction *action,
                     G_CALLBACK (open_response_cb), window);
 
   gtk_native_dialog_show (GTK_NATIVE_DIALOG (dialog));
+}
+
+void
+window_cmd_open_in_browser (GSimpleAction *action,
+                            GVariant      *parameter,
+                            gpointer       user_data)
+{
+  EphyWindow *window = user_data;
+  EphyEmbed *embed;
+  EphyWebView *view;
+  const char *uri;
+
+  embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
+  g_assert (embed != NULL);
+
+  view = ephy_embed_get_web_view (embed);
+  uri = ephy_web_view_get_address (view);
+
+  ephy_file_open_uri_in_default_browser (uri, GDK_CURRENT_TIME,
+                                         gtk_window_get_screen (GTK_WINDOW (window)));
+
+  ephy_window_close_active_child (window);
 }
 
 typedef struct {
@@ -1366,7 +1403,7 @@ window_cmd_save_as_application (GSimpleAction *action,
     return;
 
   embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   view = EPHY_WEB_VIEW (EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed));
 
@@ -1503,7 +1540,7 @@ window_cmd_save_as (GSimpleAction *action,
   char *suggested_filename;
 
   embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   dialog = ephy_create_file_chooser (_("Save"),
                                      GTK_WIDGET (window),
@@ -1582,7 +1619,7 @@ window_cmd_cut (GSimpleAction *action,
   } else {
     EphyEmbed *embed;
     embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-    g_return_if_fail (embed != NULL);
+    g_assert (embed != NULL);
 
     webkit_web_view_execute_editing_command (EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed), WEBKIT_EDITING_COMMAND_CUT);
   }
@@ -1602,7 +1639,7 @@ window_cmd_copy (GSimpleAction *action,
     EphyEmbed *embed;
 
     embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-    g_return_if_fail (embed != NULL);
+    g_assert (embed != NULL);
 
     webkit_web_view_execute_editing_command (EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed), WEBKIT_EDITING_COMMAND_COPY);
   }
@@ -1622,7 +1659,7 @@ window_cmd_paste (GSimpleAction *action,
     EphyEmbed *embed;
 
     embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-    g_return_if_fail (embed != NULL);
+    g_assert (embed != NULL);
 
     webkit_web_view_execute_editing_command (EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed), WEBKIT_EDITING_COMMAND_PASTE);
   }
@@ -1642,7 +1679,7 @@ window_cmd_delete (GSimpleAction *action,
     EphyEmbed *embed;
 
     embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-    g_return_if_fail (embed != NULL);
+    g_assert (embed != NULL);
 
     /* FIXME: TODO */
 #if 0
@@ -1663,7 +1700,7 @@ window_cmd_print (GSimpleAction *action,
 
   embed = ephy_embed_container_get_active_child
             (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (EPHY_IS_EMBED (embed));
+  g_assert (EPHY_IS_EMBED (embed));
   view = ephy_embed_get_web_view (embed);
 
   ephy_web_view_print (view);
@@ -2046,7 +2083,7 @@ window_cmd_page_source (GSimpleAction *action,
 
   embed = ephy_embed_container_get_active_child
             (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   address = ephy_web_view_get_address (ephy_embed_get_web_view (embed));
 
@@ -2086,7 +2123,7 @@ window_cmd_toggle_inspector (GSimpleAction *action,
 
   embed = ephy_embed_container_get_active_child
             (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   gtk_widget_grab_focus (GTK_WIDGET (embed));
 
@@ -2116,7 +2153,7 @@ window_cmd_select_all (GSimpleAction *action,
 
     embed = ephy_embed_container_get_active_child
               (EPHY_EMBED_CONTAINER (window));
-    g_return_if_fail (embed != NULL);
+    g_assert (embed != NULL);
 
     webkit_web_view_execute_editing_command (EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed), "SelectAll");
   }
@@ -2135,7 +2172,7 @@ window_cmd_send_to (GSimpleAction *action,
 
   embed = ephy_embed_container_get_active_child
             (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   location = ephy_web_view_get_address (ephy_embed_get_web_view (embed));
   title = ephy_embed_get_title (embed);
@@ -2241,7 +2278,7 @@ window_cmd_tabs_previous (GSimpleAction *action,
   GtkWidget *nb;
 
   nb = ephy_window_get_notebook (EPHY_WINDOW (user_data));
-  g_return_if_fail (nb != NULL);
+  g_assert (nb != NULL);
 
   ephy_notebook_prev_page (EPHY_NOTEBOOK (nb));
 }
@@ -2254,7 +2291,7 @@ window_cmd_tabs_next (GSimpleAction *action,
   GtkWidget *nb;
 
   nb = ephy_window_get_notebook (EPHY_WINDOW (user_data));
-  g_return_if_fail (nb != NULL);
+  g_assert (nb != NULL);
 
   ephy_notebook_next_page (EPHY_NOTEBOOK (nb));
 }
@@ -2371,7 +2408,7 @@ window_cmd_tabs_close (GSimpleAction *action,
   }
 
   embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
-  g_return_if_fail (embed != NULL);
+  g_assert (embed != NULL);
 
   g_signal_emit_by_name (notebook, "tab-close-request", embed);
 }

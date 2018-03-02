@@ -1,12 +1,16 @@
-Description: Install as epiphany-browser not epiphany
-Author: Jeremy Bicha <jbicha@debian.org>
+From: Josselin Mouette <joss@debian.org>
+Date: Fri, 2 Jul 2010 23:20:04 +0000
+Subject: Install as epiphany-browser not epiphany
+
 ---
- meson.build |    6 +++---
+ meson.build | 6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)
 
+diff --git a/meson.build b/meson.build
+index d801172..691f458 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -13,9 +13,9 @@ datadir = join_paths(prefix, get_option(
+@@ -13,9 +13,9 @@ datadir = join_paths(prefix, get_option('datadir'))
  libdir = join_paths(prefix, get_option('libdir'))
  libexecdir = join_paths(prefix, get_option('libexecdir'))
  localedir = join_paths(prefix, get_option('localedir'))
