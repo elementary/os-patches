@@ -1,0 +1,23 @@
+Description: "unset res" is not enough to make sure res deletes all the previous entries.
+ This lead to errors in dkms virtualbox installation, and refuse to install vboxvideo.
+ Reason is that now vboxvideo is provided by kernel staging mainline module, so versionless.
+ Previously built modules (vboxsf and so on), had the correct version, and since this variable
+ was not reset, that value was taken, leading to unability from dkms to install vboxvideo from
+ virtualbox-guest-dkms module, always preferring the staging one.
+ Now, that the variable is really reset, in case of builtin module, the check will succeed, because
+ anyversion is > than undefined
+
+Author: Gianfranco Costamagna <locutusofborg@debian.org>
+Last-Update: 2018-03-02
+
+--- dkms-2.3.orig/dkms
++++ dkms-2.3/dkms
+@@ -719,7 +719,7 @@ read_conf()
+ 
+ # Little helper function for parsing the output of modinfo.
+ get_module_verinfo(){
+-    unset res
++    res=
+     local vals=
+     while read -a vals; do
+     case ${vals[0]} in
