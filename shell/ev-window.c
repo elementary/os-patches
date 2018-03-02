@@ -100,6 +100,9 @@
 #include <X11/extensions/XInput2.h>
 #endif
 
+#define MOUSE_BACK_BUTTON 8
+#define MOUSE_FORWARD_BUTTON 9
+
 typedef enum {
 	PAGE_MODE_DOCUMENT,
 	PAGE_MODE_PASSWORD
@@ -480,7 +483,7 @@ ev_window_update_actions_sensitivity (EvWindow *ev_window)
 
 	/* File menu */
 	ev_window_set_action_enabled (ev_window, "open-copy", has_document);
-	ev_window_set_action_enabled (ev_window, "save-copy", has_document &&
+	ev_window_set_action_enabled (ev_window, "save-as", has_document &&
 				      ok_to_copy && !recent_view_mode);
 	ev_window_set_action_enabled (ev_window, "print", has_pages &&
 				      ok_to_print && !recent_view_mode);
@@ -2823,14 +2826,15 @@ file_save_dialog_response_cb (GtkWidget *fc,
 }
 
 static void
-ev_window_save_a_copy (EvWindow *ev_window)
+ev_window_save_as (EvWindow *ev_window)
 {
 	GtkWidget *fc;
-	gchar *base_name;
-	GFile *file;
+	gchar *base_name, *dir_name, *var_tmp_dir, *tmp_dir;
+	GFile *file, *parent;
+	const gchar *default_dir, *dest_dir, *documents_dir;
 
 	fc = gtk_file_chooser_dialog_new (
-		_("Save a Copy"),
+		_("Save As…"),
 		GTK_WINDOW (ev_window), GTK_FILE_CHOOSER_ACTION_SAVE,
 		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 		GTK_STOCK_SAVE, GTK_RESPONSE_OK,
@@ -2845,15 +2849,34 @@ ev_window_save_a_copy (EvWindow *ev_window)
 
 	gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER (fc), FALSE);
 	gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (fc), TRUE);
+
 	file = g_file_new_for_uri (ev_window->priv->uri);
 	base_name = g_file_get_basename (file);
+	parent = g_file_get_parent (file);
+	dir_name = g_file_get_path (parent);
+	g_object_unref (parent);
+
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), base_name);
-	g_object_unref (file);
 	g_free (base_name);
 
-        ev_window_file_chooser_restore_folder (ev_window, GTK_FILE_CHOOSER (fc),
-                                               ev_window->priv->uri,
-                                               G_USER_DIRECTORY_DOCUMENTS);
+	documents_dir = g_get_user_special_dir (G_USER_DIRECTORY_DOCUMENTS);
+	default_dir = g_file_test (documents_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR) ?
+	              documents_dir : g_get_home_dir ();
+
+	tmp_dir = g_build_filename ("tmp", NULL);
+	var_tmp_dir = g_build_filename ("var", "tmp", NULL);
+	dest_dir = dir_name && !g_str_has_prefix (dir_name, g_get_tmp_dir ()) &&
+			    !g_str_has_prefix (dir_name, tmp_dir) &&
+	                    !g_str_has_prefix (dir_name, var_tmp_dir) ?
+	                    dir_name : default_dir;
+
+	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc),
+					     dest_dir);
+
+	g_object_unref (file);
+	g_free (tmp_dir);
+	g_free (var_tmp_dir);
+	g_free (dir_name);
 
 	g_signal_connect (fc, "response",
 			  G_CALLBACK (file_save_dialog_response_cb),
@@ -2869,7 +2892,7 @@ ev_window_cmd_save_as (GSimpleAction *action,
 {
 	EvWindow *window = user_data;
 
-	ev_window_save_a_copy (window);
+	ev_window_save_as (window);
 }
 
 static void
@@ -3514,7 +3537,7 @@ document_modified_confirmation_dialog_response (GtkDialog *dialog,
 
 	switch (response) {
 	case GTK_RESPONSE_YES:
-		ev_window_save_a_copy (ev_window);
+		ev_window_save_as (ev_window);
 		break;
 	case GTK_RESPONSE_NO:
 		gtk_widget_destroy (GTK_WIDGET (ev_window));
@@ -4111,7 +4134,6 @@ ev_window_run_fullscreen (EvWindow *window)
 
 	gtk_widget_set_size_request (window->priv->fs_eventbox, -1, 1);
 	gtk_widget_set_valign (window->priv->fs_eventbox, GTK_ALIGN_START);
-	gtk_revealer_set_transition_type (GTK_REVEALER (window->priv->fs_revealer), GTK_REVEALER_TRANSITION_TYPE_SLIDE_UP);
 	gtk_revealer_set_transition_duration (GTK_REVEALER (window->priv->fs_revealer), FULLSCREEN_TRANSITION_DURATION);
 
 	g_object_ref (window->priv->main_box);
@@ -5622,6 +5644,26 @@ ev_window_key_press_event (GtkWidget   *widget,
 }
 
 static gboolean
+ev_window_button_press_event (GtkWidget      *widget,
+                              GdkEventButton *event)
+{
+        EvWindow *window = EV_WINDOW (widget);
+
+        switch (event->button) {
+        case MOUSE_BACK_BUTTON:
+                ev_history_go_back (window->priv->history);
+                return TRUE;
+        case MOUSE_FORWARD_BUTTON:
+                ev_history_go_forward (window->priv->history);
+                return TRUE;
+        default:
+                break;
+        }
+
+        return FALSE;
+}
+
+static gboolean
 ev_window_delete_event (GtkWidget   *widget,
 			GdkEventAny *event)
 {
@@ -5640,6 +5682,7 @@ ev_window_class_init (EvWindowClass *ev_window_class)
 	widget_class->key_press_event = ev_window_key_press_event;
 	widget_class->window_state_event = ev_window_state_event;
 	widget_class->drag_data_received = ev_window_drag_data_received;
+	widget_class->button_press_event = ev_window_button_press_event;
 
 	nautilus_sendto = g_find_program_in_path ("nautilus-sendto");
 
@@ -5649,7 +5692,7 @@ ev_window_class_init (EvWindowClass *ev_window_class)
 static const GActionEntry actions[] = {
 	{ "open", ev_window_cmd_file_open },
 	{ "open-copy", ev_window_cmd_file_open_copy },
-	{ "save-copy", ev_window_cmd_save_as },
+	{ "save-as", ev_window_cmd_save_as },
 	{ "send-to", ev_window_cmd_send_to },
 	{ "open-containing-folder", ev_window_cmd_open_containing_folder },
 	{ "print", ev_window_cmd_file_print },
@@ -5837,6 +5880,7 @@ window_configure_event_cb (EvWindow *window, GdkEventConfigure *event, gpointer 
 {
 	GdkWindowState state;
 	gdouble document_width, document_height;
+	gint window_x, window_y, window_width, window_height;
 
 	if (!window->priv->metadata)
 		return FALSE;
@@ -5847,14 +5891,16 @@ window_configure_event_cb (EvWindow *window, GdkEventConfigure *event, gpointer 
 		if (window->priv->document) {
 			ev_document_get_max_page_size (window->priv->document,
 						       &document_width, &document_height);
+			gtk_window_get_size (GTK_WINDOW (window), &window_width, &window_height);
+			gtk_window_get_position (GTK_WINDOW (window), &window_x, &window_y);
 			g_settings_set (window->priv->default_settings, "window-ratio", "(dd)",
-					(double)event->width / document_width,
-					(double)event->height / document_height);
+					(double)window_width / document_width,
+					(double)window_height / document_height);
 
-			ev_metadata_set_int (window->priv->metadata, "window_x", event->x);
-			ev_metadata_set_int (window->priv->metadata, "window_y", event->y);
-			ev_metadata_set_int (window->priv->metadata, "window_width", event->width);
-			ev_metadata_set_int (window->priv->metadata, "window_height", event->height);
+			ev_metadata_set_int (window->priv->metadata, "window_x", window_x);
+			ev_metadata_set_int (window->priv->metadata, "window_y", window_y);
+			ev_metadata_set_int (window->priv->metadata, "window_width",window_width);
+			ev_metadata_set_int (window->priv->metadata, "window_height", window_height);
 		}
 	}
 
@@ -5929,21 +5975,25 @@ launch_external_uri (EvWindow *window, EvLinkAction *action)
 	gboolean ret;
 	GdkAppLaunchContext *context;
 	GdkScreen *screen;
+	GFile *file;
+	gchar *uri_scheme;
 
 	screen = gtk_window_get_screen (GTK_WINDOW (window));
 	context = gdk_display_get_app_launch_context (gdk_screen_get_display (screen));
 	gdk_app_launch_context_set_screen (context, screen);
 	gdk_app_launch_context_set_timestamp (context, gtk_get_current_event_time ());
+	file = g_file_new_for_uri (uri);
+	uri_scheme = g_file_get_uri_scheme (file);
+	g_object_unref (file);
 
-	if (!g_strstr_len (uri, strlen (uri), "://") &&
-	    !g_str_has_prefix (uri, "mailto:")) {
+	if (uri_scheme == NULL) {
 		gchar *new_uri;
 
 		/* Not a valid uri, assume http if it starts with www */
 		if (g_str_has_prefix (uri, "www.")) {
 			new_uri = g_strdup_printf ("http://%s", uri);
 		} else {
-			GFile *file, *parent;
+			GFile *parent;
 
 			file = g_file_new_for_uri (window->priv->uri);
 			parent = g_file_get_parent (file);
@@ -5970,7 +6020,7 @@ launch_external_uri (EvWindow *window, EvLinkAction *action)
 		g_error_free (error);
 	}
 
-        /* FIXMEchpe: unref launch context? */
+        g_object_unref (context);
 }
 
 static void

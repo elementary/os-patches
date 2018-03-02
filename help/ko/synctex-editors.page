@@ -35,13 +35,21 @@
 </section>
 
 <section id="vim-latex"><title>Vim-latex</title>
-<p><app>지에디트</app> 플러그인에 SyncTeX이 Vim과 동작할 수 있게 하는 파이썬 스크립트(evince_dbus.py)가 있습니다. vim-latex를 <app>문서 보기</app>와 사용하려면 다음 순서를 따라야 합니다:</p>
+<p>
+The <app>gedit</app> plugin contains a python script (<file>evince_dbus.py</file>) that can be used to get SyncTeX working with Vim.
+In order to use vim-latex together with the <app>document viewer</app> you need to follow the next steps:
+</p>
 <steps>
  <item>
-  <p>evince_dbus.py를 경로 어딘가에 복사하고 +x 권한을 줍니다.</p>
+  <p>
+     Copy the <file>evince_dbus.py</file> to some directory in your path and give it +x permissions.
+
+ </p>
  </item>
  <item>
-  <p>~/.vimrc 파일을 수정하고 다음 줄을 추가합니다.</p>
+  <p>
+     Modify your <file>~/.vimrc</file> file and add the following lines.
+    </p>
 <code>
 let g:Tex_ViewRule_pdf = 'evince_dbus.py'
 let g:Tex_DefaultTargetFormat = 'pdf'

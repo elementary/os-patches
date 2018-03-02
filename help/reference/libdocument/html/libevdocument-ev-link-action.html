@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>ev-link-action: Evince Document Library Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="Evince Document Library Reference Manual">
 <link rel="up" href="document-data.html" title="Part II. Document Data">
 <link rel="prev" href="EvLayer.html" title="EvLayer">
 <link rel="next" href="libevdocument-ev-link-dest.html" title="ev-link-dest">
-<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -255,7 +255,7 @@
 </div>
 <div class="refsect1">
 <a name="libevdocument-ev-link-action.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">    <a href="/home/carlos/gnome/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+<pre class="screen">    <a href="/usr/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
     <span class="lineart">╰──</span> EvLinkActionType
     GObject
     <span class="lineart">╰──</span> EvLinkAction
@@ -263,8 +263,6 @@
 </div>
 <div class="refsect1">
 <a name="libevdocument-ev-link-action.description"></a><h2>Description</h2>
-<p>
-</p>
 </div>
 <div class="refsect1">
 <a name="libevdocument-ev-link-action.functions_details"></a><h2>Functions</h2>
@@ -273,6 +271,37 @@
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_link_action_equal (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *a</code></em>,
                       <em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *b</code></em>);</pre>
+<p>Checks whether <em class="parameter"><code>a</code></em>
+ and <em class="parameter"><code>b</code></em>
+ are equal.</p>
+<div class="refsect3">
+<a name="ev-link-action-equal.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>a</p></td>
+<td class="parameter_description"><p>a <a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>b</p></td>
+<td class="parameter_description"><p>a <a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-link-action-equal.returns"></a><h4>Returns</h4>
+<p> <code class="literal">TRUE</code> iff <em class="parameter"><code>a</code></em>
+and <em class="parameter"><code>b</code></em>
+are equal</p>
+</div>
 <p class="since">Since: <a class="link" href="api-index-3-8.html#api-index-3.8">3.8</a></p>
 </div>
 <hr>
@@ -280,8 +309,6 @@ ev_link_action_equal (<em class="parameter"><code><a class="link" href="libevdoc
 <a name="ev-link-action-get-action-type"></a><h3>ev_link_action_get_action_type ()</h3>
 <pre class="programlisting"><a class="link" href="libevdocument-ev-link-action.html#EvLinkActionType" title="enum EvLinkActionType"><span class="returnvalue">EvLinkActionType</span></a>
 ev_link_action_get_action_type (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *self</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -305,7 +332,7 @@ ev_link_action_get_dest (<em class="parameter"><code><a class="link" href="libev
 </div>
 <div class="refsect3">
 <a name="ev-link-action-get-dest.returns"></a><h4>Returns</h4>
-<p> an <a class="link" href="libevdocument-ev-link-dest.html#EvLinkDest"><span class="type">EvLinkDest</span></a>. </p>
+<p>an <a class="link" href="libevdocument-ev-link-dest.html#EvLinkDest"><span class="type">EvLinkDest</span></a>. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
@@ -314,50 +341,102 @@ ev_link_action_get_dest (<em class="parameter"><code><a class="link" href="libev
 <a name="ev-link-action-get-uri"></a><h3>ev_link_action_get_uri ()</h3>
 <pre class="programlisting">const <span class="returnvalue">gchar</span> *
 ev_link_action_get_uri (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *self</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-get-filename"></a><h3>ev_link_action_get_filename ()</h3>
 <pre class="programlisting">const <span class="returnvalue">gchar</span> *
 ev_link_action_get_filename (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *self</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-get-params"></a><h3>ev_link_action_get_params ()</h3>
 <pre class="programlisting">const <span class="returnvalue">gchar</span> *
 ev_link_action_get_params (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *self</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-get-name"></a><h3>ev_link_action_get_name ()</h3>
 <pre class="programlisting">const <span class="returnvalue">gchar</span> *
 ev_link_action_get_name (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *self</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-get-hide-list"></a><h3>ev_link_action_get_hide_list ()</h3>
 <pre class="programlisting"><span class="returnvalue">GList</span> *
 ev_link_action_get_hide_list (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *self</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-link-action-get-hide-list.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>self</p></td>
+<td class="parameter_description"><p>an <a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-link-action-get-hide-list.returns"></a><h4>Returns</h4>
+<p>a list of <a class="link" href="EvLayer.html" title="EvLayer"><span class="type">EvLayer</span></a> objects. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> EvLayer]</span></p>
+</div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-get-show-list"></a><h3>ev_link_action_get_show_list ()</h3>
 <pre class="programlisting"><span class="returnvalue">GList</span> *
 ev_link_action_get_show_list (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *self</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-link-action-get-show-list.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>self</p></td>
+<td class="parameter_description"><p>an <a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-link-action-get-show-list.returns"></a><h4>Returns</h4>
+<p>a list of <a class="link" href="EvLayer.html" title="EvLayer"><span class="type">EvLayer</span></a> objects. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> EvLayer]</span></p>
+</div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-get-toggle-list"></a><h3>ev_link_action_get_toggle_list ()</h3>
 <pre class="programlisting"><span class="returnvalue">GList</span> *
 ev_link_action_get_toggle_list (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a> *self</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-link-action-get-toggle-list.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>self</p></td>
+<td class="parameter_description"><p>an <a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-link-action-get-toggle-list.returns"></a><h4>Returns</h4>
+<p>a list of <a class="link" href="EvLayer.html" title="EvLayer"><span class="type">EvLayer</span></a> objects. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> EvLayer]</span></p>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -366,14 +445,44 @@ ev_link_action_get_toggle_list (<em class="parameter"><code><a class="link" href
 ev_link_action_new_layers_state (<em class="parameter"><code><span class="type">GList</span> *show_list</code></em>,
                                  <em class="parameter"><code><span class="type">GList</span> *hide_list</code></em>,
                                  <em class="parameter"><code><span class="type">GList</span> *toggle_list</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-link-action-new-layers-state.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>show_list</p></td>
+<td class="parameter_description"><p>a list of <a class="link" href="EvLayer.html" title="EvLayer"><span class="type">EvLayer</span></a> objects. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> EvLayer]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>hide_list</p></td>
+<td class="parameter_description"><p>a list of <a class="link" href="EvLayer.html" title="EvLayer"><span class="type">EvLayer</span></a> objects. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> EvLayer]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>toggle_list</p></td>
+<td class="parameter_description"><p>a list of <a class="link" href="EvLayer.html" title="EvLayer"><span class="type">EvLayer</span></a> objects. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> EvLayer]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-link-action-new-layers-state.returns"></a><h4>Returns</h4>
+<p>a new <a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="type">EvLinkAction</span></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-new-dest"></a><h3>ev_link_action_new_dest ()</h3>
 <pre class="programlisting"><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="returnvalue">EvLinkAction</span></a> *
 ev_link_action_new_dest (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-dest.html#EvLinkDest"><span class="type">EvLinkDest</span></a> *dest</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -381,16 +490,12 @@ ev_link_action_new_dest (<em class="parameter"><code><a class="link" href="libev
 <pre class="programlisting"><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="returnvalue">EvLinkAction</span></a> *
 ev_link_action_new_remote (<em class="parameter"><code><a class="link" href="libevdocument-ev-link-dest.html#EvLinkDest"><span class="type">EvLinkDest</span></a> *dest</code></em>,
                            <em class="parameter"><code>const <span class="type">gchar</span> *filename</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-new-external-uri"></a><h3>ev_link_action_new_external_uri ()</h3>
 <pre class="programlisting"><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="returnvalue">EvLinkAction</span></a> *
 ev_link_action_new_external_uri (<em class="parameter"><code>const <span class="type">gchar</span> *uri</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -398,16 +503,12 @@ ev_link_action_new_external_uri (<em class="parameter"><code>const <span class="
 <pre class="programlisting"><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="returnvalue">EvLinkAction</span></a> *
 ev_link_action_new_launch (<em class="parameter"><code>const <span class="type">gchar</span> *filename</code></em>,
                            <em class="parameter"><code>const <span class="type">gchar</span> *params</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-link-action-new-named"></a><h3>ev_link_action_new_named ()</h3>
 <pre class="programlisting"><a class="link" href="libevdocument-ev-link-action.html#EvLinkAction"><span class="returnvalue">EvLinkAction</span></a> *
 ev_link_action_new_named (<em class="parameter"><code>const <span class="type">gchar</span> *name</code></em>);</pre>
-<p>
-</p>
 </div>
 </div>
 <div class="refsect1">
@@ -415,21 +516,15 @@ ev_link_action_new_named (<em class="parameter"><code>const <span class="type">g
 <div class="refsect2">
 <a name="EvLinkAction-struct"></a><h3>EvLinkAction</h3>
 <pre class="programlisting">typedef struct _EvLinkAction EvLinkAction;</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="EvLinkActionClass"></a><h3>EvLinkActionClass</h3>
 <pre class="programlisting">typedef struct _EvLinkActionClass EvLinkActionClass;</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="EvLinkActionType"></a><h3>enum EvLinkActionType</h3>
-<p>
-</p>
 <div class="refsect3">
 <a name="EvLinkActionType.members"></a><h4>Members</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -441,28 +536,28 @@ ev_link_action_new_named (<em class="parameter"><code>const <span class="type">g
 <tbody>
 <tr>
 <td class="enum_member_name"><p><a name="EV-LINK-ACTION-TYPE-GOTO-DEST:CAPS"></a>EV_LINK_ACTION_TYPE_GOTO_DEST</p></td>
-<td class="enum_member_description"> </td>
-<td class="enum_member_annotations"> </td>
+<td> </td>
+<td> </td>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="EV-LINK-ACTION-TYPE-GOTO-REMOTE:CAPS"></a>EV_LINK_ACTION_TYPE_GOTO_REMOTE</p></td>
-<td class="enum_member_description"> </td>
-<td class="enum_member_annotations"> </td>
+<td> </td>
+<td> </td>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="EV-LINK-ACTION-TYPE-EXTERNAL-URI:CAPS"></a>EV_LINK_ACTION_TYPE_EXTERNAL_URI</p></td>
-<td class="enum_member_description"> </td>
-<td class="enum_member_annotations"> </td>
+<td> </td>
+<td> </td>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="EV-LINK-ACTION-TYPE-LAUNCH:CAPS"></a>EV_LINK_ACTION_TYPE_LAUNCH</p></td>
-<td class="enum_member_description"> </td>
-<td class="enum_member_annotations"> </td>
+<td> </td>
+<td> </td>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="EV-LINK-ACTION-TYPE-NAMED:CAPS"></a>EV_LINK_ACTION_TYPE_NAMED</p></td>
-<td class="enum_member_description"> </td>
-<td class="enum_member_annotations"> </td>
+<td> </td>
+<td> </td>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="EV-LINK-ACTION-TYPE-LAYERS-STATE:CAPS"></a>EV_LINK_ACTION_TYPE_LAYERS_STATE</p></td>
@@ -546,6 +641,6 @@ ev_link_action_new_named (<em class="parameter"><code>const <span class="type">g
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25.1</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

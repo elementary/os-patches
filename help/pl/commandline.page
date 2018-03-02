@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="pl">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Wiersz poleceń</title>
+    <desc>Polecenie <cmd>evince</cmd> może otwierać dowolną liczbę plików, na konkretnych stronach i w różnych trybach.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <revision pkgversion="3.24" version="0.2" date="2017-09-17" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Piotr Drąg</mal:name>
+      <mal:email>piotrdrag@gmail.com</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Aviary.pl</mal:name>
+      <mal:email>community-poland@mozilla.org</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Wiersz poleceń</title>
+<p>Aby uruchomić <app>Przeglądarkę dokumentów</app> z wiersza poleceń, wpisz <cmd>evince</cmd>. Można otworzyć konkretny plik podając jego nazwę po poleceniu:</p>
+
+<screen>evince plik.pdf</screen>
+<p>Można otworzyć wiele plików wpisując ich nazwy po poleceniu, oddzielając je spacjami:</p>
+<screen>evince plik1.pdf plik2.pdf</screen>
+<p><app>Przeglądarka dokumentów</app> obsługuje także pliki w Internecie:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Otwieranie dokumentu na konkretnej stronie</title>
+    <p>Można użyć przełącznika <cmd>--page-label</cmd>, aby otworzyć dokument na konkretnej stronie. Na przykład, aby otworzyć dokument na 3. stronie, wpisz:</p>
+    <screen>evince --page-label=3 plik.pdf</screen>
+    <p>Etykieta strony musi być w tym samym formacie, co numer strony wyświetlany na pasku tytułu <app>Przeglądarki dokumentów</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Otwieranie dokumentu w trybie pełnoekranowym</title>
+    <screen>evince --fullscreen plik.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Otwieranie dokumentu w trybie prezentacji</title>
+    <screen>evince --presentation plik.pdf</screen>
+</section>
+<section id="preview">
+    <title>Otwieranie dokumentu w trybie podglądu</title>
+    <screen>evince --preview plik.pdf</screen>
+</section>
+</page>

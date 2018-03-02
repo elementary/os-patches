@@ -3,8 +3,8 @@
 # *****************************************************************************
 
 m4_define([ev_major_version],[3])
-m4_define([ev_minor_version],[26])
-m4_define([ev_micro_version],[0])
+m4_define([ev_minor_version],[27])
+m4_define([ev_micro_version],[91])
 m4_define([ev_extra_version],[])
 m4_define([ev_version],[ev_major_version.ev_minor_version.ev_micro_version()ev_extra_version])
 
@@ -246,12 +246,6 @@ fi
 
 BACKEND_LIBTOOL_FLAGS="-module -avoid-version -no-undefined -export-symbols \$(top_srcdir)/backend/backend.symbols"
 AC_SUBST(BACKEND_LIBTOOL_FLAGS)
-
-dnl ===== Check special functions
-evince_save_LIBS=$LIBS
-LIBS="$LIBS $BACKEND_LIBS"
-AC_CHECK_FUNCS(cairo_format_stride_for_width)
-LIBS=$evince_save_LIBS
 
 # ******************
 # GKT+ Unix Printing
@@ -699,7 +693,7 @@ AC_ARG_ENABLE(comics,
 	[enable_comics=yes])
 
 if test "x$enable_comics" = "xyes"; then
-   LIBARCHIVE_REQUIRED=3.1.2
+   LIBARCHIVE_REQUIRED=3.2.0
    PKG_CHECK_MODULES(LIBARCHIVE, libarchive >= $LIBARCHIVE_REQUIRED,enable_comics=yes,enable_comics=no)
 
    if test "x$enable_comics" = "xyes"; then

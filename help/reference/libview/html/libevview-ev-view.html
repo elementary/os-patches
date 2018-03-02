@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>ev-view: Evince View Library Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="Evince View Library Reference Manual">
 <link rel="up" href="view-view.html" title="Part I. Evince View">
 <link rel="prev" href="libevview-ev-annotation-window.html" title="ev-annotation-window">
 <link rel="next" href="libevview-ev-page-cache.html" title="ev-page-cache">
-<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -501,8 +501,6 @@ EvView implements
 </div>
 <div class="refsect1">
 <a name="libevview-ev-view.description"></a><h2>Description</h2>
-<p>
-</p>
 </div>
 <div class="refsect1">
 <a name="libevview-ev-view.functions_details"></a><h2>Functions</h2>
@@ -510,8 +508,6 @@ EvView implements
 <a name="ev-view-new"></a><h3>ev_view_new ()</h3>
 <pre class="programlisting"><span class="returnvalue">GtkWidget</span> *
 ev_view_new (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -525,6 +521,10 @@ ev_view_set_model (<em class="parameter"><code><a class="link" href="libevview-e
 <a name="ev-view-is-loading"></a><h3>ev_view_is_loading ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_view_is_loading (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-view-is-loading.returns"></a><h4>Returns</h4>
+<p> <code class="literal">TRUE</code> iff the view is currently loading a document</p>
+</div>
 <p class="since">Since: <a class="link" href="api-index-3-8.html#api-index-3.8">3.8</a></p>
 </div>
 <hr>
@@ -532,97 +532,73 @@ ev_view_is_loading (<em class="parameter"><code><a class="link" href="libevview-
 <a name="ev-view-reload"></a><h3>ev_view_reload ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_reload (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-copy"></a><h3>ev_view_copy ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_copy (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-copy-link-address"></a><h3>ev_view_copy_link_address ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_copy_link_address (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
-                           <em class="parameter"><code><a href="http://library.gnome.org/devel/libevdocument/libevdocument-ev-link-action.html#EvLinkAction-struct"><span class="type">EvLinkAction</span></a> *action</code></em>);</pre>
-<p>
-</p>
+                           <em class="parameter"><code><span class="type">EvLinkAction</span> *action</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-select-all"></a><h3>ev_view_select_all ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_select_all (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-get-has-selection"></a><h3>ev_view_get_has_selection ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_view_get_has_selection (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-can-zoom-in"></a><h3>ev_view_can_zoom_in ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_view_can_zoom_in (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-zoom-in"></a><h3>ev_view_zoom_in ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_zoom_in (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-can-zoom-out"></a><h3>ev_view_can_zoom_out ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_view_can_zoom_out (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-zoom-out"></a><h3>ev_view_zoom_out ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_zoom_out (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-find-next"></a><h3>ev_view_find_next ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_find_next (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-find-previous"></a><h3>ev_view_find_previous ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_find_previous (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-find-search-changed"></a><h3>ev_view_find_search_changed ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_find_search_changed (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -630,8 +606,6 @@ ev_view_find_search_changed (<em class="parameter"><code><a class="link" href="l
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_find_set_highlight_search (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
                                    <em class="parameter"><code><span class="type">gboolean</span> value</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -647,6 +621,30 @@ ev_view_find_started (<em class="parameter"><code><a class="link" href="libevvie
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_find_restart (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
                       <em class="parameter"><code><span class="type">gint</span> page</code></em>);</pre>
+<p>Restart the current search operation from the given <em class="parameter"><code>page</code></em>
+.</p>
+<div class="refsect3">
+<a name="ev-view-find-restart.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>view</p></td>
+<td class="parameter_description"><p>an <a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>page</p></td>
+<td class="parameter_description"><p>a page index</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 <p class="since">Since: 3.12</p>
 </div>
 <hr>
@@ -654,8 +652,6 @@ ev_view_find_restart (<em class="parameter"><code><a class="link" href="libevvie
 <a name="ev-view-find-cancel"></a><h3>ev_view_find_cancel ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_find_cancel (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -664,6 +660,22 @@ ev_view_find_cancel (<em class="parameter"><code><a class="link" href="libevview
 ev_view_find_set_result (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
                          <em class="parameter"><code><span class="type">gint</span> page</code></em>,
                          <em class="parameter"><code><span class="type">gint</span> result</code></em>);</pre>
+<p>FIXME</p>
+<div class="refsect3">
+<a name="ev-view-find-set-result.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>view</p></td>
+<td class="parameter_description"><p>a <a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
 <p class="since">Since: <a class="link" href="api-index-3-10.html#api-index-3.10">3.10</a></p>
 </div>
 <hr>
@@ -671,71 +683,57 @@ ev_view_find_set_result (<em class="parameter"><code><a class="link" href="libev
 <a name="ev-view-highlight-forward-search"></a><h3>ev_view_highlight_forward_search ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_highlight_forward_search (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
-                                  <em class="parameter"><code><a href="http://library.gnome.org/devel/libevdocument/EvDocument.html#EvSourceLink-struct"><span class="type">EvSourceLink</span></a> *link</code></em>);</pre>
+                                  <em class="parameter"><code><span class="type">EvSourceLink</span> *link</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-hide-cursor"></a><h3>ev_view_hide_cursor ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_hide_cursor (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-show-cursor"></a><h3>ev_view_show_cursor ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_show_cursor (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-handle-link"></a><h3>ev_view_handle_link ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_handle_link (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
-                     <em class="parameter"><code><a href="http://library.gnome.org/devel/libevdocument/libevdocument-ev-link.html#EvLink-struct"><span class="type">EvLink</span></a> *link</code></em>);</pre>
-<p>
-</p>
+                     <em class="parameter"><code><span class="type">EvLink</span> *link</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-next-page"></a><h3>ev_view_next_page ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_view_next_page (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-previous-page"></a><h3>ev_view_previous_page ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_view_previous_page (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-autoscroll-start"></a><h3>ev_view_autoscroll_start ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_autoscroll_start (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-autoscroll-stop"></a><h3>ev_view_autoscroll_stop ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_autoscroll_stop (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-view-begin-add-annotation"></a><h3>ev_view_begin_add_annotation ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_begin_add_annotation (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
-                              <em class="parameter"><code><a href="http://library.gnome.org/devel/libevdocument/EvAnnotation.html#EvAnnotationType"><span class="type">EvAnnotationType</span></a> annot_type</code></em>);</pre>
+                              <em class="parameter"><code><span class="type">EvAnnotationType</span> annot_type</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -748,7 +746,7 @@ ev_view_cancel_add_annotation (<em class="parameter"><code><a class="link" href=
 <a name="ev-view-focus-annotation"></a><h3>ev_view_focus_annotation ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_focus_annotation (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
-                          <em class="parameter"><code><a href="http://library.gnome.org/devel/libevdocument/libevdocument-ev-mapping.html#EvMapping"><span class="type">EvMapping</span></a> *annot_mapping</code></em>);</pre>
+                          <em class="parameter"><code><span class="type">EvMapping</span> *annot_mapping</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -765,6 +763,33 @@ ev_view_get_page_extents (<em class="parameter"><code><a class="link" href="libe
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_set_page_cache_size (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
                              <em class="parameter"><code><span class="type">gsize</span> cache_size</code></em>);</pre>
+<p>Sets the maximum size in bytes that will be used to cache
+rendered pages. Use 0 to disable caching rendered pages.</p>
+<p>Note that this limit doesn't affect the current visible page range,
+which will always be rendered. In order to limit the total memory used
+you have to use <a class="link" href="libevview-ev-document-model.html#ev-document-model-set-max-scale" title="ev_document_model_set_max_scale ()"><code class="function">ev_document_model_set_max_scale()</code></a> too.</p>
+<div class="refsect3">
+<a name="ev-view-set-page-cache-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>view</p></td>
+<td class="parameter_description"><p><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> instance</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cache_size</p></td>
+<td class="parameter_description"><p>size in bytes</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -779,6 +804,21 @@ ev_view_is_caret_navigation_enabled (<em class="parameter"><code><a class="link"
 ev_view_set_caret_cursor_position (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
                                    <em class="parameter"><code><span class="type">guint</span> page</code></em>,
                                    <em class="parameter"><code><span class="type">guint</span> offset</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-view-set-caret-cursor-position.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>view</p></td>
+<td class="parameter_description"><p>a <a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
 <p class="since">Since: <a class="link" href="api-index-3-10.html#api-index-3.10">3.10</a></p>
 </div>
 <hr>
@@ -787,6 +827,29 @@ ev_view_set_caret_cursor_position (<em class="parameter"><code><a class="link" h
 <pre class="programlisting"><span class="returnvalue">void</span>
 ev_view_set_caret_navigation_enabled (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>,
                                       <em class="parameter"><code><span class="type">gboolean</span> enabled</code></em>);</pre>
+<p>Enables or disables caret navigation mode for the document.</p>
+<div class="refsect3">
+<a name="ev-view-set-caret-navigation-enabled.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>view</p></td>
+<td class="parameter_description"><p>a <a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>enabled</p></td>
+<td class="parameter_description"><p>whether to enable caret navigation mode</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 <p class="since">Since: <a class="link" href="api-index-3-10.html#api-index-3.10">3.10</a></p>
 </div>
 <hr>
@@ -794,6 +857,25 @@ ev_view_set_caret_navigation_enabled (<em class="parameter"><code><a class="link
 <a name="ev-view-supports-caret-navigation"></a><h3>ev_view_supports_caret_navigation ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_view_supports_caret_navigation (<em class="parameter"><code><a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a> *view</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-view-supports-caret-navigation.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>view</p></td>
+<td class="parameter_description"><p>a <a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-view-supports-caret-navigation.returns"></a><h4>Returns</h4>
+<p> whether the document supports caret navigation</p>
+</div>
 <p class="since">Since: <a class="link" href="api-index-3-10.html#api-index-3.10">3.10</a></p>
 </div>
 <hr>
@@ -874,15 +956,11 @@ ev_view_scroll (<em class="parameter"><code><a class="link" href="libevview-ev-v
 <div class="refsect2">
 <a name="EvView-struct"></a><h3>EvView</h3>
 <pre class="programlisting">typedef struct _EvView EvView;</pre>
-<p>
-</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="EvViewClass"></a><h3>EvViewClass</h3>
 <pre class="programlisting">typedef struct _EvViewClass EvViewClass;</pre>
-<p>
-</p>
 </div>
 </div>
 <div class="refsect1">
@@ -927,7 +1005,7 @@ user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class=
 <a name="EvView-annot-added"></a><h3>The <code class="literal">“annot-added”</code> signal</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a>       *evview,
-               <a href="http://library.gnome.org/devel/libevdocument/EvAnnotation.html#EvAnnotation-struct"><span class="type">EvAnnotation</span></a> *arg1,
+               <span class="type">EvAnnotation</span> *arg1,
                <span class="type">gpointer</span>      user_data)</pre>
 <p>Flags: Action</p>
 </div>
@@ -936,7 +1014,7 @@ user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class=
 <a name="EvView-annot-removed"></a><h3>The <code class="literal">“annot-removed”</code> signal</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a>       *evview,
-               <a href="http://library.gnome.org/devel/libevdocument/EvAnnotation.html#EvAnnotation-struct"><span class="type">EvAnnotation</span></a> *arg1,
+               <span class="type">EvAnnotation</span> *arg1,
                <span class="type">gpointer</span>      user_data)</pre>
 <p>Flags: Action</p>
 </div>
@@ -957,30 +1035,6 @@ user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class=
 user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a>  *evview,
                <span class="type">GObject</span> *arg1,
                <span class="type">gpointer</span> user_data)</pre>
-<p>
-</p>
-<div class="refsect3">
-<a name="EvView-external-link.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>evview</p></td>
-<td class="parameter_description"><p>the object which received the signal.</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>user_data</p></td>
-<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-</tbody>
-</table></div>
-</div>
 <p>Flags: Action</p>
 </div>
 <hr>
@@ -990,30 +1044,6 @@ user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class=
 user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a>  *evview,
                <span class="type">GObject</span> *arg1,
                <span class="type">gpointer</span> user_data)</pre>
-<p>
-</p>
-<div class="refsect3">
-<a name="EvView-handle-link.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>evview</p></td>
-<td class="parameter_description"><p>the object which received the signal.</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>user_data</p></td>
-<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-</tbody>
-</table></div>
-</div>
 <p>Flags: Action</p>
 </div>
 <hr>
@@ -1042,30 +1072,6 @@ user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class=
 user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a>  *evview,
                <span class="type">gpointer</span> arg1,
                <span class="type">gpointer</span> user_data)</pre>
-<p>
-</p>
-<div class="refsect3">
-<a name="EvView-popup.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>evview</p></td>
-<td class="parameter_description"><p>the object which received the signal.</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>user_data</p></td>
-<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-</tbody>
-</table></div>
-</div>
 <p>Flags: Action</p>
 </div>
 <hr>
@@ -1084,30 +1090,6 @@ user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class=
 <pre class="programlisting"><span class="returnvalue">void</span>
 user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class="type">EvView</span></a>  *evview,
                <span class="type">gpointer</span> user_data)</pre>
-<p>
-</p>
-<div class="refsect3">
-<a name="EvView-selection-changed.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>evview</p></td>
-<td class="parameter_description"><p>the object which received the signal.</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>user_data</p></td>
-<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-</tbody>
-</table></div>
-</div>
 <p>Flags: Action</p>
 </div>
 <hr>
@@ -1122,6 +1104,6 @@ user_function (<a class="link" href="libevview-ev-view.html#EvView"><span class=
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25.1</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

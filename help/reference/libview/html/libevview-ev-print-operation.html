@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>ev-print-operation: Evince View Library Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="Evince View Library Reference Manual">
 <link rel="up" href="view-view.html" title="Part I. Evince View">
 <link rel="prev" href="libevview-ev-page-cache.html" title="ev-page-cache">
 <link rel="next" href="libevview-ev-view-presentation.html" title="ev-view-presentation">
-<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -181,7 +181,7 @@
 </colgroup>
 <tbody><tr>
 <td class="property_type">
-<a href="http://library.gnome.org/devel/libevdocument/EvDocument.html#EvDocument-struct"><span class="type">EvDocument</span></a> *</td>
+<span class="type">EvDocument</span> *</td>
 <td class="property_name"><a class="link" href="libevview-ev-print-operation.html#EvPrintOperation--document" title="The “document” property">document</a></td>
 <td class="property_flags">Write / Construct Only</td>
 </tr></tbody>
@@ -248,13 +248,13 @@
 <a name="ev-print-operation-exists-for-document"></a><h3>ev_print_operation_exists_for_document ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 ev_print_operation_exists_for_document
-                               (<em class="parameter"><code><a href="http://library.gnome.org/devel/libevdocument/EvDocument.html#EvDocument-struct"><span class="type">EvDocument</span></a> *document</code></em>);</pre>
+                               (<em class="parameter"><code><span class="type">EvDocument</span> *document</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-print-operation-new"></a><h3>ev_print_operation_new ()</h3>
 <pre class="programlisting"><a class="link" href="libevview-ev-print-operation.html#EvPrintOperation"><span class="returnvalue">EvPrintOperation</span></a> *
-ev_print_operation_new (<em class="parameter"><code><a href="http://library.gnome.org/devel/libevdocument/EvDocument.html#EvDocument-struct"><span class="type">EvDocument</span></a> *document</code></em>);</pre>
+ev_print_operation_new (<em class="parameter"><code><span class="type">EvDocument</span> *document</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -275,6 +275,26 @@ ev_print_operation_set_print_settings (<em class="parameter"><code><a class="lin
 <a name="ev-print-operation-get-print-settings"></a><h3>ev_print_operation_get_print_settings ()</h3>
 <pre class="programlisting"><span class="returnvalue">GtkPrintSettings</span> *
 ev_print_operation_get_print_settings (<em class="parameter"><code><a class="link" href="libevview-ev-print-operation.html#EvPrintOperation"><span class="type">EvPrintOperation</span></a> *op</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-print-operation-get-print-settings.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>op</p></td>
+<td class="parameter_description"><p>an <a class="link" href="libevview-ev-print-operation.html#EvPrintOperation"><span class="type">EvPrintOperation</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-print-operation-get-print-settings.returns"></a><h4>Returns</h4>
+<p>a <span class="type">GtkPrintSettings</span>. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -290,6 +310,26 @@ ev_print_operation_set_default_page_setup
 <pre class="programlisting"><span class="returnvalue">GtkPageSetup</span> *
 ev_print_operation_get_default_page_setup
                                (<em class="parameter"><code><a class="link" href="libevview-ev-print-operation.html#EvPrintOperation"><span class="type">EvPrintOperation</span></a> *op</code></em>);</pre>
+<div class="refsect3">
+<a name="ev-print-operation-get-default-page-setup.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>op</p></td>
+<td class="parameter_description"><p>an <a class="link" href="libevview-ev-print-operation.html#EvPrintOperation"><span class="type">EvPrintOperation</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-print-operation-get-default-page-setup.returns"></a><h4>Returns</h4>
+<p>a <span class="type">GtkPageSetup</span>. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -368,7 +408,7 @@ ev_print_operation_get_progress (<em class="parameter"><code><a class="link" hre
 <a name="libevview-ev-print-operation.property-details"></a><h2>Property Details</h2>
 <div class="refsect2">
 <a name="EvPrintOperation--document"></a><h3>The <code class="literal">“document”</code> property</h3>
-<pre class="programlisting">  “document”                 <a href="http://library.gnome.org/devel/libevdocument/EvDocument.html#EvDocument-struct"><span class="type">EvDocument</span></a> *</pre>
+<pre class="programlisting">  “document”                 <span class="type">EvDocument</span> *</pre>
 <p>The document to print.</p>
 <p>Flags: Write / Construct Only</p>
 </div>
@@ -402,6 +442,6 @@ user_function (<a class="link" href="libevview-ev-print-operation.html#EvPrintOp
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25.1</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

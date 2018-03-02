@@ -103,7 +103,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/gtk-doc.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = version.xml
 CONFIG_CLEAN_VPATH_FILES =
@@ -128,7 +128,7 @@ am__can_run_installinfo = \
   esac
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/version.xml.in \
-	$(top_srcdir)/gtk-doc.make $(top_srcdir)/mkinstalldirs
+	$(top_srcdir)/gtk-doc.make
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
@@ -245,6 +245,7 @@ INTLTOOL_V_MERGE = @INTLTOOL_V_MERGE@
 INTLTOOL_V_MERGE_OPTIONS = @INTLTOOL_V_MERGE_OPTIONS@
 INTLTOOL__v_MERGE_ = @INTLTOOL__v_MERGE_@
 INTLTOOL__v_MERGE_0 = @INTLTOOL__v_MERGE_0@
+INTL_MACOSX_LIBS = @INTL_MACOSX_LIBS@
 INTROSPECTION_CFLAGS = @INTROSPECTION_CFLAGS@
 INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
 INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
@@ -385,7 +386,6 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
-runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -569,34 +569,34 @@ CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS) gtkdoc-check.test
 @GTK_DOC_BUILD_PDF_TRUE@PDF_BUILD_STAMP = pdf-build.stamp
 
 #### setup ####
-GTK_DOC_V_SETUP = $(GTK_DOC_V_SETUP_$(V))
-GTK_DOC_V_SETUP_ = $(GTK_DOC_V_SETUP_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_SETUP = $(GTK_DOC_V_SETUP_@AM_V@)
+GTK_DOC_V_SETUP_ = $(GTK_DOC_V_SETUP_@AM_DEFAULT_V@)
 GTK_DOC_V_SETUP_0 = @echo "  DOC   Preparing build";
 
 #### scan ####
-GTK_DOC_V_SCAN = $(GTK_DOC_V_SCAN_$(V))
-GTK_DOC_V_SCAN_ = $(GTK_DOC_V_SCAN_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_SCAN = $(GTK_DOC_V_SCAN_@AM_V@)
+GTK_DOC_V_SCAN_ = $(GTK_DOC_V_SCAN_@AM_DEFAULT_V@)
 GTK_DOC_V_SCAN_0 = @echo "  DOC   Scanning header files";
-GTK_DOC_V_INTROSPECT = $(GTK_DOC_V_INTROSPECT_$(V))
-GTK_DOC_V_INTROSPECT_ = $(GTK_DOC_V_INTROSPECT_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_INTROSPECT = $(GTK_DOC_V_INTROSPECT_@AM_V@)
+GTK_DOC_V_INTROSPECT_ = $(GTK_DOC_V_INTROSPECT_@AM_DEFAULT_V@)
 GTK_DOC_V_INTROSPECT_0 = @echo "  DOC   Introspecting gobjects";
 
 #### xml ####
-GTK_DOC_V_XML = $(GTK_DOC_V_XML_$(V))
-GTK_DOC_V_XML_ = $(GTK_DOC_V_XML_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_XML = $(GTK_DOC_V_XML_@AM_V@)
+GTK_DOC_V_XML_ = $(GTK_DOC_V_XML_@AM_DEFAULT_V@)
 GTK_DOC_V_XML_0 = @echo "  DOC   Building XML";
 
 #### html ####
-GTK_DOC_V_HTML = $(GTK_DOC_V_HTML_$(V))
-GTK_DOC_V_HTML_ = $(GTK_DOC_V_HTML_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_HTML = $(GTK_DOC_V_HTML_@AM_V@)
+GTK_DOC_V_HTML_ = $(GTK_DOC_V_HTML_@AM_DEFAULT_V@)
 GTK_DOC_V_HTML_0 = @echo "  DOC   Building HTML";
-GTK_DOC_V_XREF = $(GTK_DOC_V_XREF_$(V))
-GTK_DOC_V_XREF_ = $(GTK_DOC_V_XREF_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_XREF = $(GTK_DOC_V_XREF_@AM_V@)
+GTK_DOC_V_XREF_ = $(GTK_DOC_V_XREF_@AM_DEFAULT_V@)
 GTK_DOC_V_XREF_0 = @echo "  DOC   Fixing cross-references";
 
 #### pdf ####
-GTK_DOC_V_PDF = $(GTK_DOC_V_PDF_$(V))
-GTK_DOC_V_PDF_ = $(GTK_DOC_V_PDF_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_PDF = $(GTK_DOC_V_PDF_@AM_V@)
+GTK_DOC_V_PDF_ = $(GTK_DOC_V_PDF_@AM_DEFAULT_V@)
 GTK_DOC_V_PDF_0 = @echo "  DOC   Building PDF";
 all: all-am
 

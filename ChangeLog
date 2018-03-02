@@ -1,6 +1,1110 @@
+commit f96a30ff4ed939af428c5e8cff5397dab6d7c186
+Author: José Aliste <jose.aliste@gmail.com>
+Date:   2018-02-20
+
+    Release 3.27.91
+
+M	NEWS
+M	configure.ac
+
+commit bf3fa9a76ec1f5f0d09289c955b1b27d78d08c20
+Author: gogo <trebelnik2@gmail.com>
+Date:	2018-02-17
+
+    Update Croatian translation
+
+M	po/hr.po
+
+commit 937e77fc7b078cce3cd2839a42212c124baff9f4
+Author: José Aliste <jose.aliste@gmail.com>
+Date:	2018-02-14
+
+    shell: Save correct position and size of window in Metadata
+
+    Since now Gtk manages (sometimes) client decorations, it is
+    not safe to use the values we get from configure events or
+    size allocate events and we must call gtk_window_get_size
+    and gtk_window_get_position
+
+    Patch by iskatu@posteo.org
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=783242
+
+M	shell/ev-window.c
+
+commit 6c5824949bc21e26100b9d638ba34b7eec257fda
+Author: Fran Dieguez <frandieguez@gnome.org>
+Date:	2018-02-17
+
+    Update Galician translation
+
+M	po/gl.po
+
+commit 0626fb0e4b5a26dd31ee1bdde170706dd5fc3d24
+Author: Isaac F. Ferreira Filho <isaacmob@riseup.net>
+Date:	2018-02-16
+
+    Update Brazilian Portuguese translation
+
+M	help/pt_BR/pt_BR.po
+
+commit 479e7f6dbe74294c6bbe60d9a940dd9bec6bf024
+Author: Enrico Nicoletto <liverig@gmail.com>
+Date:	2018-02-10
+
+    Update Brazilian Portuguese translation
+
+M	po/pt_BR.po
+
+commit f8754d95bfd54a98eb8d44c79bd117853d8056ec
+Author: Piotr Drąg <piotrdrag@gmail.com>
+Date:	2018-02-08
+
+    Update Polish translation
+
+M	help/pl/pl.po
+M	po/pl.po
+
+commit baf3da028e46665af07515885ac99cc04c5a39cd
+Author: Bastien Nocera <hadess@hadess.net>
+Date:	2018-01-30
+
+    unarr: Update LZMA SDK
+
+    Using lzma1801.7z from:
+    https://sourceforge.net/projects/sevenzip/files/LZMA%20SDK/
+
+    This commit is purposefully empty, no changes made.
+
+commit b6eb111abddc6b024dd6899a441db84a71e62dc3
+Author: Balázs Úr <balazs@urbalazs.hu>
+Date:	2018-01-28
+
+    Update Hungarian translation
+
+M	help/hu/hu.po
+
+commit 4d2301de8ec78adad37a19777b3dc89a9d1f0d8d
+Author: Bastien Nocera <hadess@hadess.net>
+Date:	2018-01-24
+
+    shell: Fix media-player keys not working
+
+    gsd-media-keys doesn't have a .service file itself, but responds
+    to the
+    org.gnome.SettingsDaemon.MediaKeys name nonetheless. This however
+    seems
+    to mean that signals emitted by gsd-media-keys will not have the
+    expected sender name. Seeing as the signals come from a proxy
+    we created
+    ourselves with a well-known name, there's really no need to filter any
+    further.
+
+    This fixes pressed media player keys not doing anything with more
+    recent
+    versions of gnome-settings-daemon (3.24).
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=789738
+
+M	shell/ev-media-player-keys.c
+
+commit 7b4ff77e7582241bfd25bed741d493d21e73db3c
+Author: Bastien Nocera <hadess@hadess.net>
+Date:	2018-01-21
+
+    comics: Fix reading CBZ files created on macOS
+
+    macOS' builtin ZIP file format support will add AppleDouble files
+    to the
+    archives in order to store information that would otherwise be
+    stored in
+    extended attributes or resource forks, in a way that's unlikely to be
+    meddled with by applications that don't know how to handle this
+    metadata.
+
+    But when we store images in such a ZIP file, we'll end up with files
+    named "__MACOSX/dirname/._page0001.JPG" for example, which our current
+    code will interpret as being images, and thus pages in our comic.
+    They're not. As the AppleDouble files always have the "._" prefix,
+    ignore those.
+
+    See https://en.wikipedia.org/wiki/AppleSingle_and_AppleDouble_formats
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=792754
+
+M	backend/comics/comics-document.c
+
+commit b7e718deb8b10ca97a4e93a626283dd59286ab9d
+Author: Gil Forcada <gforcada@gnome.org>
+Date:	2018-01-22
+
+    Update Catalan translation
+
+M	po/ca.po
+
+commit 40d5b91ccbed46d3adceab141fd21ded3a1fb975
+Author: Balázs Úr <balazs@urbalazs.hu>
+Date:	2018-01-21
+
+    Update Hungarian translation
+
+M	po/hu.po
+
+commit e7840f9488734358a1d0357891563ffa0109aa91
+Author: Jason Crain <jcrain@src.gnome.org>
+Date:	2018-01-09
+
+    print-operation: Fix orientation of auto-rotate option
+
+    When printing a landscape document, if both the "Auto Rotate and
+    Center"
+    and "Select page size using document page size" options are enabled,
+    evince will choose the wrong orientation.  This will also occur
+    with any
+    document if you use a custom paper size which is wider than it is tall
+    and enable the auto rotate option, but do not enable the "Select page
+    size" option.
+
+    Fix this by having the auto rotate option pick landscape orientation
+    if
+    and only if the document's orientation does not match the paper's
+    unrotated orientation.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=792394
+
+M	libview/ev-print-operation.c
+
+commit 79b5fe597c06548fe73f62b9b0586151bbd73877
+Author: Bastien Nocera <hadess@hadess.net>
+Date:	2018-01-13
+
+    unarr: Update LZMA SDK
+
+    Using lzma1800.7z from:
+    https://sourceforge.net/projects/sevenzip/files/LZMA%20SDK/
+
+    This commit is purposefully empty, no changes made.
+
+commit 7e6ec6cc8d8e75147c6960ca5b2e5fdcb0de8977
+Author: Jiri Grönroos <jiri.gronroos@iki.fi>
+Date:	2018-01-09
+
+    Update Finnish translation
+
+M	po/fi.po
+
+commit 4f82a620025d856a371c08f289e46536923acb81
+Author: Matej Urbančič <mateju@svn.gnome.org>
+Date:	2017-12-31
+
+    Updated Slovenian translation
+
+M	po/sl.po
+
+commit b83cd4c8ed3df0d3a768a059fa3b438cefc557bb
+Author: Jason Crain <jcrain@src.gnome.org>
+Date:	2017-12-25
+
+    properties: Fix dialog extending past edge of screen
+
+    A property with a lot of newlines can extend Nautilus's file
+    properties
+    dialog past the edge of the screen.  Replace these newlines with
+    spaces
+    to limit the vertical size and let the label's ellipsizing work
+    correctly.	Have labels wrap for up to five lines in case someone is
+    relying on the properties dialog showing large properties.	Place
+    properties page in a GtkScrolledWindow in case it is still too tall.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=733618
+
+M	properties/ev-properties-main.c
+M	properties/ev-properties-view.c
+
+commit 6adc0705c78ab3f30e4c3147f1260baa84d67672
+Author: Anders Jonsson <anders.jonsson@norsjovallen.se>
+Date:	2017-12-26
+
+    Update Swedish translation
+
+M	po/sv.po
+
+commit a7472609330dde54ab797456e9e7af55250ab626
+Author: Марко Костић <marko.m.kostic@gmail.com>
+Date:	2017-12-25
+
+    Update Serbian translation
+
+M	po/sr.po
+
+commit b02dc26bf3ddbe51ce03c594a1ca94841ddf9c16
+Author: Mario Blättermann <mario.blaettermann@gmail.com>
+Date:	2017-12-25
+
+    Update German translation
+
+M	po/de.po
+
+commit de9657875d6da3a14ec3ac852079cdcb00d74f6f
+Author: Nelson Benítez León <nbenitezl+gnome@gmail.com>
+Date:	2017-12-10
+
+    ev-view: don't show tooltips for empty annotations
+
+    Empty annotations can be quite common, eg. when
+    adding highlight annotations where the user doesn't
+    enter a comment.
+
+    So don't show show empty tooltips as they are useless.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=772621
+
+M	libview/ev-view.c
+
+commit e6ed0d4cdb6326e329c8f61f9cc19ff9331cb0ce
+Author: Jason Crain <jcrain@src.gnome.org>
+Date:	2017-12-02
+
+    Remove unused configure check for cairo_format_stride_for_width
+
+    This function was introduced in cairo version 1.6.	We already require
+    version 1.10 so this function will always be available.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=788980
+
+M	backend/tiff/tiff-document.c
+M	configure.ac
+
+commit e02fe9170ad0ac2fd46c75329c4f1d4502d4a362
+Author: Jason Crain <jcrain@src.gnome.org>
+Date:	2017-12-02
+
+    Fix overflow checks in tiff backend
+
+    The overflow checks in tiff_document_render and
+    tiff_document_get_thumbnail don't work when optimizations are enabled.
+    Change the checks so they don't rely on undefined behavior.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=788980
+
+M	backend/tiff/tiff-document.c
+
+commit 5cb8ff8cb20155f090081d6db484b57bc6cf67c9
+Author: Marek Černocký <marek@manet.cz>
+Date:	2017-12-20
+
+    Updated Czech translation
+
+M	po/cs.po
+
+commit 4059fdf731d4057c95fe827fa94280c1b60e77a4
+Author: Emin Tufan Çetin <etcetin@gmail.com>
+Date:	2017-12-20
+
+    Update Turkish translation
+
+M	po/tr.po
+
+commit 2a9157daf418068b053af402b86331bb1f2de92c
+Author: Daniel Mustieles <daniel.mustieles@gmail.com>
+Date:	2017-12-20
+
+    Updated Spanish translation
+
+M	po/es.po
+
+commit cd089e6c3319dc31d9f266a2c84078d8c13186bc
+Author: Fabio Tomat <f.t.public@gmail.com>
+Date:	2017-12-15
+
+    Update Friulian translation
+
+M	po/fur.po
+
+commit f89fdb9bf51f3ba883c50a218dbfc57be17a6cac
+Author: Khaled Hosny <khaledhosny@eglug.org>
+Date:	2017-12-13
+
+    Update Arabic translation
+
+M	po/ar.po
+
+commit 88ef6b35d5b8e3bbc1c64f51f4d0e24bf92fc11d
+Author: Daniel Mustieles <daniel.mustieles@gmail.com>
+Date:	2017-12-12
+
+    Update Spanish translation
+
+M	help/es/es.po
+
+commit d51978bda3d54e0772fd7507b42317be0fd52ad3
+Author: José Aliste <jose.aliste@gmail.com>
+Date:	2017-12-07
+
+    shell: Free app launch context
+
+    According to the documentation, we have to free
+    the context after use with g_object_unref.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=791287
+
+M	shell/ev-window.c
+
+commit df38ffdc0a14be1e7870221e0de38056861e6e87
+Author: José Aliste <jose.aliste@gmail.com>
+Date:	2017-12-06
+
+    shell: better handle external links
+
+    Currently we only handle uris with :// and mailto: uris.
+    Handle all uris that g_app_info actually can handle.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=791287
+
+M	shell/ev-window.c
+
+commit 3a9dd8173b457ca8811ced4e2ba1549c6489497c
+Author: Fabian Franzen <flammi88@googlemail.com>
+Date:	2017-08-31
+
+    libdocument: Fixing display of overlapping annotations
+
+    If two PDF annotations overlap, one might "shadow" the other,
+    making it imposible for the user to click on of them if the
+    smaller one is below the larger one.
+
+    This fix calculates the area of bounding box and always puts
+    the smaller sized annotations on top of the larger ones.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=787070
+
+M	libdocument/ev-mapping-list.c
+
+commit 8f543a3a9e510da22821390f45f5c380729d0f69
+Author: Sveinn í Felli <sv1@fellsnet.is>
+Date:	2017-12-06
+
+    Update Icelandic translation
+
+M	po/is.po
+
+commit 79be58c4880e77a539d3ed37ccea2047b0cd5f50
+Author: Kukuh Syafaat <syafaatkukuh@gmail.com>
+Date:	2017-12-05
+
+    Update Indonesian translation
+
+M	po/id.po
+
+commit 93164eb52bc51b4cef9d476f1de9419b8a035e1c
+Author: Nelson Benítez León <nbenitezl+gnome@gmail.com>
+Date:	2017-12-01
+
+    sidebar: allow to shrink the sidebar more
+
+    so we can give more space to the document view, and
+    also because sidebar minimum width was too much in
+    verbose locales (because of bookmark button labels)
+    which was almost causing it to switch to a two
+    columns layout.
+
+    Fixed by:
+
+     - Switching the bookmarks section button labels
+       from "Add" and "Remove" to be "+" and "-" along
+       with corresponding tooltip and accesible names.
+
+     - Set the label of the main sidebar toggle button
+       to be ellipsizable, so the sidebar can be resized
+       to reduce width even more.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=778000
+
+M	shell/ev-sidebar-bookmarks.c
+M	shell/ev-sidebar.c
+
+commit 1ff42625f28246d790694625065c2476aaf03f19
+Author: Casey Jao <casey.jao@gmail.com>
+Date:	2017-09-08
+
+    Bind mouse back/forward buttons to history navigation.
+
+    shell/ev-window.c:
+    *Listen for mouse back/forward button presses.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=787464
+
+M	shell/ev-window.c
+
+commit 76c0888ead80e40f7e9eddcf6b84c0c8880c13cc
+Author: Stefano Facchini <stefano.facchini@gmail.com>
+Date:	2017-11-20
+
+    ev-application: Fix property name in about dialog
+
+    And remove a now-useless "wrap" property.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=790595
+
+M	shell/ev-application.c
+
+commit 3e02551bb2a71a2ab5b57c2ef54513c57d22e3df
+Author: Daniel Mustieles <daniel.mustieles@gmail.com>
+Date:	2017-11-20
+
+    Update Spanish translation
+
+M	po/es.po
+
+commit 987a3df226186a898736d96da0a95de2ef1163e7
+Author: Piotr Drąg <piotrdrag@gmail.com>
+Date:	2017-11-20
+
+    Add Polish help translation
+
+M	help/Makefile.am
+A	help/pl/figures/add-text-annotation.png
+A	help/pl/figures/annotations-nav-to-page.png
+A	help/pl/figures/print-select.png
+A	help/pl/figures/reverse-collate.png
+A	help/pl/figures/zoom.png
+A	help/pl/pl.po
+
+commit caacbde46f4dc289869930ae037f6601f28e4744
+Author: Marek Cernocky <marek_cernocky@conel.cz>
+Date:	2017-11-19
+
+    Updated Czech translation
+
+M	po/cs.po
+
+commit 8cae24ea48deafc85265ce42adecb55aa2b57a6f
+Author: Jeremy Bicha <jbicha@ubuntu.com>
+Date:	2017-11-08
+
+    build: Install appstream metadata to non-deprecated location
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=790079
+
+M	Makefile.am
+
+commit 44ef59117904480f6da85a8e3074cf22b94b851c
+Author: Stefano Facchini <stefano.facchini@gmail.com>
+Date:	2017-10-09
+
+    ev-window: Use the correct sliding mode for toolbar in fullscreen
+
+    Use the default SLIDE_DOWN transition type for the revealer, which
+    looks better.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=788718
+
+M	shell/ev-window.c
+
+commit 347a409811f62bec93c997d4f9a7b7579f603a00
+Author: Stefano Facchini <stefano.facchini@gmail.com>
+Date:	2017-10-09
+
+    ev-application: Use standard GPL2+ license type instead of custom text
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=788719
+
+M	shell/ev-application.c
+
+commit 28c98fedc1de9f688a680334e88ca94ab3111e85
+Author: Stefano Facchini <stefano.facchini@gmail.com>
+Date:	2017-11-12
+
+    shell: Add more zoom shortcuts to the help overlay.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=790253
+
+M	shell/help-overlay.ui
+
+commit 3c3cb6cd944282b2fb634b39ca911f12e597e5e5
+Author: Stefano Facchini <stefano.facchini@gmail.com>
+Date:	2017-11-12
+
+    shell: Add the "a" shortcut for "automatic" sizing mode
+
+    Similar to the already existing "f" and "w" for "Page" and "Width",
+    respectively.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=790253
+
+M	shell/ev-application.c
+
+commit 5cf2adb11a3547398a0e0c283354bef1d4a4cca7
+Author: Stefano Facchini <stefano.facchini@gmail.com>
+Date:	2017-11-12
+
+    shell: fix resources generation when builddir != srcdir
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=790283
+
+M	shell/Makefile.am
+
+commit 6ef4716595099e89965479b95235ddcd13913bc4
+Author: Alexandre Franke <alexandre.franke@gmail.com>
+Date:	2017-11-14
+
+    Update French translation
+
+M	help/fr/figures/add-text-annotation.png
+M	help/fr/figures/annotations-nav-to-page.png
+M	help/fr/figures/zoom.png
+M	help/fr/fr.po
+
+commit 276445ec40ad58038e564cba6216e1a180c5856b
+Author: Kjartan Maraas <kmaraas@gnome.org>
+Date:	2017-11-09
+
+    Updated Norwegian bokmål translation.
+
+M	po/nb.po
+
+commit 7ac3699c96dbad09b738e88aeeb6deecd373a389
+Author: gogo <trebelnik2@gmail.com>
+Date:	2017-11-09
+
+    Update Croatian translation
+
+M	po/hr.po
+
+commit 151749e1b3677584cd7cee35578cd319cb2934ff
+Author: Pawan Chitrakar <chautari@gmail.com>
+Date:	2017-11-07
+
+    Update Nepali translation
+
+    (cherry picked from commit 2a4faffb64e59ecd995647ea7df2aeddec3a1fb5)
+
+M	po/ne.po
+
+commit b72c71764184bef79011b00feb5f0c7b2311ffd3
+Author: Kjartan Maraas <kmaraas@gnome.org>
+Date:	2017-11-06
+
+    Updated Norwegian bokmål translation.
+
+M	po/nb.po
+
+commit e46c3a1bb3ad9286259ab44648fb9c9e89aaa0e1
+Author: Fabio Tomat <f.t.public@gmail.com>
+Date:	2017-11-05
+
+    Update Friulian translation
+
+M	po/fur.po
+
+commit f5acb9ebca5b349c8804ce7c6cec81a89edd7ee2
+Author: Marek Cernocky <marek_cernocky@conel.cz>
+Date:	2017-11-05
+
+    Updated Czech translation
+
+M	po/cs.po
+
+commit 335dba4cd5660e8b8bb73c399cd575cb170a94e1
+Author: Matej Urbančič <mateju@svn.gnome.org>
+Date:	2017-11-04
+
+    Updated Slovenian translation
+
+M	po/sl.po
+
+commit d66670b9e818a06fa57c5aa4212afbe4fca72e61
+Author: Mario Blättermann <mario.blaettermann@gmail.com>
+Date:	2017-11-01
+
+    Update German translation
+
+M	po/de.po
+
+commit 54bce4074b67b914bccb869d287985fa029cfa01
+Author: Marek Cernocky <marek_cernocky@conel.cz>
+Date:	2017-10-29
+
+    Updated Czech translation
+
+M	help/cs/cs.po
+M	po/cs.po
+
+commit 0d103503aaeb4dc67f9932908137c77ecc855ec8
+Author: Germán Poo-Caamaño <gpoo@gnome.org>
+Date:	2017-10-28
+
+    shell: Update current year in about dialog
+
+    Fixes https://bugzilla.gnome.org/show_bug.cgi?id=785527
+
+M	shell/ev-application.c
+
+commit 28734ffbcb364b393621dfca4666049217e79ed4
+Author: Mario Blättermann <mario.blaettermann@gmail.com>
+Date:	2017-10-27
+
+    Update German translation
+
+M	help/de/de.po
+
+commit 02a54e3bc7c630ffa5cc02e9f2d7ac11f649a3ea
+Author: Mario Blättermann <mario.blaettermann@gmail.com>
+Date:	2017-10-27
+
+    Update German translation
+
+M	po/de.po
+
+commit c0cc9d3f7097a46c86519002ecd957dc08f66205
+Author: Stas Solovey <whats_up@tut.by>
+Date:	2017-10-27
+
+    Update Russian translation
+
+M	po/ru.po
+
+commit 7c19ba4d2b72c1f9c47eaf280c7f49c0618b693f
+Author: Mingcong Bai <jeffbai@aosc.xyz>
+Date:	2017-10-26
+
+    Update zh_CN translation
+
+M	po/zh_CN.po
+
+commit 26dc2f52d002238323e4635672a1ee313b4a7bc6
+Author: Germán Poo-Caamaño <gpoo@gnome.org>
+Date:	2017-10-03
+
+    pdf: Always use poppler_document_save to avoid data loss
+
+    We used to use two methods to save a document: poppler_document_save
+    and poppler_document_save_a_copy. The latter only saves a copy of
+    the original document, discarding any change done (e.g. forms and
+    annotations). However, after a document has been modified and saved,
+    if there is no new change and the user saves the document, it will
+    discard even the previous saved changes to preserve a copy of the
+    original document.
+
+    By only using poppler_document_save to save the content of the
+    current document opened in Evince, to avoid data loss made between
+    saves.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=770012
+
+M	backend/pdf/ev-poppler.cc
+
+commit 532583427f534b83b51488f34e5552882b042801
+Author: Germán Poo-Caamaño <gpoo@gnome.org>
+Date:	2017-10-03
+
+    ev-window: Add keybindings for special back/forward keys
+
+    Back (former XF86Back) for previous page
+    Forward (former XF86Forward) for next page
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=553892
+
+M	shell/ev-application.c
+
+commit 6d299b69e8ee9bd84b3bc51dc7a11af010119194
+Author: David King <amigadave@amigadave.com>
+Date:	2017-10-03
+
+    libview: Allow zooming to the limits of the scale
+
+    If the current zoom level was within one zoom factor of the limit, it
+    was not possible to scroll towards the limit. This made smooth
+    scrolling
+    near the limit awkward, as unless the scroll event had a large
+    delta it
+    was impossible to reach the zoom limit. Non-smooth scrolling was also
+    affected, but it was just much more difficult to trigger.
+
+    Fix this by allowing zooming while the current zoom level is
+    within one
+    zoom factor of the limit. Add a new ev_view_can_zoom() function
+    to make
+    zooming by a factor (as with smooth scrolling) more convenient.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=788480
+
+M	libview/ev-view.c
+
+commit fa474de19ede3ecde90156c1715001c4654dc830
+Author: Xavi Ivars <xavi.ivars@gmail.com>
+Date:	2017-10-05
+
+    [l10n] Updated Catalan (Valencian) translation
+
+M	po/ca@valencia.po
+
+commit 30ad3429003cd9ac0a7c38b13e8c98b65054672d
+Author: Germán Poo-Caamaño <gpoo@gnome.org>
+Date:	2017-10-03
+
+    help: Update to changes in the UI to save a document
+
+    As part of the fix of Bug 767611 the UI change the menu item
+    to save documents. It changes from "Save a Copy…" to
+    "Save As…".
+
+    This patch updates the help accordingly.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=788468
+
+M	help/C/annotations-delete.page
+M	help/C/annotations-save.page
+M	help/C/forms-saving.page
+
+commit 3fcfd05ea96e0cf9cbd0d4f134fbda8acddcf79c
+Author: Sveinn í Felli <sv1@fellsnet.is>
+Date:	2017-10-02
+
+    Update Icelandic translation
+
+    (cherry picked from commit b851fba8e8da640755b4656df5e81378ecaed320)
+
+M	po/is.po
+
+commit 58f699e41463fe7bd8298f3443ff5e061cc63fb6
+Author: Anders Jonsson <anders.jonsson@norsjovallen.se>
+Date:	2017-10-01
+
+    Update Swedish translation
+
+    (cherry picked from commit 76bddda02798131c80fe95bf546b434155e709c5)
+
+M	help/sv/sv.po
+
+commit 86a5c5468ed3e9680fa66e17dbae9fb14ec40c5b
+Author: Germán Poo-Caamaño <gpoo@gnome.org>
+Date:	2017-09-26
+
+    shell: Fix navigation with annotation already selected in sidebar
+
+    This fixes the issue when an annotation is selected in the
+    sidebar, the user navigates the document, and when if the
+    user clicks on the same annotation, then nothing happens.
+    But Evince should go to the page of the annotation selected.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=680880
+
+M	libview/ev-view.c
+M	shell/ev-sidebar-annotations.c
+
+commit 319a6d4922d7a700b10b8aa92c6edf34fdfcec99
+Author: Germán Poo-Caamaño <gpoo@gnome.org>
+Date:	2017-05-12
+
+    shell: Save document to the same path it was opened from
+
+    When annotating or filling a form in a document, this must be saved
+    as a different document as evince does not overwrite documents.
+    The user can expect to store the modified file in the same place
+    than the original document, except when the document lives in
+    a temporary directory (e.g. downloaded automatically with a web
+    browser), in whose case it must fallback to the Documents
+    directory (if set) or the the home directory.
+
+    Previously, evince assumed the latest directory used, or the place
+    where an image or attachment was stored last. Such behaviour is
+    confusing because the latest place opened might have no relation
+    with the document modified.
+
+    Fixes https://bugzilla.gnome.org/show_bug.cgi?id=767611
+
+M	shell/ev-application.c
+M	shell/ev-window.c
+M	shell/evince-menus.ui
+
+commit 5048cc7dbdd53c08d6ece43f3f35361e03334511
+Author: Germán Poo-Caamaño <gpoo@gnome.org>
+Date:	2017-05-12
+
+    pdf: Set the modified status of a document after a modification
+
+    A PDF can be modified by adding/editing/removing annotations
+    or editing a form.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=767611
+
+M	backend/pdf/ev-poppler.cc
+
+commit 147ca9015f0c30625519ca5b4ddb4d1a7fb56c5d
+Author: Germán Poo-Caamaño <gpoo@gnome.org>
+Date:	2017-05-12
+
+    libdocument: Add a property to determine a document has been modified
+
+    The use case is to update the UI to save changes only when is
+    necessary.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=767611
+
+M	libdocument/ev-document.c
+M	libdocument/ev-document.h
+
+commit f7701ee46fbcf459f44ddb0c388d8e2c82e29bfa
+Author: Piotr Drąg <piotrdrag@gmail.com>
+Date:	2017-10-01
+
+    help: Remove unused translated screenshot
+
+D	help/fr/figures/gconf-editor.png
+
+commit 6e84771a85200932144a1da522d5c614220f158a
+Author: Arash Mousavi <mousavi.arash@gmail.com>
+Date:	2017-09-29
+
+    [L10N] Update Persian translation
+
+M	po/fa.po
+
+commit 6e29a9aba5f6743bb0c3ea043996abfea5adbd31
+Author: Didier Roche <didrocks@ubuntu.com>
+Date:	2017-07-20
+
+    evince.desktop: add "viewer" to desktop keywords
+
+    As document is already in the list of keywords (duplicating Name),
+    doing
+    the same for the other commonly used keyword "viewer" for evince.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=671039
+
+M	data/evince.desktop.in.in
+
+commit 7b7609005a29b09f0babe92e21d171b29e504085
+Author: Idloj <origofri+gb@gmail.com>
+Date:	2017-09-09
+
+    ev-sidebar-links: Show tooltip for Outline entries
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=787437
+
+M	shell/ev-sidebar-links.c
+
+commit 18eb6e715e225e66211095fd0ce6c777409e426a
+Author: Sebastian Rasmussen <sebras@gmail.com>
+Date:	2017-09-11
+
+    Fix typo in documentation.
+
+    Fixes https://bugzilla.gnome.org/show_bug.cgi?id=787539
+
+M	help/C/annotations.page
+
+commit ea0de86cb1e65e7a1aed12068475ce27ebe10529
+Author: Efstathios Iosifidis <eiosifidis@gnome.org>
+Date:	2017-09-25
+
+    Update Greek translation
+
+M	po/el.po
+
+commit 8fd77c6fac80e35e4845ce5a0a36e7a706727f8a
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-25
+
+    zh_CN: Fix a markup typo
+
+M	help/zh_CN/zh_CN.po
+
+commit 3bc046d5121553585f5b1f41b54ffa6eeabc3165
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-23
+
+    help: Add missing tag
+
+M	help/C/titlebar.page
+
+commit fa2ca4fc533a33e9313b1f6288f77c9b566e270a
+Author: Mario Blättermann <mario.blaettermann@gmail.com>
+Date:	2017-09-23
+
+    Updated German doc translation
+
+M	help/de/de.po
+
+commit f0b5b2c66145e7233c0ef0baff28cbfc560872dc
+Author: Mario Blättermann <mario.blaettermann@gmail.com>
+Date:	2017-09-23
+
+    Updated German  doc translation
+
+M	help/de/de.po
+
+commit 62375d8d695111288189d6c4618393cf487ecbf3
+Author: Mario Blättermann <mario.blaettermann@gmail.com>
+Date:	2017-09-23
+
+    Updated screenshots
+
+M	help/de/figures/add-text-annotation.png
+M	help/de/figures/print-select.png
+M	help/de/figures/reverse-collate.png
+M	help/de/figures/zoom.png
+
+commit d6225d1262b1ca0e7b6dada80cec50ee9c982be3
+Author: Jason Crain <jason@inspiresomeone.us>
+Date:	2017-09-21
+
+    build: Increase libarchive version requirement
+
+    The comics backend uses the archive_free and
+    archive_entry_is_encrypted
+    functions, which were introduced in libarchive 3.1.900a.  Set
+    LIBARCHIVE_REQUIRED to next stable version, 3.2.0.
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=786397
+
+M	configure.ac
+
+commit cf8cf2afc7f4eaa087462f18cf75f7061fbfd758
+Author: Stas Solovey <whats_up@tut.by>
+Date:	2017-09-18
+
+    Update Russian translation
+
+M	po/ru.po
+
+commit 2a4995479ccf65f5bd15df13f9b6c810c3156b58
+Author: Marek Cernocky <marek_cernocky@conel.cz>
+Date:	2017-09-18
+
+    Updated Czech translation
+
+M	help/cs/cs.po
+
+commit 1bc31e2fa95cca4bb83a5d4597380dee3121d52a
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: Use proper <file> markup for file names
+
+M	help/C/synctex-editors.page
+
+commit 7c7f856302130a6a09e2319fc6d4872fdd805266
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: Update a redirected external URL by its target URL
+
+M	help/C/editing.page
+
+commit b12526429ea2ef5b0b5705a230ae8adbb6aa6a37
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: Use consistent spelling 'drop-down' throughout all pages
+
+M	help/C/bookmarks.page
+M	help/C/movingaround.page
+M	help/C/print-differentsize.page
+M	help/C/print-pagescaling.page
+
+commit da2317da3cc64d3412399e03751171caba7c3f9e
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: No more toolbar; document the title bar instead
+
+M	help/C/commandline.page
+M	help/C/movingaround.page
+A	help/C/titlebar.page
+D	help/C/toolbar.page
+M	help/Makefile.am
+
+commit 90302511cef0f3e60e0f1061a144b395baf4a91a
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: Side pane is now called Side panel in the UI
+
+M	help/C/annotations.page
+M	help/C/movingaround.page
+
+commit 40a8c62b24820a1a18e88f97599b360ca144211b
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: Remove <gui> markup for side pane as that string is nowhere
+    in the UI
+
+M	help/C/annotations-navigate.page
+
+commit 05467b5c61473aa60602d5a742d08194c1b91ed8
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: Some stuff moved from toolbar/File options to View options menu
+
+M	help/C/movingaround.page
+
+commit 88ca3371bc7f621ea3d1573758535f2fd99d1ee2
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: Update printing screenshots to use default theme
+
+M	help/C/figures/print-select.png
+M	help/C/figures/reverse-collate.png
+
+commit 4d4134ca32dd6ea443d98e4d4fe0d2066c6d1d88
+Author: Marek Černocký <marek@manet.cz>
+Date:	2017-09-17
+
+    Updated Czech translation
+
+M	help/cs/cs.po
+
+commit 8caa66f1c1e4e92d12fbbaeb0feff3791307970b
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-17
+
+    help: Add comment that page is outdated
+
+M	help/C/toolbar.page
+
+commit ea0c131e164f6024af13e52a9a8a1204a92a8704
+Author: Andre Klapper <a9016009@gmx.de>
+Date:	2017-09-06
+
+    help: The sidebar is called side pane in the UI
+
+M	help/C/annotations-delete.page
+
+commit fafa2603d553ed3f81e5780cb8f8c16957d505eb
+Author: Stefano Facchini <stefano.facchini@gmail.com>
+Date:	2017-09-10
+
+    libdocument: return 96 DPI if unable to determine true value
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=719400
+
+M	libdocument/ev-document-misc.c
+
+commit 34d3ceac4914fe1f25b39d82d11631f91d291883
+Author: Cheng-Chia Tseng <pswo10680@gmail.com>
+Date:	2017-09-12
+
+    Update Chinese (Taiwan) translation
+
+M	po/zh_TW.po
+
+commit b53823ee76a10ac4c306d4254c7bce82d1ee9ecb
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:	2017-09-12
+
+    release: 3.26.0
+
+M	NEWS
+M	configure.ac
+
 commit f2744916e61d726496939ccf96388cd265d8bfbe
 Author: Daniel Mustieles <daniel.mustieles@gmail.com>
-Date:   2017-09-11
+Date:	2017-09-11
 
     Update Spanish translation
 

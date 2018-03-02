@@ -35,13 +35,13 @@
 </section>
 
 <section id="vim-latex"><title>Vim-latex</title>
-<p>Zásuvný modul aplikace <app>gedit</app> obsahuje skript v jazyce Python (evince_dbus.py), který lze použít ke zprovoznění SyncTeX spolu s editorem Vim. Aby vim-latex fungoval dohromady s <app>prohlížečem dokumentů</app>, musíte provést následující kroky:</p>
+<p>Zásuvný modul aplikace <app>gedit</app> obsahuje skript v jazyce Python (<file>evince_dbus.py</file>), který lze použít ke zprovoznění SyncTeX spolu s editorem Vim. Aby vim-latex fungoval dohromady s <app>prohlížečem dokumentů</app>, musíte provést následující kroky:</p>
 <steps>
  <item>
-  <p>Nakopírovat evince_dbus.py do nějaké složky, která je v prohledávaných cestách a přidělit mu práva +x.</p>
+  <p>Nakopírovat <file>evince_dbus.py</file> do nějaké složky, která je v prohledávaných cestách a přidělit mu práva +x.</p>
  </item>
  <item>
-  <p>Upravte svůj soubor ~/.vimrc a přidejte následující řádky.</p>
+  <p>Upravte svůj soubor <file>~/.vimrc</file> a přidejte následující řádky.</p>
 <code>
 let g:Tex_ViewRule_pdf = 'evince_dbus.py'
 let g:Tex_DefaultTargetFormat = 'pdf'

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="pl">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Autor dokumentu mógł nałożyć ograniczenie drukowania.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Piotr Drąg</mal:name>
+      <mal:email>piotrdrag@gmail.com</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Aviary.pl</mal:name>
+      <mal:email>community-poland@mozilla.org</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Nie mogę wydrukować dokumentu</title>
+<section id="why">
+ <title>Możliwe przyczyny niepowodzenia drukowania</title>
+<p>Dokument może nie zostać wydrukowany z powodu:</p>
+ <list>
+  <item><p>problemów z drukarką,</p></item>
+  <item><p>ograniczenia drukowania pliku PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Problemy z drukarką</title>
+  <p>Może być wiele powodów, dlaczego drukarka nie działa. Na przykład, może skończył się papier lub tusz, albo jest odłączona lub uszkodzona.</p>
+
+  <p>Aby sprawdzić, czy drukarka poprawnie drukuje:</p>
+  <steps>
+   <item><p>Kliknij swoje imię na górnym pasku i wybierz <gui>Ustawienia systemu</gui>.</p></item>
+   <item><p>Kliknij drukarkę na liście.</p></item>
+   <item><p>Kliknij <gui>Wydrukuj stronę testową</gui>. Strona powinna zostać wysłana do drukarki.</p>
+<note>
+ <p><link href="help:gnome-help/printing">Pomoc na temat drukowania</link> zawiera więcej informacji, jeśli to się nie powiedzie. Można także znaleźć potrzebne informacje w instrukcji drukarki.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Ograniczenia drukowania pliku PDF</title>
+  <p>Niektóre pliki PDF mają ustawienie uniemożliwiające ich drukowanie. Autorzy mogą nałożyć ograniczenie drukowania podczas pisania dokumentu. <app>Przeglądarka dokumentów</app> domyślnie zastępuje to ograniczenie, ale można sprawdzić, czy nie zostało to wyłączone:</p>
+
+  <steps>
+    <item>
+      <p>Naciśnij klawisze <keyseq><key>Alt</key><key>F2</key></keyseq>, aby otworzyć okno uruchamiania programu.</p>
+    </item>
+    <item>
+      <p>Wpisz <input>dconf-editor</input> w polu tekstowym i naciśnij klawisz <key>Enter</key>. Zostanie otwarty edytor konfiguracji.</p>
+    </item>
+    <item><p>Przejdź do <sys>/org/gnome/evince</sys> za pomocą panelu bocznego.</p></item>
+    <item>
+      <p>Upewnij się, że opcja <gui>override_restrictions</gui> jest zaznaczona.</p>
+    </item>
+    <item>
+      <p>Wróć do <app>Przeglądarki dokumentów</app> i ponownie spróbuj wydrukować dokument.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

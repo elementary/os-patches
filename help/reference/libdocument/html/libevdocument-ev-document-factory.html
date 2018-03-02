@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>ev-document-factory: Evince Document Library Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="Evince Document Library Reference Manual">
 <link rel="up" href="document-helpers.html" title="Part III. Helper Functions">
 <link rel="prev" href="libevdocument-ev-file-helpers.html" title="ev-file-helpers">
 <link rel="next" href="libevdocument-ev-backends-manager.html" title="ev-backends-manager">
-<meta name="generator" content="GTK-Doc V1.25.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -76,8 +76,6 @@
 </div>
 <div class="refsect1">
 <a name="libevdocument-ev-document-factory.description"></a><h2>Description</h2>
-<p>
-</p>
 </div>
 <div class="refsect1">
 <a name="libevdocument-ev-document-factory.functions_details"></a><h2>Functions</h2>
@@ -118,7 +116,7 @@ If the document is encrypted, it is returned but also <em class="parameter"><cod
 </div>
 <div class="refsect3">
 <a name="ev-document-factory-get-document.returns"></a><h4>Returns</h4>
-<p> a new <a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a>, or <code class="literal">NULL</code>. </p>
+<p>a new <a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a>, or <code class="literal">NULL</code>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -131,6 +129,51 @@ ev_document_factory_get_document_for_gfile
                                 <em class="parameter"><code><a class="link" href="EvDocument.html#EvDocumentLoadFlags" title="enum EvDocumentLoadFlags"><span class="type">EvDocumentLoadFlags</span></a> flags</code></em>,
                                 <em class="parameter"><code><span class="type">GCancellable</span> *cancellable</code></em>,
                                 <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Synchronously creates a <a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a> for the document at <em class="parameter"><code>file</code></em>
+; or, if no
+backend handling the document's type is found, or an error occurred on
+opening the document, returns <code class="literal">NULL</code> and fills in <em class="parameter"><code>error</code></em>
+.
+If the document is encrypted, it is returned but also <em class="parameter"><code>error</code></em>
+ is set to
+<a class="link" href="EvDocument.html#EV-DOCUMENT-ERROR-ENCRYPTED:CAPS"><code class="literal">EV_DOCUMENT_ERROR_ENCRYPTED</code></a>.</p>
+<div class="refsect3">
+<a name="ev-document-factory-get-document-for-gfile.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <span class="type">GFile</span></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>flags</p></td>
+<td class="parameter_description"><p>flags from <a class="link" href="EvDocument.html#EvDocumentLoadFlags" title="enum EvDocumentLoadFlags"><span class="type">EvDocumentLoadFlags</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <span class="type">GCancellable</span>, or <code class="literal">NULL</code>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <span class="type">GError</span> location to store an error, or <code class="literal">NULL</code>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-document-factory-get-document-for-gfile.returns"></a><h4>Returns</h4>
+<p>a new <a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a>, or <code class="literal">NULL</code>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
 <p class="since">Since: <a class="link" href="api-index-3-6.html#api-index-3.6">3.6</a></p>
 </div>
 <hr>
@@ -143,6 +186,61 @@ ev_document_factory_get_document_for_stream
                                 <em class="parameter"><code><a class="link" href="EvDocument.html#EvDocumentLoadFlags" title="enum EvDocumentLoadFlags"><span class="type">EvDocumentLoadFlags</span></a> flags</code></em>,
                                 <em class="parameter"><code><span class="type">GCancellable</span> *cancellable</code></em>,
                                 <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Synchronously creates a <a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a> for the document from <em class="parameter"><code>stream</code></em>
+; or, if no
+backend handling the document's type is found, or an error occurred
+on opening the document, returns <code class="literal">NULL</code> and fills in <em class="parameter"><code>error</code></em>
+.
+If the document is encrypted, it is returned but also <em class="parameter"><code>error</code></em>
+ is set to
+<a class="link" href="EvDocument.html#EV-DOCUMENT-ERROR-ENCRYPTED:CAPS"><code class="literal">EV_DOCUMENT_ERROR_ENCRYPTED</code></a>.</p>
+<p>If <em class="parameter"><code>mime_type</code></em>
+ is non-<code class="literal">NULL</code>, this overrides any type inferred from the stream.
+If the mime type cannot be inferred from the stream, and <em class="parameter"><code>mime_type</code></em>
+ is <code class="literal">NULL</code>,
+an error is returned.</p>
+<div class="refsect3">
+<a name="ev-document-factory-get-document-for-stream.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>stream</p></td>
+<td class="parameter_description"><p>a <span class="type">GInputStream</span></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mime_type</p></td>
+<td class="parameter_description"><p>a mime type hint. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>flags</p></td>
+<td class="parameter_description"><p>flags from <a class="link" href="EvDocument.html#EvDocumentLoadFlags" title="enum EvDocumentLoadFlags"><span class="type">EvDocumentLoadFlags</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>a <span class="type">GCancellable</span>, or <code class="literal">NULL</code>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <span class="type">GError</span> location to store an error, or <code class="literal">NULL</code>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="ev-document-factory-get-document-for-stream.returns"></a><h4>Returns</h4>
+<p>a new <a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a>, or <code class="literal">NULL</code>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
 <p class="since">Since: <a class="link" href="api-index-3-6.html#api-index-3.6">3.6</a></p>
 </div>
 <hr>
@@ -189,6 +287,6 @@ can handle.</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25.1</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="pl">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Jakiego edytora można używać do modyfikowania pliku TeX?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Piotr Drąg</mal:name>
+      <mal:email>piotrdrag@gmail.com</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Aviary.pl</mal:name>
+      <mal:email>community-poland@mozilla.org</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Obsługiwane edytory</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>Obsługiwane jest <link xref="synctex-search#forward-search">wyszukiwanie do przodu</link> (z <app>gedit</app> do <app>Przeglądarki dokumentów</app>) i <link xref="synctex-search#backward-search">wyszukiwanie do tyłu</link> (z <app>Przeglądarki dokumentów</app> do <app>gedit</app>).</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>Wtyczka programu <app>gedit</app> zawiera skrypt języka Python (<file>evince_dbus.py</file>), którego można używać do połączenia SyncTeX z programem Vim. Aby użyć programu Vim-latex z <app>Przeglądarką dokumentów</app>:</p>
+<steps>
+ <item>
+  <p>Skopiuj plik <file>evince_dbus.py</file> do jakiegoś katalogu w ścieżce i nadaj mu uprawnienia +x.</p>
+ </item>
+ <item>
+  <p>Dodaj poniższe wiersze do pliku <file>~/.vimrc</file>.</p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Teraz można wyszukiwać do przodu z programu Vim-latex wpisując \ls. Wyszukiwanie do tyłu nie jest jeszcze obsługiwane.</p>
+  </item>
+</steps>
+</section>
+</page>

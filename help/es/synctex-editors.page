@@ -35,13 +35,13 @@
 </section>
 
 <section id="vim-latex"><title>Vim-latex</title>
-<p>El complemento de <app>gedit</app> contiene un script en python (evince_dbus.py) que se puede usar para que Synctex funcione con Vim. Para usar vim-latex junto con el <app>Visor de documentos</app> debe seguir los siguientes pasos:</p>
+<p>El complemento de <app>gedit</app> contiene un script en python (<file>evince_dbus.py</file>) que se puede usar para que Synctex funcione con Vim. Para usar vim-latex junto con el <app>Visor de documentos</app> debe seguir los siguientes pasos:</p>
 <steps>
  <item>
-  <p>Copie el archivo evince_dbus.py a alguna carpeta de su ruta y otórguele permisos +x.</p>
+  <p>Copie el archivo <file>evince_dbus.py</file> a alguna carpeta de su ruta y otórguele permisos +x.</p>
  </item>
  <item>
-  <p>Modifique su archivo ~/.vimrc y añada las siguientes líneas.</p>
+  <p>Modifique su archivo <file>~/.vimrc</file> y añada las siguientes líneas.</p>
 <code>
 let g:Tex_ViewRule_pdf = 'evince_dbus.py'
 let g:Tex_DefaultTargetFormat = 'pdf'

@@ -35,13 +35,21 @@
 </section>
 
 <section id="vim-latex"><title>Vim-latex</title>
-<p><app>Gedit</app> spraudnis satur python skriptu (evince_dbus.py), kurš var tikt izmantots, lai SyncTeX strādātu ar Vim. Lai izmantotu vim-latex kopā ar <app>dokumentu skatītāju</app>, jāseko šiem soļiem:</p>
+<p>
+The <app>gedit</app> plugin contains a python script (<file>evince_dbus.py</file>) that can be used to get SyncTeX working with Vim.
+In order to use vim-latex together with the <app>document viewer</app> you need to follow the next steps:
+</p>
 <steps>
  <item>
-  <p>Nokopē evince_dbus.py uz kādu citu direktoriju savā 'ceļā' un piešķir tam +x atļaujas.</p>
+  <p>
+     Copy the <file>evince_dbus.py</file> to some directory in your path and give it +x permissions.
+
+ </p>
  </item>
  <item>
-  <p>Modificē savu ~/.vimrc datni un pievieno sekojošās rindiņas.</p>
+  <p>
+     Modify your <file>~/.vimrc</file> file and add the following lines.
+    </p>
 <code>
 let g:Tex_ViewRule_pdf = 'evince_dbus.py'
 let g:Tex_DefaultTargetFormat = 'pdf'

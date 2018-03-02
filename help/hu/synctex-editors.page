@@ -35,13 +35,13 @@
 </section>
 
 <section id="vim-latex"><title>Vim-latex</title>
-<p>A <app>gedit</app> bővítmény tartalmaz egy Python parancsfájlt (evince_dbus.py), amelynek segítségével a SyncTeX használható Vimből. A vim-latex és a <app>dokumentummegjelenítő</app> együttes használatához tegye a következőket:</p>
+<p>A <app>gedit</app> bővítmény tartalmaz egy Python parancsfájlt (<file>evince_dbus.py</file>), amelynek segítségével a SyncTeX használható Vimből. A vim-latex és a <app>dokumentummegjelenítő</app> együttes használatához tegye a következőket:</p>
 <steps>
  <item>
-  <p>Másolja az evince_dbus.py fájlt a keresési útvonalon lévő valamelyik könyvtárba, és adjon rá +x (futtatható) jogosultságot.</p>
+  <p>Másolja az <file>evince_dbus.py</file> fájlt a keresési útvonalon lévő valamelyik könyvtárba, és adjon rá +x (futtatható) jogosultságot.</p>
  </item>
  <item>
-  <p>Módosítsa a ~/.vimrc fájlt, és adja hozzá a következő sorokat.</p>
+  <p>Módosítsa a <file>~/.vimrc</file> fájlt, és adja hozzá a következő sorokat.</p>
 <code>
 let g:Tex_ViewRule_pdf = 'evince_dbus.py'
 let g:Tex_DefaultTargetFormat = 'pdf'

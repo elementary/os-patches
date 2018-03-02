@@ -273,23 +273,19 @@ tiff_document_render (EvDocument      *document,
 		return NULL;
 	}
 
-#ifdef HAVE_CAIRO_FORMAT_STRIDE_FOR_WIDTH
 	rowstride = cairo_format_stride_for_width (CAIRO_FORMAT_RGB24, width);
-#else
-	rowstride = width * 4;
-#endif
 	if (rowstride / 4 != width) {
 		g_warning("Overflow while rendering document.");
 		/* overflow, or cairo was changed in an unsupported way */
 		return NULL;                
 	}
 	
-	bytes = height * rowstride;
-	if (bytes / rowstride != height) {
+	if (height >= INT_MAX / rowstride) {
 		g_warning("Overflow while rendering document.");
 		/* overflow */
 		return NULL;
 	}
+	bytes = height * rowstride;
 	
 	pixels = g_try_malloc (bytes);
 	if (!pixels) {
@@ -374,15 +370,15 @@ tiff_document_get_thumbnail (EvDocument      *document,
 	if (width <= 0 || height <= 0)
 		return NULL;                
 
+	if (width >= INT_MAX / 4)
+		/* overflow */
+		return NULL;                
 	rowstride = width * 4;
-	if (rowstride / 4 != width)
-		/* overflow */
-		return NULL;                
         
-	bytes = height * rowstride;
-	if (bytes / rowstride != height)
+	if (height >= INT_MAX / rowstride)
 		/* overflow */
 		return NULL;                
+	bytes = height * rowstride;
 	
 	pixels = g_try_malloc (bytes);
 	if (!pixels)

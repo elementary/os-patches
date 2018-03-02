@@ -23,13 +23,21 @@
 </section>
 
 <section id="vim-latex"><title>Vim-latex</title>
-<p>Vstavek <app>Gedit</app> vsebuje skript python (evince_dbus.py), ki ga lahko uporabite, da začne Synctex delovati z Vim. Da lahko vim-latex uporabite skupaj s <app>pregledovalnikom dokumentov</app>, boste morali izvesti naslednje korake:</p>
+<p>
+The <app>gedit</app> plugin contains a python script (<file>evince_dbus.py</file>) that can be used to get SyncTeX working with Vim.
+In order to use vim-latex together with the <app>document viewer</app> you need to follow the next steps:
+</p>
 <steps>
  <item>
-  <p>Kopirajte evince_dbus.py v mapo na vaši poti in ji dajte dovoljenja +x. </p>
+  <p>
+     Copy the <file>evince_dbus.py</file> to some directory in your path and give it +x permissions.
+
+ </p>
  </item>
  <item>
-  <p>Spremenite svojo datoteko ~/.vimrc in dodajte naslednje vrstice.</p>
+  <p>
+     Modify your <file>~/.vimrc</file> file and add the following lines.
+    </p>
 <code>
 let g:Tex_ViewRule_pdf = 'evince_dbus.py'
 let g:Tex_DefaultTargetFormat = 'pdf'

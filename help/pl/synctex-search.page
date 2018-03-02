@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="pl">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Przechodzenie między <app>Przeglądarką dokumentów</app> a programem <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Piotr Drąg</mal:name>
+      <mal:email>piotrdrag@gmail.com</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Aviary.pl</mal:name>
+      <mal:email>community-poland@mozilla.org</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Wyszukiwanie za pomocą SyncTeX</title>
+<p>Po <link xref="synctex-compile">skompilowaniu pliku TeX za pomocą SyncTeX</link> można wyszukiwać. SyncTeX obsługuje nawet wyszukiwanie do przodu i do tyłu z dołączonego pliku.</p>
+
+<section id="forward-search">
+    <title>Wyszukiwanie do przodu: z pliku TeX do PDF (z programu <app>gedit</app> do <app>Przeglądarki dokumentów</app>)</title>
+     <p>Wyszukiwanie do przodu umożliwia kliknięcie wybranej sekcji kodu źródłowego TeX i przejście do powiązanego miejsca w pliku PDF. Aby to zrobić:</p>
+<steps>
+<item>
+<p>Kliknij wiersz w pliku TeX.</p>
+</item>
+<item>
+<p>W programie <app>gedit</app> kliknij <guiseq><gui>Narzędzia</gui> <gui>Wyszukiwanie do przodu</gui></guiseq>. Odpowiedni wiersz w pliku PDF zostanie wyróżniony na czerwono.</p>
+<p>Można także nacisnąć klawisze <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq> lub <keyseq><key>Ctrl</key>kliknięcie</keyseq>. Odpowiedni wiersz w pliku PDF zostanie wyróżniony na czerwono.</p>
+</item>
+</steps>
+<note>
+<p>Jeśli odpowiedni plik PDF nie jest otwarty, to wyszukiwanie do przodu otworzy go w <app>Przeglądarce dokumentów</app>.</p>
+</note>
+<p>W przypadku złożonego projektu z wieloma plikami TeX można umieścić</p>
+<code>% mainfile: główny-plik.tex</code>
+<p>w pierwszych lub ostatnich trzech wierszach każdego dołączonego pliku TeX, a wyszukiwanie do przodu zostanie włączone. Wyszukiwanie do tyłu powinno zawsze działać, nawet jeśli nie dodano wiersza trybu.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Wyszukiwanie do tyłu: z pliku PDF do TeX (z <app>Przeglądarki dokumentów</app> do programu <app>gedit</app>)</title>
+     <p>Wyszukiwanie do tyłu umożliwia kliknięcie konkretnego wiersza w pliku PDF i przejście do powiązanego wiersza w pliku źródłowym TeX.</p>
+<p>Można wyszukać do tyłu naciskając klawisze <keyseq><key>Ctrl</key>kliknięcie</keyseq> w <app>Przeglądarce dokumentów</app>. Odpowiedni wiersz w kodzie źródłowym TeX zostanie wyróżniony.</p>
+</section>
+
+</page>

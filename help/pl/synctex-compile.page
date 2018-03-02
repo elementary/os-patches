@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-compile" xml:lang="pl">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="third"/>
+    <desc>Jak skompilować dokument TeX za pomocą SyncTeX</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Piotr Drąg</mal:name>
+      <mal:email>piotrdrag@gmail.com</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Aviary.pl</mal:name>
+      <mal:email>community-poland@mozilla.org</mal:email>
+      <mal:years>2017-2018</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Kompilowanie kodu TeX za pomocą SyncTeX</title>
+<p>Dodanie wiersza <em>\synctex=1</em> do wstępu pliku TeX spowoduje synchronizację za pomocą SyncTeX.</p>
+<code>
+\documentclass{article}
+\synctex=1
+\usepackage{fullpage}
+\begin{document}
+…
+\end{document}
+</code>
+<p>Można także wykonać polecenie pdflatex za pomocą opcji <em>-synctex=1</em>:</p>
+<screen>pdflatex -synctex=1 plik.tex</screen>
+</page>

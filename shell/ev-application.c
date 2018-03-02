@@ -993,20 +993,6 @@ app_about_cb (GSimpleAction *action,
                 "Tiffany Antpolski <tiffany.antopolski@gmail.com>",
                 NULL
         };
-        const char *license[] = {
-                N_("Evince is free software; you can redistribute it and/or modify "
-                   "it under the terms of the GNU General Public License as published by "
-                   "the Free Software Foundation; either version 2 of the License, or "
-                   "(at your option) any later version.\n"),
-                N_("Evince is distributed in the hope that it will be useful, "
-                   "but WITHOUT ANY WARRANTY; without even the implied warranty of "
-                   "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
-                   "GNU General Public License for more details.\n"),
-                N_("You should have received a copy of the GNU General Public License "
-                   "along with Evince; if not, write to the Free Software Foundation, Inc., "
-                   "51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA\n")
-        };
-        char *license_trans;
 #ifdef ENABLE_NLS
         const char **p;
 
@@ -1017,26 +1003,18 @@ app_about_cb (GSimpleAction *action,
                 *p = _(*p);
 #endif
 
-        license_trans = g_strconcat (_(license[0]), "\n",
-                                     _(license[1]), "\n",
-                                     _(license[2]), "\n",
-                                     NULL);
-
         gtk_show_about_dialog (gtk_application_get_active_window (GTK_APPLICATION (application)),
                                "name", _("Evince"),
                                "version", VERSION,
-                               "copyright", _("© 1996–2014 The Evince authors"),
-                               "license", license_trans,
+                               "copyright", _("© 1996–2017 The Evince authors"),
+                               "license-type", GTK_LICENSE_GPL_2_0,
                                "website", "https://wiki.gnome.org/Apps/Evince",
                                "comments", _("Document Viewer"),
                                "authors", authors,
                                "documenters", documenters,
                                "translator-credits", _("translator-credits"),
                                "logo-icon-name", "evince",
-                               "wrap-license", TRUE,
                                NULL);
-
-        g_free (license_trans);
 }
 
 static void
@@ -1051,7 +1029,7 @@ ev_application_startup (GApplication *gapplication)
         const gchar *action_accels[] = {
           "win.open",                   "<Ctrl>O", NULL,
           "win.open-copy",              "<Ctrl>N", NULL,
-          "win.save-copy",              "<Ctrl>S", NULL,
+          "win.save-as",                "<Ctrl>S", NULL,
           "win.print",                  "<Ctrl>P", NULL,
           "win.show-properties",        "<alt>Return", NULL,
           "win.copy",                   "<Ctrl>C", "<Ctrl>Insert", NULL,
@@ -1068,10 +1046,11 @@ ev_application_startup (GApplication *gapplication)
           "win.go-forward",             "<Shift>Page_Down", NULL,
           "win.go-next-page",           "n", NULL,
           "win.go-previous-page",       "p", NULL,
-          "win.go-back-history",        "<alt>P", NULL,
-          "win.go-forward-history",     "<alt>N", NULL,
+          "win.go-back-history",        "<alt>P", "Back", NULL,
+          "win.go-forward-history",     "<alt>N", "Forward", NULL,
           "win.sizing-mode::fit-page",  "f", NULL,
           "win.sizing-mode::fit-width", "w", NULL,
+          "win.sizing-mode::automatic", "a", NULL,
           "win.open-menu",              "F10", NULL,
           "win.caret-navigation",       "F7", NULL,
           "win.zoom-in",                "plus", "<Ctrl>plus", "KP_Add", "<Ctrl>KP_Add", "equal", "<Ctrl>equal", NULL,

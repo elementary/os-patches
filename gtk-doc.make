@@ -81,8 +81,8 @@ $(REPORT_FILES): sgml-build.stamp
 
 #### setup ####
 
-GTK_DOC_V_SETUP=$(GTK_DOC_V_SETUP_$(V))
-GTK_DOC_V_SETUP_=$(GTK_DOC_V_SETUP_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_SETUP=$(GTK_DOC_V_SETUP_@AM_V@)
+GTK_DOC_V_SETUP_=$(GTK_DOC_V_SETUP_@AM_DEFAULT_V@)
 GTK_DOC_V_SETUP_0=@echo "  DOC   Preparing build";
 
 setup-build.stamp:
@@ -101,12 +101,12 @@ setup-build.stamp:
 
 #### scan ####
 
-GTK_DOC_V_SCAN=$(GTK_DOC_V_SCAN_$(V))
-GTK_DOC_V_SCAN_=$(GTK_DOC_V_SCAN_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_SCAN=$(GTK_DOC_V_SCAN_@AM_V@)
+GTK_DOC_V_SCAN_=$(GTK_DOC_V_SCAN_@AM_DEFAULT_V@)
 GTK_DOC_V_SCAN_0=@echo "  DOC   Scanning header files";
 
-GTK_DOC_V_INTROSPECT=$(GTK_DOC_V_INTROSPECT_$(V))
-GTK_DOC_V_INTROSPECT_=$(GTK_DOC_V_INTROSPECT_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_INTROSPECT=$(GTK_DOC_V_INTROSPECT_@AM_V@)
+GTK_DOC_V_INTROSPECT_=$(GTK_DOC_V_INTROSPECT_@AM_DEFAULT_V@)
 GTK_DOC_V_INTROSPECT_0=@echo "  DOC   Introspecting gobjects";
 
 scan-build.stamp: setup-build.stamp $(HFILE_GLOB) $(CFILE_GLOB)
@@ -137,8 +137,8 @@ $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)
 
 #### xml ####
 
-GTK_DOC_V_XML=$(GTK_DOC_V_XML_$(V))
-GTK_DOC_V_XML_=$(GTK_DOC_V_XML_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_XML=$(GTK_DOC_V_XML_@AM_V@)
+GTK_DOC_V_XML_=$(GTK_DOC_V_XML_@AM_DEFAULT_V@)
 GTK_DOC_V_XML_0=@echo "  DOC   Building XML";
 
 sgml-build.stamp: setup-build.stamp $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(HFILE_GLOB) $(CFILE_GLOB) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files) xml/gtkdocentities.ent
@@ -165,12 +165,12 @@ xml/gtkdocentities.ent: Makefile
 
 #### html ####
 
-GTK_DOC_V_HTML=$(GTK_DOC_V_HTML_$(V))
-GTK_DOC_V_HTML_=$(GTK_DOC_V_HTML_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_HTML=$(GTK_DOC_V_HTML_@AM_V@)
+GTK_DOC_V_HTML_=$(GTK_DOC_V_HTML_@AM_DEFAULT_V@)
 GTK_DOC_V_HTML_0=@echo "  DOC   Building HTML";
 
-GTK_DOC_V_XREF=$(GTK_DOC_V_XREF_$(V))
-GTK_DOC_V_XREF_=$(GTK_DOC_V_XREF_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_XREF=$(GTK_DOC_V_XREF_@AM_V@)
+GTK_DOC_V_XREF_=$(GTK_DOC_V_XREF_@AM_DEFAULT_V@)
 GTK_DOC_V_XREF_0=@echo "  DOC   Fixing cross-references";
 
 html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_content_files)
@@ -197,8 +197,8 @@ html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_con
 
 #### pdf ####
 
-GTK_DOC_V_PDF=$(GTK_DOC_V_PDF_$(V))
-GTK_DOC_V_PDF_=$(GTK_DOC_V_PDF_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_PDF=$(GTK_DOC_V_PDF_@AM_V@)
+GTK_DOC_V_PDF_=$(GTK_DOC_V_PDF_@AM_DEFAULT_V@)
 GTK_DOC_V_PDF_0=@echo "  DOC   Building PDF";
 
 pdf-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_content_files)
