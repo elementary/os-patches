@@ -1,13 +1,24 @@
 #!/bin/bash
 base_dist="xenial"
 
-base_url="http://archive.ubuntu.com/ubuntu/dists/$base_dist/main/uefi/grub2-amd64/current"
+if [ "$(dpkg --print-architecture)" == amd64 ]; then
+    base_url="http://archive.ubuntu.com/ubuntu/dists/$base_dist/main/uefi/grub2-amd64/current"
 
-efi_filenames=(
-    'gcdx64.efi.signed'
-    'grubnetx64.efi.signed'
-    'grubx64.efi.signed'
-    'version'
+    efi_filenames=(
+        'gcdx64.efi.signed'
+        'grubnetx64.efi.signed'
+        'grubx64.efi.signed'
+        'version'
 )
+elif [ "$(dpkg --print-architecture)" == arm64 ]; then
+    base_url="http://ports.ubuntu.com/ubuntu-ports/dists/$base_dist/main/uefi/grub2-arm64/current/"
 
-for efi_files in "${efi_filenames[@]}" ; do wget "$base_url/$efi_files" ; done
+    efi_filenames=(
+        'gcdaa64.efi.signed'
+        'grubnetaa64.efi.signed'
+        'grubaa64.efi.signed'
+        'version'
+)
+fi
+
+for efi_files in "${efi_filenames[@]}" ; do curl -O "$base_url/$efi_files" ; done
