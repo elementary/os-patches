@@ -1,0 +1,25 @@
+From 4a2879d2ea9e6179ac0f45d7196b9d905fcab0f6 Mon Sep 17 00:00:00 2001
+From: Vladimir Serbinenko <phcoder@gmail.com>
+Date: Mon, 14 Aug 2017 14:11:43 +0200
+Subject: yylex: Explicilty cast fprintf to void.
+
+It's needed to avoid warning on recent GCC.
+
+Patch-Name: yylex-explicitly_cast_fprintf_to_void.patch
+---
+ grub-core/script/yylex.l | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/script/yylex.l b/grub-core/script/yylex.l
+index 95b219170..7b44c37b7 100644
+--- a/grub-core/script/yylex.l
++++ b/grub-core/script/yylex.l
+@@ -91,7 +91,7 @@ typedef size_t yy_size_t;
+ #define stdin  0
+ #define stdout 0
+ 
+-#define fprintf(...) 0
++#define fprintf(...) (void)0
+ #define exit(...) grub_fatal("fatal error in lexer")
+ #endif
+ 
