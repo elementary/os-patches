@@ -29,7 +29,7 @@ index fcd3033..19e4df4 100644
 +      OS="${GRUB_DISTRIBUTOR}"
 +      ;;
 +    *)
-+      OS="${GRUB_DISTRIBUTOR} GNU/Linux"
++      OS="${GRUB_DISTRIBUTOR}"
 +      ;;
 +  esac
    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1|LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
@@ -49,7 +49,7 @@ index de4d215..7f88e77 100755
 +            OS="${GRUB_DISTRIBUTOR}"
 +            ;;
 +            *)
-+            OS="${GRUB_DISTRIBUTOR} GNU/Linux"
++            OS="${GRUB_DISTRIBUTOR}"
 +            ;;
 +        esac
          CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1 | LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
