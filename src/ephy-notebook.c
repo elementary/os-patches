@@ -711,34 +711,6 @@ build_tab_label (EphyNotebook *nb, EphyEmbed *embed)
   box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
   gtk_widget_show (box);
 
-  /* set hbox spacing and label padding (see below) so that there's an
-   * equal amount of space around the label */
-  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_widget_show (hbox);
-  gtk_widget_set_halign (hbox, GTK_ALIGN_CENTER);
-  gtk_box_pack_start (GTK_BOX (box), hbox, TRUE, TRUE, 0);
-
-  /* setup load feedback */
-  spinner = gtk_spinner_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), spinner, FALSE, FALSE, 0);
-
-  /* setup site icon, empty by default */
-  icon = gtk_image_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), icon, FALSE, FALSE, 0);
-  /* don't show the icon */
-
-  /* setup label */
-  label = gtk_label_new (NULL);
-  gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
-  gtk_label_set_single_line_mode (GTK_LABEL (label), TRUE);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-  gtk_widget_show (label);
-
-  /* setup speaker icon */
-  speaker_icon = gtk_image_new_from_icon_name ("audio-volume-high-symbolic",
-                                               GTK_ICON_SIZE_MENU);
-  gtk_box_pack_start (GTK_BOX (hbox), speaker_icon, FALSE, FALSE, 0);
-
   /* setup close button */
   close_button = gtk_button_new ();
   gtk_button_set_relief (GTK_BUTTON (close_button),
@@ -759,6 +731,34 @@ build_tab_label (EphyNotebook *nb, EphyEmbed *embed)
 
   gtk_box_pack_start (GTK_BOX (box), close_button, FALSE, FALSE, 0);
   gtk_widget_show (close_button);
+
+  /* set hbox spacing and label padding (see below) so that there's an
+   * equal amount of space around the label */
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_widget_show (hbox);
+  gtk_widget_set_halign (hbox, GTK_ALIGN_CENTER);
+  gtk_box_pack_start (GTK_BOX (box), hbox, TRUE, TRUE, 0);
+
+  /* setup label */
+  label = gtk_label_new (NULL);
+  gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
+  gtk_label_set_single_line_mode (GTK_LABEL (label), TRUE);
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+  gtk_widget_show (label);
+
+  /* setup speaker icon */
+  speaker_icon = gtk_image_new_from_icon_name ("audio-volume-high-symbolic",
+                                               GTK_ICON_SIZE_MENU);
+  gtk_box_pack_start (GTK_BOX (hbox), speaker_icon, FALSE, FALSE, 0);
+
+  /* setup load feedback */
+  spinner = gtk_spinner_new ();
+  gtk_box_pack_start (GTK_BOX (hbox), spinner, FALSE, FALSE, 0);
+
+  /* setup site icon, empty by default */
+  icon = gtk_image_new ();
+  gtk_box_pack_start (GTK_BOX (hbox), icon, FALSE, FALSE, 0);
+  /* don't show the icon */
 
   /* Set minimal size */
   g_signal_connect (box, "style-set",
