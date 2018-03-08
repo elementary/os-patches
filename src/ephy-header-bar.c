@@ -556,12 +556,12 @@ ephy_header_bar_change_combined_stop_reload_state (GSimpleAction *action,
 
   if (g_variant_get_boolean (loading)) {
     image = gtk_image_new_from_icon_name ("process-stop-symbolic",
-                                          GTK_ICON_SIZE_BUTTON);
+                                          GTK_ICON_SIZE_LARGE_TOOLBAR);
     /* Translators: tooltip for the stop button */
     gtk_widget_set_tooltip_text (header_bar->combined_stop_reload_button, _("Stop loading the current page"));
   } else {
     image = gtk_image_new_from_icon_name ("view-refresh-symbolic",
-                                          GTK_ICON_SIZE_BUTTON);
+                                          GTK_ICON_SIZE_LARGE_TOOLBAR);
     gtk_widget_set_tooltip_text (header_bar->combined_stop_reload_button, _(REFRESH_BUTTON_TOOLTIP));
   }
 
@@ -650,7 +650,7 @@ ephy_header_bar_constructed (GObject *object)
   button = gtk_button_new ();
   gtk_button_set_image (GTK_BUTTON (button),
                         gtk_image_new_from_icon_name ("go-previous-symbolic",
-                        GTK_ICON_SIZE_BUTTON));
+                        GTK_ICON_SIZE_LARGE_TOOLBAR));
   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
   /* Translators: tooltip for the back button */
   gtk_widget_set_tooltip_text (button, _("Go back to the previous page"));
@@ -669,7 +669,7 @@ ephy_header_bar_constructed (GObject *object)
   button = gtk_button_new ();
   gtk_button_set_image (GTK_BUTTON (button),
                         gtk_image_new_from_icon_name ("go-next-symbolic",
-                        GTK_ICON_SIZE_BUTTON));
+                        GTK_ICON_SIZE_LARGE_TOOLBAR));
   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
   /* Translators: tooltip for the forward button */
   gtk_widget_set_tooltip_text (button, _("Go forward to the next page"));
@@ -695,7 +695,7 @@ ephy_header_bar_constructed (GObject *object)
   button = gtk_button_new ();
   header_bar->combined_stop_reload_button = button;
   gtk_button_set_image (GTK_BUTTON (button),
-                        gtk_image_new_from_icon_name ("view-refresh-symbolic", GTK_ICON_SIZE_BUTTON));
+                        gtk_image_new_from_icon_name ("view-refresh-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR));
   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
   gtk_widget_set_tooltip_text (button, _(REFRESH_BUTTON_TOOLTIP));
   gtk_actionable_set_action_name (GTK_ACTIONABLE (button),
@@ -708,7 +708,7 @@ ephy_header_bar_constructed (GObject *object)
   /* Homepage */
   button = gtk_button_new ();
   gtk_button_set_image (GTK_BUTTON (button),
-                        gtk_image_new_from_icon_name ("go-home-symbolic", GTK_ICON_SIZE_BUTTON));
+                        gtk_image_new_from_icon_name ("go-home-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR));
   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
   /* Translators: tooltip for the secret homepage button */
   gtk_widget_set_tooltip_text (button, _("Go to your homepage"));
@@ -750,7 +750,7 @@ ephy_header_bar_constructed (GObject *object)
   button = gtk_menu_button_new ();
   header_bar->page_menu_button = button;
   gtk_button_set_image (GTK_BUTTON (button),
-                        gtk_image_new_from_icon_name ("open-menu-symbolic", GTK_ICON_SIZE_BUTTON));
+                        gtk_image_new_from_icon_name ("open-menu", GTK_ICON_SIZE_LARGE_TOOLBAR));
   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
   g_type_ensure (G_TYPE_THEMED_ICON);
   /* FIXME: This is horrible, but it doesn't seem possible to hide a single menu item of an existing menu.
@@ -770,7 +770,7 @@ ephy_header_bar_constructed (GObject *object)
   button = gtk_menu_button_new ();
   header_bar->bookmarks_button = button;
   gtk_button_set_image (GTK_BUTTON (button),
-                        gtk_image_new_from_icon_name ("ephy-bookmarks-symbolic", GTK_ICON_SIZE_BUTTON));
+                        gtk_image_new_from_icon_name ("user-bookmarks", GTK_ICON_SIZE_LARGE_TOOLBAR));
   gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
   /* Translators: tooltip for the bookmarks popover button */
   gtk_widget_set_tooltip_text (button, _("View and manage your bookmarks"));
