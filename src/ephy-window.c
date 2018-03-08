@@ -2966,7 +2966,7 @@ setup_header_bar (EphyWindow *window)
 
   app_mode = ephy_embed_shell_get_mode (ephy_embed_shell_get_default ());
   if (app_mode == EPHY_EMBED_SHELL_MODE_INCOGNITO)
-    gtk_style_context_add_class (gtk_widget_get_style_context (header_bar), "incognito-mode");
+    gtk_style_context_add_class (gtk_widget_get_style_context (header_bar), "incognito");
 
   title_widget = ephy_header_bar_get_title_widget (EPHY_HEADER_BAR (header_bar));
   g_signal_connect (title_widget, "lock-clicked",
