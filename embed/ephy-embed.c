@@ -156,6 +156,11 @@ static void
 ephy_embed_set_statusbar_label (EphyEmbed *embed, const char *label)
 {
   nautilus_floating_bar_set_primary_label (NAUTILUS_FLOATING_BAR (embed->floating_bar), label);
+  g_object_set (NAUTILUS_FLOATING_BAR (embed->floating_bar),
+              "margin-bottom", 3,
+              "margin-start", 3,
+              "margin-end", 3,
+              NULL);
 
   if (label == NULL || label[0] == '\0') {
     gtk_widget_hide (embed->floating_bar);

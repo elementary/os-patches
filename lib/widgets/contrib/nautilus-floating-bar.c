@@ -364,10 +364,10 @@ nautilus_floating_bar_constructed (GObject *obj)
   labels_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_box_pack_start (GTK_BOX (box), labels_box, TRUE, TRUE, 0);
   g_object_set (labels_box,
-                "margin-top", 2,
-                "margin-bottom", 2,
-                "margin-start", 12,
-                "margin-end", 12,
+                "margin-top", 0,
+                "margin-bottom", 0,
+                "margin-start", 0,
+                "margin-end", 0,
                 NULL);
   gtk_widget_show (labels_box);
 
@@ -394,7 +394,7 @@ nautilus_floating_bar_init (NautilusFloatingBar *self)
                                             NautilusFloatingBarDetails);
 
   context = gtk_widget_get_style_context (GTK_WIDGET (self));
-  gtk_style_context_add_class (context, "floating-bar");
+  gtk_style_context_add_class (context, "overlay-bar");
 }
 
 static void
