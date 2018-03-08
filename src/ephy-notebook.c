@@ -240,6 +240,19 @@ button_press_cb (EphyNotebook   *notebook,
     gtk_notebook_set_current_page (GTK_NOTEBOOK (notebook), tab_clicked);
   }
 
+  /* Open a new tab when double-clicked. */
+  if (event->type == GDK_2BUTTON_PRESS &&
+      event->button == GDK_BUTTON_PRIMARY &&
+      (event->state & gtk_accelerator_get_default_mod_mask ()) == 0) {
+    GtkWindow *window;
+    GActionGroup *group;
+    GAction *action;
+    window = gtk_widget_get_toplevel (GTK_WIDGET (notebook));
+    group = gtk_widget_get_action_group (GTK_WIDGET (window), "win");
+    action = g_action_map_lookup_action (G_ACTION_MAP (group), "new-tab");
+    g_action_activate (action, NULL);
+  }
+
   return GDK_EVENT_PROPAGATE;
 }
 
