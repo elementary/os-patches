@@ -483,7 +483,7 @@ ephy_notebook_constructed (GObject *object)
   gtk_actionable_set_action_name (GTK_ACTIONABLE (button), "win.new-tab");
   /* Translators: tooltip for the new tab button */
   gtk_widget_set_tooltip_text (button, _("Open a new tab"));
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  gtk_notebook_set_action_widget (GTK_NOTEBOOK (notebook), button, GTK_PACK_START);
   gtk_widget_show (button);
 
   button = gtk_menu_button_new ();
