@@ -729,8 +729,9 @@ ephy_header_bar_constructed (GObject *object)
     header_bar->title_widget = EPHY_TITLE_WIDGET (ephy_title_box_new ());
   else
     header_bar->title_widget = EPHY_TITLE_WIDGET (ephy_location_entry_new ());
-  gtk_widget_set_margin_start (GTK_WIDGET (header_bar->title_widget), 54);
-  gtk_widget_set_margin_end (GTK_WIDGET (header_bar->title_widget), 54);
+  gtk_widget_set_hexpand (GTK_WIDGET (header_bar->title_widget), true);
+  gtk_widget_set_margin_start (GTK_WIDGET (header_bar->title_widget), 24);
+  gtk_widget_set_margin_end (GTK_WIDGET (header_bar->title_widget), 6);
   gtk_header_bar_set_custom_title (GTK_HEADER_BAR (header_bar), GTK_WIDGET (header_bar->title_widget));
   gtk_widget_show (GTK_WIDGET (header_bar->title_widget));
 
