@@ -1076,8 +1076,15 @@ Description: for internal use; can be preseeded
 
 Template: ubiquity/download_updates
 Type: boolean
-Default: false
+Default: true
 Description: for internal use; download updates while installing.
+
+Template: ubiquity/minimal_install
+Type: boolean
+Default: false
+Description: for internal use; can be preseeded
+ Only a minimal set of package(s) will be installed when the minimal installation
+ checkbox is selected.
 
 Template: ubiquity/text/part_auto_select_drive_label
 Type: text
@@ -1182,6 +1189,16 @@ Template: ubiquity/text/label_download_updates_na
 Type: text
 _Description:
  Not available because there is no Internet connection.
+
+Template: ubiquity/text/prepare_minimal_install
+Type: text
+_Description:
+ Minimal installation
+
+Template: ubiquity/text/label_minimal_install
+Type: text
+_Description:
+ This will only install a minimal desktop environment with a browser and utilities.
 
 Template: ubiquity/text/secureboot_label
 Type: text

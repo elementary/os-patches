@@ -136,7 +136,6 @@ def generate_config():
     stepUserInfo["verified_password_label"] = 'Confirm your password:'
     stepUserInfo["hostname_extra_label"] = \
         'The name it uses when it talks to other computers.'
-    stepUserInfo["login_encrypt"] = 'Require my password to log in'
 
     # write config to tmp file
     with open('/tmp/english_config.ini', 'w') as configfile:

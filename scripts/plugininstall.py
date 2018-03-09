@@ -1396,6 +1396,14 @@ class Install(install_misc.InstallBase):
         else:
             difference = set()
 
+        # Add minimal installation package list if selected
+        if self.db.get('ubiquity/minimal_install') == 'true':
+            if os.path.exists(install_misc.minimal_install_rlist_path):
+                rm = set()
+                with open(install_misc.minimal_install_rlist_path) as m_file:
+                    rm = {line.strip().split(':')[0] for line in m_file}
+                difference |= rm
+
         # Keep packages we explicitly installed.
         keep = install_misc.query_recorded_installed()
 

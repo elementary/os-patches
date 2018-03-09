@@ -577,14 +577,12 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
                                        quit_button=True, skip_button=False)
 
     def user_info_page_tests(self, username, pwd,
-                             encrypted=False, autologin=False):
+                             autologin=False):
         """ Runs tests for the User Info Page
 
         :param username:*String*, name of user
 
         :param pwd: *String*, password for user
-
-        :param encrypted: *Bool* if true encypts the home directory
 
         :param autologin: *Bool* if true sets the user account to login
                            automagically
@@ -607,8 +605,6 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
 
         user_info_page.create_user(username, pwd)
         # TODO: get these working
-        if encrypted:
-            user_info_page.encrypt_home_dir(encrypt=True)
         if autologin:
             user_info_page.set_auto_login()
 

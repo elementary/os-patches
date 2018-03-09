@@ -1,6 +1,6 @@
-console-setup (1.166ubuntu1~mtrudel1) artful; urgency=medium
+console-setup (1.178ubuntu1) bionic; urgency=low
 
-  * Merge from Debian unstable; remaining changes:
+  * Merge from Debian unstable.  Remaining changes:
     - Add an apport hook.
     - If the locale is C during configuration, only set CHARMAP to ISO-8859-15
       on kFreeBSD; otherwise restore the previous behaviour from before the
@@ -9,7 +9,7 @@ console-setup (1.166ubuntu1~mtrudel1) artful; urgency=medium
       entirely complete, it looks better and is largely good enough.
     - Set keymap and font in the initramfs if possible and sensible.
     - debian/vtrgb, debian/vtrgb.vga,
-      debian/console-setup-linux.setvtrgb.upstart, debian/rules,
+      debian/console-setup-linux.setvtrgb.service, debian/rules,
       debian/console-setup-linux.postinst: use Ubuntu's virtual terminal color
       scheme by default, with a VGA color scheme available as an alternative.
     - Don't copy keyboard-configuration questions to /target in OEM mode.
@@ -45,9 +45,6 @@ console-setup (1.166ubuntu1~mtrudel1) artful; urgency=medium
         configs.
       - Explicitly exit 0, so that postinsts don't fail in the event that
         loadkeys can't find a console.
-    - Add systemd unit for console-setup. That avoids waiting for $remote_fs
-      during early boot. (Note: there is no need to enable it, it gets pulled
-      in through systemd-vconsole-setup.service)
     - Handle unattended upgrades without breaking plymouth when updating
       console fonts.
     - debian/rules: revert hard-coding of a list of "debconf-selectable"
@@ -57,6 +54,250 @@ console-setup (1.166ubuntu1~mtrudel1) artful; urgency=medium
       of "German (Switzerland), since it includes French too.
     - Add console-setup-tty and the udev rule that uses it to set Unicode, font,
       and keyboard mode at early boot.
+    - Keyboard/Makefile: make sure KeyboardNames.pl is built with accurate data
+      from xkb-data.
+    - Don't cat over the keymaps; they're already moved to the right place.
+    - debian/console-setup.postinst: Replace the checking of fgconsole in [1-6]
+      with checking if fgconsole is a tty according to logind. The previous
+      assumption was that a graphical environment would be on vt7, which isn't
+      true with gnome-shell any more.
+    - debian/console-setup.postinst, debian/keyboard-configuration.postinst:
+      Don't call setupcon --force -k any more - it breaks wayland sessions.
+      (LP: #1710637)
+    - debian/control: drop console-setup-freebsd: we don't keep it around since
+      it's uninstallable because vidcontrol/kbdcontrol.
+    - debian/keyboard-configuration.config: re-lower the priority for the layout
+      question that got garbled in the merge.
+    - Don't use console-setup-tty or its udev rule. This dates back to lucid and
+      now systemd is apparently able to handle this correctly. It's now actively
+      breaking graphical sessions. (LP: #1710637) 
+    - debian/control: we also need xkb-data-i18n as a Build-Depends-Indep to
+      build a complete set of translated keyboard layout/variant names.
+    - Drop dependency from console-setup to initramfs-tools |
+      linux-initramfs-tool; this was a versioned dependency used for upgrades,
+      now long obsolete.
+  * Fix previous patches:
+    - Correctly setup console in initramfs again (LP: #1719612)
+    - Make COPYRIGHT a symlink to debian/copyright, and keep various
+      other symlinks in place that were dropped in earlier uploads.
+    - Do some extra work to disable kfreebsd, dh was complaining about
+      unknown packages and failing.
+    - debian/clean: Delete Keyboard/tree-keymaps/ on clean
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 19 Feb 2018 09:29:02 +0100
+
+console-setup (1.178) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Hebrew (he.po) by Yaron Shahrabani
+  * Indonesian (id.po) by Al Qalit
+  * Tajik (tg.po) by Victor Ibragimov
+
+ -- Christian Perrier <bubulle@debian.org>  Thu, 15 Feb 2018 07:22:38 +0100
+
+console-setup (1.177) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Tajik (tg.po) by Victor Ibragimov
+
+ -- Christian Perrier <bubulle@debian.org>  Wed, 31 Jan 2018 08:26:05 +0100
+
+console-setup (1.176) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Norwegian Nynorsk (nn.po) by Petter Reinholdtsen
+  * Tajik (tg.po) by Victor Ibragimov
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 21 Jan 2018 08:19:36 +0100
+
+console-setup (1.175) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Bokmål, Norwegian (nb.po) by Alexander Jansen
+  * Panjabi (pa.po) by Aman ALam
+  * Serbian (sr.po) by Filipovic Dragan
+
+ -- Christian Perrier <bubulle@debian.org>  Fri, 12 Jan 2018 11:53:28 +0100
+
+console-setup (1.174) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Nepali (ne.po) by Jeewal Kunwar
+  * Simplified Chinese (zh_CN.po) by Boyuan Yang
+  * Traditional Chinese (zh_TW.po) by Chang-Chia Tseng
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 23 Dec 2017 16:39:22 +0100
+
+console-setup (1.173) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Esperanto (eo.po) by Felipe Castro
+  * Swedish (sv.po) by Anders Jonsson
+  * Tagalog (tl.po) by Eric Pareja
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 09 Dec 2017 08:07:42 +0100
+
+console-setup (1.172) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Hungarian (hu.po) by Dr. Nagy Elemér Károly
+  * Lithuanian (lt.po) by Rimas Kudelis
+  * Norwegian Nynorsk (nn.po) by Allan Nordhøy
+
+ -- Christian Perrier <bubulle@debian.org>  Wed, 29 Nov 2017 06:51:08 +0100
+
+console-setup (1.171) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Greek (el.po) by Sotirios Vrachas
+  * Estonian (et.po) by Kristjan Räts
+  * Swedish (sv.po) by Anders Jonsson
+
+ -- Christian Perrier <bubulle@debian.org>  Wed, 22 Nov 2017 20:09:22 +0100
+
+console-setup (1.170) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Panjabi (pa.po) by A S Alam
+
+ -- Christian Perrier <bubulle@debian.org>  Tue, 31 Oct 2017 08:20:17 +0100
+
+console-setup (1.169) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Slovenian (sl.po) by Vanja Cvelbar
+
+ -- Christian Perrier <bubulle@debian.org>  Wed, 18 Oct 2017 06:51:11 +0200
+
+console-setup (1.168) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Latvian (lv.po) by Rūdolfs Mazurs
+
+ -- Christian Perrier <bubulle@debian.org>  Fri, 13 Oct 2017 08:34:17 +0200
+
+console-setup (1.167) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Greek (el.po) by Sotirios Vrachas
+  * Hebrew (he.po) by Lior Kaplan
+  * Albanian (sq.po) by Silva Arapi
+
+ -- Christian Perrier <bubulle@debian.org>  Fri, 15 Sep 2017 06:16:35 +0200
+
+console-setup (1.166ubuntu7) artful; urgency=medium
+
+  * Drop dependency from console-setup to initramfs-tools |
+    linux-initramfs-tool; this was a versioned dependency used for upgrades,
+    now long obsolete.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 05 Oct 2017 12:04:08 -0700
+
+console-setup (1.166ubuntu6) artful; urgency=medium
+
+  * debian/control: we also need xkb-data-i18n as a Build-Depends-Indep to
+    build a complete set of translated keyboard layout/variant names.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 28 Sep 2017 17:46:56 -0400
+
+console-setup (1.166ubuntu5) artful; urgency=medium
+
+  * Don't use console-setup-tty or its udev rule. This dates back to lucid and
+    now systemd is apparently able to handle this correctly. It's now actively
+    breaking graphical sessions. (LP: #1710637) 
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 18 Sep 2017 16:36:50 -0400
+
+console-setup (1.166ubuntu4) artful; urgency=medium
+
+  * Keyboard/Makefile: Add a rule to make KeyboardNames.pl, needed by ubiquity
+    (see Debian Bug#874474)
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Wed, 06 Sep 2017 13:39:01 +0100
+
+console-setup (1.166ubuntu3) artful; urgency=medium
+
+  * debian/keyboard-configuration.config: re-lower the priority for the layout
+    question that got garbled in the merge.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 05 Sep 2017 14:58:49 -0400
+
+console-setup (1.166ubuntu2) artful; urgency=medium
+
+  * debian/control: drop console-setup-freebsd: we don't keep it around since
+    it's uninstallable because vidcontrol/kbdcontrol.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 23 Aug 2017 19:06:27 -0400
+
+console-setup (1.166ubuntu1) artful; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * Merge from Debian unstable; remaining changes:
+    - Add an apport hook.
+    - If the locale is C during configuration, only set CHARMAP to ISO-8859-15
+      on kFreeBSD; otherwise restore the previous behaviour from before the
+      kFreeBSD port of using UTF-8 in that case.
+    - Change the default font from Fixed to VGA for Lat15; while it's not
+      entirely complete, it looks better and is largely good enough.
+    - Set keymap and font in the initramfs if possible and sensible.
+    - debian/vtrgb, debian/vtrgb.vga,
+      debian/console-setup-linux.setvtrgb.service, debian/rules,
+      debian/console-setup-linux.postinst: use Ubuntu's virtual terminal color
+      scheme by default, with a VGA color scheme available as an alternative.
+    - Don't copy keyboard-configuration questions to /target in OEM mode.
+      oem-config will ask them later, and copying these confuses it.
+    - Tolerate absence of setupcon in postinst scripts.
+    - Added templates for keyboard detection.
+    - If the detect-keyboard debconf plugin is available
+      (cdebconf-newt-detect-keys in the installer), then offer to use it to
+      detect the keyboard layout.
+    - Fix default keyboard selection for language/country combinations
+      lacking a proper combined locale.
+    - Map ppc64el/* to XKBMODEL=pc105.
+    - keyboard_present.sh: Quiet config/postinst when we have no USB devices.
+    - debian/preprocessor: revert the removal of keyboard names (for size) of
+      console-setup-udeb: we do need those, since we don't use the simplified
+      xkb-keymap template from Debian just yet: this way we can still show
+      country/language names when selecting a keyboard, layout or variant.
+    - Don't make debian/copyright a symlink to COPYRIGHT, this is disallowed
+      by the Ubuntu archive installer.
+    - Include pc105.tree for ubiquity; make sure it gets built.
+    - Add Keyboard/Makefile rule to build pc105.tree.
+    - Fix command injection in ckbcomp.
+    - Generate a locale locally for translating keyboard names in
+      kbdnames-maker.
+    - xmlreader, KeyboardNames.pl: Added model entry to skip model selection.
+    - setupcon:
+      - the variables are taken from a config file which, if changed,
+        invalidates the cache.
+      - there is only ever one keyboard map per system.
+      - the system should not have to resolve filenames to find the keymap cache
+        on boot.
+      - Map XKBMODEL=SKIP to '' for compatibility with existing
+        configs.
+      - Explicitly exit 0, so that postinsts don't fail in the event that
+        loadkeys can't find a console.
+    - Handle unattended upgrades without breaking plymouth when updating
+      console fonts.
+    - debian/rules: revert hard-coding of a list of "debconf-selectable"
+      layouts for the udebs, since we don't use this debconf question in Ubuntu
+      and all layouts are selectable.
+    - Make sure we give a meaningful name to ch layouts: "Switzerland" instead
+      of "German (Switzerland), since it includes French too.
+    - Add console-setup-tty and the udev rule that uses it to set Unicode, font,
+      and keyboard mode at early boot.
+  * Keyboard/Makefile: make sure KeyboardNames.pl is built with accurate data
+    from xkb-data.
+  * Don't cat over the keymaps; they're already moved to the right place.
+
+  [ Iain Lane ]
+  * debian/console-setup.postinst: Replace the checking of fgconsole in [1-6]
+    with checking if fgconsole is a tty according to logind. The previous
+    assumption was that a graphical environment would be on vt7, which isn't
+    true with gnome-shell any more.
+  * debian/console-setup.postinst, debian/keyboard-configuration.postinst:
+    Don't call setupcon --force -k any more - it breaks wayland sessions.
+    (LP: #1710637)
 
  -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 10 Aug 2017 15:06:17 -0400
 
@@ -266,6 +507,28 @@ console-setup (1.143) unstable; urgency=medium
     deprecated encoding pragma.
 
  -- Christian Perrier <bubulle@debian.org>  Sun, 22 May 2016 08:47:29 +0200
+
+console-setup (1.142ubuntu8) artful; urgency=medium
+
+  * Drop upstart system jobs.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Mon, 21 Aug 2017 16:15:49 +0100
+
+console-setup (1.142ubuntu7) artful; urgency=medium
+
+  * Do the same as ubuntu6 in Keyboard/compose_translator too.
+  * Cherry-pick b887014dc243d3966bbb6bda975803798df7c33f from Samuel Thibaut
+    and 6800af170ff5017b67b7e0b85b61a6176eb56361 from Gregor Hermann, as well
+    as fixing Keyboard/kbdnames - perl doesn't look at `.' any more.
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Mon, 21 Aug 2017 10:48:31 +0100
+
+console-setup (1.142ubuntu6) artful; urgency=medium
+
+  * Use pragma utf8 instead of the deprecated encoding pragma. Shamelessly
+    copied from Debian's 1.143 change by Anton Zinoviev.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 04 Aug 2017 15:23:53 -0400
 
 console-setup (1.142ubuntu5) yakkety; urgency=medium
 
@@ -4501,3 +4764,4 @@ console-setup (1.0) unstable; urgency=low
     and pointing few typos).
 
  -- Anton Zinoviev <zinoviev@debian.org>  Sat, 14 Jan 2006 16:20:35 +0200
+

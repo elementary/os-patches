@@ -1,1 +1,14 @@
-console-setup-linux.keyboard-setup.service
+[Unit]
+Description=Set the console keyboard layout
+DefaultDependencies=no
+Before=local-fs-pre.target
+Wants=local-fs-pre.target
+ConditionPathExists=/bin/setupcon
+
+[Service]
+Type=oneshot
+ExecStart=/lib/console-setup/keyboard-setup.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

@@ -1,3 +1,37 @@
+ubiquity (18.04.3) bionic; urgency=medium
+
+  [ Sebastien Bacher ]
+  * Remove the encrypted userdir option from the gtk installer since
+    ecryptfs is going to move to universe. The keep the base code in case 
+    the option is added back later using another technology.
+
+  [ Iain Lane ]
+  * Fix a crash in the KDE frontend - don't refer to a widget that doesn't
+    exist. Properly hide the miminal install label and checkbox. (LP:
+    #1752323)
+  * install_misc: Use the `get_casper' function to properly get the location
+    of the live media path.
+
+ -- Iain Lane <iain.lane@canonical.com>  Wed, 28 Feb 2018 17:03:39 +0000
+
+ubiquity (18.04.2) bionic; urgency=medium
+
+  [ Didier Roche ]
+  * Add a minimal installation mode, which removes most programs from the
+    final installation. The precise list of programs to remove is supplied as
+    part of the image, and is constructed from a file in the seeds.
+
+  [ Iain Lane ]
+  * Automatic update of included source packages: console-setup
+    1.178ubuntu1, hw-detect 1.117ubuntu6, partman-auto 134ubuntu8,
+    partman-basicmethods 66, partman-lvm 122.
+  * Some small tweaks to didrocks' minimal mode
+    - update the path to the removal file
+    - livecd-rootfs supplies us with a manifest-minimal-remove file that has
+      no blank lines and no comments, so no need for us to strip them
+
+ -- Iain Lane <iain.lane@canonical.com>  Mon, 26 Feb 2018 15:16:14 +0000
+
 ubiquity (18.04.1) bionic; urgency=medium
 
   [ Dimitri John Ledkov ]
