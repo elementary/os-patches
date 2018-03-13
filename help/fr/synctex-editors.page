@@ -50,6 +50,12 @@
       <mal:email>leonor.palazzo@gmail.com</mal:email>
       <mal:years>2015</mal:years>
     </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Guillaume Bernard</mal:name>
+      <mal:email>associations@guillaume-bernard.fr</mal:email>
+      <mal:years>2018</mal:years>
+    </mal:credit>
   </info>
 
 <title>Éditeurs pris en charge</title>
@@ -59,21 +65,13 @@
 </section>
 
 <section id="vim-latex"><title>Vim-latex</title>
-<p>
-The <app>gedit</app> plugin contains a python script (<file>evince_dbus.py</file>) that can be used to get SyncTeX working with Vim.
-In order to use vim-latex together with the <app>document viewer</app> you need to follow the next steps:
-</p>
+<p>Le greffon <app>gedit</app> contient un script python (<file>evince_dbus.py</file>) qui peut être utilisé pour faire fonctionner SyncTeX avec Vim. Afin d’utiliser vim-latex conjointement avec le <app>Visionneur de documents</app>, vous devez suivre les étapes suivantes :</p>
 <steps>
  <item>
-  <p>
-     Copy the <file>evince_dbus.py</file> to some directory in your path and give it +x permissions.
-
- </p>
+  <p>Copiez le fichier <file>evince_dbus.py</file> dans un répertoire contenu dans votre variable d’environnement PATH et donnez-lui les permissions +x.</p>
  </item>
  <item>
-  <p>
-     Modify your <file>~/.vimrc</file> file and add the following lines.
-    </p>
+  <p>Modifiez votre fichier <file>~/.vimrc</file> et ajoutez les lignes suivantes.</p>
 <code>
 let g:Tex_ViewRule_pdf = 'evince_dbus.py'
 let g:Tex_DefaultTargetFormat = 'pdf'
@@ -82,7 +80,7 @@ let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
 
   </item>
   <item>
-   <p>Vous pouvez maintenant utiliser Recherche en avant à partir de vim-latex en saisissant \ls. La recherche en arrière n'est pas encore prise en charge.</p>
+   <p>Vous pouvez maintenant utiliser Recherche en avant à partir de vim-latex en saisissant \ls. La recherche en arrière n’est pas encore prise en charge.</p>
   </item>
 </steps>
 </section>

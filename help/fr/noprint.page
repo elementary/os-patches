@@ -3,7 +3,7 @@
 
   <info>
     <link type="guide" xref="index#printing"/>
-    <desc>Il se peut que l'auteur ait défini des restrictions pour l'impression du document.</desc>
+    <desc>Il se peut que l’auteur ait défini des restrictions pour l’impression du document.</desc>
     <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
     <credit type="author">
       <name>Phil Bull</name>
@@ -49,30 +49,36 @@
       <mal:email>leonor.palazzo@gmail.com</mal:email>
       <mal:years>2015</mal:years>
     </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Guillaume Bernard</mal:name>
+      <mal:email>associations@guillaume-bernard.fr</mal:email>
+      <mal:years>2018</mal:years>
+    </mal:credit>
   </info>
 
-<title>Impossible d'imprimer un document</title>
+<title>Impossible d’imprimer un document</title>
 <section id="why">
- <title>Causes possibles d'échec d'impression</title>
-<p>Un document peut ne pas s'imprimer pour une des raisons suivantes :</p>
+ <title>Causes possibles d’échec d’impression</title>
+<p>Un document peut ne pas s’imprimer pour une des raisons suivantes :</p>
  <list>
-  <item><p>problèmes d'imprimante ou</p></item>
-  <item><p>restrictions d'impression PDF.</p></item>
+  <item><p>problèmes d’imprimante ou</p></item>
+  <item><p>restrictions d’impression PDF.</p></item>
  </list>
 </section>
 
 
 <section id="printer-problems">
-  <title>Problèmes d'imprimante</title>
-  <p>Il y a beaucoup de raisons qui pourraient empêcher votre imprimante de fonctionner, par exemple, manque de papier ou d'encre ou non connexion ou endommagement.</p>
+  <title>Problèmes d’imprimante</title>
+  <p>Il y a beaucoup de raisons qui pourraient empêcher votre imprimante de fonctionner, par exemple, manque de papier ou d’encre ou non connexion ou endommagement.</p>
 
   <p>Pour vérifier que votre imprimante imprime correctement :</p>
   <steps>
-   <item><p>Cliquez sur votre nom dans la barre supérieure de l'écran et choisissez <gui>Préférences du système</gui>.</p></item>
+   <item><p>Cliquez sur votre nom dans la barre supérieure de l’écran et choisissez <gui>Préférences du système</gui>.</p></item>
    <item><p>Cliquez sur votre imprimante dans la liste.</p></item>
    <item><p>Cliquez sur <gui>Imprimer une page de test</gui>. Une page devrait être envoyée à votre imprimante.</p>
 <note>
- <p>Si cela ne marche pas, consultez <link href="help:gnome-help/printing">Aide pour l'impression</link>. Vous aurez aussi certainement besoin de consulter le manuel de votre imprimante pour voir ce que vous pouvez faire.</p>
+ <p>Si cela ne marche pas, consultez <link href="help:gnome-help/printing">Aide pour l’impression</link>. Vous aurez aussi certainement besoin de consulter le manuel de votre imprimante pour voir ce que vous pouvez faire.</p>
 </note>
 
 </item>
@@ -82,22 +88,22 @@
 </section>
 
 <section id="pdf-restrictions">
-  <title>Restrictions d'impression PDF</title>
-  <p>Certains documents PDF possèdent un paramètre qui vous empêche de les imprimer. Les auteurs peuvent définir cette restriction d'impression lorsqu'ils écrivent un document. Le <app>Visionneur de documents</app> outrepasse par défaut cette restriction, mais il se peut que vous souhaitiez vérifier que cela n'a pas été désactivé :</p>
+  <title>Restrictions d’impression PDF</title>
+  <p>Certains documents PDF possèdent un paramètre qui vous empêche de les imprimer. Les auteurs peuvent définir cette restriction d’impression lorsqu’ils écrivent un document. Le <app>Visionneur de documents</app> outrepasse par défaut cette restriction, mais il se peut que vous souhaitiez vérifier que cela n’a pas été désactivé :</p>
 
   <steps>
     <item>
       <p>Appuyez sur <keyseq><key>Alt</key><key>F2</key></keyseq> pour ouvrir la boîte de dialogue Lancer une application.</p>
     </item>
     <item>
-      <p>Saisissez <input>dconf-editor</input> dans la boîte de texte et cliquez sur <gui>Lancer</gui>. L'éditeur de configuration s'ouvre.</p>
+      <p>Saisissez <input>dconf-editor</input> dans la boîte de texte et cliquez sur <gui>Lancer</gui>. L’éditeur de configuration s’ouvre.</p>
     </item>
     <item><p>Déplacez-vous vers <sys>/org/gnome/evince</sys> en utilisant le panneau latéral.</p></item>
     <item>
-      <p>Vérifiez que l'option <gui>override_restrictions</gui> est cochée.</p>
+      <p>Vérifiez que l’option <gui>override_restrictions</gui> est cochée.</p>
     </item>
     <item>
-      <p>Retournez dans le <app>Visionneur de documents</app> et essayez d'imprimer le document à nouveau.</p>
+      <p>Retournez dans le <app>Visionneur de documents</app> et essayez d’imprimer le document à nouveau.</p>
     </item>
   </steps>
 </section>

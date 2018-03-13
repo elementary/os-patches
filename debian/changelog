@@ -1,3 +1,11 @@
+evince (3.27.92-1) unstable; urgency=medium
+
+  * New upstream release candidate
+  * Update install files for moved AppStream metadata
+  * Release to unstable
+
+ -- Jeremy Bicha <jbicha@debian.org>  Sat, 10 Mar 2018 21:31:03 -0500
+
 evince (3.27.91-1) experimental; urgency=medium
 
   * New upstream development release
@@ -71,7 +79,7 @@ evince (3.24.1-1) unstable; urgency=medium
 
 evince (3.22.1-4) unstable; urgency=high
 
-  * d/p/comics-Remove-support-for-tar-and-tar-like-commands.patch: 
+  * d/p/comics-Remove-support-for-tar-and-tar-like-commands.patch:
     Fix possible command injection vulnerability in CBT handler, this patch
     removes handling of the CBT file format completely and evince now requires
     unrar, unzip or 7z to open cbr, cbz or cb7 files (CVE-2017-1000083)
@@ -532,7 +540,7 @@ evince (3.2.0-2) unstable; urgency=low
 evince (3.2.0-1) experimental; urgency=low
 
   [ Josselin Mouette ]
-  * 03_nodisplay.patch: drop NoDisplay=true from the desktop file, so 
+  * 03_nodisplay.patch: drop NoDisplay=true from the desktop file, so
     that it appears in the shell. Closes: #427576.
 
   [ Michael Biebl ]
@@ -565,7 +573,7 @@ evince (3.0.2-1) experimental; urgency=low
 
   [ Josselin Mouette ]
   * bug-presubj: please document where to report rendering bugs.
-  * evince.mime: dropped. We have desktop files to handle MIME 
+  * evince.mime: dropped. We have desktop files to handle MIME
     associations, no need to maintain an alternate system by hand.
     Closes: #619564, #627027, #551734, #581441.
 
@@ -689,7 +697,7 @@ evince (2.30.3-1) unstable; urgency=low
 evince (2.30.1-3) unstable; urgency=low
 
   * Switch to 3.0 source format.
-  * 01_dotdir_crash.patch: stolen upstream. Fix a crash when 
+  * 01_dotdir_crash.patch: stolen upstream. Fix a crash when
     .gnome2/evince doesn’t exist. Closes: #580647, #583569.
 
  -- Josselin Mouette <joss@debian.org>  Sat, 29 May 2010 11:15:27 +0200
@@ -762,9 +770,9 @@ evince (2.28.0-1) experimental; urgency=low
   * Disable D-Bus in the GTK+ build.
   * Add missing -dev dependencies.
   * Bump shlibs for libevince1.
-  * 01_fix_last_page_in_presentations.patch, 60_gzdvi-support.patch: 
+  * 01_fix_last_page_in_presentations.patch, 60_gzdvi-support.patch:
     dropped, merged upstream.
-  * Add build-dependency on libgs-dev because of the broken 
+  * Add build-dependency on libgs-dev because of the broken
     libspectre.la.
 
  -- Josselin Mouette <joss@debian.org>  Fri, 25 Sep 2009 19:06:36 +0200
@@ -808,16 +816,16 @@ evince (2.26.2-1) unstable; urgency=low
   [ Josselin Mouette ]
   * Don’t install any .la’s, and only the relevant .a’s.
   * Use ${gnome:Depends}.
-  * Remove evince-gtk-dbg, the differences with evince are minor now and 
-    it will not work with the backends. Let’s hope the build-ids come 
+  * Remove evince-gtk-dbg, the differences with evince are minor now and
+    it will not work with the backends. Let’s hope the build-ids come
     soon to fix that mess.
   * Don’t split the docs, given their size.
-  * Ship the backends with the library; the library needs them anyway, 
+  * Ship the backends with the library; the library needs them anyway,
     and they are in a correctly versioned directory.
   * Install evince-thumbnailer.1 in evince-common.
   * Install the XPM in evince-common.
   * Fixup some dependencies.
-  * Don’t use symlinks for /usr/share/doc, it would require the 
+  * Don’t use symlinks for /usr/share/doc, it would require the
     postinst dance.
   * Correctly remove the doc from evince-common.
 
@@ -854,10 +862,10 @@ evince (2.26.1-1) unstable; urgency=low
   * Remove useless build-dependency on libglade.
   * New upstream release.
   * Add lintian override for versionless GPL, we link to both.
-  * Reinstate evince-gtk, since we can now disable GConf and 
+  * Reinstate evince-gtk, since we can now disable GConf and
     gnome-keyring.
   * Don’t install .la and .a files in the moved places.
-  * Remove files in the install/evince* targets so that GConf schemas 
+  * Remove files in the install/evince* targets so that GConf schemas
     are removed.
 
  -- Josselin Mouette <joss@debian.org>  Thu, 14 May 2009 08:27:03 +0200
@@ -872,7 +880,7 @@ evince (2.24.2-2) unstable; urgency=low
   * Let evince-dbg depend on ${misc:Depends}
 
   [ Josselin Mouette ]
-  * Revert the nautilus requirement, it will be handled later by 
+  * Revert the nautilus requirement, it will be handled later by
     binNMUs.
 
  -- Josselin Mouette <joss@debian.org>  Sun, 15 Mar 2009 13:54:00 +0100
@@ -889,7 +897,7 @@ evince (2.24.2-1) experimental; urgency=low
 
   [ Josselin Mouette ]
   * New upstream release.
-  * Require nautilus 2.22 to build the extension for the correct 
+  * Require nautilus 2.22 to build the extension for the correct
     version.
 
  -- Josselin Mouette <joss@debian.org>  Wed, 31 Dec 2008 16:41:58 +0100
@@ -944,8 +952,8 @@ evince (2.22.2-3) unstable; urgency=low
 evince (2.22.2-2) unstable; urgency=low
 
   * 01_external_libgnome.patch: use libgnome to launch external links
-    instead of GIO, which requires gvfs installed for it to work. This 
-    is a temporary measure until gvfs becomes used by default in  
+    instead of GIO, which requires gvfs installed for it to work. This
+    is a temporary measure until gvfs becomes used by default in
     nautilus. Closes: #484032.
 
  -- Josselin Mouette <joss@debian.org>  Fri, 18 Jul 2008 17:16:23 +0200
@@ -1078,7 +1086,7 @@ evince (0.9.0-1) experimental; urgency=low
     + Print button for preview mode
     + Remember print settings
     + History button improvements
-   Some bugfixes: 
+   Some bugfixes:
     + Fixes for issues with fullscreen toolbar
     + Fix for crash in comics backend when filename contains quote
     + Fix unhelpful messages on invalid URLs. (Closes: #415692)
@@ -1095,7 +1103,7 @@ evince (0.8.1-2) unstable; urgency=low
   * Upload to unstable; drop check-dist include.
   * debian/control.in:
      * Wrap build-depends and re-order them
-     * Replace b-d on "libkpathsea4-dev | libkpathsea-dev" by 
+     * Replace b-d on "libkpathsea4-dev | libkpathsea-dev" by
        "libkpathsea-dev", which is a real package nowadays.
      * Add Suggests: unrar
      * Fix little oversight in evince-dbg description
@@ -1133,7 +1141,7 @@ evince (0.8.0-1) experimental; urgency=low
   * Update and fix debian/copyright.
   * Add manpage for evince-thumbnailer and install it.
   * New upstream release:
-    + debian/control: 
+    + debian/control:
       - Updated (build-)depends (Closes: #332633, #373162)
       - Add dependency on gnome-icon-theme (>= 2.17.1), as evince uses
         some icons from there.
@@ -1333,14 +1341,14 @@ evince (0.1.5-1) unstable; urgency=low
     - support for DnD of files.
   * debian/control.in:
     - Depends on gs (Closes: #294512).
-    - Description update based on the text sent 
+    - Description update based on the text sent
       by Andre Lehovich <andrel@U.Arizona.EDU> (Closes: #294519).
     - Provides pdf-viewer, postscript-viewer (Closes: #294516).
   * debian/evince.xml, debian/evince.1:
-    - manpage written by Lars Wirzenius <liw@iki.fi> with some changes 
+    - manpage written by Lars Wirzenius <liw@iki.fi> with some changes
       by Andre Lehovich <andrel@U.Arizona.EDU> (Closes: #295095).
   * po/pt_BR.po:
-    - translation update by 
+    - translation update by
       Fábio Brito d'Araújo e Oliveira <fabio@debian-ba.org>.
 
  -- Sebastien Bacher <seb128@debian.org>  Sat, 26 Feb 2005 23:34:50 +0100
@@ -1355,7 +1363,7 @@ evince (0.1.4-1) unstable; urgency=low
   * debian/control.in:
     - don't mention DVI in the description (Closes: #294011).
     - typos fix in the description (Closes: #294348).
-  
+
  -- Sebastien Bacher <seb128@debian.org>  Wed,  9 Feb 2005 15:13:54 +0100
 
 evince (0.1.3-1) unstable; urgency=low

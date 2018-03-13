@@ -4,7 +4,7 @@
   <info>
     <link type="guide" xref="index#advanced"/>
     <title type="sort">Ligne de commande</title>
-    <desc>La commande <cmd>evince</cmd> peut ouvrir n'importe quel nombre de fichiers, à la page désirée et dans divers modes.</desc>
+    <desc>La commande <cmd>evince</cmd> peut ouvrir n’importe quel nombre de fichiers, à la page désirée et dans divers modes.</desc>
     <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
     <revision pkgversion="3.24" version="0.2" date="2017-09-17" status="final"/>
     <credit type="author">
@@ -54,6 +54,12 @@
       <mal:email>leonor.palazzo@gmail.com</mal:email>
       <mal:years>2015</mal:years>
     </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Guillaume Bernard</mal:name>
+      <mal:email>associations@guillaume-bernard.fr</mal:email>
+      <mal:years>2018</mal:years>
+    </mal:credit>
   </info>
 
 <title>La ligne de commande</title>
@@ -62,27 +68,24 @@
 <screen>evince fichier.pdf</screen>
 <p>Vous pouvez ouvrir plusieurs fichiers en saisissant les noms des fichiers après la commande <cmd>evince</cmd>, en les séparant par un espace :</p>
 <screen>evince fichier1.pdf fichier2.pdf</screen>
-<p>Le <app>Visionneur de documents</app> prend également en charge les fichiers sur le Web. Par exemple, après la commande <cmd>evince</cmd> vous pouvez fournir l'emplacement d'un fichier sur le Web :</p>
+<p>Le <app>Visionneur de documents</app> prend également en charge les fichiers sur le Web. Par exemple, après la commande <cmd>evince</cmd> vous pouvez fournir l’emplacement d’un fichier sur le Web :</p>
 <screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
 <section id="open">
-    <title>Ouverture d'un document à une page précise</title>
-    <p>Vous pouvez utiliser l'option <cmd>--page-label</cmd> pour ouvrir un document à une page précise. Par exemple, pour ouvrir un document à la page 3, vous devez saisir :</p>
+    <title>Ouverture d’un document à une page précise</title>
+    <p>Vous pouvez utiliser l’option <cmd>--page-label</cmd> pour ouvrir un document à une page précise. Par exemple, pour ouvrir un document à la page 3, vous devez saisir :</p>
     <screen>evince --page-label=3 fichier.pdf</screen>
-    <p>
-    The page label should be in the same format as the page number displayed in
-    the <app>Document Viewer</app> title bar.
-    </p>
+    <p>Le numéro de page doit être dans le même format que le numéro affiché dans la barre de titre du <app>Visionneur de documents</app>.</p>
 </section>
 <section id="fullsreen">
-    <title>Ouverture d'un document en mode plein écran</title>
+    <title>Ouverture d’un document en mode plein écran</title>
     <screen>evince --fullscreen fichier.pdf</screen>
 </section>
 <section id="presentation">
-    <title>Ouverture d'un document en mode présentation</title>
+    <title>Ouverture d’un document en mode présentation</title>
     <screen>evince --presentation fichier.pdf</screen>
 </section>
 <section id="preview">
-    <title>Ouverture d'un document en mode prévisualisation</title>
+    <title>Ouverture d’un document en mode prévisualisation</title>
     <screen>evince --preview fichier.pdf</screen>
 </section>
 </page>

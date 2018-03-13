@@ -1,6 +1,199 @@
+commit 493afe9bea52edc52edadf89c358d0823a83ac7e
+Author: José Aliste <jose.aliste@gmail.com>
+Date:   2018-03-05
+
+    Release 3.27.92
+
+M	NEWS
+M	configure.ac
+
+commit fceafdafb986b28a093ac0e8df9d0b278506f880
+Author: Joe Hansen <joedalton2@yahoo.dk>
+Date:	2018-03-05
+
+    Updated Danish translation
+
+M	help/da/da.po
+
+commit 95c5322f469cef0993e6b48669cfec13d514a293
+Author: Christian Kirbach <Christian.Kirbach@gmail.com>
+Date:	2018-03-05
+
+    Update German translation
+
+M	help/de/de.po
+
+commit d4c9410a18d9f9fcbac626b6d9567deb2d109521
+Author: Alan Mortensen <alanmortensen.am@gmail.com>
+Date:	2018-03-03
+
+    Updated Danish translation
+
+M	po/da.po
+
+commit f84d7d8e44b59850ac4733fcc82a6e70b8179a1c
+Author: Aurimas Černius <aurisc4@gmail.com>
+Date:	2018-03-03
+
+    Updated Lithuanian translation
+
+M	po/lt.po
+
+commit b3f49f4210410e170a0be3c9162049e74664f500
+Author: Jonas Hahnfeld <hahnjo@hahnjo.de>
+Date:	2017-08-19
+
+    view: Redraw ev-view-presentation when setting normal and black mode.
+
+    The black and normal mode are the same from the CSS point of view.
+    The difference is that in the draw function the page is not drawn
+    in black mode. Hence, we need to explicitly queue a redraw in these
+    cases. Since setting the white mode add a CSS class, this queues
+    the redraw for us.
+
+    Fixes https://bugzilla.gnome.org/show_bug.cgi?id=772390.
+
+M	libview/ev-view-presentation.c
+
+commit 10e877d8684fd3743540f245b1b6606ebdcdb67f
+Author: José Aliste <jose.aliste@gmail.com>
+Date:	2018-02-27
+
+    shell: Unbind Ctrl-Left and Ctrl-Right from the scrolledwindow
+
+    Bug #727529 was introduced when fixing #676040. The rational of
+    the latter fix is to forward keypress events to the focused
+    widget before processing Application shortcuts. This allows that
+    if, for e.g., you Ctrl+left on the search entry, then you jump
+    between words instead of the default Rotate left action. This is
+    the intended behavior.
+
+    But GtkScrolledWindow binds Ctrl-Left and Ctrl-Right. Hence,
+    these actions are handled instead of the Rotate left and Rotate
+    right shortcuts defined by the application in the case the horizontal
+    scrollbar is visible.
+
+    This is not intended, so unbinding these shortcuts
+    with CSS allows to Ctrl left and ctrl right to rotate independent
+    of whether
+    the scrollbars are visible or not.
+
+    This solves
+    https://bugzilla.gnome.org/show_bug.cgi?id=727529
+
+M	shell/evince.css
+
+commit 589ff4483e38283febcee5240658d2fc852f38d9
+Author: GNOME Translation Robot <gnome-sysadmin@gnome.org>
+Date:	2018-03-01
+
+    Update Scottish Gaelic translation
+
+    (cherry picked from commit ea9f335f4517f84cfad815387b4d2062a323aa36)
+
+M	po/gd.po
+
+commit c2138a7273946402c8f056c83da8a7de227e830a
+Author: Baurzhan Muftakhidinov <baurthefirst@gmail.com>
+Date:	2018-02-28
+
+    Update Kazakh translation
+
+M	po/kk.po
+
+commit c7daa61967a16fa81e9ae1acf70b488694da64e2
+Author: Trần Ngọc Quân <vnwildman@gmail.com>
+Date:	2018-02-27
+
+    Updated Vietnamese translation
+
+    Signed-off-by: Trần Ngọc Quân <vnwildman@gmail.com>
+
+M	po/vi.po
+
+commit 6df94f1946fb2fb04e3684a250353ba555ca48a5
+Author: Guillaume Bernard <associations@guillaume-bernard.fr>
+Date:	2018-02-26
+
+    Update French translation
+
+M	help/fr/fr.po
+
+commit 17c01a2a082c65636a7b754142cc73b11d3cfcf0
+Author: Guillaume Bernard <associations@guillaume-bernard.fr>
+Date:	2018-02-26
+
+    Update French translation
+
+M	po/fr.po
+
+commit b52c6c92695c0d71ffcbca52cbe54f172d8e4198
+Author: Dušan Kazik <prescott66@gmail.com>
+Date:	2018-02-25
+
+    Update Slovak translation
+
+M	po/sk.po
+
+commit b9032b0080ffad6fd8301c1cfbb7fee289136a90
+Author: Rūdolfs Mazurs <rudolfsm@src.gnome.org>
+Date:	2018-02-25
+
+    Update Latvian translation
+
+M	po/lv.po
+
+commit d8e9fcd2aa90595518b81082f93f4af6c5aa30b9
+Author: Hongmin Yang <hongminy@naver.com>
+Date:	2018-02-25
+
+    Update Korean translation
+
+M	po/ko.po
+
+commit 1373e6d7030079166e26a2f32c1e48e0f9d4b173
+Author: Cheng-Chia Tseng <pswo10680@gmail.com>
+Date:	2018-02-24
+
+    Update Chinese (Taiwan) translation
+
+M	po/zh_TW.po
+
+commit 1166a609e80fa8a4349a86cdaba21f9fe934708a
+Author: GNOME Translation Robot <gnome-sysadmin@gnome.org>
+Date:	2018-02-22
+
+    Update Dutch translation
+
+M	po/nl.po
+
+commit 8c9201ebecea3e4a0a5ffb9171d296baa4602f75
+Author: Jeremy Bicha <jbicha@ubuntu.com>
+Date:	2018-02-21
+
+    build: Install more appstream metadata to non-deprecated location
+
+    https://bugzilla.gnome.org/show_bug.cgi?id=790079
+
+M	backend/comics/Makefile.am
+M	backend/djvu/Makefile.am
+M	backend/dvi/Makefile.am
+M	backend/pdf/Makefile.am
+M	backend/ps/Makefile.am
+M	backend/tiff/Makefile.am
+M	backend/xps/Makefile.am
+
+commit 380b4dc081793a6053395470dbc99cb409d19cce
+Author: José Aliste <jose.aliste@gmail.com>
+Date:	2018-02-20
+
+    Add description to the evince.doap and myself as a maintainer.
+
+M	evince.doap
+
 commit f96a30ff4ed939af428c5e8cff5397dab6d7c186
 Author: José Aliste <jose.aliste@gmail.com>
-Date:   2018-02-20
+Date:	2018-02-20
 
     Release 3.27.91
 
