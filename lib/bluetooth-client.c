@@ -59,6 +59,7 @@ typedef struct _BluetoothClientPrivate BluetoothClientPrivate;
 
 struct _BluetoothClientPrivate {
 	GDBusObjectManager *manager;
+	GCancellable *cancellable;
 	GtkTreeStore *store;
 	GtkTreeRowReference *default_adapter;
 };
@@ -450,6 +451,7 @@ device_removed (const char      *path,
 	GtkTreeIter iter;
 
 	if (get_iter_from_path(priv->store, &iter, path) == TRUE) {
+		/* Note that removal can also happen from adapter_removed. */
 		g_signal_emit (G_OBJECT (client), signals[DEVICE_REMOVED], 0, path);
 		gtk_tree_store_remove(priv->store, &iter);
 	}
@@ -634,8 +636,9 @@ adapter_removed (GDBusObjectManager   *manager,
 		 BluetoothClient      *client)
 {
 	BluetoothClientPrivate *priv = BLUETOOTH_CLIENT_GET_PRIVATE(client);
-	GtkTreeIter iter;
+	GtkTreeIter iter, childiter;
 	gboolean was_default;
+	gboolean have_child;
 
 	if (get_iter_from_path (priv->store, &iter, path) == FALSE)
 		return;
@@ -645,6 +648,22 @@ adapter_removed (GDBusObjectManager   *manager,
 
 	if (!was_default)
 		return;
+
+	/* Ensure that all devices are removed. This can happen if bluetoothd
+	 * crashes as the "object-removed" signal is emitted in an undefined
+	 * order. */
+	have_child = gtk_tree_model_iter_children (priv->store, &childiter, &iter);
+	while (have_child) {
+		GDBusProxy *object;
+
+		gtk_tree_model_get (GTK_TREE_MODEL(priv->store), &childiter,
+				    BLUETOOTH_COLUMN_PROXY, &object, -1);
+
+		g_signal_emit (G_OBJECT (client), signals[DEVICE_REMOVED], 0, g_dbus_proxy_get_object_path (object));
+		g_object_unref (object);
+
+		have_child = gtk_tree_store_remove (priv->store, &childiter);
+	}
 
 	g_clear_pointer (&priv->default_adapter, gtk_tree_row_reference_free);
 	gtk_tree_store_remove (priv->store, &iter);
@@ -758,17 +777,23 @@ object_manager_new_callback(GObject      *source_object,
 			    GAsyncResult *res,
 			    void         *user_data)
 {
-	BluetoothClient  *client = BLUETOOTH_CLIENT (user_data);
-	BluetoothClientPrivate *priv = BLUETOOTH_CLIENT_GET_PRIVATE(client);
+	BluetoothClient *client;
+	BluetoothClientPrivate *priv;
+	GDBusObjectManager *manager;
 	GList *object_list, *l;
 	GError *error = NULL;
 
-	priv->manager = g_dbus_object_manager_client_new_for_bus_finish (res, &error);
-	if (error) {
-		g_warning ("Could not create bluez object manager: %s", error->message);
+	manager = g_dbus_object_manager_client_new_for_bus_finish (res, &error);
+	if (!manager) {
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			g_warning ("Could not create bluez object manager: %s", error->message);
 		g_error_free (error);
 		return;
 	}
+
+	client = BLUETOOTH_CLIENT (user_data);
+	priv = BLUETOOTH_CLIENT_GET_PRIVATE(client);
+	priv->manager = manager;
 
 	g_signal_connect (G_OBJECT (priv->manager), "interface-added", (GCallback) interface_added, client);
 	g_signal_connect (G_OBJECT (priv->manager), "interface-removed", (GCallback) interface_removed, client);
@@ -813,6 +838,7 @@ static void bluetooth_client_init(BluetoothClient *client)
 {
 	BluetoothClientPrivate *priv = BLUETOOTH_CLIENT_GET_PRIVATE(client);
 
+	priv->cancellable = g_cancellable_new ();
 	priv->store = gtk_tree_store_new(_BLUETOOTH_NUM_COLUMNS,
 					 G_TYPE_OBJECT,     /* BLUETOOTH_COLUMN_PROXY */
 					 G_TYPE_OBJECT,     /* BLUETOOTH_COLUMN_PROPERTIES */
@@ -838,7 +864,7 @@ static void bluetooth_client_init(BluetoothClient *client)
 						  BLUEZ_MANAGER_PATH,
 						  object_manager_get_proxy_type_func,
 						  NULL, NULL,
-						  NULL,
+						  priv->cancellable,
 						  object_manager_new_callback, client);
 }
 
@@ -1093,6 +1119,10 @@ static void bluetooth_client_finalize(GObject *object)
 	BluetoothClient *client = BLUETOOTH_CLIENT (object);
 	BluetoothClientPrivate *priv = BLUETOOTH_CLIENT_GET_PRIVATE (client);
 
+	if (priv->cancellable != NULL) {
+		g_cancellable_cancel (priv->cancellable);
+		g_clear_object (&priv->cancellable);
+	}
 	g_clear_object (&priv->manager);
 	g_object_unref (priv->store);
 
@@ -1210,7 +1240,7 @@ GtkTreeModel *bluetooth_client_get_model (BluetoothClient *client)
 	g_return_val_if_fail (BLUETOOTH_IS_CLIENT (client), NULL);
 
 	priv = BLUETOOTH_CLIENT_GET_PRIVATE(client);
-	model = g_object_ref(priv->store);
+	model = GTK_TREE_MODEL (g_object_ref(priv->store));
 
 	return model;
 }

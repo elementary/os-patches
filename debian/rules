@@ -30,3 +30,7 @@ override_dh_girepository:
 override_dh_translations:
 	ninja -C obj-$(DEB_HOST_GNU_TYPE) gnome-bluetooth2-pot
 	dh_translations
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f po/gnome-bluetooth2.pot

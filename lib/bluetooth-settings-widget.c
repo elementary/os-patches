@@ -130,7 +130,7 @@ set_connecting_page (BluetoothSettingsWidget *self,
 		gtk_spinner_start (GTK_SPINNER (WID ("connecting_spinner")));
 	gtk_notebook_set_current_page (GTK_NOTEBOOK (WID ("connecting_notebook")), page);
 	if (page == CONNECTING_NOTEBOOK_PAGE_SWITCH)
-		gtk_spinner_start (GTK_SPINNER (WID ("connecting_spinner")));
+		gtk_spinner_stop (GTK_SPINNER (WID ("connecting_spinner")));
 }
 
 static void
@@ -189,10 +189,12 @@ connect_done (GObject      *source_object,
 		GtkSwitch *button;
 
 		button = GTK_SWITCH (WID ("switch_connection"));
-		/* Reset the switch if it failed */
+
+		/* Ensure the switch position is in the correct place. */
+		gtk_switch_set_active (button, gtk_switch_get_state (button));
+
 		if (success == FALSE) {
 			g_debug ("Connection failed to %s: %s", data->bdaddr, error->message);
-			gtk_switch_set_active (button, !gtk_switch_get_active (button));
 		}
 		set_connecting_page (self, CONNECTING_NOTEBOOK_PAGE_SWITCH);
 	}
@@ -1029,16 +1031,19 @@ start_pairing (BluetoothSettingsWidget *self,
 	g_object_unref (proxy);
 }
 
-static void
-switch_connected_active_changed (GtkSwitch               *button,
-				 GParamSpec              *spec,
-				 BluetoothSettingsWidget *self)
+static gboolean
+switch_connected_state_set (GtkSwitch               *button,
+			    gboolean                 state,
+			    BluetoothSettingsWidget *self)
 {
 	ConnectData *data;
 	BluetoothSettingsWidgetPrivate *priv = BLUETOOTH_SETTINGS_WIDGET_GET_PRIVATE (self);
 
+	if (gtk_switch_get_state (button) == state)
+		return TRUE;
+
 	if (is_connecting (self, priv->selected_bdaddr))
-		return;
+		return TRUE;
 
 	data = g_new0 (ConnectData, 1);
 	data->bdaddr = g_strdup (priv->selected_bdaddr);
@@ -1053,6 +1058,8 @@ switch_connected_active_changed (GtkSwitch               *button,
 
 	add_connecting (self, data->bdaddr);
 	set_connecting_page (self, CONNECTING_NOTEBOOK_PAGE_SPINNER);
+
+	return TRUE;
 }
 
 static void
@@ -1126,17 +1133,13 @@ update_properties (BluetoothSettingsWidget *self,
 
 	/* Connection */
 	button = GTK_SWITCH (WID ("switch_connection"));
-	g_signal_handlers_block_by_func (button, switch_connected_active_changed, self);
 
+	gtk_switch_set_state (button, connected);
 	if (is_connecting (self, bdaddr)) {
-		gtk_switch_set_active (button, TRUE);
 		set_connecting_page (self, CONNECTING_NOTEBOOK_PAGE_SPINNER);
 	} else {
-		gtk_switch_set_active (button, connected);
 		set_connecting_page (self, CONNECTING_NOTEBOOK_PAGE_SWITCH);
 	}
-
-	g_signal_handlers_unblock_by_func (button, switch_connected_active_changed, self);
 
 	/* Paired */
 	gtk_label_set_text (GTK_LABEL (WID ("paired_label")),
@@ -1779,8 +1782,8 @@ setup_properties_dialog (BluetoothSettingsWidget *self)
 			  G_CALLBACK (sound_callback), self);
 	g_signal_connect (G_OBJECT (WID ("send_button")), "clicked",
 			  G_CALLBACK (send_callback), self);
-	g_signal_connect (G_OBJECT (WID ("switch_connection")), "notify::active",
-			  G_CALLBACK (switch_connected_active_changed), self);
+	g_signal_connect (G_OBJECT (WID ("switch_connection")), "state-set",
+			  G_CALLBACK (switch_connected_state_set), self);
 
 	/* Styling */
 	gtk_image_set_pixel_size (GTK_IMAGE (WID ("image")), ICON_SIZE);
