@@ -319,12 +319,8 @@ cloud_providers_collector_dup_singleton (void)
                  self->cancellable,
                  on_bus_acquired,
                  self);
+    }
 
-      return self;
-    }
-  else
-    {
-      return g_object_ref (self);
-    }
+  return g_object_ref (self);
 }
 
