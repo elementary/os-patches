@@ -1,10 +1,90 @@
-version 3.26.2
+version 3.28.0
 --------------
+
+ New or updated application translations:
+
+  * British English (Bruce Cowan)
+  * Croatian (gogo)
+  * Danish (Ask Hjorth Larsen)
+  * Romanian (Daniel Șerbănescu)
+  * srpski (Marko M. Kostić)
+  * Ελληνικά (Efstathios Iosifidis)
+
+version 3.27.91
+---------------
+
+ New or updated application translations:
+
+  * Chinese (traditional) (Cheng-Chia Tseng)
+  * Croatian (gogo)
+  * Dutch (Nathan Follens)
+  * French (Guillaume Bernard)
+  * Fòram na Gàidhlig (GunChleoc)
+  * Galician (Fran Dieguez)
+  * Italian (Milo Casagrande)
+  * Kazakh (Baurzhan Muftakhidinov)
+  * Korea (강영선)
+  * Latvian (Rūdolfs Mazurs)
+  * Lietuvių ()
+  * Slovak (Dušan Kazik)
+  * Vietnamese (Trần Ngọc Quân)
+
+version 3.27.90
+--------------
+
+ Bugs fixed:
+
+  * meson: fix executable bit (Jeremy Bicha) (#793313)
+  * file roller installs dbus service files to wrong location (#793248)
+
+ New or updated application translations:
+
+  * Brazilian Portuguese (Enrico Nicoletto)
+  * Türkçe (Emin Tufan Çetin)
+
+version 3.27.1
+--------------
+
+ New features and user visibile changes:
+
+  * Ported to meson.
+
+ Bugs fixed:
+
+  * unarchiver: check that XADFileSize is set before reading it. Lsar
+    does not set XADFileSize for directories, so we would output a
+    critical when encountering one. (Mike Gorse) (#791505)
+  * nautilus-fileroller: Avoid the use of g_dgettext.
+    nautilus-fileroller is using g_dgettext which may cause problems
+    when extracting strings on some systems. This patch replaces
+    g_dgettext for g_dcgettext, which has the same behaviour when the
+    category is LC_MESSAGES. (Iñigo Martínez) (#790569)
+  * rar archives: wrong file date when using rar 5.30 or higher. adapt
+    to the new format. (#758121)
+  * Support squashfs filesystems and .snap files (Robert Ancell)
+    (#662519)
 
  New or updated application translations:
 
   * Catalan (Xavi Ivars)
   * Chinese Simplified (Mingcong Bai)
+  * Deutsch (Mario Blättermann)
+  * es (Daniel Mustieles)
+  * Friulian (Fabio Tomat)
+  * Hungarian (Balázs Úr)
+  * Icelandic (Sveinn í Felli)
+  * Indonesian (Kukuh Syafaat)
+  * Norwegian bokmål (Åka Sikrom)
+  * Polish (Piotr Drąg)
+  * Slovenian (Matej Urbančič)
+  * suomi (Jiri Grönroos)
+  * Swedish (Anders Jonsson)
+  * čeština (Marek Černocký)
+  * српски (Марко М. Костић)
+
+ New or updated manual translations:
+
+  * Polish (Piotr Drąg)
 
 version 3.26.1
 --------------

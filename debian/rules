@@ -7,22 +7,17 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 %:
 	dh $@ --with gnome
 
-override_dh_autoreconf:
-	dh_autoreconf --as-needed
-
 override_dh_auto_configure:
-	dh_auto_configure -- --enable-magic
-
-override_dh_install:
-	dh_install
-	rm -f debian/file-roller/usr/lib/*/nautilus/extensions-*/*.a
-	rm -f debian/file-roller/usr/lib/*/nautilus/extensions-*/*.la
-	/usr/bin/pkg-gnome-compat-desktop-file \
-		debian/file-roller/usr/share/applications/org.gnome.FileRoller.desktop \
-		debian/file-roller/usr/share/applications/file-roller.desktop
+	dh_auto_configure -- -Dmagic=true
 
 override_dh_makeshlibs:
 	dh_makeshlibs --no-act
+
+override_dh_install:
+	dh_install
+	/usr/bin/pkg-gnome-compat-desktop-file \
+		debian/file-roller/usr/share/applications/org.gnome.FileRoller.desktop \
+		debian/file-roller/usr/share/applications/file-roller.desktop
 
 # p7zip is in Ubuntu "universe"
 override_dh_gencontrol:
@@ -35,3 +30,12 @@ else
 		-Vzip:Depends='p7zip-full' \
 		-Vzip:Suggests='unzip, zip'
 endif
+
+# Needed by Ubuntu
+override_dh_translations:
+	ninja -C obj-$(DEB_HOST_GNU_TYPE) file-roller-pot
+	dh_translations
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f po/file-roller.pot
