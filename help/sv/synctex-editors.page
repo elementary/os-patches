@@ -26,6 +26,12 @@
       <mal:email>sebras@gmail.com</mal:email>
       <mal:years>2015, 2017</mal:years>
     </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Anders Jonsson</mal:name>
+      <mal:email>anders.jonsson@norsjovallen.se</mal:email>
+      <mal:years>2018</mal:years>
+    </mal:credit>
   </info>
 
 <title>Redigerare som stöds</title>
@@ -35,21 +41,13 @@
 </section>
 
 <section id="vim-latex"><title>Vim-latex</title>
-<p>
-The <app>gedit</app> plugin contains a python script (<file>evince_dbus.py</file>) that can be used to get SyncTeX working with Vim.
-In order to use vim-latex together with the <app>document viewer</app> you need to follow the next steps:
-</p>
+<p><app>gedit</app>-insticksmodulen innehåller ett python-skript (<file>evince_dbus.py</file>) som kan användas för att få SyncTeX att fungera med Vim. För att använda vim-latex tillsammans med <app>Dokumentvisare</app> måste du följa dessa steg:</p>
 <steps>
  <item>
-  <p>
-     Copy the <file>evince_dbus.py</file> to some directory in your path and give it +x permissions.
-
- </p>
+  <p>Kopiera <file>evince_dbus.py</file> till någon katalog i din sökväg och ge den +x-rättigheter.</p>
  </item>
  <item>
-  <p>
-     Modify your <file>~/.vimrc</file> file and add the following lines.
-    </p>
+  <p>Modifiera din <file>~/.vimrc</file>-fil och lägg till följande rader.</p>
 <code>
 let g:Tex_ViewRule_pdf = 'evince_dbus.py'
 let g:Tex_DefaultTargetFormat = 'pdf'
