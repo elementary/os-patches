@@ -1,5 +1,9 @@
 po_dir = join_paths(meson.source_root(), 'po')
 
+install_data('file-roller-compress.contract', 'file-roller-extract-here.contract',
+ install_dir : join_paths(datadir, 'contractor')
+)
+
 install_data('org.gnome.FileRoller.gschema.xml',
   install_dir : join_paths(datadir, 'glib-2.0', 'schemas')
 )
