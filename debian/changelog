@@ -1,10 +1,29 @@
-epiphany-browser (3.27.90-1ubuntu1) bionic; urgency=medium
+epiphany-browser (3.28.0.1-1ubuntu1) bionic; urgency=medium
 
   * Sync with Debian. Remaining change:
     - Modify 07_bookmarks.patch:
       + Add Ubuntu-specific default bookmarks, borrowed from Firefox
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 23 Feb 2018 16:31:14 -0500
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Wed, 21 Mar 2018 14:55:16 -0400
+
+epiphany-browser (3.28.0.1-1) unstable; urgency=medium
+
+  * New upstream release
+  * Drop 0005-profile-utils-Fix-off-by-two-buffer-overflow.patch: Applied
+  * Release to unstable
+
+ -- Jeremy Bicha <jbicha@debian.org>  Wed, 21 Mar 2018 14:51:55 -0400
+
+epiphany-browser (3.27.92-1) experimental; urgency=medium
+
+  * New upstream release candidate
+  * Drop Breaks/Replaces/Conflicts not needed since Jessie
+  * Update disable-tests.patch. The only remaining disabled test
+    requires Internet access.
+  * Cherry-pick 0005-profile-utils-Fix-off-by-two-buffer-overflow.patch:
+    - Fix issue discovered by build tests
+
+ -- Jeremy Bicha <jbicha@debian.org>  Mon, 05 Mar 2018 13:57:33 -0500
 
 epiphany-browser (3.27.90-1) experimental; urgency=medium
 
@@ -508,7 +527,7 @@ epiphany-browser (3.8.2-1) experimental; urgency=low
 
   [ Jeremy Bicha ]
   * debian/rules:
-    - Use lsb_release to fill in distributor name too 
+    - Use lsb_release to fill in distributor name too
 
   [ Emilio Pozuelo Monfort ]
   * New upstream release.
@@ -768,10 +787,10 @@ epiphany-browser (3.0.3-1) experimental; urgency=low
 
 epiphany-browser (3.0.2-2) experimental; urgency=low
 
-  * rules: create a new epiphany-newtab.desktop which is the handler for 
+  * rules: create a new epiphany-newtab.desktop which is the handler for
     x-scheme-handler/http{,s} and has NoDisplay=true.
   * Drop epiphany-gecko and epiphany-webkit transitional packages.
-  * 11_browse_to.patch: new patch. Fix “browse to” feature, by looking 
+  * 11_browse_to.patch: new patch. Fix “browse to” feature, by looking
     for inode/directory instead of x-directory/normal.
 
  -- Josselin Mouette <joss@debian.org>  Thu, 02 Jun 2011 13:02:26 +0200
@@ -779,7 +798,7 @@ epiphany-browser (3.0.2-2) experimental; urgency=low
 epiphany-browser (3.0.2-1) experimental; urgency=low
 
   [ Josselin Mouette ]
-  * Tighten the dependency between the gir package and the browser 
+  * Tighten the dependency between the gir package and the browser
     package.
   * Improve the gir package description.
 
@@ -922,8 +941,8 @@ epiphany-browser (2.30.6-2) unstable; urgency=low
 
 epiphany-browser (2.30.6-1) unstable; urgency=low
 
-  * debian/rules: revert the desktop name change from 2.30.2-4. It 
-    breaks gnome-panel, and it is arguably a bug in gnome-shell not to 
+  * debian/rules: revert the desktop name change from 2.30.2-4. It
+    breaks gnome-panel, and it is arguably a bug in gnome-shell not to
     take into account the previous fix (g_set_prgname).
   * New upstream translation and bugfix release.
   * 99_autoreconf.patch: refreshed.
@@ -945,7 +964,7 @@ epiphany-browser (2.30.5-1) unstable; urgency=low
 epiphany-browser (2.30.3-1) unstable; urgency=low
 
   [ Josselin Mouette ]
-  * 14_download_nautilus.patch: don’t open nautilus every time a file is 
+  * 14_download_nautilus.patch: don’t open nautilus every time a file is
     saved. This is simply annoying.
 
   [ Sebastian Dröge ]
@@ -980,14 +999,14 @@ epiphany-browser (2.30.2-3) unstable; urgency=low
   * Stop renaming help files paths. Closes: #586721.
   * Drop type-handling usage. Closes: #587864.
   * Bump standards version accordingly.
-  * 13_accept-languages.patch: patch from Mario Sanchez Prada, with a 
+  * 13_accept-languages.patch: patch from Mario Sanchez Prada, with a
     small modification. Set the accept-languages string correctly.
     Closes: #570142.
   * Switch to 3.0 source package format.
   * Move the packaging to use quilt.
-  * Merge 00_browser_wrapper_path.patch and 02_ac_init.patch into a new 
+  * Merge 00_browser_wrapper_path.patch and 02_ac_init.patch into a new
     00_epiphany-browser.patch.
-  * Add to it a pair of missing renames: g_set_prgname (used by 
+  * Add to it a pair of missing renames: g_set_prgname (used by
     bug-buddy) and the --help message.
 
  -- Josselin Mouette <joss@debian.org>  Sat, 03 Jul 2010 01:38:24 +0200
@@ -1001,7 +1020,7 @@ epiphany-browser (2.30.2-2) unstable; urgency=low
   [ Josselin Mouette ]
   * Relax epiphany-gecko conflict to not make the package uninstallable.
     Closes: #583347.
-  * Make epiphany-extensions conflict a Breaks. Bump the version since 
+  * Make epiphany-extensions conflict a Breaks. Bump the version since
     the directory changed again in the meantime.
   * Disable seed on ia64 since it doesn’t work.
 
@@ -1141,7 +1160,7 @@ epiphany-browser (2.29.5-1) unstable; urgency=low
     - Add missing build dependency on libgnome-keyring-dev.
 
   [ Josselin Mouette ]
-  * Remove obsolete /usr/bin/epiphany alternative in the preinst upon 
+  * Remove obsolete /usr/bin/epiphany alternative in the preinst upon
     upgrades. Closes: #562534.
 
   [ Sebastian Dröge ]
@@ -1176,7 +1195,7 @@ epiphany-browser (2.29.1-2) unstable; urgency=low
     windows to the .desktop file, and app well favourite.
 
   [ Josselin Mouette ]
-  * Add a conflict with swfdec-mozilla, the plugin makes the browser 
+  * Add a conflict with swfdec-mozilla, the plugin makes the browser
     completely unusable on any website with Flash content.
 
  -- Josselin Mouette <joss@debian.org>  Fri, 13 Nov 2009 19:28:48 +0100
@@ -1405,7 +1424,7 @@ epiphany-webkit (2.27.1-2) unstable; urgency=low
   * 12_safetypes.patch: make application/x-desktop an unsafe MIME type.
   * Bump gtk+ build-dependency.
   * Fix dependencies of the -dev package.
-  * Add a strict dependency between -dev and -data to ensure it is the 
+  * Add a strict dependency between -dev and -data to ensure it is the
     same major version as epiphany-gecko.
   * Fix section for debug package.
 
@@ -1461,27 +1480,27 @@ epiphany-webkit (2.27.1-1) experimental; urgency=low
 epiphany-browser (2.24.3-2) UNRELEASED; urgency=low
 
   * Fix .pc file by hand so that extensions build correctly.
-  * 10_smart_bookmarks.patch: fix crash introduced by the patch because 
+  * 10_smart_bookmarks.patch: fix crash introduced by the patch because
     the text is not checked for NULLity. Closes: #516286.
 
  -- Josselin Mouette <joss@debian.org>  Tue, 17 Feb 2009 18:29:06 +0100
 
 epiphany-browser (2.24.3-1) experimental; urgency=low
 
-  * Move the contents of README.Debian to epiphany-browser.README.Debian 
+  * Move the contents of README.Debian to epiphany-browser.README.Debian
     so that it is actually shipped.
-  * epiphany-browser-data.gconf-defaults: enable the universal encoding 
+  * epiphany-browser-data.gconf-defaults: enable the universal encoding
     detector, to improve display of broken sites.
   * New upstream release.
-  * 00_browser_wrapper_path.patch, 01_bookmarks_menu.patch, 
+  * 00_browser_wrapper_path.patch, 01_bookmarks_menu.patch,
     03_dbus.patch, 07_bookmarks.patch: refreshed.
   * 99_autoreconf.patch: updated for the new version.
-  * 10_smart_bookmarks.patch: new patch to fix the smart bookmarks 
-    behavior. Always use the text from the entry to initiate a search, 
+  * 10_smart_bookmarks.patch: new patch to fix the smart bookmarks
+    behavior. Always use the text from the entry to initiate a search,
     and fill it automatically when using middle-click.
-  * Drop epiphany-webkit build for now as it has gone away from the 2.24 
+  * Drop epiphany-webkit build for now as it has gone away from the 2.24
     branch. Don’t worry, it will be soon back for good in experimental.
-  * 30_ua_debian_version.patch: new patch to add the Debian version to 
+  * 30_ua_debian_version.patch: new patch to add the Debian version to
     the user agent string. Closes: #509207.
   * rules: pass the appropriate macro so that it works.
 
@@ -1504,7 +1523,7 @@ epiphany-browser (2.24.1-1) experimental; urgency=low
       Closes: #494058.
   * Pass --disable-maintainer-mode.
   * Update build-dependencies.
-  * Remove 2.22 specificities (from the gecko 1.9 migration) in 
+  * Remove 2.22 specificities (from the gecko 1.9 migration) in
     dependencies.
   * Remove patches merged upstream:
     + 10_url_double-click.patch
@@ -1513,7 +1532,7 @@ epiphany-browser (2.24.1-1) experimental; urgency=low
     + 16_fix-notify-uninit-crash.patch
     + 17_print-scaling.patch
     + 19_passwords_crash.patch
-  * Remove 18_gnome-vfs-for-helper-display.patch and drop gnome-vfs 
+  * Remove 18_gnome-vfs-for-helper-display.patch and drop gnome-vfs
     build dependency; gio is now the default method.
   * Refresh and update other patches.
   * Regenerate 99_autoreconf.patch.
@@ -1531,7 +1550,7 @@ epiphany-browser (2.22.3-7) unstable; urgency=low
   * debian/control.in: move Homepage field to the source stanza.
 
   [ Josselin Mouette ]
-  * 08_python_path.patch: new patch by James Vega. Disable relative 
+  * 08_python_path.patch: new patch by James Vega. Disable relative
     imports in the python code. Closes: #504363.
 
  -- Josselin Mouette <joss@debian.org>  Mon, 10 Nov 2008 15:29:28 +0100
@@ -1539,10 +1558,10 @@ epiphany-browser (2.22.3-7) unstable; urgency=low
 epiphany-browser (2.22.3-6) unstable; urgency=low
 
   * The OMGWTFBBQ release.
-  * debian/certManager.js: this is a custom version of certManager.js 
-    that doesn’t use deletecert.xul, which doesn’t work because of 
+  * debian/certManager.js: this is a custom version of certManager.js
+    that doesn’t use deletecert.xul, which doesn’t work because of
     broken argument passing.
-  * 21_chrome_certmanager.patch: override certManager.js with the custom 
+  * 21_chrome_certmanager.patch: override certManager.js with the custom
     version.
   * epiphany-browser-data.install: install it.
   * Closes: #393837. Thanks to Romain Beauxis and Mike Hommey.
@@ -1552,7 +1571,7 @@ epiphany-browser (2.22.3-6) unstable; urgency=low
 epiphany-browser (2.22.3-5) unstable; urgency=low
 
   * Fix first changelog entry. Closes: #501357.
-  * 20_print_garbage.patch: pass UTF-16 to Gecko instead of UTF-8 for 
+  * 20_print_garbage.patch: pass UTF-16 to Gecko instead of UTF-8 for
     the print headers. Original patch by Vincent Caron. Closes: #492283.
 
  -- Josselin Mouette <joss@debian.org>  Tue, 21 Oct 2008 17:09:31 +0200
@@ -1562,15 +1581,15 @@ epiphany-browser (2.22.3-4) unstable; urgency=low
   [ Sam Morris ]
   * 18_gnome-vfs-for-helper-display.patch: Use gnome-vfs to display which
     helper application a downloaded file will be opened with (closes:
-    #498913). 
+    #498913).
   * Build-depend on gnome-vfs for the above patch.
   * 99_autoreconf.patch: refresh.
 
   [ Josselin Mouette ]
-  * 14_zoom-crash.patch: patch from Mike Hommey to fix crash when 
+  * 14_zoom-crash.patch: patch from Mike Hommey to fix crash when
     changing the zoom factor. Closes: #486744.
-  * 19_passwords_crash.patch: patch from upstream to fix crash when 
-    viewing passwords. Closes: #494348. The crash used to corrupt 
+  * 19_passwords_crash.patch: patch from upstream to fix crash when
+    viewing passwords. Closes: #494348. The crash used to corrupt
     user preferences which triggered another crash, so it also
     closes: #486136.
 
@@ -1578,7 +1597,7 @@ epiphany-browser (2.22.3-4) unstable; urgency=low
 
 epiphany-browser (2.22.3-3) unstable; urgency=low
 
-  * Use not+linux-gnu instead of not+linux for non-Linux targets. 
+  * Use not+linux-gnu instead of not+linux for non-Linux targets.
     Closes: #494312.
 
  -- Josselin Mouette <joss@debian.org>  Fri, 29 Aug 2008 17:30:53 +0200
@@ -1607,7 +1626,7 @@ epiphany-browser (2.22.3-2) unstable; urgency=low
     scaling; GNOME #541168 (closes: 495222).
 
   [ Josselin Mouette ]
-  * Add warnings to the epiphany-webkit description explaining it is 
+  * Add warnings to the epiphany-webkit description explaining it is
     still experimental. Closes: #492657.
   * Use not+linux instead of specifying the arch list by hand.
 
@@ -1615,23 +1634,23 @@ epiphany-browser (2.22.3-2) unstable; urgency=low
 
 epiphany-browser (2.22.3-1) unstable; urgency=low
 
-  * epiphany-browser.README.Debian: explain how to change the backend. 
+  * epiphany-browser.README.Debian: explain how to change the backend.
     Closes: #487147.
-  * 16_embed_passwords.patch: patch from Mike Hommey to fix typos 
-    causing passwords not being correctly removed from the password 
+  * 16_embed_passwords.patch: patch from Mike Hommey to fix typos
+    causing passwords not being correctly removed from the password
     manager. Closes: #487160.
-  * 04_proxy_password.patch: change the patch to still work with gecko 
+  * 04_proxy_password.patch: change the patch to still work with gecko
     1.8 so that it is suitable for upstream.
   * New upstream release.
-    + 04_proxy_password.patch, 14_contenthandler_api.patch, 
+    + 04_proxy_password.patch, 14_contenthandler_api.patch,
       16_embed_passwords.patch: dropped, merged upstream.
     + 05_libexecdir.patch, 09_download_dialog.patch: refreshed.
-    + 15_certificates_oldapi.patch: only keep the MozRegisterComponents 
-      part, others are integrated upstream. Update it to match the 
+    + 15_certificates_oldapi.patch: only keep the MozRegisterComponents
+      part, others are integrated upstream. Update it to match the
       change.
     + 99_autoreconf.patch: regenerated.
-  * rules, *.links: only ship the upstream changelog in 
-    epiphany-browser-data and link to it, since its size was multiplied 
+  * rules, *.links: only ship the upstream changelog in
+    epiphany-browser-data and link to it, since its size was multiplied
     by 30 thanks to upstream using git-svn.
   * Standards version is 3.8.0.
 
@@ -1639,11 +1658,11 @@ epiphany-browser (2.22.3-1) unstable; urgency=low
 
 epiphany-browser (2.22.2-3) unstable; urgency=low
 
-  * 04_proxy_password.patch: new patch, needed because of a change in 
-    xulrunner 1.9; the string names for obtaining the user login and 
+  * 04_proxy_password.patch: new patch, needed because of a change in
+    xulrunner 1.9; the string names for obtaining the user login and
     password have changed.
-  * 15_certificates_oldapi.patch: revert the certificates management to 
-    the old API, using nsIBadCertListener that was forward-ported to 
+  * 15_certificates_oldapi.patch: revert the certificates management to
+    the old API, using nsIBadCertListener that was forward-ported to
     xulrunner 1.9. As a side effect, closes: #485657.
   * Bump xulrunner deps and build-deps to 1.9~rc2-3 for this change.
 
@@ -1655,8 +1674,8 @@ epiphany-browser (2.22.2-2) unstable; urgency=low
   * Cleanup rules and postinsts; fix priority of epiphany-webkit.
 
   [ Josselin Mouette ]
-  * 09_download_dialog.patch: 
-    + Fix the logic that got wrong in some cases. This removes some 
+  * 09_download_dialog.patch:
+    + Fix the logic that got wrong in some cases. This removes some
       unnecessary prompts and makes the dialog more consistent.
   * Remove the seahorse conflict, it is too much.
   * Upload to unstable; drop check-dist include.
@@ -1669,26 +1688,26 @@ epiphany-browser (2.22.2-1) experimental; urgency=low
   * Conflict against seahorse < 2.22.1-3.
   * Depend on epiphany-browser-data 2.22.1.1-3. Closes: #481153.
   * Rebuild against xulrunner 1.9 rc1. Closes: #483122.
-  * 14_contenthandler_api.patch: new patch, needed because of a change 
+  * 14_contenthandler_api.patch: new patch, needed because of a change
     in the Gecko 1.9 ContentHandler API. Thanks Mike Hommey.
     Closes: #482756.
   * New upstream release.
     + Don't restrict to applications supporting URIs. Closes: #482879.
-    + Do not crash when the profile directory path is not absolute. 
+    + Do not crash when the profile directory path is not absolute.
       Closes: #467157.
     + Fix RDF import. Closes: #479546.
   * Refresh patches to apply cleanly.
-  * 09_download_dialog.patch: order buttons correctly for 
+  * 09_download_dialog.patch: order buttons correctly for
     CONTENT_ACTION_NONE. Closes: #455720.
 
  -- Josselin Mouette <joss@debian.org>  Tue, 27 May 2008 14:14:39 +0200
 
 epiphany-browser (2.22.1.1-3) experimental; urgency=low
 
-  * epiphany-gecko conflicts against python-xpcom, because of 
+  * epiphany-gecko conflicts against python-xpcom, because of
     bug#416068.
-  * 13_extensions_need_xpcom.patch: new patch; ensure that xpcomglue is 
-    initialized before the extensions that could link to gecko are 
+  * 13_extensions_need_xpcom.patch: new patch; ensure that xpcomglue is
+    initialized before the extensions that could link to gecko are
     loaded.
 
  -- Josselin Mouette <joss@debian.org>  Mon, 12 May 2008 14:04:33 +0200
@@ -1698,10 +1717,10 @@ epiphany-browser (2.22.1.1-2) experimental; urgency=low
   * Build against xulrunner 1.9:
     + Use the libxul-embedding version.
     + Build-depend on xulrunner-dev 1.9~b5-3.
-    + Set explicit dependencies on xulrunner-1.9, thanks to that crap 
+    + Set explicit dependencies on xulrunner-1.9, thanks to that crap
       not using shlibs anymore.
     + Conflict against epiphany-extensions << 2.22.1-3.
-  * 12_safetypes_rss.patch: application/rss+xml is a safe MIME type. 
+  * 12_safetypes_rss.patch: application/rss+xml is a safe MIME type.
     Closes: #461619.
   * Relax build-dependency on libwebkit-dev.
 
@@ -1723,7 +1742,7 @@ epiphany-browser (2.22.1.1-1) unstable; urgency=low
   [ Josselin Mouette ]
   * Fix installation of manual pages in the alternatives.
     Closes: #457975.
-  * Document the behaviour with NetworkManager, text from Sven 
+  * Document the behaviour with NetworkManager, text from Sven
     Arvidsson. Closes: #472079.
 
   [ Sebastian Dröge ]
@@ -1879,7 +1898,7 @@ epiphany-browser (2.18.3-1) unstable; urgency=low
   * Fix copyright (closes: #428099).
   * New upstream bugfix release.
     + Refresh patches.
-  * 11_useragent-weasel.patch: comment out the UA breakage that upstream 
+  * 11_useragent-weasel.patch: comment out the UA breakage that upstream
     introduces for xulrunner users and explain why we do it.
 
  -- Josselin Mouette <joss@debian.org>  Wed, 04 Jul 2007 22:23:31 +0200
@@ -1913,9 +1932,9 @@ epiphany-browser (2.18.2-1) unstable; urgency=low
 
 epiphany-browser (2.18.1-3) unstable; urgency=low
 
-  * 09_download_dialog.patch: still kill the download dialog, but 
-    reinstate the distinction between download and save for security 
-    reasons (closes: #424765). Also improve the preferences dialog to 
+  * 09_download_dialog.patch: still kill the download dialog, but
+    reinstate the distinction between download and save for security
+    reasons (closes: #424765). Also improve the preferences dialog to
     make insensitive the download folder selection when necessary.
 
  -- Josselin Mouette <joss@debian.org>  Sat, 19 May 2007 00:03:32 +0200
@@ -2047,8 +2066,8 @@ epiphany-browser (2.16.2-2) experimental; urgency=low
   * epiphany-browser.links: add a /usr/bin/epiphany-browser link to make
     session saving work, thanks Håvard Moen (closes: #375003).
     + Also add a link for the manual page.
-  * 08_load_on_new_tab.patch: patch from Cyril Brulebois to add a gconf 
-    key allowing to emulate the mozilla behavior when loading new tabs 
+  * 08_load_on_new_tab.patch: patch from Cyril Brulebois to add a gconf
+    key allowing to emulate the mozilla behavior when loading new tabs
     (closes: #402177).
 
  -- Josselin Mouette <joss@debian.org>  Fri, 12 Jan 2007 12:59:27 +0100
@@ -2113,8 +2132,8 @@ epiphany-browser (2.14.3-5) unstable; urgency=medium
   * epiphany-browser.gconf-defaults: set the homepage to the Debian
     website.
   * epiphany-browser.links: add a /usr/bin/epiphany-browser link to make
-    session saving work, thanks Håvard Moen (closes: #375003).  
-  * Urgency is medium to get the session fix and the branding changes to 
+    session saving work, thanks Håvard Moen (closes: #375003).
+  * Urgency is medium to get the session fix and the branding changes to
     etch.
 
  -- Josselin Mouette <joss@debian.org>  Fri, 12 Jan 2007 13:25:07 +0100
@@ -2155,7 +2174,7 @@ epiphany-browser (2.14.3-1) unstable; urgency=low
 
 epiphany-browser (2.14.2.1-3) unstable; urgency=low
 
-  * 03_dbus.patch: add a warning dialog when the dbus session isn't 
+  * 03_dbus.patch: add a warning dialog when the dbus session isn't
     found (closes: #373798).
 
  -- Josselin Mouette <joss@debian.org>  Sun, 18 Jun 2006 12:54:32 +0200
@@ -2200,7 +2219,7 @@ epiphany-browser (2.14.1-2) unstable; urgency=low
   * debian/control.in:
     - added build-dependency on dbus (Closes: #360836).
     - updated Standards-Version to 3.7.2.
-  
+
   [ Jordi Mallach ]
   * debian/control.in: epiphany-browser-dev depends on libgnomeui-dev.
 
@@ -2209,7 +2228,7 @@ epiphany-browser (2.14.1-2) unstable; urgency=low
 epiphany-browser (2.14.1-1) unstable; urgency=low
 
   * New upstream release.
-    - debian/patches/{02_ac_init,99_configure}.patch: updated.  
+    - debian/patches/{02_ac_init,99_configure}.patch: updated.
   * Sourceful upload makes it installable again (Closes: #364267).
 
  -- Guilherme de S. Pastore <gpastore@debian.org>  Sat, 22 Apr 2006 15:23:30 -0300
@@ -2239,7 +2258,7 @@ epiphany-browser (2.14.0-1) unstable; urgency=low
 
 epiphany-browser (1.8.5-2) unstable; urgency=low
 
-  * Remove dependency on xulrunner, it is unuseful now xulrunner is 
+  * Remove dependency on xulrunner, it is unuseful now xulrunner is
     fixed.
 
  -- Josselin Mouette <joss@debian.org>  Tue, 21 Feb 2006 20:36:31 +0100

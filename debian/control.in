@@ -39,22 +39,18 @@ Homepage: https://wiki.gnome.org/Apps/Web
 
 Package: epiphany-browser
 Architecture: any
-Depends: epiphany-browser-data (= ${source:Version}),
+Depends: epiphany-browser-data (>= ${source:Version}),
          ${shlibs:Depends},
          default-dbus-session-bus | dbus-session-bus,
          iso-codes,
          gsettings-desktop-schemas,
          ${misc:Depends}
-Conflicts: swfdec-mozilla,
-           epiphany-extensions (<< 3.7.91)
-Replaces: epiphany-browser-data (<< 3.14.1-1)
+Conflicts: swfdec-mozilla
 Recommends: yelp,
             evince,
             browser-plugin-evince,
             ca-certificates,
             libwebkit2gtk-4.0-37-gtk2
-Breaks: epiphany-browser-data (<< 3.14.1-1),
-        geoclue-2.0 (<< 2.1.9-2)
 Provides: www-browser, gnome-www-browser
 Description: Intuitive GNOME web browser
  Epiphany is a simple yet powerful GNOME web browser targeted at

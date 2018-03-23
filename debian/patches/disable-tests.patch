@@ -1,56 +1,27 @@
 From: Jeremy Bicha <jbicha@ubuntu.com>
 Date: Sun, 18 Feb 2018 15:22:45 -0500
-Subject: Disable tests that require compiled gsettings schemas
+Subject: Disable tests that require Internet access
 
-Bug: https://bugzilla.gnome.org/show_bug.cgi?id=782246
 ---
- tests/meson.build | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ tests/meson.build | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/tests/meson.build b/tests/meson.build
-index 8ced8eb..986bd56 100644
+index 89f903a..b9c3f7d 100644
 --- a/tests/meson.build
 +++ b/tests/meson.build
-@@ -14,7 +14,7 @@ if get_option('unit_tests')
-     'ephy-completion-model-test.c',
-     dependencies: ephymain_dep
-   )
--  test('Completion model test', completion_model_test)
-+  # test('Completion model test', completion_model_test)
- 
-   # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=778153
-   # download_test = executable('test-ephy-download',
-@@ -34,13 +34,13 @@ if get_option('unit_tests')
-     'ephy-embed-utils-test.c',
-     dependencies: ephymain_dep
-   )
--  test('Embed utils test', embed_utils_test)
-+  # test('Embed utils test', embed_utils_test)
- 
-   encodings_test = executable('test-ephy-encodings',
-     'ephy-encodings-test.c',
-     dependencies: ephymain_dep
-   )
--  test('Encodings test', encodings_test)
-+  # test('Encodings test', encodings_test)
- 
-   # https://bugzilla.gnome.org/show_bug.cgi?id=786001
-   # file_helpers_test = executable('test-ephy-file-helpers',
-@@ -53,7 +53,7 @@ if get_option('unit_tests')
+@@ -78,10 +78,10 @@ if get_option('unit_tests')
      'ephy-gsb-service-test.c',
      dependencies: ephymain_dep
    )
--  test('GSB service test', gsb_service_test)
-+  # test('GSB service test', gsb_service_test)
+-  test('GSB service test',
+-       gsb_service_test,
+-       env: envs
+-  )
++  # test('GSB service test',
++  #      gsb_service_test,
++  #      env: envs
++  # )
  
    history_test = executable('test-ephy-history',
      'ephy-history-test.c',
-@@ -71,7 +71,7 @@ if get_option('unit_tests')
-     'ephy-migration-test.c',
-     dependencies: ephymain_dep
-   )
--  test('Migration test', migration_test)
-+  # test('Migration test', migration_test)
- 
-   # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=707220
-   # session_test = executable('test-ephy-session',
