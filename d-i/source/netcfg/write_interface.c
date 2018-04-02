@@ -178,7 +178,7 @@ static int nc_wi_netplan_write_nameservers(const struct netcfg_interface *interf
 	fprintf(fd, "          addresses:\n");
 	for (i = 0; i < NETCFG_NAMESERVERS_MAX; i++) {
 		if (!empty_str(interface->nameservers[i])) {
-			fprintf(fd, "              - %s\n", interface->nameservers[i]);
+			fprintf(fd, "              - \"%s\"\n", interface->nameservers[i]);
 		}
 	}
 
@@ -230,9 +230,9 @@ static int nc_wi_static_ipv6(const struct netcfg_interface *interface, FILE *fd)
 
 static int nc_wi_netplan_static_ipv6(const struct netcfg_interface *interface, FILE *fd, const char *domain)
 {
-	fprintf(fd, "      addresses: [ %s/%i ]\n", interface->ipaddress, interface->masklen);
+	fprintf(fd, "      addresses: [ \"%s/%i\" ]\n", interface->ipaddress, interface->masklen);
 	if (!empty_str(interface->gateway))
-		fprintf(fd, "      gateway6: %s\n", interface->gateway);
+		fprintf(fd, "      gateway6: \"%s\"\n", interface->gateway);
 
 	return nc_wi_netplan_write_nameservers(interface, fd, domain);
 }

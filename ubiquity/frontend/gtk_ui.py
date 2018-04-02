@@ -54,7 +54,7 @@ if 'DISPLAY' in os.environ:
     from ubiquity import gtkwidgets
 
 from ubiquity import (
-    filteredcommand, gsettings, i18n, validation, misc, osextras)
+    filteredcommand, gsettings, i18n, validation, misc, osextras, telemetry)
 from ubiquity.components import install, plugininstall, partman_commit
 import ubiquity.frontend.base
 from ubiquity.frontend.base import BaseFrontend
@@ -757,6 +757,8 @@ class Wizard(BaseFrontend):
             self.debconf_progress_cancellable(False)
             self.refresh()
 
+        telemetry.get().set_installer_type('GTK')
+
         self.set_current_page(0)
         self.live_installer.show()
 
@@ -821,6 +823,8 @@ class Wizard(BaseFrontend):
         # postinstall will exit here by calling Gtk.main_quit in
         # find_next_step.
 
+        telemetry.get().done(self.db)
+
         self.unlock_environment()
         if self.oem_user_config:
             self.quit_installer()
@@ -870,6 +874,7 @@ class Wizard(BaseFrontend):
         misc.drop_privileges_save()
         self.progress_mode.set_current_page(
             self.progress_pages['progress_bar'])
+        telemetry.get().add_stage('user_done')
 
         if not self.slideshow:
             self.page_mode.hide()
@@ -1555,6 +1560,7 @@ class Wizard(BaseFrontend):
         for i in range(len(self.pages))[index + 1:]:
             self.dot_grid.get_child_at(i, 0).set_fraction(0)
 
+        telemetry.get().add_stage(name)
         syslog.syslog('switched to page %s' % name)
 
     # Callbacks provided to components.
@@ -1645,6 +1651,8 @@ class Wizard(BaseFrontend):
             return False
 
     def switch_to_install_interface(self):
+        if not self.installing:
+            telemetry.get().add_stage(telemetry.START_INSTALL_STAGE_TAG)
         self.installing = True
         self.lockdown_environment()
 

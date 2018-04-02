@@ -1,3 +1,35 @@
+ubiquity (18.04.4) bionic; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/control: have ubiquity-frontend-gtk Depends: explicitly on
+    sensible-utils, which is used to start a browser when slideshow or
+    release notes links are clicked. (LP: #1724224)
+  * Automatic update of included source packages: netcfg 1.142ubuntu6,
+    partman-efi 71ubuntu2, user-setup 1.63ubuntu5.
+
+  [ Sebastien Bacher ]
+  * gui/gtk/stepPrepare.ui: updated the non-free-software text to not
+    include the mention to the MP3 fluendo codecs since those have 
+    been superseeded in the recent gstreamer version.
+  * Rename the "Preparing to install Ubuntu" installer step to "Updates and 
+    other software" according to the design, thanks Matthew for pointing 
+    out the inconsistency
+
+  [ Didier Roche ]
+  * Collect and dump telemetry info as a log file: (LP: #1755456)
+    Those installation telemetry info are for optional upload later on.
+
+  [ Jeremy Bicha ]
+  * Update "Updates and Other Software" page to match the spec (LP: #1758082)
+
+  [ Rik Mills ]
+  * Update KDE/Qt "Updates and Other Software" page in line with GTK changes,
+    with some tweaks appropriate for Kubuntu usage in Bionic
+  * Mark the sddm.conf file for OEM so that it can be removed by oem-config
+    if unchanged.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 29 Mar 2018 13:42:51 -0400
+
 ubiquity (18.04.3) bionic; urgency=medium
 
   [ Sebastien Bacher ]

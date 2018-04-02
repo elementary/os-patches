@@ -266,7 +266,7 @@ class PageKde(PreparePageBase):
             from PyQt5 import QtGui
             self.page = uic.loadUi('/usr/share/ubiquity/qt/stepPrepare.ui')
             self.prepare_minimal_install = self.page.prepare_minimal_install
-            self.label_minimal_install = self.page.label_minimal_install
+            self.qt_label_minimal_install = self.page.qt_label_minimal_install
             self.prepare_download_updates = self.page.prepare_download_updates
             self.prepare_nonfree_software = self.page.prepare_nonfree_software
             self.prepare_foss_disclaimer = self.page.prepare_foss_disclaimer
@@ -291,7 +291,7 @@ class PageKde(PreparePageBase):
                 # TODO use an inconsistent state?
                 print('unable to set up power source watch:', e)
             if not os.path.exists(minimal_install_rlist_path):
-                self.label_minimal_install.hide()
+                self.qt_label_minimal_install.hide()
                 self.prepare_minimal_install.hide()
             try:
                 self.prepare_network_connection = StateBox(self.page)
@@ -356,8 +356,9 @@ class PageKde(PreparePageBase):
         self.prepare_minimal_install.setChecked(val)
 
     def get_minimal_install(self):
-        from PyQt5.QtCore import Qt
-        return self.prepare_minimal_install.checkState() == Qt.Checked
+        if self.prepare_minimal_install.isChecked():
+            return True
+        return False
 
     def set_allow_nonfree(self, allow):
         if not allow:

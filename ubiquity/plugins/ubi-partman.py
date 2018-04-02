@@ -25,7 +25,8 @@ import signal
 
 import debconf
 
-from ubiquity import misc, osextras, parted_server, plugin, validation
+from ubiquity import (misc, osextras, parted_server, plugin,
+                      telemetry, validation)
 from ubiquity.install_misc import archdetect
 
 
@@ -673,22 +674,24 @@ class PageGtk(PageBase):
 
     def get_autopartition_choice(self):
         if self.reuse_partition.get_active():
-            return self.extra_options['reuse'][0][0], None
+            return self.extra_options['reuse'][0][0], None, 'reuse_partition'
 
         if self.replace_partition.get_active():
-            return self.extra_options['replace'][0], None
+            return (self.extra_options['replace'][0], None,
+                    'reinstall_partition')
 
         elif self.custom_partitioning.get_active():
-            return self.extra_options['manual'], None
+            return self.extra_options['manual'], None, 'manual'
 
         elif self.resize_use_free.get_active():
             if 'biggest_free' in self.extra_options:
                 choice = self.extra_options['biggest_free'][0]
-                return choice, None
+                return choice, None, 'resize_use_free'
             else:
                 disk_id = self.get_current_disk_partman_id()
                 choice = self.extra_options['resize'][disk_id][0]
-                return choice, '%s B' % self.resizewidget.get_size()
+                return (choice, '%s B' % self.resizewidget.get_size(),
+                        'resize_use_free')
 
         elif self.use_device.get_active():
             def choose_recipe():
@@ -702,13 +705,15 @@ class PageGtk(PageBase):
 
                 if not ((want_crypto and have_crypto) or
                         (want_lvm and have_lvm)):
-                    return self.extra_options['use_device'][0]
+                    return self.extra_options['use_device'][0], 'use_device'
 
                 if want_crypto:
-                    return self.extra_options['some_device_crypto']
+                    return (self.extra_options['some_device_crypto'],
+                            'use_crypto')
 
                 if want_lvm:
-                    return self.extra_options['some_device_lvm']
+                    return (self.extra_options['some_device_lvm'],
+                            'use_lvm')
 
                 # Something went horribly wrong, we should have returned
                 # earlier
@@ -717,9 +722,9 @@ class PageGtk(PageBase):
             i = self.part_auto_select_drive.get_active_iter()
             m = self.part_auto_select_drive.get_model()
             disk = m.get_value(i, 0)
-            choice = choose_recipe()
+            choice, method = choose_recipe()
             # Is the encoding necessary?
-            return choice, misc.utf8(disk, errors='replace')
+            return choice, misc.utf8(disk, errors='replace'), method
 
         else:
             raise AssertionError("Couldn't get autopartition choice")
@@ -3249,10 +3254,11 @@ class Page(plugin.Plugin):
             self.preseed('grub-installer/bootdev', self.ui.get_grub_choice())
 
         if self.current_question.endswith('automatically_partition'):
-            (autopartition_choice, self.extra_choice) = \
+            (autopartition_choice, self.extra_choice, method) = \
                 self.ui.get_autopartition_choice()
             self.preseed_as_c(self.current_question, autopartition_choice,
                               seen=False)
+            telemetry.get().set_partition_method(method)
             # Don't exit partman yet.
         else:
             self.finish_partitioning = True

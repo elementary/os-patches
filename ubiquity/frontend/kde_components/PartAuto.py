@@ -252,18 +252,20 @@ class PartAuto(QtWidgets.QWidget):
             disk_id = self.extra_options['use_device'][1][comboText][0]
             disk_id = disk_id.rsplit('/', 1)[1]
             option = self.extra_options['resize'][disk_id][0]
-            return option, '%d B' % self.resizeSize
+            return option, '%d B' % self.resizeSize, 'resize_use_free'
         elif choice == self.useDeviceChoice:
             return (self.extra_options['use_device'][0],
-                    str(self.part_auto_disk_box.currentText()))
+                    str(self.part_auto_disk_box.currentText()), 'use_device')
         elif choice == self.lvm_choice:
             return (choice,
-                    str(self.part_auto_disk_box.currentText()))
+                    str(self.part_auto_disk_box.currentText()), 'use_lvm')
         elif choice == self.crypto_choice:
             return (choice,
-                    str(self.part_auto_disk_box.currentText()))
+                    str(self.part_auto_disk_box.currentText()), 'use_crypto')
+        elif choice == self.manualChoice:
+            return choice, None, 'manual'
         else:
-            return choice, None
+            return choice, None, 'unknown'
 
     def on_disks_combo_changed(self, index):
         for e in self.bar_frames:

@@ -230,6 +230,7 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
         self._check_navigation_buttons()
 
     def preparing_page_tests(self, updates=False, thirdParty=False,
+                             minimal_installation=False,
                              networkConnection=True, sufficientSpace=True,
                              powerSource=False):
         """ Runs the tests for the 'Preparing to install' page
@@ -238,6 +239,8 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
 
         :param thirdParty: Boolean, if True selects install third-party
                                     software
+        :param minimal_installation: Boolean, if True selects minimal
+                                       installation option
 
         :param networkConnection: Boolean if True checks the network state box
                                     is visible and objects are correct, If
@@ -266,6 +269,7 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
 
         objList = [
             'prepare_foss_disclaimer_license',
+            'prepare_minimal_install',
             'prepare_download_updates',
             'prepare_nonfree_software'
         ]
@@ -282,6 +286,12 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
             thrdprty_checkbutton = preparing_page.select_single(
                 GtkCheckButton, BuilderName='prepare_nonfree_software')
             self.pointing_device.click_object(thrdprty_checkbutton)
+
+        if minimal_installation:
+            logger.debug("Selecting install Minimal installation")
+            minimal_installation_checkbutton = preparing_page.select_single(
+                GtkCheckButton, BuilderName='prepare_minimal_install')
+            self.pointing_device.click_object(minimal_installation_checkbutton)
 
         self._check_page_titles()
         self._check_navigation_buttons()

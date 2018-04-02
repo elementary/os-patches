@@ -33,7 +33,7 @@ import textwrap
 
 import debconf
 
-from ubiquity import i18n
+from ubiquity import i18n, telemetry
 from ubiquity.components import install, plugininstall
 from ubiquity.frontend.base import BaseFrontend, Controller
 from ubiquity.plugin import Plugin
@@ -94,6 +94,9 @@ class Wizard(BaseFrontend):
                 'cannot continue without them.'), file=sys.stderr)
             sys.exit(1)
 
+        telemetry.get().set_installer_type('DebConf')
+        telemetry.get().add_stage(telemetry.START_INSTALL_STAGE_TAG)
+
         self.pagesindex = 0
         self.pageslen = 0
         self.pages = []
@@ -152,6 +155,7 @@ class Wizard(BaseFrontend):
                             "Install failed with exit code %s; see "
                             "/var/log/syslog" % ret)
 
+            telemetry.get().done(self.db)
             return 0
         else:
             return 10

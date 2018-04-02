@@ -58,8 +58,8 @@ def generate_config():
     stepPrepare['prepare_download_updates'] = \
         'Download updates while installing {}'.format(distro_flavor)
     stepPrepare['prepare_nonfree_software'] = \
-        'Install third-party software for graphics and Wi-Fi hardware, ' \
-        'MP3 and other media'
+        'Install software for graphics, Wi-Fi hardware, ' \
+        'and additional media playback'
     stepPrepare['prepare_network_connection'] = \
         'is connected to the Internet'
     stepPrepare['prepare_sufficient_space'] = \

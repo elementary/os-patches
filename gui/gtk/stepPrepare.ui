@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.22.0 -->
 <interface>
-  <requires lib="gtk+" version="3.0"/>
+  <requires lib="gtk+" version="3.20"/>
   <object class="GtkAlignment" id="stepNoSpace">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -62,6 +62,138 @@
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
         <child>
+          <object class="GtkBox" id="minimal_install_vbox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel" id="minimal_install_header">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">What apps would you like to install to start with?</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkRadioButton" id="prepare_normal_install">
+                <property name="label" translatable="yes">Normal installation</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="use_underline">True</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkAlignment" id="alignment5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="left_padding">25</property>
+                <child>
+                  <object class="GtkLabel" id="label_normal_install">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_top">3</property>
+                    <property name="label" translatable="yes">Web browser, utilities, office software, games, and media players.</property>
+                    <property name="wrap">True</property>
+                    <property name="ellipsize">middle</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">0</property>
+                    <attributes>
+                      <attribute name="scale" value="0.83333333333333337"/>
+                    </attributes>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkRadioButton" id="prepare_minimal_install">
+                <property name="label" translatable="yes">Minimal installation</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="use_underline">True</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+                <property name="group">prepare_normal_install</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkAlignment" id="alignment1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="left_padding">25</property>
+                <child>
+                  <object class="GtkLabel" id="label_minimal_install">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_top">3</property>
+                    <property name="label" translatable="yes">Web browser and basic utilities.</property>
+                    <property name="wrap">True</property>
+                    <property name="ellipsize">middle</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">0</property>
+                    <attributes>
+                      <attribute name="scale" value="0.83333333333333337"/>
+                    </attributes>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="install_other_options_header">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Other options</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkBox" id="box3">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -118,62 +250,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="minimal_install_vbox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">6</property>
-            <child>
-              <object class="GtkCheckButton" id="prepare_minimal_install">
-                <property name="label" translatable="yes">Minimal installation</property>
-                <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="xalign">0</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkAlignment" id="alignment5">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="left_padding">25</property>
-                <child>
-                  <object class="GtkLabel" id="label_minimal_install">
-                    <property name="label" translatable="yes">This will only install a minimal desktop environment with a browser and utilities.</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">3</property>
-                    <property name="wrap">True</property>
-                    <property name="ellipsize">middle</property>
-                    <property name="xalign">0</property>
-                    <property name="yalign">0</property>
-                    <attributes>
-                      <attribute name="scale" value="0.83333333333333337"/>
-                    </attributes>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox" id="nonfree_vbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -181,8 +257,7 @@
             <property name="spacing">6</property>
             <child>
               <object class="GtkCheckButton" id="prepare_nonfree_software">
-                <property name="label" translatable="yes">Install third-party software for graphics and Wi-Fi hardware, MP3 and other media</property>
-                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Install third-party software for graphics and Wi-Fi hardware and additional media formats</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -191,7 +266,7 @@
                 <signal name="toggled" handler="on_nonfree_toggled" swapped="no"/>
               </object>
               <packing>
-                <property name="expand">True</property>
+                <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
@@ -232,25 +307,6 @@
                             <property name="expand">False</property>
                             <property name="fill">False</property>
                             <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="prepare_foss_disclaimer_extra_label">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Fluendo MP3 plugin includes MPEG Layer-3 audio decoding technology licensed from Fraunhofer IIS and Technicolor SA.
-</property>
-                            <property name="wrap">True</property>
-                            <property name="xalign">0</property>
-                            <property name="yalign">2.2351741291171123e-10</property>
-                            <attributes>
-                              <attribute name="scale" value="0.83333333333333337"/>
-                            </attributes>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
@@ -569,7 +625,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
