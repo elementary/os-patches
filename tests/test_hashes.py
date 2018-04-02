@@ -237,5 +237,6 @@ class TestHashStringList(testcommon.TestCase):
         self.assertGreater(len(hsl2), 0)
         self.assertTrue(hsl2.verify_file(apt_pkg.__file__))
 
+
 if __name__ == "__main__":
     unittest.main()

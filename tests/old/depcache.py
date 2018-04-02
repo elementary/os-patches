@@ -14,8 +14,8 @@ def main():
     depcache.init()
     i = 0
     all = cache.package_count
-    print "Running DepCache test on all packages"
-    print "(trying to install each and then mark it keep again):"
+    print("Running DepCache test on all packages")
+    print("(trying to install each and then mark it keep again):")
     # first, get all pkgs
     for pkg in cache.packages:
         i += 1
@@ -26,27 +26,27 @@ def main():
             depcache.mark_install(pkg)
             if depcache.inst_count == 0:
                 if depcache.is_upgradable(pkg):
-                    print "Error marking %s for install" % x
+                    print("Error marking %s for install" % x)
             for p in cache.packages:
                 if depcache.marked_install(p):
                     depcache.mark_keep(p)
             if depcache.inst_count != 0:
-                print "Error undoing the selection for %s (inst_count: %s)" % (
-                    x, depcache.inst_count)
-        print "\r%i/%i=%.3f%%    " % (i, all, (float(i) / float(all) * 100)),
+                print("Error undoing the selection for %s (inst_count: %s)" % (
+                    x, depcache.inst_count))
+        print("\r%i/%i=%.3f%%    " % (i, all, (float(i) / float(all) * 100)))
 
-    print
-    print "Trying upgrade:"
+    print()
+    print("Trying upgrade:")
     depcache.upgrade()
-    print "To install: %s " % depcache.inst_count
-    print "To remove: %s " % depcache.del_count
-    print "Kept back: %s " % depcache.keep_count
+    print("To install: %s " % depcache.inst_count)
+    print("To remove: %s " % depcache.del_count)
+    print("Kept back: %s " % depcache.keep_count)
 
-    print "Trying DistUpgrade:"
+    print("Trying DistUpgrade:")
     depcache.upgrade(True)
-    print "To install: %s " % depcache.inst_count
-    print "To remove: %s " % depcache.del_count
-    print "Kept back: %s " % depcache.keep_count
+    print("To install: %s " % depcache.inst_count)
+    print("To remove: %s " % depcache.del_count)
+    print("Kept back: %s " % depcache.keep_count)
 
 
 if __name__ == "__main__":

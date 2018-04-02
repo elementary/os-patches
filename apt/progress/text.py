@@ -26,7 +26,7 @@ from apt.progress import base
 __all__ = ['AcquireProgress', 'CdromProgress', 'OpProgress']
 
 if sys.version_info.major < 3:
-    input = raw_input
+    input = raw_input  # type: ignore
 else:
     long = int
 

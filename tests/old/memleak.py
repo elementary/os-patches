@@ -12,7 +12,7 @@ cache = apt.Cache()
 # memleak
 for i in range(100):
     cache.open(None)
-    print cache["apt"].name
+    print(cache["apt"].name)
     time.sleep(1)
     gc.collect()
     f = open("%s" % i, "w")
@@ -40,7 +40,7 @@ for i in range(100):
             dict[pkg.name] = apt.package(cache, depcache,
                                          records, list, None, pkg)
 
-    print cache["apt"]
+    print(cache["apt"])
     time.sleep(1)
 
     gc.collect()

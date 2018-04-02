@@ -389,7 +389,7 @@ class SourcesList(object):
                 for line in f:
                     source = SourceEntry(line, file)
                     self.list.append(source)
-        except:
+        except Exception:
             logging.warning("could not open file '%s'\n" % file)
 
     def save(self):

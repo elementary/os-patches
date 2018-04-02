@@ -140,5 +140,6 @@ class TestDependencies(testcommon.TestCase):
         self.assertEqual(">=", apt_pkg.ParseDepends("p1 (> 1)")[0][0][2])
         self.assertEqual(">>", apt_pkg.ParseDepends("p1 (>> 1)")[0][0][2])
 
+
 if __name__ == "__main__":
     unittest.main()

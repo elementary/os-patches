@@ -12,16 +12,16 @@ def main():
     apt_pkg.init()
     cache = apt_pkg.Cache()
     i = 0
-    print "Running PkgSrcRecords test on all packages:"
+    print("Running PkgSrcRecords test on all packages:")
     for x in cache.packages:
         i += 1
         src = apt_pkg.SourceRecords()
         if src.lookup(x.name):
             #print src.package
             pass
-        print "\r%i/%i=%.3f%%    " % (
+        print("\r%i/%i=%.3f%%    " % (
             i, cache.package_count,
-            (float(i) / float(cache.package_count) * 100)),
+            (float(i) / float(cache.package_count) * 100)))
 
 
 if __name__ == "__main__":

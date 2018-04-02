@@ -14,7 +14,7 @@ def main():
     depcache = apt_pkg.DepCache(cache)
     depcache.init()
     i = 0
-    print "Running PkgRecords test on all packages:"
+    print("Running PkgRecords test on all packages:")
     for pkg in cache.packages:
         i += 1
         records = apt_pkg.PackageRecords(cache)
@@ -30,9 +30,9 @@ def main():
             x = records.filename
             y = records.long_desc
             pass
-        print "\r%i/%i=%.3f%%    " % (
+        print("\r%i/%i=%.3f%%    " % (
             i, cache.package_count,
-            (float(i) / float(cache.package_count) * 100)),
+            (float(i) / float(cache.package_count) * 100)))
 
 
 if __name__ == "__main__":

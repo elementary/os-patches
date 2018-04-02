@@ -14,4 +14,4 @@ for pkg in cache:
                         not cache[enhances.name].is_installed):
                     s += "(*missing*) "
                 s += ","
-            print s[:-1]
+            print(s[:-1])

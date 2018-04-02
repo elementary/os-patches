@@ -143,14 +143,14 @@ static PyObject *order_list_flag(PyObject *self,PyObject *args)
                          &flags, &unset_flags) == 0)
         return 0;
 
-	if (!valid_flags(flags))
-		return PyErr_Format(PyExc_ValueError, "flags (%u) is"
-		                    " not a valid combination of flags.",
-		                    flags);
-	if (!valid_flags(unset_flags))
-		return PyErr_Format(PyExc_ValueError, "unset_flags (%u) is"
-		                    " not a valid combination of flags.",
-		                    unset_flags);
+    if (!valid_flags(flags))
+       return PyErr_Format(PyExc_ValueError, "flags (%u) is"
+                           " not a valid combination of flags.",
+                           flags);
+    if (!valid_flags(unset_flags))
+       return PyErr_Format(PyExc_ValueError, "unset_flags (%u) is"
+                           " not a valid combination of flags.",
+                           unset_flags);
 
     list->Flag(PyPackage_ToCpp(pyPkg), flags, unset_flags);
     
@@ -169,10 +169,10 @@ static PyObject *order_list_is_flag(PyObject *self,PyObject *args)
                          &flags) == 0)
         return 0;
 
-	if (!valid_flags(flags))
-		return PyErr_Format(PyExc_ValueError, "flags (%u) is"
-		                    " not a valid combination of flags.",
-		                    flags);
+    if (!valid_flags(flags))
+       return PyErr_Format(PyExc_ValueError, "flags (%u) is"
+                           " not a valid combination of flags.",
+                           flags);
 
     return PyBool_FromLong(list->IsFlag(PyPackage_ToCpp(pyPkg), flags));
 }
@@ -187,10 +187,10 @@ static PyObject *order_list_wipe_flags(PyObject *self,PyObject *args)
     if (PyArg_ParseTuple(args, "I", &flags) == 0)
         return 0;
 
-	if (!valid_flags(flags))
-		return PyErr_Format(PyExc_ValueError, "flags (%u) is"
-		                    " not a valid combination of flags.",
-		                    flags);
+    if (!valid_flags(flags))
+       return PyErr_Format(PyExc_ValueError, "flags (%u) is"
+                           " not a valid combination of flags.",
+                           flags);
 
     list->WipeFlags(flags);
     Py_RETURN_NONE;

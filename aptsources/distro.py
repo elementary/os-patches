@@ -207,9 +207,9 @@ class Distribution(object):
             Customize for different distributions '''
         country = None
         i = server.find("://")
-        l = server.find(".archive.ubuntu.com")
-        if i != -1 and l != -1:
-            country = server[i + len("://"):l]
+        li = server.find(".archive.ubuntu.com")
+        if i != -1 and li != -1:
+            country = server[i + len("://"):li]
         if country in self.countries:
             # TRANSLATORS: %s is a country
             return _("Server for %s") % self.countries[country]
@@ -438,9 +438,9 @@ class DebianDistribution(Distribution):
             Debian specific '''
         country = None
         i = server.find("://ftp.")
-        l = server.find(".debian.org")
-        if i != -1 and l != -1:
-            country = server[i + len("://ftp."):l]
+        li = server.find(".debian.org")
+        if i != -1 and li != -1:
+            country = server[i + len("://ftp."):li]
         if country in self.countries:
             # TRANSLATORS: %s is a country
             return _("Server for %s") % gettext.dgettext(
@@ -508,6 +508,7 @@ def _system_image_channel():
                 'system-image-cli failed, using defaults: %s' % exc)
     return None
 
+
 class _OSRelease:
 
     DEFAULT_OS_RELEASE_FILE = '/etc/os-release'
@@ -547,7 +548,7 @@ class _OSRelease:
         f.close()
 
     def parse_entry(self, key, value):
-        value = self.parse_value(value) # Values can be shell strings...
+        value = self.parse_value(value)  # Values can be shell strings...
         if key == "ID_LIKE" and isinstance(value, str):
             # ID_LIKE is specified as quoted space-separated list. This will
             # be parsed as string that we need to split manually.
@@ -560,7 +561,9 @@ class _OSRelease:
             return values[0]
         return values
 
-def get_distro(id=None, codename=None, description=None, release=None, is_like=[]):
+
+def get_distro(id=None, codename=None, description=None, release=None,
+               is_like=[]):
     """
     Check the currently used distribution and return the corresponding
     distriubtion class that supports distro specific features.
@@ -582,7 +585,8 @@ def get_distro(id=None, codename=None, description=None, release=None, is_like=[
         #       a behavior break a which point lsb_release support should be
         #       fully removed.
         #       This in particular is a problem for template matching, as this
-        #       matches against Distribution objects and depends on string case.
+        #       matches against Distribution objects and depends on string
+        #       case.
         lsb_result = _lsb_release()
         id = lsb_result['Distributor ID']
         codename = lsb_result['Codename']
@@ -600,7 +604,8 @@ def get_distro(id=None, codename=None, description=None, release=None, is_like=[
     if id == "Ubuntu":
         return UbuntuDistribution(id, codename, description, release, is_like)
     if id == "Ubuntu-RTM":
-        return UbuntuRTMDistribution(id, codename, description, release, is_like)
+        return UbuntuRTMDistribution(
+            id, codename, description, release, is_like)
     elif id == "Debian":
         return DebianDistribution(id, codename, description, release, is_like)
     else:

@@ -3,9 +3,11 @@
 # $Id: setup.py,v 1.2 2002/01/08 07:13:21 jgg Exp $
 import glob
 import os
+import shutil
 import sys
 
 from distutils.core import setup, Extension
+from distutils.command.install import install
 from distutils import sysconfig
 cmdclass = {}
 
@@ -23,6 +25,16 @@ try:
     cmdclass['build_sphinx'] = BuildDoc
 except ImportError:
     print('W: [python%s] Sphinx import error.' % sys.version[:3])
+
+
+class InstallTypeinfo(install):
+    def run(self):
+        install.run(self)
+        for pyi in glob.glob("typehinting/*.pyi"):
+            shutil.copy(pyi, self.install_purelib)
+
+
+cmdclass['install'] = InstallTypeinfo
 
 
 def get_version():
@@ -75,7 +87,6 @@ if len(sys.argv) > 1 and sys.argv[1] == "build":
         source.close()
         build.close()
     for template in glob.glob('data/templates/*.mirrors'):
-        import shutil
         shutil.copy(template, os.path.join("build", template))
 
 # Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
@@ -92,6 +103,9 @@ setup(name="python-apt",
       author_email="deity@lists.debian.org",
       ext_modules=[apt_pkg, apt_inst],
       packages=['apt', 'apt.progress', 'aptsources'],
+      package_data={
+          'apt': ["*.pyi"],
+      },
       data_files=[('share/python-apt/templates',
                    glob.glob('build/data/templates/*.info')),
                   ('share/python-apt/templates',

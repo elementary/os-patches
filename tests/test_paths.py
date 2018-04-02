@@ -145,5 +145,6 @@ class TestPath(testcommon.TestCase):
         self.assertRaises(StopIteration, next, tag1)
         self.assertRaises(StopIteration, next, tag2)
 
+
 if __name__ == '__main__':
     unittest.main()

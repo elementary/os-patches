@@ -30,7 +30,7 @@ ProblemResolver  # pyflakes
 from apt.cdrom import Cdrom
 
 # init the package system, but do not re-initialize config
-if "APT" not in apt_pkg.config:
+if "APT" not in apt_pkg.config:  # type: ignore
     apt_pkg.init_config()
 apt_pkg.init_system()
 

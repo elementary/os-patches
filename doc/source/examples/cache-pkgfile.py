@@ -25,5 +25,6 @@ def main():
             print('Automatic: Yes')
         print()
 
+
 if __name__ == '__main__':
     main()

@@ -117,9 +117,9 @@ class TestAptCache(testcommon.TestCase):
                 "skipping test_get_provided_packages, cache empty?!?")
             return
         # a true virtual pkg
-        l = cache.get_providing_packages("mail-transport-agent")
-        self.assertTrue(len(l) > 0)
-        self.assertTrue("postfix" in [p.name for p in l])
+        li = cache.get_providing_packages("mail-transport-agent")
+        self.assertTrue(len(li) > 0)
+        self.assertTrue("postfix" in [p.name for p in li])
         self.assertTrue(
             "mail-transport-agent" in cache["postfix"].candidate.provides)
 
@@ -133,10 +133,10 @@ class TestAptCache(testcommon.TestCase):
             return
         # low level cache provides list of the pkg
         cache = highlevel_cache._cache
-        l = cache["mail-transport-agent"].provides_list
+        li = cache["mail-transport-agent"].provides_list
         # arbitrary number, just needs to be higher enough
-        self.assertEqual(len(l), 2)
-        for (providesname, providesver, version) in l:
+        self.assertEqual(len(li), 2)
+        for (providesname, providesver, version) in li:
             self.assertEqual(providesname, "mail-transport-agent")
             if version.parent_pkg.name == "postfix":
                 break
@@ -231,12 +231,12 @@ class TestAptCache(testcommon.TestCase):
 
     def test_package_cmp(self):
         cache = apt.Cache(rootdir="/")
-        l = []
-        l.append(cache["intltool"])
-        l.append(cache["python3"])
-        l.append(cache["apt"])
-        l.sort()
-        self.assertEqual([p.name for p in l],
+        li = []
+        li.append(cache["intltool"])
+        li.append(cache["python3"])
+        li.append(cache["apt"])
+        li.sort()
+        self.assertEqual([p.name for p in li],
                          ["apt", "intltool", "python3"])
 
     def test_get_architectures(self):

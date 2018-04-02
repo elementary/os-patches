@@ -74,6 +74,7 @@ Architecture: all""")
         # this should be 82324L but python3.2 gets unhappy about the "L"
         self.assertEqual(self.cache.required_download, 82324)
 
+
 if __name__ == "__main__":
     unittest.main()
 

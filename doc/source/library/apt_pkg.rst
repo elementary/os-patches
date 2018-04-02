@@ -1435,7 +1435,6 @@ Records (Release files, Packages, Sources)
             section = apt_pkg.TagSection(records.record)
             print(section['SHA256']) # Use records.sha256_hash instead
 
-
 .. class:: SourceRecords
 
     Provide an easy way to look up the records of source packages and
@@ -1486,11 +1485,12 @@ Records (Release files, Packages, Sources)
 
     .. attribute:: files
 
-        The list of files. This returns a list of tuples with the contents
-        ``(str: md5, int: size, str: path, str:type)``, where
-        'type' can be 'diff' (includes .debian.tar.gz), 'dsc', 'tar'.
+        The list of files. This returns a list of :class:`SourceRecordsFile`
 
-        .. deprecated: 1.0
+        .. versionchanged:: 1.6
+
+            Used to be a list of tuples, see :class:`SourceRecordFile` for the tuple
+            layout.
 
     .. attribute:: index
 
@@ -1518,6 +1518,30 @@ Records (Release files, Packages, Sources)
     .. attribute:: version
 
         A string describing the version of the source package.
+
+.. class:: SourceRecordsFile
+
+    Represents a file in a source record.
+
+    .. versionadded:: 1.6
+
+        Before 1.6, this was a tuple `(md5, size, path, type)`.
+
+    .. attribute:: hashes
+
+        A :class:`HashStringList` of the file's hashes.
+
+    .. attribute:: path
+
+        The path to the file
+
+    .. attribute:: size
+
+        The size of the file
+
+    .. attribute:: type
+
+        The type of the file. Can be 'diff' (includes .debian.tar.gz), 'dsc', or 'tar'.
 
 The Acquire interface
 ----------------------

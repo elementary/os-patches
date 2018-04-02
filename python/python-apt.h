@@ -170,6 +170,10 @@ struct _PyAptPkgAPIStruct {
     PyTypeObject *orderlist_type;
     PyObject* (*orderlist_fromcpp)(pkgOrderList* const &obj, bool Delete, PyObject *Owner);
     pkgOrderList*& (*orderlist_tocpp)(PyObject *self);
+
+    PyTypeObject *sourcerecordfiles_type;
+    void *sourcerecordfiles_fromcpp; // FIXME: need sourcerecordfiles_fromcpp
+    void *sourcerecordfiles_tocpp; // FIXME: need sourcerecordfiles_tocpp
 };
 
 // Checking macros.
@@ -202,6 +206,7 @@ struct _PyAptPkgAPIStruct {
 # define PyProblemResolver_Check(op)  PyObject_TypeCheck(op, &PyProblemResolver_Type)
 # define PySourceList_Check(op)       PyObject_TypeCheck(op, &PySourceList_Type)
 # define PySourceRecords_Check(op)    PyObject_TypeCheck(op, &PySourceRecords_Type)
+# define PySourceRecordFiles_Check(op)    PyObject_TypeCheck(op, &PySourceRecordFiles_Type)
 # define PyTagFile_Check(op)          PyObject_TypeCheck(op, &PyTagFile_Type)
 # define PyTagSection_Check(op)       PyObject_TypeCheck(op, &PyTagSection_Type)
 # define PyVersion_Check(op)          PyObject_TypeCheck(op, &PyVersion_Type)
@@ -236,6 +241,7 @@ struct _PyAptPkgAPIStruct {
 # define PyProblemResolver_CheckExact(op)  (op->op_type == &PyProblemResolver_Type)
 # define PySourceList_CheckExact(op)       (op->op_type == &PySourceList_Type)
 # define PySourceRecords_CheckExact(op)    (op->op_type == &PySourceRecords_Type)
+# define PySourceRecordFiles_CheckExact(op)    (op->op_type == &PySourceRecordFiles_Type)
 # define PyTagFile_CheckExact(op)          (op->op_type == &PyTagFile_Type)
 # define PyTagSection_CheckExact(op)       (op->op_type == &PyTagSection_Type)
 # define PyVersion_CheckExact(op)          (op->op_type == &PyVersion_Type)
@@ -282,6 +288,7 @@ static int import_apt_pkg(void) {
 #  define PyProblemResolver_Type   *(_PyAptPkg_API->problemresolver_type)
 #  define PySourceList_Type        *(_PyAptPkg_API->sourcelist_type)
 #  define PySourceRecords_Type     *(_PyAptPkg_API->sourcerecords_type)
+#  define PySourceRecordFiles_Type *(_PyAptPkg_API->sourcerecordfiles_type)
 #  define PyTagFile_Type           *(_PyAptPkg_API->tagfile_type)
 #  define PyTagSection_Type        *(_PyAptPkg_API->tagsection_type)
 #  define PyVersion_Type           *(_PyAptPkg_API->version_type)
@@ -316,6 +323,7 @@ static int import_apt_pkg(void) {
 #  define PyProblemResolver_ToCpp  _PyAptPkg_API->problemresolver_tocpp
 #  define PySourceList_ToCpp       _PyAptPkg_API->sourcelist_tocpp
 #  define PySourceRecords_ToCpp    _PyAptPkg_API->sourcerecords_tocpp // NULL
+#  define PySourceRecordFiles_ToCpp    _PyAptPkg_API->sourcerecordfiles_tocpp // NULL
 #  define PyTagFile_ToCpp          _PyAptPkg_API->tagfile_tocpp
 #  define PyTagSection_ToCpp       _PyAptPkg_API->tagsection_tocpp
 #  define PyVersion_ToCpp          _PyAptPkg_API->version_tocpp
@@ -350,6 +358,7 @@ static int import_apt_pkg(void) {
 #  define PyProblemResolver_FromCpp  _PyAptPkg_API->problemresolver_fromcpp
 #  define PySourceList_FromCpp       _PyAptPkg_API->sourcelist_fromcpp
 #  define PySourceRecords_FromCpp    _PyAptPkg_API->sourcerecords_fromcpp // NULL
+#  define PySourceRecordFiles_FromCpp    _PyAptPkg_API->sourcerecordfiles_fromcpp // NULL
 #  define PyTagFile_FromCpp          _PyAptPkg_API->tagfile_fromcpp
 #  define PyTagSection_FromCpp       _PyAptPkg_API->tagsection_fromcpp
 #  define PyVersion_FromCpp          _PyAptPkg_API->version_fromcpp

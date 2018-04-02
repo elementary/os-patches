@@ -21,25 +21,47 @@
 """Functionality related to packages."""
 from __future__ import print_function
 
-
+import logging
 import os
 import sys
 import re
 import socket
 import subprocess
+import threading
+threading  # pyflakes
 
 try:
     from http.client import BadStatusLine
     from urllib.error import HTTPError
     from urllib.request import urlopen
 except ImportError:
-    from httplib import BadStatusLine
-    from urllib2 import HTTPError, urlopen
+    from httplib import BadStatusLine  # type: ignore
+    from urllib2 import HTTPError, urlopen  # type: ignore
 
 from collections import Mapping, Sequence
 
+try:
+    from typing import Any, Iterable, Iterator, List, Set, Tuple, Union
+    Any  # pyflakes
+    Iterable  # pyflakes
+    Iterator  # pyflakes
+    List  # pyflakes
+    Set  # pyflakes
+    Tuple  # pyflakes
+    Union  # pyflakes
+except ImportError:
+    pass
+
 import apt_pkg
 import apt.progress.text
+
+from apt.progress.base import (
+    AcquireProgress,
+    InstallProgress,
+)
+AcquireProgress  # pyflakes
+InstallProgress  # pyflakes
+
 from apt_pkg import gettext as _
 
 __all__ = ('BaseDependency', 'Dependency', 'Origin', 'Package', 'Record',
@@ -50,10 +72,12 @@ if sys.version_info.major >= 3:
 
 
 def _file_is_same(path, size, md5):
+    # type: (str, int, str) -> bool
     """Return ``True`` if the file is the same."""
     if os.path.exists(path) and os.path.getsize(path) == size:
         with open(path) as fobj:
             return apt_pkg.md5sum(fobj) == md5
+    return False
 
 
 class FetchError(Exception):
@@ -88,23 +112,28 @@ class BaseDependency(object):
             return not self.__eq__(other)
 
     def __init__(self, version, dep):
+        # type: (Version, apt_pkg.Dependency) -> None
         self._version = version  # apt.package.Version
         self._dep = dep  # apt_pkg.Dependency
 
     def __str__(self):
+        # type: () -> str
         return '%s: %s' % (self.rawtype, self.rawstr)
 
     def __repr__(self):
+        # type: () -> str
         return ('<BaseDependency: name:%r relation:%r version:%r rawtype:%r>'
                 % (self.name, self.relation, self.version, self.rawtype))
 
     @property
     def name(self):
+        # type: () -> str
         """The name of the target package."""
         return self._dep.target_pkg.name
 
     @property
     def relation(self):
+        # type: () -> str
         """The relation (<, <=, =, !=, >=, >, '') in mathematical notation.
 
         The empty string will be returned in case of an unversioned dependency.
@@ -113,6 +142,7 @@ class BaseDependency(object):
 
     @property
     def relation_deb(self):
+        # type: () -> str
         """The relation (<<, <=, =, !=, >=, >>, '') in Debian notation.
 
         The empty string will be returned in case of an unversioned dependency.
@@ -126,6 +156,7 @@ class BaseDependency(object):
 
     @property
     def version(self):
+        # type: () -> str
         """The target version or an empty string.
 
         Note that the version is only an empty string in case of an unversioned
@@ -135,6 +166,7 @@ class BaseDependency(object):
 
     @property
     def target_versions(self):
+        # type: () -> List[Version]
         """A list of all Version objects which satisfy this dependency.
 
         .. versionadded:: 1.0.0
@@ -151,6 +183,7 @@ class BaseDependency(object):
 
     @property
     def installed_target_versions(self):
+        # type: () -> List[Version]
         """A list of all installed Version objects which satisfy this dep.
 
         .. versionadded:: 1.0.0
@@ -159,6 +192,7 @@ class BaseDependency(object):
 
     @property
     def rawstr(self):
+        # type: () -> str
         """String represenation of the dependency.
 
         Returns the string representation of the dependency as it would be
@@ -180,6 +214,7 @@ class BaseDependency(object):
 
     @property
     def rawtype(self):
+        # type: () -> str
         """Type of the dependency.
 
         This should be one of 'Breaks', 'Conflicts', 'Depends', 'Enhances',
@@ -191,6 +226,7 @@ class BaseDependency(object):
 
     @property
     def pre_depend(self):
+        # type: () -> bool
         """Whether this is a PreDepends."""
         return self._dep.dep_type_untranslated == 'PreDepends'
 
@@ -206,22 +242,27 @@ class Dependency(list):
     """
 
     def __init__(self, version, base_deps, rawtype):
-        super(Dependency, self).__init__(base_deps)
+        # type: (Version, apt_pkg.Dependency, str) -> None
+        super(Dependency, self).__init__(base_deps)  # type: ignore
         self._version = version  # apt.package.Version
         self._rawtype = rawtype
 
     def __str__(self):
+        # type: () -> str
         return '%s: %s' % (self.rawtype, self.rawstr)
 
     def __repr__(self):
+        # type: () -> str
         return '<Dependency: [%s]>' % (', '.join(repr(bd) for bd in self))
 
     @property
     def or_dependencies(self):
+        # type: () -> Dependency
         return self
 
     @property
     def rawstr(self):
+        # type: () -> str
         """String represenation of the Or-group of dependencies.
 
         Returns the string representation of the Or-group of dependencies as it
@@ -237,6 +278,7 @@ class Dependency(list):
 
     @property
     def rawtype(self):
+        # type: () -> str
         """Type of the Or-group of dependency.
 
         This should be one of 'Breaks', 'Conflicts', 'Depends', 'Enhances',
@@ -250,11 +292,12 @@ class Dependency(list):
 
     @property
     def target_versions(self):
+        # type: () -> List[Version]
         """A list of all Version objects which satisfy this Or-group of deps.
 
         .. versionadded:: 1.0.0
         """
-        tvers = []
+        tvers = []  # type: List[Version]
         for bd in self:  # apt.package.Dependency
             for tver in bd.target_versions:  # apt.package.Version
                 if tver not in tvers:
@@ -263,6 +306,7 @@ class Dependency(list):
 
     @property
     def installed_target_versions(self):
+        # type: () -> List[Version]
         """A list of all installed Version objects which satisfy this dep.
 
         .. versionadded:: 1.0.0
@@ -284,6 +328,7 @@ class Origin(object):
     """
 
     def __init__(self, pkg, packagefile):
+        # type: (Package, apt_pkg.PackageFile) -> None
         self.archive = packagefile.archive
         self.component = packagefile.component
         self.label = packagefile.label
@@ -299,6 +344,7 @@ class Origin(object):
             self.trusted = False
 
     def __repr__(self):
+        # type: () -> str
         return ("<Origin component:%r archive:%r origin:%r label:%r "
                 "site:%r isTrusted:%r>") % (self.component, self.archive,
                                             self.origin, self.label,
@@ -326,29 +372,37 @@ class Record(Mapping):
     """
 
     def __init__(self, record_str):
+        # type: (str) -> None
         self._rec = apt_pkg.TagSection(record_str)
 
     def __hash__(self):
+        # type: () -> Any
         return hash(self._rec)
 
     def __str__(self):
+        # type: () -> str
         return str(self._rec)
 
     def __getitem__(self, key):
+        # type: (str) -> str
         return self._rec[key]
 
     def __contains__(self, key):
+        # type: (object) -> bool
         return key in self._rec
 
     def __iter__(self):
+        # type: () -> Iterator[str]
         return iter(self._rec.keys())
 
     def iteritems(self):
+        # type: () -> Iterable
         """An iterator over the (key, value) items of the record."""
         for key in self._rec.keys():
             yield key, self._rec[key]
 
     def get(self, key, default=None):
+        # type: (object, object) -> object
         """Return record[key] if key in record, else *default*.
 
         The parameter *default* must be either a string or None.
@@ -356,10 +410,12 @@ class Record(Mapping):
         return self._rec.get(key, default)
 
     def has_key(self, key):
+        # type: (str) -> bool
         """deprecated form of ``key in x``."""
         return key in self._rec
 
     def __len__(self):
+        # type: () -> int
         return len(self._rec)
 
 
@@ -373,10 +429,12 @@ class Version(object):
     """
 
     def __init__(self, package, cand):
+        # type: (Package, apt_pkg.Version) -> None
         self.package = package
         self._cand = cand
 
     def _cmp(self, other):
+        # FIXME: add type hint
         """Compares against another apt.Version object or a version string.
 
         This method behaves like Python 2's cmp builtin and returns an integer
@@ -406,44 +464,56 @@ class Version(object):
                 return NotImplemented
 
     def __eq__(self, other):
+        # type: (object) -> bool
         return self._cmp(other) == 0
 
     def __ge__(self, other):
+        # type: (Version) -> bool
         return self._cmp(other) >= 0
 
     def __gt__(self, other):
+        # type: (Version) -> bool
         return self._cmp(other) > 0
 
     def __le__(self, other):
+        # type: (Version) -> bool
         return self._cmp(other) <= 0
 
     def __lt__(self, other):
+        # type: (Version) -> bool
         return self._cmp(other) < 0
 
     def __ne__(self, other):
+        # type: (object) -> bool
         try:
             return self._cmp(other) != 0
         except TypeError:
             return NotImplemented
 
     def __hash__(self):
+        # type: () -> Any
         return self._cand.hash
 
     def __str__(self):
+        # type: () -> str
         return '%s=%s' % (self.package.name, self.version)
 
     def __repr__(self):
+        # type: () -> str
         return '<Version: package:%r version:%r>' % (self.package.name,
                                                      self.version)
 
     @property
     def _records(self):
+        # type: () -> apt_pkg.PackageRecords
         """Internal helper that moves the Records to the right position."""
         if self.package._pcache._records.lookup(self._cand.file_list[0]):
             return self.package._pcache._records
+        return None
 
     @property
     def _translated_records(self):
+        # type: () -> apt_pkg.PackageRecords
         """Internal helper to get the translated description."""
         desc_iter = self._cand.translated_description
         self.package._pcache._records.lookup(desc_iter.file_list.pop(0))
@@ -451,60 +521,71 @@ class Version(object):
 
     @property
     def installed_size(self):
+        # type: () -> int
         """Return the size of the package when installed."""
         return self._cand.installed_size
 
     @property
     def homepage(self):
+        # type: () -> str
         """Return the homepage for the package."""
         return self._records.homepage
 
     @property
     def size(self):
+        # type: () -> int
         """Return the size of the package."""
         return self._cand.size
 
     @property
     def architecture(self):
+        # type: () -> str
         """Return the architecture of the package version."""
         return self._cand.arch
 
     @property
     def downloadable(self):
+        # type: () -> bool
         """Return whether the version of the package is downloadable."""
         return bool(self._cand.downloadable)
 
     @property
     def is_installed(self):
+        # type: () -> bool
         """Return wether this version of the package is currently installed.
 
         .. versionadded:: 1.0.0
         """
         inst_ver = self.package.installed
-        return inst_ver and inst_ver._cand.id == self._cand.id
+        return (inst_ver is not None and inst_ver._cand.id == self._cand.id)
 
     @property
     def version(self):
+        # type: () -> str
         """Return the version as a string."""
         return self._cand.ver_str
 
     @property
     def summary(self):
+        # type: () -> str
         """Return the short description (one line summary)."""
         return self._translated_records.short_desc
 
     @property
     def raw_description(self):
+        # type: () -> str
         """return the long description (raw)."""
         return self._records.long_desc
 
     @property
     def section(self):
+        # type: () -> str
         """Return the section of the package."""
         return self._cand.section
 
     @property
     def description(self):
+        # type: () -> str
         """Return the formatted long description.
 
         Return the formatted long description according to the Debian policy
@@ -552,6 +633,7 @@ class Version(object):
 
     @property
     def source_name(self):
+        # type: () -> str
         """Return the name of the source package."""
         try:
             return self._records.source_pkg or self.package.shortname
@@ -560,6 +642,7 @@ class Version(object):
 
     @property
     def source_version(self):
+        # type: () -> str
         """Return the version of the source package."""
         try:
             return self._records.source_ver or self._cand.ver_str
@@ -568,11 +651,13 @@ class Version(object):
 
     @property
     def priority(self):
+        # type: () -> str
         """Return the priority of the package, as string."""
         return self._cand.priority_str
 
     @property
     def policy_priority(self):
+        # type: () -> int
         """Return the internal policy priority as a number.
            See apt_preferences(5) for more information about what it means.
         """
@@ -584,6 +669,7 @@ class Version(object):
 
     @property
     def record(self):
+        # type: () -> Record
         """Return a Record() object for this version.
 
         Return a Record() object for this version which provides access
@@ -592,6 +678,7 @@ class Version(object):
         return Record(self._records.record)
 
     def get_dependencies(self, *types):
+        # FIXME: add type hints
         """Return a list of Dependency objects for the given types.
 
         Multiple types can be specified. Possible types are:
@@ -615,31 +702,37 @@ class Version(object):
 
     @property
     def provides(self):
+        # type: () -> List[str]
         """ Return a list of names that this version provides."""
         return [p[0] for p in self._cand.provides_list]
 
     @property
     def enhances(self):
+        # type: () -> List[Dependency]
         """Return the list of enhances for the package version."""
         return self.get_dependencies("Enhances")
 
     @property
     def dependencies(self):
+        # type: () -> List[Dependency]
         """Return the dependencies of the package version."""
         return self.get_dependencies("PreDepends", "Depends")
 
     @property
     def recommends(self):
+        # type: () -> List[Dependency]
         """Return the recommends of the package version."""
         return self.get_dependencies("Recommends")
 
     @property
     def suggests(self):
+        # type: () -> List[Dependency]
         """Return the suggests of the package version."""
         return self.get_dependencies("Suggests")
 
     @property
     def origins(self):
+        # type: () -> List[Origin]
         """Return a list of origins for the package version."""
         origins = []
         for (packagefile, _unused) in self._cand.file_list:
@@ -648,6 +741,7 @@ class Version(object):
 
     @property
     def filename(self):
+        # type: () -> str
         """Return the path to the file inside the archive.
 
         .. versionadded:: 0.7.10
@@ -656,6 +750,7 @@ class Version(object):
 
     @property
     def md5(self):
+        # type: () -> str
         """Return the md5sum of the binary.
 
         .. versionadded:: 0.7.10
@@ -664,6 +759,7 @@ class Version(object):
 
     @property
     def sha1(self):
+        # type: () -> str
         """Return the sha1sum of the binary.
 
         .. versionadded:: 0.7.10
@@ -672,6 +768,7 @@ class Version(object):
 
     @property
     def sha256(self):
+        # type: () -> str
         """Return the sha256sum of the binary.
 
         .. versionadded:: 0.7.10
@@ -680,6 +777,7 @@ class Version(object):
 
     @property
     def tasks(self):
+        # type: () -> Set[str]
         """Get the tasks of the package.
 
         A set of the names of the tasks this package belongs to.
@@ -689,6 +787,7 @@ class Version(object):
         return set(self.record["Task"].split())
 
     def _uris(self):
+        # type: () -> Iterator[str]
         """Return an iterator over all available urls.
 
         .. versionadded:: 0.7.10
@@ -700,6 +799,7 @@ class Version(object):
 
     @property
     def uris(self):
+        # type: () -> List[str]
         """Return a list of all available uris for the binary.
 
         .. versionadded:: 0.7.10
@@ -708,6 +808,7 @@ class Version(object):
 
     @property
     def uri(self):
+        # type: () -> str
         """Return a single URI for the binary.
 
         .. versionadded:: 0.7.10
@@ -718,6 +819,7 @@ class Version(object):
             return None
 
     def fetch_binary(self, destdir='', progress=None):
+        # type: (str, AcquireProgress) -> str
         """Fetch the binary version of the package.
 
         The parameter *destdir* specifies the directory where the package will
@@ -732,7 +834,7 @@ class Version(object):
         base = os.path.basename(self._records.filename)
         destfile = os.path.join(destdir, base)
         if _file_is_same(destfile, self.size, self._records.md5_hash):
-            print(('Ignoring already existing file: %s' % destfile))
+            logging.debug('Ignoring already existing file: %s' % destfile)
             return os.path.abspath(destfile)
         acq = apt_pkg.Acquire(progress or apt.progress.text.AcquireProgress())
         acqfile = apt_pkg.AcquireFile(acq, self.uri, self._records.md5_hash,
@@ -746,6 +848,7 @@ class Version(object):
         return os.path.abspath(destfile)
 
     def fetch_source(self, destdir="", progress=None, unpack=True):
+        # type: (str, AcquireProgress, bool) -> str
         """Get the source code of a package.
 
         The parameter *destdir* specifies the directory where the source will
@@ -781,7 +884,7 @@ class Version(object):
             if type_ == 'dsc':
                 dsc = destfile
             if _file_is_same(destfile, size, md5):
-                print(('Ignoring already existing file: %s' % destfile))
+                logging.debug('Ignoring already existing file: %s' % destfile)
                 continue
             files.append(apt_pkg.AcquireFile(acq, src.index.archive_uri(path),
                          md5, size, base, destfile=destfile))
@@ -822,12 +925,14 @@ class VersionList(Sequence):
     """
 
     def __init__(self, package, slice_=None):
+        # type: (Package, Any) -> None
         self._package = package  # apt.package.Package()
         self._versions = package._pkg.version_list  # [apt_pkg.Version(), ...]
         if slice_:
             self._versions = self._versions[slice_]
 
     def __getitem__(self, item):
+        # FIXME: add type hints
         if isinstance(item, slice):
             return self.__class__(self._package, item)
         try:
@@ -841,16 +946,20 @@ class VersionList(Sequence):
         raise KeyError("Version: %r not found." % (item))
 
     def __str__(self):
+        # type: () -> str
         return '[%s]' % (', '.join(str(ver) for ver in self))
 
     def __repr__(self):
+        # type: () -> str
         return '<VersionList: %r>' % self.keys()
 
     def __iter__(self):
+        # type: () -> Iterator[Version]
         """Return an iterator over all value objects."""
         return (Version(self._package, ver) for ver in self._versions)
 
     def __contains__(self, item):
+        # type: (object) -> bool
         if isinstance(item, Version):  # Sequence interface
             item = item.version
         # Dictionary interface.
@@ -860,18 +969,22 @@ class VersionList(Sequence):
         return False
 
     def __eq__(self, other):
+        # type: (Any) -> bool
         return list(self) == list(other)
 
     def __len__(self):
+        # type: () -> int
         return len(self._versions)
 
     # Mapping interface
 
     def keys(self):
+        # type: () -> List[str]
         """Return a list of all versions, as strings."""
         return [ver.ver_str for ver in self._versions]
 
     def get(self, key, default=None):
+        # type: (str, Version) -> Version
         """Return the key or the default."""
         try:
             return self[key]
@@ -888,22 +1001,27 @@ class Package(object):
     """
 
     def __init__(self, pcache, pkgiter):
+        # type: (apt.Cache, apt_pkg.Package) -> None
         """ Init the Package object """
         self._pkg = pkgiter
         self._pcache = pcache           # python cache in cache.py
         self._changelog = ""            # Cached changelog
 
     def __str__(self):
+        # type: () -> str
         return self.name
 
     def __repr__(self):
+        # type: () -> str
         return '<Package: name:%r architecture=%r id:%r>' % (
             self._pkg.name, self._pkg.architecture, self._pkg.id)
 
     def __lt__(self, other):
+        # type: (Package) -> bool
         return self.name < other.name
 
-    def candidate(self):
+    def __get_candidate(self):
+        # type: () -> Version
         """Return the candidate version of the package.
 
         This property is writeable to allow you to set the candidate version
@@ -913,26 +1031,31 @@ class Package(object):
         cand = self._pcache._depcache.get_candidate_ver(self._pkg)
         if cand is not None:
             return Version(self, cand)
+        return None
 
     def __set_candidate(self, version):
+        # type: (Version) -> None
         """Set the candidate version of the package."""
         self._pcache.cache_pre_change()
         self._pcache._depcache.set_candidate_ver(self._pkg, version._cand)
         self._pcache.cache_post_change()
 
-    candidate = property(candidate, __set_candidate)
+    candidate = property(__get_candidate, __set_candidate)
 
     @property
     def installed(self):
+        # type: () -> Version
         """Return the currently installed version of the package.
 
         .. versionadded:: 0.7.9
         """
         if self._pkg.current_ver is not None:
             return Version(self, self._pkg.current_ver)
+        return None
 
     @property
     def name(self):
+        # type: () -> str
         """Return the name of the package, possibly including architecture.
 
         If the package is not part of the system's preferred architecture,
@@ -948,6 +1071,7 @@ class Package(object):
 
     @property
     def fullname(self):
+        # type: () -> str
         """Return the name of the package, including architecture.
 
         .. versionadded:: 0.7.100.3"""
@@ -955,6 +1079,7 @@ class Package(object):
 
     @property
     def shortname(self):
+        # type: () -> str
         """Return the name of the package, without architecture.
 
         .. versionadded:: 0.7.100.3"""
@@ -962,12 +1087,14 @@ class Package(object):
 
     @property
     def id(self):
+        # type: () -> int
         """Return a uniq ID for the package.
 
         This can be used eg. to store additional information about the pkg."""
         return self._pkg.id
 
     def __hash__(self):
+        # type: () -> int
         """Return the hash of the object.
 
         This returns the same value as ID, which is unique."""
@@ -975,10 +1102,12 @@ class Package(object):
 
     @property
     def essential(self):
+        # type: () -> bool
         """Return True if the package is an essential part of the system."""
         return self._pkg.essential
 
     def architecture(self):
+        # type: () -> str
         """Return the Architecture of the package.
 
         .. versionchanged:: 0.7.100.3
@@ -990,6 +1119,7 @@ class Package(object):
 
     @property
     def section(self):
+        # type: () -> str
         """Return the section of the package."""
         return self._pkg.section
 
@@ -997,47 +1127,56 @@ class Package(object):
 
     @property
     def marked_install(self):
+        # type: () -> bool
         """Return ``True`` if the package is marked for install."""
         return self._pcache._depcache.marked_install(self._pkg)
 
     @property
     def marked_upgrade(self):
+        # type: () -> bool
         """Return ``True`` if the package is marked for upgrade."""
         return self._pcache._depcache.marked_upgrade(self._pkg)
 
     @property
     def marked_delete(self):
+        # type: () -> bool
         """Return ``True`` if the package is marked for delete."""
         return self._pcache._depcache.marked_delete(self._pkg)
 
     @property
     def marked_keep(self):
+        # type: () -> bool
         """Return ``True`` if the package is marked for keep."""
         return self._pcache._depcache.marked_keep(self._pkg)
 
     @property
     def marked_downgrade(self):
+        # type: () -> bool
         """ Package is marked for downgrade """
         return self._pcache._depcache.marked_downgrade(self._pkg)
 
     @property
     def marked_reinstall(self):
+        # type: () -> bool
         """Return ``True`` if the package is marked for reinstall."""
         return self._pcache._depcache.marked_reinstall(self._pkg)
 
     @property
     def is_installed(self):
+        # type: () -> bool
         """Return ``True`` if the package is installed."""
         return (self._pkg.current_ver is not None)
 
     @property
     def is_upgradable(self):
+        # type: () -> bool
         """Return ``True`` if the package is upgradable."""
         return (self.is_installed and
                 self._pcache._depcache.is_upgradable(self._pkg))
 
     @property
     def is_auto_removable(self):
+        # type: () -> bool
         """Return ``True`` if the package is no longer required.
 
         If the package has been installed automatically as a dependency of
@@ -1049,12 +1188,14 @@ class Package(object):
 
     @property
     def is_auto_installed(self):
+        # type: () -> bool
         """Return whether the package is marked as automatically installed."""
         return self._pcache._depcache.is_auto_installed(self._pkg)
     # sizes
 
     @property
     def installed_files(self):
+        # type: () -> List[str]
         """Return a list of files installed by the package.
 
         Return a list of unicode names of the files which have
@@ -1071,6 +1212,7 @@ class Package(object):
         return []
 
     def get_changelog(self, uri=None, cancel_lock=None):
+        # type: (str, threading.Event) -> str
         """
         Download the changelog of the package and return it as unicode
         string.
@@ -1084,7 +1226,7 @@ class Package(object):
                 "/%(src_section)s/%(prefix)s/%(src_pkg)s" \\
                 "/%(src_pkg)s_%(src_ver)s/changelog"
 
-        The parameter *cancel_lock* refers to an instance of threading.Lock,
+        The parameter *cancel_lock* refers to an instance of threading.Event,
         which if set, prevents the download.
         """
         # Return a cached changelog if available
@@ -1104,7 +1246,10 @@ class Package(object):
                       "/%(src_pkg)s_%(src_ver)s/changelog"
             else:
                 res = _("The list of changes is not available")
-                return res if isinstance(res, unicode) else res.decode("utf-8")
+                if isinstance(res, unicode):
+                    return res
+                else:
+                    return res.decode("utf-8")
 
         # get the src package name
         src_pkg = self.candidate.source_name
@@ -1170,7 +1315,7 @@ class Package(object):
                 socket.setdefaulttimeout(2)
 
                 # Check if the download was canceled
-                if cancel_lock and cancel_lock.isSet():
+                if cancel_lock and cancel_lock.is_set():
                     return u""
                 # FIXME: python3.2: Should be closed manually
                 changelog_file = urlopen(uri)
@@ -1179,7 +1324,7 @@ class Package(object):
                 regexp = "^%s \((.*)\)(.*)$" % (re.escape(src_pkg))
                 while True:
                     # Check if the download was canceled
-                    if cancel_lock and cancel_lock.isSet():
+                    if cancel_lock and cancel_lock.is_set():
                         return u""
                     # Read changelog line by line
                     line_raw = changelog_file.readline()
@@ -1224,17 +1369,24 @@ class Package(object):
                             "later.") % (src_pkg, src_ver)
                 else:
                     res = _("The list of changes is not available")
-                return res if isinstance(res, unicode) else res.decode("utf-8")
+                if isinstance(res, unicode):
+                    return res
+                else:
+                    return res.decode("utf-8")
             except (IOError, BadStatusLine):
                 res = _("Failed to download the list of changes. \nPlease "
                         "check your Internet connection.")
-                return res if isinstance(res, unicode) else res.decode("utf-8")
+                if isinstance(res, unicode):
+                    return res
+                else:
+                    return res.decode("utf-8")
         finally:
             socket.setdefaulttimeout(timeout)
         return self._changelog
 
     @property
     def versions(self):
+        # type: () -> VersionList
         """Return a VersionList() object for all available versions.
 
         .. versionadded:: 0.7.9
@@ -1243,28 +1395,33 @@ class Package(object):
 
     @property
     def is_inst_broken(self):
+        # type: () -> bool
         """Return True if the to-be-installed package is broken."""
         return self._pcache._depcache.is_inst_broken(self._pkg)
 
     @property
     def is_now_broken(self):
+        # type: () -> bool
         """Return True if the installed package is broken."""
         return self._pcache._depcache.is_now_broken(self._pkg)
 
     @property
     def has_config_files(self):
+        # type: () -> bool
         """Checks whether the package is is the config-files state."""
         return self. _pkg.current_state == apt_pkg.CURSTATE_CONFIG_FILES
 
     # depcache actions
 
     def mark_keep(self):
+        # type: () -> None
         """Mark a package for keep."""
         self._pcache.cache_pre_change()
         self._pcache._depcache.mark_keep(self._pkg)
         self._pcache.cache_post_change()
 
     def mark_delete(self, auto_fix=True, purge=False):
+        # type: (bool, bool) -> None
         """Mark a package for deletion.
 
         If *auto_fix* is ``True``, the resolver will be run, trying to fix
@@ -1286,6 +1443,7 @@ class Package(object):
         self._pcache.cache_post_change()
 
     def mark_install(self, auto_fix=True, auto_inst=True, from_user=True):
+        # type: (bool, bool, bool) -> None
         """Mark a package for install.
 
         If *autoFix* is ``True``, the resolver will be run, trying to fix
@@ -1310,6 +1468,7 @@ class Package(object):
         self._pcache.cache_post_change()
 
     def mark_upgrade(self, from_user=True):
+        # type: (bool) -> None
         """Mark a package for upgrade."""
         if self.is_upgradable:
             auto = self.is_auto_installed
@@ -1321,6 +1480,7 @@ class Package(object):
                               "'%s'\n") % self._pkg.name)
 
     def mark_auto(self, auto=True):
+        # type: (bool) -> None
         """Mark a package as automatically installed.
 
         Call this function to mark a package as automatically installed. If the
@@ -1330,6 +1490,7 @@ class Package(object):
         self._pcache._depcache.mark_auto(self._pkg, auto)
 
     def commit(self, fprogress, iprogress):
+        # type: (AcquireProgress, InstallProgress) -> None
         """Commit the changes.
 
         The parameter *fprogress* refers to a apt_pkg.AcquireProgress() object,
@@ -1396,6 +1557,7 @@ def _test():
                     print("Error trying to remove: %s " % name)
         print("Broken: %s " % cache._depcache.broken_count)
         print("DelCount: %s " % cache._depcache.del_count)
+
 
 # self-test
 if __name__ == "__main__":

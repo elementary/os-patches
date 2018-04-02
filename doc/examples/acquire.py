@@ -15,6 +15,7 @@ def get_file(fetcher, uri, destfile):
         return False
     return True
 
+
 apt_pkg.init()
 
 #apt_pkg.config.set("Debug::pkgDPkgPM","1");

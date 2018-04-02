@@ -21,5 +21,6 @@ class testHashes(testcommon.TestCase):
 
         self.assertRaises(MemoryError, deb.data.extractdata, "large-file")
 
+
 if __name__ == "__main__":
     unittest.main()

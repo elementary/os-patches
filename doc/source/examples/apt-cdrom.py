@@ -67,5 +67,6 @@ def main(args):
         sys.stderr.write('E: Invalid operation %s\n' % arguments[0])
         return 1
 
+
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

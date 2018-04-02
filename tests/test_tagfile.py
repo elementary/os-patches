@@ -157,5 +157,6 @@ class TestTagFile(testcommon.TestCase):
             self.assertEqual(
                 value.encode("ISO-8859-1"), tagfile.section["Maintainer"])
 
+
 if __name__ == "__main__":
     unittest.main()

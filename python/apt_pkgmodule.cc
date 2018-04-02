@@ -766,7 +766,10 @@ static struct _PyAptPkgAPIStruct API = {
    &PyGroup_ToCpp,            // group_tocpp
    &PyOrderList_Type,         // orderlist_type
    &PyOrderList_FromCpp,      // orderlist_fromcpp
-   &PyOrderList_ToCpp         // orderlist_tocpp
+   &PyOrderList_ToCpp,        // orderlist_tocpp
+   &PySourceRecordFiles_Type,     // sourcerecordfiles_type
+   0,                         // FIXME: sourcerecordfiles_fromcpp
+   0,                         // FIXME: sourcerecordfiles_tocpp
 };
 
 
@@ -870,6 +873,7 @@ extern "C" void initapt_pkg()
    ADDTYPE(Module,"PackageRecords",&PyPackageRecords_Type);
    /* ========================= pkgsrcrecords.cc ========================= */
    ADDTYPE(Module,"SourceRecords",&PySourceRecords_Type);
+   ADDTYPE(Module,"SourceRecordFiles",&PySourceRecordFiles_Type);
    /* ========================= sourcelist.cc ========================= */
    ADDTYPE(Module,"SourceList",&PySourceList_Type);
    ADDTYPE(Module,"HashString",&PyHashString_Type);

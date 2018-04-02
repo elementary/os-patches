@@ -14,7 +14,7 @@ def main():
     depcache.init()
     i = 0
     all = cache.package_count
-    print "Running Cache test on all packages:"
+    print("Running Cache test on all packages:")
     # first, get all pkgs
     for pkg in cache.packages:
         i += 1
@@ -43,7 +43,7 @@ def main():
                             j = ver.depends_list
                             pass
 
-        print "\r%i/%i=%.3f%%    " % (i, all, (float(i) / float(all) * 100)),
+        print("\r%i/%i=%.3f%%    " % (i, all, (float(i) / float(all) * 100)))
 
 
 if __name__ == "__main__":

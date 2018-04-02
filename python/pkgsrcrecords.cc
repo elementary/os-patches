@@ -16,6 +16,128 @@
 #include <Python.h>
 									/*}}}*/
 
+// PkgSrcRecordFiles Class						/*{{{*/
+// ---------------------------------------------------------------------
+typedef pkgSrcRecords::File2 PkgSrcRecordFilesStruct;
+
+// compat with the old API that provided a tuple (md5,size,path,type)
+static Py_ssize_t pkgSrcRecordFiles_length(PyObject *Self) {
+   return 4;
+}
+
+// compat with the old API that provided a tuple (md5,size,path,type)
+static PyObject* pkgSrcRecordFiles_item(PyObject *Self, Py_ssize_t i) {
+   APT_IGNORE_DEPRECATED_PUSH
+   PkgSrcRecordFilesStruct f = GetCpp<PkgSrcRecordFilesStruct>(Self);
+   switch (i) {
+      case 0:
+         return Py_BuildValue("s", f.MD5Hash.c_str());
+      case 1:
+         return Py_BuildValue("N", MkPyNumber(f.FileSize));
+      case 2:
+         return Py_BuildValue("s", f.Path.c_str());
+      case 3:
+         return Py_BuildValue("s", f.Type.c_str());
+   }
+   return NULL;
+   APT_IGNORE_DEPRECATED_POP
+}
+
+static PySequenceMethods pkgsrcrecordfiles_as_sequence = {
+   pkgSrcRecordFiles_length,0,0,pkgSrcRecordFiles_item,0,0,0,0,0,0
+};
+
+static PyObject *PkgSrcRecordFilesNew(PyTypeObject *type,PyObject *args,PyObject *kwds) {
+   char *kwlist[] = {0};
+   if (PyArg_ParseTupleAndKeywords(args,kwds,"",kwlist) == 0)
+      return 0;
+
+   return HandleErrors(CppPyObject_NEW<PkgSrcRecordFilesStruct>(NULL, type));
+}
+
+static const char *sourcerecordfile_doc =
+    "SourceRecordFile()\n\n"
+    "Provide an easy way to look up the src records of a source package.\n";
+
+static PyObject *PkgSrcRecordFilesGetPath(PyObject *Self,void*) {
+   PkgSrcRecordFilesStruct f = GetCpp<PkgSrcRecordFilesStruct>(Self);
+   return CppPyString(f.Path.c_str());
+}
+
+static PyObject *PkgSrcRecordFilesGetType(PyObject *Self,void*) {
+   PkgSrcRecordFilesStruct f = GetCpp<PkgSrcRecordFilesStruct>(Self);
+   return CppPyString(f.Type.c_str());
+}
+
+static PyObject *PkgSrcRecordFilesGetSize(PyObject *Self,void*) {
+   PkgSrcRecordFilesStruct f = GetCpp<PkgSrcRecordFilesStruct>(Self);
+   return Py_BuildValue("N", MkPyNumber(f.FileSize));
+}
+
+static PyObject *PkgSrcRecordFilesGetHashes(PyObject *Self,void*) {
+   PkgSrcRecordFilesStruct f = GetCpp<PkgSrcRecordFilesStruct>(Self);
+   auto py = CppPyObject_NEW<HashStringList> (nullptr, &PyHashStringList_Type);
+   py->Object = f.Hashes;
+   return py;
+}
+
+static PyGetSetDef PkgSrcRecordFilesGetSet[] = {
+   {"path",PkgSrcRecordFilesGetPath,0,
+    "The remote path of the source package file."},
+   {"type",PkgSrcRecordFilesGetType,0,
+    "The type of the source package file."},
+   {"size",PkgSrcRecordFilesGetSize,0,
+    "The size of the source package file."},
+   {"hashes",PkgSrcRecordFilesGetHashes,0,
+    "The hashes of the source package file."},
+   {}
+};
+
+PyTypeObject PySourceRecordFiles_Type =
+{
+   PyVarObject_HEAD_INIT(&PyType_Type, 0)
+   "apt_pkg.SourceRecordFiles",     // tp_name
+   sizeof(CppPyObject<PkgSrcRecordFilesStruct>),   // tp_basicsize
+   0,                                   // tp_itemsize
+   // Methods
+   CppDealloc<PkgSrcRecordFilesStruct>,   // tp_dealloc
+   0,                                   // tp_print
+   0,                                   // tp_getattr
+   0,                                   // tp_setattr
+   0,                                   // tp_compare
+   0,                                   // tp_repr
+   0,                                   // tp_as_number
+   &pkgsrcrecordfiles_as_sequence,      // tp_as_sequence
+   0,                                   // tp_as_mapping
+   0,                                   // tp_hash
+   0,                                   // tp_call
+   0,                                   // tp_str
+   _PyAptObject_getattro,               // tp_getattro
+   0,                                   // tp_setattro
+   0,                                   // tp_as_buffer
+   (Py_TPFLAGS_DEFAULT |                // tp_flags
+    Py_TPFLAGS_BASETYPE),
+   sourcerecordfile_doc,                   // tp_doc
+   0,                                   // tp_traverse
+   0,                                   // tp_clear
+   0,                                   // tp_richcompare
+   0,                                   // tp_weaklistoffset
+   0,                                   // tp_iter
+   0,                                   // tp_iternext
+   0,                                   // tp_methods
+   0,                                   // tp_members
+   PkgSrcRecordFilesGetSet,             // tp_getset
+   0,                                   // tp_base
+   0,                                   // tp_dict
+   0,                                   // tp_descr_get
+   0,                                   // tp_descr_set
+   0,                                   // tp_dictoffset
+   0,                                   // tp_init
+   0,                                   // tp_alloc
+   PkgSrcRecordFilesNew,                         // tp_new
+};
+// ---------------------------------------------------------------------
+
 struct PkgSrcRecordsStruct
 {
    pkgSourceList List;
@@ -30,6 +152,7 @@ struct PkgSrcRecordsStruct
       delete Records;
    };
 };
+
 
 // PkgSrcRecords Class							/*{{{*/
 // ---------------------------------------------------------------------
@@ -171,11 +294,7 @@ static PyObject *PkgSrcRecordsGetFiles(PyObject *Self,void*) {
 
    PyObject *v;
    for(unsigned int i=0;i<f.size();i++) {
-      v = Py_BuildValue("(sNss)",
-			f[i].MD5Hash.c_str(),
-			MkPyNumber(f[i].FileSize),
-			f[i].Path.c_str(),
-			f[i].Type.c_str());
+      v = CppPyObject_NEW<PkgSrcRecordFilesStruct>(Self, &PySourceRecordFiles_Type, f[i]);
       PyList_Append(List, v);
       Py_DECREF(v);
    }
@@ -220,7 +339,7 @@ static PyObject *PkgSrcRecordsGetBuildDepends(PyObject *Self,void*) {
 			bd[i].Version.c_str(), pkgCache::CompType(bd[i].Op));
 	    PyList_Append(OrGroup, v);
 	    Py_DECREF(v);
-	    if (pkgCache::Dep::Or != (bd[i].Op & pkgCache::Dep::Or) || i == bd.size())
+	    if (pkgCache::Dep::Or != (bd[i].Op & pkgCache::Dep::Or) || i + 1 >= bd.size())
 	       break;
         i++;
      }
@@ -237,8 +356,7 @@ static PyGetSetDef PkgSrcRecordsGetSet[] = {
     "A dictionary describing the build-time dependencies of the package;\n"
     "the format is the same as used for apt_pkg.Version.depends_list_str."},
    {"files",PkgSrcRecordsGetFiles,0,
-    "A list of tuples (md5: str, size: int, path: str, type: str), whereas\n"
-    "'type' can be 'diff' (includes .debian.tar.gz), 'dsc', 'tar'."},
+    "A list of :class:`SourceRecordFiles` objects."},
    {"index",PkgSrcRecordsGetIndex,0,
     "The index file associated with this record as a list of\n"
     "apt_pkg.IndexFile objects."},
@@ -311,6 +429,7 @@ PyTypeObject PySourceRecords_Type =
    0,                                   // tp_alloc
    PkgSrcRecordsNew,                         // tp_new
 };
+
 
 									/*}}}*/
 

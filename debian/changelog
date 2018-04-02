@@ -1,20 +1,40 @@
-python-apt (1.4.0~beta3ubuntu1) bionic; urgency=medium
+python-apt (1.6.0~rc2ubuntu1) bionic; urgency=medium
 
+  * Revert change to make apt.Cache subclass of dict
+  * Fix get_changelog() to correctly decode non-unicode changelogs
+  * Try to work around memory corruption in PackageRecords.*_hash
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 26 Mar 2018 12:13:04 +0200
+
+python-apt (1.6.0~rc2) unstable; urgency=medium
+
+  * Add some weird python3-distutils build-depends (Closes: #893837)
+  * Document apt_pkg.SourceRecordsFile
+
+ -- Julian Andres Klode <jak@debian.org>  Fri, 23 Mar 2018 09:27:27 +0100
+
+python-apt (1.6.0~rc1) unstable; urgency=medium
+
+  [ Michael Vogt ]
+  * add info how to run the tests
+  * Fix the remaining pep8 erorrs
+  * README: add intro how to use python-apt with mypy
+  * tests/old: update to py3
+  * apt: make Version.fetch_binary() less noisy
+  * README: make markdown and add info about building/testing
+  * apt: add support for pep484 (type hints)
+  * fix tests
+  * python: add pkgsrcrecord.Files.{hashes,size,path,type} getters
+  * python: stop using deprecated hash access (and drive by indent fixes)
+
+  [ Julian Andres Klode ]
+  * pkgsrcrecords: Fix off-by-one error in OR group handling
   * data/templates/Ubuntu.info.in: Add bionic template
+  * apt/cache.py: Fix pep8
+  * Switch travis to use Docker based tests
+  * tests: Make test_sourcerecords.py more reliable
 
- -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 26 Oct 2017 00:11:27 +0200
-
-python-apt (1.4.0~beta3build2) artful; urgency=medium
-
-  * No-change rebuild to build to drop python3.5.
-
- -- Matthias Klose <doko@ubuntu.com>  Sat, 05 Aug 2017 16:22:11 +0000
-
-python-apt (1.4.0~beta3build1) artful; urgency=medium
-
-  * No change rebuild to add Python 3.6 support.
-
- -- Michael Hudson-Doyle <michael.hudson@ubuntu.com>  Fri, 12 May 2017 14:36:30 +1200
+ -- Julian Andres Klode <jak@debian.org>  Fri, 23 Mar 2018 00:41:08 +0100
 
 python-apt (1.4.0~beta3) unstable; urgency=medium
 

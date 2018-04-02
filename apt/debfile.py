@@ -804,5 +804,6 @@ def _test():
     d = "libc6 (>= 2.3.2), libaio (>= 0.3.96) | libaio1 (>= 0.3.96)"
     print(s._satisfy_depends(apt_pkg.parse_depends(d, False)))
 
+
 if __name__ == "__main__":
     _test()

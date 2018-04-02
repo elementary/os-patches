@@ -71,7 +71,6 @@ static PyObject *PkgRecordsGetFileName(PyObject *Self,void*) {
    return (Struct.Last != 0) ? CppPyPath(Struct.Last->FileName()) : 0;
 }
 static PyObject *PkgRecordsGetHashes(PyObject *Self,void*) {
-APT_IGNORE_DEPRECATED_PUSH
    PkgRecordsStruct &Struct = GetStruct(Self,"Hashes");
    if (Struct.Last == 0)
       return 0;
@@ -79,34 +78,36 @@ APT_IGNORE_DEPRECATED_PUSH
    auto py = CppPyObject_NEW<HashStringList> (nullptr, &PyHashStringList_Type);
    py->Object = Struct.Last->Hashes();
    return py;
-APT_IGNORE_DEPRECATED_POP
 }
 static PyObject *PkgRecordsGetMD5Hash(PyObject *Self,void*) {
-APT_IGNORE_DEPRECATED_PUSH
    PkgRecordsStruct &Struct = GetStruct(Self,"MD5Hash");
-   if (PyErr_WarnEx(PyExc_DeprecationWarning,
-       "MD5Hash is deprecated, use Hashes instead", 1) == -1)
-      return NULL;
-   return (Struct.Last != 0) ? CppPyString(Struct.Last->MD5Hash()) : 0;
-APT_IGNORE_DEPRECATED_POP
+   if (Struct.Last == NULL)
+      return 0;
+   auto hashes = Struct.Last->Hashes();
+   auto hash = hashes.find("md5sum");
+   if (hash == NULL)
+      return 0;
+   return CppPyString(hash->HashValue());
 }
 static PyObject *PkgRecordsGetSHA1Hash(PyObject *Self,void*) {
-APT_IGNORE_DEPRECATED_PUSH
    PkgRecordsStruct &Struct = GetStruct(Self,"SHA1Hash");
-   if (PyErr_WarnEx(PyExc_DeprecationWarning,
-       "SHA1Hash is deprecated, use Hashes instead", 1) == -1)
-      return NULL;
-   return (Struct.Last != 0) ? CppPyString(Struct.Last->SHA1Hash()) : 0;
-APT_IGNORE_DEPRECATED_POP
+   if (Struct.Last == NULL)
+      return 0;
+   auto hashes = Struct.Last->Hashes();
+   auto hash = hashes.find("sha1");
+   if (hash == NULL)
+      return 0;
+   return CppPyString(hash->HashValue());
 }
 static PyObject *PkgRecordsGetSHA256Hash(PyObject *Self,void*) {
-APT_IGNORE_DEPRECATED_PUSH
    PkgRecordsStruct &Struct = GetStruct(Self,"SHA256Hash");
-   if (PyErr_WarnEx(PyExc_DeprecationWarning,
-       "SHA256Hash is deprecated, use Hashes instead", 1) == -1)
-      return NULL;
-   return (Struct.Last != 0) ? CppPyString(Struct.Last->SHA256Hash()) : 0;
-APT_IGNORE_DEPRECATED_POP
+   if (Struct.Last == NULL)
+      return 0;
+   auto hashes = Struct.Last->Hashes();
+   auto hash = hashes.find("sha256");
+   if (hash == NULL)
+      return 0;
+   return CppPyString(hash->HashValue());
 }
 static PyObject *PkgRecordsGetSourcePkg(PyObject *Self,void*) {
    PkgRecordsStruct &Struct = GetStruct(Self,"SourcePkg");

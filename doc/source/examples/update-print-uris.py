@@ -19,5 +19,6 @@ def main():
     for item in acquire.items:
         print(item.desc_uri)
 
+
 if __name__ == '__main__':
     main()

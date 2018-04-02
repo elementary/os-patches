@@ -262,7 +262,8 @@ class TestAptSources(testcommon.TestCase):
         aptsources.distro._OSRelease.OS_RELEASE_FILE = \
             os.path.abspath("./data/aptsources/os-release")
         distro = aptsources.distro.get_distro()
-        # Everything but is_like comes from lsb_release, see TODO in get_distro.
+        # Everything but is_like comes from lsb_release, see TODO in
+        # get_distro.
         self.assertEqual('Ubuntu', distro.id)
         self.assertEqual('xenial', distro.codename)
         self.assertEqual('Ubuntu 16.04.1 LTS', distro.description)
@@ -283,6 +284,7 @@ class TestAptSources(testcommon.TestCase):
                     ["main"])
         self.assertEqual(disabled, enabled)
         self.assertFalse(disabled.disabled)
+
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))

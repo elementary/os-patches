@@ -25,5 +25,6 @@ class TestCache(testcommon.TestCase):
         apt_depcache = apt_pkg.DepCache(apt_cache)
         self.assertNotEqual(apt_depcache, None)
 
+
 if __name__ == "__main__":
     unittest.main()

@@ -21,21 +21,21 @@ if __name__ == "__main__":
         try:
             apt_pkg.pkgsystem_lock()
         except SystemError as s:
-            print "Can't get lock: (error text:\n%s)" % s
+            print("Can't get lock: (error text:\n%s)" % s)
         sys.exit(0)
 
     apt_pkg.pkgsystem_unlock()
 
     # low-level lock
     fd = apt_pkg.get_lock(lock, True)
-    print "Lockfile fd: %s" % fd
+    print("Lockfile fd: %s" % fd)
 
     # try to get lock without error flag
     pid = os.fork()
     if pid == 0:
         # child
         fd = apt_pkg.get_lock(lock, False)
-        print "Lockfile fd (child): %s" % fd
+        print("Lockfile fd (child): %s" % fd)
         sys.exit(0)
 
     # try to get lock with error flag
@@ -43,5 +43,5 @@ if __name__ == "__main__":
     if pid == 0:
         # child
         fd = apt_pkg.get_lock(lock, True)
-        print "Lockfile fd (child): %s" % fd
+        print("Lockfile fd (child): %s" % fd)
         sys.exit(0)

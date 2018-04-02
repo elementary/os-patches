@@ -36,6 +36,15 @@ import tempfile
 import apt_pkg
 from apt_pkg import gettext as _
 
+if sys.version_info.major > 2:
+    unicode = str
+
+try:
+    from typing import List
+    List  # pyflakes
+except ImportError:
+    pass
+
 
 class AptKeyError(Exception):
     pass
@@ -50,6 +59,7 @@ class TrustedKey(object):
     """Represents a trusted key."""
 
     def __init__(self, name, keyid, date):
+        # type: (str, str, str) -> None
         self.raw_name = name
         # Allow to translated some known keys
         self.name = _(name)
@@ -61,6 +71,7 @@ class TrustedKey(object):
 
 
 def _call_apt_key_script(*args, **kwargs):
+    # type: (...) -> str
     """Run the apt-key script with the given arguments."""
     conf = None
     cmd = [apt_pkg.config.find_file("Dir::Bin::Apt-Key", "/usr/bin/apt-key")]
@@ -86,7 +97,8 @@ def _call_apt_key_script(*args, **kwargs):
 
         content = kwargs.get("stdin", None)
         # py2 needs this encoded, py3.3 will crash if it is
-        if sys.version_info.major < 3 and isinstance(content, unicode):
+        isunicode = isinstance(content, unicode)  # type: ignore
+        if sys.version_info.major < 3 and isunicode:
             content = content.encode("utf-8")
 
         output, stderr = proc.communicate(content)
@@ -108,6 +120,7 @@ def _call_apt_key_script(*args, **kwargs):
 
 
 def add_key_from_file(filename):
+    # type: (str) -> None
     """Import a GnuPG key file to trust repositores signed by it.
 
     Keyword arguments:
@@ -121,6 +134,7 @@ def add_key_from_file(filename):
 
 
 def add_key_from_keyserver(keyid, keyserver):
+    # type: (str, str) -> None
     """Import a GnuPG key file to trust repositores signed by it.
 
     Keyword arguments:
@@ -131,15 +145,17 @@ def add_key_from_keyserver(keyid, keyserver):
     tmp_keyring_dir = tempfile.mkdtemp()
     try:
         _add_key_from_keyserver(keyid, keyserver, tmp_keyring_dir)
-    except:
+    except Exception:
         raise
     finally:
         shutil.rmtree(tmp_keyring_dir)
 
 
 def _add_key_from_keyserver(keyid, keyserver, tmp_keyring_dir):
+    # type: (str, str, str) -> None
     if len(keyid.replace(" ", "").replace("0x", "")) < (160 / 4):
-        raise AptKeyIDTooShortError("Only fingerprints (v4, 160bit) are supported")
+        raise AptKeyIDTooShortError(
+            "Only fingerprints (v4, 160bit) are supported")
     # create a temp keyring dir
     tmp_secret_keyring = os.path.join(tmp_keyring_dir, "secring.gpg")
     tmp_keyring = os.path.join(tmp_keyring_dir, "pubring.gpg")
@@ -208,6 +224,7 @@ def _add_key_from_keyserver(keyid, keyserver, tmp_keyring_dir):
 
 
 def add_key(content):
+    # type: (str) -> None
     """Import a GnuPG key to trust repositores signed by it.
 
     Keyword arguments:
@@ -218,6 +235,7 @@ def add_key(content):
 
 
 def remove_key(fingerprint):
+    # type: (str) -> None
     """Remove a GnuPG key to no longer trust repositores signed by it.
 
     Keyword arguments:
@@ -227,6 +245,7 @@ def remove_key(fingerprint):
 
 
 def export_key(fingerprint):
+    # type: (str) -> str
     """Return the GnuPG key in text format.
 
     Keyword arguments:
@@ -236,6 +255,7 @@ def export_key(fingerprint):
 
 
 def update():
+    # type: () -> str
     """Update the local keyring with the archive keyring and remove from
     the local keyring the archive keys which are no longer valid. The
     archive keyring is shipped in the archive-keyring package of your
@@ -245,6 +265,7 @@ def update():
 
 
 def net_update():
+    # type: () -> str
     """Work similar to the update command above, but get the archive
     keyring from an URI instead and validate it against a master key.
     This requires an installed wget(1) and an APT build configured to
@@ -256,6 +277,7 @@ def net_update():
 
 
 def list_keys():
+    # type: () -> List[TrustedKey]
     """Returns a list of TrustedKey instances for each key which is
     used to trust repositories.
     """
@@ -274,6 +296,7 @@ def list_keys():
             key = TrustedKey(uid, keyid, creation_date)
             res.append(key)
     return res
+
 
 if __name__ == "__main__":
     # Add some known keys we would like to see translated so that they get
