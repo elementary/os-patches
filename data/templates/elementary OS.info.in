@@ -106,6 +106,438 @@ BaseURI: http://archive.ubuntu.com/ubuntu/
 MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
 _Description: Unsupported updates
 
+Suite: bionic
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://archive.ubuntu.com/ubuntu
+MatchURI-amd64: archive.ubuntu.com/ubuntu
+BaseURI-i386: http://archive.ubuntu.com/ubuntu
+MatchURI-i386: archive.ubuntu.com/ubuntu
+MirrorsFile-amd64: Ubuntu.mirrors
+MirrorsFile-i386: Ubuntu.mirrors
+_Description: Ubuntu 18.04 'Bionic Beaver'
+Component: main
+_CompDescription: Officially supported
+_CompDescriptionLong: Canonical-supported free and open-source software
+Component: universe
+_CompDescription: Community-maintained
+_CompDescriptionLong: Community-maintained free and open-source software
+Component: restricted
+_CompDescription: Non-free drivers
+_CompDescriptionLong: Proprietary drivers for devices
+Component: multiverse
+ParentComponent: universe
+_CompDescription: Restricted software
+_CompDescriptionLong: Software restricted by copyright or legal issues
+
+Suite: bionic
+ParentSuite: bionic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Ubuntu 18.04 'Bionic Beaver'
+
+Suite: bionic
+RepositoryType: deb
+MatchName: .*
+BaseURI: cdrom:\[Ubuntu.*18.04
+MatchURI: cdrom:\[Ubuntu.*18.04
+_Description: Cdrom with Ubuntu 18.04 'Bionic Beaver'
+Available: False
+Component: main
+_CompDescription: Officially supported
+Component: restricted
+_CompDescription: Restricted copyright
+
+Suite: bionic
+Official: false
+RepositoryType: deb
+BaseURI: http://archive.canonical.com
+MatchURI: archive.canonical.com
+_Description: Canonical Partners
+Component: partner
+_CompDescription: Software packaged by Canonical for their partners
+_CompDescriptionLong: This software is not part of Ubuntu.
+
+Suite: bionic-security
+ParentSuite: bionic
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://security.ubuntu.com/ubuntu/
+MatchURI-amd64: archive.ubuntu.com/ubuntu|security.ubuntu.com
+BaseURI-i386: http://security.ubuntu.com/ubuntu/
+MatchURI-i386: archive.ubuntu.com/ubuntu|security.ubuntu.com
+_Description: Important security updates
+
+Suite: bionic-security
+ParentSuite: bionic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports|security.ubuntu.com
+_Description: Important security updates
+
+Suite: bionic-updates
+ParentSuite: bionic
+RepositoryType: deb
+_Description: Recommended updates
+
+Suite: bionic-updates
+ParentSuite: bionic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Recommended updates
+
+Suite: bionic-proposed
+ParentSuite: bionic
+RepositoryType: deb
+_Description: Pre-released updates
+
+Suite: bionic-proposed
+ParentSuite: bionic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Pre-released updates
+
+Suite: bionic-backports
+ParentSuite: bionic
+RepositoryType: deb
+_Description: Unsupported updates
+
+Suite: bionic-backports
+ParentSuite: bionic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Unsupported updates
+
+Suite: artful
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://archive.ubuntu.com/ubuntu
+MatchURI-amd64: archive.ubuntu.com/ubuntu
+BaseURI-i386: http://archive.ubuntu.com/ubuntu
+MatchURI-i386: archive.ubuntu.com/ubuntu
+MirrorsFile-amd64: Ubuntu.mirrors
+MirrorsFile-i386: Ubuntu.mirrors
+_Description: Ubuntu 17.10 'Artful Aardvark'
+Component: main
+_CompDescription: Officially supported
+_CompDescriptionLong: Canonical-supported free and open-source software
+Component: universe
+_CompDescription: Community-maintained
+_CompDescriptionLong: Community-maintained free and open-source software
+Component: restricted
+_CompDescription: Non-free drivers
+_CompDescriptionLong: Proprietary drivers for devices
+Component: multiverse
+ParentComponent: universe
+_CompDescription: Restricted software
+_CompDescriptionLong: Software restricted by copyright or legal issues
+
+Suite: artful
+ParentSuite: artful
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Ubuntu 17.10 'Artful Aardvark'
+
+Suite: artful
+RepositoryType: deb
+MatchName: .*
+BaseURI: cdrom:\[Ubuntu.*17.10
+MatchURI: cdrom:\[Ubuntu.*17.10
+_Description: Cdrom with Ubuntu 17.10 'Artful Aardvark'
+Available: False
+Component: main
+_CompDescription: Officially supported
+Component: restricted
+_CompDescription: Restricted copyright
+
+Suite: artful
+Official: false
+RepositoryType: deb
+BaseURI: http://archive.canonical.com
+MatchURI: archive.canonical.com
+_Description: Canonical Partners
+Component: partner
+_CompDescription: Software packaged by Canonical for their partners
+_CompDescriptionLong: This software is not part of Ubuntu.
+
+Suite: artful-security
+ParentSuite: artful
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://security.ubuntu.com/ubuntu/
+MatchURI-amd64: archive.ubuntu.com/ubuntu|security.ubuntu.com
+BaseURI-i386: http://security.ubuntu.com/ubuntu/
+MatchURI-i386: archive.ubuntu.com/ubuntu|security.ubuntu.com
+_Description: Important security updates
+
+Suite: artful-security
+ParentSuite: artful
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports|security.ubuntu.com
+_Description: Important security updates
+
+Suite: artful-updates
+ParentSuite: artful
+RepositoryType: deb
+_Description: Recommended updates
+
+Suite: artful-updates
+ParentSuite: artful
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Recommended updates
+
+Suite: artful-proposed
+ParentSuite: artful
+RepositoryType: deb
+_Description: Pre-released updates
+
+Suite: artful-proposed
+ParentSuite: artful
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Pre-released updates
+
+Suite: artful-backports
+ParentSuite: artful
+RepositoryType: deb
+_Description: Unsupported updates
+
+Suite: artful-backports
+ParentSuite: artful
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Unsupported updates
+
+Suite: zesty
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://archive.ubuntu.com/ubuntu
+MatchURI-amd64: archive.ubuntu.com/ubuntu
+BaseURI-i386: http://archive.ubuntu.com/ubuntu
+MatchURI-i386: archive.ubuntu.com/ubuntu
+MirrorsFile-amd64: Ubuntu.mirrors
+MirrorsFile-i386: Ubuntu.mirrors
+_Description: Ubuntu 17.04 'Zesty Zapus'
+Component: main
+_CompDescription: Officially supported
+_CompDescriptionLong: Canonical-supported free and open-source software
+Component: universe
+_CompDescription: Community-maintained
+_CompDescriptionLong: Community-maintained free and open-source software
+Component: restricted
+_CompDescription: Non-free drivers
+_CompDescriptionLong: Proprietary drivers for devices
+Component: multiverse
+ParentComponent: universe
+_CompDescription: Restricted software
+_CompDescriptionLong: Software restricted by copyright or legal issues
+
+Suite: zesty
+ParentSuite: zesty
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Ubuntu 17.04 'Zesty Zapus'
+
+Suite: zesty
+RepositoryType: deb
+MatchName: .*
+BaseURI: cdrom:\[Ubuntu.*17.04
+MatchURI: cdrom:\[Ubuntu.*17.04
+_Description: Cdrom with Ubuntu 17.04 'Zesty Zapus'
+Available: False
+Component: main
+_CompDescription: Officially supported
+Component: restricted
+_CompDescription: Restricted copyright
+
+Suite: zesty
+Official: false
+RepositoryType: deb
+BaseURI: http://archive.canonical.com
+MatchURI: archive.canonical.com
+_Description: Canonical Partners
+Component: partner
+_CompDescription: Software packaged by Canonical for their partners
+_CompDescriptionLong: This software is not part of Ubuntu.
+
+Suite: zesty-security
+ParentSuite: zesty
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://security.ubuntu.com/ubuntu/
+MatchURI-amd64: archive.ubuntu.com/ubuntu|security.ubuntu.com
+BaseURI-i386: http://security.ubuntu.com/ubuntu/
+MatchURI-i386: archive.ubuntu.com/ubuntu|security.ubuntu.com
+_Description: Important security updates
+
+Suite: zesty-security
+ParentSuite: zesty
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports|security.ubuntu.com
+_Description: Important security updates
+
+Suite: zesty-updates
+ParentSuite: zesty
+RepositoryType: deb
+_Description: Recommended updates
+
+Suite: zesty-updates
+ParentSuite: zesty
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Recommended updates
+
+Suite: zesty-proposed
+ParentSuite: zesty
+RepositoryType: deb
+_Description: Pre-released updates
+
+Suite: zesty-proposed
+ParentSuite: zesty
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Pre-released updates
+
+Suite: zesty-backports
+ParentSuite: zesty
+RepositoryType: deb
+_Description: Unsupported updates
+
+Suite: zesty-backports
+ParentSuite: zesty
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Unsupported updates
+
+Suite: yakkety
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://archive.ubuntu.com/ubuntu
+MatchURI-amd64: archive.ubuntu.com/ubuntu
+BaseURI-i386: http://archive.ubuntu.com/ubuntu
+MatchURI-i386: archive.ubuntu.com/ubuntu
+MirrorsFile-amd64: Ubuntu.mirrors
+MirrorsFile-i386: Ubuntu.mirrors
+_Description: Ubuntu 16.10 'Yakkety Yak'
+Component: main
+_CompDescription: Officially supported
+_CompDescriptionLong: Canonical-supported free and open-source software
+Component: universe
+_CompDescription: Community-maintained
+_CompDescriptionLong: Community-maintained free and open-source software
+Component: restricted
+_CompDescription: Non-free drivers
+_CompDescriptionLong: Proprietary drivers for devices
+Component: multiverse
+ParentComponent: universe
+_CompDescription: Restricted software
+_CompDescriptionLong: Software restricted by copyright or legal issues
+
+Suite: yakkety
+ParentSuite: yakkety
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Ubuntu 16.10 'Yakkety Yak'
+
+Suite: yakkety
+RepositoryType: deb
+MatchName: .*
+BaseURI: cdrom:\[Ubuntu.*16.10
+MatchURI: cdrom:\[Ubuntu.*16.10
+_Description: Cdrom with Ubuntu 16.10 'Yakkety Yak'
+Available: False
+Component: main
+_CompDescription: Officially supported
+Component: restricted
+_CompDescription: Restricted copyright
+
+Suite: yakkety
+Official: false
+RepositoryType: deb
+BaseURI: http://archive.canonical.com
+MatchURI: archive.canonical.com
+_Description: Canonical Partners
+Component: partner
+_CompDescription: Software packaged by Canonical for their partners
+_CompDescriptionLong: This software is not part of Ubuntu.
+
+Suite: yakkety-security
+ParentSuite: yakkety
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://security.ubuntu.com/ubuntu/
+MatchURI-amd64: archive.ubuntu.com/ubuntu|security.ubuntu.com
+BaseURI-i386: http://security.ubuntu.com/ubuntu/
+MatchURI-i386: archive.ubuntu.com/ubuntu|security.ubuntu.com
+_Description: Important security updates
+
+Suite: yakkety-security
+ParentSuite: yakkety
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports|security.ubuntu.com
+_Description: Important security updates
+
+Suite: yakkety-updates
+ParentSuite: yakkety
+RepositoryType: deb
+_Description: Recommended updates
+
+Suite: yakkety-updates
+ParentSuite: yakkety
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Recommended updates
+
+Suite: yakkety-proposed
+ParentSuite: yakkety
+RepositoryType: deb
+_Description: Pre-released updates
+
+Suite: yakkety-proposed
+ParentSuite: yakkety
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Pre-released updates
+
+Suite: yakkety-backports
+ParentSuite: yakkety
+RepositoryType: deb
+_Description: Unsupported updates
+
+Suite: yakkety-backports
+ParentSuite: yakkety
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Unsupported updates
+
 
 Suite: xenial
 RepositoryType: deb
@@ -117,7 +549,7 @@ BaseURI-i386: http://archive.ubuntu.com/ubuntu
 MatchURI-i386: archive.ubuntu.com/ubuntu
 MirrorsFile-amd64: Ubuntu.mirrors
 MirrorsFile-i386: Ubuntu.mirrors
-_Description: Ubuntu 14.04 'Bionic Beaver'
+_Description: Ubuntu 16.04 LTS 'Xenial Xerus'
 Component: main
 _CompDescription: Officially supported
 _CompDescriptionLong: Canonical-supported free and open-source software
@@ -137,14 +569,14 @@ ParentSuite: xenial
 RepositoryType: deb-src
 BaseURI: http://archive.ubuntu.com/ubuntu/
 MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
-_Description: Ubuntu 14.04 'xenial Tahr'
+_Description: Ubuntu 16.04 LTS 'Xenial Xerus'
 
 Suite: xenial
 RepositoryType: deb
 MatchName: .*
-BaseURI: cdrom:\[Ubuntu.*14.04
-MatchURI: cdrom:\[Ubuntu.*14.04
-_Description: Cdrom with Ubuntu 14.04 'Bionic Beaver'
+BaseURI: cdrom:\[Ubuntu.*16.04 LTS
+MatchURI: cdrom:\[Ubuntu.*16.04 LTS
+_Description: Cdrom with Ubuntu 16.04 LTS 'Xenial Xerus'
 Available: False
 Component: main
 _CompDescription: Officially supported
@@ -160,16 +592,6 @@ _Description: Canonical Partners
 Component: partner
 _CompDescription: Software packaged by Canonical for their partners
 _CompDescriptionLong: This software is not part of Ubuntu.
-
-Suite: xenial
-Official: false
-RepositoryType: deb
-BaseURI: http://extras.ubuntu.com
-MatchURI: extras.ubuntu.com
-_Description: Independent
-Component: main
-_CompDescription: Provided by third-party software developers
-_CompDescriptionLong: Software offered by third party developers.
 
 Suite: xenial-security
 ParentSuite: xenial
@@ -220,6 +642,352 @@ _Description: Unsupported updates
 
 Suite: xenial-backports
 ParentSuite: xenial
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Unsupported updates
+
+Suite: wily
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://archive.ubuntu.com/ubuntu
+MatchURI-amd64: archive.ubuntu.com/ubuntu
+BaseURI-i386: http://archive.ubuntu.com/ubuntu
+MatchURI-i386: archive.ubuntu.com/ubuntu
+MirrorsFile-amd64: Ubuntu.mirrors
+MirrorsFile-i386: Ubuntu.mirrors
+_Description: Ubuntu 15.10 'Wily Werewolf'
+Component: main
+_CompDescription: Officially supported
+_CompDescriptionLong: Canonical-supported free and open-source software
+Component: universe
+_CompDescription: Community-maintained
+_CompDescriptionLong: Community-maintained free and open-source software
+Component: restricted
+_CompDescription: Non-free drivers
+_CompDescriptionLong: Proprietary drivers for devices
+Component: multiverse
+ParentComponent: universe
+_CompDescription: Restricted software
+_CompDescriptionLong: Software restricted by copyright or legal issues
+
+Suite: wily
+ParentSuite: wily
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Ubuntu 15.10 'Wily Werewolf'
+
+Suite: wily
+RepositoryType: deb
+MatchName: .*
+BaseURI: cdrom:\[Ubuntu.*15.10
+MatchURI: cdrom:\[Ubuntu.*15.10
+_Description: Cdrom with Ubuntu 15.10 'Wily Werewolf'
+Available: False
+Component: main
+_CompDescription: Officially supported
+Component: restricted
+_CompDescription: Restricted copyright
+
+Suite: wily
+Official: false
+RepositoryType: deb
+BaseURI: http://archive.canonical.com
+MatchURI: archive.canonical.com
+_Description: Canonical Partners
+Component: partner
+_CompDescription: Software packaged by Canonical for their partners
+_CompDescriptionLong: This software is not part of Ubuntu.
+
+Suite: wily-security
+ParentSuite: wily
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://security.ubuntu.com/ubuntu/
+MatchURI-amd64: archive.ubuntu.com/ubuntu|security.ubuntu.com
+BaseURI-i386: http://security.ubuntu.com/ubuntu/
+MatchURI-i386: archive.ubuntu.com/ubuntu|security.ubuntu.com
+_Description: Important security updates
+
+Suite: wily-security
+ParentSuite: wily
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports|security.ubuntu.com
+_Description: Important security updates
+
+Suite: wily-updates
+ParentSuite: wily
+RepositoryType: deb
+_Description: Recommended updates
+
+Suite: wily-updates
+ParentSuite: wily
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Recommended updates
+
+Suite: wily-proposed
+ParentSuite: wily
+RepositoryType: deb
+_Description: Pre-released updates
+
+Suite: wily-proposed
+ParentSuite: wily
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Pre-released updates
+
+Suite: wily-backports
+ParentSuite: wily
+RepositoryType: deb
+_Description: Unsupported updates
+
+Suite: wily-backports
+ParentSuite: wily
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Unsupported updates
+
+
+Suite: vivid
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://archive.ubuntu.com/ubuntu
+MatchURI-amd64: archive.ubuntu.com/ubuntu
+BaseURI-i386: http://archive.ubuntu.com/ubuntu
+MatchURI-i386: archive.ubuntu.com/ubuntu
+MirrorsFile-amd64: Ubuntu.mirrors
+MirrorsFile-i386: Ubuntu.mirrors
+_Description: Ubuntu 15.04 'Vivid Vervet'
+Component: main
+_CompDescription: Officially supported
+_CompDescriptionLong: Canonical-supported free and open-source software
+Component: universe
+_CompDescription: Community-maintained
+_CompDescriptionLong: Community-maintained free and open-source software
+Component: restricted
+_CompDescription: Non-free drivers
+_CompDescriptionLong: Proprietary drivers for devices
+Component: multiverse
+ParentComponent: universe
+_CompDescription: Restricted software
+_CompDescriptionLong: Software restricted by copyright or legal issues
+
+Suite: vivid
+ParentSuite: vivid
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Ubuntu 15.04 'Vivid Vervet'
+
+Suite: vivid
+RepositoryType: deb
+MatchName: .*
+BaseURI: cdrom:\[Ubuntu.*15.04
+MatchURI: cdrom:\[Ubuntu.*15.04
+_Description: Cdrom with Ubuntu 15.04 'Vivid Vervet'
+Available: False
+Component: main
+_CompDescription: Officially supported
+Component: restricted
+_CompDescription: Restricted copyright
+
+Suite: vivid
+Official: false
+RepositoryType: deb
+BaseURI: http://archive.canonical.com
+MatchURI: archive.canonical.com
+_Description: Canonical Partners
+Component: partner
+_CompDescription: Software packaged by Canonical for their partners
+_CompDescriptionLong: This software is not part of Ubuntu.
+
+Suite: vivid
+Official: false
+RepositoryType: deb
+BaseURI: http://extras.ubuntu.com
+MatchURI: extras.ubuntu.com
+_Description: Independent
+Component: main
+_CompDescription: Provided by third-party software developers
+_CompDescriptionLong: Software offered by third party developers.
+
+Suite: vivid-security
+ParentSuite: vivid
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://security.ubuntu.com/ubuntu/
+MatchURI-amd64: archive.ubuntu.com/ubuntu|security.ubuntu.com
+BaseURI-i386: http://security.ubuntu.com/ubuntu/
+MatchURI-i386: archive.ubuntu.com/ubuntu|security.ubuntu.com
+_Description: Important security updates
+
+Suite: vivid-security
+ParentSuite: vivid
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports|security.ubuntu.com
+_Description: Important security updates
+
+Suite: vivid-updates
+ParentSuite: vivid
+RepositoryType: deb
+_Description: Recommended updates
+
+Suite: vivid-updates
+ParentSuite: vivid
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Recommended updates
+
+Suite: vivid-proposed
+ParentSuite: vivid
+RepositoryType: deb
+_Description: Pre-released updates
+
+Suite: vivid-proposed
+ParentSuite: vivid
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Pre-released updates
+
+Suite: vivid-backports
+ParentSuite: vivid
+RepositoryType: deb
+_Description: Unsupported updates
+
+Suite: vivid-backports
+ParentSuite: vivid
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Unsupported updates
+
+
+Suite: utopic
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://archive.ubuntu.com/ubuntu
+MatchURI-amd64: archive.ubuntu.com/ubuntu
+BaseURI-i386: http://archive.ubuntu.com/ubuntu
+MatchURI-i386: archive.ubuntu.com/ubuntu
+MirrorsFile-amd64: Ubuntu.mirrors
+MirrorsFile-i386: Ubuntu.mirrors
+_Description: Ubuntu 14.10 'Utopic Unicorn'
+Component: main
+_CompDescription: Officially supported
+_CompDescriptionLong: Canonical-supported free and open-source software
+Component: universe
+_CompDescription: Community-maintained
+_CompDescriptionLong: Community-maintained free and open-source software
+Component: restricted
+_CompDescription: Non-free drivers
+_CompDescriptionLong: Proprietary drivers for devices
+Component: multiverse
+ParentComponent: universe
+_CompDescription: Restricted software
+_CompDescriptionLong: Software restricted by copyright or legal issues
+
+Suite: utopic
+ParentSuite: utopic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Ubuntu 14.10 'Utopic Unicorn'
+
+Suite: utopic
+RepositoryType: deb
+MatchName: .*
+BaseURI: cdrom:\[Ubuntu.*14.10
+MatchURI: cdrom:\[Ubuntu.*14.10
+_Description: Cdrom with Ubuntu 14.10 'Utopic Unicorn'
+Available: False
+Component: main
+_CompDescription: Officially supported
+Component: restricted
+_CompDescription: Restricted copyright
+
+Suite: utopic
+Official: false
+RepositoryType: deb
+BaseURI: http://archive.canonical.com
+MatchURI: archive.canonical.com
+_Description: Canonical Partners
+Component: partner
+_CompDescription: Software packaged by Canonical for their partners
+_CompDescriptionLong: This software is not part of Ubuntu.
+
+Suite: utopic
+Official: false
+RepositoryType: deb
+BaseURI: http://extras.ubuntu.com
+MatchURI: extras.ubuntu.com
+_Description: Independent
+Component: main
+_CompDescription: Provided by third-party software developers
+_CompDescriptionLong: Software offered by third party developers.
+
+Suite: utopic-security
+ParentSuite: utopic
+RepositoryType: deb
+BaseURI: http://ports.ubuntu.com/ubuntu-ports/
+MatchURI: ports.ubuntu.com/ubuntu-ports
+BaseURI-amd64: http://security.ubuntu.com/ubuntu/
+MatchURI-amd64: archive.ubuntu.com/ubuntu|security.ubuntu.com
+BaseURI-i386: http://security.ubuntu.com/ubuntu/
+MatchURI-i386: archive.ubuntu.com/ubuntu|security.ubuntu.com
+_Description: Important security updates
+
+Suite: utopic-security
+ParentSuite: utopic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports|security.ubuntu.com
+_Description: Important security updates
+
+Suite: utopic-updates
+ParentSuite: utopic
+RepositoryType: deb
+_Description: Recommended updates
+
+Suite: utopic-updates
+ParentSuite: utopic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Recommended updates
+
+Suite: utopic-proposed
+ParentSuite: utopic
+RepositoryType: deb
+_Description: Pre-released updates
+
+Suite: utopic-proposed
+ParentSuite: utopic
+RepositoryType: deb-src
+BaseURI: http://archive.ubuntu.com/ubuntu/
+MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
+_Description: Pre-released updates
+
+Suite: utopic-backports
+ParentSuite: utopic
+RepositoryType: deb
+_Description: Unsupported updates
+
+Suite: utopic-backports
+ParentSuite: utopic
 RepositoryType: deb-src
 BaseURI: http://archive.ubuntu.com/ubuntu/
 MatchURI: archive.ubuntu.com/ubuntu|ports.ubuntu.com/ubuntu-ports
