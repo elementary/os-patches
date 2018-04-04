@@ -53,6 +53,8 @@ if [ -r /etc/default/locale ]; then
     fi
 fi
 
+export XDG_SESSION_TYPE="x11"
+
 [ -e /run/systemd/system ] || initctl emit starting-dm DM=ubiquity-dm
 
 # turn off console blanking for install process
