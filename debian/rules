@@ -73,7 +73,8 @@ conf_args = \
 	--enable-largefile \
 	--prefix=/usr \
 	--infodir=/usr/share/info \
-	--mandir=/usr/share/man
+	--mandir=/usr/share/man \
+	--without-bash-malloc
 ifeq ($(with_installed_rl),yes)
     conf_args += --with-installed-readline
 endif
@@ -85,7 +86,6 @@ endif
 
 static_conf_args := $(conf_args) \
 	--enable-static-link \
-	--without-bash-malloc \
 
 #build: bash-build static-build preinst-build check
 build: before-build bash-build static-build preinst-build check
