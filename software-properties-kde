@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+#  software-properties - graphical abstraction of the sources.list
+#  
+#  Copyright (c) 2007 Canonical Ltd.
+#
+#  Author: Jonathan Riddell <jriddell@ubuntu.com>
+# 
+#  This program is free software; you can redistribute it and/or 
+#  modify it under the terms of the GNU General Public License as 
+#  published by the Free Software Foundation; either version 2 of the
+#  License, or (at your option) any later version.
+# 
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+# 
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+#  USA
+
+from __future__ import print_function
+
+import gettext
+import os
+import sys
+
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+import aptsources
+from aptsources.sourceslist import SourcesList
+
+#sys.path.append("@prefix@/share/update-manager/python")
+
+from softwareproperties.kde.SoftwarePropertiesKDE import SoftwarePropertiesKDE
+
+import sip
+
+class OptionParsed:
+    debug = False
+    massive_debug = False
+    no_update = False
+    enable_component = ""
+
+#--------------- main ------------------
+if __name__ == '__main__':
+    try:
+        sip.setdestroyonexit(False)
+    except AttributeError:
+        pass
+    _ = gettext.gettext
+
+    app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon.fromTheme("applications-other"))
+
+    #FIXME: Workaround for LP: 1315866
+    #       This happens due to the fact that when a Python dict is garbage
+    #       collected the order in which the individual items in the dict are
+    #       garbage collected is unpredictable, causing the dtor's to be called
+    #       after python exits. In order to work around the issue, upstream
+    #       suggested that projects disable the automatic destruction of C++
+    #       instances and C structures
+    #       Ref: http://www.riverbankcomputing.com/pipermail/pyqt/2014-March/033929.html
+    sip.setdestroyonexit(False)
+
+    parser = QCommandLineParser()
+    parser.addHelpOption()
+    parser.addVersionOption()
+    debugOption = QCommandLineOption("debug",
+                                     _("Print some debug information to the command line"));
+    parser.addOption(debugOption);
+    massiveDebugOption = QCommandLineOption("massive-debug",
+                                            _("Print a lot of debug information to the command line"));
+    parser.addOption(massiveDebugOption);
+    noUpdateOption = QCommandLineOption("dont-update",
+                                          _("No update on repository change (useful if called from an external program)"));
+    parser.addOption(noUpdateOption);
+    componentOption = QCommandLineOption("enable-component",
+                                         _("Enable the specified component of the distro's repositories"),
+                                         "name");
+    parser.addOption(componentOption);
+    ppaOption = QCommandLineOption("enable-ppa",
+                                   _("Enable PPA with the given name"),
+                                   "name");
+    parser.addOption(ppaOption);
+    keyServerOption = QCommandLineOption("keyserver",
+                                         _("Legacy option, unused"),
+                                         "url");
+    parser.addOption(keyServerOption);
+    winidOption = QCommandLineOption("attach", _("Win ID to act as a dialogue for"),
+                                     "winid");
+    parser.addOption(winidOption);
+    dataDirOption = QCommandLineOption("data-dir", _("data directory for UI files"),
+                                       "data_dir", "/usr/share/software-properties/");
+    parser.addOption(dataDirOption);
+    parser.process(app)
+
+    # Check for root permissions
+    if os.geteuid() != 0:
+        text = "Please run this software with administrative rights. To do so, run this program with kdesudo."
+        title = "Need administrative powers"
+        #msgbox = KMessageBox.sorry(None, text, title, KMessageBox.Notify)
+        msgbox = QMessageBox.critical(None, title, text)
+        sys.exit(1)
+
+    localesApp="software-properties"
+    localesDir="/usr/share/locale"
+    gettext.bindtextdomain(localesApp, localesDir)
+    gettext.textdomain(localesApp)
+
+    afile = ""
+    options = OptionParsed #FIXME set debug, massive_debug
+    if len(parser.positionalArguments()) >= 1:
+        afile = parser.positionalArguments()[0]
+        afile = str(afile)
+
+    options.debug = parser.isSet(debugOption)
+    options.debug = parser.isSet(massiveDebugOption)
+    options.no_update = parser.isSet(noUpdateOption)
+
+    attachWinID = None
+    if parser.isSet(winidOption):
+        attachWinID = parser.value(winidOption)
+    # datadir has a default value, so always read it
+    data_dir = parser.value(dataDirOption)
+
+    if parser.isSet(ppaOption):
+        app = SoftwarePropertiesKDE(datadir=data_dir, options=options, file=afile)
+        options.enable_ppa = parser.value(ppaOption)
+        app.add_source_from_line("ppa:%s" % options.enable_ppa)
+        app.sourceslist.save()
+    elif parser.isSet(componentOption) == True:
+        sourceslist = SourcesList()
+        options.enable_component = parser.value(componentOption)
+        distro = aptsources.distro.get_distro()
+        distro.get_sources(sourceslist)
+        distro.enable_component(options.enable_component)
+        sourceslist.save()
+        print("Enabled the %s component" % options.enable_component)
+    else:
+        app = SoftwarePropertiesKDE(datadir=data_dir, options=options, file=afile, attachWinID=attachWinID)
+        app.run()
+        sys.exit(app.modified_sourceslist)

@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+for locale in C.UTF-8 C
+do
+    export LC_ALL=$locale
+    echo LC_ALL=$locale test...
+    rm -f /etc/apt/sources.list.d/xnox-ubuntu-nonvirt-*.list
+    rm -f /etc/apt/trusted.gpg.d/xnox_ubuntu_nonvirt.gpg
+    add-apt-repository ppa:xnox/nonvirt --yes --no-update
+    [ -s /etc/apt/sources.list.d/xnox-ubuntu-nonvirt-*.list ]
+    [ -s /etc/apt/trusted.gpg.d/xnox_ubuntu_nonvirt.gpg ]
+    gpg -q --homedir $(mktemp -d)  --no-default-keyring --keyring /etc/apt/trusted.gpg.d/xnox_ubuntu_nonvirt.gpg --fingerprint
+done

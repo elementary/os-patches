@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+PY3REQUESTED := $(shell py3versions -r)
+PY3DEFAULT := $(shell py3versions -d)
+# Run setup.py with the default python3 last so that the scripts use
+# #!/usr/bin/python3 and not #!/usr/bin/python3.X.
+PY3 := $(filter-out $(PY3DEFAULT),$(PY3REQUESTED)) python3
+
+%:
+	dh $@ --with python2,python3,translations
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf build
+
+override_dh_auto_build:
+	dh_auto_build
+	set -ex; for python in $(PY3); do \
+		$$python setup.py build; \
+	done
+
+override_dh_auto_install:
+	dh_auto_install
+	set -ex; for python in $(PY3); do \
+               $$python setup.py install --root=$(CURDIR)/debian/tmp \
+						--install-layout=deb; \
+	done
+
+override_dh_python3:
+	dh_python3 --shebang=/usr/bin/python3

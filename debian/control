@@ -1,0 +1,89 @@
+Source: software-properties
+Section: admin
+Priority: optional
+Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
+Build-Depends: debhelper (>= 9),
+               libxml-parser-perl,
+               intltool,
+               python-all (>= 2.6.6-3~),
+               python-distutils-extra (>= 1.90),
+               python-setuptools,
+               python3-all,
+               python3-distutils-extra,
+               python3-setuptools,
+               dh-translations
+Standards-Version: 3.9.6
+Vcs-Bzr: http://code.launchpad.net/~ubuntu-core-dev/software-properties/main
+XS-Testsuite: autopkgtest
+
+Package: python-software-properties
+Section: python
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}, python, python-apt (>=
+ 0.6.20ubuntu16), python-pycurl, lsb-release, iso-codes, gpg
+Recommends: unattended-upgrades
+Description: manage the repositories that you install software from
+ This software provides an abstraction of the used apt repositories.
+ It allows you to easily manage your distribution and independent software
+ vendor software sources.
+
+Package: python3-software-properties
+Section: python
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}, python3, python3-apt (>=
+ 0.6.20ubuntu16), lsb-release, iso-codes, gpg
+Recommends: unattended-upgrades
+Description: manage the repositories that you install software from
+ This software provides an abstraction of the used apt repositories.
+ It allows you to easily manage your distribution and independent software
+ vendor software sources.
+
+Package: software-properties-common
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}, python3,
+ python3-gi, gir1.2-glib-2.0, gir1.2-goa-1.0 (>= 3.27.92-1ubuntu1), gir1.2-secret-1, gir1.2-snapd-1,
+ python-apt-common (>= 0.9), python3-dbus, python3-software-properties (= ${binary:Version}),
+ ca-certificates
+Breaks: python-software-properties (<< 0.85), python3-software-properties (<< 0.85)
+Replaces: python-software-properties (<< 0.85), python3-software-properties (<< 0.85)
+Description: manage the repositories that you install software from (common)
+ This software provides an abstraction of the used apt repositories.
+ It allows you to easily manage your distribution and independent software
+ vendor software sources.
+ .
+ This package contains the common files for software-properties like the
+ D-Bus backend.
+
+Package: software-properties-gtk
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}, python3,
+ python3-software-properties (= ${binary:Version}),
+ python3-gi,
+ gir1.2-gtk-3.0,
+ python3-aptdaemon.gtk3widgets,
+ python3-distro-info,
+ software-properties-common,
+ ubuntu-drivers-common (>= 1:0.2.75),
+ python3-gi,
+ libgtk3-perl
+Recommends: gnome-session-bin | xfce4-session | lubuntu-default-settings | lxqt-session,
+ gnome-keyring
+Description: manage the repositories that you install software from (gtk)
+ This software provides an abstraction of the used apt repositories.
+ It allows you to easily manage your distribution and independent software
+ vendor software sources.
+ .
+ This package contains a GTK+ based graphical interface.
+
+Package: software-properties-kde
+Architecture: all
+Section: kde
+Depends: ${python3:Depends}, ${misc:Depends}, python3, python3-pyqt5,
+ python3-software-properties (= ${binary:Version}), qapt-batch,
+ software-properties-common
+Description: manage the repositories that you install software from (qt)
+ This software provides an abstraction of the used apt repositories.
+ It allows you to easily manage your distribution and independent software
+ vendor software sources.
+ .
+ This package contains a Qt based graphical interface.

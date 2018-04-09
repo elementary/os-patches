@@ -1,0 +1,64 @@
+Things I've noticed:
+
+bug: edit comment on a disabled 3rd party repo and it becomes enabled
+bug: gtk frontend has two on_treeview_sources_cursor_changed, not sure which is correct, probably second
+bug: newly selected mirrors are not put into combo box
+bug: add_key always returns true
+  we should use gpg --dry-run before too
+bug: gtk frontend UI strings don't translate
+issue: may want to add a gtk crash handler
+
+TODO:
+
+server combobox changed
+i18n
+adept integration
+crash dialogue
+drag and drop for sources list
+cdrom listview needs implementing (both frontends)
+insert CD support, somehow
+various functions in the mirror dialogue: custom mirrors, edit, find fastest etc.  DialogMirror.py should be abstracted for frontend independence
+
+jriddell, 2007-02
+
+WON'T FIX:
+issue: no way to set source code back to inconsistent state, so checkbox 
+       needs tristate turned off
+rationale: would add to much complexity. the inconsistent state should only
+           be visible if the user made some custom modifications. so we would
+	   have to keep a history of all changes and take mulitiple 
+	   inconsistent states into account. finally there is a global
+	   revert button.
+FIXED:
+packaging
+
+bug: self.get_source_code_state() never returns false, only None (fixed in backend and KDE)
+
+bug: popcon state doesn't get saved (or loaded)
+
+bug: checkbutton source code sometimes can't be ticked
+
+bug: rm /etc/apt/sources.list; start up; all Update tickboxes disabled and never become enabled
+bug: after adding repo, doesn't show change
+bug: editing 3rd party archives doesn't show changes
+bug: gtk checkboxes are never marked as inconsistent
+bug: click 3rd party enable/disable twice and it doesn't get back to original state
+bug: on_button_revert_clicked doesn't revert the UI
+   Was a transistion error. The current solution is not nice, but works:
+   reload the isv_sources and show_distro after each change :/
+   It would be nice to store the meta data anywhere else, so that
+   we won't have to recreate the ui elements.
+
+bug?  untick "main" and main doesn't go away
+  was a problem with empty sources.list files. python-apt now handles this 
+  corner case correctly
+
+
+ANSWERED:
+question: where do update radio buttons get disabled/enabled at program start?
+answer: SoftwareProperties.get_update_automation_level() and 
+        SoftwarePropertiesGtk.show_auto_update_level()
+
+issue: DialogAddSourcesList obsolete?
+answer: No, it is used to open sources.list files (by drag and drop or
+        double click)

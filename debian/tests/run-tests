@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+tmpdir="$(mktemp -d)"
+cleanup () {
+	rm -rf "$tmpdir"
+}
+trap cleanup EXIT HUP INT QUIT TERM
+
+# This is a bit nasty, but at least tests/test_dbus.py relies on being run
+# in a UTF-8 locale.  Override this for now, but it might be better to make
+# the test work in other locales too.
+export LC_ALL=C.UTF-8
+
+code=0
+if [ "$TMPDIR" ]; then
+	env -u TMPDIR xvfb-run -e "$tmpdir/xvfb.log" sh -ec "TMPDIR=\"$TMPDIR\" python setup.py test && python3 setup.py test" || code="$?"
+else
+	xvfb-run -e "$tmpdir/xvfb.log" sh -ec "python setup.py test && python3 setup.py test" || code="$?"
+fi
+if [ "$code" != 0 ]; then
+	echo "xauth/Xrdb output:"
+	cat "$tmpdir/xvfb.log"
+fi
+exit "$code"
