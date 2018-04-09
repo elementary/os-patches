@@ -1,0 +1,51 @@
+From: =?UTF-8?q?Marco=20Trevisan=20=28Trevi=C3=B1o=29?= <mail@3v1n0.net>
+Date: Thu, 8 Mar 2018 14:52:14 +0100
+Subject: [PATCH] xdg-user-dirs-update: give priority to $HOME
+Bug-freedesktop: https://bugs.freedesktop.org/show_bug.cgi?id=105398
+Origin: upstream, commit: 8dc121ffa40250cfab463d3cb53ef4455421e88e
+
+---
+ xdg-user-dirs-update.c | 22 +++++++++++++++-------
+ 1 file changed, 15 insertions(+), 7 deletions(-)
+
+diff --git a/xdg-user-dirs-update.c b/xdg-user-dirs-update.c
+index 0924a1e..6a99db0 100644
+--- a/xdg-user-dirs-update.c
++++ b/xdg-user-dirs-update.c
+@@ -277,18 +277,26 @@ get_home_dir (void)
+ {
+   struct passwd *pw;
+   static char *home_dir = NULL;
++  const char *home_env;
+ 
+   if (home_dir != NULL)
+     return home_dir;
+ 
+-  setpwent ();
+-  pw = getpwuid (getuid ());
+-  endpwent ();
+-  
+-  if (pw && pw->pw_dir)
+-    home_dir = strdup (pw->pw_dir);
++  home_env = getenv ("HOME");
++
++  if (home_env && *home_env)
++    {
++      home_dir = strdup (home_env);
++    }
+   else
+-    home_dir = getenv ("HOME");
++    {
++      setpwent ();
++      pw = getpwuid (getuid ());
++      endpwent ();
++
++      if (pw && pw->pw_dir)
++	home_dir = strdup (pw->pw_dir);
++    }
+ 
+   return home_dir;
+ }
+-- 
+2.7.4
+
