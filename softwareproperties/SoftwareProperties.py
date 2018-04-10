@@ -66,8 +66,13 @@ from . import ppa
 from . import cloudarchive
 
 import gi
-gi.require_version('Snapd', '1')
-from gi.repository import Gio, Snapd
+from gi.repository import Gio
+
+try:
+  gi.require_version('Snapd', '1')
+  from gi.repository import Snapd
+except (ImportError, ValueError):
+  pass
 
 _SHORTCUT_FACTORIES = [
     ppa.shortcut_handler,

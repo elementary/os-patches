@@ -1,3 +1,13 @@
+software-properties (0.96.24.27) bionic; urgency=medium
+
+  * debian/control: Move gir1.2-goa-1.0, gir1.2-secret-1,
+    and gir1.2-snapd-1 dependencies from software-properties-common
+    to software-properties-gtk (LP: #1762082).
+  * SoftwareProperties.py: Wrap importing of gir1.2-snapd-1 in a
+    try-except block in order to avoid failures in add-apt-repository.
+
+ -- Andrea Azzarone <andrea.azzarone@canonical.com>  Mon, 09 Apr 2018 09:19:23 +0200
+
 software-properties (0.96.24.26) bionic; urgency=medium
 
   * debian/control:
