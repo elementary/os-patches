@@ -9,6 +9,7 @@ ifeq ($(DEB_HOST_GNU_SYSTEM),gnu)
 endif
 
 VENDORFILE = ubuntu
+DESTDIR = debian/base-files
 
 %:
 	dh $@ --with systemd
@@ -19,23 +20,6 @@ override_dh_auto_build:
 	sed -e "s/#VENDORFILE#/$(VENDORFILE)/g" debian/postinst.in > debian/postinst
 
 override_dh_auto_install:
-	debian/rules install DESTDIR=`pwd`/debian/base-files
-
-override_dh_link:
-	dh_link -X os-release
-
-override_dh_compress:
-	dh_compress -X README
-
-override_dh_fixperms:
-	dh_fixperms
-	cd debian/base-files && chown root:staff   var/local
-	cd debian/base-files && chmod 755  `find . -type d`
-	cd debian/base-files && chmod 1777 `cat ../1777-dirs`
-	cd debian/base-files && chmod 2775 `cat ../2775-dirs`
-	cd debian/base-files && chmod 700 root
-
-install:
 	install -p -m 644 etc/*      $(DESTDIR)/etc
 	install -p -m 644 debian/motd-news $(DESTDIR)/etc/default
 	install -p -m 644 debian/motd-news.service $(DESTDIR)/lib/systemd/system/
@@ -62,3 +46,17 @@ override_dh_systemd_enable:
 override_dh_systemd_start:
 	dh_systemd_start -pbase-files motd-news.timer
 	dh_systemd_start -pbase-files motd-news.service
+
+override_dh_link:
+	dh_link -X os-release
+
+override_dh_compress:
+	dh_compress -X README
+
+override_dh_fixperms:
+	dh_fixperms
+	cd debian/base-files && chown root:staff   var/local
+	cd debian/base-files && chmod 755  `find . -type d`
+	cd debian/base-files && chmod 1777 `cat ../1777-dirs`
+	cd debian/base-files && chmod 2775 `cat ../2775-dirs`
+	cd debian/base-files && chmod 700 root

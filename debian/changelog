@@ -1,3 +1,25 @@
+base-files (10.1ubuntu1) bionic; urgency=medium
+
+  * Merge with Debian, fixing build failure.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 09 Apr 2018 13:10:28 +0200
+
+base-files (10.1) unstable; urgency=medium
+
+  * Add CC0-1.0 to common-licenses. Closes: #859649, #882628.
+    Source: https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt.
+  * Simplify debian/rules a little bit by dropping install target
+    and using override_dh_auto_install instead. Closes: #886901.
+    Package should now build from source again in every supported way.
+    Thanks to Daniel Schepler for the report and to Niels Thykier for
+    clarifying the true nature of this bug.
+  * Do not create /etc/staff-group-for-usr-local on new installs anymore.
+    Do not create it on upgrades either, as we don't support upgrades
+    skipping stable releases, and even less skipping several releases.
+  * Standards-Version: 4.1.3.
+
+ -- Santiago Vila <sanvila@debian.org>  Sun, 14 Jan 2018 00:36:34 +0100
+
 base-files (10ubuntu1) bionic; urgency=medium
 
   * /etc/issue{,.net}, /etc/{lsb,os}-release: Welcome to Bionic Beaver!
