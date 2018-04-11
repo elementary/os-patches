@@ -1,0 +1,1128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GtkSourceCompletion: GtkSourceView 3 Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="GtkSourceView 3 Reference Manual">
+<link rel="up" href="ch04.html" title="Completion">
+<link rel="prev" href="ch04.html" title="Completion">
+<link rel="next" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext">
+<meta name="generator" content="GTK-Doc V1.27.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#GtkSourceCompletion.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
+                  <a href="#GtkSourceCompletion.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_interfaces">  <span class="dim">|</span> 
+                  <a href="#GtkSourceCompletion.implemented-interfaces" class="shortcut">Implemented Interfaces</a></span><span id="nav_properties">  <span class="dim">|</span> 
+                  <a href="#GtkSourceCompletion.properties" class="shortcut">Properties</a></span><span id="nav_signals">  <span class="dim">|</span> 
+                  <a href="#GtkSourceCompletion.signals" class="shortcut">Signals</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch04.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="ch04.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="GtkSourceCompletionContext.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="GtkSourceCompletion"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="GtkSourceCompletion.top_of_page"></a>GtkSourceCompletion</span></h2>
+<p>GtkSourceCompletion — Main Completion Object</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-add-provider" title="gtk_source_completion_add_provider ()">gtk_source_completion_add_provider</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-remove-provider" title="gtk_source_completion_remove_provider ()">gtk_source_completion_remove_provider</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-get-providers" title="gtk_source_completion_get_providers ()">gtk_source_completion_get_providers</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-show" title="gtk_source_completion_show ()">gtk_source_completion_show</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-hide" title="gtk_source_completion_hide ()">gtk_source_completion_hide</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceCompletionInfo.html" title="GtkSourceCompletionInfo"><span class="returnvalue">GtkSourceCompletionInfo</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-get-info-window" title="gtk_source_completion_get_info_window ()">gtk_source_completion_get_info_window</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="returnvalue">GtkSourceView</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-get-view" title="gtk_source_completion_get_view ()">gtk_source_completion_get_view</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="returnvalue">GtkSourceCompletionContext</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-create-context" title="gtk_source_completion_create_context ()">gtk_source_completion_create_context</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-move-window" title="gtk_source_completion_move_window ()">gtk_source_completion_move_window</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-block-interactive" title="gtk_source_completion_block_interactive ()">gtk_source_completion_block_interactive</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-unblock-interactive" title="gtk_source_completion_unblock_interactive ()">gtk_source_completion_unblock_interactive</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.properties"></a><h2>Properties</h2>
+<div class="informaltable"><table class="informaltable" border="0">
+<colgroup>
+<col width="150px" class="properties_type">
+<col width="300px" class="properties_name">
+<col width="200px" class="properties_flags">
+</colgroup>
+<tbody>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--accelerators" title="The “accelerators” property">accelerators</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--auto-complete-delay" title="The “auto-complete-delay” property">auto-complete-delay</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--proposal-page-size" title="The “proposal-page-size” property">proposal-page-size</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--provider-page-size" title="The “provider-page-size” property">provider-page-size</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--remember-info-visibility" title="The “remember-info-visibility” property">remember-info-visibility</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--select-on-show" title="The “select-on-show” property">select-on-show</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--show-headers" title="The “show-headers” property">show-headers</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--show-icons" title="The “show-icons” property">show-icons</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type">
+<a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="type">GtkSourceView</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--view" title="The “view” property">view</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.signals"></a><h2>Signals</h2>
+<div class="informaltable"><table class="informaltable" border="0">
+<colgroup>
+<col width="150px" class="signals_return">
+<col width="300px" class="signals_name">
+<col width="200px" class="signals_flags">
+</colgroup>
+<tbody>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-activate-proposal" title="The “activate-proposal” signal">activate-proposal</a></td>
+<td class="signal_flags"><a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></td>
+</tr>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-hide" title="The “hide” signal">hide</a></td>
+<td class="signal_flags"><a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></td>
+</tr>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-move-cursor" title="The “move-cursor” signal">move-cursor</a></td>
+<td class="signal_flags"><a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></td>
+</tr>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-move-page" title="The “move-page” signal">move-page</a></td>
+<td class="signal_flags"><a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></td>
+</tr>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-populate-context" title="The “populate-context” signal">populate-context</a></td>
+<td class="signal_flags"><a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></td>
+</tr>
+<tr>
+<td class="signal_type"><span class="returnvalue">void</span></td>
+<td class="signal_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-show" title="The “show” signal">show</a></td>
+<td class="signal_flags"><a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-struct" title="GtkSourceCompletion">GtkSourceCompletion</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="GtkSourceCompletion.html#GTK-SOURCE-COMPLETION-ERROR:CAPS" title="GTK_SOURCE_COMPLETION_ERROR">GTK_SOURCE_COMPLETION_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="GtkSourceCompletion.html#GtkSourceCompletionError" title="enum GtkSourceCompletionError">GtkSourceCompletionError</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="screen">    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    <span class="lineart">╰──</span> GtkSourceCompletionError
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
+    <span class="lineart">╰──</span> GtkSourceCompletion
+</pre>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.implemented-interfaces"></a><h2>Implemented Interfaces</h2>
+<p>
+GtkSourceCompletion implements
+ <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkBuildable.html#GtkBuildable-struct">GtkBuildable</a>.</p>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;gtksourceview/gtksource.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.description"></a><h2>Description</h2>
+<p>The completion system helps the user when he writes some text, such
+as words, command names, functions, and suchlike. Proposals can be
+shown, to complete the text the user is writing. Each proposal can
+contain an additional piece of information, that is displayed when
+the "Details" button is active.</p>
+<p>Proposals are created via a <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a>. There can
+be for example a provider to complete words (see
+<a class="link" href="GtkSourceCompletionWords.html" title="GtkSourceCompletionWords"><span class="type">GtkSourceCompletionWords</span></a>), another provider for the completion of
+function's names, etc. To add a provider, call
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-add-provider" title="gtk_source_completion_add_provider ()"><code class="function">gtk_source_completion_add_provider()</code></a>.</p>
+<p>When the completion is activated, a <a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="type">GtkSourceCompletionContext</span></a> object is
+created. The providers are asked whether they match the context, with
+<a class="link" href="GtkSourceCompletionProvider.html#gtk-source-completion-provider-match" title="gtk_source_completion_provider_match ()"><code class="function">gtk_source_completion_provider_match()</code></a>. If a provider doesn't match the
+context, it will not be visible in the completion window. On the
+other hand, if the provider matches the context, its proposals will
+be displayed.</p>
+<p>When several providers match, they are all shown in the completion
+window, but one can switch between providers: see the
+<a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-move-page" title="The “move-page” signal"><span class="type">“move-page”</span></a> signal. It is also possible to
+activate the first proposals with key bindings, see the
+<a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--accelerators" title="The “accelerators” property"><span class="type">“accelerators”</span></a> property.</p>
+<p>The <a class="link" href="GtkSourceCompletionProposal.html" title="GtkSourceCompletionProposal"><span class="type">GtkSourceCompletionProposal</span></a> interface represents a proposal.
+The <a class="link" href="GtkSourceCompletionItem.html" title="GtkSourceCompletionItem"><span class="type">GtkSourceCompletionItem</span></a> class is a simple implementation of this
+interface.</p>
+<p>If a proposal contains extra information (see
+<a class="link" href="GtkSourceCompletionProvider.html#gtk-source-completion-provider-get-info-widget" title="gtk_source_completion_provider_get_info_widget ()"><code class="function">gtk_source_completion_provider_get_info_widget()</code></a>), it will be
+displayed in a <a class="link" href="GtkSourceCompletionInfo.html" title="GtkSourceCompletionInfo"><span class="type">GtkSourceCompletionInfo</span></a> window, which appears when
+the "Details" button is clicked.</p>
+<p>A <a class="link" href="GtkSourceCompletionInfo.html" title="GtkSourceCompletionInfo"><span class="type">GtkSourceCompletionInfo</span></a> window can also be used to display
+calltips. When no proposals are available, it can be useful to
+display extra information like a function's prototype (number of
+parameters, types of parameters, etc).</p>
+<p>Each <a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="type">GtkSourceView</span></a> object is associated with a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>
+instance. This instance can be obtained with
+<a class="link" href="GtkSourceView.html#gtk-source-view-get-completion" title="gtk_source_view_get_completion ()"><code class="function">gtk_source_view_get_completion()</code></a>. The <a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="type">GtkSourceView</span></a> class contains also the
+<a class="link" href="GtkSourceView.html#GtkSourceView-show-completion" title="The “show-completion” signal"><span class="type">“show-completion”</span></a> signal.</p>
+<p>A same <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a> object can be used for several
+<a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p>
+<div class="refsect2">
+<a name="id-1.3.5.2.10.11"></a><h3>GtkSourceCompletion as GtkBuildable</h3>
+<p>The GtkSourceCompletion implementation of the <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkBuildable.html#GtkBuildable-struct"><span class="type">GtkBuildable</span></a> interface exposes
+the info window object (see <a class="link" href="GtkSourceCompletion.html#gtk-source-completion-get-info-window" title="gtk_source_completion_get_info_window ()"><code class="function">gtk_source_completion_get_info_window()</code></a>) with the
+internal-child "info_window".</p>
+<p>An example of a UI definition fragment with GtkSourceCompletion:</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="symbol">&lt;</span><span class="usertype">object</span><span class="normal"> class</span><span class="symbol">=</span><span class="string">"GtkSourceCompletion"</span><span class="symbol">&gt;</span>
+<span class="normal">  </span><span class="symbol">&lt;</span><span class="usertype">property</span><span class="normal"> name</span><span class="symbol">=</span><span class="string">"select_on_show"</span><span class="symbol">&gt;</span><span class="normal">False</span><span class="symbol">&lt;/</span><span class="normal">property</span><span class="symbol">&gt;</span>
+<span class="normal">  </span><span class="symbol">&lt;</span><span class="usertype">child</span><span class="normal"> internal</span><span class="symbol">-</span><span class="normal">child</span><span class="symbol">=</span><span class="string">"info_window"</span><span class="symbol">&gt;</span>
+<span class="normal">    </span><span class="symbol">&lt;</span><span class="usertype">object</span><span class="normal"> class</span><span class="symbol">=</span><span class="string">"GtkSourceCompletionInfo"</span><span class="symbol">&gt;</span>
+<span class="normal">      </span><span class="symbol">&lt;</span><span class="usertype">property</span><span class="normal"> name</span><span class="symbol">=</span><span class="string">"border_width"</span><span class="symbol">&gt;</span><span class="number">6</span><span class="symbol">&lt;/</span><span class="normal">property</span><span class="symbol">&gt;</span>
+<span class="normal">    </span><span class="symbol">&lt;/</span><span class="normal">object</span><span class="symbol">&gt;</span>
+<span class="normal">  </span><span class="symbol">&lt;/</span><span class="normal">child</span><span class="symbol">&gt;</span>
+<span class="symbol">&lt;/</span><span class="normal">object</span><span class="symbol">&gt;</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="gtk-source-completion-add-provider"></a><h3>gtk_source_completion_add_provider ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_completion_add_provider (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>,
+                                    <em class="parameter"><code><a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a> *provider</code></em>,
+                                    <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Add a new <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a> to the completion object. This will
+add a reference <em class="parameter"><code>provider</code></em>
+, so make sure to unref your own copy when you
+no longer need it.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-add-provider.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>provider</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-completion-add-provider.returns"></a><h4>Returns</h4>
+<p> <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>provider</code></em>
+was successfully added, otherwise if <em class="parameter"><code>error</code></em>
+is provided, it will be set with the error and <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> is returned.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-remove-provider"></a><h3>gtk_source_completion_remove_provider ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_completion_remove_provider (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>,
+                                       <em class="parameter"><code><a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a> *provider</code></em>,
+                                       <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Remove <em class="parameter"><code>provider</code></em>
+ from the completion.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-remove-provider.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>provider</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-completion-remove-provider.returns"></a><h4>Returns</h4>
+<p> <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>provider</code></em>
+was successfully removed, otherwise if <em class="parameter"><code>error</code></em>
+is provided, it will be set with the error and <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> is returned.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-get-providers"></a><h3>gtk_source_completion_get_providers ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *
+gtk_source_completion_get_providers (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>);</pre>
+<p>Get list of providers registered on <em class="parameter"><code>completion</code></em>
+. The returned list is owned
+by the completion and should not be freed.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-get-providers.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-completion-get-providers.returns"></a><h4>Returns</h4>
+<p>list of <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a>. </p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> GtkSource.CompletionProvider][<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-show"></a><h3>gtk_source_completion_show ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_completion_show (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>,
+                            <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *providers</code></em>,
+                            <em class="parameter"><code><a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="type">GtkSourceCompletionContext</span></a> *context</code></em>);</pre>
+<p>Starts a new completion with the specified <a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="type">GtkSourceCompletionContext</span></a> and
+a list of potential candidate providers for completion.</p>
+<p>It can be convenient for showing a completion on-the-fly, without the need to
+add or remove providers to the <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p>
+<p>Another solution is to add providers with
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-add-provider" title="gtk_source_completion_add_provider ()"><code class="function">gtk_source_completion_add_provider()</code></a>, and implement
+<a class="link" href="GtkSourceCompletionProvider.html#gtk-source-completion-provider-match" title="gtk_source_completion_provider_match ()"><code class="function">gtk_source_completion_provider_match()</code></a> for each provider.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-show.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>providers</p></td>
+<td class="parameter_description"><p>a list of <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a>, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> GtkSource.CompletionProvider][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>context</p></td>
+<td class="parameter_description"><p>The <a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="type">GtkSourceCompletionContext</span></a>
+with which to start the completion. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Alias for transfer none, used for objects with floating refs."><span class="acronym">transfer floating</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-completion-show.returns"></a><h4>Returns</h4>
+<p> <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if it was possible to the show completion window.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-hide"></a><h3>gtk_source_completion_hide ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_completion_hide (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>);</pre>
+<p>Hides the completion if it is active (visible).</p>
+<div class="refsect3">
+<a name="gtk-source-completion-hide.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-get-info-window"></a><h3>gtk_source_completion_get_info_window ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceCompletionInfo.html" title="GtkSourceCompletionInfo"><span class="returnvalue">GtkSourceCompletionInfo</span></a> *
+gtk_source_completion_get_info_window (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>);</pre>
+<p>The info widget is the window where the completion displays optional extra
+information of the proposal.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-get-info-window.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-completion-get-info-window.returns"></a><h4>Returns</h4>
+<p>The <a class="link" href="GtkSourceCompletionInfo.html" title="GtkSourceCompletionInfo"><span class="type">GtkSourceCompletionInfo</span></a> window
+associated with <em class="parameter"><code>completion</code></em>
+. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-get-view"></a><h3>gtk_source_completion_get_view ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="returnvalue">GtkSourceView</span></a> *
+gtk_source_completion_get_view (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>);</pre>
+<p>The <a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="type">GtkSourceView</span></a> associated with <em class="parameter"><code>completion</code></em>
+, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the view has been
+destroyed.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-get-view.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-completion-get-view.returns"></a><h4>Returns</h4>
+<p>The <a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="type">GtkSourceView</span></a> associated with
+<em class="parameter"><code>completion</code></em>
+, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
+<p><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-create-context"></a><h3>gtk_source_completion_create_context ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="returnvalue">GtkSourceCompletionContext</span></a> *
+gtk_source_completion_create_context (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>,
+                                      <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextIter.html#GtkTextIter-struct"><span class="type">GtkTextIter</span></a> *position</code></em>);</pre>
+<p>Create a new <a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="type">GtkSourceCompletionContext</span></a> for <em class="parameter"><code>completion</code></em>
+. The position where
+the completion occurs can be specified by <em class="parameter"><code>position</code></em>
+. If <em class="parameter"><code>position</code></em>
+ is <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>,
+the current cursor position will be used.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-create-context.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>position</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextIter.html#GtkTextIter-struct"><span class="type">GtkTextIter</span></a>, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-completion-create-context.returns"></a><h4>Returns</h4>
+<p>a new <a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="type">GtkSourceCompletionContext</span></a>.
+The reference being returned is a 'floating' reference,
+so if you invoke <a class="link" href="GtkSourceCompletion.html#gtk-source-completion-show" title="gtk_source_completion_show ()"><code class="function">gtk_source_completion_show()</code></a> with this context
+you don't need to unref it. </p>
+<p><span class="annotation">[<acronym title="Alias for transfer none, used for objects with floating refs."><span class="acronym">transfer floating</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-move-window"></a><h3>gtk_source_completion_move_window ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_completion_move_window (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextIter.html#GtkTextIter-struct"><span class="type">GtkTextIter</span></a> *iter</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">gtk_source_completion_move_window</code> has been deprecated since version 3.8 and should not be used in newly-written code.</p>
+<p>Use <a class="link" href="GtkSourceCompletionProvider.html#gtk-source-completion-provider-get-start-iter" title="gtk_source_completion_provider_get_start_iter ()"><code class="function">gtk_source_completion_provider_get_start_iter()</code></a> instead.</p>
+</div>
+<p>Move the completion window to a specific iter.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-move-window.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>iter</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextIter.html#GtkTextIter-struct"><span class="type">GtkTextIter</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-block-interactive"></a><h3>gtk_source_completion_block_interactive ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_completion_block_interactive
+                               (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>);</pre>
+<p>Block interactive completion. This can be used to disable interactive
+completion when inserting or deleting text from the buffer associated with
+the completion. Use <a class="link" href="GtkSourceCompletion.html#gtk-source-completion-unblock-interactive" title="gtk_source_completion_unblock_interactive ()"><code class="function">gtk_source_completion_unblock_interactive()</code></a> to enable
+interactive completion again.</p>
+<p>This function may be called multiple times. It will continue to block
+interactive completion until <a class="link" href="GtkSourceCompletion.html#gtk-source-completion-unblock-interactive" title="gtk_source_completion_unblock_interactive ()"><code class="function">gtk_source_completion_unblock_interactive()</code></a>
+has been called the same number of times.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-block-interactive.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-completion-unblock-interactive"></a><h3>gtk_source_completion_unblock_interactive ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_completion_unblock_interactive
+                               (<em class="parameter"><code><a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion</code></em>);</pre>
+<p>Unblock interactive completion. This can be used after using
+<a class="link" href="GtkSourceCompletion.html#gtk-source-completion-block-interactive" title="gtk_source_completion_block_interactive ()"><code class="function">gtk_source_completion_block_interactive()</code></a> to enable interactive completion
+again.</p>
+<div class="refsect3">
+<a name="gtk-source-completion-unblock-interactive.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="GtkSourceCompletion-struct"></a><h3>GtkSourceCompletion</h3>
+<pre class="programlisting">typedef struct _GtkSourceCompletion GtkSourceCompletion;</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GTK-SOURCE-COMPLETION-ERROR:CAPS"></a><h3>GTK_SOURCE_COMPLETION_ERROR</h3>
+<pre class="programlisting">#define GTK_SOURCE_COMPLETION_ERROR		(gtk_source_completion_error_quark ())
+</pre>
+<p>Error domain for the completion. Errors in this domain will be from the
+<a class="link" href="GtkSourceCompletion.html#GtkSourceCompletionError" title="enum GtkSourceCompletionError"><span class="type">GtkSourceCompletionError</span></a> enumeration. See <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> for more information on
+error domains.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletionError"></a><h3>enum GtkSourceCompletionError</h3>
+<p>An error code used with <a class="link" href="GtkSourceCompletion.html#GTK-SOURCE-COMPLETION-ERROR:CAPS" title="GTK_SOURCE_COMPLETION_ERROR"><code class="literal">GTK_SOURCE_COMPLETION_ERROR</code></a> in a <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> returned
+from a completion-related function.</p>
+<div class="refsect3">
+<a name="GtkSourceCompletionError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-COMPLETION-ERROR-ALREADY-BOUND:CAPS"></a>GTK_SOURCE_COMPLETION_ERROR_ALREADY_BOUND</p></td>
+<td class="enum_member_description">
+<p>The <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a>
+is already bound to the <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> object.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-COMPLETION-ERROR-NOT-BOUND:CAPS"></a>GTK_SOURCE_COMPLETION_ERROR_NOT_BOUND</p></td>
+<td class="enum_member_description">
+<p>The <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider"><span class="type">GtkSourceCompletionProvider</span></a> is
+not bound to the <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> object.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.property-details"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="GtkSourceCompletion--accelerators"></a><h3>The <code class="literal">“accelerators”</code> property</h3>
+<pre class="programlisting">  “accelerators”             <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a></pre>
+<p>Number of keyboard accelerators to show for the first proposals. For
+example, to activate the first proposal, the user can press</p>
+<span class="keycap"><strong>Alt</strong></span>+<span class="keycap"><strong>1</strong></span>.
+<p>Flags: Read / Write / Construct</p>
+<p>Allowed values: &lt;= 10</p>
+<p>Default value: 5</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion--auto-complete-delay"></a><h3>The <code class="literal">“auto-complete-delay”</code> property</h3>
+<pre class="programlisting">  “auto-complete-delay”      <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a></pre>
+<p>Determines the popup delay (in milliseconds) at which the completion
+will be shown for interactive completion.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Default value: 250</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion--proposal-page-size"></a><h3>The <code class="literal">“proposal-page-size”</code> property</h3>
+<pre class="programlisting">  “proposal-page-size”       <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a></pre>
+<p>The scroll page size of the proposals in the completion window. In
+other words, when <span class="keycap"><strong>PageDown</strong></span> or</p>
+<span class="keycap"><strong>PageUp</strong></span> is pressed, the selected
+<p>proposal becomes the one which is located one page size backward or
+forward.</p>
+<p>See also the <a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-move-cursor" title="The “move-cursor” signal"><span class="type">“move-cursor”</span></a> signal.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Allowed values: &gt;= 1</p>
+<p>Default value: 5</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion--provider-page-size"></a><h3>The <code class="literal">“provider-page-size”</code> property</h3>
+<pre class="programlisting">  “provider-page-size”       <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a></pre>
+<p>The scroll page size of the provider pages in the completion window.</p>
+<p>See the <a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-move-page" title="The “move-page” signal"><span class="type">“move-page”</span></a> signal.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Allowed values: &gt;= 1</p>
+<p>Default value: 5</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion--remember-info-visibility"></a><h3>The <code class="literal">“remember-info-visibility”</code> property</h3>
+<pre class="programlisting">  “remember-info-visibility” <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></pre>
+<p>Determines whether the visibility of the info window should be
+saved when the completion is hidden, and restored when the completion
+is shown again.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Default value: FALSE</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion--select-on-show"></a><h3>The <code class="literal">“select-on-show”</code> property</h3>
+<pre class="programlisting">  “select-on-show”           <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></pre>
+<p>Determines whether the first proposal should be selected when the
+completion is first shown.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Default value: TRUE</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion--show-headers"></a><h3>The <code class="literal">“show-headers”</code> property</h3>
+<pre class="programlisting">  “show-headers”             <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></pre>
+<p>Determines whether provider headers should be shown in the proposal
+list. It can be useful to disable when there is only one provider.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Default value: TRUE</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion--show-icons"></a><h3>The <code class="literal">“show-icons”</code> property</h3>
+<pre class="programlisting">  “show-icons”               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></pre>
+<p>Determines whether provider and proposal icons should be shown in
+the completion popup.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Default value: TRUE</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion--view"></a><h3>The <code class="literal">“view”</code> property</h3>
+<pre class="programlisting">  “view”                     <a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="type">GtkSourceView</span></a> *</pre>
+<p>The <a class="link" href="GtkSourceView.html" title="GtkSourceView"><span class="type">GtkSourceView</span></a> bound to the completion object.</p>
+<p>Flags: Read / Write / Construct Only</p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceCompletion.signal-details"></a><h2>Signal Details</h2>
+<div class="refsect2">
+<a name="GtkSourceCompletion-activate-proposal"></a><h3>The <code class="literal">“activate-proposal”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
+<p>The <a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-activate-proposal" title="The “activate-proposal” signal"><span class="type">“activate-proposal”</span></a> signal is a
+keybinding signal which gets emitted when the user initiates
+a proposal activation.</p>
+<p>Applications should not connect to it, but may emit it with
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#g-signal-emit-by-name"><code class="function">g_signal_emit_by_name()</code></a> if they need to control the proposal
+activation programmatically.</p>
+<div class="refsect3">
+<a name="GtkSourceCompletion-activate-proposal.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>The <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> who emits the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion-hide"></a><h3>The <code class="literal">“hide”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
+<p>Emitted when the completion window is hidden. The default handler
+will actually hide the window.</p>
+<div class="refsect3">
+<a name="GtkSourceCompletion-hide.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>The <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> who emits the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion-move-cursor"></a><h3>The <code class="literal">“move-cursor”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/gtk3-Standard-Enumerations.html#GtkScrollStep"><span class="type">GtkScrollStep</span></a>        step,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a>                 num,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
+<p>The <a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-move-cursor" title="The “move-cursor” signal"><span class="type">“move-cursor”</span></a> signal is a keybinding
+signal which gets emitted when the user initiates a cursor
+movement.</p>
+<p>The <span class="keycap"><strong>Up</strong></span>, <span class="keycap"><strong>Down</strong></span>,</p>
+<span class="keycap"><strong>PageUp</strong></span>, <span class="keycap"><strong>PageDown</strong></span>,
+<span class="keycap"><strong>Home</strong></span> and <span class="keycap"><strong>End</strong></span> keys are bound to the
+<p>normal behavior expected by those keys.</p>
+<p>When <em class="parameter"><code>step</code></em>
+ is equal to <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/gtk3-Standard-Enumerations.html#GTK-SCROLL-PAGES:CAPS"><code class="literal">GTK_SCROLL_PAGES</code></a>, the page size is defined by
+the <a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--proposal-page-size" title="The “proposal-page-size” property"><span class="type">“proposal-page-size”</span></a> property. It is used for
+the <span class="keycap"><strong>PageDown</strong></span> and <span class="keycap"><strong>PageUp</strong></span> keys.</p>
+<p>Applications should not connect to it, but may emit it with
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#g-signal-emit-by-name"><code class="function">g_signal_emit_by_name()</code></a> if they need to control the cursor
+programmatically.</p>
+<div class="refsect3">
+<a name="GtkSourceCompletion-move-cursor.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>The <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> who emits the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>step</p></td>
+<td class="parameter_description"><p>The <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/gtk3-Standard-Enumerations.html#GtkScrollStep"><span class="type">GtkScrollStep</span></a> by which to move the cursor</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>num</p></td>
+<td class="parameter_description"><p>The amount of steps to move the cursor</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion-move-page"></a><h3>The <code class="literal">“move-page”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/gtk3-Standard-Enumerations.html#GtkScrollStep"><span class="type">GtkScrollStep</span></a>        step,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a>                 num,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
+<p>The <a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion-move-page" title="The “move-page” signal"><span class="type">“move-page”</span></a> signal is a keybinding
+signal which gets emitted when the user initiates a page
+movement (i.e. switches between provider pages).</p>
+<span class="keycap"><strong>Control</strong></span>+<span class="keycap"><strong>Left</strong></span><p>is for going to the previous provider.</p>
+<span class="keycap"><strong>Control</strong></span>+<span class="keycap"><strong>Right</strong></span><p>is for going to the next provider.</p>
+<span class="keycap"><strong>Control</strong></span>+<span class="keycap"><strong>Home</strong></span><p>is for displaying all the providers.</p>
+<span class="keycap"><strong>Control</strong></span>+<span class="keycap"><strong>End</strong></span><p>is for going to the last provider.</p>
+<p>When <em class="parameter"><code>step</code></em>
+ is equal to <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/gtk3-Standard-Enumerations.html#GTK-SCROLL-PAGES:CAPS"><span class="type">GTK_SCROLL_PAGES</span></a>, the page size is defined by
+the <a class="link" href="GtkSourceCompletion.html#GtkSourceCompletion--provider-page-size" title="The “provider-page-size” property"><span class="type">“provider-page-size”</span></a> property.</p>
+<p>Applications should not connect to it, but may emit it with
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#g-signal-emit-by-name"><code class="function">g_signal_emit_by_name()</code></a> if they need to control the page selection
+programmatically.</p>
+<div class="refsect3">
+<a name="GtkSourceCompletion-move-page.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>The <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> who emits the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>step</p></td>
+<td class="parameter_description"><p>The <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/gtk3-Standard-Enumerations.html#GtkScrollStep"><span class="type">GtkScrollStep</span></a> by which to move the page</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>num</p></td>
+<td class="parameter_description"><p>The amount of steps to move the page</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion-populate-context"></a><h3>The <code class="literal">“populate-context”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a>        *completion,
+               <a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="type">GtkSourceCompletionContext</span></a> *context,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>                    user_data)</pre>
+<p>Emitted just before starting to populate the completion with providers.
+You can use this signal to add additional attributes in the context.</p>
+<div class="refsect3">
+<a name="GtkSourceCompletion-populate-context.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>The <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> who emits the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>context</p></td>
+<td class="parameter_description"><p>The <a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext"><span class="type">GtkSourceCompletionContext</span></a> for the current completion</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompletion-show"></a><h3>The <code class="literal">“show”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+user_function (<a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> *completion,
+               <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>             user_data)</pre>
+<p>Emitted when the completion window is shown. The default handler
+will actually show the window.</p>
+<div class="refsect3">
+<a name="GtkSourceCompletion-show.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>The <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion"><span class="type">GtkSourceCompletion</span></a> who emits the signal</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Flags: <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Signals.html#G-SIGNAL-ACTION:CAPS">Action</a></p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.27.1</div>
+</body>
+</html>

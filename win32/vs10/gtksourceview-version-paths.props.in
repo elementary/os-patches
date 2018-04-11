@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <VSVer>10</VSVer>
+    <GlibEtcInstallRoot>$(SolutionDir)\..\..\..\vs$(VSVer)\$(Platform)</GlibEtcInstallRoot>
+    <CopyDir>$(GlibEtcInstallRoot)</CopyDir>
+    <DefDir>$(SolutionDir)$(Configuration)\$(Platform)\obj\$(ProjectName)</DefDir>
+    <GtkSourceviewMajorVersion>@GTK_SOURCE_MAJOR_VERSION@</GtkSourceviewMajorVersion>
+    <GtkSourceviewMinorVersion>@GTK_SOURCE_MINOR_VERSION@</GtkSourceviewMinorVersion>    
+    <GtkSourceviewMicroVersion>@GTK_SOURCE_MICRO_VERSION@</GtkSourceviewMicroVersion>
+    <ApiVersion>3.0</ApiVersion>
+    <GtkSourceviewLibtoolCompatibleDllPrefix>lib</GtkSourceviewLibtoolCompatibleDllPrefix>
+    <GtkSourceviewLibtoolCompatibleDllSuffix>-$(ApiVersion)-0</GtkSourceviewLibtoolCompatibleDllSuffix>
+    <GtkSourceviewSeparateVSDllPrefix />
+    <GtkSourceviewSeparateVSDllSuffix>-3-vs$(VSVer)</GtkSourceviewSeparateVSDllSuffix>
+    <GtkSourceviewDllPrefix>$(GtkSourceviewSeparateVSDllPrefix)</GtkSourceviewDllPrefix>
+    <GtkSourceviewDllSuffix>$(GtkSourceviewSeparateVSDllSuffix)</GtkSourceviewDllSuffix>
+    <PythonDir Condition="'$(VisualStudioVersion)' == '10.0'">c:\python34</PythonDir>
+    <PythonDir Condition="'$(VisualStudioVersion)' == '11.0'">c:\python34</PythonDir>
+    <PythonDir Condition="'$(VisualStudioVersion)' == '12.0'">c:\python34</PythonDir>
+    <PythonDir Condition="'$(VisualStudioVersion)' == '14.0'">c:\python36</PythonDir>
+    <PythonDir Condition="'$(VisualStudioVersion)' == '15.0'">c:\python36</PythonDir>
+    <PythonDirX64>$(PythonDir).x64</PythonDirX64>
+    <IntrospectPythonParam>PYTHON=$(PythonDir)\python.exe</IntrospectPythonParam>
+    <IntrospectPythonParamX64>PYTHON=$(PythonDirX64)\python.exe</IntrospectPythonParamX64>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_PropertySheetDisplayName>gtksourceviewversionpathsprops</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemGroup>
+    <BuildMacro Include="VSVer">
+      <Value>$(VSVer)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GlibEtcInstallRoot">
+      <Value>$(GlibEtcInstallRoot)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GlibEtcInstallRootFromBuildWin32">
+      <Value>$(GlibEtcInstallRootFromBuildWin32)</Value>
+    </BuildMacro>
+    <BuildMacro Include="CopyDir">
+      <Value>$(CopyDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="DefDir">
+      <Value>$(DefDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewMajorVersion">
+      <Value>$(GtkSourceviewMajorVersion)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewMinorVersion">
+      <Value>$(GtkSourceviewMinorVersion)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewMicroVersion">
+      <Value>$(GtkSourceviewMicroVersion)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ApiVersion">
+      <Value>$(ApiVersion)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewLibtoolCompatibleDllPrefix">
+      <Value>$(GtkSourceviewLibtoolCompatibleDllPrefix)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewLibtoolCompatibleDllSuffix">
+      <Value>$(GtkSourceviewLibtoolCompatibleDllSuffix)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewSeparateVSDllPrefix">
+      <Value>$(GtkSourceviewSeparateVSDllPrefix)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewSeparateVSDllSuffix">
+      <Value>$(GtkSourceviewSeparateVSDllSuffix)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewDllPrefix">
+      <Value>$(GtkSourceviewDllPrefix)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GtkSourceviewDllSuffix">
+      <Value>$(GtkSourceviewDllSuffix)</Value>
+    </BuildMacro>
+    <BuildMacro Include="PythonDir">
+      <Value>$(PythonDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="PythonDirX64">
+      <Value>$(PythonDirX64)</Value>
+    </BuildMacro>
+    <BuildMacro Include="IntrospectPythonParam">
+      <Value>$(IntrospectPythonParam)</Value>
+    </BuildMacro>
+    <BuildMacro Include="IntrospectPythonParamX64">
+      <Value>$(IntrospectPythonParamX64)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

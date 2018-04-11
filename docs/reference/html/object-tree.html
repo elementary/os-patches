@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Object Hierarchy: GtkSourceView 3 Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="GtkSourceView 3 Reference Manual">
+<link rel="up" href="pt04.html" title="Part IV. Annexes">
+<link rel="prev" href="pt04.html" title="Part IV. Annexes">
+<link rel="next" href="annotation-glossary.html" title="Annotation Glossary">
+<meta name="generator" content="GTK-Doc V1.27.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="pt04.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="pt04.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="annotation-glossary.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h2 class="title">
+<a name="object-tree"></a>Object Hierarchy</h2></div></div></div>
+<pre class="screen">
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
+    <span class="lineart">├──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextBuffer.html#GtkTextBuffer-struct">GtkTextBuffer</a>
+    <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer">GtkSourceBuffer</a>
+    <span class="lineart">├──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GInitiallyUnowned">GInitiallyUnowned</a>
+    <span class="lineart">│</span>   <span class="lineart">├──</span> <a class="link" href="GtkSourceCompletionContext.html" title="GtkSourceCompletionContext">GtkSourceCompletionContext</a>
+    <span class="lineart">│</span>   <span class="lineart">├──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkWidget.html#GtkWidget-struct">GtkWidget</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>   <span class="lineart">╰──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkContainer.html#GtkContainer-struct">GtkContainer</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>       <span class="lineart">├──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkBin.html#GtkBin-struct">GtkBin</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>       <span class="lineart">│</span>   <span class="lineart">├──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkWindow.html#GtkWindow-struct">GtkWindow</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>       <span class="lineart">│</span>   <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="GtkSourceCompletionInfo.html" title="GtkSourceCompletionInfo">GtkSourceCompletionInfo</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>       <span class="lineart">│</span>   <span class="lineart">├──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkButton.html#GtkButton-struct">GtkButton</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>       <span class="lineart">│</span>   <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="GtkSourceStyleSchemeChooserButton.html" title="GtkSourceStyleSchemeChooserButton">GtkSourceStyleSchemeChooserButton</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>       <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="GtkSourceStyleSchemeChooserWidget.html" title="GtkSourceStyleSchemeChooserWidget">GtkSourceStyleSchemeChooserWidget</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>       <span class="lineart">╰──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextView.html#GtkTextView-struct">GtkTextView</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>           <span class="lineart">╰──</span> <a class="link" href="GtkSourceView.html" title="GtkSourceView">GtkSourceView</a>
+    <span class="lineart">│</span>   <span class="lineart">│</span>               <span class="lineart">╰──</span> <a class="link" href="GtkSourceMap.html" title="GtkSourceMap">GtkSourceMap</a>
+    <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="GtkSourceGutterRenderer.html" title="GtkSourceGutterRenderer">GtkSourceGutterRenderer</a>
+    <span class="lineart">│</span>       <span class="lineart">├──</span> <a class="link" href="GtkSourceGutterRendererPixbuf.html" title="GtkSourceGutterRendererPixbuf">GtkSourceGutterRendererPixbuf</a>
+    <span class="lineart">│</span>       <span class="lineart">╰──</span> <a class="link" href="GtkSourceGutterRendererText.html" title="GtkSourceGutterRendererText">GtkSourceGutterRendererText</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceCompletion.html" title="GtkSourceCompletion">GtkSourceCompletion</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceCompletionItem.html" title="GtkSourceCompletionItem">GtkSourceCompletionItem</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceCompletionWords.html" title="GtkSourceCompletionWords">GtkSourceCompletionWords</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceFile.html" title="GtkSourceFile">GtkSourceFile</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader">GtkSourceFileLoader</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver">GtkSourceFileSaver</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceGutter.html" title="GtkSourceGutter">GtkSourceGutter</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceLanguage.html" title="GtkSourceLanguage">GtkSourceLanguage</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceLanguageManager.html" title="GtkSourceLanguageManager">GtkSourceLanguageManager</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceMarkAttributes.html" title="GtkSourceMarkAttributes">GtkSourceMarkAttributes</a>
+    <span class="lineart">├──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextMark.html#GtkTextMark-struct">GtkTextMark</a>
+    <span class="lineart">│</span>   <span class="lineart">╰──</span> <a class="link" href="GtkSourceMark.html" title="GtkSourceMark">GtkSourceMark</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourcePrintCompositor.html" title="GtkSourcePrintCompositor">GtkSourcePrintCompositor</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceRegion.html" title="GtkSourceRegion">GtkSourceRegion</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceSearchContext.html" title="GtkSourceSearchContext">GtkSourceSearchContext</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceSearchSettings.html" title="GtkSourceSearchSettings">GtkSourceSearchSettings</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceSpaceDrawer.html" title="GtkSourceSpaceDrawer">GtkSourceSpaceDrawer</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceStyle.html" title="GtkSourceStyle">GtkSourceStyle</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceStyleScheme.html" title="GtkSourceStyleScheme">GtkSourceStyleScheme</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceStyleSchemeManager.html" title="GtkSourceStyleSchemeManager">GtkSourceStyleSchemeManager</a>
+    <span class="lineart">╰──</span> <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextTag.html#GtkTextTag-struct">GtkTextTag</a>
+        <span class="lineart">╰──</span> <a class="link" href="GtkSourceTag.html" title="GtkSourceTag">GtkSourceTag</a>
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/GTypeModule.html">GInterface</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceCompletionProposal.html" title="GtkSourceCompletionProposal">GtkSourceCompletionProposal</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceCompletionProvider.html" title="GtkSourceCompletionProvider">GtkSourceCompletionProvider</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceStyleSchemeChooser.html" title="GtkSourceStyleSchemeChooser">GtkSourceStyleSchemeChooser</a>
+    <span class="lineart">╰──</span> <a class="link" href="GtkSourceUndoManager.html" title="GtkSourceUndoManager">GtkSourceUndoManager</a>
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceView.html#GtkSourceBackgroundPatternType" title="enum GtkSourceBackgroundPatternType">GtkSourceBackgroundPatternType</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceBuffer.html#GtkSourceBracketMatchType" title="enum GtkSourceBracketMatchType">GtkSourceBracketMatchType</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceBuffer.html#GtkSourceChangeCaseType" title="enum GtkSourceChangeCaseType">GtkSourceChangeCaseType</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceCompletion.html#GtkSourceCompletionError" title="enum GtkSourceCompletionError">GtkSourceCompletionError</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType">GtkSourceCompressionType</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoaderError" title="enum GtkSourceFileLoaderError">GtkSourceFileLoaderError</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverError" title="enum GtkSourceFileSaverError">GtkSourceFileSaverError</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceGutterRenderer.html#GtkSourceGutterRendererAlignmentMode" title="enum GtkSourceGutterRendererAlignmentMode">GtkSourceGutterRendererAlignmentMode</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType">GtkSourceNewlineType</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceView.html#GtkSourceSmartHomeEndType" title="enum GtkSourceSmartHomeEndType">GtkSourceSmartHomeEndType</a>
+    <span class="lineart">╰──</span> <a class="link" href="GtkSourceView.html#GtkSourceViewGutterPosition" title="enum GtkSourceViewGutterPosition">GtkSourceViewGutterPosition</a>
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GFlags</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceCompletionContext.html#GtkSourceCompletionActivation" title="enum GtkSourceCompletionActivation">GtkSourceCompletionActivation</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceView.html#GtkSourceDrawSpacesFlags" title="enum GtkSourceDrawSpacesFlags">GtkSourceDrawSpacesFlags</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverFlags" title="enum GtkSourceFileSaverFlags">GtkSourceFileSaverFlags</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceGutterRenderer.html#GtkSourceGutterRendererState" title="enum GtkSourceGutterRendererState">GtkSourceGutterRendererState</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceBuffer.html#GtkSourceSortFlags" title="enum GtkSourceSortFlags">GtkSourceSortFlags</a>
+    <span class="lineart">├──</span> <a class="link" href="GtkSourceSpaceDrawer.html#GtkSourceSpaceLocationFlags" title="enum GtkSourceSpaceLocationFlags">GtkSourceSpaceLocationFlags</a>
+    <span class="lineart">╰──</span> <a class="link" href="GtkSourceSpaceDrawer.html#GtkSourceSpaceTypeFlags" title="enum GtkSourceSpaceTypeFlags">GtkSourceSpaceTypeFlags</a>
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Boxed-Types.html">GBoxed</a>
+    <span class="lineart">╰──</span> <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding">GtkSourceEncoding</a>
+</pre>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.27.1</div>
+</body>
+</html>

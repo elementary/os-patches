@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+-include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+GNOME_MODULE = gtksourceview
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,--as-needed
+
+%:
+	dh $@ --with gnome,gir
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--enable-gtk-doc \
+		--enable-static \
+		--enable-glade-catalog
+
+override_dh_install:
+	dh_install --list-missing
+
+override_dh_makeshlibs:
+	dh_makeshlibs -- -c4
+
+override_dh_auto_test:
+	$(MAKE) -C data/language-specs check

@@ -1,0 +1,960 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GtkSourceFileSaver: GtkSourceView 3 Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="GtkSourceView 3 Reference Manual">
+<link rel="up" href="ch05.html" title="File Loading and Saving">
+<link rel="prev" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader">
+<link rel="next" href="ch06.html" title="Gutter and Marks">
+<meta name="generator" content="GTK-Doc V1.27.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFileSaver.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFileSaver.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_properties">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFileSaver.properties" class="shortcut">Properties</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch05.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="GtkSourceFileLoader.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="ch06.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="GtkSourceFileSaver"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="GtkSourceFileSaver.top_of_page"></a>GtkSourceFileSaver</span></h2>
+<p>GtkSourceFileSaver — Save a GtkSourceBuffer into a file</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="returnvalue">GtkSourceFileSaver</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-new" title="gtk_source_file_saver_new ()">gtk_source_file_saver_new</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="returnvalue">GtkSourceFileSaver</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-new-with-target" title="gtk_source_file_saver_new_with_target ()">gtk_source_file_saver_new_with_target</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="returnvalue">GtkSourceBuffer</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-get-buffer" title="gtk_source_file_saver_get_buffer ()">gtk_source_file_saver_get_buffer</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="returnvalue">GtkSourceFile</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-get-file" title="gtk_source_file_saver_get_file ()">gtk_source_file_saver_get_file</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="returnvalue">GFile</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-get-location" title="gtk_source_file_saver_get_location ()">gtk_source_file_saver_get_location</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-set-encoding" title="gtk_source_file_saver_set_encoding ()">gtk_source_file_saver_set_encoding</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="returnvalue">GtkSourceEncoding</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-get-encoding" title="gtk_source_file_saver_get_encoding ()">gtk_source_file_saver_get_encoding</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-set-newline-type" title="gtk_source_file_saver_set_newline_type ()">gtk_source_file_saver_set_newline_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="returnvalue">GtkSourceNewlineType</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-get-newline-type" title="gtk_source_file_saver_get_newline_type ()">gtk_source_file_saver_get_newline_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-set-compression-type" title="gtk_source_file_saver_set_compression_type ()">gtk_source_file_saver_set_compression_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="returnvalue">GtkSourceCompressionType</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-get-compression-type" title="gtk_source_file_saver_get_compression_type ()">gtk_source_file_saver_get_compression_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-set-flags" title="gtk_source_file_saver_set_flags ()">gtk_source_file_saver_set_flags</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverFlags" title="enum GtkSourceFileSaverFlags"><span class="returnvalue">GtkSourceFileSaverFlags</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-get-flags" title="gtk_source_file_saver_get_flags ()">gtk_source_file_saver_get_flags</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-save-async" title="gtk_source_file_saver_save_async ()">gtk_source_file_saver_save_async</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-save-finish" title="gtk_source_file_saver_save_finish ()">gtk_source_file_saver_save_finish</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.properties"></a><h2>Properties</h2>
+<div class="informaltable"><table class="informaltable" border="0">
+<colgroup>
+<col width="150px" class="properties_type">
+<col width="300px" class="properties_name">
+<col width="200px" class="properties_flags">
+</colgroup>
+<tbody>
+<tr>
+<td class="property_type">
+<a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaver--buffer" title="The “buffer” property">buffer</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
+<td class="property_type"><a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="type">GtkSourceCompressionType</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaver--compression-type" title="The “compression-type” property">compression-type</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type">
+<a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="type">GtkSourceEncoding</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaver--encoding" title="The “encoding” property">encoding</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type">
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaver--file" title="The “file” property">file</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
+<td class="property_type"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverFlags" title="enum GtkSourceFileSaverFlags"><span class="type">GtkSourceFileSaverFlags</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaver--flags" title="The “flags” property">flags</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaver--location" title="The “location” property">location</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
+<td class="property_type"><a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="type">GtkSourceNewlineType</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaver--newline-type" title="The “newline-type” property">newline-type</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaver-struct" title="GtkSourceFileSaver">GtkSourceFileSaver</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="GtkSourceFileSaver.html#GTK-SOURCE-FILE-SAVER-ERROR:CAPS" title="GTK_SOURCE_FILE_SAVER_ERROR">GTK_SOURCE_FILE_SAVER_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverError" title="enum GtkSourceFileSaverError">GtkSourceFileSaverError</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverFlags" title="enum GtkSourceFileSaverFlags">GtkSourceFileSaverFlags</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="screen">    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    <span class="lineart">╰──</span> GtkSourceFileSaverError
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GFlags</a>
+    <span class="lineart">╰──</span> GtkSourceFileSaverFlags
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
+    <span class="lineart">╰──</span> GtkSourceFileSaver
+</pre>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;gtksourceview/gtksource.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.description"></a><h2>Description</h2>
+<p>A <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> object permits to save a <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> into a
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a>.</p>
+<p>A file saver should be used only for one save operation, including errors
+handling. If an error occurs, you can reconfigure the saver and relaunch the
+operation with <a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-save-async" title="gtk_source_file_saver_save_async ()"><code class="function">gtk_source_file_saver_save_async()</code></a>.</p>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="gtk-source-file-saver-new"></a><h3>gtk_source_file_saver_new ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="returnvalue">GtkSourceFileSaver</span></a> *
+gtk_source_file_saver_new (<em class="parameter"><code><a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> *buffer</code></em>,
+                           <em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<p>Creates a new <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> object. The <em class="parameter"><code>buffer</code></em>
+ will be saved to the
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>'s location.</p>
+<p>This constructor is suitable for a simple "save" operation, when the <em class="parameter"><code>file</code></em>
+
+already contains a non-<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> <a class="link" href="GtkSourceFile.html#GtkSourceFile--location" title="The “location” property"><span class="type">“location”</span></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-saver-new.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>buffer</p></td>
+<td class="parameter_description"><p>the <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> to save.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-new.returns"></a><h4>Returns</h4>
+<p> a new <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> object.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-new-with-target"></a><h3>gtk_source_file_saver_new_with_target ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="returnvalue">GtkSourceFileSaver</span></a> *
+gtk_source_file_saver_new_with_target (<em class="parameter"><code><a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> *buffer</code></em>,
+                                       <em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>,
+                                       <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> *target_location</code></em>);</pre>
+<p>Creates a new <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> object with a target location. When the
+file saving is finished successfully, <em class="parameter"><code>target_location</code></em>
+ is set to the <em class="parameter"><code>file</code></em>
+'s
+<a class="link" href="GtkSourceFile.html#GtkSourceFile--location" title="The “location” property"><span class="type">“location”</span></a> property. If an error occurs, the previous valid
+location is still available in <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p>
+<p>This constructor is suitable for a "save as" operation, or for saving a new
+buffer for the first time.</p>
+<div class="refsect3">
+<a name="gtk-source-file-saver-new-with-target.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>buffer</p></td>
+<td class="parameter_description"><p>the <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> to save.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>target_location</p></td>
+<td class="parameter_description"><p>the <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> where to save the buffer to.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-new-with-target.returns"></a><h4>Returns</h4>
+<p> a new <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> object.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-get-buffer"></a><h3>gtk_source_file_saver_get_buffer ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="returnvalue">GtkSourceBuffer</span></a> *
+gtk_source_file_saver_get_buffer (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-buffer.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-buffer.returns"></a><h4>Returns</h4>
+<p>the <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> to save. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-get-file"></a><h3>gtk_source_file_saver_get_file ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="returnvalue">GtkSourceFile</span></a> *
+gtk_source_file_saver_get_file (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-file.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-file.returns"></a><h4>Returns</h4>
+<p>the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-get-location"></a><h3>gtk_source_file_saver_get_location ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="returnvalue">GFile</span></a> *
+gtk_source_file_saver_get_location (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-location.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-location.returns"></a><h4>Returns</h4>
+<p>the <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> where to save the buffer to. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-set-encoding"></a><h3>gtk_source_file_saver_set_encoding ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_saver_set_encoding (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>,
+                                    <em class="parameter"><code>const <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="type">GtkSourceEncoding</span></a> *encoding</code></em>);</pre>
+<p>Sets the encoding. If <em class="parameter"><code>encoding</code></em>
+ is <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, the UTF-8 encoding will be set.
+By default the encoding is taken from the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-saver-set-encoding.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>encoding</p></td>
+<td class="parameter_description"><p>the new encoding, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> for UTF-8. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-get-encoding"></a><h3>gtk_source_file_saver_get_encoding ()</h3>
+<pre class="programlisting">const <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="returnvalue">GtkSourceEncoding</span></a> *
+gtk_source_file_saver_get_encoding (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-encoding.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-encoding.returns"></a><h4>Returns</h4>
+<p> the encoding.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-set-newline-type"></a><h3>gtk_source_file_saver_set_newline_type ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_saver_set_newline_type
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>,
+                                <em class="parameter"><code><a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="type">GtkSourceNewlineType</span></a> newline_type</code></em>);</pre>
+<p>Sets the newline type. By default the newline type is taken from the
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-saver-set-newline-type.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>newline_type</p></td>
+<td class="parameter_description"><p>the new newline type.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-get-newline-type"></a><h3>gtk_source_file_saver_get_newline_type ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="returnvalue">GtkSourceNewlineType</span></a>
+gtk_source_file_saver_get_newline_type
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-newline-type.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-newline-type.returns"></a><h4>Returns</h4>
+<p> the newline type.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-set-compression-type"></a><h3>gtk_source_file_saver_set_compression_type ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_saver_set_compression_type
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>,
+                                <em class="parameter"><code><a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="type">GtkSourceCompressionType</span></a> compression_type</code></em>);</pre>
+<p>Sets the compression type. By default the compression type is taken from the
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-saver-set-compression-type.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>compression_type</p></td>
+<td class="parameter_description"><p>the new compression type.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-get-compression-type"></a><h3>gtk_source_file_saver_get_compression_type ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="returnvalue">GtkSourceCompressionType</span></a>
+gtk_source_file_saver_get_compression_type
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-compression-type.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-compression-type.returns"></a><h4>Returns</h4>
+<p> the compression type.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-set-flags"></a><h3>gtk_source_file_saver_set_flags ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_saver_set_flags (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>,
+                                 <em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverFlags" title="enum GtkSourceFileSaverFlags"><span class="type">GtkSourceFileSaverFlags</span></a> flags</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-saver-set-flags.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>flags</p></td>
+<td class="parameter_description"><p>the new flags.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-get-flags"></a><h3>gtk_source_file_saver_get_flags ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverFlags" title="enum GtkSourceFileSaverFlags"><span class="returnvalue">GtkSourceFileSaverFlags</span></a>
+gtk_source_file_saver_get_flags (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-flags.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-get-flags.returns"></a><h4>Returns</h4>
+<p> the flags.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-save-async"></a><h3>gtk_source_file_saver_save_async ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_saver_save_async (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>,
+                                  <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> io_priority</code></em>,
+                                  <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                                  <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFileProgressCallback"><span class="type">GFileProgressCallback</span></a> progress_callback</code></em>,
+                                  <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> progress_callback_data</code></em>,
+                                  <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> progress_callback_notify</code></em>,
+                                  <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
+                                  <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+<p>Saves asynchronously the buffer into the file. See the <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncResult-struct"><span class="type">GAsyncResult</span></a>
+documentation to know how to use this function.</p>
+<div class="refsect3">
+<a name="gtk-source-file-saver-save-async.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>io_priority</p></td>
+<td class="parameter_description"><p>the I/O priority of the request. E.g. <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#G-PRIORITY-LOW:CAPS"><code class="literal">G_PRIORITY_LOW</code></a>,
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#G-PRIORITY-DEFAULT:CAPS"><code class="literal">G_PRIORITY_DEFAULT</code></a> or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#G-PRIORITY-HIGH:CAPS"><code class="literal">G_PRIORITY_HIGH</code></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>optional <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> object, <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to ignore. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>progress_callback</p></td>
+<td class="parameter_description"><p>function to call back with
+progress information, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if progress information is not needed. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>progress_callback_data</p></td>
+<td class="parameter_description"><p>user data to pass to <em class="parameter"><code>progress_callback</code></em>
+. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="This parameter is a 'user_data', for callbacks; many bindings can pass NULL here."><span class="acronym">closure</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>progress_callback_notify</p></td>
+<td class="parameter_description"><p>function to call on
+<em class="parameter"><code>progress_callback_data</code></em>
+when the <em class="parameter"><code>progress_callback</code></em>
+is no longer needed, or
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>callback</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> to call when the request is
+satisfied. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until first called."><span class="acronym">scope async</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data to pass to <em class="parameter"><code>callback</code></em>
+.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-saver-save-finish"></a><h3>gtk_source_file_saver_save_finish ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_file_saver_save_finish (<em class="parameter"><code><a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> *saver</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncResult-struct"><span class="type">GAsyncResult</span></a> *result</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Finishes a file saving started with <a class="link" href="GtkSourceFileSaver.html#gtk-source-file-saver-save-async" title="gtk_source_file_saver_save_async ()"><code class="function">gtk_source_file_saver_save_async()</code></a>.</p>
+<p>If the file has been saved successfully, the following <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>
+properties will be updated: the location, the encoding, the newline type and
+the compression type.</p>
+<p>Since the 3.20 version, <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextBuffer.html#gtk-text-buffer-set-modified"><code class="function">gtk_text_buffer_set_modified()</code></a> is called with <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>
+if the file has been saved successfully.</p>
+<div class="refsect3">
+<a name="gtk-source-file-saver-save-finish.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>saver</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>result</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncResult-struct"><span class="type">GAsyncResult</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-saver-save-finish.returns"></a><h4>Returns</h4>
+<p> whether the file was saved successfully.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="GtkSourceFileSaver-struct"></a><h3>GtkSourceFileSaver</h3>
+<pre class="programlisting">typedef struct _GtkSourceFileSaver GtkSourceFileSaver;</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GTK-SOURCE-FILE-SAVER-ERROR:CAPS"></a><h3>GTK_SOURCE_FILE_SAVER_ERROR</h3>
+<pre class="programlisting">#define GTK_SOURCE_FILE_SAVER_ERROR gtk_source_file_saver_error_quark ()
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileSaverError"></a><h3>enum GtkSourceFileSaverError</h3>
+<p>An error code used with the <a class="link" href="GtkSourceFileSaver.html#GTK-SOURCE-FILE-SAVER-ERROR:CAPS" title="GTK_SOURCE_FILE_SAVER_ERROR"><code class="literal">GTK_SOURCE_FILE_SAVER_ERROR</code></a> domain.</p>
+<div class="refsect3">
+<a name="GtkSourceFileSaverError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-SAVER-ERROR-INVALID-CHARS:CAPS"></a>GTK_SOURCE_FILE_SAVER_ERROR_INVALID_CHARS</p></td>
+<td class="enum_member_description">
+<p>The buffer contains invalid
+  characters.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-SAVER-ERROR-EXTERNALLY-MODIFIED:CAPS"></a>GTK_SOURCE_FILE_SAVER_ERROR_EXTERNALLY_MODIFIED</p></td>
+<td class="enum_member_description">
+<p>The file is externally
+  modified.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileSaverFlags"></a><h3>enum GtkSourceFileSaverFlags</h3>
+<p>Flags to define the behavior of a <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a>.</p>
+<div class="refsect3">
+<a name="GtkSourceFileSaverFlags.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-SAVER-FLAGS-NONE:CAPS"></a>GTK_SOURCE_FILE_SAVER_FLAGS_NONE</p></td>
+<td class="enum_member_description">
+<p>No flags.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-SAVER-FLAGS-IGNORE-INVALID-CHARS:CAPS"></a>GTK_SOURCE_FILE_SAVER_FLAGS_IGNORE_INVALID_CHARS</p></td>
+<td class="enum_member_description">
+<p>Ignore invalid characters.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-SAVER-FLAGS-IGNORE-MODIFICATION-TIME:CAPS"></a>GTK_SOURCE_FILE_SAVER_FLAGS_IGNORE_MODIFICATION_TIME</p></td>
+<td class="enum_member_description">
+<p>Save file despite external modifications.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-SAVER-FLAGS-CREATE-BACKUP:CAPS"></a>GTK_SOURCE_FILE_SAVER_FLAGS_CREATE_BACKUP</p></td>
+<td class="enum_member_description">
+<p>Create a backup before saving the file.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.property-details"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="GtkSourceFileSaver--buffer"></a><h3>The <code class="literal">“buffer”</code> property</h3>
+<pre class="programlisting">  “buffer”                   <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> *</pre>
+<p>The <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> to save. The <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> object has a
+weak reference to the buffer.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileSaver--compression-type"></a><h3>The <code class="literal">“compression-type”</code> property</h3>
+<pre class="programlisting">  “compression-type”         <a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="type">GtkSourceCompressionType</span></a></pre>
+<p>The compression type.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Default value: GTK_SOURCE_COMPRESSION_TYPE_NONE</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileSaver--encoding"></a><h3>The <code class="literal">“encoding”</code> property</h3>
+<pre class="programlisting">  “encoding”                 <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="type">GtkSourceEncoding</span></a> *</pre>
+<p>The file's encoding.</p>
+<p>Flags: Read / Write / Construct</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileSaver--file"></a><h3>The <code class="literal">“file”</code> property</h3>
+<pre class="programlisting">  “file”                     <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *</pre>
+<p>The <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>. The <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> object has a weak
+reference to the file.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileSaver--flags"></a><h3>The <code class="literal">“flags”</code> property</h3>
+<pre class="programlisting">  “flags”                    <a class="link" href="GtkSourceFileSaver.html#GtkSourceFileSaverFlags" title="enum GtkSourceFileSaverFlags"><span class="type">GtkSourceFileSaverFlags</span></a></pre>
+<p>File saving flags.</p>
+<p>Flags: Read / Write / Construct</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileSaver--location"></a><h3>The <code class="literal">“location”</code> property</h3>
+<pre class="programlisting">  “location”                 <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> *</pre>
+<p>The <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> where to save the buffer. By default the location is taken
+from the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> at construction time.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileSaver--newline-type"></a><h3>The <code class="literal">“newline-type”</code> property</h3>
+<pre class="programlisting">  “newline-type”             <a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="type">GtkSourceNewlineType</span></a></pre>
+<p>The newline type.</p>
+<p>Flags: Read / Write / Construct</p>
+<p>Default value: GTK_SOURCE_NEWLINE_TYPE_LF</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileSaver.see-also"></a><h2>See Also</h2>
+<p><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>, <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a></p>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.27.1</div>
+</body>
+</html>

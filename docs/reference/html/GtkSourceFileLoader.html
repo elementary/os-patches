@@ -1,0 +1,774 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GtkSourceFileLoader: GtkSourceView 3 Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="GtkSourceView 3 Reference Manual">
+<link rel="up" href="ch05.html" title="File Loading and Saving">
+<link rel="prev" href="GtkSourceFile.html" title="GtkSourceFile">
+<link rel="next" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver">
+<meta name="generator" content="GTK-Doc V1.27.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFileLoader.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFileLoader.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_properties">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFileLoader.properties" class="shortcut">Properties</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch05.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="GtkSourceFile.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="GtkSourceFileSaver.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="GtkSourceFileLoader"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="GtkSourceFileLoader.top_of_page"></a>GtkSourceFileLoader</span></h2>
+<p>GtkSourceFileLoader — Load a file into a GtkSourceBuffer</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="returnvalue">GtkSourceFileLoader</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-new" title="gtk_source_file_loader_new ()">gtk_source_file_loader_new</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="returnvalue">GtkSourceFileLoader</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-new-from-stream" title="gtk_source_file_loader_new_from_stream ()">gtk_source_file_loader_new_from_stream</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-set-candidate-encodings" title="gtk_source_file_loader_set_candidate_encodings ()">gtk_source_file_loader_set_candidate_encodings</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="returnvalue">GtkSourceBuffer</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-get-buffer" title="gtk_source_file_loader_get_buffer ()">gtk_source_file_loader_get_buffer</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="returnvalue">GtkSourceFile</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-get-file" title="gtk_source_file_loader_get_file ()">gtk_source_file_loader_get_file</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="returnvalue">GFile</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-get-location" title="gtk_source_file_loader_get_location ()">gtk_source_file_loader_get_location</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="returnvalue">GInputStream</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-get-input-stream" title="gtk_source_file_loader_get_input_stream ()">gtk_source_file_loader_get_input_stream</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-load-async" title="gtk_source_file_loader_load_async ()">gtk_source_file_loader_load_async</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-load-finish" title="gtk_source_file_loader_load_finish ()">gtk_source_file_loader_load_finish</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="returnvalue">GtkSourceEncoding</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-get-encoding" title="gtk_source_file_loader_get_encoding ()">gtk_source_file_loader_get_encoding</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="returnvalue">GtkSourceNewlineType</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-get-newline-type" title="gtk_source_file_loader_get_newline_type ()">gtk_source_file_loader_get_newline_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="returnvalue">GtkSourceCompressionType</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-get-compression-type" title="gtk_source_file_loader_get_compression_type ()">gtk_source_file_loader_get_compression_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.properties"></a><h2>Properties</h2>
+<div class="informaltable"><table class="informaltable" border="0">
+<colgroup>
+<col width="150px" class="properties_type">
+<col width="300px" class="properties_name">
+<col width="200px" class="properties_flags">
+</colgroup>
+<tbody>
+<tr>
+<td class="property_type">
+<a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoader--buffer" title="The “buffer” property">buffer</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
+<td class="property_type">
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoader--file" title="The “file” property">file</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
+<td class="property_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="type">GInputStream</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoader--input-stream" title="The “input-stream” property">input-stream</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+<tr>
+<td class="property_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoader--location" title="The “location” property">location</a></td>
+<td class="property_flags">Read / Write / Construct Only</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoader-struct" title="GtkSourceFileLoader">GtkSourceFileLoader</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="GtkSourceFileLoader.html#GTK-SOURCE-FILE-LOADER-ERROR:CAPS" title="GTK_SOURCE_FILE_LOADER_ERROR">GTK_SOURCE_FILE_LOADER_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoaderError" title="enum GtkSourceFileLoaderError">GtkSourceFileLoaderError</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="screen">    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    <span class="lineart">╰──</span> GtkSourceFileLoaderError
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
+    <span class="lineart">╰──</span> GtkSourceFileLoader
+</pre>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;gtksourceview/gtksource.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.description"></a><h2>Description</h2>
+<p>A <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> object permits to load the contents of a <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> or a
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="type">GInputStream</span></a> into a <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a>.</p>
+<p>A file loader should be used only for one load operation, including errors
+handling. If an error occurs, you can reconfigure the loader and relaunch the
+operation with <a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-load-async" title="gtk_source_file_loader_load_async ()"><code class="function">gtk_source_file_loader_load_async()</code></a>.</p>
+<p>Running a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> is an undoable action for the
+<a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a>. That is, <a class="link" href="GtkSourceBuffer.html#gtk-source-buffer-begin-not-undoable-action" title="gtk_source_buffer_begin_not_undoable_action ()"><code class="function">gtk_source_buffer_begin_not_undoable_action()</code></a> and
+<a class="link" href="GtkSourceBuffer.html#gtk-source-buffer-end-not-undoable-action" title="gtk_source_buffer_end_not_undoable_action ()"><code class="function">gtk_source_buffer_end_not_undoable_action()</code></a> are called, which delete the
+undo/redo history.</p>
+<p>After a file loading, the buffer is reset to the contents provided by the
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> or <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="type">GInputStream</span></a>, so the buffer is set as “unmodified”, that is,
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextBuffer.html#gtk-text-buffer-set-modified"><code class="function">gtk_text_buffer_set_modified()</code></a> is called with <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>. If the contents isn't
+saved somewhere (for example if you load from stdin), then you should
+probably call <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextBuffer.html#gtk-text-buffer-set-modified"><code class="function">gtk_text_buffer_set_modified()</code></a> with <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> after calling
+<a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-load-finish" title="gtk_source_file_loader_load_finish ()"><code class="function">gtk_source_file_loader_load_finish()</code></a>.</p>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="gtk-source-file-loader-new"></a><h3>gtk_source_file_loader_new ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="returnvalue">GtkSourceFileLoader</span></a> *
+gtk_source_file_loader_new (<em class="parameter"><code><a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> *buffer</code></em>,
+                            <em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<p>Creates a new <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> object. The contents is read from the
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>'s location. If not already done, call
+<a class="link" href="GtkSourceFile.html#gtk-source-file-set-location" title="gtk_source_file_set_location ()"><code class="function">gtk_source_file_set_location()</code></a> before calling this constructor. The previous
+location is anyway not needed, because as soon as the file loading begins,
+the <em class="parameter"><code>buffer</code></em>
+ is emptied.</p>
+<div class="refsect3">
+<a name="gtk-source-file-loader-new.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>buffer</p></td>
+<td class="parameter_description"><p>the <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> to load the contents into.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-new.returns"></a><h4>Returns</h4>
+<p> a new <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> object.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-new-from-stream"></a><h3>gtk_source_file_loader_new_from_stream ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="returnvalue">GtkSourceFileLoader</span></a> *
+gtk_source_file_loader_new_from_stream
+                               (<em class="parameter"><code><a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> *buffer</code></em>,
+                                <em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>,
+                                <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="type">GInputStream</span></a> *stream</code></em>);</pre>
+<p>Creates a new <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> object. The contents is read from <em class="parameter"><code>stream</code></em>
+.</p>
+<div class="refsect3">
+<a name="gtk-source-file-loader-new-from-stream.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>buffer</p></td>
+<td class="parameter_description"><p>the <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> to load the contents into.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>stream</p></td>
+<td class="parameter_description"><p>the <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="type">GInputStream</span></a> to load, e.g. stdin.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-new-from-stream.returns"></a><h4>Returns</h4>
+<p> a new <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> object.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-set-candidate-encodings"></a><h3>gtk_source_file_loader_set_candidate_encodings ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_loader_set_candidate_encodings
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>,
+                                <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Singly-Linked-Lists.html#GSList"><span class="type">GSList</span></a> *candidate_encodings</code></em>);</pre>
+<p>Sets the candidate encodings for the file loading. The encodings are tried in
+the same order as the list.</p>
+<p>For convenience, <em class="parameter"><code>candidate_encodings</code></em>
+ can contain duplicates. Only the first
+occurrence of a duplicated encoding is kept in the list.</p>
+<p>By default the candidate encodings are (in that order in the list):</p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>If set, the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>'s encoding as returned by
+<a class="link" href="GtkSourceFile.html#gtk-source-file-get-encoding" title="gtk_source_file_get_encoding ()"><code class="function">gtk_source_file_get_encoding()</code></a>.</p></li>
+<li class="listitem"><p>The default candidates as returned by
+<a class="link" href="GtkSourceEncoding.html#gtk-source-encoding-get-default-candidates" title="gtk_source_encoding_get_default_candidates ()"><code class="function">gtk_source_encoding_get_default_candidates()</code></a>.</p></li>
+</ol></div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-set-candidate-encodings.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>candidate_encodings</p></td>
+<td class="parameter_description"><p>a list of
+<a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="type">GtkSourceEncoding</span></a>s. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> GtkSourceEncoding]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-get-buffer"></a><h3>gtk_source_file_loader_get_buffer ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="returnvalue">GtkSourceBuffer</span></a> *
+gtk_source_file_loader_get_buffer (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-buffer.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-buffer.returns"></a><h4>Returns</h4>
+<p>the <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> to load the contents into. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-get-file"></a><h3>gtk_source_file_loader_get_file ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="returnvalue">GtkSourceFile</span></a> *
+gtk_source_file_loader_get_file (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-file.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-file.returns"></a><h4>Returns</h4>
+<p>the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-get-location"></a><h3>gtk_source_file_loader_get_location ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="returnvalue">GFile</span></a> *
+gtk_source_file_loader_get_location (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-location.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-location.returns"></a><h4>Returns</h4>
+<p>the <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> to load, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+if an input stream is used. </p>
+<p><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-get-input-stream"></a><h3>gtk_source_file_loader_get_input_stream ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="returnvalue">GInputStream</span></a> *
+gtk_source_file_loader_get_input_stream
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-input-stream.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-input-stream.returns"></a><h4>Returns</h4>
+<p>the <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="type">GInputStream</span></a> to load, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+if a <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> is used. </p>
+<p><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-load-async"></a><h3>gtk_source_file_loader_load_async ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_loader_load_async (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> io_priority</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFileProgressCallback"><span class="type">GFileProgressCallback</span></a> progress_callback</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> progress_callback_data</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> progress_callback_notify</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+<p>Loads asynchronously the file or input stream contents into the
+<a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a>. See the <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncResult-struct"><span class="type">GAsyncResult</span></a> documentation to know how to use this
+function.</p>
+<div class="refsect3">
+<a name="gtk-source-file-loader-load-async.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>io_priority</p></td>
+<td class="parameter_description"><p>the I/O priority of the request. E.g. <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#G-PRIORITY-LOW:CAPS"><code class="literal">G_PRIORITY_LOW</code></a>,
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#G-PRIORITY-DEFAULT:CAPS"><code class="literal">G_PRIORITY_DEFAULT</code></a> or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-The-Main-Event-Loop.html#G-PRIORITY-HIGH:CAPS"><code class="literal">G_PRIORITY_HIGH</code></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cancellable</p></td>
+<td class="parameter_description"><p>optional <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> object, <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to ignore. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>progress_callback</p></td>
+<td class="parameter_description"><p>function to call back with
+progress information, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if progress information is not needed. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>progress_callback_data</p></td>
+<td class="parameter_description"><p>user data to pass to <em class="parameter"><code>progress_callback</code></em>
+. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="This parameter is a 'user_data', for callbacks; many bindings can pass NULL here."><span class="acronym">closure</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>progress_callback_notify</p></td>
+<td class="parameter_description"><p>function to call on
+<em class="parameter"><code>progress_callback_data</code></em>
+when the <em class="parameter"><code>progress_callback</code></em>
+is no longer needed, or
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>callback</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> to call when the request is
+satisfied. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until first called."><span class="acronym">scope async</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data to pass to <em class="parameter"><code>callback</code></em>
+.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-load-finish"></a><h3>gtk_source_file_loader_load_finish ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_file_loader_load_finish (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>,
+                                    <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncResult-struct"><span class="type">GAsyncResult</span></a> *result</code></em>,
+                                    <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Finishes a file loading started with <a class="link" href="GtkSourceFileLoader.html#gtk-source-file-loader-load-async" title="gtk_source_file_loader_load_async ()"><code class="function">gtk_source_file_loader_load_async()</code></a>.</p>
+<p>If the contents has been loaded, the following <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> properties will
+be updated: the location, the encoding, the newline type and the compression
+type.</p>
+<div class="refsect3">
+<a name="gtk-source-file-loader-load-finish.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>result</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GAsyncResult.html#GAsyncResult-struct"><span class="type">GAsyncResult</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>a <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a>, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-load-finish.returns"></a><h4>Returns</h4>
+<p> whether the contents has been loaded successfully.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-get-encoding"></a><h3>gtk_source_file_loader_get_encoding ()</h3>
+<pre class="programlisting">const <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="returnvalue">GtkSourceEncoding</span></a> *
+gtk_source_file_loader_get_encoding (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-encoding.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-encoding.returns"></a><h4>Returns</h4>
+<p> the detected file encoding.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-get-newline-type"></a><h3>gtk_source_file_loader_get_newline_type ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="returnvalue">GtkSourceNewlineType</span></a>
+gtk_source_file_loader_get_newline_type
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-newline-type.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-newline-type.returns"></a><h4>Returns</h4>
+<p> the detected newline type.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-loader-get-compression-type"></a><h3>gtk_source_file_loader_get_compression_type ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="returnvalue">GtkSourceCompressionType</span></a>
+gtk_source_file_loader_get_compression_type
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> *loader</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-compression-type.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>loader</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-loader-get-compression-type.returns"></a><h4>Returns</h4>
+<p> the detected compression type.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="GtkSourceFileLoader-struct"></a><h3>GtkSourceFileLoader</h3>
+<pre class="programlisting">typedef struct _GtkSourceFileLoader GtkSourceFileLoader;</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GTK-SOURCE-FILE-LOADER-ERROR:CAPS"></a><h3>GTK_SOURCE_FILE_LOADER_ERROR</h3>
+<pre class="programlisting">#define GTK_SOURCE_FILE_LOADER_ERROR gtk_source_file_loader_error_quark ()
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileLoaderError"></a><h3>enum GtkSourceFileLoaderError</h3>
+<p>An error code used with the <a class="link" href="GtkSourceFileLoader.html#GTK-SOURCE-FILE-LOADER-ERROR:CAPS" title="GTK_SOURCE_FILE_LOADER_ERROR"><code class="literal">GTK_SOURCE_FILE_LOADER_ERROR</code></a> domain.</p>
+<div class="refsect3">
+<a name="GtkSourceFileLoaderError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-LOADER-ERROR-TOO-BIG:CAPS"></a>GTK_SOURCE_FILE_LOADER_ERROR_TOO_BIG</p></td>
+<td class="enum_member_description">
+<p>The file is too big.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-LOADER-ERROR-ENCODING-AUTO-DETECTION-FAILED:CAPS"></a>GTK_SOURCE_FILE_LOADER_ERROR_ENCODING_AUTO_DETECTION_FAILED</p></td>
+<td class="enum_member_description">
+<p>It is not
+possible to detect the encoding automatically.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-FILE-LOADER-ERROR-CONVERSION-FALLBACK:CAPS"></a>GTK_SOURCE_FILE_LOADER_ERROR_CONVERSION_FALLBACK</p></td>
+<td class="enum_member_description">
+<p>There was an encoding
+conversion error and it was needed to use a fallback character.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.property-details"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="GtkSourceFileLoader--buffer"></a><h3>The <code class="literal">“buffer”</code> property</h3>
+<pre class="programlisting">  “buffer”                   <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> *</pre>
+<p>The <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a> to load the contents into. The
+<a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> object has a weak reference to the buffer.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileLoader--file"></a><h3>The <code class="literal">“file”</code> property</h3>
+<pre class="programlisting">  “file”                     <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *</pre>
+<p>The <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>. The <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a> object has a weak
+reference to the file.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileLoader--input-stream"></a><h3>The <code class="literal">“input-stream”</code> property</h3>
+<pre class="programlisting">  “input-stream”             <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="type">GInputStream</span></a> *</pre>
+<p>The <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GInputStream.html#GInputStream-struct"><span class="type">GInputStream</span></a> to load. Useful for reading stdin. If this property
+is set, the <a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoader--location" title="The “location” property"><span class="type">“location”</span></a> property is ignored.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFileLoader--location"></a><h3>The <code class="literal">“location”</code> property</h3>
+<pre class="programlisting">  “location”                 <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> *</pre>
+<p>The <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> to load. If the <a class="link" href="GtkSourceFileLoader.html#GtkSourceFileLoader--input-stream" title="The “input-stream” property"><span class="type">“input-stream”</span></a> is
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, by default the location is taken from the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> at
+construction time.</p>
+<p>Flags: Read / Write / Construct Only</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFileLoader.see-also"></a><h2>See Also</h2>
+<p><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>, <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a></p>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.27.1</div>
+</body>
+</html>

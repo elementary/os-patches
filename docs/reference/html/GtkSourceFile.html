@@ -1,0 +1,764 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GtkSourceFile: GtkSourceView 3 Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="GtkSourceView 3 Reference Manual">
+<link rel="up" href="ch05.html" title="File Loading and Saving">
+<link rel="prev" href="GtkSourceEncoding.html" title="GtkSourceEncoding">
+<link rel="next" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader">
+<meta name="generator" content="GTK-Doc V1.27.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFile.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFile.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_properties">  <span class="dim">|</span> 
+                  <a href="#GtkSourceFile.properties" class="shortcut">Properties</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch05.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="GtkSourceEncoding.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="GtkSourceFileLoader.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="GtkSourceFile"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="GtkSourceFile.top_of_page"></a>GtkSourceFile</span></h2>
+<p>GtkSourceFile — On-disk representation of a GtkSourceBuffer</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="GtkSourceFile.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GMountOperation.html#GMountOperation-struct"><span class="returnvalue">GMountOperation</span></a> *
+</td>
+<td class="function_name">
+<span class="c_punctuation">(</span><a class="link" href="GtkSourceFile.html#GtkSourceMountOperationFactory" title="GtkSourceMountOperationFactory ()">*GtkSourceMountOperationFactory</a><span class="c_punctuation">)</span> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="returnvalue">GtkSourceFile</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-new" title="gtk_source_file_new ()">gtk_source_file_new</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="returnvalue">GFile</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-get-location" title="gtk_source_file_get_location ()">gtk_source_file_get_location</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-set-location" title="gtk_source_file_set_location ()">gtk_source_file_set_location</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="returnvalue">GtkSourceEncoding</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-get-encoding" title="gtk_source_file_get_encoding ()">gtk_source_file_get_encoding</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="returnvalue">GtkSourceNewlineType</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-get-newline-type" title="gtk_source_file_get_newline_type ()">gtk_source_file_get_newline_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="returnvalue">GtkSourceCompressionType</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-get-compression-type" title="gtk_source_file_get_compression_type ()">gtk_source_file_get_compression_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-check-file-on-disk" title="gtk_source_file_check_file_on_disk ()">gtk_source_file_check_file_on_disk</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-is-local" title="gtk_source_file_is_local ()">gtk_source_file_is_local</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-is-externally-modified" title="gtk_source_file_is_externally_modified ()">gtk_source_file_is_externally_modified</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-is-deleted" title="gtk_source_file_is_deleted ()">gtk_source_file_is_deleted</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-is-readonly" title="gtk_source_file_is_readonly ()">gtk_source_file_is_readonly</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="GtkSourceFile.html#gtk-source-file-set-mount-operation-factory" title="gtk_source_file_set_mount_operation_factory ()">gtk_source_file_set_mount_operation_factory</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.properties"></a><h2>Properties</h2>
+<div class="informaltable"><table class="informaltable" border="0">
+<colgroup>
+<col width="150px" class="properties_type">
+<col width="300px" class="properties_name">
+<col width="200px" class="properties_flags">
+</colgroup>
+<tbody>
+<tr>
+<td class="property_type"><a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="type">GtkSourceCompressionType</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceFile.html#GtkSourceFile--compression-type" title="The “compression-type” property">compression-type</a></td>
+<td class="property_flags">Read</td>
+</tr>
+<tr>
+<td class="property_type">
+<a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="type">GtkSourceEncoding</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFile.html#GtkSourceFile--encoding" title="The “encoding” property">encoding</a></td>
+<td class="property_flags">Read</td>
+</tr>
+<tr>
+<td class="property_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> *</td>
+<td class="property_name"><a class="link" href="GtkSourceFile.html#GtkSourceFile--location" title="The “location” property">location</a></td>
+<td class="property_flags">Read / Write / Construct</td>
+</tr>
+<tr>
+<td class="property_type"><a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="type">GtkSourceNewlineType</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceFile.html#GtkSourceFile--newline-type" title="The “newline-type” property">newline-type</a></td>
+<td class="property_flags">Read</td>
+</tr>
+<tr>
+<td class="property_type"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></td>
+<td class="property_name"><a class="link" href="GtkSourceFile.html#GtkSourceFile--read-only" title="The “read-only” property">read-only</a></td>
+<td class="property_flags">Read</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="GtkSourceFile.html#GtkSourceFile-struct" title="GtkSourceFile">GtkSourceFile</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType">GtkSourceNewlineType</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="GtkSourceFile.html#GTK-SOURCE-NEWLINE-TYPE-DEFAULT:CAPS" title="GTK_SOURCE_NEWLINE_TYPE_DEFAULT">GTK_SOURCE_NEWLINE_TYPE_DEFAULT</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType">GtkSourceCompressionType</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="screen">    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    <span class="lineart">├──</span> GtkSourceCompressionType
+    <span class="lineart">╰──</span> GtkSourceNewlineType
+    <a href="/home/seb/jhbuild/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
+    <span class="lineart">╰──</span> GtkSourceFile
+</pre>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;gtksourceview/gtksource.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.description"></a><h2>Description</h2>
+<p>A <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> object is the on-disk representation of a <a class="link" href="GtkSourceBuffer.html" title="GtkSourceBuffer"><span class="type">GtkSourceBuffer</span></a>.
+With a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>, you can create and configure a <a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>
+and <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a> which take by default the values of the
+<a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> properties (except for the file loader which auto-detect some
+properties). On a successful load or save operation, the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>
+properties are updated. If an operation fails, the <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> properties
+have still the previous valid values.</p>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="GtkSourceMountOperationFactory"></a><h3>GtkSourceMountOperationFactory ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GMountOperation.html#GMountOperation-struct"><span class="returnvalue">GMountOperation</span></a> *
+<span class="c_punctuation">(</span>*GtkSourceMountOperationFactory<span class="c_punctuation">)</span> (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>,
+                                   <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> userdata</code></em>);</pre>
+<p>Type definition for a function that will be called to create a
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GMountOperation.html#GMountOperation-struct"><span class="type">GMountOperation</span></a>. This is useful for creating a <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/gtk3-Filesystem-utilities.html#GtkMountOperation-struct"><span class="type">GtkMountOperation</span></a>.</p>
+<div class="refsect3">
+<a name="GtkSourceMountOperationFactory.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>userdata</p></td>
+<td class="parameter_description"><p>user data</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-new"></a><h3>gtk_source_file_new ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="returnvalue">GtkSourceFile</span></a> *
+gtk_source_file_new (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-new.returns"></a><h4>Returns</h4>
+<p> a new <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> object.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-get-location"></a><h3>gtk_source_file_get_location ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="returnvalue">GFile</span></a> *
+gtk_source_file_get_location (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-get-location.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-get-location.returns"></a><h4>Returns</h4>
+<p>the <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a>. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-set-location"></a><h3>gtk_source_file_set_location ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_set_location (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>,
+                              <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> *location</code></em>);</pre>
+<p>Sets the location.</p>
+<div class="refsect3">
+<a name="gtk-source-file-set-location.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>location</p></td>
+<td class="parameter_description"><p>the new <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a>, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-get-encoding"></a><h3>gtk_source_file_get_encoding ()</h3>
+<pre class="programlisting">const <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="returnvalue">GtkSourceEncoding</span></a> *
+gtk_source_file_get_encoding (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<p>The encoding is initially <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. After a successful file loading or saving
+operation, the encoding is non-<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-get-encoding.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-get-encoding.returns"></a><h4>Returns</h4>
+<p> the character encoding.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-get-newline-type"></a><h3>gtk_source_file_get_newline_type ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="returnvalue">GtkSourceNewlineType</span></a>
+gtk_source_file_get_newline_type (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-get-newline-type.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-get-newline-type.returns"></a><h4>Returns</h4>
+<p> the newline type.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-get-compression-type"></a><h3>gtk_source_file_get_compression_type ()</h3>
+<pre class="programlisting"><a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="returnvalue">GtkSourceCompressionType</span></a>
+gtk_source_file_get_compression_type (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<div class="refsect3">
+<a name="gtk-source-file-get-compression-type.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-get-compression-type.returns"></a><h4>Returns</h4>
+<p> the compression type.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-check-file-on-disk"></a><h3>gtk_source_file_check_file_on_disk ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_check_file_on_disk (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<p>Checks synchronously the file on disk, to know whether the file is externally
+modified, or has been deleted, and whether the file is read-only.</p>
+<p><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> doesn't create a <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFileMonitor.html#GFileMonitor-struct"><span class="type">GFileMonitor</span></a> to track those properties, so
+this function needs to be called instead. Creating lots of <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFileMonitor.html#GFileMonitor-struct"><span class="type">GFileMonitor</span></a>'s
+would take lots of resources.</p>
+<p>Since this function is synchronous, it is advised to call it only on local
+files. See <a class="link" href="GtkSourceFile.html#gtk-source-file-is-local" title="gtk_source_file_is_local ()"><code class="function">gtk_source_file_is_local()</code></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-check-file-on-disk.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-18.html#api-index-3.18">3.18</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-is-local"></a><h3>gtk_source_file_is_local ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_file_is_local (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<p>Returns whether the file is local. If the <a class="link" href="GtkSourceFile.html#GtkSourceFile--location" title="The “location” property"><span class="type">“location”</span></a> is <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>,
+returns <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-is-local.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-is-local.returns"></a><h4>Returns</h4>
+<p> whether the file is local.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-18.html#api-index-3.18">3.18</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-is-externally-modified"></a><h3>gtk_source_file_is_externally_modified ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_file_is_externally_modified
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<p>Returns whether the file is externally modified. If the
+<a class="link" href="GtkSourceFile.html#GtkSourceFile--location" title="The “location” property"><span class="type">“location”</span></a> is <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, returns <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.</p>
+<p>To have an up-to-date value, you must first call
+<a class="link" href="GtkSourceFile.html#gtk-source-file-check-file-on-disk" title="gtk_source_file_check_file_on_disk ()"><code class="function">gtk_source_file_check_file_on_disk()</code></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-is-externally-modified.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-is-externally-modified.returns"></a><h4>Returns</h4>
+<p> whether the file is externally modified.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-18.html#api-index-3.18">3.18</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-is-deleted"></a><h3>gtk_source_file_is_deleted ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_file_is_deleted (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<p>Returns whether the file has been deleted. If the
+<a class="link" href="GtkSourceFile.html#GtkSourceFile--location" title="The “location” property"><span class="type">“location”</span></a> is <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, returns <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.</p>
+<p>To have an up-to-date value, you must first call
+<a class="link" href="GtkSourceFile.html#gtk-source-file-check-file-on-disk" title="gtk_source_file_check_file_on_disk ()"><code class="function">gtk_source_file_check_file_on_disk()</code></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-is-deleted.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-is-deleted.returns"></a><h4>Returns</h4>
+<p> whether the file has been deleted.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-18.html#api-index-3.18">3.18</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-is-readonly"></a><h3>gtk_source_file_is_readonly ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+gtk_source_file_is_readonly (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>);</pre>
+<p>Returns whether the file is read-only. If the
+<a class="link" href="GtkSourceFile.html#GtkSourceFile--location" title="The “location” property"><span class="type">“location”</span></a> is <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, returns <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.</p>
+<p>To have an up-to-date value, you must first call
+<a class="link" href="GtkSourceFile.html#gtk-source-file-check-file-on-disk" title="gtk_source_file_check_file_on_disk ()"><code class="function">gtk_source_file_check_file_on_disk()</code></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-file-is-readonly.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-file-is-readonly.returns"></a><h4>Returns</h4>
+<p> whether the file is read-only.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-18.html#api-index-3.18">3.18</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-file-set-mount-operation-factory"></a><h3>gtk_source_file_set_mount_operation_factory ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+gtk_source_file_set_mount_operation_factory
+                               (<em class="parameter"><code><a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a> *file</code></em>,
+                                <em class="parameter"><code><a class="link" href="GtkSourceFile.html#GtkSourceMountOperationFactory" title="GtkSourceMountOperationFactory ()"><span class="type">GtkSourceMountOperationFactory</span></a> callback</code></em>,
+                                <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>,
+                                <em class="parameter"><code><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Datasets.html#GDestroyNotify"><span class="type">GDestroyNotify</span></a> notify</code></em>);</pre>
+<p>Sets a <a class="link" href="GtkSourceFile.html#GtkSourceMountOperationFactory" title="GtkSourceMountOperationFactory ()"><span class="type">GtkSourceMountOperationFactory</span></a> function that will be called when a
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GMountOperation.html#GMountOperation-struct"><span class="type">GMountOperation</span></a> must be created. This is useful for creating a
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/gtk3-Filesystem-utilities.html#GtkMountOperation-struct"><span class="type">GtkMountOperation</span></a> with the parent <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkWindow.html#GtkWindow-struct"><span class="type">GtkWindow</span></a>.</p>
+<p>If a mount operation factory isn't set, <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GMountOperation.html#g-mount-operation-new"><code class="function">g_mount_operation_new()</code></a> will be
+called.</p>
+<div class="refsect3">
+<a name="gtk-source-file-set-mount-operation-factory.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>file</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html" title="GtkSourceFile"><span class="type">GtkSourceFile</span></a>.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>callback</p></td>
+<td class="parameter_description"><p>a <a class="link" href="GtkSourceFile.html#GtkSourceMountOperationFactory" title="GtkSourceMountOperationFactory ()"><span class="type">GtkSourceMountOperationFactory</span></a> to call when a
+<a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GMountOperation.html#GMountOperation-struct"><span class="type">GMountOperation</span></a> is needed. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>the data to pass to the <em class="parameter"><code>callback</code></em>
+function. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="This parameter is a 'user_data', for callbacks; many bindings can pass NULL here."><span class="acronym">closure</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>notify</p></td>
+<td class="parameter_description"><p>function to call on <em class="parameter"><code>user_data</code></em>
+when the <em class="parameter"><code>callback</code></em>
+is no
+longer needed, or <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="GtkSourceFile-struct"></a><h3>GtkSourceFile</h3>
+<pre class="programlisting">typedef struct _GtkSourceFile GtkSourceFile;</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceNewlineType"></a><h3>enum GtkSourceNewlineType</h3>
+<div class="refsect3">
+<a name="GtkSourceNewlineType.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-NEWLINE-TYPE-LF:CAPS"></a>GTK_SOURCE_NEWLINE_TYPE_LF</p></td>
+<td class="enum_member_description">
+<p>line feed, used on UNIX.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-NEWLINE-TYPE-CR:CAPS"></a>GTK_SOURCE_NEWLINE_TYPE_CR</p></td>
+<td class="enum_member_description">
+<p>carriage return, used on Mac.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-NEWLINE-TYPE-CR-LF:CAPS"></a>GTK_SOURCE_NEWLINE_TYPE_CR_LF</p></td>
+<td class="enum_member_description">
+<p>carriage return followed by a line feed, used
+  on Windows.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GTK-SOURCE-NEWLINE-TYPE-DEFAULT:CAPS"></a><h3>GTK_SOURCE_NEWLINE_TYPE_DEFAULT</h3>
+<pre class="programlisting">#define GTK_SOURCE_NEWLINE_TYPE_DEFAULT GTK_SOURCE_NEWLINE_TYPE_CR_LF
+</pre>
+<p>The default newline type on the current OS.</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceCompressionType"></a><h3>enum GtkSourceCompressionType</h3>
+<div class="refsect3">
+<a name="GtkSourceCompressionType.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-COMPRESSION-TYPE-NONE:CAPS"></a>GTK_SOURCE_COMPRESSION_TYPE_NONE</p></td>
+<td class="enum_member_description">
+<p>plain text.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GTK-SOURCE-COMPRESSION-TYPE-GZIP:CAPS"></a>GTK_SOURCE_COMPRESSION_TYPE_GZIP</p></td>
+<td class="enum_member_description">
+<p>gzip compression.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.property-details"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="GtkSourceFile--compression-type"></a><h3>The <code class="literal">“compression-type”</code> property</h3>
+<pre class="programlisting">  “compression-type”         <a class="link" href="GtkSourceFile.html#GtkSourceCompressionType" title="enum GtkSourceCompressionType"><span class="type">GtkSourceCompressionType</span></a></pre>
+<p>The compression type.</p>
+<p>Flags: Read</p>
+<p>Default value: GTK_SOURCE_COMPRESSION_TYPE_NONE</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFile--encoding"></a><h3>The <code class="literal">“encoding”</code> property</h3>
+<pre class="programlisting">  “encoding”                 <a class="link" href="GtkSourceEncoding.html" title="GtkSourceEncoding"><span class="type">GtkSourceEncoding</span></a> *</pre>
+<p>The character encoding, initially <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. After a successful file
+loading or saving operation, the encoding is non-<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
+<p>Flags: Read</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFile--location"></a><h3>The <code class="literal">“location”</code> property</h3>
+<pre class="programlisting">  “location”                 <a href="/home/seb/jhbuild/share/gtk-doc/html/gio/GFile.html#GFile-struct"><span class="type">GFile</span></a> *</pre>
+<p>The location.</p>
+<p>Flags: Read / Write / Construct</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFile--newline-type"></a><h3>The <code class="literal">“newline-type”</code> property</h3>
+<pre class="programlisting">  “newline-type”             <a class="link" href="GtkSourceFile.html#GtkSourceNewlineType" title="enum GtkSourceNewlineType"><span class="type">GtkSourceNewlineType</span></a></pre>
+<p>The line ending type.</p>
+<p>Flags: Read</p>
+<p>Default value: GTK_SOURCE_NEWLINE_TYPE_LF</p>
+<p class="since">Since: <a class="link" href="api-index-3-14.html#api-index-3.14">3.14</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GtkSourceFile--read-only"></a><h3>The <code class="literal">“read-only”</code> property</h3>
+<pre class="programlisting">  “read-only”                <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a></pre>
+<p>Whether the file is read-only or not. The value of this property is
+not updated automatically (there is no file monitors).</p>
+<p>Flags: Read</p>
+<p>Default value: FALSE</p>
+<p class="since">Since: <a class="link" href="api-index-3-18.html#api-index-3.18">3.18</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GtkSourceFile.see-also"></a><h2>See Also</h2>
+<p><a class="link" href="GtkSourceFileLoader.html" title="GtkSourceFileLoader"><span class="type">GtkSourceFileLoader</span></a>, <a class="link" href="GtkSourceFileSaver.html" title="GtkSourceFileSaver"><span class="type">GtkSourceFileSaver</span></a></p>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.27.1</div>
+</body>
+</html>

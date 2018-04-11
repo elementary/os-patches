@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GtkSourceUtils: GtkSourceView 3 Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="GtkSourceView 3 Reference Manual">
+<link rel="up" href="ch09.html" title="Other">
+<link rel="prev" href="GtkSourceUndoManager.html" title="GtkSourceUndoManager">
+<link rel="next" href="gtksourceview-3.0-Version-Information.html" title="Version Information">
+<meta name="generator" content="GTK-Doc V1.27.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#gtksourceview-3.0-GtkSourceUtils.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch09.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="GtkSourceUndoManager.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="gtksourceview-3.0-Version-Information.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="gtksourceview-3.0-GtkSourceUtils"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="gtksourceview-3.0-GtkSourceUtils.top_of_page"></a>GtkSourceUtils</span></h2>
+<p>GtkSourceUtils — Utilities functions</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="gtksourceview-3.0-GtkSourceUtils.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="gtksourceview-3.0-GtkSourceUtils.html#gtk-source-utils-unescape-search-text" title="gtk_source_utils_unescape_search_text ()">gtk_source_utils_unescape_search_text</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="gtksourceview-3.0-GtkSourceUtils.html#gtk-source-utils-escape-search-text" title="gtk_source_utils_escape_search_text ()">gtk_source_utils_escape_search_text</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="gtksourceview-3.0-GtkSourceUtils.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;gtksourceview/gtksource.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="gtksourceview-3.0-GtkSourceUtils.description"></a><h2>Description</h2>
+<p>Utilities functions.</p>
+</div>
+<div class="refsect1">
+<a name="gtksourceview-3.0-GtkSourceUtils.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="gtk-source-utils-unescape-search-text"></a><h3>gtk_source_utils_unescape_search_text ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+gtk_source_utils_unescape_search_text (<em class="parameter"><code>const <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *text</code></em>);</pre>
+<p>Use this function before <a class="link" href="GtkSourceSearchSettings.html#gtk-source-search-settings-set-search-text" title="gtk_source_search_settings_set_search_text ()"><code class="function">gtk_source_search_settings_set_search_text()</code></a>, to
+unescape the following sequences of characters: <code class="literal">\n</code>, <code class="literal">\r</code>, <code class="literal">\t</code> and <code class="literal">\\</code>.
+The purpose is to easily write those characters in a search entry.</p>
+<p>Note that unescaping the search text is not needed for regular expression
+searches.</p>
+<p>See also: <a class="link" href="gtksourceview-3.0-GtkSourceUtils.html#gtk-source-utils-escape-search-text" title="gtk_source_utils_escape_search_text ()"><code class="function">gtk_source_utils_escape_search_text()</code></a>.</p>
+<div class="refsect3">
+<a name="gtk-source-utils-unescape-search-text.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>text</p></td>
+<td class="parameter_description"><p>the text to unescape.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-utils-unescape-search-text.returns"></a><h4>Returns</h4>
+<p> the unescaped <em class="parameter"><code>text</code></em>
+.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-10.html#api-index-3.10">3.10</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gtk-source-utils-escape-search-text"></a><h3>gtk_source_utils_escape_search_text ()</h3>
+<pre class="programlisting"><a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+gtk_source_utils_escape_search_text (<em class="parameter"><code>const <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *text</code></em>);</pre>
+<p>Use this function to escape the following characters: <code class="literal">\n</code>, <code class="literal">\r</code>, <code class="literal">\t</code> and <code class="literal">\</code>.</p>
+<p>For a regular expression search, use <a href="/home/seb/jhbuild/share/gtk-doc/html/glib/glib-Perl-compatible-regular-expressions.html#g-regex-escape-string"><code class="function">g_regex_escape_string()</code></a> instead.</p>
+<p>One possible use case is to take the <a href="/home/seb/jhbuild/share/gtk-doc/html/gtk3/GtkTextBuffer.html#GtkTextBuffer-struct"><span class="type">GtkTextBuffer</span></a>'s selection and put it in a
+search entry. The selection can contain tabulations, newlines, etc. So it's
+better to escape those special characters to better fit in the search entry.</p>
+<p>See also: <a class="link" href="gtksourceview-3.0-GtkSourceUtils.html#gtk-source-utils-unescape-search-text" title="gtk_source_utils_unescape_search_text ()"><code class="function">gtk_source_utils_unescape_search_text()</code></a>.</p>
+<div class="warning">
+Warning: the escape and unescape functions are not reciprocal! For example,
+escape (unescape (\)) = \\. So avoid cycles such as: search entry -&gt; unescape
+-&gt; search settings -&gt; escape -&gt; search entry. The original search entry text
+may be modified.
+</div>
+<div class="refsect3">
+<a name="gtk-source-utils-escape-search-text.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>text</p></td>
+<td class="parameter_description"><p>the text to escape.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="gtk-source-utils-escape-search-text.returns"></a><h4>Returns</h4>
+<p> the escaped <em class="parameter"><code>text</code></em>
+.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-3-10.html#api-index-3.10">3.10</a></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="gtksourceview-3.0-GtkSourceUtils.other_details"></a><h2>Types and Values</h2>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.27.1</div>
+</body>
+</html>
