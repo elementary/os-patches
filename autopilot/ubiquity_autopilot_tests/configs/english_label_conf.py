@@ -45,7 +45,7 @@ def generate_config():
     config['stepPrepare'] = {}
     stepPrepare = config['stepPrepare']
     stepPrepare['page_title'] = \
-        '<span size="xx-large">Preparing to install {0}</span>'\
+        '<span size="xx-large">Updates and other software</span>'\
         .format(distro_flavor)
     stepPrepare['prepare_best_results'] = \
         'For best results, please ensure that this computer:'
@@ -58,8 +58,8 @@ def generate_config():
     stepPrepare['prepare_download_updates'] = \
         'Download updates while installing {}'.format(distro_flavor)
     stepPrepare['prepare_nonfree_software'] = \
-        'Install software for graphics, Wi-Fi hardware, ' \
-        'and additional media playback'
+        'Install third-party software for graphics ' \
+        'and Wi-Fi hardware and additional media formats'
     stepPrepare['prepare_network_connection'] = \
         'is connected to the Internet'
     stepPrepare['prepare_sufficient_space'] = \

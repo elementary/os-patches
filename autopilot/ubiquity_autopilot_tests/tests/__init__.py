@@ -44,6 +44,7 @@ from ubiquity_autopilot_tests.emulators.gtkcontrols import (
     GtkLabel,
     GtkProgressBar,
     GtkTreeView,
+    GtkRadioButton,
 )
 from ubiquity_autopilot_tests.emulators.gtktoplevel import (
     GtkWindow,
@@ -290,7 +291,7 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
         if minimal_installation:
             logger.debug("Selecting install Minimal installation")
             minimal_installation_checkbutton = preparing_page.select_single(
-                GtkCheckButton, BuilderName='prepare_minimal_install')
+                GtkRadioButton, BuilderName='prepare_minimal_install')
             self.pointing_device.click_object(minimal_installation_checkbutton)
 
         self._check_page_titles()

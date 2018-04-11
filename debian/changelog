@@ -1,3 +1,26 @@
+ubiquity (18.04.5) bionic; urgency=medium
+
+  [ Steve Langasek ]
+  * Don't block plymouth-quit-wait on the ubiquity greeter; we want ttys to
+    be able to start in parallel for debuggability of ubiquity.  Blocking
+    plymouth-quit is sufficient to ensure ordering.
+  * scripts/start-ubiquity-dm: start on vt1 now instead of vt7, consistent
+    with grub, plymouth, and gdm in 18.04.  Tested on Ubuntu Desktop with
+    both "Try" and "Install" options. (LP: #1632151)
+
+  [ Heber Parruci ]
+  * autopilot: Update tests to match new UI for Updates and software page.
+
+  [ Mike Gabriel ]
+  * debian/control: Drop gir1.2-appindicator3-0.1. A11y support
+    is not using AppIndicator anymore (LP: #1760701)
+
+  [ Mathieu Trudel-Lapierre ]
+  * Automatic update of included source packages: partman-crypto
+    86ubuntu2, partman-lvm 123.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 10 Apr 2018 11:17:42 -0400
+
 ubiquity (18.04.4) bionic; urgency=medium
 
   [ Mathieu Trudel-Lapierre ]
@@ -9,7 +32,7 @@ ubiquity (18.04.4) bionic; urgency=medium
 
   [ Sebastien Bacher ]
   * gui/gtk/stepPrepare.ui: updated the non-free-software text to not
-    include the mention to the MP3 fluendo codecs since those have 
+    include the mention to the MP3 fluendo codecs since those have
     been superseeded in the recent gstreamer version.
   * Rename the "Preparing to install Ubuntu" installer step to "Updates and 
     other software" according to the design, thanks Matthew for pointing 

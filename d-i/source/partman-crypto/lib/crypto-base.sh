@@ -154,7 +154,7 @@ swap_is_safe () {
 
 	for swap in $(cat /proc/swaps); do
 		case $swap in
-		    Filename*)
+		    Filename*|/dev/zram*)
 			continue
 			;;
 		    /dev/mapper/*)
