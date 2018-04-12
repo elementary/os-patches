@@ -3,6 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
 Build-Depends: debhelper (>= 9),
+               dh-python,
                libxml-parser-perl,
                intltool,
                python-all (>= 2.6.6-3~),
@@ -68,7 +69,7 @@ Depends: ${python3:Depends}, ${misc:Depends}, python3,
  ubuntu-drivers-common (>= 1:0.2.75),
  python3-gi,
  libgtk3-perl
-Recommends: gnome-session-bin | xfce4-session | lubuntu-default-settings | lxqt-session,
+Recommends: gnome-session-bin | xfce4-session | lubuntu-default-settings | lxqt-session | mate-session-manager,
  gnome-keyring
 Description: manage the repositories that you install software from (gtk)
  This software provides an abstraction of the used apt repositories.

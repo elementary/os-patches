@@ -1,3 +1,17 @@
+software-properties (0.96.24.28) bionic; urgency=medium
+
+  [ Martin Wimpress ]
+  * Allow mate-session-manager to fulfill the gnome-session-bin Recommends
+    (LP: #1762807)
+
+  [ Jeremy Bicha ]
+  * Add Appstream metadata with compulsory_for_desktop fields to prevent
+    the accidental uninstallation of ubuntu-desktop in GNOME Software.
+    ubuntu-desktop depends on software-properties-gtk.
+  * Build-Depend on dh-python
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 10 Apr 2018 17:12:59 -0400
+
 software-properties (0.96.24.27) bionic; urgency=medium
 
   * debian/control: Move gir1.2-goa-1.0, gir1.2-secret-1,
