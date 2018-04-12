@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>EvDocument: Evince Document Library Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Evince Document Library Reference Manual">
 <link rel="up" href="document-interfaces.html" title="Part I. Document Interfaces">
 <link rel="prev" href="EvAsyncRenderer.html" title="EvAsyncRenderer">
@@ -16,7 +16,8 @@
 <td width="100%" align="left" class="shortcuts">
 <a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
                   <a href="#EvDocument.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
-                  <a href="#EvDocument.object-hierarchy" class="shortcut">Object Hierarchy</a></span>
+                  <a href="#EvDocument.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_properties">  <span class="dim">|</span> 
+                  <a href="#EvDocument.properties" class="shortcut">Properties</a></span>
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="document-interfaces.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
@@ -194,7 +195,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="/usr/share/gtk-doc/html/cairocairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *
+<span class="returnvalue">cairo_surface_t</span> *
 </td>
 <td class="function_name">
 <a class="link" href="EvDocument.html#ev-document-render" title="ev_document_render ()">ev_document_render</a> <span class="c_punctuation">()</span>
@@ -264,7 +265,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="/usr/share/gtk-doc/html/gdk-pixbufgdk-pixbuf-The-GdkPixbuf-Structure.html#GdkPixbuf-struct"><span class="returnvalue">GdkPixbuf</span></a> *
+<span class="returnvalue">GdkPixbuf</span> *
 </td>
 <td class="function_name">
 <a class="link" href="EvDocument.html#ev-document-get-thumbnail" title="ev_document_get_thumbnail ()">ev_document_get_thumbnail</a> <span class="c_punctuation">()</span>
@@ -272,7 +273,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="/usr/share/gtk-doc/html/cairocairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *
+<span class="returnvalue">cairo_surface_t</span> *
 </td>
 <td class="function_name">
 <a class="link" href="EvDocument.html#ev-document-get-thumbnail-surface" title="ev_document_get_thumbnail_surface ()">ev_document_get_thumbnail_surface</a> <span class="c_punctuation">()</span>
@@ -379,6 +380,21 @@
 </tbody>
 </table></div>
 </div>
+<div class="refsect1">
+<a name="EvDocument.properties"></a><h2>Properties</h2>
+<div class="informaltable"><table class="informaltable" border="0">
+<colgroup>
+<col width="150px" class="properties_type">
+<col width="300px" class="properties_name">
+<col width="200px" class="properties_flags">
+</colgroup>
+<tbody><tr>
+<td class="property_type"><span class="type">gboolean</span></td>
+<td class="property_name"><a class="link" href="EvDocument.html#EvDocument--modified" title="The “modified” property">modified</a></td>
+<td class="property_flags">Read / Write</td>
+</tr></tbody>
+</table></div>
+</div>
 <a name="EvSourceLink"></a><a name="EvRectangle"></a><div class="refsect1">
 <a name="EvDocument.other"></a><h2>Types and Values</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -432,12 +448,12 @@
 </div>
 <div class="refsect1">
 <a name="EvDocument.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">    <a href="/usr/share/gtk-doc/html/gobject/gobject-Boxed-Types.html">GBoxed</a>
+<pre class="screen">    GBoxed
     <span class="lineart">├──</span> EvRectangle
     <span class="lineart">╰──</span> EvSourceLink
-    <a href="/usr/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    GEnum
     <span class="lineart">╰──</span> EvDocumentError
-    <a href="/usr/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GFlags</a>
+    GFlags
     <span class="lineart">╰──</span> EvDocumentLoadFlags
     GObject
     <span class="lineart">╰──</span> EvDocument
@@ -811,7 +827,7 @@ ev_document_get_min_page_size (<em class="parameter"><code><a class="link" href=
 <hr>
 <div class="refsect2">
 <a name="ev-document-render"></a><h3>ev_document_render ()</h3>
-<pre class="programlisting"><a href="/usr/share/gtk-doc/html/cairocairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *
+<pre class="programlisting"><span class="returnvalue">cairo_surface_t</span> *
 ev_document_render (<em class="parameter"><code><a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a> *document</code></em>,
                     <em class="parameter"><code><a class="link" href="EvRenderContext.html" title="EvRenderContext"><span class="type">EvRenderContext</span></a> *rc</code></em>);</pre>
 </div>
@@ -870,7 +886,7 @@ ev_document_find_page_by_label (<em class="parameter"><code><a class="link" href
 <hr>
 <div class="refsect2">
 <a name="ev-document-get-thumbnail"></a><h3>ev_document_get_thumbnail ()</h3>
-<pre class="programlisting"><a href="/usr/share/gtk-doc/html/gdk-pixbufgdk-pixbuf-The-GdkPixbuf-Structure.html#GdkPixbuf-struct"><span class="returnvalue">GdkPixbuf</span></a> *
+<pre class="programlisting"><span class="returnvalue">GdkPixbuf</span> *
 ev_document_get_thumbnail (<em class="parameter"><code><a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a> *document</code></em>,
                            <em class="parameter"><code><a class="link" href="EvRenderContext.html" title="EvRenderContext"><span class="type">EvRenderContext</span></a> *rc</code></em>);</pre>
 <div class="refsect3">
@@ -897,14 +913,14 @@ ev_document_get_thumbnail (<em class="parameter"><code><a class="link" href="EvD
 </div>
 <div class="refsect3">
 <a name="ev-document-get-thumbnail.returns"></a><h4>Returns</h4>
-<p> a <a href="/usr/share/gtk-doc/html/gdk-pixbufgdk-pixbuf-The-GdkPixbuf-Structure.html#GdkPixbuf-struct"><span class="type">GdkPixbuf</span></a>. </p>
+<p> a <span class="type">GdkPixbuf</span>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="ev-document-get-thumbnail-surface"></a><h3>ev_document_get_thumbnail_surface ()</h3>
-<pre class="programlisting"><a href="/usr/share/gtk-doc/html/cairocairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *
+<pre class="programlisting"><span class="returnvalue">cairo_surface_t</span> *
 ev_document_get_thumbnail_surface (<em class="parameter"><code><a class="link" href="EvDocument.html" title="EvDocument"><span class="type">EvDocument</span></a> *document</code></em>,
                                    <em class="parameter"><code><a class="link" href="EvRenderContext.html" title="EvRenderContext"><span class="type">EvRenderContext</span></a> *rc</code></em>);</pre>
 <div class="refsect3">
@@ -931,7 +947,7 @@ ev_document_get_thumbnail_surface (<em class="parameter"><code><a class="link" h
 </div>
 <div class="refsect3">
 <a name="ev-document-get-thumbnail-surface.returns"></a><h4>Returns</h4>
-<p> a <a href="/usr/share/gtk-doc/html/cairocairo-cairo-surface-t.html#cairo-surface-t"><span class="type">cairo_surface_t</span></a>. </p>
+<p> a <span class="type">cairo_surface_t</span>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: 3.14</p>
@@ -1251,6 +1267,16 @@ ev_rectangle_free (<em class="parameter"><code><a class="link" href="EvDocument.
 </tbody>
 </table></div>
 </div>
+</div>
+</div>
+<div class="refsect1">
+<a name="EvDocument.property-details"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="EvDocument--modified"></a><h3>The <code class="literal">“modified”</code> property</h3>
+<pre class="programlisting">  “modified”                 <span class="type">gboolean</span></pre>
+<p>Whether the document has been modified.</p>
+<p>Flags: Read / Write</p>
+<p>Default value: FALSE</p>
 </div>
 </div>
 </div>
