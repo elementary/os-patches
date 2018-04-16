@@ -15,9 +15,9 @@ export LC_ALL=C.UTF-8
 
 code=0
 if [ "$TMPDIR" ]; then
-	env -u TMPDIR xvfb-run -e "$tmpdir/xvfb.log" sh -ec "TMPDIR=\"$TMPDIR\" python setup.py test && python3 setup.py test" || code="$?"
+	env -u TMPDIR xvfb-run -e "$tmpdir/xvfb.log" sh -ec "TMPDIR=\"$TMPDIR\" python3 setup.py test" || code="$?"
 else
-	xvfb-run -e "$tmpdir/xvfb.log" sh -ec "python setup.py test && python3 setup.py test" || code="$?"
+	xvfb-run -e "$tmpdir/xvfb.log" sh -ec "python3 setup.py test" || code="$?"
 fi
 if [ "$code" != 0 ]; then
 	echo "xauth/Xrdb output:"

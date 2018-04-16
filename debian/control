@@ -6,9 +6,16 @@ Build-Depends: debhelper (>= 9),
                dh-python,
                libxml-parser-perl,
                intltool,
-               python-all (>= 2.6.6-3~),
-               python-distutils-extra (>= 1.90),
-               python-setuptools,
+               dbus-x11 <!nocheck>,
+               gir1.2-snapd-1 <!nocheck>,
+               lsb-release <!nocheck>,
+               pyflakes3 <!nocheck>,
+               python3-apt <!nocheck>,
+               python3-dbus <!nocheck>,
+               python3-gi <!nocheck>,
+               python3-mock <!nocheck>,
+               xauth <!nocheck>,
+               xvfb <!nocheck>,
                python3-all,
                python3-distutils-extra,
                python3-setuptools,
@@ -17,22 +24,11 @@ Standards-Version: 3.9.6
 Vcs-Bzr: http://code.launchpad.net/~ubuntu-core-dev/software-properties/main
 XS-Testsuite: autopkgtest
 
-Package: python-software-properties
-Section: python
-Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, python, python-apt (>=
- 0.6.20ubuntu16), python-pycurl, lsb-release, iso-codes, gpg
-Recommends: unattended-upgrades
-Description: manage the repositories that you install software from
- This software provides an abstraction of the used apt repositories.
- It allows you to easily manage your distribution and independent software
- vendor software sources.
-
 Package: python3-software-properties
 Section: python
 Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends}, python3, python3-apt (>=
- 0.6.20ubuntu16), lsb-release, iso-codes, gpg
+ 0.6.20ubuntu16), python3-gi, lsb-release, iso-codes, gpg
 Recommends: unattended-upgrades
 Description: manage the repositories that you install software from
  This software provides an abstraction of the used apt repositories.

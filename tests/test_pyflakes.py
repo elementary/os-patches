@@ -17,9 +17,6 @@ class TestPyflakesClean(unittest.TestCase):
                 continue
             self.paths.extend(glob.glob(dirpath+"/*.py"))
 
-    def test_pyflakes_clean(self):
-        self.assertEqual(subprocess.check_call(['pyflakes'] + self.paths), 0)
-
     def test_pyflakes3_clean(self):
         self.assertEqual(subprocess.check_call(['pyflakes3'] +  self.paths), 0)
 

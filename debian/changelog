@@ -1,3 +1,29 @@
+software-properties (0.96.24.31) bionic; urgency=medium
+
+  * Build-Depend on dbus-11 and gir1.2-snapd-1 for build tests
+  * Don't ignore failing tests
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 13 Apr 2018 09:17:39 -0400
+
+software-properties (0.96.24.30) bionic; urgency=medium
+
+  * Don't use python2 in autopkgtests (LP: #1763694)
+  * Update translation template
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 13 Apr 2018 08:57:46 -0400
+
+software-properties (0.96.24.29) bionic; urgency=medium
+
+  * Drop obsolete software-properties-gnome.desktop to eliminate
+    duplication in the GNOME Software app
+  * Drop unused Python 2 python-software-properties
+  * Build with pybuild to simplify build
+  * Add several Build-Depends now that build tests are being run
+  * Ignore build test failures temporarily because of difficuly
+    getting the dbus tests to work. See bug 1763435.
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 12 Apr 2018 11:57:35 -0400
+
 software-properties (0.96.24.28) bionic; urgency=medium
 
   [ Martin Wimpress ]
@@ -692,7 +718,7 @@ software-properties (0.92.22) saucy; urgency=low
     xvfb-run and setting it again for the inferior command.
   * debian/tests/control: Depend on python-gi and python3-gi for test_dbus.
 
-  [ Jeremy Bischa ]
+  [ Jeremy Bicha ]
   * Add a scalable icon which looks better in GNOME Shell.
 
  -- Barry Warsaw <barry@ubuntu.com>  Tue, 25 Jun 2013 15:38:29 -0400
