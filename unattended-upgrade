@@ -83,11 +83,11 @@ SENDMAIL_BINARY = "/usr/sbin/sendmail"
 USERS = "/usr/bin/users"
 # no py3 lsb_release in debian :/
 DISTRO_CODENAME = subprocess.check_output(
-    ["lsb_release", "-c", "-s"], universal_newlines=True).strip()  # type: str
+    ["lsb_release", "-c", "-s", "-u"], universal_newlines=True).strip()  # type: str
 DISTRO_DESC = subprocess.check_output(
-    ["lsb_release", "-d", "-s"], universal_newlines=True).strip()  # type: str
+    ["lsb_release", "-d", "-s", "-u"], universal_newlines=True).strip()  # type: str
 DISTRO_ID = subprocess.check_output(
-    ["lsb_release", "-i", "-s"], universal_newlines=True).strip()  # type: str
+    ["lsb_release", "-i", "-s", "-u"], universal_newlines=True).strip()  # type: str
 
 # progress information is written here
 PROGRESS_LOG = "/var/run/unattended-upgrades.progress"
