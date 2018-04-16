@@ -1074,6 +1074,9 @@ class Package(object):
         # type: () -> str
         """Return the name of the package, including architecture.
 
+        Note that as for :meth:`architecture`, this returns the
+        native architecture for Architecture: all packages.
+
         .. versionadded:: 0.7.100.3"""
         return self._pkg.get_fullname(False)
 
@@ -1109,6 +1112,11 @@ class Package(object):
     def architecture(self):
         # type: () -> str
         """Return the Architecture of the package.
+
+        Note that for Architecture: all packages, this returns the
+        native architecture, as they are internally treated like native
+        packages. To get the concrete architecture, look at the
+        :attr:`Version.architecture` attribute.
 
         .. versionchanged:: 0.7.100.3
             This is now the package's architecture in the multi-arch sense,

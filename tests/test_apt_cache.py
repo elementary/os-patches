@@ -244,6 +244,43 @@ class TestAptCache(testcommon.TestCase):
         arches = apt_pkg.get_architectures()
         self.assertTrue(main_arch in arches)
 
+    def test_apt_cache_reopen_is_safe(self):
+        """cache: check that we cannot use old package objects after reopen"""
+        cache = apt.Cache()
+        old_depcache = cache._depcache
+        old_package = cache["apt"]
+        old_pkg = old_package._pkg
+        old_version = old_package.candidate
+        old_ver = old_version._cand
+        cache.open()
+        new_depcache = cache._depcache
+        new_package = cache["apt"]
+        new_pkg = new_package._pkg
+        new_version = new_package.candidate
+        new_ver = new_version._cand
+
+        # get candidate
+        self.assertRaises(ValueError, lambda: old_package.candidate)
+        self.assertRaises(ValueError, old_depcache.get_candidate_ver,
+                          new_pkg)
+        self.assertRaises(ValueError, new_depcache.get_candidate_ver,
+                         old_pkg)
+        self.assertEqual(new_ver, new_depcache.get_candidate_ver(new_pkg))
+
+        # set candidate
+        self.assertRaises(ValueError, setattr, new_package,
+                          "candidate", old_version)
+        old_depcache.set_candidate_ver(old_pkg, old_ver)
+        self.assertRaises(ValueError, old_depcache.set_candidate_ver,
+                          old_pkg, new_ver)
+        self.assertRaises(ValueError, new_depcache.set_candidate_ver,
+                          old_pkg, old_ver)
+        self.assertRaises(ValueError, new_depcache.set_candidate_ver,
+                          old_pkg, new_ver)
+        self.assertRaises(ValueError, new_depcache.set_candidate_ver,
+                          new_pkg, old_ver)
+        new_depcache.set_candidate_ver(new_pkg, new_ver)
+
 
 if __name__ == "__main__":
     unittest.main()

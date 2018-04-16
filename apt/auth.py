@@ -26,6 +26,7 @@
 
 from __future__ import print_function
 
+import errno
 import os
 import os.path
 import shutil
@@ -148,7 +149,15 @@ def add_key_from_keyserver(keyid, keyserver):
     except Exception:
         raise
     finally:
-        shutil.rmtree(tmp_keyring_dir)
+        # We are racing with gpg when removing sockets, so ignore
+        # failure to delete non-existing files.
+        def onerror(func, path, exc_info):
+            if (isinstance(exc_info[1], OSError) and
+                exc_info[1].errno == errno.ENOENT):
+                return
+            raise
+
+        shutil.rmtree(tmp_keyring_dir, onerror=onerror)
 
 
 def _add_key_from_keyserver(keyid, keyserver, tmp_keyring_dir):

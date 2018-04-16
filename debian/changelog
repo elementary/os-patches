@@ -1,3 +1,15 @@
+python-apt (1.6.0~rc2ubuntu2) bionic; urgency=medium
+
+  * apt/auth.py: Protect against race with gpg when removing tmpdir
+    (Closes: #871585)
+  * Document Architecture: all handling in Package.{fullname,architecture()}
+    (Closes: #863193)
+  * python/tag.cc: Fix invalid read in TagFileNext
+  * Raise ValueError if objects passed to DepCache are from different cache
+    (LP: #1737441)
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 12 Apr 2018 11:22:27 +0200
+
 python-apt (1.6.0~rc2ubuntu1) bionic; urgency=medium
 
   * Revert change to make apt.Cache subclass of dict
