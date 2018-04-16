@@ -1,6 +1,6 @@
 project('epiphany', 'c',
   license: 'GPL3+',
-  version: '3.28.0.1',
+  version: '3.28.1',
   meson_version: '>= 0.42.0',
   default_options: ['c_std=gnu11']
 )
@@ -31,9 +31,6 @@ conf.set_quoted('LOCALEDIR', localedir)
 conf.set_quoted('PKGDATADIR', pkgdatadir)
 conf.set_quoted('PKGLIBEXECDIR', pkglibexecdir)
 conf.set_quoted('SOURCE_ROOT', meson.source_root())
-
-# FIXME: Get rid of this option. This feature should be polished up and enabled unconditionally.
-conf.set10('ENABLE_HTTPS_EVERYWHERE', get_option('https_everywhere'))
 
 conf.set10('DEVELOPER_MODE', get_option('developer_mode'))
 
@@ -95,10 +92,6 @@ webkit2gtk_web_extension_dep = dependency('webkit2gtk-web-extension-4.0', versio
 cc = meson.get_compiler('c')
 gmp_dep = cc.find_library('gmp')
 m_dep = cc.find_library('m', required: false)
-
-if get_option('https_everywhere')
-  httpseverywhere_dep = dependency('httpseverywhere-0.8')
-endif
 
 subdir('data')
 subdir('help')
