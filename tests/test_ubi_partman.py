@@ -568,14 +568,6 @@ class TestCalculateAutopartitioningOptions(unittest.TestCase):
         desc = self.page.extended_description(question)
         use_device = ubi_partman.PartitioningOption(title, desc)
 
-        question = 'ubiquity/partitioner/ubuntu_upgrade'
-        question_has_variables(question, ['CURDISTRO', 'VER'])
-        self.page.db.subst(question, 'CURDISTRO', operating_system)
-        self.page.db.subst(question, 'VER', self.release.version)
-        title = self.page.description(question)
-        desc = self.page.extended_description(question)
-        reuse = ubi_partman.PartitioningOption(title, desc)
-
         operating_systems, ubuntu_systems = \
             self.page.calculate_operating_systems(layout)
         options = self.page.calculate_autopartitioning_options(
@@ -589,9 +581,6 @@ class TestCalculateAutopartitioningOptions(unittest.TestCase):
 
         self.assertIn('manual', options)
         self.assertCountEqual(self.manual, options['manual'])
-
-        self.assertIn('reuse', options)
-        self.assertCountEqual(reuse, options['reuse'])
 
     # 'This computer currently has Ubuntu 12.04 on it.'
     def test_same_ubuntu_only(self):

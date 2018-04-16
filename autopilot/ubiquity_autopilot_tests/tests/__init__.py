@@ -269,7 +269,7 @@ class UbiquityAutopilotTestCase(UbiquityTestCase):
             GtkAlignment, BuilderName='stepPrepare')
 
         objList = [
-            'prepare_foss_disclaimer_license',
+            'prepare_foss_disclaimer',
             'prepare_minimal_install',
             'prepare_download_updates',
             'prepare_nonfree_software'

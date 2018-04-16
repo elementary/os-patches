@@ -2077,20 +2077,6 @@ class Page(plugin.Plugin):
                     desc = self.extended_description(q)
                     return PartitioningOption(title, desc)
 
-                if current_version <= new_version:
-                    # "Windows (or Mac, ...) and an older version of Ubuntu are
-                    # present" case
-
-                    # Only allow reuse with newer install media
-                    # also block reuse when invalid version number or codename
-
-                    q = 'ubiquity/partitioner/ubuntu_upgrade'
-                    self.db.subst(q, 'CURDISTRO', ubuntu)
-                    self.db.subst(
-                        q, 'VER', "%s %s" % (release.name, release.version))
-                    title = self.description(q)
-                    desc = self.extended_description(q)
-                    return PartitioningOption(title, desc)
         return None
 
     def calculate_autopartitioning_heading(self, operating_systems,
