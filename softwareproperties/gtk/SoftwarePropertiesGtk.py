@@ -1484,7 +1484,7 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
 
         # connect to signals
         self.handlers[self.goa_auth] = \
-            self.goa_auth.connect('notify::logged', lambda o, p: self.on_goa_auth_changed())
+            self.goa_auth.connect('notify', lambda o, p: self.on_goa_auth_changed())
         self.handlers[self.checkbutton_livepatch] = \
             self.checkbutton_livepatch.connect('toggled', self.on_checkbutton_livepatch_toggled)
         self.handlers[self.button_ubuntuone] =  \

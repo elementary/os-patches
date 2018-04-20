@@ -1,3 +1,26 @@
+software-properties (0.96.24.32.1) bionic; urgency=medium
+
+  * debian/control.in:
+    - Build-Depends on dh-migrations to fix the build
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 18 Apr 2018 16:50:03 +0200
+
+software-properties (0.96.24.32) bionic; urgency=medium
+
+  * data/com.ubuntu.SoftwareProperties.gschema.xml: Add gsettings schema
+    to store the goa account id used to login in Livepatch.
+  * debian/rules: Use dh_migrations.
+  * debian/software-properties-gtk.install: install the gsetting schema.
+  * debian/software-properties-gtk.migrations: Use dh_migrations.
+  * softwareproperties/GoaAuth.py: Use gsettings instead of libsecrets
+    to store the goa account id used to login in Livepatch (LP: #1764474).
+  * softwareproperties/gtk/SoftwarePropertiesGtk.py: Update the UI
+    if the account id changes settings-side.
+  * tools/migration-scripts/01_migrate_from_keyring: Migrate the account id
+    from the keyring to gsettings.
+
+ -- Andrea Azzarone <andrea.azzarone@canonical.com>  Tue, 17 Apr 2018 13:25:44 +0200
+
 software-properties (0.96.24.31) bionic; urgency=medium
 
   * Build-Depend on dbus-11 and gir1.2-snapd-1 for build tests

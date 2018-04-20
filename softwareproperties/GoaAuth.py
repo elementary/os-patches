@@ -21,24 +21,22 @@
 
 import gi
 gi.require_version('Goa', '1.0')
-gi.require_version('Secret', '1')
-from gi.repository import GLib, Goa, GObject, Secret
-import logging
-
-SECRETS_SCHEMA = Secret.Schema.new('com.ubuntu.SotwareProperties',
-                                   Secret.SchemaFlags.NONE,
-                                   {'key': Secret.SchemaAttributeType.STRING})
+from gi.repository import Gio, Goa, GObject
 
 class GoaAuth(GObject.GObject):
 
     # Properties
     logged = GObject.Property(type=bool, default=False)
+    username = GObject.Property(type=str, default=None)
 
     def __init__(self):
         GObject.GObject.__init__(self)
 
         self.goa_client = Goa.Client.new_sync(None)
         self.account = None
+
+        self.settings = Gio.Settings.new('com.ubuntu.SoftwareProperties')
+        self.settings.connect('changed::goa-account-id', self._on_settings_changed)
         self._load()
 
     def login(self, account):
@@ -49,12 +47,6 @@ class GoaAuth(GObject.GObject):
     def logout(self):
         self._update_state(None)
         self._store()
-
-    @GObject.Property
-    def username(self):
-        if self.account is None:
-            return None
-        return self.account.props.presentation_identity
 
     @GObject.Property
     def token(self):
@@ -91,27 +83,35 @@ class GoaAuth(GObject.GObject):
     def _update_state(self, account):
         self.account = account
         if self.account is None:
+            self.username = None
             self.logged = False
         else:
             try:
                 account.call_ensure_credentials_sync(None)
             except Exception:
+                self.username = None
                 self.logged = False
             else:
                 self.account.connect('notify::attention-needed', lambda o, v: self.logout())
+                self.username = self.account.props.presentation_identity
                 self.logged = True
+
+    def _on_settings_changed(self, settings, key):
+        self._load()
 
     def _load(self):
         # Retrieve the stored account-id
-        try:
-            account_id = Secret.password_lookup_sync(SECRETS_SCHEMA, {'key': 'account-id'}, None)
-            self._update_state_from_account_id(account_id)
-        except GLib.GError as e:
-            logging.warning ("Connection to session keyring failed: {}".format(e))
+        account_id = self.settings.get_string('goa-account-id')
+        self._update_state_from_account_id(account_id)
 
     def _store(self):
+        # Store the account-id
         if self.logged:
             account_id = self.account.props.id
-            Secret.password_store(SECRETS_SCHEMA, {'key': 'account-id'}, None, 'com.ubuntu.SoftwareProperties', account_id)
+            self.settings.set_string('goa-account-id', account_id)
         else:
-            Secret.password_clear(SECRETS_SCHEMA, {'key': 'account-id'}, None, None, None)
+            self.settings.set_string('goa-account-id', "")
+
+
+
+
