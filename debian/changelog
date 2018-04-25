@@ -1,3 +1,30 @@
+dkms (2.3-3ubuntu9) bionic; urgency=medium
+
+  * 0009-Add-support-for-UEFI-Secure-Boot-validation-toggling.patch: use find
+    to get all .ko modules from a dkms build to ensure we also catch any .kos
+    that might have been built in subdirectories.
+  * 0009-Add-support-for-UEFI-Secure-Boot-validation-toggling.patch: make sure
+    we only try to enroll a MOK if we've signed modules.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 23 Apr 2018 16:42:51 -0400
+
+dkms (2.3-3ubuntu8) bionic; urgency=medium
+
+  * 0009-Add-support-for-UEFI-Secure-Boot-validation-toggling.patch: handle
+    signing of all .ko modules from a dkms build regardless of whether their
+    name matches the dkms package name.  LP: #1766215.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 23 Apr 2018 09:10:30 -0700
+
+dkms (2.3-3ubuntu7) bionic; urgency=medium
+
+  * 0009-Add-support-for-UEFI-Secure-Boot-validation-toggling.patch: update
+    for the new update-secureboot-policy code: have it generate a new MOK if
+    there isn't one yet, and use that so sign newly-built kernel modules.
+    (LP: #1748983) 
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 18 Apr 2018 17:23:41 -0400
+
 dkms (2.3-3ubuntu6) bionic; urgency=medium
 
   * Move dpkg-dev to a real depends, needed for dpkg-architecture

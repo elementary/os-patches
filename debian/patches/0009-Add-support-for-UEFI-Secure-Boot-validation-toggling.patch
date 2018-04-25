@@ -10,17 +10,44 @@ Users still have the possibility to notice this and skip the step, thus
 not disabling Secure Boot (but then, they will not be able to load the
 dkms drivers that were added).
 ---
- dkms_common.postinst | 3 +++
- 1 file changed, 3 insertions(+)
+ dkms_common.postinst |   16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
-diff --git a/dkms_common.postinst b/dkms_common.postinst
-index d2ac712..2d3738e 100644
+Index: b/dkms_common.postinst
+===================================================================
 --- a/dkms_common.postinst
 +++ b/dkms_common.postinst
-@@ -290,3 +290,6 @@ for KERNEL in $KERNELS; do
+@@ -154,6 +154,7 @@ fi
+ 
+ KERNELS=$(ls /lib/modules/ 2>/dev/null || true)
+ CURRENT_KERNEL=$(uname -r)
++SIGNED_MODULES=0
+ 
+ #We never want to keep an older version side by side to prevent conflicts
+ if [ -e "/var/lib/dkms/$NAME/$VERSION" ]; then
+@@ -283,6 +284,15 @@ for KERNEL in $KERNELS; do
+         fi
+     fi
+ 
++    if type update-secureboot-policy >/dev/null 2>&1; then
++        SHIM_NOTRIGGER=y update-secureboot-policy --new-key
++        find /var/lib/dkms/$NAME/$VERSION/$KERNEL/$(uname -m)/module/ \
++            -name "*.ko" -print0 | xargs -n1 -0 -r kmodsign sha512 \
++                /var/lib/shim-signed/mok/MOK.priv \
++                /var/lib/shim-signed/mok/MOK.der
++        SIGNED_MODULES=1
++    fi
++
+     #if the module is built (either pre-built or just now), install it
+     if [ `echo $dkms_status | grep -c ": built"` -eq 1 ] && 
+        [ `echo $dkms_status | grep -c ": installed"` -eq 0 ]; then
+@@ -290,3 +300,9 @@ for KERNEL in $KERNELS; do
      fi
  done
  
 +if type update-secureboot-policy >/dev/null 2>&1; then
-+    update-secureboot-policy || true
++    if [ $SIGNED_MODULES -eq 1 ]; then
++        update-secureboot-policy --enroll-key
++    fi
 +fi
++
