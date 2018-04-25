@@ -456,7 +456,6 @@ class PageKde(PageBase):
             self.page.username.setEnabled(False)
             self.page.login_pass.hide()
             self.page.login_auto.hide()
-            self.page.login_encrypt.hide()
             self.username_edited = True
             self.hostname_edited = True
 
@@ -541,22 +540,20 @@ class PageKde(PageBase):
         return self.page.login_auto.isChecked()
 
     def on_login_pass_clicked(self, checked):
-        self.page.login_encrypt.setEnabled(checked)
+        print("Ecryptfs is deprecated")
 
     def on_login_auto_clicked(self, checked):
-        self.page.login_encrypt.setChecked(not(checked))
-        self.page.login_encrypt.setEnabled(not(checked))
+        print("Ecryptfs is deprecated")
 
     def set_encrypt_home(self, value):
-        self.page.login_encrypt.setChecked(value)
+        print("Ecryptfs is deprecated")
 
     def set_force_encrypt_home(self, value):
-        self.page.login_encrypt.setDisabled(value)
-        self.page.login_auto.setDisabled(value)
-        self.page.login_pass.setDisabled(value)
+        print("Ecryptfs is deprecated")
 
+    # Ecryptfs is deprecated
     def get_encrypt_home(self):
-        return self.page.login_encrypt.isChecked()
+        return False
 
     def username_error(self, msg):
         self.page.username_error_reason.setText(msg)

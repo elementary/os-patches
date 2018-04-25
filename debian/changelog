@@ -1,3 +1,44 @@
+ubiquity (18.04.11) bionic; urgency=medium
+
+  [ Sebastien Bacher]
+  * Don't deactivate the screen-reader desktop keybinding, that was needed
+    when ubiquity was handling the key press events but now gsd-media-keys is
+    doing that. Listen to the corresponding key to start orca under
+    ubiquity-dm since gnome-session isn't there to do it.
+    (lp: #1741690)
+
+  [ Iain Lane ]
+  * misc.py: Fall back to SUDO_UID if PKEXEC_UID is not set.
+  * ubiquity.desktop.in, misc.py: Pass through the ubuntu user's D-Bus session
+    bus, if set, so that we can communicate with it.
+
+  [ Jean-Baptiste Lallement ]
+  * data/ubiquity.json: The separate greeter universal icon has been removed
+    and the gnome-shell mode updated accordingly.
+
+ -- Iain Lane <iain.lane@canonical.com>  Tue, 24 Apr 2018 16:29:35 +0100
+
+ubiquity (18.04.10) bionic; urgency=medium
+
+  [ Colin Watson ]
+  * Update translations from Launchpad.
+
+  [ Simon Quigley ]
+  * Following the lead of the GTK frontend, remove the encrypted home
+    directory option from the Qt installer since ecryptfs no longer has
+    support from the Ubuntu Security Team. This removes the frontend but keeps
+    the codebase for the option so it can be added back later using another
+    technology (LP: #1761396).
+
+  [ Adam Conrad ]
+  * Automatic update of included source packages: localechooser
+    2.71ubuntu2.
+
+  [ Jean-Baptiste Lallement ]
+  * Do not start gnome-initial-setup for the OEM user (LP: #1765651)
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Mon, 23 Apr 2018 04:59:24 -0600
+
 ubiquity (18.04.9) bionic; urgency=medium
 
   * Detect the proper name for zram in /proc/swaps (LP: #1763611).

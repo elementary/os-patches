@@ -50,7 +50,7 @@ DBusGMainLoop(set_as_default=True)
 
 # in query mode we won't be in X, but import needs to pass
 if 'DISPLAY' in os.environ:
-    from gi.repository import Gtk, Gdk, GObject, GLib, Atk
+    from gi.repository import Gtk, Gdk, GObject, GLib, Atk, Gio
     from ubiquity import gtkwidgets
 
 from ubiquity import (
@@ -159,6 +159,13 @@ class Controller(ubiquity.frontend.base.Controller):
         self._wizard.switch_to_install_interface()
 
 
+def on_screen_reader_enabled_changed(gsettings, key):
+    # handle starting orca only, it exits itself when the key is false
+    if (key == "screen-reader-enabled" and gsettings.get_boolean(key) and
+       osextras.find_on_path('orca')):
+        subprocess.Popen(['orca'], preexec_fn=misc.drop_all_privileges)
+
+
 class Wizard(BaseFrontend):
     def __init__(self, distro):
         def add_subpage(self, steps, name):
@@ -234,6 +241,7 @@ class Wizard(BaseFrontend):
         self.timeout_id = None
         self.screen_reader = False
         self.orca_process = None
+        self.a11y_settings = None
 
         # To get a "busy mouse":
         self.watch = Gdk.Cursor.new(Gdk.CursorType.WATCH)
@@ -537,31 +545,6 @@ class Wizard(BaseFrontend):
 
         gsettings.set(gs_schema, gs_key, gs_value)
 
-    def disable_screen_reader(self):
-        gs_key = 'screenreader'
-        for gs_schema in 'org.gnome.settings-daemon.plugins.media-keys', \
-                         'org.mate.SettingsDaemon.plugins.media-keys':
-            gs_previous = '%s/%s' % (gs_schema, gs_key)
-            if gs_previous in self.gsettings_previous:
-                return
-
-            gs_value = gsettings.get(gs_schema, gs_key)
-            self.gsettings_previous[gs_previous] = gs_value
-
-            if gs_value:
-                gsettings.set(gs_schema, gs_key, '')
-
-        atexit.register(self.enable_screen_reader)
-
-    def enable_screen_reader(self):
-        gs_key = 'screenreader'
-        for gs_schema in 'org.gnome.settings-daemon.plugins.media-keys', \
-                         'org.mate.SettingsDaemon.plugins.media-keys':
-            gs_previous = '%s/%s' % (gs_schema, gs_key)
-            gs_value = self.gsettings_previous[gs_previous]
-
-            gsettings.set(gs_schema, gs_key, gs_value)
-
     def disable_screensaver(self):
         gs_schema = 'org.gnome.desktop.screensaver'
         gs_key = 'idle-activation-enabled'
@@ -737,9 +720,17 @@ class Wizard(BaseFrontend):
         self.disable_volume_manager()
         self.disable_screensaver()
         self.disable_powermgr()
-        self.disable_screen_reader()
 
         if 'UBIQUITY_ONLY' in os.environ:
+            # handle orca only in ubiquity-dm where there is no gnome-session
+            self.a11y_settings = Gio.Settings.new(
+                "org.gnome.desktop.a11y.applications")
+            self.a11y_settings.connect("changed::screen-reader-enabled",
+                                       on_screen_reader_enabled_changed)
+            # enable if needed and a key read is needed to connect the signal
+            on_screen_reader_enabled_changed(self.a11y_settings,
+                                             "screen-reader-enabled")
+
             self.disable_logout_indicator()
             if 'UBIQUITY_DEBUG' not in os.environ:
                 self.disable_terminal()

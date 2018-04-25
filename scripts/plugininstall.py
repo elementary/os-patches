@@ -1225,6 +1225,16 @@ class Install(install_misc.InstallBase):
                                 'metadata::trusted', 'true')
                             break
 
+                    # Disable gnome-initial-setup for the OEM user
+                    install_misc.chrex(
+                        self.target, 'install', '-d',
+                        '-o', 'oem', '-g', 'oem',
+                        '/home/oem/.config')
+                    install_misc.chrex(
+                        self.target,
+                        'sudo', '-i', '-u', 'oem',
+                        'touch', '/home/oem/.config/gnome-initial-setup-done')
+
                 # Carry the locale setting over to the installed system.
                 # This mimics the behavior in 01oem-config-udeb.
                 di_locale = self.db.get('debian-installer/locale')
