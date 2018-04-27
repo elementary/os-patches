@@ -1,3 +1,17 @@
+flash-kernel (3.90ubuntu3) bionic; urgency=medium
+
+  * flash-kernel/functions: Stop attempting to install the latest kernel
+    if we request an older version, just refuse to act without --force.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Wed, 25 Apr 2018 05:11:44 -0600
+
+flash-kernel (3.90ubuntu2) bionic; urgency=medium
+
+  * initramfs-hook/flash-kernel: Pretend we're running from the kernel's
+    postinst to activate the same guard against mismatched kernel versions.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 24 Apr 2018 08:17:06 -0600
+
 flash-kernel (3.90ubuntu1) bionic; urgency=medium
 
   [ Balint Reczey ]

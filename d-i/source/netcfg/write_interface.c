@@ -170,11 +170,12 @@ static int nc_wi_netplan_write_nameservers(const struct netcfg_interface *interf
 {
 	int i;
 
-	if (empty_str(domain))
+	if (empty_str(domain) && empty_str(interface->nameservers[0]))
 		return 1;
 
 	fprintf(fd, "      nameservers:\n");
-	fprintf(fd, "          search: [ %s ]\n", domain);
+	if (!empty_str(domain))
+		fprintf(fd, "          search: [ %s ]\n", domain);
 	fprintf(fd, "          addresses:\n");
 	for (i = 0; i < NETCFG_NAMESERVERS_MAX; i++) {
 		if (!empty_str(interface->nameservers[i])) {

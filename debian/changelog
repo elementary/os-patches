@@ -1,3 +1,48 @@
+ubiquity (18.04.14) bionic; urgency=medium
+
+  * Revert the previous upload. It didn't actually *fix* all cases, just
+    papered over them. If the race was lost, the screen reader still didn't
+    work in ubiquity-dm mode.
+  * Move the Gio.Settings code into the constructor of the wizard. This runs
+    with dropped privileges (uid = 0, euid = 999) whereas run() runs as root
+    (uid = 0, euid = 0). When run as 0 / 0, dconf creates its
+    XDG_RUNTIME_DIR/dconf/user database as root. We need to ensure that it
+    runs in a context with dropped privileges. (LP: #1767067)
+
+ -- Iain Lane <iain.lane@canonical.com>  Thu, 26 Apr 2018 15:46:32 +0100
+
+ubiquity (18.04.13) bionic; urgency=medium
+
+  [ Dimitri John Ledkov ]
+  * Remove dconf/user before Try Ubuntu.
+    Just, in case it has the wrong permissions, i.e. root and thus breaks
+    user running gnome session / shell / "Try Ubuntu".
+
+  [ Colin Watson ]
+  * Automatic update of included source packages: flash-kernel 3.90ubuntu3,
+    netcfg 1.142ubuntu7.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 26 Apr 2018 15:06:50 +0100
+
+ubiquity (18.04.12) bionic; urgency=medium
+
+  [ Didier Roche ]
+  * Request shutdown and reboot without using gnome-session (LP: #1766811)
+    The if gnome_session code path doesn't declare the GNOME
+    session interface it's using, so don't work.
+    Even fixing it, we notice that calls aren't wired in GNOME session code.
+    Fallback thus for now to old code path which is executed at least
+    since xenial (when DBUS address wasn't correct in ubiquity process)
+
+  [ Iain Lane ]
+  * The dbus import is now unused and is triggering a pyflakes error, but
+    we're not sure it isn't initialising some state that's required. At this
+    late stage, just silence the error.
+  * Automatic update of included source packages: flash-kernel
+    3.90ubuntu2.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 25 Apr 2018 10:33:57 +0100
+
 ubiquity (18.04.11) bionic; urgency=medium
 
   [ Sebastien Bacher]

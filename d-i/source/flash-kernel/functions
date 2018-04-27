@@ -771,10 +771,7 @@ if [ "$kvers" != "$latest_version" ] && [ "x$force" = "xyes" ]; then
 else
 	if [ -n "$kvers" ] && [ "$kvers" != "$latest_version" ]; then
 		echo "Ignoring old or unknown version $kvers (latest is $latest_version)" >&2
-		if [ "$FK_KERNEL_HOOK_SCRIPT" = "postinst.d" ]; then
-			exit 0
-		fi
-		echo "Use --force if you want version $kvers." >&2
+		exit 0
 	fi
 	kvers="$latest_version"
 	# Make sure we install the DTB for $latest_version
