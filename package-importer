@@ -25,7 +25,7 @@ for package in $dependency_list; do
 done
 if [ "$missing_dependencies" != "" ]; then
     echo "Missing dependencies! Please install these packages to proceed:
-$missing_dependencies" > /dev/stderr
+$missing_dependencies"
     exit 1
 fi
 
@@ -40,8 +40,8 @@ rm -rf "$tmp_dir"
 
 trap cleanup EXIT
 
-echo "Using package lists from $LISTS_BRANCH"  > /dev/stderr
-[ -z "$@" ] && echo "You can override this by passing the desired branch as a command-line argument." > /dev/stderr
+echo "Using package lists from $LISTS_BRANCH" 
+[ -z "$@" ] && echo "You can override this by passing the desired branch as a command-line argument."
 bzr export "$tmp_dir/import-lists" "$LISTS_BRANCH"
 
 # don't let l10n interfere with our grepping
@@ -91,7 +91,7 @@ Either you don't have the required permissions, or your internet connection
  suddenly went out, or it's caused by a bug in this script.
 If your internet connection works and you have the required permissions for
 writing to branches at $BZR_BRANCH_PREFIX, please report this failure at:
-https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
+https://bugs.launchpad.net/ubuntu-package-imports/+filebug"
 exit 1
 }
 
@@ -106,7 +106,7 @@ for distro_version in $(ls -1 "$tmp_dir/import-lists"); do
     # check if any source repos are enabled
     if ! grep -E --silent '^ *deb-src' "$sources_list_file"; then
         echo "You don't have any source code repositories enabled in $sources_list_file
-        Please enable them by uncommenting lines starting with 'deb-src'" > /dev/stderr 
+        Please enable them by uncommenting lines starting with 'deb-src'"
         exit 1
     fi
 
@@ -158,7 +158,7 @@ for distro_version in $(ls -1 "$tmp_dir/import-lists"); do
     release_files=$(echo apt_state/lists/*_Release)
     for release_file in $release_files; do
         gpg --keyring /etc/apt/trusted.gpg --verify "$release_file.gpg" "$release_file" || {
-            echo "Could not verify signature on $release_file" > /dev/stderr 
+            echo "Could not verify signature on $release_file"
             exit 1
         }
     done
@@ -186,7 +186,7 @@ Aborted."
         if ! package_version_already_imported "$package" "$latest_version" ; then
             rm -rf "$package"*
             apt-get $apt_options --download-only source "$package" || {
-                echo "Failed to download source code package $package" > /dev/stderr 
+                echo "Failed to download source code package $package"
                 exit 1
             }
 
@@ -197,8 +197,8 @@ Aborted."
                 grep -m 1 "^[[:blank:]]\+$file_hash[[:blank:]]\+$file_size[[:blank:]]\+$file$" <(cat $sources_files) || {
                     echo "Failed to verify authenticity of package $package:
 Downloaded $file has size $file_size and sha256 $file_hash
-Closest authentic packages are:" > /dev/stderr
-grep "$package" <(cat $sources_files) > /dev/stderr
+Closest authentic packages are:"
+grep "$package" <(cat $sources_files)
                     exit 1
                 }
             done
@@ -210,7 +210,7 @@ grep "$package" <(cat $sources_files) > /dev/stderr
                 echo "Failed to cd to the downloaded source code directory.
 Most likely this is caused by a bug in the script.
 Please report this failure at:
-https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
+https://bugs.launchpad.net/ubuntu-package-imports/+filebug"
                 exit 1
                 }
 
