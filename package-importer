@@ -231,6 +231,8 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug" > /dev/stderr
                 bzr commit -m "Initial import, version $latest_version"
                 bzr push -q "$BZR_BRANCH_PREFIX""$package-$distro_version" || failed_to_upload
             fi
+
+            cd "$distro_tmp_dir"
         else
             echo "$package in $distro_version is already up to date."
         fi
