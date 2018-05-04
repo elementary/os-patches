@@ -1,25 +1,28 @@
 #!/bin/bash
 set -e
 
-# checks if any imports should be performed and performs them
-# accepts branch with package lists as command-line parameter
-# Defaunt branch is lp:ubuntu-package-imports/elementary-import-lists
+# Checks for existence of git branch for a package in list and attempts
+# to commit new version if found after verifying its integrity.
+# Accepts branch name containing package lists as command-line parameter.
 
-# In the code, UPPERCASE variables are the ones defined externally and
-# lowecase variables are those hardcoded in this script
+# In the code, UPPERRCASE variables are the ones defined externally
+# and lowercase variables are those hardcoded in this script.
 
 # export these variables from your shell to override these default values
-export BZR_BRANCH_PREFIX=${BZR_BRANCH_PREFIX:-'lp:~elementary-os/ubuntu-package-imports/'}
 export BASE_TMP_DIR=${BASE_TMP_DIR:-"$(pwd)"}
+export GIT_WEB_URL=${GIT_WEB_URL:-'https://github.com/elementary/os-patches'}
+export GPG_KEYRING=${GPG_KEYRING:-'/etc/apt/trusted.gpg'}
+git_ssh_url="ssh://git@$(echo $GIT_WEB_URL | sed 's/https\?:\/\///')"
+git_repo="$(echo $GIT_WEB_URL | cut -d/ -f4-)"
 
 if [ -z "$@" ]; then
-    LISTS_BRANCH="lp:~elementary-os/ubuntu-package-imports/elementary-import-lists"
+    LISTS_BRANCH="import-list-bionic"
 else
     LISTS_BRANCH="$1"
 fi
 
 # check for dependencies
-dependency_list='devscripts dpkg-dev build-essential bzr quilt lsb-release ubuntu-keyring'
+dependency_list='devscripts dpkg-dev build-essential git quilt lsb-release ubuntu-keyring wget openssh-client'
 for package in $dependency_list; do
     dpkg -L "$package" >/dev/null 2>&1 || missing_dependencies="$missing_dependencies $package"
 done
@@ -40,9 +43,9 @@ rm -rf "$tmp_dir"
 
 trap cleanup EXIT
 
-echo "Using package lists from $LISTS_BRANCH" 
+echo "Using package lists from $GIT_WEB_URL -b $LISTS_BRANCH" 
 [ -z "$@" ] && echo "You can override this by passing the desired branch as a command-line argument."
-bzr export "$tmp_dir/import-lists" "$LISTS_BRANCH"
+git clone --depth 1 --quiet "$git_ssh_url" -b "$LISTS_BRANCH" "$tmp_dir/import-lists"
 
 # don't let l10n interfere with our grepping
 export LC_ALL=C
@@ -81,17 +84,17 @@ package_version_already_imported() {
 package="$1"
 version="$2"
 rm -rf "$package-$distro_version"
-bzr checkout -q --lightweight "$BZR_BRANCH_PREFIX""$package-$distro_version" &&
+git clone --depth 1 --quiet "$git_ssh_url" -b "$package-$distro_version" "$package-$distro_version" &&
 grep --silent " ($version) " "$package-$distro_version"/debian/changelog
 }
 
 failed_to_upload() {
-echo "Failed to commit the changes or upload the code to the bazaar branch.
+echo "Failed to commit the changes or upload the code to the git branch.
 Either you don't have the required permissions, or your internet connection
  suddenly went out, or it's caused by a bug in this script.
 If your internet connection works and you have the required permissions for
-writing to branches at $BZR_BRANCH_PREFIX, please report this failure at:
-https://bugs.launchpad.net/ubuntu-package-imports/+filebug"
+writing to branches at $GIT_WEB_URL, please report this failure at:
+$GIT_WEB_URL/issues/new"
 exit 1
 }
 
@@ -157,7 +160,7 @@ for distro_version in $(ls -1 "$tmp_dir/import-lists"); do
     echo "Verifying signatures of *_Release files"
     release_files=$(echo apt_state/lists/*_Release)
     for release_file in $release_files; do
-        gpg --keyring /etc/apt/trusted.gpg --verify "$release_file.gpg" "$release_file" || {
+        gpg --keyring "$GPG_KEYRING" --verify "$release_file.gpg" "$release_file" || {
             echo "Could not verify signature on $release_file"
             exit 1
         }
@@ -210,7 +213,7 @@ grep "$package" <(cat $sources_files)
                 echo "Failed to cd to the downloaded source code directory.
 Most likely this is caused by a bug in the script.
 Please report this failure at:
-https://bugs.launchpad.net/ubuntu-package-imports/+filebug"
+$GIT_WEB_URL/issues/new"
                 exit 1
                 }
 
@@ -218,18 +221,21 @@ https://bugs.launchpad.net/ubuntu-package-imports/+filebug"
             # Work around https://bugs.launchpad.net/launchpad-buildd/+bug/1089615
             rm -rf .pc
 
-            if bzr checkout -q --lightweight "$BZR_BRANCH_PREFIX""$package-$distro_version" ../"$package-$distro_version"; then
+            if git clone --depth 1 --quiet "$git_ssh_url" -b "$package-$distro_version" ../"$package-$distro_version"; then
                 # checkout succeeded
-                cp -r ../"$package-$distro_version"/.bzr .bzr
-                bzr add
-                debcommit -m "updated to version $latest_version" || failed_to_upload
+                cp -r ../"$package-$distro_version"/.git .git
+                git add .
+                git commit --quiet -am "Updated to version $latest_version"
+                git push --quiet origin HEAD:"$package-$distro_version" || failed_to_upload
             else
                 # checkout failed; assuming the branch doesn't exist, which means
                 # this is the first import of this package
-                bzr init
-                bzr add
-                bzr commit -m "Initial import, version $latest_version"
-                bzr push -q "$BZR_BRANCH_PREFIX""$package-$distro_version" || failed_to_upload
+                git init --quiet
+                git remote add origin "$git_ssh_url"
+                git fetch --quiet
+                git add .
+                git commit --quiet -am "Initial import, version $latest_version" || true
+                git push --quiet origin HEAD:"$package-$distro_version" || failed_to_upload
             fi
 
             cd "$distro_tmp_dir"
