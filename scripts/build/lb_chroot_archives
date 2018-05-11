@@ -511,6 +511,7 @@ EOF
 			if Find_files config/archives/*.key || \
 			   Find_files config/archives/*.key.chroot
 			then
+				Apt chroot "install gnupg"
 				for FILE in config/archives/*.key \
 					    config/archives/*.key.chroot
 				do
@@ -855,6 +856,7 @@ EOF
 		if Find_files config/archives/*.key || \
 		   Find_files config/archives/*.key.binary
 		then
+			Apt chroot "install gnupg"
 			for FILE in config/archives/*.key \
 				    config/archives/*.key.binary
 			do
