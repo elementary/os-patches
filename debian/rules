@@ -1,0 +1,36 @@
+#!/usr/bin/make -f
+
+include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,-O1 -Wl,--warn-unresolved-symbols -Wl,--as-needed
+export DEB_LDFLAGS_MAINT_STRIP = -Wl,-Bsymbolic-functions
+
+%:
+	dh $@ --with gnome
+
+ifneq ($(DEB_HOST_ARCH_OS),linux)
+CONFFLAGS = \
+	-Drfkil=false \
+	-Dnetwork_manager=false \
+	-Dalsa=false
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--libdir=/usr/lib \
+		--libexecdir=/usr/lib/gnome-settings-daemon \
+		$(CONFFLAGS)
+
+override_dh_missing:
+	dh_missing --fail-missing
+
+# Disable tests since they require installed gsettings schemas
+# https://gitlab.gnome.org/GNOME/gnome-settings-daemon/issues/7
+override_dh_auto_test:
+ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
+ifeq (,$(filter $(DEB_HOST_ARCH), s390x hurd-i386 kfreebsd-i386 kfreebsd-amd64))
+	-xvfb-run dh_auto_test
+else
+	-xvfb-run dh_auto_test
+endif
+endif

@@ -1,0 +1,76 @@
+---
+ data/org.gnome.settings-daemon.plugins.media-keys.gschema.xml.in |    5 ++
+ plugins/media-keys/gsd-media-keys-manager.c                      |   19 ++++++++++
+ plugins/media-keys/media-keys.h                                  |    1 
+ plugins/media-keys/shortcuts-list.h                              |    1 
+ 4 files changed, 26 insertions(+)
+
+--- a/data/org.gnome.settings-daemon.plugins.media-keys.gschema.xml.in
++++ b/data/org.gnome.settings-daemon.plugins.media-keys.gschema.xml.in
+@@ -131,6 +131,11 @@
+       <summary>Record a short video of the screen</summary>
+       <description>Binding to record a short video of the screen</description>
+     </key>
++    <key name="terminal" type="s">
++      <default>'&lt;Primary&gt;&lt;Alt&gt;t'</default>
++      <summary>Launch terminal</summary>
++      <description>Binding to launch the terminal.</description>
++    </key>
+     <key name="www" type="s">
+       <default>'XF86WWW'</default>
+       <summary>Launch web browser</summary>
+--- a/plugins/media-keys/gsd-media-keys-manager.c
++++ b/plugins/media-keys/gsd-media-keys-manager.c
+@@ -936,6 +936,22 @@ gnome_session_shutdown_cb (GObject *sour
+ }
+ 
+ static void
++do_terminal_action (GsdMediaKeysManager *manager)
++{
++        GSettings *settings;
++        char *term;
++
++        settings = g_settings_new ("org.gnome.desktop.default-applications.terminal");
++        term = g_settings_get_string (settings, "exec");
++
++        if (term)
++        execute (manager, term, FALSE);
++
++        g_free (term);
++        g_object_unref (settings);
++}
++
++static void
+ gnome_session_shutdown (GsdMediaKeysManager *manager)
+ {
+         GDBusProxy *proxy;
+@@ -2391,6 +2407,9 @@ do_action (GsdMediaKeysManager *manager,
+         case SCREENCAST_KEY:
+                 do_screencast_action (manager);
+                 break;
++        case TERMINAL_KEY:
++                do_terminal_action (manager);
++                break;
+         case WWW_KEY:
+                 do_url_action (manager, "http", timestamp);
+                 break;
+--- a/plugins/media-keys/media-keys.h
++++ b/plugins/media-keys/media-keys.h
+@@ -49,6 +49,7 @@ typedef enum {
+         WINDOW_SCREENSHOT_CLIP_KEY,
+         AREA_SCREENSHOT_CLIP_KEY,
+         SCREENCAST_KEY,
++        TERMINAL_KEY,
+         WWW_KEY,
+         PLAY_KEY,
+         PAUSE_KEY,
+--- a/plugins/media-keys/shortcuts-list.h
++++ b/plugins/media-keys/shortcuts-list.h
+@@ -74,6 +74,7 @@ static struct {
+         { WINDOW_SCREENSHOT_CLIP_KEY, "window-screenshot-clip", NULL, NULL, SHELL_ACTION_MODE_NORMAL },
+         { AREA_SCREENSHOT_CLIP_KEY, "area-screenshot-clip", NULL, NULL, SHELL_ACTION_MODE_ALL },
+         { SCREENCAST_KEY, "screencast", NULL, NULL, NO_LOCK_MODE },
++        { TERMINAL_KEY, "terminal", NULL, NULL, GSD_ACTION_MODE_LAUNCHER },
+         { WWW_KEY, "www", NULL, NULL, GSD_ACTION_MODE_LAUNCHER },
+         { PLAY_KEY, "play", NULL, NULL, SHELL_ACTION_MODE_ALL },
+         { PAUSE_KEY, "pause", NULL, NULL, SHELL_ACTION_MODE_ALL },

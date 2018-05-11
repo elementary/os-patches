@@ -1,0 +1,187 @@
+From 45c3528e281d8fb92fc0a44eb10d87035727bc65 Mon Sep 17 00:00:00 2001
+From: Carlos Garnacho <carlosg@gnome.org>
+Date: Fri, 18 Nov 2016 17:24:09 +0100
+Subject: wacom: Implement minimal data migration
+
+Unfortunately we can't properly lookup the schemas for styli and
+button paths (that is, without a stylus or button path to construct
+settings paths from). However, support the tablet-wide settings on
+device hotplug.
+
+Reverted in Ubuntu because all this commit does is migrate user settings
+from the gnome-settings-daemon schemas to the gsettings-desktop-schemas
+but the old settings are still used by Unity.
+---
+ data/org.gnome.settings-daemon.peripherals.wacom.gschema.xml.in |   12 -
+ plugins/wacom/gsd-wacom-manager.c                               |   77 ----------
+ 2 files changed, 6 insertions(+), 83 deletions(-)
+
+--- a/data/org.gnome.settings-daemon.peripherals.wacom.gschema.xml.in
++++ b/data/org.gnome.settings-daemon.peripherals.wacom.gschema.xml.in
+@@ -1,8 +1,8 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <schemalist>
+-  <schema id="org.gnome.settings-daemon.peripherals.wacom.deprecated">
+-    <child name="stylus" schema="org.gnome.settings-daemon.peripherals.wacom.stylus.deprecated"/>
+-    <child name="eraser" schema="org.gnome.settings-daemon.peripherals.wacom.eraser.deprecated"/>
++  <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gnome.settings-daemon.peripherals.wacom">
++    <child name="stylus" schema="org.gnome.settings-daemon.peripherals.wacom.stylus"/>
++    <child name="eraser" schema="org.gnome.settings-daemon.peripherals.wacom.eraser"/>
+ 
+     <!-- is-absolute applies to all tools but PAD, CURSOR is hard-coded -->
+     <key name="is-absolute" type="b">
+@@ -31,7 +31,7 @@
+       <description>Enable this to move the cursor when the user touches the tablet.</description>
+     </key>
+   </schema>
+-  <schema id="org.gnome.settings-daemon.peripherals.wacom.stylus.deprecated">
++  <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gnome.settings-daemon.peripherals.wacom.stylus">
+     <key name="pressurecurve" type="ai">
+       <default>[0, 0, 100, 100]</default>
+       <summary>Wacom stylus pressure curve</summary>
+@@ -48,7 +48,7 @@
+       <description>Set this to the pressure value at which a stylus click event is generated.</description>
+     </key>
+   </schema>
+-  <schema id="org.gnome.settings-daemon.peripherals.wacom.eraser.deprecated">
++  <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gnome.settings-daemon.peripherals.wacom.eraser">
+     <key name="pressurecurve" type="ai">
+       <default>[0, 0, 100, 100]</default>
+       <summary>Wacom eraser pressure curve</summary>
+@@ -65,7 +65,7 @@
+       <description>Set this to the pressure value at which an eraser click event is generated.</description>
+     </key>
+   </schema>
+-  <schema id="org.gnome.settings-daemon.peripherals.wacom.tablet-button.deprecated">
++  <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gnome.settings-daemon.peripherals.wacom.tablet-button">
+     <key name="action-type" enum="org.gnome.settings-daemon.GsdWacomActionType">
+       <default>'none'</default>
+       <summary>Wacom button action type</summary>
+--- a/plugins/wacom/gsd-wacom-manager.c
++++ b/plugins/wacom/gsd-wacom-manager.c
+@@ -41,8 +41,6 @@
+ #include "gsd-shell-helper.h"
+ #include "gsd-device-mapper.h"
+ #include "gsd-device-manager.h"
+-#include "gsd-settings-migrate.h"
+-
+ 
+ #define GSD_WACOM_MANAGER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GSD_TYPE_WACOM_MANAGER, GsdWacomManagerPrivate))
+ 
+@@ -81,8 +79,6 @@ struct GsdWacomManagerPrivate
+ 
+         GsdDeviceMapper *device_mapper;
+ 
+-        gchar *machine_id;
+-
+         /* DBus */
+         GDBusNodeInfo   *introspection_data;
+         GDBusConnection *dbus_connection;
+@@ -104,51 +100,6 @@ G_DEFINE_TYPE (GsdWacomManager, gsd_waco
+ 
+ static gpointer manager_object = NULL;
+ 
+-static GVariant *
+-map_tablet_mapping (GVariant *value)
+-{
+-        const gchar *mapping;
+-
+-        mapping = g_variant_get_boolean (value) ? "absolute" : "relative";
+-        return g_variant_new_string (mapping);
+-}
+-
+-static GVariant *
+-map_tablet_left_handed (GVariant *value)
+-{
+-        const gchar *rotation = g_variant_get_string (value, NULL);
+-        return g_variant_new_boolean (g_strcmp0 (rotation, "half") == 0 ||
+-                                      g_strcmp0 (rotation, "ccw") == 0);
+-}
+-
+-static void
+-migrate_tablet_settings (GsdWacomManager *manager,
+-                         GsdDevice       *device)
+-{
+-        GsdSettingsMigrateEntry tablet_settings[] = {
+-                { "is-absolute", "mapping", map_tablet_mapping },
+-                { "keep-aspect", "keep-aspect", NULL },
+-                { "rotation", "left-handed", map_tablet_left_handed },
+-        };
+-        gchar *old_path, *new_path;
+-        const gchar *vendor, *product;
+-
+-        gsd_device_get_device_ids (device, &vendor, &product);
+-
+-        old_path = g_strdup_printf ("/org/gnome/settings-daemon/peripherals/wacom/%s-usb:%s:%s/",
+-                                    manager->priv->machine_id, vendor, product);
+-        new_path = g_strdup_printf ("/org/gnome/desktop/peripherals/tablets/%s:%s/",
+-                                    vendor, product);
+-
+-        gsd_settings_migrate_check ("org.gnome.settings-daemon.peripherals.wacom.deprecated",
+-                                    old_path,
+-                                    "org.gnome.desktop.peripherals.tablet",
+-                                    new_path,
+-                                    tablet_settings, G_N_ELEMENTS (tablet_settings));
+-        g_free (old_path);
+-        g_free (new_path);
+-}
+-
+ static void
+ gsd_wacom_manager_class_init (GsdWacomManagerClass *klass)
+ {
+@@ -281,9 +232,6 @@ device_added_cb (GsdDeviceManager *devic
+ 
+ 	device_type = gsd_device_get_device_type (gsd_device);
+ 
+-        if (device_type & GSD_DEVICE_TYPE_TABLET)
+-                migrate_tablet_settings (manager, gsd_device);
+-
+ 	if ((device_type & GSD_DEVICE_TYPE_TABLET) != 0 &&
+             (device_type & GSD_DEVICE_TYPE_TOUCHPAD) == 0) {
+ 		gsd_device_mapper_add_input (manager->priv->device_mapper,
+@@ -411,27 +359,6 @@ register_manager (GsdWacomManager *manag
+                    manager);
+ }
+ 
+-static gchar *
+-get_machine_id (void)
+-{
+-        gchar *no_per_machine_file, *machine_id = NULL;
+-        gboolean per_machine;
+-        gsize len;
+-
+-        no_per_machine_file = g_build_filename (g_get_user_config_dir (), "gnome-settings-daemon", "no-per-machine-config", NULL);
+-        per_machine = !g_file_test (no_per_machine_file, G_FILE_TEST_EXISTS);
+-        g_free (no_per_machine_file);
+-
+-        if (!per_machine ||
+-            (!g_file_get_contents ("/etc/machine-id", &machine_id, &len, NULL) &&
+-             !g_file_get_contents ("/var/lib/dbus/machine-id", &machine_id, &len, NULL))) {
+-                return g_strdup ("00000000000000000000000000000000");
+-        }
+-
+-        machine_id[len - 1] = '\0';
+-        return machine_id;
+-}
+-
+ gboolean
+ gsd_wacom_manager_start (GsdWacomManager *manager,
+                          GError         **error)
+@@ -440,8 +367,6 @@ gsd_wacom_manager_start (GsdWacomManager
+ 
+         register_manager (manager_object);
+ 
+-        manager->priv->machine_id = get_machine_id ();
+-
+         manager->priv->start_idle_id = g_idle_add ((GSourceFunc) gsd_wacom_manager_idle_cb, manager);
+         g_source_set_name_by_id (manager->priv->start_idle_id, "[gnome-settings-daemon] gsd_wacom_manager_idle_cb");
+ 
+@@ -457,8 +382,6 @@ gsd_wacom_manager_stop (GsdWacomManager
+ 
+         g_debug ("Stopping wacom manager");
+ 
+-        g_clear_pointer (&manager->priv->machine_id, g_free);
+-
+         if (manager->priv->name_id != 0) {
+                 g_bus_unown_name (manager->priv->name_id);
+                 manager->priv->name_id = 0;
