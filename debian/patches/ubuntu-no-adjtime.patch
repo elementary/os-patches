@@ -1,0 +1,35 @@
+Description: Drop etc/adjtime from scripts/build/lb_chroot_hacks.
+ /etc/adjtime is not  needed and should not be used in Ubuntu.
+Author: Steve Langasek <steve.langasek@ubuntu.com>
+Forwarded: no
+Last-Update: 2013-09-27
+
+--- live-build-3.0~a57.orig/scripts/build/lb_chroot_hacks
++++ live-build-3.0~a57/scripts/build/lb_chroot_hacks
+@@ -218,9 +218,6 @@ esac
+ # people might do in local hooks, and there might be no initrds at all.
+ find chroot/boot -name 'initrd*' -print0 | xargs -r -0 chmod go+r
+ 
+-# Remove build systems clock drift
+-echo "0.0 0 0.0" > chroot/etc/adjtime
+-
+ # Remove cruft
+ rm -f chroot/boot/initrd*bak*
+ rm -f chroot/etc/apt/trusted.gpg~
+@@ -229,6 +226,7 @@ rm -f chroot/etc/gshadow- chroot/etc/sha
+ rm -f chroot/var/cache/debconf/*-old
+ rm -f chroot/var/lib/dpkg/*-old
+ rm -f chroot/var/log/apt/term.log
++rm -f chroot/etc/adjtime
+ 
+ # Delete and re-create temporary directories
+ TEMP_DIRS="/tmp /var/tmp"
+@@ -277,7 +275,7 @@ then
+ 	done
+ 
+ 	# Config files which need to be RW
+-	COW_FILES="/etc/adjtime /etc/fstab /etc/hostname /etc/hosts /etc/live.conf /etc/network/interfaces /etc/resolv.conf /etc/udev/rules.d/*persistent-net.rules /etc/udev/rules.d/*persistent-cd.rules /etc/X11/xorg.conf"
++	COW_FILES="/etc/fstab /etc/hostname /etc/hosts /etc/live.conf /etc/network/interfaces /etc/resolv.conf /etc/udev/rules.d/*persistent-net.rules /etc/udev/rules.d/*persistent-cd.rules /etc/X11/xorg.conf"
+ 
+ 	# Where we will store RW config files
+ 	RW_DIRECTORY="/var/lib/live"

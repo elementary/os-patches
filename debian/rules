@@ -1,0 +1,33 @@
+#!/usr/bin/make -f
+
+%:
+	dh ${@}
+
+override_dh_auto_build:
+	chmod +x share/hooks/100-build-wubildr.binary
+	dh_auto_build
+
+override_dh_auto_install:
+	dh_auto_install -- DESTDIR=debian/live-build
+	chmod +x debian/live-build/usr/lib/live/build/*
+
+	# Removing unused files
+	rm -f debian/live-build/usr/share/doc/live-build/COPYING
+	rm -f debian/live-build/usr/share/doc/live-build/ChangeLog*
+
+	# live-build-cgi
+	mkdir -p debian/live-build-cgi/usr/share/live/build
+	mv debian/live-build/usr/share/live/build/cgi debian/live-build-cgi/usr/share/live/build
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz -z9
+
+override_dh_installchangelogs:
+	dh_installchangelogs docs/ChangeLog
+
+override_dh_link:
+	dh_link
+
+	# workaround dh_link convertion of absolute symlinks to relvative symlinks
+	rm -rf debian/live-build/usr/share/live/build/bootloaders
+	cp -a share/bootloaders debian/live-build/usr/share/live/build/bootloaders

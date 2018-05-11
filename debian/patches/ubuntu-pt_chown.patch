@@ -1,0 +1,14 @@
+Description: Mount devpts with gid=5,mode=620 to work without pt_chown.
+Author: Adam Conrad <adconrad@ubuntu.com>
+
+--- live-build-3.0~a57.orig/scripts/build/lb_chroot_devpts
++++ live-build-3.0~a57/scripts/build/lb_chroot_devpts
+@@ -49,7 +49,7 @@ case "${1}" in
+ 			mkdir -p chroot/dev/pts
+ 
+ 			# Mounting /dev/pts
+-			${LB_ROOT_COMMAND} mount devpts-live -t devpts chroot/dev/pts || true
++			${LB_ROOT_COMMAND} mount devpts-live -t devpts -o gid=5,mode=620 chroot/dev/pts || true
+ 		fi
+ 
+ 		# Creating stage file

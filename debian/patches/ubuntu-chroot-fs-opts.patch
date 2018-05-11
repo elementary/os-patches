@@ -1,0 +1,99 @@
+Description: Add options to tune the EXT FS produced in lb_binary_rootfs
+ Adds --ext-block-size, --ext-resize-blocks and --ext-fudge-factor to
+ enable building filesystem images with 4K blocks that can be
+ online-resized to a configurable length.
+Author: Daniel Watkins <daniel.watkins@canonical.com>
+
+--- a/scripts/build/lb_binary_rootfs
++++ b/scripts/build/lb_binary_rootfs
+@@ -129,7 +129,7 @@
+ 					FAKE_MTAB="true"
+ 				fi
+ 
+-				Chroot chroot "mkfs.${LB_CHROOT_FILESYSTEM} -F -b 1024 -i 8192 -m 0 -L ${LB_HDD_LABEL} filesystem.${LB_CHROOT_FILESYSTEM}"
++				Chroot chroot "mkfs.${LB_CHROOT_FILESYSTEM} -F -b ${LB_EXT_BLOCKSIZE:-1024} -i 8192 -m 0 -L ${LB_HDD_LABEL} ${LB_EXT_RESIZEBLOCKS:+-E resize=${LB_EXT_RESIZEBLOCKS}} filesystem.${LB_CHROOT_FILESYSTEM}"
+ 
+ 				mkdir -p filesystem.tmp
+ 				${LB_ROOT_COMMAND} mount -o loop chroot/filesystem.${LB_CHROOT_FILESYSTEM} filesystem.tmp
+@@ -199,7 +199,7 @@
+ 
+ 			false)
+ 				dd if=/dev/zero of=binary/${INITFS}/filesystem.${LB_CHROOT_FILESYSTEM} bs=1024k count=0 seek=${REAL_DIM}
+-				mkfs.${LB_CHROOT_FILESYSTEM} -F -b 1024 -i 8192 -m 0 -L ${LB_HDD_LABEL} binary/${INITFS}/filesystem.${LB_CHROOT_FILESYSTEM}
++				mkfs.${LB_CHROOT_FILESYSTEM} -F -b ${LB_EXT_BLOCKSIZE:-1024} -i 8192 -m 0 -L ${LB_HDD_LABEL} ${LB_EXT_RESIZEBLOCKS:+-E resize=${LB_EXT_RESIZEBLOCKS}} binary/${INITFS}/filesystem.${LB_CHROOT_FILESYSTEM}
+ 
+ 				mkdir -p filesystem.tmp
+ 				${LB_ROOT_COMMAND} mount -o loop binary/${INITFS}/filesystem.${LB_CHROOT_FILESYSTEM} filesystem.tmp
+--- a/scripts/build/lb_config
++++ b/scripts/build/lb_config
+@@ -57,6 +57,9 @@
+ \t    [--debian-installer-gui true|false]\n\
+ \t    [--debug]\n\
+ \t    [-d|--distribution CODENAME]\n\
++\t    [--ext-block-size 1024|2048|4096]\n\
++\t    [--ext-resize-blocks N]\n\
++\t    [--ext-fudge-factor PERCENTAGE]\n\
+ \t    [--parent-distribution CODENAME]\n\
+ \t    [--parent-debian-installer-distribution CODENAME]\n\
+ \t    [--dump]\n\
+@@ -157,7 +160,7 @@
+ 		apt-indices:,bootappend-install:,bootappend-live:,bootappend-failsafe:,bootloader:,checksums:,compression:,config:,zsync:,build-with-chroot:,
+ 		debian-installer:,debian-installer-distribution:,debian-installer-preseedfile:,debian-installer-gui:,
+ 		grub-splash:,isohybrid-options:,hdd-label:,hdd-size:,iso-application:,iso-preparer:,iso-publisher:,
+-		iso-volume:,jffs2-eraseblock:,memtest:,net-root-filesystem:,net-root-mountoptions:,
++		iso-volume:,jffs2-eraseblock:,ext-block-size:,ext-resize-blocks:,ext-fudge-factor:,memtest:,net-root-filesystem:,net-root-mountoptions:,
+ 		net-root-path:,net-root-server:,net-cow-filesystem:,net-cow-mountoptions:,net-cow-path:,
+ 		net-cow-server:,net-tarball:,firmware-binary:,firmware-chroot:,swap-file-path:,swap-file-size:,syslinux-theme:,
+ 		win32-loader:,source:,source-images:,breakpoints,conffile:,debug,force,
+@@ -683,6 +686,21 @@
+ 				shift 2
+ 				;;
+ 
++			--ext-block-size)
++				LB_EXT_BLOCKSIZE="${2}"
++				shift 2
++				;;
++
++			--ext-resize-blocks)
++				LB_EXT_RESIZEBLOCKS="${2}"
++				shift 2
++				;;
++
++			--ext-fudge-factor)
++				LB_EXT_FUDGEFACTOR="${2}"
++				shift 2
++				;;
++
+ 			--jffs2-eraseblock)
+ 				LB_JFFS2_ERASEBLOCK="${2}"
+ 				shift 2
+@@ -1392,6 +1410,18 @@
+ # (Default: ${LB_ISO_VOLUME})
+ LB_ISO_VOLUME="${LB_ISO_VOLUME}"
+ 
++# \$LB_EXT_BLOCKSIZE: set EXT block size
++# (Default: unset)
++LB_EXT_BLOCKSIZE="${LB_EXT_BLOCKSIZE}"
++
++# \$LB_EXT_RESIZEBLOCKS: set EXT resize parameter
++# (Default: unset)
++LB_EXT_RESIZEBLOCKS="${LB_EXT_RESIZEBLOCKS}"
++
++# \$LB_EXT_FUDGEFACTOR: set extra size of EXT images (in %)
++# (Default: unset)
++LB_EXT_FUDGEFACTOR="${LB_EXT_FUDGEFACTOR}"
++
+ # \$LB_JFFS2_ERASEBLOCK: set jffs2 eraseblock size
+ # (Default: unset)
+ LB_JFFS2_ERASEBLOCK=""
+--- a/functions/losetup.sh
++++ b/functions/losetup.sh
+@@ -68,7 +68,7 @@
+ 
+ 	case "${FILESYSTEM}" in
+ 		ext2|ext3|ext4)
+-			PERCENT="5"
++			PERCENT="${LB_EXT_FUDGEFACTOR:-5}"
+ 			;;
+ 		*)
+ 			PERCENT="3"

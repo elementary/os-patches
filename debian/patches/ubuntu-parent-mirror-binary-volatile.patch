@@ -1,0 +1,18 @@
+Description: Fix default for LB_PARENT_MIRROR_BINARY_VOLATILE
+Author: Colin Watson <cjwatson@ubuntu.com>
+Bug-Debian: http://bugs.debian.org/685669
+Last-Update: 2012-08-23
+
+Index: b/functions/defaults.sh
+===================================================================
+--- a/functions/defaults.sh
++++ b/functions/defaults.sh
+@@ -596,7 +596,7 @@
+ 					;;
+ 			esac
+ 
+-			LB_PARENT_MIRROR_BINARY_VOLATILE="${LB_PARENT_MIRROR_BINARY_VOLATILE:-${LB_PARENT_MIRROR}}"
++			LB_PARENT_MIRROR_BINARY_VOLATILE="${LB_PARENT_MIRROR_BINARY_VOLATILE:-${LB_PARENT_MIRROR_BINARY}}"
+ 			;;
+ 
+ 		*)

@@ -1,0 +1,16 @@
+Description: Add skeleton arm64 support, so that ubuntu-core can build.
+Author: Adam Conrad <adconrad@ubuntu.com>
+
+--- live-build-3.0~a57.orig/functions/defaults.sh
++++ live-build-3.0~a57/functions/defaults.sh
+@@ -702,6 +702,10 @@ Set_defaults ()
+ 
+ 	# Setting linux flavour string
+ 	case "${LB_ARCHITECTURES}" in
++		arm64)
++			# Assume we'll have a generic kernel for arm64 some day:
++			LB_LINUX_FLAVOURS="${LB_LINUX_FLAVOURS:-generic}"
++			;;
+ 		armel)
+ 			case "${LB_MODE}" in
+                                 ubuntu|kubuntu)

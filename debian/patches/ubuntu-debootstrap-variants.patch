@@ -1,0 +1,29 @@
+Description: Fix handling of --bootstrap-flavour with debootstrap
+Author: Colin Watson <cjwatson@ubuntu.com>
+Bug-Debian: http://bugs.debian.org/685675
+Last-Update: 2012-08-23
+
+Index: b/scripts/build/lb_bootstrap_debootstrap
+===================================================================
+--- a/scripts/build/lb_bootstrap_debootstrap
++++ b/scripts/build/lb_bootstrap_debootstrap
+@@ -84,7 +84,18 @@
+ 	false)
+ 		if [ -n "${LB_BOOTSTRAP_FLAVOUR}" ]
+ 		then
+-			DEBOOTSTRAP_OPTIONS="${DEBOOTSTRAP_OPTIONS} --variant=${LB_BOOTSTRAP_FLAVOUR}"
++			case "${LB_BOOTSTRAP_FLAVOUR}" in
++				minimal)
++					DEBOOTSTRAP_OPTIONS="${DEBOOTSTRAP_OPTIONS} --variant=minbase"
++					;;
++
++				standard)
++					;;
++
++				*)
++					DEBOOTSTRAP_OPTIONS="${DEBOOTSTRAP_OPTIONS} --variant=${LB_BOOTSTRAP_FLAVOUR}"
++					;;
++			esac
+ 		fi
+ 		;;
+ esac

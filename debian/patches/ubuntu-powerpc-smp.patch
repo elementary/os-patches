@@ -1,0 +1,35 @@
+Description: Switch Ubuntu from powerpc to powerpc-smp kernel
+Author: Adam Conrad <adconrad@ubuntu.com>
+Forwarded: no
+
+Index: b/scripts/build/lb_binary_debian-installer
+===================================================================
+--- a/scripts/build/lb_binary_debian-installer
++++ b/scripts/build/lb_binary_debian-installer
+@@ -395,7 +395,7 @@
+ 			DI_REQ_PACKAGES="yaboot"
+ 			case "${LB_MODE}" in
+ 				ubuntu|kubuntu)
+-					DI_PACKAGES="${DI_REQ_PACKAGES} linux-image-powerpc linux-image-powerpc64-smp"
++					DI_PACKAGES="${DI_REQ_PACKAGES} linux-image-powerpc-smp linux-image-generic"
+ 					;;
+ 
+ 				*)
+Index: b/functions/defaults.sh
+===================================================================
+--- a/functions/defaults.sh
++++ b/functions/defaults.sh
+@@ -803,11 +803,11 @@
+ 				ubuntu|kubuntu)
+ 					case "${LIST}" in
+ 						stripped|minimal)
+-							LB_LINUX_FLAVOURS="${LB_LINUX_FLAVOURS:-powerpc}"
++							LB_LINUX_FLAVOURS="${LB_LINUX_FLAVOURS:-powerpc-smp}"
+ 							;;
+ 
+ 						*)
+-							LB_LINUX_FLAVOURS="${LB_LINUX_FLAVOURS:-powerpc powerpc64-smp}"
++							LB_LINUX_FLAVOURS="${LB_LINUX_FLAVOURS:-powerpc-smp generic}"
+ 							;;
+ 					esac
+ 					;;

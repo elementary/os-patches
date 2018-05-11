@@ -1,0 +1,122 @@
+commit 5a00aa44827cd477e13470b4ce417b7b6fff62f9
+Author: Daniel Baumann <mail@daniel-baumann.ch>
+Date:   Mon Mar 11 09:49:07 2013 +0100
+
+    Using dpkg-divert for other diversions too to handle upgrades of the diverted stuff during build.
+
+diff --git a/scripts/build/chroot_dpkg b/scripts/build/chroot_dpkg
+index b199cdf..07ef966 100755
+--- a/scripts/build/lb_chroot_dpkg
++++ b/scripts/build/lb_chroot_dpkg
+@@ -40,10 +40,8 @@ case "${1}" in
+ 		# Creating lock file
+ 		Create_lockfile .lock
+ 
+-		# Save start-stop-daemon program
+-		mv chroot/sbin/start-stop-daemon chroot/sbin/start-stop-daemon.orig
+-
+-		# Create start-stop-daemon program
++		# Create custom start-stop-daemon program
++		Chroot chroot dpkg-divert --rename --quiet --add /sbin/start-stop-daemon
+ 
+ cat > chroot/sbin/start-stop-daemon << EOF
+ #!/bin/sh
+@@ -103,11 +101,9 @@ EOF
+ 			rmdir --ignore-fail-on-non-empty /var/state/samhain || true
+ 		fi
+ 
+-		# Restore start-stop-daemon program
+-		if [ -e chroot/sbin/start-stop-daemon.orig ]
+-		then
+-			mv chroot/sbin/start-stop-daemon.orig chroot/sbin/start-stop-daemon
+-		fi
++		# Remove custom start-stop-daemon program
++		rm -f chroot/sbin/start-stop-daemon
++		Chroot chroot dpkg-divert --rename --quiet --remove /sbin/start-stop-daemon
+ 
+ 		# Remove dpkg sync configuration
+ 		rm -f chroot/etc/dpkg/dpkg.cfg.d/live-build
+diff --git a/scripts/build/chroot_hostname b/scripts/build/chroot_hostname
+index edc38a1..c42b1a7 100755
+--- a/scripts/build/lb_chroot_hostname
++++ b/scripts/build/lb_chroot_hostname
+@@ -29,8 +29,6 @@ Require_stagefile .build/config .build/bootstrap
+ 
+ case "${1}" in
+ 	install)
+-		Echo_message "Configuring file /etc/hostname"
+-
+ 		# Checking stage file
+ 		Check_stagefile .build/chroot_hostname
+ 
+@@ -40,15 +38,15 @@ case "${1}" in
+ 		# Creating lock file
+ 		Create_lockfile .lock
+ 
+-		# Save hostname
+-		mv chroot/bin/hostname chroot/bin/hostname.orig
+-
+ 		# Create hostname file
++		Echo_message "Configuring file /etc/hostname"
++
+ 		echo "localhost.localdomain" > chroot/etc/hostname
+ 
++		# Create custom hostname
+ 		Echo_message "Configuring file /bin/hostname"
+ 
+-		# Create hostname program
++		Chroot chroot dpkg-divert --rename --quiet --add /bin/hostname
+ 
+ cat > chroot/bin/hostname << EOF
+ #!/bin/sh
+@@ -79,11 +77,9 @@ EOF
+ 
+ 		Echo_message "Deconfiguring file /bin/hostname"
+ 
+-		# Restore hostname file
+-		if [ -e chroot/bin/hostname.orig ]
+-		then
+-			mv chroot/bin/hostname.orig chroot/bin/hostname
+-		fi
++		# Remove custom hostname
++		rm -f chroot/bin/hostname
++		Chroot chroot dpkg-divert --rename --quiet --remove /bin/hostname
+ 
+ 		# Removing stage file
+ 		rm -f .build/chroot_hostname
+diff --git a/scripts/build/chroot_sysv-rc b/scripts/build/chroot_sysv-rc
+index 247290e..4dea100 100755
+--- a/scripts/build/lb_chroot_sysv-rc
++++ b/scripts/build/lb_chroot_sysv-rc
+@@ -40,10 +40,10 @@ case "${1}" in
+ 		# Creating lock file
+ 		Create_lockfile .lock
+ 
+-		if [ -f chroot/usr/sbin/policy-rc.d ]
++		if [ -e chroot/usr/sbin/policy-rc.d ]
+ 		then
+ 			# Save policy-rc.d file
+-			mv chroot/usr/sbin/policy-rc.d chroot/usr/sbin/policy-rc.d.orig
++			Chroot chroot dpkg-divert --rename --quiet --add /usr/sbin/policy-rc.d
+ 		fi
+ 
+ 		# Create policy-rc.d file
+@@ -68,13 +68,13 @@ EOF
+ 		# Creating lock file
+ 		Create_lockfile .lock
+ 
+-		if [ -f chroot/usr/sbin/policy-rc.d.orig ]
++		# Remove custom policy-rc.d file
++		rm -f chroot/usr/sbin/policy-rc.d
++
++		if [ -e chroot/usr/sbin/policy-rc.d.distrib ]
+ 		then
+ 			# Restore policy-rc.d file
+-			mv chroot/usr/sbin/policy-rc.d.orig chroot/usr/sbin/policy-rc.d
+-		else
+-			# Remove policy-rc.d file
+-			rm -f chroot/usr/sbin/policy-rc.d
++			Chroot chroot dpkg-divert --rename --quiet --remove /usr/sbin/policy-rc.d
+ 		fi
+ 
+ 		# Removing stage file

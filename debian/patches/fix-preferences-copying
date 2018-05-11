@@ -1,0 +1,25 @@
+Description: Fix copying apt preferences snippets into chroots
+Author: Adam Conrad <adconrad@ubuntu.com>
+
+Index: live-build-3.0~a57/scripts/build/lb_chroot_archives
+===================================================================
+--- live-build-3.0~a57.orig/scripts/build/lb_chroot_archives
++++ live-build-3.0~a57/scripts/build/lb_chroot_archives
+@@ -291,7 +291,7 @@ EOF
+ 			do
+ 				if [ -e "${FILE}" ]
+ 				then
+-					cp config/archives/$(basename ${_FILE} .chroot) chroot/etc/apt/preferences.d
++					cp ${FILE} chroot/etc/apt/preferences.d/$(basename ${FILE} .chroot)
+ 				fi
+ 			done
+ 		fi
+@@ -846,7 +846,7 @@ EOF
+ 			do
+ 				if [ -e "${FILE}" ]
+ 				then
+-					cp config/archives/$(basename ${_FILE} .binary) chroot/etc/apt/preferences.d
++					cp ${FILE} chroot/etc/apt/preferences.d/$(basename ${FILE} .binary)
+ 				fi
+ 			done
+ 		fi

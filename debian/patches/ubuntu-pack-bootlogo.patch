@@ -1,0 +1,38 @@
+Description: carry over hack from ubuntu-cdimage to update bootlogo with contents
+ New gfxboot in utopic does no longer support loading assets from outside the
+ bootlogo archive, so we pack everything together and update bootlogo as part of the
+ syslinux build part.
+Author: Harald Sitter <apachelogger@kubuntu.org>
+Origin: vendor
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/live-build/+bug/1387709
+Forwarded: no
+Reviewed-by: Rohan Garg <rohangarg@kubuntu.org>
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: live-build-3.0~a57/scripts/build/lb_binary_syslinux
+===================================================================
+--- live-build-3.0~a57.orig/scripts/build/lb_binary_syslinux
++++ live-build-3.0~a57/scripts/build/lb_binary_syslinux
+@@ -359,6 +359,22 @@ case "${LB_MODE}" in
+ 		;;
+ esac
+ 
++# Hack around the removal of support in gfxboot for reading from outside
++# the bootlogo archive.  This makes customisation harder and is not ideal.
++tmpdir="$(mktemp -d)"
++(cd "$tmpdir" && cpio -i) < ${_TARGET}/bootlogo
++cp -a -f	${_TARGET}/*.fnt \
++		${_TARGET}/*.hlp \
++		${_TARGET}/*.jpg \
++		${_TARGET}/*.pcx \
++		${_TARGET}/*.tr \
++		${_TARGET}/*.cfg \
++		$(test -e ${_TARGET}/lang && echo ${_TARGET}/lang) \
++		${_TARGET}/langlist \
++		"$tmpdir/" || true
++(cd "$tmpdir" && ls -1 | cpio --quiet -o) > ${_TARGET}/bootlogo
++rm -rf "$tmpdir"
++
+ case "${LB_BUILD_WITH_CHROOT}" in
+ 	true)
+ 		# Saving cache

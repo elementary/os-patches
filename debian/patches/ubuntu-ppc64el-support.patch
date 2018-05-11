@@ -1,0 +1,47 @@
+Description: Add basic ppc64el support
+Author: Colin Watson <cjwatson@ubuntu.com>
+Author: Daniel Watkins <daniel.watkins@canonical.com>
+Forwarded: no
+Last-Update: 2015-10-26
+
+Index: b/functions/defaults.sh
+===================================================================
+--- a/functions/defaults.sh
++++ b/functions/defaults.sh
+@@ -830,6 +830,10 @@
+ 			esac
+ 			;;
+ 
++		ppc64el)
++			LB_LINUX_FLAVOURS="${LB_LINUX_FLAVOURS:-generic}"
++			;;
++
+ 		s390)
+ 			case "${LB_MODE}" in
+ 				progress|ubuntu|kubuntu)
+Index: b/scripts/build/lb_binary_linux-image
+===================================================================
+--- a/scripts/build/lb_binary_linux-image
++++ b/scripts/build/lb_binary_linux-image
+@@ -58,7 +58,7 @@
+ esac
+ 
+ case "${LB_ARCHITECTURES}" in
+-	powerpc)
++	powerpc|ppc64el)
+ 		LINUX="vmlinux"
+ 		;;
+ 
+Index: b/scripts/build/lb_binary_rootfs
+===================================================================
+--- a/scripts/build/lb_binary_rootfs
++++ b/scripts/build/lb_binary_rootfs
+@@ -43,7 +43,7 @@
+ 		LINUX="vmlinuz"
+ 		;;
+ 
+-	powerpc)
++	powerpc|ppc64el)
+ 		LINUX="vmlinux"
+ 		;;
+ esac

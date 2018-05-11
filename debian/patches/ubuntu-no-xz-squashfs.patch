@@ -1,0 +1,25 @@
+Description: Don't turn on xz compression in mksquashfs for ubuntu builds.
+Author: Adam Conrad <adconrad@ubuntu.com>
+Forwarded: no
+Last-Update: 2012-08-24
+
+--- live-build-3.0~a57.orig/scripts/build/lb_binary_rootfs
++++ live-build-3.0~a57/scripts/build/lb_binary_rootfs
+@@ -363,8 +363,15 @@ case "${LB_CHROOT_FILESYSTEM}" in
+ 				;;
+ 
+ 			*)
+-				# FIXME: artax-backports too, once d-i has catched up
+-				MKSQUASHFS_OPTIONS="${MKSQUASHFS_OPTIONS} -comp xz"
++				case "${LB_MODE}" in
++					ubuntu|kubuntu)
++
++						;;
++					*)
++						# FIXME: artax-backports too, once d-i has catched up
++						MKSQUASHFS_OPTIONS="${MKSQUASHFS_OPTIONS} -comp xz"
++						;;
++				esac
+ 				;;
+ 		esac
+ 

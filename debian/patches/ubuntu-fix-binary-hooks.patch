@@ -1,0 +1,17 @@
+Description: Fix execution of binary hooks
+Author: Colin Watson <cjwatson@ubuntu.com>
+Last-Update: 2012-08-24
+
+Index: b/scripts/build/lb_binary_hooks
+===================================================================
+--- a/scripts/build/lb_binary_hooks
++++ b/scripts/build/lb_binary_hooks
+@@ -50,7 +50,7 @@
+ 			if [ -e "${FILE}" ]
+ 			then
+ 				cd binary
+-				./"${FILE}" || { Echo_error "${_HOOK} failed (exit non-zero). You should check for errors."; exit 1 ;}
++				"${FILE}" || { Echo_error "${_HOOK} failed (exit non-zero). You should check for errors."; exit 1 ;}
+ 				cd "${OLDPWD}"
+ 			fi
+ 		done

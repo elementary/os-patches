@@ -1,0 +1,22 @@
+Description: Handle late installation of systemd/resolvconf gracefully, by not
+ reverting /etc/resolv.conf symlink to a backup of the backup.
+Author: Dimitri John Ledkov <xnox@ubuntu.com>
+
+--- live-build-3.0~a57.orig/scripts/build/lb_chroot_resolv
++++ live-build-3.0~a57/scripts/build/lb_chroot_resolv
+@@ -81,6 +81,15 @@ case "${1}" in
+ 			# Copying local resolv.conf
+ 			cp -a config/includes.chroot/etc/resolv.conf chroot/etc/resolv.conf
+ 			rm -f chroot/etc/resolv.conf.orig
++		elif [ -L chroot/etc/resolv.conf ] && [ -e chroot/etc/resolv.conf.orig ]
++		then
++			# After debootstrap (which copied resolv.conf from
++			# the host) and after we backed that up, something
++			# converted /etc/resolv.conf into a
++			# symlink. E.g. a late installation of
++			# systemd-resolved or resolvconf. Do not touch the
++			# new symlink, but do clean up our backup.
++			rm -f chroot/etc/resolv.conf.orig
+ 		elif [ -e chroot/etc/resolv.conf.orig ] || [ -L chroot/etc/resolv.conf.orig ]
+ 		then
+ 			# Restoring resolv file or symlink

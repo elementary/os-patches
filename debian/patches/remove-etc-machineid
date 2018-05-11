@@ -1,0 +1,20 @@
+Description: Truncate /etc/machine-id (in addition to /var/lib/dbus/machine-id)
+ Systemd is using a /etc/machine-id file that needs to be unique to the
+ local system. Just like we remove /var/lib/dbus/machine-id we truncate
+ /etc/machine-id. This will make systemd generate a new one on each boot.
+Author: Michael Vogt <michael.vogt@ubuntu.com>
+
+---
+Origin: vendor
+Forwarded: no
+Last-Update: 2014-10-29
+
+--- live-build-3.0~a57.orig/share/hooks/004-remove-dbus-machine-id.chroot
++++ live-build-3.0~a57/share/hooks/004-remove-dbus-machine-id.chroot
+@@ -7,3 +7,6 @@ set -e
+ # This removes dbus machine id that cache that makes each system unique.
+ 
+ rm -f /var/lib/dbus/machine-id
++
++# truncate, do not remove otherwise systemd is unhappy
++printf "" > /etc/machine-id

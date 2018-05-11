@@ -1,0 +1,20 @@
+Description: Skip installing missing initrd
+ ... instead of failing.
+ .
+Author: Balint Reczey <rbalint@ubuntu.com>
+
+Bug-Ubuntu: https://launchpad.net/bugs/1720217
+Forwarded: no
+Last-Update: 2017-09-28
+
+--- live-build-3.0~a57.orig/scripts/build/lb_binary_linux-image
++++ live-build-3.0~a57/scripts/build/lb_binary_linux-image
+@@ -76,7 +76,7 @@ mkdir -p "${DESTDIR}"
+ if [ "${LB_LINUX_PACKAGES}" != "none" ]
+ then
+ 	cp chroot/boot/"${LINUX}"-* "${DESTDIR}"
+-	cp chroot/boot/initrd.img-* "${DESTDIR}"
++	cp chroot/boot/initrd.img-* "${DESTDIR}" 2>&1 || Echo_message "Skipped installing missing initrd."
+ fi
+ 
+ case "${LB_INITRAMFS}" in

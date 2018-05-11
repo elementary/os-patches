@@ -1,0 +1,24 @@
+Description: Remove resolvconf artifacts
+  If chroot/etc/resolvconf/resolv.conf.d exists, tidy up the original and
+  tail files, which are artifacts of the build (and leak the host system's
+  resolv.conf).
+Author: Adam Conrad <adconrad@ubuntu.com>
+Last-Update: 2012-08-20
+
+Index: b/scripts/build/lb_chroot_resolv
+===================================================================
+--- a/scripts/build/lb_chroot_resolv
++++ b/scripts/build/lb_chroot_resolv
+@@ -90,6 +90,12 @@
+ 			Truncate chroot/etc/resolv.conf
+ 		fi
+ 
++		# Clean up resolvconf's pollution
++		if [ -d chroot/etc/resolvconf/resolv.conf.d ]; then
++			rm -f chroot/etc/resolvconf/resolv.conf.d/original
++			rm -f chroot/etc/resolvconf/resolv.conf.d/tail
++		fi
++
+ 		# Removing stage file
+ 		rm -f .build/chroot_resolv
+ 		;;

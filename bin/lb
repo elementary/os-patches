@@ -1,0 +1,73 @@
+#!/bin/sh
+
+## live-build(7) - System Build Scripts
+## Copyright (C) 2006-2012 Daniel Baumann <daniel@debian.org>
+##
+## This program comes with ABSOLUTELY NO WARRANTY; for details see COPYING.
+## This is free software, and you are welcome to redistribute it
+## under certain conditions; see COPYING for details.
+
+
+set -e
+
+# Including common functions
+( . "${LIVE_BUILD}/scripts/build.sh" > /dev/null 2>&1 || true ) || . /usr/lib/live/build.sh
+
+# Setting static variables
+DESCRIPTION="$(Echo 'utility to build Debian Live systems')"
+HELP="FIXME"
+USAGE="FIXME"
+
+case "${1}" in
+	-h|--help)
+		if [ -x "$(which man 2>/dev/null)" ]
+		then
+			man lb
+			exit 0
+		else
+			${0} --usage
+			exit 0
+		fi
+		;;
+
+	""|-u|--usage)
+		Usage
+		;;
+
+	-v|--version)
+		echo "${VERSION}"
+		exit 0
+		;;
+
+	*)
+		COMMAND="lb_${1}"
+		shift
+
+		ENV=""
+
+		for _FILE in config/environment config/environment.binary
+		do
+			if [ -e "${_FILE}" ]
+			then
+				ENV="${ENV} $(grep -v '^#' ${_FILE})"
+			fi
+		done
+
+		if [ -x "${LIVE_BUILD}/scripts/build/${COMMAND}" ]
+		then
+			SCRIPT="${LIVE_BUILD}/scripts/build/${COMMAND}"
+		elif [ -x /usr/lib/live/build/${COMMAND} ]
+		then
+			SCRIPT=/usr/lib/live/build/"${COMMAND}"
+		elif [ -x "$(which ${COMMAND} 2>/dev/null)" ]
+		then
+			SCRIPT="${COMMAND}"
+		else
+			Echo_error "no such script: ${COMMAND}"
+			exit 1
+		fi
+
+		Echo "[%s] %s" "$(date +'%F %T')" "${COMMAND} ${*}"
+		LB=1 ${ENV} exec "${SCRIPT}" "${@}"
+		;;
+esac

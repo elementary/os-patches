@@ -1,0 +1,36 @@
+Description: Put kernel symlinks in /boot on some architectures
+ This matches base-installer/library.sh more closely.
+Author: Colin Watson <cjwatson@ubuntu.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/958839
+Forwarded: no
+Last-Update: 2012-04-18
+
+Index: b/scripts/build/lb_chroot_linux-image
+===================================================================
+--- a/scripts/build/lb_chroot_linux-image
++++ b/scripts/build/lb_chroot_linux-image
+@@ -118,6 +118,24 @@
+ 
+ 	fi
+ 
++	cat > chroot/etc/kernel-img.conf << EOF
++# Kernel Image management overrides
++# See kernel-img.conf(5) for details
++do_symlinks = yes
++do_bootloader = no
++EOF
++
++	case "${LB_ARCHITECTURES}" in
++		alpha|amd64|hppa|i386|ia64|m68k|mips|mipsel)
++			;;
++
++		*)
++			cat >> chroot/etc/kernel-img.conf << EOF
++link_in_boot = yes
++EOF
++			;;
++	esac
++
+ 	# Creating stage file
+ 	Create_stagefile .build/chroot_linux-image
+ fi

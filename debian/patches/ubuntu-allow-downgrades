@@ -1,0 +1,16 @@
+Description: Allow base system downgrades.
+Author: Adam Conrad <adconrad@ubuntu.com>
+
+--- live-build-3.0~a57.orig/scripts/build/lb_chroot_archives
++++ live-build-3.0~a57/scripts/build/lb_chroot_archives
+@@ -564,8 +564,8 @@ EOF
+ 			rm -rf chroot/var/cache/apt/*.bin
+ 
+ 			Apt chroot update
+-			Apt chroot "upgrade"
+-			Apt chroot "dist-upgrade"
++			Apt chroot "--force-yes" "upgrade"
++			Apt chroot "--force-yes" "dist-upgrade"
+ 
+ 			if [ "${LB_CACHE_INDICES}" = "true" ]
+ 			then

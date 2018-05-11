@@ -1,0 +1,30 @@
+Description: Drop fix-up code for sysvinit
+ SysVinit has not been essential in Ubuntu in a decade, and now it's
+ sufficiently gone that dpkg-query fails.
+Author: Steve Langasek <steve.langasek@ubuntu.com>
+Forwarded: not-needed
+Last-Update: 2017-08-08
+
+--- live-build-3.0~a57.orig/scripts/build/lb_chroot_live-packages
++++ live-build-3.0~a57/scripts/build/lb_chroot_live-packages
+@@ -48,20 +48,6 @@ then
+ 	_PACKAGES="${_PACKAGES} live-config live-config-${LB_INITSYSTEM}"
+ fi
+ 
+-# Do initsystem specific hacks
+-if [ -n "${LB_INITSYSTEM}" ] && [ "${LB_INITSYSTEM}" != "sysvinit" ]
+-then
+-	# lets see if we still need the squeeze's "pre init system policy discussion" hack:
+-	IS_SYSVINIT_ESSENTIAL="$(Chroot chroot dpkg-query --show --showformat='${Essential}\n' sysvinit)"
+-	RC="$?"
+-
+-	if [ "${IS_SYSVINIT_ESSENTIAL}" != "no" ] && [ "${RC}" = "0" ]
+-	then
+-		# sysvinit is both installed and essential, ugly hack to remove it
+-		Chroot chroot dpkg --force-remove-essential --remove sysvinit || true
+-	fi
+-fi
+-
+ # Install live packages
+ if [ -n "${_PACKAGES}" ]
+ then

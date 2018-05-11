@@ -1,0 +1,24 @@
+Description: Don't force inclusion of gnupg in debootstrap
+ gnupg is now a metapackage depending on large numbers of extraneous
+ libraries.  It should not be pulled into the base system; we should only
+ be pulling in the gpgv package instead.
+Author: Steve Langasek <steve.langasek@ubuntu.com>
+Last-Update: 2018-03-02
+
+--- live-build-3.0~a57.orig/functions/defaults.sh
++++ live-build-3.0~a57/functions/defaults.sh
+@@ -377,14 +377,6 @@ Set_defaults ()
+ 		fi
+ 	fi
+ 
+-	# Include packages on base
+-	case "${LB_MODE}" in
+-		ubuntu|kubuntu)
+-			LB_BOOTSTRAP_INCLUDE="${LB_BOOTSTRAP_INCLUDE:-gnupg}"
+-			;;
+-
+-	esac
+-
+ 	# Exclude packages on base
+ 	# LB_BOOTSTRAP_EXCLUDE
+ 

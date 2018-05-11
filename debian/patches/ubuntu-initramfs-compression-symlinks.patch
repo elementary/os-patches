@@ -1,0 +1,28 @@
+Description: Avoid recompressing initrd.img symlinks
+Author: Colin Watson <cjwatson@ubuntu.com>
+Forwarded: no
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1539157
+Last-Update: 2016-06-28
+
+Index: b/scripts/build/lb_chroot_hacks
+===================================================================
+--- a/scripts/build/lb_chroot_hacks
++++ b/scripts/build/lb_chroot_hacks
+@@ -195,7 +195,7 @@
+ 		;;
+ 
+ 	bzip2)
+-		for INITRAMFS in $(find chroot/boot -name 'initrd*'); do
++		for INITRAMFS in $(find chroot/boot -name 'initrd*' -not -type l); do
+ 			zcat "${INITRAMFS}" | bzip2 -c ${BZIP2_OPTIONS} > "${INITRAMFS}.new"
+ 			mv "${INITRAMFS}.new" "${INITRAMFS}"
+ 		done
+@@ -205,7 +205,7 @@
+ 		# We probably ought to use COMPRESS= in a temporary file in
+ 		# /etc/initramfs-tools/conf.d/ instead, but it's hard to
+ 		# pass options that way.
+-		for INITRAMFS in $(find chroot/boot -name 'initrd*'); do
++		for INITRAMFS in $(find chroot/boot -name 'initrd*' -not -type l); do
+ 			zcat "${INITRAMFS}" | lzma -c ${LZMA_OPTIONS} > "${INITRAMFS}.new"
+ 			mv "${INITRAMFS}.new" "${INITRAMFS}"
+ 		done

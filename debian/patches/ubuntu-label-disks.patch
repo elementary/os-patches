@@ -1,0 +1,23 @@
+Description: Apply LB_HDD_LABEL to disks produced in lb_binary_rootfs.
+Author: Daniel Watkins <daniel.watkins@canonical.com>
+
+--- live-build-3.0~a57.orig/scripts/build/lb_binary_rootfs
++++ live-build-3.0~a57/scripts/build/lb_binary_rootfs
+@@ -129,7 +129,7 @@ case "${LB_CHROOT_FILESYSTEM}" in
+ 					FAKE_MTAB="true"
+ 				fi
+ 
+-				Chroot chroot "mkfs.${LB_CHROOT_FILESYSTEM} -F -b 1024 -i 8192 -m 0 filesystem.${LB_CHROOT_FILESYSTEM}"
++				Chroot chroot "mkfs.${LB_CHROOT_FILESYSTEM} -F -b 1024 -i 8192 -m 0 -L ${LB_HDD_LABEL} filesystem.${LB_CHROOT_FILESYSTEM}"
+ 
+ 				mkdir -p filesystem.tmp
+ 				${LB_ROOT_COMMAND} mount -o loop chroot/filesystem.${LB_CHROOT_FILESYSTEM} filesystem.tmp
+@@ -199,7 +199,7 @@ case "${LB_CHROOT_FILESYSTEM}" in
+ 
+ 			false)
+ 				dd if=/dev/zero of=binary/${INITFS}/filesystem.${LB_CHROOT_FILESYSTEM} bs=1024k count=0 seek=${REAL_DIM}
+-				mkfs.${LB_CHROOT_FILESYSTEM} -F -b 1024 -i 8192 -m 0 binary/${INITFS}/filesystem.${LB_CHROOT_FILESYSTEM}
++				mkfs.${LB_CHROOT_FILESYSTEM} -F -b 1024 -i 8192 -m 0 -L ${LB_HDD_LABEL} binary/${INITFS}/filesystem.${LB_CHROOT_FILESYSTEM}
+ 
+ 				mkdir -p filesystem.tmp
+ 				${LB_ROOT_COMMAND} mount -o loop binary/${INITFS}/filesystem.${LB_CHROOT_FILESYSTEM} filesystem.tmp

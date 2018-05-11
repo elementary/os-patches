@@ -1,0 +1,16 @@
+Description: attempt s390x builds
+Author: Dimitri John Ledkov <xnox@ubuntu.com>
+
+--- live-build-3.0~a57.orig/functions/defaults.sh
++++ live-build-3.0~a57/functions/defaults.sh
+@@ -834,6 +834,10 @@ Set_defaults ()
+ 			LB_LINUX_FLAVOURS="${LB_LINUX_FLAVOURS:-generic}"
+ 			;;
+ 
++		s390x)
++			LB_LINUX_FLAVOURS="${LB_LINUX_FLAVOURS:-generic}"
++			;;
++
+ 		s390)
+ 			case "${LB_MODE}" in
+ 				progress|ubuntu|kubuntu)

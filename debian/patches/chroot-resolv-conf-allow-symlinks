@@ -1,0 +1,24 @@
+Description: Allow symlinks for config/includes.chroot/etc/resolv.conf
+ Backport from the 4.0 branch to allow symlinks for 
+ config/includes.chroot/etc/resolv.conf so that a image can have a
+ symlink to /run/resolvconf/resolv.conf
+Author: Michael Vogt <michael.vogt@ubuntu.com>
+
+---
+Origin: vendor
+Forwarded: not-needed
+Last-Update: 2014-10-29
+
+Index: live-build-3.0~a57/scripts/build/lb_chroot_resolv
+===================================================================
+--- live-build-3.0~a57.orig/scripts/build/lb_chroot_resolv
++++ live-build-3.0~a57/scripts/build/lb_chroot_resolv
+@@ -76,7 +76,7 @@ case "${1}" in
+ 		# Creating lock file
+ 		Create_lockfile .lock
+ 
+-		if [ -e config/includes.chroot/etc/resolv.conf ]
++		if [ -e config/includes.chroot/etc/resolv.conf ] ||  [ -L config/includes.chroot/etc/resolv.conf ];
+ 		then
+ 			# Copying local resolv.conf
+ 			cp -a config/includes.chroot/etc/resolv.conf chroot/etc/resolv.conf

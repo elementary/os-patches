@@ -1,0 +1,36 @@
+Description: Fix lb_chroot_upstart to work when upstart's not in bootstrap
+Author: Adam Conrad <adconrad@ubuntu.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1477051
+
+--- live-build-3.0~a57.orig/scripts/build/lb_chroot_upstart
++++ live-build-3.0~a57/scripts/build/lb_chroot_upstart
+@@ -27,12 +27,6 @@ Set_defaults
+ # Requiring stage file
+ Require_stagefile .build/config .build/bootstrap
+ 
+-# Check if system uses upstart
+-if [ ! -e chroot/sbin/initctl ]
+-then
+-	exit 0
+-fi
+-
+ case "${1}" in
+ 	install)
+ 		Echo_message "Configuring file /sbin/initctl"
+@@ -49,6 +43,8 @@ case "${1}" in
+ 		# Create custom initctl file
+ 		Chroot chroot dpkg-divert --rename --quiet --add /sbin/initctl
+ 
++		# Only create stub if we actually diverted something
++		if [ -e chroot/sbin/initctl.distrib ]; then
+ cat > chroot/sbin/initctl << EOF
+ #!/bin/sh
+ echo "All runlevel operations denied by policy" >&2
+@@ -56,6 +52,7 @@ exit 101
+ EOF
+ 
+ 		chmod 0755 chroot/sbin/initctl
++		fi
+ 
+ 		# Creating stage file
+ 		Create_stagefile .build/chroot_upstart
