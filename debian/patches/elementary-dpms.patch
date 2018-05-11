@@ -1,0 +1,72 @@
+--- a/data/org.gnome.settings-daemon.plugins.power.gschema.xml.in
++++ b/data/org.gnome.settings-daemon.plugins.power.gschema.xml.in
+@@ -11,6 +11,11 @@
+       <summary>Activation of this plugin</summary>
+       <description>Whether this plugin would be activated by unity-settings-daemon or not</description>
+     </key>
++    <key name="manage-dpms-defaults" type="b">
++      <default>false</default>
++      <summary>Reset X DPMS values</summary>
++      <description>Whether DPMS values will be adjusted by gnome-settings-daemon</description>
++    </key>
+     <key name="idle-brightness" type="i">
+       <default>30</default>
+       <summary>The brightness of the screen when idle</summary>
+--- a/plugins/power/gpm-common.c
++++ b/plugins/power/gpm-common.c
+@@ -302,6 +302,14 @@
+         return TRUE;
+ }
+ 
++gboolean
++manage_dpms (void)
++{
++        GSettings *settings;
++        settings = g_settings_new ("org.gnome.settings-daemon.plugins.power");
++        return g_settings_get_boolean (settings, "manage-dpms-defaults");
++}
++
+ guint
+ gsd_power_enable_screensaver_watchdog (void)
+ {
+@@ -312,7 +320,7 @@
+          * way. The defaults are now applied in Fedora 20 from
+          * being "0" by default to being "600" by default */
+         gdk_error_trap_push ();
+-        if (DPMSQueryExtension(GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), &dummy, &dummy))
++        if (manage_dpms () && DPMSQueryExtension(GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), &dummy, &dummy))
+                 DPMSSetTimeouts (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), 0, 0, 0);
+         gdk_error_trap_pop_ignored ();
+         id = g_timeout_add_seconds (XSCREENSAVER_WATCHDOG_TIMEOUT,
+--- a/plugins/power/gpm-common.h
++++ b/plugins/power/gpm-common.h
+@@ -35,6 +35,7 @@
+ gboolean         gsd_power_is_hardware_a_tablet         (void);
+ guint            gsd_power_enable_screensaver_watchdog  (void);
+ void             reset_idletime                         (void);
++gboolean         manage_dpms                            (void);
+ 
+ /* Backlight helpers */
+ 
+--- a/plugins/power/gsd-power-manager.c
++++ b/plugins/power/gsd-power-manager.c
+@@ -1030,6 +1030,9 @@
+         gboolean ret;
+         GError *error = NULL;
+ 
++        if (!(manage_dpms ()))
++                return;
++
+         iio_proxy_claim_light (manager, TRUE);
+         ret = gnome_rr_screen_set_dpms_mode (manager->priv->rr_screen,
+                                              GNOME_RR_DPMS_ON,
+@@ -1051,6 +1054,9 @@
+         gboolean ret;
+         GError *error = NULL;
+ 
++        if (!(manage_dpms ()))
++               return;
++
+         iio_proxy_claim_light (manager, FALSE);
+         ret = gnome_rr_screen_set_dpms_mode (manager->priv->rr_screen,
+                                              GNOME_RR_DPMS_OFF,
