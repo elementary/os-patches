@@ -14,7 +14,7 @@
        <summary>The brightness of the screen when idle</summary>
 --- a/plugins/power/gpm-common.c
 +++ b/plugins/power/gpm-common.c
-@@ -302,6 +302,14 @@
+@@ -302,6 +302,18 @@
          return TRUE;
  }
  
@@ -22,14 +22,18 @@
 +manage_dpms (void)
 +{
 +        GSettings *settings;
++        gboolean manage_dpms_defaults;
++
 +        settings = g_settings_new ("org.gnome.settings-daemon.plugins.power");
-+        return g_settings_get_boolean (settings, "manage-dpms-defaults");
++        manage_dpms_defaults = g_settings_get_boolean (settings, "manage-dpms-defaults");
++        g_object_unref (settings);
++        return manage_dpms_defaults;
 +}
 +
  guint
  gsd_power_enable_screensaver_watchdog (void)
  {
-@@ -312,7 +320,7 @@
+@@ -312,7 +324,7 @@
           * way. The defaults are now applied in Fedora 20 from
           * being "0" by default to being "600" by default */
          gdk_error_trap_push ();
