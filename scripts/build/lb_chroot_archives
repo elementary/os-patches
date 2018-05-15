@@ -262,6 +262,7 @@ EOF
 		if Find_files config/archives/*.list || \
 		   Find_files config/archives/*.list.chroot
 		then
+			Apt chroot update
 			for FILE in config/archives/*.list \
 				    config/archives/*.list.chroot
 			do
@@ -818,6 +819,7 @@ EOF
 		if Find_files config/archives/*.list || \
 		   Find_files config/archives/*.list.binary
 		then
+			Apt chroot update
 			for FILE in config/archives/*.list \
 				    config/archives/*.list.binary
 			do
