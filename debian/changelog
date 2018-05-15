@@ -1,0 +1,142 @@
+xdg-user-dirs (0.17-1ubuntu1) bionic; urgency=low
+
+  * Merge with Debian. Remaining change:
+    - Add launchpad_translation_export.patch:
+      + update translations from Launchpad
+  * Fixes xdg-user-dirs-update not respecting $HOME (LP: #1754356), thanks
+    Trevinho.
+
+ -- Iain Lane <iain.lane@canonical.com>  Fri, 23 Mar 2018 15:58:57 +0000
+
+xdg-user-dirs (0.17-1) unstable; urgency=medium
+
+  * New upstream release (LP: #1754356)
+  * Update Vcs fields for migration to https://salsa.debian.org/
+
+ -- Jeremy Bicha <jbicha@debian.org>  Fri, 16 Mar 2018 16:21:50 -0400
+
+xdg-user-dirs (0.16-1) unstable; urgency=medium
+
+  * New upstream release
+  * Drop 01_add-autostart-file.patch: Applied in new release
+  * Update Vcs fields for conversion to git
+  * Add debian/gbp.conf
+  * Bump Standards-Version to 4.1.2
+  * Bump debhelper compat to 11
+
+ -- Jeremy Bicha <jbicha@debian.org>  Sun, 17 Dec 2017 17:39:43 -0500
+
+xdg-user-dirs (0.15-3ubuntu3) artful; urgency=medium
+
+  * Restore translations as described in the previous upload
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 22 Aug 2017 13:16:17 +0200
+
+xdg-user-dirs (0.15-3ubuntu2) artful; urgency=medium
+
+  * debian/rules: let pkgbinarymangler strip the translations so they
+    get imported in launchpad, the change is going to be reverted
+    to include the launchpad export again in the next upload
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 22 Aug 2017 00:32:17 +0200
+
+xdg-user-dirs (0.15-3ubuntu1) artful; urgency=medium
+
+  * Sync with Debian (LP: #1708569). Remaining change:
+    - Add launchpad_translation_export.patch:
+      + update translations from Launchpad
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 18 Aug 2017 14:25:32 -0400
+
+xdg-user-dirs (0.15-3) unstable; urgency=medium
+
+  * add-autostart-file.patch: Add autostart .desktop file to launch the user
+    directory update in any session implementing the XDG autostart spec.
+    This is required for proper Wayland support.
+  * Remove Xsession.d launch file: We don't want to run twice in an X11 session.
+  * Switch packaging to use minimal dh style, compat level 10
+  * Update for standards version 4.0.0
+    - We now run autoreconf by default
+  * Resolve a typo in d/copyright
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 18 Aug 2017 20:04:48 +0200
+
+xdg-user-dirs (0.15-2) unstable; urgency=medium
+
+  * Make xdg-user-dirs Multi-Arch: foreign as this is a tool which can be run
+    on any architecture. (LP: #1371439)
+
+ -- Iain Lane <laney@debian.org>  Fri, 19 Sep 2014 10:17:41 +0100
+
+xdg-user-dirs (0.15-1) unstable; urgency=low
+
+  * New upstream release.
+    - Updated and new translations, including Croatian. (Closes: #666787)
+    - Add manpages for all files and commands. (Closes: #524903)
+  * Update Vcs-* URLs.
+  * Rebuild all translations.
+  * Bump Standards-Version to 3.9.4. No further changes.
+  * Set pkg-gnome-maintainers@lists.alioth.debian.org as Maintainer.
+  * Add Build-Depends on xsltproc, docbook-xsl and docbook-xml. Required to
+    build the documentation.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 29 Jun 2013 08:21:06 +0200
+
+xdg-user-dirs (0.14-1) unstable; urgency=low
+
+  * New upstream release.
+  * Bump Standards-Version to 3.9.2. No further changes.
+  * Bump debhelper compatibility level to 8. Update Build-Depends accordingly.
+  * debian/rules: Set TARBALL_EXT to tar.gz.
+  * debian/patches/l10n-ca.patch: Remove, merged upstream.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 30 Jul 2011 18:17:50 +0200
+
+xdg-user-dirs (0.13-2) unstable; urgency=low
+
+  * Add l10n-ca.patch, with Catalan updates.
+  * Delete ca.gmo on clean, rebuild it by hand on build.
+  * Add Vcs-* headers.
+  * Bump Standards-Version to 3.9.1, no changes required.
+
+ -- Jordi Mallach <jordi@debian.org>  Mon, 04 Oct 2010 19:05:27 +0200
+
+xdg-user-dirs (0.13-1) unstable; urgency=low
+
+  * New upstream bugfix release:
+    + New translations and a fix for a memory leak.
+
+ -- Sebastian Dröge <slomo@debian.org>  Wed, 15 Sep 2010 10:38:12 +0200
+
+xdg-user-dirs (0.12-1) unstable; urgency=low
+
+  * New upstream bugfix release:
+    + debian/patches/01_bashism.patch:
+      - Dropped, merged upstream.
+  * debian/control.in,
+    debian/compat,
+    debian/source/format,
+    debian/rules:
+    + Update Standards-Version to 3.8.4, no additional changes needed.
+    + Updating debhelper compat level to 7.
+    + Updating to source format 3.0 (quilt).
+
+ -- Sebastian Dröge <slomo@debian.org>  Wed, 24 Mar 2010 17:06:04 +0100
+
+xdg-user-dirs (0.10-1) unstable; urgency=low
+
+  * New upstream bugfix release with many new translations.
+  * debian/control.in:
+    + Update Standards-Version to 3.7.3, no additional changes needed.
+    + Move homepage to the Homepage field and fix the URL (Closes: #445898).
+  * debian/rules:
+    + Add -Wl,-z,defs to LDFLAGS and actually append.
+
+ -- Sebastian Dröge <slomo@debian.org>  Tue, 12 Feb 2008 14:54:52 +0100
+
+xdg-user-dirs (0.9-1) unstable; urgency=low
+
+  * Initial version (Closes: #413817)
+  * Thanks to Baptiste Mille-Mathias for the Xsession.d script.
+
+ -- Sebastian Dröge <slomo@debian.org>  Thu, 04 Oct 2007 15:03:16 +0200

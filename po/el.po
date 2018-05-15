@@ -1,0 +1,131 @@
+# xdg-user-dirs Greek version
+# Copyright (C) 2007 Red Hat, Inc
+# This file is distributed under the same license as the xdg-user-dirs package.
+# Nikos Charonitakis <nikosx@gmail.com>, 2007.
+# Simos Xenitellis <simos.lists@googlemail.com>, 2007.
+# Savvas Radevic <vicedar@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xdg-user-dirs 0.14\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-14 10:09+0100\n"
+"PO-Revision-Date: 2012-03-18 01:20+0100\n"
+"Last-Translator: Savvas Radevic <vicedar@gmail.com>\n"
+"Language-Team: Greek <team@lists.gnome.gr>\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: translate.c:2
+msgid "Applications"
+msgstr "Εφαρμογές"
+
+#: translate.c:2
+msgid "applications"
+msgstr "εφαρμογές"
+
+#: translate.c:3
+msgid "Desktop"
+msgstr "Επιφάνεια εργασίας"
+
+#: translate.c:3
+msgid "desktop"
+msgstr "επιφάνεια εργασίας"
+
+#: translate.c:4
+msgid "Documents"
+msgstr "Έγγραφα"
+
+#: translate.c:4
+msgid "documents"
+msgstr "έγγραφα"
+
+#: translate.c:5
+msgid "Download"
+msgstr "Λήψεις"
+
+#: translate.c:5
+msgid "download"
+msgstr "λήψεις"
+
+#: translate.c:6
+msgid "Downloads"
+msgstr "Λήψεις"
+
+#: translate.c:6
+msgid "downloads"
+msgstr "λήψεις"
+
+#: translate.c:7
+msgid "Movies"
+msgstr "Ταινίες"
+
+#: translate.c:7
+msgid "movies"
+msgstr "ταινίες"
+
+#: translate.c:8
+msgid "Music"
+msgstr "Μουσική"
+
+#: translate.c:8
+msgid "music"
+msgstr "μουσική"
+
+#: translate.c:9
+msgid "Photos"
+msgstr "Φωτογραφίες"
+
+#: translate.c:9
+msgid "photos"
+msgstr "φωτογραφίες"
+
+#: translate.c:10
+msgid "Pictures"
+msgstr "Εικόνες"
+
+#: translate.c:10
+msgid "pictures"
+msgstr "εικόνες"
+
+#: translate.c:11
+msgid "Projects"
+msgstr "Έργα"
+
+#: translate.c:11
+msgid "projects"
+msgstr "έργα"
+
+#: translate.c:12
+msgid "Public"
+msgstr "Δημόσια"
+
+#: translate.c:12
+msgid "public"
+msgstr "δημόσια"
+
+#: translate.c:13
+msgid "Share"
+msgstr "Κοινόχρηστα"
+
+#: translate.c:13
+msgid "share"
+msgstr "κοινόχρηστα"
+
+#: translate.c:14
+msgid "Templates"
+msgstr "Πρότυπα"
+
+#: translate.c:14
+msgid "templates"
+msgstr "πρότυπα"
+
+#: translate.c:15
+msgid "Videos"
+msgstr "Βίντεο"
+
+#: translate.c:15
+msgid "videos"
+msgstr "βίντεο"

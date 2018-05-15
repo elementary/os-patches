@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+-include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+export NO_PKG_MANGLE=1
+
+%:
+	dh $@ --with gnome
+
+override_dh_autoreconf:
+	dh_autoreconf
+	cp /usr/share/automake-*/mkinstalldirs .
+
+override_dh_auto_build:
+	dh_auto_build
+	$(MAKE) -C po update-gmo
+
+override_dh_clean:
+	rm -f po/*.gmo
+	dh_clean
