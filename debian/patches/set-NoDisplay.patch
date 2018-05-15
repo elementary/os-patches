@@ -1,0 +1,23 @@
+From: Michael Terry <michael.terry@canonical.com>
+Date: Fri, 15 Dec 2017 23:21:16 -0500
+Subject: set NoDisplay
+
+Clean up Startup Applications dialog by hiding default apps
+
+https://launchpad.net/bugs/803917
+---
+ user-dirs-update-gtk.desktop.in | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/user-dirs-update-gtk.desktop.in b/user-dirs-update-gtk.desktop.in
+index 920add9..b86dce8 100644
+--- a/user-dirs-update-gtk.desktop.in
++++ b/user-dirs-update-gtk.desktop.in
+@@ -5,6 +5,7 @@ _Name=User folders update
+ _Comment=Update common folders names to match current locale
+ Terminal=false
+ NotShowIn=KDE;LXQt;
++NoDisplay=true
+ Type=Application
+ StartupNotify=false
+ X-KDE-autostart-after=panel

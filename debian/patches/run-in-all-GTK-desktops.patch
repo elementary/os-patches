@@ -1,0 +1,22 @@
+From: Jeremy Bicha <jbicha@debian.org>
+Date: Fri, 15 Dec 2017 23:19:49 -0500
+Subject: run in all GTK desktops
+
+Or we could show everywhere, if KDE wants it
+---
+ user-dirs-update-gtk.desktop.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/user-dirs-update-gtk.desktop.in b/user-dirs-update-gtk.desktop.in
+index 78d5f7c..920add9 100644
+--- a/user-dirs-update-gtk.desktop.in
++++ b/user-dirs-update-gtk.desktop.in
+@@ -4,7 +4,7 @@ Exec=xdg-user-dirs-gtk-update
+ _Name=User folders update
+ _Comment=Update common folders names to match current locale
+ Terminal=false
+-OnlyShowIn=GNOME;LXDE;Unity;
++NotShowIn=KDE;LXQt;
+ Type=Application
+ StartupNotify=false
+ X-KDE-autostart-after=panel
