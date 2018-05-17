@@ -101,6 +101,18 @@ def error(parent_window, summary, msg):
     return False
 
 
+def get_dependencies(apt_cache, package_name, pattern=None):
+    """ Get the package dependencies, which can be filtered out by a pattern """
+    dependencies = []
+    for or_group in apt_cache[package_name].candidate.dependencies:
+        for dep in or_group:
+            if dep.rawtype in ["Depends", "PreDepends"]:
+                dependencies.append(dep.name)
+    if pattern:
+        dependencies = [ x for x in dependencies if x.find(pattern) != -1 ]
+    return dependencies
+
+
 class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
 
     def __init__(self, datadir=None, options=None, file=None, parent=None):
@@ -1090,6 +1102,14 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
         for pkg in self.driver_changes:
             if pkg.is_installed:
                 removals.append(pkg.shortname)
+                # The main NVIDIA package is only a metapackage.
+                # We need to collect its dependencies, so that
+                # we can uninstall the driver properly.
+                if 'nvidia' in pkg.shortname:
+                    for dep in get_dependencies(self.apt_cache, pkg.shortname, 'nvidia'):
+                        dep_pkg = self.apt_cache[dep]
+                        if dep_pkg.is_installed:
+                            removals.append(dep_pkg.shortname)
             else:
                 installs.append(pkg.shortname)
 
