@@ -116,9 +116,15 @@ def drop_privileges_save():
 def regain_privileges_save():
     """Recover our real UID/GID after calling drop_privileges_save."""
     assert _dropped_privileges is not None and _dropped_privileges > 0
+    # We need to call os.setresuid and os.setresgid twice to avoid
+    # permission issues when calling os.setgroups (see LP: #646827).
+    _, euid, _ = os.getresuid()
+    _, egid, _ = os.getresgid()
     os.setresuid(0, 0, 0)
     os.setresgid(0, 0, 0)
     os.setgroups([])
+    os.setresgid(-1, egid, -1)
+    os.setresuid(-1, euid, -1)
 
 
 @contextlib.contextmanager

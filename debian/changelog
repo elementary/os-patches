@@ -1,3 +1,17 @@
+ubiquity (18.04.14.1) bionic; urgency=medium
+
+  [ Iain Lane ]
+  * Update Vcs-* for git migration
+
+  [ Andrea Azzarone ]
+  * misc.py: Restore the corrent euid in regain_privileges_save. Calling
+    regain_privileges_save should restore the effective user-id to the one
+    before the call  to drop_privileges_save. We need to call os.setresuid and
+    os.setresgid twice to avoid permission issues when calling os.setgroups.
+    (LP: #1751252)
+
+ -- Iain Lane <iain.lane@canonical.com>  Tue, 08 May 2018 15:22:49 +0100
+
 ubiquity (18.04.14) bionic; urgency=medium
 
   * Revert the previous upload. It didn't actually *fix* all cases, just
