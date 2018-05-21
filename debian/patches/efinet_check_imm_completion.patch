@@ -1,0 +1,53 @@
+From cf2b4a36c408084852c44dea045331f039b895d2 Mon Sep 17 00:00:00 2001
+From: Martin Wilck <martin.wilck@ts.fujitsu.com>
+Date: Fri, 27 Mar 2015 14:27:56 +0100
+Subject: efinet: Check for immediate completition.
+
+This both speeds GRUB up and workarounds unexpected EFI behaviour.
+
+Patch-Name: efinet_check_imm_completion.patch
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/grub2/+bug/1437353
+Last-Update: 2018-03-19
+
+---
+ grub-core/net/drivers/efi/efinet.c |   16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+Index: b/grub-core/net/drivers/efi/efinet.c
+===================================================================
+--- a/grub-core/net/drivers/efi/efinet.c
++++ b/grub-core/net/drivers/efi/efinet.c
+@@ -40,11 +40,12 @@ send_card_buffer (struct grub_net_card *
+   grub_efi_status_t st;
+   grub_efi_simple_network_t *net = dev->efi_net;
+   grub_uint64_t limit_time = grub_get_time_ms () + 4000;
++  void *txbuf;
+ 
+   if (dev->txbusy)
+     while (1)
+       {
+-	void *txbuf = NULL;
++	txbuf = NULL;
+ 	st = efi_call_3 (net->get_status, net, 0, &txbuf);
+ 	if (st != GRUB_EFI_SUCCESS)
+ 	  return grub_error (GRUB_ERR_IO,
+@@ -77,7 +78,18 @@ send_card_buffer (struct grub_net_card *
+ 		   dev->txbuf, NULL, NULL, NULL);
+   if (st != GRUB_EFI_SUCCESS)
+     return grub_error (GRUB_ERR_IO, N_("couldn't send network packet"));
+-  dev->txbusy = 1;
++
++  /*
++     The card may have sent out the packet immediately - set txbusy
++     to 0 in this case.
++     Cases were observed where checking txbuf at the next call
++     of send_card_buffer() is too late: 0 is returned in txbuf and
++     we run in the GRUB_ERR_TIMEOUT case above.
++     Perhaps a timeout in the FW has discarded the recycle buffer.
++   */
++  st = efi_call_3 (net->get_status, net, 0, &txbuf);
++  dev->txbusy = !(st == GRUB_EFI_SUCCESS && txbuf == dev->txbuf);
++
+   return GRUB_ERR_NONE;
+ }
+ 

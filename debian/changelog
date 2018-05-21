@@ -1,3 +1,14 @@
+grub2 (2.02~beta2-36ubuntu3.18) xenial; urgency=medium
+
+  * debian/patches/efinet_check_imm_completion.patch: check for immediate
+    completion when sending data to the net device buffer. This is a required
+    commit for the patch below.
+  * debian/patches/efinet_handle_buggy_get_status.patch: correctly handle the
+    output of get_status() for EFI net devices on buggy firmware.
+    (LP: #1437353)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 19 Mar 2018 16:11:06 -0400
+
 grub2 (2.02~beta2-36ubuntu3.17) xenial; urgency=medium
 
   * Signal to zpool that it should emit full names of constituent devices.
