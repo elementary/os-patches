@@ -41,6 +41,7 @@ RELEASE_MAP = {
     'ocata': 'xenial',
     'pike': 'xenial',
     'queens': 'xenial',
+    'rocky': 'bionic',
 }
 MIRROR = "http://ubuntu-cloud.archive.canonical.com/ubuntu"
 UCA = "Ubuntu Cloud Archive"
