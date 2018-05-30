@@ -10,44 +10,40 @@ Users still have the possibility to notice this and skip the step, thus
 not disabling Secure Boot (but then, they will not be able to load the
 dkms drivers that were added).
 ---
- dkms_common.postinst |   16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+ dkms |   19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-Index: b/dkms_common.postinst
+Index: b/dkms
 ===================================================================
---- a/dkms_common.postinst
-+++ b/dkms_common.postinst
-@@ -154,6 +154,7 @@ fi
+--- a/dkms
++++ b/dkms
+@@ -1352,10 +1352,29 @@ clean_build()
+     rm -rf "$dkms_tree/$module/$module_version/build"
+ }
  
- KERNELS=$(ls /lib/modules/ 2>/dev/null || true)
- CURRENT_KERNEL=$(uname -r)
-+SIGNED_MODULES=0
- 
- #We never want to keep an older version side by side to prevent conflicts
- if [ -e "/var/lib/dkms/$NAME/$VERSION" ]; then
-@@ -283,6 +284,15 @@ for KERNEL in $KERNELS; do
-         fi
-     fi
- 
++sign_build()
++{
++    local base_dir="$dkms_tree/$module/$module_version/$kernelver/$arch"
 +    if type update-secureboot-policy >/dev/null 2>&1; then
++        echo $"Signing module:"
 +        SHIM_NOTRIGGER=y update-secureboot-policy --new-key
-+        find /var/lib/dkms/$NAME/$VERSION/$KERNEL/$(uname -m)/module/ \
-+            -name "*.ko" -print0 | xargs -n1 -0 -r kmodsign sha512 \
++        for ko in `find "$base_dir/module/" -name "*.ko" -print`;
++        do
++            echo " - $ko"
++            kmodsign sha512 \
 +                /var/lib/shim-signed/mok/MOK.priv \
-+                /var/lib/shim-signed/mok/MOK.der
-+        SIGNED_MODULES=1
-+    fi
-+
-     #if the module is built (either pre-built or just now), install it
-     if [ `echo $dkms_status | grep -c ": built"` -eq 1 ] && 
-        [ `echo $dkms_status | grep -c ": installed"` -eq 0 ]; then
-@@ -290,3 +300,9 @@ for KERNEL in $KERNELS; do
-     fi
- done
- 
-+if type update-secureboot-policy >/dev/null 2>&1; then
-+    if [ $SIGNED_MODULES -eq 1 ]; then
++                /var/lib/shim-signed/mok/MOK.der \
++                "$ko"
++        done
 +        update-secureboot-policy --enroll-key
 +    fi
-+fi
++}
 +
+ build_module()
+ {
+     prepare_build
+     do_build
++    sign_build
+     clean_build
+     echo $""
+     echo $"DKMS: build completed."
