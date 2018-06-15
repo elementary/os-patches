@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+
+# Disable intel-microcode's initramfs hook
+if [ "$1" = install ] || [ "$1" = upgrade ] ; then
+	dpkg-divert --add --rename --package disable-intel-microcode --divert /usr/share/initramfs-tools/intel_microcode.distrib /usr/share/initramfs-tools/hooks/intel_microcode
+fi

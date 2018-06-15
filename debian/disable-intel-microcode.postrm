@@ -1,0 +1,28 @@
+#!/bin/sh
+
+set -e
+
+# Restore intel-microcode's initramfs hook
+if [ "$1" = remove ] ; then
+	dpkg-divert --remove --rename --package disable-intel-microcode --divert /usr/share/initramfs-tools/intel_microcode.distrib /usr/share/initramfs-tools/hooks/intel_microcode
+fi
+
+case "$1" in
+    purge|remove)
+	if [ -x /usr/sbin/update-initramfs ] && [ -e /etc/initramfs-tools/initramfs.conf ] ; then
+	    update-initramfs -u
+	fi
+    ;;
+
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    ;;
+
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0
