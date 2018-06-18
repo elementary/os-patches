@@ -45,6 +45,13 @@ static char PyAptError_Doc[] =
 
 PyObject *PyAptError;
 
+static char PyAptCacheMismatchError_Doc[] =
+   "Raised when passing an object from a different cache to\n"
+   ":class:`apt_pkg.DepCache` methods\n\n"
+   ".. versionadded:: 1.6.1";
+
+PyObject *PyAptCacheMismatchError;
+
 /**
  * A Python->C->Python gettext() function.
  *
@@ -813,6 +820,10 @@ extern "C" void initapt_pkg()
    if (PyAptError == NULL)
       INIT_ERROR;
 
+   PyAptCacheMismatchError = PyErr_NewExceptionWithDoc("apt_pkg.CacheMismatchError", PyAptCacheMismatchError_Doc, PyExc_ValueError, NULL);
+   if (PyAptCacheMismatchError == NULL)
+      INIT_ERROR;
+
    // Initialize the module
    #if PY_MAJOR_VERSION >= 3
    PyObject *Module = PyModule_Create(&moduledef);
@@ -827,6 +838,7 @@ extern "C" void initapt_pkg()
    Config->NoDelete = true;
    PyModule_AddObject(Module,"config",Config);
    PyModule_AddObject(Module,"Error",PyAptError);
+   PyModule_AddObject(Module,"CacheMismatchError", PyAptCacheMismatchError);
 
 
 

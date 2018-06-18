@@ -41,11 +41,13 @@ except ImportError:
 from collections import Mapping, Sequence
 
 try:
-    from typing import Any, Iterable, Iterator, List, Set, Tuple, Union
+    from typing import (Any, Iterable, Iterator, List, Optional, Set,
+                        Tuple, Union)
     Any  # pyflakes
     Iterable  # pyflakes
     Iterator  # pyflakes
     List  # pyflakes
+    Optional  # pyflakes
     Set  # pyflakes
     Tuple  # pyflakes
     Union  # pyflakes
@@ -432,6 +434,7 @@ class Version(object):
         # type: (Package, apt_pkg.Version) -> None
         self.package = package
         self._cand = cand
+        self.package._pcache._weakversions.add(self)
 
     def _cmp(self, other):
         # FIXME: add type hint
@@ -507,17 +510,19 @@ class Version(object):
     def _records(self):
         # type: () -> apt_pkg.PackageRecords
         """Internal helper that moves the Records to the right position."""
-        if self.package._pcache._records.lookup(self._cand.file_list[0]):
-            return self.package._pcache._records
-        return None
+        if not self.package._pcache._records.lookup(self._cand.file_list[0]):
+            raise LookupError("Could not lookup record")
+
+        return self.package._pcache._records
 
     @property
     def _translated_records(self):
-        # type: () -> apt_pkg.PackageRecords
+        # type: () -> Optional[apt_pkg.PackageRecords]
         """Internal helper to get the translated description."""
         desc_iter = self._cand.translated_description
-        self.package._pcache._records.lookup(desc_iter.file_list.pop(0))
-        return self.package._pcache._records
+        if self.package._pcache._records.lookup(desc_iter.file_list.pop(0)):
+            return self.package._pcache._records
+        return None
 
     @property
     def installed_size(self):
@@ -567,9 +572,10 @@ class Version(object):
 
     @property
     def summary(self):
-        # type: () -> str
+        # type: () -> Optional[str]
         """Return the short description (one line summary)."""
-        return self._translated_records.short_desc
+        records = self._translated_records
+        return records.short_desc if records is not None else None
 
     @property
     def raw_description(self):
@@ -594,7 +600,13 @@ class Version(object):
         for more information.
         """
         desc = ''
-        dsc = self._translated_records.long_desc
+        records = self._translated_records
+        dsc = records.long_desc if records is not None else None
+
+        if not dsc:
+            return _("Missing description for '%s'."
+                     "Please report.") % (self.package.name)
+
         try:
             if not isinstance(dsc, unicode):
                 # Only convert where needed (i.e. Python 2.X)
@@ -808,7 +820,7 @@ class Version(object):
 
     @property
     def uri(self):
-        # type: () -> str
+        # type: () -> Optional[str]
         """Return a single URI for the binary.
 
         .. versionadded:: 0.7.10
@@ -837,7 +849,7 @@ class Version(object):
             logging.debug('Ignoring already existing file: %s' % destfile)
             return os.path.abspath(destfile)
         acq = apt_pkg.Acquire(progress or apt.progress.text.AcquireProgress())
-        acqfile = apt_pkg.AcquireFile(acq, self.uri, self._records.md5_hash,
+        acqfile = apt_pkg.AcquireFile(acq, self.uri, self._records.md5_hash,  # type: ignore # TODO: Do not use MD5 # nopep8
                                       self.size, base, destfile=destfile)
         acq.run()
 
@@ -889,6 +901,9 @@ class Version(object):
             files.append(apt_pkg.AcquireFile(acq, src.index.archive_uri(path),
                          md5, size, base, destfile=destfile))
         acq.run()
+
+        if dsc is None:
+            raise ValueError("No source for %r" % self)
 
         for item in acq.items:
             if item.status != item.STAT_DONE:
@@ -984,7 +999,7 @@ class VersionList(Sequence):
         return [ver.ver_str for ver in self._versions]
 
     def get(self, key, default=None):
-        # type: (str, Version) -> Version
+        # type: (str, Optional[Version]) -> Optional[Version]
         """Return the key or the default."""
         try:
             return self[key]
@@ -1021,7 +1036,7 @@ class Package(object):
         return self.name < other.name
 
     def __get_candidate(self):
-        # type: () -> Version
+        # type: () -> Optional[Version]
         """Return the candidate version of the package.
 
         This property is writeable to allow you to set the candidate version
@@ -1044,7 +1059,7 @@ class Package(object):
 
     @property
     def installed(self):
-        # type: () -> Version
+        # type: () -> Optional[Version]
         """Return the currently installed version of the package.
 
         .. versionadded:: 0.7.9

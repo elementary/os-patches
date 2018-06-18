@@ -32,6 +32,9 @@ Exceptions
 ----------
 .. autoclass:: Error
 
+.. autoclass:: CacheMismatchError
+
+
 Working with the cache
 ----------------------
 .. class:: Cache([progress: apt.progress.base.OpProgress])
@@ -207,6 +210,9 @@ Managing the cache with :class:`DepCache`
     methods for requesting state information or marking changes). If a
     method is expected to raise an exception, it will be stated in the
     description.
+
+    If an object of a different cache is passed, :class:`CacheMismatchError`
+    is raised.
 
     .. method:: commit(acquire_progress, install_progress)
 

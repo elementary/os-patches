@@ -36,7 +36,7 @@
 
 #define VALIDATE_ITERATOR(I) do { \
    if ((I).Cache() != &depcache->GetCache()) { \
-      PyErr_SetString(PyExc_ValueError, "Object of different cache passed as argument to apt_pkg.DepCache method"); \
+      PyErr_SetString(PyAptCacheMismatchError, "Object of different cache passed as argument to apt_pkg.DepCache method"); \
       return nullptr; \
    } \
 } while(0)

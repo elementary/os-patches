@@ -5,7 +5,6 @@ services:
   - docker
 env:
  - DISTRO=debian:stretch
- - DISTRO=debian:buster
  - DISTRO=ubuntu:bionic
 install:
  - sed -i -e "s#1000#$(id -u)#g" -e "s#debian:testing#$DISTRO#g" Dockerfile

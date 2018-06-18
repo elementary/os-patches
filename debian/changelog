@@ -1,3 +1,14 @@
+python-apt (1.6.1) unstable; urgency=medium
+
+  * apt: Fix typing errors to get CI pass again
+  * apt.Cache: Remap objects when reopening cache (LP: #1773316)
+  * apt_pkg.DepCache: Raise CacheMismatchError if argument belongs to diff. cache
+  * Set branch to 1.6.y and adjust travis CI to run against stable releases
+  * travis CI / Dockerfile: Pin mypy to 0.600 to prevent future changes breaking CI
+  * utils/get_debian_mirrors.py: Get data from salsa
+
+ -- Julian Andres Klode <jak@debian.org>  Wed, 06 Jun 2018 15:14:59 -0700
+
 python-apt (1.6.0) unstable; urgency=medium
 
   * Final release, no further changes.

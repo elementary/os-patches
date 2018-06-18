@@ -252,6 +252,7 @@ class TestAptCache(testcommon.TestCase):
         old_pkg = old_package._pkg
         old_version = old_package.candidate
         old_ver = old_version._cand
+
         cache.open()
         new_depcache = cache._depcache
         new_package = cache["apt"]
@@ -260,16 +261,17 @@ class TestAptCache(testcommon.TestCase):
         new_ver = new_version._cand
 
         # get candidate
-        self.assertRaises(ValueError, lambda: old_package.candidate)
         self.assertRaises(ValueError, old_depcache.get_candidate_ver,
                           new_pkg)
         self.assertRaises(ValueError, new_depcache.get_candidate_ver,
                          old_pkg)
         self.assertEqual(new_ver, new_depcache.get_candidate_ver(new_pkg))
+        self.assertEqual(old_package.candidate._cand, old_ver)  # Remap success
+        self.assertEqual(old_package.candidate._cand,
+                         new_depcache.get_candidate_ver(new_pkg))
 
         # set candidate
-        self.assertRaises(ValueError, setattr, new_package,
-                          "candidate", old_version)
+        new_package.candidate = old_version
         old_depcache.set_candidate_ver(old_pkg, old_ver)
         self.assertRaises(ValueError, old_depcache.set_candidate_ver,
                           old_pkg, new_ver)
