@@ -95,6 +95,7 @@ class Wizard(BaseFrontend):
             sys.exit(1)
 
         telemetry.get().set_installer_type('DebConf')
+        telemetry.get().set_is_oem(self.oem_config)
         telemetry.get().add_stage(telemetry.START_INSTALL_STAGE_TAG)
 
         self.pagesindex = 0

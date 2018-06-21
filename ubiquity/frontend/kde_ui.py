@@ -455,6 +455,7 @@ class Wizard(BaseFrontend):
             self.refresh()
 
         telemetry.get().set_installer_type('KDE')
+        telemetry.get().set_is_oem(self.oem_config)
 
         # Start the interface
         self.set_current_page(0)

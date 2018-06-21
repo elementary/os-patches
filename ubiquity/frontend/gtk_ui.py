@@ -757,6 +757,7 @@ class Wizard(BaseFrontend):
             self.refresh()
 
         telemetry.get().set_installer_type('GTK')
+        telemetry.get().set_is_oem(self.oem_config)
 
         self.set_current_page(0)
         self.live_installer.show()
