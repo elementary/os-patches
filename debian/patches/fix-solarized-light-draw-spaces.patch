@@ -1,0 +1,24 @@
+Description: Slightly modify solarized-light color scheme for better visibility
+ Make the color used for drawn spaces contrast slightly better against the background
+ of both selected and unselected text
+Author: David Hewitt <davidmhewitt@gmail.com>
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/data/styles/solarized-light.xml
++++ b/data/styles/solarized-light.xml
+@@ -34,6 +34,7 @@
+   <color name="base1"   value="#93A1A1"/>
+   <color name="base2"   value="#EEE8D5"/>
+   <color name="base3"   value="#FDF6E3"/>
++  <color name="base4"   value="#C8CCC2"/>
+   <color name="yellow"  value="#B58900"/>
+   <color name="orange"  value="#CB4B16"/>
+   <color name="red"     value="#DC322F"/>
+@@ -52,6 +53,7 @@
+   <style name="current-line"                background="base2"/>
+   <style name="line-numbers"                foreground="base1" background="base2"/>
+   <style name="background-pattern"          background="base3-2-blend"/>
++  <style name="draw-spaces"                 foreground="base4"/>
+ 
+   <!-- Bracket Matching -->
+   <style name="bracket-match"               foreground="base3" background="base1"/>
