@@ -632,10 +632,7 @@ case "$grub_package" in
 	log-output -t grub-installer $chroot $ROOT dpkg -P grub-efi grub-efi-amd64-bin grub-efi-amd64 grub-efi-amd64-signed grub-efi-ia32-bin grub-efi-ia32
 	;;
     grub-efi)
-	log-output -t grub-installer $chroot $ROOT dpkg -P grub-pc-bin grub-pc grub-gfxpayload-lists grub-efi-amd64-signed
-	;;
-    grub-efi-amd64-signed)
-	log-output -t grub-installer $chroot $ROOT dpkg -P grub-pc-bin grub-pc grub-gfxpayload-lists
+	log-output -t grub-installer $chroot $ROOT dpkg -P grub-efi-amd64-signed
 	;;
 esac
 
@@ -648,6 +645,7 @@ case "$grub_package" in
 	case $grub_package in
 	    *-signed)
 		apt-install shim-signed || true
+		apt-install grub-pc || true
 		;;
 	esac
 	;;
