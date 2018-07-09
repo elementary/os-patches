@@ -1,0 +1,226 @@
+From 1696f83780575139eb0ad801a311c947028278f2 Mon Sep 17 00:00:00 2001
+From: Łukasz 'sil2100' Zemczak <lukasz.zemczak@canonical.com>
+Date: Fri, 20 Apr 2018 19:27:37 +0200
+Subject: Add an auto-nvram option to grub-install for auto-detecting NVRAM
+ access
+
+This adds the auto-nvram functionality of only attempting the NVRAM
+variable update if the system has access to those. Useful for dual
+BIOS-EFI devices.
+
+Patch-Name: add-an-auto-nvram-option-to-grub-install.patch
+---
+ grub-core/osdep/basic/no_platform.c |  5 +++--
+ grub-core/osdep/unix/platform.c     | 22 ++++++++++++++++++++--
+ grub-core/osdep/windows/platform.c  |  5 +++--
+ include/grub/util/install.h         |  5 +++--
+ util/grub-install.c                 | 21 +++++++++++++++------
+ 5 files changed, 44 insertions(+), 14 deletions(-)
+
+diff --git a/grub-core/osdep/basic/no_platform.c b/grub-core/osdep/basic/no_platform.c
+index d76c34c14..b39e97f48 100644
+--- a/grub-core/osdep/basic/no_platform.c
++++ b/grub-core/osdep/basic/no_platform.c
+@@ -25,7 +25,7 @@
+ 
+ void
+ grub_install_register_ieee1275 (int is_prep, const char *install_device,
+-				int partno, const char *relpath)
++				int partno, const char *relpath, int detect_nvram)
+ {
+   grub_util_error ("%s", _("no IEEE1275 routines are available for your platform"));
+ }
+@@ -33,7 +33,8 @@ grub_install_register_ieee1275 (int is_prep, const char *install_device,
+ void
+ grub_install_register_efi (grub_device_t efidir_grub_dev,
+ 			   const char *efifile_path,
+-			   const char *efi_distributor)
++			   const char *efi_distributor,
++			   int detect_nvram)
+ {
+   grub_util_error ("%s", _("no EFI routines are available for your platform"));
+ }
+diff --git a/grub-core/osdep/unix/platform.c b/grub-core/osdep/unix/platform.c
+index f9c376c35..04d0d8c42 100644
+--- a/grub-core/osdep/unix/platform.c
++++ b/grub-core/osdep/unix/platform.c
+@@ -134,7 +134,8 @@ grub_install_remove_efi_entries_by_distributor (const char *efi_distributor)
+ int
+ grub_install_register_efi (grub_device_t efidir_grub_dev,
+ 			   const char *efifile_path,
+-			   const char *efi_distributor)
++			   const char *efi_distributor,
++			   int detect_nvram)
+ {
+   const char * efidir_disk;
+   int efidir_part;
+@@ -153,6 +154,18 @@ grub_install_register_efi (grub_device_t efidir_grub_dev,
+ #ifdef __linux__
+   grub_util_exec ((const char * []){ "modprobe", "-q", "efivars", NULL });
+ #endif
++
++  /* If requested, we try to detect if NVRAM access is available and if not,
++     resume normal operation.  */
++  if (detect_nvram)
++    {
++      error = grub_util_exec_redirect_null ((const char * []){ "efibootmgr", NULL });
++      if (error == 2)
++	return 0;
++      else if (error)
++	return error;
++    }
++
+   /* Delete old entries from the same distributor.  */
+   error = grub_install_remove_efi_entries_by_distributor (efi_distributor);
+   if (error)
+@@ -178,7 +191,7 @@ grub_install_register_efi (grub_device_t efidir_grub_dev,
+ 
+ void
+ grub_install_register_ieee1275 (int is_prep, const char *install_device,
+-				int partno, const char *relpath)
++				int partno, const char *relpath, int detect_nvram)
+ {
+   char *boot_device;
+ 
+@@ -189,6 +202,11 @@ grub_install_register_ieee1275 (int is_prep, const char *install_device,
+       grub_util_error (_("%s: not found"), "ofpathname");
+     }
+ 
++  /* If requested, we try to detect if NVRAM access is available and if not,
++     resume normal operation.  */
++  if (detect_nvram && grub_util_exec_redirect_null ((const char * []){ "nvram", NULL }))
++    return;
++
+   /* Get the Open Firmware device tree path translation.  */
+   if (!is_prep)
+     {
+diff --git a/grub-core/osdep/windows/platform.c b/grub-core/osdep/windows/platform.c
+index c30025b13..1c9695970 100644
+--- a/grub-core/osdep/windows/platform.c
++++ b/grub-core/osdep/windows/platform.c
+@@ -210,7 +210,8 @@ set_efi_variable_bootn (grub_uint16_t n, void *in, grub_size_t len)
+ void
+ grub_install_register_efi (grub_device_t efidir_grub_dev,
+ 			   const char *efifile_path,
+-			   const char *efi_distributor)
++			   const char *efi_distributor,
++			   int detect_nvram)
+ {
+   grub_uint16_t *boot_order, *new_boot_order;
+   grub_uint16_t *distributor16;
+@@ -417,7 +418,7 @@ grub_install_register_efi (grub_device_t efidir_grub_dev,
+ 
+ void
+ grub_install_register_ieee1275 (int is_prep, const char *install_device,
+-				int partno, const char *relpath)
++				int partno, const char *relpath, int detect_nvram)
+ {
+   grub_util_error ("%s", _("no IEEE1275 routines are available for your platform"));
+ }
+diff --git a/include/grub/util/install.h b/include/grub/util/install.h
+index 58648e209..115188399 100644
+--- a/include/grub/util/install.h
++++ b/include/grub/util/install.h
+@@ -212,11 +212,12 @@ grub_install_get_default_powerpc_machtype (void);
+ int
+ grub_install_register_efi (grub_device_t efidir_grub_dev,
+ 			   const char *efifile_path,
+-			   const char *efi_distributor);
++			   const char *efi_distributor,
++			   int detect_nvram);
+ 
+ void
+ grub_install_register_ieee1275 (int is_prep, const char *install_device,
+-				int partno, const char *relpath);
++				int partno, const char *relpath, int detect_nvram);
+ 
+ void
+ grub_install_sgi_setup (const char *install_device,
+diff --git a/util/grub-install.c b/util/grub-install.c
+index 2214e4549..b8f91101d 100644
+--- a/util/grub-install.c
++++ b/util/grub-install.c
+@@ -59,6 +59,7 @@ static int removable = 0;
+ static int no_extra_removable = 0;
+ static int recheck = 0;
+ static int update_nvram = 1;
++static int auto_nvram = 0;
+ static char *install_device = NULL;
+ static char *debug_image = NULL;
+ static char *rootdir = NULL;
+@@ -115,7 +116,8 @@ enum
+     OPTION_PRODUCT_VERSION,
+     OPTION_UEFI_SECURE_BOOT,
+     OPTION_NO_UEFI_SECURE_BOOT,
+-    OPTION_NO_EXTRA_REMOVABLE
++    OPTION_NO_EXTRA_REMOVABLE,
++    OPTION_AUTO_NVRAM
+   };
+ 
+ static int fs_probe = 1;
+@@ -206,6 +208,10 @@ argp_parser (int key, char *arg, struct argp_state *state)
+       update_nvram = 0;
+       return 0;
+ 
++    case OPTION_AUTO_NVRAM:
++      auto_nvram = 1;
++      return 0;
++
+     case OPTION_FORCE:
+       force = 1;
+       return 0;
+@@ -296,6 +302,9 @@ static struct argp_option options[] = {
+   {"no-nvram", OPTION_NO_NVRAM, 0, 0,
+    N_("don't update the `boot-device'/`Boot*' NVRAM variables. "
+       "This option is only available on EFI and IEEE1275 targets."), 2},
++  {"auto-nvram", OPTION_AUTO_NVRAM, 0, 0,
++   N_("only update NVRAM variables if possible. "
++      "This option is only available on EFI and IEEE1275 targets."), 2},
+   {"skip-fs-probe",'s',0,      0,
+    N_("do not probe for filesystems in DEVICE"), 0},
+   {"no-bootsector", OPTION_NO_BOOTSECTOR, 0, 0,
+@@ -1924,7 +1933,7 @@ main (int argc, char *argv[])
+ 		? ins_dev->disk->partition->number + 1 : 0;
+ 	      dev = grub_util_get_os_disk (install_device);
+ 	      grub_install_register_ieee1275 (0, dev, partno,
+-					      "\\\\BootX");
++					      "\\\\BootX", auto_nvram);
+ 	    }
+ 	  grub_device_close (ins_dev);
+   	  free (grub_elf);
+@@ -1956,7 +1965,7 @@ main (int argc, char *argv[])
+ 	  grub_device_close (ins_dev);
+ 	  if (update_nvram)
+ 	    grub_install_register_ieee1275 (1, grub_util_get_os_disk (install_device),
+-					    0, NULL);
++					    0, NULL, auto_nvram);
+ 	  break;
+       }
+       /* fallthrough.  */
+@@ -1971,7 +1980,7 @@ main (int argc, char *argv[])
+ 	    ? grub_dev->disk->partition->number + 1 : 0;
+ 	  dev = grub_util_get_os_disk (grub_devices[0]);
+ 	  grub_install_register_ieee1275 (0, dev,
+-					  partno, relpath);
++					  partno, relpath, auto_nvram);
+ 	}
+       break;
+     case GRUB_INSTALL_PLATFORM_MIPS_ARC:
+@@ -2020,7 +2029,7 @@ main (int argc, char *argv[])
+ 	      int error = 0;
+ 	      error = grub_install_register_efi (efidir_grub_dev,
+ 					 "\\System\\Library\\CoreServices",
+-					 efi_distributor);
++					 efi_distributor, auto_nvram);
+ 	      if (error)
+ 	        grub_util_error (_("efibootmgr failed to register the boot entry: %s"),
+ 				 strerror (error));
+@@ -2135,7 +2144,7 @@ main (int argc, char *argv[])
+ 			  (part ? ",": ""), (part ? : ""));
+ 	  grub_free (part);
+ 	  error = grub_install_register_efi (efidir_grub_dev,
+-					     efifile_path, efi_distributor);
++					     efifile_path, efi_distributor, auto_nvram);
+ 	  if (error)
+ 	    grub_util_error (_("efibootmgr failed to register the boot entry: %s"),
+ 			     strerror (error));
