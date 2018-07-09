@@ -1,3 +1,14 @@
+grub2-signed (1.93.1) bionic; urgency=medium
+
+  * debian/control: switch the grub-efi-amd64 dependency of
+    grub-efi-amd64-signed to grub-efi-amd64-bin. (LP: #1778848)
+  * debian/grub-efi-amd64-signed.postinst: invoke grub-install with
+    --auto-nvram and pass the x86_64-efi target to it, making sure we always 
+    install the right target. (LP: #1778848)
+  * debian/control: rebuild against grub2 2.02-2ubuntu8.1.
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 27 Jun 2018 09:01:13 +0200
+
 grub2-signed (1.93) bionic; urgency=medium
 
   * Rebuild against grub2 2.02-2ubuntu8. (LP: #1752767)

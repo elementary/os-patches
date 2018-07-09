@@ -2,12 +2,12 @@ Source: grub2-signed
 Section: utils
 Priority: optional
 Maintainer: Colin Watson <cjwatson@ubuntu.com>
-Build-Depends: debhelper (>= 9), lsb-release, python3, python3-apt, grub-efi-amd64-bin (>= 2.02-2ubuntu8) [amd64], grub-efi-arm64-bin (>= 2.02-2ubuntu8) [arm64]
+Build-Depends: debhelper (>= 9), lsb-release, python3, python3-apt, grub-efi-amd64-bin (>= 2.02-2ubuntu8.1) [amd64], grub-efi-arm64-bin (>= 2.02-2ubuntu8.1) [arm64]
 Standards-Version: 3.9.5
 
 Package: grub-efi-amd64-signed
 Architecture: amd64
-Depends: ${misc:Depends}, grub-efi-amd64 (= ${grub2:Version})
+Depends: ${misc:Depends}, grub-efi-amd64-bin (= ${grub2:Version})
 Recommends: secureboot-db
 Built-Using: grub2 (= ${grub2:Version})
 Description: GRand Unified Bootloader, version 2 (EFI-AMD64 version, signed)
