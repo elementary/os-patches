@@ -1,0 +1,50 @@
+Source: language-selector
+Section: admin
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: debhelper (>= 9.0.0),
+ dh-python,
+ python3-all,
+ python3-distutils-extra,
+ python3-setuptools,
+ pyqt4-dev-tools,
+ intltool,
+ intltool-debian,
+ dh-translations
+Standards-Version: 4.1.2
+
+Package: language-selector-gnome
+Architecture: all
+Depends: language-selector-common (= ${binary:Version}),
+ ${misc:Depends},
+ ${python3:Depends},
+ python3-gi,
+ gir1.2-gtk-3.0,
+ python3-apt,
+ aptdaemon (>= 0.40+bzr527),
+ python3-aptdaemon.gtk3widgets,
+ im-config (>= 0.29-1ubuntu10~)
+Recommends: yelp
+Replaces: language-selector (<< 0.17)
+Conflicts: language-selector (<< 0.17)
+Description: Language selector for Ubuntu
+ This package let you change and install language packs
+ in Ubuntu.
+ .
+ This package contains the GTK+ frontend.
+
+Package: language-selector-common
+Architecture: all
+Pre-Depends: dpkg (>= 1.15.7.2)
+Depends: ${python3:Depends},
+ ${misc:Depends},
+ iso-codes,
+ python3-apt (>= 0.7.12.0),
+ python3-dbus,
+ dbus,
+ accountsservice (>= 0.6.29-1ubuntu6)
+Description: Language selector for Ubuntu
+ This package let you change and install language packs
+ in Ubuntu.
+ .
+ This package contains the common part of language-selector
