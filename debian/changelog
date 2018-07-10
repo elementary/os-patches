@@ -1,3 +1,12 @@
+grub2-signed (1.93.2) bionic; urgency=medium
+
+  * debian/control: add a dependency of grub-efi-amd64 | grub-pc to
+    grub-efi-amd64-signed to make sure the grub postinst is triggered even for
+    cases of old iso (without the fixed installer) installations with
+    automatic download of updates enabled (LP: #1780897).
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Tue, 10 Jul 2018 20:36:23 +0200
+
 grub2-signed (1.93.1) bionic; urgency=medium
 
   * debian/control: switch the grub-efi-amd64 dependency of
