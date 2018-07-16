@@ -1,0 +1,26 @@
+Description: Make the call to chmod in ibus_bus_init conditional
+Author: Olivier Tilloy <olivier.tilloy@canonical.com>
+Origin: https://github.com/ibus/ibus/commit/28d0c1d4bc47beb38995d84cc4bb1d539c08a070
+Bug: https://github.com/ibus/ibus/issues/1996
+Bug-Ubuntu: https://launchpad.net/bugs/1761585
+
+--- a/src/ibusbus.c
++++ b/src/ibusbus.c
+@@ -557,7 +557,6 @@ ibus_bus_init (IBusBus *bus)
+     path = g_path_get_dirname (ibus_get_socket_path ());
+ 
+     g_mkdir_with_parents (path, 0700);
+-    g_chmod (path, 0700);
+ 
+     if (stat (path, &buf) == 0) {
+         if (buf.st_uid != getuid ()) {
+@@ -565,6 +564,9 @@ ibus_bus_init (IBusBus *bus)
+                        path, ibus_get_user_name ());
+             return;
+         }
++        if (buf.st_mode != (S_IFDIR | S_IRWXU)) {
++            g_chmod (path, 0700);
++        }
+     }
+ 
+     g_free (path);

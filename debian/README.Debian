@@ -1,0 +1,83 @@
+ibus for Debian                           Osamu Aoki <osamu@debian.org>
+
+=========================================================================
+!
+!      Keyboard mode switching is now changed to SUPER-space.  
+!          The SUPER-key is commonly called windows-key.
+!
+!      X and ibus should be run under the UTF-8 locale 
+!      to have stable behavior.  Set it via /etc/default/locale .
+!
+=========================================================================
+
+=========================================================================
+!	Quick Guide to Setup IBus
+=========================================================================
+
+* install required packages.
+ - The input method helper package:        im-config
+   - If you still have im-switch, please remove it while installing im-config.
+ - Core ibus input package:                ibus
+ - Support package for each UI environment
+   - GTK+2 IM module:                      ibus-gtk     (For old GTK app.)
+   - GTK+3 IM module:                      ibus-gtk3    (For new GTK app.)
+   - Qt4 IM module:                        ibus-qt4     (for KDE4 app.)
+   - Qt5 IM module:                        libqt5gui5   (for KDE5 app.)
+   - Clutter IM module:                    ibus-clutter (optional)
+   [Note]
+     These are optional.  (Otherwise, xim is used)
+     Installing them will improve user experience.
+     Both ibus-gtk and ibus-gtk3 are required to set up usable system 
+     with GTK.  GNOME and XFce use GTK.
+ - Support package for each IM engine client
+   - Japanese, MOZC (newer, heavy):        ibus-mozc
+   - Japanese, KKC (newer, light):         ibus-kkc
+   - Japanese, Anthy (older, light):       ibus-anthy
+   - Japanese, SKK (EMACS style):          ibus-skk
+   - Korean language:                      ibus-hangul
+   - Traditional Chinese:                  ibus-chewing
+   - Simplified Chinese:                   ibus-pinyin
+   - Simplified Chinese (SUN):             ibus-sunpinyin
+   - Chinese (array30):                    ibus-array
+   - Chinese (cangjie):                    ibus-cangjie
+   - Thai                                  ibus-libthai
+   - Vietnamese:                           ibus-unikey
+   - Many table based input method:        ibus-table*
+   [Note]
+     These are optional. But if you use any one of the listed language
+     you need to install that one.
+
+* configure im-config
+  If other input method packages (fcitx, uim, ...) are installed,
+  select ibus by executing im-config from a terminal window.
+  (Usually not needed since this is default.)
+
+* configure ibus
+  - How to start configuration
+    - GNOME3: use the GNOME3's keyboard setup dialog.
+    - others: execute the ibus-setup command.
+  - Add your input method explicitly via ibus configuration.
+    - If you are on GNOME3, keyboard configuration offers both the basic XKB and
+      fancy ibus based methods.  If you are not using standard US keyboard, make
+      sure to set the XKB setting for keyboard first.
+  - Setup XKB setting for ibus based input methods
+    - The system wide keyboard setting is in /etc/default/keyboard. Change it:
+      $ sudo dpkg-reconfigure keyboard-configuration
+    - If no XKB is set in the desktop configuration, some desktop system may
+      set XKB system to "us" as the  default despite your system wide keyboard 
+      setting.
+    - The ibus based input methods inherit the XKB setting of the immediately
+      previous input mode if it is set not to use the custom setup.  This is
+      useful for people with keyboard settings which produce roman alphabets
+      (German, French, ...) wishing to input Japanese etc.  But if the previous
+      input mode is something like Russian, it breaks Japanese input method.
+      So, if you have non-alphabet input via XKB, you need to lock your keyboard
+      setting within the configuration of particular ibus method used, e.g.,
+      ibus-kkc, ibus-anthy, ibus-pynyin, ....
+
+* Always restart ibus if you changes its settings.
+  If you are not sure how, exit your desktop environment and relogin to the
+  user account to have a refreshed X session.
+
+ -- Osamu Aoki <osamu@debian.org>,  Sun, 27 Jul 2014 09:20:38 +0000
+

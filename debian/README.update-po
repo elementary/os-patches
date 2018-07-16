@@ -1,0 +1,28 @@
+== Updating ibus package using Fedora package data ==
+
+1. Get the latest Fedora src.rpm and extract contents
+   * http://arm.koji.fedoraproject.org/koji/packageinfo?packageID=3103
+
+2. Compare ibus.spec of src.rpm with the previous one under debian
+   * Pay attention to patch list, source list, and configuration options
+
+3. Copy patches from src.rpm to debian/patches/* and overwrite them.
+   * Duplicate ibus-xx-f19-password.patch for gtk3
+   
+4. Adjust debian/patches/series accordingly and commit debian/patches/*
+
+5. Copy po directory of ibus-xkb-1.5.*.tar.gz under debian
+
+6. Run debian/update-po
+
+7. Update debian/rules
+   * Pay extra attention to configuration options
+
+=== Note ===
+
+ibus.conf.5 is Fedora specific.  Do not use it.
+
+Running clean target removes
+ * bindings/vala/ibus-1.0.vapi
+ * data/dconf/00-upstream-settings
+ => "git reset --hard" to get them back

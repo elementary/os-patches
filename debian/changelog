@@ -1,0 +1,949 @@
+ibus (1.5.17-3ubuntu4) bionic; urgency=medium
+
+  * debian/control, debian/rules:
+     - restore use of dh_translations which was removed in 1.5.11-1ubuntu1
+       without explanation (lp: #1764161)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 17 Apr 2018 19:43:24 +0200
+
+ibus (1.5.17-3ubuntu3) bionic; urgency=medium
+
+  * debian/patches/ubuntu-conditional-chmod.patch: backport an upstream commit
+    to make a call to chmod conditional, to avoid apparmor denials for confined
+    apps (e.g. snaps) that use libibus (LP: #1761585)
+
+ -- Olivier Tilloy <olivier.tilloy@canonical.com>  Fri, 06 Apr 2018 11:04:22 +0200
+
+ibus (1.5.17-3ubuntu2) bionic; urgency=medium
+
+  * debian/patches/ubuntu-unicode-keybinding.patch:
+    - use a change proposed/rejected upstream to restore ctrl-shift-u,
+      upstream consider it superseeded by the emoji selector but that has
+      no keybinding in our ibus version and is not an exact replacement
+      (lp: #1760308)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 05 Apr 2018 17:23:19 +0200
+
+ibus (1.5.17-3ubuntu1) bionic; urgency=medium
+
+  * Merge with Debian, remaining changes:
+    - d/ibus.gsettings-override:
+      Use system keyboard layout by default
+    - Add patches:
+      ubuntu-title-update.patch
+      ubuntu-no-notification.patch
+      ubuntu-disable-trigger.patch
+      ubuntu-forward-panel-properties.patch
+
+ -- Jeremy Bicha <jbicha@debian.org>  Sun, 31 Dec 2017 10:20:39 -0500
+
+ibus (1.5.17-3) unstable; urgency=medium
+
+  * enable emoji.  Closes: #883229
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 31 Dec 2017 18:46:31 +0900
+
+ibus (1.5.17-2) unstable; urgency=medium
+
+  * Clean up debian/patches.
+  * Fix symbols. 
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 29 Dec 2017 22:10:20 +0900
+
+ibus (1.5.17-1) unstable; urgency=medium
+
+  * New upstream version 1.5.15
+  * New upstream version 1.5.16  Closes: #864913
+  * New upstream version 1.5.17
+  * Clean debian directory
+  * Add build-dep
+  * Migrate to the new dbgsym package
+  * Sort old symbols file
+  * Update symbols file for 1.5.16
+  * Use autogen.sh for autoreconf
+  * Don't depend on gtk2.  Closes: #883112
+  * Use dh_missing --fail-missing
+  * Install ibus-portal files.
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 25 Dec 2017 23:20:01 +0900
+
+ibus (1.5.14-3) unstable; urgency=medium
+
+  * Set ENABLE_APPINDICATOR_ENGINE_ICON by installing qtbase5-dev.
+    Closes: #862814
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 20 May 2017 20:36:04 +0900
+
+ibus (1.5.14-2) unstable; urgency=medium
+
+  * Update d/control and d/watch file for URLs. 
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 10 Dec 2016 15:26:04 +0900
+
+ibus (1.5.14-1) unstable; urgency=medium
+
+  [ Osamu Aoki ]
+  * harden
+
+  [ Aron Xu ]
+  * Enable appindicator support
+  * Imported Upstream version 1.5.14
+  * Add json-glib to B-D
+  * Correct json-glib-dev package name
+  * Correct json-glib-dev package name
+  * Disable emoji dict for the moment of not having nodejs-emojione
+  * Install usr/share/dbus-1/services/org.freedesktop.IBus.service
+  * Remove unused override: package-contains-empty-directory
+  * Update symbols
+
+ -- Aron Xu <aron@debian.org>  Thu, 20 Oct 2016 20:10:54 +0800
+
+ibus (1.5.11-1) unstable; urgency=medium
+
+  * Replace gnome-icon-theme with adwaita-icon-theme, thanks to Iain Lane
+  * Imported Upstream version 1.5.11
+
+ -- Aron Xu <aron@debian.org>  Thu, 19 Nov 2015 23:39:21 +0800
+
+ibus (1.5.10-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.5.10.
+  * Remove ibus-zz-C.UTF-8.patch, applied upstream.
+  * Drop python-notify dependency (Closes: #781920).
+  * Build with python3 only (LP: #1440391).
+
+ -- Aron Xu <aron@debian.org>  Sun, 14 Jun 2015 03:23:31 +0800
+
+ibus (1.5.9-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Osamu Aoki <osamu@debian.org>  Thu, 23 Oct 2014 01:09:09 +0900
+
+ibus (1.5.8-4) unstable; urgency=medium
+
+  * Enable M-A. 
+
+ -- Osamu Aoki <osamu@debian.org>  Wed, 22 Oct 2014 23:20:35 +0900
+
+ibus (1.5.8-3) unstable; urgency=medium
+
+  * Debian jessie has C.UTF-8 but doen't always have en_US.UTF-8.  
+    Closes: #758385
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 10 Oct 2014 00:18:09 +0900
+
+ibus (1.5.8-2) unstable; urgency=medium
+
+  * Disable parallel to try avoid FTBFS on kfreebsd*
+
+ -- Aron Xu <aron@debian.org>  Wed, 06 Aug 2014 11:47:58 +0800
+
+ibus (1.5.8-1) unstable; urgency=medium
+
+  [ Aron Xu ]
+  * Allow parallel building
+
+  [ Osamu Aoki ]
+  * Update ibus document with Qt5 support
+
+  [ Aron Xu ]
+  * Imported Upstream version 1.5.8
+  * Remove patch for chasing HEAD, imported new upstream release
+  * Remove the patch for updating IBusKeymap jp, applied upstream
+  * Drop gtk2 version of the password patch because it's never executed
+  * Drop ibus-541492-xkb.patch
+  * Drop ibus-530711-preload-sys.patch
+  * Drop ibus-810211-no-switch-by-no-trigger.patch
+  * Drop 999-update-po.patch
+
+  [ Osamu Aoki ]
+  * linux-any for ibus-wayland
+  * Remove some symbols matching ibus-541492-xkb.patch
+  * Remove old patch for GTK+ 3.6
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 04 Aug 2014 22:42:19 +0900
+
+ibus (1.5.7-2) unstable; urgency=medium
+
+  * Fix Japanese keycode/keysym table (upstream accepted patch).
+  * Build override modules with python-gi-dev and include them 
+    in gir*. Closes: #754670
+  * Add debug package. Closes: #754650
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 27 Jul 2014 16:09:53 +0900
+
+ibus (1.5.7-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Update patches with FC21.3 patches.
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 20 Jun 2014 22:28:56 +0900
+
+ibus (1.5.6-4) unstable; urgency=medium
+
+  * Fix dependency to python3-gi. Closes: 751010 
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 09 Jun 2014 23:53:33 +0900
+
+ibus (1.5.6-3) unstable; urgency=medium
+
+  * Make ibus-wayland [linyx-any]. Closes: #750902
+  * Update bug script.
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 09 Jun 2014 21:05:25 +0900
+
+ibus (1.5.6-2) unstable; urgency=medium
+
+  * Set ibus-wayland to Multi-Arch: foreign.
+  * Update copyright to DEP-5.
+  * Update uploaders field matching current contributors.
+  * Add lintian-overides.
+  * Remove python-ibus.install
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 07 Jun 2014 00:02:47 +0900
+
+ibus (1.5.6-1) unstable; urgency=medium
+
+  * New upstream release.
+    - Update patches with FC21 patches.
+    - Fix Vala issues. Closes: #746136
+  * Build with wayland support.
+  * Build with python3
+  * Drop python-ibus.
+  * New upstream URL.  Closes: #748320
+  * Add bug report script support. 
+
+ -- Osamu Aoki <osamu@debian.org>  Thu, 05 Jun 2014 22:41:50 +0900
+
+ibus (1.5.5-1) unstable; urgency=medium
+
+  * New upstream release.
+    - CVE-2013-4509 (also with FC19 patch).  Closes: #729065
+    - Update ibus-setup message. Closes: #729472
+  * Sync with ibus-1.5.5-1.fc19.src.rpm
+  * Update debian/rules using DEB_*_MAINT_APPEND (compat=9).
+  * Update README.Debian. Closes: #732434
+  * Update Standards-Version: 3.9.5
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 26 Jan 2014 16:28:28 +0900
+
+ibus (1.5.4-1) unstable; urgency=low
+
+  * New upstream release.
+  * Depend on gir1.2-gtk-3.0 (>=3.8.5). Closes: #723031, #725134, #726467
+  * wrap-and-sort.
+  * Sync upstream with ibus-HEAD.patch which fixes candidate orientation
+    bug.  Closes: #725024
+
+ -- Osamu Aoki <osamu@debian.org>  Tue, 15 Oct 2013 22:01:21 +0900
+
+ibus (1.5.3-7) unstable; urgency=low
+
+  * Fix unowned files after purge: /etc/dconf/db/ibus 
+    Closes: #722593
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 14 Sep 2013 01:50:04 +0900
+
+ibus (1.5.3-6) unstable; urgency=low
+
+  * debian/control:
+    - Depend on gir1.2-gtk-3.0 and python-gi. Closes: #722121
+  * debian/rules: (thanks Jeremy)
+    - Simplify override_dh_install rule
+    - Only hide ibus-setup in GNOME and Unity
+    - Restore --disable-silent-rules
+
+ -- Osamu Aoki <osamu@debian.org>  Wed, 11 Sep 2013 23:56:01 +0900
+
+ibus (1.5.3-5) unstable; urgency=low
+
+  * This initiates ibus 1.4 to 1.5 transition.  This changes IM 
+    switching key to SUPER-space and integrates xkb. 
+    Closes: #690605, #699368
+  * Remove gjs and gnome-shell build dependency since ibus-gjs was 
+    removed.
+  * Add breaks to packages indirectly depending on python-ibus
+    since ibus does not depend on python-ibus anymore.
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 06 Sep 2013 23:41:07 +0900
+
+ibus (1.5.3-4) experimental; urgency=low
+
+  * Deprecate python-ibus and mention GObject introspection
+    transition. 
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 31 Aug 2013 00:24:35 +0900
+
+ibus (1.5.3-3) experimental; urgency=low
+
+  * Deleted ibus-gjs as EOL. (1.5.3-2 was configured with 
+    different options.)
+  * Confirmed functioning ibus 1.5. Closes: #692424
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 26 Aug 2013 22:09:40 +0900
+
+ibus (1.5.3-2) experimental; urgency=low
+
+  * Drop multiarch patch introduced in ibus (1.4.0-2) which
+    is not required with compat 9.
+  * Merge from the FC19 released package.
+    - ibus-810211-no-switch-by-no-trigger.patch: refreshed
+    - ibus-xx-setup-frequent-lang.patch: refreshed
+    - ibus-gjs-3.4.1.20130115.patch: refreshed
+  * Update package dependency and build rules.
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 24 Aug 2013 22:01:01 +0900
+
+ibus (1.5.3-1) experimental; urgency=low
+
+  * New upstream release. Applied patches dropped:
+    - the 0001 - 0017 backport patches
+    - the format-security patches
+  * Merge from 1.5.3-0ubuntu1
+    - debian/control:
+      + Recommend ibus-gtk | ibus-qt4, ibus-gtk3 | ibus-qt4 instead of
+        recommending all of them
+      + Suggest ibus-clutter instead of recommending it
+      + Depend on dconf-cli instead of dconf-tools 
+    - debian/rules:
+      + Use --disable-silent-rules
+    - debian/patches/ibus-541492-xkb.patch: from Fedora, refreshed
+    - debian/patches/ibus-530711-preload-sys.patch: from Fedora, refreshed
+  * Not merging Ubuntu specific following changes in 1.5.3-0ubuntu1
+    - use of dh_translations in rules
+    - 02_title_update.patch
+    - 05_appindicator.patch
+    - disable-input-trigger.patch
+  * Update symbols file with 1.5.3.
+    - Somehow 1.5.3-0ubuntu1 symbols file is marked these and 1.5.2-3~ 
+      as 1.5.2.
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 24 Aug 2013 01:25:05 +0900
+
+ibus (1.5.2-4) experimental; urgency=low
+
+  * Update postinst/prerm since no im-switch is not supported.
+    Closes: #716829
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 13 Jul 2013 22:07:58 +0900
+
+ibus (1.5.2-3) experimental; urgency=low
+
+  * Typo fix.  Thanks Ansgar Burchardt
+  * Merge upstream changes (FC19 timing)
+  * Refreshed and adjusted patches to the Debian package
+  * Add dependency.
+  * Patch to avoid hitting -Werror=format-security.
+  * updated debian/* for file installation etc.
+  * updated symbols
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 13 Jul 2013 21:31:57 +0900
+
+ibus (1.5.2-2) experimental; urgency=low
+
+  * Drop "Replaces: libibus-1.0-0"
+
+ -- Osamu Aoki <osamu@debian.org>  Thu, 11 Jul 2013 23:10:13 +0900
+
+ibus (1.5.2-1) experimental; urgency=low
+
+  [ Osamu Aoki ]
+  * New upstream release.
+  * Merge post-revert changes in the recent unstable released packages
+    and include such changelog entries.
+
+  [ Aron Xu ]
+  * debian/control:
+    - ibus Depends on gir1.2-ibus-1.0 and dconf-tools. Closes: #700076
+
+ -- Osamu Aoki <osamu@debian.org>  Wed, 10 Jul 2013 07:41:50 +0900
+
+ibus (1.5.1.is.1.4.2-2) unstable; urgency=low
+
+  [ Peter Michael Green ]
+  * Fix format security error by passing format string and parameter directly
+    to g_dbus_method_invocation_return_error rather than formatting the string
+    ourselves and passing that to the function. Closes: #710643
+
+  [ Osamu Aoki ]
+  * Fix ibus-setup breakage by setting all related packages to use
+   --libexec=/usr/lib/ibus.  Closes: #712149
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 16 Jun 2013 22:29:37 +0900
+
+ibus (1.5.1.is.1.4.2-1) unstable; urgency=low
+
+  * Revert to 1.4.2.
+
+ -- Aron Xu <aron@debian.org>  Wed, 13 Feb 2013 20:58:07 +0800
+
+ibus (1.5.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control:
+    - Add myself to Uploaders, remove LI and Zhengpeng
+    - Remove M-A: same from libibus-1.0-dev since gir isn't M-A:same
+    - Update std-ver 3.9.3 -> 3.9.4, no change
+    - Remove obsolete DMUA field
+  * debian/libibus-1.0-5.symbols:
+    - Add new symbols file, remove old one
+  * debian/rules:
+    - Enable tests, but do not fail
+    - Call dh_install with --fail-missing
+    - Remove useless .la files
+    - Remove executable bit from bash_complemention file
+
+ -- Aron Xu <aron@debian.org>  Sat, 02 Feb 2013 00:36:51 +0800
+
+ibus (1.4.99.20120917-3) experimental; urgency=low
+
+  * Team upload
+  * Call gir with dh sequences (Closes: #691071).
+
+ -- Aron Xu <aron@debian.org>  Wed, 24 Oct 2012 22:55:06 +0800
+
+ibus (1.4.99.20120917-2) experimental; urgency=low
+
+  * Fix "libibus-1.0-0 ships libibus-1.0.so.5" (Closes: #690287)
+
+ -- Asias He <asias@debian.org>  Wed, 17 Oct 2012 12:41:59 +0800
+
+ibus (1.4.99.20120917-1) experimental; urgency=low
+
+  * New upstream release
+  * Bump debhelper to (>= 9)
+  * Drop 'ibus source: package-needs-versioned-debhelper-build-depends 9'
+    from debian/source/lintian-overrides
+
+ -- Asias He <asias.hejun@gmail.com>  Fri, 05 Oct 2012 13:32:50 +0800
+
+ibus (1.4.1-7) unstable; urgency=low
+
+  * Add dependency to gnome-icon-theme. Closes: #678422
+  * Use Hardening Options. 
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 23 Jun 2012 03:16:04 +0900
+
+ibus (1.4.1-6) unstable; urgency=low
+
+  * Fix build-depend by adding python-dbus-dev. Closes: #673853
+
+ -- Osamu Aoki <osamu@debian.org>  Thu, 24 May 2012 00:17:47 +0900
+
+ibus (1.4.1-5) unstable; urgency=low
+
+  * Fix multiarch bug for gir1.2-ibus-1.0. Closes: #669982 
+  * Add Suggests: ibus-doc. Closes: #666466
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 27 Apr 2012 00:22:42 +0900
+
+ibus (1.4.1-4) unstable; urgency=low
+
+  * Fix FTBFS by cleaning up install. Closes: Bug#669545
+  * Fix control for "Multi-Arch:".
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 20 Apr 2012 22:49:02 +0900
+
+ibus (1.4.1-3) unstable; urgency=low
+
+  * Fixed im-switch hook script. Closes: #664201 
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 18 Mar 2012 00:25:01 +0900
+
+ibus (1.4.1-2) unstable; urgency=low
+
+  * Reenable --enable-surrounding-text.  Closes: #664102 
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 16 Mar 2012 22:07:41 +0900
+
+ibus (1.4.1-1) unstable; urgency=low
+
+  * Remove old patches included in the upstream.
+  * Revert pkglibexec patch by Kees Cook with old automake1.11-2
+    workaround and use configure option --libexec.
+  * Add doc-base support and preinst for documentation location
+    migration.
+  * Fix 'ibus-1.0' not found error using patch by Daiki Ueno.
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 12 Feb 2012 14:08:49 +0900
+
+ibus (1.4.0-4) unstable; urgency=low
+
+  * Apply patch to add gobject-introspection support from Daiki Ueno.
+    Closes: #657436
+  * Add Daiki Ueno as Uploaders.
+  * Fix build problem due to old automake1.11-2. Closes: #657828
+  * Fix typo and other minor issues. 
+  * Fix documentation location. Closes: #655056 
+
+ -- Osamu Aoki <osamu@debian.org>  Tue, 31 Jan 2012 20:56:01 +0900
+
+ibus (1.4.0-3) unstable; urgency=low
+
+  [ Kees Cook ]
+  * debian/{control,*.install}: Convert to Multi-Arch. Closes: #651488
+  * debian/patches/use_pkglibexec.patch: modify upstream build to use
+    pkglibexec instead of libexec, since this provides the ibus/
+    subdirectory.
+  * proper-gtk-plugin-path.patch: adjust to leave gtk3 where it thinks
+    it should be.
+
+  [ Osamu Aoki ]
+  * debian/xinput/ibus: adopt to multiarch having multiple matches.
+  * Add comments to patch fixing #642317 in 1.4.0-2.
+  * Add im-switch as seconday choice for smoother upgrade.
+  * Enable autoreconf for each build. Closes: #558568
+
+ -- Osamu Aoki <osamu@debian.org>  Thu, 15 Dec 2011 23:44:12 +0900
+
+ibus (1.4.0-2) unstable; urgency=low
+
+  [ LI Daobing ]
+  * Fix "The xim doesn't work; the location to install gtk im modules
+    doesn't consider multiarch", thanks Steve Langasek.
+    (Closes: #642317)
+  * Fix "checking for ibus support in gtk2 and gtk3 separately", thanks Steve
+    Langasek and Osamu Aoki (Closes: #645729)
+
+  [ Osamu Aoki ]
+  * Remove old README.source (Closes:#645728)
+  * Add README.Debian to improve documentation. (Closes: #600414) 
+  * Breaks should be used instead of Conflicts for versioned case.
+
+ -- Osamu Aoki <osamu@debian.org>  Wed, 07 Dec 2011 23:35:51 +0900
+
+ibus (1.4.0-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Asias He <asias.hejun@gmail.com>  Sat, 24 Sep 2011 10:02:49 +0800
+
+ibus (1.3.99.20110817-1) unstable; urgency=low
+
+  * New upstream release
+  * Fix "--enable-surrounding-text" (Closes: #639552)
+  * Fix "new upstream version 1.3.99.20110817" (Closes: #639824)
+  * Fix "typo in package description" (Closes: #636109)
+  * Fix "Typing errors in package description." (Closes: #639133)
+
+ -- Asias He <asias.hejun@gmail.com>  Sat, 03 Sep 2011 23:17:02 +0800
+
+ibus (1.3.99.20110419-1) unstable; urgency=low
+
+  * New upstream release
+  * Fix "Switch to dh_python2" (Closes: #635023)
+  * Use dh in debian/rules
+
+ -- Asias He <asias.hejun@gmail.com>  Sat, 23 Jul 2011 22:10:45 +0800
+
+ibus (1.3.9-2) unstable; urgency=low
+
+  * Enable GTK3 support
+  * Bump standards version to 3.9.2 
+  * Set DM-Upload-Allowed to yes
+  * Set VCS to git.debian.org
+  * Introduce ibus-gtk3
+  * Add Add CLUTTER_IM_MODULE in xinput.d
+  * Fix "ibus-setup.desktop need to be policy complient" (Closes: #586524)
+  * Fix "Please enable GTK3 support" (Closes: #622910)
+  * Fix "Please add support for ibus-clutter in xinput.d" (Closes: #621133)
+  * Fix "[ibus] ibus-setup shouldn't recommend $HOME/.bashrc for
+    environment variables"(Closes: #557555)
+
+ -- Asias He <asias.hejun@gmail.com>  Fri, 20 May 2011 22:02:36 +0800
+
+ibus (1.3.9-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Asias He <asias.hejun@gmail.com>  Sun, 05 Dec 2010 15:44:16 +0800
+
+ibus (1.3.8-1) unstable; urgency=low
+
+  [ LI Daobing ]
+  * fix typo in debian/changelog
+
+  [ Asias He ]
+  * New upstream release.
+  * debian/control: drop Depends python-glade2 (closes: #599301)
+
+ -- LI Daobing <lidaobing@debian.org>  Mon, 25 Oct 2010 23:31:31 +0800
+
+ibus (1.3.7-1) unstable; urgency=low
+
+  [ Asias He ]
+  * New upstream release.
+  * debian/control: bump standards version to 3.9.1.
+  * debian/libibus2.symbols: updated.
+  * debian/control: added im-config to Recommends (closes: #587296)
+
+ -- LI Daobing <lidaobing@debian.org>  Wed, 04 Aug 2010 21:47:44 +0800
+
+ibus (1.3.6-1) unstable; urgency=low
+
+  [ Asias He ]
+  * New upstream release. (closes: #586976)
+  * debian/libibus2.symbols: updated.
+  * debian/patches/*: updated.
+  * debian/control: bump standards version to 3.9.0.
+  * debian/ibus.install: updated.
+  * debian/libibus-dev.install: updated.
+
+  [ LI Daobing ]
+  * debian/control: replaces and breaks ibus (<< 1.3.6)
+
+ -- LI Daobing <lidaobing@debian.org>  Tue, 06 Jul 2010 16:02:22 +0800
+
+ibus (1.3.5-1) unstable; urgency=low
+
+  [ Asias He ]
+  * New upstream release.
+  * debian/libibus2.symbols: updated.
+
+ -- LI Daobing <lidaobing@debian.org>  Sat, 12 Jun 2010 19:37:05 +0800
+
+ibus (1.3.4-1) unstable; urgency=low
+
+  [ Asias He ]
+  * New upstream release.
+
+  [ LI Daobing ]
+  * debian/libibus2.symbols: updated.
+
+ -- LI Daobing <lidaobing@debian.org>  Sun, 30 May 2010 10:35:47 +0800
+
+ibus (1.3.3-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 06 May 2010 19:42:32 +0800
+
+ibus (1.3.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/libibus2.symbols: updated. 
+  * debian/control:
+    - change maintainer to IME Packaging Team, add me to uploaders.
+    - update Vcs-* fields.
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 29 Apr 2010 19:51:08 +0800
+
+ibus (1.3.1-2) unstable; urgency=low
+
+  * Fix "Please fix python-notify dependancy" (Closes: #577587)
+    - debian/control: ibus depends on python-notify
+  * improve manpages (Closes: #562542)
+    - debian/ibus.1 -> debian/ibus.7, and add setup information.
+    - debian/ibus-daemon.1: updated.
+    - debian/ibus-setup.1: updated.
+    - debian/ibus-gconf.1, debian/ibus-ui-gtk.1, debian/ibus-x11.1: removed.
+    - debian/ibus.manpages: updated.
+  * debian/source/format: 3.0. 
+    - remove dpatch, update debian/control, debian/rules, debian/patches
+
+ -- LI Daobing <lidaobing@debian.org>  Wed, 14 Apr 2010 20:59:30 +0800
+
+ibus (1.3.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Sat, 03 Apr 2010 18:53:10 +0800
+
+ibus (1.3.0-1) experimental; urgency=low
+
+  * New upstream release.
+  * debian/source/format: missing-debian-source-format
+  * debian/libibus2.symbols: updated.
+
+ -- LI Daobing <lidaobing@debian.org>  Wed, 24 Mar 2010 20:47:49 +0800
+
+ibus (1.2.99.20100202-1) experimental; urgency=low
+
+  * New upstream release.
+  * debian/control: bump standards version to 3.8.4.
+  * libibus1 -> libibus2 transition:
+    - debian/control: updated
+    - debian/libibus1.*: deleted
+    - debian/libibus2.*: added
+    - debian/rules: updated.
+
+ -- LI Daobing <lidaobing@debian.org>  Sun, 21 Mar 2010 18:23:37 +0800
+
+ibus (1.2.0.20091215-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/libibus1.symbols: updated
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 17 Dec 2009 19:43:32 +0800
+
+ibus (1.2.0.20091124-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 26 Nov 2009 19:24:06 +0800
+
+ibus (1.2.0.20091024-1) unstable; urgency=low
+
+  * new upstream release.
+    - Fix "notification icon should be optional" (LP: #422253)
+  * Fix "move im-switch from depends to recommends" (Closes: #551157)
+    - debian/control: updated.
+  * debian/rules: rewrited.
+  * debian/clean: updated.
+  * Fix "Desktop entry needs the X-Ubuntu-Gettext-Domain key"  (LP: #457632)
+    - debian/control: add dpatch to build-depends.
+    - debian/patches/*: added.
+    - debian/README.source: added.
+  * debian/rules: ignore test.
+
+ -- LI Daobing <lidaobing@debian.org>  Mon, 26 Oct 2009 18:55:02 +0800
+
+ibus (1.2.0.20091014-1) unstable; urgency=low
+
+  * new upstream release.
+  * debian/control:
+    - depends on librsvg2-common instead of python-rsvg.
+    - Turn ANDed ibus-{gtk,qt4} dependency into an OR, to avoid installing
+      both. (LP: #449966)
+  * debian/xinput/ibus: Turn ANDed ibus-{gtk,qt4} dependency into an OR
+
+ -- LI Daobing <lidaobing@debian.org>  Wed, 14 Oct 2009 19:04:57 +0800
+
+ibus (1.2.0.20090927-2) unstable; urgency=low
+
+  * create po template when build (LP: #188690)
+    - debian/rules: updated.
+    - debian/clean: remove pot file when clean.
+  * debian/control: build depends on python-rsvg (LP: #432375)
+
+ -- LI Daobing <lidaobing@debian.org>  Mon, 05 Oct 2009 20:45:18 +0800
+
+ibus (1.2.0.20090927-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Tue, 29 Sep 2009 20:28:59 +0800
+
+ibus (1.2.0.20090915-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Tue, 15 Sep 2009 19:30:53 +0800
+
+ibus (1.2.0.20090904-1) unstable; urgency=low
+
+  * new upstream release.
+  * debian/rules: remove ibus.desktop (LP: #420282)
+
+ -- LI Daobing <lidaobing@debian.org>  Sat, 05 Sep 2009 12:17:53 +0800
+
+ibus (1.2.0.20090828-1) unstable; urgency=low
+
+  * new upstream release.
+  * debian/control: bump standards version to 3.8.3.
+  * debian/libibus1.symbols: updated.
+
+ -- LI Daobing <lidaobing@debian.org>  Sun, 30 Aug 2009 12:37:45 +0800
+
+ibus (1.2.0.20090812-1) unstable; urgency=low
+
+  * new upstream release.
+  * debian/libibus1.symbols: updated.
+
+ -- LI Daobing <lidaobing@debian.org>  Wed, 12 Aug 2009 20:41:02 +0800
+
+ibus (1.2.0.20090810-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Mon, 10 Aug 2009 19:15:15 +0800
+
+ibus (1.2.0.20090807-1) unstable; urgency=low
+
+  * new upstream release.
+  * suggest qt4:
+    - debian/control: add recommends for ibus-qt4
+    - debian/xinput/ibus: detect ibus-qt4
+
+ -- LI Daobing <lidaobing@debian.org>  Sun, 09 Aug 2009 15:27:19 +0800
+
+ibus (1.2.0.20090806-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 06 Aug 2009 22:00:41 +0800
+
+ibus (1.2.0.20090723-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 23 Jul 2009 20:22:09 +0800
+
+ibus (1.2.0.20090719-2) unstable; urgency=low
+
+  * Fix "Cannot find libibus.so and fail to launch ibus", change it to
+    libibus.so.1 (Closes: #537685)
+
+ -- LI Daobing <lidaobing@debian.org>  Mon, 20 Jul 2009 21:33:29 +0800
+
+ibus (1.2.0.20090719-1) unstable; urgency=low
+
+  * new upstream release.
+  * debian/libibus1.symbols: updated.
+  * debian/control: change url of vcs-bzr
+
+ -- LI Daobing <lidaobing@debian.org>  Sun, 19 Jul 2009 16:00:48 +0800
+
+ibus (1.2.0.20090617-2) unstable; urgency=low
+
+  * Fix "ibus' autostart in xdg folder breaks im-switch and other input
+    method" (Closes: #537217)
+    - debian/ibus.install: remove the autostart file.
+    - debian/rules: remove /etc/xdg after install.
+    - debian/ibus.postinst: remove the autostart file.
+
+ -- LI Daobing <lidaobing@debian.org>  Thu, 16 Jul 2009 20:41:18 +0800
+
+ibus (1.2.0.20090617-1) unstable; urgency=low
+
+  * new upstream release.
+  * libibus0 -> libibus1:
+    - debian/control: rename the package.
+    - debian/libibus0.install: removed
+    - debian/libibus0.symbols: removed
+    - debian/libibus1.install: added
+    - debian/libibus1.symbols: added
+    - debian/rules: change script of dh_gtkmodules
+  * debian/ibus-gtk.install: updated.
+  * debian/control:
+    - ibus conflicts the ibus modules with low version.
+    - bump policy version to 3.8.2.
+
+ -- LI Daobing <lidaobing@debian.org>  Fri, 26 Jun 2009 22:47:52 +0800
+
+ibus (1.1.0.20090612-1) unstable; urgency=low
+
+  * new upstream release.
+  * Fix "python-ibus should depends on iso-codes" (Closes: #532163)
+  * debian/libibus0.symbols: update symbols
+
+ -- LI Daobing <lidaobing@debian.org>  Sat, 13 Jun 2009 11:39:05 +0800
+
+ibus (1.1.0.20090531-1) unstable; urgency=low
+
+  * new upstream release.
+
+ -- LI Daobing <lidaobing@debian.org>  Mon, 01 Jun 2009 20:57:27 +0800
+
+ibus (1.1.0.20090508-1) unstable; urgency=low
+
+  * new upstream release.
+  * merge ubuntu changelog.
+  * debian/control:
+    - depends of ibus: add python-xdg (closes: #529055)
+
+ -- LI Daobing <lidaobing@debian.org>  Sun, 17 May 2009 22:19:38 +0800
+
+ibus (1.1.0.20090508-0ubuntu1) karmic; urgency=low
+
+  * new upstream release (LP: #373976)
+  * debian/libibus0.symbols: update symbols
+
+ -- LI Daobing <lidaobing@debian.org>  Sat, 09 May 2009 13:52:29 +0800
+
+ibus (1.1.0.20090423-0ubuntu1) karmic; urgency=low
+
+  * new upstream release (LP: #325740)
+  * debian/patches/01_typo_in_Makefile_am.dpatch: merged by upstream, removed.
+  * no patch needed, remove dpatch from debian/*
+  * debian/rules:
+    - add "--list-missing --fail-missing" to dh_install, refactor other to make
+      this works.
+  * debian/xinput/ibus: change XIM_PROGRAM from ibus to ibus-daemon, add
+    "--xim" to XIM_ARGS
+  * debian/xinput/ibus-qt4: removed.
+  * debian/ibus.install: install gconf schemas, lib and autostart.
+  * debian/rules: add dh_gconf
+  * debian/control:
+    - build depends: add intltool, python-dbus, python-gobject-dev,
+      libgconf2-dev. remove libqt4-dev, dpatch.
+    - package libibus-gtk0 renamed to libibus0.
+    - change maintainer's email.
+    - bump standards version to 3.8.1.
+    - use simple depends on python-dbus.
+    - depends of ibus: add python-xdg.
+    - package ibus-qt4 removed. (no longer supported)
+    - new package libibus-dev.
+  * debian/libibus0.symbols: update symbols
+  * debian/docs: added
+
+ -- LI Daobing <lidaobing@debian.org>  Fri, 01 May 2009 10:41:09 +0800
+
+ibus (1.1.0.20090417-1) unstable; urgency=low
+
+  * initial release to Debian (closes: #501106)
+  * new upstream release (LP: #325740)
+    - package libibus-gtk0 renamed to libibus0.
+    - package ibus-qt4 removed. (no longer supported)
+    - new package libibus-dev.
+    - debian/control: add intltool to build depends.
+  * debian/patches/01_typo_in_Makefile_am.dpatch: merged by upstream, removed.
+  * no patch needed, remove dpatch from debian/*
+  * debian/rules:
+    - add "--list-missing --fail-missing" to dh_install, refactor other to make
+      this works.
+  * debian/xinput/ibus: change XIM_PROGRAM from ibus to ibus-daemon, add
+    "--xim" to XIM_ARGS
+  * debian/xinput/ibus-qt4: removed.
+  * debian/ibus.install: install gconf schemas
+  * debian/rules: add dh_gconf
+  * debian/control:
+    - build depends on python-dbus.
+    - change maintainer's email.
+    - bump standards version to 3.8.1.
+    - use simple depends on python-dbus.
+  * debian/libibus0.symbols: update symbols
+  * debian/docs: added
+
+ -- LI Daobing <lidaobing@debian.org>  Wed, 22 Apr 2009 21:28:45 +0800
+
+ibus (0.1.1.20081023-0ubuntu5) jaunty; urgency=low
+
+  * debian/control: Add depends on python-gconf as ibus needs this to run
+    correctly. (LP: #358770)
+
+ -- LI Daobing <lidaobing@gmail.com>  Sun, 12 Apr 2009 10:58:27 +0800
+
+ibus (0.1.1.20081023-0ubuntu4) jaunty; urgency=low
+
+  * port to python2.6 (LP: #336525)
+    - debian/pyversions: change from "2.5" to "2.5-"
+    - debian/rules: fix dh_pysupport
+  * debian/rules: change "dh_clean -k" to "dh_prep"
+
+ -- LI Daobing <lidaobing@gmail.com>  Mon, 02 Mar 2009 13:03:03 +0800
+
+ibus (0.1.1.20081023-0ubuntu3) jaunty; urgency=low
+
+  * debian/rules: add dh_gtkmodules (LP: #314375)
+  * debian/control: depends on ${misc:Depends}
+
+ -- LI Daobing <lidaobing@gmail.com>  Tue, 06 Jan 2009 22:29:46 +0800
+
+ibus (0.1.1.20081023-0ubuntu2) jaunty; urgency=low
+
+  * ibus should depends on python-ibus (LP: #312428)
+
+ -- LI Daobing <lidaobing@gmail.com>  Tue, 30 Dec 2008 21:26:16 +0800
+
+ibus (0.1.1.20081023-0ubuntu1) jaunty; urgency=low
+
+  [ LI Daobing ]
+  * Initial release (LP: #292616)
+
+  [ Zhengpeng Hou ]
+  * Add myself as an uploader. :)
+  * Add im-switch's support, stole it from scim-bridge. :)
+
+ -- Zhengpeng Hou <zhengpeng-hou@ubuntu.com>  Sun, 30 Nov 2008 10:41:05 +0000

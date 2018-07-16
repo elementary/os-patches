@@ -1,0 +1,25 @@
+From: Marc Deslauriers <marc.deslauriers@ubuntu.com>
+Date: Wed, 27 Nov 2013 09:58:12 -0500
+Subject: Don't show the notification if not actually upgrading
+
+from a previous version
+
+Bug: http://code.google.com/p/ibus/issues/detail?id=1677
+Bug-Ubuntu: https://bugs.launchpad.net/ibus/+bug/1255542
+Forwarded: yes
+---
+ ui/gtk3/panel.vala | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/ui/gtk3/panel.vala b/ui/gtk3/panel.vala
+index f15ba5d..4cd88e2 100644
+--- a/ui/gtk3/panel.vala
++++ b/ui/gtk3/panel.vala
+@@ -956,6 +956,7 @@ class Panel : IBus.PanelService {
+         string current_version = null;
+ 
+         if (compare_versions(prev_version, "1.5.3") < 0)
++	if (prev_version != "" && compare_versions(prev_version, "1.5.3") < 0)
+             update_version_1_5_3();
+ 
+         if (compare_versions(prev_version, "1.5.8") < 0)

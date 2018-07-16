@@ -1,0 +1,100 @@
+#!/bin/bash
+####################################################################
+# rough outline of this command
+# 1. get po file from {ibus_xkb_version}.tar.gz
+#    cp path/to/*.po debian/po/
+# 2. update patches with new fedora ones
+#    cp (RPM package one) (deb package one)
+#    HEAD patch is the one changing in most cases. 
+# 3. invoke this as "debian/update-po"
+#    refresh patch
+#    update PO
+#    create new 999-update-po.patch
+####################################################################
+# 999-update-po.patch is corresponds to following part of SPEC file
+# # Actual path is https://github.com/.../%%{ibus_xkb_version}.tar.gz
+# # Renamed %%{ibus_xkb_version}.tar.gz to ibus-xkb-%%{ibus_xkb_version}.tar.gz
+# Source3:        https://github.com/ibus/ibus-xkb/archive/ibus-xkb-%{ibus_xkb_version}.tar.gz
+# 
+# zcat %SOURCE3 | tar xf -
+# POS=`(cd ibus-xkb-%ibus_xkb_version/po; ls *.po)`
+# for PO in $POS
+# do
+#   cp po/$PO po/$PO.orig
+#   msgcat --use-first po/$PO ibus-xkb-%ibus_xkb_version/po/$PO -o po/$PO
+# done
+# ====================
+
+set -e -x
+
+dquilt() {
+quilt --quiltrc=${HOME}/.quiltrc-dpkg "$@"
+}
+# sanity check
+if [ ! -d debian/po ]; then
+    echo "Untar ibus-xkb-1.5.*.tar.gz"
+    echo "Copy PO files from ibus-xkb-*/po/*.po to debian/po/*.po"
+    exit
+fi
+# drop old 999-update-po.patch
+rm -f debian/patches/999-update-po.patch
+mv debian/patches/series debian/patches/series.orig
+grep -v ^999-update-po.patch debian/patches/series.orig >debian/patches/series
+rm debian/patches/series.orig
+
+# apply all patches and unfuzzy
+while dquilt push -a ; do dquilt refresh; done
+
+# create new 999-update-po.patch
+dquilt new 999-update-po.patch
+
+POSEXT=$(cd ./debian/po >/dev/null; ls *.po)
+POS=$(cd ./po >/dev/null; ls *.po)
+
+set +x
+# This is just precaution, if file does not exist.
+for PO in $POSEXT; do
+    if [ ! -f po/$PO ]; then
+        echo "Add: $PO"
+	: > $PO
+    fi
+done
+set -x
+
+# record before updates
+dquilt add po/*.po
+
+# merge PO from debian/po/*.po
+for PO in $POSEXT; do
+    echo "Update: po/$PO by merging debian/po/$PO"
+    msgcat --use-first po/$PO debian/po/$PO -o po/$PO
+done
+
+# make POT PO from source
+cd ./po; intltool-update --pot ; cd -
+POT=ibus10.pot
+
+# update PO by POT
+for PO in $POS; do
+    echo "Update: $PO"
+    msgmerge  --update --backup=off po/$PO po/$POT
+done
+
+# The modification to the /po/*.po files should be recorded as the quilt patch in
+# the debian/patches/ directory for use with the Debian package.
+dquilt refresh
+dquilt pop -a
+
+# clean up
+rm -rf .pc
+echo "Remove debian/po/*"
+rm -rf debian/po
+
+# new commit
+git add debian/patches/*
+git commit -m "Update 999-update-po.patch and refresh"
+
+# remove junks
+git reset --hard HEAD
+git clean -d -f -x
+

@@ -1,0 +1,33 @@
+From: Sebastien Bacher <seb128@ubuntu.com>
+Date: Wed, 4 Aug 2010 18:19:17 +0200
+Subject: Rename "IBus Preferences" to "Keyboard Input Methods"
+
+---
+ setup/main.py | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/setup/main.py b/setup/main.py
+index f0eee99..8aa039e 100644
+--- a/setup/main.py
++++ b/setup/main.py
+@@ -504,7 +504,7 @@ class Setup(object):
+         if self.__bus.is_connected():
+             return
+ 
+-        message = _("The IBus daemon is not running. Do you wish to start it?")
++        message = _("Keyboard Input Methods (IBus Daemon) is not running. Do you wish to start it?")
+         dlg = Gtk.MessageDialog(message_type = Gtk.MessageType.QUESTION,
+                                 buttons = Gtk.ButtonsType.YES_NO,
+                                 text = message)
+@@ -526,10 +526,7 @@ class Setup(object):
+ 
+         if self.__bus.is_connected():
+             message = _("IBus has been started! "
+-                "If you cannot use IBus, add the following lines to your $HOME/.bashrc; then relog into your desktop.\n"
+-                "  export GTK_IM_MODULE=ibus\n"
+-                "  export XMODIFIERS=@im=ibus\n"
+-                "  export QT_IM_MODULE=ibus"
++                "If you can not use IBus, please open System Menu -&gt; System Settings -&gt; Language Support and set the \"Keyboard Input Method\" to \"ibus\", then log out and back in again."
+                 )
+             dlg = Gtk.MessageDialog(message_type = Gtk.MessageType.INFO,
+                                     buttons = Gtk.ButtonsType.OK,

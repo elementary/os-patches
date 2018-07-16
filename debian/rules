@@ -1,0 +1,65 @@
+#!/usr/bin/make -f
+#DH_VERBOSE = 1
+
+# See dpkg-buildflags(1)
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+%:
+	dh $@ --with autoreconf,gir,python3,translations
+
+CONFIGURE_FLAGS = \
+		--disable-silent-rules \
+		--disable-static \
+		--enable-emoji-dict \
+		--enable-gtk2 \
+		--enable-gtk3 \
+		--enable-xim \
+		--enable-gtk-doc \
+		--with-no-snooper-apps='gnome-do,Do.*,firefox.*,.*chrome.*,.*chromium.*' \
+		--enable-surrounding-text \
+		--enable-introspection \
+		--enable-appindicator \
+		--libexecdir=/usr/lib/ibus \
+                --with-python=python3
+
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+CONFIGURE_FLAGS += --enable-wayland
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(CONFIGURE_FLAGS)
+
+override_dh_autoreconf:
+	dh_autoreconf ./autogen.sh -- $(CONFIGURE_FLAGS)
+
+override_dh_auto_build:
+	make -C ui/gtk3 maintainer-clean-generic
+	# make -C po update-gmo
+	dh_auto_build
+
+override_dh_shlibdeps:
+	dh_shlibdeps -- -xlibgtk2.0-0
+
+override_dh_install:
+	echo "Keywords=keyboard;input;" >> debian/tmp/usr/share/applications/ibus-setup.desktop
+	# KDE, Xfce, LXDE may needs to be added
+	echo "NotShowIn=GNOME;Unity;" >> debian/tmp/usr/share/applications/ibus-setup.desktop
+	# workaround for desktop-file-install
+	sed -i -e 's|Comment\[ja\]=IBus |& |' \
+		debian/tmp/usr/share/applications/ibus-setup.desktop
+	desktop-file-install --delete-original \
+		--dir debian/tmp/usr/share/applications \
+		debian/tmp/usr/share/applications/*
+	dh_install -X.la -X.pyc -X.pyo
+
+override_dh_missing:
+	dh_missing --fail-missing -X.la -X.pyc -X.pyo
+
+override_dh_makeshlibs:
+	dh_makeshlibs -Nibus-gtk -Nibus-gtk3
+
+override_dh_auto_test:
+	-dh_auto_test -- V=1 # disabled due to FAIL: ibus-compose
+

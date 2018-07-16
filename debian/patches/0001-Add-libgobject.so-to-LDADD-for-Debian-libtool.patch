@@ -1,0 +1,44 @@
+From 21a5d1bd8d28f66bd9fbab4a3c49c0b8e95ef850 Mon Sep 17 00:00:00 2001
+From: Osamu Aoki <osamu@debian.org>
+Date: Sun, 31 Dec 2017 17:42:41 +0900
+Subject: [PATCH] Add libgobject.so to LDADD for Debian libtool
+
+Thanks Jeremy Bicha for providing pointer.
+
+  https://github.com/ibus/ibus/commit/a28fa74
+
+Debian libtool ignores dependency_libs in libibus.la for dlopen modules
+so need to add libraries in LDADD explicitly.
+https://www.mail-archive.com/libtool@gnu.org/msg11616.html
+
+BUG=#1952
+R=Shawn.P.Huang@gmail.com
+
+Review URL: https://codereview.appspot.com/334070043
+
+Patch from Danny <lesarde@gmail.com>.
+---
+ src/Makefile.am | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index e7bc8be..303250f 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -312,10 +312,12 @@ emoji_parser_SOURCES =          \
+     $(NULL)
+ emoji_parser_CFLAGS =           \
+     $(GLIB2_CFLAGS)             \
++    $(GOBJECT2_CFLAGS)          \
+     $(NULL)
+ emoji_parser_LDADD =            \
+-    $(GLIB2_LIBS)               \
+     $(libibus)                  \
++    $(GLIB2_LIBS)               \
++    $(GOBJECT2_LIBS)            \
+     $(NULL)
+ 
+ clean-local:
+-- 
+2.15.1
+

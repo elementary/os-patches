@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gconfschemafile>
+  <schemalist>
+    <schema>
+      <key>/schemas/desktop/ibus/general/preload_engines</key>
+      <applyto>/desktop/ibus/general/preload_engines</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <default>[]</default>
+      <list_type>string</list_type>
+      <locale name="C">
+        <short><!-- Translators: Here “Preload” is a verb -->Preload engines</short>
+	    <long><!-- Translators: Tooltip for the button “Preload Engines” -->Preload engines during ibus starts up</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/engines_order</key>
+      <applyto>/desktop/ibus/general/engines_order</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <default>[]</default>
+      <list_type>string</list_type>
+      <locale name="C">
+        <short>Engines order</short>
+            <long>Saved engines order in input method list</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/switcher-delay-time</key>
+      <applyto>/desktop/ibus/general/switcher-delay-time</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>400</default>
+      <locale name="C">
+        <short>Popup delay milliseconds for IME switcher window</short>
+            <long>Set popup delay milliseconds to show IME switcher window.
+                  The default is 400.
+                  0 = Show the window immediately.
+                  0 &lt; Delay milliseconds.
+                  0 &gt; Do not show the window and switch prev/next engines.
+            </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/version</key>
+      <applyto>/desktop/ibus/general/version</applyto>
+      <owner>ibus</owner>
+      <type>string</type>
+      <default></default>
+      <locale name="C">
+        <short>Saved version number</short>
+            <long>The saved version number will be used to check the
+                  difference between the version of the previous installed
+                  ibus and one of the current ibus.
+            </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/xkb-latin-layouts</key>
+      <applyto>/desktop/ibus/general/xkb-latin-layouts</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[ara,bg,cz,dev,gr,gur,in,jp(kana),mal,mkd,ru,ua]</default>
+      <locale name="C">
+        <short>Latin layouts which have no ASCII</short>
+           <long>US layout is appended to the latin layouts. variant can be
+                 omitted.
+           </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/use-xmodmap</key>
+      <applyto>/desktop/ibus/general/use-xmodmap</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>true</default>
+      <locale name="C">
+        <short>Use xmodmap</short>
+          <long>Run xmodmap if .xmodmap or .Xmodmap exists when
+                ibus engines are switched.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/hotkey/trigger</key>
+      <applyto>/desktop/ibus/general/hotkey/trigger</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[Control+space,Zenkaku_Hankaku,Alt+Kanji,Alt+grave,Hangul,Alt+Release+Alt_R]</default>
+      <locale name="C">
+        <short>Trigger shortcut keys</short>
+          <long>The shortcut keys for turning input method on or off</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/hotkey/triggers</key>
+      <applyto>/desktop/ibus/general/hotkey/triggers</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[&lt;Super&gt;space]</default>
+      <locale name="C">
+        <short>Trigger shortcut keys for gtk_accelerator_parse</short>
+          <long>The shortcut keys for turning input method on or off</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/hotkey/enable_unconditional</key>
+      <applyto>/desktop/ibus/general/hotkey/enable_unconditional</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[]</default>
+      <locale name="C">
+        <short>Enable shortcut keys</short>
+	    <long>The shortcut keys for turning input method on</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/hotkey/disable_unconditional</key>
+      <applyto>/desktop/ibus/general/hotkey/disable_unconditional</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[]</default>
+      <locale name="C">
+        <short>Disable shortcut keys</short>
+	    <long>The shortcut keys for turning input method off</long>
+      </locale>
+    </schema>
+    <!-- For backward compatibility -->
+    <schema>
+      <key>/schemas/desktop/ibus/general/hotkey/next_engine</key>
+      <applyto>/desktop/ibus/general/hotkey/next_engine</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[Alt+Shift_L]</default>
+      <locale name="C">
+        <short>Next engine shortcut keys</short>
+	    <long>The shortcut keys for switching to the next input method in the list</long>
+      </locale>
+    </schema>
+
+    <schema>
+      <key>/schemas/desktop/ibus/general/hotkey/next_engine_in_menu</key>
+      <applyto>/desktop/ibus/general/hotkey/next_engine_in_menu</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[Alt+Shift_L]</default>
+      <locale name="C">
+        <short>Next engine shortcut keys</short>
+	    <long>The shortcut keys for switching to the next input method in the list</long>
+      </locale>
+    </schema>
+
+    <!-- For backward compatibility -->
+    <schema>
+      <key>/schemas/desktop/ibus/general/hotkey/prev_engine</key>
+      <applyto>/desktop/ibus/general/hotkey/prev_engine</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[]</default>
+      <locale name="C">
+        <short>Prev engine shortcut keys</short>
+	    <long>The shortcut keys for switching to the previous input method</long>
+      </locale>
+    </schema>
+
+    <schema>
+      <key>/schemas/desktop/ibus/general/hotkey/previous_engine</key>
+      <applyto>/desktop/ibus/general/hotkey/previous_engine</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[]</default>
+      <locale name="C">
+        <short>Prev engine shortcut keys</short>
+	    <long>The shortcut keys for switching to the previous input method</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/show</key>
+      <applyto>/desktop/ibus/panel/show</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>0</default>
+      <locale name="C">
+        <short>Auto hide</short>
+	    <long>The behavior of property panel. 0 = Do not show, 1 = Auto hide, 2 = Always show</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/x</key>
+      <applyto>/desktop/ibus/panel/x</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>-1</default>
+      <locale name="C">
+        <short>Language panel position</short>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/y</key>
+      <applyto>/desktop/ibus/panel/y</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>-1</default>
+      <locale name="C">
+        <short>Language panel position</short>
+      </locale>
+    </schema>
+    <!--
+    <schema>
+      <key>/schemas/desktop/ibus/panel/position</key>
+      <applyto>/desktop/ibus/panel/position</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>3</default>
+      <locale name="C">
+        <short>Language panel position</short>
+	    <long>The position of the language panel. 0 = Top left corner, 1 = Top right corner, 2 = Bottom left corner, 3 = Bottom right corner, 4 = Custom</long>
+      </locale>
+    </schema>
+    -->
+    <schema>
+      <key>/schemas/desktop/ibus/panel/follow-input-cursor-when-always-shown</key>
+      <applyto>/desktop/ibus/panel/follow-input-cursor-when-always-shown</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Follow the input cursor in case the panel is always shown</short>
+          <long>If true, the panel follows the input cursor in case the
+                panel is always shown. If false, the panel is shown at
+                a fixed location.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/auto-hide-timeout</key>
+      <applyto>/desktop/ibus/panel/auto-hide-timeout</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>10000</default>
+      <locale name="C">
+        <short>The milliseconds to show property panel</short>
+          <long>The milliseconds to show property panel after focus-in or
+                properties are changed.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/lookup_table_orientation</key>
+      <applyto>/desktop/ibus/panel/lookup_table_orientation</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>1</default>
+      <locale name="C">
+        <short>Orientation of lookup table</short>
+	    <long>Orientation of lookup table. 0 = Horizontal, 1 = Vertical</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/show_icon_on_systray</key>
+      <applyto>/desktop/ibus/panel/show_icon_on_systray</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>true</default>
+      <locale name="C">
+        <short>Show icon on system tray</short>
+	    <long>Show icon on system tray</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/show_im_name</key>
+      <applyto>/desktop/ibus/panel/show_im_name</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Show input method name</short>
+	    <long>Show input method name on language bar</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/xkb-icon-rgba</key>
+      <applyto>/desktop/ibus/panel/xkb-icon-rgba</applyto>
+      <owner>ibus</owner>
+      <type>string</type>
+      <default>#415099</default>
+      <locale name="C">
+        <short>RGBA value of XKB icon</short>
+	    <long>XKB icon shows the layout string and the string is
+                  rendered with the RGBA value. The RGBA value can be
+                  1. a color name from X11, 2. a hex value in form '#rrggbb'
+                  where 'r', 'g' and 'b' are hex digits of the red, green,
+                  and blue, 3. a RGB color in form 'rgb(r,g,b)' or
+                  4. a RGBA color in form 'rgba(r,g,b,a)' where 'r',
+                  'g', and 'b' are either integers in the range 0 to 255
+                  or precentage values in the range 0% to 100%, and
+                  'a' is a floating point value in the range 0 to 1
+                  of the alpha.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/property-icon-delay-time</key>
+      <applyto>/desktop/ibus/panel/property-icon-delay-time</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>500</default>
+      <locale name="C">
+        <short>The milliseconds to show the panel icon for a property</short>
+          <long>The milliseconds to show the panel icon from the
+                engine icon to a property icon whenever engines are
+                switched if the property is specified by the value of
+                icon-prop-key in IBusEngineDesc.
+                If the value is 0, no delay time and the property icon
+                is shown immediately.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/use_system_keyboard_layout</key>
+      <applyto>/desktop/ibus/general/use_system_keyboard_layout</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Use system keyboard layout</short>
+	    <long>Use system keyboard (XKB) layout</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/use_custom_font</key>
+      <applyto>/desktop/ibus/panel/use_custom_font</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Use custom font</short>
+	    <long>Use custom font name for language panel</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/custom_font</key>
+      <applyto>/desktop/ibus/panel/custom_font</applyto>
+      <owner>ibus</owner>
+      <type>string</type>
+      <default>Sans 10</default>
+      <locale name="C">
+        <short>Custom font</short>
+	    <long>Custom font name for language panel</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/emoji/hotkey</key>
+      <applyto>/desktop/ibus/panel/emoji/hotkey</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <list_type>string</list_type>
+      <default>[&lt;Control&gt;&lt;Shift&gt;e]</default>
+      <locale name="C">
+        <short>Emoji shortcut keys for gtk_accelerator_parse</short>
+          <long>The shortcut keys for turning emoji typing on or off</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/emoji/font</key>
+      <applyto>/desktop/ibus/panel/emoji/font</applyto>
+      <owner>ibus</owner>
+      <type>string</type>
+      <default>Monospace 16</default>
+      <locale name="C">
+        <short>Custom font</short>
+	    <long>Custom font name for emoji chracters on emoji dialog</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/emoji/lang</key>
+      <applyto>/desktop/ibus/panel/emoji/lang</applyto>
+      <owner>ibus</owner>
+      <type>string</type>
+      <default>en</default>
+      <locale name="C">
+        <short>Default language for emoji dictionary</short>
+	    <long>Choose a default language of emoji dictionaries on
+	          the emoji dialog. The value $lang is applied to
+                  /usr/share/ibus/dicts/emoji-$lang.dict
+            </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/emoji/favorites</key>
+      <applyto>/desktop/ibus/panel/emoji/favorites</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <default>[]</default>
+      <list_type>string</list_type>
+      <locale name="C">
+        <short>favorite emoji list on emoji dialog</short>
+	    <long>You can show the favorite emojis on emoji list
+                  if this list has any characters.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/emoji/favorite-annotations</key>
+      <applyto>/desktop/ibus/panel/emoji/favorite-annotations</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <default>[]</default>
+      <list_type>string</list_type>
+      <locale name="C">
+        <short>favorite emoji annotation list on emoji dialog</short>
+	    <long>You can assign an annotation for a favorite emoji
+                  in this list.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/emoji/has-partial-match</key>
+      <applyto>/desktop/ibus/panel/emoji/has-partial-match</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Whether emoji annotations can be match partially or not</short>
+	    <long>Whether emoji annotations can be matched with a partial
+                  string instead of the exact match or not.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/emoji/partial-match-length</key>
+      <applyto>/desktop/ibus/panel/emoji/partial-match-length</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>3</default>
+      <locale name="C">
+        <short>Match emoji annotations with the specified length</short>
+	    <long>Match emoji annotations partially with more than
+                  the specified number of characters instead of
+                  the exact match.</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/panel/emoji/partial-match-condition</key>
+      <applyto>/desktop/ibus/panel/emoji/partial-match-condition</applyto>
+      <owner>ibus</owner>
+      <type>int</type>
+      <default>0</default>
+      <locale name="C">
+        <short>Choose a condition to match emoji annotations partially</short>
+	    <long>Choose one of the following conditions to match emoji
+	          annotations partially:
+                  0 == Prefix match, 1 == Suffix match, 2 == Containing match
+                  </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/embed_preedit_text</key>
+      <applyto>/desktop/ibus/general/embed_preedit_text</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>true</default>
+      <locale name="C">
+        <short>Embed Preedit Text</short>
+	    <long>Embed Preedit Text in Application Window</long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/desktop/ibus/general/use_global_engine</key>
+      <applyto>/desktop/ibus/general/use_global_engine</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>true</default>
+      <locale name="C">
+        <short>Use global input method</short>
+	    <long>Share the same input method among all applications</long>
+      </locale>
+    </schema>
+
+    <schema>
+      <key>/schemas/desktop/ibus/general/enable_by_default</key>
+      <applyto>/desktop/ibus/general/enable_by_default</applyto>
+      <owner>ibus</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Enable input method by default</short>
+	    <long>Enable input method by default when the application gets input
+            focus</long>
+      </locale>
+    </schema>
+
+    <schema>
+      <key>/schemas/desktop/ibus/general/dconf_preserve_name_prefixes</key>
+      <applyto>/desktop/ibus/general/dconf_preserve_name_prefixes</applyto>
+      <owner>ibus</owner>
+      <type>list</type>
+      <default>[/desktop/ibus/engine/pinyin,/desktop/ibus/engine/bopomofo,/desktop/ibus/engine/hangul]</default>
+      <list_type>string</list_type>
+      <locale name="C">
+        <short>DConf preserve name prefixes</short>
+	    <long>Prefixes of DConf keys to stop name conversion</long>
+      </locale>
+    </schema>
+  </schemalist>
+</gconfschemafile>
