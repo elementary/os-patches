@@ -1,3 +1,21 @@
+python-apt (1.1.0~beta1ubuntu0.16.04.2) xenial; urgency=medium
+
+  * python/tag.cc: Fix invalid read in TagFileNext
+  * DepCache: Check that candidate we are setting belongs to package
+  * Raise CacheMismatchError if objects passed to DepCache are from different cache
+    (LP: #1737441); also includes the following regression fixes from bionic:
+    - apt.Cache: Remap objects when reopening cache (LP: 1773316 in bionic+), incl. regression fixes:
+      + Add more extensive test cases for cache remapping
+      + Regression fix: Do not override __hash__ in apt.package.Package (LP: 1780099 in bionic+)
+  * CI / pre-build / data changes:
+    - Replace broken travis CI integration with current docker-based one
+    - utils/get_debian_mirrors.py: Get data from salsa (for pre-build hook)
+    - debian/control: Point to salsa instead of anonscm
+    - debian/gbp.conf: Point to 1.1.y-xenial branch
+    - Updated mirror list
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Tue, 10 Jul 2018 12:47:50 +0200
+
 python-apt (1.1.0~beta1ubuntu0.16.04.1) xenial; urgency=medium
 
   * Refreshed mirror list for upcoming point-release.

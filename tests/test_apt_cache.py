@@ -8,6 +8,8 @@
 # notice and this notice are preserved.
 """Unit tests for verifying the correctness of check_dep, etc in apt_pkg."""
 
+from __future__ import print_function
+
 import glob
 import logging
 import os
@@ -61,6 +63,8 @@ class TestAptCache(unittest.TestCase):
     def tearDown(self):
         for item in self._cnf:
             apt_pkg.config.set(item, self._cnf[item])
+
+        apt_pkg.init_system()
 
     @if_sources_list_is_readable
     def test_apt_cache(self):
@@ -250,6 +254,127 @@ class TestAptCache(unittest.TestCase):
         main_arch = apt.apt_pkg.config.get("APT::Architecture")
         arches = apt_pkg.get_architectures()
         self.assertTrue(main_arch in arches)
+
+    def test_apt_cache_reopen_is_safe(self):
+        """cache: check that we cannot use old package objects after reopen"""
+        cache = apt.Cache()
+        old_depcache = cache._depcache
+        old_package = cache["apt"]
+        old_pkg = old_package._pkg
+        old_version = old_package.candidate
+        old_ver = old_version._cand
+
+        cache.open()
+        new_depcache = cache._depcache
+        new_package = cache["apt"]
+        new_pkg = new_package._pkg
+        new_version = new_package.candidate
+        new_ver = new_version._cand
+
+        # get candidate
+        self.assertRaises(ValueError, old_depcache.get_candidate_ver,
+                          new_pkg)
+        self.assertRaises(ValueError, new_depcache.get_candidate_ver,
+                         old_pkg)
+        self.assertEqual(new_ver, new_depcache.get_candidate_ver(new_pkg))
+        self.assertEqual(old_package.candidate._cand, old_ver)  # Remap success
+        self.assertEqual(old_package.candidate._cand,
+                         new_depcache.get_candidate_ver(new_pkg))
+
+        # set candidate
+        new_package.candidate = old_version
+        old_depcache.set_candidate_ver(old_pkg, old_ver)
+        self.assertRaises(ValueError, old_depcache.set_candidate_ver,
+                          old_pkg, new_ver)
+        self.assertRaises(ValueError, new_depcache.set_candidate_ver,
+                          old_pkg, old_ver)
+        self.assertRaises(ValueError, new_depcache.set_candidate_ver,
+                          old_pkg, new_ver)
+        self.assertRaises(ValueError, new_depcache.set_candidate_ver,
+                          new_pkg, old_ver)
+        new_depcache.set_candidate_ver(new_pkg, new_ver)
+
+    @staticmethod
+    def write_status_file(packages):
+        with open(apt_pkg.config["Dir::State::Status"], "w") as fobj:
+            for package in packages:
+                print("Package:", package, file=fobj)
+                print("Status: install ok installed", file=fobj)
+                print("Priority: optional", file=fobj)
+                print("Section: admin", file=fobj)
+                print("Installed-Size: 1", file=fobj)
+                print("Maintainer: X <x@x.invalid>", file=fobj)
+                print("Architecture: all", file=fobj)
+                print("Version: 1", file=fobj)
+                print("Description: blah", file=fobj)
+                print("", file=fobj)
+
+    def test_apt_cache_reopen_is_safe_out_of_bounds(self):
+        """Check that out of bounds access is remapped correctly."""
+        with tempfile.NamedTemporaryFile() as status:
+            apt_pkg.config["Dir::Etc::SourceList"] = "/dev/null"
+            apt_pkg.config["Dir::Etc::SourceParts"] = "/dev/null"
+            apt_pkg.config["Dir::State::Status"] = status.name
+            apt_pkg.init_system()
+
+            self.write_status_file("abcdefghijklmnopqrstuvwxyz")
+            c = apt.Cache()
+            p = c["z"]
+            p_id = p.id
+            self.write_status_file("az")
+            apt_pkg.init_system()
+            c.open()
+            self.assertNotEqual(p.id, p_id)
+            self.assertLess(p.id, 2)
+            p.mark_delete()
+            self.assertEqual([p], c.get_changes())
+
+    def test_apt_cache_reopen_is_safe_out_of_bounds_no_match(self):
+        """Check that installing gone package raises correct exception"""
+        with tempfile.NamedTemporaryFile() as status:
+            apt_pkg.config["Dir::Etc::SourceList"] = "/dev/null"
+            apt_pkg.config["Dir::Etc::SourceParts"] = "/dev/null"
+            apt_pkg.config["Dir::State::Status"] = status.name
+            apt_pkg.init_system()
+
+            self.write_status_file("abcdefghijklmnopqrstuvwxyz")
+            c = apt.Cache()
+            p = c["z"]
+            p_id = p.id
+            self.write_status_file("a")
+            apt_pkg.init_system()
+            c.open()
+            self.assertEqual(p.id, p_id)        # Could not be remapped
+            self.assertRaises(apt_pkg.CacheMismatchError, p.mark_delete)
+
+    def test_apt_cache_reopen_is_safe_swap(self):
+        """Check that swapping a and b does not mark the wrong package."""
+        with tempfile.NamedTemporaryFile() as status:
+            apt_pkg.config["Dir::Etc::SourceList"] = "/dev/null"
+            apt_pkg.config["Dir::Etc::SourceParts"] = "/dev/null"
+            apt_pkg.config["Dir::State::Status"] = status.name
+            apt_pkg.init_system()
+
+            self.write_status_file("abcdefghijklmnopqrstuvwxyz")
+            c = apt.Cache()
+            p = c["a"]
+            a_id = p.id
+            p_hash = hash(p)
+            set_of_p = set([p])
+            self.write_status_file("baz")
+            apt_pkg.init_system()
+            c.open()
+            # b now has the same id as a in the old cache
+            self.assertEqual(c["b"].id, a_id)
+            self.assertNotEqual(p.id, a_id)
+            # Marking a should still mark a, not b.
+            p.mark_delete()
+            self.assertEqual([p], c.get_changes())
+
+            # Ensure that p can still be found in a set of it, as a test
+            # for bug https://bugs.launchpad.net/bugs/1780099
+            self.assertEqual(hash(p), p_hash)
+            self.assertIn(p, set_of_p)
 
 
 if __name__ == "__main__":

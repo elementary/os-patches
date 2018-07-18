@@ -35,6 +35,14 @@
 #include <Python.h>
 									/*}}}*/
 
+static char PyAptCacheMismatchError_Doc[] =
+   "Raised when passing an object from a different cache to\n"
+   ":class:`apt_pkg.DepCache` methods\n\n"
+   ".. versionadded:: 1.6.1\n\n"
+   ".. versionadded:: 1.4.0~beta1ubuntu0.16.04.2";
+
+PyObject *PyAptCacheMismatchError;
+
 /**
  * A Python->C->Python gettext() function.
  *
@@ -786,6 +794,10 @@ extern "C" void initapt_pkg()
    if (PyType_Ready(&PyConfiguration_Type) == -1) INIT_ERROR;
    if (PyType_Ready(&PyCacheFile_Type) == -1) INIT_ERROR;
 
+   PyAptCacheMismatchError = PyErr_NewExceptionWithDoc("apt_pkg.CacheMismatchError", PyAptCacheMismatchError_Doc, PyExc_ValueError, NULL);
+   if (PyAptCacheMismatchError == NULL)
+      INIT_ERROR;
+
    // Initialize the module
    #if PY_MAJOR_VERSION >= 3
    PyObject *Module = PyModule_Create(&moduledef);
@@ -799,8 +811,7 @@ extern "C" void initapt_pkg()
    // Global configuration, should never be deleted.
    Config->NoDelete = true;
    PyModule_AddObject(Module,"config",Config);
-
-
+   PyModule_AddObject(Module,"CacheMismatchError", PyAptCacheMismatchError);
 
 
    // Add our classes.

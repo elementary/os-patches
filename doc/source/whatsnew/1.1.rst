@@ -2,6 +2,16 @@ What's New In python-apt 1.1
 ==============================
 This release is built against APT 1.1
 
+Changed
+-------
+* Starting with *1.1.0~beta1ubuntu0.16.04.2*, depcache stops accepting
+  objects belonging to a different cache; and candidates need to belong
+  to the package they are being set for. This was necessary to avoid
+  out-of-bounds indexes, but might break existing applications.
+
+  For :class:`apt.cache.Cache`, objects are remapped automatically
+  when reopening to reduce the impact.
+
 Removed
 -------
 * The class :class:`apt_pkg.IndexRecords` has been removed, as it was removed

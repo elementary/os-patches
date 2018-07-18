@@ -375,6 +375,7 @@ class Version(object):
     def __init__(self, package, cand):
         self.package = package
         self._cand = cand
+        self.package._pcache._weakversions.add(self)
 
     def _cmp(self, other):
         """Compares against another apt.Version object or a version string.
@@ -965,12 +966,6 @@ class Package(object):
         """Return a uniq ID for the package.
 
         This can be used eg. to store additional information about the pkg."""
-        return self._pkg.id
-
-    def __hash__(self):
-        """Return the hash of the object.
-
-        This returns the same value as ID, which is unique."""
         return self._pkg.id
 
     @property

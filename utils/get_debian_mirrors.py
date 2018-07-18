@@ -24,9 +24,9 @@ import urllib2
 from debian_bundle import deb822
 
 mirrors = collections.defaultdict(set)
-masterlist = urllib2.urlopen("http://anonscm.debian.org/viewvc/"
-                             "webwml/webwml/english/"
-                             "mirror/Mirrors.masterlist?revision=HEAD")
+masterlist = urllib2.urlopen("https://salsa.debian.org/mirror-team/"
+                             "masterlist/raw/master/"
+                             "Mirrors.masterlist")
 
 for mirror in deb822.Deb822.iter_paragraphs(masterlist):
     if "Country" not in mirror:

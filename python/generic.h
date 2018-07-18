@@ -32,6 +32,11 @@
 #include <iostream>
 #include <new>
 
+/**
+ * Exception class for invalidated cache objects.
+ */
+extern PyObject *PyAptCacheMismatchError;
+
 #if PYTHON_API_VERSION < 1013
 typedef int Py_ssize_t;
 #endif

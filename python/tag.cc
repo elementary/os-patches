@@ -342,7 +342,10 @@ static PyObject *TagFileNext(PyObject *Self)
    //  append a \n because GetSection() will only give us a single \n
    //  but Scan() needs \n\n to work
    Obj.Section->Data = new char[Stop-Start+2];
-   snprintf(Obj.Section->Data, Stop-Start+2, "%s\n", Start);
+
+   memcpy(Obj.Section->Data, Start, Stop - Start);
+   Obj.Section->Data[Stop-Start] = '\n';
+   Obj.Section->Data[Stop-Start+1] = '\0';
    // Rescan it
    if(Obj.Section->Object.Scan(Obj.Section->Data, Stop-Start+2) == false)
       return HandleErrors(NULL);

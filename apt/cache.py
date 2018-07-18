@@ -81,6 +81,7 @@ class Cache(object):
         self._callbacks = {}
         self._callbacks2 = {}
         self._weakref = weakref.WeakValueDictionary()
+        self._weakversions = weakref.WeakSet()  # type: weakref.WeakSet[Version] # nopep8
         self._changes_count = -1
         self._sorted_set = None
 
@@ -167,12 +168,44 @@ class Cache(object):
         self._list = apt_pkg.SourceList()
         self._list.read_main_list()
         self._sorted_set = None
-        self._weakref.clear()
+        self.__remap()
 
         self._have_multi_arch = len(apt_pkg.get_architectures()) > 1
 
         progress.done()
         self._run_callbacks("cache_post_open")
+
+    def __remap(self):
+        # type: () -> None
+        """Called after cache reopen() to relocate to new cache.
+
+        Relocate objects like packages and versions from the old
+        underlying cache to the new one.
+        """
+        for key in list(self._weakref.keys()):
+            try:
+                pkg = self._weakref[key]
+            except KeyError:
+                continue
+
+            try:
+                pkg._pkg = self._cache[pkg._pkg.name, pkg._pkg.architecture]
+            except LookupError:
+                del self._weakref[key]
+
+        for ver in list(self._weakversions):
+            # Package has been reseated above, reseat version
+            for v in ver.package._pkg.version_list:
+                # Requirements as in debListParser::SameVersion
+                if (v.hash == ver._cand.hash and
+                    (v.size == 0 or ver._cand.size == 0 or
+                     v.size == ver._cand.size) and
+                    v.multi_arch == ver._cand.multi_arch and
+                    v.ver_str == ver._cand.ver_str):
+                    ver._cand = v
+                    break
+            else:
+                self._weakversions.remove(ver)
 
     def close(self):
         """ Close the package cache """
