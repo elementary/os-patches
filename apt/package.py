@@ -1111,13 +1111,6 @@ class Package(object):
         This can be used eg. to store additional information about the pkg."""
         return self._pkg.id
 
-    def __hash__(self):
-        # type: () -> int
-        """Return the hash of the object.
-
-        This returns the same value as ID, which is unique."""
-        return self._pkg.id
-
     @property
     def essential(self):
         # type: () -> bool
