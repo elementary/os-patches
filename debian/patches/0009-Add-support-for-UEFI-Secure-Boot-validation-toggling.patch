@@ -10,8 +10,9 @@ Users still have the possibility to notice this and skip the step, thus
 not disabling Secure Boot (but then, they will not be able to load the
 dkms drivers that were added).
 ---
- dkms |   19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ dkms                 |   19 +++++++++++++++++++
+ dkms_common.postinst |    2 ++
+ 2 files changed, 21 insertions(+)
 
 Index: b/dkms
 ===================================================================
@@ -47,3 +48,16 @@ Index: b/dkms
      clean_build
      echo $""
      echo $"DKMS: build completed."
+Index: b/dkms_common.postinst
+===================================================================
+--- a/dkms_common.postinst
++++ b/dkms_common.postinst
+@@ -6,6 +6,8 @@
+ 
+ set -e
+ 
++. /usr/share/debconf/confmodule
++
+ uname_s=$(uname -s)
+ 
+ _get_kernel_dir() {
