@@ -1530,13 +1530,21 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
                 text = "<span color='red'>" +  text + "</span>"
                 self.label_livepatch_login.set_markup(text)
         else:
-            self.checkbutton_livepatch.set_sensitive(False)
+            if self.is_livepatch_enabled() and not self.waiting_livepatch_response:
+                # Allow the user to disable livepatch even if
+                # the account expired (see LP: #1768797)
+                self.checkbutton_livepatch.set_sensitive(True)
+                self.label_livepatch_login.set_label(_('Livepatch is active.'))
+            else:
+                self.checkbutton_livepatch.set_sensitive(False)
+                self.label_livepatch_login.set_label(_('To use Livepatch you need to sign in.'))
+
             self.button_ubuntuone.set_label(_('Sign In…'))
-            self.label_livepatch_login.set_label(_('To use Livepatch you need to sign in.'))
 
     def on_livepatch_status_changed(self, file_monitor, file, other_file, event_type):
         if not self.waiting_livepatch_response:
             self.checkbutton_livepatch.set_active(self.is_livepatch_enabled())
+            self.on_goa_auth_changed()
 
     def on_button_ubuntuone_clicked(self, button):
         if self.goa_auth.logged:
@@ -1561,8 +1569,8 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
                     self.checkbutton_livepatch.set_active(True)
 
     def do_logout(self):
-        self.goa_auth.logout()
         self.checkbutton_livepatch.set_active(False)
+        self.goa_auth.logout()
 
     def on_checkbutton_livepatch_toggled(self, checkbutton):
         if self.waiting_livepatch_response:
@@ -1621,6 +1629,8 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
                                                  reply_handler=self.livepatch_enabled_reply_handler,
                                                  error_handler=self.livepatch_enabled_error_handler,
                                                  timeout=LIVEPATCH_TIMEOUT)
+
+        self.on_goa_auth_changed()
 
         if self.quit_when_livepatch_responds:
             self.on_close_button(self.button_close)
