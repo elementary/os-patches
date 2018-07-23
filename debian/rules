@@ -84,7 +84,6 @@ FLICKER_FREE_BOOT := no
 endif
 
 ifeq ($(FLICKER_FREE_BOOT),yes)
-DEFAULT_HIDDEN_TIMEOUT := 0
 DEFAULT_HIDDEN_TIMEOUT_BOOL := true
 confflags += \
 	--enable-quiet-boot \
@@ -95,7 +94,6 @@ substvars += \
 	-Vlsb-base-depends="lsb-base (>= 3.0-6)" \
 	-Vgfxpayload-depends="grub-gfxpayload-lists [any-i386 any-amd64]"
 else
-DEFAULT_HIDDEN_TIMEOUT :=
 DEFAULT_HIDDEN_TIMEOUT_BOOL := false
 endif
 
@@ -438,8 +436,8 @@ ifneq (,$(filter grub2-common,$(BUILD_PACKAGES)))
 		-e "s/@DEFAULT_CMDLINE@/$(DEFAULT_CMDLINE)/g" \
 		-e "s/@DEFAULT_TIMEOUT@/$(DEFAULT_TIMEOUT)/g" \
 		debian/grub2-common/usr/share/grub/default/grub
-ifneq (,$(DEFAULT_HIDDEN_TIMEOUT))
-	perl -pi -e 's/^GRUB_TIMEOUT=.*/GRUB_HIDDEN_TIMEOUT=0\nGRUB_HIDDEN_TIMEOUT_QUIET=true\n$$&/' \
+ifneq (,$(DEFAULT_HIDDEN_TIMEOUT_BOOL))
+	perl -pi -e 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT_STYLE=hidden\n$$&/' \
 		debian/grub2-common/usr/share/grub/default/grub
 endif
 endif
