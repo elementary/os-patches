@@ -1,3 +1,11 @@
+live-build (3.0~a57-1ubuntu34.1) bionic; urgency=medium
+
+  * ubuntu-initramfs-handling.patch: Use initramfs-tools to work with initrds,
+    instead of trying to naively repack and unpack them blindly (LP: #1778811)
+  * debian/control: Need to depend on initramfs-tools which isn't in chroots.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 26 Jun 2018 16:36:32 -0600
+
 live-build (3.0~a57-1ubuntu34) bionic; urgency=medium
 
   * Handle late installation of systemd/resolvconf gracefully, by not
