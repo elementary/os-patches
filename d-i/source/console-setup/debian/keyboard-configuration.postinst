@@ -36,7 +36,15 @@ fi
 
 CONFIGFILE=/etc/default/keyboard
 
-if [ "$1" = "configure" -a ! -L "$CONFIGFILE" ]; then
+# Don't change /etc/default/keyboard at package upgrades on desktops
+if [ ! -d /lib/debian-installer.d ] && type dpkg-query >/dev/null 2>&1; then
+    PKGVERSION=$(dpkg-query --show --showformat='${Version}' $DPKG_MAINTSCRIPT_PACKAGE)
+    if dpkg --compare-versions "$2" lt-nl "$PKGVERSION" && [ -n "XDG_CURRENT_DESKTOP" ]; then
+        NOCHANGE=true
+    fi
+fi
+
+if [ "$1" = "configure" -a ! -L "$CONFIGFILE" -a "$NOCHANGE" != true ]; then
     
     db_get keyboard-configuration/modelcode
     model="$RET"

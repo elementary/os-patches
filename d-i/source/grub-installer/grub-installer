@@ -783,7 +783,7 @@ case $ARCH:$grub_package in
 		use_disks=
 		for frdisk_one in $frdisk_list; do
 			prefix=$(echo "$frdisk_one" | \
-			  sed 's:\(/dev/\(cciss\|ida\|rs\)/c[0-9]d[0-9][0-9]*\|/dev/mmcblk[0-9]\|/dev/\(ad\|da\)[0-9]\+\|/dev/[a-z]\+\).*:\1:')
+			  sed 's:\(/dev/\(cciss\|ida\|rs\)/c[0-9]d[0-9][0-9]*\|/dev/mmcblk[0-9]\|/dev/\(ad\|da\)[0-9]\+\|/dev/nvme[0-9]n[0-9]\|/dev/[a-z]\+\).*:\1:')
 			disks="${disks:+$disks }$prefix"
 			case $prefix in
 			    /dev/[hmsv]d[a-z]|/dev/xvd[a-z]|/dev/cciss/c[0-9]d[0-9]*|/dev/ida/c[0-9]d[0-9]*|/dev/rs/c[0-9]d[0-9]*|/dev/mmcblk[0-9]|/dev/ad[0-9]*|/dev/da[0-9]*|/dev/fio[a-z]|/dev/nvme[0-9]n[0-9])

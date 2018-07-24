@@ -224,6 +224,7 @@ class Install(install_misc.InstallBase):
 
         self.next_region()
         self.db.progress('INFO', 'ubiquity/install/bootloader')
+        self.copy_mok()
         self.configure_bootloader()
 
         self.next_region(size=4)
@@ -1010,6 +1011,31 @@ class Install(install_misc.InstallBase):
 
             for bind in binds:
                 misc.execute('umount', '-f', self.target + bind)
+
+    def copy_mok(self):
+        if 'UBIQUITY_OEM_USER_CONFIG' in os.environ:
+            return
+        try:
+            if self.db.get('oem-config/enable') == 'true':
+                return
+        except debconf.DebconfError:
+            pass
+
+        source = "/var/lib/shim-signed/mok/"
+        target = "/target/var/lib/shim-signed/mok/"
+
+        if not os.path.exists(source):
+            return
+
+        os.makedirs(target, exist_ok=True)
+        for mok_file in os.listdir(source):
+            source_file = os.path.join(source, mok_file)
+            target_file = os.path.join(target, mok_file)
+
+            if os.path.exists(target_file):
+                continue
+
+            shutil.copy(source_file, target_file)
 
     def do_remove(self, to_remove, recursive=False):
         self.nested_progress_start()

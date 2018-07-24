@@ -1,3 +1,33 @@
+ubiquity (18.04.14.5) bionic; urgency=medium
+
+  * Drop .bzrignore, .bzr-builddeb now that we've got code in git.
+  * scripts/plugininstall.py: check for existence of /var/lib/shim-signed/mok
+    before attempting a copy.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 23 Jul 2018 22:40:36 -0400
+
+ubiquity (18.04.14.4) bionic; urgency=medium
+
+  * d-i/sources.list: add bionic-updates to make sure we include all necessary
+    d-i component updates.
+  * debian/ubiquity.templates: revise Secure Boot messages to clarify that we
+    are not actually disabling Secure Boot anymore, but instead configuring it
+    with a generated Machine-Owner Key.
+  * Automatic update of included source packages: console-setup
+    1.178ubuntu2.2, grub-installer 1.128ubuntu8.18.04.2, shim-signed 1.34.9.2.
+  * d-i/lists/amd64, d-i/Makefile: add shim-signed to packages' we include from
+    the archive; we'll need update-secureboot-policy from it.
+  * d-i/get-sources, d-i/update-control:
+    - adjust for downloading, but not building, shim-signed
+    - make sure we use the right Dpkg status file.
+    - clean up the binary blobs we don't need from shim-signed.
+  * debian/ubiquity.dirs-amd64: ensure we create /usr/lib/ubiquity/shim-signed.
+  * scripts/simple-plugins: create MOK key and start enrollment in firmware if
+    the option to configure SecureBoot was selected and a password entered.
+  * scripts/plugininstall.py: copy generated MOK to the target.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 23 Jul 2018 19:14:41 -0400
+
 ubiquity (18.04.14.3) bionic; urgency=medium
 
   * Automatic update of included source packages: grub-installer

@@ -1,3 +1,19 @@
+console-setup (1.178ubuntu2.2) bionic; urgency=medium
+
+  * debian/console-setup-udeb.postinst: Guard the dpkg call in the postinst,
+    so it isn't attempted in the debian-installer environment (LP: #1782835)
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Fri, 20 Jul 2018 14:22:45 -0600
+
+console-setup (1.178ubuntu2.1) bionic; urgency=medium
+
+  * debian/keyboard-configuration.postinst:
+    - Don't change /etc/default/keyboard at package upgrades on
+      desktops, since it may conflict with how desktops deal with
+      keyboard configuration (LP: #1762952).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 15 May 2018 01:12:00 +0200
+
 console-setup (1.178ubuntu2) bionic; urgency=medium
 
   * debian/keyboard-configuration.config:

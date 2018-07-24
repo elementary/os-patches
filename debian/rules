@@ -209,6 +209,14 @@ ifeq ($(DEB_HOST_ARCH),powerpc)
 	install d-i/source/yaboot-installer/debian/postinst \
 		debian/ubiquity/usr/lib/ubiquity/yaboot-installer/yaboot-installer
 endif
+ifeq ($(DEB_HOST_ARCH),amd64)
+	install d-i/source/shim-signed/openssl.cnf \
+		debian/ubiquity/usr/lib/ubiquity/shim-signed/openssl.cnf
+	sed 's,/usr/lib/shim/mok/openssl.cnf,/usr/lib/ubiquity/shim-signed/openssl.cnf,g' \
+		d-i/source/shim-signed/update-secureboot-policy \
+		> debian/ubiquity/usr/lib/ubiquity/shim-signed/update-secureboot-policy
+	chmod +x debian/ubiquity/usr/lib/ubiquity/shim-signed/update-secureboot-policy
+endif
 
 	touch install-stamp
 
