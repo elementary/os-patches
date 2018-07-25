@@ -907,7 +907,7 @@ while :; do
 		else
 			extra_lang=${LANGUAGE%%_*}_$COUNTRYCODE
 		fi
-		if [ "$LOCALE" != C ] && [ "$LOCALE" != C.UTF-8 ] \
+		if [ "$LOCALE" != C ] && [ "$LOCALE" != C.UTF-8 ] && \
 		   [ "$LANGUAGE" ] && [ "$COUNTRYCODE" ] && \
 		   [ "$COUNTRYCODE" != "$DEFAULT_COUNTRY" ] && \
 		   ! echo ":$LANGUAGELIST:" | grep -q ":$extra_lang:" && \
