@@ -1,3 +1,19 @@
+partman-auto (134ubuntu1.3) xenial; urgency=medium
+
+  * Bump minimum and maximum sizes for /boot partitions on default, x86, and 
+    EFI platforms to a minimum of 512Mb and maximum of 768Mb. (LP: #1716999)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 06 Jul 2018 12:52:33 -0400
+
+partman-auto (134ubuntu1.2) xenial; urgency=medium
+
+  * Introduce partman-auto/cap-ram, to allow capping RAM size as used for
+    swap partition calculations. This allows us to effectively cap the
+    swap partitions size to maximum of 2*CAP. Default is set to 1024, thus
+    capping swap partitions to 2GB maximum. LP: #1351267
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 23 Feb 2018 16:59:11 +0000
+
 partman-auto (134ubuntu1.1) xenial; urgency=medium
 
   * lib/auto-shared.sh: list Software RAID devices on NVMe disks. Thanks to
