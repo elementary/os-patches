@@ -65,8 +65,8 @@ fi
 # probably from the systemd motd-news.service.  Let's update...
 
 # Generate our temp files, clean up when done
-NEWS=$(mktemp)
-ERR="$NEWS.err"
+NEWS=$(mktemp) || exit 1
+ERR=$(mktemp) || exit 1
 trap "rm -f $NEWS $ERR" HUP INT QUIT ILL TRAP KILL BUS TERM
 
 # Construct a user agent, similar to Firefox/Chrome/Safari/IE to
@@ -119,5 +119,5 @@ for u in $URLS; do
 		: > "$CACHE"
  	fi
 done
-rm -f "$NEWS" "$NEWS.err"
+rm -f "$NEWS" "$ERR"
 exit 0
