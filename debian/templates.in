@@ -65,3 +65,19 @@ _Description: /boot/grub/device.map has been regenerated
  .
  If you do not understand this message, or if there are no custom
  boot menu entries, you can ignore this message.
+
+Template: grub2/unsigned_kernels_title
+Type: title
+_Description: unsigned kernels
+
+Template: grub2/unsigned_kernels
+Type: note
+_Description: Cannot upgrade Secure Boot enforcement policy due to unsigned kernels
+ Your system has UEFI Secure Boot enabled in firmware, and the following kernels
+ present on your system are unsigned:
+ .
+  ${unsigned_versions}
+ .
+ These kernels cannot be verified under Secure Boot.  To ensure your system
+ remains bootable, GRUB will not be upgraded on your disk until these kernels are
+ removed or replaced with signed kernels.
