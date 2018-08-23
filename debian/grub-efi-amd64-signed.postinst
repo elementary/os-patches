@@ -19,6 +19,7 @@ case $1 in
 	bootloader_id="$(config_item GRUB_DISTRIBUTOR | tr A-Z a-z | \
 			 cut -d' ' -f1)"
 	if [ "$bootloader_id" ] && [ -d "/boot/efi/EFI/$bootloader_id" ]; then
+	    /usr/share/grub/grub-check-signatures
 	    grub-install --target=x86_64-efi --auto-nvram
 	fi
 	;;
