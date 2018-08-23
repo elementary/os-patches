@@ -1,11 +1,106 @@
-mutter (3.28.2-2~ubuntu18.04.1) bionic; urgency=medium
+mutter (3.28.3-2~ubuntu18.04.1) bionic; urgency=medium
+
+  * No-change backport from unstable to bionic
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 03 Aug 2018 05:20:10 +0100
+
+mutter (3.28.3-2) unstable; urgency=medium
+
+  * Team upload
+
+  [ Iain Lane ]
+  * debian/gbp.conf: Set the upstream branch to upstream/3.28.x, since we've
+    branched for experimental now.
 
   [ Marco Trevisan (Treviño) ]
-  * Backport from cosmic (LP: #1778703)
-    - Hybrid GPU: 'shallow' crash while interacting with the
-      secondary screen (LP: #1758528)
+  * d/p/native-gpu-Handle-drmModeSetCrtc-failing-gracefully.patch:
+    - Avoid crashing when warning about wrongly set crtc mode
+      (LP: #1754949)
+  * d/p/gpu-kms-Don-t-crash-if-drmModeGetResources-returns-N.patch:
+    - Don't crash if drmModeGetResources returns NULL  (LP: #1767956)
+  * d/p/window-wayland-Always-update-monitor-for-non-user-ops.patch:
+    - Always update monitor in wayland, avoiding crash (LP: #1784398)
+  * d/p/monitor-manager-Filter-out-low-screen-resolutions.patch:
+    - Don't return screen resolutions that can't be applied (LP: #1772831)
+  * d/p/window-Don-t-refuse-to-move-focus-to-the-grab-window.patch,
+    d/p/window-Explicitly-exclude-unmanaging-window-from-focus-ag.patch:
+    - Don't crash if a modal dialog closes while being dragged
+      (LP: #1422253)
+  * d/p/monitor-Use-current-monitor-mode-to-check-whether-active.patch:
+    - Don't try to use an invalid monitor mode to figure out scaling
+      (LP: #1723615)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 26 Jun 2018 15:24:45 +0200
+  [ Simon McVittie ]
+  * Sort patch series in upstream order, with patches applied upstream
+    first
+  * d/copyright: Remove obsolete FSF postal addresses
+  * Standards-Version: 4.1.5 (no changes required)
+  * Set Rules-Requires-Root to no
+  * Update symbols file
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 31 Jul 2018 15:35:03 +0100
+
+mutter (3.28.3-1~ubuntu18.04.1) bionic; urgency=medium
+
+  * No-change backport to bionic (LP: #1783311)
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Tue, 24 Jul 2018 12:20:56 +0100
+
+mutter (3.28.3-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/p/backends-Add-logical-monitor-monitor-output-crtc-ref-chai.patch,
+    d/p/backends-Move-MetaOutput-crtc-field-into-private-struct.patch,
+    d/p/clutter-device-evdev-Get-devices-from-main-seat-if-no-rea.patch,
+    d/p/clutter-evdev-Don-t-ignore-CAPS-lock-as-modifier.patch,
+    d/p/clutter-evdev-ignore-injected-events-from-IM.patch,
+    d/p/clutter-seat-evdev-Add-function-to-get-device-by-id.patch,
+    d/p/device-manager-evdev-Add-main-seat-to-seats-by-default.patch,
+    d/p/device-manager-evdev-Free-the-main-seat-on-finalize.patch,
+    d/p/device-manager-evdev-Set-and-unset-the-stage-for-the-main.patch,
+    d/p/frames-Allow-for-unknown-mouse-buttons.patch,
+    d/p/frames-Handle-touch-events.patch,
+    d/p/frames-Make-1st-button-motion-handlers-take-generic-event.patch,
+    d/p/renderer-native-Don-t-crash-if-the-FB-surface-can-t-be-lo.patch,
+    d/p/wayland-Compare-geometries-after-chaining-up.patch,
+    d/p/wayland-Don-t-reset-input-focus-on-text-commit.patch,
+    d/p/wayland-Use-cursor-position-in-logical-monitor.patch,
+    d/p/wayland-update-enter-leave-output-after-effects.patch,
+    d/p/window-actor-add-new-signal-effects-completed.patch:
+    Remove patches already applied on 3.28 branch
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 19 Jul 2018 14:59:38 +0100
+
+mutter (3.28.2-3) unstable; urgency=medium
+
+  * Team upload
+  * d/p/backends-Move-MetaOutput-crtc-field-into-private-struct.patch,
+    d/p/backends-Add-logical-monitor-monitor-output-crtc-ref-chai.patch:
+    Mark as applied upstream
+  * d/p/backends-Move-MetaOutput-crtc-field-into-private-struct.patch:
+    Update to the version that was applied upstream
+  * d/p/frames-Handle-touch-events.patch,
+    d/p/frames-Make-1st-button-motion-handlers-take-generic-event.patch,
+    d/p/frames-Allow-for-unknown-mouse-buttons.patch:
+    Reinstate patches dropped in previous upload, along with the
+    upstream fix for #899181
+  * d/p/wayland-Compare-geometries-after-chaining-up.patch,
+    d/p/window-actor-add-new-signal-effects-completed.patch,
+    d/p/wayland-update-enter-leave-output-after-effects.patch,
+    d/p/frames-Allow-for-unknown-mouse-buttons.patch,
+    d/p/wayland-Don-t-reset-input-focus-on-text-commit.patch,
+    d/p/clutter-seat-evdev-Add-function-to-get-device-by-id.patch,
+    d/p/clutter-device-evdev-Get-devices-from-main-seat-if-no-rea.patch,
+    d/p/device-manager-evdev-Set-and-unset-the-stage-for-the-main.patch,
+    d/p/device-manager-evdev-Free-the-main-seat-on-finalize.patch,
+    d/p/device-manager-evdev-Add-main-seat-to-seats-by-default.patch,
+    d/p/renderer-native-Don-t-crash-if-the-FB-surface-can-t-be-lo.patch:
+    Update to upstream gnome-3-28 branch
+  * Add a symbols file for libmutter-2-0
+  * d/copyright: Copy many licenses and copyright holders into this file,
+    multiplying its length by 5 (Closes: #891156)
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 08 Jul 2018 11:32:56 +0100
 
 mutter (3.28.2-2) unstable; urgency=medium
 
