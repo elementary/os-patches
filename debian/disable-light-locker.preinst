@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+# Disable light-locker's autostart
+if [ "$1" = install ] || [ "$1" = upgrade ] ; then
+	dpkg-divert --add --rename --package disable-light-locker --divert /etc/xdg/autostart/light-locker.desktop.distrib /etc/xdg/autostart/light-locker.desktop
+fi
+
+#DEBHELPER#
+
+exit 0
