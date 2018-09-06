@@ -14,7 +14,10 @@ DESTDIR = debian/base-files
 %:
 	dh $@ --with systemd
 
-override_dh_auto_build:
+locale-check:
+	$(CC) $(CFLAGS) $(LDFLAGS) -o locale-check locale-check.c
+
+override_dh_auto_build: locale-check
 	sh debian/check-md5sum-etc profile
 	sed -e "s&#OSNAME#&$(OSNAME)&g" debian/copyright.in > debian/copyright
 	sed -e "s/#VENDORFILE#/$(VENDORFILE)/g" debian/postinst.in > debian/postinst
@@ -28,6 +31,8 @@ override_dh_auto_install:
 	install -p -m 644 origins/*  $(DESTDIR)/etc/dpkg/origins
 	install -p -m 644 share/*    $(DESTDIR)/usr/share/base-files
 	install -p -m 755 update-motd.d/* $(DESTDIR)/etc/update-motd.d
+	install -p -m 644 profile.d/* $(DESTDIR)/etc/profile.d
+	install -p -m 755 locale-check $(DESTDIR)/usr/bin
 ifeq ($(DEB_HOST_GNU_SYSTEM),gnu)
 	rmdir $(DESTDIR)/sys
 endif
