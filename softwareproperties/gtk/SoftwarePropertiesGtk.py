@@ -1512,10 +1512,19 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
         self.handlers[self.lp_monitor] = \
             self.lp_monitor.connect('changed', self.on_livepatch_status_changed)
 
+    def has_online_accounts(self):
+        try:
+            d = Gio.DesktopAppInfo.new('gnome-online-accounts-panel.desktop')
+            return d != None
+        except Exception:
+            return False
+
     def is_livepatch_supported(self):
         distro = aptsources.distro.get_distro()
         di = distro_info.UbuntuDistroInfo()
-        return di.is_lts(distro.codename) and distro.codename in di.supported(datetime.now().date())
+        return self.has_online_accounts() and \
+               di.is_lts(distro.codename) and \
+               distro.codename in di.supported(datetime.now().date())
 
     def on_goa_auth_changed(self):
         if self.goa_auth.logged:
