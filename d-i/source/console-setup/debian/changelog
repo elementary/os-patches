@@ -1,3 +1,30 @@
+console-setup (1.178ubuntu2.7) bionic; urgency=medium
+
+  * keyboard-configuration.config: Fix exit/return thinko (LP: #1788597)
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Thu, 23 Aug 2018 16:32:45 -0600
+
+console-setup (1.178ubuntu2.6) bionic; urgency=medium
+
+  * keyboard-configuration.config: Only treat missing XKBOPTIONS as empty.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Wed, 08 Aug 2018 17:32:23 -0600
+
+console-setup (1.178ubuntu2.5) bionic; urgency=medium
+
+  * keyboard-configuration.config: While sourcing config files to re-seed
+    debconf, load missing variables as empty values of same (LP: #1762952)
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Wed, 08 Aug 2018 16:50:48 -0600
+
+console-setup (1.178ubuntu2.4) bionic; urgency=medium
+
+  * keyboard-configuration.{config,templates}: There is no good default for
+    layout toggling, stop pretending there is.  Console users can set one
+    with dpkg-reconfigure or editing /etc/defaults/keyboard (LP: #1762952)
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Wed, 25 Jul 2018 05:50:59 -0600
+
 console-setup (1.178ubuntu2.3) bionic; urgency=medium
 
   * Revert changes from 1.178ubuntu2.2 and 1.178ubuntu2.1 as those seem to

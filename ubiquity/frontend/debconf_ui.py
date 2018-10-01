@@ -33,7 +33,7 @@ import textwrap
 
 import debconf
 
-from ubiquity import i18n, telemetry
+from ubiquity import misc, i18n, telemetry
 from ubiquity.components import install, plugininstall
 from ubiquity.frontend.base import BaseFrontend, Controller
 from ubiquity.plugin import Plugin
@@ -86,6 +86,12 @@ class Wizard(BaseFrontend):
     def stop_debconf(self):
         if 'DEBIAN_HAS_FRONTEND' not in os.environ:
             BaseFrontend.stop_debconf(self)
+
+    def do_reboot(self):
+        misc.execute_root("reboot")
+
+    def do_shutdown(self):
+        misc.execute_root("poweroff")
 
     def run(self):
         if os.getuid() != 0:
