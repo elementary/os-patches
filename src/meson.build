@@ -1,6 +1,7 @@
 libcloudproviders_deps = [glib, gio, gio_unix]
 
 libcloudproviders_headers = [
+  'cloudproviders.h',
   'cloudproviderscollector.h',
   'cloudprovidersaccount.h',
   'cloudprovidersaccountexporter.h',
