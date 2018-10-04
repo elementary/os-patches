@@ -242,8 +242,7 @@ cloud_providers_account_set_property (GObject      *object,
 
 /**
  * cloud_providers_account_new
- * @bus_name: DBus bus name
- * @object_path: Path to export the DBus object to
+ * @proxy: DBus proxy
  *
  * A #CloudProvidersAccount object are used to fetch details about cloud providers from DBus.
  * Object are usually fetched from cloud_providers_get_providers() as a list.
