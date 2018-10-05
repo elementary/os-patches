@@ -47,6 +47,8 @@ bindir = get_option ('bindir')
 datadir = get_option ('datadir')
 servicedir = join_paths (datadir, 'dbus-1', 'services')
 incdir = join_paths (prefix, get_option('includedir'), 'cloudproviders')
+girdir= join_paths(datadir, 'gir-1.0')
+typelibdir = join_paths(libdir, 'girepository-1.0')
 
 gnome = import('gnome')
 
