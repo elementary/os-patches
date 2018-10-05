@@ -52,13 +52,13 @@ struct _CloudProvidersAccountClass
 
 CloudProvidersAccount *cloud_providers_account_new (GDBusProxy *proxy);
 
-gchar* cloud_providers_account_get_name (CloudProvidersAccount *self);
+const gchar* cloud_providers_account_get_name (CloudProvidersAccount *self);
 CloudProvidersAccountStatus cloud_providers_account_get_status (CloudProvidersAccount *self);
-gchar* cloud_providers_account_get_status_details (CloudProvidersAccount *self);
+const gchar* cloud_providers_account_get_status_details (CloudProvidersAccount *self);
 GIcon *cloud_providers_account_get_icon (CloudProvidersAccount *self);
 GMenuModel *cloud_providers_account_get_menu_model (CloudProvidersAccount *self);
 GActionGroup* cloud_providers_account_get_action_group (CloudProvidersAccount *self);
-gchar *cloud_providers_account_get_path (CloudProvidersAccount *self);
+const gchar *cloud_providers_account_get_path (CloudProvidersAccount *self);
 G_END_DECLS
 
 

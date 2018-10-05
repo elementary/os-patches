@@ -375,7 +375,7 @@ cloud_providers_account_init (CloudProvidersAccount *self)
  *
  * Returns: The name of the cloud provider account
  */
-gchar*
+const gchar*
 cloud_providers_account_get_name (CloudProvidersAccount *self)
 {
   return self->name;
@@ -403,7 +403,7 @@ cloud_providers_account_get_status (CloudProvidersAccount *self)
  *
  * Returns: The status detail description of the cloud provider account
  */
-gchar*
+const gchar*
 cloud_providers_account_get_status_details (CloudProvidersAccount *self)
 {
   return self->status_details;
@@ -460,7 +460,7 @@ cloud_providers_account_get_action_group (CloudProvidersAccount *self)
  *
  * Returns: The directory path of the cloud provider account
  */
-gchar *
+const gchar *
 cloud_providers_account_get_path (CloudProvidersAccount *self)
 {
   return self->path;
