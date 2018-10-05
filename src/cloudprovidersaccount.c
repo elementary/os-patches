@@ -414,7 +414,7 @@ cloud_providers_account_get_status_details (CloudProvidersAccount *self)
  *
  * Get the icon of the account
  *
- * Returns: The icon of the cloud provider account
+ * Returns: (transfer none) : The icon of the cloud provider account
  */
 GIcon*
 cloud_providers_account_get_icon (CloudProvidersAccount *self)
@@ -428,7 +428,7 @@ cloud_providers_account_get_icon (CloudProvidersAccount *self)
  *
  * Get the menu model exported for the account
  *
- * Returns: The menu model exported by the cloud provider account
+ * Returns: (transfer none) : The menu model exported by the cloud provider account
  */
 GMenuModel*
 cloud_providers_account_get_menu_model (CloudProvidersAccount *self)
@@ -443,7 +443,7 @@ cloud_providers_account_get_menu_model (CloudProvidersAccount *self)
  * Get the action group exported in addition to the #GMenuModel from
  * cloud_providers_account_get_menu_model()
  *
- * Returns: The action group exported by the cloud provider account
+ * Returns: (transfer none) : The action group exported by the cloud provider account
  */
 GActionGroup*
 cloud_providers_account_get_action_group (CloudProvidersAccount *self)
