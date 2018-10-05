@@ -2,7 +2,7 @@ image: fedora:26
 stages:
   - build
 before_script:
-  - dnf install -y gcc meson ninja-build gettext gtk-doc glib2-devel gobject-introspection-devel vala
+  - dnf install -y gcc meson ninja-build gettext gtk-doc glib2-devel gobject-introspection-devel vala redhat-rpm-config
 build-libcloudproviders:
   stage: build
   script:
