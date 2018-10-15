@@ -391,6 +391,11 @@ cloud_providers_provider_get_name (CloudProvidersProvider *self)
     return self->name;
 }
 
+/**
+ * cloud_providers_provider_get_accounts
+ * @self: A CloudProvidersProvider
+ * Returns: (element-type CloudProviders.Account) (transfer none): A GList* of #CloudProvidersProvider objects.
+ */
 GList*
 cloud_providers_provider_get_accounts (CloudProvidersProvider *self)
 {

@@ -25,7 +25,7 @@
 G_BEGIN_DECLS
 
 #define CLOUD_PROVIDERS_TYPE_COLLECTOR (cloud_providers_collector_get_type())
-G_DECLARE_FINAL_TYPE (CloudProvidersCollector, cloud_providers_collector, CLOUD_PROVIDERS, COLLECTOR, GObject);
+G_DECLARE_FINAL_TYPE (CloudProvidersCollector, cloud_providers_collector, CLOUD_PROVIDERS, COLLECTOR, GObject)
 
 struct _CloudProvidersCollectorClass
 {

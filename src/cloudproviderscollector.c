@@ -140,7 +140,7 @@ cloud_providers_collector_init (CloudProvidersCollector *self)
 /**
  * cloud_providers_collector_get_providers
  * @self: A CloudProvidersCollector
- * Returns: (transfer none): A GList* of #CloudProvidersAccount objects.
+ * Returns: (element-type CloudProviders.Provider) (transfer none): A GList* of #CloudProvidersProvider objects.
  */
 GList*
 cloud_providers_collector_get_providers (CloudProvidersCollector *self)

@@ -25,7 +25,7 @@
 G_BEGIN_DECLS
 
 #define CLOUD_PROVIDERS_TYPE_PROVIDER_EXPORTER (cloud_providers_provider_exporter_get_type())
-G_DECLARE_FINAL_TYPE (CloudProvidersProviderExporter, cloud_providers_provider_exporter, CLOUD_PROVIDERS, PROVIDER_EXPORTER, GObject);
+G_DECLARE_FINAL_TYPE (CloudProvidersProviderExporter, cloud_providers_provider_exporter, CLOUD_PROVIDERS, PROVIDER_EXPORTER, GObject)
 
 struct _CloudProvidersProviderExporterClass
 {

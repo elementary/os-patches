@@ -43,7 +43,7 @@ typedef enum {
 } CloudProvidersAccountStatus;
 
 #define CLOUD_PROVIDERS_TYPE_ACCOUNT (cloud_providers_account_get_type())
-G_DECLARE_FINAL_TYPE (CloudProvidersAccount, cloud_providers_account, CLOUD_PROVIDERS, ACCOUNT, GObject);
+G_DECLARE_FINAL_TYPE (CloudProvidersAccount, cloud_providers_account, CLOUD_PROVIDERS, ACCOUNT, GObject)
 
 struct _CloudProvidersAccountClass
 {
