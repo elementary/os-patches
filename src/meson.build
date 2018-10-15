@@ -51,11 +51,34 @@ pkg.generate(
   description : 'Cloud providers DBus API library.'
 )
 
-
-
 libcloudproviders_dep = declare_dependency (
   link_with: libcloudproviders,
   dependencies: libcloudproviders_deps,
   include_directories: include_directories('.')
 )
 
+if get_option('introspection')
+  libcloudproviders_gir = gnome.generate_gir(
+    libcloudproviders,
+    sources: libcloudproviders_headers + libcloudproviders_sources,
+    nsversion: meson.project_version(),
+    dependencies: libcloudproviders_deps,
+    namespace: 'CloudProviders',
+    symbol_prefix: 'cloud_providers',
+    link_with: libcloudproviders,
+    includes: [ 'GLib-2.0', 'Gio-2.0' ],
+    install: true,
+    install_dir_gir: girdir,
+    install_dir_typelib: typelibdir,
+    extra_args: [ '--c-include=cloudproviders/cloudproviders.h', '--quiet' ]
+  )
+endif
+
+if get_option('vapigen')
+  libcloudproviders_vapi = gnome.generate_vapi(
+    'cloudproviders',
+    sources: libcloudproviders_gir[0],
+    packages: ['gio-2.0'],
+    install: true,
+  )
+endif
