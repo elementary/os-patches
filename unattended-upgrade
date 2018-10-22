@@ -158,7 +158,10 @@ class UnattendedUpgradesCache(apt.Cache):
         """
         try:
             new_cand = ver_in_allowed_origin(pkg, self.allowed_origins)
-            if new_cand != pkg.candidate:
+            # Only adjust to lower versions to avoid flipping back and forth
+            # and to avoid picking a newer version, not selected by apt.
+            # This helps avoiding upgrades to experimental's packages.
+            if new_cand.version < pkg.candidate.version:
                 logging.debug("adjusting candidate version: %s" % new_cand)
                 pkg.candidate = new_cand
                 return True
@@ -187,6 +190,8 @@ class UnattendedUpgradesCache(apt.Cache):
         function(pkg, **kwargs)
         changes = self.get_changes()
         for marked_pkg in changes:
+            if marked_pkg.name in self._cached_candidate_pkgnames:
+                continue
             if not is_allowed_origin(marked_pkg.candidate,
                                      self.allowed_origins):
                 try:
@@ -200,10 +205,13 @@ class UnattendedUpgradesCache(apt.Cache):
                     pkgs_with_no_allowed_origin.append(marked_pkg)
 
         if new_pkgs_to_adjust:
+            new_pkg_adjusted = False
             for pkg_to_adjust in new_pkgs_to_adjust:
-                self.adjust_candidate(pkg_to_adjust)
-                self._cached_candidate_pkgnames.add(pkg_to_adjust.name)
-            self.call_adjusted(function, pkg, **kwargs)
+                if self.adjust_candidate(pkg_to_adjust):
+                    self._cached_candidate_pkgnames.add(pkg_to_adjust.name)
+                    new_pkg_adjusted = True
+            if new_pkg_adjusted:
+                self.call_adjusted(function, pkg, **kwargs)
         else:
             if pkgs_with_no_allowed_origin:
                 raise NoAllowedOriginError
@@ -351,13 +359,22 @@ class Unlocked:
     def __enter__(self):
         # type: () -> None
         try:
-            apt_pkg.pkgsystem_unlock()
-        except Exception:
-            pass
+            apt_pkg.pkgsystem_unlock_inner()
+        except AttributeError:
+            try:
+                apt_pkg.pkgsystem_unlock()
+            except Exception:
+                # earlier python-apt used to leak lock
+                logging.warning("apt_pkg.pkgsystem_unlock() failed due to not "
+                                "holding the lock but trying to continue")
+                pass
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         # type: (object, object, object) -> None
-        apt_pkg.pkgsystem_lock()
+        try:
+            apt_pkg.pkgsystem_lock_inner()
+        except AttributeError:
+            apt_pkg.pkgsystem_lock()
 
 
 def is_dpkg_journal_dirty():
@@ -535,10 +552,13 @@ def cache_commit(cache,           # type: apt.Cache
         iprogress = LogInstallProgress(logfile_dpkg, verbose)
 
     try:
-        with Unlocked():
+        if hasattr(apt_pkg, "pkgsystem_lock_inner"):
             res = cache.commit(install_progress=iprogress)
+        else:
+            with Unlocked():
+                res = cache.commit(install_progress=iprogress)
         cache.open()
-    except Exception as e:
+    except SystemError as e:
         error = e
         if verbose:
             logging.exception("Exception happened during upgrade.")
@@ -1572,34 +1592,6 @@ def main(options, rootdir=""):
     # see debian #776752
     install_start_time = datetime.datetime.now().replace(microsecond=0)
 
-    # check if the journal is dirty and if so, take emergceny action
-    # the alternative is to leave the system potentially unsecure until
-    # the user comes in and fixes
-    if (is_dpkg_journal_dirty() and
-        apt_pkg.config.find_b(
-            "Unattended-Upgrade::AutoFixInterruptedDpkg", True)):
-        # ensure the dpkg database is not already locked (LP: #754330)
-        admindir = os.path.dirname(apt_pkg.config.find("Dir::State::Status"))
-        lockfd = apt_pkg.get_lock(os.path.join(admindir, "lock"), False)
-        if lockfd > 0:
-            logging.warning(
-                _("Unclean dpkg state detected, trying to correct"))
-            print(_("Unclean dpkg state detected, trying to correct"))
-            env = copy.copy(os.environ)
-            env["DEBIAN_FRONTEND"] = "noninteractive"
-            try:
-                os.close(lockfd)
-                output = subprocess.check_output(
-                    ["dpkg", "--force-confold", "--configure", "-a"],
-                    env=env,
-                    universal_newlines=True)
-            except subprocess.CalledProcessError as e:
-                output = e.output
-            logging.warning(_("dpkg --configure -a output:\n%s"), output)
-        else:
-            logging.debug("Unclean dpkg state, but locked, another package "
-                          "manager working?")
-
     # check and get lock
     try:
         apt_pkg.pkgsystem_lock()
@@ -1608,6 +1600,28 @@ def main(options, rootdir=""):
                         "manager running?)"))
         print(_("Cache lock can not be acquired, exiting"))
         sys.exit(1)
+
+    # check if the journal is dirty and if so, take emergceny action
+    # the alternative is to leave the system potentially unsecure until
+    # the user comes in and fixes
+    if is_dpkg_journal_dirty() and \
+       apt_pkg.config.find_b("Unattended-Upgrade::AutoFixInterruptedDpkg",
+                             True):
+        logging.warning(
+            _("Unclean dpkg state detected, trying to correct"))
+        print(_("Unclean dpkg state detected, trying to correct"))
+        env = copy.copy(os.environ)
+        env["DEBIAN_FRONTEND"] = "noninteractive"
+        env["DPKG_FRONTEND_LOCKED"] = "1"
+        try:
+            with Unlocked():
+                output = subprocess.check_output(
+                    ["dpkg", "--force-confold", "--configure", "-a"],
+                    env=env,
+                    universal_newlines=True)
+        except subprocess.CalledProcessError as e:
+            output = e.output
+        logging.warning(_("dpkg --configure -a output:\n%s"), output)
 
     # get a cache
     try:
