@@ -1,3 +1,18 @@
+python-apt (1.6.3) bionic; urgency=medium
+
+  * Frontend locking and related locking improvements (LP: #1795407)
+    - apt.Cache: Keep / Re-establish the system lock in commit()
+    - apt.Cache: Keep archive locked during commit()/ in fetch_archives()
+    - apt.Cache: Reinstate locks in a finally / run dpkg inside try
+    - Introduce frontend locking
+    - Convert apt.Cache.commit and apt_pkg.DepCache.commit to FE lock
+  * Other changes to make that work:
+    - Cherry-pick apt_pkg.Error type hint from 1.7
+    - travis CI: bionic only; stretch does not have FE locking nor PPA
+  * As always, updated mirror lists
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 01 Oct 2018 16:00:14 +0200
+
 python-apt (1.6.2) unstable; urgency=medium
 
   * Introduce gitlab ci

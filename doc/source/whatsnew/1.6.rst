@@ -24,3 +24,12 @@ Bugfixes
 * Various other fixes for segmentation faults
 * apt/auth.py: Protect against race with gpg when removing tmpdir
   (Closes: #871585)
+
+1.6.3
+----- 
+* New methods for frontend locking have been added:
+  :meth:`apt_pkg.pkgsystem_lock_inner`,
+  :meth:`apt_pkg.pkgsystem_unlock_inner`,
+  :meth:`apt_pkg.pkgsystem_is_locked`. 
+* :meth:`apt.Cache.commit` and :meth:`apt_pkg.DepCache.commit` now use
+  frontend locking to run dpkg.

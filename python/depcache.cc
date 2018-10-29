@@ -169,7 +169,7 @@ static PyObject *PkgDepCacheCommit(PyObject *Self,PyObject *Args)
       //FIXME: make this more flexible, e.g. with a failedDl handler
       if(Failed)
 	 Py_RETURN_FALSE;
-      _system->UnLock(true);
+      _system->UnLockInner(true);
 
       pkgPackageManager::OrderResult Res = iprogress.Run(PM);
       //std::cout << "iprogress.Run() returned: " << (int)Res << std::endl;
@@ -189,7 +189,7 @@ static PyObject *PkgDepCacheCommit(PyObject *Self,PyObject *Args)
       if (PM->GetArchives(&Fetcher,&List,&Recs) == false) {
 	 Py_RETURN_FALSE;
       }
-      _system->Lock();
+      _system->LockInner();
    }
 
    return HandleErrors(Py_None);

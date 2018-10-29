@@ -2498,6 +2498,41 @@ following three functions:
     Unlock the global pkgsystem. This reverts the effect of
     :func:`pkgsystem_lock`.
 
+Since version 1.7, APT switches to the frontend locking approach where
+dpkg has two lock files, :file:`lock-frontend` and :file:`lock`, the
+latter being called the inner lock in apt.
+When running dpkg, the inner lock must be released before calling dpkg
+and reacquired afterwards. When not using APT functions to run dpkg,
+the variable `DPKG_FRONTEND_LOCKED` must be set to tell dpkg to not
+acquire the :file:`lock-frontend` lock.
+These functions usually do not need to be used by external code.
+
+.. function:: pkgsystem_unlock_inner()
+
+    Release the :file:`lock` lock file to allow dpkg to be run.
+    
+    .. versionadded:: 1.6.3
+    
+    .. versionadded:: 1.7
+
+.. function:: pkgsystem_lock_inner()
+
+    Release the :file:`lock` lock file after a dpkg run.
+
+    .. versionadded:: 1.6.3
+    
+    .. versionadded:: 1.7
+
+.. function:: pkgsystem_is_locked()
+
+    Returns true if the global lock is hold. Can be used to check whether
+    :meth:`pkgsystem_unlock_inner` needs to be called.
+
+    .. versionadded:: 1.6.3
+    
+    .. versionadded:: 1.7
+
+
 
 Other classes
 --------------
