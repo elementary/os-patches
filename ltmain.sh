@@ -1,5 +1,5 @@
 #! /bin/sh
-## DO NOT EDIT - This file generated from ./build-aux/ltmain.in
+## DO NOT EDIT - This file generated from ../libtool-2.4.6/build-aux/ltmain.in
 ##               by inline-source v2014-01-03.01
 
 # libtool (GNU libtool) 2.4.6
@@ -31,7 +31,7 @@
 
 PROGRAM=libtool
 PACKAGE=libtool
-VERSION="2.4.6 Debian-2.4.6-2"
+VERSION=2.4.6
 package_revision=2.4.6
 
 
@@ -2068,12 +2068,12 @@ include the following information:
        compiler:       $LTCC
        compiler flags: $LTCFLAGS
        linker:         $LD (gnu? $with_gnu_ld)
-       version:        $progname $scriptversion Debian-2.4.6-2
+       version:        $progname (GNU libtool) 2.4.6
        automake:       `($AUTOMAKE --version) 2>/dev/null |$SED 1q`
        autoconf:       `($AUTOCONF --version) 2>/dev/null |$SED 1q`
 
 Report bugs to <bug-libtool@gnu.org>.
-GNU libtool home page: <http://www.gnu.org/s/libtool/>.
+GNU libtool home page: <http://www.gnu.org/software/libtool/>.
 General help using GNU software: <http://www.gnu.org/gethelp/>."
     exit 0
 }
@@ -2254,9 +2254,13 @@ _LT_EOF
 # libtool_options_prep [ARG]...
 # -----------------------------
 # Preparation for options parsed by libtool.
-libtool_options_prep ()
-{
+#libtool_options_prep ()
+#{
     $debug_mode
+
+    # Option defaults:
+    opt_verbose=false
+    opt_warning_types=
 
     # Option defaults:
     opt_config=false
@@ -2294,19 +2298,14 @@ libtool_options_prep ()
       shift; set dummy --mode uninstall ${1+"$@"}; shift
       ;;
     esac
-
-    # Pass back the list of options.
-    func_quote_for_eval ${1+"$@"}
-    libtool_options_prep_result=$func_quote_for_eval_result
-}
-func_add_hook func_options_prep libtool_options_prep
+#}
 
 
 # libtool_parse_options [ARG]...
 # ---------------------------------
 # Provide handling for libtool specific options.
-libtool_parse_options ()
-{
+#libtool_parse_options ()
+#{
     $debug_cmd
 
     # Perform our own loop to consume as many options as possible in
@@ -2386,29 +2385,90 @@ libtool_parse_options ()
                         func_append preserve_args " $_G_opt"
                         ;;
 
-	# An option not handled by this hook function:
-        *)		set dummy "$_G_opt" ${1+"$@"};	shift; break  ;;
+        --debug|-x)   debug_cmd='set -x'
+                      func_echo "enabling shell trace mode"
+                      $debug_cmd
+                      ;;
+
+        --no-warnings|--no-warning|--no-warn)
+                      set dummy --warnings none ${1+"$@"}
+                      shift
+		      ;;
+
+        --warnings|--warning|-W)
+                      test $# = 0 && func_missing_arg $_G_opt && break
+                      case " $warning_categories $1" in
+                        *" $1 "*)
+                          # trailing space prevents matching last $1 above
+                          func_append_uniq opt_warning_types " $1"
+                          ;;
+                        *all)
+                          opt_warning_types=$warning_categories
+                          ;;
+                        *none)
+                          opt_warning_types=none
+                          warning_func=:
+                          ;;
+                        *error)
+                          opt_warning_types=$warning_categories
+                          warning_func=func_fatal_error
+                          ;;
+                        *)
+                          func_fatal_error \
+                             "unsupported warning category: '$1'"
+                          ;;
+                      esac
+                      shift
+                      ;;
+
+        --verbose|-v) opt_verbose=: ;;
+        --version)    func_version ;;
+        -\?|-h)       func_usage ;;
+        --help)       func_help ;;
+
+	# Separate optargs to long options (plugins may need this):
+	--*=*)        func_split_equals "$_G_opt"
+	              set dummy "$func_split_equals_lhs" \
+                          "$func_split_equals_rhs" ${1+"$@"}
+                      shift
+                      ;;
+
+       # Separate optargs to short options:
+        -W*)
+                      func_split_short_opt "$_G_opt"
+                      set dummy "$func_split_short_opt_name" \
+                          "$func_split_short_opt_arg" ${1+"$@"}
+                      shift
+                      ;;
+
+        # Separate non-argument short options:
+        -\?*|-h*|-v*|-x*)
+                      func_split_short_opt "$_G_opt"
+                      set dummy "$func_split_short_opt_name" \
+                          "-$func_split_short_opt_arg" ${1+"$@"}
+                      shift
+                      ;;
+
+        --)           break ;;
+        -*)           func_fatal_help "unrecognised option: '$_G_opt'" ;;
+        *)            set dummy "$_G_opt" ${1+"$@"}; shift; break ;;
       esac
     done
+#}
 
-
-    # save modified positional parameters for caller
-    func_quote_for_eval ${1+"$@"}
-    libtool_parse_options_result=$func_quote_for_eval_result
-}
-func_add_hook func_parse_options libtool_parse_options
-
+# Display all warnings if -W was not given.
+test -n "$opt_warning_types" || opt_warning_types=" $warning_categories"
 
 
 # libtool_validate_options [ARG]...
 # ---------------------------------
 # Perform any sanity checks on option settings and/or unconsumed
 # arguments.
-libtool_validate_options ()
-{
+#libtool_validate_options ()
+#{
     # save first non-option argument
     if test 0 -lt $#; then
-      nonopt=$1
+      nonopt=$_G_opt
       shift
     fi
 
@@ -2416,6 +2476,12 @@ libtool_validate_options ()
     test : = "$debug_cmd" || func_append preserve_args " --debug"
 
     case $host in
+      # For NIOS2, we want to make sure that it's not caught by the
+      # more general OS/2 check below. Otherwise, NIOS2 is the same
+      # as the default option.
+      *nios2*)
+        opt_duplicate_compiler_generated_deps=$opt_preserve_dup_deps
+        ;;
       # Solaris2 added to fix http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16452
       # see also: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59788
       *cygwin* | *mingw* | *pw32* | *cegcc* | *solaris2* | *os2*)
@@ -2449,20 +2515,10 @@ libtool_validate_options ()
       generic_help=$help
       help="Try '$progname --help --mode=$opt_mode' for more information."
     }
+#}
 
-    # Pass back the unparsed argument list
-    func_quote_for_eval ${1+"$@"}
-    libtool_validate_options_result=$func_quote_for_eval_result
-}
-func_add_hook func_validate_options libtool_validate_options
-
-
-# Process options as early as possible so that --help and --version
-# can return quickly.
-func_options ${1+"$@"}
-eval set dummy "$func_options_result"; shift
-
-
+# Bail if the options were screwed!
+$exit_cmd $EXIT_FAILURE
 
 ## ----------- ##
 ##    Main.    ##
@@ -4275,8 +4331,15 @@ func_mode_install ()
 	func_append dir "$objdir"
 
 	if test -n "$relink_command"; then
+      # Strip any trailing slash from the destination.
+      func_stripname '' '/' "$libdir"
+      destlibdir=$func_stripname_result
+
+      func_stripname '' '/' "$destdir"
+      s_destdir=$func_stripname_result
+
 	  # Determine the prefix the user has applied to our future dir.
-	  inst_prefix_dir=`$ECHO "$destdir" | $SED -e "s%$libdir\$%%"`
+	  inst_prefix_dir=`$ECHO "X$s_destdir" | $Xsed -e "s%$destlibdir\$%%"`
 
 	  # Don't allow the user to place us outside of our expected
 	  # location b/c this prevents finding dependent libraries that
@@ -7272,13 +7335,10 @@ func_mode_link ()
       # -tp=*                Portland pgcc target processor selection
       # --sysroot=*          for sysroot support
       # -O*, -g*, -flto*, -fwhopr*, -fuse-linker-plugin GCC link-time optimization
-      # -specs=*             GCC specs files
       # -stdlib=*            select c++ std lib with clang
-      # -fsanitize=*         Clang/GCC memory and address sanitizer
       -64|-mips[0-9]|-r[0-9][0-9]*|-xarch=*|-xtarget=*|+DA*|+DD*|-q*|-m*| \
       -t[45]*|-txscale*|-p|-pg|--coverage|-fprofile-*|-F*|@*|-tp=*|--sysroot=*| \
-      -O*|-g*|-flto*|-fwhopr*|-fuse-linker-plugin|-fstack-protector*|-stdlib=*| \
-      -specs=*|-fsanitize=*)
+      -O*|-g*|-flto*|-fwhopr*|-fuse-linker-plugin|-fstack-protector*|-stdlib=*)
         func_quote_for_eval "$arg"
 	arg=$func_quote_for_eval_result
         func_append compile_command " $arg"
@@ -7571,10 +7631,7 @@ func_mode_link ()
 	case $pass in
 	dlopen) libs=$dlfiles ;;
 	dlpreopen) libs=$dlprefiles ;;
-	link)
-	  libs="$deplibs %DEPLIBS%"
-	  test "X$link_all_deplibs" != Xno && libs="$libs $dependency_libs"
-	  ;;
+	link) libs="$deplibs %DEPLIBS% $dependency_libs" ;;
 	esac
       fi
       if test lib,dlpreopen = "$linkmode,$pass"; then
@@ -7893,19 +7950,19 @@ func_mode_link ()
 	    # It is a libtool convenience library, so add in its objects.
 	    func_append convenience " $ladir/$objdir/$old_library"
 	    func_append old_convenience " $ladir/$objdir/$old_library"
-	    tmp_libs=
-	    for deplib in $dependency_libs; do
-	      deplibs="$deplib $deplibs"
-	      if $opt_preserve_dup_deps; then
-		case "$tmp_libs " in
-		*" $deplib "*) func_append specialdeplibs " $deplib" ;;
-		esac
-	      fi
-	      func_append tmp_libs " $deplib"
-	    done
 	  elif test prog != "$linkmode" && test lib != "$linkmode"; then
 	    func_fatal_error "'$lib' is not a convenience library"
 	  fi
+	  tmp_libs=
+	  for deplib in $dependency_libs; do
+	    deplibs="$deplib $deplibs"
+	    if $opt_preserve_dup_deps; then
+	      case "$tmp_libs " in
+	      *" $deplib "*) func_append specialdeplibs " $deplib" ;;
+	      esac
+	    fi
+	    func_append tmp_libs " $deplib"
+	  done
 	  continue
 	fi # $pass = conv
 
@@ -8138,6 +8195,15 @@ func_mode_link ()
 	if test -n "$library_names" &&
 	   { test no = "$use_static_libs" || test -z "$old_library"; }; then
 	  case $host in
+	  *nios2*)
+	    # For NIOS2, we want to make sure that it's not caught by the
+	    # more general OS/2 check below. Otherwise, NIOS2 is the same
+	    # as the default option.
+	    if test no = "$installed"; then
+	      func_append notinst_deplibs " $lib"
+	      need_relink=yes
+	    fi
+	    ;;
 	  *cygwin* | *mingw* | *cegcc* | *os2*)
 	      # No point in relinking DLLs because paths are not encoded
 	      func_append notinst_deplibs " $lib"
@@ -8208,6 +8274,11 @@ func_mode_link ()
 	    elif test -n "$soname_spec"; then
 	      # bleh windows
 	      case $host in
+	      *nios2*)
+		# For NIOS2, we want to make sure that it's not caught by the
+		# more general OS/2 check below. Otherwise, NIOS2 is the same
+		# as the default option.
+		;;
 	      *cygwin* | mingw* | *cegcc* | *os2*)
 	        func_arith $current - $age
 		major=$func_arith_result
@@ -8367,7 +8438,7 @@ func_mode_link ()
 	      fi
 	    else
 	      # We cannot seem to hardcode it, guess we'll fake it.
-	      add_dir=-L$libdir
+	      add_dir="-L$lt_sysroot$libdir"
 	      # Try looking first in the location we're being installed to.
 	      if test -n "$inst_prefix_dir"; then
 		case $libdir in
@@ -8828,9 +8899,6 @@ func_mode_link ()
 	    age=$number_minor
 	    revision=$number_minor
 	    lt_irix_increment=no
-	    ;;
-	  *)
-	    func_fatal_configuration "$modename: unknown library version type '$version_type'"
 	    ;;
 	  esac
 	  ;;
@@ -9549,9 +9617,11 @@ EOF
 	  test relink = "$opt_mode" || rpath=$compile_rpath$rpath
 	  for libdir in $rpath; do
 	    if test -n "$hardcode_libdir_flag_spec"; then
+		  func_replace_sysroot "$libdir"
+		  libdir=$func_replace_sysroot_result
+		  func_stripname '=' '' "$libdir"
+		  libdir=$func_stripname_result
 	      if test -n "$hardcode_libdir_separator"; then
-		func_replace_sysroot "$libdir"
-		libdir=$func_replace_sysroot_result
 		if test -z "$hardcode_libdirs"; then
 		  hardcode_libdirs=$libdir
 		else
@@ -9565,8 +9635,16 @@ EOF
 		  esac
 		fi
 	      else
-		eval flag=\"$hardcode_libdir_flag_spec\"
-		func_append dep_rpath " $flag"
+                # We only want to hardcode in an rpath if it isn't in the
+                # default dlsearch path.
+                func_normal_abspath "$libdir"
+                libdir_norm=$func_normal_abspath_result
+	        case " $sys_lib_dlsearch_path " in
+	        *" $libdir_norm "*) ;;
+	        *) eval flag=\"$hardcode_libdir_flag_spec\"
+                   func_append dep_rpath " $flag"
+                   ;;
+	        esac
 	      fi
 	    elif test -n "$runpath_var"; then
 	      case "$perm_rpath " in
@@ -10281,6 +10359,10 @@ EOF
       hardcode_libdirs=
       for libdir in $compile_rpath $finalize_rpath; do
 	if test -n "$hardcode_libdir_flag_spec"; then
+	  func_replace_sysroot "$libdir"
+	  libdir=$func_replace_sysroot_result
+	  func_stripname '=' '' "$libdir"
+	  libdir=$func_stripname_result
 	  if test -n "$hardcode_libdir_separator"; then
 	    if test -z "$hardcode_libdirs"; then
 	      hardcode_libdirs=$libdir
@@ -10295,8 +10377,16 @@ EOF
 	      esac
 	    fi
 	  else
-	    eval flag=\"$hardcode_libdir_flag_spec\"
-	    func_append rpath " $flag"
+            # We only want to hardcode in an rpath if it isn't in the
+            # default dlsearch path.
+            func_normal_abspath "$libdir"
+            libdir_norm=$func_normal_abspath_result
+	    case " $sys_lib_dlsearch_path " in
+	    *" $libdir_norm "*) ;;
+	    *) eval flag=\"$hardcode_libdir_flag_spec\"
+               rpath+=" $flag"
+               ;;
+	    esac
 	  fi
 	elif test -n "$runpath_var"; then
 	  case "$perm_rpath " in
@@ -10332,6 +10422,10 @@ EOF
       hardcode_libdirs=
       for libdir in $finalize_rpath; do
 	if test -n "$hardcode_libdir_flag_spec"; then
+	  func_replace_sysroot "$libdir"
+	  libdir=$func_replace_sysroot_result
+	  func_stripname '=' '' "$libdir"
+	  libdir=$func_stripname_result
 	  if test -n "$hardcode_libdir_separator"; then
 	    if test -z "$hardcode_libdirs"; then
 	      hardcode_libdirs=$libdir
@@ -10346,8 +10440,14 @@ EOF
 	      esac
 	    fi
 	  else
-	    eval flag=\"$hardcode_libdir_flag_spec\"
-	    func_append rpath " $flag"
+            # We only want to hardcode in an rpath if it isn't in the
+            # default dlsearch path.
+	    case " $sys_lib_dlsearch_path " in
+	    *" $libdir "*) ;;
+	    *) eval flag=\"$hardcode_libdir_flag_spec\"
+               func_append rpath " $flag"
+               ;;
+	    esac    
 	  fi
 	elif test -n "$runpath_var"; then
 	  case "$finalize_perm_rpath " in

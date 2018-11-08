@@ -23,7 +23,7 @@
 ## the same distribution terms that you use for the rest of that program.
 
 dnl IT_PROG_INTLTOOL([MINIMUM-VERSION], [no-xml])
-# serial 42 IT_PROG_INTLTOOL
+# serial 42.1 IT_PROG_INTLTOOL
 AC_DEFUN([IT_PROG_INTLTOOL], [
 AC_PREREQ([2.50])dnl
 AC_REQUIRE([AM_NLS])dnl
@@ -129,27 +129,6 @@ mmversion="`$MSGMERGE --version|grep '(GNU ' 2> /dev/null`"
 mfversion="`$MSGFMT --version|grep '(GNU ' 2> /dev/null`"
 if test -z "$xgversion" -o -z "$mmversion" -o -z "$mfversion"; then
     AC_MSG_ERROR([GNU gettext tools not found; required for intltool])
-fi
-
-AC_PATH_PROG(INTLTOOL_PERL, perl)
-if test -z "$INTLTOOL_PERL"; then
-   AC_MSG_ERROR([perl not found])
-fi
-AC_MSG_CHECKING([for perl >= 5.8.1])
-$INTLTOOL_PERL -e "use 5.8.1;" > /dev/null 2>&1
-if test $? -ne 0; then
-   AC_MSG_ERROR([perl 5.8.1 is required for intltool])
-else
-   IT_PERL_VERSION=`$INTLTOOL_PERL -e "printf '%vd', $^V"`
-   AC_MSG_RESULT([$IT_PERL_VERSION])
-fi
-if test "x$2" != "xno-xml"; then
-   AC_MSG_CHECKING([for XML::Parser])
-   if `$INTLTOOL_PERL -e "require XML::Parser" 2>/dev/null`; then
-       AC_MSG_RESULT([ok])
-   else
-       AC_MSG_ERROR([XML::Parser perl module is required for intltool])
-   fi
 fi
 
 # Substitute ALL_LINGUAS so we can use it in po/Makefile

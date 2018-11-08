@@ -107,6 +107,7 @@ typedef struct {
 #define ZOOM_OUT_FACTOR (1.0/ZOOM_IN_FACTOR)
 
 #define SCROLL_TIME 150
+#define SCROLL_PAGE_THRESHOLD 0.7
 
 #define DEFAULT_PIXBUF_CACHE_SIZE 52428800 /* 50MB */
 
@@ -951,6 +952,10 @@ compute_scroll_increment (EvView        *view,
 		if (cairo_region_num_rectangles (sel_region) > 0) {
 			cairo_region_get_rectangle (sel_region, 0, &rect);
 			fraction = 1 - (rect.height / gtk_adjustment_get_page_size (adjustment));
+			/* jump the full page height if the line is too large a
+			 * fraction of the page */
+			if (fraction < SCROLL_PAGE_THRESHOLD)
+				fraction = 1.0;
 		}
 		cairo_region_destroy (sel_region);
 	}
@@ -1373,7 +1378,7 @@ _ev_view_transform_view_point_to_doc_point (EvView       *view,
 					    double       *doc_point_y)
 {
 	*doc_point_x = MAX ((double) (view_point->x - page_area->x - border->left) / view->scale, 0);
-	*doc_point_y = MAX ((double) (view_point->y - page_area->y - border->right) / view->scale, 0);
+	*doc_point_y = MAX ((double) (view_point->y - page_area->y - border->top) / view->scale, 0);
 }
 
 void
@@ -1384,7 +1389,7 @@ _ev_view_transform_view_rect_to_doc_rect (EvView       *view,
 					  EvRectangle  *doc_rect)
 {
 	doc_rect->x1 = MAX ((double) (view_rect->x - page_area->x - border->left) / view->scale, 0);
-	doc_rect->y1 = MAX ((double) (view_rect->y - page_area->y - border->right) / view->scale, 0);
+	doc_rect->y1 = MAX ((double) (view_rect->y - page_area->y - border->top) / view->scale, 0);
 	doc_rect->x2 = doc_rect->x1 + (double) view_rect->width / view->scale;
 	doc_rect->y2 = doc_rect->y1 + (double) view_rect->height / view->scale;
 }
@@ -5393,6 +5398,7 @@ ev_view_motion_notify_event (GtkWidget      *widget,
 					1, (GdkEvent *)event);
 
 			view->selection_info.in_drag = FALSE;
+			view->pressed_button = -1;
 
 			gtk_target_list_unref (target_list);
 
@@ -5413,6 +5419,7 @@ ev_view_motion_notify_event (GtkWidget      *widget,
 					1, (GdkEvent *)event);
 
 			view->image_dnd_info.in_drag = FALSE;
+			view->pressed_button = -1;
 
 			gtk_target_list_unref (target_list);
 
@@ -6201,6 +6208,7 @@ ev_view_move_cursor (EvView         *view,
 	gint            prev_page;
 	cairo_region_t *damage_region;
 	gboolean        clear_selections = FALSE;
+	const gboolean  forward = count >= 0;
 
 	if (!view->caret_enabled || view->rotation != 0)
 		return FALSE;
@@ -6276,9 +6284,18 @@ ev_view_move_cursor (EvView         *view,
 		return TRUE;
 
 	if (step == GTK_MOVEMENT_DISPLAY_LINES) {
+		const gint prev_cursor_offset = view->cursor_offset;
+
 		position_caret_cursor_at_location (view,
 						   MAX (rect.x, view->cursor_line_offset),
 						   rect.y + (rect.height / 2));
+		/* Make sure we didn't move the cursor in the wrong direction
+		 * in case the visual order isn't the same as the logical one,
+		 * in order to avoid cursor movement loops */
+		if ((forward && prev_cursor_offset > view->cursor_offset) ||
+		    (!forward && prev_cursor_offset < view->cursor_offset)) {
+			view->cursor_offset = prev_cursor_offset;
+		}
 		if (!clear_selections &&
 		    prev_offset == view->cursor_offset && prev_page == view->cursor_page) {
 			gtk_widget_error_bell (GTK_WIDGET (view));
@@ -8191,7 +8208,10 @@ ev_view_dual_odd_left_changed_cb (EvDocumentModel *model,
 {
 	view->dual_even_left = !ev_document_model_get_dual_page_odd_pages_left (model);
 	view->pending_scroll = SCROLL_TO_PAGE_POSITION;
-	gtk_widget_queue_resize (GTK_WIDGET (view));
+	if (ev_document_model_get_dual_page (model))
+		/* odd_left may be set when not in dual mode,
+		   queue_resize is not needed in that case */
+		gtk_widget_queue_resize (GTK_WIDGET (view));
 }
 
 static void
