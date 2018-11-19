@@ -1,0 +1,43 @@
+From: Carlos Garnacho <carlosg@gnome.org>
+Date: Wed, 3 Oct 2018 22:43:21 +0200
+Subject: clutter: Do not latch modifiers on modifier keys
+
+If the user maps eg. Alt+F2 to a pad button, the MetaInputSettings will
+send the full Alt press, F2 press, F2 release, Alt release sequence.
+However the keycode corresponding to Alt is found in level 1, so the
+Shift modifier gets unintendedly latched in addition to the Alt key
+press/release pair.
+
+We could probably improve keycode lookup heuristics so level=0 (and
+no modifier latching) is preferred, but we can do without it altogether
+for modifier keys.
+
+Ubuntu-Bug: https://bugs.launchpad.net/oem-priority/+bug/1730211
+Applied-Upstream: yes, 3.30.1
+---
+ clutter/clutter/x11/clutter-virtual-input-device-x11.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/clutter/clutter/x11/clutter-virtual-input-device-x11.c b/clutter/clutter/x11/clutter-virtual-input-device-x11.c
+index b86ded0..e16ba3f 100644
+--- a/clutter/clutter/x11/clutter-virtual-input-device-x11.c
++++ b/clutter/clutter/x11/clutter-virtual-input-device-x11.c
+@@ -147,14 +147,16 @@ clutter_virtual_input_device_x11_notify_keyval (ClutterVirtualInputDevice *virtu
+       return;
+     }
+ 
+-  if (key_state == CLUTTER_KEY_STATE_PRESSED)
++  if (!_clutter_keymap_x11_get_is_modifier (keymap, keycode) &&
++      key_state == CLUTTER_KEY_STATE_PRESSED)
+     clutter_keymap_x11_latch_modifiers (keymap, level, TRUE);
+ 
+   XTestFakeKeyEvent (clutter_x11_get_default_display (),
+                      (KeyCode) keycode,
+                      key_state == CLUTTER_KEY_STATE_PRESSED, 0);
+ 
+-  if (key_state == CLUTTER_KEY_STATE_RELEASED)
++  if (!_clutter_keymap_x11_get_is_modifier (keymap, keycode) &&
++      key_state == CLUTTER_KEY_STATE_RELEASED)
+     clutter_keymap_x11_latch_modifiers (keymap, level, FALSE);
+ }
+ 

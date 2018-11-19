@@ -1,0 +1,63 @@
+From: =?utf-8?q?Alex_Villac=C3=ADs_Lasso?= <a_villacis@palosanto.com>
+Date: Fri, 27 Jul 2018 16:08:52 +0000
+Subject: renderer/native: Fallback to non-planar API if
+ gbm_bo_get_handle_for_plane fails
+
+Commit c0d9b08ef9bf2be865aad9bf1bc74ba24c655d9f replaced the old GBM API calls
+with the multi-plane GBM API. However, the call to gbm_bo_get_handle_for_plane
+fails for some DRI drivers (in particular i915). Due to missing error checks,
+the subsequent call to drmModeAddFB[2] fails and the screen output locks up.
+
+This commit adds the missing error checks and falls back to the old GBM API
+(non-planar) if necessary.
+
+v5: test success of gbm_bo_get_handle_for_plane instead of errno
+
+This commit adopts solution proposed by Daniel van Vugt to check the return
+value of gbm_bo_get_handle_for_plane on plane 0 and fall back to old
+non-planar method if the call fails. This removes the errno check (for
+ENOSYS) that could abort if mesa ever sets a different value.
+
+Related to: https://gitlab.gnome.org/GNOME/mutter/issues/127
+
+(cherry picked from commit f7af32a3eaefabbea3ebbda3a93eff98dd105ab9)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/mutter/+bug/1727356
+Applied-Upstream: yes, 3.28.4
+---
+ src/backends/native/meta-renderer-native.c | 21 ++++++++++++++++-----
+ 1 file changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/src/backends/native/meta-renderer-native.c b/src/backends/native/meta-renderer-native.c
+index fc6b223..59003b3 100644
+--- a/src/backends/native/meta-renderer-native.c
++++ b/src/backends/native/meta-renderer-native.c
+@@ -1607,12 +1607,23 @@ gbm_get_next_fb_id (MetaGpuKms         *gpu_kms,
+       return FALSE;
+     }
+ 
+-  for (i = 0; i < gbm_bo_get_plane_count (next_bo); i++)
++  if (gbm_bo_get_handle_for_plane (next_bo, 0).s32 == -1)
+     {
+-      strides[i] = gbm_bo_get_stride_for_plane (next_bo, i);
+-      handles[i] = gbm_bo_get_handle_for_plane (next_bo, i).u32;
+-      offsets[i] = gbm_bo_get_offset (next_bo, i);
+-      modifiers[i] = gbm_bo_get_modifier (next_bo);
++      /* Failed to fetch handle to plane, falling back to old method */
++      strides[0] = gbm_bo_get_stride (next_bo);
++      handles[0] = gbm_bo_get_handle (next_bo).u32;
++      offsets[0] = 0;
++      modifiers[0] = DRM_FORMAT_MOD_INVALID;
++    }
++  else
++    {
++      for (i = 0; i < gbm_bo_get_plane_count (next_bo); i++)
++        {
++          strides[i] = gbm_bo_get_stride_for_plane (next_bo, i);
++          handles[i] = gbm_bo_get_handle_for_plane (next_bo, i).u32;
++          offsets[i] = gbm_bo_get_offset (next_bo, i);
++          modifiers[i] = gbm_bo_get_modifier (next_bo);
++        }
+     }
+ 
+   kms_fd = meta_gpu_kms_get_fd (gpu_kms);
