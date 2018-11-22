@@ -1,3 +1,24 @@
+grub2 (2.02-2ubuntu8.9) bionic; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/default/grub.md5sum: add entry for 2.02-2ubuntu8.7; to force an
+    update of /etc/default/grub back to the correct timeout value of 0 if the
+    file has otherwise not been edited by the user. (LP: #1784363)
+
+  [ Steve Langasek ]
+  * debian/grub-check-signatures: Handle the case where we have unsigned
+    vmlinuz and signed vmlinuz.efi.signed. (LP: #1788727)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 08 Nov 2018 10:53:28 -0500
+
+grub2 (2.02-2ubuntu8.8) bionic; urgency=medium
+
+  * debian/rules: set DEFAULT_TIMEOUT=0 for flicker-free boot scenarios (all
+    arches but ppc64el) to avoid 10 second delays at boot not showing a menu.
+    (LP: #1784363)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 12 Oct 2018 15:29:35 -0400
+
 grub2 (2.02-2ubuntu8.7) bionic; urgency=medium
 
   * debian/patches/0001-i386-linux-Add-support-for-ext_lfb_base.patch:
