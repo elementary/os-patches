@@ -1,3 +1,14 @@
+grub2 (2.02~beta2-36ubuntu3.20) xenial; urgency=medium
+
+  * debian/patches/linuxefi_fix_relocate_coff.patch: fix typo in
+    relocate_coff() causing issues with relocation of code in chainload.
+    (LP: #1792575)
+  * debian/patches/linuxefi_truncate_overlong_reloc_section.patch: The Windows
+    7 bootloader has inconsistent headers; truncate to the smaller, correct
+    size to fix chainloading Windows 7. (LP: #1792575)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 02 Nov 2018 13:08:47 -0400
+
 grub2 (2.02~beta2-36ubuntu3.19) xenial; urgency=medium
 
   * debian/patches/0001-i386-linux-Add-support-for-ext_lfb_base.patch:

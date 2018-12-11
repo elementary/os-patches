@@ -1,0 +1,112 @@
+From 0785df0598ba00c074a087299cad1848396f7650 Mon Sep 17 00:00:00 2001
+From: Laszlo Ersek <lersek@redhat.com>
+Date: Wed, 23 Nov 2016 06:27:09 +0100
+Subject: efi/chainloader: truncate overlong relocation section
+
+The UEFI Windows 7 boot loader ("EFI/Microsoft/Boot/bootmgfw.efi", SHA1
+31b410e029bba87d2068c65a80b88882f9f8ea25) has inconsistent headers.
+
+Compare:
+
+> The Data Directory
+> ...
+> Entry 5 00000000000d9000 00000574 Base Relocation Directory [.reloc]
+
+Versus:
+
+> Sections:
+> Idx Name      Size      VMA               LMA               File off ...
+> ...
+>  10 .reloc    00000e22  00000000100d9000  00000000100d9000  000a1800 ...
+
+That is, the size reported by the RelocDir entry (0x574) is smaller than
+the virtual size of the .reloc section (0xe22).
+
+Quoting the grub2 debug log for the same:
+
+> chainloader.c:595: reloc_dir: 0xd9000 reloc_size: 0x00000574
+> chainloader.c:603: reloc_base: 0x7d208000 reloc_base_end: 0x7d208573
+> ...
+> chainloader.c:620: Section 10 ".reloc" at 0x7d208000..0x7d208e21
+> chainloader.c:661:  section is not reloc section?
+> chainloader.c:663:  rds: 0x00001000, vs: 00000e22
+> chainloader.c:664:  base: 0x7d208000 end: 0x7d208e21
+> chainloader.c:666:  reloc_base: 0x7d208000 reloc_base_end: 0x7d208573
+> chainloader.c:671:  Section characteristics are 42000040
+> chainloader.c:673:  Section virtual size: 00000e22
+> chainloader.c:675:  Section raw_data size: 00001000
+> chainloader.c:678:  Discarding section
+
+After hexdumping "bootmgfw.efi" and manually walking its relocation blocks
+(yes, really), I determined that the (smaller) RelocDir value is correct.
+The remaining area that extends up to the .reloc section size (== 0xe22 -
+0x574 == 0x8ae bytes) exists as zero padding in the file.
+
+This zero padding shouldn't be passed to relocate_coff() for parsing. In
+order to cope with it, split the handling of .reloc sections into the
+following branches:
+
+- original case (equal size): original behavior (--> relocation
+  attempted),
+
+- overlong .reloc section (longer than reported by RelocDir): truncate the
+  section to the RelocDir size for the purposes of relocate_coff(), and
+  attempt relocation,
+
+- .reloc section is too short, or other checks fail: original behavior
+  (--> relocation not attempted).
+
+Bugzilla: https://bugzilla.redhat.com/show_bug.cgi?id=1347291
+Signed-off-by: Laszlo Ersek <lersek@redhat.com>
+Patch-Name: linuxefi_truncate_overlong_relocs.patch
+Last-Update: 2018-09-25
+---
+ grub-core/loader/efi/chainloader.c | 26 +++++++++++++++++++++-----
+ 1 file changed, 21 insertions(+), 5 deletions(-)
+
+Index: grub2-2.02~beta2/grub-core/loader/efi/chainloader.c
+===================================================================
+--- grub2-2.02~beta2.orig/grub-core/loader/efi/chainloader.c
++++ grub2-2.02~beta2/grub-core/loader/efi/chainloader.c
+@@ -592,7 +592,7 @@ handle_image (void *data, grub_efi_uint3
+   grub_dprintf ("chain", "reloc_base: %p reloc_base_end: %p\n",
+ 		reloc_base, reloc_base_end);
+ 
+-  struct grub_pe32_section_table *reloc_section = NULL;
++  struct grub_pe32_section_table *reloc_section = NULL, fake_reloc_section;
+ 
+   section = context.first_section;
+   for (i = 0; i < context.number_of_sections; i++, section++)
+@@ -641,12 +641,28 @@ handle_image (void *data, grub_efi_uint3
+ 	   * made sense, and the VA and size match RelocDir's
+ 	   * versions, then we believe in this section table. */
+ 	  if (section->raw_data_size && section->virtual_size &&
+-	      base && end && reloc_base == base && reloc_base_end == end)
++	      base && end && reloc_base == base)
+ 	    {
+-	      grub_dprintf ("chain", " section is relocation section\n");
+-	      reloc_section = section;
++	      if (reloc_base_end == end)
++		{
++		  grub_dprintf ("chain", " section is relocation section\n");
++		  reloc_section = section;
++		}
++	      else if (reloc_base_end && reloc_base_end < end)
++	        {
++		  /* Bogus virtual size in the reloc section -- RelocDir
++		   * reported a smaller Base Relocation Directory. Decrease
++		   * the section's virtual size so that it equal RelocDir's
++		   * idea, but only for the purposes of relocate_coff(). */
++		  grub_dprintf ("chain",
++				" section is (overlong) relocation section\n");
++		  grub_memcpy (&fake_reloc_section, section, sizeof *section);
++		  fake_reloc_section.virtual_size -= (end - reloc_base_end);
++		  reloc_section = &fake_reloc_section;
++		}
+ 	    }
+-	  else
++
++	  if (!reloc_section)
+ 	    {
+ 	      grub_dprintf ("chain", " section is not reloc section?\n");
+ 	      grub_dprintf ("chain", " rds: 0x%08x, vs: %08x\n",
