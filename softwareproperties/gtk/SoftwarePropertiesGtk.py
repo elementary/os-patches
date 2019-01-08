@@ -1254,7 +1254,7 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
                         lmp = self.apt_cache[linux_meta]
                         if not lmp.is_installed:
                             self.driver_changes.append(lmp)
-        except KeyError:
+        except (AttributeError, KeyError):
             pass
 
         if button.get_active():
