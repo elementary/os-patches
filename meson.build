@@ -1,5 +1,5 @@
 project ('libcloudproviders', 'c',
-  version: '0.2.5',
+  version: '0.3.0',
   meson_version: '>=0.42.0',
   license: 'LGPL3+',
   default_options: [
