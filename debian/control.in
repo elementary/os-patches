@@ -1,0 +1,63 @@
+Source: libcloudproviders
+Section: libs
+Priority: optional
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Uploaders: @GNOME_TEAM@
+Build-Depends: debhelper (>= 11),
+               gnome-pkg-tools,
+               gtk-doc-tools,
+               libglib2.0-dev (>= 2.52.0),
+               meson (>= 0.40.0),
+Standards-Version: 4.3.0
+Vcs-Browser: https://salsa.debian.org/gnome-team/libcloudproviders
+Vcs-Git: https://salsa.debian.org/gnome-team/libcloudproviders.git
+
+Package: libcloudproviders0
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Description: cloud provider library
+ libcloudproviders is a glib based library that makes it easier to implement
+ a cloud provider server or client.
+ .
+ libcloudproviders also provides a DBus API that allows cloud storage sync
+ clients to expose their services. Clients such as file managers and desktop
+ environments can then provide integrated access to the cloud providers
+ services.
+
+Package: libcloudproviders-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends},
+         libcloudproviders0 (= ${binary:Version}),
+         libglib2.0-dev (>= 2.52.0),
+Suggests: libcloudproviders-doc
+Description: cloud provider library - development files
+ libcloudproviders is a glib based library that makes it easier to implement
+ a cloud provider server or client.
+ .
+ libcloudproviders also provides a DBus API that allows cloud storage sync
+ clients to expose their services. Clients such as file managers and desktop
+ environments can then provide integrated access to the cloud providers
+ services.
+ .
+ This package contains the development files.
+
+Package: libcloudproviders-doc
+Section: doc
+Build-Profiles: <!nodoc>
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Description: cloud provider library - documentation
+ libcloudproviders is a glib based library that makes it easier to implement
+ a cloud provider server or client.
+ .
+ libcloudproviders also provides a DBus API that allows cloud storage sync
+ clients to expose their services. Clients such as file managers and desktop
+ environments can then provide integrated access to the cloud providers
+ services.
+ .
+ This package contains the API reference.
