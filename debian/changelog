@@ -1,3 +1,12 @@
+gnome-bluetooth (3.28.0-2ubuntu0.1) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: work around bluetoothd discoverability issue
+    - debian/patches/CVE-2018-10910.patch: fix Discoverable being reset
+      when turned off in lib/bluetooth-client.c.
+    - CVE-2018-10910
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Fri, 11 Jan 2019 14:41:45 -0500
+
 gnome-bluetooth (3.28.0-2) unstable; urgency=medium
 
   * Have libgnome-bluetooth-dev depend on libcanberra-gtk3-dev and
