@@ -1,0 +1,43 @@
+From 2a65e932dbcc8add0f8006451f59004e5eeb6f09 Mon Sep 17 00:00:00 2001
+From: Beniamino Galvani <bgalvani@redhat.com>
+Date: Sun, 4 Mar 2018 14:59:01 +0100
+Subject: [PATCH] libnma: unescape certificate paths in URIs
+
+When the URI is a filesystem path, we want to return the unescaped
+value ready to be used as a file name.
+
+Note: value_with_scheme_to_uri() does not need a g_uri_escape_string()
+because it seems file URIs can contain any character after "file://".
+
+Fixes: 0da2398042bd8dccfdf63abf76b4d6b0679e4803
+
+https://bugzilla.gnome.org/show_bug.cgi?id=793910
+---
+ src/libnma/nma-cert-chooser.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/libnma/nma-cert-chooser.c b/src/libnma/nma-cert-chooser.c
+index 8d78141f..0461dcef 100644
+--- a/src/libnma/nma-cert-chooser.c
++++ b/src/libnma/nma-cert-chooser.c
+@@ -101,7 +101,7 @@ uri_to_value_with_scheme (const gchar *uri, NMSetting8021xCKScheme *scheme)
+ 		return NULL;
+ 	} else if (g_str_has_prefix (uri, NM_SETTING_802_1X_CERT_SCHEME_PREFIX_PATH)) {
+ 		*scheme = NM_SETTING_802_1X_CK_SCHEME_PATH;
+-		return g_strdup (uri + sizeof (NM_SETTING_802_1X_CERT_SCHEME_PREFIX_PATH) - 1);
++		return g_uri_unescape_string (uri + NM_STRLEN (NM_SETTING_802_1X_CERT_SCHEME_PREFIX_PATH), NULL);
+ 	} else if (g_str_has_prefix (uri, NM_SETTING_802_1X_CERT_SCHEME_PREFIX_PKCS11)) {
+ 		*scheme = NM_SETTING_802_1X_CK_SCHEME_PKCS11;
+ 		return g_strdup (uri);
+@@ -131,7 +131,7 @@ uri_to_value_with_scheme (const gchar *uri, NMSetting8021xCKScheme *scheme)
+ 	}
+ 
+ 	g_return_val_if_fail (g_str_has_prefix (uri, "file://"), NULL);
+-	return g_strdup (uri + 7);
++	return g_uri_unescape_string (uri + 7, NULL);
+ }
+ 
+ #endif
+-- 
+2.18.1
+
