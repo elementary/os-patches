@@ -10,6 +10,7 @@ Vcs-Browser: https://git.launchpad.net/~ubuntu-core-dev/shim/+git/shim-signed
 Package: shim-signed
 Architecture: amd64
 Depends: ${misc:Depends}, shim (= ${shim:Version}), grub-efi-amd64-signed, grub2-common (>= 2.02-2ubuntu8.1), mokutil, sbsigntool
+Breaks: grub-efi-amd64-signed (<< 1.93.7)
 Recommends: secureboot-db
 Built-Using: shim (= ${shim:Version})
 Description: Secure Boot chain-loading bootloader (Microsoft-signed binary)

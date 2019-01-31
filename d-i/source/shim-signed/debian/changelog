@@ -1,22 +1,52 @@
-shim-signed (1.34.9.2) bionic; urgency=medium
+shim-signed (1.37~18.04.3) bionic; urgency=medium
+
+  * Don't fail non-interactive upgrade of nvidia module and module removals
+    (LP: #1726803)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 25 Oct 2018 20:55:38 +0200
+
+shim-signed (1.37~18.04.2) bionic; urgency=medium
+
+  * debian/control: add Breaks: grub-efi-amd64-signed (<< 1.93.7), as the new
+    version of shim exercises a bug in relocation code for chainload that was
+    fixed in that upload of grub, affecting Windows 7, Windows 10, and some
+    netboot scenarios where chainloading is required. (LP: #1792575)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 28 Sep 2018 11:02:56 -0400
+
+shim-signed (1.37~18.04.1) bionic; urgency=medium
+
+  * Backport shim-signed 1.37 to Ubuntu 18.04. (LP: #1790724)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 04 Sep 2018 17:02:59 -0400
+
+shim-signed (1.37) cosmic; urgency=medium
+
+  * Update to the signed 15+1533136590.3beb971-0ubuntu1 binary from Microsoft.
+  * debian/real-po: replace debian/po to make sure things are translatable
+    via Launchpad.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 29 Aug 2018 15:43:41 -0400
+
+shim-signed (1.36) cosmic; urgency=medium
 
   * debian/shim-signed.postinst: use --auto-nvram with grub-install in case
-    we're installing on a NVRAM-unavailable platform. (LP: #1778848)
+    we're installing on a NVRAM-unavailable platform.
   * debian/control: bump the dependency for grub2-common to make sure
-    grub-install supports --auto-nvram. (LP: #1778848)
+    grub-install supports --auto-nvram.
   * debian/control: switch the grub-efi-amd64-bin dependency to
-    grub-efi-amd64-signed. (LP: #1778848)
+    grub-efi-amd64-signed.
 
- -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 27 Jun 2018 10:14:24 +0200
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 06 Jun 2018 20:25:57 +0200
 
-shim-signed (1.34.9.1) bionic; urgency=medium
+shim-signed (1.35) cosmic; urgency=medium
 
   * update-secureboot-policy: fix quoting for key/again password handling to
     mokutil. (LP: #1770579)
   * update-secureboot-policy: don't allow backtracking at the "main" question
     for whether to enroll a new MOK. (LP: #1767091)
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 11 Jun 2018 15:23:28 -0400
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 31 May 2018 17:46:46 -0400
 
 shim-signed (1.34.9) bionic; urgency=medium
 

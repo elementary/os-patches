@@ -1,3 +1,24 @@
+ubiquity (18.04.14.11) bionic; urgency=medium
+
+  [ Steve Langasek ]
+  * scripts/plugininstall.py: don't hard-code a resume partition in
+    /etc/initramfs-tools/conf.d/resume at install time.  In bionic and later,
+    initramfs-tools will autodetect an appropriate resume partition at
+    initramfs generation time, so ubiquity's resume setting is redundant and
+    possibly wrong.  LP: #1768230.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Mon, 21 Jan 2019 20:25:03 +0000
+
+ubiquity (18.04.14.10) bionic; urgency=medium
+
+  * When installing non-free packages, also iterate and install any
+    apt-installed marked packages which may include non-free drivers
+    detected by ubuntu-drivers. LP: #1793671
+  * Automatic update of included source packages: flash-kernel
+    3.90ubuntu3.18.04.1, shim-signed 1.37~18.04.3.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 15 Jan 2019 10:38:30 +0000
+
 ubiquity (18.04.14.9) bionic; urgency=medium
 
   * Mask ubiquity.service in a system installed with oem-config/enabled=true,

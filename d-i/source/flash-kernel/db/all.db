@@ -1427,6 +1427,19 @@ Boot-Initrd-Path: /boot/firmware/initrd.img
 Boot-Script-Path: /boot/firmware/boot.scr
 # XXX we should copy the entire overlay dtbs dir too
 
+# Raspberry Pi 3 B+
+Machine: Raspberry Pi 3 Model B+
+Machine: Raspberry Pi 3 Model B Plus
+Machine: Raspberry Pi 3 Model B Plus Rev 1.3
+DTB-Id: bcm2710-rpi-3-b-plus.dtb
+U-Boot-Script-Name: bootscr.rpi3
+Required-Packages: u-boot-tools
+Boot-DTB-Path: /boot/firmware/bcm2710-rpi-3-b-plus.dtb
+Boot-Kernel-Path: /boot/firmware/vmlinuz
+Boot-Initrd-Path: /boot/firmware/initrd.img
+Boot-Script-Path: /boot/firmware/boot.scr
+# XXX we should copy the entire overlay dtbs dir too
+
 Machine: SAMSUNG SSDK5440 board based on EXYNOS5440
 Kernel-Flavors: exynos5 exynos generic
 U-Boot-Kernel-Address: 0x80008000

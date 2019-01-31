@@ -759,27 +759,6 @@ class Install(install_misc.InstallBase):
         self.db.progress('SET', 5)
         self.db.progress('STOP')
 
-    def get_resume_partition(self):
-        biggest_size = 0
-        biggest_partition = None
-        try:
-            with open('/proc/swaps') as swaps:
-                for line in swaps:
-                    words = line.split()
-                    if words[1] != 'partition':
-                        continue
-                    if not os.path.exists(words[0]):
-                        continue
-                    if words[0].startswith('/dev/zram'):
-                        continue
-                    size = int(words[2])
-                    if size > biggest_size:
-                        biggest_size = size
-                        biggest_partition = words[0]
-        except Exception:
-            return None
-        return biggest_partition
-
     def configure_hardware(self):
         """Reconfigure several hardware-specific packages.
 
@@ -806,29 +785,6 @@ class Install(install_misc.InstallBase):
         if 'UBIQUITY_OEM_USER_CONFIG' in os.environ:
             script += '-oem'
         misc.execute(script)
-
-        resume = self.get_resume_partition()
-        if resume is not None:
-            resume_uuid = None
-            try:
-                resume_uuid = subprocess.Popen(
-                    ['block-attr', '--uuid', resume],
-                    stdout=subprocess.PIPE,
-                    universal_newlines=True).communicate()[0].rstrip('\n')
-            except OSError:
-                pass
-            if resume_uuid:
-                resume = "UUID=%s" % resume_uuid
-            if os.path.exists(self.target_file('etc/initramfs-tools/conf.d')):
-                configdir = self.target_file('etc/initramfs-tools/conf.d')
-            elif os.path.exists(self.target_file('etc/mkinitramfs/conf.d')):
-                configdir = self.target_file('etc/mkinitramfs/conf.d')
-            else:
-                configdir = None
-            if configdir is not None:
-                resume_path = os.path.join(configdir, 'resume')
-                with open(resume_path, 'w') as configfile:
-                    print("RESUME=%s" % resume, file=configfile)
 
         osextras.unlink_force(self.target_file('etc/popularity-contest.conf'))
         try:
@@ -1195,6 +1151,8 @@ class Install(install_misc.InstallBase):
         if self.db.get('ubiquity/use_nonfree') == 'true':
             self.db.progress('INFO', 'ubiquity/install/nonfree')
             packages = self.db.get('ubiquity/nonfree_package').split()
+            # also install recorded non-free packages
+            packages.extend(install_misc.query_recorded_installed())
             self.do_install(packages)
 
     def install_extras(self):
@@ -1212,6 +1170,7 @@ class Install(install_misc.InstallBase):
         if not found_cdrom:
             os.rename("%s.apt-setup" % sources_list, sources_list)
 
+        # this will not install non-free packages due to above divert
         self.do_install(install_misc.query_recorded_installed())
 
         if found_cdrom:

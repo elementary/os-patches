@@ -55,6 +55,23 @@ clear_new_dkms_list()
     rm "$NEW_DKMS_LIST"
 }
 
+new_dkms_module()
+{
+    # handle nvidia module specially because it changed path
+    if ! grep -q "/var/lib/dkms/nvidia" "$OLD_DKMS_LIST" && grep -q "/var/lib/dkms/nvidia" "$NEW_DKMS_LIST" ; then
+        # nvidia module is newly added
+        return 0
+    fi
+
+    # return 0 if there is any other new module
+    env LC_ALL=C comm -1 -3 $OLD_DKMS_LIST $NEW_DKMS_LIST | grep -q -v "/var/lib/dkms/nvidia"
+}
+
+show_dkms_list_changes()
+{
+    diff -u $OLD_DKMS_LIST $NEW_DKMS_LIST >&2
+}
+
 validate_password()
 {
     db_capb
@@ -146,7 +163,8 @@ do_it()
             if [ -z "$key$again" ] && echo "$seen_key" | grep -q ^30; then
                 echo "Running in non-interactive mode, doing nothing." >&2
 
-                if ! diff -u $OLD_DKMS_LIST $NEW_DKMS_LIST; then
+                if new_dkms_module; then
+                    show_dkms_list_changes
                     clear_new_dkms_list
                     exit 1
                 else
