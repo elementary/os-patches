@@ -1,3 +1,19 @@
+grub2 (2.02-2ubuntu8.10) bionic; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/grub-check-signatures: check kernel signatures against keys known
+    in firmware, in case a kernel is signed but not using a key that will pass
+    validation, such as when using kernels coming from a PPA. (LP: #1789918)
+  * debian/patches/mkconfig_leave_breadcrumbs.patch: make sure grub-mkconfig
+    leaves a trace of what files were sourced to help generate the config
+    we're building. (LP: #1812863)
+
+  [ Steve Langasek ]
+  * debian/patches/quick-boot-lvm.patch: If we don't have writable
+    grubenv and we're on EFI, always show the menu.  Closes LP: #1800722.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 09 Jan 2019 14:04:09 -0500
+
 grub2 (2.02-2ubuntu8.9) bionic; urgency=medium
 
   [ Mathieu Trudel-Lapierre ]

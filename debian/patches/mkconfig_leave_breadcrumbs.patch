@@ -1,0 +1,29 @@
+From 4c5bf7a6fa6798a5972bdf7999edd3bb5e294647 Mon Sep 17 00:00:00 2001
+From: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+Date: Fri, 14 Dec 2018 13:46:14 -0500
+Subject: grub-mkconfig: leave a trace of what files were sourced to generate
+ the config
+
+Patch-Name: mkconfig_leave_breadcrumbs.patch
+Signed-off-by: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+---
+ util/grub-mkconfig.in | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/util/grub-mkconfig.in b/util/grub-mkconfig.in
+index 9fca8cd7e..f1e7ca829 100644
+--- a/util/grub-mkconfig.in
++++ b/util/grub-mkconfig.in
+@@ -155,10 +155,12 @@ if [ x"$GRUB_FS" = xunknown ]; then
+ fi
+ 
+ if test -f ${sysconfdir}/default/grub ; then
++  gettext_printf "Sourcing file \`%s'\n" "${sysconfdir}/default/grub" 1>&2
+   . ${sysconfdir}/default/grub
+ fi
+ for x in ${sysconfdir}/default/grub.d/*.cfg ; do
+   if [ -e "${x}" ]; then
++    gettext_printf "Sourcing file \`%s'\n" "${x}" 1>&2
+     . "${x}"
+   fi
+ done
