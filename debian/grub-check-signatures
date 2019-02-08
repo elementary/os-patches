@@ -47,11 +47,9 @@ extract_known_keys() {
 
 	# Extract known UEFI certs from firmware variables
 	( cd $tmpdir; \
-		mokutil --export --db; \
-		mokutil --export --mok >/dev/null 2>/dev/null; \
-		for derfile in *.der; do \
-			openssl x509 -inform der -in $derfile -outform pem -out $derfile.crt; \
-		done )
+		mokutil --export --db >/dev/null 2>/dev/null; \
+		mokutil --export --mok >/dev/null 2>/dev/null; )
+	find $tmpdir -name "*.der" -exec openssl x509 -inform der -in {} -outform pem -out {}.crt  \;
 }
 
 # Check if a given kernel image is signed

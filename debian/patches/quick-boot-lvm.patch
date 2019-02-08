@@ -1,4 +1,4 @@
-From 896d6d6ed832e6a2a1429cf17a51bc94efcb3de1 Mon Sep 17 00:00:00 2001
+From de7f32d19958620ad72793fbe7982ecd3c73a259 Mon Sep 17 00:00:00 2001
 From: Steve Langasek <steve.langasek@ubuntu.com>
 Date: Tue, 30 Oct 2018 15:04:16 -0700
 Subject: If we don't have writable grubenv and we're on EFI, always show the
@@ -22,10 +22,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/1800722
  util/grub.d/00_header.in | 18 +++++++++++++++---
  1 file changed, 15 insertions(+), 3 deletions(-)
 
-diff --git a/util/grub.d/00_header.in b/util/grub.d/00_header.in
-index 23322458a..6a9a869a2 100644
---- a/util/grub.d/00_header.in
-+++ b/util/grub.d/00_header.in
+Index: grub2-2.02+dfsg1/util/grub.d/00_header.in
+===================================================================
+--- grub2-2.02+dfsg1.orig/util/grub.d/00_header.in
++++ grub2-2.02+dfsg1/util/grub.d/00_header.in
 @@ -142,7 +142,7 @@ EOF
            cat <<EOF
    # GRUB lacks write support for $abstraction, so recordfail support is disabled.
@@ -61,7 +61,7 @@ index 23322458a..6a9a869a2 100644
  EOF
 +if [ "$recordfail_broken" = 1 ]; then
 +  cat << EOF
-+if lsefi; then
++if [ \$grub_platform = efi ]; then
 +  set timeout=${GRUB_RECORDFAIL_TIMEOUT:-30}
 +  if [ x\$feature_timeout_style = xy ] ; then
 +    set timeout_style=menu

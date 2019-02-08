@@ -1,0 +1,43 @@
+From 10a7a5a6402467899a4b733d948eb94b643a5e4e Mon Sep 17 00:00:00 2001
+From: Linn Crosetto <linn@hpe.com>
+Date: Tue, 5 Apr 2016 11:49:05 -0600
+Subject: Disallow unsigned kernels if UEFI Secure Boot is enabled
+
+If UEFI Secure Boot is enabled and kernel signature verification fails, do not
+boot the kernel. Before this change, if kernel signature verification failed
+then GRUB would fall back to calling ExitBootServices() and continuing the
+boot.
+
+Patch-Name: linuxefi_disable_sb_fallback.patch
+
+Signed-off-by: Linn Crosetto <linn@hpe.com>
+---
+ grub-core/loader/i386/linux.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+Index: bionic/grub-core/loader/i386/linux.c
+===================================================================
+--- bionic.orig/grub-core/loader/i386/linux.c
++++ bionic/grub-core/loader/i386/linux.c
+@@ -704,10 +704,8 @@ grub_cmd_linux (grub_command_t cmd __att
+   using_linuxefi = 0;
+   if (grub_efi_secure_boot ())
+     {
+-      /* Try linuxefi first, which will require a successful signature check
+-	 and then hand over to the kernel without calling ExitBootServices.
+-	 If that fails, however, fall back to calling ExitBootServices
+-	 ourselves and then booting an unsigned kernel.  */
++      /* linuxefi requires a successful signature check and then hand over
++	 to the kernel without calling ExitBootServices. */
+       grub_dl_t mod;
+       grub_command_t linuxefi_cmd;
+ 
+@@ -729,7 +727,7 @@ grub_cmd_linux (grub_command_t cmd __att
+ 		  return GRUB_ERR_NONE;
+ 		}
+ 	      grub_dprintf ("linux", "linuxefi failed (%d)\n", grub_errno);
+-	      grub_errno = GRUB_ERR_NONE;
++	      goto fail;
+ 	    }
+ 	}
+     }

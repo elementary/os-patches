@@ -1,3 +1,30 @@
+grub2 (2.02-2ubuntu8.12) bionic; urgency=medium
+
+  * debian/grub-check-signatures: make sure grub-check-signatures conserves
+    its execute bit.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 07 Feb 2019 18:20:04 -0500
+
+grub2 (2.02-2ubuntu8.11) bionic; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/grub-check-signatures: properly account for DB showing as empty on
+    some broken firmwares: Guard against mokutil --export --db failing, and do
+    a better job at finding the DER certs for conversion to PEM format.
+    (LP: #1814575)
+  * debian/patches/linuxefi_disable_sb_fallback.patch: Disallow unsigned
+    kernels if UEFI Secure Boot is enabled.  If UEFI Secure Boot is enabled
+    and kernel signature verification fails, do not boot the kernel. Patch
+    from Linn Crosetto. (LP: #1401532)
+
+  [ Steve Langasek ]
+  * debian/patches/quick-boot-lvm.patch: checking the return value of
+    'lsefi' when the command doesn't exist does not do what's expected, so
+    instead check the value of $grub_platform which is simpler anyway.
+    LP: #1814403.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 05 Feb 2019 12:26:27 -0500
+
 grub2 (2.02-2ubuntu8.10) bionic; urgency=medium
 
   [ Mathieu Trudel-Lapierre ]
