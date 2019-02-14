@@ -1,3 +1,13 @@
+dkms (2.2.0.3-2ubuntu11.6) xenial; urgency=medium
+
+  * debian/patches/shim_secureboot_support.patch:
+    - Move to signing just after module build to ensure it correctly applies
+      at kernel update times. (LP: #1772950)
+    - Generate a new MOK if there isn't one yet, and use that so sign
+      newly-built kernel modules. (LP: #1748983)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 28 Jan 2019 10:21:09 -0500
+
 dkms (2.2.0.3-2ubuntu11.5) xenial; urgency=medium
 
   * 0014-remove-initrd-backup.patch: When removing a kernel also remove
