@@ -1,3 +1,11 @@
+user-setup (1.63ubuntu4.1) xenial; urgency=medium
+
+  * Mount /proc before calling adduser --encrypt-home. This calls into
+    ecryptfs, which requires a /proc in order to find out where sysfs is
+    mounted. (LP: #1817689)
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Tue, 26 Feb 2019 18:43:44 +0000
+
 user-setup (1.63ubuntu4) xenial; urgency=medium
 
   * Fix sddm.conf paths when replacing PLACEHOLDER for the DE to be run by
