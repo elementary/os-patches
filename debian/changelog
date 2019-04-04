@@ -1,3 +1,13 @@
+grub2 (2.02-2ubuntu8.13) bionic; urgency=medium
+
+   * debian/build-efi-images: add HTTP to generated UEFI images. (LP: #1787630)
+   * debian/config.in, debian/grub-common.dirs, debian/postinst.in,
+     debian/postrm.in: cherry-pick Colin's changes to ucf handling from
+     2.02+dfsg1-11 to avoid unnecessarily prompting about grub.cfg changes.
+     (LP: #564853)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 18 Mar 2019 12:11:57 -0400
+
 grub2 (2.02-2ubuntu8.12) bionic; urgency=medium
 
   * debian/grub-check-signatures: make sure grub-check-signatures conserves
