@@ -351,7 +351,13 @@ lid_is_closed_changed (UpClient   *client,
                        gpointer    user_data)
 {
   MetaMonitorManager *manager = user_data;
+  gboolean lid_is_closed;
 
+  lid_is_closed = up_client_get_lid_is_closed (manager->up_client);
+  if (lid_is_closed == manager->lid_is_closed)
+    return;
+
+  manager->lid_is_closed = lid_is_closed;
   meta_monitor_manager_lid_is_closed_changed (manager);
 }
 
@@ -361,7 +367,7 @@ meta_monitor_manager_real_is_lid_closed (MetaMonitorManager *manager)
   if (!manager->up_client)
     return FALSE;
 
-  return up_client_get_lid_is_closed (manager->up_client);
+  return manager->lid_is_closed;
 }
 
 gboolean
@@ -733,8 +739,12 @@ meta_monitor_manager_constructed (GObject *object)
   if (manager_class->is_lid_closed == meta_monitor_manager_real_is_lid_closed)
     {
       manager->up_client = up_client_new ();
-      g_signal_connect_object (manager->up_client, "notify::lid-is-closed",
-                               G_CALLBACK (lid_is_closed_changed), manager, 0);
+      if (manager->up_client)
+        {
+          g_signal_connect_object (manager->up_client, "notify::lid-is-closed",
+                                   G_CALLBACK (lid_is_closed_changed), manager, 0);
+          manager->lid_is_closed = up_client_get_lid_is_closed (manager->up_client);
+        }
     }
 
   g_signal_connect_object (manager, "notify::power-save-mode",
@@ -1323,9 +1333,13 @@ meta_monitor_manager_handle_get_current_state (MetaDBusDisplayConfig *skeleton,
           GVariantBuilder mode_properties_builder;
           MetaCrtcModeFlag mode_flags;
 
+          if (!meta_monitor_mode_should_be_advertised (monitor_mode))
+            continue;
+
           mode_id = meta_monitor_mode_get_id (monitor_mode);
           meta_monitor_mode_get_resolution (monitor_mode,
                                             &mode_width, &mode_height);
+
           refresh_rate = meta_monitor_mode_get_refresh_rate (monitor_mode);
 
           preferred_scale =

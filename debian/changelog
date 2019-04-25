@@ -1,3 +1,38 @@
+mutter (3.28.3+git20190124-0ubuntu18.04.2) bionic; urgency=medium
+
+  * control: Add Breaks on budgie-desktop verions broken by this upload.
+    budgie-desktop needs a fix in 10.4+git20171031.10.g9f71bb8-1.2ubuntu1.2
+    for compatibility with this mutter.
+
+ -- Iain Lane <iain.lane@canonical.com>  Wed, 17 Apr 2019 11:35:51 +0100
+
+mutter (3.28.3+git20190124-0ubuntu18.04.1) bionic; urgency=medium
+
+  * New upstream git snapshot based on 3.28.3 plus commits up to 4af8d9d47
+    (LP: #1811900)
+    - Fix crash in dual monitor setup and gdm activation (LP: #1790525,
+      LP: #1795774)
+    - Make possible to launch gnome-shell in wayland using nvidia and EGLDevice
+      backend (LP: #1805444)
+  * debian/libmutter-2-0.symbols: Add new symbols
+  * d/p/gpu-kms-Don-t-crash-if-drmModeGetResources-returns-N.patch,
+    d/p/native-gpu-Handle-drmModeSetCrtc-failing-gracefully.patch,
+    d/p/monitor-manager-Filter-out-low-screen-resolutions.patch,
+    d/p/window-wayland-Always-update-monitor-for-non-user-ops.patch,
+    d/p/window-Don-t-refuse-to-move-focus-to-the-grab-window.patch,
+    d/p/window-Explicitly-exclude-unmanaging-window-from-focus-ag.patch,
+    d/p/monitor-Use-current-monitor-mode-to-check-whether-active.patch,
+    d/p/core-Return-1-if-meta_window_get_monitor-is-called-on-an-.patch,
+    d/p/renderer-native-Fallback-to-non-planar-API-if-gbm_bo_get_.patch,
+    d/p/clutter-x11-Implement-keycode-lookup-from-keysyms-on-virt.patch,
+    d/p/clutter-Do-not-latch-modifiers-on-modifier-keys.patch:
+    - Removed as applied upstream
+  * d/p/clutter-Fix-offscreen-effect-painting-of-clones.patch:
+    - Fix offscreen-effect painting of clones in zoom mode (LP: #1767648,
+      LP: #1779615)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 25 Jan 2019 17:50:33 +0000
+
 mutter (3.28.3-2~ubuntu18.04.2) bionic; urgency=medium
 
   * d/p/renderer-native-Fallback-to-non-planar-API-if-gbm_bo_get_.patch:

@@ -82,6 +82,7 @@ typedef enum
   META_MOVE_RESIZE_UNMAXIMIZE = 1 << 6,
   META_MOVE_RESIZE_FORCE_MOVE = 1 << 7,
   META_MOVE_RESIZE_WAYLAND_STATE_CHANGED = 1 << 8,
+  META_MOVE_RESIZE_FORCE_UPDATE_MONITOR = 1 << 9,
 } MetaMoveResizeFlags;
 
 typedef enum
@@ -120,6 +121,13 @@ typedef enum
   META_PLACEMENT_CONSTRAINT_ADJUSTMENT_RESIZE_X = 1 << 4,
   META_PLACEMENT_CONSTRAINT_ADJUSTMENT_RESIZE_Y = 1 << 5,
 } MetaPlacementConstraintAdjustment;
+
+typedef enum _MetaWindowUpdateMonitorFlags
+{
+  META_WINDOW_UPDATE_MONITOR_FLAGS_NONE = 0,
+  META_WINDOW_UPDATE_MONITOR_FLAGS_USER_OP = 1 << 0,
+  META_WINDOW_UPDATE_MONITOR_FLAGS_FORCE = 1 << 1,
+} MetaWindowUpdateMonitorFlags;
 
 typedef struct _MetaPlacementRule
 {
@@ -409,6 +417,9 @@ struct _MetaWindow
   /* whether or not the window is from a program running on another machine */
   guint is_remote : 1;
 
+  /* whether focus should be restored on map */
+  guint restore_focus_on_map : 1;
+
   /* if non-NULL, the bounds of the window frame */
   cairo_region_t *frame_bounds;
 
@@ -549,8 +560,8 @@ struct _MetaWindowClass
                                   cairo_surface_t **icon,
                                   cairo_surface_t **mini_icon);
   uint32_t (*get_client_pid)     (MetaWindow *window);
-  void (*update_main_monitor)    (MetaWindow *window,
-                                  gboolean    user_op);
+  void (*update_main_monitor)    (MetaWindow                   *window,
+                                  MetaWindowUpdateMonitorFlags  flags);
   void (*main_monitor_changed)   (MetaWindow *window,
                                   const MetaLogicalMonitor *old);
   void (*force_restore_shortcuts) (MetaWindow         *window,
@@ -768,8 +779,8 @@ void meta_window_activate_full (MetaWindow     *window,
 MetaLogicalMonitor * meta_window_calculate_main_logical_monitor (MetaWindow *window);
 
 MetaLogicalMonitor * meta_window_get_main_logical_monitor (MetaWindow *window);
-void meta_window_update_monitor (MetaWindow *window,
-                                 gboolean    user_op);
+void meta_window_update_monitor (MetaWindow                   *window,
+                                 MetaWindowUpdateMonitorFlags  flags);
 
 void meta_window_set_urgent (MetaWindow *window,
                              gboolean    urgent);

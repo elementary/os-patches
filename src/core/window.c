@@ -119,6 +119,7 @@ static gboolean queue_calc_showing_func (MetaWindow *window,
                                          void       *data);
 
 static void meta_window_move_between_rects (MetaWindow          *window,
+                                            MetaMoveResizeFlags  move_resize_flags,
                                             const MetaRectangle *old_area,
                                             const MetaRectangle *new_area);
 
@@ -1031,7 +1032,6 @@ _meta_window_shared_new (MetaDisplay         *display,
   window->tab_unminimized = FALSE;
   window->iconic = FALSE;
   window->mapped = attrs->map_state != IsUnmapped;
-  window->hidden = FALSE;
   window->known_to_compositor = FALSE;
   window->visible_to_compositor = FALSE;
   window->pending_compositor_effect = effect;
@@ -1070,10 +1070,17 @@ _meta_window_shared_new (MetaDisplay         *display,
   window->mwm_has_move_func = TRUE;
   window->mwm_has_resize_func = TRUE;
 
-  if (client_type == META_WINDOW_CLIENT_TYPE_X11)
-    window->decorated = TRUE;
-  else
-    window->decorated = FALSE;
+  switch (client_type)
+    {
+    case META_WINDOW_CLIENT_TYPE_X11:
+      window->decorated = TRUE;
+      window->hidden = FALSE;
+      break;
+    case META_WINDOW_CLIENT_TYPE_WAYLAND:
+      window->decorated = FALSE;
+      window->hidden = TRUE;
+      break;
+    }
 
   window->has_close_func = TRUE;
   window->has_minimize_func = TRUE;
@@ -1469,7 +1476,9 @@ meta_window_unmanage (MetaWindow  *window,
       meta_topic (META_DEBUG_FOCUS,
                   "Focusing default window since we're unmanaging %s\n",
                   window->desc);
-      meta_workspace_focus_default_window (window->screen->active_workspace, NULL, timestamp);
+      meta_workspace_focus_default_window (window->screen->active_workspace,
+                                           window,
+                                           timestamp);
     }
   else
     {
@@ -3750,11 +3759,15 @@ maybe_move_attached_dialog (MetaWindow *window,
  *
  * Gets index of the monitor that this window is on.
  *
- * Return Value: The index of the monitor in the screens monitor list
+ * Return Value: The index of the monitor in the screens monitor list, or -1
+ * if the window has been recently unmanaged and does not have a monitor.
  */
 int
 meta_window_get_monitor (MetaWindow *window)
 {
+  if (!window->monitor)
+    return -1;
+
   return window->monitor->number;
 }
 
@@ -3802,7 +3815,8 @@ meta_window_update_for_monitors_changed (MetaWindow *window)
 
   if (window->override_redirect || window->type == META_WINDOW_DESKTOP)
     {
-      meta_window_update_monitor (window, FALSE);
+      meta_window_update_monitor (window,
+                                  META_WINDOW_UPDATE_MONITOR_FLAGS_FORCE);
       return;
     }
 
@@ -3832,23 +3846,25 @@ meta_window_update_for_monitors_changed (MetaWindow *window)
        * monitors changed and the same index could be refereing
        * to a different monitor. */
       meta_window_move_between_rects (window,
+                                      META_MOVE_RESIZE_FORCE_UPDATE_MONITOR,
                                       &old->rect,
                                       &new->rect);
     }
   else
     {
-      meta_window_update_monitor (window, FALSE);
+      meta_window_update_monitor (window,
+                                  META_WINDOW_UPDATE_MONITOR_FLAGS_FORCE);
     }
 }
 
 void
-meta_window_update_monitor (MetaWindow *window,
-                            gboolean    user_op)
+meta_window_update_monitor (MetaWindow                   *window,
+                            MetaWindowUpdateMonitorFlags  flags)
 {
   const MetaLogicalMonitor *old;
 
   old = window->monitor;
-  META_WINDOW_GET_CLASS (window)->update_main_monitor (window, user_op);
+  META_WINDOW_GET_CLASS (window)->update_main_monitor (window, flags);
   if (old != window->monitor)
     {
       meta_window_on_all_workspaces_changed (window);
@@ -3862,7 +3878,8 @@ meta_window_update_monitor (MetaWindow *window,
        * That should be handled by explicitly moving the window before changing the
        * workspace.
        */
-      if (meta_prefs_get_workspaces_only_on_primary () && user_op &&
+      if (meta_prefs_get_workspaces_only_on_primary () &&
+          flags & META_WINDOW_UPDATE_MONITOR_FLAGS_USER_OP &&
           meta_window_is_on_primary_monitor (window)  &&
           window->screen->active_workspace != window->workspace)
         meta_window_change_workspace (window, window->screen->active_workspace);
@@ -3905,6 +3922,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
   MetaRectangle constrained_rect;
   MetaMoveResizeResultFlags result = 0;
   gboolean moved_or_resized = FALSE;
+  MetaWindowUpdateMonitorFlags update_monitor_flags;
 
   g_return_if_fail (!window->override_redirect);
 
@@ -4005,13 +4023,19 @@ meta_window_move_resize_internal (MetaWindow          *window,
                                             did_placement);
     }
 
+  update_monitor_flags = META_WINDOW_UPDATE_MONITOR_FLAGS_NONE;
+  if (flags & META_MOVE_RESIZE_USER_ACTION)
+    update_monitor_flags |= META_WINDOW_UPDATE_MONITOR_FLAGS_USER_OP;
+  if (flags & META_MOVE_RESIZE_FORCE_UPDATE_MONITOR)
+    update_monitor_flags |= META_WINDOW_UPDATE_MONITOR_FLAGS_FORCE;
+
   if (window->monitor)
     {
       guint old_output_winsys_id;
 
       old_output_winsys_id = window->monitor->winsys_id;
 
-      meta_window_update_monitor (window, flags & META_MOVE_RESIZE_USER_ACTION);
+      meta_window_update_monitor (window, update_monitor_flags);
 
       if (old_output_winsys_id != window->monitor->winsys_id &&
           flags & META_MOVE_RESIZE_MOVE_ACTION && flags & META_MOVE_RESIZE_USER_ACTION)
@@ -4019,7 +4043,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
     }
   else
     {
-      meta_window_update_monitor (window, flags & META_MOVE_RESIZE_USER_ACTION);
+      meta_window_update_monitor (window, update_monitor_flags);
     }
 
   if ((result & META_MOVE_RESIZE_RESULT_FRAME_SHAPE_CHANGED) && window->frame_bounds)
@@ -4063,6 +4087,7 @@ meta_window_move_frame (MetaWindow *window,
 
 static void
 meta_window_move_between_rects (MetaWindow  *window,
+                                MetaMoveResizeFlags  move_resize_flags,
                                 const MetaRectangle *old_area,
                                 const MetaRectangle *new_area)
 {
@@ -4086,7 +4111,12 @@ meta_window_move_between_rects (MetaWindow  *window,
   window->saved_rect.x = window->unconstrained_rect.x;
   window->saved_rect.y = window->unconstrained_rect.y;
 
-  meta_window_move_resize_now (window);
+  meta_window_move_resize_internal (window,
+                                    move_resize_flags |
+                                    META_MOVE_RESIZE_MOVE_ACTION |
+                                    META_MOVE_RESIZE_RESIZE_ACTION,
+                                    NorthWestGravity,
+                                    window->unconstrained_rect);
 }
 
 /**
@@ -4147,14 +4177,14 @@ meta_window_move_to_monitor (MetaWindow  *window,
       window->unconstrained_rect.height == 0 ||
       !meta_rectangle_overlap (&window->unconstrained_rect, &old_area))
     {
-      meta_window_move_between_rects (window, NULL, &new_area);
+      meta_window_move_between_rects (window, 0, NULL, &new_area);
     }
   else
     {
       if (monitor == window->monitor->number)
         return;
 
-      meta_window_move_between_rects (window, &old_area, &new_area);
+      meta_window_move_between_rects (window, 0, &old_area, &new_area);
     }
 
   window->preferred_output_winsys_id = window->monitor->winsys_id;
@@ -4615,11 +4645,15 @@ meta_window_focus (MetaWindow  *window,
 
   g_return_if_fail (!window->override_redirect);
 
+  /* This is a oneshot flag */
+  window->restore_focus_on_map = FALSE;
+
   meta_topic (META_DEBUG_FOCUS,
               "Setting input focus to window %s, input: %d take_focus: %d\n",
               window->desc, window->input, window->take_focus);
 
   if (window->display->grab_window &&
+      window->display->grab_window != window &&
       window->display->grab_window->all_keys_grabbed &&
       !window->display->grab_window->unmanaging)
     {
@@ -7927,7 +7961,15 @@ meta_window_set_transient_for (MetaWindow *window,
             }
         }
     }
+  else if (window->attached && parent == NULL)
+    {
+      guint32 timestamp;
 
+      timestamp =
+        meta_display_get_current_time_roundtrip (window->display);
+      meta_window_unmanage (window, timestamp);
+      return;
+    }
   /* We know this won't create a reference cycle because we check for loops */
   g_clear_object (&window->transient_for);
   window->transient_for = parent ? g_object_ref (parent) : NULL;
