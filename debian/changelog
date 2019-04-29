@@ -1,3 +1,13 @@
+evince (3.18.2-1ubuntu4.4) xenial-security; urgency=medium
+
+  * SECURITY UPDATE: Uninitialized memory use
+    - debian/patches/CVE-2019-11459.patch: handle failure
+      from TIFFREADGBAImageOriented, returning NULL instead
+      of displaying uninitialized memory in backend/tiff/tiff-document.c.
+    - CVE-2019-11459
+
+ -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Thu, 25 Apr 2019 12:31:44 -0300
+
 evince (3.18.2-1ubuntu4.3) xenial-security; urgency=medium
 
   * SECURITY UPDATE: command injection in dvi backend
