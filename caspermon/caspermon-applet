@@ -1,0 +1,75 @@
+#!/usr/bin/python
+
+import pygtk
+pygtk.require('2.0')
+
+import gtk
+import gnome.applet
+import subprocess
+import os
+
+# A simple applet to display the utilization of the snapshot device
+# during a casper session
+#
+# Matt Zimmerman <mdz@canonical.com>
+
+# TODO:
+# - tooltip with details
+# - flash at threshold
+
+class CasperApplet:
+    def __init__(self, applet, iid):
+        self.timeout_interval = 1000
+        self.device = 'casper-snapshot'
+        self.capacity = [0,0]
+        self.datafile = '/var/lib/casper/snapshot-status'
+        
+        # initializate the gnome internals
+        gnome.init("casper", "0.1")
+
+        self.applet = applet
+
+        self.tooltips = gtk.Tooltips()
+        self.hbox = gtk.HBox()
+        applet.add(self.hbox)
+
+        # add the second button event for the popup menu and the enter mouse event to change the tooltip value
+        self.ev_box = gtk.EventBox()
+        #self.ev_box.connect("button-press-event",self.button_press)
+        self.ev_box.connect("enter-notify-event", self.update_info)
+        self.hbox.add(self.ev_box)
+
+        self.prog = gtk.ProgressBar()
+        self.ev_box.add(self.prog)
+
+        self.update_info()
+        
+        gtk.timeout_add(self.timeout_interval,self.update_info, self)
+
+        applet.connect("destroy",self.cleanup)
+        applet.show_all()
+      
+    def update_info(self, event=None):
+        self.capacity = self.read_info()
+        self.prog.set_fraction(float(self.capacity[0]) / self.capacity[1])
+        self.prog.update()
+
+    def read_info(self):
+        fields = open(self.datafile).readline().split()
+        if fields[2] != 'snapshot':
+            return None
+
+        return map(int,fields[3].split('/', 1))
+
+    def cleanup(self):
+        # what goes here?
+        pass
+
+def casper_factory(applet, iid):
+    CasperApplet(applet, iid)
+
+    return gtk.TRUE
+
+gnome.applet.bonobo_factory("OAFIID:GNOME_PythonAppletCasper_Factory", 
+                             gnome.applet.Applet.__gtype__, 
+                             "casper", "0", casper_factory)
