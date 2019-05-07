@@ -17,3 +17,4 @@ The following variables can be passed:
 * `BASE_TMP_DIR` - Default: `$PWD`
 * `GIT_WEB_URL` - Default: `https://github.com/elementary/os-patches`
 * `GPG_KEYRING` - Default: `/etc/apt/trusted.gpg`
+* `WEBHOOK_URL` - Default: blank
