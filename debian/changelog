@@ -1,3 +1,25 @@
+python-apt (1.1.0~beta1ubuntu0.16.04.4) xenial; urgency=medium
+
+  * apt.Cache: Fix (un)locking of archives (Closes: #922416) (LP: #1826870)
+  * apt.Cache: Use explicit, more safe locking in update()
+  * Update mirror lists
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 29 Apr 2019 14:11:32 +0200
+
+python-apt (1.1.0~beta1ubuntu0.16.04.3) xenial; urgency=medium
+
+  * Frontend locking and related locking improvements (LP: #1795407)
+    - apt.Cache: Keep / Re-establish the system lock in commit()
+    - apt.Cache: Keep archive locked during commit()/ in fetch_archives()
+    - apt.Cache: Reinstate locks in a finally / run dpkg inside try
+    - Introduce frontend locking
+    - Convert apt.Cache.commit and apt_pkg.DepCache.commit to FE lock
+  * Other changes to make that work:
+    - travis CI: enable PPA for new apt versions
+  * As always, updated mirror lists
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 01 Oct 2018 16:00:14 +0200
+
 python-apt (1.1.0~beta1ubuntu0.16.04.2) xenial; urgency=medium
 
   * python/tag.cc: Fix invalid read in TagFileNext

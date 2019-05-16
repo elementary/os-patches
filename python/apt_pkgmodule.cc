@@ -525,8 +525,8 @@ static PyObject *GetLock(PyObject *Self,PyObject *Args)
 
 static char *doc_PkgSystemLock =
 "pkgsystem_lock() -> bool\n\n"
-"Acquire the global lock for the package system by using /var/lib/dpkg/lock\n"
-"to do the locking. From Python 2.6 on, the apt_pkg.SystemLock context\n"
+"Acquire the global lock for the package system by using /var/lib/dpkg/lock-frontend\n"
+"and /var/lib/dpkg/lock to do the locking. From Python 2.6 on, the apt_pkg.SystemLock context\n"
 "manager is available and should be used instead.";
 static PyObject *PkgSystemLock(PyObject *Self,PyObject *Args)
 {
@@ -548,6 +548,69 @@ static PyObject *PkgSystemUnLock(PyObject *Self,PyObject *Args)
       return 0;
 
    bool res = _system->UnLock();
+
+   Py_INCREF(Py_None);
+   return HandleErrors(PyBool_FromLong(res));
+}
+
+static char *doc_PkgSystemLockInner =
+"pkgsystem_lock_inner() -> bool\n\n"
+"Reacquire the dpkg 'lock' lock file. Must be called only after\n"
+":meth:`pkgsystem_unlock_inner` and only around invocations of dpkg.\n"
+"\n"
+".. versionadded:: 1.1.0~beta1ubuntu0.16.04.3\n"
+"\n"
+".. versionadded:: 1.6.3\n"
+"\n"
+".. versionadded:: 1.7";
+static PyObject *PkgSystemLockInner(PyObject *Self,PyObject *Args)
+{
+   if (PyArg_ParseTuple(Args,"") == 0)
+      return 0;
+
+   bool res = _system->LockInner();
+
+   Py_INCREF(Py_None);
+   return HandleErrors(PyBool_FromLong(res));
+}
+
+static char *doc_PkgSystemUnLockInner =
+"pkgsystem_unlock_inner() -> bool\n\n"
+"Release the dpkg lock file 'lock'. To be called before manually\n"
+"invoking dpkg.\n"
+"\n"
+".. versionadded:: 1.1.0~beta1ubuntu0.16.04.3\n"
+"\n"
+".. versionadded:: 1.6.3\n"
+"\n"
+".. versionadded:: 1.7";
+static PyObject *PkgSystemUnLockInner(PyObject *Self,PyObject *Args)
+{
+   if (PyArg_ParseTuple(Args,"") == 0)
+      return 0;
+
+   bool res = _system->UnLockInner();
+
+   Py_INCREF(Py_None);
+   return HandleErrors(PyBool_FromLong(res));
+}
+
+static char *doc_PkgSystemIsLocked =
+"pkgsystem_is_locked() -> bool\n\n"
+"Check if the system is locked. Can be used to check whether the inner\n"
+"lock needs to be released or not in generic code.\n"
+"\n"
+".. versionadded:: 1.1.0~beta1ubuntu0.16.04.3\n"
+"\n"
+".. versionadded:: 1.6.3\n"
+"\n"
+".. versionadded:: 1.7";
+static PyObject *PkgSystemIsLocked(PyObject *Self,PyObject *Args)
+{
+   if (PyArg_ParseTuple(Args,"") == 0)
+      return 0;
+
+   bool res = _system->IsLocked();
 
    Py_INCREF(Py_None);
    return HandleErrors(PyBool_FromLong(res));
@@ -581,6 +644,9 @@ static PyMethodDef methods[] =
    {"get_lock",GetLock,METH_VARARGS,doc_GetLock},
    {"pkgsystem_lock",PkgSystemLock,METH_VARARGS,doc_PkgSystemLock},
    {"pkgsystem_unlock",PkgSystemUnLock,METH_VARARGS,doc_PkgSystemUnLock},
+   {"pkgsystem_lock_inner",PkgSystemLockInner,METH_VARARGS,doc_PkgSystemLockInner},
+   {"pkgsystem_unlock_inner",PkgSystemUnLockInner,METH_VARARGS,doc_PkgSystemUnLockInner},
+   {"pkgsystem_is_locked",PkgSystemIsLocked,METH_VARARGS,doc_PkgSystemIsLocked},
 
    // Command line
    {"read_config_file",LoadConfig,METH_VARARGS,doc_LoadConfig},

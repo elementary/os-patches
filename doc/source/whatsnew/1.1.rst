@@ -16,3 +16,13 @@ Removed
 -------
 * The class :class:`apt_pkg.IndexRecords` has been removed, as it was removed
   in APT 1.1
+
+
+1.1.0~beta1ubuntu0.16.04.3
+--------------------------
+* New methods for frontend locking have been added:
+  :meth:`apt_pkg.pkgsystem_lock_inner`,
+  :meth:`apt_pkg.pkgsystem_unlock_inner`,
+  :meth:`apt_pkg.pkgsystem_is_locked`.x
+* :meth:`apt.Cache.commit` and :meth:`apt_pkg.DepCache.commit` now use
+  frontend locking to run dpkg.
