@@ -1,0 +1,31 @@
+From e807cbd80adead977a1f53443b00b6dc9a947245 Mon Sep 17 00:00:00 2001
+From: Bastien Nocera <hadess@hadess.net>
+Date: Fri, 22 Mar 2019 16:03:01 +0100
+Subject: [PATCH] client: Fix bluetooth_client_set_trusted() not working
+
+The guard was guarding against a local variable ("device") being
+NULL, instead guarding against one of the arguments ("device_path")
+being NULL. Depending on the compiler and runtime, this would probably
+fail most of the time, leading to problems using non-pairing devices
+after the initial setup.
+
+bluetooth_client_set_trusted: assertion 'device != NULL' failed
+
+Fixes: 27e88fc0119d6c423caade21b575d9f66f15c5ce
+---
+ lib/bluetooth-client.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: gnome-bluetooth-3.28.0/lib/bluetooth-client.c
+===================================================================
+--- gnome-bluetooth-3.28.0.orig/lib/bluetooth-client.c
++++ gnome-bluetooth-3.28.0/lib/bluetooth-client.c
+@@ -1490,7 +1490,7 @@ bluetooth_client_set_trusted (BluetoothC
+ 	GtkTreeIter iter;
+ 
+ 	g_return_val_if_fail (BLUETOOTH_IS_CLIENT (client), FALSE);
+-	g_return_val_if_fail (device != NULL, FALSE);
++	g_return_val_if_fail (device_path != NULL, FALSE);
+ 
+ 	if (get_iter_from_path (priv->store, &iter, device_path) == FALSE) {
+ 		g_debug ("Couldn't find device '%s' in tree to mark it as trusted", device_path);

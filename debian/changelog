@@ -1,3 +1,15 @@
+gnome-bluetooth (3.28.0-2ubuntu0.2) bionic; urgency=medium
+
+  * debian/patches/git_set_trusted.patch,
+    debian/patches/git_pair_pointer.patch:
+    - backport upstream commits to fix marking of device trusted on pairing
+      not always working (leading to auto-reconnect not working).
+      Always try to pair pointer devices also, that's expected by most
+      recent devices, removing the specific list of devices which should
+      use the default PIN and do that for all devices (lp: #1779289)
+    
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 12 Apr 2019 15:06:49 +0200
+
 gnome-bluetooth (3.28.0-2ubuntu0.1) bionic-security; urgency=medium
 
   * SECURITY UPDATE: work around bluetoothd discoverability issue
