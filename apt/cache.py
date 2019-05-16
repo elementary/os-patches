@@ -68,6 +68,29 @@ class CacheClosedException(Exception):
     """Exception that is thrown when the cache is used after close()."""
 
 
+class _WrappedLock(object):
+    """Wraps an apt_pkg.FileLock to raise LockFailedException.
+
+    Initialized using a directory path."""
+
+    def __init__(self, path):
+        # type: (str) -> None
+        self._path = path
+        self._lock = apt_pkg.FileLock(os.path.join(path, "lock"))
+
+    def __enter__(self):
+        # type: () -> None
+        try:
+            return self._lock.__enter__()
+        except apt_pkg.Error as e:
+            raise LockFailedException(("Failed to lock directory %s: %s") %
+                                       (self._path, e))
+
+    def __exit__(self, typ, value, traceback):
+        # type: (object, object, object) -> None
+        return self._lock.__exit__(typ, value, traceback)
+
+
 class Cache(object):
     """Dictionary-like package cache.
 
@@ -133,6 +156,11 @@ class Cache(object):
             # Call InitSystem so the change to Dir::State::Status is actually
             # recognized (LP: #320665)
             apt_pkg.init_system()
+
+        # Prepare a lock object (context manager for archive lock)
+        archive_dir = apt_pkg.config.find_dir("Dir::Cache::Archives")
+        self._archive_lock = _WrappedLock(archive_dir)
+
         self.open(progress)
 
     def _inc_changes_count(self):
@@ -423,16 +451,6 @@ class Cache(object):
         # fetched
         return self._run_fetcher(fetcher)
 
-    def _get_archive_lock(self, fetcher):
-        # type: (apt_pkg.Acquire) -> None
-        # get lock
-        archive_dir = apt_pkg.config.find_dir("Dir::Cache::Archives")
-        try:
-            fetcher.get_lock(archive_dir)
-        except apt_pkg.Error as e:
-            raise LockFailedException(("Failed to lock archive directory %s: "
-                                       " %s") % (archive_dir, e))
-
     def fetch_archives(self, progress=None, fetcher=None):
         # type: (AcquireProgress, apt_pkg.Acquire) -> int
         """Fetch the archives for all packages marked for install/upgrade.
@@ -454,10 +472,9 @@ class Cache(object):
         if fetcher is None:
             fetcher = apt_pkg.Acquire(progress)
 
-        self._get_archive_lock(fetcher)
-
-        return self._fetch_archives(fetcher,
-                                    apt_pkg.PackageManager(self._depcache))
+        with self._archive_lock:
+            return self._fetch_archives(fetcher,
+                                        apt_pkg.PackageManager(self._depcache))
 
     def is_virtual_package(self, pkgname):
         # type: (str) -> bool
@@ -517,43 +534,41 @@ class Cache(object):
         sources_list -- Update a alternative sources.list than the default.
         Note that the sources.list.d directory is ignored in this case
         """
-        lockfile = apt_pkg.config.find_dir("Dir::State::Lists") + "lock"
-        lock = apt_pkg.get_lock(lockfile)
-
-        if lock < 0:
-            raise LockFailedException("Failed to lock %s" % lockfile)
-
-        if sources_list:
-            old_sources_list = apt_pkg.config.find("Dir::Etc::sourcelist")
-            old_sources_list_d = apt_pkg.config.find("Dir::Etc::sourceparts")
-            old_cleanup = apt_pkg.config.find("APT::List-Cleanup")
-            apt_pkg.config.set("Dir::Etc::sourcelist",
-                               os.path.abspath(sources_list))
-            apt_pkg.config.set("Dir::Etc::sourceparts", "xxx")
-            apt_pkg.config.set("APT::List-Cleanup", "0")
-            slist = apt_pkg.SourceList()
-            slist.read_main_list()
-        else:
-            slist = self._list
-
-        try:
-            if fetch_progress is None:
-                fetch_progress = apt.progress.base.AcquireProgress()
-            try:
-                res = self._cache.update(fetch_progress, slist,
-                                         pulse_interval)
-            except SystemError as e:
-                raise FetchFailedException(e)
-            if not res and raise_on_error:
-                raise FetchFailedException()
-            else:
-                return res
-        finally:
-            os.close(lock)
+        with _WrappedLock(apt_pkg.config.find_dir("Dir::State::Lists")):
             if sources_list:
-                apt_pkg.config.set("Dir::Etc::sourcelist", old_sources_list)
-                apt_pkg.config.set("Dir::Etc::sourceparts", old_sources_list_d)
-                apt_pkg.config.set("APT::List-Cleanup", old_cleanup)
+                old_sources_list = apt_pkg.config.find("Dir::Etc::sourcelist")
+                old_sources_list_d = (
+                    apt_pkg.config.find("Dir::Etc::sourceparts"))
+                old_cleanup = apt_pkg.config.find("APT::List-Cleanup")
+                apt_pkg.config.set("Dir::Etc::sourcelist",
+                                   os.path.abspath(sources_list))
+                apt_pkg.config.set("Dir::Etc::sourceparts", "xxx")
+                apt_pkg.config.set("APT::List-Cleanup", "0")
+                slist = apt_pkg.SourceList()
+                slist.read_main_list()
+            else:
+                slist = self._list
+
+            try:
+                if fetch_progress is None:
+                    fetch_progress = apt.progress.base.AcquireProgress()
+                try:
+                    res = self._cache.update(fetch_progress, slist,
+                                             pulse_interval)
+                except SystemError as e:
+                    raise FetchFailedException(e)
+                if not res and raise_on_error:
+                    raise FetchFailedException()
+                else:
+                    return res
+            finally:
+                if sources_list:
+                    apt_pkg.config.set("Dir::Etc::sourcelist",
+                                       old_sources_list)
+                    apt_pkg.config.set("Dir::Etc::sourceparts",
+                                       old_sources_list_d)
+                    apt_pkg.config.set("APT::List-Cleanup",
+                                       old_cleanup)
 
     def install_archives(self, pm, install_progress):
         # type: (apt_pkg.PackageManager, InstallProgress) -> int
@@ -617,25 +632,25 @@ class Cache(object):
         with apt_pkg.SystemLock():
             pm = apt_pkg.PackageManager(self._depcache)
             fetcher = apt_pkg.Acquire(fetch_progress)
-            self._get_archive_lock(fetcher)
+            with self._archive_lock:
+                while True:
+                    # fetch archives first
+                    res = self._fetch_archives(fetcher, pm)
 
-            while True:
-                # fetch archives first
-                res = self._fetch_archives(fetcher, pm)
-
-                # then install
-                res = self.install_archives(pm, install_progress)
-                if res == pm.RESULT_COMPLETED:
-                    break
-                elif res == pm.RESULT_FAILED:
-                    raise SystemError("installArchives() failed")
-                elif res == pm.RESULT_INCOMPLETE:
-                    pass
-                else:
-                    raise SystemError("internal-error: unknown result code "
-                                      "from InstallArchives: %s" % res)
-                # reload the fetcher for media swaping
-                fetcher.shutdown()
+                    # then install
+                    res = self.install_archives(pm, install_progress)
+                    if res == pm.RESULT_COMPLETED:
+                        break
+                    elif res == pm.RESULT_FAILED:
+                        raise SystemError("installArchives() failed")
+                    elif res == pm.RESULT_INCOMPLETE:
+                        pass
+                    else:
+                        raise SystemError("internal-error: unknown result "
+                                          "code from InstallArchives: %s" %
+                                          res)
+                    # reload the fetcher for media swaping
+                    fetcher.shutdown()
         return (res == pm.RESULT_COMPLETED)
 
     def clear(self):
