@@ -15,8 +15,6 @@
 # DP: - don't define a default DEFAULT_MAIL_DIRECTORY, because it
 # DP:   can cause a timeout on NFS mounts.
 
-Index: b/config-bot.h
-===================================================================
 --- a/config-bot.h
 +++ b/config-bot.h
 @@ -200,4 +200,4 @@
@@ -25,10 +23,17 @@ Index: b/config-bot.h
  /* If you don't want bash to provide a default mail file to check. */
 -/* #undef DEFAULT_MAIL_DIRECTORY */
 +#undef DEFAULT_MAIL_DIRECTORY
-Index: b/config-top.h
-===================================================================
 --- a/config-top.h
 +++ b/config-top.h
+@@ -63,7 +63,7 @@
+ /* The default value of the PATH variable. */
+ #ifndef DEFAULT_PATH_VALUE
+ #define DEFAULT_PATH_VALUE \
+-  "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:."
++  "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ #endif
+ 
+ /* The value for PATH when invoking `command -p'.  This is only used when
 @@ -87,20 +87,20 @@
  #define DEFAULT_BASHRC "~/.bashrc"
  
