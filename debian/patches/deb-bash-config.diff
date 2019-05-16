@@ -15,16 +15,29 @@
 # DP: - don't define a default DEFAULT_MAIL_DIRECTORY, because it
 # DP:   can cause a timeout on NFS mounts.
 
---- a/config-bot.h
-+++ b/config-bot.h
+Index: bash-4.3/config-bot.h
+===================================================================
+--- bash-4.3.orig/config-bot.h
++++ bash-4.3/config-bot.h
 @@ -196,4 +196,4 @@
  /******************************************************************/
  
  /* If you don't want bash to provide a default mail file to check. */
 -/* #undef DEFAULT_MAIL_DIRECTORY */
 +#undef DEFAULT_MAIL_DIRECTORY
---- a/config-top.h
-+++ b/config-top.h
+Index: bash-4.3/config-top.h
+===================================================================
+--- bash-4.3.orig/config-top.h
++++ bash-4.3/config-top.h
+@@ -59,7 +59,7 @@
+ /* The default value of the PATH variable. */
+ #ifndef DEFAULT_PATH_VALUE
+ #define DEFAULT_PATH_VALUE \
+-  "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:."
++  "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ #endif
+ 
+ /* The value for PATH when invoking `command -p'.  This is only used when
 @@ -80,20 +80,20 @@
  #define KSH_COMPATIBLE_SELECT
  
