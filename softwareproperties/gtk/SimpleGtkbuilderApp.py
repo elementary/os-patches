@@ -38,6 +38,9 @@ class SimpleGtkbuilderApp(Gtk.Application):
     def on_activate(self, data=None):
         self.add_window(self.window_main)
 
+        if not self.window_main.is_visible():
+            self.window_main.show()
+
     def run(self):
         """
         Starts the main loop of processing events checking for Control-C.

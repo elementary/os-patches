@@ -32,7 +32,6 @@ import re
 import os
 import glob
 import shutil
-import subprocess
 import threading
 import atexit
 import tempfile
@@ -65,14 +64,7 @@ from . import shortcuts
 from . import ppa
 from . import cloudarchive
 
-import gi
 from gi.repository import Gio
-
-try:
-  gi.require_version('Snapd', '1')
-  from gi.repository import Snapd
-except (ImportError, ValueError):
-  pass
 
 _SHORTCUT_FACTORIES = [
     ppa.shortcut_handler,
@@ -100,9 +92,6 @@ class SoftwareProperties(object):
     RELEASE_UPGRADES_NEVER  : 'never',
   }
 
-  # file to monitor canonical-livepatch status
-  LIVEPATCH_RUNNING_FILE = '/var/snap/canonical-livepatch/common/machine-token'
-  
   def __init__(self, datadir=None, options=None, rootdir="/"):
     """ Provides the core functionality to configure the used software 
         repositories, the corresponding authentication keys and 
@@ -873,147 +862,6 @@ class SoftwareProperties(object):
       return True
     except:
       return False
-
-  #
-  # Livepatch
-  #
-  def init_snapd(self):
-      self.snapd_client = Snapd.Client()
-
-  def get_livepatch_snap_async(self, callback):
-      assert self.snapd_client
-      self.snapd_client.list_one_async('canonical-livepatch',
-                                        self.cancellable,
-                                        self.on_list_one_ready_cb,
-                                        callback)
-
-  def on_list_one_ready_cb(self, source_object, result, user_data):
-      callback = user_data
-      try:
-          snap = source_object.list_one_finish(result)
-      except:
-          snap = None
-      if snap:
-          if callback:
-              callback(snap)
-          return
-      else:
-          assert self.snapd_client
-          self.snapd_client.find_async(Snapd.FindFlags.MATCH_NAME,
-                                       'canonical-livepatch',
-                                        self.cancellable,
-                                        self.on_find_ready_cb,
-                                        callback)
-
-  def on_find_ready_cb(self, source_object, result, user_data):
-      callback = user_data
-      try:
-          snaps = source_object.find_finish(result)[0]
-      except:
-          snaps = list()
-      snap = snaps[0] if len(snaps) else None
-      if callback:
-          callback(snap)
-
-  def get_livepatch_snap_status(self, snap):
-      if snap is None:
-          return Snapd.SnapStatus.UNKNOWN
-      return snap.get_status()
-
-  # glib-snapd does not keep track of the status of the snap. Use this decorator
-  # to make it easy to write async functions that will always have an updated
-  # snap object.
-  def require_livepatch_snap(func):
-      def get_livepatch_snap_and_call(*args, **kwargs):
-          return args[0].get_livepatch_snap_async(lambda snap: func(snap=snap, *args, **kwargs))
-      return get_livepatch_snap_and_call
-
-  def is_livepatch_enabled(self):
-      file = Gio.File.new_for_path(path=self.LIVEPATCH_RUNNING_FILE)
-      return file.query_exists(None)
-
-  @require_livepatch_snap
-  def set_livepatch_enabled_async(self, enabled, token, callback, snap=None):
-      status = self.get_livepatch_snap_status(snap)
-      if status == Snapd.SnapStatus.UNKNOWN:
-          if callback:
-              callback(True, _("Canonical Livepatch snap cannot be installed."))
-      elif status == Snapd.SnapStatus.ACTIVE:
-          if enabled:
-              error = self.enable_livepatch_service(token)
-          else:
-              error = self.disable_livepatch_service()
-          if callback:
-              callback(len(error) > 0, error)
-      elif status == Snapd.SnapStatus.INSTALLED:
-          if enabled:
-              self.snapd_client.enable_async(name='canonical-livepatch',
-                                             cancellable=self.cancellable,
-                                             callback=self.livepatch_enable_snap_cb,
-                                             user_data=(callback, token))
-          else:
-              if callback:
-                  callback(False, "")
-      elif status == Snapd.SnapStatus.AVAILABLE:
-          if enabled:
-              self.snapd_client.install_async(name='canonical-livepatch',
-                                              cancellable=self.cancellable,
-                                              callback=self.livepatch_install_snap_cb,
-                                              user_data=(callback, token))
-          else:
-              if callback:
-                  callback(False, "")
-
-  def livepatch_enable_snap_cb(self, source_object, result, user_data):
-      (callback, token) = user_data
-      try:
-          if source_object.enable_finish(result):
-              error = self.enable_livepatch_service(token)
-              if callback:
-                  callback(len(error) > 0, error)
-      except Exception:
-          if callback:
-              callback(True, _("Canonical Livepatch snap cannot be enabled."))
-
-  def livepatch_install_snap_cb(self, source_object, result, user_data):
-      (callback, token) = user_data
-      try:
-          if source_object.install_finish(result):
-              error = self.enable_livepatch_service(token)
-              if callback:
-                  callback(len(error) > 0, error)
-      except Exception:
-          if callback:
-              callback(True, _("Canonical Livepatch snap cannot be installed."))
-
-  def enable_livepatch_service(self, token):
-      generic_error =  _("Canonical Livepatch cannot be enabled.")
-
-      if self.is_livepatch_enabled():
-            return ""
-
-      try:
-          subprocess.check_output(['/snap/bin/canonical-livepatch', 'enable', token], stderr=subprocess.STDOUT)
-          return ""
-      except subprocess.CalledProcessError as e:
-          return e.output if e.output else generic_error
-      except:
-          return generic_error
-
-
-  def disable_livepatch_service(self):
-      generic_error =  _("Canonical Livepatch cannot be disabled.")
-
-      if not self.is_livepatch_enabled():
-          return ""
-
-      try:
-          subprocess.check_output(['/snap/bin/canonical-livepatch', 'disable'], stderr=subprocess.STDOUT)
-          return ""
-      except subprocess.CalledProcessError as e:
-          return e.output if e.output else generic_error
-      except:
-          return generic_error
 
 def shortcut_handler(shortcut):
     for factory in _SHORTCUT_FACTORIES:

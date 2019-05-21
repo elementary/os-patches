@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018 Canonical
+#  Copyright (c) 2017-2019 Canonical
 #
 #  Authors:
 #       Andrea Azzarone <andrea.azzarone@canonical.com>
@@ -21,6 +21,8 @@
 
 import os
 
+from gettext import gettext as _
+
 from softwareproperties.gtk.utils import (
     setup_ui,
 )
@@ -31,20 +33,27 @@ class DialogLivepatchError:
     RESPONSE_SETTINGS = 100
     RESPONSE_IGNORE = 101
 
+    primary = _("Sorry, there's been a problem with setting up Canonical Livepatch.")
+
     def __init__(self, parent, datadir):
         """setup up the gtk dialog"""
         self.parent = parent
 
-        setup_ui(self, os.path.join(datadir, "gtkbuilder",
-                                    "dialog-livepatch-error.ui"), domain="software-properties")
+        setup_ui(
+            self,
+            os.path.join(datadir, "gtkbuilder", "dialog-livepatch-error.ui"),
+            domain="software-properties")
 
         self.dialog = self.messagedialog_livepatch
-        self.dialog.use_header_bar = True
         self.dialog.set_transient_for(parent)
 
     def run(self, error, show_settings_button):
-        self.dialog.format_secondary_markup(
-            "The error was: \"%s\"" % error.strip())
+        p = "<span weight=\"bold\" size=\"larger\">{}</span>".format(self.primary)
+        self.label_primary.set_markup(p)
+
+        textbuffer = self.treeview_message.get_buffer()
+        textbuffer.set_text(error)
+
         self.button_settings.set_visible(show_settings_button)
         res = self.dialog.run()
         self.dialog.hide()

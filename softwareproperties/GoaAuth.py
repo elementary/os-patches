@@ -21,7 +21,9 @@
 
 import gi
 gi.require_version('Goa', '1.0')
-from gi.repository import Gio, Goa, GObject
+from gi.repository import Gio, GLib, Goa, GObject
+
+import logging
 
 class GoaAuth(GObject.GObject):
 
@@ -32,12 +34,21 @@ class GoaAuth(GObject.GObject):
     def __init__(self):
         GObject.GObject.__init__(self)
 
-        self.goa_client = Goa.Client.new_sync(None)
         self.account = None
+        self.cancellable = Gio.Cancellable()
+        Goa.Client.new(self.cancellable, self._on_goa_client_ready)
 
         self.settings = Gio.Settings.new('com.ubuntu.SoftwareProperties')
         self.settings.connect('changed::goa-account-id', self._on_settings_changed)
-        self._load()
+
+    def _on_goa_client_ready(self, source, res):
+        try:
+            self.goa_client = Goa.Client.new_finish(res)
+        except GLib.Error as e:
+            logging.error('Failed to get a Gnome Online Account: {}'.format(e.message))
+            self.goa_client = None
+        else:
+            self._load()
 
     def login(self, account):
         assert(account)
@@ -50,7 +61,7 @@ class GoaAuth(GObject.GObject):
 
     @GObject.Property
     def token(self):
-        if self.account is None:
+        if self.account is None or self.goa_client is None:
             return None
 
         obj = self.goa_client.lookup_by_id(self.account.props.id)
@@ -64,7 +75,7 @@ class GoaAuth(GObject.GObject):
         return pbased.call_get_password_sync('livepatch')
 
     def _update_state_from_account_id(self, account_id):
-        if account_id:
+        if account_id and self.goa_client is not None:
             # Make sure the account-id is valid
             obj = self.goa_client.lookup_by_id(account_id)
             if obj is None:

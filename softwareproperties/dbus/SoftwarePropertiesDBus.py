@@ -25,10 +25,12 @@ import logging
 import subprocess
 import tempfile
 import sys
+import threading
 
 from aptsources.sourceslist import SourceEntry
 
 from dbus.mainloop.glib import DBusGMainLoop
+from softwareproperties.LivepatchService import LivepatchService
 from softwareproperties.SoftwareProperties import SoftwareProperties
 
 DBUS_BUS_NAME = 'com.ubuntu.SoftwareProperties'
@@ -61,7 +63,7 @@ class SoftwarePropertiesDBus(dbus.service.Object, SoftwareProperties):
         self.enforce_polkit = True
         logging.debug("waiting for connections")
 
-        self.init_snapd()
+        self._livepatch_service = LivepatchService()
 
     # override set_modified_sourceslist to emit a signal
     def save_sourceslist(self):
@@ -324,9 +326,13 @@ class SoftwarePropertiesDBus(dbus.service.Object, SoftwareProperties):
                          sender_keyword="sender", connection_keyword="conn",
                          in_signature='bs', out_signature='bs', async_callbacks=('reply_handler', 'error_handler'))
     def SetLivepatchEnabled(self, enabled, token, reply_handler, error_handler, sender=None, conn=None):
+        def enable_thread_func():
+            ret = self._livepatch_service.set_enabled(enabled, token)
+            GLib.idle_add(lambda: reply_handler(*ret))
+
         self._check_policykit_privilege(
             sender, conn, "com.ubuntu.softwareproperties.applychanges")
-        self.set_livepatch_enabled_async(enabled, token, reply_handler)
+        threading.Thread(target=enable_thread_func).start()
 
     # helper from jockey
     def _check_policykit_privilege(self, sender, conn, privilege):

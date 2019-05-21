@@ -27,9 +27,6 @@ from __future__ import absolute_import, print_function
 
 import apt
 import apt_pkg
-import aptsources.distro
-from datetime import datetime
-import distro_info
 import dbus
 from gettext import gettext as _
 import gettext
@@ -52,11 +49,9 @@ from .DialogMirror import DialogMirror
 from .DialogEdit import DialogEdit
 from .DialogCacheOutdated import DialogCacheOutdated
 from .DialogAddSourcesList import DialogAddSourcesList
-from .DialogLivepatchError import DialogLivepatchError
-from .DialogAuth import DialogAuth
+from .LivepatchPage import LivepatchPage
 
 import softwareproperties
-from softwareproperties.GoaAuth import GoaAuth
 import softwareproperties.distro
 from softwareproperties.SoftwareProperties import SoftwareProperties
 import softwareproperties.SoftwareProperties
@@ -84,8 +79,6 @@ RESPONSE_ADD = 2
     STORE_SEPARATOR,
     STORE_VISIBLE
 ) = list(range(5))
-
-LIVEPATCH_TIMEOUT = 1200
 
 
 def error(parent_window, summary, msg):
@@ -1045,7 +1038,9 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
             d = DialogCacheOutdated(self.window_main,
                                     self.datadir)
             d.run()
-        if self.waiting_livepatch_response:
+
+        self.quit_when_livepatch_responds = False
+        if self.livepatch_page.waiting_livepatch_response:
             self.quit_when_livepatch_responds = True
             self.hide()
         else:
@@ -1483,163 +1478,5 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
         else:
             self.label_driver_action.set_label(_("No proprietary drivers are in use."))
 
-    #
-    # Livepatch
-    #
     def init_livepatch(self):
-        self.goa_auth = GoaAuth()
-        self.waiting_livepatch_response = False
-        self.quit_when_livepatch_responds = False
-
-        if not self.is_livepatch_supported():
-            self.grid_livepatch.set_visible(False)
-            return
-
-        self.checkbutton_livepatch.set_active(self.is_livepatch_enabled())
-        self.on_goa_auth_changed()
-
-        # hacky way to monitor if livepatch is enabled or not
-        file = Gio.File.new_for_path(path=self.LIVEPATCH_RUNNING_FILE)
-        self.lp_monitor = file.monitor_file(Gio.FileMonitorFlags.NONE)
-
-        # connect to signals
-        self.handlers[self.goa_auth] = \
-            self.goa_auth.connect('notify', lambda o, p: self.on_goa_auth_changed())
-        self.handlers[self.checkbutton_livepatch] = \
-            self.checkbutton_livepatch.connect('toggled', self.on_checkbutton_livepatch_toggled)
-        self.handlers[self.button_ubuntuone] =  \
-            self.button_ubuntuone.connect('clicked', self.on_button_ubuntuone_clicked)
-        self.handlers[self.lp_monitor] = \
-            self.lp_monitor.connect('changed', self.on_livepatch_status_changed)
-
-    def has_online_accounts(self):
-        try:
-            d = Gio.DesktopAppInfo.new('gnome-online-accounts-panel.desktop')
-            return d != None
-        except Exception:
-            return False
-
-    def is_livepatch_supported(self):
-        distro = aptsources.distro.get_distro()
-        di = distro_info.UbuntuDistroInfo()
-        return self.has_online_accounts() and \
-               di.is_lts(distro.codename) and \
-               distro.codename in di.supported(datetime.now().date())
-
-    def on_goa_auth_changed(self):
-        if self.goa_auth.logged:
-            self.button_ubuntuone.set_label(_('Sign Out'))
-
-            if self.goa_auth.token:
-                self.checkbutton_livepatch.set_sensitive(True)
-                self.label_livepatch_login.set_label(_('Signed in as %s' % self.goa_auth.username))
-            else:
-                self.checkbutton_livepatch.set_sensitive(False)
-                text = _('%s isn\'t authorized to use Livepatch.' % self.goa_auth.username)
-                text = "<span color='red'>" +  text + "</span>"
-                self.label_livepatch_login.set_markup(text)
-        else:
-            if self.is_livepatch_enabled() and not self.waiting_livepatch_response:
-                # Allow the user to disable livepatch even if
-                # the account expired (see LP: #1768797)
-                self.checkbutton_livepatch.set_sensitive(True)
-                self.label_livepatch_login.set_label(_('Livepatch is active.'))
-            else:
-                self.checkbutton_livepatch.set_sensitive(False)
-                self.label_livepatch_login.set_label(_('To use Livepatch you need to sign in.'))
-
-            self.button_ubuntuone.set_label(_('Sign In…'))
-
-    def on_livepatch_status_changed(self, file_monitor, file, other_file, event_type):
-        if not self.waiting_livepatch_response:
-            self.checkbutton_livepatch.set_active(self.is_livepatch_enabled())
-            self.on_goa_auth_changed()
-
-    def on_button_ubuntuone_clicked(self, button):
-        if self.goa_auth.logged:
-            self.do_logout()
-        else:
-            self.do_login()
-
-    def do_login(self):
-        try:
-            # Show login dialog!
-            dialog = DialogAuth(self.window_main, self.datadir)
-            response = dialog.run()
-        except Exception as e:
-            logging.error(e)
-            error(self.window_main,
-                  _("Error enabling Canonical Livepatch"),
-                  _("Please check your Internet connection."))
-        else:
-            if response == Gtk.ResponseType.OK:
-                self.goa_auth.login(dialog.account)
-                if self.goa_auth.logged:
-                    self.checkbutton_livepatch.set_active(True)
-
-    def do_logout(self):
-        self.checkbutton_livepatch.set_active(False)
-        self.goa_auth.logout()
-
-    def on_checkbutton_livepatch_toggled(self, checkbutton):
-        if self.waiting_livepatch_response:
-            return
-
-        self.waiting_livepatch_response = True
-
-        token = ''
-        enabled = False
-        if self.checkbutton_livepatch.get_active():
-            enabled = True
-            token = self.goa_auth.token if self.goa_auth.token else ''
-        self.backend.SetLivepatchEnabled(enabled, token,
-                                         reply_handler=self.livepatch_enabled_reply_handler,
-                                         error_handler=self.livepatch_enabled_error_handler,
-                                         timeout=LIVEPATCH_TIMEOUT)
-
-    def livepatch_enabled_reply_handler(self, is_error, prompt):
-        self.sync_checkbutton_livepatch(is_error, prompt)
-
-    def livepatch_enabled_error_handler(self, e):
-        if e._dbus_error_name == 'com.ubuntu.SoftwareProperties.PermissionDeniedByPolicy':
-            logging.error("Authentication canceled, changes have not been saved")
-            self.sync_checkbutton_livepatch(is_error=True, prompt=None)
-        else:
-            self.sync_checkbutton_livepatch(is_error=True, prompt=str(e))
-
-    def sync_checkbutton_livepatch(self, is_error, prompt):
-        if is_error:
-            self.waiting_livepatch_response = False
-            self.checkbutton_livepatch.handler_block(self.handlers[self.checkbutton_livepatch])
-            self.checkbutton_livepatch.set_active(self.is_livepatch_enabled())
-            self.checkbutton_livepatch.handler_unblock(self.handlers[self.checkbutton_livepatch])
-
-            if prompt:
-                dialog = DialogLivepatchError(self.window_main, self.datadir)
-                response = dialog.run(prompt, show_settings_button=self.quit_when_livepatch_responds)
-                if response == DialogLivepatchError.RESPONSE_SETTINGS:
-                    self.window_main.show()
-                    self.quit_when_livepatch_responds = False
-        else:
-            do_dbus_call = False
-            if self.is_livepatch_enabled() and not self.checkbutton_livepatch.get_active():
-                do_dbus_call = True
-                enabled = False
-                token = ''
-            elif not self.is_livepatch_enabled() and self.checkbutton_livepatch.get_active():
-                do_dbus_call = True
-                enabled = True
-                token = self.goa_auth.token if self.goa_auth.token else ''
-            else:
-                self.waiting_livepatch_response = False
-
-            if do_dbus_call:
-                self.backend.SetLivepatchEnabled(enabled, token,
-                                                 reply_handler=self.livepatch_enabled_reply_handler,
-                                                 error_handler=self.livepatch_enabled_error_handler,
-                                                 timeout=LIVEPATCH_TIMEOUT)
-
-        self.on_goa_auth_changed()
-
-        if self.quit_when_livepatch_responds:
-            self.on_close_button(self.button_close)
+        self.livepatch_page = LivepatchPage(self)
