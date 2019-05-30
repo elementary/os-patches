@@ -355,9 +355,10 @@ class LivepatchPage(object):
             else:
                 # The user tooggled on/off the switch while we were waiting
                 # livepatch to respond back.
+                token = self._auth.token or ''
                 self._parent.backend.SetLivepatchEnabled(
                     self._parent.switch_livepatch.get_active(),
-                    self._auth.token,
+                    token,
                     reply_handler=self._enabled_reply_handler,
                     error_handler=self._enabled_error_handler,
                     timeout=1200)
