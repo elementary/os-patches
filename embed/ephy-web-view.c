@@ -651,7 +651,7 @@ history_service_query_urls_cb (EphyHistoryService *service,
     goto out;
 
   /* Have we already started a new load? */
-  if (strcmp (url, view->pending_snapshot_uri) != 0)
+  if (g_strcmp0 (url, view->pending_snapshot_uri) != 0)
     goto out;
 
   for (GList *l = urls; l; l = g_list_next (l)) {
@@ -3319,6 +3319,7 @@ ephy_web_view_get_web_app_title_finish (EphyWebView  *view,
  * ephy_web_view_get_security_level:
  * @view: an #EphyWebView
  * @level: (out): return value of security level
+ * @address: (out) (transfer none): the URI to which the security level corresponds
  * @certificate: (out) (transfer none): return value of TLS certificate
  * @errors: (out): return value of TLS errors
  *
@@ -3327,15 +3328,19 @@ ephy_web_view_get_web_app_title_finish (EphyWebView  *view,
  * have been found with that certificate.
  **/
 void
-ephy_web_view_get_security_level (EphyWebView          *view,
-                                  EphySecurityLevel    *level,
-                                  GTlsCertificate     **certificate,
-                                  GTlsCertificateFlags *errors)
+ephy_web_view_get_security_level (EphyWebView           *view,
+                                  EphySecurityLevel     *level,
+                                  const char           **address,
+                                  GTlsCertificate      **certificate,
+                                  GTlsCertificateFlags  *errors)
 {
   g_assert (EPHY_IS_WEB_VIEW (view));
 
   if (level)
     *level = view->security_level;
+
+  if (address)
+    *address = view->last_committed_address;
 
   if (certificate)
     *certificate = view->certificate;

@@ -179,7 +179,8 @@ is_garbage (const char *name,
     return FALSE;
 
   for (i = 0; i < G_N_ELEMENTS (fields); i++) {
-    if (fields[i].host != NULL &&
+    if (host != NULL &&
+        fields[i].host != NULL &&
         !g_str_has_suffix (host, fields[i].host))
       continue;
     if (!g_strcmp0 (fields[i].field, name))
@@ -459,6 +460,8 @@ ephy_uri_decode (const char *uri_string)
 
     if (U_FAILURE (error)) {
       g_warning ("ICU error converting domain %s for display: %d", uri->host, error);
+      soup_uri_free (uri);
+      g_free (idna_decoded_name);
       return g_strdup (uri_string);
     }
 
@@ -466,6 +469,7 @@ ephy_uri_decode (const char *uri_string)
     g_free (uri->host);
     uri->host = evaluate_host_for_display (percent_decoded_host, idna_decoded_name);
     g_free (percent_decoded_host);
+    g_free (idna_decoded_name);
   }
 
   /* Note: this also strips passwords from the display URI. */
@@ -505,12 +509,13 @@ char *
 ephy_uri_to_security_origin (const char *uri_string)
 {
   WebKitSecurityOrigin *origin;
-  const char *result;
+  char *result;
 
   /* Convert to URI containing only protocol, host, and port. */
   origin = webkit_security_origin_new_for_uri (uri_string);
   result = webkit_security_origin_to_string (origin);
   webkit_security_origin_unref (origin);
 
-  return result != NULL ? g_strdup (result) : NULL;
+  /* May be NULL. */
+  return result;
 }
