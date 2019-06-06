@@ -1,0 +1,53 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 3 May 2019 11:31:08 -0500
+Subject: renderer-native: Advertise _FEATURE_SWAP_THROTTLE
+
+Because it is implemented and always on. By advertising this fact
+the master clock is able to sync to the native refresh rate instead
+of always using the fallback of 60.00Hz.
+
+Patch 2 of 2
+
+Origin: https://gitlab.gnome.org/vanvugt/mutter/commits/add-vsync-3.28
+Bug-GNOME: https://bugzilla.gnome.org/show_bug.cgi?id=781296
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1763892
+Applied-Upstream: https://gitlab.gnome.org/vanvugt/mutter/commit/e8c27603
+Forwarded: yes
+Last-Update: 2019-03-13
+---
+ src/backends/native/meta-renderer-native.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/src/backends/native/meta-renderer-native.c b/src/backends/native/meta-renderer-native.c
+index 0fd104b..dce7981 100644
+--- a/src/backends/native/meta-renderer-native.c
++++ b/src/backends/native/meta-renderer-native.c
+@@ -1997,6 +1997,13 @@ meta_renderer_native_init_egl_context (CoglContext *cogl_context,
+                   COGL_WINSYS_FEATURE_MULTIPLE_ONSCREEN,
+                   TRUE);
+ 
++  /* COGL_WINSYS_FEATURE_SWAP_THROTTLE is always true for this renderer
++   * because we have the call to wait_for_pending_flips on every frame.
++   */
++  COGL_FLAGS_SET (cogl_context->winsys_features,
++                  COGL_WINSYS_FEATURE_SWAP_THROTTLE,
++                  TRUE);
++
+ #ifdef HAVE_EGL_DEVICE
+   if (renderer_gpu_data->mode == META_RENDERER_NATIVE_MODE_EGL_DEVICE)
+     COGL_FLAGS_SET (cogl_context->features,
+@@ -2625,8 +2632,12 @@ meta_renderer_native_create_onscreen (MetaRendererNative   *renderer_native,
+     }
+ 
+   onscreen = cogl_onscreen_new (context, width, height);
+-  cogl_onscreen_set_swap_throttled (onscreen,
+-                                    _clutter_get_sync_to_vblank ());
++
++  /* We have wait_for_pending_flips hardcoded, so throttling always. */
++  cogl_onscreen_set_swap_throttled (onscreen, TRUE);
++  if (!_clutter_get_sync_to_vblank ())
++    g_warning ("Request to disable sync-to-vblank is being ignored. "
++               "MetaRendererNative does not support disabling it.");
+ 
+   if (!cogl_framebuffer_allocate (COGL_FRAMEBUFFER (onscreen), error))
+     {

@@ -1,0 +1,372 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 3 May 2019 11:31:08 -0500
+Subject: renderer-native: Add hardware presentation timing
+
+Add support for getting hardware presentation times from KMS (Wayland
+sessions). Also implement cogl_get_clock_time which is required to compare
+and judge the age of presentation timestamps.
+
+For single monitor systems this is straightforward. For multi-monitor
+systems though we have to choose a display to sync to. The compositor
+already partially solves this for us in the case of only one display
+updating because it will only use the subset of monitors that are
+changing. In the case of multiple monitors consuming the same frame
+concurrently however, we choose the fastest one (in use at the time).
+
+Patch 1 of 2
+
+Origin: https://gitlab.gnome.org/vanvugt/mutter/commits/add-vsync-3.28
+Bug-GNOME: https://bugzilla.gnome.org/show_bug.cgi?id=781296
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1763892
+Applied-Upstream: https://gitlab.gnome.org/vanvugt/mutter/commit/e9e4b2b7
+Forwarded: yes
+Last-Update: 2019-03-13
+---
+ src/Makefile.am                            | 25 ++++++++++-
+ src/backends/native/meta-gpu-kms.c         | 69 +++++++++++++++++++++++++++---
+ src/backends/native/meta-gpu-kms.h         |  3 ++
+ src/backends/native/meta-renderer-native.c | 38 +++++++++++++++-
+ src/meta-marshal.list                      |  1 +
+ 5 files changed, 128 insertions(+), 8 deletions(-)
+ create mode 100644 src/meta-marshal.list
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index bcb3505..13862e9 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -51,6 +51,8 @@ mutter_built_sources = \
+ 	$(dbus_login1_built_sources)		\
+ 	meta/meta-enum-types.h			\
+ 	meta-enum-types.c			\
++	meta-marshal.c	        		\
++	meta-marshal.h		        	\
+ 	$(NULL)
+ 
+ if HAVE_REMOTE_DESKTOP
+@@ -653,6 +655,7 @@ EXTRA_DIST +=					\
+ 	libmutter.pc.in				\
+ 	meta-enum-types.h.in			\
+ 	meta-enum-types.c.in			\
++	meta-marshal.list			\
+ 	org.freedesktop.login1.xml		\
+ 	org.gnome.Mutter.DisplayConfig.xml	\
+ 	org.gnome.Mutter.IdleMonitor.xml	\
+@@ -666,7 +669,10 @@ BUILT_SOURCES =					\
+ 	$(libmutterinclude_built_headers)
+ 
+ MUTTER_STAMP_FILES = stamp-meta-enum-types.h
+-CLEANFILES += $(MUTTER_STAMP_FILES)
++CLEANFILES +=					\
++	$(MUTTER_STAMP_FILES)			\
++	meta-marshal.c	        		\
++	meta-marshal.h
+ 
+ meta/meta-enum-types.h: stamp-meta-enum-types.h Makefile
+ 	@true
+@@ -760,3 +766,20 @@ endef
+ 	$(AM_V_GEN)$(WAYLAND_SCANNER) code $< $@
+ %-server-protocol.h : $(srcdir)/wayland/protocol/%.xml
+ 	$(AM_V_GEN)$(WAYLAND_SCANNER) server-header $< $@
++
++meta_marshal_opts = --prefix=meta_marshal --internal
++
++meta-marshal.h: meta-marshal.list
++	$(AM_V_GEN)$(GLIB_GENMARSHAL) \
++		--header \
++		$(meta_marshal_opts) \
++		--output=$@ \
++		$<
++
++meta-marshal.c: meta-marshal.list meta-marshal.h
++	$(AM_V_GEN)$(GLIB_GENMARSHAL) \
++		--include-header=meta-marshal.h \
++		$(meta_marshal_opts) \
++		--body \
++		--output=$@ \
++		$<
+diff --git a/src/backends/native/meta-gpu-kms.c b/src/backends/native/meta-gpu-kms.c
+index 815caf5..02649c5 100644
+--- a/src/backends/native/meta-gpu-kms.c
++++ b/src/backends/native/meta-gpu-kms.c
+@@ -27,6 +27,7 @@
+ #include <errno.h>
+ #include <poll.h>
+ #include <string.h>
++#include <time.h>
+ #include <xf86drm.h>
+ #include <xf86drmMode.h>
+ 
+@@ -51,6 +52,7 @@ typedef struct _MetaGpuKmsFlipClosureContainer
+ {
+   GClosure *flip_closure;
+   MetaGpuKms *gpu_kms;
++  MetaCrtc *crtc;
+ } MetaGpuKmsFlipClosureContainer;
+ 
+ struct _MetaGpuKms
+@@ -61,6 +63,8 @@ struct _MetaGpuKms
+   char *file_path;
+   GSource *source;
+ 
++  clockid_t clock_id;
++
+   drmModeConnector **connectors;
+   unsigned int n_connectors;
+ 
+@@ -166,18 +170,26 @@ meta_gpu_kms_apply_crtc_mode (MetaGpuKms *gpu_kms,
+ 
+ static void
+ invoke_flip_closure (GClosure   *flip_closure,
+-                     MetaGpuKms *gpu_kms)
++                     MetaGpuKms *gpu_kms,
++                     MetaCrtc   *crtc,
++                     int64_t     page_flip_time_ns)
+ {
+   GValue params[] = {
+     G_VALUE_INIT,
+-    G_VALUE_INIT
++    G_VALUE_INIT,
++    G_VALUE_INIT,
++    G_VALUE_INIT,
+   };
+ 
+   g_value_init (&params[0], G_TYPE_POINTER);
+   g_value_set_pointer (&params[0], flip_closure);
+   g_value_init (&params[1], G_TYPE_OBJECT);
+   g_value_set_object (&params[1], gpu_kms);
+-  g_closure_invoke (flip_closure, NULL, 2, params, NULL);
++  g_value_init (&params[2], G_TYPE_OBJECT);
++  g_value_set_object (&params[2], crtc);
++  g_value_init (&params[3], G_TYPE_INT64);
++  g_value_set_int64 (&params[3], page_flip_time_ns);
++  g_closure_invoke (flip_closure, NULL, 4, params, NULL);
+   g_closure_unref (flip_closure);
+ }
+ 
+@@ -217,6 +229,7 @@ meta_gpu_kms_is_crtc_active (MetaGpuKms *gpu_kms,
+ 
+ MetaGpuKmsFlipClosureContainer *
+ meta_gpu_kms_wrap_flip_closure (MetaGpuKms *gpu_kms,
++                                MetaCrtc   *crtc,
+                                 GClosure   *flip_closure)
+ {
+   MetaGpuKmsFlipClosureContainer *closure_container;
+@@ -224,7 +237,8 @@ meta_gpu_kms_wrap_flip_closure (MetaGpuKms *gpu_kms,
+   closure_container = g_new0 (MetaGpuKmsFlipClosureContainer, 1);
+   *closure_container = (MetaGpuKmsFlipClosureContainer) {
+     .flip_closure = flip_closure,
+-    .gpu_kms = gpu_kms
++    .gpu_kms = gpu_kms,
++    .crtc = crtc
+   };
+ 
+   return closure_container;
+@@ -264,6 +278,7 @@ meta_gpu_kms_flip_crtc (MetaGpuKms *gpu_kms,
+       int kms_fd = meta_gpu_kms_get_fd (gpu_kms);
+ 
+       closure_container = meta_gpu_kms_wrap_flip_closure (gpu_kms,
++                                                          crtc,
+                                                           flip_closure);
+ 
+       ret = drmModePageFlip (kms_fd,
+@@ -297,6 +312,23 @@ meta_gpu_kms_flip_crtc (MetaGpuKms *gpu_kms,
+   return TRUE;
+ }
+ 
++static int64_t
++timespec_to_nanoseconds (const struct timespec *ts)
++{
++  const int64_t one_billion = 1000000000;
++
++  return ((int64_t) ts->tv_sec) * one_billion + ts->tv_nsec;
++}
++
++static int64_t
++timeval_to_nanoseconds (const struct timeval *tv)
++{
++  int64_t usec = ((int64_t) tv->tv_sec) * G_USEC_PER_SEC + tv->tv_usec;
++  int64_t nsec = usec * 1000;
++
++  return nsec;
++}
++
+ static void
+ page_flip_handler (int           fd,
+                    unsigned int  frame,
+@@ -307,8 +339,12 @@ page_flip_handler (int           fd,
+   MetaGpuKmsFlipClosureContainer *closure_container = user_data;
+   GClosure *flip_closure = closure_container->flip_closure;
+   MetaGpuKms *gpu_kms = closure_container->gpu_kms;
++  struct timeval page_flip_time = {sec, usec};
+ 
+-  invoke_flip_closure (flip_closure, gpu_kms);
++  invoke_flip_closure (flip_closure,
++                       gpu_kms,
++                       closure_container->crtc,
++                       timeval_to_nanoseconds (&page_flip_time));
+   meta_gpu_kms_flip_closure_container_free (closure_container);
+ }
+ 
+@@ -381,6 +417,17 @@ meta_gpu_kms_get_file_path (MetaGpuKms *gpu_kms)
+   return gpu_kms->file_path;
+ }
+ 
++int64_t
++_meta_gpu_kms_get_current_time_ns (MetaGpuKms *gpu_kms)
++{
++  struct timespec ts;
++
++  if (clock_gettime (gpu_kms->clock_id, &ts))
++    return 0;
++
++  return timespec_to_nanoseconds (&ts);
++}
++
+ void
+ meta_gpu_kms_set_power_save_mode (MetaGpuKms *gpu_kms,
+                                   uint64_t    state)
+@@ -680,6 +727,17 @@ init_crtcs (MetaGpuKms       *gpu_kms,
+   meta_gpu_take_crtcs (gpu, crtcs);
+ }
+ 
++static void
++init_frame_clock (MetaGpuKms *gpu_kms)
++{
++  uint64_t uses_monotonic;
++
++  if (drmGetCap (gpu_kms->fd, DRM_CAP_TIMESTAMP_MONOTONIC, &uses_monotonic) != 0)
++    uses_monotonic = 0;
++
++  gpu_kms->clock_id = uses_monotonic ? CLOCK_MONOTONIC : CLOCK_REALTIME;
++}
++
+ static void
+ init_outputs (MetaGpuKms       *gpu_kms,
+               MetaKmsResources *resources)
+@@ -809,6 +867,7 @@ meta_gpu_kms_read_current (MetaGpu  *gpu,
+   init_modes (gpu_kms, resources.resources);
+   init_crtcs (gpu_kms, &resources);
+   init_outputs (gpu_kms, &resources);
++  init_frame_clock (gpu_kms);
+ 
+   meta_kms_resources_release (&resources);
+ 
+diff --git a/src/backends/native/meta-gpu-kms.h b/src/backends/native/meta-gpu-kms.h
+index 01c3f2c..c12246c 100644
+--- a/src/backends/native/meta-gpu-kms.h
++++ b/src/backends/native/meta-gpu-kms.h
+@@ -81,6 +81,8 @@ int meta_gpu_kms_get_fd (MetaGpuKms *gpu_kms);
+ 
+ const char * meta_gpu_kms_get_file_path (MetaGpuKms *gpu_kms);
+ 
++int64_t _meta_gpu_kms_get_current_time_ns (MetaGpuKms *gpu_kms);
++
+ void meta_gpu_kms_get_max_buffer_size (MetaGpuKms *gpu_kms,
+                                        int        *max_width,
+                                        int        *max_height);
+@@ -97,6 +99,7 @@ gboolean meta_drm_mode_equal (const drmModeModeInfo *one,
+ float meta_calculate_drm_mode_refresh_rate (const drmModeModeInfo *mode);
+ 
+ MetaGpuKmsFlipClosureContainer * meta_gpu_kms_wrap_flip_closure (MetaGpuKms *gpu_kms,
++                                                                 MetaCrtc   *crtc,
+                                                                  GClosure   *flip_closure);
+ 
+ void meta_gpu_kms_flip_closure_container_free (MetaGpuKmsFlipClosureContainer *closure_container);
+diff --git a/src/backends/native/meta-renderer-native.c b/src/backends/native/meta-renderer-native.c
+index 470da88..0fd104b 100644
+--- a/src/backends/native/meta-renderer-native.c
++++ b/src/backends/native/meta-renderer-native.c
+@@ -61,6 +61,7 @@
+ #include "backends/native/meta-monitor-manager-kms.h"
+ #include "backends/native/meta-renderer-native.h"
+ #include "backends/native/meta-renderer-native-gles3.h"
++#include "meta-marshal.h"
+ #include "cogl/cogl.h"
+ #include "core/boxes-private.h"
+ 
+@@ -1157,6 +1158,8 @@ meta_onscreen_native_swap_drm_fb (CoglOnscreen *onscreen)
+ static void
+ on_crtc_flipped (GClosure         *closure,
+                  MetaGpuKms       *gpu_kms,
++                 MetaCrtc         *crtc,
++                 int64_t           page_flip_time_ns,
+                  MetaRendererView *view)
+ {
+   ClutterStageView *stage_view = CLUTTER_STAGE_VIEW (view);
+@@ -1167,6 +1170,24 @@ on_crtc_flipped (GClosure         *closure,
+   MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
+   MetaRendererNative *renderer_native = onscreen_native->renderer_native;
+   MetaGpuKms *render_gpu = onscreen_native->render_gpu;
++  CoglFrameInfo *frame_info;
++  float refresh_rate;
++
++  frame_info = g_queue_peek_tail (&onscreen->pending_frame_infos);
++  refresh_rate = crtc && crtc->current_mode ?
++                 crtc->current_mode->refresh_rate :
++                 0.0f;
++
++  /* Only keep the frame info for the fastest CRTC in use, which may not be
++   * the first one to complete a flip. By only telling the compositor about the
++   * fastest monitor(s) we direct it to produce new frames fast enough to
++   * satisfy all monitors.
++   */
++  if (refresh_rate >= frame_info->refresh_rate)
++    {
++      frame_info->presentation_time = page_flip_time_ns;
++      frame_info->refresh_rate = refresh_rate;
++    }
+ 
+   if (gpu_kms != render_gpu)
+     {
+@@ -1297,7 +1318,9 @@ flip_egl_stream (MetaOnscreenNative *onscreen_native,
+     return FALSE;
+ 
+   closure_container =
+-    meta_gpu_kms_wrap_flip_closure (onscreen_native->render_gpu, flip_closure);
++    meta_gpu_kms_wrap_flip_closure (onscreen_native->render_gpu,
++                                    NULL,
++                                    flip_closure);
+ 
+   acquire_attribs = (EGLAttrib[]) {
+     EGL_DRM_FLIP_EVENT_DATA_NV,
+@@ -1540,7 +1563,7 @@ meta_onscreen_native_flip_crtcs (CoglOnscreen *onscreen)
+   flip_closure = g_cclosure_new (G_CALLBACK (on_crtc_flipped),
+                                  g_object_ref (view),
+                                  (GClosureNotify) flip_closure_destroyed);
+-  g_closure_set_marshal (flip_closure, g_cclosure_marshal_VOID__OBJECT);
++  g_closure_set_marshal (flip_closure, meta_marshal_VOID__OBJECT_OBJECT_INT64);
+ 
+   /* Either flip the CRTC's of the monitor info, if we are drawing just part
+    * of the stage, or all of the CRTC's if we are drawing the whole stage.
+@@ -2673,6 +2696,15 @@ meta_renderer_native_create_offscreen (MetaRendererNative    *renderer,
+   return fb;
+ }
+ 
++static int64_t
++meta_renderer_native_get_clock_time (CoglContext *context)
++{
++  CoglRenderer *cogl_renderer = cogl_context_get_renderer (context);
++  MetaGpuKms *gpu_kms = cogl_renderer->custom_winsys_user_data;
++
++  return _meta_gpu_kms_get_current_time_ns (gpu_kms);
++}
++
+ static const CoglWinsysVtable *
+ get_native_cogl_winsys_vtable (CoglRenderer *cogl_renderer)
+ {
+@@ -2701,6 +2733,8 @@ get_native_cogl_winsys_vtable (CoglRenderer *cogl_renderer)
+       vtable.onscreen_swap_buffers_with_damage =
+         meta_onscreen_native_swap_buffers_with_damage;
+ 
++      vtable.context_get_clock_time = meta_renderer_native_get_clock_time;
++
+       vtable_inited = TRUE;
+     }
+ 
+diff --git a/src/meta-marshal.list b/src/meta-marshal.list
+new file mode 100644
+index 0000000..c1f4781
+--- /dev/null
++++ b/src/meta-marshal.list
+@@ -0,0 +1 @@
++VOID:OBJECT,OBJECT,INT64

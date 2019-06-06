@@ -1,3 +1,25 @@
+mutter (3.28.4-0ubuntu18.04.1) bionic; urgency=medium
+
+  * New upstream release:
+    - Implement keycode remap to keysyms on virtual key devices (LP: #1827029)
+  * d/p/monitor-manager-Don-t-use-switch-config-when-ensuring-con.patch,
+    d/p/monitor-manager-use-MonitorsConfig-to-track-switch_config.patch:
+    - Ensure switch display mode is cyclic (LP: #1772811)
+
+  [ Daniel van Vugt ]
+  * d/p/lp1763892-a-renderer-native-Add-hardware-presentation-timing.patch,
+    d/p/lp1763892-b-renderer-native-Advertise-_FEATURE_SWAP_THROTTLE.patch:
+    - Add support for high frame rate displays (LP: #1763892)
+  * d/p/clutter-Smooth-out-master-clock-to-smooth-visuals.patch:
+    - Dropped
+
+  [ Iain Lane ]
+  * Update symbols file for *_switch_config.
+    These are added as a backport in this update. They are available in
+    subsequent releases (so generated deps should keep working fine).
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 07 May 2019 18:05:21 +0100
+
 mutter (3.28.3+git20190124-0ubuntu18.04.2) bionic; urgency=medium
 
   * control: Add Breaks on budgie-desktop verions broken by this upload.
