@@ -61,7 +61,7 @@ class _WrappedLock(object):
         # type: () -> None
         try:
             return self._lock.__enter__()
-        except apt_pkg.Error as e:
+        except SystemError as e:
             raise LockFailedException(("Failed to lock directory %s: %s") %
                                        (self._path, e))
 
