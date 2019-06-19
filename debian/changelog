@@ -1,3 +1,23 @@
+evince (3.18.2-1ubuntu4.5) xenial-security; urgency=medium
+
+  * apparmor-profile: apply hardening from Ubuntu 18.10
+    - add preamble for expectations of the profile
+    - evince{-previewer}: restrict access to DBus system bus (we allow full
+      access to session, translation and accessibility buses for compatibility)
+      + allow Get* to anything polkit allows
+      + allow talking to avahi (for printing)
+      + allow talking to colord (for printing)
+    - make the thumbnailer more restrictive (LP: #1794848) (Closes: #909849)
+      + remove evince abstraction and use only what is needed from it
+      + limit access to DBus session bus
+      + generally disallow writes
+      + allow reads for non-hidden files
+  * debian/apparmor-profile.abstraction: apply hardening from Ubuntu 18.10
+    - disallow access to the dirs of private files (LP: #1788929)
+  * debian/apparmor-profile: allow /bin/env ixr
+
+ -- Jamie Strandboge <jamie@ubuntu.com>  Tue, 18 Jun 2019 19:28:02 +0000
+
 evince (3.18.2-1ubuntu4.4) xenial-security; urgency=medium
 
   * SECURITY UPDATE: Uninitialized memory use
