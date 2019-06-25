@@ -1,0 +1,18 @@
+Description: Do not /dev/null dkms_autoinstaller
+ Do not invoke dkms_autoinstaller from /etc/kernel/header_postinst.d/dkms
+ with redirection to /dev/null (LP: #1827697), this caused debconf dialog
+ to not be shown.
+Author: Julian Andres Klode <juliank@ubuntu.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1827697
+
+--- dkms-2.6.1.orig/kernel_postinst.d_dkms
++++ dkms-2.6.1/kernel_postinst.d_dkms
+@@ -36,7 +36,7 @@ case "${uname_s}" in
+ esac
+ 
+ if [ -x /usr/lib/dkms/dkms_autoinstaller ]; then
+-    exec /usr/lib/dkms/dkms_autoinstaller start $inst_kern > /dev/null
++    exec /usr/lib/dkms/dkms_autoinstaller start $inst_kern
+ fi
+ 
+ if ! _check_kernel_dir $inst_kern ; then

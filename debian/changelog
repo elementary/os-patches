@@ -1,3 +1,11 @@
+dkms (2.2.0.3-2ubuntu11.7) xenial; urgency=medium
+
+  * Do not invoke dkms_autoinstaller from /etc/kernel/header_postinst.d/dkms
+    with redirection to /dev/null (LP: #1827697), this caused debconf dialog
+    to not be shown.
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 17 May 2019 13:21:05 +0200
+
 dkms (2.2.0.3-2ubuntu11.6) xenial; urgency=medium
 
   * debian/patches/shim_secureboot_support.patch:
