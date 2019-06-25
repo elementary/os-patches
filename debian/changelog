@@ -1,3 +1,11 @@
+dkms (2.3-3ubuntu9.3) bionic; urgency=medium
+
+  * Do not invoke dkms_autoinstaller from /etc/kernel/header_postinst.d/dkms
+    with redirection to /dev/null (LP: #1827697), this caused debconf dialog
+    to not be shown.
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 17 May 2019 12:56:47 +0200
+
 dkms (2.3-3ubuntu9.2) bionic; urgency=medium
 
   * 0009-Add-support-for-UEFI-Secure-Boot-validation-toggling.patch: source
