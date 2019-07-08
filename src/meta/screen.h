@@ -58,6 +58,10 @@ void meta_screen_remove_workspace (MetaScreen    *screen,
                                    MetaWorkspace *workspace,
                                    guint32        timestamp);
 
+void meta_screen_reorder_workspace (MetaScreen    *screen,
+                                    MetaWorkspace *workspace,
+                                    int            new_index);
+
 MetaWorkspace *meta_screen_append_new_workspace (MetaScreen    *screen,
                                                  gboolean       activate,
                                                  guint32        timestamp);

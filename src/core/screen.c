@@ -90,6 +90,7 @@ enum
   WORKSPACE_ADDED,
   WORKSPACE_REMOVED,
   WORKSPACE_SWITCHED,
+  WORKSPACES_REORDERED,
   WINDOW_ENTERED_MONITOR,
   WINDOW_LEFT_MONITOR,
   STARTUP_SEQUENCE_CHANGED,
@@ -209,6 +210,14 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_INT,
                   G_TYPE_INT,
                   META_TYPE_MOTION_DIRECTION);
+
+  screen_signals[WORKSPACES_REORDERED] =
+    g_signal_new ("workspaces-reordered",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 
   screen_signals[WINDOW_ENTERED_MONITOR] =
     g_signal_new ("window-entered-monitor",
@@ -1084,6 +1093,58 @@ set_desktop_viewport_hint (MetaScreen *screen)
                    XA_CARDINAL,
                    32, PropModeReplace, (guchar*) data, 2);
   meta_error_trap_pop (screen->display);
+}
+
+void
+meta_screen_reorder_workspace (MetaScreen    *screen,
+                               MetaWorkspace *workspace,
+                               int            new_index)
+{
+  GList *l;
+  GList *from, *to;
+  int index;
+  int active_index, new_active_index;
+
+  g_return_if_fail (META_IS_SCREEN (screen));
+  g_return_if_fail (new_index >= 0 &&
+                    new_index < (gint)g_list_length (screen->workspaces));
+
+  l = g_list_find (screen->workspaces, workspace);
+  g_return_if_fail (l);
+
+  index = meta_workspace_index (workspace);
+
+  if (new_index == index)
+    return;
+
+  active_index =
+    meta_screen_get_active_workspace_index (screen);
+
+  screen->workspaces =
+    g_list_remove_link (screen->workspaces, l);
+
+  screen->workspaces =
+    g_list_insert (screen->workspaces, l->data, new_index);
+
+  g_list_free (l);
+
+  new_active_index =
+    meta_screen_get_active_workspace_index (screen);
+
+  if (active_index != new_active_index)
+    meta_screen_set_active_workspace_hint (screen);
+
+  from = g_list_nth (screen->workspaces, MIN (new_index, index));
+  to = g_list_nth (screen->workspaces, MAX (new_index, index));
+  for (l = from; l != to->next; l = l->next)
+    {
+      MetaWorkspace *w = l->data;
+
+      meta_workspace_index_changed (w);
+    }
+
+  meta_screen_queue_workarea_recalc (screen);
+  g_signal_emit (screen, screen_signals[WORKSPACES_REORDERED], 0, NULL);
 }
 
 void
