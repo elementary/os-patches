@@ -1,0 +1,144 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.4
+Patch-ID:	bash44-020
+
+Bug-Reported-by:	Graham Northup <northug@clarkson.edu>
+Bug-Reference-ID:	<537530c3-61f0-349b-9de6-fa4e2487f428@clarkson.edu>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2017-02/msg00025.html
+
+Bug-Description:
+
+In circumstances involving long-running scripts that create and reap many
+processes, it is possible for the hash table bash uses to store exit
+statuses from asynchronous processes to develop loops. This patch fixes
+the loop causes and adds code to detect any future loops.
+
+Origin: upstream, https://ftp.gnu.org/gnu/bash/bash-4.4-patches/bash44-020
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/bash/+bug/1822776
+Last-Update: 2019-06-10
+
+diff --git a/jobs.c b/jobs.c
+index fc96603..2684632 100644
+--- a/jobs.c
++++ b/jobs.c
+@@ -812,8 +812,22 @@ bgp_add (pid, status)
+   ps_index_t *bucket, psi;
+   struct pidstat *ps;
+ 
+-  bucket = pshash_getbucket (pid);
+-  psi = bgp_getindex ();
++  /* bucket == existing chain of pids hashing to same value
++     psi = where were going to put this pid/status */
++
++  bucket = pshash_getbucket (pid);	/* index into pidstat_table */
++  psi = bgp_getindex ();		/* bgpids.head, index into storage */
++
++  /* XXX - what if psi == *bucket? */
++  if (psi == *bucket)
++    {
++#ifdef DEBUG
++      internal_warning ("hashed pid %d (pid %d) collides with bgpids.head, skipping", psi, pid);
++#endif
++      bgpids.storage[psi].pid = NO_PID;		/* make sure */
++      psi = bgp_getindex ();			/* skip to next one */
++    }
++
+   ps = &bgpids.storage[psi];
+ 
+   ps->pid = pid;
+@@ -841,32 +855,47 @@ pshash_delindex (psi)
+      ps_index_t psi;
+ {
+   struct pidstat *ps;
++  ps_index_t *bucket;
+ 
+   ps = &bgpids.storage[psi];
+   if (ps->pid == NO_PID)
+     return;
+ 
+-  if (ps->bucket_next != NO_PID)
++  if (ps->bucket_next != NO_PIDSTAT)
+     bgpids.storage[ps->bucket_next].bucket_prev = ps->bucket_prev;
+-  if (ps->bucket_prev != NO_PID)
++  if (ps->bucket_prev != NO_PIDSTAT)
+     bgpids.storage[ps->bucket_prev].bucket_next = ps->bucket_next;
+   else
+-    *(pshash_getbucket (ps->pid)) = ps->bucket_next;
++    {
++      bucket = pshash_getbucket (ps->pid);
++      *bucket = ps->bucket_next;	/* deleting chain head in hash table */
++    }
++
++  /* clear out this cell, just in case */
++  ps->pid = NO_PID;
++  ps->bucket_next = ps->bucket_prev = NO_PIDSTAT;
+ }
+ 
+ static int
+ bgp_delete (pid)
+      pid_t pid;
+ {
+-  ps_index_t psi;
++  ps_index_t psi, orig_psi;
+ 
+   if (bgpids.storage == 0 || bgpids.nalloc == 0 || bgpids.npid == 0)
+     return 0;
+ 
+   /* Search chain using hash to find bucket in pidstat_table */
+-  for (psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
+-    if (bgpids.storage[psi].pid == pid)
+-      break;
++  for (orig_psi = psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
++    {
++      if (bgpids.storage[psi].pid == pid)
++	break;
++      if (orig_psi == bgpids.storage[psi].bucket_next)	/* catch reported bug */
++	{
++	  internal_warning ("bgp_delete: LOOP: psi (%d) == storage[psi].bucket_next", psi);
++	  return 0;
++	}
++    }
+ 
+   if (psi == NO_PIDSTAT)
+     return 0;		/* not found */
+@@ -904,15 +933,22 @@ static int
+ bgp_search (pid)
+      pid_t pid;
+ {
+-  ps_index_t psi;
++  ps_index_t psi, orig_psi;
+ 
+   if (bgpids.storage == 0 || bgpids.nalloc == 0 || bgpids.npid == 0)
+     return -1;
+ 
+   /* Search chain using hash to find bucket in pidstat_table */
+-  for (psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
+-    if (bgpids.storage[psi].pid == pid)
+-      return (bgpids.storage[psi].status);
++  for (orig_psi = psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
++    {
++      if (bgpids.storage[psi].pid == pid)
++	return (bgpids.storage[psi].status);
++      if (orig_psi == bgpids.storage[psi].bucket_next)	/* catch reported bug */
++	{
++	  internal_warning ("bgp_search: LOOP: psi (%d) == storage[psi].bucket_next", psi);
++	  return -1;
++	}
++    }
+ 
+   return -1;
+ }
+diff --git a/patchlevel.h b/patchlevel.h
+index a711c49..4a65dc0 100644
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 19
++#define PATCHLEVEL 20
+ 
+ #endif /* _PATCHLEVEL_H_ */
