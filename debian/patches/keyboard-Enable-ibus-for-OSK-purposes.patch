@@ -166,7 +166,7 @@ index 343b049..480e735 100644
  }
  
  static void
-@@ -812,8 +859,15 @@ start_keyboard_idle_cb (GsdKeyboardManager *manager)
+@@ -818,8 +865,15 @@ start_keyboard_idle_cb (GsdKeyboardManager *manager)
  	set_devicepresence_handler (manager);
  
          manager->priv->input_sources_settings = g_settings_new (GNOME_DESKTOP_INPUT_SOURCES_DIR);
@@ -184,7 +184,7 @@ index 343b049..480e735 100644
  
          manager->priv->cancellable = g_cancellable_new ();
  
-@@ -876,10 +930,12 @@ gsd_keyboard_manager_stop (GsdKeyboardManager *manager)
+@@ -882,10 +936,12 @@ gsd_keyboard_manager_stop (GsdKeyboardManager *manager)
  
          g_clear_object (&p->settings);
          g_clear_object (&p->input_sources_settings);
