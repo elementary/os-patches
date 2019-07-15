@@ -1,3 +1,13 @@
+bash (4.3-14ubuntu1.4) xenial-security; urgency=medium
+
+  * SECURITY UPDATE: rbash restriction bypass (LP: #1803441)
+    - debian/patches/CVE-2019-9924.patch: if the shell is restricted,
+      reject attempts to add pathnames containing slashes to the hash table
+      in variables.c.
+    - CVE-2019-9924
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Fri, 12 Jul 2019 14:25:28 -0400
+
 bash (4.3-14ubuntu1.3) xenial; urgency=medium
 
   * Resurrect "Set the default path to comply with Debian policy" in
