@@ -1,0 +1,21 @@
+Description: Use provided path when checking kernel headers
+ When getting the kernel source directory (headers), the check does not take into account
+ if a non-standard location was provided via the command-line.
+ Fix this by picking a line from a more recent version of DKMS.
+Forwarded: not-needed
+Last-Update: 2019-07-26
+
+Index: dkms-2.2.0.3/dkms
+===================================================================
+--- dkms-2.2.0.3.orig/dkms
++++ dkms-2.2.0.3/dkms
+@@ -48,6 +48,9 @@ _get_kernel_dir() {
+        Linux)          DIR="/lib/modules/$KVER/build" ;;
+        GNU/kFreeBSD)   DIR="/usr/src/kfreebsd-headers-$KVER/sys" ;;
+     esac
++
++    [ ! -z "$ksourcedir_fromcli" ] && DIR=$kernel_source_dir
++
+     echo $DIR
+ }
+ 
