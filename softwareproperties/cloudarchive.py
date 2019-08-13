@@ -47,7 +47,7 @@ RELEASE_MAP = {
 }
 MIRROR = "http://ubuntu-cloud.archive.canonical.com/ubuntu"
 UCA = "Ubuntu Cloud Archive"
-WEB_LINK = 'https://wiki.ubuntu.com/ServerTeam/CloudArchive'
+WEB_LINK = 'https://wiki.ubuntu.com/OpenStack/CloudArchive'
 APT_INSTALL_KEY = ['apt-get', '--quiet', '--assume-yes', 'install',
                    'ubuntu-cloud-keyring']
 

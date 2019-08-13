@@ -24,7 +24,7 @@ import gettext
 from gettext import gettext as _
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import GLib, GObject, Gtk
+from gi.repository import Gio, GLib, GObject, Gtk
 import logging
 
 from softwareproperties.GoaAuth import GoaAuth
@@ -51,6 +51,15 @@ class LivepatchPage(object):
         self._lps = LivepatchService()
         self._auth = GoaAuth()
 
+        self._un_settings = None
+        source = Gio.SettingsSchemaSource.get_default()
+        if source is not None:
+            schema = source.lookup('com.ubuntu.update-notifier', True)
+            if schema is not None:
+                settings = Gio.Settings.new('com.ubuntu.update-notifier')
+                if schema.has_key('show-livepatch-status-icon'):
+                    self._un_settings = settings
+
         # Connect signals
         self._lps.connect(
             'notify::availability', self._lps_availability_changed_cb)
@@ -62,6 +71,12 @@ class LivepatchPage(object):
             'state-set', self._switch_state_set_cb)
         self._parent.button_livepatch_login.connect(
             'clicked', self._button_livepatch_login_clicked_cb)
+        self._parent.checkbutton_livepatch_topbar.connect(
+            'toggled', self._checkbutton_livepatch_topbar_toggled_cb)
+
+        if self._un_settings is not None:
+            self._un_settings_handler = self._un_settings.connect(
+                'changed::show-livepatch-status-icon', self._un_settings_changed_cb)
 
         self._lps.trigger_availability_check()
 
@@ -87,6 +102,7 @@ class LivepatchPage(object):
             self._update_switch_label()
             self._update_auth_button()
             self._update_stack(error_message)
+            self._update_topbar_checkbutton()
 
             return False
 
@@ -193,6 +209,24 @@ class LivepatchPage(object):
         else:
             self._update_status()
 
+    def _update_topbar_checkbutton(self):
+        """Update the state of the checkbutton to show/hide Livepatch status in
+        the top bar.
+        """
+        visibile = self._un_settings is not None
+        self._parent.checkbutton_livepatch_topbar.set_visible(visibile)
+
+        if visibile:
+            availability = self._lps.props.availability
+
+            self._parent.checkbutton_livepatch_topbar.set_sensitive(
+                availability == LivepatchAvailability.TRUE and
+                self._lps.props.enabled)
+            self._parent.checkbutton_livepatch_topbar.set_active(
+                availability == LivepatchAvailability.TRUE and
+                self._lps.props.enabled and
+                self._un_settings.get_boolean('show-livepatch-status-icon'))
+
     def _format_timedelta(self, td):
         days = td.days
         hours = td.seconds // 3600
@@ -260,7 +294,7 @@ class LivepatchPage(object):
         else:
             logging.warning('Livepatch status contains an invalid state: {}'.format(state))
 
-        if check_state == 'needs-check' or state == 'unapplied':
+        if check_state == 'needs-check' or state == 'unapplied' or state == 'applying':
             self._trigger_ui_update()
 
     def _update_fixes(self, fixes):
@@ -323,6 +357,17 @@ class LivepatchPage(object):
             self._do_logout()
         else:
             self._do_login()
+
+    def _checkbutton_livepatch_topbar_toggled_cb(self, button):
+        if not button.get_sensitive():
+            return
+        self._un_settings.handler_block(self._un_settings_handler)
+        self._un_settings.set_boolean('show-livepatch-status-icon', button.get_active())
+        self._un_settings.handler_unblock(self._un_settings_handler)
+
+
+    def _un_settings_changed_cb(self, settings, key):
+        self._trigger_ui_update(skip=True)
 
     def _show_error_dialog(self, message):
         dialog = DialogLivepatchError(
