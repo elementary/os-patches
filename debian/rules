@@ -1,0 +1,18 @@
+#! /usr/bin/make -f
+
+VERSION := $(shell LC_ALL=C dpkg-parsechangelog | grep ^Version: | cut -d ' ' -f 2)
+
+%:
+	dh $@
+
+docdir := debian/grub-efi-amd64-signed/usr/share/doc/grub-efi-amd64-signed
+
+override_dh_installchangelogs:
+	dh_installchangelogs
+	# Quieten lintian, which otherwise gets confused by our odd version
+	# number.
+	ln $(docdir)/changelog $(docdir)/changelog.Debian
+
+override_dh_gencontrol:
+	dh_gencontrol -- -v$(VERSION)+$(shell cat version) \
+		-Vgrub2:Version=$(shell cat version)

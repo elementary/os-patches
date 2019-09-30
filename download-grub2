@@ -1,0 +1,27 @@
+#! /usr/bin/python3
+
+import re
+import shutil
+from urllib.parse import urlparse, urlunparse
+from urllib.request import urlopen
+
+import apt
+
+cache = apt.Cache()
+grub_efi_amd64 = cache["grub-efi-amd64"].candidate
+pool_parsed = urlparse(grub_efi_amd64.uri)
+dists_dir = "/dists/%s/main/uefi/grub2-%s/current/" % (
+    grub_efi_amd64.origins[0].archive, grub_efi_amd64.architecture)
+
+for base in (
+        "gcdx64.efi.signed",
+        "grubx64.efi.signed",
+        "grubnetx64.efi.signed",
+        "version",
+        ):
+    dists_parsed = list(pool_parsed)
+    dists_parsed[2] = re.sub(r"/pool/.*", dists_dir + base, dists_parsed[2])
+    dists_uri = urlunparse(dists_parsed)
+    print("Downloading %s ..." % dists_uri)
+    with urlopen(dists_uri) as dists, open(base, "wb") as out:
+        shutil.copyfileobj(dists, out)
