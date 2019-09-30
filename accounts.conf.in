@@ -1,0 +1,20 @@
+<backup-configuration>
+  <application-type>nokia</application-type>
+  <application-name>Accounts</application-name>
+  <backup-methods>backup-scripts</backup-methods>
+  <backup-method>backup-scripts</backup-method>
+  <backup-scripts>
+    <backup-script-name>
+      /usr/share/accounts/accounts-backup
+    </backup-script-name>
+    <restore-script-name>
+      /usr/share/accounts/accounts-restore
+    </restore-script-name>
+  </backup-scripts>
+  <locations>
+    <location type="permanent-backup-file" category="settings">
+      $HOME/@DATABASE_DIR@/accounts.db.bak
+    </location>
+  </locations>
+</backup-configuration>
+

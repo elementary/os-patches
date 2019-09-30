@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/doxbook/xml/4.3/docbookx.dtd">
+
+<section id="application-file-format" xreflabel="application manifest files">
+
+<title>Application manifest file format</title>
+
+<para>
+Applications using libacounts-glib should supply a manifest: a simple XML file
+describing the application and the services that it will use. An example is
+shown below:
+</para>
+
+<example>
+  <title>Application manifest for a gallery application</title>
+  <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;application id="Gallery"&gt;
+  &lt;description&gt;Image gallery&lt;/description&gt;
+  &lt;desktop-entry&gt;gallery&lt;/desktop-entry&gt;
+  &lt;translations&gt;gallery&lt;/translations&gt;
+
+  &lt;services&gt;
+    &lt;service id="OtherService"&gt;
+      &lt;description&gt;Publish images on OtherService&lt;/description&gt;
+    &lt;/service&gt;
+  &lt;/services&gt;
+
+  &lt;service-types&gt;
+    &lt;service-type id="sharing"&gt;
+      &lt;description&gt;Share your images with your friends&lt;/description&gt;
+    &lt;/service-type&gt;
+  &lt;/service-types&gt;
+
+&lt;/application&gt;</programlisting>
+</example>
+
+<para>
+The example application manifest describes an application called
+<literal>Gallery</literal>, indicated by the
+<sgmltag class="attribute" role="xml">id</sgmltag> attribute on the
+<sgmltag class="element" role="xml">application</sgmltag> element. The
+<sgmltag class="element" role="xml">description</sgmltag> is a string that
+describes the application in general, and is also used for specific services
+and service types. The
+<sgmltag class="element" role="xml">desktop-entry</sgmltag> element is only
+required if the basename of the desktop file is different than the basename of
+the application manifest, where the basename is the filename excluding any file
+extension. The <sgmltag class="element" role="xml">translations</sgmltag>
+element is used to indicate the gettext translation domain for the
+<sgmltag class="element" role="xml">name</sgmltag> and
+<sgmltag class="element" role="xml">description</sgmltag> elements, to be used
+by applications when showing those elements in a UI. The
+<sgmltag class="element" role="xml">services</sgmltag> element contains
+individual <sgmltag class="element" role="xml">service</sgmltag> elements, with
+an <sgmltag class="attribute" role="xml">id</sgmltag> attribute that
+corresponds to an installed service. Finally, a
+<sgmltag class="element" role="xml">service-types</sgmltag> element contains
+individual <sgmltag class="element" role="xml">service-type</sgmltag> elements,
+which act in the same way as for services.
+  <note>
+  <para>
+  It is only useful to list services in the manifest if a separate description
+  is desired for each service, such as if some special features are
+  supported by the application, beyond those suggested by the general
+  description and the service type.
+  </para>
+  </note>
+</para>
+
+  <section>
+
+  <title>Installation</title>
+
+  <para>
+  Application manifest filenames should end in
+  <filename class="extension">.application</filename> and be installed to
+  <filename class="directory">${prefix}/share/accounts/applications</filename>,
+  which normally expands to
+  <filename class="directory">/usr/share/accounts/applications</filename>. The
+  path can be queried with <command>pkg-config</command> by checking the
+  <varname>applicationfilesdir</varname> variable of the libaccounts-glib
+  pkg-config file, for example:
+  </para>
+
+  <informalexample>
+  <programlisting>pkg-config --variable=applicationfilesdir libaccounts-glib</programlisting>
+  </informalexample>
+
+  </section>
+
+</section>

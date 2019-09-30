@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DTD for libaccounts service files. -->
+
+<!-- Root element for service files. -->
+<!ELEMENT service (type, name?, description?, icon?, provider, translations?,
+                   tags?, template?)>
+
+<!-- The ID is optional, and only used if it differs from the basename of
+     the service file. -->
+<!ATTLIST service
+  id ID #IMPLIED>
+
+<!-- Service-type identifier. -->
+<!ELEMENT type (#PCDATA)>
+
+<!-- Human-readable name of the service, for display to the user. -->
+<!ELEMENT name (#PCDATA)>
+
+<!-- Description of the service, for display to the user. -->
+<!ELEMENT description (#PCDATA)>
+
+<!-- Name of a themed icon representing the service. -->
+<!ELEMENT icon (#PCDATA)>
+
+<!-- The identifier of the provider which supports this service. -->
+<!ELEMENT provider (#PCDATA)>
+
+<!-- The gettext translation domain used for internationalization support in
+     applications. -->
+<!ELEMENT translations (#PCDATA)>
+
+<!-- Container element for tags to describe the service. -->
+<!ELEMENT tags (tag*)>
+
+<!-- A tag to describe the service. -->
+<!ELEMENT tag (#PCDATA)>
+
+<!-- Optional template settings. Account settings have a higher priority
+     than settings listed in the template. -->
+<!ELEMENT template (group*, setting*)>
+
+<!-- A named settings group. This could be used to group settings for
+     an application or class of applications. -->
+<!ELEMENT group (setting*, group*)>
+<!ATTLIST group
+  name ID #IMPLIED>
+
+<!ELEMENT setting (#PCDATA)>
+<!-- Settings are assumed to be of string type (hence the "s" GVariant type
+     string as the default for type), but this can be overridden (for example,
+     in the case of boolean types). -->
+<!ATTLIST setting
+  name ID #REQUIRED
+  type CDATA "s">

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<service id="MyService">
+  <type>e-mail</type>
+  <name>My Service</name>
+  <description>My Service Description</description>
+  <icon>general_myservice</icon>
+  <provider>maemo</provider>
+  <translations>myservice_i18n</translations>
+  
+  <!-- default settings (account settings have precedence over these) -->
+  <template>
+    <group name="parameters">
+      <setting name="server">talk.google.com</setting>
+      <setting name="port" type="i">5223</setting>
+      <setting name="old-ssl" type="b">true</setting>
+      <setting name="fallback-conference-server">conference.jabber.org</setting>
+      <setting name="capabilities" type="as">["chat", "file", "smileys"]</setting>
+    </group>
+    <setting name="enabled" type="b">true</setting>
+  </template>
+
+</service>

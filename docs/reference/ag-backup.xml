@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[<!ENTITY version SYSTEM "version.xml">]>
+
+<refentry id="ag-backup">
+
+<refmeta>
+<refentrytitle>ag-backup</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">User Commands</refmiscinfo>
+<refmiscinfo class="source">libaccounts-glib</refmiscinfo>
+<refmiscinfo class="version">&version;</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ag-backup</refname>
+<refpurpose>Backup the libaccounts database</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ag-backup</command>
+<arg choice="opt">--help</arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+<command>ag-backup</command> is a simple tool to backup the accounts database.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Invocation</title>
+<para>
+<command>ag-backup</command> accepts a single argument, to show usage notes. On
+execution with no arguments, it will backup the accounts database from
+<filename><varname>XDG_CONFIG_HOME</varname>/libaccounts-glib/accounts.db</filename>
+to
+<filename><varname>XDG_CONFIG_HOME</varname>/libaccounts-glib/accounts.db.bak</filename>.
+</para>
+
+<refsect2>
+<title>Options</title>
+
+<variablelist>
+  <varlistentry>
+    <term><option>--help</option></term>
+    <listitem>
+      <para>Show usage notes and exit.</para>
+    </listitem>
+  </varlistentry>
+</variablelist>
+
+</refsect2>
+
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+<command>ag-backup</command> was written by Alberto Mardegan
+<email>alberto.mardegan@canonical.com</email>.
+</para>
+
+<para>
+This manual page was written by David King
+<email>david.king@canonical.com</email>.
+</para>
+</refsect1>
+
+</refentry>

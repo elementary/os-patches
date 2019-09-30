@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/doxbook/xml/4.3/docbookx.dtd">
+
+<section id="provider-file-format" xreflabel="provider description files">
+
+<title>Provider description file format</title>
+
+<para>
+Providers for libaccounts-glib are described with a simple XML file. An example
+for a hypothetical <literal>CoolProvider</literal> is shown below:
+</para>
+
+<example>
+  <title>Provider description for CoolProvider</title>
+  <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;provider id="coolprovider"&gt;
+  &lt;name&gt;CoolProvider&lt;/name&gt;
+  &lt;description&gt;CoolProvider brings frost to your desktop&lt;/description&gt;
+  &lt;translations&gt;coolprovider&lt;/translations&gt;
+  &lt;icon&gt;coolprovider&lt;/icon&gt;
+  &lt;domains&gt;.*coolprovider\.com&lt;/domains&gt;
+
+&lt;/provider&gt;</programlisting>
+</example>
+
+<para>
+The example provider description describes a provider called
+<literal>coolprovider</literal>, indicated by the
+<sgmltag class="attribute" role="xml">id</sgmltag> attribute on the
+<sgmltag class="element" role="xml">provider</sgmltag> element. The
+<sgmltag class="element" role="xml">name</sgmltag> element contains a
+human-readable version of the provider name. The
+<sgmltag class="element" role="xml">description</sgmltag> is a string that
+describes the provider in general, and is especially useful if the provider
+supports a wide range of services. The
+<sgmltag class="element" role="xml">translations</sgmltag> element is used to
+indicate the gettext translation domain for the
+<sgmltag class="element" role="xml">name</sgmltag> and
+<sgmltag class="element" role="xml">description</sgmltag> elements, to be used
+by applications when showing those elements in a UI. The
+<sgmltag class="element" role="xml">icon</sgmltag> element specifies a themed
+icon to represent the provider. Finally, a
+<sgmltag class="element" role="xml">domains</sgmltag> element is a regular
+expression which should match all the web domains where the account with
+<literal>coolprovider</literal> can be used. This can be used with an Ubuntu
+Webapp to automatically create an account when the user logs in to an accepted
+domain.
+</para>
+
+  <section>
+
+  <title>Installation</title>
+
+  <para>
+  Provider description filenames should end in
+  <filename class="extension">.provider</filename> and be installed to
+  <filename class="directory">${prefix}/share/accounts/providers</filename>,
+  which normally expands to
+  <filename class="directory">/usr/share/accounts/providers</filename>. The
+  path can be queried with <command>pkg-config</command> by checking the
+  <varname>providerfilesdir</varname> variable of the libaccounts-glib
+  pkg-config file, for example:
+  </para>
+
+  <informalexample>
+  <programlisting>pkg-config --variable=providerfilesdir libaccounts-glib</programlisting>
+  </informalexample>
+
+  </section>
+
+</section>

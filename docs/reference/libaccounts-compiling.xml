@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/doxbook/xml/4.3/docbookx.dtd">
+
+<chapter id="libaccounts-compiling">
+
+<title>Compiling libaccounts-glib applications</title>
+
+<para>
+Building your application against libaccounts-glib is straightforward, and
+this documentation give some hints for those new to the process.
+</para>
+
+  <section>
+
+  <title>
+  Using <application>pkg-config</application> to query compiler and linker
+  flags
+  </title>
+
+  <para>
+  To compile your own application which uses libaccounts-glib, you must give
+  the compiler the location of the libaccounts-glib header files, and the
+  linker the name of the library to link with. The easiest way to do this is to
+  query those flags from the pkg-config file installed by libaccounts-glib. For
+  example, to query both the compiler and linker flags, run:
+  </para>
+
+  <informalexample>
+  <programlisting>pkg-config --cflags --libs libaccounts-glib</programlisting>
+  </informalexample>
+
+  <note>
+    <para>
+    In order for the pkg-config execution to succeed, you must have the
+    development files for libaccounts-glib installed on your system. In most
+    distributions, these are installed in a separate development package.
+    Installing such packages is outside the scope of this documentation.
+    </para>
+  </note>
+
+  <para>
+  The <filename>libaccounts-glib.pc</filename> file installed by
+  libaccounts-glib also contains several other useful variables, including the
+  install locations for <xref linkend="application-file-format"/>,
+  <xref linkend="provider-file-format"/>, <xref linkend="service-file-format"/>
+  and <xref linkend="service-type-file-format"/>. Check the installed file for
+  details, or query the list of variables with pkg-config:
+  </para>
+
+  <informalexample>
+  <programlisting>pkg-config --print-variables libaccounts-glib</programlisting>
+  </informalexample>
+
+  </section>
+
+</chapter>

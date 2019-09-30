@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DTD for libaccounts application files. -->
+
+<!-- Root element for application files. -->
+<!ELEMENT application (description?, desktop-entry?, translations?, services?,
+                       service-types?)>
+
+<!-- The ID is optional, and only used if it differs from the basename of
+     the application file. -->
+<!ATTLIST application
+  id ID #IMPLIED>
+
+<!-- Description of the application, service or service-type. -->
+<!ELEMENT description (#PCDATA)>
+
+<!-- Only required if the basename of the desktop file associated with the
+     application is different to the basename of the application file. Used to
+     lookup the application icon and name. -->
+<!ELEMENT desktop-entry (#PCDATA)>
+
+<!-- The gettext translation domain used for internationalization support in
+     applications. -->
+<!ELEMENT translations (#PCDATA)>
+
+<!-- Container element for individual service descriptions. -->
+<!ELEMENT services (service*)>
+
+<!-- Container for a description of how the application uses a specified
+     service. -->
+<!ELEMENT service (description?)>
+<!-- The ID must match a service identifier, defined in a separate .service
+     file. -->
+<!ATTLIST service
+  id ID #REQUIRED>
+
+<!-- Container element for individual service-type descriptions. -->
+<!ELEMENT service-types (service-type*)>
+
+<!-- Container for a description of how the application uses a specified
+     service-type. -->
+<!ELEMENT service-type (description?)>
+<!ATTLIST service-type
+  id ID #REQUIRED>

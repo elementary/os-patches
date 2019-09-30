@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/doxbook/xml/4.3/docbookx.dtd">
+
+<section id="service-file-format" xreflabel="service descriptions files">
+
+<title>Service description file format</title>
+
+<para>
+Services for libaccounts-glib providers are described with a simple XML file.
+An example for a hypothetical <literal>CoolProvider</literal> chat service is
+shown below:
+</para>
+
+<example>
+  <title>Service description for CoolProvider chat service</title>
+  <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;service id="coolprovider-chat"&gt;
+  &lt;type&gt;IM&lt;/type&gt;
+  &lt;name&gt;CoolProvider Chat&lt;/name&gt;
+  &lt;description&gt;Chat with your cool friends&lt;/description&gt;
+  &lt;icon&gt;coolprovider&lt;/icon&gt;
+  &lt;provider&gt;coolprovider&lt;/provider&gt;
+  &lt;translations&gt;coolprovider&lt;/translations&gt;
+  &lt;tags&gt;
+    &lt;tag&gt;chat&lt;/tag&gt;
+  &lt;/tags&gt;
+
+  &lt;template&gt;
+    &lt;group name="telepathy"&gt;
+      &lt;setting name="manager"&gt;gabble&lt;/setting&gt;
+      &lt;setting name="protocol"&gt;jabber&lt;/setting&gt;
+    &lt;/group&gt;
+
+    &lt;group name="auth"&gt;
+      &lt;setting name="method"&gt;oauth2&lt;/setting&gt;
+      &lt;setting name="mechanism"&gt;user_agent&lt;/setting&gt;
+      &lt;group name="oauth2/user_agent"&gt;
+        &lt;setting name="ClientId"&gt;ABCDEclient.ID&lt;/setting&gt;
+      &lt;/group&gt;
+    &lt;/group&gt;
+  &lt;/template&gt;
+
+&lt;/service&gt;</programlisting>
+</example>
+
+<para>
+The example service description describes a service called
+<literal>coolprovider-chat</literal>, indicated by the
+<sgmltag class="attribute" role="xml">id</sgmltag> attribute on the
+<sgmltag class="element" role="xml">service</sgmltag> element. The
+<sgmltag class="element" role="xml">type</sgmltag> element corresponds to the
+service type. The <sgmltag class="element" role="xml">name</sgmltag> element
+contains a human-readable version of the service name. The
+<sgmltag class="element" role="xml">description</sgmltag> is a string that
+describes the service in general. The
+<sgmltag class="element" role="xml">icon</sgmltag> element specifies a themed
+icon to represent the service. The
+<sgmltag class="element" role="provider">provider</sgmltag> element must point
+to the identifier of the provider which supports this service. The
+<sgmltag class="element" role="xml">translations</sgmltag> element is used to
+indicate the gettext translation domain for the name and description elements,
+to be used by applications when showing those elements in a UI. The
+<sgmltag class="element" role="xml">tags</sgmltag> element is a container of
+<sgmltag class="element" role="xml">tag</sgmltag> elements, which are used to
+describe the service in abstract terms. Finally, a
+<sgmltag class="element" role="xml">template</sgmltag> element is a container
+for <sgmltag class="element" role="xml">group</sgmltag> elements, which
+themselves are containers of
+<sgmltag class="element" role="xml">setting</sgmltag> elements. Settings stored
+within the template are default settings for the service, which the
+applications using the account may need in order to function correctly. The
+default settings can be overriden, typically at run time during the account
+configuration phase.
+</para>
+
+  <section>
+
+  <title>Installation</title>
+
+  <para>
+  Service description filenames should end in
+  <filename class="extension">.service</filename> and be installed to
+  <filename class="directory">${prefix}/share/accounts/services</filename>,
+  which normally expands to
+  <filename class="directory">/usr/share/accounts/services</filename>. The path
+  can be queried with <command>pkg-config</command> by checking the
+  <varname>servicefilesdir</varname> variable of the libaccounts-glib
+  pkg-config file, for example:
+  </para>
+
+  <informalexample>
+  <programlisting>pkg-config --variable=servicefilesdir libaccounts-glib</programlisting>
+  </informalexample>
+
+  </section>
+
+</section>

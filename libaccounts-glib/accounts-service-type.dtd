@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DTD for libaccounts service-type files. -->
+
+<!-- Root element for service-type files. -->
+<!ELEMENT service-type (name?, description?, icon?, translations?, tags?)>
+
+<!-- The ID is optional, and only used if it differs from the basename of
+     the service file. -->
+<!ATTLIST service-type
+  id ID #IMPLIED>
+
+<!-- Human-readable name of the service-type, for display to the user. -->
+<!ELEMENT name (#PCDATA)>
+
+<!-- Description of the service-type, for display to the user. -->
+<!ELEMENT description (#PCDATA)>
+
+<!-- Name of a themed icon representing the service-type. -->
+<!ELEMENT icon (#PCDATA)>
+
+<!-- The gettext translation domain used for internationalization support in
+     applications. -->
+<!ELEMENT translations (#PCDATA)>
+
+<!-- Container element for tags to describe the service-type. -->
+<!ELEMENT tags (tag*)>
+
+<!-- A tag to describe the service-type. -->
+<!ELEMENT tag (#PCDATA)>

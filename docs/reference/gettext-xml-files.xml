@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd">
+
+<section id="gettext-xml-files">
+
+<title>Internationalizing XML data files using gettext</title>
+
+<para>
+Strings to be shown to the user which are found in the <acronym>XML</acronym>
+data files supported by libaccounts-glib can be localized to the user's
+language. For this purpose, a
+<sgmltag class="element" role="xml">translations</sgmltag> element is present
+to identify the gettext translation domain, which can then be used by
+applications which consume those strings in order to request gettext to
+localize the text. Thus, the burden of localization is split between the author
+of the data file and the application developer. The following sections will
+give brief explanations of how to simplify both tasks.
+</para>
+
+  <section id="intltool-xml-files">
+
+  <title>
+  Using <application>intltool</application> to extract translatable strings
+  </title>
+
+  <para>
+  <command>intltool</command> is a helper tool to make internationalization
+  easier for application developers. Using intltool, a developer can extract
+  the translatable strings from XML data files with ease. There are several
+  steps that must be taken to integrate intltool to extract translatable
+  strings, as described below.
+  </para>
+
+  <procedure>
+  <step>
+    <para>
+    Ensure that each XML data file has a
+    <sgmltag class="element">translations</sgmltag> element, containing the
+    gettext tranlslation domain for the application. This will generally be the
+    name of the package, and is often set in <filename>configure.ac</filename>
+    with:
+    </para>
+    <informalexample>
+    <programlisting>AC_SUBST([GETTEXT_PACKAGE], [$PACKAGE_TARNAME])</programlisting>
+    </informalexample>
+  </step>
+  <step>
+    <para>
+    Add a <filename class="extension">.in</filename> to the end of the name of
+    the XML data file. For example, rename
+    <filename><replaceable>my-application</replaceable>.application</filename>
+    to
+    <filename><replaceable>my-application</replaceable>.application.in</filename>.
+    </para>
+  </step>
+  <step>
+    <para>
+    Translatable elements in an XML file must be marked for translation by
+    adding an underscore at the beginning of the element name. For example,
+    <literal>&lt;description&gt;</literal> would change to
+    <literal>&lt;_description&gt;</literal>. An underscore prefix must also be
+    added to the corresponding closing element.
+    </para>
+  </step>
+  <step>
+    <para>
+    The strings that are marked for translation must be extracted by intltool.
+    This simply creates a corresponding XML data file, without the
+    <filename class="extension">.in</filename> extension, and places the
+    marked strings in the intltool cache. The following
+    <application>automake</application> snippet will extract the marked strings
+    and distribute and install the resulting provider file:
+    </para>
+    <informalexample>
+    <programlisting># Extract transatable strings from .provider file
+my-provider.provider: my-provider.provider.in $(INTLTOOL_MERGE)
+	$(INTLTOOL_V_MERGE) LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_MERGE_V_OPTIONS) --no-translations -x -u $&lt; $@
+
+provider_in_file = \
+	my-provider.provider.in
+
+providerdir = $(datadir)/accounts/providers
+provider_DATA = \
+	$(providers_in_file:.provider.in=.provider)
+
+dist_noinst_DATA = \
+	$(provider_in_file)
+
+CLEANFILES = \
+	$(provider_DATA)</programlisting>
+    </informalexample>
+  </step>
+  <step>
+    <para>
+    Add the <filename class="extension">.in</filename> to
+    <filename>po/POTFILES.in</filename>, being sure to list the file type
+    alongside it. For example, with a service file
+    <filename><replaceable>my-service</replaceable>.service.in</filename> in
+    the <filename class="directory">data</filename> directory in the source
+    tree, the <filename>POTFILES.in</filename> addition would be:
+    </para>
+    <informalexample>
+    <programlisting>[type: gettext/xml]data/my-service.service.in</programlisting>
+    </informalexample>
+  </step>
+  </procedure>
+
+  </section>
+
+  <section id="gettext-xml-files-applications">
+
+  <title>
+  Using <application>gettext</application> to localize translatable strings
+  </title>
+
+  <para>
+  <application>gettext</application> is used to show the localized versions of
+  translatable strings that have been extracted and translated. As most use of
+  gettext in a client application involves translatable strings only from that
+  application, it is common practice to bind the translataion domain of the
+  application as the default, which is normally done as follows:
+  </para>
+
+  <informalexample>
+  <programlisting>bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALEDIR);</programlisting>
+  </informalexample>
+
+  <para>
+  If the translation domain is bound in this way, then when requesting
+  translation of text from another project, such as the XML data files used by
+  libaccounts-glib, the domain must be specified explicitly. The
+  <function>dgettext</function> function can be used for this purpose. As an
+  example, for a hypothetical service <varname>foo_service</varname> calling
+  dgettext could be done as follows:
+  </para>
+
+  <informalexample>
+  <programlisting>dgettext (ag_service_get_i18n_domain (foo_service),
+          ag_service_get_description (foo_service));</programlisting>
+  </informalexample>
+
+  <para>
+  This returns the translated string, which can then be shown to the user.
+  </para>
+
+  </section>
+
+</section>

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[<!ENTITY version SYSTEM "version.xml">]>
+
+<refentry id="ag-tool">
+
+<refmeta>
+<refentrytitle>ag-tool</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">User Commands</refmiscinfo>
+<refmiscinfo class="source">libaccounts-glib</refmiscinfo>
+<refmiscinfo class="version">&version;</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ag-tool</refname>
+<refpurpose>Edit the libaccounts database</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">create-account</arg>
+<arg choice="plain"><replaceable>PROVIDER-ID</replaceable></arg>
+<arg>
+  <arg choice="plain"><replaceable>DISPLAY-NAME</replaceable></arg>
+  <group>
+    <arg choice="plain">enable</arg>
+    <arg choice="plain">disable</arg>
+  </group>
+</arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">delete-account</arg>
+<group choice="req">
+  <arg choice="plain"><replaceable>ACCOUNT-ID</replaceable></arg>
+  <arg choice="plain">all</arg>
+</group>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">disable-account</arg>
+<arg choice="plain"><replaceable>ACCOUNT-ID</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">disable-service</arg>
+<arg choice="plain"><replaceable>ACCOUNT-ID</replaceable></arg>
+<arg choice="plain"><replaceable>SERVICE-ID</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">enable-account</arg>
+<arg choice="plain"><replaceable>ACCOUNT-ID</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">enable-service</arg>
+<arg choice="plain"><replaceable>ACCOUNT-ID</replaceable></arg>
+<arg choice="plain"><replaceable>SERVICE-ID</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">get-account</arg>
+<arg choice="plain"><replaceable>ACCOUNT-ID</replaceable></arg>
+<arg choice="req">
+  <group choice="plain">
+    <arg choice="plain">int</arg>
+    <arg choice="plain">uint</arg>
+    <arg choice="plain">bool</arg>
+    <arg choice="plain">string</arg>
+  </group>
+  :
+  <arg choice="plain"><replaceable>key</replaceable></arg>
+</arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">get-service</arg>
+<arg choice="plain"><replaceable>ACCOUNT-ID</replaceable></arg>
+<arg choice="plain"><replaceable>SERVICE-ID</replaceable></arg>
+<arg choice="req">
+  <group choice="plain">
+    <arg choice="plain">int</arg>
+    <arg choice="plain">uint</arg>
+    <arg choice="plain">bool</arg>
+    <arg choice="plain">string</arg>
+  </group>
+  :
+  <arg choice="plain"><replaceable>key</replaceable></arg>
+</arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">list-accounts</arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">list-enabled</arg>
+<arg choice="opt"><replaceable>ACCOUNT-ID</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">list-providers</arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">list-services</arg>
+<arg choice="opt"><replaceable>ACCOUNT-ID</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">list-settings</arg>
+<arg choice="plain"><replaceable>ACCOUNT-ID</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+<command>ag-tool</command>
+<arg choice="plain">--help</arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+<command>ag-tool</command> is a simple tool to modify and query the accounts
+database.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Invocation</title>
+<para>
+<command>ag-tool</command> takes a required <replaceable>action</replaceable>
+as argument, followed by zero or more <replaceable>option</replaceable>s.
+</para>
+
+<refsect2>
+<title>Actions and options</title>
+<variablelist>
+  <varlistentry>
+    <term><option>delete-account</option></term>
+    <listitem>
+      <para>
+      Delete the account specified by <replaceable>ACCOUNT-ID</replaceable>.
+      Alternatively, use the special value <literal>all</literal> to delete all
+      accounts in the database.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>disable-account</option></term>
+    <listitem>
+      <para>
+      Disable the account specified by <replaceable>ACCOUNT-ID</replaceable>.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>disable-service</option></term>
+    <listitem>
+      <para>
+      Disable the service specified by <replaceable>SERVICE-ID</replaceable> on
+      the account given by <replaceable>ACCOUNT-ID</replaceable>.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>enable-account</option></term>
+    <listitem>
+      <para>
+      Enable the account given by <replaceable>ACCOUNT-ID</replaceable>.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>enable-service</option></term>
+    <listitem>
+      <para>
+      Enable the service specified by <replaceable>SERVICE-ID</replaceable> on
+      the account given by <replaceable>ACCOUNT-ID</replaceable>.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>get-account</option></term>
+    <listitem>
+      <para>
+      Gets the value of a settings key from the account given by
+      <replaceable>ACCOUNT-ID</replaceable>, where the type of the setting is
+      one of <literal>int</literal>, <literal>uint</literal>,
+      <literal>bool</literal> or <literal>string</literal>.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>get-service</option></term>
+    <listitem>
+      <para>
+      Gets the value of a settings key from the account given by
+      <replaceable>ACCOUNT-ID</replaceable> with the service given by
+      <replaceable>SERVICE-ID</replaceable>, where the type of the setting is
+      one of <literal>int</literal>, <literal>uint</literal>,
+      <literal>bool</literal> or <literal>string</literal>.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>list-accounts</option></term>
+    <listitem>
+      <para>List the accounts in the accounts database.</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>list-enabled</option></term>
+    <listitem>
+      <para>
+      If <replaceable>ACCOUNT-ID</replaceable> is specified, list services
+      enabled on the given account. If <replaceable>ACCOUNT-ID</replaceable> is
+      not given, list the enabled accounts.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>list-providers</option></term>
+    <listitem>
+      <para>List the available account providers.</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>list-services</option></term>
+    <listitem>
+      <para>
+      If <replaceable>ACCOUNT-ID</replaceable> is specified, list the services
+      on the given account. If <replaceable>ACCOUNT-ID</replaceable> is not
+      specified, list the available services.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>list-settings</option></term>
+    <listitem>
+      <para>
+      List the settings associated with the account given by
+      <replaceable>ACCOUNT-ID</replaceable>.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><option>--help</option></term>
+    <listitem>
+      <para>Show usage notes and exit.</para>
+    </listitem>
+  </varlistentry>
+</variablelist>
+</refsect2>
+
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+<command>ag-tool</command> was written by Aparna Nandyal
+<email>aparna.nand@wipro.com</email>.
+</para>
+
+<para>
+This manual page was written by David King
+<email>david.king@canonical.com</email>.
+</para>
+</refsect1>
+
+</refentry>

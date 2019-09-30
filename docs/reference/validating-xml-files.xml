@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd">
+
+<section id="validating-xml-files">
+
+<title>Validating XML files against the DTDs</title>
+
+<para>
+<acronym>DTD</acronym>s exist for the <acronym>XML</acronym> file formats
+supported by libaccounts-glib. Using these DTDs, it is possible to validate the
+XML data files for errors. This is especially useful during the build or
+testing process of applications which use libaccounts-glib, so that errors in
+data files can be caught early.
+</para>
+
+  <section id="validating-with-xmllint">
+
+  <title>Using <application>xmllint</application></title>
+
+  <para>
+  <command>xmllint</command> is part of <application>libxml2</application> and
+  can be used to validate an XML document against a DTD. A sample command to
+  validate the hypothetical XML file <filename>coolprovider.xml</filename> is:
+  </para>
+
+  <informalexample>
+  <programlisting>xmllint --noout --dtdvalid /usr/share/xml/accounts/schema/dtd/accounts-provider.dtd coolprovider.xml</programlisting>
+  </informalexample>
+
+  <para>
+  The <parameter class="option">--noout</parameter> argument suppresses
+  printing of the XML document, and
+  <parameter class="option">--dtdvalid</parameter> requests validation against
+  a DTD, given by the following argument. By default, the libaccounts-glib DTDs
+  are installed to
+  <filename class="directory">$(datadir)/xml/accounts/schema/dtd</filename>,
+  which usually expands to
+  <filename class="directory">/usr/share/xml/accounts/schema/dtd</filename>.
+  </para>
+
+  </section>
+
+</section>

@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/doxbook/xml/4.3/docbookx.dtd">
+
+<chapter id="libaccounts-running">
+
+<title>Running and debugging libaccounts-glib applications</title>
+
+<para>
+There are various debugging techniques available for applications which use
+libaccounts-glib.
+</para>
+
+  <section>
+
+  <title>Environment variables</title>
+
+  <para>
+  There are several environment variables which can aid in debugging
+  libaccounts-glib applications by changing runtime behavior.
+  </para>
+
+  <variablelist>
+  <title>Supported envionment variables</title>
+    <varlistentry>
+      <term>
+      <varname>ACCOUNTS</varname>
+      </term>
+      <listitem>
+        <para>
+        Specifies the path to the accounts database. If this is unset, the
+        database is stored in
+        <filename class="directory">$XDG_CONFIG_HOME/libaccounts-glib</filename>,
+        which normally expands to
+        <filename class="directory">~/.config/libaccounts-glib</filename>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+      <varname>AG_DEBUG</varname>
+      </term>
+      <listitem>
+        <para>
+        Can be set to a list of debug options, which causes libaccounts-glib to
+        print different debug information.
+        <variablelist>
+        <title><varname>AG_DEBUG</varname> options</title>
+          <varlistentry>
+            <term>
+            <literal>time</literal>
+            </term>
+            <listitem>
+              <para>
+              Print timing debug messages.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>
+            <literal>refs</literal>
+            </term>
+            <listitem>
+              <para>
+              Print reference-counting debug messages.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>
+            <literal>locks</literal>
+            </term>
+            <listitem>
+              <para>
+              Print locking debug messages.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>
+            <literal>queries</literal>
+            </term>
+            <listitem>
+              <para>
+              Print <acronym>SQL</acronym> query debug messages.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>
+            <literal>info</literal>
+            </term>
+            <listitem>
+              <para>
+              Print miscellaneous debug messages.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+        The special value <literal>all</literal> can be used to turn on all
+        debug options.
+        </para>
+        <note>
+          <para>
+          In order for debug messages to be printed, libaccounts-glib must have
+          been configured with the option <option>--enable-debug</option>.
+          Additionally, GLib must be configured to print debug messages at the
+          required debug level, for example with
+          <varname>G_MESSAGES_DEBUG</varname> set to <literal>all</literal>.
+          </para>
+        </note>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+      <varname>AG_APPLICATIONS</varname>
+      </term>
+      <listitem>
+        <para>
+        Specifies the path to search for
+        <xref linkend="application-file-format"/>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+      <varname>AG_PROVIDERS</varname>
+      </term>
+      <listitem>
+        <para>
+        Specifies the path to search for
+        <xref linkend="provider-file-format"/>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+      <varname>AG_SERVICES</varname>
+      </term>
+      <listitem>
+        <para>
+        Specifies the path to search for <xref linkend="service-file-format"/>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+      <varname>AG_SERVICE_TYPES</varname>
+      </term>
+      <listitem>
+        <para>
+        Specifies the path to search for
+        <xref linkend="service-type-file-format"/>.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+
+  </section>
+
+</chapter>

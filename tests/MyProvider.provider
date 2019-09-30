@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<provider id="MyProvider">
+  <name>My Provider</name>
+  <description>My Provider Description</description>
+  <translations>provider_i18n</translations>
+  <icon>general_myprovider</icon>
+  <domains>.*provider\.com</domains>
+  <plugin>oauth2</plugin>
+  <single-account>true</single-account>
+
+  <!-- default settings (account settings have precedence over these) -->
+  <template>
+    <group name="login">
+      <setting name="server">login.example.com</setting>
+      <setting name="remember-me" type="b">true</setting>
+    </group>
+    <setting name="color">green</setting>
+  </template>
+</provider>

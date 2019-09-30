@@ -1,0 +1,16 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+applicationfilesdir=${prefix}/share/@APPLICATION_FILES_DIR@
+servicefilesdir=${prefix}/share/@SERVICE_FILES_DIR@
+servicetypefilesdir=${prefix}/share/@SERVICE_TYPE_FILES_DIR@
+providerfilesdir=${prefix}/share/@PROVIDER_FILES_DIR@
+
+Name: libaccounts-glib
+Description: A low-level library for managing accounts settings.
+Requires: glib-2.0 gobject-2.0 gio-unix-2.0
+Require.private: libxml-2.0 sqlite3
+Version: @VERSION@
+Libs: -L${libdir} -laccounts-glib
+Cflags: -I${includedir}

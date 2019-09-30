@@ -1,0 +1,161 @@
+libaccounts-glib NEWS
+
+Version 1.15
+------------
+
+* Fix SQL query for ag_manager_list_by_service_type()
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=208
+
+Version 1.14
+------------
+
+* Add ag_provider_get_single_account
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=202
+* Add coverage reporting using lcov
+* Tests: increase test coverage
+* Tests: increase tolerance on blocking time
+
+Version 1.13
+------------
+
+* Allow disabling WAL journaling mode at configuration time; this is needed
+  in order to support accessing the DB in read-only mode
+* Tests: make test_signals_other_manager() more stable
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=200
+
+Version 1.12
+------------
+
+* Allow opening the DB in read-only mode
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=199
+* Application: do not require ".desktop" suffix
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=193
+* Account: emit "enabled" signal also on non-selected services
+* AgAccount: implement the GInitable interface
+* Tests: revert "don't run tests in parallel", disable gtkdoc tests
+
+Version 1.11
+------------
+
+* Tests: don't run tests in parallel
+
+Version 1.10
+------------
+
+* Vala: rename .vapi and .deps files
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=176
+* Tests: don't fail on critical warnings
+* AgService: load the XML file before returning tags
+* Removed deprecated g_type_init and bumped GObject dependency
+
+Version 1.9
+-----------
+
+* Fix compilation with GCC 4.8
+* Install tests
+* Add installcheck target for installed tests
+
+Version 1.8
+-----------
+
+* Account::enabled(): use NULL for global account
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=157
+* Do never return a NULL AgAuthData pointer
+
+Version 1.7
+-----------
+
+* Link with rt only when necessary.
+* Remove AEGIS dead code.
+* Update VAPI file.
+* Allow creating AuthData for a global account.
+
+Version 1.6
+-----------
+
+* Fix the check for pyoverridesdir for python3
+* Also support Python 2.7
+
+Version 1.5
+-----------
+
+* Allow provider XML files to specify which plugin manages the accounts of the
+  provider
+* Include ag-auth-data.h in accounts-glib.h
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=136
+
+Version 1.4
+-----------
+
+* Port to GDBus; drop the dependencies on libdbus and libdbus-glib.
+* Added support for the <template> element in .provider files. This allows to
+  specify default settings for the global account in the XML file.
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=111
+* Make some GObject properties readable.
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=125
+* New method: ag_account_store_async(), which uses GAsyncResult and allows for
+  a GCancellable option.
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=116
+* Add a few GObject properties:
+  AgAccount:
+   - enabled
+   - display-name
+  AgAccountService:
+   - enabled
+* Generate and install man pages from documentation for ag-tool and ag-backup.
+  Add a --disable-man flag so that packagers can disable the generation if
+  necessary.
+* Add GVariant-based APIs beside the GValue-based ones, which become
+  deprecated.
+* Enhance Python overrides to provide a more Pythonic API.
+  Fixes: http://code.google.com/p/accounts-sso/issues/detail?id=109
+
+Version 1.3
+-----------
+
+* Fix duplicate signal handling in AgManager
+* Fix test for implicit ordering of the returned AgAccountService list
+* Fix many compiler warnings
+
+Version 1.2
+-----------
+
+* Add new AgAccountsError and deprecate AgError
+* Distribute Vala bindings
+* Set G_LOG_DOMAIN for namespaced logging messages
+* Update D-Bus interface and object paths
+* Emit "enabled" signal on AgAccountService deletion
+* Remove an unnecessary D-Bus signal emission
+* Fix reading of timepsec on 64-bit machines
+* Move all typedefs to ag-types.h
+* Fix linker error in tools
+* Add description field to AgProvider, AgService and AgServiceType, and the
+  corresponding XML data files
+* Add Requires.private and application and service file path to pkg-config file
+* Fix GValue direction in introspection data
+* Add ag_provider_match_domain() for matching against the domain regex
+
+Version 1.1
+-----------
+
+* Add domain match regular expression to AgProvider
+* Document that AgAccountService can operate on global settings
+* Do not require building with Python support
+* Fix a couple of compiler warnings
+* Make AgManager:service-type and AgAccount:id properties readable
+* Add AgAuthData
+* Add some short examples to the API reference
+* Use dbus-test-runner if it is available
+* Store the accounts database in $XDG_CONFIG_HOME
+* Do not install test scripts
+* Add tag support for AgServiceType and AgService
+* Add AgApplication as a new boxed type
+* Unify scode for scanning data files
+* Several documentation fixes
+* Test changes to run from the source tree
+* Add several new test cases
+* Add support for string arrays and doubles
+* Remove AEGIS crypto support
+* Add AgAccountSettingsIter for bindings
+* Add PyGObject override file
+* Use GObject-Introspection for bindings

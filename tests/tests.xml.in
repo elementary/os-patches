@@ -1,0 +1,11 @@
+<testdefinition version="0.1">
+    <suite name="libaccounts-glib0-tests" domain="Accounts and SSO">
+        <set description="libaccounts-glib0-tests:accounts-glib-tests" name="@TESTDIR@/accounts-glib-test.sh">
+            <case description="libaccounts-glib-tests:accounts-glib-test.sh" name="accounts-glib-test.sh" type="Functional" level="Feature">
+                <step>(cd @TESTDIR@ &amp;&amp; TESTDATADIR=@TESTDATADIR@ ./accounts-glib-test.sh)</step>
+            </case>
+            <environments><scratchbox>true</scratchbox>
+            <hardware>true</hardware></environments>
+        </set>
+    </suite>
+</testdefinition>

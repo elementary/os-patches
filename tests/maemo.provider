@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<provider id="maemo">
+  <name>Example provider</name>
+  <description>An example provider</description>
+  <icon>example</icon>
+  <domains>.*example\.com</domains>
+  <!-- default settings (account settings have precedence over these) -->
+  <template>
+    <setting name="auth/method">dummy-method</setting>
+    <setting name="auth/mechanism">dummy-mechanism</setting>
+    <group name="auth/dummy-method/dummy-mechanism">
+      <setting name="id">879</setting>
+      <setting name="display">desktop</setting>
+      <setting name="from-provider">yes</setting>
+    </group>
+  </template>
+</provider>
