@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY appversion "2.28">
+<!ENTITY app "<application>gnome-bluetooth</application>">
+<!ENTITY appname "gnome-bluetooth">
+<!ENTITY legal SYSTEM "legal.xml">
+]>
+<article id="index" lang="fr">
+    <articleinfo>
+        <title>Manuel de gnome-bluetooth</title>
+        <copyright><year>2009</year> <holder>Baptiste Mille-Mathias</holder></copyright>
+        
+           <legalnotice id="legalnotice">
+         <para>Permission vous est donnée de copier, distribuer et/ou modifier ce document selon les termes de la licence de documentation libre GNU, Version 1.1 ou ultérieure publiée par la Free Software Foundation sans section inaltérable, sans texte de première page de couverture ni texte de dernière page de couverture. Vous trouverez un exemplaire de cette licence en suivant ce <ulink type="help" url="help:fdl">lien</ulink> ou dans le fichier COPYING-DOCS fourni avec le présent manuel.</para>
+          <para>Ce manuel fait partie de la collection de manuels GNOME distribués selon les termes de la licence de documentation libre GNU. Si vous souhaitez distribuer ce manuel indépendamment de la collection, vous devez joindre un exemplaire de la licence au document, comme indiqué dans la section 6 de celle-ci.</para>
+ 
+         <para>La plupart des noms utilisés par les entreprises pour distinguer leurs produits et services sont des marques déposées. Lorsque ces noms apparaissent dans la documentation GNOME et que les membres du projet de Documentation GNOME sont informés de l'existence de ces marques déposées, soit ces noms entiers, soit leur première lettre est en majuscule.</para>
+ 
+         <para>LE PRÉSENT DOCUMENT ET SES VERSIONS MODIFIÉES SONT FOURNIS SELON LES TERMES DE LA LICENCE DE DOCUMENTATION LIBRE GNU SACHANT QUE : <orderedlist>
+                 <listitem>
+                   <para>LE PRÉSENT DOCUMENT EST FOURNI « TEL QUEL », SANS AUCUNE GARANTIE, EXPRESSE OU IMPLICITE, Y COMPRIS, ET SANS LIMITATION, LES GARANTIES DE MARCHANDABILITÉ, D'ADÉQUATION À UN OBJECTIF PARTICULIER OU DE NON INFRACTION DU DOCUMENT OU DE SA VERSION MODIFIÉE. L'UTILISATEUR ASSUME TOUT RISQUE RELATIF À LA QUALITÉ, À LA PERTINENCE ET À LA PERFORMANCE DU DOCUMENT OU DE SA VERSION DE MISE À JOUR. SI LE DOCUMENT OU SA VERSION MODIFIÉE S'AVÉRAIT DÉFECTUEUSE, L'UTILISATEUR (ET NON LE RÉDACTEUR INITIAL, L'AUTEUR, NI TOUT AUTRE PARTICIPANT) ENDOSSERA LES COÛTS DE TOUTE INTERVENTION, RÉPARATION OU CORRECTION NÉCESSAIRE. CETTE DÉNÉGATION DE RESPONSABILITÉ CONSTITUE UNE PARTIE ESSENTIELLE DE CETTE LICENCE. AUCUNE UTILISATION DE CE DOCUMENT OU DE SA VERSION MODIFIÉE N'EST AUTORISÉE AUX TERMES DU PRÉSENT ACCORD, EXCEPTÉ SOUS CETTE DÉNÉGATION DE RESPONSABILITÉ ; EN AUCUNE CIRCONSTANCE ET SOUS AUCUNE INTERPRÉTATION DE LA LOI, QU'IL S'AGISSE D'UN DÉLIT CIVIL (Y COMPRIS LA NÉGLIGENCE), CONTRACTUEL OU AUTRE, L'AUTEUR, LE RÉDACTEUR INITIAL, TOUT PARTICIPANT OU TOUT DISTRIBUTEUR DE CE DOCUMENT OU DE SA VERSION MODIFIÉE, OU TOUT FOURNISSEUR DE L'UNE DE CES PARTIES NE POURRA ÊTRE TENU RESPONSABLE À L'ÉGARD DE QUICONQUE POUR TOUT DOMMAGE DIRECT, INDIRECT, PARTICULIER, OU ACCIDENTEL DE TOUT TYPE Y COMPRIS, SANS LIMITATION, LES DOMMAGES LIÉS À LA PERTE DE CLIENTÈLE, À UN ARRÊT DE TRAVAIL, À UNE DÉFAILLANCE OU UN MAUVAIS FONCTIONNEMENT INFORMATIQUE, OU À TOUT AUTRE DOMMAGE OU PERTE LIÉE À L'UTILISATION DU DOCUMENT ET DE SES VERSIONS MODIFIÉES, MÊME SI LADITE PARTIE A ÉTÉ INFORMÉE DE L'ÉVENTUALITÉ DE TELS DOMMAGES.</para>
+                 </listitem>
+           </orderedlist></para>
+   </legalnotice>
+ 
+
+        <authorgroup>
+            <author role="maintainer"><firstname>Baptiste</firstname> <surname>Mille-Mathias</surname> <affiliation> <orgname>Projet de documentation GNOME</orgname> <address> <email>baptiste.millemathias@gmail.com</email> </address> </affiliation></author>
+        </authorgroup>
+        
+        <!-- According to GNU FDL, revision history is mandatory if you are -->
+        <!-- modifying/reusing someone else's document.  If not, you can omit it. -->
+        <revhistory>
+            <revision><revnumber>1.0</revnumber> <date>Mars 2009</date> <revdescription>
+                    <para role="author">Baptiste Mille-Mathias <email>baptiste.millemathias@gmail.com</email></para>
+                </revdescription></revision>
+            <!-- Uncomment for future revision
+		<revision>
+		  <revnumber>1.1</revnumber>
+		  <date>March 2009</date>
+		  <revdescription>
+			 <para role="author">Baptiste Mille-Mathias
+			     <email>baptiste.millemathias@gmail.com</email></para>
+		  </revdescription>
+		</revision>
+		-->
+        </revhistory>
+        <releaseinfo>Ce manuel documente la version 2.28 de gnome-bluetooth.</releaseinfo>
+        <legalnotice>
+            <title>Votre avis</title>
+            <para>Pour signaler une anomalie ou émettre une suggestion concernant <application>gnome-bluetooth</application> ou ce manuel, procédez comme indiqué sur la <ulink url="ghelp:user-guide?feedback-bugs" type="help">page de réactions sur GNOME</ulink>.</para>
+        </legalnotice>
+        <abstract role="description">
+            <para><application>gnome-bluetooth</application> est une application pour gérer les périphériques Bluetooth dans le bureau GNOME.</para>
+        </abstract>
+    </articleinfo>
+    <indexterm><primary>gnome-bluetooth</primary></indexterm>
+    <indexterm><primary>Bluetooth</primary></indexterm>
+    <indexterm><primary>Communication</primary></indexterm>
+    
+    <sect1 id="gnome-bluetooth-intro">
+        <title>Introduction</title>
+        <para><application>gnome-bluetooth</application> est une application qui vous permet de gérer le Bluetooth pour le bureau GNOME. <itemizedlist>
+                <listitem>
+                    <para><application>gnome-bluetooth</application> permet d'envoyer des fichiers à vos périphériques Bluetooth ou de parcourir leur contenu.</para>
+                </listitem>
+                <listitem>
+                    <para>Il vous permet de vous connecter à vos périphériques, comme des casques d'écoute ou des passerelles audio.</para>
+                </listitem>
+                <listitem>
+                    <para>Vous pouvez ajouter ou supprimer des périphériques Bluetooth ou gérer leurs permissions.</para>
+                </listitem>
+            </itemizedlist></para>
+    </sect1>
+    
+    <sect1 id="gnome-bluetooth-applet">
+        <title>Applet Bluetooth</title>
+        
+        <para>L'applet est l'application résidente qui se trouve dans la zone de notification ; elle vous permet d'accéder rapidement à des fonctionnalités comme l'envoi de fichiers ou la gestion des périphériques.</para>
+        <figure id="gnome-bluetooth-applet-notification">
+            <title>Icône de l'applet Bluetooth dans la zone de notification</title>
+            <screenshot>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/bluetooth-applet.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </screenshot>
+        </figure>
+        
+        <sect2 id="gnome-bluetooth-applet-start">
+            <title>Lancement de l'applet Bluetooth</title>
+            
+            <para>L'applet <application>gnome-bluetooth</application> démarre automatiquement dès le début de votre session. Son icône est visible dans la zone de notification. Pour lancer l'applet manuellement, choisissez  <menuchoice><guimenu>Applications</guimenu><guimenu>Accessoires</guimenu><guimenu>Terminal</guimenu></menuchoice> et saisissez <command>bluetooth-applet</command>.</para>
+            <para>Pour empêcher l'applet de se lancer automatiquement, choisissez <menuchoice><guimenu>Système</guimenu><guimenu>Préférences</guimenu><guimenu>Applications au démarrage</guimenu></menuchoice> et décochez <guilabel>Gestionnaire Bluetooth</guilabel>.</para>
+        </sect2>
+        <sect2 id="gnome-bluetooh-applet-power">
+            <title>Désactivation de l'adaptateur Bluetooth</title>
+            <para>La désactivation de votre adaptateur Bluetooth bloque toutes communications, actuelles et futures, de ou vers cet adaptateur. Cela permet d'économiser l'énergie de la batterie de votre ordinateur portable et augmente son autonomie. C'est donc une bonne idée de désactiver votre périphérique Bluetooth lorsque vous ne l'utilisez pas.</para>
+            <para>Cliquez sur l'icône de l'applet et choisissez <menuchoice><guimenu>Désactiver Bluetooth</guimenu></menuchoice>. L'icône de notification est alors grisée.</para>
+        </sect2>
+
+        <sect2 id="gnome-bluetooth-applet-sending">
+            <title>Envoi de fichiers à un appareil Bluetooth</title>
+	    <para>Choisissez ce menu pour envoyer un fichier à un autre appareil. Un sélecteur de fichiers apparaît pour choisir le fichier à envoyer, puis vous devrez sélectionner l'appareil cible de cet envoi.</para>
+        </sect2>
+        
+        <sect2 id="gnome-bluetooth-applet-browsing">
+            <title>Parcours de périphériques Bluetooth</title>
+            <para>Choisissez ce menu pour parcourir le système de fichiers du périphérique directement dans votre gestionnaire de fichiers.</para>
+        </sect2>
+
+	<sect2 id="gnome-bluetooth-applet-devices">
+	    <title>Derniers périphériques utilisés</title>
+	    <para>Cette section affiche les les périphériques appariés auxquels vous pouvez vous connecter.</para>
+	    <para>Pour vous connecter au périphérique, cliquez sur son nom. Celui-ci apparaîtra en gras pour indiquer que vous êtes connecté.</para>
+	</sect2>
+        
+        <sect2 id="gnome-bluetooth-applet-setup">
+            <title>Ajout d'un nouveau périphérique</title>
+            
+            <para>Pour ajouter un nouveau périphérique (ce qui consiste à apparier votre adaptateur avec le périphérique), cliquez sur l'icône de l'applet et choisissez <guimenu>Configurer un nouveau périphérique</guimenu>. Un assistant graphique vous aide ensuite à configurer le périphérique.</para>
+            
+            <note>
+                <para>N'oubliez pas de régler votre périphérique externe en mode visible avant de lancer ce processus, sinon l'assistant ne pourra pas le trouver.</para>
+            </note>
+            
+            <para>L'assistant affiche tous les périphériques visibles qu'il découvre à proximité. Vous pouvez filtrer la liste des périphériques en choisissant le type de périphériques que vous recherchez.</para>
+            
+            <figure id="gnome-bluetooth-wizard-img">
+                <title>Recherche de périphérique dans l'assistant</title>
+                <screenshot>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="figures/bluetooth-wizard.png" format="PNG"/>
+                        </imageobject>
+                    </mediaobject>
+                </screenshot>
+            </figure>
+            
+            <para>Si le périphérique possède une clé de liaison fixe, choisissez <guibutton>Options de la clé de liaison</guibutton>. Dans la boîte de dialogue qui apparaît, saisissez la clé de liaison à utiliser.</para>
+            <para>Choisissez <guibutton>Continuer</guibutton> pour passer à l'étape de la liaison. Si une clé de liaison fixe a été saisie lors de l'étape précédente, l'appariement s'effectue automatiquement. Dans le cas contraire, vous voyez apparaître une clé de liaison à saisir sur le périphérique. Saisissez la clé sur le périphérique. Dès que cette étape est terminée, le périphérique et votre adaptateur sont appariés.</para>
+        </sect2>
+
+        <sect2 id="gnome-bluetooth-applet-preferences">
+            <title>Préférences</title>
+            
+            <para>Cliquez sur l'icône de l'applet et choisissez <menuchoice><guilabel>Préférences</guilabel></menuchoice>. La boîte de dialogue des préférences apparaît.</para>
+            <para>Pour plus d'informations sur les préférences, consultez la section <xref linkend="gnome-bluetooth-preferences"/>.</para>
+        </sect2>
+    </sect1>
+    
+    <sect1 id="gnome-bluetooth-preferences">
+        <title>Préférences</title>
+        <para>La boîte de dialogue des préférences de <application>gnome-bluetooth</application> permet de gérer vos différents périphériques Bluetooth ou de modifier les paramètres de votre adaptateur Bluetooth.</para>
+        
+        <figure id="gnome-bluetooth-prefs-img">
+            <title>Boîte de dialogue des préférences</title>
+            <screenshot>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/bluetooth-properties.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </screenshot>
+        </figure>
+            
+	<sect2 id="gnome-bluetooth-prefs-adapter-discover">
+	    <title>Visibilité</title>
+	    
+	    <para>Lorsque votre adaptateur est réglé sur <guilabel>Visible</guilabel>, tout périphérique Bluetooth à proximité pourra le voir et sera donc en mesure de demander un appariement.</para>
+	    <important>
+		<para>Comme d'autres types de réseau, Bluetooth présente des risques de sécurité. Le masquage de la visibilité de votre adaptateur peut donc se révéler être un bon moyen de limiter les possibilités d'intrusion.</para>
+	    </important>
+	    <para>Le fait de rendre visible votre adaptateur n'est utile que si vous prévoyez de le lier à une autre périphérique. Ensuite, vous pouvez de nouveau masquer sa visibilité en décochant la case <guilabel>Visible</guilabel>.</para>
+	    <note>
+		<para>Lorsqu'un périphérique Bluetooth est invisible, la communication avec les autres appareils déjà liés est toujours possible.</para>
+	    </note>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-adapter-name">
+	    <title>Nom convivial de l'adaptateur</title>
+	    <para>Le nom convivial est un alias de l'adresse utilisée pour identifier chaque périphérique Bluetooth.</para>
+	    <para>Par défaut, le nom convivial de l'adaptateur est <envar>NOM_HÔTE</envar>-0 (où <envar>NOM_HÔTE</envar> est le nom de votre ordinateur). Pour le modifier, saisissez le nom souhaité dans la zone de texte. La modification prend effet immédiatement.</para>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-adapter-devices">
+	    <title>Périphériques connus</title>
+	    <para><guilabel>Périphériques connus</guilabel> affiche la liste des périphériques Bluetooth appariés et vous permet de les gérer. Vous pouvez les supprimer, vous connecter à l'un d'eux ou en ajouter de nouveaux. <itemizedlist>
+		    <listitem>
+			<para>Configuration d'un nouveau périphérique, comme décrit dans <xref linkend="gnome-bluetooth-applet-setup"/>.</para>
+		    </listitem>
+		    <listitem>
+			<para>Connexion/déconnexion à un périphérique.</para>
+		    </listitem>
+		    <listitem>
+			<para>Suppression d'un périphérique. Cette suppression détruit l'appariement entre l'adaptateur et le périphérique, ce qui empêche toute communication. Vous devez les apparier à nouveau si vous souhaitez de nouveau utiliser ce périphérique, par exemple pour transmettre des fichiers.</para>
+		    </listitem>
+		</itemizedlist></para>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-show-icon">
+	    <title>Affichage de l'icône Bluetooth</title>
+	    <para>Vous pouvez afficher ou masquer l'icône Bluetooth sur le tableau de bord. Consultez <xref linkend="gnome-bluetooth-applet"/> pour plus de détails au sujet des fonctionnalités de l'applet.</para>
+	    
+	    <important>
+		<para>Si vous désactivez l'icône sur le tableau de bord, seul un nombre limité d'actions sont disponibles.</para>
+	    </important>
+	</sect2>
+
+	<sect2 id="gnome-bluetooth-prefs-receive">
+	    <title>Réception de fichiers</title>
+	    
+	    <para>Cliquez sur le bouton <guilabel>Recevoir des fichiers</guilabel> pour faire apparaître la boîte de dialogue des <guilabel>Préférences du partage de fichiers personnels</guilabel>. C'est là que vous pouvez configurer la réception et le partage de fichiers par Bluetooth.</para>
+	    <important>
+		<para>Cette fonctionnalité n'est pas fournie par <application>gnome-bluetooth</application>. Il faut installer pour cela <application>gnome-user-share</application>.</para>
+		<para>Pour en savoir plus, consultez le <ulink type="help" url="help:gnome-user-share">manuel du partage de fichiers personnels</ulink> : <ulink type="help" url="help:gnome-user-share#gnome-user-share-bluetooth-receiving">réception</ulink> et <ulink type="help" url="help:gnome-user-share#gnome-user-share-enabling-bluetooth">partage</ulink>.</para>
+	    </important>
+	</sect2>
+    </sect1>
+
+    <sect1 id="gnome-bluetooth-FAQ">
+        <title>Foire aux questions</title>
+        <qandaset>
+            <qandaentry>
+                <question>
+                    <para>Je ne vois pas comment recevoir des fichiers par Bluetooth sur mon ordinateur dans <application>gnome-bluetooth</application>, suis-je aveugle ?</para>
+                </question>
+                <answer>
+                    <para>La réception de fichiers n'est pas implémentée dans <application>gnome-bluetooth</application>, mais dans <application>gnome-user-share</application>. Vous devez donc installer cette application pour pouvoir recevoir des fichiers par Bluetooth. Le bouton présenté dans <xref linkend="gnome-bluetooth-prefs-receive"/> n'est qu'un moyen de lancer sa boîte de dialogue de configuration.</para>
+                </answer>
+            </qandaentry>
+            <qandaentry>
+                <question>
+                    <para>J'ai trouvé une anomalie dans <application>gnome-bluetooth</application>, que puis-je faire ?</para>
+                </question>
+                <answer>
+                    <para>Vous devriez soumettre un rapport d'anomalie sur le site <ulink url="http://bugzilla.gnome.org/enter_bug.cgi?product=gnome-bluetooth"/>.</para>
+                </answer>
+            </qandaentry>
+            <!--
+	  <qandaentry>
+	      <question>
+		  <para></para>
+	      </question>
+	      <answer>
+		  <para></para>
+	      </answer>
+	  </qandaentry>-->
+        </qandaset>
+    </sect1>
+    
+    
+</article>

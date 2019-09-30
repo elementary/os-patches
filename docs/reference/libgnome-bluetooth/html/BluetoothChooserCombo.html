@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>BluetoothChooserCombo</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="index.html" title="gnome-bluetooth Reference Manual">
+<link rel="up" href="ch01.html" title="API Reference">
+<link rel="prev" href="BluetoothChooserButton.html" title="BluetoothChooserButton">
+<link rel="next" href="gnome-bluetooth-bluetooth-plugin.html" title="bluetooth-plugin">
+<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="BluetoothChooserButton.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">gnome-bluetooth Reference Manual</th>
+<td><a accesskey="n" href="gnome-bluetooth-bluetooth-plugin.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#BluetoothChooserCombo.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#BluetoothChooserCombo.description" class="shortcut">Description</a>
+                   | 
+                  <a href="#BluetoothChooserCombo.object-hierarchy" class="shortcut">Object Hierarchy</a>
+                   | 
+                  <a href="#BluetoothChooserCombo.implemented-interfaces" class="shortcut">Implemented Interfaces</a>
+                   | 
+                  <a href="#BluetoothChooserCombo.properties" class="shortcut">Properties</a>
+                   | 
+                  <a href="#BluetoothChooserCombo.signals" class="shortcut">Signals</a>
+</td></tr>
+</table>
+<div class="refentry">
+<a name="BluetoothChooserCombo"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="BluetoothChooserCombo.top_of_page"></a>BluetoothChooserCombo</span></h2>
+<p>BluetoothChooserCombo — a Bluetooth chooser combo button</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.stability-level"></a><h2>Stability Level</h2>
+Stable, unless otherwise indicated
+</div>
+<div class="refsynopsisdiv">
+<a name="BluetoothChooserCombo.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+#include &lt;bluetooth-chooser-combo.h&gt;
+
+#define             <a class="link" href="BluetoothChooserCombo.html#BLUETOOTH-CHOOSER-COMBO-FIRST-DEVICE:CAPS" title="BLUETOOTH_CHOOSER_COMBO_FIRST_DEVICE">BLUETOOTH_CHOOSER_COMBO_FIRST_DEVICE</a>
+                    <a class="link" href="BluetoothChooserCombo.html#BluetoothChooserCombo-struct" title="BluetoothChooserCombo">BluetoothChooserCombo</a>;
+struct              <a class="link" href="BluetoothChooserCombo.html#BluetoothChooserComboClass" title="struct BluetoothChooserComboClass">BluetoothChooserComboClass</a>;
+<a href="http://developer.gnome.org/gtk2/GtkWidget.html"><span class="returnvalue">GtkWidget</span></a> *         <a class="link" href="BluetoothChooserCombo.html#bluetooth-chooser-combo-new" title="bluetooth_chooser_combo_new ()">bluetooth_chooser_combo_new</a>         (<em class="parameter"><code><span class="type">void</span></code></em>);
+</pre>
+</div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="synopsis">
+  GObject
+   +----GInitiallyUnowned
+         +----<a href="http://developer.gnome.org/gtk2/GtkWidget.html">GtkWidget</a>
+               +----<a href="http://developer.gnome.org/gtk2/GtkContainer.html">GtkContainer</a>
+                     +----<a href="http://developer.gnome.org/gtk2/GtkBox.html">GtkBox</a>
+                           +----BluetoothChooserCombo
+</pre>
+</div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.implemented-interfaces"></a><h2>Implemented Interfaces</h2>
+<p>
+BluetoothChooserCombo implements
+ AtkImplementorIface,  <a href="http://developer.gnome.org/gtk2/GtkBuildable.html">GtkBuildable</a> and  <a href="http://developer.gnome.org/gtk2/gtk3-Orientable.html#GtkOrientable">GtkOrientable</a>.</p>
+</div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.properties"></a><h2>Properties</h2>
+<pre class="synopsis">
+  "<a class="link" href="BluetoothChooserCombo.html#BluetoothChooserCombo--chooser" title='The "chooser" property'>chooser</a>"                  <a class="link" href="BluetoothChooser.html" title="BluetoothChooser"><span class="type">BluetoothChooser</span></a>*     : Read
+  "<a class="link" href="BluetoothChooserCombo.html#BluetoothChooserCombo--device" title='The "device" property'>device</a>"                   <span class="type">gchar</span>*                : Read / Write
+</pre>
+</div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.signals"></a><h2>Signals</h2>
+<pre class="synopsis">
+  "<a class="link" href="BluetoothChooserCombo.html#BluetoothChooserCombo-chooser-created" title='The "chooser-created" signal'>chooser-created</a>"                                : <code class="literal">Run Last</code>
+</pre>
+</div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.description"></a><h2>Description</h2>
+<p>
+A combo box used to select Bluetooth devices.
+</p>
+</div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.details"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="BLUETOOTH-CHOOSER-COMBO-FIRST-DEVICE:CAPS"></a><h3>BLUETOOTH_CHOOSER_COMBO_FIRST_DEVICE</h3>
+<pre class="programlisting">#define BLUETOOTH_CHOOSER_COMBO_FIRST_DEVICE "00:00:00:00:00:00"
+</pre>
+<p>
+A convenience value used to select the first device regardless of its address.
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BluetoothChooserCombo-struct"></a><h3>BluetoothChooserCombo</h3>
+<pre class="programlisting">typedef struct _BluetoothChooserCombo BluetoothChooserCombo;</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BluetoothChooserComboClass"></a><h3>struct BluetoothChooserComboClass</h3>
+<pre class="programlisting">struct BluetoothChooserComboClass {
+  GtkBoxClass parent_class;
+
+  void (*chooser_created) (BluetoothChooserCombo *self, GtkWidget *chooser);
+};
+</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-chooser-combo-new"></a><h3>bluetooth_chooser_combo_new ()</h3>
+<pre class="programlisting"><a href="http://developer.gnome.org/gtk2/GtkWidget.html"><span class="returnvalue">GtkWidget</span></a> *         bluetooth_chooser_combo_new         (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>
+Returns a new <a class="link" href="BluetoothChooserCombo.html" title="BluetoothChooserCombo"><span class="type">BluetoothChooserCombo</span></a> widget.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a class="link" href="BluetoothChooserCombo.html" title="BluetoothChooserCombo"><span class="type">BluetoothChooserCombo</span></a> widget.</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.property-details"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="BluetoothChooserCombo--chooser"></a><h3>The <code class="literal">"chooser"</code> property</h3>
+<pre class="programlisting">  "chooser"                  <a class="link" href="BluetoothChooser.html" title="BluetoothChooser"><span class="type">BluetoothChooser</span></a>*     : Read</pre>
+<p>
+The <a class="link" href="BluetoothChooser.html" title="BluetoothChooser"><span class="type">BluetoothChooser</span></a> used in the widget
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BluetoothChooserCombo--device"></a><h3>The <code class="literal">"device"</code> property</h3>
+<pre class="programlisting">  "device"                   <span class="type">gchar</span>*                : Read / Write</pre>
+<p>
+The Bluetooth address of the selected device or <code class="literal">NULL</code>
+</p>
+<p>Default value: NULL</p>
+</div>
+</div>
+<div class="refsect1">
+<a name="BluetoothChooserCombo.signal-details"></a><h2>Signal Details</h2>
+<div class="refsect2">
+<a name="BluetoothChooserCombo-chooser-created"></a><h3>The <code class="literal">"chooser-created"</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="BluetoothChooserCombo.html" title="BluetoothChooserCombo"><span class="type">BluetoothChooserCombo</span></a> *self,
+                                                        <span class="type">GObject</span>               *chooser,
+                                                        <span class="type">gpointer</span>               user_data)      : <code class="literal">Run Last</code></pre>
+<p>
+The signal is sent when a popup dialogue is created for the user to select
+a device. This signal allows you to change the configuration and filtering
+of the tree from its defaults.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em> :</span></p></td>
+<td>a <a class="link" href="BluetoothChooserCombo.html" title="BluetoothChooserCombo"><span class="type">BluetoothChooserCombo</span></a> widget</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>chooser</code></em> :</span></p></td>
+<td>a <a class="link" href="BluetoothChooser.html" title="BluetoothChooser"><span class="type">BluetoothChooser</span></a> widget</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.19</div>
+</body>
+</html>

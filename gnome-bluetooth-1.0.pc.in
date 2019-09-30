@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+applet_libdir=@libdir@/gnome-bluetooth
+applet_libs=-Wl,--rpath=${applet_libdir} -L${applet_libdir} -lgnome-bluetooth-applet
+
+Name: gnome-bluetooth-1.0
+Description: Widgets for Bluetooth device selection
+Version: @VERSION@
+Requires: gtk+-3.0 gio-2.0
+Libs: -L${libdir} -lgnome-bluetooth
+Cflags: -I${includedir}/gnome-bluetooth

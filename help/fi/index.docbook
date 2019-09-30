@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY appversion "2.28">
+<!ENTITY app "<application>gnome-bluetooth</application>">
+<!ENTITY appname "gnome-bluetooth">
+<!ENTITY legal SYSTEM "legal.xml">
+]>
+<article id="index" lang="fi">
+    <articleinfo>
+        <title>gnome-bluetooth ohjekirja</title>
+        <copyright lang="C">
+            <year>2009</year>
+            <holder>Baptiste Mille-Mathias</holder>
+        </copyright>
+        
+           <legalnotice id="legalnotice">
+         <para lang="C">
+           Permission is granted to copy, distribute and/or modify this
+           document under the terms of the GNU Free Documentation
+           License (GFDL), Version 1.1 or any later version published
+           by the Free Software Foundation with no Invariant Sections,
+           no Front-Cover Texts, and no Back-Cover Texts.  You can find
+           a copy of the GFDL at this <ulink type="help" url="help:fdl">link</ulink> or in the file COPYING-DOCS
+           distributed with this manual.
+          </para>
+          <para>Tämä käyttöohje on osa Gnomen käyttöohjekokoelmaa ja levitetään GFDL-lisenssin alaisena. Jos haluat levittää tätä käyttöohjetta erillään kokoelmasta, voit tehdä sen liittämällä lisenssin kopion ohjeen mukaan, kuten lisenssin luku 6 sanelee.</para>
+ 
+         <para>Monet tuotteiden ja palveluiden nimet ovat tuotemerkkejä. Gnomen dokumentointiprojektissa nämä nimet pyritään kirjoittamaan suuraakkosin tai isolla alkukirjaimella, sikäli kun projektin jäsenet tietävät kyseisistä tuotemerkeistä.</para>
+ 
+         <para lang="C">
+           DOCUMENT AND MODIFIED VERSIONS OF THE DOCUMENT ARE PROVIDED
+           UNDER  THE TERMS OF THE GNU FREE DOCUMENTATION LICENSE
+           WITH THE FURTHER UNDERSTANDING THAT:
+ 
+           <orderedlist>
+                 <listitem>
+                   <para lang="C">DOCUMENT IS PROVIDED ON AN "AS IS" BASIS,
+                     WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR
+                     IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES
+                     THAT THE DOCUMENT OR MODIFIED VERSION OF THE
+                     DOCUMENT IS FREE OF DEFECTS MERCHANTABLE, FIT FOR
+                     A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE
+                     RISK AS TO THE QUALITY, ACCURACY, AND PERFORMANCE
+                     OF THE DOCUMENT OR MODIFIED VERSION OF THE
+                     DOCUMENT IS WITH YOU. SHOULD ANY DOCUMENT OR
+                     MODIFIED VERSION PROVE DEFECTIVE IN ANY RESPECT,
+                     YOU (NOT THE INITIAL WRITER, AUTHOR OR ANY
+                     CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY
+                     SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER
+                     OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS
+                     LICENSE. NO USE OF ANY DOCUMENT OR MODIFIED
+                     VERSION OF THE DOCUMENT IS AUTHORIZED HEREUNDER
+                     EXCEPT UNDER THIS DISCLAIMER; AND
+                     UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL
+                     THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE),
+                     CONTRACT, OR OTHERWISE, SHALL THE AUTHOR,
+                     INITIAL WRITER, ANY CONTRIBUTOR, OR ANY
+                     DISTRIBUTOR OF THE DOCUMENT OR MODIFIED VERSION
+                     OF THE DOCUMENT, OR ANY SUPPLIER OF ANY OF SUCH
+                     PARTIES, BE LIABLE TO ANY PERSON FOR ANY
+                     DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
+                     CONSEQUENTIAL DAMAGES OF ANY CHARACTER
+                     INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS
+                     OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR
+                     MALFUNCTION, OR ANY AND ALL OTHER DAMAGES OR
+                     LOSSES ARISING OUT OF OR RELATING TO USE OF THE
+                     DOCUMENT AND MODIFIED VERSIONS OF THE DOCUMENT,
+                     EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF
+                     THE POSSIBILITY OF SUCH DAMAGES.
+                   </para>
+                 </listitem>
+           </orderedlist>
+         </para>
+   </legalnotice>
+ 
+
+        <authorgroup>
+            <author role="maintainer" lang="C">
+                <firstname>Baptiste</firstname>
+                <surname>Mille-Mathias</surname>
+                <affiliation>
+                    <orgname>GNOME Documentation Project</orgname>
+                    <address>
+                        <email>baptiste.millemathias@gmail.com</email>
+                    </address>
+                </affiliation>
+            </author>
+        </authorgroup>
+        
+        <!-- According to GNU FDL, revision history is mandatory if you are -->
+        <!-- modifying/reusing someone else's document.  If not, you can omit it. -->
+        <revhistory>
+            <revision lang="C">
+                <revnumber>1.0</revnumber>
+                <date>March 2009</date>
+                <revdescription>
+                    <para role="author" lang="C">Baptiste Mille-Mathias
+                        <email>baptiste.millemathias@gmail.com</email>
+                    </para>
+                </revdescription>
+            </revision>
+            <!-- Uncomment for future revision
+		<revision>
+		  <revnumber>1.1</revnumber>
+		  <date>March 2009</date>
+		  <revdescription>
+			 <para role="author">Baptiste Mille-Mathias
+			     <email>baptiste.millemathias@gmail.com</email></para>
+		  </revdescription>
+		</revision>
+		-->
+        </revhistory>
+        <releaseinfo>Tämä opas kuvaa gnome-bluetoothin versiota 2.28.</releaseinfo>
+        <legalnotice>
+            <title>Palaute</title>
+            <para>Jos haluat ilmoittaa ohjelmavirheestä tai sinulla on ehdotuksia <application>Gnomen bluetoothista</application> tai tästä käyttöohjeesta, seuraa ohjeita <ulink url="ghelp:user-guide?feedback-bugs" type="help">Gnomen palautesivulta</ulink>.</para>
+        </legalnotice>
+        <abstract role="description">
+            <para><application>gnome-bluetooth</application> on ohjelmasovellus, jolla hallinnoidaan Bluetooth-laitteita GNOME-työpöydällä.</para>
+        </abstract>
+    </articleinfo>
+    <indexterm lang="C">
+        <primary>gnome-bluetooth</primary>
+    </indexterm>
+    <indexterm lang="C">
+        <primary>Bluetooth</primary>
+    </indexterm>
+    <indexterm lang="C">
+        <primary>Communication</primary>
+    </indexterm>
+    
+    <sect1 id="gnome-bluetooth-intro">
+        <title>Esittely</title>
+        <para lang="C">
+            <application>gnome-bluetooth</application> is an application that let you manage Bluetooth in the GNOME destkop.
+            <itemizedlist>
+                <listitem>
+                    <para lang="C">
+                        <application>gnome-bluetooth</application> permits to send files to your Bluetooth devices, or browse their content.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para lang="C">
+			Connect to your devices, like headset or audio gateway.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para lang="C">
+                        You can add or delete Bluetooth devices, or manage their permissions.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+    </sect1>
+    
+    <sect1 id="gnome-bluetooth-applet">
+        <title>Bluetooth-sovelma</title>
+        
+        <para>Sovelma on uusin sovellus, joka löytyy tiedotesovelmasta, jolla pääset nopeasti käsiksi ominaisuuksiin, kuten tiedostojen lähettämiseen tai laitteiden hallinnointiin.</para>
+        <figure id="gnome-bluetooth-applet-notification">
+            <title>Bluetooth-sovelmakuvake tiedotetarjottimella</title>
+            <screenshot>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/bluetooth-applet.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </screenshot>
+        </figure>
+        
+        <sect2 id="gnome-bluetooth-applet-start">
+            <title>Bluetooth-sovelman käynnistäminen</title>
+            
+            <para lang="C">
+                The <application>gnome-bluetooth</application> applet is started automatically when you log into your session, and you can find its icon in the
+                notification zone. To launch manually the applet, open menu
+                <menuchoice>
+                    <guimenu>Applications</guimenu><guimenu>Accessories</guimenu><guimenu>Terminal</guimenu>
+                </menuchoice>
+                and type <command>bluetooth-applet</command>.
+            </para>
+            <para lang="C">
+                To prevent launching of the applet in your desktop, open menu
+                <menuchoice>
+                    <guimenu>System</guimenu><guimenu>Preferences</guimenu><guimenu>Session</guimenu>
+                </menuchoice>
+                and disable <guilabel>Bluetooth Manager</guilabel>.
+            </para>
+        </sect2>
+        <sect2 id="gnome-bluetooh-applet-power">
+            <title>Bluetooth-sovittimen kytkeminen pois käytöstä</title>
+            <para>Bluetooth-sovittimen kytkeminen pois käytöstä pysäyttää kaiken viestinnän sinun ja Bluetooth-sovittimen välillä nyt ja tulevaisuudessa. Bluetooth-sovittimen kytkeminen pois käytöstä säästää kannettavasi akkua, joten pystyt käyttämään konetta pidempään. Silloin voi olla hyvä ajatus kytkeä Bluetooth-sovitin pois käytöstä, kun et käytä sitä.</para>
+            <para>Napsauta sovelman kuvaketta, ja valitse <menuchoice><guimenu>Kytke Bluetooth pois päältä </guimenu></menuchoice>. Tiedotekuvake muuttuu harmaaksi.</para>
+        </sect2>
+
+        <sect2 id="gnome-bluetooth-applet-sending">
+            <title>Tiedostojen lähettäminen Bluetooth-laitteelle</title>
+	    <para>Valitse tämä valikko lähettääksesi tiedoston laitteelle. Esiin tulee tiedonstonvalinta, josta voit valita haluamasi tiedoston ja laitteen, johon lähettää tiedosto.</para>
+        </sect2>
+        
+        <sect2 id="gnome-bluetooth-applet-browsing">
+            <title>Bluetooth-laitteiden selaaminen</title>
+            <para>Valitse tämä valikko selataksesi laitteen tiedostojärjestelmää suoraan tiedostonhallinnassasi.</para>
+        </sect2>
+
+	<sect2 id="gnome-bluetooth-applet-devices">
+	    <title>Viimeksi käytetyt laitteet</title>
+	    <para>Tämä osio näyttää paritetut laitteesi, joihin voit ottaa yhteyden.</para>
+	    <para>Ottaaksesi yhteyden laitteeseen, napsauta sen nimeä. Nimi muuttuu paksunnetuksi, mikä tarkoittaa, että yhteys on luotu.</para>
+	</sect2>
+        
+        <sect2 id="gnome-bluetooth-applet-setup">
+            <title>Uuden laitteen lisääminen</title>
+            
+            <para>Lisätäksesi uuden laitteen (mikä tarkoittaa sovittimesi parittamista laitteen kanssa), napsauta sovelman kuvaketta, ja valitse <guimenu>Tee uuden laitteen asetukset...</guimenu>. Kuva-avustaja auttaa sinua asetusten tekemisessä laitetta varten.</para>
+            
+            <note>
+                <para>Muista laittaa etälaitteesi löydettävään tilaan ennen kuin aloitat, koska muuten avustaja ei löydä sitä.</para>
+            </note>
+            
+            <para>Avustaja näyttää ympäristöstä löytämänsä laitteet. Voit suodattaa listaa valitsemalla, minkätyyppisiä laitteita olet etsimässä.</para>
+            
+            <figure id="gnome-bluetooth-wizard-img">
+                <title>Laitteiden etsiminen avustajassa</title>
+                <screenshot>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="figures/bluetooth-wizard.png" format="PNG"/>
+                        </imageobject>
+                    </mediaobject>
+                </screenshot>
+            </figure>
+            
+            <para>Jos laitteessasi on käytössä salasana, valitse <guibutton>Salasanavaihtoehdot...</guibutton>, ja valitse esiintulevassa valintaikkunassa, mitä salasanaa käyttää.</para>
+            <para>Valitse <guibutton>Jatka</guibutton> jatkaaksesi paritusta. Jos määrittelit edellisessä vaiheessa salasanan, paritus tapahtuu automaattisesti. Muuten joudut syöttämään laitteen salanan, Kun olet antanut sen, laitteesi ja sovittimesi on paritettu.</para>
+        </sect2>
+
+        <sect2 id="gnome-bluetooth-applet-preferences">
+            <title>Asetukset</title>
+            
+            <para lang="C">
+                Click on the icon of the applet, and choose 
+                <menuchoice>
+                    <guilabel>Preferences</guilabel>
+                </menuchoice>,
+                the preferences dialog will appear.
+            </para>
+            <para>Saadaksesi lisää tietoa asetuksista, katso kohtaa <xref linkend="gnome-bluetooth-preferences"/></para>
+        </sect2>
+    </sect1>
+    
+    <sect1 id="gnome-bluetooth-preferences">
+        <title>Asetukset</title>
+        <para><application>Gnome-bluetoothin</application> asetusvalikosta voit hallinnoida Bluetooth-laitteitasi tai vaihtaa Bluetooth-sovittimiesi ominaisuuksia.</para>
+        
+        <figure id="gnome-bluetooth-prefs-img">
+            <title>Asetusvalikko</title>
+            <screenshot>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/bluetooth-properties.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </screenshot>
+        </figure>
+            
+	<sect2 id="gnome-bluetooth-prefs-adapter-discover">
+	    <title>Löydettävissä</title>
+	    
+	    <para>Kun sovittimesi on asetettu tilaan <guilabel>Löydettävissä</guilabel>, mikä tahansa Bluetooth-laite lähistöllä näkee sen, ja pystyy anomaan parittamista.</para>
+	    <important>
+		<para>Bluetoothissa, kuten muissakin verkkotyypeissä, on turvallisuusriskejä, joten on hyvä ajatus asettaa sovittimesi näkymättömiin muille laitteille, jotta murtautuminen olisi hankalampaa.</para>
+	    </important>
+	    <para>Tämä on ainoa käytännöllinen tapa asettaa laitteesi näkyväksi, jos aiot parittaa sen toisen laitteen kanssa. Kun olet tehnyt sen, voit poistaa valinnan <guilabel>Löydettävissä</guilabel>.</para>
+	    <note>
+		<para>Kun laitteesi ei ole löydettävissä, kummunikointi valmiiksi paritettujen Bluetooth-laitteiden kanssa on kuitenkin mahdollista.</para>
+	    </note>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-adapter-name">
+	    <title>Sovittimen näkyvä nimi</title>
+	    <para>Näkyvä nimi on osoitteen korvike, jonka avulla on helpompaa muistaa ja tunnistaa kukin kytketty Bluetooth-laite.</para>
+	    <para>Oletusarvoisesti sovittimen näkyvä nimi on <envar>ISÄNTÄNIMI</envar>-0 (jossa <envar>ISÄNTÄNIMI</envar> on tietokoneesi nimi). Vaihtaaksesi sitä, muuta tekstiä ja kirjoita haluamasi nimi. Muutos astuu voimaan välittömästi.</para>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-adapter-devices">
+	    <title>Tunnetut laitteet</title>
+	    <para lang="C">
+		<guilabel>Known devices</guilabel> lists the Bluetooth devices you paired and let you manage them,
+		like deleting them, connect to them or adding new one.
+		<itemizedlist>
+		    <listitem>
+			<para lang="C">
+			    Setup new device, as described in <xref linkend="gnome-bluetooth-applet-setup"/>
+			</para>
+		    </listitem>
+		    <listitem>
+			<para lang="C">
+			    Connect / Disconnect to a device.
+			</para>
+		    </listitem>
+		    <listitem>
+			<para lang="C">
+			    Device Deletion. Deletion will suppress pairing between the adapter and the device, and
+			    no communication will be allowed. You need to pair them together again if you want transfer
+			    files for instance.
+			</para>
+		    </listitem>
+		</itemizedlist>
+	    </para>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-show-icon">
+	    <title>Näytä Bluetooth-kuvake</title>
+	    <para>Voit näyttää tai piilottaa Bluetooth-kuvakkeen paneelista. Katso <xref linkend="gnome-bluetooth-applet"/> nähdäksesi sovelman ominaisuudet.</para>
+	    
+	    <important>
+		<para>Jos poistat kuvakkeen paneelista, vain rajallinen määrä toimintoja jää mahdollisiksi.</para>
+	    </important>
+	</sect2>
+
+	<sect2 id="gnome-bluetooth-prefs-receive">
+	    <title>Tiedostojen vastaanotto</title>
+	    
+	    <para>Napsauta <guilabel>Vastaanota tiedostoja</guilabel> -painiketta, niin esiin tulee <guilabel>Henkilökohtaisen tiedostojaon asetukset</guilabel> -valintaikkuna. Valintaikkunassa voit muokata Bluetoothin tiedostojen vastaanottoa ja jakamista.</para>
+	    <important>
+		<para>Tätä ominaisuutta ei ole tarjolla <application>gnome-bluetooth</application>-sovelmassa. <application>gnome-user-share</application>-sovelman täytyy olla asennettuna, jotta tätä ominaisuutta voisi käyttää.</para>
+		<para lang="C">
+		    Read more in the <ulink type="help" url="help:gnome-user-share">Personal File Sharing Manual</ulink>:
+		    <ulink type="help" url="help:gnome-user-share/gnome-user-share-getting-started#gnome-user-share-bluetooth-receiving">receiving</ulink> and <ulink type="help" url="help:gnome-user-share/gnome-user-share-getting-started#gnome-user-share-enabling-bluetooth">sharing</ulink>.
+		</para>
+	    </important>
+	</sect2>
+    </sect1>
+
+    <sect1 id="gnome-bluetooth-FAQ">
+        <title>Usein kysytyt kysymykset</title>
+        <qandaset>
+            <qandaentry>
+                <question>
+                    <para>En näe, kuinka vastaanottaa tiedostoja Bluetooth-yhteydellä tietokoneeni <application>gnome-bluetooth</application>-sovelmalla, olenko sokea?</para>
+                </question>
+                <answer>
+                    <para>Tiedostojen vastaanottoa ei ole otettu mukaan <application>gnome-bluetooth</application>-sovelmaan, mutta se on <application>gnome-user-share</application>-sovelmassa, joten sinun täytyy asentaa tämä sovellus voidaksesi ottaa vastaan tiedostoja Bluetooth-yhteyden yli. Painike, jota kuvaillaan osiossa <xref linkend="gnome-bluetooth-prefs-receive"/> on vain asetusikkunan käynnistäjä.</para>
+                </answer>
+            </qandaentry>
+            <qandaentry>
+                <question>
+                    <para>Löysin ohjelmavirheen <application>gnome-bluetooth</application>-sovelmassa, mitä voin tehdä?</para>
+                </question>
+                <answer>
+                    <para>Raportoi ohjelmavirheestä osoitteeseen <ulink url="http://bugzilla.gnome.org/enter_bug.cgi?product=gnome-bluetooth"/>.</para>
+                </answer>
+            </qandaentry>
+            <!--
+	  <qandaentry>
+	      <question>
+		  <para></para>
+	      </question>
+	      <answer>
+		  <para></para>
+	      </answer>
+	  </qandaentry>-->
+        </qandaset>
+    </sect1>
+    
+    
+</article>

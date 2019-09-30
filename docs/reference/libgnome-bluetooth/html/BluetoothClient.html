@@ -1,0 +1,396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>BluetoothClient</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="index.html" title="gnome-bluetooth Reference Manual">
+<link rel="up" href="ch01.html" title="API Reference">
+<link rel="prev" href="ch01.html" title="API Reference">
+<link rel="next" href="BluetoothChooser.html" title="BluetoothChooser">
+<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="ch01.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">gnome-bluetooth Reference Manual</th>
+<td><a accesskey="n" href="BluetoothChooser.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#BluetoothClient.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#BluetoothClient.description" class="shortcut">Description</a>
+                   | 
+                  <a href="#BluetoothClient.object-hierarchy" class="shortcut">Object Hierarchy</a>
+                   | 
+                  <a href="#BluetoothClient.properties" class="shortcut">Properties</a>
+</td></tr>
+</table>
+<div class="refentry">
+<a name="BluetoothClient"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="BluetoothClient.top_of_page"></a>BluetoothClient</span></h2>
+<p>BluetoothClient — Bluetooth client object</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="BluetoothClient.stability-level"></a><h2>Stability Level</h2>
+Stable, unless otherwise indicated
+</div>
+<div class="refsynopsisdiv">
+<a name="BluetoothClient.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+#include &lt;bluetooth-client.h&gt;
+
+struct              <a class="link" href="BluetoothClient.html#BluetoothClient-struct" title="struct BluetoothClient">BluetoothClient</a>;
+struct              <a class="link" href="BluetoothClient.html#BluetoothClientClass" title="struct BluetoothClientClass">BluetoothClientClass</a>;
+<span class="returnvalue">void</span>                <a class="link" href="BluetoothClient.html#bluetooth-client-connect-service" title="bluetooth_client_connect_service ()">bluetooth_client_connect_service</a>    (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *device</code></em>,
+                                                         <em class="parameter"><code><span class="type">gboolean</span> connect</code></em>,
+                                                         <em class="parameter"><code><span class="type">GCancellable</span> *cancellable</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncReadyCallback</span> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);
+<span class="returnvalue">gboolean</span>            <a class="link" href="BluetoothClient.html#bluetooth-client-connect-service-finish" title="bluetooth_client_connect_service_finish ()">bluetooth_client_connect_service_finish</a>
+                                                        (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncResult</span> *res</code></em>,
+                                                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);
+<a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="returnvalue">GtkTreeModel</span></a> *      <a class="link" href="BluetoothClient.html#bluetooth-client-get-adapter-model" title="bluetooth_client_get_adapter_model ()">bluetooth_client_get_adapter_model</a>  (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>);
+<a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="returnvalue">GtkTreeModel</span></a> *      <a class="link" href="BluetoothClient.html#bluetooth-client-get-device-model" title="bluetooth_client_get_device_model ()">bluetooth_client_get_device_model</a>   (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>);
+<a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="returnvalue">GtkTreeModel</span></a> *      <a class="link" href="BluetoothClient.html#bluetooth-client-get-filter-model" title="bluetooth_client_get_filter_model ()">bluetooth_client_get_filter_model</a>   (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>,
+                                                         <em class="parameter"><code><a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html#GtkTreeModelFilterVisibleFunc"><span class="type">GtkTreeModelFilterVisibleFunc</span></a> func</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GDestroyNotify</span> destroy</code></em>);
+<a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="returnvalue">GtkTreeModel</span></a> *      <a class="link" href="BluetoothClient.html#bluetooth-client-get-model" title="bluetooth_client_get_model ()">bluetooth_client_get_model</a>          (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>);
+<a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="returnvalue">BluetoothClient</span></a> *   <a class="link" href="BluetoothClient.html#bluetooth-client-new" title="bluetooth_client_new ()">bluetooth_client_new</a>                (<em class="parameter"><code><span class="type">void</span></code></em>);
+</pre>
+</div>
+<div class="refsect1">
+<a name="BluetoothClient.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="synopsis">
+  GObject
+   +----BluetoothClient
+</pre>
+</div>
+<div class="refsect1">
+<a name="BluetoothClient.properties"></a><h2>Properties</h2>
+<pre class="synopsis">
+  "<a class="link" href="BluetoothClient.html#BluetoothClient--default-adapter" title='The "default-adapter" property'>default-adapter</a>"          <span class="type">gchar</span>*                : Read
+  "<a class="link" href="BluetoothClient.html#BluetoothClient--default-adapter-discoverable" title='The "default-adapter-discoverable" property'>default-adapter-discoverable</a>" <span class="type">gboolean</span>              : Read / Write
+  "<a class="link" href="BluetoothClient.html#BluetoothClient--default-adapter-discovering" title='The "default-adapter-discovering" property'>default-adapter-discovering</a>" <span class="type">gboolean</span>              : Read / Write
+  "<a class="link" href="BluetoothClient.html#BluetoothClient--default-adapter-name" title='The "default-adapter-name" property'>default-adapter-name</a>"     <span class="type">gchar</span>*                : Read
+  "<a class="link" href="BluetoothClient.html#BluetoothClient--default-adapter-powered" title='The "default-adapter-powered" property'>default-adapter-powered</a>"  <span class="type">gboolean</span>              : Read
+</pre>
+</div>
+<div class="refsect1">
+<a name="BluetoothClient.description"></a><h2>Description</h2>
+<p>
+The <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> object is used to query the state of Bluetooth
+devices and adapters.
+</p>
+</div>
+<div class="refsect1">
+<a name="BluetoothClient.details"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="BluetoothClient-struct"></a><h3>struct BluetoothClient</h3>
+<pre class="programlisting">struct BluetoothClient;</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BluetoothClientClass"></a><h3>struct BluetoothClientClass</h3>
+<pre class="programlisting">struct BluetoothClientClass {
+	GObjectClass parent_class;
+};
+</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-client-connect-service"></a><h3>bluetooth_client_connect_service ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                bluetooth_client_connect_service    (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *device</code></em>,
+                                                         <em class="parameter"><code><span class="type">gboolean</span> connect</code></em>,
+                                                         <em class="parameter"><code><span class="type">GCancellable</span> *cancellable</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncReadyCallback</span> callback</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);</pre>
+<p>
+When the connection operation is finished, <em class="parameter"><code>callback</code></em> will be called. You can
+then call <a class="link" href="BluetoothClient.html#bluetooth-client-connect-service-finish" title="bluetooth_client_connect_service_finish ()"><code class="function">bluetooth_client_connect_service_finish()</code></a> to get the result of the
+operation.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>a <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>device</code></em> :</span></p></td>
+<td>the DBUS path on which to operate</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>connect</code></em> :</span></p></td>
+<td>Whether try to connect or disconnect from services on a device</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>cancellable</code></em> :</span></p></td>
+<td>optional <span class="type">GCancellable</span> object, <code class="literal">NULL</code> to ignore</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>a <span class="type">GAsyncReadyCallback</span> to call when the connection is complete. <span class="annotation">[<acronym title="The callback is valid until first called."><span class="acronym">scope async</span></acronym>]</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>the data to pass to callback function</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-client-connect-service-finish"></a><h3>bluetooth_client_connect_service_finish ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>            bluetooth_client_connect_service_finish
+                                                        (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>,
+                                                         <em class="parameter"><code><span class="type">GAsyncResult</span> *res</code></em>,
+                                                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>
+Finishes the connection operation, See <a class="link" href="BluetoothClient.html#bluetooth-client-connect-service" title="bluetooth_client_connect_service ()"><code class="function">bluetooth_client_connect_service()</code></a>.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>a <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>res</code></em> :</span></p></td>
+<td>a <span class="type">GAsyncResult</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>a <span class="type">GError</span>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>
+<code class="literal">TRUE</code> if the connection operation succeeded, <code class="literal">FALSE</code> otherwise.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-client-get-adapter-model"></a><h3>bluetooth_client_get_adapter_model ()</h3>
+<pre class="programlisting"><a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="returnvalue">GtkTreeModel</span></a> *      bluetooth_client_get_adapter_model  (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>);</pre>
+<p>
+Returns a <a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html"><span class="type">GtkTreeModelFilter</span></a> with only adapters present.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>a <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> object</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="type">GtkTreeModel</span></a> object. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-client-get-device-model"></a><h3>bluetooth_client_get_device_model ()</h3>
+<pre class="programlisting"><a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="returnvalue">GtkTreeModel</span></a> *      bluetooth_client_get_device_model   (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>);</pre>
+<p>
+Returns a <a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html"><span class="type">GtkTreeModelFilter</span></a> with only devices belonging to the default adapter listed.
+Note that the model will follow a specific adapter, and will not follow the default adapter.
+Also note that due to the way <a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html"><span class="type">GtkTreeModelFilter</span></a> works, you will probably want to
+monitor signals on the "child-model" <a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="type">GtkTreeModel</span></a> to monitor for changes.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>a <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> object</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="type">GtkTreeModel</span></a> object. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-client-get-filter-model"></a><h3>bluetooth_client_get_filter_model ()</h3>
+<pre class="programlisting"><a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="returnvalue">GtkTreeModel</span></a> *      bluetooth_client_get_filter_model   (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>,
+                                                         <em class="parameter"><code><a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html#GtkTreeModelFilterVisibleFunc"><span class="type">GtkTreeModelFilterVisibleFunc</span></a> func</code></em>,
+                                                         <em class="parameter"><code><span class="type">gpointer</span> data</code></em>,
+                                                         <em class="parameter"><code><span class="type">GDestroyNotify</span> destroy</code></em>);</pre>
+<p>
+Returns a <a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html"><span class="type">GtkTreeModelFilter</span></a> of devices filtered using the <em class="parameter"><code>func</code></em>, <em class="parameter"><code>data</code></em> and <em class="parameter"><code>destroy</code></em> arguments to pass to <a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html#gtk-tree-model-filter-set-visible-func"><code class="function">gtk_tree_model_filter_set_visible_func()</code></a>.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>a <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> object</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>func</code></em> :</span></p></td>
+<td>a <a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html#GtkTreeModelFilterVisibleFunc"><span class="type">GtkTreeModelFilterVisibleFunc</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em> :</span></p></td>
+<td>user data to pass to <a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html#gtk-tree-model-filter-set-visible-func"><code class="function">gtk_tree_model_filter_set_visible_func()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>destroy</code></em> :</span></p></td>
+<td>a destroy function for <a href="http://developer.gnome.org/gtk2/GtkTreeModelFilter.html#gtk-tree-model-filter-set-visible-func"><code class="function">gtk_tree_model_filter_set_visible_func()</code></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="type">GtkTreeModel</span></a> object. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-client-get-model"></a><h3>bluetooth_client_get_model ()</h3>
+<pre class="programlisting"><a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="returnvalue">GtkTreeModel</span></a> *      bluetooth_client_get_model          (<em class="parameter"><code><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> *client</code></em>);</pre>
+<p>
+Returns an unfiltered <a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="type">GtkTreeModel</span></a> representing the adapter and devices available on the system.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>a <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> object</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a href="http://developer.gnome.org/gtk2/GtkTreeModel.html"><span class="type">GtkTreeModel</span></a> object. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-client-new"></a><h3>bluetooth_client_new ()</h3>
+<pre class="programlisting"><a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="returnvalue">BluetoothClient</span></a> *   bluetooth_client_new                (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>
+Returns a reference to the <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> singleton. Use <code class="function">g_object_unref()</code> when done with the object.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a class="link" href="BluetoothClient.html" title="BluetoothClient"><span class="type">BluetoothClient</span></a> object. <span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1">
+<a name="BluetoothClient.property-details"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="BluetoothClient--default-adapter"></a><h3>The <code class="literal">"default-adapter"</code> property</h3>
+<pre class="programlisting">  "default-adapter"          <span class="type">gchar</span>*                : Read</pre>
+<p>
+The D-Bus path of the default Bluetooth adapter or <code class="literal">NULL</code>.
+</p>
+<p>Default value: NULL</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BluetoothClient--default-adapter-discoverable"></a><h3>The <code class="literal">"default-adapter-discoverable"</code> property</h3>
+<pre class="programlisting">  "default-adapter-discoverable" <span class="type">gboolean</span>              : Read / Write</pre>
+<p>
+<code class="literal">TRUE</code> if the default Bluetooth adapter is discoverable.
+</p>
+<p>Default value: FALSE</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BluetoothClient--default-adapter-discovering"></a><h3>The <code class="literal">"default-adapter-discovering"</code> property</h3>
+<pre class="programlisting">  "default-adapter-discovering" <span class="type">gboolean</span>              : Read / Write</pre>
+<p>
+<code class="literal">TRUE</code> if the default Bluetooth adapter is discovering.
+</p>
+<p>Default value: FALSE</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BluetoothClient--default-adapter-name"></a><h3>The <code class="literal">"default-adapter-name"</code> property</h3>
+<pre class="programlisting">  "default-adapter-name"     <span class="type">gchar</span>*                : Read</pre>
+<p>
+The name of the default Bluetooth adapter or <code class="literal">NULL</code>.
+</p>
+<p>Default value: NULL</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BluetoothClient--default-adapter-powered"></a><h3>The <code class="literal">"default-adapter-powered"</code> property</h3>
+<pre class="programlisting">  "default-adapter-powered"  <span class="type">gboolean</span>              : Read</pre>
+<p>
+<code class="literal">TRUE</code> if the default Bluetooth adapter is powered.
+</p>
+<p>Default value: FALSE</p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.19</div>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY appversion "2.28">
+<!ENTITY app "<application>gnome-bluetooth</application>">
+<!ENTITY appname "gnome-bluetooth">
+<!ENTITY legal SYSTEM "legal.xml">
+]>
+<article id="index" lang="el">
+    <articleinfo>
+        <title>Εγχειρίδιο του gnome-bluetooth</title>
+        <copyright><year>2009</year> <holder>Baptiste Mille-Mathias</holder></copyright>
+        
+           <legalnotice id="legalnotice">
+         <para>Επιτρέπεται η αντιγραφή, διανομή και/ή τροποποίηση αυτού του εγγράφου υπό τους όρους της Ελεύθερης Άδειας Τεκμηρίωσης GNU (GFDL), έκδοση 1.1 ή οποιαδήποτε μεταγενέστερη, δημοσιευμένη από το Ίδρυμα Ελεύθερου Λογισμικού χωρίς αμετάβλητα εδάφια, χωρίς κείμενα εξωφύλλου, και χωρίς κείμενα οπισθόφυλλου. Μπορείτε να βρείτε ένα αντίγραφο της GFDL σε αυτό το <ulink type="help" url="help:fdl">σύνδεσμο</ulink> ή στο αρχείο COPYING-DOCS που διανέμεται με αυτό το εγχειρίδιο.</para>
+          <para>Αυτό το εγχειρίδιο είναι μέρος μιας συλλογής εγχειριδίων του GNOME τα οποία διανέμονται υπό την GFDL. Αν θέλετε να διανείμετε αυτό το εγχειρίδιο ξεχωριστά από αυτή τη συλλογή, μπορείτε να το κάνετε προσθέτοντας σε αυτό ένα αντίγραφο της άδειας, όπως περιγράφεται στο τμήμα 6 της άδειας.</para>
+ 
+         <para>Πολλά από τα ονόματα που χρησιμοποιούνται από εταιρίες για να ξεχωρίσουν τα προϊόντα και τις υπηρεσίες τους είναι σήματα κατατεθέντα. Όπου αυτά τα ονόματα εμφανίζονται στην τεκμηρίωση GNOME, και τα μέλη της ομάδας τεκμηρίωσης GNOME έχουν γνώση αυτών, τότε αυτά αναγράφονται με κεφαλαίους χαρακτήρες ή με αρχικούς κεφαλαίους χαρακτήρες.</para>
+ 
+         <para>TΟ ΕΓΓΡΑΦΟ ΚΑΙ ΟΙ ΤΡΟΠΟΙΗΜΕΝΕΣ ΕΚΔΟΣΕΙΣ ΤΟΥ ΠΑΡΕΧΟΝΤΑΙ ΥΠΟ ΤΟΥΣ ΟΡΟΥΣ ΤΗΣ ΕΛΕΥΘΕΡΗΣ ΑΔΕΙΑΣ ΤΕΚΜΗΡΙΩΣΗΣ GNU ΜΕ ΤΙΣ ΕΠΙΠΛΕΟΝ ΓΝΩΣΤΟΠΟΙΗΣΕΙΣ: <orderedlist>
+                 <listitem>
+                   <para>ΤΟ ΕΓΓΡΑΦΟ ΠΑΡΕΧΕΤΑΙ ΩΣ ΕΧΕΙ, ΧΩΡΙΣ ΚΑΜΜΙΑ ΕΓΓΥΗΣΗ ΡΗΤΗ Η ΝΟΟΥΜΕΝΗ, ΜΗ ΑΠΟΚΛΕΙΣΤΙΚΑ ΠΕΡΙΛΑΜΒΑΝΟΜΕΝΩΝ ΕΓΓΥΗΣΕΩΝ ΟΤΙ ΤΟ ΕΓΓΡΑΦΟ Η ΤΡΟΠΟΠΟΙΗΜΕΝΕΣ ΕΚΔΟΣΕΙΣ ΑΥΤΟΥ ΕΙΝΑΙ ΕΛΕΥΘΕΡΕΣ ΑΠΟ ΕΛΑΤΤΩΜΑΤΑ ΕΜΠΟΡΕΥΣΙΜΑ, ΚΑΤΑΛΛΗΛΑ ΓΙΑ ΣΥΓΚΕΚΡΙΜΕΝΟ ΣΚΟΠΟ Η ΜΗ ΠΑΡΑΒΑΤΙΚΑ. ΑΚΕΡΑΙΟΣ Ο ΚΙΝΔΥΝΟΣ ΩΣ ΠΡΟΣ ΤΗΝ ΠΟΙΟΤΗΤΑ, ΑΚΡΙΒΕΙΑ, ΚΑΙ ΑΠΟΔΟΣΗ ΤΟΥ ΕΓΓΡΑΦΟΥ Η ΤΡΟΠΟΠΟΙΗΜΕΝΩΝ ΕΚΔΟΣΕΩΝ ΤΟΥ ΒΑΡΑΙΝΕΙ ΕΣΑΣ. ΑΝ ΟΠΟΙΟΔΗΠΟΤΕ ΕΓΓΡΑΦΟ Η ΤΡΟΠΟΠΟΗΜΕΝΗ ΕΚΔΟΣΗ ΤΟΥ ΑΠΟΔΕΙΚΤΟΥΝ ΕΛΑΤΤΩΜΑΤΙΚΑ ΜΕ ΟΠΟΙΟΔΗΠΟΤΕ ΤΡΟΠΟ, ΕΣΕΙΣ (ΚΑΙ ΟΧΙ Ο ΑΡΧΙΚΟΣ ΣΥΓΓΡΑΦΕΑΣ, ΔΗΜΙΟΥΡΓΟΣ Η ΣΥΜΜΕΤΕΧΟΝΤΑΣ) ΑΝΑΛΑΜΒΑΝΕΤΕ ΤΟ ΚΟΣΤΟΣ ΚΑΘΕ ΑΝΑΓΚΑΙΑΣ ΕΠΙΣΚΕΥΗΣ Η ΔΙΟΡΘΩΣΗΣ. ΑΥΤΗ Η ΑΠΑΛΛΑΓΗ ΑΠΟ ΕΓΓΥΗΣΗ ΑΠΟΤΕΛΕΙ ΑΝΑΠΟΣΠΑΣΤΟ ΜΕΡΟΣ ΤΗΣ ΑΔΕΙΑΣ. ΔΕΝ ΕΠΙΤΡΕΠΕΤΑΙ Η ΧΡΗΣΗ ΚΑΝΕΝΟΣ ΕΓΓΡΑΦΟΥ Η ΤΡΟΠΟΠΟΙΗΣΗΣ ΑΥΤΟΥ ΕΚΤΟΣ ΥΠΟ ΤΗΝ ΑΠΑΛΛΑΓΗ ΑΥΤΗ. ΚΑΙ ΣΕ ΚΑΜΜΙΑ ΠΕΡΙΠΤΩΣΗ ΚΑΙ ΥΠΟ ΚΑΜΜΙΑ ΝΟΜΙΚΗ ΘΕΩΡΙΑ. ΕΙΤΕ ΣΕ ΠΑΡΑΝΟΜΙΑ Η ΠΑΡΑΛΕΙΨΗ, ΣΥΜΒΟΛΑΙΟ, Η ΑΛΛΙΩΣ, Ο ΑΡΧΙΚΟΣ ΔΗΜΙΟΥΡΓΟΣ. ΣΥΓΓΡΑΦΕΑΣ, ΣΥΜΜΕΤΕΧΟΝΤΑΣ Η ΔΙΑΝΟΜΕΑΣ ΤΟΥ ΕΓΓΡΑΦΟΥ Η ΤΡΟΠΟΠΟΙΗΣΗΣ ΑΥΤΟΥ, Η ΟΠΟΙΟΣΔΗΠΟΤΕ ΠΡΟΜΗΘΕΥΤΗΣ ΑΥΤΩΝ, ΔΕΝ ΕΧΕΙ ΕΥΘΥΝΗ ΣΕ ΚΑΝΕΝΑΝ ΓΙΑ ΚΑΜΜΙΑ ΑΜΕΣΗ, ΕΜΜΕΣΗ, ΕΙΔΙΚΗ, ΠΕΡΙΣΤΑΣΙΑΚΗ Η ΑΠΟ ΣΥΝΕΠΕΙΑ ΖΗΜΙΑ ΓΙΑ ΑΠΩΛΕΙΑ ΚΑΛΗΣ ΘΕΛΗΣΗΣ, ΕΡΓΑΣΙΑΣ, ΠΑΥΣΗΣ, ΑΣΤΟΧΙΑΣ Η ΔΥΣΛΕΙΤΟΥΡΓΙΑΣ ΥΠΟΛΟΓΙΣΤΙΚΟΥ ΣΥΣΤΗΜΑΤΟΣ. Η ΓΙΑ ΟΠΟΙΑΔΗΠΟΤΕ ΑΛΛΗ ΖΗΜΙΑ Η ΑΠΩΛΕΙΑ ΠΟΥ ΠΡΟΕΡΧΕΤΑΙ ΑΠΟ Η ΣΧΕΤΙΖΕΤΑΙ ΜΕ ΤΗ ΧΡΗΣΗ ΤΟΥ ΕΓΓΡΑΦΟΥ Η ΤΡΟΠΟΠΟΙΗΣΕΩΝ ΤΟΥ, ΑΚΟΜΑ ΚΑΙ ΑΝ ΑΥΤΟ ΤΟ ΜΕΡΟΣ ΕΧΕΙ ΕΝΗΜΕΡΩΘΕΙ ΓΙΑ ΤΗΝ ΠΙΘΑΝΟΤΗΤΑ ΤΕΤΟΙΩΝ ΖΗΜΙΩΝ.</para>
+                 </listitem>
+           </orderedlist></para>
+   </legalnotice>
+ 
+
+        <authorgroup>
+            <author role="maintainer"><firstname>Baptiste</firstname> <surname>Mille-Mathias</surname> <affiliation> <orgname>Έργο τεκμηρίωσης του GNOME</orgname> <address> <email>baptiste.millemathias@gmail.com</email> </address> </affiliation></author>
+        </authorgroup>
+        
+        <!-- According to GNU FDL, revision history is mandatory if you are -->
+        <!-- modifying/reusing someone else's document.  If not, you can omit it. -->
+        <revhistory>
+            <revision><revnumber>1.0</revnumber> <date>Μάρτιος 2009</date> <revdescription>
+                    <para role="author">Baptiste Mille-Mathias <email>baptiste.millemathias@gmail.com</email></para>
+                </revdescription></revision>
+            <!-- Uncomment for future revision
+		<revision>
+		  <revnumber>1.1</revnumber>
+		  <date>March 2009</date>
+		  <revdescription>
+			 <para role="author">Baptiste Mille-Mathias
+			     <email>baptiste.millemathias@gmail.com</email></para>
+		  </revdescription>
+		</revision>
+		-->
+        </revhistory>
+        <releaseinfo>Αυτό το εγχειρίδιο περιγράφει της έκδοση 2.28 του gnome-bluetooth.</releaseinfo>
+        <legalnotice>
+            <title>Ανάδραση</title>
+            <para>Για να αναφέρετε ένα σφάλμα ή να κάνετε μια εισήγηση για την εφαρμογή <application>gnome-bluetooth</application> ή για αυτό το εγχειρίδιο, ακολουθήστε τις οδηγίες στη <ulink url="ghelp:user-guide?feedback-bugs" type="help">σελίδα ανάδρασης του GNOME</ulink>.</para>
+        </legalnotice>
+        <abstract role="description">
+            <para>Το <application>gnome-bluetooth</application> είναι μια εφαρμογή για τη διαχείριση των συσκευών Bluetooth στην επιφάνεια εργασίας GNOME.</para>
+        </abstract>
+    </articleinfo>
+    <indexterm><primary>gnome-bluetooth</primary></indexterm>
+    <indexterm><primary>Bluetooth</primary></indexterm>
+    <indexterm><primary>Επικοινωνία</primary></indexterm>
+    
+    <sect1 id="gnome-bluetooth-intro">
+        <title>Εισαγωγή</title>
+        <para>Το <application>gnome-bluetooth</application> είναι μια εφαρμογή που σας επιτρέπει να διαχειρίζεστε το Bluetooth στην επιφάνεια εργασίας GNOME. <itemizedlist>
+                <listitem>
+                    <para>Το <application>gnome-bluetooth</application> σας επιτρέπει να στέλνετε αρχεία στις συσκευές Bluetooth, ή να περιηγείστε στα περιεχόμενά τους.</para>
+                </listitem>
+                <listitem>
+                    <para>Συνδεθείτε με τις συσκευές σας, όπως ακουστικά ή συσκευές ήχου.</para>
+                </listitem>
+                <listitem>
+                    <para>Μπορείτε να προσθέτετε ή να διαγράφετε συσκευές Bluetooth, ή να διαχειρίζεστε τα δικαιώματά τους.</para>
+                </listitem>
+            </itemizedlist></para>
+    </sect1>
+    
+    <sect1 id="gnome-bluetooth-applet">
+        <title>Μικροεφαρμογή Bluetooth</title>
+        
+        <para>Η μικροεφαρμογή είναι η μόνιμη εφαρμογή που μπορείτε να βρείτε στην περιοχή ειδοποιήσεων, που σας επιτρέπει γρήγορη πρόσβαση σε χαρακτηριστικά όπως η αποστολή αρχείων και η διαχείριση των συσκευών.</para>
+        <figure id="gnome-bluetooth-applet-notification">
+            <title>Το εικονίδιο της μικροεφαρμογής Bluetooth στην περιοχή ειδοποιήσεων</title>
+            <screenshot>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/bluetooth-applet.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </screenshot>
+        </figure>
+        
+        <sect2 id="gnome-bluetooth-applet-start">
+            <title>Εκκίνηση της μικροεφαρμογής Bluetooth</title>
+            
+            <para>Η μικροεφαρμογή <application>gnome-bluetooth</application> ξεκινά αυτόματα όταν συνδέεστε στη συνεδρία σας, και μπορείτε να βρείτε το εικονίδιό της στην περιοχή ειδοποιήσεων. Για να εκκινήσετε χειροκίνητα τη μικροεφαρμογή, επιλέξτε το μενού <menuchoice> <guimenu>Εφαρμογές</guimenu><guimenu>Βοηθήματα</guimenu><guimenu>Τερματικό</guimenu> </menuchoice> και πληκτρολογήστε <command>bluetooth-applet</command>.</para>
+            <para>Για να αποτρέψετε την εκκίνηση της μικροεφαρμογής στην επιφάνεια εργασίας σας, επιλέξτε από το μενού <menuchoice> <guimenu>Σύστημα</guimenu><guimenu>Προτιμήσεις</guimenu><guimenu>Συνεδρία</guimenu> </menuchoice> και απενεργοποιήστε τον <guilabel>Διαχειριστή Bluetooth</guilabel>.</para>
+        </sect2>
+        <sect2 id="gnome-bluetooh-applet-power">
+            <title>Απενεργοποίηση του ελεγκτή Bluetooth</title>
+            <para>Η απενεργοποίηση του ελεγκτή Bluetooth θα σταματήσει την τρέχουσα και τη μελλοντική επικοινωνία από και προς τον ελεγκτή Bluetooth. Η απενεργοποίηση του ελεγκτή Bluetooth σας επιτρέπει να εξοικονομείτε ενέργεια από τη μπαταρία του φορητού υπολογιστή σας, αυξάνοντας έτσι την αυτονομία του, αυτό είναι καλή ιδέα να απενεργοποιείτε τον ελεγκτή Bluetooth όταν δεν τον χρησιμοποιείτε.</para>
+            <para>Πατήστε στο εικονίδια της μικροεφαρμογής, και επιλέξτε <menuchoice><guimenu>Απενεργοποίηση Bluetooth</guimenu></menuchoice>, οπότε το εικονίδιο ειδοποίησης θα γίνει γκρίζο.</para>
+        </sect2>
+
+        <sect2 id="gnome-bluetooth-applet-sending">
+            <title>Αποστολή αρχείων σε συσκευή Bluetooth</title>
+	    <para>Επιλέξτε αυτό το μενού για να στείλετε ένα αρχείο σε μια συσκευή· θα εμφανιστεί ένας επιλογέας αρχείων για να διαλέξετε το αρχείο που θα σταλεί, και θα πρέπει να επιλέξετε τη συσκευή στην οποία θα στείλετε το αρχείο.</para>
+        </sect2>
+        
+        <sect2 id="gnome-bluetooth-applet-browsing">
+            <title>Περιήγηση συσκευής Bluetooth</title>
+            <para>Επιλέξτε αυτό το μενού για να περιηγηθείτε στο σύστημα αρχείων της συσκευής απευθείας μέσα από τον περιηγητή αρχείων σας.</para>
+        </sect2>
+
+	<sect2 id="gnome-bluetooth-applet-devices">
+	    <title>Πρόσφατα χρησιμοποιημένες συσκευές</title>
+	    <para>Αυτή η ενότητα εμφανίζει τις συζευγμένες συσκευές στις οποίες μπορείτε να συνδεθείτε.</para>
+	    <para>Για να συνδεθείτε στη συσκευή πατήστε στο όνομά της, το όποιο θα γίνει πιο έντονο για να σας δείξει ότι συνδέεστε σε αυτήν.</para>
+	</sect2>
+        
+        <sect2 id="gnome-bluetooth-applet-setup">
+            <title>Προσθήκη νέας συσκευής</title>
+            
+            <para>Για να προσθέσετε μια νέα συσκευή (δηλαδή να τη συζεύξετε με τον ελεγκτή σας), πατήστε στο εικονίδιο της μικροεφαρμογής και επιλέξτε <guimenu>Ρύθμιση νέας συσκευής...</guimenu>. Ένας βοηθός θα σας καθοδηγήσει στη διαδικασία ρύθμισης της συσκευής σας.</para>
+            
+            <note>
+                <para>Μη ξεχάσετε να ρυθμίσετε τη φορητή συσκευή σας σε ανιχνεύσιμη κατάσταση προτού ξεκινήσετε τη διαδικασία, αλλιώς ο βοηθός δε θα μπορεί να τη βρει.</para>
+            </note>
+            
+            <para>Ο βοηθός θα παρουσιάσει τις ανιχνεύσιμες συσκευές που έχει βρει. Μπορείτε να φιλτράρετε τις συσκευές επιλέγοντας τον τύπο της συσκευής για την οποία ψάχνετε.</para>
+            
+            <figure id="gnome-bluetooth-wizard-img">
+                <title>Αναζήτηση συσκευής στο βοηθό</title>
+                <screenshot>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="figures/bluetooth-wizard.png" format="PNG"/>
+                        </imageobject>
+                    </mediaobject>
+                </screenshot>
+            </figure>
+            
+            <para>Αν η συσκευή σας έχει ενσωματωμένο κωδικό πρόσβασης, επιλέξτε <guibutton>Επιλογές PIN...</guibutton> και στο νέο διάλογο επιλέξτε τον κωδικό που θα χρησιμοποιηθεί.</para>
+            <para>Επιλέξτε <guibutton>Μπροστά</guibutton> για τη σύζευξη· αν ορίσατε ένα σταθερό κωδικό στο προηγούμενο βήμα η σύζευξη θα γίνει αυτόματα, αλλιώς θα εμφανιστεί ένας κωδικός για να εισάγετε στη συσκευή σας, πληκτρολογήστε τον στη συσκευή σας και όταν τελειώσετε οι συσκευές και ο ελεγκτής σας θα συζευχθούν.</para>
+        </sect2>
+
+        <sect2 id="gnome-bluetooth-applet-preferences">
+            <title>Προτιμήσεις</title>
+            
+            <para>Πατήστε στο εικονίδιο της μικροεφαρμογής, και επιλέξτε <menuchoice> <guilabel>Προτιμήσεις</guilabel> </menuchoice>, και θα εμφανιστεί ο διάλογος προτιμήσεων.</para>
+            <para>Για περισσότερες πληροφορίες σχετικά με τις προτιμήσεις, δείτε την ενότητα <xref linkend="gnome-bluetooth-preferences"/></para>
+        </sect2>
+    </sect1>
+    
+    <sect1 id="gnome-bluetooth-preferences">
+        <title>Προτιμήσεις</title>
+        <para>Ο διάλογος προτιμήσεων του <application>gnome-bluetooth</application> σας επιτρέπει να διαχειρίζεστε τις διάφορες συσκευές Bluetooth ή να αλλάζετε τις ιδιότητες των ελεγκτών σας.</para>
+        
+        <figure id="gnome-bluetooth-prefs-img">
+            <title>Διάλογος προτιμήσεων</title>
+            <screenshot>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/bluetooth-properties.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </screenshot>
+        </figure>
+            
+	<sect2 id="gnome-bluetooth-prefs-adapter-discover">
+	    <title>Ανιχνεύσιμο</title>
+	    
+	    <para>Όταν ο ελεγκτής σας είναι ρυθμισμένο σε <guilabel>Ανιχνεύσιμο</guilabel> οποιαδήποτε κοντινή συσκευή Bluetooth θα μπορεί να τον δει, οπότε θα μπορεί και να ζητήσει σύζευξη.</para>
+	    <important>
+		<para>Το Bluetooth, όπως και άλλοι τύποι δικτύωσης, εμπεριέχει κινδύνους ασφαλείας, οπότε η ρύθμιση του ελεγκτή σε μη ανιχνεύσιμο είναι ένα καλός τρόπος για να περιορίσετε το ενδεχόμενο παραβίασης.</para>
+	    </important>
+	    <para>Είναι χρήσιμο να ορίσετε τη συσκευή σας σε ανιχνεύσιμο όταν σκοπεύετε να τη συζεύξετε με άλλη συσκευή, και όταν τελειώσετε να απενεργοποιήσετε το <guilabel>Ανιχνεύσιμο</guilabel>.</para>
+	    <note>
+		<para>Ενόσω η συσκευή σας είναι μη ανιχνεύσιμη, είναι δυνατή η επικοινωνία με ήδη συζευγμένες συσκευές Bluetooth.</para>
+	    </note>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-adapter-name">
+	    <title>Φιλικό όνομα προσαρμογέα</title>
+	    <para>Το φιλικό όνομα είναι ένα ψευδώνυμο για τη διεύθυνση που χρησιμοποιείται για την αναγνώριση κάθε συσκευής Bluetooth, το οποίο είναι πιο εύκολο να θυμάστε.</para>
+	    <para>Από προεπιλογή το φιλικό όνομα του προσαρμογέα είναι <envar>HOSTNAME</envar>-0 (όπου <envar>HOSTNAME</envar> είναι το όνομα του υπολογιστή σας). Για να το αλλάξετε, επεξεργαστείτε το πεδίο κειμένου και ορίστε το όνομα που θέλετε. Η αλλαγή θα εφαρμοστεί αμέσως.</para>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-adapter-devices">
+	    <title>Γνωστές συσκευές</title>
+	    <para>Οι <guilabel>Γνωστές συσκευές</guilabel> παρουσιάζουν τις συσκευές Bluetooth που συζεύξατε και σας επιτρέπουν να τις διαχειριστείτε, να συνδεθείτε σε αυτές ή να προσθέσετε μια καινούρια. <itemizedlist>
+		    <listitem>
+			<para>Ρυθμίστε μια νέα συσκευή όπως περιγράφεται στο <xref linkend="gnome-bluetooth-applet-setup"/></para>
+		    </listitem>
+		    <listitem>
+			<para>Σύνδεση/αποσύνδεση στη συσκευή.</para>
+		    </listitem>
+		    <listitem>
+			<para>Διαγραφή συσκευής. Η διαγραφή θα αποτρέψει τη σύζευξη μεταξύ του προσαρμογέα και της συσκευής, και δε θα επιτραπεί καμιά επικοινωνία. Θα πρέπει να τα συζεύξετε ξανά αν θέλετε π.χ. να μεταφέρετε αρχεία.</para>
+		    </listitem>
+		</itemizedlist></para>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-show-icon">
+	    <title>Εμφάνιση εικονιδίου Bluetooth</title>
+	    <para>Μπορείτε να εμφανίζετε ή να αποκρύβετε το εικονίδιο του Bluetooth από τον πίνακα εφαρμογών. Δείτε το <xref linkend="gnome-bluetooth-applet"/> για τα χαρακτηριστικά της μικροεφαρμογής.</para>
+	    
+	    <important>
+		<para>Αν απενεργοποιήσετε το εικονίδιο από τον πίνακα εφαρμογών, μόνο ένα περιορισμένο υποσύνολο ενεργειών θα παραμείνουν διαθέσιμες.</para>
+	    </important>
+	</sect2>
+
+	<sect2 id="gnome-bluetooth-prefs-receive">
+	    <title>Λήψη αρχείων</title>
+	    
+	    <para>Πατήστε το κουμπί <guilabel>Λψη αρχείων</guilabel> και θα εμφανιστεί ο διάλογος <guilabel>Προσωπικές προτιμήσεις διαμοιρασμού αρχείων</guilabel>. Από εκεί μπορείτε να προσαρμόσετε τη λήψη και το διαμοιρασμό αρχείων μέσω Bluetooth.</para>
+	    <important>
+		<para>Αυτό το χαρακτηριστικό δεν παρέχεται από το <application>gnome-bluetooth</application>. Πρέπει να έχετε το <application>gnome-user-share</application> για να το χρησιμοποιήσετε.</para>
+		<para>Διαβάστε περισσότερα στο <ulink type="help" url="help:gnome-user-share">Εγχειρίδιο διαμοιρασμού προσωπικών αρχείων</ulink>: <ulink type="help" url="help:gnome-user-share/gnome-user-share-getting-started#gnome-user-share-bluetooth-receiving">λήψη</ulink> και <ulink type="help" url="help:gnome-user-share/gnome-user-share-getting-started#gnome-user-share-enabling-bluetooth">διαμοιρασμός</ulink>.</para>
+	    </important>
+	</sect2>
+    </sect1>
+
+    <sect1 id="gnome-bluetooth-FAQ">
+        <title>Απαντήσεις σε συχνές ερωτήσεις</title>
+        <qandaset>
+            <qandaentry>
+                <question>
+                    <para>Δε βλέπω πώς να λάβω αρχεία μέσω Bluetooth στον υπολογιστή μου στο <application>gnome-bluetooth</application>, μήπως έχω τυφλωθεί;</para>
+                </question>
+                <answer>
+                    <para>Η λήψη αρχείων δεν έχει υλοποιηθεί στο <application>gnome-bluetooth</application>, αλλά στο <application>gnome-user-share</application>, οπότε θα πρέπει να εγκαταστήσετε αυτή την εφαρμογή αν θέλετε να λαμβάνετε αρχεία μέσω Bluetooth. Το κουμπί που περιγράφεται στο <xref linkend="gnome-bluetooth-prefs-receive"/> είναι απλά ένας εκκινητής για το διάλογο προτιμήσεών του.</para>
+                </answer>
+            </qandaentry>
+            <qandaentry>
+                <question>
+                    <para>Βρήκα ένα σφάλμα στο <application>gnome-bluetooth</application>, τι μπορώ να κάνω;</para>
+                </question>
+                <answer>
+                    <para>Θα πρέπει να υποβάλετε μια αναφορά σφάλματος στο <ulink url="http://bugzilla.gnome.org/enter_bug.cgi?product=gnome-bluetooth"/>.</para>
+                </answer>
+            </qandaentry>
+            <!--
+	  <qandaentry>
+	      <question>
+		  <para></para>
+	      </question>
+	      <answer>
+		  <para></para>
+	      </answer>
+	  </qandaentry>-->
+        </qandaset>
+    </sect1>
+    
+    
+</article>

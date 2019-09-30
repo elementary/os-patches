@@ -1,0 +1,31 @@
+From 91ac544495d874159893eefff1f68332c4780001 Mon Sep 17 00:00:00 2001
+From: Bastien Nocera <hadess@hadess.net>
+Date: Wed, 20 Nov 2013 16:10:07 +0000
+Subject: lib: Fix a few memory leaks
+
+---
+diff --git a/lib/bluetooth-client.c b/lib/bluetooth-client.c
+index 8bddb58..1fe7e6d 100644
+--- a/lib/bluetooth-client.c
++++ b/lib/bluetooth-client.c
+@@ -1878,8 +1878,10 @@ bluetooth_client_connect_service (BluetoothClient     *client,
+ 			g_object_unref (proxy);
+ 			goto bail;
+ 		}
++		g_hash_table_unref (table);
+ 
+ 		service = get_proxy_for_iface (DEVICE (proxy), iface_name, client);
++		g_object_unref (proxy);
+ 
+ 		g_debug ("Calling 'Connect' on interface %s for %s",
+ 			 iface_name, g_dbus_proxy_get_object_path (service));
+@@ -1922,6 +1924,7 @@ bluetooth_client_connect_service (BluetoothClient     *client,
+ 					NULL,
+ 					(GAsyncReadyCallback) disconnect_callback,
+ 					conndata);
++		g_object_unref (proxy);
+ 	}
+ 
+ 	return;
+--
+cgit v0.9.2

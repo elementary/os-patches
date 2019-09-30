@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>bluetooth-utils</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="index.html" title="gnome-bluetooth Reference Manual">
+<link rel="up" href="ch01.html" title="API Reference">
+<link rel="prev" href="gnome-bluetooth-bluetooth-enums.html" title="bluetooth-enums">
+<link rel="next" href="object-tree.html" title="Object Hierarchy">
+<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="gnome-bluetooth-bluetooth-enums.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">gnome-bluetooth Reference Manual</th>
+<td><a accesskey="n" href="object-tree.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts">
+<a href="#gnome-bluetooth-bluetooth-utils.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#gnome-bluetooth-bluetooth-utils.description" class="shortcut">Description</a>
+</td></tr>
+</table>
+<div class="refentry">
+<a name="gnome-bluetooth-bluetooth-utils"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="gnome-bluetooth-bluetooth-utils.top_of_page"></a>bluetooth-utils</span></h2>
+<p>bluetooth-utils — Bluetooth utility functions</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="gnome-bluetooth-bluetooth-utils.stability-level"></a><h2>Stability Level</h2>
+Stable, unless otherwise indicated
+</div>
+<div class="refsynopsisdiv">
+<a name="gnome-bluetooth-bluetooth-utils.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+#include &lt;bluetooth-utils.h&gt;
+
+<a class="link" href="gnome-bluetooth-bluetooth-enums.html#BluetoothType"><span class="returnvalue">BluetoothType</span></a>       <a class="link" href="gnome-bluetooth-bluetooth-utils.html#bluetooth-class-to-type" title="bluetooth_class_to_type ()">bluetooth_class_to_type</a>             (<em class="parameter"><code><span class="type">guint32</span> class</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="gnome-bluetooth-bluetooth-utils.html#bluetooth-send-to-address" title="bluetooth_send_to_address ()">bluetooth_send_to_address</a>           (<em class="parameter"><code>const <span class="type">char</span> *address</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *alias</code></em>);
+const <span class="returnvalue">gchar</span> *       <a class="link" href="gnome-bluetooth-bluetooth-utils.html#bluetooth-type-to-string" title="bluetooth_type_to_string ()">bluetooth_type_to_string</a>            (<em class="parameter"><code><span class="type">guint</span> type</code></em>);
+const <span class="returnvalue">char</span> *        <a class="link" href="gnome-bluetooth-bluetooth-utils.html#bluetooth-uuid-to-string" title="bluetooth_uuid_to_string ()">bluetooth_uuid_to_string</a>            (<em class="parameter"><code>const <span class="type">char</span> *uuid</code></em>);
+<span class="returnvalue">gboolean</span>            <a class="link" href="gnome-bluetooth-bluetooth-utils.html#bluetooth-verify-address" title="bluetooth_verify_address ()">bluetooth_verify_address</a>            (<em class="parameter"><code>const <span class="type">char</span> *bdaddr</code></em>);
+</pre>
+</div>
+<div class="refsect1">
+<a name="gnome-bluetooth-bluetooth-utils.description"></a><h2>Description</h2>
+<p>
+Those helper functions are used throughout the Bluetooth
+management utilities.
+</p>
+</div>
+<div class="refsect1">
+<a name="gnome-bluetooth-bluetooth-utils.details"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="bluetooth-class-to-type"></a><h3>bluetooth_class_to_type ()</h3>
+<pre class="programlisting"><a class="link" href="gnome-bluetooth-bluetooth-enums.html#BluetoothType"><span class="returnvalue">BluetoothType</span></a>       bluetooth_class_to_type             (<em class="parameter"><code><span class="type">guint32</span> class</code></em>);</pre>
+<p>
+Returns the type of device corresponding to the given <em class="parameter"><code>class</code></em> value.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>class</code></em> :</span></p></td>
+<td>a Bluetooth device class</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a <a class="link" href="gnome-bluetooth-bluetooth-enums.html#BluetoothType"><span class="type">BluetoothType</span></a>.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-send-to-address"></a><h3>bluetooth_send_to_address ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                bluetooth_send_to_address           (<em class="parameter"><code>const <span class="type">char</span> *address</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *alias</code></em>);</pre>
+<p>
+Start a GUI application for transfering files over Bluetooth.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
+<td>Remote device to use</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>alias</code></em> :</span></p></td>
+<td>Remote device's name</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-type-to-string"></a><h3>bluetooth_type_to_string ()</h3>
+<pre class="programlisting">const <span class="returnvalue">gchar</span> *       bluetooth_type_to_string            (<em class="parameter"><code><span class="type">guint</span> type</code></em>);</pre>
+<p>
+Returns a human-readable string representation of <em class="parameter"><code>type</code></em> usable for display to users. Do not free the return value.
+The returned string is already translated with <code class="function">gettext()</code>.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>type</code></em> :</span></p></td>
+<td>a <a class="link" href="gnome-bluetooth-bluetooth-enums.html#BluetoothType"><span class="type">BluetoothType</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a string.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-uuid-to-string"></a><h3>bluetooth_uuid_to_string ()</h3>
+<pre class="programlisting">const <span class="returnvalue">char</span> *        bluetooth_uuid_to_string            (<em class="parameter"><code>const <span class="type">char</span> *uuid</code></em>);</pre>
+<p>
+Returns a string representing a human-readable (but not usable for display to users) version of the <em class="parameter"><code>uuid</code></em>. Do not free the return value.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>uuid</code></em> :</span></p></td>
+<td>a string representing a Bluetooth UUID</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a string.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bluetooth-verify-address"></a><h3>bluetooth_verify_address ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>            bluetooth_verify_address            (<em class="parameter"><code>const <span class="type">char</span> *bdaddr</code></em>);</pre>
+<p>
+Returns whether the string is a valid Bluetooth address. This does not contact the device in any way.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bdaddr</code></em> :</span></p></td>
+<td>a string representing a Bluetooth address</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>
+<code class="literal">TRUE</code> if the address is valid, <code class="literal">FALSE</code> if not.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.19</div>
+</body>
+</html>

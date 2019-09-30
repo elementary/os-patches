@@ -1,0 +1,16 @@
+Author: Chad MILLER
+Bug-gnome: https://bugzilla.gnome.org/show_bug.cgi?id=721652
+
+--- a/wizard/pin-code-database.xml
++++ b/wizard/pin-code-database.xml
+@@ -73,6 +73,10 @@
+ 	<device oui="D8:A2:5E:" type="tablet" pin="0000"/>
+ 	<device oui="28:37:37:" type="tablet" pin="0000"/>
+ 	<device oui="C8:BC:C8:" type="tablet" pin="0000"/>
++	<device oui="84:38:35:" type="tablet" pin="0000"/>
++	<!-- Names are unstable. OSX pairing will clobber them. This will catch
++	     future unknown, unpaired trackpads, though. -->
++	<device name="Apple Wireless Trackpad" type="tablet" pin="0000"/>
+ 
+ 	<!-- BT-GPS8 JENTRO, GPS mouse -->
+ 	<device oui="00:0D:B5:" name="BT-GPS8 JENTRO" pin="0000"/>

@@ -1,0 +1,16 @@
+## Description: add PIN/OUI for Microsoft Wedge/Sculpt Mouse
+## Origin/Author: Anthony Wong
+## Bug: https://bugs.launchpad.net/ubuntu/+source/bluez/+bug/1094744
+## Upstream-Bug: https://bugzilla.gnome.org/show_bug.cgi?id=690927
+--- a/wizard/pin-code-database.xml
++++ b/wizard/pin-code-database.xml
+@@ -83,6 +83,9 @@
+ 	<!-- ION iCade Game Controller -->
+ 	<device name="iCade" type="keyboard" pin="ICADE"/>
+ 
++	<!-- Microsoft Wedge/Sculpt Touch mouse -->
++	<device oui="7C:1E:52:" type="mouse" name="Microsoft Touch Mouse" pin="0000"/>
++
+ <!-- GPS devices -->
+ 	<device oui="00:0D:B5:" name="TomTom Wireless GPS MkII" pin="0000"/>
+ 	<device oui="00:0D:B5:" name="GPS-GW-005" pin="0000"/>

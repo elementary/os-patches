@@ -1,0 +1,17 @@
+From: Jesse Sung <jesse.sung@canonical.com>
+Subject: Make sure the applet notices it might be time to show the whole menu
+ when the killswitch is toggled.
+Bug-Ubuntu: http://bugs.launchpad.net/ubuntu/+source/bluez/+bug/907818
+
+Index: gnome-bluetooth-3.4.2/applet/bluetooth-applet.c
+===================================================================
+--- gnome-bluetooth-3.4.2.orig/applet/bluetooth-applet.c	2012-07-02 22:21:54.000000000 +1200
++++ gnome-bluetooth-3.4.2/applet/bluetooth-applet.c	2012-07-05 14:51:57.960835633 +1200
+@@ -637,6 +637,7 @@
+   BluetoothApplet *self = BLUETOOTH_APPLET (user_data);
+ 
+   g_object_notify (G_OBJECT (self), "killswitch-state");
++  g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_FULL_MENU]);
+ }
+ 
+ typedef struct {

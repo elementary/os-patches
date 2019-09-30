@@ -1,0 +1,86 @@
+Description: ssp parameter fix
+   * Add ssp parameter fix, fix the parameter entered in agent dbus API,
+     also fix the wizard's UI to show the pin code correctly.
+     Fixed Logitech Bluetooth Keyboard K760, Logitech Bluetooth Keyboard K810,
+     HP Bluetooth Keyboard K4000 secure simple pairing failed issue.
+     (LP: #1035431, #1291756)
+Author: Jian-Ding Chen (timchen119) <tim.chen119@canonical.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1035431
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1291756
+Last-Update: 2014-04-29
+
+--- gnome-bluetooth-3.8.2.1.orig/lib/bluetooth-agent.c
++++ gnome-bluetooth-3.8.2.1/lib/bluetooth-agent.c
+@@ -52,7 +52,7 @@ static const gchar introspection_xml[] =
+ "    <method name='DisplayPasskey'>"
+ "      <arg type='o' name='device' direction='in'/>"
+ "      <arg type='u' name='passkey' direction='in'/>"
+-"      <arg type='y' name='entered' direction='in'/>"
++"      <arg type='q' name='entered' direction='in'/>"
+ "    </method>"
+ "    <method name='RequestConfirmation'>"
+ "      <arg type='o' name='device' direction='in'/>"
+@@ -164,7 +164,7 @@ static gboolean bluetooth_agent_request_
+ }
+ 
+ static gboolean bluetooth_agent_display_passkey(BluetoothAgent *agent,
+-			const char *path, guint passkey, guint8 entered,
++			const char *path, guint passkey, guint16 entered,
+ 						GDBusMethodInvocation *invocation)
+ {
+ 	BluetoothAgentPrivate *priv = BLUETOOTH_AGENT_GET_PRIVATE(agent);
+@@ -339,9 +339,9 @@ handle_method_call (GDBusConnection
+ 	} else if (g_strcmp0 (method_name, "DisplayPasskey") == 0) {
+ 		char *path;
+ 		guint32 passkey;
+-		guint8 entered;
++		guint16 entered;
+ 
+-		g_variant_get (parameters, "(ouy)", &path, &passkey, &entered);
++		g_variant_get (parameters, "(ouq)", &path, &passkey, &entered);
+ 		bluetooth_agent_display_passkey (agent, path, passkey, entered, invocation);
+ 		g_free (path);
+ 	} else if (g_strcmp0 (method_name, "RequestConfirmation") == 0) {
+--- gnome-bluetooth-3.8.2.1.orig/wizard/main.c
++++ gnome-bluetooth-3.8.2.1/wizard/main.c
+@@ -303,7 +303,7 @@ display_callback (GDBusMethodInvocation
+ 		  guint entered,
+ 		  gpointer user_data)
+ {
+-	gchar *text, *done, *code;
++	gchar *text, *done, *code, *label;
+ 
+ 	display_called = TRUE;
+ 	target_ssp = TRUE;
+@@ -329,18 +329,27 @@ display_callback (GDBusMethodInvocation
+ 
+ 		done = g_string_free (str, FALSE);
+ 	} else {
+-		done = g_strdup ("");
++		done = g_strdup_printf("%s", code);
+ 	}
+ 
+-	gtk_widget_show (label_pin_help);
++	gtk_widget_show (label_ssp_pin);
+ 
+-	gtk_label_set_markup(GTK_LABEL(label_ssp_pin_help), _("Please enter the following PIN:"));
+-	text = g_strdup_printf("%s%s", done, code + entered);
++	if (target_ui_behaviour == PAIRING_UI_KEYBOARD) {
++		label = g_strdup_printf (_("Please enter the following PIN on '%s' and press “Enter” on the keyboard:"), target_name);
++		text = g_strdup_printf("%s⏎", done);
++	}
++	else {
++		label = g_strdup_printf (_("Please enter the following PIN on '%s':"), target_name);
++		text = g_strdup_printf("%s", done);
++	}
++
++	gtk_label_set_markup(GTK_LABEL(label_ssp_pin_help), label);
+ 	set_large_label (GTK_LABEL (label_ssp_pin), text);
+ 	g_free(text);
+ 
+ 	g_free(done);
+ 	g_free(code);
++	g_free(label);
+ 
+ 	g_dbus_method_invocation_return_value (invocation, NULL);
+ 

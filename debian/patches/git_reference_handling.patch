@@ -1,0 +1,26 @@
+From fbc1ce2836ccf17368fb6fe2aa0c69396c610aa5 Mon Sep 17 00:00:00 2001
+From: Bastien Nocera <hadess@hadess.net>
+Date: Wed, 20 Nov 2013 16:11:32 +0000
+Subject: lib: Fix extraneous reference that could lead to crash
+
+The proxy we got from the tree model was already the extra
+reference we needed. This makes sure that all additional
+instances of the device (the ones not in the tree model)
+are destroyed when cancelling a disconnect call.
+---
+diff --git a/lib/bluetooth-client.c b/lib/bluetooth-client.c
+index e224033..c5e86de 100644
+--- a/lib/bluetooth-client.c
++++ b/lib/bluetooth-client.c
+@@ -1900,7 +1900,7 @@ bluetooth_client_connect_service (BluetoothClient     *client,
+ 	} else if (table != NULL) {
+ 		GDBusProxy *service;
+ 
+-		conndata->device = g_object_ref (DEVICE (proxy));
++		conndata->device = DEVICE (proxy);
+ 		conndata->services = g_hash_table_get_keys (table);
+ 		g_hash_table_unref (table);
+ 		conndata->services = g_list_sort (conndata->services, (GCompareFunc) rev_sort_services);
+--
+cgit v0.9.2
+

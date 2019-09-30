@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/">
+  <interface name="org.bluez.Manager">
+    <method name="DefaultAdapter">
+      <arg type="o" direction="out"/>
+    </method>
+
+    <method name="GetProperties">
+      <arg type="a{sv}" direction="out"/>
+    </method>
+
+    <signal name="AdapterAdded">
+      <arg type="o"/>
+    </signal>
+    <signal name="AdapterRemoved">
+      <arg type="o"/>
+    </signal>
+    <signal name="DefaultAdapterChanged">
+      <arg type="o"/>
+    </signal>
+  </interface>
+
+  <interface name="org.bluez.Adapter">
+    <method name="GetProperties">
+      <arg type="a{sv}" direction="out"/>
+    </method>
+
+    <method name="SetProperty">
+      <arg type="s" direction="in"/>
+      <arg type="v" direction="in"/>
+    </method>
+
+    <method name="StartDiscovery">
+    </method>
+
+    <method name="StopDiscovery">
+    </method>
+
+    <method name="RemoveDevice">
+      <arg type="o" name="device" direction="in"/>
+    </method>
+
+    <signal name="PropertyChanged">
+      <arg type="s"/>
+      <arg type="v"/>
+    </signal>
+    <signal name="DeviceCreated">
+      <arg type="o"/>
+    </signal>
+    <signal name="DeviceRemoved">
+      <arg type="o"/>
+    </signal>
+    <signal name="DeviceFound">
+      <arg type="s"/>
+      <arg type="a{sv}"/>
+    </signal>
+  </interface>
+
+  <interface name="org.bluez.Device">
+    <method name="GetProperties">
+      <arg type="a{sv}" direction="out"/>
+    </method>
+
+    <method name="SetProperty">
+      <arg type="s" direction="in"/>
+      <arg type="v" direction="in"/>
+    </method>
+
+    <method name="Disconnect"/>
+
+    <signal name="PropertyChanged">
+      <arg type="s"/>
+      <arg type="v"/>
+    </signal>
+  </interface>
+</node>

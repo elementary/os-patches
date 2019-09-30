@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY appversion "2.28">
+<!ENTITY app "<application>gnome-bluetooth</application>">
+<!ENTITY appname "gnome-bluetooth">
+<!ENTITY legal SYSTEM "legal.xml">
+]>
+<article id="index" lang="th">
+    <articleinfo>
+        <title>คู่มือ gnome-bluetooth</title>
+        <copyright lang="C">
+            <year>2009</year>
+            <holder>Baptiste Mille-Mathias</holder>
+        </copyright>
+        
+           <legalnotice id="legalnotice">
+         <para lang="C">
+           Permission is granted to copy, distribute and/or modify this
+           document under the terms of the GNU Free Documentation
+           License (GFDL), Version 1.1 or any later version published
+           by the Free Software Foundation with no Invariant Sections,
+           no Front-Cover Texts, and no Back-Cover Texts.  You can find
+           a copy of the GFDL at this <ulink type="help" url="help:fdl">link</ulink> or in the file COPYING-DOCS
+           distributed with this manual.
+          </para>
+          <para>คู่มือนี้ เป็นส่วนหนึ่งของชุดคู่มือ GNOME ที่เผยแพร่ภายใต้ GFDL ถ้าคุณต้องการเผยแพร่คู่มือนี้แยกต่างหากจากชุด คุณสามารถทำได้โดยเพิ่มสำเนาของสัญญาอนุญาตไปกับคู่มือ ตามที่อธิบายในข้อ 6 ของสัญญาอนุญาต</para>
+ 
+         <para>มีชื่อหลายชื่อที่บริษัทต่าง ๆ ใช้แยกความแตกต่างของผลิตภัณฑ์และบริการของตนจากบริษัทอื่น และอ้างเป็นเครื่องหมายการค้า ที่ใดก็ตามที่ชื่อเหล่านั้นปรากฏในเอกสารของ GNOME และสมาชิกโครงการเอกสาร GNOME ได้รับทราบเกี่ยวกับเครื่องหมายการค้าเหล่านั้น ชื่อเหล่านั้นจะเขียนด้วยตัวพิมพ์ใหญ่ หรือขึ้นต้นด้วยตัวพิมพ์ใหญ่</para>
+ 
+         <para lang="C">
+           DOCUMENT AND MODIFIED VERSIONS OF THE DOCUMENT ARE PROVIDED
+           UNDER  THE TERMS OF THE GNU FREE DOCUMENTATION LICENSE
+           WITH THE FURTHER UNDERSTANDING THAT:
+ 
+           <orderedlist>
+                 <listitem>
+                   <para lang="C">DOCUMENT IS PROVIDED ON AN "AS IS" BASIS,
+                     WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR
+                     IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES
+                     THAT THE DOCUMENT OR MODIFIED VERSION OF THE
+                     DOCUMENT IS FREE OF DEFECTS MERCHANTABLE, FIT FOR
+                     A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE
+                     RISK AS TO THE QUALITY, ACCURACY, AND PERFORMANCE
+                     OF THE DOCUMENT OR MODIFIED VERSION OF THE
+                     DOCUMENT IS WITH YOU. SHOULD ANY DOCUMENT OR
+                     MODIFIED VERSION PROVE DEFECTIVE IN ANY RESPECT,
+                     YOU (NOT THE INITIAL WRITER, AUTHOR OR ANY
+                     CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY
+                     SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER
+                     OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS
+                     LICENSE. NO USE OF ANY DOCUMENT OR MODIFIED
+                     VERSION OF THE DOCUMENT IS AUTHORIZED HEREUNDER
+                     EXCEPT UNDER THIS DISCLAIMER; AND
+                     UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL
+                     THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE),
+                     CONTRACT, OR OTHERWISE, SHALL THE AUTHOR,
+                     INITIAL WRITER, ANY CONTRIBUTOR, OR ANY
+                     DISTRIBUTOR OF THE DOCUMENT OR MODIFIED VERSION
+                     OF THE DOCUMENT, OR ANY SUPPLIER OF ANY OF SUCH
+                     PARTIES, BE LIABLE TO ANY PERSON FOR ANY
+                     DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
+                     CONSEQUENTIAL DAMAGES OF ANY CHARACTER
+                     INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS
+                     OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR
+                     MALFUNCTION, OR ANY AND ALL OTHER DAMAGES OR
+                     LOSSES ARISING OUT OF OR RELATING TO USE OF THE
+                     DOCUMENT AND MODIFIED VERSIONS OF THE DOCUMENT,
+                     EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF
+                     THE POSSIBILITY OF SUCH DAMAGES.
+                   </para>
+                 </listitem>
+           </orderedlist>
+         </para>
+   </legalnotice>
+ 
+
+        <authorgroup>
+            <author role="maintainer" lang="C">
+                <firstname>Baptiste</firstname>
+                <surname>Mille-Mathias</surname>
+                <affiliation>
+                    <orgname>GNOME Documentation Project</orgname>
+                    <address>
+                        <email>baptiste.millemathias@gmail.com</email>
+                    </address>
+                </affiliation>
+            </author>
+        </authorgroup>
+        
+        <!-- According to GNU FDL, revision history is mandatory if you are -->
+        <!-- modifying/reusing someone else's document.  If not, you can omit it. -->
+        <revhistory>
+            <revision lang="C">
+                <revnumber>1.0</revnumber>
+                <date>March 2009</date>
+                <revdescription>
+                    <para role="author" lang="C">Baptiste Mille-Mathias
+                        <email>baptiste.millemathias@gmail.com</email>
+                    </para>
+                </revdescription>
+            </revision>
+            <!-- Uncomment for future revision
+		<revision>
+		  <revnumber>1.1</revnumber>
+		  <date>March 2009</date>
+		  <revdescription>
+			 <para role="author">Baptiste Mille-Mathias
+			     <email>baptiste.millemathias@gmail.com</email></para>
+		  </revdescription>
+		</revision>
+		-->
+        </revhistory>
+        <releaseinfo>คู่มือนี้อธิบาย gnome-bluetooth รุ่น 2.28</releaseinfo>
+        <legalnotice>
+            <title>ข้อเสนอแนะ</title>
+            <para>หากพบปัญหาหรือมีข้อเสนอแนะสำหรับโปรแกรม <application>gnome-bluetooth</application> หรือเกี่ยวกับคู่มือนี้ กรุณาแจ้งให้เราทราบ ตามขั้นตอนใน <ulink url="ghelp:user-guide?feedback-bugs" type="help">หน้าเสนอแนะ GNOME</ulink></para>
+        </legalnotice>
+        <abstract role="description">
+            <para><application>gnome-bluetooth</application> เป็นโปรแกรมที่ใช้จัดการอุปกรณ์บลูทูทในเดสก์ท็อป GNOME</para>
+        </abstract>
+    </articleinfo>
+    <indexterm lang="C">
+        <primary>gnome-bluetooth</primary>
+    </indexterm>
+    <indexterm lang="C">
+        <primary>Bluetooth</primary>
+    </indexterm>
+    <indexterm lang="C">
+        <primary>Communication</primary>
+    </indexterm>
+    
+    <sect1 id="gnome-bluetooth-intro">
+        <title>เกริ่นนำ</title>
+        <para lang="C">
+            <application>gnome-bluetooth</application> is an application that let you manage Bluetooth in the GNOME destkop.
+            <itemizedlist>
+                <listitem>
+                    <para lang="C">
+                        <application>gnome-bluetooth</application> permits to send files to your Bluetooth devices, or browse their content.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para lang="C">
+			Connect to your devices, like headset or audio gateway.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para lang="C">
+                        You can add or delete Bluetooth devices, or manage their permissions.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+    </sect1>
+    
+    <sect1 id="gnome-bluetooth-applet">
+        <title>แอพเพล็ตบลูทูท</title>
+        
+        <para>แอพเพล็ตนี้ เป็นโปรแกรมที่ประจำอยู่ ซึ่งคุณจะพบได้ในพื้นที่แจ้งเหตุ และจะช่วยให้คุณเข้าถึงคำสั่งต่าง ๆ เช่น การส่งแฟ้ม หรือการจัดการอุปกรณ์ของคุณได้</para>
+        <figure id="gnome-bluetooth-applet-notification">
+            <title>ไอคอนแอพเพล็ตบลูทูทในถาดแจ้งเหตุ</title>
+            <screenshot>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/bluetooth-applet.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </screenshot>
+        </figure>
+        
+        <sect2 id="gnome-bluetooth-applet-start">
+            <title>การเริ่มต้นแอพเพล็ตบลูทูท</title>
+            
+            <para lang="C">
+                The <application>gnome-bluetooth</application> applet is started automatically when you log into your session, and you can find its icon in the
+                notification zone. To launch manually the applet, open menu
+                <menuchoice>
+                    <guimenu>Applications</guimenu><guimenu>Accessories</guimenu><guimenu>Terminal</guimenu>
+                </menuchoice>
+                and type <command>bluetooth-applet</command>.
+            </para>
+            <para lang="C">
+                To prevent launching of the applet in your desktop, open menu
+                <menuchoice>
+                    <guimenu>System</guimenu><guimenu>Preferences</guimenu><guimenu>Session</guimenu>
+                </menuchoice>
+                and disable <guilabel>Bluetooth Manager</guilabel>.
+            </para>
+        </sect2>
+        <sect2 id="gnome-bluetooh-applet-power">
+            <title>การปิดอะแดปเตอร์บลูทูทของคุณ</title>
+            <para>การปิดใช้งานอะแดปเตอร์บลูทูท จะเป็นการหยุดการติดต่อสื่อสารปัจจุบันและในอนาคตทั้งหมดกับอะแดปเตอร์บลูทูท การปิดใช้งานอะแดปเตอร์บลูทูท จะช่วยประหยัดพลังงานแบตเตอรี่ของแล็ปท็อป ช่วยให้คุณเคลื่อนย้ายไปมาได้อิสระมากขึ้น เป็นความคิดที่ดีที่จะปิดการใช้งานอุปกรณ์บลูทูทเมื่อคุณไม่ได้ใช้</para>
+            <para>คลิกที่ไอคอนของแอพเพล็ต แล้วเลือก <menuchoice><guimenu>ปิดบลูทูท</guimenu></menuchoice> ไอคอนแจ้งเหตุจะกลายเป็นสีเทา</para>
+        </sect2>
+
+        <sect2 id="gnome-bluetooth-applet-sending">
+            <title>การส่งแฟ้มไปยังอุปกรณ์บลูทูท</title>
+	    <para>เลือกเมนูนี้เพื่อส่งแฟ้มไปยังอุปกรณ์ จะปรากฏกล่องโต้ตอบเลือกแฟ้มเพื่อเลือกแฟ้มที่จะส่ง และคุณจะต้องเลือกอุปกรณ์ที่จะส่งแฟ้มไป</para>
+        </sect2>
+        
+        <sect2 id="gnome-bluetooth-applet-browsing">
+            <title>การเรียกดูอุปกรณ์บลูทูท</title>
+            <para>เลือกเมนูนี้เพื่อเรียกดูระบบแฟ้มในอุปกรณ์โดยตรง โดยใช้เครื่องมือจัดการแฟ้มของคุณ</para>
+        </sect2>
+
+	<sect2 id="gnome-bluetooth-applet-devices">
+	    <title>อุปกรณ์ล่าสุดที่ใช้</title>
+	    <para>ส่วนนี้จะแสดงอุปกรณ์ต่าง ๆ ที่มีการจับคู่ไว้ ซึ่งคุณสามารถเชื่อมต่อไปหาได้</para>
+	    <para>วิธีเชื่อมต่อไปยังอุปกรณ์ คลิกที่ชื่อของอุปกรณ์ ซึ่งชื่ออุปกรณ์จะกลายเป็นตัวหนา เพื่อแจ้งว่าคุณได้เชื่อมต่อไปยังอุปกรณ์แล้ว</para>
+	</sect2>
+        
+        <sect2 id="gnome-bluetooth-applet-setup">
+            <title>การเพิ่มอุปกรณ์ใหม่</title>
+            
+            <para>วิธีเพิ่มอุปกรณ์ใหม่ (ซึ่งเริ่มจากการจับคู่อะแดปเตอร์กับอุปกรณ์) คลิกที่ไอคอนของแอพเพล็ต แล้วเลือก <guimenu>ตั้งค่าอุปกรณ์ใหม่...</guimenu> เครื่องมือช่วยแบบกราฟิกจะช่วยคุณผ่านขั้นตอนการตั้งค่าอุปกรณ์ของคุณ</para>
+            
+            <note>
+                <para>อย่าลืมตั้งค่าอุปกรณ์อีกฝ่ายหนึ่งให้อยู่ในโหมดเปิดให้ตรวจพบได้ก่อนที่จะเริ่มต้นกระบวนการ มิฉะนั้น เครื่องมือช่วยนี้จะไม่สามารถค้นหาอุปกรณ์ได้</para>
+            </note>
+            
+            <para>เครื่องมือช่วยจะแสดงอุปกรณ์ที่เปิดให้ตรวจพบได้และตรวจพบในบริเวณรอบ ๆ ทั้งหมด คุณสามารถกรองรายชื่อของอุปกรณ์ได้ โดยเลือกประเภทของอุปกรณ์ที่คุณกำลังมองหา</para>
+            
+            <figure id="gnome-bluetooth-wizard-img">
+                <title>การค้นหาอุปกรณ์ในเครื่องมือช่วย</title>
+                <screenshot>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="figures/bluetooth-wizard.png" format="PNG"/>
+                        </imageobject>
+                    </mediaobject>
+                </screenshot>
+            </figure>
+            
+            <para>ถ้าอุปกรณ์ของคุณมี PIN ที่กำหนดตายตัว ก็เลือก <guibutton>ตัวเลือกของ PIN...</guibutton> แล้วเลือก PIN ที่จะใช้ในกล่องโต้ตอบ</para>
+            <para>เลือก <guibutton>ถัดไป</guibutton> เพื่อเข้าสู่ขั้นตอนการจับคู่ ถ้าคุณได้กำหนด PIN แบบตายตัวไว้ในขั้นที่แล้ว การจับคู่ก็จะเกิดขึ้นโดยอัตโนมัติ ถ้ายังไม่ได้กำหนด โปรแกรมก็จะแสดง PIN ที่คุณจะต้องป้อนลงในอุปกรณ์ของคุณ คุณก็ป้อนลงในอุปกรณ์ตามที่บอก เมื่อป้อนเสร็จแล้ว อุปกรณ์กับอะแดปเตอร์ก็จะจับคู่กัน</para>
+        </sect2>
+
+        <sect2 id="gnome-bluetooth-applet-preferences">
+            <title>การปรับแต่ง</title>
+            
+            <para lang="C">
+                Click on the icon of the applet, and choose 
+                <menuchoice>
+                    <guilabel>Preferences</guilabel>
+                </menuchoice>,
+                the preferences dialog will appear.
+            </para>
+            <para>ดูข้อมูลเพิ่มเติมเกี่ยวกับการปรับแต่งได้ที่ <xref linkend="gnome-bluetooth-preferences"/></para>
+        </sect2>
+    </sect1>
+    
+    <sect1 id="gnome-bluetooth-preferences">
+        <title>การปรับแต่ง</title>
+        <para>กล่องโต้ตอบปรับแต่ง <application>gnome-bluetooth</application> ช่วยคุณจัดการกับอุปกรณ์บลูทูทต่าง ๆ หรือปรับเปลี่ยนคุณสมบัติของอะแดปเตอร์บลูทูทของคุณ</para>
+        
+        <figure id="gnome-bluetooth-prefs-img">
+            <title>กล่องโต้ตอบปรับแต่ง</title>
+            <screenshot>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/bluetooth-properties.png" format="PNG"/>
+                    </imageobject>
+                </mediaobject>
+            </screenshot>
+        </figure>
+            
+	<sect2 id="gnome-bluetooth-prefs-adapter-discover">
+	    <title>เปิดให้ตรวจพบได้</title>
+	    
+	    <para>เมื่ออะแดปเตอร์ของคุณถูกกำหนดเป็น <guilabel>เปิดให้ตรวจพบได้</guilabel> อุปกรณ์บลูทูทใด ๆ ที่อยู่รอบข้างจะสามารถเห็นตัวอะแดปเตอร์ได้ และสามารถขอจับคู่ได้</para>
+	    <important>
+		<para>ในฐานะที่เป็นเครือข่ายอีกชนิดหนึ่ง บลูทูทจะนำมาซึ่งความเสี่ยงในด้านระบบรักษาความปลอดภัย ดังนั้น การกำหนดอะแดปเตอร์ให้อุปกรณ์อื่นไม่สามารถตรวจพบได้ จึงเป็นสิ่งที่ควรทำ เพื่อจำกัดความเป็นไปได้ที่จะถูกเจาะระบบ</para>
+	    </important>
+	    <para>การตั้งค่าอุปกรณ์โดยเปิดให้ตรวจพบได้ จะเป็นประโยชน์เฉพาะเมื่อคุณจะจับคู่อุปกรณ์นั้นกับอุปกรณ์อื่นเท่านั้น และเมื่อจับคู่เสร็จแล้ว คุณสามารถเลิกกา <guilabel>เปิดคอมพิวเตอร์ให้ตรวจพบได้</guilabel> ได้</para>
+	    <note>
+		<para>เมื่ออุปกรณ์ของคุณไม่สามารถตรวจพบได้ การติดต่อสื่อสารกับอุปกรณ์บลูทูทที่จับคู่ไว้แล้วยังคงเป็นไปได้</para>
+	    </note>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-adapter-name">
+	    <title>ชื่อที่เข้าใจง่ายของอะแดปเตอร์</title>
+	    <para>ชื่อที่เข้าใจง่าย เป็นชื่อเล่นที่ใช้แทนที่อยู่ที่ใช้ระบุอุปกรณ์บลูทูทแต่ละตัว ซึ่งจำง่ายกว่ามาก</para>
+	    <para>โดยปกติแล้ว ชื่อที่เข้าใจง่ายของอะแดปเตอร์จะเป็น <envar>HOSTNAME</envar>-0 (โดย <envar>HOSTNAME</envar> คือชื่อของคอมพิวเตอร์ของคุณ) วิธีเปลี่ยนชื่อ ทำได้โดยแก้ไขข้อความในช่องข้อความให้เป็นชื่อที่คุณต้องการ การเปลี่ยนชื่อจะมีผลทันที</para>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-adapter-devices">
+	    <title>อุปกรณ์ที่ทราบ</title>
+	    <para lang="C">
+		<guilabel>Known devices</guilabel> lists the Bluetooth devices you paired and let you manage them,
+		like deleting them, connect to them or adding new one.
+		<itemizedlist>
+		    <listitem>
+			<para lang="C">
+			    Setup new device, as described in <xref linkend="gnome-bluetooth-applet-setup"/>
+			</para>
+		    </listitem>
+		    <listitem>
+			<para lang="C">
+			    Connect / Disconnect to a device.
+			</para>
+		    </listitem>
+		    <listitem>
+			<para lang="C">
+			    Device Deletion. Deletion will suppress pairing between the adapter and the device, and
+			    no communication will be allowed. You need to pair them together again if you want transfer
+			    files for instance.
+			</para>
+		    </listitem>
+		</itemizedlist>
+	    </para>
+	</sect2>
+	
+	<sect2 id="gnome-bluetooth-prefs-show-icon">
+	    <title>แสดงไอคอนบลูทูท</title>
+	    <para>คุณสามารถแสดงหรือซ่อนไอคอนบลูทูทในพาเนลได้ ดูความสามารถต่าง ๆ ของแอพเพล็ตได้จาก <xref linkend="gnome-bluetooth-applet"/></para>
+	    
+	    <important>
+		<para>ถ้าคุณปิดการใช้งานไอคอนในพาเนล คุณก็จะสามารถสั่งการต่าง ๆ ได้เพียงจำกัดไม่กี่อย่างเท่านั้น</para>
+	    </important>
+	</sect2>
+
+	<sect2 id="gnome-bluetooth-prefs-receive">
+	    <title>รับแฟ้ม</title>
+	    
+	    <para>คลิกที่ปุ่ม <guilabel>รับแฟ้ม</guilabel> แล้วกล่องโต้ตอบ <guilabel>ปรับแต่งการแบ่งปันแฟ้มส่วนตัว</guilabel> จะปรากฏ คุณสามารถตั้งค่าการรับแฟ้มและแบ่งปันแฟ้มผ่านบลูทูทได้ที่นั่น</para>
+	    <important>
+		<para>ความสามารถนี้ไม่ได้มีใน <application>gnome-bluetooth</application> คุณต้องติดตั้ง <application>gnome-user-share</application> เพื่อที่จะใช้ความสามารถนี้</para>
+		<para lang="C">
+		    Read more in the <ulink type="help" url="help:gnome-user-share">Personal File Sharing Manual</ulink>:
+		    <ulink type="help" url="help:gnome-user-share/gnome-user-share-getting-started#gnome-user-share-bluetooth-receiving">receiving</ulink> and <ulink type="help" url="help:gnome-user-share/gnome-user-share-getting-started#gnome-user-share-enabling-bluetooth">sharing</ulink>.
+		</para>
+	    </important>
+	</sect2>
+    </sect1>
+
+    <sect1 id="gnome-bluetooth-FAQ">
+        <title>คำถามที่ถามบ่อย</title>
+        <qandaset>
+            <qandaentry>
+                <question>
+                    <para>ฉันหาวิธีรับแฟ้มผ่านบลูทูทที่เครื่องคอมพิวเตอร์ของฉันใน <application>gnome-bluetooth</application> ไม่เจอ ฉันตาบอดหรือ?</para>
+                </question>
+                <answer>
+                    <para>การรับแฟ้มไม่ได้ทำใน <application>gnome-bluetooth</application> แต่ทำใน <application>gnome-user-share</application> ดังนั้น คุณต้องติดตั้งโปรแกรมดังกล่าวเพื่อที่จะสามารถรับแฟ้มผ่านบลูทูทได้ ปุ่มที่ได้อธิบายไว้ใน <xref linkend="gnome-bluetooth-prefs-receive"/> เป็นเพียงปุ่มเรียกกล่องโต้ตอบตั้งค่าของโปรแกรมเท่านั้น</para>
+                </answer>
+            </qandaentry>
+            <qandaentry>
+                <question>
+                    <para>ฉันพบบั๊กใน <application>gnome-bluetooth</application> ฉันสามารถทำอะไรได้?</para>
+                </question>
+                <answer>
+                    <para>คุณควรจะส่งรายงานบั๊กไปยัง <ulink url="http://bugzilla.gnome.org/enter_bug.cgi?product=gnome-bluetooth"/></para>
+                </answer>
+            </qandaentry>
+            <!--
+	  <qandaentry>
+	      <question>
+		  <para></para>
+	      </question>
+	      <answer>
+		  <para></para>
+	      </answer>
+	  </qandaentry>-->
+        </qandaset>
+    </sect1>
+    
+    
+</article>

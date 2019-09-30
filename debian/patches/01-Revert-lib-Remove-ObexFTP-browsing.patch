@@ -1,0 +1,151 @@
+From 4bba54bf4371b5862f74af011e67d1c59b67bab1 Mon Sep 17 00:00:00 2001
+From: Emilio Pozuelo Monfort <pochu27@gmail.com>
+Date: Fri, 29 Mar 2013 12:05:37 +0100
+Subject: [PATCH] Revert "lib: Remove ObexFTP browsing"
+
+This reverts commit ce841d2166e3af9ae5f6a001c9f12e7ea7421e74.
+
+Conflicts:
+	lib/bluetooth-utils.c
+---
+ lib/bluetooth-utils.c |  107 +++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/bluetooth-utils.h |    8 ++++
+ 2 files changed, 115 insertions(+)
+
+diff --git a/lib/bluetooth-utils.c b/lib/bluetooth-utils.c
+index 25ff91e..b19b4e1 100644
+--- a/lib/bluetooth-utils.c
++++ b/lib/bluetooth-utils.c
+@@ -340,3 +340,110 @@ bluetooth_send_to_address (const char *address,
+ 	g_ptr_array_free (a, TRUE);
+ }
+ 
++typedef struct {
++  GSimpleAsyncResult *result;
++  guint timestamp;
++} MountClosure;
++
++static void
++mount_ready_cb (GObject *object,
++		GAsyncResult *result,
++		gpointer user_data)
++{
++	GError *error = NULL;
++	GFile *file = G_FILE (object);
++	char *uri = g_file_get_uri (file);
++	MountClosure *closure = user_data;
++
++	if (g_file_mount_enclosing_volume_finish (file, result, &error) == FALSE) {
++		/* Ignore "already mounted" error */
++		if (error->domain == G_IO_ERROR &&
++		    error->code == G_IO_ERROR_ALREADY_MOUNTED) {
++			g_error_free (error);
++			error = NULL;
++		}
++	}
++
++	if (!error) {
++		gtk_show_uri (NULL, uri, closure->timestamp, &error);
++	}
++
++	if (error) {
++		g_simple_async_result_set_from_error (closure->result, error);
++		g_error_free (error);
++	} else {
++		g_simple_async_result_set_op_res_gboolean (closure->result, TRUE);
++	}
++
++	g_simple_async_result_complete (closure->result);
++
++	g_free (uri);
++	g_object_unref (closure->result);
++	g_free (closure);
++}
++
++/**
++ * bluetooth_browse_address_finish:
++ * @object: a #GObject
++ * @result: the #GAsyncResult from the callback
++ * @error: a #GError
++ *
++ * Finishes the browse operation, See bluetooth_browse_address().
++ *
++ * Returns: %TRUE if the operation was successful, %FALSE if error is set.
++ */
++gboolean
++bluetooth_browse_address_finish (GObject      *object,
++				 GAsyncResult *result,
++				 GError      **error)
++{
++	GSimpleAsyncResult *simple;
++
++	g_return_val_if_fail (G_IS_OBJECT (object), FALSE);
++	g_return_val_if_fail (g_simple_async_result_is_valid (result, object, bluetooth_browse_address), FALSE);
++
++	simple = G_SIMPLE_ASYNC_RESULT (result);
++	if (g_simple_async_result_propagate_error (simple, error))
++		return FALSE;
++	else
++		return TRUE;
++}
++
++/**
++ * bluetooth_browse_address:
++ * @object: a #GObject, such as the top-level of your management application
++ * @address: the Bluetooth device to browse
++ * @timestamp: a timestamp to prevent focus stealing
++ * @callback: (scope async): the completion callback
++ * @user_data: the data to pass to callback function
++ *
++ * Opens a Bluetooth device in Nautilus.
++ *
++ * Ideally the timestamp is taken from the event triggering the call to this function.
++ * If timestamp is not known you can take #GDK_CURRENT_TIME.
++ */
++void
++bluetooth_browse_address (GObject             *object,
++			  const char          *address,
++			  guint                timestamp,
++			  GAsyncReadyCallback  callback,
++			  gpointer             user_data)
++{
++	GFile *file;
++	char *uri;
++	MountClosure *closure;
++
++	g_return_if_fail (G_IS_OBJECT (object));
++	g_return_if_fail (address != NULL);
++
++	uri = g_strdup_printf ("obex://[%s]/", address);
++	file = g_file_new_for_uri (uri);
++
++	closure = g_new (MountClosure, 1);
++	closure->result = g_simple_async_result_new (object, callback, user_data, bluetooth_browse_address);
++	closure->timestamp = timestamp;
++	g_file_mount_enclosing_volume(file, G_MOUNT_MOUNT_NONE, NULL, NULL, mount_ready_cb, closure);
++
++	g_free (uri);
++	g_object_unref (file);
++}
+diff --git a/lib/bluetooth-utils.h b/lib/bluetooth-utils.h
+index 8920b4c..53c341b 100644
+--- a/lib/bluetooth-utils.h
++++ b/lib/bluetooth-utils.h
+@@ -35,6 +35,14 @@ const gchar   *bluetooth_type_to_string (guint type);
+ gboolean       bluetooth_verify_address (const char *bdaddr);
+ const char    *bluetooth_uuid_to_string (const char *uuid);
+ 
++gboolean bluetooth_browse_address_finish (GObject *object,
++					  GAsyncResult *result,
++					  GError **error);
++void bluetooth_browse_address (GObject *object,
++			       const char *address,
++			       guint timestamp,
++			       GAsyncReadyCallback callback,
++			       gpointer user_data);
+ void bluetooth_send_to_address (const char *address,
+ 				const char *alias);
+ 
+-- 
+1.7.10.4
+
