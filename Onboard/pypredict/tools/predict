@@ -1,0 +1,146 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Onboard is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Onboard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright © 2012, marmuta <marmvta@gmail.com>
+#
+# This file is part of pypredict, Onboard.
+#
+
+import sys
+import itertools
+from optparse import OptionParser
+from pypredict import *
+
+
+def main():
+    parser = OptionParser(usage="Usage: %prog [options] corpus model")
+    parser.add_option("-m", "--language-model", type="str", dest="language_model",
+              help="optional filename of a language model")
+    parser.add_option("-d", "--dictionary-test", action="store_true", 
+              dest="dictionary_test",
+              help="use synthethic training data to test dictionary performance")
+    parser.add_option("-c", "--case-insensitive", action="store_true", 
+              dest="case_insensitive",
+              help="case insensitive completion")
+    parser.add_option("-a", "--accent-insensitive", action="store_true", 
+              dest="accent_insensitive",
+              help="accent insensitive completion")
+    options, args = parser.parse_args()
+
+    if options.language_model:
+        model = CachedDynamicModel()
+        with timeit("loading"):
+            model.load(options.language_model)
+
+        context = [str(w) for w in args or [""]]
+        model.recency_ratio = 0
+
+    elif options.dictionary_test:
+        model = CachedDynamicModel()
+        with timeit("creating synthetic training data"):
+            s = "".join([chr(c) for c in range(ord("a"), ord("z") + 1)])
+            perms = list(itertools.permutations(s, 4))
+            for perm in perms[:0xfff0]:
+                model.count_ngram(["".join(perm)])
+        context = [str(w) for w in args or [""]]
+        model.recency_ratio = 0
+
+    else:
+
+        # usage:
+        # pypredict/predict dummy [history] prefix
+        # e.g. pypredict/predict "" www test ""
+
+        model = CachedDynamicModel()
+
+        # debug
+        training_text = """
+            No, when I go to sea, I go as a simple sailor, right before the mast,
+            plumb down into the forecastle, aloft there to the royal mast-head.
+            True, they rather order me about some, and make me jump from spar to
+            spar, like a grasshopper in a May meadow. And at first, this sort
+            of thing is unpleasant enough. And more than all,
+            if just previous to putting your hand into the tar-pot, you have been
+            lording it as a country schoolmaster, making the tallest boys stand
+            in awe of you. The transition is a keen one, I assure you, from a
+            schoolmaster to a sailor, and requires a strong decoction of Seneca and
+            the Stoics to enable you to grin and bear it. But even this wears off in
+            time.
+            www.test.com
+            www.gnome.org
+            """
+        tokens, spans = tokenize_text(training_text)
+        #tokens, spans = tokenize_text(u"<s> Mary has a little lamb.")
+        #tokens, spans = tokenize_text(u"Mary has a little lamb little.")
+        #tokens, spans = tokenize_text(read_corpus("../../moby.txt"))
+        #tokens, spans = tokenize_text(read_corpus("/home/user/.gpredict/learned_text.txt"))
+        model.learn_tokens(tokens)
+        for ng in model.iter_ngrams():
+            if "bzr" in ng[0]:
+                print(ng)
+        context = [str(w) for w in args or [""]]
+        # fixme, remove <unk> <unk> <weird word> ngrams
+        #context = [u"xxxxx", u""]
+        #context = [u"import", u"pypredict", u""]
+        model.recency_ratio = 1
+
+    counts, totals = model.get_counts()
+    for i,c in enumerate(counts):
+        sys.stdout.write("%d-grams: types %10d, occurences %10d\n" % \
+              (i+1, counts[i], totals[i]))
+
+    with timeit("predict (50)"):
+        choices = model.predictp(context, 50)
+
+    print(options.case_insensitive, options.accent_insensitive)
+    with timeit("predict (all)"):
+
+        _options = model.INCLUDE_CONTROL_WORDS
+        if options.case_insensitive:
+            _options |= model.CASE_INSENSITIVE
+        if options.accent_insensitive:
+            _options |= model.ACCENT_INSENSITIVE
+        
+        choices = model.predictp(context=context, limit=-1, options=_options)
+
+    print_choices(model, context, choices)
+    print(model.memory_size(), sum(model.memory_size()))
+
+
+def print_choices(model, context, choices):
+    n   = min(model.order, len(context))
+    history = context[-n:-1]
+    prefix  = context[-1]
+
+    print()
+    print("history:", history, "prefix '%s' " % prefix)
+
+    psum = 0
+    counts = []
+    for x in choices:
+        ngram = history + [x[0]]
+        psum += x[1]
+        padding = max(model.order-len(context),0)
+        ng = [""]*padding + ngram
+        counts.append([model.get_ngram_count(ng[i:]) for i in range(model.order)])
+
+    print("Probability sum %f for %d results" % (psum,len(choices)))   # ought to be 1.0 for the whole vocabulary
+    print("Words with zero probability: ", sum(1 for x in choices if x[1] == 0))
+    for i,x in enumerate(choices[:20]):
+        print("%10f " % x[1] + "".join("%8d " % c for c in counts[i]) + "'%s'" % x[0])
+
+if __name__ == '__main__':
+    main()
+

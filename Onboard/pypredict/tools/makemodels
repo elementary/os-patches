@@ -1,0 +1,230 @@
+#!/bin/bash
+# Copyright © 2012, marmuta
+#
+# This file is part of Onboard.
+#
+# Onboard is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Onboard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Important directories:
+#
+# ./models/raw    - Input directory containing large raw models with only
+#                   minimal processing (utf-8 encoded). Due to their large
+#                   size, often in the GB range, raw models aren't
+#                   included with Onboard's source package,
+#
+# ./models        - Output directory for final filtered system language models
+#                   (utf-8 encoded).
+#
+
+LANGUAGES=
+LANGUAGES+="en_US en_GB en_AU en_CA "
+LANGUAGES+="de_DE de_CH de_AT "
+LANGUAGES+="fr_FR "
+LANGUAGES+="it_IT "
+LANGUAGES+="es_ES "
+LANGUAGES+="pt_PT pt_BR "
+LANGUAGES+="ru_RU "
+LANGUAGES+="gd_GB "
+LANGUAGES+="ga_IE "
+LANGUAGES+="tr_TR "
+LANGUAGES+="pl_PL "
+# All Dutch models are currently identical, but the spell checkers
+# might have differences. Keep them for now so we can easily
+# select all flavours in the language menu.
+LANGUAGES+="nl_NL nl_BE nl_AW nl_AN nl_SR " 
+LANGUAGES+="ro_RO "
+LANGUAGES+="da_DK "
+LANGUAGES+="el_GR "
+LANGUAGES+="sv_SE "
+LANGUAGES+="lb_LU "
+
+MODELDIR="models"
+RAWMODELDIR="../training/raw_models"
+MODELEXT="lm"
+
+TRAIN_CMD=Onboard/pypredict/tools/train
+FILTER_CMD=Onboard/pypredict/tools/filter
+
+ORDER=2
+VERBOSE=0
+
+set -e
+
+help()
+{
+cat >&2 << END
+Usage: `basename $0` [-e|E] [-i|I] [-v] [languages...]
+Script to create language models.
+Options:
+ -v  More verbose output
+
+ -h  Show this help.
+END
+}
+
+
+# process command line arguments
+while getopts "v" opt; do
+	case "$opt" in
+	v)
+		VERBOSE=1
+		;;
+	\?|*)
+		help
+		exit 1
+		;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+
+# get languages from positional parameters
+if [ $# -gt 0 ]; then
+    langs=""
+    for lang in $*; do
+        lang_id=${lang:0:2}
+        if [ "${lang}" == "${lang_id}" ]; then
+
+            # expand language to full lang_country id
+            for l in ${LANGUAGES}; do
+                lid=${l:0:2}
+                if [ "${lang_id}" == "${lid}" ]; then
+                    langs="${langs} ${l}"
+                fi
+            done
+        else
+            # append language as is
+            langs="${langs} ${lang}"
+        fi
+    done
+
+    LANGUAGES="${langs}"
+fi
+
+# make sure the directories exist
+[ -d "$MODELDIR" ] || mkdir $MODELDIR
+
+# filter language models
+for lang in $LANGUAGES; do
+    lang_id=${lang:0:2}
+    MODEL_IN="$RAWMODELDIR/$lang_id.$MODELEXT.sorted-pruned"
+    MODEL_OUT="$MODELDIR/$lang.$MODELEXT"
+
+    echo "Building '$MODEL_OUT'..."
+
+    PRUNE_FREQ=49
+    REGEX_DROP_UNIGRAM="\'s$|^\S$"
+    REGEX_DROP_NGRAM="^\w{1}\ | \s\S{1,3}(?:\s|$)"
+    NAME_EXCEPTIONS=
+    MAX_LC_UC_RATIO=200
+
+    case "$lang_id" in
+        en)
+            PRUNE_FREQ=499,499
+            REGEX_DROP_UNIGRAM="\'s$|^[^IaA]$"
+            NAME_EXCEPTIONS=Union,Kingdom,Nations,New,Barack,Obama,Bush,South,West,North,East,Southern,Western,Northern,Eastern,Mean,Standard,Coast,Time,Grand,Central,Station,Large,Cloud,Collider,Psychology,Geographic \
+            MAX_LC_UC_RATIO=2.0
+            ;;
+
+        de)
+            PRUNE_FREQ=399
+            MAX_LC_UC_RATIO=300.0
+            ;;
+
+        fr)
+            PRUNE_FREQ=169
+            MAX_LC_UC_RATIO=150.0
+            ;;
+
+        es)
+            PRUNE_FREQ=149
+            MAX_LC_UC_RATIO=50.0
+            ;;
+
+        pt)
+            PRUNE_FREQ=69
+            MAX_LC_UC_RATIO=50.0
+            ;;
+
+        it)
+            PRUNE_FREQ=99
+           ;;
+
+        ru)
+            PRUNE_FREQ=249
+            ;;
+
+        tr)
+            PRUNE_FREQ=34
+            ;;
+
+        pl)
+            PRUNE_FREQ=199,199,-1
+            ;;
+
+        gd)
+            PRUNE_FREQ=1,1,-1
+            MAX_LC_UC_RATIO=50.0
+            ;;
+
+        ga)
+            PRUNE_FREQ=4,4,-1
+            ;;
+
+        nl)
+            PRUNE_FREQ=89,89,-1
+            ;;
+
+        da)
+            PRUNE_FREQ=24,24,-1
+            ;;
+
+        ro)
+            PRUNE_FREQ=27,27,-1
+            ;;
+
+        el)
+            PRUNE_FREQ=24,24,-1
+            ;;
+
+        sv)
+            PRUNE_FREQ=54,54,-1
+            ;;
+
+        lb)
+            PRUNE_FREQ=1,1,-1
+            ;;
+
+       *)
+            echo "Unsupported language $lang, Aborting"
+            exit 1
+    esac
+
+    REMAINING_OPTIONS=""
+    if [ ! "${NAME_EXCEPTIONS}" == "" ]; then
+        REMAINING_OPTIONS="${REMAINING_OPTIONS} -x ${NAME_EXCEPTIONS}"
+    fi
+
+    $FILTER_CMD -p "${PRUNE_FREQ}" \
+                -r "${REGEX_DROP_UNIGRAM}" \
+                -n "${REGEX_DROP_NGRAM}" \
+                -t \
+                -l $lang \
+                -N \
+                -i ${MAX_LC_UC_RATIO} \
+                ${REMAINING_OPTIONS} \
+                --save-sorted $MODEL_IN $MODEL_OUT
+    echo
+
+done

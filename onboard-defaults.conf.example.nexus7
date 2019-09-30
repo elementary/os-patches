@@ -1,0 +1,112 @@
+#
+# Onboard system defaults
+#
+# System defaults control the initial appearance, aka branding,
+# of Onboard in display manager (gdm, LightDM) and user sessions.
+#
+# Place this file in the project's installation directory (e.g.
+# /usr/share/onboard) and/or in /etc/onboard/.
+#
+# Keys have to start in column 0. A whitespace in column 0 indicates
+# a line continuation.
+#
+
+[main]
+#layout=Compact
+#layout=Phone
+layout=Small
+theme=Nightshade
+system-theme-associations={"HighContrast" : "HighContrast", "HighContrastInverse" : "HighContrastInverse", "LowContrast" : "LowContrast"}
+#system-theme-tracking-enabled=True
+
+key-label-font=Ubuntu
+superkey-label=
+superkey-label-independent-size=True
+show-status-icon=True
+
+# Enable embedding into gnome-screen-saver
+# If set to True, screen-saver integration will be enabled on first start.
+# It can be disabled again in Onboard's preferences.
+#
+# Caution: This only happens silently when the relevant screen-saver
+# keys are still at their default values. If the keys have been set before,
+# for example by a different on-screen keyboard, Onboard shows a message
+# box on startup and lets the user decide what to do.
+#
+# The screen-saver keys are:
+# org.gnome.desktop.screensaver embedded-keyboard-command
+# org.gnome.desktop.screensaver embedded-keyboard-enabled
+#
+xembed-onboard=True
+
+[window]
+window-state-sticky=True
+force-to-top=True
+inactive-transparency-delay=5.0
+docking-enabled=True
+docking-edge=bottom
+docking-shrink-workarea=True
+resize-handles=SE SW NW NE
+
+[window.landscape]
+x=65
+y=500
+width=1215
+height=300
+dock-expand=True
+dock-height=300
+dock-width=1150
+
+[window.portrait]
+x=65
+y=985
+width=735
+height=300
+dock-expand=True
+dock-height=300
+dock-width=700
+
+[icon-palette]
+# floating icon
+#in-use = True
+resize-handles=SE
+
+[icon-palette.landscape]
+# Position and size of the floating icon on landscape screens.
+x=1232
+y=752
+width=48
+height=48
+
+[icon-palette.portrait]
+# Position and size of the floating icon on portrait screens.
+x=752
+y=1232
+width=48
+height=48
+
+[keyboard]
+# label popup
+touch-feedback-enabled=True
+# size of the label popup in pixels, 0 for default size
+touch-feedback-size=100
+
+[auto-show]
+enabled=True
+
+[typing-helpers]
+#auto-capitalization=False
+
+[word-suggestions]
+#enabled=False
+
+[universal-access]
+
+[scanner]
+device-name=0000:0000:3
+
+[lockdown]
+# Block switching to other virtual terminals.
+# There is no way back using Onboard.
+disable-keys=[["CTRL", "LALT", "F[0-9]+"]]
+

@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+from string import ascii_lowercase
+from random import sample
+from pypredict import *
+
+def main():
+    model = DynamicModel(3)
+
+    for loop in xrange(10):
+        print loop
+        tokens = []
+        for i in xrange(10000):
+            tokens.append(u"".join(sample(ascii_lowercase,8)))
+        model.learn_tokens(tokens)
+        
+
+    counts, totals = model.get_counts()
+    for i,c in enumerate(counts):
+        sys.stdout.write("%d-grams: types %10d, occurences %10d\n" % \
+              (i+1, counts[i], totals[i]))
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,145 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Author: marmuta <marmvta@gmail.com>
+#
+# Calculate keystroke saving rate
+# -------------------------------
+#
+# Based on:
+# "EFFECTS OF NGRAM ORDER AND TRAINING TEXT SIZE ON WORD PREDICTION"
+# by Gregory W. Lesher, Ph.D., Bryan J. Moulton, M.S., and D. Jeffery
+# Higginbotham, Ph.D.
+#
+# Usage:
+# ksr <language model> <typed text> <prediction limit>
+# Calculates the number of keystrokes saved with a maximum number of
+# <prediction limit> predictions to choose from when typing <typed text>.
+#
+# Example:
+# split_corpus moby.txt
+# train training.txt 3 moby.lm
+# ksr moby.lm testing.txt 10
+# This loads language model moby.lm, uses it to create at most 10 predicted
+# words per typed letter and simulates the typing of testing.txt.
+#
+
+from __future__ import division, print_function, unicode_literals
+
+import sys, re, codecs, math
+from pypredict import *
+from optparse import OptionParser
+import matplotlib.pyplot as plt
+
+def main():
+    parser = OptionParser(usage="Usage: %prog [options] text")
+    parser.add_option("-m", "--language-model", type="str", dest="language_model",
+              help="optional filename of a language model")
+    parser.add_option("-n", "--num-choices", type="int", default="10",
+              dest="num_choices",
+              help="number of virtual word choices")
+    parser.add_option("-l", "--learn", action="store_true", dest="learn",
+              help="learn after each sentence")
+    parser.add_option("-c", "--cached-model", action="store_true", dest="cached",
+              help="use a model with recency caching")
+    parser.add_option("-o", "--order", type="int", default="3",
+              dest="order",
+              help="order of the language model")
+    parser.add_option("-p", "--plot", action="store_true", dest="plot",
+              help="plot the result with matplotlib")
+    options, args = parser.parse_args()
+
+    if len(args) < 1:
+        print("Please supply a text file as input for simulated typing.")
+        sys.exit(1)
+
+    order = options.order
+    if options.cached:
+        model = CachedDynamicModel(order)
+    else:
+        model = DynamicModel(order)
+
+    if options.language_model:
+        with timeit("loading model"):
+            model.load(options.language_model)
+
+    sentences, spans = split_sentences(read_corpus(args[0]))
+    num_choices = options.num_choices
+
+    learn_model = model if options.learn else None
+    total_chars, pressed_keys = simulate_typing(model, learn_model, sentences, 
+                                                num_choices,
+                                                Progress(len(sentences),
+                                                         options.plot))
+    #print get_stat_string(total_chars, pressed_keys)
+
+    if options.plot:
+        plt.ioff()
+        plt.show()  # blocks; allows for interaction with the chart, saving images
+
+def get_stat_string(total_chars, pressed_keys):
+    saved_keystrokes = total_chars - pressed_keys
+    ksr = saved_keystrokes * 100.0 / total_chars if total_chars else 0
+    return "characters %8d, keystrokes %8d, " \
+           "saved %8d, ksr %6.2f%%" \
+           % (total_chars, pressed_keys, saved_keystrokes, ksr)
+
+
+class Progress:
+    def __init__(self, num_sentences, plot = False):
+        self._plot = plot
+        self._plot_progress = PlotProgress()
+        self._num_sentences = num_sentences
+
+    def __call__(self, i, n, total_chars, pressed_keys):
+        # progress feedback
+        step = max(1, self._num_sentences // 100)
+        if i == 0 or i == n-1 or (i+1) % step == 0:
+            saved_keystrokes = total_chars - pressed_keys
+            ksr = saved_keystrokes * 100.0 / total_chars if total_chars else 0
+
+            print("sentence {:6} of {:6}: {}" \
+                  .format(i+1, n, get_stat_string(total_chars, pressed_keys)))
+
+            if self._plot:
+                self._plot_progress(i+1, ksr)
+
+class PlotProgress:
+    def __init__(self):
+        self.xvalues = []
+        self.ksrs = []
+        self.best_ksrs = []
+
+    def __call__(self, n, ksr):
+        self.xvalues.append(n)
+        self.ksrs.append(ksr)
+        plt.ion()  # interactive mode on
+        plt.figure(1)
+        plt.clf()
+        lines = [
+            plt.plot(self.xvalues, self.ksrs),
+        ]
+        labels = ["current"]
+        plt.xlabel("sentences")
+        plt.ylabel('ksr [%]')
+        ymin, ymax = plt.ylim()
+        plt.ylim(ymin, ymax+(ymax-ymin)*0.05)
+        plt.gcf().suptitle('Keystroke savings rate',
+                           fontsize=16)
+        plt.draw()
+
+if __name__ == '__main__':
+    main()
+

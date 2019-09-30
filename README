@@ -1,0 +1,88 @@
+Onboard 0.99.0
+--------------
+
+Description:
+
+    Onboard is an onscreen keyboard useful for everybody that cannot use a
+    hardware keyboard; for example TabletPC users, mobility impaired users,...
+
+    It has been designed with simplicity in mind and can be used right away
+    without the need of any configuration, as it can read the keyboard layout
+    from the X server.
+
+    Among its features are:
+    - Support of custom layouts through the use of xml and svg files.
+    - Support of custom themes for the appearance through the use of xml files.
+    - Support of macros to automatically type custom defined texts.
+    - Support of <modifier>+<mouseclick> combination.
+    - Toggling mouse buttons to perform right clicks with the left mouse button.
+    - Control of the hover click feature provided by the system.
+    - Minimizing the keyboard to the panel, a trayicon, or a floating icon.
+    - Docking
+    - XEmbedding
+    - Support for scanning.
+
+
+D-Bus Service:
+
+    Once running, Onboard provides a D-Bus service at the bus name
+    'org.onboard.Onboard', that allows other processes to control the
+    visibiliy of the keyboard window.
+
+    Interface 'org.onboard.Onboard.Keyboard':
+
+    Show(), method
+        Show the keyboard window.
+        Return value: None
+
+        If auto-show is enabled, the window is locked visible, i.e.
+        auto-hiding is suspended until Onboard is hidden either manually
+        or by calling the D-Bus method "Hide". This is the same bahavior as if
+        Onboard was shown by user action, e.g. by status menu, floating icon
+        or by starting a second instance.
+
+        Example:
+            dbus-send --type=method_call --dest=org.onboard.Onboard 
+            /org/onboard/Onboard/Keyboard org.onboard.Onboard.Keyboard.Show
+
+    Hide(), method
+        Hide the keyboard window.
+        Return value: None
+
+        Example:
+            dbus-send --type=method_call --dest=org.onboard.Onboard 
+            /org/onboard/Onboard/Keyboard org.onboard.Onboard.Keyboard.Hide
+
+    ToggleVisible(), method
+        Show the keyboard window if it was hidden, else hide it.
+        Return value: None
+
+        Example:
+            dbus-send --type=method_call --dest=org.onboard.Onboard 
+            /org/onboard/Onboard/Keyboard
+            org.onboard.Onboard.Keyboard.ToggleVisible
+
+    Visible, Boolean property, read-only
+        True if the window is currently visible, False otherwise.
+        Signal: org.freedesktop.DBus.Properties.PropertiesChanged
+
+        Example:
+        dbus-send --print-reply --type=method_call --dest=org.onboard.Onboard 
+        /org/onboard/Onboard/Keyboard org.freedesktop.DBus.Properties.Get 
+        string:"org.onboard.Onboard.Keyboard" string:"Visible"
+
+
+Homepage:
+
+    https://launchpad.net/onboard
+
+
+Reporting Bugs:
+
+    https://bugs.launchpad.net/onboard
+
+
+License:
+
+    This program is released under the terms of the GNU General
+    Public License. Please see the file COPYING for details.

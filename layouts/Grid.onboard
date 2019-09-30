@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<keyboard 
+    id='Grid'
+    format='3.1'
+    section="system"
+    summary="Grid of keys, suitable for keyboard scanning" >
+
+    <include file='key_defs.xml'/>
+
+    <box border="0.5" spacing="1.5" orientation="vertical">
+        <!--- word suggestions -->
+        <panel filename='Grid-Alpha.svg'>
+            <include file='word_suggestions.xml'/>
+        </panel>
+
+        <box spacing="1.5">
+            <panel layer='alpha' filename='Grid-Alpha.svg'>
+                <key group='alphanumeric' id='0' keycode='19'/>
+                <key group='alphanumeric' id='1' keycode='10'/>
+                <key group='alphanumeric' id='2' keycode='11'/>
+                <key group='alphanumeric' id='3' keycode='12'/>
+                <key group='alphanumeric' id='4' keycode='13'/>
+                <key group='alphanumeric' id='5' keycode='14'/>
+                <key group='alphanumeric' id='6' keycode='15'/>
+                <key group='alphanumeric' id='7' keycode='16'/>
+                <key group='alphanumeric' id='8' keycode='17'/>
+                <key group='alphanumeric' id='9' keycode='18'/>
+                <key group='alphanumeric' id='q' keycode='24'/>
+                <key group='alphanumeric' id='w' keycode='25'/>
+                <key group='alphanumeric' id='e' keycode='26'/>
+                <key group='alphanumeric' id='r' keycode='27'/>
+                <key group='alphanumeric' id='t' keycode='28'/>
+                <key group='alphanumeric' id='y' keycode='29'/>
+                <key group='alphanumeric' id='u' keycode='30'/>
+                <key group='alphanumeric' id='i' keycode='31'/>
+                <key group='alphanumeric' id='o' keycode='32'/>
+                <key group='alphanumeric' id='p' keycode='33'/>
+                <key group='alphanumeric' id='a' keycode='38'/>
+                <key group='alphanumeric' id='s' keycode='39'/>
+                <key group='alphanumeric' id='d' keycode='40'/>
+                <key group='alphanumeric' id='f' keycode='41'/>
+                <key group='alphanumeric' id='g' keycode='42'/>
+                <key group='alphanumeric' id='h' keycode='43'/>
+                <key group='alphanumeric' id='j' keycode='44'/>
+                <key group='alphanumeric' id='k' keycode='45'/>
+                <key group='alphanumeric' id='l' keycode='46'/>
+                <key group='alphanumeric' id='z' keycode='52'/>
+                <key group='alphanumeric' id='x' keycode='53'/>
+                <key group='alphanumeric' id='c' keycode='54'/>
+                <key group='alphanumeric' id='v' keycode='55'/>
+                <key group='alphanumeric' id='b' keycode='56'/>
+                <key group='alphanumeric' id='n' keycode='57'/>
+                <key group='alphanumeric' id='m' keycode='58'/>
+                <key group='alphanumeric' id='full-stop' keycode='60'/>
+                <key group='alphanumeric' id='comma' keycode='59'/>
+                <key group='bottomrow' id='LFSH.grid'/>
+                <key group='bottomrow' id='SPCE.grid' label='Space'/>
+                <key group='bottomrow' id='BKSP.grid'/>
+                <key group='bottomrow' id='RTRN.grid' label='Return' label_x_align = '0.5' popup_id="RTRN_popup"/>
+            </panel>
+
+            <!-- Panel with the click buttons -->
+            <panel filename="Grid-Alpha.svg" id="click">
+                <key group="click" id="middleclick"/>
+                <key group="click" id="secondaryclick"/>
+                <key group="click" id="doubleclick"/>
+                <key group="click" id="dragclick"/>
+                <key group="click" id="hoverclick"/>
+            </panel>
+        </box>
+    </box>
+
+    <!-- popup definition -->
+    <layout id="RTRN_popup" filename="Grid-Alpha.svg">
+        <box compact="true">
+            <key group='bottomrow' id="quit"/>
+            <key id="settings"/>
+            <key id="move"/>
+            <key id="showclick"/>
+            <key id="hide" svg_id="hide.popup" image="close.svg" group="nowordlist" />
+        </box>
+    </layout>
+
+</keyboard>

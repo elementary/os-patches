@@ -1,0 +1,213 @@
+<html>
+	<head>
+		<title>Onboard - Layout creation</title>
+	</head>
+	<body>
+		<h1>Onboard - Layout creation</h1>
+		
+		<h3>3.1 Basic Layout Personalisation</h3>
+		<p>
+			Open the settings dialog.  Select the layout you want to personalise and click
+			"Personalise this layout".  Type the name of your new layout.  
+			A file browser window will now open showing your layout folder.
+			Open the .svg file you want to change with a vector graphics package.  
+			I recommend Inkscape which is free.  You can move the keys, change their width, height
+			and colour.<br>
+			<img src="personalise.png"><br>
+		</p><p>	
+			To move a key from one pane to another, right click on the key and click object
+			properties.  Note the id of the key.  Either create a new rectangle on the other pane
+			or use an existing one.  Bring up the object properties and change the id to that of the 
+			key you want it to be.<br>
+			<img src="changeid.png"><br>	
+		</p>
+		<h3>3.2 Creating a layout from scratch and advanced layout personalisation</h3>
+		<p>
+			Layouts are composed of one .onboard file and one or more .svg files.  The .onboard file
+			contains all the settings for each pane and properties such as label 
+			and action but not the location of each key.
+		</p>
+		<p>
+			Each svg file contains the placement of each key on the plane.  I recommend you use
+			a vector graphics package such as inkscape to create or modify these files.  
+			Keys can be rectangles or paths (straight lines or bezier curves) though Onboard 
+			only detects clicks quite approximately around curves.  The id of each object in the
+			svg file corresponds to a key in the .onboard file with the same id.  Set the id in 
+			Inkscape by right clicking on the object and selecting object properties.<br>
+			<img src="changeid.png" width="675" height="583" border="0" alt=""><br>
+		</p>
+		<p>
+			The .onboard file contains pane and key objects.  It is in XML 
+			format.  Each pane object has:
+			<ul>
+				<li>
+					Each part of the colour of the pane.
+					<ul>
+					<li>					
+						backGroundRed = "number"
+					</li>
+					<li>
+						backGroundGreen = "number"
+					</li>
+					<li>
+						backGroundBlue = "number"
+					</li>
+					<li>
+						backGroundAlpha = "number"
+					</li>
+					</ul>
+				</li>
+				<li>
+					The font size<br>
+					font = "number"
+				</li>
+				<li>
+					The id<br>
+					id = "name"				
+				</li>
+				<li>
+					The name of the corresponding svg file within the folder<br>
+					filename = "name"
+				</li>
+			</ul>		
+		</p>
+		<p>
+			Each key object has:
+				<ul>
+					<li>
+						The id that corresponds with that in the svg file.<br>
+						id = "name"
+					</li>
+					<li>
+						Whether the key sticks in the manner that modifiers do in the
+						default layout.<br>
+						sticky = "true/false"
+					</li>
+					<li>
+						The default label on the key.<br>
+						label = "name"						
+					</li>
+				</ul>
+		</p>
+		<p>
+			It can also have:
+			<ul>
+				<li>
+					The label for when caps lock or shift is pressed<br>
+					cap_label = "name"
+				</li>
+				<li>
+					The label for when only shift is pressed<br>
+					shift_label = "name"
+				</li>
+				<li>
+					The label for when alt gr is pressed<br>
+					altgr_label = "name"
+				</li>
+				<li>
+					The label for when alt gr and shift is pressed<br>
+					altgrNshift_label = "name"
+				</li>
+				<li>
+					The x label offset mainly needed for non-rectangle keys<br>
+					font_offset_x = "number"
+				</li>
+				<li>
+					The y label offset<br>
+					font_offset_y = "number"
+				</li>
+				
+			</ul>
+			It must have one of:
+			<ul>
+				<li>
+					The character written when key pressed.<br>
+					char = "character"
+				</li>
+				<li>
+					The keysym or the physical key being emulated in decimal or hex if prefixed by 0x.<br>
+					keysym = "number"
+				</li>
+				<li>
+					Name of emulated keys see list below.<br>
+					press = "name"
+				</li>
+				<li>
+					The macro number starting from 0 that the key corresponds with.<br>
+					macro = "number"
+				</li>
+				<li>
+					The name of the script which is ran when key is pressed.<br>
+					script = "name"
+				</li>
+				<li>
+					The name of the modifier which key emulates.  It is recommended to have
+					the sticky attribute set to true for modifiers.  List of modifier names given 
+					below.<br>
+					modifier = "name"
+				</li>
+			</ul>
+		</p>
+		<p>
+		List of names that can be paired with the modifier attribute of key:
+		<ul>
+			<li>
+				shift
+			</li>
+			<li>
+				caps
+			</li>
+			<li>
+				control
+			</li>
+			<li>
+				mod1 (alt)
+			</li>
+			<li>
+				mod2
+			</li>
+			<li>
+				mod3 (num lock)
+			</li>	
+			<li>
+				mod4
+			</li>
+			<li>
+				mod5 (alt gr)
+			</li>
+		</ul>
+		</p>		
+		<p>
+		List of names that can be paired with the press attribute of key:
+		<ul>
+			<li>
+				space
+			</li>
+			<li>
+				insert
+			</li>
+			<li>
+				home
+			</li>
+			<li>
+				page_up
+			</li>
+			<li>
+				page_down
+			</li>
+			<li>
+				end
+			</li>	
+			<li>
+				delete
+			</li>
+			<li>
+				return
+			</li>
+			<li>
+				backspace
+			</li>
+		</ul>
+		</p>
+	</body>
+</html>

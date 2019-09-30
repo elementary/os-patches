@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Onboard is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Onboard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright © 2012, marmuta
+#
+# This file is part of pypredict, Onboard.
+
+
+import os
+import icu
+
+t = icu.Transliterator.createInstance("NFD; [:Nonspacing Mark:] Remove; NFC",
+                                      icu.UTransDirection.FORWARD)
+
+print("//")
+print("// Generated for Onboard by " + os.path.basename(__file__))
+print("//")
+print()
+print("#include <wctype.h>")
+print()
+print("wint_t _accent_transform[][2] = {")
+
+count = 0
+all_chars = 0xd7ff
+for i, c in enumerate(chr(i) for i in range(all_chars)): 
+    tc = t.transliterate(c)
+    if len(tc) == 1 and tc != c:
+        count += 1
+        print(" "*4 + "{{ 0x{:0=4x}, 0x{:0=4x} }},   // {} -> {}" \
+              .format(ord(c), ord(tc), c, tc))
+print("};")
+
+
+

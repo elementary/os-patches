@@ -1,0 +1,145 @@
+-------------------------------------------------------------------------------
+pypredict - updatable n-gram language model and prediction engine
+-------------------------------------------------------------------------------
+
+Pypredict is a Python package for working with n-gram language models.
+It is primarily meant to be used for word prediction in onscreen keyboards.
+
+Currently implemented features are:
+ - N-gram language models of order two and up, with order three 
+   being the main focus.
+ - On-line adaptation, i.e. support for continuous learning
+ - N-gram smoothing: interpolated Witten-Bell, Absolute Discounting
+   and Kneser-Ney
+ - Language model interpolation and "merging"
+ - Smoothed recency caching across all known n-grams
+ - All Unicode (UTF-32), UTF-8 for text files
+ - Fast prediction, usually in the low double to single 
+   digit ms range (@3GHz, with a vocabulary of around 35000 words)
+ - Reasonably low memory usage with <30MiB per million n-grams
+ - Few build and runtime dependencies for the core language model (pypredict). 
+   Only the C++ runtime and Python development files are required.
+
+Known problems:
+ - Loading large language models takes a few seconds
+   (~4s/million n-grams, @3GHz).
+ - The order of language model interpolation should be reworked to
+   include recency caching _after_ all frequency based weighting.
+   This is only an issue if there are multiple language models 
+   active in parallel.
+
+Comments, bugs? mailto:marmvta@gmail.com
+
+
+How to build
+------------
+
+Make sure you have a working gcc tool-chain and python development files.
+For Ubuntu 10.04:
+
+    sudo apt-get install build-essential python2.6-dev
+
+Then run:
+
+    make
+
+
+Getting started
+---------------
+
+Part of the project are a number of basic command line tools for
+creating, testing, optimizing and otherwise working with language models.
+The rest of this document briefely describes their usage.
+
+Training a language model
+-------------------------
+
+Training requires one or more training texts (corpus). For testing, any
+reasonably large text file should do. For best results choose a variety
+of texts with different topics and from multiple authors. Make sure the
+training texts contain complete sentences of a single languange.
+UTF8 encoding is expected for a wide variety of supported languages. 
+This example uses Herman Melville's Moby Dick, available from 
+Project Gutenberg at
+
+     http://www.gutenberg.org/files/2701/2701.txt
+
+Running
+
+    ./train moby.txt 3 moby.lm
+
+reads the training text, trains a language model of order 3
+(unigrams, bigrams and trigrams) and saves it to moby.lm.
+
+
+Prediction
+----------
+
+    ./predict moby.lm this Moby ""
+
+This loads the language model 'moby.lm' and attempts to predict the most
+likely words following "this Moby". The result is a list of words sorted by
+decreasing probability. Any letters between the qutes above would act as
+prefix for word completion.
+
+
+
+Advanced usage/optimization
+---------------------------
+
+
+Keystroke Savings Rate
+----------------------
+
+Based on "EFFECTS OF NGRAM ORDER AND TRAINING TEXT SIZE ON WORD PREDICTION"
+by Gregory W. Lesher†, Ph.D., Bryan J. Moulton†, M.S., and D. Jeffery .
+
+KSR determines the percentage of saved key presses, in this case saved key
+presses due to successfully predicted words. The tool "ksr" simulates
+typing continuous text while trying to save a maximum number of keystrokes
+by selecting matching words from a list of prediction choices.
+
+In order to get meaningful results the simulated text must not be part of
+the training corpus of the used language model. The tool "split_corpus"
+divides a given text into three non-overlapping portions:
+training.txt, held_out.txt and testing.txt.
+
+Split the training corpus:
+
+    ./split_corpus moby.txt
+
+Then train a language model from the newly created training text:
+
+    ./train training.txt 3 moby.lm
+
+And finally calculate the keystroke savings rate for this language model
+using the testing text:
+
+    ./ksr moby.lm testing.txt 10
+
+The last parameter here is the prediction limit, i.e. the maximum number of
+word choices to choose from when ksr simulates key presses. Higher values
+give better keystroke savings in theory, but these results don't easily
+translate to the same savings in practice. The whole list is assumed to be
+presented to the user and a long list will have reduced utility.
+
+
+License
+-------
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Copyright (c) Michael Djavidan
+
+

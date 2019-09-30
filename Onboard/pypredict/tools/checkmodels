@@ -1,0 +1,263 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# Copyright © 2014, marmuta
+#
+# This file is part of Onboard.
+#
+# Onboard is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Onboard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+import os
+import sys
+import glob
+import re
+import optparse
+try:
+    import pypredict
+except ImportError:
+    import Onboard.pypredict
+
+
+def main():
+    exit_code = 0
+
+    parser = optparse.OptionParser(usage=
+             "Usage: %prog [options] [model1 model2 ...]")
+    parser.add_option("-t", "--test", action="store_true",
+              dest="test_mode",
+              help="output error data as comma separated list for unittests")
+    options, args = parser.parse_args()
+
+    filenames = args
+    if not filenames:
+        path = os.path.join(os.path.expanduser("~"), ".local/share/onboard/models")
+        filenames = glob.glob(os.path.join(path, "*.lm"))
+
+    if not filenames:
+        print("No models found in default paths. "
+              "Please specify one or more filenames.", file=sys.stderr)
+        exit_code = 1
+
+    if not exit_code:
+        for i, fn in enumerate(filenames):
+            if not options.test_mode:
+                if i > 0:
+                    print()
+                print("checking '{}'".format(fn))
+
+            file_info, levels, errors = check_model(fn)
+
+            if not options.test_mode:
+                print("File size {}; Number of lines {}" \
+                    .format(file_info.file_size, file_info.num_lines))
+                for level, ld in sorted(levels.items()):
+                    print("Number of {}-grams: declared {:8}, found {:8}, {}" \
+                        .format(level, ld.data_count, ld.encountered_count,
+                        "OK" if ld.data_count == ld.encountered_count else "Error"))
+
+                if errors:
+                    print("Errors found:")
+                    for i, e in enumerate(errors):
+                        print("{:3}: {}".format(i+1, e), file=sys.stderr)
+                else:
+                    print("No errors.")
+            else:
+                print("{}, {}" \
+                    .format(file_info.file_size, file_info.num_lines))
+                for level, ld in sorted(levels.items()):
+                    print("{}, {}, {}" \
+                        .format(level, ld.data_count, ld.encountered_count))
+                for e in errors:
+                    print("{}, {}".format(e.id, e.params), file=sys.stderr)
+
+            if errors:
+                exit_code = 2
+
+    if exit_code and \
+       not options.test_mode and \
+       len(filenames) > 1:
+        print("\nThere were errors.")
+    sys.exit(exit_code)
+
+def check_model(filename):
+    errors = []
+    lineno = 0
+    size = 0
+    levels = {}  # [count_data, count_found, num_fields]
+    sections = []
+    tail = []
+    max_tail_lines = 5
+    class ErrorExit(Exception): pass
+
+    try:
+        if not os.path.exists(filename):
+            errors.append(Error("FILE_NOT_FOUND", "file not found"))
+            raise ErrorExit()
+
+        if not os.path.isfile(filename):
+            errors.append(Error("NOT_A_FILE", "not a file"))
+            raise ErrorExit()
+
+        size = os.path.getsize(filename)
+        if not size:
+            errors.append(Error("EMPTY_FILE", "empty file"))
+            raise ErrorExit()
+
+        with open(filename,encoding="UTF-8") as f:
+
+            (BEGIN, COUNTS, NGRAMS_HEAD, NGRAMS, DONE) = range(5)
+            state = BEGIN
+            level = None
+
+            while True:
+                line = f.readline()
+                if not line:
+                    break
+                lineno += 1
+
+                if len(tail) >= max_tail_lines:
+                    del tail[0]
+                tail.append(line)
+
+                line = line.strip()
+                if not line:
+                    continue
+
+                # start of a section?
+                if line.startswith("\\"):
+                    if line.startswith("\\data\\"):
+                        sections.append("data")
+                        state = COUNTS
+                        continue
+                    m = re.search(r"\\(\d+)-grams", line)
+                    if m:
+                        level = int(m.groups()[0])
+                        if not level in levels:
+                            levels[level] = LevelData()
+                        sections.append("{}-grams".format(level))
+                        state = NGRAMS
+                        continue
+                    if line.startswith("\\end\\"):
+                        sections.append("end")
+                        state = DONE
+                        break
+
+                # in data section?
+                if state == COUNTS:
+                    match = re.search("^ngram\s*(\d+)=(\d+)$", line)
+                    groups = match.groups() if match else ()
+                    if len(groups) != 2:
+                        errors.append(Error(
+                            "BAD_DATA_SECTION_ENTRY",
+                            "malformed \\data\\ section entry '{}'",
+                            line))
+                    else:
+                        level = int(groups[0])
+                        count = int(groups[1])
+                        ld = LevelData()
+                        ld.data_count = count
+                        levels[level] = ld
+
+                # in ngram section?
+                if state == NGRAMS:
+                    fields = line.split()
+                    n = len(fields)
+
+                    ld = levels.get(level)
+                    if ld.num_fields is None:
+                        ld.num_fields = n
+                    if n != ld.num_fields:
+                        errors.append(Error(
+                            "WRONG_NUMBER_OF_FIELDS",
+                            "wrong number of fields {} instead of {} "
+                            "at line {}: '{}'",
+                            n, ld.num_fields, lineno, line))
+                    else:
+                        ld.encountered_count += 1
+
+            if not "data" in sections:
+                errors.append(Error(
+                    "NO_DATA_SECTION",
+                    'section "\\data\\" not found,'
+                    ' not an Onboard language model'))
+            else:
+                counts = [ld.data_count for ld in levels.values() \
+                          if not ld.data_count is None]
+                if not counts:
+                    errors.append(Error(
+                        "EMPTY_DATA_SECTION",
+                        'empty \\data\\ section'))
+
+                for i, ld in enumerate(levels.values()):
+                    level = i + 1
+                    if ld.data_count is None:
+                        if ld.encountered_count > 0:
+                            errors.append(Error(
+                                "UNEXPECTED_NGRAM_SECTION",
+                                'no {}-grams declared in \\data\\ '
+                                'section, but {} found',
+                                level, ld.encountered_count))
+
+                for i, ld in enumerate(levels.values()):
+                    level = i + 1
+                    if not ld.data_count is None and \
+                        ld.data_count != ld.encountered_count:
+                        errors.append(Error(
+                            "WRONG_NGRAM_COUNT",
+                            'wrong {}-gram count: {} declared in '
+                            'data section, {} found',
+                            level, ld.data_count, ld.encountered_count))
+
+                if not "end" in sections:
+                    errors.append(Error(
+                        "UNEXPECTED_EOF",
+                        'unexpected end of file, there is no \\end\\: {},',
+                        tail))
+    except ErrorExit:
+        pass
+
+    file_info = FileInfo()
+    file_info.file_size = size
+    file_info.num_lines = lineno
+
+    return file_info, levels, errors
+
+
+class Error:
+    def __init__(self, id, format, *params):
+        self.id = id
+        self.format = format
+        self.params = list(params)
+
+    def __str__(self):
+        return self.format.format(*self.params)
+
+
+class FileInfo:
+    file_size = None
+    num_lines = None
+
+
+class LevelData:
+    data_count = None
+    encountered_count = 0
+    num_fields = None
+
+
+if __name__ == '__main__':
+    main()
+
+
+
+

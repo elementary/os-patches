@@ -1,0 +1,71 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Author: marmuta <marmvta@gmail.com>
+#
+
+import sys
+import codecs
+import pypredict
+import random
+
+# usage: $0 <source text> [<hstep> [<tstep>]]
+# The <source text> is split into three distinct sets of sentences that
+# are then saved to training.txt, held_out.txt and testing.txt.
+# Every <hstep> sentence is added to held-out.txt, default 20.
+# Every <tstep> sentence is added to training.txt, default 20.
+def main():
+    # every hstep sentence is added to held-out
+    hstep = int(sys.argv[2]) if len(sys.argv) >= 2+1 else 20
+
+    # every tstep sentence is added to training
+    tstep = int(sys.argv[3]) if len(sys.argv) >= 2+2 else 20
+
+    training, held_out, testing = read_corpus(sys.argv[1], hstep, tstep)
+
+    for fn,sentences in [("training.txt", training),
+                     ("held_out.txt", held_out),
+                     ("testing.txt", testing)] :
+        with codecs.open(fn, "w", encoding='utf-8') as f:
+            f.writelines(s + "\n" for s in sentences)
+
+
+def read_corpus(filename, hstep=20, tstep=20):
+    text = pypredict.read_corpus(filename)
+
+    # Split into sentences including separators (punctuation, <s>).
+    # "disambiguate" allows to feed saved sentences back into split_sentences
+    # without loss, i.e. adjacent sentences cannot join erroneously.
+    sentences, spans = pypredict.split_sentences(text, disambiguate=True)
+
+    # divide corpus into 3 sections: training, held_out, test
+    r = range(len(sentences))
+    sh = set(r[hstep//3::hstep])
+    st = set(r[hstep//3*2::tstep])
+    st = st - sh
+    #print len(st - sh), len(set(r) - sh), len(set(r) - st), len(set(r) - st - sh)
+    training  = [sentences[i] for i in set(r) - sh - st]
+    held_out  = [sentences[i] for i in sh]
+    testing   = [sentences[i] for i in st]
+
+    print("sentences: total {}, training {}, held_out {}, testing {}" \
+          .format(len(sentences),len(training),len(held_out),len(testing)))
+
+    return training, held_out, testing
+
+
+if __name__ == '__main__':
+    main()
+

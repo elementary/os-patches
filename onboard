@@ -1,0 +1,16 @@
+#!/usr/bin/python3
+# -*- coding: UTF-8 -*-
+from __future__ import division, print_function, unicode_literals
+
+__copyright__ = "Copyright © 2009 Chris Jones"
+__author__    = "Chris Jones <chrisejones@gmail.com>"
+
+import sys
+
+# Replace the default exception handler with one which handles chained
+# exceptions.
+from Onboard.Exceptions import chain_handler
+sys.excepthook = chain_handler
+
+from Onboard.OnboardGtk import OnboardGtk as Onboard
+ob = Onboard()
