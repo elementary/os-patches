@@ -1,0 +1,36 @@
+#! /bin/sh
+
+PREREQ=""
+DESCRIPTION="Disabling unnecessary KDE services..."
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+. /scripts/casper-functions
+
+log_begin_msg "$DESCRIPTION"
+
+rm -f /root/usr/share/autostart/kab2kabc.desktop
+rm -f /root/usr/share/autostart/kaddressbookmigrator.desktop
+rm -f /root/usr/share/autostart/korgac.desktop
+rm -f /root/usr/share/autostart/printer-applet.desktop
+rm -f /root/usr/share/autostart/nepomukserver.desktop
+rm -f /root/usr/share/kde4/services/kwalletd.desktop
+rm -f /root/usr/share/kde4/services/kded/kpackagekitd.desktop
+if [ -z "${PERSISTENT}" ]; then
+	rm -f /root/usr/share/kde4/services/kded/freespacenotifier.desktop
+fi
+rm -f /root/usr/share/kde4/services/plasma-runner-contacts.desktop  # starts akonadi
+rm -f /root/usr/share/kde4/services/plasma-dataengine-calendar.desktop  # starts akonadi
+
+log_end_msg

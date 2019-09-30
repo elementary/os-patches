@@ -1,0 +1,620 @@
+#!/bin/sh
+#
+# casper-a11y-enable - Sets accessibility profile settings for the live session
+#                      or installed system.
+#
+# This script is called by several other scripts, as well as ubiquity itself to
+# set up accessibility profile settings for use in the live environment and on
+# an installed system.
+#
+# Copyright (C) 2011, Canonical Ltd.
+#
+# Author:
+# - Luke Yelavich <luke.yelavich@canonical.com>
+#
+# This script is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2 of the License, or at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this application; if not, write to the Free Software Foundation, Inc., 51
+# Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+##################################################################################
+
+set -e
+
+### PROFILE SETTINGS METHODS BEGIN HERE ###
+# The methods that are used to set profile data have been placed as close to the
+# top of this file as possible, so they are easy to locate, and will hopefully
+# save time when making smaller changes.
+
+# Common settings for low vision profiles. Any change you make here will affect
+# all low vision profiles, for both the user session and login manager.
+set_common_lowvis()
+{
+	gset set com.canonical.indicator.datetime show-calendar false
+	gset set org.gnome.desktop.interface toolkit-accessibility true
+	gct -s -t bool /desktop/gnome/interface/accessibility true
+	gct -s -t bool /apps/gksu/disable-grab true
+	gset set org.gnome.yelp show-cursor true
+}
+
+# Common settings for motor profiles. Any change you make here will affect
+# all motor profiles, for both the user session and login manager.
+set_common_motor()
+{
+	gset set org.gnome.desktop.a11y.keyboard enable true
+	gct -s -t bool /apps/gksu/disable-grab true
+	gset set org.gnome.desktop.a11y.keyboard stickykeys-enable true
+	gset set org.gnome.desktop.a11y.keyboard stickykeys-two-key-off false
+}
+
+# Settings for the high-contrast profile.
+set_high_contrast()
+{
+	gset set org.gnome.desktop.interface icon-theme HighContrast
+	gset set org.gnome.desktop.interface monospace-font-name "monospace 18"
+	gset set org.gnome.desktop.interface font-name "sans 18"
+	gset set org.gnome.desktop.background picture-uri ""
+	gset set org.gnome.desktop.background picture-options none
+	gset set org.gnome.desktop.background primary-color \#666666
+	gset set org.gnome.desktop.background secondary-color \#7F7F7F
+	gset set org.gnome.desktop.background color-shading-type solid
+	gset set org.gnome.desktop.interface cursor-size 48
+	gset set org.gnome.desktop.interface cursor-theme whiteglass
+	kderc_addtoprefixes /usr/share/kubuntu-default-settings/kde-profile/lesser-visual-impairment/
+	if [ -d $CHROOT_DIR/usr/share/xubuntu-default-settings/accessibility ]; then
+		cp -a $CHROOT_DIR/usr/share/xubuntu-default-settings/accessibility/* $CHROOT_DIR/etc/xdg/
+	fi
+
+	if [ -n "$SET_LOGIN" ]; then
+		gset_lightdm set com.canonical.unity-greeter high-contrast true
+	fi
+}
+
+set_magnifier()
+{
+	# Ubuntu
+	gset set org.gnome.desktop.a11y.applications screen-magnifier-enabled true
+	set_orca_config magnifier
+
+	# Kubuntu
+	kderc_addtoprefixes /usr/share/kubuntu-default-settings/kde-profile/lesser-visual-impairment/,/usr/share/kubuntu-default-settings/kde-profile/moderate-visual-impairment/
+}
+
+set_blindness()
+{
+	gset set org.gnome.desktop.a11y.applications screen-reader-enabled true
+	gset set org.gnome.Empathy.conversation theme classic
+	set_orca_config speech
+
+	if [ -n "$SET_LOGIN" ]; then
+		gset_lightdm set com.canonical.unity-greeter screen-reader true
+	fi
+}
+
+set_braille()
+{
+	gset set org.gnome.desktop.a11y.applications screen-reader-enabled true
+	gset set org.gnome.Empathy.conversation theme classic
+	set_orca_config braille
+
+	if [ -n "$SET_LOGIN" ]; then
+		gset_lightdm set com.canonical.unity-greeter screen-reader true
+	fi
+}
+
+set_keyboard_modifiers()
+{
+	gset set org.gnome.desktop.a11y.keyboard mousekeys-enable true
+	gset set org.gnome.desktop.a11y.keyboard stickykeys-modifier-beep true
+	gset set org.gnome.settings-daemon.peripherals.keyboard repeat true
+	gset set org.gnome.settings-daemon.peripherals.keyboard delay 700
+	gset set org.gnome.settings-daemon.peripherals.keyboard repeat-interval 10
+	kderc_addtoprefixes /usr/share/kubuntu-default-settings/kde-profile/minor-motor-difficulties/
+	if [ -e $CHROOT_DIR/etc/xdg/xfce4/mcs_settings/keyboard.xml ]; then
+		sed -i 's/0/1/' $CHROOT_DIR/etc/xdg/xfce4/mcs_settings/keyboard.xml
+	fi
+}
+
+set_onscreen_keyboard()
+{
+	gset set org.gnome.desktop.interface toolkit-accessibility true
+	gset set org.gnome.desktop.a11y.keyboard stickykeys-modifier-beep false
+	gset set org.gnome.desktop.a11y.applications screen-keyboard-enabled true
+
+	if [ -n "$SET_LOGIN" ]; then
+		gset_lightdm set com.canonical.unity-greeter onscreen-keyboard true
+	fi
+
+	kderc_addtoprefixes /usr/share/kubuntu-default-settings/kde-profile/minor-motor-difficulties/,/usr/share/kubuntu-default-settings/kde-profile/motor-difficulties-pointing-devices/
+	if [ -e $CHROOT_DIR/etc/xdg/xfce4/mcs_settings/keyboard.xml ]; then
+		sed -i '/Sticky/ s/0/1/' $CHROOT_DIR/etc/xdg/xfce4/mcs_settings/keyboard.xml
+	fi
+}
+### PROFILE SETTINGS METHODS END HERE ###
+
+help()
+{
+	cat <<EOF
+Usage: $0 		[-chroot=<root>] [-user=<username>] [-l|-login]
+			[-i|-initramfs] [-d|-debug] <profilename>
+
+-h, -help		Display this help.
+-chroot=<root>		Chroot into <root> to apply profile settings, requires a
+			username to be specified, see below.
+-user=<username>	The user where a profile is to be applied, requires the
+			script to be run as root. If no username is given, it
+			is assumed that you wish to apply profile settings for
+			the current user.
+-l, -login		Apply some of the selected profile settings to the
+			login manager. Currently this is hard-coded to lightdm.
+			This requires root privileges.
+-i, -initramfs		Indicate that the script is being called from the
+			initramfs. Allows the script to assume some values
+			that can not otherwise be easily determined in an
+			initramfs environment. Requires that a chroot dir and
+			user name are specified. See above.
+-script			Create a script to be run at system boot that will
+			apply all settings for the specified user and for
+			login. This script will then remove itself. This is
+			needed to work around gsettings not working in a chroot
+			environment with no dconf service running.
+-d|-debug		Enable debugging output.
+<profilename>		The name of the profile you wish to apply, see below.
+
+The profiles currently available are as follows:
+high-contrast	For users with lesser visual impairments who only need a high
+		contrast theme, mouse cursor and icons.
+magnifier	For users with moderate visual impairments who require a screen
+		magnifier.
+blindness	Users who are partially or completely blind who require a screen
+		reader.
+braille		Users who are partially or completely blind who require a screen
+		reader and wish to use a Braille display.
+keyboard-modifiers
+		Users who have minor motor impairments who require slight
+		changes to the way their keyboard behaves.
+onscreen-keyboard
+		Users with motor impairments who require the use of an
+		on-screen keyboard.
+EOF
+}
+
+gset()
+{
+	if [ -n "$GLIBBIN_VERSION" ]; then
+		if [ -n "$STARTUP_SCRIPT" ]; then
+			echo "gsettings " "$@" >> $CHROOT_DIR/usr/bin/a11y-profile-settings
+		else
+			$DO_CHROOT $DO_SUDO gsettings "$@"
+		fi
+	fi
+}
+
+gset_lightdm()
+{
+	if [ -n "$GLIBBIN_VERSION" ]; then
+		if [ -n "$STARTUP_SCRIPT" ]; then
+			echo "gsettings " "$@" >> $CHROOT_DIR/usr/bin/a11y-profile-settings-lightdm
+		else
+			$DO_CHROOT sudo -u lightdm gsettings "$@"
+		fi
+	fi
+}
+
+# Soon to be deprecated
+gct()
+{
+	if [ -n "$GCONF_VERSION" ]; then
+		if [ -n "$STARTUP_SCRIPT" ]; then
+			echo "gconftool-2 " "$@" >> $CHROOT_DIR/usr/bin/a11y-profile-settings
+		else
+			$DO_CHROOT $DO_SUDO gconftool-2 "$@"
+		fi
+	fi
+}
+
+kderc_addtoprefixes()
+{
+	if [ -e $CHROOT_DIR/etc/kde4rc ]; then
+		sed -i "s|\\(prefixes=/usr/share/kubuntu-default-settings/kde-profile/default/\\)|\\1,$1|" $CHROOT_DIR/etc/kde4rc
+	fi
+}
+
+# Unfortunately this bloats this script somewhat, but orca doesn't seem to want
+# to deal with individual settings/a small config fragment.
+# Arguments: $1 = speech/magnifier/braille (which
+# accessibility feature to turn on)
+set_orca_config()
+{
+	# Yes, we could use $HOME, but enquiring about $HOME is not easy when
+	# Outside the target environment, particularly when running from the
+	# initramfs, and this script is not everything for everybody anyway.
+	if [ -n "$ORCA_VERSION" ] && ! [ -f "$CHROOT_DIR/home/$USER_NAME/.local/share/orca/user-settings.conf" ]; then
+		mkdir -p "$CHROOT_DIR/home/$USER_NAME/.local/share/orca"
+
+		cat <<EOF > "$CHROOT_DIR/home/$USER_NAME/.local/share/orca/user-settings.conf"
+{
+    "pronunciations": {}, 
+    "keybindings": {}, 
+    "profiles": {
+        "default": {
+            "profile": [
+                "Default", 
+                "default"
+            ], 
+            "pronunciations": {}, 
+            "keybindings": {}
+        }
+    }, 
+    "general": {
+        "speakCellHeaders": true, 
+        "magEdgeMargin": 0, 
+        "brailleContractionTable": "", 
+        "magPointerFollowsFocus": false, 
+        "magTextTrackingMode": 2, 
+        "magZoomerBorderSize": 1, 
+        "brailleAlignmentStyle": 0, 
+        "enableEchoByWord": false, 
+        "enableMagZoomerColorInversion": false, 
+        "magCursorSize": 32, 
+        "magSmoothingMode": 0, 
+        "magZoomerLeft": 840, 
+        "showMainWindow": true, 
+        "sayAllStyle": 1, 
+        "brailleSelectorIndicator": 192, 
+        "presentDateFormat": "%x", 
+        "magContrastLevel": 0, 
+        "magMouseTrackingMode": 0, 
+        "speakCellSpan": true, 
+        "progressBarUpdateInterval": 10, 
+        "speakCellCoordinates": true, 
+        "enablePauseBreaks": true, 
+        "brailleEOLIndicator": " $l", 
+        "verbalizePunctuationStyle": 1, 
+        "progressBarVerbosity": 1, 
+        "enableSpeech": false, 
+        "enableBraille": false, 
+        "chatAnnounceBuddyTyping": false, 
+        "speakMultiCaseStringsAsWords": false, 
+        "enableBrailleGrouping": false, 
+        "readTableCellRow": true, 
+        "speechServerFactory": "speechdispatcherfactory", 
+        "textAttributesBrailleIndicator": 0, 
+        "enableMagCursorExplicitSize": false, 
+        "messageVerbosityLevel": 1, 
+        "enableMagLiveUpdating": true, 
+        "enableSpeechIndentation": false, 
+        "enableKeyEcho": true, 
+        "magHideCursor": false, 
+        "magZoomerBorderColor": "#000000", 
+        "magPointerFollowsZoomer": true, 
+        "mouseDwellDelay": 0, 
+        "magBrightnessLevelRed": 0, 
+        "enableMagnifier": false, 
+        "magZoomFactor": 4.0, 
+        "activeProfile": [
+            "Default", 
+            "default"
+        ], 
+        "enableMagZoomerBorder": false, 
+        "flashVerbosityLevel": 1, 
+        "enableFlashMessages": true, 
+        "speechServerInfo": null, 
+        "presentToolTips": false, 
+        "flashIsPersistent": false, 
+        "skipBlankCells": false, 
+        "firstStart": false, 
+        "largeObjectTextLength": 75, 
+        "enableEchoBySentence": false, 
+        "magContrastLevelBlue": 0, 
+        "magContrastLevelRed": 0, 
+        "enableContractedBraille": false, 
+        "orcaModifierKeys": [
+            "Insert", 
+            "KP_Insert"
+        ], 
+        "enableMagCursor": true, 
+        "speechRequiredStateString": "required", 
+        "quitOrcaNoConfirmation": false, 
+        "brailleRequiredStateString": "required", 
+        "magCursorColor": "#000000", 
+        "enablePositionSpeaking": false, 
+        "magZoomerType": 0, 
+        "onlySpeakDisplayedText": false, 
+        "enableProgressBarUpdates": true, 
+        "wrappedStructuralNavigation": true, 
+        "chatRoomHistories": false, 
+        "brailleVerbosityLevel": 1, 
+        "enableFunctionKeys": true, 
+        "enableModifierKeys": true, 
+        "magCrossHairColor": "#000000", 
+        "enableTutorialMessages": false, 
+        "enableActionKeys": true, 
+        "speakBlankLines": true, 
+        "magColorFilteringMode": 0, 
+        "magZoomerRight": 1680, 
+        "keyboardLayout": 1, 
+        "magTargetDisplay": "", 
+        "disableBrailleEOL": false, 
+        "magZoomerTop": 0, 
+        "magSourceDisplay": "", 
+        "enableDiacriticalKeys": false, 
+        "enableMnemonicSpeaking": false, 
+        "enabledBrailledTextAttributes": "size:; family-name:; weight:400; indent:0; underline:none; strikethrough:false; justification:left; style:normal; text-spelling:none;", 
+        "speechVerbosityLevel": 1, 
+        "enableMagCrossHair": true, 
+        "enableBrailleMonitor": false, 
+        "voices": {
+            "default": {
+                "established": false
+            }, 
+            "uppercase": {
+                "average-pitch": 5.6
+            }, 
+            "system": {
+                "established": false
+            }, 
+            "hyperlink": {
+                "established": false
+            }
+        }, 
+        "magContrastLevelGreen": 0, 
+        "brailleFlashTime": 5000, 
+        "magCrossHairSize": 16, 
+        "enableMouseReview": false, 
+        "enableNavigationKeys": false, 
+        "magBrightnessLevelGreen": 0, 
+        "chatSpeakRoomName": false, 
+        "startingProfile": [
+            "Default", 
+            "default"
+        ], 
+        "enableLockingKeys": true, 
+        "profile": [
+            "Default", 
+            "default"
+        ], 
+        "brailleRolenameStyle": 1, 
+        "brailleLinkIndicator": 192, 
+        "enableEchoByCharacter": false, 
+        "magBrightnessLevelBlue": 0, 
+        "enableBrailleContext": true, 
+        "magControlTrackingMode": 2, 
+        "magZoomerBottom": 1050, 
+        "enablePrintableKeys": true, 
+        "enabledSpokenTextAttributes": "size:; family-name:; weight:400; indent:0; underline:none; strikethrough:false; justification:left; style:normal; paragraph-style:; text-spelling:none;", 
+        "chatMessageVerbosity": 0, 
+        "presentTimeFormat": "%X", 
+        "magBrightnessLevel": 0, 
+        "presentRequiredState": false, 
+        "enableMagCrossHairClip": false
+    }
+}
+EOF
+
+		case "$1" in
+			magnifier)
+				sed -i -e 's/\"enableMagnifier\": false/\"enableMagnifier\": true/' "$CHROOT_DIR/home/$USER_NAME/.local/share/orca/user-settings.conf"
+			;;
+			speech)
+				sed -i -e 's/\"enableSpeech\": false/\"enableSpeech\": true/' "$CHROOT_DIR/home/$USER_NAME/.local/share/orca/user-settings.conf"
+			;;
+			braille)
+				sed -i -e 's/\"enableBraille\": false/\"enableBraille\": true/' "$CHROOT_DIR/home/$USER_NAME/.local/share/orca/user-settings.conf"
+			;;
+			*)
+			;;
+		esac
+
+		if [ "$HOME" = "/root" ] || [ -n "$IN_INITRAMFS" ]; then
+			chmod 755 "$CHROOT_DIR/home/$USER_NAME/.local/share/orca"
+			$DO_CHROOT chown $USER_NAME.$USER_NAME -R "/home/$USER_NAME/.local"
+		fi
+	fi
+}
+
+create_conf()
+{
+	cat <<EOF > /tmp/casper-a11y.conf
+UBIQUITY_A11Y_PROFILE=$1
+EOF
+}
+
+if [ "$#" = "0" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+	help
+	exit 1
+fi
+
+while [ "$#" -gt 0 ];
+do
+	case "$1" in
+		-chroot=*)
+			CHROOT_DIR="${1#-chroot=}"
+			DO_CHROOT="chroot $CHROOT_DIR"
+			shift
+			continue
+		;;
+		-user=*)
+			USER_NAME="${1#-user=}"
+			DO_SUDO="sudo -u $USER_NAME"
+			shift
+			continue
+		;;
+		-l|-login)
+			SET_LOGIN=1
+			shift
+			continue
+		;;
+		-i|-initramfs)
+			IN_INITRAMFS=1
+			shift
+			continue
+		;;
+		-d|-debug)
+			set -x
+			shift
+			continue
+		;;
+		-script)
+			STARTUP_SCRIPT=1
+			shift
+			continue
+		;;
+		*)
+			PROFILE_NAME="$1"
+			shift
+			continue
+		;;
+	esac
+done
+
+if [ -n "$IN_INITRAMFS" ] && [ -z "$CHROOT_DIR" ]; then
+	echo "Error: In initramfs, but no chroot directory specified."
+	help
+	exit 1
+elif [ -n "$IN_INITRAMFS" ] && [ -z "$USER_NAME" ]; then
+	echo "Error: In initramfs, but no username specified."
+	help
+	exit 1
+fi
+
+if [ -n "$SET_LOGIN" ] && [ "$HOME" != "/root" ] && [ -z "$IN_INITRAMFS" ]; then
+	echo "Error: Setting up accessibility for login requires root privileges."
+	help
+	exit 1
+fi
+
+
+if [ -n "$CHROOT_DIR" ] || [ -n "$USER_NAME" ]; then
+	if [ "$HOME" != "/root" ] && [ -z "$IN_INITRAMFS" ]; then
+		echo "Error: You are not running as root."
+		help
+		exit 1
+	fi
+fi
+
+if [ -n "$CHROOT_DIR" ]; then
+	if [ ! -d "$CHROOT_DIR" ]; then
+		echo "Error: Target chroot directory does not exist, or you do not have permission to access it."
+		exit 1
+	fi
+	if [ -z "$IN_INITRAMFS" ] && ! type chroot >/dev/null 2>&1 ; then
+		echo "Error: Chroot command not available in running environment."
+		exit 1
+	fi
+fi
+
+if [ -n "$STARTUP_SCRIPT" ]; then
+	if [ -z "$USER_NAME" ]; then
+		echo "Error: You have requested to create a startup script, but no user was specified."
+		exit 1
+	fi
+	if [ "$HOME" != "/root" ] && [ -z "$IN_INITRAMFS" ]; then
+		echo "Error: You have requested to create a startup script, but you do not have root"
+		echo "privileges."
+		exit 1
+	fi
+	if [ -z "$CHROOT_DIR" ]; then
+		echo "Error: You have requested to create a startup script, but you did not specify"
+		echo "a target directory to chroot to."
+		exit 1
+	fi
+fi
+
+# If no username was entered on the command line, grab the name of the current
+# user, so we can write files to their home directory.
+if [ -z "$USER_NAME" ]; then
+	if [ -z "$USER" ]; then
+		USER_NAME="${HOME#/home/}"
+	else
+		USER_NAME="$USER"
+	fi
+fi
+
+# Check to see if a few necessary packages are present in the target
+# environment.
+GCONF_VERSION=$($DO_CHROOT /usr/bin/dpkg-query -W --showformat='${Version}' gconf2 2>/dev/null) || GCONF_VERSION=""
+GLIBBIN_VERSION=$($DO_CHROOT /usr/bin/dpkg-query -W --showformat='${Version}' libglib2.0-bin 2>/dev/null) || GLIBBIN_VERSION=""
+ORCA_VERSION=$($DO_CHROOT /usr/bin/dpkg-query -W --showformat='${Version}' gnome-orca 2>/dev/null) || ORCA_VERSION=""
+
+if [ -n "$STARTUP_SCRIPT" ]; then
+	cat <<EOF > $CHROOT_DIR/etc/init/a11y-profile-settings.conf
+# a11y-profile-settings - A job to set up accessibility settings
+
+description     "Accessibility profile settings"
+
+start on runlevel [2345]
+
+umask 022
+
+script
+    sudo -u $USER_NAME /usr/bin/dbus-launch --exit-with-session /usr/bin/a11y-profile-settings
+    sudo -u lightdm /usr/bin/dbus-launch --exit-with-session /usr/bin/a11y-profile-settings-lightdm
+    rm /usr/bin/a11y-profile-settings /usr/bin/a11y-profile-settings-lightdm
+    rm /etc/init/a11y-profile-settings.conf
+end script
+EOF
+	cat <<EOF > $CHROOT_DIR/usr/bin/a11y-profile-settings
+#!/bin/sh
+
+# Created by the casper accessibility profile settings script on
+# $(date).
+
+# This script deletes itself once run.
+
+EOF
+	cat <<EOF > $CHROOT_DIR/usr/bin/a11y-profile-settings-lightdm
+#!/bin/sh
+
+# Created by the casper accessibility profile settings script on
+# $(date).
+
+# This script deletes itself once run.
+
+EOF
+fi
+
+case $PROFILE_NAME in
+	high-contrast)
+		set_common_lowvis
+		set_high_contrast
+		create_conf $PROFILE_NAME
+	;;
+	magnifier)
+		set_common_lowvis
+		set_magnifier
+		create_conf $PROFILE_NAME
+	;;
+	blindness)
+		set_common_lowvis
+		set_blindness
+		create_conf screen-reader
+	;;
+	braille)
+		set_common_lowvis
+		set_braille
+		create_conf $PROFILE_NAME
+	;;
+	keyboard-modifiers)
+		set_common_motor
+		set_keyboard_modifiers
+		create_conf $PROFILE_NAME
+	;;
+	onscreen-keyboard)
+		set_common_motor
+		set_onscreen_keyboard
+		create_conf $PROFILE_NAME
+	;;
+esac
+
+if [ -n "$STARTUP_SCRIPT" ]; then
+	chmod 755 $CHROOT_DIR/usr/bin/a11y-profile-settings*
+fi

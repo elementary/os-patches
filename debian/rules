@@ -1,0 +1,21 @@
+#! /usr/bin/make -f
+
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+
+%:
+	dh $@
+
+ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+override_dh_auto_build:
+	dh_auto_build -- CC=$(DEB_HOST_GNU_TYPE)-gcc PKG_CONFIG=$(DEB_HOST_GNU_TYPE)-pkg-config
+endif
+
+override_dh_installinit:
+	dh_installinit -r --no-start -- start 89 0 6 .
+
+check:
+	# Check the syntax of any shell scripts.
+	set -e; for x in $$(find -type f \! -name \*.po \! -name \*.pot -print0 | xargs -0 file -i | grep "text/x-shellscript" | cut -d':' -f1); do \
+		sh -n $$x; \
+	done

@@ -1,0 +1,44 @@
+#!/bin/sh
+
+PREREQ=""
+DESCRIPTION="Setting up automatic login..."
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+. /scripts/casper-functions
+
+log_begin_msg "$DESCRIPTION"
+
+STRING1="               if (this._userManager.list_users().length > 2 || !(this._userManager.get_user('ubuntu')))\n \
+                            return GdmUtil.fadeInActor(this._promptLabel); \/\/show\n \
+                        else\n \
+                            this._promptLabel.hide();"
+STRING2="               if (this._userManager.list_users().length > 2 || !(this._userManager.get_user('ubuntu')))\n \
+                            return GdmUtil.fadeInActor(this._promptEntry); \/\/show\n \
+                        else\n \
+                            this._promptEntry.hide();"
+
+GDMLoginFile=/root/usr/share/gnome-shell/js/gdm/loginDialog.js
+
+if [ -f $GDMLoginFile ]; then
+    # Configure GDM autologin
+
+    sed -i -e "s/^.*return GdmUtil.fadeInActor(this._promptLabel);\$/$STRING1/" \
+           -e "s/^.*return GdmUtil.fadeInActor(this._promptEntry);\$/$STRING2/" \
+           $GDMLoginFile
+
+fi
+
+
+log_end_msg

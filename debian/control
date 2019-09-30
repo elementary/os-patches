@@ -1,0 +1,29 @@
+Source: casper
+Section: misc
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: debhelper (>= 7.0.50~), lsb-release, libplymouth-dev (>= 0.8.0~-13), pkg-config
+Standards-Version: 3.9.3
+Vcs-Bzr: https://code.launchpad.net/+branch/ubuntu/casper
+
+Package: casper
+Architecture: any
+Section: misc
+Priority: extra
+Depends: ${shlibs:Depends}, ${misc:Depends}, initramfs-tools (>= 0.92bubuntu55), busybox-initramfs (>= 1:1.1.3-4ubuntu3), dmsetup, user-setup, sudo, eject, uuid-runtime, localechooser-data (>= 2.03ubuntu1), util-linux (>= 2.15-1), file, lzma, udev (>= 174), cifs-utils
+Conflicts: usplash (<< 0.4-43), live-initramfs
+Breaks: genext2fs (<< 1.4.1)
+Tag: admin::boot, admin::filesystem, implemented-in::shell, protocol::smb, role::plugin, scope::utility, special::completely-tagged, works-with-format::iso9660
+Description: Run a "live" preinstalled system from read-only media
+
+Package: ubiquity-casper
+Architecture: all
+Depends: laptop-detect, sudo, ${misc:Depends}
+Enhances: ubiquity
+Replaces: casper (<< 1.318)
+Breaks: casper (<< 1.318)
+Tag: admin::boot, admin::filesystem, implemented-in::shell, protocol::smb, role::plugin, scope::utility, special::completely-tagged, works-with-format::iso9660
+Description: Configuration hooks for live installer
+ This package provides hook scripts for the Ubiquity live installer that
+ repeat some pieces of configuration done by the live system boot process in
+ the system installed by Ubiquity.

@@ -1,0 +1,74 @@
+#!/bin/sh
+# If you are looking to change accessibility profile settings, plesae look in
+# bin/casper-a11y-enable.
+
+PREREQ=""
+DESCRIPTION="Configuring accessibility options..."
+
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+	prereqs)
+		prereqs
+	       exit 0
+	       ;;
+esac
+
+. /scripts/casper-functions
+
+log_begin_msg "$DESCRIPTION"
+
+for x in $(cat /proc/cmdline); do
+	case $x in
+		# Lesser Visual Impairment
+		access=v1)
+			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -script high-contrast
+                        ;;
+		# Moderate Visual Impairment
+		access=v2)
+			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -script magnifier
+                        ;;
+		# Blindness
+		access=v3)
+			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -script blindness
+                        ;;
+		# Braille
+		braille=ask)
+			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -script braille
+                        ;;
+		# Minor Motor Difficulties
+		access=m1)
+			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -script keyboard-modifiers
+                        ;;
+		# Motor Difficulties - pointing devices
+		access=m2)
+			/root/usr/bin/casper-a11y-enable -initramfs -user="$USERNAME" -chroot=/root -script onscreen-keyboard
+                        ;;
+		maybe-ubiquity|only-ubiquity)
+			NO_A11Y_DESKTOP_FILE=1
+			;;
+	esac
+done
+
+# Write out a desktop file that will be triggered if the screen-reader-enabled
+# gsettings key is enabled, to set up the screen reader profile. THis key
+# is enabled if the user launches orca with a shortcut key. We don't want
+# to write out the file if the user is running oem-config, or botts directly
+# into ubiquity, where there is code to deal with the setting of the profile.
+if [ -z "$NO_A11Y_DESKTOP_FILE" ]; then
+	cat <<EOF > /root/etc/xdg/autostart/screen-reader-profile.desktop
+[Desktop Entry]
+Type=Application
+Name=Screen Reader Accessibility Profile
+Exec=/usr/bin/casper-a11y-enable blindness
+NoDisplay=true
+AutostartCondition=GSettings org.gnome.desktop.a11y.applications screen-reader-enabled
+X-GNOME-AutoRestart=false
+OnlyShowIn=GNOME;Unity;
+EOF
+fi
+log_end_msg

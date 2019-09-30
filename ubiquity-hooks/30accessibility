@@ -1,0 +1,96 @@
+#!/bin/sh
+# If you are looking to change accessibility profile settings, plesae look in
+# bin/casper-a11y-enable.
+
+. /usr/share/debconf/confmodule
+. /etc/casper.conf
+
+PREREQ=""
+DESCRIPTION="Configuring accessibility options..."
+db_get passwd/username
+TARGET_USERNAME="$RET"
+
+copy_orca_config()
+{
+	if [ -f /home/$USERNAME/.local/share/orca/user-settings.conf ]; then
+		mkdir -p /target/home/$TARGET_USERNAME/.local/share
+		mkdir -p /target/var/lib/lightdm/.local/share
+		cp -r /home/$USERNAME/.local/share/orca /target/home/$TARGET_USERNAME/.local/share
+		cp -r /home/$USERNAME/.local/share/orca /target/var/lib/lightdm/.local/share
+		chroot /target chown -R $TARGET_USERNAME.$TARGET_USERNAME /home/$TARGET_USERNAME/.local
+		chroot /target chown -R lightdm.lightdm /var/lib/lightdm/.local
+		chmod 755 /target/home/$TARGET_USERNAME/.local/share/orca
+		chmod 755 /target/var/lib/lightdm/.local/share/orca
+	fi
+}
+
+for x in $(cat /proc/cmdline); do
+	case $x in
+		# Lesser Visual Impairment
+		access=v1)
+			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script high-contrast
+			exit
+                        ;;
+		# Moderate Visual Impairment
+		access=v2)
+			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script magnifier
+			exit
+                        ;;
+		# Blindness
+		access=v3)
+			copy_orca_config
+			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script blindness
+			exit
+                        ;;
+		# Braille
+		braille=ask)
+			copy_orca_config
+			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script braille
+			exit
+                        ;;
+		# Minor Motor Difficulties
+		access=m1)
+			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script keyboard-modifiers
+			exit
+                        ;;
+		# Motor Difficulties - pointing devices
+		access=m2)
+			/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script onscreen-keyboard
+			exit
+                        ;;
+		esac
+done
+
+if [ -z "$UBIQUITY_A11Y_PROFILE" ] && [ -f /tmp/casper-a11y.conf ]; then
+	. /tmp/casper-a11y.conf
+fi
+
+case "$UBIQUITY_A11Y_PROFILE" in
+	# Lesser Visual Impairment
+	high-contrast)
+		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script high-contrast
+		;;
+	# Moderate Visual Impairment
+	magnifier)
+		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script magnifier
+		;;
+	# Blindness
+	screen-reader)
+		copy_orca_config
+		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script blindness
+		;;
+	# Braille
+	braille)
+		copy_orca_config
+		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script braille
+		;;
+	# Minor Motor Difficulties
+	keyboard-modifiers)
+		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script keyboard-modifiers
+		;;
+	# Motor Difficulties - pointing devices
+	onscreen-keyboard)
+		/usr/bin/casper-a11y-enable -login -user="$TARGET_USERNAME" -chroot=/target -script onscreen-keyboard
+		;;
+esac
+
