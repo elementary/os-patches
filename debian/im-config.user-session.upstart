@@ -1,0 +1,21 @@
+description "Launch and configure input method"
+author "Stéphane Graber <stgraber@ubuntu.com>"
+
+start on starting xsession-init and started dbus
+
+pre-start script
+    if [ "$IM_CONFIG_PHASE" = 1 ]; then
+        IM_CONFIG_PHASE=2
+        # initialize all im-config common functions and parameters
+        . /usr/share/im-config/xinputrc.common
+        # source the first found configuration file
+        if [ -r "$IM_CONFIG_XINPUTRC_USR" ]; then
+            . $IM_CONFIG_XINPUTRC_USR
+        elif [ -x /usr/bin/fcitx ]; then
+            # Ubuntu Kylin special
+            run_im fcitx
+        elif [ -r "$IM_CONFIG_XINPUTRC_SYS" ]; then
+            . $IM_CONFIG_XINPUTRC_SYS
+        fi
+    fi
+end script

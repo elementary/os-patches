@@ -1,0 +1,32 @@
+Description: Make fcitx the system default if installed (for Ubuntu Kylin)
+ There is a related hack in language-selector, LanguageSelector/ImConfig.py.
+Bug-Ubuntu: https://launchpad.net/bugs/1297831
+Forwarded: not needed
+Author: Gunnar Hjalmarsson <gunnarhj@ubuntu.com>
+
+diff -ru im-config.orig/70im-config_launch im-config/70im-config_launch
+--- im-config.orig/70im-config_launch	2014-01-07 14:40:18.000000000 +0100
++++ im-config/70im-config_launch	2014-03-27 16:09:29.179709818 +0100
+@@ -26,6 +26,9 @@
+     # source the first found configuration file
+     if [ -r "$IM_CONFIG_XINPUTRC_USR" ]; then
+         . $IM_CONFIG_XINPUTRC_USR
++    elif [ -x /usr/bin/fcitx ]; then
++        # Ubuntu Kylin special
++        run_im fcitx
+     elif [ -r "$IM_CONFIG_XINPUTRC_SYS" ]; then
+         . $IM_CONFIG_XINPUTRC_SYS
+     fi
+diff -ru im-config.orig/im-launch im-config/im-launch
+--- im-config.orig/im-launch	2014-01-07 14:40:18.000000000 +0100
++++ im-config/im-launch	2014-03-27 16:10:07.399899342 +0100
+@@ -24,6 +24,9 @@
+     # source the first found configuration file
+     if [ -r "$IM_CONFIG_XINPUTRC_USR" ]; then
+         . $IM_CONFIG_XINPUTRC_USR
++    elif [ -x /usr/bin/fcitx ]; then
++        # Ubuntu Kylin special
++        run_im fcitx
+     elif [ -r "$IM_CONFIG_XINPUTRC_SYS" ]; then
+         . $IM_CONFIG_XINPUTRC_SYS
+     fi

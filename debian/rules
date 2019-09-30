@@ -1,0 +1,7 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_install:
+	dh_auto_install
+	install -m 644 -D debian/im-config.user-session.upstart debian/im-config/usr/share/upstart/sessions/im-config.conf

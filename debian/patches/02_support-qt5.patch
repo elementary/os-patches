@@ -1,0 +1,92 @@
+## Description: To support Qt5, set QT_IM_MODULE
+## Bug-Debian: https://bugs.debian.org/732396
+## Bug-Ubuntu: https://launchpad.net/bugs/1309885
+Index: im-config/data/20_ibus.rc
+===================================================================
+--- im-config.orig/data/20_ibus.rc	2014-04-25 02:47:46.457845612 +0900
++++ im-config/data/20_ibus.rc	2014-04-25 02:47:46.453845612 +0900
+@@ -42,6 +42,14 @@
+         break
+     fi
+ done
++QT_IM_MODULE=xim
++# use immodule when available for Qt5
++for IM_CONFIG_MARKER in /usr/lib/*/qt5/plugins/platforminputcontexts/libibusplatforminputcontextplugin.so ; do
++    if [ -e $IM_CONFIG_MARKER ]; then
++        QT_IM_MODULE=ibus
++        break
++    fi
++done
+ 
+ CLUTTER_IM_MODULE=xim
+ # use immodule when available for clutter
+Index: im-config/data/22_fcitx.rc
+===================================================================
+--- im-config.orig/data/22_fcitx.rc	2014-04-25 02:47:46.457845612 +0900
++++ im-config/data/22_fcitx.rc	2014-04-25 02:47:46.453845612 +0900
+@@ -34,7 +34,7 @@
+ fi
+ 
+ QT4_IM_MODULE=xim
+-# use immodule when available for Qt4 (Qt3 has been long dead)
++# use immodule when available for Qt4
+ for IM_CONFIG_MARKER in /usr/lib/*/qt4/plugins/inputmethods/qtim-fcitx.so \
+                         /usr/lib/qt4/plugins/inputmethods/qtim-fcitx.so ; do
+     if [ -e $IM_CONFIG_MARKER ]; then
+@@ -43,6 +43,16 @@
+     fi
+ done
+ 
++QT_IM_MODULE=xim
++# use immodule when available for Qt5
++for IM_CONFIG_MARKER in /usr/lib/*/qt5/plugins/platforminputcontexts/libfcitxplatforminputcontextplugin.so ; do
++    if [ -e $IM_CONFIG_MARKER ]; then
++        QT_IM_MODULE=fcitx
++        break
++    fi
++done
++
++
+ # This is placeholder at this moment.
+ CLUTTER_IM_MODULE=xim
+ # use immodule when available for clutter
+Index: im-config/data/24_uim.rc
+===================================================================
+--- im-config.orig/data/24_uim.rc	2014-04-25 02:47:41.313956000 +0900
++++ im-config/data/24_uim.rc	2014-04-25 02:48:21.873844577 +0900
+@@ -48,18 +48,8 @@
+     GTK_IM_MODULE=uim
+ fi
+ 
+-QT_IM_MODULE=xim
+-# use immodule when available for Qt3
+-for IM_CONFIG_MARKER in /usr/lib/*/qt3/plugins/inputmethods/libquiminputcontextplugin.so \
+-                        /usr/lib/qt3/plugins/inputmethods/libquiminputcontextplugin.so ; do
+-    if [ -e $IM_CONFIG_MARKER ]; then
+-        QT_IM_MODULE=uim
+-        break
+-    fi
+-done
+-
+ QT4_IM_MODULE=xim
+-# use immodule when available for Qt4 (Qt3 has been long dead)
++# use immodule when available for Qt4
+ for IM_CONFIG_MARKER in /usr/lib/*/qt4/plugins/inputmethods/libuiminputcontextplugin.so \
+                         /usr/lib/qt4/plugins/inputmethods/libuiminputcontextplugin.so ; do
+     if [ -e $IM_CONFIG_MARKER ]; then
+@@ -67,6 +57,15 @@
+         break
+     fi
+ done
++QT_IM_MODULE=xim
++# use immodule when available for Qt5
++for IM_CONFIG_MARKER in /usr/lib/*/qt5/plugins/inputmethods/libquiminputcontextplugin.so ; do
++    if [ -e $IM_CONFIG_MARKER ]; then
++        QT_IM_MODULE=uim
++        break
++    fi
++done
++
+ 
+ CLUTTER_IM_MODULE=xim
+ fi

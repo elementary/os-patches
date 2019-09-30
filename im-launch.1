@@ -1,0 +1,34 @@
+.TH IM\-LAUNCH 1
+.\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
+.\" other parms are allowed: see man(7), man(1)
+.SH NAME
+im\-launch \- launch input method end execute session program
+.SH SYNOPSIS
+.TP
+.B im\-launch \fISESSION\-PROGRAM\fP
+
+.SH DESCRIPTION
+
+The \fBim\-launch\fP command is used to start a input method framework server
+daemon such as \fBibus\-daemon\fP, set up the appropriate environment variables
+for the client programs, and execute \fISESSION\-PROGRAM\fP such as
+\fBx\-session\-manager\fP.
+
+This command is usually not invoked from the console of a normal user but 
+is normally invoked by the \fB/etc/X11/Xsession.d/70im-config_launch\fP.
+
+.SH "TROUBLESHOOT"
+If you have any problem, see the first part of \fB~/.xsession-errors\fP and
+look for the cause.  If you are running \fBim\-config\fP while Debian (sid)
+system is undergoing a major library transition, you may need to manually set
+up \fB~/.xinputrc\fP with adjusted library version number etc.  Please file a
+bug report to the im\-config package using reportbug(1) describing your
+resolution experience.
+
+.SH "SEE ALSO"
+.BR im-config(8),
+.BR /usr/share/doc/im\-config/README.Debian.gz
+.SH AUTHOR
+This manual page was written by Aron Xu <aron@debian.org>, and Osamu
+Aoki <osamu@debian.org> for the Debian GNU/Linux system (but may be used
+by others).

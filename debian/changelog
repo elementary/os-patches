@@ -1,0 +1,338 @@
+im-config (0.24-1ubuntu4.2) trusty; urgency=medium
+
+  * debian/patches/03-not-always-require-zenity.patch:
+    Get rid of unwarrented crash of gnome-language-selector when
+    calling "im-config -l" (LP: #1450147).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 04 Nov 2015 16:45:00 +0100
+
+im-config (0.24-1ubuntu4.1) trusty; urgency=medium
+
+  * debian/patches/02_support-qt5.patch:
+    To support Qt5, set QT_IM_MODULE(LP: #1309885)
+
+ -- Nobuto MURATA <nobuto@ubuntu.com>  Fri, 25 Apr 2014 03:06:22 +0900
+
+im-config (0.24-1ubuntu4) trusty; urgency=medium
+
+  * debian/patches/01_fcitx-default-if-installed.patch,
+    debian/im-config.user-session.upstart:
+    Make fcitx the system default if installed (LP: #1297831).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 27 Mar 2014 16:17:00 +0100
+
+im-config (0.24-1ubuntu3) trusty; urgency=low
+
+  * debian/im-config.user-session.upstart:
+    Description corrected (LP: #1271667).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 23 Jan 2014 14:11:00 +0100
+
+im-config (0.24-1ubuntu2) trusty; urgency=low
+
+  * Alternative depends for zenity: kde-baseapps-bin (contains kdialog)
+
+ -- Harald Sitter <apachelogger@kubuntu.org>  Thu, 16 Jan 2014 13:39:32 +0100
+
+im-config (0.24-1ubuntu1) trusty; urgency=low
+
+  * Dropped patches:
+    - 01_modify_system_default.patch (no longer needed)
+    - 02_list_installed_input_methods.patch (applied upstream)
+    - 03_kdialog_support.path (applied upstream)
+  * Merge with Debian unstable, remaining Ubuntu changes:
+    - debian/im-config.user-session.upstart
+    - debian/rules: Install upstart job script
+    - debian/postinst: Additional condition to be met to edit
+      80im-switch.
+  * The new version includes a bunch of PO files (LP: #1225305).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 10 Jan 2014 10:35:00 +0100
+
+im-config (0.24-1) unstable; urgency=medium
+
+  * Fix typos in manpage
+  * Fix changelog 0.23-1.  Closes: #724024, #724309
+  * Use safe tmp file kde menu.
+  * Add many PO files from Ubuntu translation site. 
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 10 Jan 2014 00:37:20 +0900
+
+im-config (0.23-1) unstable; urgency=medium
+
+  * Revert 0.22-2 and 0.22-3 changes to keep things simple since 
+    it was not a bug.
+  * Add -l, -m, and -o options. -l is compatible with the Ubuntu 
+    change. Closes: #694941
+  * Update translation (uk, ru).  Closes: #724024, #724309
+  * Refined build script.
+
+ -- Osamu Aoki <osamu@debian.org>  Wed, 08 Jan 2014 23:22:20 +0900
+
+im-config (0.22-3) unstable; urgency=low
+
+  * Fix typo regression in 0.22-2. Closes: #710969
+
+ -- Osamu Aoki <osamu@debian.org>  Tue, 04 Jun 2013 23:36:33 +0900
+
+im-config (0.22-2) unstable; urgency=low
+
+  * Fix wild card match logic error for all IM. Closes: #709921
+
+ -- Osamu Aoki <osamu@debian.org>  Wed, 29 May 2013 21:39:44 +0900
+
+im-config (0.22-1) unstable; urgency=low
+
+  * Change this to non-native 3.0 (quilt) source/format.
+  * KUBUNTU patch to use kdialog too.  Closes: #705284
+  * Mallit input method support by Michał Zając.  Closes: #701831 
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 19 May 2013 08:48:18 +0900
+
+im-config (0.21ubuntu4) saucy; urgency=low
+
+  * debian/patches/01_modify_system_default.patch:
+    Change the system default on Unity from "cjkv" to "auto" to make
+    ibus work by default with the Text Entry tab in
+    gnome-control-center also when a non-cjkv language is the current
+    display language (LP: #1234768).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 04 Oct 2013 03:07:00 +0200
+
+im-config (0.21ubuntu3) raring; urgency=low
+
+  * Add 03_kdialog_support.path
+  * Add kde-baseapps-bin as alternative dependency for dialog applications
+
+ -- Harald Sitter <apachelogger@kubuntu.org>  Wed, 10 Apr 2013 12:21:34 +0200
+
+im-config (0.21ubuntu2) raring; urgency=low
+
+  * Add an upstart user-session job to activate im-config. (LP: #1155205)
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Mon, 25 Mar 2013 10:04:29 -0400
+
+im-config (0.21ubuntu1) raring; urgency=low
+
+  * debian/patches/02_list_installed_input_methods.patch:
+    Refreshed.
+  * debian/postinst:
+    Don't prepend a disable line to 80im-switch if it's there already
+    via a previous update of the im-switch package (LP: #1101836).
+  * debian/rules:
+    Use quilt in Ubuntu only. This change should make it possible to
+    use exactly the same version of this package in Debian and Ubuntu.
+  * Merge with Debian unstable, remaining Ubuntu changes:
+    - debian/control: Build-Depends on quilt.
+    - debian/rules: Use quilt when building on Ubuntu.
+    - debian/postinst: Additional condition to be met to edit
+      80im-switch.
+    - debian/patches/01_make_cjkv_mode_default.patch
+    - debian/patches/02_list_installed_input_methods.patch
+    - debian/patches/series
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 27 Feb 2013 02:16:00 +0100
+
+im-config (0.21) unstable; urgency=low
+
+  * Disable im-switch hook script if im-switch package is removed
+    and im-config is installed.  Closes: #701224
+
+ -- Osamu Aoki <osamu@debian.org>  Tue, 26 Feb 2013 23:04:39 +0900
+
+im-config (0.20) unstable; urgency=low
+
+  * Fix regression on uim for #683950 caused by the 0.19~pre1 fixing
+    #694446. Closes: #695940
+  * Adjust desktop file to match the gnome-shell 3.4.1-8 behavior
+    updated just around the wheezy freeze on 23 Jun 2012.
+  * Work around zenity bug for readable display under Japanese.
+    Closes: #695939 
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 15 Dec 2012 11:25:11 +0900
+
+im-config (0.19ubuntu3) raring; urgency=low
+
+  * debian/postinst:
+    For cases when 80im-switch is not removed because it was modified
+    by the user, we prepend a line that in effect disables it
+    (LP: #1101836).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 21 Feb 2013 15:23:20 +0100
+
+im-config (0.19ubuntu2) raring; urgency=low
+
+  * debian/patches/02_list_installed_input_methods.patch:
+    Add an "-l" option which lists input methods that im-config
+    supports (LP: #1090754).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 18 Dec 2012 21:20:00 +0100
+
+im-config (0.19ubuntu1) raring; urgency=low
+
+  * debian/patches/01_make_cjkv_mode_default.patch:
+    Make cjkv mode the system default (LP: #1076975).
+  * debian/postinst:
+    Make sure that 80im-switch is removed by adding md5sum for
+    version 1.22ubuntu3.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 10 Dec 2012 14:24:00 +0100
+
+im-config (0.19) unstable; urgency=low
+
+  * Uploading to unstable.
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 02 Dec 2012 11:07:57 +0900
+
+im-config (0.19~pre1) experimental; urgency=low
+
+  * Fix for programs stared by dbus by moving exporting of environment 
+    variables earlier. Closes: #694446
+
+ -- Osamu Aoki <osamu@debian.org>  Thu, 29 Nov 2012 00:14:56 +0900
+
+im-config (0.18) unstable; urgency=low
+
+  * Updated uim support for gtk3 and add uim-xim requirement for XIM.
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 25 Aug 2012 13:38:42 +0900
+
+im-config (0.18~pre1) experimental; urgency=low
+
+  * Inspired by Aron Xu's patch, new im-launch script was created
+    while moving its hook script to 70im-config_launch. Closes: #683950
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 11 Aug 2012 13:28:14 +0900
+
+im-config (0.17) unstable; urgency=low
+
+  * Update for scim using Tz-Huan Huang' patch as its basis. 
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 29 Jun 2012 21:35:17 +0900
+
+im-config (0.16) unstable; urgency=low
+
+  * Reactivate zenity as default backend under X with more
+    sanity checks. Closes: #672271 
+
+ -- Osamu Aoki <osamu@debian.org>  Tue, 15 May 2012 23:10:05 +0900
+
+im-config (0.15) unstable; urgency=low
+
+  * Updated #671655 bug fix with new xim menu.
+  * Disable zenity as default backend under X. Closes: #672262
+
+ -- Osamu Aoki <osamu@debian.org>  Wed, 09 May 2012 21:52:38 +0900
+
+im-config (0.14) unstable; urgency=low
+
+  * Fixed -n option operation.  Closes: #671233 
+  * Add bare XIM support XKB users. Closes: #671655 
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 07 May 2012 00:05:26 +0900
+
+im-config (0.13) unstable; urgency=low
+
+  * Fixed uim starting script.  Closes: #670265, #670269 
+  * Updated Standards-Version to 3.9.3.
+
+ -- Osamu Aoki <osamu@debian.org>  Thu, 26 Apr 2012 23:44:48 +0900
+
+im-config (0.12) unstable; urgency=low
+
+  * Added -n option for use by external scripts. Closes: #659458 
+
+ -- Osamu Aoki <osamu@debian.org>  Thu, 16 Feb 2012 00:29:50 +0900
+
+im-config (0.11) unstable; urgency=low
+
+  * Updated zh_CN translation.  Thanks Aron Xu.
+  * Updated hime and gcin. Thanks Yao Wei.  Closes: #658581
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 05 Feb 2012 20:25:22 +0900
+
+im-config (0.10) unstable; urgency=low
+
+  * Added German translation. Thanks Hendrik Knackstedt.
+  * Added HIME and Chinese translation.  Thanks Yao Wei. Closes: #652522
+
+ -- Osamu Aoki <osamu@debian.org>  Tue, 17 Jan 2012 22:06:36 +0900
+
+im-config (0.9) unstable; urgency=low
+
+  * Moved gettext to xinputrc.common. Thanks Patrice Duroux. 
+    Closes: #653700 
+
+ -- Osamu Aoki <osamu@debian.org>  Fri, 30 Dec 2011 22:50:57 +0900
+
+im-config (0.8) unstable; urgency=low
+
+  * Internationalization with gettext. 
+
+ -- Osamu Aoki <osamu@debian.org>  Tue, 20 Dec 2011 00:37:14 +0900
+
+im-config (0.7) unstable; urgency=low
+
+  * Updated fcitx description.
+  * Added LANG=C for dpkg-query. Thanks Igor Urazov. Closes: #651646
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 11 Dec 2011 09:29:43 +0900
+
+im-config (0.6) unstable; urgency=low
+
+  * Added lib-thai and imhangul support. Closes: #650244
+  * Refactored UI code and added automatic variable export support
+    for custom user script.
+  * Added -a -c -s options and updated im-config(8). 
+  * Major code clean up readying for gettext usage.
+  * Updated README.Debian.
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 05 Dec 2011 23:48:05 +0900
+
+im-config (0.5) unstable; urgency=low
+
+  * Added multi-arch support. Closes: #644254 
+  * Updated fcitx support. Closes: #642215
+  * Supported GTK+2/GTK+3 immodule for all capable input method
+    (enable it only when both gtk2 and gtk3 immodules are available).
+  * Dependency adjustment for dialog and zenity. Closes: #631777
+  * Clutter support for ibus.
+  * Updated contents of README.Debian.
+  * Refined UI dialogue and indicated auto choice with @.
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 13 Nov 2011 13:15:43 +0900
+
+im-config (0.4) unstable; urgency=low
+
+  * Added xsunpinyin support by Zhengpeng Hou.
+  * Adjusted gcin priority in line with README.Debian.
+  * Lowered skim priority since it will not be supported under KDE4.
+  * Fixed package removal side effects. Closes: #618021 
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 14 Mar 2011 22:58:05 +0900
+
+im-config (0.3) unstable; urgency=low
+
+  * Added skim support.
+  * Enabled menu if corresponding package is installed even for low
+    priority entries.
+  * Fixed library check logic to set environment variables. 
+
+ -- Osamu Aoki <osamu@debian.org>  Sat, 17 Jul 2010 21:42:59 +0900
+
+im-config (0.2) unstable; urgency=low
+
+  * Set menu entry to be NoDisplay.
+  * Improved GTK+ menu messages.
+  * Added console menu.
+  * Updated documentation.
+
+ -- Osamu Aoki <osamu@debian.org>  Mon, 28 Jun 2010 22:22:55 +0900
+
+im-config (0.1) unstable; urgency=low
+
+  * Created a new package to manage the input method on Debian with a
+    much simpler structure than that of im-switch.
+  * Initial release to Debian. Closes: #587258
+
+ -- Osamu Aoki <osamu@debian.org>  Sun, 27 Jun 2010 14:41:55 +0900

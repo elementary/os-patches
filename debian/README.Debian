@@ -1,0 +1,141 @@
+im-config for Debian                     Osamu Aoki <osamu@debian.org>
+
+If you are using systemd, relogin with GDM may not restart the X session
+to update the system with the newly set im-config parameters.  You have
+to restart the X session explicitly using the service(8) command (or
+reboot the system).
+
+=======================================================================
+!	Basic design of im-config
+=======================================================================
+
+1. If an reasonable and single set of input method packages is 
+   installed, im-config activates it automatically for all users by 
+   default. (recommended situation)
+
+2. If several reasonable sets of input method packages are installed, 
+   im-config activates the most reasonable one automatically for all 
+   users by default.
+
+3. It provides a reasonably simple GUI configuration menu which is off
+   for the system menu by the default.  Menu selected user configuration
+   can override the system default.  Menu should normally show only 
+   available input methods on the system.
+
+4. Its configuration files are intuitive and its contents can be manually 
+   overridden easily as a POSIX shell hook script with following rules:
+     * Environment variables are set if "$IM_CONFIG_PHASE" = 1
+     * Daemon programs are started if "$IM_CONFIG_PHASE" = 2
+
+5. Menu configuration system is smart enough to detect manual changes of
+   configuration by editor and honors such changes.
+
+6. POSIX shell script is internationalized via gettext.sh
+
+=======================================================================
+!	How To Configure Input Method with im-config
+=======================================================================
+
+If you wish to override system default, 
+
+For user configuration, execute as:
+  $ im-config
+
+For system wide default, execute as:
+  $ sudo editor /etc/default/im-config
+or
+  $ sudo im-config
+
+Under GNOME2, you can do the same by enabling GUI menu by right-clicking menu
+under GNOME -> "Edit Menu" and check menu entry to be activated.  Then you can
+use this GUI menu for user configuration as  "System" -> "Preferences" -> 
+"Input Method" which runs "im-config". 
+
+(Under current GNOME3 in testing, this does not work.)
+
+=========================================================================
+!	Quick Guide to Setup Input Method
+=========================================================================
+
+* IBus (GTK+2, GTK+3, Qt4, Clutter, EMACS) -- this is most versatile
+  - Install all useful IBus packages (use "l" under aptitude to find them.)
+    - Core ibus input package:                ibus
+    - Support package for each UI environment
+      - GTK+2 IM module:                      ibus-gtk
+      - GTK+3 IM module:                      ibus-gtk3
+      - Qt4 IM module:                        ibus-qt4
+      - Clutter IM module:                    ibus-clutter
+      - EMACS (optional optimization):        ibus-el
+      [Note]
+        These are optional.  (Otherwise, xim is used)
+        Installing them will improve user experience.
+        Both ibus-gtk and ibus-gtk3 are required to be installed to activate 
+        GTK IM module with im-config.
+    - Support package for each IM engine client
+      - Japanese, MOZC (best):                ibus-mozc
+      - Japanese, Anthy (good):               ibus-anthy
+      - Japanese, SKK (EMACS style):          ibus-skk
+      - Korean language:                      ibus-hangul
+      - Traditional Chinese:                  ibus-chewing
+      - Simplified Chinese:                   ibus-pinyin
+      - Simplified Chinese (SUN):             ibus-sunpinyin
+      - Simplified Chinese (Google):          ibus-googlepinyin
+      - Vietnamese:                           ibus-unikey
+      - Many table based input method:        ibus-table*
+  - If other input method packages (fcitx, uim, ...) are installed,
+    select ibus by executing im-config from a terminal window.
+    (Usually not needed since this is default.)
+  - Configure ibus by adding your desired input method engine.
+    This configuration may be accessed by right clicking small keyboard icon
+    on the top right corner.  For example, I would chose MOZC for Japanese.
+  - Relogin to the user account to refresh X session.
+
+* fcitx (GTK+2, GTK+3, Qt4) -- mostly for Chinese
+  [TODO -- Add tutorial] This is new and very active tool chain.
+
+* uim (GTK+2, GTK+3, Qt4) -- mostly for Japanese
+  - Install all useful uim packages (use "l" under aptitude to find them.)
+    uim, uim-anthy (Japanese), uim-gtk2.0, uim-gtk3, uim-qt, uim-xim
+  - "System" -> "Preferences" -> "Input Method" and select
+    "universal input method (uim)"
+    This will enable first found status display dialogue from the following.
+      - "uim-toolbar-gtk-systray"     for systray (GTK+).
+      - "uim-toolbar-gtk"             for toolbar (GTK+).
+      - "uim-toolbar-qt"              for toolbar (Qt).
+  - Relogin to user account to refresh X session.
+
+  FYI: (With the method written in uim package, you can use toolbar under 
+        non-gnome environment)
+
+* SCIM -- deprecated for wheezy, use ibus instead.
+  - Install all useful scim packages (use "l" under aptitude to find them.)
+    scim, scim-anthy (Japanese), ...
+  - "System" -> "Preferences" -> "Input Method" and select 
+    "Smart Common Input Method (SCIM)"
+  - Relogin to user account to refresh X session.
+
+* Force to disable Input Method.
+  - select "none" from menu in the im-config command.
+
+* REMOVE im-config configuration
+  - select "REMOVE" from menu in the im-config command.
+
+=======================================================================
+!	New input method support
+=======================================================================
+
+If you are interested to add a new input method support, please send me a
+start up code as *.rc and its matching *.conf for /usr/share/im-config/data by
+reporting to the BTS of the im-config package using reportbug(1).
+
+*.conf files contain the definition of following variables and functions:
+Variables:
+  IM_CONFIG_SHORT Short description of the im-config configuration.
+  IM_CONFIG_LONG Long description of the im-config configuration.
+Functions:
+  package_menu  return true if enough packages exist for menu listing   00-89
+  package_auto  return true if enough packages exist for auto selection 10-79
+
+Please note these are different from im-switch configuration files.
+
+ -- Osamu Aoki <osamu@debian.org>,  Wed, 30 Nov 2011 13:20:48 +0000

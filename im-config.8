@@ -1,0 +1,188 @@
+.TH IM\-CONFIG 8 
+.\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
+.\" other parms are allowed: see man(7), man(1)
+.SH NAME
+im\-config \- set up input method configuration for X Window System
+.SH SYNOPSIS
+.TP
+.B im\-config [OPTION]
+
+.SH OPTIONS
+.TP 8
+.B \-a
+List all; force to list all possible input methods in menu or STDOUT 
+even if any associated packages are not installed on the system.
+.TP 8
+.B \-c
+Use console dialogue.
+.TP 8
+.B \-x
+Use X dialogue with zenity.
+.TP 8
+.B \-s
+No action; perform a simulation of events that would occur but do
+not actually change configuration files.
+.TP 8
+.B \-l
+List all available input method configuration settings to STDOUT.
+Unless
+.B \-a
+is used, list only ones with associated packages installed.
+.TP 8
+.B \-m
+List active configuration (system), active configuration (user) and
+automatic configuration values to STDOUT.  If \fBcustom\fP means the user made
+a custom configuration and im-config should not change it.
+.TP 8
+.B \-n
+.I <input method name>
+
+Set input method to \fI<input method name>\fP. This option is for other
+configuration tool to set the input method.  Since the default value of
+\fI<input method name>\fP is "auto", you usually do not need to use this from
+other configuration script.
+
+Specifying invalid \fI<input method name>\fP causes the error exit. Updating
+the configuration file which was not updated by \fBim-config\fP also causes the
+error exit.
+
+When this \fI<input method name>\fP is "REMOVE" then it always removes the
+configuration file even if it was not updated by \fBim-config\fP.
+.TP 8
+.B \-o
+.I <input method name>
+
+Print the localized description of the input method \fI<input method name>\fP to
+STDOUT.
+.PP
+The \fB-l\fP, \fB-m\fP, \fB-n\fP, and \fB-o\fP options are meant to be API for other 
+programs to control the im-config.
+
+.SH "DESCRIPTION"
+This manual page very briefly documents \fBim\-config\fP and the configuration
+of the input method.  
+.PP
+\fBim\-config\fP provides the framework to configure the input method on X
+Window System with GTK GUI or console terminal dialogue. If this is invoked
+without option, this lists available input methods as its choice while marking
+automatic choice with trailing @-mark. The listing is ordered by the priority
+of the input method.  The input method with the highest priority comes first.
+The availability of the input method is judged by the installation of any
+associated packages. After you make a choice for the input method, this
+displays a guidance for associated packages to be installed.
+.PP
+If only a set of required input method packages along with the im\-config
+package is installed, you do not need to use this command.  Such a installation
+works well in its default and there is no need to use this command.  When you
+wish to have multiple input method environments installed and wish to switch
+among them, you need to use this command.
+.PP
+If you have no idea for what package to install, \fBim\-config\fP invoked with
+both \fB\-a\fP and \fB\-s\fP is a good start.
+.PP
+This input method is the essential mechanism for Japanese, Chinese and Korean
+(CJK) languages to enter their non-ASCII native characters.  This is also
+useful to support specialized keyboard bindings for other non-European
+languages such as Indic and other Asian languages.
+.PP
+Some input methods such as IBus, fcitx, and uim support not only one of these
+CJK languages but support almost all languages simultaneously by dynamically
+switching keyboard modes with GUI on the fly.
+.PP
+The im\-config package installs a hook script
+\fB/etc/X11/Xsession.d/70im-config_launch\fP. When X starts, it sources this
+file as a POSIX shell code.  Then this hook script tries to source the user
+configuration file \fB~/.xinputrc\fP, if it exists.  Otherwise, this hook
+script sources the system configuration file \fB/etc/X11/xinit/xinputrc\fP.
+.PP
+\fBim\-config\fP invoked from a user account updates the user configuration
+file \fB~/.xinputrc\fP.  \fBim\-config\fP invoked from the root account updates
+the system configuration file \fB~/etc/X11/xinit/xinputrc\fP.  The essential
+contents of generated files are:
+.PP
+.B run_im \fI<input method name>\fP
+.PP
+When these files are sourced, the \fBrun_im\fP shell function instructs to
+source the initialization code for the corresponding input method. This
+initialization code is defined in the \fI<2 digits number>\fP_\fI<input method
+name>\fP.\fBrc\fP file in \fB/usr/share/im-config/data\fP.
+.PP
+The im\-config hook script, \fB/etc/X11/Xsession.d/70im-config_launch\fP,
+exports following variables to X programs: $XMODIFIERS, $GTK_IM_MODULE,
+$QT_IM_MODULE, $QT4_IM_MODULE, and $CLUTTER_IM_MODULE.
+.PP
+The im\-config hook script, \fB/etc/X11/Xsession.d/70im-config_launch\fP,
+also set $STARTUP to use \fB/usr/bin/im-launch\fP for starting required
+daemons.
+.PP
+If you wish to create a custom configuration beyond what \fBim\-config\fP
+can do for you, please copy one of these initialization code files into
+\fB~/.xinputrc\fP or \fB/etc/X11/xinit/xinputrc\fP and edit it to suite your
+need.  For example, \fB02_cjkv.rc\fP tells how input method can be customized
+for each locale.  This script should be written to set environment variables if
+"$IM_CONFIG_PHASE" = 1 and to start daemon programs if "$IM_CONFIG_PHASE" = 2 .
+.PP
+Please note that this \fI<2 digits number>\fP part of these
+configuration files may change for every new releases of the im\-config
+package.
+.PP
+When a user makes manual changes to \fB~/.xinputrc\fP or
+\fB/etc/X11/xinit/xinputrc\fP without using \fBim\-config\fP, \fBim\-config\fP
+will detect it using a md5sum hush value embedded in the shell comment and will
+not overwrite such files.  You must erase them manually if you wish to replace
+them with ones created by \fBim\-config\fP.
+.PP
+The \fI<2 digits number>\fP_\fI<input method name>\fP.\fBconf\fP files in
+\fB/usr/share/im-config/data\fP provide the UI data for \fBim\-config\fP
+and the heuristic logic of selecting desirable input method under the
+auto mode.  The smaller number of the \fI<2 digits number>\fP indicates the
+higher priority of \fI<input method name>\fP.
+.PP
+These \fI<2 digits number>\fP_\fI<input method name>\fP.\fBconf\fP files
+defines few variables and functions.  The value of \fBIM_CONFIG_SHORT\fP is the
+short description of the input method for the menu.  The value of
+\fBIM_CONFIG_LONG\fP is the long description of the input method explaining its
+package dependency.  The \fBpackage_menu\fP shell function defines as a
+function to return true if any associated input method packages are installed
+to activate its menu entry.  The \fBpackage_auto\fP shell function defines as a
+function to return true if the sufficient input method packages are installed
+for the auto mode.  These definitions use the \fBpackage_status\fP shell
+function which takes package name as its argument and returns true if it is
+installed properly.
+.PP
+The menu lists input methods with the \fI<2 digits number>\fP between \fB00\fP
+and \fB89\fP.  The auto mode considers its input method candidate from \fI<2
+digits number>\fP between \fB10\fP and \fB79\fP in this order.  The usage
+convention of \fI<2 digits number>\fP is:
+.TP 8
+.B 00-09:
+Input Method choice mode       (default/auto/cjkv/REMOVE)
+.TP 8
+.B 10-49:
+Input Method supporting multiple languages.(auto ready)
+.TP 8
+.B 50-79:
+Input Method supporting limited languages. (auto ready)
+.TP 8
+.B 80-89:
+Input Method (deprecated one) (not for auto)
+.TP 8
+.B 90-99:
+Used internally by \fBim\-config\fP (not for auto)
+.PP
+This structure ensures to have different input methods to be installed
+side-by-side with minimal user configurations.
+
+.SH "TROUBLESHOOT"
+If you have any problem, see the first part of \fB~/.xsession-errors\fP and
+look for the cause.  If you are running \fBim\-config\fP while Debian (sid)
+system is undergoing a major library transition, you may need to manually set
+up \fB~/.xinputrc\fP with adjusted library version number etc.  Please file a
+bug report to the im\-config package using reportbug(1) describing your
+resolution experience.
+
+.SH "SEE ALSO"
+.BR /usr/share/doc/im\-config/README.Debian.gz
+.SH AUTHOR
+This manual page was written by Osamu Aoki <osamu@debian.org>,
+for the Debian GNU/Linux system (but may be used by others).
