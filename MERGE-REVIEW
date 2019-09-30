@@ -1,0 +1,19 @@
+
+This documents the expections that the project has on what both submitters
+and reviewers should ensure that they've done for a merge into the project.
+
+== Submitter Responsibilities ==
+
+ * Ensure the project compiles and the test suite executes without error
+ * Ensure that non-obvious code has comments explaining it
+ * If the change works on specific profiles, please include those in the merge description.
+
+== Reviewer Responsibilities ==
+
+ * Did the Jenkins build compile?  Pass?  Run unit tests successfully?
+ * Are there appropriate tests to cover any new functionality?
+ * If the description says this effects the phone profile:
+   * Run tests indicator-datetime/unity8*
+ * If the description says this effects the desktop profile:
+   * Run tests indicator-datetime/unity7*
+

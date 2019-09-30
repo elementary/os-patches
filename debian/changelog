@@ -1,0 +1,1302 @@
+indicator-datetime (13.10.0+14.04.20140415.3-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * If there's a large batch of EDS events coming in, try to wait until
+    the event storm has passed before running our requery. (LP:
+    #1306112)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 15 Apr 2014 22:25:42 +0000
+
+indicator-datetime (13.10.0+14.04.20140408-0ubuntu1) trusty; urgency=low
+
+  [ Iain Lane ]
+  * split_settings_location: Initialise the 'first' pointer, otherwise
+    it points to random memory which leads to undefined behaviour. Fixes
+    FTBFS in testsuite on arm64.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 08 Apr 2014 13:12:09 +0000
+
+indicator-datetime (13.10.0+14.04.20140328-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * Short-term workaround for the GIO GAppInfo wakeup bug discussed in
+    bug 1296233 (LP: #1296233)
+  * Improved translator comments for better time/date localization. (LP:
+    #1001595)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 28 Mar 2014 16:11:23 +0000
+
+indicator-datetime (13.10.0+14.04.20140324.1-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * When clicking onto a different calendar date on the Desktop, show
+    the events for that calendar day starting at the beginning of the
+    day, rather than the current time of day. (LP: #1293646)
+  * Point to the right object path for the phone greeter. (LP: #1294832)
+  * Remove unused dependencies from packaging. (LP: #1120358)
+  * Change the desktop menu's settings menuitem's label to match the
+    spec. (LP: #1296585)
+
+  [ Ted Gould ]
+  * Synchronize process management across indicators
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 24 Mar 2014 16:18:24 +0000
+
+indicator-datetime (13.10.0+14.04.20140321-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * If we notify_notification_show() fails, we shouldn't play the alarm
+    sound. The alarm sound loops until the user dismisses it, which will
+    never happen if we can't talk to unity-notiifications. So the
+    outcome in this error case is that the alarm plays forever and can't
+    be dismissed by the user. (LP: #1295237)
+  * Add debug logging of what capabilities the notification server said
+    it supports. (LP: #1295271)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 21 Mar 2014 05:23:04 +0000
+
+indicator-datetime (13.10.0+14.04.20140314.1-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * When the user clicks on a date in the calendar, update the "Upcoming
+    Events" section to show events starting at that date. (LP: #1290169)
+  * Don't use EDS if we're in the greeter. (LP: #1256130)
+  * Don't show the "Add Event..." button if the calendar app can't be
+    found. (LP: #1250632)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 14 Mar 2014 17:37:32 +0000
+
+indicator-datetime (13.10.0+14.04.20140311.1-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * add desktop_lockscreen profile
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 11 Mar 2014 18:16:48 +0000
+
+indicator-datetime (13.10.0+14.04.20140227.1-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * When the notification engine is notify-osd, use bubble notifications
+    instead of the phone's snap decisions. (LP: #1283142)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 27 Feb 2014 18:44:10 +0000
+
+indicator-datetime (13.10.0+14.04.20140227-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * Don't log E_CLIENT_ERROR_NOT_SUPPORTED errors returned by
+    e_cal_client_get_attachment_uris() -- we can silently interpret that
+    as 'no attachments' (LP: #1285212)
+  * DateTime::format(), don't pass NULL to a std::string's assignment
+    operator (LP: #1285243)
+  * In EdsPlanner's get_appointments(), sort 'em before returning them
+    to the caller. (LP: #1285249)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 27 Feb 2014 10:59:26 +0000
+
+indicator-datetime (13.10.0+14.04.20140225-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * Test the EClient's color hint string for NULL before passing it to a
+    std::string constructor. (LP: #1283834)
+  * Test the EDS component summary for NULL before using it in a
+    std::string. (LP: #1280341)
+  * In the alarms menu, don't let iterations of recurring events drown
+    out everything else.
+  * Fix g_assert_if_reached() in EdsPlanner::on_source_enabled(). (LP:
+    #1283610)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 25 Feb 2014 16:58:43 +0000
+
+indicator-datetime (13.10.0+14.04.20140219.1-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * support for ubuntu-clock-app's alarms (LP: #1233176)
+
+  [ Ted Gould ]
+  * Adding acceptance tests and merge review policies
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 19 Feb 2014 18:02:43 +0000
+
+indicator-datetime (13.10.0+14.04.20140217-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * Move date/time panel into unity-control-center
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 17 Feb 2014 12:53:26 +0000
+
+indicator-datetime (13.10.0+14.04.20140205-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * Don't load the alarm icon until it's needed s.t. we don't hit click
+    unnecessarily when starting up in the greeter.
+
+  [ Sebastien Bacher ]
+  * use the correct naming under unity-control-center
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Feb 2014 18:22:52 +0000
+
+indicator-datetime (13.10.0+14.04.20140131-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * Finally land this. Other, still open bugs will be fixed in
+    subsequent commits. (LP: #793450)
+
+  [ Sebastien Bacher ]
+  * Use the correct location for datetime-dialog.ui. (LP: #1274046)
+
+  [ Lars Uebernickel ]
+  * Set calendar to the current date when the menu is popped up This
+    makes use of the "submenu-action" attribute to get notified when the
+    menu is popped up. Charles, if your big refactoring-branch should
+    land before this, do you mind adapting this patch for that? Thanks .
+    (LP: #793450)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 31 Jan 2014 11:46:16 +0000
+
+indicator-datetime (13.10.0+14.04.20140124-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * Support both gnome-control-center and unity-control-center. (LP:
+    #1257505)
+  * Run the unity-control-center panel under Unity. Rename the unity
+    panel to just "datetime".
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 294
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 24 Jan 2014 11:00:08 +0000
+
+indicator-datetime (13.10.0+14.04.20131217-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * Make the phone profile's header format sensitive to whether the
+    phone is running in a 12h or 24h locale, and use a 12h or 24h
+    notation accordingly. (LP: #1256061)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 291
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 17 Dec 2013 09:49:56 +0000
+
+indicator-datetime (13.10.0+14.04.20131125-0ubuntu1) trusty; urgency=low
+
+  [ Charles Kerr ]
+  * Switch the build system to cmake. (LP: #1237509)
+  * As per the spec, let users show the year in indicator-datetime. (LP:
+    #465689)
+  * Don't generate g_critical() messages in the log when the timezone
+    object is clearing its value. . (LP: #1246532)
+  * When in the desktop-greeter mode, don't allow clicking on calendar
+    dates to launch evolution. (LP: #1246812)
+  * Use g_icon_serialize() output when setting menuitems' "icon"
+    property.
+  * In src/clock-live.c, pass the right pointer to
+    on_detect_location_changed(). (LP: #1251460)
+
+  [ Ted Gould ]
+  * Adding a phone_greeter profile.
+  * Upstart Job. (LP: #1185565)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 289
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 25 Nov 2013 03:55:52 +0000
+
+indicator-datetime (13.10.0+13.10.20131023.2-0ubuntu2) trusty; urgency=low
+
+  * No-change rebuild for new e-d-s
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Wed, 13 Nov 2013 13:12:53 +0000
+
+indicator-datetime (13.10.0+13.10.20131023.2-0ubuntu1) saucy-proposed; urgency=low
+
+  [ Marcus Tomlinson ]
+  * Fixed datetime title text to read "Date and Time" rather than the
+    day of the week (as per spec). (LP: #1236400)
+
+  [ Lars Uebernickel ]
+  * Work around glib's type initialization deadlock.
+    https://bugzilla.gnome.org/show_bug.cgi?id=674885. (LP: #1239710)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 279
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Mon, 28 Oct 2013 14:59:27 -0400
+
+indicator-datetime (13.10.0+13.10.20131016.2-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Remove the g_error() call that caused an abort() in the call to
+    on_name_lost() in our bus handler. (LP: #1238737)
+
+  [ Didier Roche ]
+  * remove invalid click recommends and downgrade to Suggests
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 274
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 16 Oct 2013 15:30:10 +0000
+
+indicator-datetime (13.10.0+13.10.20131016-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Use the Unity Mobile icon name for the alarm clock icon.
+  * cache our internal GTimeZone instead of constantly re-creating it.
+    (LP: #1238043)
+  * Changes the phone profile's "Clock" menuitem in two ways: 1. instead
+    of using a stock icon, try to use the clock app's icon. 2. when
+    clicked, launch the clock app. (LP: #1227106)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 271
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 16 Oct 2013 02:35:10 +0000
+
+indicator-datetime (13.10.0+13.10.20131011-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * start tracking failure-to-connect-to-bus errors on indicator-
+    datetime. (LP: #1227519)
+  * When an unsupported date format is being used, improve the error
+    message to also include the unsupported date format so that users
+    can include it in their bug reports. (LP: #1196059)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 267
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 11 Oct 2013 04:27:40 +0000
+
+indicator-datetime (13.10.0+13.10.20131004-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Change the tablet time format string to remove leading zeroes from
+    the hour component of the time format (ie, H:MM rather than HH:MM).
+    (LP: #1234483)
+  * on the phone, show appointments at 1AM as '1 AM', clock times as
+    '1:00 AM'. (LP: #1220297)
+  * Update settings URL to settings:///system. (LP: #1231444)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 264
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 04 Oct 2013 02:29:26 +0000
+
+indicator-datetime (13.10.0+13.10.20130930-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Use url-dispatcher instead of invoking system-settings directly.
+    (LP: #1230819)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 260
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 30 Sep 2013 06:32:59 +0000
+
+indicator-datetime (13.10.0+13.10.20130924.2-0ubuntu1) saucy; urgency=low
+
+  [ Timo Jyrinki ]
+  * Add X-Ubuntu-Gettext-Domain in .desktop file to use translations
+    (LP: #1223498). (LP: #1223498)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 258
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 24 Sep 2013 08:58:52 +0000
+
+indicator-datetime (13.10.0+13.10.20130913-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Make the EDS planner nonblocking. (LP: #1204532)
+  * Minor changes that eliminate unnecessary temporary strings.
+  * This change adds a GSettings* arg to the utils functions so that
+    they don't have to churn through temporary GSettings objects. These
+    functions are usually called in a loop, causing a lot of GSettings
+    temporaries, even though the calling code already has an instance
+    for that GSettings schema.
+  * name says it all; this branch is for improving indicator-datetime
+    test coverage.
+  * Remove code duplication between timezone-file and timezone-geoclue.
+  * Adds a title in the header's action state. (LP: #1223635)
+
+  [ Ted Gould ]
+  * Fix GeoClue signal handler to have proper prototype. (LP: #1195874)
+  * Protect against invalid begin or end dates. (LP: #1216263)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 256
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 13 Sep 2013 15:16:38 +0000
+
+indicator-datetime (13.10.0+13.10.20130903-0ubuntu1) saucy; urgency=low
+
+  [ Jeremy Bicha ]
+  * Really don't install *.la file.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 247
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 03 Sep 2013 02:08:17 +0000
+
+indicator-datetime (13.10.0+13.10.20130828.2-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Updating version to make the Conflicts/Replace nicer
+  * Split out gnome-control-center panel into it's own package
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 245
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 28 Aug 2013 10:09:19 +0000
+
+indicator-datetime (12.10.3+13.10.20130822.1-0ubuntu1) saucy; urgency=low
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Iain Lane ]
+  * Use month '1' when constructing the 'begin' range to decide which
+    appointments to display. glib started validating the arguments to
+    g_date_time_new and it turns out that '0' isn't a valid day of the
+    month.
+  * Don't use deprecated g_simple_action_group_insert; use
+    g_action_map_add_action instead.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 243
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 22 Aug 2013 21:46:45 +0000
+
+indicator-datetime (12.10.3+13.10.20130731-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * add a phone menu as described at
+    https://wiki.ubuntu.com/TimeAndDate#Indicator.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 240
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 31 Jul 2013 02:02:57 +0000
+
+indicator-datetime (12.10.3+13.10.20130725-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Add a phone entry in the datetime .indicator file.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 238
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 25 Jul 2013 02:03:25 +0000
+
+indicator-datetime (12.10.3+13.10.20130716-0ubuntu1) saucy; urgency=low
+
+  [ Jeremy Bicha ]
+  * Have 'Help' point to the Time & Date section of help.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 236
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 16 Jul 2013 02:02:52 +0000
+
+indicator-datetime (12.10.3+13.10.20130708-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Make the desktop greeter's menu name 'desktop_greeter'.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 234
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 08 Jul 2013 02:02:31 +0000
+
+indicator-datetime (12.10.3+13.10.20130703.1-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * make the greeter menu key consistent with indicator-session.
+
+  [ Lars Uebernickel ]
+  * Set the desired position in the panel. (LP: #1196650)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 232
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 03 Jul 2013 14:17:15 +0000
+
+indicator-datetime (12.10.3+13.10.20130702-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * at seb's request, use … directly in strings instead of the C octal
+    escaped UTF-8.
+  * remove --enable-localinstall from this indicator, too.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 229
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 02 Jul 2013 02:02:48 +0000
+
+indicator-datetime (12.10.3+13.10.20130628-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * This push extracts geoclue to its own self-contained module, fixes
+    an errant g_critical, and merges ryan's timedate1 changes from the
+    13.04 branch.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 226
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 28 Jun 2013 02:03:02 +0000
+
+indicator-datetime (12.10.3daily13.06.19-0ubuntu1) saucy; urgency=low
+
+  [ Iain Lane ]
+  * Link test program in the right order. Importantly, make sure
+    XORG_GTEST_LIBS comes after it as it uses pthread.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 224
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 19 Jun 2013 02:01:53 +0000
+
+indicator-datetime (12.10.3daily13.06.07-0ubuntu2) saucy; urgency=low
+
+  * Build against libical 1.0
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Thu, 13 Jun 2013 13:23:54 +0100
+
+indicator-datetime (12.10.3daily13.06.07-0ubuntu1) saucy; urgency=low
+
+  [ Jeremy Bicha ]
+  * Rename .desktop file for compatibility with gnome-control-center 3.8 
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 220
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Jun 2013 02:02:41 +0000
+
+indicator-datetime (12.10.3daily13.05.06.1-0ubuntu2) saucy; urgency=low
+
+  * debian/control, configure.ac: Remove obsolete dependency on
+    libedataserverui-3.0-dev
+
+ -- Iain Lane <iain.lane@canonical.com>  Fri, 31 May 2013 10:31:55 +0100
+
+indicator-datetime (12.10.3daily13.05.06.1-0ubuntu1) saucy; urgency=low
+
+  [ Sebastien Bacher ]
+  * [FFE] Use systemd-services rather than ubuntu-system-service
+    systemdcompatibility code (LP: #1153567)
+
+  [ Iain Lane ]
+  * Stop using ConsoleKit (LP: #1156613)
+
+  [ Mathieu Trudel-Lapierre ]
+  * [FFE] Use systemd-services rather than ubuntu-system-service
+    systemdcompatibility code (LP: #1153567)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 216
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 06 May 2013 19:23:23 +0000
+
+indicator-datetime (12.10.3daily13.05.02-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * g_critical hit when datetime indicator first shown (LP: #1175392)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 213
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 02 May 2013 22:59:08 +0000
+
+indicator-datetime (12.10.3daily13.03.26-0ubuntu1) raring; urgency=low
+
+  * Use systemd's service backend, ffe lp: #1153567
+  * debian/control: depends on systemd-services and systemd-shim
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 26 Mar 2013 19:53:55 +0100
+
+indicator-datetime (12.10.3daily13.03.07-0ubuntu1) raring; urgency=low
+
+  [ Michael Terry ]
+  * Manually editing date field results in bogus date (LP: #1149696)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 210
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Thu, 07 Mar 2013 02:01:22 +0000
+
+indicator-datetime (12.10.3daily13.03.06-0ubuntu1) raring; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Jenkins build failure on gtest "undefined reference to symbol
+    'pthread_key_delete@@GLIBC_2.2.5'" (LP: #1126362)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 208
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Wed, 06 Mar 2013 02:01:48 +0000
+
+indicator-datetime (12.10.3daily13.02.06-0ubuntu1) raring; urgency=low
+
+  [ Colin Watson ]
+  * build_timezone leaks timezonefile reference (LP: #1111628)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 206
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Wed, 06 Feb 2013 02:01:12 +0000
+
+indicator-datetime (12.10.3daily13.02.01-0ubuntu1) raring; urgency=low
+
+  [ Colin Watson ]
+  * Misuses g_object_connect (LP: #1110362)
+  * Lots of criticals from dbusmenu_menuitem_property_set_variant (LP:
+    #1110398)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 204
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Fri, 01 Feb 2013 02:01:14 +0000
+
+indicator-datetime (12.10.3daily13.01.25-0ubuntu1) raring; urgency=low
+
+  * Automatic snapshot from revision 201
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Fri, 25 Jan 2013 02:01:10 +0000
+
+indicator-datetime (12.10.3daily12.11.23-0ubuntu1) raring; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Automatic snapshot from revision 197 (bootstrap):
+    - Add scaffolding for Google Tests. (LP: #985060)
+    - Add "check-news" to our AM_INIT_AUTOMAKE() call. (LP: #1075753)
+    - Don't use geoclue until the user clicks the "Show time in auto-detected
+      location" checkbox. (LP: #1074999)
+    - Remove stray semicolon found by Coverity. (LP: #1064546)
+  * debian/control:
+    - Update to follow style like other indicator packages: use trailing commas
+      at the end of lists.
+    - Reorganize Build-Depends for clarity.
+    - Drop Build-Depends on cdbs, bump debhelper to (>= 9). 
+    - Update Vcs-Bzr and Vcs-Browser, add a notice for uploaders.
+    - Add gnome-common to Build-Depends.
+    - Add libxorg-gtest-dev, libgtest-dev to Build-Depends.
+  * debian/compat: bump compat level to 9.
+  * debian/rules:
+    - Switch to using the dh sequencer instead of cdbs rules, adjust targets
+      accordingly.
+    - Override dh_autoreconf to make it use autogen.sh from upstream.
+
+  [ Didier Roche ]
+  * debian/copyright:
+    - Update the copyright
+
+  [ Mathieu Trudel-Lapierre ]
+  * Don't use geoclue if "show-auto-detected-location" is set to false
+    (LP: #1074999)
+  * Add check-news to indicators' AM_INIT_AUTOMAKE rules (LP: #1075753)
+  * Add Google Test to projects lacking test suites (LP: #985060)
+  * Stray semicolon in datetime-prefs (LP: #1064546)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 199
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Fri, 23 Nov 2012 07:39:58 +0000
+
+indicator-datetime (12.10.2-0ubuntu4) raring; urgency=low
+
+  * Backported r192 and r193, fix:
+    - "shows all-day events one day too early" (lp: #1000182)
+    - "Bogus insensitive events after clicking on different date"
+       (lp: #1069177)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 05 Nov 2012 17:23:13 +0100
+
+indicator-datetime (12.10.2-0ubuntu3) quantal; urgency=low
+
+  * Backport "fix off-by-one error" leading to have the settings item run
+    the calendar application rather than the control center (lp: #1064375)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 09 Oct 2012 19:35:18 +0200
+
+indicator-datetime (12.10.2-0ubuntu2) quantal; urgency=low
+
+  * Backport fix from Lars for a missing NULL check leading to segfault
+    (lp: #1061867)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 05 Oct 2012 17:24:16 +0200
+
+indicator-datetime (12.10.2-0ubuntu1) quantal; urgency=low
+
+  * New upstream release:
+    - Fix 12.10.0 appointment calendar regression. (LP: #1060263)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 04 Oct 2012 17:53:56 +0200
+
+indicator-datetime (12.10.1-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+    - Gracefully handle clock skew (LP: #917236)
+    - Raise the version number of our EDS dependency (LP: #1024437)
+    - Fix X-Ubuntu-Gettext-Domain entries in the .desktop file (LP: #1048834)
+    - Remove unnecessary watching for geoclue address provider changes
+  * build-dep on newer e-d-s stack
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 20 Sep 2012 18:51:34 +0200
+
+indicator-datetime (12.10.0-0ubuntu2) quantal; urgency=low
+
+  * data/indicator-datetime-preferences.desktop.in
+    - Removed stray lines from the desktop file, it's causing duplicate 
+      X-Ubuntu-Gettext-Domain to get added. (LP: #1048834)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 11 Sep 2012 15:38:10 -0400
+
+indicator-datetime (12.10.0-0ubuntu1) quantal; urgency=low
+
+  * New upstream release:
+    - Support EDS 3.6's API
+    - Apply an 'en space' between the date and time strings. (LP #749847)
+    - Sort locations as spec'ed by https://wiki.ubuntu.com/TimeAndDate 
+    - Fix a bug that caused location settings to be re-saved each 2 seconds
+  * debian/control, debian/indicator-datetime.install, debian/rules:
+    - drop GTK2 build it's deprecated
+  * debian/patches/port-eds-3.5.patch: included in the new version
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 13 Jul 2012 17:56:46 +0200
+
+indicator-datetime (0.3.94-0ubuntu4) quantal-proposed; urgency=low
+
+  * debian/patches/port-eds-3.5.patch: update to build with the new EDS
+    3.5 APIs.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Thu, 05 Jul 2012 17:11:31 -0400
+
+indicator-datetime (0.3.94-0ubuntu3) quantal; urgency=low
+
+  * Rebuild against evolution-data-server 3.4
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 25 May 2012 20:21:44 -0400
+
+indicator-datetime (0.3.94-0ubuntu2) precise; urgency=low
+
+  * src/datetime-prefs-locations.c, src/datetime-prefs.c
+    - Switch the parsing of the lat and long to be non-locale based as it's 
+      returned from the webservice in C, we want to parse it using the decimal 
+      instead of a comma.  This fixes incorrect timezone selection for users 
+      with a locale that uses a comma as a decimal separator  (LP: #773987)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 18 Apr 2012 23:20:30 -0400
+
+indicator-datetime (0.3.94-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    * Fix location timezone sorting issue.
+    * Clicking the systems settings window shouldn't close the
+      Locations dialog. (LP: #947315)
+    * Add gcov targets to autotools build for code-coverage reporting.
+
+ -- Charles Kerr <charles.kerr@canonical.com>  Wed, 04 Apr 2012 16:53:20 -0500
+
+indicator-datetime (0.3.93-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    * Fix g-c-c crash caused by datetime's prefs panel (LP: #942450)
+    * Fix several memory leaks in datetime's preferences page (LP: #965533)
+
+ -- Charles Kerr <charles.kerr@canonical.com>  Wed, 28 Mar 2012 16:10:35 -0700
+
+indicator-datetime (0.3.92-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    * Fix several memory leaks (LP: #772340, LP: #957320)
+
+ -- Charles Kerr <charles.kerr@canonical.com>  Wed, 21 Mar 2012 11:22:20 -0500
+
+indicator-datetime (0.3.91-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    * Make GSettings readonly to fix DConf service starting on boot 
+    * Explicitly give types to GVariant Builder
+    * Confirm scanf usage for Coverity (LP: #943747)
+    * Remove unused code (LP: #943746)
+    * Fix timezone ordering in the menu (LP: #833325, LP: #833337)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 08 Mar 2012 16:58:28 -0600
+
+indicator-datetime (0.3.90-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    * Still need to distribute these files even if we're not building it
+    * Adding some extra ignore stuff in
+    * Adding in code coverage calculation
+    * Allow ccpanel to be optional
+    * Move to use libtimezone map
+    * Add a name hint on the indicator
+    * Build fixes for updated dependencies
+    * Fixing Geoclue support
+  * debian/control:
+    * Bumping libdbusmenu requirement to 0.5.90
+    * Added dependency on libtimezonemap
+  * debian/patches: Removed, all upstream.
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 17 Feb 2012 16:24:51 -0600
+
+indicator-datetime (0.3.1-0ubuntu5) precise; urgency=low
+
+  * no change rebuild for libindicator7
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 25 Jan 2012 09:54:53 -0500
+
+indicator-datetime (0.3.1-0ubuntu4) precise; urgency=low
+
+  [ Andreas Moog ]
+  * Migrate from libpolkit-gtk-1-dev to libpolkit-gobject-1-dev.
+
+  [ Martin Pitt ]
+  * Add disable_Werror.patch: Disable -Werror, causes build failures due to
+    deprecated symbols.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 23 Jan 2012 13:09:08 +0100
+
+indicator-datetime (0.3.1-0ubuntu3) precise; urgency=low
+
+  * Rebuild for the new e-d-s libraries.
+  * debian/patches/gtk_box_api.patch: port gtk_hbox_new() to gtk_box_new() if
+    building for GTK3, no change if building against GTK2.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Fri, 13 Jan 2012 00:03:40 +0100
+
+indicator-datetime (0.3.1-0ubuntu2) precise; urgency=low
+
+  * debian/patches/lp_802384.patch
+    - Fixed a NULL check which prevented querying geoclue (LP: #802384)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 28 Oct 2011 11:20:55 -0400
+
+indicator-datetime (0.3.1-0ubuntu1) oneiric-proposed; urgency=low
+
+  * New upstream release.
+    * Drop an unused icon (LP: #746176)
+    * Fix showing a timezone that we're currently set to (LP: #833337)
+    * Remove check for libunique as it's unused
+  * debian/control: Drop libunique requirements, it was unused
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 13 Oct 2011 13:40:21 -0500
+
+indicator-datetime (0.3.0-0ubuntu3) oneiric; urgency=low
+
+  * Reupload to oneiric final, the fix is safe and important enough.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 06 Oct 2011 06:50:30 +0200
+
+indicator-datetime (0.3.0-0ubuntu2) oneiric-proposed; urgency=low
+
+  * debian/patches/lp_844741.patch
+    - gnome-control-center crashed with SIGABRT in raise() (LP: #844741)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 05 Oct 2011 11:59:21 -0400
+
+indicator-datetime (0.3.0-0ubuntu1) oneiric; urgency=low
+
+  [ Ken VanDine ]
+  * debian/control
+    - Added recommends for e-d-s
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Fix corrupt environment when LANGUAGE not set (LP: #861123)
+    * Measure string size with GLib (LP: #730476)
+    * Free ECals when they have errors (LP: #774071)
+    * Fix untranslated string (LP: #853130)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 29 Sep 2011 15:39:41 -0500
+
+indicator-datetime (0.2.95-0ubuntu1) oneiric; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Set default timezone on events without (LP: #837359)
+    * Update docs to specify correct custom formats (LP: #775113)
+    * Remove add event when using greeter (LP: #836521)
+    * Fix gettext domain for builder files (LP: #845473)
+    * Update date correctly when opening menu (LP: #793450)
+
+  [ Didier Roche ]
+  * debian/control:
+    - bump the libglib build-dep
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 15 Sep 2011 10:45:57 -0500
+
+indicator-datetime (0.2.93-0ubuntu2) oneiric; urgency=low
+
+  * debian/rules
+    - dh_translations doesn't handle multibuilds, so manually add the domain
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 26 Aug 2011 10:35:45 -0400
+
+indicator-datetime (0.2.93-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    ∘ Use cleaner GDateTime API
+    ∘ Use locale preferred date format (LP: #729056)
+    ∘ Use real ellipsis (LP: #621339)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 18 Aug 2011 15:36:21 -0500
+
+indicator-datetime (0.2.92-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    * Adding in a new greeter mode
+    * Fixing autotools
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 11 Aug 2011 11:30:50 -0500
+
+indicator-datetime (0.2.91-0ubuntu3) oneiric; urgency=low
+
+  * debian/rules
+    - run intltool-update to update the translations template
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 12 Aug 2011 10:26:04 -0400
+
+indicator-datetime (0.2.91-0ubuntu2) oneiric; urgency=low
+
+  * No change rebuild for evolution-data-server 3.1.3.1
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 12 Jul 2011 13:45:24 -0400
+
+indicator-datetime (0.2.91-0ubuntu1) oneiric; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * libindicator 0.4 transition
+    * Making preferences a gnome-control-center plugin
+    * Calling gnome-control-center from the menu
+    * Fixing timezone setting with new gsd
+  * Dropped debian/patches/fix-timezones.patch: merged upstream
+
+  [ Ken VanDine ]
+  * debian/control
+    - Bumped build depends for libindicator to >= 0.3.90
+    - Added build depends on libgnome-control-center-dev
+    - Added depends for gnome-control-center
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 08 Jul 2011 09:38:50 -0400
+
+indicator-datetime (0.2.90-0ubuntu4) oneiric; urgency=low
+
+  * No change rebuild to fix badly packaged diff.gz from last time
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 28 Jun 2011 17:55:25 +0100
+
+indicator-datetime (0.2.90-0ubuntu3) oneiric; urgency=low
+
+  * debian/rules, debian/control:
+    - Arg, this wasn't source format 3.0, so add quilt so that the patch
+      applies.
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 28 Jun 2011 17:05:59 +0100
+
+indicator-datetime (0.2.90-0ubuntu2) oneiric; urgency=low
+
+  * debian/control:
+    - Drop -gtk2 recommends for the gtk3 indicator
+  * debian/rules:
+    - Use dh-autoreconf
+  * debian/patches/fix-timezones.patch:
+    - Add patch to handle g-s-d DBus API change for timezones and to
+      be more robust about querying what the current timezone is
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 28 Jun 2011 15:42:39 +0100
+
+indicator-datetime (0.2.90-0ubuntu1) oneiric; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    - Set minimum width for appointments to prevent continuous resizing 
+      when the calendar is hiden and ensure there is enough of the 
+      event description visible (LP: #762976)
+    - ellipsize long appointment descriptions (LP: #750671)
+    - GTK3 build
+  * Dropping debian/patches/lp_762976.patch and debian/patches/lp_750671.patch
+    as merged upstream.
+  * debian/control: Switching dep to libedataserverui-3.0-dev
+
+  [ Ken VanDine ]
+  * debian/control
+    - Bumped standards version to 3.9.2
+    - Add new binary for indicator-datetime-gtk2 
+    - Make indicator-datetime recommend indicator-datetime-gtk2 (until unity 
+      can load gtk3 indicators)
+    - indicator-datetime-gtk2 replaces indicator-datetime << 0.2.90
+    - Added build depends for libdbusmenu-gtk3-dev and libindicator3-dev
+  * debian/rules
+    - build for both gtk2 and gtk3
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 22 Jun 2011 11:46:55 -0400
+
+indicator-datetime (0.2.3-0ubuntu3) natty; urgency=low
+
+  * debian/patches/lp_762976.patch
+    - Set minimum width for appointments to prevent continuous resizing 
+      when the calendar is hiden and ensure there is enough of the 
+      event description visible (LP: #762976)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 18 Apr 2011 10:05:41 -0400
+
+indicator-datetime (0.2.3-0ubuntu2) natty; urgency=low
+
+  * debian/patches/lp_750671.patch
+    - ellipsize long appointment descriptions (LP: #750671)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 15 Apr 2011 10:00:41 -0400
+
+indicator-datetime (0.2.3-0ubuntu2~ppa1) natty; urgency=low
+
+  * Upstream Merge
+    * Ellipsize calendar entries that are too long (LP: #750671)
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 15 Apr 2011 09:32:43 -0500
+
+indicator-datetime (0.2.3-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    ∘ Use GTK directly for detecting when the menu appears and disappears
+      to reset the date (LP: #649800)
+    ∘ Handle items being removed from the locations list by choosing
+      another item in the list (LP: #740948)
+    ∘ Check for resume in the service and update the label as well
+      (LP: #759854)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 14 Apr 2011 14:51:20 -0500
+
+indicator-datetime (0.2.2-0ubuntu1) natty; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    ∘ Add language and proper distro version to geonames URL to allow
+      for proper server side fixes
+    ∘ Give full day events the day name instead of a time
+    ∘ Make sure the calendar follows the user setting (LP: #748772)
+    ∘ Ensure that events handle month boundaries correctly (LP: #746713)
+    ∘ Only show calendars the user has configured (LP: #729033)
+    ∘ Reenable clicking on the timezone in the menu to set it.
+
+  [ Ken VanDine ]
+  * debian/control
+    - Added build depends for libgconf2-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 07 Apr 2011 14:53:52 -0400
+
+indicator-datetime (0.2.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    * indicator-datetime-preferences crashed with SIGSEGV in
+      g_utf8_normalize() (LP: #727089)
+    * Uninstalling Evolution removes calendar from clock applet (LP: #691953)
+    * clock doesn't update on timezone change (LP: #735445)
+    * Cannot change main location (LP: #729029)
+    * indicator-datetime-preferences crashed with SIGSEGV in
+      g_simple_async_result_complete() (LP: #734951)
+    * Time zone map looks identical when sensitive vs. insensitive (LP: #740846)
+    * "Locations" window behaves like a modal dialog (LP: #740924)
+    * Added location for clock menu isn't used or remembered (LP: #740930)
+    * Time not displayed for added location in "Locations" window (LP: #740931)
+    * "UTC" location can be removed but not re-added (LP: #740938)
+    * "Locations" window bottom bar is missing a border (LP: #740941)
+    * Add and Remove buttons in "Locations" window have unnecessary tooltips
+      (LP: #740944)
+    * No separator between "Add Event" and locations (LP: #740971)
+    * indicator-datetime-preferences crashed with SIGSEGV in
+      g_atomic_int_exchange_and_add() (LP: #740978)
+    * inicator-datetime dosen't show corretly the time when changing from 24
+      hours format to 12 hours (LP: #743394)
+    * Add tooltips on the error icons
+    * Fix marking to refresh as the calendar changes
+    * Recycle old entries to make the refresh cleaner
+    * Use day when timezone is set to 'locale'
+    * Reset time when coming back from suspend (LP: #726053)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 31 Mar 2011 14:32:40 -0500
+
+indicator-datetime (0.2.0-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    ∘ Remove unused liboobs
+    ∘ Add translator comments and make strings translatable (LP: #737326)
+    ∘ Remove password dialog for calendars not the keyring
+    ∘ Use default matching when geonames aren't available (LP: #740870)
+    ∘ UI Cleanups and naming fixes (LP: #740806, LP: #740819)
+    ∘ Free JSON parser data
+    ∘ Avoid duplicates in GeoNames data (LP: #740884)
+    ∘ Make location completion more robust
+  * debian/control: Dropping liboobs
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 23 Mar 2011 16:22:50 -0500
+
+indicator-datetime (0.1.98-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    ∘ Make appointments match calendar month
+    ∘ Fix time format of appointments
+    ∘ Get date change signals from calendar and adjust based on them.
+    ∘ Crash fixes (LP: #733833, LP: #729444)
+    ∘ Valgrind invalid read (LP: #729175)
+    ∘ Translation fixes to date label (LP: #729632)
+    * Fix handling of reoccruing events
+    * Handle settings in the indicator
+    * Allow for hiding the calendar and the clock
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 16 Mar 2011 16:17:38 -0500
+
+indicator-datetime (0.1.97-0ubuntu1~ppa1) natty; urgency=low
+
+  * New upstream release.
+    * Fix handling of reoccruing events
+    * Handle settings in the indicator
+    * Allow for hiding the calendar and the clock
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 10 Mar 2011 23:14:41 -0600
+
+indicator-datetime (0.1.96-0ubuntu1) natty; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Preference UI cleanups
+    * Fix color rendering for appointments
+    * Fix spin buttons to behave properly
+
+  [ Ken VanDine ]
+  * Better handling of recurring events (LP: #726603)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 03 Mar 2011 16:38:01 -0500
+
+indicator-datetime (0.1.95-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - New preference dialog
+    - Improved EDS support
+    - Improved timezone support
+  * debian/control:
+    - Update Build-Depends
+
+ -- Michael Terry <mterry@ubuntu.com>  Mon, 28 Feb 2011 08:09:29 -0500
+
+indicator-datetime (0.1.94-0ubuntu1) natty; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    ∘ Timezone support
+    ∘ Multiple calendar support
+    ∘ Accessible description
+
+  [ Ken VanDine ]
+  * debian/control
+    - Added build depends for libedataserverui1.2-dev 
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 17 Feb 2011 14:48:41 -0500
+
+indicator-datetime (0.1.93-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    * Merging in first EDS branch
+  * debian/rules: Adding in autoreconf 
+
+  [ Ken VanDine ]
+  * debian/control
+    - New build deps for eds integration, libecal1.2-dev, libical-dev, 
+      libgtk2.0-dev, libcairo2-dev, libedataserver1.2-dev
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 09 Feb 2011 13:25:57 -0600
+
+indicator-datetime (0.1.92-0ubuntu4) natty; urgency=low
+
+  * debian/source/format
+    - Source format v1 instead of v3
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 08 Feb 2011 13:59:35 -0500
+
+indicator-datetime (0.1.92-0ubuntu3) natty; urgency=low
+
+  * debian/control
+    - Bump standards version to 3.9.1
+    - Set Vcs-Bzr
+  * +debian/source/format
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 08 Feb 2011 11:14:02 -0500
+
+indicator-datetime (0.1.92-0ubuntu2) natty; urgency=low
+
+  * debian/control
+    - Depend on geoclue-ubuntu-geoip | geoclue-provider (LP: #714763)
+  * src/datetime-service.c
+    - Don't crash if we can get a geoclue provider (LP: #714763)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 08 Feb 2011 11:02:31 -0500
+
+indicator-datetime (0.1.92-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    * Increase robustness of GeoClue error handling
+    * Remove g_error()'s from the .so
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 03 Feb 2011 15:10:43 -0600
+
+indicator-datetime (0.1.91-0ubuntu1~ppa1) natty; urgency=low
+
+  * New upstream release.
+    * Change to canonical.com for naming
+    * Fixing a type callback
+    * Switching to GDbus and dbusmenu-0.4
+    * Supporting a wider range of custom strings for time and support
+      seconds in the custom time strings.
+    * Fixing to take time settings from LC_TIME
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 27 Jan 2011 16:48:48 -0600
+
+indicator-datetime (0.1.90.is.0.0.6-0ubuntu2) natty; urgency=low
+
+  * Merged gdbus and dbusmenu-glib-0.4 port
+  * debian/control
+    - Added build depends for dh-autoreconf
+    - bumped dbusmenu build depends to >= 0.3.91
+  * debian/rules
+    - Added autoreconf.mk
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 13 Jan 2011 20:48:31 -0600
+
+indicator-datetime (0.1.90.is.0.0.6-0ubuntu1) natty; urgency=low
+
+  * Uploading 0.0.6 again to superceed 0.1.90 which is still blocked on
+    MIR
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 13 Dec 2010 11:30:25 -0500
+
+indicator-datetime (0.1.90-0ubuntu2) natty; urgency=low
+
+  * debian/control
+    - Bump build depends for libdbusmenu-* to >= 0.3.90
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 09 Dec 2010 11:46:00 -0500
+
+indicator-datetime (0.1.90-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    * Generate the format string at init
+    * Add in Geoclue support for setting proper timezone
+    * Add support for building GTK2 and GTK3 versions
+  * debian/control: Add recommends for geoclue-ubuntu-geoip
+  * debian/control: Adding dependencies on Geoclue and OOBS
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 03 Dec 2010 13:46:32 -0600
+
+indicator-datetime (0.0.6-0ubuntu3) maverick; urgency=low
+
+  * Cherry-picked from upstream:
+    - Fix date string format (12/24h) not taken from translation (LP: #579134)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 30 Sep 2010 16:09:41 +0200
+
+indicator-datetime (0.0.6-0ubuntu2) maverick; urgency=low
+
+  * Rebuild for libindicator ABI change (LP: #637692)
+  * debian/control: depends on latest libindicator-dev
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 22 Sep 2010 18:21:26 +0200
+
+indicator-datetime (0.0.6-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    * Refresh times on timezone change
+    * Update the date daily (lp: #614529)
+    * Fixing distcheck
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 09 Sep 2010 13:10:10 -0500
+
+indicator-datetime (0.0.5-0ubuntu2) maverick; urgency=low
+
+  * debian/rules: use gnome.mk so a translation template is built (lp: #612540)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 03 Aug 2010 12:41:08 +0200
+
+indicator-datetime (0.0.5-0ubuntu1) maverick; urgency=low
+
+  * New version update
+
+  [ Ted Gould ]
+  * Upstream Merge
+    * Making time format configurable via translations and
+      gsettings.
+  * debian/control: Adding in a glib dependency to get gsettings
+  * Autogen update
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 22 Jul 2010 21:41:12 +0200
+
+indicator-datetime (0.0.4-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    * Change menus to come from the service
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 15 Jul 2010 10:33:14 -0500
+
+indicator-datetime (0.0.3-0ubuntu1) maverick; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Copyright fixes
+    * Adding translations
+    * Fix translation domain
+
+  [ Didier Roche ]
+  * debian/control:
+    - bump Standards-Version to latest
+    - fix homepage url
+    - remove uneeded pkg-config build-dep
+    - Recommends: indicator-applet | indicator-renderer
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 07 Jun 2010 10:24:51 +0200
+
+indicator-datetime (0.0.2-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 03 Jun 2010 17:44:45 +0200
+
+indicator-datetime (0.0.2-0ubuntu1~ppa1) lucid; urgency=low
+
+  * New upstream release.
+    * Making label guess and reasonable width starting out.
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 04 Mar 2010 12:04:55 -0600
+
+indicator-datetime (0.0.1-0ubuntu1) lucid; urgency=low
+
+  * New upstream release.
+  * debian/control:
+    - add libdbusmenu-gtk-dev build-dep (/!\ not in configure.ac)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Fri, 26 Feb 2010 10:41:22 +0100
+
+indicator-datetime (0.0.1~r2-0ubuntu3) lucid; urgency=low
+
+  * debian/control: Adding libdbusmenu-gtk as a build dep
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 18 Feb 2010 10:47:29 -0600
+
+indicator-datetime (0.0.1~r2-0ubuntu2) lucid; urgency=low
+
+  * debian/control:
+    - fix build-dep
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 11 Feb 2010 20:27:22 +0100
+
+indicator-datetime (0.0.1~r2-0ubuntu1) lucid; urgency=low
+
+  * new upstream version
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 10 Feb 2010 12:10:48 +0100
+
+indicator-datetime (0.0.1~r1-0ubuntu1) lucid; urgency=low
+
+  * Initial packaging
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 27 Jan 2010 12:13:00 +0100

@@ -1,0 +1,46 @@
+Source: indicator-datetime
+Section: misc
+Priority: optional
+Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
+# language-pack-en-base is for the unit tests s.t. we can test in 12h and 24h locales
+Build-Depends: cmake,
+               dbus,
+               dbus-test-runner,
+               python3-dbusmock,
+               debhelper (>= 9), 
+               dh-translations,
+               language-pack-en-base,
+               libgtest-dev,
+               libglib2.0-dev (>= 2.35.4),
+               libnotify-dev (>= 0.7.6),
+               libcanberra-dev,
+               libecal1.2-dev (>= 3.5),
+               libical-dev (>= 1.0),
+               libedataserver1.2-dev (>= 3.5),
+               liburl-dispatcher1-dev,
+               libproperties-cpp-dev,
+               libdbustest1-dev,
+               locales,
+Standards-Version: 3.9.3
+Homepage: https://launchpad.net/indicator-datetime
+# If you aren't a member of ~indicator-applet-developers but need to upload
+# packaging changes, just go ahead.  ~indicator-applet-developers will notice
+# and sync up the code again.
+Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/indicator-datetime/trunk.13.04
+Vcs-Browser: https://bazaar.launchpad.net/~indicator-applet-developers/indicator-datetime/trunk.13.04/files
+
+Package: indicator-datetime
+Architecture: any
+Depends: ${shlibs:Depends}, 
+         ${misc:Depends},
+         systemd-services,
+         systemd-shim,
+Recommends: indicator-applet | indicator-renderer,
+            evolution-data-server,
+            geoclue-ubuntu-geoip | geoclue-provider,
+            unity-control-center (>= 14.04.3) | ubuntu-system-settings,
+Suggests: click,
+Conflicts: indicator-datetime (<< 13.10.0)
+Replaces: indicator-datetime (<< 13.10.0)
+Description: Simple clock
+ A simple clock appearing in the indicator bar

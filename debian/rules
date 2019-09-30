@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+LDFLAGS += -Wl,-z,defs -Wl,--as-needed
+
+%:
+	dh $@ --with translations
+
+override_dh_install:
+	dh_install --fail-missing
+
+
