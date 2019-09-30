@@ -1,0 +1,22 @@
+description "Indicator Application Service"
+
+start on indicator-services-start
+stop on desktop-end or indicator-services-end
+
+emits appindicators-start appindicators-end
+
+respawn
+respawn limit 2 10
+
+pre-start script
+	# NOTE: Limiting only to Unity 7 right now as it's still using
+	# dbusmenu.  That can be lifted after it is ported to GMenu
+
+	if [ "x$DESKTOP_SESSION" = "xubuntu-touch" ] ; then
+		stop; exit 0
+	fi
+end script
+
+exec @pkglibexecdir@/indicator-application-service
+
+pre-stop exec initctl emit appindicators-end
