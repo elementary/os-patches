@@ -1,0 +1,665 @@
+ido (13.10.0+14.04.20170403-0ubuntu1) trusty; urgency=medium
+
+  * IdoCalendarMenuItem: disconnect from parent signals on item
+    destruction (LP: #1506427)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Mon, 03 Apr 2017 16:09:37 +0000
+
+ido (13.10.0+14.04.20151021-0ubuntu1) trusty; urgency=medium
+
+  * IdoCalendarMenuItem: add crash guard on
+    ido_calendar_menu_item_key_press (LP: #1350821)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Wed, 21 Oct 2015 15:52:32 +0000
+
+ido (13.10.0+14.04.20140423-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Make long track infos better readable By (a) making the width of the
+    menu slightly larger and (b) reducing the font size. Also removes
+    the hard-coded width of 200px in favor of a width based on font size
+    (25 characters) and center the playback widget horizontally. (LP:
+    #1080076)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 23 Apr 2014 17:03:35 +0000
+
+ido (13.10.0+14.04.20140407-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * idobasicmenuitem: update icon when the theme changes
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 07 Apr 2014 12:30:17 +0000
+
+ido (13.10.0+14.04.20140328-0ubuntu1) trusty; urgency=low
+
+  [ Ubuntu daily release ]
+  * debian/*symbols: auto-update new symbols to released version
+
+  [ Lars Uebernickel ]
+  * Highlight back/forward buttons when hovering them with the pointer
+    Space bar still activates play/pause, unless the mouse pointer
+    hovers another button. (LP: #733285)
+  * expose idobasicmenuitem, a normal menu item that supports non-square
+    icons
+  * idoplaybackmenuitem: propagate events in the menu keyrelease handler
+    To issue a redraw on the menu items as well. Fixes lp:1297818. (LP:
+    #1297818)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 28 Mar 2014 11:27:53 +0000
+
+ido (13.10.0+14.04.20140324-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * idoplaybackmenuitem: set active flag when player is launching The
+    active flag is used to signal the theme that the spinner should
+    animate. Using that flag is a bit weird, but it's consistent with
+    GtkSpinner and thus doesn't require special handling in the theme.
+    (LP: #1231796)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 24 Mar 2014 17:45:12 +0000
+
+ido (13.10.0+14.04.20140321-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * idoapplicationmenuitem: request correct size for empty icons Empty
+    icons request more space than GTK_ICON_SIZE_MENU, which makes menu
+    items unnecessarily high.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 21 Mar 2014 06:56:56 +0000
+
+ido (13.10.0+14.04.20140313-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * idoscalemenuitem: use the scale's actual size allocation for events
+    (LP: #1069762)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 13 Mar 2014 10:15:45 +0000
+
+ido (13.10.0+14.04.20140213-0ubuntu1) trusty; urgency=low
+
+  [ Ted Gould ]
+  * No error for deprecations
+  * Allow gcov 1.10
+
+  [ Lars Uebernickel ]
+  * IdoScaleMenuItem: intercept left and right keys. (LP: #1242550)
+
+  [ Sebastien Bacher ]
+  * Update the Standards-Version
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 13 Feb 2014 15:54:16 +0000
+
+ido (13.10.0+14.04.20131127-0ubuntu2) trusty; urgency=medium
+
+  * Build with -Wno-error=deprecated-declarations.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 18 Dec 2013 23:59:33 +0100
+
+ido (13.10.0+14.04.20131127-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * idoactionhelper: remove potentially stray idle source when
+    finalizing.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 162
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 27 Nov 2013 11:37:40 +0000
+
+ido (13.10.0+14.04.20131126-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * ido_calendar_menu_item_new_from_model: initialize local variables
+    with NULL Both of these variables will be passed to g_free() without
+    checking whether g_menu_item_get_attribute() failed. (LP: #1255076)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 160
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 26 Nov 2013 19:28:37 +0000
+
+ido (13.10.0+14.04.20131106-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * ido_user_menu_item: remove superfluous unref The return value of
+    g_file_icon_get_file() is transfer-none. (LP: #1248446)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 158
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 06 Nov 2013 11:23:53 +0000
+
+ido (13.10.0+14.04.20131105.1-0ubuntu1) trusty; urgency=low
+
+  [ Ubuntu daily release ]
+  * debian/*symbols: auto-update new symbols to released version
+
+  [ Lars Uebernickel ]
+  * Make IdoSwitchMenuItem accessible from gtk_menu_new_from_model.
+  * IdoUserMenuItem: only allow file icons as avatars In practice, all
+    avatars are file icons. This restriction allowed for quite some
+    cleanup, as we don't need to worry about symbolic icons and themes
+    aymore. Note: this patch removes the warning when the user avatar
+    image was not found. This is a common enough case that the warning
+    just clutters up logs.
+  * idoscalemenuitem: disconnect signal from parent This fixes a crash:
+    the widget installed a handler for the parent's hide signal, but was
+    destroyed before the parent without disconnecting the signal. (LP:
+    #1246536)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 156
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 05 Nov 2013 11:01:56 +0000
+
+ido (13.10.0+13.10.20131011-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * idousermenuitem: center avatar and adjust spacing.
+  * idoscalemenuitem: request a minimum width of 200px.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 152
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 11 Oct 2013 04:28:12 +0000
+
+ido (13.10.0+13.10.20130930-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * idoscalemenuitem: don't update the action state when the action
+    state changes GtkRange has the same weird semantics for its "value-
+    changed" signal that the check menu items have: it is emitted not
+    only on user interaction, but also when gtk_range_set_value() is
+    called. The handler to "value-changed" updates the action.
+    gtk_range_set_value() is called when the action notifies about a
+    state change. Loop, meet loop. This patch works around that by
+    adding a "value-changed" to IdoScaleMenuItem that is only emitted
+    when the user changes the slider's value. . (LP: #1229076)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 149
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 30 Sep 2013 06:32:59 +0000
+
+ido (13.10.0+13.10.20130920-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Reverse slider movement when scrolling by default. (LP: #1225330)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 147
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 20 Sep 2013 10:20:27 +0000
+
+ido (13.10.0+13.10.20130814-0ubuntu1) saucy; urgency=low
+
+  [ Ubuntu daily release ]
+  * debian/*symbols: auto-update new symbols to released version
+
+  [ Ted Gould ]
+  * Add widgets for messaging menu.
+
+  [ Lars Uebernickel ]
+  * Add widgets for messaging menu.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 145
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 14 Aug 2013 02:58:11 +0000
+
+ido (13.10.0+13.10.20130731-0ubuntu1) saucy; urgency=low
+
+  [ Ubuntu daily release ]
+  * debian/*symbols: auto-update new symbols to released version
+
+  [ Charles Kerr ]
+  * Support x-canonical-type: "com.canonical.indicator.progress" and
+    "com.canonical.indicator.alarm".
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 143
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 31 Jul 2013 02:02:57 +0000
+
+ido (13.10.0+13.10.20130703.1-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * fix IdoLocationMenuItem label alignment issue reported by ted.
+
+  [ Ted Gould ]
+  * Fix broken comments for the introspection scanner.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 141
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 03 Jul 2013 14:16:50 +0000
+
+ido (13.10.0+13.10.20130702-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Test to see if a user's avatar is loadable before we use it. If it's
+    not, use the fallback avatar instead. This fixes the issue reported
+    by lars of having the "gtk-missing-image" used when his avatar file
+    wasn't readable.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 138
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 02 Jul 2013 02:02:50 +0000
+
+ido (13.10.0+13.10.20130628-0ubuntu1) saucy; urgency=low
+
+  [ Ubuntu daily release ]
+  * debian/*symbols: auto-update new symbols to released version
+
+  [ Charles Kerr ]
+  * Adds support for the guest menuitem. A guest menuitem is the same as
+    a user menuitem except for how it uses its action's state, so
+    instead of adding a new class, this patch adds a new factory method
+    (ido_guest_menu_item_new_from_model) and private action state
+    handler.
+  * one-liner fix to a copy-paste error in GuestMenuItem's handling of
+    online/active guests.
+
+  [ Lars Uebernickel ]
+  * Add IdoMediaPlayerMenuItem and IdoPlaybackMenuItem.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 136
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 28 Jun 2013 02:03:07 +0000
+
+ido (13.10.0daily13.06.19-0ubuntu1) saucy; urgency=low
+
+  [ Ubuntu daily release ]
+  * debian/*symbols: auto-update new symbols to released version
+
+  [ Charles Kerr ]
+  * adds the ido widgets needed for indicator-datetime.
+    http://bazaar.launchpad.net/~charlesk/indicator-
+    datetime/gmenuify/view/head:/README documents the actions &
+    menuitems.
+  * Better handling of IdoMenuItem construction from GMenuItems, better
+    public API documentation.
+
+  [ Jeremy Bicha ]
+  * Depend on valac instead of valac-0.16 for easier transitions Have
+    libido3-0.1-dev depend on gir1.2-ido3-0.1 Drop unnecessary gir
+    build-depends.
+
+  [ Lars Uebernickel ]
+  * Add support for creating scale menu items from a menu model.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 132
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 19 Jun 2013 02:02:27 +0000
+
+ido (13.10.0daily13.06.07-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * New upstream release
+
+  [ Ubuntu daily release ]
+  * debian/*symbols: auto-update new symbols to released version
+  * Automatic snapshot from revision 127
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Jun 2013 02:02:40 +0000
+
+ido (12.10.3daily13.03.01-0ubuntu1) raring; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Fix build against libgtest/libxorg-gtest failing due to paths to gtest
+    source being incorrect. (LP: #1112775)
+  * Jenkins build failure on libgtest_xorg "undefined reference to
+    symbol '_XDefaultError'" (LP: #1126353)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 125
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Fri, 01 Mar 2013 02:02:29 +0000
+
+ido (12.10.3daily13.01.11-0ubuntu1) raring; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/control:
+    - Update to match style with other indicator stack packages: use trailing
+      commas at the end of dependency lists.
+    - Add gnome-common to Build-Depends.
+    - Reorganize Build-Depends: move libxorg-gtest-dev up to be consistent with
+      other indicator stack packages.
+    - List libgtest-dev explicitly in Build-Depends.
+    - Add Vcs-Bzr, Vcs-Browser fields with a notice to uploaders.
+    - Add xvfb to Build-Depends.
+  * debian/rules:
+    - Add and export DPKG_GENSYMBOLS_CHECK_LEVEL instead of passing -c4 to
+      dh_makeshlibs.
+    - Override dh_autoreconf to call autogen.sh and not run configure...
+    - Drop the override for dh_makeshlibs.
+    - Override dh_auto_test to run them through xvfb-run.
+
+  [ Didier Roche ]
+  * Automatic snapshot from revision 118 (bootstrap)
+
+  [ Allan LeSage ]
+  * debian/rules:
+    - Remove xvfb auto_test override which caused Jenkins failures.
+  * debian/control:
+    - Remove xvfb from Build-Depends.
+
+  [ Robert Ancell ]
+  * Add GObject introspection support to IDO (LP: #582985)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 122
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Fri, 11 Jan 2013 02:02:27 +0000
+
+ido (12.10.2-0ubuntu1) quantal; urgency=low
+
+  * New upstream release
+    - fix escape key behavior in calendar menuitem (LP: #953757)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 20 Sep 2012 18:27:59 +0200
+
+ido (12.10.1-0ubuntu1) quantal; urgency=low
+
+  * New upstream release:
+    - fix inconsistent slider behavior (lp: #953757)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 28 Aug 2012 13:49:28 +0200
+
+ido (12.10.0-0ubuntu2) quantal; urgency=low
+
+  * debian/control:
+    - build-depends on libxorg-gtest-dev
+  * debian/rules:
+    - run the tests
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 22 Aug 2012 11:21:58 +0200
+
+ido (12.10.0-0ubuntu1) quantal; urgency=low
+
+  * New upstream release:
+   - new widget GtkSwitchMenuItem for indicator-sync
+  * Drop gtk2 build, the new version use widgets that are not available 
+    in the old gtk
+  * debian/rules: turn off "make check" run until the required components
+    get through mir promotion
+  * Updated packaging, use dh9 rather than cdbs, set up for multiarch
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 22 Aug 2012 11:06:25 +0200
+
+ido (0.3.4-0ubuntu2) quantal-proposed; urgency=low
+
+  * Use AC_CHECK_LIBM to get -lm now that gtk doesn't include it
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 24 Jul 2012 10:47:16 -0400
+
+ido (0.3.4-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 21 Mar 2012 16:14:13 -0400
+
+ido (0.3.3-0ubuntu2) precise; urgency=low
+
+  * src/idoscalemenuitem.c
+    - fix regression that broke mousewheel operations on the 
+      idoscale (LP: #954440)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 14 Mar 2012 16:31:04 -0400
+
+ido (0.3.3-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - add style class "menubar" to the offscreen proxy, this fixes the 
+      white background drawn in the sound menu menu with the current 
+      gtk3/light-themes (LP: #925700)
+    - fall back on gdk_screen_get_system_visual() if RGBA isn't 
+      available (LP: #867649)
+  * debian/libido3-0.1-0.symbols, debian/libido-0.1-0.symbols
+    - refreshed
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 13 Mar 2012 17:00:19 -0400
+
+ido (0.3.2-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 12 Mar 2012 19:29:38 +0100
+
+ido (0.3.1-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+  * configured.ac: drop Werror to workaround gtk3 deprecations warnings.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 13 Dec 2011 18:07:15 +0100
+
+ido (0.3.0-0ubuntu4) oneiric; urgency=low
+
+  * src/idoscalemenuitem.c
+    - Fixed FTBFS on armel (LP: #866039)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 05 Oct 2011 14:45:16 -0400
+
+ido (0.3.0-0ubuntu3) oneiric; urgency=low
+
+  * src/idorange.c, src/idorange.h, src/idoscalemenuitem.c
+    - Fixed FTBFS on armel (LP: #866039)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 05 Oct 2011 13:14:23 -0400
+
+ido (0.3.0-0ubuntu2) oneiric; urgency=low
+
+  * src/idorange.c
+    - cherry picked fix from Michal Hruby for a crasher in 
+      IdoRange (LP: #865122)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 03 Oct 2011 11:08:59 -0400
+
+ido (0.3.0-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 28 Sep 2011 15:21:37 -0400
+
+ido (0.2.93-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - Cannot click on Calendar to select day, month or year (LP: #807509)
+  * debian/rules
+    - removed deprecated/unused simple-patchsys.mk
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 19 Sep 2011 22:57:05 -0700
+
+ido (0.2.92-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release:
+    - Fix the slider soudmenu bug (LP: #804009)
+  * debian/libido3-0.1-0.symbols:
+    - updated with new symbols
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 14 Sep 2011 08:04:39 +0200
+
+ido (0.2.90-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - Added GTK3 support
+    - Clicking a date of previous or next month does not select the right 
+      date  (LP: #768956)
+  * -debian/patches/10-gtk3.patch merged upstream
+  * debian/control
+    - Bump standards version to 3.9.2
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 21 Jun 2011 16:06:48 -0400
+
+ido (0.2.2-0ubuntu2) oneiric; urgency=low
+
+  * debian/patches/10-gtk3.patch:
+    - Allow building against either GTK+ 2 or 3
+  * debian/rules, debian/control, debian/*.install, debian/*.symbols:
+    - Enable dual build and add new packages for the GTK+ 3 libraries
+  * COPYING.LGPL.2.1, autogen.sh, gtk-doc.make:
+    - Drop extra files that our packing was adding
+
+ -- Michael Terry <mterry@ubuntu.com>  Mon, 20 Jun 2011 09:44:30 -0400
+
+ido (0.2.2-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Add signals for when the date is clicked and double clicked
+    - Fixed API regression from last release
+  * debian/patches/10-backport-calendar-api.patch
+    - Dropped, merged upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 16 Mar 2011 14:34:43 -0400
+
+ido (0.2.1-0ubuntu2) natty; urgency=low
+
+  * debian/patches/10-backport-calendar-api.patch:
+    - Backport a new ido_calendar_menu_item_get_display_options() call
+      for use by indicator-datetime
+  * debian/libido-0.1-0.symbols:
+    - Add new function
+
+ -- Michael Terry <mterry@ubuntu.com>  Mon, 28 Feb 2011 08:03:23 -0500
+
+ido (0.2.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+  * -debian/patches/01_fix-add-needed-linking.patch
+    - Upstream
+  * debian/libido-0.1-0.symbols
+    - Added symbols
+  * src/idocalendarmenuitem.{c,h}
+    - Added back missing symbol to prevent ABI breakage, submitted back 
+      upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 24 Feb 2011 14:32:26 -0500
+
+ido (0.1.14-0ubuntu2) natty; urgency=low
+
+  * debian/patches/01_fix-add-needed-linking.patch:
+    Fix linking of the examples with "ld --add-needed" (lp: #698205)
+
+ -- Michael Bienia <geser@ubuntu.com>  Thu, 06 Jan 2011 18:39:43 +0100
+
+ido (0.1.14-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - Updates for the entry needed for indicator-me changes (LP: #552745)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 16 Sep 2010 11:27:10 -0400
+
+ido (0.1.13-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - Each key press selects the entry text (LP: #635370)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 14 Sep 2010 15:33:02 -0400
+
+ido (0.1.11-0ubuntu2) maverick; urgency=low
+
+  * Backport upstream commit to fix armel build
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 12 Aug 2010 17:37:56 +0200
+
+ido (0.1.11-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - bump build depends for libgtk2.0-dev to >= 2.21.5-1ubuntu3
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 29 Jul 2010 18:06:59 -0400
+
+ido (0.1.10-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - Added ido_timeline_set_progress API
+    - Added new calendar menu widget
+  * debian/libido-0.1-0.symbols
+    - Added new symbols
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 22 Jul 2010 18:08:13 +0200
+
+ido (0.1.9-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+  * debian/libido-0.1-0.symbols
+    - new version update
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 15 Jul 2010 11:03:44 -0400
+
+ido (0.1.8-0ubuntu1) maverick; urgency=low
+
+  * New upstream versions:
+    - Add IdoMessageDialog
+  * debian/libido-0.1-0.symbols:
+    - new version update
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 08 Jul 2010 22:59:45 +0200
+
+ido (0.1.6-0ubuntu1) lucid-proposed; urgency=low
+
+  * New upstream version fixing indicator-sound theming issues (lp: #532234)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 08 Jun 2010 19:39:32 +0200
+
+ido (0.1.5-0ubuntu1) lucid; urgency=low
+
+  * New upstream version:
+     - Navigation with keyboard stuck in the text field (indicator-me)
+       (lp: #537608)
+     - Pressing the Return key doesn't activate the menuitem
+     - After right clicking in text field, closing Me menu is difficult
+  * debian/control:
+    - update gtk requirement 
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 24 Mar 2010 12:32:12 +0100
+
+ido (0.1.4-0ubuntu1) lucid; urgency=low
+
+  * New upstream version:
+    - Don't forward the event to the entry if the user hit the Esc key.
+    - Fix for grab/release signals. If you grab the slider and then release it 
+      while the mouse is outside the menu, it was not emitting 
+      the released signal.
+    - Fix keyboard navigation issues in the entry widget, fixes bug #533284.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 11 Mar 2010 18:29:11 +0100
+
+ido (0.1.3-0ubuntu1) lucid; urgency=low
+
+  * New upstream version
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 04 Mar 2010 17:03:49 -0500
+
+ido (0.1.2-0ubuntu1) lucid; urgency=low
+
+  * New upstream version
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 18 Feb 2010 13:36:09 +0100
+
+ido (0.1.1-0ubuntu1) lucid; urgency=low
+
+  * New upstream release.
+  * debian/patches/arm_ftbfs.patch
+    - removed, merged upstream
+  * debian/libido-0.1-0.symbols
+    - added new symbols
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 11 Feb 2010 17:14:58 -0500
+
+ido (0.1.0-0ubuntu2) lucid; urgency=low
+
+  * debian/patches/arm_ftbfs.patch
+    - Fix FTBFS on arm
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 05 Feb 2010 14:35:55 -0800
+
+ido (0.1.0-0ubuntu1) lucid; urgency=low
+
+  * Initial release
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 04 Feb 2010 18:22:44 -0800
