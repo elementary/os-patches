@@ -1,0 +1,34 @@
+From 4b30b1a7b7eac0981b91fd76b21e8bd674b4d7fc Mon Sep 17 00:00:00 2001
+From: Raymund Will <rw@suse.com>
+Date: Fri, 10 Apr 2015 01:45:02 -0400
+Subject: [PATCH] Use device part of chainloader target, if present.
+
+Otherwise chainloading is restricted to '$root', which might not even
+be readable by EFI!
+
+v1. use grub_file_get_device_name() to get device name
+
+Signed-off-by: Michael Chang <mchang@suse.com>
+Signed-off-by: Peter Jones <pjones@redhat.com>
+---
+ grub-core/loader/efi/chainloader.c |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+Index: b/grub-core/loader/efi/chainloader.c
+===================================================================
+--- a/grub-core/loader/efi/chainloader.c
++++ b/grub-core/loader/efi/chainloader.c
+@@ -219,8 +219,11 @@ grub_cmd_chainloader (grub_command_t cmd
+   if (! file)
+     goto fail;
+ 
+-  /* Get the root device's device path.  */
+-  dev = grub_device_open (0);
++  /* Get the device path from filename. */
++  char *devname = grub_file_get_device_name (filename);
++  dev = grub_device_open (devname);
++  if (devname)
++    grub_free (devname);
+   if (! dev)
+     goto fail;
+ 

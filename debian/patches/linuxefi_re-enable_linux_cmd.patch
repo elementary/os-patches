@@ -1,0 +1,37 @@
+From: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
+Subject: Temporarily re-enable the generic linux loader
+
+We're currently relying on it and an automatic hand-off to linuxefi for EFI
+booting; so we need the linux command to start to be able to do the hand-off
+correctly.
+
+This is a temporary measure until we switch to calling linuxefi directly.
+
+---
+ grub-core/loader/i386/linux.c |    6 ------
+ 1 file changed, 6 deletions(-)
+
+Index: b/grub-core/loader/i386/linux.c
+===================================================================
+--- a/grub-core/loader/i386/linux.c
++++ b/grub-core/loader/i386/linux.c
+@@ -1138,9 +1138,6 @@ static grub_command_t cmd_linux, cmd_ini
+ 
+ GRUB_MOD_INIT(linux)
+ {
+-  if (grub_efi_secure_boot())
+-    return;
+-
+   cmd_linux = grub_register_command ("linux", grub_cmd_linux,
+ 				     0, N_("Load Linux."));
+   cmd_initrd = grub_register_command ("initrd", grub_cmd_initrd,
+@@ -1150,9 +1147,6 @@ GRUB_MOD_INIT(linux)
+ 
+ GRUB_MOD_FINI(linux)
+ {
+-  if (grub_efi_secure_boot())
+-    return;
+-
+   grub_unregister_command (cmd_linux);
+   grub_unregister_command (cmd_initrd);
+ }

@@ -1,0 +1,378 @@
+From a741a53e352513787aadb6c933bf1e3bc1dbe83c Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Fri, 10 Jun 2016 14:06:15 -0400
+Subject: [PATCH] Rework even more of efi chainload so non-sb cases work right.
+
+This ensures that if shim protocol is not loaded, or is loaded but shim
+is disabled, we will fall back to a correct load method for the efi
+chain loader.
+
+Here's what I tested with this version:
+
+results                             expected    actual
+------------------------------------------------------------
+sb + enabled + shim + fedora        success     success
+sb + enabled + shim + win           success     success
+sb + enabled + grub + fedora        fail        fail
+sb + enabled + grub + win           fail        fail
+
+sb + mokdisabled + shim + fedora    success     success
+sb + mokdisabled + shim + win       success     success
+sb + mokdisabled + grub + fedora    fail        fail
+sb + mokdisabled + grub + win       fail        fail
+
+sb disabled + shim + fedora         success     success*
+sb disabled + shim + win            success     success*
+sb disabled + grub + fedora         success     success
+sb disabled + grub + win            success     success
+
+nosb + shim + fedora                success     success*
+nosb + shim + win                   success     success*
+nosb + grub + fedora                success     success
+nosb + grub + win                   success     success
+
+* for some reason shim protocol is being installed in these cases, and I
+  can't see why, but I think it may be this firmware build returning an
+  erroneous value.  But this effectively falls back to the mokdisabled
+  behavior, which works correctly, and the presence of the "grub" (i.e.
+  no shim) tests effectively tests the desired behavior here.
+
+Resolves: rhbz#1344512
+
+Signed-off-by: Peter Jones <pjones@redhat.com>
+---
+ grub-core/kern/efi/sb.c            |   14 +++-
+ grub-core/loader/arm64/linux.c     |    4 -
+ grub-core/loader/efi/chainloader.c |  117 ++++++++++++++++++++++---------------
+ grub-core/loader/efi/linux.c       |   13 ++--
+ grub-core/loader/i386/efi/linux.c  |    7 +-
+ include/grub/efi/linux.h           |    2 
+ 6 files changed, 98 insertions(+), 59 deletions(-)
+
+Index: grub2-2.02~beta2/grub-core/kern/efi/sb.c
+===================================================================
+--- grub2-2.02~beta2.orig/grub-core/kern/efi/sb.c
++++ grub2-2.02~beta2/grub-core/kern/efi/sb.c
+@@ -36,14 +36,20 @@ grub_efi_secure_boot (void)
+   grub_efi_boolean_t ret = 0;
+ 
+   secure_boot = grub_efi_get_variable("SecureBoot", &efi_var_guid, &datasize);
+-
+   if (datasize != 1 || !secure_boot)
+-    goto out;
++    {
++      grub_dprintf ("secureboot", "No SecureBoot variable\n");
++      goto out;
++    }
++  grub_dprintf ("secureboot", "SecureBoot: %d\n", *secure_boot);
+ 
+   setup_mode = grub_efi_get_variable("SetupMode", &efi_var_guid, &datasize);
+-
+   if (datasize != 1 || !setup_mode)
+-    goto out;
++    {
++      grub_dprintf ("secureboot", "No SetupMode variable\n");
++      goto out;
++    }
++  grub_dprintf ("secureboot", "SetupMode: %d\n", *setup_mode);
+ 
+   if (*secure_boot && !*setup_mode)
+     ret = 1;
+Index: grub2-2.02~beta2/grub-core/loader/arm64/linux.c
+===================================================================
+--- grub2-2.02~beta2.orig/grub-core/loader/arm64/linux.c
++++ grub2-2.02~beta2/grub-core/loader/arm64/linux.c
+@@ -253,6 +253,7 @@ grub_cmd_linux (grub_command_t cmd __att
+   grub_file_t file = 0;
+   struct grub_arm64_linux_kernel_header lh;
+   struct grub_arm64_linux_pe_header *pe;
++  int rc;
+ 
+   grub_dl_ref (my_mod);
+ 
+@@ -297,7 +298,8 @@ grub_cmd_linux (grub_command_t cmd __att
+ 
+   grub_dprintf ("linux", "kernel @ %p\n", kernel_addr);
+ 
+-  if (!grub_linuxefi_secure_validate (kernel_addr, kernel_size))
++  rc = grub_linuxefi_secure_validate (kernel_addr, kernel_size);
++  if (rc < 0)
+     {
+       grub_error (GRUB_ERR_INVALID_COMMAND, N_("%s has invalid signature"), argv[0]);
+       goto fail;
+Index: grub2-2.02~beta2/grub-core/loader/efi/chainloader.c
+===================================================================
+--- grub2-2.02~beta2.orig/grub-core/loader/efi/chainloader.c
++++ grub2-2.02~beta2/grub-core/loader/efi/chainloader.c
+@@ -178,7 +178,6 @@ make_file_path (grub_efi_device_path_t *
+   /* Fill the file path for the directory.  */
+   d = (grub_efi_device_path_t *) ((char *) file_path
+ 				  + ((char *) d - (char *) dp));
+-  grub_efi_print_device_path (d);
+   copy_file_path ((grub_efi_file_path_device_path_t *) d,
+ 		  dir_start, dir_end - dir_start);
+ 
+@@ -248,10 +247,9 @@ read_header (void *data, grub_efi_uint32
+   grub_efi_status_t status;
+ 
+   shim_lock = grub_efi_locate_protocol (&guid, NULL);
+-
+   if (!shim_lock)
+     {
+-      grub_error (GRUB_ERR_BAD_ARGUMENT, "no shim lock protocol");
++      grub_dprintf ("chain", "no shim lock protocol");
+       return 0;
+     }
+ 
+@@ -276,7 +274,7 @@ read_header (void *data, grub_efi_uint32
+       break;
+     }
+ 
+-  return 0;
++  return -1;
+ }
+ 
+ static void*
+@@ -510,17 +508,24 @@ handle_image (void *data, grub_efi_uint3
+   grub_uint32_t section_alignment;
+   grub_uint32_t buffer_size;
+   int found_entry_point = 0;
++  int rc;
+ 
+   b = grub_efi_system_table->boot_services;
+ 
+-  if (read_header (data, datasize, &context))
++  rc = read_header (data, datasize, &context);
++  if (rc < 0)
+     {
+-      grub_dprintf ("chain", "Succeed to read header\n");
++      grub_dprintf ("chain", "Failed to read header\n");
++      goto error_exit;
++    }
++  else if (rc == 0)
++    {
++      grub_dprintf ("chain", "Secure Boot is not enabled\n");
++      return 0;
+     }
+   else
+     {
+-      grub_dprintf ("chain", "Failed to read header\n");
+-      goto error_exit;
++      grub_dprintf ("chain", "Header read without error\n");
+     }
+ 
+   /*
+@@ -793,9 +798,55 @@ grub_secureboot_chainloader_unload (void
+ }
+ 
+ static grub_err_t
++grub_load_and_start_image(void *boot_image)
++{
++  grub_efi_boot_services_t *b;
++  grub_efi_status_t status;
++  grub_efi_loaded_image_t *loaded_image;
++
++  b = grub_efi_system_table->boot_services;
++
++  status = efi_call_6 (b->load_image, 0, grub_efi_image_handle, file_path,
++		       boot_image, fsize, &image_handle);
++  if (status != GRUB_EFI_SUCCESS)
++    {
++      if (status == GRUB_EFI_OUT_OF_RESOURCES)
++	grub_error (GRUB_ERR_OUT_OF_MEMORY, "out of resources");
++      else
++	grub_error (GRUB_ERR_BAD_OS, "cannot load image");
++      return -1;
++    }
++
++  /* LoadImage does not set a device handler when the image is
++     loaded from memory, so it is necessary to set it explicitly here.
++     This is a mess.  */
++  loaded_image = grub_efi_get_loaded_image (image_handle);
++  if (! loaded_image)
++    {
++      grub_error (GRUB_ERR_BAD_OS, "no loaded image available");
++      return -1;
++    }
++  loaded_image->device_handle = dev_handle;
++
++  if (cmdline)
++    {
++      loaded_image->load_options = cmdline;
++      loaded_image->load_options_size = cmdline_len;
++    }
++
++  return 0;
++}
++
++static grub_err_t
+ grub_secureboot_chainloader_boot (void)
+ {
+-  handle_image ((void *)address, fsize);
++  int rc;
++  rc = handle_image ((void *)address, fsize);
++  if (rc == 0)
++    {
++      grub_load_and_start_image((void *)address);
++    }
++
+   grub_loader_unset ();
+   return grub_errno;
+ }
+@@ -809,9 +860,9 @@ grub_cmd_chainloader (grub_command_t cmd
+   grub_efi_boot_services_t *b;
+   grub_device_t dev = 0;
+   grub_efi_device_path_t *dp = 0;
+-  grub_efi_loaded_image_t *loaded_image;
+   char *filename;
+   void *boot_image = 0;
++  int rc;
+ 
+   if (argc == 0)
+     return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
+@@ -898,9 +949,6 @@ grub_cmd_chainloader (grub_command_t cmd
+   if (! file_path)
+     goto fail;
+ 
+-  grub_printf ("file path: ");
+-  grub_efi_print_device_path (file_path);
+-
+   fsize = grub_file_size (file);
+   if (!fsize)
+     {
+@@ -975,50 +1023,27 @@ grub_cmd_chainloader (grub_command_t cmd
+     }
+ #endif
+ 
+-  if (grub_linuxefi_secure_validate((void *)address, fsize))
++  rc = grub_linuxefi_secure_validate((void *)(grub_addr_t)address, fsize);
++  grub_dprintf ("chain", "linuxefi_secure_validate: %d\n", rc);
++  if (rc > 0)
+     {
+       grub_file_close (file);
+       grub_loader_set (grub_secureboot_chainloader_boot,
+ 		       grub_secureboot_chainloader_unload, 0);
+       return 0;
+     }
+-
+-  status = efi_call_6 (b->load_image, 0, grub_efi_image_handle, file_path,
+-		       boot_image, fsize, &image_handle);
+-  if (status != GRUB_EFI_SUCCESS)
++  else if (rc == 0)
+     {
+-      if (status == GRUB_EFI_OUT_OF_RESOURCES)
+-	grub_error (GRUB_ERR_OUT_OF_MEMORY, "out of resources");
+-      else
+-	grub_error (GRUB_ERR_BAD_OS, "cannot load image");
+-
+-      goto fail;
+-    }
+-
+-  /* LoadImage does not set a device handler when the image is
+-     loaded from memory, so it is necessary to set it explicitly here.
+-     This is a mess.  */
+-  loaded_image = grub_efi_get_loaded_image (image_handle);
+-  if (! loaded_image)
+-    {
+-      grub_error (GRUB_ERR_BAD_OS, "no loaded image available");
+-      goto fail;
++      grub_load_and_start_image(boot_image);
++      grub_file_close (file);
++      grub_loader_set (grub_chainloader_boot, grub_chainloader_unload, 0);
++      return 0;
+     }
+-  loaded_image->device_handle = dev_handle;
+ 
+   grub_file_close (file);
++  grub_device_close (dev);
+ 
+-  if (cmdline)
+-    {
+-      loaded_image->load_options = cmdline;
+-      loaded_image->load_options_size = cmdline_len;
+-    }
+-
+-  grub_loader_set (grub_chainloader_boot, grub_chainloader_unload, 0);
+-  return 0;
+-
+- fail:
+-
++fail:
+   if (dev)
+     grub_device_close (dev);
+ 
+Index: grub2-2.02~beta2/grub-core/loader/efi/linux.c
+===================================================================
+--- grub2-2.02~beta2.orig/grub-core/loader/efi/linux.c
++++ grub2-2.02~beta2/grub-core/loader/efi/linux.c
+@@ -33,21 +33,24 @@ struct grub_efi_shim_lock
+ };
+ typedef struct grub_efi_shim_lock grub_efi_shim_lock_t;
+ 
+-grub_efi_boolean_t
++int
+ grub_linuxefi_secure_validate (void *data, grub_uint32_t size)
+ {
+   grub_efi_guid_t guid = SHIM_LOCK_GUID;
+   grub_efi_shim_lock_t *shim_lock;
++  grub_efi_status_t status;
+ 
+   shim_lock = grub_efi_locate_protocol(&guid, NULL);
+-
++  grub_dprintf ("secureboot", "shim_lock: %p\n", shim_lock);
+   if (!shim_lock)
+-    return 1;
++    return 0;
+ 
+-  if (shim_lock->verify(data, size) == GRUB_EFI_SUCCESS)
++  status = shim_lock->verify(data, size);
++  grub_dprintf ("secureboot", "shim_lock->verify(): %ld\n", (unsigned long)status);
++  if (status == GRUB_EFI_SUCCESS)
+     return 1;
+ 
+-  return 0;
++  return -1;
+ }
+ 
+ typedef void (*handover_func) (void *, grub_efi_system_table_t *, void *);
+Index: grub2-2.02~beta2/grub-core/loader/i386/efi/linux.c
+===================================================================
+--- grub2-2.02~beta2.orig/grub-core/loader/i386/efi/linux.c
++++ grub2-2.02~beta2/grub-core/loader/i386/efi/linux.c
+@@ -155,6 +155,7 @@ grub_cmd_linux (grub_command_t cmd __att
+   struct linux_kernel_header lh;
+   grub_ssize_t len, start, filelen;
+   void *kernel = NULL;
++  int rc;
+ 
+   grub_dl_ref (my_mod);
+ 
+@@ -180,11 +181,13 @@ grub_cmd_linux (grub_command_t cmd __att
+ 
+   if (grub_file_read (file, kernel, filelen) != filelen)
+     {
+-      grub_error (GRUB_ERR_FILE_READ_ERROR, N_("Can't read kernel %s"), argv[0]);
++      grub_error (GRUB_ERR_FILE_READ_ERROR, N_("Can't read kernel %s"),
++		  argv[0]);
+       goto fail;
+     }
+ 
+-  if (! grub_linuxefi_secure_validate (kernel, filelen))
++  rc = grub_linuxefi_secure_validate (kernel, filelen);
++  if (rc < 0)
+     {
+       grub_error (GRUB_ERR_INVALID_COMMAND, N_("%s has invalid signature"), argv[0]);
+       goto fail;
+Index: grub2-2.02~beta2/include/grub/efi/linux.h
+===================================================================
+--- grub2-2.02~beta2.orig/include/grub/efi/linux.h
++++ grub2-2.02~beta2/include/grub/efi/linux.h
+@@ -22,7 +22,7 @@
+ #include <grub/err.h>
+ #include <grub/symbol.h>
+ 
+-grub_efi_boolean_t
++int
+ EXPORT_FUNC(grub_linuxefi_secure_validate) (void *data, grub_uint32_t size);
+ grub_err_t
+ EXPORT_FUNC(grub_efi_linux_boot) (void *kernel_address, grub_off_t offset,

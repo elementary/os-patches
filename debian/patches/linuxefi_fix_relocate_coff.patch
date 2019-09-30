@@ -1,0 +1,36 @@
+From bfe7c890db05f79d34752498991b5e40bc11e263 Mon Sep 17 00:00:00 2001
+From: Laszlo Ersek <lersek@redhat.com>
+Date: Mon, 21 Nov 2016 15:34:00 +0100
+Subject: efi/chainloader: fix wrong sanity check in relocate_coff()
+
+In relocate_coff(), the relocation entries are parsed from the original
+image (not the section-wise copied image). The original image is
+pointed-to by the "orig" pointer. The current check
+
+  (void *)reloc_end < data
+
+compares the addresses of independent memory allocations. "data" is a typo
+here, it should be "orig".
+
+Bugzilla: https://bugzilla.redhat.com/show_bug.cgi?id=1347291
+Signed-off-by: Laszlo Ersek <lersek@redhat.com>
+Tested-by: Bogdan Costescu <bcostescu@gmail.com>
+Tested-by: Juan Orti <j.orti.alcaine@gmail.com>
+Patch-Name: linuxefi_fix_relocate_coff.patch
+---
+ grub-core/loader/efi/chainloader.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: grub2-2.02~beta2/grub-core/loader/efi/chainloader.c
+===================================================================
+--- grub2-2.02~beta2.orig/grub-core/loader/efi/chainloader.c
++++ grub2-2.02~beta2/grub-core/loader/efi/chainloader.c
+@@ -397,7 +397,7 @@ relocate_coff (pe_coff_loader_image_cont
+       reloc_end = (struct grub_pe32_fixup_block *)
+ 	((char *)reloc_base + reloc_base->size);
+ 
+-      if ((void *)reloc_end < data || (void *)reloc_end > image_end)
++      if ((void *)reloc_end < orig || (void *)reloc_end > image_end)
+         {
+           grub_error (GRUB_ERR_BAD_ARGUMENT, "Reloc entry %d overflows binary",
+ 		      n);
