@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+export DPKG_GENSYMBOLS_CHECK_LEVEL=4
+
+%:
+	dh $@ --with translations,autoreconf
+
+override_dh_autoreconf:
+	NOCONFIGURE=1 dh_autoreconf ./autogen.sh
+
+override_dh_install:
+	find debian/indicator-bluetooth/usr/lib -name *.la -delete
+	find debian/indicator-bluetooth/usr/lib -name *.a -delete
+	dh_install --fail-missing

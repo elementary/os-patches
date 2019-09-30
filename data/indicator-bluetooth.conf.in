@@ -1,0 +1,11 @@
+description "Indicator Bluetooth Backend"
+
+# Want to move to indicator-services-[start|end], but that's not all
+# there yet. Use the signals that exist today for now.
+
+start on indicators-loaded or indicator-services-start
+stop on desktop-end or indicator-services-end
+
+respawn
+
+exec @pkglibexecdir@/indicator-bluetooth-service
