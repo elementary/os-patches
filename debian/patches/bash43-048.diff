@@ -1,0 +1,34 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.3
+Patch-ID:	bash43-048
+
+Bug-Reported-by:	up201407890@alunos.dcc.fc.up.pt
+Bug-Reference-ID:	<20151210201649.126444eionzfsam8@webmail.alunos.dcc.fc.up.pt>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2015-12/msg00054.html
+
+Bug-Description:
+
+If a malicious user can inject a value of $SHELLOPTS containing `xtrace'
+and a value for $PS4 that includes a command substitution into a shell
+running as root, bash will expand the command substitution as part of
+expanding $PS4 when it executes a traced command.
+
+Index: bash-4.3/variables.c
+===================================================================
+--- bash-4.3.orig/variables.c	2017-05-16 07:42:30.000000000 -0400
++++ bash-4.3/variables.c	2017-05-16 07:43:09.292966687 -0400
+@@ -495,7 +495,11 @@ initialize_shell_variables (env, privmod
+ #endif
+       set_if_not ("PS2", secondary_prompt);
+     }
+-  set_if_not ("PS4", "+ ");
++
++  if (current_user.euid == 0)
++    bind_variable ("PS4", "+ ", 0);
++  else
++    set_if_not ("PS4", "+ ");
+ 
+   /* Don't allow IFS to be imported from the environment. */
+   temp_var = bind_variable ("IFS", " \t\n", 0);

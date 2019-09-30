@@ -1,0 +1,15 @@
+# DP: Define PGRP_PIPE to avoid race condition.
+
+Index: b/input.c
+===================================================================
+--- a/input.c
++++ b/input.c
+@@ -509,7 +509,7 @@
+       if (nr == 0)
+ 	bp->b_flag |= B_EOF;
+       else
+-	bp->b_flag |= B_ERROR;
++	fatal_error("error reading input file: %s", strerror(errno));
+       return (EOF);
+     }
+ 

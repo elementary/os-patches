@@ -1,0 +1,40 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.4
+Patch-ID:	bash44-006
+
+Bug-Reported-by:	<fernando@null-life.com>
+Bug-Reference-ID:	<CAEr-gPFPvqheiAeENmMkEwWRd4U=1iqCsYmR3sLdULOqL++_tQ@mail.gmail.com>
+Bug-Reference-URL:	
+
+Bug-Description:
+
+Out-of-range negative offsets to popd can cause the shell to crash attempting
+to free an invalid memory block.
+
+Index: bash-4.3/builtins/pushd.def
+===================================================================
+--- bash-4.3.orig/builtins/pushd.def	2013-09-16 15:32:31.000000000 -0400
++++ bash-4.3/builtins/pushd.def	2017-05-16 07:43:22.397124914 -0400
+@@ -359,7 +359,7 @@ popd_builtin (list)
+ 	break;
+     }
+ 
+-  if (which > directory_list_offset || (directory_list_offset == 0 && which == 0))
++  if (which > directory_list_offset || (which < -directory_list_offset) || (directory_list_offset == 0 && which == 0))
+     {
+       pushd_error (directory_list_offset, which_word ? which_word : "");
+       return (EXECUTION_FAILURE);
+@@ -381,6 +381,11 @@ popd_builtin (list)
+ 	 remove that directory from the list and shift the remainder
+ 	 of the list into place. */
+       i = (direction == '+') ? directory_list_offset - which : which;
++      if (i < 0 || i > directory_list_offset)
++	{
++	  pushd_error (directory_list_offset, which_word ? which_word : "");
++	  return (EXECUTION_FAILURE);
++	}
+       free (pushd_directory_list[i]);
+       directory_list_offset--;
+ 
