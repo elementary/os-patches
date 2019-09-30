@@ -1,0 +1,18 @@
+Description: Update the the apport.utils api change
+Author: Sebastien Bacher <seb128@ubuntu.com>
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/dkms/+bug/1499842
+Index: dkms-2.2.0.3/dkms_apport.py
+===================================================================
+--- dkms-2.2.0.3.orig/dkms_apport.py	2015-09-30 07:33:50.889516751 -0400
++++ dkms-2.2.0.3/dkms_apport.py	2015-09-30 10:34:52.791255837 -0400
+@@ -94,5 +94,8 @@
+ 
+ if options.kernel:
+     report['DKMSKernelVersion'] = options.kernel
+-with open(apport.fileutils.make_report_path(report), 'wb') as f:
+-    report.write(f)
++try:
++    with apport.fileutils.make_report_file(report) as f:
++        report.write(f)
++except (IOError, OSError) as e:
++    apport.fatal('Cannot create report: ' + str(e))

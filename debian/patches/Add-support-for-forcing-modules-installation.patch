@@ -1,0 +1,75 @@
+From d878f6c8e5976091da4975600825f484c813fa54 Mon Sep 17 00:00:00 2001
+From: Alberto Milone <alberto.milone@canonical.com>
+Date: Fri, 23 Mar 2012 15:45:03 +0100
+Subject: [PATCH 1/1] Add support for forcing modules installation with
+ configuration files
+
+This allows dkms to force the installation of modules whose names
+are listed in the text files in the following directory:
+  /usr/share/dkms/modules_to_force_install
+
+Signed-off-by: Alberto Milone <alberto.milone@canonical.com>
+---
+ dkms |   32 ++++++++++++++++++++++++++++++++
+ 1 files changed, 32 insertions(+), 0 deletions(-)
+
+diff --git a/dkms b/dkms
+index 042acc0..b26af41 100644
+--- a/dkms
++++ b/dkms
+@@ -1270,6 +1270,28 @@ build_module()
+     echo $"DKMS: build completed."
+ }
+ 
++# Force the installation of a module if this is listed
++# in the files in $forced_modules_dir, if any
++force_installation()
++{
++    forced_modules_dir="/usr/share/dkms/modules_to_force_install"
++    to_force=""
++    if [ -d $forced_modules_dir ]; then
++        for elem in $forced_modules_dir/*; do
++            if [ -e $elem ]; then
++                to_force="$to_force $(cat $elem)"
++            fi
++        done
++
++        for elem in $to_force; do
++            if [ "${1}" = "${elem}" ]; then
++                return 0
++            fi
++        done
++    fi
++    return 1
++}
++
+ # Install a previously built module
+ # There are huge swaths of code here that special-case for various distros.
+ # They should be split into their own functions.
+@@ -1280,6 +1302,13 @@ install_module()
+     local base_dir="$dkms_tree/$module/$module_version/$kernelver/$arch"
+     check_module_args install
+ 
++    # Save the status of $force
++    tmp_force="$force"
++
++    # If the module is set to be force-installed
++    force_installation $module && echo "Forcing installation of $module" \
++        && force="true"
++
+     # Make sure that kernel exists to install into
+     [[ -e $install_tree/$kernelver ]] || die 6 \
+ 	$"The directory $install_tree/$kernelver doesn't exist." \
+@@ -1417,6 +1446,9 @@ install_module()
+     }
+     echo $""
+     echo $"DKMS: install completed."
++
++    # Restore the status of $force
++    force="$tmp_force"
+ }
+ 
+ # List each kernel object that has been installed for a particular module.
+-- 
+1.7.5.4
+

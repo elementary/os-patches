@@ -1,0 +1,146 @@
+From: Darik Horn <dajhorn@vanadac.com>                                          
+Date: Mon, 15 Jul 2013 16:25:02 -0500                                           
+Subject: Add BUILD_DEPENDS configuration option.                                
+                                                                                
+Implement a BUILD_DEPENDS directive that instructs `dkms autoinstall`           
+to build Linux modules in a specific order. The motivating case is              
+                                                                                
+  lustre -> zfs -> spl                                                          
+                                                                                
+Where ZFS fails to build if SPL is not already installed.                       
+
+[ Colin Ian King: Modified to sync with latest dkms patches ]
+                                                                                
+Signed-off-by: Darik Horn <dajhorn@vanadac.com>                                 
+Signed-off-by: Brian Behlendorf <behlendorf1@llnl.gov>  
+
+Index: dkms-2.2.0.3/dkms
+===================================================================
+--- dkms-2.2.0.3.orig/dkms
++++ dkms-2.2.0.3/dkms
+@@ -25,7 +25,7 @@ shopt -s extglob
+ # Does not include directives
+ readonly dkms_conf_variables="CLEAN REMAKE_INITRD remake_initrd PACKAGE_NAME
+        PACKAGE_VERSION POST_ADD POST_BUILD POST_INSTALL POST_REMOVE PRE_BUILD
+-       PRE_INSTALL BUILD_EXCLUSIVE_KERNEL BUILD_EXCLUSIVE_ARCH
++       PRE_INSTALL BUILD_DEPENDS BUILD_EXCLUSIVE_KERNEL BUILD_EXCLUSIVE_ARCH
+        build_exclude OBSOLETE_BY MAKE MAKE_MATCH MODULES_CONF
+        modules_conf_array PATCH PATCH_MATCH patch_array BUILT_MODULE_NAME
+        built_module_name BUILT_MODULE_LOCATION built_module_location
+@@ -3167,15 +3167,26 @@ make_kmp()
+ # by hand if dkms_autoinstaller is not used.
+ autoinstall() {
+     local status mv mvka m v k a last_v last_m tenative
++    local install_count next_depends
+     local -a to_install=()
++    local -a next_install=()
++    local -a installed_modules=()
++    local -A build_depends=()
++
+     # Walk through our list of installed and built modules, and create
+     # a list of modules that need to be reinstalled.
+     while read status mvka; do
+         IFS='/' read m v k a <<< "$mvka"
+         [[ ! $last_m ]] && last_m="$m"
+         # If the module is already installed or weak-installed, skip it.
+-        _is_module_installed "$m" "$v" "$kernelver" "$arch" && continue
+-        module_status_weak "$m" "$v" "$kernelver" "$arch" >/dev/null && continue
++        if _is_module_installed "$m" "$v" "$kernelver" "$arch"; then
++            installed_modules[${#installed_modules[@]}]="$m"
++            continue
++        fi
++        if module_status_weak "$m" "$v" "$kernelver" "$arch" >/dev/null; then
++            installed_modules[${#installed_modules[@]}]="$m"
++            continue
++        fi
+         # if the module does not want to be autoinstalled, skip it.
+         read_conf_or_die "$k" "$a" "$dkms_tree/$m/$v/source/dkms.conf"
+         if [[ ! $AUTOINSTALL ]]; then
+@@ -3184,7 +3195,10 @@ autoinstall() {
+         elif [[ $last_m != $m ]]; then
+             last_m="$m"
+             last_v='0'
+-            [[ $tenative ]] && to_install[${#to_install[@]}]="$tenative"
++            if [[ $tenative ]]; then
++                to_install[${#to_install[@]}]="$tenative"
++                build_depends["$m"]="${BUILD_DEPENDS[@]}"
++            fi
+             tenative=''
+         fi
+         if [[ ($(VER $v) > $(VER $last_v)) ]]; then
+@@ -3194,14 +3208,50 @@ autoinstall() {
+     done < <(module_status)
+     # We may have exited the loop with $tenative set.  If it is,
+     # it contains something that should be updated.
+-    [[ $tenative ]] && to_install[${#to_install[@]}]="$tenative"
++    if [[ $tenative ]]; then
++        to_install[${#to_install[@]}]="$tenative"
++        build_depends["$m"]="${BUILD_DEPENDS[@]}"
++    fi
+     [[ $to_install ]] || return 0
+-    # Install modules that need to be updated in parallel.
+-    for mv in "${to_install[@]}"; do
+-        IFS=/ read m v <<< "$mv"
+-        (module="$m"; module_version="$v"; install_module) &
++
++    while true; do
++        install_count=0
++        next_install=( )
++
++        # Step 1: Remove installed modules from all dependency lists.
++        for m in ${!build_depends[@]}; do
++            next_depends=
++            for d in ${build_depends[$m]}; do
++                for i in ${installed_modules[@]}; do
++                    [[ "$d" = "$i" ]] && continue 2
++                done
++                next_depends+="$d "
++            done
++            build_depends[$m]="${next_depends%% }"
++        done
++
++        # Step 2: Install modules that have an empty dependency list.
++        for mv in "${to_install[@]}"; do
++            IFS=/ read m v <<< "$mv"
++            if [[ -z "${build_depends[$m]}" ]]; then
++                (module="$m"; module_version="$v"; install_module) &
++                installed_modules[${#installed_modules[@]}]="$m"
++                install_count=$(($install_count +1))
++            else
++                next_install[${#next_install[@]}]="$mv"
++            fi
++         done
++
++         wait
++
++         # Step 3: Keep going if at least one module was installed during
++         # this iteration.
++         [[ "$install_count" -gt 0 ]] || break;
++
++         # Step 4: Remove modules that were installed during Step 2 from
++         # the job queue.
++         to_install=( "${next_install[@]}" )
+     done
+-    wait
+ }
+ 
+ function make_redhat3_driver_disk ()
+Index: dkms-2.2.0.3/dkms.8
+===================================================================
+--- dkms-2.2.0.3.orig/dkms.8
++++ dkms-2.2.0.3/dkms.8
+@@ -825,6 +825,14 @@ on
+ .B dkms_autoinstaller
+ for more information.
+ .TP
++.B BUILD_DEPENDS[#]=
++This optional directive is an array that allows you to specify other modules as
++dependencies for your module. Each array element should be the
++.B PACKAGE_NAME
++of another module that is managed by dkms. Do not specify a version or
++architecture in the dependency. Note that this directive is only advisory;
++missing or broken dependencies cause non-fatal warnings.
++.TP
+ .B BUILD_EXCLUSIVE_KERNEL=
+ This optional directive allows you to specify a regular expression which defines
+ the subset of kernels which DKMS is allowed to build your module for.  If the kernel

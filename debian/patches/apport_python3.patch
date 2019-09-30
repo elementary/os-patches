@@ -1,0 +1,85 @@
+Description: Port apport hook to Python 3 and take care of opening the output file in binary mode.
+Author: Martin Pitt <martin.pitt@ubuntu.com>
+Bug-Ubuntu: https://launchpad.net/bugs/1008092
+Bug-Ubuntu: https://launchpad.net/bugs/1013171
+
+Index: dkms-2.2.0.3/dkms_apport.py
+===================================================================
+--- dkms-2.2.0.3.orig/dkms_apport.py	2013-05-29 08:04:46.000000000 +0200
++++ dkms-2.2.0.3/dkms_apport.py	2013-05-29 08:28:40.000000000 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python3
+ #
+ #  Dynamic Kernel Module Support (DKMS) <dkms-devel@dell.com>
+ #  Copyright (C) 2009 Dell, Inc.
+@@ -36,12 +36,12 @@
+ options=optparser.parse_args()[0]
+ 
+ if not options.module or not options.version:
+-    print >> sys.stderr, 'ERROR (dkms apport): both -m and -v are required'
++    sys.stderr.write('ERROR (dkms apport): both -m and -v are required\n')
+     sys.exit(2)
+ 
+ package=packaging.get_file_package('/usr/src/' + options.module + '-' + options.version)
+ if package is None:
+-    print >> sys.stderr, 'ERROR (dkms apport): binary package for %s: %s not found' % (options.module,options.version)
++    sys.stderr.write('ERROR (dkms apport): binary package for %s: %s not found\n' % (options.module,options.version))
+     sys.exit(1)
+ 
+ if options.kernel:
+@@ -51,12 +51,12 @@
+     supported_kernel = True
+     try:
+         supported_kernel = apport.packaging.is_distro_package(kernel_package)
+-    except ValueError, e:
++    except ValueError as e:
+         if str(e) == 'package does not exist':
+             supported_kernel = False
+ 
+     if not supported_kernel:
+-        print >> sys.stderr, 'ERROR (dkms apport): kernel package %s is not supported' % (kernel_package)
++        sys.stderr.write('ERROR (dkms apport): kernel package %s is not supported\n' % (kernel_package))
+         sys.exit(1)
+ 
+ make_log=os.path.join('/var','lib','dkms',options.module,options.version,'build','make.log')
+@@ -66,7 +66,7 @@
+ try:
+     report['SourcePackage'] = apport.packaging.get_source(package)
+ except ValueError:
+-    print >> sys.stderr, 'ERROR (dkms apport): unable to determine source package for %s' % package
++    sys.stderr.write('ERROR (dkms apport): unable to determine source package for %s\n' % package)
+     sys.exit(3)
+ try:
+     version = packaging.get_version(package)
+@@ -85,7 +85,7 @@
+ if 'DKMSBuildLog' in report:
+     this_year = str(datetime.today().year)
+     if 'Segmentation fault' in report['DKMSBuildLog']:
+-        print >> sys.stderr, 'ERROR (dkms apport): There was a segmentation fault when trying to build the module'
++        sys.stderr.write('ERROR (dkms apport): There was a segmentation fault when trying to build the module\n')
+         sys.exit(1)
+     dupe_sig = ''
+     for line in report['DKMSBuildLog'].split('\n'):
+@@ -96,4 +96,5 @@
+ 
+ if options.kernel:
+     report['DKMSKernelVersion'] = options.kernel
+-report.write(open(apport.fileutils.make_report_path(report), 'w'))
++with open(apport.fileutils.make_report_path(report), 'wb') as f:
++    report.write(f)
+Index: dkms-2.2.0.3/dkms
+===================================================================
+--- dkms-2.2.0.3.orig/dkms	2013-05-29 08:04:46.000000000 +0200
++++ dkms-2.2.0.3/dkms	2013-05-29 08:30:55.406135813 +0200
+@@ -3032,8 +3032,8 @@
+ report_build_problem()
+ {
+     #If apport is on the system, files a build problem
+-    if [ -x /usr/share/apport/apport ] && which python>/dev/null; then
+-	python /usr/share/apport/package-hooks/dkms_packages.py -m $module -v $module_version -k ${kernelver[0]}
++    if [ -x /usr/share/apport/apport ] && which python3 >/dev/null; then
++	python3 /usr/share/apport/package-hooks/dkms_packages.py -m $module -v $module_version -k ${kernelver[0]}
+     fi
+     die "$@"
+ }
