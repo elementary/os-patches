@@ -1,0 +1,26 @@
+From 260359bc74dda450dda6bff1c4a17dd126a61b18 Mon Sep 17 00:00:00 2001
+From: Alexander Larsson <alexl@redhat.com>
+Date: Tue, 20 Aug 2013 12:30:29 +0000
+Subject: xsettings: Enable the automatic hidpi selection
+
+gnome-shell can now handle Gtk+ enabling scaling by default, so its
+now safe to automatically enable this.
+---
+diff --git a/plugins/xsettings/gsd-xsettings-manager.c b/plugins/xsettings/gsd-xsettings-manager.c
+index 1620566..cb018a0 100644
+--- a/plugins/xsettings/gsd-xsettings-manager.c
++++ b/plugins/xsettings/gsd-xsettings-manager.c
+@@ -454,11 +454,6 @@ get_window_scale (GnomeXSettingsManager *manager)
+                         if (dpi_x > HIDPI_LIMIT && dpi_y > HIDPI_LIMIT)
+                                 window_scale = 2;
+                 }
+-
+-                /* TODO: For now we don't support automatic scale picking, because it
+-                   any scale but 1 breaks gnome-shell. Remove this when gnome-shell
+-                   is fixed. */
+-                window_scale = 1;
+         }
+ 
+         return window_scale;
+--
+cgit v0.9.2

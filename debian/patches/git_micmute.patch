@@ -1,0 +1,20 @@
+Author: Bastien Nocera <hadess@hadess.net>
+Origion: upstream
+Description: media-keys: Add XF86AudioMicMute as a mic mute key
+ Needed because of https://bugs.freedesktop.org/show_bug.cgi?id=54171 being fixed
+Applied-Upstream: https://git.gnome.org/browse/gnome-settings-daemon/commit/?id=3a8beaaf380a483ce33363031d8d276c371d7af1
+---
+---
+ plugins/media-keys/shortcuts-list.h |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/plugins/media-keys/shortcuts-list.h
++++ b/plugins/media-keys/shortcuts-list.h
+@@ -109,6 +109,7 @@ static struct {
+         { VOLUME_DOWN_KEY, "volume-down", NULL, NULL, SHELL_KEYBINDING_MODE_ALL },
+         { VOLUME_UP_KEY, "volume-up", NULL, NULL, SHELL_KEYBINDING_MODE_ALL },
+         { MIC_MUTE_KEY, NULL, N_("Microphone Mute"), "F20", SHELL_KEYBINDING_MODE_ALL },
++        { MIC_MUTE_KEY, NULL, N_("Microphone Mute"), "XF86AudioMicMute", SHELL_KEYBINDING_MODE_ALL },
+         { MUTE_QUIET_KEY, NULL, N_("Quiet Volume Mute"), "<Alt>XF86AudioMute", SHELL_KEYBINDING_MODE_ALL },
+         { VOLUME_DOWN_QUIET_KEY, NULL, N_("Quiet Volume Down"), "<Alt>XF86AudioLowerVolume", SHELL_KEYBINDING_MODE_ALL },
+         { VOLUME_UP_QUIET_KEY, NULL, N_("Quiet Volume Up"), "<Alt>XF86AudioRaiseVolume", SHELL_KEYBINDING_MODE_ALL },

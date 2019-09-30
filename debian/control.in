@@ -1,0 +1,103 @@
+Source: gnome-settings-daemon
+Section: gnome
+Priority: optional
+Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
+XSBC-Original-Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Uploaders: @GNOME_TEAM@
+Build-Depends: cdbs,
+               debhelper (>= 9),
+               gnome-pkg-tools,
+               gtk-doc-tools,
+               dh-autoreconf,
+               autotools-dev,
+               intltool (>= 0.37.1),
+               libdbus-glib-1-dev (>= 0.74),
+               libglib2.0-dev (>= 2.35.3),
+               libgtk-3-dev (>= 3.7.8),
+               libnotify-dev (>= 0.7.0),
+               libxt-dev,
+               libxi-dev,
+               libfontconfig1-dev,
+               libxext-dev,
+               libx11-dev,
+               libxtst-dev,
+               gsettings-desktop-schemas-dev (>= 3.7.2.1),
+               libgnome-desktop-3-dev (>= 3.7.90),
+               libpulse-dev (>= 1:2.0),
+               librsvg2-dev (>= 2.36.2),
+               libcanberra-gtk3-dev,
+               libcups2-dev,
+               libpolkit-gobject-1-dev,
+               libaccountsservice-dev (>= 0.6.34),
+               libappindicator3-dev (>= 0.4.90),
+               hwdata,
+               libupower-glib-dev (>= 0.9.11),
+               libcolord-dev (>= 0.1.12),
+               liblcms2-dev,
+               libnss3-dev,
+               libgudev-1.0-dev,
+               libwacom-dev (>= 0.7),
+               xserver-xorg-input-wacom,
+               libgnomekbd-dev (>= 3.5.1),
+               libxklavier-dev,
+               libsystemd-login-dev (>= 183),
+               libibus-1.0-dev (>= 1.5.0)
+Standards-Version: 3.9.3
+Vcs-Bzr: https://code.launchpad.net/~ubuntu-desktop/gnome-settings-daemon/trusty
+
+Package: gnome-settings-daemon
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         accountsservice (>= 0.6.34),
+         gsettings-desktop-schemas (>= 3.7.2.1),
+         nautilus-data (>= 2.91.3-1),
+         gnome-settings-daemon-schemas (= ${binary:Version})
+Recommends: ibus (>= 1.5.0),
+            pulseaudio,
+            systemd-services
+Pre-Depends: ${misc:Pre-Depends}
+Breaks: rhythmbox (<< 0.11.5),
+        banshee (<< 0.13.2+dfsg-7),
+        totem (<< 2.22.0),
+        gnome-control-center (<< 1:3.6.3-0ubuntu35),
+        gnome-session (<< 3.9.90-0ubuntu6),
+        gnome-screensaver (<< 2.28.0),
+        gnome-color-manager (<< 3.0),
+        unity-greeter (<< 0.2.1-0ubuntu1),
+        indicator-datetime (<< 12.10.3daily13.03.26)
+Suggests: x11-xserver-utils,
+          gnome-screensaver,
+          metacity | x-window-manager
+Description: daemon handling the GNOME session settings
+ This package contains the daemon which is responsible for setting the
+ various parameters of a GNOME session and the applications that run
+ under it. It handles the following kinds of settings:
+ .
+  * Keyboard: layout, accessibility options, shortcuts, media keys
+  * Clipboard management
+  * Theming: background, icons, GTK+ applications
+  * Cleanup of unused files
+  * Mouse: cursors, speed, accessibility options
+  * Startup of other daemons: screensaver, sound daemon
+  * Typing break
+ .
+ It also sets various application settings through X resources and
+ freedesktop.org XSETTINGS.
+
+Package: gnome-settings-daemon-schemas
+Architecture: all
+Replaces: gnome-settings-daemon (<< 3.8.6.1-0ubuntu8)
+Breaks: gnome-settings-daemon (<< 3.8.6.1-0ubuntu8)
+Description: gnome-settings-daemon schemas
+ This package contains the schemas used by gnome-settings-daemon
+
+Package: gnome-settings-daemon-dev
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         libdbus-glib-1-dev (>= 0.74),
+         libglib2.0-dev (>= 2.35.3)
+Description: Headers for building applications communicating with gnome-settings-daemon
+ This package contains header files required to build applications that
+ communicate with the GNOME settings daemon over D-Bus.

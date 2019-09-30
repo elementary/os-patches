@@ -1,0 +1,196 @@
+From 1ae70dc6ff141e248e8198ee1d82e1bec6ed4434 Mon Sep 17 00:00:00 2001
+From: Jasper St. Pierre <jstpierre@mecheye.net>
+Date: Thu, 18 Jul 2013 01:10:02 +0000
+Subject: media-keys: Add a binding to take a short screencast of the screen
+
+https://bugzilla.gnome.org/show_bug.cgi?id=704435
+---
+--- a/data/org.gnome.settings-daemon.plugins.media-keys.gschema.xml.in.in
++++ b/data/org.gnome.settings-daemon.plugins.media-keys.gschema.xml.in.in
+@@ -135,6 +135,11 @@
+       <_summary>Launch terminal</_summary>
+       <_description>Binding to launch the terminal.</_description>
+     </key>
++    <key name="screencast" type="s">
++      <default>'&lt;Ctrl&gt;&lt;Shift&gt;&lt;Alt&gt;R'</default>
++      <_summary>Record a short video of the screen</_summary>
++      <description>Binding to record a short video of the screen</description>
++    </key>
+     <key name="www" type="s">
+       <default>'XF86WWW'</default>
+       <_summary>Launch web browser</_summary>
+--- a/plugins/media-keys/gsd-media-keys-manager.c
++++ b/plugins/media-keys/gsd-media-keys-manager.c
+@@ -86,6 +86,9 @@
+ 
+ #define SHELL_GRABBER_RETRY_INTERVAL 1
+ 
++/* Screencasts last for 5 mins */
++#define SCREENCAST_LENGTH 300
++
+ static const gchar introspection_xml[] =
+ "<node name='/org/gnome/SettingsDaemon/MediaKeys'>"
+ "  <interface name='org.gnome.SettingsDaemon.MediaKeys'>"
+@@ -184,6 +187,11 @@
+         GCancellable    *shell_cancellable;
+         GCancellable    *grab_cancellable;
+ 
++        /* Screencast stuff */
++        GDBusProxy      *screencast_proxy;
++        guint            screencast_timeout_id;
++        GCancellable    *screencast_cancellable;
++
+         /* systemd stuff */
+         GDBusProxy      *logind_proxy;
+         gint             inhibit_keys_fd;
+@@ -2368,6 +2376,61 @@
+ }
+ 
+ static void
++screencast_stop (GsdMediaKeysManager *manager)
++{
++        if (manager->priv->screencast_timeout_id > 0) {
++                g_source_remove (manager->priv->screencast_timeout_id);
++                manager->priv->screencast_timeout_id = 0;
++        }
++
++        g_dbus_proxy_call (manager->priv->screencast_proxy,
++                           "StopScreencast", NULL,
++                           G_DBUS_CALL_FLAGS_NONE, -1,
++                           manager->priv->screencast_cancellable,
++                           NULL, NULL);
++}
++
++static gboolean
++screencast_timeout (gpointer user_data)
++{
++        GsdMediaKeysManager *manager = user_data;
++        screencast_stop (manager);
++        return G_SOURCE_REMOVE;
++}
++
++static void
++screencast_start (GsdMediaKeysManager *manager)
++{
++        g_dbus_proxy_call (manager->priv->screencast_proxy,
++                           "Screencast",
++                           /* Translators: this is a filename used for screencast
++                            * recording, where "%d" and "%t" date and time, e.g.
++                            * "Screencast from 07-17-2013 10:00:46 PM.webm" */
++                           /* xgettext:no-c-format */
++                           g_variant_new_parsed ("(%s, @a{sv} {})",
++                                                 _("Screencast from %d %t.webm")),
++                           G_DBUS_CALL_FLAGS_NONE, -1,
++                           manager->priv->screencast_cancellable,
++                           NULL, NULL);
++
++        manager->priv->screencast_timeout_id = g_timeout_add_seconds (SCREENCAST_LENGTH,
++                                                                      screencast_timeout,
++                                                                      manager);
++}
++
++static void
++do_screencast_action (GsdMediaKeysManager *manager)
++{
++        if (manager->priv->screencast_proxy == NULL)
++                return;
++
++        if (manager->priv->screencast_timeout_id == 0)
++                screencast_start (manager);
++        else
++                screencast_stop (manager);
++}
++
++static void
+ do_custom_action (GsdMediaKeysManager *manager,
+                   guint                deviceid,
+                   MediaKey            *key,
+@@ -2445,6 +2508,9 @@
+         case TERMINAL_KEY:
+                 do_terminal_action (manager);
+                 break;
++        case SCREENCAST_KEY:
++                do_screencast_action (manager);
++                break;
+         case WWW_KEY:
+                 do_url_action (manager, "http", timestamp);
+                 break;
+@@ -2729,6 +2795,17 @@
+ }
+ 
+ static void
++on_screencast_proxy_ready (GObject      *source,
++                           GAsyncResult *result,
++                           gpointer      data)
++{
++        GsdMediaKeysManager *manager = data;
++
++        manager->priv->screencast_proxy =
++                g_dbus_proxy_new_for_bus_finish (result, NULL);
++}
++
++static void
+ on_key_grabber_ready (GObject      *source,
+                       GAsyncResult *result,
+                       gpointer      data)
+@@ -2772,6 +2849,14 @@
+                                   SHELL_DBUS_NAME,
+                                   manager->priv->shell_cancellable,
+                                   on_shell_proxy_ready, manager);
++
++        g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
++                                  0, NULL,
++                                  name_owner,
++                                  SHELL_DBUS_PATH "/Screencast",
++                                  SHELL_DBUS_NAME ".Screencast",
++                                  manager->priv->screencast_cancellable,
++                                  on_screencast_proxy_ready, manager);
+ }
+ 
+ static void
+@@ -2895,6 +2980,7 @@
+ 
+         ensure_cancellable (&manager->priv->grab_cancellable);
+         ensure_cancellable (&manager->priv->shell_cancellable);
++        ensure_cancellable (&manager->priv->screencast_cancellable);
+ 
+         manager->priv->name_owner_id =
+                 g_bus_watch_name (G_BUS_TYPE_SESSION,
+@@ -2982,6 +3068,7 @@
+         g_clear_object (&priv->power_proxy);
+         g_clear_object (&priv->power_screen_proxy);
+         g_clear_object (&priv->power_keyboard_proxy);
++        g_clear_object (&priv->screencast_proxy);
+ 
+         if (manager->priv->name_owner_id) {
+                 g_bus_unwatch_name (manager->priv->name_owner_id);
+@@ -3045,6 +3132,11 @@
+                 g_clear_object (&priv->shell_cancellable);
+         }
+ 
++        if (priv->screencast_cancellable != NULL) {
++                g_cancellable_cancel (priv->screencast_cancellable);
++                g_clear_object (&priv->screencast_cancellable);
++        }
++
+         g_clear_pointer (&priv->screens, g_slist_free);
+         g_clear_object (&priv->sink);
+         g_clear_object (&priv->source);
+--- a/plugins/media-keys/shortcuts-list.h
++++ b/plugins/media-keys/shortcuts-list.h
+@@ -53,6 +53,7 @@
+         SCREENSHOT_CLIP_KEY,
+         WINDOW_SCREENSHOT_CLIP_KEY,
+         AREA_SCREENSHOT_CLIP_KEY,
++        SCREENCAST_KEY,
+         TERMINAL_KEY,
+         WWW_KEY,
+         PLAY_KEY,
+@@ -127,6 +128,7 @@
+         { SCREENSHOT_CLIP_KEY, "screenshot-clip", NULL, NULL, SHELL_KEYBINDING_MODE_ALL },
+         { WINDOW_SCREENSHOT_CLIP_KEY, "window-screenshot-clip", NULL, NULL, SHELL_KEYBINDING_MODE_NORMAL },
+         { AREA_SCREENSHOT_CLIP_KEY, "area-screenshot-clip", NULL, NULL, SHELL_KEYBINDING_MODE_ALL },
++        { SCREENCAST_KEY, "screencast", NULL, NULL, SHELL_KEYBINDING_MODE_ALL },
+         { TERMINAL_KEY, "terminal", NULL, NULL, GSD_KEYBINDING_MODE_LAUNCHER },
+         { WWW_KEY, "www", NULL, NULL, GSD_KEYBINDING_MODE_LAUNCHER },
+         { PLAY_KEY, "play", NULL, NULL, SHELL_KEYBINDING_MODE_ALL },
