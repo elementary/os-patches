@@ -1,0 +1,17 @@
+indicator-keyboard-icon-generator
+=================================
+
+To refresh the keyboard layout icons, I usually enter the data directory and
+run:
+
+./indicator-keyboard-icon-generator -i icon.svg.in -I icon-1.svg.in -o dark  -c '#dfdbd2'
+./indicator-keyboard-icon-generator -i icon.svg.in -I icon-1.svg.in -o light -c '#3c3c3c'
+('#dfdbd2' and '#3c3c3c' are the colours for the dark and light themes.)
+
+Then I just copy the files in the dark and light directories to
+ubuntu-mono-dark/status/22 and ubuntu-mono-light/status/22 in the ubuntu-themes
+source package.
+
+data/icon.svg.in and data/icon-1.svg.in are template files for the
+un-subscripted and subscripted icons. Parameters can be tweaked on the command
+line for the generator: './indicator-keyboard-icon-generator -?' for details.

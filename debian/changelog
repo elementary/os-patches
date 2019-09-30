@@ -1,0 +1,238 @@
+indicator-keyboard (0.0.0+14.04.20140410.1-0ubuntu1) trusty; urgency=low
+
+  [ William Hua ]
+  * If an IBus input source is active when the session is locked, switch
+    to another non-IBus one instead. (LP: #1301860)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 10 Apr 2014 16:49:00 +0000
+
+indicator-keyboard (0.0.0+14.04.20140410-0ubuntu1) trusty; urgency=low
+
+  [ William Hua ]
+  * Export separate menus for desktop and greeter. (LP: #1291962)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 10 Apr 2014 11:50:41 +0000
+
+indicator-keyboard (0.0.0+14.04.20140403.1-0ubuntu1) trusty; urgency=low
+
+  [ William Hua ]
+  * Document how to refresh indicator-keyboard's icons for the ubuntu-
+    mono themes.
+  * Refresh the menu and indicator when IBus is connected. (LP:
+    #1246537)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 03 Apr 2014 16:17:38 +0000
+
+indicator-keyboard (0.0.0+14.04.20140328.1-0ubuntu1) trusty; urgency=low
+
+  [ William Hua ]
+  * Use Ubuntu-specific IBus D-Bus API so that we don't have to replace
+    the old IBus panel service in order to inspect and activate IBus
+    engine properties. (LP: #1290881)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 28 Mar 2014 14:59:09 +0000
+
+indicator-keyboard (0.0.0+14.04.20140311-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Add desktop_lockscreen profile
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 11 Mar 2014 18:29:39 +0000
+
+indicator-keyboard (0.0.0+14.04.20140227.3-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * Drop unity8 test description, that indicator is used on desktop only
+
+  [ William Hua ]
+  * Do not set org.gnome.desktop.input-sources.current when unchanged
+    (LP: #1256559). (LP: #1256559)
+  * Update icons when icon theme changes. (LP: #1237749)
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 27 Feb 2014 19:38:10 +0000
+
+indicator-keyboard (0.0.0+14.04.20140220-0ubuntu1) trusty; urgency=low
+
+  [ William Hua ]
+  * Implement the IBus panel within the indicator.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 20 Feb 2014 16:16:34 +0000
+
+indicator-keyboard (0.0.0+14.04.20140219.1-0ubuntu1) trusty; urgency=low
+
+  [ CI bot ]
+  * Resync trunk
+
+  [ Sebastien Bacher ]
+  * use unity-control-center instead of gnome-control-center
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 19 Feb 2014 17:33:49 +0000
+
+indicator-keyboard (0.0.0+14.04.20140207-0ubuntu1) trusty; urgency=low
+
+  [ Ted Gould ]
+  * Adding acceptance tests and merge review policies.
+
+  [ William Hua ]
+  * Fix tests by restoring DISPLAY's value.
+  * Replace BAMF with Unity window stack API calls.
+
+  [ CI bot ]
+  * Adding acceptance tests and merge review policies
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Feb 2014 16:27:55 +0000
+
+indicator-keyboard (0.0.0+14.04.20131125-0ubuntu1) trusty; urgency=low
+
+  [ William Hua ]
+  * Enable middle click and mouse wheel scrolling. (LP: #887139)
+  * Add accountsservice.vapi (accountsservice no long ships it).
+
+  [ Allan LeSage ]
+  * Add gcov coverage tooling; use ./autogen.sh --enable-gcov and then
+    make coverage-html to see a report of what's covered. You can read
+    about the rationale in this old blog post:
+    http://qualityhour.wordpress.com/2012/01/29/test-coverage-tutorial-
+    for-cc-autotools-projects/ .
+
+  [ Lars Uebernickel ]
+  * Set the indicator's position according to
+    http://wiki.ubuntu.com/SystemComponents.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 185
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 25 Nov 2013 03:55:06 +0000
+
+indicator-keyboard (0.0.0+14.04.20131029.1-0ubuntu1) trusty; urgency=low
+
+  [ Dmitrijs Ledkovs ]
+  * Define "ubiquity" indicator profile, reusing the greeter object. (LP:
+    #1241539)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 155
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 29 Oct 2013 10:30:36 +0000
+
+indicator-keyboard (0.0.0+13.10.20131010.1-0ubuntu1) saucy; urgency=low
+
+  [ William Hua ]
+  * Don't set LightDM's layout if we're in a session. (LP: 1226962).
+    (LP: #1226962)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 134
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 10 Oct 2013 12:36:09 +0000
+
+indicator-keyboard (0.0.0+13.10.20131004-0ubuntu1) saucy; urgency=low
+
+  [ William Hua ]
+  * Set the selected user's first keyboard layout whenever it changes
+    under unity-greeter. (LP #1233945). (LP: #1233945)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 125
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 04 Oct 2013 02:28:12 +0000
+
+indicator-keyboard (0.0.0+13.10.20130924.2-0ubuntu3) saucy; urgency=low
+
+  * Updated POTFILES.skip, seems to be required as well.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 27 Sep 2013 17:09:25 +0200
+
+indicator-keyboard (0.0.0+13.10.20130924.2-0ubuntu2) saucy; urgency=low
+
+  * Update translations template (workaround launchpad bug) (lp: #1223488)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 27 Sep 2013 16:10:01 +0200
+
+indicator-keyboard (0.0.0+13.10.20130924.2-0ubuntu1) saucy; urgency=low
+
+  [ William Hua ]
+  * Fall-back on old unity-greeter keyboard layouts in case migration
+    hasn't occurred. (LP: #1228489)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 116
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 24 Sep 2013 08:58:16 +0000
+
+indicator-keyboard (0.0.0+13.10.20130829.1-0ubuntu1) saucy; urgency=low
+
+  [ William Hua ]
+  * Append input source suffix to accessible-desc as described in design
+    spec.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 112
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 29 Aug 2013 06:06:42 +0000
+
+indicator-keyboard (0.0.0+13.10.20130829-0ubuntu1) saucy; urgency=low
+
+  [ Matthieu Baerts ]
+  * Added an 'accessible description' This description is used by other
+    applications (like Cairo-Dock) as label for this icon. (LP:
+    #1217855)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 110
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 29 Aug 2013 02:07:27 +0000
+
+indicator-keyboard (0.0.0+13.10.20130822.4-0ubuntu1) saucy; urgency=low
+
+  [ William Hua ]
+  * Kill running gvfs instance after tests finish. Because the
+    XDG_RUNTIME_DIR was changed to be in the build-tree, a running gvfs
+    instance held a lock on a file in the directory, preventing it from
+    being cleaned properly, and preventing the build from finishing. So
+    we send a SIGTERM to the running gvfs-fused instance, allowing the
+    build to finish.
+  * Use accountsservice and make work under unity-greeter.
+  * Proper shutdown on SIGTERM.
+
+  [ Jeremy Bicha ]
+  * Don't build-depend on quilt and drop debian/README.source, thanks
+    Michael Terry!.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 108
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 22 Aug 2013 20:29:00 +0000
+
+indicator-keyboard (0.0.0+13.10.20130821-0ubuntu1) saucy; urgency=low
+
+  [ Jeremy Bicha ]
+  * debian/control:
+    - Don't build-depend on vala-0.20-vapi
+    - Build-depend on dbus for tests
+
+  [ William Hua ]
+  * Initial Release.
+
+  [ Mathieu Trudel-Lapierre ]
+  * Automatic snapshot from revision 102 (bootstrap)
+  * debian/control:
+    - Packaging review, add comment to developers.
+    - Fix Vcs-Bzr, Vcs-Browser.
+    - Sort Build-Depends, use trailing commas.
+    - Improve long description.
+  * debian/rules:
+    - Add DPKG_GENSYMBOLS_CHECK_LEVEL = 4.
+    - Override dh_autoreconf to run ./autogen.sh.
+    - Override dh_install to remove .la and .a files.
+    - Run dh_install with --fail-missing.
+  * debian/compat: bump to compat level 9.
+  * debian/source/format: make sure we're using format 1.0.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 103
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 21 Aug 2013 14:07:27 +0000

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+export PATH="@abs_top_builddir@/tests/execute:$PATH"
+export DCONF_PROFILE="@abs_top_builddir@/tests/profiles/indicator-keyboard-test"
+export GSETTINGS_SCHEMA_DIR="@abs_top_builddir@/data"
+export XDG_RUNTIME_DIR="@abs_top_builddir@/tests"
+
+if xvfb-run -a ./indicator-keyboard-tests
+then
+  pkill -f tests/gvfs || exit 0
+else
+  pkill -f tests/gvfs && exit 1
+fi

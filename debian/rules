@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export DPKG_GENSYMBOLS_CHECK_LEVEL=4
+
+%:
+	dh $@ --with autoreconf,translations
+
+override_dh_autoreconf:
+	NOCONFIGURE=1 dh_autoreconf ./autogen.sh
+
+override_dh_install:
+	find debian/indicator-keyboard/usr/lib -name *.la -delete
+	find debian/indicator-keyboard/usr/lib -name *.a -delete
+	dh_install --fail-missing
+

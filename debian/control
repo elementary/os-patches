@@ -1,0 +1,38 @@
+Source: indicator-keyboard
+Section: gnome
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: William Hua <william.hua@canonical.com>
+Build-Depends: debhelper (>= 9.0.0),
+               dh-autoreconf,
+               dh-translations,
+               dbus,
+               libaccountsservice-dev,
+               libgee-dev,
+               libgirepository1.0-dev,
+               libgnome-desktop-3-dev,
+               libgnomekbd-dev,
+               libgtk-3-dev,
+               libibus-1.0-dev (>= 1.5.0),
+               liblightdm-gobject-1-dev,
+               valac,
+               xauth,
+               xvfb,
+Standards-Version: 3.9.4
+Homepage: https://code.launchpad.net/indicator-keyboard
+# If you aren't a member of ~indicator-applet-developers but need to upload
+# packaging changes, just go ahead. ~indicator-applet-developers will notice
+# and sync up the code again.
+Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/indicator-keyboard/trunk
+Vcs-Browser: https://bazaar.launchpad.net/~indicator-applet-develpers/indicator-keyboard/trunk/files
+
+Package: indicator-keyboard
+Architecture: any
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Breaks: ibus (<< 1.5.5-1ubuntu3),
+Description: Keyboard indicator
+ This package contains the keyboard indicator, which should show as an icon in
+ the top panel when using the Unity environment. It can be used to switch
+ key layouts or languages, and helps the user identifying which layouts are
+ currently in use.
