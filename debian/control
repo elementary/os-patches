@@ -1,0 +1,44 @@
+Source: indicator-session
+Section: gnome
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: cmake,
+               dbus,
+               debhelper (>= 9),
+               dh-translations,
+               intltool,
+               libglib2.0-dev (>= 2.36),
+               libgtest-dev,
+               python,
+Standards-Version: 3.9.3
+Homepage: https://launchpad.net/indicator-session
+# If you aren't a member of ~indicator-applet-developers but need to upload
+# packaging changes, just go ahead.  ~indicator-applet-developers will notice
+# and sync up the code again.
+Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/indicator-session/trunk.13.04
+Vcs-Browser: https://bazaar.launchpad.net/~indicator-applet-developers/indicator-session/trunk.13.04/files
+#XS-Testsuite: autopkgtest
+
+Package: indicator-session
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         systemd-services,
+         gnome-settings-daemon-schemas,
+         gsettings-desktop-schemas,
+Recommends: indicator-applet (>= 0.2) | indicator-renderer,
+            gnome-screensaver,
+            yelp,
+            unity-control-center | gnome-control-center,
+            unity-control-center-signon | gnome-control-center-signon
+Suggests: lightdm,
+          apport,
+          zenity
+Description: indicator showing session management, status and user switching
+ This indicator is designed to be placed on the right side of a panel and
+ give the user easy control for changing their instant message status.  
+ Switching to another user.  Starting a guest session.  Or controlling the
+ status of their own session.
+ .
+ It requires some way to be hosted into a panel.  For the GNOME Panel the
+ appropriate package is indicator-applet-session.

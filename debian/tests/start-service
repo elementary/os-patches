@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -x
+set -e
+
+if [ ! -d /var/run/dbus ]; then
+	mkdir /var/run/dbus
+fi
+
+dbus-daemon --fork --print-address=4 --config-file /etc/dbus-1/system.conf --print-pid=5 4>/tmp/system-bus-addr 5>/tmp/system-bus-pid
+dbus-daemon --fork --session --print-address=4 --config-file 4>/tmp/session-bus-addr
+
+DBUS_SYSTEM_BUS_ADDRESS=`cat /tmp/system-bus-addr`
+DBUS_SESSION_BUS_ADDRESS=`cat /tmp/session-bus-addr`
+
+/usr/lib/policykit-1/polkitd 2>&1 &
+/usr/sbin/console-kit-daemon &
+/usr/lib/accountsservice/accounts-daemon &
+
+make -C tests integrationcheck
+
