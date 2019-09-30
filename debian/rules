@@ -1,0 +1,32 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/autoreconf.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/utils.mk
+include /usr/share/cdbs/1/class/gnome.mk
+include /usr/share/gnome-pkg-tools/1/rules/uploaders.mk
+include /usr/share/gnome-pkg-tools/1/rules/gnome-version.mk
+include /usr/share/gnome-pkg-tools/1/rules/clean-la.mk
+include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,-O1 -Wl,--as-needed
+include /usr/share/dpkg/buildflags.mk
+
+DEB_CONFIGURE_EXTRA_FLAGS += --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
+                             --disable-update-mimedb \
+                             --enable-systemd
+
+DEB_DH_MAKESHLIBS_ARGS_gnome-control-center = --no-act
+
+# Install a wrapper to run unity-control-center under Unity
+binary-post-install/gnome-control-center::
+	mv debian/gnome-control-center/usr/bin/gnome-control-center debian/gnome-control-center/usr/bin/gnome-control-center.real
+	cp debian/gnome-control-center.sh debian/gnome-control-center/usr/bin/gnome-control-center
+
+binary-post-install/gnome-control-center-data::
+	rm -rf debian/capplets-data/usr/share/applications/mimeinfo.cache
+	rm -rf debian/capplets-data/usr/share/pkgconfig
+	dh_installmime -p$(cdbs_curpkg)
+	./panels/info/logo-generator --logo debian/UbuntuLogoBlank.png --text "ubuntu 14.04 LTS" --output debian/gnome-control-center-data/usr/share/gnome-control-center/ui/UbuntuLogo.png
+
+common-binary-post-install-arch:: list-missing
