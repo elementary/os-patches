@@ -1,0 +1,2691 @@
+2013-08-21  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfLegacyScreen: use bigger icons size by default
+	
+	libwnck would just use 32 and 16 sized icons, while we can safely use bigger versions. Fixes: https://bugs.launchpad.net/bugs/1214426.
+	
+	Approved by PS Jenkins bot, Andrea Azzarone.
+
+2013-08-10  Stephen M. Webb  <stephen.webb@canonical.com>
+
+	directly include bamf-tab.h in libbamf.h.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-08-09  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Bamf: remove Obsolete and never used BamfTabSource/BamfTabProvider
+	
+	This has been implemented using unity webapps properly.
+	
+	Approved by Stephen M. Webb, PS Jenkins bot.
+
+2013-08-08  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfApplication: include Path in .desktop file if its working dir is not the default one. Fixes: https://bugs.launchpad.net/bugs/765466.
+	
+	Approved by Christopher Townsend, PS Jenkins bot.
+
+2013-08-07  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: ignore known invalid window class values when matching windows
+	
+	And generate better .desktop files for local apps.
+	This will make us life easier with Java.
+	
+	Approved by PS Jenkins bot, Christopher Townsend.
+
+2013-08-07  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfDaemon: Use nicer and more compliant dbus object paths for views.
+	
+	Approved by Christopher Townsend, PS Jenkins bot.
+
+2013-08-06  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfControl: add an API to allow generation of local .desktop file for a BamfApplication.
+	
+	Add a bamf_control dbus method that requests to generate a new local .desktop
+	file for the provided application path. In case the application has alredy
+	a desktop file, the request is ignored. Otherwise we use some euristic to
+	generate an hopefully valid file saved in $XDG_DATA_HOME dir.
+	
+	Also added a new DesktopUpdated signal to the BamfApplication DBus interface
+	that is emitted when the .desktop file for an application is set (for now). Fixes: https://bugs.launchpad.net/bugs/753305.
+	
+	Approved by Christopher Townsend, PS Jenkins bot.
+
+2013-07-24  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: add support for the "--desktop_file_hint" exec parameter to override matching
+	
+	This is needed mostly by new Qml applications, but it allows to every app to override
+	its matching by calling it with --desktop_file_hint file-to-use.desktop. Fixes: https://bugs.launchpad.net/bugs/1180402.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-07-24  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfLegacyWindow: cache the window Exec string
+	
+	We might use this value multiple times during the BAMF execution,
+	and we don't need to recompute it everytime. Caching looks a good compromise.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-07-24  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: correctly match QML applications launched with qmlscene or qmlviewer. Fixes: https://bugs.launchpad.net/bugs/1180402.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-07-23  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	"BamfPrivate, no need to define depreaction macro, GLib includes one.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-07-16  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfApplication: keep track of the application main-window and update name and icon accordingly
+	
+	Applications without a .desktop file should update their name and icon based on their children.
+	So now we try to compute the main window children, and we update name and icon based on it. Fixes: https://bugs.launchpad.net/bugs/751909.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-07-16  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	
+	
+	BamfApplication: if the .desktop file contains the full-path of an icon we should use it
+	
+	If the parsed icon is a file, then we just use it without asking gtk if it's valid for theme.
+	. Fixes: https://bugs.launchpad.net/bugs/1201408.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-06-26  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfFactory: remove the local_views list, we don't need that anymore
+	
+	Having them tracked on allocated_views list is enough, and fixes an issue as explained on bug #1193559. Fixes: https://bugs.launchpad.net/bugs/1193449.
+	
+	Approved by PS Jenkins bot, Andrea Azzarone.
+
+2013-06-26  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfApplication: try to use a window icon if the computed icon belongs to a "generic" app
+	
+	Added a bunch of new BamfApplication tests for icon. Fixes: https://bugs.launchpad.net/bugs/768931, https://bugs.launchpad.net/bugs/1007383.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-06-26  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: ignore registered .desktop files that are in an autostart-folder. Fixes: https://bugs.launchpad.net/bugs/1193502.
+	
+	Approved by PS Jenkins bot, Andrea Azzarone.
+
+2013-06-19  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfDaemon, LibBamf: add icon property to store the BamfView icon and notify about its changes.
+	
+	New tests added.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-06-19  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfDaemon, LibBamf: Make the BamfView's name a property, deprecated method+signal.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-06-18  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: If a Window has changed its class, then we try to rematch it
+	
+	This is mostly the case of LibreOffice, but if a window has changed its class,
+	then we should try to re-match, checking if now it can be matched by a new application.
+	If this is the case, then we remove the window from the previous application (that may
+	eventually be closed) and we add it to the new one.
+	
+	Thanks to this we can finally remove a lot of libreoffice-only related code.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-06-13  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Bamf: use generic marshallers when creating signals, remove legacy bamf-marshal
+	
+	Improvements to the build system, fixed "make distcheck" (it was still referencing the old 
+	bamf.h file) and  generation of files when using parallel builds (make -jX).
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2013-06-13  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Bamf: the big trailing spaces cleanup!
+	
+	I was just tired of all these spaces around, it's the time to remove them all!.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-06-13  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfView: don't try to reload the children if they're empty but we already tried once
+	
+	This finally mutes the "Unable to fetch children" warning... \o/. Fixes: https://bugs.launchpad.net/bugs/943083.
+	
+	Approved by PS Jenkins bot, Andrea Azzarone.
+
+2013-06-13  Ted Gould  <ted@gould.cx>
+
+	Have bamfdaemon depend on the library instead of vice versa.
+	
+	Approved by Marco Trevisan (Treviño), PS Jenkins bot.
+
+2013-06-13  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfView: disconnect proper callback if a bamf-tab is closed
+	
+	I guess it was a typo, we need to disconnect to the callback we've been
+	connected to before.
+	
+	Approved by PS Jenkins bot, Andrea Azzarone.
+
+2013-06-13  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfView: use incremental children caching, delete them only when daemon stops
+	
+	Each view used to cleanup the cached children every time a new one was added or
+	removed. This was needed at the dbus-glib times to handle the case of bamfdaemon
+	restart, but now we can handle this nicely, clening the children up only when this
+	happens.
+	
+	Approved by PS Jenkins bot, Andrea Azzarone.
+
+2013-06-13  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfFactory: fix references of allocated/closed views; improve re-matching of views
+	
+	Now the ownership of the open views is in the hash-table, closed views must be owned
+	by clients (if they want to). The factory also tracks the allocated views until they
+	don't get destroyed to re-use them if possible. Fixes: https://bugs.launchpad.net/bugs/1176524, https://bugs.launchpad.net/bugs/1181717.
+	
+	Approved by Andrea Azzarone, PS Jenkins bot, Ted Gould.
+
+2013-06-11  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfView: use statically allocated pspec to notify property changes
+	
+	BamfFactory: some initial cleanup, remove views that have changed their path and use cached children.
+	
+	Approved by PS Jenkins bot, Andrea Azzarone.
+
+2013-06-11  Jeremy Bicha  <jbicha@ubuntu.com>
+
+	debian/control: Have libbamf3-dev depend on gir1.2-bamf-3, Drop build-depends on gir1.2-glib-2.0.
+	
+	Approved by PS Jenkins bot, Mathieu Trudel-Lapierre, Marco Trevisan (Treviño).
+
+2013-06-11  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Reverting revision 540, to get back GDBus based libbamf and DBus properties usage. Fixes: https://bugs.launchpad.net/bugs/697146, https://bugs.launchpad.net/bugs/1180057, https://bugs.launchpad.net/bugs/1180837, https://bugs.launchpad.net/bugs/1188518.
+	
+	Approved by Andrea Azzarone, PS Jenkins bot.
+
+2013-06-10  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfDaemon, LibBamf: Fix compilation errors out from ubuntu. Fixes: https://bugs.launchpad.net/bugs/1176524, https://bugs.launchpad.net/bugs/1186915.
+	
+	Approved by PS Jenkins bot, Christopher Townsend.
+
+2013-06-10  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Makefile.am.gtests: kill the launched dbus-daemon after running the tests. Fixes: https://bugs.launchpad.net/bugs/1088696, https://bugs.launchpad.net/bugs/1186915.
+	
+	Approved by Francis Ginther, PS Jenkins bot.
+
+2013-06-07  Didier Roche  <didier.roche@canonical.com>
+
+	Try reverting intrusive rev 536, 537 and 538 for getting unity back on shape during tests
+
+2013-06-07  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf, BamfView: Use dbus-properties (both values and signals)
+	
+	It allows to have correct values and signals when they get updated.
+	Deprecating related dbus methods/signals.
+	
+	Approved by Andrea Azzarone, PS Jenkins bot.
+
+2013-06-06  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libBamf: use GDBus proxies to connect to the daemon, move away from dbus-glib!
+	
+	Include a lot of code cleanup, added destruction bits to the BamfFactory.
+	Use GCancellable for the dbus calls to have nicer object destruction.
+	Implement Matcher's GetTab methods (both daemon and library side) and XidsForApplication.
+	Expose signals names as #define'd strings.
+	Fix some library annotations (to have better GIR bindings).
+	Correctly emit property-changed signals for about-to-close view's. Fixes: https://bugs.launchpad.net/bugs/697146, https://bugs.launchpad.net/bugs/1180057, https://bugs.launchpad.net/bugs/1180837.
+	
+	Approved by PS Jenkins bot, Mathieu Trudel-Lapierre, Andrea Azzarone, Brandon Schaefer.
+
+2013-06-05  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	LibBamfPrivate: add new private library to share code between client and daemon.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-06-04  Mathieu Trudel-Lapierre  <mathieu-tl@ubuntu.com>
+
+	Fix test-libbamf to properly call gtester2xunit.
+	
+	Approved by PS Jenkins bot, Didier Roche.
+
+2013-05-31  Timo Jyrinki  <timo.jyrinki@canonical.com>
+
+	libbamf: BamfApplication: cache MimeTypes and ApplicationType on favorite and sticky apps. Fixes: https://bugs.launchpad.net/bugs/1183871, https://bugs.launchpad.net/bugs/1183978.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-05-02  Andrea Azzarone  <azzaronea@gmail.com>
+
+	Remove functional tests.
+	
+	Approved by PS Jenkins bot, Marco Trevisan (Treviño).
+
+2013-04-18  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: use role and class changes signal to match LibreOffice and g-c-c. Fixes: https://bugs.launchpad.net/bugs/1100554.
+	
+	Approved by Andrea Azzarone, PS Jenkins bot.
+
+2013-04-17  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: fix a memory leak when trying to associate apps to new desktop files. Fixes: https://bugs.launchpad.net/bugs/1100551, https://bugs.launchpad.net/bugs/1100553, https://bugs.launchpad.net/bugs/1169990.
+	
+	Approved by Andrea Azzarone, PS Jenkins bot.
+
+2013-04-16  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: move the ownership of a chromeless webapp between WM and WebApps
+	
+	Also use new child-{added,removed}-internal signals. Fixes: https://bugs.launchpad.net/bugs/1059475.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-04-02  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	debian/changelog: updated to match last changes
+
+2013-03-28  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: make sure that all the no-display desktop files have lower priority. Fixes: https://bugs.launchpad.net/bugs/1161531.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-03-28  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	debian/bamfdaemon.postinst: write it in multiline and add support for StartupWMClass
+	
+	And other properties such as NoDisplay and OnlyShowIn.
+	
+	Also rewritten the bamfdaemon.postinst to use a multi-line perl script for easier review. Fixes: https://bugs.launchpad.net/bugs/1161430.
+	
+	Approved by PS Jenkins bot, Loïc Minier, Brandon Schaefer.
+
+2013-03-28  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	TestBamfMatcher: fix crashes caused by missing exec
+	
+	libbamf: use scanner-flags for introspection, fixes a compilation error.
+	
+	Approved by PS Jenkins bot, Brandon Schaefer.
+
+2013-03-06  György Balló  <ballogy@freestart.hu>
+
+	This change fixes the following two problems what I experienced while using BAMF on Arch Linux:
+	
+	1. Fix desktop file table if XDG_CURRENT_DESKTOP environment variable is not available.
+	
+	Using the vanilla gnome-session without Ubuntu patches, the XDG_CURRENT_DESKTOP is not specified. In this case, all desktop files are ignored which contain the OnlyShowIn property. This isn't the expected behavior, because many GNOME desktop files are ignored in a GNOME session, e.g. nautilus, control center entries. To fix this issue, all desktop files should be added to the desktop file table if no XDG_CURRENT_DESKTOP specified.
+	
+	2. Fix a critical warning if an empty Exec= line specified in a desktop file.
+	
+	Without this extra check, the following critical message displayed in this case (e.g. with the unity-scope-gdocs.desktop file):
+	
+	** (bamfdaemon:20159): CRITICAL **: insert_data_into_tables: assertion `exec' failed.
+	
+	Approved by PS Jenkins bot, Marco Trevisan (Treviño).
+
+2013-02-06  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfView: use an idle to emit the active-changed signal to avoid to send the same event to a view. Fixes: https://bugs.launchpad.net/bugs/1115827.
+	
+	Approved by Brandon Schaefer.
+
+2013-02-04  Alex Launi  <alex.launi@canonical.com>
+
+	Sets is-foreground-tab in bamf_unity_webapps_tab_initialize_properties. Fixes: https://bugs.launchpad.net/bugs/1109198.
+	
+	Approved by Marco Trevisan (Treviño).
+
+2013-01-29  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: ignore the javaws windows when setting the window hint. Fixes: https://bugs.launchpad.net/bugs/979752, https://bugs.launchpad.net/bugs/1098186, https://bugs.launchpad.net/bugs/1108380.
+	
+	Approved by Brandon Schaefer.
+
+2013-01-10  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: Don't associate .desktopless applications with different exec string, fix JavaWS apps. Fixes: https://bugs.launchpad.net/bugs/979752.
+	
+	Approved by Brandon Schaefer.
+
+2013-01-10  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf: use proper GIR dirs and build the gir1.2-bamf-0.2 package.
+	
+	Approved by Michael Terry.
+
+2013-01-09  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: improve the exec_string trimming code, revise the LO and GCC matching.
+	
+	Approved by Brandon Schaefer.
+
+2012-12-19  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf: bump the SONAME value and remove the unneeded libwnck dependencies.
+	
+	Approved by Michael Terry, PS Jenkins bot.
+
+2012-12-19  Andrea Azzarone  <azzaronea@gmail.com>
+
+	Make BamfWindow and BamfTab mockable.
+	
+	Approved by Marco Trevisan (Treviño).
+
+2012-12-19  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: use a GList to handle known pids.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2012-12-18  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: remove the duplicated code to fetch a window exec string.
+	
+	Approved by Brandon Schaefer, PS Jenkins bot.
+
+2012-12-18  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Bamf: removing the indicators related code (dead).
+	
+	Approved by Brandon Schaefer.
+
+2012-12-17  Francis Ginther  <francis.ginther@canonical.com>
+
+	Add code coverage reporting with coverage-html and coverage-gcovr targets.
+	
+	Coverage reporting can be enabled with --enable-gcov.
+	
+	Approved by Marco Trevisan (Treviño), Allan LeSage.
+
+2012-12-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	libbamf/bamfapplication: Fix annotation for get_xids.
+	
+	Approved by Michael Terry.
+
+2012-12-06  Francis Ginther  <francis.ginther@canonical.com>
+
+	Fix test failure caused when xvfb exits before script has a chance to kill it on script exit
+	
+	The xvfb process may or may not be present when the test script exits. Allow this with the addition of "||true". Fixes: https://bugs.launchpad.net/bugs/1079329.
+	
+	Approved by Marco Trevisan (Treviño).
+
+2012-12-06  Didier Roche  <didier.roche@canonical.com>
+
+	releasing version 0.4.0daily12.12.05-0ubuntu2
+
+2012-12-06  Didier Roche  <didier.roche@canonical.com>
+
+	Remove a wrong build-dep
+
+2012-12-05  Didier Roche  <didier.roche@canonical.com>
+
+	Releasing 0.4.0daily12.12.05-0ubuntu1 to ubuntu
+
+2012-11-19  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Autconf, debian: remove the legacy gtk-2 support and factorize the test building code.
+	
+	Approved by Michael Terry.
+
+2012-11-15  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf, BamfMatcher: avoid to return the same app twice in bamf_matcher_get_applications. Fixes: https://bugs.launchpad.net/bugs/1078448.
+	
+	Approved by Łukasz Zemczak.
+
+2012-11-15  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Bump revision to 0.4.0.
+	
+	Approved by Michael Terry.
+
+2012-11-15  Michael Terry  <michael.terry@canonical.com>
+
+	Use -c4 for dpkg-gensymbols to catch when we add or remove symbols from the library.
+	
+	Approved by Marco Trevisan (Treviño).
+
+2012-11-15  Didier Roche  <didier.roche@canonical.com>
+
+	Bootstrap for the daily build system. No bug to list on that one.
+	
+	Approved by .
+
+2012-11-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Don't call g_type_init while building against glib >= 2.35. Approved by Marco Trevisan (Treviño).
+
+2012-11-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	libbamf: add bamf_view_is_user_visible ()
+	
+	This makes the gir/vala api nicer and avoids a conlict with the property.
+	Mark bamf_view_user_visible as deprecated using glib 2.32 macro. Approved by Marco Trevisan (Treviño).
+
+2012-11-08  Michael Terry  <michael.terry@canonical.com>
+
+	Switch debian/ to debhelper 9 and other small build modernizations. Approved by Didier Roche, Stephen M. Webb.
+
+2012-11-07  Didier Roche  <didier.roche@canonical.com>
+
+	Bring debian/ packaging inline, build with dh-autoregen, and update the debian symbols files.. Approved by Francis Ginther, Marco Trevisan (Treviño), Didier Roche.
+
+2012-10-17  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: always associate children windows to the parent application. Approved by Brandon Schaefer.
+
+2012-10-10  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: add support for libreoffice Base, and libreoffice matching tests. Fixes: https://bugs.launchpad.net/bugs/1063862. Approved by Brandon Schaefer.
+
+2012-10-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Autoconf: Exclude generated sources from tarball and fix "make distcheck". Approved by Marco Trevisan (Treviño).
+
+2012-10-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	libbamf: gir-annotion fixes and make gi-scanner verbose. Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-10-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Libbamf: Some signal, type and annotation fixes. Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-10-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Autoconf: Make libunity-webapps an optional dependency. Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-10-04  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfFactory: don't use the secondary matching method for views with valid .desktop file (LP: #1026426). Fixes: https://bugs.launchpad.net/bugs/1026426. Approved by Timo Jyrinki.
+
+2012-10-01  Łukasz 'sil2100' Zemczak  <lukasz.zemczak@canonical.com>
+
+	Release 0.3.2
+
+2012-10-01  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Daemon, BamfApplication: fix a crash on getting the supported mimes
+	
+	Also remove the unneeded mimes_initialized, just use the pointer value and add tests.. Fixes: https://bugs.launchpad.net/bugs/1058260. Approved by Michal Hruby.
+
+2012-10-01  Maxim Ermilov  <maxim.ermilov@canonical.com>
+
+	Daemon, BamfUnityWebApp: don't unref the view when not needed, the matcher will handle that.. Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-09-17  Robert Carr  <racarr@canonical.com>
+
+	Fix typo in bamf_unity_webapps_application_get_close_when_empty, closes bug 1051042. Fixes: https://bugs.launchpad.net/bugs/1051042. Approved by Marco Trevisan (Treviño).
+
+2012-09-03  Łukasz 'sil2100' Zemczak  <lukasz.zemczak@canonical.com>
+
+	Release 0.3.0
+
+2012-08-22  Robert Carr  <racarr@canonical.com>
+
+	Add webapps support. Fixes: . Approved by Marco Trevisan (Treviño), Jason Smith.
+
+2012-08-10  Michal Hruby  <michal.mhr@gmail.com>
+
+	Release 0.2.122
+
+2012-08-01  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	tests: include the tests data dir in distribution. Fixes: . Approved by Łukasz Zemczak.
+
+2012-08-01  Łukasz 'sil2100' Zemczak  <lukasz.zemczak@canonical.com>
+
+	Added some missing header files to src/Makefile.am.. Fixes: . Approved by Sam Spilsbury.
+
+2012-07-31  Michal Hruby  <michal.mhr@gmail.com>
+
+	Fix non-srcdir build. Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-07-31  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: don't reopen windows when iterating on view's list, add tests. Fixes: . Approved by Michal Hruby.
+
+2012-07-17  Brandon Schaefer  <brandontschaefer@gmail.com>
+
+	Daemon, BamfApplication: Use the default icon if there is not one defined in the desktop file.. Fixes: https://bugs.launchpad.net/bugs/886778. Approved by Marco Trevisan (Treviño).
+
+2012-07-13  Michal Hruby  <michal.mhr@gmail.com>
+
+	Enable introspection. Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-07-13  Ying-Chun Liu (PaulLiu)  <grandpaul@gmail.com>
+
+	Fix type mismatch in bamf_control_register_application_for_pid() and the dbus interface
+	
+	(LP: #1021143). Fixes: https://bugs.launchpad.net/bugs/1021143. Approved by Marco Trevisan (Treviño).
+
+2012-07-04  Michal Hruby  <michal.mhr@gmail.com>
+
+	Release 0.2.120
+
+2012-06-22  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: force a view as closed or not-closed on proper signals.
+	
+	This avoids that a view that is opened is actually marked as closed when
+	really it's running. Fixes #925421. Fixes: https://bugs.launchpad.net/bugs/925421. Approved by Jason Smith.
+
+2012-06-22  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf, bamf-view: don't unset the proxy on closed sticky views
+	
+	Also, don't reset the proxy if the current one is still valid.. Fixes: https://bugs.launchpad.net/bugs/976642. Approved by Jason Smith.
+
+2012-06-20  Didier Roche  <didier.roche@canonical.com>
+
+	remerge libbamf, Makefile: don't export private symbols (factory and matcher)
+
+2012-06-20  Didier Roche  <didier.roche@canonical.com>
+
+	releasing 0.2.118
+
+2012-05-22  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: when a new .desktop file is added, try to rematch it to opened applications. Fixes: https://bugs.launchpad.net/bugs/1003005. Approved by Jason Smith.
+
+2012-05-22  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: use both instance and class names for matching WMClass
+	
+	Also, filter out the .desktop files that have a defined StartupWMClass
+	that doesn't match with our .desktop file.. Fixes: https://bugs.launchpad.net/bugs/692462. Approved by Jason Smith.
+
+2012-05-22  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher: match chromium web applications with no .desktop file as new applications. Fixes: https://bugs.launchpad.net/bugs/692462. Approved by Jason Smith.
+
+2012-05-22  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfMatcher must emit the "running-applications-changed" signal for closed applications.. Fixes: https://bugs.launchpad.net/bugs/989551. Approved by Gord Allott.
+
+2012-05-17  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf: unset the previously defined proxy if adding a new one
+	
+	This fixes some crashes, and memory leaks.. Fixes: https://bugs.launchpad.net/bugs/995916, https://bugs.launchpad.net/bugs/999820, https://bugs.launchpad.net/bugs/1000577. Approved by Tim Penhey, Andrea Azzarone.
+
+2012-04-27  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfFactory: be more smart to re-associate a dbus path to a view using windows xid. Fixes: https://bugs.launchpad.net/bugs/928912. Approved by Michal Hruby.
+
+2012-04-26  Gord Allott  <gord.allott@canonical.com>
+
+	Release 0.2.116
+
+2012-04-24  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BamfLegacyWindow and BamfMatcher changes needed to get the proper WM_CLASS / desktop-class matching in BAMF.. Fixes: https://bugs.launchpad.net/bugs/692462. Approved by Jason Smith.
+
+2012-04-24  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf, BamfMatcher: added finalize and dispose functions to disconnect to proxy when destructed. Fixes: . Approved by Michal Hruby.
+
+2012-04-22  Charles Kerr  <charles.kerr@canonical.com>
+
+	BamfView: invoke the invoke the superclass' dispose. Fixes: https://bugs.launchpad.net/bugs/986888. Approved by Marco Trevisan (Treviño).
+
+2012-04-18  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf, BamfFactory: don't cast a view to application if is not a bamf-application. Fixes: . Approved by Michal Hruby, Andrea Azzarone.
+
+2012-04-10  Thomi Richards  <thomi.richards@canonical.com>
+
+	Fixed a memory leak in libbamf.. Fixes: . Approved by Gord Allott.
+
+2012-03-23  Michal Hruby  <michal.mhr@gmail.com>
+
+	Release 0.2.114
+
+2012-03-20  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Fix memory leaks and some read errors in Bamf. Fixes: https://bugs.launchpad.net/bugs/929468. Approved by Michal Hruby.
+
+2012-03-12  Michal Hruby  <michal.mhr@gmail.com>
+
+	Release 0.2.112
+
+2012-02-28  Ryan Lortie  <desrt@desrt.ca>
+
+	In libbamf BamfMatcher Don't ref/unref views when they are opened/closed
+	
+	When a "Opened" signal comes from bamf, the client side matcher gets the view for the path and refs it. on "Closed" it unrefs it.
+	
+	the problem comes when you close a window that was open when the application using bamf started running. in that case, the client library sees "Closed" with no "Opened" and drops a reference that it doesn't own.
+	
+	UNBLOCK. Fixes: https://bugs.launchpad.net/bugs/942070. Approved by Marco Trevisan (Treviño).
+
+2012-02-27  Michal Hruby  <michal.mhr@gmail.com>
+
+	Let's make these changes by Jason land ;). Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-02-27  Ted Gould  <ted@gould.cx>
+
+	Fixes a case where there is no session bus to be found.. Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-02-27  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Fixed the Coverity warning.. Fixes: https://bugs.launchpad.net/bugs/937398. Approved by Jason Smith.
+
+2012-02-27  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Making libbamf correctly free items when disposing BamfView and BamfControl, plus some misc cleanups. Fixes: https://bugs.launchpad.net/bugs/942148. Approved by Jason Smith.
+
+2012-02-24  Charles Kerr  <charles.kerr@canonical.com>
+
+	. Fixes: https://bugs.launchpad.net/bugs/937402. Approved by Marco Trevisan (Treviño).
+
+2012-02-17  Michal Hruby  <michal.mhr@gmail.com>
+
+	Merge trunk
+
+2012-02-17  Michal Hruby  <michal.mhr@gmail.com>
+
+	Release 0.2.110
+
+2012-02-16  Sven Baars  <svenb.linux@gmail.com>
+
+	Make sure the result of g_dbus_proxy_call_sync is unreffed. g_dbus_proxy_call_sync returns a non-floating GVariant.. Fixes: . Approved by Marco Trevisan (Treviño).
+
+2012-02-15  Jason Smith  <jason.smith@canonical.com>
+
+	UNBLOCK
+	
+	Gets rid of cache tracking and simply invalidates cache when add or remove signals are received.. Fixes: . Approved by Gord Allott.
+
+2012-02-10  Jason Smith  <jason.smith@canonical.com>
+
+	Fix approved in IRC by desrt. Fixes: . Approved by .
+
+2012-02-10  Jason Smith  <jason.smith@canonical.com>
+
+	Make sure we actually get UTF8 strings when needed. Fixes: . Approved by Ted Gould.
+
+2012-02-10  Jason Smith  <jason.smith@canonical.com>
+
+	Implements updates to the dbus menu spec (new atoms mostly)
+	
+	Merge does not contain tests. Tests will be covered in User Acceptance testing in Unity later when the required dependencies for the tests are available.. Fixes: . Approved by Ted Gould.
+
+2012-02-09  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Some bool are returned on non-gboolean functions, fixed them plus a gerror memory leak. Fixes: . Approved by Michal Hruby.
+
+2012-02-09  Sven Baars  <svenb.linux@gmail.com>
+
+	This should fix
+	
+	==1933== 96 bytes in 8 blocks are definitely lost in loss record 8,181 of 10,585
+	==1933==    at 0x4C296CD: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+	==1933==    by 0x6710918: g_malloc (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.3116.0)
+	==1933==    by 0x6702A4C: ??? (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.3116.0)
+	==1933==    by 0x6703DDF: g_key_file_get_string (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.3116.0)
+	==1933==    by 0x2366A677: bamf_application_new_favorite (in /usr/lib/x86_64-linux-gnu/libbamf3.so.0.0.0)
+	==1933==    by 0x2366F34F: bamf_factory_app_for_file (in /usr/lib/x86_64-linux-gnu/libbamf3.so.0.0.0)
+	==1933==    by 0x2366C023: bamf_matcher_get_application_for_desktop_file (in /usr/lib/x86_64-linux-gnu/libbamf3.so.0.0.0)
+	==1933==    by 0x22D83554: unity::launcher::Controller::Impl::CreateFavorite(char const*) (in /usr/lib/compiz/libunityshell.so)
+	==1933==    by 0x22D8623B: unity::launcher::Controller::Impl::SetupBamf() (in /usr/lib/compiz/libunityshell.so)
+	==1933==    by 0x22D865A8: ??? (in /usr/lib/compiz/libunityshell.so)
+	==1933==    by 0x670B76A: ??? (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.3116.0)
+	==1933==    by 0x670AB29: g_main_context_dispatch (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.3116.0). Fixes: . Approved by Michal Hruby.
+
+2012-02-08  Sven Baars  <svenb.linux@gmail.com>
+
+	This should fix
+	
+	==1994== 49 (16 direct, 33 indirect) bytes in 1 blocks are definitely lost in loss record 11,086 of 25,065
+	==1994==    at 0x4C296CD: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+	==1994==    by 0x4C29857: realloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+	==1994==    by 0x670D9D6: g_realloc (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.3116.0)
+	==1994==    by 0x66DCB58: ??? (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.3116.0)
+	==1994==    by 0x66DCCD3: g_array_sized_new (in /lib/x86_64-linux-gnu/libglib-2.0.so.0.3116.0)
+	==1994==    by 0x10EC9D96: ??? (in /usr/lib/x86_64-linux-gnu/libdbus-glib-1.so.2.2.2)
+	==1994==    by 0x10ECAAD4: ??? (in /usr/lib/x86_64-linux-gnu/libdbus-glib-1.so.2.2.2)
+	==1994==    by 0x10EC437C: ??? (in /usr/lib/x86_64-linux-gnu/libdbus-glib-1.so.2.2.2)
+	==1994==    by 0x10EC769A: dbus_g_proxy_call (in /usr/lib/x86_64-linux-gnu/libdbus-glib-1.so.2.2.2)
+	==1994==    by 0x1B0DB81E: bamf_view_get_children (in /usr/lib/x86_64-linux-gnu/libbamf3.so.0.0.0)
+	==1994==    by 0x19EE94B3: unity::launcher::BamfLauncherIcon::EnsureWindowState() (in /usr/lib/compiz/libunityshell.so)
+	==1994==    by 0x19EE9B87: unity::launcher::BamfLauncherIcon::BamfLauncherIcon(_BamfApplication*) (in /usr/lib/compiz/libunityshell.so). Fixes: . Approved by Mikkel Kamstrup Erlandsen.
+
+2012-02-07  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Makes bamf not double add items if the user calls get_children before a child-added signal arrives.. Fixes: https://bugs.launchpad.net/bugs/928014. Approved by Tim Penhey.
+
+2012-02-03  Didier Roche  <didier.roche@canonical.com>
+
+	releasing 0.2.108
+
+2012-01-27  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Libreoffice desktop files have changed the exec parameter in last upgrade, we need to match them correctly.
+	
+	Code updated to support both the old and the new lo .desktop files.. Fixes: https://bugs.launchpad.net/bugs/919892. Approved by Jason Smith.
+
+2012-01-27  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Fixed bug bug #801784 making gnome-control-center to rematch in BAMF
+	
+	Used a similar hack used for re-matching libreoffice. Here the gnome-control-center window is rematched when its name changes, getting its ID from the defined WM_WINDOW_ROLE.
+	
+	Also I've fixed a bug that caused all the gnome-control-center desktop to be ignored by the matcher, only the last parsed was considered by bamf before (due to this when doing "gnome-control-center display" in a terminal, the window was matched as a generic g-c-c window, not as the display one). To do this, I've added a white-list regex to match the prefixes that must not be ignored and that should be included into the exec string (I guess that this can be useful also for fixing the matching of the wine apps).
+	
+	Note that this branch to work correctly needs lp:~3v1n0/ubuntu/precise/gnome-control-center/add-window-role-to-panels
+	If no patched gnome-control-center is found, all the gnome-control-center windows will always be shown as generic g-c-c windows.. Fixes: https://bugs.launchpad.net/bugs/801784. Approved by .
+
+2012-01-27  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Fixed bug #919366 that was caused by the fact that the list of the cached children were not correctly updated on children removal.
+	
+	Reffing the objects on the list and manually looking for the removed one, does the work.
+	In the case we can't find the removed object, we just free the cached list, that will be eventually repopulated on next request.. Fixes: https://bugs.launchpad.net/bugs/919366. Approved by Jason Smith.
+
+2012-01-24  Jason Smith  <jason.smith@canonical.com>
+
+	. Fixes: . Appoved by Andrea Azzarone.
+
+2012-01-20  Michal Hruby  <michal.mhr@gmail.com>
+
+	Added method and signal to list desktop file paths of running applications, this is needed for application lens, which should exclude running applications from the default results and we need to minimize the number of wakeups of the lens daemon.. Fixes: . Appoved by Marco Trevisan (Treviño), Mikkel Kamstrup Erlandsen.
+
+2012-01-19  smspillaz  <sam.spilsbury@canonical.com>
+
+	Collects existing merges from Marco (sorry, we need this merged) and fixes conflicts/naming. Fixes: . Appoved by Marco Trevisan (Treviño), Michal Hruby, Andrea Azzarone.
+
+2012-01-19  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Added the wrapper functions for the new DBus APIs defined in lp:~3v1n0/bamf/bamfdaemon-net-dbus-hints. Fixes: . Appoved by .
+
+2012-01-19  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Implemented the _DBUS_APPLICATION_ID, _DBUS_UNIQUE_NAME, and _DBUS_OBJECT_PATH support
+	
+	Added more APIs to get more informations from a window, and to get the stacked windows per monitor.. Fixes: . Appoved by Jason Smith.
+
+2012-01-19  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Ported the BAMF daemon to GDBus, using gdbus-codegen to generate most of the low-level code.
+	
+	The BamfMatcher and BamfControl are directly extending the generated skeleton class, while the Views are now extending the generated BamfDBusItemObjectSkeleton class, so it has been easily possible to transform each subclass into a kind of proxy to the generated skeleton interface. To reduce code redundancy for initializing signals, some view classes are also implementing the related skeleton interface, but this has been done only for convenience.
+	
+	Then, I've added a BamfDaemon class to handle the daemon initialization and termination, and I've updated the tests against the new internal APIs.
+	
+	Finally, I've also ported all the code for indicators and tabs, while I guess that this is now quite obsolete (the indicator part shouldn't totally, but the tabs really are), so maybe it could safely be removed.
+	
+	I also want to make clear that the public DBus API interface has not been touched by this porting, so the new bamfdaemon can safely replace the old one (in fact I'm using it on my PC for some days with no crashes or unexpected behavior).
+	
+	The port of libbamf will begin soon as well, and doing that maybe we should refine also the DBus interface.
+	
+	PS: of course I've also included some random code fixes and cleanup.. Fixes: https://bugs.launchpad.net/bugs/697148. Appoved by Jason Smith.
+
+2012-01-12  Didier Roche  <didier.roche@canonical.com>
+
+	releasing 0.2.106
+
+2011-12-15  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	Fixed LibreOffice and OpenOffice compatibility, remapping windows to their real type. Fixes: https://bugs.launchpad.net/bugs/741995, https://bugs.launchpad.net/bugs/840000, https://bugs.launchpad.net/bugs/842566, https://bugs.launchpad.net/bugs/861355. Appoved by Mikkel Kamstrup Erlandsen.
+
+2011-12-07  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	BAMF doesn't consider any .desktop file saved in ~/.local/share/applications or any other local folder which contains the flag OnlyShowIn=GNOME;Unity; so, it's impossible to directly copy any .desktop file from /usr/share/applications to a local folder to customize it, without removing the above flag, and this is wrong. This patch fixes the issue.. Fixes: https://bugs.launchpad.net/bugs/863290. Appoved by Jason Smith.
+
+2011-11-29  Marco Trevisan (Treviño)  <mail@3v1n0.net>
+
+	libbamf doesn't actually notifies when a sticky application is opened or closed.
+	This branch fixes the issue.. Fixes: . Reviewed by Didier Roche.
+
+2011-11-29  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Bugfix:
+	
+	* Add missing guard checking if the legacy WnckWindow is != NULL in bamf_legacy_window_save_mini_icon(). This fixes the tests /Application/ManagesXid and /Application/Xids when running headless
+	
+	Fixes for headless test mode:
+	
+	* Properly exit if any tests report errors during 'make check' when running in headless mode
+	* Remove debug spew when running tests "Export path: %s\n"
+	* Remove unused variable TEST_RESULTS from test Makefile.ams. Fixes: . Reviewed by Didier Roche.
+
+2011-11-28  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Fixes 'make check' and adds a headless testing mode that will be enabled if running configure with --enable-headless-tests=yes. Fixes: 897148,897150. Reviewed by Didier Roche.
+
+2011-09-26  Didier Roche  <didier.roche@canonical.com>
+
+	Releasing 0.2.104
+
+2011-09-26  Didier Roche  <didier.roche@canonical.com>
+
+	use the new API only with gtk3 wnck
+
+2011-09-26  Didier Roche  <didier.roche@canonical.com>
+
+	releasing 0.2.102
+
+2011-09-22  Jason Smith  <jason.smith@canonical.com>
+
+	fix webapps created through the wrench menu
+
+2011-09-22  Jason Smith  <jason.smith@canonical.com>
+
+	fix chromium webapp support
+
+2011-09-13  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	bamfdaemon crashed with SIGSEGV in sn_xcb_display_new()
+
+2011-09-08  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.98
+
+2011-08-30  Marco Trevisan
+
+	Merge bamf fixes branch
+
+2011-08-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.96
+
+2011-08-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.94
+
+2011-08-24  Jason Smith  <jason.smith@canonical.com>
+
+	dont crash if someone frees memory we didn't mean to pass out
+
+2011-08-01  Jason Smith  <jason.smith@canonical.com>
+
+	merge gio removal branch
+
+2011-06-17  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.92
+
+2011-06-09  Micheal Terry  <michael.terry@canonical.com >
+
+	Merge gtk3 support branch
+
+2011-04-27  Gord Allott  <gord.allott@canonical.com>
+
+	respects the NoDisplay option in .desktop files - fixes lp:741129
+
+2011-04-26  Jason Smith  <jason.smith@canonical.com>
+
+	fix issue where already active windows didn't signal the state change
+
+2011-04-21  Jason Smith  <jason.smith@canonical.com>
+
+	Expand suffix regex to cover python
+
+2011-04-19  Jason Smith  <jason.smith@canonical.com>
+
+	remove printf
+
+2011-04-19  Jason Smith  <jason.smith@canonical.com>
+
+	account for -bin or .bin style launchers
+
+2011-04-19  Didier Roche  <didier.roche@canonical.com>
+
+	[release] 0.2.90
+
+2011-04-18  Gord Allott  <gord.allott@canonical.com>
+
+	Uses X-GNOME-FullName instead of the Name if its available
+
+2011-04-18  Jason Smith  <jason.smith@canonical.com>
+
+	merge fix for using window name vs class for unmatched windows
+
+2011-04-15  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Send back a copied string
+
+2011-04-14  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.88
+
+2011-04-12  Jason Smith  <jason.smith@canonical.com>
+
+	make sure we dont fail to match because the WM class was different. Simply prefer matches based on wm-class
+
+2011-04-11  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.86
+
+2011-04-08  Jason Smith  <jason.smith@canonical.com>
+
+	dont export stable name based on wm-class. wm-class may be shared between multiple discrete apps and is not a valid way to provide a stable/unique name
+
+2011-04-07  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.84
+
+2011-04-06  Jason Smith  <jason.smith@canonical.com>
+
+	ensure we dont send bad windows out to dbus and crash
+
+2011-04-06  Jason Smith  <jason.smith@canonical.com>
+
+	ref_sink rather than ref so that when a floating view is set sticky it will destroy properly
+
+2011-04-05  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Check what we actually want to check is valid, not what we know is invalid
+
+2011-03-31  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.82
+
+2011-03-31  Jason Smith  <jason.smith@canonical.com>
+
+	merge wm matching class work from Marco Trevisan
+
+2011-03-31  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Protect against a NULL display returning
+
+2011-03-17  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.80
+
+2011-03-16  Gord Allott  <gord.allott@canonical.com>
+
+	fixes a bug in bamf sub-directory lookups, kde 4 apps now match fixes:693755
+
+2011-02-13  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Add a validity check for a returned View
+
+2011-02-10  Didier Roche  <didier.roche@canonical.com>
+
+	bump version
+
+2011-02-10  Jason Smith  <jason.smith@canonical.com>
+
+	fix tabs
+
+2011-02-10  Jason Smith  <jason.smith@canonical.com>
+
+	merge libreoffice fix from Martin Pitt
+
+2011-02-09  Jason Smith  <jason.smith@canonical.com>
+
+	minor type fix
+
+2011-01-27  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.76
+
+2011-01-26  Mirco Müller  <mirco.mueller@ubuntu.com>
+
+	modified:
+	lib/libbamf/bamf-view.c
+	lib/libbamf/bamf-view.h
+	src/bamf-view-glue.xml
+	src/bamf-view.c
+	src/bamf-view.h
+	tests/functional/alt-tabber.c
+	
+	Merged bamf-branch add-name-changed-signal after review and approval from
+	Jason. This adds the signal "name-changed" to the daemon and library so
+	client-applications can hook up to a signal, if they want to be informed,
+	if the title of a window (because of a tab-focus change) was altered.
+	This is a prerequisite for fixing unity bug 691651.
+
+2011-01-20  Didier Roche  <didier.roche@canonical.com>
+
+	releasing 0.2.74
+
+2011-01-18  Didier Roche  <didier.roche@canonical.com>
+
+	Set the default application icon when the application desktop file has no icon=
+	key. It was appearing fully black. This fix bug #703521.
+
+2011-01-14  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.72
+
+2011-01-14  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[merge] ted's work
+
+2011-01-14  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.70
+
+2011-01-14  Jason Smith  <jason.smith@canonical.com>
+
+	make bamf use stable as possible naming
+
+2010-12-17  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.68
+
+2010-12-11  Jason Smith  <jason.smith@canonical.com>
+
+	use a weak ref to remove dead objects
+
+2010-12-09  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.66
+
+2010-12-03  Didier Roche  <didier.roche@canonical.com>
+
+	check that desktop file is currently supported before creating the favorite LP: #682345
+
+2010-12-03  Jason Smith  <jason.smith@canonical.com>
+
+	ensure we dont have an invalid reference to ourself after emitting the closed signal
+
+2010-12-02  Jason Smith  <jason.smith@canonical.com>
+
+	hopefully fix ref counting once and for all
+
+2010-11-30  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.64
+
+2010-11-29  Jason Smith  <jason.smith@canonical.com>
+
+	minor fixes for favorites handling
+
+2010-11-18  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.62
+
+2010-11-18  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Final build-fiddling to make bamf work out-of-tree in jhbuild
+
+2010-11-18  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Build fixes in order to work with jhbuild:
+	
+	* Require --enable-introspection=no in distcheck
+	* Fix includes in bamf-tab.h
+	* Fix include paths to also pick up the generated files in the build dir
+
+2010-11-16  Jason Smith  <jason.smith@canonical.com>
+
+	merge crash fix 
+
+2010-11-11  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.60
+
+2010-11-05  Didier Roche  <didier.roche@canonical.com>
+
+	fix DSO linking
+
+2010-11-02  jassmith@gmail.com
+
+	ensure we favorite applications over the bus as well
+
+2010-11-01  jassmith@gmail.com
+
+	improve favorites behavior (refcounting was failing)
+	begin implementing suggested click behaviors
+
+2010-10-25  jassmith@gmail.com
+
+	add favorites support 
+
+2010-09-29  jassmith@gmail.com
+
+	fix string in gio module
+
+2010-09-27  jassmith@gmail.com
+
+	dummy commit
+
+2010-09-27  jassmith@gmail.com
+
+	pre release increment
+
+2010-09-27  jassmith@gmail.com
+
+	ensure we dont mark windows user visible that are confusing to unity
+
+2010-09-24  jassmith@gmail.com
+
+	ensure we are pushing valid data
+
+2010-09-22  jassmith@gmail.com
+
+	merge favorites fixes
+
+2010-09-22  jassmith@gmail.com
+
+	Ensure we free tmp files and that we dont crash in malformed .desktop files
+
+2010-09-22  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Post release bump
+
+2010-09-22  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.54
+
+2010-09-21  jassmith@gmail.com
+
+	Update to include convenience API for non-dock type consumers. Useful for consumers watching window change events not wishing to track closed signals for every object.
+
+2010-09-16  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Post release bump
+
+2010-09-16  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.52
+
+2010-09-15  jassmith@gmail.com
+
+	Ensure we ship proper strings to open office windows
+
+2010-09-15  Ken VanDine  <ken.vandine@canonical.com>
+
+	Release 0.2.50
+
+2010-09-15  jassmith@gmail.com
+
+	Initialize xid
+
+2010-09-15  jassmith@gmail.com
+
+	Undo yesterdays stupid
+
+2010-09-14  jassmith@gmail.com
+
+	Add extra caching
+
+2010-09-14  jassmith@gmail.com
+
+	merge pc file version branch
+
+2010-09-14  jassmith@gmail.com
+
+	ensure we load .desktop files that are passed as favorites
+
+2010-09-14  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	post release bump
+
+2010-09-14  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.4.48
+
+2010-09-13  jassmith@gmail.com
+
+	pass back correct path on application for xid
+
+2010-09-13  jassmith@gmail.com
+
+	Change show_stubs to be show_menu_stubs
+
+2010-09-13  jassmith@gmail.com
+
+	merge application for window branch
+
+2010-09-13  jassmith@gmail.com
+
+	merge show-stubs branch
+
+2010-09-13  jassmith@gmail.com
+
+	fix registration
+
+2010-09-09  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Post release version bump
+
+2010-09-09  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Release 0.2.46
+
+2010-09-09  jassmith@gmail.com
+
+	merge in favorites branch
+
+2010-09-01  Ted Gould  <ted@gould.cx>
+
+	Add get_windows to the library header
+
+2010-08-31  jassmith@gmail.com
+
+	add api for getting window list
+
+2010-08-31  jassmith@gmail.com
+
+	Add support to export the desktop window and marking window types
+
+2010-08-19  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Post release version bump
+
+2010-08-19  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Release 0.2.44
+
+2010-08-19  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Merge Mikkel's branch lp:~unity-team/bamf/gio-api-bump:
+	
+	* Bump to new API/ABI for the GIO extension point
+
+2010-08-19  jassmith@gmail.com
+
+	use o for signature instead of s
+
+2010-08-18  jassmith@gmail.com
+
+	Add approver revise judgement api and disable approver by default
+
+2010-08-18  jassmith@gmail.com
+
+	Fix potential NULL deref when XDG_DATA_DIRS is not set
+
+2010-08-12  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Post release version bump
+
+2010-08-12  Mikkel Kamstrup Erlandsen  <mikkel.kamstrup@gmail.com>
+
+	Release 0.2.42
+
+2010-08-11  jassmith@gmail.com
+
+	fix timer and ensure tesets can run with improperly setup environment for MIR
+
+2010-08-02  Mikkel Kamstrup Erlandsen  <kamstrup@delight>
+
+	Post release version bump
+
+2010-08-02  Mikkel Kamstrup Erlandsen  <kamstrup@delight>
+
+	Release 0.2.40
+
+2010-07-30  Neil Jagdish Patel  <njpatel@Pulse>
+
+	Update some gtk-doc stuff to be explicit about ownership transfer
+
+2010-07-22  Mikkel Kamstrup Erlandsen  <kamstrup@hardback>
+
+	Post release version bump to 0.2.39
+
+2010-07-22  Mikkel Kamstrup Erlandsen  <kamstrup@hardback>
+
+	post release version bump to 0.2.38
+
+2010-07-20  jassmith@gmail.com
+
+	add notify signals
+
+2010-07-20  jassmith@gmail.com
+
+	fix issue where wrong signal was emitted on view removed
+
+2010-07-16  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Bump to the next devel version
+
+2010-07-16  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.36
+
+2010-07-13  jassmith@gmail.com
+
+	implement code to re-register with remote service in case of crash
+
+2010-07-13  jassmith@gmail.com
+
+	whitespace
+
+2010-07-13  jassmith@gmail.com
+
+	ensure the view closed signal is the LAST signal fired that references that signal. This is important for the client lib as it will need to clean up its memory
+
+2010-07-13  jassmith@gmail.com
+
+	start work to clean up memory management
+
+2010-07-12  jassmith@gmail.com
+
+	re-disable warning message when bamf-factory gets an empty string as it has valid reasons for happening
+
+2010-07-12  jassmith@gmail.com
+
+	add caching of flags and fix minor logic error in item factory
+
+2010-07-12  jassmith@gmail.com
+
+	remove unneeded wnck reference
+
+2010-07-12  jassmith@gmail.com
+
+	more memory cleanups
+
+2010-07-12  jassmith@gmail.com
+
+	enforce const and improve caching in lib
+
+2010-07-12  jassmith@gmail.com
+
+	export properties over the bus for easier inspection and debugging using d-feet
+
+2010-07-12  jassmith@gmail.com
+
+	allow for grabbing of the remote dbus menu path
+
+2010-07-12  jassmith@gmail.com
+
+	print out indicators in alt-tabber test
+
+2010-07-12  jassmith@gmail.com
+
+	Add library implementation of indicator
+
+2010-07-12  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Bump to next development release
+
+2010-07-12  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Update ignores
+
+2010-07-12  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.34
+
+2010-07-09  jassmith@gmail.com
+
+	Unused defines
+
+2010-07-09  jassmith@gmail.com
+
+	migrate to API as provided by teds branch
+
+2010-07-09  jassmith@gmail.com
+
+	ensure proper setting of running state
+
+2010-07-09  jassmith@gmail.com
+
+	Add parents API to bus for debugging purposes
+
+2010-07-09  jassmith@gmail.com
+
+	properly dispose of indicators when they fall off the bus
+
+2010-07-09  jassmith@gmail.com
+
+	major overhaul of how indicators are handled
+	modified api for closing views to removing disposal magic
+	updated tests to reflect new api
+
+2010-07-06  jassmith@gmail.com
+
+	delete code that was meant to be deleted long ago
+
+2010-07-06  Jason Smith  <jason@hakimaki>
+
+	missing header
+
+2010-07-02  Jason Smith  <jason@hakimaki>
+
+	Allow legacy windows to save their mini icons to a file for fallback purposes
+
+2010-07-02  Jason Smith  <jason@hakimaki>
+
+	line swap
+
+2010-07-02  Jason Smith  <jason@hakimaki>
+
+	fix test building
+
+2010-07-02  Jason Smith  <jason@hakimaki>
+
+	Make sure to send back a proper approve signal
+
+2010-07-02  Jason Smith  <jason@hakimaki>
+
+	finish up matching work on indicators
+
+2010-07-01  Jason Smith  <jason@hakimaki>
+
+	initial implementation of indicator approver service
+
+2010-06-24  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Bump to next development version
+
+2010-06-24  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.32
+
+2010-06-24  Jason Smith  <jason@hakimaki>
+
+	fix potential crash from junk data
+
+2010-06-18  Jason Smith  <jason@hakimaki>
+
+	Check on process name if no matches are found (fixes exaile)
+
+2010-06-17  Jason Smith  <jason@hakimaki>
+
+	better oo.o matching
+
+2010-06-17  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	bump for next devel release
+
+2010-06-17  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.30
+
+2010-06-17  Jason Smith  <jason@hakimaki>
+
+	ensure we recurse into directories
+
+2010-06-14  Jason Smith  <jason@hakimaki>
+
+	Add bamf_window_last_active to BamfWindow in client library. Backend modifications required for situations where applications start up after window has opened.
+
+2010-06-14  Jason Smith  <jason@hakimaki>
+
+	merge el trunko
+
+2010-06-14  Jason Smith  <jason@hakimaki>
+
+	initial import for tab class into client library
+
+2010-06-11  Jason Smith  <jason@hakimaki>
+
+	perform wild ass guess for transient windows. It should be relatively harmless.
+
+2010-06-11  Jason Smith  <jason@hakimaki>
+
+	setup parent list
+
+2010-06-11  Jason Smith  <jason@hakimaki>
+
+	remove bamf_view_get_parent as its intended for internal use only
+
+2010-06-11  Jason Smith  <jason@hakimaki>
+
+	Add call to client library for checking transients
+
+2010-06-11  Jason Smith  <jason@hakimaki>
+
+	add transient window property to bus
+
+2010-06-07  Jason Smith  <jason@hakimaki>
+
+	merge anjali bamf
+
+2010-06-04  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Bump to next development release
+
+2010-06-04  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.26
+
+2010-06-03  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Make sure to send back a dupped string, otherwise you crash
+
+2010-06-02  Jason Smith  <jason@hakimaki>
+
+	Use more descript marshaller
+
+2010-06-02  Jason Smith  <jason@hakimaki>
+
+	more updates for Maverick
+
+2010-06-02  Jason Smith  <jason@hakimaki>
+
+	fix the first of many new issues in maverick
+
+2010-06-02  Mikkel Kamstrup Erlandsen  <kamstrup@hardback>
+
+	Merge Mikkel's branch lp:~anjali-team/anjali/bamf.gtk-doc
+	
+	* Adds gtk-doc support for libbamf
+	
+	* Fixes distcheck
+
+2010-05-28  Jason Smith  <jason@hakimaki>
+
+	remove cruft
+
+2010-05-28  Jason Smith  <jason@hakimaki>
+
+	merge bamf public branch
+
+2010-05-27  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Bump to next development version
+
+2010-05-27  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.24
+
+2010-05-27  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Check if GAppInfo is valid
+
+2010-05-27  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	- For non-desktop-file-backed applications, get some of the applications
+	properties from the first child that's added
+
+2010-05-26  Jason Smith  <jason@hakimaki>
+
+	update filter to ensure we dont get stray events
+
+2010-05-26  Jason Smith  <jason@hakimaki>
+
+	hook up signals properly
+
+2010-05-26  Jason Smith  <jason@hakimaki>
+
+	properly set name
+
+2010-05-26  Jason Smith  <jason@hakimaki>
+
+	Avoid double freeing memory in certain conditions
+
+2010-05-26  Gord Allott  <gord.allott@canonical.com>
+
+	added introspection.m4 so that  we can build without gobject-introspection
+
+2010-05-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Remove useless marshal.[h|c]
+
+2010-05-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Update copyright again so licensecheck can detect it
+
+2010-05-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.22
+
+2010-05-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Add LGPL-2.1 COPYING
+
+2010-05-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	- Update Copyright to correct year
+	
+	modified:
+	lib/libbamf/bamf-application.c
+	lib/libbamf/bamf-application.h
+	lib/libbamf/bamf-control.c
+	lib/libbamf/bamf-control.h
+	lib/libbamf/bamf-factory.c
+	lib/libbamf/bamf-factory.h
+	lib/libbamf/bamf-matcher.c
+	lib/libbamf/bamf-matcher.h
+	lib/libbamf/bamf-tab-source.c
+	lib/libbamf/bamf-tab-source.h
+	lib/libbamf/bamf-view.c
+	lib/libbamf/bamf-view.h
+	lib/libbamf/bamf-window.c
+	lib/libbamf/bamf-window.h
+	lib/libbamf/libbamf.h
+	lib/libbamf/marshal.c
+	lib/libbamf/marshal.h
+	src/bamf-application.c
+	src/bamf-application.h
+	src/bamf-control.c
+	src/bamf-control.h
+	src/bamf-legacy-screen.c
+	src/bamf-legacy-screen.h
+	src/bamf-legacy-window-test.c
+	src/bamf-legacy-window-test.h
+	src/bamf-legacy-window.c
+	src/bamf-legacy-window.h
+	src/bamf-matcher.c
+	src/bamf-matcher.h
+	src/bamf-tab-source.c
+	src/bamf-tab-source.h
+	src/bamf-tab.c
+	src/bamf-tab.h
+	src/bamf-view.c
+	src/bamf-view.h
+	src/bamf-window.c
+	src/bamf-window.h
+	src/bamf.h
+	src/main.c
+	src/main.h
+
+2010-05-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Update Copyright for bamfdaemon
+
+2010-05-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Fix Copyright in libbamf
+
+2010-05-25  Didier Roche  <didier.roche@canonical.com>
+
+	remove wrong extra_dist target in Makefile.am
+
+2010-05-19  Jason Smith  <jason.smith@canonical.com>
+
+	make plugin actually load inside of chromium, it does not do much yet but it is getting there!
+
+2010-05-19  Jason Smith  <jason.smith@canonical.com>
+
+	Add introductory work on chromium plugin
+
+2010-05-19  Jason Smith  <jason.smith@canonical.com>
+
+	More work in tab integration, tabs items should now be created properly but are not exported or matched
+
+2010-05-19  Jason Smith  <jason.smith@canonical.com>
+
+	fix sending the wrong item in remove signals
+
+2010-05-19  Jason Smith  <jason.smith@canonical.com>
+
+	Hookup Active Application and Active Window change signals in matcher
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	add tests for Active event in BamfWindow and BamfApplication to ensure events are properly triggered
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	move code around to be more GObject friendly
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	ensure active signal is properly bubbled by children of applications instead of doing manual checks
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	Ensure unit tests pass and add API for tedder
+	Add ActiveWindowChanged signal
+	Add ActiveApplicationChanged signal
+	Add ActiveApplication call
+	Add ActiveWindow call
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	export more of the tab interface
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	start hooking up signals for tab management
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	Added:
+	src/bamf-tab-glue.xml		: API Glue
+	src/bamf-tab.c		: Tab class
+	src/bamf-tab.h		: Tab class header
+	tests/functional/tab-source-test.c	: First and simplest possible functional test of remote tab registration
+	modified:
+	lib/libbamf/bamf-tab-source.c	: Finish out base class, consumers will need to subclass
+	lib/libbamf/libbamf.h		: Add tab source header
+	src/Makefile.am		: Update with new files
+	src/bamf-control.c		: Add support for creating new remote tab sources
+	src/bamf-tab-source.c		: Make this kind of start to work as designed
+	src/bamf-view.c		: Add a check to prevent double close signals
+	tests/functional/Makefile.am	: Update for new test
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	missing test
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	typo
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	Missing file
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	make build
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	missing files
+
+2010-05-18  Jason Smith  <jason.smith@canonical.com>
+
+	API updates
+
+2010-05-12  Jason Smith  <jason.smith@canonical.com>
+
+	Ensure we unhook dbus events
+
+2010-05-12  Jason Smith  <jason.smith@canonical.com>
+
+	ensure you can fetch xid from bamf-window
+
+2010-05-12  Jason Smith  <jason.smith@canonical.com>
+
+	remove spare items from signal enum
+
+2010-05-12  Jason Smith  <jason.smith@canonical.com>
+
+	Migrate is_urgent into bamf-view classes
+
+2010-05-12  Jason Smith  <jason.smith@canonical.com>
+
+	Migrate user visible into bamf-view, ensuring not to break unit tests
+
+2010-05-12  Jason Smith  <jason.smith@canonical.com>
+
+	White space fixes
+
+2010-05-12  Jason Smith  <jason.smith@canonical.com>
+
+	removed:
+	tests/bamfdaemon/test-mock-window.ca	: use mock windows in bamf daemon instead
+	tests/bamfdaemon/test-mock-window.h
+	modified:
+	module/dbus-module.c			: Track depends
+	module/gapplaunchhandlerdbus.c	: Ensure we dont conflict with wncksync
+	module/gapplaunchhandlerdbus.h
+	src/bamf-legacy-screen.c		: Update screen handling of state files
+	src/bamf-tab-source.c			: Get ready to consume dbus objects
+	src/simple-state.txt			: Slightly more complex to fully test out file format
+	tests/bamfdaemon/Makefile.am
+	tests/bamfdaemon/test-application.c	: Properly use daemon mock objects
+
+2010-05-10  Jason Smith  <jason.smith@canonical.com>
+
+	make loading from file accept an exec string. This promotes a lot more realistic interaction
+
+2010-05-10  Jason Smith  <jason.smith@canonical.com>
+
+	start adding tab source crap
+
+2010-05-09  Jason Smith  <jason.smith@canonical.com>
+
+	migrate bamf-daemon to using generated marshallers
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	add example state file
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	add support for loading state from file
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	Add unit tests for bamf window
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	add icon support to libbamf
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	add support for getting an icon
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	allow bamf view to be subclassed on the client side
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	Add ending squigly line
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	Add default values for failed calls
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	test events and visiblity fully
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	remove extra includes
+
+2010-05-07  Jason Smith  <jason.smith@canonical.com>
+
+	implement bamf legacy stuff
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	fix build
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	start work on interaction tester and ignore DESKTOP windows
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	fix single in factory class
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	add missing signals
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	stuff gord did
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	remove wnck from build
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	make sure that all our signals fire properly
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Make flag events fire properly
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Bind "Xids" dbus call
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Add methods for checking user visible
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Add methods to check if things are user visible and test into functional tests
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	remove stray wnck crap
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	fix build
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	more hatred of wnck
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	make .pc define WNCK_I_KNOW_THIS_IS_UNSTABLE
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	more documentation
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	fix typos
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	add documentation
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	spelling
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	add docs to bamf-window
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	add docs to bamf-view.h
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Update gio module strings
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Update doc
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	fix GIR namespace
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	test out new comment structure in bamf-view
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	implement RunningApplications
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	clean up new () function
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	clean up constructors further
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	cleanup constructor in bamf-application
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Clean up new function in bamf-window
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Remove legacy files from bamf daemon
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	Remove legacy source files from libbamf
+
+2010-05-06  Jason Smith  <jason.smith@canonical.com>
+
+	merge vapi branch
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	add test framework for libbamf... no tests
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	Make things build
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	missing files
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	add unit testing into get_xids call
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	Add missing files
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	Start next unit test, for some reason G_DEFINE_TYPE is not working in this file yet...
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	More application unit tests
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	add application unit test file
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	add unit tests
+
+2010-05-05  Jason Smith  <jason.smith@canonical.com>
+
+	Move tests into subdirectory
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	almost no memory leaks
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	memory leak fixes
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	Update for memory leaks
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	add signals into bamf-view
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	Add signals into bamf-applicaiton.c
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	fix crash from null referencing
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	remove debug
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	Ensure we dont have errors exporting objects
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	Fix bug where applications never left the bus
+
+2010-05-04  Jason Smith  <jason.smith@canonical.com>
+
+	Update demo and client lib. demo not working fully yet and client lib not fully completed
+
+2010-05-03  Jason Smith  <jason.smith@canonical.com>
+
+	Start work on client library
+
+2010-05-03  Jason Smith  <jason.smith@canonical.com>
+
+	General source and header cleanup
+
+2010-05-03  Jason Smith  <jason.smith@canonical.com>
+
+	saner API
+
+2010-05-02  Jason Smith  <jason.smith@canonical.com>
+
+	Fix typo and ensure that views deparent on closing
+
+2010-05-02  Jason Smith  <jason.smith@canonical.com>
+
+	remove extra GList from application
+
+2010-05-02  Jason Smith  <jason.smith@canonical.com>
+
+	Make active window tracking work
+
+2010-05-02  Jason Smith  <jason.smith@canonical.com>
+
+	Make applicaiton and matcher 90% functional
+
+2010-05-02  Jason Smith  <jason.smith@canonical.com>
+
+	lots of work, things largely starting to work at this point
+
+2010-04-29  Jason Smith  <jason.smith@canonical.com>
+
+	remove runtime warnings
+
+2010-04-29  Jason Smith  <jason.smith@canonical.com>
+
+	Merge el trunko
+
+2010-04-29  Jason Smith  <jason.smith@canonical.com>
+
+	Make build and kind of start running, huzzah!
+
+2010-04-28  Jason Smith  <jason.smith@canonical.com>
+
+	forgot to add bamf.h [as fortold by the prophetic email]
+
+2010-04-27  Jason Smith  <jason.smith@canonical.com>
+
+	builds at long last. feature severely incomplete
+
+2010-04-27  Jason Smith  <jason.smith@canonical.com>
+
+	build fixes
+
+2010-04-27  Jason Smith  <jason.smith@canonical.com>
+
+	more build fixes
+
+2010-04-27  Jason Smith  <jason.smith@canonical.com>
+
+	build system progress
+
+2010-04-27  Jason Smith  <jason.smith@canonical.com>
+
+	minor change
+
+2010-04-27  Jason Smith  <jason.smith@canonical.com>
+
+	add headers for libbamf
+
+2010-04-26  Jason Smith  <jason.smith@canonical.com>
+
+	fill in methods for bamf-application
+
+2010-04-26  Jason Smith  <jason.smith@canonical.com>
+
+	More work on application, matching API
+
+2010-04-26  Jason Smith  <jason.smith@canonical.com>
+
+	More work on bamf restructure
+
+2010-04-23  Jason Smith  <jason.smith@canonical.com>
+
+	Add new source files and update bamf naming
+
+2010-03-31  Jason Smith  <jason.smith@canonical.com>
+
+	Avoid junking our hashtable
+
+2010-03-29  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.20
+
+2010-03-25  Jason Smith  <jason.smith@canonical.com>
+
+	Merge prefer desktop-id branch
+
+2010-03-19  Jason Smith  <jason.smith@canonical.com>
+
+	Better fix for previous commit
+
+2010-03-19  Jason Smith  <jason.smith@canonical.com>
+
+	Ensure matching state is preserved across runs by re-reading in existing desktop file hints. Useful for several things, mostly crash recovery. Also includes minor memory leak fix.
+
+2010-03-18  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.18
+
+2010-03-12  Jason Smith  <jason.smith@canonical.com>
+
+	Catch and ignore X errors
+
+2010-03-12  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	bump version for new dailys
+
+2010-03-12  Jason Smith  <jason.smith@canonical.com>
+
+	Merge async API branch
+
+2010-03-11  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.16
+
+2010-03-11  Jason Smith  <jason.smith@canonical.com>
+
+	Merge gobject branch
+
+2010-03-04  Jason Smith  <jason.smith@canonical.com>
+
+	minor memory leak fix
+	cleanups to make hunting crashers easier
+
+2010-03-04  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.14
+
+2010-02-26  Jason Smith  <jason.smith@canonical.com>
+
+	Ensure we dont match onto terminals we launched from
+
+2010-02-26  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.12
+
+2010-02-25  Jason Smith  <jason.smith@canonical.com>
+
+	Remove gmenu and use wncksync caches instead
+
+2010-02-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.11
+
+2010-02-25  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	Add needed stuff to EXTRA_DIST
+
+2010-02-23  Jason Smith  <jason.smith@canonical.com>
+
+	Add robustness to chromium application matching
+
+2010-02-20  Jason Smith  <jason.smith@canonical.com>
+
+	Add matching based on desktop_id as GNOME is currently making a push to try to make this viable
+
+2010-02-18  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.10
+
+2010-02-17  Jason Smith  <jason.smith@canonical.com>
+
+	Merge matcher upgrade branch
+
+2010-02-02  Jason Smith  <jason.smith@canonical.com>
+
+	Format according to GNU standards
+
+2010-01-26  Jason Smith  <jason.smith@canonical.com>
+
+	Fix distcheck
+
+2010-01-26  Jason Smith  <jason.smith@canonical.com>
+
+	Increment version
+
+2010-01-26  Jason Smith  <jason.smith@canonical.com>
+
+	Make .service file work right
+
+2010-01-26  Jason Smith  <jason.smith@canonical.com>
+
+	Actually merge in Martin Pitt's branch.
+
+2010-01-20  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	- Merge from upstream
+	- Bump version to 0.2.4
+	
+	renamed:
+	examples/ => tests/
+	modified:
+	Makefile.am
+	configure.in
+	tests/alt-tabber.c
+	tests/desktop-file-launcher.c
+	pending merges:
+	Jason Smith 2010-01-19 Fix copyright in examples/
+
+2010-01-18  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.2 -- more licensing fixes
+
+2010-01-18  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[release] 0.2.1
+
+2010-01-18  Neil Jagdish Patel  <neil.patel@canonical.com>
+
+	[copyright] Add LGPL license, license lib/ as LGPL and re-license model/ as LGPL (so it can be safely used with gio and non-gpl programs that use glib)
+	
+	added:
+	COPYING.LGPL
+	modified:
+	lib/libwncksync/libwncksync.c
+	lib/libwncksync/libwncksync.h
+	module/dbus-module.c
+	module/gapplaunchhandlerdbus.c
+	module/gapplaunchhandlerdbus.h
+
+2010-01-14  Jason Smith  <jason.smith@canonical.com>
+
+	Fix errors in merging
+
+2010-01-14  Jason Smith  <jason.smith@canonical.com>
+
+	Merge branch to make distcheck work
+
+2009-11-09  Jason Smith  <jason@t500>
+
+	Fix build and add dbus method
+
+2009-11-09  Jason Smith  <jason@t500>
+
+	src/windowmatcher.c : add window_matcher_is_match_ready to help with open office window matching
+
+2009-11-06  Jason Smith  <jason@t500>
+
+	Remove mono dust
+
+2009-11-06  Jason Smith  <jason@t500>
+
+	Rename gio module to libgiowncksync
+
+2009-11-06  Jason Smith  <jason@t500>
+
+	Kill window switcher
+
+2009-10-30  Jason Smith  <jason@t500>
+
+	Xid's are defined as gulong by libwnck however they are defined by xorg as uint32, we will use uint32 instead of gulong.
+
+2009-10-17  Jason Smith  <jason@t500>
+
+	Don't crash
+
+2009-10-17  Jason Smith  <jason@t500>
+
+	Update patch
+
+2009-10-17  Jason Smith  <jason@t500>
+
+	Update gio patch to build properly
+
+2009-08-07  Jason Smith  <jason@t500>
+
+	loosen requirements for mono gmcs
+
+2009-08-05  Jason Smith  <jason@t500>
+
+	Add reflection, modify source to use
+
+2009-08-04  Jason Smith  <jason@t500>
+
+	remove debugging statement
+
+2009-08-04  Jason Smith  <jason@t500>
+
+	potential crasher
+
+2009-08-04  Jason Smith  <jason@t500>
+
+	update naming
+
+2009-08-03  Jason Smith  <jason@t500>
+
+	fix crash
+
+2009-08-03  Jason Smith  <jason@t500>
+
+	Patch from neil
+
+2009-08-03  Jason Smith  <jason@t500>
+
+	Modify behavior of window switcher to be more consistent. Super+Tab now switcher applications. Super+` switches windows within an application. Arrows also work
+
+2009-08-02  Jason Smith  <jason@t500>
+
+	Improve appearance
+
+2009-08-02  Jason Smith  <jason@t500>
+
+	fix build, improve behavior of switcher with multiple windows
+
+2009-08-02  Jason Smith  <jason@t500>
+
+	Bug fixes and deal with large numbers of windows
+
+2009-08-02  Jason Smith  <jason@t500>
+
+	finish out build system for mono example
+
+2009-08-02  Jason Smith  <jason@t500>
+
+	Fix infinite loop
+	Allow building of mono based solutions
+
+2009-08-01  Jason Smith  <jason@t500>
+
+	Add m4
+
+2009-08-01  Jason Smith  <jason@t500>
+
+	Work on build system, fix build issue
+
+2009-08-01  Jason Smith  <jason@t500>
+
+	Add custom keybinder
+
+2009-07-31  Jason Smith  <jason@t500>
+
+	Improvements to window switcher program
+
+2009-07-31  Jason Smith  <jason@t500>
+
+	SwitcherArea.cs: Dont switch windows until key up
+	windowmatcher.c: minor cleanup
+
+2009-07-30  Jason Smith  <jason@t500>
+
+	memory leak
+
+2009-07-29  Jason Smith  <jason@t500>
+
+	Make pretty with crash recovery
+
+2009-07-29  Jason Smith  <jason@t500>
+
+	Update patch, remove URI support from windowmatcher.c
+
+2009-07-29  Jason Smith  <jason@t500>
+
+	Update TODO
+
+2009-07-29  Jason Smith  <jason@t500>
+
+	Remove writeline
+
+2009-07-29  Jason Smith  <jason@t500>
+
+	add new keybinding
+
+2009-07-29  Jason Smith  <jason@t500>
+
+	Add WindowSwitcher demo
+
+2009-07-28  Jason Smith  <jason@t500>
+
+	Remove libwnck build dep
+
+2009-07-28  Jason Smith  <jason@t500>
+
+	Remove libwnck from header
+
+2009-07-28  Jason Smith  <jason@t500>
+
+	Remove all libwnck'ing from libwncksync
+
+2009-07-28  Jason Smith  <jason@t500>
+
+	Fix fencepost error in window matcher
+	Change api of libwncksync to make it easier to bind against
+
+2009-07-27  Jason Smith  <jason@t500>
+
+	update patch
+
+2009-07-27  Jason Smith  <jason@t500>
+
+	Add patch
+
+2009-07-27  Jason Smith  <jason@t500>
+
+	Deal with file:// prefixes
+
+2009-07-27  Jason Smith  <jason@t500>
+
+	unique names
+
+2009-07-27  Jason Smith  <jason@t500>
+
+	Polish
+
+2009-07-27  Jason Smith  <jason@t500>
+
+	fix up header file and pkg-config file
+
+2009-07-23  Jason Smith  <jason@t500>
+
+	Fix matching of open office to work with newly opened windows
+
+2009-07-23  Jason Smith  <jason@t500>
+
+	reinstate call to process_exec_string that was removed by accident
+
+2009-07-23  Jason Smith  <jason@t500>
+
+	dont free wrong thing
+
+2009-07-23  Jason Smith  <jason@t500>
+
+	start working on ooffice stuff
+
+2009-07-23  Jason Smith  <jason@t500>
+
+	Add missing function to libwncksync
+
+2009-07-23  Jason Smith  <jason@t500>
+
+	Add TODO
+
+2009-07-22  Jason Smith  <jason@t500>
+
+	Update makefile
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	fix bugs
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	Add testing program for GIO module
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	Update GIO patch
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	Add gio patch
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	Add first run at gio module for patched gio
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	Add quit handler
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	cleanup api to not use XID's
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	add data dir
+
+2009-07-21  Jason Smith  <jason@t500>
+
+	finish up example program
+
+2009-07-20  Jason Smith  <jason@t500>
+
+	Fix compile
+
+2009-07-20  Jason Smith  <jason@t500>
+
+	fix Requires line
+
+2009-07-20  Jason Smith  <jason@t500>
+
+	Cleanup
+
+2009-07-20  Jason Smith  <jason@t500>
+
+	Add .pc.in file
+
+2009-07-20  Jason Smith  <jason@t500>
+
+	Add start of examples dir and autofoo to match
+
+2009-07-17  Jason Smith  <jason@t500>
+
+	Autogen foo
+
+2009-07-16  Jason Smith  <jason@t500>
+
+	At last
+
+2009-07-16  Jason Smith  <jason@t500>
+
+	Another intermediate
+
+2009-07-16  Jason Smith  <jason@t500>
+
+	halfway commit
+
+2009-07-16  Jason Smith  <jason@t500>
+
+	remove useless files
+
+2009-07-16  Jason Smith  <jason@t500>
+
+	Re-orginize
+
+2009-07-16  Jason Smith  <jason@t500>
+
+	Remove C# code
+
+2009-07-16  Jason Smith  <jason@t500>
+
+	Implement pid registration
+
+2009-07-13  Jason Smith  <jason@t500>
+
+	objectify windowmatcher
+
+2009-07-13  Jason Smith  <jason@t500>
+
+	Add C implentation of daemon
+
+2009-07-07  Jason Smith  <jason@t500>
+
+	Update libwncksync, works cleanly now for fetching .desktop files from xid
+
+2009-07-07  Jason Smith  <jason@t500>
+
+	Update naming
+
+2009-07-07  Jason Smith  <jason@t500>
+
+	Rename files
+
+2009-07-07  Jason Smith  <jason@t500>
+
+	Basic implementation
+
+2009-07-07  Jason Smith  <jason@t500>
+
+	Add shell of libwncksync C lib
+
+2009-07-07  Jason Smith  <jason@t500>
+
+	Add autotools
+
+2009-07-07  Jason Smith  <jason@t500>
+
+	Cast properly
+
+2009-07-07  Jason Smith  <jason@t500>
+
+	initial import
+

@@ -1,0 +1,61 @@
+# Utility targets for testing. The variable $(TEST_BINARY) defines the binary
+# to be ran to perform the gtests.
+#
+# Author: Marco Trevisan <marco@ubuntu.com>
+
+GTESTER2XUNIT_RUN = $(abs_top_srcdir)/tests/gtester2xunit.py
+
+# Run tests as part of make check
+
+if ENABLE_HEADLESS_TESTS
+
+XVFB_RUN = $(abs_top_srcdir)/tests/run-xvfb.sh
+LOG_PATH = headless-logs
+test-headless:
+	set -e; \
+	rm -rf $(LOG_PATH); \
+	mkdir $(LOG_PATH); \
+	export LOG_PATH=$(LOG_PATH); \
+	export XVFB_PATH=$(XVFB); \
+	export DISPLAY=""; \
+	export XDG_CURRENT_DESKTOP="Unity"; \
+	source $(XVFB_RUN); \
+	\
+	$(DBUS_LAUNCH) > $(LOG_PATH)/sessionbus.sh; \
+	source $(LOG_PATH)/sessionbus.sh; \
+	\
+	make $(AM_MAKEFLAGS) -k test;
+	\
+	source $(LOG_PATH)/sessionbus.sh; \
+	rm $(LOG_PATH)/sessionbus.sh; \
+	kill $$DBUS_SESSION_BUS_PID;
+
+check-local: test-headless
+
+else # END HEADLESS TESTS
+
+check-local: test
+
+endif
+
+
+test:
+	@gtester -k --verbose -o=$(TEST_BINARY)-results.xml ./$(TEST_BINARY); \
+	$(GTESTER2XUNIT_RUN) -x $(abs_top_srcdir)/tests/gtester.xsl $(TEST_BINARY)-results.xml
+
+.PHONY: check-report full-report
+check-report: $(TEST_BINARY)
+	@gtester -k --verbose -o=$(TEST_BINARY)-results.xml -k ./$(TEST_BINARY) \
+		&& ( gtester-report $(TEST_BINARY)-results.xml \
+				| sed 's/GTester Unit Test Report</>GTester Unit Test Report (normal)</' \
+				> $(TEST_BINARY)-results.html ) \
+		&& gnome-open ./$(TEST_BINARY)-results.html
+
+full-report:
+		@gtester -k --verbose -o=$(TEST_BINARY)-results.xml -k -m=slow ./$(TEST_BINARY) \
+	  && ( gtester-report $(TEST_BINARY)-results.xml \
+	      | sed 's/>GTester Unit Test Report</>GTester Unit Test Report (normal)</' \
+	      > $(TEST_BINARY)-results.html )
+
+clean-generic:
+	rm -f $(TEST_BINARY)-results*.xml $(TEST_BINARY)-results.html

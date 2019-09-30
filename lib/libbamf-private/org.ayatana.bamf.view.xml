@@ -1,0 +1,159 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="org.ayatana.bamf.view">
+    <method name="ViewType">
+      <arg name="view_type" type="s" direction="out"/>
+    </method>
+    <method name="Icon">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="name" type="s" direction="out"/>
+    </method>
+    <method name="Name">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="name" type="s" direction="out"/>
+    </method>
+    <method name="UserVisible">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="visible" type="b" direction="out"/>
+    </method>
+    <method name="IsUrgent">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="urgent" type="b" direction="out"/>
+    </method>
+    <method name="IsRunning">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="running" type="b" direction="out"/>
+    </method>
+    <method name="IsActive">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="active" type="b" direction="out"/>
+    </method>
+    <method name="Parents">
+      <arg name="parents_paths" type="as" direction="out"/>
+    </method>
+    <method name="Children">
+      <arg name="children_paths" type="as" direction="out"/>
+    </method>
+    <signal name="NameChanged">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="old_name" type="s"/>
+      <arg name="new_name" type="s"/>
+    </signal>
+    <signal name="UserVisibleChanged">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="user_visible" type="b"/>
+    </signal>
+    <signal name="UrgentChanged">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="is_urgent" type="b"/>
+    </signal>
+    <signal name="RunningChanged">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="is_running" type="b"/>
+    </signal>
+    <signal name="ActiveChanged">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="is_active" type="b"/>
+    </signal>
+    <signal name="ChildRemoved">
+      <arg name="path" type="s"/>
+    </signal>
+    <signal name="ChildAdded">
+      <arg name="path" type="s"/>
+    </signal>
+    <signal name="Closed">
+    </signal>
+    <property name="Name" type="s" access="read"/>
+    <property name="Icon" type="s" access="read"/>
+    <property name="UserVisible" type="b" access="read"/>
+    <property name="Running" type="b" access="read"/>
+    <property name="Urgent" type="b" access="read"/>
+    <property name="Active" type="b" access="read"/>
+  </interface>
+
+  <interface name="org.ayatana.bamf.application">
+    <method name="ShowStubs">
+      <arg name="show_stubs" type="b" direction="out"/>
+    </method>
+    <method name="Xids">
+      <arg name="xids" type="au" direction="out"/>
+    </method>
+    <method name="DesktopFile">
+      <arg name="desktop_file" type="s" direction="out"/>
+    </method>
+    <method name="SupportedMimeTypes">
+      <arg name="mime_types" type="as" direction="out"/>
+    </method>
+    <method name="ApplicationType">
+      <arg name="type" type="s" direction="out"/>
+    </method>
+    <method name="ApplicationMenu">
+      <annotation name="org.freedesktop.DBus.Deprecated" value="true"/>
+      <arg name="busname" type="s" direction="out"/>
+      <arg name="objectpath" type="s" direction="out"/>
+    </method>
+    <method name="FocusableChild">
+      <arg name="path" type="s" direction="out"/>
+    </method>
+    <signal name="WindowRemoved">
+      <arg name="path" type="s"/>
+    </signal>
+    <signal name="WindowAdded">
+      <arg name="path" type="s"/>
+    </signal>
+    <signal name="SupportedMimeTypesChanged">
+      <arg name="dnd_mimes" type="as"/>
+    </signal>
+    <signal name="DesktopFileUpdated">
+      <arg name="desktop_file" type="s"/>
+    </signal>
+  </interface>
+
+  <interface name="org.ayatana.bamf.window">
+    <method name="GetXid">
+      <arg name="xid" type="u" direction="out"/>
+    </method>
+    <method name="GetPid">
+      <arg name="pid" type="u" direction="out"/>
+    </method>
+    <method name="Transient">
+      <arg name="path" type="s" direction="out"/>
+    </method>
+    <method name="WindowType">
+      <arg name="type" type="u" direction="out"/>
+    </method>
+    <method name="Xprop">
+      <arg name="xprop" type="s" direction="in"/>
+      <arg name="name" type="s" direction="out"/>
+    </method>
+    <method name="Monitor">
+      <arg name="monitor_number" type="i" direction="out"/>
+    </method>
+    <method name="Maximized">
+      <arg name="maximized" type="i" direction="out"/>
+    </method>
+    <signal name="MonitorChanged">
+      <arg name="old" type="i" direction="out"/>
+      <arg name="new" type="i" direction="out"/>
+    </signal>
+    <signal name="MaximizedChanged">
+      <arg name="old" type="i" direction="out"/>
+      <arg name="new" type="i" direction="out"/>
+    </signal>
+  </interface>
+
+  <interface name="org.ayatana.bamf.tab">
+    <method name="Raise">
+    </method>
+    <method name="Close">
+    </method>
+    <method name="RequestPreview">
+      <arg type="s" name="data" direction="out"/>
+    </method>
+    <property name="location" type="s" access="read"/>
+    <property name="xid" type="t" access="read"/>
+    <property name="desktop-id" type="s" access="read"/>
+    <property name="is-foreground-tab" type="b" access="read"/>
+  </interface>
+</node>

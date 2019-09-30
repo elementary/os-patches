@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+# -*- Mode: Makefile; indent-tabs-mode: t -*-
+
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs -Wl,--as-needed
+export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
+
+%:
+	dh $@ --with autoreconf,gir
+
+override_dh_autoreconf:
+	NOCONFIGURE=1 dh_autoreconf ./autogen.sh
+
+override_dh_auto_configure:
+	dh_auto_configure -- --enable-introspection=yes \
+	                     --enable-gtk-doc \
+	                     --enable-headless-tests \
+	                     --disable-silent-rules
+
+override_dh_auto_install:
+	dh_auto_install
+	find debian/tmp/usr/lib -name \*.la -exec rm {} \;
+	find debian/tmp/usr/lib -name \*.a -exec rm {} \;
+
+override_dh_install:
+	dh_install --fail-missing
+
+override_dh_strip:
+	dh_strip --dbg-package=bamf-dbg
+
+override_dh_girepository:
+	dh_girepository -pgir1.2-bamf-0.2
