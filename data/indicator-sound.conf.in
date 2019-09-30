@@ -1,0 +1,9 @@
+description "Indicator Sound Service"
+
+start on indicator-services-start
+stop on desktop-end or indicator-services-end
+
+respawn
+respawn limit 2 10
+
+exec @CMAKE_INSTALL_FULL_LIBEXECDIR@/indicator-sound/indicator-sound-service

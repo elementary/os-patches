@@ -1,0 +1,42 @@
+<node>
+  <interface name="com.canonical.indicator.sound.AccountsService">
+
+    <annotation name="org.freedesktop.Accounts.VendorExtension" value="true"/>
+
+    <annotation name="org.freedesktop.Accounts.Authentication.ChangeOwn"
+                value="com.canonical.indicator.sound.AccountsService.ModifyOwnUser"/>
+
+    <annotation name="org.freedesktop.Accounts.Authentication.ReadAny"
+                value="com.canonical.indicator.sound.AccountsService.ModifyAnyUser"/>
+
+    <annotation name="org.freedesktop.Accounts.Authentication.ChangeAny"
+                value="com.canonical.indicator.sound.AccountsService.ModifyAnyUser"/>
+
+    <property name="Timestamp" type="t" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="0"/>
+    </property>
+    <property name="PlayerName" type="s" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value=""/>
+    </property>
+    <property name="PlayerIcon" type="v" access="readwrite"/>
+    <property name="Running" type="b" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="false"/>
+    </property>
+    <property name="State" type="s" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value=""/>
+    </property>
+    <property name="Title" type="s" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value=""/>
+    </property>
+    <property name="Artist" type="s" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value=""/>
+    </property>
+    <property name="Album" type="s" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value=""/>
+    </property>
+    <property name="ArtUrl" type="s" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value=""/>
+    </property>
+
+  </interface>
+</node>

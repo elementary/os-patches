@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+export DPKG_GENSYMBOLS_CHECK_LEVEL=4
+
+%:
+	dh $@ --parallel --fail-missing --with translations
+
+override_dh_auto_configure:
+	# Debian defines CMAKE_INSTALL_LOCALSTATEDIR as /usr/var, which is wrong.
+	# So until Debian bug 719148 is fixed, do it ourselves.
+	dh_auto_configure -- -DCMAKE_INSTALL_LOCALSTATEDIR="/var"
+
+override_dh_install:
+	mkdir -p debian/indicator-sound/usr/share/apport/package-hooks/
+	install -m 644 debian/source_indicator-sound.py debian/indicator-sound/usr/share/apport/package-hooks/
+	mkdir -p debian/indicator-sound/etc/apport/crashdb.conf.d/
+	install -m 644 debian/indicator-sound-crashdb.conf debian/indicator-sound/etc/apport/crashdb.conf.d/
+	dh_install --fail-missing
+

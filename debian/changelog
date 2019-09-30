@@ -1,0 +1,1338 @@
+indicator-sound (12.10.2+14.04.20140401-0ubuntu1) trusty; urgency=low
+
+  [ Michael Terry ]
+  * Use correct dbus name for Unity Greeter.
+
+  [ Ted Gould ]
+  * Don't unref the objects in the test
+  * Check the username has been gotten before using it. (LP: #1297078)
+  * Make unity-greeter-session-broadcast a suggests to avoid pulling it
+    into seeds
+  * Remove mute from the phone greeter
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 01 Apr 2014 23:21:06 +0000
+
+indicator-sound (12.10.2+14.04.20140324-0ubuntu1) trusty; urgency=low
+
+  [ Michael Terry ]
+  * Sync volume and mute settings with AccountsService. (LP: #840777)
+
+  [ Ted Gould ]
+  * Add an apport hook for debugging
+  * Synchronize process management across indicators
+  * Export currently running player to Accounts Service
+  * Create players on the phone greeter based on the accounts service
+    data
+  * Allow the phone greeter player to control the running player in the
+    session.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 24 Mar 2014 15:03:16 +0000
+
+indicator-sound (12.10.2+14.04.20140320-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Scale volume in notifications when allow-amplified-volume is set
+    (LP: #1293163)
+  * Use audio-volume-mute-blocking-panel instead of *-blocked-panel
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 20 Mar 2014 08:58:30 +0000
+
+indicator-sound (12.10.2+14.04.20140318-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Show a red icon in the panel when a sound is playing while mute is
+    on (LP: #1291530)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 18 Mar 2014 10:01:01 +0000
+
+indicator-sound (12.10.2+14.04.20140313-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Don't show player sections on the greeter and lock screen (LP:
+    #1280378)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 13 Mar 2014 15:33:11 +0000
+
+indicator-sound (12.10.2+14.04.20140311.1-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Add desktop_lockscreen profile
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 11 Mar 2014 18:26:29 +0000
+
+indicator-sound (12.10.2+14.04.20140305-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Honor com.canonical.indicator.sound visible (LP: #829648)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Mar 2014 08:44:14 +0000
+
+indicator-sound (12.10.2+14.04.20140224-0ubuntu1) trusty; urgency=low
+
+  [ Sebastien Bacher ]
+  * Remove the new added allow-applified key, it's moved to shared
+    schemas, that way the other desktop components don't need to depends
+    on indicator-sound only to read that settings
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 24 Feb 2014 14:33:07 +0000
+
+indicator-sound (12.10.2+14.04.20140220-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * Add support for amplified volumes Add a settings key "allow-
+    amplified-volume" which controls whether the volume slider stops at
+    100% or PA_VOLUME_UI_MAX. unity-control-center will provide a ui for
+    this key.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 20 Feb 2014 18:13:42 +0000
+
+indicator-sound (12.10.2+14.04.20140207-0ubuntu1) trusty; urgency=low
+
+  [ Unit193 ]
+  * Drop the recommends to suggests for the control centers and system
+    settings so that flavors that don't seed those packages aren't stuck
+    with them.
+
+  [ Ted Gould ]
+  * Adding acceptance tests and merge review policies.
+
+  [ CI bot ]
+  * Adding acceptance tests and merge review policies
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Feb 2014 16:26:07 +0000
+
+indicator-sound (12.10.2+14.04.20140124-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * Use unity-control-center if it is available. (LP: #1257505)
+
+  [ Ted Gould ]
+  * Own the server capabilities so we clean it up.
+
+  [ Lars Uebernickel ]
+  * Don't write 'interested-media-players' on startup
+    IndicatorSound.Service read that gsettings key and inserted the
+    players desktop ids into a MediaPlayerList, which emits "player-
+    added" every time a player is added. This patch makes the service
+    keep track of whether players are added because it is syncing the
+    key or when a player appeared on the bus. .
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 408
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 24 Jan 2014 11:00:18 +0000
+
+indicator-sound (12.10.2+14.04.20131125-0ubuntu1) trusty; urgency=low
+
+  [ Ted Gould ]
+  * Switching around the config files. (LP: #1185565)
+  * Fix license information.
+  * Test name watching utilities.
+
+  [ Lars Uebernickel ]
+  * Call Raise() when a media player is already running Before, it was
+    repeatedly launching the player. This patch also make the menu item
+    insensitive if the player can't be raised. (LP: #710824)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 404
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 25 Nov 2013 03:56:15 +0000
+
+indicator-sound (12.10.2+14.04.20131029.1-0ubuntu1) trusty; urgency=low
+
+  [ Dmitrijs Ledkovs ]
+  * Define "ubiquity" indicator profile, reusing the greeter object. (LP:
+    #1241539)
+
+  [ Charles Kerr ]
+  * When we can't connect to pulse, wait a moment before retrying. (LP:
+    #1244010)
+  * In Service's volume_changed() function, explicitly instantiate the
+    GVariant to avoid leaking it. See the description in bug #1244468
+    for before & after C code and more information. (LP: #1244468)
+  * Test that MediaPlayer's icon property isn't NULL before we serialize
+    it. (LP: #1229612)
+
+  [ Sebastien Bacher ]
+  * Don't special case Unity sessions, that's not needed since gnome-
+    control-center is doing the right thing, the session name used was
+    also wrong and couldn't work (lp: #1239545). (LP: #1239545)
+
+  [ Lars Uebernickel ]
+  * Only display running players in the phone's sound menu The design
+    says to only display the _one_ running player. This will have that
+    effect, as there's only one player allowed to run at a time on the
+    phone.
+  * VolumeControl: don't pass vala closures into libpulse Libpulse's
+    vala bindings don't specify that callbacks passed into some of its
+    functions (e.g., get_server_info) can be called after the function
+    returns. Vala thus frees closure data after these functions return.
+    This can't easily be fixed in the bindings, because libpulse doesn't
+    provide variants of these functions with destroy_notifies. This
+    patch works around this problem by only passing non-closure
+    functions into libpulse. (LP: #1244386)
+  * Depend on vala 0.20 and use its GIcon.serialize().
+
+  [ Ted Gould ]
+  * Adding a phone_greeter profile.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 399
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 29 Oct 2013 10:32:48 +0000
+
+indicator-sound (12.10.2+13.10.20131011-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Allow activating the 'volume' action It does the same as the
+    'scroll' action except showing a notification. (LP: #1236292)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 389
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 11 Oct 2013 04:27:50 +0000
+
+indicator-sound (12.10.2+13.10.20131004-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Fix translation support dh_translations doesn't perform variable
+    substitution when parsing the CMakeLists.txt file. (LP: #1233679)
+
+  [ Ted Gould ]
+  * Add a desktop_greeter menu without settings.
+
+  [ Lars Uebernickel ]
+  * Reconnect when pulseaudio terminates (or crashes). (LP: #1231942)
+  * Show synchronous notification when changing the volume by scrolling
+    over the indicator. (LP: #1225335)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 387
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 04 Oct 2013 02:29:38 +0000
+
+indicator-sound (12.10.2+13.10.20130930-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Use url-dispatcher instead of invoking system-settings directly.
+    (LP: #1230819)
+
+  [ Ted Gould ]
+  * Update settings URL to settings:///system. (LP: #1231444)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 382
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 30 Sep 2013 06:33:10 +0000
+
+indicator-sound (12.10.2+13.10.20130924-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Recommending gnome-control-center first.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 379
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 24 Sep 2013 22:45:08 +0000
+
+indicator-sound (12.10.2+13.10.20130918-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Don't show the "Mute" menu item in the phone profile. (LP: #1220215)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 377
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 18 Sep 2013 06:24:34 +0000
+
+indicator-sound (12.10.2+13.10.20130913-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Fixes bug #1221242 and #1204036 (make scrolling and middle clicking
+    work on the sound indicator) It soft-depends on
+    lp:~larsu/libindicator/ng-add-scrolling. That means, this branch can
+    be merged without problems, as it only adds an action and a few
+    attributes on the root item. The bugs won't be fixed until both
+    branches land, though. Please the other merge request for a
+    description of the new attributes. (LP: #1221242, #1204036)
+  * Update POTFILES.in and mark remaining strings as translatable. (LP:
+    #1223500)
+  * Add "title" to the root action state dictionary . (LP: #1223635)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 375
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 13 Sep 2013 15:16:35 +0000
+
+indicator-sound (12.10.2+13.10.20130829-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Use bus_watch_namespace() for more robust monitoring of mpris
+    players appearing or disappearing on the bus.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 371
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 29 Aug 2013 02:08:13 +0000
+
+indicator-sound (12.10.2+13.10.20130822-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Don't use deprecated GSimpleActionGroup APIs.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 369
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 22 Aug 2013 20:29:51 +0000
+
+indicator-sound (12.10.2+13.10.20130820-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Re-write build scripts using cmake.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 367
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Aug 2013 10:08:24 +0000
+
+indicator-sound (12.10.2+13.10.20130812.1-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * Add back an accessible_desc property to the sound indicator.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 365
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 12 Aug 2013 06:06:47 +0000
+
+indicator-sound (12.10.2+13.10.20130731-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * add Recommends: u-s-s | g-c-c to debian/control.
+
+  [ Nick Dedekind ]
+  * Fixed max-icon on volume control slider. (LP: #1206534)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 363
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 31 Jul 2013 02:02:57 +0000
+
+indicator-sound (12.10.2+13.10.20130726-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Actually export a phone menu.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 360
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 26 Jul 2013 02:03:50 +0000
+
+indicator-sound (12.10.2+13.10.20130725-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Specify fallback icons The *-panel suffix is only used by the
+    ubuntu-mono icon themes. . (LP: #1202932)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 358
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 25 Jul 2013 02:03:43 +0000
+
+indicator-sound (12.10.2+13.10.20130722-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Remove Rhythmbox from the default of the 'interested-media-players'
+    setting The sound menu should only contain players that have been
+    started before. (LP: #1202933)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 356
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 22 Jul 2013 02:03:34 +0000
+
+indicator-sound (12.10.2+13.10.20130716-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Add phone profile to indicator config.
+
+  [ Lars Uebernickel ]
+  * Remove gtk and dbusmenu. Sorry for the big changeset. I'd appreciate
+    a good deal of testing before merging this into the wild ;).
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 354
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 16 Jul 2013 02:02:55 +0000
+
+indicator-sound (12.10.2daily13.06.07-0ubuntu1) saucy; urgency=low
+
+  [ Jeremy Bicha ]
+  * debian/control:
+    - Build with valac (>= 0.18) instead of vala-0.18 for easier transitions
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 351
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Jun 2013 02:02:47 +0000
+
+indicator-sound (12.10.2daily13.05.02-0ubuntu1) saucy; urgency=low
+
+  * Automatic snapshot from revision 349
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 02 May 2013 22:59:34 +0000
+
+indicator-sound (12.10.2daily13.04.12-0ubuntu1) raring; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * Indicator-sound should send the event timestamp when launching a
+    player (LP: #1163434)
+  * Player controls are non-functional in all mpris2 supported players
+    (LP: #1167908)
+  * Window management - Apps raised from indicators sometimes dont have
+    the focus (LP: #627195)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 348
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 12 Apr 2013 02:03:33 +0000
+
+indicator-sound (12.10.2daily13.04.09-0ubuntu1) raring; urgency=low
+
+  * Automatic snapshot from revision 348
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 09 Apr 2013 02:02:50 +0000
+
+indicator-sound (12.10.2daily13.04.08-0ubuntu1) raring; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * Indicator-sound should send the event timestamp when launching a
+    player (LP: #1163434)
+  * Window management - Apps raised from indicators sometimes dont have
+    the focus (LP: #627195)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 347
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 08 Apr 2013 02:03:24 +0000
+
+indicator-sound (12.10.2daily13.03.07-0ubuntu1) raring; urgency=low
+
+  * Automatic snapshot from revision 343
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Thu, 07 Mar 2013 02:01:27 +0000
+
+indicator-sound (12.10.2daily13.02.25-0ubuntu1) raring; urgency=low
+
+  [ Lars Uebernickel ]
+  * ubuntu-themes don't work with gtk 3.7 (LP: #1130183)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 341
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Mon, 25 Feb 2013 02:02:59 +0000
+
+indicator-sound (12.10.2daily12.11.21.1-0ubuntu1) raring; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/control:
+    - add gnome-common to Build-Depends for use by dh_autoreconf.
+    - update style for constency: use trailing commas at the end of dep lists.
+    - Add Vcs-Bzr, Vcs-Browser fields with comment for uploaders.
+  * debian/rules:
+    - override dh_autoreconf to use autogen.sh for the reconfiguration process.
+    - add export DPKG_GENSYMBOLS_CHECK_LEVEL=4.
+    - enable quilt with the dh sequencer to make sure patches get applied.
+  * debian/compat: bump to compat level 9.
+  * debian/source/format: migrate back to source format 1.0 for consistency
+    with the rest of the indicator stack.
+  * Automatic snapshot from revision 337 (bootstrap):
+    - Add 'check-news' to AM_INIT_AUTOMAKE. (LP: #1075753)
+    - Remove the determine_key function. (LP: #1064255)
+    - Use the file path directly if it's an absolute path. (LP: #1024705)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 339
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Wed, 21 Nov 2012 11:47:58 +0000
+
+indicator-sound (12.10.1-0ubuntu2) raring; urgency=low
+
+  [ Allan LeSage ]
+  * debian/control: update to debhelper 9.0
+  * debian/rules: change to debhelper 9.0
+
+  [ Ken VanDine ]
+  * debian/control
+    - build depend on dh-translations
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 30 Oct 2012 21:34:14 +0000
+
+indicator-sound (12.10.1-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 03 Oct 2012 21:52:53 +0200
+
+indicator-sound (12.10.0-0ubuntu2) quantal; urgency=low
+
+  * Drop GTK2 build since ido stopped providing support for that version
+  * debian/control: build with the current vala version
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 22 Aug 2012 12:05:18 +0200
+
+indicator-sound (12.10.0-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+    - Allow setting preferred media players through a settings key.
+    - Fix sound indicator not working after Amarok close.
+    - Explicit handling of Ardour
+    - Fix deprecated GTK+ API calls
+  * debian/patches/lp_992262.patch:
+  * debian/patches/lp_902715.patch:
+    - dropped, the fix is in the new version
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 12 Jul 2012 20:07:48 +0200
+
+indicator-sound (0.8.5.0-0ubuntu3) quantal; urgency=low
+
+  * debian/patches/lp_992262.patch
+    - fix sound indicator not working after amarok close (LP: #992262)
+  * debian/patches/lp_902715.patch
+    - Partial fix which sets the accessibility property on the volume
+      slider menu item. Previously this was achieved by sending a signal
+      on the indicator object but now it seems the way to update orca is
+      to set/update the appropriate property on the menuitem.  Orca doesn't
+      broadcast volume updates on slider movement but at least it updates
+      when the user moves to the item on the menu, previously it was entirely
+      silent. (LP: #902715)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 03 May 2012 16:07:19 -0700
+
+indicator-sound (0.8.5.0-0ubuntu2) precise; urgency=low
+
+  * debian/patches:
+    - sound_ubuntustudio.patch: added to prefer pavucontrol as the
+      mixer app in Ubuntu Studio. (LP: #972749)
+
+ -- Janne Jokitalo (astraljava) <astraljava@kapsi.fi>  Sun, 01 Apr 2012 21:45:34 +0300
+
+indicator-sound (0.8.5.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - Inconsistency between messaging menu and sound menu pips (LP: #933593)
+    - indicator-sound-service crashed with SIGSEGV in 
+      fast_validate() (LP: #949837)
+    - free-memory-read crash in indicator-sound-service's file 
+      monitoring (LP: #965848)
+    - minor memory leaks in blacklist handling (LP: #960578)
+    - FIX (LP: FIX)
+  * -debian/patches/lp_945827.patch, debian/patches/lp_960846.patch
+     - dropped, merged upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 30 Mar 2012 14:45:03 -0400
+
+indicator-sound (0.8.4.1-0ubuntu4) precise; urgency=low
+
+  * debian/patches:
+    - sound_xubuntu.patch: added, prefer pavucontrol over xfce4-mixer on
+      Xubuntu. (lp: #961745)
+
+ -- Lionel Le Folgoc <mrpouit@ubuntu.com>  Thu, 22 Mar 2012 00:17:34 +0100
+
+indicator-sound (0.8.4.1-0ubuntu3) precise; urgency=low
+
+  * debian/patches/lp_960846.patch
+    - check that the active playlists container is not null (LP: #960846)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 21 Mar 2012 11:00:15 -0400
+
+indicator-sound (0.8.4.1-0ubuntu2) precise; urgency=low
+
+  * debian/patches/lp_945827.patch
+    - fix for a playlist crasher (LP: #945827)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 20 Mar 2012 16:40:24 -0400
+
+indicator-sound (0.8.4.1-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - fix i18n of indicator-sound's accessible description (LP: #957517)
+    - don't abort isound via g_error() if it can't connect to the 
+      bus (LP: #953111)
+  * debian/patches/sound_nua.patch
+    - don't try to free a static string (LP: #957387)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 19 Mar 2012 11:22:00 -0400
+
+indicator-sound (0.8.4.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - indicator-sound "Choose Playlist" menu item does nothing when using 
+      Rhythmbox (LP: #952550)
+    - crashed with SIGSEGV in g_strdup() (LP: #946607)
+    - crashed with SIGABRT in pa_operation_unref() (LP: #944148)
+    - crashed with signal 5 in g_type_create_instance() (LP: #921755)
+    - slider on unmute resets volume (LP: #921065)
+    - play controls not exposed in HUD (LP: #949032)
+    - unity-panel-service at 100% cpu when opened /w rb without album 
+      cover (LP: #806848)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 16 Mar 2012 14:04:30 -0400
+
+indicator-sound (0.8.3.0-0ubuntu2) precise; urgency=low
+
+  * debian/patches/sound_nua.patch
+    - Sound Settings link doesn't work in GNOME Classic (LP: #941704)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 16 Mar 2012 13:39:03 -0400
+
+indicator-sound (0.8.3.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - Fixed memory corruption issue (LP: #897218)
+    - crashed with SIGABRT in pa_operation_unref (LP: #908682)
+    - Banshee shown in sound menu after removal until reboot (LP: #771202)
+    - Coverity PASS_BY_VALUE - CID 10620 (LP: #937451)
+    - App icon and name are not aligned (LP: #939929)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 02 Mar 2012 11:26:41 -0500
+
+indicator-sound (0.8.2.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - crashed with SIGABRT in pa_cvolume_set (LP: #900117)
+    - Mouse on coverart flushes the sound menu (LP: #927733)
+    - album artwork misaligned and not visible (LP: #933359)
+    - unity-panel-service crashed with SIGSEGV in 
+      transport_widget_is_selected (LP: #882109)
+  * -debian/patches/correct_ldflags_use.patch
+    - fixed upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 22 Feb 2012 16:41:12 -0500
+
+indicator-sound (0.8.1.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - No easy way to turn the sound menu on/off (lp: #829648)
+    - Avoid spawning notification daemon at startup (lp: #912150)
+    - Creation of album-art-cache folder (lp: #799383)
+    - schema id & path are inconsistent with other indicators (lp: #914377)
+  * debian/patches/correct_ldflags_use.patch:
+    - typo fix in ldflags use
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 14 Feb 2012 19:46:41 +0100
+
+indicator-sound (0.8.0.0-0ubuntu4) precise; urgency=low
+
+  * debian/patches/sound_nua.patch
+    - open the new sound-nua panel in gnome-control-center 
+  * debian/patches/dbusmenu_05_90.patch
+    - fixed FTBFS with dbusmenu 0.5.90
+  * debian/control
+    - bump build depends for dbusmenu to >= 0.5.90
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 09 Feb 2012 16:49:15 -0500
+
+indicator-sound (0.8.0.0-0ubuntu3) precise; urgency=low
+
+  * rebuild for libindicator7
+  * debian/rules
+    - build with no-error=deprecated-declarations 
+  * -debian/patches/disable_Werror.patch
+    - disabled in debian/rules instead
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 25 Jan 2012 10:00:00 -0500
+
+indicator-sound (0.8.0.0-0ubuntu2) precise; urgency=low
+
+  * Add lazy_init.patch: Avoid spawning notification daemon right at startup,
+    instead initialize it lazily when actually doing a notification. Improves
+    boot speed. (LP: #912150)
+  * Add disable_Werror.patch: Build without -Werror, to avoid build failure
+    due to deprecated declarations. (LP: #912160)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 05 Jan 2012 09:29:36 +0100
+
+indicator-sound (0.8.0.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - removed build depends for libgconf2-dev
+  * debian/patches/fix-864405.patch
+    - dropped, merged upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 01 Dec 2011 14:33:34 -0500
+
+indicator-sound (0.7.9.1-0ubuntu2) precise; urgency=low
+
+  * debian/patches/fix-864405.patch:
+    - Clicking on left 25% of "Pause/Play" circle clicks "Previous".
+      (LP: #864405)
+
+ -- Omer Akram <om26er@ubuntu.com>  Mon, 28 Nov 2011 23:03:20 +0500
+
+indicator-sound (0.7.9.1-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    - indicator-sound-service crashed with SIGABRT in raise() (LP: #840986)
+    - don't let the menu grow wide enough to push off the screen (LP: #873006)
+    - bump the limit for number of playlists to 20 (LP: #835384)
+    - indicator-sound-service crashed with SIGSEGV (LP: #864732)
+    - Music player icon is not top-aligned (LP: #874454)
+  * debian/control
+    - build with valac-0.14
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 28 Oct 2011 09:45:22 -0400
+
+indicator-sound (0.7.9-0ubuntu1) oneiric-proposed; urgency=low
+
+  * New upstream release.
+    - Protect against source indexes that are lower than 0 (LP: #850662)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 13 Oct 2011 13:53:21 -0400
+
+indicator-sound (0.7.8-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - indicator-sound interferes with gnome-settings-daemon (LP: #855557)
+  * debian/patches/01_fix_FTBFS.patch
+    - Dropped, fixed upstream
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 28 Sep 2011 14:34:38 -0400
+
+indicator-sound (0.7.7.0-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+  * add 01_fix_FTBFS.patch for needed -lm link
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 13 Sep 2011 10:20:29 +0200
+
+indicator-sound (0.7.6.1-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - theming fix for the spinner
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 24 Aug 2011 16:09:29 -0400
+
+indicator-sound (0.7.6-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - mute action crashes the panel (LP: #828114)
+    - Clicking music player does not dismiss the menu  (LP: #818293)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 18 Aug 2011 14:19:06 -0400
+
+indicator-sound (0.7.5-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - Don't allow starting programs via the greeter indicators (LP: #811853)
+    - support libunity's Track and Player specific items (LP: #824050)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 10 Aug 2011 12:51:49 -0400
+
+indicator-sound (0.7.4.1-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - menu resizes on reopen   (LP: #809275)
+    - pulse indication of SoundMenu play button not strong 
+      enough (LP: #742251)
+  * debian/rules
+    - Moved autoreconf to the top
+  * New upstream release.
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 29 Jul 2011 13:21:41 -0400
+
+indicator-sound (0.7.3-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - libindicator scroll signals (LP: #804618)
+    - metadatawidget collapse (LP: #806439)
+  * debian/control
+    - Bumped build depends for libindicator to 0.3.90
+  * debian/patches/gtk3_define.patch
+    - dropped
+  * configure.ac
+    - Fixup pkgconfig check for libindicator-0.4
+  * debian/rules
+    - Added autoreconf.mk
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 07 Jul 2011 15:37:27 -0400
+
+indicator-sound (0.7.2-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - "Sound Preferences..." should be "Sound Settings" (LP: #785571)
+    - Not obvious what track info menu item does (LP: #699899)
+  * debian/patches/lp_750823.patch
+    - Dropped patch, merged upstream
+  * debian/patches/gtk3_define.patch
+    - Wrap another gtk3 block in an ifdef
+  * debian/control
+    - Updated standards version to 3.9.2
+    - Cleaned up description to quiet lintian
+    - Added quilt build dep
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 28 Jun 2011 10:51:51 -0400
+
+indicator-sound (0.7.0-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    - Displayed cover don't keep the original ratio (LP: #654196)
+    - show record level control PULSE_PROP_media.role=production (LP: #736049)
+    - Volume notification is based on previous volume; should be based on 
+      the new volume (LP: #748831)
+    - [gnome3] Sound Preferences link doesn't work (LP: #759390)
+  * debian/patches/lp_759390.patch
+    - dropped, merged upstream
+  * debian/control
+    - renamed the libnotify4-dev build depends to libnotify-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 19 May 2011 15:38:19 -0400
+
+indicator-sound (0.6.6.1-0ubuntu3) natty; urgency=low
+
+  * debian/patches/lp_750823.patch
+    - Place timeout in the mpris controller to accommodate flaky mpris dbus 
+      behaviour, it can be seen sometimes that the players emit a property 
+      changed on the metadata property but the actual value of the property 
+      which the service then tries to use is the old value (LP: #750823)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 18 Apr 2011 15:08:13 -0400
+
+indicator-sound (0.6.6.1-0ubuntu2) natty; urgency=low
+
+  * debian/patches/lp_759390.patch
+    - Sound Preferences link doesn't work in gnome3 (LP: #759390)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 15 Apr 2011 17:12:32 -0400
+
+indicator-sound (0.6.6.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Fix crash with SIGABRT (LP: #738051) (LP: #744304)
+    - ensure that if the service crashes the indicator will not show 
+      multiple sliders
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Mon, 04 Apr 2011 10:02:19 -0400
+
+indicator-sound (0.6.5.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Don't change the banshee id yet, that will change in 0.9.6 
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 23 Mar 2011 13:46:06 -0400
+
+indicator-sound (0.6.5-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Media player should be automatically started up when play button is 
+      pressed (LP: #714750)
+    - volume goes to zero when using some players like banshee or 
+      rhythmbox (LP: #730925)
+    - handle banshee id change (LP: #737447)
+    - filter out video playlists (LP: #739273)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 23 Mar 2011 12:03:02 -0400
+
+indicator-sound (0.6.4-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Harmonize mute behaviour of both VOIP and volume slider (LP: #731870)
+    - keyboard handling for voip slider not working (LP: #732500)
+    - "Choose Playlist" needs to be marked for translation (LP: #736372)
+    - show record level control on PULSE_PROP_media.role=production 
+      (LP: #736049)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 17 Mar 2011 14:08:17 -0400
+
+indicator-sound (0.6.3-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Broken images on playlist items (LP: #727325)
+    - wrong icon for audio-input slider (LP: #723254)
+    - blacklist dbus api lacks query functionality (LP: #730526)
+    - volume goes to zero when using some players like banshee, 
+      rhythmbox (LP: #730925)
+    - holding the FW or RW button should have an effect (LP: #694258)
+    - With new notify-osd the volume notification on scroll doesn't work as 
+      expected (LP: #729849)
+  * debian/control
+    - Bumped build depends for dbusmenu to >= 0.3.101
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 11 Mar 2011 12:47:26 -0500
+
+indicator-sound (0.6.2-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Fixed crashed with SIGSEGV in pa_context_connect() (LP: #717453)
+    - Fixed crashed with SIGSEGV in pa_pdispatch_run() (LP: #723096)
+    - Fixed crashed with SIGSEGV (LP: #723096)
+    - Fixed crashed with SIGSEGV  (LP: #717557)
+    - Fixed crashed with SIGSEGV in g_variant_builder_add_value() 
+      (LP: #717999)
+    - Sound Menu Play lists show Favorites item twice in menu and icons for 
+      all playlists not found (LP: #728263)
+    - Players are raised too quickly (LP: #723278)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 04 Mar 2011 13:07:40 -0500
+
+indicator-sound (0.6.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Icon-only menu titles don't have accessible names (LP: #691677)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 24 Feb 2011 11:19:57 -0500
+
+indicator-sound (0.6.0-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - New voip slider will be displayed in the sound menu while in a call
+    - [Conexant CX20561(Hermosa)] No indicator that input is muted (LP: #683689)
+    - Ctrl+arrow jumps sound to max volume in indicator (LP: #669167)
+    - Fixed build with latest dbusmenu (LP: #717340)
+    - Ported to libnotify >= 0.7.0
+  * debian/control
+    - Changed build depends for libnotify-dev to libnotify4-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 18 Feb 2011 13:20:44 -0500
+
+indicator-sound (0.5.9-0ubuntu2) natty; urgency=low
+
+  * debian/control
+    - bump build depends for libindicator-dev to >= 0.3.19
+    - bump build depends for libdbusmenu-glib-dev to >= 0.3.97
+    - added build depends on dh-autoreconf
+  * src/Makefile.am
+    - Hand Dbusmenu-Glib-0.4 rename to Dbusmenu-0.4
+  * debian/rules
+    - include autoreconf.mk to handle the Dbusmenu rename
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 17 Feb 2011 15:21:33 -0500
+
+indicator-sound (0.5.9-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - crashed with SIGSEGV in pa_cvolume_valid () (LP: #705009)
+    - The players list should be customizable (LP: #685725)
+    - Allow players to set their own title (LP: #709367)
+    - refactor pulse manager (LP: #709371)
+    - listen for playlist changed signal (LP: #715277)
+    - playlist name not updated corrrectly (LP: #715694)
+    - Not enough feedback when changing the volume (LP: #669163)
+    - indicator-sound volume does not detect sink change (LP: #700361)
+  * debian/control
+    - Added new build depends libnotify-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 10 Feb 2011 11:52:59 -0500
+
+indicator-sound (0.5.8-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Media buttons inconsistent with system-wide button behavior (LP: #651006)
+    - update to deal with dbusmenu api chages (LP: #709181)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 28 Jan 2011 09:28:10 -0500
+
+indicator-sound (0.5.7-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Music control buttons flicker (LP: #684755)
+    - Sound Menu should re-read playlists from MPRIS apps when 
+      PropertiesChanged is postec (LP: #707042)
+    - Spotify crashes the service (LP: #707367)
+    - Refactor service dbus code plus state handling (LP: #708793)
+    - changing the volume is impossible while muted (LP: #558784)
+    - Banshee icon changes to coloured icon once in use (LP: #692648)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 27 Jan 2011 15:57:41 -0500
+
+indicator-sound (0.5.6-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Port the sound indicator to the new dbusmenu (LP: #701145)
+  * debian/control
+    - Bumped build depends for dbusmenu to >= 0.3.91
+    - Dropped unneeded build depends for libindicate-dev and dh-autoreconf
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 14 Jan 2011 10:53:50 -0600
+
+indicator-sound (0.5.5-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - unity-panel-service crashed with SIGSEGV in cairo_translate (LP: #683184)
+    - Add MPRIS Playlist support (LP: #692644)
+    - only first word of application name is shown (LP: #695385)
+    - The players list should be customizable (LP: #685725)
+    - gio-unix-2.0 checks (LP: #694828)
+    - Desktop file loading should not manually use full path (LP: #693824)
+    - Banshee mpris interface crashes (LP: #701692)
+  * debian/control
+    - Added build depends for libxml2-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 11 Jan 2011 16:44:40 -0600
+
+indicator-sound (0.5.3-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Libindicate removed from registration process (LP: #691189)
+    - Vala code now using Gdbus exclusively for mpris interaction 
+    - Fixed memory leak with album art resizing (LP: #689686)
+    - Gconf removed and Gsettings schema added (LP: #656405)
+    - registration process now uses gsettings 
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 16 Dec 2010 15:03:15 -0500
+
+indicator-sound (0.5.2-0ubuntu2) natty; urgency=low
+
+  * debian/control
+    - Bump build depends for libdbusmenu-* to >= 0.3.90
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 09 Dec 2010 11:44:02 -0500
+
+indicator-sound (0.5.2-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - updated to accommodate vala 0.10 to vala 0.12 api changes
+    - grey scale icon for default music player
+    - button and key handling improvements
+  * debian/control
+    - Changed build depends from valac-0.10 to valac, it builds now with 
+      the 0.12 series
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 18 Nov 2010 11:13:32 -0500
+
+indicator-sound (0.5.1-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    - Includes a lot of Design updates collected at UDS.
+      * album art border, now rectangular with a simple top and bottom 1 pixel 
+        border. top dark and bottom light.
+      * Empty album art image now has darker background rather than same 
+        colour as menu background
+      * Application icon now uses application image as opposed to generic 
+        image used in maverick
+      * Banshee is now the default player.
+      * spacing between metadata and transport widget has been resolved plus 
+        the spacing between the transport and the separator below it.
+  * debian/control
+    - Bump standards version to 3.9.1
+    - Changed build depends to valac-0.10, until it is ported to valac-0.12
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 12 Nov 2010 10:14:49 -0500
+
+indicator-sound (0.5.0.1-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - Fixed a regression, which would show the metadata widget when the
+      player has no current track (LP: #674016)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 12 Nov 2010 09:40:47 -0500
+
+indicator-sound (0.5.0-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - Buttons' hover image stays after dragging (LP: #643395)
+    - Sound indicator works incorrect with playing status (LP: #656947)
+    - sound applet volume slider has no effect if pulseaudio is 
+      restarted (LP: #662296)
+    - Default music player should be present in the menu from a clean 
+      install (LP: #664743)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 04 Nov 2010 17:03:08 -0400
+
+indicator-sound (0.4.9-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - fixes tranlation mpris name regression (LP: #654140)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 14 Oct 2010 10:40:13 -0400
+
+indicator-sound (0.4.8-0ubuntu1) maverick-proposed; urgency=low
+
+  * New upstream release.
+    - indicator-sound-service eating CPU on second user login (LP: #581173)
+    - Right border of transport control is different colour while using 
+      Ambiance (LP: #632774)
+    - Incorrect ellipsing (LP: #637580)
+    - always show unmuted at startup (LP: #648238)
+    - click or enter on metadata widget does not copy contents to 
+      clipboard (LP: #651246)
+    - Sound menu has two Rhythmbox elements when using 
+      translations (LP: #654140)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 07 Oct 2010 10:08:19 -0400
+
+indicator-sound (0.4.7-0ubuntu2) maverick; urgency=low
+
+  * Rebuild for libindicator ABI change (LP: #637692)
+  * debian/control: depends on latest libindicator-dev 
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 22 Sep 2010 18:40:25 +0200
+
+indicator-sound (0.4.7-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - Media Buttons should trigger action only on button release (LP: #624610)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 15 Sep 2010 18:02:13 -0400
+
+indicator-sound (0.4.6-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - indicator crashes in the event of the service crashing (LP: #638891)
+    - metadata widget should remain hidden if there is no track 
+      data (LP: #637031)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 15 Sep 2010 08:47:49 -0400
+
+indicator-sound (0.4.5-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - service crashes on last fm playback with rb (LP: #633654)
+    - sound_icon for indicator-sound missing for ubuntu-light (LP: #628896)
+    - indicator-sound-service crashed with signal 5 in dbusmenu_menuitem_handle_event() (LP: #633897)
+    - mpris2 playback status behaving as if it were static (LP: #631893)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 14 Sep 2010 15:13:50 -0400
+
+indicator-sound (0.4.4-0ubuntu1) maverick; urgency=low
+
+  * New upstream release, fix crash in gtk_range_get_value() (lp: #615277)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 10 Sep 2010 17:49:49 +0200
+
+indicator-sound (0.4.3-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 08 Sep 2010 17:53:33 +0200
+
+indicator-sound (0.4.2-0ubuntu1) maverick; urgency=low
+
+  * New upstream release fixing those issues
+    - Media Buttons should trigger action only on button release (lp: #624610)
+    - Mouse wheel no longer works to change volume (lp: #620858)
+    - Crashes if Rhythmbox is playing from Last.FM (lp: #627505)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 08 Sep 2010 12:32:24 +0200
+
+indicator-sound (0.4.1-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 26 Aug 2010 11:38:07 +0200
+
+indicator-sound (0.4.0-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 18 Aug 2010 15:51:03 +0200
+
+indicator-sound (0.3.9-0ubuntu2) maverick; urgency=low
+
+  * Backport upstream commit to fix the indicator crashing when rhythmbox starts
+    (lp: #612299) 
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 02 Aug 2010 12:08:57 +0200
+
+indicator-sound (0.3.9-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - Scrub bar should now work properly.
+    - Spacing between all UI widgets should be fixed.
+    - Playlist menuitem in place (for now this is just a mock up item, will 
+      complete once there is a client with which I can test against)
+    - Transport bar has been visually tweaked.
+  * debian/control
+    - build depend on libido-0.1-dev (>= 0.1.11)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 29 Jul 2010 11:26:41 -0400
+
+indicator-sound (0.3.8-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+  * debian/control:
+    - update ido requirement
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 22 Jul 2010 21:12:10 +0200
+
+indicator-sound (0.3.6-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 12 Jul 2010 17:45:06 +0200
+
+indicator-sound (0.3.5-0ubuntu1) maverick; urgency=low
+
+  * New upstream release:
+    -New transport widget integrated
+    -New title widget integrated which allows the user 
+     to launch familiar app directly from the menu
+    - UI tidied
+    - Each player that registers with the menu will be stored in the 
+      cache file allowing the menu to show the application even if it has 
+      not been launched.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 08 Jul 2010 19:32:29 +0200
+
+indicator-sound (0.3.4-0ubuntu1) maverick; urgency=low
+
+  * New upstream version:
+    - Album art now positioned correctly
+    - Track title, artist name and album name now the correct size, 
+      weight and position
+    - Text truncated with an ellipsis if it is over the an estimated acceptable 
+      width (no guidance given by design).
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 28 Jun 2010 17:20:03 +0200
+
+indicator-sound (0.3.3-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - Fixes menu flicker when playing a song with artwork 
+      displayed (LP: #598438)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 25 Jun 2010 11:19:15 -0400
+
+indicator-sound (0.3.2-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - MPRIS transport status updates reflecting in UI
+      If externally a registered player transport is changed (play/stop) 
+      the menu should reflect that
+    - The first time a player registers its desktop file path should be 
+      stored ~.cache/indicators/sound/familiar-players-db.keyfile (provided 
+      the application indicator has a desktop file set.
+    - Album art dynamically updated
+    - Album title dynamically updated
+    - Track title dynamically updated
+    - Artist name dynamically updated
+    - Play/pause transport control should be working from the menu
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 24 Jun 2010 13:55:01 -0400
+
+indicator-sound (0.3.1-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - bumped build-dep version of libdbusmenu-glib-dev to (>= 0.3.1)
+    - Added build-dep for libindicate-dev (>= 0.4.1)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 17 Jun 2010 16:50:31 -0400
+
+indicator-sound (0.2.3-0ubuntu1) lucid-proposed; urgency=low
+
+  * New upstream version:
+    - "Changing left/right balance in sound-preferences changes the output 
+       volume slider when indicator-applet is running" (lp: #532095)
+    - update the mute animation on theme changes (lp: #568586)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 29 Apr 2010 11:53:37 +0200
+
+indicator-sound (0.2.2-0ubuntu1) lucid; urgency=low
+
+  * New upstream version
+    - Animation for mute-blocking state greatly improved
+    - Handles sink removal far better
+    - improves scrolling action icon on panel
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 31 Mar 2010 18:12:47 +0200
+
+indicator-sound (0.2.2-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release.
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 31 Mar 2010 17:49:12 +0200
+
+indicator-sound (0.2.1-0ubuntu1) lucid; urgency=low
+
+  * New upstream release.
+    - can't change audio using mouse wheel (LP: #521046)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 18 Mar 2010 15:07:24 -0400
+
+indicator-sound (0.1.3.1-0ubuntu2) lucid; urgency=low
+
+  * Backport upstream changes to fix those issues:
+    - "Wrong i18n for menu entries", thank Luca Ferretti (lp: #538704)
+    - "display a mute icon until volume is changed since update" (lp: #537977)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 15 Mar 2010 15:51:35 +0100
+
+indicator-sound (0.1.3.1-0ubuntu1) lucid; urgency=low
+
+  * New upstream version:
+    - clear looks seg fault fix (lp: #537891)
+    - slider resizing properly (lp: #533208)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 12 Mar 2010 20:29:25 +0100
+
+indicator-sound (0.1.3-0ubuntu1) lucid; urgency=low
+
+  * New upstream version:
+    - icon sizing fixed.
+    - correct icon names loaded with fallback mechanism
+    - no sink handling improved - now handles going from no sink to one sink 
+      back to no sink properly
+    - Mute blocking state implemented with animation on title image.
+    - smoother sliding due new signals emitted from the 0.1.4 of ido
+  * debian/control:
+    - updated libindicator requirement
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 11 Mar 2010 18:53:58 +0100
+
+indicator-sound (0.1.2-0ubuntu1) lucid; urgency=low
+
+  * New upstream version:
+    - Stability of the service should now be much improved. The backend sound 
+      service should now be able to handle Pulseaudio not being up or flapping.
+      (lp: #529324)
+    - Arrow keys should be working properly allowing users to move between 
+      indicators. (lp: #525733)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 04 Mar 2010 13:32:10 +0100
+
+indicator-sound (0.1.1-0ubuntu2) lucid; urgency=low
+
+  * Backporting trunk commit to fix keyboard controls (lp: #521088)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 18 Feb 2010 19:13:03 +0100
+
+indicator-sound (0.1.1-0ubuntu1) lucid; urgency=low
+
+  * New upstream version
+    - resolve the UI keyboard controls which were lacking (lp: #521088)
+    - the volume control should now be far smoother
+    - included is the ability to dynamically swap output devices 
+      using gnome volume control
+    - use of new icons from the new humanity theme.
+    - update volume slider in the right direction on mouse scroll (lp: #521090)
+  * debian/control:
+    - updated ido requirement
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 18 Feb 2010 17:46:11 +0100
+
+indicator-sound (0.1.0-0ubuntu2) lucid; urgency=low
+
+  * Backport trunk change to fix audiosink detection and volume controls 
+    not working for some users (lp: #521286, #521930)  
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 15 Feb 2010 16:44:01 +0100
+
+indicator-sound (0.1.0-0ubuntu1) lucid; urgency=low
+
+  * debian/control:
+    - depends on pulseaudio
+    - don't set lib section, the applet is not a library
+  * debian/rules:
+    - build using --as-needed to avoid unnecessary depends
+        
+  [ Ken VanDine ]
+  * Initial release
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 12 Feb 2010 11:13:22 +0100

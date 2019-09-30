@@ -1,0 +1,47 @@
+Source: indicator-sound
+Section: sound
+Priority: extra
+Maintainer: Ubuntu Desktop Team <ubuntu-desktop@lists.ubuntu.com>
+XSBC-Original-Maintainer: Conor Curran <conor.curran@canonical.com>
+Build-Depends: debhelper (>= 9.0),
+               cmake,
+               dbus,
+               dbus-test-runner (>= 14.04.0+14.04.20140226),
+               dh-translations,
+               gir1.2-accountsservice-1.0,
+               gnome-common,
+               autotools-dev,
+               valac (>= 0.20),
+               libaccountsservice-dev,
+               libdbustest1-dev (>= 14.04.1),
+               libgirepository1.0-dev,
+               libglib2.0-dev (>= 2.22.3),
+               libgtest-dev,
+               liburl-dispatcher1-dev,
+               libpulse-dev (>= 0.9.18),
+               libpulse-mainloop-glib0 (>= 0.9.18),
+               libnotify-dev,
+               libgee-dev,
+               libxml2-dev,
+               python3-dbusmock,
+Standards-Version: 3.9.4
+Homepage: https://launchpad.net/indicator-sound
+# If you aren't a member of ~indicator-applet-developers but need to upload
+# packaging changes, just go ahead.  ~indicator-applet-developers will notice
+# and sync up the code again.
+Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/indicator-sound/trunk.13.04
+Vcs-Browser: https://bazaar.launchpad.net/~indicator-applet-developers/indicator-sound/trunk.13.04/files
+
+Package: indicator-sound
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         pulseaudio,
+         gsettings-ubuntu-schemas (>= 0.0.1+14.04.20140224),
+Recommends: unity-control-center | gnome-control-center | ubuntu-system-settings | pavucontrol,
+            accountsservice,
+Suggests: unity-greeter-session-broadcast,
+Description: System sound indicator.
+ System sound indicator which provides easy control of the PulseAudio sound 
+ daemon.
+

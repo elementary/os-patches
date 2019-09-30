@@ -1,0 +1,61 @@
+<schemalist>
+  <schema id="com.canonical.indicator.sound" path="/com/canonical/indicator/sound/" gettext-domain="indicator-sound">
+    <key name="blacklisted-media-players" type="as">
+      <summary>A list of applications blacklisted from the sound menu</summary>
+      <default>[]</default>
+      <description>
+        Each media player which abides by the MPRIS2 spec will automatically appear in the menu.
+        This array should contain the desktop file names (minus .desktop suffix) of applications which
+        do not want to be included in the sound menu.
+      </description>
+    </key>
+    <key name="interested-media-players" type="as">
+      <summary>A list of applications which at some point have registered with the sound menu</summary>
+      <default>[]</default>
+      <description>
+        Each media player which abides by the MPRIS2 spec will automatically appear in the menu.
+        This array should contain the desktop file names (minus .desktop suffix) of applications which
+        have at some point appeared in the menU. This allows the menu remember and display offlined applications.
+      </description>
+    </key>
+    <key name="preferred-media-players" type="as">
+      <summary>A list of applications that will have player controls visible all the time</summary>
+      <default>[ 'rhythmbox' ]</default>
+      <description>
+        A list of applications that will have player controls visible all the time
+      </description>
+    </key>
+    <key name="global-mute" type="b">
+      <default>false</default>
+      <summary>Initial setting for global mute (mute all) on the menu </summary>
+      <description>
+        On start up volume should not be muted.
+      </description>
+    </key>
+    <key name="show-notify-osd-on-scroll" type="b">
+      <default>true</default>
+      <summary>Initial setting for showing notify-osd notification on scroll volume-change</summary>
+      <description>
+        When using the mouse scroll-wheel over the indicator-sound icon, the volume changes.
+        Enabling this setting, every scroll volume-change a notify-osd bubble with the
+        updated volume value will be shown (if supported by your notification daemon).
+      </description>
+    </key>
+    <key name="visible" type="b">
+      <default>true</default>
+      <summary>Whether or not to show the sound indicator in the menu bar.</summary>
+      <description>
+        Whether or not to show the sound indicator in the menu bar.
+      </description>
+    </key>
+    <key name="greeter-export" type="b">
+      <default>true</default>
+      <summary>Whether or not to export the currently playing song to the greeter.</summary>
+      <description>
+        If enabled the sound indicator will export the current player and
+        song to the greeter so that it can be shown if the user is selected
+        and the sound menu is shown.
+      </description>
+    </key>
+  </schema>
+</schemalist>
