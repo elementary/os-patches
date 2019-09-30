@@ -1,0 +1,1186 @@
+indicator-messages (13.10.1+14.04.20140410-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * messages-service: listen to the ApplicationStoppedRunning call Prior
+    to this patch, only applications that exit were marked as "not
+    running". However, this must also happen when an application unrefs
+    it's MessagingMenuApp instance. This is a problem for applications
+    which implement messaging menu integration as a plugin (when
+    unloading the plugin). Specifically, this causes bug #1302930, as
+    telepathy-indicator doesn't exit when empathy exits. (LP: #1302930)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 10 Apr 2014 12:07:10 +0000
+
+indicator-messages (13.10.1+14.04.20140408-0ubuntu1) trusty; urgency=low
+
+  [ Ted Gould ]
+  * Synchronize process management across indicators
+
+  [ Lars Uebernickel ]
+  * Don't show the messaging menu and the status section when no app is
+    registered for them (LP: #1225063)
+  * desktop menu: sort applications like specified Default chat client,
+    default email client, and the other applications sorted by alphabet.
+    (LP: #1216833)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 08 Apr 2014 16:25:00 +0000
+
+indicator-messages (13.10.1+14.04.20140321-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * desktop menu: use com.canonical.application menu items for actions
+    The unity implementation of that menu item indents the label even
+    when there's no icon.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 21 Mar 2014 06:57:05 +0000
+
+indicator-messages (13.10.1+14.04.20140207-0ubuntu1) trusty; urgency=low
+
+  [ Ted Gould ]
+  * Adding acceptance tests and merge review policies.
+
+  [ CI bot ]
+  * Adding acceptance tests and merge review policies
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Feb 2014 16:21:43 +0000
+
+indicator-messages (13.10.1+14.04.20140116-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * phone menu: set action targets on source and message menu items.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 400
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 16 Jan 2014 10:03:41 +0000
+
+indicator-messages (13.10.1+14.04.20131125-0ubuntu1) trusty; urgency=low
+
+  [ Lars Uebernickel ]
+  * im-menu: fix leak.
+  * Stop showing expected warnings in the actionmuxer test.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 398
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 25 Nov 2013 03:55:11 +0000
+
+indicator-messages (13.10.1+14.04.20131029.1-0ubuntu1) trusty; urgency=low
+
+  [ Ted Gould ]
+  * Adding a phone_greeter profile.
+
+  [ Lars Uebernickel ]
+  * im-application-list: unpack icon correctly An additional variant was
+    left by unpacking it the old way, which confused
+    g_icon_deserialize() on the menu-rendering side. (LP: #1238927)
+  * Protect against processes calling Register() multiple times Don't
+    unnecessarily reset the application's state if the same process
+    calls Register() more than once.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 395
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 29 Oct 2013 10:30:47 +0000
+
+indicator-messages (13.10.1+13.10.20131011-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * messages-service.c: remove superfluous unref.
+  * Fix the logic for turning the indicator icon blue.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 391
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 11 Oct 2013 04:27:10 +0000
+
+indicator-messages (13.10.1+13.10.20131004-0ubuntu1) saucy; urgency=low
+
+  [ Charles Kerr ]
+  * in im_application_list_update_draws_attention(), free the temporary
+    icon_name string created by g_strdup_printf(). (LP: #1234895)
+
+  [ Sebastien Bacher ]
+  * remove old sources from the translatable list.
+
+  [ Lars Uebernickel ]
+  * messages-service: return TRUE from "handle-*" GDBusProxy method
+    handlers This is done to signify that the handlers replied to the
+    messages. Otherwise GDBus might send another reply, depending on
+    whether 0 or !0 was lying around on the stack. .
+  * Change title to "Incoming".
+  * Remove 'indicator.' from the "Clear All" menu item on the phone's
+    menu.
+  * Return values from functions that have return values. Somehow -
+    Wreturn-type warnings aren't always triggered for g_return_if_fail
+    macros.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 388
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 04 Oct 2013 02:28:41 +0000
+
+indicator-messages (13.10.1+13.10.20130930-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * phone menu: don't show "Clear All" when there are no messages. (LP:
+    #1229422)
+  * im-application-list: show all sources that have a count, time, or
+    non-empty string. (LP: #1231435)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 381
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 30 Sep 2013 06:32:28 +0000
+
+indicator-messages (13.10.1+13.10.20130913-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Install into /usr/lib/$arch, to be consistent with the other
+    indicators.
+  * Use g_icon_serialize() instead of g_icon_to_string().
+  * Add "title" to the root action state dictionary. (LP: #1223635)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 378
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 13 Sep 2013 15:15:38 +0000
+
+indicator-messages (13.10.1+13.10.20130903-0ubuntu1) saucy; urgency=low
+
+  [ Nick Dedekind ]
+  * Remove parameter type from root action.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 374
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 03 Sep 2013 02:07:40 +0000
+
+indicator-messages (13.10.1+13.10.20130830.2-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * libmessaging-menu: default MessagingMenuMessage::draws-attention to
+    TRUE In most cases, apps will want to draw the user's attention when
+    they add a message to the menu. (LP: #1215644)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 372
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 30 Aug 2013 10:07:39 +0000
+
+indicator-messages (13.10.1+13.10.20130829-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Don't pass source and message ids into parameters that expect
+    detailed action names.
+  * Remove app-section.[ch], it's not used anymore.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 370
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 29 Aug 2013 02:07:50 +0000
+
+indicator-messages (13.10.1+13.10.20130828.2-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * Remove extraneous variable 'old_draw'.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 367
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 28 Aug 2013 10:08:42 +0000
+
+indicator-messages (13.10.1+13.10.20130827.4-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Protect against invalid actions. (LP: #1216758)
+  * Remove unused and slightly used dependencies.
+
+  [ Lars Uebernickel ]
+  * Fix bug #1216843 Remove all sources when an applications quits and
+    don't show sources with a count of 0. (LP: #1216843)
+  * test-client.py: flush GDBusConnection before (potentially) freeing
+    it. (LP: #1217131)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 365
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 27 Aug 2013 15:53:01 +0000
+
+indicator-messages (13.10.1+13.10.20130822.5-0ubuntu1) saucy; urgency=low
+
+  [ Pete Woods ]
+  * Re-merge the consolidate branch, but with additional bugfix.
+
+  [ Ted Gould ]
+  * Re-merge the consolidate branch, but with additional bugfix.
+  * Add a DBus error for list_add().
+  * Migrate away from deprecated function. (LP: #1215180)
+
+  [ Sebastien Bacher ]
+  * don't error out on deprecated declarations.
+
+  [ Lars Uebernickel ]
+  * Don't use deprecated g_simple_action_group_{lookup,insert}. (LP:
+    #1215180)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 360
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 22 Aug 2013 20:29:12 +0000
+
+indicator-messages (13.10.1+13.10.20130820.2-0ubuntu1) saucy; urgency=low
+
+  * Automatic snapshot from revision 354
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Aug 2013 08:59:34 +0000
+
+indicator-messages (13.10.1+13.10.20130820-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Bumping version to ensure we override all PPAs when this lands
+
+  [ Ubuntu daily release ]
+  * debian/*symbols: auto-update new symbols to released version
+  * Automatic snapshot from revision 352
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Aug 2013 02:06:40 +0000
+
+indicator-messages (12.10.6+13.10.20130702-0ubuntu1) saucy; urgency=low
+
+  [ Mathias Dietrich ]
+  * Change abbreviation for minutes from m to min. (LP: #652845)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 350
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 02 Jul 2013 02:02:36 +0000
+
+indicator-messages (12.10.6daily13.06.19-0ubuntu1) saucy; urgency=low
+
+  [ Sebastien Bacher ]
+  * use gtk_style_context_get instead of deprecated
+    gtk_style_context_get_font.
+
+  [ Jeremy Bicha ]
+  * Have libmessaging-menu-dev depend on gir1.2-messagingmenu-1.0.
+
+  [ Lars Uebernickel ]
+  * use gtk_style_context_get instead of deprecated
+    gtk_style_context_get_font.
+  * Notify the service when an app unrefs its MessagingMenuApp. (LP:
+    #1154099)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 348
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 19 Jun 2013 02:01:48 +0000
+
+indicator-messages (12.10.6daily13.05.15-0ubuntu1) saucy; urgency=low
+
+  [ Lars Uebernickel ]
+  * libmessaging-menu: don't use detailed action names Detailed action
+    names are of the form action::target or action(target), so they
+    can't have colons or parens in them. This restriction does not apply
+    to messaging menu ids. (LP: #1180302)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 344
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 15 May 2013 16:59:49 +0000
+
+indicator-messages (12.10.6daily13.05.02-0ubuntu1) saucy; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * Opening new-window from quicklist static action does not focus the
+    newly opened window (LP: #1164483)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 342
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 02 May 2013 22:59:03 +0000
+
+indicator-messages (12.10.6daily13.04.09-0ubuntu1) raring; urgency=low
+
+  * Automatic snapshot from revision 340
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 09 Apr 2013 02:02:02 +0000
+
+indicator-messages (12.10.6daily13.04.08-0ubuntu1) raring; urgency=low
+
+  [ Marco Trevisan (Treviño) ]
+  * Window management - Apps raised from indicators sometimes dont have
+    the focus (LP: #627195)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 339
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 08 Apr 2013 02:02:06 +0000
+
+indicator-messages (12.10.6daily13.02.13-0ubuntu1) raring; urgency=low
+
+  [ Jason Conti ]
+  * Stuck notifications (blue envolope remains after I've already read
+    msg) (LP: #1113721)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 337
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Wed, 13 Feb 2013 02:02:11 +0000
+
+indicator-messages (12.10.6daily13.01.25-0ubuntu1) raring; urgency=low
+
+  [ Charles Kerr ]
+  * indicators call deprecated glib function g_type_init() (LP:
+    #1103087)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 335
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Fri, 25 Jan 2013 02:01:11 +0000
+
+indicator-messages (12.10.6daily12.11.22-0ubuntu1) raring; urgency=low
+
+  [ Lars Uebernickel ]
+  * Crash in g_variant_valist_get_leaf when highlighted (LP: #1081754)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 333
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Thu, 22 Nov 2012 10:02:35 +0000
+
+indicator-messages (12.10.6daily12.11.21.1-0ubuntu1) raring; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/rules:
+    - Use autogen.sh for dh_autoreconf.
+    - Drop the override for dh_makeshlibs.
+    - Add DPKG_GENSYMBOLS_CHECK_LEVEL=4.
+  * debian/control:
+    - Fix styling: add trailing commas at the end of lists. 
+    - Update Vcs-Bzr, Vcs-Browser fields and add a notice for developers.
+    - Add libgtest-dev to Build-Depends.
+  * Automatic snapshot from revision 329 (bootstrap):
+    - Clear the detail (count or time) of a source when another type of detail
+      is set. (LP: #1071640)
+
+  [ Automatic PS uploader ]
+  * Automatic snapshot from revision 331
+
+ -- Automatic PS uploader <ps-jenkins@lists.canonical.com>  Wed, 21 Nov 2012 10:41:37 +0000
+
+indicator-messages (12.10.5-0ubuntu2) raring; urgency=low
+
+  * Upload to raring
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 07 Nov 2012 15:16:08 +0100
+
+indicator-messages (12.10.5-0ubuntu1) quantal-proposed; urgency=low
+
+  * New upstream release:
+    - fix crash caused by GError not being cleared (lp #1064314)
+    - fix crash when registering an app that was previously unregistered 
+      (lp #1065169)
+    - remove the icon if NULL is passed to source_set_icon (lp #1070421)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 24 Oct 2012 17:30:45 +0200
+
+indicator-messages (12.10.4-0ubuntu1) quantal; urgency=low
+
+  * New upstream release:
+    - don't segfault if .desktop file is not installed (lp: #1058386)
+    - Use fallback icon names (without status emblems).
+      (lp: #1056595)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 02 Oct 2012 23:20:19 +0200
+
+indicator-messages (12.10.2-0ubuntu1) quantal; urgency=low
+
+  * New upstream release, includes apis to allow changing the label and
+    the icon of sources and add documentation
+  * debian/libmessaging-menu0.symbols:
+    - new version update
+  * debian/libmessaging-menu-dev.install:
+    - install the documentation
+  * debian/rules:
+    - build the documentation
+    - updated shlibs version
+    - use --with gir so gir:Depends work as it should 
+      (lp: #1044125)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Sat, 01 Sep 2012 12:36:35 +0200
+
+indicator-messages (12.10.1-0ubuntu1) quantal-proposed; urgency=low
+
+  * New upstream version
+  * debian/control:
+    - breaks on version of ported clients using libindicate
+    - set some conflicts on the old deprecated status provider binaries
+    - updated Build-Depends
+  * debian/control, debian/*.install:
+    - drop indicator-status-provider-*, those are deprecated
+    - new binaries for the libmessaging-menu library
+  * debian/libmessaging-menu0.symbols:
+    - symbol file for the new library
+  * Updated packaging to dh9, current standards
+  * Drop gtk2 build from the packaging since support for it was 
+    dropped in trunk, thanks Lars Uebernickel
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 27 Aug 2012 18:56:59 +0200
+
+indicator-messages (0.6.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    * Handle blank icons properly (LP: #956147)
+    * Fix telepathy offline/disconnected state bug 
+
+ -- Charles Kerr <charles.kerr@canonical.com>  Wed, 11 Apr 2012 11:09:46 -0500
+
+indicator-messages (0.5.95-0ubuntu1) precise; urgency=low
+
+  [ Charles Kerr ]
+  * New upstream release.
+    * Fix 0.5.94 blacklist regression.
+
+  [ Ken VanDine ]
+  * src/indicator-messages.c
+    * revert fix for the broken images in indicator-messages-service, it 
+      caused the service to build against gtk and we can't parallel install 
+      the service anyway
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 05 Apr 2012 16:47:19 -0400
+
+indicator-messages (0.5.94-0ubuntu1) precise; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Fix for missing icons in the messaging menu (LP: #960553)
+    * Fix i18n for description (LP: #957525)
+    * Implementing initial testing
+    * Fixing blacklists (LP: #939258)
+  * debian/control: Adding dep on libgtest-dev
+
+  [ Ken VanDine ]
+  * debian/control: Don't build depend on libgtest-dev, it isn't in main
+  * debian/rules: disable tests, they require libgtest-dev
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 21 Mar 2012 17:00:10 -0400
+
+indicator-messages (0.5.93-0ubuntu2) precise; urgency=low
+
+  * src/im-menu-item.c
+    - cherry picked fix for missing icons in the messaging menu (LP: #960553)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 20 Mar 2012 16:41:13 -0400
+
+indicator-messages (0.5.93-0ubuntu1) precise; urgency=low
+  
+  * debian/control:
+    - drop build-depends on gnome-doc-utils and scrollkeeper, not required
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Fixing alignment of menu items (LP: #939953)
+    * Vertically centering alignment of double high items (LP: #770486)
+    * Fixing setting of status on telepathy (LP: #943757)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 08 Mar 2012 22:11:24 +0100
+
+indicator-messages (0.5.92-0ubuntu1) precise; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Fix goto handling (by removing) (LP: #937441, LP: #937438)
+    * Tell accountsservice when user has messages for the benefit of
+      LightDM.
+  * Dropping debian/patches: Merged upstream
+
+  [ Ken VanDine ]
+  * debian/source/format
+    - dropped "3.0 (quilt), it doesn't play well with bzr maintained packages 
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 23 Feb 2012 02:48:09 -0500
+
+indicator-messages (0.5.91-0ubuntu3) precise; urgency=low
+
+  * debian/source/format:
+    - Make "3.0 (quilt)"
+  * debian/patches/tell-accounts-service.patch:
+    - Tell accountsservice when user has messages for the benefit of
+      LightDM.
+
+ -- Michael Terry <mterry@ubuntu.com>  Wed, 15 Feb 2012 15:32:16 -0500
+
+indicator-messages (0.5.91-0ubuntu2) precise; urgency=low
+
+  * debian/control: build-depends on dh-autoreconf as well
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 14 Feb 2012 23:50:15 +0100
+
+indicator-messages (0.5.91-0ubuntu1) precise; urgency=low
+
+  * New upstream release.
+    * Better lozenges that look nice
+  * debian/rules: Adding autoreconf and running make check
+  * debian/compat: 5
+  * debian/source/format: Dropping
+
+ -- Ted Gould <ted@ubuntu.com>  Tue, 14 Feb 2012 15:29:52 -0600
+
+indicator-messages (0.5.90-0ubuntu1) precise; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Adding code coverage targets
+    * Match libindicate 0.6.90
+    * Updating for Dbusmenu 0.5.90
+    * Plug leak in launcher_menu_item_new
+    * Fix memory leak: Free path string.
+    * Compare server and path for multi-server clients
+    * Using the new GTK3 box API to avoid deprecations
+    * Adding a name hint
+  * debian/control: Requiring libindicate 0.6.90 and dbusmenu 0.5.90
+
+  [ Ken VanDine ]
+  * debian/rules
+    - drop no-error=deprecated-declarations from CFLAGS
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 10 Feb 2012 14:29:59 -0500
+
+indicator-messages (0.5.0-1ubuntu1) precise; urgency=low
+
+  * rebuild for libindicator7
+  * debian/rules
+    - build with no-error=deprecated-declarations
+  * debian/control
+    - set ubuntu-desktop VCS and maintainer
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 25 Jan 2012 09:56:59 -0500
+
+indicator-messages (0.5.0-1) experimental; urgency=low
+
+  * Merge new upstream from Ubuntu.
+
+ -- Evgeni Golov <evgeni@debian.org>  Wed, 19 Oct 2011 13:36:00 +0200
+
+indicator-messages (0.5.0-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    * Fix memory leak (LP: #690668)
+  * Drop debian/patches/lp_690668.patch: Merged upstream
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 28 Sep 2011 10:39:26 -0500
+
+indicator-messages (0.4.95-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    * Fix naming of "Clear" item
+    * Fix alignment of items to there is a consistent gutter
+  * debian/patches/lp_690668.patch: Updating
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 25 Aug 2011 09:09:20 -0500
+
+indicator-messages (0.4.94-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+    ∘ Fix drawing of triangles and capsules in GTK3
+    ∘ Fix Emesene statuses (LP: #817504)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 18 Aug 2011 10:57:40 -0500
+
+indicator-messages (0.4.93-0ubuntu2) oneiric; urgency=low
+
+  * debian/rules
+    - run intltool-update to update the translations template
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 12 Aug 2011 10:05:01 -0400
+
+indicator-messages (0.4.93-0ubuntu1) oneiric; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Add an item to clear the alert
+    * Choose mail applications based on the default application
+    * Clear based on middle click
+
+  [ Ken VanDine ]
+  * debian/control
+    - Bumped build depends for libindicate to >= 0.5.90 
+  * debian/rules
+    - Fixed configure arg for gtk version
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 11 Aug 2011 14:18:05 -0400
+
+indicator-messages (0.4.92-0ubuntu4) oneiric; urgency=low
+
+  * debian/control
+    - Dropped recommends for gwibber now that it is seeded
+  * cherry picked r220 from trunk 
+    - Make sure to insert in the right locations
+  * cherry picked r221 from trunk
+    - Making mail applications based on the default mail client not a 
+      hardcoded desktop file.
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 05 Aug 2011 14:33:39 -0400
+
+indicator-messages (0.4.92-0ubuntu3) oneiric; urgency=low
+
+  * debian/control
+    - Added recommends for gwibber, it got missed when we dropped indicator-me
+      should get removed after we get it seeded properly
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Sun, 31 Jul 2011 16:36:09 -0400
+
+indicator-messages (0.4.92-0ubuntu2) oneiric; urgency=low
+
+  * debian/control:
+    - use conflicts against indicator-me
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 29 Jul 2011 15:49:40 +0200
+
+indicator-messages (0.4.92-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release.
+  * debian/control
+    - Added Replaces indicator-me
+    - Added build depends for libtelepathy-glib-dev
+    - Added new binary packages, libindicator-messages-status-provider-dev,
+      libindicator-messages-status-provider1, and each provider
+    - Make indicator-messages recommend indicator-status-provider-mc5
+  * debian/libindicator-messages-status-provider1.symbols
+    - Added symbols file
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 14 Jul 2011 16:28:23 -0400
+
+indicator-messages (0.4.91-0ubuntu1) oneiric; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * Update for libindicator 0.4
+
+  [ Ken VanDine ]
+  * debian/control
+    - Bumped build depends for libindicator to >= 0.3.90
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 08 Jul 2011 11:23:58 -0400
+
+indicator-messages (0.4.90-0ubuntu2) oneiric; urgency=low
+
+  * Rebuild for libdbusmenu-gtk3-4
+  * debian/control
+    - Removed duplicate build depends
+    - Dropped build depends on indicator-messages-gtk2
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 28 Jun 2011 09:01:12 -0400
+
+indicator-messages (0.4.90-0ubuntu1) oneiric; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * GTK 3
+
+  [ Ken VanDine ]
+  * debian/control
+    - Bumped standards version to 3.9.2
+    - Add new binary for indicator-messages-gtk2 
+    - Make indicator-messages recommend indicator-messages-gtk2 (until unity 
+      can load gtk3 indicators)
+    - indicator-messages-gtk2 replaces indicator-messages << 0.4.90
+    - Added build depends for libdbusmenu-gtk3-dev and libindicator3-dev
+  * debian/rules
+    - build for both gtk2 and gtk3
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 22 Jun 2011 12:34:43 -0400
+
+indicator-messages (0.4.0-1) unstable; urgency=low
+
+  * Merge new upstream from Ubuntu.
+  * Standards-Version: 3.9.2
+
+ -- Evgeni Golov <evgeni@debian.org>  Sun, 05 Jun 2011 13:16:03 +0200
+
+indicator-messages (0.4.0-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    ∘ Set the type before other variables to get default handling more
+      reliable (LP: #723873)
+    ∘ Add support for overriding the default icon with a specific one
+      for the messaging menu (LP: #741068)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 07 Apr 2011 12:35:36 -0500
+
+indicator-messages (0.3.92-1) unstable; urgency=low
+
+  * Merge new upstream from Ubuntu.
+  * Fix 0.3.11-0ubuntu3 changelog entry (missed a space), so that
+    bzr builddeb won't go crazy (see Debian Bug #620242)
+  * Fix debian/copyright, was refering to libdbusmenu by mistake.
+
+ -- Evgeni Golov <evgeni@debian.org>  Sun, 03 Apr 2011 13:37:33 +0200
+
+indicator-messages (0.3.92-0ubuntu3) natty; urgency=low
+
+  * debian/patches/lp_690668.patch
+    - Memory leak fixes (LP: #690668)
+  * debian/control
+    - Bump standards version to 3.9.1
+  * debian/source/format
+    - Use source format 3.0 (quilt)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 24 Feb 2011 12:13:33 -0500
+
+indicator-messages (0.3.92-0ubuntu2) natty; urgency=low
+
+  * src/launcher-menu-item.c
+    - Make sure menu entries are displayed for launchers that aren't running (LP: #723873)
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 23 Feb 2011 16:06:37 -0500
+
+indicator-messages (0.3.92-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    * Adding in accessible description support
+  * debian/control: libindicator version 0.3.19
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 17 Feb 2011 12:18:32 -0600
+
+indicator-messages (0.3.91-0ubuntu1) natty; urgency=low
+
+  * New upstream release.
+    * Fixing the service file
+    * Adding a log domain
+    * Fixing type handler for dbusmenu 0.3.94
+  * debian/control: dbusmenu to 0.3.94
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 27 Jan 2011 17:01:34 -0600
+
+indicator-messages (0.3.90-0ubuntu1) natty; urgency=low
+
+  [ Ted Gould ]
+  * New upstream release.
+    * GDBus Port
+    * New libindicate and dbusmenu
+
+  [ Ken VanDine ]
+  * debian/control
+    - Build depends on libindicate-dev to 0.4.91
+    - Build depends on dbusmenu to 0.3.91
+    - Set Vcs to ~ubuntu-desktop
+  * data/indicator-messages.service.in
+    - Fixed dbus interface name
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 14 Jan 2011 14:50:30 -0600
+
+indicator-messages (0.3.11-0ubuntu4) natty; urgency=low
+
+  * debian/control
+    - Bump build depends for libdbusmenu-* to >= 0.3.90
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 09 Dec 2010 11:39:40 -0500
+
+indicator-messages (0.3.11-0ubuntu3) UNRELEASED; urgency=low
+
+  * debian/control: package description spelling (LP: #658096)
+
+ -- Greg Auger <gregory.auger@googlemail.com>  Tue, 09 Nov 2010 18:49:38 +0000
+
+indicator-messages (0.3.11-0ubuntu2) maverick; urgency=low
+
+  * Rebuild for libindicator ABI change (LP: #637692)
+  * debian/control: depends on latest libindicator-dev 
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 22 Sep 2010 18:39:27 +0200
+
+indicator-messages (0.3.11-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    * Fixing triangles by passing data to callback (LP: #623453)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 09 Sep 2010 13:24:13 -0500
+
+indicator-messages (0.3.10-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    * Shifting icons into the gutter and adjusting the arrow
+      padding.
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 26 Aug 2010 15:08:31 -0500
+
+indicator-messages (0.3.9-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    * Remove parens from counts
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 12 Aug 2010 13:10:10 -0500
+
+indicator-messages (0.3.8-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+    - running apps triangle indicator overlay
+    - message counters are now rendered with a nice rounded background
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 29 Jul 2010 13:33:14 -0400
+
+indicator-messages (0.3.7-1) unstable; urgency=low
+
+  * Merge from Ubuntu.
+    Closes: #586132
+  * debian/control:
+    - Homepage is at LP/indicator-messages, not -applet.
+    - Update package description.
+    - Update Vcs-* fields.
+    - Standards-Version: 3.8.4.
+  * debian/copyright:
+    - Convert to DEP5 format.
+    - Add missing copyright holders of debian/.
+
+ -- Evgeni Golov <evgeni@debian.org>  Thu, 17 Jun 2010 13:02:37 +0200
+
+indicator-messages (0.3.7-0ubuntu1~ppa1) lucid; urgency=low
+
+  * New upstream release.
+    * When loading desktop files check to see if they've
+      already been eclipsed by an app. (LP: #549096)
+    * Track better application shortcuts and ensure that they
+      get removed when the application is. (LP: #539167)
+    * Track blacklisted apps to ensure that the messaging menu
+      hides when there is no app.  (LP: #533021)
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 21 May 2010 15:02:16 -0500
+
+indicator-messages (0.3.6-0ubuntu2) lucid; urgency=low
+
+  * Upstream Merge
+    * When loading desktop files check to see if they've
+      already been eclipsed by an app. (LP: #549096)
+    * Track better application shortcuts and ensure that they
+      get removed when the application is. (LP: #539167)
+
+ -- Ted Gould <ted@ubuntu.com>  Sat, 17 Apr 2010 13:10:42 -0500
+
+indicator-messages (0.3.6-0ubuntu1) lucid; urgency=low
+
+  * New upstream release.
+    * Fixing several bugs with regards to visibility and placement
+      if items and separators in the menu.  (LP: #446914)
+    * Changing the service management over to using libindicator
+      services and service manager for robustness.
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 01 Apr 2010 10:13:38 -0500
+
+indicator-messages (0.3.5-0ubuntu2) lucid; urgency=low
+
+  * debian/control:
+    - change the indicator-applet depends to a recommends to let other 
+      desktops use other options rather than having to trigger GNOME
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 30 Mar 2010 10:35:59 +0200
+
+indicator-messages (0.3.5-0ubuntu1) lucid; urgency=low
+
+  * Upstream release 0.3.5
+    * Show which applications are running with a small icon
+      next to their entry. (LP: #438526)
+    * Shift command items to line up with application names.
+      (LP: #537312)
+    * Track applications we've seen so that we can show "Set Up"
+      text if we've not seen the app before.
+    * Fix avatar spacing to match other menu items
+    * Use standard libindicator icon handling in panel
+    * Fix translation of non-running applications (LP: #540148)
+    * Handling bools for requesting attention from apps
+    * Changing microblogging to broadcast to match Me Menu (LP: #534952)
+  * debian/control: 
+    - Updating requirement to libindicator 0.3.5
+    - Increasing dbusmenu-glib dep to 0.2.8
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 25 Mar 2010 10:53:01 -0500
+
+indicator-messages (0.3.4-0ubuntu1~ppa1) lucid; urgency=low
+
+  * Upstream release 0.3.4
+    * Fix avatar spacing to match other menu items
+    * Use standard libindicator icon handling in panel
+    * Fix translation of non-running applications (LP: #540148)
+    * Handling bools for requesting attention from apps
+    * Changing microblogging to broadcast to match Me Menu (LP: #534952)
+  * debian/control: Updating requirement to libindicator 0.3.5
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 18 Mar 2010 13:45:19 -0500
+
+indicator-messages (0.3.3-0ubuntu2) lucid; urgency=low
+
+  * src/default-applications.c
+    - string change for consistency (LP: #534952) 
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Fri, 12 Mar 2010 11:44:46 -0500
+
+indicator-messages (0.3.3-0ubuntu1) lucid; urgency=low
+
+  * Upstream release 0.3.3
+    * Changing names of default applications to generic names
+    * Making icons of default applications match panel theme
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 04 Mar 2010 16:02:11 -0600
+
+indicator-messages (0.3.2-0ubuntu1) lucid; urgency=low
+
+  * Upstream release 0.3.2
+    * Removing extra ref
+    * Moving locally defined variable to use the one defined in
+      the function to fix a NULL pointer. (lp: #518547)
+    * Disconnect the count changed signal property
+    * Adding static desktop shortcuts to application items
+    * Adding dynamic application menuitems
+    * Switching application menu items to remove descriptions
+      and add in application icons
+  * debian/control:
+    * libindicator build dependency to 0.3.3
+    * dbusmenu build dependency to 0.2.5
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 18 Feb 2010 12:23:29 -0600
+
+indicator-messages (0.3.1-0ubuntu2) lucid; urgency=low
+
+  * Upstream Merge
+    * Removing extra ref
+    * Moving locally defined variable to use the one defined in
+      the function to fix a NULL pointer. (lp: #518547)
+
+ -- Ted Gould <ted@ubuntu.com>  Tue, 09 Feb 2010 09:30:10 -0600
+
+indicator-messages (0.3.1-0ubuntu1) lucid; urgency=low
+
+  * Upstream release 0.3.1
+    * Updates for dbusmenu 0.2.2
+    * Updates for libindicate 0.3.0
+  * debian/control:
+    * dbusmenu* depends to 0.2.2
+    * libindicate* depends to 0.3.0
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 04 Feb 2010 18:23:34 -0800
+
+indicator-messages (0.3.0-0ubuntu1) lucid; urgency=low
+
+  * Upstream release 0.3.0
+    - Disabling static builds.
+    - Porting to libindicator 0.3.0
+    - Adding translator comments from hours and minutes strings.
+      (LP: #456437)
+    - Upgrading to dbusmenu 0.2.0
+  * debian/control: Updating dbusmenu dependency to 0.2.0
+  * debian/control: Increasing libindicator-dev dependency to
+    0.3.0
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 08 Jan 2010 12:05:25 -0600
+
+indicator-messages (0.2.6+r156-0ubuntu2) lucid; urgency=low
+
+  * debian/control
+    - add a Breaks for indicator-applet (<< 0.3.0) 
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Tue, 15 Dec 2009 11:57:42 -0500
+
+indicator-messages (0.2.6+r156-0ubuntu1) lucid; urgency=low
+
+  * New snapshot for libindicator 0.3.0
+  * debian/control
+    - Build-Depends on libindicator >= 0.3.0
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 10 Dec 2009 14:35:46 -0500
+
+indicator-messages (0.2.6-0ubuntu1) karmic; urgency=low
+
+  * Upstream release 0.2.6 (LP: #446629)
+    * Building the menu after checking the blacklist so that the
+      separators are all correct.
+    * Small fix for a perspective memory leak.
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 09 Oct 2009 08:14:27 +0200
+
+indicator-messages (0.2.5-0ubuntu1) karmic; urgency=low
+
+  * Upstream release 0.2.5 (LP: #440217)
+    * Adding a check on addition of launchers to ensure icon is correctly
+      visible. (LP: #433274)
+    * Making it so that if applications don't set the time on an indicator
+      the time isn't shown in the menu. (LP: #438237)
+    * Putting icons in the right places. (LP: #436460)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 01 Oct 2009 23:34:28 +0200
+
+indicator-messages (0.2.4-0ubuntu1) karmic; urgency=low
+
+  * Upstream release 0.2.4 (LP: #436093)
+    - Merging in the min menu width feature (LP: #428292)
+    - Merging in icon scaling branch from trunk. Now better icons (LP: #433143)
+    - Merging in updated trunk (LP: #434097 and LP: #435184)
+    - add i18n support
+    - Prevent null entries (LP: #435184)
+    - add a path for indicators in /usr/share (LP: #434097)
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 24 Sep 2009 13:07:46 -0500
+
+indicator-messages (0.2.2-0ubuntu2) karmic; urgency=low
+
+  * src/messages-service.c: initialise the translations
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 15 Sep 2009 16:41:03 +0200
+
+indicator-messages (0.2.2-0ubuntu1) karmic; urgency=low
+
+  * New release (LP: #427357)
+    * Adds in separators between application groups
+    * Merging in v2-api stuff which will become 0.2.1
+  * debian/control: 
+    - Requiring > 0.2.0 of libindicate-*
+    - bump dbusmenu dependencies.
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 10 Sep 2009 09:11:57 -0500
+
+indicator-messages (0.2.0-0ubuntu2) karmic; urgency=low
+
+  * debian/control
+    - Bump build depends on dbusmenu to 0.1.0
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Thu, 27 Aug 2009 21:14:46 +0200
+
+indicator-messages (0.2.0-0ubuntu1) karmic; urgency=low
+
+  [ Ted Gould ]
+  * Upstream version 0.2.0
+  * debian/control: Adding dependency information for libdbusmenu
+    to say >= 0.0.2 to match upstream build system.
+  * debian/watch: Changing to use indicator-messages project.
+
+  [ Martin Pitt ]
+  * debian/control: Update Vcs-Bzr: for new branch location.
+
+ -- Ted Gould <ted@ubuntu.com>  Thu, 27 Aug 2009 20:46:27 +0200
+
+indicator-messages (0.2.0~bzr124-0ubuntu1) karmic; urgency=low
+
+  * Update to fix build issue
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 07 Aug 2009 17:12:40 +0100
+
+indicator-messages (0.2.0~bzr121-0ubuntu3) karmic; urgency=low
+
+  * Fix to dereference the application menu items correctly so that
+    the signal handlers are dropped as well. (lp: #410251)
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 05 Aug 2009 19:00:31 +0100
+
+indicator-messages (0.2.0~bzr121-0ubuntu2) karmic; urgency=low
+
+  * Run autogen.sh before upload
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Wed, 05 Aug 2009 00:42:39 +0100
+
+indicator-messages (0.2.0~bzr121-0ubuntu1) karmic; urgency=low
+
+  [ Ted Gould ]
+  * debian/control: Adding in a build dep on libindicate-gtk-dev
+  * Changes for the changing libindicate stuff.
+  * Merge in the dbusmenu changes from the dbusmenu branch
+  * debian/control: Adding in a build dependency on libdbusmenu-glib and
+    libdbusmenu-gtk to catch up with the merge.
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Wed, 05 Aug 2009 00:21:50 +0100
+
+indicator-messages (0.2.0~bzr120-0ubuntu1) jaunty; urgency=low
+
+  * Fix to track the timer. (LP: #365187)
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 13 May 2009 09:56:20 -0500
+
+indicator-messages (0.2.0~bzr119-0ubuntu1) jaunty; urgency=low
+
+  * Upstream update
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 22 Apr 2009 23:34:21 -0500
+
+indicator-messages (0.2.0~bzr116-0ubuntu3) jaunty; urgency=low
+
+  * debian/rules: Adding a rule to remove the .la/.a clutter
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 22 Apr 2009 16:46:59 -0500
+
+indicator-messages (0.2.0~bzr116-0ubuntu2) jaunty; urgency=low
+
+  * debian/control: libindicator-dev to ~bzr301
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 22 Apr 2009 15:58:45 -0500
+
+indicator-messages (0.2.0~bzr116-0ubuntu1) jaunty; urgency=low
+
+  * Upstream release
+    * Bug fixes
+    * Update API to new libindicator
+  * debian/control: Adding new dependency on libindicator-dev
+
+ -- Ted Gould <ted@ubuntu.com>  Wed, 22 Apr 2009 15:45:21 -0500
+
+indicator-messages (0.1.6-0ubuntu1) jaunty; urgency=low
+
+  * New upstream version
+    * Patch from Cody Russell to fix LP: #359018 by correctly implementing
+      the finalize functions.
+
+ -- Ted Gould <ted@ubuntu.com>  Tue, 14 Apr 2009 11:32:00 +0200
+
+indicator-messages (0.1.5-0ubuntu1) jaunty; urgency=low
+
+  * New upstream version
+    * Fixes the lifecycle of the various structures tracking the messages
+      and applications.  Fixing bugs like (LP: #355616) (LP: #352881)
+    * Fixes the visual appearance by setting the widget name to grab the
+      style settings from the main applet.  (LP: #351979)
+  * debian/control: Upgrading dependency on libindicate-dev to 0.1.5 or
+    higher as the new version requires that.
+
+ -- Ted Gould <ted@ubuntu.com>  Fri, 03 Apr 2009 16:32:49 -0500
+
+indicator-messages (0.1.4-0ubuntu1) jaunty; urgency=low
+
+  * New upstream version
+    * Adding the display of indicators that are login messages coming from
+      other applications.  (LP: #345494)
+    * Making all times displayed for IM messages relative instead of
+      absolute.  (LP: #346345)
+    * Cleaning up the server removal code.  May fix (LP: #345599), I can't
+      recreate it anymore afterwards.
+
+ -- Ted Gould <ted@ubuntu.com>  Mon, 30 Mar 2009 09:40:40 +0200
+
+indicator-messages (0.1.3-0ubuntu1) jaunty; urgency=low
+
+  [ Ted Gould ]
+  * New upstream version.
+    - Now changes the icon based on non-IM indicators so that Evolution
+      works much better.  (LP: #342480)
+    - Now the menu items are in a predictable order, alphabetical.
+    - The Messages for a particular client (i.e. Pidgin) are grouped with
+      the client they're associated with.
+    - Adjusting the icon size to match the new one in the Human theme.
+    - Adjusting the build so that all the different libraries are not
+      built in a versioned manner.  Now it's just one .so, which is
+      what it should have been originally.
+
+  [ Martin Pitt ]
+  * Add debian/watch.
+  * Add bzr-builddeb configuration.
+  * debian/copyright: Fix download location.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 19 Mar 2009 12:23:17 +0100
+
+indicator-messages (0.1-0ubuntu1) jaunty; urgency=low
+
+  * Initial release, based on DX team's PPA packaging branch.
+    (lp:~indicator-applet-developers/indicator-applet/messages-packaging)
+  * debian/control: Add Homepage:, Vcs-Bzr:, and fix package
+    description.
+  * debian/copyright: Properly describe license.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 17 Feb 2009 11:35:38 +0100
+

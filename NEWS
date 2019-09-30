@@ -1,0 +1,42 @@
+
+12.10.5
+
+* fix crash caused by GError not being cleared (lp #1064314)
+* fix crash when registering an app that was previously unregistered (lp #1065169)
+* remove the icon if NULL is passed to source_set_icon (lp #1070421)
+* call gtk-update-icon-cache (lp #1060618)
+
+12.10.4
+
+* specify fallback icons for the ones with status emblem (lp #1056595)
+* make icon size consistent with the other indicators (lp #1055966)
+* libmessaging-menu: fix crash when receiving a invalid desktop id (lp #1058386)
+
+
+12.10.3
+
+* hide indicator when no application shows in the menu (lp #661059)
+* remove apps as soon as they are uninstalled (lp #864545)
+* make generated .gir compatible with vala (lp #104496)
+* draw counts as lozenges (lp #1046331)
+* show separators (lp #1048245)
+* show chat presence in the panel (lp #859905)
+* improve documentation
+
+
+12.10.2
+
+* libmessaging-menu:
+  - expand source documentation and add gtk-doc to the build system
+  - added new API: messaging_menu_app_set_source_{label,icon}
+  - fix bug: only one MessagingMenuApp was exported to the messaging menu
+
+
+12.10.1
+
+* presence icons are shown again
+* the icon is changed when a source draws attention
+* the time in source menu items is always kep current
+* fixed all g-ir-scanner warnings
+* libmessaging-menu now removes sources when they are activated
+* fixed several bugs

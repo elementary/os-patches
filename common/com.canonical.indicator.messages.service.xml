@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node name="/">
+	<interface name="com.canonical.indicator.messages.service">
+
+		<method name="RegisterApplication">
+		    <arg type="s" name="desktop_id" direction="in" />
+		    <arg type="o" name="menu_path" direction="in" />
+		</method>
+
+		<method name="UnregisterApplication">
+		    <arg type="s" name="desktop_id" direction="in" />
+		</method>
+
+		<method name="ApplicationStoppedRunning">
+			<arg type="s" name="desktop_id" direction="in" />
+		</method>
+
+		<method name="SetStatus">
+			<arg type="s" name="desktop_id" direction="in" />
+			<arg type="s" name="status" direction="in" />
+		</method>
+
+		<signal name="StatusChanged">
+			<arg type="s" name="status" direction="in" />
+		</signal>
+
+	</interface>
+</node>

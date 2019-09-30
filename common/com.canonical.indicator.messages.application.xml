@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node name="/">
+  <interface name="com.canonical.indicator.messages.application">
+    <method name="ListSources">
+      <arg type="a(ssavuxsb)" name="sources" direction="out" />
+    </method>
+    <method name="ListMessages">
+        <arg type="a(savsssxaa{sv}b)" name="message" direction="out" />
+    </method>
+    <method name="ActivateSource">
+      <arg type="s" name="source_id" direction="in" />
+    </method>
+    <method name="ActivateMessage">
+      <arg type="s" name="message_id" direction="in" />
+      <arg type="s" name="action_id" direction="in" />
+      <arg type="av" name="parameter" direction="in" />
+    </method>
+    <method name="Dismiss">
+      <arg type="as" name="sources" direction="in" />
+      <arg type="as" name="messages" direction="in" />
+    </method>
+    <signal name="SourceAdded">
+      <arg type="u" name="position" direction="in" />
+      <arg type="(ssavuxsb)" name="source" direction="in" />
+    </signal>
+    <signal name="SourceChanged">
+      <arg type="(ssavuxsb)" name="source" direction="in" />
+    </signal>
+    <signal name="SourceRemoved">
+      <arg type="s" name="source_id" direction="in" />
+    </signal>
+    <signal name="MessageAdded">
+        <arg type="(savsssxaa{sv}b)" name="message" direction="in" />
+    </signal>
+    <signal name="MessageRemoved">
+      <arg type="s" name="message_id" direction="in" />
+    </signal>
+  </interface>
+</node>
