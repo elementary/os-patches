@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+
+<!--
+  Copyright © 2012 Red Hat, Inc.
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the licence, or (at
+  your option) any later version.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02110-1301
+  USA
+
+  Author: Florian Muellner <fmuellner@gnome.org>
+-->
+
+<interface>
+  <menu id="app-menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">By _Script</attribute>
+        <attribute name="action">app.group-by</attribute>
+        <attribute name="target">script</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">By _Unicode Block</attribute>
+        <attribute name="action">app.group-by</attribute>
+        <attribute name="target">block</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Sho_w only glyphs from this font</attribute>
+        <attribute name="action">app.show-only-glyphs-in-font</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Snap _Columns to Power of Two</attribute>
+        <attribute name="action">win.snap-cols-pow2</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Zoom _In</attribute>
+        <attribute name="action">app.zoom-in</attribute>
+        <attribute name="accel">&lt;Primary&gt;plus</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Zoom _Out</attribute>
+        <attribute name="action">app.zoom-out</attribute>
+        <attribute name="accel">&lt;Primary&gt;minus</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Normal Size</attribute>
+        <attribute name="action">app.normal-size</attribute>
+        <attribute name="accel">&lt;Primary&gt;0</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Find</attribute>
+        <attribute name="action">app.find</attribute>
+        <attribute name="accel">&lt;Primary&gt;f</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Help</attribute>
+        <attribute name="action">app.help</attribute>
+        <attribute name="accel">F1</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Close Window</attribute>
+        <attribute name="action">app.close</attribute>
+          <attribute name="accel">&lt;Primary&gt;W</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <menu id="menubar">
+    <submenu>
+      <attribute name="label" translatable="yes">_File</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">_Close</attribute>
+          <attribute name="action">win.close</attribute>
+          <attribute name="accel">&lt;Primary&gt;W</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">_View</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">By _Script</attribute>
+          <attribute name="action">win.group-by</attribute>
+          <attribute name="target">script</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">By _Unicode Block</attribute>
+          <attribute name="action">win.group-by</attribute>
+          <attribute name="target">block</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Sho_w only glyphs from this font</attribute>
+          <attribute name="action">win.show-only-glyphs-in-font</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Snap _Columns to Power of Two</attribute>
+          <attribute name="action">win.snap-cols-pow2</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Zoom _In</attribute>
+          <attribute name="action">win.zoom-in</attribute>
+          <attribute name="accel">&lt;Primary&gt;plus</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Zoom _Out</attribute>
+          <attribute name="action">win.zoom-out</attribute>
+          <attribute name="accel">&lt;Primary&gt;minus</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">_Normal Size</attribute>
+          <attribute name="action">win.normal-size</attribute>
+          <attribute name="accel">&lt;Primary&gt;0</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">_Search</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">_Find</attribute>
+          <attribute name="action">win.find</attribute>
+          <attribute name="accel">&lt;Primary&gt;f</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Find _Next</attribute>
+          <attribute name="action">win.find-next</attribute>
+          <attribute name="accel">&lt;Primary&gt;g</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Find _Previous</attribute>
+          <attribute name="action">win.find-previous</attribute>
+          <attribute name="accel">&lt;Shift&gt;&lt;Primary&gt;g</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">_Go</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">_Next Character</attribute>
+          <attribute name="action">win.next-character</attribute>
+          <attribute name="accel">&lt;Primary&gt;n</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">_Previous Character</attribute>
+          <attribute name="action">win.previous-character</attribute>
+          <attribute name="accel">&lt;Primary&gt;p</attribute>
+        </item>
+      </section>
+      <item><link name="section" id="go-chapter"/></item>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">_Help</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">_Contents</attribute>
+          <attribute name="action">win.help</attribute>
+          <attribute name="accel">F1</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">_About</attribute>
+          <attribute name="action">win.about</attribute>
+        </item>
+      </section>
+    </submenu>
+  </menu>
+</interface>

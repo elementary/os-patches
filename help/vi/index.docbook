@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY legal SYSTEM "legal.xml">
+<!ENTITY appversion "1.3.0">
+<!ENTITY manrevision "2.1">
+<!ENTITY date "February 2004">
+<!ENTITY app "Character Map">
+]>
+<!-- 
+ (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  http://developer.gnome.org/projects/gdp
+  Template version: 2.0 beta
+  Template last modified Apr 11, 2002
+-->
+<!-- =============Document Header ============================= -->
+<article id="index" lang="vi"> 
+<!-- please do not change the id; for translations, change lang to -->
+<!-- appropriate code -->
+  <articleinfo> 
+    <title>Hướng dẫn sử dụng Sơ đồ ký tự</title>
+    <abstract role="description">
+      <para>Sơ đồ ký tự là một bảng liệt kê các ký tự Unicode để bạn chọn ra và chèn vào trong các văn bản khi cần.</para>
+    </abstract>
+    <copyright lang="en">
+      <year>2004</year>
+      <holder>Sun Microsystems</holder>
+    </copyright>
+    <copyright lang="en"> 
+      <year>2003</year> 
+      <year>2004</year>
+      <holder>Chee Bin HOH</holder> 
+    </copyright> 
+
+<!-- translators: uncomment this:
+    <copyright>
+      <year>2002</year>
+      <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
+    </copyright>
+-->
+
+    <publisher role="maintainer"> 
+      <publishername>Dự án biên soạn tài liệu GNOME</publishername> 
+    </publisher> 
+
+      <legalnotice id="legalnotice">
+	<para lang="en">
+	  Permission is granted to copy, distribute and/or modify this
+	  document under the terms of the GNU Free Documentation
+	  License (GFDL), Version 1.1 or any later version published
+	  by the Free Software Foundation with no Invariant Sections,
+	  no Front-Cover Texts, and no Back-Cover Texts.  You can find
+	  a copy of the GFDL at this <ulink type="help" url="help:fdl">link</ulink> or in the file COPYING-DOCS
+	  distributed with this manual.
+         </para>
+         <para>This manual is part of a collection of GNOME manuals distributed under the GFDL. If you want to distribute this manual separately from the collection, you can do so by adding a copy of the license to the manual, as described in section 6 of the license.</para>
+
+	<para>Many of the names used by companies to distinguish their products and services are claimed as trademarks. Where those names appear in any GNOME documentation, and the members of the GNOME Documentation Project are made aware of those trademarks, then the names are in capital letters or initial capital letters.</para>
+
+	<para lang="en">
+	  DOCUMENT AND MODIFIED VERSIONS OF THE DOCUMENT ARE PROVIDED
+	  UNDER  THE TERMS OF THE GNU FREE DOCUMENTATION LICENSE
+	  WITH THE FURTHER UNDERSTANDING THAT:
+
+	  <orderedlist>
+		<listitem>
+		  <para lang="en">DOCUMENT IS PROVIDED ON AN "AS IS" BASIS,
+                    WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR
+                    IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES
+                    THAT THE DOCUMENT OR MODIFIED VERSION OF THE
+                    DOCUMENT IS FREE OF DEFECTS MERCHANTABLE, FIT FOR
+                    A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE
+                    RISK AS TO THE QUALITY, ACCURACY, AND PERFORMANCE
+                    OF THE DOCUMENT OR MODIFIED VERSION OF THE
+                    DOCUMENT IS WITH YOU. SHOULD ANY DOCUMENT OR
+                    MODIFIED VERSION PROVE DEFECTIVE IN ANY RESPECT,
+                    YOU (NOT THE INITIAL WRITER, AUTHOR OR ANY
+                    CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY
+                    SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER
+                    OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS
+                    LICENSE. NO USE OF ANY DOCUMENT OR MODIFIED
+                    VERSION OF THE DOCUMENT IS AUTHORIZED HEREUNDER
+                    EXCEPT UNDER THIS DISCLAIMER; AND
+		  </para>
+		</listitem>
+		<listitem>
+		  <para lang="en">UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL
+                       THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE),
+                       CONTRACT, OR OTHERWISE, SHALL THE AUTHOR,
+                       INITIAL WRITER, ANY CONTRIBUTOR, OR ANY
+                       DISTRIBUTOR OF THE DOCUMENT OR MODIFIED VERSION
+                       OF THE DOCUMENT, OR ANY SUPPLIER OF ANY OF SUCH
+                       PARTIES, BE LIABLE TO ANY PERSON FOR ANY
+                       DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
+                       CONSEQUENTIAL DAMAGES OF ANY CHARACTER
+                       INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS
+                       OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR
+                       MALFUNCTION, OR ANY AND ALL OTHER DAMAGES OR
+                       LOSSES ARISING OUT OF OR RELATING TO USE OF THE
+                       DOCUMENT AND MODIFIED VERSIONS OF THE DOCUMENT,
+                       EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF
+                       THE POSSIBILITY OF SUCH DAMAGES.
+		  </para>
+		</listitem>
+	  </orderedlist>
+	</para>
+  </legalnotice>
+
+
+   <!-- This file  contains link to license for the documentation (GNU FDL), and 
+        other legal stuff such as "NO WARRANTY" statement. Please do not change 
+	any of this. -->
+
+    <authorgroup> 
+      <author lang="en">
+        <firstname>Sun</firstname>
+        <surname>GNOME Documentation Team</surname>
+        <affiliation><orgname>Sun Microsystems</orgname></affiliation>
+      </author>
+      <author lang="en"> 
+        <firstname>Chee Bin</firstname> 
+        <surname>HOH</surname> 
+        <affiliation> 
+          <orgname>GNOME Documentation Project</orgname> 
+          <address> <email>cbhoh@gnome.org</email> </address> 
+        </affiliation> 
+      </author> 
+
+<!--
+      <author> 
+        <firstname>Documentation</firstname> 
+          <surname>Writer 1</surname> 
+          <affiliation> 
+            <orgname>GNOME Documentation Project</orgname> 
+            <address> <email>doc-writer1@gnome.org</email> </address> 
+          </affiliation> 
+      </author> 
+-->
+      
+<!-- This is appropriate place for other contributors: translators,
+     maintainers,  etc. Commented out by default.
+      <othercredit role="translator">
+        <firstname>Latin</firstname> 
+	<surname>Translator 1</surname> 
+	<affiliation> 
+          <orgname>Latin Translation Team</orgname> 
+          <address> <email>translator@gnome.org</email> </address> 
+	</affiliation>
+	<contrib>Latin translation</contrib>
+      </othercredit>
+-->
+    </authorgroup>
+    <publisher role="maintainer">
+      <publishername>Dự án biên soạn tài liệu GNOME</publishername>
+    </publisher>
+
+
+    <revhistory>
+      <revision lang="en"> 
+	<revnumber>Character Map Manual V2.1</revnumber> 
+	<date>2004-02-26</date>
+	<revdescription> 
+	  <para lang="en">Updated for GNOME 2.6, program version 1.3.0.</para>
+          <para role="author" lang="en">Sun GNOME Documentation Team</para>
+          <para role="publisher" lang="en">GNOME Documentation Project</para>
+        </revdescription> 
+      </revision> 
+      <revision lang="en"> 
+	<revnumber>Unicode Character Map Manual V2.0</revnumber> 
+	<date>October 2003</date> 
+	<revdescription> 
+          <para role="author" lang="en">Chee Bin HOH
+	    <email>cbhoh@gnome.org</email>
+          </para>
+          <para role="publisher" lang="en">GNOME Documentation Project</para>
+        </revdescription> 
+      </revision> 
+    </revhistory> 
+
+    <releaseinfo>Tài liệu này hướng dẫn bạn sử dụng Sơ đồ ký tự, phiên bản 1.3 trên GNOME.</releaseinfo> 
+
+    <legalnotice> 
+      <title>Phản hồi</title> 
+      <para lang="en">To report a bug or make a suggestion regarding the <application>Character Map</application> application or this manual, follow the directions in the <ulink url="help:gnome-feedback" type="help">GNOME Feedback Page</ulink>. 
+      </para>
+<!-- Translators may also add here feedback address for translations -->
+    </legalnotice> 
+  </articleinfo> 
+
+<!-- ============= Index ===================================== -->
+  <indexterm zone="index" lang="en"> 
+    <primary>gucharmap</primary> 
+  </indexterm> 
+  <indexterm zone="index" lang="en"> 
+    <primary>Character Map</primary> 
+  </indexterm>
+  <indexterm zone="index" lang="en"> 
+    <primary>Character Map</primary> 
+  </indexterm>
+
+<!-- ============= Document Body ============================= -->
+<!-- ============= Introduction ============================== -->
+  <sect1 id="gucharmap-introduction"> 
+    <title>Giới thiệu</title> 
+    <para><application>Character Map</application> cho phép bạn chèn các ký tự đặc biệt vào trong 1 tài liệu hoặc 1 trường văn bản. Trong <application>Character Map</application>, bạn có thể lấy ra các ký tự phiên âm, ký hiệu toán học, cũng như các ký tự và dấu đặc biệt khác. Nhờ đó, ta có thể nhập các ký tự không có trên bàn phím bằng <application>Character Map</application>.</para>
+    <para><application>Character Map</application> liệt kê mọi ký tự có trong tất cả các ngôn ngữ đã được cài trên máy bạn, thông qua bộ mã Unicode. Unicode là 1 bảng mã chuẩn bao gồm tất cả các ký tự trong mọi ngôn ngữ trên thế giới.</para>
+  </sect1>
+
+<!-- =========== Getting Started ============================== -->
+
+  <sect1 id="gucharmap-getting-started"> 
+    <title>Bắt đầu</title> 
+
+    <sect2 id="gucharmap-start">
+      <title>Để khởi động Sơ đồ ký tự</title>
+      <para>Để khởi động <application>Character Map</application>, ta có thể làm một trong những cách sau:</para> 
+      <variablelist>
+        <varlistentry>
+          <term>Trình đơn <guimenu>Application</guimenu></term>
+          <listitem>
+            <para>Chọn <menuchoice><guimenu>Accessories</guimenu><guimenuitem>Character Map</guimenuitem></menuchoice>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Dòng lệnh</term>
+	  <listitem>
+            <para>Trên dòng lệnh, ta chạy lệnh: <command>gnome-character-map</command></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2 id="gucharmap-when-start">
+      <title>Khởi chạy Sơ đồ ký tự</title>
+      <para>Sau khi khởi động <application>Character Map</application>, cửa sổ chương trình sẽ hiện ra.</para>
+
+      <!-- ==== Figure ==== -->
+      <figure id="gucharmap-window-fig"> 
+        <title>Cửa sổ Sơ đồ ký tự</title> 
+        <screenshot> 
+          <mediaobject lang="en"> 
+	    <imageobject>
+              <imagedata fileref="figures/gucharmap_window.png" format="PNG"/> 
+            </imageobject>
+	    <textobject> 
+              <phrase>Shows Character Map window.</phrase> 
+	    </textobject> 
+          </mediaobject> 
+        </screenshot> 
+      </figure>
+      <!-- ==== End of Figure ==== -->
+
+      <!-- Include any descriptions of the GUI immediately after the screenshot of the main UI, -->
+      <!-- for example, the items on the menubar and on the toolbar. This section is optional. -->
+
+      <para>Cửa sổ <application>Character Map</application> bao gồm những thành phần sau:</para>
+      <variablelist>
+        <varlistentry>
+          <term>Thanh trình đơn</term>
+          <listitem>
+            <para>Các trình đơn trên thanh trình đơn chứa các lệnh dành cho <application>Character Map</application>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Thanh công cụ</term>
+          <listitem>
+            <para>Thanh công cụ, bao gồm danh sách phông chữ, nút đặt kiểu dáng phông, và ô kích cỡ.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Vùng biểu diễn</term>
+          <listitem>
+            <para>Vùng biểu diễn phông chữ bao gồm các thành phần sau:</para>
+            <itemizedlist>
+              <listitem>
+                <para>Hộp chọn <guilabel>Script</guilabel> hoặc <guilabel>Unicode Block</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Phần <guilabel>Character Table</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Phần <guilabel>Character Details</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Ô <guilabel>Text to copy</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Nút <guibutton>Copy</guibutton></para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Thanh trạng thái</term>
+          <listitem>
+            <para>Thanh trạng thái, cho biết mã Unicode và tên của ký tự đang được chọn.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+  </sect1>
+
+<!-- ================ Usage ================================ --> 
+  <sect1 id="gucharmap-usage">
+    <title>Cách dùng</title> 
+    
+    <sect2 id="gucharmap-change-view">
+      <title>Để đổi bộ ký tự</title>
+      <para>Để liệt kê bộ ký tự theo tên chữ viết, hãy chọn <menuchoice><guimenu>View</guimenu><guimenuitem>By Script</guimenuitem></menuchoice>.</para>
+      <para>Để liệt kê các ký tự theo khối Unicode, chọn <menuchoice><guimenu>View</guimenu><guimenuitem>By Unicode Block</guimenuitem></menuchoice>.</para>
+    </sect2>
+    
+    <sect2 id="gucharmap-create-textstring">
+      <title>Để tạo chuỗi văn bản</title>
+      <para>Để tạo 1 chuỗi văn bản trong ô <guilabel>Text to copy</guilabel>, hãy làm các bước sau:</para>
+      <orderedlist>
+        <listitem>
+          <para>Chọn 1 ký tự từ trong hộp chọn <guilabel>Script</guilabel> hoặc <guilabel>Unicode Block</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Chèn các ký tự bằng những cách sau:</para>
+          <itemizedlist>
+            <listitem>
+              <para>Bấm đúp chuột lên nút ký tự trong phần <guilabel>Character Table</guilabel> để chèn nó vào trong ô <guilabel>Text to copy</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para lang="en">
+                Select a character button in the <guilabel>Character Table</guilabel> tabbed section, then press <keycap>Return</keycap> to insert the character in the <guilabel>Text to copy</guilabel> field. 
+              </para>
+            </listitem>
+            <listitem>
+              <para lang="en">
+                Select a character button in the <guilabel>Character Table</guilabel> tabbed section, then click and drag the character to the <guilabel>Text to copy</guilabel> field. 
+              </para>
+            </listitem>
+            <listitem>
+              <para>Bấm chuột vào ô <guilabel>Text to copy</guilabel> để đưa con trỏ vào đó. Nếu đang có 1 chuỗi văn bản trong đó, hãy bấm chuột vào chỗ cần chèn trong đoạn, rồi nhấn 1 phím trên bàn phím để thêm ký tự tương ứng vào.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+    </sect2>
+
+<!-- =============== To Copy and Paste a Text String ====================== -->
+    <sect2 id="gucharmap-copy-textstring">
+      <title>Để chép và dán văn bản vào ứng dụng khác</title>
+      <para>Để chép và dán chuỗi văn bản trong ô <guilabel>Text to copy</guilabel> vào 1 ứng dụng khác, hãy làm như sau:</para>
+      <orderedlist>
+        <listitem>
+          <para>Nhấn nút <guibutton>Copy</guibutton>. Nếu bạn không chọn gì trong ô văn bản, tất cả đoạn văn sẽ được chép vào bảng nháp. Nếu chỉ 1 phần trong đoạn là được chọn, phần đó sẽ được chép vào bảng nháp.</para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            Switch to your application and choose <menuchoice><guimenu>Edit</guimenu><guimenuitem>Paste</guimenuitem></menuchoice>,
+            or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>V</keycap></keycombo>.
+            <!-- FIXME: link to User Guide section on working with the clipboard, once it exists --> 
+          </para>
+        </listitem>
+      </orderedlist>
+      <para>Khi bạn dán nội dung của ô <guilabel>Text to copy</guilabel> vào ứng dụng khác, nội dung đó sẽ được biểu diễn theo bộ ký tự mà ứng dụng này dùng.</para>
+      <para>Nếu đoạn bạn dán vào có chứa các ký tự không nhìn thấy được, bạn chỉ có thể chèn nó vào các ứng dụng hỗ trợ bộ ký tự đủ.</para>
+    </sect2>
+
+    <sect2 id="usage-find-character">
+      <title>Để tìm ký tự</title>
+      <para>Để tìm 1 ký tự, hãy làm theo các bước sau:</para>
+      <orderedlist>
+        <listitem>
+          <para lang="en">
+            Choose <menuchoice><guimenu>Search</guimenu><guimenuitem>Find</guimenuitem></menuchoice>,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>.
+	    The <guilabel>Find</guilabel> dialog opens.
+          </para>
+        </listitem>
+        <listitem>
+          <para>Nhập văn bản cần tìm vào trong ô <guilabel>Search</guilabel>.</para>
+          <itemizedlist>            
+             <listitem><para>Chọn ô <guilabel>Match whole word</guilabel> để chương trình in ra những từ trùng khớp với văn bản nhập vào.</para></listitem>
+             <listitem><para>Theo mặc định, chương trình chỉ tìm theo tên ký tự. Chọn <guilabel>Search in character details</guilabel> để tìm cả trong các thông tin mô tả, như ghi chú, ký tự tương đương và xấp xỉ với ký tự này.</para></listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>Nhấn nút <guibutton>Next</guibutton> để tới kết quả đầu tiên khớp với văn bản nhập vào. Ký tự được <application>Character Map</application> tìm thấy sẽ được chọn.</para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            Click <guibutton>Next</guibutton> to find the next matching character. Alternatively, choose <menuchoice><guimenu>Search</guimenu><guimenuitem>Find Next</guimenuitem></menuchoice>,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            Click <guibutton>Previous</guibutton> to find the previous matching character. Alternatively, choose <menuchoice><guimenu>Search</guimenu><guimenuitem>Find Previous</guimenuitem></menuchoice>,
+	    or press shortcut key <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.
+          </para>
+        </listitem>
+      </orderedlist>
+    </sect2>
+    
+<!-- =============== To Browse the Character Table  ========================= -->
+    <sect2 id="usage-browse-characters">
+      <title>Để di chuyển trong bảng ký tự</title>
+      <para>Để di chuyển trong bảng ký tự, hãy dùng trình đơn <guimenu>Go</guimenu>.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para lang="en">
+	    Next character,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+	    Previous character,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>P</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+	    Next script,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>Page Down</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+	    Previous script,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>Page Up</keycap></keycombo>.
+          </para>
+        </listitem>
+      </itemizedlist>
+        
+      <para>Bạn có thể duyệt bảng ký tự theo từng ký tự một, theo chữ viết hoặc theo khối Unicode, tuỳ vào việc bảng ký tự đang ở chế độ sắp xếp theo chữ viết hay theo khối Unicode. Để chuyển chế độ liệt kê, hãy chọn <menuchoice><guimenu>View</guimenu><guimenuitem>By Script</guimenuitem></menuchoice> hoặc <menuchoice><guimenu>View</guimenu><guimenuitem>By Unicode Block</guimenuitem></menuchoice>.</para>
+      
+      <para>Ta có thể dùng các phím tắt sau để di chuyển bên trong bảng ký tự:</para>
+        
+      <itemizedlist>
+        <listitem>
+          <para>Các phím mũi tên trái, phải, lên, xuống.</para>
+        </listitem>
+        <listitem>
+          <para>Cuộn bảng lên hoặc xuống từng trang bằng phím <keycap>Page Up</keycap> hoặc <keycap>Page Down</keycap>.</para>
+        </listitem>
+        <listitem>
+          <para>Nhấn <keycap>Home</keycap> để chọn ký tự Unicode đầu tiên trong bảng, và <keycap>End</keycap> để chọn ký tự cuối cùng.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-display-details">
+      <title>Để xem thông tin chi tiết về 1 ký tự</title>
+      <para>Để xem thông tin chi tiết về 1 ký tự, hãy làm như sau:</para>
+      <orderedlist>
+        <listitem>
+          <para>Chọn 1 bộ ký tự trong ô chọn <guilabel>Script</guilabel> hoặc <guilabel>Unicode Block</guilabel>. Ví dụ: <guilabel>Basic Latin</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Chọn 1 ký tự trong phần <guilabel>Character Table</guilabel>. Ví dụ: <guilabel>B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Bấm chuột để chọn thẻ <guilabel>Character Details</guilabel>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Phần <guilabel>Character Details</guilabel> được mở ra, liệt kê các thông tin cụ thể cho ký tự được chọn:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Mã ký tự kiểu Unicode</para>
+          <para>Ví dụ: <guilabel>U+0042</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Tên ký tự Unicode</para>
+          <para>Ví dụ: <guilabel>LATIN CAPITAL LETTER B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            <guilabel>General Character Properties</guilabel>
+          </para>
+          <itemizedlist>
+            <listitem>
+              <para>Loại Unicode</para>
+              <para>Ví dụ: <guilabel>Letter, Uppercase</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            <guilabel>Various Useful Representations</guilabel>
+          </para>
+          <itemizedlist>
+            <listitem>
+              <para>Mã hoá UTF-8</para>
+              <para>Ví dụ: <guilabel>0x42</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Mã hoá UTF-16</para>
+              <para>Ví dụ: <guilabel>0x0042</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Mã hoá UTF-8 giống ngôn ngữ C</para>
+              <para>Ví dụ: <guilabel>\102</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Thực thể thập phân XML</para>
+              <para>Ví dụ: <guilabel>"&amp;#66"</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            <guilabel>Annotations and Cross References</guilabel>
+          </para>
+          <para>Ví dụ: <guilabel>U+212C SCRIPT CAPITAL B</guilabel></para>
+          <para>Nhấn vào liên kết để xem thông tin chi tiết về ký tự được chọn.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-character">
+      <title>Để thay đổi định dạng của 1 ký tự</title>
+      <para>Để thay đổi định dạng của 1 ký tự, hãy làm như sau:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Để thay phông chữ, chọn 1 phông khác từ trong ô danh sách các phông.</para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            To change the font type to bold type, click on the <guibutton>Bold</guibutton> button,
+	    or press shortcut key <keycombo><keycap>Alt</keycap><keycap>B</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            To change the font type to italic type, click on the <guibutton>Italic</guibutton> button,
+	    or press shortcut key <keycombo><keycap>Alt</keycap><keycap>I</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            To increase the font size, choose <menuchoice><guimenu>View</guimenu><guimenuitem>Zoom In</guimenuitem></menuchoice> or use the zoom spin box,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>+</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            To decrease the font size, choose <menuchoice><guimenu>View</guimenu><guimenuitem>Zoom Out</guimenuitem></menuchoice> or use the zoom spin box,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>-</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            To display normal font size, choose <menuchoice><guimenu>View</guimenu><guimenuitem>Normal Size</guimenuitem></menuchoice>,
+	    or press shortcut key <keycombo><keycap>Ctrl</keycap><keycap>=</keycap></keycombo>.
+          </para>
+        </listitem>
+        <listitem>
+          <para lang="en">
+            To magnify the selected character, hold <keycap>Shift</keycap>.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-chartable">
+      <title>Để thay đổi định dạng cho bảng ký tự</title>
+      <para>Để thay đổi định dạng của bảng ký tự, hãy chọn <menuchoice><guimenu>View</guimenu><guimenuitem>Snap Columns to Power of Two</guimenuitem></menuchoice>.</para>
+      <para><application>Character Map</application> sẽ thay đổi kích cỡ các cột trong phần <guilabel>Character Table</guilabel> sao cho số cột là luỹ thừa của hai, như 2, 4, 8, 16.... Số cột hiện lên tuỳ thuộc vào kích cỡ cửa sổ và kích thước phông được dùng.</para>
+    </sect2>
+
+  </sect1>
+</article>

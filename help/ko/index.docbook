@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY legal SYSTEM "legal.xml">
+<!ENTITY appversion "1.3.0">
+<!ENTITY manrevision "2.1">
+<!ENTITY date "February 2004">
+<!ENTITY app "Character Map">
+]>
+<!-- 
+ (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  http://developer.gnome.org/projects/gdp
+  Template version: 2.0 beta
+  Template last modified Apr 11, 2002
+-->
+<!-- =============Document Header ============================= -->
+<article id="index" lang="ko"> 
+<!-- please do not change the id; for translations, change lang to -->
+<!-- appropriate code -->
+  <articleinfo> 
+    <title>문자 표 설명서</title>
+    <abstract role="description">
+      <para>문자 표는 유니코드 문자 표입니다. 표에서 문자를 선택해서 그 문자를 텍스트 문자열에 입력할 수 있습니다.</para>
+    </abstract>
+    <copyright><year>2004</year> <holder>Sun Microsystems</holder></copyright>
+    <copyright><year>2003</year> <year>2004</year> <holder>Chee Bin HOH</holder></copyright> 
+
+<!-- translators: uncomment this:
+    <copyright>
+      <year>2002</year>
+      <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
+    </copyright>
+-->
+
+    <publisher role="maintainer"> 
+      <publishername>그놈 문서 프로젝트</publishername> 
+    </publisher> 
+
+      <legalnotice id="legalnotice">
+	<para>본 설명서는 자유 소프트웨어 재단(FSF)에서 발행한 GNU 자유 문서 라이선스(GFDL) 버전 1.1 이상의 조항에 따라 변경 불가 부분, 앞 표지 텍스트 및 뒷 표지 텍스트를 제외하고 복사, 수정 및/또는 배포할 수 있습니다. GFDL의 사본은 <ulink type="help" url="ghelp:fdl">링크</ulink> 또는 본 설명서와 함께 배포된 COPYING-DOCS 파일에서 찾을 수 있습니다.</para>
+         <para>본 설명서는 GFDL에 따라 배포된 그놈 설명서 컬렉션의 일부입니다. 본 설명서를 컬렉션과 별도로 배포하려는 경우에는 라이선스 조항 6에 따라 라이선스 사본을 설명서에 추가하면 됩니다.</para>
+
+	<para>기업의 제품과 서비스를 식별하기 위해 사용된 많은 이름은 상표로 간주됩니다. 그놈 문서에 사용된 이름과 그놈 문서 프로젝트의 구성원은 해당 상표로, 모두 대문자로 표시되거나 첫 글자가 대문자로 표시되어 있습니다.</para>
+
+	<para>문서 및 수정판은 다음 GNU 자유 문서 라이선스의 조항 및 더 많은 이해 사항에 따라 제공합니다: <placeholder-1/></para>
+  </legalnotice>
+
+
+   <!-- This file  contains link to license for the documentation (GNU FDL), and 
+        other legal stuff such as "NO WARRANTY" statement. Please do not change 
+	any of this. -->
+
+    <authorgroup> 
+      <author><firstname>Sun</firstname> <surname>그놈 문서 팀</surname> <affiliation><orgname>Sun Microsystems</orgname></affiliation></author>
+      <author><firstname>Chee Bin</firstname> <surname>HOH</surname> <affiliation> <orgname>그놈 문서 프로젝트</orgname> <address> <email>cbhoh@gnome.org</email> </address> </affiliation></author> 
+
+<!--
+      <author> 
+        <firstname>Documentation</firstname> 
+          <surname>Writer 1</surname> 
+          <affiliation> 
+            <orgname>GNOME Documentation Project</orgname> 
+            <address> <email>doc-writer1@gnome.org</email> </address> 
+          </affiliation> 
+      </author> 
+-->
+      
+<!-- This is appropriate place for other contributors: translators,
+     maintainers,  etc. Commented out by default.
+      <othercredit role="translator">
+        <firstname>Latin</firstname> 
+	<surname>Translator 1</surname> 
+	<affiliation> 
+          <orgname>Latin Translation Team</orgname> 
+          <address> <email>translator@gnome.org</email> </address> 
+	</affiliation>
+	<contrib>Latin translation</contrib>
+      </othercredit>
+-->
+    </authorgroup>
+    <publisher role="maintainer">
+      <publishername>그놈 문서 프로젝트</publishername>
+    </publisher>
+
+
+    <revhistory>
+      <revision><revnumber>문자표 설명서 V2.1</revnumber> <date>2004-02-26</date> <revdescription> 
+	  <para>그놈 2.6, 프로그램 1.3.0 업데이트.</para>
+          <para role="author">Sun 그놈 문서 팀</para>
+          <para role="publisher">그놈 문서 프로젝트</para>
+        </revdescription></revision> 
+      <revision><revnumber>유니코드 문자 표 설명서 V2.0</revnumber> <date>2003년 10월</date> <revdescription> 
+          <para role="author">Chee Bin HOH <email>cbhoh@gnome.org</email></para>
+          <para role="publisher">그놈 문서 프로젝트</para>
+        </revdescription></revision> 
+    </revhistory> 
+
+    <releaseinfo>이 설명서는 문자 표 버전 1.3.0에 대해 설명합니다.</releaseinfo> 
+
+    <legalnotice> 
+      <title>피드백</title> 
+      <para><application>문자 표</application> 프로그램이나 이 설명서에 대해 버그를 보고하거나 의견을 제시하려면 <ulink url="ghelp:gnome-feedback" type="help">그놈 피드백 페이지</ulink>에 있는 대로 하십시오.</para>
+<!-- Translators may also add here feedback address for translations -->
+    </legalnotice> 
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Changwoo Ryu</firstname>
+      </personname>
+      <email>cwryu@debian.org</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2007</year>
+      
+        <year>2008.</year>
+      
+      <holder>Changwoo Ryu</holder>
+    </copyright>
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Seong-ho Cho</firstname>
+      </personname>
+      <email>darkcircle.0426@gmail.com</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2012</year>
+      
+      <holder>Seong-ho Cho</holder>
+    </copyright>
+  </articleinfo> 
+
+<!-- ============= Index ===================================== -->
+  <indexterm zone="index"><primary>gucharmap</primary></indexterm> 
+  <indexterm zone="index"><primary>문자 표</primary></indexterm>
+  <indexterm zone="index"><primary>문자 표</primary></indexterm>
+
+<!-- ============= Document Body ============================= -->
+<!-- ============= Introduction ============================== -->
+  <sect1 id="gucharmap-introduction"> 
+    <title>소개</title> 
+    <para><application>문자 표</application> 프로그램을 사용해 특수 문자를 문서나 텍스트 입력란에 입력할 수 있습니다. <application>문자 표</application>로 악센트가 붙은 문자, 수학 기호, 특수 기호, 구두점을 사용할 수 있습니다. <application>문자 표</application>를 이용해 키보드에 없는 문자를 이용할 수 있습니다.</para>
+    <para><application>문자 표</application>는 유니코드 문자 집합을 사용해 시스템에서 사용할 수 있는 모든 문자를 표시합니다. 유니코드는 세계의 모든 종류의 문자를 포함하는 목적의 문자 집합 표준입니다.</para>
+  </sect1>
+
+<!-- =========== Getting Started ============================== -->
+
+  <sect1 id="gucharmap-getting-started"> 
+    <title>시작하기</title> 
+
+    <sect2 id="gucharmap-start">
+      <title>문자 표를 시작하려면</title>
+      <para><application>문자 표</application>를 다음 방법으로 시작할 수 있습니다:</para> 
+      <variablelist>
+        <varlistentry>
+          <term><guimenu>프로그램</guimenu> 메뉴</term>
+          <listitem>
+            <para><menuchoice><guimenu>보조 프로그램</guimenu><guimenuitem>문자 표</guimenuitem></menuchoice>를 선택하십시오.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>명령행</term>
+	  <listitem>
+            <para>다음 명령어를 실행하십시오: <command>gnome-character-map</command></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2 id="gucharmap-when-start">
+      <title>문자 표를 시작하면</title>
+      <para><application>문자 표</application>를 시작하면, 다음 창을 표시합니다.</para>
+
+      <!-- ==== Figure ==== -->
+      <figure id="gucharmap-window-fig"> 
+        <title>문자 표 창</title> 
+        <screenshot> 
+          <mediaobject><imageobject> <imagedata fileref="figures/gucharmap_window.png" format="PNG"/> </imageobject> <textobject> <phrase>문자 표 창을 보입니다.</phrase> </textobject></mediaobject> 
+        </screenshot> 
+      </figure>
+      <!-- ==== End of Figure ==== -->
+
+      <!-- Include any descriptions of the GUI immediately after the screenshot of the main UI, -->
+      <!-- for example, the items on the menubar and on the toolbar. This section is optional. -->
+
+      <para><application>문자 표</application> 창에는 다음과 같은 인터페이스가 들어 있습니다:</para>
+      <variablelist>
+        <varlistentry>
+          <term>메뉴 모음</term>
+          <listitem>
+            <para>메뉴 모음의 메뉴에는 <application>문자 표</application>를 이용하는 데 필요한 거의 모든 명령이 들어 있습니다.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>도구 모음</term>
+          <listitem>
+            <para>도구 모음에는 글꼴 드롭다운 목록, 글꼴 모양 단추, 크기 스핀 상자가 들어 있습니다.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>표시 영역</term>
+          <listitem>
+            <para>표시 영역에는 다음 사항이 들어 있습니다:</para>
+            <itemizedlist>
+              <listitem>
+                <para><guilabel>문자 범위</guilabel> 또는 <guilabel>유니코드 범위</guilabel> 목록 상자</para>
+              </listitem>
+              <listitem>
+                <para><guilabel>문자 표</guilabel> 탭 섹션</para>
+              </listitem>
+              <listitem>
+                <para><guilabel>문자 자세히</guilabel> 탭 섹션</para>
+              </listitem>
+              <listitem>
+                <para><guilabel>복사할 텍스트</guilabel> 텍스트 상자</para>
+              </listitem>
+              <listitem>
+                <para><guibutton>복사</guibutton> 단추</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>상태 표시줄</term>
+          <listitem>
+            <para>상태 표시줄은 현재 선택한 문자의 유니코드 코드 포인트와 유니코드 문자 이름을 표시합니다.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+  </sect1>
+
+<!-- ================ Usage ================================ --> 
+  <sect1 id="gucharmap-usage">
+    <title>사용법</title> 
+    
+    <sect2 id="gucharmap-change-view">
+      <title>문자 집합 목록을 바꾸려면</title>
+      <para>문자 범위의 이름 순서로 문자 집합의 목록을 표시하려면, <menuchoice><guimenu>보기</guimenu><guimenuitem>문자 범위 순서</guimenuitem></menuchoice>를 선택하십시오.</para>
+      <para>유니코드 범위의 순서로 문자 집합의 목록을 표시하려면, <menuchoice><guimenu>보기</guimenu><guimenuitem>유니코드 범위 순서</guimenuitem></menuchoice>를 선택하십시오.</para>
+    </sect2>
+    
+    <sect2 id="gucharmap-create-textstring">
+      <title>텍스트 문자열을 만드려면</title>
+      <para><guilabel>복사할 텍스트</guilabel> 입력란에 텍스트 문자열을 만드려면, 다음 순서대로 하십시오:</para>
+      <orderedlist>
+        <listitem>
+          <para><guilabel>문자 범위</guilabel> 혹은 <guilabel>유니코드 범위</guilabel> 목록 상자에서 문자 집합을 하나 선택하십시오.</para>
+        </listitem>
+        <listitem>
+          <para>다음 중 한 가지 방법으로 문자를 입력하십시오:</para>
+          <itemizedlist>
+            <listitem>
+              <para><guilabel>문자 표</guilabel> 탭 섹션에서 문자 단추를 두 번 누르십시오. 그러면 <guilabel>복사할 텍스트</guilabel> 입력란에 해당 문자를 입력합니다.</para>
+            </listitem>
+            <listitem>
+              <para><guilabel>복사할 텍스트</guilabel> 입력란에 해당 문자를 입력하려면 <guilabel>문자 표</guilabel> 탭 섹션의 문자 단추를 선택하고, <keycap>Return</keycap>을 누르십시오.</para>
+            </listitem>
+            <listitem>
+              <para><guilabel>문자 표</guilabel> 탭 섹션의 문자 단추를 선택하고, 해당 문자를 <guilabel>복사할 텍스트</guilabel> 입력란으로 누르고 끌어 놓으십시오.</para>
+            </listitem>
+            <listitem>
+              <para><guilabel>복사할 텍스트</guilabel> 입력란을 눌러 포커스를 입력란으로 옮기십시오. 입력란에 이미 문자열이 들어 있으면, 그 문자열에서 문자를 입력할 위치를 누르십시오. 키보드의 문자 키를 눌러 문자를 입력란에 입력하십시오.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+    </sect2>
+
+<!-- =============== To Copy and Paste a Text String ====================== -->
+    <sect2 id="gucharmap-copy-textstring">
+      <title>텍스트 문자열을 복사해서 응용 프로그램에 붙여 넣으려면</title>
+      <para><guilabel>복사할 텍스트</guilabel> 입력란에서 응용 프로그램에 텍스트 문자열을 복사해서 붙여 넣으려면, 다음 순서대로 하십시오:</para>
+      <orderedlist>
+        <listitem>
+          <para><guibutton>복사</guibutton>를 누르십시오. 텍스트 문자열을 선택하지 않았거나 모두 선택했다면, 그 문자열 모두를 클립보드에 복사합니다. 문자열의 일부만 선택했다면, 선택한 부분만 복사합니다.</para>
+        </listitem>
+        <listitem>
+          <para>프로그램을 바꾸고 <menuchoice><guimenu>편집</guimenu><guimenuitem>붙여넣기</guimenuitem></menuchoice>를 선택하거나 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>V</keycap></keycombo>를 누십시오.</para>
+        </listitem>
+      </orderedlist>
+      <para><guilabel>복사할 텍스트</guilabel> 입력란의 내용을 다른 응용 프로그램으로 붙여 넣으면, 그 응용 프로그램의 현재 문자 집합에 따라 그 문자열이 나타납니다.</para>
+      <para>텍스트 문자열에 표시되지 않는 문자가 들어 있으면, 전체 문제 집합을 지원하는 응용 프로그램에서만 그 텍스트 문자열을 입력할 수 있습니다.</para>
+    </sect2>
+
+    <sect2 id="usage-find-character">
+      <title>문자를 찾으려면</title>
+      <para>문자를 찾으려면 다음 순서대로 하십시오:</para>
+      <orderedlist>
+        <listitem>
+          <para><menuchoice><guimenu>검색</guimenu><guimenuitem>찾기</guimenuitem></menuchoice>를 선택하거나 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>를 누르십시오. <guilabel>찾기</guilabel> 대화 창이 열립니다.</para>
+        </listitem>
+        <listitem>
+          <para>찾을 텍스트를 <guilabel>검색</guilabel> 란에 입력하십시오.</para>
+          <itemizedlist>            
+             <listitem><para><guilabel>전체 단어 일치</guilabel>를 선택하면 전체가 텍스트와 일치하는 단어만 찾습니다.</para></listitem>
+             <listitem><para>기본값으로 문자의 이름만 찾습니다. <guilabel>문자 자세히 정보에서 검색</guilabel>를 선택하면 문자의 설명(주의, 같은 문자, 비슷한 문자) 부분에서도 찾습니다.</para></listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guibutton>다음</guibutton>을 누르면 현재 선택한 문자의 다음에 맨 처음 나오는 텍스트를 찾습니다. <application>문자 표</application>는 찾은 글자를 선택하게 됩니다.</para>
+        </listitem>
+        <listitem>
+          <para>르다음 일치하는 문자를 찾으려면 <guibutton>다음</guibutton>을 누르십시오. 대신, <menuchoice><guimenu>검색</guimenu><guimenuitem>다음 찾기</guimenuitem></menuchoice>를 선택하거나 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>를 누르실 수 있습니다.</para>
+        </listitem>
+        <listitem>
+          <para>이전 일치하는 문자를 찾으려면 <guibutton>이전</guibutton>을 누르십시오. 대신, <menuchoice><guimenu>검색</guimenu><guimenuitem>이전 찾기</guimenuitem></menuchoice>를 선택하거나 <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>를 누르실 수 있습니다.</para>
+        </listitem>
+      </orderedlist>
+    </sect2>
+    
+<!-- =============== To Browse the Character Table  ========================= -->
+    <sect2 id="usage-browse-characters">
+      <title>모든 문자를 살펴보려면</title>
+      <para>문자 표를 살펴보려면, <guimenu>이동</guimenu> 메뉴를 이용하십시오.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>다음 문자 또는 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo>를 누릅니다.</para>
+        </listitem>
+        <listitem>
+          <para>이전 문자 또는 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>P</keycap></keycombo>를 누릅니다.</para>
+        </listitem>
+        <listitem>
+          <para>다음 스크립트 또는 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>Page Down</keycap></keycombo>을 누릅니다.</para>
+        </listitem>
+        <listitem>
+          <para>이전 스크립트 또는 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>Page Up</keycap></keycombo>을 누릅니다.</para>
+        </listitem>
+      </itemizedlist>
+        
+      <para>각 문자와 문자 범위 단위로, 혹은 유니코드 범위 단위로 문자 표를 살펴볼 수 있습니다. 문자 표가 문자 범위를 표시하는 지 아니면 유니코드 범위를 표시하는 지에 따라 달라집니다. 이 방법을 바꾸려면, <menuchoice><guimenu>보기</guimenu><guimenuitem>글자 범위 순서</guimenuitem></menuchoice> 혹은 <menuchoice><guimenu>보기</guimenu><guimenuitem>유니코드 범위 순서</guimenuitem></menuchoice> 중의 하나를 선택하십시오.</para>
+      
+      <para>다음 키는 문자 표를 살펴볼 때도 동작합니다:</para>
+        
+      <itemizedlist>
+        <listitem>
+          <para>키보드의 화살표 키를 누르면 문자들 사이를 옮겨 다닙니다.</para>
+        </listitem>
+        <listitem>
+          <para><keycap>Page Up</keycap> 및 <keycap>Page Down</keycap> 키를 누르면 문자 페이지를 페이지 단위로 살펴봅니다.</para>
+        </listitem>
+        <listitem>
+          <para><keycap>Home</keycap> 키를 누르면 해당 유니코드 영역의 첫 번째 문자를 선택합니다. 마지막 문자를 선택하려면 <keycap>End</keycap> 키를 누르십시오.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-display-details">
+      <title>문자의 자세한 정보를 표시하려면</title>
+      <para>문자의 자세한 정보를 표시하려면, 다음 순서대로 하십시오:</para>
+      <orderedlist>
+        <listitem>
+          <para><guilabel>문자 범위</guilabel> 혹은 <guilabel>유니코드 범위</guilabel> 목록 상자에서 문자 집합을 하나 선택하십시오. 예: <guilabel>기본 라틴 문자</guilabel></para>
+        </listitem>
+        <listitem>
+          <para><guilabel>문자 표</guilabel> 탭 섹션에서 문자를 하나 선택하십시오. 예: <guilabel>B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para><guilabel>문자 자세히</guilabel> 탭 섹션을 누르십시오.</para>
+        </listitem>
+      </orderedlist>
+      <para><guilabel>문자 자세히</guilabel> 탭 섹션은 선택한 문자에 대해 다음 정보를 표시합니다:</para>
+      <itemizedlist>
+        <listitem>
+          <para>유니코드 코드 포인트</para>
+          <para>예: <guilabel>U+0042</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>유니코드 문자 이름</para>
+          <para>예: <guilabel>LATIN CAPITAL LETTER B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para><guilabel>일반 문자 속성</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>유니코드 분류</para>
+              <para>예: <guilabel>글자, 대문자</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>다양하며 유용한 표기법</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>UTF-8 인코딩</para>
+              <para>예: <guilabel>0x42</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>UTF-16 인코딩</para>
+              <para>예: <guilabel>0x0042</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>C언어 8진수로 표기한 UTF-8 인코딩</para>
+              <para>예: <guilabel>\102</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>XML 10진수 엔티티</para>
+              <para>예: <guilabel>"&amp;#66"</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>해설 및 참고 사항</guilabel></para>
+          <para>예: <guilabel>U+212C SCRIPT CAPITAL B</guilabel></para>
+          <para>해당 문자의 자세한 정보를 보려면 링크를 누르십시오.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-character">
+      <title>문자의 형식을 바꾸려면</title>
+      <para>문자의 형식을 바꾸려면, 다음과 같이 하십시오:</para>
+      <itemizedlist>
+        <listitem>
+          <para>글꼴을 바꾸려면, 글꼴 드롭다운 목록에서 글꼴을 선택하십시오.</para>
+        </listitem>
+        <listitem>
+          <para>글꼴의 종류를 굵은 글씨로 바꾸려면, <guibutton>굵게</guibutton> 단추를 누르거나 바로 가기 키 <keycombo><keycap>Alt</keycap><keycap>B</keycap></keycombo>를 누르십시오.</para>
+        </listitem>
+        <listitem>
+          <para>글꼴의 종류를 기울임으로 바꾸려면, <guibutton>기울임</guibutton> 단추를 누르거나 바로 가기 키 <keycombo><keycap>Alt</keycap><keycap>I</keycap></keycombo>를 누르십시오.</para>
+        </listitem>
+        <listitem>
+          <para>글꼴 크기를 늘리려면, <menuchoice><guimenu>보기</guimenu><guimenuitem>확대</guimenuitem></menuchoice>를 선택하거나 확대 조절 스핀 상자를 사용하거나 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>+</keycap></keycombo>를 누르십시오.</para>
+        </listitem>
+        <listitem>
+          <para>글꼴 크기를 줄이려면, <menuchoice><guimenu>보기</guimenu><guimenuitem>축소</guimenuitem></menuchoice>를 선택하거나 확대 조절 스핀 상자를 사용하거나 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>-</keycap></keycombo>를 누르십시오.</para>
+        </listitem>
+        <listitem>
+          <para>보통 글꼴 크기로 표시하려면, <menuchoice><guimenu>보기</guimenu><guimenuitem>보통 크기</guimenuitem></menuchoice>를 선택하거나 바로 가기 키 <keycombo><keycap>Ctrl</keycap><keycap>=</keycap></keycombo>를 누르십시오.</para>
+        </listitem>
+        <listitem>
+          <para>선택한 문자를 확대하려면, <keycap>Shift</keycap>를 누른 상태를 유지합니다.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-chartable">
+      <title>문자 표의 형식을 바꾸려면</title>
+      <para>문자 표의 형식을 바꾸려면, <menuchoice><guimenu>보기</guimenu><guimenuitem>2의 거듭제곱으로 가로 칸 맞추기</guimenuitem></menuchoice>를 선택하십시오.</para>
+      <para><guilabel>문자 표</guilabel> 탭 섹션의 가로 열 개수를 2의 거듭제곱으로 바꿉니다. 예를 들어, 열 2개, 열 4개, 열 8개와 같은 식입니다. 열 개수는 창의 크기와 글꼴의 크기에 따라 달라집니다.</para>
+    </sect2>
+
+  </sect1>
+</article>

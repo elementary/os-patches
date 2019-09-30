@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY legal SYSTEM "legal.xml">
+<!ENTITY appversion "1.3.0">
+<!ENTITY manrevision "2.1">
+<!ENTITY date "February 2004">
+<!ENTITY app "Character Map">
+]>
+<!-- 
+ (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  http://developer.gnome.org/projects/gdp
+  Template version: 2.0 beta
+  Template last modified Apr 11, 2002
+-->
+<!-- =============Document Header ============================= -->
+<article id="index" lang="fr"> 
+<!-- please do not change the id; for translations, change lang to -->
+<!-- appropriate code -->
+  <articleinfo> 
+    <title>Manuel de la Table de caractères</title>
+    <abstract role="description">
+      <para>La Table de caractères est une table de caractères Unicode permettant de sélectionner des caractères dans un tableau et de les insérer dans une chaîne de texte.</para>
+    </abstract>
+    <copyright><year>2004</year> <holder>Sun Microsystems</holder></copyright>
+    <copyright><year>2003</year> <year>2004</year> <holder>Chee Bin HOH</holder></copyright> 
+
+<!-- translators: uncomment this:
+    <copyright>
+      <year>2002</year>
+      <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
+    </copyright>
+-->
+
+    <publisher role="maintainer"> 
+      <publishername>Le projet de documentation GNOME</publishername> 
+    </publisher> 
+
+      <legalnotice id="legalnotice">
+	<para>Permission vous est donnée de copier, distribuer et/ou modifier ce document selon les termes de la Licence GNU Free Documentation License, Version 1.1 ou ultérieure publiée par la Free Software Foundation sans section inaltérable, sans texte de première page de couverture ni texte de dernière page de couverture. Vous trouverez un exemplaire de cette licence en suivant ce <ulink type="help" url="help:fdl">lien</ulink> ou dans le fichier COPYING-DOCS fourni avec le présent manuel.</para>
+         <para>Ce manuel fait partie de la collection de manuels GNOME distribués selon les termes de la licence de documentation libre GNU. Si vous souhaitez distribuer ce manuel indépendamment de la collection, vous devez joindre un exemplaire de la licence au document, comme indiqué dans la section 6 de celle-ci.</para>
+
+	<para>La plupart des noms utilisés par les entreprises pour distinguer leurs produits et services sont des marques déposées. Lorsque ces noms apparaissent dans la documentation GNOME et que les membres du projet de Documentation GNOME sont informés de l'existence de ces marques déposées, soit ces noms entiers, soit leur première lettre est en majuscule.</para>
+
+	<para>LE PRÉSENT DOCUMENT ET SES VERSIONS MODIFIÉES SONT FOURNIS SELON LES TERMES DE LA LICENCE DE DOCUMENTATION LIBRE GNU SACHANT QUE : <orderedlist>
+		<listitem>
+		  <para>LE PRÉSENT DOCUMENT EST FOURNI « TEL QUEL », SANS AUCUNE GARANTIE, EXPRESSE OU IMPLICITE, Y COMPRIS, ET SANS LIMITATION, LES GARANTIES DE BONNE QUALITÉ MARCHANDE OU D'APTITUDE À UN EMPLOI PARTICULIER OU AUTORISÉ DU DOCUMENT OU DE SA VERSION MODIFIÉE. L'UTILISATEUR ASSUME TOUT RISQUE RELATIF À LA QUALITÉ, À LA PERTINENCE ET À LA PERFORMANCE DU DOCUMENT OU DE SA VERSION DE MISE À JOUR. SI LE DOCUMENT OU SA VERSION MODIFIÉE S'AVÉRAIT DÉFECTUEUSE, L'UTILISATEUR (ET NON LE RÉDACTEUR INITIAL, L'AUTEUR, NI TOUT AUTRE PARTICIPANT) ENDOSSERA LES COÛTS DE TOUTE INTERVENTION, RÉPARATION OU CORRECTION NÉCESSAIRE. CETTE DÉNÉGATION DE RESPONSABILITÉ CONSTITUE UNE PARTIE ESSENTIELLE DE CETTE LICENCE. AUCUNE UTILISATION DE CE DOCUMENT OU DE SA VERSION MODIFIÉE N'EST AUTORISÉE AUX TERMES DU PRÉSENT ACCORD, EXCEPTÉ SOUS CETTE DÉNÉGATION DE RESPONSABILITÉ ; </para>
+		</listitem>
+		<listitem>
+		  <para>EN AUCUNE CIRCONSTANCE ET SOUS AUCUNE INTERPRÉTATION DE LA LOI, QU'IL S'AGISSE DE RESPONSABILITÉ CIVILE (Y COMPRIS LA NÉGLIGENCE), CONTRACTUELLE OU AUTRE, L'AUTEUR, LE RÉDACTEUR INITIAL, TOUT PARTICIPANT ET TOUT DISTRIBUTEUR DE CE DOCUMENTOU DE SA VERSION DE MISE À JOUR AINSI QUE TOUT FOURNISSEUR DE QUELQUE PARTIE QUE CE SOIT NE POURRONT ÊTRE TENUS RESPONSABLES À L'ÉGARD DE QUICONQUE POUR TOUT DOMMAGE DIRECT, INDIRECT, PARTICULIER OU ACCIDENTEL DE TOUT TYPE Y COMPRIS, SANS LIMITATION, LES DOMMAGES LIÉS À LA PERTE DE CLIENTÈLE, AUX ARRÊTS DE TRAVAIL, AUX DÉFAILLANCES ET AUX DYSFONCTIONNEMENTS INFORMATIQUES OU TOUT AUTRE DOMMAGE OU PERTE LIÉE À L'UTILISATION DU PRÉSENT DOCUMENT ET DE SES VERSIONS DE MISE À JOUR, ET CE MÊME SI CES PARTIES ONT ÉTÉ INFORMÉES DE LA POSSIBILITÉ DE TELS DOMMAGES.</para>
+		</listitem>
+	  </orderedlist></para>
+  </legalnotice>
+
+
+   <!-- This file  contains link to license for the documentation (GNU FDL), and 
+        other legal stuff such as "NO WARRANTY" statement. Please do not change 
+	any of this. -->
+
+    <authorgroup> 
+      <author><firstname>Sun</firstname> <surname>Équipe de documentation GNOME</surname> <affiliation><orgname>Sun Microsystems</orgname></affiliation></author>
+      <author><firstname>Chee Bin</firstname> <surname>HOH</surname> <affiliation> <orgname>Projet de documentation GNOME</orgname> <address> <email>cbhoh@gnome.org</email> </address> </affiliation></author> 
+
+<!--
+      <author> 
+        <firstname>Documentation</firstname> 
+          <surname>Writer 1</surname> 
+          <affiliation> 
+            <orgname>GNOME Documentation Project</orgname> 
+            <address> <email>doc-writer1@gnome.org</email> </address> 
+          </affiliation> 
+      </author> 
+-->
+      
+<!-- This is appropriate place for other contributors: translators,
+     maintainers,  etc. Commented out by default.
+      <othercredit role="translator">
+        <firstname>Latin</firstname> 
+	<surname>Translator 1</surname> 
+	<affiliation> 
+          <orgname>Latin Translation Team</orgname> 
+          <address> <email>translator@gnome.org</email> </address> 
+	</affiliation>
+	<contrib>Latin translation</contrib>
+      </othercredit>
+-->
+    </authorgroup>
+    <publisher role="maintainer">
+      <publishername>Le projet de documentation GNOME</publishername>
+    </publisher>
+
+
+    <revhistory>
+      <revision><revnumber>Manuel de Table de caractères V2.1</revnumber> <date>26/02/2004</date> <revdescription> 
+	  <para>Mis à jour pour GNOME 2.6, version 1.3.0 du programme</para>
+          <para role="author">L'équipe de documentation GNOME de Sun</para>
+          <para role="publisher">Le projet de documentation GNOME</para>
+        </revdescription></revision> 
+      <revision><revnumber>Manuel de Table de caractères Unicode V2.0</revnumber> <date>Octobre 2003</date> <revdescription> 
+          <para role="author">Chee Bin HOH <email>cbhoh@gnome.org</email></para>
+          <para role="publisher">Le projet de documentation GNOME</para>
+        </revdescription></revision> 
+    </revhistory> 
+
+    <releaseinfo>Ce manuel documente la version 1.3.0 de la Table de caractères.</releaseinfo> 
+
+    <legalnotice> 
+      <title>Votre avis</title> 
+      <para>Pour rapporter une anomalie ou émettre une suggestion concernant la <application>Table de caractères</application> ou ce manuel, procédez comme indiqué sur la <ulink url="help:gnome-feedback" type="help">page de réactions sur GNOME</ulink>.</para>
+<!-- Translators may also add here feedback address for translations -->
+    </legalnotice> 
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Jonathan Ernst</firstname>
+      </personname>
+      <email>jonathan@ernstfamily.ch</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2006.</year>
+      
+      <holder>Jonathan Ernst</holder>
+    </copyright>
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Claude Paroz</firstname>
+      </personname>
+      <email>Claude@2xlibre.net</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2006-2009.</year>
+      
+      <holder>Claude Paroz</holder>
+    </copyright>
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Laurent Coudeur</firstname>
+      </personname>
+      <email>laurentc@iol.ie</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2009.</year>
+      
+      <holder>Laurent Coudeur</holder>
+    </copyright>
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Mickael Albertus</firstname>
+      </personname>
+      <email>mickael.albertus@gmail.com</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2012</year>
+      
+      <holder>Mickael Albertus</holder>
+    </copyright>
+  </articleinfo> 
+
+<!-- ============= Index ===================================== -->
+  <indexterm zone="index"><primary>gucharmap</primary></indexterm> 
+  <indexterm zone="index"><primary>Table de caractères</primary></indexterm>
+  <indexterm zone="index"><primary>Table de caractères</primary></indexterm>
+
+<!-- ============= Document Body ============================= -->
+<!-- ============= Introduction ============================== -->
+  <sect1 id="gucharmap-introduction"> 
+    <title>Introduction</title> 
+    <para>L'application <application>Table de caractères</application> vous permet d'insérer des caractères spéciaux dans un document ou une zone de texte. La <application>Table de caractères</application> contient des caractères accentués, des symboles mathématiques, des symboles spéciaux et des signes de ponctuation. Beaucoup de caractères proposés par la <application>Table de caractères</application> ne sont pas accessibles via un clavier standard.</para>
+    <para>La <application>Table de caractères</application> affiche tous les caractères disponibles de toutes les langues écrites de votre système, en utilisant le jeu de caractères Unicode. Unicode est un jeu de caractères normalisé qui a comme objectif d'inclure tous les caractères utilisés dans toutes les langues écrites du monde.</para>
+  </sect1>
+
+<!-- =========== Getting Started ============================== -->
+
+  <sect1 id="gucharmap-getting-started"> 
+    <title>Premiers pas</title> 
+
+    <sect2 id="gucharmap-start">
+      <title>Démarrage de la Table de caractères</title>
+      <para>Vous pouvez démarrer la <application>Table de caractères</application> en recourant à l'une des méthodes suivantes :</para> 
+      <variablelist>
+        <varlistentry>
+          <term>Menu <guimenu>Applications</guimenu></term>
+          <listitem>
+            <para>Choisissez <menuchoice><guimenu>Accessoires</guimenu><guimenuitem>Table de caractères</guimenuitem></menuchoice>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Ligne de commande</term>
+	  <listitem>
+            <para>Exécutez la commande suivante : <command>gnome-character-map</command></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2 id="gucharmap-when-start">
+      <title>Au démarrage de la Table de caractères</title>
+      <para>Lorsque vous lancez la <application>Table de caractères</application>, la fenêtre suivante apparaît :</para>
+
+      <!-- ==== Figure ==== -->
+      <figure id="gucharmap-window-fig"> 
+        <title>Fenêtre de la Table de caractères</title> 
+        <screenshot> 
+          <mediaobject><imageobject> <imagedata fileref="figures/gucharmap_window.png" format="PNG"/> </imageobject> <textobject> <phrase>Montre la fenêtre principale de Table de caractères.</phrase> </textobject></mediaobject> 
+        </screenshot> 
+      </figure>
+      <!-- ==== End of Figure ==== -->
+
+      <!-- Include any descriptions of the GUI immediately after the screenshot of the main UI, -->
+      <!-- for example, the items on the menubar and on the toolbar. This section is optional. -->
+
+      <para>La fenêtre de la <application>Table de caractères</application> contient les éléments suivants :</para>
+      <variablelist>
+        <varlistentry>
+          <term>Barre de menus</term>
+          <listitem>
+            <para>Les menus de la barre de menus comprennent la plupart des commandes nécessaires pour utiliser la <application>Table de caractères</application>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Barre d'outils</term>
+          <listitem>
+            <para>La barre d'outils contient une liste déroulante de polices, des boutons de style de police ainsi qu'une zone de sélection numérique.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Zone d'affichage</term>
+          <listitem>
+            <para>La zone d'affichage comporte les éléments suivants :</para>
+            <itemizedlist>
+              <listitem>
+                <para>zone de liste <guilabel>Script</guilabel> ou <guilabel>Bloc Unicode</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>onglet <guilabel>Table de caractères</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>onglet <guilabel>Détails du caractère</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>zone de texte <guilabel>Texte à copier</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>bouton <guibutton>Copier</guibutton></para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Barre d'état</term>
+          <listitem>
+            <para>La barre d'état affiche le point de code Unicode et le nom Unicode du caractère sélectionné.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+  </sect1>
+
+<!-- ================ Usage ================================ --> 
+  <sect1 id="gucharmap-usage">
+    <title>Utilisation</title> 
+    
+    <sect2 id="gucharmap-change-view">
+      <title>Modification de la liste Jeu de caractères</title>
+      <para>Pour lister les jeux de caractères par nom de script, choisissez <menuchoice><guimenu>Affichage</guimenu><guimenuitem>Par script</guimenuitem></menuchoice>.</para>
+      <para>Pour lister les jeux de caractères par bloc Unicode, choisissez <menuchoice><guimenu>Affichage</guimenu><guimenuitem>Par blocs Unicode</guimenuitem></menuchoice>.</para>
+    </sect2>
+    
+    <sect2 id="gucharmap-create-textstring">
+      <title>Création d'une chaîne de texte</title>
+      <para>Pour créer une chaîne de texte dans le champ <guilabel>Texte à copier</guilabel>, procédez comme suit :</para>
+      <orderedlist>
+        <listitem>
+          <para>Sélectionnez un jeu de caractères dans la liste <guilabel>Script</guilabel> ou <guilabel>Bloc Unicode</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Insérez des caractères de l'une des façons suivantes :</para>
+          <itemizedlist>
+            <listitem>
+              <para>Double-cliquez sur un caractère dans l'onglet <guilabel>Table de caractères</guilabel> pour l'insérer dans le champ <guilabel>Texte à copier</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Cliquez sur un caractère dans l'onglet <guilabel>Table de caractères</guilabel>, puis appuyez sur <keycap>Entrée</keycap> pour l'insérer dans le champ <guilabel>Texte à copier</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Cliquez sur un caractère dans l'onglet <guilabel>Table de caractères</guilabel>, puis faites-le glisser dans le champ <guilabel>Texte à copier</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Cliquez sur le champ <guilabel>Texte à copier</guilabel> pour l'activer. Si une chaîne de texte figure déjà dans le champ, cliquez à l'emplacement exact où vous souhaitez insérer le caractère. Appuyez sur un caractère de votre clavier pour l'insérer dans le champ.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+    </sect2>
+
+<!-- =============== To Copy and Paste a Text String ====================== -->
+    <sect2 id="gucharmap-copy-textstring">
+      <title>Copie et collage de la chaîne de texte dans une application</title>
+      <para>Pour copier et coller la chaîne de texte du champ <guilabel>Texte à copier</guilabel> dans une application, procédez comme suit :</para>
+      <orderedlist>
+        <listitem>
+          <para>Cliquez sur <guibutton>Copier</guibutton>. Si toute la chaîne de texte est sélectionnée, ou qu'elle n'est pas du tout sélectionnée, la chaîne entière sera copiée dans le presse-papiers. Si seule une partie de la chaîne est sélectionnée, c'est cette partie qui y sera copiée.</para>
+        </listitem>
+        <listitem>
+          <para>Retournez à votre application et choisissez <menuchoice><guimenu>Édition</guimenu><guimenuitem>Coller</guimenuitem></menuchoice> ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>V</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Lorsque vous collez le contenu du champ <guilabel>Texte à copier</guilabel> dans d'autres applications, la chaîne de texte apparaît dans le jeu de caractères actif de l'application.</para>
+      <para>Si votre chaîne de texte contient des caractères invisibles, vous ne pouvez l'insérer que dans les applications prenant en charge la totalité du jeu de caractères.</para>
+    </sect2>
+
+    <sect2 id="usage-find-character">
+      <title>Recherche d'un caractère</title>
+      <para>Pour rechercher un caractère, procédez comme suit :</para>
+      <orderedlist>
+        <listitem>
+          <para>Choisissez <menuchoice><guimenu>Rechercher</guimenu><guimenuitem>Rechercher</guimenuitem></menuchoice> ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>. La boîte de dialogue <guilabel>Rechercher</guilabel> apparaît.</para>
+        </listitem>
+        <listitem>
+          <para>Saisissez le texte à trouver dans le champ <guilabel>Rechercher</guilabel>.</para>
+          <itemizedlist>            
+             <listitem><para>Sélectionnez <guilabel>Trouver le mot entier</guilabel> pour ne rechercher que des mots entiers correspondant au texte saisi.</para></listitem>
+             <listitem><para>Par défaut, la recherche se fait uniquement dans les noms de caractères. Sélectionnez <guilabel>Chercher dans les détails du caractère</guilabel> pour effectuer la recherche dans d'autres parties de la description du caractère, telles que les notes, les équivalents ou les équivalents approximatifs.</para></listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>Cliquez sur <guibutton>Suivant</guibutton> pour trouver la première occurrence du texte apparaissant après le caractère actuellement sélectionné. La <application>Table de caractères</application> sélectionne alors le caractère trouvé.</para>
+        </listitem>
+        <listitem>
+          <para>Cliquez sur <guibutton>Suivant</guibutton> pour trouver le prochain caractère correspondant. Il est aussi possible de choisir <menuchoice><guimenu>Rechercher</guimenu><guimenuitem>Rechercher le suivant</guimenuitem></menuchoice> ou d'utiliser le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Cliquez sur <guibutton>Précédent</guibutton> pour trouver le caractère précédent correspondant aux critères. Il est aussi possible de choisir <menuchoice><guimenu>Rechercher</guimenu><guimenuitem>Rechercher le précédent</guimenuitem></menuchoice> ou d'utiliser le raccourci clavier  <keycombo><keycap>Majuscule</keycap><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+    </sect2>
+    
+<!-- =============== To Browse the Character Table  ========================= -->
+    <sect2 id="usage-browse-characters">
+      <title>Navigation parmi les caractères</title>
+      <para>Pour parcourir la table de caractères, utilisez le menu <guimenu>Aller</guimenu>.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Caractère suivant, ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Caractère précédent, ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>P</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Script suivant, ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>Page bas</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Script précédent, ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>Page haut</keycap></keycombo>.</para>
+        </listitem>
+      </itemizedlist>
+        
+      <para>Vous parcourez la table de caractères un caractère à la fois. Le parcours se fait script par script ou bloc Unicode par bloc Unicode suivant l'affichage utilisé dans la table de caractères. Pour modifier l'affichage, choisissez <menuchoice><guimenu>Affichage</guimenu><guimenuitem>Par script</guimenuitem></menuchoice> ou <menuchoice><guimenu>Affichage</guimenu><guimenuitem>Par blocs Unicode</guimenuitem></menuchoice>.</para>
+      
+      <para>Les touches suivantes peuvent aussi servir à parcourir la table de caractères :</para>
+        
+      <itemizedlist>
+        <listitem>
+          <para>Appuyez sur les touches flèches du clavier.</para>
+        </listitem>
+        <listitem>
+          <para>Appuyez sur les touches <keycap>Page précédente</keycap> et <keycap>Page suivante</keycap> pour parcourir les caractères page par page.</para>
+        </listitem>
+        <listitem>
+          <para>Appuyez sur la touche <keycap>Origine</keycap> pour sélectionner le premier caractère de la séquence Unicode. Pour sélectionner le dernier caractère, appuyez sur la touche <keycap>Fin</keycap>.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-display-details">
+      <title>Affichage des informations détaillées d'un caractère</title>
+      <para>Pour afficher les informations détaillées correspondant à un caractère, procédez comme suit :</para>
+      <orderedlist>
+        <listitem>
+          <para>Sélectionnez un jeu de caractères dans la zone de liste <guilabel>Script</guilabel> ou <guilabel>Bloc Unicode</guilabel>. Exemple : <guilabel>Latin de base</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Sélectionnez un caractère dans l'onglet <guilabel>Table de caractères</guilabel>. Exemple : <guilabel>B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Cliquez sur l'onglet <guilabel>Détails du caractère</guilabel>.</para>
+        </listitem>
+      </orderedlist>
+      <para>L'onglet <guilabel>Détails du caractère</guilabel> affiche les informations suivantes pour le caractère sélectionné :</para>
+      <itemizedlist>
+        <listitem>
+          <para>point de code Unicode</para>
+          <para>Exemple : <guilabel>U+0042</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>nom de caractère Unicode</para>
+          <para>Exemple : <guilabel>LATIN CAPITAL LETTER B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para><guilabel>Propriétés générales du caractère</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>catégorie Unicode</para>
+              <para>Exemple : <guilabel>lettre, majuscule</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Diverses représentations utiles</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>codage UTF-8</para>
+              <para>Exemple : <guilabel>0x42</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>codage UTF-16</para>
+              <para>Exemple : <guilabel>0x0042</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>codage UTF-8 en C octal échappé</para>
+              <para>Exemple : <guilabel>\102</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>entité décimale XML</para>
+              <para>Exemple : <guilabel>&amp;#66</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Annotations et références croisées</guilabel></para>
+          <para>Exemple : <guilabel>U+212C SCRIPT CAPITAL B</guilabel></para>
+          <para>Cliquez sur le lien pour afficher les caractéristiques du caractère référencé.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-character">
+      <title>Modification du format d'un caractère</title>
+      <para>Pour modifier le format d'un caractère, utilisez l'une ou l'autre des procédures suivantes :</para>
+      <itemizedlist>
+        <listitem>
+          <para>Pour modifier la police, sélectionnez une police dans la liste déroulante correspondante.</para>
+        </listitem>
+        <listitem>
+          <para>Pour mettre le texte en gras, cliquez sur le bouton <guibutton>Gras</guibutton> ou utilisez le raccourci clavier <keycombo><keycap>Alt</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Pour mettre le texte en italique, cliquez sur le bouton <guibutton>Italique</guibutton> ou utilisez le raccourci clavier <keycombo><keycap>Alt</keycap><keycap>I</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Pour agrandir la taille de la police, choisissez <menuchoice><guimenu>Affichage</guimenu><guimenuitem>Zoom avant</guimenuitem></menuchoice> ou utilisez la zone de sélection numérique du zoom, ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>+</keycap></keycombo>. Selon la configuration de votre clavier, il est possible que vous deviez ajouter la touche <keycap>Majuscule</keycap> à cette combinaison.</para>
+        </listitem>
+        <listitem>
+          <para>Pour réduire la taille de la police, choisissez <menuchoice><guimenu>Affichage</guimenu><guimenuitem>Zoom arrière</guimenuitem></menuchoice> ou utilisez la zone de sélection numérique du zoom, ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>-</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Pour afficher la police à sa taille normale, choisissez <menuchoice><guimenu>Affichage</guimenu><guimenuitem>Taille normale</guimenuitem></menuchoice> ou utilisez le raccourci clavier <keycombo><keycap>Ctrl</keycap><keycap>=</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Pour agrandir le caractère sélectionné, appuyez sur la touche <keycap>Majuscule</keycap>.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-chartable">
+      <title>Modification du format de la Table de caractères</title>
+      <para>Pour modifier le format de la table de caractères, choisissez <menuchoice><guimenu>Affichage</guimenu><guimenuitem>Diviser les colonnes en multiple de deux</guimenuitem></menuchoice>.</para>
+      <para>La <application>Table de caractères</application> modifie l'onglet <guilabel>Table de caractères</guilabel> de telle sorte que le nombre de colonnes soit un multiple de deux ; par exemple, deux colonnes, quatre colonnes, huit colonnes, etc. Le nombre de colonnes dépend de la taille de la police et de la fenêtre.</para>
+    </sect2>
+
+  </sect1>
+</article>

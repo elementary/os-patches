@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY legal SYSTEM "legal.xml">
+<!ENTITY appversion "1.3.0">
+<!ENTITY manrevision "2.1">
+<!ENTITY date "February 2004">
+<!ENTITY app "Character Map">
+]>
+<!-- 
+ (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  http://developer.gnome.org/projects/gdp
+  Template version: 2.0 beta
+  Template last modified Apr 11, 2002
+-->
+<!-- =============Document Header ============================= -->
+<article id="index" lang="cs"> 
+<!-- please do not change the id; for translations, change lang to -->
+<!-- appropriate code -->
+  <articleinfo> 
+    <title>Příručka k aplikaci Mapa znaků</title>
+    <abstract role="description">
+      <para>Mapa znaků je mapa znaků Unicode, která vám umožní vybrat znak z tabulky a vložit ho do textu</para>
+    </abstract>
+    <copyright><year>2004</year> <holder>Sun Microsystems</holder></copyright>
+    <copyright><year>2003</year> <year>2004</year> <holder>Chee Bin HOH</holder></copyright> 
+
+<!-- translators: uncomment this:
+    <copyright>
+      <year>2002</year>
+      <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
+    </copyright>
+-->
+
+    <publisher role="maintainer"> 
+      <publishername>Dokumentační projekt GNOME</publishername> 
+    </publisher> 
+
+      <legalnotice id="legalnotice">
+	<para>Je povoleno kopírovat, šířit a/nebo upravovat tento dokument za podmínek GNU Free Documentation License (GFDL) ve verzi 1.1 nebo v jakékoli další verzi vydané nadací Free Software Foundation; bez neměnných oddílů, bez textů předních desek a bez textů zadních desek. Kopii licence GFDL naleznete pod <ulink type="help" url="help:fdl">tímto odkazem</ulink> nebo v souboru COPYING-DOCS dodávaném s touto příručkou.</para>
+         <para>Tato příručka je součástí sbírky příruček GNOME šířených za podmínek licence GNU FDL. Pokud chcete tento dokument šířit odděleně od sbírky, musíte přiložit kopii licence dle popisu v oddílu 6 dané licence.</para>
+
+	<para>Mnoho užívaných názvů určených k zviditelnění produktů nebo služeb jsou ochranné známky. Na místech, kde jsou tato jména v dokumentaci užita a členové Dokumentačního projektu GNOME jsou si vědomi skutečnosti, že se jedná o ochrannou známku, je takové jméno psáno velkými písmeny celé nebo s velkým písmenem na začátku.</para>
+
+	<para>DOKUMENT A JEHO UPRAVENÉ VERZE JSOU ŠÍŘENY V SOULADU SE ZNĚNÍM LICENCE GNU FREE DOCUMENTATION LICENSE S NÁSLEDUJÍCÍM USTANOVENÍM: <orderedlist>
+		<listitem>
+		  <para>DOKUMENT JE POSKYTOVÁN V PODOBĚ „JAK JE“, BEZ ZÁRUKY JAKÉHOKOLIV DRUHU, NEPOSKYTUJÍ SE ANI ODVOZENÉ ZÁRUKY, ZÁRUKY, ŽE DOKUMENT, NEBO JEHO UPRAVENÁ VERZE, JE BEZCHYBNÝ, NEBO ZÁRUKY PRODEJNOSTI, VHODNOSTI PRO URČITÝ ÚČEL, NEBO NEPORUŠENOSTI. RIZIKO NEKVALITY, NEPŘESNOSTI A ŠPATNÉHO PROVEDENÍ DOKUMENTU, NEBO JEHO UPRAVENÉ VERZE, NESETE VY. POKUD JE TENTO DOKUMENT NEBO JEHO UPRAVENÁ VERZE VADNÁ V JAKÉMKOLIV SMYSLU, VY (NIKOLIV PŮVODCE, AUTOR NEBO JAKÝKOLIV PŘISPĚVATEL) PŘEBÍRÁTE ODPOVĚDNOST ZA JAKÉKOLIV NÁKLADY NA NUTNÉ ÚPRAVY, OPRAVY ČI SLUŽBY. TOTO PROHLÁŠENÍ O ZÁRUCE PŘEDSTAVUJE ZÁKLADNÍ SOUČÁST TÉTO LICENCE. BEZ TOHOTO PROHLÁŠENÍ NENÍ PODLE TÉTO DOHODY POVOLENO UŽÍVÁNÍ ANI ÚPRAVY TOHOTO DOKUMENTU; DÁLE</para>
+		</listitem>
+		<listitem>
+		  <para>ZA ŽÁDNÝCH OKOLNOSTÍ A ŽÁDNÝCH PRÁVNÍCH PŘEDPOKLADŮ, AŤ SE JEDNÁ O PŘEČIN (VČETNĚ NEDBALOSTNÍCH), SMLOUVU NEBO JINÉ, NENÍ AUTOR, PŮVODNÍ PISATEL, KTERÝKOLIV PŘISPĚVATEL NEBO KTERÝKOLIV DISTRIBUTOR TOHOTO DOKUMENTU NEBO UPRAVENÉ VERZE DOKUMENTU NEBO KTERÝKOLIV DODAVATEL NĚKTERÉ Z TĚCHTO STRAN ODPOVĚDNÝ NĚJAKÉ OSOBĚ ZA PŘÍMÉ, NEPŘÍMÉ, SPECIÁLNÍ, NAHODILÉ NEBO NÁSLEDNÉ ŠKODY JAKÉHOKOLIV CHARAKTERU, VČETNĚ, ALE NEJEN, ZA POŠKOZENÍ ZE ZTRÁTY DOBRÉHO JMÉNA, PŘERUŠENÍ PRÁCE, PORUCHY NEBO NESPRÁVNÉ FUNKCE POČÍTAČE NEBO JINÉHO A VŠECH DALŠÍCH ŠKOD NEBO ZTRÁT VYVSTÁVAJÍCÍCH Z NEBO VZTAHUJÍCÍCH SE K POUŽÍVÁNÍ TOHOTO DOKUMENTU NEBO UPRAVENÝCH VERZÍ DOKUMENTU, I KDYŽ BY TAKOVÁTO STRANA BYLA INFORMOVANÁ O MOŽNOSTI TAKOVÉHOTO POŠKOZENÍ.</para>
+		</listitem>
+	  </orderedlist></para>
+  </legalnotice>
+
+
+   <!-- This file  contains link to license for the documentation (GNU FDL), and 
+        other legal stuff such as "NO WARRANTY" statement. Please do not change 
+	any of this. -->
+
+    <authorgroup> 
+      <author><firstname>Sun</firstname> <surname>Dokumentační tým GNOME</surname> <affiliation><orgname>Sun Microsystems</orgname></affiliation></author>
+      <author><firstname>Chee Bin</firstname> <surname>HOH</surname> <affiliation> <orgname>Dokumentační projekt GNOME</orgname> <address> <email>cbhoh@gnome.org</email> </address> </affiliation></author> 
+
+<!--
+      <author> 
+        <firstname>Documentation</firstname> 
+          <surname>Writer 1</surname> 
+          <affiliation> 
+            <orgname>GNOME Documentation Project</orgname> 
+            <address> <email>doc-writer1@gnome.org</email> </address> 
+          </affiliation> 
+      </author> 
+-->
+      
+<!-- This is appropriate place for other contributors: translators,
+     maintainers,  etc. Commented out by default.
+      <othercredit role="translator">
+        <firstname>Latin</firstname> 
+	<surname>Translator 1</surname> 
+	<affiliation> 
+          <orgname>Latin Translation Team</orgname> 
+          <address> <email>translator@gnome.org</email> </address> 
+	</affiliation>
+	<contrib>Latin translation</contrib>
+      </othercredit>
+-->
+    </authorgroup>
+    <publisher role="maintainer">
+      <publishername>Dokumentační projekt GNOME</publishername>
+    </publisher>
+
+
+    <revhistory>
+      <revision><revnumber>Příručka V2.1 k aplikaci Mapa znaků</revnumber> <date>26.2.2004</date><revdescription> 
+	  <para>Aktualizováno pro GNOME 2.6, verzi programu 1.3.0</para>
+          <para role="author">Dokumentační tým Sun GNOME</para>
+          <para role="publisher">Dokumentační projekt GNOME</para>
+        </revdescription></revision> 
+      <revision><revnumber>Příručka V2.0 k aplikaci Mapa znaků Unikódu</revnumber> <date>říjen 2003</date><revdescription> 
+          <para role="author">Chee Bin HOH <email>cbhoh@gnome.org</email></para>
+          <para role="publisher">Dokumentační projekt GNOME</para>
+        </revdescription></revision> 
+    </revhistory> 
+
+    <releaseinfo>Tato příručka popisuje verzi 1.3.0 Mapy znaků</releaseinfo> 
+
+    <legalnotice> 
+      <title>Ohlasy</title> 
+      <para>Pokud chcete oznámit chybu nebo navrhnout vylepšení vztahující se k aplikaci <application>Mapa znaků</application> nebo této příručce, postupujte dle instrukcí na stránce <ulink url="help:gnome-feedback" type="help">Stránka s ohlasy na GNOME</ulink>.</para>
+<!-- Translators may also add here feedback address for translations -->
+    </legalnotice> 
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Marek Černocký</firstname>
+      </personname>
+      <email>marek@manet.cz</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2009</year>
+      
+        <year>2013.</year>
+      
+      <holder>Marek Černocký</holder>
+    </copyright>
+  </articleinfo> 
+
+<!-- ============= Index ===================================== -->
+  <indexterm zone="index"><primary>gucharmap</primary></indexterm> 
+  <indexterm zone="index"><primary>Mapa znaků</primary></indexterm>
+  <indexterm zone="index"><primary>Mapa znaků</primary></indexterm>
+
+<!-- ============= Document Body ============================= -->
+<!-- ============= Introduction ============================== -->
+  <sect1 id="gucharmap-introduction"> 
+    <title>Úvod</title> 
+    <para>Aplikace <application>Mapa znaků</application> vám umožňuje do dokumentů a textových polí vkládat speciální znaky. <application>Mapa znaků</application> poskytuje znaky s diakritikou, matematické symboly, speciální symboly a interpunkční znaménka. Využijte <application>Mapu znaků</application> na vkládání znaků, které nejsou dostupné z vaší klávesnice.</para>
+    <para><application>Mapa znaků</application> zobrazuje všechny znaky, které jsou dostupné ve všech jazykových skriptech ve vašem systému za použití znakové sady Unicode. Unicode je standard pro znakové sady, jehož hlavním cílem je obsáhnout všechny znaky používané ve všech jazycích na světě.</para>
+  </sect1>
+
+<!-- =========== Getting Started ============================== -->
+
+  <sect1 id="gucharmap-getting-started"> 
+    <title>Jak začít</title> 
+
+    <sect2 id="gucharmap-start">
+      <title>Spuštění Mapy znaků</title>
+      <para><application>Mapu znaků</application> můžete spustit následujícími způsoby:</para> 
+      <variablelist>
+        <varlistentry>
+          <term>Nabídka <guimenu>aplikací</guimenu></term>
+          <listitem>
+            <para>Zvolte <menuchoice><guimenu>Příslušenství</guimenu><guimenuitem>Mapa znaků</guimenuitem></menuchoice>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Příkazový řádek</term>
+	  <listitem>
+            <para>Spusťte následující příkaz: <command>gnome-character-map</command></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2 id="gucharmap-when-start">
+      <title>Po spuštění Mapy znaků</title>
+      <para>Po spuštění <application>Mapy znaků</application> se zobrazí následující okno.</para>
+
+      <!-- ==== Figure ==== -->
+      <figure id="gucharmap-window-fig"> 
+        <title>Okno mapy znaků</title> 
+        <screenshot> 
+          <mediaobject><imageobject> <imagedata fileref="figures/gucharmap_window.png" format="PNG"/> </imageobject> <textobject> <phrase>Ukazuje okno Mapy znaků.</phrase> </textobject></mediaobject> 
+        </screenshot> 
+      </figure>
+      <!-- ==== End of Figure ==== -->
+
+      <!-- Include any descriptions of the GUI immediately after the screenshot of the main UI, -->
+      <!-- for example, the items on the menubar and on the toolbar. This section is optional. -->
+
+      <para>Okno <application>Mapy znaků</application> obsahuje následující části:</para>
+      <variablelist>
+        <varlistentry>
+          <term>Panel nabídek</term>
+          <listitem>
+            <para>Nabídky v panelu nabídek obsahují většinu funkcí, které můžete pro práci s <application>Mapou znaků</application> potřebovat.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Panel nástrojů</term>
+          <listitem>
+            <para>Panel nástrojů obsahuje vyskakovací seznam písem, tlačítka se styly písma a nastavení velikosti písma.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Zobrazovací oblast</term>
+          <listitem>
+            <para>Zobrazovací oblast obsahuje následující části:</para>
+            <itemizedlist>
+              <listitem>
+                <para>Seznam se <guilabel>Skripty</guilabel> nebo <guilabel>Bloky Unicode</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Kartu s <guilabel>Tabulkou znaků</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Kartu s <guilabel>Detaily znaku</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Textové pole s <guilabel>Textem ke zkopírování</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Tlačítko <guibutton>Kopírovat</guibutton></para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Stavový řádek</term>
+          <listitem>
+            <para>Stavový řádek zobrazuje kód Unicode a název Unicode pro aktuálně vybraný znak.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+  </sect1>
+
+<!-- ================ Usage ================================ --> 
+  <sect1 id="gucharmap-usage">
+    <title>Použití</title> 
+    
+    <sect2 id="gucharmap-change-view">
+      <title>Změna seznamu znakových sad</title>
+      <para>Pokud chcete seznam se znakovými sadami podle názvu skriptu, tak zvolte choose <menuchoice><guimenu>Zobrazit</guimenu><guimenuitem>Podle skriptu</guimenuitem></menuchoice>.</para>
+      <para>Pokud chcete seznam se znakovými sadami podle bloku Unicode, tak zvolte choose <menuchoice><guimenu>Zobrazit</guimenu><guimenuitem>Podle bloku Unicode</guimenuitem></menuchoice>.</para>
+    </sect2>
+    
+    <sect2 id="gucharmap-create-textstring">
+      <title>Vytvoření textového řetězce</title>
+      <para>Textový řetězec v poli <guilabel>Text ke zkopírování</guilabel> vytvoříte následujícími kroky:</para>
+      <orderedlist>
+        <listitem>
+          <para>Zvolte znakovou sadu ze seznamu <guilabel>Skriptů</guilabel> nebo <guilabel>Bloků Unicode</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Vložte znak jedním z následujících způsobů:</para>
+          <itemizedlist>
+            <listitem>
+              <para>Dvojitě klikněte na políčko se znakem na kartě <guilabel>Tabulka znaků</guilabel> a znak se vloží do pole <guilabel>Text ke zkopírování</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Vyberte políčko se znakem na kartě <guilabel>Tabulka znaků</guilabel> a stiskněte <keycap>Return</keycap>, znak se vloží do pole <guilabel>Text ke zkopírování</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Vyberte políčko se znakem na kartě <guilabel>Tabulka znaků</guilabel> a zmáčkněte tlačítko myši a přetáhněte znak do pole <guilabel>Text ke zkopírování</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Klikněte do pole <guilabel>Text ke zkopírování</guilabel>, kde se objeví textový kurzor. Pokud je již v poli nějaký text, přesuňte textový kurzor na místo, kde chcete vkládat znaku nebo na to místo klikněte myší. Potom začněte normálně psát pomocí klávesnice.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+    </sect2>
+
+<!-- =============== To Copy and Paste a Text String ====================== -->
+    <sect2 id="gucharmap-copy-textstring">
+      <title>Kopírování a vkládání vašeho textového řetězce do jiné aplikace</title>
+      <para>Zkopírování a vložení textového řetězce z pole <guilabel>Text ke zkopírování</guilabel> do jiné aplikace provedete následovně:</para>
+      <orderedlist>
+        <listitem>
+          <para>Klikněte na <guibutton>Kopírovat</guibutton>. Pokud text není vybraný nebo je vybraný celý, tak se do schránky zkopíruje celý text. Pokud je vybraná část textu, tak se zkopíruje tato část.</para>
+        </listitem>
+        <listitem>
+          <para>Přepněte se do požadované aplikace a zvolte <menuchoice><guimenu>Upravit</guimenu><guimenuitem>Vložit</guimenuitem></menuchoice> nebo zmáčkněte klávesovou zkratku <keycombo><keycap>Ctrl</keycap><keycap>V</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Při vkládání obsahu pole <guilabel>Text ke zkopírování</guilabel> do jiné aplikace se vložený text objeví v aktuální znakové sadě dané aplikace.</para>
+      <para>Pokud váš textový řetězec obsahuje neviditelné znaky, můžete je vkládat pouze do aplikace, která podporuje plnou znakovou sadu.</para>
+    </sect2>
+
+    <sect2 id="usage-find-character">
+      <title>Vyhledání znaku</title>
+      <para>Pokud chcete nají znak, tak postupujte podle těchto kroků:</para>
+      <orderedlist>
+        <listitem>
+          <para>Zvolte <menuchoice><guimenu>Hledat</guimenu><guimenuitem>Hledat</guimenuitem></menuchoice> nebo zmáčkněte klávesovou zkratku <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>. Otevře se dialog <guilabel>Hledání</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Do pole <guilabel>Hledat</guilabel> zadejte hledaný text.</para>
+          <itemizedlist>            
+             <listitem><para>Zvolte <guilabel>Hledat celá slova</guilabel> pokud chcete najít pouze slova, která se celá shodují s vaším textem.</para></listitem>
+             <listitem><para>Standardně se hledá pouze v názvech znaků. Pokud zvolíte <guilabel>Hledat v detailech znaku</guilabel>, budou se prohledávat i další údaje popisující znak, jako jsou poznámky, ekvivalenty a přibližné ekvivalenty.</para></listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>Kliknutím na <guibutton>Následující</guibutton> se najde první výskyt zadaného textu od pozice aktuálně vybraného znaku. <application>Mapa znaků</application> nalezený znak označí jako vybraný.</para>
+        </listitem>
+        <listitem>
+          <para>Další výskyt najdete opětovným kliknutím na <guibutton>Následující</guibutton>. Případně můžete zvolit <menuchoice><guimenu>Hledat</guimenu><guimenuitem>Hledat následující</guimenuitem></menuchoice> nebo zmáčknout klávesovou zkratku <keycombo><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Kliknutím na <guibutton>Předchozí</guibutton> najdete předcházející výskyt znaku. Případně můžete zvolit <menuchoice><guimenu>Hledat</guimenu><guimenuitem>Hledat předchozí</guimenuitem></menuchoice> nebo zmáčknout klávesovou zkratku <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+    </sect2>
+    
+<!-- =============== To Browse the Character Table  ========================= -->
+    <sect2 id="usage-browse-characters">
+      <title>Procházení všech znaků</title>
+      <para>K procházení mapou znaků použijte nabídku <guimenu>Přejít</guimenu>.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><guimenuitem>Následující znak</guimenuitem> nebo klávesová zkratka <keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para><guimenuitem>Předchozí znak</guimenuitem> nebo klávesová zkratka <keycombo><keycap>Ctrl</keycap><keycap>P</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para><guimenuitem>Následující skript</guimenuitem> nebo klávesová zkratka <keycombo><keycap>Ctrl</keycap><keycap>Page Down</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para><guimenuitem>Předchozí skript</guimenuitem> nebo klávesová zkratka <keycombo><keycap>Ctrl</keycap><keycap>Page Up</keycap></keycombo>.</para>
+        </listitem>
+      </itemizedlist>
+        
+      <para>Mapu znaků můžete procházet po jednotlivých znacích, skriptech nebo blocích Unicode. Záleží na tom, zda mapa znaků zobrazuje skripty nebo bloky Unicode. Změnit to můžete volbou <menuchoice><guimenu>Zobrazit</guimenu><guimenuitem>Podle skriptu</guimenuitem></menuchoice> nebo <menuchoice><guimenu>Zobrazit</guimenu><guimenuitem>Podle bloku Unicode</guimenuitem></menuchoice>.</para>
+      
+      <para>K procházení mapy znaků můžete používat také následující klávesy:</para>
+        
+      <itemizedlist>
+        <listitem>
+          <para>K procházení po znacích lze použít kurzorové klávesy se šipkami.</para>
+        </listitem>
+        <listitem>
+          <para>Klávesami <keycap>Page Up</keycap> a <keycap>Page Down</keycap> procházíte znaky po stránkách.</para>
+        </listitem>
+        <listitem>
+          <para>Klávesou <keycap>Home</keycap> se dostanete na první znak sekvence Unicode. Na poslední znak se dostanete stiskem klávesy <keycap>End</keycap>.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-display-details">
+      <title>Zobrazení podrobných informací o znaku</title>
+      <para>Podrobné informace o znaku zobrazíte následujícím postupem:</para>
+      <orderedlist>
+        <listitem>
+          <para>Vyberte znakovou sadu ze seznamu <guilabel>Skriptů</guilabel> nebo <guilabel>Bloků Unicode</guilabel>. Například: <guilabel>Základní latinka</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Na kartě <guilabel>Tabulka znaků</guilabel> vyberte znak. Například: <guilabel>B</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Klikněte na kartu <guilabel>Detaily znaku</guilabel>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Na kartě <guilabel>Detaily znaku</guilabel> se o vybraném znaku zobrazují následující informace:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Kód podle Unicode</para>
+          <para>Příklad: <guilabel>U+0042</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Název podle Unicode</para>
+          <para>Příklad: <guilabel>LATIN CAPITAL LETTER B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para><guilabel>Obecné vlastnosti znaku</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>Kategorie Unicode</para>
+              <para>Příklad: <guilabel>Písmeno, velké</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Různé užitečné reprezentace</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>Kódování UTF-8</para>
+              <para>Příklad: <guilabel>0x42</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Kódování UTF-16</para>
+              <para>Příklad: <guilabel>0x0042</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Sekvence escape (osmičkově) v UTF-8</para>
+              <para>Příklad: <guilabel>\102</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Entita XML (desítkově)</para>
+              <para>Příklad: <guilabel>"&amp;#66"</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Poznámky a křížové odkazy</guilabel></para>
+          <para>Příklad: <guilabel>U+212C SCRIPT CAPITAL B</guilabel></para>
+          <para>Kliknutím na odkazovaný znak se zobrazí informace o tomto znaku.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-character">
+      <title>Změna formátu znaku</title>
+      <para>Pokud chcete změnit formát znaku, postupujte následovně:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Změňte písmo výběrem písma z vyskakovacího seznamu s písmy.</para>
+        </listitem>
+        <listitem>
+          <para>Tučné variantu písma nastavíte kliknutím na tlačítko <guibutton>Tučné</guibutton> nebo stiskem klávesové zkratky <keycombo><keycap>Alt</keycap><keycap>B</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Variantu písma kurzíva nastavíte kliknutím na tlačítko <guibutton>Kurzíva</guibutton> nebo stiskem klávesové zkratky <keycombo><keycap>Alt</keycap><keycap>I</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Písmo zvětšíte pomocí <menuchoice><guimenu>Zobrazit</guimenu><guimenuitem>Zvětšit</guimenuitem></menuchoice> nebo ovládacím prvkem pro velikost písma na panelu nástrojů nebo stiskem klávesové zkratky <keycombo><keycap>Ctrl</keycap><keycap>+</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Písmo zmenšíte pomocí <menuchoice><guimenu>Zobrazit</guimenu><guimenuitem>Zmenšit</guimenuitem></menuchoice> nebo ovládacím prvkem pro velikost písma na panelu nástrojů nebo stiskem klávesové zkratky <keycombo><keycap>Ctrl</keycap><keycap>-</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Normální velikost písma nastavíte pomocí <menuchoice><guimenu>Zobrazit</guimenu><guimenuitem>Normální velikost</guimenuitem></menuchoice> nebo stiskem klávesové zkratky <keycombo><keycap>Ctrl</keycap><keycap>=</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Podržením klávesy <keycap>Shift</keycap> si vybraný znak zvětšíte jak lupou.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-chartable">
+      <title>Změna formátu tabulky znaků</title>
+      <para>Pro změnu formátu tabulky znaků zvolte <menuchoice><guimenu>Zobrazit</guimenu><guimenuitem>Přichytit sloupce k mocninám dvojky</guimenuitem></menuchoice>.</para>
+      <para><application>Mapa znaků</application> bude měnit kartu <guilabel>Tabulka znaků</guilabel> tak, aby počet sloupců byl mocninou dvou, např. dva sloupce, čtyři sloupce, osm sloupců atd. Konkrétní počet závisí na velikosti okna a velikosti písma.</para>
+    </sect2>
+
+  </sect1>
+</article>

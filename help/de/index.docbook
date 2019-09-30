@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY legal SYSTEM "legal.xml">
+<!ENTITY appversion "1.3.0">
+<!ENTITY manrevision "2.1">
+<!ENTITY date "February 2004">
+<!ENTITY app "Character Map">
+]>
+<!-- 
+ (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  http://developer.gnome.org/projects/gdp
+  Template version: 2.0 beta
+  Template last modified Apr 11, 2002
+-->
+<!-- =============Document Header ============================= -->
+<article id="index" lang="de"> 
+<!-- please do not change the id; for translations, change lang to -->
+<!-- appropriate code -->
+  <articleinfo> 
+    <title>Zeichentabelle-Handbuch</title>
+    <abstract role="description">
+      <para>Mit der Anwendung Zeichentabelle, einer Unicode-Zeichentabelle, können Sie bei Bedarf Schriftzeichen aus einer Tabelle auswählen und in eine Textfolge einfügen.</para>
+    </abstract>
+    <copyright><year>2004</year> <holder>Sun Microsystems</holder></copyright>
+    <copyright><year>2003</year> <year>2004</year> <holder>Chee Bin HOH</holder></copyright> 
+
+<!-- translators: uncomment this:
+    <copyright>
+      <year>2002</year>
+      <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
+    </copyright>
+-->
+
+    <publisher role="maintainer"> 
+      <publishername>GNOME-Dokumentationsprojekt</publishername> 
+    </publisher> 
+
+      <legalnotice id="legalnotice">
+	<para>Das vorliegende Dokument kann gemäß den Bedingungen der GNU Free Documentation License (GFDL), Version 1.1 oder jeder späteren, von der Free Software Foundation veröffentlichten Version ohne unveränderbare Abschnitte sowie ohne Texte auf dem vorderen und hinteren Buchdeckel kopiert, verteilt und/oder modifiziert werden. Eine Kopie der GFDL finden Sie unter diesem <ulink type="help" url="help:fdl">Link</ulink> oder in der mit diesem Handbuch gelieferten Datei COPYING-DOCS.</para>
+         <para>Das vorliegende Handbuch ist Teil einer Reihe von GNOME-Handbüchern, die unter der GFDL verteilt werden. Wenn Sie dieses Handbuch separat verteilen möchten, können Sie dies tun, indem Sie dem Handbuch eine Kopie der Lizenz, wie in Abschnitt 6 der Lizenz beschrieben, hinzufügen.</para>
+
+	<para>Bei vielen der von Firmen zur Unterscheidung ihrer Produkte und Dienstleistungen verwendeten Namen handelt es sich um Marken. An den Stellen, an denen derartige Namen in einer GNOME-Dokumentation vorkommen und wenn die Mitglieder des GNOME Documentation Project über diese Marken informiert wurden, sind die Namen in Grossbuchstaben oder mit großen Anfangsbuchstaben geschrieben.</para>
+
+	<para>DAS DOKUMENT UND MODIFIZIERTE VERSIONEN DES DOKUMENTS WERDEN GEMÄSS DER BEDINGUNGEN DER GNU FREE DOCUMENTATION LICENSE MIT DER FOLGENDEN VEREINBARUNG BEREITGESTELLT: <orderedlist>
+		<listitem>
+		  <para>DAS DOKUMENT WIRD »WIE VORLIEGEND« GELIEFERT, OHNE JEGLICHE GEWÄHRLEISTUNG, WEDER AUSDRÜCKLICH NOCH STILLSCHWEIGEND, EINSCHLIESSLICH, ABER NICHT BESCHRÄNKT AUF, GEWÄHRLEISTUNGEN, DASS DAS DOKUMENT ODER EINE MODIFIZIERTE VERSION DES DOKUMENTS FREI VON HANDELSÜBLICHEN FEHLERN UND FÜR EINEN BESTIMMTEN ZWECK GEEIGNET IST UND KEINE RECHTE DRITTER VERLETZT. JEGLICHES RISIKO IN BEZUG AUF DIE QUALITÄT, GENAUIGKEIT UND LEISTUNG DES DOKUMENTS ODER EINER MODIFIZIERTEN VERSION DES DOKUMENTS TRAGEN SIE. SOLLTE SICH EIN DOKUMENT ODER EINE MODIFIZIERTE VERSION DAVON IN IRGENDEINER WEISE ALS FEHLERHAFT ERWEISEN, TRAGEN SIE (NICHT DER URSPRÜNGLICHE VERFASSER, AUTOR ODER EIN MITWIRKENDER) DIE KOSTEN FÜR JEGLICHE ERFORDERLICHE SERVICE-, REPARATUR- UND KORREKTURMASSNAHMEN: DIESE BESCHRÄNKUNG DER GEWÄHRLEISTUNG IST WESENTLICHER BESTANDTEIL DIESER LIZENZ. JEDE VERWENDUNG EINES DOKUMENTS ODER EINER MODIFIZIERTEN VERSION DES DOKUMENTS UNTERLIEGT DIESER BESCHRÄNKUNG; UND</para>
+		</listitem>
+		<listitem>
+		  <para>UNTER KEINEN UMSTÄNDEN UND GEMÄSS KEINER RECHTSLEHRE, WEDER AUFGRUND VON UNERLAUBTEN HANDLUNGEN (EINSCHLIESSLICH FAHRLÄSSIGKEIT), VERTRÄGEN ODER SONSTIGEM, KANN DER AUTOR, DER URSPRÜNGLICHE VERFASSER, EIN MITWIRKENDER ODER EIN VERTEILER DES DOKUMENTS ODER EINER MODIFIZIERTEN VERSION DES DOKUMENTS ODER EIN LIEFERANT EINER DIESER PARTEIEN VON EINER PERSON FÜR DIREKTE, INDIREKTE, BESONDERE, ZUFÄLLIGE ODER ALS FOLGE AUFGETRETENE SCHÄDEN IRGENDEINER ART, EINSCHLIESSLICH, ABER NICHT BESCHRÄNKT AUF, SCHÄDEN DURCH GESCHÄFTSWERTVERLUSTE, ARBEITSAUSFÄLLE, COMPUTERAUSFÄLLE ODER -FUNKTIONSSTÖRUNGEN ODER JEGLICHE ANDERE SCHÄDEN ODER VERLUSTE, DIE DURCH ODER IM ZUSAMMENHANG MIT DER VERWENDUNG DES DOKUMENTS ODER EINER MODIFIZIERTEN VERSION DES DOKUMENTS ENTSTANDEN SIND, SELBST WENN DIESE PARTEI ÜBER MÖGLICHE SCHÄDEN INFORMIERT WORDEN SEIN SOLLTE, HAFTBAR GEMACHT WERDEN.</para>
+		</listitem>
+	  </orderedlist></para>
+  </legalnotice>
+
+
+   <!-- This file  contains link to license for the documentation (GNU FDL), and 
+        other legal stuff such as "NO WARRANTY" statement. Please do not change 
+	any of this. -->
+
+    <authorgroup> 
+      <author><firstname>Sun</firstname> <surname>GNOME-Dokumentationsteam</surname> <affiliation><orgname>Sun Microsystems</orgname></affiliation></author>
+      <author><firstname>Chee Bin</firstname> <surname>HOH</surname> <affiliation> <orgname>GNOME-Dokumentationsprojekt</orgname> <address> <email>cbhoh@gnome.org</email> </address> </affiliation></author> 
+
+<!--
+      <author> 
+        <firstname>Documentation</firstname> 
+          <surname>Writer 1</surname> 
+          <affiliation> 
+            <orgname>GNOME Documentation Project</orgname> 
+            <address> <email>doc-writer1@gnome.org</email> </address> 
+          </affiliation> 
+      </author> 
+-->
+      
+<!-- This is appropriate place for other contributors: translators,
+     maintainers,  etc. Commented out by default.
+      <othercredit role="translator">
+        <firstname>Latin</firstname> 
+	<surname>Translator 1</surname> 
+	<affiliation> 
+          <orgname>Latin Translation Team</orgname> 
+          <address> <email>translator@gnome.org</email> </address> 
+	</affiliation>
+	<contrib>Latin translation</contrib>
+      </othercredit>
+-->
+    </authorgroup>
+    <publisher role="maintainer">
+      <publishername>GNOME-Dokumentationsprojekt</publishername>
+    </publisher>
+
+
+    <revhistory>
+      <revision><revnumber>Zeichentabelle-Handbuch V2.1</revnumber> <date>2004-02-26</date> <revdescription> 
+	  <para>Aktualisiert für GNOME 2.6, Anwendungsversion 1.3.0</para>
+          <para role="author">Sun GNOME Dokumentationsteam</para>
+          <para role="publisher">GNOME-Dokumentationsprojekt</para>
+        </revdescription></revision> 
+      <revision><revnumber>Zeichentabelle-Handbuch V2.0</revnumber> <date>October 2003</date> <revdescription> 
+          <para role="author">Chee Bin HOH <email>cbhoh@gnome.org</email></para>
+          <para role="publisher">GNOME-Dokumentationsprojekt</para>
+        </revdescription></revision> 
+    </revhistory> 
+
+    <releaseinfo>In diesem Handbuch wird Version 1.3.0 der Anwendung Zeichentabelle beschrieben.</releaseinfo> 
+
+    <legalnotice> 
+      <title>Rückmeldungen</title> 
+      <para>Wenn Sie Fehler finden oder Vorschläge zur Anwendung <application>Zeichentabelle</application> oder zu diesem Handbuch haben, folgen Sie den Anweisungen auf der <ulink url="help:gnome-feedback" type="help">GNOME-Seite für Rückmeldungen</ulink>.</para>
+<!-- Translators may also add here feedback address for translations -->
+    </legalnotice> 
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Jan Arne Petersen</firstname>
+      </personname>
+      <email>jap@gnome.org</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2007</year>
+      
+      <holder>Jan Arne Petersen</holder>
+    </copyright>
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Mario Blättermann</firstname>
+      </personname>
+      <email>mario.blaettermann@gmail.com</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2008</year>
+      
+        <year>2009</year>
+      
+        <year>2012</year>
+      
+      <holder>Mario Blättermann</holder>
+    </copyright>
+  </articleinfo> 
+
+<!-- ============= Index ===================================== -->
+  <indexterm zone="index"><primary>gucharmap</primary></indexterm> 
+  <indexterm zone="index"><primary>Zeichentabelle</primary></indexterm>
+  <indexterm zone="index"><primary>Zeichentabelle</primary></indexterm>
+
+<!-- ============= Document Body ============================= -->
+<!-- ============= Introduction ============================== -->
+  <sect1 id="gucharmap-introduction"> 
+    <title>Einführung</title> 
+    <para>Die Anwendung <application>Zeichentabelle</application> erlaubt es Ihnen, Sonderzeichen in ein Dokument oder Textfeld einzufügen. Die Anwendung <application>Zeichentabelle</application> stellt akzentuierte Zeichen, mathematische und sonstige Symbole sowie besondere typographische Zeichen zur Verfügung. Verwenden Sie die <application>Zeichentabelle</application>, um auf Zeichen zuzugreifen, die nicht über die Standardtastatur zur Verfügung stehen.</para>
+    <para>Die Anwendung <application>Zeichentabelle</application> zeigt alle Schriftzeichen in allen auf Ihrem System vorhandenen Sprachskripten mit Hilfe der Unicode-Zeichencodierung an. Bei Unicode handelt es sich um einen Standard zur Zeichenkodierung mit dem Ziel, alle Schriftzeichen aller weltweit verwendeten Schriftsysteme abzubilden.</para>
+  </sect1>
+
+<!-- =========== Getting Started ============================== -->
+
+  <sect1 id="gucharmap-getting-started"> 
+    <title>Erste Schritte</title> 
+
+    <sect2 id="gucharmap-start">
+      <title>Die Zeichentabelle starten</title>
+      <para>Sie können die Anwendung <application>Zeichentabelle</application> auf eine der folgenden Weisen starten:</para> 
+      <variablelist>
+        <varlistentry>
+          <term><guimenu>Anwendungs</guimenu>-Menü</term>
+          <listitem>
+            <para>Wählen Sie <menuchoice><guimenu>Zubehör</guimenu><guimenuitem>Zeichentabelle</guimenuitem></menuchoice>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Befehlszeile</term>
+	  <listitem>
+            <para>Führen Sie folgenden Befehl aus: <command>gnome-character-map</command></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2 id="gucharmap-when-start">
+      <title>Beim Start der Anwendung Zeichentabelle</title>
+      <para>Wenn Sie <application>Zeichentabelle</application> starten, wird das folgende Fenster angezeigt.</para>
+
+      <!-- ==== Figure ==== -->
+      <figure id="gucharmap-window-fig"> 
+        <title>Zeichentabelle-Fenster</title> 
+        <screenshot> 
+          <mediaobject><imageobject> <imagedata fileref="figures/gucharmap_window.png" format="PNG"/> </imageobject> <textobject> <phrase>Zeigt das Fenster der Zeichentabelle.</phrase> </textobject></mediaobject> 
+        </screenshot> 
+      </figure>
+      <!-- ==== End of Figure ==== -->
+
+      <!-- Include any descriptions of the GUI immediately after the screenshot of the main UI, -->
+      <!-- for example, the items on the menubar and on the toolbar. This section is optional. -->
+
+      <para>Das <application>Zeichentabelle</application>-Fenster enthält die folgenden Elemente:</para>
+      <variablelist>
+        <varlistentry>
+          <term>Menüleiste</term>
+          <listitem>
+            <para>Die Menüs der Menüleiste erhalten die meisten zur Arbeit mit der Anwendung <application>Zeichentabelle</application> erforderlichen Befehle.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Werkzeugleiste</term>
+          <listitem>
+            <para>Die Werkzeugleiste enthält eine ausklappbare Schriftenliste, verschiedene Knöpfe zum Festlegen des Schriftstils und ein Einstellfeld zum Festlegen der Schriftgröße.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Anzeigebereich</term>
+          <listitem>
+            <para>Der Anzeigebereich umfasst folgende Elemente:</para>
+            <itemizedlist>
+              <listitem>
+                <para>Listenfeld mit <guilabel>Skript</guilabel> oder <guilabel>Unicode-Blöcken</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Reiter <guilabel>Zeichentabelle</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Reiter <guilabel>Zeichendetails</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Textfeld <guilabel>Zu kopierender Text</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Knopf <guibutton>Kopieren</guibutton></para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Statusleiste</term>
+          <listitem>
+            <para>In der Statusleiste werden Informationen zum gerade ausgewählten Zeichen angezeigt.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+  </sect1>
+
+<!-- ================ Usage ================================ --> 
+  <sect1 id="gucharmap-usage">
+    <title>Verwendung</title> 
+    
+    <sect2 id="gucharmap-change-view">
+      <title>Ändern der Zeichensatz-Liste</title>
+      <para>Um die Zeichensätze nach Skriptnamen aufzulisten, wählen Sie <menuchoice><guimenu>Ansicht</guimenu><guimenuitem>Nach Skript</guimenuitem></menuchoice>.</para>
+      <para>Um die Zeichensätze nach Unicode-Blöcken aufzulisten, wählen Sie <menuchoice><guimenu>Ansicht</guimenu><guimenuitem>Nach Unicode-Block</guimenuitem></menuchoice>.</para>
+    </sect2>
+    
+    <sect2 id="gucharmap-create-textstring">
+      <title>Erstellen einer Textfolge</title>
+      <para>Um Ihre gewünschte Textfolge im Feld <guilabel>Zu kopierender Text</guilabel> zusammenzustellen, gehen Sie wie folgt vor:</para>
+      <orderedlist>
+        <listitem>
+          <para>Wählen Sie einen Zeichensatz aus der <guilabel>Skript</guilabel>- oder <guilabel>Unicode-Block</guilabel>-Liste aus.</para>
+        </listitem>
+        <listitem>
+          <para>Übernehmen Sie die gewünschten Zeichen mit einer der folgenden Methoden:</para>
+          <itemizedlist>
+            <listitem>
+              <para>Doppelklicken Sie im Reiter <guilabel>Zeichentabelle</guilabel> auf einen Zeichen-Knopf, um das Zeichen in das Feld <guilabel>Zu kopierender Text</guilabel> einzufügen.</para>
+            </listitem>
+            <listitem>
+              <para>Wählen Sie im Reiter <guilabel>Zeichentabelle</guilabel> einen Zeichen-Knopf und drücken Sie die <keycap>Eingabetaste</keycap>. Das ausgewählte Zeichen wird in das Feld <guilabel>Zu kopierender Text</guilabel>übernommen.</para>
+            </listitem>
+            <listitem>
+              <para>Wählen Sie im Reiter <guilabel>Zeichentabelle</guilabel> einen Zeichen-Knopf und ziehen Sie das Zeichen mit der Maus in das Feld <guilabel>Zu kopierender Text</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Klicken Sie in das Feld <guilabel>Zu kopierender Text</guilabel>, um es zu aktivieren. Wenn das Feld bereits eine Textfolge enthält, setzen Sie die Eingabemarke mit einem Mausklick an die gewünschte Einfügeposition. Nun können Sie über die Tastatur beliebige Standardzeichen einfügen.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+    </sect2>
+
+<!-- =============== To Copy and Paste a Text String ====================== -->
+    <sect2 id="gucharmap-copy-textstring">
+      <title>Eine Textfolge kopieren und fügen sie in eine Anwendung einfügen</title>
+      <para>Um die Textfolge aus dem Feld <guilabel>Zu kopierender Text</guilabel> in einer anderen Anwendung einzufügen, gehen Sie wie folgt vor:</para>
+      <orderedlist>
+        <listitem>
+          <para>Klicken Sie auf <guibutton>Kopieren</guibutton>. Wenn nichts, oder die komplette Textfolge markiert ist, wird die komplette Textfolge in die Zwischenablage kopiert. Wenn nur ein Teil der Textfolge markiert ist, wird nur der markierte Teil kopiert.</para>
+        </listitem>
+        <listitem>
+          <para>Wechseln Sie in die Zielanwendung und wählen Sie <menuchoice><guimenu>Bearbeiten</guimenu><guimenuitem>Einfügen</guimenuitem></menuchoice> oder drücken Sie die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>V</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Wenn Sie den Inhalt des Felds <guilabel>Zu kopierender Text</guilabel> in eine andere Anwendung kopieren, erscheint er dort im aktuellen Zeichensatz dieser Anwendung.</para>
+      <para>Wenn die Textfolge nicht sichtbare Zeichen enthält, kann diese nur in Anwendungen eingefügt werden, die den gesamten Zeichensatz unterstützen.</para>
+    </sect2>
+
+    <sect2 id="usage-find-character">
+      <title>Nach bestimmten Zeichen suchen</title>
+      <para>Um ein Zeichen zu suchen, gehen Sie wie folgt vor:</para>
+      <orderedlist>
+        <listitem>
+          <para>Wählen Sie <menuchoice><guimenu>Suchen</guimenu><guimenuitem>Suchen</guimenuitem></menuchoice> oder drücken Sie die Tastenkombination<keycombo><keycap>Strg</keycap><keycap>F</keycap></keycombo>. Das Dialogfeld <guilabel>Suchen</guilabel> erscheint.</para>
+        </listitem>
+        <listitem>
+          <para>Geben Sie im Feld <guilabel>Suchbegriff</guilabel> den zu suchenden Text ein.</para>
+          <itemizedlist>            
+             <listitem><para>Wählen Sie <guilabel>Nur vollständige Wörter berücksichtigen</guilabel> um nur vollständige Wörter, die ihrem Text entsprechen, zu berücksichtigen.</para></listitem>
+             <listitem><para>Standardmäßig werden nur Zeichennamen durchsucht. Wählen Sie <guilabel>Suchen in Zeichendetails</guilabel> um auch andere Teile der Zeichenbeschreibung, wie Bemerkungen, Entsprechungen und ungefähre Entsprechungen zu durchsuchen.</para></listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>Um das erste Auftreten hres Textes nach dem aktuell ausgewählten Zeichen suchen zu lassen, klicken Sie auf <guibutton>Weitersuchen</guibutton>. Das gefundene Zeichen wird von der Anwendung <application>Zeichensatz</application> ausgewählt.</para>
+        </listitem>
+        <listitem>
+          <para>Um nach dem nächsten passenden Zeichen suchen zu lassen, klicken Sie auf <guibutton>Weitersuchen</guibutton>. Alternativ wählen Sie <menuchoice><guimenu>Suchen</guimenu><guimenuitem>Weitersuchen</guimenuitem></menuchoice> oder drücken Sie die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Um zurück zum letzten passenden Zeichen zu springen,  klicken Sie <guibutton>Rückwärts suchen</guibutton>. Alternativ wählen Sie <menuchoice><guimenu>Suchen</guimenu><guimenuitem>Rückwärts suchen</guimenuitem></menuchoice> oder drücken Sie die Tastenkombination <keycombo><keycap>Shift</keycap><keycap>Strg</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+    </sect2>
+    
+<!-- =============== To Browse the Character Table  ========================= -->
+    <sect2 id="usage-browse-characters">
+      <title>Die vollständige Zeichenliste durchsuchen</title>
+      <para>Verwenden Sie das <guimenu>Gehe zu</guimenu>-Menü, um die Zeichentabelle zu durchsuchen.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Nächstes Zeichen, auch erreichbar über die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>N</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Vorheriges Zeichen, auch erreichbar über die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>P</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Nächstes Skript, auch erreichbar über die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>Bild ab</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Vorheriges Skript, auch erreichbar über die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>Bild auf</keycap></keycombo>.</para>
+        </listitem>
+      </itemizedlist>
+        
+      <para>Sie können in der Zeichentabelle einzelne Zeichen nach Skript oder Unicode-Block durchlaufen. Dies hängt davon ab, ob die Zeichentabelle Skripte oder Unicode-Blöcke anzeigt. Um dies zu ändern, wählen Sie <menuchoice><guimenu>Ansicht</guimenu><guimenuitem>Nach Skript</guimenuitem></menuchoice> oder <menuchoice><guimenu>Ansicht</guimenu><guimenuitem>Nach Unicode-Block</guimenuitem></menuchoice>.</para>
+      
+      <para>Die folgenden Tasten können ebenso zum Durchsuchen der Zeichentabelle verwendet werden:</para>
+        
+      <itemizedlist>
+        <listitem>
+          <para>Drücken Sie eine der Pfeiltasten auf der Tastatur.</para>
+        </listitem>
+        <listitem>
+          <para>Lassen Sie sich die Zeichen durch Drücken der Tasten <keycap>BildAuf</keycap> bzw. <keycap>BildAb</keycap> seitenweise anzeigen.</para>
+        </listitem>
+        <listitem>
+          <para>Springen Sie mit der Taste <keycap>Pos1</keycap> zum ersten Zeichen der Unicode-Sequenz. Zum letzten Zeichen können Sie mit der Taste <keycap>Ende</keycap> springen.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-display-details">
+      <title>Detailinformationen zu einem bestimmten Zeichen anzeigen</title>
+      <para>Detailinformationen zu einem bestimmten Zeichen können Sie sich wie folgt anzeigen lassen:</para>
+      <orderedlist>
+        <listitem>
+          <para>Wählen Sie einen Zeichensatz aus der <guilabel>Skript</guilabel>- oder <guilabel>Unicode-Block</guilabel>-Liste aus. Beispiel: <guilabel>Lateinische Schrift</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Wählen Sie im Reiter <guilabel>Zeichentabelle</guilabel> ein Zeichen aus. Beispiel: <guilabel>B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Klicken Sie auf das Register <guilabel>Zeichendetails</guilabel>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Auf dem Reiter <guilabel>Zeichendetails</guilabel> finden Sie nun folgende Angaben zum ausgewählten Zeichen:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Unicode-Hexadezimalcode</para>
+          <para>Beispiel: <guilabel>U+0042</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Unicode-Zeichenname</para>
+          <para>Beispiel: <guilabel>LATIN CAPITAL LETTER B</guilabel></para>
+        </listitem>
+        <listitem>
+          <para><guilabel>Allgemeine Zeicheneigenschaften</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>Unicode-Kategorie</para>
+              <para>Beispiel: <guilabel>Buchstabe, Großschrift</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Verschiedene, nützliche Darstellungsweisen</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>UTF-8-Codierung</para>
+              <para>Beispiel: <guilabel>0x42</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>UTF-16-Codierung</para>
+              <para>Beispiel: <guilabel>0x0042</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>C-Oktal terminierte UTF-8-Codierung:</para>
+              <para>Beispiel: <guilabel>\102</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Dezimale XML-Entität</para>
+              <para>Beispiel: <guilabel>"&amp;#66;"</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Darstellungsweisen und Querverweise</guilabel></para>
+          <para>Beispiel: <guilabel>U+212C SCRIPT CAPITAL B</guilabel></para>
+          <para>Klicken Sie auf die Verknüpfung, um Detailinformationen zum angegebenen Zeichen anzeigen zu lassen.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-character">
+      <title>Ändern des Formats eines Zeichens</title>
+      <para>Um das Format eines Zeichens zu ändern, gehen Sie folgendermaßen vor:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Zum Ändern der Schriftart wählen Sie die gewünschte Schrift aus der dafür vorgesehenen Aufklappliste aus.</para>
+        </listitem>
+        <listitem>
+          <para>Für fetten Schriftschnitt klicken Sie auf den Knopf <guibutton>Fett</guibutton> oder drücken die Tastenkombination <keycombo><keycap>Alt</keycap><keycap>B</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Für Kursivschrift klicken Sie auf den Knopf <guibutton>Kursiv</guibutton> oder drücken die Tastenkombination <keycombo><keycap>Alt</keycap><keycap>I</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Um die Schrift zu vergrößern, wählen Sie <menuchoice><guimenu>Ansicht</guimenu><guimenuitem>Vergrößern</guimenuitem></menuchoice> oder stellen die gewünschte Größe im entsprechenden Einstellfeld ein, oder Sie drücken die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>+</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Um die Schrift zu verkleinern, wählen Sie <menuchoice><guimenu>Ansicht</guimenu><guimenuitem>Verkleinern</guimenuitem></menuchoice> oder verwenden wiederum das entsprechende Einstellfeld, oder Sie drücken die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>-</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Um die normale Schriftgröße zu verwenden, wählen Sie <menuchoice><guimenu>Ansicht</guimenu><guimenuitem>Normale Größe</guimenuitem></menuchoice> oder drücken die Tastenkombination <keycombo><keycap>Strg</keycap><keycap>=</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Um das ausgewählte Zeichen zu vergrößern, halten Sie die <keycap>Umschalttaste</keycap> gedrückt.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-chartable">
+      <title>Ändern des Formats der Zeichentabelle</title>
+      <para>Um das Format der Zeichentabelle zu ändern, wählen Sie <menuchoice><guimenu>Ansicht</guimenu><guimenuitem>Spalten bis zur doppelten Breite erweitern</guimenuitem></menuchoice>.</para>
+      <para>Die Anwendung <application>Zeichentabelle</application> passt den Reiter <guilabel>Zeichentabelle</guilabel> nun so an, dass die Spaltenanzahl einer Zweierpotenz entspricht, also beispielsweise zwei, vier oder acht Spalten. Wie viele Spalten angezeigt werden, hängt von der Schriftgröße ab.</para>
+    </sect2>
+
+  </sect1>
+</article>

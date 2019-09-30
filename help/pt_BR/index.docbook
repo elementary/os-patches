@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY legal SYSTEM "legal.xml">
+<!ENTITY appversion "1.3.0">
+<!ENTITY manrevision "2.1">
+<!ENTITY date "February 2004">
+<!ENTITY app "Character Map">
+]>
+<!-- 
+ (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  http://developer.gnome.org/projects/gdp
+  Template version: 2.0 beta
+  Template last modified Apr 11, 2002
+-->
+<!-- =============Document Header ============================= -->
+<article id="index" lang="pt-BR"> 
+<!-- please do not change the id; for translations, change lang to -->
+<!-- appropriate code -->
+  <articleinfo> 
+    <title>Manual do Mapa de caracteres</title>
+    <abstract role="description">
+      <para>O Mapa de caracteres é um mapa de caracteres Unicode que lhe permite selecionar caracteres de uma tabela e inseri-los em um texto.</para>
+    </abstract>
+    <copyright><year>2004</year> <holder>Sun Microsystems</holder></copyright>
+    <copyright><year>2003</year> <year>2004</year> <holder>Chee Bin HOH</holder></copyright> 
+
+<!-- translators: uncomment this:
+    <copyright>
+      <year>2002</year>
+      <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
+    </copyright>
+-->
+
+    <publisher role="maintainer"> 
+      <publishername>Projeto de documentação do GNOME</publishername> 
+    </publisher> 
+
+      <legalnotice id="legalnotice">
+	<para>Permissão concedida para copiar, distribuir e/ou modificar este documento sob os termos da Licença de Documentação Livre GNU (GNU Free Documentation License), Versão 1.1 ou qualquer versão mais recente publicada pela Free Software Foundation; sem Seções Invariantes, Textos de Capa Frontal, e sem Textos de Contracapa. Você pode encontrar uma cópia da licença GFDL neste <ulink type="help" url="help:fdl">link</ulink> ou no arquivo COPYING-DOCS distribuído com este manual.</para>
+         <para>Este manual é parte da coleção dos manuais do GNOME, distribuídos pela GFDL. Se você quiser distribuir este manual separadamente da coleção, você pode fazê-lo ao adicionar uma cópia da licença ao manual, como descrito na seção 6 da licença.</para>
+
+	<para>Muitos dos nomes usados por empresas para distinguir seus produtos e serviços são marcas registradas. Quando esses nomes aparecem em qualquer documentação GNOME e os membros do Projeto de Documentação do GNOME estão cientes dessas marcas registradas, os nomes aparecem em letras maiúsculas ou com iniciais em maiúsculas.</para>
+
+	<para>O DOCUMENTO E VERSÕES MODIFICADAS DO DOCUMENTO SÃO FORNECIDOS SOB OS TERMOS DA GNU FREE DOCUMENTATION LICENSE COM O ENTENDIMENTO ADICIONAL DE QUE: <orderedlist>
+		<listitem>
+		  <para>O DOCUMENTO É FORNECIDO "NO ESTADO", SEM GARANTIA DE QUALQUER TIPO, TANTO EXPRESSA QUANTO IMPLÍCITA, INCLUINDO, SEM LIMITAÇÕES, GARANTIAS DE QUE O DOCUMENTO OU VERSÃO MODIFICADA DO MESMO É COMERCIALIZADO LIVRE DE DEFEITOS, PRÓPRIO PARA UM PROPÓSITO ESPECÍFICO OU QUE NÃO HÁ INFRAÇÕES. TODO RISCO DE QUALIDADE, PRECISÃO E PERFORMANCE DO DOCUMENTO OU VERSÃO MODIFICADA É COM VOCÊ. SE ALGUM DOCUMENTO OU VERSÃO MODIFICADA É PROVADO DEFEITUOSO EM QUALQUER ASPECTO, VOCÊ (NÃO O ESCRITOR INICIAL, AUTOR OU QUALQUER CONTRIBUIDOR) ASSUME O CUSTO DE QUALQUER SERVIÇO NECESSÁRIO, REPARO OU CORREÇÃO. ESTE AVISO DE GARANTIA CONSTITUI UMA PARTE ESSENCIAL DA LICENÇA. NENHUM USO DE QUALQUER DOCUMENTO OU VERSÃO MODIFICADA DO DOCUMENTO É AUTORIZADO EXCETO SOB ESTA CONDIÇÃO; E</para>
+		</listitem>
+		<listitem>
+		  <para>SOB NENHUMA CIRCUNSTÂNCIA E SOB NENHUMA TEORIA LEGAL, TANTO EM DANO (INCLUINDO NEGLIGÊNCIA), CONTRATO, OU OUTROS, DEVEM O AUTOR, ESCRITOR INICIAL, QUALQUER CONTRIBUIDOR, OU QUALQUER DISTRIBUIDOR DO DOCUMENTO OU VERSÃO MODIFICADA DO DOCUMENTO, OU QUALQUER FORNECEDOR DE ALGUMA DESSAS PARTES, SER CONSIDERADOS RESPONSÁVEIS A QUALQUER PESSOA POR QUALQUER DANO, SEJA DIRETO, INDIRETO, ESPECIAL, ACIDENTAL OU CONSEQÜENCIAL DE QUALQUER INDIVÍDUO, INCLUINDO, MAS NÃO LIMITADO A, DANOS POR PERDA DE BOA VONTADE, TRABALHO PARADO, FALHA OU MAU FUNCIONAMENTO DO COMPUTADOR, OU QUALQUER E TODOS OS OUTROS DANOS OU PERDAS RESULTANTES OU RELACIONADOS AO USO DO DOCUMENTO E VERSÕES MODIFICADAS, MESMO QUE TAL PARTE TENHA SIDO INFORMADA DA POSSIBILIDADE DE TAIS DANOS.</para>
+		</listitem>
+	  </orderedlist></para>
+  </legalnotice>
+
+
+   <!-- This file  contains link to license for the documentation (GNU FDL), and 
+        other legal stuff such as "NO WARRANTY" statement. Please do not change 
+	any of this. -->
+
+    <authorgroup> 
+      <author><firstname>Sun</firstname> <surname>Equipe de documentação do GNOME</surname> <affiliation><orgname>Sun Microsystems</orgname></affiliation></author>
+      <author><firstname>Chee Bin</firstname> <surname>HOH</surname> <affiliation> <orgname>Projeto de documentação do GNOME</orgname> <address> <email>cbhoh@gnome.org</email> </address> </affiliation></author> 
+
+<!--
+      <author> 
+        <firstname>Documentation</firstname> 
+          <surname>Writer 1</surname> 
+          <affiliation> 
+            <orgname>GNOME Documentation Project</orgname> 
+            <address> <email>doc-writer1@gnome.org</email> </address> 
+          </affiliation> 
+      </author> 
+-->
+      
+<!-- This is appropriate place for other contributors: translators,
+     maintainers,  etc. Commented out by default.
+      <othercredit role="translator">
+        <firstname>Latin</firstname> 
+	<surname>Translator 1</surname> 
+	<affiliation> 
+          <orgname>Latin Translation Team</orgname> 
+          <address> <email>translator@gnome.org</email> </address> 
+	</affiliation>
+	<contrib>Latin translation</contrib>
+      </othercredit>
+-->
+    </authorgroup>
+    <publisher role="maintainer">
+      <publishername>Projeto de documentação do GNOME</publishername>
+    </publisher>
+
+
+    <revhistory>
+      <revision><revnumber>Manual do Mapa de caracteres V2.1</revnumber> <date>26/02/2004</date> <revdescription> 
+	  <para>Atualizado para o GNOME 2.6, versão do programa 1.3.0.</para>
+          <para role="author">Equipe de Documentação do GNOME da Sun</para>
+          <para role="publisher">Projeto de documentação do GNOME</para>
+        </revdescription></revision> 
+      <revision><revnumber>Mapa do Manual de caracteres Unicode V2.0</revnumber> <date>Outubro de 2003</date> <revdescription> 
+          <para role="author">Chee Bin HOH <email>cbhoh@gnome.org</email></para>
+          <para role="publisher">Projeto de documentação do GNOME</para>
+        </revdescription></revision> 
+    </revhistory> 
+
+    <releaseinfo>Esse manual descreve a versão 1.3.0 do Mapa de caracteres.</releaseinfo> 
+
+    <legalnotice> 
+      <title>Comentários (Feedback)</title> 
+      <para>Para relatar um erro ou fazer uma sugestão relativa ao aplicativo <application>Mapa de caracteres</application> ou este manual, siga as orientações na <ulink url="help:gnome-feedback" type="help">Página de Feedback do GNOME</ulink>.</para>
+<!-- Translators may also add here feedback address for translations -->
+    </legalnotice> 
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Leonardo Ferreira Fontenelle</firstname>
+      </personname>
+      <email>leonardof@gnome.org</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2008.</year>
+      
+      <holder>Leonardo Ferreira Fontenelle</holder>
+    </copyright>
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>Enrico Nicoletto</firstname>
+      </personname>
+      <email>liverig@gmail.com</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2011.</year>
+      
+      <holder>Enrico Nicoletto</holder>
+    </copyright>
+  
+    <othercredit class="translator">
+      <personname>
+        <firstname>José Carlos Menezes da Silva Junior</firstname>
+      </personname>
+      <email>jcmenezes.91@gmail.com</email>
+    </othercredit>
+    <copyright>
+      
+        <year>2013.</year>
+      
+      <holder>José Carlos Menezes da Silva Junior</holder>
+    </copyright>
+  </articleinfo> 
+
+<!-- ============= Index ===================================== -->
+  <indexterm zone="index"><primary>gucharmap</primary></indexterm> 
+  <indexterm zone="index"><primary>Mapa de caracteres</primary></indexterm>
+  <indexterm zone="index"><primary>Mapa de caracteres</primary></indexterm>
+
+<!-- ============= Document Body ============================= -->
+<!-- ============= Introduction ============================== -->
+  <sect1 id="gucharmap-introduction"> 
+    <title>Introdução</title> 
+    <para>O <application>Mapa de caracteres</application> lhe permite inserir caracteres especiais em um documento ou campo de texto. O <application>Mapa de caracteres</application> fornece caracteres acentuados, símbolos matemáticos, símbolos especiais e pontuação. Use o <application>Mapa de caracteres</application> para acessar caracteres indisponíveis em seu teclado.</para>
+    <para>O <application>Mapa de caracteres</application> exibe todos os caracteres disponíveis em todos os sistemas de escrita em seu sistema, usando o conjunto de caracteres Unicode. Unicode é um padrão de conjunto de caracteres com a meta de incluir todos os caracteres usados por todos os idiomas escritos no mundo.</para>
+  </sect1>
+
+<!-- =========== Getting Started ============================== -->
+
+  <sect1 id="gucharmap-getting-started"> 
+    <title>Começando</title> 
+
+    <sect2 id="gucharmap-start">
+      <title>Para iniciar o Mapa de caracteres</title>
+      <para>Você pode iniciar o <application>Mapa de caracteres</application> das seguintes maneiras:</para> 
+      <variablelist>
+        <varlistentry>
+          <term>Menu <guimenu>Aplicativos</guimenu></term>
+          <listitem>
+            <para>Escolha <menuchoice><guimenu>Acessórios</guimenu><guimenuitem>Mapa de caracteres</guimenuitem></menuchoice>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Linha de comando</term>
+	  <listitem>
+            <para>Execute o seguinte comando: <command>gnome-character-map</command></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2 id="gucharmap-when-start">
+      <title>Quando você inicia o Mapa de caracteres</title>
+      <para>Quando você iniciar o <application>Mapa de caracteres</application>, a seguinte janela será exibida.</para>
+
+      <!-- ==== Figure ==== -->
+      <figure id="gucharmap-window-fig"> 
+        <title>Janela do Mapa de caracteres</title> 
+        <screenshot> 
+          <mediaobject><imageobject> <imagedata fileref="figures/gucharmap_window.png" format="PNG"/> </imageobject> <textobject> <phrase>Mostra a janela de mapa de caracteres.</phrase> </textobject></mediaobject> 
+        </screenshot> 
+      </figure>
+      <!-- ==== End of Figure ==== -->
+
+      <!-- Include any descriptions of the GUI immediately after the screenshot of the main UI, -->
+      <!-- for example, the items on the menubar and on the toolbar. This section is optional. -->
+
+      <para>A janela do <application>Mapa de caracteres</application> contém os seguintes elementos:</para>
+      <variablelist>
+        <varlistentry>
+          <term>Barra de menu</term>
+          <listitem>
+            <para>Os menus da barra de menu contêm a maioria dos comandos necessários para trabalhar com o <application>Mapa de caracteres</application>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Barra de ferramentas</term>
+          <listitem>
+            <para>A barra de ferramentas contém uma lista suspensa de fontes, botões de estilo de fonte, e um seletor numérico de zoom.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Área de exibição</term>
+          <listitem>
+            <para>A área de exibição contém os seguintes componentes:</para>
+            <itemizedlist>
+              <listitem>
+                <para>Lista do <guilabel>Sistema de escrita</guilabel> ou do <guilabel>Bloco Unicode</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Aba <guilabel>Tabela de caracteres</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Aba <guilabel>Detalhes do caractere</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Caixa de texto <guilabel>Texto para copiar</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Botão <guibutton>Copiar</guibutton></para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Barra de status</term>
+          <listitem>
+            <para>A barra de status exibe o código e o nome Unicode do caractere selecionado.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+  </sect1>
+
+<!-- ================ Usage ================================ --> 
+  <sect1 id="gucharmap-usage">
+    <title>Uso</title> 
+    
+    <sect2 id="gucharmap-change-view">
+      <title>Para alterar a lista de conjuntos de caractere</title>
+      <para>Para listar os conjuntos de caracteres por nome do sistema de escrita, escolha <menuchoice><guimenu>Ver</guimenu><guimenuitem>Por sistema de escrita</guimenuitem></menuchoice>.</para>
+      <para>Para listar os conjuntos de caracteres por bloco Unicode, escolha <menuchoice><guimenu>Ver</guimenu><guimenuitem>Por bloco Unicode</guimenuitem></menuchoice>.</para>
+    </sect2>
+    
+    <sect2 id="gucharmap-create-textstring">
+      <title>Para criar um texto</title>
+      <para>Para criar um texto no campo <guilabel>Texto para copiar</guilabel>, execute os seguintes passos:</para>
+      <orderedlist>
+        <listitem>
+          <para>Selecione um conjunto de caracteres da lista <guilabel>Sistema de escrita</guilabel> ou da lista <guilabel>Bloco Unicode</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Insira caracteres de uma das seguintes maneiras:</para>
+          <itemizedlist>
+            <listitem>
+              <para>Dê um duplo clique em um botão de caractere na aba <guilabel>Tabela de caracteres</guilabel>, para inserir o caractere no campo <guilabel>Texto para copiar</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Selecione um botão de caractere no menu de abas <guilabel>Tabela de caracteres</guilabel>, e então pressione <keycap>Enter</keycap> para inserir o caractere no campo <guilabel>Texto para copiar</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Selecione um botão de caractere no menu de abas <guilabel>Tabela de caracteres</guilabel>, e então clique e arraste o caractere para o campo <guilabel>Texto para copiar</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Clique no campo <guilabel>Texto para copiar</guilabel> para dar foco ao campo. Se uma seqüência de texto já estiver no campo, clique nela no ponto em que você quiser inserir o caractere. Pressione uma tecla de caractere em seu teclado para inserir aquele caractere no campo.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+    </sect2>
+
+<!-- =============== To Copy and Paste a Text String ====================== -->
+    <sect2 id="gucharmap-copy-textstring">
+      <title>Para copiar e colar seu texto em uma aplicação</title>
+      <para>Para copiar e colar o texto do campo <guilabel>Texto para copiar</guilabel> em uma aplicação, execute os seguintes passos:</para>
+      <orderedlist>
+        <listitem>
+          <para>Clique no botão <guibutton>Copiar</guibutton>. Se nada ou todo o texto estiver selecionado, todo o texto será copiado para a área de transferência. Se uma parte do texto estiver selecionada, apelas esta porção será copiada.</para>
+        </listitem>
+        <listitem>
+          <para>Volte para o seu aplicativo e escolha a opção <menuchoice><guimenu>Editar</guimenu><guimenuitem>Colar</guimenuitem></menuchoice>, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>V</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Quando você cola o conteúdo do campo <guilabel>Texto para copiar</guilabel> em outros aplicativos, o texto aparece no conjunto de caracteres atual do aplicativo.</para>
+      <para>Se seu texto contém caracteres invisíveis, você só pode inseri-lo em aplicativos com suporte completo ao conjunto de caracteres.</para>
+    </sect2>
+
+    <sect2 id="usage-find-character">
+      <title>Para pesquisar por um caractere</title>
+      <para>Para pesquisar por um caractere, execute os seguintes passos:</para>
+      <orderedlist>
+        <listitem>
+          <para>Escolha a opção <menuchoice><guimenu>Pesquisar</guimenu><guimenuitem>Localizar</guimenuitem></menuchoice>, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>. A janela de diálogo <guilabel>Localizar</guilabel> será aberto.</para>
+        </listitem>
+        <listitem>
+          <para>Digite o texto a ser pesquisado no campo <guilabel>Pesquisar</guilabel>.</para>
+          <itemizedlist>            
+             <listitem><para>Selecione <guilabel>Palavra inteira</guilabel> para localizar apenas palavras que correspondam completamente ao seu texto.</para></listitem>
+             <listitem><para>Por padrão, apenas os nomes de caracteres são pesquisados. Selecione <guilabel>Pesquisar nos detalhes dos caracteres</guilabel> para pesquisar em outras partes de uma descrição de caractere, como as notas, os equivalentes, e os equivalentes aproximados.</para></listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>Clique em <guibutton>Próximo</guibutton> para localizar a próxima ocorrência de seu texto após o caractere atualmente selecionado. O <application>Mapa de caracteres</application> selecionará o caractere encontrado.</para>
+        </listitem>
+        <listitem>
+          <para>Clique em <guibutton>Próxima</guibutton> para localizar o próximo caractere correspondente. Alternativamente, escolha <menuchoice><guimenu>Pesquisar</guimenu><guimenuitem>Localizar próxima</guimenuitem></menuchoice>, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Clique em <guibutton>Anterior</guibutton> para localizar o caractere prévio correspondente. Alternativamente, escolha <menuchoice><guimenu>Pesquisar</guimenu><guimenuitem>Localizar anterior</guimenuitem></menuchoice>, ou pressione a tecla de atalho <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+    </sect2>
+    
+<!-- =============== To Browse the Character Table  ========================= -->
+    <sect2 id="usage-browse-characters">
+      <title>Para navegar em todos os caracteres</title>
+      <para>Para navegar no mapa de caracteres, use o menu <guimenu>Ir</guimenu>.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Próximo caractere, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Caractere anterior, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>P</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Próximo sistema de escrita, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>Page Down</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Sistema de escrita anterior, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>Page Up</keycap></keycombo>.</para>
+        </listitem>
+      </itemizedlist>
+        
+      <para>Você pode navegar o mapa de caracteres por caractere individual, por sistema de escrita ou por bloco Unicode. Isso depende de se o mapa de caractere está mostrando sistemas de escrita ou blocos Unicode. Para alterar isso, escolha <menuchoice><guimenu>Ver</guimenu><guimenuitem>Por Sistema de escrita</guimenuitem></menuchoice> ou <menuchoice><guimenu>Ver</guimenu><guimenuitem>Por bloco Unicode</guimenuitem></menuchoice>.</para>
+      
+      <para>As seguintes teclas também funcionam para navegar o mapa de caracteres:</para>
+        
+      <itemizedlist>
+        <listitem>
+          <para>Pressione as teclas de seta no teclado para navegar pelos caracteres.</para>
+        </listitem>
+        <listitem>
+          <para>Pressione as teclas <keycap>Page Up</keycap> e <keycap>Page Down</keycap> para navegar pelos caracteres página a página.</para>
+        </listitem>
+        <listitem>
+          <para>Pressione a tecla <keycap>Home</keycap> para selecionar o primeiro caractere na seqüência Unicode. Para selecionar o último caractere, pressione a tecla <keycap>End</keycap>.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-display-details">
+      <title>Para exibir informações detalhadas sobre um caractere</title>
+      <para>Para exibir informações detalhadas sobre um caractere, execute os seguintes passos:</para>
+      <orderedlist>
+        <listitem>
+          <para>Selecione um conjunto de caracteres da lista <guilabel>Sistema de Escrita</guilabel> ou <guilabel>Bloco Unicode</guilabel>. Exemplo: <guilabel>Latim</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Selecione um caractere da aba <guilabel>Tabela de caracteres</guilabel>. Exemplo: <guilabel>Ç</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Clique na aba <guilabel>Detalhes do caractere</guilabel>.</para>
+        </listitem>
+      </orderedlist>
+      <para>A aba <guilabel>Detalhes do caractere</guilabel> exibirá as seguintes informações sobre o caractere selecionado:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Código Unicode</para>
+          <para>Exemplo: <guilabel>U+00C7</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Nome Unicode do caractere</para>
+          <para>Exemplo: <guilabel>LATIN CAPITAL LETTER C WITH CEDILLA</guilabel></para>
+        </listitem>
+        <listitem>
+          <para><guilabel>Propriedades gerais de caracteres</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>Categoria Unicode</para>
+              <para>Exemplo: <guilabel>Letra, Maiúscula</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Várias representações úteis</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>Codificação UTF-8</para>
+              <para>Exemplo: <guilabel>0xC3 0x87</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Codificação UTF-16</para>
+              <para>Exemplo: <guilabel>0x00C7</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Codificação Octal C UTF-8 com escape</para>
+              <para>Exemplo: <guilabel>Ç</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Entidade decimal XML</para>
+              <para>Exemplo: <guilabel>"&amp;#199"</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Anotações e referências cruzadas</guilabel></para>
+          <para>Exemplo: <guilabel>U+0043 LATIN CAPITAL LETTER C</guilabel> <guilabel>U+0327 COMBINING CEDILLA</guilabel></para>
+          <para>Clique no link para exibir os detalhes do caractere referenciado.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-character">
+      <title>Para alterar o formato de um caractere</title>
+      <para>Para alterar o formato de um caractere, execute qualquer um dos seguintes passos:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Para alterar a fonte, selecione uma fonte da lista suspensa de fontes.</para>
+        </listitem>
+        <listitem>
+          <para>Para alterar o tipo da fonte para negrito, clique no botão <guibutton>Negrito</guibutton>, ou pressione a tecla de atalho <keycombo><keycap>Alt</keycap><keycap>N</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Para alterar o tipo da fonte para itálico, clique no botão <guibutton>Itálico</guibutton>, ou pressione a tecla de atalho <keycombo><keycap>Alt</keycap><keycap>I</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Para aumentar o tamanho da fonte, escolha <menuchoice><guimenu>Ver</guimenu><guimenuitem>Ampliar</guimenuitem></menuchoice> ou use o seletor numérico de zoom, ou também pressionar a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>+</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Para diminuir o tamanho da fonte, escolha <menuchoice><guimenu>Ver</guimenu><guimenuitem>Reduzir</guimenuitem></menuchoice> ou use o seletor numérico de zoom, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>-</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Para usar o tamanho de fonte normal, escolha <menuchoice><guimenu>Ver</guimenu><guimenuitem>Tamanho normal</guimenuitem></menuchoice>, ou pressione a tecla de atalho <keycombo><keycap>Ctrl</keycap><keycap>=</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Para ampliar o caractere selecionado, segure a tecla <keycap>Shift</keycap>.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-chartable">
+      <title>Para alterar o formato da tabela de caracteres</title>
+      <para>Para alterar o formato da tabela de caracteres, escolha <menuchoice><guimenu>Ver</guimenu><guimenuitem>Ajustar colunas para potência de dois</guimenuitem></menuchoice>.</para>
+      <para>O <application>Mapa de caracteres</application> alterará a aba <guilabel>Tabela de caracteres</guilabel> de forma que o número de colunas seja uma potência de dois: duas colunas, quatro colunas, oito colunas etc. O número de colunas dependerá do tamanho da janela e do tamanho da fonte.</para>
+    </sect2>
+
+  </sect1>
+</article>

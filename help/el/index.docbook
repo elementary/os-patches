@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY legal SYSTEM "legal.xml">
+<!ENTITY appversion "1.3.0">
+<!ENTITY manrevision "2.1">
+<!ENTITY date "February 2004">
+<!ENTITY app "Character Map">
+]>
+<!-- 
+ (Do not remove this comment block.)
+  Maintained by the GNOME Documentation Project
+  http://developer.gnome.org/projects/gdp
+  Template version: 2.0 beta
+  Template last modified Apr 11, 2002
+-->
+<!-- =============Document Header ============================= -->
+<article id="index" lang="el"> 
+<!-- please do not change the id; for translations, change lang to -->
+<!-- appropriate code -->
+  <articleinfo> 
+    <title>Εγχειρίδιο του πίνακα χαρακτήρων</title>
+    <abstract role="description">
+      <para>Ο πίνακας χαρακτήρων είναι ένας πίνακας χαρακτήρων Unicode που σας επιτρέπει να επιλέγετε χαρακτήρες από τον πίνακα και να τους εισάγετε σε κείμενο.</para>
+    </abstract>
+    <copyright><year>2004</year> <holder>Sun Microsystems</holder></copyright>
+    <copyright><year>2003</year> <year>2004</year> <holder>Chee Bin HOH</holder></copyright> 
+
+<!-- translators: uncomment this:
+    <copyright>
+      <year>2002</year>
+      <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
+    </copyright>
+-->
+
+    <publisher role="maintainer"> 
+      <publishername>Έργο Τεκμηρίωσης GNOME</publishername> 
+    </publisher> 
+
+      <legalnotice id="legalnotice">
+	<para>Δίνεται άδεια για αντιγραφή, διανομή και/ή τροποποίηση του εγγράφου υπό τους όρους της Ελεύθερης Άδειας Τεκμηρίωσης GNU (GFDL), Έκδοση 1.1 ή μεταγενέστερη εκδιδόμενη από το Ίδρυμα Ελεύθερου Λογισμικού χωρίς Σταθερά Εδάφια, χωρίς Εξώφυλλα Κειμένου, και χωρίς Οπισθόφυλλα Κειμένου. Μπορείτε να βρείτε ένα αντίγραφο της GFDL σε αυτόν τον <ulink type="help" url="help:fdl">σύνδεσμο</ulink> ή στο αρχείο COPYING-DOCS που διανεμήθηκε με αυτόν τον οδηγό.</para>
+         <para>Αυτή η τεκμηρίωση είναι μέρος της συλλογής τεκμηρίωσης του GNOME όπως διανέμεται υπό τους όρους του GFDL. Εάν επιθυμείτε να διανείμετε αυτή την τεκμηρίωση ξεχωριστά από την συλλογή, μπορείτε να το κάνετε εάν η τεκμηρίωση συνοδεύεται από αντίγραφο της άδειας (GFDL) όπως περιγράφεται στον τομέα 6 της άδειας.</para>
+
+	<para>Πολλά από τα ονόματα που χρησιμοποιούνται από εταιρίες για να ξεχωρίσουν τα προϊόντα και τις υπηρεσίες είναι σήματα κατατεθέν. Όπου αυτά τα ονόματα εμφανίζονται στην τεκμηρίωση GNOME, και τα μέλη της ομάδας τεκμηρίωσης GNOME έχουν γνώση αυτών, τότε αυτά αναγράφονται με κεφαλαίους χαρακτήρες ή με αρχικούς κεφαλαίους χαρακτήρες.</para>
+
+	<para>ΤΟ ΈΓΓΡΑΦΟ ΚΑΙ ΤΡΟΠΟΠΟΙΗΜΕΝΕΣ ΕΚΔΟΣΕΙΣ ΑΥΤΟΥ ΠΑΡΕΧΟΝΤΑΙ ΥΠΟ ΤΟΥΣ ΟΡΟΥΣ ΤΗΣ ΑΔΕΙΑΣ GNU FREE DOCUMENTATION ΜΕ ΤΗΝ ΠΕΡΑΙΤΕΡΩ ΔΙΕΥΚΡΙΝΙΣΗ ΟΤΙ: <orderedlist>
+		<listitem>
+		  <para>Η ΤΕΚΜΗΡΙΩΣΗ ΑΥΤΗ ΠΑΡΕΧΕΤΑΙ "ΩΣ ΕΧΕΙ", ΧΩΡΙΣ ΚΑΜΙΑ ΕΓΓΥΗΣΗ ΟΤΙ ΜΠΟΡΕΙ ΝΑ ΕΞΥΠΗΡΕΤΗΣΕΙ ΚΑΠΟΙΟ ΣΚΟΠΟ Η ΟΤΙ ΕΙΝΑΙ ΧΩΡΙΣ ΣΦΑΛΜΑ. ΟΛΟΚΛΗΡΗ Η ΕΥΘΥΝΗ ΓΙΑ ΤΗΝ ΠΟΙΟΤΗΤΑ, ΑΚΡΙΒΕΙΑ ΚΑΙ ΛΕΙΤΟΥΡΓΙΚΟΤΗΤΑ ΤΗΣ ΤΕΚΜΗΡΙΩΣΗΣ Ή ΠΑΡΑΛΛΑΓΩΝ ΑΥΤΗΣ ΑΝΗΚΕΙ ΣΕ ΕΣΑΣ. ΕΑΝ Η ΤΕΚΜΗΡΙΩΣΗ ΑΥΤΗ Ή ΠΑΡΑΛΛΑΓΗ ΑΥΤΗΣ ΕΙΝΑΙ ΛΑΘΟΣ ΚΑΤΑ ΚΑΠΟΙΟ ΤΡΟΠΟ ΕΣΕΙΣ ΑΝΑΛΑΜΒΑΝΕΤΕ ΤΗΝ ΕΥΘΥΝΗ ΤΗΣ ΔΙΟΡΘΩΣΗΣ. Η ΑΠΑΛΛΑΓΗ ΕΥΘΥΝΗΣ ΠΟΥ ΣΥΝΟΔΕΥΕΙ ΑΥΤΗ ΤΗΝ ΤΕΚΜΗΡΙΩΣΗ ΕΙΝΑΙ ΑΝΑΠΟΣΠΑΣΤΟ ΚΟΜΜΑΤΙ ΑΥΤΗΣ. ΚΑΜΙΑ ΧΡΗΣΗ ΤΗΣ ΤΕΚΜΗΡΙΩΣΗΣ Ή ΠΑΡΑΛΛΑΓΩΝ ΑΥΤΗΣ ΔΕΝ ΕΠΙΤΡΕΠΕΤΑΙ ΠΑΡΑ ΜΟΝΟ ΕΑΝ ΣΥΝΟΔΕΥΕΤΑΙ ΑΠΟ ΤΗΝ ΑΠΑΛΛΑΓΗ ΕΥΘΥΝΗΣ.</para>
+		</listitem>
+		<listitem>
+		  <para>ΣΕ ΚΑΜΙΑ ΠΕΡΙΠΤΩΣΗ ΚΑΙ ΥΠΟ ΚΑΜΙΑ ΝΟΜΙΚΗ ΣΥΝΘΗΚΗ, ΕΙΤΕ ΜΕΣΩ ΣΥΜΒΟΛΑΙΩΝ Ή ΑΛΛΙΩΣ, ΔΕΝ ΕΥΘΥΝΟΝΤΑΙ Ο ΣΥΓΓΡΑΦΕΑΣ, Ο ΔΙΑΝΟΜΕΑΣ, Η ΑΛΛΟΣ ΣΥΝΥΠΕΥΘΥΝΟΣ ΓΙΑ ΤΗΝ ΣΥΓΓΡΑΦΗ ΤΗΣ ΤΕΚΜΗΡΙΩΣΗΣ, ΓΙΑ ΕΜΜΕΣΕΣ Η ΑΜΕΣΕΣ, ΤΥΧΑΙΕΣ Ή ΜΗ ΖΗΜΙΕΣ ΠΑΝΤΩΣ ΦΥΣΕΩΣ ΠΟΥ ΠΡΟΕΡΧΟΝΤΑΙ ΑΠΟ ΤΗΝ ΧΡΗΣΗ ΤΗΣ ΤΕΚΜΗΡΙΩΣΗΣ ΚΑΙ/Ή ΠΑΡΑΛΛΑΓΩΝ ΑΥΤΗΣ ΑΚΟΜΑ ΚΑΙ ΕΑΝ ΕΧΕΙ ΥΠΑΡΞΕΙ ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΓΙΑ ΤΗΝ ΠΙΘΑΝΟΤΗΤΑ ΥΠΑΡΞΗΣ ΤΕΤΟΙΩΝ ΖΗΜΙΩΝ.</para>
+		</listitem>
+	  </orderedlist></para>
+  </legalnotice>
+
+
+   <!-- This file  contains link to license for the documentation (GNU FDL), and 
+        other legal stuff such as "NO WARRANTY" statement. Please do not change 
+	any of this. -->
+
+    <authorgroup> 
+      <author><firstname>Sun</firstname> <surname>Ομάδα τεκμηρίωσης του GNOME</surname> <affiliation> <orgname>Sun Microsystems</orgname> </affiliation></author>
+      <author><firstname>Chee Bin</firstname> <surname>HOH</surname> <affiliation> <orgname>Έργο τεκμηρίωσης του GNOME</orgname> <address> <email>cbhoh@gnome.org</email> </address> </affiliation></author> 
+
+<!--
+      <author> 
+        <firstname>Documentation</firstname> 
+          <surname>Writer 1</surname> 
+          <affiliation> 
+            <orgname>GNOME Documentation Project</orgname> 
+            <address> <email>doc-writer1@gnome.org</email> </address> 
+          </affiliation> 
+      </author> 
+-->
+      
+<!-- This is appropriate place for other contributors: translators,
+     maintainers,  etc. Commented out by default.
+      <othercredit role="translator">
+        <firstname>Latin</firstname> 
+	<surname>Translator 1</surname> 
+	<affiliation> 
+          <orgname>Latin Translation Team</orgname> 
+          <address> <email>translator@gnome.org</email> </address> 
+	</affiliation>
+	<contrib>Latin translation</contrib>
+      </othercredit>
+-->
+    </authorgroup>
+    <publisher role="maintainer">
+      <publishername>Έργο Τεκμηρίωσης GNOME</publishername>
+    </publisher>
+
+
+    <revhistory>
+      <revision><revnumber>Εγχειρίδιο του Πίνακα Χαρακτήρων V2.1</revnumber> <date>2004-02-26</date> <revdescription> 
+	  <para>Ενημερώθηκε για το GNOME 2.6 και την έκδοση 1.3.0 του προγράμματος.</para>
+          <para role="author">Ομάδα Τεκμηρίωσης GNOME της Sun</para>
+          <para role="publisher">Έργο Τεκμηρίωσης GNOME</para>
+        </revdescription></revision> 
+      <revision><revnumber>Εγχειρίδιο του Unicode Πίνακα Χαρακτήρων V2.0</revnumber> <date>Οκτώβριος 2003</date> <revdescription> 
+          <para role="author">Chee Bin HOH <email>cbhoh@gnome.org</email></para>
+          <para role="publisher">Έργο Τεκμηρίωσης GNOME</para>
+        </revdescription></revision> 
+    </revhistory> 
+
+    <releaseinfo>Αυτή η τεκμηρίωση καλύπτει την έκδοση 1.3.0 του πίνακα χαρακτήρων.</releaseinfo> 
+
+    <legalnotice> 
+      <title>Ανάδραση</title> 
+      <para>Για να αναφέρετε ένα σφάλμα ή να κάνετε μια πρόταση σχετικά με τον <application>Πίνακα χαρακτήρων</application> ή την τεκμηρίωση του, ακολουθήστε τις οδηγίες στη <ulink url="help:gnome-feedback" type="help">σελίδα ανάδρασης GNOME</ulink>.</para>
+<!-- Translators may also add here feedback address for translations -->
+    </legalnotice> 
+  </articleinfo> 
+
+<!-- ============= Index ===================================== -->
+  <indexterm zone="index"><primary>gucharmap</primary></indexterm> 
+  <indexterm zone="index"><primary>Πίνακας Χαρακτήρων</primary></indexterm>
+  <indexterm zone="index"><primary>Πίνακας Χαρακτήρων</primary></indexterm>
+
+<!-- ============= Document Body ============================= -->
+<!-- ============= Introduction ============================== -->
+  <sect1 id="gucharmap-introduction"> 
+    <title>Εισαγωγή</title> 
+    <para>Η εφαρμογή <application>Πίνακας χαρακτήρων</application> σας επιτρέπει να εισάγετε ειδικούς χαρακτήρες σε έγγραφα ή πεδία κειμένου. Ο <application>Πίνακας χαρακτήρων</application> περιέχει τονισμένους χαρακτήρες, μαθηματικά σύμβολα, ειδικά σύμβολα και σημεία στίξης. Χρησιμοποιήστε τον <application>Πίνακα χαρακτήρων</application> για να αποκτήσετε πρόσβαση σε χαρακτήρες που δεν είναι διαθέσιμοι από το πληκτρολόγιό σας. </para>
+    <para>Ο <application>Πίνακας χαρακτήρων</application> εμφανίζει όλους τους χαρακτήρες που είναι διαθέσιμοι σε όλα τα διαφορετικά αλφάβητα του συστήματός σας, χρησιμοποιώντας το σετ χαρακτήρων Unicode. Το Unicode είναι ένα πρότυπο σετ χαρακτήρων που στοχεύει στη συμπερίληψη όλων των χαρακτήρων όλων των γραπτών γλωσσών του κόσμου.</para>
+  </sect1>
+
+<!-- =========== Getting Started ============================== -->
+
+  <sect1 id="gucharmap-getting-started"> 
+    <title>Ξεκινώντας</title> 
+
+    <sect2 id="gucharmap-start">
+      <title>Εκκίνηση του πίνακα χαρακτήρων</title>
+      <para>Μπορείτε να ξεκινήσετε τον <application>Πίνακα χαρακτήρων</application> με τους εξής τρόπους:</para> 
+      <variablelist>
+        <varlistentry>
+          <term>Μενού <guimenu>Εφαρμογές</guimenu></term>
+          <listitem>
+            <para>Επιλέξτε <menuchoice><guimenu>Βοηθήματα</guimenu><guimenuitem>Πίνακας χαρακτήρων</guimenuitem></menuchoice>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Γραμμή εντολών</term>
+	  <listitem>
+            <para>Εκτελέστε την ακόλουθη εντολή: <command>gnome-character-map</command></para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+
+    <sect2 id="gucharmap-when-start">
+      <title>Αφού ξεκινήσετε τον πίνακα χαρακτήρων</title>
+      <para>Όταν γίνεται εκκίνηση του <application>Πίνακα χαρακτήρων</application>, εμφανίζεται το ακόλουθο παράθυρο.</para>
+
+      <!-- ==== Figure ==== -->
+      <figure id="gucharmap-window-fig"> 
+        <title>Παράθυρο του πίνακα χαρακτήρων</title> 
+        <screenshot> 
+          <mediaobject><imageobject> <imagedata fileref="figures/gucharmap_window.png" format="PNG"/> </imageobject> <textobject> <phrase>Παράθυρο του Πίνακα Χαρακτήρων.</phrase> </textobject></mediaobject> 
+        </screenshot> 
+      </figure>
+      <!-- ==== End of Figure ==== -->
+
+      <!-- Include any descriptions of the GUI immediately after the screenshot of the main UI, -->
+      <!-- for example, the items on the menubar and on the toolbar. This section is optional. -->
+
+      <para>Το παράθυρο του <application>Πίνακα χαρακτήρων</application> περιλαμβάνει τα ακόλουθα στοιχεία:</para>
+      <variablelist>
+        <varlistentry>
+          <term>Γραμμή μενού</term>
+          <listitem>
+            <para>Τα μενού στη γραμμή μενού περιέχουν τις περισσότερες από τις εντολές που θα χρειαστείτε για να εργαστείτε με τον <application>Πίνακα χαρακτήρων</application>.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Εργαλειοθήκη</term>
+          <listitem>
+            <para>Η εργαλειοθήκη περιλαμβάνει μία αναδυόμενη λίστα γραμματοσειρών, κουμπιά επιλογής στιλ για τις γραμματοσειρές και ένα πλαίσιο επιλογής μεγέθους.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Κύρια επιφάνεια</term>
+          <listitem>
+            <para>Η κύρια επιφάνεια περιλαμβάνει τα εξής:</para>
+            <itemizedlist>
+              <listitem>
+                <para>Λίστα ταξινόμησης κατά <guilabel>Γραφή</guilabel> ή <guilabel>Μπλοκ Unicode</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Ταμπέλα <guilabel>Πίνακας χαρακτήρων</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Ταμπέλα <guilabel>Λεπτομέρειες χαρακτήρα</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Πεδίο κειμένου <guilabel>Κείμενο προς αντιγραφή</guilabel></para>
+              </listitem>
+              <listitem>
+                <para>Κουμπί <guibutton>Αντιγραφή</guibutton></para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Γραμμή κατάστασης</term>
+          <listitem>
+            <para>Η γραμμή κατάστασης εμφανίζει τον κωδικό Unicode και το όνομα Unicode του επιλεγμένου χαρακτήρα.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+  </sect1>
+
+<!-- ================ Usage ================================ --> 
+  <sect1 id="gucharmap-usage">
+    <title>Χρήση</title> 
+    
+    <sect2 id="gucharmap-change-view">
+      <title>Αλλαγή λίστας σετ χαρακτήρων</title>
+      <para>Για να εμφανίσετε τα σετ χαρακτήρων με βάση το όνομα του συστήματος γραφής, επιλέξτε <menuchoice><guimenu>Προβολή</guimenu><guimenuitem>Κατά γραφή</guimenuitem></menuchoice>.</para>
+      <para>Για να εμφανίσετε τα σετ χαρακτήρων με βάση το μπλοκ Unicode όπου ανήκουν, επιλέξτε <menuchoice><guimenu>Προβολή</guimenu><guimenuitem>Κατά μπλοκ Unicode</guimenuitem></menuchoice>.</para>
+    </sect2>
+    
+    <sect2 id="gucharmap-create-textstring">
+      <title>Δημιουργία κειμένου</title>
+      <para>Για να εισάγετε κείμενο στο πεδίο <guilabel>Κείμενο προς αντιγραφή</guilabel>, εκτελέστε τα ακόλουθα βήματα:</para>
+      <orderedlist>
+        <listitem>
+          <para>Επιλέξτε ένα σετ χαρακτήρων από τη λίστα <guilabel>Γραφή</guilabel> ή <guilabel>Μπλοκ Unicode</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Εισάγετε χαρακτήρες με έναν από τους παρακάτω τρόπους:</para>
+          <itemizedlist>
+            <listitem>
+              <para>Κάντε διπλό κλικ σε ένα χαρακτήρα της ταμπέλας <guilabel>Πίνακας χαρακτήρων</guilabel> και ο χαρακτήρας θα εισαχθεί στο πεδίο <guilabel>Κείμενο προς αντιγραφή</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Επιλέξτε ένα χαρακτήρα από την ταμπέλα <guilabel>Πίνακας χαρακτήρων</guilabel> και πατήστε <keycap>Enter</keycap>. Ο χαρακτήρας θα εισαχθεί στο πεδίο <guilabel>Κείμενο προς αντιγραφή</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Επιλέξτε ένα χαρακτήρα από την ταμπέλα <guilabel>Πίνακας χαρακτήρων</guilabel>. Κάντε κλικ πάνω του και, κρατώντας το κουμπί του ποντικιού πατημένο, σύρτε τον στο πεδίο <guilabel>Κείμενο προς αντιγραφή</guilabel>.</para>
+            </listitem>
+            <listitem>
+              <para>Κάντε κλικ στο πεδίο <guilabel>Κείμενο προς αντιγραφή</guilabel> για να εστιάσετε στο πεδίο αυτό. Αν υπάρχει ήδη κείμενο στο πεδίο, κάντε κλικ στη θέση όπου επιθυμείτε να εισάγετε το χαρακτήρα. Πατήστε το κατάλληλο πλήκτρο στο πληκτρολόγιό σας για να εισάγετε στο πεδίο τον επιθυμητό χαρακτήρα.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+    </sect2>
+
+<!-- =============== To Copy and Paste a Text String ====================== -->
+    <sect2 id="gucharmap-copy-textstring">
+      <title>Αντιγραφή και επικόλληση κειμένου σε εφαρμογή</title>
+      <para>Για να αντιγράψετε και να επικολλήσετε κείμενο από το πεδίο <guilabel>Κείμενο προς αντιγραφή</guilabel> σε μία εφαρμογή, εκτελέστε τα παρακάτω βήματα:</para>
+      <orderedlist>
+        <listitem>
+          <para>Πατήστε <guibutton>Αντιγραφή</guibutton>. Αν το κείμενο δεν είναι επιλεγμένο ή έχει επιλεχθεί ολόκληρο, τότε όλο το κείμενο αντιγράφεται στο πρόχειρο. Αν είναι επιλεγμένο μόνο τμήμα του κειμένου, αντιγράφεται μόνο το επιλεγμένο κείμενο.</para>
+        </listitem>
+        <listitem>
+          <para>Μεταβείτε στην εφαρμογή σας και επιλέξτε <menuchoice><guimenu>Επεξεργασία</guimenu><guimenuitem>Επικόλληση</guimenuitem></menuchoice> ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>V</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Όταν γίνεται επικόλληση των περιεχομένων του πεδίου <guilabel>Κείμενο προς αντιγραφή</guilabel> σε άλλες εφαρμογές, το κείμενο εμφανίζεται με χαρακτήρες από το τρέχον σετ χαρακτήρων της εφαρμογής.</para>
+      <para>Αν το κείμενό σας περιέχει μη ορατούς χαρακτήρες, το κείμενο μπορεί να εισαχθεί μόνο σε εφαρμογές που υποστηρίζουν το πλήρες σετ χαρακτήρων.</para>
+    </sect2>
+
+    <sect2 id="usage-find-character">
+      <title>Αναζήτηση χαρακτήρα</title>
+      <para>Για να αναζητήσετε έναν χαρακτήρα, εκτελέστε τα ακόλουθα βήματα:</para>
+      <orderedlist>
+        <listitem>
+          <para>Επιλέξτε <menuchoice><guimenu>Αναζήτηση</guimenu><guimenuitem>Εύρεση</guimenuitem></menuchoice> ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>F</keycap></keycombo>. Θα ανοίξει ο διάλογος <guilabel>Εύρεση</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Εισάγετε κείμενο προς αναζήτηση στο πεδίο <guilabel>Αναζήτηση</guilabel>.</para>
+          <itemizedlist>            
+             <listitem><para>Επιλέξτε <guilabel>Αναζήτηση ολόκληρων λέξεων</guilabel> για να βρείτε μόνο ολοκληρωμένες λέξεις που να αντιστοιχούν στο εισηγμένο κείμενο.</para></listitem>
+             <listitem><para>Η προεπιλεγμένη συμπεριφορά είναι να γίνεται αναζήτηση μόνο στα ονόματα των χαρακτήρων. Επιλέξτε <guilabel>Αναζήτηση στις λεπτομέρειες χαρακτήρα</guilabel> για να κάνετε αναζήτηση και στην υπόλοιπη περιγραφή του χαρακτήρα (σημειώσεις, ισοδύναμα και περίπου ισοδύναμα).</para></listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>Πατήστε <guibutton>Επόμενο</guibutton> για να βρείτε την επόμενη εμφάνιση του ζητούμενου κειμένου. Ο <application>Πίνακας χαρακτήρων</application> επιλέγει τον αντίστοιχο χαρακτήρα.</para>
+        </listitem>
+        <listitem>
+          <para>Πατήστε <guibutton>Επόμενο</guibutton> για να βρείτε τον επόμενο χαρακτήρα που αντιστοιχεί στην αναζήτησή σας. Εναλλακτικά, επιλέξτε <menuchoice><guimenu>Αναζήτηση</guimenu><guimenuitem>Εύρεση επόμενου</guimenuitem></menuchoice> ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Πατήστε <guibutton>Προηγούμενο</guibutton> για να βρείτε τον προηγούμενο χαρακτήρα που αντιστοιχεί στην αναζήτησή σας. Εναλλακτικά, επιλέξτε <menuchoice><guimenu>Αναζήτηση</guimenu><guimenuitem>Εύρεση προηγούμενου</guimenuitem></menuchoice> ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Shift</keycap><keycap>Ctrl</keycap><keycap>G</keycap></keycombo>.</para>
+        </listitem>
+      </orderedlist>
+    </sect2>
+    
+<!-- =============== To Browse the Character Table  ========================= -->
+    <sect2 id="usage-browse-characters">
+      <title>Περιήγηση στο σύνολο των χαρακτήρων</title>
+      <para>Για να περιηγηθείτε στον πίνακα χαρακτήρων χρησιμοποιήστε το μενού <guimenu>Μετάβαση</guimenu>.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Επόμενος χαρακτήρας, ή η συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>N</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Προηγούμενος χαρακτήρας, ή η συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>P</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Επόμενη γραφή, ή η συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>Page Down</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Προηγούμενη γραφή, ή η συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>Page Up</keycap></keycombo>.</para>
+        </listitem>
+      </itemizedlist>
+        
+      <para>Μπορείτε να περιηγηθείτε στον πίνακα χαρακτήρων ανά γραφή, μπλοκ Unicode ή μεμονωμένο χαρακτήρα. Εξαρτάται από το αν ο πίνακας χαρακτήρων είναι ρυθμισμένος να προβάλλει γραφές ή μπλοκ Unicode. Για να αλλάξετε τον τρόπο προβολής, επιλέξτε <menuchoice><guimenu>Προβολή</guimenu><guimenuitem>Κατά γραφή</guimenuitem></menuchoice> ή <menuchoice><guimenu>Προβολή</guimenu><guimenuitem>Κατά μπλοκ Unicode</guimenuitem></menuchoice>.</para>
+      
+      <para>Για την περιήγηση στον πίνακα χαρακτήρων μπορείτε επίσης να χρησιμοποιήσετε τα ακόλουθα πλήκτρα:</para>
+        
+      <itemizedlist>
+        <listitem>
+          <para>Πατήστε τα βέλη του πληκτρολογίου σας για να περιηγηθείτε στους μεμονωμένους χαρακτήρες.</para>
+        </listitem>
+        <listitem>
+          <para>Χρησιμοποιήστε τα πλήκτρα <keycap>Page Up</keycap> και <keycap>Page Down</keycap> για να περιηγηθείτε στους χαρακτήρες ανά σελίδα.</para>
+        </listitem>
+        <listitem>
+          <para>Χρησιμοποιήστε το πλήκτρο <keycap>Home</keycap> για να επιλέξετε τον πρώτο χαρακτήρα κάθε ομάδας χαρακτήρων Unicode. Για να επιλέξετε τον τελευταίο χαρακτήρα χρησιμοποιήστε το πλήκτρο <keycap>End</keycap>.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-display-details">
+      <title>Εμφάνιση λεπτομερών πληροφοριών χαρακτήρα</title>
+      <para>Για να εμφανίσετε λεπτομερείς πληροφορίες για ένα χαρακτήρα, εκτελέστε τα ακόλουθα βήματα:</para>
+      <orderedlist>
+        <listitem>
+          <para>Επιλέξτε ένα σετ χαρακτήρων από τη λίστα <guilabel>Γραφή</guilabel> ή <guilabel>μπλοκ Unicode</guilabel>. Π.χ.: <guilabel>Βασικά Λατινικά</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Επιλέξτε ένα χαρακτήρα από την ταμπέλα <guilabel>Πίνακας χαρακτήρων</guilabel>. Π.χ.: <guilabel>B</guilabel>.</para>
+        </listitem>
+        <listitem>
+          <para>Κάντε κλικ στην ταμπέλα <guilabel>Λεπτομέρειες χαρακτήρα</guilabel>.</para>
+        </listitem>
+      </orderedlist>
+      <para>Η ταμπέλα <guilabel>Λεπτομέρειες χαρακτήρα</guilabel> θα εμφανίσει τις ακόλουθες πληροφορίες για τον επιλεγμένο χαρακτήρα:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Κωδικός Unicode</para>
+          <para>Π.χ.: <guilabel>U+0042</guilabel></para>
+        </listitem>
+        <listitem>
+          <para>Όνομα Unicode</para>
+          <para>Π.χ.: <guilabel>LATIN CAPITAL LETTER B</guilabel> (Λατινικό κεφαλαίο γράμμα B)</para>
+        </listitem>
+        <listitem>
+          <para><guilabel>Γενικές ιδιότητες χαρακτήρα</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>Κατηγορία Unicode</para>
+              <para>Π.χ.: <guilabel>Γράμμα, Κεφαλαίο</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Διάφορες χρήσιμες κωδικοποιήσεις</guilabel></para>
+          <itemizedlist>
+            <listitem>
+              <para>Κωδικοποίηση UTF-8</para>
+              <para>Π.χ.: <guilabel>0x42</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Κωδικοποίηση UTF-16</para>
+              <para>Π.χ.: <guilabel>0x0042</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Οκταδική κωδικοποίηση UTF-8 σε C με χαρακτήρες διαφυγής</para>
+              <para>Π.χ.: <guilabel>\102</guilabel></para>
+            </listitem>
+            <listitem>
+              <para>Δεκαδική οντότητα XML</para>
+              <para>Π.χ.: <guilabel>"&amp;#66"</guilabel></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para><guilabel>Σχόλια και παραπομπές</guilabel></para>
+          <para>Π.χ.: <guilabel>U+212C SCRIPT CAPITAL B</guilabel></para>
+          <para>Κάντε κλικ στο σύνδεσμο για να εμφανίσετε τις λεπτομέρειες του επισημασμένου χαρακτήρα.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-character">
+      <title>Αλλαγή μορφοποίησης χαρακτήρα</title>
+      <para>Για να αλλάξετε τη μορφοποίηση ενός χαρακτήρα, εκτελέστε τα παρακάτω βήματα:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Για να αλλάξετε τη γραμματοσειρά, επιλέξτε νέα γραμματοσειρά από το αναδυόμενο μενού.</para>
+        </listitem>
+        <listitem>
+          <para>Για να αλλάξετε το στιλ της γραμματοσειράς σε έντονα, πατήστε το κουμπί <guibutton>Έντονα</guibutton> ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Alt</keycap><keycap>B</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Για να αλλάξετε το στιλ της γραμματοσειράς σε πλάγια, πατήστε το κουμπί <guibutton>Πλάγια</guibutton> ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Alt</keycap><keycap>I</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Για να αυξήσετε το μέγεθος της γραμματοσειράς, επιλέξτε <menuchoice><guimenu>Προβολή</guimenu><guimenuitem>Μεγέθυνση</guimenuitem></menuchoice>, χρησιμοποιήστε το πλαίσιο επιλογής μεγέθους ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>+</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Για να μειώσετε το μέγεθος της γραμματοσειράς, επιλέξτε <menuchoice><guimenu>Προβολή</guimenu><guimenuitem>Σμίκρυνση</guimenuitem></menuchoice>, χρησιμοποιήστε το πλαίσιο επιλογής μεγέθους ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>-</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Για να προβάλετε τη γραμματοσειρά στο κανονικό της μέγεθος, επιλέξτε <menuchoice><guimenu>Προβολή</guimenu><guimenuitem>Κανονικό μέγεθος</guimenuitem></menuchoice> ή χρησιμοποιήστε τη συντόμευση <keycombo><keycap>Ctrl</keycap><keycap>=</keycap></keycombo>.</para>
+        </listitem>
+        <listitem>
+          <para>Για να μεγεθύνετε τον επιλεγμένο χαρακτήρα κρατήστε πιεσμένο το <keycap>Shift</keycap>.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    
+    <sect2 id="usage-format-chartable">
+      <title>Αλλαγή εμφάνισης του πίνακα χαρακτήρων</title>
+      <para>Για να αλλάξετε την εμφάνιση του πίνακα χαρακτήρων, επιλέξτε <menuchoice><guimenu>Προβολή</guimenu><guimenuitem>Αριθμός στηλών αντιστοιχεί σε δύναμη του 2</guimenuitem></menuchoice>.</para>
+      <para>Η ταμπέλα <application>Πίνακας χαρακτήρων</application> αλλάζει έτσι ώστε ο αριθμός στηλών να αντιστοιχεί σε δυνάμεις του δύο, π.χ. δύο, τέσσερις ή οχτώ στήλες. Ο αριθμός των στηλών εξαρτάται από τις διαστάσεις του παραθύρου και το μέγεθος της γραμματοσειράς.</para>
+    </sect2>
+
+  </sect1>
+</article>
