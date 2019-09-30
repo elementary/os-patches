@@ -1,0 +1,180 @@
+#!/bin/bash
+# A script to remove all packages in a PPA and revert back to the normal
+# distribution ones.
+#
+# AUTHORS: Robert Hooker (Sarvatt), Tormod Volden
+
+# Defaults
+F_ARCHS=$(dpkg --print-foreign-architectures)
+PPA_PKGS=$(mktemp)
+REVERTS=$(mktemp)
+trap "rm $PPA_PKGS $REVERTS" 0
+
+# Functions to write output nicely.
+write_msg() {
+    echo "$*" | fold -s -w "${COLUMNS:-80}"
+}
+
+msg() {
+	write_msg "$*"
+}
+
+warn() {
+	write_msg "Warning:  $*" 1>&2
+}
+
+usage() {
+	echo "Usage: sudo ppa-purge [options] <ppa:ppaowner>[/ppaname]"
+	echo
+	echo "ppa-purge will reset all packages from a PPA to the standard"
+	echo "versions released for your distribution."
+	echo
+	echo "Options:"
+	echo "	-p [ppaname]		PPA name to be disabled (default: ppa)"
+	echo "	-s [host]		Repository server (default: ppa.launchpad.net)"
+	echo "	-d [distribution]	Override the default distribution choice."
+	echo "	-y 			Pass "-y --force-yes" to apt-get or "-y" to aptitude"
+	echo "	-i			Reverse preference of apt-get upon aptitude."
+	echo "	-h			Display this help text"
+	echo
+	echo "Example usage commands:"
+	echo "	sudo ppa-purge xorg-edgers"
+	echo "	will remove https://launchpad.net/~xorg-edgers/+archive/ppa"
+	echo
+	echo "	sudo ppa-purge -p xorg-testing sarvatt"
+	echo "	will remove https://launchpad.net/~sarvatt/+archive/xorg-testing"
+	echo
+	echo "	sudo ppa-purge ppa:ubuntu-x-swat/x-updates"
+	echo "	will remove https://launchpad.net/~ubuntu-x-swat/+archive/x-updates"
+	echo
+	echo "Notice: If ppa-purge fails for some reason and you wish to try again,"
+	echo "(For example: you left synaptic open while attempting to run it) simply"
+	echo "uncomment the PPA from your sources, run apt-get update and try again."
+	echo
+	exit $1
+}
+
+# Command line options
+while getopts "p:s:d:yih\?" opt; do
+	case "$opt" in
+		p ) PPANAME="$OPTARG"				;;
+		s ) PPAHOST="$OPTARG"				;;
+		d ) DIST="$OPTARG"				;;
+		y ) FORCEINSTALL="true"				;;
+		i ) APTALT="true" 				;;
+		h ) usage 0;					;;
+		\?) usage 1;					;;
+		* ) warn "Unknown option '$opt'"; usage 1;	;;
+	esac
+done
+shift $(($OPTIND -1))
+
+PPAOWNER=$1
+APTARG=""
+if [ ! -z "$APTALT" ]; then
+	if [ ! -z "$FORCEINSTALL" ]; then
+	APTARG="-y"
+	fi
+	APT=aptitude; APTALT=apt-get
+else
+	if [ ! -z "$FORCEINSTALL" ]; then
+	APTARG="-y --force-yes"
+	fi
+	APT=apt-get; APTALT=aptitude
+fi
+
+if echo $1 | grep -q "^ppa:"; then
+	PPAOWNER=$(echo $1 | sed "s#^ppa:\(.*\)/\(.*$\)#\1#")
+	PPANAME=$(echo $1 | sed "s#^ppa:\(.*\)/\(.*$\)#\2#")
+fi
+
+if [ -z "$PPAOWNER" ]; then
+	warn "Required ppa-name argument was not specified"
+	usage 1
+fi
+
+# If not set, using defaults
+[ -z "$PPAHOST" ] && PPAHOST="ppa.launchpad.net"
+[ -z "$PPANAME" ] && PPANAME="ppa"
+[ -z "$DIST" ] && DIST=$(lsb_release -c -s)
+
+if [ "$(id -u)" != "0" ]; then
+	warn "This script would need superuser privileges, use sudo"
+	usage 1
+fi
+
+msg "Updating packages lists"
+$APT update > /dev/null || warn "$APT update failed for some reason"
+
+msg "PPA to be removed: $PPAOWNER $PPANAME"
+
+# Make list of all packages in PPA
+PPA_LIST=/var/lib/apt/lists/${PPAHOST}_${PPAOWNER}_${PPANAME}_*_Packages
+for LIST in $PPA_LIST; do
+	if [ -e $LIST ]; then
+		grep "^Package: " $LIST | cut -d " " -f2 | sort >> $PPA_PKGS
+	fi
+done
+
+if [ ! -s $PPA_PKGS ]; then
+	warn "Could not find package list for PPA: $PPAOWNER $PPANAME"
+	exit 1
+fi
+
+# Ignore the ppa-purge package
+if grep -q "ppa-purge" $PPA_PKGS; then
+	sed -i '/ppa-purge/d' $PPA_PKGS
+	msg "Note: Not removing ppa-purge package"
+fi
+
+# Get multi-arch package names for revert list
+cat $PPA_PKGS | sort -u |  
+    xargs dpkg-query -W -f='${binary:Package}\t${db:Status-Abbrev}\n' 2>/dev/null |
+    awk '/\tii $/{print $1}' > $REVERTS
+# Fallback for Precise
+if [ ! -s $REVERTS ]; then
+    for PACKAGE in $(cat $PPA_PKGS | sort -u); do
+        dpkg-query -W -f='${PackageSpec}\t${Status}\n' $PACKAGE 2>/dev/null |
+            awk '/\tinstall/{print $1}' >> $REVERTS
+        for F_ARCH in $F_ARCHS; do 
+            dpkg-query -W -f='${PackageSpec}\t${Status}\n' "$PACKAGE:$F_ARCH" 2>/dev/null |
+                awk '/\tinstall/{print $1}' >> $REVERTS
+        done 
+	done
+fi
+
+# Create apt argument list for reverting packages
+REINSTALL=""
+for PACKAGE in $(cat $REVERTS); do
+	REINSTALL="$REINSTALL $PACKAGE/$DIST"
+done
+
+msg "Package revert list generated:"
+msg "$REINSTALL"
+echo
+
+# Disable PPA from sources.list files
+for LIST in $(find /etc/apt/ -name "*.list" -exec readlink -f '{}' \;); do
+	if [ -e $LIST ] && grep -q $PPAOWNER/$PPANAME $LIST; then
+		msg "Disabling $PPAOWNER PPA from $LIST"
+		sed -ri "\:^[^#]+/${PPAOWNER}/${PPANAME}/:s/^deb/# deb/" $LIST
+	fi
+done
+
+msg "Updating packages lists"
+$APT update > /dev/null || warn "$APT update failed for some reason"
+
+# FIXME:
+# Workaround for now in case APT fails because of a package not in Ubuntu.
+# APTALT actually works but it would be preferred to remove the package
+# from $REINSTALL directly.
+
+if $APT $APTARG install $REINSTALL; then
+	msg "PPA purged successfully"
+elif $APTALT $APTARG install $REINSTALL; then
+	msg "PPA purged successfully using $APTALT fallback"
+else
+	warn "Something went wrong, packages may not have been reverted"
+	exit 1
+fi
+exit 0
