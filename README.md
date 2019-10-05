@@ -1,20 +1,27 @@
-# package-importer
-Keeps package source code branches up-to-date by checking for the existence of a git branch for a given package in a list and attempts to commit the new version if found after verifying its integrity.
+# OS Patches metarepository
 
-## Usage
-`GIT_WEB_URL="https://github.com/elementary/os-patches" ./package-importer import-list-bionic`
+This repository contains all the sources for the elementary specific patches
 
-Note that `git` operations are performed using `ssh://` protocol magically determined from `GIT_WEB_URL`. `GIT_WEB_URL` is otherwise only used in human-friendly output messages.
+The packages are included into the [OS Patches Repository](https://launchpad.net/~elementary-os/+archive/ubuntu/os-patches).
 
-## Lists
-A list branch consists of a directory containing both a `sources.list` and a `packages_to_import` file containing package names. Only one package name per line.
+## How is this repository working
 
-## Automation
-`package-importer` can be used in combination with systemd and [deploy keys](https://developer.github.com/guides/managing-deploy-keys).
+The `master` branch is composed of GitHub Workflows that are running daily to
+check for any new version in the Ubuntu repositories of the patched components.
+It uses the `get-latest-version.py` python script included.
 
-## Variables
-The following variables can be passed:
-* `BASE_TMP_DIR` - Default: `$PWD`
-* `GIT_WEB_URL` - Default: `https://github.com/elementary/os-patches`
-* `GPG_KEYRING` - Default: `/etc/apt/trusted.gpg`
-* `WEBHOOK_URL` - Default: blank
+It depends on `python3-launchpadlib`, `python3-apt` and `python3-github`.
+
+## Many branches
+
+The repository is made of several distinc branches:
+ * `import-list-$UBUNTU_NAME` is the branch listing the different packages
+ that are getting patched.
+ * `$PACKAGE-$UBUNTU_NAME` is the last source that got used to create the
+ patched version
+ * `$PACKAGE-$UBUNTU_NAME-patched` is `$PACKAGE-$UBUNTU_NAME` with the patch
+ applied on it
+
+
+> Note that when possible, we try to discourage the use of OS patches and work
+directly with upstream to include them.
