@@ -67,7 +67,8 @@ fi
 # Generate our temp files, clean up when done
 NEWS=$(mktemp) || exit 1
 ERR=$(mktemp) || exit 1
-trap "rm -f $NEWS $ERR" HUP INT QUIT ILL TRAP KILL BUS TERM
+CLOUD=$(mktemp) || exit 1
+trap "rm -f $NEWS $ERR $CLOUD" HUP INT QUIT ILL TRAP KILL BUS TERM
 
 # Construct a user agent, similar to Firefox/Chrome/Safari/IE to
 # ensure a proper, tailored, accurate message of the day
@@ -84,13 +85,24 @@ codename="$DISTRIB_CODENAME"
 platform="$(uname -o)/$(uname -r)/$(uname -m)"
 arch="$(uname -m)"
 cpu="$(grep -m1 "^model name" /proc/cpuinfo | sed -e "s/.*: //" -e "s:\s\+:/:g")"
+cloud_id="unknown"
+if [ -x /usr/bin/cloud-id ]; then
+    /usr/bin/cloud-id > "$CLOUD" 2>/dev/null
+    if [ $? -eq 0 ]; then
+        # sanitize it a bit, just in case
+        cloud_id=$(cut -c -40 "${CLOUD}" | tr -c -d '[:alnum:]')
+        if [ -z "${cloud_id}" ]; then
+            cloud_id="unknown"
+        fi
+    fi
+fi
 
 # Some messages may only be pertinent before or after some amount of uptime
 read up idle < /proc/uptime
 uptime="uptime/$up/$idle"
 
 # Piece together the user agent
-USER_AGENT="curl/$curl_ver $lsb $platform $cpu $uptime"
+USER_AGENT="curl/$curl_ver $lsb $platform $cpu $uptime cloud_id/$cloud_id"
 
 # Loop over any configured URLs
 for u in $URLS; do
@@ -119,5 +131,5 @@ for u in $URLS; do
 		: > "$CACHE"
  	fi
 done
-rm -f "$NEWS" "$ERR"
+rm -f "$NEWS" "$ERR" "$CLOUD"
 exit 0
