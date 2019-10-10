@@ -126,3 +126,24 @@ if [ "$1" = "configure" ] && [ "$2" != "" ]; then
     install_directory mnt 755 root
   fi
 fi
+
+# Manually inject expected maintainer script contents based on dh_systemd_*
+
+# This will only remove masks created by d-s-h on package removal.
+deb-systemd-helper unmask 'motd-news.timer' >/dev/null || true
+
+# was-enabled defaults to true, so new installations run enable.
+if deb-systemd-helper --quiet was-enabled 'motd-news.timer'; then
+    # Enables the unit on first installation, creates new
+    # symlinks on upgrades if the unit file has changed.
+    deb-systemd-helper enable 'motd-news.timer' >/dev/null || true
+else
+    # Update the statefile to add new symlinks (if any), which need to be
+    # cleaned up on purge. Also remove old symlinks.
+    deb-systemd-helper update-state 'motd-news.timer' >/dev/null || true
+fi
+
+if [ -d /run/systemd/system ]; then
+	systemctl --system daemon-reload >/dev/null || true
+	deb-systemd-invoke start motd-news.timer >/dev/null || true
+fi

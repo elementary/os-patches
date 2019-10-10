@@ -1,3 +1,28 @@
+base-files (9.4ubuntu4.11) xenial; urgency=medium
+
+  * update-motd.d/50-motd-news: add cloud_id to user-agent string
+    (LP: #1840946)
+  * d/postinst.in, d/postrm: add missing dh_systemd_enable pieces. This
+    completes the fix for LP #1637800
+  * d/postinst.in: do not start the motd-news.service, as it won't be
+    in an enabled state anyway, and the timer will run it when needed. This
+    addresses the motd-news.service bit in comment #19 of #1637800.
+
+ -- Andreas Hasenack <andreas@canonical.com>  Mon, 30 Sep 2019 10:31:01 -0300
+
+base-files (9.4ubuntu4.10) xenial; urgency=medium
+
+  * Fix syntax error in new base-files postinst code.  LP: #1836236.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 11 Jul 2019 16:55:32 -0700
+
+base-files (9.4ubuntu4.9) xenial; urgency=medium
+
+  * Backport /etc/update-motd.d/50-motd-news, along with the systemd units
+    that are used to keep the local cache file up-to-date.  LP: #1637800
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 18 May 2019 14:53:42 -0700
+
 base-files (9.4ubuntu4.8) xenial; urgency=medium
 
   * /etc/issue, /etc/issue.net, /etc/lsb-release, /etc/os-release: Bump

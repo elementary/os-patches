@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+# Manually inject expected maintainer script contents based on dh_systemd_*
+if [ -d /run/systemd/system ]; then
+    systemctl --system daemon-reload >/dev/null || true
+fi
+if [ -d /run/systemd/system ]; then
+    systemctl --system daemon-reload >/dev/null || true
+fi
+if [ "$1" = "remove" ]; then
+    if [ -x "/usr/bin/deb-systemd-helper" ]; then
+        deb-systemd-helper mask 'motd-news.timer' >/dev/null || true
+    fi
+fi
+if [ "$1" = "purge" ]; then
+    if [ -x "/usr/bin/deb-systemd-helper" ]; then
+        deb-systemd-helper purge 'motd-news.timer' >/dev/null || true
+        deb-systemd-helper unmask 'motd-news.timer' >/dev/null || true
+    fi
+fi

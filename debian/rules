@@ -42,6 +42,7 @@ binary-arch: build
 	sed -e "s/#VENDORFILE#/$(VENDORFILE)/g" debian/postinst.in \
 		> debian/tmp/DEBIAN/postinst
 	chmod 755 debian/tmp/DEBIAN/postinst
+	install -m 755 debian/prerm debian/postrm debian/tmp/DEBIAN
 	cd debian && install -m 644 conffiles tmp/DEBIAN
 	cd debian/tmp && install -d `cat ../directory-list`
 	install -p -m 644 share/* debian/tmp/usr/share/base-files
@@ -54,6 +55,9 @@ binary-arch: build
 	ln -s README $(docdir)/FAQ
 	install -p -m 644 etc/* debian/tmp/etc
 	install -p -m 755 debian/update-motd.d/* debian/tmp/etc/update-motd.d
+	install -p -m 644 debian/motd-news debian/tmp/etc/default
+	install -p -m 644 debian/motd-news.service debian/tmp/lib/systemd/system/
+	install -p -m 644 debian/motd-news.timer debian/tmp/lib/systemd/system/
 ifeq ($(DEB_HOST_GNU_SYSTEM),gnu)
 	rmdir debian/tmp/sys
 endif
@@ -69,7 +73,7 @@ endif
 	ln -s ../usr/lib/os-release debian/tmp/etc/os-release
 	gzip -9n $(docdir)/changelog
 	cd debian/tmp && \
-		find usr -type f ! -regex "DEBIAN/.*" -print0 |\
+		find lib usr -type f ! -regex "DEBIAN/.*" -print0 |\
 		LC_ALL=C sort -z | xargs -0r md5sum > DEBIAN/md5sums
 	chown -R root:root debian/tmp
 	chmod -R u+w,go=rX debian/tmp
