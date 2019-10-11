@@ -30,6 +30,7 @@ override_dh_auto_install:
 	install -p -m 644 origins/*  $(DESTDIR)/etc/dpkg/origins
 	install -p -m 644 share/*    $(DESTDIR)/usr/share/base-files
 	install -p -m 755 update-motd.d/* $(DESTDIR)/etc/update-motd.d
+	install -p -m 644 upstream-release/* $(DESTDIR)/etc/upstream-release
 	install -p -m 644 profile.d/* $(DESTDIR)/etc/profile.d
 	install -p -m 755 locale-check $(DESTDIR)/usr/bin
 ifeq ($(DEB_HOST_GNU_SYSTEM),gnu)
@@ -42,14 +43,6 @@ endif
 	sed -e "s&#OSNAME#&$(OSNAME)&g" etc/os-release > $(DESTDIR)/etc/os-release
 	mv $(DESTDIR)/etc/os-release $(DESTDIR)/usr/lib/os-release
 	ln -s ../usr/lib/os-release $(DESTDIR)/etc/os-release
-
-override_dh_systemd_enable:
-	dh_systemd_enable -pbase-files motd-news.timer
-	dh_systemd_enable -pbase-files motd-news.service
-
-override_dh_systemd_start:
-	dh_systemd_start -pbase-files motd-news.timer
-	dh_systemd_start -pbase-files motd-news.service
 
 override_dh_link:
 	dh_link -X os-release
