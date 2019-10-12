@@ -11,9 +11,14 @@ if len(sys.argv) < 2:
     raise ValueError("Please provide a package name")
 
 if len(sys.argv) < 3:
-    serie_name = "bionic"
+    series_name = "bionic"
 else:
-    serie_name = sys.argv[2]
+    series_name = sys.argv[2]
+
+if len(sys.argv) < 4:
+    upstream_series_name = series_name
+else:
+    upstream_series_name = sys.argv[3]
 
 component_name = sys.argv[1]
 
@@ -31,7 +36,8 @@ launchpad = Launchpad.login_anonymously(
 ubuntu = launchpad.distributions["ubuntu"]
 ubuntu_archive = ubuntu.main_archive
 patches_archive = launchpad.people['elementary-os'].getPPAByName(distribution=ubuntu,name='os-patches')
-series = ubuntu.getSeries(name_or_version=serie_name)
+series = ubuntu.getSeries(name_or_version=series_name)
+upstream_series = ubuntu.getSeries(name_or_version=upstream_series_name)
 
 # Initialize GitHub variables
 github_token = os.environ['GITHUB_TOKEN']
@@ -55,7 +61,7 @@ for pocket in pockets:
         source_name=component_name,
         status="Published",
         pocket=pocket,
-        distro_series=series)
+        distro_series=upstream_series)
     if len(found_sources) > 0:
         pocket_version = found_sources[0].source_package_version
         if apt_pkg.version_compare(pocket_version, patched_version) > 0:
