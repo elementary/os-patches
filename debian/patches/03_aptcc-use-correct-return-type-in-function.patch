@@ -1,0 +1,39 @@
+From: Stephan Hohe <sth.dev@tejp.de>
+Date: Sun, 20 Jan 2019 22:38:38 +0100
+Subject: Use correct return type in function
+
+---
+ backends/aptcc/apt-messages.cpp | 2 +-
+ backends/aptcc/apt-messages.h   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/backends/aptcc/apt-messages.cpp b/backends/aptcc/apt-messages.cpp
+index 38c58b16b..26cf0596a 100644
+--- a/backends/aptcc/apt-messages.cpp
++++ b/backends/aptcc/apt-messages.cpp
+@@ -29,7 +29,7 @@
+ 
+ using namespace std;
+ 
+-bool show_errors(PkBackendJob *job, PkErrorEnum errorCode, bool errModify)
++void show_errors(PkBackendJob *job, PkErrorEnum errorCode, bool errModify)
+ {
+     stringstream errors;
+ 
+diff --git a/backends/aptcc/apt-messages.h b/backends/aptcc/apt-messages.h
+index 7c02921ca..128e39bdd 100644
+--- a/backends/aptcc/apt-messages.h
++++ b/backends/aptcc/apt-messages.h
+@@ -31,7 +31,7 @@
+ /**
+  * Call the Packagekit error dialog
+  */
+-bool show_errors(PkBackendJob *job,
++void show_errors(PkBackendJob *job,
+                  PkErrorEnum errorCode = PK_ERROR_ENUM_UNKNOWN,
+                  bool errModify = false);
+ 
+-- 
+2.17.1
+
+

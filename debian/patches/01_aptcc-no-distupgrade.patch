@@ -1,0 +1,57 @@
+From a1d6ff0324dd1933172e5a106b9ef876093fbe38 Mon Sep 17 00:00:00 2001
+From: Matthias Klumpp <matthias@tenstral.net>
+Date: Tue, 26 Feb 2019 21:03:25 +0100
+Subject: [PATCH] aptcc: Disable distro-upgrade functionality (for now)
+
+This feature is broken currently and causes users problems who
+accidentally trigger it somehow (it never worked on Debian, and
+currently doesn't on Ubuntu as well).
+We should actually fix this (maybe by using AppStream directly to fetch
+release information?), but that implementation will require some
+redesign and time.
+So, disable this for now so users don't accidentally trigger it and get
+shown weird errors.
+---
+ backends/aptcc/Makefile.am          | 2 +-
+ backends/aptcc/pk-backend-aptcc.cpp | 5 -----
+ 2 files changed, 1 insertion(+), 6 deletions(-)
+
+--- a/backends/aptcc/Makefile.am
++++ b/backends/aptcc/Makefile.am
+@@ -37,6 +37,7 @@
+ aptconf_DATA = 20packagekit
+ 
+ EXTRA_DIST = 20packagekit \
++	     get-distro-upgrade.py \
+ 	     pkg-list.h \
+ 	     apt-intf.h \
+ 	     apt-utils.h \
+@@ -49,13 +50,12 @@
+ 
+ helperdir = $(datadir)/PackageKit/helpers/aptcc
+ dist_helper_DATA =					\
+-	get-distro-upgrade.py				\
+ 	pkconffile					\
+ 	pkconffile.nodiff				\
+ 	$(NULL)
+ 
+ install-data-hook:
+-	chmod +x $(DESTDIR)$(helperdir)/*.py $(DESTDIR)$(helperdir)/pkconffile
++	chmod +x $(DESTDIR)$(helperdir)/pkconffile
+ 
+ clean-local :
+ 	rm -f *~
+--- a/backends/aptcc/pk-backend-aptcc.cpp
++++ b/backends/aptcc/pk-backend-aptcc.cpp
+@@ -245,11 +245,6 @@
+     pk_backend_job_thread_create(job, backend_depends_on_or_requires_thread, NULL, NULL);
+ }
+ 
+-void pk_backend_get_distro_upgrades(PkBackend *backend, PkBackendJob *job)
+-{
+-    pk_backend_spawn_helper(spawn, job, "get-distro-upgrade.py", "get-distro-upgrades", NULL);
+-}
+-
+ static void backend_get_files_thread(PkBackendJob *job, GVariant *params, gpointer user_data)
+ {
+     gchar **package_ids;

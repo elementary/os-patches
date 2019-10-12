@@ -1,0 +1,36 @@
+From 24859ec4d98b60a02d133fd2cc364b6a62f28e91 Mon Sep 17 00:00:00 2001
+From: Kalev Lember <klember@redhat.com>
+Date: Thu, 3 Jan 2019 19:26:53 +0100
+Subject: [PATCH 1/6] transaction: Keep a ref on transaction while doing async
+ polkit call
+
+Otherwise it may get destroyed while we're doing the async call and
+result in a spew of criticals.
+---
+ src/pk-transaction.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/pk-transaction.c b/src/pk-transaction.c
+index d14ea7d9c..83ee5588c 100644
+--- a/src/pk-transaction.c
++++ b/src/pk-transaction.c
+@@ -2224,6 +2224,7 @@ pk_transaction_authorize_actions_finished_cb (GObject *source_object,
+ 	}
+ 
+ out:
++	g_object_unref (data->transaction);
+ 	g_ptr_array_unref (data->actions);
+ 	g_free (data);
+ }
+@@ -2333,7 +2334,7 @@ pk_transaction_authorize_actions (PkTransaction *transaction,
+ 	}
+ 
+ 	data = g_new (struct AuthorizeActionsData, 1);
+-	data->transaction = transaction;
++	data->transaction = g_object_ref (transaction);
+ 	data->role = role;
+ 	data->actions = g_ptr_array_ref (actions);
+ 
+-- 
+2.20.1
+

@@ -1,0 +1,53 @@
+From 5ba21995f9a212076bc8957d1ef1be7110ec1db4 Mon Sep 17 00:00:00 2001
+From: Julian Andres Klode <julian.klode@canonical.com>
+Date: Fri, 1 Mar 2019 13:12:07 +0100
+Subject: [PATCH] aptcc: Implement frontend-locking
+
+This implements APT frontend locking, which prevents other programs
+from stealing the dpkg lock in race conditions where apt(cc) has to
+release the lock in order to run dpkg.
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1795614
+---
+ backends/aptcc/apt-intf.cpp | 3 ++-
+ configure.ac                | 6 ++++++
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/backends/aptcc/apt-intf.cpp b/backends/aptcc/apt-intf.cpp
+index 5b4ee2829..7ef92273d 100644
+--- a/backends/aptcc/apt-intf.cpp
++++ b/backends/aptcc/apt-intf.cpp
+@@ -2384,7 +2384,7 @@ bool AptIntf::installPackages(PkBitfield flags)
+ 
+     // we could try to see if this is the case
+     setenv("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", 1);
+-    _system->UnLock();
++    _system->UnLockInner();
+ 
+     pkgPackageManager::OrderResult res;
+     res = PM->DoInstallPreFork();
+@@ -2482,6 +2482,7 @@ bool AptIntf::installPackages(PkBitfield flags)
+     close(readFromChildFD[0]);
+     close(readFromChildFD[1]);
+     close(pty_master);
++    _system->LockInner();
+ 
+     cout << "Parent finished..." << endl;
+     return true;
+diff --git a/configure.ac b/configure.ac
+index 27d695cb4..a7abd8c11 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -462,6 +462,12 @@ if test x$enable_aptcc = xyes; then
+ 			  AC_MSG_RESULT([yes]),
+ 			  AC_MSG_FAILURE([need libapt-pkg 1.1 or later]))
+ 
++	AC_MSG_CHECKING([whether apt has frontend locking / is at least version 1.7])
++	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <apt-pkg/pkgsystem.h>]],
++					  [[_system->LockInner();]])],
++			  AC_MSG_RESULT([yes]),
++			  AC_MSG_FAILURE([need libapt-pkg 1.7 or later - or backported frontend locking]))
++
+ 	AC_MSG_CHECKING([whether apt supports ddtp])
+ 	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <apt-pkg/pkgcache.h>]],
+ 					  [[pkgCache::DescIterator d;]])],
