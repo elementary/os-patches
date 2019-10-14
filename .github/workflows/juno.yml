@@ -32,7 +32,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_REPOSITORY: elementary/os-patches
       run: |
-        while read -r line; do
+        while IFS=":" read -r line upstream_series; do
             echo "Checking version for $line"
-            python3 ./get-latest-version.py "$line" "bionic"
+            python3 ./get-latest-version.py "$line" "bionic" "$upstream_series"
         done < "/tmp/patched-packages"
