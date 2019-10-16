@@ -6,19 +6,27 @@ import apt_pkg
 from launchpadlib.launchpad import Launchpad
 from github import Github
 
+default_series_name = "bionic"
+
 # Process the command line arguments
 if len(sys.argv) < 2:
     raise ValueError("Please provide a package name")
 
 if len(sys.argv) < 3:
-    series_name = "bionic"
+    series_name = default_series_name
 else:
     series_name = sys.argv[2]
+
+if not series_name:
+    series_name = default_series_name
 
 if len(sys.argv) < 4:
     upstream_series_name = series_name
 else:
     upstream_series_name = sys.argv[3]
+
+if not upstream_series_name:
+    upstream_series_name = series_name
 
 component_name = sys.argv[1]
 
