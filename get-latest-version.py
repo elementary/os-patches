@@ -51,6 +51,15 @@ upstream_series = ubuntu.getSeries(name_or_version=upstream_series_name)
 github_token = os.environ['GITHUB_TOKEN']
 github_repo = os.environ['GITHUB_REPOSITORY']
 github = Github(github_token)
+repo = github.get_repo(github_repo)
+
+# Method for checking if GitHub Actions has already opened an issue with this title
+def github_issue_exists(title):
+    open_issues = repo.get_issues(state='open')
+    for issue in open_issues:
+        if issue.title == title and issue.user.login == "github-actions[bot]":
+            return True
+    return False
 
 # Get the current version of a package in elementary os patches PPA
 patched_sources = patches_archive.getPublishedSources(exact_match=True,
@@ -58,7 +67,11 @@ patched_sources = patches_archive.getPublishedSources(exact_match=True,
     status="Published",
     distro_series=series)
 if len(patched_sources) == 0:
-    raise ValueError("Package %s not found in elementary os-patches!" % (component_name))
+    issue_title = "Package `%s` not found in os-patches PPA" % (component_name)
+    if not github_issue_exists(issue_title):
+        issue = repo.create_issue(issue_title, "`%s` found in the import list, but not in the PPA. Not deployed yet or removed by accident?" % (component_name))
+        print("Package `%s` not found in elementary os-patches! - Created issue %d" % (component_name, issue.number))
+    sys.exit(0)
 
 patched_version = patched_sources[0].source_package_version
 
@@ -73,6 +86,7 @@ for pocket in pockets:
     if len(found_sources) > 0:
         pocket_version = found_sources[0].source_package_version
         if apt_pkg.version_compare(pocket_version, patched_version) > 0:
-            repo = github.get_repo(github_repo)
-            issue = repo.create_issue("New version of %s available" % (component_name), "The package %s can be upgraded to version %s" % (component_name, pocket_version))
-            print("The patched package `%s` has a new version `%s` (was version `%s`) - Created issue %d" % (component_name, pocket_version, patched_version, issue.number))
+            issue_title = "New version of %s available" % (component_name)
+            if not github_issue_exists(issue_title):
+                issue = repo.create_issue(issue_title, "The package `%s` can be upgraded to version `%s`" % (component_name, pocket_version))
+                print("The patched package `%s` has a new version `%s` (was version `%s`) - Created issue %d" % (component_name, pocket_version, patched_version, issue.number))
