@@ -1,0 +1,64 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 13 Nov 2018 08:45:56 +0100
+Subject: tests: Verify focused window in closed-transient tests
+
+Ensure that we have a focused window when closing transient windows with
+no-focus or no-take-focus atoms
+
+https://gitlab.gnome.org/GNOME/mutter/merge_requests/307
+(cherry picked from commit fcb408ad5d8d7fec3e6a7bdaa92e5ef06b55c2c6)
+
+Origin: https://gitlab.gnome.org/GNOME/mutter/merge_requests/307
+Bug-Ubuntu: https://launchpad.net/bugs/1791574
+Bug-JetBrains: https://youtrack.jetbrains.com/issue/IDEA-198187
+Bug-GNOME: https://gitlab.gnome.org/GNOME/mutter/issues/308
+Applied-Upstream: 3.28.5
+---
+ .../closed-transient-no-input-no-take-focus-parent.metatest |  2 ++
+ ...closed-transient-no-input-no-take-focus-parents.metatest | 13 ++++++++++---
+ 2 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/src/tests/stacking/closed-transient-no-input-no-take-focus-parent.metatest b/src/tests/stacking/closed-transient-no-input-no-take-focus-parent.metatest
+index 4249c32..0c0649c 100644
+--- a/src/tests/stacking/closed-transient-no-input-no-take-focus-parent.metatest
++++ b/src/tests/stacking/closed-transient-no-input-no-take-focus-parent.metatest
+@@ -13,9 +13,11 @@ set_parent 1/3 2
+ show 1/3
+ 
+ wait
++assert_focused 1/3
+ assert_stacking 1/1 1/2 1/3
+ 
+ destroy 1/3
+ 
+ wait
++assert_focused 1/1
+ assert_stacking 1/1 1/2
+diff --git a/src/tests/stacking/closed-transient-no-input-no-take-focus-parents.metatest b/src/tests/stacking/closed-transient-no-input-no-take-focus-parents.metatest
+index a61c640..6556803 100644
+--- a/src/tests/stacking/closed-transient-no-input-no-take-focus-parents.metatest
++++ b/src/tests/stacking/closed-transient-no-input-no-take-focus-parents.metatest
+@@ -1,3 +1,8 @@
++new_client 2 x11
++create 2/1
++show 2/1
++wait
++
+ new_client 1 x11
+ create 1/1
+ accept_focus 1/1 false
+@@ -15,9 +20,11 @@ set_parent 1/3 2
+ show 1/3
+ 
+ wait
+-assert_stacking 1/1 1/2 1/3
++assert_focused 1/3
++assert_stacking 2/1 1/1 1/2 1/3
+ 
+ destroy 1/3
+-wait
+ 
+-assert_stacking 1/1 1/2
++wait
++assert_stacking 1/1 1/2 2/1
++assert_focused 2/1

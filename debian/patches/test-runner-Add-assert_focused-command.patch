@@ -1,0 +1,76 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 13 Nov 2018 08:37:14 +0100
+Subject: test-runner: Add 'assert_focused' command
+
+This allows to verify which window should have the focus, which might not
+be the same as the top of the stack.
+
+It's possible to assert the case where there's no focused window using
+"NONE" as parameter.
+
+https://gitlab.gnome.org/GNOME/mutter/merge_requests/307
+(cherry picked from commit 51f9e04ef1fa8cd7298044ac8c82e83bea425770)
+
+Origin: https://gitlab.gnome.org/GNOME/mutter/merge_requests/307
+Bug-Ubuntu: https://launchpad.net/bugs/1791574
+Bug-JetBrains: https://youtrack.jetbrains.com/issue/IDEA-198187
+Bug-GNOME: https://gitlab.gnome.org/GNOME/mutter/issues/308
+Applied-Upstream: 3.28.5
+---
+ src/tests/test-runner.c | 36 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/src/tests/test-runner.c b/src/tests/test-runner.c
+index 37befb4..9056d9a 100644
+--- a/src/tests/test-runner.c
++++ b/src/tests/test-runner.c
+@@ -273,6 +273,37 @@ test_case_assert_stacking (TestCase *test,
+   return *error == NULL;
+ }
+ 
++static gboolean
++test_case_assert_focused (TestCase    *test,
++                          const char  *expected_window,
++                          GError     **error)
++{
++  MetaDisplay *display = meta_get_display ();
++
++  if (!display->focus_window)
++    {
++      if (g_strcmp0 (expected_window, "none") != 0)
++        {
++          g_set_error (error, TEST_RUNNER_ERROR, TEST_RUNNER_ERROR_ASSERTION_FAILED,
++                       "focus: expected='%s', actual='none'", expected_window);
++        }
++    }
++  else
++    {
++      const char *focused = display->focus_window->title;
++
++      if (g_str_has_prefix (focused, "test/"))
++        focused += 5;
++
++      if (g_strcmp0 (focused, expected_window) != 0)
++        g_set_error (error, TEST_RUNNER_ERROR, TEST_RUNNER_ERROR_ASSERTION_FAILED,
++                     "focus: expected='%s', actual='%s'",
++                     expected_window, focused);
++    }
++
++  return *error == NULL;
++}
++
+ static gboolean
+ test_case_check_xserver_stacking (TestCase *test,
+                                   GError  **error)
+@@ -496,6 +527,11 @@ test_case_do (TestCase *test,
+       if (!test_case_check_xserver_stacking (test, error))
+         return FALSE;
+     }
++  else if (strcmp (argv[0], "assert_focused") == 0)
++    {
++      if (!test_case_assert_focused (test, argv[1], error))
++        return FALSE;
++    }
+   else
+     {
+       BAD_COMMAND("Unknown command %s", argv[0]);

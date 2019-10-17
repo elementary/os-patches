@@ -1,0 +1,43 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 3 May 2019 20:10:47 +0200
+Subject: window: Emit an error and return when trying to activate an
+ unmanaged
+
+If something (i.e. gnome-shell or an extension) tries to activate an unmanaged
+window, we should warn about this and avoid to perform further actions as this
+could lead to a crash of mutter, since the window has not valid flags (like
+workspace) set anymore at this stage.
+
+Fixes https://gitlab.gnome.org/GNOME/mutter/issues/580
+
+https://gitlab.gnome.org/GNOME/mutter/merge_requests/564
+
+(cherry picked from commit a6fc656e917fd48b8708b8d9f4bf9f8b15581313)
+
+Origin: https://gitlab.gnome.org/GNOME/mutter/merge_requests/307
+Bug-Ubuntu: https://launchpad.net/bugs/1791574
+Bug-JetBrains: https://youtrack.jetbrains.com/issue/IDEA-198187
+Bug-GNOME: https://gitlab.gnome.org/GNOME/mutter/issues/308
+Applied-Upstream: 3.28.5
+---
+ src/core/window.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/core/window.c b/src/core/window.c
+index eaae5b0..32c9461 100644
+--- a/src/core/window.c
++++ b/src/core/window.c
+@@ -3622,6 +3622,13 @@ meta_window_activate_full (MetaWindow     *window,
+                            MetaWorkspace  *workspace)
+ {
+   gboolean allow_workspace_switch;
++
++  if (window->unmanaging)
++    {
++      g_warning ("Trying to activate unmanaged window '%s'", window->desc);
++      return;
++    }
++
+   meta_topic (META_DEBUG_FOCUS,
+               "_NET_ACTIVE_WINDOW message sent for %s at time %u "
+               "by client type %u.\n",

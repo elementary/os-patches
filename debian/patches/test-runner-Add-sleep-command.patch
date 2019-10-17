@@ -1,0 +1,82 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 18 Jun 2019 19:33:10 +0200
+Subject: test-runner: Add 'sleep' command
+
+This allows to sleep for a given timeout in milliseconds.
+
+Rename test_case_before_redraw to test_case_loop_quit since it's a generic
+function and use it for the timeout too.
+
+https://gitlab.gnome.org/GNOME/mutter/merge_requests/307
+(cherry picked from commit d08763c18cb25fe250b27bf296e1607e63e86400)
+
+Origin: https://gitlab.gnome.org/GNOME/mutter/merge_requests/307
+Bug-Ubuntu: https://launchpad.net/bugs/1791574
+Bug-JetBrains: https://youtrack.jetbrains.com/issue/IDEA-198187
+Bug-GNOME: https://gitlab.gnome.org/GNOME/mutter/issues/308
+Applied-Upstream: 3.28.5
+---
+ src/tests/test-runner.c | 29 +++++++++++++++++++++++++++--
+ 1 file changed, 27 insertions(+), 2 deletions(-)
+
+diff --git a/src/tests/test-runner.c b/src/tests/test-runner.c
+index 9056d9a..75732c6 100644
+--- a/src/tests/test-runner.c
++++ b/src/tests/test-runner.c
+@@ -113,7 +113,7 @@ test_case_new (void)
+ }
+ 
+ static gboolean
+-test_case_before_redraw (gpointer data)
++test_case_loop_quit (gpointer data)
+ {
+   TestCase *test = data;
+ 
+@@ -144,7 +144,7 @@ test_case_wait (TestCase *test,
+    * waiting until after *all* frame processing.
+    */
+   meta_later_add (META_LATER_BEFORE_REDRAW,
+-                  test_case_before_redraw,
++                  test_case_loop_quit,
+                   test,
+                   NULL);
+   g_main_loop_run (test->loop);
+@@ -157,6 +157,17 @@ test_case_wait (TestCase *test,
+   return TRUE;
+ }
+ 
++static gboolean
++test_case_sleep (TestCase  *test,
++                 guint32    interval,
++                 GError   **error)
++{
++  g_timeout_add_full (G_PRIORITY_LOW, interval, test_case_loop_quit, test, NULL);
++  g_main_loop_run (test->loop);
++
++  return TRUE;
++}
++
+ #define BAD_COMMAND(...)                                                \
+   G_STMT_START {                                                        \
+       g_set_error (error,                                               \
+@@ -519,6 +530,20 @@ test_case_do (TestCase *test,
+       if (!test_case_wait (test, error))
+         return FALSE;
+     }
++  else if (strcmp (argv[0], "sleep") == 0)
++    {
++      guint64 interval;
++
++      if (argc != 2)
++        BAD_COMMAND("usage: %s <milliseconds>", argv[0]);
++
++      if (!g_ascii_string_to_unsigned (argv[1], 10, 0, G_MAXUINT32,
++                                       &interval, error))
++        return FALSE;
++
++      if (!test_case_sleep (test, (guint32) interval, error))
++        return FALSE;
++    }
+   else if (strcmp (argv[0], "assert_stacking") == 0)
+     {
+       if (!test_case_assert_stacking (test, argv + 1, argc - 1, error))

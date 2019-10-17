@@ -1,0 +1,43 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 25 Jun 2019 20:22:54 +0200
+Subject: screen: Unset the active workspace and remove workspaces on free
+
+Related to https://gitlab.gnome.org/GNOME/mutter/issues/652
+
+Origin: https://gitlab.gnome.org/GNOME/mutter/merge_requests/653
+Bug-Ubuntu: https://launchpad.net/bugs/1832869
+Bug-GNOME: https://gitlab.gnome.org/GNOME/mutter/issues/652
+Applied-Upstream: 3.28.5
+---
+ src/core/screen.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/src/core/screen.c b/src/core/screen.c
+index 2e59754..11f3bad 100644
+--- a/src/core/screen.c
++++ b/src/core/screen.c
+@@ -836,6 +836,7 @@ meta_screen_free (MetaScreen *screen,
+                   guint32     timestamp)
+ {
+   MetaDisplay *display;
++  GList *l;
+ 
+   display = screen->display;
+ 
+@@ -877,6 +878,16 @@ meta_screen_free (MetaScreen *screen,
+ 
+   g_free (screen->screen_name);
+ 
++  screen->active_workspace = NULL;
++
++  for (l = screen->workspaces; l;)
++    {
++      MetaWorkspace *workspace = l->data;
++      l = l->next;
++
++      meta_workspace_remove (workspace);
++    }
++
+   g_object_unref (screen);
+ }
+ 
