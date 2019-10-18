@@ -67,7 +67,11 @@ patched_sources = patches_archive.getPublishedSources(exact_match=True,
     status="Published",
     distro_series=series)
 if len(patched_sources) == 0:
-    raise ValueError("Package %s not found in elementary os-patches!" % (component_name))
+    issue_title = "Package `%s` not found in os-patches PPA" % (component_name)
+    if not github_issue_exists(issue_title):
+        issue = repo.create_issue(issue_title, "`%s` found in the import list, but not in the PPA. Not deployed yet or removed by accident?" % (component_name))
+        print("Package `%s` not found in elementary os-patches! - Created issue %d" % (component_name, issue.number))
+    sys.exit(0)
 
 patched_version = patched_sources[0].source_package_version
 
@@ -84,5 +88,5 @@ for pocket in pockets:
         if apt_pkg.version_compare(pocket_version, patched_version) > 0:
             issue_title = "New version of %s available" % (component_name)
             if not github_issue_exists(issue_title):
-                issue = repo.create_issue(issue_title, "The package %s can be upgraded to version %s" % (component_name, pocket_version))
+                issue = repo.create_issue(issue_title, "The package `%s` can be upgraded to version `%s`" % (component_name, pocket_version))
                 print("The patched package `%s` has a new version `%s` (was version `%s`) - Created issue %d" % (component_name, pocket_version, patched_version, issue.number))
