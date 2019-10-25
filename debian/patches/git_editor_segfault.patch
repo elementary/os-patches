@@ -1,0 +1,34 @@
+From 9ef81a0820c7951e6dffc047e83d83a467c128b2 Mon Sep 17 00:00:00 2001
+From: Beniamino Galvani <bgalvani@redhat.com>
+Date: Mon, 24 Jun 2019 15:24:02 +0200
+Subject: [PATCH] editor: avoid crash when checking for visible children
+
+When a connection is added the editor adds a new empty item to the
+tree store with gtk_tree_store_append() and then populates
+it. Therefore, has_visible_children() must be prepared to deal with
+missing values.
+
+Fixes: 4645c9ae9dd6edd41f9cae48f2de26b39f884795
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1543958
+---
+ src/connection-editor/nm-connection-list.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+Index: network-manager-applet-1.8.10/src/connection-editor/nm-connection-list.c
+===================================================================
+--- network-manager-applet-1.8.10.orig/src/connection-editor/nm-connection-list.c
++++ network-manager-applet-1.8.10/src/connection-editor/nm-connection-list.c
+@@ -658,6 +658,11 @@ has_visible_children (NMConnectionList *
+ 	search = gtk_entry_get_text (GTK_ENTRY (priv->search_entry));
+ 	do {
+ 		gtk_tree_model_get (model, &iter, COL_ID, &id, -1);
++		if (!id) {
++			/* gtk_tree_store_append() inserts an empty row, ignore
++			 * it until it is fully populated. */
++			continue;
++		}
+ 		if (strcasestr (id, search) != NULL) {
+ 			g_free (id);
+ 			return TRUE;
+

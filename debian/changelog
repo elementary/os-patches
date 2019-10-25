@@ -1,3 +1,15 @@
+network-manager-applet (1.8.10-2ubuntu3) bionic; urgency=medium
+
+  * debian/patches/git_error_handling.patch:
+    - don't segfault when gnome-keyring is missing (lp: #1806269)
+  * debian/patches/git_editor_segfault.patch:
+    - backport a segfault fix for the editor (lp: #1848185)
+  * debian/patches/git_label_warning.patch:
+    - backport fix for parsing error warnings being displayed when
+      connecting to an ap with special chars (lp: #1848186)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 15 Oct 2019 10:50:14 +0200
+
 network-manager-applet (1.8.10-2ubuntu2) bionic; urgency=medium
 
   * debian/patches/git_certificate_escaping.patch:

@@ -1,0 +1,45 @@
+From f98fc200c71c47d97ba3ebbe3800fc25ed34cb23 Mon Sep 17 00:00:00 2001
+From: Beniamino Galvani <bgalvani@redhat.com>
+Date: Fri, 13 Sep 2019 15:05:13 +0200
+Subject: [PATCH] applet: fix gtk warning about label markup
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fix the following warning:
+
+ "Failed to set text 'ab&cd' from markup due to error parsing markup:
+ Error on line 1: Entity did not end with a semicolon; most likely you
+ used an ampersand character without intending to start an entity —
+ escape ampersand as &amp;"
+
+Don't first enable markup (with the old label) and then set the text;
+do both with one call to gtk_label_set_markup().
+
+https://gitlab.freedesktop.org/NetworkManager/NetworkManager/issues/244
+---
+ src/ap-menu-item.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+Index: network-manager-applet-1.8.10/src/ap-menu-item.c
+===================================================================
+--- network-manager-applet-1.8.10.orig/src/ap-menu-item.c
++++ network-manager-applet-1.8.10/src/ap-menu-item.c
+@@ -181,14 +181,15 @@ update_label (NMNetworkMenuItem *item, g
+ {
+ 	NMNetworkMenuItemPrivate *priv = NM_NETWORK_MENU_ITEM_GET_PRIVATE (item);
+ 
+-	gtk_label_set_use_markup (GTK_LABEL (priv->ssid), use_bold);
+ 	if (use_bold) {
+ 		char *markup = g_markup_printf_escaped ("<b>%s</b>", priv->ssid_string);
+ 
+ 		gtk_label_set_markup (GTK_LABEL (priv->ssid), markup);
+ 		g_free (markup);
+-	} else
++	} else {
++		gtk_label_set_use_markup (GTK_LABEL (priv->ssid), FALSE);
+ 		gtk_label_set_text (GTK_LABEL (priv->ssid), priv->ssid_string);
++	}
+ }
+ 
+ void
