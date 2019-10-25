@@ -1,0 +1,83 @@
+From: Alex Tu <alex.tu@canonical.com>
+Date: Wed, 25 Sep 2019 16:00:23 +0800
+Subject: add --force-version-override and {dkms}_version-override option
+
+when --force-version-override or {dkms}_version-override content be
+found under /usr/share/dkms/modules_to_force_install/{file}, then it
+will skip the code block of version comparing with existed module.
+---
+ dkms | 26 ++++++++++++++++++++++----
+ 1 file changed, 22 insertions(+), 4 deletions(-)
+
+diff --git a/dkms b/dkms
+index 2293b49..e27acb7 100644
+--- a/dkms
++++ b/dkms
+@@ -135,7 +135,7 @@ show_usage()
+     echo $"  [action]  = { add | remove | build | install | uninstall | match | autoinstall"
+     echo $"               | mkdriverdisk | mktarball | ldtarball | mkrpm | mkkmp | mkdeb | mkbmdeb | status }"
+     echo $"  [options] = [-m module] [-v module-version] [-k kernel-version] [-a arch]"
+-    echo $"              [-d distro] [-c dkms.conf-location] [-q] [--force] [--all]"
++    echo $"              [-d distro] [-c dkms.conf-location] [-q] [--force] [--force-version-override] [--all]"
+     echo $"              [--templatekernel=kernel] [--directive='cli-directive=cli-value']"
+     echo $"              [--config=kernel-.config-location] [--archive=tarball-location]"
+     echo $"              [--kernelsourcedir=source-location] [--no-prepare-kernel] [--no-initrd]"
+@@ -784,6 +784,11 @@ check_version_sanity()
+     read -a kernels_module < <(find $lib_tree -name ${4}$module_suffix)
+     [ -z $kernels_module ] && return 0
+ 
++    if [[ "$force_version_override" == "true" ]]; then
++        # Skip the following version checking code.
++        return 0
++    fi
++
+     if [[ ${kernels_module[1]} ]]; then
+         warn $"Warning! Cannot do version sanity checking because multiple ${4}$module_suffix" \
+             $"modules were found in kernel $1."
+@@ -1394,6 +1399,10 @@ force_installation()
+ 
+         for elem in $to_force; do
+             if [ "${1}" = "${elem}" ]; then
++                echo "force"
++                return 0
++            elif [ "${1}_version-override" = "${elem}" ]; then
++                echo "version-override"
+                 return 0
+             fi
+         done
+@@ -1415,9 +1424,14 @@ install_module()
+     tmp_force="$force"
+ 
+     # If the module is set to be force-installed
+-    force_installation $module && echo "Forcing installation of $module" \
+-        && force="true"
+-
++    local ret=$(force_installation $module)
++    if [[ "$ret" == "force" ]];then
++        force="true"
++        echo "Forcing installation of $module"
++    elif [[ "$ret" == "version-override" ]];then
++        force_version_override="true"
++        echo "Forcing version override of $module"
++    fi
+     # Make sure that kernel exists to install into
+     [[ -e $install_tree/$kernelver ]] || die 6 \
+         $"The directory $install_tree/$kernelver doesn't exist." \
+@@ -3657,6 +3671,7 @@ kernel_source_dir=""
+ ksourcedir_fromcli=""
+ action=""
+ force=""
++force_version_override=""
+ no_prepare_kernel=""
+ no_clean_kernel=""
+ binaries_only=""
+@@ -3738,6 +3753,9 @@ while (($# > 0)); do
+         --force)
+             force="true"
+             ;;
++        --force-version-override)
++            force_version_override="true"
++            ;;
+         --all)
+             all="true"
+             ;;
