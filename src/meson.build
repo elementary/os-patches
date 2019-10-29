@@ -170,7 +170,7 @@ libhandy_deps = [
   dependency('glib-2.0', version: glib_min_version),
   dependency('gio-2.0', version: glib_min_version),
   dependency('gmodule-2.0', version: glib_min_version),
-  dependency('gtk+-3.0', version: '>= 3.24.1'),
+  dependency('gtk+-3.0', version: '>= 3.22'),
   cc.find_library('m', required: false),
   cc.find_library('rt', required: false),
 ]
