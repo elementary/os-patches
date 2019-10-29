@@ -1,0 +1,51 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd" >
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+  <interface name="com.endlessm.ParentalControls.AppFilter">
+    <property name="AppFilter" type="(bas)" access="readwrite">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            List of applications to allow (boolean is True) or deny
+            (boolean is False) access to.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+    </property>
+
+    <property name="OarsFilter" type="(sa{ss})" access="readwrite">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Restriction levels for different OARS categories, preventing
+            installation of apps which exceed those levels. The first string is
+            the OARS version (for example, `oars-1.1`), followed by a dictionary
+            mapping OARS categories to values.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+    </property>
+
+    <property name="AllowUserInstallation" type="b" access="readwrite">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Whether to allow installation of apps to the user flatpak
+            repository.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+    </property>
+
+    <property name="AllowSystemInstallation" type="b" access="readwrite">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Whether to allow installation of apps to the system flatpak
+            repository.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+    </property>
+
+  </interface>
+</node>

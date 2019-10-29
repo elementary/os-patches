@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="com.endlessm.ParentalControls.AppFilter">
+
+    <annotation name="org.freedesktop.Accounts.VendorExtension" value="true"/>
+
+    <annotation name="org.freedesktop.Accounts.Authentication.ChangeOwn"
+      value="com.endlessm.ParentalControls.AppFilter.ChangeOwn"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ReadOwn"
+      value="com.endlessm.ParentalControls.AppFilter.ReadOwn"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ChangeAny"
+      value="com.endlessm.ParentalControls.AppFilter.ChangeAny"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ReadAny"
+      value="com.endlessm.ParentalControls.AppFilter.ReadAny"/>
+
+    <!--
+      AppFilter:
+
+      A filter for which applications and binaries the user can run. This is
+      intended to be set by administrators and read by users, rather than being
+      editable by the user themselves.
+
+      The string list contains flatpak application IDs (containing at least one
+      dot and no leading slash) and absolute binary paths (containing a leading
+      slash). The boolean value indicates whether this is a whitelist (true) or
+      blacklist (false).
+    -->
+    <property name="AppFilter" type="(bas)" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue"
+        value="(false, [])"/>
+    </property>
+
+    <!--
+      OarsFilter:
+
+      A filter for which applications the user can see in app lists and install.
+      This is intended to be set by administrators and read by users, rather
+      than being editable by the user themselves.
+
+      It’s a two-tuple of the rating type, and a dictionary of rating sections
+      and values. The type gives the rating scheme in use — currently only
+      `oars-1.0` and `oars-1.1` are supported.
+
+      Each dictionary entry is a mapping from an OARS section to the
+      most severe value for it which the user is allowed to see (inclusive). Any
+      app with a more severe value for any section must not be listed or
+      installable by the user.
+
+      An empty dictionary means that no OARS filtering is to be performed for
+      the user.
+
+      This setting is essentially equivalent to the `content_rating` dictionary
+      in AppStream data:
+      https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html#tag-content_rating.
+    -->
+    <property name="OarsFilter" type="(sa{ss})" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue"
+        value="('oars-1.1', @a{ss} {})"/>
+    </property>
+
+    <!--
+      AllowUserInstallation:
+
+      Whether this user is allowed to install to their flatpak user repository.
+      If this is true, and if the polkit check for allowing app installation
+      succeeds, and if the OarsFilter does not restrict this app, app
+      installation can proceed.
+
+      If this is false, the user is not allowed to install any apps or runtimes
+      to their flatpak user repository.
+    -->
+    <property name="AllowUserInstallation" type="b" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="true"/>
+    </property>
+
+    <!--
+      AllowSystemInstallation:
+
+      Whether this user is allowed to install to the flatpak system repository.
+      If this is true, and if the polkit check for allowing app installation
+      succeeds, and if the OarsFilter does not restrict this app, app
+      installation can proceed.
+
+      If this is false, the user is not allowed to install any apps or runtimes
+      to the flatpak system repository.
+    -->
+    <property name="AllowSystemInstallation" type="b" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="false"/>
+    </property>
+  </interface>
+</node>

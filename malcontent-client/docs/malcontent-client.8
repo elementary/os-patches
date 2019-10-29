@@ -1,0 +1,120 @@
+.\" Manpage for malcontent\-client.
+.\" Documentation is under the same licence as the malcontent
+.\" package.
+.TH man 8 "13 Jun 2019" "1.1" "malcontent\-client man page"
+.\"
+.SH NAME
+.IX Header "NAME"
+malcontent\-client — Parental Controls Access Utility
+.\"
+.SH SYNOPSIS
+.IX Header "SYNOPSIS"
+.\"
+\fBmalcontent\-client get [\-q] [\-n] [\fPUSER\fB]
+.PP
+\fBmalcontent\-client check [\-q] [\-n] [\fPUSER\fB] \fPARG\fB
+.\"
+.SH DESCRIPTION
+.IX Header "DESCRIPTION"
+.\"
+\fBmalcontent\-client\fP is a utility for querying and updating the
+parental controls settings for users on the system. It will typically require
+adminstrator access to do anything more than query the current user’s parental
+controls.
+.PP
+It communicates with accounts-service, which stores parental controls data.
+.PP
+Its first argument is a command to run. Currently, the only supported commands
+are \fBget\fP and \fBcheck\fP.
+.\"
+.SH \fBget\fP OPTIONS
+.IX Header "get OPTIONS"
+.\"
+.IP "\fBUSER\fP"
+Username or ID of the user to get the app filter for. If not specified, the
+current user will be used by default.
+.\"
+.IP "\fB\-q\fP, \fB\-\-quiet\fP"
+Only output error messages, and no informational messages, as the operation
+progresses. (Default: Output informational messages.)
+.\"
+.IP "\fB\-n\fP, \fB\-\-no\-interactive\fP"
+Do not allow interactive authorization with polkit. If this is needed to
+complete the operation, the operation will fail. (Default: Allow interactive
+authorization.)
+.\"
+.SH \fBcheck\fP OPTIONS
+.IX Header "check OPTIONS"
+.\"
+.IP "\fBUSER\fP"
+Username or ID of the user to get the app filter for. If not specified, the
+current user will be used by default.
+.\"
+.IP "\fBARG\fP"
+Path to a program, content type or flatpak ref to check against the app filter,
+to see if it is allowed for the specified user.
+.\"
+.IP "\fB\-q\fP, \fB\-\-quiet\fP"
+Only output error messages, and no informational messages, as the operation
+progresses. (Default: Output informational messages.)
+.\"
+.IP "\fB\-n\fP, \fB\-\-no\-interactive\fP"
+Do not allow interactive authorization with polkit. If this is needed to
+complete the operation, the operation will fail. (Default: Allow interactive
+authorization.)
+.\"
+.SH "ENVIRONMENT"
+.IX Header "ENVIRONMENT"
+.\"
+\fBmalcontent\-client\fP supports the standard GLib environment
+variables for debugging. These variables are \fBnot\fP intended to be used in
+production:
+.\"
+.IP \fI$G_MESSAGES_DEBUG\fP 4
+.IX Item "$G_MESSAGES_DEBUG"
+This variable can contain one or more debug domain names to display debug output
+for. The value \fIall\fP will enable all debug output. The default is for no
+debug output to be enabled.
+.\"
+.SH "EXIT STATUS"
+.IX Header "EXIT STATUS"
+.\"
+\fBmalcontent\-client\fP may return one of several error codes if it
+encounters problems.
+.\"
+.IP "0" 4
+.IX Item "0"
+No problems occurred. The utility ran and successfully queried the app filter.
+If running the \fBcheck\fP command, the given path, content type or flatpak ref
+was allowed for the given user.
+.\"
+.IP "1" 4
+.IX Item "1"
+An invalid option was passed to \fBmalcontent\-client\fP on
+startup.
+.\"
+.IP "2" 4
+.IX Item "2"
+The current user was not authorized to query the app filter for the given user.
+.\"
+.IP "3" 4
+.IX Item "3"
+If running the \fBcheck\fP command, the given path, content type or flatpak ref
+was \fInot\fP allowed for the given user.
+.\"
+.SH BUGS
+.IX Header "BUGS"
+.\"
+Any bugs which are found should be reported on the project website:
+.br
+\fIhttps://support.endlessm.com/\fP
+.\"
+.SH AUTHOR
+.IX Header "AUTHOR"
+.\"
+Endless Mobile, Inc.
+.\"
+.SH COPYRIGHT
+.IX Header "COPYRIGHT"
+.\"
+Copyright © 2018 Endless Mobile, Inc.

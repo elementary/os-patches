@@ -1,0 +1,49 @@
+image: fedora:30
+
+before_script:
+  - dnf install -y meson pkgconf-pkg-config gtk-doc
+                   libxml2-devel dbus-daemon
+                   glib2-devel dbus-devel gobject-introspection-devel
+                   gettext-devel polkit-devel polkit-gnome git
+                   lcov
+  - export LANG=C.UTF-8
+
+stages:
+  - build
+  - deploy
+
+cache:
+  paths:
+    - _ccache/
+
+fedora:
+  stage: build
+  except:
+    - tags
+  script:
+    - git submodule update --init
+    - meson --buildtype debug --werror -Db_coverage=true -Ddocumentation=true _build .
+    - meson test -C _build
+    # FIXME: lcov doesn't support gcc9 yet:
+    # https://github.com/linux-test-project/lcov/issues/58
+    - ninja -C _build coverage || true
+  coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
+  artifacts:
+    when: always
+    name: "malcontent-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
+    paths:
+      - "_build/meson-logs"
+
+# FIXME: Run gtkdoc-check when we can. See:
+# https://github.com/mesonbuild/meson/issues/3580
+
+pages:
+  stage: deploy
+  only:
+    - master
+  script:
+    - mkdir -p public/
+    - mv _build/meson-logs/coveragereport/ public/coverage/
+  artifacts:
+    paths:
+      - public

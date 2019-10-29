@@ -1,0 +1,47 @@
+Overview of changes in malcontent 0.4.0
+=======================================
+
+* Implement `--quiet` in the `check` and `set` subcommands of
+  `malcontent-client` to make it nicer to use from scripts (!13)
+
+* Add support for filtering apps by content type (!15)
+
+* Bugs fixed:
+ - !2 tests: Use gdbus-codegen to drop hand-coded interface definitions
+ - !12 libmalcontent: Add missing field initialisers to BUILDER_INIT
+ - !13 Implement --quiet in the check and set subcommands of malcontent-client
+ - !14 Improve README coverage of whole system design
+ - !15 Add support to filter by content type
+
+
+Overview of changes in malcontent 0.3.0
+=======================================
+
+* API change for getting app filters: use `mct_manager_get_app_filter()` now,
+  rather than `mct_get_app_filter()` (#1, !6)
+
+* Support signalling that a user’s app filter has changed using
+  `MctManager::app-filter-changed` (#1)
+
+* Add a `MCT_APP_FILTER_ERROR_DISABLED` error to distinguish between the app
+  filter not being installed/supported, and temporarily not working (!9)
+
+* Add a top-level header file: use `#include <libmalcontent/malcontent.h>`
+
+* Bugs fixed:
+ - #1 Emit a signal when a user’s parental controls change
+ - !5 docs: Fix NEWS entry
+ - !6 lib: Change allow_interactive_authorization bool to flags
+ - !7 build: Post-release version bump
+ - !8 docs: Expand README to be more informative
+ - !9 libmalcontent: Add MCT_APP_FILTER_ERROR_DISABLED error
+ - !11 libmalcontent: Add a top-level header file
+
+
+Overview of changes in malcontent 0.2.0
+=======================================
+
+* Renamed project from eos-parental-controls to malcontent
+
+* Bugs fixed:
+ - !1 Rename project
