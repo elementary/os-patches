@@ -1,0 +1,142 @@
+stages:
+  - build
+  - docs
+  - test
+  - package
+  - deploy
+
+before_script:
+  - apt-get -y update
+  - apt-get -y install build-essential libgtk-3-doc lcov
+  - apt-get -y build-dep .
+
+.tags: &tags
+  tags:
+    - librem5
+
+.build: &build_steps
+    echo "BUILD_OPTS=${BUILD_OPTS}" &&
+    export LC_ALL=C.UTF-8 &&
+    meson ${BUILD_OPTS} . _build  &&
+    ninja -C _build
+
+build-debian-gcc:
+  image: debian:buster
+  <<: *tags
+  stage: build
+  variables:
+    BUILD_OPTS: -Dgtk_doc=true -Db_coverage=true --werror
+  script:
+    - *build_steps
+  artifacts:
+    when: always
+    paths:
+      - _build
+
+build-debian-gcc-static:
+  image: debian:buster
+  <<: *tags
+  stage: build
+  variables:
+    BUILD_OPTS: -Dintrospection=disabled -Dstatic=true -Dgtk_doc=false --werror
+  script:
+    - *build_steps
+
+build-debian-clang:
+  image: debian:buster
+  before_script:
+    - apt-get -y update
+    - apt-get -y install build-essential clang-tools
+    - apt-get -y build-dep .
+  <<: *tags
+  stage: build
+  script:
+    - export LC_ALL=C.UTF-8
+    - meson . _build
+    # With meson 0.49 we can do
+    # SCANBUILD="scan-build --status-bugs" ninja scan-build
+    # https://github.com/mesonbuild/meson/commit/1e7aea65e68a43b0319a4a28908daddfec621548
+    - ninja -C _build scan-build
+  artifacts:
+    when: always
+    paths:
+      - _build/meson-logs/scanbuild
+
+build-fedora-gcc:
+  image: fedora:29
+  <<: *tags
+  stage: build
+  variables:
+    BUILD_OPTS: -Dgtk_doc=true --werror
+  before_script:
+    - dnf -y update
+    - dnf -y install @development-tools redhat-rpm-config dnf-plugins-core
+    - dnf -y builddep data/packaging/rpm/libhandy.spec
+  script:
+    - *build_steps
+
+build-gtkdoc:
+  image: debian:buster
+  <<: *tags
+  stage: docs
+  dependencies:
+    - build-debian-gcc
+  script:
+    - ninja -C _build meson-libhandy-doc 2>&1 | tee _build/doc/buildlog
+    - if grep -qs 'warning' _build/doc/buildlog; then exit 1; fi
+  artifacts:
+    when: always
+    paths:
+      - _build/doc/html
+
+unit-test:
+  image: debian:buster
+  <<: *tags
+  stage: test
+  dependencies:
+    - build-debian-gcc
+  script:
+    - xvfb-run -s -noreset ninja -C _build test
+    - ninja -C _build coverage
+  coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
+  artifacts:
+    when: always
+    paths:
+      - _build
+
+package-debian:
+  image: debian:buster
+  <<: *tags
+  stage: package
+  script:
+    - dpkg-buildpackage -uc -us
+    - cp ../*.deb .
+  artifacts:
+    paths:
+      - "*.deb"
+
+publish-docs:
+  stage: deploy
+  dependencies:
+    - build-gtkdoc
+  environment:
+    name: production
+    url: https://developer.puri.sm/projects/libhandy/
+  before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get -y update
+    - apt-get -y install ssh rsync
+  tags:
+    - librem5
+  script:
+    # Don't publish in forks
+    - '[ "$CI_PROJECT_NAMESPACE" == "Librem5" ] || exit 0'
+    - mkdir -p ~/.ssh/
+    - chmod 0700 ~/.ssh/
+    - echo "$SSH_HOST_KEY" > ~/.ssh/known_hosts
+    - touch ~/.ssh/id_rsa
+    - chmod 0600 ~/.ssh/id_rsa
+    - echo "$SSH_KEY" >> ~/.ssh/id_rsa
+    - rsync -av -i --stats -e "ssh -l $SSH_USER -i ~/.ssh/id_rsa -p $SSH_PORT" _build/doc/html/ "$RSYNC_TARGET"
+  only:
+    - master
