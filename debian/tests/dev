@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+# vim:set sw=4 sts=4 et ft=perl:
+
+use strict;
+use warnings;
+use Test::More;
+use IPC::Run qw(run);
+
+sub run_ok {
+    my $argv = shift;
+    my $debug = join(' ', @$argv);
+    ok(run($argv, @_), qq{"$debug" should succeed});
+}
+
+my $out;
+run_ok([qw(bwrap --ro-bind / / --dev /dev //bin/sh -c), "echo /dev/*"],
+    '<', \undef, '>', \$out);
+like($out, qr{(^| )/dev/full( |$)});
+like($out, qr{(^| )/dev/null( |$)});
+like($out, qr{(^| )/dev/pts( |$)});
+like($out, qr{(^| )/dev/random( |$)});
+like($out, qr{(^| )/dev/shm( |$)});
+like($out, qr{(^| )/dev/stderr( |$)});
+like($out, qr{(^| )/dev/stdin( |$)});
+like($out, qr{(^| )/dev/stdout( |$)});
+like($out, qr{(^| )/dev/tty( |$)});
+like($out, qr{(^| )/dev/urandom( |$)});
+like($out, qr{(^| )/dev/zero( |$)});
+unlike($out, qr{(^| )/dev/hda( |$)});
+unlike($out, qr{(^| )/dev/dsp( |$)});
+unlike($out, qr{(^| )/dev/fuse( |$)});
+unlike($out, qr{(^| )/dev/kmsg( |$)});
+unlike($out, qr{(^| )/dev/loop0( |$)});
+unlike($out, qr{(^| )/dev/mem( |$)});
+unlike($out, qr{(^| )/dev/sda( |$)});
+unlike($out, qr{(^| )/dev/snd( |$)});
+unlike($out, qr{(^| )/dev/tty1( |$)});
+unlike($out, qr{(^| )/dev/vda( |$)});
+
+done_testing;

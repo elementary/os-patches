@@ -1,0 +1,33 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Wed, 17 Jan 2018 14:10:40 +0000
+Subject: Use Python 3 for test/demo code
+
+Forwarded: not-needed
+---
+ demos/userns-block-fd.py | 2 +-
+ tests/test-run.sh        | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/demos/userns-block-fd.py b/demos/userns-block-fd.py
+index 4c68242..2ef2fd6 100755
+--- a/demos/userns-block-fd.py
++++ b/demos/userns-block-fd.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ import os, select, subprocess, sys, json
+ 
+diff --git a/tests/test-run.sh b/tests/test-run.sh
+index a404c4e..1d2ffbc 100755
+--- a/tests/test-run.sh
++++ b/tests/test-run.sh
+@@ -215,7 +215,7 @@ fi
+ # Test --die-with-parent
+ 
+ cat >lockf-n.py <<EOF
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ import struct,fcntl,sys
+ path = sys.argv[1]
+ if sys.argv[2] == 'wait':

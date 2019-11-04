@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+# vim:set sw=4 sts=4 et ft=perl:
+
+use strict;
+use warnings;
+use Test::More;
+use IPC::Run qw(run);
+
+sub run_ok {
+    my $argv = shift;
+    my $debug = join(' ', @$argv);
+    ok(run($argv, @_), qq{"$debug" should succeed});
+}
+
+my $out;
+run_ok([qw(bwrap --ro-bind / / /usr/bin/id -u)], '<', \undef, '>', \$out);
+is($out, `id -u`);
+run_ok([qw(bwrap --ro-bind / / /usr/bin/id -g)], '<', \undef, '>', \$out);
+is($out, `id -g`);
+
+done_testing;

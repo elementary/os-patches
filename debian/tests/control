@@ -1,0 +1,36 @@
+Tests:
+ basic
+ dev
+ net
+ upstream
+ userns
+Restrictions: allow-stderr, isolation-machine
+Depends:
+ bubblewrap,
+ iproute2,
+ libcap2-bin,
+ libipc-run-perl,
+ perl,
+ python3,
+
+Tests: upstream-usrmerge
+Restrictions: allow-stderr, isolation-machine, breaks-testbed
+Depends:
+ bubblewrap,
+ iproute2,
+ libcap2-bin,
+ libipc-run-perl,
+ perl,
+ python3,
+ usrmerge
+
+Tests:
+ upstream-as-root
+Restrictions: allow-stderr, isolation-machine, needs-root
+Depends:
+ bubblewrap,
+ iproute2,
+ libcap2-bin,
+ libipc-run-perl,
+ perl,
+ python3,

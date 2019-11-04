@@ -1,0 +1,35 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+pie,+bindnow
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+PKGDIR=$(CURDIR)/debian/bubblewrap
+
+%:
+	dh $@
+
+override_dh_fixperms:
+	chmod a+x $(PKGDIR)/usr/share/bash-completion/completions/bwrap
+# Ubuntu enables unprivileged user namespaces; no need for bwrap to be suid
+# there.
+ifneq (yes,$(shell dpkg-vendor --derives-from Ubuntu && echo yes))
+	chmod 04755 $(PKGDIR)/usr/bin/bwrap
+	dh_fixperms -Xbin/bwrap
+else
+	dh_fixperms
+endif
+
+.PHONY: override_dh_fixperms
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	# Remove LD_PRELOAD so we don't run with faketime. It uses
+	# sem_open(), but bubblewrap runs in an environment where that
+	# can't work.
+	env -u LD_PRELOAD dh_auto_test
+endif
+
+.PHONY: override_dh_auto_test

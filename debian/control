@@ -1,0 +1,35 @@
+Source: bubblewrap
+Section: admin
+Priority: optional
+Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
+Uploaders:
+ Laszlo Boszormenyi (GCS) <gcs@debian.org>,
+ Simon McVittie <smcv@debian.org>,
+Build-Depends:
+ automake (>= 1.14.1),
+ bash-completion,
+ debhelper (>= 10),
+ docbook-xml,
+ docbook-xsl,
+ libcap-dev,
+ libselinux1-dev (>= 2.1.9),
+ pkg-config,
+ python3 <!nocheck>,
+ xsltproc,
+Standards-Version: 4.4.0
+Homepage: https://github.com/projectatomic/bubblewrap
+Vcs-Git: https://salsa.debian.org/debian/bubblewrap.git
+Vcs-Browser: https://salsa.debian.org/debian/bubblewrap
+Rules-Requires-Root: no
+
+Package: bubblewrap
+Architecture: linux-any
+Multi-arch: foreign
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Breaks:
+ flatpak (<< 0.8.0-2~),
+Description: setuid wrapper for unprivileged chroot and namespace manipulation
+ Core execution engine for unprivileged containers that works as a setuid
+ binary on kernels without user namespaces.

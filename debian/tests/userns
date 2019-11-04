@@ -1,0 +1,42 @@
+#!/usr/bin/perl
+# vim:set sw=4 sts=4 et ft=perl:
+
+use strict;
+use warnings;
+use Test::More;
+use IPC::Run qw(run);
+
+sub run_ok {
+    my $argv = shift;
+    my $debug = join(' ', @$argv);
+    ok(run($argv, @_), qq{"$debug" should succeed});
+}
+
+my $out;
+
+diag("Unshare user ID");
+run_ok([qw(bwrap --ro-bind / / --unshare-user --uid 2 --gid 3 /usr/bin/id -u)],
+    '<', \undef, '>', \$out);
+is($out, "2\n");
+run_ok([qw(bwrap --ro-bind / / --unshare-user --uid 2 --gid 3 /usr/bin/id -g)],
+    '<', \undef, '>', \$out);
+is($out, "3\n");
+run_ok([qw(bwrap --ro-bind / / --unshare-user --uid 2 --gid 3 /bin/sh -c),
+        'ls -l /etc/passwd'],
+    '<', \undef, '>', \$out);
+like($out, qr{ nobody nogroup });
+
+diag("Combine new /dev with new user namespace (#71)");
+run_ok([qw(bwrap --ro-bind / / --unshare-user --uid 2 --gid 3 --dev /dev /bin/sh -c),
+        'echo /dev/*'],
+    '<', \undef, '>', \$out);
+like($out, qr{(^| )/dev/full( |$)});
+unlike($out, qr{(^| )/dev/tty1( |$)});
+run_ok([qw(bwrap --ro-bind / / --unshare-user --uid 2 --gid 3 --dev /dev /usr/bin/id -u)],
+    '<', \undef, '>', \$out);
+is($out, "2\n");
+run_ok([qw(bwrap --ro-bind / / --unshare-user --uid 2 --gid 3 --dev /dev /usr/bin/id -g)],
+    '<', \undef, '>', \$out);
+is($out, "3\n");
+
+done_testing;

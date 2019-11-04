@@ -1,0 +1,363 @@
+bubblewrap (0.3.3-2) unstable; urgency=medium
+
+  * Release to unstable
+  * d/salsa-ci.yml: Request standard CI on salsa.debian.org
+  * d/rules: Disable any active LD_PRELOAD hacks while running tests.
+    These will typically assume a fully-featured OS (for example faketime
+    assumes sem_open() will work), but bubblewrap is a low-level tool
+    that temporarily operates in a container that is only partially
+    functional (for example /dev/shm isn't always mounted).
+  * Standards-Version: 4.4.0 (no changes required)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 09 Jul 2019 09:34:53 +0100
+
+bubblewrap (0.3.3-1) experimental; urgency=medium
+
+  * New upstream release
+    - Drop all patches except
+      d/p/debian/Use-Python-3-for-test-demo-code.patch, merged upstream
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 05 May 2019 10:36:48 +0100
+
+bubblewrap (0.3.1-4) unstable; urgency=medium
+
+  * d/p/Don-t-create-our-own-temporary-mount-point-for-pivot_root.patch:
+    Replace with the version that was applied upstream
+  * d/p/tests-Ensure-that-tmpfs-with-oldroot-newroot-doesn-t-appe.patch:
+    Add a test to check that the above patch works as intended
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 06 Mar 2019 14:43:44 +0000
+
+bubblewrap (0.3.1-3) unstable; urgency=medium
+
+  * d/p/Don-t-create-our-own-temporary-mount-point-for-pivot_root.patch:
+    Avoid denial of service and potential symlink attacks on systems not
+    using systemd-logind (Closes: #923557)
+  * Standards-Version: 4.3.0 (no changes required)
+  * d/upstream/metadata: Add DEP-12 metadata
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 02 Mar 2019 13:03:29 +0000
+
+bubblewrap (0.3.1-2) unstable; urgency=medium
+
+  [ Iain Lane ]
+  * d/tests/basic: Don't assume `id` will be the same inside the sandbox,
+    making this test pass on (Ubuntu) systems where bubblewrap is not
+    setuid (Closes: #910006)
+  * d/tests/upstream-usrmerge: Add a test to ensure that bubblewrap
+    works on a /usr-merged system
+
+  [ Simon McVittie ]
+  * d/p/tests-Handle-systems-without-merged-usr.patch:
+    Add patch from upstream git to make tests pass on non-merged-/usr
+    systems where bubblewrap is not setuid. Thanks to Iain Lane.
+  * d/p/man-page-Describe-chdir-not-nonexistent-cwd.patch:
+    Add patch from upstream git to fix documentation of --chdir option
+  * d/p/Make-lockdata-long-enough-on-32-bit-with-64-bit-file-poin.patch:
+    Add patch from upstream git to fix lock handling in tests on 32-bit
+    platforms with 64-bit off_t. Thanks to Timothy E Baldwin.
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 03 Oct 2018 15:23:27 +0100
+
+bubblewrap (0.3.1-1) unstable; urgency=medium
+
+  [ Simon McVittie ]
+  * Standards-Version: 4.2.1 (no changes required)
+  * New upstream release
+
+  [ Iain Lane ]
+  * Don't install setuid on Ubuntu and derivatives.
+    Ubuntu's kernel enables unprivileged user namespaces, so we don't
+    need to install bwrap setuid there.
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 27 Sep 2018 20:30:53 +0100
+
+bubblewrap (0.3.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Upload to unstable
+    - d/gbp.conf: Switch back to debian/master
+  * Standards-Version: 4.1.5 (no changes required)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 12 Jul 2018 10:03:38 +0100
+
+bubblewrap (0.2.1+5+g5991dab-1) experimental; urgency=medium
+
+  * d/watch: Strip +N+gHHHHHHH snapshot markers from version
+  * d/gbp.conf: Use debian/experimental branch
+  * New upstream git snapshot
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 07 Jun 2018 13:04:18 +0100
+
+bubblewrap (0.2.1-1) unstable; urgency=medium
+
+  * New upstream release
+    - Drop all patches except
+      d/p/debian/Use-Python-3-for-test-demo-code.patch, merged upstream
+  * Standards-Version: 4.1.4 (no changes required)
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 08 Apr 2018 15:42:03 +0100
+
+bubblewrap (0.2.0-4) unstable; urgency=medium
+
+  * Change Vcs-* to point to salsa.debian.org
+  * Standards-Version: 4.1.3 (no changes required)
+  * d/control, d/tests/control,
+    d/p/debian/Use-Python-3-for-test-demo-code.patch:
+    Use Python 3 for tests and demo code
+  * d/control: Annotate python3 dependency with <!nocheck>
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 17 Jan 2018 14:12:50 +0000
+
+bubblewrap (0.2.0-3) unstable; urgency=medium
+
+  * d/patches/0.2.1/userns-block-fd-*.patch: Update patches to match
+    what was merged upstream, with both Python 2 and 3 support
+  * Standards-Version: 4.1.2 (no changes required)
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 15 Dec 2017 15:01:39 +0000
+
+bubblewrap (0.2.0-2) unstable; urgency=medium
+
+  * Build-depend on automake (>= 1.14.1) to avoid backports
+    resolvers sometimes deciding to install automake1.11, which is
+    not enough
+  * Standards-Version: 4.1.1 (no changes required)
+  * Set Rules-Requires-Root: no
+  * d/dist/, d/patches/dist/: Add missing files via a patch instead of
+    shipping them in debian/
+  * Add patches to make demos/userns-block-fd.py work on Debian
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 31 Oct 2017 15:53:05 +0000
+
+bubblewrap (0.2.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/watch: Import release tarballs
+  * d/gbp.conf: Merge upstream git tags into the tarball imports
+  * d/watch: Stop repacking upstream tarballs
+  * d/dist/: Add upstream README.md and demos/ directory, which are
+    missing from the official tarball releases
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 09 Oct 2017 17:31:27 +0100
+
+bubblewrap (0.1.8+git37+g27eb690-1) experimental; urgency=medium
+
+  * d/gbp.conf: Branch for experimental
+  * New upstream snapshot v0.1.8-37-g27eb690
+    - d/copyright: Remove Files-Excluded, the non-DFSG file was removed
+      upstream
+    - d/patches: Remove
+  * d/watch: Adjust to remove +git... suffix
+  * d/tests/upstream-as-root: Re-run upstream tests as root if allowed
+  * d/tests/control: Depend on libcap2-bin, for capsh and getpcaps
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 07 Oct 2017 14:19:53 +0100
+
+bubblewrap (0.1.8+dfsg-1) unstable; urgency=medium
+
+  * Repack tarball to remove CC-BY-ND cat picture (Closes: #876980)
+    - d/copyright: Add Files-Excluded
+    - d/watch: Adjust to add/remove +dfsg suffix
+    - Add patch from upstream removing a link to it from the README
+  * d/watch: Take the opportunity to upgrade to v4 and use @PACKAGE@,
+    @ANY_VERSION@, @ARCHIVE_EXT@ tokens
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Sep 2017 11:47:42 +0100
+
+bubblewrap (0.1.8-3) unstable; urgency=medium
+
+  * Use Perl rather than shell script for the autopkgtest test cases.
+    This avoids needing the uncommon bats package, or writing shell
+    scripts.
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 25 Jul 2017 21:10:13 +0100
+
+bubblewrap (0.1.8-2) unstable; urgency=medium
+
+  * Standards-Version: 4.0.0
+    - Use https URL for format of debian/copyright
+  * Upload to unstable
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 21 Jun 2017 14:14:20 +0100
+
+bubblewrap (0.1.8-1) experimental; urgency=medium
+
+  * New upstream release
+    - Stop trying to run tests/test-basic.sh, it no longer exists
+    - Build-depend on python, one test now needs it
+  * Build-depend on docbook-xml for the documentation DTD
+  * Move to debhelper compat level 10
+    - drop dh-autoreconf, it is now done by default
+    - drop explicit --parallel, it is now the default
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 03 Apr 2017 18:35:44 +0100
+
+bubblewrap (0.1.7-1) unstable; urgency=medium
+
+  * New upstream release
+    - effectively the same as 0.1.6-2
+    - drop all patches
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 19 Jan 2017 14:33:46 +0000
+
+bubblewrap (0.1.6-2) unstable; urgency=medium
+
+  * d/p/Make-the-call-to-setsid-optional-with-new-session.patch:
+    Add patch from upstream to make the setsid() that addresses
+    CVE-2017-5226 optional, because it breaks interactive shells.
+    Users of bubblewrap to confine untrusted programs should either
+    add --new-session to the bwrap command line, or prevent the
+    TIOCSTI ioctl with a seccomp filter instead (as Flatpak does).
+    - d/control: add Breaks on versions of Flatpak that did not
+      load the necessary seccomp filter to prevent CVE-2017-5226
+  * d/p/demos-bubblewrap-shell.sh-Unshare-all-namespaces.patch:
+    Add patch from upstream to improve example code
+  * d/p/Call-setsid-and-setexeccon-befor-forking-the-init-monitor.patch,
+    d/p/Install-seccomp-filter-at-the-very-end.patch:
+    Add patches from upstream to re-order initialization. This means
+    the seccomp filter is no longer required to account for syscalls that
+    are made by bwrap itself.
+  * d/p/Add-unshare-all-and-share-net.patch:
+    Add patch from upstream introducing new command line options
+    --unshare-all and --share-net, for a more whitelist-based approach
+    to sharing namespaces with the parent.
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 18 Jan 2017 00:56:19 +0000
+
+bubblewrap (0.1.6-1) unstable; urgency=medium
+
+  * New upstream release
+    - drop the only patch, applied upstream
+  * debian/patches: update to upstream master for additional fixes
+    to SIGCHLD handling and documentation, and improved hardening
+    against being able to obtain capabilities
+  * debian/bubblewrap.examples: install upstream examples
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 14 Jan 2017 22:18:09 +0000
+
+bubblewrap (0.1.5-2) unstable; urgency=high
+
+  * d/p/Call-setsid-before-executing-sandboxed-code-CVE-2017-5226.patch:
+    Call setsid() before executing sandboxed code, preventing a
+    sandboxed executable invoked with a controlling terminal (for
+    example in Flatpak) from escalating its privileges by injecting
+    keypresses into the controlling terminal with the TIOCSTI
+    ioctl. (Closes: #850702; CVE-2017-5226)
+  * d/control: remove Maintainer status from Laszlo Boszormenyi at his
+    request. Add him to Uploaders instead, and hand the package over
+    to the Utopia Maintenance Team (the same as OSTree and Flatpak).
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 09 Jan 2017 18:09:54 +0000
+
+bubblewrap (0.1.5-1) unstable; urgency=medium
+
+  * New upstream release
+    - drop all patches, applied upstream
+    - debian/copyright: update for build system additions
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 20 Dec 2016 11:25:23 +0000
+
+bubblewrap (0.1.4-2) unstable; urgency=medium
+
+  * d/tests/*: only run tests on a real or virtual machine, not in a
+    container. bubblewrap is effectively already a container, and
+    nesting containers doesn't work particularly well.
+    Unfortunately this means the tests won't work on ci.debian.net,
+    which uses LXC.
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 01 Dec 2016 12:42:33 +0000
+
+bubblewrap (0.1.4-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/p/test-run-be-a-bash-script.patch,
+    d/p/test-run-don-t-assume-we-are-uid-1000.patch,
+    d/p/Adapt-tests-so-they-can-be-run-against-installed-binaries.patch,
+    d/p/Fix-incorrect-nesting-of-backticks-when-finding-a-FUSE-mo.patch:
+    improve the upstream tests
+  * d/tests/upstream: run the upstream tests as autopkgtests
+  * d/rules: Do not enable setuid mode at configure time. If we do, we
+    can't run the build-time tests, and it no longer makes any difference
+    to the actual code. Make the executable setuid via Debian packaging
+    instead.
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 29 Nov 2016 12:55:31 +0000
+
+bubblewrap (0.1.3-1) unstable; urgency=medium
+
+  * New upstream release
+    - bring back --set-hostname, the upstream fix for CVE-2016-8659
+      makes it no longer a vulnerability
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 16 Oct 2016 14:32:11 +0100
+
+bubblewrap (0.1.2-2) unstable; urgency=high
+
+  * Revert addition of --set-hostname as a short-term fix for
+    CVE-2016-8659 (Closes: #840605)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 13 Oct 2016 11:12:38 +0100
+
+bubblewrap (0.1.2-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 09 Sep 2016 09:22:57 +0100
+
+bubblewrap (0.1.1-1) unstable; urgency=medium
+
+  * New upstream release
+    - drop patch, included upstream
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 17 Jul 2016 09:08:35 +0100
+
+bubblewrap (0.1.0-3) unstable; urgency=medium
+
+  * d/control: bubblewrap is Multi-Arch: foreign
+  * Hardening: build as a position-independent executable with
+    eager symbol binding
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 06 Jul 2016 11:07:32 +0100
+
+bubblewrap (0.1.0-2) unstable; urgency=medium
+
+  * Run basic and dev autopkgtests in addition to userns
+  * Really add the regression test for keeping CAP_NET_ADMIN
+  * debian/gbp.conf: add DEP-14-style git-buildpackage configuration
+  * Normalize package lists via `wrap-and-sort -abst`
+  * Add Vcs-Git, Vcs-Browser metadata
+  * d/p/build-put-libraries-in-LDADD-not-LDFLAGS.patch: new patch
+    fixing linking with -Wl,--as-needed (closes: #826787)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 14 Jun 2016 16:28:09 -0400
+
+bubblewrap (0.1.0-1) unstable; urgency=low
+
+  * New upstream release (closes: #826358).
+  * Add watch file.
+  * Add Simon McVittie as uploader.
+
+  [ Simon McVittie <smcv@debian.org> ]
+  * debian/copyright: correct package name and source (closes: #824969)
+  * debian/control: make the whole package Linux-only. Like Flatpak, this
+    package is inherently non-portable.
+  * Move from Section: web to Section: admin
+  * Increase Priority to optional, because this tool is likely to be
+    depended on by gnome-software (via Flatpak) in future
+  * Add some simple autopkgtests, including one for bug 71 (closes: #824968)
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Mon, 06 Jun 2016 17:20:38 +0000
+
+bubblewrap (0~git160513-2) unstable; urgency=low
+
+  * Install bwrap binary setuid (closes: #824646).
+  * Make libselinux1-dev build dependency Linux only.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Thu, 19 May 2016 15:24:35 +0000
+
+bubblewrap (0~git160513-1) unstable; urgency=low
+
+  * Initial upload (closes: #823548).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.org>  Tue, 10 May 2016 08:45:59 +0000

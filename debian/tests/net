@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+# vim:set sw=4 sts=4 et ft=perl:
+
+use strict;
+use warnings;
+use Test::More;
+use IPC::Run qw(run);
+
+sub run_ok {
+    my $argv = shift;
+    my $debug = join(' ', @$argv);
+    ok(run($argv, @_), qq{"$debug" should succeed});
+}
+
+my $out;
+run_ok([qw(bwrap --ro-bind / / --unshare-net /bin/sh -c), "ip link ls"],
+    '<', \undef, '>', \$out);
+
+like($out, qr{^[0-9]+: lo:});
+unlike($out, qr{^[0-9]+: en[^:]*:});
+unlike($out, qr{^[0-9]+: eth[^:]*:});
+unlike($out, qr{^[0-9]+: wlan[^:]*:});
+
+done_testing;
