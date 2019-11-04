@@ -1,0 +1,113 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+include /usr/share/dpkg/architecture.mk
+
+CPPFLAGS = $(shell dpkg-buildflags --get CPPFLAGS) -Wall
+CFLAGS = $(shell dpkg-buildflags --get CFLAGS)
+LDFLAGS = $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
+
+EXTRA_CMAKE_ARGUMENTS =
+
+# Sacrifice speed in order to make it more likely resource limits
+# won't be hit.
+ifeq ($(DEB_BUILD_ARCH_BITS),32)
+	LDFLAGS += -Wl,--no-keep-memory
+endif
+
+# The debug packages produced by webkit are huge and cause problems in
+# most buildds, so use -g1 in all architectures except the ones that
+# are known to work fine
+ifeq (,$(filter $(DEB_HOST_ARCH),amd64 ppc64 ppc64el))
+	CFLAGS := $(CFLAGS:-g=-g1)
+endif
+
+# Use the CLoop Javascript interpreter and disable the JIT. This is
+# slow but it is the most compatible solution for old (non-SSE2) CPUs.
+ifneq (,$(filter $(DEB_HOST_ARCH),i386))
+	EXTRA_CMAKE_ARGUMENTS += -DENABLE_JIT=OFF -DENABLE_C_LOOP=ON
+endif
+
+# See https://bugs.webkit.org/show_bug.cgi?id=197192
+ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+	EXTRA_CMAKE_ARGUMENTS += -DWTF_CPU_ARM64_CORTEXA53=OFF
+endif
+
+# See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81426
+ifneq (,$(filter $(DEB_HOST_ARCH),armhf sh3 sh4 powerpc))
+	CFLAGS := $(CFLAGS:-O2=-O1)
+endif
+
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
+	EXTRA_CMAKE_ARGUMENTS += -DUSE_SYSTEM_MALLOC=ON
+	CPPFLAGS += -DRELEASE_WITHOUT_OPTIMIZATIONS
+endif
+
+ifneq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+	EXTRA_CMAKE_ARGUMENTS += -DENABLE_GTKDOC=OFF
+else
+	EXTRA_CMAKE_ARGUMENTS += -DENABLE_GTKDOC=ON
+endif
+
+ifneq (,$(filter debug,$(DEB_BUILD_OPTIONS)))
+	EXTRA_CMAKE_ARGUMENTS += -DCMAKE_BUILD_TYPE=Debug
+else
+	EXTRA_CMAKE_ARGUMENTS += -DCMAKE_BUILD_TYPE=Release
+	CPPFLAGS += -DNDEBUG -DG_DISABLE_CAST_CHECKS
+endif
+
+# openjpeg2 is not in Ubuntu main yet https://launchpad.net/bugs/711061
+ifeq ($(shell dpkg-vendor --derives-from Ubuntu && echo yes),yes)
+	CPPFLAGS += -DUSER_AGENT_GTK_DISTRIBUTOR_NAME='"Ubuntu"'
+endif
+
+# gstreamer1.0-libav is not in Ubuntu "main"
+override_dh_gencontrol:
+ifeq ($(shell dpkg-vendor --derives-from Ubuntu && echo yes),yes)
+	dh_gencontrol -- -Vgst:Suggests="gstreamer1.0-libav"
+else
+	dh_gencontrol -- -Vgst:Recommends="gstreamer1.0-libav"
+endif
+
+%:
+	dh $@ --with gir --buildsystem=cmake
+
+override_dh_auto_configure:
+	CC=clang-7 \
+	CXX=clang++-7 \
+	CXXFLAGS="$(CFLAGS)" \
+	dh_auto_configure -- \
+	   -DPORT=GTK \
+	   -DCMAKE_INSTALL_LIBEXECDIR=lib/$(DEB_HOST_MULTIARCH) \
+	   -DCMAKE_C_FLAGS_RELEASE="" \
+	   -DCMAKE_C_FLAGS_DEBUG="" \
+	   -DCMAKE_CXX_FLAGS_RELEASE="" \
+	   -DCMAKE_CXX_FLAGS_DEBUG="" \
+	   -DENABLE_MINIBROWSER=ON \
+	   -DUSE_WPE_RENDERER=OFF \
+	   -DENABLE_MEDIA_SOURCE=OFF \
+	   -DUSE_OPENJPEG=OFF \
+	   $(EXTRA_CMAKE_ARGUMENTS)
+
+# Create a dummy doc directory in case the "nodoc" build option is set
+override_dh_install:
+	mkdir -p $(CURDIR)/debian/tmp/usr/share/gtk-doc/html/webkit2gtk-4.0
+	touch $(CURDIR)/debian/tmp/usr/share/gtk-doc/html/webkit2gtk-4.0/index.html
+	dh_install
+
+override_dh_makeshlibs:
+	dh_makeshlibs -plibwebkit2gtk-4.0-37 -Xinjected-bundle
+	dh_makeshlibs -plibjavascriptcoregtk-4.0-18
+
+override_dh_installdocs:
+	dh_installdocs -A NEWS
+
+override_dh_missing:
+	dh_missing --fail-missing
+
+override_dh_builddeb:
+	DEB_BUILD_OPTIONS="$(filter-out parallel=%,$(DEB_BUILD_OPTIONS))" \
+		dh_builddeb
+
+override_dh_auto_test:

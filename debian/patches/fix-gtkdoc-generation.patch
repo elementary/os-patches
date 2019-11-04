@@ -1,0 +1,15 @@
+Subject: Fix gtk-doc generation for stretch-backports
+Forwarded: no
+Index: webkitgtk/Source/WebKit/UIProcess/API/glib/WebKitSettings.cpp
+===================================================================
+--- webkitgtk.orig/Source/WebKit/UIProcess/API/glib/WebKitSettings.cpp
++++ webkitgtk/Source/WebKit/UIProcess/API/glib/WebKitSettings.cpp
+@@ -1501,7 +1501,7 @@ static void webkit_settings_class_init(W
+      * WebKitSettings:enable-media:
+      *
+      * Enable or disable support for media playback on pages. This setting is enabled by
+-     * default. Disabling it means `<audio>`, `<track>` and `<video>` elements will have
++     * default. Disabling it means `audio`, `track` and `video` elements will have
+      * playback support disabled.
+      *
+      * Since: 2.26

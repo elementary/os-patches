@@ -1,0 +1,71 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH jsc 1 "Jan 21, 2014"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+jsc \- command-line JavaScript interpreter.
+.SH SYNOPSIS
+.B jsc
+.RI [ options ]
+.RI [ files ]
+.RI [ \-\-\ arguments ]
+.SH DESCRIPTION
+This manual page documents briefly the
+.B jsc
+command.
+.PP
+\fBjsc\fP is a command-line utility that allows you to run JavaScript
+programs outside of the context of a web browser. It is primarily used
+as part of the test harness for validating the JavaScript portions of
+WebKit, but can also be used as a scripting tool.
+.PP
+\fBjsc\fP can be run in an interactive mode to test out JavaScript
+expressions, or it can be passed one or more files to run similar to
+invoking a Perl or Python script.
+.SH OPTIONS
+.TP
+.B \-e
+Evaluate argument as script code.
+.TP
+.B \-f
+Specifies a source file (deprecated).
+.TP
+.B \-h,\ \-\-help
+Shows summary of command-line options.
+.TP
+.B \-i
+Enables interactive mode (default if no files are specified).
+.TP
+.BI \-p " file"
+Outputs profiling data to a file.
+.TP
+.B \-s
+Installs signal handlers that exit on a crash.
+.TP
+.B \-x
+Output exit code before terminating.
+.TP
+.B \--options
+Dumps all JSC VM options and exits.
+.TP
+.B \-\-dumpOptions
+Dumps all JSC VM options before continuing.
+.TP
+.B \-\-<jsc VM option>=<value>
+Sets the specified JSC VM option.
+.SH AUTHOR
+This manual page was written by Alberto Garcia <berto@igalia.com>,
+based on the contents of \fIhttp://trac.webkit.org/wiki/JSC\fP.

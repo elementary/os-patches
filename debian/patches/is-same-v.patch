@@ -1,0 +1,37 @@
+Subject: Define std::is_same_v and std::is_pod_v when using clang
+Index: webkitgtk/Source/JavaScriptCore/runtime/JSGlobalObject.cpp
+===================================================================
+--- webkitgtk.orig/Source/JavaScriptCore/runtime/JSGlobalObject.cpp
++++ webkitgtk/Source/JavaScriptCore/runtime/JSGlobalObject.cpp
+@@ -229,6 +229,13 @@
+ #include "JSCWrapperMap.h"
+ #endif
+ 
++#if COMPILER(CLANG)
++namespace std {
++    template< class T, class U >
++    inline constexpr bool is_same_v = is_same<T, U>::value;
++}
++#endif
++
+ namespace JSC {
+ 
+ #define CHECK_FEATURE_FLAG_TYPE(capitalName, lowerName, properName, instanceType, jsName, prototypeBase, featureFlag) \
+Index: webkitgtk/Source/JavaScriptCore/b3/B3Type.cpp
+===================================================================
+--- webkitgtk.orig/Source/JavaScriptCore/b3/B3Type.cpp
++++ webkitgtk/Source/JavaScriptCore/b3/B3Type.cpp
+@@ -30,6 +30,13 @@
+ 
+ #include <wtf/PrintStream.h>
+ 
++#if COMPILER(CLANG)
++namespace std {
++    template< class T >
++    inline constexpr bool is_pod_v = is_pod<T>::value;
++}
++#endif
++
+ namespace WTF {
+ 
+ using namespace JSC::B3;

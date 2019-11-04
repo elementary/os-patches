@@ -1,0 +1,143 @@
+From: John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
+Subject: Fix FTBFS on m68k
+Bug-Debian: https://bugs.debian.org/868126
+Last-Update: 2017-07-11
+Index: webkitgtk/Source/WTF/wtf/Platform.h
+===================================================================
+--- webkitgtk.orig/Source/WTF/wtf/Platform.h
++++ webkitgtk/Source/WTF/wtf/Platform.h
+@@ -58,6 +58,11 @@
+ /* ==== CPU() - the target CPU architecture ==== */
+ /* CPU(KNOWN) becomes true if we explicitly support a target CPU. */
+ 
++/* CPU(M68K) - m68k */
++#if defined(__m68k__)
++#define WTF_CPU_BIG_ENDIAN 1
++#endif
++
+ /* CPU(MIPS) - MIPS 32-bit and 64-bit */
+ #if (defined(mips) || defined(__mips__) || defined(MIPS) || defined(_MIPS_) || defined(__mips64))
+ #if defined(_ABI64) && (_MIPS_SIM == _ABI64)
+Index: webkitgtk/Source/WebCore/css/CSSProperty.cpp
+===================================================================
+--- webkitgtk.orig/Source/WebCore/css/CSSProperty.cpp
++++ webkitgtk/Source/WebCore/css/CSSProperty.cpp
+@@ -33,7 +33,11 @@ struct SameSizeAsCSSProperty {
+     void* value;
+ };
+ 
++#if defined(__m68k__)
++COMPILE_ASSERT(sizeof(CSSProperty) <= sizeof(SameSizeAsCSSProperty), CSSProperty_should_stay_small);
++#else
+ COMPILE_ASSERT(sizeof(CSSProperty) == sizeof(SameSizeAsCSSProperty), CSSProperty_should_stay_small);
++#endif
+ 
+ CSSPropertyID StylePropertyMetadata::shorthandID() const
+ {
+Index: webkitgtk/Source/WebCore/dom/ElementRareData.cpp
+===================================================================
+--- webkitgtk.orig/Source/WebCore/dom/ElementRareData.cpp
++++ webkitgtk/Source/WebCore/dom/ElementRareData.cpp
+@@ -56,6 +56,10 @@ struct SameSizeAsElementRareData : NodeR
+ 
+ };
+ 
++#if defined(__m68k__)
++static_assert(sizeof(ElementRareData) <= sizeof(SameSizeAsElementRareData), "ElementRareData should stay small");
++#else
+ static_assert(sizeof(ElementRareData) == sizeof(SameSizeAsElementRareData), "ElementRareData should stay small");
++#endif
+ 
+ } // namespace WebCore
+Index: webkitgtk/Source/WebCore/dom/NodeRareData.cpp
+===================================================================
+--- webkitgtk.orig/Source/WebCore/dom/NodeRareData.cpp
++++ webkitgtk/Source/WebCore/dom/NodeRareData.cpp
+@@ -40,7 +40,11 @@ struct SameSizeAsNodeRareData {
+     void* m_pointer[2];
+ };
+ 
++#if defined(__m68k__)
++COMPILE_ASSERT(sizeof(NodeRareData) <= sizeof(SameSizeAsNodeRareData), NodeRareDataShouldStaySmall);
++#else
+ COMPILE_ASSERT(sizeof(NodeRareData) == sizeof(SameSizeAsNodeRareData), NodeRareDataShouldStaySmall);
++#endif
+ 
+ // Ensure the 10 bits reserved for the m_connectedFrameCount cannot overflow
+ static_assert(Page::maxNumberOfFrames < 1024, "Frame limit should fit in rare data count");
+Index: webkitgtk/Source/WebCore/dom/ShadowRoot.cpp
+===================================================================
+--- webkitgtk.orig/Source/WebCore/dom/ShadowRoot.cpp
++++ webkitgtk/Source/WebCore/dom/ShadowRoot.cpp
+@@ -52,7 +52,11 @@ struct SameSizeAsShadowRoot : public Doc
+     void* slotAssignment;
+ };
+ 
++#if defined(__m68k__)
++COMPILE_ASSERT(sizeof(ShadowRoot) <= sizeof(SameSizeAsShadowRoot), shadowroot_should_stay_small);
++#else
+ COMPILE_ASSERT(sizeof(ShadowRoot) == sizeof(SameSizeAsShadowRoot), shadowroot_should_stay_small);
++#endif
+ 
+ ShadowRoot::ShadowRoot(Document& document, ShadowRootMode type)
+     : DocumentFragment(document, CreateShadowRoot)
+Index: webkitgtk/Source/WebCore/rendering/style/RenderStyle.cpp
+===================================================================
+--- webkitgtk.orig/Source/WebCore/rendering/style/RenderStyle.cpp
++++ webkitgtk/Source/WebCore/rendering/style/RenderStyle.cpp
+@@ -66,7 +66,11 @@ struct SameSizeAsBorderValue {
+     int m_restBits;
+ };
+ 
++#if defined(__m68k__)
++COMPILE_ASSERT(sizeof(BorderValue) <= sizeof(SameSizeAsBorderValue), BorderValue_should_not_grow);
++#else
+ COMPILE_ASSERT(sizeof(BorderValue) == sizeof(SameSizeAsBorderValue), BorderValue_should_not_grow);
++#endif
+ 
+ struct SameSizeAsRenderStyle {
+     void* dataRefs[7];
+@@ -84,7 +88,11 @@ struct SameSizeAsRenderStyle {
+ #endif
+ };
+ 
++#if defined(__m68k__)
++static_assert(sizeof(RenderStyle) <= sizeof(SameSizeAsRenderStyle), "RenderStyle should stay small");
++#else
+ static_assert(sizeof(RenderStyle) == sizeof(SameSizeAsRenderStyle), "RenderStyle should stay small");
++#endif
+ 
+ RenderStyle& RenderStyle::defaultStyle()
+ {
+Index: webkitgtk/Source/WebCore/rendering/style/StyleBoxData.cpp
+===================================================================
+--- webkitgtk.orig/Source/WebCore/rendering/style/StyleBoxData.cpp
++++ webkitgtk/Source/WebCore/rendering/style/StyleBoxData.cpp
+@@ -33,7 +33,11 @@ struct SameSizeAsStyleBoxData : public R
+     uint32_t bitfields;
+ };
+ 
++#if defined(__m68k__)
++COMPILE_ASSERT(sizeof(StyleBoxData) <= sizeof(SameSizeAsStyleBoxData), StyleBoxData_should_not_grow);
++#else
+ COMPILE_ASSERT(sizeof(StyleBoxData) == sizeof(SameSizeAsStyleBoxData), StyleBoxData_should_not_grow);
++#endif
+ 
+ StyleBoxData::StyleBoxData()
+     : m_minWidth(RenderStyle::initialMinSize())
+Index: webkitgtk/Source/WebCore/css/RuleSet.h
+===================================================================
+--- webkitgtk.orig/Source/WebCore/css/RuleSet.h
++++ webkitgtk/Source/WebCore/css/RuleSet.h
+@@ -98,7 +98,11 @@ struct SameSizeAsRuleData {
+     unsigned d[4];
+ };
+ 
++#if defined(__m68k__)
++COMPILE_ASSERT(sizeof(RuleData) <= sizeof(SameSizeAsRuleData), RuleData_should_stay_small);
++#else
+ COMPILE_ASSERT(sizeof(RuleData) == sizeof(SameSizeAsRuleData), RuleData_should_stay_small);
++#endif
+ 
+ class RuleSet {
+     WTF_MAKE_NONCOPYABLE(RuleSet); WTF_MAKE_FAST_ALLOCATED;

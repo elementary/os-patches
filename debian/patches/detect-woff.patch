@@ -1,0 +1,17 @@
+From: Alberto Garcia <berto@igalia.com>
+Subject: Disable USE_WOFF2 if the package is not found
+Forwarded: no
+Index: webkitgtk/Source/cmake/OptionsGTK.cmake
+===================================================================
+--- webkitgtk.orig/Source/cmake/OptionsGTK.cmake
++++ webkitgtk/Source/cmake/OptionsGTK.cmake
+@@ -363,7 +363,8 @@ endif ()
+ if (USE_WOFF2)
+     find_package(WOFF2Dec 1.0.2)
+     if (NOT WOFF2DEC_FOUND)
+-       message(FATAL_ERROR "libwoff2dec is needed for USE_WOFF2.")
++       set(USE_WOFF2 OFF)
++       message(STATUS "libwoff2dec is needed for USE_WOFF2.")
+     endif ()
+ endif ()
+ 

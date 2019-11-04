@@ -1,0 +1,46 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH WebKitWebDriver 1 "Jan 4, 2018"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+WebKitWebDriver \- WebDriver service implementation for WebKitGTK.
+.SH SYNOPSIS
+.B WebKitWebDriver
+.RI [ options ]
+.SH DESCRIPTION
+This manual page documents briefly the
+.B WebKitWebDriver
+command.
+.PP
+WebDriver is an automation API to control a web browser. It allows to
+create automated tests for web applications independently of the
+browser and platform.
+
+The \fBWebKitWebDriver\fP binary provides the WebDriver service
+implementation for WebKitGTK. It works as a server, processing client
+requests to spawn and control the web browser. This driver is not tied
+to any specific browser and can be used with any WebKitGTK-based
+browser, but it uses MiniBrowser as the default.
+.SH OPTIONS
+.TP
+.B \-h,\ \-\-help
+Show summary of command-line options.
+.TP
+.B \-p <port>,\ \-\-port=<port>
+Set the port number that the driver will use.
+.SH AUTHOR
+This manual page was written by Alberto Garcia <berto@igalia.com>,
+based on the contents of \fIhttps://blogs.igalia.com/carlosgc/2017/09/09/webdriver-support-in-webkitgtk-2-18/\fP.

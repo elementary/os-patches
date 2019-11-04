@@ -1,0 +1,19 @@
+From: David Matthew Mattli <dmm@mattli.us>
+Subject: Fix FTBFS in sparc64
+Bug-Debian: https://bugs.debian.org/806816
+Index: webkitgtk/Source/WTF/wtf/Platform.h
+===================================================================
+--- webkitgtk.orig/Source/WTF/wtf/Platform.h
++++ webkitgtk/Source/WTF/wtf/Platform.h
+@@ -114,6 +114,11 @@
+ #define WTF_CPU_KNOWN 1
+ #endif
+ 
++/* CPU(SPARC64) - sparc64 */
++#if defined(__sparc__) && defined(__sparc_v9__)
++#define WTF_CPU_BIG_ENDIAN 1
++#endif
++
+ /* CPU(X86) - i386 / x86 32-bit */
+ #if   defined(__i386__) \
+     || defined(i386)     \

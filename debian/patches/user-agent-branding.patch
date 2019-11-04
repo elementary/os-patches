@@ -1,0 +1,26 @@
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Thu, 26 Feb 2015 21:38:13 -0500
+Subject: user-agent-branding
+
+Add optional distributor string to user agent
+
+https://bugs.webkit.org/show_bug.cgi?id=162611
+https://src.fedoraproject.org/rpms/webkit2gtk3/blob/master/f/user-agent-branding.patch
+---
+ Source/WebCore/platform/glib/UserAgentGLib.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Source/WebCore/platform/glib/UserAgentGLib.cpp b/Source/WebCore/platform/glib/UserAgentGLib.cpp
+index 8eabebe..c50e359 100644
+--- a/Source/WebCore/platform/glib/UserAgentGLib.cpp
++++ b/Source/WebCore/platform/glib/UserAgentGLib.cpp
+@@ -88,6 +88,9 @@ static String buildUserAgentString(const UserAgentQuirks& quirks)
+     else {
+         uaString.append(platformForUAString());
+         uaString.appendLiteral("; ");
++#if defined(USER_AGENT_GTK_DISTRIBUTOR_NAME)
++        uaString.appendLiteral(USER_AGENT_GTK_DISTRIBUTOR_NAME "; ");
++#endif
+         uaString.append(platformVersionForUAString());
+     }
+ 

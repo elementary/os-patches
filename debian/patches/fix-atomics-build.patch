@@ -1,0 +1,17 @@
+From: Alberto Garcia <berto@igalia.com>
+Subject: Use -latomic for WTF if needed; fixes the armel build
+Index: webkitgtk/Source/WTF/wtf/PlatformGTK.cmake
+===================================================================
+--- webkitgtk.orig/Source/WTF/wtf/PlatformGTK.cmake
++++ webkitgtk/Source/WTF/wtf/PlatformGTK.cmake
+@@ -57,6 +57,10 @@ list(APPEND WTF_LIBRARIES
+     ${ZLIB_LIBRARIES}
+ )
+ 
++if (ATOMIC_INT64_REQUIRES_LIBATOMIC)
++    list(APPEND WTF_LIBRARIES atomic)
++endif ()
++
+ list(APPEND WTF_SYSTEM_INCLUDE_DIRECTORIES
+     ${GIO_UNIX_INCLUDE_DIRS}
+     ${GLIB_INCLUDE_DIRS}

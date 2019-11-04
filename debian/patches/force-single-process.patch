@@ -1,0 +1,41 @@
+From: Alberto Garcia <berto@igalia.com>
+Bug: https://bugs.webkit.org/show_bug.cgi?id=201033
+Origin: https://mail.gnome.org/archives/distributor-list/2019-October/msg00000.html
+Description: Force the single-process mode in Evolution and Geary
+ Since WebKitGTK 2.26 the single-process mode is considered a security
+ risk and the process limiting APIs have been completely disabled.
+ This change is transparent for most applications, but Geary and
+ particularly Evolution (see upstream bug #587) are known to have
+ problems in multi-process mode. This has already been fixed in Geary
+ 3.33.91 and in Evolution 3.34.1.
+ .
+ Although the API to set the single-process model is no longer
+ available, it is still possible to do it internally. This patch does
+ that for Evolution and Geary.
+ .
+ This is a temporary workaround and it is especially meant for stable
+ distributions and security updates, where patching or updating the
+ affected apps is not an option.
+Index: webkitgtk/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
+===================================================================
+--- webkitgtk.orig/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
++++ webkitgtk/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
+@@ -348,8 +348,16 @@ ALLOW_DEPRECATED_DECLARATIONS_END
+         configuration.setLocalStorageDirectory(FileSystem::stringFromFileSystemRepresentation(priv->localStorageDirectory.data()));
+ 
+     const char* useSingleWebProcess = getenv("WEBKIT_USE_SINGLE_WEB_PROCESS");
+-    if (useSingleWebProcess && strcmp(useSingleWebProcess, "0"))
+-        configuration.setUsesSingleWebProcess(true);
++    if (useSingleWebProcess) {
++        if (strcmp(useSingleWebProcess, "0")) {
++            configuration.setUsesSingleWebProcess(true);
++        }
++    } else {
++        const char* prgname = g_get_prgname();
++        if (!g_strcmp0(prgname, "evolution") || !g_strcmp0(prgname, "geary")) {
++            configuration.setUsesSingleWebProcess(true);
++        }
++    }
+     priv->processPool = WebProcessPool::create(configuration);
+ 
+     if (!priv->websiteDataManager)
