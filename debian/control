@@ -1,0 +1,56 @@
+Source: xdg-dbus-proxy
+Section: admin
+Priority: optional
+Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
+Uploaders:
+ Simon McVittie <smcv@debian.org>,
+Build-Depends:
+ autoconf-archive,
+ dbus <!nocheck>,
+ debhelper (>= 10),
+ docbook-xml,
+ docbook-xsl,
+ libglib2.0-dev,
+ xsltproc,
+Rules-Requires-Root: no
+Standards-Version: 4.3.0
+Homepage: https://github.com/flatpak/xdg-dbus-proxy
+Vcs-Git: https://salsa.debian.org/debian/xdg-dbus-proxy.git
+Vcs-Browser: https://salsa.debian.org/debian/xdg-dbus-proxy
+
+Package: xdg-dbus-proxy
+Architecture: any
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: filtering D-Bus proxy
+ xdg-dbus-proxy is a filtering proxy for D-Bus connections. It was
+ originally part of the Flatpak project, but it has been broken out as
+ a standalone module to facilitate using it in other contexts, for
+ example in WebKit-GTK's optional bubblewrap-based sandbox.
+ .
+ For this proxy to be useful, restricted D-Bus clients must be denied
+ access to the normal D-Bus socket (for example by using containers or
+ AppArmor rules), and instead given access to the listening Unix socket
+ created by the proxy (typically by bind-mounting it into a Linux
+ container).
+
+Package: xdg-dbus-proxy-tests
+Architecture: any
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+ dbus,
+ xdg-dbus-proxy,
+Recommends:
+ gnome-desktop-testing,
+Description: filtering D-Bus proxy - as-installed tests
+ xdg-dbus-proxy is a filtering proxy for D-Bus connections. It was
+ originally part of the Flatpak project, but it has been broken out as
+ a standalone module to facilitate using it in other contexts, for
+ example in WebKit-GTK's optional bubblewrap-based sandbox.
+ .
+ This package contains as-installed tests, which can be run using
+ autopkgtest or gnome-desktop-testing-runner, or directly.

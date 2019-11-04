@@ -1,0 +1,32 @@
+xdg-dbus-proxy (0.1.1-1) unstable; urgency=medium
+
+  * d/upstream/metadata: Add DEP-12 metadata
+  * New upstream release
+    - Drop all patches, applied upstream
+  * Remove workaround that made sure build-aux/tap-test was executable.
+    Now that it's part of the upstream source and not added by a patch,
+    it already has suitable permissions.
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 20 Jan 2019 11:13:12 +0000
+
+xdg-dbus-proxy (0.1.0-2) unstable; urgency=medium
+
+  * Improve patch metadata
+  * Add patches to facilitate backporting to stretch
+  * Standards-Version: 4.3.0
+  * Use debhelper-compat 12
+  * Ensure that build-aux/tap-test is executable before running tests
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 14 Jan 2019 20:05:06 +0000
+
+xdg-dbus-proxy (0.1.0-1) unstable; urgency=medium
+
+  * Initial release under this name (Closes: #915579).
+    xdg-dbus-proxy was previously flatpak-dbus-proxy, in the flatpak
+    package. It was factored out by the Flatpak upstream developers so
+    that it can be used by packages like webkit2gtk 2.23.x.
+  * Apply patches from upstream git to add a license, --help, a man page
+    and a simple regression test (upstream PRs #2, #3, #5) and to
+    fix a compiler warning (upstream PR #4)
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 12 Dec 2018 14:57:14 +0000
