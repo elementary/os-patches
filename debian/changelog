@@ -1,0 +1,670 @@
+appstream (0.12.9-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.9
+    - Permits cache rebuilds on lower-end 32bit platforms (Closes: #935146)
+  * Update symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Tue, 24 Sep 2019 20:26:24 +0200
+
+appstream (0.12.8-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.8
+  * Clean up the cache directory when migrating from older versions
+  * Drop patch: Applied upstream
+  * Update .symbols file
+  * Bump standards version: No changes needed
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 16 Aug 2019 21:28:34 +0200
+
+appstream (0.12.7-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.7
+  * Upload to unstable
+  * Drop patches: Applied upstream
+  * Update .symbols file
+  * 01_use-fallback-tempdir-if-user-home-does-not-exist.patch:
+    - Fix test failure
+  * Build-depend on LMDB
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 16 Jun 2019 22:16:48 +0200
+
+appstream (0.12.6-2) experimental; urgency=medium
+
+  * Cherry-pick patches from upstream to fix test failures with GLib 2.59
+
+ -- Iain Lane <laney@debian.org>  Tue, 02 Apr 2019 15:03:17 +0100
+
+appstream (0.12.6-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.6
+    - Fulltext search improvements
+    - Support for release artifacts
+  * Update symbols file
+  * Add missing license to d/copyright
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 02 Mar 2019 16:34:54 +0100
+
+appstream (0.12.5-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.5
+  * Drop patch: Applied upstream
+  * Switch to dh compat level 12
+  * Bump standards version: No changes needed
+  * Update symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 26 Jan 2019 18:10:38 +0100
+
+appstream (0.12.4-2) unstable; urgency=medium
+
+  * Add no-invalid-warnings.patch: Don't warn about nonexistent issues
+    on cache refresh.
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 22 Dec 2018 18:36:18 +0100
+
+appstream (0.12.4-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.4
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 22 Dec 2018 18:02:12 +0100
+
+appstream (0.12.3-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.3
+  * Drop all patches: Applied upstream
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 22 Oct 2018 18:44:32 +0200
+
+appstream (0.12.2-2) unstable; urgency=medium
+
+  * Use HTTPS version of homepage URL
+  * cache-explicit-variants.patch: Set explicit variant types when
+    generating the cache, for cases were we may not be able to
+    infer them automatically (Closes: #906538)
+  * apt-ignore-exit-status.patch: Don't return failure on metadata issues,
+    only print a warning and exit normally (Closes: #868018)
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 19 Aug 2018 16:32:23 +0200
+
+appstream (0.12.2-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.2
+    - Fixes autopkgtest by working around Meson/pkg-config bug
+      (Closes: #901299)
+    - Closes a few memory leaks (Closes: #868785)
+  * Bump standards version: No changes needed
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 04 Aug 2018 15:48:52 +0800
+
+appstream (0.12.1-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.1
+  * Drop all patches: Applied upstream
+  * Add build dependency on gperf
+  * Update symbols file
+  * Bump standards version: No changes needed
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 10 Jun 2018 18:46:42 +0200
+
+appstream (0.12.0-3) unstable; urgency=medium
+
+  * load-desktop-data.patch: Load desktop file data properly again
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 06 Apr 2018 21:30:08 +0200
+
+appstream (0.12.0-2) unstable; urgency=medium
+
+  * Make autopkgtest work again
+  * Update d/copyright (Closes: #894856)
+  * icon config: Pull in non-HiDPI config for large icons
+    if large-icon HiDPI config is installed
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 06 Apr 2018 14:12:26 +0200
+
+appstream (0.12.0-1) unstable; urgency=medium
+
+  * New upstream version: 0.12.0
+  * Drop all patches: Applied upstream
+  * Update .symbols file
+  * d/rules: Drop obsolete --parallel flag
+  * Add APT config snippet packages for an easy way of enabling
+    icon downloads for different sizes and HiDPI.
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 04 Apr 2018 18:36:26 +0200
+
+appstream (0.11.8-3) unstable; urgency=medium
+
+  * appstream-doc breaks older appstream package versions (Closes: #888301)
+    - The upstream NEWS file accidentally moved from appstream to
+      appstream-doc, and now that it is there it makes sense to
+      keep it in the -doc package.
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 24 Jan 2018 20:50:20 +0100
+
+appstream (0.11.8-2) unstable; urgency=medium
+
+  * qt-define-locations-nodebug.patch: Allow finding the Qt library
+    for non-debug builds correctly again (Closes: #888144)
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 24 Jan 2018 20:32:40 +0100
+
+appstream (0.11.8-1) unstable; urgency=medium
+
+  * New upstream version: 0.11.8
+  * Update Vcs-* URLs for Salsa migration
+  * Bump dh compat level to 11
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 22 Jan 2018 23:58:02 +0100
+
+appstream (0.11.7-1) unstable; urgency=medium
+
+  * New upstream version: 0.11.7
+  * Drop patches: Applied upstream
+  * Make appstream package suggest curl
+  * Bump standards version: No changes needed
+  * Update .symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 22 Oct 2017 19:52:02 +0200
+
+appstream (0.11.6-2) unstable; urgency=medium
+
+  * fix-screenshot-validate-loop.patch: Fix endless loop when
+    validating screenshots
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 08 Oct 2017 17:17:46 +0200
+
+appstream (0.11.6-1) unstable; urgency=medium
+
+  * New upstream version: 0.11.6
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 02 Oct 2017 22:18:42 +0200
+
+appstream (0.11.5-1) unstable; urgency=medium
+
+  * New upstream version 0.11.5
+    - Makes Qt CMake file work on non-64bit-arches again (Closes: #874169)
+  * Bump standards version: No changes needed
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 04 Sep 2017 18:22:14 +0200
+
+appstream (0.11.4-1) unstable; urgency=medium
+
+  * New upstream version: 0.11.4
+  * Adjust packaging to use the Meson buildsystem
+  * Update .install files
+  * Update .symbols file
+  * Fail on missing files
+  * Trim & update build-dependencies
+    - xmlto is no longer needed
+    - itstool is no longer needed
+    - libgirepository1.0-dev >= 1.53, older versions have bugs
+      breaking the build.
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 30 Aug 2017 19:56:48 +0200
+
+appstream (0.11.3-1) unstable; urgency=medium
+
+  * New upstream version: 0.11.3
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 04 Aug 2017 13:14:34 -0400
+
+appstream (0.11.2-1) unstable; urgency=medium
+
+  * New upstream version: 0.11.2
+  * Update symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Tue, 18 Jul 2017 20:36:34 +0200
+
+appstream (0.11.1-1) unstable; urgency=medium
+
+  * New upstream version: 0.11.1
+  * Update .symbols file
+  * Fix autopkgtest
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 02 Jul 2017 16:32:06 +0200
+
+appstream (0.11.0-1) unstable; urgency=medium
+
+  * New upstream version: 0.11.0
+  * Drop appstream-index transitional package
+  * Drop all patches: Applied upstream
+  * Update symbols file
+  * Bump standards version: No changes needed
+  * Use noawait triggers for cache rebuilds
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 24 Jun 2017 17:35:18 +0200
+
+appstream (0.10.6-2) unstable; urgency=medium
+
+  * vala-deps.patch: Add Vala dependency file
+    - Fixes Vala builds which don't explicitly depend on GIO already.
+  * yaml-serialize-crash.patch: Don't crash when serializing components
+    with a session DBus provides to YAML.
+  * no-cache-if-no-cpts.patch: Don't attempt (and fail) to create a cache
+    if there are no components at all to serialize.
+  * no-gvfsd-root.patch: Ensure gvfsd and friends don't get spawned as
+    root (or at all in case of ascli). (Closes: #852696)
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 08 Mar 2017 20:48:26 +0100
+
+appstream (0.10.6-1) unstable; urgency=medium
+
+  * New upstream version: 0.10.6
+    - APT will no longer download icons by default if
+      there are no GUI frontends available that use them (Closes: #847543)
+    - AppStream GUIs will need to tell APT that they require icons.
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 22 Jan 2017 19:56:54 +0100
+
+appstream (0.10.5-1) unstable; urgency=medium
+
+  * New upstream version: 0.10.5
+    - Uses fnmatch on modalias provides (Closes: #841160)
+    - More verbose error messages on cache update failures (Closes: #820774)
+  * Update symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 22 Dec 2016 18:06:34 +0100
+
+appstream (0.10.4-1) unstable; urgency=medium
+
+  * New upstream version: 0.10.4
+  * Bump debhelper compat level
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 27 Nov 2016 19:14:15 +0100
+
+appstream (0.10.3-1) unstable; urgency=medium
+
+  * New upstream version: 0.10.3
+  * Update Qt package name for API break
+
+ -- Matthias Klumpp <mak@debian.org>  Tue, 01 Nov 2016 16:46:12 +0100
+
+appstream (0.10.2-1) unstable; urgency=medium
+
+  * New upstream version: 0.10.2
+  * Update dependencies
+    - Drop intltool
+    - Add itstool, gettext
+    - Update minimum qtbase version
+  * Update symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 10 Oct 2016 20:05:52 +0200
+
+appstream (0.10.1-2) unstable; urgency=medium
+
+  * Install metainfo file
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 03 Oct 2016 21:12:00 +0200
+
+appstream (0.10.1-1) unstable; urgency=medium
+
+  * New upstream release: 0.10.1
+  * Drop patches: Applied upstream
+  * Fix GIR package name and use GIR dh addon (Closes: #837684)
+  * Add more multiarch metadata
+  * Properly clean up the global cache on purge
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 16 Sep 2016 14:28:38 +0200
+
+appstream (0.10.0-2) unstable; urgency=medium
+
+  * cache-serialization.patch: Correctly (de)serialize screenshot data
+  * yaml-screenshot-image-type.patch: Set correct image type when
+    reading YAML
+  * addons-find-target.patch: Fix addon/target associations
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 31 Aug 2016 22:34:06 +0200
+
+appstream (0.10.0-1) unstable; urgency=medium
+
+  * New upstream release: 0.10.0
+  * Refresh dependencies
+  * Build with stemming support
+  * Drop all patches: Applied upstream
+  * Update symbols file for ABI break
+
+ -- Matthias Klumpp <mak@debian.org>  Tue, 30 Aug 2016 22:48:30 +0200
+
+appstream (0.9.8-4) unstable; urgency=medium
+
+  * cache-translate-urls.patch: Make cache aware of
+    'translate' URLs (LP: #1614375)
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 18 Aug 2016 20:28:56 +0200
+
+appstream (0.9.8-3) unstable; urgency=medium
+
+  * Fix cache update in postinst (Closes: #834136)
+  * unittest-32bit-fix.patch: Fix build on 32bit architectures
+    (Closes: #834124)
+
+ -- Matthias Klumpp <mak@debian.org>  Tue, 16 Aug 2016 19:19:02 +0200
+
+appstream (0.9.8-2) unstable; urgency=medium
+
+  * unittest-arm-fix.patch: Resolve FTBFS on ARM due to
+    failing unittests
+  * Make libas-dev package depend on the GIR
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 11 Aug 2016 20:02:18 +0200
+
+appstream (0.9.8-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.8
+  * Update symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 10 Aug 2016 22:48:52 +0200
+
+appstream (0.9.7-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.7
+  * Update package descriptions
+  * Update .symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 20 Jul 2016 16:58:46 +0200
+
+appstream (0.9.6-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.6
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 12 May 2016 18:44:26 +0200
+
+appstream (0.9.5-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.5
+  * Drop patches: Applied upstream
+  * Update .symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 02 May 2016 18:48:14 +0200
+
+appstream (0.9.4-2) unstable; urgency=medium
+
+  * Update .symbols file
+  * iconfinding-refactor.patch: Update iconfinding code,
+    resolves double-free issue (Closes: #822317)
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 22 Apr 2016 17:08:14 +0200
+
+appstream (0.9.4-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.4
+    - Closes: #820126
+  * Fix autopkgtest
+  * Update .symbols file
+  * Bump standards version: No changes needed
+  * Use secure Vcs-* URLs
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 18 Apr 2016 16:24:42 +0200
+
+appstream (0.9.3-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.3
+  * Update symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 24 Mar 2016 19:26:44 +0100
+
+appstream (0.9.2-2) unstable; urgency=medium
+
+  * Update symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 28 Feb 2016 21:48:52 +0100
+
+appstream (0.9.2-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.2
+  * Update debian/copyright
+  * libappstream: Update .symbols file
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 28 Feb 2016 16:10:10 +0100
+
+appstream (0.9.1-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.1
+  * Drop all patches: Applied upstream
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 04 Feb 2016 17:27:02 +0100
+
+appstream (0.9.0-3) unstable; urgency=medium
+
+  * Always keep metadata GZip compressed
+    - Adds compatibility with APT >= 1.2
+  * Fix test for ascli in APT post-update hook (Closes: #810832)
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 14 Jan 2016 21:26:50 +0100
+
+appstream (0.9.0-2) unstable; urgency=medium
+
+  * Ensure all data generated by AppStream gets removed on purge
+  * Improve the package descriptions slightly
+  * Don't print status message on apt update (Closes: #807976)
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 16 Dec 2015 22:48:34 +0100
+
+appstream (0.9.0-1) unstable; urgency=medium
+
+  * New upstream release: 0.9.0
+  * Adjust to libappstream ABI break
+  * Enable APT support
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 12 Dec 2015 18:44:38 +0100
+
+appstream (0.8.6-1) unstable; urgency=medium
+
+  * New upstream release: 0.8.6
+  * Drop all patches: Applied upstream
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 06 Nov 2015 14:20:08 +0100
+
+appstream (0.8.5-2) unstable; urgency=medium
+
+  * Don't have libappstream recommend the appstream package
+    - The library is useful even without having a cache built.
+      Ṕackages which need the cache and/or the AppStream utilities
+      need to explicitly depend on the "appstream" package now.
+  * Don't print errors when updating data
+  * Build the Vala API as well
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 28 Oct 2015 19:46:24 +0100
+
+appstream (0.8.5-1) unstable; urgency=medium
+
+  * New upstream release: 0.8.5
+  * Update dependencies
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 14 Oct 2015 18:45:48 +0200
+
+appstream (0.8.4-1) unstable; urgency=medium
+
+  * New upstream release: 0.8.4
+
+ -- Matthias Klumpp <mak@debian.org>  Tue, 08 Sep 2015 20:40:36 +0200
+
+appstream (0.8.3-2) unstable; urgency=medium
+
+  * Bring back appstream-index package, needed for proper upgrades
+  * Suggest dep11-tools
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 30 Aug 2015 16:04:16 +0200
+
+appstream (0.8.3-1) unstable; urgency=medium
+
+  * New upstream release: 0.8.3
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 28 Aug 2015 22:42:11 +0200
+
+appstream (0.8.2-2) unstable; urgency=medium
+
+  * Include changelog file
+  * Fix debian/copyright
+  * Rename appstream-index package to appstream
+
+ -- Matthias Klumpp <mak@debian.org>  Tue, 25 Aug 2015 22:24:08 +0200
+
+appstream (0.8.2-1) unstable; urgency=medium
+
+  * New upstream release: 0.8.2
+    - Closes: #783392
+    - This release drops support for Ubuntu AppInstall.
+      Having DEP-11 YAML or AppStream XML is now mandatory.
+  * Fix the package tests
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 28 Jun 2015 18:56:06 +0200
+
+appstream (0.8.0-2) unstable; urgency=medium
+
+  * Upload to unstable
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 21 Jun 2015 12:06:14 +0200
+
+appstream (0.8.0-1) experimental; urgency=medium
+
+  * New upstream release: 0.8.0
+  * The Qt library is now built against Qt5 by default
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 26 Jan 2015 20:16:54 +0100
+
+appstream (0.7.6-1) experimental; urgency=medium
+
+  * New upstream release: 0.7.6
+  * Adjust packaging to soname change
+  * Drop all patches: Applied upstream
+  * Adjust autopkgtest
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 14 Jan 2015 21:16:08 +0100
+
+appstream (0.7.4-2) unstable; urgency=medium
+
+  * Fix memory leak while parsing DEP-11 data
+  * Return the right component name, instead of the origin
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 24 Nov 2014 21:28:34 +0100
+
+appstream (0.7.4-1) unstable; urgency=medium
+
+  * New upstream release: 0.7.4
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 30 Oct 2014 18:42:06 +0100
+
+appstream (0.7.3-1) unstable; urgency=medium
+
+  * New upstream bugfix release: 0.7.3
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 10 Oct 2014 16:10:34 +0200
+
+appstream (0.7.2-1) unstable; urgency=medium
+
+  * New upstream release: 0.7.2
+  * Add very simple autopkgtest
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 22 Sep 2014 16:14:28 +0200
+
+appstream (0.7.1-1) unstable; urgency=medium
+
+  * New upstream release: 0.7.1
+    - Closes: #760654
+  * Drop patches: Applied upstream
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 08 Sep 2014 18:40:56 +0200
+
+appstream (0.7.0-2) unstable; urgency=medium
+
+  * appstream-doc: Install the whole AppStream documentation
+  * Make appstream-index recommendation less strict (Closes: #755393)
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 20 Jul 2014 21:04:48 +0200
+
+appstream (0.7.0-1) unstable; urgency=medium
+
+  * New upstream release: 0.7.0
+  * Update project homepage url
+  * Enable docs and qt library
+  * asqt_installpaths.patch: Install Qt library to multiarch paths
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 16 Jul 2014 16:24:48 +0200
+
+appstream (0.6.2-1) unstable; urgency=medium
+
+  * New upstream bugfix release: 0.6.2
+  * Force-upgrade database on package installation,
+    instead of doing a deferred upgrade
+
+ -- Matthias Klumpp <mak@debian.org>  Mon, 12 May 2014 18:40:58 +0200
+
+appstream (0.6.1-1) unstable; urgency=low
+
+  * New upstream release: 0.6.1
+  * Drop all patches: Applied upstream
+  * Bump standards version: No changes needed
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 26 Apr 2014 18:42:14 +0200
+
+appstream (0.6.0-1) unstable; urgency=low
+
+  * New upstream release: 0.6
+  * fix-pkgconfig.patch: Fix prefix in libappstream pkg-config file
+
+ -- Matthias Klumpp <mak@debian.org>  Wed, 16 Apr 2014 20:44:36 +0200
+
+appstream (0.5.0-1) unstable; urgency=low
+
+  * New upstream release: 0.5
+  * Simplify rebuild-trigger in postinst script
+  * Remove obsolete config-file (Closes: #727121)
+  * Tighten dependency on GLib
+  * Drop all patches: Applied upstream
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 23 Feb 2014 20:34:26 +0100
+
+appstream (0.4.0-1) unstable; urgency=low
+
+  * New upstream release: 0.4.0
+  * Update descriptions
+  * Install pc-file into multiarch libdir
+  * Touch AppStream dirs after update, so we schedule a cache rebuild
+
+ -- Matthias Klumpp <mak@debian.org>  Sun, 20 Oct 2013 18:40:26 +0200
+
+appstream (0.3.1-3) unstable; urgency=low
+
+  * Tighten dependency on libappstream0 (Closes: #714513)
+  * Add AppStream app-info dir to trigger
+  * Install missing config file
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 11 Jul 2013 18:15:25 +0200
+
+appstream (0.3.1-2) unstable; urgency=low
+
+  * Don't automatically refresh cache after installation (Closes: #703513)
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 29 Jun 2013 21:28:52 +0200
+
+appstream (0.3.1-1) unstable; urgency=low
+
+  * Update debian/watch file
+  * New upstream release: 0.3.1
+  * Drop all patches: Applied upstream
+
+ -- Matthias Klumpp <mak@debian.org>  Fri, 28 Jun 2013 17:52:08 +0200
+
+appstream (0.2.0-2) unstable; urgency=low
+
+  * Fix debian/watch file
+  * Fix database path
+  * Add dependency on PolicyKit (Closes: #703513)
+  * db_missing.patch: Create database if it is missing
+  * uai_failsafe.patch: Make UAI a bit more failsafe
+
+ -- Matthias Klumpp <mak@debian.org>  Thu, 21 Mar 2013 14:04:45 +0100
+
+appstream (0.2.0-1) unstable; urgency=low
+
+  * New upstream release: 0.2
+  * Fix override disparity
+  * Change mail to my Debian address
+
+ -- Matthias Klumpp <mak@debian.org>  Tue, 19 Mar 2013 21:42:32 +0100
+
+appstream (0.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #689998)
+
+ -- Matthias Klumpp <matthias@tenstral.net>  Mon, 08 Oct 2012 20:57:15 +0200

@@ -1,0 +1,49 @@
+option('stemming',
+       type : 'boolean',
+       value : true,
+       description : 'Use stemming while searching. Requires Snowball (libstemmer)'
+)
+option('vapi',
+       type : 'boolean',
+       value : false,
+       description : 'Create and install a Vala API file. Requires "gir" to be enabled as well'
+)
+option('qt',
+       type : 'boolean',
+       value : false,
+       description : 'Build libappstream-qt'
+)
+option('docs',
+       type : 'boolean',
+       value : false,
+       description : 'Build documentation for API and specification'
+)
+option('apidocs',
+       type : 'boolean',
+       value : true,
+       description : 'Build API documentation (automatically enabled when "-Ddocs=true" is passed)'
+)
+option('install-docs',
+       type : 'boolean',
+       value : true,
+       description : 'Install documentation for API and specification'
+)
+option('apt-support',
+       type : 'boolean',
+       value : false,
+       description : 'Enable integration with APT on Debian'
+)
+option('gir',
+       type : 'boolean',
+       value : true,
+       description : 'Build introspection data'
+)
+
+#
+# For development
+#
+option('maintainer',
+       type : 'boolean',
+       value : false,
+       description : 'Enable maintainer mode (use strict compiler flags, e.g. -Werror)'
+)

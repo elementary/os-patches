@@ -1,0 +1,1385 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
+ * Copyright (C) 2012-2015 Matthias Klumpp <matthias@tenstral.net>
+ *
+ * Licensed under the GNU Lesser General Public License Version 2.1
+ *
+ * This library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 2.1 of the license, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <glib.h>
+#include <glib/gprintf.h>
+
+#include "appstream.h"
+#include "as-metadata.h"
+#include "as-test-utils.h"
+
+static gchar *datadir = NULL;
+
+/**
+ * test_basic:
+ *
+ * Test basic functions related to YAML processing.
+ */
+static void
+test_basic (void)
+{
+	g_autoptr(AsMetadata) mdata = NULL;
+	gchar *path;
+	GFile *file;
+	GPtrArray *cpts;
+	guint i;
+	AsComponent *cpt_tomatoes = NULL;
+	GError *error = NULL;
+
+	mdata = as_metadata_new ();
+	as_metadata_set_locale (mdata, "C");
+	as_metadata_set_format_style (mdata, AS_FORMAT_STYLE_COLLECTION);
+
+	path = g_build_filename (datadir, "dep11-0.8.yml", NULL);
+	file = g_file_new_for_path (path);
+	g_free (path);
+
+	as_metadata_parse_file (mdata, file, AS_FORMAT_KIND_YAML, &error);
+	g_object_unref (file);
+	g_assert_no_error (error);
+
+	cpts = as_metadata_get_components (mdata);
+	g_assert_cmpint (cpts->len, ==, 8);
+
+	for (i = 0; i < cpts->len; i++) {
+		AsComponent *cpt = AS_COMPONENT (g_ptr_array_index (cpts, i));
+		g_assert (as_component_is_valid (cpt));
+
+		if (g_strcmp0 (as_component_get_name (cpt), "I Have No Tomatoes") == 0)
+			cpt_tomatoes = cpt;
+	}
+
+	/* just check one of the components... */
+	g_assert_nonnull (cpt_tomatoes);
+	g_assert_cmpstr (as_component_get_summary (cpt_tomatoes), ==, "How many tomatoes can you smash in ten short minutes?");
+	g_assert_cmpstr (as_component_get_pkgnames (cpt_tomatoes)[0], ==, "tomatoes");
+}
+
+static AsScreenshot*
+test_h_create_dummy_screenshot (void)
+{
+	AsScreenshot *scr;
+	AsImage *img;
+
+	scr = as_screenshot_new ();
+	as_screenshot_set_caption (scr, "The FooBar mainwindow", "C");
+	as_screenshot_set_caption (scr, "Le FooBar mainwindow", "fr");
+
+	img = as_image_new ();
+	as_image_set_kind (img, AS_IMAGE_KIND_SOURCE);
+	as_image_set_width (img, 840);
+	as_image_set_height (img, 560);
+	as_image_set_url (img, "https://example.org/images/foobar-full.png");
+	as_screenshot_add_image (scr, img);
+	g_object_unref (img);
+
+	img = as_image_new ();
+	as_image_set_kind (img, AS_IMAGE_KIND_THUMBNAIL);
+	as_image_set_width (img, 400);
+	as_image_set_height (img, 200);
+	as_image_set_url (img, "https://example.org/images/foobar-small.png");
+	as_screenshot_add_image (scr, img);
+	g_object_unref (img);
+
+	img = as_image_new ();
+	as_image_set_kind (img, AS_IMAGE_KIND_THUMBNAIL);
+	as_image_set_width (img, 210);
+	as_image_set_height (img, 120);
+	as_image_set_url (img, "https://example.org/images/foobar-smaller.png");
+	as_screenshot_add_image (scr, img);
+	g_object_unref (img);
+
+	return scr;
+}
+
+/**
+ * as_yaml_test_serialize:
+ *
+ * Helper function for other tests.
+ */
+static gchar*
+as_yaml_test_serialize (AsComponent *cpt)
+{
+	gchar *data;
+	g_autoptr(AsMetadata) metad = NULL;
+	GError *error = NULL;
+
+	metad = as_metadata_new ();
+	as_metadata_set_locale (metad, "ALL");
+	as_metadata_add_component (metad, cpt);
+	as_metadata_set_write_header (metad, TRUE);
+
+	data = as_metadata_components_to_collection (metad, AS_FORMAT_KIND_YAML, &error);
+	g_assert_no_error (error);
+
+	return data;
+}
+
+/**
+ * test_yamlwrite:
+ *
+ * Test writing a YAML document.
+ */
+static void
+test_yamlwrite_general (void)
+{
+	guint i;
+	g_autoptr(AsMetadata) metad = NULL;
+	g_autoptr(AsScreenshot) scr = NULL;
+	g_autoptr(AsRelease) rel1 = NULL;
+	g_autoptr(AsRelease) rel2 = NULL;
+	g_autoptr(AsBundle) bdl = NULL;
+	AsIssue *issue;
+	g_autofree gchar *resdata = NULL;
+	AsComponent *cpt = NULL;
+	GError *error = NULL;
+	gchar *_PKGNAME1[2] = {"fwdummy", NULL};
+	gchar *_PKGNAME2[2] = {"foobar-pkg", NULL};
+
+	const gchar *expected_yaml = "---\n"
+				"File: DEP-11\n"
+				"Version: '0.12'\n"
+				"---\n"
+				"Type: firmware\n"
+				"ID: org.example.test.firmware\n"
+				"Package: fwdummy\n"
+				"Extends:\n"
+				"- org.example.alpha\n"
+				"- org.example.beta\n"
+				"Name:\n"
+				"  de_DE: Ünittest Fürmwäre (dummy Eintrag)\n"
+				"  C: Unittest Firmware\n"
+				"Summary:\n"
+				"  C: Just part of an unittest.\n"
+				"Url:\n"
+				"  homepage: https://example.com\n"
+				"---\n"
+				"Type: desktop-application\n"
+				"ID: org.freedesktop.foobar.desktop\n"
+				"Package: foobar-pkg\n"
+				"Name:\n"
+				"  C: TEST!!\n"
+				"Summary:\n"
+				"  C: Just part of an unittest.\n"
+				"Icon:\n"
+				"  cached:\n"
+				"  - name: test_writetest.png\n"
+				"    width: 20\n"
+				"    height: 20\n"
+				"  - name: test_writetest.png\n"
+				"    width: 40\n"
+				"    height: 40\n"
+				"  stock: yml-writetest\n"
+				"Bundles:\n"
+				"- type: flatpak\n"
+				"  id: foobar\n"
+				"Screenshots:\n"
+				"- caption:\n"
+				"    fr: Le FooBar mainwindow\n"
+				"    C: The FooBar mainwindow\n"
+				"  thumbnails:\n"
+				"  - url: https://example.org/images/foobar-small.png\n"
+				"    width: 400\n"
+				"    height: 200\n"
+				"  - url: https://example.org/images/foobar-smaller.png\n"
+				"    width: 210\n"
+				"    height: 120\n"
+				"  source-image:\n"
+				"    url: https://example.org/images/foobar-full.png\n"
+				"    width: 840\n"
+				"    height: 560\n"
+				"Languages:\n"
+				"- locale: de_DE\n"
+				"  percentage: 84\n"
+				"- locale: en_GB\n"
+				"  percentage: 100\n"
+				"Releases:\n"
+				"- version: '1.2'\n"
+				"  type: stable\n"
+				"  unix-timestamp: 1462288512\n"
+				"  urgency: medium\n"
+				"  description:\n"
+				"    C: >-\n"
+				"      <p>The CPU no longer overheats when you hold down spacebar.</p>\n"
+				"  issues:\n"
+				"  - id: bz#12345\n"
+				"    url: https://example.com/bugzilla/12345\n"
+				"  - type: cve\n"
+				"    id: CVE-2019-123456\n"
+				"- version: '1.0'\n"
+				"  type: development\n"
+				"  unix-timestamp: 1460463132\n"
+				"  description:\n"
+				"    de_DE: >-\n"
+				"      <p>Großartige erste Veröffentlichung.</p>\n"
+				"\n"
+				"      <p>Zweite zeile.</p>\n"
+				"    C: >-\n"
+				"      <p>Awesome initial release.</p>\n"
+				"\n"
+				"      <p>Second paragraph.</p>\n"
+				"  url:\n"
+				"    details: https://example.org/releases/1.0.html\n"
+				"---\n"
+				"Type: generic\n"
+				"ID: org.example.ATargetComponent\n"
+				"Merge: replace\n"
+				"Name:\n"
+				"  C: ReplaceThis!\n";
+
+	metad = as_metadata_new ();
+
+	/* firmware component */
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_FIRMWARE);
+	as_component_set_id (cpt, "org.example.test.firmware");
+	as_component_set_pkgnames (cpt, _PKGNAME1);
+	as_component_set_name (cpt, "Unittest Firmware", "C");
+	as_component_set_name (cpt, "Ünittest Fürmwäre (dummy Eintrag)", "de_DE");
+	as_component_set_summary (cpt, "Just part of an unittest.", "C");
+	as_component_add_extends (cpt, "org.example.alpha");
+	as_component_add_extends (cpt, "org.example.beta");
+	as_component_add_url (cpt, AS_URL_KIND_HOMEPAGE, "https://example.com");
+	as_metadata_add_component (metad, cpt);
+	g_object_unref (cpt);
+
+	/* component with icons, screenshots and release descriptions */
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_DESKTOP_APP);
+	as_component_set_id (cpt, "org.freedesktop.foobar.desktop");
+	as_component_set_pkgnames (cpt, _PKGNAME2);
+	as_component_set_name (cpt, "TEST!!", "C");
+	as_component_set_summary (cpt, "Just part of an unittest.", "C");
+	as_component_add_language (cpt, "en_GB", 100);
+	as_component_add_language (cpt, "de_DE", 84);
+	scr = test_h_create_dummy_screenshot ();
+	as_component_add_screenshot (cpt, scr);
+
+	for (i = 1; i <= 3; i++) {
+		g_autoptr(AsIcon) icon = NULL;
+
+		icon = as_icon_new ();
+		if (i != 3)
+			as_icon_set_kind (icon, AS_ICON_KIND_CACHED);
+		else
+			as_icon_set_kind (icon, AS_ICON_KIND_STOCK);
+		as_icon_set_width (icon, i * 20);
+		as_icon_set_height (icon, i * 20);
+
+		if (i != 3)
+			as_icon_set_filename (icon, "test_writetest.png");
+		else
+			as_icon_set_filename (icon, "yml-writetest");
+
+		as_component_add_icon (cpt, icon);
+	}
+
+	rel1 = as_release_new ();
+	as_release_set_version (rel1, "1.0");
+	as_release_set_kind (rel1, AS_RELEASE_KIND_DEVELOPMENT);
+	as_release_set_timestamp (rel1, 1460463132);
+	as_release_set_description (rel1, "<p>Awesome initial release.</p>\n<p>Second paragraph.</p>", "C");
+	as_release_set_description (rel1, "<p>Großartige erste Veröffentlichung.</p>\n<p>Zweite zeile.</p>", "de_DE");
+	as_release_set_url (rel1, AS_RELEASE_URL_KIND_DETAILS, "https://example.org/releases/1.0.html");
+	as_component_add_release (cpt, rel1);
+
+	rel2 = as_release_new ();
+	as_release_set_version (rel2, "1.2");
+	as_release_set_timestamp (rel2, 1462288512);
+	as_release_set_description (rel2, "<p>The CPU no longer overheats when you hold down spacebar.</p>", "C");
+	as_release_set_urgency (rel2, AS_URGENCY_KIND_MEDIUM);
+	as_component_add_release (cpt, rel2);
+
+	/* issues */
+	issue = as_issue_new ();
+	as_issue_set_id (issue, "bz#12345");
+	as_issue_set_url (issue, "https://example.com/bugzilla/12345");
+	as_release_add_issue (rel2, issue);
+	g_object_unref (issue);
+
+	issue = as_issue_new ();
+	as_issue_set_kind (issue, AS_ISSUE_KIND_CVE);
+	as_issue_set_id (issue, "CVE-2019-123456");
+	as_release_add_issue (rel2, issue);
+	g_object_unref (issue);
+
+	/* bundle */
+	bdl = as_bundle_new ();
+	as_bundle_set_kind (bdl, AS_BUNDLE_KIND_FLATPAK);
+	as_bundle_set_id (bdl, "foobar");
+	as_component_add_bundle (cpt, bdl);
+
+	as_metadata_add_component (metad, cpt);
+	g_object_unref (cpt);
+
+	/* merge component */
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_merge_kind (cpt, AS_MERGE_KIND_REPLACE);
+	as_component_set_id (cpt, "org.example.ATargetComponent");
+	as_component_set_name (cpt, "ReplaceThis!", "C");
+	as_metadata_add_component (metad, cpt);
+	g_object_unref (cpt);
+
+	/* serialize and validate */
+	resdata = as_metadata_components_to_collection (metad, AS_FORMAT_KIND_YAML, &error);
+	g_assert_no_error (error);
+
+	g_assert (as_test_compare_lines (resdata, expected_yaml));
+}
+
+/**
+ * as_yaml_test_read_data:
+ *
+ * Helper function to read a single component from YAML data.
+ */
+static AsComponent*
+as_yaml_test_read_data (const gchar *data, GError **error)
+{
+	AsComponent *cpt;
+	g_autoptr(AsMetadata) metad = NULL;
+
+	metad = as_metadata_new ();
+	as_metadata_set_locale (metad, "ALL");
+	as_metadata_set_format_style (metad, AS_FORMAT_STYLE_COLLECTION);
+
+	if (error == NULL) {
+		g_autoptr(GError) local_error = NULL;
+		as_metadata_parse (metad, data, AS_FORMAT_KIND_YAML, &local_error);
+		g_assert_no_error (local_error);
+
+		g_assert_cmpint (as_metadata_get_components (metad)->len, >, 0);
+		cpt = AS_COMPONENT (g_ptr_array_index (as_metadata_get_components (metad), 0));
+
+		return g_object_ref (cpt);
+	} else {
+		as_metadata_parse (metad, data, AS_FORMAT_KIND_YAML, error);
+
+		if (as_metadata_get_components (metad)->len > 0) {
+			cpt = AS_COMPONENT (g_ptr_array_index (as_metadata_get_components (metad), 0));
+			return g_object_ref (cpt);
+		} else {
+			return NULL;
+		}
+	}
+}
+
+/**
+ * test_yaml_read_icons:
+ *
+ * Test reading the Icons field.
+ */
+static void
+test_yaml_read_icons (void)
+{
+	guint i;
+	GPtrArray *icons;
+	g_autoptr(AsComponent) cpt = NULL;
+
+	const gchar *yamldata_icons_legacy = "---\n"
+					"ID: org.example.Test\n"
+					"Icon:\n"
+					"  cached: test_test.png\n"
+					"  stock: test\n";
+	const gchar *yamldata_icons_current = "---\n"
+					"ID: org.example.Test\n"
+					"Icon:\n"
+					"  cached:\n"
+					"    - width: 64\n"
+					"      height: 64\n"
+					"      name: test_test.png\n"
+					"    - width: 64\n"
+					"      height: 64\n"
+					"      name: test_test.png\n"
+					"      scale: 2\n"
+					"    - width: 128\n"
+					"      height: 128\n"
+					"      name: test_test.png\n"
+					"  stock: test\n";
+	const gchar *yamldata_icons_single = "---\n"
+					"ID: org.example.Test\n"
+					"Icon:\n"
+					"  cached:\n"
+					"    - width: 64\n"
+					"      height: 64\n"
+					"      name: single_test.png\n";
+
+	/* check the legacy icons */
+	cpt = as_yaml_test_read_data (yamldata_icons_legacy, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.Test");
+
+	icons = as_component_get_icons (cpt);
+	g_assert_cmpint (icons->len, ==, 2);
+	for (i = 0; i < icons->len; i++) {
+		AsIcon *icon = AS_ICON (g_ptr_array_index (icons, i));
+
+		if (as_icon_get_kind (icon) == AS_ICON_KIND_CACHED)
+			g_assert_cmpstr (as_icon_get_filename (icon), ==, "test_test.png");
+		if (as_icon_get_kind (icon) == AS_ICON_KIND_STOCK)
+			g_assert_cmpstr (as_icon_get_name (icon), ==, "test");
+	}
+
+	/* check the new style icons tag */
+	g_object_unref (cpt);
+	cpt = as_yaml_test_read_data (yamldata_icons_current, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.Test");
+
+	icons = as_component_get_icons (cpt);
+	g_assert_cmpint (icons->len, ==, 4);
+	for (i = 0; i < icons->len; i++) {
+		AsIcon *icon = AS_ICON (g_ptr_array_index (icons, i));
+
+		if (as_icon_get_kind (icon) == AS_ICON_KIND_CACHED)
+			g_assert_cmpstr (as_icon_get_filename (icon), ==, "test_test.png");
+		if (as_icon_get_kind (icon) == AS_ICON_KIND_STOCK)
+			g_assert_cmpstr (as_icon_get_name (icon), ==, "test");
+	}
+
+	g_assert_nonnull (as_component_get_icon_by_size (cpt, 64, 64));
+	g_assert_nonnull (as_component_get_icon_by_size (cpt, 128, 128));
+
+	/* check a component with just a single icon */
+	g_object_unref (cpt);
+	cpt = as_yaml_test_read_data (yamldata_icons_single, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.Test");
+
+	icons = as_component_get_icons (cpt);
+	g_assert_cmpint (icons->len, ==, 1);
+	g_assert_cmpstr (as_icon_get_filename (AS_ICON (g_ptr_array_index (icons, 0))), ==, "single_test.png");
+}
+
+/**
+ * test_yaml_read_languages:
+ *
+ * Test if reading the Languages field works.
+ */
+static void
+test_yaml_read_languages (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	const gchar *yamldata_languages = "---\n"
+					"ID: org.example.Test\n"
+					"Languages:\n"
+					"  - locale: de_DE\n"
+					"    percentage: 48\n"
+					"  - locale: en_GB\n"
+					"    percentage: 100\n";
+
+	cpt = as_yaml_test_read_data (yamldata_languages, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.Test");
+
+	g_assert_cmpint (as_component_get_language (cpt, "de_DE"), ==, 48);
+	g_assert_cmpint (as_component_get_language (cpt, "en_GB"), ==, 100);
+	g_assert_cmpint (as_component_get_language (cpt, "invalid_C"), ==, -1);
+}
+
+/**
+ * test_yaml_read_url:
+ *
+ * Test if reading the Url field works.
+ */
+static void
+test_yaml_read_url (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	const gchar *yamldata_urls = "---\n"
+				     "ID: org.example.Test\n"
+				     "Url:\n"
+				     "  homepage: https://example.org\n"
+				     "  faq: https://example.org/faq\n"
+				     "  donation: https://example.org/donate\n"
+				     "  contact: https://example.org/contact\n";
+
+	cpt = as_yaml_test_read_data (yamldata_urls, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.Test");
+
+	g_assert_cmpstr (as_component_get_url (cpt, AS_URL_KIND_HOMEPAGE), ==, "https://example.org");
+	g_assert_cmpstr (as_component_get_url (cpt, AS_URL_KIND_FAQ), ==, "https://example.org/faq");
+	g_assert_cmpstr (as_component_get_url (cpt, AS_URL_KIND_DONATION), ==, "https://example.org/donate");
+	g_assert_cmpstr (as_component_get_url (cpt, AS_URL_KIND_CONTACT), ==, "https://example.org/contact");
+}
+
+/**
+ * test_yaml_corrupt_data:
+ *
+ * Test reading of a broken YAML document.
+ */
+static void
+test_yaml_corrupt_data (void)
+{
+	g_autoptr(GError) error = NULL;
+	g_autoptr(AsComponent) cpt = NULL;
+	const gchar *yamldata_corrupt = "---\n"
+					"ID: org.example.Test\n"
+					"\007\n";
+
+	cpt = as_yaml_test_read_data (yamldata_corrupt, &error);
+
+	g_assert_error (error, AS_METADATA_ERROR, AS_METADATA_ERROR_PARSE);
+	g_assert_null (cpt);
+}
+
+/**
+ * test_yaml_write_suggests:
+ *
+ * Test writing the Suggests field.
+ */
+static void
+test_yaml_write_suggests (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autoptr(AsSuggested) sug_us = NULL;
+	g_autoptr(AsSuggested) sug_hr = NULL;
+	g_autofree gchar *res = NULL;
+	const gchar *expected_sug_yaml = "---\n"
+					 "File: DEP-11\n"
+					 "Version: '0.12'\n"
+					 "---\n"
+					 "Type: generic\n"
+					 "ID: org.example.SuggestsTest\n"
+					 "Suggests:\n"
+					 "- type: upstream\n"
+					 "  ids:\n"
+					 "  - org.example.Awesome\n"
+					 "- type: heuristic\n"
+					 "  ids:\n"
+					 "  - org.example.MachineLearning\n"
+					 "  - org.example.Stuff\n";
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_id (cpt, "org.example.SuggestsTest");
+
+	sug_us = as_suggested_new ();
+	as_suggested_set_kind (sug_us, AS_SUGGESTED_KIND_UPSTREAM);
+	as_suggested_add_id (sug_us, "org.example.Awesome");
+	as_component_add_suggested (cpt, sug_us);
+
+	sug_hr = as_suggested_new ();
+	as_suggested_set_kind (sug_hr, AS_SUGGESTED_KIND_HEURISTIC);
+	as_suggested_add_id (sug_hr, "org.example.MachineLearning");
+	as_suggested_add_id (sug_hr, "org.example.Stuff");
+	as_component_add_suggested (cpt, sug_hr);
+
+	/* test collection serialization */
+	res = as_yaml_test_serialize (cpt);
+	g_assert (as_test_compare_lines (res, expected_sug_yaml));
+}
+
+/**
+ * test_yaml_read_suggests:
+ *
+ * Test if reading the Suggests field works.
+ */
+static void
+test_yaml_read_suggests (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	GPtrArray *suggestions;
+	GPtrArray *cpt_ids;
+	AsSuggested *sug;
+	const gchar *yamldata_suggests = "---\n"
+					 "ID: org.example.Test\n"
+					 "Suggests:\n"
+					 "  - type: upstream\n"
+					 "    ids:\n"
+					 "      - org.example.Awesome\n"
+					 "      - org.example.test1\n"
+					 "      - org.example.test2\n"
+					 "  - type: heuristic\n"
+					 "    ids:\n"
+					 "      - org.example.test3\n";
+
+	cpt = as_yaml_test_read_data (yamldata_suggests, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.Test");
+
+	suggestions = as_component_get_suggested (cpt);
+	g_assert_cmpint (suggestions->len, ==, 2);
+
+	sug = AS_SUGGESTED (g_ptr_array_index (suggestions, 0));
+	g_assert (as_suggested_get_kind (sug) == AS_SUGGESTED_KIND_UPSTREAM);
+	cpt_ids = as_suggested_get_ids (sug);
+	g_assert_cmpint (cpt_ids->len, ==, 3);
+
+	g_assert_cmpstr ((const gchar*) g_ptr_array_index (cpt_ids, 0), ==, "org.example.Awesome");
+	g_assert_cmpstr ((const gchar*) g_ptr_array_index (cpt_ids, 1), ==, "org.example.test1");
+	g_assert_cmpstr ((const gchar*) g_ptr_array_index (cpt_ids, 2), ==, "org.example.test2");
+
+	sug = AS_SUGGESTED (g_ptr_array_index (suggestions, 1));
+	g_assert (as_suggested_get_kind (sug) == AS_SUGGESTED_KIND_HEURISTIC);
+	cpt_ids = as_suggested_get_ids (sug);
+	g_assert_cmpint (cpt_ids->len, ==, 1);
+	g_assert_cmpstr ((const gchar*) g_ptr_array_index (cpt_ids, 0), ==, "org.example.test3");
+}
+
+static const gchar *yamldata_custom_field = "---\n"
+					 "File: DEP-11\n"
+					 "Version: '0.12'\n"
+					 "---\n"
+					 "Type: generic\n"
+					 "ID: org.example.CustomTest\n"
+					 "Custom:\n"
+					 "  executable: myapp --test\n"
+					 "  foo bar: value-with space\n"
+					 "  Oh::Snap::Punctuation!: Awesome!\n";
+/**
+ * test_yaml_write_custom:
+ *
+ * Test writing the Custom fields.
+ */
+static void
+test_yaml_write_custom (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autofree gchar *res = NULL;
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_id (cpt, "org.example.CustomTest");
+
+	as_component_insert_custom_value (cpt, "executable", "myapp --test");
+	as_component_insert_custom_value (cpt, "foo bar", "value-with space");
+	as_component_insert_custom_value (cpt, "Oh::Snap::Punctuation!", "Awesome!");
+
+	/* test collection serialization */
+	res = as_yaml_test_serialize (cpt);
+	g_assert (as_test_compare_lines (res, yamldata_custom_field));
+}
+
+/**
+ * test_yaml_read_custom:
+ *
+ * Test if reading the Custom field works.
+ */
+static void
+test_yaml_read_custom (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+
+	cpt = as_yaml_test_read_data (yamldata_custom_field, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.CustomTest");
+
+	g_assert_cmpstr (as_component_get_custom_value (cpt, "executable"), ==, "myapp --test");
+	g_assert_cmpstr (as_component_get_custom_value (cpt, "foo bar"), ==, "value-with space");
+	g_assert_cmpstr (as_component_get_custom_value (cpt, "Oh::Snap::Punctuation!"), ==, "Awesome!");
+}
+
+static const gchar *yamldata_content_rating_field = "---\n"
+						"File: DEP-11\n"
+						"Version: '0.12'\n"
+						"---\n"
+						"Type: generic\n"
+						"ID: org.example.ContentRatingTest\n"
+						"ContentRating:\n"
+						"  oars-1.0:\n"
+						"    drugs-alcohol: moderate\n"
+						"    language-humor: mild\n";
+
+/**
+ * test_yaml_write_content_rating:
+ *
+ * Test writing the ContentRating field.
+ */
+static void
+test_yaml_write_content_rating (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autoptr(AsContentRating) rating = NULL;
+	g_autofree gchar *res = NULL;
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_id (cpt, "org.example.ContentRatingTest");
+
+	rating = as_content_rating_new ();
+	as_content_rating_set_kind (rating, "oars-1.0");
+
+	as_content_rating_set_value (rating, "drugs-alcohol", AS_CONTENT_RATING_VALUE_MODERATE);
+	as_content_rating_set_value (rating, "language-humor", AS_CONTENT_RATING_VALUE_MILD);
+
+	as_component_add_content_rating (cpt, rating);
+
+	/* test collection serialization */
+	res = as_yaml_test_serialize (cpt);
+	g_assert (as_test_compare_lines (res, yamldata_content_rating_field));
+}
+
+/**
+ * test_yaml_read_content_rating:
+ *
+ * Test if reading the ContentRating field works.
+ */
+static void
+test_yaml_read_content_rating (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	AsContentRating *rating;
+
+	cpt = as_yaml_test_read_data (yamldata_content_rating_field, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.ContentRatingTest");
+
+	rating = as_component_get_content_rating (cpt, "oars-1.0");
+	g_assert_nonnull (rating);
+	g_assert_cmpint (as_content_rating_get_value (rating, "drugs-alcohol"), ==, AS_CONTENT_RATING_VALUE_MODERATE);
+	g_assert_cmpint (as_content_rating_get_value (rating, "language-humor"), ==, AS_CONTENT_RATING_VALUE_MILD);
+}
+
+static const gchar *yamldata_launchable_field = "---\n"
+						"File: DEP-11\n"
+						"Version: '0.12'\n"
+						"---\n"
+						"Type: generic\n"
+						"ID: org.example.LaunchTest\n"
+						"Launchable:\n"
+						"  desktop-id:\n"
+						"  - org.example.Test.desktop\n"
+						"  - kde4-kool.desktop\n";
+
+/**
+ * test_yaml_write_launchable:
+ *
+ * Test writing the Launchable field.
+ */
+static void
+test_yaml_write_launchable (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autoptr(AsLaunchable) launch = NULL;
+	g_autofree gchar *res = NULL;
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_id (cpt, "org.example.LaunchTest");
+
+	launch = as_launchable_new ();
+	as_launchable_set_kind (launch, AS_LAUNCHABLE_KIND_DESKTOP_ID);
+
+	as_launchable_add_entry (launch, "org.example.Test.desktop");
+	as_launchable_add_entry (launch, "kde4-kool.desktop");
+
+	as_component_add_launchable (cpt, launch);
+
+	/* test collection serialization */
+	res = as_yaml_test_serialize (cpt);
+	g_assert (as_test_compare_lines (res, yamldata_launchable_field));
+}
+
+/**
+ * test_yaml_read_launchable:
+ *
+ * Test if reading the Launchable field works.
+ */
+static void
+test_yaml_read_launchable (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	AsLaunchable *launch;
+
+	cpt = as_yaml_test_read_data (yamldata_launchable_field, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.LaunchTest");
+
+	launch = as_component_get_launchable (cpt, AS_LAUNCHABLE_KIND_DESKTOP_ID);
+	g_assert_nonnull (launch);
+
+	g_assert_cmpint (as_launchable_get_entries (launch)->len, ==, 2);
+	g_assert_cmpstr (g_ptr_array_index (as_launchable_get_entries (launch), 0), ==, "org.example.Test.desktop");
+	g_assert_cmpstr (g_ptr_array_index (as_launchable_get_entries (launch), 1), ==, "kde4-kool.desktop");
+}
+
+static const gchar *yamldata_requires_recommends_field = "---\n"
+						"File: DEP-11\n"
+						"Version: '0.12'\n"
+						"---\n"
+						"Type: generic\n"
+						"ID: org.example.RelationsTest\n"
+						"Recommends:\n"
+						"- memory: '2500'\n"
+						"- modalias: usb:v1130p0202d*\n"
+						"Requires:\n"
+						"- kernel: Linux\n"
+						"  version: '>= 4.15'\n"
+						"- id: org.example.TestDependency\n"
+						"  version: == 1.2\n";
+
+/**
+ * test_yaml_write_requires_recommends:
+ *
+ * Test writing the Requires/Recommends fields.
+ */
+static void
+test_yaml_write_requires_recommends (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autofree gchar *res = NULL;
+	g_autoptr(AsRelation) mem_relation = NULL;
+	g_autoptr(AsRelation) moda_relation = NULL;
+	g_autoptr(AsRelation) kernel_relation = NULL;
+	g_autoptr(AsRelation) id_relation = NULL;
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_id (cpt, "org.example.RelationsTest");
+
+	mem_relation = as_relation_new ();
+	moda_relation = as_relation_new ();
+	kernel_relation = as_relation_new ();
+	id_relation = as_relation_new ();
+
+	as_relation_set_kind (mem_relation, AS_RELATION_KIND_RECOMMENDS);
+	as_relation_set_kind (moda_relation, AS_RELATION_KIND_RECOMMENDS);
+	as_relation_set_kind (kernel_relation, AS_RELATION_KIND_REQUIRES);
+	as_relation_set_kind (id_relation, AS_RELATION_KIND_REQUIRES);
+
+	as_relation_set_item_kind (mem_relation, AS_RELATION_ITEM_KIND_MEMORY);
+	as_relation_set_value (mem_relation, "2500");
+	as_relation_set_item_kind (moda_relation, AS_RELATION_ITEM_KIND_MODALIAS);
+	as_relation_set_value (moda_relation, "usb:v1130p0202d*");
+
+	as_relation_set_item_kind (kernel_relation, AS_RELATION_ITEM_KIND_KERNEL);
+	as_relation_set_value (kernel_relation, "Linux");
+	as_relation_set_version (kernel_relation, "4.15");
+	as_relation_set_compare (kernel_relation, AS_RELATION_COMPARE_GE);
+
+	as_relation_set_item_kind (id_relation, AS_RELATION_ITEM_KIND_ID);
+	as_relation_set_value (id_relation, "org.example.TestDependency");
+	as_relation_set_version (id_relation, "1.2");
+	as_relation_set_compare (id_relation, AS_RELATION_COMPARE_EQ);
+
+	as_component_add_relation (cpt, mem_relation);
+	as_component_add_relation (cpt, moda_relation);
+	as_component_add_relation (cpt, kernel_relation);
+	as_component_add_relation (cpt, id_relation);
+
+	/* test collection serialization */
+	res = as_yaml_test_serialize (cpt);
+	g_assert (as_test_compare_lines (res, yamldata_requires_recommends_field));
+}
+
+/**
+ * test_yaml_read_requires_recommends:
+ *
+ * Test if reading the Requires/Recommends fields works.
+ */
+static void
+test_yaml_read_requires_recommends (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	GPtrArray *recommends;
+	GPtrArray *requires;
+	AsRelation *relation;
+
+	cpt = as_yaml_test_read_data (yamldata_requires_recommends_field, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.RelationsTest");
+
+	recommends = as_component_get_recommends (cpt);
+	requires = as_component_get_requires (cpt);
+
+	g_assert_cmpint (recommends->len, ==, 2);
+	g_assert_cmpint (requires->len, ==, 2);
+
+	/* memory relation */
+	relation = AS_RELATION (g_ptr_array_index (recommends, 0));
+	g_assert_cmpint (as_relation_get_kind (relation), ==, AS_RELATION_KIND_RECOMMENDS);
+	g_assert_cmpint (as_relation_get_item_kind (relation), ==, AS_RELATION_ITEM_KIND_MEMORY);
+	g_assert_cmpint (as_relation_get_value_int (relation), ==, 2500);
+
+	/* modalias relation */
+	relation = AS_RELATION (g_ptr_array_index (recommends, 1));
+	g_assert_cmpint (as_relation_get_kind (relation), ==, AS_RELATION_KIND_RECOMMENDS);
+	g_assert_cmpint (as_relation_get_item_kind (relation), ==, AS_RELATION_ITEM_KIND_MODALIAS);
+	g_assert_cmpstr (as_relation_get_value (relation), ==, "usb:v1130p0202d*");
+
+	/* kernel relation */
+	relation = AS_RELATION (g_ptr_array_index (requires, 0));
+	g_assert_cmpint (as_relation_get_kind (relation), ==, AS_RELATION_KIND_REQUIRES);
+	g_assert_cmpint (as_relation_get_item_kind (relation), ==, AS_RELATION_ITEM_KIND_KERNEL);
+	g_assert_cmpstr (as_relation_get_value (relation), ==, "Linux");
+	g_assert_cmpstr (as_relation_get_version (relation), ==, "4.15");
+	g_assert_cmpint (as_relation_get_compare (relation), ==, AS_RELATION_COMPARE_GE);
+
+	/* ID relation */
+	relation = AS_RELATION (g_ptr_array_index (requires, 1));
+	g_assert_cmpint (as_relation_get_kind (relation), ==, AS_RELATION_KIND_REQUIRES);
+	g_assert_cmpint (as_relation_get_item_kind (relation), ==, AS_RELATION_ITEM_KIND_ID);
+	g_assert_cmpstr (as_relation_get_value (relation), ==, "org.example.TestDependency");
+	g_assert_cmpstr (as_relation_get_version (relation), ==, "1.2");
+	g_assert_cmpint (as_relation_get_compare (relation), ==, AS_RELATION_COMPARE_EQ);
+}
+
+
+static const gchar *yamldata_agreements = "---\n"
+						"File: DEP-11\n"
+						"Version: '0.12'\n"
+						"---\n"
+						"Type: generic\n"
+						"ID: org.example.AgreementsTest\n"
+						"Agreements:\n"
+						"- type: eula\n"
+						"  version_id: 1.2.3a\n"
+						"  sections:\n"
+						"  - type: intro\n"
+						"    name:\n"
+						"      C: Intro\n"
+						"      xde_DE: Einführung\n"
+						"    description:\n"
+						"      C: >-\n"
+						"        <p>Mighty Fine</p>\n";
+
+
+/**
+ * test_yaml_write_agreements:
+ *
+ * Test writing the Agreements field.
+ */
+static void
+test_yaml_write_agreements (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autofree gchar *res = NULL;
+	g_autoptr(AsAgreement) agreement = NULL;
+	g_autoptr(AsAgreementSection) sect = NULL;
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_id (cpt, "org.example.AgreementsTest");
+
+	agreement = as_agreement_new ();
+	sect = as_agreement_section_new ();
+
+	as_agreement_set_kind (agreement, AS_AGREEMENT_KIND_EULA);
+	as_agreement_set_version_id (agreement, "1.2.3a");
+
+	as_agreement_section_set_kind (sect, "intro");
+	as_agreement_section_set_name (sect, "Intro", "C");
+	as_agreement_section_set_name (sect, "Einführung", "xde_DE");
+
+	as_agreement_section_set_description (sect, "<p>Mighty Fine</p>", "C");
+
+	as_agreement_add_section (agreement, sect);
+	as_component_add_agreement (cpt, agreement);
+
+	/* test collection serialization */
+	res = as_yaml_test_serialize (cpt);
+	g_assert (as_test_compare_lines (res, yamldata_agreements));
+}
+
+/**
+ * test_yaml_read_agreements:
+ *
+ * Test if reading the Agreement field works.
+ */
+static void
+test_yaml_read_agreements (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	AsAgreement *agreement;
+	AsAgreementSection *sect;
+
+	cpt = as_yaml_test_read_data (yamldata_agreements, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.AgreementsTest");
+
+	agreement = as_component_get_agreement_by_kind (cpt, AS_AGREEMENT_KIND_EULA);
+	g_assert_nonnull (agreement);
+
+	g_assert_cmpint (as_agreement_get_kind (agreement), ==, AS_AGREEMENT_KIND_EULA);
+	g_assert_cmpstr (as_agreement_get_version_id (agreement), ==, "1.2.3a");
+	sect = as_agreement_get_section_default (agreement);
+	g_assert_nonnull (sect);
+
+	as_agreement_section_set_active_locale (sect, "C");
+	g_assert_cmpstr (as_agreement_section_get_kind (sect), ==, "intro");
+	g_assert_cmpstr (as_agreement_section_get_name (sect), ==, "Intro");
+	g_assert_cmpstr (as_agreement_section_get_description (sect), ==, "<p>Mighty Fine</p>");
+
+	as_agreement_section_set_active_locale (sect, "xde_DE");
+	g_assert_cmpstr (as_agreement_section_get_name (sect), ==, "Einführung");
+}
+
+static const gchar *yamldata_screenshots = "---\n"
+						"File: DEP-11\n"
+						"Version: '0.12'\n"
+						"---\n"
+						"Type: generic\n"
+						"ID: org.example.ScreenshotsTest\n"
+						"Screenshots:\n"
+						"- default: true\n"
+						"  caption:\n"
+						"    de_DE: Das Hauptfenster, welches irgendwas zeigt\n"
+						"    C: The main window displaying a thing\n"
+						"  thumbnails:\n"
+						"  - url: https://example.org/alpha_small.png\n"
+						"    width: 800\n"
+						"    height: 600\n"
+						"  source-image:\n"
+						"    url: https://example.org/alpha.png\n"
+						"    width: 1916\n"
+						"    height: 1056\n"
+						"- caption:\n"
+						"    C: A screencast of this app\n"
+						"  videos:\n"
+						"  - codec: av1\n"
+						"    container: matroska\n"
+						"    url: https://example.org/screencast.mkv\n"
+						"    width: 1916\n"
+						"    height: 1056\n"
+						"  - codec: av1\n"
+						"    container: matroska\n"
+						"    url: https://example.org/screencast_de.mkv\n"
+						"    width: 1916\n"
+						"    height: 1056\n"
+						"    lang: de_DE\n";
+
+/**
+ * test_yaml_write_screenshots:
+ *
+ * Test writing the Screenshots field.
+ */
+static void
+test_yaml_write_screenshots (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autofree gchar *res = NULL;
+	g_autoptr(AsScreenshot) scr1 = NULL;
+	g_autoptr(AsScreenshot) scr2 = NULL;
+	AsImage *img;
+	AsVideo *vid;
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_id (cpt, "org.example.ScreenshotsTest");
+
+	scr1 = as_screenshot_new ();
+	as_screenshot_set_kind (scr1, AS_SCREENSHOT_KIND_DEFAULT);
+	as_screenshot_set_caption (scr1, "The main window displaying a thing", "C");
+	as_screenshot_set_caption (scr1, "Das Hauptfenster, welches irgendwas zeigt", "de_DE");
+	img = as_image_new ();
+	as_image_set_kind (img, AS_IMAGE_KIND_SOURCE);
+	as_image_set_width (img, 1916);
+	as_image_set_height (img, 1056);
+	as_image_set_url (img, "https://example.org/alpha.png");
+	as_screenshot_add_image (scr1, img);
+	g_object_unref (img);
+
+	img = as_image_new ();
+	as_image_set_kind (img, AS_IMAGE_KIND_THUMBNAIL);
+	as_image_set_width (img, 800);
+	as_image_set_height (img, 600);
+	as_image_set_url (img, "https://example.org/alpha_small.png");
+	as_screenshot_add_image (scr1, img);
+	g_object_unref (img);
+
+	scr2 = as_screenshot_new ();
+	as_screenshot_set_caption (scr2, "A screencast of this app", "C");
+	vid = as_video_new ();
+	as_video_set_codec_kind (vid, AS_VIDEO_CODEC_KIND_AV1);
+	as_video_set_container_kind (vid, AS_VIDEO_CONTAINER_KIND_MKV);
+	as_video_set_width (vid, 1916);
+	as_video_set_height (vid, 1056);
+	as_video_set_url (vid, "https://example.org/screencast.mkv");
+	as_screenshot_add_video (scr2, vid);
+	g_object_unref (vid);
+
+	vid = as_video_new ();
+	as_video_set_codec_kind (vid, AS_VIDEO_CODEC_KIND_AV1);
+	as_video_set_container_kind (vid, AS_VIDEO_CONTAINER_KIND_MKV);
+	as_video_set_locale (vid, "de_DE");
+	as_video_set_width (vid, 1916);
+	as_video_set_height (vid, 1056);
+	as_video_set_url (vid, "https://example.org/screencast_de.mkv");
+	as_screenshot_add_video (scr2, vid);
+	g_object_unref (vid);
+
+	as_component_add_screenshot (cpt, scr1);
+	as_component_add_screenshot (cpt, scr2);
+
+	/* test collection serialization */
+	res = as_yaml_test_serialize (cpt);
+	g_assert (as_test_compare_lines (res, yamldata_screenshots));
+}
+
+/**
+ * test_yaml_read_screenshots:
+ *
+ * Test if reading the Screenshots field works.
+ */
+static void
+test_yaml_read_screenshots (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	GPtrArray *screenshots;
+	AsScreenshot *scr1;
+	AsScreenshot *scr2;
+	GPtrArray *images;
+	GPtrArray *videos;
+	AsImage *img;
+	AsVideo *vid;
+
+	cpt = as_yaml_test_read_data (yamldata_screenshots, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.ScreenshotsTest");
+
+	screenshots = as_component_get_screenshots (cpt);
+	g_assert_cmpint (screenshots->len, ==, 2);
+
+	scr1 = AS_SCREENSHOT (g_ptr_array_index (screenshots, 0));
+	scr2 = AS_SCREENSHOT (g_ptr_array_index (screenshots, 1));
+
+	/* screenshot 1 */
+	g_assert_cmpint (as_screenshot_get_kind (scr1), ==, AS_SCREENSHOT_KIND_DEFAULT);
+	g_assert_cmpint (as_screenshot_get_media_kind (scr1), ==, AS_SCREENSHOT_MEDIA_KIND_IMAGE);
+	as_screenshot_set_active_locale (scr1, "C");
+	g_assert_cmpstr (as_screenshot_get_caption (scr1), ==, "The main window displaying a thing");
+	as_screenshot_set_active_locale (scr1, "de_DE");
+	g_assert_cmpstr (as_screenshot_get_caption (scr1), ==, "Das Hauptfenster, welches irgendwas zeigt");
+
+	images = as_screenshot_get_images_all (scr1);
+	g_assert_cmpint (images->len, ==, 2);
+
+	img = AS_IMAGE (g_ptr_array_index (images, 1));
+	g_assert_cmpint (as_image_get_kind (img), ==, AS_IMAGE_KIND_SOURCE);
+	g_assert_cmpstr (as_image_get_url (img), ==, "https://example.org/alpha.png");
+	g_assert_cmpint (as_image_get_width (img), ==, 1916);
+	g_assert_cmpint (as_image_get_height (img), ==, 1056);
+
+	img = AS_IMAGE (g_ptr_array_index (images, 0));
+	g_assert_cmpint (as_image_get_kind (img), ==, AS_IMAGE_KIND_THUMBNAIL);
+	g_assert_cmpstr (as_image_get_url (img), ==, "https://example.org/alpha_small.png");
+	g_assert_cmpint (as_image_get_width (img), ==, 800);
+	g_assert_cmpint (as_image_get_height (img), ==, 600);
+
+	/* screenshot 2 */
+	as_screenshot_set_active_locale (scr2, "C");
+	g_assert_cmpint (as_screenshot_get_kind (scr2), ==, AS_SCREENSHOT_KIND_EXTRA);
+	g_assert_cmpint (as_screenshot_get_media_kind (scr2), ==, AS_SCREENSHOT_MEDIA_KIND_VIDEO);
+	g_assert_cmpstr (as_screenshot_get_caption (scr2), ==, "A screencast of this app");
+	as_screenshot_set_active_locale (scr2, "C");
+	g_assert_cmpint (as_screenshot_get_images (scr2)->len, ==, 0);
+	videos = as_screenshot_get_videos (scr2);
+	g_assert_cmpint (videos->len, ==, 1);
+	as_screenshot_set_active_locale (scr2, "de_DE");
+	videos = as_screenshot_get_videos (scr2);
+	g_assert_cmpint (videos->len, ==, 1);
+	vid = AS_VIDEO (g_ptr_array_index (videos, 0));
+	g_assert_cmpstr (as_video_get_url (vid), ==, "https://example.org/screencast_de.mkv");
+
+	as_screenshot_set_active_locale (scr2, "ALL");
+	videos = as_screenshot_get_videos (scr2);
+	g_assert_cmpint (videos->len, ==, 2);
+
+	vid = AS_VIDEO (g_ptr_array_index (videos, 0));
+	g_assert_cmpint (as_video_get_codec_kind (vid), ==, AS_VIDEO_CODEC_KIND_AV1);
+	g_assert_cmpint (as_video_get_container_kind (vid), ==, AS_VIDEO_CONTAINER_KIND_MKV);
+	g_assert_cmpstr (as_video_get_url (vid), ==, "https://example.org/screencast.mkv");
+	g_assert_cmpint (as_video_get_width (vid), ==, 1916);
+	g_assert_cmpint (as_video_get_height (vid), ==, 1056);
+
+	vid = AS_VIDEO (g_ptr_array_index (videos, 1));
+	g_assert_cmpint (as_video_get_codec_kind (vid), ==, AS_VIDEO_CODEC_KIND_AV1);
+	g_assert_cmpint (as_video_get_container_kind (vid), ==, AS_VIDEO_CONTAINER_KIND_MKV);
+	g_assert_cmpstr (as_video_get_url (vid), ==, "https://example.org/screencast_de.mkv");
+	g_assert_cmpint (as_video_get_width (vid), ==, 1916);
+	g_assert_cmpint (as_video_get_height (vid), ==, 1056);
+}
+
+static const gchar *yamldata_releases_field = "---\n"
+						"File: DEP-11\n"
+						"Version: '0.12'\n"
+						"---\n"
+						"Type: generic\n"
+						"ID: org.example.ReleasesTest\n"
+						"Releases:\n"
+						"- version: '1.2'\n"
+						"  type: stable\n"
+						"  unix-timestamp: 1462288512\n"
+						"  urgency: medium\n"
+						"  description:\n"
+						"    C: >-\n"
+						"      <p>The CPU no longer overheats when you hold down spacebar.</p>\n"
+						"  issues:\n"
+						"  - id: bz#12345\n"
+						"    url: https://example.com/bugzilla/12345\n"
+						"  - type: cve\n"
+						"    id: CVE-2019-123456\n"
+						"- version: '1.0'\n"
+						"  type: development\n"
+						"  unix-timestamp: 1460463132\n"
+						"  description:\n"
+						"    de_DE: >-\n"
+						"      <p>Großartige erste Veröffentlichung.</p>\n"
+						"\n"
+						"      <p>Zweite zeile.</p>\n"
+						"    C: >-\n"
+						"      <p>Awesome initial release.</p>\n"
+						"\n"
+						"      <p>Second paragraph.</p>\n"
+						"  url:\n"
+						"    details: https://example.org/releases/1.0.html\n";
+
+/**
+ * test_yaml_write_releases:
+ *
+ * Test writing the Releases field.
+ */
+static void
+test_yaml_write_releases (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autoptr(AsRelease) rel1 = NULL;
+	g_autoptr(AsRelease) rel2 = NULL;
+	AsIssue *issue = NULL;
+	g_autofree gchar *res = NULL;
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_GENERIC);
+	as_component_set_id (cpt, "org.example.ReleasesTest");
+
+	rel1 = as_release_new ();
+	as_release_set_version (rel1, "1.0");
+	as_release_set_kind (rel1, AS_RELEASE_KIND_DEVELOPMENT);
+	as_release_set_timestamp (rel1, 1460463132);
+	as_release_set_description (rel1, "<p>Awesome initial release.</p>\n<p>Second paragraph.</p>", "C");
+	as_release_set_description (rel1, "<p>Großartige erste Veröffentlichung.</p>\n<p>Zweite zeile.</p>", "de_DE");
+	as_release_set_url (rel1, AS_RELEASE_URL_KIND_DETAILS, "https://example.org/releases/1.0.html");
+	as_component_add_release (cpt, rel1);
+
+	rel2 = as_release_new ();
+	as_release_set_version (rel2, "1.2");
+	as_release_set_timestamp (rel2, 1462288512);
+	as_release_set_description (rel2, "<p>The CPU no longer overheats when you hold down spacebar.</p>", "C");
+	as_release_set_urgency (rel2, AS_URGENCY_KIND_MEDIUM);
+	as_component_add_release (cpt, rel2);
+
+	/* issues */
+	issue = as_issue_new ();
+	as_issue_set_id (issue, "bz#12345");
+	as_issue_set_url (issue, "https://example.com/bugzilla/12345");
+	as_release_add_issue (rel2, issue);
+	g_object_unref (issue);
+
+	issue = as_issue_new ();
+	as_issue_set_kind (issue, AS_ISSUE_KIND_CVE);
+	as_issue_set_id (issue, "CVE-2019-123456");
+	as_release_add_issue (rel2, issue);
+	g_object_unref (issue);
+
+	/* test collection serialization */
+	res = as_yaml_test_serialize (cpt);
+	g_assert (as_test_compare_lines (res, yamldata_releases_field));
+}
+
+/**
+ * test_yaml_read_releases:
+ *
+ * Test if reading the Releases field works.
+ */
+static void
+test_yaml_read_releases (void)
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	AsRelease *rel;
+	GPtrArray *issues;
+
+	cpt = as_yaml_test_read_data (yamldata_releases_field, NULL);
+	g_assert_cmpstr (as_component_get_id (cpt), ==, "org.example.ReleasesTest");
+
+	g_assert_cmpint (as_component_get_releases (cpt)->len, ==, 2);
+
+	rel = AS_RELEASE (g_ptr_array_index (as_component_get_releases (cpt), 0));
+	g_assert_cmpint (as_release_get_kind (rel), ==, AS_RELEASE_KIND_STABLE);
+	g_assert_cmpstr (as_release_get_version (rel), ==,  "1.2");
+
+	issues = as_release_get_issues (rel);
+	g_assert_cmpint (issues->len, ==, 2);
+	for (guint i = 0; i < issues->len; i++) {
+		AsIssue *issue = AS_ISSUE (g_ptr_array_index (issues, i));
+
+		if (as_issue_get_kind (issue) == AS_ISSUE_KIND_GENERIC) {
+			g_assert_cmpstr (as_issue_get_id (issue), ==, "bz#12345");
+			g_assert_cmpstr (as_issue_get_url (issue), ==, "https://example.com/bugzilla/12345");
+
+		} else if (as_issue_get_kind (issue) == AS_ISSUE_KIND_CVE) {
+			g_assert_cmpstr (as_issue_get_id (issue), ==, "CVE-2019-123456");
+			g_assert_cmpstr (as_issue_get_url (issue), ==, "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-123456");
+
+		} else {
+			g_assert_not_reached ();
+		}
+	}
+}
+
+/**
+ * main:
+ */
+int
+main (int argc, char **argv)
+{
+	int ret;
+
+	if (argc == 0) {
+		g_error ("No test directory specified!");
+		return 1;
+	}
+
+	datadir = argv[1];
+	g_assert (datadir != NULL);
+	datadir = g_build_filename (datadir, "samples", NULL);
+	g_assert (g_file_test (datadir, G_FILE_TEST_EXISTS) != FALSE);
+
+	g_setenv ("G_MESSAGES_DEBUG", "all", TRUE);
+	g_test_init (&argc, &argv, NULL);
+
+	/* only critical and error are fatal */
+	g_log_set_fatal_mask (NULL, G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL);
+
+	g_test_add_func ("/YAML/Basic", test_basic);
+	g_test_add_func ("/YAML/Write/General", test_yamlwrite_general);
+
+	g_test_add_func ("/YAML/Read/CorruptData", test_yaml_corrupt_data);
+	g_test_add_func ("/YAML/Read/Icons", test_yaml_read_icons);
+	g_test_add_func ("/YAML/Read/Url", test_yaml_read_url);
+	g_test_add_func ("/YAML/Read/Languages", test_yaml_read_languages);
+
+	g_test_add_func ("/YAML/Read/Suggests", test_yaml_read_suggests);
+	g_test_add_func ("/YAML/Write/Suggests", test_yaml_write_suggests);
+
+	g_test_add_func ("/YAML/Read/Custom", test_yaml_read_custom);
+	g_test_add_func ("/YAML/Write/Custom", test_yaml_write_custom);
+
+	g_test_add_func ("/YAML/Read/ContentRating", test_yaml_read_content_rating);
+	g_test_add_func ("/YAML/Write/ContentRating", test_yaml_write_content_rating);
+
+	g_test_add_func ("/YAML/Read/Launchable", test_yaml_read_launchable);
+	g_test_add_func ("/YAML/Write/Launchable", test_yaml_write_launchable);
+
+	g_test_add_func ("/YAML/Read/RequiresRecommends", test_yaml_read_requires_recommends);
+	g_test_add_func ("/YAML/Write/RequiresRecommends", test_yaml_write_requires_recommends);
+
+	g_test_add_func ("/YAML/Read/Agreements", test_yaml_read_agreements);
+	g_test_add_func ("/YAML/Write/Agreements", test_yaml_write_agreements);
+
+	g_test_add_func ("/YAML/Read/Screenshots", test_yaml_read_screenshots);
+	g_test_add_func ("/YAML/Write/Screenshots", test_yaml_write_screenshots);
+
+	g_test_add_func ("/YAML/Read/Releases", test_yaml_read_releases);
+	g_test_add_func ("/YAML/Write/Releases", test_yaml_write_releases);
+
+	ret = g_test_run ();
+	g_free (datadir);
+	return ret;
+}

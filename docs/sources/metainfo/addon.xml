@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!ENTITY % BOOK_ENTITIES SYSTEM "AppStream.ent">
+%BOOK_ENTITIES;
+]>
+
+<section id="sect-Metadata-Addon">
+	<title>Addons</title>
+
+	<section id="spec-addondata-introduction">
+		<title>Introduction</title>
+		<para>
+			Some components are not standalone, but rather extend existing software installed on the system and can only be used
+			together with it.
+			The <literal>addon</literal> component type exists to reflect that.
+		</para>
+		<para>
+			Software which provides addons can ship one or more files in <filename>/usr/share/metainfo/%{id}.metainfo.xml</filename>.
+		</para>
+	</section>
+
+	<section id="spec-addoncdata-example">
+		<title>Example file</title>
+		<para>
+			A addon meta-info file should look like this:
+		</para>
+		<programlisting language="XML">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+  <id>org.gnome.gedit_code_assistance</id>
+  <extends>org.gnome.gedit</extends>
+  <name>Code Assistance</name>
+  <summary>Code assistance for C, C++ and Objective-C</summary>
+  <url type="homepage">http://projects.gnome.org/gedit</url>
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+</component>]]></programlisting>
+	</section>
+
+	<section id="spec-addondata-filespec">
+		<title>File specification</title>
+		<para>
+			Note that the XML root must have the <literal>type</literal> property set to <code>addon</code>.
+			This clearly identifies this metainfo document as describing an addon to existing software.
+		</para>
+
+		<variablelist>
+			<varlistentry id="tag-id-addon">
+			<term>&lt;id/&gt;</term>
+			<listitem>
+				<para>
+					For addons, the component-ID must follow the generic naming conventions (see <xref linkend="tag-id-generic"/>).
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry id="tag-extends">
+			<term>&lt;extends/&gt;</term>
+			<listitem>
+				<para>
+					This tag is refers to the ID of the component this addon is extending.
+				</para>
+				<para>
+					For example, if there is a plugin "kipi" which extens the application "Gwenview", it needs to be referred to as:
+				</para>
+				<programlisting language="XML"><![CDATA[<extends>org.kde.Gwenview</extends>]]></programlisting>
+				<para>
+					The <code>&lt;extends/&gt;</code> tag may be specified multiple times.
+				</para>
+			</listitem>
+			</varlistentry>
+		</variablelist>
+
+		<para>
+			For a component of type <literal>addon</literal>, the following tags are required and must be present: <xref linkend="tag-id-addon"/>, <xref linkend="tag-name"/>, <xref linkend="tag-summary"/>,
+			<xref linkend="tag-metadata_license"/>, <xref linkend="tag-extends"/>.
+		</para>
+
+	</section>
+</section>

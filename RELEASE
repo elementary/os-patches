@@ -1,0 +1,51 @@
+AppStream Release Notes
+
+1. Write NEWS entries for AppStream in the same format as usual.
+
+git shortlog v0.12.8.. | grep -i -v trivial | grep -v Merge > NEWS.new
+
+--------------------------------------------------------------------------------
+Version 0.12.9
+~~~~~~~~~~~~~~
+Released: 2019-xx-xx
+
+Notes:
+
+Features:
+
+Specification:
+
+Bugfixes:
+--------------------------------------------------------------------------------
+
+2. Update library version if new ABI or API in meson.build
+
+3. Commit changes in AppStream git:
+
+git commit -a -m "Release version 0.12.9"
+git tag -s -f -m "Release 0.12.9" v0.12.9 <gpg password>
+git push --tags
+git push
+
+4. run './release.sh --version=0.12.9 --git-tag=v0.12.9 --sign'
+
+5. Upload tarball: scp -r *.tar.xz* annarchy.freedesktop.org:/srv/www.freedesktop.org/www/software/appstream/releases/
+
+6. Upload documentation:
+   scp -r build/release_install/usr/local/share/doc/appstream/html/* annarchy.freedesktop.org:/srv/www.freedesktop.org/www/software/appstream/docs/
+
+7. Do post release version bump in meson.build, RELEASE
+
+8. Commit trivial changes:
+
+git commit -a -m "trivial: post release version bump"
+git push
+
+9. Send an email to appstream@lists.freedesktop.org
+
+=================================================
+AppStream 0.12.9 released!
+
+Tarballs available here: https://www.freedesktop.org/software/appstream/releases/
+
+=================================================

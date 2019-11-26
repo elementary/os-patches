@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!ENTITY % BOOK_ENTITIES SYSTEM "AppStream.ent">
+%BOOK_ENTITIES;
+]>
+
+<section id="sect-Quickstart-Translation">
+	<title>Translating Metadata</title>
+
+	<section id="qsr-l10n-introduction">
+		<title>Introduction</title>
+		<para>
+			Most AppStream metadata can be translated, This page contains some practical instructions how to translate the
+			metadata.
+		</para>
+
+		<note>
+			<title>For KDE developers</title>
+			<para>
+				If you are a KDE developer and using the KDE infrastructure with it's localization support, you need to do nothing
+				to get translated metadata. Just place your <filename>*.metainfo.xml*</filename> (or <filename>*.appdata.xml*</filename> file)
+				at a sane place, and the l10n-script will translate the file in-place automatically.
+			</para>
+		</note>
+	</section>
+
+	<section id="qsr-l10n-intltool">
+		<title>Translating using Intltool</title>
+		<para>
+			If you ship an <filename>.xml.in</filename> file rather than an <filename>.xml</filename> file, you can use Intltool to translate the data.
+		</para>
+		<para>
+			Each translatable element in the <filename>.xml.in</filename> file needs to be prefixed with an underscore (<code>_</code>) to be marked as translatable.
+			This should include the <code>name</code>,  <code>summary</code>, and <code>caption</code> tags, as well as each paragraph in the
+			<code>description</code>. Apart from that, the same specifications apply to this file as for any other AppStream metadata.
+		</para>
+
+		<para>
+			To translate the appstream data, first add the <filename>.xml.in</filename> file to <filename>po/POTFILES.in</filename>, along with any other
+			translatable files. Then create the translation template file <filename>&lt;package name&gt;.pot</filename>.
+		</para>
+
+		<programlisting language="Bash"><![CDATA[cd po; intltool-update --pot --gettext-package=<package name>]]></programlisting>
+
+		<para>
+			For each supported language, copy the template file to <filename>po/&lt;language&gt;-[&lt;COUNTRY&gt;].po</filename>, where
+			<filename>po/&lt;language&gt;</filename> and the optional <filename>po/&lt;COUNTRY&gt;</filename> are standard two-letter codes.
+			Edit the file to add translated strings.
+		</para>
+
+		<para>
+			As the translatable content is updated, recreate the template file, and update the <filename>.po</filename> files.
+		</para>
+
+		<programlisting language="Bash"><![CDATA[cd po; intltool-update --dist --gettext-package=<package name> <language>]]></programlisting>
+
+		<para>
+			Create the translated <filename>.xml</filename> with the following command.
+		</para>
+
+		<programlisting language="Bash"><![CDATA[intltool-merge -u -c ./po/.intltool-merge-cache ./po -x <file>.xml.in <file>.xml]]></programlisting>
+
+		<section id="qsr-l10n-intltool-autotools">
+			<title>Integrating with Autotools (the AppStream way)</title>
+			<para>
+				The generic way to add translation to your AppStream metadata in case you use Autotools is by using
+				the following code snippet:
+			</para>
+<programlisting language="Makefile"><![CDATA[appstreamdir = $(datadir)/metainfo/
+appstream_in_files = gedit.metainfo.xml.in
+appstream_DATA = $(appstream_in_files:.xml.in=.xml)
+@INTLTOOL_XML_RULE@
+EXTRA_DIST = $(metainfo_in_files)
+CLEANFILES = $(appstream_DATA)]]></programlisting>
+			<para>
+				The code assumes you are using the Intltool Automake code.
+			</para>
+		</section>
+
+
+		<section id="qsr-l10n-intltool-autotools-asglib">
+			<title>Integrating with Autotools (the AppStream-GLib way)</title>
+			<para>
+				In case you want to use the macro provided by the AppStream-GLib library, you can use this code snippet:
+			</para>
+<programlisting language="Makefile"><![CDATA[@APPSTREAM_XML_RULES@
+appstream_in_files = gedit.metainfo.xml.in
+appstream_XML = $(appstream_in_files:.xml.in=.xml)
+@INTLTOOL_XML_RULE@
+EXTRA_DIST = $(metainfo_in_files)
+CLEANFILES = $(appstream_XML)]]></programlisting>
+			<para>
+				Make sure you have the additional AppStream macro installed.
+			</para>
+		</section>
+	</section>
+
+	<section id="qsr-l10n-itstool">
+		<title>Translating using Itstool</title>
+
+		<para>
+			You can also use Itstool for translation. In order to translate an XML file with it, you need an <filename>.its</filename> file with translation definitions.
+			An appropriate file for AppStream upstream metadata of any kind can be found here:
+		</para>
+		<programlisting language="XML">
+<![CDATA[<its:rules
+  xmlns:its="http://www.w3.org/2005/11/its"
+  version="1.0">
+  <its:translateRule translate="no" selector="/component"/>
+  <its:translateRule translate="yes"
+    selector="/component/name | /component/summary |
+    /component/description | /component/screenshots/screenshot/caption | /component/developer_name"/>
+</its:rules>]]>
+</programlisting>
+		<para>
+			Save this file as <filename>as-metainfo.its</filename> for example.
+		</para>
+
+		<para>
+			To extract a GNU Gettext <filename>.pot</filename> file from your XML file, run itstool with the follwing arguments (replacing "foo" with
+			your project name):
+		</para>
+		<programlisting language="Bash"><![CDATA[itstool -i as-metainfo.its -o $podir/foo_metadata.pot data/foo.metainfo.xml]]></programlisting>
+
+		<para>
+			You can then translate the <filename>.pot</filename> file using the standard methods for translating files like these. You obtain
+			<filename>.po</filename> files, which you can convert into <filename>.mo</filename> files (using msgfmt) like you would do with any
+			other localization. Then, you need to call <command>itstool</command> again, to create a translated version of the original XML file:
+		</para>
+		<programlisting language="Bash"><![CDATA[itstool -i as-metainfo.its -j data/foo.metainfo.xml -o output/foo.metainfo.xml $modir/*.mo]]></programlisting>
+
+		<para>
+			Please ensure that the <filename>.mo</filename> files in <filename>$modir</filename> are named with their language codes.
+		</para>
+
+		<note>
+			<para>
+				You can find more information about Itstool <ulink url="http://itstool.org/">on their homepage</ulink>.
+			</para>
+		</note>
+
+	</section>
+</section>

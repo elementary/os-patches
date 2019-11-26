@@ -1,0 +1,16 @@
+#!/bin/sh
+# postinst script for appstream
+set -e
+
+if dpkg --compare-versions "$2" ge-nl "0.12.8"; then
+    # cleanup old cache files
+    rm -rf /var/cache/app-info
+fi
+
+# Force-upgrade the cache, to ensure it matches the installed
+# version of AppStream and is present.
+appstreamcli refresh-cache --force || true
+
+#DEBHELPER#
+
+exit 0

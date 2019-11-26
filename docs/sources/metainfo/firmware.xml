@@ -1,0 +1,163 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!ENTITY % BOOK_ENTITIES SYSTEM "AppStream.ent">
+%BOOK_ENTITIES;
+]>
+
+<section id="sect-Metadata-Firmware">
+	<title>Firmware</title>
+
+	<section id="spec-firmware-introduction">
+		<title>Introduction</title>
+		<para>
+			Device firmware can be accompanied by AppStream upstream metadata, to be incorporated
+			by a distribution. Tools like <ulink url="https://github.com/hughsie/fwupd">fwupd</ulink> make
+			use of this metadata to automatically update flashed firmware of devices found in the machine.
+			Additionally, this component type can also be used for firmware which is loaded onto the device at runtime.
+		</para>
+		<para>
+			Firmware can ship one or more files in <filename>/usr/share/metainfo/%{id}.metainfo.xml</filename>.
+		</para>
+	</section>
+
+	<section id="spec-firmware-example">
+		<title>Example file</title>
+		<para>
+			A firmware meta-info file should look like this:
+		</para>
+		<programlisting language="XML">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<component type="firmware">
+  <id>com.hughski.ColorHug2.firmware</id>
+  <name>ColorHugALS Firmware</name>
+  <summary>Firmware for the ColorHugALS Ambient Light Sensor</summary>
+  <description>
+    <p>
+      Updating the firmware on your ColorHugALS device improves performance and
+      adds new features.
+    </p>
+  </description>
+  <url type="homepage">http://www.hughski.com/</url>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0+</project_license>
+  <developer_name>Hughski Limited</developer_name>
+  <provides>
+    <firmware type="flashed">84f40464-9272-4ef7-9399-cd95f12da696</firmware>
+  </provides>
+  <releases>
+    <release version="3.0.2" date="2015-02-16">
+      <artifacts>
+        <artifact type="binary">
+          <location>http://www.hughski.com/downloads/colorhug-als/firmware/colorhug-als-3.0.2.cab</location>
+        </artifact>
+      </artifacts>
+      <description>
+        <p>This stable release fixes the following bugs:</p>
+        <ul>
+          <li>Fix the return code from GetHardwareVersion</li>
+          <li>Scale the output of TakeReadingRaw by the datasheet values</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>]]></programlisting>
+
+		<para>
+			You can find additional information on how to create a complete firmware package for flashed firmware upstream in
+			the <ulink url="https://github.com/hughsie/fwupd/blob/master/README.md">README document of fwupd</ulink>.
+		</para>
+
+	</section>
+
+	<section id="spec-firmware-filespec">
+		<title>File specification</title>
+		<para>
+			Note that the XML root must have the <literal>type</literal> property set to <code>firmware</code>.
+			This clearly identifies this metainfo document as describing firmware.
+		</para>
+
+		<variablelist>
+			<varlistentry id="tag-id-firmware">
+			<term>&lt;id/&gt;</term>
+			<listitem>
+				<para>
+					For firmware, the value of the <code>&lt;id/&gt;</code> tag must follow the reverse-DNS scheme as described for generic components.
+					It is sometimes useful to suffix the ID with <literal>.firmware</literal> to make it more unique.
+					For example <code>com.hughski.ColorHug2.firmware</code>.
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry id="tag-firmware-releases">
+			<term>&lt;releases/&gt;</term>
+			<listitem>
+				<para>
+					This tag is identical to the generic <xref linkend="tag-releases"/> tag.
+					Additional to the generic tag, for each <code>&lt;release/&gt;</code> child at least one <code>&lt;artifact/&gt;</code> tag is required in case the component describes
+					flashed firmware.
+				</para>
+				<para>
+					The <code>&lt;location/&gt;</code> tag of the binary artifact specifies a remote location where the firmware <literal>.cab</literal> can be downloaded from.
+					The download location needs to be accessible via HTTP, HTTPS or FTP.
+				</para>
+				<para>
+					Example:
+				</para>
+				<programlisting language="XML"><![CDATA[<releases>
+  <release version="3.0.2" date="2015-02-16">
+    <artifacts>
+      <artifact type="binary">
+        <location>http://www.hughski.com/downloads/colorhug-als/firmware/colorhug-als-3.0.2.cab</location>
+      </artifact>
+    </artifacts>
+    <description>
+      <p>This stable release fixes bugs.</p>
+    </description>
+  </release>
+</releases>]]></programlisting>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry id="tag-firmware-provides">
+			<term>&lt;provides/&gt; ↪ &lt;firmware/&gt;</term>
+			<listitem>
+				<para>
+					The <literal>provides/firmware</literal> tag describes the technical information needed to associate a firmware with a device, or describes
+					which runtime firmware file it makes available to the kernel.
+				</para>
+				<para>
+					For runtime-loadable firmware, the <literal>type</literal> property of the <literal>firmware</literal> tag needs to be set to <code>runtime</code>,
+					and its value needs to define the filename of a firmware below <filename>/lib/firmware</filename> to the firmware file in question,
+					like the firmware value exported from Linux kernel modules.
+				</para>
+				<para>
+					Example:
+				</para>
+				<programlisting language="XML"><![CDATA[<provides>
+  <firmware type="runtime">ipw2200-bss.fw</firmware>
+</provides>]]></programlisting>
+
+				<para>
+					For flashed firmware, the <literal>type</literal> property of the tag needs to be set to <code>flashed</code>.
+					Its value needs to define the GUID of the device the firmware should be flashed onto.
+				</para>
+				<para>
+					Example:
+				</para>
+				<programlisting language="XML"><![CDATA[<provides>
+  <firmware type="flashed">84f40464-9272-4ef7-9399-cd95f12da696</firmware>
+</provides>]]></programlisting>
+
+			</listitem>
+			</varlistentry>
+
+		</variablelist>
+
+		<para>
+			For a component of type <literal>firmware</literal>, the following tags are required and must be present for a valid document:
+			<xref linkend="tag-id-firmware"/>, <xref linkend="tag-name"/>, <xref linkend="tag-summary"/>,
+			<xref linkend="tag-metadata_license"/>, <xref linkend="tag-firmware-provides"/>.
+		</para>
+
+	</section>
+</section>

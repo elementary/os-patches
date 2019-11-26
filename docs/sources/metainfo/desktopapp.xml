@@ -1,0 +1,236 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!ENTITY % BOOK_ENTITIES SYSTEM "AppStream.ent">
+%BOOK_ENTITIES;
+]>
+
+<section id="sect-Metadata-Application">
+	<title>Desktop Applications</title>
+
+	<section id="spec-appdata-introduction">
+		<title>Introduction</title>
+		<para>
+			A desktop application is an application which has a graphical user interface and is commonly used with mouse and keyboard. It also ships a Freedesktop
+			<filename>.desktop</filename> file to be visible in application menus.
+		</para>
+		<para>
+			AppStream generators may pull data from the preexisting <filename>.desktop</filename> files to represent an application in the AppStream metadata pool. Upstream projects should
+			ship a metainfo file containing additional metadata to describe their application though, to enhance the available metadata.
+			This data includes things like screenshots, long descriptions, icon information and various other things needed
+			to present the application properly to the user.
+			For some distributions, the presence of this metadata is a prerequisite for the application showing up in the metadata pool and being presented in software centers.
+		</para>
+		<para>
+			The file described in this document is built upon the generic component metadata with fields specific for desktop applications (see <xref linkend="sect-Metadata-GenericComponent"/>).
+		</para>
+		<para>
+			The metainfo files override any values which are automatically fetched from other sources by the AppStream data generator, which means that its data will always take precedence over
+			data which has already been defined in a <filename>.desktop</filename> file.
+			Applications can ship one or more files in <filename>/usr/share/metainfo/%{id}.metainfo.xml</filename>.
+		</para>
+		<para>
+			Data will only be fetched from a desktop file if one <xref linkend="tag-dapp-launchable"/> tag is present to define a .desktop file ID. If multiple <literal>launchable</literal> tags are
+			defined, no data will be merged in from .desktop files.
+		</para>
+		<note>
+			<para>
+				If you are looking for some quickstart guide to just get your application to ship AppStream metadata quickly, this document might not be for you.
+				You might want to take a look at <xref linkend="sect-Quickstart-DesktopApps"/> instead.
+			</para>
+		</note>
+		<note>
+			<para>
+				While <literal>desktop-application</literal> metadata is commonly stored in <filename>/usr/share/metainfo/%{id}.metainfo.xml</filename> (with a <filename>.metainfo.xml</filename> extension),
+				using a <filename>.appdata.xml</filename> extension is also permitted for this component type for legacy compatibility.
+				AppStream implementations will recognize either file type, as long as it ends up in the right location on the filesystem.
+			</para>
+		</note>
+		<note>
+			<para>
+				If you want to hide a desktop-entry file from AppStream metadata generators which synthesize components from desktop-entry data, you may
+				want to add <code>X-AppStream-Ignore=True</code> to the <code>Desktop Entry</code> section of the .desktop file.
+				Keep in mind that if your .desktop file already has a <code>NoDisplay=True</code> key or is not of <code>Type=Application</code>, it will
+				always be ignored, unless metainfo file exists that references it (in which case its data may be merged with the metainfo data).
+			</para>
+		</note>
+	</section>
+
+	<section id="spec-appdata-filespec">
+		<title>File specification</title>
+
+		<para>
+			The basic structure for a generic component as described at <xref linkend="spec-component-filespec"/> applies.
+			Note that the XML root must have the <literal>type</literal> property set to <code>desktop-application</code>, while in a generic component this
+			property can be omitted. This clearly identifies this metainfo document as describing an application.
+		</para>
+
+		<note>
+			<para>
+				All tags defined in the <literal>generic</literal> component specification are valid for <literal>desktop-application</literal> components as well.
+				An application is just a specialized component, allowing tools like software centers to filter out the component types they want to display.
+			</para>
+		</note>
+		<note>
+			<para>
+				The <code>desktop-application</code> component type is the same as the <code>desktop</code> component type - <code>desktop</code> is the older
+				type identifier for desktop-applications and should not be used for new metainfo files, unless compatibility with very old AppStream tools (pre 2016)
+				is still wanted.
+			</para>
+		</note>
+
+		<para>
+			The following list describes the special tags for application upstream metadata and provides some additional information about the values
+			the tags are expected to have.
+			If no information is given about a tag, refer to the respective tag in <xref linkend="sect-Metadata-GenericComponent"/>.
+		</para>
+
+		<variablelist>
+			<varlistentry id="tag-id-desktopapp">
+			<term>&lt;id/&gt;</term>
+			<listitem>
+				<para>
+					For desktop applications, the <code>&lt;id/&gt;</code> tag value must follow the reverse-DNS scheme as described in <xref linkend="tag-id-generic"/>.
+				</para>
+				<note>
+					<para>
+						In previous AppStream releases, the <code>&lt;id/&gt;</code> was used to associate metainfo files with their .desktop files to merge in
+						data from .desktop files into the AppStream generator's final output. In modern metainfo files, the component-ID for <literal>desktop-application</literal>
+						components can be an arbitrary reverse-DNS string (matching the naming rules applying to all AppStream metadata), while the <xref linkend="tag-dapp-launchable"/> tag is used
+						to associate .desktop files with their metainfo files.
+					</para>
+					<para>
+						Note that even though the component-ID can now be any rDNS name, when updating existing applications, do not change their
+						<code>&lt;id/&gt;</code> to drop the .desktop suffix. The rules are relaxed when picking a new component-ID for new
+						applications, but when updating older applications they still need to keep their original <code>&lt;id/&gt;</code> (when
+						it's otherwise compliant). The ID is used to uniquely identify applications across distributions and releases and should
+						always remain the same for the same application.
+					</para>
+				</note>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry>
+			<term>&lt;metadata_license/&gt;</term>
+			<listitem>
+				<para>
+					The <code>&lt;metadata_license/&gt;</code> tag as described in <xref linkend="tag-metadata_license"/> must be present.
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry id="tag-dapp-name">
+			<term>&lt;name/&gt;</term>
+			<listitem>
+				<para>
+					The human-readable name of the application. This is the name you want users to see prior to installing the application.
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry id="tag-dapp-summary">
+			<term>&lt;summary/&gt;</term>
+			<listitem>
+				<para>
+					A short summary on what this application does, roughly equivalent to the <literal>Comment</literal> field of the
+					accompanying <filename>.desktop</filename> file of the application.
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry id="tag-dapp-launchable">
+			<term>&lt;launchable/&gt;</term>
+			<listitem>
+				<para>
+					It is recommended that a <code>&lt;launchable/&gt;</code> tag is present in <literal>desktop-application</literal> metainfo files.
+					The tag is described in detail at <xref linkend="tag-launchable"/>.
+				</para>
+				<para>
+					If only one <literal>launchable</literal> entry of type <literal>desktop-id</literal> is present, AppStream metadata generators might decide to
+					merge metadata from .desktop files referenced by the tag into their final output.
+				</para>
+				<para>
+					The <literal>launchable</literal> tag is optional, but if omitted software centers will not be able to launch the application directly after
+					it was installed.
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry id="tag-dapp-screenshots">
+			<term>&lt;screenshots/&gt;</term>
+			<listitem>
+				<para>
+					A screenshot presents your application to the outside world, and could be seen by hundreds or thousands of people.
+				</para>
+				<para>
+					The <code>&lt;screenshots/&gt;</code> tag should look like it is described at <xref linkend="tag-screenshots"/>.
+				</para>
+				<para>
+					Screenshot size, shape and format recommendations for applications:
+				</para>
+				<itemizedlist>
+					<listitem>
+						<para>
+							All screenshots should have a 16:9 aspect ratio, and should have a width that is no smaller than 620px (software center applications will be able to fill in the screenshots in the space they provide for that
+							more easily then).
+						</para>
+						<para>
+							Ideally the window will be resized to a 16:9 aspect ratio, but screenshots can also be cropped if only a small area of the window needs to be shown.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Screenshots should ideally be in the PNG format, but JPEG and WebP images are also fine. Keep in mind though that the images are converted into PNG
+							when collection metadata is generated for a software distribution.
+						</para>
+					</listitem>
+					<listitem>
+						<para>Do not scale screenshots below their original size.</para>
+					</listitem>
+				</itemizedlist>
+				<para>
+					You can find a lot more information on how to create good screenshots in the <link linkend="qsr-app-screenshots-info">quickstart guide on applications</link>.
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry>
+			<term>&lt;project_group/&gt;</term>
+			<listitem>
+				<para>
+					This tag is described for generic components at <xref linkend="spec-component-filespec"/>. You should use it for your application if appropriate.
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry>
+			<term>&lt;provides/&gt;</term>
+			<listitem>
+				<para>
+					This tag is described in detail for generic components at <xref linkend="tag-provides"/>.
+				</para>
+				<para>
+					If your application ships a binary in a location in the default <envar>PATH</envar>, you should add at least a child of type
+					<code>&lt;binary/&gt;</code> to make that new executable known to the distribution.
+				</para>
+			</listitem>
+			</varlistentry>
+
+			<varlistentry>
+			<term>&lt;releases/&gt;</term>
+			<listitem>
+				<para>
+					The application metainfo should at least provide one <code>&lt;releases/&gt;</code> tag,
+					which has one or more <code>&lt;release/&gt;</code> children to define the version and release date of this
+					application. For details, see <xref linkend="tag-releases"/> .
+				</para>
+			</listitem>
+			</varlistentry>
+		</variablelist>
+
+		<para>
+			For a component of type <literal>desktop-application</literal>, the following tags are required and must always be present: <xref linkend="tag-id-desktopapp"/>,
+			<xref linkend="tag-dapp-name"/>, <xref linkend="tag-dapp-summary"/>, <xref linkend="tag-description"/>, <xref linkend="tag-metadata_license"/>.
+		</para>
+
+	</section>
+</section>

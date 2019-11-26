@@ -1,0 +1,46 @@
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
+ * Copyright (C) 2016-2019 Matthias Klumpp <matthias@tenstral.net>
+ *
+ * Licensed under the GNU General Public License Version 2
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the license, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef __ASCLI_ACTIONS_MISC_H
+#define __ASCLI_ACTIONS_MISC_H
+
+#include <glib-object.h>
+#include "appstream.h"
+
+G_BEGIN_DECLS
+
+int		ascli_show_status (void);
+
+int		ascli_make_desktop_entry_file (const gchar *mi_fname,
+					       const gchar *de_fname,
+					       const gchar *exec_line);
+
+int		ascli_news_to_metainfo (const gchar *news_fname,
+					const gchar *mi_fname,
+					const gchar *out_fname,
+					guint limit,
+					const gchar *format_str);
+int		ascli_metainfo_to_news (const gchar *mi_fname,
+					const gchar *news_fname,
+					const gchar *format_str);
+
+G_END_DECLS
+
+#endif /* __ASCLI_ACTIONS_MISC_H */

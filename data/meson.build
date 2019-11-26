@@ -1,0 +1,26 @@
+# Meson definition for AppStream data
+
+install_data ('its/metainfo.its', install_dir: 'share/gettext/its')
+install_data ('its/metainfo.loc', install_dir: 'share/gettext/its')
+
+# NOTE: We do not translate the release notes on purpose here.
+# If you do want to give translators a chance to translate them,
+# ascli news-to-metainfo needs to produce a temporary file to translate
+# prior to running (x)gettext on the file.
+metainfo_with_relinfo = custom_target('gen-output',
+    input : ['../NEWS', 'org.freedesktop.appstream.cli.metainfo.xml'],
+    output : ['nol10n_withrelinfo_org.freedesktop.appstream.cli.metainfo.xml'],
+    command : [ascli_exe, 'news-to-metainfo', '--limit=6', '@INPUT0@', '@INPUT1@', '@OUTPUT@']
+)
+
+i18n.merge_file (
+    input:  metainfo_with_relinfo,
+    output: 'org.freedesktop.appstream.cli.metainfo.xml',
+    type: 'xml',
+    data_dirs: [meson.current_source_dir()],
+    po_dir: join_paths (source_root, 'po'),
+    install: true,
+    install_dir: join_paths (get_option ('datadir'), 'metainfo')
+)
+
+install_data ('appstream.conf', install_dir: '/etc')

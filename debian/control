@@ -1,0 +1,219 @@
+Source: appstream
+Section: admin
+Priority: optional
+Maintainer: Matthias Klumpp <mak@debian.org>
+Build-Depends: debhelper (>= 11),
+               gettext,
+               gobject-introspection,
+               gperf,
+               gtk-doc-tools,
+               libgirepository1.0-dev (>= 1.53),
+               libglib2.0-dev (>= 2.46),
+               liblmdb-dev,
+               libstemmer-dev,
+               libxml2-dev (>= 2.8.0),
+               libyaml-dev (>= 0.1.6),
+               meson (>= 0.42),
+               qtbase5-dev (>= 5.6),
+               valac
+Standards-Version: 4.4.0
+Homepage: https://www.freedesktop.org/wiki/Distributions/AppStream/
+Vcs-Git: https://salsa.debian.org/pkgutopia-team/appstream.git
+Vcs-Browser: https://salsa.debian.org/pkgutopia-team/appstream
+
+Package: appstream
+Architecture: any
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: appstream-index (<< ${source:Version}),
+        gnome-software (<< 3.22.5-1),
+        plasma-discover (<< 5.8.5-3)
+Provides: appstream-index
+Suggests: apt-config-icons,
+          curl
+Description: Software component metadata management
+ AppStream is a metadata specification, allowing to write metadata for
+ software projects in a standardized format.
+ It provides facilities to easily access and transform the data, as well
+ as a few additional services to allow building feature-rich software center
+ applications.
+ .
+ This package provides tools to generate, maintain and query the AppStream
+ data pool of installed and available software, and enables integration
+ with the APT package manager.
+ .
+ The 'appstreamcli' tool can be used for accessing the software component
+ pool as well as for working with AppStream metadata directly, including
+ validating it for compliance with the specification.
+
+Package: libappstream4
+Architecture: any
+Section: libs
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Description: Library to access AppStream services
+ AppStream is a metadata specification, allowing to write metadata for
+ software projects in a standardized format. This allows software centers
+ to display useful information for not installed software, as well as
+ determining software the user might want to install (e.g. to open an
+ unknown file type or to make missing firmware available).
+ .
+ This package contains a GObject-based library to access AppStream
+ services, like the software component metadata pool.
+ It also contains functions for reading, writing and transforming AppStream
+ metadata.
+
+Package: libappstream-dev
+Architecture: any
+Section: libdevel
+Depends: gir1.2-appstream-1.0 (= ${binary:Version}),
+         libappstream4 (= ${binary:Version}),
+         libglib2.0-dev (>= 2.46),
+         ${misc:Depends}
+Suggests: appstream-generator
+Description: Library to access AppStream services (development files)
+ AppStream is a metadata specification, allowing to write metadata for
+ software projects in a standardized format. This allows software centers
+ to display useful information for not installed software, as well as
+ determining software the user might want to install (e.g. to open an
+ unknown file type or to make missing firmware available).
+ .
+ This package contains development files necessary to develop
+ software management tools which use the AppStream library.
+
+Package: gir1.2-appstream-1.0
+Architecture: any
+Section: introspection
+Depends: libappstream4 (= ${binary:Version}),
+         ${gir:Depends},
+         ${misc:Depends}
+Breaks: gir1.2-appstream (<< 0.10.1)
+Replaces: gir1.2-appstream (<< 0.10.1)
+Description: Library to access AppStream services (introspection data)
+ AppStream is a metadata specification, allowing to write metadata for
+ software projects in a standardized format. This allows software centers
+ to display useful information for not installed software, as well as
+ determining software the user might want to install (e.g. to open an
+ unknown file type or to make missing firmware available).
+ .
+ This package contains introspection data for the AppStream library.
+
+Package: libappstreamqt2
+Architecture: any
+Section: libs
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Description: Qt5 library to access AppStream services
+ AppStream is a metadata specification, allowing to write metadata for
+ software projects in a standardized format. This allows software centers
+ to display useful information for not installed software, as well as
+ determining software the user might want to install (e.g. to open an
+ unknown file type or to make missing firmware available).
+ .
+ This package contains a Qt-based library to access AppStream
+ services, like the software component metadata pool.
+
+Package: libappstreamqt-dev
+Architecture: any
+Multi-Arch: same
+Section: libdevel
+Depends: libappstreamqt2 (= ${binary:Version}),
+         qtbase5-dev (>= 5.4),
+         ${misc:Depends}
+Description: Qt5 library to access AppStream services (development files)
+ AppStream is a metadata specification, allowing to write metadata for
+ software projects in a standardized format. This allows software centers
+ to display useful information for not installed software, as well as
+ determining software the user might want to install (e.g. to open an
+ unknown file type or to make missing firmware available).
+ .
+ This package contains development files necessary to develop
+ software management tools which use the Qt-based AppStream library.
+
+Package: appstream-doc
+Architecture: all
+Multi-Arch: foreign
+Section: doc
+Depends: ${misc:Depends}
+Suggests: appstream
+Breaks: appstream (<< 0.11.8)
+Description: Developer documentation for AppStream
+ AppStream is a metadata specification, allowing to write metadata for
+ software projects in a standardized format. This allows software centers
+ to display useful information for not installed software, as well as
+ determining software the user might want to install (e.g. to open an
+ unknown file type or to make missing firmware available).
+ .
+ This package provides developer documentation for AppStream.
+
+Package: apt-config-icons
+Architecture: all
+Multi-Arch: foreign
+Section: misc
+Depends: appstream,
+         ${misc:Depends}
+Description: APT configuration snippet to enable icon downloads
+ This package contains an APT configuration snippet that enables the
+ download of an icon tarball containing application icons for display in
+ software centers.
+ Icons get downloaded directly from the archive via regular cache updates,
+ and match the software currently available in the respective archive suites.
+ .
+ This snippet enables icons of the default icon size set in the AppStream
+ specification for software centers, 64x64px. It also enables downloads
+ of smaller 48x48px icons.
+
+Package: apt-config-icons-hidpi
+Architecture: all
+Multi-Arch: foreign
+Section: misc
+Depends: apt-config-icons,
+         ${misc:Depends}
+Description: APT configuration snippet to enable HiDPI icon downloads
+ This package contains an APT configuration snippet that enables the
+ download of an icon tarball containing application icons for display in
+ software centers.
+ Icons get downloaded directly from the archive via regular cache updates,
+ and match the software currently available in the respective archive suites.
+ .
+ This snippet enables icons in the size of 64x64@2, that are suitable for
+ HiDPI displays.
+
+Package: apt-config-icons-large
+Architecture: all
+Multi-Arch: foreign
+Section: misc
+Depends: apt-config-icons,
+         ${misc:Depends}
+Description: APT configuration snippet to enable large icon downloads
+ This package contains an APT configuration snippet that enables the
+ download of an icon tarball containing application icons for display in
+ software centers.
+ Icons get downloaded directly from the archive via regular cache updates,
+ and match the software currently available in the respective archive suites.
+ .
+ This snippet enables icon tarball downloads in large, 128x128px size.
+ If these bigger icons are not downloaded by APT, a software center may
+ decide to fetch them on-demand from a web location.
+
+Package: apt-config-icons-large-hidpi
+Architecture: all
+Multi-Arch: foreign
+Section: misc
+Depends: apt-config-icons-large,
+         ${misc:Depends}
+Description: APT configuration snippet to enable large HiDPI icon downloads
+ This package contains an APT configuration snippet that enables the
+ download of an icon tarball containing application icons for display in
+ software centers.
+ Icons get downloaded directly from the archive via regular cache updates,
+ and match the software currently available in the respective archive suites.
+ .
+ This snippet enables icon tarball downloads in large, 128x128@2 size that
+ are also suitable for HiDPI displays.
+ If these bigger icons are not downloaded by APT, a software center may
+ decide to fetch them on-demand from a web location.

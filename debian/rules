@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+#export DH_VERBOSE=1
+
+AS_CONFIGURE_ARGS = -Dqt=true \
+		-Dapt-support=true \
+		-Dvapi=true
+
+%:
+	dh $@ --with gir
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(AS_CONFIGURE_ARGS)
+
+override_dh_missing:
+	dh_missing --fail-missing

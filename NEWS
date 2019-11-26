@@ -1,0 +1,2072 @@
+Version 0.12.9
+~~~~~~~~~~~~~~
+Released: 2019-09-24
+
+Features:
+ * validator: Add method to retrieve list of all tags
+ * ascli: Add command to make a desktop-entry file from a metainfo file
+ * ascli: Add command for YAMl NEWS file conversion
+ * ascli: Convert text NEWS file as well
+ * Recognize Specification/Documentation as new section type when converting NEWS
+ * Augment metainfo file with release information automatically
+ * Use gperf for description markup as well
+ * validator: Make file-extension checks work with complex URIs
+ * Implement support for release issues
+
+Specification:
+ * docs: Actually give a metadata license recommendation
+ * Document the issue tag, which can be part of release information
+ * spec: Explicitly allow WebP for images in metainfo files
+ * Permit requires/recommends relations on firmware, like Fwupd uses
+
+Bugfixes:
+ * docs: Move compulsory_for_desktop where it belongs
+ * docs: Mention how to exclude .desktop files from being processed
+ * Make -Wdeprecated-copy non-fatal in maintainer mode for now
+ * cache: Relax LMDB database max size assumption a bit to help 32bit builds
+ * validator: Don't crash in assertion if we have no filename
+ * Catch more errors when parsing YAML and _ref less often
+ * Interleave translated/untranslated paragraphs when generating metainfo XML
+ * Don't format cached XML
+ * Don't emit language tag for screenshot if it is unnecessary
+ * docs: Add missing documentation to API reference
+ * docs: Document a few missing ascli subcommands
+
+Version 0.12.8
+~~~~~~~~~~~~~~
+Released: 2019-08-16
+
+Notes:
+ * This release changes the output of appstreamcli's validate actions.
+   Please account for that if you were parsing it! The new `--format=yaml`
+   flag for ascli may be interesting to produce machine-readable output.
+
+Features:
+ * Add install-docs meson build option (Antonio Larrosa)
+ * Use more portable deprecation macro
+ * Deprecate AsIssueImportance, use equivalent AsIssueSeverity instead
+ * validator: Implement first bits of tag-based validation
+ * cli: Print terse issue list by default, make long explanation explicit
+ * Assume releases are sorted in metainfo, fail validation on wrong sorting
+ * validator: Allow returning validator output as structured YAML
+ * validator: Refine YAML output and allow CLI to generate it for validate-tree
+ * Improve XML node dumping functions
+ * Permit <em/> and <code/> in description paragraphs and lists
+ * validator: Don't complain about <em/> and <code/> in paragraphs
+ * validator: Validate release info better, check release dates
+ * Recognize more "provides" item types
+ * validator: Check relations for loops with the component itself
+ * its: Handle new inline markup correctly in translations
+ * Add AsVideo object to contain screenshot video data
+ * Implement video support for screenshots
+ * validator: Validate the new video screenshot element
+ * qt: Add support for screenshot videos
+ * validator: The default screenshot must not contain a video
+ * validator: Add methods to query tag severity/explanation explicitly
+ * Implement support for icon-theme components
+
+Specification:
+ * spec: Recommend latest-to-oldest release order for metainfo
+ * spec: Permit use of <em/> and <code/> for description formatting
+ * docs: Clarify when/why to use .appdata.xml instead of .metainfo.xml extensions
+ * docs: Explain why name/summary should not be omitted for app metainfo files
+ * spec: Clarify that ISO 8601 dates in AppStream require the complete date
+ * spec: Specify videos as a screenshot option
+ * spec: Specify an icon-theme component type
+
+Bugfixes:
+ * Change spelling: DBus → D-Bus, MIME types → Media types (Allan Nordhøy)
+ * pool: Use fallback tempdir if user /home does not exist
+ * Restore compatibility with GLib < 2.58
+ * Find LMDB even if no pkg-config file was installed
+ * pool: Improve error reporting on cache refreshes
+ * Fix possible NULL dereference
+ * Fix division-by-zero if there are no components available at all
+ * pool: Fix some error checks when adding components
+ * Report better errors when counting cached components fails
+ * Fix infinite recursion if component has itself listed as an addon
+ * validator: Correctly read line numbers in long files
+ * Catch out-of-context XML reading errors again
+ * Protect against addon extension loops in the cache
+
+Version 0.12.7
+~~~~~~~~~~~~~~
+Released: 2019-06-16
+
+Notes:
+ * This release changes the way AsPool caches components and will also
+   permanently keep components in an LMDB-based cache.
+   Additionally, the GVariant AsComponent serialization was removed.
+
+Features:
+ * Depend on LMDB (Matthias Klumpp)
+ * tests: Test pool cache and XML read performance separately (Matthias Klumpp)
+ * Improvements to data caching and fulltext search (Matthias Klumpp)
+ * Add new LMDB based component cache (Matthias Klumpp)
+ * cache: Implicitly hash keys if they are too long for the database (Matthias Klumpp)
+ * cache: Implement all supported search modes (Matthias Klumpp)
+ * cache: Implement various performance optimizations and helpers (Matthias Klumpp)
+ * cache: Allow switch to nosync mode, make insertions threadsafe (Matthias Klumpp)
+ * Refactor component pool to make use of the mmap'ed caches by default (Matthias Klumpp)
+ * Don't limit term length in user search queries (Matthias Klumpp)
+ * Ignore one-letter search terms (Matthias Klumpp)
+ * pool: Mask removed components in readonly caches so they can not be queried (Matthias Klumpp)
+ * Remove component GVariant serialization (Matthias Klumpp)
+ * cache: Use binary representations for cache values (Matthias Klumpp)
+ * cache: Always refine launchable entries, to make them searchable (Matthias Klumpp)
+ * Make component scope API public (Matthias Klumpp)
+ * Handle LicenseRef URLs explicitly when extracing a license URL (Matthias Klumpp)
+ * Update static data (Matthias Klumpp)
+ * tests: Update perf test with test for the new cache implementation (Matthias Klumpp)
+ * its: Add "translatable" option in metainfo.its (fujiwarat)
+
+Specification:
+ * Add a note about not dropping .desktop suffix from existing IDs (Kalev Lember)
+ * spec: clarify <translation/> purpose (Kamil Páral)
+ * docs: Explicitly rule out nested lists (Marius Vollmer)
+ * docs: Add link to project page to specification abstract (Matthias Klumpp)
+ * spec: Clarify format of the appstream: URI (Matthias Klumpp)
+ * spec: Clarify how to denote proprietary licenses (Matthias Klumpp)
+
+Bugfixes:
+ * tests: Fix potential wrong output when two tests fail in parallel (Matthias Klumpp)
+ * validator: Allow some top-level tags to be empty (Matthias Klumpp)
+ * Only match all things for broad queries, for invalid ones return nothing (Matthias Klumpp)
+ * Determine system cache age correctly and don't needlessly refresh it (Matthias Klumpp)
+ * Never attempt to load the system cache when it is not needed (Matthias Klumpp)
+ * Assume "unknown" distribution ID by default (if /etc/os-release is missing) (Matthias Klumpp)
+ * cache: Ensure previous cache is closed before opening a new one (Matthias Klumpp)
+ * Put test data in alphabetical order (Robert Ancell)
+ * Generate XML and YAML in alphabetical order (Robert Ancell)
+
+Version 0.12.6
+~~~~~~~~~~~~~~
+Released: 2019-03-02
+
+Features:
+ * Implement artifacts (Matthias Klumpp)
+ * Search improvements (Matthias Klumpp)
+
+Specification:
+ * doc: help distinguish the 2 'languages' tags (Beuc)
+ * spec: Document the new artifacts tag (Matthias Klumpp)
+
+Translation:
+ * Finnish
+   - Ammuu5
+ * Hungarian
+   - Balázs Úr
+ * Turkish
+   - Kemal Oktay Aktoğan
+ * Spanish
+   - advocatux
+ * Danish
+   - scootergrisen
+
+Version 0.12.5
+~~~~~~~~~~~~~~
+Released: 2019-01-26
+
+Features:
+ * qt: expose the spdx parser to Qt users (Aleix Pol)
+ * Implement operating-system component and add convenience functions (Matthias Klumpp)
+ * qt: Add operating-system component type and a few utility functions (Matthias Klumpp)
+ * Allow fetching the ISO8601 date directly alongside the timestamp in AsRelease (Matthias Klumpp)
+ * Implement date_eol for AsRelease (Matthias Klumpp)
+ * Add convenience methods for retrieving date_eol as UNIX timestamp (Matthias Klumpp)
+ * qt: Allow retrieving the EOL timestamp for releases (Matthias Klumpp)
+ * Implement new release details URL (Matthias Klumpp)
+ * Make rDNS conversion function more generic and add more extensive tests (Matthias Klumpp)
+
+Specification:
+ * docs: <release> tag can have details url (Jehan)
+ * spec: Specify the operating-system component (Matthias Klumpp)
+ * spec: Specify date_eol for releases (Matthias Klumpp)
+ * docs: Explicitly state list items are allowed in ol/ul lists (Matthias Klumpp)
+
+Bugfixes:
+ * Don't warn about issues in a cache refresh if there weren't any (Matthias Klumpp)
+ * Ensure releases are always sorted in descending order (Matthias Klumpp)
+ * pool: Fix g-i for get_components_*() while GPtrArray owns its elements (Rico Tzschichholz)
+
+Translation:
+ * Chinese (Simplified)
+   - Dingzhong Chen
+ * German
+   - Johannes Keyser
+ * Turkish
+   - Mesut Akcan
+ * French
+   - Nathan
+ * Czech
+   - Pavel Borecki
+ * Catalan
+   - Robert Antoni Buj Gelonch
+ * Portuguese:
+   - ssantos
+
+Version 0.12.4
+~~~~~~~~~~~~~~
+Released: 2018-12-22
+
+Features:
+ * pool: Be a lot more forgiving when encountering invalid components (Matthias Klumpp)
+ * Implement component removal via remove-component merges (Matthias Klumpp)
+ * validator: Warn about insecure URLs, handle mailto: URLs (Matthias Klumpp)
+ * Add a contact URL type (Robert Ancell)
+
+Specification:
+ * Document new remove-component merge type (Matthias Klumpp)
+
+Bugfixes:
+ * as-pool: fix GObject annotation for GPtrArray owning the elements (Corentin Noël)
+ * Make invalid components ratio check more accurate (Matthias Klumpp)
+ * Ensure description paragraphs contain no invalid XML tags (Matthias Klumpp)
+
+Translation:
+ * Norwegian Bokmål
+   - Allan Nordhøy
+ * Swedish
+   - Anders Jonsson
+ * Chinese (Traditional)
+   - Chang-Chia Tseng
+   - Jeff Huang
+ * Dutch
+   - Heimen Stoffels
+ * Russian
+   - Igor
+ * Galician
+   - Iván
+ * Japanese
+   - Ryo Nakano
+   - Kyotaro Iijima
+ * Turkish
+   - Mesut Akcan
+ * Italian
+   - Milo Casagrande
+ * Lithuanian
+   - Moo
+ * Polish
+   - Piotr Drąg
+ * Portuguese (Brazil)
+   - Rafael Fontenelle
+ * Portuguese
+   - ssantos
+ * Ukrainian
+   - Yuri Chornoivan
+ * Arabic
+   - alaazghoul
+   - mohammadA
+
+Version 0.12.3
+~~~~~~~~~~~~~~
+Released: 2018-10-22
+
+Notes:
+ * Beginning with this release, data from local .desktop files will not be loaded into
+   the pool automatically, unless a metainfo file also exists.
+   This should ensure less duplicated components in general higher-quality data to be
+   displayed. It also provides another incentive to add/fix metainfo files.
+   If you prefer the previous behavior, set the AS_POOL_FLAG_READ_DESKTOP_FILES flag
+   on your AsPool instance.
+
+Features:
+ * apt: Ignore errors post-update (Matthias Klumpp)
+ * validator: Allow content_rating to be empty (Matthias Klumpp)
+ * ascli: Display stock icon name if no suitable icon was found for details view (Matthias Klumpp)
+ * Refactor loading of local metainfo files (Matthias Klumpp)
+
+Specification:
+ * spec: Clarify the requirement for content_attribute tags in content_rating (Matthias Klumpp)
+ * docs: Write intro for addon quickstart (Matthias Klumpp)
+ * docs: Replace hyphens in component-IDs of XML examples (Matthias Klumpp)
+
+Bugfixes:
+ * Ensure all addons are linked to a component (David Hewitt)
+ * Annotate nullable return types (David Hewitt)
+ * cache: Set explicit variant types for cases where they can not be inferred (Matthias Klumpp)
+ * utils: Handle NULL strings when comparing versions (Matthias Klumpp)
+ * Explicitly include string.h in as-tag.c (Matthias Klumpp)
+ * Properly ignore desktop-entry components if we have better data (Matthias Klumpp)
+ * Remove AppStream XSD schema (Matthias Klumpp)
+ * Update static data (Matthias Klumpp)
+ * Set error variable if there were some errors during refinement (Stefan Bruens)
+
+Translation:
+ * Norwegian Bokmål
+   - Allan Nordhøy
+   - Petter Reinholdtsen
+ * German
+   - Chris
+ * Spanish
+   - Tatiana Canales
+ * Japanese
+   - rikanotank1
+
+Version 0.12.2
+~~~~~~~~~~~~~~
+Released: 2018-08-04
+
+Bugfixes:
+ * Fix a couple of incorrect g_ptr_array_unrefs (Iain Lane)
+ * Use autofree functions instead of freeing resources
+   explicitly (Matthias Klumpp)
+ * Add missing const (Matthias Klumpp)
+ * Ensure we don't produce a .pc file with unnecessary
+   Requires.private lines (Matthias Klumpp)
+ * Stop leaking local GVariantDict instance contents (Phil Miller)
+ * Drop leaked references to container items (Phil Miller)
+
+Translation:
+ * Norwegian Bokmål
+   - Allan Nordhøy
+ * Swedish
+   - Anders Jonsson
+ * Indonesian
+   - Andika Triwidada
+ * Chinese (Traditional)
+   - Chang-Chia Tseng
+ * Dutch
+   - Heimen Stoffels
+ * French
+   - Hugo Locurcio
+ * Deutsch
+   - James Bond
+ * Italian
+   - Milo Casagrande
+ * Lithuanian
+   - Moo
+ * Čeština
+   - Pavel Borecki
+ * Português (Brasil)
+   - Rafael Fontenelle
+ * Catalan
+   - Robert Antoni Buj Gelonch
+ * Arabic
+   - alaazghoul
+
+Version 0.12.1
+~~~~~~~~~~~~~~
+Released: 2018-06-10
+
+Features:
+ * ascli: Add command to compare version numbers (Matthias Klumpp)
+ * yaml: Allow reading multiple localized strings from YAML data (Matthias Klumpp)
+ * yaml: Always include the untranslated strings (Matthias Klumpp)
+ * Allow to ignore media_baseurl when parsing metadata (Matthias Klumpp)
+ * xml: Add implementation of the agreement tag (Matthias Klumpp)
+ * Add new "repository" component type (Matthias Klumpp)
+ * yaml: Implement Agreements field (Matthias Klumpp)
+ * cache: Implement support for agreements (Matthias Klumpp)
+ * tests: Improve cache data tests, add agreement tag test (Matthias Klumpp)
+ * Use gperf for perfect hash generation for some tags (Matthias Klumpp)
+ * tests: Add rundimentary performance test (Matthias Klumpp)
+ * its: Mark agreement sections as translatable (Matthias Klumpp)
+ * qt: Add support for service/repository component types (Matthias Klumpp)
+
+Specification:
+ * docs: Describe the custom tag (Matthias Klumpp)
+ * spec: Describe the new agreement tag (Matthias Klumpp)
+ * docs: Clarify that the /usr/share/appdata/ path is legacy and should
+   not be used (Matthias Klumpp)
+
+Bugfixes:
+ * its: Allow translation of release descriptions (Marc J)
+ * Load data from desktop files properly again (Matthias Klumpp)
+ * Update desktop-environment list (Matthias Klumpp)
+ * qt: Don't warn about inlining in maintainer mode (Matthias Klumpp)
+
+Translation:
+ * Spanish
+   - Adolfo Jayme Barrientos
+ * Русский
+   - Igor
+ * French
+   - Jean-François Michaud
+ * Dutch
+   - Jeff Huijsmans
+ * Polish
+   - Piotr Drąg
+ * Ukrainian
+   - Yuri Chornoivan
+
+Version 0.12.0
+~~~~~~~~~~~~~~
+Released: 2018-04-04
+
+Features:
+ * Implement release types (Matthias Klumpp)
+ * qt: Support release types (Matthias Klumpp)
+ * Update static data lists (Matthias Klumpp)
+ * Make as_str_replace use as_gstring_replace internally (Matthias Klumpp)
+ * spdx: Add some compatibility workarounds for SPDX 3.0 (Matthias Klumpp)
+ * validator: Validate SPDX license expressions for metadata_license (Matthias Klumpp)
+ * apt: Add config snippets to enable icon downloads (Matthias Klumpp)
+ * yaml: Ensure all string values have whitespaces stripped (Matthias Klumpp)
+ * Make as_component_get_launchables public API (Matthias Klumpp)
+ * Implement support for requires/recommends (Matthias Klumpp)
+ * Add recommends/requires data to the cache (Matthias Klumpp)
+ * Add a quick way to check if a version satisfies an AsRelation requirement (Matthias Klumpp)
+ * ascli: Properly document the --no-net flag (Matthias Klumpp)
+ * ascli: Allow to disable network acces via an environment variable (Matthias Klumpp)
+ * apt: Support 48x48px icons (Matthias Klumpp)
+ * yaml: Make Requires/Recommends data more compact and easier to emit (Matthias Klumpp)
+ * validator: Validate requires/recommends tags (Matthias Klumpp)
+ * Default to format version 0.12 (Matthias Klumpp)
+
+Specification:
+ * spec: Add a "type" property to <release/> tag. (Jehan)
+ * spec: Initial draft for requires/recommends (Matthias Klumpp)
+ * spec: Document the YAML Rquires/Recommends fields (Matthias Klumpp)
+ * spec: Clarify that the memory requirement uses MiB as unit (Matthias Klumpp)
+
+Bugfixes:
+ * qt: Implement missing constructors (Aleix Pol)
+ * apt: escape the icon scale factor as it is using the arobase character (Corentin Noël)
+ * Check plain language string in as_component_localized_get as well (Antonio Rojas)
+ * qt: Define location and soname for all configurations, not just Debug (Gabriel Souza Franco)
+ * Never override high-quality data with incomplete .desktop data (Matthias Klumpp)
+ * Make data update script work with recent SPDX (Matthias Klumpp)
+ * Add a timeout to URL validity checks (Matthias Klumpp)
+
+Translation:
+ * Ukrainian
+   - AB
+   - Yuri Chornoivan
+ * Norwegian Bokmål
+   - Allan Nordhøy
+ * Swedish
+   - Anders Jonsson
+ * Indonesian
+   - Andika Triwidada
+   - se7entime
+ * German
+   - Andreas Kleinert
+ * Hungarian
+   - Balázs Meskó
+   - Balázs Úr
+ * Chinese (Traditional)
+   - Chang-Chia Tseng
+ * Russian
+   - Igor
+ * Finnish
+   - Juhani Numminen
+ * Korean
+   - Jung-Kyu Park
+ * Portuguese (Brazil)
+   - Luiz Fernando Ranghetti
+   - Rafael Fontenelle
+   - Rafael Henrique Mendes de Oliv
+ * Slovak
+   - Matúš Baňas
+ * Arabic
+   - Michal Čihař
+   - Mutaz Tayyeb AbuSaad
+ * Italian
+   - Milo Casagrande
+ * Lithuanian
+   - Moo
+ * Czech
+   - Pavel Borecki
+ * Polish
+   - Piotr Drąg
+ * Catalan
+   - Robert Antoni Buj Gelonch
+
+Version 0.11.8
+~~~~~~~~~~~~~~
+Released: 2018-01-22
+
+Features:
+ * validator: Emit a hint in case a discouraged AppStream ID style is used (Matthias Klumpp)
+ * l10n: Renamed Norwegian Bokmål language file (Matthias Klumpp)
+
+Specification:
+ * docs: Add quickstart instructions for intltool (David Steele)
+ * spec: Discourage use of hyphens and digit-started segments for IDs (Matthias Klumpp)
+
+Bugfixes:
+ * qt: Export the AppStreamQt target (Aleix Pol)
+ * Various string improvements (Allan Nordhøy)
+ * validator: Don't make HEAD requests for URL checks, fetch first byte instead (Matthias Klumpp)
+ * Enforce a non-broken version of gobject-introspection (Matthias Klumpp)
+ * Ensure LINGUAS update is only run explicitly (Matthias Klumpp)
+ * Fix a minor memory and fd leak (Matthias Klumpp)
+
+Translation:
+ * Norwegian Bokmål
+   - Allan Nordhøy
+   - Petter Reinholdtsen
+ * Swedish
+   - Anders Jonsson
+   - Allan Nordhøy
+ * German
+   - Andreas Kleinert
+ * Chinese (Traditional)
+   - Chang-Chia Tseng
+ * Chinese (Simplified)
+   - Dingzhong Chen
+ * French
+   - Emmanuel Gil Peyrot
+   - Yvan Masson
+ * Dutch
+   - Heimen Stoffels
+ * Russian
+   - Igor
+ * Slovak
+   - Martina Tatranská
+ * Italian
+   - Milo Casagrande
+ * Czech
+   - Pavel Borecki
+ * Polish
+   - Piotr Drąg
+ * Ukrainian
+   - Yuri Chornoivan
+
+Version 0.11.7
+~~~~~~~~~~~~~~
+Released: 2017-10-22
+
+Notes:
+ * The appstreamcli validation commands now use curl if it is available to check all
+   URLs in the metadata for existence.
+   If you don't want this behavior, pass "--nonet" to appstreamcli. There might also
+   be false positives (one is known with the KDE bugtracker) that need to be investigated,
+   so feedback on this new feature is welcome.
+
+Features:
+ * validator: Check all urls for validity (Matthias Klumpp)
+ * validator: Check web-application components for missing tags (Matthias Klumpp)
+ * Add API to retrieve the AppStream library version (Matthias Klumpp)
+ * apt: Allow fetching 128x128@2 HiDPI icons (Rico Tzschichholz)
+
+Specification:
+ * Add the "url" launchable type (Dimitrios Christidis)
+ * spec: Clarify some icon details in the collection data (Marius Vollmer)
+ * spec: Allow <icon> tags in generic components (Marius Vollmer)
+ * spec: Specify the web-application component type (Matthias Klumpp)
+
+Bugfixes:
+ * Fix endless loop when validating screenshots (Matthias Klumpp)
+ * ascli: Show a list of component-types when --help is passed to new-template (Matthias Klumpp)
+ * validator: Drop the wget fallback, making missing curl only an info (Matthias Klumpp)
+ * meson: Properly define header-file in gir (Rico Tzschichholz)
+
+Translation:
+ * Norwegian Bokmål [new!]
+   - Allan Nordhøy
+ * Swedish
+   - Anders Jonsson
+ * German
+   - Andreas Kleinert
+ * Chinese (Traditional)
+   - Chang-Chia Tseng
+ * Dutch
+   - Heimen Stoffels
+ * Italian
+   - Milo Casagrande
+ * Czech
+   - Pavel Borecki
+ * Polish
+   - Piotr Drąg
+ * Ukrainian
+   - Yuri Chornoivan
+
+Version 0.11.6
+~~~~~~~~~~~~~~
+Released: 2017-10-02
+
+Features:
+ * Improve screenshot validation (Matthias Klumpp)
+ * Allow to disable introspection (Matthias Klumpp)
+
+Bugfixes:
+ * Revert back to the old build option names (Matthias Klumpp)
+ * Apply maintainer flags equally to C++ and C (Matthias Klumpp)
+ * Explicitly set C/C++ standard versions (Matthias Klumpp)
+ * vapi: Include the right header (Matthias Klumpp)
+ * xml: Correctly write screenshots tag again (Matthias Klumpp)
+ * Do not cache a screenshot that doesn't have images (Matthias Klumpp)
+ * xml: Support legacy screenshot tags again (Matthias Klumpp)
+
+Translation:
+ * Swedish
+   - Anders Jonsson
+ * Portuguese (Brazil)
+   - Davi da Silva Böger
+   - Rafael Fontenelle
+
+Version 0.11.5
+~~~~~~~~~~~~~~
+Released: 2017-09-04
+
+Features:
+ * Restructure build feature flags (Matthias Klumpp)
+ * Allow disabling API documentation build (Matthias Klumpp)
+
+Bugfixes:
+ * qt: Don't check bitness when finding AppStreamQt (Matthias Klumpp)
+
+Translation:
+ * Indonesian
+   - se7entime
+
+Version 0.11.4
+~~~~~~~~~~~~~~
+Released: 2017-08-30
+
+Notes:
+ * This release switches the build system from CMake to Meson. You will need
+   Meson (>= 0.42) in order to build AppStream. Please test for any regressions.
+
+Features:
+ * Implement Meson support (Matthias Klumpp)
+ * meson: Make build with sanitizers (partially) work again (Matthias Klumpp)
+ * meson: Add helper script for building documentation (Matthias Klumpp)
+ * docs: Always rebuild documentation on-demand (Matthias Klumpp)
+ * Update README for Meson (Matthias Klumpp)
+ * Implement cockpit-manifest launchable type (Matthias Klumpp)
+ * validator: Actually validate the type property of "launchable" tags (Matthias Klumpp)
+ * Allow to search the pool for components that provide a launchable (Matthias Klumpp)
+ * qt: Add new function to search components by launchable (Matthias Klumpp)
+
+Specification:
+ * spec: New "cockpit-manifest" launchable type (Marius Vollmer)
+
+Bugfixes:
+ * validator: Complain if a component has no ID (Matthias Klumpp)
+
+Translation:
+ * Chinese (Traditional)
+   - Chang-Chia Tseng
+ * Polish
+   - Piotr Drąg
+
+Version 0.11.3
+~~~~~~~~~~~~~~
+Released: 2017-08-04
+
+Bugfixes:
+ * qt: Don't crash when an error is found and no error string is passed (Aleix Pol)
+ * Propagate document context to the context object for XML files (Matthias Klumpp)
+ * validator: Correctly recognize "launchable" as valid tag (Matthias Klumpp)
+
+Translation:
+ * Swedish
+   - Anders Jonsson
+ * Czech
+   - Pavel Borecki
+ * Catalan
+   - Robert Antoni Buj Gelonch
+
+Version 0.11.2
+~~~~~~~~~~~~~~
+Released: 2017-07-18
+
+Features:
+ * cache: Refactor cache functions (Matthias Klumpp)
+ * Deduplicate origin/locale/arch with AsContext (Matthias Klumpp)
+ * Get rid of a couple of internal helper methods (Matthias Klumpp)
+ * cli: When using convert, always assume collection style for YAML (Matthias Klumpp)
+
+Specification:
+ * Adjust docs to clearly state that licenses are SPDX expressions (Harald Sitter)
+
+Bugfixes:
+ * qt: Improve Icon QDebug information (Aleix Pol)
+ * Resolve crash when serializing lots of XML documents (Matthias Klumpp)
+ * xml: Don't truncate translated entries after encounting a wrong locale (Matthias Klumpp)
+ * Set a real locale if locale is set to "ALL" (Matthias Klumpp)
+ * validator: Make ending dot in component name only a pedantic issue (Matthias Klumpp)
+
+
+Translation:
+ * Arabic
+   - Heba ahmed
+ * Russian
+   - Igor
+ * Italian
+   - Milo Casagrande
+ * Lithuanian
+   - Moo
+ * Spanish
+   - Piotr Drąg
+
+Version 0.11.1
+~~~~~~~~~~~~~~
+Released: 2017-07-02
+
+Notes:
+ * This release contains refactoring of the XML/YAML parsers and some other changes that are more invasive
+   than usual.
+
+Features:
+ * qt: Add new getters/setters and classes to be on par with the GObject library (Jan Grulich)
+ * qt: Add AS::Metadata class used for parsing desktop and appstream metadata files (Jan Grulich)
+ * Refactor the XML parser and serialization code (Matthias Klumpp)
+ * Refactor the YAML parser and emitter code (Matthias Klumpp)
+ * Implement 'service' component type (Matthias Klumpp)
+ * Improve speed of metainfo description parsing slightly (Matthias Klumpp)
+ * test: Add additional testcase for reading metainfo description tags (Matthias Klumpp)
+ * test: Test metainfo descriptions starting with enumerations (Matthias Klumpp)
+
+Specification:
+ * doc: Add Distro Packaging page (Jeremy Bicha)
+ * doc: Add "service" components and their launchables (Marius Vollmer)
+ * Allow components to provide other components (provides -> id) (Matthias Klumpp)
+
+Bugfixes:
+ * doc: Uncomment line in middle of paragraph (Jeremy Bicha)
+ * doc: A releases tag is not essential for components, but summary is (Matthias Klumpp)
+ * Allow descriptions to start with an enumeration (Matthias Klumpp)
+ * Ensure we always update with fresh data when refreshing the cache (Matthias Klumpp)
+ * Replace invalid components in the pool with new ones of the same name (Matthias Klumpp)
+ * Resolve a few potential bugs (found by static checks) (Matthias Klumpp)
+ * xml: Check if we are trying to parse a real component (Matthias Klumpp)
+
+Translation:
+ * Spanish
+   - Adolfo Jayme-Barrientos
+ * Hungarian
+   - Balázs Úr
+ * Dutch
+   - Heimen Stoffels
+ * Russian
+   - Igor
+ * French
+   - Jean-Baptiste
+ * Lithuanian
+   - Moo
+ * Czech
+   - Pavel Borecki
+ * Polish
+   - Piotr Drąg
+ * Ukrainian
+   - Yuri Chornoivan
+ * Serbian (latin)
+   - Слободан Симић(Slobodan Simić)
+
+Version 0.11.0
+~~~~~~~~~~~~~~
+Released: 2017-05-03
+
+Features:
+ * Implement read/write support for content ratings (Matthias Klumpp)
+ * tests: Test the content_rating tag XML read/write (Matthias Klumpp)
+ * yaml: Read/write ContentRating (Matthias Klumpp)
+ * cache: Handle the content-rating property (Matthias Klumpp)
+ * Add new AsLaunch type (Matthias Klumpp)
+ * Fully implement the launchable tag (Matthias Klumpp)
+ * Recognize scaling factor for HiDPI icons (Matthias Klumpp)
+ * apt: Allow fetching HiDPI icons (Matthias Klumpp)
+
+Specification:
+ * spec: Don't give wrong information about the <font/> tag (Matthias Klumpp)
+ * spec: Specify content_rating tag for content age ratings (Matthias Klumpp)
+ * spec: Specify the new launchable tag and apply its effects (Matthias Klumpp)
+ * spec: Add note on where to place icons with a scaling factor (Matthias Klumpp)
+
+Bugfixes:
+ * Add missing word in string (Anders Jonsson)
+ * yaml: Fix crash when serializing component with a dbus:user provided item (Matthias Klumpp)
+ * cache: Don't write cache if there are no valid components (Matthias Klumpp)
+ * docs: Clarify "permissive" for metadata_license and make the paragraph more explicit (Matthias Klumpp)
+ * Ensure GVFS never starts in root user slice (Matthias Klumpp)
+ * Correctly tokenize values with dash or plus (Matthias Klumpp)
+ * vapi: Add appstream.deps file (Rico Tzschichholz)
+
+Translation:
+ * Swedish
+   - Anders Jonsson
+   - Josef
+ * Indonesian
+   - Andika Triwidada
+ * Chinese (Traditional)
+   - Chang-Chia Tseng
+ * Chinese (China)
+   - Dingzhong Chen
+   - 陈鼎中
+ * Gaelic
+   - GunChleoc
+ * Dutch
+   - Heimen Stoffels
+ * Russian
+   - Igor
+   - Maxim Taranov
+ * French
+   - Jean-Baptiste
+ * Italian
+   - Milo Casagrande
+ * Lithuanian
+   - Moo
+ * Turkish
+   - Muhammet Kara
+ * Polish
+   - Piotr Drąg
+ * Ukrainian
+   - Yuri Chornoivan
+ * Serbian
+   - Slobodan Simić
+
+Version 0.10.6
+~~~~~~~~~~~~~~
+Released: 2017-01-22
+
+Features:
+ * validator: Be more strict about the <icon> tag types in metainfo files (Matthias Klumpp)
+ * validator: Unconditionally check for name and summary (Matthias Klumpp)
+ * Move all merge logic to AsComponent (Matthias Klumpp)
+ * Allow making AppStream consume data from metainfo instead of collection files (Matthias Klumpp)
+ * apt: Do not enable any icon downloads by default (Matthias Klumpp)
+ * validator: Check categories in XML as well (Matthias Klumpp)
+ * cli: Make templates for different component-types a bit more useful (Matthias Klumpp)
+ * Allow a few more permissive licenses for metadata_license (Matthias Klumpp)
+ * Add support for "+" operator at the end of SPDX license identifiers (Kalev Lember, Matthias Klumpp)
+ * cli: Print tiny summary after validation (very useful for validate-tree) (Matthias Klumpp)
+ * validator: Validate for hyperlinks in description / summary / developer-name (Matthias Klumpp)
+ * validator: Make missing long description a pedantic issue in more cases (Matthias Klumpp)
+ * Also recognize "FSFUL" license as pemissive (Matthias Klumpp)
+ * validator: Adjust priorities of missing modalias/font tags in driver/font components (Matthias Klumpp)
+ * Skip loading desktop-entries if we know their component already (Matthias Klumpp)
+ * Be lazier, only parse what is necessary in the data pool (Matthias Klumpp)
+
+Specification:
+ * spec: Clarify that name/summary are now always required for metainfo files (Matthias Klumpp)
+ * spec: Clarify desktop vs. desktop-application (Matthias Klumpp)
+ * spec: Add a small paragraph about whether and what xmlns to use (Matthias Klumpp)
+ * spec: Make it clear <categories/> can be used in metainfo files too (Matthias Klumpp)
+ * spec: Make clear that update_contact's value is case-insensitive (Matthias Klumpp)
+ * docs: Make sure all examples follow the reverse-DNS scheme (Matthias Klumpp)
+
+Bugfixes:
+ * Don't hardcode share dir but use CMAKE_INSTALL.. (Heiko Becker)
+ * validator: Don't enforce .desktop suffix on desktop-app component IDs (Matthias Klumpp)
+ * qt: Allow catching error strings returned by Pool::load (Aleix Pol)
+ * Always drop data from desktop-entry files if we have better metadata (Matthias Klumpp)
+ * apt: Install icons back if they went completely missing (Matthias Klumpp)
+ * Update SPDX and TLD data (Matthias Klumpp)
+ * yaml: Read release/urgency key (Matthias Klumpp)
+
+Translation:
+ * Chinese (Taiwan)
+   - Chang-Chia Tseng
+ * Dutch (new!)
+   - Heimen Stoffels
+ * Russian
+   - Igor
+ * Finnish
+   - Juhani Numminen
+   - Lari Oesch
+ * Portuguese
+   - Manuela Silva
+ * Italian
+   - Milo Casagrande
+ * Czech
+   - Pavel Borecki
+ * Polish
+   - Piotr Drąg
+ * Ukrainian
+   - Yuri Chornoivan
+ * French
+   - Yvan Masson
+
+Version 0.10.5
+~~~~~~~~~~~~~~
+Released: 2016-12-22
+
+Features:
+ * Match modalias wildcards on regular searches (Matthias Klumpp)
+ * xml: Add methods to get/set custom data in metainfo/collection files (Matthias Klumpp)
+ * Make cache update issue messages slightly more verbose (Matthias Klumpp)
+ * Add preliminary code for reading metainfo files in addition to .desktop files (Matthias Klumpp)
+ * cache: Cache custom fields as well (Matthias Klumpp)
+
+Bugfixes:
+ * qt: Make sure dependencies are fetched when looking for the package (Aleix Pol)
+ * yaml: Consistently read/write the Suggests field (Matthias Klumpp)
+ * Correctly read bundle kind from XML data (Matthias Klumpp)
+
+Translation:
+ * Russian
+   - Igor
+ * German
+   - Lukas Selch
+ * Italian
+   - Milo Casagrande
+ * Turkish
+   - Muhammet Kara
+ * Polish
+   - Piotr Drąg
+ * Ukrainian
+   - Yuri Chornoivan
+ * Portuguese (Brazil)
+   - dsboger
+
+Version 0.10.4
+~~~~~~~~~~~~~~
+Released: 2016-11-27
+
+Features:
+ * qt: Introduce AppStream::Suggested in the Qt frontend (Aleix Pol)
+
+Bugfixes:
+ * Properly validate suggests tag (Matthias Klumpp)
+ * qt: Add an empty check to Provided and return it if necessary (Matthias Klumpp)
+ * Add path search to find libstemmer headers (#91) (Neal Gompa)
+
+Translation:
+ * Indonesian
+   - John Vandenberg
+   - Prasasto Adi
+   - Sandy Kurniawan
+ * English (United Kingdom)
+   - John Vandenberg
+ * Lithuanian
+   - Moo
+
+Version 0.10.3
+~~~~~~~~~~~~~~
+Released: 2016-11-01
+
+Notes:
+ * The release breaks the Qt library API. Patches to make KDE Discover use the new API exist
+   in its Git master branch, and will be available with Plasma 5.9.
+   The patches will likely not enter the stable branch, so if you want to upgrade AppStream,
+   you might need to ship patches for Discover downstream to use the new API.
+
+Features:
+ * qt: Update API to reflect more recent AppStream features, be easier to
+   extend and also a bit faster due to removing needless data conversions.
+   (Matthias Klumpp, Aleix Pol)
+ * Make components record their origin kind internally (Matthias Klumpp)
+ * Provide a file:/ URL for icons when we know a file name (Matthias Klumpp)
+ * Add support for Snappy/Snap bundles (Matthias Klumpp)
+
+Specification:
+ * Add new AppStream logo and button (Ken Vermette)
+ * Add new AppStream logo and buttons to the docs (Matthias Klumpp)
+
+Bugfixes:
+ * ascli: When converting, always include all translations (Matthias Klumpp)
+ * Match .desktop files and metainfo data properly if ID is lacking .desktop suffix (Matthias Klumpp)
+
+Translation:
+ * Chinese (Taiwan)
+   - Mingye Wang
+ * Chinese (China)
+   - Mingye Wang
+ * English (United Kingdom)
+   - Sandy Kurniawan
+ * Indonesian
+   - Sandy Kurniawan
+
+Version 0.10.2
+~~~~~~~~~~~~~~
+Released: 2016-10-10
+
+Features:
+ * test: Add unittests for reading urls (Matthias Klumpp)
+ * qt: Add AppStream::Category class (Matthias Klumpp)
+ * qt: Add missing URL type (Matthias Klumpp)
+ * Handle "font" provided type in XML and YAML (Matthias Klumpp)
+ * Replace Intltool with modern Gettext/Itstool (Matthias Klumpp)
+ * Add logic to parse desktop entries (Matthias Klumpp)
+ * Don't add ignored components to the pool (Matthias Klumpp)
+ * validator: Validate fd.o domain name, make GNOME warning only pedantic (Matthias Klumpp)
+ * validator: Allow languages tag in metainfo files (Matthias Klumpp)
+ * Read information from .desktop files and add it to the pool (Matthias Klumpp)
+ * Give the client app full control on what data sources we load (Matthias Klumpp)
+ * Add private API for component scoping (Matthias Klumpp)
+
+Specification:
+ * docs: Clarify name/summary essentialness for desktop-apps (Matthias Klumpp)
+ * spec: Clarify how fonts provides should be handled (Matthias Klumpp)
+ * spec: Simplify font metainfo, add more examples and clarify requirements (Matthias Klumpp)
+
+Bugfixes:
+ * ascli: Replace refresh-index with refresh-cache in help text (#81) (Larry Price)
+ * qt: nullptr access on unopened databases resulting in a crash (Harald Sitter)
+ * qt: The data pool must always be valid during the Database lifetime (Matthias Klumpp)
+ * If search results are going to be sorted, it makes sense for higher scores to be at the top of the list. Fixes #77. (Larry Price)
+ * validator: Don't enforce long descriptions on fonts (Matthias Klumpp)
+ * Hardcode metainfo directory (Matthias Klumpp)
+ * ascli: Make every module use the global no-color flag properly (Matthias Klumpp)
+ * validator: Don't emit excess warnings on missing type properties (Matthias Klumpp)
+
+Translation:
+ * Hungarian
+   - Balázs Úr
+ * German
+   - James Bond
+ * Italian
+   - Milo Casagrande
+ * Lithuanian (new!)
+   - Moo
+ * Polish
+   - Piotr Drąg
+ * Portuguese (Brazil)
+   - Rafael Capaci Pereira
+ * Ukrainian
+   - Yuri Chornoivan
+
+Version 0.10.1
+~~~~~~~~~~~~~~
+Released: 2016-09-16
+
+Features:
+ * Add AppStream button image (Ken Vermette)
+ * Ship a metainfo file (Matthias Klumpp)
+ * Don't use an extra hash table for AsProvided (Matthias Klumpp)
+ * Register bundle type for AppImageKit (Matthias Klumpp)
+ * Implement localization component type (Matthias Klumpp)
+ * validator: Complain less-loudly when encontering GNOME-specific tags (Matthias Klumpp)
+ * validator: Check for superfluous dots (Matthias Klumpp)
+ * validator: Strictly validate ID for KDE and GNOME (Matthias Klumpp)
+ * ascli: Modernize the way we handle subcommands (Matthias Klumpp)
+ * qt: Allow retrieving the desktop-id of a component (Matthias Klumpp)
+
+Specification:
+ * Add new driver component type (Matthias Klumpp)
+ * spec: Describe localization component type (Matthias Klumpp)
+
+Bugfixes:
+ * docs: Add a few missing classes to the API docs (Matthias Klumpp)
+ * Fix cache (de)serialization for screenshots and suggestions (Matthias Klumpp)
+ * yaml: Set screenshot image type correctly (Matthias Klumpp)
+ * cache: Iterate the right dictionary when looking at checksums (#71) (Iain Lane)
+ * apt: Ignore broken symlinks in /var/lib/apt/lists (Iain Lane)
+ * as_get_yml_data_origin: Error out if opening the file fails for any reason (Iain Lane)
+ * Make addons find their target component again (Matthias Klumpp)
+ * yaml: Don't fail if we encounter a translated node without template (Matthias Klumpp)
+ * Don't  use GObject ref on GPtrArray (Matthias Klumpp)
+ * ascli: Read metainfo files correctly when converting files (Matthias Klumpp)
+ * xml: Properly serialize provides tag (Matthias Klumpp)
+ * pool: Correctly update addon info when loading data from a cache object (Matthias Klumpp)
+ * ascli: Auto-disable colors if we are not on a tty (Matthias Klumpp)
+ * yaml: Enforce string/int type on YAML scalars (Matthias Klumpp)
+ * yaml: Fix loading of cached icons in all formats (Matthias Klumpp)
+ * qt: Never lie about a component kind (Matthias Klumpp)
+
+Translation:
+ * Hungarian
+   - Balázs Úr
+ * Chinese (Taiwan)
+   - Chang-Chia Tseng
+ * German
+   - Matthias Klumpp
+ * Italian
+   - Milo Casagrande
+ * Indonesian
+   - Mohamad Hasan Al Banna
+ * Polish
+   - Piotr Drąg
+ * Kurdish Sorani [NEW!]
+   - Rasti K5
+ * Ukrainian
+   - Yuri Chornoivan
+
+Version 0.10.0
+~~~~~~~~~~~~~~
+Released: 2016-08-30
+
+Notes:
+ * This release breaks API/ABI in order to support multiple metadata sets describing the same
+   component (needed for bundling support), moving away from the database as central data store
+   and general cleanup.
+ * Porting is relatively straightforward, if you were using AsDatabase, you should switch to AsPool
+   now (AsDatabase has been a wrapper around AsPool for a while anyway).
+ * Many methods became private API with this release, file a bug if you miss anything.
+ * The 'categories.xml' file is gone - please account for that if you were reading it directly,
+   and consider using AsCategory instead, which offers the same functionality.
+
+Features:
+ * Remove the AsDatabase class (Matthias Klumpp)
+ * Use cmakedefine for compile-time features (Matthias Klumpp)
+ * Rename AsDataPool -> AsPool (Matthias Klumpp)
+ * Add placeholder enum for web applications (Matthias Klumpp)
+ * qt: Implement Appstream::Release for the Qt interface (Aleix Pol)
+ * Recognize the "Pantheon" desktop for Elementary (Matthias Klumpp)
+ * Get rid of the menu parser and make AsCategory more useful instead (Matthias Klumpp)
+ * Allow AsComponent to automatically check for list-value duplicates (Matthias Klumpp)
+ * Give bundles their own class (Matthias Klumpp)
+ * Stop shipping the categories.xml file (Matthias Klumpp)
+ * Allow multiple metadata sets in the pool to describe a component (Matthias Klumpp)
+ * Name AppStream metadata styles consistently (Matthias Klumpp)
+ * Allow the 'C' description fallback to be turned off (Iain Lane)
+ * Make AsScreenshot return localized images by default (Matthias Klumpp)
+ * Allow to compare AsRelease versions easily (Matthias Klumpp)
+ * Make get_icon_repository_paths private API (Matthias Klumpp)
+ * ascli: Allow dumping metadata as YAML (Matthias Klumpp)
+ * Use GVariant instead of ProtoBuf based cache (Matthias Klumpp)
+ * Enable stemming by default (Matthias Klumpp)
+ * Make components directly reference their addons, avoiding to query twice (Matthias Klumpp)
+ * Refactor data pool metadata loading (Matthias Klumpp)
+ * Allow setting the AppStream format version when (de)serializing data (Matthias Klumpp)
+ * Always write modern metadata, unless a lower format version is requested explicitly (Matthias Klumpp)
+ * Also find components in searches which have the search keyword in an addon (Matthias Klumpp)
+ * ascli: Add function to convert XML to YAML and vice versa (Matthias Klumpp)
+ * Consistent naming for metadata format and style (Matthias Klumpp)
+
+Specification:
+ * spec: Add hint on how the keywords tag should be localized (Matthias Klumpp)
+
+Bugfixes:
+ * Resolve unit test failures on arm and mips (Matthias Klumpp)
+ * gir: Correctly annotate ownership transference of GPtrArrays (Matthias Klumpp)
+ * l10n: Drop languages without translations (Matthias Klumpp)
+ * Don't hide symbols in public headers (Matthias Klumpp)
+ * Properly validate desktop-environment strings (Matthias Klumpp)
+ * validator: Fix name/summary check in validate-tree (Matthias Klumpp)
+ * xml: Properly write localized keywords (Matthias Klumpp)
+ * Avoid watching superfluous directories for metadata (Matthias Klumpp)
+ * Update architecture diagrams and optimize PNGs (Matthias Klumpp)
+ * Get rid of Xapian-isms (Matthias Klumpp)
+
+Translation:
+ * Chinese (Taiwan)
+   - Chang-Chia Tseng
+ * Chinese (China)
+   - Dingzhong Chen
+   - wsxy162
+ * French:
+   - Christophe CHAUVET
+   - Claude Paroz
+ * German:
+   - Mario Blättermann
+ * Czech:
+   - Michal Čihař
+ * Italian:
+   - Milo Casagrande
+ * Russian:
+   - Nataliia
+ * Polish
+   - Piotr Drąg
+ * Catalan:
+   - Robert Antoni Buj Gelonch
+ * Ukrainian:
+   - Yuri Chornoivan
+ * Hungarian:
+   - kelemeng
+
+Version 0.9.8
+~~~~~~~~~~~~~~
+Released: 2016-08-10
+
+Features:
+ * qt: Different approach for storing the icon size and url relation (Aleix Pol)
+ * Strictly validate AppStream IDs (Matthias Klumpp)
+ * Add AsSuggested class (Lucas Moura)
+ * tests: Test merges for suggestions (Lucas Moura)
+ * Add functions handling SPDX license ids and expressions (Matthias Klumpp)
+ * validator: Include a line-hint in the issue report (Matthias Klumpp)
+ * Implement console-application component type (Matthias Klumpp)
+ * validator: Validate files following the new cid scheme properly (Matthias Klumpp)
+ * validator: Validate metadata_license for permissiveness (Matthias Klumpp)
+ * Compress cache data (Matthias Klumpp)
+ * Implement "translate" URL type (Matthias Klumpp)
+ * xml: Implement the suggests tag (Matthias Klumpp)
+ * yaml: Implement reading and writing of Suggests field (Matthias Klumpp)
+ * Consider merge components valid if they have at least an ID (Matthias Klumpp)
+ * yaml: Read/write merge components (Matthias Klumpp)
+
+Specification:
+ * spec: Add console-application component type (Matthias Klumpp)
+ * spec: Streamline the requirements for component-ids (Matthias Klumpp)
+ * spec: Define a "translate" URL type (Matthias Klumpp)
+ * spec: Specify the suggests tag (Matthias Klumpp)
+ * spec: Describe the merge property (Matthias Klumpp)
+ * spec: Proofreading fixes (Philip Withnall)
+
+Bugfixes:
+ * Make searching for multiple terms work properly again (Matthias Klumpp)
+ * Don't fail on invalid search terms (Matthias Klumpp)
+ * Don't re-instantiate stemmer on each use (Matthias Klumpp)
+ * ascli: Line-wrap unicode texts properly on the console (Matthias Klumpp)
+ * Add missing docs to the API reference (Matthias Klumpp)
+ * tests: Add test description to each test (Matthias Klumpp)
+ * Sort search results by default (Matthias Klumpp)
+ * Fix a few issues with merging (Matthias Klumpp)
+
+Version 0.9.7
+~~~~~~~~~~~~~~
+Released: 2016-07-20
+
+Notes:
+ * This release contains a lot of very invasive changes and deprecates some API, most
+   notably AsDatabase. Please test this release carefully.
+   There will be an API/ABI break in a future release, so if possible please adjust your
+   code to not use deprecated interfaces.
+
+Features:
+ * Don't fall back to Debian screenshots server if none is specified for the distro (Matthias Klumpp)
+ * Split out distro-specific helpers (Matthias Klumpp)
+ * Implement Xapian-less search (Matthias Klumpp)
+ * Use a pure PB cache instead of Xapian (Matthias Klumpp)
+ * qt: Don't rely on Xapian for searches (Matthias Klumpp)
+ * Deprecate AsDatabase (Matthias Klumpp)
+ * Hide internal symbols from the symbols table (Matthias Klumpp)
+ * Allow injecting components into the pool and unittest the cache (Matthias Klumpp)
+ * Add by-category filter to AsDataPool (Matthias Klumpp)
+ * Validate Freedesktop category names (Matthias Klumpp)
+ * Allow building AppStream with stemming support (Matthias Klumpp)
+ * Cache search tokens (Matthias Klumpp)
+
+Specification:
+ * docs/quickstart: Clarify the role of releases/provides (Matthias Klumpp)
+ * docs/quickstart: Screenshot images don't need to define width/height (Matthias Klumpp)
+
+Bugfixes:
+ * qt: Properly expose enums for introspection (Aleix Pol)
+ * qt: Make it possible to easily output data types using QDebug (Aleix Pol)
+ * xml: Fix formatting of <screenshot/> tag (Matthias Klumpp)
+ * xml: Work around non-threadsafe behavior of libxml2 (Matthias Klumpp)
+ * xml: Properly write provides tag (Matthias Klumpp)
+ * Fix code documentation for as_component_get_id (Lucas Moura)
+ * Fix some xmldata methods documentation (Lucas Moura)
+ * cli: Create metainfo directory if it is missing and respect DESTDIR (Matthias Klumpp)
+
+Version 0.9.6
+~~~~~~~~~~~~~~
+Released: 2016-05-12
+
+Features:
+ * Improve metadata file decompression code (Matthias Klumpp)
+ * validator: Simplify loading of data too (Matthias Klumpp)
+ * Make it easy to compile with Address Sanitizer enabled (Matthias Klumpp)
+ * Allow compiling with UBSan as well (Matthias Klumpp)
+ * Add back support for Travis CI (Matthias Klumpp)
+ * yaml: Write Releases field (Matthias Klumpp)
+
+Bugfixes:
+ * qt: Properly check for component validity (Matthias Klumpp)
+ * Ensure decompressed metadata is null-terminated (Neil Mayhew)
+ * validator: Long descriptions are not needed for generic components (Matthias Klumpp)
+ * Make VAPI generation depend on GIR typelibs explicitly (Matthias Klumpp)
+ * Be more verbose when failing to move the cache directory (Matthias Klumpp)
+ * Handle format errors when parsing YAML metadata (Neil Mayhew)
+
+Version 0.9.5
+~~~~~~~~~~~~~~
+Released: 2016-05-02
+
+Features:
+ * Update README (Matthias Klumpp)
+ * Provide a bit more hints for translators (Matthias Klumpp)
+ * Improve error messages when reading broken XML (Matthias Klumpp)
+ * Load all XML in AsXMLData (Matthias Klumpp)
+ * Implement reading localized images from metadata (Matthias Klumpp)
+ * Write localized images in XML/YAML serialize routines (Matthias Klumpp)
+ * Unify codepaths for checking compatible locales (Matthias Klumpp)
+ * yaml: Implement read/write support for the Languages field (Matthias Klumpp)
+ * xml: Serialize and read languages tag properly (Matthias Klumpp)
+ * validator: Validate files in legacy paths too (Matthias Klumpp)
+
+Specification:
+ * spec: Allow localized screenshot images (Matthias Klumpp)
+
+Bugfixes:
+ * Refactor icon-finding code and fix rare double-free corruption (Matthias Klumpp)
+ * Properly validate randomly ordered XML tags for duplicates (Matthias Klumpp)
+ * validator: The translation tag is only valid in metainfo files (Matthias Klumpp)
+ * Be slightly less pedantic about size info when reading screenshot images (Matthias Klumpp)
+ * xml: Properly write <release/> description tag (Matthias Klumpp)
+
+Version 0.9.4
+~~~~~~~~~~~~~~
+Released: 2016-04-18
+
+Features:
+ * Handle legacy screenshot tags (Matthias Klumpp)
+ * Print prettier YAML documents (Matthias Klumpp)
+ * yaml: Allow loading of distro metadata slices without header (Matthias Klumpp)
+ * Do not check for installation candidate on minimal validation (Matthias Klumpp)
+ * Don't check if component has an installation candidate before including it (Matthias Klumpp)
+ * Quick-check components only when the pool is fully loaded (Matthias Klumpp)
+ * Support the stub data of GNOME Software (Matthias Klumpp)
+ * Support reading per-component priorities (Matthias Klumpp)
+ * Implement the architecture property (Matthias Klumpp)
+ * Use architecture data to resolve conflicting IDs (Matthias Klumpp)
+ * Add icon size information to generated XML (Matthias Klumpp)
+ * xml: Load size hints for icons (Matthias Klumpp)
+ * l10n: Update
+
+Specification:
+ * docs: Explicitly define more minimally required tags per component type (Matthias Klumpp)
+ * Make /usr/share/metainfo the canonical path for upstream metadata (Matthias Klumpp)
+ * spec: Make architecture a property of <components/>, and no tag (Matthias Klumpp)
+ * spec: Update the cached icon DEP-11 specification to allow size information (Matthias Klumpp)
+
+Bugfixes:
+ * Fix a few minor issues spotted by the YAML validator (Matthias Klumpp)
+ * Correctly build distro XML descriptions from upstream XML (Matthias Klumpp)
+ * Be very strict about which elements are allowed in a description tag (Matthias Klumpp)
+ * yaml: Prevent bool keys (Matthias Klumpp)
+ * ascli: Properly print long descriptions and wrap lines (Matthias Klumpp)
+ * Export less C++ symbols (Matthias Klumpp)
+ * Show a better error message when failing to parse XML (Matthias Klumpp)
+ * Allow adding 0x0 icons (Matthias Klumpp)
+ * yaml: Implement the updated "cached" icon format in a backwards-compatible way (Matthias Klumpp)
+ * apt: Drop flat repository entries (Matthias Klumpp)
+ * Probe less sizes if we already have size information (Matthias Klumpp)
+ * Don't make stubs delete package information from valid components (Matthias Klumpp)
+ * apt: Handle quoted origin entries properly (Matthias Klumpp)
+
+Version 0.9.3
+~~~~~~~~~~~~~~
+Released: 2016-03-24
+
+Features:
+ * Allow to update an existing component with fresh metadata
+ * Implement YAML serialization
+ * writer: Allow to omit writing a header/root node
+ * cli: Add convenience method to install metainfo files
+ * cli: Add a new "status" command for various diagnostic information
+ * yaml: Allow unicode
+ * Print prettier XML by default
+ * l10n: Update
+
+Bugfixes:
+ * Reset umask before building the data cache
+ * apt: Work around APT using server mtime for its downloaded files
+
+Version 0.9.2
+~~~~~~~~~~~~~~
+Released: 2016-02-28
+
+Features:
+ * qt: Improve usage of Qt containers (Aleix Pol)
+ * qt: Implement Component::extends on the Qt front-end (Aleix Pol)
+ * qt: Also call reserve for bundles on the Qt frontend (Aleix Pol)
+ * validator: strstrip values when reading XML/YAML and validate linebreaks in summaries (Matthias Klumpp)
+ * validator: Check if a description is present (Matthias Klumpp)
+ * Always build with YAML support (Matthias Klumpp)
+ * Move XML parser into its own class (Matthias Klumpp)
+ * Make data-pool use the new YAML-aware metadata parser (Matthias Klumpp)
+ * Simplify data-pool building routine (Matthias Klumpp)
+ * Preprocess extension information for frontends (Matthias Klumpp)
+ * qt: Use the new extensions property (Matthias Klumpp)
+ * Implement translations tag (Matthias Klumpp)
+ * cli: Document the "install" command (Matthias Klumpp)
+ * l10n: Update
+
+Specification:
+ * spec: Document the translation tag (Matthias Klumpp)
+ * doc: Don't use <tip/> tags in documentation (Matthias Klumpp)
+ * spec: Mention the essential tags for a type:desktop component (Matthias Klumpp)
+
+Bugfixes:
+ * as-cache-builder: Cope with no YAML documents (Iain Lane)
+ * 50appstream: Don't run if we can't write to the system paths (Iain Lane)
+ * Check for writability instead of root permissions when updating the cache (Matthias Klumpp)
+ * qt: Don't compute screenshot images and then forget about them (Aleix Pol)
+ * Add the missing extends property to the Xapian cache (Matthias Klumpp)
+ * validator: Don't fail validation for description-less addons. (Matthias Klumpp)
+ * Make reading empty cache values more robust (Matthias Klumpp)
+ * Check if GIR scanner & compiler are really installed (Matthias Klumpp)
+
+Version 0.9.1
+~~~~~~~~~~~~~~
+Released: 2016-02-04
+
+Features:
+ * Improve Qt5 usage (Aleix Pol)
+ * Also use Q_GLOBAL_STATIC for Provides::kindToString (Aleix Pol)
+ * validator: Validate the font component type (Matthias Klumpp)
+ * Implement date property on release tags (Matthias Klumpp)
+ * Ship ITS files from KDE upstream (Matthias Klumpp)
+
+Specification:
+ * doc: Clarify why the metadata_license tag is needed (Matthias Klumpp)
+ * spec: Specify font component type (Matthias Klumpp)
+ * doc: Update year and version (Matthias Klumpp)
+ * spec: Specify a date attribute on release tags, containing an ISO8601 time (Matthias Klumpp)
+
+Bugfixes:
+ * Lower cmake requirement to 3.1.0 (Harald Sitter)
+ * doc: DEP-11 URLs are no integers (Matthias Klumpp)
+ * apt: Hide appstreamcli stdout output (Matthias Klumpp)
+ * Return specific error when cache was not found (Matthias Klumpp)
+ * apt: Ensure DEP-11 files stay gzip compressed (Matthias Klumpp)
+ * apt: Correctly test for appstreamcli (Matthias Klumpp)
+ * Fix a few memory leaks (Matthias Klumpp)
+ * Work around limitations of GLibs time_val_from_iso8601 function (Matthias Klumpp)
+
+Version 0.9.0
+~~~~~~~~~~~~~~
+Released: 2015-12-12
+
+Notes:
+ * This release breaks API/ABI, ensure you adjust your depending applications!
+   All code marked as legacy has been removed, as well as some older, now unnecessary
+   classes. Instead, new classes, like AsProvided, have now been introduced.
+   Take a look at the API documentation for furher information.
+ * For Debian-based systems, we now provide full integration with the APT package-manager.
+   Support for this feature needs to be explicitly enabled at build-time.
+
+Features:
+ * Use modern GLib macros to declare types (Matthias Klumpp)
+ * Refactor icon handling (Matthias Klumpp)
+ * Refactor handling of provided items (Matthias Klumpp)
+ * Modernize AsCacheBuilder class (Matthias Klumpp)
+ * Modernize AsCategory class (Matthias Klumpp)
+ * Bump API level (Matthias Klumpp)
+ * Make some AsComponent methods private (Matthias Klumpp)
+ * Drop obsolete utility functions (Matthias Klumpp)
+ * Modernize AsDatabase class (Matthias Klumpp)
+ * Drop AsSearchQuery (Matthias Klumpp)
+ * Make AsDistroDetails a modern class (Matthias Klumpp)
+ * Modernize AsMenuParser and AsImage (Matthias Klumpp)
+ * Update validator classes (Matthias Klumpp)
+ * Improve error handling for database queries. (Matthias Klumpp)
+ * Initial code to improve APT integration (Matthias Klumpp)
+ * Refine the AsDataPool class (Matthias Klumpp)
+ * cli: Add new install command to directly install components (Matthias Klumpp)
+ * cli: Make removal of packages by component-id possible (Matthias Klumpp)
+ * Make cache builder smarter in detecting metadata changes (Matthias Klumpp)
+ * l10n: Update translations
+
+Bugfixes:
+ * categories: Add missing icon names (Aleix Pol)
+ * Tweak the component-id-collision test slightly (Matthias Klumpp)
+ * AsComponent: Added missing documentation (Corentin Noël)
+ * gir: Fix warnings (Matthias Klumpp)
+ * Always build a new cache if none existed yet in the target location (Matthias Klumpp)
+ * Don't do symlink maintenance if target doesn't exist yet (Matthias Klumpp)
+
+Version 0.8.6
+~~~~~~~~~~~~~~
+Released: 2015-11-06
+
+Features:
+ * Define autoptr macros for AppStream types (Matthias Klumpp)
+ * Implement the release/size tag (Matthias Klumpp)
+ * validator: Check for missing name / summary in metainfo and .desktop files
+   (Matthias Klumpp)
+
+Specification:
+ * spec: Specify the appstream:// URL handler (Matthias Klumpp)
+ * spec: Add new size tag to the release tag (Matthias Klumpp)
+
+Bugfixes:
+ * Don't fail displaying package names in component_to_string (Matthias Klumpp)
+ * Fixed VAPI compilation. (Corentin Noël)
+ * qt: Correctly load icon urls again (Matthias Klumpp)
+ * Add missing GIR annotations. (Corentin Noël)
+ * Reinitialize the DEP-11 parser after each file (Corentin Noël)
+
+Version 0.8.5
+~~~~~~~~~~~~~~
+Released: 2015-10-14
+
+Features:
+ * Update README
+ * Use ProtoBuf to serialize data for the Xapian cache
+ * Annotate the proto definition with descriptions about the messages
+ * Restructure database schema definition
+ * qt: Read screenshots pb data
+ * qt: Fully support the new database layout
+ * Show if component type is unknown in debug output
+ * Implement the release-urgency property
+ * qt: Don't build standalone - this now only leads to potential errors
+ * qt: Add some very basic unit tests
+ * Enable unit-tests unconditionally
+
+Specification:
+ * spec: Document the release-urgency property
+
+Bugfixes:
+ * Don't stop processing completely, if XML file with errors is found
+ * cli: Fix display of detailed output
+ * Correctly check the database schema version
+ * Move default cache to avoid errors when the old db is still around
+ * qt: Ensure database schema version matches
+ * Don't crash if database schema is unknown
+
+Version 0.8.4
+~~~~~~~~~~~~~~
+Released: 2015-09-08
+
+Features:
+ * ascli: Validate whole file trees
+ * qt: Align version number with the AppStream version numbers
+ * validator: Always include the filename in validator output
+ * qt: Remove support for Qt4
+ * ascli: Allow some commands to bypass the cache
+ * Change validator output to make it a bit easier to read
+ * validator: Validate metainfo filenames as well
+ * l10n: Update translations
+
+Bugfixes:
+ * Fix crash when parsing metainfo file without all locales enabled
+ * ascli: Make manpage reflect reality
+
+Version 0.8.3
+~~~~~~~~~~~~~~
+Released: 2015-08-28
+
+Notes:
+ * All the different appstream-* tools are now combined in one
+   appstream-cli tool.
+
+Features:
+ * Be less strict about valid screenshot tags
+ * Implement changes on provides/firmware
+ * Rename the 'appstream*' tools to 'appstream-cli'
+ * Implement MediaBaseUrl property
+ * dep11: Implement parsing of Releases
+
+Specification:
+ * docs: Document the new naming scheme for type:firmware component IDs
+ * Start documenting DEP-11 in AppStream as well
+ * docs: Mention the DEP-11 validator tool
+ * docs: Completely describe current DEP-11 spec
+
+Bugfixes:
+ * The DBus session bus is actually an user bus
+ * Fix component priorization for XML and YAML
+
+Version 0.8.2
+~~~~~~~~~~~~~~
+Released: 2015-06-26
+
+Notes:
+ * Ubuntu AppInstall support has been removed from this release, as its data
+   never matched the DEP11/ASXML data and pretty much every distribution can offer
+   one of those better data sources now.
+ * This release contains some heavy refactoring, most importantly it removes the
+   "DataProvider" concept and hardcodes the ASXML/DEP11 metadata parsers.
+   This improves maintainability and speed of the AppStream libraries.
+   Please report any bugs you may find!
+
+Features:
+ * Refactor DataProvider code (Matthias Klumpp)
+ * Remove DEP-11 validator, it belongs to the dep11 package (Matthias Klumpp)
+ * Add icon information to generated XML (Matthias Klumpp)
+ * Allow more than one checksum kind per AsRelease (Matthias Klumpp)
+ * Propagate bundle information in case multiple components with the same id are found
+   (Matthias Klumpp)
+
+Bugfixes:
+ * tests: Add unit test for simple XML description writer (Matthias Klumpp)
+ * Remove some useless code in AsDataPool and recognize DEP-11 data again (Matthias Klumpp)
+ * Fix several quirks in the ASXML description writing code (Matthias Klumpp)
+ * tests: Add rudimentary DEP-11 test (Matthias Klumpp)
+ * Fix a rare double-free corruption (Matthias Klumpp)
+ * Extract correct description markup when reading distro XML (Matthias Klumpp)
+ * Updated POTFILES.in (Piotr Drąg)
+
+Version 0.8.1
+~~~~~~~~~~~~~~
+Released: 2015-05-31
+
+Features:
+ * qt: Add QLoggingCategory appstreamqt.database (Daniel Nicoletti)
+ * Don't implicitly clear component list when parsing XML (Matthias Klumpp)
+ * Implement support for firmware component type (Matthias Klumpp)
+ * qt: Recognize firmware component type (Matthias Klumpp)
+
+Specification:
+ * spec: Document the firmware component (Matthias Klumpp)
+
+Bugfixes:
+ * qt: Remove useless moc file on database.cpp (Daniel Nicoletti)
+ * Fix doc symlink install code (Matthias Klumpp)
+ * qt: Load developer_name from database (Matthias Klumpp)
+ * Prevent crash when saving an empty XML document (Matthias Klumpp)
+ * Handle empty XML document as valid file (Matthias Klumpp)
+ * Relicense some remaining files from GPLv3 to GPLv2 (Matthias Klumpp)
+ * Fix typo which prevented description XML from being generated (Matthias Klumpp)
+
+Version 0.8.0
+~~~~~~~~~~~~~~
+Released: 2015-01-26
+
+Notes:
+ * This release contains a few new tags, <source_pkgname/> and <bundle/>, as well
+   as several specification refinements.
+   Refer to the documentation for detailed explanations.
+
+Features:
+ * qt: Make Qt5 default (Aleix Pol)
+ * validator: Hide pedantic issues by default (Matthias Klumpp)
+ * Make origin a public property of the metadata generator (Matthias Klumpp)
+ * Implement the <bundle/> tag (Matthias Klumpp)
+ * qt: Implement support for bundles (Matthias Klumpp)
+ * Update the validator to the latest spec version (Matthias Klumpp)
+ * Implement <source_pkgname/> tag (Matthias Klumpp)
+ * validator: Make it possible to validate a gzip-compressed metadata file (Matthias Klumpp)
+ * Install prebuilt documentation by default (Matthias Klumpp)
+
+Specification:
+ * spec: Allow width and height properties for "local" and "remote" icons (Matthias Klumpp)
+ * spec: Add <bundle/> tag (Matthias Klumpp)
+ * spec: Allow bundles of type "xdg-app", additionally to "limba" (Matthias Klumpp)
+ * spec: Make clear that <release/> tags may have a <description/> child (Matthias Klumpp)
+ * spec: Recommend screenshot sizes for distro-XML (Matthias Klumpp)
+ * spec: Specify the <source_pkgname/> tag (Matthias Klumpp)
+
+Bugfixes:
+ * Clean up some dead code in Xapian wrapper (Matthias Klumpp)
+ * Fix a couple of minor issues found by static code analysis (Matthias Klumpp)
+ * asi: Always return a valid exit code (Matthias Klumpp)
+ * Always search for data in /usr/share, ignore DATADIR (Aleix Pol)
+ * Correctly read and propagate language properties (Matthias Klumpp)
+ * Add missing developer_name to database (Matthias Klumpp)
+ * Improve database-writing code to ignore NULL values (Matthias Klumpp)
+ * Properly write localized XML for some tags (Matthias Klumpp)
+ * validator: Fix empty-check for description tag (Matthias Klumpp)
+ * validator: Don't perform sanity checks on the metadata tag (Matthias Klumpp)
+
+Version 0.7.6
+~~~~~~~~~~~~~~
+Released: 2015-01-14
+
+Notes:
+ * This release contains some API and ABI breaks. Recompiling against the new library
+   should be the only necessary step for most software, if you were not using
+   deprecated functionality.
+
+Features:
+ * Update translations
+ * Update database location for possible fast language switching (Matthias Klumpp)
+ * Use colorful output when using GCC and compiling in maintainer-mode (Matthias Klumpp)
+ * Make API to parse distro XML in AsMetadata public (Matthias Klumpp)
+ * Allow building distro XML from a list of AsComponent objects (Matthias Klumpp)
+ * Convert AsComponent into a "modern" GObject (Matthias Klumpp)
+ * Add extra multilanguage support to AsComponent, which is needed for
+   complete serialization (Matthias Klumpp)
+ * Remove functions marked as deprecated (Matthias Klumpp)
+ * Add convenience functions to save generated XML (Matthias Klumpp)
+
+Bugfixes:
+ * Move component serialization to AsMetadata (Matthias Klumpp)
+
+Version 0.7.5
+~~~~~~~~~~~~~~
+Released: 2014-11-28
+
+Features:
+ * Update translations
+
+Specification:
+ * doc: Clarify meaning of icon types (Matthias Klumpp)
+
+Bugfixes:
+ * dep11: Fix memory leak in DEP-11 parser (Matthias Klumpp)
+ * Fix origin<->name confusion (Matthias Klumpp)
+
+Version 0.7.4
+~~~~~~~~~~~~~~
+Released: 2014-10-30
+
+Features:
+ * Add local icon directories to the icon search path (Matthias Klumpp)
+ * Properly handle origin and icons in size-specific directories (Matthias Klumpp)
+ * Allow client applications to fetch icons in multiple sizes (Matthias Klumpp)
+ * qt: Implement multisize-icons (Matthias Klumpp)
+ * qt: Add documentation to the deprecated methods (Matthias Klumpp)
+ * validator: Ensure that stock and cached icons only contain the icon basename (Matthias Klumpp)
+
+Bugfixes:
+ * dep11: refine quote test (Matthias Klumpp)
+ * Don't count it as problem if no metadata is found (Matthias Klumpp)
+ * Check if AppInstall directory exists, before attempting to scan it (Matthias Klumpp)
+ * Don't query system categories while processing metadata (Matthias Klumpp)
+
+Version 0.7.3
+~~~~~~~~~~~~~~
+Released: 2014-10-10
+
+Features:
+ * Implement basic support for the new icon cache layout (Matthias Klumpp)
+
+Specification:
+ * spec: Update the icon-cache layout to allow icons with larger sizes (Matthias Klumpp)
+
+Bugfixes:
+ * Treat the text/plain mimetype equal to YAML or XML (Matthias Klumpp)
+ * Use camel-case for the AppStream GIR (as used everywhere else) (Matthias Klumpp)
+ * qt: Include QMultiHash (Aleix Pol)
+ * Fix wrong DATADIR variable (Matthias Klumpp)
+
+Version 0.7.2
+~~~~~~~~~~~~~~
+Released: 2014-09-22
+
+Notes:
+ * This release drops the PackageKit plugin (and the build dependency on PK alltogether).
+   This means that AppStream will no longer automagically update the Xapian index. Please
+   make sure that tools or packages which modify the AppStream distro XML/YAML call
+   'appstream-index refresh' when they are done. (reason for dropping the plugin is PackageKit
+   removing support for plugins with its 1.0 release)
+
+Features:
+ * Remove the PackageKit plugin (Matthias Klumpp)
+ * Use GNUInstallDirs (Matthias Klumpp)
+
+Bugfixes:
+ * Ensure that we do not convert NULL to a C++ string (Matthias Klumpp)
+ * Fix check for generic/unknown component in XML serialization (Matthias Klumpp)
+ * Fix tests on a system which doesn't have a 'categories.xml' (Matthias Klumpp)
+ * Fix some compiler warnings with clang (Matthias Klumpp)
+
+Version 0.7.1
+~~~~~~~~~~~~~~
+Released: 2014-09-08
+
+Features:
+ * qt: Make it possible to build AppstreamQt against Qt5 (Aleix Pol)
+ * qt: Introduce a method to check if a Qt Appstream::Component is
+   fully initialized (Aleix Pol)
+ * qt: Make it possible to query the database for the components given
+   a package name (Aleix Pol)
+ * Improve generator performance by caching the short language code (Matthias Klumpp)
+ * qt: Print component id instead of package name in warning messages (Matthias Klumpp)
+ * Improve loading of uncompressed distro-metadata (Matthias Klumpp)
+ * Allow manually defining the default locale for a data pool (Matthias Klumpp)
+ * dep11: Add validator for the DEP-11 file-format (Matthias Klumpp)
+ * Add basic function to convert AsComponent to XML (Matthias Klumpp)
+ * dep11: Implement DEP-11 data parser based on libyaml (Matthias Klumpp)
+ * Share icon-refinement and component-completion between all data providers (Matthias Klumpp)
+
+Bugfixes:
+ * qt: Respect the global install paths set by the toplevel CMake file (Matthias Klumpp)
+ * docs: get rid of "childrens" (Vladimír Čunát)
+ * Don't crash if no timestamp was defined (Matthias Klumpp)
+ * Fix FTBFS with Clang (Matthias Klumpp)
+ * docs: Update architecture images to reflect reality (Matthias Klumpp)
+ * Install PK plugin into PK >= 0.9.x plugin path (Matthias Klumpp)
+ * Don't crash in as_component_to_string() if no packages are set (Matthias Klumpp)
+ * Don't crash when generating the database in case a component has no categories (Matthias Klumpp)
+
+Version 0.7.0
+~~~~~~~~~~~~~~
+Released: 2014-07-16
+
+Notes:
+ The AppStream code has been relicensed from LGPL-3+ to LGPL-2.1+
+ There have also been smaller API breaks in libappstream, see the
+ list below for information about that.
+
+Features:
+ * Allow overriding of watched data dirs (Matthias Klumpp)
+ * More work on the cache-builder to be more flexible (Matthias Klumpp)
+ * Add DataPool helper class (Matthias Klumpp)
+ * Do some major refactoring on how the cache is created (Matthias Klumpp)
+ * validate: Process multiple files (Matthias Klumpp)
+ * Get rid of as_strv_dup (Matthias Klumpp)
+ * Implement support for the "addon" component type (Matthias Klumpp)
+ * Implement support for dbus provides type (Matthias Klumpp)
+ * Allow fetching data by component type (Matthias Klumpp)
+ * Relicense to LGPLv2.1+ and GPLv2+ (Matthias Klumpp)
+ * Drop some deprecated API (Matthias Klumpp)
+ * Add some limited support for parsing legacy upstream metadata files (Matthias Klumpp)
+ * Implement developer_name tag (Matthias Klumpp)
+ * Allow querying the database for multiple component types with one query (Matthias Klumpp)
+ * Implement 'languages' tag (Matthias Klumpp)
+ * Improve code which loads urls from the database (Matthias Klumpp)
+ * validator: Correctly check for compliant localization of tags (Matthias Klumpp)
+ * Share database definition between libas and libas-qt (Matthias Klumpp)
+ * appinstall: Handle NoDisplay as well, and treat OnlyShowIn as compulsority (Matthias Klumpp)
+ * qt: Make it possible to compile only the Qt library (Matthias Klumpp)
+ * Optimize database generation process to save some time (Matthias Klumpp)
+ * asi: Don't use GObject class to handle the tool's internals (Matthias Klumpp)
+ * asi: Improve command syntax (Matthias Klumpp)
+ * asi: Further code improvements (Matthias Klumpp)
+ * Expose internal options for database and data placement to asi (Matthias Klumpp)
+ * Improve database refresh API (Matthias Klumpp)
+ * tests: Make tests work standalone (Matthias Klumpp)
+ * vapi: Move to contrib, it's not static data (Matthias Klumpp)
+ * Update global categories definition (Matthias Klumpp)
+ * Implement support for multiple package names per component (Matthias Klumpp)
+ * qt: Implement support for screenshots (Matthias Klumpp)
+ * qt: More methods to retrieve components from the database (Matthias Klumpp)
+ * docs: Install gtk-doc documentation (Matthias Klumpp)
+ * Use XZ compression for release tarball (Matthias Klumpp)
+ * Use the same datasource-dir method for AsDataPool which was used for AsBuilder (Matthias Klumpp)
+ * qt: Parse the screenshot xml and store it in some relevant datatypes (Sune Vuorela)
+ * qt: Acually return the map built when converting UrlKinds to strings (Sune Vuorela)
+ * qt: Parse and handle the Provides part of the appstream data (Sune Vuorela)
+ * Some Qt cleanups after a review by Andreas. (Sune Vuorela)
+ * qt: Create a database constructor that uses the default system path (Sune Vuorela)
+ * qt: Adapt to multiple package names for a component (Sune Vuorela)
+
+Specification:
+ * spec: Use UNIX epoch instead of YYYYMMDD for timestamps (Matthias Klumpp)
+ * spec: Add new "languages" tag to distro XML (Matthias Klumpp)
+ * spec: Add new component type: Addon (Matthias Klumpp)
+ * spec: Define a 'dbus' type as new 'provides' element (Matthias Klumpp)
+ * spec: Specify a developer_name tag (Matthias Klumpp)
+ * spec: Allow an update_contact tag in upstream-metadata (Matthias Klumpp)
+ * spec: Allow /var/cache location for icons (Matthias Klumpp)
+ * spec: Allow multiple definitions of the 'pkgname' tag (Matthias Klumpp)
+ * spec: Hide multiarch install path section (Matthias Klumpp)
+
+Documentation:
+ * docs: Add quickstart page template (Matthias Klumpp)
+ * docs: Export documentation by default (Matthias Klumpp)
+ * docs: Restructure application description and add quickstart page (Matthias Klumpp)
+ * docs: Explicitly allow the mimetypes tag in generic components (Matthias Klumpp)
+ * docs: Sketch section about translation (Matthias Klumpp)
+ * docs: Various fixes for the spec, add missing project_license to generic component (Matthias Klumpp)
+ * docs: Add Intltool translation Automake integration hints (Matthias Klumpp)
+ * docs: Sketch section about addons (Igor Gnatenko)
+ * docs: Fix some quirks in the distro XML spec (Matthias Klumpp)
+ * docs: Update app quickstart guide and add example screenshots (Matthias Klumpp)
+
+Bugfixes:
+ * Fix some bugs in handling of provides-items (Matthias Klumpp)
+ * Fix some annotations & remove cruft (Matthias Klumpp)
+ * Update tests and fix a memory leak (Matthias Klumpp)
+ * validator: Improve handling of translated metadata files (Matthias Klumpp)
+ * Fix issue when loading compressed metadata files (Matthias Klumpp)
+ * qt: Added 'const' to the description (Floris-Andrei Stoica-Marcu)
+ * Print a better result message on cache update in case of metadata errors (Matthias Klumpp)
+ * Fix crash in AppInstall data provider (Matthias Klumpp)
+ * Remove bogus g_free() of paths strv in ASXML provider (Matthias Klumpp)
+ * Get rid of explicit include of config.h (Matthias Klumpp)
+ * Fix typo in appstream-index manpage (Sune Vuorela)
+ * validator: Only test if valid tags are empty (Matthias Klumpp)
+ * Make creating the Xapian cache at different locations work again (Matthias Klumpp)
+ * Remove leftover cruft from config.h.in (Sune Vuorela)
+ * asi: Respect the no-color option (Matthias Klumpp)
+
+Version 0.6.2
+~~~~~~~~~~~~~~
+Released: 2014-05-12
+
+Features:
+ * Deprecate get_homepage in favour of get_url
+ * Store all urls in the database
+ * Split validation into new AsValidator for future extension
+ * Heavily improve metadata validator, add new as-validator binary
+ * Add methods to check if component is compulsory or in a specific category
+ * Add function to pretty-print description markup and use it in asi-tool
+ * Implement missing support for mimetypes
+ * Add manpage for appstream-validate
+ * Allow fast searching for mimetype handlers
+
+Specification:
+ * spec: Use subdirectories for multiarch metadata
+ * spec: Exclusively use SPDX license tags
+ * spec: Update screenshot spec to reflect reality
+ * docs: Fix some quirks and issues
+ * docs: Rework url information as variablelist
+ * spec: Rename "manual" url type to "help"
+
+Bugfixes:
+ * Ensure active metadata locale does not have an UTF-8 suffix
+ * Refine icon path/url detection for applications
+ * Deprecate idname and make Component header nicer to work with
+ * Fix bug in category-loading and display categories in the asi-tool
+ * Fix multiple potential crashes when parsing upstream metadata
+ * Make sure we don't use deprecated methods internally anymore
+ * tests: Run database tests on private db copy
+ * asi-tool: Fix small (but annoying) warning
+ * asi-tool: Adjust manpage to reflect reality
+ * validator: Create better log messages
+
+Version 0.6.1
+~~~~~~~~~~~~~~
+Released: 2014-04-24
+
+Features:
+ * Make AsMetadata handle (almost) all XML parsing (Matthias Klumpp)
+ * Add function to parse upstream metadata in AsMetadata (Matthias Klumpp)
+ * Add methods to set/get locale used for metadata parsing (Matthias Klumpp)
+ * Add function to load metadata from memory (Matthias Klumpp)
+ * Implement a parser mode to abstract away differences in AS metadata (Matthias Klumpp)
+ * Auto-generate Vala API file, if desired (Matthias Klumpp)
+ * Add functions to get a component by it's ID (Matthias Klumpp)
+ * Index terms for provided items (Matthias Klumpp)
+ * Allow fetching components by the items they provide (Matthias Klumpp)
+ * Parse AppStream data in /var/lib/app-info/xmls (Matthias Klumpp)
+ * Implement priority property (Matthias Klumpp)
+
+Specification:
+ * spec: Add priority property for components in distro-metadata (Matthias Klumpp)
+
+Bugfixes:
+ * Fix libappstream pkgconfig (Matthias Klumpp)
+ * Make data-providers emit "component" signal (instead of "application") (Matthias Klumpp)
+ * Make translation possible again (Matthias Klumpp)
+ * Handle lib directory suffix on distributions like Fedora (Rex Dieter)
+ * docs: Fix examples to use the <releases/> tag correctly (Matthias Klumpp)
+ * Print error if compiled with -DVAPI, but no vapigen was found (Matthias Klumpp)
+ * Improve documentation and annotations (Matthias Klumpp)
+ * Improve API for provides-tests (Matthias Klumpp)
+ * Implement strict parsing of the description tag in upstream metadata (Matthias Klumpp)
+ * docs: Fix the section on 3rd-party screenshot services (Matthias Klumpp)
+
+Version 0.6.0
+~~~~~~~~~~~~~~
+Released: 2014-04-16
+
+Notes:
+ This release breaks both the library API and the Appstream specification.
+ Please adjust your tools to work with Appstream 0.6, especially take a look
+ at the documentation for the new Appstream XML specification.
+
+Features:
+ * Add new AsComponent class (Matthias Klumpp)
+ * Rewrote libappstream in plain C (Matthias Klumpp)
+ * client: Add option for detailed output (Matthias Klumpp)
+ * Use "kind" instead of "ctype" for component types (Matthias Klumpp)
+ * Implement compulsory-for-desktop (Matthias Klumpp)
+ * Some refactoring, additions and improvements (Matthias Klumpp)
+ * Correctly handle component types according to the 0.6 spec (Matthias Klumpp)
+ * Bring back thumbnail support for ss.d.n services (Matthias Klumpp)
+ * client: Improve screenshot url display (Matthias Klumpp)
+ * Implement support for <provides/> (Matthias Klumpp)
+ * Implement support for <release/> (Matthias Klumpp)
+ * Some API future-proofing (Matthias Klumpp)
+ * Add helper to generate Vala VAPI file (Matthias Klumpp)
+
+Specification:
+ * docs: Initial documentation on components and lots of restructuring (Matthias Klumpp)
+ * docs: Add FontData meta-info spec (Matthias Klumpp)
+ * docs: Add description of input-method metainfo (Matthias Klumpp)
+ * docs: Some changes on ASXML for component-support (Matthias Klumpp)
+ * docs: Clarify font classifier (Matthias Klumpp)
+ * spec: Don't use specialized tags, everything is a component. Kill <id/> types (Matthias Klumpp)
+ * spec: All upstream meta-info goes to /usr/share/appdata now (Matthias Klumpp)
+ * specs: Update Appstream example XML for latest changes (Matthias Klumpp)
+ * specs: Add new <architectures/> tag to Appstream distro spec (Matthias Klumpp)
+ * spec: Add "origin" property for components tag (Matthias Klumpp)
+ * spec: Define icon repository (Matthias Klumpp)
+ * spec: Component-type is "desktop" for apps now (Matthias Klumpp)
+ * spec: Add <releases/> parent for release tags (Matthias Klumpp)
+ * spec: Allow more url types (Matthias Klumpp)
+ * spec: Clarify how the description tag should be translated (Matthias Klumpp)
+ * spec: Hide fonts for now - the spec is not yet ready (Matthias Klumpp)
+ * spec: Add component type for codecs (Matthias Klumpp)
+ * specs: Update project mission statement (Matthias Klumpp)
+ * spec: Use metadata_license instead of the BE version (Matthias Klumpp)
+ * spec: Add note on multiarch-support (Matthias Klumpp)
+
+
+Bugfixes:
+ * Make parallel compilation possible (Matthias Klumpp)
+ * Allow compiling with -Wall -Werror (Matthias Klumpp)
+ * Prevent identifier collisions in the database (Matthias Klumpp)
+ * Some fixes for the introspection build process (Matthias Klumpp)
+ * Some basic fixes for the XSD schemes (Matthias Klumpp)
+
+Version 0.5.0
+~~~~~~~~~~~~~~
+Released: 2014-02-23
+
+Features:
+ * Parse screenshot data and make it available via library API (Matthias Klumpp)
+ * Add screenshot data to the Xapian database (Matthias Klumpp)
+ * Add function to dump screenshot data as XML (Matthias Klumpp)
+ * cli: Add colored output to the command-line tool (Matthias Klumpp)
+ * cli: Display some screenshot information, if it is found (Matthias Klumpp)
+ * cli: Allow the tool to trigger cache rebuilds (Matthias Klumpp)
+ * Add new API to return available screenshot sizes (Matthias Klumpp)
+ * Always compile tests (Matthias Klumpp)
+ * Improve Xapian search capabilities (Matthias Klumpp)
+
+Specification:
+ * spec: Deprecate appcategory element in favour of category element (Matthias Klumpp)
+ * docs: Update architecture images (Matthias Klumpp)
+ * docs: Remove reference to OCS (Matthias Klumpp)
+ * spec: Add caption for screenshots (Matthias Klumpp)
+
+Bugfixes:
+ * Always install appstream.pc in correct libdir (Matthias Klumpp)
+ * Always rebuild the database if watchfile is missing (Matthias Klumpp)
+ * Don't throw an error if we are on a system without the ASXML dir (Matthias Klumpp)
+ * Fix some memory leaks (Matthias Klumpp)
+ * Fix some strange vala compile issue with newer valac versions (Matthias Klumpp)
+
+Version 0.4.0
+~~~~~~~~~~~~~~
+Released: 2013-10-20
+
+Features:
+ * Include /var/cache/app-info as location for AppStream XMLs (Matthias Klumpp)
+ * Search for icons in the caches too (Matthias Klumpp)
+ * Remove API for manually refreshing the Xapian cache (Matthias Klumpp)
+ * Remove refresh action from appstream-index tool (Matthias Klumpp)
+ * Implement PackageKit plugin to refresh the cache (Matthias Klumpp)
+ * Implement support for compressed AppStream files (Matthias Klumpp)
+ * Support all icon types in AppStream XML parser (Matthias Klumpp)
+ * Parse description tags in AppStream XML (Matthias Klumpp)
+ * Update database schema, breaking USC compatibility (Matthias Klumpp)
+ * Only rebuild AppStream Xapian cache if data has changed (Matthias Klumpp)
+ * Store app homepage and iconpath correctly in new database layout (Matthias Klumpp)
+ * docs: Document important parts of AppStream (Matthias Klumpp)
+ * docs: Document appcategories tag (Matthias Klumpp)
+ * docs: Add example XML for AppStream files (Matthias Klumpp)
+ * docs: Briefly describe the screenshot service (Matthias Klumpp)
+ * docs: Include preexisting architecture graphics and fix some quirks (Matthias Klumpp)
+ * docs: Specify how icons will be handled and which ones take priority (Matthias Klumpp)
+
+Specification:
+ * spec: Add project_group element (Matthias Klumpp)
+ * spec: The "remote" type is much more precise than "url" (Matthias Klumpp)
+ * spec: Add documentation tag to the AppStream spec (Matthias Klumpp)
+ * spec: Enforce at least one id, pkgname, name, summary and icon tag (Matthias Klumpp)
+ * spec: Define and describe project_license tag (Matthias Klumpp)
+ * spec: Add screenshots to the AppStream XML spec (Matthias Klumpp)
+ * spec: Add new compulsory_for_desktop tag (Matthias Klumpp)
+
+Bugfixes:
+ * Ensure that we have GI set up, before compiling libappstream (Matthias Klumpp)
+ * Set has_type_id=false for Xapian binding (Matthias Klumpp)
+ * Ensure we do always target the right GLib version (Matthias Klumpp)
+ * Fix crash in AppStream PackageKit plugin (Matthias Klumpp)
+
+Version 0.3.1
+~~~~~~~~~~~~~~
+Released: 2013-06-26
+
+Bugfixes:
+ * Use a GPtrArray for search results
+ * Adjust unit-tests and client tool
+
+Version 0.3.0
+~~~~~~~~~~~~~~
+Released: 2013-06-10
+
+Features:
+ * Add command-line method to search for apps (Matthias Klumpp)
+ * Restructure code to clearly separate client and daemon (Matthias Klumpp)
+ * Make DBus API an internal implementation detail (Matthias Klumpp)
+ * Rewritten and more advanced XDG menu file parser (Matthias Klumpp)
+ * Implemented new Category handling (Matthias Klumpp)
+ * Many improvements in documentation (Matthias Klumpp)
+ * Implement API to access any AppStream-compliant screenshot service (Matthias Klumpp)
+
+Bugfixes:
+ * Fix creation of missing database (Matthias Klumpp)
+ * Make UAI more failsafe (Matthias Klumpp)
+ * Improve error handling and command-line output (Matthias Klumpp)
+ * Greatly improve search results (Matthias Klumpp)
+ * Fix translation template (Matthias Klumpp)
+
+Version 0.2.0
+~~~~~~~~~~~~~~
+Released: 2013-03-15
+
+Features:
+ * Add distro-agnostic category definition (Matthias Klumpp)
+ * Make DBus API more failsafe (Matthias Klumpp)
+ * Place Xapian cache in different directory (Matthias Klumpp)
+ * Add release script and release instructions (Matthias Klumpp)
+
+Bugfixes:
+ * Kill some compiler warnings (Matthias Klumpp)
+ * Print error message if xmlto was not found (Matthias Klumpp)
+ * Make --nowait option finally work again (Matthias Klumpp)
+ * docs: Build C API documentation (Matthias Klumpp)
+ * Print better message if category dir is null (Matthias Klumpp)
+
+Version 0.1.0
+~~~~~~~~~~~~~~
+Released: 2012-10-02
+
+Notes:
+ * Initial release
