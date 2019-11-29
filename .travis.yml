@@ -1,0 +1,22 @@
+# Travis CI config for the AppStream Generator
+language: d
+sudo: required
+dist: trusty
+
+services:
+  - docker
+
+d:
+  - gdc
+  - ldc
+
+matrix:
+  allow_failures:
+    - d: gdc
+
+before_script:
+  - docker build -t asgen -f test/ci/Dockerfile .
+
+script:
+  - docker run -t -e DC=$DC -v `pwd`:/build asgen
+    ./test/ci/build_and_test.sh

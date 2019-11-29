@@ -1,0 +1,329 @@
+Version 0.6.8
+~~~~~~~~~~~~~~
+Released: 2017-11-06
+
+Notes:
+ * The -Ddownload_js build flag is now -Ddownload-js to follow the naming
+   of other Meson flags more closely.
+
+Features:
+ * Encode AppStream library version in version info string on reports
+ * Don't require an install candidate for a webapp
+ * Update hicolor theme fallback definition
+ * Try to filter out symbolic icons for apps
+ * Allow processing only one section in a suite
+ * Relax icon scaling rules
+
+Bugfixes:
+ * Move time graph legend to the top left
+ * ci: Use the packaged gir-to-d
+ * Drop an unused gdc conditional
+ * Ensure the validator never tests web URLs for validity
+ * Drop LLVM DC bug workaround and allow cross-module inlining
+ * Make D GIR interface build work again with recent Meson versions
+ * Don't fail if we have a dupe ID with no pkgname, can happen now with webapps
+
+Version 0.6.7
+~~~~~~~~~~~~~~
+Released: 2017-10-02
+
+Features:
+ * ci: Enable gdc again for testing (Matthias Klumpp)
+ * Make rpmmd backend work (Matthias Klumpp)
+ * Make an empty main function for embedded unittests (Matthias Klumpp)
+ * Add a metainfo file (Matthias Klumpp)
+ * Add a manual page (Matthias Klumpp)
+ * Sort suite names on the index page (Matthias Klumpp)
+
+Bugfixes:
+ * use file.exists to check file existence (Antonio Rojas)
+ * arch: Don't ref generator results (Matthias Klumpp)
+ * Improve the icon tarball generation code (Matthias Klumpp)
+ * Resolve deprecation warning (Matthias Klumpp)
+
+Version 0.6.6
+~~~~~~~~~~~~~~
+Released: 2017-09-22
+
+Features:
+ * Add basic HiDPI support (Corentin Noël)
+ * Generate the HiDPI tarball (Corentin Noël)
+ * Add an 'info' command to dump package information (Matthias Klumpp)
+ * Handle the "Hidden" property in .desktop files and complain about it (Matthias Klumpp)
+
+Bugfixes:
+ * arch: XML-escape package descriptions (Matthias Klumpp)
+ * Check for availability of a component-id at the right time (Matthias Klumpp)
+ * Make writing compressed results a bit more robust (Matthias Klumpp)
+ * Resolve all deprecation warnings and slightly improve code (Matthias Klumpp)
+
+Version 0.6.5
+~~~~~~~~~~~~~~
+Released: 2017-07-02
+
+Features:
+ * Generate type=codec metadata for gstreamer packages (Iain Lane)
+ * Add a feature flag for GStreamer processing (Iain Lane)
+ * ci: Switch to using upstream GirToD (Matthias Klumpp)
+ * Set asgen version in defines.d by Meson as well (Matthias Klumpp)
+ * Format graphs a bit nicer (Matthias Klumpp)
+
+Bugfixes:
+ * Find files in DATADIR - not relative to the executable (Iain Lane)
+ * Fix typo in metadata-path hint (Matthias Klumpp)
+ * Try to be more informative when a component has no ID (Matthias Klumpp)
+ * Ensure the rDNS scheme is really followed before editing an ID (Matthias Klumpp)
+
+Version 0.6.4
+~~~~~~~~~~~~~~
+Released: 2017-05-25
+
+Features:
+ * Automatically generate GIR D bindings at build-time (Matthias Klumpp)
+ * Remove dub build file (Matthias Klumpp)
+ * Use Meson subproject/wrap to fetch mustache-d in case it is missing (Matthias Klumpp)
+ * Add a launchable tag to output if we can add one (Matthias Klumpp)
+ * Make legacy metainfo dir a warning (Matthias Klumpp)
+ * Validate launchable entries and add heuristics in case they aren't present (Matthias Klumpp)
+
+Bugfixes:
+ * Import buildPath directly from std.path (Antonio Rojas)
+ * Remove spurious std.stream import (Matthias Klumpp)
+
+Version 0.6.3
+~~~~~~~~~~~~~~
+Released: 2017-03-08
+
+Features:
+ * Experiment with scoped classes (Matthias Klumpp)
+ * Drop embedded generator copy (Matthias Klumpp)
+ * Use final classes whenever possible (Matthias Klumpp)
+ * Centralize all export-dir locations in base config class (Matthias Klumpp)
+ * Allow to manually configure data export locations (Matthias Klumpp)
+
+Bugfixes:
+ * Fix some quirks and make the tests work again (Matthias Klumpp)
+ * ci: Don't build with GDC (Matthias Klumpp)
+ * Don't fail if a suite has no base suite (Matthias Klumpp)
+ * engine: Process base suite packages for contents only (Iain Lane)
+ * Update README.md (#39) (Blake Kostner)
+ * debian: Only select the most recent packages for a scan (Matthias Klumpp)
+ * Streamline final component validity check, resolve a crash (Matthias Klumpp)
+
+Version 0.6.2
+~~~~~~~~~~~~~~
+Released: 2017-01-24
+
+Notes:
+ * GDC 6.x can't compile the project at time due to a GDC bug.
+   See https://bugzilla.gdcproject.org/show_bug.cgi?id=251 for more
+   information.
+
+Features:
+ * Support desktop-app metainfo files without .desktop file if they have an icon set
+ * Write log entry when starting/finishing icon tarball write
+ * Update AppStream bindings
+ * Allow to specify allowed <custom/> keys
+ * Don't show pedantic validator hints
+ * Allow metainfo file to specify sample texts for fonts
+ * Process XPM icons if they are large enough
+
+Bugfixes:
+ * Safeguard against TLD checks  with empty-or-null string
+ * Ensure desktop-apps have at least one valid category set
+ * Don't override metainfo name/summary with .desktop values
+ * Quit immediately if the component type is unknown
+ * Correctly read a font's full-name
+ * Don't needlessly reprocess fonts
+
+Version 0.6.1
+~~~~~~~~~~~~~~
+Released: 2016-12-26
+
+Features:
+ * Add a symlink so that Ubuntu uses the same template as Debian (Iain Lane)
+ * Support linking to "old suites" in the HTML index (Iain Lane)
+ * hints: icon-not-found: Explain the symlink problem for Debian & Ubuntu (Iain Lane)
+ * Add preliminary new asgen logo (Matthias Klumpp)
+ * Use struct for archive (Matthias Klumpp)
+ * Reuse AsMetadata while processing metainfo files (Matthias Klumpp)
+
+Bugfixes:
+ * Correctly install templates with Meson (Matthias Klumpp)
+ * meson: Make finding mustache-d more robust (Matthias Klumpp)
+ * Fix build with DMD (Antonio Rojas)
+ * engine: Don't clean packages in base suites (Iain Lane)
+ * download: If we have a last-modified date, set the mtime of the target file (Iain Lane)
+ * Simplify zarchive code a little (Matthias Klumpp)
+ * Use module initializer to initialize global static data (Matthias Klumpp)
+ * Fix build on Debian with GDC (Matthias Klumpp)
+
+Version 0.6.0
+~~~~~~~~~~~~~~
+Released: 2016-10-03
+
+Notes:
+ * If possible, you should build Meson with the LLVM D compiler and the
+   Meson build system now.
+
+Features:
+ * Produce better error messages on failed libarchive actions (Matthias Klumpp)
+ * Add a hook to the desktop file parser to run backend specific code (Iain Lane)
+ * Add an Ubuntu backend to retrieve langpack translations (Iain Lane)
+ * Open databases with NOTLS (Matthias Klumpp)
+ * Tweak the issue messages a bit (Matthias Klumpp)
+ * Complain about stuff in legacy paths (Matthias Klumpp)
+ * Only search for .desktop files if we have a DESKTOP_APP component (Matthias Klumpp)
+ * Create new Font class to read font metadata (Matthias Klumpp)
+ * Render an icon for fonts (Matthias Klumpp)
+ * Add dependencies on Pango, FreeType and Fontconfig (Matthias Klumpp)
+ * Determine languages a font supports (Matthias Klumpp)
+ * Reorganize code for proper namespacing (Matthias Klumpp)
+ * Render font screenshots (Matthias Klumpp)
+ * Map font full names to files in a spec-compliant way (Matthias Klumpp)
+ * Enable fonts support by default (Matthias Klumpp)
+ * Share ContentsStore between threads again (Matthias Klumpp)
+ * Make Meson a first-class buildsystem for asgen (Matthias Klumpp)
+ * Update README (Matthias Klumpp)
+
+Bugfixes:
+ * Fix build on non-64-bit architectures (Matthias Klumpp)
+ * Work around LDC bug (Matthias Klumpp)
+ * fclose() the memstream when we are done with it (Iain Lane)
+ * debpkgindex: Be less noisy about translations in debug mode (Iain Lane)
+ * Use getTestSamplesDir (Iain Lane)
+ * Retry on all curl errors, not just timeouts (Iain Lane)
+ * Synchronise downloading of files (Iain Lane)
+ * ubuntu: Don't reference all packages, just the ones we need (langpacks) (Iain Lane)
+ * Use an ugly mutex to work around Fontconfig issues (Matthias Klumpp)
+ * Make FC mutex a bit more fine-grained (Matthias Klumpp)
+
+Version 0.5.0
+~~~~~~~~~~~~~~
+Released: 2016-08-30
+
+Features:
+ * Add more speed and style optimizations, make Package an abstract class (Matthias Klumpp)
+ * Use a string appender instead of a string array for writing output (Matthias Klumpp)
+ * debian: Support downloading files from a mirror, instead of having them local (Iain Lane)
+ * debian: Support DDTP translations (Iain Lane)
+ * Ignore some more useless categories (Matthias Klumpp)
+ * Add skeleton for RPMMD (Matthias Klumpp)
+ * Add a few optimizations using immutable and appender (Matthias Klumpp)
+ * Do not spawn compressors anymore, use libarchive directly (Matthias Klumpp)
+ * Make compiling with LDC easier (Matthias Klumpp)
+ * Add example for cruft collection script (Matthias Klumpp)
+ * Allow cleaning up statistical data retroactively (Matthias Klumpp)
+ * Rehash hash tables that we query often (Matthias Klumpp)
+ * Always optimize debug builds (Matthias Klumpp)
+ * Make a splitbuild with Meson and Ninja possible (Matthias Klumpp)
+ * Use AppStream's knowledge about TLDs to build smarter global-component-ids (Matthias Klumpp)
+ * Allow specifying the format version metadata should be built for (Matthias Klumpp)
+ * Adjust for AppStream 0.10 release (Matthias Klumpp)
+ * Perform legal checks before allowing metadata to be added to the pool (Matthias Klumpp)
+
+Bugfixes:
+ * Fix dataUseJSTime in section overview template (Blake Kostner)
+ * debian: Only retrieve DDTP translations from the section we're looking at (Iain Lane)
+ * Fix deprecation warnings from LDC (Matthias Klumpp)
+ * Work around some weird JSON parser quirk (int incompatible with uint) (Matthias Klumpp)
+ * Prevent creating excess statistic entries (Matthias Klumpp)
+ * Fix potential crash (Matthias Klumpp)
+ * Use native generator when not compiling with GDC (Matthias Klumpp)
+ * Work correctly if CIDs omit the .desktop suffix (Matthias Klumpp)
+ * Only add valid category names to output (Matthias Klumpp)
+ * Don't emit description-from-package multiple times per package. (Matthias Klumpp)
+
+Version 0.4.0
+~~~~~~~~~~~~~~
+Released: 2016-07-12
+
+Features:
+ * README: Add link to D tour
+ * Run optipng with standard settings
+ * Add command to forget extracted data for a package
+ * Implement immutable suites
+ * Use appender more often and apply some style fixes
+ * Build with parallel by default when using Makefile
+ * Drop some deprecated stuff
+
+Bugfixes:
+ * Display an error when processing a suite without section or arch
+ * debian: Fix exception message if directory does not exist
+ * Code improvements: More pure, more safe, more trusted
+ * Drop global data validation result box
+ * Don't crash if media pool directory does not exist and immutable suites are used
+
+Version 0.3.0
+~~~~~~~~~~~~~~
+Released: 2016-05-24
+
+Features:
+ * Register new backend for Arch Linux (Matthias Klumpp)
+ * arch: Add reader for lists index file and skeleton for PackageIndex (Matthias Klumpp)
+ * Make generic archive class work well with non-Debian packages (Matthias Klumpp)
+ * Add HTML anchors for maintainers on report pages (Matthias Klumpp)
+ * html: Show suite name in section overview (Matthias Klumpp)
+ * Allow not setting a MediaBaseUrl (Matthias Klumpp)
+ * Add some font rendering experiments (Matthias Klumpp)
+ * Allow storing multiple statitics entries per point in time (Matthias Klumpp)
+ * Make icon tarball build reproducible (Matthias Klumpp)
+ * Make ArchiveDecompressor API more powerful and always return const(ubyte)[] (Matthias Klumpp)
+ * arch: Speed up backend by loading all data in one go (Matthias Klumpp)
+ * Split "handleScreenshots" into more useful, fine-grained flags (Matthias Klumpp)
+ * Add timestamp to output and only touch it if something has changed (Matthias Klumpp)
+ * Only update metadata if the indices have been changed (Matthias Klumpp)
+ * Store media in pool subdirectory (Matthias Klumpp)
+ * Add flag to enforce metadata processing, even if nothing changed (Matthias Klumpp)
+ * Allow disabling metadata timestamps (Matthias Klumpp)
+ * Improve scan-skipping code (Matthias Klumpp)
+
+Bugfixes:
+ * Fix build on non-64bit arches (Matthias Klumpp)
+ * Handle compressed empty files correctly (Neil Mayhew)
+ * Drop other, non-UTF-8 encodings from language codes too (Matthias Klumpp)
+ * Drop non-printable characters from .desktop file values (Matthias Klumpp)
+ * Loop over more things by-reference to reduce RAM usage (Matthias Klumpp)
+ * debian: Read Packages.xz files if no .gz file is available (Matthias Klumpp)
+ * Don't lie about thumbnail sizes in their filename (Matthias Klumpp)
+ * Don't duplicate architecture tag if there are multiple issues (Matthias Klumpp)
+ * Catch data serialization errors (Matthias Klumpp)
+ * Run bower with allow root to be able to make js as root (Harald Sitter)
+
+Version 0.2.0
+~~~~~~~~~~~~~~
+Released: 2016-04-24
+
+Features:
+ * Don't ship minified JS
+ * Get rid of (almost) all the embedded JS copies, use Bower
+ * Add makefile for convenience
+ * Use Flot for drawing graphs
+ * Update README
+ * Document all asgen-config settings
+ * Reserve subdb in contents database to cache icon data
+ * Make IconHandler use a pre-filtered list of icons
+ * Allow templates to override only parts of the default branding
+ * Add some default branding for Debian
+ * Show logo on generated HTML pages
+ * debian: Link some interesting resources from the main page
+
+Bugfixes:
+ * Find aliased icons correctly
+ * Keep priority sorting of themes
+ * Make the hicolor theme always-available, using an embedded index copy if necessary
+ * Fix counting of issues
+ * Do not accidentally upscale screenshots while creating thumbnails
+ * debian: Don't make a missing package index fatal
+ * Don't fail if we are trying to add statistics too quickly
+ * Rename remove-valid to reflect what it actually does
+ * Ignore errors if we are trying to decompress a 0-byte gzip file
+ * Suite arguments aren't optional for process/remove-found
+ * Demote screenshot-no-thumbnails to info
+
+Version 0.1.0
+~~~~~~~~~~~~~~
+Released: 2016-04-18
+
+Notes:
+  * Initial release

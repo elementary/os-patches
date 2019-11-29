@@ -1,0 +1,75 @@
+{{#partial}}{title}Issues for {{package_name}} in {{suite}}/{{section}}{{/partial}}
+
+{{#partial}}{ float_right }
+<small>Last updated on: {{time}}</small>
+{{/partial}}
+
+{{#partial}}{ header_content }
+<span style="font-size:18px;"><a href="index.html" style="color: #000000;">⇦ |</a></span>
+
+<span>{{package_name}}</span> <span style="font-size:16px;">[{{section}}]</span>
+{{/partial}}
+
+{{#partial}}{ content }
+    <h1>Hints for {{package_name}} in {{section}}</h1>
+
+    <div class="wrapper">
+
+
+    {{#entries}}
+    <h2>
+      {{component_id}}
+      {{#architectures}}
+        <span style="font-size:12px;" class="label label-neutral">⚙ {{arch}}</span>
+      {{/architectures}}
+    </h2>
+
+      {{#has_errors}}
+      <div class="infobox infobox-error">
+        <h2>Errors</h2>
+        <ul class="list-group">
+          {{#errors}}
+            <li class="list-group-item list-group-item-info">
+            <strong>{{error_tag}}</strong><br/>
+            {{{error_description}}}
+            </li>
+          {{/errors}}
+        </ul>
+      </div>
+      {{/has_errors}}
+
+
+      {{#has_warnings}}
+      <div class="infobox infobox-warning">
+        <h2>Warnings</h2>
+        <ul class="list-group">
+          {{#warnings}}
+            <li class="list-group-item list-group-item-info">
+            <strong>{{warning_tag}}</strong><br/>
+            {{{warning_description}}}
+            </li>
+          {{/warnings}}
+        </ul>
+      </div>
+      {{/has_warnings}}
+
+      {{#has_infos}}
+      <div class="infobox infobox-hint">
+        <h2>Hints</h2>
+        <ul class="list-group">
+          {{#infos}}
+            <li class="list-group-item list-group-item-info">
+            <strong>{{info_tag}}</strong><br/>
+            {{{info_description}}}
+            </li>
+          {{/infos}}
+        </ul>
+      </div>
+      {{/has_infos}}
+
+    {{/entries}}
+
+    </div>
+{{/partial}}
+
+{{> base}}

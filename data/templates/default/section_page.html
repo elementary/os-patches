@@ -1,0 +1,174 @@
+{{#partial}}{title}Data for {{suite}}/{{section}}{{/partial}}
+
+{{#partial}}{ head_extra }
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/jquery/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/flot/jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/flot/jquery.flot.time.js"></script>
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/flot/jquery.flot.resize.js"></script>
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/flot/jquery.flot.fillbetween.js"></script>
+
+<style>
+.graph-container {
+    position: relative;
+    height: 280px;
+    width: 80%;
+}
+
+.graph-placeholder {
+    width: 100%;
+    height: 100%;
+    font-size: 14px;
+    line-height: 1.2em;
+}
+</style>
+{{/partial}}
+
+{{#partial}}{ header_content }
+<span style="font-size:18px;"><a href="../" style="color: #000000;">⇦ |</a></span>
+<span>AppStream data for {{project_name}}/{{suite}}/{{section}}</span>
+{{/partial}}
+
+{{#partial}}{ content }
+    <h1>Overview for {{suite}}/{{section}}</h1>
+
+    <h2>Data</h2>
+
+    <h3><a href="issues/index.html">Issues</a> - Issues found while extracting the data</h3>
+
+    <h3><a href="metainfo/index.html">Metainfo</a> - Per-package view of the generated data</h3>
+
+
+    <h2>Health</h2>
+    <div class="wrapper">
+
+      <h3>Issue overview</h3>
+      <div style="width: 80%;">
+
+        <div class="progress" style="margin-left: 20px;">
+          <div style="width: {{valid_percentage}}%" class="progress-bar progress-bar-green">
+            <span class="sr-only">{{valid_percentage}}% Valid</span>
+          </div>
+          <div style="width: {{info_percentage}}%" class="progress-bar progress-bar-blue">
+            <span class="sr-only">{{info_percentage}}% Infos</span>
+          </div>
+          <div style="width: {{warning_percentage}}%" class="progress-bar progress-bar-yellow">
+            <span class="sr-only">{{warning_percentage}}% Warnings</span>
+          </div>
+          <div style="width: {{error_percentage}}%" class="progress-bar progress-bar-red">
+            <span class="sr-only">{{error_percentage}}% Errors</span>
+          </div>
+        </div>
+
+        <div class="graph-container" style="width: 100%;">
+          <div id="placeholder" class="graph-placeholder" style="float:left; width:90%;"></div>
+          <div id="choices" style="float:right;"></div>
+        </div>
+
+      </div>
+
+      <ul>
+        <li>{{metainfo_count}} valid components</li>
+        <li>{{error_count}} errors</li>
+        <li>{{warning_count}} warnings</li>
+        <li>{{info_count}} infos/hints</li>
+      </ul>
+
+    </div>
+
+    <script type="text/javascript">
+      function dataUseJSTime(data) {
+          return data.map(function(v) {
+              return [v[0] * 1000, v[1]];
+          });
+      }
+
+      $.getJSON("{{root_url}}/statistics.json", function(allData) {
+        data = allData["{{suite}}"]["{{section}}"];
+
+        var datasets = {
+            "errors": {
+                color: "#c05020",
+                data: dataUseJSTime(data["errors"]),
+                label: "Errors",
+                id: "errors"
+            },
+            "warnings": {
+                color: "#ffcc66",
+                data: dataUseJSTime(data["warnings"]),
+                label: "Warnings"
+            },
+            "infos": {
+                color: "#6060c0",
+                data: dataUseJSTime(data["infos"]),
+                label: "Infos"
+            },
+            "valid": {
+                color: "#30a420",
+                data: dataUseJSTime(data["metadata"]),
+                label: "Valid data"
+            }
+        };
+
+        // insert checkboxes
+        var choiceContainer = $("#choices");
+        $.each(datasets, function(key, val) {
+            choiceContainer.append("<br/><input type='checkbox' name='" + key +
+                "' checked='checked' id='id" + key + "'></input>" +
+                "<label for='id" + key + "'>" + val.label + "</label>");
+        });
+
+        choiceContainer.find("input").click(plotAccordingToChoices);
+
+        function plotAccordingToChoices() {
+            var data = [];
+
+            choiceContainer.find("input:checked").each(function () {
+                var key = $(this).attr("name");
+                if (key && datasets[key]) {
+                    data.push(datasets[key]);
+                }
+            });
+
+            if (data.length > 0) {
+                $.plot("#placeholder", data, {
+                    series: {
+                        lines: {
+                            show: true,
+                            fill: 0.1
+                        },
+                        fillBetween: "errors"
+                    },
+
+                    yaxis: {
+                        min: 0
+                    },
+
+                    xaxis: {
+                        mode: "time",
+                        timeformat: "%y/%m/%d"
+                    },
+
+                    grid: {
+                        hoverable: true,
+                        clickable: true
+                    },
+
+                    legend: {
+                        position: 'nw'
+                    }
+                });
+
+            };
+        }
+
+        plotAccordingToChoices();
+      });
+    </script>
+
+{{/partial}}
+
+{{#partial}}{ float_right }
+<small>Last updated on: {{time}}</small>
+{{/partial}}
+
+{{> base}}

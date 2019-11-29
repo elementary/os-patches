@@ -1,0 +1,130 @@
+{{#partial}}{title}Data for the {{suite}} suite{{/partial}}
+
+{{#partial}}{ header_content }
+<span style="font-size:18px;"><a href="../" style="color: #000000;">⇦ |</a></span>
+<span>AppStream data for {{project_name}}/{{suite}}</span>
+{{/partial}}
+
+{{#partial}}{ head_extra }
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/jquery/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/flot/jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/flot/jquery.flot.pie.js"></script>
+<script language="javascript" type="text/javascript" src="{{root_url}}/static/js/flot/jquery.flot.resize.js"></script>
+
+<style>
+.graph-container {
+    position: relative;
+    height: 380px;
+}
+
+.graph-placeholder {
+    height: 90%;
+    font-size: 14px;
+    margin-top: -20px;
+}
+</style>
+{{/partial}}
+
+{{#partial}}{ content }
+    <h1>Select an archive section</h1>
+
+    <h2>Sections</h2>
+    {{#sections}}
+      <h3><a href="{{section}}/index.html">{{section}}</a></h3>
+    {{/sections}}
+
+    <h2>Health of suite "{{suite}}"</h2>
+
+    <div class="wrapper">
+      <div class="graph-container">
+          {{#sections}}
+          <div align="center" class="float-left" style="height: 100%; float: left; width: 33.333%;">
+            <center><strong>{{section}}</strong></center>
+            <div id="placeholder_{{section}}" class="graph-placeholder" style="float:left; width:100%;"></div>
+          </div>
+          {{/sections}}
+      </div>
+    </div>
+
+    <script>
+      $.getJSON("{{root_url}}/statistics.json", function(data) {
+        var sections = [];
+        {{#sections}}
+          sections.push("{{section}}");
+        {{/sections}}
+
+        for (var i = 0; i < sections.length; i++) {
+          var sdata = data["{{suite}}"];
+          var sectionName = sections[i];
+          var secData = sdata[sectionName];
+
+          var resData = [
+              {
+                label: "Errors",
+                data: [ 1, secData["errors"][secData["errors"].length-1][1] ],
+                color: "#c05020"
+              },
+              {
+                label: "Warnings",
+                data: [ 1, secData["warnings"][secData["warnings"].length-1][1] ],
+                color: "#ffcc66"
+              },
+              {
+                label: "Infos",
+                data: [ 1, secData["infos"][secData["infos"].length-1][1] ],
+                color: "#6060c0"
+              },
+              {
+                label: "Valid Data",
+                data: [ 1, secData["metadata"][secData["metadata"].length-1][1] ],
+                color: "#30a420"
+              }
+          ];
+
+          drawSummaryChart(resData, sectionName);
+        }
+      });
+    </script>
+    <script>
+      function labelFormatter(label, series) {
+          return "<div style='font-size:8pt; text-align:center; padding:2px; color:white;'>" + Math.round(series.percent) + "%</div>";
+      }
+
+      function drawSummaryChart(data, section) {
+        $.plot('#placeholder_' + section, data, {
+            series: {
+                pie: {
+                    innerRadius: 0.34,
+                    show: true,
+
+                    label: {
+                        show: true,
+                        radius: 3/5,
+                        formatter: labelFormatter,
+                        background: {
+                            opacity: 0.6,
+                            color: '#000'
+                        }
+                    }
+                }
+            },
+
+            grid: {
+                hoverable: true,
+                clickable: true,
+                margin: 0,
+                borderWidth: 0
+            },
+
+            legend: { show: false }
+        });
+      }
+    </script>
+
+{{/partial}}
+
+{{#partial}}{ float_right }
+<small>Last updated on: {{time}}</small>
+{{/partial}}
+
+{{> base}}

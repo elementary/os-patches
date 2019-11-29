@@ -1,0 +1,217 @@
+{
+
+"internal-error": {
+  "text": [ "A fatal problem appeared in the generator.",
+            "Please <a href=\"https://github.com/ximion/appstream-generator/issues\">report a bug</a>: {{msg}}"],
+  "severity": "error"
+},
+
+"internal-unknown-tag": {
+  "text": ["The generator emitted a tag '{{tag}}' which is unknown. This is a bug in the metadata generator, please",
+           "<a href=\"https://github.com/ximion/appstream-generator/issues\">file a bugreport</a>."],
+  "severity": "warning"
+},
+
+"desktop-file-error": {
+  "text": "Unable to read data from .desktop file: {{msg}}",
+  "severity": "error"
+},
+
+"desktop-file-hidden-set": {
+  "text": ["This .desktop file has the 'Hidden' property set. This is wrong for vendor-installed .desktop files, and",
+           "nullifies all effects this .desktop file has, which most certainly not what was intended.",
+           "See <a href=\"https://standards.freedesktop.org/desktop-entry-spec/latest/ar01s05.html\">the specification</a> for details."],
+  "severity": "warning"
+},
+
+"metainfo-parsing-error": {
+  "text": "Unable to parse AppStream metainfo file, the data is likely malformed.<br/>Error: {{msg}}",
+  "severity": "error"
+},
+
+"icon-format-unsupported": {
+  "text": "Icon file '{{icon_fname}}' uses an unsupported image file format.",
+  "severity": "error"
+},
+
+"icon-not-found": {
+  "text": [ "The icon '{{icon_fname}}' was not found in the archive. This issue can have multiple reasons:",
+            "<ul>",
+            "  <li>The icon is not present in the archive.</li>",
+            "  <li>The icon is in a wrong directory.</li>",
+            "  <li>The icon is not available in a suitable size (at least 64x64px)</li>",
+            "  <li>On Debian and Ubuntu, the icon is a symlink. The generator cannot read symlinks on these distributions - make the icon a real file.</li>",
+            "</ul>",
+            "To make the icon easier to find, place it in <code>/usr/share/icons/hicolor/&lt;size&gt;/apps</code> and ensure the <code>Icon=</code> value",
+            "of the .desktop file is set correctly."
+           ],
+  "severity": "error"
+},
+
+"gui-app-without-icon": {
+  "text": [ "The component is a GUI application (application which has a .desktop file for the XDG menu and <code>Type=Application</code>),",
+            "but we could not find a matching icon for this application."
+          ],
+  "severity": "error"
+},
+
+"pkg-extract-error": {
+  "text": "Could not extract file '{{fname}}' from package '{{pkg_fname}}'. Error: {{error}}",
+  "severity": "error"
+},
+
+"pkg-empty-file": {
+  "text": ["Could not extract file '{{fname}}' from package '{{pkg_fname}}'.",
+           "Icon data was empty. The icon might be a symbolic link pointing at a file outside of this package.",
+           "Please do not do that and instead place the icons in their appropriate directories in <code>/usr/share/icons/hicolor/</code>."],
+  "severity": "error"
+},
+
+"image-write-error": {
+  "text": ["Could write new image generated from '{{fname}}' (package '{{pkg_fname}}'): {{error}}"],
+  "severity": "error"
+},
+
+"metainfo-no-id": {
+  "text": ["Could not determine an ID for the component in '{{fname}}'. The AppStream metainfo file likely lacks an <code>&lt;id/&gt;</code> tag.<br/>",
+           "The identifier tag is essential for AppStream metadata, and must not be missing."],
+  "severity": "error"
+},
+
+"metainfo-validation-hint": {
+  "text": "Validation of the metainfo file yielded the following hint: {{msg}}",
+  "severity": "info"
+},
+
+"metainfo-validation-issue": {
+  "text": "Validation of the metainfo file found a problem: {{msg}}",
+  "severity": "warning"
+},
+
+"ancient-metadata": {
+  "text": ["The AppStream metadata should be updated to follow a more recent version of the specification.<br/>",
+           "Please consult <a href=\"http://freedesktop.org/software/appstream/docs/chap-Quickstart.html\">the XML quickstart guide</a> for more information."],
+  "severity": "warning"
+},
+
+"legacy-metainfo-directory": {
+  "text": ["The AppStream metainfo file '{{fname}}' was found in a legacy path.<br/>",
+           "Please install metainfo files into <code>/usr/share/metainfo</code>, as the old path will not be recognized anymore in the future."],
+  "severity": "warning"
+},
+
+"metainfo-screenshot-but-no-image": {
+  "text": ["A screenshot has been found for this component, but apparently it does not have any images defined."],
+  "severity": "warning"
+},
+
+"screenshot-download-error": {
+  "text": ["Error while downloading screenshot from '{{url}}': {{error}}<br/>",
+           "This might be a temporary server issue."],
+  "severity": "warning"
+},
+
+"screenshot-save-error": {
+  "text": "Unable to store screenshot for '{{url}}': {{error}}",
+  "severity": "warning"
+},
+
+"screenshot-no-thumbnails": {
+  "text": ["No thumbnails have been generated for screenshot '{{url}}'.<br/>",
+           "This could be a sign of the original screenshot being too small."],
+  "severity": "info"
+},
+
+"no-install-candidate": {
+  "text": "Component has no install candidate defined. A package must be associated with a package or bundle providing it.",
+  "severity": "error"
+},
+
+"metainfo-quoted-value": {
+  "text": "The value {{value}} in '{{field}}' is quoted, which is likely unintentional.",
+  "severity": "info"
+},
+
+"metainfo-unknown-type": {
+  "text": ["The component has an unknown type. Please make sure this component type is mentioned in the specification, and that the",
+           "<code>type=</code> property of the component root-node of the metainfo file does not contain a typing error."],
+  "severity": "error"
+},
+
+"metainfo-no-name": {
+  "text": "Component has no name specified. Ensure that the AppStream metainfo file or the .desktop file (if there is any) specify a component name.",
+  "severity": "error"
+},
+
+"metainfo-no-summary": {
+  "text": ["Component does not contain a short summary. Ensure that the components metainfo file has a <code>summary</code> tag, or that its .desktop file",
+           "has a <code>Comment=</code> field set.<br/>",
+           "More information can be found in the <a href=\"http://standards.freedesktop.org/desktop-entry-spec/latest/ar01s05.html\">Desktop Entry specification</a>",
+           "and the <a href=\"https://www.freedesktop.org/software/appstream/docs/sect-Metadata-Application.html#tag-dapp-summary\">MetaInfo specification</a>."],
+  "severity": "error"
+},
+
+"metainfo-duplicate-id": {
+  "text": ["The component-id '{{cid}}' already appeared in package '{{pkgname}}'. AppStream-IDs must be unique, please resolve which package will be",
+           "providing this component by default.<br/>",
+           "This issue may happen temporarily when metadata is moved from one package to another. In that case, ignore this issue, it will vanish soon."],
+  "severity": "error"
+},
+
+"missing-desktop-file": {
+  "text": ["Found an AppStream metainfo XML file, but the associated .desktop file is missing. This often happens when the .desktop file is renamed, but the",
+           "<code>&lt;id/&gt;</code> tag of the AppStream metainfo file is not adapted as well, or if the metainfo file is located in a different package than the .desktop file.<br/>",
+           "Please fix the packaging or work with upstream to resolve this issue."],
+  "severity": "error"
+},
+
+"missing-launchable-desktop-file": {
+  "text": ["The metainfo file references a .desktop file with ID '{{desktop_id}}' in its <code>launchable</code> tag, but the file",
+           "was not found in the same package. In order to be able to launch the software once it was installed, please place the",
+           "metainfo file and its .desktop files in the same package."],
+  "severity": "warning"
+},
+
+"description-from-package": {
+  "text": ["This component gets its description from the package it is located in.<br/>",
+           "This has several disadvantages, like poor markup, too technical descriptions for users of software centers, different components having the same description, etc.<br/>",
+           "Please consider writing a metainfo file for this component to take the long description upstream. In future, components without metainfo file might be dropped from the metadata entirely.",
+           "You can consult the <a href=\"http://freedesktop.org/software/appstream/docs/chap-Quickstart.html\">XML quickstart guides</a> for more information on how to write a metainfo file."],
+  "severity": "info"
+},
+
+"metadata-serialization-failed": {
+  "text": ["Could not create the final metadata. This could have many causes, including a generator bug, but the likeliest cause is an error in the input metadata.<br/>",
+           "The error message was: {{msg}}"],
+  "severity": "error"
+},
+
+"category-name-invalid": {
+  "text": ["The category name {{category}} is invalid. The software can not be shown in this category."],
+  "severity": "warning"
+},
+
+"no-valid-category": {
+  "text": ["This software component is no member of any valid category."],
+  "severity": "error"
+},
+
+"metainfo-license-invalid": {
+  "text": ["The metainfo file does not seem to be licensed under a permissive license. Valid permissive licenses include FSFAP, CC0-1.0 or MIT.",
+           "Permissive licenses are required to allow distributors to include the metadata in mixed data collections without the risk of license violations due to mutually incompatible licenses.",
+           "If you think this message is an error and '{{license}}' is actually valid, please <a href=\"https://github.com/ximion/appstream/issues\">file a bug against AppStream</a>."],
+  "severity": "error"
+},
+
+"font-metainfo-but-no-font": {
+  "text": ["A metainfo file with component-type <code>font</code> was found, but we could not find any matching font file (TrueType or OpenType) in the package.<br/>",
+           "This can mean that the <code>&lt;provides&gt; - &lt;font&gt;</code> tags contain wrong values that we could not map to the actual fonts, or that the package simply contained no fonts at all."],
+  "severity": "error"
+},
+
+"font-load-error": {
+  "text": "Unable to load font '{{fname}}' from package '{{pkg_fname}}: {{error}}",
+  "severity": "error"
+}
+
+}

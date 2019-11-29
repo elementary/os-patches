@@ -1,0 +1,1093 @@
+From d0ce025826bfe7fea3ec5687e78624e809f3e401 Mon Sep 17 00:00:00 2001
+From: Matthias Klumpp <matthias@tenstral.net>
+Date: Thu, 9 Nov 2017 01:18:57 +0100
+Subject: [PATCH] Update wrap files to be compatible with gir-to-d >= 0.13
+
+Pulling changes from GtkD, merging asgen customizations into the files.
+Resolves: #57
+---
+ contrib/girwrap/APILookupGLib.txt    | 161 ++++++++++++++++++----
+ contrib/girwrap/APILookupGObject.txt | 254 +++++++++++++++++++++++++----------
+ contrib/girwrap/APILookupGio.txt     | 204 ++++++++++------------------
+ 3 files changed, 385 insertions(+), 234 deletions(-)
+
+diff --git a/contrib/girwrap/APILookupGLib.txt b/contrib/girwrap/APILookupGLib.txt
+index 39f8c09..0cf5f20 100644
+--- a/contrib/girwrap/APILookupGLib.txt
++++ b/contrib/girwrap/APILookupGLib.txt
+@@ -13,6 +13,7 @@
+ #
+ # You should have received a copy of the GNU Lesser General Public License
+ # along with this library.  If not, see <http://www.gnu.org/licenses/>.
++#
+ 
+ #############################################
+ ### Definitions for wrapping Gtk+ ###########
+@@ -43,11 +44,6 @@ addAliases: start
+ 		alias uint gulong;
+ 	}
+ 
+-	version( Windows )
+-		enum _utfPostfix = "_utf8";
+-	else
+-		enum _utfPostfix = "";
+-
+ 	version (Windows)
+ 	{
+ 		private import core.stdc.stdio;
+@@ -137,6 +133,20 @@ addEnums: start
+ 
+ addEnums: end
+ 
++noConstant: DIR_SEPARATOR
++noConstant: DIR_SEPARATOR_S
++noConstant: E
++noConstant: LN10
++noConstant: LN2
++noConstant: LOG_2_BASE_10
++noConstant: PI
++noConstant: PI_2
++noConstant: PI_4
++noConstant: SEARCHPATH_SEPARATOR
++noConstant: SEARCHPATH_SEPARATOR_S
++noConstant: SQRT2
++noConstant: VERSION_MIN_REQUIRED
++
+ struct: Array
+ class: ArrayG
+ 
+@@ -409,6 +419,7 @@ struct: Hmac
+ noCode: get_digest
+ move: compute_hmac_for_data Hmac
+ move: compute_hmac_for_string Hmac
++move: compute_hmac_for_bytes Hmac
+ array: compute_hmac_for_data data length
+ array: compute_hmac_for_string str length
+ code: start
+@@ -579,6 +590,7 @@ array: write_chars buf count
+ struct: List
+ class: ListG
+ import: gobject.ObjectG
++import: glib.Str
+ code: start
+   	/** */
+ 	@property void* data()
+@@ -618,7 +630,8 @@ code: start
+ 	 * Turn the list into a D array of the desiered type.
+ 	 * Type T wraps should match the type of the data.
+ 	 */
+-	public T[] toArray(T, TC = typeof(T.tupleof[0]))()
++	public T[] toArray(T, TC = getCType!T)()
++		if ( is(T == class) )
+ 	{
+ 		T[] arr = new T[length()];
+ 		ListG list = this;
+@@ -634,6 +647,32 @@ code: start
+ 		return arr;
+ 	}
+ 
++	/** Ditto */
++	public T[] toArray(T)()
++		if ( is ( T == string ) )
++	{
++		T[] arr = new T[length()];
++		ListG list = this;
++		size_t count;
++
++		while(list !is null && count < arr.length)
++		{
++			arr[count] = Str.toString(cast(char*)list.data);
++			list = list.next();
++			count++;
++		}
++
++		return arr;
++	}
++
++	private template getCType(T)
++	{
++		static if ( is(T == class) )
++			alias getCType = typeof(T.tupleof[0]);
++		else
++			alias getCType = void*;
++	}
++
+ 	unittest
+ 	{
+ 		import gobject.Value;
+@@ -645,6 +684,12 @@ code: start
+ 
+ 		assert(arr[0].getInt() == 0);
+ 		assert(arr[1].getInt() == 1);
++
++		list = new ListG(null);
++		list = list.append(cast(void*)"test\0".ptr);
++		list = list.append(cast(void*)"test2\0".ptr);
++
++		assert(["test", "test2"] == list.toArray!string());
+ 	}
+ code: end
+ 
+@@ -657,22 +702,22 @@ class: SimpleXML
+ 
+ struct: MemorySlice
+ code: start
+-	T* mewSlice(T)()
++	public static T* mewSlice(T)()
+ 	{
+ 		return cast(T*)g_slice_alloc(T.sizeof);
+ 	}
+ 
+-	T* mewSlice0(T)()
++	public static T* mewSlice0(T)()
+ 	{
+ 		return cast(T*)g_slice_alloc0(T.sizeof);
+ 	}
+ 
+-	T* dup(T)(T* memBlock)
++	public static T* dup(T)(T* memBlock)
+ 	{
+ 		return cast(T*)g_slice_copy(T.sizeof, memBlock);
+ 	}
+ 
+-	void free(T)(T* memBlock)
++	public static void free(T)(T* memBlock)
+ 	{
+ 		 g_slice_free1(T.sizeof, memBlock);
+ 	}
+@@ -722,6 +767,7 @@ class: ScannerG
+ struct: SList
+ class: ListSG
+ import: gobject.ObjectG
++import: glib.Str
+ code: start
+   	/** */
+ 	@property void* data()
+@@ -747,7 +793,8 @@ code: start
+ 	 * Turn the list into a D array of the desiered type.
+ 	 * Type T wraps should match the type of the data.
+ 	 */
+-	public T[] toArray(T, TC = typeof(T.tupleof[0]))()
++	public T[] toArray(T, TC = getCType!T)()
++		if ( is(T == class) )
+ 	{
+ 		T[] arr = new T[length()];
+ 		ListSG list = this;
+@@ -763,6 +810,32 @@ code: start
+ 		return arr;
+ 	}
+ 
++	/** Ditto */
++	public T[] toArray(T)()
++		if ( is ( T == string ) )
++	{
++		T[] arr = new T[length()];
++		ListSG list = this;
++		size_t count;
++
++		while(list !is null && count < arr.length)
++		{
++			arr[count] = Str.toString(cast(char*)list.data);
++			list = list.next();
++			count++;
++		}
++
++		return arr;
++	}
++
++	private template getCType(T)
++	{
++		static if ( is(T == class) )
++			alias getCType = typeof(T.tupleof[0]);
++		else
++			alias getCType = void*;
++	}
++
+ 	unittest
+ 	{
+ 		import gobject.Value;
+@@ -774,6 +847,12 @@ code: start
+ 
+ 		assert(arr[0].getInt() == 0);
+ 		assert(arr[1].getInt() == 1);
++
++		list = new ListSG(null);
++		list = list.append(cast(void*)"test\0".ptr);
++		list = list.append(cast(void*)"test2\0".ptr);
++
++		assert(["test", "test2"] == list.toArray!string());
+ 	}
+ code: end
+ 
+@@ -784,6 +863,7 @@ import: core.thread
+ import: core.stdc.string
+ import: core.stdc.stdio
+ import: std.string
++import: std.traits
+ #noCode: spawn_async_with_pipes
+ code: start
+ 	//we need fdopen.
+@@ -791,7 +871,7 @@ code: start
+ 	{
+ 		private import core.sys.posix.stdio;
+ 	}
+-	//fdopen for Windows is defined in gi.glibtypes.
++	//fdopen for Windows is defined in glib.c.types.
+ 
+ 	string workingDirectory = ".";
+ 	string[] argv;
+@@ -864,10 +944,21 @@ code: start
+ 			fclose(standardError);
+ 			stdErr = 0;
+ 		}
+-		if ( childPid != 0 )
++		static if ( isPointer!(GPid) )
++		{
++			if ( childPid !is null )
++			{
++				closePid(childPid);
++				childPid = null;
++			}
++		}
++		else
+ 		{
+-			closePid(childPid);
+-			childPid = 0;
++			if ( childPid != 0 )
++			{
++				closePid(childPid);
++				childPid = 0;
++			}
+ 		}
+ 	}
+ 
+@@ -1833,7 +1924,6 @@ move: ascii_strup Str
+ move: ascii_tolower Str
+ move: ascii_toupper Str
+ move: ascii_xdigit_value Str
+-move: fprintf Str
+ move: printf Str
+ move: printf_string_upper_bound Str
+ move: snprintf Str
+@@ -1881,11 +1971,20 @@ move: strv_get_type Str
+ move: strv_length Str
+ move: strv_contains Str
+ move: vasprintf Str
+-move: vfprintf Str
+ move: vprintf Str
+ move: vsnprintf Str
+ move: vsprintf Str
+ 
++version !OSX: start
++	move: fprintf Str
++	move: vfprintf Str
++version: end
++
++version 2.54: start
++	move: ascii_string_to_signed Str
++	move: ascii_string_to_unsigned Str
++version: end
++
+ move: string_new String
+ move: string_new_len String
+ move: string_sized_new String
+@@ -1974,16 +2073,19 @@ move: utf8_to_ucs4 Unicode
+ move: utf8_to_ucs4_fast Unicode
+ move: utf8_to_utf16 Unicode
+ move: utf8_validate Unicode
+-
+-move: unix_error_quark UnixUtils error_quark
+-move: unix_fd_add UnixUtils fd_add
+-move: unix_fd_add_full UnixUtils fd_add_full
+-move: unix_fd_source_new UnixUtils fd_source_new
+-move: unix_open_pipe UnixUtils open_pipe
+-move: unix_set_fd_nonblocking UnixUtils set_fd_nonblocking
+-move: unix_signal_add UnixUtils signal_add
+-move: unix_signal_add_full UnixUtils signal_add_full
+-move: unix_signal_source_new UnixUtils signal_source_new
++version 2.52: move: utf8_make_valid Unicode
++
++version !Windows: start
++	move: unix_error_quark UnixUtils error_quark
++	move: unix_fd_add UnixUtils fd_add
++	move: unix_fd_add_full UnixUtils fd_add_full
++	move: unix_fd_source_new UnixUtils fd_source_new
++	move: unix_open_pipe UnixUtils open_pipe
++	move: unix_set_fd_nonblocking UnixUtils set_fd_nonblocking
++	move: unix_signal_add UnixUtils signal_add
++	move: unix_signal_add_full UnixUtils signal_add_full
++	move: unix_signal_source_new UnixUtils signal_source_new
++version: end
+ 
+ move: filename_from_uri URI
+ move: filename_to_uri URI
+@@ -1993,6 +2095,11 @@ move: uri_parse_scheme URI
+ move: uri_unescape_segment URI
+ move: uri_unescape_string URI
+ 
++version 2.52: start
++	move: uuid_string_is_valid Uuid string_is_valid
++	move: uuid_string_random Uuid string_random
++version: end
++
+ move: atexit Util
+ move: basename Util
+ move: bit_nth_lsf Util
+diff --git a/contrib/girwrap/APILookupGObject.txt b/contrib/girwrap/APILookupGObject.txt
+index 07b42f6..2af5224 100644
+--- a/contrib/girwrap/APILookupGObject.txt
++++ b/contrib/girwrap/APILookupGObject.txt
+@@ -13,7 +13,7 @@
+ #
+ # You should have received a copy of the GNU Lesser General Public License
+ # along with this library.  If not, see <http://www.gnu.org/licenses/>.
+-
++#
+ 
+ #############################################
+ ### Definitions for wrapping Gtk+ ###########
+@@ -23,10 +23,6 @@
+ wrap: gobject
+ file: GObject-2.0.gir
+ 
+-addAliases: start
+-	public import glib.c.types;
+-addAliases: end
+-
+ noAlias: Type
+ addEnums: start
+ 
+@@ -131,9 +127,10 @@ code: start
+ code: end
+ 
+ struct: Object
+-class: ObjectG
+ import: core.memory
+ import: gobject.Signals
++import: std.algorithm
++import: std.traits
+ merge: InitiallyUnowned
+ noSignal: notify
+ move: clear_object Object
+@@ -174,7 +171,7 @@ code: start
+ 			}
+ 
+ 			//When constructed via GtkBuilder set the structs.
+-			if ( getStruct() is null)
++			if ( getStruct() is null )
+ 			{
+ 				setStruct(gObject);
+ 			}
+@@ -191,6 +188,9 @@ code: start
+ 				obj.isGcRoot = false;
+ 			}
+ 
++			if ( obj.gObject.refCount > 0 )
++				obj.removeToggleRef(cast(GToggleNotify)&toggleNotify, cast(void*)obj);
++
+ 			obj.gObject = null;
+ 		}
+ 
+@@ -211,7 +211,12 @@ code: start
+ 
+ 	~this()
+ 	{
+-		if ( gObject !is null )
++		static if ( isPointer!(typeof(g_object_steal_data)) )
++			bool libLoaded = Linker.isLoaded(LIBRARY_GOBJECT);
++		else
++			enum libLoaded = true;
++
++		if ( libLoaded && gObject !is null )
+ 		{
+ 			// Remove the GDestroyNotify callback,
+ 			// for when the D object is destroyed before the C one.
+@@ -223,7 +228,7 @@ code: start
+ 				isGcRoot = false;
+ 			}
+ 
+-			unref();
++			g_object_remove_toggle_ref(gObject, cast(GToggleNotify)&toggleNotify, cast(void*)this);
+ 		}
+ 	}
+ 
+@@ -240,60 +245,73 @@ code: start
+ 			return null;
+ 		}
+ 
+-		static if ( is(T : ObjectG) )
++		static if ( is(T : ObjectG) && !is(RT == interface) )
+ 		{
+ 			auto p = g_object_get_data(cast(GObject*)obj, Str.toStringz("GObject"));
+ 
+ 			if ( p !is null )
+-			{
+-				static if ( is(RT == interface ) )
+-				{
+-					return cast(RT)cast(ObjectG)p;
+-				}
+-				else
+-				{
+-					return cast(RT)p;
+-				}
+-			}
++				return cast(RT)p;
+ 			else
+-			{
+ 				return new T(obj, ownedRef);
+-			}
++		}
++		else static if ( is(RT == interface) && hasMember!(RT, "getType") && is(ReturnType!(RT.getType) == GType) )
++		{
++			auto p = g_object_get_data(cast(GObject*)obj, Str.toStringz("GObject"));
++
++			if ( p !is null )
++				return cast(RT)cast(ObjectG)p;
++			else
++				return getInterfaceInstance!RT(cast(GObject*)obj);
+ 		}
+ 		else
+ 		{
+-			return new T(obj);
++			return new T(obj, ownedRef);
+ 		}
+ 	}
+ 
+-	protected void setStruct(GObject* obj)
++	private static I getInterfaceInstance(I)(GObject* instance)
+ 	{
+-		gObject = cast(GObject*)obj;
+-	}
++		static class Impl: ObjectG, I
++		{
++			public this (GObject* gObject, bool ownedRef = false)
++			{
++				super(gObject, ownedRef);
++			}
+ 
+-	/** */
+-	public void setProperty(string propertyName, int value)
+-	{
+-		setProperty(propertyName, new Value(value));
+-	}
++			/** the main Gtk struct as a void* */
++			protected override void* getStruct()
++			{
++				return cast(void*)gObject;
++			}
+ 
+-	/** */
+-	public void setProperty(string propertyName, string value)
+-	{
+-		setProperty(propertyName, new Value(value));
++			// add the interface capabilities
++			mixin("import "~ moduleName!I[0..$-2] ~"T;import "~ moduleName!I ~"; mixin "~ __traits(identifier, I)[0..$-2] ~"T!("~__traits(identifier, Impl)~");");
++		}
++
++		ClassInfo ci = Impl.classinfo;
++		Impl iface;
++		void* p;
++
++		//Skip all the setup for the memory management,
++		//and only add an extra reference for the instance returned.
++		p = GC.malloc(ci.initializer.length, GC.BlkAttr.FINALIZE, ci);
++		p[0..ci.initializer.length] = ci.initializer;
++		iface = cast(Impl)p;
++		iface.gObject = instance;
++		iface.doref();
++
++		return iface;
+ 	}
+ 
+-	/** */
+-	public void setProperty(string propertyName, long value)
++	protected void setStruct(GObject* obj)
+ 	{
+-		//We use g_object_set instead of g_object_set_property, because Value doesn't like longs and ulongs for some reason.
+-		g_object_set( gObject, Str.toStringz(propertyName), value, null);
++		gObject = cast(GObject*)obj;
+ 	}
+ 
+ 	/** */
+-	public void setProperty(string propertyName, ulong value)
++	public void setProperty(T)(string propertyName, T value)
+ 	{
+-		g_object_set( gObject, Str.toStringz(propertyName), value, null);
++		setProperty(propertyName, new Value(value));
+ 	}
+ 
+ 	deprecated("Use the member function")
+@@ -308,9 +326,32 @@ code: start
+ 		return obj.doref();
+ 	}
+ 
+-	int[string] connectedSignals;
++	protected class OnNotifyDelegateWrapper
++	{
++		void delegate(ParamSpec, ObjectG) dlg;
++		gulong handlerId;
++
++		this(void delegate(ParamSpec, ObjectG) dlg)
++		{
++			this.dlg = dlg;
++			onNotifyListeners ~= this;
++		}
++
++		void remove(OnNotifyDelegateWrapper source)
++		{
++			foreach(index, wrapper; onNotifyListeners)
++			{
++				if (wrapper.handlerId == source.handlerId)
++				{
++					onNotifyListeners[index] = null;
++					onNotifyListeners = std.algorithm.remove(onNotifyListeners, index);
++					break;
++				}
++			}
++		}
++	}
++	OnNotifyDelegateWrapper[] onNotifyListeners;
+ 
+-	void delegate(ParamSpec, ObjectG)[] onNotifyListeners;
+ 	/**
+ 	 * The notify signal is emitted on an object when one of its
+ 	 * properties has been changed. Note that getting this signal
+@@ -329,7 +370,7 @@ code: start
+ 	 *     property     = Set this if you only want to receive the signal for a specific property.
+ 	 *     connectFlags = The behavior of the signal's connection.
+ 	 */
+-	void addOnNotify(void delegate(ParamSpec, ObjectG) dlg, string property = "", ConnectFlags connectFlags=cast(ConnectFlags)0)
++	gulong addOnNotify(void delegate(ParamSpec, ObjectG) dlg, string property = "", ConnectFlags connectFlags=cast(ConnectFlags)0)
+ 	{
+ 		string signalName;
+ 
+@@ -338,25 +379,25 @@ code: start
+ 		else
+ 			signalName = "notify::"~ property;
+ 
+-		if ( !(signalName in connectedSignals) )
+-		{
+-			Signals.connectData(
++		auto wrapper = new OnNotifyDelegateWrapper(dlg);
++		wrapper.handlerId = Signals.connectData(
+ 			this,
+ 			signalName,
+ 			cast(GCallback)&callBackNotify,
+-			cast(void*)this,
+-			null,
++			cast(void*)wrapper,
++			cast(GClosureNotify)&callBackNotifyDestroy,
+ 			connectFlags);
+-			connectedSignals[signalName] = 1;
+-		}
+-		onNotifyListeners ~= dlg;
++		return wrapper.handlerId;
+ 	}
+-	extern(C) static void callBackNotify(GObject* gobjectStruct, GParamSpec* pspec, ObjectG _objectG)
++
++	extern(C) static void callBackNotify(GObject* objectgStruct, GParamSpec* pspec,OnNotifyDelegateWrapper wrapper)
+ 	{
+-		foreach ( void delegate(ParamSpec, ObjectG) dlg ; _objectG.onNotifyListeners )
+-		{
+-			dlg(ObjectG.getDObject!(ParamSpec)(pspec), _objectG);
+-		}
++		wrapper.dlg(ObjectG.getDObject!(ParamSpec)(pspec), wrapper.outer);
++	}
++
++	extern(C) static void callBackNotifyDestroy(OnNotifyDelegateWrapper wrapper, GClosure* closure)
++	{
++		wrapper.remove(wrapper);
+ 	}
+ code: end
+ 
+@@ -439,6 +480,27 @@ code: start
+ 	{
+ 		return g_signal_connect_data(instanc, Str.toStringz(detailedSignal), cHandler, cast(void*)data, destroyData, connectFlags);
+ 	}
++
++	/**
++	 * Connects a GCallback function to a signal for a particular object.
++	 *
++	 * The handler will be called before the default handler of the signal.
++	 *
++	 * See [memory management of signal handlers][signal-memory-management] for
++	 * details on how to handle the return value and memory management of @data.
++	 *
++	 * Params:
++	 *     instance       = the instance to connect to.
++	 *     detailedSignal = a string of the form "signal-name::detail".
++	 *     cHandler       = the GCallback to connect.
++	 *     data           = data to pass to cHandler calls.
++	 *
++	 * Returns: the handler ID, of type gulong (always greater than 0 for successful connections)
++	 */
++	public static gulong connect(ObjectG instanc, string detailedSignal, GCallback cHandler, void* data)
++	{
++		return g_signal_connect_data((instanc is null) ? null : instanc.getObjectGStruct(), Str.toStringz(detailedSignal), cHandler, data, null, cast(ConnectFlags)0);
++	}
+ code: end
+ 
+ struct: Type
+@@ -461,12 +523,8 @@ code: start
+ 	}
+ code: end
+ 
+-struct:
+-class: TypePlugin
+-extend: Object
+-implements: TypePlugin
+-
+ struct: Value
++import: std.traits
+ code: start
+ 	/** */
+ 	public this()
+@@ -475,6 +533,16 @@ code: start
+ 	}
+ 
+ 	/** */
++	this(GOBJECT)(GOBJECT obj)
++		if ( is(GOBJECT : ObjectG) )
++	{
++		this();
++		init(GOBJECT.getType());
++		setObject(obj);
++	}
++
++
++	/** */
+ 	this(string value)
+ 	{
+ 		this();
+@@ -483,27 +551,63 @@ code: start
+ 	}
+ 
+ 	/** */
+-	this(int value)
++	this(BOOL)(BOOL value)
++		if( isBoolean!BOOL )
+ 	{
+ 		this();
+-		init(GType.INT);
+-		setInt(value);
++		init(GType.BOOLEAN);
++		setBoolean(value);
+ 	}
+ 
+ 	/** */
+-	this(float value)
++	this(INT)(INT value)
++		if ( isIntegral!INT )
+ 	{
+ 		this();
+-		init(GType.FLOAT);
+-		setFloat(value);
++
++		static if ( is(OriginalType!INT == int) )
++		{
++			init(GType.INT);
++			setInt(value);
++		}
++		else static if ( is(OriginalType!INT == uint) )
++		{
++			init(GType.UINT);
++			setUint(value);
++		}
++		else static if ( is(OriginalType!INT == long) )
++		{
++			init(GType.INT64);
++			setInt64(value);
++		}
++		else static if ( is(OriginalType!INT == ulong) )
++		{
++			init(GType.UINT64);
++			setUint64(value);
++		}
++		else
++		{
++			init(GType.INT);
++			setInt(value);
++		}
+ 	}
+ 
+ 	/** */
+-	this(double value)
++	this(FLOAT)(FLOAT value)
++		if ( isFloatingPoint!FLOAT )
+ 	{
+ 		this();
+-		init(GType.DOUBLE);
+-		setDouble(value);
++
++		static if ( is( FLOAT == float ) )
++		{
++			init(GType.FLOAT);
++			setFloat(value);
++		}
++		else
++		{
++			init(GType.DOUBLE);
++			setDouble(value);
++		}
+ 	}
+ code: end
+ 
+@@ -520,6 +624,8 @@ code: end
+ # Move functions defined as global into there respective classes
+ #
+ 
++struct:
++
+ move: boxed_copy Boxed copy
+ move: boxed_free Boxed free
+ move: boxed_type_register_static Boxed type_register_static
+@@ -531,6 +637,11 @@ move: enum_get_value_by_name Enums get_value_by_name
+ move: enum_get_value_by_nick Enums get_value_by_nick
+ move: enum_register_static Enums register_static
+ 
++version 2.54: start
++	move: enum_to_string Enums
++	move: flags_to_string Enums
++version: end
++
+ move: flags_complete_type_info Flags complete_type_info
+ move: flags_get_first_value Flags get_first_value
+ move: flags_get_value_by_name Flags get_value_by_name
+@@ -663,4 +774,5 @@ move: type_remove_class_cache_func Type remove_class_cache_func
+ move: type_remove_interface_check Type remove_interface_check
+ move: type_set_qdata Type set_qdata
+ move: type_test_flags Type test_flags
++move: type_get_instance_count Type get_instance_count
+ #move: type_value_table_peek Type value_table_peek
+diff --git a/contrib/girwrap/APILookupGio.txt b/contrib/girwrap/APILookupGio.txt
+index ab4a96c..ec72465 100644
+--- a/contrib/girwrap/APILookupGio.txt
++++ b/contrib/girwrap/APILookupGio.txt
+@@ -13,6 +13,7 @@
+ #
+ # You should have received a copy of the GNU Lesser General Public License
+ # along with this library.  If not, see <http://www.gnu.org/licenses/>.
++#
+ 
+ #############################################
+ ### Definitions for wrapping Gtk+ ###########
+@@ -22,53 +23,33 @@
+ wrap: gio
+ file: Gio-2.0.gir
+ 
+-addAliases: start
+-	public import glib.c.types;
+-	public import gobject.c.types;
+-addAliases: end
+-
+-struct:
+-class: Action
+-extend: GObject.Object
+-implements: Action
+-
+-struct:
+-class: ActionGroup
+-extend: GObject.Object
+-implements: ActionGroup
+-
+-struct:
+-class: AppInfo
+-extend: GObject.Object
+-implements: AppInfo
+-
+ struct: Application
+ code: start
+ 	protected class ScopedOnCommandLineDelegateWrapper
+ 	{
+-		static ScopedOnCommandLineDelegateWrapper[] listeners;
+ 		int delegate(Scoped!ApplicationCommandLine, Application) dlg;
+ 		gulong handlerId;
+ 
+ 		this(int delegate(Scoped!ApplicationCommandLine, Application) dlg)
+ 		{
+ 			this.dlg = dlg;
+-			this.listeners ~= this;
++			scopedOnCommandLineListeners ~= this;
+ 		}
+ 
+ 		void remove(ScopedOnCommandLineDelegateWrapper source)
+ 		{
+-			foreach(index, wrapper; listeners)
++			foreach(index, wrapper; scopedOnCommandLineListeners)
+ 			{
+ 				if (wrapper.handlerId == source.handlerId)
+ 				{
+-					listeners[index] = null;
+-					listeners = std.algorithm.remove(listeners, index);
++					scopedOnCommandLineListeners[index] = null;
++					scopedOnCommandLineListeners = std.algorithm.remove(scopedOnCommandLineListeners, index);
+ 					break;
+ 				}
+ 			}
+ 		}
+ 	}
++	ScopedOnCommandLineDelegateWrapper[] scopedOnCommandLineListeners;
+ 
+ 	/**
+ 	 * The ::command-line signal is emitted on the primary instance when
+@@ -129,11 +110,6 @@ code: start
+ 	}
+ code: end
+ 
+-struct:
+-class: Converter
+-extend: GObject.Object
+-implements: Converter
+-
+ struct: DataInputStream
+ noCode: read_byte
+ 
+@@ -249,11 +225,6 @@ code: start
+ 	}
+ code: end
+ 
+-struct:
+-class: DBusObject
+-extend: GObject.Object
+-implements: DBusObject
+-
+ struct: DBusObjectManagerClient
+ alias: new newObjectManagerClient
+ noCode: new_finish
+@@ -298,11 +269,6 @@ code: start
+ 	}
+ code: end
+ 
+-struct:
+-class: DBusInterface
+-extend: GObject.Object
+-implements: DBusInterface
+-
+ struct: DBusProxy
+ alias: new newProxy
+ noCode: new_finish
+@@ -348,46 +314,36 @@ code: start
+ 	}
+ code: end
+ 
+-struct: DesktopAppInfo
+-noCode: new_from_filename
+-code: start
+-	/**
+-	 * Creates a new #GDesktopAppInfo.
+-	 *
+-	 * Params:
+-	 *     filename = the path of a desktop file, in the GLib filename encoding
+-	 *
+-	 * Return: a new #GDesktopAppInfo or %NULL on error.
+-	 *
+-	 * Throws: ConstructionException GTK+ fails to create the object.
+-	 */
+-	public static DesktopAppInfo createFromFilename(string filename)
+-	{
+-		auto p = g_desktop_app_info_new_from_filename(Str.toStringz(filename));
+-
+-		if(p is null)
++version !Windows: start
++	struct: DesktopAppInfo
++	noCode: new_from_filename
++	code: start
++		/**
++		* Creates a new #GDesktopAppInfo.
++		*
++		* Params:
++		*     filename = the path of a desktop file, in the GLib filename encoding
++		*
++		* Return: a new #GDesktopAppInfo or %NULL on error.
++		*
++		* Throws: ConstructionException GTK+ fails to create the object.
++		*/
++		public static DesktopAppInfo createFromFilename(string filename)
+ 		{
+-			throw new ConstructionException("null returned by g_desktop_app_info_new_from_filename");
+-		}
++			auto p = g_desktop_app_info_new_from_filename(Str.toStringz(filename));
+ 
+-		return new DesktopAppInfo(p, true);
+-	}
+-code: end
+-
+-struct:
+-class: Drive
+-extend: GObject.Object
+-implements: Drive
++			if(p is null)
++			{
++				throw new ConstructionException("null returned by g_desktop_app_info_new_from_filename");
++			}
+ 
+-struct:
+-class: File
+-extend: GObject.Object
+-implements: File
++			return new DesktopAppInfo(p, true);
++		}
++	code: end
++version: end
+ 
+-struct:
+-class: Icon
+-extend: GObject.Object
+-implements: Icon
++struct: FileAttributeInfoList
++array: infos n_infos
+ 
+ struct: InetAddress
+ noCode: new_any
+@@ -435,46 +391,20 @@ move: load NoExternal
+ move: unload NoExternal
+ move: query NoExternal
+ 
+-struct: IOModuleScope
+-
+ struct: MenuItem
+ noCode: new_section
+ noCode: new_submenu
+ 
+-struct:
+-class: Mount
+-extend: GObject.Object
+-implements: Mount
+-
+-struct:
+-class: NetworkMonitor
+-extend: GObject.Object
+-implements: NetworkMonitor
+-
+ struct: OutputStream
+ out: vprintf error
+ 
+ struct: PollableUtils
+ namespace:
+ 
+-struct:
+-class: Proxy
+-extend: GObject.Object
+-implements: Proxy
+-
+-struct:
+-class: ProxyResolver
+-extend: GObject.Object
+-implements: ProxyResolver
+-
+ struct: Resource
+ alias: _register register
+ alias: _unregister unregister
+ 
+-struct: SettingsSchema
+-
+-struct: SettingsSchemaSource
+-
+ struct: SimpleAsyncResult
+ noCode: new_take_error
+ 
+@@ -488,35 +418,25 @@ ref: receive_from buffer
+ out: receive_message messages
+ out: receive_message num_messages
+ 
+-struct:
+-class: SocketConnectable
+-extend: GObject.Object
+-implements: SocketConnectable
+-
+ struct: SubprocessLauncher
+ array: set_environ env
+ 
+ struct: ThemedIcon
+ noCode: new
+ 
+-struct:
+-class: TlsBackend
+-extend: GObject.Object
+-implements: TlsBackend
+-
+ struct: TlsPassword
+ out: get_value length
+ array: get_value Return length
+ array: set_value value length
+ array: set_value_full value length
+ 
+-struct: UnixSocketAddress
+-noCode: new_abstract
++version !Windows: start
++	struct: UnixMountEntry
++	class: UnixMountEntry
+ 
+-struct:
+-class: Volume
+-extend: GObject.Object
+-implements: Volume
++	struct: UnixSocketAddress
++	noCode: new_abstract
++version: end
+ 
+ struct: VolumeMonitor
+ import: glib.ConstructionException
+@@ -571,6 +491,7 @@ move: content_type_guess_for_tree ContentType guess_for_tree
+ move: content_type_is_a ContentType is_a
+ move: content_type_is_unknown ContentType is_unknown
+ move: content_types_get_registered ContentType
++version 2.52: move: content_type_is_mime_type ContentType is_mime_type
+ 
+ move: dbus_error_encode_gerror DBusError encode_gerror
+ move: dbus_error_get_remote_error DBusError get_remote_error
+@@ -626,25 +547,36 @@ move: resources_open_stream Resource
+ move: resources_register Resource _register
+ move: resources_unregister Resource _unregister
+ 
++move: keyfile_settings_backend_new SettingsBackend
++move: memory_settings_backend_new SettingsBackend
++move: null_settings_backend_new SettingsBackend
++
+ move: simple_async_report_error_in_idle SimpleAsyncResult
+ move: simple_async_report_gerror_in_idle SimpleAsyncResult
+ move: simple_async_report_take_gerror_in_idle SimpleAsyncResult
+ 
+-move: unix_is_mount_path_system_internal UnixMountEntry is_mount_path_system_internal
+-move: unix_mount_at UnixMountEntry at
+-move: unix_mount_compare UnixMountEntry compare
+-move: unix_mount_free UnixMountEntry free
+-move: unix_mount_get_device_path UnixMountEntry get_device_path
+-move: unix_mount_get_fs_type UnixMountEntry get_fs_type
+-move: unix_mount_get_mount_path UnixMountEntry get_mount_path
+-move: unix_mount_guess_can_eject UnixMountEntry guess_can_eject
+-move: unix_mount_guess_icon UnixMountEntry guess_icon
+-move: unix_mount_guess_name UnixMountEntry guess_name
+-move: unix_mount_guess_should_display UnixMountEntry guess_should_display
+-move: unix_mount_guess_symbolic_icon UnixMountEntry guess_symbolic_icon
+-move: unix_mount_is_readonly UnixMountEntry is_readonly
+-move: unix_mount_is_system_internal UnixMountEntry is_system_internal
+-move: unix_mount_points_changed_since UnixMountEntry points_changed_since
+-move: unix_mount_points_get UnixMountEntry mount_points_get
+-move: unix_mounts_changed_since UnixMountEntry mounts_changed_since
+-move: unix_mounts_get UnixMountEntry mounts_get
++version !Windows: start
++	move: unix_is_mount_path_system_internal UnixMountEntry is_mount_path_system_internal
++	move: unix_mount_at UnixMountEntry at
++	move: unix_mount_compare UnixMountEntry compare
++	move: unix_mount_free UnixMountEntry free
++	move: unix_mount_get_device_path UnixMountEntry get_device_path
++	move: unix_mount_get_fs_type UnixMountEntry get_fs_type
++	move: unix_mount_get_mount_path UnixMountEntry get_mount_path
++	move: unix_mount_guess_can_eject UnixMountEntry guess_can_eject
++	move: unix_mount_guess_icon UnixMountEntry guess_icon
++	move: unix_mount_guess_name UnixMountEntry guess_name
++	move: unix_mount_guess_should_display UnixMountEntry guess_should_display
++	move: unix_mount_guess_symbolic_icon UnixMountEntry guess_symbolic_icon
++	move: unix_mount_is_readonly UnixMountEntry is_readonly
++	move: unix_mount_is_system_internal UnixMountEntry is_system_internal
++	move: unix_mount_points_changed_since UnixMountEntry points_changed_since
++	move: unix_mount_points_get UnixMountEntry mount_points_get
++	move: unix_mounts_changed_since UnixMountEntry mounts_changed_since
++	move: unix_mounts_get UnixMountEntry mounts_get
++
++	version 2.54: start
++		move: unix_mount_copy UnixMountEntry copy
++		move: unix_mount_for UnixMountEntry mount_for
++	version: end
++version: end

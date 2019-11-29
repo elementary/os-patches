@@ -1,0 +1,51 @@
+Source: appstream-generator
+Section: misc
+Priority: optional
+Maintainer: Matthias Klumpp <mak@debian.org>
+Build-Depends: debhelper (>= 10.6),
+               docbook-xsl,
+               gir-to-d (>= 0.11.1-2),
+               ldc (>= 1:1.5),
+               libappstream-dev (>= 0.11.6),
+               libarchive-dev (>= 3.2),
+               libcairo2-dev,
+               libcurl4-gnutls-dev | libcurl4-openssl-dev,
+               libfontconfig1-dev,
+               libfreetype6-dev,
+               libgdk-pixbuf2.0-dev,
+               libgirepository1.0-dev,
+               libglib2.0-dev,
+               libjs-highlight.js,
+               libjs-jquery-flot,
+               liblmdb-dev,
+               libmustache-d-dev (>= 0.1.2),
+               libpango1.0-dev,
+               librsvg2-dev,
+               meson (>= 0.42),
+               xsltproc
+Standards-Version: 4.1.1
+Homepage: https://github.com/ximion/appstream-generator
+Vcs-Git: https://anonscm.debian.org/git/pkg-packagekit/appstream-generator.git
+Vcs-Browser: https://anonscm.debian.org/git/pkg-packagekit/appstream-generator.git
+
+Package: appstream-generator
+Architecture: any
+Depends: libjs-highlight.js,
+         libjs-jquery-flot,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Recommends: optipng
+Description: Generator for AppStream metadata
+ AppStream is a cross-distribution effort for creating and sharing
+ metadata of software components available in the package repositories
+ of a distribution.
+ It provides specifications for an unified software component metadata format
+ and provides tools to read, write and validate the metadata.
+ .
+ This package contains a tool to generate distribution metadata from package
+ repositories.
+ It will extract icons, download screenshots, validate and transform the
+ metadata and return XML or YAML files that can be read by AppStream clients,
+ such as software centers.
+ The `appstream-generator` will also generate issue reports as JSON documents
+ and HTML pages.

@@ -1,0 +1,54 @@
+{{#partial}}{title}Start{{/partial}}
+
+{{#partial}}{ header_content }
+<span>AppStream data hints for {{project_name}}</span>
+{{/partial}}
+
+{{#partial}}{ content }
+<div class="wrapper">
+
+    <h1>Welcome!</h1>
+    <p>Welcome to the AppStream Generator HTML pages!</p>
+    <p>
+      These pages exist to provide a user-friendly view on the issues discovered by the
+      AppStream metadata generator while extracting metadata from packages in the {{project_name}} archive.
+      They can also be used to take a look at the raw metadata, to spot possible problems
+      with the data itself or the generation process.
+    </p>
+
+    <h1>Select a suite</h1>
+    {{#suites}}
+      <h3><a href="{{suite}}/index.html">{{suite}}</a></h3>
+    {{/suites}}
+    <br/>
+    {{#oldsuites}}
+      <h3><a href="{{suite}}/index.html">{{suite}}</a></h3>
+    {{/oldsuites}}
+
+    <br/><hr/>
+    <img src="{{root_url}}/static/img/asgen.png" alt="AppStream Generator Logo" style="margin: 4px; float: right;" />
+    <h1>What is AppStream?</h1>
+    <p>
+      AppStream is a cross-distro XML format to provide metadata for software components and to assign unique identifiers to software.<br/>
+      In {{project_name}}, we parse all XML provided by upstream projects as well as other metadata (.desktop-files, ...), and compile a single
+      metadata file from it, which is then shipped to users.
+    </p>
+    <p>
+      The generated metadata can for example be used by software centers like GNOME Software or KDE Discover to display a user-friendly application-centric
+      view on the package archive.<br/>
+      It can also be used by other software to find missing plugins, codecs, fonts, etc. or simply by users to install software on any Linux distribution
+      without knowing the exact package name.
+    </p>
+
+    <h1>More information</h1>
+    <p>
+      The offical AppStream specification can be found at <a href="http://www.freedesktop.org/software/appstream/docs/">freedesktop.org</a>.
+    </p>
+    <p>
+      You can find the source-code of the AppStream Generator <a href="https://github.com/ximion/appstream-generator">here</a>.
+    </p>
+
+</div>
+{{/partial}}
+
+{{> base}}
