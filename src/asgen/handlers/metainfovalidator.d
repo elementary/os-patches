@@ -51,8 +51,12 @@ void validateMetaInfoFile (GeneratorResult res, Component cpt, string data)
     for (ListG l = issueList; l !is null; l = l.next) {
         auto issue = ObjectG.getDObject!ValidatorIssue (cast (typeof(ValidatorIssue.tupleof[0])) l.data);
 
-        // we have a special hint tag for legacy metadata
-        if (issue.getKind () == IssueKind.LEGACY) {
+        // create a tag for asgen out of the AppStream validator tag by prefixing it
+        immutable asvTag = "asv-%s".format (issue.getTag);
+
+        // we have a special hint tag for legacy metadata,
+        // with its proper "error" priority
+        if (asvTag == "asv-metainfo-ancient") {
             res.addHint (cpt.getId (), "ancient-metadata");
             continue;
         }
