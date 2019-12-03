@@ -186,6 +186,7 @@ private bool renderFontIcon (GeneratorResult gres, Font font, immutable string c
         icon.setKind (IconKind.CACHED);
         icon.setWidth (size.width);
         icon.setHeight (size.height);
+        icon.setScale (size.scale);
         icon.setName (iconName);
         cpt.addIcon (icon);
     }
