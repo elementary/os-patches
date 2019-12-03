@@ -265,10 +265,10 @@ Component parseDesktopFile (GeneratorResult gres, string fname, string data, boo
             if (mts.empty)
                 continue;
 
-            Provided prov = cpt.getProvidedForKind (ProvidedKind.MIMETYPE);
+            Provided prov = cpt.getProvidedForKind (ProvidedKind.MEDIATYPE);
             if (prov is null) {
                 prov = new Provided ();
-                prov.setKind (ProvidedKind.MIMETYPE);
+                prov.setKind (ProvidedKind.MEDIATYPE);
             }
 
             foreach (ref mt; mts) {
