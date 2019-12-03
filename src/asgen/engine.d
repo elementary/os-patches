@@ -684,12 +684,12 @@ public:
                         foreach (ref pkg; pkgs) {
                             pkgSet[pkg.id] = true;
                         }
+
+                        // free some memory
+                        pkgIndex.release ();
+                        gcCollect ();
                     }
                 }
-
-                // free some memory
-                pkgIndex.release ();
-                gcCollect ();
             }
         }
 
