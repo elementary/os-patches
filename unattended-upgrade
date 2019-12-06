@@ -1280,6 +1280,7 @@ def do_install(cache,             # type: apt.Cache
                 blacklisted_pkgs, whitelisted_pkgs, logfile_dpkg,
                 options.verbose or options.debug)
         else:
+            mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
             pkg_install_success = upgrade_normal(
                 cache, logfile_dpkg, options.verbose or options.debug)
     except Exception as e:
@@ -1511,6 +1512,10 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
                            allowed_origins,
                            blacklisted_pkgs,
                            whitelisted_pkgs)
+
+    if cache.get_changes():
+        cache.clear()
+
     return pkgs_to_upgrade, pkgs_kept_back
 
 
@@ -1708,6 +1713,16 @@ def update_kept_packages(kept_pkgs, kept_file):
             os.remove(kept_file)
 
 
+def mark_pkgs_to_upgrade(cache, pkgs_to_upgrade):
+    # type (apt.Cache, List[apt.Package]) -> None
+    for pkg in pkgs_to_upgrade:
+        if pkg.is_upgradable:
+            cache.mark_upgrade_adjusted(pkg,
+                                        from_user=not pkg.is_auto_installed)
+        elif not pkg.is_installed:
+            cache.mark_install_adjusted(pkg, from_user=False)
+
+
 def main(options, rootdir="/"):
     # type: (Options, str) -> int
     # useful for testing
@@ -1827,6 +1842,8 @@ def main(options, rootdir="/"):
     os.nice(old_priority - os.nice(0))
 
     # download what looks good
+    mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
+
     if options.debug:
         fetcher = apt_pkg.Acquire(apt.progress.text.AcquireProgress())
     else:
@@ -1852,6 +1869,9 @@ def main(options, rootdir="/"):
 
     if options.download_only:
         return 0
+
+    if cache.get_changes():
+        cache.clear()
 
     pkg_conffile_prompt = False
     if dpkg_conffile_prompt():
@@ -1905,7 +1925,6 @@ def main(options, rootdir="/"):
         logging.debug("whitelist: %s" % whitelisted_pkgs)
         # find out about the packages that are upgradable (in a allowed_origin)
         if len(blacklisted_pkgs) > 0 or len(whitelisted_pkgs) > 0:
-            cache.clear()
             old_pkgs_to_upgrade = pkgs_to_upgrade[:]
             pkgs_to_upgrade = []
             for pkg in old_pkgs_to_upgrade:
@@ -1927,6 +1946,9 @@ def main(options, rootdir="/"):
                         cache.call_adjusted(
                             apt.package.Package.mark_upgrade, pkg2,
                             from_user=not pkg2.is_auto_installed)
+            if cache.get_changes():
+                cache.clear()
+
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
