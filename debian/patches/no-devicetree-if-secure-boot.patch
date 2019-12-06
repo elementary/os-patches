@@ -1,0 +1,77 @@
+From 05d3ab203e40872bc001d42222b58a518b3aa21b Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Wed, 24 Apr 2019 10:03:04 -0400
+Subject: Forbid the "devicetree" command when Secure Boot is enabled.
+
+Signed-off-by: Peter Jones <pjones@redhat.com>
+Signed-off-by: Steve McIntyre <93sam@debian.org>
+
+Origin: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=927888#15
+Bug-Debian: https://bugs.debian.org/927888
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1851897
+Last-Update: 2019-11-09
+
+Patch-Name: no-devicetree-if-secure-boot.patch
+---
+ grub-core/loader/arm/linux.c | 13 +++++++++++++
+ grub-core/loader/efi/fdt.c   |  9 +++++++++
+ 2 files changed, 22 insertions(+)
+
+Index: grub2-2.02/grub-core/loader/arm/linux.c
+===================================================================
+--- grub2-2.02.orig/grub-core/loader/arm/linux.c
++++ grub2-2.02/grub-core/loader/arm/linux.c
+@@ -30,6 +30,11 @@
+ #include <grub/lib/cmdline.h>
+ #include <grub/linux.h>
+ 
++#ifdef GRUB_MACHINE_EFI
++#include <grub/efi/efi.h>
++#include <grub/efi/sb.h>
++#endif
++
+ GRUB_MOD_LICENSE ("GPLv3+");
+ 
+ static grub_dl_t my_mod;
+@@ -463,6 +468,14 @@ grub_cmd_devicetree (grub_command_t cmd
+   if (argc != 1)
+     return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
+ 
++#ifdef GRUB_MACHINE_EFI
++  if (grub_efi_secure_boot ())
++    {
++      return grub_error (GRUB_ERR_ACCESS_DENIED,
++		  "Secure Boot forbids loading devicetree from %s", argv[0]);
++    }
++#endif
++
+   dtb = grub_file_open (argv[0]);
+   if (!dtb)
+     goto out;
+Index: grub2-2.02/grub-core/loader/efi/fdt.c
+===================================================================
+--- grub2-2.02.orig/grub-core/loader/efi/fdt.c
++++ grub2-2.02/grub-core/loader/efi/fdt.c
+@@ -24,6 +24,7 @@
+ #include <grub/file.h>
+ #include <grub/efi/efi.h>
+ #include <grub/efi/fdtload.h>
++#include <grub/efi/sb.h>
+ 
+ static void *loaded_fdt;
+ static void *fdt;
+@@ -122,6 +123,14 @@ grub_cmd_devicetree (grub_command_t cmd
+       return GRUB_ERR_NONE;
+     }
+ 
++#ifdef GRUB_MACHINE_EFI
++  if (grub_efi_secure_boot ())
++    {
++      return grub_error (GRUB_ERR_ACCESS_DENIED,
++		  "Secure Boot forbids loading devicetree from %s", argv[0]);
++    }
++#endif
++
+   dtb = grub_file_open (argv[0]);
+   if (!dtb)
+     goto out;

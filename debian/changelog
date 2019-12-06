@@ -1,3 +1,12 @@
+grub2 (2.02-2ubuntu8.14) bionic; urgency=medium
+
+  * Fix kexec on ACPI/UEFI ARM systems w/ crashkernel reserved memory
+    beyond the 4GiB boundary. (LP: #1851190)
+  * Apply patch from Peter Jones to forbid the "devicetree" command when
+    Secure Boot is enabled. (LP: #1851897)
+
+ -- dann frazier <dannf@ubuntu.com>  Sun, 10 Nov 2019 22:52:35 -0700
+
 grub2 (2.02-2ubuntu8.13) bionic; urgency=medium
 
    * debian/build-efi-images: add HTTP to generated UEFI images. (LP: #1787630)
