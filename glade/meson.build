@@ -4,15 +4,15 @@ if glade_catalog
 # https://gitlab.gnome.org/GNOME/glade/issues/379
 is_flatpak_app = get_option('prefix') == '/app'
 
-glade_xml = 'libhandy.xml'
+glade_xml          = 'libhandy.xml'
 if (is_flatpak_app)
-  module_dir = join_paths(libdir, 'glade', 'modules')
+  module_dir       = libdir / 'glade' / 'modules'
 else
-  module_dir = gladeui_dep.get_pkgconfig_variable('moduledir')
+  module_dir       = gladeui_dep.get_pkgconfig_variable('moduledir')
 endif
-dtd = join_paths(meson.current_source_dir(), 'glade-catalog.dtd')
+dtd                = meson.current_source_dir() / 'glade-catalog.dtd'
 if (is_flatpak_app)
-  glade_catalogdir = join_paths(datadir, 'glade', 'catalogs')
+  glade_catalogdir = datadir / 'glade' / 'catalogs'
 else
   glade_catalogdir = gladeui_dep.get_pkgconfig_variable('catalogdir')
 endif
@@ -20,6 +20,7 @@ endif
 libglade_hdy_sources = [
   'glade-hdy-header-group.c',
   'glade-hdy-paginator.c',
+  'glade-hdy-swipe-group.c',
 ]
 
 libglade_hdy_deps = [
@@ -35,7 +36,7 @@ libglade_hdy = shared_library(
                c_args: libglade_hdy_args,
          dependencies: libglade_hdy_deps,
   include_directories: [ root_inc, src_inc ],
-              install: true,
+              install: installable,
           install_dir: module_dir,
 )
 
@@ -44,14 +45,16 @@ xmllint = find_program('xmllint', required: true)
 if xmllint.found()
   custom_target(
     'xmllint',
-      build_by_default: true,
-      input: glade_xml,
-      output: 'doesnotexist',
-      command: [xmllint, '--dtdvalid', dtd, '--noout', '@INPUT@'],
+    build_by_default: true,
+               input: glade_xml,
+              output: 'doesnotexist',
+             command: [xmllint, '--dtdvalid', dtd, '--noout', '@INPUT@'],
   )
 endif
 
-# Install glade catalog
-install_data(glade_xml, install_dir: glade_catalogdir)
+if installable
+  # Install glade catalog
+  install_data(glade_xml, install_dir: glade_catalogdir)
+endif
 
 endif

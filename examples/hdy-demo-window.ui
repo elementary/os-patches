@@ -22,21 +22,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkAdjustment" id="adj_arrows_count">
-    <property name="lower">1</property>
-    <property name="upper">10</property>
-    <property name="value">1</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="adj_arrows_count_value_changed_cb" swapped="no"/>
-  </object>
-  <object class="GtkAdjustment" id="adj_arrows_duration">
-    <property name="upper">10000</property>
-    <property name="value">1000</property>
-    <property name="step_increment">250</property>
-    <property name="page_increment">1000</property>
-    <signal name="value-changed" handler="adj_arrows_duration_value_changed_cb" swapped="no"/>
-  </object>
   <template class="HdyDemoWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
     <property name="title">Handy Demo</property>
@@ -48,10 +33,8 @@
         <property name="visible">True</property>
         <child>
           <object class="HdyLeaflet" id="header_box">
+            <property name="transition-type" bind-source="content_box" bind-property="transition-type" bind-flags="sync-create"/>
             <property name="visible">True</property>
-            <property name="mode-transition-type">slide</property>
-            <property name="child-transition-type">slide</property>
-            <property name="visible-child-name" bind-source="content_box" bind-property="visible-child-name" bind-flags="sync-create"/>
             <signal name="notify::visible-child" handler="notify_header_visible_child_cb" swapped="no"/>
             <signal name="notify::fold" handler="notify_fold_cb" after="yes" swapped="no"/>
             <child>
@@ -92,6 +75,9 @@
                   <class name="sidebar"/>
                 </style>
               </object>
+              <packing>
+                <property name="allow-visible">False</property>
+              </packing>
             </child>
             <child>
               <object class="GtkHeaderBar" id="sub_header_bar">
@@ -165,8 +151,7 @@
       <object class="HdyLeaflet" id="content_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="mode_transition_type">slide</property>
-        <property name="child_transition_type">slide</property>
+        <property name="can-swipe-back">True</property>
         <child>
           <object class="GtkStackSidebar" id="sidebar">
             <property name="width_request">270</property>
@@ -187,6 +172,9 @@
               <class name="sidebar"/>
             </style>
           </object>
+          <packing>
+            <property name="allow-visible">False</property>
+          </packing>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrolled_window">
@@ -316,7 +304,7 @@
                                 <property name="can_focus">False</property>
                                 <property name="valign">center</property>
                                 <property name="pixel_size">128</property>
-                                <property name="icon_name">input-dialpad-symbolic</property>
+                                <property name="icon_name">view-dual-symbolic</property>
                                 <property name="icon-size">0</property>
                                 <property name="margin-bottom">18</property>
                                 <style>
@@ -337,7 +325,7 @@
                                     <property name="visible">True</property>
                                     <property name="opacity">0.5</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Dialer</property>
+                                    <property name="label" translatable="yes">Leaflet</property>
                                     <property name="halign">center</property>
                                     <property name="xalign">0</property>
                                     <property name="margin-bottom">12</property>
@@ -356,7 +344,7 @@
                                     <property name="visible">True</property>
                                     <property name="opacity">0.5</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">A number dialer.</property>
+                                    <property name="label" translatable="yes">A widget showing either all its children or only one, depending on the available space. This window is using leaflets, you can control them with the settings below.</property>
                                     <property name="justify">center</property>
                                     <property name="use_markup">true</property>
                                     <property name="wrap">True</property>
@@ -375,52 +363,34 @@
                           </object>
                         </child>
                         <child>
-                          <object class="HdyColumn">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="maximum-width">300</property>
-                            <property name="linear-growth-width">300</property>
+                            <property name="expand">True</property>
+                            <property name="label" translatable="yes">Leaflet</property>
+                            <property name="justify">left</property>
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">12</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkListBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="expand">True</property>
+                            <property name="selection-mode">none</property>
+                            <style>
+                              <class name="frame"/>
+                            </style>
                             <child>
-                              <object class="GtkBox" id="box_dialer">
+                              <object class="HdyComboRow" id="leaflet_transition_row">
+                                <property name="subtitle" translatable="yes">The type of transition to use when the leaflets adapt its size or when changing the visible child</property>
+                                <property name="title" translatable="yes">Transition type</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="valign">center</property>
-                                <property name="hexpand">True</property>
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">12</property>
-                                <child>
-                                  <object class="GtkLabel" id="display">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="single_line_mode">True</property>
-                                    <attributes>
-                                      <attribute name="scale" value="1.6"/>
-                                    </attributes>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="HdyDialer" id="dialer">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="column_spacing">10</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="row_spacing">8</property>
-                                    <property name="valign">center</property>
-                                    <signal name="deleted" handler="deleted_cb" after="yes" swapped="no"/>
-                                    <signal name="submitted" handler="submitted_cb" after="yes" swapped="no"/>
-                                    <signal name="symbol-clicked" handler="symbol_clicked_cb" after="yes" swapped="no"/>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
+                                <signal name="notify::selected-index" handler="notify_leaflet_transition_cb" swapped="no"/>
                               </object>
                             </child>
                           </object>
@@ -429,9 +399,8 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="name">dialer</property>
-                    <property name="title">Dialer</property>
-                    <property name="position">1</property>
+                    <property name="name">leaflet</property>
+                    <property name="title">Leaflet</property>
                   </packing>
                 </child>
                 <child>
@@ -464,28 +433,22 @@
                             <property name="margin-bottom">32</property>
                             <property name="expand">True</property>
                             <child>
-                              <object class="GtkBox">
+                              <object class="GtkImage">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="halign">center</property>
                                 <property name="valign">center</property>
-                                <property name="margin">16</property>
-                                <child>
-                                  <object class="HdyArrows" id="arrows">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                    <property name="count">3</property>
-                                    <property name="margin-bottom">18</property>
-                                    <property name="width_request">96</property>
-                                    <property name="height_request">96</property>
-                                    <style>
-                                      <class name="dim-label"/>
-                                    </style>
-                                  </object>
-                                </child>
+                                <property name="pixel_size">128</property>
+                                <property name="icon_name">input-dialpad-symbolic</property>
+                                <property name="icon-size">0</property>
+                                <property name="margin-bottom">18</property>
+                                <style>
+                                  <class name="dim-label"/>
+                                </style>
                               </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                              </packing>
                             </child>
                             <child>
                               <object class="GtkBox">
@@ -496,7 +459,7 @@
                                     <property name="visible">True</property>
                                     <property name="opacity">0.5</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Arrows</property>
+                                    <property name="label" translatable="yes">Keypad</property>
                                     <property name="halign">center</property>
                                     <property name="xalign">0</property>
                                     <property name="margin-bottom">12</property>
@@ -515,7 +478,7 @@
                                     <property name="visible">True</property>
                                     <property name="opacity">0.5</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Arrows indicating a swiping direction.</property>
+                                    <property name="label" translatable="yes">A number keypad.</property>
                                     <property name="justify">center</property>
                                     <property name="use_markup">true</property>
                                     <property name="wrap">True</property>
@@ -534,72 +497,83 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="HdyColumn">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="expand">True</property>
-                            <property name="label" translatable="yes">Arrows</property>
-                            <property name="justify">left</property>
-                            <property name="halign">start</property>
-                            <property name="margin-bottom">12</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkListBox" id="arrows_listbox">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="expand">True</property>
-                            <property name="selection-mode">none</property>
-                            <style>
-                              <class name="frame"/>
-                            </style>
+                            <property name="maximum-width">300</property>
+                            <property name="linear-growth-width">300</property>
                             <child>
-                              <object class="HdyComboRow" id="arrows_direction_row">
-                                <property name="title" translatable="yes">Direction</property>
+                              <object class="GtkBox" id="box_keypad">
                                 <property name="visible">True</property>
-                                <signal name="notify::selected-index" handler="notify_arrows_direction_cb" swapped="no"/>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="HdyActionRow">
                                 <property name="can_focus">False</property>
-                                <property name="title" translatable="yes">Number of arrows</property>
-                                <property name="visible">True</property>
-                                <child type="action">
-                                  <object class="GtkSpinButton">
+                                <property name="valign">center</property>
+                                <property name="hexpand">True</property>
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">12</property>
+                                <child>
+                                  <object class="GtkListBox" id="keypad_listbox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="text" translatable="yes">0</property>
-                                    <property name="input_purpose">digits</property>
-                                    <property name="adjustment">adj_arrows_count</property>
-                                    <property name="climb_rate">1</property>
-                                    <property name="snap_to_ticks">True</property>
-                                    <property name="numeric">True</property>
-                                    <property name="valign">center</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="expand">True</property>
+                                    <property name="selection-mode">none</property>
+                                    <style>
+                                      <class name="frame"/>
+                                    </style>
+                                    <child>
+                                      <object class="HdyActionRow">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="title" translatable="yes">Show extra symbols</property>
+                                        <child type="action">
+                                          <object class="GtkSwitch" id="keypad_show_symbols">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="state">True</property>
+                                            <property name="valign">center</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="HdyActionRow">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="title" translatable="yes">Show only digits</property>
+                                        <child type="action">
+                                          <object class="GtkSwitch" id="keypad_only_digits">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="valign">center</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="HdyActionRow">
-                                <property name="can_focus">False</property>
-                                <property name="title" translatable="yes">Animation duration</property>
-                                <property name="visible">True</property>
-                                <child type="action">
-                                  <object class="GtkSpinButton">
+                                <child>
+                                  <object class="GtkEntry" id="entry_keypad">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="input_purpose">digits</property>
-                                    <property name="adjustment">adj_arrows_duration</property>
-                                    <property name="climb_rate">250</property>
-                                    <property name="snap_to_ticks">True</property>
-                                    <property name="numeric">True</property>
-                                    <property name="value">1000</property>
-                                    <property name="valign">center</property>
                                   </object>
+                                </child>
+                                <child>
+                                  <object class="HdyKeypad" id="keypad">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="column_spacing">10</property>
+                                    <property name="row_spacing">8</property>
+                                    <property name="only_digits">FALSE</property>
+                                    <property name="halign">center</property>
+                                    <property name="entry">entry_keypad</property>
+                                    <property name="only-digits" bind-source="keypad_only_digits" bind-property="state" bind-flags="sync-create | bidirectional"/>
+                                    <property name="show-symbols" bind-source="keypad_show_symbols" bind-property="state" bind-flags="sync-create | bidirectional"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="pack_type">end</property>
+                                    <property name="position">1</property>
+                                  </packing>
                                 </child>
                               </object>
                             </child>
@@ -609,8 +583,8 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="name">arrows</property>
-                    <property name="title">Arrows</property>
+                    <property name="name">keypad</property>
+                    <property name="title">Keypad</property>
                   </packing>
                 </child>
                 <child>
@@ -1351,6 +1325,7 @@
                     <property name="visible">True</property>
                     <property name="center_content">True</property>
                     <property name="indicator_spacing">6</property>
+                    <signal name="notify::position" handler="notify_paginator_position_cb"/>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
@@ -1521,6 +1496,12 @@
       <headerbar name="header_bar"/>
       <headerbar name="sub_header_bar"/>
     </headerbars>
+  </object>
+  <object class="HdySwipeGroup" id="swipe_group">
+    <swipeables>
+      <swipeable name="header_box"/>
+      <swipeable name="content_box"/>
+    </swipeables>
   </object>
   <object class="GtkAdjustment" id="column_width_adjustment">
     <property name="lower">0</property>

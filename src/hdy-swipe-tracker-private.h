@@ -11,6 +11,7 @@
 #endif
 
 #include <gtk/gtk.h>
+#include "hdy-swipeable-private.h"
 
 G_BEGIN_DECLS
 
@@ -18,7 +19,7 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (HdySwipeTracker, hdy_swipe_tracker, HDY, SWIPE_TRACKER, GObject)
 
-HdySwipeTracker *hdy_swipe_tracker_new (GtkWidget *widget);
+HdySwipeTracker *hdy_swipe_tracker_new (HdySwipeable *swipeable);
 
 gboolean         hdy_swipe_tracker_get_enabled (HdySwipeTracker *self);
 void             hdy_swipe_tracker_set_enabled (HdySwipeTracker *self,
@@ -27,6 +28,10 @@ void             hdy_swipe_tracker_set_enabled (HdySwipeTracker *self,
 gboolean         hdy_swipe_tracker_get_reversed (HdySwipeTracker *self);
 void             hdy_swipe_tracker_set_reversed (HdySwipeTracker *self,
                                                  gboolean         reversed);
+
+gboolean         hdy_swipe_tracker_get_allow_mouse_drag (HdySwipeTracker *self);
+void             hdy_swipe_tracker_set_allow_mouse_drag (HdySwipeTracker *self,
+                                                         gboolean         allow_mouse_drag);
 
 gboolean         hdy_swipe_tracker_captured_event (HdySwipeTracker *self,
                                                    GdkEvent        *event);

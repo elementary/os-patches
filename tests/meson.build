@@ -10,7 +10,6 @@ test_env = [
 ]
 
 test_cflags = [
-  '-fPIE',
   '-DHDY_LOG_DOMAIN="Handy"',
   '-DTEST_DATA_DIR="@0@/data"'.format(meson.current_source_dir()),
 ]
@@ -29,6 +28,7 @@ test_names = [
   'test-expander-row',
   'test-header-bar',
   'test-header-group',
+  'test-keypad',
   'test-paginator',
   'test-preferences-group',
   'test-preferences-page',
@@ -37,6 +37,7 @@ test_names = [
   'test-search-bar',
   'test-squeezer',
   'test-string-utf8',
+  'test-swipe-group',
   'test-value-object',
   'test-view-switcher',
   'test-view-switcher-bar',
@@ -44,10 +45,11 @@ test_names = [
 
 foreach test_name : test_names
   t = executable(test_name, [test_name + '.c'] + libhandy_generated_headers,
-		 c_args: test_cflags,
-		 link_args: test_link_args,
-		 dependencies: libhandy_deps + [libhandy_dep],
-		)
+                       c_args: test_cflags,
+                    link_args: test_link_args,
+                 dependencies: libhandy_deps + [libhandy_dep],
+                          pie: true,
+                )
   test(test_name, t, env: test_env)
 endforeach
 

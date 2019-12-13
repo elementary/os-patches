@@ -11,6 +11,7 @@
 
 #include "hdy-paginator-box-private.h"
 #include "hdy-swipe-tracker-private.h"
+#include "hdy-swipeable-private.h"
 
 #include <math.h>
 
@@ -68,10 +69,16 @@ struct _HdyPaginator
   gboolean center_content;
   GtkOrientation orientation;
   guint animation_duration;
+
+  gulong scroll_timeout_id;
+  gboolean can_scroll;
 };
 
+static void hdy_paginator_swipeable_init (HdySwipeableInterface *iface);
+
 G_DEFINE_TYPE_WITH_CODE (HdyPaginator, hdy_paginator, GTK_TYPE_EVENT_BOX,
-                         G_IMPLEMENT_INTERFACE (GTK_TYPE_ORIENTABLE, NULL));
+                         G_IMPLEMENT_INTERFACE (GTK_TYPE_ORIENTABLE, NULL)
+                         G_IMPLEMENT_INTERFACE (HDY_TYPE_SWIPEABLE, hdy_paginator_swipeable_init))
 
 enum {
   PROP_0,
@@ -83,20 +90,40 @@ enum {
   PROP_CENTER_CONTENT,
   PROP_SPACING,
   PROP_ANIMATION_DURATION,
+  PROP_ALLOW_MOUSE_DRAG,
 
   /* GtkOrientable */
   PROP_ORIENTATION,
-  LAST_PROP = PROP_ANIMATION_DURATION + 1,
+  LAST_PROP = PROP_ALLOW_MOUSE_DRAG + 1,
 };
 
 static GParamSpec *props[LAST_PROP];
 
+enum {
+  SIGNAL_PAGE_CHANGED,
+  SIGNAL_LAST_SIGNAL,
+};
+static guint signals[SIGNAL_LAST_SIGNAL];
+
 static void
-swipe_begin_cb (HdyPaginator    *self,
-                gdouble          x,
-                gdouble          y,
-                HdySwipeTracker *tracker)
+hdy_paginator_switch_child (HdySwipeable *swipeable,
+                            guint         index,
+                            gint64        duration)
 {
+  HdyPaginator *self = HDY_PAGINATOR (swipeable);
+  GtkWidget *child;
+
+  child = hdy_paginator_box_get_nth_child (self->scrolling_box, index);
+
+  hdy_paginator_box_scroll_to (self->scrolling_box, child, duration);
+}
+
+static void
+hdy_paginator_begin_swipe (HdySwipeable *swipeable,
+                           gint          direction,
+                           gboolean      direct)
+{
+  HdyPaginator *self = HDY_PAGINATOR (swipeable);
   gdouble distance, position, closest_point;
   guint i, n_pages;
   gdouble *points;
@@ -114,24 +141,26 @@ swipe_begin_cb (HdyPaginator    *self,
   for (i = 0; i < n_pages; i++)
     points[i] = i;
 
-  hdy_swipe_tracker_confirm_swipe (tracker, distance, points, n_pages,
+  hdy_swipe_tracker_confirm_swipe (self->tracker, distance, points, n_pages,
                                    position, closest_point);
 }
 
 static void
-swipe_update_cb (HdyPaginator    *self,
-                 gdouble          value,
-                 HdySwipeTracker *tracker)
+hdy_paginator_update_swipe (HdySwipeable *swipeable,
+                            gdouble       value)
 {
+  HdyPaginator *self = HDY_PAGINATOR (swipeable);
+
   hdy_paginator_box_set_position (self->scrolling_box, value);
 }
 
 static void
-swipe_end_cb (HdyPaginator    *self,
-              gint64           duration,
-              gdouble          to,
-              HdySwipeTracker *tracker)
+hdy_paginator_end_swipe (HdySwipeable *swipeable,
+                         gint64       duration,
+                         gdouble      to)
 {
+  HdyPaginator *self = HDY_PAGINATOR (swipeable);
+
   if (duration == 0) {
     hdy_paginator_box_set_position (self->scrolling_box, to);
     return;
@@ -164,6 +193,19 @@ notify_spacing_cb (HdyPaginator *self,
                    GObject      *object)
 {
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SPACING]);
+}
+
+static void
+animation_stopped_cb (HdyPaginator    *self,
+                      HdyPaginatorBox *box)
+{
+  gdouble position;
+  gint index;
+
+  position = hdy_paginator_box_get_position (self->scrolling_box);
+  index = round (position);
+
+  g_signal_emit (self, signals[SIGNAL_PAGE_CHANGED], 0, index);
 }
 
 static GdkRGBA
@@ -400,10 +442,111 @@ update_orientation (HdyPaginator *self)
 }
 
 static gboolean
+scroll_timeout_cb (HdyPaginator *self)
+{
+  self->can_scroll = TRUE;
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean
+handle_discrete_scroll_event (HdyPaginator *self,
+                              GdkEvent     *event)
+{
+  GdkDevice *source_device;
+  GdkInputSource input_source;
+  GdkScrollDirection direction;
+  gdouble dx, dy;
+  gint index;
+  gboolean allow_vertical;
+  GtkOrientation orientation;
+  guint duration;
+
+  if (!self->can_scroll)
+    return GDK_EVENT_PROPAGATE;
+
+  if (!hdy_paginator_get_interactive (self))
+    return GDK_EVENT_PROPAGATE;
+
+  if (event->type != GDK_SCROLL)
+    return GDK_EVENT_PROPAGATE;
+
+  source_device = gdk_event_get_source_device (event);
+  input_source = gdk_device_get_source (source_device);
+  if (input_source == GDK_SOURCE_TOUCHPAD)
+    return GDK_EVENT_PROPAGATE;
+
+  /* Mice often don't have easily accessible horizontal scrolling,
+   * hence allow vertical mouse scrolling regardless of orientation */
+  allow_vertical = (input_source == GDK_SOURCE_MOUSE);
+
+  if (gdk_event_get_scroll_direction (event, &direction)) {
+    dx = 0;
+    dy = 0;
+
+    switch (direction) {
+    case GDK_SCROLL_UP:
+      dy = -1;
+      break;
+    case GDK_SCROLL_DOWN:
+      dy = 1;
+      break;
+    case GDK_SCROLL_LEFT:
+      dy = -1;
+      break;
+    case GDK_SCROLL_RIGHT:
+      dy = 1;
+      break;
+    case GDK_SCROLL_SMOOTH:
+      g_assert_not_reached ();
+    default:
+      return GDK_EVENT_PROPAGATE;
+    }
+  } else {
+    gdk_event_get_scroll_deltas (event, &dx, &dy);
+  }
+
+  orientation = gtk_orientable_get_orientation (GTK_ORIENTABLE (self));
+  index = 0;
+
+  if (orientation == GTK_ORIENTATION_VERTICAL || allow_vertical) {
+    if (dy > 0)
+      index++;
+    else if (dy < 0)
+      index--;
+  }
+
+  if (orientation == GTK_ORIENTATION_HORIZONTAL && index == 0) {
+    if (dx > 0)
+      index++;
+    else if (dx < 0)
+      index--;
+  }
+
+  if (index == 0)
+    return GDK_EVENT_PROPAGATE;
+
+  index += (gint) round (hdy_paginator_get_position (self));
+  index = CLAMP (index, 0, (gint) hdy_paginator_get_n_pages (self) - 1);
+
+  hdy_paginator_scroll_to (self, hdy_paginator_box_get_nth_child (self->scrolling_box, index));
+
+  /* Don't allow the delay to go lower than 250ms */
+  duration = MIN (self->animation_duration, DEFAULT_DURATION);
+
+  self->can_scroll = FALSE;
+  g_timeout_add (duration, (GSourceFunc) scroll_timeout_cb, self);
+
+  return GDK_EVENT_STOP;
+}
+
+static gboolean
 captured_event_cb (HdyPaginator *self,
                    GdkEvent     *event)
 {
-  return hdy_swipe_tracker_captured_event (self->tracker, event);
+  if (hdy_swipe_tracker_captured_event (self->tracker, event))
+    return GDK_EVENT_STOP;
+
+  return handle_discrete_scroll_event (self, event);
 }
 
 static void
@@ -483,10 +626,14 @@ hdy_paginator_dispose (GObject *object)
   HdyPaginator *self = (HdyPaginator *)object;
 
   if (self->tracker) {
-    g_signal_handlers_disconnect_by_data (self->tracker, self);
     g_clear_object (&self->tracker);
 
     g_object_set_data (object, "captured-event-handler", NULL);
+  }
+
+  if (self->scroll_timeout_id != 0) {
+    g_source_remove (self->scroll_timeout_id);
+    self->scroll_timeout_id = 0;
   }
 
   G_OBJECT_CLASS (hdy_paginator_parent_class)->dispose (object);
@@ -527,6 +674,10 @@ hdy_paginator_get_property (GObject    *object,
 
   case PROP_SPACING:
     g_value_set_uint (value, hdy_paginator_get_spacing (self));
+    break;
+
+  case PROP_ALLOW_MOUSE_DRAG:
+    g_value_set_boolean (value, hdy_paginator_get_allow_mouse_drag (self));
     break;
 
   case PROP_ORIENTATION:
@@ -575,6 +726,10 @@ hdy_paginator_set_property (GObject      *object,
     hdy_paginator_set_animation_duration (self, g_value_get_uint (value));
     break;
 
+  case PROP_ALLOW_MOUSE_DRAG:
+    hdy_paginator_set_allow_mouse_drag (self, g_value_get_boolean (value));
+    break;
+
   case PROP_ORIENTATION:
     {
       GtkOrientation orientation = g_value_get_enum (value);
@@ -589,6 +744,15 @@ hdy_paginator_set_property (GObject      *object,
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
   }
+}
+
+static void
+hdy_paginator_swipeable_init (HdySwipeableInterface *iface)
+{
+  iface->switch_child = hdy_paginator_switch_child;
+  iface->begin_swipe = hdy_paginator_begin_swipe;
+  iface->update_swipe = hdy_paginator_update_swipe;
+  iface->end_swipe = hdy_paginator_end_swipe;
 }
 
 static void
@@ -737,11 +901,49 @@ hdy_paginator_class_init (HdyPaginatorClass *klass)
                        0, G_MAXUINT, DEFAULT_DURATION,
                        G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyPaginator:allow-mouse-drag:
+   *
+   * Sets whether the #HdyPaginator can be dragged with mouse pointer. If the
+   * value is %FALSE, dragging is only available on touch.
+   *
+   * This should usually be %FALSE.
+   *
+   * Since: 0.0.12
+   */
+  props[PROP_ALLOW_MOUSE_DRAG] =
+    g_param_spec_boolean ("allow-mouse-drag",
+                          _("Allow mouse drag"),
+                          _("Whether to allow dragging with mouse pointer"),
+                          FALSE,
+                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_override_property (object_class,
                                     PROP_ORIENTATION,
                                     "orientation");
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  /**
+   * HdyPaginator::page-changed:
+   * @self: The #HdyPaginator instance
+   * @index: Current page
+   *
+   * This signal is emitted after a page has been changed. This can be used to
+   * implement "infinite scrolling" by connecting to this signal and amending
+   * the pages.
+   *
+   * Since: 0.0.12
+   */
+  signals[SIGNAL_PAGE_CHANGED] =
+    g_signal_new ("page-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE,
+                  1,
+                  G_TYPE_UINT);
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/sm/puri/handy/ui/hdy-paginator.ui");
@@ -753,6 +955,7 @@ hdy_paginator_class_init (HdyPaginatorClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, notify_n_pages_cb);
   gtk_widget_class_bind_template_callback (widget_class, notify_position_cb);
   gtk_widget_class_bind_template_callback (widget_class, notify_spacing_cb);
+  gtk_widget_class_bind_template_callback (widget_class, animation_stopped_cb);
 
   gtk_widget_class_set_css_name (widget_class, "hdypaginator");
 }
@@ -765,10 +968,8 @@ hdy_paginator_init (HdyPaginator *self)
 
   self->animation_duration = DEFAULT_DURATION;
 
-  self->tracker = hdy_swipe_tracker_new (GTK_WIDGET (self));
-  g_signal_connect_swapped (self->tracker, "begin", G_CALLBACK (swipe_begin_cb), self);
-  g_signal_connect_swapped (self->tracker, "update", G_CALLBACK (swipe_update_cb), self);
-  g_signal_connect_swapped (self->tracker, "end", G_CALLBACK (swipe_end_cb), self);
+  self->tracker = hdy_swipe_tracker_new (HDY_SWIPEABLE (self));
+  self->can_scroll = TRUE;
 
   /*
    * HACK: GTK3 has no other way to get events on capture phase.
@@ -875,8 +1076,7 @@ hdy_paginator_scroll_to (HdyPaginator *self,
 {
   g_return_if_fail (HDY_IS_PAGINATOR (self));
 
-  hdy_paginator_box_scroll_to (self->scrolling_box, widget,
-                               self->animation_duration);
+  hdy_paginator_scroll_to_full (self, widget, self->animation_duration);
 }
 
 /**
@@ -894,10 +1094,18 @@ hdy_paginator_scroll_to_full (HdyPaginator *self,
                               GtkWidget    *widget,
                               gint64        duration)
 {
+  GList *children;
+  gint n;
+
   g_return_if_fail (HDY_IS_PAGINATOR (self));
+
+  children = gtk_container_get_children (GTK_CONTAINER (self->scrolling_box));
+  n = g_list_index (children, widget);
+  g_list_free (children);
 
   hdy_paginator_box_scroll_to (self->scrolling_box, widget,
                                duration);
+  hdy_swipeable_emit_switch_child (HDY_SWIPEABLE (self), n, duration);
 }
 
 /**
@@ -1189,4 +1397,47 @@ hdy_paginator_set_animation_duration (HdyPaginator *self,
   self->animation_duration = duration;
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ANIMATION_DURATION]);
+}
+
+/**
+ * hdy_paginator_get_allow_mouse_drag:
+ * @self: a #HdyPaginator
+ *
+ * Sets whether @self can be dragged with mouse pointer
+ *
+ * Returns: %TRUE if @self can be dragged with mouse
+ *
+ * Since: 0.0.12
+ */
+gboolean
+hdy_paginator_get_allow_mouse_drag (HdyPaginator *self)
+{
+  g_return_val_if_fail (HDY_IS_PAGINATOR (self), FALSE);
+
+  return hdy_swipe_tracker_get_allow_mouse_drag (self->tracker);
+}
+
+/**
+ * hdy_paginator_set_allow_mouse_drag:
+ * @self: a #HdyPaginator
+ * @allow_mouse_drag: whether @self can be dragged with mouse pointer
+ *
+ * Sets whether @self can be dragged with mouse pointer. If @allow_mouse_drag
+ * is %FALSE, dragging is only available on touch.
+ *
+ * This should usually be %FALSE.
+ *
+ * Since: 0.0.12
+ */
+void
+hdy_paginator_set_allow_mouse_drag (HdyPaginator *self,
+                                    gboolean      allow_mouse_drag)
+{
+  g_return_if_fail (HDY_IS_PAGINATOR (self));
+
+  allow_mouse_drag = !!allow_mouse_drag;
+
+  hdy_swipe_tracker_set_allow_mouse_drag (self->tracker, allow_mouse_drag);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ALLOW_MOUSE_DRAG]);
 }

@@ -10,6 +10,7 @@
 #error "Only <handy.h> can be included directly."
 #endif
 
+#include "hdy-deprecation-macros.h"
 #include "hdy-dialer-button.h"
 
 G_BEGIN_DECLS
@@ -24,6 +25,7 @@ G_DECLARE_DERIVABLE_TYPE (HdyDialerCycleButton, hdy_dialer_cycle_button, HDY, DI
  * @cycle_start: Class handler for the #HdyDialerCycleButton::cycle-start signal
  * @cycle_end: Class handler for the #HdyDialerCycleButton::cycle-end signal
  */
+_HDY_DEPRECATED
 struct _HdyDialerCycleButtonClass
 {
   HdyDialerButtonClass parent_class;
@@ -33,11 +35,17 @@ struct _HdyDialerCycleButtonClass
   void (*cycle_end)     (HdyDialerCycleButton    *self);
 };
 
+_HDY_DEPRECATED
 GtkWidget     *hdy_dialer_cycle_button_new                   (const gchar          *symbols);
+_HDY_DEPRECATED
 gunichar       hdy_dialer_cycle_button_get_current_symbol    (HdyDialerCycleButton *self);
+_HDY_DEPRECATED
 gboolean       hdy_dialer_cycle_button_is_cycling            (HdyDialerCycleButton *self);
+_HDY_DEPRECATED
 void           hdy_dialer_cycle_button_stop_cycle            (HdyDialerCycleButton *self);
+_HDY_DEPRECATED
 gint           hdy_dialer_cycle_button_get_cycle_timeout     (HdyDialerCycleButton *self);
+_HDY_DEPRECATED
 void           hdy_dialer_cycle_button_set_cycle_timeout     (HdyDialerCycleButton *self,
                                                               gint                  timeout);
 

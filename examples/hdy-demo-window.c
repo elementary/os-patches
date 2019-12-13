@@ -15,14 +15,12 @@ struct _HdyDemoWindow
   GtkToggleButton *search_button;
   GtkStackSidebar *sidebar;
   GtkStack *stack;
-  GtkWidget *box_dialer;
-  HdyDialer *dialer;
-  GtkLabel *display;
-  GtkWidget *arrows;
+  HdyComboRow *leaflet_transition_row;
+  GtkWidget *box_keypad;
+  GtkListBox *keypad_listbox;
+  HdyKeypad *keypad;
   HdySearchBar *search_bar;
   GtkEntry *search_entry;
-  GtkListBox *arrows_listbox;
-  HdyComboRow *arrows_direction_row;
   GtkListBox *column_listbox;
   GtkListBox *lists_listbox;
   HdyComboRow *combo_row;
@@ -32,23 +30,21 @@ struct _HdyDemoWindow
   GtkListBox *paginator_listbox;
   HdyComboRow *paginator_orientation_row;
   HdyComboRow *paginator_indicator_style_row;
-  GtkAdjustment *adj_arrows_count;
-  GtkAdjustment *adj_arrows_duration;
 };
 
 G_DEFINE_TYPE (HdyDemoWindow, hdy_demo_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static gboolean
 hdy_demo_window_key_pressed_cb (GtkWidget     *sender,
-                                GdkEventKey   *event,
+                                GdkEvent      *event,
                                 HdyDemoWindow *self)
 {
   GdkModifierType default_modifiers = gtk_accelerator_get_default_mod_mask ();
   guint keyval;
   GdkModifierType state;
 
-  gdk_event_get_keyval ((GdkEvent *) event, &keyval);
-  gdk_event_get_state ((GdkEvent *) event, &state);
+  gdk_event_get_keyval (event, &keyval);
+  gdk_event_get_state (event, &state);
 
   if ((keyval == GDK_KEY_q || keyval == GDK_KEY_Q) &&
       (state & default_modifiers) == GDK_CONTROL_MASK) {
@@ -98,12 +94,24 @@ hdy_demo_window_notify_fold_cb (GObject       *sender,
 }
 
 static void
+update_leaflet_swipe (HdyDemoWindow *self)
+{
+  gboolean first_page = (hdy_paginator_get_position (self->paginator) <= 0);
+  gboolean paginator_visible =
+    (gtk_stack_get_visible_child (self->stack) == GTK_WIDGET (self->paginator));
+
+  hdy_leaflet_set_can_swipe_back (self->content_box,
+                                  !paginator_visible || first_page);
+}
+
+static void
 hdy_demo_window_notify_visible_child_cb (GObject       *sender,
                                          GParamSpec    *pspec,
                                          HdyDemoWindow *self)
 {
   hdy_leaflet_set_visible_child_name (self->content_box, "content");
   update_header_bar (self);
+  update_leaflet_swipe (self);
 }
 
 static void
@@ -113,114 +121,37 @@ hdy_demo_window_back_clicked_cb (GtkWidget     *sender,
   hdy_leaflet_set_visible_child_name (self->content_box, "sidebar");
 }
 
-static void
-hdy_demo_window_submitted_cb (GtkWidget *widget,
-                              gchar     *number)
-{
-  g_print ("Submit %s\n", number);
-}
-
-
-static void
-deleted_cb (HdyDialer     *dialer,
-            HdyDemoWindow *self)
-{
-  g_assert (HDY_IS_DIALER (dialer));
-  g_assert (HDY_IS_DEMO_WINDOW (self));
-  g_print ("Delete btn\n");
-}
-
-
-static void
-number_notify_cb (HdyDemoWindow *self,
-                  gpointer       unused)
-{
-  gtk_label_set_label (self->display, hdy_dialer_get_number (self->dialer));
-  g_print ("wuff: %s\n", hdy_dialer_get_number (self->dialer));
-}
-
-
-static void
-symbol_clicked_cb (HdyDialer     *dialer,
-                   gchar          symbol,
-                   HdyDemoWindow *self)
-{
-  g_assert (HDY_IS_DIALER (dialer));
-  g_assert (HDY_IS_DEMO_WINDOW (self));
-  g_print ("clicked: %c\n", symbol);
-}
-
-
-static void
-stack_visible_child_notify_cb (HdyDemoWindow *self,
-                               gpointer       unused)
-{
-  if (gtk_stack_get_visible_child (GTK_STACK (self->stack)) == GTK_WIDGET (self->box_dialer)) {
-    gtk_widget_grab_focus (GTK_WIDGET (self->dialer));
-  }
-}
-
-
 static gchar *
-arrows_direction_name (HdyEnumValueObject *value,
-                       gpointer            user_data)
+leaflet_transition_name (HdyEnumValueObject *value,
+                         gpointer            user_data)
 {
   g_return_val_if_fail (HDY_IS_ENUM_VALUE_OBJECT (value), NULL);
 
   switch (hdy_enum_value_object_get_value (value)) {
-  case HDY_ARROWS_DIRECTION_UP:
-    return g_strdup (_("Up"));
-  case HDY_ARROWS_DIRECTION_DOWN:
-    return g_strdup (_("Down"));
-  case HDY_ARROWS_DIRECTION_LEFT:
-    return g_strdup (_("Left"));
-  case HDY_ARROWS_DIRECTION_RIGHT:
-    return g_strdup (_("Right"));
+  case HDY_LEAFLET_TRANSITION_TYPE_NONE:
+    return g_strdup (_("None"));
+  case HDY_LEAFLET_TRANSITION_TYPE_SLIDE:
+    return g_strdup (_("Slide"));
+  case HDY_LEAFLET_TRANSITION_TYPE_OVER:
+    return g_strdup (_("Over"));
+  case HDY_LEAFLET_TRANSITION_TYPE_UNDER:
+    return g_strdup (_("Under"));
   default:
     return NULL;
   }
 }
 
-
 static void
-notify_arrows_direction_cb (GObject       *sender,
-                            GParamSpec    *pspec,
-                            HdyDemoWindow *self)
+notify_leaflet_transition_cb (GObject       *sender,
+                              GParamSpec    *pspec,
+                              HdyDemoWindow *self)
 {
   HdyComboRow *row = HDY_COMBO_ROW (sender);
 
   g_assert (HDY_IS_COMBO_ROW (row));
   g_assert (HDY_IS_DEMO_WINDOW (self));
 
-  hdy_arrows_set_direction (HDY_ARROWS (self->arrows), hdy_combo_row_get_selected_index (row));
-}
-
-
-static void
-adj_arrows_count_value_changed_cb (GtkAdjustment *adj,
-                                   HdyDemoWindow *self)
-{
-  gdouble count;
-
-  g_assert (GTK_IS_ADJUSTMENT (adj));
-  g_assert (HDY_IS_DEMO_WINDOW (self));
-
-  count = gtk_adjustment_get_value (adj);
-  hdy_arrows_set_count (HDY_ARROWS (self->arrows), count);
-}
-
-
-static void
-adj_arrows_duration_value_changed_cb (GtkAdjustment *adj,
-                                      HdyDemoWindow *self)
-{
-  gdouble duration;
-
-  g_assert (GTK_IS_ADJUSTMENT (adj));
-  g_assert (HDY_IS_DEMO_WINDOW (self));
-
-  duration = gtk_adjustment_get_value (adj);
-  hdy_arrows_set_duration (HDY_ARROWS (self->arrows), duration);
+  hdy_leaflet_set_transition_type (HDY_LEAFLET (self->content_box), hdy_combo_row_get_selected_index (row));
 }
 
 static void
@@ -334,6 +265,14 @@ paginator_orientation_name (HdyEnumValueObject *value,
 }
 
 static void
+notify_paginator_position_cb (GObject       *sender,
+                              GParamSpec    *pspec,
+                              HdyDemoWindow *self)
+{
+  update_leaflet_swipe (self);
+}
+
+static void
 notify_paginator_orientation_cb (GObject       *sender,
                                  GParamSpec    *pspec,
                                  HdyDemoWindow *self)
@@ -409,20 +348,6 @@ hdy_demo_window_constructed (GObject *object)
 
   G_OBJECT_CLASS (hdy_demo_window_parent_class)->constructed (object);
 
-  g_signal_connect_swapped (self->dialer,
-                            "notify::number",
-                            G_CALLBACK (number_notify_cb),
-                            self);
-
-  g_signal_connect_swapped (self->stack,
-                            "notify::visible-child",
-                            G_CALLBACK (stack_visible_child_notify_cb),
-                            self);
-
-  gtk_adjustment_set_value (self->adj_arrows_count,
-                            hdy_arrows_get_count (HDY_ARROWS (self->arrows)));
-  gtk_adjustment_set_value (self->adj_arrows_duration,
-                            hdy_arrows_get_duration (HDY_ARROWS (self->arrows)));
   hdy_search_bar_connect_entry (self->search_bar, self->search_entry);
 }
 
@@ -442,14 +367,12 @@ hdy_demo_window_class_init (HdyDemoWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, search_button);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, sidebar);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, stack);
-  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, box_dialer);
-  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, dialer);
-  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, display);
-  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, arrows);
+  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, leaflet_transition_row);
+  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, box_keypad);
+  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, keypad_listbox);
+  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, keypad);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, search_bar);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, search_entry);
-  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, arrows_listbox);
-  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, arrows_direction_row);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, column_listbox);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, lists_listbox);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, combo_row);
@@ -459,23 +382,17 @@ hdy_demo_window_class_init (HdyDemoWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, paginator_listbox);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, paginator_orientation_row);
   gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, paginator_indicator_style_row);
-  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, adj_arrows_count);
-  gtk_widget_class_bind_template_child (widget_class, HdyDemoWindow, adj_arrows_duration);
   gtk_widget_class_bind_template_callback_full (widget_class, "key_pressed_cb", G_CALLBACK(hdy_demo_window_key_pressed_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "notify_header_visible_child_cb", G_CALLBACK(hdy_demo_window_notify_header_visible_child_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "notify_fold_cb", G_CALLBACK(hdy_demo_window_notify_fold_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "notify_visible_child_cb", G_CALLBACK(hdy_demo_window_notify_visible_child_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "back_clicked_cb", G_CALLBACK(hdy_demo_window_back_clicked_cb));
-  gtk_widget_class_bind_template_callback_full (widget_class, "submitted_cb", G_CALLBACK(hdy_demo_window_submitted_cb));
-  gtk_widget_class_bind_template_callback_full (widget_class, "symbol_clicked_cb", G_CALLBACK(symbol_clicked_cb));
-  gtk_widget_class_bind_template_callback_full (widget_class, "deleted_cb", G_CALLBACK(deleted_cb));
-  gtk_widget_class_bind_template_callback_full (widget_class, "notify_arrows_direction_cb", G_CALLBACK(notify_arrows_direction_cb));
-  gtk_widget_class_bind_template_callback_full (widget_class, "adj_arrows_count_value_changed_cb", G_CALLBACK(adj_arrows_count_value_changed_cb));
-  gtk_widget_class_bind_template_callback_full (widget_class, "adj_arrows_duration_value_changed_cb", G_CALLBACK(adj_arrows_duration_value_changed_cb));
+  gtk_widget_class_bind_template_callback_full (widget_class, "notify_leaflet_transition_cb", G_CALLBACK(notify_leaflet_transition_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "dialog_clicked_cb", G_CALLBACK(dialog_clicked_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "dialog_action_clicked_cb", G_CALLBACK(dialog_action_clicked_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "dialog_complex_clicked_cb", G_CALLBACK(dialog_complex_clicked_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "view_switcher_demo_clicked_cb", G_CALLBACK(view_switcher_demo_clicked_cb));
+  gtk_widget_class_bind_template_callback_full (widget_class, "notify_paginator_position_cb", G_CALLBACK(notify_paginator_position_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "notify_paginator_orientation_cb", G_CALLBACK(notify_paginator_orientation_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "notify_paginator_indicator_style_cb", G_CALLBACK(notify_paginator_indicator_style_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "paginator_return_clicked_cb", G_CALLBACK(paginator_return_clicked_cb));
@@ -512,10 +429,12 @@ static void
 hdy_demo_window_init (HdyDemoWindow *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
-  gtk_list_box_set_header_func (self->column_listbox, hdy_list_box_separator_header, NULL, NULL);
 
-  gtk_list_box_set_header_func (self->arrows_listbox, hdy_list_box_separator_header, NULL, NULL);
-  hdy_combo_row_set_for_enum (self->arrows_direction_row, HDY_TYPE_ARROWS_DIRECTION, arrows_direction_name, NULL, NULL);
+  hdy_combo_row_set_for_enum (self->leaflet_transition_row, HDY_TYPE_LEAFLET_TRANSITION_TYPE, leaflet_transition_name, NULL, NULL);
+  hdy_combo_row_set_selected_index (self->leaflet_transition_row, HDY_LEAFLET_TRANSITION_TYPE_OVER);
+
+  gtk_list_box_set_header_func (self->column_listbox, hdy_list_box_separator_header, NULL, NULL);
+  gtk_list_box_set_header_func (self->keypad_listbox, hdy_list_box_separator_header, NULL, NULL);
 
   lists_page_init (self);
 

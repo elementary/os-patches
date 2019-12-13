@@ -27,18 +27,24 @@ G_BEGIN_DECLS
 #include "hdy-version.h"
 #include "hdy-action-row.h"
 #include "hdy-animation.h"
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #include "hdy-arrows.h"
+G_GNUC_END_IGNORE_DEPRECATIONS
 #include "hdy-column.h"
 #include "hdy-combo-row.h"
+#include "hdy-deprecation-macros.h"
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #include "hdy-dialer-button.h"
 #include "hdy-dialer-cycle-button.h"
 #include "hdy-dialer.h"
+G_GNUC_END_IGNORE_DEPRECATIONS
 #include "hdy-dialog.h"
 #include "hdy-enum-value-object.h"
 #include "hdy-expander-row.h"
 #include "hdy-fold.h"
 #include "hdy-header-bar.h"
 #include "hdy-header-group.h"
+#include "hdy-keypad.h"
 #include "hdy-leaflet.h"
 #include "hdy-list-box.h"
 #include "hdy-main.h"
@@ -50,6 +56,8 @@ G_BEGIN_DECLS
 #include "hdy-search-bar.h"
 #include "hdy-squeezer.h"
 #include "hdy-string-utf8.h"
+#include "hdy-swipe-group.h"
+#include "hdy-swipeable.h"
 #include "hdy-title-bar.h"
 #include "hdy-value-object.h"
 #include "hdy-view-switcher.h"

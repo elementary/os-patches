@@ -14,11 +14,13 @@
 
 /**
  * SECTION:hdy-dialer
- * @short_description: A keypad for dialing numbers
+ * @short_description: A keypad for dialing numbers.
  * @Title: HdyDialer
  *
  * The #HdyDialer widget is a keypad for entering numbers such as phone numbers
  * or PIN codes.
+ *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 
 typedef struct
@@ -182,14 +184,14 @@ press_btn (GtkButton *btn,
 
 static gboolean
 key_press_event_cb (GtkWidget   *widget,
-                    GdkEventKey *event,
+                    GdkEvent    *event,
                     gpointer     data)
 {
   HdyDialerPrivate *priv = hdy_dialer_get_instance_private (HDY_DIALER (widget));
   gboolean pressed = !!GPOINTER_TO_INT (data);
   guint keyval;
 
-  gdk_event_get_keyval ((GdkEvent *) event, &keyval);
+  gdk_event_get_keyval (event, &keyval);
 
   switch (keyval) {
   case GDK_KEY_0 ... GDK_KEY_9:
@@ -530,6 +532,7 @@ hdy_dialer_class_init (HdyDialerClass *klass)
  *
  * Returns: the newly created #HdyDialer widget
  *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 GtkWidget *hdy_dialer_new (void)
 {
@@ -558,6 +561,8 @@ hdy_dialer_init (HdyDialer *self)
  * Get the currently displayed number.
  *
  * Returns: (transfer none): the current number in the display
+ *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 const gchar *
 hdy_dialer_get_number (HdyDialer *self)
@@ -577,6 +582,7 @@ hdy_dialer_get_number (HdyDialer *self)
  *
  * Set the currently displayed number.
  *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 void
 hdy_dialer_set_number (HdyDialer   *self,
@@ -600,6 +606,7 @@ hdy_dialer_set_number (HdyDialer   *self,
  * Set the current number to the empty string. When the number is already
  * cleared no action is performed.
  *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 void
 hdy_dialer_clear_number (HdyDialer   *self)
@@ -621,6 +628,8 @@ hdy_dialer_clear_number (HdyDialer   *self)
  * Get whether the submit and delete buttons are to be shown.
  *
  * Returns: whether the buttons are to be shown
+ *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 gboolean
 hdy_dialer_get_show_action_buttons (HdyDialer *self)
@@ -641,6 +650,7 @@ hdy_dialer_get_show_action_buttons (HdyDialer *self)
  *
  * Set whether to show the submit and delete buttons.
  *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 void
 hdy_dialer_set_show_action_buttons (HdyDialer *self,
@@ -673,6 +683,8 @@ hdy_dialer_set_show_action_buttons (HdyDialer *self,
  * #HdyDialer widget.
  * Two styles exist, %GTK_RELIEF_NORMAL and %GTK_RELIEF_NONE.
  * The default style is, as one can guess, %GTK_RELIEF_NORMAL.
+ *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 void
 hdy_dialer_set_relief (HdyDialer      *self,
@@ -699,6 +711,8 @@ hdy_dialer_set_relief (HdyDialer      *self,
  * #HdyDialer.
  *
  * Returns: The current #GtkReliefStyle
+ *
+ * Deprecated: 0.0.12: use #HdyKeypad instead
  */
 GtkReliefStyle
 hdy_dialer_get_relief (HdyDialer *self)
