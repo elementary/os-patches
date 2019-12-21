@@ -891,24 +891,11 @@ page_created_cb (EphyEmbedShell        *shell,
   if (webkit_web_view_get_page_id (WEBKIT_WEB_VIEW (view)) != page_id)
     return;
 
+  if (view->web_extension)
+    g_object_remove_weak_pointer (G_OBJECT (view->web_extension), (gpointer *)&view->web_extension);
+
   view->web_extension = web_extension;
   g_object_add_weak_pointer (G_OBJECT (view->web_extension), (gpointer *)&view->web_extension);
-
-  g_signal_connect_object (shell, "form-auth-data-save-requested",
-                           G_CALLBACK (form_auth_data_save_requested),
-                           view, 0);
-
-  g_signal_connect_object (shell, "sensitive-form-focused",
-                           G_CALLBACK (sensitive_form_focused_cb),
-                           view, 0);
-
-  g_signal_connect_object (shell, "allow-tls-certificate",
-                           G_CALLBACK (allow_tls_certificate_cb),
-                           view, 0);
-
-  g_signal_connect_object (shell, "allow-unsafe-browsing",
-                           G_CALLBACK (allow_unsafe_browsing_cb),
-                           view, 0);
 }
 
 static void
@@ -1029,7 +1016,7 @@ ephy_web_view_set_address (EphyWebView *view,
   view->address = g_strdup (address);
 
   g_free (view->display_address);
-  view->display_address = ephy_uri_decode (view->address);
+  view->display_address = view->address != NULL ? ephy_uri_decode (view->address) : NULL;
 
   _ephy_web_view_set_is_blank (view, ephy_embed_utils_url_is_empty (address));
 
@@ -1668,13 +1655,6 @@ restore_zoom_level (EphyWebView *view,
                                            (EphyHistoryJobCallback)get_host_for_url_cb, view);
 }
 
-/**
- * ephy_web_view_set_loading_message:
- * @view: an #EphyWebView
- * @address: the loading address
- *
- * Update @view's loading message
- **/
 static void
 ephy_web_view_set_loading_message (EphyWebView *view,
                                    const char  *address)
@@ -1696,8 +1676,17 @@ ephy_web_view_set_loading_message (EphyWebView *view,
 
     g_free (decoded_address);
     g_free (title);
+  } else {
+    view->loading_message = g_strdup (_("Loading…"));
   }
 
+  g_object_notify_by_pspec (G_OBJECT (view), obj_properties[PROP_STATUS_MESSAGE]);
+}
+
+static void
+ephy_web_view_unset_loading_message (EphyWebView *view)
+{
+  g_clear_pointer (&view->loading_message, g_free);
   g_object_notify_by_pspec (G_OBJECT (view), obj_properties[PROP_STATUS_MESSAGE]);
 }
 
@@ -1793,10 +1782,12 @@ load_changed_cb (WebKitWebView  *web_view,
 
   g_object_freeze_notify (object);
 
+  /* Warning: the URI property may remain set to the URI of the
+   * previously-loaded page until WEBKIT_LOAD_COMMITTED! During
+   * WEBKIT_LOAD_STARTED, it may or may not match the URI being loaded.
+   */
   switch (load_event) {
     case WEBKIT_LOAD_STARTED: {
-      const char *loading_uri = NULL;
-
       view->load_failed = FALSE;
 
       if (view->snapshot_timeout_id) {
@@ -1804,18 +1795,12 @@ load_changed_cb (WebKitWebView  *web_view,
         view->snapshot_timeout_id = 0;
       }
 
-      loading_uri = webkit_web_view_get_uri (web_view);
+      if (view->address == NULL || view->address[0] == '\0') {
+        /* We've probably never loaded any page before. */
+        ephy_web_view_set_address (view, webkit_web_view_get_uri (web_view));
+      }
 
-      if (ephy_embed_utils_is_no_show_address (loading_uri))
-        ephy_web_view_freeze_history (view);
-
-      if (view->address == NULL || view->address[0] == '\0')
-        ephy_web_view_set_address (view, loading_uri);
-
-      ephy_web_view_set_loading_message (view, loading_uri);
-
-      /* Zoom level. */
-      restore_zoom_level (view, loading_uri);
+      ephy_web_view_set_loading_message (view, NULL);
       break;
     }
     case WEBKIT_LOAD_REDIRECTED:
@@ -1829,7 +1814,13 @@ load_changed_cb (WebKitWebView  *web_view,
       ephy_web_view_set_committed_location (view, uri);
       update_security_status_for_committed_load (view, uri);
 
+      /* Zoom level. */
+      restore_zoom_level (view, uri);
+
       /* History. */
+      if (ephy_embed_utils_is_no_show_address (uri))
+        ephy_web_view_freeze_history (view);
+
       if (!ephy_web_view_is_history_frozen (view)) {
         char *history_uri = NULL;
 
@@ -1857,7 +1848,7 @@ load_changed_cb (WebKitWebView  *web_view,
       break;
     }
     case WEBKIT_LOAD_FINISHED:
-      ephy_web_view_set_loading_message (view, NULL);
+      ephy_web_view_unset_loading_message (view);
 
       /* Ensure we load the icon for this web view, if available. */
       _ephy_web_view_update_icon (view);
@@ -2642,6 +2633,10 @@ script_dialog_cb (WebKitWebView      *web_view,
 static void
 ephy_web_view_init (EphyWebView *web_view)
 {
+  EphyEmbedShell *shell;
+
+  shell = ephy_embed_shell_get_default ();
+
   web_view->is_blank = TRUE;
   web_view->ever_committed = FALSE;
   web_view->document_type = EPHY_WEB_VIEW_DOCUMENT_HTML;
@@ -2649,7 +2644,7 @@ ephy_web_view_init (EphyWebView *web_view)
 
   web_view->file_monitor = ephy_file_monitor_new (web_view);
 
-  web_view->history_service = ephy_embed_shell_get_global_history_service (ephy_embed_shell_get_default ());
+  web_view->history_service = ephy_embed_shell_get_global_history_service (shell);
   web_view->history_service_cancellable = g_cancellable_new ();
 
   g_signal_connect_object (web_view->history_service,
@@ -2711,8 +2706,24 @@ ephy_web_view_init (EphyWebView *web_view)
                     G_CALLBACK (new_window_cb),
                     NULL);
 
-  g_signal_connect_object (ephy_embed_shell_get_default (), "page-created",
+  g_signal_connect_object (shell, "page-created",
                            G_CALLBACK (page_created_cb),
+                           web_view, 0);
+
+  g_signal_connect_object (shell, "form-auth-data-save-requested",
+                           G_CALLBACK (form_auth_data_save_requested),
+                           web_view, 0);
+
+  g_signal_connect_object (shell, "sensitive-form-focused",
+                           G_CALLBACK (sensitive_form_focused_cb),
+                           web_view, 0);
+
+  g_signal_connect_object (shell, "allow-tls-certificate",
+                           G_CALLBACK (allow_tls_certificate_cb),
+                           web_view, 0);
+
+  g_signal_connect_object (shell, "allow-unsafe-browsing",
+                           G_CALLBACK (allow_unsafe_browsing_cb),
                            web_view, 0);
 }
 
