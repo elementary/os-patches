@@ -309,15 +309,17 @@ xdp_portal_session_uninhibit (XdpPortal *portal,
   g_return_if_fail (id > 0);
 
   if (portal->inhibit_handles == NULL ||
-      !g_hash_table_steal_extended (portal->inhibit_handles,
-                                    GINT_TO_POINTER (id),
-                                    (gpointer *)&key,
-                                    (gpointer *)&value))
+      !g_hash_table_lookup_extended (portal->inhibit_handles,
+                                     GINT_TO_POINTER (id),
+                                     (gpointer *)&key,
+                                     (gpointer *)&value))
     {
+      g_hash_table_steal (portal->inhibit_handles, key);
       g_warning ("No inhibit handle found");
       return;
     }
 
+  g_hash_table_steal (portal->inhibit_handles, key);
   g_dbus_connection_call (portal->bus,
                           PORTAL_BUS_NAME,
                           value,
