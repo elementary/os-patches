@@ -1,0 +1,27 @@
+name: libportal CI
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+    
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo add-apt-repository ppa:alexlarsson/glib260
+        sudo apt-get update
+        sudo apt-get install -y libglib2.0 gettext dbus gtk-doc-tools meson
+    - name: Check out libportal
+      uses: actions/checkout@v1
+    - name: Configure libportal
+      run: meson setup --prefix=/usr _build
+    - name: Build libportal
+      run: ninja -C_build
