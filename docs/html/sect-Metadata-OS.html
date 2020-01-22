@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.15. Operating System</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-Repository.html" title="2.14. Repositories" /><link rel="next" href="sect-Metadata-Runtime.html" title="2.16. Runtime" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-Repository.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-Runtime.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-OS">
+      ⁠</a>2.15. Operating System</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-os-introduction">
+      ⁠</a>2.15.1. Introduction</h3></div></div></div><div class="para">
+			The <code class="literal">operating-system</code> component type describes a whole operating system such as GNU/Linux distributions like Debian, Fedora, RHEL, etc. or Windows and macOS.
+		</div><div class="para">
+			Operating systems can ship metainfo files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-os-example">
+      ⁠</a>2.15.2. Example file</h3></div></div></div><div class="para">
+			An <code class="literal">operating-system</code> metainfo file can look like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="UTF-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"operating-system"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>org.debian.debian<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>Debian GNU/Linux<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>The universal operating system<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      Debian is a free operating system (OS) for your computer.
+<span xmlns="" class="line">​</span>      An operating system is the set of basic programs and utilities that make your computer run.
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>    ...
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;url</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"homepage"</span><span xmlns="" class="perl_Keyword">&gt;</span>https://www.debian.org/<span xmlns="" class="perl_Keyword">&lt;/url&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>FSFAP<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;developer_name&gt;</span>The Debian Project<span xmlns="" class="perl_Keyword">&lt;/developer_name&gt;</span>
+<span xmlns="" class="line">​</span>  ...
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;releases&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;release</span><span xmlns="" class="perl_Others"> version=</span><span xmlns="" class="perl_String">"10.0"</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"development"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>The next release of Debian.<span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/release&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;release</span><span xmlns="" class="perl_Others"> version=</span><span xmlns="" class="perl_String">"9.0"</span><span xmlns="" class="perl_Others"> date=</span><span xmlns="" class="perl_String">"2017-07-17"</span><span xmlns="" class="perl_Others"> date_eol=</span><span xmlns="" class="perl_String">"2020-07-17"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>Now contains the Linux kernel 4.9, GNOME 3.22, KDE Plasma 5, LibreOffice 5.2 and Qt 5.7. LXQt has been added.<span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/release&gt;</span>
+<span xmlns="" class="line">​</span>    ...
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/releases&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span></pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-os-filespec">
+      ⁠</a>2.15.3. File specification</h3></div></div></div><div class="para">
+			Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">operating-system</code>. This clearly identifies this metainfo document as describing an operating system.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="tag-id-os">
+      ⁠</a><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For operating systems, the value of the <code class="code">&lt;id/&gt;</code> tag must follow the reverse-DNS scheme as described for generic components. In order for AppStream consumers to determine which component is describing the operating system they are currently running on, on Linux distributions the component ID must follow the data provided in the operating system's <code class="filename">/etc/os-release</code> file. This means the reversed-DNS <code class="code">HOME_URL</code> value from <code class="filename">/etc/os-release</code> (without any https/www parts) combined with the <code class="code">ID</code> of the operating system will produce the operating system's component id.
+					</div><div class="para">
+						E.g. if <code class="code">HOME_URL</code> is <code class="code">https://www.debian.org/</code> and <code class="code">ID</code> is <code class="code">debian</code>, the resulting AppStream component-ID will be <code class="code">org.debian.debian</code>.
+					</div></dd><dt><a id="tag-os-releases">
+      ⁠</a><span class="term">&lt;releases/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;releases/&gt;</code> tag as described in <a class="xref" href="chap-Metadata.html#tag-releases">&lt;releases/&gt;</a> must be present and contain the individual releases of the operating system. It is also recommended to set the <code class="literal">date_eol</code> property on individual releases, to allow software to determine whether the current operating system release is still supported.
+					</div></dd></dl></div><div class="para">
+			For a component of type <code class="literal">operating-system</code>, the following tags are required and must be present for a valid document: <a class="xref" href="sect-Metadata-OS.html#tag-id-os">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>, <a class="xref" href="sect-Metadata-OS.html#tag-os-releases">&lt;releases/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-Repository.html"><strong>Prev</strong>2.14. Repositories</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-Runtime.html"><strong>Next</strong>2.16. Runtime</a></li></ul></body></html>

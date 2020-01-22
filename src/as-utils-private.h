@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -127,6 +127,8 @@ gchar			*as_ptr_array_to_str (GPtrArray *array,
 
 AS_INTERNAL_VISIBLE
 gchar			*as_filebasename_from_uri (const gchar *uri);
+
+gchar			*as_date_time_format_iso8601 (GDateTime *datetime);
 
 #pragma GCC visibility pop
 G_END_DECLS

@@ -47,6 +47,7 @@ aslib_pub_headers = [
     'appstream.h',
     'as-utils.h',
     'as-spdx.h',
+    'as-context.h',
     'as-metadata.h',
     'as-component.h',
     'as-pool.h',
@@ -77,7 +78,7 @@ aslib_pub_headers = [
 aslib_priv_headers = [
     'as-utils-private.h',
     'as-tag.h',
-    'as-context.h',
+    'as-context-private.h',
     'as-xml.h',
     'as-yaml.h',
     'as-cache.h',
@@ -138,6 +139,7 @@ aslib_src = aslib_src + [aslib_gperf_xml, aslib_gperf_yaml]
 aslib_deps = [glib_dep,
               gobject_dep,
               gio_unix_dep,
+              soup_dep,
               lmdb_dep,
               xml2_dep,
               yaml_dep]

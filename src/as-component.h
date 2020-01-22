@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -26,6 +26,7 @@
 #define __AS_COMPONENT_H
 
 #include <glib-object.h>
+#include "as-context.h"
 #include "as-enums.h"
 #include "as-provided.h"
 #include "as-icon.h"
@@ -75,6 +76,7 @@ struct _AsComponentClass
  * @AS_COMPONENT_KIND_REPOSITORY:	A remote software or data source
  * @AS_COMPONENT_KIND_OPERATING_SYSTEM: A computer operating system
  * @AS_COMPONENT_KIND_ICON_THEME:	An icon theme following the XDG specification
+ * @AS_COMPONENT_KIND_RUNTIME:		An application runtime platform
  *
  * The type of an #AsComponent.
  **/
@@ -95,6 +97,7 @@ typedef enum  {
 	AS_COMPONENT_KIND_REPOSITORY,
 	AS_COMPONENT_KIND_OPERATING_SYSTEM,
 	AS_COMPONENT_KIND_ICON_THEME,
+	AS_COMPONENT_KIND_RUNTIME,
 	/*< private >*/
 	AS_COMPONENT_KIND_LAST
 } AsComponentKind;
@@ -352,10 +355,22 @@ void			as_component_add_agreement (AsComponent *cpt,
 AsAgreement		*as_component_get_agreement_by_kind (AsComponent *cpt,
 							     AsAgreementKind kind);
 
+const gchar		*as_component_get_name_variant_suffix (AsComponent *cpt);
+void			as_component_set_name_variant_suffix (AsComponent *cpt,
+								const gchar *value,
+								const gchar *locale);
+
 GHashTable		*as_component_get_name_table (AsComponent *cpt);
 GHashTable		*as_component_get_summary_table (AsComponent *cpt);
 GHashTable		*as_component_get_keywords_table (AsComponent *cpt);
 
+gboolean		as_component_load_from_xml_data (AsComponent *cpt,
+							 AsContext *context,
+							 const gchar *data,
+							 GError **error);
+gchar			*as_component_to_xml_data (AsComponent *cpt,
+						   AsContext *context,
+						   GError **error);
 
 /* DEPRECATED */
 

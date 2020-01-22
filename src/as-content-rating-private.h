@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2017 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2017-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -28,11 +28,6 @@
 
 G_BEGIN_DECLS
 #pragma GCC visibility push(hidden)
-
-typedef struct {
-	gchar			*id;
-	AsContentRatingValue	 value;
-} AsContentRatingKey;
 
 gboolean	as_content_rating_load_from_xml (AsContentRating *content_rating,
 						 AsContext *ctx,

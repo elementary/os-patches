@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2016 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  * Copyright (C) 2015-2016 Richard Hughes <richard@hughsie.com>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
@@ -33,7 +33,7 @@
  * @include: appstream.h
  *
  * This object represents a XDG category, as defined at:
- * http://standards.freedesktop.org/menu-spec/menu-spec-1.0.html#category-registry
+ * https://specifications.freedesktop.org/menu-spec/menu-spec-1.0.html#category-registry
  *
  * The #AsCategory object does not support all aspects of a menu. Its main purpose
  * is to be used in software-centers to group visual components (gui/web applications).

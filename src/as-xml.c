@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2017 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -45,14 +45,14 @@ as_xml_get_node_value (xmlNode *node)
 }
 
 /**
- * as_xmldata_get_node_locale:
+ * as_xml_get_node_locale_match:
  * @node: A XML node
  *
  * Returns: The locale of a node, if the node should be considered for inclusion.
  * %NULL if the node should be ignored due to a not-matching locale.
  */
 gchar*
-as_xmldata_get_node_locale (AsContext *ctx, xmlNode *node)
+as_xml_get_node_locale_match (AsContext *ctx, xmlNode *node)
 {
 	gchar *lang;
 
@@ -63,7 +63,7 @@ as_xmldata_get_node_locale (AsContext *ctx, xmlNode *node)
 		goto out;
 	}
 
-	if (as_context_get_all_locale_enabled (ctx)) {
+	if (as_context_get_locale_all_enabled (ctx)) {
 		/* we should read all languages */
 		goto out;
 	}
@@ -128,16 +128,14 @@ as_xml_dump_node_content (xmlNode *node)
 	if (!as_xml_dump_node (node, &content, &len))
 		return NULL;
 
-	/* remove the encosing root node from the string */
+	/* remove the enclosing root node from the string */
 	tmp = g_strrstr_len (content, len, "<");
 	if (tmp != NULL)
 		tmp[0] = '\0';
 
 	tmp = g_strstr_len (content, -1, ">");
-	if (tmp == NULL) {
-		g_free (content);
+	if (tmp == NULL)
 		return NULL;
-	}
 
 	return g_strdup (tmp + 1);
 }
@@ -360,7 +358,7 @@ as_xml_parse_metainfo_description_node (AsContext *ctx, xmlNode *node, GHFunc fu
 			g_autofree gchar *lang = NULL;
 			g_autofree gchar *content = NULL;
 
-			lang = as_xmldata_get_node_locale (ctx, iter);
+			lang = as_xml_get_node_locale_match (ctx, iter);
 			if (lang == NULL)
 				/* this locale is not for us */
 				continue;
@@ -397,7 +395,7 @@ as_xml_parse_metainfo_description_node (AsContext *ctx, xmlNode *node, GHFunc fu
 				if (iter2_tag_id != AS_TAG_LI)
 					continue;
 
-				lang = as_xmldata_get_node_locale (ctx, iter2);
+				lang = as_xml_get_node_locale_match (ctx, iter2);
 				if (lang == NULL)
 					continue;
 
@@ -741,7 +739,7 @@ as_xml_set_out_of_context_error (gchar **error_msg_ptr)
 }
 
 /**
- * as_xmldata_parse_document:
+ * as_xml_parse_document:
  */
 xmlDoc*
 as_xml_parse_document (const gchar *data, gssize len, GError **error)
@@ -795,8 +793,11 @@ as_xml_parse_document (const gchar *data, gssize len, GError **error)
 
 /**
  * as_xml_node_to_str:
+ * @root: The document root node.
  *
  * Converts an XML node into its textural representation.
+ * This takes ownership of the root node and frees it in
+ * the process.
  *
  * Returns: XML metadata.
  */

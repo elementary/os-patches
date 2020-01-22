@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.11. Firmware</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-InputMethod.html" title="2.10. Input Methods" /><link rel="next" href="sect-Metadata-Driver.html" title="2.12. Driver" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-InputMethod.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-Driver.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-Firmware">
+      ⁠</a>2.11. Firmware</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-firmware-introduction">
+      ⁠</a>2.11.1. Introduction</h3></div></div></div><div class="para">
+			Device firmware can be accompanied by AppStream upstream metadata, to be incorporated by a distribution. Tools like <a href="https://github.com/hughsie/fwupd">fwupd</a> make use of this metadata to automatically update flashed firmware of devices found in the machine. Additionally, this component type can also be used for firmware which is loaded onto the device at runtime.
+		</div><div class="para">
+			Firmware can ship one or more files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-firmware-example">
+      ⁠</a>2.11.2. Example file</h3></div></div></div><div class="para">
+			A firmware meta-info file should look like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="UTF-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"firmware"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>com.hughski.ColorHug2.firmware<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>ColorHugALS Firmware<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>Firmware for the ColorHugALS Ambient Light Sensor<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      Updating the firmware on your ColorHugALS device improves performance and
+<span xmlns="" class="line">​</span>      adds new features.
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;url</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"homepage"</span><span xmlns="" class="perl_Keyword">&gt;</span>http://www.hughski.com/<span xmlns="" class="perl_Keyword">&lt;/url&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>CC0-1.0<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;project_license&gt;</span>GPL-2.0+<span xmlns="" class="perl_Keyword">&lt;/project_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;developer_name&gt;</span>Hughski Limited<span xmlns="" class="perl_Keyword">&lt;/developer_name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;provides&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;firmware</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"flashed"</span><span xmlns="" class="perl_Keyword">&gt;</span>84f40464-9272-4ef7-9399-cd95f12da696<span xmlns="" class="perl_Keyword">&lt;/firmware&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/provides&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;releases&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;release</span><span xmlns="" class="perl_Others"> version=</span><span xmlns="" class="perl_String">"3.0.2"</span><span xmlns="" class="perl_Others"> date=</span><span xmlns="" class="perl_String">"2015-02-16"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;artifacts&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;artifact</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"binary"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>          <span xmlns="" class="perl_Keyword">&lt;location&gt;</span>http://www.hughski.com/downloads/colorhug-als/firmware/colorhug-als-3.0.2.cab<span xmlns="" class="perl_Keyword">&lt;/location&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;/artifact&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;/artifacts&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>This stable release fixes the following bugs:<span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;ul&gt;</span>
+<span xmlns="" class="line">​</span>          <span xmlns="" class="perl_Keyword">&lt;li&gt;</span>Fix the return code from GetHardwareVersion<span xmlns="" class="perl_Keyword">&lt;/li&gt;</span>
+<span xmlns="" class="line">​</span>          <span xmlns="" class="perl_Keyword">&lt;li&gt;</span>Scale the output of TakeReadingRaw by the datasheet values<span xmlns="" class="perl_Keyword">&lt;/li&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;/ul&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/release&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/releases&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span></pre><div class="para">
+			You can find additional information on how to create a complete firmware package for flashed firmware upstream in the <a href="https://github.com/hughsie/fwupd/blob/master/README.md">README document of fwupd</a>.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-firmware-filespec">
+      ⁠</a>2.11.3. File specification</h3></div></div></div><div class="para">
+			Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">firmware</code>. This clearly identifies this metainfo document as describing firmware.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="tag-id-firmware">
+      ⁠</a><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For firmware, the value of the <code class="code">&lt;id/&gt;</code> tag must follow the reverse-DNS scheme as described for generic components. It is sometimes useful to suffix the ID with <code class="literal">.firmware</code> to make it more unique. For example <code class="code">com.hughski.ColorHug2.firmware</code>.
+					</div></dd><dt><a id="tag-firmware-releases">
+      ⁠</a><span class="term">&lt;releases/&gt;</span></dt><dd><div class="para">
+						This tag is identical to the generic <a class="xref" href="chap-Metadata.html#tag-releases">&lt;releases/&gt;</a> tag. Additional to the generic tag, for each <code class="code">&lt;release/&gt;</code> child at least one <code class="code">&lt;artifact/&gt;</code> tag is required in case the component describes flashed firmware.
+					</div><div class="para">
+						The <code class="code">&lt;location/&gt;</code> tag of the binary artifact specifies a remote location where the firmware <code class="literal">.cab</code> can be downloaded from. The download location needs to be accessible via HTTP, HTTPS or FTP.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;releases&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;release</span><span xmlns="" class="perl_Others"> version=</span><span xmlns="" class="perl_String">"3.0.2"</span><span xmlns="" class="perl_Others"> date=</span><span xmlns="" class="perl_String">"2015-02-16"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;artifacts&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;artifact</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"binary"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;location&gt;</span>http://www.hughski.com/downloads/colorhug-als/firmware/colorhug-als-3.0.2.cab<span xmlns="" class="perl_Keyword">&lt;/location&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;/artifact&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/artifacts&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>This stable release fixes bugs.<span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/release&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/releases&gt;</span></pre></dd><dt><a id="tag-firmware-provides">
+      ⁠</a><span class="term">&lt;provides/&gt; ↪ &lt;firmware/&gt;</span></dt><dd><div class="para">
+						The <code class="literal">provides/firmware</code> tag describes the technical information needed to associate a firmware with a device, or describes which runtime firmware file it makes available to the kernel.
+					</div><div class="para">
+						For runtime-loadable firmware, the <code class="literal">type</code> property of the <code class="literal">firmware</code> tag needs to be set to <code class="code">runtime</code>, and its value needs to define the filename of a firmware below <code class="filename">/lib/firmware</code> to the firmware file in question, like the firmware value exported from Linux kernel modules.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;provides&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;firmware</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"runtime"</span><span xmlns="" class="perl_Keyword">&gt;</span>ipw2200-bss.fw<span xmlns="" class="perl_Keyword">&lt;/firmware&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/provides&gt;</span></pre><div class="para">
+						For flashed firmware, the <code class="literal">type</code> property of the tag needs to be set to <code class="code">flashed</code>. Its value needs to define the GUID of the device the firmware should be flashed onto.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;provides&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;firmware</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"flashed"</span><span xmlns="" class="perl_Keyword">&gt;</span>84f40464-9272-4ef7-9399-cd95f12da696<span xmlns="" class="perl_Keyword">&lt;/firmware&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/provides&gt;</span></pre></dd></dl></div><div class="para">
+			For a component of type <code class="literal">firmware</code>, the following tags are required and must be present for a valid document: <a class="xref" href="sect-Metadata-Firmware.html#tag-id-firmware">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>, <a class="xref" href="sect-Metadata-Firmware.html#tag-firmware-provides">&lt;provides/&gt; ↪ &lt;firmware/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-InputMethod.html"><strong>Prev</strong>2.10. Input Methods</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-Driver.html"><strong>Next</strong>2.12. Driver</a></li></ul></body></html>

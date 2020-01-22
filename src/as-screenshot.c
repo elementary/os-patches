@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  * Copyright (C) 2014 Richard Hughes <richard@hughsie.com>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
@@ -34,6 +34,7 @@
 
 #include "as-utils.h"
 #include "as-utils-private.h"
+#include "as-context-private.h"
 #include "as-image-private.h"
 #include "as-video-private.h"
 
@@ -267,17 +268,11 @@ as_screenshot_add_video (AsScreenshot *screenshot, AsVideo *video)
 const gchar*
 as_screenshot_get_caption (AsScreenshot *screenshot)
 {
-	const gchar *caption;
 	AsScreenshotPrivate *priv = GET_PRIVATE (screenshot);
-
-	caption = g_hash_table_lookup (priv->caption,
-					as_screenshot_get_active_locale (screenshot));
-	if (caption == NULL) {
-		/* fall back to untranslated / default */
-		caption = g_hash_table_lookup (priv->caption, "C");
-	}
-
-	return caption;
+	return as_context_localized_ht_get (priv->context,
+					    priv->caption,
+					    priv->active_locale_override,
+					    AS_VALUE_FLAG_NONE);
 }
 
 /**
@@ -291,13 +286,10 @@ void
 as_screenshot_set_caption (AsScreenshot *screenshot, const gchar *caption, const gchar *locale)
 {
 	AsScreenshotPrivate *priv = GET_PRIVATE (screenshot);
-
-	if (locale == NULL)
-		locale = as_screenshot_get_active_locale (screenshot);
-
-	g_hash_table_insert (priv->caption,
-				as_locale_strip_encoding (g_strdup (locale)),
-				g_strdup (caption));
+	as_context_localized_ht_set (priv->context,
+				     priv->caption,
+				     caption,
+				     locale);
 }
 
 /**
@@ -499,7 +491,7 @@ as_screenshot_load_from_xml (AsScreenshot *screenshot, AsContext *ctx, xmlNode *
 			if (content == NULL)
 				continue;
 
-			lang = as_xmldata_get_node_locale (ctx, iter);
+			lang = as_xml_get_node_locale_match (ctx, iter);
 			if (lang != NULL)
 				as_screenshot_set_caption (screenshot, content, lang);
 		}

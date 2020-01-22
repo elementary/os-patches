@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2018-2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2018-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -153,7 +153,7 @@ AsValidatorIssueTag as_validator_issue_tag_list[] =  {
 
 	{ "spdx-license-unknown",
 	  AS_ISSUE_SEVERITY_WARNING,
-	  N_("The license ID is not found in the SPDX database. "
+	  N_("The license ID was not found in the SPDX database. "
 	     "Please check that the license ID is written in an SPDX-conformant way and is a valid free software license.")
 	},
 
@@ -184,7 +184,7 @@ AsValidatorIssueTag as_validator_issue_tag_list[] =  {
 	  N_("Unable to reach the screenshot video on its remote location - does the video file exist?")
 	},
 
-	{ "screenshot-media-url-insecure",
+	{ "screenshot-media-url-not-secure",
 	  AS_ISSUE_SEVERITY_INFO,
 	  N_("Consider using a secure (HTTPS) URL to reference this screenshot image or video.")
 	},
@@ -383,6 +383,11 @@ AsValidatorIssueTag as_validator_issue_tag_list[] =  {
 	  N_("Consider using a secure (HTTPS) URL for this web link."),
 	},
 
+	{ "url-uses-ftp",
+	  AS_ISSUE_SEVERITY_WARNING,
+	  N_("This web link uses the FTP protocol. Consider switching to HTTP(S) instead."),
+	},
+
 	{ "developer-name-has-url",
 	  AS_ISSUE_SEVERITY_WARNING,
 	  N_("The <developer_name/> can not contain a hyperlink."),
@@ -390,7 +395,7 @@ AsValidatorIssueTag as_validator_issue_tag_list[] =  {
 
 	{ "unknown-desktop-id",
 	  AS_ISSUE_SEVERITY_ERROR,
-	  N_("The given values is not an identifier for a desktop environment as registered with Freedesktop.org."),
+	  N_("The set value is not an identifier for a desktop environment as registered with Freedesktop.org."),
 	},
 
 	{ "launchable-unknown-type",
@@ -542,11 +547,6 @@ AsValidatorIssueTag as_validator_issue_tag_list[] =  {
 	  N_("The XML of this file is malformed."),
 	},
 
-	{ "curl-not-found",
-	  AS_ISSUE_SEVERITY_INFO,
-	  N_("Unable to find the curl binary. remote URLs can not be checked for validity!"),
-	},
-
 	{ "component-collection-tag-invalid",
 	  AS_ISSUE_SEVERITY_ERROR,
 	  /* TRANSLATORS: Please do not translate AppStream tag and property names. */
@@ -621,6 +621,18 @@ AsValidatorIssueTag as_validator_issue_tag_list[] =  {
 	  AS_ISSUE_SEVERITY_WARNING,
 	  N_("This component extends, provides, requires or recommends itself, which is certainly not intended and may confuse users or machines dealing "
 	     "with this metadata."),
+	},
+
+	{ "runtime-project-license-no-ref",
+	  AS_ISSUE_SEVERITY_INFO,
+	  /* TRANSLATORS: Please do not translate AppStream tag and property names. */
+	  N_("Licenses for 'runtime' components are usually too complex to reflect them in a simple SPDX expression. Consider using a `LicenseRef` and a web URL "
+	     "as value for this component's 'project_license'. E.g. `LicenseRef-free=https://example.com/licenses.html`")
+	},
+
+	{ "runtime-no-provides",
+	  AS_ISSUE_SEVERITY_PEDANTIC,
+	  N_("Since a 'runtime' component is comprised of multiple other software components, their component-IDs may be listed in a `<provides/>` section for this runtime.")
 	},
 
 	{ "unknown-provides-item-type",

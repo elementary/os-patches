@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
+ * Copyright (C) 2014-2020 Matthias Klumpp <matthias@tenstral.net>
  * Copyright (C) 2014 Richard Hughes <richard@hughsie.com>
- * Copyright (C) 2014-2016 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -288,7 +288,7 @@ as_image_load_from_xml (AsImage *image, AsContext *ctx, xmlNode *node, GError **
 	if (content == NULL)
 		return FALSE;
 
-	lang = as_xmldata_get_node_locale (ctx, node);
+	lang = as_xml_get_node_locale_match (ctx, node);
 
 	/* check if this image is for us */
 	if (lang == NULL)
@@ -332,6 +332,7 @@ as_image_load_from_xml (AsImage *image, AsContext *ctx, xmlNode *node, GError **
 		}
 	}
 
+	g_strstrip (content);
 	if (!as_context_has_media_baseurl (ctx)) {
 		/* no baseurl, we can just set the value as URL */
 		as_image_set_url (image, content);

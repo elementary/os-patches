@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2018-2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2018-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -53,6 +53,7 @@ struct _AsCacheClass
  * @AS_CACHE_ERROR_LOCALE_MISMATCH:	Cache locale was different from the expected one.
  * @AS_CACHE_ERROR_FLOATING:		The given action can not be performed on a floating cache.
  * @AS_CACHE_ERROR_NO_FILENAME:		No filename was set to open the database.
+ * @AS_CACHE_ERROR_BAD_DATA:		The data that should be added failed a sanity check
  *
  * A metadata pool error.
  **/
@@ -63,6 +64,7 @@ typedef enum {
 	AS_CACHE_ERROR_LOCALE_MISMATCH,
 	AS_CACHE_ERROR_FLOATING,
 	AS_CACHE_ERROR_NO_FILENAME,
+	AS_CACHE_ERROR_BAD_DATA,
 	/*< private >*/
 	AS_CACHE_ERROR_LAST
 } AsCacheError;

@@ -1,0 +1,27 @@
+From 3ef1e7d4957ee61c2d63c202f4324c1a62befb3c Mon Sep 17 00:00:00 2001
+From: Matthias Klumpp <matthias@tenstral.net>
+Date: Sat, 18 Jan 2020 19:38:18 +0100
+Subject: [PATCH] Be less noisy about ignoring excessively long search tokens
+
+See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=942438 for an
+example. Until the tokenizer can handle Japanese better or a stemming
+algorithm is added that works for Japanese, it's better to not make too
+much noise about these issues.
+We do still log them though.
+---
+ src/as-cache.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/as-cache.c b/src/as-cache.c
+index 68b30087..c6454ded 100644
+--- a/src/as-cache.c
++++ b/src/as-cache.c
+@@ -1192,7 +1192,7 @@ as_cache_insert (AsCache *cache, AsComponent *cpt, GError **error)
+ 			continue;
+ 		}
+ 		if (token_len > priv->max_keysize) {
+-			g_warning ("Ignored search token '%s': Too long to be stored in the cache.", token_str);
++			g_debug ("Ignored search token '%s': Too long to be stored in the cache.", token_str);
+ 			continue;
+ 		}
+ 

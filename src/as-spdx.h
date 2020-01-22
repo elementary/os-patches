@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2016 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -29,8 +29,9 @@
 
 G_BEGIN_DECLS
 
-gboolean	 as_is_spdx_license_id (const gchar *license_id);
-gboolean	 as_is_spdx_license_expression (const gchar *license);
+gboolean	as_is_spdx_license_id (const gchar *license_id);
+gboolean	as_is_spdx_license_exception_id (const gchar *exception_id);
+gboolean	as_is_spdx_license_expression (const gchar *license);
 
 gchar		**as_spdx_license_tokenize (const gchar *license);
 gchar		*as_spdx_license_detokenize (gchar **license_tokens);
@@ -38,6 +39,7 @@ gchar		*as_spdx_license_detokenize (gchar **license_tokens);
 gchar		*as_license_to_spdx_id (const gchar *license);
 
 gboolean	as_license_is_metadata_license (const gchar *license);
+gboolean	as_license_is_free_license (const gchar *license);
 
 gchar		*as_get_license_url (const gchar *license);
 

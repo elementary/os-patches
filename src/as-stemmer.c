@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2016 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2016-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -131,6 +131,14 @@ as_stemmer_stem (AsStemmer *stemmer, const gchar *term)
 						     strlen (term)));
 
 	g_mutex_locker_free (locker);
+
+	/* Snowball sometimes stems tokens to an empty string,
+	 * for example the Turkish "leri" token. See issue #264
+	 * In this case, we currently just filter out the token,
+	 * as this sort of stemming seems to generally indicate an
+	 * unsuitable search token. */
+	if ((result != NULL) && (result[0] == '\0'))
+		return NULL;
 	return result;
 #else
 	return g_strdup (term);

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.5. Services</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-WebApplication.html" title="2.4. Web Applications" /><link rel="next" href="sect-Metadata-Addon.html" title="2.6. Addons" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-WebApplication.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-Addon.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-Service">
+      ⁠</a>2.5. Services</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-service-introduction">
+      ⁠</a>2.5.1. Introduction</h3></div></div></div><div class="para">
+			A service component is any software that is started and supervised by the Operating Systems "init" facility, such as systemd.
+		</div><div class="para">
+			The metadata described in this document is built upon the generic component metadata with fields specific for services (see <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a>). All tags valid for a generic component are valid for a <code class="literal">service</code> component as well.
+		</div><div class="para">
+			In order to enhance the available metadata about their services, projects shipping a service can ship one or more metainfo files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-service-filespec">
+      ⁠</a>2.5.2. File specification</h3></div></div></div><div class="para">
+			The basic structure for a generic component as described at <a class="xref" href="chap-Metadata.html#spec-component-filespec">Section 2.1.3, “XML Specification”</a> applies. Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">service</code>, while in a generic component this property can be omitted. This clearly identified this metainfo document as describing a service.
+		</div><div class="para">
+			The following list describes tags for <code class="literal">service</code> upstream metadata and provides some additional information about the values the tags are expected to have. If no information is given about a tag, refer to the respective tag in <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a>.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="tag-id-service-app">
+      ⁠</a><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For services, the <code class="code">&lt;id/&gt;</code> tag value must follow the AppStream ID naming conventions (it should be a reverse-DNS name).
+					</div></dd><dt><span class="term">&lt;metadata_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;metadata_license/&gt;</code> tag as described in <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a> must be present.
+					</div></dd><dt><span class="term">&lt;name/&gt;</span></dt><dd><div class="para">
+						A <code class="literal">name</code> must be present for services. See <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><span class="term">&lt;summary/&gt;</span></dt><dd><div class="para">
+						A <code class="literal">summary</code> must be present for services. See <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><a id="tag-service-provides">
+      ⁠</a><span class="term">&lt;provides/&gt; ↪ &lt;service/&gt;</span></dt><dd><div class="para">
+						This tag is described in detail for generic components at <a class="xref" href="chap-Metadata.html#tag-provides">&lt;provides/&gt;</a>.
+					</div></dd><dt><a id="tag-service-launchable">
+      ⁠</a><span class="term">&lt;launchable/&gt;</span></dt><dd><div class="para">
+						This tag is described in detail for generic components at <a class="xref" href="chap-Metadata.html#tag-launchable">&lt;launchable/&gt;</a>.
+					</div><div class="para">
+						At least one launchable element with type "service" must be present. The value is a name that can be used with the OS init facility to start/stop and monitor the service.
+					</div></dd></dl></div><div class="para">
+			For a component of type <code class="literal">service</code>, the following tags are required and must always be present: <a class="xref" href="sect-Metadata-Service.html#tag-id-service-app">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>, <a class="xref" href="sect-Metadata-Service.html#tag-service-provides">&lt;provides/&gt; ↪ &lt;service/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-WebApplication.html"><strong>Prev</strong>2.4. Web Applications</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-Addon.html"><strong>Next</strong>2.6. Addons</a></li></ul></body></html>

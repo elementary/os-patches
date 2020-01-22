@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.14. Repositories</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-Localization.html" title="2.13. Localization" /><link rel="next" href="sect-Metadata-OS.html" title="2.15. Operating System" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-Localization.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-OS.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-Repository">
+      ⁠</a>2.14. Repositories</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-repository-introduction">
+      ⁠</a>2.14.1. Introduction</h3></div></div></div><div class="para">
+			A repository component describes a remote archive of digital content, usually other software or additional data (e.g. themes, icons, books, music, ...). Upon installation of a component of this type, the repective repository is added to the system and activated, letting the user access the new content.
+		</div><div class="para">
+			The metadata described in this document is built upon the generic component metadata (see <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a>). All tags valid for a generic component are valid for a <code class="literal">repository</code> component as well.
+		</div><div class="para">
+			In order to add metadata about a software repository, projects can provide one or more metainfo files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-repository-filespec">
+      ⁠</a>2.14.2. File specification</h3></div></div></div><div class="para">
+			The basic structure for a generic component as described at <a class="xref" href="chap-Metadata.html#spec-component-filespec">Section 2.1.3, “XML Specification”</a> applies. Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">repository</code>, while in a generic component this property can be omitted. This clearly identified this metainfo document as describing a repository.
+		</div><div class="para">
+			The following list describes tags for <code class="literal">repository</code> upstream metadata and provides some additional information about the values the tags are expected to have. If no information is given about a tag, refer to the respective tag in <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a>.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="tag-id-repo">
+      ⁠</a><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For repositories, the <code class="code">&lt;id/&gt;</code> tag value must follow the AppStream ID naming conventions (it should be a reverse-DNS name).
+					</div></dd><dt><span class="term">&lt;metadata_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;metadata_license/&gt;</code> tag as described in <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a> must be present.
+					</div></dd><dt><span class="term">&lt;name/&gt;</span></dt><dd><div class="para">
+						A <code class="literal">name</code> must be present for repositories. See <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><span class="term">&lt;summary/&gt;</span></dt><dd><div class="para">
+						A <code class="literal">summary</code> must be present for repositories. See <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><a id="tag-extends-repo">
+      ⁠</a><span class="term">&lt;extends/&gt;</span></dt><dd><div class="para">
+						This tag is refers to the ID of the component this repository is added to, similarly to how components of type <code class="literal">addon</code> work.
+					</div><div class="para">
+						Adding an <code class="literal">extends</code> tag ensures the respective repository is tied to its main component, e.g. a source for firmware downloads is tied to the firmware update service, or a repository for a site-specific package manager is tied to the tool that can actually install pieces from the repository.
+					</div><div class="para">
+						The <code class="code">&lt;extends/&gt;</code> tag may be specified multiple times.
+					</div></dd><dt><a id="tag-agreement-repo">
+      ⁠</a><span class="term">&lt;agreement/&gt;</span></dt><dd><div class="para">
+						It is recommended to add a <a href="https://www.eugdpr.org/">GDPR</a> compliant privacy statement to <code class="literal">repository</code> components, in case any personal data is acquired when the repository is accessed.
+					</div><div class="para">
+						The <code class="literal">agreement</code> tag allows to add a privacy statement and other agreements easily. Refer to the <a class="xref" href="chap-Metadata.html#tag-agreement">&lt;agreement/&gt;</a> tag as described for generic components for information on how to use agreements in AppStream.
+					</div></dd></dl></div><div class="para">
+			For a component of type <code class="literal">repository</code>, the following tags are required and must always be present: <a class="xref" href="sect-Metadata-Repository.html#tag-id-repo">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-Localization.html"><strong>Prev</strong>2.13. Localization</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-OS.html"><strong>Next</strong>2.15. Operating System</a></li></ul></body></html>

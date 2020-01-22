@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2017 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -456,7 +456,7 @@ as_yaml_get_node_locale (AsContext *ctx, GNode *node)
 {
 	const gchar *key = as_yaml_node_get_key (node);
 
-	if (as_context_get_all_locale_enabled (ctx)) {
+	if (as_context_get_locale_all_enabled (ctx)) {
 		/* we should read all languages */
 		return key;
 	}

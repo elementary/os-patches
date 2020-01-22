@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.8. Icon Themes</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-Fonts.html" title="2.7. Fonts" /><link rel="next" href="sect-Metadata-Codec.html" title="2.9. Codecs" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-Fonts.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-Codec.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-IconTheme">
+      ⁠</a>2.8. Icon Themes</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-iconthemedata-introduction">
+      ⁠</a>2.8.1. Introduction</h3></div></div></div><div class="para">
+			Icon themes as defined in the <a href="https://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html"> Freedesktop Icon Theme Specification</a> can contain <code class="literal">icon-theme</code> metainfo files to be installed by software centers. This metainfo specification describes how metadata for icon themes should be structured.
+		</div><div class="para">
+			Icon theme packages can ship one or more files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div><div class="para">
+			Icon theme metadata files can – just like all other metainfo files – be translated. See the section about translation for more information.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-iconthemedata-example">
+      ⁠</a>2.8.2. Example file</h3></div></div></div><div class="para">
+			A minimal icon theme metainfo file can look like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="utf-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"icon-theme"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>io.git.PapirusIconTheme<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>FSFAP<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;project_license&gt;</span>GPL-3.0<span xmlns="" class="perl_Keyword">&lt;/project_license&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>Papirus<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>A free and open source icon theme for Linux, based on the Paper Icon Set<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      Papirus is a free and open source SVG icon theme for Linux, based on Paper Icon Set
+<span xmlns="" class="line">​</span>      with a lot of new icons and a few extras, like Hardcode-Tray support, KDE colorscheme
+<span xmlns="" class="line">​</span>      support, Folder Color support, and others.
+<span xmlns="" class="line">​</span>      It is available in four variants:
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;ul&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;li&gt;</span>Papirus<span xmlns="" class="perl_Keyword">&lt;/li&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;li&gt;</span>Papirus Dark<span xmlns="" class="perl_Keyword">&lt;/li&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;li&gt;</span>Papirus Light<span xmlns="" class="perl_Keyword">&lt;/li&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;li&gt;</span>ePapirus (for elementary OS and Pantheon Desktop)<span xmlns="" class="perl_Keyword">&lt;/li&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/ul&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;screenshots&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;screenshot</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"default"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;image</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"source"</span><span xmlns="" class="perl_Keyword">&gt;</span>https://raw.githubusercontent.com/PapirusDevelopmentTeam/papirus-icon-theme/master/preview.png<span xmlns="" class="perl_Keyword">&lt;/image&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/screenshot&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/screenshots&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span></pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-iconthemedata-filespec">
+      ⁠</a>2.8.3. File specification</h3></div></div></div><div class="para">
+			Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">icon-theme</code>. This clearly identifies this metainfo document as describing an icon theme following the Freedesktop specification.
+		</div><div class="para">
+			A new metainfo file is required for each variant of the icon theme (one for each <code class="filename">index.theme</code>) to describe the individual icon themes and allow them to be installed individually. That is, unless all the different theme variants are designed to be installed together (due to symbolic links between themes or <code class="code">Inherits</code> fields in the theme description), in which case only one <code class="literal">icon-theme</code> component is required to describe the whole icon theme set.
+		</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For fonts, the <code class="literal">%{id}</code> must follow the reverse-DNS scheme as described for generic components.
+					</div></dd><dt><span class="term">&lt;metadata_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;metadata_license/&gt;</code> tag is required. See <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a> for a description of this tag.
+					</div></dd><dt><span class="term">&lt;name/&gt;</span></dt><dd><div class="para">
+						Set a name for the icon theme or set of icon themes intended to be shipped in one bundle.
+					</div></dd><dt><span class="term">&lt;summary/&gt;</span></dt><dd><div class="para">
+						A short description of the icon theme.
+					</div></dd><dt><span class="term">&lt;description/&gt;</span></dt><dd><div class="para">
+						Add a long description of your icon theme.
+					</div><div class="para">
+						See the generic component <a class="xref" href="chap-Metadata.html#tag-description">&lt;description/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><span class="term">&lt;screenshots/&gt;</span></dt><dd><div class="para">
+						A screenshot to show off the icon theme.
+					</div><div class="para">
+						A good example on how that may look like is <a href="https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/blob/master/preview.png">the preview image of the Papirus icon theme</a>.
+					</div><div class="para">
+						See the generic component <a class="xref" href="chap-Metadata.html#tag-screenshots">&lt;screenshots/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><span class="term">&lt;url/&gt;</span></dt><dd><div class="para">
+						This is a recommended tag for links of type <code class="code">homepage</code>. Links of type <code class="code">homepage</code> should be a link to the upstream homepage for the icon theme. See the generic component <a class="xref" href="chap-Metadata.html#tag-url">&lt;url/&gt;</a> for a description of this tag.
+					</div></dd></dl></div><div class="para">
+			For a component of type <code class="literal">icon-theme</code>, the following tags are required and must be present: <a class="xref" href="chap-Metadata.html#tag-id-generic">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-Fonts.html"><strong>Prev</strong>2.7. Fonts</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-Codec.html"><strong>Next</strong>2.9. Codecs</a></li></ul></body></html>

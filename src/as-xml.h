@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2017 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -29,14 +29,15 @@
 #include <libxml/parser.h>
 #include <libxml/xmlsave.h>
 #include "as-context.h"
+#include "as-metadata.h"
 #include "as-tag.h"
 
 G_BEGIN_DECLS
 #pragma GCC visibility push(hidden)
 
 gchar		*as_xml_get_node_value (xmlNode *node);
-gchar		*as_xmldata_get_node_locale (AsContext *ctx,
-					     xmlNode *node);
+gchar		*as_xml_get_node_locale_match (AsContext *ctx,
+					       xmlNode *node);
 
 void		as_xml_add_children_values_to_array (xmlNode *node,
 						     const gchar *element_name,

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.7. Fonts</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-Addon.html" title="2.6. Addons" /><link rel="next" href="sect-Metadata-IconTheme.html" title="2.8. Icon Themes" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-Addon.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-IconTheme.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-Fonts">
+      ⁠</a>2.7. Fonts</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-fontdata-introduction">
+      ⁠</a>2.7.1. Introduction</h3></div></div></div><div class="para">
+			A software center can allow users to install additional fonts using font metadata. Also, applications can use font metadata to find missing fonts (for example, if a special mathematical font is needed) in the distribution's software sources. This metainfo specification describes how metadata for fonts or font collections should be structured.
+		</div><div class="para">
+			Font packages can ship one or more files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div><div class="para">
+			Font metadata files can – just like all other metainfo files – be translated. See the section about translation for more information.
+		</div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+				A <code class="literal">font</code> component is in most cases not describing a single font, but rather a collection of fonts that are grouped together, usually by their art style or font-family.
+			</div><div class="para">
+				To make the individual fonts known to the system, use the <a class="xref" href="sect-Metadata-Fonts.html#tag-font-provides">&lt;provides/&gt; ↪ &lt;font/&gt;</a> tag.
+			</div></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-fontdata-example">
+      ⁠</a>2.7.2. Example file</h3></div></div></div><div class="para">
+			A minimal font metainfo file can look like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="UTF-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"font"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>com.latofonts.Lato<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>MIT<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;project_license&gt;</span>OFL-1.1<span xmlns="" class="perl_Keyword">&lt;/project_license&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>Lato<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>A sanserif type­face fam­ily<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      Lato is a sanserif type­face fam­ily designed in the Sum­mer 2010 by Warsaw-​​based designer
+<span xmlns="" class="line">​</span>      Łukasz Dziedzic (“Lato” means “Sum­mer” in Pol­ish). In Decem­ber 2010 the Lato fam­ily
+<span xmlns="" class="line">​</span>      was pub­lished under the open-​​source Open Font License by his foundry tyPoland, with
+<span xmlns="" class="line">​</span>      sup­port from Google.
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;provides&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>Lato Regular<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>Lato Italic<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>Lato Bold<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>Lato Light<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>Lato Light Italic<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span>    ...
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/provides&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span></pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-fontdata-filespec">
+      ⁠</a>2.7.3. File specification</h3></div></div></div><div class="para">
+			Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">font</code>. This clearly identifies this metainfo document as describing a font.
+		</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For fonts, the <code class="literal">%{id}</code> must follow the reverse-DNS scheme as described for generic components. For the product name part, it is recommended to take the the name of the font or font bundle without whitespace.
+					</div></dd><dt><span class="term">&lt;metadata_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;metadata_license/&gt;</code> tag is required. See <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a> for a description of this tag.
+					</div></dd><dt><span class="term">&lt;name/&gt;</span></dt><dd><div class="para">
+						Set a name for the font or font collection.
+					</div></dd><dt><span class="term">&lt;summary/&gt;</span></dt><dd><div class="para">
+						A short description of the font described in this metainfo file.
+					</div></dd><dt><span class="term">&lt;description/&gt;</span></dt><dd><div class="para">
+						Add a long description of your font. Do not assume the format is HTML. Only paragraph, ordered list and unordered list are supported at this time.
+					</div><div class="para">
+						See the generic component <a class="xref" href="chap-Metadata.html#tag-description">&lt;description/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><span class="term">&lt;screenshots/&gt;</span></dt><dd><div class="para">
+						A screenshot presents your font to the outside world.
+					</div><div class="para">
+						If the font metadata does not define an own screenshot, the AppStream generator is supposed to render one or multiple sample images using the respective font.
+					</div><div class="para">
+						See the generic component <a class="xref" href="chap-Metadata.html#tag-screenshots">&lt;screenshots/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><span class="term">&lt;url/&gt;</span></dt><dd><div class="para">
+						This is a recommended tag for links of type <code class="code">homepage</code>. Links of type <code class="code">homepage</code> should be a link to the upstream homepage for the application. See the generic component <a class="xref" href="chap-Metadata.html#tag-url">&lt;url/&gt;</a> for a description of this tag.
+					</div></dd><dt><a id="tag-font-provides">
+      ⁠</a><span class="term">&lt;provides/&gt; ↪ &lt;font/&gt;</span></dt><dd><div class="para">
+						This tag is described in detail for generic components at <a class="xref" href="chap-Metadata.html#tag-provides">&lt;provides/&gt;</a>.
+					</div><div class="para">
+						You should add one or more children of type <code class="code">&lt;font/&gt;</code> to make the font's full-names known. The full-name should be the same as given in the font file for the English language. If no full-name is set, a space-separated combination of the font's <code class="literal">family</code> and <code class="literal">style</code> is used instead. The font <span class="emphasis"><em>must</em></span> have a <code class="literal">family</code> defined to be included.
+					</div><div class="para">
+						The full-name entry should show the complete name of a typeface in its “natural” form, including style and character set information (if any), and without abbreviations. This is the name that some systems and applications look at to determine full, unabbreviated font menu names.
+					</div><div class="para">
+						If you want to query the full-name and its <code class="literal">family</code> and <code class="literal">style</code> to see what needs to be added to this tag, you can use the <code class="command">fc-query</code> utility of Fonconfig:
+					</div><pre class="screen"><code class="command">fc-query</code> --format='FN: %{fullname[0]}\nFS: %{family[0]} %{style[0]}\n' <strong class="userinput"><code>FONT-FILENAME</code></strong></pre><div class="para">
+						Examples:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;provides&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>Lato Heavy Italic<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>Noto Kufi Arabic Bold<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>Liberation Serif Bold Italic<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;font&gt;</span>FontAwesome Regular<span xmlns="" class="perl_Keyword">&lt;/font&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/provides&gt;</span></pre><div class="para">
+						If no <code class="code">&lt;font/&gt;</code> tags were defined, the AppStream collection data generator should try to extract them from the actual font files found in the software package/bundle.
+					</div><div class="para">
+						In every case, the names given in the provides tag <span class="emphasis"><em>must</em></span> match the metadat the fonts contain themselves. If the data of the font files is incomplete, the data can not be extended by the <code class="code">&lt;font/&gt;</code> tag. This is important because the AppStream generator may use the data to pick the right fonts, and because applications expect the exact font they requested via AppStream to be present on the system after the component was installed (and not one which has different metadata).
+					</div></dd><dt><a id="tag-font-languages">
+      ⁠</a><span class="term">&lt;languages/&gt;</span></dt><dd><div class="para">
+						This tag gives information about the locale a font supports.
+					</div><div class="para">
+						This tak allows specifying the main locale (and thereby scripts) the font can be used with. It does not have to contain an extensive list, as the AppStream metadata generator will try get obtain that information from the font files themselves, but it is useful to define to hint the generator in the right direction.
+					</div><div class="para">
+						If samples of the font are rendered as screenshots by the collection metadata generator, the locale mentioned in the metainfo file will be preferred over automatically (or heuristically) defined ones.
+					</div><div class="para">
+						You can use the following command to determine which languages a font supports:
+					</div><pre class="screen"><code class="command">fc-query</code> --format='%{lang}\n' <strong class="userinput"><code>FONT-FILENAME</code></strong></pre><div class="para">
+						Tag example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;languages&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;lang&gt;</span>de<span xmlns="" class="perl_Keyword">&lt;/lang&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;lang&gt;</span>en<span xmlns="" class="perl_Keyword">&lt;/lang&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;lang&gt;</span>cn<span xmlns="" class="perl_Keyword">&lt;/lang&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/languages&gt;</span>
+</pre></dd></dl></div><div class="para">
+			For a component of type <code class="literal">font</code>, the following tags are required and must be present: <a class="xref" href="chap-Metadata.html#tag-id-generic">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>, <a class="xref" href="sect-Metadata-Fonts.html#tag-font-provides">&lt;provides/&gt; ↪ &lt;font/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-Addon.html"><strong>Prev</strong>2.6. Addons</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-IconTheme.html"><strong>Next</strong>2.8. Icon Themes</a></li></ul></body></html>

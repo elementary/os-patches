@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">Chapter 4. Metadata Quickstart</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="index.html" title="AppStream" /><link rel="prev" href="sect-AppStream-IconCache.html" title="3.3. Icon Cache" /><link rel="next" href="sect-Quickstart-Addons.html" title="4.2. For upstream projects providing addons" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-AppStream-IconCache.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Quickstart-Addons.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="chapter" lang="en-US"><div class="titlepage"><div><div><h1 class="title"><a id="chap-Quickstart">
+      ⁠</a>Chapter 4. Metadata Quickstart</h1></div></div></div><div class="toc"><dl class="toc"><dt><span class="section"><a href="chap-Quickstart.html#sect-Quickstart-DesktopApps">4.1. For GUI application upstream maintainers</a></span></dt><dt><span class="section"><a href="sect-Quickstart-Addons.html">4.2. For upstream projects providing addons</a></span></dt><dt><span class="section"><a href="sect-Quickstart-Distros.html">4.3. For distributors packaging Appstream metadata</a></span></dt><dt><span class="section"><a href="sect-Quickstart-Translation.html">4.4. Translating Metadata</a></span></dt></dl></div><div class="para">
+		These pages are designed to give upstream authors compressed information on how to write metadata for their applications. The documents describe just the basic information, and don't resemble the whole specification, to give upstreams an easy way to get started with AppStream.
+	</div><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Quickstart-DesktopApps">
+      ⁠</a>4.1. For GUI application upstream maintainers</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="qsr-app-introduction">
+      ⁠</a>4.1.1. Introduction</h3></div></div></div><div class="para">
+			Every software center that exists allows the user to look at screenshots and a long description of the application before it is installed. For most users it allows them to answer the question <span class="quote">“<span class="quote">Do I want to install this application?</span>”</span>. Traditionally in Linux distributions, we have none of this data for the vast majority of our desktop user-installable applications. The packages-descriptions are describing all contents of a package, and not just a single application. They are also often written in a technical language and refer to other packages, which makes it hard for beginners to understand what the application they want to install really does. Additionally, if you are not using Debian or Ubuntu, the package descriptions are often untranslated. Also, packages do not provide some metadata users might be interested in before installing an application.
+		</div><div class="para">
+			To solve this, we have defined a new data file, which the upstream project can optionally translate using the same technique as <a href="https://specifications.freedesktop.org/desktop-entry-spec/latest/">Desktop Entry files</a> or GSetting schemas. The application metainfo specification is a subset of the AppStream metadata (see <a class="xref" href="chap-CollectionData.html#sect-AppStream-XML">Section 3.1, “AppStream collection XML”</a>) and extends the generic component metadata with fields specific for applications (see <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a>).
+		</div><div class="para">
+			The application-metainfo files override any values which are automatically fetched by the AppStream data generator. Applications can ship one or more files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div><div class="para">
+			Application metainfo files can - just like all other metainfo files - be translated. See the section about translation for more information about that.
+		</div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+				All tags defined in the generic component specification are valid for components of type <code class="literal">desktop-application</code> as well, an application is just defined as a specialized component, which has the additional benefit of being displayed in a software-center application.
+			</div></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="qsr-app-example">
+      ⁠</a>4.1.2. Example file</h3></div></div></div><div class="para">
+			The file should contain something like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="UTF-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Comment">&lt;!-- Copyright 2013 First Lastname &lt;your@email.com&gt; --&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"desktop-application"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>org.gnome.gnome-power-statistics<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>FSFAP<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;project_license&gt;</span>GPL-2.0+<span xmlns="" class="perl_Keyword">&lt;/project_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>Power Statistics<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>Observe power management<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      Power Statistics is a program used to view historical and current battery
+<span xmlns="" class="line">​</span>      information and will show programs running on your computer using power.
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>Example list:<span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;ul&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;li&gt;</span>First item<span xmlns="" class="perl_Keyword">&lt;/li&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;li&gt;</span>Second item<span xmlns="" class="perl_Keyword">&lt;/li&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/ul&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      You probably only need to install this application if you are having problems
+<span xmlns="" class="line">​</span>      with your laptop battery, or are trying to work out what programs are using
+<span xmlns="" class="line">​</span>      significant amounts of power.
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;launchable</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"desktop-id"</span><span xmlns="" class="perl_Keyword">&gt;</span>org.gnome.gnome-power-statistics.desktop<span xmlns="" class="perl_Keyword">&lt;/launchable&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;screenshots&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;screenshot</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"default"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;caption&gt;</span>The options dialog<span xmlns="" class="perl_Keyword">&lt;/caption&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;image&gt;</span>http://www.hughsie.com/en_US/main.png<span xmlns="" class="perl_Keyword">&lt;/image&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/screenshot&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;screenshot&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;image&gt;</span>http://www.hughsie.com/en_US/preferences.png<span xmlns="" class="perl_Keyword">&lt;/image&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/screenshot&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/screenshots&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;url</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"homepage"</span><span xmlns="" class="perl_Keyword">&gt;</span>http://www.gnome.org/projects/en_US/gnome-power-manager<span xmlns="" class="perl_Keyword">&lt;/url&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;project_group&gt;</span>GNOME<span xmlns="" class="perl_Keyword">&lt;/project_group&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;provides&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;binary&gt;</span>gnome-power-statistics<span xmlns="" class="perl_Keyword">&lt;/binary&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/provides&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;releases&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;release</span><span xmlns="" class="perl_Others"> version=</span><span xmlns="" class="perl_String">"3.12.2"</span><span xmlns="" class="perl_Others"> date=</span><span xmlns="" class="perl_String">"2013-04-12"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>        <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>Fixes issues X, Y and Z<span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>      <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/release&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/releases&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span>
+</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="qsr-app-contents">
+      ⁠</a>4.1.3. Recommended metadata file contents</h3></div></div></div><div class="para">
+			This is a list of tags you might want to define for your application. For a full list of all possible tags, take a look at the definition of a generic component (<a class="xref" href="chap-Metadata.html#spec-component-filespec">Section 2.1.3, “XML Specification”</a>) and an application-component (<a class="xref" href="sect-Metadata-Application.html#spec-appdata-filespec">Section 2.2.2, “File specification”</a>).
+		</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;id/&gt;</code> tag value contains the unique identifier for this application. It is usually modeled after the .desktop filename and follows a reverse-DNS scheme. For the full naming guidelines see <a class="xref" href="chap-Metadata.html#tag-id-generic">&lt;id/&gt;</a>.
+					</div><div class="para">
+						Example: If your application's <code class="filename">.desktop</code> file is named <code class="filename">org.example.FooBar.desktop</code>, a good component-id would be <code class="code">org.example.FooBar</code>.
+					</div></dd><dt><span class="term">&lt;metadata_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;metadata_license/&gt;</code> tag is indicating the content license that you are releasing the one metainfo file under. This is not typically the same as the project license. Omitting the license value can result in your data not being incorporated into the distribution metadata (so this is a required tag).
+					</div><div class="para">
+						A <a href="https://en.wikipedia.org/wiki/Permissive_software_licence">permissive</a> license ensures your data can be combined with arbitrary other data in one file, without license conflics (this means copyleft licenses like the GPL are not suitable as metadata license). Possible license identifiers include:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								FSFAP
+							</div></li><li class="listitem"><div class="para">
+								CC0-1.0
+							</div></li><li class="listitem"><div class="para">
+								CC-BY-3.0
+							</div></li><li class="listitem"><div class="para">
+								CC-BY-SA-3.0
+							</div></li><li class="listitem"><div class="para">
+								GFDL-1.3
+							</div></li><li class="listitem"><div class="para">
+								MIT
+							</div></li></ul></div><div class="para">
+						The license codes correspond to the identifiers found at the <a href="http://spdx.org/licenses/">SPDX OpenSource License Registry</a>. Take a look at <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a> for more details about this tag.
+					</div><div class="para">
+						If you are unsure about which license to pick, the <a href="https://spdx.org/licenses/FSFAP.html">FSFAP</a> or FSFUL license statement is usually a good choice, as it is short and safe to combine with other licenses.
+					</div></dd><dt><span class="term">&lt;project_license/&gt;</span></dt><dd><div class="para">
+						The <code class="literal">&lt;project_license/&gt;</code> tag is indicating the license(s) this application is released under. Take a look at the specification of the <a class="xref" href="chap-Metadata.html#tag-project_license">&lt;project_license/&gt;</a> tag for details on how to properly use it.
+					</div></dd><dt><span class="term">&lt;name/&gt;</span></dt><dd><div class="para">
+						It is highly recommended to have this tag present and contain a name of your application as value.
+					</div><div class="para">
+						In theory you can omit this tag and have the AppStream generator of a Linux distribution automatically use the <code class="literal">Name</code> field of the associated <code class="filename">.desktop</code> file (In which case one <a class="xref" href="chap-Quickstart.html#qsr-app-launchable-info">&lt;launchable/&gt;</a> tag must be present). However, a large amount of tools expect the metainfo file to be complete and self-sufficient now, which is why omitting this tag will render it invalid for tools like Flatpak and others use cases which do not involve a metadata preprocessing step.
+					</div><div class="para">
+						If no <code class="literal">name</code> tag (and no <code class="literal">Name</code> desktop-entry field) is present, the metadata is considered invalid and will be ignored by the AppStream generator.
+					</div></dd><dt><span class="term">&lt;summary/&gt;</span></dt><dd><div class="para">
+						It is highly recommended to have this tag present and contain a brief summary of what your application is about.
+					</div><div class="para">
+						In theory you can omit this tag and have the AppStream generator of a Linux distribution automatically use the <code class="literal">Comment</code> field of the associated <code class="filename">.desktop</code> file (In which case one <a class="xref" href="chap-Quickstart.html#qsr-app-launchable-info">&lt;launchable/&gt;</a> tag must be present). However, a large amount of tools expect the metainfo file to be complete and self-sufficient now, which is why omitting this tag will render it invalid for tools like Flatpak and others use cases which do not involve a metadata preprocessing step.
+					</div><div class="para">
+						If no <code class="literal">summary</code> tag (and no <code class="literal">Comment</code> desktop-entry field) is present, the metadata is considered invalid and will be ignored by the AppStream generator.
+					</div></dd><dt><span class="term">&lt;description/&gt;</span></dt><dd><div class="para">
+						The long description is an important part of the file. Important things to consider when writing the application description:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								Include 2-3 paragraphs of interesting easy to read prose.
+							</div></li><li class="listitem"><div class="para">
+								Ensure you provide a description of what the application actually does.
+							</div></li><li class="listitem"><div class="para">
+								Describe any important features.
+							</div></li><li class="listitem"><div class="para">
+								Do not use possily trademarked product names when refering to competitors.
+							</div></li><li class="listitem"><div class="para">
+								Break down each paragraph into easily translated paragraphs.
+							</div></li><li class="listitem"><div class="para">
+								Use lists sparingly.
+							</div></li><li class="listitem"><div class="para">
+								Never refer to installable items as packages.
+							</div></li><li class="listitem"><div class="para">
+								Never start the first sentence with "This application..."
+							</div></li><li class="listitem"><div class="para">
+								Try not use more than 100 words.
+							</div></li><li class="listitem"><div class="para">
+								Do not be too geeky. Aim for an intelligent semi-technical reader.
+							</div></li><li class="listitem"><div class="para">
+								Don't mention what language an application is written in, users don't care
+							</div></li><li class="listitem"><div class="para">
+								Only mention what the application can do now, rather than what is planned
+							</div></li></ul></div><div class="para">
+						Do not assume the format is HTML. Only paragraph, ordered list and unordered list are supported at this time, as well as emphasis and inline code. See <a class="xref" href="chap-Metadata.html#tag-description">&lt;description/&gt;</a> for more information.
+					</div><div class="para">
+						In metainfo files, this tag should be translated by-paragraph, meaning that in a translated file, each translated <code class="literal">&lt;p/&gt;</code> child has a language property.
+					</div></dd><dt><a id="qsr-app-launchable-info">
+      ⁠</a><span class="term">&lt;launchable/&gt;</span></dt><dd><div class="para">
+						This tag indicates a possible method to launch the software. Usually you want the application to be launchable by its .desktop file ID.
+					</div><div class="para">
+						The tag makes it possible for software centers to offer launching an application immediately after installation. It also connects the metainfo file with a .desktop file, so AppStream metadata generators and the distribution can absorb its metadata into the final AppStream output.
+					</div><div class="para">
+						See <a class="xref" href="chap-Metadata.html#tag-launchable">&lt;launchable/&gt;</a> for a detailed description of the tag. Example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;launchable</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"desktop-id"</span><span xmlns="" class="perl_Keyword">&gt;</span>org.gnome.Sysprof2.desktop<span xmlns="" class="perl_Keyword">&lt;/launchable&gt;</span></pre></dd><dt><a id="qsr-app-screenshots-info">
+      ⁠</a><span class="term">&lt;screenshots/&gt;</span></dt><dd><div class="para">
+						A screenshot presents your application to the outside world, and could be seen by hundreds or thousands of people.
+					</div><div class="para">
+						The <code class="code">&lt;screenshots/&gt;</code> tag contains multiple <code class="code">&lt;screenshot/&gt;</code> children, where at least one of them must have the property <code class="code">type="default"</code> to indicate the application's primary screenshot. Every <code class="code">&lt;screenshot/&gt;</code> tag must have at least one <code class="code">&lt;image/&gt;</code> child, which may define the width and height of the referenced image in it's properties. The value of the <code class="code">&lt;image/&gt;</code> tag is a direct URL to a screenshot uploaded to a public location on the web.
+					</div><div class="para">
+						Optionally, a <code class="code">&lt;screenshot/&gt;</code> tag may have a <code class="code">&lt;caption/&gt;</code> child, defining a short (not more than 180 characters!) description of what the user can see on the referenced screenshot.
+					</div><div class="para">
+						Screenshots are an important part of how people choose which applications to install, so it's important to get them right. Consistent, good looking screenshots will make your application look more attractive and will expand your userbase. Consistent screenshots also provide a more predictable experience for people using the software center.
+					</div><div class="para">
+						Screenshot size, shape and format:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								All screenshots should have a 16:9 aspect ratio, and should have a width that is no smaller than 620px (software center applications will be able to fill in the screenshots in the space they provide for that more easily then).
+							</div><div class="para">
+								Ideally the window will be resized to a 16:9 aspect ratio, but screenshots can also be cropped if only a small area of the window needs to be shown.
+							</div></li><li class="listitem"><div class="para">
+								Screenshots should ideally be in the PNG format, but JPEG and WebP images are also fine. Keep in mind though that the images are converted into PNG in any case by the distributor of a software collection.
+							</div></li><li class="listitem"><div class="para">
+								Do not scale screenshots below their original size.
+							</div></li></ul></div><div class="para">
+						Basic guidelines for things to include (and not include) in your screenshots:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								Use the default visual and theme settings, including the default font, icons, and window controls. Avoid including your own tweaks to the standard distribution offering.
+							</div></li><li class="listitem"><div class="para">
+								Screenshots should be taken with English as the display language.
+							</div></li><li class="listitem"><div class="para">
+								Your default screenshot should give an overview of your application, and should show an entire application window. It can be combined with screenshots which show specific aspects of the application.
+							</div></li><li class="listitem"><div class="para">
+								Screenshots should not show anything outside the application's windows (including the background wallpaper). If you are taking a screenshot of the whole window, use your screenshot tool's "window" mode (including any window borders in the screenshot, and ensuring that the resulting image has an alpha mask for the rounded corners).
+							</div></li><li class="listitem"><div class="para">
+								Some applications, such as games, primarily run full screen. Screenshots of these applications should be taken with the application running full screen - there should be no visible window controls in the screenshot.
+							</div></li><li class="listitem"><div class="para">
+								Don't add shadows to your screenshots.
+							</div></li><li class="listitem"><div class="para">
+								Do not include content that might be considered offensive or controversial, and avoid showing personal information. Remember that your screenshots will be visible to the internet at large.
+							</div></li></ul></div><div class="para">
+						Additional advice on how to take effective screenshots:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								Each of your screenshots should focus on one thing and one thing only. Screenshot one window at a time, and avoid having overlapping windows or user interface elements. This will make it much easier for people to understand what you are showing them.
+							</div></li><li class="listitem"><div class="para">
+								If a screenshot is demonstrating a single feature or aspect of the application, crop it to exclude irrelevant detail.
+							</div></li><li class="listitem"><div class="para">
+								Screenshots often need to feature content, such as images, documents, web pages or videos. Don’t show your application in an ‘empty’ state, and try and use high quality content which has positive associations and broad appeal.
+							</div></li><li class="listitem"><div class="para">
+								In general, you shouldn't include the mouse pointer in your screenshots.
+							</div></li></ul></div><div class="para">
+						Some advice for a good screenshot caption:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								The caption should be short. Try not to use more than a few words to describe the image.
+							</div></li><li class="listitem"><div class="para">
+								Try not to state the obvious: "Main window displaying an image" is something the user can see on the screenshot already.
+							</div></li><li class="listitem"><div class="para">
+								Try not to repeat the application's name in the caption.
+							</div></li><li class="listitem"><div class="para">
+								Do not end your caption with a fullstop.
+							</div></li></ul></div><div class="para">
+						Some examples of good and bad screenshot choices:
+					</div><div class="informaltable"><table xmlns:d="http://docbook.org/ns/docbook" class="lt-4-cols lt-7-rows"><colgroup><col width="48px" /><col width="48px" /></colgroup><tbody><tr><td> <div class="mediaobject"><img src="images/scr-examples/xterm-bad.png" /><div class="caption"><div class="para">
+											<span class="bold bold"><strong>BAD:</strong></span> Not on Linux
+										</div></div></div>
+									 </td><td> <div class="mediaobject"><img src="images/scr-examples/geany-good.png" /><div class="caption"><div class="para">
+											<span class="bold bold"><strong>GOOD</strong></span>
+										</div></div></div>
+									 </td></tr><tr><td> <div class="mediaobject"><img src="images/scr-examples/xmedcon-bad.png" /><div class="caption"><div class="para">
+											<span class="bold bold"><strong>BAD:</strong></span> Not 16:9, shows the whole desktop and too many small windows
+										</div></div></div>
+									 </td><td> <div class="mediaobject"><img src="images/scr-examples/xonotic-good.png" /><div class="caption"><div class="para">
+											<span class="bold bold"><strong>GOOD:</strong></span> No window border required for fullscreen game
+										</div></div></div>
+									 </td></tr><tr><td> <div class="mediaobject"><img src="images/scr-examples/gameconqueror-bad.png" /><div class="caption"><div class="para">
+											<span class="bold bold"><strong>BAD:</strong></span> Uses custom font, custom color theme and is not 16:9
+										</div></div></div>
+									 </td><td> <div class="mediaobject"><img src="images/scr-examples/wireshark-good.png" /><div class="caption"><div class="para">
+											<span class="bold bold"><strong>GOOD</strong></span>
+										</div></div></div>
+									 </td></tr></tbody></table></div></dd><dt><span class="term">&lt;url/&gt;</span></dt><dd><div class="para">
+						This is a recommended tag for links of type <code class="code">homepage</code>. Links of type <code class="code">homepage</code> should be a link to the upstream homepage for the application.
+					</div><div class="para">
+						For other possible values, tage a look at the tag's description at <a class="xref" href="chap-Metadata.html#tag-url">&lt;url/&gt;</a>.
+					</div></dd><dt><span class="term">&lt;project_group/&gt;</span></dt><dd><div class="para">
+						This tag is described for generic components at <a class="xref" href="chap-Metadata.html#tag-project_group">&lt;project_group/&gt;</a>. You should use it for your application if appropriate.
+					</div></dd><dt><span class="term">&lt;developer_name/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;developer_name/&gt;</code> tag is designed to represent the developers or project responsible for development of the project described in the metadata.
+					</div><div class="para">
+						Values might be for example "The GNOME Foundation" or "The KDE Community". You must not include hyperlinks or emails in this field, if you want to link to the developer's homepage, use the <a class="xref" href="chap-Metadata.html#tag-url">&lt;url/&gt;</a>-tag instead.
+					</div><div class="para">
+						This tag is translatable.
+					</div></dd><dt><span class="term">&lt;update_contact/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;update_contact/&gt;</code> tag is an optional tag which can be added to provide an email address distributors can use to contact the project about invalid or incomplete metadata, or in case the specification has changed, about old metadata. It can also be used to ask general questions in case of an update of the component described in the metadata file. Spam protection using <code class="code">_AT_</code> is valid.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;update_contact&gt;</span>developer_AT_example.com<span xmlns="" class="perl_Keyword">&lt;/update_contact&gt;</span></pre></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="qsr-app-contents-suggestions">
+      ⁠</a>4.1.4. Suggested metadata file contents</h3></div></div></div><div class="para">
+			It is useful to add these tags as well if they make sense for the described application. They are not strictly required to be present though.
+		</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">&lt;releases/&gt;</span></dt><dd><div class="para">
+						The application metainfo may include one <code class="code">&lt;releases/&gt;</code> tag, which has one or multiple <code class="code">&lt;release/&gt;</code> subnodes to define the version and release date of this application. For details, see <a class="xref" href="chap-Metadata.html#tag-releases">&lt;releases/&gt;</a> .
+					</div><div class="para">
+						It is very useful to attach short release-notes to a <code class="code">&lt;release/&gt;</code> using the <code class="code">&lt;description/&gt;</code> subnode. These release-notes should contain brief information about what is new in the release, in a way which is understandable by non-technical users.
+					</div></dd><dt><span class="term">&lt;provides/&gt;</span></dt><dd><div class="para">
+						This tag is described in detail for generic components at <a class="xref" href="chap-Metadata.html#tag-provides">&lt;provides/&gt;</a>.
+					</div><div class="para">
+						If your application ships a binary in a location in the default <code class="envar">PATH</code>, it is useful to add at least a child of type <code class="code">&lt;binary/&gt;</code> to make it easily possible to find your application's metadata using the name of its binary.
+					</div></dd></dl></div></div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-AppStream-IconCache.html"><strong>Prev</strong>3.3. Icon Cache</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Quickstart-Addons.html"><strong>Next</strong>4.2. For upstream projects providing addons</a></li></ul></body></html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.13. Localization</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-Driver.html" title="2.12. Driver" /><link rel="next" href="sect-Metadata-Repository.html" title="2.14. Repositories" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-Driver.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-Repository.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-Localization">
+      ⁠</a>2.13. Localization</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-l10n-introduction">
+      ⁠</a>2.13.1. Localization</h3></div></div></div><div class="para">
+			The <code class="literal">localization</code> component type describes language packs for individual software components or groups of software components. A language pack includes anything necessary to localize a software component for a specific language and/or country. This is usually translations, but may also be translated media content, currency information and other things. A <code class="literal">localization</code> component <code class="literal">extends</code> one or multiple other components and defines the languages it provides via its <code class="literal">languages</code> tag.
+		</div><div class="para">
+			Language packs can ship one or more metainfo files as <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div><div class="para">
+			Do not confuse language packs with the software collection <a class="xref" href="chap-CollectionData.html#tag-ct-languages">&lt;languages/&gt;</a> tag, used to identify bundled translations.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-l10n-example">
+      ⁠</a>2.13.2. Example file</h3></div></div></div><div class="para">
+			A localization metainfo file can look like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="UTF-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"localization"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>org.kde.l10n.de<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>KDE German Language<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>German localization for the KDE desktop and apps<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;extends&gt;</span>org.kde.plasmashell<span xmlns="" class="perl_Keyword">&lt;/extends&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;extends&gt;</span>org.kde.gwenview.desktop<span xmlns="" class="perl_Keyword">&lt;/extends&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;extends&gt;</span>org.kde.dolphin.desktop<span xmlns="" class="perl_Keyword">&lt;/extends&gt;</span>
+<span xmlns="" class="line">​</span>  ...
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;url</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"homepage"</span><span xmlns="" class="perl_Keyword">&gt;</span>http://i18n.kde.org/team-infos.php?teamcode=de<span xmlns="" class="perl_Keyword">&lt;/url&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>FSFAP<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;developer_name&gt;</span>The KDE German L10N team<span xmlns="" class="perl_Keyword">&lt;/developer_name&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;languages&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;lang&gt;</span>de_DE<span xmlns="" class="perl_Keyword">&lt;/lang&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;lang</span><span xmlns="" class="perl_Others"> percentage=</span><span xmlns="" class="perl_String">"96"</span><span xmlns="" class="perl_Keyword">&gt;</span>de_AT<span xmlns="" class="perl_Keyword">&lt;/lang&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;lang</span><span xmlns="" class="perl_Others"> percentage=</span><span xmlns="" class="perl_String">"100"</span><span xmlns="" class="perl_Keyword">&gt;</span>de<span xmlns="" class="perl_Keyword">&lt;/lang&gt;</span>
+<span xmlns="" class="line">​</span>    ...
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/languages&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span></pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-l10n-filespec">
+      ⁠</a>2.13.3. File specification</h3></div></div></div><div class="para">
+			Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">localization</code>. This clearly identifies this metainfo document as describing a language pack.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="tag-id-l10n">
+      ⁠</a><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For localizations, the value of the <code class="code">&lt;id/&gt;</code> tag must follow the reverse-DNS scheme as described for generic components. Ideally, the name of the component this language pack is for should be suffixed with <code class="code">.l10n.%{lang}</code>, where <code class="code">%{lang}</code> is the language code of the language pack.
+					</div><div class="para">
+						For example, if your applications component-id is <code class="code">org.gimp.gimp</code> the ID of the German language pack for GIMP should be <code class="code">org.gimp.gimp.l10n.de</code>.
+					</div></dd><dt><a id="tag-l10n-extends">
+      ⁠</a><span class="term">&lt;extends/&gt;</span></dt><dd><div class="para">
+						The <code class="literal">extends</code> tags contain all the components this language pack can be used with.
+					</div></dd><dt><a id="tag-l10n-languages">
+      ⁠</a><span class="term">&lt;languages/&gt;</span></dt><dd><div class="para">
+						This tag gives information about the locale a localization component provides support for.
+					</div><div class="para">
+						The tag is allowed to only occur once per component, and contains multiple <code class="code">&lt;lang/&gt;</code> child nodes, which have a <a href="https://www.gnu.org/software/gettext/manual/html_node/Language-Codes.html">language code</a> as value. Each <code class="code">&lt;lang/&gt;</code> node may have a <code class="literal">percentage</code> property, which describes the percentage value to which a component has been translated.
+					</div><div class="para">
+						Tag example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;languages&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;lang&gt;</span>de_DE<span xmlns="" class="perl_Keyword">&lt;/lang&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;lang</span><span xmlns="" class="perl_Others"> percentage=</span><span xmlns="" class="perl_String">"94"</span><span xmlns="" class="perl_Keyword">&gt;</span>de_AT<span xmlns="" class="perl_Keyword">&lt;/lang&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/languages&gt;</span>
+</pre></dd></dl></div><div class="para">
+			For a component of type <code class="literal">localization</code>, the following tags are required and must be present for a valid document: <a class="xref" href="sect-Metadata-Localization.html#tag-id-l10n">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>, <a class="xref" href="sect-Metadata-Localization.html#tag-l10n-extends">&lt;extends/&gt;</a>, <a class="xref" href="sect-Metadata-Localization.html#tag-l10n-languages">&lt;languages/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-Driver.html"><strong>Prev</strong>2.12. Driver</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-Repository.html"><strong>Next</strong>2.14. Repositories</a></li></ul></body></html>

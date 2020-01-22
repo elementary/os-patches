@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
  * Copyright (C) 2018 Richard Hughes <richard@hughsie.com>
- * Copyright (C) 2018 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2018-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -33,6 +33,7 @@
 
 #include "as-agreement-section-private.h"
 #include "as-utils-private.h"
+#include "as-context-private.h"
 
 typedef struct {
 	gchar		*kind;
@@ -129,21 +130,17 @@ const gchar*
 as_agreement_section_get_name (AsAgreementSection *agreement_section)
 {
 	AsAgreementSectionPrivate *priv = GET_PRIVATE (agreement_section);
-	const gchar *name;
-
-	name = g_hash_table_lookup (priv->name,
-					as_agreement_section_get_active_locale (agreement_section));
-	if (name == NULL)
-		name = g_hash_table_lookup (priv->name, "C");
-
-	return name;
+	return as_context_localized_ht_get (priv->context,
+					    priv->name,
+					    priv->active_locale_override,
+					    AS_VALUE_FLAG_NONE);
 }
 
 /**
  * as_agreement_section_set_name:
  * @agreement_section: a #AsAgreementSection instance.
- * @locale: (nullable): the locale. e.g. "en_GB"
  * @name: the agreement name, e.g. "GDPR"
+ * @locale: (nullable): the locale. e.g. "en_GB"
  *
  * Sets the agreement section name.
  *
@@ -154,12 +151,10 @@ as_agreement_section_set_name (AsAgreementSection *agreement_section,
 			       const gchar *name, const gchar *locale)
 {
 	AsAgreementSectionPrivate *priv = GET_PRIVATE (agreement_section);
-
-	if (locale == NULL)
-		locale = as_agreement_section_get_active_locale (agreement_section);
-	g_hash_table_insert (priv->name,
-				as_locale_strip_encoding (g_strdup (locale)),
-				g_strdup (name));
+	as_context_localized_ht_set (priv->context,
+				     priv->name,
+				     name,
+				     locale);
 }
 
 /**
@@ -176,14 +171,10 @@ const gchar*
 as_agreement_section_get_description (AsAgreementSection *agreement_section)
 {
 	AsAgreementSectionPrivate *priv = GET_PRIVATE (agreement_section);
-	const gchar *desc;
-
-	desc = g_hash_table_lookup (priv->description,
-					as_agreement_section_get_active_locale (agreement_section));
-	if (desc == NULL)
-		desc = g_hash_table_lookup (priv->description, "C");
-
-	return desc;
+	return as_context_localized_ht_get (priv->context,
+					    priv->description,
+					    priv->active_locale_override,
+					    AS_VALUE_FLAG_NONE);
 }
 
 /**
@@ -201,12 +192,10 @@ as_agreement_section_set_description (AsAgreementSection *agreement_section,
 				      const gchar *desc, const gchar *locale)
 {
 	AsAgreementSectionPrivate *priv = GET_PRIVATE (agreement_section);
-
-	if (locale == NULL)
-		locale = as_agreement_section_get_active_locale (agreement_section);
-	g_hash_table_insert (priv->description,
-				as_locale_strip_encoding (g_strdup (locale)),
-				g_strdup (desc));
+	as_context_localized_ht_set (priv->context,
+				     priv->description,
+				     desc,
+				     locale);
 }
 
 /**
@@ -313,7 +302,7 @@ as_agreement_section_load_from_xml (AsAgreementSection *agreement_section, AsCon
 		if (iter->type != XML_ELEMENT_NODE)
 			continue;
 
-		lang = as_xmldata_get_node_locale (ctx, iter);
+		lang = as_xml_get_node_locale_match (ctx, iter);
 
 		if (g_strcmp0 ((gchar*) iter->name, "name") == 0) {
 			g_autofree gchar *content = NULL;

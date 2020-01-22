@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2019 Matthias Klumpp <matthias@tenstral.net>
- * Copyright (C)      2016 Richard Hughes <richard@hughsie.com>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2016 Richard Hughes <richard@hughsie.com>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -213,14 +213,13 @@ as_str_empty (const gchar* str)
 /**
  * as_iso8601_to_datetime:
  *
- * Helper function to work around a bug in g_time_val_from_iso8601.
+ * Helper function to work around a bug in g_date_time_new_from_iso8601.
  * Can be dropped when the bug gets resolved upstream:
  * https://bugzilla.gnome.org/show_bug.cgi?id=760983
  **/
 GDateTime*
 as_iso8601_to_datetime (const gchar *iso_date)
 {
-	GTimeVal tv;
 	guint dmy[] = {0, 0, 0};
 
 	/* nothing set */
@@ -228,12 +227,14 @@ as_iso8601_to_datetime (const gchar *iso_date)
 		return NULL;
 
 	/* try to parse complete ISO8601 date */
-	if (g_strstr_len (iso_date, -1, " ") != NULL) {
-		if (g_time_val_from_iso8601 (iso_date, &tv) && tv.tv_sec != 0)
-			return g_date_time_new_from_timeval_utc (&tv);
+	if (g_strstr_len (iso_date, -1, "T") != NULL) {
+		g_autoptr(GTimeZone) tz_utc = g_time_zone_new_utc ();
+		GDateTime *res = g_date_time_new_from_iso8601 (iso_date, tz_utc);
+		if (res != NULL)
+			return res;
 	}
 
-	/* g_time_val_from_iso8601() blows goats and won't
+	/* g_date_time_new_from_iso8601() blows goats and won't
 	 * accept a valid ISO8601 formatted date without a
 	 * time value - try and parse this case */
 	if (sscanf (iso_date, "%u-%u-%u", &dmy[0], &dmy[1], &dmy[2]) != 3)
@@ -438,7 +439,8 @@ as_utils_is_writable (const gchar *path)
 /**
  * as_get_current_locale:
  *
- * Returns a locale string as used in the AppStream specification.
+ * Returns the current locale string in the format
+ * used by the AppStream.
  *
  * Returns: (transfer full): A locale string, free with g_free()
  */
@@ -447,11 +449,26 @@ as_get_current_locale (void)
 {
 	const gchar * const *locale_names;
 	gchar *tmp;
-	gchar *locale;
+	gchar *locale = NULL;
 
+	/* use LANGUAGE, LC_ALL, LC_MESSAGES and LANG */
 	locale_names = g_get_language_names ();
-	/* set active locale without UTF-8 suffix */
-	locale = g_strdup (locale_names[0]);
+
+	if (g_strstr_len (locale_names[0], -1, "_") == NULL) {
+		/* The locale doesn't have a region code - see if LANG has more to offer.
+		 * Some users expect LANG to take priority, and PackageKit uses region codes
+		 * as well since frontends submit them (based on LANG).
+		 * So if we don't have them in LANGUAGE but do have them in LANG, we have
+		 * different localization depending on how the application was launched as well as
+		 * multiple caches on systems which generate them via a backend in PackageKit. */
+		const gchar *env_lang = g_getenv ("LANG");
+		if ((env_lang != NULL) && (g_strstr_len (env_lang, -1, "_") != NULL))
+			locale = g_strdup (env_lang);
+	}
+	if (locale == NULL)
+		locale = g_strdup (locale_names[0]);
+
+	/* set active locale without UTF-8 suffix, UTF-8 is default in AppStream */
 	tmp = g_strstr_len (locale, -1, ".UTF-8");
 	if (tmp != NULL)
 		*tmp = '\0';
@@ -1373,4 +1390,44 @@ as_filebasename_from_uri (const gchar *uri)
 		tmp[0] = '\0';
 
 	return bname;
+}
+
+/**
+ * as_date_time_format_iso8601:
+ * @datetime: A #GDateTime
+ *
+ * Format datetime in ISO 8601 format.
+ *
+ * Compatibility wrapper to support GLib < 2.62.
+ * This function can go away if we bump the GLib minimal version.
+ */
+gchar*
+as_date_time_format_iso8601 (GDateTime *datetime)
+{
+#if GLIB_CHECK_VERSION(2,62,0)
+	return g_date_time_format_iso8601 (datetime);
+#else
+	GString *outstr = NULL;
+	gchar *main_date = NULL;
+	gint64 offset;
+
+	/* Main date and time. */
+	main_date = g_date_time_format (datetime, "%Y-%m-%dT%H:%M:%S");
+	outstr = g_string_new (main_date);
+	g_free (main_date);
+
+	/* Timezone. Format it as `%:::z` unless the offset is zero, in which case
+	 * we can simply use `Z`. */
+	offset = g_date_time_get_utc_offset (datetime);
+
+	if (offset == 0) {
+		g_string_append_c (outstr, 'Z');
+	} else {
+		gchar *time_zone = g_date_time_format (datetime, "%:::z");
+		g_string_append (outstr, time_zone);
+		g_free (time_zone);
+	}
+
+	return g_string_free (outstr, FALSE);
+#endif
 }

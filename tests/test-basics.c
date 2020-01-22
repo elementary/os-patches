@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -274,17 +274,30 @@ test_spdx (void)
 	g_strfreev (tok);
 	g_free (tmp);
 
-	/*  trailing brackets */
+	/* trailing brackets */
 	tok = as_spdx_license_tokenize ("MPLv1.1 and (LGPLv3 or GPLv3)");
 	tmp = g_strjoinv ("  ", tok);
 	g_assert_cmpstr (tmp, ==, "MPLv1.1  &  (  LGPLv3  |  GPLv3  )");
 	g_strfreev (tok);
 	g_free (tmp);
 
-	/*  deprecated names */
+	/* deprecated names */
 	tok = as_spdx_license_tokenize ("CC0 and (CC0 or CC0)");
 	tmp = g_strjoinv ("  ", tok);
 	g_assert_cmpstr (tmp, ==, "@CC0-1.0  &  (  @CC0-1.0  |  @CC0-1.0  )");
+	g_strfreev (tok);
+	g_free (tmp);
+
+	/* WITH operator */
+	tok = as_spdx_license_tokenize ("GPL-3.0-or-later WITH GCC-exception-3.1");
+	tmp = g_strjoinv ("  ", tok);
+	g_assert_cmpstr (tmp, ==, "@GPL-3.0+  ^  @GCC-exception-3.1");
+	g_strfreev (tok);
+	g_free (tmp);
+
+	tok = as_spdx_license_tokenize ("OFL-1.1 OR (GPL-3.0-or-later WITH Font-exception-2.0)");
+	tmp = g_strjoinv ("  ", tok);
+	g_assert_cmpstr (tmp, ==, "@OFL-1.1  |  (  @GPL-3.0+  ^  @Font-exception-2.0  )");
 	g_strfreev (tok);
 	g_free (tmp);
 
@@ -296,6 +309,8 @@ test_spdx (void)
 	g_assert (as_is_spdx_license_expression ("CC0-1.0 AND GFDL-1.3"));
 	g_assert (as_is_spdx_license_expression ("CC-BY-SA-3.0+"));
 	g_assert (as_is_spdx_license_expression ("CC-BY-SA-3.0+ AND Zlib"));
+	g_assert (as_is_spdx_license_expression ("GPL-3.0-or-later WITH GCC-exception-3.1"));
+	g_assert (as_is_spdx_license_expression ("GPL-3.0-or-later WITH Font-exception-2.0 AND OFL-1.1"));
 	g_assert (as_is_spdx_license_expression ("NOASSERTION"));
 	g_assert (!as_is_spdx_license_expression ("CC0 dave"));
 	g_assert (!as_is_spdx_license_expression (""));
@@ -329,6 +344,14 @@ test_spdx (void)
 	tmp = as_get_license_url ("LicenseRef-proprietary=https://example.com/mylicense.txt");
 	g_assert_cmpstr (tmp, ==, "https://example.com/mylicense.txt");
 	g_free (tmp);
+
+	/* licenses are free-as-in-freedom */
+	g_assert (as_license_is_free_license ("CC0"));
+	g_assert (as_license_is_free_license ("GPL-2.0 AND FSFAP"));
+	g_assert (as_license_is_free_license ("OFL-1.1 OR (GPL-3.0-or-later WITH Font-exception-2.0)"));
+	g_assert (!as_license_is_free_license ("NOASSERTION"));
+	g_assert (!as_license_is_free_license ("LicenseRef-proprietary=https://example.com/mylicense.txt"));
+	g_assert (!as_license_is_free_license ("MIT AND LicenseRef-proprietary=https://example.com/lic.txt"));
 }
 
 /**
@@ -531,6 +554,41 @@ test_filebasename_from_uri ()
 	g_free (tmp);
 }
 
+/* Test that the OARS → CSM mapping table in as_content_rating_attribute_to_csm_age()
+ * is complete (contains mappings for all known IDs), and that the ages it
+ * returns are non-decreasing for increasing values of #AsContentRatingValue in
+ * each ID.
+ *
+ * Also test that unknown values of #AsContentRatingValue return an unknown age,
+ * and unknown IDs do similarly. */
+static void
+test_content_rating_mappings (void)
+{
+	const AsContentRatingValue values[] = {
+		AS_CONTENT_RATING_VALUE_NONE,
+		AS_CONTENT_RATING_VALUE_MILD,
+		AS_CONTENT_RATING_VALUE_MODERATE,
+		AS_CONTENT_RATING_VALUE_INTENSE,
+	};
+	g_autofree const gchar **ids = as_content_rating_get_all_rating_ids ();
+
+	for (gsize i = 0; ids[i] != NULL; i++) {
+		guint max_age = 0;
+
+		for (gsize j = 0; j < G_N_ELEMENTS (values); j++) {
+			guint age = as_content_rating_attribute_to_csm_age (ids[i], values[j]);
+			g_assert_cmpuint (age, >=, max_age);
+			max_age = age;
+		}
+
+		g_assert_cmpuint (max_age, >, 0);
+		g_assert_cmpuint (as_content_rating_attribute_to_csm_age (ids[i], AS_CONTENT_RATING_VALUE_UNKNOWN), ==, 0);
+		g_assert_cmpuint (as_content_rating_attribute_to_csm_age (ids[i], AS_CONTENT_RATING_VALUE_LAST), ==, 0);
+	}
+
+	g_assert_cmpuint (as_content_rating_attribute_to_csm_age ("not-valid-id", AS_CONTENT_RATING_VALUE_INTENSE), ==, 0);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -561,6 +619,7 @@ main (int argc, char **argv)
 	g_test_add_func ("/AppStream/DistroDetails", test_distro_details);
 	g_test_add_func ("/AppStream/rDNSConvert", test_rdns_convert);
 	g_test_add_func ("/AppStream/URIToBasename", test_filebasename_from_uri);
+	g_test_add_func ("/AppStream/ContentRatingMapings", test_content_rating_mappings);
 
 	ret = g_test_run ();
 	g_free (datadir);

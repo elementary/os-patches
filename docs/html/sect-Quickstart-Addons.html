@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">4.2. For upstream projects providing addons</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Quickstart.html" title="Chapter 4. Metadata Quickstart" /><link rel="prev" href="chap-Quickstart.html" title="Chapter 4. Metadata Quickstart" /><link rel="next" href="sect-Quickstart-Distros.html" title="4.3. For distributors packaging Appstream metadata" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="chap-Quickstart.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Quickstart-Distros.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Quickstart-Addons">
+      ⁠</a>4.2. For upstream projects providing addons</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="qsr-addon-introduction">
+      ⁠</a>4.2.1. Introduction</h3></div></div></div><div class="para">
+			Some software installed on the system is extensible via addons. To allow the user to install addons for software that is already available on the system, AppStream defines an <code class="literal">addon</code> component type. Software centers will usually group these components together with their host component and display them for installation. Extensible software may also access the AppStream data pool provided by the distribution or other software source directly, to offer installing missing addons from within the application.
+		</div><div class="para">
+			Software which provides addons can ship one or more files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="qsr-addon-example">
+      ⁠</a>4.2.2. Example file</h3></div></div></div><div class="para">
+			The file should contain something like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="UTF-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"addon"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>org.gnome.gedit.gedit_bookmarks<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;extends&gt;</span>org.gnome.gedit<span xmlns="" class="perl_Keyword">&lt;/extends&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>Bookmarks<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>Easy document navigation with bookmarks<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;url</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"homepage"</span><span xmlns="" class="perl_Keyword">&gt;</span>https://wiki.gnome.org/Apps/Gedit/ShippedPlugins<span xmlns="" class="perl_Keyword">&lt;/url&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;url</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"bugtracker"</span><span xmlns="" class="perl_Keyword">&gt;</span>https://bugzilla.gnome.org/enter_bug.cgi?product=gedit<span xmlns="" class="perl_DecVal">&amp;amp;</span>component=Plugins<span xmlns="" class="perl_Keyword">&lt;/url&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>FSFAP<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;project_license&gt;</span>GPL-2.0+<span xmlns="" class="perl_Keyword">&lt;/project_license&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span></pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="qsr-addon-content">
+      ⁠</a>4.2.3. Metadata file contents</h3></div></div></div><div class="para">
+			This is a list of tags you might want to define for your application. For a full list of possible tags, take a look at the definition of a generic component (<a class="xref" href="chap-Metadata.html#spec-component-filespec">Section 2.1.3, “XML Specification”</a>) and an addon component (<a class="xref" href="sect-Metadata-Addon.html#spec-addondata-filespec">Section 2.6.3, “File specification”</a>).
+		</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For addons, there is no strict rule for the component-ID. You should just ensure that you pick a unique name.
+					</div><div class="para">
+						It is highly recommended to apply a <code class="code">application_name-plugin_name</code> naming scheme for your addon-id.
+					</div></dd><dt><span class="term">&lt;extends/&gt;</span></dt><dd><div class="para">
+						This tag is refers to the ID of the component this addon is extending. For desktop applications, this is usually the name of their <code class="filename">.desktop</code> file.
+					</div><div class="para">
+						This tag is described in detail for addon components at <a class="xref" href="sect-Metadata-Addon.html#tag-extends">&lt;extends/&gt;</a>.
+					</div></dd><dt><span class="term">&lt;name/&gt;</span></dt><dd><div class="para">
+						Each addon component needs a <code class="literal">&lt;name/&gt;</code> tag, giving the addon a human-readable name.
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+							Don't put the application name you are extending in the <code class="literal">&lt;name/&gt;</code> - so you want to use <code class="code">Bookmarks</code> rather than <code class="code">GEdit Bookmarks</code>
+						</div></div></div></dd><dt><span class="term">&lt;summary/&gt;</span></dt><dd><div class="para">
+						The <code class="literal">&lt;summary/&gt;</code> tag follows the basic structure of a <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a> as described in the specification. It is a required tag for an addon component.
+					</div><div class="para">
+						Some useful hints for finding a good addon summary:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								Don't put the application name you are extending in the <code class="literal">&lt;summary/&gt;</code> - so you want to use <code class="code">Easy document navigation with bookmarks</code> rather than <code class="code">Easy document navigation with bookmarks in GEdit</code>.
+							</div></li><li class="listitem"><div class="para">
+								Don't use long or short descriptions. Ideally <code class="literal">&lt;summmary/&gt;</code> should be less than <code class="code">101</code> and more than <code class="code">8</code>.
+							</div></li></ul></div></dd><dt><span class="term">&lt;url/&gt;</span></dt><dd><div class="para">
+						It is recommended to include links of types <code class="code">homepage</code> and <code class="code">bugtracker</code>. You can omit the <code class="literal">&lt;url/&gt;</code> if it's the same as the upstream project.
+					</div><div class="para">
+						Links of type <code class="code">homepage</code> should be a link to the upstream homepage for the addon.
+					</div><div class="para">
+						Links of type <code class="code">bugtracker</code> should be a link to the upstream bugtracker.
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+							It is highly recommended to be a link to the upstream bugzilla with filed component and product.
+						</div></div></div><div xmlns:d="http://docbook.org/ns/docbook" class="warning"><div class="admonition_header"><p><strong>Warning</strong></p></div><div class="admonition"><div class="para">
+							It might be necessary to escape URLs. For example replacing of <code class="code">&amp;</code> with <code class="code">&amp;amp;</code>.
+						</div></div></div><div class="para">
+						For other possible values, take a look at the tag's description in <a class="xref" href="chap-Metadata.html#tag-url">&lt;url/&gt;</a>.
+					</div></dd><dt><span class="term">&lt;metadata_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;metadata_license/&gt;</code> tag is indicating the content license that you are releasing the one metadata file as. This is not typically the same as the project license. By ommitting the license value would probably mean your data would not be incorporated into the distribution metadata. Permissible license codes include:
+					</div><div class="para">
+						The license codes correspond to the identifiers found at the <a href="http://spdx.org/licenses/">SPDX OpenSource License Registry</a>. Take a look at <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a> for more details about this tag.
+					</div></dd><dt><span class="term">&lt;project_license/&gt;</span></dt><dd><div class="para">
+						The <code class="literal">&lt;project_license/&gt;</code> tag is indicating the license(s) this addon is released under. Take a look at the specification of the <a class="xref" href="chap-Metadata.html#tag-project_license">&lt;project_license/&gt;</a> tag for details on how to properly use it.
+					</div></dd><dt><span class="term">&lt;update_contact/&gt;</span></dt><dd><div class="para">
+						You might want to include an update-contact email address. Take a look at the specification of the <a class="xref" href="chap-Metadata.html#tag-update_contact">&lt;update_contact/&gt;</a> tag for more details on how to use this tag.
+					</div></dd></dl></div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="chap-Quickstart.html"><strong>Prev</strong>Chapter 4. Metadata Quickstart</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Quickstart-Distros.html"><strong>Next</strong>4.3. For distributors packaging Appstream metadata</a></li></ul></body></html>

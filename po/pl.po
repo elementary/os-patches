@@ -2,23 +2,21 @@
 # Copyright (C) YEAR Matthias Klumpp
 # This file is distributed under the same license as the appstream package.
 # Translators:
-# Piotr Drąg <piotrdrag@gmail.com>, 2014-2016, 2019.
+# Piotr Drąg <piotrdrag@gmail.com>, 2014-2016, 2019, 2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: AppStream\n"
 "Report-Msgid-Bugs-To: appstream@lists.freedesktop.org\n"
-"POT-Creation-Date: 2019-09-24 19:46+0200\n"
-"PO-Revision-Date: 2019-09-23 17:42+0000\n"
+"POT-Creation-Date: 2020-01-14 01:44+0100\n"
+"PO-Revision-Date: 2020-01-14 14:30+0000\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
-"Language-Team: Polish <https://hosted.weblate.org/projects/appstream/"
-"translations/pl/>\n"
+"Language-Team: Polish <https://hosted.weblate.org/projects/appstream/translations/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 3.9-dev\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 3.11-dev\n"
 
 #: tools/appstream-cli.c:157
 #, c-format
@@ -88,7 +86,7 @@ msgid "Also show pedantic hints."
 msgstr "Wyświetla także drobiazgowe uwagi."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:492
+#: src/as-validator-issue-tag.h:497
 msgid ""
 "An 'extends' tag is specified, but the component is not of type 'addon', "
 "'localization' or 'repository'."
@@ -160,7 +158,7 @@ msgstr ""
 "AppStream to specyfikacja używana przez wiele dystrybucji do dostarczania "
 "metadanych o składnikach oprogramowania."
 
-#: src/as-pool.c:1787
+#: src/as-pool.c:1937
 #, c-format
 msgid ""
 "AppStream system cache refresh failed. Turn on verbose mode to get detailed "
@@ -242,7 +240,7 @@ msgstr "Gry planszowe"
 msgid "Bundle"
 msgstr "Paczka"
 
-#: src/as-pool.c:1687
+#: src/as-pool.c:1828
 #, c-format
 msgid "Cache location '%s' is not writable."
 msgstr "Położenie pamięci podręcznej „%s” nie jest zapisywalne."
@@ -349,7 +347,6 @@ msgid "Could not find component providing '%s::%s'."
 msgstr "Nie można odnaleźć składnika dostarczającego „%s::%s”."
 
 #: tools/appstream-cli.c:869
-#, fuzzy
 msgid "Create a XDG desktop-entry file from a metainfo file."
 msgstr "Tworzy plik .desktop XDG z pliku Metainfo."
 
@@ -602,7 +599,7 @@ msgstr ""
 "Odnaleziono nieznany znacznik w grupie wymagań/zaleceń. To prawdopodobnie "
 "błąd, ponieważ związek składników tego typu jest nieznany."
 
-#: src/as-validator-issue-tag.h:422
+#: src/as-validator-issue-tag.h:427
 msgid ""
 "Found invalid tag. Non-standard tags should be prefixed with 'x-'. AppStream "
 "also provides the <custom/> tag to add arbitrary custom data to metainfo "
@@ -618,8 +615,8 @@ msgstr ""
 "jeśli tylko mają zostać dodane niestandardowe dane do pliku Metainfo."
 
 #. TRANSLATORS: An invalid XML tag was found, "Found" refers to the tag name found, "Allowed" to the permitted name.
-#: src/as-validator.c:478 src/as-validator.c:890 src/as-validator.c:975
-#: src/as-validator.c:1185
+#: src/as-validator.c:526 src/as-validator.c:939 src/as-validator.c:1024
+#: src/as-validator.c:1237
 #, c-format
 msgid "Found: %s - Allowed: %s"
 msgstr "Odnaleziono: %s — dozwolone: %s"
@@ -726,7 +723,7 @@ msgstr ""
 "Nieprawidłowe działanie porównania wersji w elemencie związku. Dozwolone są "
 "tylko działania eq/ne/lt/gt/le/ge."
 
-#: src/as-validator-issue-tag.h:445
+#: src/as-validator-issue-tag.h:450
 msgid ""
 "It is recommended to add a long description to this component to present it "
 "better to users."
@@ -734,7 +731,7 @@ msgstr ""
 "Zalecane jest dodanie długiego opisu do tego składnika, aby lepiej "
 "przedstawić go użytkownikom."
 
-#: src/as-validator-issue-tag.h:440
+#: src/as-validator-issue-tag.h:445
 msgid ""
 "It would be useful to add a long description to this font to present it "
 "better to users."
@@ -765,6 +762,15 @@ msgstr "Biblioteki"
 #: tools/ascli-utils.c:363
 msgid "License"
 msgstr "Licencja"
+
+#. TRANSLATORS: Please do not translate AppStream tag and property names.
+#: src/as-validator-issue-tag.h:629
+msgid ""
+"Licenses for 'runtime' components are usually too complex to reflect them in "
+"a simple SPDX expression. Consider using a `LicenseRef` and a web URL as "
+"value for this component's 'project_license'. E.g. `LicenseRef-free=https://"
+"example.com/licenses.html`"
+msgstr "Licencje dla składników typu „runtime” (środowisko wykonawcze) zwykle są zbyt złożone, aby odzwierciedlić je w prostym wyrażeniu SPDX. Proszę rozważyć użycie „LicenseRef” i adresu URL do strony internetowej jako wartości dla znacznika „project_license” tego składnika, np. „LicenseRef-free=https://example.com/licenses.html”"
 
 #. TRANSLATORS: ascli flag description for: --limit as part of the news-to-metainfo command
 #: tools/appstream-cli.c:771
@@ -799,7 +805,7 @@ msgstr "Ręcznie wybrane położenie pamięci podręcznej AppStream."
 msgid "Manually selected location of AppStream metadata to scan."
 msgstr "Ręcznie wybrane położenie metadanych AppStream do skanowania."
 
-#: src/as-pool.c:1209
+#: src/as-pool.c:1280
 msgid ""
 "Many components have been recognized as invalid. See debug output for "
 "details."
@@ -826,7 +832,7 @@ msgstr "Typy multimediów"
 msgid "Metadata file '%s' does not exist."
 msgstr "Plik metadanych „%s” nie istnieje."
 
-#: src/as-pool.c:841
+#: src/as-pool.c:881
 msgid "Metadata files have errors:"
 msgstr "Pliki metadanych mają błędy:"
 
@@ -975,6 +981,11 @@ msgstr "Ponownie buduje pamięć podręczną metadanych składników."
 msgid "Remove software matching the component-ID."
 msgstr "Usuwa oprogramowanie pasujące do identyfikatora składnika."
 
+#. TRANSLATORS: We tried to download from an URL, but the retrieved data was empty
+#: src/as-validator.c:364
+msgid "Retrieved file size was zero."
+msgstr "Rozmiar odebranego pliku wynosi zero."
+
 #: src/as-category.c:248
 msgctxt "Category of Science"
 msgid "Robotics"
@@ -1033,6 +1044,13 @@ msgstr "Wyświetla dodatkowe informacje debugowania."
 msgid "Show the program version."
 msgstr "Wyświetla wersję programu."
 
+#: src/as-validator-issue-tag.h:635
+msgid ""
+"Since a 'runtime' component is comprised of multiple other software "
+"components, their component-IDs may be listed in a `<provides/>` section for "
+"this runtime."
+msgstr "Ponieważ składnik „runtime” (środowisko wykonawcze) składa się z wielu innych składników oprogramowania, ich identyfikatory mogą być wymienione w sekcji „<provides/>” tego środowiska wykonawczego."
+
 #: src/as-category.c:153
 msgctxt "Category of Games"
 msgid "Sports"
@@ -1049,7 +1067,7 @@ msgid "Subcommands:"
 msgstr "Podpolecenia:"
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:522
+#: src/as-validator-issue-tag.h:527
 msgid ""
 "Suggestions of any type other than 'upstream' are not allowed in metainfo "
 "files."
@@ -1095,7 +1113,7 @@ msgstr ""
 "wielu nazw pakietów na składnik."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:411
+#: src/as-validator-issue-tag.h:416
 msgid ""
 "The 'update_contact' tag should not be included in collection AppStream XML."
 msgstr ""
@@ -1106,7 +1124,7 @@ msgstr ""
 msgid "The .desktop file '%s' does not exist."
 msgstr "Plik .desktop „%s” nie istnieje."
 
-#: src/as-validator-issue-tag.h:388
+#: src/as-validator-issue-tag.h:393
 msgid "The <developer_name/> can not contain a hyperlink."
 msgstr "Znacznik <developer_name/> nie może zawierać odnośnika."
 
@@ -1128,7 +1146,7 @@ msgstr ""
 "najmniej do dnia, aby określać daty. Proszę się upewnić, że ciąg daty jest "
 "prawidłowy."
 
-#: src/as-pool.c:1774
+#: src/as-pool.c:1924
 #, c-format
 msgid ""
 "The AppStream system cache was updated, but problems were found which "
@@ -1137,7 +1155,7 @@ msgstr ""
 "Zaktualizowano systemową pamięć podręczną AppStream, ale odnaleziono "
 "problemy powodujące ignorowanie metadanych: %s"
 
-#: src/as-pool.c:1772
+#: src/as-pool.c:1922
 msgid ""
 "The AppStream system cache was updated, but some components were ignored. "
 "Refer to the verbose log for more information."
@@ -1156,7 +1174,7 @@ msgstr ""
 msgid "The TYPE must be a valid component-type, such as: %s"
 msgstr "TYP musi być prawidłowym typem składnika, na przykład: %s"
 
-#: src/as-validator-issue-tag.h:542
+#: src/as-validator-issue-tag.h:547
 msgid "The XML of this file is malformed."
 msgstr "Kod XML tego pliku jest błędnie sformatowany."
 
@@ -1168,7 +1186,7 @@ msgstr ""
 "Kategoria określona w pliku .desktop jest nieprawidłowa. Specyfikacja menu "
 "XDG zawiera listę prawidłowych kategorii."
 
-#: src/as-validator-issue-tag.h:527
+#: src/as-validator-issue-tag.h:532
 msgid ""
 "The category name is not valid. Refer to the XDG Menu Specification for a "
 "list of valid category names."
@@ -1260,11 +1278,11 @@ msgstr ""
 "Metainfo."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:498
+#: src/as-validator-issue-tag.h:503
 msgid "The component is an addon, but no 'extends' tag was specified."
 msgstr "Składnik jest dodatkiem, ale nie podano znacznika „extends”."
 
-#: src/as-validator-issue-tag.h:435
+#: src/as-validator-issue-tag.h:440
 msgid ""
 "The component is missing a long description. Components of this type must "
 "have a long description."
@@ -1338,7 +1356,7 @@ msgstr ""
 "dozwolone, proszę zamiast tego użyć znacznika <url/> do wstawiania "
 "odnośników."
 
-#: src/as-validator.c:144
+#: src/as-validator.c:152
 msgid ""
 "The emitted issue tag is unknown in the tag registry of AppStream. This is a "
 "bug in the validator itself, please report this issue in our bugtracker."
@@ -1348,7 +1366,7 @@ msgstr ""
 "zgłaszania błędów."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:430
+#: src/as-validator-issue-tag.h:435
 msgid ""
 "The essential tag 'metadata_license' is missing. A license for the metadata "
 "itself always has to be defined."
@@ -1368,23 +1386,12 @@ msgstr ""
 "wygląd opisu w centrach oprogramowania i dostarczyć bardziej szczegółowe "
 "informacje o tym składniku od razu w pierwszym akapicie."
 
-#: src/as-validator-issue-tag.h:393
-msgid ""
-"The given values is not an identifier for a desktop environment as "
-"registered with Freedesktop.org."
-msgstr ""
-"Podana wartość nie jest identyfikatorem środowiska pulpitu zarejestrowanym "
-"we FreeDesktop.org."
-
 #: src/as-validator-issue-tag.h:156
 msgid ""
-"The license ID is not found in the SPDX database. Please check that the "
+"The license ID was not found in the SPDX database. Please check that the "
 "license ID is written in an SPDX-conformant way and is a valid free software "
 "license."
-msgstr ""
-"Nie odnaleziono tego identyfikatora licencji w bazie danych SPDX. Proszę "
-"sprawdzić, czy identyfikator licencji jest zapisany w sposób zgodny ze SPDX "
-"i jest prawidłową licencją wolnego oprogramowania."
+msgstr "Nie odnaleziono tego identyfikatora licencji w bazie danych SPDX. Proszę sprawdzić, czy identyfikator licencji jest zapisany w sposób zgodny ze SPDX i jest prawidłową licencją wolnego oprogramowania."
 
 #: src/as-validator-issue-tag.h:96
 msgid ""
@@ -1457,7 +1464,7 @@ msgstr ""
 "jest zawsze na górze. Uporządkowanie wydań zwiększa także czytelność pliku "
 "Metainfo."
 
-#: src/as-validator-issue-tag.h:532
+#: src/as-validator-issue-tag.h:537
 msgid "The screenshot caption is too long (should be <= 80 characters)"
 msgstr "Podpis zrzutu ekranu jest za długi (musi mieć 80 znaków lub mniej)"
 
@@ -1513,6 +1520,14 @@ msgstr ""
 "Ustawiony typ składnika nie jest znanym, prawidłowym typem składnika "
 "AppStream."
 
+#: src/as-validator-issue-tag.h:398
+msgid ""
+"The set value is not an identifier for a desktop environment as registered "
+"with Freedesktop.org."
+msgstr ""
+"Ustawiona wartość nie jest identyfikatorem środowiska pulpitu "
+"zarejestrowanym we FreeDesktop.org."
+
 #: tools/ascli-actions-mdata.c:449
 #, c-format
 msgid ""
@@ -1528,7 +1543,7 @@ msgstr ""
 "Podsumowanie nie może zawierać adresu URL. Należy użyć znaczników <url/> dla "
 "odnośników."
 
-#: src/as-validator-issue-tag.h:628
+#: src/as-validator-issue-tag.h:640
 msgid ""
 "The type of the item that the component provides is not known to AppStream."
 msgstr ""
@@ -1553,17 +1568,17 @@ msgstr ""
 "wybrać „yaml” lub „text” zamiast niego."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:405
+#: src/as-validator-issue-tag.h:410
 msgid "This 'bundle' tag has an unknown type and can not be used."
 msgstr "Ten znacznik „bundle” ma nieznany typ i nie może zostać użyty."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:399
+#: src/as-validator-issue-tag.h:404
 msgid "This 'launchable' tag has an unknown type and can not be used."
 msgstr "Ten znacznik „launchable” ma nieznany typ i nie może zostać użyty."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:510
+#: src/as-validator-issue-tag.h:515
 msgid ""
 "This 'localization' component does not define any languages this "
 "localization is for."
@@ -1572,7 +1587,7 @@ msgstr ""
 "lokalizacją."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:504
+#: src/as-validator-issue-tag.h:509
 msgid ""
 "This 'localization' component is missing an 'extends' tag, to specify the "
 "components it adds localization to."
@@ -1581,13 +1596,13 @@ msgstr ""
 "składników, do których dodaje lokalizację."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:516
+#: src/as-validator-issue-tag.h:521
 msgid ""
 "This 'service' component is missing a 'launchable' tag of type 'service'."
 msgstr "Ten składnik „service” nie ma znacznika „launchable” typu „service”."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:468
+#: src/as-validator-issue-tag.h:473
 msgid ""
 "This 'web-application' component is missing a 'icon' tag to specify a valid "
 "icon."
@@ -1596,14 +1611,14 @@ msgstr ""
 "prawidłowej ikony."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:462
+#: src/as-validator-issue-tag.h:467
 msgid ""
 "This 'web-application' component is missing a 'launchable' tag of type 'url'."
 msgstr ""
 "Ten składnik „web-application” nie ma znacznika „launchable” typu „url”."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:474
+#: src/as-validator-issue-tag.h:479
 msgid ""
 "This 'web-application' component is missing categorizations. A 'categories' "
 "block is likely missing."
@@ -1664,14 +1679,14 @@ msgstr ""
 "„appstream-generator”) prawidłowo przetworzy ten element podczas "
 "kompilowania danych."
 
-#: src/as-validator-issue-tag.h:450
+#: src/as-validator-issue-tag.h:455
 msgid ""
 "This generic component is missing a long description. It may be useful to "
 "add one."
 msgstr ""
 "Ten ogólny składnik nie ma długiego opisu. Dodanie go może być przydatne."
 
-#: src/as-validator-issue-tag.h:416
+#: src/as-validator-issue-tag.h:421
 msgid ""
 "This tag is a GNOME-specific extension to AppStream and not part of the "
 "official specification. Do not expect it to work in all implementations and "
@@ -1699,6 +1714,13 @@ msgstr ""
 "oprogramowanie dostarczające podany typ MIME i zainstalować je według jego "
 "identyfikatora składnika oprogramowania."
 
+#: src/as-validator-issue-tag.h:388
+msgid ""
+"This web link uses the FTP protocol. Consider switching to HTTP(S) instead."
+msgstr ""
+"Ten odnośnik internetowy używa protokołu FTP. Proszę rozważyć użycie HTTP(S) "
+"zamiast tego."
+
 #: tools/appstream-cli.c:648
 msgid ""
 "Too many parameters: Need two version numbers or version numbers and a "
@@ -1708,7 +1730,7 @@ msgstr ""
 "i operator porównania."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:456
+#: src/as-validator-issue-tag.h:461
 msgid ""
 "Type 'console-application' component, but no information about binaries in "
 "$PATH was provided via a 'provides/binary' tag."
@@ -1717,7 +1739,7 @@ msgstr ""
 "o plikach binarnych w ścieżce $PATH za pomocą znacznika „provides/binary”."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:486
+#: src/as-validator-issue-tag.h:491
 msgid ""
 "Type 'driver' component, but no modalias information was provided via a "
 "provides/modalias tag."
@@ -1726,13 +1748,17 @@ msgstr ""
 "pomocą znacznika „provides/modalias”."
 
 #. TRANSLATORS: Please do not translate AppStream tag and property names.
-#: src/as-validator-issue-tag.h:480
+#: src/as-validator-issue-tag.h:485
 msgid ""
 "Type 'font' component, but no font information was provided via a 'provides/"
 "font' tag."
 msgstr ""
 "Składnik jest typu „font”, ale nie podano żadnych informacji o czcionce za "
 "pomocą znacznika „provides/font”."
+
+#: src/as-validator.c:333
+msgid "URL format is invalid."
+msgstr "Format adresu URL jest nieprawidłowy."
 
 #: tools/ascli-actions-mdata.c:544
 #, c-format
@@ -1759,13 +1785,6 @@ msgstr "Nie można odnaleźć składnika pasującego do %s."
 #, c-format
 msgid "Unable to find component with ID '%s'!"
 msgstr "Nie można odnaleźć składnika o identyfikatorze „%s”."
-
-#: src/as-validator-issue-tag.h:547
-msgid ""
-"Unable to find the curl binary. remote URLs can not be checked for validity!"
-msgstr ""
-"Nie można odnaleźć pliku binarnego curl. Nie można sprawdzić poprawności "
-"zdalnych adresów URL."
 
 #: tools/ascli-actions-misc.c:224
 #, c-format
@@ -1801,7 +1820,7 @@ msgstr ""
 "Nie można połączyć się z filmem zrzutu ekranu w jego zdalnym położeniu — czy "
 "na pewno istnieje?"
 
-#: src/as-validator-issue-tag.h:537
+#: src/as-validator-issue-tag.h:542
 msgid "Unable to read file."
 msgstr "Nie można odczytać pliku."
 
@@ -1814,7 +1833,7 @@ msgstr "Nie można odczytać pliku .desktop powiązanego z tym składnikiem."
 msgid "Unable to read the .desktop file: %s"
 msgstr "Nie można odczytać pliku .desktop: %s"
 
-#: src/as-pool.c:583
+#: src/as-pool.c:606
 msgid "Unable to remove old cache."
 msgstr "Nie można usunąć starej pamięci podręcznej."
 
@@ -2026,7 +2045,7 @@ msgstr "Należy podać co najmniej jeden plik do sprawdzenia poprawności."
 #. * to include in a search but that should normally be ignored in
 #. * the search.
 #.
-#: src/as-pool.c:106
+#: src/as-pool.c:107
 msgid "app;application;package;program;programme;suite;tool"
 msgstr ""
 "aplikacja;apka;app;application;pakiet;paczka;package;program;programme;"
@@ -2055,6 +2074,13 @@ msgstr "drobne problemy: %lu"
 #, c-format
 msgid "warnings: %lu"
 msgstr "ostrzeżenia: %lu"
+
+#~ msgid ""
+#~ "Unable to find the curl binary. remote URLs can not be checked for "
+#~ "validity!"
+#~ msgstr ""
+#~ "Nie można odnaleźć pliku binarnego curl. Nie można sprawdzić poprawności "
+#~ "zdalnych adresów URL."
 
 #~ msgid "Command '%s' is unknown."
 #~ msgstr "Nieznane polecenie „%s”."

@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU General Public License Version 2
  *
@@ -994,7 +994,7 @@ as_client_run (char **argv, int argc)
 		return as_client_run_status (argv, argc);
 	} else if (g_strcmp0 (command, "convert") == 0) {
 		return as_client_run_convert (argv, argc);
-	} else if (g_strcmp0 (command, "compare-versions") == 0) {
+	} else if ((g_strcmp0 (command, "compare-versions") == 0) || (g_strcmp0 (command, "vercmp") == 0)) {
 		return as_client_run_compare_versions (argv, argc);
 	} else if (g_strcmp0 (command, "new-template") == 0) {
 		return as_client_run_new_template (argv, argc);

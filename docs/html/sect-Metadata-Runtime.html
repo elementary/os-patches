@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.16. Runtime</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-OS.html" title="2.15. Operating System" /><link rel="next" href="chap-CollectionData.html" title="Chapter 3. Collection Metadata" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-OS.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="chap-CollectionData.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-Runtime">
+      ⁠</a>2.16. Runtime</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-runtime-introduction">
+      ⁠</a>2.16.1. Introduction</h3></div></div></div><div class="para">
+			Components of type <code class="literal">runtime</code> describe a collection of interdependent software components that are required to run other software. They set a baseline of dependencies that other software can rely on and link against. A very simple runtime may for example be a chroot environment of a minimal Linux system bootstrap. Runtimes are often employed by software distribution systems such as <a href="https://flatpak.org/">Flatpak</a> or Valve's Steam, but may be used by others and may even be directly distributed as part of tranditional Linux distributions.
+		</div><div class="para">
+			Runtimes can ship metainfo files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-runtime-example">
+      ⁠</a>2.16.2. Example file</h3></div></div></div><div class="para">
+			A <code class="literal">runtime</code> metainfo file can look like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="UTF-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"runtime"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>org.freedesktop.Platform<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>FSFAP<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;project_license&gt;</span>LicenseRef-free=https://freedesktop-sdk.gitlab.io/<span xmlns="" class="perl_Keyword">&lt;/project_license&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>Freedesktop Platform<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>Basic libraries to run Linux desktop applications<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      The Freedesktop Platform is a runtime that contains the most basic libraries
+<span xmlns="" class="line">​</span>      and files needed to run a Linux desktop application.
+<span xmlns="" class="line">​</span>      ...
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;url</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"homepage"</span><span xmlns="" class="perl_Keyword">&gt;</span>https://freedesktop-sdk.gitlab.io/<span xmlns="" class="perl_Keyword">&lt;/url&gt;</span>
+<span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;releases&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;release</span><span xmlns="" class="perl_Others"> version=</span><span xmlns="" class="perl_String">"10.0"</span> <span xmlns="" class="perl_Keyword">/&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;release</span><span xmlns="" class="perl_Others"> version=</span><span xmlns="" class="perl_String">"9.0"</span><span xmlns="" class="perl_Others"> date=</span><span xmlns="" class="perl_String">"2020-01-12"</span> <span xmlns="" class="perl_Keyword">/&gt;</span>
+<span xmlns="" class="line">​</span>    ...
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/releases&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span></pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-runtime-filespec">
+      ⁠</a>2.16.3. File specification</h3></div></div></div><div class="para">
+			Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">runtime</code>. This clearly identifies this metainfo document as describing a runtime.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="tag-id-runtime">
+      ⁠</a><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For runtimes, the value of the <code class="code">&lt;id/&gt;</code> tag must follow the AppStream ID naming conventions (it should be a reverse-DNS name).
+					</div></dd><dt><a id="tag-runtime-requires">
+      ⁠</a><span class="term">&lt;requires/&gt;</span></dt><dd><div class="para">
+						The <code class="literal">requires</code> tag may be used if multiple runtimes are based on top of each other, or if the runtime actually describes a software development kit (SDK) that wants to require its base runtime. See <a class="xref" href="chap-Metadata.html#tag-requires-recommends">&lt;requires/&gt; &amp; &lt;recommends/&gt;</a> for a detailed description of this tag.
+					</div><div class="para">
+						In order to depend on other runtimes, their component-ID should be referenced in a <code class="literal">requires</code> tag. Example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;requires&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id</span><span xmlns="" class="perl_Others"> version=</span><span xmlns="" class="perl_String">"1.0"</span><span xmlns="" class="perl_Others"> compare=</span><span xmlns="" class="perl_String">"ge"</span><span xmlns="" class="perl_Keyword">&gt;</span>org.freedesktop.Sdk<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/requires&gt;</span></pre></dd><dt><a id="tag-runtime-project_license">
+      ⁠</a><span class="term">&lt;project_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;project_license/&gt;</code> tag usually indicates the license of the component (refer to <a class="xref" href="chap-Metadata.html#tag-project_license">&lt;project_license/&gt;</a> for details). This is tricky for runtimes, as they are usually comprised of many individual pieces of software under different licenses, which would create a very long and complex SPDX license expression. It is therefore recommended to have the tool that builds the runtime collect all the licenses and generate a document or website containing. This document can then be linked using <code class="code">LicenseRef-free=URL</code> if the runtime is free software, or <code class="code">LicenseRef-proprietary=URL</code> in case it contains non-free elements.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting"><span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;project_license&gt;</span>LicenseRef-free=https://example.com/licenses.html<span xmlns="" class="perl_Keyword">&lt;/project_license&gt;</span></pre></dd><dt><a id="tag-runtime-provides">
+      ⁠</a><span class="term">&lt;provides/&gt;</span></dt><dd><div class="para">
+						This tag is described in detail for generic components at <a class="xref" href="chap-Metadata.html#tag-provides">&lt;provides/&gt;</a>.
+					</div><div class="para">
+						The runtime may use the <code class="code">&lt;provides/&gt;</code> tag to denote the individual modules it is comprised of, using their component IDs.
+					</div></dd></dl></div><div class="para">
+			For a component of type <code class="literal">runtime</code>, the following tags are required and must be present for a valid document: <a class="xref" href="sect-Metadata-Runtime.html#tag-id-runtime">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-project_license">&lt;project_license/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-OS.html"><strong>Prev</strong>2.15. Operating System</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="chap-CollectionData.html"><strong>Next</strong>Chapter 3. Collection Metadata</a></li></ul></body></html>

@@ -2,35 +2,37 @@ Source: appstream
 Section: admin
 Priority: optional
 Maintainer: Matthias Klumpp <mak@debian.org>
-Build-Depends: debhelper (>= 11),
+Build-Depends: debhelper-compat (= 12),
                gettext,
                gobject-introspection,
                gperf,
                gtk-doc-tools,
-               libgirepository1.0-dev (>= 1.53),
-               libglib2.0-dev (>= 2.46),
+               libgirepository1.0-dev (>= 1.58),
+               libglib2.0-dev (>= 2.58),
                liblmdb-dev,
+               libsoup2.4-dev (>= 2.56),
                libstemmer-dev,
                libxml2-dev (>= 2.8.0),
                libyaml-dev (>= 0.1.6),
-               meson (>= 0.42),
+               meson (>= 0.48),
                qtbase5-dev (>= 5.6),
                valac
-Standards-Version: 4.4.0
+Rules-Requires-Root: no
+Standards-Version: 4.4.1
 Homepage: https://www.freedesktop.org/wiki/Distributions/AppStream/
 Vcs-Git: https://salsa.debian.org/pkgutopia-team/appstream.git
 Vcs-Browser: https://salsa.debian.org/pkgutopia-team/appstream
 
 Package: appstream
 Architecture: any
-Depends: ${misc:Depends},
+Depends: shared-mime-info,
+         ${misc:Depends},
          ${shlibs:Depends}
 Breaks: appstream-index (<< ${source:Version}),
         gnome-software (<< 3.22.5-1),
         plasma-discover (<< 5.8.5-3)
 Provides: appstream-index
-Suggests: apt-config-icons,
-          curl
+Suggests: apt-config-icons
 Description: Software component metadata management
  AppStream is a metadata specification, allowing to write metadata for
  software projects in a standardized format.

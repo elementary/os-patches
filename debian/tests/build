@@ -1,0 +1,72 @@
+#!/bin/sh
+# autopkgtest check: Build and run a simple dummy program using the AppStream lib,
+# to verify that the headers and pkg-config file are installed correctly
+# (c) 2014-2016 Matthias Klumpp <mak@debian.org>
+set -e
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+cd $WORKDIR
+cat <<EOF > asbuildtest.c
+#include <appstream.h>
+
+int main()
+{
+	g_autoptr(AsComponent) cpt = NULL;
+	g_autoptr(AsMetadata) metad = NULL;
+	g_autofree gchar *xml_metainfo = NULL;
+	g_autofree gchar *xml_collection = NULL;
+	g_auto(GStrv) strv = NULL;
+	GError *error = NULL;
+
+	cpt = as_component_new ();
+	as_component_set_kind (cpt, AS_COMPONENT_KIND_DESKTOP_APP);
+
+	as_component_set_id (cpt, "org.example.Test.desktop");
+	as_component_set_name (cpt, "Test", "C");
+	as_component_set_summary (cpt, "It does things", "C");
+
+	strv = g_new0 (gchar*, 1 + 2);
+	strv[0] = g_strdup ("foobar");
+	strv[1] = NULL;
+	as_component_set_pkgnames (cpt, strv);
+
+	metad = as_metadata_new ();
+	as_metadata_add_component (metad, cpt);
+
+	xml_metainfo = as_metadata_component_to_metainfo (metad, AS_FORMAT_KIND_XML, &error);
+	g_assert_no_error (error);
+
+	xml_collection = as_metadata_components_to_collection (metad, AS_FORMAT_KIND_XML, &error);
+	g_assert_no_error (error);
+
+	g_debug ("Metainfo XML: %s", xml_metainfo);
+	g_debug ("Collection XML: %s", xml_collection);
+
+	g_assert_cmpstr (xml_metainfo, ==, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+					   "<component type=\"desktop-application\">\n"
+					   "  <id>org.example.Test.desktop</id>\n"
+					   "  <name>Test</name>\n"
+					   "  <summary>It does things</summary>\n"
+					   "  <pkgname>foobar</pkgname>\n"
+					   "</component>\n");
+	g_assert_cmpstr (xml_collection, ==, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+					 "<components version=\"0.12\">\n"
+					 "  <component type=\"desktop-application\">\n"
+					 "    <id>org.example.Test.desktop</id>\n"
+					 "    <name>Test</name>\n"
+					 "    <summary>It does things</summary>\n"
+					 "    <pkgname>foobar</pkgname>\n"
+					 "  </component>\n"
+					 "</components>\n");
+
+	return 0;
+}
+EOF
+export G_MESSAGES_DEBUG=all
+
+gcc -o asbuildtest asbuildtest.c `pkg-config --cflags --libs appstream`
+echo "build: OK"
+[ -x asbuildtest ]
+./asbuildtest
+echo "run: OK"

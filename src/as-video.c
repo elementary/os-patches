@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2019-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -356,7 +356,7 @@ as_video_load_from_xml (AsVideo *video, AsContext *ctx, xmlNode *node, GError **
 	if (content == NULL)
 		return FALSE;
 
-	lang = as_xmldata_get_node_locale (ctx, node);
+	lang = as_xml_get_node_locale_match (ctx, node);
 
 	/* check if this video is for us */
 	if (lang == NULL)

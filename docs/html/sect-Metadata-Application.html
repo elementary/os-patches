@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.2. Desktop Applications</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="next" href="sect-Metadata-ConsoleApplication.html" title="2.3. Console Applications" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="chap-Metadata.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-ConsoleApplication.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-Application">
+      ⁠</a>2.2. Desktop Applications</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-appdata-introduction">
+      ⁠</a>2.2.1. Introduction</h3></div></div></div><div class="para">
+			A desktop application is an application which has a graphical user interface and is commonly used with mouse and keyboard. It also ships a Freedesktop <code class="filename">.desktop</code> file to be visible in application menus.
+		</div><div class="para">
+			AppStream generators may pull data from the preexisting <code class="filename">.desktop</code> files to represent an application in the AppStream metadata pool. Upstream projects should ship a metainfo file containing additional metadata to describe their application though, to enhance the available metadata. This data includes things like screenshots, long descriptions, icon information and various other things needed to present the application properly to the user. For some distributions, the presence of this metadata is a prerequisite for the application showing up in the metadata pool and being presented in software centers.
+		</div><div class="para">
+			The file described in this document is built upon the generic component metadata with fields specific for desktop applications (see <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a>).
+		</div><div class="para">
+			The metainfo files override any values which are automatically fetched from other sources by the AppStream data generator, which means that its data will always take precedence over data which has already been defined in a <code class="filename">.desktop</code> file. Applications can ship one or more files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div><div class="para">
+			Data will only be fetched from a desktop file if one <a class="xref" href="sect-Metadata-Application.html#tag-dapp-launchable">&lt;launchable/&gt;</a> tag is present to define a .desktop file ID. If multiple <code class="literal">launchable</code> tags are defined, no data will be merged in from .desktop files.
+		</div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+				If you are looking for some quickstart guide to just get your application to ship AppStream metadata quickly, this document might not be for you. You might want to take a look at <a class="xref" href="chap-Quickstart.html#sect-Quickstart-DesktopApps">Section 4.1, “For GUI application upstream maintainers”</a> instead.
+			</div></div></div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+				While <code class="literal">desktop-application</code> metadata is commonly stored in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code> (with a <code class="filename">.metainfo.xml</code> extension), using a <code class="filename">.appdata.xml</code> extension is also permitted for this component type for legacy compatibility. AppStream implementations will recognize either file type, as long as it ends up in the right location on the filesystem.
+			</div></div></div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+				If you want to hide a desktop-entry file from AppStream metadata generators which synthesize components from desktop-entry data, you may want to add <code class="code">X-AppStream-Ignore=True</code> to the <code class="code">Desktop Entry</code> section of the .desktop file. Keep in mind that if your .desktop file already has a <code class="code">NoDisplay=True</code> key or is not of <code class="code">Type=Application</code>, it will always be ignored, unless metainfo file exists that references it (in which case its data may be merged with the metainfo data).
+			</div></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-appdata-filespec">
+      ⁠</a>2.2.2. File specification</h3></div></div></div><div class="para">
+			The basic structure for a generic component as described at <a class="xref" href="chap-Metadata.html#spec-component-filespec">Section 2.1.3, “XML Specification”</a> applies. Note that the XML root must have the <code class="literal">type</code> property set to <code class="code">desktop-application</code>, while in a generic component this property can be omitted. This clearly identifies this metainfo document as describing an application.
+		</div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+				All tags defined in the <code class="literal">generic</code> component specification are valid for <code class="literal">desktop-application</code> components as well. An application is just a specialized component, allowing tools like software centers to filter out the component types they want to display.
+			</div></div></div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+				The <code class="code">desktop-application</code> component type is the same as the <code class="code">desktop</code> component type - <code class="code">desktop</code> is the older type identifier for desktop-applications and should not be used for new metainfo files, unless compatibility with very old AppStream tools (pre 2016) is still wanted.
+			</div></div></div><div class="para">
+			The following list describes the special tags for application upstream metadata and provides some additional information about the values the tags are expected to have. If no information is given about a tag, refer to the respective tag in <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a>.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="tag-id-desktopapp">
+      ⁠</a><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For desktop applications, the <code class="code">&lt;id/&gt;</code> tag value must follow the reverse-DNS scheme as described in <a class="xref" href="chap-Metadata.html#tag-id-generic">&lt;id/&gt;</a>.
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="note"><div class="admonition_header"><p><strong>Note</strong></p></div><div class="admonition"><div class="para">
+							In previous AppStream releases, the <code class="code">&lt;id/&gt;</code> was used to associate metainfo files with their .desktop files to merge in data from .desktop files into the AppStream generator's final output. In modern metainfo files, the component-ID for <code class="literal">desktop-application</code> components can be an arbitrary reverse-DNS string (matching the naming rules applying to all AppStream metadata), while the <a class="xref" href="sect-Metadata-Application.html#tag-dapp-launchable">&lt;launchable/&gt;</a> tag is used to associate .desktop files with their metainfo files.
+						</div><div class="para">
+							Note that even though the component-ID can now be any rDNS name, when updating existing applications, do not change their <code class="code">&lt;id/&gt;</code> to drop the .desktop suffix. The rules are relaxed when picking a new component-ID for new applications, but when updating older applications they still need to keep their original <code class="code">&lt;id/&gt;</code> (when it's otherwise compliant). The ID is used to uniquely identify applications across distributions and releases and should always remain the same for the same application.
+						</div></div></div></dd><dt><span class="term">&lt;metadata_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;metadata_license/&gt;</code> tag as described in <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a> must be present.
+					</div></dd><dt><a id="tag-dapp-name">
+      ⁠</a><span class="term">&lt;name/&gt;</span></dt><dd><div class="para">
+						The human-readable name of the application. This is the name you want users to see prior to installing the application.
+					</div></dd><dt><a id="tag-dapp-summary">
+      ⁠</a><span class="term">&lt;summary/&gt;</span></dt><dd><div class="para">
+						A short summary on what this application does, roughly equivalent to the <code class="literal">Comment</code> field of the accompanying <code class="filename">.desktop</code> file of the application.
+					</div></dd><dt><a id="tag-dapp-launchable">
+      ⁠</a><span class="term">&lt;launchable/&gt;</span></dt><dd><div class="para">
+						It is recommended that a <code class="code">&lt;launchable/&gt;</code> tag is present in <code class="literal">desktop-application</code> metainfo files. The tag is described in detail at <a class="xref" href="chap-Metadata.html#tag-launchable">&lt;launchable/&gt;</a>.
+					</div><div class="para">
+						If only one <code class="literal">launchable</code> entry of type <code class="literal">desktop-id</code> is present, AppStream metadata generators might decide to merge metadata from .desktop files referenced by the tag into their final output.
+					</div><div class="para">
+						The <code class="literal">launchable</code> tag is optional, but if omitted software centers will not be able to launch the application directly after it was installed.
+					</div></dd><dt><a id="tag-dapp-screenshots">
+      ⁠</a><span class="term">&lt;screenshots/&gt;</span></dt><dd><div class="para">
+						A screenshot presents your application to the outside world, and could be seen by hundreds or thousands of people.
+					</div><div class="para">
+						The <code class="code">&lt;screenshots/&gt;</code> tag should look like it is described at <a class="xref" href="chap-Metadata.html#tag-screenshots">&lt;screenshots/&gt;</a>.
+					</div><div class="para">
+						Screenshot size, shape and format recommendations for applications:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								All screenshots should have a 16:9 aspect ratio, and should have a width that is no smaller than 620px (software center applications will be able to fill in the screenshots in the space they provide for that more easily then).
+							</div><div class="para">
+								Ideally the window will be resized to a 16:9 aspect ratio, but screenshots can also be cropped if only a small area of the window needs to be shown.
+							</div></li><li class="listitem"><div class="para">
+								Screenshots should ideally be in the PNG format, but JPEG and WebP images are also fine. Keep in mind though that the images are converted into PNG when collection metadata is generated for a software distribution.
+							</div></li><li class="listitem"><div class="para">
+								Do not scale screenshots below their original size.
+							</div></li></ul></div><div class="para">
+						You can find a lot more information on how to create good screenshots in the <a class="link" href="chap-Quickstart.html#qsr-app-screenshots-info">quickstart guide on applications</a>.
+					</div></dd><dt><span class="term">&lt;project_group/&gt;</span></dt><dd><div class="para">
+						This tag is described for generic components at <a class="xref" href="chap-Metadata.html#spec-component-filespec">Section 2.1.3, “XML Specification”</a>. You should use it for your application if appropriate.
+					</div></dd><dt><a id="tag-dapp-provides">
+      ⁠</a><span class="term">&lt;provides/&gt;</span></dt><dd><div class="para">
+						This tag is described in detail for generic components at <a class="xref" href="chap-Metadata.html#tag-provides">&lt;provides/&gt;</a>.
+					</div><div class="para">
+						If your application ships a binary in a location in the default <code class="envar">PATH</code>, you should add at least a child of type <code class="code">&lt;binary/&gt;</code> to make that new executable known to the distribution.
+					</div></dd><dt><span class="term">&lt;releases/&gt;</span></dt><dd><div class="para">
+						The application metainfo should at least provide one <code class="code">&lt;releases/&gt;</code> tag, which has one or more <code class="code">&lt;release/&gt;</code> children to define the version and release date of this application. For details, see <a class="xref" href="chap-Metadata.html#tag-releases">&lt;releases/&gt;</a> .
+					</div></dd></dl></div><div class="para">
+			For a component of type <code class="literal">desktop-application</code>, the following tags are required and must always be present: <a class="xref" href="sect-Metadata-Application.html#tag-id-desktopapp">&lt;id/&gt;</a>, <a class="xref" href="sect-Metadata-Application.html#tag-dapp-name">&lt;name/&gt;</a>, <a class="xref" href="sect-Metadata-Application.html#tag-dapp-summary">&lt;summary/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-description">&lt;description/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="chap-Metadata.html"><strong>Prev</strong>Chapter 2. Upstream Metadata</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-ConsoleApplication.html"><strong>Next</strong>2.3. Console Applications</a></li></ul></body></html>

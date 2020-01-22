@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2014-2019 Matthias Klumpp <matthias@tenstral.net>
- * Copyright (C)      2014 Richard Hughes <richard@hughsie.com>
+ * Copyright (C) 2014-2020 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2014 Richard Hughes <richard@hughsie.com>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -38,6 +38,7 @@
 
 #include "as-utils.h"
 #include "as-utils-private.h"
+#include "as-context-private.h"
 #include "as-artifact-private.h"
 #include "as-checksum-private.h"
 #include "as-issue-private.h"
@@ -298,14 +299,11 @@ void
 as_release_set_timestamp (AsRelease *release, guint64 timestamp)
 {
 	AsReleasePrivate *priv = GET_PRIVATE (release);
-	GTimeVal time;
+	g_autoptr(GDateTime) time = g_date_time_new_from_unix_utc (timestamp);
 
 	priv->timestamp = timestamp;
-	time.tv_sec = priv->timestamp;
-	time.tv_usec = 0;
-
 	g_free (priv->date);
-	priv->date = g_time_val_to_iso8601 (&time);
+	priv->date = as_date_time_format_iso8601 (time);
 }
 
 /**
@@ -429,15 +427,14 @@ void
 as_release_set_timestamp_eol (AsRelease *release, guint64 timestamp)
 {
 	AsReleasePrivate *priv = GET_PRIVATE (release);
-	GTimeVal time;
+	g_autoptr(GDateTime) time = NULL;
 
 	if (timestamp == 0)
 		return;
 
-	time.tv_sec = timestamp;
-	time.tv_usec = 0;
+	time = g_date_time_new_from_unix_utc (timestamp);
 	g_free (priv->date_eol);
-	priv->date_eol = g_time_val_to_iso8601 (&time);
+	priv->date_eol = as_date_time_format_iso8601 (time);
 }
 
 /**
@@ -485,16 +482,11 @@ as_release_set_urgency (AsRelease *release, AsUrgencyKind urgency)
 const gchar*
 as_release_get_description (AsRelease *release)
 {
-	const gchar *desc;
 	AsReleasePrivate *priv = GET_PRIVATE (release);
-
-	desc = g_hash_table_lookup (priv->description, as_release_get_active_locale (release));
-	if (desc == NULL) {
-		/* fall back to untranslated / default */
-		desc = g_hash_table_lookup (priv->description, "C");
-	}
-
-	return desc;
+	return as_context_localized_ht_get (priv->context,
+					    priv->description,
+					    priv->active_locale_override,
+					    AS_VALUE_FLAG_NONE);
 }
 
 /**
@@ -508,13 +500,10 @@ void
 as_release_set_description (AsRelease *release, const gchar *description, const gchar *locale)
 {
 	AsReleasePrivate *priv = GET_PRIVATE (release);
-
-	if (locale == NULL)
-		locale = as_release_get_active_locale (release);
-
-	g_hash_table_insert (priv->description,
-				g_strdup (locale),
-				g_strdup (description));
+	as_context_localized_ht_set (priv->context,
+				     priv->description,
+				     description,
+				     locale);
 }
 
 /**
@@ -940,7 +929,7 @@ as_release_load_from_xml (AsRelease *release, AsContext *ctx, xmlNode *node, GEr
 
 				/* for collection XML, the "description" tag has a language property, so parsing it is simple */
 				content = as_xml_dump_node_children (iter);
-				lang = as_xmldata_get_node_locale (ctx, iter);
+				lang = as_xml_get_node_locale_match (ctx, iter);
 				if (lang != NULL)
 					as_release_set_description (release, content, lang);
 			} else {
@@ -1031,10 +1020,8 @@ as_release_to_xml_node (AsRelease *release, AsContext *ctx, xmlNode *root)
 			xmlNewProp (subnode, (xmlChar*) "timestamp",
 					(xmlChar*) time_str);
 		} else {
-			GTimeVal time;
-			time.tv_sec = priv->timestamp;
-			time.tv_usec = 0;
-			time_str = g_time_val_to_iso8601 (&time);
+			g_autoptr(GDateTime) time = g_date_time_new_from_unix_utc (priv->timestamp);
+			time_str = as_date_time_format_iso8601 (time);
 			xmlNewProp (subnode, (xmlChar*) "date",
 					(xmlChar*) time_str);
 		}
@@ -1180,10 +1167,8 @@ as_release_emit_yaml (AsRelease *release, AsContext *ctx, yaml_emitter_t *emitte
 						      "unix-timestamp",
 						      priv->timestamp);
 		} else {
-			GTimeVal time;
-			time.tv_sec = priv->timestamp;
-			time.tv_usec = 0;
-			time_str = g_time_val_to_iso8601 (&time);
+			g_autoptr(GDateTime) time = g_date_time_new_from_unix_utc (priv->timestamp);
+			time_str = as_date_time_format_iso8601 (time);
 			as_yaml_emit_entry (emitter, "date", time_str);
 		}
 	}

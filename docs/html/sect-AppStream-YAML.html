@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">3.2. AppStream collection YAML</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-CollectionData.html" title="Chapter 3. Collection Metadata" /><link rel="prev" href="chap-CollectionData.html" title="Chapter 3. Collection Metadata" /><link rel="next" href="sect-AppStream-IconCache.html" title="3.3. Icon Cache" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="chap-CollectionData.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-AppStream-IconCache.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-AppStream-YAML">
+      ⁠</a>3.2. AppStream collection YAML</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-dep11-introduction">
+      ⁠</a>3.2.1. Introduction</h3></div></div></div><div class="para">
+			DEP-11 is a YAML implementation of the AppStream collection specification, which is primarily used by Debian and its derivatives. This document describes the DEP-11 YAML. All AppStream support libraries available today are able to read both the YAML and the XML specification.
+		</div><div xmlns:d="http://docbook.org/ns/docbook" class="important"><div class="admonition_header"><p><strong>Important</strong></p></div><div class="admonition"><div class="para">
+				If you want to use AppStream in your distribution, and are not based on Debian, please use the XML specification (unless you have strong reasons for preferring YAML). XML is the official format for AppStream collection metadata.
+			</div></div></div><div class="para">
+			The DEP-11 YAML metadata can be validated for correctness using the <code class="command">dep11-validate</code> tool from the <a href="https://packages.debian.org/source/sid/appstream-dep11">AppStream DEP-11 utils</a>.
+		</div><div class="para">
+			Fields not mentioned in this document are not recognized by DEP-11 YAML parsers.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-dep11-filenaming">
+      ⁠</a>3.2.2. File naming and location</h3></div></div></div><div class="para">
+			Take a look at <a class="xref" href="chap-CollectionData.html#spec-asxml-filenaming">Section 3.1.2, “File naming and location”</a> for AppStream XML files. While the XML data belongs into the <code class="filename">xmls</code> subdirectory in <code class="filename">/usr/share/app-info</code> (or <code class="filename">/var/cache/app-info</code>), the YAML data is stored in the <code class="filename">yaml</code> subdirectory. All other rules affecting the XML apply the DEP-11 YAML as well, including the recommendation to compress the files with gzip.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-dep11-general">
+      ⁠</a>3.2.3. General DEP-11 YAML structure</h3></div></div></div><div class="para">
+			Each YAML file starts with a header document, which defines the basic properties of the metadata, which is followed by the actual metadata in form of one YAML document per AppStream component.
+		</div><div class="para">
+			The header document contains the following fields, all of them are required or at least strongly recommended.
+		</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">File</span></dt><dd><div class="para">
+						This field identifies the file as DEP-11 file. Its value is always <code class="code">DEP-11</code>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><span class="term">Version</span></dt><dd><div class="para">
+						The version of the AppStream specification this file was built for.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><span class="term">Origin</span></dt><dd><div class="para">
+						Defines the repository-id this file belongs to. This usually matches the filename without extension. On Debian systems, it is the <code class="code">&lt;suite&gt;-&lt;component&gt;</code> combination, e.g. <strong class="userinput"><code>jessie-main</code></strong>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><span class="term">MediaBaseUrl</span></dt><dd><div class="para">
+						The base URL for media (screenshots, icons, ...) referenced in the metadata file. If this is set, all urls in the document referencing media will be treated relative to the base url.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>no</em></span></p></div></dd><dt><span class="term">Architecture</span></dt><dd><div class="para">
+						Defines the architecture this data belongs to. This information is useful to resolve AppStream-ID conflicts on multiarch systems, which appear if the user has metadata for two architectures installed.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>no</em></span></p></div></dd><dt><span class="term">Priority</span></dt><dd><div class="para">
+						The priorization of this metadata file over other metadata.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>int</em></span>, <span class="property">required</span>:<span class="emphasis"><em>no</em></span></p></div></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-dep11-translated">
+      ⁠</a>3.2.4. Translated fields</h3></div></div></div><div class="para">
+			Fields with translated values follow the following conventions:
+		</div><div xmlns:d="http://docbook.org/ns/docbook" class="orderedlist"><ol><li class="listitem"><div class="para">
+					They are of type <span class="emphasis"><em>dict</em></span>
+				</div></li><li class="listitem"><div class="para">
+					They must contain a key <code class="literal">C</code>, with the untranslated string as value
+				</div></li><li class="listitem"><div class="para">
+					All languages are represented with their locale name as key in the dict and the translated content as value (which is of type <span class="emphasis"><em>str</em></span>, unless explicitly stated otherwise)
+				</div></li></ol></div><div class="para">
+			In this document, the type <span class="emphasis"><em>localized</em></span> is used to indicate that the field contains translated values following this schema.
+		</div><div class="para">
+			Example for a translated <code class="literal">Name</code> field:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span>Name<span xmlns="" class="perl_Char">:</span>
+<span xmlns="" class="line">​</span>  C<span xmlns="" class="perl_Char">:</span> I am the untranslated string.
+<span xmlns="" class="line">​</span>  be@latin<span xmlns="" class="perl_Char">:</span> Redaktar naładaŭ
+<span xmlns="" class="line">​</span>  bg<span xmlns="" class="perl_Char">:</span> Настройки на програмите
+<span xmlns="" class="line">​</span>  pl<span xmlns="" class="perl_Char">:</span> Edytor konfiguracji</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-dep11-fields">
+      ⁠</a>3.2.5. Valid fields</h3></div></div></div><div class="para">
+			This document describes all valid fields in the DEP-11 YAML specification. The requirements for the values are exactly the same as in the XML specification, and each field links to its correspondent XML tag for reference.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="field-dep11-id">
+      ⁠</a><span class="term">ID</span></dt><dd><div class="para">
+						The <code class="literal">ID</code> field is a short unique and usually lower-cases identifier for the component. Depending on the component's type, different naming conventions apply.
+					</div><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-component-id">&lt;id/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><a id="field-dep11-priority">
+      ⁠</a><span class="term">Priority</span></dt><dd><div class="para">
+						The <code class="literal">Priority</code> field sets the priority this component's metadata should have over other meadata in the pool. Data with a higher priority replaces data with a lower priority.
+					</div><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#spec-asxml-tags">Section 3.1.4, “Valid tags for all component types”</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>int</em></span>, <span class="property">required</span>:<span class="emphasis"><em>no</em></span></p></div></dd><dt><a id="field-dep11-type">
+      ⁠</a><span class="term">Type</span></dt><dd><div class="para">
+						The type of this component. Allowed values are:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								<code class="code">generic</code> for <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a>
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">desktop-application</code> for <a class="xref" href="sect-Metadata-Application.html">Section 2.2, “Desktop Applications”</a>
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">console-application</code> for <a class="xref" href="sect-Metadata-ConsoleApplication.html">Section 2.3, “Console Applications”</a>
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">addon</code> for <a class="xref" href="sect-Metadata-Addon.html">Section 2.6, “Addons”</a>
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">codec</code> for <a class="xref" href="sect-Metadata-Codec.html">Section 2.9, “Codecs”</a>
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">inputmethod</code> for <a class="xref" href="sect-Metadata-InputMethod.html">Section 2.10, “Input Methods”</a>
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">firmware</code> for <a class="xref" href="sect-Metadata-Firmware.html">Section 2.11, “Firmware”</a>
+							</div></li></ul></div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><a id="field-dep11-merge">
+      ⁠</a><span class="term">Merge</span></dt><dd><div class="para">
+						The optional <code class="literal">Merge</code> field describes the merge strategy that should be applied when merging data of this component into its base. It may assume the values <code class="code">append</code>, <code class="code">replace</code> or <code class="code">remove-component</code>.
+					</div><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#spec-asxml-tags">Section 3.1.4, “Valid tags for all component types”</a> for a description on how merging works.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>no</em></span></p></div></dd><dt><a id="field-dep11-package">
+      ⁠</a><span class="term">Package</span></dt><dd><div class="para">
+						The name of the package which needs to be installed in order to make this component available on the system.
+					</div><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-pkgname">&lt;pkgname/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><a id="field-dep11-sourcepackage">
+      ⁠</a><span class="term">SourcePackage</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-source_pkgname">&lt;source_pkgname/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span></p></div></dd><dt><a id="field-dep11-name">
+      ⁠</a><span class="term">Name</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-name">&lt;name/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>localized</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><a id="field-dep11-summary">
+      ⁠</a><span class="term">Summary</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-summary">&lt;summary/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>localized</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><a id="field-dep11-project_license">
+      ⁠</a><span class="term">ProjectLicense</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-project_license">&lt;project_license/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span></p></div></dd><dt><a id="field-dep11-description">
+      ⁠</a><span class="term">Description</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-description">&lt;description/&gt;</a>.
+					</div><div class="para">
+						The markup for the description is the same as in the XML specification, so it can be read by anything parsing basic HTML markup.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>localized</em></span></p></div></dd><dt><a id="field-dep11-url">
+      ⁠</a><span class="term">Url</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-url">&lt;url/&gt;</a>.
+					</div><div class="para">
+						The <code class="literal">Url</code> field contains the different url types as keys in its dict. Valid url types are defined in the main AppStream XML specification. All URL types must be lowercased.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Url:
+  homepage: https://example.org
+  faq: https://example.org/faq
+  bugtracker: https://bugs.example.org/report-issue</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>dict</em></span></p></div></dd><dt><a id="field-dep11-projectgroup">
+      ⁠</a><span class="term">ProjectGroup</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-project_group">&lt;project_group/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span></p></div></dd><dt><a id="field-dep11-icon">
+      ⁠</a><span class="term">Icon</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-icon">&lt;icon/&gt;</a>.
+					</div><div class="para">
+						The <code class="literal">Icon</code> field has the different icon types as keys for its dict.
+					</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">stock</span></dt><dd><div class="para">
+									Contains the stock icon name.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span></p></div></dd><dt><span class="term">cached</span></dt><dd><div class="para">
+									Contains a list of dictionaries with the keys <code class="literal">width</code> and <code class="literal">height</code> of type <span class="emphasis"><em>int</em></span> specifying the dimensions of the icon, as well as the key <code class="literal">name</code> of type <span class="emphasis"><em>str</em></span> specifying the name of the icon in the cache.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list ➟ dict</em></span></p></div></dd><dt><span class="term">local</span></dt><dd><div class="para">
+									Contains a list of dictionaries with the keys <code class="literal">width</code> and <code class="literal">height</code> of type <span class="emphasis"><em>int</em></span> specifying the dimensions of the icon, as well as the key <code class="literal">name</code> of type <span class="emphasis"><em>str</em></span> specifying the absolute filename pointing to the right icon.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list ➟ dict</em></span></p></div></dd><dt><span class="term">remote</span></dt><dd><div class="para">
+									Contains a list of dictionaries with the keys <code class="literal">width</code> and <code class="literal">height</code> of type <span class="emphasis"><em>int</em></span> specifying the dimensions of the icon, as well as the key <code class="literal">url</code> of type <span class="emphasis"><em>str</em></span> which contains a HTTP(S) or FTP URL to the icon.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list ➟ dict</em></span></p></div></dd></dl></div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>dict</em></span></p></div></dd><dt><a id="field-dep11-categories">
+      ⁠</a><span class="term">Categories</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-categories">&lt;categories/&gt;</a>.
+					</div><div class="para">
+						This field follows its XML counterpart in almost all regards. The different XDG menu category names are encoded in the list, and are of type <span class="emphasis"><em>str</em></span>.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Categories:
+  - Network
+  - Telephony</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list</em></span></p></div></dd><dt><a id="field-dep11-keywords">
+      ⁠</a><span class="term">Keywords</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-keywords">&lt;keywords/&gt;</a>.
+					</div><div class="para">
+						This field contains the keywords for this component. The keys define the locales for the respective language, the values are of type <span class="emphasis"><em>list</em></span> and contain the list of keywords for the respective language. An unlocalized <code class="literal">C</code> key must be present.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Keywords:
+  C:
+    - IDE
+    - development
+    - programming
+  de:
+    - IDE
+    - entwicklung
+    - programmierung</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>translated(list)</em></span></p></div></dd><dt><a id="field-dep11-screenshots">
+      ⁠</a><span class="term">Screenshots</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-screenshots">&lt;screenshots/&gt;</a>.
+					</div><div class="para">
+						The <code class="literal">Screenshots</code> field contains a list of screenshots. A screenshot is of type <span class="emphasis"><em>dict</em></span> and contains the following keys:
+					</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">default</span></dt><dd><div class="para">
+									If <code class="literal">default</code> is <code class="code">true</code>, the screenshot is selected as default screenshot. There has to be at least one screenshot which is marked as default.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>bool</em></span></p></div></dd><dt><span class="term">source-image</span></dt><dd><div class="para">
+									Describes the source image for this screenshot. If this field is present, <code class="literal">videos</code> must not be present as well. The field valus is a dictionary with the following keys:
+								</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+											<code class="literal">height</code>
+										</div><div class="para">
+											The image height (<span class="property">value-type</span>:<span class="emphasis"><em>int</em></span>)
+										</div></li><li class="listitem"><div class="para">
+											<code class="literal">width</code>
+										</div><div class="para">
+											The image width (<span class="property">value-type</span>:<span class="emphasis"><em>int</em></span>)
+										</div></li><li class="listitem"><div class="para">
+											<code class="literal">url</code>
+										</div><div class="para">
+											The full image url, or the url component added to <code class="literal">MediaBaseUrl</code>, if defined (<span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>).
+										</div></li><li class="listitem"><div class="para">
+											<code class="literal">lang</code>
+										</div><div class="para">
+											The language this screenshot image is translated in. The value is a locale string. (<span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>no</em></span>)
+										</div></li></ul></div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>dict</em></span>, <span class="property">required</span>:<span class="emphasis"><em>conditional</em></span></p></div></dd><dt><span class="term">thumbnails</span></dt><dd><div class="para">
+									A list of an arbitrary number of screenshots. All screenshots are of type <span class="emphasis"><em>dict</em></span> and must contain the same keys as described for <code class="literal">source-image</code>. This key must not be present if <code class="literal">videos</code> is present.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list</em></span>, <span class="property">required</span>:<span class="emphasis"><em>no</em></span></p></div></dd><dt><span class="term">videos</span></dt><dd><div class="para">
+									Contains a list of video dicts for this screenshot. If this field is present, <code class="literal">source-image</code> must not be present as well. The field valus is a dictionary with the following keys:
+								</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+											<code class="literal">container</code>
+										</div><div class="para">
+											The video container format (<span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, values as described in the XML specification)
+										</div></li><li class="listitem"><div class="para">
+											<code class="literal">codec</code>
+										</div><div class="para">
+											The video codec format (<span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, values as described in the XML specification)
+										</div></li><li class="listitem"><div class="para">
+											<code class="literal">height</code>
+										</div><div class="para">
+											The video height (<span class="property">value-type</span>:<span class="emphasis"><em>int</em></span>)
+										</div></li><li class="listitem"><div class="para">
+											<code class="literal">width</code>
+										</div><div class="para">
+											The video width (<span class="property">value-type</span>:<span class="emphasis"><em>int</em></span>)
+										</div></li><li class="listitem"><div class="para">
+											<code class="literal">url</code>
+										</div><div class="para">
+											The full video url, or the url component added to <code class="literal">MediaBaseUrl</code>, if defined (<span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>).
+										</div></li><li class="listitem"><div class="para">
+											<code class="literal">lang</code>
+										</div><div class="para">
+											The language this screenshot video is translated in. The value is a locale string. (<span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>no</em></span>)
+										</div></li></ul></div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span>, <span class="property">required</span>:<span class="emphasis"><em>conditional</em></span></p></div></dd><dt><span class="term">caption</span></dt><dd><div class="para">
+									A caption for this screenshot.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>localized</em></span></p></div></dd></dl></div><div class="para">
+						Example for a <code class="literal">Screenshots</code> field containing one screenshot:
+					</div><pre class="programlisting">Screenshots:
+  - default: true
+    caption:
+      C: Foobar showing kitchen-sink functionality
+      si: Foobar shoeewing kischän-sünk funzionality
+    source-image:
+      height: 800
+      url: https://www.example.org/en_US/main.png
+      width: 600
+    thumbnails:
+      - height: 423
+        width: 752
+        url: https://www.example.org/en_US/main-large.png
+      - height: 63
+        width: 112
+        url: https://www.example.org/en_US/main-small.png
+  - source-video:
+      container: matroska
+      codec: av1
+      height: 900
+      url: https://www.example.org/en_US/screencast.mkv
+      width: 1600</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list</em></span></p></div></dd><dt><a id="field-dep11-compulsoryfordesktop">
+      ⁠</a><span class="term">CompulsoryForDesktop</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-compulsory_for_desktop">&lt;compulsory_for_desktop/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span></p></div></dd><dt><a id="field-dep11-provides">
+      ⁠</a><span class="term">Provides</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-provides">&lt;provides/&gt;</a>.
+					</div><div class="para">
+						The <code class="literal">Provides</code> field is of type <span class="emphasis"><em>dict</em></span> and can have the following keys set with the described allowed values:
+					</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">libraries</span></dt><dd><div class="para">
+									A list of provided library names.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(str)</em></span></p></div></dd><dt><span class="term">binaries</span></dt><dd><div class="para">
+									A list of provided binaries in <code class="envar">PATH</code>.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(str)</em></span></p></div></dd><dt><span class="term">mimetypes</span></dt><dd><div class="para">
+									A list of mimetypes this component can handle.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(str)</em></span></p></div></dd><dt><span class="term">firmware</span></dt><dd><div class="para">
+									A list of provided firmware. Each firmware entry is of type <span class="emphasis"><em>dict</em></span> and has a <code class="literal">type</code> key, which has either <code class="code">runtime</code> or <code class="code">flashed</code> as value. Firmware of type <code class="code">flashed</code> has a <code class="literal">guid</code> key, containing the GUID of the device the firmware is flashed on, while firmware of type <code class="code">runtime</code> has a <code class="literal">file</code> key, containing the firmware filename which the kernel is looking for.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span></p></div></dd><dt><span class="term">dbus</span></dt><dd><div class="para">
+									A list of provided DBus services. Each service entry in the list is of type <span class="emphasis"><em>dict</em></span> and has a <code class="literal">type</code> key, which has either <code class="code">system</code> or <code class="code">user</code> as value. <code class="code">user</code> means the DBus service name is for a user/session service, while <code class="code">system</code> means it describes a system service. The <code class="literal">service</code> key contains the name of the DBus service file. All dict values are of type <span class="emphasis"><em>str</em></span>.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span></p></div></dd></dl></div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>dict</em></span></p></div></dd><dt><a id="field-dep11-developername">
+      ⁠</a><span class="term">DeveloperName</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-developer_name">&lt;developer_name/&gt;</a>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>localized</em></span></p></div></dd><dt><a id="field-dep11-launchable">
+      ⁠</a><span class="term">Launchable</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-launchable">&lt;launchable/&gt;</a>.
+					</div><div class="para">
+						A dictionary containing the launchable-type as key, and a list of IDs used for launching the application as value.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Launch:
+  desktop-id:
+    - org.gnome.Sysprof2.desktop</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>dict(list)</em></span></p></div></dd><dt><a id="field-dep11-releases">
+      ⁠</a><span class="term">Releases</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-releases">&lt;releases/&gt;</a>.
+					</div><div class="para">
+						The <code class="literal">Releases</code> contains a list of releases sorted latest-to-oldest, where each list items contains the following fields/keys:
+					</div><div class="variablelist"><dl class="variablelist"><dt><span class="term">version</span></dt><dd><div class="para">
+									The version number of this release.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>yes</em></span></p></div></dd><dt><span class="term">unix-timestamp</span></dt><dd><div class="para">
+									The UNIX timestamp of when this software was released.
+								</div><div class="para">
+									One of the <code class="literal">unix-timestamp</code> or <code class="literal">date</code> fields must be present.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>int</em></span>, <span class="property">required</span>:<span class="emphasis"><em>maybe</em></span></p></div></dd><dt><span class="term">date</span></dt><dd><div class="para">
+									The <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> complete date of when this software was released.
+								</div><div class="para">
+									One of the <code class="literal">unix-timestamp</code> or <code class="literal">date</code> fields must be present.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>str</em></span>, <span class="property">required</span>:<span class="emphasis"><em>maybe</em></span></p></div></dd><dt><span class="term">description</span></dt><dd><div class="para">
+									A description of this release. May contain allowed HTML markup.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>localized</em></span></p></div></dd><dt><span class="term">issues</span></dt><dd><div class="para">
+									A list of dictionaries describing the issues resolved by this release. The dictionaries contain a <code class="literal">id</code> key for the value of an issue as described in the XML specification, as well as a <code class="literal">type</code> and <code class="literal">url</code> key for the tag properties of the same name described in the XML AppStream specification.
+								</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span></p></div></dd></dl></div><div class="para">
+						It is recommended to order this list starting with the latest timestamp to the olderst one.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Releases:
+  - version: '1.8'
+    unix-timestamp: 1424116753
+    description:
+      C: |
+        &lt;p&gt;This stable release fixes the following bug:&lt;/p&gt;
+        &lt;ul&gt;
+          &lt;li&gt;CPU no longer overheats when you hold down spacebar&lt;/li&gt;
+        &lt;/ul&gt;
+  - version: '1.2'
+    unix-timestamp: 1397253600
+  - version: '1.0'
+    unix-timestamp: 1345932000</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span></p></div></dd><dt><a id="field-dep11-languages">
+      ⁠</a><span class="term">Languages</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-languages">&lt;languages/&gt;</a>.
+					</div><div class="para">
+						The languages list is a list of dictionaries. They must contain a <code class="literal">percentage</code> key, indicating the completion of translation for this language, and a <code class="literal">locale</code> key, with the locale string as value.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Languages:
+  - locale: gu
+    percentage: 96
+  - locale: ca@valencia
+    percentage: 94
+  - locale: de
+    percentage: 91
+  - locale: eo
+    percentage: 93</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span></p></div></dd><dt><a id="field-dep11-bundles">
+      ⁠</a><span class="term">Bundles</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-bundle">&lt;bundle/&gt;</a>.
+					</div><div class="para">
+						The <code class="literal">Bundles</code> contains a list of dictionaries with the keys <code class="literal">type</code>, having the ID for a specific bundling system (e.g. <code class="code">flatpak</code> or <code class="code">limba</code>) as value, and <code class="literal">id</code> for the associated bundle-id. See the XML tag description for information on all valid bundling systems.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Bundles:
+  - type: limba
+    id: foobar-1.0.2</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list</em></span></p></div></dd><dt><a id="field-dep11-extends">
+      ⁠</a><span class="term">Extends</span></dt><dd><div class="para">
+						See <a class="xref" href="sect-Metadata-Addon.html#tag-extends">&lt;extends/&gt;</a>.
+					</div><div class="para">
+						Contains a list of AppStream IDs of the other component extended by the described component. This field may only be used with component-type <code class="literal">addon</code>.
+					</div><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(str)</em></span></p></div></dd><dt><a id="field-dep11-suggests">
+      ⁠</a><span class="term">Suggests</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-suggests">&lt;suggests/&gt;</a>.
+					</div><div class="para">
+						A list of dictionaries containing suggested software components. The dictionaries must have a <code class="literal">type</code> key with the string value <code class="code">upstream</code> or <code class="code">heuristic</code> depending on where the suggestion originates from. The also must have a <code class="literal">ids</code> key containing a list of component-ids of the suggested software.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Suggests:
+  - type: upstream
+    ids:
+      - org.example.Awesome
+  - type: heuristic
+    ids:
+      - org.example.Test1
+      - org.example.Test2</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span></p></div></dd><dt><a id="field-dep11-content_rating">
+      ⁠</a><span class="term">ContentRating</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-content_rating">&lt;content_rating/&gt;</a>.
+					</div><div class="para">
+						A dictionary containing the rating system as key, and a dictionary of rating-values as value. The value-dictionary itself has the content rating IDs as keys and the intensity values as values. The intensity values as well as IDs and rating system names match the values from the XML exactly.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">ContentRating:
+  oars-1.0:
+    drugs-alcohol: moderate
+    language-humor: mild</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>dict(dict)</em></span></p></div></dd><dt><a id="field-dep11-requires-recommends">
+      ⁠</a><span class="term">Requires &amp; Recommends</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-Metadata.html#tag-requires-recommends">&lt;requires/&gt; &amp; &lt;recommends/&gt;</a>.
+					</div><div class="para">
+						A list of dictionaries containing the referenced items. The dictionaries in the list must have one key denoting the item type, which has the respective item value as value. Refer to the XML description for a list of possible types.
+					</div><div class="para">
+						Each dictionary may have a <code class="literal">version</code> field with contains a version comparison string. The first two characters denote the version comparison operation, and are followed by the version number to be compared with. The comparison operation may be one of:
+					</div><div xmlns:d="http://docbook.org/ns/docbook" class="itemizedlist"><ul><li class="listitem"><div class="para">
+								<code class="code">==</code> - Equal to
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">!=</code> - Not equal to
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">&lt;&lt;</code> - Lesser than
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">&gt;&gt;</code> - Greater than
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">&lt;=</code> - Lesser than or equal to
+							</div></li><li class="listitem"><div class="para">
+								<code class="code">&gt;=</code> - Greater than or equal to
+							</div></li></ul></div><div class="para">
+						Example:
+					</div><pre class="programlisting">Recommends:
+- memory: '2500'
+- modalias: usb:v1130p0202d*
+Requires:
+- kernel: Linux
+  version: '&gt;= 4.15'
+- id: org.example.TestDependency
+  version: == 1.2</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span></p></div></dd><dt><a id="field-dep11-agreements">
+      ⁠</a><span class="term">Agreements</span></dt><dd><div class="para">
+						See <a class="xref" href="chap-CollectionData.html#tag-ct-agreement">&lt;agreement/&gt;</a>.
+					</div><div class="para">
+						A list containing the agreements as dictionaries, with a <code class="literal">sections</code> key containing a list of sections. All dict values are the same as the respective XML tag values / properties.
+					</div><div class="para">
+						Example:
+					</div><pre class="programlisting">Agreements:
+- type: eula
+  version_id: 1.2.3a
+  sections:
+  - type: intro
+    name:
+      C: Intro\n"
+    description:
+      C: &gt;-
+        &lt;p&gt;If it breaks, you get to keep both pieces.&lt;/p&gt;</pre><div class="literallayout"><p>Field info: <span class="property">value-type</span>:<span class="emphasis"><em>list(dict)</em></span></p></div></dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-dep11-example">
+      ⁠</a>3.2.6. Example YAML file</h3></div></div></div><div class="para">
+			This is an example AppStream DEP-11 metadata file:
+		</div><pre class="programlisting">
+---
+File: DEP-11
+Version: '0.8'
+Origin: chromodoris-main
+MediaBaseUrl: https://metadata.tanglu.org/appstream/media/
+---
+Type: desktop-application
+ID: gconf-editor.desktop
+Icon:
+  cached: gconf-editor_gconf-editor.png
+Name:
+  C: Configuration Editor
+  be@latin: Redaktar naładaŭ
+  bg: Настройки на програмите
+  pl: Edytor konfiguracji
+Package: gconf-editor
+Summary:
+  C: Directly edit your entire configuration database
+  ar: حرّر مباشرة كامل قاعدة بيانات الإعدادات.
+  de: Direkten Zugriff auf Ihre gesamte Konfigurationsdatenbank erlangen
+Categories:
+  - GNOME
+  - GTK
+  - System
+---
+Type: desktop-application
+ID: kmplayer.desktop
+Icon:
+  cached: kmplayer_kmplayer.png
+Name:
+  C: KMPlayer
+  hi: केएम-प्लेयर
+  hne: केएम-प्लेयर
+  ku: KMLêdar
+  pa: KM-ਪਲੇਅਰ
+  sr: КМ‑плејер
+  sr@ijekavian: КМ‑плејер
+  sv: Kmplayer
+Package: kmplayer
+Summary:
+  C: KDE interface for MPlayer
+Categories:
+  - Qt
+  - KDE
+  - AudioVideo
+  - Player
+Provides:
+  mimetypes:
+    - application/ogg
+    - application/smil
+    - application/vnd.ms-asf
+    - application/vnd.rn-realmedia
+    - application/x-kmplayer
+    - video/webm
+    - video/x-avi
+---
+ID: texstudio.desktop
+Type: desktop-application
+Package: texstudio
+Name:
+  C: TeXstudio
+Summary:
+  C: LaTeX development environment
+  fr: Environnement de développement LaTeX
+Description:
+  C: &lt;p&gt;TeXstudio is an integrated writing environment for creating LaTeX documents. It integrates editing,
+    building and viewing into a single frontend.&lt;/p&gt;&lt;p&gt;Our goal is to make writing LaTeX as easy and comfortable
+    as possible. This is achieved through a rich feature set including:&lt;/p&gt;
+Icon:
+  cached: texstudio_texstudio.png
+Keywords:
+  C:
+    - editor
+    - latex
+    - pdflatex
+    - xelatex
+    - lualatex
+    - context
+    - bibtex
+ProjectLicense: GPL-2.0
+Url:
+  homepage: https://texstudio.sourceforge.net/
+Categories:
+  - Office
+  - Publishing
+Provides:
+  mimetypes:
+    - text/x-tex
+Screenshots:
+  - default: true
+    source-image:
+      height: 756
+      url: texstudio_2.8.4+debian-3_amd64/screenshots/source/screenshot-1.png
+      width: 1344
+    thumbnails:
+      - height: 423
+        url: texstudio_2.8.4+debian-3_amd64/screenshots/752x423/screenshot-1.png
+        width: 752
+      - height: 351
+        url: texstudio_2.8.4+debian-3_amd64/screenshots/624x351/screenshot-1.png
+        width: 624
+      - height: 63
+        url: texstudio_2.8.4+debian-3_amd64/screenshots/112x63/screenshot-1.png
+        width: 112</pre></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="chap-CollectionData.html"><strong>Prev</strong>Chapter 3. Collection Metadata</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-AppStream-IconCache.html"><strong>Next</strong>3.3. Icon Cache</a></li></ul></body></html>

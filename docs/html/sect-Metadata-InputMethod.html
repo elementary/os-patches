@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title xmlns:d="http://docbook.org/ns/docbook">2.10. Input Methods</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta xmlns:d="http://docbook.org/ns/docbook" name="generator" content="publican v4.3.2" /><meta xmlns:d="http://docbook.org/ns/docbook" name="package" content="AppStream-AppStream-0.12-en-US-0.0-0" /><link rel="home" href="index.html" title="AppStream" /><link rel="up" href="chap-Metadata.html" title="Chapter 2. Upstream Metadata" /><link rel="prev" href="sect-Metadata-Codec.html" title="2.9. Codecs" /><link rel="next" href="sect-Metadata-Firmware.html" title="2.11. Firmware" /></head><body><p id="title"><a class="left" href="http://www.freedesktop.org/wiki/Distributions/AppStream/"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="http://www.freedesktop.org/software/appstream/docs/"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><ul class="docnav top"><li class="previous"><a accesskey="p" href="sect-Metadata-Codec.html"><strong>Prev</strong></a></li><li class="home">AppStream</li><li class="next"><a accesskey="n" href="sect-Metadata-Firmware.html"><strong>Next</strong></a></li></ul><div xml:lang="en-US" class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="sect-Metadata-InputMethod">
+      ⁠</a>2.10. Input Methods</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-imdata-introduction">
+      ⁠</a>2.10.1. Introduction</h3></div></div></div><div class="para">
+			It is a nice feature for a software center to allows users the installation of additional input methods. This meta-info specification describes how metadata about input methods should be structured.
+		</div><div class="para">
+			Software components providing an input method can ship one or more files in <code class="filename">/usr/share/metainfo/%{id}.metainfo.xml</code>.
+		</div><div class="para">
+			Input method metadata files can – just like all other metainfo files – be translated. See the section about translation for more information.
+		</div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-imdata-example">
+      ⁠</a>2.10.2. Example file</h3></div></div></div><div class="para">
+			The input method meta-info file should look like this:
+		</div><pre class="programlisting"><span xmlns="" class="line">​</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;?xml</span> version="1.0" encoding="UTF-8"<span xmlns="" class="perl_Keyword">?&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;component</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"inputmethod"</span><span xmlns="" class="perl_Keyword">&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;id&gt;</span>com.github.ibus.mathwriter-ibus.db<span xmlns="" class="perl_Keyword">&lt;/id&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;metadata_license&gt;</span>FSFAP<span xmlns="" class="perl_Keyword">&lt;/metadata_license&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;name&gt;</span>Mathwriter<span xmlns="" class="perl_Keyword">&lt;/name&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;summary&gt;</span>Math symbols input method<span xmlns="" class="perl_Keyword">&lt;/summary&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;description&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      The input method is designed for entering mathematical symbols.
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;p&gt;</span>
+<span xmlns="" class="line">​</span>      Input methods are typing systems allowing users to input complex languages.
+<span xmlns="" class="line">​</span>      They are necessary because these contain too many characters to simply be laid
+<span xmlns="" class="line">​</span>      out on a traditional keyboard.
+<span xmlns="" class="line">​</span>    <span xmlns="" class="perl_Keyword">&lt;/p&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;/description&gt;</span>
+<span xmlns="" class="line">​</span>  <span xmlns="" class="perl_Keyword">&lt;url</span><span xmlns="" class="perl_Others"> type=</span><span xmlns="" class="perl_String">"homepage"</span><span xmlns="" class="perl_Keyword">&gt;</span>https://github.com/mike-fabian/ibus-table-others<span xmlns="" class="perl_Keyword">&lt;/url&gt;</span>
+<span xmlns="" class="line">​</span><span xmlns="" class="perl_Keyword">&lt;/component&gt;</span></pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="spec-imdata-filespec">
+      ⁠</a>2.10.3. File specification</h3></div></div></div><div class="para">
+			Note that the XML root must have the <code class="literal">type</code> property set to <code class="literal">inputmethod</code>. This clearly identifies this metainfo document as describing an input method instead of a generic software component.
+		</div><div class="variablelist"><dl class="variablelist"><dt><a id="tag-id-inputmethod">
+      ⁠</a><span class="term">&lt;id/&gt;</span></dt><dd><div class="para">
+						For input methods, the <code class="literal">%{id}</code> should follow the standard reverse-domain-name scheme. For the product name part, it is recommended to take the database filename of the input method.
+					</div></dd><dt><span class="term">&lt;metadata_license/&gt;</span></dt><dd><div class="para">
+						The <code class="code">&lt;metadata_license/&gt;</code> tag is required. See <a class="xref" href="chap-Metadata.html#sect-Metadata-GenericComponent">Section 2.1, “Generic Component”</a> for a description of this tag.
+					</div></dd><dt><span class="term">&lt;name/&gt;</span></dt><dd><div class="para">
+						Set a name for your input method.
+					</div></dd><dt><span class="term">&lt;summary/&gt;</span></dt><dd><div class="para">
+						A short description of the input method described in this metainfo file.
+					</div></dd><dt><span class="term">&lt;description/&gt;</span></dt><dd><div class="para">
+						Add a long description of the input method.
+					</div><div class="para">
+						Do not assume the format is HTML. Only paragraph, ordered list and unordered list are supported at this time.
+					</div></dd><dt><span class="term">&lt;screenshots/&gt;</span></dt><dd><div class="para">
+						A screenshot may be included, showing the input method in use in an application.
+					</div><div class="para">
+						Refer to <a class="xref" href="chap-Metadata.html#tag-screenshots">&lt;screenshots/&gt;</a> for a detailed description of this tag.
+					</div></dd><dt><span class="term">&lt;url/&gt;</span></dt><dd><div class="para">
+						This is a recommended tag for links of type <code class="code">homepage</code>. Links of type <code class="code">homepage</code> should be a link to the upstream homepage for the application. See See <a class="xref" href="chap-Metadata.html#tag-url">&lt;url/&gt;</a> for a description of this tag.
+					</div></dd><dt><span class="term">&lt;provides/&gt;</span></dt><dd><div class="para">
+						This tag is described for generic components at <a class="xref" href="chap-Metadata.html#tag-provides">&lt;provides/&gt;</a> in detail.
+					</div><div class="para">
+						You can add one or more children of type <code class="code">&lt;library/&gt;</code> in case you publish some additional shared libraries. If not, and there are no public binaries involved, you may omit the <code class="literal">provides</code> tag for input methods.
+					</div></dd></dl></div><div class="para">
+			For a component of type <code class="literal">inputmethod</code>, the following tags are required and must be present: <a class="xref" href="sect-Metadata-InputMethod.html#tag-id-inputmethod">&lt;id/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-name">&lt;name/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-summary">&lt;summary/&gt;</a>, <a class="xref" href="chap-Metadata.html#tag-metadata_license">&lt;metadata_license/&gt;</a>.
+		</div></div></div><ul class="docnav"><li class="previous"><a accesskey="p" href="sect-Metadata-Codec.html"><strong>Prev</strong>2.9. Codecs</a></li><li class="up"><a accesskey="u" href="#"><strong>Up</strong></a></li><li class="home"><a accesskey="h" href="index.html"><strong>Home</strong></a></li><li class="next"><a accesskey="n" href="sect-Metadata-Firmware.html"><strong>Next</strong>2.11. Firmware</a></li></ul></body></html>

@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2017 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -25,7 +25,12 @@
  *
  * Contains information about the context of AppStream metadata, from the
  * root node of the document.
- * This is a private/internal class.
+ * Instances of #AsContext may be shared between #AsComponent instances.
+ *
+ * You usually do not want to use this directly, but use the more convenient
+ * #AsMetadata instead.
+ *
+ * See also: #AsComponent, #AsMetadata
  */
 
 #include "config.h"
@@ -51,6 +56,107 @@ typedef struct
 G_DEFINE_TYPE_WITH_PRIVATE (AsContext, as_context, G_TYPE_OBJECT)
 
 #define GET_PRIVATE(o) (as_context_get_instance_private (o))
+
+/**
+ * as_format_kind_to_string:
+ * @kind: the #AsFormatKind.
+ *
+ * Converts the enumerated value to an text representation.
+ *
+ * Returns: string version of @kind
+ *
+ * Since: 0.10
+ **/
+const gchar*
+as_format_kind_to_string (AsFormatKind kind)
+{
+	if (kind == AS_FORMAT_KIND_XML)
+		return "xml";
+	if (kind == AS_FORMAT_KIND_YAML)
+		return "yaml";
+	return "unknown";
+}
+
+/**
+ * as_format_kind_from_string:
+ * @kind_str: the string.
+ *
+ * Converts the text representation to an enumerated value.
+ *
+ * Returns: a #AsFormatKind or %AS_FORMAT_KIND_UNKNOWN for unknown
+ *
+ * Since: 0.10
+ **/
+AsFormatKind
+as_format_kind_from_string (const gchar *kind_str)
+{
+	if (g_strcmp0 (kind_str, "xml") == 0)
+		return AS_FORMAT_KIND_XML;
+	if (g_strcmp0 (kind_str, "yaml") == 0)
+		return AS_FORMAT_KIND_YAML;
+	return AS_FORMAT_KIND_UNKNOWN;
+}
+
+/**
+ * as_format_version_to_string:
+ * @version: the #AsFormatKind.
+ *
+ * Converts the enumerated value to an text representation.
+ *
+ * Returns: string version of @version
+ *
+ * Since: 0.10
+ **/
+const gchar*
+as_format_version_to_string (AsFormatVersion version)
+{
+	if (version == AS_FORMAT_VERSION_V0_6)
+		return "0.6";
+	if (version == AS_FORMAT_VERSION_V0_7)
+		return "0.7";
+	if (version == AS_FORMAT_VERSION_V0_8)
+		return "0.8";
+	if (version == AS_FORMAT_VERSION_V0_9)
+		return "0.9";
+	if (version == AS_FORMAT_VERSION_V0_10)
+		return "0.10";
+	if (version == AS_FORMAT_VERSION_V0_11)
+		return "0.11";
+	if (version == AS_FORMAT_VERSION_V0_12)
+		return "0.12";
+	return "?.??";
+}
+
+/**
+ * as_format_version_from_string:
+ * @version_str: the string.
+ *
+ * Converts the text representation to an enumerated value.
+ *
+ * Returns: a #AsFormatVersion. For unknown, the highest version
+ * number is assumed.
+ *
+ * Since: 0.10
+ **/
+AsFormatVersion
+as_format_version_from_string (const gchar *version_str)
+{
+	if (g_strcmp0 (version_str, "0.12") == 0)
+		return AS_FORMAT_VERSION_V0_12;
+	if (g_strcmp0 (version_str, "0.11") == 0)
+		return AS_FORMAT_VERSION_V0_11;
+	if (g_strcmp0 (version_str, "0.10") == 0)
+		return AS_FORMAT_VERSION_V0_10;
+	if (g_strcmp0 (version_str, "0.9") == 0)
+		return AS_FORMAT_VERSION_V0_9;
+	if (g_strcmp0 (version_str, "0.8") == 0)
+		return AS_FORMAT_VERSION_V0_8;
+	if (g_strcmp0 (version_str, "0.7") == 0)
+		return AS_FORMAT_VERSION_V0_7;
+	if (g_strcmp0 (version_str, "0.6") == 0)
+		return AS_FORMAT_VERSION_V0_6;
+	return AS_FORMAT_VERSION_V0_10;
+}
 
 static void
 as_context_finalize (GObject *object)
@@ -96,7 +202,7 @@ AsFormatVersion
 as_context_get_format_version (AsContext *ctx)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	return priv->format_version;
+	return g_atomic_int_get (&priv->format_version);
 }
 
 /**
@@ -110,7 +216,7 @@ void
 as_context_set_format_version (AsContext *ctx, AsFormatVersion ver)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	priv->format_version = ver;
+	g_atomic_int_set (&priv->format_version, ver);
 }
 
 /**
@@ -123,7 +229,7 @@ AsFormatStyle
 as_context_get_style (AsContext *ctx)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	return priv->style;
+	return g_atomic_int_get (&priv->style);
 }
 
 /**
@@ -137,7 +243,7 @@ void
 as_context_set_style (AsContext *ctx, AsFormatStyle style)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	priv->style = style;
+	g_atomic_int_set (&priv->style, style);
 }
 
 /**
@@ -150,7 +256,7 @@ gint
 as_context_get_priority (AsContext *ctx)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	return priv->priority;
+	return g_atomic_int_get (&priv->priority);
 }
 
 /**
@@ -164,7 +270,7 @@ void
 as_context_set_priority (AsContext *ctx, gint priority)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	priv->priority = priority;
+	g_atomic_int_set (&priv->priority, priority);
 }
 
 /**
@@ -221,9 +327,9 @@ as_context_set_locale (AsContext *ctx, const gchar *value)
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
 	g_free (priv->locale);
 
-	priv->all_locale = FALSE;
+	g_atomic_int_set (&priv->all_locale, FALSE);
 	if (g_strcmp0 (value, "ALL") == 0) {
-		priv->all_locale = TRUE;
+		g_atomic_int_set (&priv->all_locale, TRUE);
 		priv->locale = as_get_current_locale ();
 	} else {
 		priv->locale = g_strdup (value);
@@ -231,16 +337,16 @@ as_context_set_locale (AsContext *ctx, const gchar *value)
 }
 
 /**
- * as_context_get_all_locale_enabled:
+ * as_context_get_locale_all_enabled:
  * @ctx: a #AsContext instance.
  *
  * Returns: %TRUE if all locale should be parsed.
  **/
 gboolean
-as_context_get_all_locale_enabled (AsContext *ctx)
+as_context_get_locale_all_enabled (AsContext *ctx)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	return priv->all_locale;
+	return g_atomic_int_get (&priv->all_locale);
 }
 
 /**
@@ -350,7 +456,7 @@ gboolean
 as_context_get_internal_mode (AsContext *ctx)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	return priv->internal_mode;
+	return g_atomic_int_get (&priv->internal_mode);
 }
 
 /**
@@ -366,7 +472,85 @@ void
 as_context_set_internal_mode (AsContext *ctx, gboolean enabled)
 {
 	AsContextPrivate *priv = GET_PRIVATE (ctx);
-	priv->internal_mode = enabled;
+	g_atomic_int_set (&priv->internal_mode, enabled);
+}
+
+/**
+ * as_context_localized_ht_get:
+ * @ctx: a #AsContext instance, or %NULL
+ * @lht: (element-type utf8 utf8): the #GHashTable from which the value will be retreived.
+ * @locale_override: Override the default locale defined by @ctx, or %NULL
+ *
+ * Helper function to get a value for the current locale from a localization
+ * hash table (which maps locale to localized strings).
+ *
+ * This is used by all entities which have a context and have localized strings.
+ *
+ * Returns: The localized string in the best matching localization.
+ */
+const gchar*
+as_context_localized_ht_get (AsContext *ctx, GHashTable *lht, const gchar *locale_override, AsValueFlags value_flags)
+{
+	const gchar *locale;
+	const gchar *msg;
+
+	/* retrieve context locale, if the locale isn't explicitly overridden */
+	if ((ctx != NULL) && (locale_override == NULL)) {
+		AsContextPrivate *priv = GET_PRIVATE (ctx);
+		locale = priv->locale;
+	} else {
+		locale = locale_override;
+	}
+
+	/* NULL is not an acceptable value here and means "C" */
+	if (locale == NULL)
+		locale = "C";
+
+	msg = g_hash_table_lookup (lht, locale);
+	if ((msg == NULL) && (!as_flags_contains (value_flags, AS_VALUE_FLAG_NO_TRANSLATION_FALLBACK))) {
+		g_autofree gchar *lang = as_utils_locale_to_language (locale);
+		/* fall back to language string */
+		msg = g_hash_table_lookup (lht, lang);
+		if (msg == NULL) {
+			/* fall back to untranslated / default */
+			msg = g_hash_table_lookup (lht, "C");
+		}
+	}
+
+	return msg;
+}
+
+/**
+ * as_context_localized_ht_set:
+ * @ctx: a #AsContext instance, or %NULL
+ * @lht: (element-type utf8 utf8): the #GHashTable to which the value will be added.
+ * @value: the value to add.
+ * @locale: (nullable): the locale, or %NULL. e.g. "en_GB".
+ *
+ * Helper function to set a localized value on a trabslation mapping.
+ *
+ * This is used by all entities which have a context and have localized strings.
+ */
+void
+as_context_localized_ht_set (AsContext *ctx, GHashTable *lht, const gchar *value, const gchar *locale)
+{
+	const gchar *selected_locale;
+
+	/* if no locale was specified, we assume the default locale
+	 * NOTE: %NULL does NOT necessarily mean lang=C here! */
+	if ((ctx != NULL) && (locale == NULL)) {
+		AsContextPrivate *priv = GET_PRIVATE (ctx);
+		selected_locale = priv->locale;
+	} else {
+		selected_locale = locale;
+	}
+	/* if we still have no locale, assume "C" as best option */
+	if (selected_locale == NULL)
+		selected_locale = "C";
+
+	g_hash_table_insert (lht,
+			     as_locale_strip_encoding (g_strdup (selected_locale)),
+			     g_strdup (value));
 }
 
 /**

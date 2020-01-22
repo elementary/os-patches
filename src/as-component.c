@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
  *
- * Copyright (C) 2012-2019 Matthias Klumpp <matthias@tenstral.net>
+ * Copyright (C) 2012-2020 Matthias Klumpp <matthias@tenstral.net>
  *
  * Licensed under the GNU Lesser General Public License Version 2.1
  *
@@ -28,6 +28,7 @@
 #include "as-utils-private.h"
 #include "as-stemmer.h"
 
+#include "as-context-private.h"
 #include "as-icon-private.h"
 #include "as-screenshot-private.h"
 #include "as-bundle-private.h"
@@ -116,6 +117,7 @@ typedef struct
 
 	gboolean		ignored; /* whether we should ignore this component */
 
+	GHashTable		*name_variant_suffix; /* variant suffix for component name */
 	GHashTable		*custom; /* free-form user-defined custom data */
 } AsComponentPrivate;
 
@@ -180,6 +182,7 @@ as_component_kind_get_type (void)
 					{AS_COMPONENT_KIND_REPOSITORY,   "AS_COMPONENT_KIND_REPOSITORY",   "repository"},
 					{AS_COMPONENT_KIND_OPERATING_SYSTEM, "AS_COMPONENT_KIND_OPERATING_SYSTEM", "operating-system"},
 					{AS_COMPONENT_KIND_ICON_THEME,   "AS_COMPONENT_KIND_ICON_THEME",   "icon-theme"},
+					{AS_COMPONENT_KIND_RUNTIME,      "AS_COMPONENT_KIND_RUNTIME",      "runtime"},
 					{0, NULL, NULL}
 		};
 		GType as_component_type_type_id;
@@ -230,6 +233,8 @@ as_component_kind_to_string (AsComponentKind kind)
 		return "operating-system";
 	if (kind == AS_COMPONENT_KIND_ICON_THEME)
 		return "icon-theme";
+	if (kind == AS_COMPONENT_KIND_RUNTIME)
+		return "runtime";
 	return "unknown";
 }
 
@@ -276,6 +281,8 @@ as_component_kind_from_string (const gchar *kind_str)
 		return AS_COMPONENT_KIND_OPERATING_SYSTEM;
 	if (g_strcmp0 (kind_str, "icon-theme") == 0)
 		return AS_COMPONENT_KIND_ICON_THEME;
+	if (g_strcmp0 (kind_str, "runtime") == 0)
+		return AS_COMPONENT_KIND_RUNTIME;
 
 	/* legacy */
 	if (g_strcmp0 (kind_str, "desktop") == 0)
@@ -448,6 +455,8 @@ as_component_finalize (GObject* object)
 	g_hash_table_unref (priv->custom);
 	g_ptr_array_unref (priv->content_ratings);
 	g_ptr_array_unref (priv->icons);
+	if (priv->name_variant_suffix != NULL)
+		g_hash_table_unref (priv->name_variant_suffix);
 
 	g_ptr_array_unref (priv->recommends);
 	g_ptr_array_unref (priv->requires);
@@ -1127,58 +1136,6 @@ as_component_set_active_locale (AsComponent *cpt, const gchar *locale)
 }
 
 /**
- * as_component_localized_get:
- * @cpt: a #AsComponent instance.
- * @lht: (element-type utf8 utf8): the #GHashTable on which the value will be retreived.
- *
- * Helper function to get a localized property using the current
- * active locale for this component.
- */
-static const gchar*
-as_component_localized_get (AsComponent *cpt, GHashTable *lht)
-{
-	AsComponentPrivate *priv = GET_PRIVATE (cpt);
-	const gchar *locale;
-	gchar *msg;
-
-	locale = as_component_get_active_locale (cpt);
-	msg = g_hash_table_lookup (lht, locale);
-	if ((msg == NULL) && (!as_flags_contains (priv->value_flags, AS_VALUE_FLAG_NO_TRANSLATION_FALLBACK))) {
-		g_autofree gchar *lang = as_utils_locale_to_language (locale);
-		/* fall back to language string */
-		msg = g_hash_table_lookup (lht, lang);
-		if (msg == NULL) {
-			/* fall back to untranslated / default */
-			msg = g_hash_table_lookup (lht, "C");
-		}
-	}
-
-	return msg;
-}
-
-/**
- * as_component_localized_set:
- * @cpt: a #AsComponent instance.
- * @lht: (element-type utf8 utf8): the #GHashTable on which the value will be added.
- * @value: the value to add.
- * @locale: (nullable): the locale, or %NULL. e.g. "en_GB".
- *
- * Helper function to set a localized property.
- */
-static void
-as_component_localized_set (AsComponent *cpt, GHashTable *lht, const gchar* value, const gchar *locale)
-{
-	/* if no locale was specified, we assume the default locale */
-	/* CAVE: %NULL does NOT mean lang=C! */
-	if (locale == NULL)
-		locale = as_component_get_active_locale (cpt);
-
-	g_hash_table_insert (lht,
-				as_locale_strip_encoding (g_strdup (locale)),
-				g_strdup (value));
-}
-
-/**
  * as_component_get_name:
  * @cpt: a #AsComponent instance.
  *
@@ -1190,7 +1147,10 @@ const gchar*
 as_component_get_name (AsComponent *cpt)
 {
 	AsComponentPrivate *priv = GET_PRIVATE (cpt);
-	return as_component_localized_get (cpt, priv->name);
+	return as_context_localized_ht_get (priv->context,
+					    priv->name,
+					    priv->active_locale_override,
+					    priv->value_flags);
 }
 
 /**
@@ -1206,7 +1166,10 @@ as_component_set_name (AsComponent *cpt, const gchar* value, const gchar *locale
 {
 	AsComponentPrivate *priv = GET_PRIVATE (cpt);
 
-	as_component_localized_set (cpt, priv->name, value, locale);
+	as_context_localized_ht_set (priv->context,
+				     priv->name,
+				     value,
+				     locale);
 	g_object_notify ((GObject *) cpt, "name");
 }
 
@@ -1222,7 +1185,10 @@ const gchar*
 as_component_get_summary (AsComponent *cpt)
 {
 	AsComponentPrivate *priv = GET_PRIVATE (cpt);
-	return as_component_localized_get (cpt, priv->summary);
+	return as_context_localized_ht_get (priv->context,
+					    priv->summary,
+					    priv->active_locale_override,
+					    priv->value_flags);
 }
 
 /**
@@ -1238,7 +1204,10 @@ as_component_set_summary (AsComponent *cpt, const gchar* value, const gchar *loc
 {
 	AsComponentPrivate *priv = GET_PRIVATE (cpt);
 
-	as_component_localized_set (cpt, priv->summary, value, locale);
+	as_context_localized_ht_set (priv->context,
+				     priv->summary,
+				     value,
+				     locale);
 	g_object_notify ((GObject *) cpt, "summary");
 }
 
@@ -1254,7 +1223,10 @@ const gchar*
 as_component_get_description (AsComponent *cpt)
 {
 	AsComponentPrivate *priv = GET_PRIVATE (cpt);
-	return as_component_localized_get (cpt, priv->description);
+	return as_context_localized_ht_get (priv->context,
+					    priv->description,
+					    priv->active_locale_override,
+					    priv->value_flags);
 }
 
 /**
@@ -1270,7 +1242,10 @@ as_component_set_description (AsComponent *cpt, const gchar* value, const gchar 
 {
 	AsComponentPrivate *priv = GET_PRIVATE (cpt);
 
-	as_component_localized_set (cpt, priv->description, value, locale);
+	as_context_localized_ht_set (priv->context,
+				     priv->description,
+				     value,
+				     locale);
 	g_object_notify ((GObject *) cpt, "description");
 }
 
@@ -1553,7 +1528,10 @@ const gchar*
 as_component_get_developer_name (AsComponent *cpt)
 {
 	AsComponentPrivate *priv = GET_PRIVATE (cpt);
-	return as_component_localized_get (cpt, priv->developer_name);
+	return as_context_localized_ht_get (priv->context,
+					    priv->developer_name,
+					    priv->active_locale_override,
+					    priv->value_flags);
 }
 
 /**
@@ -1568,7 +1546,56 @@ void
 as_component_set_developer_name (AsComponent *cpt, const gchar *value, const gchar *locale)
 {
 	AsComponentPrivate *priv = GET_PRIVATE (cpt);
-	as_component_localized_set (cpt, priv->developer_name, value, locale);
+	as_context_localized_ht_set (priv->context,
+				     priv->developer_name,
+				     value,
+				     locale);
+}
+
+/**
+ * as_component_get_name_variant_suffix:
+ * @cpt: a #AsComponent instance.
+ *
+ * Get variant suffix for the component name
+ * (only to be displayed if two components have the same name).
+ *
+ * Returns: the variant suffix
+ *
+ * Since: 0.12.10
+ */
+const gchar*
+as_component_get_name_variant_suffix (AsComponent *cpt)
+{
+	AsComponentPrivate *priv = GET_PRIVATE (cpt);
+	if (priv->name_variant_suffix == NULL)
+		return NULL;
+	return as_context_localized_ht_get (priv->context,
+					    priv->name_variant_suffix,
+					    priv->active_locale_override,
+					    priv->value_flags);
+}
+
+/**
+ * as_component_set_name_variant_suffix:
+ * @cpt: a #AsComponent instance.
+ * @value: the developer or developer team name
+ * @locale: (nullable): the locale, or %NULL. e.g. "en_GB"
+ *
+ * Set a variant suffix for the component name
+ * (only to be displayed if components have the same name).
+ *
+ * Since: 0.12.10
+ */
+void
+as_component_set_name_variant_suffix (AsComponent *cpt, const gchar *value, const gchar *locale)
+{
+	AsComponentPrivate *priv = GET_PRIVATE (cpt);
+	if (priv->name_variant_suffix == NULL)
+		priv->name_variant_suffix = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	as_context_localized_ht_set (priv->context,
+				     priv->name_variant_suffix,
+				     value,
+				     locale);
 }
 
 /**
@@ -2377,12 +2404,17 @@ as_component_add_token_helper (AsComponent *cpt,
 	if (!as_utils_search_token_valid (value))
 		return;
 	/* small tokens are invalid unless they are in the summary / name of the component */
-	if (match_flag < AS_TOKEN_MATCH_SUMMARY)
+	if (match_flag < AS_TOKEN_MATCH_SUMMARY) {
 		if (strlen (value) < 3)
 			return;
+	}
 
 	/* create a stemmed version of our token */
 	token_stemmed = as_stemmer_stem (stemmer, value);
+
+	/* ignore the token if it couldn't be stemmed (usually means we had a low quality token) */
+	if (token_stemmed == NULL)
+		return;
 
 	/* does the token already exist */
 	match_pval = g_hash_table_lookup (priv->token_cache, token_stemmed);
@@ -2408,9 +2440,8 @@ as_component_add_token (AsComponent *cpt,
 		  gboolean allow_split,
 		  AsTokenMatch match_flag)
 {
-	g_autoptr(AsStemmer) stemmer = NULL;
-
-	stemmer = g_object_ref (as_stemmer_get ());
+	/* get global stemmer instance (it's threadsafe and should survive this invocation) */
+	AsStemmer *stemmer = as_stemmer_get ();
 
 	/* add extra tokens for names like x-plane or half-life */
 	if (allow_split && g_strstr_len (value, -1, "-") != NULL) {
@@ -2515,7 +2546,7 @@ as_component_create_token_cache_target (AsComponent *cpt, AsComponent *donor)
 
 	tmp = as_component_get_description (cpt);
 	if (tmp != NULL) {
-		as_component_add_tokens (cpt, tmp, FALSE, AS_TOKEN_MATCH_DESCRIPTION);
+		as_component_add_tokens (cpt, tmp, TRUE, AS_TOKEN_MATCH_DESCRIPTION);
 	}
 
 	keywords = as_component_get_keywords (cpt);
@@ -3617,7 +3648,7 @@ as_component_load_from_xml (AsComponent *cpt, AsContext *ctx, xmlNode *node, GEr
 
 		node_name = (const gchar*) iter->name;
 		content = as_xml_get_node_value (iter);
-		lang = as_xmldata_get_node_locale (ctx, iter);
+		lang = as_xml_get_node_locale_match (ctx, iter);
 
 		tag_id = as_xml_tag_from_string (node_name);
 
@@ -3772,6 +3803,9 @@ as_component_load_from_xml (AsComponent *cpt, AsContext *ctx, xmlNode *node, GEr
 			} else if (tag_id == AS_TAG_INTERNAL_ORIGIN) {
 				as_component_set_origin (cpt, content);
 			}
+		} else if (tag_id == AS_TAG_NAME_VARIANT_SUFFIX) {
+			if (lang != NULL)
+				as_component_set_name_variant_suffix (cpt, content, lang);
 		}
 	}
 
@@ -4070,6 +4104,10 @@ as_component_to_xml_node (AsComponent *cpt, AsContext *ctx, xmlNode *root)
 
 	as_xml_add_text_node (cnode, "project_license", priv->project_license);
 	as_xml_add_text_node (cnode, "project_group", priv->project_group);
+
+	/* name variant suffix */
+	if (priv->name_variant_suffix != NULL)
+		as_xml_add_localized_text_node (cnode, "name_variant_suffix", priv->name_variant_suffix);
 
 	/* developer name */
 	as_xml_add_localized_text_node (cnode, "developer_name", priv->developer_name);
@@ -4655,6 +4693,9 @@ as_component_load_from_yaml (AsComponent *cpt, AsContext *ctx, GNode *root, GErr
 				if (as_agreement_load_from_yaml (agreement, ctx, n, NULL))
 					as_component_add_agreement (cpt, agreement);
 			}
+		} else if (field_id == AS_TAG_NAME_VARIANT_SUFFIX) {
+			priv->name_variant_suffix = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+			as_yaml_set_localized_table (ctx, node, priv->name_variant_suffix);
 		} else if (field_id == AS_TAG_CUSTOM) {
 			as_component_yaml_parse_custom (cpt, node);
 		} else {
@@ -5067,6 +5108,10 @@ as_component_emit_yaml (AsComponent *cpt, AsContext *ctx, yaml_emitter_t *emitte
 	/* Description */
 	as_yaml_emit_long_localized_entry (emitter, "Description", priv->description);
 
+	/* NameVariantSuffix */
+	if (priv->name_variant_suffix != NULL)
+		as_yaml_emit_localized_entry (emitter, "NameVariantSuffix", priv->name_variant_suffix);
+
 	/* DeveloperName */
 	as_yaml_emit_localized_entry (emitter, "DeveloperName", priv->developer_name);
 
@@ -5244,6 +5289,63 @@ as_component_emit_yaml (AsComponent *cpt, AsContext *ctx, yaml_emitter_t *emitte
 	yaml_document_end_event_initialize (&event, 1);
 	res = yaml_emitter_emit (emitter, &event);
 	g_assert (res);
+}
+
+/**
+ * as_component_load_from_xml_data:
+ * @cpt: an #AsComponent instance.
+ * @context: an #AsContext instance.
+ * @data: The XML data to load.
+ * @error: a #GError.
+ *
+ * Load metadata for this component from an XML string.
+ * You normally do not want to use this method directly and instead use the more
+ * convenient API of #AsMetadata to create and update components.
+ *
+ * Returns: %TRUE on success.
+ *
+ * Since: 0.12.10
+ */
+gboolean
+as_component_load_from_xml_data (AsComponent *cpt, AsContext *context, const gchar *data, GError **error)
+{
+	xmlDoc *doc;
+	xmlNode *root;
+	gboolean ret;
+	g_return_val_if_fail (context != NULL, FALSE);
+
+	doc = as_xml_parse_document (data, -1, error);
+	if (doc == NULL)
+		return FALSE;
+	root = xmlDocGetRootElement (doc);
+
+	ret = as_component_load_from_xml (cpt, context, root, error);
+	xmlFreeDoc (doc);
+	return ret;
+}
+
+/**
+ * as_component_to_xml_data:
+ * @cpt: an #AsComponent instance.
+ * @context: an #AsContext instance.
+ * @error: a #GError.
+ *
+ * Serialize this component into an XML string.
+ * You normally do not want to use this method directly and instead use the more
+ * convenient API of #AsMetadata to serialize components.
+ *
+ * Returns: %TRUE on success.
+ *
+ * Since: 0.12.10
+ */
+gchar*
+as_component_to_xml_data (AsComponent *cpt, AsContext *context, GError **error)
+{
+	xmlNode *node;
+	g_return_val_if_fail (context != NULL, NULL);
+
+	node = as_component_to_xml_node (cpt, context, NULL);
+	return as_xml_node_to_str (node, error);
 }
 
 /**
