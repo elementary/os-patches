@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <blkid.h>
 
 /**********************************************************************
    Logging
@@ -1360,6 +1361,61 @@ is_system_with_firmware_on_disk()
         return result;
 }
 
+/*
+ * wipe all superblocks libblkid knows about from a device
+ * (condensed from wipefs in util-linux)
+ */
+static int
+do_wipe(char *devname)
+{
+        blkid_probe pr = NULL;
+        int fd = -1;
+        int r = -1;
+
+        fd = open(devname, O_RDWR);
+
+        if (fd < 0) {
+                log("open(%s) failed errno %d", devname, errno);
+                goto error;
+        }
+
+        log("do_wipe open(%s), %d", devname, fd);
+
+
+        pr = blkid_new_probe();
+        if (!pr || blkid_probe_set_device(pr, fd, 0, 0) != 0) {
+                log("setting up probe failed");
+                goto error;
+        }
+
+        blkid_probe_enable_superblocks(pr, 1);
+        blkid_probe_set_superblocks_flags(pr, BLKID_SUBLKS_MAGIC |      /* return magic string and offset */
+                                          BLKID_SUBLKS_TYPE |           /* return superblock type */
+                                          BLKID_SUBLKS_BADCSUM);        /* accept bad checksums */
+
+        blkid_probe_enable_partitions(pr, 1);
+        blkid_probe_set_partitions_flags(pr, BLKID_PARTS_MAGIC |
+                                         BLKID_PARTS_FORCE_GPT);
+
+        while (blkid_do_probe(pr) == 0) {
+                char *type = "unknown";
+                if (blkid_probe_lookup_value(pr, "TYPE", &type, NULL) < 0)
+                        blkid_probe_lookup_value(pr, "PTTYPE", &type, NULL);
+                log("wiping superblock of type %s", type);
+                if (blkid_do_wipe(pr, 0) != 0) {
+                        log("wiping failed");
+                }
+        }
+
+        fsync(fd);
+        r = 0;
+      error:
+        if (fd >= 0)
+                close(fd);
+        blkid_free_probe(pr);
+        return r;
+}
+
 void
 command_commit()
 {
@@ -1382,8 +1438,25 @@ command_commit()
         }
 
         open_out();
-        if (disk != NULL && named_is_changed(device_name))
-                ped_disk_commit(disk);
+        if (disk != NULL) {
+                /* ped_disk_clobber does not remove all superblock information
+                 * -- in particular it does not wipe mdraid 0.90 metadata,
+                 * which can lead to an unbootable system as in
+                 * https://bugs.launchpad.net/ubuntu/+source/partman-base/+bug/1828558.
+                 * parted upstream didn't think this was a bug so here we give
+                 * it a helping hand by using libblkid to wipe all superblocks. */
+                if (disk->needs_clobber) {
+                        log("command_commit: wiping superblocks from %s", dev->path);
+                        if (do_wipe(dev->path) != 0) {
+                                log("wiping superblocks from %s failed", dev->path);
+                        } else {
+                                log("wiping superblocks from %s succeeded", dev->path);
+                        }
+                }
+                if (named_is_changed(device_name)) {
+                        ped_disk_commit(disk);
+                }
+        }
         unchange_named(device_name);
         oprintf("OK\n");
 }

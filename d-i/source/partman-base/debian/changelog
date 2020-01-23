@@ -1,3 +1,17 @@
+partman-base (192ubuntu1.2) bionic; urgency=medium
+
+  * Move superblock wiping code from command_new_label to command_commit, as
+    the disk is not supposed to be written to until the latter is called.
+
+ -- Michael Hudson-Doyle <michael.hudson@ubuntu.com>  Tue, 06 Aug 2019 12:04:16 +1200
+
+partman-base (192ubuntu1.1) bionic; urgency=medium
+
+  * parted_server.c: Wipe all known superblocks from device in
+    command_new_label. (LP: #1828558)
+
+ -- Michael Hudson-Doyle <michael.hudson@ubuntu.com>  Tue, 30 Jul 2019 10:18:37 +1200
+
 partman-base (192ubuntu1) bionic; urgency=medium
 
   * Resynchronise with Debian.  Remaining changes:

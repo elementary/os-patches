@@ -6,6 +6,7 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
 
 PKG_CHECK_MODULES([libparted], [libparted])
+PKG_CHECK_MODULES([blkid], [blkid])
 
 AC_ARG_VAR([libparted_fs_resize_LIBS], [linker flags for libparted-fs-resize])
 AC_MSG_CHECKING([for libparted >= 3.1])

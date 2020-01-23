@@ -1,3 +1,13 @@
+hw-detect (1.117ubuntu6.18.04.1) bionic; urgency=medium
+
+  * Add iSCSI iBFT support to the installer (LP: #1817321)
+    - disk-detect.templates: add option 'disk-detect/ibft/enable'
+      for preseeding.
+    - disk-detect.sh: detect iSCSI iBFT disks with
+      'disk-detect/ibft/enable=true'.
+
+ -- Mauricio Faria de Oliveira <mfo@canonical.com>  Fri, 22 Mar 2019 18:24:15 -0300
+
 hw-detect (1.117ubuntu6) bionic; urgency=medium
 
   * Drop hw-detect.pre-pkgsel.d/20install-hwpackages, as it installs

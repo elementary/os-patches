@@ -1,3 +1,20 @@
+console-setup (1.178ubuntu2.9) bionic; urgency=medium
+
+  * Call setupcon --force only when debian-installer is active
+    and always redirect output to /dev/null to not block. (LP: #520546)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 23 Apr 2019 14:04:14 +0200
+
+console-setup (1.178ubuntu2.8) bionic; urgency=medium
+
+  * setupcon: use /run for tempfiles (and dump the various unnecessary
+    fallback paths), since /run is always mountable rw at least as early as
+    /tmp is and is guaranteed to be safe from tmpcleaners at boot.  Only keep
+    /tmp as a fallback in case we have access to write to /tmp and to a
+    console, but not to /run.  LP: #1824227.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 10 Apr 2019 13:13:34 -0700
+
 console-setup (1.178ubuntu2.7) bionic; urgency=medium
 
   * keyboard-configuration.config: Fix exit/return thinko (LP: #1788597)
