@@ -61,6 +61,26 @@ class TestPath(testcommon.TestCase):
             destfile=self.file_bytes,
             hash="sha1:41050ed528554fdd6c6c9a086ddd6bdba5857b21")
 
+    def test_acquire_hashes(self):
+        hs = apt_pkg.HashString("d41d8cd98f00b204e9800998ecf8427e")
+        hsl = apt_pkg.HashStringList()
+        hsl.append(hs)
+        apt_pkg.AcquireFile(apt_pkg.Acquire(),
+                            "http://example.com",
+                            hash=hsl,
+                            destdir=self.file_unicode,
+                            destfile=self.file_unicode)
+        apt_pkg.AcquireFile(apt_pkg.Acquire(),
+                            "http://example.com",
+                            hash=str(hs),
+                            destdir=self.file_unicode,
+                            destfile=self.file_unicode)
+        self.assertRaises(TypeError, apt_pkg.AcquireFile, apt_pkg.Acquire(),
+                            "http://example.com",
+                            hash=hs,
+                            destdir=self.file_unicode,
+                            destfile=self.file_unicode)
+
     def test_ararchive(self):
         archive = apt_inst.ArArchive(u"data/test_debs/data-tar-xz.deb")
 

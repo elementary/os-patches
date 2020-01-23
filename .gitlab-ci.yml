@@ -2,14 +2,23 @@ image: ubuntu:bionic
 variables:
   DEBIAN_FRONTEND: noninteractive
 
-test:
+typing:
   script:
   - apt update
   - apt install -q -y python3-pip
-  - apt build-dep -q -y ./
   - python3 -m pip install -U mypy==0.600
-  - env python3 tests/testmanual_pep8.py
   - env MYPYPATH=$PWD/typehinting/ mypy ./apt
+
+pep8:
+  script:
+  - apt update
+  - apt install -q -y pep8
+  - env python3 tests/testmanual_pep8.py
+
+test:
+  script:
+  - apt update
+  - apt build-dep -q -y ./
   - dpkg-buildpackage
   - make -C doc html
   artifacts:

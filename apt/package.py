@@ -73,17 +73,21 @@ if sys.version_info.major >= 3:
     unicode = str
 
 
-def _file_is_same(path, size, md5):
-    # type: (str, int, str) -> bool
+def _file_is_same(path, size, hashes):
+    # type: (str, int, apt_pkg.HashStringList) -> bool
     """Return ``True`` if the file is the same."""
     if os.path.exists(path) and os.path.getsize(path) == size:
         with open(path) as fobj:
-            return apt_pkg.md5sum(fobj) == md5
+            return apt_pkg.Hashes(fobj).hashes == hashes
     return False
 
 
 class FetchError(Exception):
     """Raised when a file could not be fetched."""
+
+
+class UntrustedError(FetchError):
+    """Raised when a file did not have a trusted hash."""
 
 
 class BaseDependency(object):
@@ -510,6 +514,7 @@ class Version(object):
     def _records(self):
         # type: () -> apt_pkg.PackageRecords
         """Internal helper that moves the Records to the right position."""
+        # If changing lookup, change fetch_binary() as well
         if not self.package._pcache._records.lookup(self._cand.file_list[0]):
             raise LookupError("Could not lookup record")
 
@@ -830,8 +835,9 @@ class Version(object):
         except StopIteration:
             return None
 
-    def fetch_binary(self, destdir='', progress=None):
-        # type: (str, AcquireProgress) -> str
+    def fetch_binary(self, destdir='', progress=None,
+                     allow_unauthenticated=None):
+        # type: (str, Optional[AcquireProgress], Optional[bool]) -> str
         """Fetch the binary version of the package.
 
         The parameter *destdir* specifies the directory where the package will
@@ -841,15 +847,39 @@ class Version(object):
         object. If not specified or None, apt.progress.text.AcquireProgress()
         is used.
 
+        The keyword-only parameter *allow_unauthenticated* specifies whether
+        to allow unauthenticated downloads. If not specified, it defaults to
+        the configuration option `APT::Get::AllowUnauthenticated`.
+
         .. versionadded:: 0.7.10
         """
+        if allow_unauthenticated is None:
+            allow_unauthenticated = apt_pkg.config.find_b("APT::Get::"
+                                        "AllowUnauthenticated", False)
         base = os.path.basename(self._records.filename)
         destfile = os.path.join(destdir, base)
-        if _file_is_same(destfile, self.size, self._records.md5_hash):
+        if _file_is_same(destfile, self.size, self._records.hashes):
             logging.debug('Ignoring already existing file: %s' % destfile)
             return os.path.abspath(destfile)
+
+        # Verify that the index is actually trusted
+        pfile, offset = self._cand.file_list[0]
+        index = self.package._pcache._list.find_index(pfile)
+
+        if not (allow_unauthenticated or (index and index.is_trusted)):
+            raise UntrustedError("Could not fetch %s %s source package: "
+                                 "Source %r is not trusted" %
+                                 (self.package.name, self.version,
+                                  getattr(index, "describe", "<unkown>")))
+        if not self.uri:
+            raise ValueError("No URI for this binary.")
+        hashes = self._records.hashes
+        if not (allow_unauthenticated or hashes.usable):
+            raise UntrustedError("The item %r could not be fetched: "
+                                     "No trusted hash found." %
+                                     destfile)
         acq = apt_pkg.Acquire(progress or apt.progress.text.AcquireProgress())
-        acqfile = apt_pkg.AcquireFile(acq, self.uri, self._records.md5_hash,  # type: ignore # TODO: Do not use MD5 # nopep8
+        acqfile = apt_pkg.AcquireFile(acq, self.uri, hashes,
                                       self.size, base, destfile=destfile)
         acq.run()
 
@@ -859,8 +889,9 @@ class Version(object):
 
         return os.path.abspath(destfile)
 
-    def fetch_source(self, destdir="", progress=None, unpack=True):
-        # type: (str, AcquireProgress, bool) -> str
+    def fetch_source(self, destdir="", progress=None, unpack=True,
+                     allow_unauthenticated=None):
+        # type: (str, Optional[AcquireProgress], bool, Optional[bool]) -> str
         """Get the source code of a package.
 
         The parameter *destdir* specifies the directory where the source will
@@ -875,7 +906,15 @@ class Version(object):
 
         If *unpack* is ``True``, the path to the extracted directory is
         returned. Otherwise, the path to the .dsc file is returned.
+
+        The keyword-only parameter *allow_unauthenticated* specifies whether
+        to allow unauthenticated downloads. If not specified, it defaults to
+        the configuration option `APT::Get::AllowUnauthenticated`.
         """
+        if allow_unauthenticated is None:
+            allow_unauthenticated = apt_pkg.config.find_b("APT::Get::"
+                                        "AllowUnauthenticated", False)
+
         src = apt_pkg.SourceRecords()
         acq = apt_pkg.Acquire(progress or apt.progress.text.AcquireProgress())
 
@@ -890,16 +929,28 @@ class Version(object):
         if not source_lookup:
             raise ValueError("No source for %r" % self)
         files = list()
-        for md5, size, path, type_ in src.files:
-            base = os.path.basename(path)
+
+        if not (allow_unauthenticated or src.index.is_trusted):
+            raise UntrustedError("Could not fetch %s %s source package: "
+                                 "Source %r is not trusted" %
+                                 (self.package.name, self.version,
+                                  src.index.describe))
+        for fil in src.files:
+            base = os.path.basename(fil.path)
             destfile = os.path.join(destdir, base)
-            if type_ == 'dsc':
+            if fil.type == 'dsc':
                 dsc = destfile
-            if _file_is_same(destfile, size, md5):
+            if _file_is_same(destfile, fil.size, fil.hashes):
                 logging.debug('Ignoring already existing file: %s' % destfile)
                 continue
-            files.append(apt_pkg.AcquireFile(acq, src.index.archive_uri(path),
-                         md5, size, base, destfile=destfile))
+
+            if not (allow_unauthenticated or fil.hashes.usable):
+                raise UntrustedError("The item %r could not be fetched: "
+                                         "No trusted hash found." %
+                                         destfile)
+            files.append(apt_pkg.AcquireFile(acq,
+                            src.index.archive_uri(fil.path),
+                            fil.hashes, fil.size, base, destfile=destfile))
         acq.run()
 
         if dsc is None:

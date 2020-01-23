@@ -1,3 +1,34 @@
+python-apt (1.6.5ubuntu0.2) bionic-security; urgency=medium
+
+  * SECURITY REGRESSION: crash with ubuntu-release-upgrader (LP: #1860606)
+    - apt/cache.py: make allow_unauthenticated argument to
+      fetch_archives() optional.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 22 Jan 2020 16:52:51 -0500
+
+python-apt (1.6.5ubuntu0.1) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: Check that repository is trusted before downloading
+    files from it (LP: #1858973)
+    - apt/cache.py: Add checks to fetch_archives() and commit()
+    - apt/package.py: Add checks to fetch_binary() and fetch_source()
+    - CVE-2019-15796
+  * SECURITY UPDATE: Do not use MD5 for verifying downloadeds
+    (Closes: #944696) (#LP: #1858972)
+    - apt/package.py: Use all hashes when fetching packages, and
+      check that we have trusted hashes when downloading
+    - CVE-2019-15795
+  * To work around the new checks, the parameter allow_unauthenticated=True
+    can be passed to the functions. It defaults to the value of the
+    APT::Get::AllowUnauthenticated option.
+    - Bump Breaks aptdaemon (<< 1.1.1+bzr982-0ubuntu21.2), as it will have
+      to set that parameter after having done validation.
+  * Automatic changes and fixes for external regressions:
+    - Adjustments to test suite and CI to fix CI regressions
+    - Automatic mirror list update
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Wed, 15 Jan 2020 17:01:17 +0100
+
 python-apt (1.6.4) bionic; urgency=medium
 
   * apt.Cache: Fix (un)locking of archives (Closes: #922416) (LP: #1826870)

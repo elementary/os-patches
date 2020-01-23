@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, Iterator, List, Mapping, Tuple, Union
+from typing import *
 
 from apt.progress.base import (
     AcquireProgress,
@@ -108,6 +108,7 @@ class PackageRecords():
     md5_hash: str
     sha1_hash: str
     sha256_hash: str
+    hashes: HashStringList
     def __init__(self, cache: Cache) -> None: ...
     def lookup(self, packagefile: PackageFile, index: int=0) -> bool: ...
 
@@ -192,8 +193,34 @@ class AcquireItem:
     STAT_AUTH_ERROR: int
     STAT_TRANSIENT_NETWORK_ERROR: int
 
+class AcquireItemDesc:
+    description: str
+    owner: AcquireItem
+    shortdesc: str
+    uri: str
+
+class Hashes:
+    def __init__(self, object: Union[bytes, object, int]) -> None: ...
+    hashes: HashStringList
+
+class HashString:
+    def __init__(self, type: str, hash: Optional[str] = None) -> None: ...
+    def verify_file(self, filename: str) -> bool: ...
+
+    hashtype: str
+    hashvalue: str
+    usable: bool
+
+class HashStringList:
+    def append(self, object: HashString) -> None: ...
+    def find(self, type: str = "") -> HashString: ...
+    def verify_file(self, filename: str) -> bool: ...
+
+    file_size: int
+    usable: bool
+
 class AcquireFile(AcquireItem):
-    def __init__(self, owner: Acquire, uri: str, md5: str="", size: int=0, descr: str="", short_descr: str="", destdir: str="", destfile: str="") -> None: ...
+    def __init__(self, owner: Acquire, uri: str, hash: Optional[Union[HashStringList, str]], size: int=0, descr: str="", short_descr: str="", destdir: str="", destfile: str="") -> None: ...
 
 class IndexFile:
     def archive_uri(self, path: str) -> str: ...
@@ -204,13 +231,20 @@ class IndexFile:
     label: str
     size: int
     
+class SourceRecordFiles:
+
+    hashes: HashStringList
+    path: str
+    size: int
+    type: str
+
 class SourceRecords:
     def lookup(self, name: str) -> bool: ...
     def restart(self) -> None: ...
     def step(self) -> bool: ...
     binaries: List[str]
     version: str
-    files: List[Tuple[str, int, str, str]]
+    files: List[SourceRecordFiles]
     index: IndexFile
     package: str
     section: str

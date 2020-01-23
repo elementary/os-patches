@@ -91,6 +91,9 @@ static PyObject *hashstringlist_verify_file(PyObject *self, PyObject *args)
 static PyObject *hashstringlist_get_file_size(PyObject *self, void*) {
     return MkPyNumber(GetCpp<HashStringList>(self).FileSize());
 }
+static PyObject *hashstringlist_get_usable(PyObject *self, void*) {
+    return PyBool_FromLong(GetCpp<HashStringList>(self).usable());
+}
 
 static int hashstringlist_set_file_size(PyObject *self, PyObject *value, void *) {
     if (PyLong_Check(value)) {
@@ -159,6 +162,8 @@ static PyMethodDef hashstringlist_methods[] =
 static PyGetSetDef hashstringlist_getset[] = {
     {"file_size",hashstringlist_get_file_size,hashstringlist_set_file_size,
      "If a file size is part of the list, return it, otherwise 0."},
+    {"usable",hashstringlist_get_usable,nullptr,
+     "True if at least one safe/trusted hash is in the list."},
     {}
 };
 

@@ -58,6 +58,12 @@ static PyObject *hashstring_get_hashtype(PyObject *self)
     return CppPyString(hash->HashType());
 }
 
+static PyObject *hashstring_get_usable(PyObject *self)
+{
+    const HashString *hash = GetCpp<HashString*>(self);
+    return PyBool_FromLong(hash->usable());
+}
+
 static char *hashstring_verify_file_doc =
     "verify_file(filename: str) -> bool\n\n"
     "Verify that the file indicated by filename matches the hash.";
@@ -80,6 +86,8 @@ static PyMethodDef hashstring_methods[] = {
 static PyGetSetDef hashstring_getset[] = {
     {"hashtype",(getter)hashstring_get_hashtype,0,
      "The type of the hash, as a string (possible: MD5Sum,SHA1,SHA256)."},
+    {"usable",(getter)hashstring_get_usable,0,
+     "True if the hashstring is a trusted hash type."},
     {NULL}
 };
 

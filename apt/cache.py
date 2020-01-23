@@ -60,6 +60,10 @@ class FetchFailedException(IOError):
     """Exception that is thrown when fetching fails."""
 
 
+class UntrustedException(FetchFailedException):
+    """Exception that is thrown when fetching fails for trust reasons"""
+
+
 class LockFailedException(IOError):
     """Exception that is thrown when locking fails."""
 
@@ -413,8 +417,17 @@ class Cache(object):
                 reqreinst.add(pkg.get_fullname(pretty=True))
         return reqreinst
 
-    def _run_fetcher(self, fetcher):
-        # type: (apt_pkg.Acquire) -> int
+    def _run_fetcher(self, fetcher, allow_unauthenticated):
+        # type: (apt_pkg.Acquire, Optional[bool]) -> int
+        if allow_unauthenticated is None:
+            allow_unauthenticated = apt_pkg.config.find_b("APT::Get::"
+                                        "AllowUnauthenticated", False)
+
+        untrusted = [item for item in fetcher.items if not item.is_trusted]
+        if untrusted and not allow_unauthenticated:
+            raise UntrustedException("Untrusted packages:\n%s" %
+                "\n".join(i.desc_uri for i in untrusted))
+
         # do the actual fetching
         res = fetcher.run()
 
@@ -437,8 +450,12 @@ class Cache(object):
             raise FetchFailedException(err_msg)
         return res
 
-    def _fetch_archives(self, fetcher, pm):
-        # type: (apt_pkg.Acquire, apt_pkg.PackageManager) -> int
+    def _fetch_archives(self,
+                        fetcher,                # type: apt_pkg.Acquire
+                        pm,                     # type: apt_pkg.PackageManager
+                        allow_unauthenticated=None,  # type: Optional[bool]
+                        ):
+        # type: (...) -> int
         """ fetch the needed archives """
         if self._records is None:
             raise CacheClosedException(
@@ -447,12 +464,17 @@ class Cache(object):
         # this may as well throw a SystemError exception
         if not pm.get_archives(fetcher, self._list, self._records):
             return False
+
         # now run the fetcher, throw exception if something fails to be
         # fetched
-        return self._run_fetcher(fetcher)
+        return self._run_fetcher(fetcher, allow_unauthenticated)
 
-    def fetch_archives(self, progress=None, fetcher=None):
-        # type: (AcquireProgress, apt_pkg.Acquire) -> int
+    def fetch_archives(self,
+                       progress=None,        # type: Optional[AcquireProgress]
+                       fetcher=None,         # type: Optional[apt_pkg.Acquire]
+                       allow_unauthenticated=None,  # type: Optional[bool]
+                       ):
+        # type: (...) -> int
         """Fetch the archives for all packages marked for install/upgrade.
 
         You can specify either an :class:`apt.progress.base.AcquireProgress()`
@@ -462,6 +484,10 @@ class Cache(object):
         The return value of the function is undefined. If an error occurred,
         an exception of type :class:`FetchFailedException` or
         :class:`FetchCancelledException` is raised.
+
+        The keyword-only parameter *allow_unauthenticated* specifies whether
+        to allow unauthenticated downloads. If not specified, it defaults to
+        the configuration option `APT::Get::AllowUnauthenticated`.
 
         .. versionadded:: 0.8.0
         """
@@ -474,7 +500,8 @@ class Cache(object):
 
         with self._archive_lock:
             return self._fetch_archives(fetcher,
-                                        apt_pkg.PackageManager(self._depcache))
+                                        apt_pkg.PackageManager(self._depcache),
+                                        allow_unauthenticated)
 
     def is_virtual_package(self, pkgname):
         # type: (str) -> bool
@@ -604,8 +631,12 @@ class Cache(object):
             install_progress.finish_update()
         return res
 
-    def commit(self, fetch_progress=None, install_progress=None):
-        # type: (AcquireProgress, InstallProgress) -> bool
+    def commit(self,
+               fetch_progress=None,         # type: Optional[AcquireProgress]
+               install_progress=None,       # type: Optional[InstallProgress]
+               allow_unauthenticated=None,  # type: Optional[bool]
+               ):
+        # type: (...) -> bool
         """Apply the marked changes to the cache.
 
         The first parameter, *fetch_progress*, refers to a FetchProgress()
@@ -614,6 +645,10 @@ class Cache(object):
 
         The second parameter, *install_progress*, is a
         apt.progress.InstallProgress() object.
+
+        The keyword-only parameter *allow_unauthenticated* specifies whether
+        to allow unauthenticated downloads. If not specified, it defaults to
+        the configuration option `APT::Get::AllowUnauthenticated`.
         """
         # FIXME:
         # use the new acquire/pkgmanager interface here,
@@ -635,7 +670,8 @@ class Cache(object):
             with self._archive_lock:
                 while True:
                     # fetch archives first
-                    res = self._fetch_archives(fetcher, pm)
+                    res = self._fetch_archives(fetcher, pm,
+                                               allow_unauthenticated)
 
                     # then install
                     res = self.install_archives(pm, install_progress)
@@ -982,7 +1018,7 @@ def _test():
     apt_pkg.config.set("Dir::Cache::Archives", "/tmp/pytest")
     pm = apt_pkg.PackageManager(cache._depcache)
     fetcher = apt_pkg.Acquire(apt.progress.text.AcquireProgress())
-    cache._fetch_archives(fetcher, pm)
+    cache._fetch_archives(fetcher, pm, None)
     #sys.exit(1)
 
     print("Testing filtered cache (argument is old cache)")
