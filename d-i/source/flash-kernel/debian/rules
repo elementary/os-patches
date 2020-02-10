@@ -32,9 +32,11 @@ override_dh_auto_clean:
 	dh_auto_clean
 
 override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	FK_CHECKOUT=. ./test_db
 	FK_CHECKOUT=. ./test_flash-kernel
 	FK_CHECKOUT=. ./test_functions
+endif
 
 %:
 	dh $@

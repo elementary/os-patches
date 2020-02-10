@@ -39,7 +39,13 @@ fi
 setenv bootargs @@LINUX_KERNEL_CMDLINE_DEFAULTS@@ ${bootargs} @@LINUX_KERNEL_CMDLINE@@
 @@UBOOT_ENV_EXTRA@@
 
-image_locations='/boot/ /'
+if test -z "${image_locations}"; then
+   setenv image_locations ${prefix}
+fi
+if test -z "${image_locations}"; then
+   setenv image_locations /boot/ /
+fi
+
 if test -z "${fk_kvers}"; then
    setenv fk_kvers '@@KERNEL_VERSION@@'
 fi

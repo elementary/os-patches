@@ -25,7 +25,7 @@ if test -n "${console}"; then
   setenv bootargs "${bootargs} console=${console}"
 fi
 
-setenv bootargs @@LINUX_KERNEL_CMDLINE_DEFAULTS@@ ${bootargs} @@LINUX_KERNEL_CMDLINE@@
+setenv bootargs "@@LINUX_KERNEL_CMDLINE_DEFAULTS@@ ${bootargs} @@LINUX_KERNEL_CMDLINE@@"
 @@UBOOT_ENV_EXTRA@@
 
 if test -z "${fk_kvers}"; then
@@ -48,14 +48,32 @@ else
   setenv partition ${distro_bootpart}
 fi
 
-load ${devtype} ${devnum}:${partition} ${kernel_addr_r} ${prefix}vmlinuz-${fk_kvers} \
-&& load ${devtype} ${devnum}:${partition} ${fdt_addr_r} ${prefix}${fdtpath} \
-&& load ${devtype} ${devnum}:${partition} ${ramdisk_addr_r} ${prefix}initrd.img-${fk_kvers} \
-&& echo "Booting Debian ${fk_kvers} from ${devtype} ${devnum}:${partition}..." \
-&& bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r}
+@@UBOOT_PREBOOT_EXTRA@@
 
-load ${devtype} ${devnum}:${partition} ${kernel_addr_r} ${prefix}vmlinuz \
-&& load ${devtype} ${devnum}:${partition} ${fdt_addr_r} ${prefix}dtb \
-&& load ${devtype} ${devnum}:${partition} ${ramdisk_addr_r} ${prefix}initrd.img \
-&& echo "Booting Debian from ${devtype} ${devnum}:${partition}..." \
-&& bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r}
+if test -z "${fk_image_locations}"; then
+  setenv fk_image_locations ${prefix}
+fi
+
+for pathprefix in ${fk_image_locations}
+do
+  if test -e ${devtype} ${devnum}:${partition} ${pathprefix}vmlinuz-${fk_kvers}
+  then
+    load ${devtype} ${devnum}:${partition} ${kernel_addr_r} ${pathprefix}vmlinuz-${fk_kvers} \
+    && load ${devtype} ${devnum}:${partition} ${fdt_addr_r} ${pathprefix}${fdtpath} \
+    && load ${devtype} ${devnum}:${partition} ${ramdisk_addr_r} ${pathprefix}initrd.img-${fk_kvers} \
+    && echo "Booting Debian ${fk_kvers} from ${devtype} ${devnum}:${partition}..." \
+    && bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r}
+  fi
+done
+
+for pathprefix in ${fk_image_locations}
+do
+  if test -e ${devtype} ${devnum}:${partition} ${pathprefix}vmlinuz
+  then
+    load ${devtype} ${devnum}:${partition} ${kernel_addr_r} ${pathprefix}vmlinuz \
+    && load ${devtype} ${devnum}:${partition} ${fdt_addr_r} ${pathprefix}dtb \
+    && load ${devtype} ${devnum}:${partition} ${ramdisk_addr_r} ${pathprefix}initrd.img \
+    && echo "Booting Debian from ${devtype} ${devnum}:${partition}..." \
+    && bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r}
+  fi
+done

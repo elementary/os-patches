@@ -1,3 +1,385 @@
+flash-kernel (3.98ubuntu11~18.04.1) bionic; urgency=medium
+
+  * Permit flash-kernel to workaround an inconsistent /boot directory when
+    triggered prior to the kernel finishing its triggers (LP: #1861292)
+
+ -- Dave Jones <dave.jones@canonical.com>  Wed, 29 Jan 2020 16:15:05 +0000
+
+flash-kernel (3.98ubuntu10~18.04.1) bionic; urgency=medium
+
+  * SRU of 3.98ubuntu10 to support Raspberry Pi 4B. (LP: #1847587)
+  * Removed new entries from db/all.db for machines that were not already
+    supported on Bionic
+  * Remove "quiet splash" from kernel command line options; Bionic shipped
+    without these options and we shouldn't change the boot experience for
+    existing users
+  * Ensure the "overlays" dir always exists on the boot partition; the Bionic
+    image for the Pi 2 shipped without this dir
+
+ -- Dave Jones <dave.jones@canonical.com>  Fri, 24 Jan 2020 16:14:06 +0000
+
+flash-kernel (3.98ubuntu10) focal; urgency=medium
+
+  * Always run flash-kernel on install/upgrade
+
+ -- Dave Jones <dave.jones@canonical.com>  Wed, 22 Jan 2020 19:53:20 +0000
+
+flash-kernel (3.98ubuntu9) focal; urgency=medium
+
+  * Ensure overlays dir always exists
+
+ -- Dave Jones <dave.jones@canonical.com>  Fri, 17 Jan 2020 13:40:28 +0000
+
+flash-kernel (3.98ubuntu8) focal; urgency=medium
+
+  * Add support for the Raspberry Pi 4 rev 1.2 board (LP: #1854487)
+
+ -- Dave Jones <dave.jones@canonical.com>  Fri, 29 Nov 2019 11:35:00 +0000
+
+flash-kernel (3.98ubuntu7) focal; urgency=medium
+
+  * Add systemd depends, as systemd-detect-virt is called in the scripts.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 26 Nov 2019 14:18:02 +0000
+
+flash-kernel (3.98ubuntu6) focal; urgency=medium
+
+  * Remove redundant DTB-Kernel-Version field
+  * Remove redundant copying of boot dtb
+  * Fix mkimage_kernel tests
+  * Add "pi" value for the "Method" field which copies all dtbs and overlays
+    to the boot partition and provides defaults for the boot paths of the
+    kernel, initrd, and u-boot script. This fixes upgrades to support the Pi 4
+    on Bionic (LP: #1850678)
+  * Update pi bootscript to support all flash-kernel vars, including
+    calculated devtype and partition for future USB boot support
+  * Add entry for Raspberry Pi 3A+ (LP: #1841955)
+
+ -- Dave Jones <dave.jones@canonical.com>  Thu, 07 Nov 2019 14:02:26 +0000
+
+flash-kernel (3.98ubuntu5) eoan; urgency=medium
+
+  * Fix AARCH64 qcom laptop names, to those accepted upstream and in the
+    Ubuntu kernel. LP: #1847594
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 10 Oct 2019 13:04:59 +0100
+
+flash-kernel (3.98ubuntu4) eoan; urgency=medium
+
+  * Add support for Raspberry Pi 4 (LP: #1847587)
+
+ -- Dave Jones <dave.jones@canonical.com>  Thu, 10 Oct 2019 10:41:43 +0100
+
+flash-kernel (3.98ubuntu3) eoan; urgency=medium
+
+  * Add support for AAarch64 Qualcomm laptops.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sun, 21 Jul 2019 11:17:17 -0300
+
+flash-kernel (3.98ubuntu2) eoan; urgency=medium
+
+  * Merge all RPi bootscripts into one unified bootscript which handles all Pi
+    architectures
+  * Remove uboot.env case which was only used for RPi2 (now supported by the
+    unified RPi bootscript)
+
+ -- Dave Jones <dave.jones@canonical.com>  Tue, 11 Jun 2019 13:43:21 +0000
+
+flash-kernel (3.98ubuntu1) eoan; urgency=medium
+
+  * Merge with Debian unstable. Remaining changes:
+    - add "quiet splash" as default options to omap bootscr
+    - re-add support for the FLASH_KERNEL_SKIP env variable, so the image
+      build infrastructure has a chance to skip the automated flash-kernel run
+      during image builds.
+    - Also check for FLASH_KERNEL_SKIP to avoid setting up the root parameter
+      in case flash-kernel will not be used
+    - make the package postinst respect FLASH_KERNEL_SKIP
+    - make sure that if we dont want to override the bootloader root=
+      option by setting "Bootloader-sets-root: yes", we actually dont do it
+    - use umount -l in the cleanup function, else we fail while finishing up
+      with the script
+    - add a diversion for update-initramfs to live-installers
+      post-base-installer.d to avoid update-initramfs runs before flash-kernel
+      is configured
+    - add a check for the diverted update-initramfs to flash-kernel-installer,
+      so it gets reverted before we try to call update-initramfs
+    - make post-base-installer.d/01flash-kernel-diversion actually an
+      executable shell script
+    - enable UUID detection of the currently used root device
+    - if uEnv.txt is defined in the db for an arch, generate preEnv.txt from
+      UBOOT_DEFAULTS and UUID detection data
+    - make sure blkid only gives us the UUID and not any other metadata like
+      labels or filesystem
+    - hide the boot device from udisk's automounting after installation on all
+      systems using uEnv.txt to configure u-boot
+    - make sure we only rename the bootrom partition so udisks hides it,
+      when using mkdosfs for setting the label like we did in jasper (where
+      we cached the contents before doing this) MLO and u-boot.bin are gone
+    - make sure that /dev is bind mounted in /target when running
+      update-initramfs from flash-kernel-installer, else we do not find the
+      boot media (this is only a workaround, actual fixing of the netinst
+      environment is needed to fix this properly)
+    - drop the "|| true" from the initramfs building code, if we fail here we
+      actually dont want to attempt to flash that
+    - Do not run flash-kernel inside an LXC container
+    - Call systemd-detect-virt instead of the Ubuntu specific
+      running-in-container wrapper.
+    - Add generic-lpae to the XB-Subarchitecture list in debian/control
+    - debian/flash-kernel-installer.isinstallable: add arm*/generic-lpae
+    - Fix typo in dtb_kver test that made it break all non-dtb platforms.
+    - Apply patch from Paolo Pisati for appended DTB support
+    - Filter the selection of 'latest' usable kernel through the whitelist.
+    - Do not fail if there are no specified Kernel-Flavors for this machine.
+    - Allow us to find DTBs in both the old flat layout and the new vendor
+      subdirectory layout, so we keep backward compatibility
+    - Add support for installing dtb files in boot partition
+    - Add support for gzip-compressed kernel images
+    - db/all.db: add dummy entries as noops when running on VMs
+    - Add support for Calxeda Highbank
+      - Add support for Calxeda Highbank (with bootscr.highbank different from
+        Debian's version)
+      - bootscr.highbank: allow more space to load larger kernels
+    - Add support for Marvell ArmadaXP
+      - Re-add support for Marvell ArmadaXP
+      - Fix armadaxp kernel load address
+    - Add support for OMAP3 and OMAP4 boards
+      - add DB entry for "OMAP3 Beagle Board" (funnily thats missing)
+      - add Panda to the list of supported board in the README file
+      - debian/control: Re-add omap and omap4 to the flash-kernel-installer
+        XB-Subarchitecture field. These appear to have been lost somewhere
+        along the way.
+      - Also add omap and omap4 to flash-kernel-installer.isinstallable.
+      - switch omap3 and omap4 to uEnv.txt/preEnv.txt (the former holds all
+        active boot commands, the latter holds the kernel commandline only)
+      - switch omap3 and omap4 from Bootloader-sets-root: no to yes, we now
+        generate a root=UUID= line on the fly for arches using
+        uEnv.txt/preEnv.txt
+      - introduce bootscript/uEnvtxt.omap
+      - do not move the original uEnvtxt.omap to the target, use a copy
+        instead
+    - Add support for grouper boards
+      - add support for the grouper architecture
+    - Add support for Samsung Exynos 5440 platforms
+      - Add support for EXYNOS5440-based platforms
+    - Add support for HP ProLiant m400 and m800 cartridges
+      - Added support for HP ProLiant m800 Server Cartridge
+      - Add support for HP ProLiant m800 cartridges
+      - Set required boot arguments for HP ProLiant m800 cartridges
+      - Add support for HP ProLiant m400 Server Cartridges
+      - HP Moonshot Cartridges: Use $baudrate from u-boot environment as
+        serial console speed
+      - HP Moonshot Cartridges: Enable hardware flow control as required by
+        the HP moonshot chassis
+      - Enable U-Boot environment support for X-Gene platforms
+      - Use filesystem agnostic "load" command instead of assuming ext4
+      - Add a bootscript specific to X-Gene Mustang boards since they need to
+        pull their dtb from the OS.
+    - Add support for Wandboard Quad
+      - Wandboard: Use /dev/disk/by-path/platform-2198000.usdhc-part1
+        instead of the hardcoded mmcblk1p1, this should make things work on
+        boards with just a single microSD card in.
+      - Add basic support for WandBoard Quad.
+    - Add support for Raspberry Pi 2, 3, 3+, CM3, and CM3+
+      - Extend support for the RPi2 to actually install the kernel/initramfs
+        on the fat partition, and provide a uboot boot script based on the one
+        used for Snappy images.
+      - Extend functions to support generating uboot.env images, as an
+        alternative to boot.scr and uEnv.txt, and use this for RPi2 as well.
+      - Adjust the uboot.env.rpi2 to use the one Paolo Pisati has tested,
+        instead of trying to base on the Snappy one, which is failing to boot.
+      - Adjust the size of uboot.env based on empirical results on the rpi2.
+      - Adjust rpi2/3 dtb address from 0x100 to 0x02000000
+      - Support Raspberry Pi 2 Model B Rev 1.2
+      - Add Raspberry Pi 3 Model B+ to the db.
+      - Modify the Pi 3 boot.scr addresses to fit a bigger kernel, prepare
+        separate versions for armhf and arm64.
+      - Add Raspberry Pi Compute Module 3 and 3+ to the db.
+    - Add support for Nexus 4 (Mako)
+      - Enabling support for mako (Nexus 4)
+    - Add support for QCT APQ8064 CDP
+      - Add support for QCT APQ8064 CDP; thanks Alfonso Sanchez-Beato.
+    - Migrate default /etc/default/flash-kernel content to new default without
+      asking via debconf
+    - Update tests with new fields: Android-Skip-Initrd, Bootloader-sets-root,
+      DTB-Kernel-Version
+    - Look for dtbs in /lib/firmware/$kvers/device-tree/ in find_dtb_file()
+    - Add Bootloader-sets-root to Toshiba AC100 [previously undocumented]
+    - Install all potential uboot scripts [previously undocumented]
+    - initramfs-hook/flash-kernel: Pretend we're running from the kernel's
+      postinst to activate the same guard against mismatched kernel versions.
+    - flash-kernel/functions: Stop attempting to install the latest kernel
+      if we request an older version, just refuse to act without --force.
+
+  * Dropped changes merged in Debian:
+    - Remove commit-tmp cruft [previously undocumented]
+
+  * Dropped obsolete changes:
+    - Add archs (why?) and duplicate generic (why?!) in d/control [previously
+      undocumented]
+
+ -- Dave Jones <dave.jones@canonical.com>  Thu, 16 May 2019 12:08:32 +0000
+
+flash-kernel (3.98) unstable; urgency=medium
+
+  [ Vagrant Cascadian ]
+  * Add machine db entry for Rock64 (Closes: #906696). Thanks to Josua
+    Mayer.
+  * Add machine db entry for Banana Pi M2 Berry (Closes: #923483). Thanks
+    to Lucas Nussbaum.
+
+  [ Cyril Brulebois ]
+  * Drop support for arm*/ixp4xx and arm*/iop32x; support for those
+    platforms was removed from the Linux kernel and therefore d-i.
+
+  [ Heinrich Schuchardt ]
+  * Provide db entry for the Pine A64 LTS board (Closes: #923655).
+
+  [ Jonas Smedegaard ]
+  * Add an entry for Olimex A64 Teres-I (Closes: #926071).
+
+  [ Vagrant Cascadian ]
+  * Add entries for Raspberry Pi 1, Pi Zero and Pi 3 Compute Module
+    (Closes: #921518). Thanks to Alexandre GRIVEAUX.
+
+  [ Updated translations ]
+  * Indonesian (id.po) by Muhammad Rifqi Priyo Susanto
+  * Vietnamese (vi.po) by Trần Ngọc Quân
+
+ -- Holger Wansing <hwansing@mailbox.org>  Thu, 04 Apr 2019 23:38:42 +0200
+
+flash-kernel (3.97) unstable; urgency=medium
+
+  [ Vagrant Cascadian ]
+  * Add machine db entry for Odroid HC1 (Closes: #916980). Thanks to
+    Benjamin Drung.
+
+  [ Karsten Merker ]
+  * Apply a patch from Hajo Noerenberg adding a machine db entry for
+    the Seagate Blackarmor NAS220 (Closes: #918193).
+
+ -- Karsten Merker <merker@debian.org>  Fri, 04 Jan 2019 14:43:50 +0100
+
+flash-kernel (3.96) unstable; urgency=medium
+
+  [ Helmut Grohne ]
+  * Support DEB_BUILD_OPTIONS=nocheck (Closes: #908355)
+
+  [ Karsten Merker ]
+  * Add a machine db entry for the Helios-4 NAS system,
+    provided by Josua Mayer. (Closes: #914016)
+
+ -- Karsten Merker <merker@debian.org>  Sun, 18 Nov 2018 19:26:50 +0100
+
+flash-kernel (3.95) unstable; urgency=medium
+
+  [ Heinrich Schuchardt ]
+  * Add a machine db entry for the Rockchip RK3288 Tinker Board.
+    (Closes: #895934)
+
+  [ Cyril Brulebois ]
+  * Update Vcs-{Browser,Git} to point to salsa (alioth's replacement).
+
+  [ Heinrich Schuchardt ]
+  * Update Firefly-RK3399 Board (Closes: #899091).
+  * Rockchip RK3399 Evaluation Board (Closes: #899090).
+  * Update entry for Marvell 8040 MACCHIATOBin (Closes: #899092):
+    - Add new Machine name.
+    - Update DTB path.
+  * Update Pine64+ (Closes: #899093).
+  * Update Raspberry Pi 3 Model B (Closes: #899096).
+
+  [ Josua Mayer ]
+  * Clearfog Pro: correct DTB name (Closes: #902432).
+  * Add missing entries for HummingBoard variants (Closes: #905962).
+
+  [ Vagrant Cascadian ]
+  * Add entries for additional Cubox-i models:
+    - SolidRun Cubox-i Dual/Quad (1.5som)
+    - SolidRun Cubox-i Dual/Quad (1.5som+emmc)
+  * Add entry for Raspberry PI 3 B+ (Closes: #905002).
+    Thanks to Johannes Keyser.
+
+ -- Karsten Merker <merker@debian.org>  Sun, 19 Aug 2018 22:42:38 +0200
+
+flash-kernel (3.94) unstable; urgency=medium
+
+  [ Vagrant Cascadian ]
+  * Fix typos in imx-base boot script.
+
+  [ Uwe Kleine-König ]
+  * Add Boot-DTB-Path-Version similar to Boot-Kernel-Path-Version.
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 14 Apr 2018 07:42:10 +0200
+
+flash-kernel (3.93) unstable; urgency=medium
+
+  [ Vagrant Cascadian ]
+  * Add support for Theobroma Systems RK3399-Q7 SoM.
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 10 Mar 2018 05:59:42 +0100
+
+flash-kernel (3.92) unstable; urgency=medium
+
+  [ Updated translations ]
+  * Hebrew (he.po) by Yaron Shahrabani
+
+ -- Christian Perrier <bubulle@debian.org>  Wed, 21 Feb 2018 12:19:06 +0100
+
+flash-kernel (3.91) unstable; urgency=medium
+
+  [ Vagrant Cascadian ]
+  * Make ubootenv.d work on CuBox-i. Thanks to Rainer Dorsch.
+  * Do not install flash-kernel.in.
+
+  [ Heinrich Schuchardt ]
+  * flash-kernel: Provide hook to start EFI application (Closes: #873390).
+
+  [ Vagrant Cascadian ]
+  * Add support for SolidRun Clearfog Boards (Closes: #839595). Thanks to
+    Christoph Egger and Joshua Mayer.
+  * Add support for SolidRun CuBox (dove) (Closes: #876773). Thanks to
+    Josua Mayer.
+  * Fix when no Kernel-Flavors are defined (Closes: #887803).
+  * Add Boot-Kernel-Path-Version and Boot-Initrd-Path-Version to be used
+    to append the version to the generated kernel/initrd images.
+  * debian/control: Set Rules-Requires-Root: no.
+
+  [ Heinrich Schuchardt ]
+  * flash-kernel: support relative paths for DTB-Id (Closes: #860304).
+
+  [ Vagrant Cascadian ]
+  * Add compatibility symlink to dtb in vendor sub-directory.
+  * Add support for root device specified by PARTLABEL.
+
+  [ Andre Heider ]
+  * Add support for multiple scripts sources
+
+  [ Vagrant Cascadian ]
+  * Convert Wandboard and CuBox-i to use a shared imx-base plus
+    uboot-generic boot script.
+  * Adjust sunxi boot script to prefer prefix variable if defined to set
+    the locations to search for boot files.
+
+  [ Updated translations ]
+  * Tajik (tg.po) by Victor Ibragimov
+
+ -- Christian Perrier <bubulle@debian.org>  Thu, 01 Feb 2018 06:32:56 +0100
+
+flash-kernel (3.90ubuntu5) disco; urgency=medium
+
+  * Add Raspberry Pi Compute Module 3 and 3+ to the db.
+
+ -- Dave Jones <dave.jones@canonical.com>  Thu, 14 Feb 2019 11:12:13 +0000
+
+flash-kernel (3.90ubuntu4) disco; urgency=medium
+
+  * Add Raspberry Pi 3 Model B+ to the db.
+  * Modify the Pi 3 boot.scr addresses to fit a bigger kernel, prepare
+    separate versions for armhf and arm64.
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 05 Dec 2018 00:18:12 +0200
+
 flash-kernel (3.90ubuntu3.18.04.2) bionic; urgency=medium
 
   * Add Raspberry Pi Compute Module 3 and 3+ to the db. (LP: #1816029)

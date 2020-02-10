@@ -22,7 +22,7 @@
 MACHINE_DB="$(cat "${FK_CHECKOUT:-$FK_DIR}/db/"*.db)"
 
 test_no_unknown_fields() {
-    local expected='Android-Boot-Device Android-Skip-Initrd Boot-Device Boot-DTB-Path Boot-Initrd-Path Boot-Kernel-Path Bootloader-Sets-Incorrect-Root Bootloader-sets-root Boot-Multi-Path Boot-Script-Path DTB-Append DTB-Append-From DTB-Id DTB-Kernel-Version Kernel-Flavors Machine Machine-Id Method Mtd-Initrd Mtd-Kernel Optional-Packages Required-Packages U-Boot-Initrd-Address U-Boot-Kernel-Address U-Boot-Kernel-Entry-Point U-Boot-Multi-Address U-Boot-Script-Address U-Boot-Script-Name'
+    local expected='Android-Boot-Device Android-Skip-Initrd Boot-Device Boot-DTB-Path Boot-Initrd-Path Boot-Kernel-Path Bootloader-Sets-Incorrect-Root Bootloader-sets-root Boot-Multi-Path Boot-Script-Path DTB-Append DTB-Append-From DTB-Id Kernel-Flavors Machine Machine-Id Method Mtd-Initrd Mtd-Kernel Optional-Packages Required-Packages U-Boot-Initrd-Address U-Boot-Kernel-Address U-Boot-Kernel-Entry-Point U-Boot-Multi-Address U-Boot-Script-Address U-Boot-Script-Name'
     expected="$(echo "$expected" | sed 's/ /\n/g' | sort -u | xargs)"
     local fields="$(echo "$MACHINE_DB" | sed -n '/^[^#]*:/s/:.*//p' | sort -u | xargs)"
     if [ "$fields" != "$expected" ]; then

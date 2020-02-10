@@ -1,0 +1,37 @@
+# boot script for Wandboard
+
+if test "${devtype}" ; then
+   setenv devtype mmc
+fi
+
+if test "${devnum}" ; then
+  setenv devnum ${mmcdev}
+fi
+
+if test -z "${partition}" ; then
+   setenv partition ${distro_bootpart}
+fi
+
+if test -z "${partition}" ; then
+   setenv partition ${bootpart}
+fi
+
+if test -z "${partition}" ; then
+   setenv partition ${mmcpart}
+fi
+
+if test -z "${ramdisk_addr_r}" ; then
+	setenv ramdisk_addr_r 0x13000000
+fi
+
+if test -z "${ramdiskaddr}" ; then
+	setenv ramdiskaddr ${ramdisk_addr_r}
+fi
+
+if test -z "${fk_image_locations}" ; then
+   setenv fk_image_locations "${prefix}"
+fi
+
+if test -z "${fk_image_locations}" ; then
+   setenv fk_image_locations "/boot/ /"
+fi

@@ -41,6 +41,8 @@ else
   setenv partition ${distro_bootpart}
 fi
 
+@@UBOOT_PREBOOT_EXTRA@@
+
 load ${devtype} ${devnum}:${partition} ${kernel_addr_r} ${prefix}vmlinuz-${fk_kvers} \
 && load ${devtype} ${devnum}:${partition} ${fdt_addr_r} ${prefix}${fdtpath} \
 && load ${devtype} ${devnum}:${partition} ${ramdisk_addr_r} ${prefix}initrd.img-${fk_kvers} \

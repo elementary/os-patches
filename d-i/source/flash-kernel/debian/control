@@ -8,17 +8,20 @@ Uploaders: Christian Perrier <bubulle@debian.org>,
            Karsten Merker <merker@debian.org>
 Build-Depends: debhelper (>= 9), devio, linux-base (>= 3.2), dash
 Standards-Version: 3.9.6
-Vcs-Browser: https://anonscm.debian.org/cgit/d-i/flash-kernel.git
-Vcs-Git: https://anonscm.debian.org/git/d-i/flash-kernel.git
+Vcs-Browser: https://salsa.debian.org/installer-team/flash-kernel
+Vcs-Git: https://salsa.debian.org/installer-team/flash-kernel.git
+Rules-Requires-Root: no
 
 Package: flash-kernel
-Architecture: arm64 armel armhf armeb arm
+Architecture: arm64 armel armhf
 Depends: ${misc:Depends},
          devio,
          initramfs-tools (>= 0.92f),
+         systemd,
          linux-base (>= 3.2),
          mtd-utils,
-         ucf
+         ucf,
+         awk
 Recommends: u-boot-tools
 Description: utility to make certain embedded devices bootable
  flash-kernel is a script which will put the kernel and initramfs in
@@ -31,8 +34,8 @@ Package: flash-kernel-installer
 Section: debian-installer
 Priority: standard
 Package-Type: udeb
-Architecture: arm64 armel armhf armeb arm
-XB-Subarchitecture: armadaxp exynos5 generic-lpae generic iop32x ixp4xx keystone kirkwood orion5x s3c24xx mx5 omap omap4 xgene generic
+Architecture: arm64 armel armhf
+XB-Subarchitecture: armadaxp exynos5 generic-lpae iop32x ixp4xx keystone kirkwood orion5x s3c24xx mx5 omap omap4 xgene generic
 Provides: bootable-system
 Depends: cdebconf-udeb, installed-base
 XB-Installer-Menu-Item: 7300

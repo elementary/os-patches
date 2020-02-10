@@ -119,13 +119,16 @@ The supported fields are:
   This option is ignored if a DTB is to be appended, via either DTB-Append or
   DTB-Append-From.
 
-* DTB-Id: (optional) specifies the name of the DTB file for this device
-  relative to the kernel package DTB dir or /etc/flash-kernel/dtbs.
-  It's not necessary to specify the directory if the DTB is in a vendor
-  subdirectory as flash-kernel will search for the filename in
-  subdirectories.  If the value begins with a `!' then the field is a script
-  which should be run.  The script must produce the DTB filename (just the
-  filename, without a vendor subdirectory) on stdout (and nothing else).
+* DTB-Id: (optional) specifies the name of the DTB file for this device.
+  If DTB-Id specifies an absolute path the directory specifies the path from
+  where the DTB is copied.
+  If DTB-Id specifies a relative path the directory specifies the subdirectory
+  of the kernel version directory where the DTB will be installed.
+  The filename is used to search for the filename in subdirectories of
+  /usr/lib/linux-image-* or /etc/flash-kernel/dtbs.
+  If the value begins with a `!' then the field is a script which should be
+  run. The script must produce the DTB filename (possibly including a
+  directory) on stdout.
 
 * DTB-Append: (optional) when yes the DTB specified by DTB-Id will be appended
   to the kernel image.
@@ -152,6 +155,10 @@ The supported fields are:
 * Boot-Kernel-Path, Boot-Initrd-Path: (optional) where to put the
   generated kernel and initrd files on the filesystem; see also
   Boot-Device
+
+* Boot-Kernel-Path-Version, Boot-Initrd-Path-Version, Boot-DTB-Path-Version:
+  (optional) if "yes" appends the kernel version to files created with
+  Boot-Kernel-Path, Boot-Initrd-Path and Boot-DTB-Path.
 
 * Boot-Script-Path: (optional) like Boot-Kernel-Path and
   Boot-Initrd-Path but for an U-Boot boot script; see also
@@ -186,8 +193,6 @@ The supported fields are:
   kernel,  initrd and U-Boot script; Boot-Kernel-Path, Boot-Initrd-Path and
   Boot-Script-Path are then taken relative to this boot device
 
-* DTB-Kernel-Version: (optional) minimal kernel version for DTB concatenation
-
 
 Configuration
 - - - - - - -
@@ -206,9 +211,9 @@ Configuration files currently supported:
 * /etc/flash-kernels/bootscript (directory). The files referenced via
   the Boot-Script-Name field are installed here.
 
-* /etc/flash-kernel/ubootenv.d can be used to add or override u-boot
-  script snippets. See "Adding U-Boot Commands for Pre-Boot Execution"
-  below for more details.
+* /etc/flash-kernel/ubootenv.d and /etc/flash-kernel/preboot.d can be used to
+  add or override u-boot script snippets. See "Adding U-Boot Commands for
+  Pre-Boot Execution" below for more details.
 
 * /etc/default/flash-kernel currently contains the following variables:
     - LINUX_KERNEL_CMDLINE, which should be used by bootscripts to set kernel
@@ -235,10 +240,13 @@ Adding U-Boot Commands for Pre-Boot Execution
 
 Packages can drop in files containing U-Boot commands to be executed by a
 platform's bootscript before starting the OS. These files should be
-dropped in /usr/share/flash-kernel/ubootenv.d. Users can add additional
+dropped in /usr/share/flash-kernel/ubootenv.d and
+/usr/share/flash-kernel/preboot.d. Users can add additional
 stubs, or override stubs provided by packages, by adding files to
-/etc/flash-kernel/ubootenv.d. Files in the /etc path that have the same
-name as files in the /usr path will override the /usr counterparts.
+/etc/flash-kernel/ubootenv.d and /etc/flash-kernel/preboot.d. Files in the
+/etc path that have the same name as files in the /usr path will override the
+/usr counterparts.
 
-Platform bootscripts must contain the @@UBOOT_ENV_EXTRA@@ macro for the
-contents of these stubs to be incorporated.
+Platform bootscripts must contain the @@UBOOT_ENV_EXTRA@@ and
+@@UBOOT_PREBOOT_EXTRA@@ macros for the contents of these stubs to be
+incorporated.

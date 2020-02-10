@@ -1,0 +1,36 @@
+# Boot-Script for SolidRun CuBox (Dove)
+# environment variables provided by the 2009.08* vendor U-Boot:
+# device_name [usb,mmc,ide]
+# partition [1,2]
+# directory [/,/boot/]
+# fstype [ext4,fat]
+
+# set load-address for ramdisk image
+setenv loadaddrrd 0x20000000
+
+# set up serial console as default
+setenv console ttyS0,115200n8
+
+# set bootargs
+setenv bootargs @@LINUX_KERNEL_CMDLINE_DEFAULTS@@ console=${console} @@LINUX_KERNEL_CMDLINE@@
+
+# set up distr-boot-like variable names where possible
+setenv devnum 0
+setenv devtype ${device_name}
+setenv distro_bootpart ${partition}
+setenv kernel_addr_r ${loadaddr}
+setenv prefix ${directory}
+setenv ramdisk_addr_r ${loadaddrrd}
+
+# allow overriding u-boot environment
+@@UBOOT_ENV_EXTRA@@
+
+# look for boot images where this script was loaded from
+setenv partition ${distro_bootpart}
+
+# Boot it
+${fstype}load ${devtype} ${devnum}:${partition} ${kernel_addr_r} ${prefix}uImage
+${fstype}load ${devtype} ${devnum}:${partition} ${ramdisk_addr_r} ${prefix}uInitrd
+
+echo "Booting Debian from ${devtype} ${devnum}:${partition}..."
+bootm ${kernel_addr_r} ${ramdisk_addr_r}
