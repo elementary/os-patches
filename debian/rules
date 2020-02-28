@@ -31,6 +31,7 @@ override_dh_auto_install:
 	install -p -m 644 licenses/* $(DESTDIR)/usr/share/common-licenses
 	install -p -m 644 origins/*  $(DESTDIR)/etc/dpkg/origins
 	install -p -m 644 share/*    $(DESTDIR)/usr/share/base-files
+	install -p -m 644 upstream-release/* $(DESTDIR)/etc/upstream-release
 	install -p -m 644 profile.d/* $(DESTDIR)/etc/profile.d
 	install -p -m 755 locale-check $(DESTDIR)/usr/bin
 ifeq ($(DEB_HOST_GNU_SYSTEM),gnu)
