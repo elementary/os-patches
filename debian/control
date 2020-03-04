@@ -1,0 +1,215 @@
+Source: lsb
+Section: misc
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Debian sysvinit maintainers <debian-init-diversity@chiark.greenend.org.uk>
+Uploaders: Dmitry Bogatov <KAction@debian.org>
+Build-Depends:
+ po-debconf (>= 0.5.0),
+ dpkg-dev (>= 1.10),
+ python3-all:any,
+ dh-python,
+ distro-info-data,
+ ionit,
+ debhelper-compat (= 12)
+Standards-Version: 4.4.0
+Homepage: https://wiki.linuxfoundation.org/lsb/start
+Vcs-Browser: https://salsa.debian.org/debian/lsb
+Vcs-Git: https://salsa.debian.org/debian/lsb.git
+
+Package: lsb-core
+Architecture: amd64 armhf arm64 ppc64el s390x
+Multi-Arch: foreign
+Depends: lsb-release (>= ${source:Version}),
+ ${glibc},
+ libz1,
+ libncurses5,
+ libpam0g,
+ lsb-invalid-mta (>= ${source:Version}) | mail-transport-agent,
+ at,
+ bc,
+ binutils,
+ bsdmainutils,
+ bsdutils,
+ cpio,
+ cron | cron-daemon,
+ ed,
+ file,
+ libc6-dev | libc-dev,
+ locales,
+ cups-bsd | lpr,
+ lprng | cups-client,
+ m4,
+ mailx | mailutils,
+ make,
+ man-db,
+ mawk | gawk,
+ ncurses-term,
+ passwd,
+ patch,
+ pax,
+ procps,
+ psmisc,
+ rsync,
+ alien (>= 8.36),
+ python3,
+ ${python3:Depends},
+ ${misc:Depends},
+ ${depends},
+ lsb-base (>= ${source:Version}),
+ lsb-security (>= ${source:Version}),
+ time
+Provides: lsb-core-noarch, ${provides}
+Description: Linux Standard Base core support package
+ The Linux Standard Base (http://www.linuxbase.org/) is a standard
+ core system that third-party applications written for Linux can
+ depend upon.
+ .
+ This package provides an implementation of the core of the Linux Standard
+ Base for Debian on the Intel x86, Intel ia64 (Itanium), IBM S390, and
+ PowerPC 32-bit architectures with the Linux kernel. Future revisions of the
+ specification and this package may support the LSB on additional
+ architectures and kernels.
+ .
+ The intent of this package is to provide a best current practice way
+ of installing and running LSB packages on Debian GNU/Linux. Its
+ presence does not imply that Debian fully complies
+ with the Linux Standard Base, and should not be construed as a
+ statement that Debian is LSB-compliant.
+
+Package: lsb-printing
+Architecture: amd64 armhf arm64 ppc64el s390x
+Depends: lsb-core (>= ${source:Version}),
+ libcups2,
+ libcupsimage2,
+ foomatic-filters,
+ ghostscript,
+ cups-filters (>= 1.0.36) | ghostscript-cups,
+ ${misc:Depends}
+Provides: lsb-printing-noarch, ${provides}
+Description: Linux Standard Base Printing package
+ The Linux Standard Base (http://www.linuxbase.org/) is a standard
+ core system that third-party applications written for Linux can
+ depend upon.
+ .
+ This package provides an implementation of the Linux Standard Base
+ Printing specification for Debian on the Intel x86, Intel ia64 (Itanium),
+ IBM S390, and PowerPC 32-bit architectures with the Linux kernel. Future
+ revisions of the specification and this package may support the LSB on
+ additional architectures and kernels.
+ .
+ The intent of this package is to provide a best current practice way
+ of installing and running LSB packages on Debian GNU/Linux. Its
+ presence does not imply that Debian fully complies
+ with the Linux Standard Base, and should not be construed as a
+ statement that Debian is LSB-compliant.
+
+Package: lsb-security
+Architecture: any
+Depends: libnss3,
+ libnspr4,
+ ${misc:Depends}
+Recommends: lsb-core (>= ${source:Version}),
+Provides: lsb-security-noarch,
+ ${provides}
+Description: Linux Standard Base Security package
+ The Linux Standard Base (http://www.linuxbase.org/) is a standard
+ core system that third-party applications written for Linux can
+ depend upon.
+ .
+ This package provides an implementation of the Linux Standard Base Security
+ specification for Debian on the Intel x86, Intel ia64 (Itanium), IBM S390,
+ and PowerPC 32-bit architectures with the Linux kernel. Future revisions of
+ the specification and this package may support the LSB on additional
+ architectures and kernels.
+ .
+ The intent of this package is to provide a best current practice way
+ of installing and running LSB packages on Debian GNU/Linux. Its
+ presence does not imply that Debian fully complies
+ with the Linux Standard Base, and should not be construed as a
+ statement that Debian is LSB-compliant.
+
+Package: lsb
+Architecture: all
+Depends: lsb-core (>= ${source:Version}),
+ lsb-printing (>= ${source:Version}),
+ ${misc:Depends}, libjpeg62
+Description: Linux Standard Base support package
+ The Linux Standard Base (http://www.linuxbase.org/) is a standard
+ core system that third-party applications written for Linux can
+ depend upon.
+ .
+ This package provides an implementation of only the printing and core
+ modules of the Linux Standard Base for Ubuntu.  Recent versions of Ubuntu
+ do not implement the full LSB interfaces; this package is provided only for
+ compatibility with third-party printer driver packages which depend on the
+ lsb package.
+ .
+ The intent of this package is to provide a best current practice way
+ of installing and running LSB packages on Debian GNU/Linux. Its presence
+ does not imply that Ubuntu fully complies with the Linux Standard Base,
+ and should not be construed as a statement that Ubuntu is LSB-compliant.
+
+Package: lsb-base
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Priority: required
+Description: Linux Standard Base init script functionality
+ The Linux Standard Base (http://www.linuxbase.org/) is a standard
+ core system that third-party applications written for Linux can
+ depend upon.
+ .
+ This package only includes the init-functions shell library, which
+ may be used by other packages' initialization scripts for console
+ logging and other purposes.
+
+Package: lsb-release
+Architecture: all
+Multi-Arch: foreign
+Depends: ${python3:Depends},
+ ${misc:Depends},
+ distro-info-data,
+Recommends: apt
+Description: Linux Standard Base version reporting utility
+ The Linux Standard Base (http://www.linuxbase.org/) is a standard
+ core system that third-party applications written for Linux can
+ depend upon.
+ .
+ The lsb-release command is a simple tool to help identify the Linux
+ distribution being used and its compliance with the Linux Standard Base.
+ LSB conformance will not be reported unless the required metapackages are
+ installed.
+ .
+ While it is intended for use by LSB packages, this command may also
+ be useful for programmatically distinguishing between a pure Debian
+ installation and derived distributions.
+
+Package: lsb-invalid-mta
+Architecture: all
+Depends: ${misc:Depends}
+Suggests: lsb
+Provides: mail-transport-agent
+Conflicts: mail-transport-agent
+Description: Linux Standard Base sendmail dummy
+ The Linux Standard Base (http://www.linuxbase.org/) is a standard
+ core system that third-party applications written for Linux can
+ depend upon.
+ .
+ This package contains nothing else than a fake /usr/sbin/sendmail
+ command to fulfill the LSB's requirement of providing this command without
+ requiring an MTA to get installed, which once introduces a daemon which
+ can cause security problems and second, users get asked questions about
+ how they want their MTA configured when in reality they simply wanted to
+ install a desktop application or a printer driver, but the dependency on
+ LSB compliance pulls in an MTA with the installation.
+ .
+ The LSB requirement on /usr/sbin/sendmail comes from old times where Linux
+ and Unix machines had all fixed IPs and did server tasks in data centers.
+ Today's typical desktop Linux machines do not do local e-mail any more as
+ users use external e-mail services.
+ .
+ The /usr/sbin/sendmail always exits with exit status -1 (255) and sends a
+ warning message to stderr, so that if a program actually tries to send e-mail
+ via the sendmail command the user gets note.
