@@ -1,0 +1,18 @@
+Source: elementary-os-overlay
+Section: metapackages
+Priority: extra
+Maintainer: Sergey "Shnatsel" Davidoff <shnatsel@gmail.com>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.2
+
+Package: elementary-os-overlay
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: forces elementary OS overlay for some packages
+ This package forces some patched packages to be installed from a ppa instead
+ of using the latest version available.
+ .
+ The packages in elementary PPA have greater version than those in Ubuntu
+ most of the time, but the patching might lag several hours behind Ubuntu
+ archive. This package exists to prevent upgrading to unpatched packages
+ when such lag occurs.
