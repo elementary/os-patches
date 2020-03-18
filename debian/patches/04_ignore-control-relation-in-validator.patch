@@ -1,0 +1,27 @@
+From df4aaaacc0433f2d2ff487a1e34953c40a68b5b1 Mon Sep 17 00:00:00 2001
+From: Matthias Klumpp <matthias@tenstral.net>
+Date: Sat, 14 Mar 2020 16:40:56 +0100
+Subject: [PATCH] Ignore control relation in validator
+
+---
+ src/as-validator.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/as-validator.c b/src/as-validator.c
+index 7d7037c..73ab001 100644
+--- a/src/as-validator.c
++++ b/src/as-validator.c
+@@ -1067,6 +1067,10 @@ as_validator_check_requires_recommends (AsValidator *validator, xmlNode *node, A
+ 
+ 		item_kind = as_relation_item_kind_from_string (node_name);
+ 		if (item_kind == AS_RELATION_ITEM_KIND_UNKNOWN) {
++			/* ignore control instructions in this version of AppStream - they will be
++			 * properly implemented in the next release */
++			if (g_strcmp0 (node_name, "control") == 0)
++				continue;
+ 			as_validator_add_issue (validator, iter,
+ 						"relation-invalid-tag",
+ 						node_name);
+-- 
+2.25.1
+

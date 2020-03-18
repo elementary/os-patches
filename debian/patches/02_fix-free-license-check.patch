@@ -1,0 +1,220 @@
+From ccfa73b8b387452ee7230397cf9d823b3707ee39 Mon Sep 17 00:00:00 2001
+From: Matthias Klumpp <matthias@tenstral.net>
+Date: Sun, 23 Feb 2020 19:53:17 +0100
+Subject: [PATCH] Tighten the "free license" check and prevent false positives
+
+Previously, all SPDX licenses were considered free, which is the wrong
+approach. With this change, only truly free licenses are accepted.
+Please refer to the API documentation for more information.
+---
+ data/update-data.py         | 53 ++++++++++++++++++++++++++-----------
+ src/appstream.gresource.xml |  1 +
+ src/as-spdx.c               | 43 +++++++++++++++++++++++++-----
+ tests/test-basics.c         |  2 ++
+ 4 files changed, 77 insertions(+), 22 deletions(-)
+
+diff --git a/data/update-data.py b/data/update-data.py
+index a9eb63af..7a7fbc99 100755
+--- a/data/update-data.py
++++ b/data/update-data.py
+@@ -55,19 +55,10 @@ def get_tld_list(fname, url):
+         f.write('\n')
+ 
+ 
+-def get_spdx_id_list(licenselist_fname, exceptionlist_fname, git_url, with_deprecated=True):
+-    print('Updating list of SPDX license IDs...')
+-    tdir = TemporaryDirectory(prefix='spdx_master-')
+-
+-    subprocess.check_call(['git', 'clone', git_url, tdir.name])
+-    last_tag_ver = subprocess.check_output(['git', 'describe', '--abbrev=0',  '--tags'], cwd=tdir.name)
+-    last_tag_ver = str(last_tag_ver.strip(), 'utf-8')
+-    if last_tag_ver.startswith('v'):
+-        last_tag_ver = last_tag_ver[1:]
+-
++def _read_spdx_licenses(data_dir, last_tag_ver, only_free=False):
+     # load license and exception data
+-    licenses_json_fname = os.path.join(tdir.name, 'json', 'licenses.json')
+-    exceptions_json_fname = os.path.join(tdir.name, 'json', 'exceptions.json')
++    licenses_json_fname = os.path.join(data_dir, 'json', 'licenses.json')
++    exceptions_json_fname = os.path.join(data_dir, 'json', 'exceptions.json')
+     with open(licenses_json_fname, 'r') as f:
+         licenses_data = json.loads(f.read())
+     with open(exceptions_json_fname, 'r') as f:
+@@ -83,28 +74,60 @@ def get_spdx_id_list(licenselist_fname, exceptionlist_fname, git_url, with_depre
+ 
+     lid_list = []
+     for license in licenses_data['licenses']:
++        if only_free:
++            if not license.get('isFsfLibre') and not license.get('isOsiApproved'):
++                continue
+         lid_list.append(license['licenseId'])
+ 
+     eid_list = []
+     for exception in exceptions_data['exceptions']:
+         eid_list.append(exception['licenseExceptionId'])
+ 
++    return {'licenses': lid_list,
++            'exceptions': eid_list,
++            'license_list_ver': license_ver_ref,
++            'eceptions_list_ver': exceptions_ver_ref}
++
++
++def get_spdx_id_list(licenselist_fname, licenselist_free_fname, exceptionlist_fname, git_url, with_deprecated=True):
++    print('Updating list of SPDX license IDs...')
++    tdir = TemporaryDirectory(prefix='spdx_master-')
++
++    subprocess.check_call(['git',
++                           'clone',
++                           git_url, tdir.name])
++    last_tag_ver = subprocess.check_output(['git', 'describe', '--abbrev=0',  '--tags'], cwd=tdir.name)
++    last_tag_ver = str(last_tag_ver.strip(), 'utf-8')
++    if last_tag_ver.startswith('v'):
++        last_tag_ver = last_tag_ver[1:]
++
++    license_data = _read_spdx_licenses(tdir.name, last_tag_ver)
++    lid_list = license_data['licenses']
++    eid_list = license_data['exceptions']
++    license_list_ver = license_data['license_list_ver']
++
+     lid_list.sort()
+     with open(licenselist_fname, 'w') as f:
+-        f.write('# The list of licenses recognized by SPDX, v{}\n'.format(license_ver_ref))
++        f.write('# The list of all licenses recognized by SPDX, v{}\n'.format(license_list_ver))
+         f.write('\n'.join(lid_list))
+         f.write('\n')
+ 
+     eid_list.sort()
+     with open(exceptionlist_fname, 'w') as f:
+-        f.write('# The list of license exceptions recognized by SPDX, v{}\n'.format(exceptions_ver_ref))
++        f.write('# The list of license exceptions recognized by SPDX, v{}\n'.format(license_data['eceptions_list_ver']))
+         f.write('\n'.join(eid_list))
+         f.write('\n')
+ 
++    license_free_data = _read_spdx_licenses(tdir.name, last_tag_ver, only_free=True)
++    with open(licenselist_free_fname, 'w') as f:
++        f.write('# The list of free (OSI or FSF approved) licenses recognized by SPDX, v{}\n'.format(license_list_ver))
++        f.write('\n'.join(license_free_data['licenses']))
++        f.write('\n')
++
+ 
+ def main():
+     get_tld_list('iana-filtered-tld-list.txt', IANA_TLD_LIST_URL)
+-    get_spdx_id_list('spdx-license-ids.txt', 'spdx-license-exception-ids.txt', SPDX_REPO_URL)
++    get_spdx_id_list('spdx-license-ids.txt', 'spdx-free-license-ids.txt', 'spdx-license-exception-ids.txt', SPDX_REPO_URL)
+ 
+     print('All done.')
+ 
+diff --git a/src/appstream.gresource.xml b/src/appstream.gresource.xml
+index 3a41d233..8b7ff2ef 100644
+--- a/src/appstream.gresource.xml
++++ b/src/appstream.gresource.xml
+@@ -5,6 +5,7 @@
+   <file>iana-filtered-tld-list.txt</file>
+   <file>desktop-environments.txt</file>
+   <file>spdx-license-ids.txt</file>
++  <file>spdx-free-license-ids.txt</file>
+   <file>spdx-license-exception-ids.txt</file>
+  </gresource>
+ </gresources>
+diff --git a/src/as-spdx.c b/src/as-spdx.c
+index a42608c8..c4f86da8 100644
+--- a/src/as-spdx.c
++++ b/src/as-spdx.c
+@@ -167,7 +167,7 @@ as_is_spdx_license_id (const gchar *license_id)
+ 	if (g_str_has_prefix (license_id, "LicenseRef-"))
+ 		return TRUE;
+ 
+-	/* load the readonly data section and look for the icon name */
++	/* load the readonly data section and look for the license ID */
+ 	data = g_resource_lookup_data (as_get_resource (),
+ 				       "/org/freedesktop/appstream/spdx-license-ids.txt",
+ 				       G_RESOURCE_LOOKUP_FLAGS_NONE,
+@@ -199,7 +199,7 @@ as_is_spdx_license_exception_id (const gchar *exception_id)
+ 	if (exception_id == NULL || exception_id[0] == '\0')
+ 		return FALSE;
+ 
+-	/* load the readonly data section and look for the icon name */
++	/* load the readonly data section and look for the license exception ID */
+ 	data = g_resource_lookup_data (as_get_resource (),
+ 				       "/org/freedesktop/appstream/spdx-license-exception-ids.txt",
+ 				       G_RESOURCE_LOOKUP_FLAGS_NONE,
+@@ -651,12 +651,17 @@ as_get_license_url (const gchar *license)
+  * @license: The SPDX license string to test.
+  *
+  * Check if the given license is for free-as-in-freedom software.
+- * Currently, all licenses listed on the SPDX website are considered to
+- * be "free software" licenses.
++ * A free software license is either approved by the Free Software Foundation
++ * or the Open Source Initiative.
+  *
+- * This definition may be tightened in future. In any case, this function does
+- * not give any legal advice. Please read the license texts to know more about
+- * the individual licenses.
++ * This function does *not* yet handle complex license expressions with AND and OR.
++ * If the expression contains any of these, it will still simply check if all mentioned
++ * licenses are Free licenses.
++ * Currently, any license exception recognized by SPDX is assumed to not impact the free-ness
++ * status of a software component.
++ *
++ * Please note that this function does not give any legal advice. Please read the license texts
++ * to learn more about the individual licenses and their conditions.
+  *
+  * Returns: %TRUE if the license string contains only free-as-in-freedom licenses.
+  *
+@@ -666,12 +671,23 @@ gboolean
+ as_license_is_free_license (const gchar *license)
+ {
+ 	g_auto(GStrv) tokens = NULL;
++	g_autoptr(GBytes) rdata = NULL;
+ 	gboolean is_free;
+ 
++	/* load the readonly data section of (free) license IDs */
++	rdata = g_resource_lookup_data (as_get_resource (),
++				       "/org/freedesktop/appstream/spdx-free-license-ids.txt",
++				       G_RESOURCE_LOOKUP_FLAGS_NONE,
++				       NULL);
++	if (rdata == NULL)
++		return FALSE;
++
+ 	/* assume we have a free software license, unless proven otherwise */
+ 	is_free = TRUE;
+ 	tokens = as_spdx_license_tokenize (license);
+ 	for (guint i = 0; tokens[i] != NULL; i++) {
++		g_autofree gchar *lkey = NULL;
++
+ 		if (g_strcmp0 (tokens[i], "&") == 0 ||
+ 		    g_strcmp0 (tokens[i], "+") == 0 ||
+ 		    g_strcmp0 (tokens[i], "|") == 0 ||
+@@ -698,6 +714,19 @@ as_license_is_free_license (const gchar *license)
+ 			is_free = FALSE;
+ 			break;
+ 		}
++
++		if (as_is_spdx_license_exception_id (tokens[i] + 1)) {
++			/* for now, we assume any SPDX license exception is still fine and doesn't change the
++			 * "free-ness" status of a software component */
++			continue;
++		}
++
++		lkey = g_strdup_printf ("\n%s\n", tokens[i] + 1);
++		if (g_strstr_len (g_bytes_get_data (rdata, NULL), -1, lkey) == NULL) {
++			/* the license was not in our "free" list, so we consider it non-free */
++			is_free = FALSE;
++			break;
++		}
+ 	}
+ 
+ 	return is_free;
+diff --git a/tests/test-basics.c b/tests/test-basics.c
+index 29efcee1..18457cca 100644
+--- a/tests/test-basics.c
++++ b/tests/test-basics.c
+@@ -352,6 +352,8 @@ test_spdx (void)
+ 	g_assert (!as_license_is_free_license ("NOASSERTION"));
+ 	g_assert (!as_license_is_free_license ("LicenseRef-proprietary=https://example.com/mylicense.txt"));
+ 	g_assert (!as_license_is_free_license ("MIT AND LicenseRef-proprietary=https://example.com/lic.txt"));
++	g_assert (!as_license_is_free_license ("ADSL"));
++	g_assert (!as_license_is_free_license ("JSON AND GPL-3.0-or-later"));
+ }
+ 
+ /**

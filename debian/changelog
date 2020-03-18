@@ -1,3 +1,18 @@
+appstream (0.12.10-2) unstable; urgency=medium
+
+  * Add fix-free-license-check.patch: Non-free licenses were previously
+    considered free software, this patch fixes that
+  * Add ascli-explain-in-manpage.patch: Explain the `--explain` flag for
+    `appstreamcli validate` in the manual page as well
+  * Add ignore-control-relation-in-validator.patch: Don't fail validation
+    if control relations exists. This is an upcoming AppStream feature that
+    will potentially be used quite a lot.
+  * Add update-static-data.patch: Update the license and TLD lists to
+    validate newer licenses correctly.
+  * Bump standards version: No changes needed
+
+ -- Matthias Klumpp <mak@debian.org>  Sat, 14 Mar 2020 16:40:14 +0100
+
 appstream (0.12.10-1) unstable; urgency=medium
 
   * New upstream version: 0.12.10
