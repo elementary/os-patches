@@ -1,3 +1,16 @@
+ibus (1.5.17-3ubuntu5.3) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: Lack of access control on DBus socket allows other
+    local users to make arbitrary method calls
+    - debian/patches/CVE-2019-14822.patch:
+      Re-enable to implement GDBusAuthObserver callback in bus/server.c to
+      add access control to the DBus server socket
+    - CVE-2019-14822
+  * Add breaks for older libglib2.0-0 releases which do not contain the
+    GDBusServer fix for Qt applications
+
+ -- Alex Murray <alex.murray@canonical.com>  Mon, 04 Nov 2019 11:28:41 +1030
+
 ibus (1.5.17-3ubuntu5.2) bionic-security; urgency=medium
 
   * SECURITY UPDATE: ibus regression in Qt applications (LP: #1844853)
