@@ -1,0 +1,73 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+include /usr/share/dpkg/default.mk
+
+binaries := $(shell dh_listpackages)
+
+%:
+	dh $@ --with=gir
+
+override_dh_clean:
+	dh_clean
+	rm -fr debian/HOME
+	rm -fr debian/XDG_RUNTIME_DIR
+
+override_dh_autoreconf:
+	dh_autoreconf \
+		--as-needed \
+		debian/autogen.sh \
+		-- \
+		$(NULL)
+
+configure_options =
+
+ifneq ($(filter nodoc,$(DEB_BUILD_OPTIONS)),)
+configure_options += --disable-docbook-docs
+configure_options += --disable-documentation
+else
+configure_options += --enable-docbook-docs
+configure_options += --enable-documentation
+endif
+
+ifneq ($(filter libflatpak-doc,$(binaries)),)
+configure_options += --enable-gtk-doc
+else
+configure_options += --disable-gtk-doc
+endif
+
+override_dh_auto_configure:
+	rm -f app/parse-datetime.c
+	dh_auto_configure -- \
+		--disable-selinux-module \
+		--enable-installed-tests \
+		--libexecdir=/usr/libexec \
+		--with-dbus-config-dir=/usr/share/dbus-1/system.d \
+		--with-priv-mode=none \
+		--with-privileged-group=sudo \
+		--with-systemdsystemunitdir=/lib/systemd/system \
+		--with-system-helper-user=_flatpak \
+		$(configure_options)
+
+override_dh_install:
+	install -d debian/tmp/etc/X11/Xsession.d
+	install -m644 debian/tmp/etc/profile.d/flatpak.sh \
+		debian/tmp/etc/X11/Xsession.d/20flatpak
+	rm -f debian/tmp/usr/lib/*/*.la
+	dh_install
+
+override_dh_missing:
+	dh_missing --fail-missing
+
+override_dh_installsystemd:
+	dh_installsystemd --no-start
+
+override_dh_auto_test-arch:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	debian/test.sh
+endif
+
+override_dh_auto_test-indep:
+	@:

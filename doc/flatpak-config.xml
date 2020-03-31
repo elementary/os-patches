@@ -1,0 +1,204 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<refentry id="flatpak-config">
+
+    <refentryinfo>
+        <title>flatpak config</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak config</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-config</refname>
+        <refpurpose>Manage configuration</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak config</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+            </cmdsynopsis>
+            <cmdsynopsis>
+                <command>flatpak config</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="plain">--set</arg>
+                <arg choice="plain">KEY</arg>
+                <arg choice="plain">VALUE</arg>
+            </cmdsynopsis>
+            <cmdsynopsis>
+                <command>flatpak config</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="plain">--unset|--get</arg>
+                <arg choice="plain">KEY</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            The flatpak config command shows or modifies the configuration of a flatpak installation.
+            The following keys are supported:
+        </para>
+        <variablelist>
+            <varlistentry>
+                <term><varname>languages</varname></term>
+                <listitem><para>
+                   The languages that are included when installing Locale extensions.
+                   The value is a semicolon-separated list of two-letter language codes,
+                   or one of the special values <literal>*</literal> or <literal>all</literal>. If this key is unset, flatpak
+                   defaults to including the <varname>extra-languages</varname> key and the current locale.
+                </para></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><varname>extra-languages</varname></term>
+                <listitem><para>
+                   This key is used when languages is not set, and it defines extra locale
+                   extensions on top of the system configured languages. The value is a
+                   semicolon-separated list of locale identifiers
+                   (language, optional locale, optional codeset, optional modifier) as documented by
+                   <citerefentry><refentrytitle>setlocale</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+                   (for example, <literal>en;en_DK;zh_HK.big5hkscs;uz_UZ.utf8@cyrillic</literal>).
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+
+        <para>
+            For configuration of individual remotes, see
+            <citerefentry><refentrytitle>flatpak-remote-modify</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+            For configuration of individual applications, see
+            <citerefentry><refentrytitle>flatpak-override</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--list</option></term>
+
+                <listitem><para>
+                    Print all keys and their values.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--set</option></term>
+
+                <listitem><para>
+                    Set key <arg choice="plain">KEY</arg> to <arg choice="plain">VALUE</arg>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--unset</option></term>
+
+                <listitem><para>
+                    Unset key <arg choice="plain">KEY</arg>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--get</option></term>
+
+                <listitem><para>
+                  Print value of <arg choice="plain">KEY</arg>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    Configure per-user installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    Configure system-wide installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    Configure the system-wide installation
+                    specified by <arg choice="plain">NAME</arg> among those defined in
+                    <filename>/etc/flatpak/installations.d/</filename>. Using
+                    <option>--installation=default</option> is equivalent to using
+                    <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak config --set languages "sv;en;fi"</command>
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+        <para>
+            <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-remote-modify</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-override</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
+
+    </refsect1>
+
+</refentry>

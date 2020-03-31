@@ -1,0 +1,189 @@
+Source: flatpak
+Section: admin
+Priority: optional
+Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
+Uploaders:
+ Matthias Klumpp <mak@debian.org>,
+ Simon McVittie <smcv@debian.org>,
+Build-Depends:
+ attr <!nocheck>,
+ automake (>= 1.14.1),
+ bison,
+ ca-certificates <!nocheck>,
+ dbus,
+ debhelper (>= 9),
+ desktop-file-utils <!nocheck>,
+ dh-exec (>= 0.23~),
+ docbook-xml <!nodoc>,
+ docbook-xsl <!nodoc>,
+ fuse <!nocheck>,
+ gnupg <!nocheck>,
+ gobject-introspection,
+ gtk-doc-tools,
+ gtk-update-icon-cache  | libgtk-3-bin <!nocheck>,
+ hicolor-icon-theme <!nocheck>,
+ libappstream-glib-dev (>= 0.5.10),
+ libarchive-dev (>= 2.8.0),
+ libattr1-dev,
+ libcap-dev,
+ libdconf-dev,
+ libdw-dev,
+ libelf-dev,
+ libfuse-dev (>= 2.9.2),
+ libgdk-pixbuf2.0-dev,
+ libgirepository1.0-dev,
+ libglib2.0-dev (>= 2.44),
+ libgpgme11-dev (>= 1.1.8),
+ libjson-glib-dev,
+ libostree-dev (>= 2018.9),
+ libpolkit-agent-1-dev,
+ libpolkit-gobject-1-dev,
+ libseccomp-dev,
+ libsoup2.4-dev,
+ libsystemd-dev,
+ libxau-dev,
+ libxml2-dev (>= 2.4),
+ libxml2-utils,
+ ostree (>= 2018.9) <!nocheck>,
+ policykit-1 <!nocheck>,
+ procps,
+ python3 <!nocheck>,
+ shared-mime-info <!nocheck>,
+ socat <!nocheck>,
+ xmlto <!nodoc>,
+ xsltproc <!nodoc>,
+Build-Depends-Indep:
+ libglib2.0-doc,
+ libostree-doc,
+Standards-Version: 4.3.0
+Homepage: http://flatpak.org/
+Vcs-Git: https://salsa.debian.org/debian/flatpak.git
+Vcs-Browser: https://salsa.debian.org/debian/flatpak
+
+Package: flatpak
+Architecture: linux-any
+Depends:
+ adduser,
+ xdg-desktop-portal (>= 0.10),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Recommends:
+ desktop-file-utils,
+ hicolor-icon-theme,
+ gtk-update-icon-cache,
+ libpam-systemd,
+ p11-kit,
+ policykit-1,
+ shared-mime-info,
+ xdg-desktop-portal-gtk | xdg-desktop-portal-backend,
+Suggests:
+ avahi-daemon,
+Conflicts:
+ xdg-app,
+Replaces:
+ xdg-app,
+Description: Application deployment framework for desktop apps
+ Flatpak installs, manages and runs sandboxed desktop application bundles.
+ Application bundles run partially isolated from the wider system, using
+ containerization techniques such as namespaces to prevent direct access
+ to system resources. Resources from outside the sandbox can be accessed
+ via "portal" services, which are responsible for access control; for
+ example, the Documents portal displays an "Open" dialog outside the
+ sandbox, then allows the application to access only the selected file.
+ .
+ Each application uses a specified "runtime", or set of libraries, which is
+ available as /usr inside its sandbox. This can be used to run application
+ bundles with multiple, potentially incompatible sets of dependencies within
+ the same desktop environment.
+ .
+ This package contains the services and executables needed to install and
+ launch sandboxed applications, and the portal services needed to provide
+ limited access to resources outside the sandbox.
+
+Package: flatpak-tests
+Architecture: linux-any
+Section: misc
+Depends:
+ attr,
+ ca-certificates,
+ desktop-file-utils,
+ flatpak (= ${binary:Version}),
+ gnupg,
+ gtk-update-icon-cache,
+ hicolor-icon-theme,
+ ostree (>= 2018.9),
+ shared-mime-info,
+ socat,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Recommends:
+ python3,
+Description: Application deployment framework for desktop apps (tests)
+ Flatpak installs, manages and runs sandboxed desktop application bundles.
+ See the flatpak package for a more comprehensive description.
+ .
+ This package contains automated tests.
+
+Package: gir1.2-flatpak-1.0
+Architecture: linux-any
+Multi-Arch: same
+Section: introspection
+Depends:
+ ${gir:Depends},
+ ${misc:Depends},
+Description: Application deployment framework for desktop apps (introspection)
+ Flatpak installs, manages and runs sandboxed desktop application bundles.
+ See the flatpak package for a more comprehensive description.
+ .
+ This package can be used by other packages using the GIRepository format to
+ generate dynamic bindings for libflatpak0.
+
+Package: libflatpak-dev
+Architecture: linux-any
+Multi-Arch: same
+Section: libdevel
+Depends:
+ gir1.2-flatpak-1.0 (= ${binary:Version}),
+ libflatpak0 (= ${binary:Version}),
+ libglib2.0-dev,
+ libostree-dev (>= 2018.9),
+ libxml2-dev (>= 2.4),
+ pkg-config,
+ ${misc:Depends},
+Description: Application deployment framework for desktop apps (development)
+ Flatpak installs, manages and runs sandboxed desktop application bundles.
+ See the flatpak package for a more comprehensive description.
+ .
+ This package contains development headers and pkg-config metadata
+ for libflatpak0.
+
+Package: libflatpak-doc
+Build-Profiles: <!nodoc>
+Architecture: all
+Section: doc
+Depends:
+ ${misc:Depends},
+Suggests:
+ devhelp,
+Multi-Arch: foreign
+Description: Application deployment framework for desktop apps (documentation)
+ Flatpak installs, manages and runs sandboxed desktop application bundles.
+ See the flatpak package for a more comprehensive description.
+ .
+ This package contains reference documentation for libflatpak0.
+
+Package: libflatpak0
+Architecture: linux-any
+Section: libs
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Pre-Depends:
+ ${misc:Pre-Depends},
+Multi-arch: same
+Description: Application deployment framework for desktop apps (library)
+ Flatpak installs, manages and runs sandboxed desktop application bundles.
+ See the flatpak package for a more comprehensive description.
+ .
+ This package contains the flatpak shared library, used by higher level
+ package management tools like gnome-software.

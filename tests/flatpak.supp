@@ -1,0 +1,247 @@
+# Use this to suppress "possibly lost" for global statics
+{
+   handle_reflink
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:btrfs_reflink_with_progress
+   fun:file_copy_fallback
+}
+
+# https://github.com/ostreedev/ostree/issues/533
+{
+   ignore_static_delta_uninitialized
+   Memcheck:Cond
+   ...
+   fun:_ostree_lzma_compressor_convert
+   fun:write_internal
+   fun:g_output_stream_real_splice
+   fun:g_output_stream_splice
+   fun:ostree_repo_static_delta_generate
+}
+
+# ioctl FICLONE is apparently not supported
+{
+   ignore_ioctl_ficlone
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:glnx_regfile_copy_bytes
+}
+
+# There seem to be some leaks in "ostree pull", lets just ignore them for now
+{
+  ignore_ostree_pull1
+  Memcheck:Leak
+  fun:malloc
+  ...
+  fun:ostree_fetcher_session_thread
+}
+{
+  ignore_ostree_pull2
+  Memcheck:Leak
+  fun:realloc
+  ...
+  fun:ostree_fetcher_session_thread
+}
+{
+  ignore_ostree_pull3
+  Memcheck:Leak
+  fun:malloc
+  ...
+  fun:ostree_repo_write_metadata_async
+}
+{
+  ignore_ostree_pull4
+  Memcheck:Leak
+  fun:calloc
+  ...
+  fun:ostree_repo_write_metadata_async
+}
+{
+  ignore_ostree_pull5
+  Memcheck:Leak
+  fun:malloc
+  ...
+  fun:write_metadata_thread
+}
+{
+  ignore_ostree_pull6
+  Memcheck:Leak
+  fun:calloc
+  ...
+  fun:write_metadata_thread
+}
+# static delta generation seem to leak too...
+{
+  ignore_ostree_delta1
+  Memcheck:Leak
+  fun:malloc
+  ...
+  fun:generate_delta_thread
+}
+{
+  ignore_ostree_delta2
+  Memcheck:Leak
+  fun:calloc
+  ...
+  fun:generate_delta_thread
+}
+{
+  ignore_ostree_delta3
+  Memcheck:Leak
+  fun:realloc
+  ...
+  fun:generate_delta_thread
+}
+# writing content...
+{
+  ignore_ostree_write_content1
+  Memcheck:Leak
+  fun:g_type_create_instance
+  ...
+  fun:write_content_thread
+}
+{
+  ignore_ostree_write_content2
+  Memcheck:Leak
+  fun:malloc
+  ...
+  fun:write_content_thread
+}
+{
+  ignore_ostree_write_content3
+  Memcheck:Leak
+  fun:malloc
+  ...
+  fun:ostree_repo_write_content_async
+}
+
+# Some glib threadpool issue?
+{
+  ignore_gthreadpool1
+  Memcheck:Leak
+  fun:calloc
+  ...
+  fun:g_idle_source_new
+  ...
+  fun:g_thread_pool_thread_proxy
+}
+
+# libsoup thing
+{
+  ignore_libsoup_file_leak
+  Memcheck:Leak
+  fun:calloc
+  ...
+  fun:_g_local_file_new
+  fun:soup_request_file_ensure_file
+}
+
+# glibc valgrind fnmatch issue (https://www.mail-archive.com/kde-bugs-dist@kde.org/msg214842.html)
+{
+  ignore_glibc_fnmatch
+  Memcheck:Cond
+  fun:__wmemchr_avx2
+  fun:internal_fnwmatch
+  fun:fnmatch@@GLIBC_2.2.5
+}
+
+# ostree reflink check
+{
+  ignore_ostree_reflink_check_ioctl
+  Memcheck:Param
+  ioctl(generic)
+  fun:ioctl
+  fun:_check_support_reflink
+}
+
+# ostree pthread_create issue
+{
+   ostree_pthread_create_issue
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:g_system_thread_new
+}
+
+# Weird leak of UnixInputStream in ostree, can't figure it out
+{
+   ostree_unix_stream_leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:g_type_create_instance
+   ...
+   fun:g_object_new
+   fun:g_unix_input_stream_new
+   fun:repo_load_file_archive
+   fun:ostree_repo_load_file
+   fun:_ostree_repo_import_object
+   fun:async_import_in_thread
+}
+{
+   ostree_mutable_tree_write_tree_leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   ...
+   fun:ostree_repo_write_dfd_to_mtree
+}
+{
+   polkit_agent_leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   fun:g_malloc0
+   fun:thread_memory_from_self
+   fun:g_slice_alloc
+   fun:g_hash_table_new_full
+   fun:g_main_context_new
+}
+{
+   polkit_agent_leak2
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:g_malloc
+   ...
+   fun:polkit_agent_listener_register_with_options
+   fun:main
+}
+{
+   polkit_agent_leak3
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   ...
+   fun:polkit_agent_listener_register_with_options
+}
+# Ostree transaction repo locks seem to leak if the repo is not finalized on same thread
+{
+   ostree_repo_lock_leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   fun:g_malloc0
+   fun:push_repo_lock
+}
+# Some gnutls conditional failure
+{
+   gnutls_import_fail
+   Memcheck:Cond
+   ...
+   fun:gnutls_x509_ext_import_subject_alt_names
+   fun:gnutls_x509_crt_import
+}
+# Deliberately leaking once per process
+{
+   flatpak_get_user_base_dir_location
+   Memcheck:Leak
+   ...
+   fun:g_file_new_for_path
+   fun:flatpak_get_user_base_dir_location
+}

@@ -1,0 +1,324 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+    "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<refentry id="flatpak-remote-add">
+
+    <refentryinfo>
+        <title>flatpak remote-add</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak remote-add</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-remote-add</refname>
+        <refpurpose>Add a remote repository</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak remote-add</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="plain">NAME</arg>
+                <arg choice="plain">LOCATION</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            Adds a remote repository to the flatpak repository configuration.
+            <arg choice="plain">NAME</arg> is the name for the new remote, and
+            <arg choice="plain">LOCATION</arg> is a url or pathname.
+            The <arg choice="plain">LOCATION</arg> is either a flatpak repository,
+            or a <filename>.flatpakrepo</filename> file which
+            describes a repository. In the former case you may also have to specify
+            extra options, such as the gpg key for the repo.
+        </para>
+        <para>
+            Unless overridden with the <option>--user</option> or <option>--installation</option> options, this command
+            changes the default system-wide installation.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--from</option></term>
+
+                <listitem><para>
+                  Assume the URI is a .flatpakrepo file rather than the repository itself. This is enabled
+                  by default if the extension is .flatpakrepo, so generally you don't need this option.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    Modify the per-user configuration.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    Modify the default system-wide configuration.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    Modify a system-wide installation specified by <arg choice="plain">NAME</arg>
+                    among those defined in <filename>/etc/flatpak/installations.d/</filename>.
+                    Using <option>--installation=default</option> is equivalent to using
+                    <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-gpg-verify</option></term>
+
+                <listitem><para>
+                    Disable GPG verification for the added remote.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--prio=PRIO</option></term>
+
+                <listitem><para>
+                    Set the priority for the remote. Default is 1, higher is more prioritized. This is
+                    mainly used for graphical installation tools.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-enumerate</option></term>
+
+                <listitem><para>
+                    Mark the remote as not enumerated. This means the remote will
+                    not be used to list applications, for instance in graphical
+                    installation tools.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-use-for-deps</option></term>
+
+                <listitem><para>
+                    Mark the remote as not to be used for automatic runtime
+                    dependency resolution.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--if-not-exists</option></term>
+
+                <listitem><para>
+                    Do nothing if the provided remote already exists.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--disable</option></term>
+
+                <listitem><para>
+                    Disable the added remote.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--title=TITLE</option></term>
+
+                <listitem><para>
+                    A title for the remote, e.g. for display in a UI.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--comment=COMMENT</option></term>
+
+                <listitem><para>
+                    A single-line comment for the remote, e.g. for display in a UI.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--description=DESCRIPTION</option></term>
+
+                <listitem><para>
+                    A full-paragraph description for the remote, e.g. for display in a UI.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--homepage=URL</option></term>
+
+                <listitem><para>
+                    URL for a website for the remote, e.g. for display in a UI.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--icon=URL</option></term>
+
+                <listitem><para>
+                    URL for an icon for the remote, e.g. for display in a UI.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--default-branch=BRANCH</option></term>
+
+                <listitem><para>
+                    A default branch for the remote, mainly for use in a UI.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--filter=PATH</option></term>
+
+                <listitem><para>
+                  Add a local filter to the remote. A filter file is a list of lines, each
+                  file starting with "allow" or "deny", and then a glob for the ref to
+                  allow or disallow. The globs specify a partial ref (i.e. you can leave out
+                  trailing parts which will then match everything), but otherwise only "*" is
+                  special, matching anything in that part of the ref.
+                </para>
+                <para>
+                  By default all refs are allowed, but if a ref
+                  matches a deny rule it is disallowed unless it
+                  specifically matches an allow rule. This means you
+                  can use this to implement both whitelisting and blacklisting.
+                </para>
+                <para>
+                  Here is an example filter file:
+<programlisting>
+# This is a whitelist style filter as it denies all first
+deny *
+allow runtime/org.freedesktop.*
+allow org.some.app/arm
+allow org.signal.Signal/*/stable
+allow org.signal.Signal.*/*/stable
+</programlisting>
+                </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--gpg-import=FILE</option></term>
+
+                <listitem><para>
+                     Import gpg keys from the specified keyring file as
+                     trusted for the new remote. If the file is - the
+                     keyring is read from standard input.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--authenticator-name=NAME</option></term>
+
+                <listitem><para>
+                    Specify the authenticator to use for the remote.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--authenticator-option=KEY=VALUE</option></term>
+
+                <listitem><para>
+                    Specify an authenticator option for the remote.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--authenticator-install</option></term>
+
+                <listitem><para>
+                    Enable auto-installation of authenticator.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-authenticator-install</option></term>
+
+                <listitem><para>
+                    Disable auto-installation of authenticator.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak remote-add gnome https://sdk.gnome.org/gnome.flatpakrepo</command>
+        </para>
+        <para>
+            <command>$ flatpak --user remote-add --no-gpg-verify test-repo https://people.gnome.org/~alexl/gnome-sdk/repo/</command>
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+            <para>
+                <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+                <citerefentry><refentrytitle>flatpak-remote-modify</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+                <citerefentry><refentrytitle>flatpak-remote-delete</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+                <citerefentry><refentrytitle>flatpak-remotes</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+                <citerefentry><refentrytitle>flatpak-flatpakrepo</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+            </para>
+    </refsect1>
+
+</refentry>

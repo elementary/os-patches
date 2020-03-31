@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+exec 2>&1
+
+# Ubuntu provides internet access via a proxy, but libostree doesn't need
+# that. However, libostree also doesn't support no_proxy, so it will try
+# to use Ubuntu's proxy for localhost, and fail to reach itself.
+unset ftp_proxy
+unset http_proxy
+unset https_proxy
+unset no_proxy
+
+# Don't pollute the home directory unless this looks like a dedicated
+# autopkgtest environment
+case "$(id -nu)@$(hostname)" in
+	(adt@*|debci@*|user@host)
+		install -d ~/.flatpak-tests/
+		;;
+esac
+
+exec gnome-desktop-testing-runner $(
+	gnome-desktop-testing-runner -l Flatpak | while read -r t d; do
+		case "$t" in
+			(Flatpak/test-oci*)
+				;;
+			(*)
+				echo "$t"
+				;;
+		esac
+	done
+)
