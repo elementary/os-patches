@@ -532,17 +532,20 @@ do_init (int event_fd, pid_t initial_pid, struct sock_fprog *seccomp_prog)
       int status;
 
       child = wait (&status);
-      if (child == initial_pid && event_fd != -1)
+      if (child == initial_pid)
         {
-          uint64_t val;
-          int res UNUSED;
-
           initial_exit_status = propagate_exit_status (status);
 
-          val = initial_exit_status + 1;
-          res = write (event_fd, &val, 8);
-          /* Ignore res, if e.g. the parent died and closed event_fd
-             we don't want to error out here */
+          if(event_fd != -1)
+            {
+              uint64_t val;
+              int res UNUSED;
+
+              val = initial_exit_status + 1;
+              res = write (event_fd, &val, 8);
+              /* Ignore res, if e.g. the parent died and closed event_fd
+                 we don't want to error out here */
+            }
         }
 
       if (child == -1 && errno != EINTR)
@@ -834,11 +837,13 @@ switch_to_user_with_privs (void)
 
 /* Call setuid() and use capset() to adjust capabilities */
 static void
-drop_privs (bool keep_requested_caps)
+drop_privs (bool keep_requested_caps,
+            bool already_changed_uid)
 {
   assert (!keep_requested_caps || !is_privileged);
   /* Drop root uid */
-  if (geteuid () == 0 && setuid (opt_sandbox_uid) < 0)
+  if (is_privileged && !already_changed_uid &&
+      setuid (opt_sandbox_uid) < 0)
     die_with_error ("unable to drop root uid");
 
   drop_all_caps (keep_requested_caps);
@@ -2296,6 +2301,9 @@ main (int    argc,
   if (opt_userns_fd != -1 && is_privileged)
     die ("--userns doesn't work in setuid mode");
 
+  if (opt_userns2_fd != -1 && is_privileged)
+    die ("--userns2 doesn't work in setuid mode");
+
   /* We have to do this if we weren't installed setuid (and we're not
    * root), so let's just DWIM */
   if (!is_privileged && getuid () != 0 && opt_userns_fd == -1)
@@ -2499,7 +2507,7 @@ main (int    argc,
         die_with_error ("Setting userns2 failed");
 
       /* We don't need any privileges in the launcher, drop them immediately. */
-      drop_privs (FALSE);
+      drop_privs (FALSE, FALSE);
 
       /* Optionally bind our lifecycle to that of the parent */
       handle_die_with_parent ();
@@ -2674,7 +2682,7 @@ main (int    argc,
       if (child == 0)
         {
           /* Unprivileged setup process */
-          drop_privs (FALSE);
+          drop_privs (FALSE, TRUE);
           close (privsep_sockets[0]);
           setup_newroot (opt_unshare_pid, privsep_sockets[1]);
           exit (0);
@@ -2763,13 +2771,16 @@ main (int    argc,
       if (unshare (CLONE_NEWUSER))
         die_with_error ("unshare user ns");
 
+      /* We're in a new user namespace, we got back the bounding set, clear it again */
+      drop_cap_bounding_set (FALSE);
+
       write_uid_gid_map (opt_sandbox_uid, ns_uid,
                          opt_sandbox_gid, ns_gid,
                          -1, FALSE, FALSE);
     }
 
   /* All privileged ops are done now, so drop caps we don't need */
-  drop_privs (!is_privileged);
+  drop_privs (!is_privileged, TRUE);
 
   if (opt_block_fd != -1)
     {

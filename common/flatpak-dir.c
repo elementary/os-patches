@@ -4942,7 +4942,7 @@ flatpak_dir_setup_extra_data (FlatpakDir                           *self,
   g_assert (results == NULL || rev != NULL);
 
   /* ostree-metadata and appstreams never have extra data, so ignore those */
-  if (g_str_has_prefix ("app/", ref) || g_str_has_prefix ("runtime/", ref))
+  if (g_str_has_prefix (ref, "app/") || g_str_has_prefix (ref, "runtime/"))
     {
       extra_data_sources = flatpak_repo_get_extra_data_sources (repo, rev, cancellable, NULL);
       if (extra_data_sources == NULL)
@@ -15153,7 +15153,7 @@ flatpak_dir_delete_mirror_refs (FlatpakDir    *self,
    * OS updates which Flatpak shouldn't touch.
    */
   remotes = ostree_repo_remote_list (repo, NULL);
-  for (i = 0; remotes[i] != NULL; i++)
+  for (i = 0; remotes != NULL && remotes[i] != NULL; i++)
     {
       g_autofree char *remote_collection_id = NULL;
 
