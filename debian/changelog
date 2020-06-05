@@ -1,3 +1,14 @@
+software-properties (0.96.24.32.13) bionic; urgency=medium
+
+  * softwareproperties/gtk/SoftwarePropertiesGtk.py:
+    - Gtk is doing something that takes a lock while processing checkbox
+      toggled events, the polkit auth dialog can't be displayed in return,
+      we don't have a proper fix and it might require GTK changes,
+      meanwhile we want a working interface so workaround with a sleep
+      (lp: #1727908)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 08 May 2020 16:47:19 +0200
+
 software-properties (0.96.24.32.12) bionic; urgency=medium
 
   * cloudarchive: Enable support for the Ussuri Ubuntu Cloud Archive on

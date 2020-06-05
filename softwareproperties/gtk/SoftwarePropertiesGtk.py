@@ -37,6 +37,7 @@ from aptdaemon.errors import NotAuthorizedError, TransactionFailed
 import logging
 import threading
 import sys
+import time
 
 import gi
 gi.require_version("Gdk", "3.0")
@@ -741,6 +742,13 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
 
     def on_isv_source_toggled(self, cell_toggle, path, store):
         """Enable or disable the selected channel"""
+
+        #FIXME Gtk is doing something that takes a lock while processing
+        # the events, the polkit auth dialog can't be displayed in return,
+        # we don't have a proper fix and it might require GTK changes,
+        # meanwhile we want a working interface so workaround with a sleep
+        # https://launchpad.net/bugs/1727908
+        time.sleep(0.3)
         #FIXME cdroms need to disable the comps in the childs and sources
         iter = store.get_iter((int(path),))
         source_entry = store.get_value(iter, STORE_SOURCE)
