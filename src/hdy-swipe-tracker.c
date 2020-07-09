@@ -14,6 +14,7 @@
 
 #define TOUCHPAD_BASE_DISTANCE_H 400
 #define TOUCHPAD_BASE_DISTANCE_V 300
+#define EVENT_HISTORY_THRESHOLD_MS 150
 #define SCROLL_MULTIPLIER 10
 #define MIN_ANIMATION_DURATION 100
 #define MAX_ANIMATION_DURATION 400
@@ -47,6 +48,11 @@ typedef enum {
   HDY_SWIPE_TRACKER_STATE_REJECTED,
 } HdySwipeTrackerState;
 
+typedef struct {
+  gdouble delta;
+  guint32 time;
+} EventHistoryRecord;
+
 struct _HdySwipeTracker
 {
   GObject parent_instance;
@@ -57,12 +63,11 @@ struct _HdySwipeTracker
   gboolean allow_mouse_drag;
   GtkOrientation orientation;
 
+  GArray *event_history;
+
   gint start_x;
   gint start_y;
   gboolean use_capture_phase;
-
-  guint32 prev_time;
-  gdouble velocity;
 
   gdouble initial_progress;
   gdouble progress;
@@ -151,12 +156,11 @@ reset (HdySwipeTracker *self)
   self->initial_progress = 0;
   self->progress = 0;
 
+  g_array_remove_range (self->event_history, 0, self->event_history->len);
+
   self->start_x = 0;
   self->start_y = 0;
   self->use_capture_phase = FALSE;
-
-  self->prev_time = 0;
-  self->velocity = 0;
 
   self->cancelled = FALSE;
 
@@ -203,20 +207,74 @@ gesture_prepare (HdySwipeTracker        *self,
 
   self->initial_progress = hdy_swipeable_get_progress (self->swipeable);
   self->progress = self->initial_progress;
-  self->velocity = 0;
   self->state = HDY_SWIPE_TRACKER_STATE_PENDING;
+}
+
+static void
+trim_history (HdySwipeTracker *self)
+{
+  g_autoptr (GdkEvent) event = gtk_get_current_event ();
+  guint32 threshold_time = gdk_event_get_time (event) - EVENT_HISTORY_THRESHOLD_MS;
+  guint i;
+
+  for (i = 0; i < self->event_history->len; i++) {
+    guint32 time = g_array_index (self->event_history,
+                                  EventHistoryRecord, i).time;
+
+    if (time >= threshold_time)
+      break;
+  }
+
+  if (i > 0)
+    g_array_remove_range (self->event_history, 0, i);
+}
+
+static void
+append_to_history (HdySwipeTracker *self,
+                   gdouble          delta)
+{
+  g_autoptr (GdkEvent) event = gtk_get_current_event ();
+  EventHistoryRecord record;
+
+  trim_history (self);
+
+  record.delta = delta;
+  record.time = gdk_event_get_time (event);
+
+  g_array_append_val (self->event_history, record);
+}
+
+static gdouble
+calculate_velocity (HdySwipeTracker *self)
+{
+  gdouble total_delta = 0;
+  guint32 first_time = 0, last_time = 0;
+  guint i;
+
+  for (i = 0; i < self->event_history->len; i++) {
+    EventHistoryRecord *r =
+      &g_array_index (self->event_history, EventHistoryRecord, i);
+
+    if (i == 0)
+      first_time = r->time;
+    else
+      total_delta += r->delta;
+
+    last_time = r->time;
+  }
+
+  if (first_time == last_time)
+    return 0;
+
+  return total_delta / (last_time - first_time);
 }
 
 static void
 gesture_begin (HdySwipeTracker *self)
 {
-  g_autoptr (GdkEvent) event = NULL;
-
   if (self->state != HDY_SWIPE_TRACKER_STATE_PENDING)
     return;
 
-  event = gtk_get_current_event ();
-  self->prev_time = gdk_event_get_time (event);
   self->state = HDY_SWIPE_TRACKER_STATE_SCROLLING;
 
   gtk_grab_add (GTK_WIDGET (self->swipeable));
@@ -226,22 +284,18 @@ static void
 gesture_update (HdySwipeTracker *self,
                 gdouble          delta)
 {
-  g_autoptr (GdkEvent) event = NULL;
-  guint32 time;
   gdouble progress;
   gdouble first_point, last_point;
 
   if (self->state != HDY_SWIPE_TRACKER_STATE_SCROLLING)
     return;
 
-  event = gtk_get_current_event ();
-  time = gdk_event_get_time (event);
-  if (time != self->prev_time)
-    self->velocity = delta / (time - self->prev_time);
+  append_to_history (self, delta);
 
   get_range (self, &first_point, &last_point);
 
   progress = self->progress + delta;
+
   progress = CLAMP (progress, first_point, last_point);
 
   /* FIXME: this is a hack to prevent swiping more than 1 page at once */
@@ -250,8 +304,6 @@ gesture_update (HdySwipeTracker *self,
   self->progress = progress;
 
   hdy_swipe_tracker_emit_update_swipe (self, progress);
-
-  self->prev_time = time;
 }
 
 static void
@@ -286,7 +338,8 @@ get_closest_snap_points (HdySwipeTracker *self,
 
 static gdouble
 get_end_progress (HdySwipeTracker *self,
-                  gdouble          distance)
+                  gdouble          distance,
+                  gdouble          velocity)
 {
   gdouble upper, lower, middle;
 
@@ -297,10 +350,10 @@ get_end_progress (HdySwipeTracker *self,
   middle = (upper + lower) / 2;
 
   if (self->progress > middle)
-    return (self->velocity * distance > -VELOCITY_THRESHOLD ||
+    return (velocity * distance > -VELOCITY_THRESHOLD ||
             self->initial_progress > upper) ? upper : lower;
 
-  return (self->velocity * distance < VELOCITY_THRESHOLD ||
+  return (velocity * distance < VELOCITY_THRESHOLD ||
           self->initial_progress < lower) ? lower : upper;
 }
 
@@ -314,11 +367,14 @@ gesture_end (HdySwipeTracker *self,
   if (self->state == HDY_SWIPE_TRACKER_STATE_NONE)
     return;
 
-  end_progress = get_end_progress (self, distance);
+  trim_history (self);
 
-  velocity = ANIMATION_BASE_VELOCITY;
-  if ((end_progress - self->progress) * self->velocity > 0)
-    velocity = self->velocity;
+  velocity = calculate_velocity (self);
+
+  end_progress = get_end_progress (self, distance, velocity);
+
+  if ((end_progress - self->progress) * velocity <= 0)
+    velocity = ANIMATION_BASE_VELOCITY;
 
   duration = ABS ((self->progress - end_progress) / velocity * DURATION_MULTIPLIER);
   if (self->progress != end_progress)
@@ -1001,7 +1057,9 @@ hdy_swipe_tracker_class_init (HdySwipeTrackerClass *klass)
 static void
 hdy_swipe_tracker_init (HdySwipeTracker *self)
 {
+  self->event_history = g_array_new (FALSE, FALSE, sizeof (EventHistoryRecord));
   reset (self);
+
   self->orientation = GTK_ORIENTATION_HORIZONTAL;
   self->enabled = TRUE;
 }
