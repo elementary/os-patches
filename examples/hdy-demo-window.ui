@@ -1008,6 +1008,7 @@ Try using it with a horizontally expanded clamp to make your search entry adapti
                     <child>
                       <object class="HdyCarousel" id="carousel">
                         <property name="visible">True</property>
+                        <property name="allow-long-swipes" bind-source="carousel_long_swipes" bind-property="active" bind-flags="sync-create|bidirectional"/>
                         <child>
                           <object class="HdyStatusPage">
                             <property name="visible">True</property>
@@ -1049,6 +1050,19 @@ Try using it with a horizontally expanded clamp to make your search entry adapti
                                     <property name="title" translatable="yes">Page Indicators</property>
                                     <property name="visible">True</property>
                                     <signal name="notify::selected-index" handler="notify_carousel_indicators_cb" swapped="no"/>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="HdyActionRow">
+                                    <property name="visible">True</property>
+                                    <property name="title" translatable="yes">Long swipes</property>
+                                    <property name="activatable_widget">carousel_long_swipes</property>
+                                    <child>
+                                      <object class="GtkSwitch" id="carousel_long_swipes">
+                                        <property name="visible">True</property>
+                                        <property name="valign">center</property>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
