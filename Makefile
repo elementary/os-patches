@@ -14,19 +14,19 @@ EFI_NAME := aa64
 endif
 
 SIGNED := \
-	grub$(EFI_NAME).efi.signed \
-	gcd$(EFI_NAME).efi.signed \
-	grubnet$(EFI_NAME).efi.signed
+	current/grub$(EFI_NAME).efi.signed \
+	current/gcd$(EFI_NAME).efi.signed \
+	current/grubnet$(EFI_NAME).efi.signed
 
 all: $(SIGNED)
 
 $(SIGNED):
-	./download-grub2
+	./download-signed grub2-common current grub2 uefi
 
 install: $(SIGNED)
 	install -d $(DESTDIR)/usr/lib/grub/$(PLATFORM)-signed
-	install -m0644 $(SIGNED) version \
+	install -m0644 $(SIGNED) current/version \
 		$(DESTDIR)/usr/lib/grub/$(PLATFORM)-signed/
 
 clean:
-	rm -f $(SIGNED) version
+	rm -rf current/

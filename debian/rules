@@ -15,8 +15,8 @@ override_dh_installchangelogs:
 	ln $(docdir)/changelog $(docdir)/changelog.Debian
 
 override_dh_gencontrol:
-	dh_gencontrol -- -v$(DEB_VERSION)+$(shell cat version) \
-		-Vgrub2:Version=$(shell cat version)
+	dh_gencontrol -- -v$(DEB_VERSION)+$(shell cat current/version) \
+		-Vgrub2:Version=$(shell cat current/version)
 
 override_dh_auto_install:
 	dh_auto_install --destdir=$(destdir)
