@@ -1,0 +1,90 @@
+From 02fdac962effd9278bef85644072f91853f6ef9f Mon Sep 17 00:00:00 2001
+From: Dimitri John Ledkov <xnox@ubuntu.com>
+Date: Wed, 22 Jul 2020 11:31:43 +0100
+Subject: linuxefi: fail kernel validation without shim protocol.
+
+If certificates that signed grub are installed into db, grub can be
+booted directly. It will then boot any kernel without signature
+validation. The booted kernel will think it was booted in secureboot
+mode and will implement lockdown, yet it could have been tampered.
+
+CVE-2020-15705
+
+Reported-by: Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>
+Signed-off-by: Dimitri John Ledkov <xnox@ubuntu.com>
+---
+ grub-core/loader/arm64/linux.c     | 12 ++++++++----
+ grub-core/loader/efi/chainloader.c |  1 +
+ grub-core/loader/efi/linux.c       |  1 +
+ grub-core/loader/i386/efi/linux.c  |  2 +-
+ 4 files changed, 11 insertions(+), 5 deletions(-)
+
+Index: bionic-security/grub-core/loader/arm64/linux.c
+===================================================================
+--- bionic-security.orig/grub-core/loader/arm64/linux.c
++++ bionic-security/grub-core/loader/arm64/linux.c
+@@ -32,6 +32,7 @@
+ #include <grub/efi/pe32.h>
+ #include <grub/i18n.h>
+ #include <grub/lib/cmdline.h>
++#include <grub/efi/sb.h>
+ 
+ GRUB_MOD_LICENSE ("GPLv3+");
+ 
+@@ -298,11 +299,15 @@ grub_cmd_linux (grub_command_t cmd __att
+ 
+   grub_dprintf ("linux", "kernel @ %p\n", kernel_addr);
+ 
+-  rc = grub_linuxefi_secure_validate (kernel_addr, kernel_size);
+-  if (rc < 0)
++  if (grub_efi_secure_boot ())
+     {
+-      grub_error (GRUB_ERR_INVALID_COMMAND, N_("%s has invalid signature"), argv[0]);
+-      goto fail;
++      rc = grub_linuxefi_secure_validate (kernel_addr, kernel_size);
++      if (rc <= 0)
++        {
++          grub_error (GRUB_ERR_INVALID_COMMAND,
++		      N_("%s has invalid signature"), argv[0]);
++          goto fail;
++        }
+     }
+ 
+   pe = (void *)((unsigned long)kernel_addr + lh.hdr_offset);
+Index: bionic-security/grub-core/loader/efi/chainloader.c
+===================================================================
+--- bionic-security.orig/grub-core/loader/efi/chainloader.c
++++ bionic-security/grub-core/loader/efi/chainloader.c
+@@ -1075,6 +1075,7 @@ grub_cmd_chainloader (grub_command_t cmd
+ 
+       return 0;
+     }
++  // -1 fall-through to fail
+ 
+   grub_file_close (file);
+   grub_device_close (dev);
+Index: bionic-security/grub-core/loader/efi/linux.c
+===================================================================
+--- bionic-security.orig/grub-core/loader/efi/linux.c
++++ bionic-security/grub-core/loader/efi/linux.c
+@@ -33,6 +33,7 @@ struct grub_efi_shim_lock
+ };
+ typedef struct grub_efi_shim_lock grub_efi_shim_lock_t;
+ 
++// Returns 1 on success, -1 on error, 0 when not available
+ int
+ grub_linuxefi_secure_validate (void *data, grub_uint32_t size)
+ {
+Index: bionic-security/grub-core/loader/i386/efi/linux.c
+===================================================================
+--- bionic-security.orig/grub-core/loader/i386/efi/linux.c
++++ bionic-security/grub-core/loader/i386/efi/linux.c
+@@ -201,7 +201,7 @@ grub_cmd_linux (grub_command_t cmd __att
+   if (grub_efi_secure_boot ())
+     {
+       rc = grub_linuxefi_secure_validate (kernel, filelen);
+-      if (rc < 0)
++      if (rc <= 0)
+ 	{
+ 	  grub_error (GRUB_ERR_ACCESS_DENIED, N_("%s has invalid signature"),
+ 		      argv[0]);

@@ -1,0 +1,38 @@
+From 6ef40cdb663d37cfd9aa28fe2cfdcfa09058cc56 Mon Sep 17 00:00:00 2001
+From: Chris Coulson <chris.coulson@canonical.com>
+Date: Thu, 23 Jul 2020 14:02:17 +0100
+Subject: chainloader: Avoid a double free when validation fails
+
+---
+ grub-core/loader/efi/chainloader.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+Index: bionic-security/grub-core/loader/efi/chainloader.c
+===================================================================
+--- bionic-security.orig/grub-core/loader/efi/chainloader.c
++++ bionic-security/grub-core/loader/efi/chainloader.c
+@@ -1064,6 +1064,7 @@ grub_cmd_chainloader (grub_command_t cmd
+   if (rc > 0)
+     {
+       grub_file_close (file);
++      grub_device_close (dev);
+       grub_loader_set (grub_secureboot_chainloader_boot,
+ 		       grub_secureboot_chainloader_unload, 0);
+       return 0;
+@@ -1072,15 +1073,13 @@ grub_cmd_chainloader (grub_command_t cmd
+     {
+       grub_load_and_start_image(boot_image);
+       grub_file_close (file);
++      grub_device_close (dev);
+       grub_loader_set (grub_chainloader_boot, grub_chainloader_unload, 0);
+ 
+       return 0;
+     }
+   // -1 fall-through to fail
+ 
+-  grub_file_close (file);
+-  grub_device_close (dev);
+-
+ fail:
+   if (dev)
+     grub_device_close (dev);

@@ -540,6 +540,10 @@ case "$1" in
         elif running_in_container; then
           # Skip grub-install in containers.
           :
+        elif dpkg --compare-versions "$2" ge 2.02-2ubuntu8; then
+          # Avoid the possibility of breaking grub on SRU update
+          # due to ABI change
+          :
         elif test -z "$2" || test -e /boot/grub/core.img || \
              test -e /boot/grub/@FIRST_CPU_PLATFORM@/core.img || \
              test "$UPGRADE_FROM_GRUB_LEGACY" || test "$wubi_device"; then

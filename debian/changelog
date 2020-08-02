@@ -1,3 +1,92 @@
+grub2 (2.02-2ubuntu8.17) bionic; urgency=medium
+
+  * debian/postinst.in: Avoid calling grub-install on upgrade of the grub-pc
+    package, since we cannot be certain that it will install to the correct
+    disk and a grub-install failure will render the system unbootable.
+    LP: #1889556.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 30 Jul 2020 18:49:49 -0700
+
+grub2 (2.02-2ubuntu8.16) bionic; urgency=medium
+
+  [ Chris Coulson ]
+  * SECURITY UPDATE: Heap buffer overflow when encountering commands that
+    cannot be tokenized to less than 8192 characters.
+    - 0082-yylex-Make-lexer-fatal-errors-actually-be-fatal.patch: Make
+      fatal lexer errors actually be fatal
+    - CVE-2020-10713
+  * SECURITY UPDATE: Multiple integer overflow bugs that could result in
+    heap buffer allocations that were too small and subsequent heap buffer
+    overflows when handling certain filesystems, font files or PNG images.
+    - 0083-safemath-Add-some-arithmetic-primitives-that-check-f.patch: Add
+      arithmetic primitives that allow for overflows to be detected
+    - 0084-calloc-Make-sure-we-always-have-an-overflow-checking.patch:
+      Make sure that there is always an overflow checking implementation
+      of calloc() available
+    - 0085-calloc-Use-calloc-at-most-places.patch: Use calloc where
+      appropriate
+    - 0086-malloc-Use-overflow-checking-primitives-where-we-do-.patch: Use
+      overflow-safe arithmetic primitives when performing allocations
+      based on the results of operations that might overflow
+    - 0094-hfsplus-fix-two-more-overflows.patch: Fix integer overflows in
+      hfsplus
+    - 0095-lvm-fix-two-more-potential-data-dependent-alloc-over.patch: Fix
+      more potential integer overflows in lvm
+    - CVE-2020-14308, CVE-2020-14309, CVE-2020-14310, CVE-2020-14311
+  * SECURITY UPDATE: Use-after-free when executing a command that causes
+    a currently executing function to be redefined.
+    - 0092-script-Remove-unused-fields-from-grub_script_functio.patch:
+      Remove unused fields from grub_script_function
+    - 0093-script-Avoid-a-use-after-free-when-redefining-a-func.patch:
+      Avoid a use-after-free when redefining a function during execution
+    - CVE-2020-15706
+  * SECURITY UPDATE: Integer overflows that could result in heap buffer
+    allocations that were too small and subsequent heap buffer overflows
+    during initrd loading.
+    - 0105-linux-Fix-integer-overflows-in-initrd-size-handling.patch: Fix
+      integer overflows in initrd size handling
+    - 0106-efilinux-Fix-integer-overflows-in-grub_cmd_initrd.patch: Fix
+      integer overflows in linuxefi grub_cmd_initrd
+    - CVE-2020-15707
+  * Various fixes as a result of code review and static analysis:
+    - 0087-iso9660-Don-t-leak-memory-on-realloc-failures.patch: Fix a
+     memory leak on realloc failures when processing symbolic links
+    - 0088-font-Do-not-load-more-than-one-NAME-section.patch: Fix a
+      memory leak when processing font files with more than one NAME
+      section
+    - 0089-gfxmenu-Fix-double-free-in-load_image.patch: Zero self->bitmap
+      after it is freed in order to avoid a potential double free later on
+    - 0090-lzma-Make-sure-we-don-t-dereference-past-array.patch: Fix an
+      out-of-bounds read in LzmaEncode
+    - 0091-tftp-Do-not-use-priority-queue.patch: Refactor tftp to not use
+      priority queues and fix a double free
+    - 0096-efi-fix-some-malformed-device-path-arithmetic-errors.patch: Fix
+      various arithmetic errors with malformed device paths
+    - 0098-Fix-a-regression-caused-by-efi-fix-some-malformed-de.patch: Fix
+      a NULL deref in the chainloader command introduced by a previous
+      patch
+    - 0100-chainloader-Avoid-a-double-free-when-validation-fail.patch:
+      Avoid a double free in the chainloader command when validation fails
+    - 0101-relocator-Protect-grub_relocator_alloc_chunk_addr-in.patch:
+      Protect grub_relocator_alloc_chunk_addr input arguments against
+      integer overflow / underflow
+    - 0102-relocator-Protect-grub_relocator_alloc_chunk_align-m.patch:
+      Protect grub_relocator_alloc_chunk_align max_addr argument against
+      integer underflow
+    - 0103-relocator-Fix-grub_relocator_alloc_chunk_align-top-m.patch: Fix
+      grub_relocator_alloc_chunk_align top memory allocation
+    - 0104-linux-loader-avoid-overflow-on-initrd-size-calculati.patch:
+      Avoid overflow on initrd size calculation
+
+  [ Dimitri John Ledkov ]
+  * SECURITY UPDATE: Grub does not enforce kernel signature validation
+    when the shim protocol isn't present.
+    - 0097-linuxefi-fail-kernel-validation-without-shim-protoco.patch:
+      Fail kernel validation if the shim protocol isn't available
+    - CVE-2020-15705
+
+ -- Chris Coulson <chris.coulson@canonical.com>  Mon, 20 Jul 2020 19:50:54 +0100
+
 grub2 (2.02-2ubuntu8.15) bionic; urgency=medium
 
   * Make the linux command in EFI grub always try EFI handover; thanks
