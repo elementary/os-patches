@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-O1 -Wl,-z,defs -Wl,--as-needed
+
+# needed with the Ubuntu toolchain to avoid issues
+export DEB_LDFLAGS_MAINT_STRIP := -Wl,-Bsymbolic-functions
+
+ifneq (,$(findstring nodoc,$(DEB_BUILD_PROFILES)))
+	DOC_FLAGS += -Dgtk_doc=false
+else
+	DOC_FLAGS += -Dgtk_doc=true
+endif
+
+%:
+	dh $@ --with gnome,gir --without autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		-Dglade_catalog=true \
+		$(DOC_FLAGS)
+
+override_dh_missing:
+	dh_missing --fail-missing
+
+override_dh_makeshlibs:
+	dh_makeshlibs -- -c4
+
+override_dh_auto_test:
+	xvfb-run -a dh_auto_test
