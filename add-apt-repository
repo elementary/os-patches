@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import io
 import os
+import re
 import sys
 import gettext
 import locale
@@ -146,7 +147,11 @@ sources.list
             print(e)
             sys.exit(1)
 
-        print(" %s" % (info["description"] or ""))
+        # strip ANSI escape sequences
+        description = re.sub(r"(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]",
+                             "", info["description"] or "")
+
+        print(" %s" % description)
         print(_(" More info: %s") % str(info["web_link"]))
         if (sys.stdin.isatty() and
             not "FORCE_ADD_APT_REPOSITORY" in os.environ):
