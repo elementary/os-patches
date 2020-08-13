@@ -1,3 +1,25 @@
+shim-signed (1.37~18.04.6) bionic; urgency=medium
+
+  * Pass --timeout -1 to mokutil in a separate mokutil run (LP: #1869187)
+    thanks to Aleksander Miera for the patch.
+
+ -- Matthieu Clemenceau <matthieu.clemenceau@canonical.com>  Fri, 10 Jul 2020 14:27:41 -0500
+
+shim-signed (1.37~18.04.5) bionic; urgency=medium
+
+  * Fix versioned dependency on mokutil so that it matches the version in
+    bionic-updates.  LP: #1862632.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 10 Feb 2020 09:50:46 -0800
+
+shim-signed (1.37~18.04.4) bionic; urgency=medium
+
+  * Pass --timeout -1 to mokutil so that users don't end up with broken
+    systems by missing MokManager on reboot after install.  LP: #1856422.
+  * Add a versioned dependency on the mokutil that introduces --timeout.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 14 Dec 2019 20:33:19 -0800
+
 shim-signed (1.37~18.04.3) bionic; urgency=medium
 
   * Don't fail non-interactive upgrade of nvidia module and module removals
