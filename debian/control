@@ -14,7 +14,7 @@ Depends: ${misc:Depends}, ${shlibs:Depends}
 Essential: yes
 Priority: required
 Replaces: base, miscutils, dpkg (<= 1.15.0)
-Breaks: initscripts (<< 2.88dsf-13.3), sendfile (<< 2.1b.20080616-5.2~)
+Breaks: initscripts (<< 2.88dsf-13.3), sendfile (<< 2.1b.20080616-5.2~), ubuntu-server (<< 1.417.5)
 Multi-Arch: foreign
 Description: Debian base system miscellaneous files
  This package contains the basic filesystem hierarchy of a Debian system, and
@@ -28,3 +28,15 @@ Section: debian-installer
 Architecture: all
 Priority: extra
 Description: LSB release information
+
+Package: motd-news-config
+Architecture: all
+Priority: optional
+Breaks: base-files (<< 10.1ubuntu2.10)
+Replaces: base-files (<< 10.1ubuntu2.10)
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Configuration for motd-news shipped in base-files
+ This package contains the configuration read by the motd-news script
+ shipped in the base-files package.
+ .
+ Install this package if you want motd-news to be enabled.

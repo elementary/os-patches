@@ -1,3 +1,36 @@
+base-files (10.1ubuntu2.10) bionic; urgency=medium
+
+  [ Andreas Hasenack ]
+  * motd/50-motd-news: don't include uptime in the user-agent string
+    (LP: #1886572)
+  * Move the /etc/default/motd-news conffile to the motd-news-config
+    package (LP: #1888575):
+    - d/base-files.maintscript: remove /etc/default/motd-news config file
+      on upgrade
+    - d/control: break on ubuntu-server << 1.417.5 to force an upgrade if
+      it is installed, which will pull motd-news-config and the conffile
+      back in
+    - d/motd-news-config.postinst:
+      + handle the upgrade case where the motd-news config file was
+        changed while it belonged to base-files
+      + disable motd-news if the config file was removed by hand before
+        the upgrade
+    - d/postinst.in: signal the motd-news-config package if the
+      motd-news config file was removed manually before the upgrade
+    - d/control: new motd-news-config package, carrying the
+      configuration file for the /etc/update-motd.d/50-motd-news script.
+    - d/rules, d/motd-news-config.install: /e/d/motd-news is in the
+      motd-news-config package now
+
+  [ Steve Langasek ]
+  * motd/50-motd-news: use wget instead of curl, since wget is standard but
+    curl is optional (LP: #1888572):
+    - This changes the timeout behavior slightly because wget does not have
+      an exact equivalent to curl's --max-time argument, we are using
+      --timeout instead.
+
+ -- Andreas Hasenack <andreas@canonical.com>  Thu, 13 Aug 2020 15:59:47 -0300
+
 base-files (10.1ubuntu2.9) bionic; urgency=medium
 
   * /etc/issue, /etc/issue.net, /etc/lsb-release, /etc/os-release: Bump

@@ -24,7 +24,6 @@ override_dh_auto_build: locale-check
 
 override_dh_auto_install:
 	install -p -m 644 etc/*      $(DESTDIR)/etc
-	install -p -m 644 debian/motd-news $(DESTDIR)/etc/default
 	install -p -m 644 debian/motd-news.service $(DESTDIR)/lib/systemd/system/
 	install -p -m 644 debian/motd-news.timer $(DESTDIR)/lib/systemd/system/
 	install -p -m 644 licenses/* $(DESTDIR)/usr/share/common-licenses
