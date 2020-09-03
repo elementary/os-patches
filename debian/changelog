@@ -1,3 +1,14 @@
+grub2 (2.02-2ubuntu8.18) bionic; urgency=medium
+
+  * debian/patches/ubuntu-flavour-order.patch:
+    - Add a (hidden) GRUB_FLAVOUR_ORDER setting that can mark certain kernel
+      flavours as preferred, and specify an order between those preferred
+      flavours (LP: #1882663)
+  * debian/patches/ubuntu-recovery-dis_ucode_ldr.patch:
+    - Pass dis_ucode_ldr to kernel for recovery mode (LP: #1831789)
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 24 Aug 2020 10:45:45 +0200
+
 grub2 (2.02-2ubuntu8.17) bionic; urgency=medium
 
   * debian/postinst.in: Avoid calling grub-install on upgrade of the grub-pc
