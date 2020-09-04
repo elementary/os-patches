@@ -125,4 +125,17 @@ if [ "$1" = "configure" ] && [ "$2" != "" ]; then
   fi
 fi
 
+# special case of having /etc/default/motd-news removed by hand
+# signal the motd-news-config package that this happened, so that
+# it does not put back the file with default contents which would
+# re-enable motd-news
+motd_news_config="/etc/default/motd-news"
+if [ ! -e ${motd_news_config} ]; then
+  if [ ! -e ${motd_news_config}.dpkg-remove ]; then
+    if [ ! -e ${motd_news_config}.dpkg-backup ]; then
+      touch ${motd_news_config}.wasremoved
+    fi
+  fi
+fi
+
 #DEBHELPER#
