@@ -248,3 +248,9 @@ hdy_ease_out_cubic (gdouble t)
   gdouble p = t - 1;
   return p * p * p + 1;
 }
+
+gdouble
+hdy_ease_in_cubic (gdouble t)
+{
+  return t * t * t;
+}

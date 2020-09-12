@@ -45,5 +45,6 @@ gdouble       hdy_animation_get_value (HdyAnimation *self);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (HdyAnimation, hdy_animation_unref)
 
 gdouble hdy_lerp (gdouble a, gdouble b, gdouble t);
+gdouble hdy_ease_in_cubic (gdouble t);
 
 G_END_DECLS
