@@ -41,6 +41,7 @@ test_names = [
   'test-squeezer',
   'test-status-page',
   'test-swipe-group',
+  'test-tab-bar',
   'test-tab-view',
   'test-value-object',
   'test-view-switcher',
