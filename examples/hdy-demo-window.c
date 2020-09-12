@@ -2,6 +2,7 @@
 
 #include <glib/gi18n.h>
 #include "hdy-flap-demo-window.h"
+#include "hdy-tab-view-demo-window.h"
 #include "hdy-view-switcher-demo-window.h"
 
 struct _HdyDemoWindow
@@ -475,6 +476,17 @@ flap_demo_clicked_cb (GtkButton     *btn,
 }
 
 static void
+tab_view_demo_clicked_cb (GtkButton     *btn,
+                          HdyDemoWindow *self)
+{
+  HdyTabViewDemoWindow *window = hdy_tab_view_demo_window_new ();
+
+  hdy_tab_view_demo_window_prepopulate (window);
+
+  gtk_window_present (GTK_WINDOW (window));
+}
+
+static void
 hdy_demo_window_constructed (GObject *object)
 {
   HdyDemoWindow *self = HDY_DEMO_WINDOW (object);
@@ -538,6 +550,7 @@ hdy_demo_window_class_init (HdyDemoWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, avatar_file_set_cb);
   gtk_widget_class_bind_template_callback (widget_class, avatar_save_to_file_cb);
   gtk_widget_class_bind_template_callback (widget_class, flap_demo_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, tab_view_demo_clicked_cb);
 }
 
 static void

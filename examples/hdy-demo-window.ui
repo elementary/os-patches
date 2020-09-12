@@ -1460,6 +1460,26 @@ It allows to have headerbar in content area, incl. above content, and round corn
                     <property name="title" translatable="yes">Flap</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="HdyStatusPage">
+                    <property name="visible">True</property>
+                    <property name="icon-name">widget-tab-view-symbolic</property>
+                    <property name="title" translatable="yes">Tab View</property>
+                    <property name="description" translatable="yes">A modern tab widget.</property>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Run the demo</property>
+                        <property name="halign">center</property>
+                        <signal name="clicked" handler="tab_view_demo_clicked_cb" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">tab-view</property>
+                    <property name="title" translatable="yes">Tab View</property>
+                  </packing>
+                </child>
               </object>
             </child>
           </object>
