@@ -157,6 +157,7 @@ src_sources = [
   'hdy-swipe-tracker.c',
   'hdy-swipeable.c',
   'hdy-tab.c',
+  'hdy-tab-box.c',
   'hdy-tab-view.c',
   'hdy-title-bar.c',
   'hdy-value-object.c',
