@@ -170,6 +170,11 @@ update_custom_image (HdyAvatar *self)
     gtk_style_context_remove_class (context, "image");
   }
 
+  if (self->round_image)
+    gtk_style_context_add_class (context, "image");
+  else
+    gtk_style_context_remove_class (context, "image");
+
   if (was_custom || self->round_image != NULL)
     gtk_widget_queue_draw (GTK_WIDGET (self));
 }
