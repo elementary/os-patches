@@ -369,18 +369,19 @@ hdy_avatar_draw (GtkWidget *widget,
 
   set_class_contrasted (HDY_AVATAR (widget), size);
 
-  gtk_render_frame (context, cr, x, y, size, size);
-
   if (self->round_image) {
     cairo_set_source_surface (cr, self->round_image, x, y);
     cairo_paint (cr);
 
     gtk_render_background (context, cr, x, y, size, size);
+    gtk_render_frame (context, cr, x, y, size, size);
 
     return FALSE;
   }
 
   gtk_render_background (context, cr, x, y, size, size);
+  gtk_render_frame (context, cr, x, y, size, size);
+
   ensure_pango_layout (HDY_AVATAR (widget));
 
   if (self->show_initials && self->layout != NULL) {
