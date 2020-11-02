@@ -215,6 +215,29 @@ test_hdy_avatar_draw_to_pixbuf (void)
   g_assert_cmpint (gdk_pixbuf_get_height (pixbuf), ==, TEST_SIZE * 2);
 }
 
+static void
+test_hdy_avatar_loadable_icon (void)
+{
+  GtkWidget* avatar = NULL;
+  g_autoptr (GdkPixbuf) pixbuf = NULL;
+
+  avatar = hdy_avatar_new (TEST_SIZE, NULL, TRUE);
+  g_assert_nonnull (avatar);
+
+  g_assert_null (hdy_avatar_get_loadable_icon (HDY_AVATAR (avatar)));
+  hdy_avatar_set_loadable_icon (HDY_AVATAR (avatar), NULL);
+  g_assert_null (hdy_avatar_get_loadable_icon (HDY_AVATAR (avatar)));
+
+  g_object_ref (avatar);
+  g_assert_true (did_draw_something (avatar));
+
+  pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8, TEST_SIZE, TEST_SIZE);
+  gdk_pixbuf_fill (pixbuf, 0);
+  hdy_avatar_set_loadable_icon (HDY_AVATAR (avatar), G_LOADABLE_ICON (pixbuf));
+  g_assert_false (did_draw_something (avatar));
+  g_object_unref (avatar);
+}
+
 gint
 main (gint argc,
       gchar *argv[])
@@ -228,6 +251,7 @@ main (gint argc,
   g_test_add_func ("/Handy/Avatar/text", test_hdy_avatar_text);
   g_test_add_func ("/Handy/Avatar/size", test_hdy_avatar_size);
   g_test_add_func ("/Handy/Avatar/draw_to_pixbuf", test_hdy_avatar_draw_to_pixbuf);
+  g_test_add_func ("/Handy/Avatar/loadable_icon", test_hdy_avatar_loadable_icon);
 
   return g_test_run ();
 }
