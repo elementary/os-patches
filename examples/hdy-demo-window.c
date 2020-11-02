@@ -313,43 +313,21 @@ avatar_file_remove_cb (HdyDemoWindow *self)
   file = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (self->avatar_filechooser));
   if (file)
     gtk_file_chooser_unselect_filename (GTK_FILE_CHOOSER (self->avatar_filechooser), file);
-  hdy_avatar_set_image_load_func (self->avatar, NULL, NULL, NULL);
-}
 
-static GdkPixbuf *
-avatar_load_file (gint size, HdyDemoWindow *self)
-{
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GdkPixbuf) pixbuf = NULL;
-  g_autofree gchar *file = NULL;
-  gint width, height;
-
-  g_assert (HDY_IS_DEMO_WINDOW (self));
-
-  file = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (self->avatar_filechooser));
-
-  gdk_pixbuf_get_file_info (file, &width, &height);
-
-  pixbuf = gdk_pixbuf_new_from_file_at_scale (file,
-                                            (width <= height) ? size : -1,
-                                            (width >= height) ? size : -1,
-                                            TRUE,
-                                            &error);
-  if (error != NULL) {
-    g_critical ("Failed to create pixbuf from file: %s", error->message);
-
-    return NULL;
-  }
-
-  return g_steal_pointer (&pixbuf);
+  hdy_avatar_set_loadable_icon (self->avatar, NULL);
 }
 
 static void
 avatar_file_set_cb (HdyDemoWindow *self)
 {
+  g_autoptr (GFile) file = NULL;
+  g_autoptr (GIcon) icon = NULL;
+
   g_assert (HDY_IS_DEMO_WINDOW (self));
 
-  hdy_avatar_set_image_load_func (self->avatar, (HdyAvatarImageLoadFunc) avatar_load_file, self, NULL);
+  file = gtk_file_chooser_get_file (GTK_FILE_CHOOSER (self->avatar_filechooser));
+  icon = g_file_icon_new (file);
+  hdy_avatar_set_loadable_icon (self->avatar, G_LOADABLE_ICON (icon));
 }
 
 static void
