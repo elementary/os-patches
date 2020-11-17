@@ -540,11 +540,11 @@ case "$1" in
         elif running_in_container; then
           # Skip grub-install in containers.
           :
-        elif dpkg --compare-versions "$2" ge 2.02-2ubuntu8; then
+        elif dpkg --compare-versions "$2" ge 2.02-2ubuntu8 && [ -z "$DEBCONF_RECONFIGURE" ]; then
           # Avoid the possibility of breaking grub on SRU update
           # due to ABI change
           :
-        elif test -z "$2" || test -e /boot/grub/core.img || \
+        elif test -e /boot/grub/core.img || \
              test -e /boot/grub/@FIRST_CPU_PLATFORM@/core.img || \
              test "$UPGRADE_FROM_GRUB_LEGACY" || test "$wubi_device"; then
           question=grub-pc/install_devices
@@ -715,7 +715,7 @@ case "$1" in
                     continue
                   fi
                 else
-                  break # noninteractive
+                  exit 1 # noninteractive
                 fi
               fi
             fi
@@ -738,7 +738,14 @@ case "$1" in
                   db_fset grub-pc/install_devices_empty seen false
                 fi
               else
-                break # noninteractive
+                # if question was seen we are done
+                # Otherwise, abort
+                db_fget grub-pc/install_devices_empty seen
+                if [ "$RET" = true ]; then
+                  break
+                else
+                  exit 1
+                fi
               fi
             else
               break

@@ -1,3 +1,21 @@
+grub2 (2.02-2ubuntu8.19) bionic; urgency=medium
+
+  * grub-install: cherry-pick patch from grub-devel to make grub-install
+    fault tolerant. Create backup of files in /boot/grub, and restore them
+    on failure to complete grub-install. LP: #1891680
+    Also cherry-pick patch to make atexit work correctly.
+  * postinst.in: do not exit successfully when failing to show critical
+    grub-pc/install_devices_failed and grub-pc/install_devices_empty
+    prompts in non-interactive mode. This enables surfacing upgrade errors
+    to the users and/or automation. LP: #1891680 LP: #1896608
+  * postinst.in: do not attempt to call grub-install upon fresh install of
+    grub-pc because it it a job of installers to do that after fresh
+    install. Fixup for the issue unmasked by above. LP: #1891680
+  * postinst.in: Fixup postinst.in, to attempt grub-install upon explicit
+    dpkg-reconfigure grub-pc. LP: #1892526
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 22 Oct 2020 15:01:52 +0100
+
 grub2 (2.02-2ubuntu8.18) bionic; urgency=medium
 
   * debian/patches/ubuntu-flavour-order.patch:

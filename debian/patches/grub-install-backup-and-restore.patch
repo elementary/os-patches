@@ -1,0 +1,175 @@
+From 229c7f88463e2ae9fbb891a286cba50b580f7bad Mon Sep 17 00:00:00 2001
+From: Dimitri John Ledkov <xnox@ubuntu.com>
+Date: Wed, 19 Aug 2020 01:49:09 +0100
+Subject: grub-install: Add backup and restore
+
+Refactor clean_grub_dir to create a backup of all the files, instead
+of just irrevocably removing them as the first action. If available,
+register on_exit handle to restore the backup if any errors occur, or
+remove the backup if everything was successful. If on_exit is not
+available, the backup remains on disk for manual recovery.
+
+This allows safer upgrades of MBR & modules, such that
+modules/images/fonts/translations are consistent with MBR in case of
+errors. For example accidental grub-install /dev/non-existent-disk
+currently clobbers and upgrades modules in /boot/grub, despite not
+actually updating any MBR. This increases peak disk-usage slightly, by
+requiring temporarily twice the disk space to complete grub-install.
+
+Also add modinfo.sh to the cleanup/backup/restore codepath, to ensure
+it is also cleaned / backed up / restored.
+
+Signed-off-by: Dimitri John Ledkov <xnox@ubuntu.com>
+
+Patch-Name: grub-install-backup-and-restore.patch
+---
+ configure.ac               |   2 +-
+ util/grub-install-common.c | 105 +++++++++++++++++++++++++++++++------
+ 2 files changed, 91 insertions(+), 16 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 1819188f9f..6a88b9b0c0 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -420,7 +420,7 @@ else
+ fi
+ 
+ # Check for functions and headers.
+-AC_CHECK_FUNCS(posix_memalign memalign getextmntent)
++AC_CHECK_FUNCS(posix_memalign memalign getextmntent on_exit)
+ AC_CHECK_HEADERS(sys/param.h sys/mount.h sys/mnttab.h limits.h)
+ 
+ # glibc 2.25 still includes sys/sysmacros.h in sys/types.h but emits deprecation
+diff --git a/util/grub-install-common.c b/util/grub-install-common.c
+index 447504d3f4..a883b6daef 100644
+--- a/util/grub-install-common.c
++++ b/util/grub-install-common.c
+@@ -185,38 +185,113 @@ grub_install_mkdir_p (const char *dst)
+   free (t);
+ }
+ 
++static int
++strcmp_ext (const char *a, const char *b, const char *ext)
++{
++  char *bsuffix = grub_util_path_concat_ext (1, b, ext);
++  int r = strcmp (a, bsuffix);
++  free (bsuffix);
++  return r;
++}
++
++enum clean_grub_dir_mode
++{
++  CLEAN = 0,
++  CLEAN_BACKUP = 1,
++  CREATE_BACKUP = 2,
++  RESTORE_BACKUP = 3,
++};
++
+ static void
+-clean_grub_dir (const char *di)
++clean_grub_dir_real (const char *di, enum clean_grub_dir_mode mode)
+ {
+   grub_util_fd_dir_t d;
+   grub_util_fd_dirent_t de;
++  char suffix[2] = "";
++
++  if ((mode == CLEAN_BACKUP) || (mode == RESTORE_BACKUP))
++    {
++      strcpy (suffix, "-");
++    }
+ 
+   d = grub_util_fd_opendir (di);
+   if (!d)
+-    grub_util_error (_("cannot open directory `%s': %s"),
+-		     di, grub_util_fd_strerror ());
++    {
++      if (mode == CLEAN_BACKUP)
++	return;
++      grub_util_error (_("cannot open directory `%s': %s"),
++		       di, grub_util_fd_strerror ());
++    }
+ 
+   while ((de = grub_util_fd_readdir (d)))
+     {
+       const char *ext = strrchr (de->d_name, '.');
+-      if ((ext && (strcmp (ext, ".mod") == 0
+-		   || strcmp (ext, ".lst") == 0
+-		   || strcmp (ext, ".img") == 0
+-		   || strcmp (ext, ".mo") == 0)
+-	   && strcmp (de->d_name, "menu.lst") != 0)
+-	  || strcmp (de->d_name, "efiemu32.o") == 0
+-	  || strcmp (de->d_name, "efiemu64.o") == 0)
++      if ((ext && (strcmp_ext (ext, ".mod", suffix) == 0
++		   || strcmp_ext (ext, ".lst", suffix) == 0
++		   || strcmp_ext (ext, ".img", suffix) == 0
++		   || strcmp_ext (ext, ".mo", suffix) == 0)
++	   && strcmp_ext (de->d_name, "menu.lst", suffix) != 0)
++	  || strcmp_ext (de->d_name, "modinfo.sh", suffix) == 0
++	  || strcmp_ext (de->d_name, "efiemu32.o", suffix) == 0
++	  || strcmp_ext (de->d_name, "efiemu64.o", suffix) == 0)
+ 	{
+-	  char *x = grub_util_path_concat (2, di, de->d_name);
+-	  if (grub_util_unlink (x) < 0)
+-	    grub_util_error (_("cannot delete `%s': %s"), x,
+-			     grub_util_fd_strerror ());
+-	  free (x);
++	  char *srcf = grub_util_path_concat (2, di, de->d_name);
++
++	  if (mode == CREATE_BACKUP)
++	    {
++	      char *dstf = grub_util_path_concat_ext (2, di, de->d_name, "-");
++	      if (grub_util_rename (srcf, dstf) < 0)
++		grub_util_error (_("cannot backup `%s': %s"), srcf,
++				 grub_util_fd_strerror ());
++	      free (dstf);
++	    }
++	  else if (mode == RESTORE_BACKUP)
++	    {
++	      char *dstf = grub_util_path_concat_ext (2, di, de->d_name);
++	      dstf[strlen (dstf) - 1] = 0;
++	      if (grub_util_rename (srcf, dstf) < 0)
++		grub_util_error (_("cannot restore `%s': %s"), dstf,
++				 grub_util_fd_strerror ());
++	      free (dstf);
++	    }
++	  else
++	    {
++	      if (grub_util_unlink (srcf) < 0)
++		grub_util_error (_("cannot delete `%s': %s"), srcf,
++				 grub_util_fd_strerror ());
++	    }
++	  free (srcf);
+ 	}
+     }
+   grub_util_fd_closedir (d);
+ }
+ 
++static void
++restore_backup_on_exit (int status, void *arg)
++{
++  if (status == 0)
++    {
++      clean_grub_dir_real ((char *) arg, CLEAN_BACKUP);
++    }
++  else
++    {
++      clean_grub_dir_real ((char *) arg, CLEAN);
++      clean_grub_dir_real ((char *) arg, RESTORE_BACKUP);
++    }
++  free (arg);
++  arg = NULL;
++}
++
++static void
++clean_grub_dir (const char *di)
++{
++  clean_grub_dir_real (di, CLEAN_BACKUP);
++  clean_grub_dir_real (di, CREATE_BACKUP);
++#if defined(HAVE_ON_EXIT)
++  on_exit (restore_backup_on_exit, strdup (di));
++#endif
++}
++
+ struct install_list
+ {
+   int is_default;
