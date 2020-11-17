@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <utility>
 
+#include "gesture/device-type.h"
+
 void LininputPinchHandler::handlePinchBegin(struct libinput_event * /*event*/) {
   this->state.reset();
 }
@@ -41,7 +43,7 @@ void LininputPinchHandler::handlePinchUpdate(struct libinput_event *event) {
 
     auto gesture = std::make_unique<Gesture>(
         GestureType::PINCH, this->state.direction, this->state.percentage,
-        this->state.fingers, elapsedTime);
+        this->state.fingers, DeviceType::TOUCHPAD, elapsedTime);
     this->gestureController->onGestureBegin(std::move(gesture));
   } else {
     this->state.percentage = this->calculatePinchAnimationPercentage(
@@ -51,7 +53,7 @@ void LininputPinchHandler::handlePinchUpdate(struct libinput_event *event) {
 
     auto gesture = std::make_unique<Gesture>(
         GestureType::PINCH, this->state.direction, this->state.percentage,
-        this->state.fingers, elapsedTime);
+        this->state.fingers, DeviceType::TOUCHPAD, elapsedTime);
     this->gestureController->onGestureUpdate(std::move(gesture));
   }
 }
@@ -68,7 +70,7 @@ void LininputPinchHandler::handlePinchEnd(struct libinput_event *event) {
 
     auto gesture = std::make_unique<Gesture>(
         GestureType::PINCH, this->state.direction, this->state.percentage,
-        this->state.fingers, elapsedTime);
+        this->state.fingers, DeviceType::TOUCHPAD, elapsedTime);
     this->gestureController->onGestureEnd(std::move(gesture));
   }
 

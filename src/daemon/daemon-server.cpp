@@ -95,6 +95,7 @@ void DaemonServer::send(GestureEventType eventType,
   event.percentage = gesture->percentage();
   event.fingers = gesture->fingers();
   event.elapsedTime = gesture->elapsedTime();
+  event.performedOnDeviceType = gesture->performedOnDeviceType();
 
   // Send the gesture event to every client
   std::vector<int> disconnectedClients{};

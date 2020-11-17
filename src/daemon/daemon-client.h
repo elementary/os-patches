@@ -23,6 +23,7 @@
 #include "daemon/gesture-event.h"
 #include "gesture-controller/gesture-controller-delegate.h"
 #include "gesture/gesture.h"
+#include "window-system/window-system.h"
 
 /**
  * Class to connect to the daemon server and send the gestures received from the
