@@ -1,0 +1,80 @@
+From b2bd086d143301c2d70529b2858d55de91fdbb31 Mon Sep 17 00:00:00 2001
+From: Javier Martinez Canillas <javierm@redhat.com>
+Date: Thu, 10 Sep 2020 17:17:57 +0200
+Subject: tftp: Roll-over block counter to prevent data packets timeouts
+
+Commit 781b3e5efc3 (tftp: Do not use priority queue) caused a regression
+when fetching files over TFTP whose size is bigger than 65535 * block size.
+
+  grub> linux /images/pxeboot/vmlinuz
+  grub> echo $?
+  0
+  grub> initrd /images/pxeboot/initrd.img
+  error: timeout reading '/images/pxeboot/initrd.img'.
+  grub> echo $?
+  28
+
+It is caused by the block number counter being a 16-bit field, which leads
+to a maximum file size of ((1 << 16) - 1) * block size. Because GRUB sets
+the block size to 1024 octets (by using the TFTP Blocksize Option from RFC
+2348 [0]), the maximum file size that can be transferred is 67107840 bytes.
+
+The TFTP PROTOCOL (REVISION 2) RFC 1350 [1] does not mention what a client
+should do when a file size is bigger than the maximum, but most TFTP hosts
+support the block number counter to be rolled over. That is, acking a data
+packet with a block number of 0 is taken as if the 65356th block was acked.
+
+It was working before because the block counter roll-over was happening due
+an overflow. But that got fixed by the mentioned commit, which led to the
+regression when attempting to fetch files larger than the maximum size.
+
+To allow TFTP file transfers of unlimited size again, re-introduce a block
+counter roll-over so the data packets are acked preventing the timeouts.
+
+[0]: https://tools.ietf.org/html/rfc2348
+[1]: https://tools.ietf.org/html/rfc1350
+
+Fixes: 781b3e5efc3 (tftp: Do not use priority queue)
+
+Suggested-by: Peter Jones <pjones@redhat.com>
+Signed-off-by: Javier Martinez Canillas <javierm@redhat.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1900773
+Origin: upstream, https://git.savannah.gnu.org/cgit/grub.git/commit/?id=a6838bbc6726ad624bd2b94991f690b8e9d23c69
+Last-Updated: 2020-11-09
+Patch-Name: tftp-rollover-block-counter.patch
+---
+ grub-core/net/tftp.c | 17 ++++++++++++++---
+ 1 file changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/grub-core/net/tftp.c b/grub-core/net/tftp.c
+index e6566fa17..33c0b8214 100644
+--- a/grub-core/net/tftp.c
++++ b/grub-core/net/tftp.c
+@@ -183,11 +183,22 @@ tftp_receive (grub_net_udp_socket_t sock __attribute__ ((unused)),
+ 	  return GRUB_ERR_NONE;
+ 	}
+ 
+-      /* Ack old/retransmitted block. */
+-      if (grub_be_to_cpu16 (tftph->u.data.block) < data->block + 1)
++      /*
++       * Ack old/retransmitted block.
++       *
++       * The block number is a 16-bit counter, thus the maximum file size that
++       * could be transfered is 65535 * block size. Most TFTP hosts support to
++       * roll-over the block counter to allow unlimited transfer file size.
++       *
++       * This behavior is not defined in the RFC 1350 [0] but is implemented by
++       * most TFTP clients and hosts.
++       *
++       * [0]: https://tools.ietf.org/html/rfc1350
++       */
++      if (grub_be_to_cpu16 (tftph->u.data.block) < ((grub_uint16_t) (data->block + 1)))
+ 	ack (data, grub_be_to_cpu16 (tftph->u.data.block));
+       /* Ignore unexpected block. */
+-      else if (grub_be_to_cpu16 (tftph->u.data.block) > data->block + 1)
++      else if (grub_be_to_cpu16 (tftph->u.data.block) > ((grub_uint16_t) (data->block + 1)))
+ 	grub_dprintf ("tftp", "TFTP unexpected block # %d\n", tftph->u.data.block);
+       else
+ 	{

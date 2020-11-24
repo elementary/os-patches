@@ -1,3 +1,12 @@
+grub2 (2.02-2ubuntu8.20) bionic; urgency=medium
+
+  * Avoid "EFI stub: FIRMWARE BUG" message when booting >= 5.7 kernels
+    on arm64 by setting the image base address before jumping to the
+    PE/COFF entry point LP: #1900774
+  * Fix tftp timeouts when fetching large files. LP: #1900773
+
+ -- dann frazier <dannf@ubuntu.com>  Fri, 13 Nov 2020 17:40:19 -0700
+
 grub2 (2.02-2ubuntu8.19) bionic; urgency=medium
 
   * grub-install: cherry-pick patch from grub-devel to make grub-install
