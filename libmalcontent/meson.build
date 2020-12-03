@@ -77,4 +77,4 @@ libmalcontent_gir = gnome.generate_gir(libmalcontent,
   dependencies: libmalcontent_dep,
 )
 
-subdir('tests')
+#subdir('tests')
