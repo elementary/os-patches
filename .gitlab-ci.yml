@@ -1,0 +1,68 @@
+stages:
+  - build
+  - deploy
+
+cache:
+  paths:
+    - _ccache/
+
+variables:
+  DEBIAN_IMAGE: "registry.freedesktop.org/pwithnall/malcontent/debian-unstable:v1"
+  MESON_TEST_TIMEOUT_MULTIPLIER: 2
+  G_MESSAGES_DEBUG: all
+  MESON_COMMON_OPTIONS: "--buildtype debug --wrap-mode=nodownload"
+
+.only-default:
+  only:
+    - branches
+  except:
+    - tags
+
+.build:
+  extends: .only-default
+  before_script:
+    - cp -r $HOME/subprojects/* subprojects/
+
+debian:
+  extends: .build
+  image: $DEBIAN_IMAGE
+  stage: build
+  variables:
+    CFLAGS: "-coverage -ftest-coverage -fprofile-arcs"
+  script:
+    - meson ${MESON_COMMON_OPTIONS}
+            --werror
+            -Db_coverage=true
+            -Dinstalled_tests=true
+            -Dprivileged_group=sudo
+            _build
+    - ninja -C _build
+    - mkdir -p _coverage
+    - lcov --config-file .gitlab-ci/lcovrc --directory _build --capture --initial --output-file "_coverage/${CI_JOB_NAME}-baseline.lcov"
+    - .gitlab-ci/run-tests.sh
+    - lcov --config-file .gitlab-ci/lcovrc --directory _build --capture --output-file "_coverage/${CI_JOB_NAME}.lcov"
+    - bash -x ./.gitlab-ci/coverage-docker.sh
+  coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
+  artifacts:
+    reports:
+      junit: "_build/${CI_JOB_NAME}-report.xml"
+    name: "malcontent-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
+    when: always
+    paths:
+      - "_build/config.h"
+      - "_build/meson-logs"
+      - "_build/${CI_JOB_NAME}-report.xml"
+      - "_coverage"
+
+# FIXME: Run gtkdoc-check when we can. See:
+# https://github.com/mesonbuild/meson/issues/3580
+
+pages:
+  stage: deploy
+  only:
+    - master
+  script:
+    - mv _coverage/ public/
+  artifacts:
+    paths:
+      - public

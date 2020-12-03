@@ -1,0 +1,233 @@
+Source: malcontent
+Priority: optional
+Maintainer: Debian freedesktop.org maintainers <pkg-freedesktop-maintainers@lists.alioth.debian.org>
+Uploaders: Laurent Bigonville <bigon@debian.org>
+Build-Depends: appstream-util,
+               debhelper-compat (= 12),
+               desktop-file-utils,
+               gobject-introspection,
+               itstool,
+               libaccountsservice-dev,
+               libappstream-glib-dev,
+               libdbus-1-dev,
+               libflatpak-dev <!pkg.malcontent.nogui>,
+               libgirepository1.0-dev,
+               libglib-testing-0-dev,
+               libglib2.0-dev (>= 2.60),
+               libgtk-3-dev <!pkg.malcontent.nogui>,
+               libpam0g-dev,
+               libpolkit-gobject-1-dev,
+               libxml2-utils,
+               meson (>= 0.50.0),
+               policykit-1
+Rules-Requires-Root: no
+Standards-Version: 4.5.0
+Section: admin
+Homepage: https://gitlab.freedesktop.org/pwithnall/malcontent/
+Vcs-Browser: https://salsa.debian.org/freedesktop-team/malcontent
+Vcs-Git: https://salsa.debian.org/freedesktop-team/malcontent.git
+
+Package: malcontent
+Architecture: all
+Depends: accountsservice,
+         gir1.2-glib-2.0,
+         gir1.2-malcontent-0 (>= ${binary:Version}),
+         policykit-1,
+         python3,
+         python3-gi,
+         ${misc:Depends}
+Description: framework for parental control of applications
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+
+Package: malcontent-gui
+Build-Profiles: <!pkg.malcontent.nogui>
+Architecture: any
+Depends: malcontent (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
+Description: GUI to configure malcontent
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+ .
+ This package contains the GUI to configure malcontent.
+
+Package: libmalcontent-0-0
+Section: libs
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: library for parental control of applications
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+ .
+ This package contains the libmalcontent library.
+
+Package: libmalcontent-0-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: gir1.2-malcontent-0 (= ${binary:Version}),
+         libglib2.0-dev (>= 2.60),
+         libmalcontent-0-0 (= ${binary:Version}),
+         ${misc:Depends}
+Description: development files for libmalcontent
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+ .
+ This package contains the development files for libmalcontent.
+
+Package: gir1.2-malcontent-0
+Section: introspection
+Architecture: any
+Multi-Arch: same
+Depends: ${gir:Depends}, ${misc:Depends}, ${shlibs:Depends}
+Description: GObject introspection bindings for libmalcontent
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+ .
+ This package contains the GObject introspection bindings for libmalcontent.
+
+Package: libmalcontent-ui-0-0
+Build-Profiles: <!pkg.malcontent.nogui>
+Section: libs
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: library for parental control of applications - GTK+ widgets and dialogs
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+ .
+ This package contains the libmalcontent-ui library to display GTK+ widgets and
+ dialogs.
+
+Package: libmalcontent-ui-0-dev
+Build-Profiles: <!pkg.malcontent.nogui>
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: gir1.2-malcontentui-0 (= ${binary:Version}),
+         libaccountsservice-dev,
+         libappstream-glib-dev,
+         libflatpak-dev,
+         libglib2.0-dev (>= 2.60),
+         libgtk-3-dev,
+         libmalcontent-0-dev (= ${binary:Version}),
+         libmalcontent-ui-0-0 (= ${binary:Version}),
+         ${misc:Depends}
+Description: development files for libmalcontent-ui
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+ .
+ This package contains the development files for libmalcontent-ui.
+
+Package: gir1.2-malcontentui-0
+Build-Profiles: <!pkg.malcontent.nogui>
+Section: introspection
+Architecture: any
+Multi-Arch: same
+Depends: ${gir:Depends}, ${misc:Depends}, ${shlibs:Depends}
+Description: GObject introspection bindings for libmalcontent-ui
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+ .
+ This package contains the GObject introspection bindings for libmalcontent-ui.
+
+Package: libpam-malcontent
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: PAM module to control the time a user is spending on the computer
+ malcontent implements support for restricting the type of content accessible
+ to non-administrator accounts on a Linux system. Typically, when this is used,
+ a non-administrator account will be for a child using the system; and the
+ administrator accounts will be for the parents; and the content being filtered
+ will be apps which are not suitable for the child to use, due to (for example)
+ being too violent.
+ .
+ This is not a security boundary, and a sufficiently technically advanced user
+ may always work around these parental controls. malcontent is not a mandatory
+ access control (MAC) system like AppArmor or SELinux. However, its correct use
+ by applications should provide enough of an obstacle to prevent users easily or
+ accidentally having access to content which they shouldn’t.
+ .
+ This package contains a PAM module to control the time a user is spending on
+ the computer.

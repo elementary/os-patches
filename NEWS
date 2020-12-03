@@ -1,0 +1,302 @@
+Overview of changes in malcontent 0.9.0
+=======================================
+
+* Use appstream-glib code for content rating systems if available — this
+  adds a dependency on appstream-glib, but no particular version (see #7)
+
+* Rename three APIs in `app-filter.h` to avoid discriminatory language:
+  - `mct_app_filter_builder_blacklist_path` → `…_blocklist_path`
+  - `…_blacklist_flatpak_ref` → `…_blocklist_flatpak_ref`
+  - `…_blacklist_content_type` → `…_blocklist_content_type`
+  This is an API break. (See !72)
+
+* Add a `privileged_group` configure option to set the name of the system
+  sudo group — it might be `sudo` or `wheel` (thanks to Sergey Shatunov; see #22)
+
+* Bugs fixed:
+ - #7 Lift GNOME Software content rating implementation into appstream-glib, and fix it
+ - #21 No references to homosexuality
+ - #22 Polkit rules should use wheel group instead of sudo
+ - !69 Two small UI tweaks
+ - !72 tree-wide: Replace usages of whitelist/blacklist
+ - !73 po: Update translations from downstream in Endless
+ - !74 Update Ukrainian translation
+ - !75 Update Polish translation 200614
+ - !77 all: Fix various typos and incorrect terminology
+ - !78 build: Use meson.current_source_dir() instead of source_root()
+ - !79 build: Re-add libglib-testing subproject
+ - !80 Update Brazilian Portuguese translation
+ - !81 ci: Use pre-built Docker images for CI builds
+ - !82 subprojects: Limit depth when cloning
+ - !83 Update Spanish translation
+
+* Translation updates:
+ - Afrikaans
+ - Arabic
+ - Bangla
+ - Basque
+ - Bokmål, Norwegian
+ - Bulgarian
+ - Catalan
+ - Catalan — valencia.UTF-8
+ - Chinese (Taiwan)
+ - Croatian
+ - Czech
+ - Danish
+ - Dutch
+ - Esperanto
+ - Finnish
+ - French
+ - Friulian
+ - Gaelic
+ - Galician
+ - German
+ - Greek, Modern (1453-)
+ - Hebrew
+ - Hindi
+ - Hungarian
+ - Indonesian
+ - Italian
+ - Kazakh
+ - Korean
+ - Latvian
+ - Lithuanian
+ - Malay
+ - Malayalam
+ - Occitan (post 1500)
+ - Panjabi
+ - Persian
+ - Polish
+ - Portuguese
+ - Portuguese (Brazil)
+ - Romanian
+ - Russian
+ - Serbian
+ - Serbian — latin.UTF-8
+ - Slovak
+ - Slovenian
+ - Spanish
+ - Swedish
+ - Thai
+ - Turkish
+ - Ukrainian
+ - Vietnamese
+
+
+Overview of changes in malcontent 0.8.0
+=======================================
+
+* Add user manual (!51)
+
+* Add a header bar and primary menu to the main UI (!58)
+
+* Bump Meson dependency to 0.50.0 (!59)
+
+* Fix translation of libmalcontent-ui widgets when used in other applications (!68)
+
+* Bugs fixed:
+ - !3 Remove use of libglib-testing subproject
+ - !50 Various meson cleanups
+ - !51 Add user manual/documentation
+ - !52 Update Polish translation 200329
+ - !53 Added Indonesian translation
+ - !54 Update Ukrainian translation
+ - !55 libmalcontent: Add enum types to fix introspection of MctManagerError
+ - !56 Update Polish translation 200405
+ - !57 Update Ukrainian translation + docs translation
+ - !58 malcontent-control: Add a header bar and primary menu
+ - !59 meson: bump minimum version to 0.50.0
+ - !60 user-controls: Add a fallback bus connection
+ - !62 Added Indonesian help translation
+ - !63 Import translations from Endless
+ - !64 Import zh_TW translation from Endless
+ - !65 Add translator comments for about dialog strings
+ - !66 Update Brazilian Portuguese translation
+ - !67 Add Brazilian Portuguese translation
+ - !68 Fix translation of libmalcontent-ui
+
+* Translation updates:
+ - Afrikaans
+ - Arabic
+ - Bangla
+ - Basque
+ - Bokmål, Norwegian
+ - Bulgarian
+ - Catalan
+ - Catalan — valencia.UTF-8
+ - Chinese (Taiwan)
+ - Croatian
+ - Czech
+ - Danish
+ - Dutch
+ - Esperanto
+ - Finnish
+ - French
+ - Friulian
+ - Gaelic
+ - Galician
+ - German
+ - Greek, Modern (1453-)
+ - Hebrew
+ - Hindi
+ - Hungarian
+ - Indonesian
+ - Italian
+ - Kazakh
+ - Korean
+ - Latvian
+ - Lithuanian
+ - Malay
+ - Malayalam
+ - Occitan (post 1500)
+ - Panjabi
+ - Persian
+ - Polish
+ - Portuguese
+ - Portuguese (Brazil)
+ - Romanian
+ - Russian
+ - Serbian
+ - Serbian — latin.UTF-8
+ - Slovak
+ - Slovenian
+ - Spanish
+ - Swedish
+ - Thai
+ - Turkish
+ - Ukrainian
+ - Vietnamese
+
+
+Overview of changes in malcontent 0.7.0
+=======================================
+
+* Add `-Dui` configure option to help work around circular dependency with
+  flatpak (#16)
+
+* Add data serialization and deserialization methods for app filters and
+  session limits (!45)
+
+* Add mct_app_filter_is_enabled() and mct_session_limits_is_enabled() APIs
+  for determining whether filtering/limits are enabled at a high level (!47)
+
+* Bugs fixed:
+ - #16 Circular dependency on flatpak
+ - !35 Update Ukrainian translation
+ - !37 Drop a few unnecessary dependencies
+ - !39 Add Polish translation
+ - !40 Use libglib-testing submodule only as fallback
+ - !41 Fix typo in malcontent-client.8
+ - !42 docs: Update license information in README and meson.build
+ - !43 user-controls: Make OARS drop down open to the right
+ - !44 Fix updating the UI when a user’s locale changes
+ - !45 Support data serialisation and deserialisation
+ - !46 Fix papercuts when editing parental controls of current user
+ - !47 app-filter: Add mct_app_filter_is_enabled() API
+ - !48 Update POTFILES.in 200320
+ - !49 malcontent-control: Refactor bus initialisation
+
+* Translation updates:
+ - Polish
+ - Ukrainian
+
+
+Overview of changes in malcontent 0.6.0
+=======================================
+
+* Add icon for `malcontent-control` (thanks Jakub Steiner) (#9)
+
+* Redesign `malcontent-control` UI in response to design feedback (#11)
+
+* Add `AccountInfo` interface for metadata on parent accounts (!26)
+
+* Fix translation of the UI (!31)
+
+* Bugs fixed:
+ - #9 Add icon for malcontent-control
+ - #11 User controls UI tweaks
+ - !26 accounts-service: Add AccountInfo interface
+ - !27 user-selector: Fix some const-to-non-const cast warnings
+ - !29 po: Add some missing files to POTFILES.in
+ - !30 Add Ukrainian translation
+ - !31 build: Fix definition of PACKAGE_LOCALE_DIR
+ - !32 Add Brazilian Portuguese translation
+ - !33 po: Order LINGUAS alphabetically
+ - !34 More small UI tweaks
+
+* Translation updates:
+ - Portuguese (Brazil)
+ - Ukrainian
+
+
+Overview of changes in malcontent 0.5.0
+=======================================
+
+* Add libmalcontent-ui library for parental controls widgets
+
+* Add malcontent-control parental controls app
+
+* Add initial support for session limits (but more needs to be done)
+
+* Rename some of the commands for `malcontent-client` and rename some C APIs
+  (but with compatibility defines)
+
+* Bugs fixed:
+ - #6 Align GLib dependency requirements
+ - !16 docs: Improve documentation of "app-filter-changed" signal
+ - !18 build: Port meson-make-symlink script to Python
+ - !19 Add session limits support and PAM module
+ - !20 Initial version of parental controls app
+ - !21 build: Fix default value of pamlibdir
+ - !22 Iterate on UI of parental controls app
+ - !23 Split widgets into separate library
+ - !24 Allow user controls to be used for not-yet-existing users
+
+
+Overview of changes in malcontent 0.4.0
+=======================================
+
+* Implement `--quiet` in the `check` and `set` subcommands of
+  `malcontent-client` to make it nicer to use from scripts (!13)
+
+* Add support for filtering apps by content type (!15)
+
+* Bugs fixed:
+ - !2 tests: Use gdbus-codegen to drop hand-coded interface definitions
+ - !12 libmalcontent: Add missing field initialisers to BUILDER_INIT
+ - !13 Implement --quiet in the check and set subcommands of malcontent-client
+ - !14 Improve README coverage of whole system design
+ - !15 Add support to filter by content type
+
+
+Overview of changes in malcontent 0.3.0
+=======================================
+
+* API change for getting app filters: use `mct_manager_get_app_filter()` now,
+  rather than `mct_get_app_filter()` (#1, !6)
+
+* Support signalling that a user’s app filter has changed using
+  `MctManager::app-filter-changed` (#1)
+
+* Add a `MCT_APP_FILTER_ERROR_DISABLED` error to distinguish between the app
+  filter not being installed/supported, and temporarily not working (!9)
+
+* Add a top-level header file: use `#include <libmalcontent/malcontent.h>`
+
+* Bugs fixed:
+ - #1 Emit a signal when a user’s parental controls change
+ - !5 docs: Fix NEWS entry
+ - !6 lib: Change allow_interactive_authorization bool to flags
+ - !7 build: Post-release version bump
+ - !8 docs: Expand README to be more informative
+ - !9 libmalcontent: Add MCT_APP_FILTER_ERROR_DISABLED error
+ - !11 libmalcontent: Add a top-level header file
+
+
+Overview of changes in malcontent 0.2.0
+=======================================
+
+* Renamed project from eos-parental-controls to malcontent
+
+* Bugs fixed:
+ - !1 Rename project

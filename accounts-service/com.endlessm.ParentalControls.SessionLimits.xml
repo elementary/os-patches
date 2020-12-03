@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="com.endlessm.ParentalControls.SessionLimits">
+
+    <annotation name="org.freedesktop.Accounts.VendorExtension" value="true"/>
+
+    <annotation name="org.freedesktop.Accounts.Authentication.ChangeOwn"
+      value="com.endlessm.ParentalControls.SessionLimits.ChangeOwn"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ReadOwn"
+      value="com.endlessm.ParentalControls.SessionLimits.ReadOwn"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ChangeAny"
+      value="com.endlessm.ParentalControls.SessionLimits.ChangeAny"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ReadAny"
+      value="com.endlessm.ParentalControls.SessionLimits.ReadAny"/>
+
+    <!--
+      LimitType:
+
+      The type of session limit applied to the user, as an enumerated type.
+      Currently, the following values are supported, but more values may be
+      added in future.
+       - `0`: No filter enabled. The user is not limited in the times or
+         durations of their sessions.
+       - `1`: Daily schedule. The user is limited to using the computer between
+         a fixed start and end time each day, as set in the `DailySchedule`
+         property.
+    -->
+    <property name="LimitType" type="u" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="0"/>
+    </property>
+
+    <!--
+      DailySchedule:
+
+      A daily schedule to limit the user’s computer use. This is a two-tuple of
+      a start time and an end time, both given as the number of seconds since
+      midnight. The end time must be greater than the start time, and must be
+      ≤ 86400 (the number of seconds in a day). There is no handling of leap
+      seconds.
+
+      This property will be used if `LimitType` is set to `1`, but it must be
+      set to a valid value regardless.
+    -->
+    <property name="DailySchedule" type="(uu)" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="(0, 86400)"/>
+    </property>
+  </interface>
+</node>

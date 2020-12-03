@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright © 2020 Endless, Inc. -->
+<interface>
+  <requires lib="gtk+" version="3.12"/>
+  <template class="MctUserSelector" parent="GtkBox">
+    <child>
+      <object class="MctCarousel" id="carousel">
+        <property name="visible">True</property>
+        <property name="hexpand">True</property>
+        <signal name="item-activated" handler="carousel_item_activated"/>
+      </object>
+    </child>
+  </template>
+</interface>

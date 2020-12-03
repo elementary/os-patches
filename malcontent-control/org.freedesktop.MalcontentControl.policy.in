@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD polkit Policy Configuration 1.0//EN" "http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
+<!-- Copyright © 2020 Endless Mobile, Inc. -->
+<policyconfig>
+  <vendor>The Malcontent Project</vendor>
+  <vendor_url>https://gitlab.freedesktop.org/pwithnall/malcontent</vendor_url>
+
+  <action id="org.freedesktop.MalcontentControl.administration">
+    <description>Manage parental controls</description>
+    <message>Authentication is required to read and change user parental controls</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.imply">com.endlessm.ParentalControls.AppFilter.ReadAny com.endlessm.ParentalControls.AppFilter.ChangeAny com.endlessm.ParentalControls.AppFilter.ReadOwn com.endlessm.ParentalControls.AppFilter.ChangeOwn</annotate>
+  </action>
+</policyconfig>

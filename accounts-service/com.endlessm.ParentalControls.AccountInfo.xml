@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="com.endlessm.ParentalControls.AccountInfo">
+
+    <annotation name="org.freedesktop.Accounts.VendorExtension" value="true"/>
+
+    <annotation name="org.freedesktop.Accounts.Authentication.ChangeOwn"
+      value="com.endlessm.ParentalControls.AccountInfo.ChangeOwn"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ReadOwn"
+      value="com.endlessm.ParentalControls.AccountInfo.ReadOwn"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ChangeAny"
+      value="com.endlessm.ParentalControls.AccountInfo.ChangeAny"/>
+    <annotation name="org.freedesktop.Accounts.Authentication.ReadAny"
+      value="com.endlessm.ParentalControls.AccountInfo.ReadAny"/>
+
+    <!--
+      IsParent:
+
+      Whether this user is a parent on the system. All parents must be
+      administrators, but not all administrators must be parents.
+
+      This is intended to allow parent accounts to be rendered differently in
+      the user interface. It must not be used to make authentication
+      decisions — use polkit for that.
+
+      The value of this property must be treated as `false` if the user is not
+      an administrator.
+    -->
+    <property name="IsParent" type="b" access="readwrite">
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="false"/>
+    </property>
+  </interface>
+</node>

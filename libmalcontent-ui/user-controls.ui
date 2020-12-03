@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright © 2018, 2019, 2020 Endless, Inc. -->
+<interface domain="malcontent">
+  <requires lib="gtk+" version="3.12"/>
+  <template class="MctUserControls" parent="GtkGrid">
+    <property name="visible">True</property>
+    <property name="margin-top">18</property>
+    <property name="row-spacing">6</property>
+    <property name="column-spacing">12</property>
+    <property name="valign">start</property>
+
+    <!-- Application Usage Restrictions -->
+    <child>
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="xalign">0.0</property>
+        <property name="label" translatable="yes">Application Usage Restrictions</property>
+        <attributes>
+          <attribute name="weight" value="bold" />
+        </attributes>
+      </object>
+      <packing>
+        <property name="top-attach">0</property>
+        <property name="left-attach">0</property>
+      </packing>
+    </child>
+
+    <child>
+      <object class="GtkFrame">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="label_xalign">0</property>
+        <property name="shadow_type">in</property>
+        <child>
+          <object class="GtkListBox" id="application_usage_permissions_listbox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="selection_mode">none</property>
+            <property name="activate-on-single-click">True</property>
+            <signal name="row-activated" handler="on_application_usage_permissions_listbox_activated_cb" object="MctUserControls" swapped="no" />
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="activatable">False</property>
+                <property name="selectable">False</property>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="margin-left">12</property>
+                    <property name="margin-right">12</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="row-spacing">4</property>
+                    <property name="column-spacing">4</property>
+                    <child>
+                      <object class="GtkLabel" id="restrict_web_browsers_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">end</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Restrict _Web Browsers</property>
+                        <property name="use_underline">True</property>
+                        <property name="mnemonic_widget">restrict_web_browsers_switch</property>
+                        <accessibility>
+                          <relation target="restrict_web_browsers_switch" type="label-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="restrict_web_browsers_description">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">none</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <!-- Set dynamically from user-controls.c: -->
+                        <property name="label">Prevents {username} from running web browsers. Limited web content may still be available in other applications.</property>
+                        <attributes>
+                          <attribute name="scale" value="0.88"/>
+                        </attributes>
+                        <style>
+                          <class name="dim-label" />
+                        </style>
+                        <accessibility>
+                          <relation target="restrict_web_browsers_switch" type="description-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSwitch" id="restrict_web_browsers_switch">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <signal name="notify::active" handler="on_restrict_web_browsers_switch_active_changed_cb" object="MctUserControls" swapped="no" />
+                        <style>
+                          <class name="restricts" />
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                        <property name="height">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkListBoxRow" id="restrict_applications_row">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="activatable">True</property>
+                <property name="selectable">False</property>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="margin-left">12</property>
+                    <property name="margin-right">12</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="row-spacing">4</property>
+                    <property name="column-spacing">4</property>
+                    <child>
+                      <object class="GtkLabel" id="restrict_applications_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">end</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">_Restrict Applications</property>
+                        <property name="use_underline">True</property>
+                        <property name="mnemonic_widget">restrict_applications_button</property>
+                        <accessibility>
+                          <relation target="restrict_applications_button" type="label-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="restrict_applications_description">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">none</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <!-- Set dynamically from user-controls.c: -->
+                        <property name="label">Prevents specified applications from being used by {username}.</property>
+                        <attributes>
+                          <attribute name="scale" value="0.88"/>
+                        </attributes>
+                        <style>
+                          <class name="dim-label" />
+                        </style>
+                        <accessibility>
+                          <relation target="restrict_applications_button" type="description-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="restrict_applications_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <property name="relief">none</property>
+                        <signal name="clicked" handler="on_restrict_applications_button_clicked_cb" object="MctUserControls" swapped="no" />
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="icon-name">go-next-symbolic</property>
+                            <property name="icon-size">4</property><!-- GTK_ICON_SIZE_BUTTON -->
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                        <property name="height">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="top-attach">1</property>
+        <property name="left-attach">0</property>
+      </packing>
+    </child>
+
+    <!-- Software Installation Restrictions -->
+    <child>
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="margin-top">12</property>
+        <property name="xalign">0.0</property>
+        <property name="label" translatable="yes">Software Installation Restrictions</property>
+        <attributes>
+          <attribute name="weight" value="bold" />
+        </attributes>
+      </object>
+      <packing>
+        <property name="top-attach">2</property>
+        <property name="left-attach">0</property>
+      </packing>
+    </child>
+
+    <child>
+      <object class="GtkFrame">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="label_xalign">0</property>
+        <property name="shadow_type">in</property>
+        <child>
+          <object class="GtkListBox" id="software_installation_permissions_listbox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="selection_mode">none</property>
+            <property name="activate_on_single_click">False</property>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible" bind-source="restrict_user_installation_switch" bind-property="visible" bind-flags="default|sync-create" />
+                <property name="can_focus">True</property>
+                <property name="activatable">False</property>
+                <property name="selectable">False</property>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="margin-left">12</property>
+                    <property name="margin-right">12</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="row-spacing">4</property>
+                    <property name="column-spacing">4</property>
+                    <child>
+                      <object class="GtkLabel" id="restrict_user_installation_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">end</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Restrict Application _Installation</property>
+                        <property name="use_underline">True</property>
+                        <property name="mnemonic_widget">restrict_user_installation_switch</property>
+                        <accessibility>
+                          <relation target="restrict_user_installation_switch" type="label-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="restrict_user_installation_description">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">none</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <!-- Set dynamically from user-controls.c: -->
+                        <property name="label">Prevents {username} from installing applications.</property>
+                        <attributes>
+                          <attribute name="scale" value="0.88"/>
+                        </attributes>
+                        <style>
+                          <class name="dim-label" />
+                        </style>
+                        <accessibility>
+                          <relation target="restrict_user_installation_switch" type="description-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSwitch" id="restrict_user_installation_switch">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <signal name="notify::active" handler="on_restrict_installation_switch_active_changed_cb" object="MctUserControls" swapped="no" />
+                        <style>
+                          <class name="restricts" />
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                        <property name="height">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible" bind-source="restrict_system_installation_switch" bind-property="visible" bind-flags="default|sync-create" />
+                <property name="can_focus">True</property>
+                <property name="activatable">False</property>
+                <property name="selectable">False</property>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="margin-left">12</property>
+                    <property name="margin-right">12</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="row-spacing">4</property>
+                    <property name="column-spacing">4</property>
+                    <child>
+                      <object class="GtkLabel" id="restrict_system_installation_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">end</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Restrict Application Installation for _Others</property>
+                        <property name="use_underline">True</property>
+                        <property name="mnemonic_widget">restrict_system_installation_switch</property>
+                        <accessibility>
+                          <relation target="restrict_system_installation_switch" type="label-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="restrict_system_installation_description">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">none</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <!-- Set dynamically from user-controls.c: -->
+                        <property name="label">Applications installed by {username} will not appear for other users.</property>
+                        <attributes>
+                          <attribute name="scale" value="0.88"/>
+                        </attributes>
+                        <style>
+                          <class name="dim-label" />
+                        </style>
+                        <accessibility>
+                          <relation target="restrict_system_installation_switch" type="description-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSwitch" id="restrict_system_installation_switch">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <signal name="notify::active" handler="on_restrict_installation_switch_active_changed_cb" object="MctUserControls" swapped="no" />
+                        <style>
+                          <class name="restricts" />
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                        <property name="height">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="activatable">False</property>
+                <property name="selectable">False</property>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="margin-left">12</property>
+                    <property name="margin-right">12</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="row-spacing">4</property>
+                    <property name="column-spacing">4</property>
+                    <child>
+                      <object class="GtkLabel" id="oars_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">end</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Application _Suitability</property>
+                        <property name="use_underline">True</property>
+                        <property name="mnemonic_widget">oars_button</property>
+                        <accessibility>
+                          <relation target="oars_button" type="label-for"/>
+                          <relation target="oars_button" type="flows-to"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="oars_description">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="hexpand">True</property>
+                        <property name="ellipsize">none</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Restricts browsing or installation of applications to applications suitable for certain ages or above.</property>
+                        <attributes>
+                          <attribute name="scale" value="0.88"/>
+                        </attributes>
+                        <style>
+                          <class name="dim-label" />
+                        </style>
+                        <accessibility>
+                          <relation target="oars_button" type="description-for"/>
+                        </accessibility>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkMenuButton" id="oars_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <property name="direction">right</property>
+                        <property name="popover">oars_popover</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="orientation">horizontal</property>
+                            <child>
+                              <object class="GtkLabel" id="oars_button_label">
+                                <property name="visible">True</property>
+                                <property name="label"></property>
+                                <property name="expand">True</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0.0</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="icon-name">pan-down-symbolic</property>
+                                <property name="icon-size">4</property><!-- GTK_ICON_SIZE_BUTTON -->
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                        <property name="height">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="top-attach">3</property>
+        <property name="left-attach">0</property>
+      </packing>
+    </child>
+  </template>
+
+  <object class="GtkPopoverMenu" id="oars_popover">
+    <accessibility>
+      <relation target="oars_button" type="popup-for"/>
+    </accessibility>
+  </object>
+
+  <menu id="age_menu" />
+
+  <object class="GtkSizeGroup">
+    <property name="mode">horizontal</property>
+    <widgets>
+      <widget name="oars_button" />
+      <widget name="oars_popover" />
+    </widgets>
+  </object>
+
+  <object class="GtkSizeGroup">
+    <property name="mode">horizontal</property>
+    <widgets>
+      <widget name="restrict_web_browsers_label" />
+      <widget name="restrict_web_browsers_description" />
+      <widget name="restrict_applications_label" />
+      <widget name="restrict_applications_description" />
+      <widget name="oars_label" />
+      <widget name="restrict_user_installation_label" />
+      <widget name="restrict_system_installation_label" />
+    </widgets>
+  </object>
+
+  <object class="MctRestrictApplicationsDialog" id="restrict_applications_dialog">
+    <property name="visible">False</property>
+    <property name="modal">True</property>
+    <property name="destroy-with-parent">False</property>
+    <property name="use-header-bar">1</property>
+    <signal name="delete-event" handler="on_restrict_applications_dialog_delete_event_cb" />
+    <signal name="response" handler="on_restrict_applications_dialog_response_cb" />
+  </object>
+</interface>

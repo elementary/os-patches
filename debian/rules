@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+#export DH_VERBOSE = 1
+
+binaries := $(shell dh_listpackages)
+
+%:
+	dh $@ --with gir
+
+meson_options := -Dpamlibdir=/lib/$(DEB_HOST_MULTIARCH)/security
+
+ifneq ($(filter libmalcontent-ui-%,$(binaries)),)
+meson_options += -Dui=enabled
+else
+meson_options += -Dui=disabled
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure -- -Dprivileged_group=sudo $(meson_options)

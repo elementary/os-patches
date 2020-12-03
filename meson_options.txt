@@ -1,0 +1,29 @@
+option(
+  'installed_tests',
+  type: 'boolean',
+  value: false,
+  description: 'enable installed tests'
+)
+option(
+  'pamlibdir',
+  type: 'string',
+  description: 'directory for PAM modules'
+)
+option(
+  'ui',
+  type: 'feature',
+  value: 'enabled',
+  description: 'enable UI library'
+)
+option(
+  'use_system_libmalcontent',
+  type: 'boolean',
+  value: false,
+  description: 'use installed libmalcontent rather than building it; used in distros to break a dependency cycle'
+)
+option(
+  'privileged_group',
+  type: 'string',
+  value: 'wheel',
+  description: 'name of group that has elevated permissions'
+)

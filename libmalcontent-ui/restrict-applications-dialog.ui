@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright © 2020 Endless, Inc. -->
+<interface domain="malcontent">
+  <requires lib="gtk+" version="3.12"/>
+  <template class="MctRestrictApplicationsDialog" parent="GtkDialog">
+    <property name="title" translatable="yes">Restrict Applications</property>
+    <property name="skip-taskbar-hint">True</property>
+    <property name="default-width">300</property>
+    <property name="default-height">500</property>
+    <child internal-child="headerbar">
+      <object class="GtkHeaderBar">
+        <property name="title" translatable="yes">Restrict Applications</property>
+        <property name="show-close-button">True</property>
+      </object>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="visible">True</property>
+        <property name="margin">18</property>
+        <property name="spacing">12</property>
+        <child>
+          <object class="GtkLabel" id="description">
+            <!-- Translated dynamically: -->
+            <property name="label">Restrict {username} from using the following installed applications.</property>
+            <property name="visible">False</property>
+            <property name="ellipsize">none</property>
+            <property name="wrap">True</property>
+            <property name="halign">start</property>
+            <property name="xalign">0</property>
+            <property name="hexpand">True</property>
+            <child internal-child="accessible">
+              <object class="AtkObject">
+                <property name="accessible-role">static</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="MctRestrictApplicationsSelector" id="selector">
+            <property name="visible">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
