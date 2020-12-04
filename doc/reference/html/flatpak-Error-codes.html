@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Error codes: Flatpak Library Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="Flatpak Library Reference Manual">
+<link rel="up" href="ch01.html" title="Flatpak">
+<link rel="prev" href="FlatpakInstance.html" title="FlatpakInstance">
+<link rel="next" href="flatpak-Version-information.html" title="Version information">
+<meta name="generator" content="GTK-Doc V1.33.0 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#flatpak-Error-codes.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="FlatpakInstance.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="flatpak-Version-information.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="flatpak-Error-codes"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="flatpak-Error-codes.top_of_page"></a>Error codes</span></h2>
+<p>Error codes</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="flatpak-Error-codes.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="flatpak-Error-codes.html#FLATPAK-ERROR:CAPS" title="FLATPAK_ERROR">FLATPAK_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="flatpak-Error-codes.html#FlatpakError" title="enum FlatpakError">FlatpakError</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="flatpak-Error-codes.html#FLATPAK-PORTAL-ERROR:CAPS" title="FLATPAK_PORTAL_ERROR">FLATPAK_PORTAL_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="flatpak-Error-codes.html#FlatpakPortalError" title="enum FlatpakPortalError">FlatpakPortalError</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="flatpak-Error-codes.description"></a><h2>Description</h2>
+<p>The FlatpakError and FlatpakPortalError enumerations contain error codes
+for some common errors.</p>
+</div>
+<div class="refsect1">
+<a name="flatpak-Error-codes.functions_details"></a><h2>Functions</h2>
+<p></p>
+</div>
+<div class="refsect1">
+<a name="flatpak-Error-codes.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="FLATPAK-ERROR:CAPS"></a><h3>FLATPAK_ERROR</h3>
+<pre class="programlisting">#define FLATPAK_ERROR flatpak_error_quark ()
+</pre>
+<p>The error domain for <a class="link" href="flatpak-Error-codes.html#FlatpakError" title="enum FlatpakError"><span class="type">FlatpakError</span></a> errors.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="FlatpakError"></a><h3>enum FlatpakError</h3>
+<p>Error codes for library functions.</p>
+<div class="refsect3">
+<a name="FlatpakError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-ALREADY-INSTALLED:CAPS"></a>FLATPAK_ERROR_ALREADY_INSTALLED</p></td>
+<td class="enum_member_description">
+<p>App/runtime is already installed</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-NOT-INSTALLED:CAPS"></a>FLATPAK_ERROR_NOT_INSTALLED</p></td>
+<td class="enum_member_description">
+<p>App/runtime is not installed</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-ONLY-PULLED:CAPS"></a>FLATPAK_ERROR_ONLY_PULLED</p></td>
+<td class="enum_member_description">
+<p>App/runtime was only pulled into the local
+repository but not installed.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-DIFFERENT-REMOTE:CAPS"></a>FLATPAK_ERROR_DIFFERENT_REMOTE</p></td>
+<td class="enum_member_description">
+<p>The App/Runtime is already installed, but from a different remote.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-ABORTED:CAPS"></a>FLATPAK_ERROR_ABORTED</p></td>
+<td class="enum_member_description">
+<p>The transaction was aborted (returned <code class="literal">TRUE</code> in operation-error signal).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-SKIPPED:CAPS"></a>FLATPAK_ERROR_SKIPPED</p></td>
+<td class="enum_member_description">
+<p>The App/Runtime install was skipped due to earlier errors.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-NEED-NEW-FLATPAK:CAPS"></a>FLATPAK_ERROR_NEED_NEW_FLATPAK</p></td>
+<td class="enum_member_description">
+<p>The App/Runtime needs a more recent version of flatpak.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-REMOTE-NOT-FOUND:CAPS"></a>FLATPAK_ERROR_REMOTE_NOT_FOUND</p></td>
+<td class="enum_member_description">
+<p>The specified remote was not found.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-RUNTIME-NOT-FOUND:CAPS"></a>FLATPAK_ERROR_RUNTIME_NOT_FOUND</p></td>
+<td class="enum_member_description">
+<p>A runtime needed for the app was not found.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-DOWNGRADE:CAPS"></a>FLATPAK_ERROR_DOWNGRADE</p></td>
+<td class="enum_member_description">
+<p>The pulled commit is a downgrade, and a downgrade wasn't
+specifically allowed. (Since: 1.0)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-INVALID-REF:CAPS"></a>FLATPAK_ERROR_INVALID_REF</p></td>
+<td class="enum_member_description">
+<p>A ref could not be parsed. (Since: 1.0.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-INVALID-DATA:CAPS"></a>FLATPAK_ERROR_INVALID_DATA</p></td>
+<td class="enum_member_description">
+<p>Invalid data. (Since: 1.0.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-UNTRUSTED:CAPS"></a>FLATPAK_ERROR_UNTRUSTED</p></td>
+<td class="enum_member_description">
+<p>Missing GPG key or signature. (Since: 1.0.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-SETUP-FAILED:CAPS"></a>FLATPAK_ERROR_SETUP_FAILED</p></td>
+<td class="enum_member_description">
+<p>Sandbox setup failed. (Since: 1.0.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-EXPORT-FAILED:CAPS"></a>FLATPAK_ERROR_EXPORT_FAILED</p></td>
+<td class="enum_member_description">
+<p>Exporting data failed. (Since: 1.0.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-REMOTE-USED:CAPS"></a>FLATPAK_ERROR_REMOTE_USED</p></td>
+<td class="enum_member_description">
+<p>Remote can't be uninstalled. (Since: 1.0.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-RUNTIME-USED:CAPS"></a>FLATPAK_ERROR_RUNTIME_USED</p></td>
+<td class="enum_member_description">
+<p>Runtime can't be uninstalled. (Since: 1.0.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-INVALID-NAME:CAPS"></a>FLATPAK_ERROR_INVALID_NAME</p></td>
+<td class="enum_member_description">
+<p>Application, runtime or remote name is invalid. (Since: 1.0.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-OUT-OF-SPACE:CAPS"></a>FLATPAK_ERROR_OUT_OF_SPACE</p></td>
+<td class="enum_member_description">
+<p>More disk space needed. (Since: 1.2.0)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-WRONG-USER:CAPS"></a>FLATPAK_ERROR_WRONG_USER</p></td>
+<td class="enum_member_description">
+<p>An operation is being attempted by the wrong user (such as
+root operating on a user installation). (Since: 1.2.0)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-NOT-CACHED:CAPS"></a>FLATPAK_ERROR_NOT_CACHED</p></td>
+<td class="enum_member_description">
+<p>Cached data was requested, but it was not available. (Since: 1.4.0)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-REF-NOT-FOUND:CAPS"></a>FLATPAK_ERROR_REF_NOT_FOUND</p></td>
+<td class="enum_member_description">
+<p>The specified ref was not found. (Since: 1.4.0)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-PERMISSION-DENIED:CAPS"></a>FLATPAK_ERROR_PERMISSION_DENIED</p></td>
+<td class="enum_member_description">
+<p>An operation was not allowed by the administrative policy.
+For example, an app is not allowed to be installed due
+to not complying with the parental controls policy. (Since: 1.5.1)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-AUTHENTICATION-FAILED:CAPS"></a>FLATPAK_ERROR_AUTHENTICATION_FAILED</p></td>
+<td class="enum_member_description">
+<p>An authentication operation failed, for example, no
+correct password was supplied. (Since: 1.7.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-ERROR-NOT-AUTHORIZED:CAPS"></a>FLATPAK_ERROR_NOT_AUTHORIZED</p></td>
+<td class="enum_member_description">
+<p>An operation tried to access a ref, or information about it that it
+was not authorized. For example, when succesfully authenticating with a
+server but the user doesn't have permissions for a private ref. (Since: 1.7.3)</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="FLATPAK-PORTAL-ERROR:CAPS"></a><h3>FLATPAK_PORTAL_ERROR</h3>
+<pre class="programlisting">#define FLATPAK_PORTAL_ERROR flatpak_portal_error_quark ()
+</pre>
+<p>The error domain for <a class="link" href="flatpak-Error-codes.html#FlatpakPortalError" title="enum FlatpakPortalError"><span class="type">FlatpakPortalError</span></a> errors.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="FlatpakPortalError"></a><h3>enum FlatpakPortalError</h3>
+<p>Error codes returned by portal calls.</p>
+<div class="refsect3">
+<a name="FlatpakPortalError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-PORTAL-ERROR-FAILED:CAPS"></a>FLATPAK_PORTAL_ERROR_FAILED</p></td>
+<td class="enum_member_description">
+<p>General portal failure</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-PORTAL-ERROR-INVALID-ARGUMENT:CAPS"></a>FLATPAK_PORTAL_ERROR_INVALID_ARGUMENT</p></td>
+<td class="enum_member_description">
+<p>An argument was invalid</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-PORTAL-ERROR-NOT-FOUND:CAPS"></a>FLATPAK_PORTAL_ERROR_NOT_FOUND</p></td>
+<td class="enum_member_description">
+<p>The object was not found</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-PORTAL-ERROR-EXISTS:CAPS"></a>FLATPAK_PORTAL_ERROR_EXISTS</p></td>
+<td class="enum_member_description">
+<p>The object already exists</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-PORTAL-ERROR-NOT-ALLOWED:CAPS"></a>FLATPAK_PORTAL_ERROR_NOT_ALLOWED</p></td>
+<td class="enum_member_description">
+<p>The call was not allowed</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-PORTAL-ERROR-CANCELLED:CAPS"></a>FLATPAK_PORTAL_ERROR_CANCELLED</p></td>
+<td class="enum_member_description">
+<p>The call was cancelled by the user</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="FLATPAK-PORTAL-ERROR-WINDOW-DESTROYED:CAPS"></a>FLATPAK_PORTAL_ERROR_WINDOW_DESTROYED</p></td>
+<td class="enum_member_description">
+<p>The window was destroyed by the user</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.0</div>
+</body>
+</html>
