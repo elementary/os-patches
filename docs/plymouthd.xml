@@ -1,0 +1,121 @@
+<?xml version='1.0'?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+        "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<refentry id="plymouthd">
+
+        <refentryinfo>
+                <title>plymouthd</title>
+                <productname>plymouth</productname>
+
+                <authorgroup>
+                        <author>
+                                <contrib>Developer</contrib>
+                                <firstname>Kristian</firstname>
+                                <surname>Høgsberg</surname>
+                        </author>
+                        <author>
+                                <contrib>Developer</contrib>
+                                <firstname>Ray</firstname>
+                                <surname>Strode</surname>
+                        </author>
+                </authorgroup>
+
+        </refentryinfo>
+
+        <refmeta>
+                <refentrytitle>plymouthd</refentrytitle>
+                <manvolnum>8</manvolnum>
+                <refmiscinfo class="manual">System Administration</refmiscinfo>
+        </refmeta>
+
+        <refnamediv>
+                <refname>plymouthd</refname>
+                <refpurpose>The plymouth daemon</refpurpose>
+        </refnamediv>
+
+        <refsynopsisdiv>
+                <cmdsynopsis>
+                        <command>plymouthd <arg choice="opt" rep="repeat">OPTION</arg></command>
+                </cmdsynopsis>
+        </refsynopsisdiv>
+
+        <refsect1>
+                <title>Description</title>
+
+<para>
+The <command>plymouthd</command> daemon is usually run out of
+the initrd. It does the heavy lifting of the plymouth system, logging
+the session and showing the splash screen.
+</para>
+<para>
+The <command>plymouth</command> is used to send commands to plymouthd
+that control its behaviour.
+</para>
+
+        </refsect1>
+
+        <refsect1>
+                <title>Options</title>
+
+                <para>The following options are understood:</para>
+
+                <variablelist>
+                        <varlistentry>
+                                <term><option>--help</option></term>
+                                <listitem><para>Show summary of options.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--attach-to-session</option></term>
+                                <listitem><para>Redirect console messages from screen to log.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--no-daemon</option></term>
+                                <listitem><para>Do not daemonize.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--debug</option></term>
+                                <listitem><para>Output debugging information.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--debug-file=STRING</option></term>
+                                <listitem><para>File to write debugging information to.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--mode=MODE</option></term>
+                                <listitem><para>Set mode to either boot or shutdown.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--pid-file=STRING</option></term>
+                                <listitem><para>Write the PID of the daemon to a file.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--kernel-command-line=STRING</option></term>
+                                <listitem><para>Fake kernel commandline to use.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--tty=STRING</option></term>
+                                <listitem><para>TTY to use instead of default.</para></listitem>
+                        </varlistentry>
+                </variablelist>
+        </refsect1>
+
+        <refsect1>
+                <title>See Also</title>
+                <para>
+                        <citerefentry><refentrytitle>grub</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+                        <citerefentry><refentrytitle>plymouth</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+                        <citerefentry><refentrytitle>plymouth</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+                        <ulink url="http://www.freedesktop.org/wiki/Software/Plymouth">http://www.freedesktop.org/wiki/Software/Plymouth</ulink>
+                </para>
+        </refsect1>
+
+</refentry>

@@ -1,0 +1,15 @@
+[Unit]
+Description=Show Plymouth Boot Screen
+DefaultDependencies=no
+Wants=systemd-ask-password-plymouth.path systemd-vconsole-setup.service
+After=systemd-vconsole-setup.service systemd-udev-trigger.service systemd-udevd.service
+Before=systemd-ask-password-plymouth.service
+ConditionKernelCommandLine=!plymouth.enable=0
+ConditionVirtualization=!container
+
+[Service]
+ExecStart=@PLYMOUTH_DAEMON_DIR@/plymouthd --mode=boot --pid-file=@plymouthruntimedir@/pid --attach-to-session
+ExecStartPost=-@PLYMOUTH_CLIENT_DIR@/plymouth show-splash
+Type=forking
+KillMode=none
+SendSIGKILL=no

@@ -1,0 +1,3087 @@
+plymouth (0.9.4git20200323-0ubuntu6.2) focal; urgency=medium
+
+  * debian/patches/timeout-for-ping.patch: Raise the ping timeout from 2 to
+    30 seconds. Two seconds was way too short,
+    - causing ping to randomly fail on some busy multi-monitor start-ups,
+    - causing gdm to think no plymouthd is running,
+    - causing gdm to never call 'plymouth deactivate',
+    - causing plymouthd to retain ownership of the graphics hardware,
+    - causing gdm's login screen to fail to start. (LP: #1872159)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Mon, 02 Nov 2020 18:02:17 +0800
+
+plymouth (0.9.4git20200323-0ubuntu6.1) focal; urgency=medium
+
+  * Clear twostep footer, at the end of fsck, and clear lingering Ctrl+C
+    message LP: #1880250
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 30 Sep 2020 15:01:26 +0100
+
+plymouth (0.9.4git20200323-0ubuntu6) focal; urgency=medium
+
+  * debian/patches/ubuntu-default-devicetimeout.patch: Increase the graphics
+    probing timeout to 8 seconds to match upstream. This also fixes missing
+    graphics when booting some ThinkPads. (LP: #1838725)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 01 Apr 2020 17:49:08 +0800
+
+plymouth (0.9.4git20200323-0ubuntu5) focal; urgency=medium
+
+  * debian/patches/git-drm-improve.patch:
+    - backport an upstream patch to improve drm/kms probing
+
+  [ Daniel Van Vugt ]
+  * debian/patches/ubuntu-spinner-fsck.patch:
+    - Add support for fsck status messages (lp: #1867130)
+  * debian/patches/gitlab-center-messages.patch:
+    - Center message text within labels if labels are centered
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 31 Mar 2020 10:23:57 +0200
+
+plymouth (0.9.4git20200323-0ubuntu3) focal; urgency=medium
+
+  * debian/control:
+    - plymouth-theme-spinner Depends on plymouth-label, it's required
+      to be able to display messages on the splash screen
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Sun, 29 Mar 2020 12:23:27 +0200
+
+plymouth (0.9.4git20200323-0ubuntu2) focal; urgency=medium
+
+  * debian/patches/ubuntu-spinner-style.patch:
+    - Ubuntu style for the spinner/bgrt theme.
+      Use the Ubuntu font instead of cantarell (lp: #1869170)
+      Display the password entry under the bios logo (lp: #1867131)
+  * debian/local/lock.png, debian/local/entry.png, debian/rules:
+    - theme the spinner password entry assets to have an Ubuntu orange
+      color rather than an upstream blue one
+  * themes/ubuntu-logo/ubuntu-logo.png:
+    - updated the logo image to be correctly center again, thanks Daniel
+      (lp: #1869150)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 27 Mar 2020 16:31:27 +0100
+
+plymouth (0.9.4git20200323-0ubuntu1) focal; urgency=medium
+
+  * New git snapshot
+  * debian/patches/git_assert_fix.patch:
+    - removed, included in the new version
+  * themes/ubuntu-logo/ubuntu-logo.png:
+    - updated logo from design with better resolution (lp: #1866413)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 23 Mar 2020 13:07:07 +0100
+
+plymouth (0.9.4git20200109-0ubuntu8) focal; urgency=medium
+
+  * debian/local/spinner, debian/rules:
+    - Install the Ubuntu yaru spinner assets, thanks Frederik for working
+      on/providing the new images!
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 13 Mar 2020 11:05:07 +0100
+
+plymouth (0.9.4git20200109-0ubuntu7) focal; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - try to copy the watermark image in the initramfs only if the spinner
+      theme is installed (lp: #1866377)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Sat, 07 Mar 2020 10:26:16 +0100
+
+plymouth (0.9.4git20200109-0ubuntu6) focal; urgency=medium
+
+  * themes/ubuntu-logo/ubuntu-logo.png:
+    - update the logo using in plymouth/gdm to be monochrome,
+      thanks Wayne!
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 06 Mar 2020 10:27:38 +0100
+
+plymouth (0.9.4git20200109-0ubuntu5) focal; urgency=medium
+
+  * debian/local/plymouth.hook,
+    debian/rules:
+    - install the ubuntu-logo asset as a watermark for the bgrt theme
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 06 Mar 2020 10:09:07 +0100
+
+plymouth (0.9.4git20200109-0ubuntu3.3) focal; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - handle the case when there is no theme alternative defined
+      (lp: #1865959)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 04 Mar 2020 12:23:07 +0100
+
+plymouth (0.9.4git20200109-0ubuntu3.2) focal; urgency=medium
+
+  * debian/patches/git_assert_fix.patch:
+    - backport an assert fix from upstream git
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 03 Mar 2020 18:07:23 +0100
+
+plymouth (0.9.4git20200109-0ubuntu3.1) focal; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - if the current theme has an ImageDir includes the directory
+      in the initramfs (lp: #1864586) 
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 03 Mar 2020 17:02:28 +0100
+
+plymouth (0.9.4git20200109-0ubuntu3) focal; urgency=medium
+
+  * Drop setting purple on grub boot for now, until we have a good plan
+    for flickerless boot either by tweaking our theme for new world order,
+    or changing to a different theme.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 20 Feb 2020 16:34:20 +0000
+
+plymouth (0.9.4git20200109-0ubuntu2) focal; urgency=medium
+
+  * No-change rebuild with fixed binutils on arm64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 08 Feb 2020 11:17:22 +0000
+
+plymouth (0.9.4git20200109-0ubuntu1) focal; urgency=medium
+
+  * New upstream version:
+    - includes a new keyboard layout/capslock indicator
+  * debian/control, debian/libplymouth5.lintian-overrides, debian/rules:
+    - updated for the library soname change
+  * debian/libplymouth5.*:
+    - updated for the soname change
+  * debian/patches/misc-changes.patch:
+    - updated to fix an implicity declaration warning
+  * debian/patches/0001-script-Add-image-tile-support.patch:
+    - removed, included in the new version
+  * debian/plymouth.install:
+    - install the new logrotate.d boot.log entry
+  * debian/plymouth-themes.install:
+    - updated for the throbgress plugin removal
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 09 Jan 2020 17:03:09 +0100
+
+plymouth (0.9.4git20190712-0ubuntu5) focal; urgency=medium
+
+  * debian/patches/misc-changes.patch: fix an Ubuntu-specific bug in
+    handling plymouth ask-for-password with a --command option that results
+    in a crash, breaking disk unlocking with zfs.  Thank to Witold Krecicki
+    for the fix.  LP: #1810154.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 14 Dec 2019 10:43:21 -0800
+
+plymouth (0.9.4git20190712-0ubuntu4) eoan; urgency=medium
+
+  * debian/plymouth-theme-spinner.postinst/rm:
+    - call update-grub when installing/removing the theme so grub isn't
+      stucked on colors from the old theme (lp: #1837360)
+
+ -- Sebastien Bacher <seb128@debian.org>  Wed, 09 Oct 2019 17:23:40 +0200
+
+plymouth (0.9.4git20190712-0ubuntu3) eoan; urgency=medium
+
+  * Update grub script to yaru aubergine.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 11 Sep 2019 11:42:46 +0100
+
+plymouth (0.9.4git20190712-0ubuntu2) eoan; urgency=medium
+
+  * Add tile support in script plugin, use it to create background
+    matching gnome-shell.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 10 Sep 2019 14:41:56 +0100
+
+plymouth (0.9.4git20190712-0ubuntu1) eoan; urgency=medium
+
+  * Update to a new upstream git snapshot including those changes:
+    - new BGRT theme, using the firmware boot splash as background
+    - new firmware-upgrade mode for use by fwupd
+    - fix failing to pick the native monitor mode starting with kernel 5.2
+  * debian/control:
+    - build-depends on gettext and intltool
+    - build a new binary for the spinner theme
+  * debian/plymouth.install:
+    - include the translations
+  * debian/control,
+    debian/plymouth-themes.install:
+    - install the new bgrt theme in plymouth-themes for now, we probably
+      want to move it to a new binary (with spinner which it relies on)
+      if/when we make it default
+  * debian/libplymouth4.symbols:
+    - refreshed for the new version symbols
+  * debian/plymouth.postinst,
+    debian/plymouth-theme-ubuntu-logo.postinst:
+    debian/plymouth-theme-ubuntu-text.postinst:
+    - remove transition code that was needed until xenial
+  * debian/plymouth-theme-spinner.install:
+    - install the spinner and bgrt themes in that binary
+  * debian/plymouth-theme-spinner.postinst/postrm:
+    - install the new bgrt theme with an higher alternative score,
+      call update-initramfs
+  * debian/patches/0008-show-delay.patch:
+    - removed, the patch is in the new version
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 15 Jul 2019 17:31:09 +0200
+
+plymouth (0.9.4-1ubuntu2) eoan; urgency=medium
+
+  * debian/patches/0001-awk.patch,
+    debian/patches/0004-return-code.patch:
+    - remove those Debian patches, we don't ship plymouth-set-default-theme
+      in Ubuntu so they only creates more work for package updates
+  * debian/patches/avoid-sigpipe.patch:
+    - removed, the issue was fixed upstream with another commit
+      https://gitlab.freedesktop.org/plymouth/plymouth/commit/396cae8e
+  * debian/patches/details-short-prompt.patch:
+    - remove, that change was never upstreamed and it was useful when
+      cryptsetup was using multilines prompts which doens't seem the 
+      case anymore
+  * debian/patches/fix-split-writes.patch:
+    - remove, the issue was fixed in 0.9.2 with another solution
+      https://gitlab.freedesktop.org/plymouth/plymouth/commit/b97c30a0
+  * Updated some patches description with upload/upstream references
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 12 Jul 2019 11:34:05 +0200
+
+plymouth (0.9.4-1ubuntu1) disco; urgency=low
+
+  * Merge from Debian unstable.  Remaining changes:
+    - include ubuntu theme logos:
+      themes/ubuntu-logo/*, debian/source/include-binaries.
+    - debian/libplymouth4.apport: add Apport hook.
+    - Ship ubuntu-logo instead of debian-logo (debian/rules and
+      debian/local/plymouth.hook).
+    - Ship debian/source_plymouth.apport apport hook (debian/rules).
+    - Add plymouth-label as a separate package and makes themes depending on
+      it (debian/control, debian/plymouth-label.install,
+      debian/plymouth-themes.install).
+    - Drop fontconfig dependencies from plymouth; they are on plymouth-label.
+    - Ship plymouth-theme-ubuntu-logo and plymouth-theme-ubuntu-text specific
+      themes (debian/plymouth-theme-ubuntu-* and debian/control) and add
+      Recommends on it | plymouth-theme to accommodate flavors.
+    - Remove debian/patches/0003-default-theme.patch as we handle our defaults
+      via alternatives. (and refresh debian/patches/0008-show-delay.patch)
+    - debian/patches/misc-changes.patch: old undocumented inline changes.
+      export a new symbol added in debian/libplymouth4.symbols.
+    - debian/patches/avoid-sigpipe.patch:
+      Use first a socket connection before fallbacking to regular write()
+    - debian/patches/details-short-prompt.patch: When we display bullets in the
+      ubuntu details theme, shorten the prompt.
+    - debian/patches/details-remove-separator.patch: Removed explicit printing
+      of ':'.
+    - debian/patches/details-update-status.patch: Implement update status (U)
+      splash plugin function for details plugin, imply display those updates
+      as text messages.
+    - debian/patches/initramfsless-boot.patch: support intramfsless boot.
+    - debian/patches/fix-split-writes.patch: fix split writes for long server
+      responses.
+    - debian/patches/ubuntu-add-splash-option.patch: add "splash" option as a
+      condition to trigger plymouth.
+    - debian/rules:
+      - disable optimization if noopt found in $DEB_BUILD_OPTION
+      - enable -Werror
+      - use ubuntu-themes background color
+    - debian/local/<initramfs scripts>: export OPTION=FRAMEBUFFER for user's
+      command line argument explicitly disabling framebuffer.
+    - We use alternatives instead of plymouth-set-default-theme tool:
+      + debian/plymouth-themes.{prerm,postinst}: ensure we select one default
+        plymouth logo and text themes through alternatives even when we remove
+        ubuntu-base ones.
+      + debian/rules, debian/plymouth.{install,links), don't ship non
+        non alternative-based theme policy files and tools.
+      + update plymouth.README.Debian to tell to use update-alternative
+        instead of set-default-theme
+      + change debian/local/plymouth.hook to use update-alternative to get
+        default theme instead of set-default-theme. Also, don't copy
+        deleted files to initramfs.
+    - Add Breaks: against older themes versions as they are shipping in /lib
+      instead of /usr/share.
+    ^ ubuntu old changelog containing debian-like packaging version has been
+      copied to debian/changelog.ubuntu.old in the source package.
+    ^ Remove dependency on initramfs-tools | dracut.
+    - debian/plymouth-theme-ubuntu-text.postinst: Only remove the leftover
+      generated files when upgrading, not when triggered.
+    - debian/local/plymouth.init-premount: Don't start plymouth if "splash" is
+      not present on the kernel command line. This makes initrd behaviour
+      consistent with what happens at boot (see ubuntu-add-splash-option.patch).
+      Fixes password prompts when not booting with "splash".
+    ^ Add missing replaces due to apport hook move
+    - debian/local/plymouth.hook:
+      + protect when there is no alternative configured
+      + handle having the minimum dependency packages installed (no font)
+        when setting either no graphical theme or ubuntu-text one as default.
+      + Fix kernel updates on some weird configurations where there is
+        a plymouth theme alternative setup pointing to a non existing theme.
+      + adapt to handle text flavor plugin, copying the ubuntu-text module
+      + be more resilient if there is only one plymouth theme configured
+        (default or text) or none.
+      + disable harmless (in the ubuntu case, where we control supported official
+        and flavors themes) warning which confuses users for flavors not using
+        a compiled text theme
+      + Fix hook script to not print warnings about label.so when using the
+        ubuntu-text theme.
+      + ensure that whenever configuration order is, we only build the
+        initramfs if we have a default and text themes.
+    - Add a patch to unconditionally set DeviceTimeout to a non-zero value
+      to prevent plymouthd asserts on boot.
+    - Use newer syntax to update the root fs.
+    - Run plymouth in debug mode and store the log in /run/plymouth.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 20 Feb 2019 09:34:33 +0100
+
+plymouth (0.9.4-1) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/copyright: Use https protocol in Format field
+
+  [ Laurent Bigonville ]
+  * New upstream version 0.9.3
+    - Add support screen rotation (Closes: #905429)
+    - Drop patches merged upstream
+    - debian/patches/0005-cmdline.patch: Refreshed
+    - debian/libplymouth4.symbols: Add newly exported symbols
+  * debian/control: Bump Standards-Version to 4.2.1 (no further changes)
+  * Do not explicitly set the compression algorithm, to please lintian
+  * debian/rules: Use dh_missing --fail-missing instead of dh_install
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 08 Nov 2018 02:03:31 +0100
+
+plymouth (0.9.3-3) unstable; urgency=medium
+
+  * debian/local/plymouth.hook: Call fc-cache when generating the initramfs,
+    this will create the fc cache and .uuid files and should mitigate bug
+    #897572
+  * debian/control: Update VCS-* fields to point to the salsa machine
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 14 May 2018 11:25:26 +0200
+
+plymouth (0.9.3-2) unstable; urgency=medium
+
+  * Import upstream patches coming from the master branch:
+    - Remove d/p/0002-stderr.patch, replaced by
+      d/p/0002-scripts-Use-2-instead-of-dev-stderr.patch
+    - d/p/0006-x11-don-t-call-gdk_display_get_name-before-gtk_init.patch:
+      Fixes a crash when the x11 renderer is installed (Closes: #878115)
+  * debian/control: Drop obsolete dh-systemd build-dependency and bump
+    debhelper minimal version
+  * debian/control: Bump Standards-Version to 4.1.3 (no further changes)
+  * debian/watch: Use https:// URL
+  * Add apport hook, taken from Ubuntu and adjusted to support the fact that
+    we are not using alternatives to select the default theme
+
+ -- Laurent Bigonville <bigon@debian.org>  Fri, 19 Jan 2018 11:31:55 +0100
+
+plymouth (0.9.3-1ubuntu12) disco; urgency=medium
+
+  * debian/patches/git_helper_renderer.patch,
+    debian/patches/git_desactivate_renderer.patch:
+    - 'device-manager: free keyboards when deactivating a renderer', 
+      (lp: #1794292)
+  * debian/patches/git_small_bugfixes.patch:
+    - backported some upstream small bugfixes
+  * debian/patches/keyboard_deactivation.patch,
+    debian/patches/remember_found_devices.patch,
+    debian/patches/fix_unrefd_plugin_interface.patch:
+    - removed patches, superseeded by the previous one from upstream
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 17 Dec 2018 20:18:03 +0100
+
+plymouth (0.9.3-1ubuntu11) disco; urgency=medium
+
+  * Workaround a plugin being already deactivated when we try to remove input
+    watchers for keyboards in DRM mode. Also guard against races at removing
+    input watches and new device detection at startup. (LP: #1794292)
+    - debian/patches/fix_unrefd_plugin_interface.patch
+    - debian/patches/remember_found_devices.patch
+    - debian/patches/keyboard_deactivation.patch
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 19 Nov 2018 12:16:23 -0500
+
+plymouth (0.9.3-1ubuntu10) cosmic; urgency=medium
+
+  * Grab some commits from upstream:
+    + 0009-renderer-support-reactivating-renderer-without-closi.patch,
+      0010-main-Only-activate-renderers-if-the-splash-uses-pixe.patch:
+      Fix (or at least improve the situation regarding!) toggling of renderers
+      on and off, e.g. when pressing escape multiple times to switch between
+      text and graphics.
+    + 0011-drm-Remove-unnecessary-reset_scan_out_buffer_if_need.patch:
+      See the patch for a detailed description, but it avoids some cases of
+      renderers becoming active unnecessarily, which is related to...
+    + 0013-device-manager-don-t-watch-for-udev-events-when-deac.patch:
+      Don't process udev events after we've been deactivated. These can cause
+      renderers to activate, which might make them claim DRM master and never
+      release it, causing wayland / Xorg to fail. (LP: #1795637)
+  * git_ensure_tty_closed_0a662723.patch:
+    + Re-cherry-picked, as it had been rebased before. The filename is now a
+      lie, since I took the commit instead of the merge, but kept as-is for
+      a more sane diff.
+
+ -- Iain Lane <iain.lane@canonical.com>  Wed, 10 Oct 2018 20:40:30 +0100
+
+plymouth (0.9.3-1ubuntu9) cosmic; urgency=medium
+
+  * debian/patches/git_move_renderer_deactivate_778e0fb7.patch: move the
+    ply_device_manager_deactivate_renderers() calls into hide_splash(). This
+    makes sure it is run in all three of the likely code-paths to deactivating
+    plymouth's splash, and ensures objects are in the right state when
+    deactivating on close. (LP: #1794292)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 01 Oct 2018 11:46:00 -0400
+
+plymouth (0.9.3-1ubuntu8) cosmic; urgency=medium
+
+  * debian/patches/git_ensure_tty_closed_0a662723.patch: ensure tty is closed
+    on deactivate. (LP: #1767918) 
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 11 Sep 2018 18:56:37 -0400
+
+plymouth (0.9.3-1ubuntu7) bionic; urgency=medium
+
+  * debian/patches/misc-changes.patch: Drop call to stop_animation as it would
+    unreference a bunch of variables and may cause a crash writing a NULL VMA.
+    (LP: #1745406)
+
+ -- Brian Murray <brian@ubuntu.com>  Thu, 12 Apr 2018 17:07:36 -0700
+
+plymouth (0.9.3-1ubuntu6) bionic; urgency=medium
+
+  * Drop references to dejavu fonts in the initramfs hook; our themes only
+    ever use the Ubuntu font, and any other themes that want a different
+    font should handle this themselves.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 02 Apr 2018 11:19:15 -0700
+
+plymouth (0.9.3-1ubuntu5) bionic; urgency=medium
+
+  * Move the Ubuntu font, dejavu font, fontconfig dependencies to
+    plymouth-label package, such that any "graphical" theme based on
+    plymouth label has the right fonts, e.g. the src:lubuntu-artwork
+    themes. LP: #1592405
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sun, 01 Apr 2018 23:28:23 +0100
+
+plymouth (0.9.3-1ubuntu4) bionic; urgency=medium
+
+  * debian/patches/timeout-for-ping.ptach: Don't wait forever for a reply from
+    a ping command. (LP: #1705345)
+
+ -- Brian Murray <brian@ubuntu.com>  Fri, 30 Mar 2018 07:41:54 -0700
+
+plymouth (0.9.3-1ubuntu3) bionic; urgency=medium
+
+  * Make the Ubuntu font the default sans-serif & mono fonts. LP: #1592405
+  * Adjust title of ubuntu-text theme.
+  * In the ubuntu-logo theme fallback to sans-serif font, if Ubuntu font
+    is not available.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sun, 25 Mar 2018 22:00:14 +0100
+
+plymouth (0.9.3-1ubuntu2) bionic; urgency=medium
+
+  * Make the lsb-release triggers interest-noawait, so that we don't block
+    configuration of an Essential: yes package during upgrades.
+    LP: #1750465.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 20 Mar 2018 23:15:58 -0700
+
+plymouth (0.9.3-1ubuntu1) bionic; urgency=medium
+
+  * Merged from debian unstable (second time ever…) Remaining changes:
+    - include ubuntu theme logos:
+      themes/ubuntu-logo/*, debian/source/include-binaries.
+    - debian/libplymouth4.apport: add Apport hook.
+    - Ship ubuntu-logo instead of debian-logo (debian/rules and
+      debian/local/plymouth.hook).
+    - Ship debian/source_plymouth.apport apport hook (debian/rules).
+    - Add plymouth-label as a separate package and makes themes depending on
+      it (debian/control, debian/plymouth-label.install,
+      debian/plymouth-themes.install).
+    - As log-viewer is disabled by default upstream and now in debian, don't
+      ship its man page (debian/plymouth.links).
+    - Ship plymouth-theme-ubuntu-logo and plymouth-theme-ubuntu-text specific
+      themes (debian/plymouth-theme-ubuntu-* and debian/control) and add
+      Recommends on it | plymouth-theme to accommodate flavors.
+    - Remove debian/patches/0003-default-theme.patch as we handle our defaults
+      via alternatives. (and refresh debian/patches/0008-show-delay.patch)
+    - debian/patches/misc-changes.patch: old undocumented inline changes.
+      export a new symbol added in debian/libplymouth4.symbols.
+    - debian/patches/avoid-sigpipe.patch:
+      Use first a socket connection before fallbacking to regular write()
+    - debian:patches/details-short-prompt.patch: When we display bullets in the
+      ubuntu details theme, shorten the prompt.
+    - debian/patches/details-remove-separator.patch: Removed explicit printing
+      of ':'.
+    - debian/patches/details-update-status.patch: Implement update status (U)
+      splash plugin function for details plugin, imply display those updates
+      as text messages.
+    - debian/patches/initramfsless-boot.patch: support intramfsless boot.
+    - debian/patches/fix-split-writes.patch: fix split writes for long server
+      responses.
+    - debian/patches/ubuntu-add-splash-option.patch: add "splash" option as a
+      condition to trigger plymouth.
+    - debian/rules:
+      - disable optimization is noopt found in $DEB_BUILD_OPTION
+      - enable -Werror
+      - use ubuntu-themes background color
+    - debian/local/<initramfs scripts>: export OPTION=FRAMEBUFFER for user's
+      command line argument explicitly disabling framebuffer.
+    - We use alternatives instead of plymouth-set-default-theme tool:
+      + debian/plymouth-themes.{prerm,postinst}: ensure we select one default
+       plymouth logo and text themes through alternatives even when we remove
+       ubuntu-base ones.
+      + debian/rules, debian/plymouth.{install,links), don't ship non
+        non alternative-based theme policy files and tools.
+      + update plymouth.README.Debian to tell to use update-alternative
+        instead of set-default-theme
+      + change debian/local/plymouth.hook to use update-alternative to get
+        default theme instead of set-default-theme. Also, don't copy
+        deleted files to initramfs.
+    - Add Breaks: against older themes versions as they are shipping in /lib
+      instead of /usr/share.
+    - ubuntu old changelog containing debian-like packaging version has been
+      copied to debian/changelog.ubuntu.old in the source package.
+    - Remove dependency on initramfs-tools | dracut.
+    - debian/plymouth-theme-ubuntu-text.postinst: Only remove the leftover
+      generated files when upgrading, not when triggered.
+    - debian/local/plymouth.init-premount: Don't start plymouth if "splash" is
+      not present on the kernel command line. This makes initrd behaviour
+      consistent with what happens at boot (see ubuntu-add-splash-option.patch).
+      Fixes password prompts when not booting with "splash".
+    - Add missing replaces due to apport hook move
+    - debian/local/plymouth.hook:
+      + protect when there is no alternative configured
+      + handle having the minimum dependency packages installed (no font)
+        when setting either no graphical theme or ubuntu-text one as default.
+      + Fix kernel updates on some weird configurations where there is
+        a plymouth theme alternative setup pointing to a non existing theme.
+      + adapt to handle text flavor plugin, copying the ubuntu-text module
+      + be more resilient if there is only one plymouth theme configured
+        (default or text) or none.
+      + disable harmless (in the ubuntu case, where we control supported official
+        and flavors themes) warning which confuses users for flavors not using
+        a compiled text theme
+      + Fix hook script to not print warnings about label.so when using the
+        ubuntu-text theme.
+      + ensure that whenever configuration order is, we only build the
+        initramfs if we have a default and text themes.
+
+  * Add a patch to unconditionally set DeviceTimeout to a non-zero value
+    to prevent plymouthd asserts on boot.
+  * Use newer syntax to update the root fs.
+  * Run plymouth in debug mode and store the log in /run/plymouth.
+  * Drop the old ubuntu-logo-scale-2 "manual" hidpi theme, superseeded by
+    hidpi support in plymouth.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 17 Jan 2018 13:37:16 +0000
+
+plymouth (0.9.3-1) unstable; urgency=medium
+
+  [ Laurent Bigonville ]
+  * debian/watch: Bump to version 4 and use the macro's
+  * New upstream version 0.9.3
+  * debian/libplymouth4.symbols: Adjust the symbols file
+  * Refresh the patches and drop the one merged upstream
+
+  [ Scott Moser ]
+  * debian/local/plymouth.hook: add only a single copy of nss libs in
+    initramfs.  (Closes: #874502)
+
+ -- Laurent Bigonville <bigon@debian.org>  Tue, 19 Sep 2017 15:09:29 +0200
+
+plymouth (0.9.2-5) unstable; urgency=medium
+
+  [ Aurélien COUDERC ]
+  * Split labels.so plugin into its own package so debian themes can stop
+    requiring the whole plymouth-themes package
+
+  [ Laurent Bigonville ]
+  * Run wrap-and-sort
+  * debian/gbp.conf: Rename git-buildpackage to buildpackage
+  * debian/control: Bump Standards-Version to 4.0.0 (no further changes)
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 09 Aug 2017 15:20:48 +0200
+
+plymouth (0.9.2-4) unstable; urgency=medium
+
+  [ Laurent Bigonville ]
+  * debian/plymouth.postrm: Remove /var/lib/plymouth/boot-duration on purge
+    (Closes: #815222)
+
+  [ Sjoerd Simons ]
+  * plymouth.hook: Always install drm modules
+
+  [ Laurent Bigonville ]
+  * debian/control: Update the Vcs-* fields and switch to https to please
+    lintian
+  * Drop -dbg package and rely on the automatically built -dbgsym ones
+  * debian/control: Depends against lsb-base to please lintian
+  * debian/control: Bump Standards-Version to 3.9.8 (no further changes)
+  * Drop debian/patches/0007-udev-seat-tag.patch and ensure seat tag is
+    properly applied instead
+  * Fix/workaround red and black artefacts caused by compiler issues on i386
+    (Closes: #801080)
+  * Do not hardcode to the update-initramfs executable anymore
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 18 Dec 2016 11:50:34 +0100
+
+plymouth (0.9.2-3ubuntu17) artful; urgency=medium
+
+  * Remove dependency on initramfs-tools | dracut.  LP: #1716825.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 12 Sep 2017 22:09:59 -0700
+
+plymouth (0.9.2-3ubuntu16) artful; urgency=medium
+
+  * debian/local/plymouth.hook: add only a single copy of nss libs in
+    initramfs.  LP #1714319.
+
+ -- Scott Moser <smoser@ubuntu.com>  Wed, 06 Sep 2017 10:55:55 -0400
+
+plymouth (0.9.2-3ubuntu15) yakkety; urgency=medium
+
+  * Fix hook script to not print warnings about label.so when using the
+    ubuntu-text theme.  LP: #1578006.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 04 May 2016 19:55:22 -0700
+
+plymouth (0.9.2-3ubuntu14) yakkety; urgency=medium
+
+  * No-change rebuild for libpng soname change.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 23 Apr 2016 00:18:35 +0000
+
+plymouth (0.9.2-3ubuntu13) xenial; urgency=medium
+
+  * debian/plymouth-theme-ubuntu-text.postinst: Make rmdir less noisy.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Sat, 16 Apr 2016 14:43:32 -0600
+
+plymouth (0.9.2-3ubuntu12) xenial; urgency=medium
+
+  * debian/plymouth-theme-ubuntu-text.postinst: Only remove the leftover
+    generated files when upgrading, not when triggered.
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Fri, 15 Apr 2016 12:29:06 +0100
+
+plymouth (0.9.2-3ubuntu11) xenial; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - Fix kernel updates on some weird configurations where there is
+      a plymouth theme alternative setup pointing to a non existing theme.
+      (LP: #1532355, #1548254)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 16 Mar 2016 15:25:50 +0100
+
+plymouth (0.9.2-3ubuntu10) xenial; urgency=medium
+
+  * debian/local/plymouth.init-premount: Don't start plymouth if "splash" is
+    not present on the kernel command line. This makes initrd behaviour
+    consistent with what happens at boot (see ubuntu-add-splash-option.patch).
+    Fixes password prompts when not booting with "splash". (LP: #1432265)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 22 Feb 2016 13:15:42 +0100
+
+plymouth (0.9.2-3ubuntu9) xenial; urgency=medium
+
+  * Add missing replaces due to apport hook move (LP: #1531070)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 07 Jan 2016 08:12:20 +0100
+
+plymouth (0.9.2-3ubuntu8) xenial; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - handle having the minimum dependency packages installed (no font)
+      when setting either no graphical theme or ubuntu-text one as default.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 16 Dec 2015 15:42:00 +0100
+
+plymouth (0.9.2-3ubuntu7) xenial; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - protect when there is no alternative configured
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 16 Dec 2015 12:22:17 +0100
+
+plymouth (0.9.2-3ubuntu6) xenial; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - adapt to handle text flavor plugin, copying the ubuntu-text module
+      (LP: #1525841)
+    - be more resilient if there is only one plymouth theme configured
+      (default or text) or none.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 16 Dec 2015 08:27:28 +0100
+
+plymouth (0.9.2-3ubuntu5) xenial; urgency=medium
+
+  * Declare a Conflicts: with broken (and not-deconfigureable) versions of
+    plymouth-theme-lubuntu-text, to work around LP: #1524480.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 11 Dec 2015 14:45:22 -0800
+
+plymouth (0.9.2-3ubuntu4) xenial; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - disable harmless (in the ubuntu case, where we control supported official
+      and flavors themes) warning which confuses users for flavors not using
+      a compiled text theme (LP: #1524937)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Fri, 11 Dec 2015 11:18:29 +0100
+
+plymouth (0.9.2-3ubuntu3) xenial; urgency=medium
+
+  * debian/plymouth-theme-ubuntu-text.postinst: don't fail if the directory
+    /lib/plymouth doesn't exist when we try to remove it, such as when a new
+    install is being bootstrapped.
+
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 09 Dec 2015 17:43:15 -0500
+
+plymouth (0.9.2-3ubuntu2) xenial; urgency=medium
+
+  * debian/local/plymouth.hook:
+    - ensure that whenever configuration order is, we only build the
+      initramfs if we have a default and text themes.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 09 Dec 2015 12:30:47 +0100
+
+plymouth (0.9.2-3ubuntu1) xenial; urgency=medium
+
+  * Merged from debian unstable (first time ever…) Remaining changes:
+    - include ubuntu theme logos:
+      themes/ubuntu-logo/*, debian/source/include-binaries.
+    - debian/libplymouth4.apport: add Apport hook.
+    - Ship ubuntu-logo instead of debian-logo (debian/rules and
+      debian/local/plymouth.hook).
+    - Ship debian/source_plymouth.apport apport hook (debian/rules).
+    - Add plymouth-label as a separate package and makes themes depending on
+      it (debian/control, debian/plymouth-label.install,
+      debian/plymouth-themes.install).
+    - As log-viewer is disabled by default upstream and now in debian, don't
+      ship its man page (debian/plymouth.links).
+    - Ship plymouth-theme-ubuntu-logo and plymouth-theme-ubuntu-text specific
+      themes (debian/plymouth-theme-ubuntu-* and debian/control) and add
+      Recommends on it | plymouth-theme to accommodate flavors.
+    - Remove debian/patches/0003-default-theme.patch as we handle our defaults
+      via alternatives. (and refresh debian/patches/0008-show-delay.patch)
+    - debian/patches/misc-changes.patch: old undocumented inline changes.
+      export a new symbol added in debian/libplymouth4.symbols.
+    - debian/patches/avoid-sigpipe.patch:
+      Use first a socket connection before fallbacking to regular write()
+    - debian:patches/details-short-prompt.patch: When we display bullets in the
+      ubuntu details theme, shorten the prompt.
+    - debian/patches/details-remove-separator.patch: Removed explicit printing
+      of ':'.
+    - debian/patches/details-update-status.patch: Implement update status (U)
+      splash plugin function for details plugin, imply display those updates
+      as text messages.
+    - debian/patches/initramfsless-boot.patch: support intramfsless boot.
+    - debian/patches/fix-split-writes.patch: fix split writes for long server
+      responses.
+    - debian/patches/ubuntu-add-splash-option.patch: add "splash" option as a
+      condition to trigger plymouth.
+    - debian/rules:
+      - disable optimization is noopt found in $DEB_BUILD_OPTION
+      - enable -Werror
+      - use ubuntu-themes background color
+    - debian/local/<initramfs scripts>: export OPTION=FRAMEBUFFER for user's
+      command line argument explicitly disabling framebuffer.
+    - We use alternatives instead of plymouth-set-default-theme tool:
+      + debian/plymouth-themes.{prerm,postinst}: ensure we select one default
+       plymouth logo and text themes through alternatives even when we remove
+       ubuntu-base ones.
+      + debian/rules, debian/plymouth.{install,links), don't ship non
+        non alternative-based theme policy files and tools.
+      + update plymouth.README.Debian to tell to use update-alternative
+        instead of set-default-theme
+      + change debian/local/plymouth.hook to use update-alternative to get
+        default theme instead of set-default-theme. Also, don't copy
+        deleted files to initramfs.
+    - Add Breaks: against older themes versions as they are shipping in /lib
+      instead of /usr/share.
+  * Noticeable changes from previous ubuntu version:
+    - Follow debian in moving all renderers from /lib to /usr/lib 
+    - Follow debian as well in moving all themes from /lib to /usr/share
+      and handle transition removing older /lib/plymouth/theme generated files.
+    - Renamed all ubuntu_logo* to ubuntu-logo* to follow debian naming. Do
+      something comparable with all our assets and adapt scripts to it.
+    - Renamed debian/libplymouth4.apport to debian/source_plymouth.apport
+      as we install it under this name.
+    - Cleaning up deprecated transitions in maintainer scripts and package
+      metadata.
+    - Log viewer has been disabled in upstream build for quite a while and
+      is now not built either in debian. Follow this changes. We can re-enable
+      it if there is a need but systemd logs should be generally enough.
+    - Update ubuntu specific package description to match debian's one.
+    - Following debian change, we disable plymouth splash with !nosplash as
+      a kernel command parameter.
+    - All patches needed some adapation as upstream changed its identation from
+      2 to 8 space characters.
+    - debian/plymouth-theme-ubuntu-text.postrm: clean up generated postinst
+      ubuntu-text plymouth metafile.
+    - we do select one default theme when no ubuntu related themes are
+      installed from the default plymouth theme package (spinner theme). If
+      you don't want to install an ubuntu plymouth theme and select another
+      one from the default set manually, update the alternative.
+    - add missing lsb-release dep on plymouth-theme-ubuntu-text
+  * ubuntu old changelog containing debian-like packaging version has been
+    copied to debian/changelog.ubuntu.old in the source package.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 02 Dec 2015 09:41:06 +0100
+
+plymouth (0.9.2-3) unstable; urgency=medium
+
+  * debian/plymouth.NEWS: Set the proper release for the entry (Closes:
+    #801840)
+  * Add initramfs panic script, this is not yet implemented in the debian
+    initramfs-tools package, but at least we are ready. (See: #602331)
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 15 Nov 2015 13:55:42 +0100
+
+plymouth (0.9.2-2) unstable; urgency=medium
+
+  * debian/plymouth.init: Do not override the TTY during shutdown
+  * Enable I/O multiplexing functionality of plymouth by default as soon as
+    the main package is installed. (Closes: #768329)
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 14 Oct 2015 22:18:57 +0200
+
+plymouth (0.9.2-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.9.2
+  * debian/control: Depends against libgtk-3-dev instead of libgtk2.0-dev
+  * Do not try to build or install the log viewer, it has been dropped
+    upstream
+  * d/p/0007-udev-seat-tag.patch: Refreshed
+  * Drop d/p/0009-use-correct-utf8-multibyte-sequence.patch: Applied Upstream
+  * Drop d/p/0010-revert-systemd-wantedby.patch: Applied Upstream
+  * Drop d/p/libply-splash-core-also-monitor-for-file-removal-in-.patch:
+    Applied Upstream
+  * Drop d/p/utils-Don-t-create-unix-sockets-non-blocking.patch: Applied
+    Upstream
+  * Split libplymouth out of the main plymouth package
+  * Use the default tty for boot and shutdown
+  * Do not install plugins static library files
+  * Move the static libraries and development symlinks from /lib to /usr/lib
+  * plymouth-themes is now an arch:any package, fix the dependencies
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 07 Oct 2015 22:51:55 +0200
+
+plymouth (0.9.0-9) unstable; urgency=medium
+
+  [ Laurent Bigonville ]
+  * debian/control: Add a dependency against init-system-helpers as we are
+    explicitly using deb-systemd-helper in the plymouth postinst script
+    (Closes: #767937)
+  * debian/local/plymouth.hook: Test if the plugin is present on disk before
+    trying to copy it to the initramfs (Closes: #767170)
+  * debian/control: Reword the package description. (Closes: #768350)
+    Thanks to Justin B Rye <justin.byam.rye@gmail.com>
+  * debian/local/plymouth.hook: Properly copy .plymouth file into the
+    initramfs for themes that are not shipping images, this should fix the
+    tribar theme.
+
+  [ Sjoerd Simons ]
+  * debian/patches/debian/patches/utils-Don-t-create-unix-sockets-non-blocking.patch:
+    + Added. Don't open unix socket connections as non-blocking as the read
+    function assume blocking sockets. Fixes plymouth failing to query the
+    password from the user  (Closes: #763276)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon, 17 Nov 2014 22:42:50 +0100
+
+plymouth (0.9.0-8) unstable; urgency=medium
+
+  * Move the script.so from plymouth-themes to the main plymouth package
+    (Closes: #764644)
+  * debian/patches/drop-systemd-vconsole-setup-service.patch: Remove
+    references to systemd-vconsole-setup.service as it isn't shipped in Debian
+    (Closes: #755194)
+  * debian/control: Bump Standards-Version to 3.9.6 (no further changes)
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 26 Oct 2014 01:08:41 +0200
+
+plymouth (0.9.0-7) unstable; urgency=medium
+
+  * Add d/p/libply-splash-core-also-monitor-for-file-removal-in-.patch
+    - Correctly detect the end of coldplugging with udev (>= 213)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 10 Aug 2014 10:36:41 +0200
+
+plymouth (0.9.0-6) unstable; urgency=medium
+
+  * New maintainer (Closes: #756075)
+  * Move the frame-buffer and drm renderers into the main plymouth package and
+    always install them in the initramfs, this should fix the issue where the
+    splash is not shown for some users (Closes: #752752)
+  * Move the libply-splash-graphics library to the main package and the themes
+    related .so files to the -themes package, this is effectively killing the
+    -drm package
+  * Add debian/watch file
+  * debian/rules:
+    - Tell dh_makeshlibs to exclude plugins from shlibs file
+    - Minimize the runtime dependencies by calling dh_autoreconf with
+      --as-needed and passing the same flag to LDFLAGS
+    - Pass --disable-silent-rules to the configure
+  * debian/control:
+    - Fix short description for plymouth-x11 package to please lintian
+    - Use ${misc:Pre-Depends} instead of hardcoding multiarch-support package
+    - Update the Vcs-* fields
+  * debian/local/plymouth.hook: Always copy text.so and details.so in the
+    initramfs as they are used as fallbacks
+  * Add debian/patches/0009-use-correct-utf8-multibyte-sequence.patch: This
+    should fix the character displayed in the text theme (Closes: #756244)
+  * Add plymouth-{themes,x11}.postrm: Also regenerate the initramfs when these
+    two packages are removed
+  * debian/plymouth.dirs: Create /var/lib/plymouth on installation, this
+    directory is needed to store boot-duration file
+  * debian/plymouth.lintian-overrides: Override
+    init.d-script-depends-on-all-virtual-facility, we really want to be the
+    last to be started so the splash screen stays until the end of the boot
+  * Drop debian/patches/0006-initscript-aliases.patch and use symlinks instead
+    to mask the LSB initscripts
+  * debian/plymouth.postinst, d/p/0010-revert-systemd-wantedby.patch: The
+    WantedBy option in the .service files was useless as they are already
+    statically enabled and has been removed, we also need to cleanup i-s-h
+    related files on upgrade
+  * Add debian/gbp.conf file
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 30 Jul 2014 18:08:40 +0200
+
+plymouth (0.9.0-5) unstable; urgency=low
+
+  * I don't care anymore, not worth it.. orphaning.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 25 Jul 2014 16:42:29 +0200
+
+plymouth (0.9.0-4) unstable; urgency=low
+
+  * Dropping old --disable-libkms and --disable-tests configure flags
+    (Closes: #752802).
+  * Setting no delay for fast booting machines (Closes: #752746).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 26 Jun 2014 19:45:22 +0200
+
+plymouth (0.9.0-3) unstable; urgency=low
+
+  * Dropping drm module in initrd (Closes: #752575).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 25 Jun 2014 00:57:49 +0200
+
+plymouth (0.9.0-2) unstable; urgency=low
+
+  * Adding patch to ignore udev seat tags for the time being (Closes:
+    #751726).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 16 Jun 2014 06:40:49 +0200
+
+plymouth (0.9.0-1) unstable; urgency=low
+
+  * Merging upstream version 0.9.0.
+  * Refreshing stderr.patch.
+  * Refreshing default-theme.patch.
+  * Refreshing cmdline.patch.
+  * Removing udevadm.patch, not needed anymore.
+  * Removing deactive.patch, included upstream.
+  * Removing config-parser.patch, included upstream.
+  * Refreshing initscript-aliases.patch.
+  * Renumbering patches.
+  * Adding build-depends to libudev-dev.
+  * Adding build-depends to xsltproc.
+  * Adding build-depends to docbook-xsl.
+  * Ordering removal of unneeded files in rules for more consistency.
+  * Including drm module in initrd, thanks to Lukas Anzinger
+    <l.anzinger@gmail.com> (Closes: #751275).
+  * Adding build-depends to systemd.
+  * Keeping building of static libraries.
+  * Wrapping configure call in rules.
+  * Updating plymouth package contents for new upstream.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 14 Jun 2014 12:48:42 +0200
+
+plymouth (0.9.0-0ubuntu9) vivid; urgency=medium
+
+  * themes/ubuntu-logo/ubuntu-logo.script:
+    update to support fsckd systemd service protocol.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 20 Jan 2015 09:30:07 +0100
+
+plymouth (0.9.0-0ubuntu8) vivid; urgency=medium
+
+  * Add libply-splash-core-also-monitor-for-file-removal-in-.patch:
+    libply-splash-core: also monitor for file removal in udev
+     directory. Ensures that plymouth detects coldplug completion with recent
+     udev (>= 213). Patch cherry-picked from upstream git.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 24 Oct 2014 14:44:11 -0400
+
+plymouth (0.9.0-0ubuntu7) utopic; urgency=low
+
+  * d/p/ubuntu-fix-split-writes.patch -- avoid the client seeing
+    the beginning of our replies before the whole reply is ready for
+    consumption.  This avoids us aborting password lookups even though
+    they were correctly entered. (LP: #1362333)
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Tue, 21 Oct 2014 12:55:18 +0100
+
+plymouth (0.9.0-0ubuntu6) utopic; urgency=medium
+
+  * d/p/ubuntu-seat-terminal-may-be-null.patch -- check that the
+    seat->terminal/keyboard is valid before instantiating a text terminal
+    on it.  (LP: #1371651)
+
+ -- Andy Whitcroft <apw@ubuntu.com>  Thu, 25 Sep 2014 18:31:09 +0100
+
+plymouth (0.9.0-0ubuntu5) utopic; urgency=medium
+
+  * Adjust grub snippet that sets purple background color - set alpha to
+    zero. This corrects early boot theming. Thanks to Yu Ning. (LP:
+    #1308723).
+
+ -- Dimitri John Ledkov <xnox@debian.org>  Sun, 21 Sep 2014 22:28:25 +0100
+
+plymouth (0.9.0-0ubuntu4) utopic; urgency=medium
+
+  * Move the dependency on ttf-ubuntu-font-family from
+    plymouth-theme-ubuntu-logo to plymouth-label, replacing the dependency
+    on fonts-dejavu-core instead of causing us to depend on two different
+    fonts
+  * Readd the plymouth hook, but in the plymouth package instead of the
+    library package to avoid uninstallibility problems during library
+    transitions.  In practice, this hook is only interesting to have if
+    plymouth itself is installed.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 17 Sep 2014 08:40:23 -0700
+
+plymouth (0.9.0-0ubuntu3) utopic; urgency=medium
+
+  * Convert versioned upstart dependency into a versioned Breaks. We ship
+    systemd units too now, and this avoids a hard upstart dependency even
+    in minimal debootstraps/chroots. (LP: #1351306)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 01 Aug 2014 15:12:37 +0200
+
+plymouth (0.9.0-0ubuntu2) utopic; urgency=medium
+
+  * Build without apport hook, and without breaks/replaces libplymouth2,
+    such that rebuilds in the archive can happen with both libplymouths
+    co-installed.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Mon, 14 Jul 2014 10:47:38 +0100
+
+plymouth (0.9.0-0ubuntu1) utopic; urgency=medium
+
+  * New upstream release.
+  * Cherrypick library abi bump.
+  * Change initramfs plymouth pid to integrate with systemd ask pass.
+  * Make libplymouth4 break and replace libplymouth2, apport hook file
+    conflict.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sun, 13 Jul 2014 04:14:05 +0100
+
+plymouth (0.8.8-17) unstable; urgency=low
+
+  * Building with dh-autoreconf, thanks to Fernando Seiti Furusato
+    <ferseiti@br.ibm.com> (Closes: #748988).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 24 May 2014 11:30:48 +0200
+
+plymouth (0.8.8-16) unstable; urgency=low
+
+  * Depending on fonts-dejavu-core alternatively to ttf-dejavu-core
+    (Closes: #743946).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 08 Apr 2014 22:50:39 +0200
+
+plymouth (0.8.8-15) unstable; urgency=low
+
+  * Updating to standards version 3.9.5.
+  * Correcting initscript-aliases.patch description.
+  * Updating year in copyright file.
+  * Building with dh --parallel.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 31 Mar 2014 21:23:53 +0200
+
+plymouth (0.8.8-14) experimental; urgency=low
+
+  * Merging drm themes into plymouth-themes package.
+  * Adding debug package.
+  * Sourcing init-functions in iniscripts.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 18 Sep 2013 10:18:16 +0200
+
+plymouth (0.8.8-13) experimental; urgency=low
+
+  * Updating todo file.
+  * Building without libkms support (Closes: #720560).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 23 Aug 2013 14:17:45 +0200
+
+plymouth (0.8.8-12) experimental; urgency=low
+
+  * Updating todo file.
+  * Updating vcs fields.
+  * Applying slightly modified patch from Sjoerd Simons
+    <sjoerd@debian.org> to use dh-systemd (Closes: #719121).
+  * Applying slightly modified patch from Sjoerd Simons
+    <sjoerd@debian.org> to add aliases to the systemd service so they mask
+    the LSB init scripts.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 12 Aug 2013 10:08:14 +0200
+
+plymouth (0.8.8-11) experimental; urgency=low
+
+  * Adding vcs fields.
+  * Wrapping control fields.
+  * Adding patch from Ray Strode <rstrode@redhat.com> to ignore leading
+    spaces and blank lines in config parser (Closes: #664187).
+  * Updating lintian overrides.
+  * Updating plymouth manpage symlinks.
+  * Adding todo file.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 17 Jul 2013 21:30:52 +0200
+
+plymouth (0.8.8-10) experimental; urgency=low
+
+  * Rebuilding initrd on removal.
+  * Dropping obsolete sysvinit initscript start/stop numbers.
+  * Updating plymouth call on stop for proper shutdown (Closes: #610287,
+    #712543).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 17 Jun 2013 10:36:07 +0200
+
+plymouth (0.8.8-9) experimental; urgency=low
+
+  * Adding alternative dependency to dracut, dracut backend still needs to
+    be done by someone though, patches welcome (Closes: #697432).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 04 Jun 2013 17:34:43 +0200
+
+plymouth (0.8.8-8) experimental; urgency=low
+
+  * Updating again initramfs inclusion of pango for jessie and newer
+    (Closes: #702040, #702900, #704872).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 27 May 2013 19:12:35 +0200
+
+plymouth (0.8.8-7) experimental; urgency=low
+
+  * Updating initramfs inclusion of font-dejavu for jessie and newer
+    (Closes: #707765).
+  * Ordering fontconfig inclusion in initramfs hook.
+  * Updating initramfs inclusion of pango for jessie and newer (Closes:
+    #702040, #702900, #704872).
+  * Adding patch from upstream to return directly when deactivated
+    (Closes: #632737).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 23 May 2013 10:31:12 +0200
+
+plymouth (0.8.8-6) unstable; urgency=low
+
+  * Removing all references to my old email address.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 10 Mar 2013 21:25:31 +0100
+
+plymouth (0.8.8-5) unstable; urgency=low
+
+  * Prefixing patches with four digits.
+  * Trimming diff headers in patches.
+  * Adding patch to update udevadm paths for Debian based systems when
+    using systemd (Closes: #701524).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 27 Feb 2013 18:00:36 +0100
+
+plymouth (0.8.8-4) unstable; urgency=low
+
+  * Updating year in copyright file.
+  * Dropping dpkg compression levels.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 27 Jan 2013 10:13:29 +0100
+
+plymouth (0.8.8-3) unstable; urgency=low
+
+  * Moving /usr/lib to /lib (Closes: #695706).
+  * Dropping pre-wheezy versioned build-depends on dpkg-dev.
+  * Dropping pre-wheezy conflicts and replaces.
+  * Updating to standards version 3.9.4.
+  * Correcting spelling ov NVIDIA in readme.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 12 Dec 2012 09:54:32 +0100
+
+plymouth (0.8.8-2) unstable; urgency=low
+
+  * Correcting mistaken conflicts against console-tools instead of
+    console-common.
+  * Using lsb post functions instead of pre functions (Closes: #691794).
+  * Adding dpkg-source local options.
+  * Temporarily including dummy root account lookup (Closes: #691598).
+  * Dropping conditional multiarch support, not needed anymore for jessie
+    and wheezy backports.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 11 Dec 2012 06:42:10 +0100
+
+plymouth (0.8.8-1) unstable; urgency=low
+
+  * Merging upstream version 0.8.8.
+  * Rediffing default-theme.patch.
+  * Updating cmdline.patch.
+  * Removing os-release-quotes.patch, included upstream.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 27 Oct 2012 19:30:18 +0200
+
+plymouth (0.8.8-0ubuntu18) utopic; urgency=medium
+
+  * Import debian patches, sans default theme. This also brings in systemd
+    units fixes.
+  * Enable systemd units & parallel build.
+  * Synchronise postinst/postrm with debian.
+  * Fold ubuntu-logo patches into one.
+  * Drop autoreconf patch, as we use dh-autoreconf now.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 06 May 2014 19:00:06 +0100
+
+plymouth (0.8.8-0ubuntu17) trusty; urgency=medium
+
+  * Suppress job-name update notifications to plymouthd from
+    plymouth-upstart-bridge. (LP: #1303815)
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 11 Apr 2014 17:01:51 +0100
+
+plymouth (0.8.8-0ubuntu16) trusty; urgency=medium
+
+  [ Steve Langasek ]
+  * Fix debian/patches/tty1-after-boot.patch: when we have multiple
+    non-default console options on the kernel commandline,
+    local_console_terminal will not be set, so we should avoid the resulting
+    assert.  LP: #1160079, LP: #1235231.
+
+  [ Dimitri John Ledkov ] LP: #1292458
+  * debian/patches/use-upstart-private-socket.patch: instead of using
+    system dbus, use private upstart socket in the plymouth-upstart-bridge.
+  * debian/plymouth.plymouth-upstart-bridge.upstart: start
+    plymouth-upstart-bridge on startup, and thus gather a more complete
+    boot.log.
+  * debian/patches/dont-bail-on-dummy-terms.patch: don't bail
+    plymouth-upstart-bridge if TERM is not set and/or running on a dummy
+    terminal, as we can run on those. This makes console-log useful in
+    lxc-containers and actually contain messages from upstart jobs
+    starting and stopping.
+  * debian/patches/no-print-empty-description.patch: do not store
+    description when dbus returns empty string, and thus stop printing
+    empty "Starting... done" messages. LP: #1185560.
+  * debian/plymouth.plymouth-upstart-bridge.upstart: update stop on
+    conditions to stop when plymouth-shutdown finishes.
+  * Make ubuntu-logo theme support scale factor, provide one plymouth
+    theme with scale 1 and another with scale 2, until scale factor can be
+    dynamically detected.
+  * Mark plymouth-upstart-bridge to respawn.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 03 Apr 2014 16:37:29 +0100
+
+plymouth (0.8.8-0ubuntu15) trusty; urgency=medium
+
+  * Update plymouth ubuntu logos to match installer bootsplash and design
+    guidelines (circle of friends is white with orange, not white and
+    transparent thus aubergine).
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 20 Feb 2014 21:42:59 +0000
+
+plymouth (0.8.8-0ubuntu14) trusty; urgency=medium
+
+  * Implement message-less shutdown (LP: #967229):
+    * Refactor plymouth job into plymouth (boot mode) and plymouth-shutdown
+      (shutdown-mode), as the two are two different jobs.
+    * If present, make plymouth-shutdown stop and wait for lightdm to stop.
+    * Add versioned dependency on upstart, which has rc.conf start
+      plymouth-shutdown on shutdown.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 04 Feb 2014 17:07:35 +0000
+
+plymouth (0.8.8-0ubuntu13) trusty; urgency=medium
+
+  * Fix initramfs hook to look in the right path for fonts, now that we
+    don't depend on the transitional ttf-dejavu-core package.  LP: #1262983.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 19 Dec 2013 22:29:18 -0800
+
+plymouth (0.8.8-0ubuntu12) trusty; urgency=low
+
+  * Build using dh-autoreconf.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 06 Dec 2013 16:40:26 +0100
+
+plymouth (0.8.8-0ubuntu11) trusty; urgency=low
+
+  * Implement update status (U) splash plugin function for details plugin,
+    simply display those updates as text messages. (LP: #540645)
+
+ -- Dmitrijs Ledkovs <xnox@ubuntu.com>  Wed, 04 Dec 2013 12:36:46 +0000
+
+plymouth (0.8.8-0ubuntu10) trusty; urgency=low
+
+  * Update font dependency from ttf-dejavu-core to fonts-dejavu-core.
+
+ -- Benjamin Drung <bdrung@ubuntu.com>  Thu, 28 Nov 2013 21:05:57 +0100
+
+plymouth (0.8.8-0ubuntu9) trusty; urgency=low
+
+  * Update plymouth.plymouth-stop.upstart:
+    KDM does no longer support hand over; ensure plymouth quits accordingly.
+
+ -- Harald Sitter <apachelogger@kubuntu.org>  Mon, 18 Nov 2013 02:33:27 +0100
+
+plymouth (0.8.8-0ubuntu8) saucy; urgency=low
+
+  * Tweak the description of the plymouth-ready upstart job.
+  * debian/patches/Fix-missing-prototype-of-ply_get_timestamp.patch:
+    Fix missing prototype of ply_get_timestamp().  LP: #1187318.
+  * Build with -Werror, to prevent bugs like this from sneaking in in the
+    future.
+  * Drop -Wl,--as-needed from build flags, now used by default in the
+    toolchain.
+  * Fix the ubuntu-text plugin to build cleanly (no -Werror=format-security
+    or -Werror=unused-but-set-variable problems).
+  * debian/patches/Miscellaneous-fixes-for-compiler-warnings.patch:
+    Miscellaneous fixes for compiler warnings.
+  * debian/patches/nouveau-framebuffer.patch: we're no longer building with
+    the nouveau backend at all; make the code build without warnings for this
+    case, but leave the patch in place for right now.
+  * src/client/ply-boot-client.c: fix possible uninitialized variable
+    problems.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 01 Aug 2013 08:51:45 +0000
+
+plymouth (0.8.8-0ubuntu7) saucy; urgency=low
+
+  * debian/initramfs-tools/hooks/plymouth: Stop copying the pango modules and
+    *-fc.so, these are included in the main pango shared lib now.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 27 May 2013 15:15:28 +0200
+
+plymouth (0.8.8-0ubuntu6.1) raring-proposed; urgency=low
+
+  * plymouth-ready.conf: Send an event to indicate plymouth is up. Needed
+    to inform login managers that they can start without racing with
+    plymouth-splash. (LP: #982889)
+
+ -- Timo Aaltonen <tjaalton@ubuntu.com>  Fri, 19 Apr 2013 21:55:18 +0300
+
+plymouth (0.8.8-0ubuntu6) raring; urgency=low
+
+  [ Markus Waas ]
+  * Implement display_question callback for ask-question command.
+    (LP: #509384)
+
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Wed, 13 Feb 2013 16:56:49 +0000
+
+plymouth (0.8.8-0ubuntu5) raring; urgency=low
+
+  * Auto-detect the pango directory to accomodate the versioned path.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Tue, 11 Dec 2012 16:19:46 -0700
+
+plymouth (0.8.8-0ubuntu4) raring; urgency=low
+
+  * Drop the dependency on hardware-specific libdrm modules. 
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Mon, 10 Dec 2012 16:50:24 -0700
+
+plymouth (0.8.8-0ubuntu3) raring; urgency=low
+
+  * Convert libplymouth2 and libplymouth-dev to multiarch.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 03 Dec 2012 15:14:00 +0000
+
+plymouth (0.8.8-0ubuntu2) raring; urgency=low
+
+  * Fix dependency s/libdrm-nouveau1a/libdrm-nouveau2/g. Thanks Colin for
+    spotting.
+
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Mon, 26 Nov 2012 01:40:54 +0000
+
+plymouth (0.8.8-0ubuntu1) raring; urgency=low
+
+  [ Colin Watson ]
+  * Make descriptions of non-task Upstart jobs be noun phrases in sentence
+    case, so that they look right in plymouth-upstart-bridge output.
+
+  [ Dmitrijs Ledkovs ]
+  * New upstream release:
+    - drop, applied upstream upstream-add-generic-driver-to-drm-renderer-plugin.patch
+    - drop, applied upstream invalid-event-source-workaround.patch
+    - drop, raring has recent enough drm update-libdrm-nouveau-library-dependency.patch
+    - rebase tty1-after-boot.patch
+    - rebase misc-changes.patch
+  * Update symbols.
+
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Thu, 22 Nov 2012 12:16:46 +0000
+
+plymouth (0.8.6.1-1) unstable; urgency=low
+
+  * Merging upstream version 0.8.6.1.
+  * Removing default-osrelease.patch, included upstream.
+  * Renumbering patches.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 21 Sep 2012 18:43:51 +0200
+
+plymouth (0.8.5.1-8) unstable; urgency=low
+
+  * Adding patch from upstream to strip quotes from /etc/os-release.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 31 Aug 2012 07:44:25 +0200
+
+plymouth (0.8.5.1-7) unstable; urgency=low
+
+  * Abort early when sourcing /lib/lsb/init-functions.d/99-plymouth and
+    plymouth isn't active (Closes: #685437).
+  * Protecting multiarch queries since install files are run with set -
+    e.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 21 Aug 2012 12:06:58 +0200
+
+plymouth (0.8.5.1-6) unstable; urgency=low
+
+  * Using --retain-splash when stopping plymouth on startup, avoids
+    showing console before display manager is up, thanks to Benjamin
+    Stark <benny_stark@live.de> (Closes: #683764).
+  * Adding plymouth specific configuration for lsb msg functions, thanks
+    to Benjamin Stark <benny_stark@live.de> (Closes: #683763).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 03 Aug 2012 18:51:33 +0200
+
+plymouth (0.8.5.1-5) unstable; urgency=low
+
+  * Adding a conflict against console-tools which is about to be removed
+    from the archive and which is apparently to be incompatible with
+    plymouth (Closes: #606132).
+  * Adding modified patch from Luca Capello <luca@pca.it> to allow
+    plymouth details plugin without plymouth-dkms (Closes: #680700,
+    #680689).
+  * Using 'splash' instead of 'plymouth.enable' boot parameter in
+    systemd unit files, thanks to Laurent Bigonville <bigon@debian.org>
+    (Closes: #680517).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 09 Jul 2012 02:10:16 +0200
+
+plymouth (0.8.5.1-4) unstable; urgency=low
+
+  * Correcting systemd configure option in rules (Closes: #679324).
+  * Including systemd files in plymouth package.
+  * Adding desktop-base and plymouth-drm to suggests for plymouth,
+    recommends would have been even nicer but defeats the initial
+    package split.
+  * Also update initramfs for both plymouth-drm and plymouth-x11.
+  * Including all available drm modules in initramfs hook rather than
+    ati and intel only.
+  * Explicitly enable libkms support.
+  * Updating default-theme.patch to not set the theme in
+    /etc/plymouthd.conf as active.
+  * Correcting path for plymouth-update-initrd installation in rules.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 04 Jul 2012 17:09:37 +0200
+
+plymouth (0.8.5.1-3) unstable; urgency=low
+
+  * Using multiarch paths for plymouth renderer in initramfs-tools hook
+    (Closes: #679687, #679938, #679971).
+  * Correcting --with-boot-tty and --with-shutdown-tty configure call in
+    rules with full device name (Closes: #680124).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 04 Jul 2012 00:07:16 +0200
+
+plymouth (0.8.5.1-2) unstable; urgency=low
+
+  * Switching to xz compression.
+  * Enabling systemd support (Closes: #679324).
+  * Sorting configure flags in rules.
+  * Removing old dpkg trigger for update-initramfs.
+  * Updating to standards version 3.9.3.
+  * Updating to debhelper version 9.
+  * Updating copyright file to format version 1.0.
+  * Setting boot and shutdown tty to 7 (Closes: #606077).
+  * Updating debhelper install files for multiarch.
+  * Applying slightly modified patch from Laurent Bigonville
+    <bigon@debian.org> to issue a /bin/plymouth update-root-fs --read-
+    write in order to write the logfiles to the disk (Closes: #678982).
+  * Simplyfing initscripts.
+  * Adding conditional pre-depends on multiarch-support.
+  * Sorting overrides in rules alphabetically.
+  * Updating lintian overrides.
+  * Adding missing dependency to remote_fs in plymouth-log initscript.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 30 Jun 2012 12:44:56 +0200
+
+plymouth (0.8.5.1-1) unstable; urgency=low
+
+  [ Daniel Baumann ]
+  * Using compression level 9 also for binary packages.
+  * Merging upstream version 0.8.5.1 (Closes: #670197):
+  * Dropping parse-etc-debian_version.patch in favour of using /etc/os-
+    release.
+  * Dropping set-default-framebuffer-device-to-dev-fb0.patch, included
+    upstream.
+  * Dropping tty.patch, included upstream.
+  * Rediffing stderr.patch.
+  * Rediffing return-code.patch.
+  * Renumbering patches.
+
+  [ Andreas Henriksson ]
+  * Using /etc/os-release from base-files 6.8 as release file.
+
+  [ Michael Biebl ]
+  * Creating pid file /run/plymouth/pid (Closes: #659438).
+  * Stopping to to load non-existing modules i8042.ko and atkbd.ko
+    (Closes: #659436).
+
+  [ Andreas Henriksson ]
+  * Using x-display-manager variable in LSB header of initscript
+    (Closes: #669032).
+  * Adding --enable-log-viewer configure flag to continue building it.
+  * Add new plymouth-themes-spinner package
+  * Adding patch patch to fix upstream error handling code when os-
+    release is missing.
+  * Including /etc/os-release in initramfs-tools hook if existing.
+  * Exit early in initramfs-tools hook if the plymouth module is not
+    existing (Closes: #629416).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 21 Jun 2012 12:37:05 +0200
+
+plymouth (0.8.4-0ubuntu3) quantal; urgency=low
+
+  * Drop kubuntu-text, moved to kubuntu-default-settings (LP: #1005512)
+  * Refresh autoreconf.patch to pick up the removal of the above theme.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Thu, 16 Aug 2012 01:41:26 -0600
+
+plymouth (0.8.4-0ubuntu2) quantal; urgency=low
+
+  * debian/patches/upstream-add-generic-driver-to-drm-renderer-plugin.patch:
+    - Add the generic driver to the drm render plugin, which is the only one
+      supported on latest upstream, working also for omap. Not yet disabling
+      the others, as they can still be used in case the generic one fails,
+      which keeps plymouth safe for x86 (LP: #1018907)
+  * debian/patches/update-libdrm-nouveau-library-dependency.patch:
+    - Old nouveau driver is now called libdrm_nouveau1 at the latest libdrm
+      package (>= 2.4.38)
+  * Refresh autoreconf.patch.
+
+ -- Ricardo Salveti de Araujo <ricardo.salveti@linaro.org>  Thu, 16 Aug 2012 01:53:54 -0300
+
+plymouth (0.8.4-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+    - drop patches originating from or merged upstream: debug-fixes.patch,
+      gcc45-arith-workaround.patch,
+      main-Don-t-watch-for-keyboard-input-if-no-keyboard.patch,
+      upstart-bridge.patch, upstream-*.patch
+    - debian/rules: pass --with-log-viewer to explicitly request its
+      inclusion.
+    - update libplymouth2.symbols.
+  * debian/patches/initramfsless-boot.patch: clean up our failure path when
+    /dev/pts isn't available yet:
+    - don't free a buffer that we might use again later
+    - once we've created the session object, keep it around, instead of
+      freeing it again and leaving a dangling reference to it in the loop
+      exit handler list.
+    it's not clear if this was working before, but it definitely hits an
+    assert now.  LP: #981314.
+  * Build with --disable-libdrm_intel on !x86, to avoid an unnecessary
+    dependency.  LP: #927424.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 05 May 2012 01:19:02 +0000
+
+plymouth (0.8.3-20) unstable; urgency=low
+
+  * Updating maintainer and uploaders fields.
+  * Removing vcs fields.
+  * Removing references to my old email address.
+  * Compacting copyright file.
+  * Removing superfluous README.source.
+  * Adding note about nvidia cards in readme.
+  * Updating to standards version 3.9.2.
+  * Switching architecture fields to linux-any (Closes: #611593,
+    #637034).
+  * Exit early in initscript if package was removed but not purged,
+    thanks to Maximilian Gaukler <development@maxgaukler.de> (Closes:
+    #617857).
+  * Adding patch from Michael Prokop <mika@debian.org> to fix wrong
+    return code of plymouth-set-default-theme (Closes: #605018).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 08 Sep 2011 15:34:42 +0200
+
+plymouth (0.8.3-19) unstable; urgency=low
+
+  * Applying patch from Steve Langasek <steve.langasek@ubuntu.com> to support
+    multiarch (Closes: #634253).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 30 Jul 2011 20:55:29 +0200
+
+plymouth (0.8.3-18) unstable; urgency=low
+
+  * Switching to source format 3.0 (quilt).
+  * Replacing debian logo with a swirl (Closes: #603286).
+  * Rediffing set-default-framebuffer-device-to-dev-fb0.patch.
+  * Adding debian-logo.png to source/include-binaries.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 20 Nov 2010 16:27:22 +0100
+
+plymouth (0.8.3-17) unstable; urgency=medium
+
+  [ Julien Cristau ]
+  * Cherry-pick "[terminal] don't stomp over original tty lock
+    settings". Prevents setting tty1 in 'echo' mode after boot (Closes:
+    595178).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 13 Oct 2010 18:01:24 +0200
+
+plymouth (0.8.3-16) unstable; urgency=low
+
+  * Correcting themes depends (Closes: #599411).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 07 Oct 2010 15:02:11 +0200
+
+plymouth (0.8.3-15) unstable; urgency=low
+
+  * Updating to debhelper version 8.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 07 Oct 2010 08:15:17 +0200
+
+plymouth (0.8.3-14) experimental; urgency=low
+
+  * Adding conflicts/replaces for old plymouth on plymouth-x11 (Closes:
+    #598733).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 02 Oct 2010 11:41:37 +0200
+
+plymouth (0.8.3-13) experimental; urgency=low
+
+  * Reverting patch from upstream for make plymouth work with systemd,
+    made plymouth break otherwise (Reopen: #596680).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 01 Oct 2010 07:18:25 +0200
+
+plymouth (0.8.3-12) experimental; urgency=low
+
+  * Adding patch from upstream prepared by Michael Biebl
+    <biebl@debian.org> to make plymouth work with systemd (Closes:
+    #596680).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 14 Sep 2010 21:21:39 +0200
+
+plymouth (0.8.3-11) experimental; urgency=low
+
+  * Adding symlink from plymouth.8 to plymouth-set-default-theme.8
+    (Closes: #596570).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 12 Sep 2010 19:29:47 +0200
+
+plymouth (0.8.3-10) experimental; urgency=low
+
+  * Making pango build-depends unversioned, not needed anymore.
+  * Splitting out kms stuff into plymouth-drm, this allows to have the
+    plymouth package containing everything for the text splash without
+    any depends other than libc6 and initramfs-tools.
+  * Correcting conditionals for text theme in initramfs hook.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 11 Sep 2010 00:01:15 +0200
+
+plymouth (0.8.3-9) unstable; urgency=high
+
+  * Removing superfluous reference to intel_agp and drm in
+    README.Debian, thanks to Julien Cristau <jcristau@debian.org>.
+  * Shipping preconfigured plymouthd.conf instead of setting the default
+    theme in postinst which doesn't work reliable (Closes: #594999).
+  * Correcting typo in fontconfig-config package name in previous
+    changelog entry.
+  * Avoid kms bloat if text theme is used (the text theme only works in
+    non-kms mode anyway).
+  * Also setting default plugin to text in plymouthd.defaults.
+  * Downgrading fontconfig-config and ttf-dejavu-core depends to
+    recommends, they are not needed when running the default text
+    plugin.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 10 Sep 2010 22:06:46 +0200
+
+plymouth (0.8.3-8) unstable; urgency=low
+
+  [ Anisse Astier ]
+  * Adding fontconfig-config to depends.
+
+  [ Daniel Baumann ]
+  * Updating postinst script to deal with not just with empty but also
+    with the uninitialized theme.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 06 Sep 2010 13:31:39 +0200
+
+plymouth (0.8.3-7) unstable; urgency=low
+
+  * Calling plymouthd with --attach-to-session (Closes: #575177,
+    #593408, #595178).
+  * Setting default plugin to text if nothing else was specified
+    (Closes: #594999).
+  * Adding shutdown and restart messages in initscript when using text
+    plugin, thanks to Leszek Lesner <leszek.lesner@googlemail.com>.
+  * Updating to standards version 3.9.1.
+  * Updating README.Debian for plymouth 0.8.
+  * Adding information for AMD (ATI) graphic cards to README.Debian,
+    thanks to Sebastian Leske <Sebastian.Leske@sleske.name> (Closes:
+    #591623).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 06 Sep 2010 12:30:29 +0200
+
+plymouth (0.8.3-6) unstable; urgency=low
+
+  * Removing old conflicts and replaces.
+  * Correcting spelling typo in package description (Closes: #592866).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 14 Aug 2010 12:44:50 +0200
+
+plymouth (0.8.3-5) unstable; urgency=high
+
+  [ Daniel Baumann ]
+  * Updating standards version to 3.9.0.
+
+  [ Anisse Astier ]
+  * Starting plymouth as late as possible in order to have it on screen
+    until X is started on an user mode setting system.
+
+  [ Daniel Baumann ]
+  * Adding depends to ttf-dejavu-core, thanks to Anisse Astier
+    <anisse@astier.eu>.
+
+  [ Michael Prokop ]
+  * Only copying /etc/plymouth/plymouthd.conf in hook if it exists
+    (Closes: #587557).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 31 Jul 2010 03:17:35 +0200
+
+plymouth (0.8.3-4) unstable; urgency=medium
+
+  * Correcting lsb headers in initscript (Closes: #584204).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 23 Jun 2010 20:58:56 +0200
+
+plymouth (0.8.3-3) unstable; urgency=low
+
+  * Restricting plymouth to amd64 and i386 only for the time being.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 08 Jun 2010 12:41:47 +0200
+
+plymouth (0.8.3-2) unstable; urgency=low
+
+  * Adding patch to use fd for stdout instead of device node in scripts
+    (Closes: #581649).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 30 May 2010 23:01:47 +0200
+
+plymouth (0.8.3-1) unstable; urgency=low
+
+  * Merging upstream version 0.8.3.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 07 May 2010 14:20:23 +0200
+
+plymouth (0.8.2-2ubuntu30) precise; urgency=low
+
+  [ Philip Muškovac ]
+  * debian/patches/kubuntu-text.patch:
+    Change kubuntu-text theme to new grey (LP: #979824)
+
+  [ James Hunt ]
+  * Temporary work-around that minimizes chance of referencing invalid
+    sources (LP: #553745). 
+
+ -- James Hunt <james.hunt@ubuntu.com>  Fri, 13 Apr 2012 15:11:36 +0100
+
+plymouth (0.8.2-2ubuntu29) precise; urgency=low
+
+  * debian/patches/main-Don-t-watch-for-keyboard-input-if-no-keyboard.patch:
+    Cherry-pick from upstream; don't watch for keyboard input if no keyboard
+    is set, as is the case when should_ignore_show_splash_calls() returns
+    true, fixing an assert failure.  LP: #619021.
+  * debian/ubuntu-logo.png: remove in favor of the logo included in the
+    ubuntu-logo theme which has the correct branding.  This has no impact on
+    the default user experience, but fixes the branding when using certain
+    non-default themes available in the archive.  (We still ship a copy in
+    the main plymouth package for this reason.)  LP: #667262.
+  * debian/patches/tty1-after-boot.patch: Switch back to tty1 on exit if
+    started with vt.handoff.  Closes LP: #913731.
+  * debian/plymouth-theme-{k,}ubuntu-text.{triggers,postinst}: regenerate
+    our theme when /etc/lsb-release changes.  LP: #957380.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 11 Apr 2012 04:59:54 +0000
+
+plymouth (0.8.2-2ubuntu28) oneiric; urgency=low
+
+  * debian/libplymouth2.apport: collect boot.log and plymouth-debug.log if it
+    exists (LP: #860371)
+
+ -- Brian Murray <brian@ubuntu.com>  Wed, 28 Sep 2011 07:23:45 +0200
+
+plymouth (0.8.2-2ubuntu27) oneiric; urgency=low
+
+  * debian/plymouth.upstart: don't start up on 'stopped gdm' or 'stopped
+    lightdm' since on upgrade one of these two will always be stopped at
+    system boot.  Instead look for a 'desktop-shutdown' event, and declare
+    appropriate Breaks: against earlier versions of gdm, lightdm, kdm and
+    lxdm that don't implement this event.  LP: #854329.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 25 Sep 2011 22:58:30 -0700
+
+plymouth (0.8.2-2ubuntu26) oneiric; urgency=low
+
+  * Add direct dependency on ttf-dejavu-core since that's the font used in
+    the initramfs-tools hook, instead of trusting that fontconfig-config
+    pulls in the right alternative.  LP: #828027.
+  * debian/initramfs-tools/scripts/init-bottom/plymouth: /run doesn't get
+    moved to ${rootmnt}/run until *after* our script has run, so don't try
+    to check for it before calling plymouth update-root-fs - it's not like
+    we would ever want to not pivot root, anyway.  Fixes the fact that we
+    haven't been getting /var/log/boot.log for months now.
+  * debian/plymouth.plymouth-stop.upstart: if stopped by lightdm, let
+    lightdm handle the VT transition as it's able, so we get flicker-free
+    boot.  LP: #849954.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 19 Sep 2011 10:56:55 -0700
+
+plymouth (0.8.2-2ubuntu25) oneiric; urgency=low
+
+  * debian/libplymouth2.apport: include grub configuration file and the
+    contents of /proc/cmdline when reporting a bug with apport (LP: #787685)
+
+ -- Brian Murray <brian@ubuntu.com>  Tue, 19 Jul 2011 09:57:35 -0700
+
+plymouth (0.8.2-2ubuntu24) oneiric; urgency=low
+
+  * initramfs scripts: /dev/.initramfs/ → /run/initramfs transition.
+    (LP: #810956)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 15 Jul 2011 12:26:00 +0200
+
+plymouth (0.8.2-2ubuntu23) natty-proposed; urgency=low
+
+  * details/plugin.c: On every key stroke, the "details" plugin in plymouth
+    clears only the current line before overwriting it with the password
+    prompt. If the prompt is multilined then the last line ends up being
+    overwritten but the previous lines are repeated. Re-printing only the
+    last line of the password prompt on every keystroke. (LP: #566818)
+  * details/plugin.c: Removed the explicit printing of ':'. Expected to be a
+    part of the prompt.
+
+ -- Surbhi Palande <surbhi.palande@canonical.com>  Thu, 21 Apr 2011 09:54:07 +0300
+
+plymouth (0.8.2-2ubuntu22) natty; urgency=low
+
+  * Install slave alternative for plymouth-theme-ubuntu-logo, telling GRUB
+    to set an aubergine background (LP: #696915).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 15 Apr 2011 14:35:17 +0100
+
+plymouth (0.8.2-2ubuntu21) natty; urgency=low
+
+  * Tolerate pre-multiarch versions of pango (LP: #741832).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 28 Mar 2011 11:07:14 +0100
+
+plymouth (0.8.2-2ubuntu20) natty; urgency=low
+
+  * Backport from upstream:
+    - [event-loop] Add reference count to event sources (with any luck, this
+      will fix LP: #553745).
+    - [event-loop] Handle more than 8 events at once (LP: #518926).
+    - [terminal] Force enter to output newline.
+    - [terminal] Add OPOST to tty attributes (LP: #546251).
+    - [terminal] Don't set ISTRIP in terminal attributes.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 24 Mar 2011 14:17:20 +0000
+
+plymouth (0.8.2-2ubuntu19) natty; urgency=low
+
+  * debian/initramfs-tools/hooks/plymouth: handle the nss_files modules
+    being in the multiarch library path instead of in /lib.
+  * Build-depend on dpkg-dev (>= 1.16.0~ubuntu4) so we can check the 
+    multiarch path at build time.
+  * Also handle multiarch paths for pango modules.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 23 Mar 2011 15:18:47 -0700
+
+plymouth (0.8.2-2ubuntu18) natty; urgency=low
+
+  [ Colin Watson ]
+  * Split nouveau patches out from misc-changes.patch.
+  * If plymouth:force-drm is found on the kernel command line, use the drm
+    renderer even on nouveau.  This allows us to test fixes for LP #539655.
+    See also LP #533135.
+
+  [ Andy Whitcroft ]
+  * Make splash dependant on either a graphics device appearing or
+    udev-graphics-fallback completing.  (LP: #702090)
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 18 Mar 2011 22:35:41 +0000
+
+plymouth (0.8.2-2ubuntu17) natty; urgency=low
+
+  * Rework the avoid-sigpipe patch to first attempt to use send(), and
+    then fall back to write in case of ENOTSOCK. (LP: #718044).
+
+ -- Soren Hansen <soren@ubuntu.com>  Mon, 14 Feb 2011 13:30:00 +0100
+
+plymouth (0.8.2-2ubuntu16) natty; urgency=low
+
+  * Rename .plymouth files to .plymouth.in.
+  * Fold changes from debian-changes that went missing back into patches to
+    which they pertain.
+  * Refresh autoreconf.patch.
+
+ -- Soren Hansen <soren@ubuntu.com>  Sat, 12 Feb 2011 15:25:03 +0100
+
+plymouth (0.8.2-2ubuntu15) natty; urgency=low
+
+  * Pass MSG_NOSIGNAL when writing to Plymouth. This stops clients from
+    getting SIGPIPE'd when Plymouth goes away unexpectedly. (LP: 717153)
+  * Refresh autoreconf.patch.
+
+ -- Soren Hansen <soren@ubuntu.com>  Sat, 12 Feb 2011 15:00:00 +0100
+
+plymouth (0.8.2-2ubuntu14) natty; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Adjust the text plymouth themes to only ship a template, which then gets
+    used to generate the actual message from the output of lsb_release.
+  * debian/plymouth-theme-kubuntu-text.postinst,
+    debian/plymouth-theme-ubuntu-text.postinst:
+    - Build on the changes to set the text and colors for the -text themes via
+      settings; attempt to properly set the current Ubuntu version according to
+      what LSB tells us.
+  * debian/plymouth-theme-kubuntu-text.prerm,
+    debian/plymouth-theme-ubuntu-text.prerm:
+    - Clean up the actual theme config file for ubuntu-text themes since it's
+      generated at install time.
+  * debian/plymouth-theme-kubuntu-text.postrm,
+    debian/plymouth-theme-ubuntu-text.postrm:
+    - Don't remove /lib/plymouth and /lib/plymouth/themes, it will be done by
+      the plymouth package itself on removal.
+
+  [ Steve Langasek ]
+  * Clean up the prerm scripts:
+    - don't use this horrible case $1 meme that infests maintainer 
+      scripts everywhere (including the other scripts in this package :)
+    - use rm -f instead of ignoring failures
+    - avoid useless exit 0 at the end
+  * While we're at it, clean up the other postrm scripts by moving
+    update-alternatives calls to new prerms, and clean up the unnecessary
+    boilerplate in the remaining postrms.
+  * debian/initramfs-tools/hooks/plymouth: don't overwrite /etc/passwd in
+    the initramfs if it's already present, since ours is just there as an
+    NSS stub and some other hooks may care about the contents.  Also, as
+    long as we're setting this up, use /bin/sh for the shell instead of
+    /bin/bash since that actually exists in the initramfs.  LP: #715482
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 09 Feb 2011 13:26:13 -0800
+
+plymouth (0.8.2-2ubuntu13) natty; urgency=low
+
+  * Switch dependency from libdrm-nouveau1 to libdrm-nouveau1a.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Wed, 26 Jan 2011 02:30:16 +0000
+
+plymouth (0.8.2-2ubuntu12) natty; urgency=low
+
+  * Build-depend on libdbus-1-dev and libncursesw5-dev for the Upstart
+    bridge.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 21 Jan 2011 19:09:43 +0000
+
+plymouth (0.8.2-2ubuntu11) natty; urgency=low
+
+  * Print messages when Upstart jobs start or stop (LP: #616403).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 21 Jan 2011 18:10:46 +0000
+
+plymouth (0.8.2-2ubuntu10) natty; urgency=low
+
+  [ Martin Pitt ]
+  * gcc45-arith-workaround.patch: Add upstream bug link.
+
+  [ Colin Watson ]
+  * Backport a couple of patches from upstream to make debugging less
+    painful:
+    - Fix parsing of plymouth:debug=file:.
+    - Handle plymouth:splash or plymouth:debug as last argument.
+  * Rearrange patch handling in a way that doesn't cause dpkg-source to
+    entirely shuffle the contents of debian/patches/debian-changes every
+    time we upload, and to make it easier to merge in future:
+    - Split debian-changes (mostly) into separate patches.  A small
+      misc-changes.patch file remains with some patches I didn't have time
+      to analyse, but the bulk of this can now be handled with separate
+      quilt operations.  (As usual, if you don't use quilt, patches will end
+      up in a debian-changes patch at the end of the patch series.)
+    - Remove .pc from revision control; it's too noisy and hard to keep
+      consistent.  Use
+      http://people.canonical.com/~cjwatson/dpkg-quilt-setup after checking
+      out from revision control to set up quilt.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 21 Jan 2011 14:10:49 +0000
+
+plymouth (0.8.2-2ubuntu9) natty; urgency=low
+
+  [ Steve Langasek ]
+  * debian/control: set Vcs-Bzr to forestall future mis-uploads
+
+  [ Martin Pitt ]
+  * Add gcc45-arith-workaround.patch: Work around a gcc-4.5 behaviour
+    change/bug(?). Also, this change is actually correct, as the arithmethics
+    can easily overflow a 16 bit value. (LP: #685352)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 14 Jan 2011 12:09:05 -0600
+
+plymouth (0.8.2-2ubuntu8) natty; urgency=low
+
+  * Adjust ubuntu-logo background colour very slightly: the official "dark
+    aubergine" background colour value is #2c001e, whose red component is
+    closer to 17% than 16%.  The difference is noticeable when GRUB is set
+    up to show its own background colour.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 13 Dec 2010 13:57:26 +0000
+
+plymouth (0.8.2-2ubuntu7) natty; urgency=low
+
+  [ Steve Langasek ]
+  * Refactor ubuntu-text theme to allow setting colors and text via settings
+    in the plymouth theme file, and have plymouth-theme-kubuntu-text depend
+    on ubuntu-text instead of duplicating the code.
+  * Bump the version strings from 10.10 to 11.04.  LP: #683994.
+
+  [ Michael Terry ]
+  * debian/plymouth.plymouth-stop.upstart,
+    debian/plymouth.upstart:
+    - Recognize uxlaunch as a display manager. (LP: #609163)
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 03 Dec 2010 15:06:17 -0800
+
+plymouth (0.8.2-2ubuntu6) natty; urgency=low
+
+  * debian/plymouth.plymouth-stop.upstart:
+  * debian/plymouth.upstart:
+    - Add LightDM
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 01 Dec 2010 14:52:57 +1100
+
+plymouth (0.8.2-2ubuntu5.1) maverick-proposed; urgency=low
+
+  * Generate a dummy NSS stack in the initrd to suppress a glib warning
+    generated by the label control (LP: #649917).
+
+ -- Evan Broder <evan@ebroder.net>  Fri, 29 Oct 2010 06:39:20 -0700
+
+plymouth (0.8.2-2ubuntu5) maverick; urgency=low
+
+  * Add kubuntu-text theme, closes LP: #613636
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Fri, 24 Sep 2010 13:07:19 +0100
+
+plymouth (0.8.2-2ubuntu4) maverick; urgency=low
+
+  * src/plugins/splash/details/plugin.c: Implement display_message, either
+    by displaying it immediately or by queueing it for later display in the
+    event that we're already waiting for user input (LP: #563916).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Wed, 08 Sep 2010 01:20:35 +0100
+
+plymouth (0.8.2-2ubuntu3) maverick; urgency=low
+
+  * src/plugins/splash/ubuntu-text/plugin.c: Change Ubuntu version to 10.10
+    (LP: #588633).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 25 Jun 2010 15:56:04 +0100
+
+plymouth (0.8.2-2ubuntu2) lucid; urgency=low
+
+  * Don't call ply_boot_client_process_pending_requests on flush, because
+    ply_event_loop_process_pending_events already calls this for us when the
+    fd is writable - so calling it again causes a race condition and an
+    assertion failure if _process_pending_events has already cleared the
+    event queue for us.  LP: #570289.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 27 Apr 2010 09:35:00 +0100
+
+plymouth (0.8.2-2ubuntu1) lucid; urgency=low
+
+  * src/main.c: if the splash screen isn't up yet, queue message requests
+    instead of discarding them.  LP: #507881.
+  * src/client/ply-boot-client.c: some replies may be sent out of order
+    because they depend on user input, so pay attention to the message type
+    when picking the handler instead of handing the response to the first
+    handler in the list; without this, cancelling fsck in mountall will
+    never work.  LP: #562811.
+  * src/client/ply-boot-client.c: instead of trying to read from the server
+    pipe if there are any outstanding requests, call
+    ply_event_loop_process_pending_events() which already knows whether we
+    can read from the pipe.  LP: #559761.
+  * add the pixel display bpp symbols to libplymouth2.symbols with a correct
+    version, so that packages using them don't wind up with overly-strict
+    dependencies on libplymouth2.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 25 Apr 2010 16:15:37 +0100
+
+plymouth (0.8.2-2) lucid; urgency=low
+
+  * debian/initramfs-tools/hooks/plymouth: 'readlink -f' returns the
+    original filename in the case of a non-existent file, so test for the
+    existence of the filename it returns rather than merely whether it's
+    non-empty.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 16 Apr 2010 14:23:45 +0100
+
+plymouth (0.8.2-1) lucid; urgency=low
+
+  [ Steve Langasek ]
+  * New upstream release.
+  * debian/plymouth.plymouth-stop.upstart: trust the new kdm to stop plymouth
+    for us, too.  LP: #540177.
+  * plymouth needs to depend on initramfs-tools to avoid calling
+    update-initramfs when the stack isn't configured yet and rendering the
+    system unbootable with a broken initramfs.  LP: #358654.
+  * src/client/ply-boot-client.c: ply_boot_client_flush() needs to process
+    the incoming queue before the outgoing, otherwise we get a deadlock.
+    LP: #554737.
+  * src/plugins/splash/script/script-lib-image.c: call script_obj_is_null()
+    to check for the presence of the alpha argument, otherwise all our labels
+    are rendered invisibly...
+  * src/plugins/renderers/drm/plugin.c: temporarily disable the drm backend
+    for nouveau, until we can get to the bottom of the DRM lockup in bug
+    #539655.  This is not as pretty, but it boots to the desktop without
+    hanging regardless of how many displays are used, and that takes
+    precedence.  LP: #533135.
+
+  [ Scott James Remnant ]
+  * Implement a Window.GetBitsPerPixel() function in the script library,
+    and the necessary support in ply_pixel_display, ply_renderer and in
+    the vga16fb and frame-buffer renderers to make that information
+    available.  This will return "0" on drm and x11 where the answer is
+    "lots".  LP: #558352.
+  * Modify vga16fb to only fallback to reducing colors if it's overflowed
+    the 16-color palette already, so if you stick to the same 16 colors,
+    you can get exact matches.
+  * Use alternate 16-color images when we have only 4bpp.  LP: #551013.
+
+  [ Alberto Milone ]
+  * ubuntu-logo: accept a format string from mountall for the disk check
+    progress, so that localization is possible.  LP: #553954.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 15 Apr 2010 00:55:46 +0000
+
+plymouth (0.8.2-2) unstable; urgency=low
+
+  * Making libdrm-dev build-depends unversioned again, now that it has
+    been uploaded to unstable.
+  * Uploading to unstable.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 17 Apr 2010 16:50:34 +0200
+
+plymouth (0.8.2-1) experimental; urgency=low
+
+  [ Daniel Baumann ]
+  * Correcting spelling typo in previous changelog entry.
+
+  [ Guido Guenther ]
+  * Add drm modules (Closes: #576731).
+
+  [ Daniel Baumann ]
+  * Updating plymouth lintian overrides.
+  * Removing patch to disable nouveau, and making libdrm build-depends
+    versioned.
+  * Renumbering patches.
+  * Merging upstream version 0.8.2.
+  * Removing shlibs depends from theme packages.
+  * Marking themes packages architecture independent.
+  * Removing todo file, currently nothing is left.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Wed, 14 Apr 2010 19:41:42 +0200
+
+plymouth (0.8.1-2) unstable; urgency=low
+
+  * Uploading to unstable.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Tue, 06 Apr 2010 12:41:39 +0200
+
+plymouth (0.8.1-1) experimental; urgency=low
+
+  [ Daniel Baumann ]
+  * Merging upstream version 0.8.1.
+
+  [ Guido Guenther ]
+  * Add missing config files.
+
+  [ Daniel Baumann ]
+  * Removing removal of config files in rules so that they actually can
+    be installed into the package.
+
+  [ Guido Guenther ]
+  * Drop /usr/bin otherwise log-viewer ends up in two packages.
+  * Update libdrm.patch to not use
+    ply_renderer_nouveau_driver_get_interface to avoid undefined
+    reference.
+  * Update initramfs hook for 0.8.0.
+  * Install custom plymouth-update-initrd (Closes: #575713).
+
+  [ Daniel Baumann ]
+  * Renaming plugins packages to themes, and including plugins in main
+    plymouth package (Closes: #575712).
+  * Dropping no longer needed depends on plymouth themes.
+  * Adding recommends to plymouth-themes-all.
+  * Correcting version depends of plymouth-x11 on plymouth.
+  * Wrapping depends.
+  * Removing default.plymouth from initramfs hook, doesn't exist anymore
+    in 0.8.1.
+  * Adding patch to update awk call in plymouth-set-default-theme to not
+    always return zero.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Mon, 29 Mar 2010 08:27:14 +0200
+
+plymouth (0.8.1-4ubuntu1) lucid; urgency=low
+
+  * Don't fail if --attach-to-session is passed and /dev/pts isn't mounted
+    yet, as this breaks booting without an initramfs.
+  * debian/initramfs-tools/hooks/plymouth: if we don't have a default.plymouth
+    link, don't try to copy the graphics support since the libs aren't needed
+    and may not even be installed.  LP: #554566.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 03 Apr 2010 17:25:50 -0700
+
+plymouth (0.8.1-4) lucid; urgency=low
+
+  [ Steve Langasek ]
+  * debian/libplymouth2.apport: include the targets of the theme alternatives
+    in the report.
+
+  [ Colin Watson ]
+  * Split /lib/plymouth/label.so out into a new plymouth-label package,
+    depended on by the themes that use it.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 01 Apr 2010 14:03:16 +0100
+
+plymouth (0.8.1-3) lucid; urgency=low
+
+  [ Colin Watson ]
+  * Pass the single-debian-patch option to dpkg-source.
+  * frame-buffer/vga16fb renderers: It's possible for activate to be called
+    before map_to_device, for example if a non-graphical splash plugin is in
+    use.  Initialise map_address to MAP_FAILED so that we won't try to
+    redraw in this situation.
+
+  [ Scott James Remnant ]
+  * Add a ply_boot_client_flush() method to flush outgoing requests
+    before we exit()
+  * vga16fb: move the VGA register resetting into the flush_head call
+    rather than VT activation, since we may not have permission to
+    fiddle with the VGA at that early point.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 31 Mar 2010 19:31:35 +0100
+
+plymouth (0.8.1-2) lucid; urgency=low
+
+  * Quit Plymouth on initramfs panic.
+
+ -- Evan Dandrea <evand@ubuntu.com>  Tue, 30 Mar 2010 11:13:37 +0100
+
+plymouth (0.8.1-1ubuntu3) lucid; urgency=low
+
+  * configure.ac, src/plugins/renderers/Makefile.am, debian/rules,
+    debian/plymouth.install.in: if sys/io.h is absent, as on powerpc or sparc,
+    omit building the vga16fb renderer.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 29 Mar 2010 04:52:22 +0000
+
+plymouth (0.8.1-1ubuntu2) lucid; urgency=low
+
+  * Make sure all the plymouth themes declare Replaces: plymouth (<< 0.8.1-1~)
+    to give a smooth upgrade.  LP: #549701.
+  * Add Breaks: against the old versions of the out-of-tree plymouth theme
+    packages.
+  * Recommend plymouth-theme-ubuntu-text | plymouth-theme, to avoid pulling
+    in a theme at random.  LP: #550237.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 28 Mar 2010 15:36:41 -0700
+
+plymouth (0.8.1-1ubuntu1) lucid; urgency=low
+
+  * ubuntu-logo theme:
+    - move the entry box below the passphrase prompt where it belongs.
+      LP: #540685, #540806
+    - add some code to notice if our text boxes are going to run off the
+      bottom of the screen, and move them up in that case.
+  * debian/initramfs-tools/hooks/plymouth: fix to work with the new
+    update-alternatives theme handling. LP: #549247
+  * include the vga16fb renderer in the initramfs.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 27 Mar 2010 01:20:26 +0000
+
+plymouth (0.8.1-1) lucid; urgency=low
+
+  [ Scott James Remnant ]
+  * Update to the upstream 0.8.1 release:
+    - Our patches have been merged upstream, some changes due to cleaning
+      them up for submission and noticing a few bugs along the way.
+      Remaining changes are:
+      + ubuntu-logo theme
+      + ubuntu version of the text theme
+      + call update-initramfs rather than plymouth-update-initrd in
+        plymouth-set-default-theme
+      + filter fsck progress updates from the progress bar tracker
+      + watch for enter key press
+      + support lbm-nouveau as an alternate driver name for nouveau to
+        permit backports once Lucid has released
+      + use /dev/fb0 as default framebuffer device name
+      + stop animation of script plugin in idle function
+    - Will become process group leader of its VT if possible (opens without
+      O_NOCTTY when redirecting stdio to it), this is almost certainly
+      correct keyboard-wise.
+    - Deallocates VT on "plymouth quit" after switching VT back to VT1
+    - Open terminal in text and details plugin, don't assume it's already
+      open.
+    - Calling "plymouth quit" or "plymouth deactivate" while the same
+      command is already running will now block the new command until the
+      old one complete, rather than returning immediately.
+    - Various window fixes for script plugin
+    - Script plugin updated to use the window X and Y offsets every time
+    - Plymouth client tool has been updated to have commands for many cases
+      in preference to the --command style.
+
+  * Restored code to disable Plymouth's graphical plugins when an alternate
+    init= is given on the kernel command-line, otherwise init=/bin/bash
+    doesn't work so well when Plymouth is in the initramfs.
+  * Restored crash handler that dumps boot messages to /dev/tty1.
+
+  * Split themes out into different packages, reducing the size of the
+    Plymouth package.  This also means that you can remove the themes
+    packages to remove the "graphical splash" part of Plymouth while keeping
+    the ability to prompt for questions on the console.
+  * Use the alternatives system to select the default themes.  The existing
+    symlink will be replaced on upgrade if you have not changed it.
+  * Also use alternatives to select the text theme.
+  * Restore the upstream text theme, renaming ours to "ubuntu-text".
+  * Fallback to the built-in details theme (boot messages on console, but
+    with the ability to prompt for questions) if no theme package is
+    installed.
+  (LP: #507238)
+
+    Unfortunately these changes mean that if you've selected a custom
+    theme, you will need to install that package and select it again.
+    Sorry about that.
+
+  * Include the 16-color VGA frame-buffer renderer.  LP: #526892.
+
+  * Fix text, ubuntu-text and details themes to restore the console to text
+    mode when adding text displays.
+
+  * debian/rules:
+    - Set default tty for boot and shutdown with configure arguments
+    - Set default background color to the Ubuntu Aubergine, this provides
+      some consistency with other default themes.
+  * debian/plymouth.upstart, debian/initramfs-tools/scripts/init-top/plymouth:
+    - Redirect console output to Plymouth, this will be both logged and made
+      available to splash themes that want it (details by default).
+      LP: #535108.
+  * debian/plymouth.upstart, debian/plymouth.plymouth-splash.upstart:
+    - Call show-splash from the plymouth script itself in the shutdown case.
+
+  * ubuntu-logo theme:
+    - Update in same manner as script has been to add Window.GetX() to
+      math that centers things.
+
+  [ Steve Langasek ]
+  * ubuntu-logo theme:
+    - fix the password prompt handling so the display of boot messages is
+      restored after the passphrase has been entered, and subsequent password
+      requests don't incorrectly reuse the previous prompt.  LP: #515822
+    - turn the message_notification[0].y check right-way-round in
+      password_dialogue_setup(), though this doesn't seem to have any
+      practical impact.
+    - pass logo.z to the SetZ() function, not the SetY() one; thanks to
+      Vishal Rao for this catch.  LP: #542458.
+    - refactor get_message_label: the y position of the second line shouldn't
+      vary according to its own height.  This brings the passphrase prompts
+      from cryptsetup back up to where they should be.  LP: #539723.
+  * Turn tracing on post-beta.
+  * src/main.c: when the user presses enter, compare the keystroke lists to
+    the enter key, not to some previously-typed string that we may or may not
+    have.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 26 Mar 2010 18:52:37 +0000
+
+plymouth (0.8.0-1) experimental; urgency=low
+
+  [ Daniel Baumann ]
+  * Merging upstream version 0.8.0 (Closes: #573582).
+  * Rediffing parse-etc-debian_version.patch.
+  * Removing no-need-to-check-for-lib64, not needed anymore.
+  * Rediffing set-default-framebuffer-device-to-dev-fb0.
+  * Renumbering patches.
+
+  [ Guido Guenther ]
+  * Disable noveau.
+
+  [ Daniel Baumann ]
+  * Adding TODO file.
+  * Adding build-depends to libdrm-dev.
+
+  [ Guido Guenther ]
+  * Add new plugins.
+  * Add renderers.
+
+  [ Daniel Baumann ]
+  * Dropping la files.
+  * Droppping shlibs file, not needed anymore.
+  * Correcting typo in plymouth-plugins-script package short-
+    description.
+  * Sorting plugins in control.
+  * Removing deprecated --without-default-plugin from configure call in
+    rules.
+  * Reordering install blocks in rule in preparation of using --fail-
+    missing for dh_install.
+  * Updating plymouth debhelper install file to include newly added
+    manpage.
+  * Sorting plymouth debhelper install file.
+  * Updating plymouth-dev debhelper install file to include static files
+    of the newly added renderers.
+  * Removing removal of /usr/libexec, not needed anymore.
+  * Updating removal of /var in a more 'break-early-when-things-change'-
+    way.
+  * Including upstreams initrd scripts in plymouth.
+  * Removing plymouthd default configs from build-tree.
+  * Calling dh_install with --fail-missing.
+  * Dropping manual removal of empty directories, dh_install doesn't
+    fail on them.
+  * Sorting debhelper install files for the plugin packages.
+  * Dropping library links, not worth the efforts.
+  * Updating TODO.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 27 Mar 2010 16:26:12 +0100
+
+plymouth (0.8.0~-17) lucid; urgency=low
+
+  [ Scott James Remnant ]
+  * src/libply-splash-core/ply-terminal.c:
+    - To restore a terminal into Canonical Mode, rather than setting flags
+      that happen to be the opposite of what cfmakeraw() removes, set the
+      flags that stty's sane mode sets.
+    - Ensure that we clear the "is unbuffered" flag on every exit path from
+      ply_terminal_set_buffered() that means the terminal is Canonical Mode
+      so that we don't reset it back to Canonical Mode again unexpectedly
+      when closing out the terminal under X.
+    LP: #540256.
+
+  [ Steve Langasek ]
+  * src/main.c: allow clients to watch for <enter> as a keystroke.
+    LP: #539182
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 17 Mar 2010 22:36:47 +0000
+
+plymouth (0.8.0~-16) lucid; urgency=low
+
+  * src/libply-splash-core/ply-text-display.c:
+    - It turns out that resetting the VT back into KD_TEXT mode every
+      second, while the X server is starting, is not perhaps the best
+      idea.  LP: #538213.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 17 Mar 2010 03:28:03 +0000
+
+plymouth (0.8.0~-15) lucid; urgency=low
+
+  * debian/plymouth.upstart, debian/plymouth.plymouth-stop.upstart:
+    - Replace the "stop on" clause in plymouth's own job with a job that
+      handles stopping plymouth for the normal cases.
+
+      For a display manager that handles the plymouth transition properly
+      (gdm & ubiquity only at this point), this simply appears to be running
+      until plymouth is stopped by that display manager.  This blocks plymouth
+      from being stopped for other reasons, e.g. rc2 exiting.  LP: #538214.
+
+      For other display managers, and when we reach the end of rc2 or
+      other reasons, this simply asks plymouth to quit.  We never use
+      --retain-splash, if the display manager can't do plymouth transitions,
+      we never want to leave the VT in KD_GRAPHICS in case the display
+      manager gets things wrong (hi, kdm!).  LP: #538524.
+  * debian/plymouth.plymouth-splash.upstart:
+    - Add LXDM.  LP: #526748
+
+  * debian/plymouth.plymouth-splash.upstart:
+    - Remove the "starting gdm" bit from the job, since that won't have any
+      effect (job is already started by the time gdm is); and as a result of
+      the above changes could end up with plymouth --show-splash and quit
+      being called together if someone runs "start gdm" themselves.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 17 Mar 2010 01:19:37 +0000
+
+plymouth (0.8.0~-14) lucid; urgency=low
+
+  * Add Breaks: against old versions of mountall and casper, due to the soname
+    changes in ~-13.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 12 Mar 2010 12:27:50 -0800
+
+plymouth (0.8.0~-13) lucid; urgency=low
+
+  [ Steve Langasek ]
+  * Don't attach /proc/cmdline to apport reports, this is already in the
+    standard info that gets collected...
+
+  [ Alberto Milone ]
+  * ubuntu_logo theme:
+    - New logo from Otto Greenslade.
+    - Switch off dots starting from the ones on the left instead of
+      switching them off all at once.
+
+  [ Scott James Remnant ]
+  * Move the Ubuntu logo up as discussed with Otto, this makes the mouse
+    cursor appear between the logo and dots and solves the optical illusion
+    of the logo being too low.  LP: #535014.
+  * Don't include message about disk checks, which can come from mountall.
+  * Drop the rc script splash functions, we don't want the SysV-rc compat
+    stuff messing around with the splash screen - this can be entirely
+    managed by Upstart now.  LP: #528787, #537262.
+
+  * Plymouth Fix Mega Patch:
+    - This hasn't yet been broken up into enough bits to send upstream, and
+      doesn't *quite* address all the issues yet, but it's a major step.
+
+    - Rewrite the VT handling, rather than abusing /dev/tty0 keep all VT
+      operations on the actual VT (tty7), this avoids issues where we set
+      the graphics mode of the wrong VT or put the wrong VT into VT_PROCESS
+      mode.  LP: #520460, #522598, #526321, #533135
+    - Don't attempt VT switch when using non-VT consoles.
+    - Make VT mandatory for renderer plugins, so we fallback gracefully to
+      text when the console is not a VT.  LP: #516825, #527083.
+    - Restore VT when finished displaying the splash unless plymouth quit
+      is called with --retain-splash.  LP: #506297.
+    - Activate VT from text and details plugins, rather than haphardly in
+      the main code, this means the textual boot is also on VT7.
+      LP: #518352, #520122.
+    - Add a --has-active-vt command that can let gdm inquire whether it
+      should reuse Plymouth's VT; fixes the issue where Plymouth has no
+      visible splash screen and X ends up on VT1.  LP: #519641, #533572.
+
+    - Don't open terminal device in X11, fixes the issue where X will crash
+      when debugging plugins using the X11 renderer.
+    - Add --tty option to plymouthd for debugging when X is running and
+      thus using an alternate VT.
+
+    - Improve deactivate command so that the terminal is no longer watched
+      for keyboard input, session is closed, etc.  LP: #528787, #531650.
+    - Ignore mode changes while deactivated, otherwise we can end up
+      resetting the VT back into text mode while X is starting up.
+      LP: #523788, #502509.
+
+    - Fix races with simultaneous quit and deactivate commands, or multiples
+      of those commands.
+    - Ignore --show-splash, --hide-splash, etc. commands while deactivated.
+    - Add reactivate command for testing purposes.
+
+    - Don't scan out drm buffer contents to fbcon when not called with
+      quit --retain-splash.  LP: #527180.
+
+    - Avoid resetting the terminal to unbuffered mode on every write, this
+      results in setting X's VT into raw mode and results in the X server
+      crashing on key presses.  LP: #532047, #534861, #519460, #520593,
+      #522974, #525393
+
+  * I'm aware that if you see the TEXT plugin, it's possible for Enter to
+    still crash the X server for some people.  I will be opening a new bug
+    for this, and would appreciate details from people affected.
+
+  * If you have issues with Enter crashing the X server, and you see a
+    GRAPHICAL plugin, check that gdm is up to date - if it is, please
+    file new bugs.
+
+  * I'm also aware of an issue where after boot, rather than seeing an X
+    server, you see the ordinary "login:" getty screen.  Pressing Alt+F7
+    should take you to X.  I will be opening a new bug for this, and would
+    appreciate details from people affected.
+
+  * Don't send fsck progress updates to the boot-duration file.
+  * Make all the dots orange just before starting the X server.
+
+  * Cute text-version of the splash screen.
+    - Added basic support for fsck notification.
+    - Added support for showing keys information on separate lines.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 12 Mar 2010 19:02:54 +0000
+
+plymouth (0.8.0~-12) lucid; urgency=low
+
+  * ubuntu_logo theme:
+    - New logo from Otto Greenslade.
+  * debian/rules:
+    - Disable tracing.
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Thu, 04 Mar 2010 17:31:41 +0100
+
+plymouth (0.8.0~-11) lucid; urgency=low
+
+  * ubuntu_logo theme:
+    - New logo, colours and simplified design in compliance with the
+      artwork and with the guidelines provided by Otto Greenslade.
+  * Add support for additional separate places for messages (LP: #497311).
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Fri, 26 Feb 2010 11:27:26 +0100
+
+plymouth (0.8.0~-10ubuntu1) lucid; urgency=low
+
+  * Merge from upstream:
+    - change plymouth-set-default-theme help output
+    - include upstream manpage (LP: #518414)
+  * Add an apport hook to collect /proc/fb and /proc/cmdline.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 18 Feb 2010 01:24:34 +0000
+
+plymouth (0.8.0~-10) lucid; urgency=low
+ 
+  * Add lbm-nouveau/plymouth integration patch.
+ 
+ -- Robert Hooker <sarvatt@ubuntu.com>  Wed, 10 Feb 2010 23:29:41 -0500
+
+plymouth (0.8.0~-9ubuntu1) lucid; urgency=low
+
+  * Make plymouth-splash a service instead of a task, to make sure we only
+    run it once per instance of plymouthd; and add an 'or starting gdm' to the
+    start condition so that we're assured of having this command run before
+    gdm starts - otherwise, this plays havoc with gdm's assumptions regarding
+    initial VT selection.  LP: #516412.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 10 Feb 2010 16:08:56 -0800
+
+plymouth (0.8.0~-9) lucid; urgency=low
+
+  * move plymouth-log-viewer to plymouth-x11 also, to completely move GTK out
+    of the base package.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 05 Feb 2010 17:37:37 -0800
+
+plymouth (0.8.0~-8) lucid; urgency=low
+
+  [ Steve Langasek ]
+  * Include label.so in the initramfs, as well as the font support files it
+    depends on, needed for any text prompts or messages.  This will bloat the
+    initramfs substantially (about 3MB) and impact boot performance as a
+    result, but the solution to that is to not include plymouth in the
+    initramfs unless we know it's needed for prompting (e.g., cryptsetup).
+    LP: #496765.
+  * Move x11 renderer into a separate package, to avoid pulling GTK into the
+    server install by default.  LP: #509579.
+  * debian/rules: fix up the dh_makeshlibs exclude path to match where we're
+    currently installing.
+  * src/plugins/splash/script/plugin.c: the script plugin has no support at
+    all for text consoles, so if there are no pixel displays available,
+    return an error so that plymouth can fall back to the text plugin.
+    LP: #506717.
+  * Always include the 'details' and 'text' themes in the initramfs, since
+    plymouth uses these as built-in fallbacks and they're tiny.
+  * src/main.c: when a splash plugin fails to load, make sure to unregister
+    any related keyboard handlers.
+  * don't let the password walk off the end of the dialog box.  LP: #496782.
+  * split the plymouth upstart job into plymouth and plymouth-splash, so that
+    plymouth starts up early and doesn't have to race gdm; and stop
+    unconditionally adding plymouth to the initramfs now that we can start it
+    this way.
+  * debian/plymouth.postinst: also set the theme on first install, or on
+    upgrade from versions prior to 0.8.0~-7, because update-initramfs called
+    before plymouth has been configured for the first time will accidentally
+    cause a call to --reset to use the text theme instead of the intended
+    default.
+  * debian/plymouth.plymouth-splash.upstart: don't wait on tty-device-added,
+    these are now guaranteed to be available; copied from gdm upstart job.
+  * Depend on mountall (>= 2.0) to ensure we have the above guarantee.
+  * Mark /usr/share/initramfs-tools/scripts/init-bottom/plymouth executable,
+    otherwise initramfs-tools skips it.  LP: #509487.
+  * Drop the Debian revision (-1) from the version in the symbols file, to
+    fix a lintian warning.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Tue, 02 Feb 2010 08:11:47 +0000
+
+plymouth (0.8.0~-7) lucid; urgency=low
+
+  * Fixed a bug where we couldn't load the script plugin if it were
+    compiled without optimisations.
+  * Attempt to work around issues with VT switching and fbcon reasserting
+    over our output.  LP: #496784, #497115.
+  * Don't attach to the session for now, this code path doesn't work with
+    the current console/VT code.  LP: #502494.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 11 Jan 2010 13:47:36 +0000
+
+plymouth (0.8.0~-6) lucid; urgency=low
+
+  * Revert change in 0.8.0~-4 that scans the buffer out fo fbcon when
+    deactivating i915; this was actually wrong, we don't want to use fbcon
+    for the transition, we want to use our current framebuffer instead.
+    Other bugs (with the VT code) are preventing that transition from working.
+  * Fix a crash on "plymouth deactivate" when no renderer is active.
+    LP: #499541.
+  * Fix a crash on "plymouth deactivate" when --show-splash has never
+    been called.
+  * Fix failure to quit on "plymouth quit" after "plymouth deactivate".
+
+  * Remove the code that disables plymouth when init= is on the command-line,
+    we don't want that.
+
+  * debian/initramfs-tools/scripts/init-top/plymouth:
+    - Don't check the kernel command-line; we always want plymouth running
+      whether or not "splash" is present, plymouth uses that to determine
+      which of the graphics or text renderers to use.
+    - Start with --attach-to-session so we redirect console messages.
+  * debian/plymouth.plymouth-log.upstart:
+    - Once the filesystem is mounted, flush the log out.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Wed, 23 Dec 2009 03:54:42 +0000
+
+plymouth (0.8.0~-5) lucid; urgency=low
+
+  * Include the ply-boot-protocol.h file in the headers directory.
+  * Include the plybootclient directory in the CFLAGS from pkg-config.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 14 Dec 2009 06:26:25 +0000
+
+plymouth (0.8.0~-4) lucid; urgency=low
+
+  * Patched to scan the buffer out to the console when deactivating the
+    i915 plugin so that X can start.
+
+  * debian/initramfs-tools/scripts/init-top/plymouth:
+    - Turn off the blinking cursor, otherwise it'll appear later when
+      we transition to gdm.
+  * debian/plymouth.upstart:
+    - Don't stop when gdm starts, gdm is smart and will handle the plymouth
+      transition by itself.
+  * debian/plymouth.postinst:
+    - Update the initramfs when we don't change the theme (otherwise we
+      don't update the binaries).
+
+ -- Scott James Remnant <scott@ubuntu.com>  Fri, 11 Dec 2009 05:59:35 +0000
+
+plymouth (0.8.0~-3) lucid; urgency=low
+
+  * Update to GIT HEAD:
+    - Maintainer mode enabled by default.
+    - plymouth-set-default-theme now supports --help.
+    - script gains window get position functions.
+
+  * debian/initramfs-tools/scripts/init-bottom/plymouth:
+    - Tell plymouth about the new root filesystem after switching to it. 
+  * debian/rules:
+    - Drop --enable-maintainer-mode since it's now enabled by default. 
+  * debian/plymouth.upstart:
+    - Remove the "start on" rules that would cause Plymouth to be started
+      if you hadn't got an initramfs; since these were different to the
+      rules for X.org itself, you could end up in the situation (often!)
+      where X would start first (and plymouth stopped), then Plymouth
+      restarted again.  LP: #495085.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 10 Dec 2009 20:04:43 +0000
+
+plymouth (0.8.0~-2) lucid; urgency=low
+
+  [ Scott James Remnant ]
+  * debian/initramfs-tools/conf-hooks.d/plymouth:
+    - Always enable the framebuffer for now, on the SSD model we end up
+      crashing X while faffing with the splash screen; it's better to just
+      delay it for now.
+  * debian/plymouth.upstart:
+    - Use the udev PRIMARY_DEVICE_FOR_DISPLAY=1 tag to know which of the
+      graphics or drm device we needed to start.
+    - Do not need fbcon, but we do need tty0
+
+  [ Alberto Milone ]
+  * Add the "ubuntu-logo" theme:
+    - Add ubuntu-logo to themes/Makefile.{am|in}.
+    - Put the theme in themes/ubuntu-logo.
+  * debian/plymouth.postinst:
+    - Add a provisional ubuntu logo.
+    - Do not install bizcom.png.
+  * debian/rules:
+    - Set the default logo to /lib/plymouth/ubuntu-logo.png.
+    - Pass --enable-maintainer-mode to dh_auto_configure.
+  * debian/plymouth.postinst:
+    - Set the default theme to "ubuntu-logo".
+
+ -- Scott James Remnant <scott@ubuntu.com>  Mon, 07 Dec 2009 20:07:11 +0000
+
+plymouth (0.8.0~-1) lucid; urgency=low
+
+  [ Michael Vogt ]
+  * merged from the fastboot PPA
+
+  [ Scott James Remnant ]
+  * Rebased on latest GIT from bzr import.
+    - Directly applied debian/patches/01_default_fb.patch
+    - Directly applied debian/patches/03_set_default_plugin.patch
+    - Directly applied debian/patches/13_use_tty7.patch
+    - Directly applied debian/patches/11_create_pid_file.patch
+    - Dropped debian/patches/12_wait_for_sigterm.patch:
+      + We're not going to shutdown plymouth when X starts, simply
+        deactivate it.  Upstart pre-stop and SIGTERM handling should
+        therefore be sufficient.
+    - All other patches were from GIT and are already in the tree, so
+      dropped them too.
+  * Changed packaging to use dh 7 instead of cdbs.
+  * Changed to install into /lib rather than /usr
+  * Removed old init scripts and Upstart jobs to tidy up package.
+  * Added symbols file for the libraries.
+
+  * Disabled the crash handler, since it does something very silly when
+    X is running.
+  * Added initramfs conf that enables the framebuffer and plymouth unless
+    the root disk is on SSD.  The rationale is that SSD-based systems get
+    to the point where we can start plymouth in the real system just as
+    fast, while HDD-based systems have to do ureadahead first and we want
+    something pretty on screen while that happens.
+
+ -- Scott James Remnant <scott@ubuntu.com>  Thu, 03 Dec 2009 19:10:53 +0000
+
+plymouth (0.8.0+git20090929-0ubuntu0.1~fastboot1) karmic; urgency=low
+
+  * New upstream release.
+  * Update 01_default_fb.patch. 
+  * debian/patches/11_create_pid_file.patch:
+    - Add --pid-file=filename parameter to the client so as to write
+      the pid to a file.
+  * debian/patches/12_wait_for_sigterm.patch:
+    - Add --wait-for-sigterm parameter to the client so as to wait for
+      SIGTERM before quitting.
+  * debian/patches/13_use_tty7.patch:
+    - Make plymouth use tty7 instead of tty1.
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Wed, 11 Nov 2009 14:33:33 +0100
+
+plymouth (0.7.2-0ubuntu0.1~fastboot1) karmic; urgency=low
+
+  * New upstream release.
+  * Adapt the "plain" plugin (written by Michael Terry).
+  * 06_force_graphics_mode.patch:
+    - Make sure that graphics mode is always used.
+  
+  [ Michael Terry ]
+  * debian/patches/05_add_plain_plugin.patch:
+    - Add a plugin called 'plain' that just shows the logo in the center
+      of the screen, no animation, no progress.
+  * debian/initramfs-tools/hooks/plymouth:
+    - Work with hardy initramfs helper functions
+  * debian/patches/05_add_plain_plugin.patch:
+    - Never revert to TEXT mode, rather stay in GRAPHICS mode.
+  * debian/plymouth-shutdown:
+    - Add shutdown script to show plymouth when rebooting or shutting down.
+
+ -- Alberto Milone <alberto.milone@canonical.com>  Fri, 23 Oct 2009 15:31:43 +0200
+
+plymouth (0.8.0+git20090929-0ubuntu1~mvo1) karmic; urgency=low
+
+  * merged from the fastboot PPA
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 23 Jul 2009 11:14:55 +0200
+
+plymouth (0.7.2-6) unstable; urgency=low
+
+  * Applying slightely modifed patch from Christian Meyer
+    <c2h5oh@web.de> to add notes about how to enable KMS in
+    README.Debian (Closes: #574755).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 27 Mar 2010 14:28:52 +0100
+
+plymouth (0.7.2-5) experimental; urgency=low
+
+  [ Daniel Baumann ]
+  * Including debian_version file in initramfs hook, thanks to Matthias
+    Berndt <matthias_berndt@gmx.de> (Closes: #575165).
+
+  [ Guido Guenther ]
+  * Add pango/fontconfig files (Closes: #574829).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Thu, 25 Mar 2010 07:13:51 +0100
+
+plymouth (0.7.2-4) experimental; urgency=low
+
+  [ Daniel Baumann ]
+  * Correcting spelling mistake in previous changelog entry.
+
+  [ Guido Guenther ]
+  * Don't stop init script on upgrade (Closes: #574720).
+  * Honor nosplash option in init script (Closes: #574722).
+
+  [ Daniel Baumann ]
+  * Unify coding style in init script.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 21 Mar 2010 08:39:02 +0100
+
+plymouth (0.7.2-3) experimental; urgency=low
+
+  [ Guido Guenther ]
+  * Add initramfs and init scripts (Closes: #573888).
+
+  [ Daniel Baumann ]
+  * Unify coding style in initramfs files.
+  * Correcting accidentally dropped install call for Debian's
+    plymouth-set-default-plugin (Closes: #573947).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Fri, 19 Mar 2010 10:37:58 +0100
+
+plymouth (0.7.2-2) experimental; urgency=low
+
+  [ Daniel Baumann ]
+  * Updating year in copyright file.
+  * Updating to standards 3.8.4.
+
+  [ Guido Guenther ]
+  * Parse /etc/debian_version (Closes: #573602).
+  * No need to check for lib64 (Closes: #565508).
+  * Install base themes (Closes: #573577).
+  * Add missing shared objects (Closes: #573578).
+  * Set default framebuffer device to /dev/fb0 instead of /dev/fb which
+    doesn't exist by default (Closes: #573724).
+  * Add Debian logo (Closes: #573760).
+
+  [ Daniel Baumann ]
+  * Adding entry for the debian logo in copyright file.
+
+  [ Guido Guenther ]
+  * Add themes to hook script (Closes: #573862).
+  * Simplify initramfs creation (Closes: #573725).
+
+  [ Daniel Baumann ]
+  * Adding REAMDE.source.
+  * Adding README.Debian (Closes: #546155).
+  * Removing useless empty line at the end of plymouth.hook.
+  * Removing TODO file, not needed anymore.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 14 Mar 2010 19:19:51 +0100
+
+plymouth (0.7.2-1) experimental; urgency=low
+
+  * Merging upstream version 0.7.2.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 27 Dec 2009 17:23:56 +0100
+
+plymouth (0.7.1-1) experimental; urgency=low
+
+  * Merging upstream version 0.7.1.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 27 Dec 2009 17:16:38 +0100
+
+plymouth (0.7.0+git20090723-0ubuntu1~ppa1) karmic; urgency=low
+
+  [ Marcelo Boveto Shima ]
+  * Move the script plymouth from /usr/share/initramfs-tools/scripts/init-top to
+    /usr/share/initramfs-tools/scripts/local-top.
+    Fix plymouth loading with kms.
+
+  [ Michael Vogt ]
+  * updated to the current git
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 23 Jul 2009 11:14:55 +0200
+
+plymouth (0.7.0+git20090506-0ubuntu0.1~ppa2) jaunty; urgency=low
+
+  * exchange sym-links with real files in ./build-tools
+
+ -- Mirco Müller (MacSlow) <mirco.mueller@ubuntu.com>  Thu, 07 May 2009 10:17:12 +0100
+
+plymouth (0.7.0+git20090506-0ubuntu0.1~ppa1) jaunty; urgency=low
+
+  * update to latest plymouth upstream tarball
+  * dropped debian/patches/02_splash_cmdline.patch since this is now in upstream
+  * dropped debian/patches/04_support_solar_default.patch since this is now in
+    upstream
+
+ -- Mirco Müller (MacSlow) <mirco.mueller@ubuntu.com>  Wed, 06 May 2009 16:24:32 +0100
+
+plymouth (0.7.0+git20090207-0ubuntu0.1~ppa5) UNRELEASED; urgency=low
+
+  [ Michael Terry ]
+  * debian/compat, debian/control, debian/libplymouth-dev.install,
+    debian/libplymouth2.install, debian/plymouth.install:
+    - Reduce debhelper dependency to 6, for ease of hardy backports.
+    - Prepend install paths with debian/tmp/, as debhelper 6 likes.
+  * debian/initramfs-tools/hooks/plymouth:
+    - Always pass copy_exec a target path that already exist, for 
+      compatibility with hardy's initramf-tool's hook-functions.
+
+ -- Michael Terry <michael.terry@canonical.com>  Mon, 16 Mar 2009 09:10:38 -0400
+
+plymouth (0.7.0+git20090207-0ubuntu0.1~ppa4) jaunty; urgency=low
+
+  * Use "Plymouth" instead of "Usplash" in the splash-functions comments.
+  * Add watch file.
+  * Use install's -D flag instead of mkdir.
+  * Add #DEBHELPER# in postinst.
+  * Add postrm to update-initramfs on removal.
+  * Cleanup maintainer scripts.
+  * Use set -e in postinst.
+  * Drop "rhgb" from startup suggestions as "splash" is supported now.
+  * Exclude Plymouth plugins in /usr/lib/plymouth/ for dh_makeshlibs.
+  * Split in multiple packages: add library and development packages.
+    - Add Replaces on older plymouth versions.
+  * Install Debian/Ubuntu scripts via dh_install as well.
+  * TODO: add note to check for the usefulness of some dirs "make install"
+    creates.
+
+ -- Loic Minier <lool@dooz.org>  Tue, 17 Feb 2009 16:37:12 +0100
+
+plymouth (0.7.0+git20090207-0ubuntu0.1~ppa3) jaunty; urgency=low
+
+  * debian/initramfs-hooks:
+    - simplify the initramfs hook generation (thanks to lool)
+  * debian/splash-functions:
+    - add plymouth --wait after --quit (thanks again to the
+      unstopable lool :)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 17 Feb 2009 14:33:08 +0100
+
+plymouth (0.7.0+git20090207-0ubuntu0.1~ppa2) jaunty; urgency=low
+
+  * debian/rules:
+    - install hook with propper permissions
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 12 Feb 2009 11:10:27 +0100
+
+plymouth (0.7.0+git20090207-0ubuntu0.1~ppa1) jaunty; urgency=low
+
+  * initial test release
+  * debian/patches/01_default_fb.patch:
+    - default to framebuffer /dev/fb0
+  * debian/patches/02_splash_cmdline.patch:
+    - support "splash" on the kernel commandline
+  * debian/patches/03_set_default_plugin.patch:
+    - update the helper plymouth-set-default-plugin to work on
+      ubuntu and call initramfs-update 
+  * debian/patches/04_support_solar_default.patch:
+    - add missing "solar" to configure.in tests
+  * debian/splash-functions:
+    - add compat functions so that it works as a usplash
+      replacement
+  * debian/initramfs-hooks:
+    - hook into our initramfs generation
+    - copy only needed plugin bits onto the initramfs
+  * debian/initramfs-script-init-top:
+    - hook into initramfs run
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 11 Feb 2009 08:29:48 -0800
+
+plymouth (0.7.0-1) experimental; urgency=low
+
+  * Merging upstream version 0.7.0 (Closes: #541176).
+  * Updating package to standards version 3.8.3.
+  * Updating maintainer field.
+  * Updating vcs fields.
+  * Removing drop-nash.patch, went upstream.
+  * Correcting wrong vcs-browser field.
+  * Adding explicit debian source version 1.0 until switch to 3.0.
+  * Bumping versioned build-depends on debhelper.
+  * Adding misc depends.
+  * Sorting and wrapping depends.
+  * Adding upstream and maintainer header in copyright.
+  * Minimizing rules file.
+  * Updating debhelper install files for new upstream version.
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sun, 27 Dec 2009 17:08:18 +0100
+
+plymouth (0.6.0-1) experimental; urgency=low
+
+  * Initial release (Closes: #506899).
+
+ -- Daniel Baumann <mail@daniel-baumann.ch>  Sat, 07 Feb 2009 19:02:00 +0100
+

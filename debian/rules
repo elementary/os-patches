@@ -1,0 +1,122 @@
+#!/usr/bin/make -f
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+# Ensure at build time that the library has no dependencies on undefined
+# symbols, and speed up loading.
+export DEB_LDFLAGS_MAINT_APPEND=-Wl,-z,defs -Wl,--as-needed
+
+# Build with -Werror
+DEB_CFLAGS_MAINT_APPEND  := -Werror -Wno-error=unused-result \
+       -Wno-error=sign-compare
+
+# Disable optimisations if noopt found in $DEB_BUILD_OPTIONS
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	DEB_LDFLAGS_MAINT_APPEND += -Wl,-O0
+else
+	DEB_LDFLAGS_MAINT_APPEND += -Wl,-O1
+endif
+
+%:
+	dh ${@} --parallel --with autoreconf,systemd
+
+override_dh_auto_clean:
+	dh_auto_clean
+
+	rm -f build-tools/config.guess build-tools/config.sub
+
+override_dh_auto_configure:
+	cp -f /usr/share/misc/config.guess build-tools
+	cp -f /usr/share/misc/config.sub build-tools
+
+	dh_auto_configure -- \
+		--disable-silent-rules \
+		--prefix=/usr \
+		--localstatedir=/var \
+		--enable-pango \
+		--enable-systemd-integration \
+		--enable-static \
+		--enable-tracing \
+		--disable-gdm-transition \
+		--with-background-color=0x2c001e \
+		--with-background-start-color-stop=0x2c001e \
+		--with-background-end-color-stop=0x2c001e \
+		--with-logo=/usr/share/plymouth/ubuntu-logo.png \
+		--with-release-file=/etc/os-release \
+		--with-system-root-install \
+		--without-rhgb-compat-link
+
+override_dh_auto_install:
+	dh_auto_install
+
+	rm -f debian/tmp/lib/$(DEB_HOST_MULTIARCH)/*.la
+	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/*.la
+	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/plymouth/*.la
+	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/plymouth/*/*.la
+	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/plymouth/*.a
+	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/plymouth/*/*.a
+
+override_dh_install:
+	# Moving /usr/lib to /lib
+	mv debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/*.so.* debian/tmp/lib/$(DEB_HOST_MULTIARCH)
+
+	mv debian/tmp/lib/$(DEB_HOST_MULTIARCH)/*.so debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)
+	mv debian/tmp/lib/$(DEB_HOST_MULTIARCH)/*.a debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)
+
+	# remove non alternative-based theme policy files and tools
+	rm -f debian/tmp/etc/plymouth/plymouthd.conf
+	rm -f debian/tmp/usr/share/plymouth/plymouthd.defaults
+	rm -f debian/tmp/usr/sbin/plymouth-set-default-theme
+	rm -f debian/tmp/usr/share/man/man1/plymouth-set-default-theme.1
+
+	dh_install --fail-missing
+
+	# Adding initramfs-tools integration
+	install -D -m 0755 debian/local/plymouth.hook debian/plymouth/usr/share/initramfs-tools/hooks/plymouth
+	sed -i -e 's|@DEB_HOST_MULTIARCH@|$(DEB_HOST_MULTIARCH)|g' debian/plymouth/usr/share/initramfs-tools/hooks/plymouth
+	install -D -m 0755 debian/local/plymouth.init-premount debian/plymouth/usr/share/initramfs-tools/scripts/init-premount/plymouth
+	install -D -m 0755 debian/local/plymouth.init-bottom debian/plymouth/usr/share/initramfs-tools/scripts/init-bottom/plymouth
+	install -D -m 0755 debian/local/plymouth.panic debian/plymouth/usr/share/initramfs-tools/scripts/panic/plymouth
+
+	# Adding other debian specific files
+	install -D -m 0644 themes/ubuntu-logo/ubuntu-logo.png debian/plymouth/usr/share/plymouth/ubuntu-logo.png
+	install -D -m 0755 debian/local/plymouth-update-initrd debian/plymouth/usr/lib/$(DEB_HOST_MULTIARCH)/plymouth/plymouth-update-initrd
+	install -D -m 0644 debian/local/plymouth.lsb debian/plymouth/lib/lsb/init-functions.d/99-plymouth
+	install -D -m 0644 themes/ubuntu-logo/ubuntu-logo.png debian/plymouth/usr/share/plymouth/themes/spinner/watermark.png
+
+	# Adding apport file (from Ubuntu)
+	mkdir -p debian/plymouth/usr/share/apport/package-hooks
+	install -m 644 debian/source_plymouth.apport debian/plymouth/usr/share/apport/package-hooks/source_plymouth.py
+
+	# Install the ubuntu spinner assets
+	cp debian/local/spinner/* debian/plymouth-theme-spinner/usr/share/plymouth/themes/spinner
+	cp debian/local/entry.png debian/plymouth-theme-spinner/usr/share/plymouth/themes/spinner
+	cp debian/local/lock.png debian/plymouth-theme-spinner/usr/share/plymouth/themes/spinner
+
+override_dh_systemd_start:
+	dh_systemd_start --no-start
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
+
+override_dh_installinit:
+	dh_installinit --no-start -- start . 2 3 4 5 . stop . 0 6 .
+	dh_installinit --no-start --name=plymouth-log -- start . S .
+
+override_dh_link:
+	# correcting symlink targets
+	for LIB in debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/*.so; \
+	do \
+		dh_link -plibplymouth-dev lib/$(DEB_HOST_MULTIARCH)/$$(basename $$(readlink $${LIB})) usr/lib/$(DEB_HOST_MULTIARCH)/$$(basename $${LIB}); \
+	done
+
+	dh_link --remaining-packages
+
+override_dh_makeshlibs:
+	dh_makeshlibs -Xusr/lib/$(DEB_HOST_MULTIARCH)/plymouth
+
+override_dh_strip:
+	dh_strip --dbgsym-migration='plymouth-dbg (<< 0.9.2-4~)'
+
+override_dh_missing:
+	dh_missing --fail-missing

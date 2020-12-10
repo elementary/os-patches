@@ -1,0 +1,28 @@
+From d42ed5e4efdfee8cbd291101c5f269d3108f5b27 Mon Sep 17 00:00:00 2001
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Mon, 30 Mar 2020 18:52:39 +0800
+Subject: [PATCH] two-step: Center message text within labels if labels are
+ centered
+
+This makes a difference when you start rendering multiple lines in
+a single label. For a single line label you won't see any difference.
+
+Upstream: https://gitlab.freedesktop.org/plymouth/plymouth/-/merge_requests/103
+---
+ src/plugins/splash/two-step/plugin.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+Index: plymouth-0.9.4git20200323/src/plugins/splash/two-step/plugin.c
+===================================================================
+--- plymouth-0.9.4git20200323.orig/src/plugins/splash/two-step/plugin.c
++++ plymouth-0.9.4git20200323/src/plugins/splash/two-step/plugin.c
+@@ -1876,6 +1876,9 @@ view_show_message (view_t     *view,
+         ply_boot_splash_plugin_t *plugin = view->plugin;
+         int x, y, width, height;
+ 
++        if (plugin->message_below_animation)
++                ply_label_set_alignment (view->message_label, PLY_LABEL_ALIGN_CENTER);
++
+         ply_label_set_text (view->message_label, message);
+         width = ply_label_get_width (view->message_label);
+         height = ply_label_get_height (view->message_label);
