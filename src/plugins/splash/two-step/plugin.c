@@ -139,6 +139,7 @@ struct _ply_boot_splash_plugin
         ply_image_t                        *header_image;
         ply_image_t                        *background_tile_image;
         ply_image_t                        *background_bgrt_image;
+        ply_image_t                        *background_bgrt_fallback_image;
         ply_image_t                        *watermark_image;
         ply_list_t                         *views;
 
@@ -1243,6 +1244,9 @@ destroy_plugin (ply_boot_splash_plugin_t *plugin)
         if (plugin->background_bgrt_image != NULL)
                 ply_image_free (plugin->background_bgrt_image);
 
+        if (plugin->background_bgrt_fallback_image != NULL)
+                ply_image_free (plugin->background_bgrt_fallback_image);
+
         if (plugin->watermark_image != NULL)
                 ply_image_free (plugin->watermark_image);
 
@@ -1654,11 +1658,17 @@ show_splash_screen (ply_boot_splash_plugin_t *plugin,
                         plugin->background_bgrt_raw_width = ply_image_get_width (plugin->background_bgrt_image);
                         plugin->background_bgrt_raw_height = ply_image_get_height (plugin->background_bgrt_image);
                 } else {
-                        ply_image_free (plugin->background_bgrt_image);
-                        plugin->background_bgrt_image = NULL;
-                        for (i = 0; i < PLY_BOOT_SPLASH_MODE_COUNT; i++)
-                                plugin->mode_settings[i].use_firmware_background = false;
-                        plugin->use_firmware_background = false;
+                        ply_trace ("loading background bgrt fallback image");
+                        if (ply_image_load (plugin->background_bgrt_fallback_image)) {
+                                plugin->background_bgrt_image = plugin->background_bgrt_fallback_image;
+                                plugin->background_bgrt_fallback_image = NULL;
+                        } else  {
+                                ply_image_free (plugin->background_bgrt_image);
+                                plugin->background_bgrt_image = NULL;
+                                for (i = 0; i < PLY_BOOT_SPLASH_MODE_COUNT; i++)
+                                        plugin->mode_settings[i].use_firmware_background = false;
+                                plugin->use_firmware_background = false;
+                        }
                 }
         }
 
