@@ -1,3 +1,18 @@
+python-apt (1.6.5ubuntu0.4) bionic-security; urgency=high
+
+  * SECURITY UPDATE: various memory and file descriptor leaks (LP: #1899193)
+    - python/arfile.cc, python/generic.h, python/tag.cc, python/tarfile.cc:
+      fix file descriptor and memory leaks
+    - python/apt_instmodule.cc, python/apt_instmodule.h, python/arfile.h:
+      Avoid reference cycle with control,data members in apt_inst.DebFile
+      objects
+    - tests/test_cve_2020_27351.py: Test cases for DebFile (others not easily
+      testable)
+    - CVE-2020-27351
+  * data/templates: Update mirror lists
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Tue, 01 Dec 2020 20:16:11 +0100
+
 python-apt (1.6.5ubuntu0.3) bionic; urgency=medium
 
   * Don't duplicate disabled sources during add() (LP: #1311056)

@@ -302,4 +302,23 @@ public:
    }
 };
 
+
+/**
+ * Basic smart pointer to hold initial objects.
+ *
+ * This is like a std::unique_ptr<PyObject, decltype(&Py_DecRef)> to some extend,
+ * but it is for initialization only, and hence will also clear out any members
+ * in case it deletes the instance (the error case).
+ */
+template <class T, bool clear=true> struct PyApt_UniqueObject {
+    T *self;
+    explicit PyApt_UniqueObject(T *self) : self(self) { }
+    ~PyApt_UniqueObject() { reset(NULL); }
+    void reset(T *newself) { if (clear && self && Py_TYPE(self)->tp_clear) Py_TYPE(self)->tp_clear(self); Py_XDECREF(self); self = newself; }
+    PyApt_UniqueObject<T> operator =(PyApt_UniqueObject<T>) = delete;
+    bool operator ==(void *other) { return self == other; }
+    T *operator ->() { return self; }
+    T *get() { return self; }
+    T *release() { T *ret = self; self = NULL; return ret; }
+};
 #endif

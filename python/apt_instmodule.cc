@@ -77,5 +77,6 @@ extern "C" void initapt_inst()
    ADDTYPE(module,"DebFile",&PyDebFile_Type);
    ADDTYPE(module,"TarFile",&PyTarFile_Type);
    ADDTYPE(module,"TarMember",&PyTarMember_Type);
+   ADDTYPE(module,"__FileFd",&PyFileFd_Type);
    RETURN(module);
 }

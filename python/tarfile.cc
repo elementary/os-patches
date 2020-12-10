@@ -341,7 +341,6 @@ PyTypeObject PyTarMember_Type = {
 static PyObject *tarfile_new(PyTypeObject *type,PyObject *args,PyObject *kwds)
 {
     PyObject *file;
-    PyTarFileObject *self;
     PyApt_Filename filename;
     int fileno;
     int min = 0;
@@ -353,7 +352,7 @@ static PyObject *tarfile_new(PyTypeObject *type,PyObject *args,PyObject *kwds)
                                     &max,&comp) == 0)
         return 0;
 
-    self = (PyTarFileObject*)CppPyObject_NEW<ExtractTar*>(file,type);
+    PyApt_UniqueObject<PyTarFileObject> self((PyTarFileObject*)CppPyObject_NEW<ExtractTar*>(file,type));
 
     // We receive a filename.
     if (filename.init(file))
@@ -364,15 +363,14 @@ static PyObject *tarfile_new(PyTypeObject *type,PyObject *args,PyObject *kwds)
         new (&self->Fd) FileFd(fileno,false);
     }
     else {
-        Py_DECREF(self);
         return 0;
     }
 
     self->min = min;
     self->Object = new ExtractTar(self->Fd,max,comp);
     if (_error->PendingError() == true)
-        return HandleErrors(self);
-    return self;
+        return HandleErrors(self.release());
+    return self.release();
 }
 
 static const char *tarfile_extractall_doc =
