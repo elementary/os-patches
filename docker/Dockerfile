@@ -20,12 +20,16 @@ RUN apt-get update && \
         libostree-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# Build testify from source
+# testify v1.3.0 is the last version to work with golang v1.11
+WORKDIR $GOPATH/src/github.com/stretchr/testify
+RUN git clone --depth 1 --branch v1.3.0 https://github.com/stretchr/testify . && \
+    GO111MODULE=on go get ./...
+
 # Build debos
 COPY . $GOPATH/src/github.com/go-debos/debos
 WORKDIR $GOPATH/src/github.com/go-debos/debos/cmd/debos
-RUN go get -d ./... && \
-    go get -d github.com/stretchr/testify && \
-    go install
+RUN go get -t ./...
 
 ### second stage - runner ###
 FROM debian:buster-slim as runner
@@ -63,6 +67,8 @@ RUN apt-get update && \
         debootstrap \
         dosfstools \
         e2fsprogs \
+        fdisk \
+        f2fs-tools \
         gzip \
         pigz \
         libostree-1-1 \
@@ -73,6 +79,7 @@ RUN apt-get update && \
         qemu-user-static \
         systemd \
         systemd-container \
+	u-boot-tools \
         unzip \
         xz-utils && \
     rm -rf /var/lib/apt/lists/*

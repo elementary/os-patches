@@ -2,6 +2,10 @@
 ImagePartition Action
 
 This action creates an image file, partitions it and formats the filesystems.
+Mountpoints can be defined so the created partitions can be mounted during the
+build, and optionally (but by-default) mounted at boot in the final system. The
+mountpoints are sorted on their position in the filesystem hierarchy so the
+order in the recipe does not matter.
 
 Yaml syntax:
  - action: image-partition
@@ -36,8 +40,8 @@ Properties for mount points are described below.
 Yaml syntax for partitions:
 
    partitions:
-     - name: label
-	   name: partition name
+     - name: partition name
+	   partlabel: partition label
 	   fs: filesystem
 	   start: offset
 	   end: offset
@@ -48,7 +52,8 @@ Yaml syntax for partitions:
 Mandatory properties:
 
 - name -- is used for referencing named partition for mount points
-configuration (below) and label the filesystem located on this partition.
+configuration (below) and label the filesystem located on this partition. Must be
+unique.
 
 - fs -- filesystem type used for formatting.
 
@@ -62,6 +67,17 @@ For 'start' and 'end' properties offset can be written in human readable
 form -- '32MB', '1GB' or as disk percentage -- '100%'.
 
 Optional properties:
+
+- partlabel -- label for the partition in the GPT partition table. Defaults
+to the `name` property of the partition. May only be used for GPT partitions.
+
+- parttype -- set the partition type in the partition table. The string should
+be in a hexadecimal format (2-characters) for msdos partition tables and GUID format
+(36-characters) for GPT partition tables. For instance, "82" for msdos sets the
+partition type to Linux Swap. Whereas "0657fd6d-a4ab-43c4-84e5-0933c84b4f4f" for
+GPT sets the partition type to Linux Swap.
+For msdos partition types hex codes see: https://en.wikipedia.org/wiki/Partition_type
+For gpt partition type GUIDs see: https://systemd.io/DISCOVERABLE_PARTITIONS/
 
 - features -- list of additional filesystem features which need to be enabled
 for partition.
@@ -82,17 +98,18 @@ Yaml syntax for mount points:
 
 Mandatory properties:
 
-- partition -- partition name for mounting.
+- partition -- partition name for mounting. The partion must exist under `partitions`.
 
 - mountpoint -- path in the target root filesystem where the named partition
-should be mounted.
+should be mounted. Must be unique, only one partition can be mounted per
+mountpoint.
 
 Optional properties:
 
 - options -- list of options to be added to appropriate entry in fstab file.
 
 - buildtime -- if set to true then the mountpoint only used during the debos run.
-No entry in `/etc/fstab' will be created.
+No entry in `/etc/fstab` will be created.
 The mountpoints directory will be removed from the image, so it is recommended
 to define a `mountpoint` path which is temporary and unique for the image,
 for example: `/mnt/temporary_mount`.
@@ -134,6 +151,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -142,15 +160,17 @@ import (
 )
 
 type Partition struct {
-	number   int
-	Name     string
-	Start    string
-	End      string
-	FS       string
-	Flags    []string
-	Features []string
-	Fsck     bool "fsck"
-	FSUUID   string
+	number    int
+	Name      string
+	PartLabel string
+	PartType  string
+	Start     string
+	End       string
+	FS        string
+	Flags     []string
+	Features  []string
+	Fsck      bool "fsck"
+	FSUUID    string
 }
 
 type Mountpoint struct {
@@ -250,6 +270,16 @@ func (i ImagePartitionAction) getPartitionDevice(number int, context debos.Debos
 	}
 }
 
+func (i *ImagePartitionAction) triggerDeviceNodes(context *debos.DebosContext) error {
+	err := debos.Command{}.Run("udevadm", "udevadm", "trigger", "--settle", context.Image)
+	if err != nil {
+		log.Printf("Failed to trigger device nodes")
+		return err
+	}
+
+	return nil
+}
+
 func (i ImagePartitionAction) PreMachine(context *debos.DebosContext, m *fakemachine.Machine,
 	args *[]string) error {
 	image, err := m.CreateImage(i.ImageName, i.size)
@@ -273,6 +303,11 @@ func (i ImagePartitionAction) formatPartition(p *Partition, context debos.DebosC
 	case "btrfs":
 		// Force formatting to prevent failure in case if partition was formatted already
 		cmdline = append(cmdline, "mkfs.btrfs", "-L", p.Name, "-f")
+		if len(p.Features) > 0 {
+			cmdline = append(cmdline, "-O", strings.Join(p.Features, ","))
+		}
+	case "f2fs":
+		cmdline = append(cmdline, "mkfs.f2fs", "-l", p.Name)
 		if len(p.Features) > 0 {
 			cmdline = append(cmdline, "-O", strings.Join(p.Features, ","))
 		}
@@ -348,7 +383,9 @@ func (i ImagePartitionAction) Run(context *debos.DebosContext) error {
 	}
 	/* Defer will keep the fd open until the function returns, at which points
 	 * the filesystems will have been mounted protecting from more udev funnyness
-	 */
+	 * After the fd is closed the kernel needs to be informed of partition table
+	 * changes (defer calls are executed in LIFO order) */
+	defer i.triggerDeviceNodes(context)
 	defer imageFD.Close()
 
 	err = syscall.Flock(int(imageFD.Fd()), syscall.LOCK_EX)
@@ -366,9 +403,14 @@ func (i ImagePartitionAction) Run(context *debos.DebosContext) error {
 	}
 	for idx, _ := range i.Partitions {
 		p := &i.Partitions[idx]
+
+		if p.PartLabel == "" {
+			p.PartLabel = p.Name
+		}
+
 		var name string
 		if i.PartitionType == "gpt" {
-			name = p.Name
+			name = p.PartLabel
 		} else {
 			name = "primary"
 		}
@@ -379,6 +421,7 @@ func (i ImagePartitionAction) Run(context *debos.DebosContext) error {
 			command = append(command, "fat32")
 		case "hfsplus":
 			command = append(command, "hfs+")
+		case "f2fs":
 		case "none":
 		default:
 			command = append(command, p.FS)
@@ -400,6 +443,14 @@ func (i ImagePartitionAction) Run(context *debos.DebosContext) error {
 			}
 		}
 
+		if p.PartType != "" {
+			err = debos.Command{}.Run("sfdisk", "sfdisk", "--part-type", context.Image, fmt.Sprintf("%d", p.number), p.PartType)
+			if err != nil {
+				return err
+			}
+		}
+
+
 		devicePath := i.getPartitionDevice(p.number, *context)
 
 		err = i.formatPartition(p, *context)
@@ -413,6 +464,23 @@ func (i ImagePartitionAction) Run(context *debos.DebosContext) error {
 
 	context.ImageMntDir = path.Join(context.Scratchdir, "mnt")
 	os.MkdirAll(context.ImageMntDir, 0755)
+
+	// sort mountpoints based on position in filesystem hierarchy
+	sort.SliceStable(i.Mountpoints, func(a, b int) bool {
+		mntA := i.Mountpoints[a].Mountpoint
+		mntB := i.Mountpoints[b].Mountpoint
+
+		// root should always be mounted first
+		if (mntA == "/") {
+			return true
+		}
+		if (mntB == "/") {
+			return false
+		}
+
+		return strings.Count(mntA, "/") < strings.Count(mntB, "/")
+	})
+
 	for _, m := range i.Mountpoints {
 		dev := i.getPartitionDevice(m.part.number, *context)
 		mntpath := path.Join(context.ImageMntDir, m.Mountpoint)
@@ -449,6 +517,11 @@ func (i ImagePartitionAction) Cleanup(context *debos.DebosContext) error {
 		if m.Buildtime == true {
 			if err = os.Remove(mntpath); err != nil {
 				log.Printf("Failed to remove temporary mount point %s: %s", m.Mountpoint, err)
+
+				if err.(*os.PathError).Err.Error() == "read-only file system" {
+					continue
+				}
+
 				return err
 			}
 		}
@@ -513,6 +586,31 @@ func (i *ImagePartitionAction) Verify(context *debos.DebosContext) error {
 		if p.Name == "" {
 			return fmt.Errorf("Partition without a name")
 		}
+
+		// check for duplicate partition names
+		for j := idx + 1; j < len(i.Partitions); j++ {
+			if i.Partitions[j].Name == p.Name {
+				return fmt.Errorf("Partition %s already exists", p.Name)
+			}
+		}
+
+		if i.PartitionType != "gpt" && p.PartLabel != "" {
+			return fmt.Errorf("Can only set partition partlabel on GPT filesystem")
+		}
+
+		if p.PartType != "" {
+			var partTypeLen int
+			switch i.PartitionType {
+			case "gpt":
+				partTypeLen = 36
+			case "msdos":
+				partTypeLen = 2
+			}
+			if len(p.PartType) != partTypeLen {
+				return fmt.Errorf("incorrect partition type for %s, should be %d characters", p.Name, partTypeLen)
+			}
+		}
+
 		if p.Start == "" {
 			return fmt.Errorf("Partition %s missing start", p.Name)
 		}
@@ -530,6 +628,14 @@ func (i *ImagePartitionAction) Verify(context *debos.DebosContext) error {
 
 	for idx, _ := range i.Mountpoints {
 		m := &i.Mountpoints[idx]
+
+		// check for duplicate mountpoints
+		for j := idx + 1; j < len(i.Mountpoints); j++ {
+			if i.Mountpoints[j].Mountpoint == m.Mountpoint {
+				return fmt.Errorf("Mountpoint %s already exists", m.Mountpoint)
+			}
+		}
+
 		for pidx, _ := range i.Partitions {
 			p := &i.Partitions[pidx]
 			if m.Partition == p.Name {
@@ -538,7 +644,7 @@ func (i *ImagePartitionAction) Verify(context *debos.DebosContext) error {
 			}
 		}
 		if m.part == nil {
-			return fmt.Errorf("Couldn't fount partition for %s", m.Mountpoint)
+			return fmt.Errorf("Couldn't find partition for %s", m.Mountpoint)
 		}
 	}
 
