@@ -1,0 +1,44 @@
+Source: golang-github-go-debos-fakemachine
+Section: devel
+Priority: optional
+Maintainer: Debian Go Packaging Team <pkg-go-maintainers@lists.alioth.debian.org>
+Uploaders: Héctor Orón Martínez <zumbi@debian.org>
+Build-Depends: debhelper (>= 10),
+               dh-golang,
+               golang-any,
+               golang-github-docker-go-units-dev,
+               golang-github-surma-gocpio-dev,
+               golang-golang-x-sys-dev,
+               golang-go-flags-dev,
+               golang-github-stretchr-testify-dev,
+# need for tests
+#               busybox,
+#               qemu-system
+Standards-Version: 4.2.1
+Rules-Requires-Root: no
+Homepage: https://github.com/go-debos/fakemachine
+Vcs-Browser: https://salsa.debian.org/go-team/packages/golang-github-go-debos-fakemachine
+Vcs-Git: https://salsa.debian.org/go-team/packages/golang-github-go-debos-fakemachine.git
+XS-Go-Import-Path: github.com/go-debos/fakemachine
+
+Package: fakemachine
+Architecture: amd64
+Built-Using: ${misc:Built-Using}
+Depends: busybox | busybox-static,
+         qemu-system-x86,
+         systemd,
+         ${shlibs:Depends},
+         ${misc:Depends}
+Recommends: e2fsprogs,
+            linux-image-amd64
+Description: create and spawn virtual machines for building images with debos.
+ Create and spawn virtual machines for building images with debos tool.
+
+Package: golang-github-go-debos-fakemachine-dev
+Architecture: amd64
+Built-Using: ${misc:Built-Using}
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: create and spawn virtual machines for building images with debos.
+ Create and spawn virtual machines for building images with debos tool.
+ (development libraries)
