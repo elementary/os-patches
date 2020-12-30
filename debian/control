@@ -1,0 +1,52 @@
+Source: debos
+Section: devel
+Priority: optional
+Maintainer: Debian Go Packaging Team <pkg-go-maintainers@lists.alioth.debian.org>
+Uploaders: Héctor Orón Martínez <zumbi@debian.org>, Andrej Shadura <andrewsh@debian.org>
+Build-Depends: debhelper (>= 10),
+               dh-golang,
+               golang-any,
+               golang-github-docker-go-units-dev,
+               golang-github-stretchr-testify-dev,
+               golang-yaml.v2-dev,
+               golang-github-sjoerdsimons-ostree-go-dev (>= 0.0~git20190304.5d29096~),
+               golang-go-flags-dev,
+               golang-github-go-debos-fakemachine-dev (>= 0.0~git20181105.9316584~),
+               golang-github-surma-gocpio-dev,
+               libostree-dev,
+               golang-gopkg-freddierice-go-losetup.v1-dev
+Standards-Version: 4.2.1
+Rules-Requires-Root: no
+Homepage: https://github.com/go-debos/debos
+Vcs-Browser: https://salsa.debian.org/go-team/packages/debos
+Vcs-Git: https://salsa.debian.org/go-team/packages/debos.git
+XS-Go-Import-Path: github.com/go-debos/debos
+Testsuite: autopkgtest-pkg-go
+
+Package: debos
+Architecture: amd64
+Built-Using: ${misc:Built-Using}
+Recommends: bmap-tools
+          , ovmf
+          , bzip2
+          , xz-utils
+          , zip
+# For the action image-partition
+          , parted
+          , mount
+          , udev
+          , e2fsprogs
+          , linux-image-amd64
+Depends: ${shlibs:Depends}
+         , ${misc:Depends}
+         , busybox | busybox-static
+         , systemd-container
+         , debootstrap
+         , qemu-system-x86
+         , qemu-user-static
+Description: Debian OS builder
+ debos is a tool to make creation of various Debian based OS "images"
+ simpler. While most other tools focus on specific use-case, debos is
+ more meant as a toolchain to make comon actions trivial while providing
+ enough rope to do whatever tweaking that might be required behind
+ the scenes.
