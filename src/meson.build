@@ -125,6 +125,7 @@ src_sources = [
   'hdy-animation.c',
   'hdy-application-window.c',
   'hdy-avatar.c',
+  'hdy-avatar-icon.c',
   'hdy-bidi.c',
   'hdy-carousel.c',
   'hdy-carousel-box.c',

@@ -7,6 +7,7 @@ private_headers = [
     'gtkprogresstrackerprivate.h',
     'gtk-window-private.h',
     'hdy-animation-private.h',
+    'hdy-avatar-icon-private.h',
     'hdy-bidi-private.h',
     'hdy-carousel-box-private.h',
     'hdy-css-private.h',
