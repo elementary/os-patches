@@ -32,34 +32,8 @@
  * The color is picked based on the hash of the #HdyAvatar:text.
  * If #HdyAvatar:show-initials is set to %FALSE, `avatar-default-symbolic` is
  * shown in place of the initials.
- * Use hdy_avatar_set_image_load_func () to set a custom image.
- * Create a #HdyAvatarImageLoadFunc similar to this example:
- *
- * |[<!-- language="C" -->
- * static GdkPixbuf *
- * image_load_func (gint size, gpointer user_data)
- * {
- *   g_autoptr (GError) error = NULL;
- *   g_autoptr (GdkPixbuf) pixbuf = NULL;
- *   g_autofree gchar *file = gtk_file_chooser_get_filename ("avatar.png");
- *   gint width, height;
- *
- *   gdk_pixbuf_get_file_info (file, &width, &height);
- *
- *   pixbuf = gdk_pixbuf_new_from_file_at_scale (file,
- *                                              (width <= height) ? size : -1,
- *                                              (width >= height) ? size : -1,
- *                                              TRUE,
- *                                              error);
- *   if (error != NULL) {
- *    g_critical ("Failed to create pixbuf from file: %s", error->message);
- *
- *    return NULL;
- *   }
- *
- *   return pixbuf;
- * }
- * ]|
+ * Use hdy_avatar_set_loadable_icon() or #HdyAvatar:loadable-icon to set a
+ * custom image.
  *
  * # CSS nodes
  *
