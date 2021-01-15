@@ -57,6 +57,7 @@ static char *opt_commit;
 static char *opt_runtime_commit;
 static int opt_parent_pid;
 static gboolean opt_parent_expose_pids;
+static int opt_instance_id_fd = -1;
 
 static GOptionEntry options[] = {
   { "arch", 0, 0, G_OPTION_ARG_STRING, &opt_arch, N_("Arch to use"), N_("ARCH") },
@@ -71,7 +72,7 @@ static GOptionEntry options[] = {
   { "log-a11y-bus", 0, 0, G_OPTION_ARG_NONE, &opt_log_a11y_bus, N_("Log accessibility bus calls"), NULL },
   { "no-a11y-bus", 0, G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &opt_a11y_bus, N_("Don't proxy accessibility bus calls"), NULL },
   { "a11y-bus", 0, 0, G_OPTION_ARG_NONE, &opt_a11y_bus, N_("Proxy accessibility bus calls (default except when sandboxed)"), NULL },
-  { "no-session-bus", 0, G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &opt_a11y_bus, N_("Don't proxy session bus calls"), NULL },
+  { "no-session-bus", 0, G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &opt_session_bus, N_("Don't proxy session bus calls"), NULL },
   { "session-bus", 0, 0, G_OPTION_ARG_NONE, &opt_session_bus, N_("Proxy session bus calls (default except when sandboxed)"), NULL },
   { "no-documents-portal", 0, 0, G_OPTION_ARG_NONE, &opt_no_documents_portal, N_("Don't start portals"), NULL },
   { "file-forwarding", 0, 0, G_OPTION_ARG_NONE, &opt_file_forwarding, N_("Enable file forwarding"), NULL },
@@ -81,6 +82,7 @@ static GOptionEntry options[] = {
   { "die-with-parent", 'p', 0, G_OPTION_ARG_NONE, &opt_die_with_parent, N_("Kill processes when the parent process dies"), NULL },
   { "parent-pid", 0, 0, G_OPTION_ARG_INT, &opt_parent_pid, N_("Use PID as parent pid for sharing namespaces"), N_("PID") },
   { "parent-expose-pids", 0, 0, G_OPTION_ARG_NONE, &opt_parent_expose_pids, N_("Make processes visible in parent namespace"), NULL },
+  { "instance-id-fd", 0, 0, G_OPTION_ARG_INT, &opt_instance_id_fd, N_("Write the instance ID to the given file descriptor"), NULL },
   { NULL }
 };
 
@@ -310,6 +312,7 @@ flatpak_builtin_run (int argc, char **argv, GCancellable *cancellable, GError **
                         opt_command,
                         &argv[rest_argv_start + 1],
                         rest_argc - 1,
+                        opt_instance_id_fd,
                         NULL,
                         cancellable,
                         error))

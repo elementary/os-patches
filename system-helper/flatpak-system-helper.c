@@ -38,6 +38,7 @@
 #include "flatpak-dir-private.h"
 #include "flatpak-error.h"
 #include "flatpak-oci-registry-private.h"
+#include "flatpak-progress-private.h"
 #include "flatpak-utils-base-private.h"
 #include "flatpak-utils-private.h"
 
@@ -242,11 +243,6 @@ dir_get_system (const char *installation,
   return system;
 }
 
-static void
-no_progress_cb (OstreeAsyncProgress *progress, gpointer user_data)
-{
-}
-
 #define DBUS_NAME_DBUS "org.freedesktop.DBus"
 #define DBUS_INTERFACE_DBUS DBUS_NAME_DBUS
 #define DBUS_PATH_DBUS "/org/freedesktop/DBus"
@@ -389,7 +385,6 @@ handle_deploy (FlatpakSystemHelper   *object,
   g_autoptr(GFile) repo_file = g_file_new_for_path (arg_repo_path);
   g_autoptr(GError) error = NULL;
   g_autoptr(GFile) deploy_dir = NULL;
-  g_autoptr(OstreeAsyncProgressFinish) ostree_progress = NULL;
   gboolean is_oci;
   gboolean is_update;
   gboolean no_deploy;
@@ -515,7 +510,6 @@ handle_deploy (FlatpakSystemHelper   *object,
       g_autoptr(FlatpakOciVersioned) versioned = NULL;
       g_autoptr(FlatpakOciImage) image_config = NULL;
       g_autoptr(FlatpakRemoteState) state = NULL;
-      FlatpakCollectionRef collection_ref;
       g_autoptr(GHashTable) remote_refs = NULL;
       g_autofree char *checksum = NULL;
       const char *verified_digest;
@@ -557,7 +551,7 @@ handle_deploy (FlatpakSystemHelper   *object,
           return TRUE;
         }
 
-      versioned = flatpak_oci_registry_load_versioned (registry, NULL, desc->parent.digest, NULL,
+      versioned = flatpak_oci_registry_load_versioned (registry, NULL, desc->parent.digest, (const char **)desc->parent.urls, NULL,
                                                        NULL, &error);
       if (versioned == NULL || !FLATPAK_IS_OCI_MANIFEST (versioned))
         {
@@ -568,6 +562,7 @@ handle_deploy (FlatpakSystemHelper   *object,
 
       image_config = flatpak_oci_registry_load_image_config (registry, NULL,
                                                              FLATPAK_OCI_MANIFEST (versioned)->config.digest,
+                                                             (const char **)FLATPAK_OCI_MANIFEST (versioned)->config.urls,
                                                              NULL, NULL, &error);
       if (image_config == NULL)
         {
@@ -594,10 +589,7 @@ handle_deploy (FlatpakSystemHelper   *object,
           return TRUE;
         }
 
-      collection_ref.collection_id = state->collection_id;
-      collection_ref.ref_name = (char *) arg_ref;
-
-      verified_digest = g_hash_table_lookup (remote_refs, &collection_ref);
+      verified_digest = g_hash_table_lookup (remote_refs, arg_ref);
       if (!verified_digest)
         {
           g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
@@ -613,8 +605,8 @@ handle_deploy (FlatpakSystemHelper   *object,
           return TRUE;
         }
 
-      checksum = flatpak_pull_from_oci (flatpak_dir_get_repo (system), registry, NULL, desc->parent.digest, FLATPAK_OCI_MANIFEST (versioned), image_config,
-                                        arg_origin, arg_ref, NULL, NULL, NULL, &error);
+      checksum = flatpak_pull_from_oci (flatpak_dir_get_repo (system), registry, NULL, desc->parent.digest, NULL, FLATPAK_OCI_MANIFEST (versioned), image_config,
+                                        arg_origin, arg_ref, FLATPAK_PULL_FLAGS_NONE, NULL, NULL, NULL, &error);
       if (checksum == NULL)
         {
           g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
@@ -624,19 +616,11 @@ handle_deploy (FlatpakSystemHelper   *object,
     }
   else if (strlen (arg_repo_path) > 0)
     {
-      g_autoptr(GMainContextPopDefault) main_context = NULL;
-
-      /* Work around ostree-pull spinning the default main context for the sync calls */
-      main_context = flatpak_main_context_new_default ();
-
-      ostree_progress = ostree_async_progress_new_and_connect (no_progress_cb, NULL);
-
       if (!flatpak_dir_pull_untrusted_local (system, arg_repo_path,
                                              arg_origin,
                                              arg_ref,
                                              (const char **) arg_subpaths,
-                                             ostree_progress,
-                                             NULL, &error))
+                                             NULL, NULL, &error))
         {
           flatpak_invocation_return_error (invocation, error, "Error pulling from repo");
           return TRUE;
@@ -644,7 +628,6 @@ handle_deploy (FlatpakSystemHelper   *object,
     }
   else if (local_pull)
     {
-      g_autoptr(GMainContextPopDefault) main_context = NULL;
       g_autoptr(FlatpakRemoteState) state = NULL;
       if (!ostree_repo_remote_get_url (flatpak_dir_get_repo (system),
                                        arg_origin,
@@ -669,13 +652,8 @@ handle_deploy (FlatpakSystemHelper   *object,
           return TRUE;
         }
 
-      /* Work around ostree-pull spinning the default main context for the sync calls */
-      main_context = flatpak_main_context_new_default ();
-
-      ostree_progress = ostree_async_progress_new_and_connect (no_progress_cb, NULL);
-
-      if (!flatpak_dir_pull (system, state, arg_ref, NULL, NULL, (const char **) arg_subpaths, NULL, NULL,
-                             FLATPAK_PULL_FLAGS_NONE, OSTREE_REPO_PULL_FLAGS_UNTRUSTED, ostree_progress,
+      if (!flatpak_dir_pull (system, state, arg_ref, NULL, (const char **) arg_subpaths, NULL, NULL, NULL, NULL,
+                             FLATPAK_PULL_FLAGS_NONE, OSTREE_REPO_PULL_FLAGS_UNTRUSTED, NULL,
                              NULL, &error))
         {
           flatpak_invocation_return_error (invocation, error, "Error pulling from repo");
@@ -817,11 +795,11 @@ handle_deploy_appstream (FlatpakSystemHelper   *object,
 
   if (is_oci)
     {
-      g_autoptr(GMainContextPopDefault) context =  NULL;
+      g_auto(FlatpakMainContext) context = FLATKPAK_MAIN_CONTEXT_INIT;
 
       /* This does soup http requests spinning the current mainloop, so we need one
          for this thread. */
-      context = flatpak_main_context_new_default ();
+      flatpak_progress_init_main_context (NULL, &context);
       /* In the OCI case, we just do the full update, including network i/o, in the
        * system helper, see comment in flatpak_dir_update_appstream()
        */
@@ -844,26 +822,19 @@ handle_deploy_appstream (FlatpakSystemHelper   *object,
     {
       g_autoptr(GError) first_error = NULL;
       g_autoptr(GError) second_error = NULL;
-      g_autoptr(GMainContextPopDefault) main_context = NULL;
-      g_autoptr(OstreeAsyncProgressFinish) ostree_progress = NULL;
-
-      /* Work around ostree-pull spinning the default main context for the sync calls */
-      main_context = flatpak_main_context_new_default ();
-
-      ostree_progress = ostree_async_progress_new_and_connect (no_progress_cb, NULL);
 
       if (!flatpak_dir_pull_untrusted_local (system, arg_repo_path,
                                              arg_origin,
                                              new_branch,
                                              NULL,
-                                             ostree_progress,
+                                             NULL,
                                              NULL, &first_error))
         {
           if (!flatpak_dir_pull_untrusted_local (system, arg_repo_path,
                                                  arg_origin,
                                                  old_branch,
                                                  NULL,
-                                                 ostree_progress,
+                                                 NULL,
                                                  NULL, &second_error))
             {
               g_prefix_error (&first_error, "Error updating appstream2: ");
@@ -877,11 +848,9 @@ handle_deploy_appstream (FlatpakSystemHelper   *object,
   else /* empty path == local pull */
     {
       g_autoptr(FlatpakRemoteState) state = NULL;
-      g_autoptr(OstreeAsyncProgressFinish) ostree_progress = NULL;
       g_autoptr(GError) first_error = NULL;
       g_autoptr(GError) second_error = NULL;
       g_autofree char *url = NULL;
-      g_autoptr(GMainContextPopDefault) main_context = NULL;
 
       if (!ostree_repo_remote_get_url (flatpak_dir_get_repo (system),
                                        arg_origin,
@@ -906,17 +875,12 @@ handle_deploy_appstream (FlatpakSystemHelper   *object,
           return TRUE;
         }
 
-      /* Work around ostree-pull spinning the default main context for the sync calls */
-      main_context = flatpak_main_context_new_default ();
-
-      ostree_progress = ostree_async_progress_new_and_connect (no_progress_cb, NULL);
-
-      if (!flatpak_dir_pull (system, state, new_branch, NULL, NULL, NULL, NULL, NULL,
-                             FLATPAK_PULL_FLAGS_NONE, OSTREE_REPO_PULL_FLAGS_UNTRUSTED, ostree_progress,
+      if (!flatpak_dir_pull (system, state, new_branch, NULL, NULL, NULL, NULL, NULL, NULL,
+                             FLATPAK_PULL_FLAGS_NONE, OSTREE_REPO_PULL_FLAGS_UNTRUSTED, NULL,
                              NULL, &first_error))
         {
-          if (!flatpak_dir_pull (system, state, old_branch, NULL, NULL, NULL, NULL, NULL,
-                                 FLATPAK_PULL_FLAGS_NONE, OSTREE_REPO_PULL_FLAGS_UNTRUSTED, ostree_progress,
+          if (!flatpak_dir_pull (system, state, old_branch, NULL, NULL, NULL, NULL, NULL, NULL,
+                                 FLATPAK_PULL_FLAGS_NONE, OSTREE_REPO_PULL_FLAGS_UNTRUSTED, NULL,
                                  NULL, &second_error))
             {
               g_prefix_error (&first_error, "Error updating appstream2: ");
@@ -1142,7 +1106,9 @@ handle_configure (FlatpakSystemHelper   *object,
       return TRUE;
     }
 
-  if ((strcmp (arg_key, "languages") != 0) && (strcmp (arg_key, "extra-languages") != 0))
+  if ((strcmp (arg_key, "languages") != 0) &&
+      (strcmp (arg_key, "extra-languages") != 0) &&
+      (strcmp (arg_key, "masked") != 0))
     {
       g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS,
                                              "Unsupported key: %s", arg_key);
@@ -1235,7 +1201,7 @@ handle_update_remote (FlatpakSystemHelper   *object,
       return TRUE;
     }
 
-  if (summary_sig_bytes == NULL && state->collection_id == NULL)
+  if (summary_sig_bytes == NULL)
     {
       g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS,
                                              "UpdateRemote requires a summary signature");
@@ -1355,6 +1321,7 @@ handle_ensure_repo (FlatpakSystemHelper   *object,
 {
   g_autoptr(FlatpakDir) system = NULL;
   g_autoptr(GError) error = NULL;
+  g_autoptr(GError) local_error = NULL;
 
   g_debug ("EnsureRepo %u %s", arg_flags, arg_installation);
 
@@ -1377,6 +1344,9 @@ handle_ensure_repo (FlatpakSystemHelper   *object,
       g_dbus_method_invocation_return_gerror (invocation, error);
       return TRUE;
     }
+
+  if (!flatpak_dir_migrate_config (system, NULL, NULL, &local_error))
+    g_warning ("Failed to migrate configuration for installation %s: %s", arg_installation, local_error->message);
 
   flatpak_system_helper_complete_ensure_repo (object, invocation);
 
@@ -1875,7 +1845,7 @@ static gboolean
 dir_ref_is_installed (FlatpakDir *dir,
                       const char *ref)
 {
-  g_autoptr(GVariant) deploy_data = NULL;
+  g_autoptr(GBytes) deploy_data = NULL;
 
   deploy_data = flatpak_dir_get_deploy_data (dir, ref, FLATPAK_DEPLOY_VERSION_ANY, NULL, NULL);
 

@@ -174,6 +174,7 @@ flatpak_oci_versioned_init (FlatpakOciVersioned *self)
 
 FlatpakOciVersioned *
 flatpak_oci_versioned_from_json (GBytes *bytes,
+                                 const char *content_type,
                                  GError **error)
 {
   g_autoptr(JsonParser) parser = NULL;
@@ -193,6 +194,8 @@ flatpak_oci_versioned_from_json (GBytes *bytes,
 
   if (json_object_has_member (object, "mediaType"))
     mediatype = json_object_get_string_member (object, "mediaType");
+  else
+    mediatype = content_type;
 
   if (mediatype == NULL)
     {
@@ -372,6 +375,36 @@ flatpak_oci_manifest_get_annotations (FlatpakOciManifest *self)
   return self->annotations;
 }
 
+FlatpakOciDescriptor *
+flatpak_oci_manifest_find_delta_for (FlatpakOciManifest *delta_manifest,
+                                     const char         *from_diffid,
+                                     const char         *to_diffid)
+{
+  int i;
+
+  if (from_diffid == NULL || to_diffid == NULL)
+    return NULL;
+
+  for (i = 0; delta_manifest->layers != NULL && delta_manifest->layers[i] != NULL; i++)
+    {
+      FlatpakOciDescriptor *layer = delta_manifest->layers[i];
+      const char *layer_from = NULL, *layer_to = NULL;
+
+      if (layer->annotations != NULL)
+        {
+          layer_from = g_hash_table_lookup (layer->annotations, "io.github.containers.delta.from");
+          layer_to = g_hash_table_lookup (layer->annotations, "io.github.containers.delta.to");
+
+          if (g_strcmp0 (layer_from, from_diffid) == 0 &&
+              g_strcmp0 (layer_to, to_diffid) == 0)
+            return layer;
+        }
+    }
+
+  return NULL;
+}
+
+
 G_DEFINE_TYPE (FlatpakOciIndex, flatpak_oci_index, FLATPAK_TYPE_OCI_VERSIONED);
 
 static void
@@ -469,7 +502,8 @@ const char *
 flatpak_oci_manifest_descriptor_get_ref (FlatpakOciManifestDescriptor *m)
 {
   if (m->parent.mediatype == NULL ||
-      strcmp (m->parent.mediatype, FLATPAK_OCI_MEDIA_TYPE_IMAGE_MANIFEST) != 0)
+      (strcmp (m->parent.mediatype, FLATPAK_OCI_MEDIA_TYPE_IMAGE_MANIFEST) != 0 &&
+       strcmp (m->parent.mediatype, FLATPAK_DOCKER_MEDIA_TYPE_IMAGE_MANIFEST2) != 0))
     return NULL;
 
   if (m->parent.annotations == NULL)
@@ -555,6 +589,31 @@ flatpak_oci_index_remove_manifest (FlatpakOciIndex *self,
     self->manifests[i] = self->manifests[i + 1];
 
   return TRUE;
+}
+
+FlatpakOciDescriptor *
+flatpak_oci_index_find_delta_for (FlatpakOciIndex *delta_index,
+                                  const char      *for_digest)
+{
+  int i;
+
+  if (delta_index->manifests == NULL)
+    return NULL;
+
+  for (i = 0; delta_index->manifests[i] != NULL; i++)
+    {
+      FlatpakOciManifestDescriptor *d = delta_index->manifests[i];
+      const char *target;
+
+      if (d->parent.annotations == NULL)
+        continue;
+
+      target = g_hash_table_lookup (d->parent.annotations, "io.github.containers.delta.target");
+      if (g_strcmp0 (target, for_digest) == 0)
+        return &d->parent;
+    }
+
+  return NULL;
 }
 
 G_DEFINE_TYPE (FlatpakOciImage, flatpak_oci_image, FLATPAK_TYPE_JSON);
@@ -715,6 +774,12 @@ flatpak_oci_image_set_layers (FlatpakOciImage *image,
 {
   g_strfreev (image->rootfs.diff_ids);
   image->rootfs.diff_ids = g_strdupv ((char **) layers);
+}
+
+int
+flatpak_oci_image_get_n_layers (FlatpakOciImage *image)
+{
+  return ptrv_count ((gpointer *) image->rootfs.diff_ids);
 }
 
 GHashTable *

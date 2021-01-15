@@ -30,8 +30,23 @@ else
     test_builddir=$(dirname $0)
 fi
 
+# All the asserts and ok functions below are wrapped such that they
+# don't output any set -x traces of their internals (but still echo
+# errors to stderr). This way the log output focuses on tracing what
+# is essential to the test (the asserts being run and errors from them)
+
 assert_not_reached () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     echo $@ 1>&2; exit 1
+    } 3> /dev/null
+}
+
+ok () {
+    # Wrap this to avoid set -x showing the echo commands
+    {
+        echo "ok $@";
+        echo "================ $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]} ================";
+    } 2> /dev/null
 }
 
 test_tmpdir=$(pwd)
@@ -73,10 +88,12 @@ mkdir -p ${TEST_DATA_DIR}/home
 mkdir -p ${TEST_DATA_DIR}/runtime
 mkdir -p ${TEST_DATA_DIR}/system
 mkdir -p ${TEST_DATA_DIR}/config
+mkdir -p ${TEST_DATA_DIR}/run
 export FLATPAK_SYSTEM_DIR=${TEST_DATA_DIR}/system
 export FLATPAK_SYSTEM_CACHE_DIR=${TEST_DATA_DIR}/system-cache
 export FLATPAK_SYSTEM_HELPER_ON_SESSION=1
 export FLATPAK_CONFIG_DIR=${TEST_DATA_DIR}/config
+export FLATPAK_RUN_DIR=${TEST_DATA_DIR}/run
 export FLATPAK_FANCY_OUTPUT=0
 
 export HOME=${TEST_DATA_DIR}/home
@@ -109,99 +126,129 @@ fi
 export FLATPAK="${CMD_PREFIX} flatpak"
 
 assert_streq () {
-    test "$1" = "$2" || (echo 1>&2 "$1 != $2"; exit 1)
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
+    test "$1" = "$2" || (echo 1>&2 "$1 != $2 at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"; exit 1)
+    } 3> /dev/null
 }
 
 assert_not_streq () {
-    (! test "$1" = "$2") || (echo 1>&2 "$1 == $2"; exit 1)
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
+    (! test "$1" = "$2") || (echo 1>&2 "$1 == $2 at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"; exit 1)
+    } 3> /dev/null
 }
 
 assert_has_file () {
-    test -f "$1" || (echo 1>&2 "Couldn't find '$1'"; exit 1)
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
+    test -f "$1" || (echo 1>&2 "Couldn't find '$1' at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"; exit 1)
+    } 3> /dev/null
 }
 
 assert_has_symlink () {
-    test -L "$1" || (echo 1>&2 "Couldn't find '$1'"; exit 1)
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
+    test -L "$1" || (echo 1>&2 "Couldn't find '$1' at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"; exit 1)
+    } 3> /dev/null
 }
 
 assert_has_dir () {
-    test -d "$1" || (echo 1>&2 "Couldn't find '$1'"; exit 1)
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
+    test -d "$1" || (echo 1>&2 "Couldn't find '$1' at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"; exit 1)
+    } 3> /dev/null
 }
 
 assert_not_has_file () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     if test -f "$1"; then
         sed -e 's/^/# /' < "$1" >&2
-        echo 1>&2 "File '$1' exists"
+        echo 1>&2 "File '$1' exists at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
         exit 1
     fi
+    } 3> /dev/null
 }
 
 assert_not_file_has_content () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     if grep -q -e "$2" "$1"; then
         sed -e 's/^/# /' < "$1" >&2
-        echo 1>&2 "File '$1' incorrectly matches regexp '$2'"
+        echo 1>&2 "File '$1' incorrectly matches regexp '$2' at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
         exit 1
     fi
+    } 3> /dev/null
 }
 
 assert_file_has_mode () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     mode=$(stat -c '%a' $1)
     if [ "$mode" != "$2" ]; then
-        echo 1>&2 "File '$1' has wrong mode: expected $2, but got $mode"
+        echo 1>&2 "File '$1' has wrong mode: expected $2, but got $mode at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
         exit 1
     fi
+    } 3> /dev/null
 }
 
 assert_not_has_dir () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     if test -d "$1"; then
-        echo 1>&2 "Directory '$1' exists"; exit 1
+        echo 1>&2 "Directory '$1' exists at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"; exit 1
     fi
+    } 3> /dev/null
 }
 
 assert_file_has_content () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     if ! grep -q -e "$2" "$1"; then
         sed -e 's/^/# /' < "$1" >&2
-        echo 1>&2 "File '$1' doesn't match regexp '$2'"
+        echo 1>&2 "File '$1' doesn't match regexp '$2' at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
         exit 1
     fi
+    } 3> /dev/null
 }
 
 assert_log_has_gpg_signature_error () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     if ! grep -q -e "GPG signatures found, but none are in trusted keyring" "$1"; then
         if ! grep -q -e "Can't check signature: public key not found" "$1"; then
             sed -e 's/^/# /' < "$1" >&2
-            echo 1>&2 "File '$1' doesn't have gpg signature error"
+            echo 1>&2 "File '$1' doesn't have gpg signature error at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
             exit 1
         fi
     fi
+    } 3> /dev/null
 }
 
 assert_symlink_has_content () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     if ! readlink "$1" | grep -q -e "$2"; then
         readlink "$1" |sed -e 's/^/# /' >&2
-        echo 1>&2 "Symlink '$1' doesn't match regexp '$2'"
+        echo 1>&2 "Symlink '$1' doesn't match regexp '$2' at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
         exit 1
     fi
+    } 3> /dev/null
 }
 
 assert_file_empty() {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     if test -s "$1"; then
         sed -e 's/^/# /' < "$1" >&2
-        echo 1>&2 "File '$1' is not empty"
+        echo 1>&2 "File '$1' is not empty at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
         exit 1
     fi
+    } 3> /dev/null
 }
 
 assert_remote_has_config () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     ostree config --repo=$FL_DIR/repo get --group 'remote "'"$1"'"' "$2" > key-output
     assert_file_has_content key-output "$3"
+    } 3> /dev/null
 }
 
 assert_remote_has_no_config () {
+    { { local BASH_XTRACEFD=3; } 2> /dev/null
     if ostree config --repo=$FL_DIR/repo get --group 'remote "'"$1"'"' "$2" > /dev/null; then
-        echo 1>&2 "Remote '$1' unexpectedly has key '$2'"
+        echo 1>&2 "Remote '$1' unexpectedly has key '$2' at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
         exit 1
     fi
+    } 3> /dev/null
 }
 
 export FL_GPG_HOMEDIR=${TEST_DATA_DIR}/gpghome
@@ -233,7 +280,7 @@ make_runtime () {
         (
             flock -s 200
             if [ ! -d ${RUNTIME_REPO} ]; then
-                $(dirname $0)/make-test-runtime.sh ${RUNTIME_REPO} org.test.Platform ${BRANCH} "" > /dev/null
+                $(dirname $0)/make-test-runtime.sh ${RUNTIME_REPO} org.test.Platform ${BRANCH} "" "" > /dev/null
             fi
         ) 200>${TEST_DATA_DIR}/runtime-repo-lock
     fi
@@ -248,7 +295,7 @@ make_runtime () {
         ostree --repo=repos/${REPONAME} init --mode=archive-z2 ${collection_args}
     fi
 
-    flatpak build-commit-from --disable-fsync --src-repo=${RUNTIME_REPO} --force ${GPGARGS} repos/${REPONAME}  ${RUNTIME_REF}
+    flatpak build-commit-from --disable-fsync --no-update-summary --src-repo=${RUNTIME_REPO} --force ${GPGARGS} repos/${REPONAME}  ${RUNTIME_REF}
 }
 
 httpd () {
@@ -257,8 +304,12 @@ httpd () {
 
     rm -f httpd-pipe
     mkfifo httpd-pipe
-    $(dirname $0)/$COMMAND "$DIR" 3> httpd-pipe &
+    PYTHONUNBUFFERED=1 $(dirname $0)/$COMMAND "$DIR" 3> httpd-pipe 2>&1 | tee --append httpd-log &
     read < httpd-pipe
+}
+
+httpd_clear_log () {
+    truncate -s 0 httpd-log
 }
 
 setup_repo_no_add () {
@@ -309,6 +360,10 @@ update_repo () {
         collection_args=
     fi
 
+    if test -f repos/${REPONAME}/summary; then
+        sleep 1 # ensure we get a new timestamp on the summary files
+    fi
+
     ${FLATPAK} build-update-repo ${collection_args} ${GPGARGS:-${FL_GPGARGS}} ${UPDATE_REPO_ARGS-} repos/${REPONAME}
 }
 
@@ -320,8 +375,11 @@ make_updated_app () {
         COLLECTION_ID=""
     fi
     BRANCH=${3:-master}
+    TEXT=${4:-UPDATED}
+    APP_ID=${5:-""}
+    RUNTIME_BRANCH=${6:-$BRANCH}
 
-    GPGARGS="${GPGARGS:-${FL_GPGARGS}}" $(dirname $0)/make-test-app.sh repos/${REPONAME} "" "${BRANCH}" "${COLLECTION_ID}" ${4:-UPDATED} > /dev/null
+    RUNTIME_BRANCH=$RUNTIME_BRANCH GPGARGS="${GPGARGS:-${FL_GPGARGS}}" $(dirname $0)/make-test-app.sh repos/${REPONAME} "${APP_ID}" "${BRANCH}" "${COLLECTION_ID}" "${TEXT}" > /dev/null
     update_repo $REPONAME "${COLLECTION_ID}"
 }
 
@@ -334,7 +392,7 @@ setup_sdk_repo () {
     fi
     BRANCH=${3:-master}
 
-    GPGARGS="${GPGARGS:-${FL_GPGARGS}}" . $(dirname $0)/make-test-runtime.sh repos/${REPONAME} org.test.Sdk "${BRANCH}" "${COLLECTION_ID}" make mkdir cp touch > /dev/null
+    GPGARGS="${GPGARGS:-${FL_GPGARGS}}" . $(dirname $0)/make-test-runtime.sh repos/${REPONAME} org.test.Sdk "${BRANCH}" "${COLLECTION_ID}" "" make mkdir cp touch > /dev/null
     update_repo $REPONAME "${COLLECTION_ID}"
 }
 
@@ -456,6 +514,12 @@ fi
 
 gdb_bt () {
     gdb -batch -ex "run" -ex "thread apply all bt" -ex "quit 1"  --args "$@"
+}
+
+commit_to_path () {
+    COMMIT=$1
+    EXT=$2
+    echo "objects/$(echo $COMMIT | cut -b 1-2)/$(echo $COMMIT | cut -b 3-)".${EXT}
 }
 
 cleanup () {

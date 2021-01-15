@@ -56,6 +56,7 @@ static char **opt_gpg_import;
 static char *opt_authenticator_name = NULL;
 static char **opt_authenticator_options = NULL;
 static gboolean opt_authenticator_install = -1;
+static gboolean opt_no_follow_redirect;
 
 static GOptionEntry add_options[] = {
   { "if-not-exists", 0, 0, G_OPTION_ARG_NONE, &opt_if_not_exists, N_("Do nothing if the provided remote exists"), NULL },
@@ -82,6 +83,7 @@ static GOptionEntry common_options[] = {
   { "authenticator-option", 0, 0, G_OPTION_ARG_STRING_ARRAY, &opt_authenticator_options, N_("Authenticator option"), N_("KEY=VALUE") },
   { "authenticator-install", 0, 0, G_OPTION_ARG_NONE, &opt_authenticator_install, N_("Autoinstall authenticator"), NULL },
   { "no-authenticator-install", 0, G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &opt_authenticator_install, N_("Don't autoinstall authenticator"), NULL },
+  { "no-follow_redirect", 0, G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &opt_no_follow_redirect, N_("Don't follow the redirect set in the summary file"), NULL },
   { NULL }
 };
 
@@ -115,10 +117,7 @@ get_config_from_opts (GKeyFile *config,
     }
 
   if (opt_collection_id)
-    {
-      g_key_file_set_string (config, group, "collection-id", opt_collection_id);
-      g_key_file_set_boolean (config, group, "gpg-verify-summary", FALSE);
-    }
+    g_key_file_set_string (config, group, "collection-id", opt_collection_id);
 
   if (opt_title)
     {
@@ -214,6 +213,9 @@ get_config_from_opts (GKeyFile *config,
         }
     }
 
+  if (opt_no_follow_redirect)
+    g_key_file_set_boolean (config, group, "url-is-set", TRUE);
+
   return TRUE;
 }
 
@@ -229,14 +231,15 @@ load_options (const char *remote_name,
   g_autoptr(GBytes) bytes = NULL;
 
   if (g_str_has_prefix (filename, "http:") ||
-      g_str_has_prefix (filename, "https:"))
+      g_str_has_prefix (filename, "https:") ||
+      g_str_has_prefix (filename, "file:"))
     {
       const char *options_data;
       gsize options_size;
       g_autoptr(SoupSession) soup_session = NULL;
 
       soup_session = flatpak_create_soup_session (PACKAGE_STRING);
-      bytes = flatpak_load_http_uri (soup_session, filename, 0, NULL, NULL, NULL, NULL, &local_error);
+      bytes = flatpak_load_uri (soup_session, filename, 0, NULL, NULL, NULL, NULL, NULL, &local_error);
 
       if (bytes == NULL)
         {
@@ -289,7 +292,7 @@ flatpak_builtin_remote_add (int argc, char **argv,
   g_option_context_add_main_entries (context, common_options, NULL);
 
   if (!flatpak_option_context_parse (context, add_options, &argc, &argv,
-                                     FLATPAK_BUILTIN_FLAG_ONE_DIR | FLATPAK_BUILTIN_FLAG_OPTIONAL_REPO,
+                                     FLATPAK_BUILTIN_FLAG_ONE_DIR,
                                      &dirs, cancellable, error))
     return FALSE;
 

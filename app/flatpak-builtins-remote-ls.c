@@ -33,6 +33,7 @@
 #include "flatpak-builtins-utils.h"
 #include "flatpak-utils-private.h"
 #include "flatpak-table-printer.h"
+#include "flatpak-variant-impl-private.h"
 
 static gboolean opt_show_details;
 static gboolean opt_runtime;
@@ -40,6 +41,7 @@ static gboolean opt_app;
 static gboolean opt_all;
 static gboolean opt_only_updates;
 static gboolean opt_cached;
+static gboolean opt_sideloaded;
 static char *opt_arch;
 static char *opt_app_runtime;
 static const char **opt_cols;
@@ -54,6 +56,8 @@ static GOptionEntry options[] = {
   { "app-runtime", 0, 0, G_OPTION_ARG_STRING, &opt_app_runtime, N_("List all applications using RUNTIME"), N_("RUNTIME") },
   { "columns", 0, 0, G_OPTION_ARG_STRING_ARRAY, &opt_cols, N_("What information to show"), N_("FIELD,…") },
   { "cached", 0, 0, G_OPTION_ARG_NONE, &opt_cached, N_("Use local caches even if they are stale"), NULL },
+  /* Translators: A sideload is when you install from a local USB drive rather than the Internet. */
+  { "sideloaded", 0, 0, G_OPTION_ARG_NONE, &opt_sideloaded, N_("Only list refs available as sideloads"), NULL },
   { NULL }
 };
 
@@ -160,8 +164,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
       g_hash_table_iter_init (&iter, refs);
       while (g_hash_table_iter_next (&iter, &key, &value))
         {
-          FlatpakCollectionRef *coll_ref = key;
-          char *ref = coll_ref->ref_name;
+          char *ref = key;
           char *partial_ref;
           const char *slash = strchr (ref, '/');
 
@@ -178,8 +181,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
       g_hash_table_iter_init (&iter, refs);
       while (g_hash_table_iter_next (&iter, &key, &value))
         {
-          FlatpakCollectionRef *coll_ref = key;
-          const char *ref = coll_ref->ref_name;
+          const char *ref = key;
           const char *checksum = value;
           g_auto(GStrv) parts = NULL;
 
@@ -192,7 +194,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
 
           if (opt_only_updates)
             {
-              g_autoptr(GVariant) deploy_data = flatpak_dir_get_deploy_data (dir, ref, FLATPAK_DEPLOY_VERSION_ANY, cancellable, NULL);
+              g_autoptr(GBytes) deploy_data = flatpak_dir_get_deploy_data (dir, ref, FLATPAK_DEPLOY_VERSION_ANY, cancellable, NULL);
 
               if (deploy_data == NULL)
                 continue;
@@ -233,8 +235,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
               strcmp (arches[0], parts[2]) != 0)
             {
               g_autofree char *alt_arch_ref = g_strconcat (parts[0], "/", parts[1], "/", arches[0], "/", parts[3], NULL);
-              g_autoptr(FlatpakCollectionRef) alt_arch_coll_ref = flatpak_collection_ref_new (coll_ref->collection_id, alt_arch_ref);
-              if (g_hash_table_lookup (refs, alt_arch_coll_ref))
+              if (g_hash_table_lookup (refs, alt_arch_ref))
                 continue;
             }
 
@@ -264,15 +265,17 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
           g_autofree char *runtime = NULL;
           AsApp *app = NULL;
           g_auto(GStrv) parts = NULL;
-          g_autoptr(GVariant) sparse = NULL;
-
-          sparse = flatpak_remote_state_lookup_sparse_cache (state, ref, NULL);
+          gboolean has_sparse_cache;
+          VarMetadataRef sparse_cache;
 
           /* The sparse cache is optional */
-          if (sparse)
+          has_sparse_cache = flatpak_remote_state_lookup_sparse_cache (state, ref, &sparse_cache, NULL);
+          if (!opt_all && has_sparse_cache)
             {
-              const char *eol;
-              if (!opt_all && (g_variant_lookup (sparse, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE, "&s", &eol) || g_variant_lookup (sparse, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE_REBASE, "&s", &eol)))
+              const char *eol = var_metadata_lookup_string (sparse_cache, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE, NULL);
+              const char *eol_rebase = var_metadata_lookup_string (sparse_cache, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE_REBASE, NULL);
+
+              if (eol != NULL || eol_rebase != NULL)
                 continue;
             }
 
@@ -280,12 +283,12 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
 
           if (need_cache_data)
             {
-              const char *metadata = NULL;
+              g_autofree char *metadata = NULL;
               g_autoptr(GKeyFile) metakey = NULL;
 
-              if (!flatpak_remote_state_lookup_cache (state, ref,
-                                                      &download_size, &installed_size, &metadata,
-                                                      NULL, error))
+              if (!flatpak_remote_state_load_data (state, ref,
+                                                   &download_size, &installed_size, &metadata,
+                                                   error))
                 return FALSE;
 
               metakey = g_key_file_new ();
@@ -361,14 +364,15 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
               else if (strcmp (columns[j].name, "options") == 0)
                 {
                   flatpak_table_printer_add_column (printer, ""); /* Extra */
-                  if (sparse)
+                  if (has_sparse_cache)
                     {
-                      const char *eol;
+                      const char *eol = var_metadata_lookup_string (sparse_cache, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE, NULL);
+                      const char *eol_rebase = var_metadata_lookup_string (sparse_cache, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE_REBASE, NULL);
 
-                      if (g_variant_lookup (sparse, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE, "&s", &eol))
+                      if (eol)
                         flatpak_table_printer_append_with_comma_printf (printer, "eol=%s", eol);
-                      if (g_variant_lookup (sparse, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE_REBASE, "&s", &eol))
-                        flatpak_table_printer_append_with_comma_printf (printer, "eol-rebase=%s", eol);
+                      if (eol_rebase)
+                        flatpak_table_printer_append_with_comma_printf (printer, "eol-rebase=%s", eol_rebase);
                     }
                 }
             }
@@ -438,7 +442,7 @@ flatpak_builtin_remote_ls (int argc, char **argv, GCancellable *cancellable, GEr
             return FALSE;
         }
 
-      state = get_remote_state (preferred_dir, argv[1], opt_cached, cancellable, error);
+      state = get_remote_state (preferred_dir, argv[1], opt_cached, opt_sideloaded, cancellable, error);
       if (state == NULL)
         return FALSE;
 
@@ -473,7 +477,7 @@ flatpak_builtin_remote_ls (int argc, char **argv, GCancellable *cancellable, GEr
               if (flatpak_dir_get_remote_disabled (dir, remote_name))
                 continue;
 
-              state = get_remote_state (dir, remote_name, opt_cached,
+              state = get_remote_state (dir, remote_name, opt_cached, opt_sideloaded,
                                         cancellable, error);
               if (state == NULL)
                 return FALSE;

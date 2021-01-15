@@ -39,6 +39,7 @@
 static char *opt_arch;
 static char *opt_commit;
 static char **opt_subpaths;
+static char **opt_sideload_repos;
 static gboolean opt_force_remove;
 static gboolean opt_no_pull;
 static gboolean opt_no_deploy;
@@ -66,6 +67,8 @@ static GOptionEntry options[] = {
   { "subpath", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &opt_subpaths, N_("Only update this subpath"), N_("PATH") },
   { "assumeyes", 'y', 0, G_OPTION_ARG_NONE, &opt_yes, N_("Automatically answer yes for all questions"), NULL },
   { "noninteractive", 0, 0, G_OPTION_ARG_NONE, &opt_noninteractive, N_("Produce minimal output and don't ask questions"), NULL },
+  /* Translators: A sideload is when you install from a local USB drive rather than the Internet. */
+  { "sideload-repo", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &opt_sideload_repos, N_("Use this local repo for sideloads"), N_("PATH") },
   { NULL }
 };
 
@@ -113,6 +116,10 @@ flatpak_builtin_update (int           argc,
       n_prefs = 1;
     }
 
+  /* It doesn't make sense to use the same commit for more than one thing */
+  if (opt_commit && n_prefs != 1)
+    return usage_error (context, _("With --commit, only one REF may be specified"), error);
+
   transactions = g_ptr_array_new_with_free_func ((GDestroyNotify) g_object_unref);
 
   /* Walk through the array backwards so we can safely remove */
@@ -140,6 +147,9 @@ flatpak_builtin_update (int           argc,
       flatpak_transaction_set_disable_static_deltas (transaction, opt_no_static_deltas);
       flatpak_transaction_set_disable_dependencies (transaction, opt_no_deps);
       flatpak_transaction_set_disable_related (transaction, opt_no_related);
+
+      for (int i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
+        flatpak_transaction_add_sideload_repo (transaction, opt_sideload_repos[i]);
 
       g_ptr_array_insert (transactions, 0, transaction);
     }

@@ -41,11 +41,12 @@ mark_need_token () {
 
 assert_failed_with_401 () {
     LOGFILE=${1:-install-error-log}
-    # Unfortunately we don't properly return the 401 error in the p2p case...
-    if [ x${USE_COLLECTIONS_IN_CLIENT-} != xyes ] ; then
-        assert_file_has_content $LOGFILE "401"
-    fi
+    assert_file_has_content $LOGFILE "401"
 }
+
+make_updated_app test "" autoinstall "" org.flatpak.Authenticator.test master
+
+assert_not_has_dir $FL_DIR/app/org.flatpak.Authenticator.test/$ARCH/autoinstall/active/files
 
 # Mark as need token, even though the app doesn't have token-type set
 # We should not be able to install this because we will not present
@@ -56,6 +57,7 @@ if ${FLATPAK} ${U} install -y test-repo org.test.Hello master 2> install-error-l
     assert_not_reached "Should not be able to install with no secret"
 fi
 assert_failed_with_401
+assert_not_has_dir $FL_DIR/app/org.flatpak.Authenticator.test/$ARCH/autoinstall/active/files
 
 # Propertly mark it with token-type
 EXPORT_ARGS="--token-type=2" make_updated_app
@@ -66,15 +68,19 @@ if ${FLATPAK} ${U} install -y test-repo org.test.Hello master 2> install-error-l
     assert_not_reached "Should not be able to install without authenticator"
 fi
 assert_file_has_content install-error-log "No authenticator configured for remote"
+assert_not_has_dir $FL_DIR/app/org.flatpak.Authenticator.test/$ARCH/autoinstall/active/files
 
-${FLATPAK} ${U} remote-modify test-repo --authenticator-name org.flatpak.Authenticator.test
+${FLATPAK} ${U} remote-modify test-repo --authenticator-name org.flatpak.Authenticator.test --authenticator-install
 
+flatpak remote-ls test-repo -a -d
 # Install with wrong token
 echo -n not-the-secret > ${XDG_RUNTIME_DIR}/required-token
 if ${FLATPAK} ${U} install -y test-repo org.test.Hello master  2> install-error-log; then
     assert_not_reached "Should not be able to install with wrong secret"
 fi
 assert_failed_with_401
+# Now we should have auto-installed the authenticator!
+assert_has_dir $FL_DIR/app/org.flatpak.Authenticator.test/$ARCH/autoinstall/active/files
 
 # Install with right token
 echo -n the-secret > ${XDG_RUNTIME_DIR}/required-token
@@ -99,7 +105,7 @@ assert_failed_with_401
 echo -n the-secret > ${XDG_RUNTIME_DIR}/required-token
 ${FLATPAK} ${U} update -y org.test.Hello
 
-echo "ok installed build-exported token-type app"
+ok "installed build-exported token-type app"
 
 # Drop token-type on main version
 make_updated_app test "" master UPDATE3
@@ -107,7 +113,8 @@ make_updated_app test "" master UPDATE3
 ${FLATPAK} ${U} update -y org.test.Hello
 
 # Use build-commit-from to add it to a new version
-$FLATPAK build-commit-from  ${FL_GPGARGS} --token-type=2 --disable-fsync --src-ref=app/org.test.Hello/$ARCH/master repos/test app/org.test.Hello/$ARCH/copy
+$FLATPAK build-commit-from  --no-update-summary ${FL_GPGARGS} --token-type=2 --disable-fsync --src-ref=app/org.test.Hello/$ARCH/master repos/test app/org.test.Hello/$ARCH/copy
+update_repo
 mark_need_token app/org.test.Hello/$ARCH/copy the-secret
 
 # Install with wrong token
@@ -121,7 +128,7 @@ assert_failed_with_401
 echo -n the-secret > ${XDG_RUNTIME_DIR}/required-token
 ${FLATPAK} ${U} install -y test-repo org.test.Hello//copy
 
-echo "ok installed build-commit-from token-type app"
+ok "installed build-commit-from token-type app"
 
 EXPORT_ARGS="--token-type=2" make_updated_app test "" master UPDATE4
 mark_need_token app/org.test.Hello/$ARCH/master the-secret
@@ -151,4 +158,4 @@ export BROWSER=curl
 EXPORT_ARGS="--token-type=2" make_updated_app test "" master UPDATE5
 mark_need_token app/org.test.Hello/$ARCH/master the-secret
 
-echo "ok update with webflow"
+ok "update with webflow"

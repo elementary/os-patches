@@ -154,7 +154,7 @@ flatpak_builtin_build (int argc, char **argv, GCancellable *cancellable, GError 
 {
   g_autoptr(GOptionContext) context = NULL;
   g_autoptr(FlatpakDeploy) runtime_deploy = NULL;
-  g_autoptr(GVariant) runtime_deploy_data = NULL;
+  g_autoptr(GBytes) runtime_deploy_data = NULL;
   g_autoptr(FlatpakDeploy) extensionof_deploy = NULL;
   g_autoptr(GFile) var = NULL;
   g_autoptr(GFile) var_tmp = NULL;
@@ -537,7 +537,7 @@ flatpak_builtin_build (int argc, char **argv, GCancellable *cancellable, GError 
                                       runtime_ref,
                                       app_id_dir, app_context, NULL,
                                       FALSE, TRUE, TRUE,
-                                      &app_info_path,
+                                      &app_info_path, -1,
                                       &instance_id_host_dir,
                                       error))
     return FALSE;

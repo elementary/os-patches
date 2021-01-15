@@ -21,6 +21,7 @@
 #include "config.h"
 #include <locale.h>
 
+#include <glib/gi18n-lib.h>
 #include <json-glib/json-glib.h>
 #include "flatpak-oci-registry-private.h"
 #include "flatpak-utils-http-private.h"
@@ -220,12 +221,21 @@ handle_request_ref_tokens_basic_auth_reply (FlatpakAuthenticatorRequest *object,
 static char *
 run_basic_auth (FlatpakAuthenticatorRequest *request,
                 const char *sender,
-                const char *realm)
+                const char *realm,
+                const char *previous_error)
 {
   BasicAuthData auth = { FALSE };
   int id1, id2;
   g_autofree char *combined = NULL;
-  g_autoptr(GVariant) options = g_variant_ref_sink (g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0));
+  g_autoptr(GVariant) options = NULL;
+  GVariantBuilder options_builder;
+
+  g_variant_builder_init (&options_builder, G_VARIANT_TYPE ("a{sv}"));
+
+  if (previous_error)
+    g_variant_builder_add (&options_builder, "{sv}", "previous-error", g_variant_new_string (previous_error));
+
+  options = g_variant_ref_sink (g_variant_builder_end (&options_builder));
 
   g_cond_init (&auth.cond);
   g_mutex_init (&auth.mutex);
@@ -277,7 +287,7 @@ get_token_for_ref (FlatpakOciRegistry *registry,
 
   if (!g_variant_lookup (data, "summary.xa.oci-repository", "&s", &oci_repository))
     {
-      flatpak_fail (error, "Not a oci remote, missing summary.xa.oci-repository");
+      flatpak_fail (error, _("Not a oci remote, missing summary.xa.oci-repository"));
       return NULL;
     }
 
@@ -300,18 +310,33 @@ cancel_request (FlatpakAuthenticatorRequest *request,
 }
 
 static gboolean
-error_request (FlatpakAuthenticatorRequest *request,
-               const char *sender,
-               const char *error_message)
+error_request_raw (FlatpakAuthenticatorRequest *request,
+                   const char *sender,
+                   gint32 error_code,
+                   const char *error_message)
 {
   GVariantBuilder results;
 
   g_variant_builder_init (&results, G_VARIANT_TYPE ("a{sv}"));
   g_variant_builder_add (&results, "{sv}", "error-message", g_variant_new_string (error_message));
+  g_variant_builder_add (&results, "{sv}", "error-code", g_variant_new_int32 (error_code));
   flatpak_authenticator_request_emit_response (request,
                                                FLATPAK_AUTH_RESPONSE_ERROR,
                                                g_variant_builder_end (&results));
   return TRUE;
+}
+
+static gboolean
+error_request (FlatpakAuthenticatorRequest *request,
+               const char *sender,
+               GError *error)
+{
+  int error_code = -1;
+
+  if (error->domain == FLATPAK_ERROR)
+    error_code = error->code;
+
+  return error_request_raw (request, sender, error_code, error->message);
 }
 
 static char *
@@ -414,7 +439,7 @@ lookup_auth_from_config (const char *oci_registry_uri)
 
 /* Note: This runs on a thread, so we can just block */
 static gboolean
-handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
+handle_request_ref_tokens (FlatpakAuthenticator *f_authenticator,
                            GDBusMethodInvocation *invocation,
                            const gchar *arg_handle_token,
                            GVariant *arg_authenticator_options,
@@ -426,6 +451,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
 {
   g_autofree char *request_path = NULL;
   g_autoptr(GError) error = NULL;
+  g_autoptr(GError) anon_error = NULL;
   g_autoptr(AutoFlatpakAuthenticatorRequest) request = NULL;
   const char *auth = NULL;
   gboolean have_auth;
@@ -447,7 +473,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
     {
       g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
                                              G_DBUS_ERROR_INVALID_ARGS,
-                                             "Not a OCI remote");
+                                             _("Not a OCI remote"));
       return TRUE;
     }
   g_variant_lookup (arg_options, "no-interaction", "b", &no_interaction);
@@ -458,7 +484,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
     {
       g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
                                              G_DBUS_ERROR_INVALID_ARGS,
-                                             "Invalid token");
+                                             _("Invalid token"));
       return TRUE;
     }
 
@@ -472,11 +498,11 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
       return TRUE;
     }
 
-  flatpak_authenticator_complete_request_ref_tokens (authenticator, invocation, request_path);
+  flatpak_authenticator_complete_request_ref_tokens (f_authenticator, invocation, request_path);
 
   registry = flatpak_oci_registry_new (oci_registry_uri, FALSE, -1, NULL, &error);
   if (registry == NULL)
-    return error_request (request, sender, error->message);
+    return error_request (request, sender, error);
 
 
   /* Look up credentials in config files */
@@ -493,11 +519,28 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
     {
       g_autoptr(GVariant) ref_data = g_variant_get_child_value (arg_refs, 0);
 
-      first_token = get_token_for_ref (registry, ref_data, NULL, &error);
+      g_debug ("Trying anonymous authentication");
+
+      first_token = get_token_for_ref (registry, ref_data, NULL, &anon_error);
       if (first_token != NULL)
         have_auth = TRUE;
       else
-        g_clear_error (&error);
+        {
+          if (g_error_matches (anon_error, FLATPAK_ERROR, FLATPAK_ERROR_NOT_AUTHORIZED))
+            {
+              g_debug ("Anonymous authentication failed: %s", anon_error->message);
+
+              /* Continue trying with authentication below */
+            }
+          else
+            {
+              /* We failed with some weird reason (network issue maybe?) and it is unlikely
+               * that adding some authentication will fix it. It will just cause a bad UX like
+               * described in #3753, so just return the error early.
+               */
+              return error_request (request, sender, anon_error);
+            }
+        }
     }
 
   /* Prompt the user for credentials */
@@ -507,14 +550,18 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
     {
       g_autoptr(GVariant) ref_data = g_variant_get_child_value (arg_refs, 0);
 
+      g_debug ("Trying user/password based authentication");
+
       while (auth == NULL)
         {
           g_autofree char *test_auth = NULL;
 
-          test_auth = run_basic_auth (request, sender, oci_registry_uri);
+          test_auth = run_basic_auth (request, sender, oci_registry_uri, error ? error->message : NULL);
 
           if (test_auth == NULL)
             return cancel_request (request, sender);
+
+          g_clear_error (&error);
 
           first_token = get_token_for_ref (registry, ref_data, test_auth, &error);
           if (first_token != NULL)
@@ -524,14 +571,19 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
             }
           else
             {
-              g_debug ("Failed to get token: %s", error->message);
-              g_clear_error (&error);
+              if (!g_error_matches (error, FLATPAK_ERROR, FLATPAK_ERROR_NOT_AUTHORIZED))
+                return error_request (request, sender, error);
+              else
+                {
+                  g_debug ("Auth failed getting token: %s", error->message);
+                  /* Keep error for reporting below, or clear on next iteration start */
+                }
             }
         }
     }
 
-  if (!have_auth)
-    return error_request (request, sender, "No authentication information available");
+  if (!have_auth && n_refs > 0)
+    return error_request (request, sender, error ? error : anon_error);
 
   g_variant_builder_init (&tokens, G_VARIANT_TYPE ("a{sas}"));
 
@@ -549,7 +601,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
         {
           token = get_token_for_ref (registry, ref_data, auth, &error);
           if (token == NULL)
-            return error_request (request, sender, error->message);
+            return error_request (request, sender, error);
         }
 
       g_variant_get_child (ref_data, 0, "&s", &for_refs_strv[0]);

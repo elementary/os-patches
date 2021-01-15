@@ -166,11 +166,11 @@ fsck_dirtree (OstreeRepo *repo,
               else if (iterres == OSTREE_REPO_COMMIT_ITER_RESULT_FILE)
                 {
                   char *name;
-                  char *checksum;
+                  char *commit_checksum;
                   FsckStatus file_status;
 
-                  ostree_repo_commit_traverse_iter_get_file (&iter, &name, &checksum);
-                  file_status = fsck_leaf_object (repo, checksum, OSTREE_OBJECT_TYPE_FILE, object_status_cache);
+                  ostree_repo_commit_traverse_iter_get_file (&iter, &name, &commit_checksum);
+                  file_status = fsck_leaf_object (repo, commit_checksum, OSTREE_OBJECT_TYPE_FILE, object_status_cache);
                   status = MAX (status, file_status);
                 }
               else if (iterres == OSTREE_REPO_COMMIT_ITER_RESULT_DIR)
@@ -252,7 +252,7 @@ transaction_add_local_ref (FlatpakDir         *dir,
                            FlatpakTransaction *transaction,
                            const char         *ref)
 {
-  g_autoptr(GVariant) deploy_data = NULL;
+  g_autoptr(GBytes) deploy_data = NULL;
   g_autoptr(GError) local_error = NULL;
   g_autofree char *repo_checksum = NULL;
   const char *origin;

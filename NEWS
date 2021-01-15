@@ -1,3 +1,124 @@
+Changes in 1.8.3
+~~~~~~~~~~~~~~~~
+Released: 2020-11-17
+
+  * Fixed progress reporting for OCI and extra-data
+  * The in-memory summary cache is more efficient
+  * Fixed authentication getting stuck in a loop in some cases
+  * Fixed authentication error reporting
+  * We now extract OCI info for runtimes as well as apps
+  * Fixed crash if anonymous authentication fails and -y is specified
+  * flatpak info now only looks at the specified installation
+    if one is specified
+  * Better error reporting for server HTTP errors during download
+  * Uninstall now removes applications before the runtime it depends on
+  * Fixed test-suite to pass with the latest OSTree version
+  * Fixed dbus environment variables in flatpak enter
+  * Avoid updating metadata from the remote when uninstalling
+  * Fixed error message handling in various places
+  * FlatpakTransaction now verifies all passed in refs to avoid
+    potential issues with invalid names
+  * Updated translations
+
+Changes in 1.8.2
+================
+
+ * Added validation of collection id settins for remotes
+ * Fix seccomp filters on s390
+ * Robustness fixes to the spawn portal
+ * Fix support for masking update in the system installation
+ * Better support for distros with uncommon models of merged /usr
+ * Cache responses from localed/AccoutService
+ * Fix hangs in cases where xdg-dbus-proxy fails to start
+ * Fix double-free in cups socket detection
+ * OCI authenticator now doesn't ask for auth in case of http errors
+
+Changes in 1.8.1
+================
+
+ * Avoid calling authenticator in update if ref didn't change
+ * Don't fail transaction if ref is already installed (after transaction start)
+ * Fix flatpak run handling of userns in the --device=all case
+ * Fix handling of extensions from different remotes
+ * Fix flatpak run --no-session-bus
+ * Updated translations
+
+Changes in 1.8.0
+================
+
+New stable release series 1.8.
+
+Changes:
+ * FlatpakTransaction has a new signal "install-authenticator" which clients can handle to
+   install authenticators needed for the transaction. This is done in the CLI commands.
+ * We now always expose the host timezone data, allowing us the expose the host /etc/localtime
+   in a way that works better, fixing several apps that had timezone issues.
+ * Fix flatpak enter which didn't work in some cases.
+ * We now ship a systemd unit (not installed by default) to automatically detect plugged in
+   usb sticks with sideload repos.
+ * By default we no longer install the gdm env.d file, as the systemd generators work better
+ * create-usb now exports partial commits by default
+ * Fix handling of docker media types in oci remotes
+ * Fix subjects in remote-info --log output
+
+Changes in 1.7.3
+================
+
+ * Allow direct ALSA device access if app has pulseaudio access.
+ * Flatpak now ships a sysusers.d file for allowing systemd to create the required users.
+ * Fix issue in remote-delete where it failed to delete system remotes if it had to uninstall
+   something first.
+ * New library calls flatpak_transaction_operation_get_related_to_ops(), flatpak_transaction_operation_get_is_skipped() and
+   flatpak_transaction_set_no_interaction().
+ * New options --[no-]follow-redirect in remote-add/modify
+ * New spawn portal APIs to get real pid of launched app.
+ * By default, all OCI remotes now use the flatpak-oci-authenticator.
+ * Support flatpak remote-info and flatpak update --commit= to specific versions for OCI remotes.
+ * Initial work in progress on using deltas for OCI remotes.
+ * Fix race in the generation of ld.so.cache when starting copies of the same app at the same time.
+ * Minor fix in what locales are installed on update.
+ * Flatpak uninstall now doesn't fail if one ref (of many) was not installed.
+ * Flatpak systemd transient units now have an app-prefix to match new XDG spec for
+   cgroup names.
+ * In some cases we previously downloaded the summary twice.
+ * flatpak upgrade is now an alias for flatpak update.
+ * Fix to selinux module to work without unconfined module.
+ * Respect user XDG basedirs when finding users fonts and icons.
+ * Fix issue where thread were sometimes initialized causing flatpak enter to fail.
+ * Better error reporting when authentication goes wrong.
+
+Changes in 1.7.2
+================
+
+This fixes some regressions in progress reporting in 1.7.1, where it would report > 100%.
+
+Other changes:
+ * Completion support for fish shell
+ * Properly handle migration of remotes with collection ids
+ * The summary now has some extra-data download size info which can make downloads slightly more efficient
+
+Changes in 1.7.1
+================
+
+This is the first release in the 1.7.x unstable release series.
+
+A major change is that the support for the ostree peer-to-peer installation has been
+simplified. Flatpak no longer supports installing from local network peers, and sideloading
+from local usb stick is no longer automatic. To enable sideloading you have to configure
+a sideload repository by creating a symlink to it from /var/lib/flatpak/sideload-repos or
+/run/flatpak/sideload-repos. Due to this the flatpak code has been simplified internally
+and the p2p support is more efficient.
+
+Other major changes
+ * If an app has filesystem access, the host /lib is accessible as /run/host/lib, etc.
+ * New filesystem permission "host-etc" and "host-os" give access to system /usr and /etc.
+ * Flatpak now uses variant-schema-compiler to generate more efficient code for
+   parsing GVariant files from ostreee.
+ * libsystemd use is now optional in configure.
+ * Journal sockets are mounted readonly
+ * document-export now supports exporting directories (requires new portal version)
+ * DConf migration now allows version numbers in object paths
+
 Changes in 1.6.3
 ================
 

@@ -16,6 +16,9 @@ shift
 COLLECTION_ID=$1
 shift
 
+EXTRA="${1-}"
+shift
+
 mkdir ${DIR}/files
 mkdir ${DIR}/usr
 cat > ${DIR}/metadata <<EOF
@@ -74,6 +77,13 @@ for i in `cat $LIBS`; do
 done
 ln -s bash ${DIR}/usr/bin/sh
 
+# This only exists so we can update the runtime
+cat > ${DIR}/usr/bin/runtime_hello.sh <<EOF
+#!/bin/sh
+echo "Hello world, from a runtime$EXTRA"
+EOF
+chmod a+x ${DIR}/usr/bin/runtime_hello.sh
+
 # We copy the C.UTF8 locale and call it en_US. Its a bit of a lie, but
 # the real en_US locale is often not available, because its in the
 # local archive.
@@ -87,5 +97,5 @@ else
 fi
 
 mkdir -p repos
-flatpak build-export ${collection_args} --disable-sandbox --runtime ${GPGARGS-} ${REPO} ${DIR} ${BRANCH}
+flatpak build-export ${collection_args} --no-update-summary  --disable-sandbox --runtime ${GPGARGS-} ${REPO} ${DIR} ${BRANCH}
 rm -rf ${DIR}

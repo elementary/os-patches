@@ -149,10 +149,10 @@ gboolean flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
                                       GError        **error);
 gboolean flatpak_run_add_app_info_args (FlatpakBwrap   *bwrap,
                                         GFile          *app_files,
-                                        GVariant       *app_deploy_data,
+                                        GBytes         *app_deploy_data,
                                         const char     *app_extensions,
                                         GFile          *runtime_files,
-                                        GVariant       *runtime_deploy_data,
+                                        GBytes         *runtime_deploy_data,
                                         const char     *runtime_extensions,
                                         const char     *app_id,
                                         const char     *app_branch,
@@ -164,6 +164,7 @@ gboolean flatpak_run_add_app_info_args (FlatpakBwrap   *bwrap,
                                         gboolean        build,
                                         gboolean        devel,
                                         char          **app_info_path_out,
+                                        int             instance_id_fd,
                                         char          **host_instance_id_host_dir_out,
                                         GError        **error);
 
@@ -179,8 +180,11 @@ gboolean flatpak_run_app (const char     *app_ref,
                           const char     *custom_command,
                           char           *args[],
                           int             n_args,
+                          int             instance_id_fd,
                           char          **instance_dir_out,
                           GCancellable   *cancellable,
                           GError        **error);
+
+extern const char * const *flatpak_abs_usrmerged_dirs;
 
 #endif /* __FLATPAK_RUN_H__ */

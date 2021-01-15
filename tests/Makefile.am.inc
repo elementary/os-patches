@@ -105,11 +105,15 @@ tests/services/org.flatpak.Authenticator.test.service: tests/org.flatpak.Authent
 	mkdir -p tests/services
 	$(AM_V_GEN) $(SED) -e "s|\@libexecdir\@|$(abs_top_builddir)/tests|" $< > $@
 
+tests/services/org.flatpak.Authenticator.Oci.service: oci-authenticator/org.flatpak.Authenticator.Oci.service.in
+	mkdir -p tests/services
+	$(AM_V_GEN) $(SED) -e "s|\@libexecdir\@|$(abs_top_builddir)|" $< > $@
+
 tests/share/xdg-desktop-portal/portals/test.portal: tests/test.portal.in
 	mkdir -p tests/share/xdg-desktop-portal/portals
 	$(AM_V_GEN) install -m644 $< $@
 
-tests/libtest.sh: tests/services/org.freedesktop.Flatpak.service tests/services/org.freedesktop.Flatpak.SystemHelper.service tests/services/org.freedesktop.portal.Flatpak.service tests/share/xdg-desktop-portal/portals/test.portal tests/services/org.freedesktop.impl.portal.desktop.test.service tests/services/org.flatpak.Authenticator.test.service
+tests/libtest.sh: tests/services/org.freedesktop.Flatpak.service tests/services/org.freedesktop.Flatpak.SystemHelper.service tests/services/org.freedesktop.portal.Flatpak.service tests/share/xdg-desktop-portal/portals/test.portal tests/services/org.freedesktop.impl.portal.desktop.test.service tests/services/org.flatpak.Authenticator.test.service tests/services/org.flatpak.Authenticator.Oci.service
 
 install-test-data-hook:
 if ENABLE_INSTALLED_TESTS
@@ -177,17 +181,17 @@ TEST_MATRIX_SOURCE = \
 	tests/test-http-utils.sh \
 	tests/test-run.sh{{user+system+system-norevokefs},{nodeltas+deltas}} \
 	tests/test-info.sh{user+system} \
-	tests/test-repo.sh{user+system+system-norevokefs+collections+collections-server-only} \
+	tests/test-repo.sh{user+system+system-norevokefs} \
+	tests/test-sideload.sh{user+system} \
 	tests/test-default-remotes.sh \
 	tests/test-extensions.sh \
 	tests/test-bundle.sh{user+system+system-norevokefs} \
 	tests/test-oci.sh \
 	tests/test-oci-registry.sh{{user+system} \
-	tests/test-unsigned-summaries.sh \
 	tests/test-update-remote-configuration.sh \
 	tests/test-override.sh \
 	tests/test-update-portal.sh \
-	tests/test-auth.sh{nocollections+collections} \
+	tests/test-auth.sh \
 	$(NULL)
 
 update-test-matrix:
@@ -198,7 +202,7 @@ tests/test-%.wrap:
 
 tests/runtime-repo: tests/make-test-runtime.sh flatpak
 	rm -rf tests/runtime-repo
-	PATH=$(abs_top_builddir):$${PATH} $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo org.test.Platform master ""
+	PATH=$(abs_top_builddir):$${PATH} $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo org.test.Platform master "" ""
 
 check_DATA += tests/runtime-repo
 
@@ -223,6 +227,7 @@ DISTCLEANFILES += \
 	tests/services/org.freedesktop.portal.Flatpak.service \
 	tests/services/org.freedesktop.impl.portal.desktop.test.service \
 	tests/services/org.flatpak.Authenticator.test.service \
+	tests/services/org.flatpak.Authenticator.Oci.service \
 	tests/share/xdg-desktop-portal/portals/test.portal \
 	tests/package_version.txt \
 	$(NULL)

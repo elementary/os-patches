@@ -33,6 +33,7 @@
 #include "flatpak-builtins-utils.h"
 #include "flatpak-utils-private.h"
 #include "flatpak-table-printer.h"
+#include "flatpak-variant-impl-private.h"
 
 static char *opt_arch;
 static char *opt_commit;
@@ -46,6 +47,7 @@ static gboolean opt_log;
 static gboolean opt_show_runtime;
 static gboolean opt_show_sdk;
 static gboolean opt_cached;
+static gboolean opt_sideloaded;
 
 static GOptionEntry options[] = {
   { "arch", 0, 0, G_OPTION_ARG_STRING, &opt_arch, N_("Arch to install for"), N_("ARCH") },
@@ -60,6 +62,8 @@ static GOptionEntry options[] = {
   { "show-runtime", 0, 0, G_OPTION_ARG_NONE, &opt_show_runtime, N_("Show runtime"), NULL },
   { "show-sdk", 0, 0, G_OPTION_ARG_NONE, &opt_show_sdk, N_("Show sdk"), NULL },
   { "cached", 0, 0, G_OPTION_ARG_NONE, &opt_cached, N_("Use local caches even if they are stale"), NULL },
+  /* Translators: A sideload is when you install from a local USB drive rather than the Internet. */
+  { "sideloaded", 0, 0, G_OPTION_ARG_NONE, &opt_sideloaded, N_("Only list refs available as sideloads"), NULL },
   { NULL }
 };
 
@@ -79,7 +83,6 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
   g_autoptr(GPtrArray) dirs = NULL;
   g_autoptr(FlatpakDir) preferred_dir = NULL;
   g_autoptr(GVariant) commit_v = NULL;
-  g_autoptr(GVariant) commit_metadata = NULL;
   const char *remote;
   const char *pref;
   g_autofree char *default_branch = NULL;
@@ -94,21 +97,20 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
   g_autofree char *commit = NULL;
   g_autofree char *parent = NULL;
   g_autoptr(FlatpakRemoteState) state = NULL;
-  g_autoptr(GVariant) sparse = NULL;
-  const char *eol = NULL;
-  const char *eol_rebase = NULL;
   gboolean friendly = TRUE;
   const char *xa_metadata = NULL;
   const char *collection_id = NULL;
+  const char *eol = NULL;
+  const char *eol_rebase = NULL;
   g_autoptr(GKeyFile) metakey = NULL;
   guint64 installed_size = 0;
   guint64 download_size = 0;
   g_autofree char *formatted_installed_size = NULL;
   g_autofree char *formatted_download_size = NULL;
   const gchar *subject = NULL;
-  const gchar *body = NULL;
   guint64 timestamp;
   g_autofree char *formatted_timestamp = NULL;
+  VarMetadataRef sparse_cache;
 
   context = g_option_context_new (_(" REMOTE REF - Show information about an application or runtime in a remote"));
   g_option_context_set_translation_domain (context, GETTEXT_PACKAGE);
@@ -136,12 +138,12 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
                                       &matched_kinds, &id, &arch, &branch, error))
     return FALSE;
 
-  ref = flatpak_dir_find_remote_ref (preferred_dir, remote, id, branch, default_branch, arch,
+  ref = flatpak_dir_find_remote_ref (preferred_dir, remote, NULL, id, branch, default_branch, arch,
                                      matched_kinds, &kind, cancellable, error);
   if (ref == NULL)
     return FALSE;
 
-  state = get_remote_state (preferred_dir, remote, opt_cached, cancellable, error);
+  state = get_remote_state (preferred_dir, remote, opt_cached, opt_sideloaded, cancellable, error);
   if (state == NULL)
     return FALSE;
 
@@ -151,7 +153,7 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
         commit = g_strdup (opt_commit);
       else
         {
-          flatpak_remote_state_lookup_ref (state, ref, &commit, NULL, error);
+          flatpak_remote_state_lookup_ref (state, ref, &commit, NULL, NULL, NULL, error);
           if (commit == NULL)
             {
               if (error != NULL && *error == NULL)
@@ -164,16 +166,15 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
     }
   else
     {
-      commit_v = flatpak_dir_fetch_remote_commit (preferred_dir, remote, ref, opt_commit, &commit, cancellable, error);
+      commit_v = flatpak_remote_state_load_ref_commit (state, preferred_dir, ref, opt_commit, NULL, &commit, cancellable, error);
       if (commit_v == NULL)
         return FALSE;
     }
 
-  sparse = flatpak_remote_state_lookup_sparse_cache (state, ref, NULL);
-  if (sparse)
+  if (flatpak_remote_state_lookup_sparse_cache (state, ref, &sparse_cache, NULL))
     {
-      g_variant_lookup (sparse, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE, "&s", &eol);
-      g_variant_lookup (sparse, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE_REBASE, "&s", &eol_rebase);
+      eol = var_metadata_lookup_string (sparse_cache, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE, NULL);
+      eol_rebase = var_metadata_lookup_string (sparse_cache, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE_REBASE, NULL);
     }
 
   if (opt_show_ref || opt_show_commit || opt_show_parent || opt_show_metadata || opt_show_runtime || opt_show_sdk)
@@ -212,14 +213,18 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
 
       if (commit_v)
         {
-          g_variant_get (commit_v, "(a{sv}aya(say)&s&stayay)", NULL, NULL, NULL,
-                         &subject, &body, NULL, NULL, NULL);
+          VarCommitRef commit = var_commit_from_gvariant (commit_v);
+          VarMetadataRef commit_metadata;
 
+          subject = var_commit_get_subject (commit);
           parent = ostree_commit_get_parent (commit_v);
           timestamp = ostree_commit_get_timestamp (commit_v);
 
-          commit_metadata = g_variant_get_child_value (commit_v, 0);
-          g_variant_lookup (commit_metadata, "xa.metadata", "&s", &xa_metadata);
+          commit_metadata = var_commit_get_metadata (commit);
+          xa_metadata = var_metadata_lookup_string (commit_metadata, "xa.metadata", NULL);
+          if (xa_metadata == NULL)
+            g_printerr (_("Warning: Commit has no flatpak metadata\n"));
+
           if (xa_metadata == NULL)
             g_printerr (_("Warning: Commit has no flatpak metadata\n"));
           else
@@ -229,13 +234,10 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
                 return FALSE;
             }
 
-          g_variant_lookup (commit_metadata, "ostree.collection-binding", "&s", &collection_id);
+          collection_id = var_metadata_lookup_string (commit_metadata, "ostree.collection-binding", NULL);
 
-          if (g_variant_lookup (commit_metadata, "xa.installed-size", "t", &installed_size))
-            installed_size = GUINT64_FROM_BE (installed_size);
-
-          if (g_variant_lookup (commit_metadata, "xa.download-size", "t", &download_size))
-            download_size = GUINT64_FROM_BE (download_size);
+          installed_size = GUINT64_FROM_BE (var_metadata_lookup_uint64 (commit_metadata, "xa.installed-size", 0));
+          download_size = GUINT64_FROM_BE (var_metadata_lookup_uint64 (commit_metadata, "xa.download-size", 0));
 
           formatted_installed_size = g_format_size (installed_size);
           formatted_download_size = g_format_size (download_size);
@@ -297,12 +299,12 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
           g_autofree char *runtime = g_key_file_get_string (metakey, "Application", "runtime", error);
           print_aligned (len, _("Runtime:"), runtime ? runtime : "-");
         }
-      g_print ("\n");
       if (strcmp (parts[0], "app") == 0 && metakey != NULL)
         {
           g_autofree char *sdk = g_key_file_get_string (metakey, "Application", "sdk", error);
           print_aligned (len, _("Sdk:"), sdk ? sdk : "-");
         }
+      g_print ("\n");
       {
         g_autofree char *formatted_commit = ellipsize_string (commit, width);
         print_aligned (len, _("Commit:"), formatted_commit);
@@ -341,8 +343,9 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
               guint64 p_timestamp;
               g_autofree char *p_formatted_timestamp = NULL;
               g_autoptr(GVariant) p_commit_v = NULL;
+              VarCommitRef p_commit;
 
-              p_commit_v = flatpak_dir_fetch_remote_commit (preferred_dir, remote, ref, p, NULL, cancellable, NULL);
+              p_commit_v = flatpak_remote_state_load_ref_commit (state, preferred_dir, ref, p, NULL, NULL, cancellable, NULL);
               if (p_commit_v == NULL)
                 break;
 
@@ -350,8 +353,8 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
               p_timestamp = ostree_commit_get_timestamp (p_commit_v);
               p_formatted_timestamp = format_timestamp (p_timestamp);
 
-              g_variant_get (p_commit_v, "(a{sv}aya(say)&s&stayay)", NULL, NULL, NULL,
-                             &p_subject, NULL, NULL, NULL, NULL);
+              p_commit = var_commit_from_gvariant (p_commit_v);
+              p_subject = var_commit_get_subject (p_commit);
 
               print_aligned (len, _(" Commit:"), p);
               print_aligned (len, _(" Subject:"), p_subject);
@@ -463,7 +466,7 @@ flatpak_builtin_remote_info (int argc, char **argv, GCancellable *cancellable, G
           c_v = NULL;
 
           if (c && opt_log)
-            c_v = flatpak_dir_fetch_remote_commit (preferred_dir, remote, ref, c, NULL, cancellable, NULL);
+            c_v = flatpak_remote_state_load_ref_commit (state, preferred_dir, ref, c, NULL, NULL, cancellable, NULL);
         }
       while (c_v != NULL);
     }

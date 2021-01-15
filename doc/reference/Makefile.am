@@ -26,6 +26,7 @@ IGNORE_HFILES = \
 	flatpak-json-oci-private.h \
 	flatpak-json-private.h \
 	flatpak-oci-registry-private.h \
+	flatpak-progress-private.h \
 	flatpak-remote-private.h \
 	flatpak-remote-ref-private.h \
 	flatpak-run-private.h \
@@ -39,6 +40,7 @@ IGNORE_HFILES = \
 	flatpak-auth-private.h \
 	flatpak-parental-controls-private.h \
 	flatpak-appdata-private.h \
+	flatpak-zstd-decompressor-private.h \
 	$(NULL)
 
 EXTRA_HFILES =

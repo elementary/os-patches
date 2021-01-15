@@ -43,14 +43,6 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakOciRegistry, g_object_unref)
 
 GType flatpak_oci_layer_writer_get_type (void);
 
-typedef enum {
-  FLATPAK_OCI_ERROR_NOT_CHANGED = 0,
-} FlatpakOciErrorEnum;
-
-#define FLATPAK_OCI_ERROR flatpak_oci_error_quark ()
-
-FLATPAK_EXTERN GQuark  flatpak_oci_error_quark (void);
-
 typedef struct FlatpakOciLayerWriter FlatpakOciLayerWriter;
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakOciLayerWriter, g_object_unref)
@@ -62,6 +54,7 @@ FlatpakOciRegistry  *  flatpak_oci_registry_new (const char           *uri,
                                                  GError              **error);
 void                   flatpak_oci_registry_set_token (FlatpakOciRegistry *self,
                                                        const char *token);
+gboolean               flatpak_oci_registry_is_local (FlatpakOciRegistry *self);
 const char          *  flatpak_oci_registry_get_uri (FlatpakOciRegistry *self);
 FlatpakOciIndex     *  flatpak_oci_registry_load_index (FlatpakOciRegistry *self,
                                                         GCancellable       *cancellable,
@@ -74,6 +67,7 @@ int                    flatpak_oci_registry_download_blob (FlatpakOciRegistry   
                                                            const char            *repository,
                                                            gboolean               manifest,
                                                            const char            *digest,
+                                                           const char           **alt_uris,
                                                            FlatpakLoadUriProgress progress_cb,
                                                            gpointer               user_data,
                                                            GCancellable          *cancellable,
@@ -88,6 +82,8 @@ GBytes             *   flatpak_oci_registry_load_blob (FlatpakOciRegistry *self,
                                                        const char         *repository,
                                                        gboolean            manifest,
                                                        const char         *digest,
+                                                       const char        **alt_uris,
+                                                       char              **out_content_type,
                                                        GCancellable       *cancellable,
                                                        GError            **error);
 char *                 flatpak_oci_registry_store_blob (FlatpakOciRegistry *self,
@@ -99,6 +95,7 @@ gboolean               flatpak_oci_registry_mirror_blob (FlatpakOciRegistry    *
                                                          const char            *repository,
                                                          gboolean               manifest,
                                                          const char            *digest,
+                                                         const char          **alt_uris,
                                                          FlatpakLoadUriProgress progress_cb,
                                                          gpointer               user_data,
                                                          GCancellable          *cancellable,
@@ -110,18 +107,36 @@ FlatpakOciDescriptor * flatpak_oci_registry_store_json (FlatpakOciRegistry *self
 FlatpakOciVersioned *  flatpak_oci_registry_load_versioned (FlatpakOciRegistry *self,
                                                             const char         *repository,
                                                             const char         *digest,
+                                                            const char        **alt_uris,
                                                             gsize              *out_size,
                                                             GCancellable       *cancellable,
                                                             GError            **error);
 FlatpakOciImage *      flatpak_oci_registry_load_image_config (FlatpakOciRegistry *self,
                                                                const char         *repository,
                                                                const char         *digest,
+                                                               const char        **alt_uris,
                                                                gsize              *out_size,
                                                                GCancellable       *cancellable,
                                                                GError            **error);
 FlatpakOciLayerWriter *flatpak_oci_registry_write_layer (FlatpakOciRegistry *self,
                                                          GCancellable       *cancellable,
                                                          GError            **error);
+
+int                     flatpak_oci_registry_apply_delta (FlatpakOciRegistry    *self,
+                                                          int                    delta_fd,
+                                                          GFile                 *content_dir,
+                                                          GCancellable          *cancellable,
+                                                          GError               **error);
+char *                  flatpak_oci_registry_apply_delta_to_blob (FlatpakOciRegistry    *self,
+                                                                  int                    delta_fd,
+                                                                  GFile                 *content_dir,
+                                                                  GCancellable          *cancellable,
+                                                                  GError               **error);
+FlatpakOciManifest *   flatpak_oci_registry_find_delta_manifest (FlatpakOciRegistry    *registry,
+                                                                 const char            *oci_repository,
+                                                                 const char            *for_digest,
+                                                                 const char            *delta_manifest_uri,
+                                                                 GCancellable          *cancellable);
 
 struct archive *flatpak_oci_layer_writer_get_archive (FlatpakOciLayerWriter *self);
 gboolean        flatpak_oci_layer_writer_close (FlatpakOciLayerWriter *self,

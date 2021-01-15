@@ -146,7 +146,11 @@ struct _FlatpakTransactionClass
                                 const char         *realm,
                                 GVariant           *options,
                                 guint               id);
-  gpointer padding[5];
+  void (*install_authenticator)   (FlatpakTransaction *transaction,
+                                   const char         *remote,
+                                   const char         *authenticator_ref);
+
+  gpointer padding[4];
 };
 
 FLATPAK_EXTERN
@@ -173,6 +177,10 @@ FLATPAK_EXTERN
 FlatpakTransactionOperationType flatpak_transaction_operation_get_operation_type (FlatpakTransactionOperation *self);
 FLATPAK_EXTERN
 const char *                    flatpak_transaction_operation_get_ref (FlatpakTransactionOperation *self);
+FLATPAK_EXTERN
+GPtrArray *                     flatpak_transaction_operation_get_related_to_ops (FlatpakTransactionOperation *self);
+FLATPAK_EXTERN
+gboolean                        flatpak_transaction_operation_get_is_skipped (FlatpakTransactionOperation *self);
 FLATPAK_EXTERN
 const char *                    flatpak_transaction_operation_get_remote (FlatpakTransactionOperation *self);
 FLATPAK_EXTERN
@@ -216,6 +224,9 @@ FLATPAK_EXTERN
 void                flatpak_transaction_set_reinstall (FlatpakTransaction *self,
                                                        gboolean            reinstall);
 FLATPAK_EXTERN
+void                flatpak_transaction_set_no_interaction (FlatpakTransaction *self,
+                                                            gboolean            no_interaction);
+FLATPAK_EXTERN
 void                flatpak_transaction_set_force_uninstall (FlatpakTransaction *self,
                                                              gboolean            force_uninstall);
 FLATPAK_EXTERN
@@ -229,6 +240,9 @@ const char *        flatpak_transaction_get_parent_window (FlatpakTransaction *s
 FLATPAK_EXTERN
 void                flatpak_transaction_add_dependency_source (FlatpakTransaction  *self,
                                                                FlatpakInstallation *installation);
+FLATPAK_EXTERN
+void                flatpak_transaction_add_sideload_repo (FlatpakTransaction  *self,
+                                                           const char          *path);
 FLATPAK_EXTERN
 void                flatpak_transaction_add_default_dependency_sources (FlatpakTransaction *self);
 FLATPAK_EXTERN

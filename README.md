@@ -2,14 +2,14 @@
   <img src="https://github.com/flatpak/flatpak/blob/master/flatpak.png?raw=true" alt="Flatpak icon"/>
 </p>
 
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/flatpak/flatpak.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/flatpak/flatpak/context:python)
+[![Language Grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/flatpak/flatpak.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/flatpak/flatpak/context:cpp)<br/>
 
 Flatpak is a system for building, distributing, and running sandboxed
 desktop applications on Linux.
 
 See https://flatpak.org/ for more information.
 
-Community discussion happens in [#flatpak on Freenode](ircs://chat.freenode.net/flatpak) and on [the mailing list](https://lists.freedesktop.org/mailman/listinfo/flatpak).
+Community discussion happens in [#flatpak on Freenode](ircs://chat.freenode.net/flatpak), on [the mailing list](https://lists.freedesktop.org/mailman/listinfo/flatpak), and on [the Flathub Discourse](https://discourse.flathub.org/).
 
 Read documentation for [Flatpak](http://docs.flatpak.org/en/latest/introduction.html), its [commandline tools](http://docs.flatpak.org/en/latest/flatpak-command-reference.html), and for the libflatpak [library API](http://flatpak.github.io/flatpak/reference/html/index.html).
 

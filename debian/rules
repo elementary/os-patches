@@ -56,6 +56,7 @@ override_dh_install:
 	install -m644 debian/tmp/etc/profile.d/flatpak.sh \
 		debian/tmp/etc/X11/Xsession.d/20flatpak
 	rm -f debian/tmp/usr/lib/*/*.la
+	rm -f debian/tmp/usr/lib/sysusers.d/flatpak.conf
 	dh_install
 
 override_dh_missing:

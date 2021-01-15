@@ -159,6 +159,47 @@ operation_error (FlatpakTransaction            *transaction,
   return non_fatal; /* Continue if non-fatal */
 }
 
+static void
+install_authenticator (FlatpakTransaction            *old_transaction,
+                       const char                    *remote,
+                       const char                    *ref)
+{
+  g_autoptr(FlatpakTransaction)  transaction2 = NULL;
+  g_autoptr(GError) local_error = NULL;
+  FlatpakInstallation *installation = flatpak_transaction_get_installation (old_transaction);
+  FlatpakDir *dir = flatpak_installation_get_dir (installation, NULL);
+
+  if (dir == NULL)
+    {
+      /* This should not happen */
+      g_warning ("No dir in install_authenticator");
+      return;
+    }
+
+  transaction2 = flatpak_quiet_transaction_new (dir, &local_error);
+  if (transaction2 == NULL)
+    {
+      g_printerr ("Unable to install authenticator: %s\n", local_error->message);
+      return;
+    }
+
+  if (!flatpak_transaction_add_install (transaction2, remote, ref, NULL, &local_error))
+    {
+      if (!g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_ALREADY_INSTALLED))
+        g_printerr ("Unable to install authenticator: %s\n", local_error->message);
+      return;
+    }
+
+  if (!flatpak_transaction_run (transaction2, NULL, &local_error))
+    {
+      if (!g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_ABORTED))
+        g_printerr ("Unable to install authenticator: %s\n", local_error->message);
+      return;
+    }
+
+  return;
+}
+
 static gboolean
 end_of_lifed_with_rebase (FlatpakTransaction *transaction,
                           const char         *remote,
@@ -218,6 +259,16 @@ flatpak_quiet_transaction_run (FlatpakTransaction *transaction,
   return TRUE;
 }
 
+static void
+flatpak_quiet_transaction_finalize (GObject *object)
+{
+  FlatpakQuietTransaction *self = FLATPAK_QUIET_TRANSACTION (object);
+  g_autoptr(FlatpakInstallation) installation = NULL;
+
+  installation = flatpak_transaction_get_installation (FLATPAK_TRANSACTION (self));
+
+  G_OBJECT_CLASS (flatpak_quiet_transaction_parent_class)->finalize (object);
+}
 
 static void
 flatpak_quiet_transaction_init (FlatpakQuietTransaction *transaction)
@@ -227,14 +278,17 @@ flatpak_quiet_transaction_init (FlatpakQuietTransaction *transaction)
 static void
 flatpak_quiet_transaction_class_init (FlatpakQuietTransactionClass *class)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS (class);
   FlatpakTransactionClass *transaction_class = FLATPAK_TRANSACTION_CLASS (class);
 
+  object_class->finalize = flatpak_quiet_transaction_finalize;
   transaction_class->choose_remote_for_ref = choose_remote_for_ref;
   transaction_class->add_new_remote = add_new_remote;
   transaction_class->new_operation = new_operation;
   transaction_class->operation_error = operation_error;
   transaction_class->end_of_lifed_with_rebase = end_of_lifed_with_rebase;
   transaction_class->run = flatpak_quiet_transaction_run;
+  transaction_class->install_authenticator = install_authenticator;
 }
 
 FlatpakTransaction *
@@ -248,8 +302,6 @@ flatpak_quiet_transaction_new (FlatpakDir *dir,
   if (installation == NULL)
     return NULL;
 
-  flatpak_installation_set_no_interaction (installation, TRUE);
-
   self = g_initable_new (FLATPAK_TYPE_QUIET_TRANSACTION,
                          NULL, error,
                          "installation", installation,
@@ -258,6 +310,7 @@ flatpak_quiet_transaction_new (FlatpakDir *dir,
   if (self == NULL)
     return NULL;
 
+  flatpak_transaction_set_no_interaction (FLATPAK_TRANSACTION (self), TRUE);
   flatpak_transaction_add_default_dependency_sources (FLATPAK_TRANSACTION (self));
 
   return FLATPAK_TRANSACTION (g_steal_pointer (&self));

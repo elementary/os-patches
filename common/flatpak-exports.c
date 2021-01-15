@@ -49,9 +49,11 @@
 #include "flatpak-error.h"
 
 /* We don't want to export paths pointing into these, because they are readonly
-   (so we can't create mountpoints there) and don't match what's on the host anyway */
+   (so we can't create mountpoints there) and don't match what's on the host anyway.
+   flatpak_abs_usrmerged_dirs get the same treatment without having to be listed
+   here. */
 const char *dont_export_in[] = {
-  "/lib", "/lib32", "/lib64", "/bin", "/sbin", "/usr", "/etc", "/app", "/dev", "/proc", NULL
+  "/usr", "/etc", "/app", "/dev", "/proc", NULL
 };
 
 static char *
@@ -92,7 +94,8 @@ typedef struct
 struct _FlatpakExports
 {
   GHashTable           *hash;
-  FlatpakFilesystemMode host_fs;
+  FlatpakFilesystemMode host_etc;
+  FlatpakFilesystemMode host_os;
 };
 
 static void
@@ -219,6 +222,27 @@ path_is_symlink (const char *path)
   return S_ISLNK (s.st_mode);
 }
 
+/*
+ * @name: A file or directory below /etc
+ * @test: How we test whether it is suitable
+ *
+ * The paths in /etc that are required if we want to make use of the
+ * host /usr (and /lib, and so on).
+ */
+typedef struct
+{
+  const char *name;
+  GFileTest test;
+} LibsNeedEtc;
+
+static const LibsNeedEtc libs_need_etc[] =
+{
+  /* glibc */
+  { "ld.so.cache", G_FILE_TEST_IS_REGULAR },
+  /* Used for executables and a few libraries on e.g. Debian */
+  { "alternatives", G_FILE_TEST_IS_DIR }
+};
+
 void
 flatpak_exports_append_bwrap_args (FlatpakExports *exports,
                                    FlatpakBwrap   *bwrap)
@@ -277,16 +301,98 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
         }
     }
 
-  if (exports->host_fs != 0)
+  if (exports->host_os != 0)
     {
+      const char *os_bind_mode = "--bind";
+      int i;
+
+      if (exports->host_os == FLATPAK_FILESYSTEM_MODE_READ_ONLY)
+        os_bind_mode = "--ro-bind";
+
       if (g_file_test ("/usr", G_FILE_TEST_IS_DIR))
         flatpak_bwrap_add_args (bwrap,
-                                (exports->host_fs == FLATPAK_FILESYSTEM_MODE_READ_ONLY) ? "--ro-bind" : "--bind",
-                                "/usr", "/run/host/usr", NULL);
+                                os_bind_mode, "/usr", "/run/host/usr", NULL);
+
+      for (i = 0; flatpak_abs_usrmerged_dirs[i] != NULL; i++)
+        {
+          const char *subdir = flatpak_abs_usrmerged_dirs[i];
+          g_autofree char *target = NULL;
+          g_autofree char *run_host_subdir = NULL;
+
+          g_assert (subdir[0] == '/');
+          /* e.g. /run/host/lib32 */
+          run_host_subdir = g_strconcat ("/run/host", subdir, NULL);
+          target = glnx_readlinkat_malloc (-1, subdir, NULL, NULL);
+
+          if (target != NULL &&
+              g_str_has_prefix (target, "usr/"))
+            {
+              /* e.g. /lib32 is a relative symlink to usr/lib32, or
+               * on Arch Linux, /lib64 is a relative symlink to usr/lib;
+               * keep it relative */
+              flatpak_bwrap_add_args (bwrap,
+                                      "--symlink", target, run_host_subdir,
+                                      NULL);
+            }
+          else if (target != NULL &&
+                   g_str_has_prefix (target, "/usr/"))
+            {
+              /* e.g. /lib32 is an absolute symlink to /usr/lib32; make
+               * it a relative symlink to usr/lib32 instead by skipping
+               * the '/' */
+              flatpak_bwrap_add_args (bwrap,
+                                      "--symlink", target + 1, run_host_subdir,
+                                      NULL);
+            }
+          else if (g_file_test (subdir, G_FILE_TEST_IS_DIR))
+            {
+              /* e.g. /lib32 is a symlink to /opt/compat/ia32/lib,
+               * or is a plain directory because the host OS has not
+               * undergone the /usr merge; bind-mount the directory instead */
+              flatpak_bwrap_add_args (bwrap,
+                                      os_bind_mode, subdir, run_host_subdir,
+                                      NULL);
+            }
+        }
+
+      if (exports->host_etc == 0)
+        {
+          guint i;
+
+          /* We are exposing the host /usr (and friends) but not the
+           * host /etc. Additionally expose just enough of /etc to make
+           * things that want to read /usr work as expected.
+           *
+           * (If exports->host_etc is nonzero, we'll do this as part of
+           * /etc instead.) */
+
+          for (i = 0; i < G_N_ELEMENTS (libs_need_etc); i++)
+            {
+              const LibsNeedEtc *item = &libs_need_etc[i];
+              g_autofree gchar *host_path = g_strconcat ("/etc/", item->name, NULL);
+
+              if (g_file_test (host_path, item->test))
+                {
+                  g_autofree gchar *run_host_path = g_strconcat ("/run/host/etc/", item->name, NULL);
+
+                  flatpak_bwrap_add_args (bwrap,
+                                          os_bind_mode, host_path, run_host_path,
+                                          NULL);
+                }
+            }
+        }
+    }
+
+  if (exports->host_etc != 0)
+    {
+      const char *etc_bind_mode = "--bind";
+
+      if (exports->host_etc == FLATPAK_FILESYSTEM_MODE_READ_ONLY)
+        etc_bind_mode = "--ro-bind";
+
       if (g_file_test ("/etc", G_FILE_TEST_IS_DIR))
         flatpak_bwrap_add_args (bwrap,
-                                (exports->host_fs == FLATPAK_FILESYSTEM_MODE_READ_ONLY) ? "--ro-bind" : "--bind",
-                                "/etc", "/run/host/etc", NULL);
+                                etc_bind_mode, "/etc", "/run/host/etc", NULL);
     }
 }
 
@@ -544,6 +650,16 @@ _exports_path_expose (FlatpakExports *exports,
         }
     }
 
+  for (i = 0; flatpak_abs_usrmerged_dirs[i] != NULL; i++)
+    {
+      /* Same as /usr, but for the directories that get merged into /usr */
+      if (flatpak_has_path_prefix (path, flatpak_abs_usrmerged_dirs[i]))
+        {
+          g_debug ("skipping export for path %s", path);
+          return FALSE;
+        }
+    }
+
   /* Handle any symlinks prior to the target itself. This includes path itself,
      because we expose the target of the symlink. */
   slash = canonical;
@@ -617,8 +733,15 @@ flatpak_exports_add_path_dir (FlatpakExports *exports,
 }
 
 void
-flatpak_exports_add_host_expose (FlatpakExports       *exports,
-                                 FlatpakFilesystemMode mode)
+flatpak_exports_add_host_etc_expose (FlatpakExports       *exports,
+                                     FlatpakFilesystemMode mode)
 {
-  exports->host_fs = mode;
+  exports->host_etc = mode;
+}
+
+void
+flatpak_exports_add_host_os_expose (FlatpakExports       *exports,
+                                    FlatpakFilesystemMode mode)
+{
+  exports->host_os = mode;
 }

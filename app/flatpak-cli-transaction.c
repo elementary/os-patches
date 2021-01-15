@@ -140,6 +140,49 @@ add_new_remote (FlatpakTransaction            *transaction,
   return FALSE;
 }
 
+static void
+install_authenticator (FlatpakTransaction            *old_transaction,
+                       const char                    *remote,
+                       const char                    *ref)
+{
+  FlatpakCliTransaction *old_cli = FLATPAK_CLI_TRANSACTION (old_transaction);
+  g_autoptr(FlatpakTransaction)  transaction2 = NULL;
+  g_autoptr(GError) local_error = NULL;
+  FlatpakInstallation *installation = flatpak_transaction_get_installation (old_transaction);
+  FlatpakDir *dir = flatpak_installation_get_dir (installation, NULL);
+
+  if (dir == NULL)
+    {
+      /* This should not happen */
+      g_warning ("No dir in install_authenticator");
+      return;
+    }
+
+  transaction2 = flatpak_cli_transaction_new (dir, old_cli->disable_interaction, TRUE, FALSE, &local_error);
+  if (transaction2 == NULL)
+    {
+      g_printerr ("Unable to install authenticator: %s\n", local_error->message);
+      return;
+    }
+
+  g_print ("Installing required authenticator for remote %s\n", remote);
+  if (!flatpak_transaction_add_install (transaction2, remote, ref, NULL, &local_error))
+    {
+      if (!g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_ALREADY_INSTALLED))
+        g_printerr ("Unable to install authenticator: %s\n", local_error->message);
+      return;
+    }
+
+  if (!flatpak_transaction_run (transaction2, NULL, &local_error))
+    {
+      if (!g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_ABORTED))
+        g_printerr ("Unable to install authenticator: %s\n", local_error->message);
+      return;
+    }
+
+  return;
+}
+
 static char *
 op_type_to_string (FlatpakTransactionOperationType operation_type)
 {
@@ -332,11 +375,10 @@ progress_changed_cb (FlatpakTransactionProgress *progress,
           g_autofree char *text = NULL;
           int row;
 
-          formatted_max = g_format_size (max);
-          if (transferred < 1024) // avoid "bytes"
-            formatted = g_strdup ("1.0 kB");
-          else
-            formatted = g_format_size (transferred);
+          // avoid "bytes"
+          formatted = transferred < 1000 ? g_format_size (1000) : g_format_size (transferred);
+          formatted_max = max < 1000 ? g_format_size (1000) : g_format_size (max);
+
           text = g_strdup_printf ("%s / %s", formatted, formatted_max);
           row = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (op), "row"));
           flatpak_table_printer_set_decimal_cell (cli->printer, row, cli->download_col, text);
@@ -474,8 +516,10 @@ operation_error (FlatpakTransaction            *transaction,
     msg = g_strdup_printf (_("%s needs a later flatpak version"), flatpak_ref_get_name (rref));
   else if (g_error_matches (error, FLATPAK_ERROR, FLATPAK_ERROR_OUT_OF_SPACE))
     msg = g_strdup (_("Not enough disk space to complete this operation"));
-  else
+  else if (error)
     msg = g_strdup (error->message);
+  else
+    msg = g_strdup (_("(internal error, please report)"));
 
   if (!non_fatal && self->first_operation_error == NULL)
     g_propagate_prefixed_error (&self->first_operation_error,
@@ -563,10 +607,13 @@ basic_auth_start (FlatpakTransaction *transaction,
                   guint               id)
 {
   FlatpakCliTransaction *self = FLATPAK_CLI_TRANSACTION (transaction);
-  char *user, *password;
+  char *user, *password, *previous_error = NULL;
 
   if (self->disable_interaction)
     return FALSE;
+
+  if (g_variant_lookup (options, "previous-error", "&s", &previous_error))
+    g_print ("%s\n", previous_error);
 
   g_print (_("Login required remote %s (realm %s)\n"), remote, realm);
   user = flatpak_prompt (FALSE, _("User"));
@@ -1148,6 +1195,7 @@ flatpak_cli_transaction_class_init (FlatpakCliTransactionClass *klass)
   transaction_class->webflow_start = webflow_start;
   transaction_class->webflow_done = webflow_done;
   transaction_class->basic_auth_start = basic_auth_start;
+  transaction_class->install_authenticator = install_authenticator;
 }
 
 FlatpakTransaction *
@@ -1159,8 +1207,6 @@ flatpak_cli_transaction_new (FlatpakDir *dir,
 {
   g_autoptr(FlatpakInstallation) installation = NULL;
   g_autoptr(FlatpakCliTransaction) self = NULL;
-
-  flatpak_dir_set_no_interaction (dir, disable_interaction);
 
   installation = flatpak_installation_new_for_dir (dir, NULL, error);
   if (installation == NULL)
@@ -1177,6 +1223,7 @@ flatpak_cli_transaction_new (FlatpakDir *dir,
   self->stop_on_first_error = stop_on_first_error;
   self->non_default_arch = non_default_arch;
 
+  flatpak_transaction_set_no_interaction (FLATPAK_TRANSACTION (self), disable_interaction);
   flatpak_transaction_add_default_dependency_sources (FLATPAK_TRANSACTION (self));
 
   return (FlatpakTransaction *) g_steal_pointer (&self);

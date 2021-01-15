@@ -26,6 +26,7 @@
 #include "flatpak-remote-ref-private.h"
 #include "flatpak-remote-ref.h"
 #include "flatpak-enum-types.h"
+#include "flatpak-variant-impl-private.h"
 
 /**
  * SECTION:flatpak-remote-ref
@@ -318,19 +319,19 @@ flatpak_remote_ref_get_eol_rebase (FlatpakRemoteRef *self)
 }
 
 FlatpakRemoteRef *
-flatpak_remote_ref_new (FlatpakCollectionRef *coll_ref,
+flatpak_remote_ref_new (const char           *full_ref,
                         const char           *commit,
                         const char           *remote_name,
+                        const char           *collection_id,
                         FlatpakRemoteState   *state)
 {
   FlatpakRefKind kind = FLATPAK_REF_KIND_APP;
   guint64 download_size = 0, installed_size = 0;
-  const char *metadata = NULL;
+  g_autofree char *metadata = NULL;
   g_autoptr(GBytes) metadata_bytes = NULL;
   g_auto(GStrv) parts = NULL;
   FlatpakRemoteRef *ref;
-  g_autoptr(GVariant) sparse = NULL;
-  const char *full_ref = coll_ref->ref_name;
+  VarMetadataRef sparse_cache;
   const char *eol = NULL;
   const char *eol_rebase = NULL;
 
@@ -339,23 +340,24 @@ flatpak_remote_ref_new (FlatpakCollectionRef *coll_ref,
     return NULL;
 
   if (state &&
-      !flatpak_remote_state_lookup_cache (state, full_ref,
-                                          &download_size, &installed_size, &metadata,
-                                          NULL, NULL))
+      !flatpak_remote_state_load_data (state, full_ref,
+                                       &download_size, &installed_size, &metadata,
+                                       NULL))
     {
       g_debug ("Can't find metadata for ref %s", full_ref);
     }
 
   if (metadata)
-    metadata_bytes = g_bytes_new (metadata, strlen (metadata));
-
-  if (state)
-    sparse = flatpak_remote_state_lookup_sparse_cache (state, full_ref, NULL);
-
-  if (sparse)
     {
-      g_variant_lookup (sparse, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE, "&s", &eol);
-      g_variant_lookup (sparse, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE_REBASE, "&s", &eol_rebase);
+      metadata_bytes = g_bytes_new_take (metadata, strlen (metadata));
+      metadata = NULL; /* steal */
+    }
+
+  if (state &&
+      flatpak_remote_state_lookup_sparse_cache (state, full_ref, &sparse_cache, NULL))
+    {
+      eol = var_metadata_lookup_string (sparse_cache, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE, NULL);
+      eol_rebase = var_metadata_lookup_string (sparse_cache, FLATPAK_SPARSE_CACHE_KEY_ENDOFLINE_REBASE, NULL);
     }
 
   if (strcmp (parts[0], "app") != 0)
@@ -366,9 +368,9 @@ flatpak_remote_ref_new (FlatpakCollectionRef *coll_ref,
                       "name", parts[1],
                       "arch", parts[2],
                       "branch", parts[3],
-                      "collection-id", coll_ref->collection_id,
                       "commit", commit,
                       "remote-name", remote_name,
+                      "collection-id", collection_id,
                       "installed-size", installed_size,
                       "download-size", download_size,
                       "metadata", metadata_bytes,

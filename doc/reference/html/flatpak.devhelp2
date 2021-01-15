@@ -18,6 +18,7 @@
     </sub>
     <sub name="Object Hierarchy" link="object-tree.html"/>
     <sub name="API Index" link="full-api-index.html"/>
+    <sub name="Index of deprecated API" link="deprecated-api-index.html"/>
     <sub name="Annotation Glossary" link="annotation-glossary.html"/>
   </chapters>
   <functions>
@@ -28,12 +29,12 @@
     <keyword type="function" name="flatpak_installation_get_is_user ()" link="FlatpakInstallation.html#flatpak-installation-get-is-user"/>
     <keyword type="function" name="flatpak_installation_get_path ()" link="FlatpakInstallation.html#flatpak-installation-get-path"/>
     <keyword type="function" name="flatpak_installation_create_monitor ()" link="FlatpakInstallation.html#flatpak-installation-create-monitor"/>
-    <keyword type="function" name="flatpak_installation_install ()" link="FlatpakInstallation.html#flatpak-installation-install"/>
-    <keyword type="function" name="flatpak_installation_install_full ()" link="FlatpakInstallation.html#flatpak-installation-install-full"/>
-    <keyword type="function" name="flatpak_installation_update ()" link="FlatpakInstallation.html#flatpak-installation-update"/>
-    <keyword type="function" name="flatpak_installation_update_full ()" link="FlatpakInstallation.html#flatpak-installation-update-full"/>
-    <keyword type="function" name="flatpak_installation_uninstall ()" link="FlatpakInstallation.html#flatpak-installation-uninstall"/>
-    <keyword type="function" name="flatpak_installation_uninstall_full ()" link="FlatpakInstallation.html#flatpak-installation-uninstall-full" since="0.11.8"/>
+    <keyword type="function" name="flatpak_installation_install ()" link="FlatpakInstallation.html#flatpak-installation-install" deprecated="1.7.0: Use flatpak_transaction_add_install() instead."/>
+    <keyword type="function" name="flatpak_installation_install_full ()" link="FlatpakInstallation.html#flatpak-installation-install-full" deprecated="1.7.0: Use flatpak_transaction_add_install() instead."/>
+    <keyword type="function" name="flatpak_installation_update ()" link="FlatpakInstallation.html#flatpak-installation-update" deprecated="1.7.0: Use flatpak_transaction_add_update() instead."/>
+    <keyword type="function" name="flatpak_installation_update_full ()" link="FlatpakInstallation.html#flatpak-installation-update-full" deprecated="1.7.0: Use flatpak_transaction_add_update() instead."/>
+    <keyword type="function" name="flatpak_installation_uninstall ()" link="FlatpakInstallation.html#flatpak-installation-uninstall" deprecated="1.7.0: Use flatpak_transaction_add_uninstall() instead."/>
+    <keyword type="function" name="flatpak_installation_uninstall_full ()" link="FlatpakInstallation.html#flatpak-installation-uninstall-full" deprecated="1.7.0: Use flatpak_transaction_add_uninstall() instead." since="0.11.8"/>
     <keyword type="function" name="flatpak_installation_launch ()" link="FlatpakInstallation.html#flatpak-installation-launch"/>
     <keyword type="function" name="flatpak_installation_launch_full ()" link="FlatpakInstallation.html#flatpak-installation-launch-full" since="1.1"/>
     <keyword type="function" name="flatpak_installation_get_current_installed_app ()" link="FlatpakInstallation.html#flatpak-installation-get-current-installed-app"/>
@@ -62,8 +63,8 @@
     <keyword type="function" name="flatpak_installation_fetch_remote_size_sync ()" link="FlatpakInstallation.html#flatpak-installation-fetch-remote-size-sync"/>
     <keyword type="function" name="flatpak_installation_load_app_overrides ()" link="FlatpakInstallation.html#flatpak-installation-load-app-overrides"/>
     <keyword type="function" name="flatpak_installation_update_appstream_sync ()" link="FlatpakInstallation.html#flatpak-installation-update-appstream-sync"/>
-    <keyword type="function" name="flatpak_installation_install_bundle ()" link="FlatpakInstallation.html#flatpak-installation-install-bundle"/>
-    <keyword type="function" name="flatpak_installation_install_ref_file ()" link="FlatpakInstallation.html#flatpak-installation-install-ref-file" since="0.6.10"/>
+    <keyword type="function" name="flatpak_installation_install_bundle ()" link="FlatpakInstallation.html#flatpak-installation-install-bundle" deprecated="1.7.0: Use flatpak_transaction_add_install_bundle() instead."/>
+    <keyword type="function" name="flatpak_installation_install_ref_file ()" link="FlatpakInstallation.html#flatpak-installation-install-ref-file" deprecated="1.7.0: Use flatpak_transaction_add_install_flatpakref() instead." since="0.6.10"/>
     <keyword type="function" name="flatpak_installation_drop_caches ()" link="FlatpakInstallation.html#flatpak-installation-drop-caches"/>
     <keyword type="function" name="flatpak_installation_add_remote ()" link="FlatpakInstallation.html#flatpak-installation-add-remote" since="1.3.4"/>
     <keyword type="function" name="flatpak_installation_modify_remote ()" link="FlatpakInstallation.html#flatpak-installation-modify-remote"/>
@@ -188,6 +189,7 @@
     <keyword type="signal" name="The “choose-remote-for-ref” signal" link="FlatpakTransaction.html#FlatpakTransaction-choose-remote-for-ref"/>
     <keyword type="signal" name="The “end-of-lifed” signal" link="FlatpakTransaction.html#FlatpakTransaction-end-of-lifed"/>
     <keyword type="signal" name="The “end-of-lifed-with-rebase” signal" link="FlatpakTransaction.html#FlatpakTransaction-end-of-lifed-with-rebase"/>
+    <keyword type="signal" name="The “install-authenticator” signal" link="FlatpakTransaction.html#FlatpakTransaction-install-authenticator"/>
     <keyword type="signal" name="The “new-operation” signal" link="FlatpakTransaction.html#FlatpakTransaction-new-operation"/>
     <keyword type="signal" name="The “operation-done” signal" link="FlatpakTransaction.html#FlatpakTransaction-operation-done"/>
     <keyword type="signal" name="The “operation-error” signal" link="FlatpakTransaction.html#FlatpakTransaction-operation-error"/>
@@ -297,6 +299,7 @@
     <keyword type="macro" name="FLATPAK_MICRO_VERSION" link="flatpak-Version-information.html#FLATPAK-MICRO-VERSION:CAPS"/>
     <keyword type="constant" name="FLATPAK_QUERY_FLAGS_NONE" link="FlatpakInstallation.html#FLATPAK-QUERY-FLAGS-NONE:CAPS"/>
     <keyword type="constant" name="FLATPAK_QUERY_FLAGS_ONLY_CACHED" link="FlatpakInstallation.html#FLATPAK-QUERY-FLAGS-ONLY-CACHED:CAPS"/>
+    <keyword type="constant" name="FLATPAK_QUERY_FLAGS_ONLY_SIDELOADED" link="FlatpakInstallation.html#FLATPAK-QUERY-FLAGS-ONLY-SIDELOADED:CAPS"/>
     <keyword type="constant" name="FLATPAK_UPDATE_FLAGS_NONE" link="FlatpakInstallation.html#FLATPAK-UPDATE-FLAGS-NONE:CAPS"/>
     <keyword type="constant" name="FLATPAK_UPDATE_FLAGS_NO_DEPLOY" link="FlatpakInstallation.html#FLATPAK-UPDATE-FLAGS-NO-DEPLOY:CAPS"/>
     <keyword type="constant" name="FLATPAK_UPDATE_FLAGS_NO_PULL" link="FlatpakInstallation.html#FLATPAK-UPDATE-FLAGS-NO-PULL:CAPS"/>
@@ -355,6 +358,8 @@
     <keyword type="constant" name="FLATPAK_ERROR_NOT_CACHED" link="flatpak-Error-codes.html#FLATPAK-ERROR-NOT-CACHED:CAPS"/>
     <keyword type="constant" name="FLATPAK_ERROR_REF_NOT_FOUND" link="flatpak-Error-codes.html#FLATPAK-ERROR-REF-NOT-FOUND:CAPS"/>
     <keyword type="constant" name="FLATPAK_ERROR_PERMISSION_DENIED" link="flatpak-Error-codes.html#FLATPAK-ERROR-PERMISSION-DENIED:CAPS"/>
+    <keyword type="constant" name="FLATPAK_ERROR_AUTHENTICATION_FAILED" link="flatpak-Error-codes.html#FLATPAK-ERROR-AUTHENTICATION-FAILED:CAPS"/>
+    <keyword type="constant" name="FLATPAK_ERROR_NOT_AUTHORIZED" link="flatpak-Error-codes.html#FLATPAK-ERROR-NOT-AUTHORIZED:CAPS"/>
     <keyword type="constant" name="FLATPAK_PORTAL_ERROR_FAILED" link="flatpak-Error-codes.html#FLATPAK-PORTAL-ERROR-FAILED:CAPS"/>
     <keyword type="constant" name="FLATPAK_PORTAL_ERROR_INVALID_ARGUMENT" link="flatpak-Error-codes.html#FLATPAK-PORTAL-ERROR-INVALID-ARGUMENT:CAPS"/>
     <keyword type="constant" name="FLATPAK_PORTAL_ERROR_NOT_FOUND" link="flatpak-Error-codes.html#FLATPAK-PORTAL-ERROR-NOT-FOUND:CAPS"/>

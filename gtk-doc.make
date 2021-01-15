@@ -57,6 +57,7 @@ DOC_STAMPS=setup-build.stamp scan-build.stamp sgml-build.stamp \
 	sgml.stamp html.stamp pdf.stamp
 
 SCANOBJ_FILES = 		 \
+	$(DOC_MODULE).actions	 \
 	$(DOC_MODULE).args 	 \
 	$(DOC_MODULE).hierarchy  \
 	$(DOC_MODULE).interfaces \
@@ -142,9 +143,8 @@ scan-build.stamp: setup-build.stamp $(HFILE_GLOB) $(CFILE_GLOB)
 	    fi; \
 	  fi; \
 	  CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" RUN="$(GTKDOC_RUN)" CFLAGS="$(GTKDOC_CFLAGS) $(CFLAGS)" LDFLAGS="$(GTKDOC_LIBS) $(LDFLAGS)" \
-	  gtkdoc-scangobj $(SCANGOBJ_OPTIONS) $$scanobj_options --verbose --module=$(DOC_MODULE); \
+	  gtkdoc-scangobj $(SCANGOBJ_OPTIONS) $$scanobj_options --module=$(DOC_MODULE); \
 	else \
-	  echo GAZ; \
 	  for i in $(SCANOBJ_FILES) ; do \
 	    test -f $$i || touch $$i ; \
 	  done \

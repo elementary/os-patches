@@ -14,7 +14,7 @@ AC_PREREQ([2.63])
 # on the unstable (ie master), interface age = 0
 
 m4_define([flatpak_major_version], [1])
-m4_define([flatpak_minor_version], [6])
+m4_define([flatpak_minor_version], [8])
 m4_define([flatpak_micro_version], [3])
 m4_define([flatpak_extra_version], [])
 m4_define([flatpak_interface_age], [0])
@@ -214,13 +214,25 @@ PKG_CHECK_MODULES(ARCHIVE, [libarchive >= 2.8.0])
 PKG_CHECK_MODULES(BASE, [glib-2.0 >= $GLIB_REQS gio-2.0 gio-unix-2.0])
 PKG_CHECK_MODULES(SOUP, [libsoup-2.4])
 PKG_CHECK_MODULES(XML, [libxml-2.0 >= 2.4])
+PKG_CHECK_MODULES(ZSTD, [libzstd >= 0.8.1], [have_zstd=yes], [have_zstd=no])
+if test $have_zstd = yes; then
+  AC_DEFINE(HAVE_ZSTD, 1, [Define if libzstd is available])
+fi
 PKG_CHECK_MODULES(DCONF, [dconf >= 0.26], [have_dconf=yes], [have_dconf=no])
 if test $have_dconf = yes; then
   AC_DEFINE(HAVE_DCONF, 1, [Define if dconf is available])
 fi
-PKG_CHECK_MODULES(SYSTEMD, [libsystemd], [have_libsystemd=yes], [have_libsystemd=no])
-if test $have_libsystemd = yes; then
-  AC_DEFINE(HAVE_LIBSYSTEMD, 1, [Define if libsystemd is available])
+AC_ARG_WITH([systemd], AS_HELP_STRING([--with-systemd],
+    [Build with systemd support [default=auto]]), [], [with_systemd=auto],)
+if test "x$with_systemd" != "xno"; then
+  PKG_CHECK_MODULES(SYSTEMD, [libsystemd], [have_libsystemd=yes], [have_libsystemd=no])
+  if test $have_libsystemd = yes; then
+    AC_DEFINE(HAVE_LIBSYSTEMD, 1, [Define if libsystemd is available])
+  elif test "x$with_systemd" == "xyes"; then
+    AC_MSG_ERROR([systemd was requested but it could not be found])
+  fi
+else
+  have_libsystemd=no
 fi
 PKG_CHECK_MODULES([MALCONTENT], [malcontent-0 >= 0.4.0], [have_libmalcontent=yes], [have_libmalcontent=no])
 AS_IF([test "$have_libmalcontent" = "yes"],[
@@ -270,6 +282,13 @@ if test "x$enable_system_helper" = "xyes"; then
 fi
 AM_CONDITIONAL(BUILD_SYSTEM_HELPER, test x$enable_system_helper = xyes)
 
+AC_ARG_ENABLE([auto-sideloading],
+              AC_HELP_STRING([--enable-auto-sideloading],
+                             [Enable systemd units which make Flatpak sideload from inserted USB drives]),
+              [],
+              [enable_auto_sideloading=no])
+AM_CONDITIONAL(BUILD_AUTO_SIDELOADING, test x$enable_auto_sideloading = xyes)
+
 PKG_CHECK_MODULES(FUSE, fuse >= 2.9.2)
 
 AC_ARG_ENABLE([xauth],
@@ -282,6 +301,11 @@ if test "x$enable_xauth" = "xyes"; then
    AC_DEFINE([ENABLE_XAUTH], [1],
       [Define if using xauth])
 fi
+
+AC_ARG_ENABLE([gdm-env-file],
+              [AC_HELP_STRING([--enable-gdm-env-file], [Install gdm env.d file (not needed if systemd generators work)])],
+              install_gdm_env_file=$enableval, install_gdm_env_file=no)
+AM_CONDITIONAL(INSTALL_GDM_ENV_FILE, test x$install_gdm_env_file = xyes)
 
 AC_ARG_ENABLE([sandboxed-triggers],
               AC_HELP_STRING([--disable-sandboxed-triggers],
@@ -333,6 +357,23 @@ AC_ARG_WITH(system-install-dir,
            [with_system_install_dir='$(localstatedir)/lib/flatpak'])
 SYSTEM_INSTALL_DIR=$with_system_install_dir
 AC_SUBST(SYSTEM_INSTALL_DIR)
+
+AC_ARG_WITH(run-media-dir,
+           [AS_HELP_STRING([--with-run-media-dir=DIR],
+                           [Location of auto-mounted USB drives [/run/media]])],
+           [],
+           [with_run_media_dir='/run/media'])
+RUN_MEDIA_DIR=$with_run_media_dir
+AC_SUBST(RUN_MEDIA_DIR)
+
+AC_ARG_WITH([sysusersdir],
+            [AS_HELP_STRING([--with-sysusersdir=DIR],
+                            [Directory for systemd sysusers.d configuration files (default=PREFIX/lib/sysusers.d)])],
+    [],
+    dnl This is deliberately not ${libdir}: systemd units always go in
+    dnl .../lib, never .../lib64 or .../lib/x86_64-linux-gnu
+    [with_sysusersdir='${prefix}/lib/sysusers.d'])
+AC_SUBST([sysusersdir], [$with_sysusersdir])
 
 AC_ARG_WITH(system-helper-user,
            [AS_HELP_STRING([--with-system-helper-user=USERNAME],
@@ -538,4 +579,6 @@ echo "          Privilege mode:         $with_priv_mode"
 echo "          Use dconf:              $have_dconf"
 echo "          Use libsystemd:         $have_libsystemd"
 echo "          Use libmalcontent:      $have_libmalcontent"
+echo "          Use libzstd:            $have_zstd"
+echo "          Use auto sideloading:   $enable_auto_sideloading"
 echo ""

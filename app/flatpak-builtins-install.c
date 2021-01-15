@@ -42,6 +42,7 @@
 static char *opt_arch;
 static char **opt_gpg_file;
 static char **opt_subpaths;
+static char **opt_sideload_repos;
 static gboolean opt_no_pull;
 static gboolean opt_no_deploy;
 static gboolean opt_no_related;
@@ -73,6 +74,8 @@ static GOptionEntry options[] = {
   { "reinstall", 0, 0, G_OPTION_ARG_NONE, &opt_reinstall, N_("Uninstall first if already installed"), NULL },
   { "noninteractive", 0, 0, G_OPTION_ARG_NONE, &opt_noninteractive, N_("Produce minimal output and don't ask questions"), NULL },
   { "or-update", 0, 0, G_OPTION_ARG_NONE, &opt_or_update, N_("Update install if already installed"), NULL },
+  /* Translators: A sideload is when you install from a local USB drive rather than the Internet. */
+  { "sideload-repo", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &opt_sideload_repos, N_("Use this local repo for sideloads"), N_("PATH") },
   { NULL }
 };
 
@@ -165,6 +168,9 @@ install_bundle (FlatpakDir *dir,
   flatpak_transaction_set_disable_related (transaction, opt_no_related);
   flatpak_transaction_set_reinstall (transaction, opt_reinstall);
 
+  for (int i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
+    flatpak_transaction_add_sideload_repo (transaction, opt_sideload_repos[i]);
+
   if (!flatpak_transaction_add_install_bundle (transaction, file, gpg_data, error))
     return FALSE;
 
@@ -207,7 +213,7 @@ install_from (FlatpakDir *dir,
     {
       g_autoptr(SoupSession) soup_session = NULL;
       soup_session = flatpak_create_soup_session (PACKAGE_STRING);
-      file_data = flatpak_load_http_uri (soup_session, filename, 0, NULL, NULL, NULL, cancellable, error);
+      file_data = flatpak_load_uri (soup_session, filename, 0, NULL, NULL, NULL, NULL, cancellable, error);
       if (file_data == NULL)
         {
           g_prefix_error (error, "Can't load uri %s: ", filename);
@@ -238,6 +244,9 @@ install_from (FlatpakDir *dir,
   flatpak_transaction_set_disable_related (transaction, opt_no_related);
   flatpak_transaction_set_reinstall (transaction, opt_reinstall);
   flatpak_transaction_set_default_arch (transaction, opt_arch);
+
+  for (int i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
+    flatpak_transaction_add_sideload_repo (transaction, opt_sideload_repos[i]);
 
   if (!flatpak_transaction_add_install_flatpakref (transaction, file_data, error))
     return FALSE;
@@ -392,7 +401,7 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
                                                         matched_kinds, FIND_MATCHING_REFS_FLAGS_FUZZY,
                                                         cancellable, &local_error);
                   else
-                    refs = flatpak_dir_find_remote_refs (this_dir, this_remote, id, branch, this_default_branch, arch,
+                    refs = flatpak_dir_find_remote_refs (this_dir, this_remote, (const char **)opt_sideload_repos, id, branch, this_default_branch, arch,
                                                          flatpak_get_default_arch (),
                                                          matched_kinds, FIND_MATCHING_REFS_FLAGS_FUZZY,
                                                          cancellable, &local_error);
@@ -459,6 +468,9 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
   flatpak_transaction_set_disable_related (transaction, opt_no_related);
   flatpak_transaction_set_reinstall (transaction, opt_reinstall);
 
+  for (i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
+    flatpak_transaction_add_sideload_repo (transaction, opt_sideload_repos[i]);
+
   for (i = 0; i < n_prefs; i++)
     {
       const char *pref = prefs[i];
@@ -484,7 +496,7 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
                                             matched_kinds, FIND_MATCHING_REFS_FLAGS_FUZZY,
                                             cancellable, error);
       else
-        refs = flatpak_dir_find_remote_refs (dir, remote, id, branch, default_branch, arch,
+        refs = flatpak_dir_find_remote_refs (dir, remote, (const char **)opt_sideload_repos, id, branch, default_branch, arch,
                                              flatpak_get_default_arch (),
                                              matched_kinds, FIND_MATCHING_REFS_FLAGS_FUZZY,
                                              cancellable, error);

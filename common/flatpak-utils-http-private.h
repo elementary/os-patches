@@ -25,6 +25,16 @@
 
 #include <libsoup/soup.h>
 
+typedef enum {
+  FLATPAK_HTTP_ERROR_NOT_CHANGED = 0,
+  FLATPAK_HTTP_ERROR_UNAUTHORIZED = 1,
+} FlatpakHttpErrorEnum;
+
+#define FLATPAK_HTTP_ERROR flatpak_http_error_quark ()
+
+FLATPAK_EXTERN GQuark  flatpak_http_error_quark (void);
+
+
 SoupSession * flatpak_create_soup_session (const char *user_agent);
 
 typedef enum {
@@ -36,14 +46,15 @@ typedef enum {
 typedef void (*FlatpakLoadUriProgress) (guint64  downloaded_bytes,
                                         gpointer user_data);
 
-GBytes * flatpak_load_http_uri (SoupSession           *soup_session,
-                                const char            *uri,
-                                FlatpakHTTPFlags       flags,
-                                const char            *token,
-                                FlatpakLoadUriProgress progress,
-                                gpointer               user_data,
-                                GCancellable          *cancellable,
-                                GError               **error);
+GBytes * flatpak_load_uri (SoupSession           *soup_session,
+                           const char            *uri,
+                           FlatpakHTTPFlags       flags,
+                           const char            *token,
+                           FlatpakLoadUriProgress progress,
+                           gpointer               user_data,
+                           char                 **out_content_type,
+                           GCancellable          *cancellable,
+                           GError               **error);
 gboolean flatpak_download_http_uri (SoupSession           *soup_session,
                                     const char            *uri,
                                     FlatpakHTTPFlags       flags,

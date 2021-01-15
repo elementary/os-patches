@@ -74,6 +74,8 @@ static FlatpakCommand commands[] = {
   { N_(" Manage installed applications and runtimes") },
   { "install", N_("Install an application or runtime"), flatpak_builtin_install, flatpak_complete_install },
   { "update", N_("Update an installed application or runtime"), flatpak_builtin_update, flatpak_complete_update },
+  /* Alias upgrade to update to help users of yum/dnf */
+  { "upgrade", NULL, flatpak_builtin_update, flatpak_complete_update, TRUE },
   { "uninstall", N_("Uninstall an installed application or runtime"), flatpak_builtin_uninstall, flatpak_complete_uninstall },
   /* Alias remove to uninstall to help users of yum/dnf/apt */
   { "remove", NULL, flatpak_builtin_uninstall, flatpak_complete_uninstall, TRUE },
@@ -193,7 +195,7 @@ no_message_handler (const char     *log_domain,
 }
 
 static GOptionContext *
-flatpak_option_context_new_with_commands (FlatpakCommand *commands)
+flatpak_option_context_new_with_commands (FlatpakCommand *f_commands)
 {
   GOptionContext *context;
   GString *summary;
@@ -203,25 +205,25 @@ flatpak_option_context_new_with_commands (FlatpakCommand *commands)
 
   summary = g_string_new (_("Builtin Commands:"));
 
-  while (commands->name != NULL)
+  while (f_commands->name != NULL)
     {
-      if (!commands->deprecated)
+      if (!f_commands->deprecated)
         {
-          if (commands->fn != NULL)
+          if (f_commands->fn != NULL)
             {
-              g_string_append_printf (summary, "\n  %s", commands->name);
+              g_string_append_printf (summary, "\n  %s", f_commands->name);
               /* Note: the 23 is there to align command descriptions with
                * the option descriptions produced by GOptionContext.
                */
-              if (commands->description)
-                g_string_append_printf (summary, "%*s%s", (int) (23 - strlen (commands->name)), "", _(commands->description));
+              if (f_commands->description)
+                g_string_append_printf (summary, "%*s%s", (int) (23 - strlen (f_commands->name)), "", _(f_commands->description));
             }
           else
             {
-              g_string_append_printf (summary, "\n%s", _(commands->name));
+              g_string_append_printf (summary, "\n%s", _(f_commands->name));
             }
         }
-      commands++;
+      f_commands++;
     }
 
   g_option_context_set_summary (context, summary->str);
@@ -763,6 +765,21 @@ flatpak_run (int      argc,
       g_strcmp0 (command->name, "build") != 0)
     polkit_agent = install_polkit_agent ();
 
+  /* g_vfs_get_default can spawn threads */
+  if (g_strcmp0 (command->name, "enter") != 0)
+    {
+      g_autofree const char *old_env = NULL;
+
+      /* avoid gvfs (http://bugzilla.gnome.org/show_bug.cgi?id=526454) */
+      old_env = g_strdup (g_getenv ("GIO_USE_VFS"));
+      g_setenv ("GIO_USE_VFS", "local", TRUE);
+      g_vfs_get_default ();
+      if (old_env)
+        g_setenv ("GIO_USE_VFS", old_env, TRUE);
+      else
+        g_unsetenv ("GIO_USE_VFS");
+    }
+
   if (!command->fn (argc, argv, cancellable, &error))
     goto out;
 
@@ -836,7 +853,6 @@ main (int    argc,
       char **argv)
 {
   g_autoptr(GError) error = NULL;
-  g_autofree const char *old_env = NULL;
   int ret;
   struct sigaction action;
 
@@ -865,15 +881,6 @@ main (int    argc,
 
   /* Avoid weird recursive type initialization deadlocks from libsoup */
   g_type_ensure (G_TYPE_SOCKET);
-
-  /* avoid gvfs (http://bugzilla.gnome.org/show_bug.cgi?id=526454) */
-  old_env = g_strdup (g_getenv ("GIO_USE_VFS"));
-  g_setenv ("GIO_USE_VFS", "local", TRUE);
-  g_vfs_get_default ();
-  if (old_env)
-    g_setenv ("GIO_USE_VFS", old_env, TRUE);
-  else
-    g_unsetenv ("GIO_USE_VFS");
 
   if (argc >= 4 && strcmp (argv[1], "complete") == 0)
     return complete (argc, argv);
