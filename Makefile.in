@@ -197,9 +197,11 @@ check_PROGRAMS = $(am__EXEEXT_5) $(am__EXEEXT_6)
 @WITH_SYSTEM_DBUS_PROXY_FALSE@am__append_30 = FLATPAK_DBUSPROXY=$$(cd $(top_builddir) && pwd)/flatpak-dbus-proxy
 @WITH_SYSTEM_BWRAP_TRUE@am__append_31 = FLATPAK_BWRAP=$(BWRAP)
 @WITH_SYSTEM_BWRAP_FALSE@am__append_32 = FLATPAK_BWRAP=$$(cd $(top_builddir) && pwd)/flatpak-bwrap
-@WITH_SYSTEM_DBUS_PROXY_FALSE@am__append_33 = flatpak-dbus-proxy
+@ENABLE_INSTALLED_TESTS_TRUE@am__append_33 = -rpath $(installed_testdir)
+@ENABLE_INSTALLED_TESTS_FALSE@am__append_34 = -rpath  ${abs_builddir}
+@WITH_SYSTEM_DBUS_PROXY_FALSE@am__append_35 = flatpak-dbus-proxy
 @WITH_SYSTEM_BWRAP_FALSE@bwrap_PROGRAMS = flatpak-bwrap$(EXEEXT)
-@INSTALL_GDM_ENV_FILE_TRUE@am__append_34 = flatpak.env
+@INSTALL_GDM_ENV_FILE_TRUE@am__append_36 = flatpak.env
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/libglnx/libglnx.m4 \
@@ -456,6 +458,17 @@ libglnx_la_OBJECTS = $(am_libglnx_la_OBJECTS)
 libglnx_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libglnx_la_CFLAGS) \
 	$(CFLAGS) $(libglnx_la_LDFLAGS) $(LDFLAGS) -o $@
+tests_libpreload_la_LIBADD =
+am_tests_libpreload_la_OBJECTS = tests/libpreload.lo
+tests_libpreload_la_OBJECTS = $(am_tests_libpreload_la_OBJECTS)
+tests_libpreload_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(tests_libpreload_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+@ENABLE_ALWAYS_BUILD_TESTS_FALSE@am_tests_libpreload_la_rpath =
+@ENABLE_ALWAYS_BUILD_TESTS_TRUE@am_tests_libpreload_la_rpath =
+@ENABLE_INSTALLED_TESTS_TRUE@am_tests_libpreload_la_rpath = -rpath \
+@ENABLE_INSTALLED_TESTS_TRUE@	$(installed_testdir)
 am__flatpak_SOURCES_DIST = app/flatpak-main.c app/flatpak-builtins.h \
 	app/flatpak-builtins-remote-add.c \
 	app/flatpak-builtins-remote-modify.c \
@@ -907,6 +920,7 @@ am__depfiles_remade =  \
 	session-helper/$(DEPDIR)/flatpak_session_helper-flatpak-session-helper.Po \
 	system-helper/$(DEPDIR)/flatpak_system_helper-flatpak-system-helper.Po \
 	tests/$(DEPDIR)/httpcache-httpcache.Po \
+	tests/$(DEPDIR)/libpreload.Plo \
 	tests/$(DEPDIR)/test_authenticator-test-authenticator.Po \
 	tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po \
 	tests/$(DEPDIR)/test_update_portal-test-update-portal.Po \
@@ -938,8 +952,9 @@ SOURCES = $(libflatpak_app_la_SOURCES) \
 	$(libflatpak_common_la_SOURCES) \
 	$(nodist_libflatpak_common_la_SOURCES) \
 	$(libflatpak_la_SOURCES) $(libglnx_la_SOURCES) \
-	$(flatpak_SOURCES) $(nodist_flatpak_SOURCES) \
-	$(flatpak_bwrap_SOURCES) $(flatpak_dbus_proxy_SOURCES) \
+	$(tests_libpreload_la_SOURCES) $(flatpak_SOURCES) \
+	$(nodist_flatpak_SOURCES) $(flatpak_bwrap_SOURCES) \
+	$(flatpak_dbus_proxy_SOURCES) \
 	$(flatpak_oci_authenticator_SOURCES) $(flatpak_portal_SOURCES) \
 	$(nodist_flatpak_portal_SOURCES) \
 	$(flatpak_session_helper_SOURCES) \
@@ -958,7 +973,8 @@ DIST_SOURCES = $(libflatpak_app_la_SOURCES) \
 	$(libflatpak_common_base_la_SOURCES) \
 	$(am__libflatpak_common_la_SOURCES_DIST) \
 	$(libflatpak_la_SOURCES) $(libglnx_la_SOURCES) \
-	$(am__flatpak_SOURCES_DIST) $(am__flatpak_bwrap_SOURCES_DIST) \
+	$(tests_libpreload_la_SOURCES) $(am__flatpak_SOURCES_DIST) \
+	$(am__flatpak_bwrap_SOURCES_DIST) \
 	$(am__flatpak_dbus_proxy_SOURCES_DIST) \
 	$(flatpak_oci_authenticator_SOURCES) $(flatpak_portal_SOURCES) \
 	$(flatpak_session_helper_SOURCES) \
@@ -2258,6 +2274,10 @@ dist_installed_test_data = \
 	tests/org.flatpak.Authenticator.test.service.in \
 	$(NULL)
 
+test_ltlibraries = tests/libpreload.la
+tests_libpreload_la_SOURCES = tests/libpreload.c
+tests_libpreload_la_LDFLAGS = -avoid-version -module -no-undefined \
+	$(NULL) $(am__append_33) $(am__append_34)
 installed_test_keyringdir = $(installed_testdir)/test-keyring
 installed_test_keyring2dir = $(installed_testdir)/test-keyring2
 @ENABLE_INSTALLED_TESTS_TRUE@dist_installed_test_keyring_DATA = \
@@ -2381,7 +2401,7 @@ fishcompletion_DATA = completion/flatpak.fish
 profiledir = $(PROFILE_DIR)
 profile_DATA = profile/flatpak.sh
 envdir = $(datadir)/gdm/env.d
-env_DATA = $(am__append_34)
+env_DATA = $(am__append_36)
 envgendir = $(systemduserenvgendir)
 envgen_SCRIPTS = env.d/60-flatpak
 pkgconfigdir = $(libdir)/pkgconfig
@@ -2880,6 +2900,17 @@ libglnx/la-glnx-shutil.lo: libglnx/$(am__dirstamp) \
 
 libglnx.la: $(libglnx_la_OBJECTS) $(libglnx_la_DEPENDENCIES) $(EXTRA_libglnx_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libglnx_la_LINK)  $(libglnx_la_OBJECTS) $(libglnx_la_LIBADD) $(LIBS)
+tests/$(am__dirstamp):
+	@$(MKDIR_P) tests
+	@: > tests/$(am__dirstamp)
+tests/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) tests/$(DEPDIR)
+	@: > tests/$(DEPDIR)/$(am__dirstamp)
+tests/libpreload.lo: tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+
+tests/libpreload.la: $(tests_libpreload_la_OBJECTS) $(tests_libpreload_la_DEPENDENCIES) $(EXTRA_tests_libpreload_la_DEPENDENCIES) tests/$(am__dirstamp)
+	$(AM_V_CCLD)$(tests_libpreload_la_LINK) $(am_tests_libpreload_la_rpath) $(tests_libpreload_la_OBJECTS) $(tests_libpreload_la_LIBADD) $(LIBS)
 app/flatpak-flatpak-main.$(OBJEXT): app/$(am__dirstamp) \
 	app/$(DEPDIR)/$(am__dirstamp)
 app/flatpak-flatpak-builtins-remote-add.$(OBJEXT):  \
@@ -3158,12 +3189,6 @@ libglnx/tests/test_libglnx_xattrs-test-libglnx-xattrs.$(OBJEXT):  \
 test-libglnx-xattrs$(EXEEXT): $(test_libglnx_xattrs_OBJECTS) $(test_libglnx_xattrs_DEPENDENCIES) $(EXTRA_test_libglnx_xattrs_DEPENDENCIES) 
 	@rm -f test-libglnx-xattrs$(EXEEXT)
 	$(AM_V_CCLD)$(test_libglnx_xattrs_LINK) $(test_libglnx_xattrs_OBJECTS) $(test_libglnx_xattrs_LDADD) $(LIBS)
-tests/$(am__dirstamp):
-	@$(MKDIR_P) tests
-	@: > tests/$(am__dirstamp)
-tests/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) tests/$(DEPDIR)
-	@: > tests/$(DEPDIR)/$(am__dirstamp)
 tests/testcommon-testcommon.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
@@ -3396,6 +3421,7 @@ mostlyclean-compile:
 	-rm -f session-helper/*.$(OBJEXT)
 	-rm -f system-helper/*.$(OBJEXT)
 	-rm -f tests/*.$(OBJEXT)
+	-rm -f tests/*.lo
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -3520,6 +3546,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@session-helper/$(DEPDIR)/flatpak_session_helper-flatpak-session-helper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@system-helper/$(DEPDIR)/flatpak_system_helper-flatpak-system-helper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/httpcache-httpcache.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/libpreload.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_authenticator-test-authenticator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_update_portal-test-update-portal.Po@am__quote@ # am--include-marker
@@ -6479,6 +6506,7 @@ distclean: distclean-recursive
 	-rm -f session-helper/$(DEPDIR)/flatpak_session_helper-flatpak-session-helper.Po
 	-rm -f system-helper/$(DEPDIR)/flatpak_system_helper-flatpak-system-helper.Po
 	-rm -f tests/$(DEPDIR)/httpcache-httpcache.Po
+	-rm -f tests/$(DEPDIR)/libpreload.Plo
 	-rm -f tests/$(DEPDIR)/test_authenticator-test-authenticator.Po
 	-rm -f tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po
 	-rm -f tests/$(DEPDIR)/test_update_portal-test-update-portal.Po
@@ -6671,6 +6699,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f session-helper/$(DEPDIR)/flatpak_session_helper-flatpak-session-helper.Po
 	-rm -f system-helper/$(DEPDIR)/flatpak_system_helper-flatpak-system-helper.Po
 	-rm -f tests/$(DEPDIR)/httpcache-httpcache.Po
+	-rm -f tests/$(DEPDIR)/libpreload.Plo
 	-rm -f tests/$(DEPDIR)/test_authenticator-test-authenticator.Po
 	-rm -f tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po
 	-rm -f tests/$(DEPDIR)/test_update_portal-test-update-portal.Po

@@ -45,7 +45,7 @@
  *
  * The micro version.
  */
-#define FLATPAK_MICRO_VERSION (3)
+#define FLATPAK_MICRO_VERSION (5)
 
 /**
  * FLATPAK_CHECK_VERSION:
