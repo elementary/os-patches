@@ -1,3 +1,12 @@
+python-apt (1.6.5ubuntu0.5) bionic-security; urgency=medium
+
+  * REGRESSION UPDATE: Passing a file descriptor to apt_inst.ArFile or
+    apt_inst.DebFile caused a segmentation fault (LP: #1907676)
+    - python/arfile.cc: Fix segmentation fault when opening fd, track
+      lifetime correctly
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Thu, 10 Dec 2020 09:48:08 -0500
+
 python-apt (1.6.5ubuntu0.4) bionic-security; urgency=high
 
   * SECURITY UPDATE: various memory and file descriptor leaks (LP: #1899193)

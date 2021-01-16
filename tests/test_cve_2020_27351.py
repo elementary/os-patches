@@ -17,8 +17,10 @@ libdir = get_library_dir()
 if libdir:
     sys.path.insert(0, libdir)
 import apt_inst
+import gc
 import subprocess
 import tempfile
+import warnings
 
 
 @unittest.skipIf(
@@ -33,6 +35,51 @@ class TestCVE_2020_27351(unittest.TestCase):
         """opening package successfully should not leak fd"""
         before = os.listdir("/proc/self/fd")
         apt_inst.DebFile(self.GOOD_DEB)
+        after = os.listdir("/proc/self/fd")
+        self.assertEqual(before, after)
+
+    def test_regression_bug_977000(self):
+        """opening with a file handle should work correctly"""
+        with open(self.GOOD_DEB) as good_deb:
+            apt_inst.DebFile(good_deb).control.extractdata("control")
+
+    def test_regression_bug_977000_2(self):
+        """file object <-> debfile cycles should be collected by gc."""
+
+        class Cycle(object):
+            def __init__(self, fname):
+                self.file = open(fname)
+                self.deb = apt_inst.DebFile(self)
+
+            def fileno(self):
+                return self.file.fileno()
+
+        before = os.listdir("/proc/self/fd")
+        Cycle(self.GOOD_DEB).deb.control.extractdata("control")
+        warnings.filterwarnings("ignore", category=Warning)
+        gc.collect()
+        warnings.resetwarnings()
+        after = os.listdir("/proc/self/fd")
+        self.assertEqual(before, after)
+
+    def test_regression_bug_977000_2_ar(self):
+        """file object <-> debfile cycles should be collected by gc."""
+
+        class Cycle(object):
+            def __init__(self, fname):
+                self.file = open(fname)
+                self.deb = apt_inst.ArArchive(self)
+
+            def fileno(self):
+                return self.file.fileno()
+
+        before = os.listdir("/proc/self/fd")
+        Cycle(self.GOOD_DEB).deb.gettar("control.tar.gz", "gzip").extractdata(
+            "control"
+        )
+        warnings.filterwarnings("ignore", category=Warning)
+        gc.collect()
+        warnings.resetwarnings()
         after = os.listdir("/proc/self/fd")
         self.assertEqual(before, after)
 
