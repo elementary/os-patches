@@ -1,3 +1,44 @@
+mutter (3.28.4+git20200505-0ubuntu18.04.2) bionic; urgency=medium
+
+  * debian/patches: Cherry-pick patch to make mutter compile with newer mesa
+    (LP: #1896825)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 23 Sep 2020 21:29:30 +0200
+
+mutter (3.28.4+git20200505-0ubuntu18.04.1) bionic; urgency=medium
+
+  * New upstream git snapsnot
+    - monitor-manager: use MonitorsConfig to track switch_config
+    - monitor-manager: Don't use switch-config when ensuring configuration
+    - core: Avoid consecutive workspace changes in window construction
+    - core: propagate the effective on-all-workspaces setting to transient window
+    - window: Really propagate effective on-all-workspaces setting to transients
+    - monitor-config-manager: Fallback to closed laptop lid configuration
+      (LP: #1793496)
+  * debian/control*: update VCS informations to point to ubuntu salsa branch
+  * d/p/monitor-manager-Don-t-use-switch-config-when-ensuring-con.patch,
+    d/p/monitor-manager-use-MonitorsConfig-to-track-switch_config.patch,
+    d/p/screen-Destroy-window-actors-after-windows-while-unmanagi.patch,
+    d/p/screen-Unset-the-active-workspace-and-remove-workspaces-o.patch,
+    d/p/stack-Add-a-function-to-get-a-sorted-list-of-focus-candid.patch,
+    d/p/test-runner-Add-assert_focused-command.patch,
+    d/p/test-runner-Add-dispatch-command.patch,
+    d/p/test-runner-Add-sleep-command.patch,
+    d/p/tests-Add-accept_focus-command-to-runner-and-client.patch,
+    d/p/tests-Add-can_take_focus-command-to-runner-and-client.patch,
+    d/p/tests-Verify-focused-window-in-closed-transient-tests.patch,
+    d/p/tests-stacking-Add-tests-with-no-input-and-no-take-focus-.patch,
+    d/p/window-Emit-an-error-and-return-when-trying-to-activate-a.patch,
+    d/p/window-x11-Accept-any-focusable-window-as-fallback-focus.patch,
+    d/p/window-x11-Don-t-double-check-for-unmanaging-windows.patch,
+    d/p/window-x11-Focus-a-window-in-the-active-workspace-as-take.patch,
+    d/p/window-x11-Focus-the-default-window-with-delay-while-wait.patch,
+    d/p/window-x11-Use-any-focusable-window-as-fallback-delayed-f.patch,
+    d/p/workspace-Focus-only-ancestors-that-are-focusable.patch:
+    - Dropped, included in the git snapshot already
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 05 May 2020 21:50:40 +0200
+
 mutter (3.28.4-0ubuntu18.04.2) bionic; urgency=medium
 
   [ Marco Trevisan (Treviño) ]

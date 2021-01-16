@@ -330,21 +330,33 @@ MetaMonitorsConfigKey *
 meta_create_monitors_config_key_for_current_state (MetaMonitorManager *monitor_manager)
 {
   MetaMonitorsConfigKey *config_key;
+  MetaMonitorSpec *laptop_monitor_spec;
   GList *l;
   GList *monitor_specs;
 
+  laptop_monitor_spec = NULL;
   monitor_specs = NULL;
   for (l = monitor_manager->monitors; l; l = l->next)
     {
       MetaMonitor *monitor = l->data;
       MetaMonitorSpec *monitor_spec;
 
-      if (meta_monitor_is_laptop_panel (monitor) &&
-          meta_monitor_manager_is_lid_closed (monitor_manager))
-        continue;
+      if (meta_monitor_is_laptop_panel (monitor))
+        {
+          laptop_monitor_spec = meta_monitor_get_spec (monitor);
+
+          if (meta_monitor_manager_is_lid_closed (monitor_manager))
+            continue;
+        }
 
       monitor_spec = meta_monitor_spec_clone (meta_monitor_get_spec (monitor));
       monitor_specs = g_list_prepend (monitor_specs, monitor_spec);
+    }
+
+  if (!monitor_specs && laptop_monitor_spec)
+    {
+      monitor_specs =
+        g_list_prepend (NULL, meta_monitor_spec_clone (laptop_monitor_spec));
     }
 
   if (!monitor_specs)
@@ -1007,6 +1019,7 @@ meta_monitor_config_manager_create_for_switch_config (MetaMonitorConfigManager  
                                                       MetaMonitorSwitchConfigType  config_type)
 {
   MetaMonitorManager *monitor_manager = config_manager->monitor_manager;
+  MetaMonitorsConfig *config;
 
   if (!meta_monitor_manager_can_switch_config (monitor_manager))
     return NULL;
@@ -1014,18 +1027,27 @@ meta_monitor_config_manager_create_for_switch_config (MetaMonitorConfigManager  
   switch (config_type)
     {
     case META_MONITOR_SWITCH_CONFIG_ALL_MIRROR:
-      return create_for_switch_config_all_mirror (config_manager);
-    case META_MONITOR_SWITCH_CONFIG_ALL_LINEAR:
-      return meta_monitor_config_manager_create_linear (config_manager);
-    case META_MONITOR_SWITCH_CONFIG_EXTERNAL:
-      return create_for_switch_config_external (config_manager);
-    case META_MONITOR_SWITCH_CONFIG_BUILTIN:
-      return create_for_switch_config_builtin (config_manager);
-    case META_MONITOR_SWITCH_CONFIG_UNKNOWN:
-      g_warn_if_reached ();
+      config = create_for_switch_config_all_mirror (config_manager);
       break;
+    case META_MONITOR_SWITCH_CONFIG_ALL_LINEAR:
+      config = meta_monitor_config_manager_create_linear (config_manager);
+      break;
+    case META_MONITOR_SWITCH_CONFIG_EXTERNAL:
+      config = create_for_switch_config_external (config_manager);
+      break;
+    case META_MONITOR_SWITCH_CONFIG_BUILTIN:
+      config = create_for_switch_config_builtin (config_manager);
+      break;
+    case META_MONITOR_SWITCH_CONFIG_UNKNOWN:
+    default:
+      g_warn_if_reached ();
+      return NULL;
     }
-  return NULL;
+
+  if (config)
+    meta_monitors_config_set_switch_config (config, config_type);
+
+  return config;
 }
 
 void
@@ -1217,6 +1239,19 @@ meta_monitors_config_key_equal (gconstpointer data_a,
   return TRUE;
 }
 
+MetaMonitorSwitchConfigType
+meta_monitors_config_get_switch_config (MetaMonitorsConfig *config)
+{
+  return config->switch_config;
+}
+
+void
+meta_monitors_config_set_switch_config (MetaMonitorsConfig          *config,
+                                        MetaMonitorSwitchConfigType  switch_config)
+{
+  config->switch_config = switch_config;
+}
+
 MetaMonitorsConfig *
 meta_monitors_config_new_full (GList                        *logical_monitor_configs,
                                GList                        *disabled_monitor_specs,
@@ -1232,6 +1267,7 @@ meta_monitors_config_new_full (GList                        *logical_monitor_con
                                               disabled_monitor_specs);
   config->layout_mode = layout_mode;
   config->flags = flags;
+  config->switch_config = META_MONITOR_SWITCH_CONFIG_UNKNOWN;
 
   return config;
 }

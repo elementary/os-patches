@@ -1272,11 +1272,10 @@ _meta_window_shared_new (MetaDisplay         *display,
                       window->desc, window->transient_for->desc);
 
           set_workspace_state (window,
-                               window->transient_for->on_all_workspaces_requested,
+                               window->transient_for->on_all_workspaces,
                                window->transient_for->workspace);
         }
-
-      if (window->on_all_workspaces)
+      else if (window->on_all_workspaces)
         {
           meta_topic (META_DEBUG_PLACEMENT,
                       "Putting window %s on all workspaces\n",
@@ -3622,6 +3621,13 @@ meta_window_activate_full (MetaWindow     *window,
                            MetaWorkspace  *workspace)
 {
   gboolean allow_workspace_switch;
+
+  if (window->unmanaging)
+    {
+      g_warning ("Trying to activate unmanaged window '%s'", window->desc);
+      return;
+    }
+
   meta_topic (META_DEBUG_FOCUS,
               "_NET_ACTIVE_WINDOW message sent for %s at time %u "
               "by client type %u.\n",
