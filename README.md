@@ -52,6 +52,32 @@ AppArmor or SELinux. However, its correct use by applications should provide
 enough of an obstacle to prevent users easily or accidentally having access to
 content which they shouldn’t.
 
+Development principles
+---
+
+malcontent exists to make it easier for parents to responsibly set limits on
+what their children can do on the computer (similarly, for other carer/caree
+relationships). It should provide guidance on, and nudge parents towards,
+following the best practice for discussing, choosing and setting restrictions on
+their child’s computer use.
+
+Restrictions should be supported which allow giving children access to material
+which is appropriate to their age/stage of development, but which can restrict
+access to other material so they are not overwhelmed with too many, or too
+complex, ideas for their stage of development. Similarly, restrictions should be
+supported to control unsupervised communication with unknown people online, as
+being coerced or bullied is one of the more common harms for children online.
+
+Best practices should be research and evidence-based, and supported by large
+international or national childrens’ organisations or charities. They may change
+over time.
+
+malcontent is a tool to help with a social problem. In the hands of a bad
+parent, it can be used to do bad things. Features in malcontent should be
+designed with that in mind, such that if they are used maliciously, they should
+not give the parent radically more power over their child than they would have
+had without malcontent.
+
 Example usage
 ---
 

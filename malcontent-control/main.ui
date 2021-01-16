@@ -3,8 +3,8 @@
 <interface>
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkApplicationWindow" id="main_window">
-    <property name="default-width">500</property>
-    <property name="default-height">600</property>
+    <property name="default-width">540</property>
+    <property name="default-height">580</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header">
         <property name="show-close-button">True</property>
@@ -55,13 +55,35 @@
               <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
                 <property name="hscrollbar-policy">never</property>
-                <property name="min-content-height">350</property>
+                <property name="min-content-height">370</property>
                 <child>
-                  <object class="MctUserControls" id="user_controls">
-                    <property name="halign">center</property>
+                  <object class="GtkBox">
+                    <property name="margin">18</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">18</property>
                     <property name="visible">True</property>
-                    <property name="margin">12</property>
-                    <property name="dbus-connection">dbus_connection</property>
+                    <child>
+                      <object class="GtkLabel" id="help_label">
+                        <!-- Content is set in code; this string is just a placeholder -->
+                        <property name="label">It’s recommended that restrictions are set as part of an ongoing conversation with $name. Read guidance on what to consider.</property>
+                        <property name="visible">True</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0.0</property>
+                        <property name="yalign">0.0</property>
+                        <child internal-child="accessible">
+                          <object class="AtkObject">
+                            <property name="AtkObject::accessible-role">static</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="MctUserControls" id="user_controls">
+                        <property name="halign">center</property>
+                        <property name="visible">True</property>
+                        <property name="dbus-connection">dbus_connection</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -120,6 +142,8 @@
                     <property name="can-default">True</property>
                     <property name="has-default">True</property>
                     <property name="can-focus">True</property>
+                    <!-- Give 18px spacing between the label and the button -->
+                    <property name="margin-top">6</property>
                   </object>
                 </child>
               </object>
@@ -143,9 +167,21 @@
                 <property name="spacing">12</property>
                 <property name="margin">18</property>
                 <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">system-users-symbolic</property>
+                    <property name="pixel-size">96</property>
+                    <property name="visible">True</property>
+                    <child internal-child="accessible">
+                      <object class="AtkObject">
+                        <property name="AtkObject::accessible-role">static</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">No Child Users Configured</property>
+                    <property name="label" translatable="yes">No Standard User Accounts</property>
                     <attributes>
                       <attribute name="scale" value="1.4"/>
                     </attributes>
@@ -159,7 +195,9 @@
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">No child users are currently set up on the system. Create one before setting up their parental controls.</property>
+                    <property name="justify">center</property>
+                    <property name="label" translatable="yes">Parental controls can only be applied to standard user
+accounts. These can be created in the user settings.</property>
                     <property name="wrap">True</property>
                     <child internal-child="accessible">
                       <object class="AtkObject">
@@ -171,12 +209,14 @@
                 <child>
                   <object class="GtkButton" id="user_accounts_panel_button">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Create _Child User</property>
+                    <property name="label" translatable="yes">_User Settings</property>
                     <property name="halign">center</property>
                     <property name="can-default">True</property>
                     <property name="has-default">True</property>
                     <property name="use-underline">True</property>
                     <property name="can-focus">True</property>
+                    <!-- Give 18px spacing between the label and the button -->
+                    <property name="margin-top">6</property>
                     <style>
                       <class name="suggested-action"/>
                     </style>

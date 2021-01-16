@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: malcontent master\n"
 "Report-Msgid-Bugs-To: https://gitlab.freedesktop.org/pwithnall/malcontent/issu"
 "es\n"
-"POT-Creation-Date: 2020-06-10 15:26+0000\n"
-"PO-Revision-Date: 2020-06-10 20:33+0300\n"
+"POT-Creation-Date: 2020-12-09 03:28+0000\n"
+"PO-Revision-Date: 2020-12-09 08:59+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
 "%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Lokalize 20.07.70\n"
+"X-Generator: Lokalize 20.11.70\n"
 
 #: accounts-service/com.endlessm.ParentalControls.policy.in:4
 msgid "Change your own app filter"
@@ -136,30 +136,29 @@ msgstr "Фільтр програм для користувача %u запис�
 msgid "OARS filter for user %u has an unrecognized kind ‘%s’"
 msgstr "Фільтр OARS для користувача %u належить до невідомого типу «%s»"
 
-#: libmalcontent/manager.c:283 libmalcontent/manager.c:412
+#: libmalcontent/manager.c:283 libmalcontent/manager.c:420
+#: libmalcontent/manager.c:803
 #, c-format
-msgid "Not allowed to query app filter data for user %u"
+msgid "Not allowed to query parental controls data for user %u"
 msgstr ""
-"Не дозволено опитувати систему щодо даних фільтра програм для користувача %u"
+"Не дозволено опитувати дані щодо батьківського контролю для користувача %u"
 
 #: libmalcontent/manager.c:288
 #, c-format
 msgid "User %u does not exist"
 msgstr "Запису користувача %u не існує"
 
-#: libmalcontent/manager.c:394
+#: libmalcontent/manager.c:296
+msgid "System accounts service not available"
+msgstr "Загальносистемна служба облікових записів є недоступною"
+
+#: libmalcontent/manager.c:402
 msgid "App filtering is globally disabled"
 msgstr "Фільтрування програм вимкнено на загальному рівні"
 
-#: libmalcontent/manager.c:777
+#: libmalcontent/manager.c:785
 msgid "Session limits are globally disabled"
 msgstr "Обмеження сеансів вимкнено на загальному рівні"
-
-#: libmalcontent/manager.c:795
-#, c-format
-msgid "Not allowed to query session limits data for user %u"
-msgstr ""
-"Не дозволено опитувати систему щодо даних обмежень сеансів для користувача %u"
 
 #: libmalcontent/session-limits.c:306
 #, c-format
@@ -238,17 +237,17 @@ msgid "No applications found to restrict."
 msgstr "Не знайдено програм, доступ до яких можна обмежити."
 
 #. Translators: this is the full name for an unknown user account.
-#: libmalcontent-ui/user-controls.c:242 libmalcontent-ui/user-controls.c:253
+#: libmalcontent-ui/user-controls.c:207 libmalcontent-ui/user-controls.c:218
 msgid "unknown"
 msgstr "невідомий"
 
-#: libmalcontent-ui/user-controls.c:338 libmalcontent-ui/user-controls.c:425
-#: libmalcontent-ui/user-controls.c:711
+#: libmalcontent-ui/user-controls.c:312 libmalcontent-ui/user-controls.c:397
+#: libmalcontent-ui/user-controls.c:669
 msgid "All Ages"
 msgstr "Усі вікові групи"
 
 #. Translators: The placeholder is a user’s display name.
-#: libmalcontent-ui/user-controls.c:514
+#: libmalcontent-ui/user-controls.c:477
 #, c-format
 msgid ""
 "Prevents %s from running web browsers. Limited web content may still be "
@@ -258,52 +257,42 @@ msgstr ""
 "можливий за допомогою інших програм."
 
 #. Translators: The placeholder is a user’s display name.
-#: libmalcontent-ui/user-controls.c:519
+#: libmalcontent-ui/user-controls.c:482
 #, c-format
 msgid "Prevents specified applications from being used by %s."
 msgstr "Запобігає користуванню %s вказаними програмами."
 
 #. Translators: The placeholder is a user’s display name.
-#: libmalcontent-ui/user-controls.c:524
+#: libmalcontent-ui/user-controls.c:487
 #, c-format
 msgid "Prevents %s from installing applications."
 msgstr "Забороняє %s встановлювати програми."
 
-#. Translators: The placeholder is a user’s display name.
-#: libmalcontent-ui/user-controls.c:529
-#, c-format
-msgid "Applications installed by %s will not appear for other users."
-msgstr "Програми, які встановлено %s, не буде показано іншим користувачам."
-
-#: libmalcontent-ui/user-controls.ui:17
+#: libmalcontent-ui/user-controls.ui:16
 msgid "Application Usage Restrictions"
 msgstr "Обмеження на користування програмами"
 
-#: libmalcontent-ui/user-controls.ui:68
+#: libmalcontent-ui/user-controls.ui:67
 msgid "Restrict _Web Browsers"
 msgstr "Обмежити _браузери"
 
-#: libmalcontent-ui/user-controls.ui:152
+#: libmalcontent-ui/user-controls.ui:151
 msgid "_Restrict Applications"
 msgstr "_Обмежити доступ до програм"
 
-#: libmalcontent-ui/user-controls.ui:231
+#: libmalcontent-ui/user-controls.ui:230
 msgid "Software Installation Restrictions"
 msgstr "Обмеження на встановлення програмного забезпечення"
 
-#: libmalcontent-ui/user-controls.ui:281
+#: libmalcontent-ui/user-controls.ui:280
 msgid "Restrict Application _Installation"
 msgstr "Обмежити вс_тановлення програм"
 
-#: libmalcontent-ui/user-controls.ui:366
-msgid "Restrict Application Installation for _Others"
-msgstr "Обмежити встановлення програм для _інших"
-
-#: libmalcontent-ui/user-controls.ui:451
+#: libmalcontent-ui/user-controls.ui:365
 msgid "Application _Suitability"
 msgstr "П_ридатність програм"
 
-#: libmalcontent-ui/user-controls.ui:473
+#: libmalcontent-ui/user-controls.ui:387
 msgid ""
 "Restricts browsing or installation of applications to applications suitable "
 "for certain ages or above."
@@ -311,42 +300,76 @@ msgstr ""
 "Обмежує перелік програм, які користувач може бачити або встановлювати, до "
 "програм, доступних певній віковій групі."
 
+#. Translators: This documents the --user command line option to malcontent-control:
+#: malcontent-control/application.c:102
+msgid "User to select in the UI"
+msgstr "Користувач, якого слід вибрати у графічному інтерфейсі"
+
+#. Translators: This is a placeholder for a command line argument value:
+#: malcontent-control/application.c:104
+msgid "USERNAME"
+msgstr "КОРИСТУВАЧ"
+
+#: malcontent-control/application.c:115
+msgid "— view and edit parental controls"
+msgstr "— перегляд батьківського контролю і керування ним"
+
 #. Translators: This is the title of the main window
 #. Translators: the name of the application as it appears in a software center
-#: malcontent-control/application.c:105 malcontent-control/main.ui:12
+#: malcontent-control/application.c:122 malcontent-control/main.ui:12
 #: malcontent-control/org.freedesktop.MalcontentControl.appdata.xml.in:9
 #: malcontent-control/org.freedesktop.MalcontentControl.desktop.in:3
 msgid "Parental Controls"
 msgstr "Батьківський контроль"
 
-#: malcontent-control/application.c:270
+#: malcontent-control/application.c:308
 msgid "Copyright © 2019, 2020 Endless Mobile, Inc."
 msgstr "© Endless Mobile, Inc., 2019, 2020"
 
 #. Translators: this should be "translated" to the
 #. names of people who have translated Malcontent into
 #. this language, one per line.
-#: malcontent-control/application.c:275
+#: malcontent-control/application.c:313
 msgid "translator-credits"
 msgstr "Юрій Чорноіван <yurchor@ukr.net>"
 
 #. Translators: "Malcontent" is the brand name of this
 #. project, so should not be translated.
-#: malcontent-control/application.c:281
+#: malcontent-control/application.c:319
 msgid "Malcontent Website"
 msgstr "Сайт Malcontent"
 
-#: malcontent-control/application.c:299
+#: malcontent-control/application.c:337
 msgid "The help contents could not be displayed"
 msgstr "Неможливо показати вміст довідки"
 
-#: malcontent-control/application.c:336
+#: malcontent-control/application.c:374
 msgid "Failed to load user data from the system"
 msgstr "Не вдалося завантажити дані користувача з системи"
 
-#: malcontent-control/application.c:338
+#: malcontent-control/application.c:376
 msgid "Please make sure that the AccountsService is installed and enabled."
 msgstr "Будь ласка, переконайтеся, що встановлено і увімкнено AccountsService."
+
+#. Translators: Replace the link to commonsensemedia.org with some
+#. * localised guidance for parents/carers on how to set restrictions on
+#. * their child/caree in a responsible way which is in keeping with the
+#. * best practice and culture of the region. If no suitable localised
+#. * guidance exists, and if the default commonsensemedia.org link is not
+#. * suitable, please file an issue against malcontent so we can discuss
+#. * further!
+#. * https://gitlab.freedesktop.org/pwithnall/malcontent/-/issues/new
+#.
+#: malcontent-control/application.c:407
+#, c-format
+msgid ""
+"It’s recommended that restrictions are set as part of an ongoing "
+"conversation with %s. <a href='https://www.commonsensemedia.org/privacy-and-"
+"internet-safety'>Read guidance</a> on what to consider."
+msgstr ""
+"Рекомендуємо встановити обмеження як частину наступної розмови із %s. <a "
+"href='https://www.commonsensemedia.org/privacy-and-internet-"
+"safety'>Ознайомтеся із настановами</a> щодо того, що слід врахувати."
 
 #: malcontent-control/carousel.ui:48
 msgid "Previous Page"
@@ -356,42 +379,43 @@ msgstr "Попередня сторінка"
 msgid "Next Page"
 msgstr "Наступна сторінка"
 
-#: malcontent-control/main.ui:93
+#: malcontent-control/main.ui:115
 msgid "Permission Required"
 msgstr "Потрібні права доступу"
 
-#: malcontent-control/main.ui:107
+#: malcontent-control/main.ui:129
 msgid ""
 "Permission is required to view and change user parental controls settings."
 msgstr ""
 "Для перегляду і внесення змін до параметрів батьківського контролю для "
 "користувача потрібні відповідні права доступу."
 
-#: malcontent-control/main.ui:148
-msgid "No Child Users Configured"
-msgstr "Не налаштовано жодного користувача-дитини"
+#: malcontent-control/main.ui:182
+msgid "No Standard User Accounts"
+msgstr "Немає стандартних облікових записів користувачів"
 
-#: malcontent-control/main.ui:162
+#: malcontent-control/main.ui:197
 msgid ""
-"No child users are currently set up on the system. Create one before setting "
-"up their parental controls."
+"Parental controls can only be applied to standard user\n"
+"accounts. These can be created in the user settings."
 msgstr ""
-"У системі зараз не налаштовано жодного дитячого облікового запису. Створіть "
-"такий запис, перш ніж налаштовувати батьківський контроль для нього."
+"Батьківський контроль можна застосовувати лише до стандартних\n"
+"облікових записів користувачів. Такі записи можна створити у параметрах"
+" користувачів."
 
-#: malcontent-control/main.ui:174
-msgid "Create _Child User"
-msgstr "Створити користува_ча-дитину"
+#: malcontent-control/main.ui:210
+msgid "_User Settings"
+msgstr "П_араметри користувачів"
 
-#: malcontent-control/main.ui:202
+#: malcontent-control/main.ui:238
 msgid "Loading…"
 msgstr "Завантаження…"
 
-#: malcontent-control/main.ui:265
+#: malcontent-control/main.ui:301
 msgid "_Help"
 msgstr "_Довідка"
 
-#: malcontent-control/main.ui:269
+#: malcontent-control/main.ui:305
 msgid "_About Parental Controls"
 msgstr "_Про «Батьківський контроль»"
 
@@ -413,7 +437,11 @@ msgstr ""
 "забезпечення, яке можна встановлювати, та переліком програмного "
 "забезпечення, яке можна запускати."
 
-#: malcontent-control/org.freedesktop.MalcontentControl.appdata.xml.in:39
+#: malcontent-control/org.freedesktop.MalcontentControl.appdata.xml.in:25
+msgid "Main window"
+msgstr "Головне вікно"
+
+#: malcontent-control/org.freedesktop.MalcontentControl.appdata.xml.in:38
 msgid "The GNOME Project"
 msgstr "Проєкт GNOME"
 

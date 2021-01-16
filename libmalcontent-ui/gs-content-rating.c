@@ -567,7 +567,7 @@ static const struct {
 	{ "social-info",	OARS_1_0, 0, 0, 13, 13 },
 	{ "social-location",	OARS_1_0, 0, 13, 13, 13 },
 	/* v1.1 additions */
-	{ "sex-homosexuality",	OARS_1_1, 0, 10, 13, 15 },
+	{ "sex-homosexuality",	OARS_1_1, 0, 13, 14, 15 },
 	{ "sex-prostitution",	OARS_1_1, 0, 12, 14, 18 },
 	{ "sex-adultery",	OARS_1_1, 0, 8, 10, 18 },
 	{ "sex-appearance",	OARS_1_1, 0, 10, 10, 15 },
@@ -576,51 +576,6 @@ static const struct {
 	{ "violence-slavery",	OARS_1_1, 0, 13, 15, 18 },
 };
 #endif  /* appstream-glib < 0.7.18 */
-
-#if !AS_CHECK_VERSION(0, 7, 15)
-/**
- * as_content_rating_id_value_to_csm_age:
- * @id: the subsection ID e.g. "violence-cartoon"
- * @value: the #AsContentRatingValue, e.g. %MCT_APP_FILTER_OARS_VALUE_INTENSE
- *
- * Gets the Common Sense Media approved age for a specific rating level.
- *
- * Returns: The age in years, or 0 for no details.
- *
- * Since: 0.5.12
- **/
-guint
-as_content_rating_id_value_to_csm_age (const gchar *id, MctAppFilterOarsValue value)
-{
-	if (value == AS_CONTENT_RATING_VALUE_UNKNOWN ||
-	    value == AS_CONTENT_RATING_VALUE_LAST)
-		return 0;
-
-	for (gsize i = 0; i < G_N_ELEMENTS (oars_to_csm_mappings); i++) {
-		if (g_str_equal (id, oars_to_csm_mappings[i].id)) {
-			switch (value) {
-			case AS_CONTENT_RATING_VALUE_NONE:
-				return oars_to_csm_mappings[i].csm_age_none;
-			case AS_CONTENT_RATING_VALUE_MILD:
-				return oars_to_csm_mappings[i].csm_age_mild;
-			case AS_CONTENT_RATING_VALUE_MODERATE:
-				return oars_to_csm_mappings[i].csm_age_moderate;
-			case AS_CONTENT_RATING_VALUE_INTENSE:
-				return oars_to_csm_mappings[i].csm_age_intense;
-			case AS_CONTENT_RATING_VALUE_UNKNOWN:
-			case AS_CONTENT_RATING_VALUE_LAST:
-			default:
-				/* Handled above. */
-				g_assert_not_reached ();
-				return 0;
-			}
-		}
-	}
-
-	/* @id not found. */
-	return 0;
-}
-#endif  /* appstream-glib < 0.7.15 */
 
 #if !AS_CHECK_VERSION(0, 7, 18)
 /**

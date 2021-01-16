@@ -69,7 +69,7 @@
       installation can proceed.
 
       If this is false, the user is not allowed to install any apps or runtimes
-      to their flatpak user repository.
+      to their flatpak user repository due to parental controls.
     -->
     <property name="AllowUserInstallation" type="b" access="readwrite">
       <annotation name="org.freedesktop.Accounts.DefaultValue" value="true"/>
@@ -80,14 +80,15 @@
 
       Whether this user is allowed to install to the flatpak system repository.
       If this is true, and if the polkit check for allowing app installation
-      succeeds, and if the OarsFilter does not restrict this app, app
+      succeeds (i.e. the user is an administrator or an administrator has given
+      permission), and if the OarsFilter does not restrict this app, app
       installation can proceed.
 
       If this is false, the user is not allowed to install any apps or runtimes
-      to the flatpak system repository.
+      to the flatpak system repository due to parental controls.
     -->
     <property name="AllowSystemInstallation" type="b" access="readwrite">
-      <annotation name="org.freedesktop.Accounts.DefaultValue" value="false"/>
+      <annotation name="org.freedesktop.Accounts.DefaultValue" value="true"/>
     </property>
   </interface>
 </node>

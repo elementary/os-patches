@@ -61,6 +61,7 @@ struct _MctRestrictApplicationsSelector
 
   GtkListBox *listbox;
 
+  GList *cached_apps;  /* (nullable) (owned) (element-type GAppInfo) */
   GListStore *apps;  /* (owned) */
   GAppInfoMonitor *app_info_monitor;  /* (owned) */
   gulong app_info_monitor_changed_id;
@@ -102,6 +103,9 @@ mct_restrict_applications_selector_constructed (GObject *obj)
     }
 
   g_assert (self->app_filter != NULL);
+
+  /* Load the apps. */
+  reload_apps (self);
 
   G_OBJECT_CLASS (mct_restrict_applications_selector_parent_class)->constructed (obj);
 }
@@ -151,6 +155,7 @@ mct_restrict_applications_selector_dispose (GObject *object)
 
   g_clear_pointer (&self->blocklisted_apps, g_hash_table_unref);
   g_clear_object (&self->apps);
+  g_clear_list (&self->cached_apps, g_object_unref);
 
   if (self->app_info_monitor != NULL && self->app_info_monitor_changed_id != 0)
     {
@@ -225,6 +230,7 @@ mct_restrict_applications_selector_init (MctRestrictApplicationsSelector *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 
   self->apps = g_list_store_new (G_TYPE_APP_INFO);
+  self->cached_apps = NULL;
 
   self->app_info_monitor = g_app_info_monitor_get ();
   self->app_info_monitor_changed_id =
@@ -284,6 +290,21 @@ on_switch_active_changed_cb (GtkSwitch  *s,
   g_signal_emit (self, signals[SIGNAL_CHANGED], 0);
 }
 
+static void
+update_listbox_row_switch (MctRestrictApplicationsSelector *self,
+                           GtkSwitch                       *w)
+{
+  GAppInfo *app = g_object_get_data (G_OBJECT (w), "GAppInfo");
+  gboolean allowed = mct_app_filter_is_appinfo_allowed (self->app_filter, app);
+
+  gtk_switch_set_active (w, !allowed);
+
+  if (allowed)
+    g_hash_table_remove (self->blocklisted_apps, app);
+  else
+    g_hash_table_add (self->blocklisted_apps, g_object_ref (app));
+}
+
 static GtkWidget *
 create_row_for_app_cb (gpointer item,
                        gpointer user_data)
@@ -292,7 +313,6 @@ create_row_for_app_cb (gpointer item,
   GAppInfo *app = G_APP_INFO (item);
   g_autoptr(GIcon) icon = NULL;
   GtkWidget *box, *w;
-  gboolean allowed;
   const gchar *app_name;
   gint size;
   GtkStyleContext *context;
@@ -339,16 +359,8 @@ create_row_for_app_cb (gpointer item,
   gtk_widget_show_all (box);
 
   /* Fetch status from AccountService */
-  allowed = mct_app_filter_is_appinfo_allowed (self->app_filter, app);
-
-  gtk_switch_set_active (GTK_SWITCH (w), !allowed);
   g_object_set_data_full (G_OBJECT (w), "GAppInfo", g_object_ref (app), g_object_unref);
-
-  if (allowed)
-    g_hash_table_remove (self->blocklisted_apps, app);
-  else
-    g_hash_table_add (self->blocklisted_apps, g_object_ref (app));
-
+  update_listbox_row_switch (self, GTK_SWITCH (w));
   g_signal_connect (w, "notify::active", G_CALLBACK (on_switch_active_changed_cb), self);
 
   return box;
@@ -372,6 +384,7 @@ app_compare_id_length_cb (gconstpointer a,
 {
   GAppInfo *info_a = (GAppInfo *) a, *info_b = (GAppInfo *) b;
   const gchar *id_a, *id_b;
+  gsize id_a_len, id_b_len;
 
   id_a = g_app_info_get_id (info_a);
   id_b = g_app_info_get_id (info_b);
@@ -383,17 +396,76 @@ app_compare_id_length_cb (gconstpointer a,
   else if (id_b == NULL)
     return 1;
 
-  return strlen (id_a) - strlen (id_b);
+  id_a_len = strlen (id_a);
+  id_b_len = strlen (id_b);
+  if (id_a_len == id_b_len)
+    return strcmp (id_a, id_b);
+  else
+    return id_a_len - id_b_len;
 }
 
+/* Elements in @added_out and @removed_out are valid as long as @old_apps and
+ * @new_apps are valid.
+ *
+ * Both lists have to be sorted the same before calling this function. */
+static void
+diff_app_lists (GList      *old_apps,
+                GList      *new_apps,
+                GPtrArray **added_out,
+                GPtrArray **removed_out)
+{
+  g_autoptr(GPtrArray) added = g_ptr_array_new_with_free_func (NULL);
+  g_autoptr(GPtrArray) removed = g_ptr_array_new_with_free_func (NULL);
+  GList *o, *n;
+
+  g_return_if_fail (added_out != NULL);
+  g_return_if_fail (removed_out != NULL);
+
+  for (o = old_apps, n = new_apps; o != NULL || n != NULL;)
+    {
+      int comparison;
+
+      if (o == NULL)
+        comparison = 1;
+      else if (n == NULL)
+        comparison = -1;
+      else
+        comparison = app_compare_id_length_cb (o->data, n->data);
+
+      if (comparison < 0)
+        {
+          g_ptr_array_add (removed, o->data);
+          o = o->next;
+        }
+      else if (comparison > 0)
+        {
+          g_ptr_array_add (added, n->data);
+          n = n->next;
+        }
+      else
+        {
+          o = o->next;
+          n = n->next;
+        }
+    }
+
+  *added_out = g_steal_pointer (&added);
+  *removed_out = g_steal_pointer (&removed);
+}
+
+/* This is quite expensive to call, as there’s no way to avoid calling
+ * g_app_info_get_all() to see if anything’s changed; and that’s quite expensive. */
 static void
 reload_apps (MctRestrictApplicationsSelector *self)
 {
-  GList *iter, *apps;
+  g_autolist(GAppInfo) old_apps = NULL;
+  g_autolist(GAppInfo) new_apps = NULL;
+  g_autoptr(GPtrArray) added_apps = NULL, removed_apps = NULL;
   g_autoptr(GHashTable) seen_flatpak_ids = NULL;
   g_autoptr(GHashTable) seen_executables = NULL;
 
-  apps = g_app_info_get_all ();
+  old_apps = g_steal_pointer (&self->cached_apps);
+  new_apps = g_app_info_get_all ();
 
   /* Sort the apps by increasing length of #GAppInfo ID. When coupled with the
    * deduplication of flatpak IDs and executable paths, below, this should ensure that we
@@ -402,20 +474,46 @@ reload_apps (MctRestrictApplicationsSelector *self)
    *
    * This is designed to avoid listing all the components of LibreOffice for example,
    * which all share an app ID and hence have the same entry in the parental controls
-   * app filter. */
-  apps = g_list_sort (apps, app_compare_id_length_cb);
+   * app filter.
+   *
+   * Then diff the old and new lists so that the code below doesn’t end up
+   * removing more rows than are necessary, and hence potentially losing
+   * in-progress user input. */
+  new_apps = g_list_sort (new_apps, app_compare_id_length_cb);
+  diff_app_lists (old_apps, new_apps, &added_apps, &removed_apps);
+
+  g_debug ("%s: Diffed old and new app lists: %u apps added, %u apps removed",
+           G_STRFUNC, added_apps->len, removed_apps->len);
+
   seen_flatpak_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   seen_executables = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
-  g_list_store_remove_all (self->apps);
-
-  for (iter = apps; iter; iter = iter->next)
+  /* Remove items first. */
+  for (guint i = 0; i < removed_apps->len; i++)
     {
-      GAppInfo *app;
+      GAppInfo *app = removed_apps->pdata[i];
+      guint pos;
+      gboolean found;
+
+      found = g_list_store_find_with_equal_func (self->apps, app,
+                                                 (GEqualFunc) g_app_info_equal, &pos);
+
+      /* The app being removed may have not passed the condition checks below
+       * to have been added to self->apps. */
+      if (!found)
+        continue;
+
+      g_debug ("Removing app ‘%s’", g_app_info_get_id (app));
+      g_list_store_remove (self->apps, pos);
+    }
+
+  /* Now add the new items. */
+  for (guint i = 0; i < added_apps->len; i++)
+    {
+      GAppInfo *app = added_apps->pdata[i];
       const gchar *app_name;
       const gchar * const *supported_types;
 
-      app = iter->data;
       app_name = g_app_info_get_name (app);
 
       supported_types = g_app_info_get_supported_types (app);
@@ -486,21 +584,17 @@ reload_apps (MctRestrictApplicationsSelector *self)
                                   self);
     }
 
-  g_list_free_full (apps, g_object_unref);
+  /* Update the cache for next time. */
+  self->cached_apps = g_steal_pointer (&new_apps);
 }
 
 static void
 app_info_changed_cb (GAppInfoMonitor *monitor,
                      gpointer         user_data)
 {
-  /* FIXME: We should update the list of apps here, but we can’t call
-   * reload_apps() because that will dump and reload the entire list, losing
-   * any changes the user has already made to the set of switches. We need
-   * something more fine-grained.
   MctRestrictApplicationsSelector *self = MCT_RESTRICT_APPLICATIONS_SELECTOR (user_data);
 
   reload_apps (self);
-   */
 }
 
 /* Will return %NULL if @flatpak_id is not installed. */
@@ -663,6 +757,7 @@ mct_restrict_applications_selector_set_app_filter (MctRestrictApplicationsSelect
                                                    MctAppFilter                    *app_filter)
 {
   g_autoptr(MctAppFilter) owned_app_filter = NULL;
+  guint n_apps;
 
   g_return_if_fail (MCT_IS_RESTRICT_APPLICATIONS_SELECTOR (self));
 
@@ -680,6 +775,30 @@ mct_restrict_applications_selector_set_app_filter (MctRestrictApplicationsSelect
   g_clear_pointer (&self->app_filter, mct_app_filter_unref);
   self->app_filter = mct_app_filter_ref (app_filter);
 
-  reload_apps (self);
+  /* Update the status of each app row. */
+  n_apps = g_list_model_get_n_items (G_LIST_MODEL (self->apps));
+
+  for (guint i = 0; i < n_apps; i++)
+    {
+      GtkListBoxRow *row;
+      GtkWidget *box, *w;
+      g_autoptr(GList) children = NULL;  /* (element-type GtkWidget) */
+
+      /* Navigate the widget hierarchy set up in create_row_for_app_cb(). */
+      row = gtk_list_box_get_row_at_index (self->listbox, i);
+      g_assert (row != NULL && GTK_IS_LIST_BOX_ROW (row));
+
+      box = gtk_bin_get_child (GTK_BIN (row));
+      g_assert (box != NULL && GTK_IS_BOX (box));
+
+      children = gtk_container_get_children (GTK_CONTAINER (box));
+      g_assert (children != NULL);
+
+      w = g_list_nth_data (children, 2);
+      g_assert (w != NULL && GTK_IS_SWITCH (w));
+
+      update_listbox_row_switch (self, GTK_SWITCH (w));
+    }
+
   g_object_notify_by_pspec (G_OBJECT (self), properties[PROP_APP_FILTER]);
 }

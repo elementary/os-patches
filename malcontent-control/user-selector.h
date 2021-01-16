@@ -34,4 +34,7 @@ MctUserSelector *mct_user_selector_new (ActUserManager *user_manager);
 
 ActUser *mct_user_selector_get_user (MctUserSelector *self);
 
+gboolean mct_user_selector_select_user_by_username (MctUserSelector *self,
+                                                    const gchar     *username);
+
 G_END_DECLS

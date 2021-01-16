@@ -755,6 +755,33 @@ mct_app_filter_deserialize (GVariant  *variant,
   return g_steal_pointer (&app_filter);
 }
 
+/**
+ * mct_app_filter_equal:
+ * @a: (not nullable): an #MctAppFilter
+ * @b: (not nullable): an #MctAppFilter
+ *
+ * Check whether app filters @a and @b are equal.
+ *
+ * Returns: %TRUE if @a and @b are equal, %FALSE otherwise
+ * Since: 0.10.0
+ */
+gboolean
+mct_app_filter_equal (MctAppFilter *a,
+                      MctAppFilter *b)
+{
+  g_return_val_if_fail (a != NULL, FALSE);
+  g_return_val_if_fail (a->ref_count >= 1, FALSE);
+  g_return_val_if_fail (b != NULL, FALSE);
+  g_return_val_if_fail (b->ref_count >= 1, FALSE);
+
+  return (a->user_id == b->user_id &&
+          a->app_list_type == b->app_list_type &&
+          a->allow_user_installation == b->allow_user_installation &&
+          a->allow_system_installation == b->allow_system_installation &&
+          g_strv_equal ((const gchar * const *) a->app_list, (const gchar * const *) b->app_list) &&
+          g_variant_equal (a->oars_ratings, b->oars_ratings));
+}
+
 /*
  * Actual implementation of #MctAppFilterBuilder.
  *

@@ -1,7 +1,7 @@
 .\" Manpage for malcontent\-client.
 .\" Documentation is under the same licence as the malcontent
 .\" package.
-.TH man 8 "13 Jun 2019" "1.1" "malcontent\-client man page"
+.TH man 8 "27 Oct 2020" "1.2" "malcontent\-client man page"
 .\"
 .SH NAME
 .IX Header "NAME"
@@ -13,6 +13,14 @@ malcontent\-client \- Parental Controls Access Utility
 \fBmalcontent\-client get\-app\-filter [\-q] [\-n] [\fPUSER\fB]
 .PP
 \fBmalcontent\-client check\-app\-filter [\-q] [\-n] [\fPUSER\fB] \fPARG\fB
+.PP
+\fBmalcontent\-client set\-app\-filter [\-q] [\-n] [\fPUSER\fB] \fPARG\fB
+.PP
+\fBmalcontent\-client oars\-section [\-q] [\-n] [\fPUSER\fB] \fPSECTION\fB
+.PP
+\fBmalcontent\-client get\-session\-limits [\-q] [\-n] [\fPUSER\fB]
+.PP
+\fBmalcontent\-client monitor [\-q] [\fPUSER\fB]
 .\"
 .SH DESCRIPTION
 .IX Header "DESCRIPTION"
@@ -24,14 +32,21 @@ controls.
 .PP
 It communicates with accounts-service, which stores parental controls data.
 .PP
-Its first argument is a command to run. Currently, the only supported commands
-are \fBget\-app\-filter\fP and \fBcheck\-app\-filter\fP.
+Its first argument is a command to run. The supported commands are documented
+below.
 .PP
 The command line API and output format are unstable and likely to change in
 future versions of \fBmalcontent\-client\fP.
 .\"
 .SH \fBget\-app\-filter\fP OPTIONS
 .IX Header "get\-app\-filter OPTIONS"
+.\"
+Get the app filter for a user. For example:
+.RS
+.ad l
+# malcontent\-client get\-app\-filter timmy
+.ad b
+.RE
 .\"
 .IP "\fBUSER\fP"
 Username or ID of the user to get the app filter for. If not specified, the
@@ -49,6 +64,18 @@ authorization.)
 .SH \fBcheck\-app\-filter\fP OPTIONS
 .IX Header "check\-app\-filter OPTIONS"
 .\"
+Check if a given program, content type or flatpak ref is permitted to be used by
+a user, according to their current app filter. For example:
+.RS
+.ad l
+# malcontent\-client check\-app\-filter timmy $(which gnome\-calculator)
+.PP
+# malcontent\-client check\-app\-filter timmy x\-scheme\-handler/http
+.PP
+# malcontent\-client check\-app\-filter timmy app/com.realm667.WolfenDoom_Blade_of_Agony/x86_64/stable
+.ad b
+.RE
+.\"
 .IP "\fBUSER\fP"
 Username or ID of the user to get the app filter for. If not specified, the
 current user will be used by default.
@@ -65,6 +92,127 @@ progresses. (Default: Output informational messages.)
 Do not allow interactive authorization with polkit. If this is needed to
 complete the operation, the operation will fail. (Default: Allow interactive
 authorization.)
+.\"
+.SH \fBset\-app\-filter\fP OPTIONS
+.IX Header "set\-app\-filter OPTIONS"
+.\"
+Set the app filter for a user, replacing all previous values in it. For example:
+.RS
+.ad l
+# malcontent\-client set\-app\-filter timmy \\
+      \-\-disallow\-user\-installation \\
+      $(which gnome\-calculator) \\
+      x\-scheme\-handler/http \\
+      app/com.realm667.WolfenDoom_Blade_of_Agony/x86_64/stable
+.ad b
+.RE
+.\"
+.IP "\fBUSER\fP"
+Username or ID of the user to set the app filter for. If not specified, the
+current user will be used by default.
+.\"
+.IP "\fBARG\fP"
+Item to filter in the user’s app filter. This could either be an absolute path
+or flatpak ref of a program to block; a content type to block all programs
+handling that type; or an OARS \fBsection=value\fP pair to block installation of
+apps with a more extreme rating for that OARS section. Multiple items may be
+specified, and they will replace the user’s current app filter in entirety. If
+zero items are specified, the app filter is cleared.
+.\"
+.IP "\fB\-\-allow\-user\-installation\fP"
+Allow the user to install flatpaks to their user repository.
+.\"
+.IP "\fB\-\-disallow\-user\-installation\fP"
+Disallow the user from installing flatpaks to their user repository.
+.\"
+.IP "\fB\-\-allow\-system\-installation\fP"
+Allow the user to install flatpaks to the system repository.
+.\"
+.IP "\fB\-\-disallow\-system\-installation\fP"
+Disallow the user from installing flatpaks to the system repository.
+.\"
+.IP "\fB\-q\fP, \fB\-\-quiet\fP"
+Only output error messages, and no informational messages, as the operation
+progresses. (Default: Output informational messages.)
+.\"
+.IP "\fB\-n\fP, \fB\-\-no\-interactive\fP"
+Do not allow interactive authorization with polkit. If this is needed to
+complete the operation, the operation will fail. (Default: Allow interactive
+authorization.)
+.\"
+.SH \fBoars\-section\fP OPTIONS
+.IX Header "oars\-section OPTIONS"
+.\"
+Get the value set for a specific OARS section from the app filter of the given
+user. For example:
+.RS
+.ad l
+# malcontent\-client oars\-section timmy language\-profanity
+.ad b
+.RE
+.\"
+.IP "\fBUSER\fP"
+Username or ID of the user to get the OARS filter for. If not specified, the
+current user will be used by default.
+.\"
+.IP "\fBSECTION\fP"
+OARS section to get the restriction level of the given user for.
+For example, \fBlanguage\-profanity\fP.
+.\"
+.IP "\fB\-q\fP, \fB\-\-quiet\fP"
+Only output error messages, and no informational messages, as the operation
+progresses. (Default: Output informational messages.)
+.\"
+.IP "\fB\-n\fP, \fB\-\-no\-interactive\fP"
+Do not allow interactive authorization with polkit. If this is needed to
+complete the operation, the operation will fail. (Default: Allow interactive
+authorization.)
+.\"
+.SH \fBget\-session\-limits\fP OPTIONS
+.IX Header "get\-session\-limits OPTIONS"
+.\"
+Get the session limits set for a user. For example:
+.RS
+.ad l
+# malcontent\-client get\-session\-limits timmy
+.ad b
+.RE
+.\"
+.IP "\fBUSER\fP"
+Username or ID of the user to get the session limits for. If not specified, the
+current user will be used by default.
+.\"
+.IP "\fB\-q\fP, \fB\-\-quiet\fP"
+Only output error messages, and no informational messages, as the operation
+progresses. (Default: Output informational messages.)
+.\"
+.IP "\fB\-n\fP, \fB\-\-no\-interactive\fP"
+Do not allow interactive authorization with polkit. If this is needed to
+complete the operation, the operation will fail. (Default: Allow interactive
+authorization.)
+.\"
+.IP "\fB\-\-now yyyy\-mm\-ddThh:mm:ssZ\fP"
+Check session limits (in particular, session expiry time) against the given
+date/time, provided in ISO 8601 format. (Default: Current date/time.)
+.\"
+.SH \fBmonitor\fP OPTIONS
+.IX Header "monitor OPTIONS"
+.\"
+Monitor changes to the parental controls settings for a specific user. For
+example:
+.RS
+.ad l
+# malcontent\-client monitor timmy
+.ad b
+.RE
+.\"
+.IP "\fBUSER\fP"
+Username or ID of the user to monitor the parental controls for. If not
+specified, the current user will be used by default.
+.\"
+.IP "\fB\-q\fP, \fB\-\-quiet\fP"
+Only output error messages, and no informational messages, as the operation
+progresses. (Default: Output informational messages.)
 .\"
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
@@ -119,7 +267,7 @@ An operation failed and no more specific error information is available.
 .\"
 Any bugs which are found should be reported on the project website:
 .br
-\fIhttps://support.endlessm.com/\fP
+\fIhttps://gitlab.freedesktop.org/pwithnall/malcontent/-/issues\fP
 .\"
 .SH AUTHOR
 .IX Header "AUTHOR"

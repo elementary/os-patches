@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: malcontent\n"
 "Report-Msgid-Bugs-To: https://gitlab.freedesktop.org/pwithnall/malcontent/"
 "issues\n"
-"POT-Creation-Date: 2020-06-10 15:26+0000\n"
-"PO-Revision-Date: 2020-06-14 13:48+0200\n"
+"POT-Creation-Date: 2020-10-22 15:27+0000\n"
+"PO-Revision-Date: 2020-10-25 09:20+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -141,28 +141,29 @@ msgstr "Filtr programów użytkownika %u jest w nieznanym formacie"
 msgid "OARS filter for user %u has an unrecognized kind ‘%s’"
 msgstr "Filtr OARS użytkownika %u ma nieznany rodzaj „%s”"
 
-#: libmalcontent/manager.c:283 libmalcontent/manager.c:412
+#: libmalcontent/manager.c:283 libmalcontent/manager.c:420
+#: libmalcontent/manager.c:803
 #, c-format
-msgid "Not allowed to query app filter data for user %u"
-msgstr "Brak zezwolenia na odpytanie danych filtru programów użytkownika %u"
+msgid "Not allowed to query parental controls data for user %u"
+msgstr ""
+"Brak zezwolenia na odpytanie danych kontroli rodzicielskiej użytkownika %u"
 
 #: libmalcontent/manager.c:288
 #, c-format
 msgid "User %u does not exist"
 msgstr "Użytkownik %u nie istnieje"
 
-#: libmalcontent/manager.c:394
+#: libmalcontent/manager.c:296
+msgid "System accounts service not available"
+msgstr "Systemowa usługa kont jest niedostępna"
+
+#: libmalcontent/manager.c:402
 msgid "App filtering is globally disabled"
 msgstr "Filtrowanie programów jest wyłączone globalnie"
 
-#: libmalcontent/manager.c:777
+#: libmalcontent/manager.c:785
 msgid "Session limits are globally disabled"
 msgstr "Ograniczenia sesji są wyłączone globalnie"
-
-#: libmalcontent/manager.c:795
-#, c-format
-msgid "Not allowed to query session limits data for user %u"
-msgstr "Brak zezwolenia na odpytanie danych ograniczeń sesji użytkownika %u"
 
 #: libmalcontent/session-limits.c:306
 #, c-format
@@ -318,22 +319,36 @@ msgstr ""
 "Ogranicza przeglądanie lub instalowanie programów do tych odpowiednich dla "
 "danego wieku."
 
+#. Translators: This documents the --user command line option to malcontent-control:
+#: malcontent-control/application.c:101
+msgid "User to select in the UI"
+msgstr "Użytkownik do wybrania w interfejsie użytkownika"
+
+#. Translators: This is a placeholder for a command line argument value:
+#: malcontent-control/application.c:103
+msgid "USERNAME"
+msgstr "NAZWA-UŻYTKOWNIKA"
+
+#: malcontent-control/application.c:114
+msgid "— view and edit parental controls"
+msgstr "— wyświetlanie i modyfikowanie kontroli rodzicielskiej"
+
 #. Translators: This is the title of the main window
 #. Translators: the name of the application as it appears in a software center
-#: malcontent-control/application.c:105 malcontent-control/main.ui:12
+#: malcontent-control/application.c:121 malcontent-control/main.ui:12
 #: malcontent-control/org.freedesktop.MalcontentControl.appdata.xml.in:9
 #: malcontent-control/org.freedesktop.MalcontentControl.desktop.in:3
 msgid "Parental Controls"
 msgstr "Kontrola rodzicielska"
 
-#: malcontent-control/application.c:270
+#: malcontent-control/application.c:306
 msgid "Copyright © 2019, 2020 Endless Mobile, Inc."
 msgstr "Copyright © 2019, 2020 Endless Mobile, Inc."
 
 #. Translators: this should be "translated" to the
 #. names of people who have translated Malcontent into
 #. this language, one per line.
-#: malcontent-control/application.c:275
+#: malcontent-control/application.c:311
 msgid "translator-credits"
 msgstr ""
 "Piotr Drąg <piotrdrag@gmail.com>, 2020\n"
@@ -341,19 +356,19 @@ msgstr ""
 
 #. Translators: "Malcontent" is the brand name of this
 #. project, so should not be translated.
-#: malcontent-control/application.c:281
+#: malcontent-control/application.c:317
 msgid "Malcontent Website"
 msgstr "Witryna projektu Malcontent"
 
-#: malcontent-control/application.c:299
+#: malcontent-control/application.c:335
 msgid "The help contents could not be displayed"
 msgstr "Nie można wyświetlić treści pomocy"
 
-#: malcontent-control/application.c:336
+#: malcontent-control/application.c:372
 msgid "Failed to load user data from the system"
 msgstr "Wczytanie danych użytkownika z systemu się nie powiodło"
 
-#: malcontent-control/application.c:338
+#: malcontent-control/application.c:374
 msgid "Please make sure that the AccountsService is installed and enabled."
 msgstr ""
 "Proszę się upewnić, że usługa AccountsService jest zainstalowana i włączona."
@@ -422,7 +437,11 @@ msgstr ""
 "kontrolowanie jak długo mogą używać komputera, jakie oprogramowanie mogą "
 "instalować oraz którego zainstalowanego oprogramowania mogą używać."
 
-#: malcontent-control/org.freedesktop.MalcontentControl.appdata.xml.in:39
+#: malcontent-control/org.freedesktop.MalcontentControl.appdata.xml.in:25
+msgid "Main window"
+msgstr "Główne okno"
+
+#: malcontent-control/org.freedesktop.MalcontentControl.appdata.xml.in:38
 msgid "The GNOME Project"
 msgstr "Projekt GNOME"
 

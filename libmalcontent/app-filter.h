@@ -104,6 +104,9 @@ MctAppFilter *mct_app_filter_deserialize (GVariant      *variant,
                                           uid_t          user_id,
                                           GError       **error);
 
+gboolean mct_app_filter_equal (MctAppFilter *a,
+                               MctAppFilter *b);
+
 /**
  * MctAppFilterBuilder:
  *

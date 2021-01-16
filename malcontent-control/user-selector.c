@@ -506,3 +506,38 @@ mct_user_selector_get_user (MctUserSelector *self)
 
   return self->user;
 }
+
+/**
+ * mct_user_selector_select_user_by_username:
+ * @self: an #MctUserSelector
+ * @username: username of the user to select
+ *
+ * Selects the given @username in the widget. This might fail if @username isn’t
+ * a valid user, or if they aren’t listed in the selector due to being an
+ * administrator (see #MctUserSelector:show-administrators).
+ *
+ * Returns: %TRUE if the user was successfully selected, %FALSE otherwise
+ * Since: 0.10.0
+ */
+gboolean
+mct_user_selector_select_user_by_username (MctUserSelector *self,
+                                           const gchar     *username)
+{
+  MctCarouselItem *item = NULL;
+  ActUser *user = NULL;
+
+  g_return_val_if_fail (MCT_IS_USER_SELECTOR (self), FALSE);
+  g_return_val_if_fail (username != NULL && *username != '\0', FALSE);
+
+  user = act_user_manager_get_user (self->user_manager, username);
+  if (user == NULL)
+    return FALSE;
+
+  item = mct_carousel_find_item (self->carousel, user, user_compare);
+  if (item == NULL)
+    return FALSE;
+
+  mct_carousel_select_item (self->carousel, item);
+
+  return TRUE;
+}

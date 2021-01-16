@@ -162,6 +162,65 @@ test_app_filter_deserialize_invalid (void)
     }
 }
 
+/* Test that mct_app_filter_equal() returns the correct results on various
+ * app filters. */
+static void
+test_app_filter_equal (void)
+{
+  g_auto(MctAppFilterBuilder) builder = MCT_APP_FILTER_BUILDER_INIT ();
+  MctAppFilter *equal_filters[2];
+  const gchar *unequal_filters_serialised[] =
+    {
+      "{ 'AppFilter': <(true, @as ['/usr/bin/gnome-software'])> }",
+      "{ 'AppFilter': <(false, @as ['/usr/bin/gnome-software'])> }",
+      "{ 'AllowUserInstallation': <true> }",
+      "{ 'AllowSystemInstallation': <true> }",
+      "{ 'OarsFilter': <('oars-1.1', { 'violence-cartoon': 'mild' })> }",
+    };
+  MctAppFilter *unequal_filters[G_N_ELEMENTS (unequal_filters_serialised)];
+
+  /* Build a couple of filters which are identical. */
+  equal_filters[0] = mct_app_filter_builder_end (&builder);
+
+  mct_app_filter_builder_init (&builder);
+  equal_filters[1] = mct_app_filter_builder_end (&builder);
+
+  /* And a load of filters which are not. */
+  for (gsize i = 0; i < G_N_ELEMENTS (unequal_filters_serialised); i++)
+    {
+      g_autoptr(GVariant) serialized = NULL;
+
+      serialized = g_variant_parse (NULL, unequal_filters_serialised[i], NULL, NULL, NULL);
+      g_assert (serialized != NULL);
+
+      unequal_filters[i] = mct_app_filter_deserialize (serialized, 1, NULL);
+      g_assert (unequal_filters[i] != NULL);
+    }
+
+  /* Test the equality checks on them all. */
+  for (gsize i = 0; i < G_N_ELEMENTS (equal_filters); i++)
+    for (gsize j = 0; j < G_N_ELEMENTS (equal_filters); j++)
+      g_assert_true (mct_app_filter_equal (equal_filters[i], equal_filters[j]));
+
+  for (gsize i = 0; i < G_N_ELEMENTS (unequal_filters); i++)
+    {
+      for (gsize j = 0; j < G_N_ELEMENTS (equal_filters); j++)
+        g_assert_false (mct_app_filter_equal (unequal_filters[i], equal_filters[j]));
+      for (gsize j = 0; j < G_N_ELEMENTS (unequal_filters); j++)
+        {
+          if (i != j)
+            g_assert_false (mct_app_filter_equal (unequal_filters[i], unequal_filters[j]));
+          else
+            g_assert_true (mct_app_filter_equal (unequal_filters[i], unequal_filters[j]));
+        }
+    }
+
+  for (gsize i = 0; i < G_N_ELEMENTS (equal_filters); i++)
+    mct_app_filter_unref (equal_filters[i]);
+  for (gsize i = 0; i < G_N_ELEMENTS (unequal_filters); i++)
+    mct_app_filter_unref (unequal_filters[i]);
+}
+
 /* Test that mct_app_filter_is_enabled() returns the correct results on various
  * app filters. */
 static void
@@ -1520,6 +1579,8 @@ main (int    argc,
   g_test_add_func ("/app-filter/serialize", test_app_filter_serialize);
   g_test_add_func ("/app-filter/deserialize", test_app_filter_deserialize);
   g_test_add_func ("/app-filter/deserialize/invalid", test_app_filter_deserialize_invalid);
+
+  g_test_add_func ("/app-filter/equal", test_app_filter_equal);
 
   g_test_add_func ("/app-filter/is-enabled", test_app_filter_is_enabled);
 
