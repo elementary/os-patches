@@ -19,11 +19,7 @@ case "$(id -nu)@$(hostname)" in
 		;;
 esac
 
-# Deliberately word-splitting list of tests:
-# shellcheck disable=SC2046
 exec gnome-desktop-testing-runner $(
-	# d (the directory) is deliberately ignored:
-	# shellcheck disable=SC2034
 	gnome-desktop-testing-runner -l Flatpak | while read -r t d; do
 		case "$t" in
 			(Flatpak/test-oci*)

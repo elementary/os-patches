@@ -57,6 +57,7 @@ struct _FlatpakRefPrivate
   char          *commit;
   FlatpakRefKind kind;
   char          *collection_id;
+  char          *cached_full_ref;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (FlatpakRef, flatpak_ref, G_TYPE_OBJECT)
@@ -83,8 +84,25 @@ flatpak_ref_finalize (GObject *object)
   g_free (priv->branch);
   g_free (priv->commit);
   g_free (priv->collection_id);
+  g_free ((char *)g_atomic_pointer_get (&priv->cached_full_ref));
 
   G_OBJECT_CLASS (flatpak_ref_parent_class)->finalize (object);
+}
+
+/* These support setting e.g. the arch from referencing a ref.
+ * i.e. it would get "x86_64/master" as an argument. */
+static char *
+value_dup_ref_part (const GValue *value)
+{
+  const char *part = value->data[0].v_pointer;
+  const char *slash;
+
+  slash = strchr (part, '/');
+
+  if (slash)
+    return g_strndup (part, slash - part);
+
+  return g_strdup (part);
 }
 
 static void
@@ -99,22 +117,22 @@ flatpak_ref_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_NAME:
-      g_clear_pointer (&priv->name, g_free);
-      priv->name = g_value_dup_string (value);
+      g_assert (priv->name == NULL); /* Construct-only */
+      priv->name = value_dup_ref_part (value);
       break;
 
     case PROP_ARCH:
-      g_clear_pointer (&priv->arch, g_free);
-      priv->arch = g_value_dup_string (value);
+      g_assert (priv->arch == NULL); /* Construct-only */
+      priv->arch = value_dup_ref_part (value);
       break;
 
     case PROP_BRANCH:
-      g_clear_pointer (&priv->branch, g_free);
-      priv->branch = g_value_dup_string (value);
+      g_assert (priv->branch == NULL); /* Construct-only */
+      priv->branch = value_dup_ref_part (value);
       break;
 
     case PROP_COMMIT:
-      g_clear_pointer (&priv->commit, g_free);
+      g_assert (priv->commit == NULL); /* Construct-only */
       priv->commit = g_value_dup_string (value);
       break;
 
@@ -123,7 +141,7 @@ flatpak_ref_set_property (GObject      *object,
       break;
 
     case PROP_COLLECTION_ID:
-      g_clear_pointer (&priv->collection_id, g_free);
+      g_assert (priv->collection_id == NULL); /* Construct-only */
       priv->collection_id = g_value_dup_string (value);
       break;
 
@@ -341,6 +359,37 @@ flatpak_ref_format_ref (FlatpakRef *self)
 }
 
 /**
+ * flatpak_ref_format_ref_cached:
+ * @self: a #FlatpakRef
+ *
+ * Like flatpak_ref_format_ref() but this returns the same string each time
+ * it's called rather than allocating a new one.
+ *
+ * Returns: (transfer none): string representation
+ *
+ * Since: 1.9.1
+ */
+const char *
+flatpak_ref_format_ref_cached (FlatpakRef *self)
+{
+  FlatpakRefPrivate *priv = flatpak_ref_get_instance_private (self);
+  const char *full_ref;
+  char *full_ref_new;
+
+  full_ref = (const char *)g_atomic_pointer_get (&priv->cached_full_ref);
+  if (full_ref == NULL)
+    {
+      full_ref_new = flatpak_ref_format_ref (self);
+      if (!g_atomic_pointer_compare_and_exchange ((void**) &priv->cached_full_ref, NULL, full_ref_new))
+        g_free (full_ref_new); /* Raced with someone, free our version */
+
+      full_ref = (const char *)g_atomic_pointer_get (&priv->cached_full_ref); /* Now guaranteed to be non-NULL */
+    }
+
+  return full_ref;
+}
+
+/**
  * flatpak_ref_parse:
  * @ref: A string ref name, such as "app/org.test.App/x86_64/master"
  * @error: return location for a #GError
@@ -353,23 +402,17 @@ flatpak_ref_format_ref (FlatpakRef *self)
 FlatpakRef *
 flatpak_ref_parse (const char *ref, GError **error)
 {
-  g_auto(GStrv) parts = NULL;
-  FlatpakRefKind kind;
+  g_autoptr(FlatpakDecomposed) decomposed = NULL;
 
-  parts = flatpak_decompose_ref (ref, error);
-  if (parts == NULL)
+  decomposed = flatpak_decomposed_new_from_ref (ref, error);
+  if (decomposed == NULL)
     return NULL;
 
-  if (g_strcmp0 (parts[0], "app") == 0)
-    kind = FLATPAK_REF_KIND_APP;
-  else
-    kind = FLATPAK_REF_KIND_RUNTIME;
-
   return FLATPAK_REF (g_object_new (FLATPAK_TYPE_REF,
-                                    "kind", kind,
-                                    "name", parts[1],
-                                    "arch", parts[2],
-                                    "branch", parts[3],
+                                    "kind", flatpak_decomposed_get_kind (decomposed),
+                                    "name", flatpak_decomposed_peek_id (decomposed, NULL),
+                                    "arch", flatpak_decomposed_peek_arch (decomposed, NULL),
+                                    "branch", flatpak_decomposed_peek_branch (decomposed, NULL),
                                     NULL));
 }
 

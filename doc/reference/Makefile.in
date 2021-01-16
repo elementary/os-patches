@@ -583,6 +583,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
+systemdsystemenvgendir = @systemdsystemenvgendir@
 systemdsystemunitdir = @systemdsystemunitdir@
 systemduserenvgendir = @systemduserenvgendir@
 systemduserunitdir = @systemduserunitdir@
@@ -636,6 +637,28 @@ IGNORE_HFILES = \
 
 EXTRA_HFILES = 
 HTML_IMAGES = 
+dbus_stamp_files = \
+	dbus-org.freedesktop.Flatpak.Authenticator.stamp \
+	dbus-org.freedesktop.Flatpak.stamp \
+	dbus-org.freedesktop.impl.portal.PermissionStore.stamp \
+	dbus-org.freedesktop.portal.Documents.stamp \
+	dbus-org.freedesktop.portal.Flatpak.stamp \
+	$(NULL)
+
+
+# Generated from the above stamps
+xml_files = \
+	dbus-org.freedesktop.Flatpak.AuthenticatorRequest.xml \
+	dbus-org.freedesktop.Flatpak.Authenticator.xml \
+	dbus-org.freedesktop.Flatpak.Development.xml \
+	dbus-org.freedesktop.Flatpak.SessionHelper.xml \
+	dbus-org.freedesktop.Flatpak.SystemHelper.xml \
+	dbus-org.freedesktop.impl.portal.PermissionStore.xml \
+	dbus-org.freedesktop.portal.Documents.xml \
+	dbus-org.freedesktop.portal.Flatpak.UpdateMonitor.xml \
+	dbus-org.freedesktop.portal.Flatpak.xml \
+	$(NULL)
+
 content_files = 
 expand_content_files = 
 AM_CPPFLAGS = -I$(top_srcdir)/common -I$(top_builddir)/common $(BASE_CFLAGS)
@@ -679,7 +702,8 @@ REPORT_FILES = \
 	$(DOC_MODULE)-undeclared.txt \
 	$(DOC_MODULE)-unused.txt
 
-CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS) gtkdoc-check.test
+CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS) \
+	gtkdoc-check.test $(xml_files)
 @GTK_DOC_BUILD_HTML_FALSE@HTML_BUILD_STAMP = 
 @GTK_DOC_BUILD_HTML_TRUE@HTML_BUILD_STAMP = html-build.stamp
 @GTK_DOC_BUILD_PDF_FALSE@PDF_BUILD_STAMP = 
@@ -1283,8 +1307,10 @@ dist-hook: dist-check-gtkdoc all-gtk-doc dist-hook-local
 
 .PHONY : dist-hook-local docs
 
-libflatpak-docs.html: libflatpak-docs.xml docs
-	$(AM_V_GEN) $(XMLTO) $(XMLTO_FLAGS) --skip-validation xhtml-nochunks -m $(srcdir)/../xmlto-config.xsl $<
+sgml.stamp: $(dbus_stamp_files)
+
+dbus-%.stamp: $(top_srcdir)/data/%.xml
+	$(AM_V_GEN)$(GDBUS_CODEGEN) --generate-docbook=dbus $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

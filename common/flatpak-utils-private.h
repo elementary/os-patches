@@ -54,8 +54,22 @@
 #define FLATPAK_ANSI_ROW_N "\x1b[%d;1H"
 #define FLATPAK_ANSI_CLEAR "\x1b[0J"
 
-#define FLATPAK_XA_CACHE_VERSION 1
+#define FLATPAK_XA_CACHE_VERSION 2
 /* version 1 added extra data download size */
+/* version 2 added ot.ts timestamps (to new format) */
+
+#define FLATPAK_XA_SUMMARY_VERSION 1
+/* version 0/missing is standard ostree summary,
+ * version 1 is compact format with inline cache and no deltas
+ */
+
+/* Thse are key names in the per-ref metadata in the summary */
+#define OSTREE_COMMIT_TIMESTAMP "ostree.commit.timestamp"
+#define OSTREE_COMMIT_TIMESTAMP2 "ot.ts" /* Shorter version of the above */
+
+#define FLATPAK_SUMMARY_DIFF_HEADER "xadf"
+
+#define FLATPAK_SUMMARY_HISTORY_LENGTH_DEFAULT 16
 
 gboolean flatpak_set_tty_echo (gboolean echo);
 void flatpak_get_window_size (int *rows,
@@ -159,9 +173,14 @@ gboolean flatpak_variant_save (GFile        *dest,
                                GError      **error);
 GVariant *flatpak_repo_load_summary (OstreeRepo *repo,
                                      GError    **error);
-char **  flatpak_summary_match_subrefs (GVariant   *summary,
-                                        const char *collection_id,
-                                        const char *ref);
+GVariant *flatpak_repo_load_summary_index (OstreeRepo *repo,
+                                           GError    **error);
+GVariant *flatpak_repo_load_digested_summary (OstreeRepo *repo,
+                                              const char *digest,
+                                              GError    **error);
+GPtrArray *flatpak_summary_match_subrefs (GVariant   *summary,
+                                          const char *collection_id,
+                                          FlatpakDecomposed *ref);
 gboolean flatpak_summary_lookup_ref (GVariant      *summary,
                                      const char    *collection_id,
                                      const char    *ref,
@@ -170,9 +189,9 @@ gboolean flatpak_summary_lookup_ref (GVariant      *summary,
 gboolean flatpak_summary_find_ref_map (VarSummaryRef  summary,
                                        const char    *collection_id,
                                        VarRefMapRef  *refs_out);
-gboolean flatpak_name_matches_one_wildcard_prefix (const char         *string,
-                                                   const char * const *maybe_wildcard_prefixes,
-                                                   gboolean            require_exact_match);
+gboolean flatpak_var_ref_map_lookup_ref (VarRefMapRef   ref_map,
+                                         const char    *ref,
+                                         VarRefInfoRef *out_info);
 
 gboolean flatpak_get_allowed_exports (const char     *source_path,
                                       const char     *app_id,
@@ -181,77 +200,16 @@ gboolean flatpak_get_allowed_exports (const char     *source_path,
                                       char         ***allowed_prefixes_out,
                                       gboolean       *require_exact_match_out);
 
-gboolean flatpak_is_valid_name (const char *string,
-                                GError    **error);
-gboolean flatpak_is_valid_branch (const char *string,
-                                  GError    **error);
-gboolean flatpak_has_name_prefix (const char *string,
-                                  const char *name);
-
-char * flatpak_make_valid_id_prefix (const char *orig_id);
-gboolean flatpak_id_has_subref_suffix (const char *id);
-
-char **flatpak_decompose_ref (const char *ref,
-                              GError    **error);
-
-char * flatpak_filter_glob_to_regexp (const char *glob, GError **error);
-gboolean flatpak_parse_filters (const char *data,
-                                GRegex **allow_refs_out,
-                                GRegex **deny_refs_out,
-                                GError **error);
-gboolean flatpak_filters_allow_ref (GRegex *allow_refs,
-                                    GRegex *deny_refs,
-                                    const char *ref);
-
-FlatpakKinds flatpak_kinds_from_bools (gboolean app,
-                                       gboolean runtime);
-
-gboolean flatpak_split_partial_ref_arg (const char   *partial_ref,
-                                        FlatpakKinds  default_kinds,
-                                        const char   *default_arch,
-                                        const char   *default_branch,
-                                        FlatpakKinds *out_kinds,
-                                        char        **out_id,
-                                        char        **out_arch,
-                                        char        **out_branch,
-                                        GError      **error);
-gboolean flatpak_split_partial_ref_arg_novalidate (const char   *partial_ref,
-                                                   FlatpakKinds  default_kinds,
-                                                   const char   *default_arch,
-                                                   const char   *default_branch,
-                                                   FlatpakKinds *out_kinds,
-                                                   char        **out_id,
-                                                   char        **out_arch,
-                                                   char        **out_branch);
-
-int flatpak_compare_ref (const char *ref1,
-                         const char *ref2);
-
-char * flatpak_compose_ref (gboolean    app,
-                            const char *name,
-                            const char *branch,
-                            const char *arch,
-                            GError    **error);
-
-char * flatpak_build_untyped_ref (const char *runtime,
-                                  const char *branch,
-                                  const char *arch);
-char * flatpak_build_runtime_ref (const char *runtime,
-                                  const char *branch,
-                                  const char *arch);
-char * flatpak_build_app_ref (const char *app,
-                              const char *branch,
-                              const char *arch);
-char * flatpak_find_current_ref (const char   *app_id,
-                                 GCancellable *cancellable,
-                                 GError      **error);
-GFile *flatpak_find_deploy_dir_for_ref (const char   *ref,
-                                        FlatpakDir  **dir_out,
-                                        GCancellable *cancellable,
-                                        GError      **error);
-GFile * flatpak_find_files_dir_for_ref (const char   *ref,
-                                        GCancellable *cancellable,
-                                        GError      **error);
+FlatpakDecomposed *flatpak_find_current_ref (const char   *app_id,
+                                             GCancellable *cancellable,
+                                             GError      **error);
+GFile *flatpak_find_deploy_dir_for_ref (FlatpakDecomposed  *ref,
+                                        FlatpakDir        **dir_out,
+                                        GCancellable       *cancellable,
+                                        GError            **error);
+GFile * flatpak_find_files_dir_for_ref (FlatpakDecomposed *ref,
+                                        GCancellable      *cancellable,
+                                        GError           **error);
 GFile * flatpak_find_unmaintained_extension_dir_if_exists (const char   *name,
                                                            const char   *arch,
                                                            const char   *branch,
@@ -263,6 +221,7 @@ FlatpakDeploy * flatpak_find_deploy_for_ref_in (GPtrArray    *dirs,
                                                 GError      **error);
 FlatpakDeploy * flatpak_find_deploy_for_ref (const char   *ref,
                                              const char   *commit,
+                                             FlatpakDir   *opt_user_dir,
                                              GCancellable *cancellable,
                                              GError      **error);
 char ** flatpak_list_deployed_refs (const char   *type,
@@ -322,6 +281,33 @@ g_key_file_load_from_bytes (GKeyFile     *key_file,
 }
 #endif
 
+#if !GLIB_CHECK_VERSION (2, 54, 0)
+static inline gboolean
+g_ptr_array_find_with_equal_func (GPtrArray     *haystack,
+                                  gconstpointer  needle,
+                                  GEqualFunc     equal_func,
+                                  guint         *index_)
+{
+  guint i;
+
+  g_return_val_if_fail (haystack != NULL, FALSE);
+
+  if (equal_func == NULL)
+    equal_func = g_direct_equal;
+
+  for (i = 0; i < haystack->len; i++)
+    {
+      if (equal_func (g_ptr_array_index (haystack, i), needle))
+        {
+          if (index_ != NULL)
+            *index_ = i;
+          return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+#endif
 
 #if !GLIB_CHECK_VERSION (2, 56, 0)
 GDateTime *flatpak_g_date_time_new_from_iso8601 (const gchar *text,
@@ -459,14 +445,35 @@ gboolean flatpak_repo_set_deploy_collection_id (OstreeRepo *repo,
 gboolean flatpak_repo_set_deploy_sideload_collection_id (OstreeRepo *repo,
                                                          gboolean    deploy_collection_id,
                                                          GError    **error);
+gboolean flatpak_repo_set_summary_history_length (OstreeRepo *repo,
+                                                  guint       length,
+                                                  GError    **error);
+guint    flatpak_repo_get_summary_history_length (OstreeRepo *repo);
 gboolean flatpak_repo_set_gpg_keys (OstreeRepo *repo,
                                     GBytes     *bytes,
                                     GError    **error);
-gboolean flatpak_repo_update (OstreeRepo   *repo,
-                              const char  **gpg_key_ids,
-                              const char   *gpg_homedir,
-                              GCancellable *cancellable,
-                              GError      **error);
+
+GBytes *flatpak_zlib_compress_bytes   (GBytes  *bytes,
+                                       int      level,
+                                       GError **error);
+GBytes *flatpak_zlib_decompress_bytes (GBytes  *bytes,
+                                       GError **error);
+
+GBytes *flatpak_summary_apply_diff (GBytes *old,
+                                    GBytes *diff,
+                                    GError **error);
+
+typedef enum {
+  FLATPAK_REPO_UPDATE_FLAG_NONE = 0,
+  FLATPAK_REPO_UPDATE_FLAG_DISABLE_INDEX = 1 << 0,
+} FlatpakRepoUpdateFlags;
+
+gboolean flatpak_repo_update (OstreeRepo            *repo,
+                              FlatpakRepoUpdateFlags flags,
+                              const char           **gpg_key_ids,
+                              const char            *gpg_homedir,
+                              GCancellable          *cancellable,
+                              GError               **error);
 gboolean flatpak_repo_collect_sizes (OstreeRepo   *repo,
                                      GFile        *root,
                                      guint64      *installed_size,
@@ -507,17 +514,16 @@ gboolean flatpak_mtree_create_dir (OstreeRepo         *repo,
                                    OstreeMutableTree **dir_out,
                                    GError            **error);
 
-
-GVariant * flatpak_bundle_load (GFile   *file,
-                                char   **commit,
-                                char   **ref,
-                                char   **origin,
-                                char   **runtime_repo,
-                                char   **app_metadata,
-                                guint64 *installed_size,
-                                GBytes **gpg_keys,
-                                char   **collection_id,
-                                GError **error);
+GVariant *flatpak_bundle_load (GFile              *file,
+                               char              **commit,
+                               FlatpakDecomposed **ref,
+                               char              **origin,
+                               char              **runtime_repo,
+                               char              **app_metadata,
+                               guint64            *installed_size,
+                               GBytes            **gpg_keys,
+                               char              **collection_id,
+                               GError            **error);
 
 gboolean flatpak_pull_from_bundle (OstreeRepo   *repo,
                                    GFile        *file,
@@ -563,18 +569,18 @@ gboolean flatpak_mirror_image_from_oci (FlatpakOciRegistry    *dst_registry,
 
 typedef struct
 {
-  char    *id;
-  char    *installed_id;
-  char    *commit;
-  char    *ref;
-  char    *directory;
-  char    *files_path;
-  char    *subdir_suffix;
-  char    *add_ld_path;
-  char   **merge_dirs;
-  int      priority;
-  gboolean needs_tmpfs;
-  gboolean is_unmaintained;
+  char               *id;
+  char               *installed_id;
+  char               *commit;
+  FlatpakDecomposed *ref;
+  char              *directory;
+  char              *files_path;
+  char              *subdir_suffix;
+  char              *add_ld_path;
+  char             **merge_dirs;
+  int                priority;
+  gboolean           needs_tmpfs;
+  gboolean           is_unmaintained;
 } FlatpakExtension;
 
 void flatpak_extension_free (FlatpakExtension *extension);
@@ -802,6 +808,14 @@ void flatpak_appstream_xml_filter (FlatpakXml *appstream,
                                    GRegex *allow_refs,
                                    GRegex *deny_refs);
 
+char * flatpak_filter_glob_to_regexp (const char *glob, gboolean runtime_only, GError **error);
+gboolean flatpak_parse_filters (const char *data,
+                                GRegex **allow_refs_out,
+                                GRegex **deny_refs_out,
+                                GError **error);
+gboolean flatpak_filters_allow_ref (GRegex *allow_refs,
+                                    GRegex *deny_refs,
+                                    const char *ref);
 
 gboolean flatpak_allocate_tmpdir (int           tmpdir_dfd,
                                   const char   *tmpdir_relpath,
@@ -865,7 +879,9 @@ gboolean flatpak_check_required_version (const char *ref,
                                          GError    **error);
 
 int flatpak_levenshtein_distance (const char *s,
-                                  const char *t);
+                                  gssize      ls,
+                                  const char *t,
+                                  gssize      lt);
 
 char *   flatpak_dconf_path_for_app_id (const char *app_id);
 gboolean flatpak_dconf_path_is_similar (const char *path1,

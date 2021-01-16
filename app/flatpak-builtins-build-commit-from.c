@@ -47,9 +47,11 @@ static char *opt_gpg_homedir;
 static char *opt_endoflife;
 static char **opt_endoflife_rebase;
 static char **opt_endoflife_rebase_new;
+static char **opt_subsets;
 static char *opt_timestamp;
 static char **opt_extra_collection_ids;
 static int opt_token_type = -1;
+static gboolean opt_no_summary_index = FALSE;
 
 static GOptionEntry options[] = {
   { "src-repo", 0, 0, G_OPTION_ARG_STRING, &opt_src_repo, N_("Source repo dir"), N_("SRC-REPO") },
@@ -57,6 +59,7 @@ static GOptionEntry options[] = {
   { "untrusted", 0, 0, G_OPTION_ARG_NONE, &opt_untrusted, "Do not trust SRC-REPO", NULL },
   { "force", 0, 0, G_OPTION_ARG_NONE, &opt_force, "Always commit, even if same content", NULL },
   { "extra-collection-id", 0, 0, G_OPTION_ARG_STRING_ARRAY, &opt_extra_collection_ids, "Add an extra collection id ref and binding", "COLLECTION-ID" },
+  { "subset", 0, 0, G_OPTION_ARG_STRING_ARRAY, &opt_subsets, "Add to a named subset", "SUBSET" },
   { "subject", 's', 0, G_OPTION_ARG_STRING, &opt_subject, N_("One line subject"), N_("SUBJECT") },
   { "body", 'b', 0, G_OPTION_ARG_STRING, &opt_body, N_("Full description"), N_("BODY") },
   { "update-appstream", 0, 0, G_OPTION_ARG_NONE, &opt_update_appstream, N_("Update the appstream branch"), NULL },
@@ -68,6 +71,7 @@ static GOptionEntry options[] = {
   { "token-type", 0, 0, G_OPTION_ARG_INT, &opt_token_type, N_("Set type of token needed to install this commit"), N_("VAL") },
   { "timestamp", 0, 0, G_OPTION_ARG_STRING, &opt_timestamp, N_("Override the timestamp of the commit (NOW for current time)"), N_("TIMESTAMP") },
   { "disable-fsync", 0, 0, G_OPTION_ARG_NONE, &opt_disable_fsync, "Do not invoke fsync()", NULL },
+  { "no-summary-index", 0, 0, G_OPTION_ARG_NONE, &opt_no_summary_index, N_("Don't generate a summary index"), NULL },
   { NULL }
 };
 
@@ -222,6 +226,32 @@ rewrite_delta (OstreeRepo *src_repo,
   return TRUE;
 }
 
+static gboolean
+get_subsets (char **subsets, GVariant **out)
+{
+  g_autoptr(GVariantBuilder) builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
+  gboolean found = FALSE;
+
+  if (subsets == NULL)
+    return FALSE;
+
+  for (int i = 0; subsets[i] != NULL; i++)
+    {
+      const char *subset = subsets[i];
+      if (*subset != 0)
+        {
+          found = TRUE;
+          g_variant_builder_add (builder, "s", subset);
+        }
+    }
+
+  if (!found)
+    return FALSE;
+
+  *out = g_variant_ref_sink (g_variant_builder_end (builder));
+  return TRUE;
+}
+
 
 gboolean
 flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancellable, GError **error)
@@ -286,10 +316,10 @@ flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancella
           *rebase_new = 0;
           rebase_new++;
 
-          if (!flatpak_is_valid_name (rebase_old, error))
+          if (!flatpak_is_valid_name (rebase_old, -1, error))
             return glnx_prefix_error (error, _("Invalid name %s in --end-of-life-rebase"), rebase_old);
 
-          if (!flatpak_is_valid_name (rebase_new, error))
+          if (!flatpak_is_valid_name (rebase_new, -1, error))
             return glnx_prefix_error (error, _("Invalid name %s in --end-of-life-rebase"), rebase_new);
 
           opt_endoflife_rebase_new[i] = rebase_new;
@@ -433,6 +463,7 @@ flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancella
       g_autoptr(GFile) src_ref_root = NULL;
       g_autoptr(GVariant) src_commitv = NULL;
       g_autoptr(GVariant) dst_commitv = NULL;
+      g_autoptr(GVariant) subsets_v = NULL;
       g_autoptr(OstreeMutableTree) mtree = NULL;
       g_autoptr(GFile) dst_root = NULL;
       g_autoptr(GVariant) commitv_metadata = NULL;
@@ -538,15 +569,15 @@ flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancella
       g_variant_builder_add (&metadata_builder, "{sv}", "xa.from_commit", g_variant_new_string (resolved_ref));
 
       if (opt_src_repo)
-	{
-	  guint64 download_size;
-	  if (!flatpak_repo_collect_sizes (dst_repo, src_ref_root, NULL, &download_size,
-					   cancellable, error))
-	    {
-	      return FALSE;
-	    }
-	  g_variant_builder_add (&metadata_builder, "{sv}", "xa.download-size", g_variant_new_uint64 (GUINT64_TO_BE (download_size)));
-	}
+        {
+          guint64 download_size;
+          if (!flatpak_repo_collect_sizes (dst_repo, src_ref_root, NULL, &download_size,
+                                           cancellable, error))
+            {
+              return FALSE;
+            }
+          g_variant_builder_add (&metadata_builder, "{sv}", "xa.download-size", g_variant_new_uint64 (GUINT64_TO_BE (download_size)));
+        }
 
       for (j = 0; j < g_variant_n_children (commitv_metadata); j++)
         {
@@ -561,8 +592,8 @@ flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancella
               strcmp (key, "ostree.ref-binding") == 0)
             continue;
 
-	  if (opt_src_repo && strcmp (key, "xa.download-size") == 0)
-	    continue ;
+          if (opt_src_repo && strcmp (key, "xa.download-size") == 0)
+            continue;
 
           if (opt_endoflife &&
               strcmp (key, OSTREE_COMMIT_META_KEY_ENDOFLIFE) == 0)
@@ -573,6 +604,9 @@ flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancella
             continue;
 
           if (opt_token_type >= 0 && strcmp (key, "xa.token-type") == 0)
+            continue;
+
+          if (opt_subsets != NULL && strcmp (key, "xa.subsets") == 0)
             continue;
 
           g_variant_builder_add_value (&metadata_builder, child);
@@ -605,6 +639,10 @@ flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancella
       if (opt_token_type >= 0)
         g_variant_builder_add (&metadata_builder, "{sv}", "xa.token-type",
                                g_variant_new_int32 (GINT32_TO_LE (opt_token_type)));
+
+      /* Skip "" subsets as they mean everything. This way --subsets= causes old subsets to be stripped from the original commit */
+      if (get_subsets (opt_subsets, &subsets_v))
+        g_variant_builder_add (&metadata_builder, "{sv}", "xa.subsets", subsets_v);
 
       timestamp = ostree_commit_get_timestamp (src_commitv);
       if (opt_timestamp)
@@ -671,7 +709,7 @@ flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancella
       /* Copy + Rewrite any deltas */
       {
         const char *from[2];
-        gsize j, n_from = 0;
+        gsize n_from = 0;
 
         if (dst_parent != NULL)
           from[n_from++] = dst_parent;
@@ -693,13 +731,21 @@ flatpak_builtin_build_commit_from (int argc, char **argv, GCancellable *cancella
       !flatpak_repo_generate_appstream (dst_repo, (const char **) opt_gpg_key_ids, opt_gpg_homedir, 0, cancellable, error))
     return FALSE;
 
-  if (!opt_no_update_summary &&
-      !flatpak_repo_update (dst_repo,
-                            (const char **) opt_gpg_key_ids,
-                            opt_gpg_homedir,
-                            cancellable,
-                            error))
-    return FALSE;
+  if (!opt_no_update_summary)
+    {
+      FlatpakRepoUpdateFlags flags = FLATPAK_REPO_UPDATE_FLAG_NONE;
+
+      if (opt_no_summary_index)
+        flags |= FLATPAK_REPO_UPDATE_FLAG_DISABLE_INDEX;
+
+      g_debug ("Updating summary");
+      if (!flatpak_repo_update (dst_repo, flags,
+                                (const char **) opt_gpg_key_ids,
+                                opt_gpg_homedir,
+                                cancellable,
+                                error))
+        return FALSE;
+    }
 
   return TRUE;
 }

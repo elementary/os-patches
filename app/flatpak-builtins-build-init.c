@@ -181,13 +181,12 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
   const char *sdk_pref;
   const char *runtime_pref;
   const char *default_branch = NULL;
-  const char *sdk_branch = NULL;
+  g_autofree char *sdk_branch = NULL;
   g_autofree char *base_ref = NULL;
-  g_autofree char *runtime_ref = NULL;
-  g_autofree char *extension_runtime_id = NULL;
-  g_autofree char *var_ref = NULL;
-  g_autofree char *sdk_ref = NULL;
-  g_auto(GStrv) sdk_ref_parts = NULL;
+  g_autoptr(FlatpakDecomposed) runtime_ref = NULL;
+  g_autofree char *extension_runtime_pref = NULL;
+  g_autoptr(FlatpakDecomposed) var_ref = NULL;
+  g_autoptr(FlatpakDecomposed) sdk_ref = NULL;
   FlatpakKinds kinds;
   int i;
   g_autoptr(FlatpakDir) sdk_dir = NULL;
@@ -232,7 +231,7 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
   else
     is_app = TRUE;
 
-  if (!flatpak_is_valid_name (app_id, &my_error))
+  if (!flatpak_is_valid_name (app_id, -1, &my_error))
     return flatpak_fail (error, _("'%s' is not a valid application name: %s"), app_id, my_error->message);
 
 
@@ -253,7 +252,8 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
 
   if (is_extension)
     {
-      if (g_str_has_prefix (runtime_ref, "app/"))
+      /* The "runtime" can be an app in case we're building an extension */
+      if (flatpak_decomposed_is_app (runtime_ref))
         {
           g_autoptr(GKeyFile) runtime_metadata = NULL;
 
@@ -262,12 +262,12 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
             return FALSE;
 
           runtime_metadata = flatpak_deploy_get_metadata (runtime_deploy);
-          extension_runtime_id = g_key_file_get_string (runtime_metadata, FLATPAK_METADATA_GROUP_APPLICATION,
-                                                       FLATPAK_METADATA_KEY_RUNTIME, NULL);
-          g_assert (extension_runtime_id);
+          extension_runtime_pref = g_key_file_get_string (runtime_metadata, FLATPAK_METADATA_GROUP_APPLICATION,
+                                                          FLATPAK_METADATA_KEY_RUNTIME, NULL);
+          g_assert (extension_runtime_pref);
         }
       else
-        extension_runtime_id = g_strdup (runtime_ref + strlen ("runtime/"));
+        extension_runtime_pref = flatpak_decomposed_dup_pref (runtime_ref);
     }
 
   base = g_file_new_for_commandline_arg (directory);
@@ -316,10 +316,7 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
         return FALSE;
     }
 
-  sdk_ref_parts = flatpak_decompose_ref (sdk_ref, error);
-  if (sdk_ref_parts == NULL)
-    return FALSE;
-  sdk_branch = sdk_ref_parts[3];
+  sdk_branch = flatpak_decomposed_dup_branch (sdk_ref);
 
   if (opt_sdk_extensions &&
       !ensure_extensions (sdk_deploy, sdk_branch,
@@ -328,7 +325,9 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
 
   if (opt_var)
     {
-      var_ref = flatpak_build_runtime_ref (opt_var, default_branch, opt_arch);
+      var_ref = flatpak_decomposed_new_from_parts (FLATPAK_KINDS_RUNTIME, opt_var, opt_arch, default_branch, error);
+      if (var_ref == NULL)
+        return FALSE;
 
       var_deploy_files = flatpak_find_files_dir_for_ref (var_ref, cancellable, error);
       if (var_deploy_files == NULL)
@@ -349,7 +348,7 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
 
       base_branch = opt_base_version ? opt_base_version : "master";
       base_ref = flatpak_build_app_ref (opt_base, base_branch, opt_arch);
-      base_deploy = flatpak_find_deploy_for_ref (base_ref, NULL, cancellable, error);
+      base_deploy = flatpak_find_deploy_for_ref (base_ref, NULL, NULL, cancellable, error);
       if (base_deploy == NULL)
         return FALSE;
 
@@ -395,15 +394,15 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
                           app_id);
 
   /* The "runtime" can be an app in case we're building an extension */
-  if (g_str_has_prefix (runtime_ref, "runtime/"))
+  if (flatpak_decomposed_is_runtime (runtime_ref))
     g_string_append_printf (metadata_contents,
                             "runtime=%s\n",
-                            runtime_ref + strlen ("runtime/"));
+                            flatpak_decomposed_get_pref (runtime_ref));
 
-  if (g_str_has_prefix (sdk_ref, "runtime/"))
+  if (flatpak_decomposed_is_runtime (sdk_ref))
     g_string_append_printf (metadata_contents,
                             "sdk=%s\n",
-                            sdk_ref + strlen ("runtime/"));
+                            flatpak_decomposed_get_pref (sdk_ref));
 
   if (base_ref)
     g_string_append_printf (metadata_contents,
@@ -430,8 +429,8 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
                               "ref=%s\n"
                               "runtime=%s\n"
                               "%s\n",
-                              runtime_ref,
-                              extension_runtime_id,
+                              flatpak_decomposed_get_ref (runtime_ref),
+                              extension_runtime_pref,
                               optional_extension_tag);
     }
 
@@ -448,6 +447,9 @@ flatpak_builtin_build_init (int argc, char **argv, GCancellable *cancellable, GE
       elements = g_strsplit (opt_extensions[i], "=", 3);
       if (g_strv_length (elements) < 2)
         return flatpak_fail (error, _("Too few elements in --extension argument %s, format should be NAME=VAR[=VALUE]"), opt_extensions[i]);
+
+      if (!flatpak_is_valid_name (elements[0], -1, error))
+        return glnx_prefix_error (error, _("Invalid extension name %s"), elements[0]);
 
       groupname = g_strconcat (FLATPAK_METADATA_GROUP_PREFIX_EXTENSION,
                                elements[0], NULL);
@@ -472,7 +474,6 @@ flatpak_complete_build_init (FlatpakCompletion *completion)
   g_autoptr(GOptionContext) context = NULL;
   g_autoptr(FlatpakDir) user_dir = NULL;
   g_autoptr(FlatpakDir) system_dir = NULL;
-  int i;
 
   context = g_option_context_new ("");
 
@@ -498,35 +499,27 @@ flatpak_complete_build_init (FlatpakCompletion *completion)
       user_dir = flatpak_dir_get_user ();
       {
         g_autoptr(GError) error = NULL;
-        g_auto(GStrv) refs = flatpak_dir_find_installed_refs (user_dir, NULL, NULL, opt_arch,
-                                                              FLATPAK_KINDS_RUNTIME,
-                                                              FIND_MATCHING_REFS_FLAGS_NONE,
-                                                              &error);
+        g_autoptr(GPtrArray) refs = flatpak_dir_find_installed_refs (user_dir, NULL, NULL, opt_arch,
+                                                                     FLATPAK_KINDS_RUNTIME,
+                                                                     FIND_MATCHING_REFS_FLAGS_NONE,
+                                                                     &error);
         if (refs == NULL)
           flatpak_completion_debug ("find local refs error: %s", error->message);
-        for (i = 0; refs != NULL && refs[i] != NULL; i++)
-          {
-            g_auto(GStrv) parts = flatpak_decompose_ref (refs[i], NULL);
-            if (parts)
-              flatpak_complete_word (completion, "%s ", parts[1]);
-          }
+
+        flatpak_complete_ref_id (completion, refs);
       }
 
       system_dir = flatpak_dir_get_system_default ();
       {
         g_autoptr(GError) error = NULL;
-        g_auto(GStrv) refs = flatpak_dir_find_installed_refs (system_dir, NULL, NULL, opt_arch,
-                                                              FLATPAK_KINDS_RUNTIME,
-                                                              FIND_MATCHING_REFS_FLAGS_NONE,
-                                                              &error);
+        g_autoptr(GPtrArray) refs = flatpak_dir_find_installed_refs (system_dir, NULL, NULL, opt_arch,
+                                                                     FLATPAK_KINDS_RUNTIME,
+                                                                     FIND_MATCHING_REFS_FLAGS_NONE,
+                                                                     &error);
         if (refs == NULL)
           flatpak_completion_debug ("find local refs error: %s", error->message);
-        for (i = 0; refs != NULL && refs[i] != NULL; i++)
-          {
-            g_auto(GStrv) parts = flatpak_decompose_ref (refs[i], NULL);
-            if (parts)
-              flatpak_complete_word (completion, "%s ", parts[1]);
-          }
+
+        flatpak_complete_ref_id (completion, refs);
       }
 
       break;
@@ -535,35 +528,27 @@ flatpak_complete_build_init (FlatpakCompletion *completion)
       user_dir = flatpak_dir_get_user ();
       {
         g_autoptr(GError) error = NULL;
-        g_auto(GStrv) refs = flatpak_dir_find_installed_refs (user_dir, completion->argv[3], NULL, opt_arch,
-                                                              FLATPAK_KINDS_RUNTIME,
-                                                              FIND_MATCHING_REFS_FLAGS_NONE,
-                                                              &error);
+        g_autoptr(GPtrArray) refs = flatpak_dir_find_installed_refs (user_dir, completion->argv[3], NULL, opt_arch,
+                                                                     FLATPAK_KINDS_RUNTIME,
+                                                                     FIND_MATCHING_REFS_FLAGS_NONE,
+                                                                     &error);
         if (refs == NULL)
           flatpak_completion_debug ("find local refs error: %s", error->message);
-        for (i = 0; refs != NULL && refs[i] != NULL; i++)
-          {
-            g_auto(GStrv) parts = flatpak_decompose_ref (refs[i], NULL);
-            if (parts)
-              flatpak_complete_word (completion, "%s ", parts[3]);
-          }
+
+        flatpak_complete_ref_branch (completion, refs);
       }
 
       system_dir = flatpak_dir_get_system_default ();
       {
         g_autoptr(GError) error = NULL;
-        g_auto(GStrv) refs = flatpak_dir_find_installed_refs (system_dir, completion->argv[3], NULL, opt_arch,
-                                                              FLATPAK_KINDS_RUNTIME,
-                                                              FIND_MATCHING_REFS_FLAGS_NONE,
-                                                              &error);
+        g_autoptr(GPtrArray) refs = flatpak_dir_find_installed_refs (system_dir, completion->argv[3], NULL, opt_arch,
+                                                                     FLATPAK_KINDS_RUNTIME,
+                                                                     FIND_MATCHING_REFS_FLAGS_NONE,
+                                                                     &error);
         if (refs == NULL)
           flatpak_completion_debug ("find local refs error: %s", error->message);
-        for (i = 0; refs != NULL && refs[i] != NULL; i++)
-          {
-            g_auto(GStrv) parts = flatpak_decompose_ref (refs[i], NULL);
-            if (parts)
-              flatpak_complete_word (completion, "%s ", parts[3]);
-          }
+
+        flatpak_complete_ref_branch (completion, refs);
       }
 
       break;

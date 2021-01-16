@@ -345,6 +345,11 @@
 <td class="signal_flags">Run Last</td>
 </tr>
 <tr>
+<td class="signal_type"><span class="returnvalue">gboolean</span></td>
+<td class="signal_name"><a class="link" href="FlatpakTransaction.html#FlatpakTransaction-ready-pre-auth" title="The “ready-pre-auth” signal">ready-pre-auth</a></td>
+<td class="signal_flags">Run Last</td>
+</tr>
+<tr>
 <td class="signal_type"><span class="returnvalue">void</span></td>
 <td class="signal_name"><a class="link" href="FlatpakTransaction.html#FlatpakTransaction-webflow-done" title="The “webflow-done” signal">webflow-done</a></td>
 <td class="signal_flags">Run Last</td>
@@ -646,10 +651,10 @@ flatpak_transaction_add_rebase (<em class="parameter"><code><a class="link" href
 <p>Adds updating the <em class="parameter"><code>previous_ids</code></em>
  of the given ref to this transaction, via either
 installing the <em class="parameter"><code>ref</code></em>
- if it was not already present. The will treat <em class="parameter"><code>ref</code></em>
- as the
-result of following an eol-rebase, and data migration from the refs in
-<em class="parameter"><code>previous_ids</code></em>
+ if it was not already present or updating it. This will
+treat <em class="parameter"><code>ref</code></em>
+ as the result of following an eol-rebase, and data migration from
+the refs in <em class="parameter"><code>previous_ids</code></em>
  will be set up.</p>
 <p>See <a class="link" href="FlatpakTransaction.html#flatpak-transaction-add-install" title="flatpak_transaction_add_install ()"><code class="function">flatpak_transaction_add_install()</code></a> for a description of <em class="parameter"><code>remote</code></em>
 .</p>
@@ -737,7 +742,7 @@ flatpak_transaction_add_update (<em class="parameter"><code><a class="link" href
 <td class="parameter_name"><p>subpaths</p></td>
 <td class="parameter_description"><p>subpaths to install; <code class="literal">NULL</code>
 to use the current set plus the set of configured languages, or
-<code class="literal">{ "", NULL }</code> to pull all subpaths. </p></td>
+<code class="literal">{ NULL }</code> or <code class="literal">{ "", NULL }</code> to pull all subpaths. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
@@ -970,7 +975,8 @@ flatpak_transaction_get_installation (<em class="parameter"><code><a class="link
 <a name="flatpak-transaction-get-operations"></a><h3>flatpak_transaction_get_operations ()</h3>
 <pre class="programlisting"><span class="returnvalue">GList</span> *
 flatpak_transaction_get_operations (<em class="parameter"><code><a class="link" href="FlatpakTransaction.html" title="FlatpakTransaction"><span class="type">FlatpakTransaction</span></a> *self</code></em>);</pre>
-<p>Gets the list of operations. Skipped operations are not included.</p>
+<p>Gets the list of operations. Skipped operations are not included. The order
+of the list is the order in which the operations are executed.</p>
 <div class="refsect3">
 <a name="flatpak-transaction-get-operations.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1853,6 +1859,12 @@ to be marked as end-of-life before the transaction begins. Unlike
 <a class="link" href="FlatpakTransaction.html#FlatpakTransaction-end-of-lifed" title="The “end-of-lifed” signal"><span class="type">“end-of-lifed”</span></a>, this signal allows for the
 transaction to be modified in order to e.g. install the rebased
 ref.</p>
+<p>If the caller wants to install the rebased ref, they should call
+<a class="link" href="FlatpakTransaction.html#flatpak-transaction-add-uninstall" title="flatpak_transaction_add_uninstall ()"><code class="function">flatpak_transaction_add_uninstall()</code></a> on <em class="parameter"><code>ref</code></em>
+,
+<a class="link" href="FlatpakTransaction.html#flatpak-transaction-add-rebase" title="flatpak_transaction_add_rebase ()"><code class="function">flatpak_transaction_add_rebase()</code></a> on <em class="parameter"><code>rebased_to_ref</code></em>
+, and return <code class="literal">TRUE</code>.
+Otherwise <code class="literal">FALSE</code> may be returned.</p>
 <div class="refsect3">
 <a name="FlatpakTransaction-end-of-lifed-with-rebase.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1904,7 +1916,8 @@ ref.</p>
 <div class="refsect3">
 <a name="FlatpakTransaction-end-of-lifed-with-rebase.returns"></a><h4>Returns</h4>
 <p> <code class="literal">TRUE</code> if the operation on this end-of-lifed ref should
-be skipped, <code class="literal">FALSE</code> if it should remain.</p>
+be skipped (e.g. because the rebased ref has been added to the
+transaction), <code class="literal">FALSE</code> if it should remain.</p>
 </div>
 <p>Flags: Run Last</p>
 </div>
@@ -2035,8 +2048,8 @@ the transaction when an operation is finished.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>commit</p></td>
-<td class="parameter_description"><p>The commit</p></td>
-<td class="parameter_annotations"> </td>
+<td class="parameter_description"><p>The commit. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>result</p></td>
@@ -2114,9 +2127,9 @@ execution of the transaction.</p>
 user_function (<a class="link" href="FlatpakTransaction.html" title="FlatpakTransaction"><span class="type">FlatpakTransaction</span></a> *object,
                <span class="type">gpointer</span>            user_data)</pre>
 <p>The ::ready signal is emitted when all the refs involved in the operation
-have been resolved to commits. At this point <a class="link" href="FlatpakTransaction.html#flatpak-transaction-get-operations" title="flatpak_transaction_get_operations ()"><code class="function">flatpak_transaction_get_operations()</code></a>
-will return all the operations that will be executed as part of the
-transaction.</p>
+have been resolved to commits, and the required authentication for all ops is gotten.
+At this point <a class="link" href="FlatpakTransaction.html#flatpak-transaction-get-operations" title="flatpak_transaction_get_operations ()"><code class="function">flatpak_transaction_get_operations()</code></a> will return all the operations
+that will be executed as part of the transaction.</p>
 <div class="refsect3">
 <a name="FlatpakTransaction-ready.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2141,6 +2154,48 @@ transaction.</p>
 </div>
 <div class="refsect3">
 <a name="FlatpakTransaction-ready.returns"></a><h4>Returns</h4>
+<p> <code class="literal">TRUE</code> to carry on with the transaction, <code class="literal">FALSE</code> to abort</p>
+</div>
+<p>Flags: Run Last</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="FlatpakTransaction-ready-pre-auth"></a><h3>The <code class="literal">“ready-pre-auth”</code> signal</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+user_function (<a class="link" href="FlatpakTransaction.html" title="FlatpakTransaction"><span class="type">FlatpakTransaction</span></a> *object,
+               <span class="type">gpointer</span>            user_data)</pre>
+<p>The ::ready-pre-auth signal is emitted when all the refs involved in the transaction
+have been resolved to commits, but we might not necessarily have asked for authenticaion
+for all their required operations. This is very similar to the ::ready signal, and you can
+chose which one (or both) to use depending on how you want to handle authentication in your user
+interface.</p>
+<p>At this point <a class="link" href="FlatpakTransaction.html#flatpak-transaction-get-operations" title="flatpak_transaction_get_operations ()"><code class="function">flatpak_transaction_get_operations()</code></a> will return all the operations
+that will be executed as part of the transaction. You can call <code class="function">flatpak_transaction_operation_get_requires_authentication()</code>
+to see which will require authentication.</p>
+<div class="refsect3">
+<a name="FlatpakTransaction-ready-pre-auth.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>object</p></td>
+<td class="parameter_description"><p>A <a class="link" href="FlatpakTransaction.html" title="FlatpakTransaction"><span class="type">FlatpakTransaction</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>user data set when the signal handler was connected.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="FlatpakTransaction-ready-pre-auth.returns"></a><h4>Returns</h4>
 <p> <code class="literal">TRUE</code> to carry on with the transaction, <code class="literal">FALSE</code> to abort</p>
 </div>
 <p>Flags: Run Last</p>

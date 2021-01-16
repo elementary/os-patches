@@ -57,6 +57,7 @@ static char *opt_commit;
 static char *opt_runtime_commit;
 static int opt_parent_pid;
 static gboolean opt_parent_expose_pids;
+static gboolean opt_parent_share_pids;
 static int opt_instance_id_fd = -1;
 
 static GOptionEntry options[] = {
@@ -82,6 +83,7 @@ static GOptionEntry options[] = {
   { "die-with-parent", 'p', 0, G_OPTION_ARG_NONE, &opt_die_with_parent, N_("Kill processes when the parent process dies"), NULL },
   { "parent-pid", 0, 0, G_OPTION_ARG_INT, &opt_parent_pid, N_("Use PID as parent pid for sharing namespaces"), N_("PID") },
   { "parent-expose-pids", 0, 0, G_OPTION_ARG_NONE, &opt_parent_expose_pids, N_("Make processes visible in parent namespace"), NULL },
+  { "parent-share-pids", 0, 0, G_OPTION_ARG_NONE, &opt_parent_share_pids, N_("Share process ID namespace with parent"), NULL },
   { "instance-id-fd", 0, 0, G_OPTION_ARG_INT, &opt_instance_id_fd, N_("Write the instance ID to the given file descriptor"), NULL },
   { NULL }
 };
@@ -91,8 +93,8 @@ flatpak_builtin_run (int argc, char **argv, GCancellable *cancellable, GError **
 {
   g_autoptr(GOptionContext) context = NULL;
   g_autoptr(FlatpakDeploy) app_deploy = NULL;
-  g_autofree char *app_ref = NULL;
-  g_autofree char *runtime_ref = NULL;
+  g_autoptr(FlatpakDecomposed) app_ref = NULL;
+  g_autoptr(FlatpakDecomposed) runtime_ref = NULL;
   const char *pref;
   int i;
   int rest_argv_start, rest_argc;
@@ -158,28 +160,22 @@ flatpak_builtin_run (int argc, char **argv, GCancellable *cancellable, GError **
 
   if (branch == NULL || arch == NULL)
     {
-      g_autofree char *current_ref = flatpak_find_current_ref (id, NULL, NULL);
-
+      g_autoptr(FlatpakDecomposed) current_ref = flatpak_find_current_ref (id, NULL, NULL);
       if (current_ref)
         {
-          g_auto(GStrv) parts = flatpak_decompose_ref (current_ref, NULL);
-          if (parts)
-            {
-              if (branch == NULL)
-                branch = g_strdup (parts[3]);
-              if (arch == NULL)
-                arch = g_strdup (parts[2]);
-            }
+          if (branch == NULL)
+            branch = flatpak_decomposed_dup_branch (current_ref);
+          if (arch == NULL)
+            arch = flatpak_decomposed_dup_arch (current_ref);
         }
     }
 
   if ((kinds & FLATPAK_KINDS_APP) != 0)
     {
-      app_ref = flatpak_compose_ref (TRUE, id, branch, arch, &local_error);
-      if (app_ref == NULL)
-        return FALSE;
+      app_ref = flatpak_decomposed_new_from_parts (FLATPAK_KINDS_APP, id, arch, branch, &local_error);
+      if (app_ref != NULL)
+        app_deploy = flatpak_find_deploy_for_ref_in (dirs, flatpak_decomposed_get_ref (app_ref), opt_commit, cancellable, &local_error);
 
-      app_deploy = flatpak_find_deploy_for_ref_in (dirs, app_ref, opt_commit, cancellable, &local_error);
       if (app_deploy == NULL &&
           (!g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_NOT_INSTALLED) ||
            (kinds & FLATPAK_KINDS_RUNTIME) == 0))
@@ -206,22 +202,19 @@ flatpak_builtin_run (int argc, char **argv, GCancellable *cancellable, GError **
       for (i = 0; i < dirs->len; i++)
         {
           FlatpakDir *dir = g_ptr_array_index (dirs, i);
-          g_auto(GStrv) refs = NULL;
-          char **iter;
+          g_autoptr(GPtrArray) refs = NULL;
 
           refs = flatpak_dir_find_installed_refs (dir, id, branch, arch, FLATPAK_KINDS_RUNTIME,
                                                   FIND_MATCHING_REFS_FLAGS_NONE, error);
           if (refs == NULL)
             return FALSE;
-          else if (g_strv_length (refs) == 0)
+          else if (refs->len == 0)
             continue;
 
-          for (iter = refs; iter && *iter; iter++)
+          for (int j = 0; j < refs->len; j++)
             {
-              const char *ref = *iter;
-              RefDirPair *pair;
-
-              pair = ref_dir_pair_new (ref, dir);
+              FlatpakDecomposed *ref = g_ptr_array_index (refs, j);
+              RefDirPair *pair = ref_dir_pair_new (ref, dir);
               g_ptr_array_add (ref_dir_pairs, pair);
             }
         }
@@ -244,7 +237,7 @@ flatpak_builtin_run (int argc, char **argv, GCancellable *cancellable, GError **
            * something that's not deployed */
           chosen_dir_array = g_ptr_array_new ();
           g_ptr_array_add (chosen_dir_array, chosen_pair->dir);
-          runtime_deploy = flatpak_find_deploy_for_ref_in (chosen_dir_array, chosen_pair->ref,
+          runtime_deploy = flatpak_find_deploy_for_ref_in (chosen_dir_array, flatpak_decomposed_get_ref (chosen_pair->ref),
                                                            opt_commit ? opt_commit : opt_runtime_commit,
                                                            cancellable, &local_error2);
         }
@@ -265,7 +258,7 @@ flatpak_builtin_run (int argc, char **argv, GCancellable *cancellable, GError **
           return FALSE;
         }
 
-      runtime_ref = g_strdup (chosen_pair->ref);
+      runtime_ref = flatpak_decomposed_ref (chosen_pair->ref);
 
       /* Clear app-kind error */
       g_clear_error (&local_error);
@@ -295,6 +288,8 @@ flatpak_builtin_run (int argc, char **argv, GCancellable *cancellable, GError **
     flags |= FLATPAK_RUN_FLAG_NO_DOCUMENTS_PORTAL;
   if (opt_parent_expose_pids)
     flags |= FLATPAK_RUN_FLAG_PARENT_EXPOSE_PIDS;
+  if (opt_parent_share_pids)
+    flags |= FLATPAK_RUN_FLAG_PARENT_SHARE_PIDS;
   if (!opt_a11y_bus)
     flags |= FLATPAK_RUN_FLAG_NO_A11Y_BUS_PROXY;
   if (!opt_session_bus)
@@ -329,7 +324,7 @@ flatpak_complete_run (FlatpakCompletion *completion)
   g_autoptr(FlatpakDir) user_dir = NULL;
   g_autoptr(GPtrArray) system_dirs = NULL;
   g_autoptr(GError) error = NULL;
-  int i, j;
+  int i;
   g_autoptr(FlatpakContext) arg_context = NULL;
 
   context = g_option_context_new ("");
@@ -353,18 +348,14 @@ flatpak_complete_run (FlatpakCompletion *completion)
 
       user_dir = flatpak_dir_get_user ();
       {
-        g_auto(GStrv) refs = flatpak_dir_find_installed_refs (user_dir, NULL, NULL, opt_arch,
-                                                              FLATPAK_KINDS_APP,
-                                                              FIND_MATCHING_REFS_FLAGS_NONE,
-                                                              &error);
+        g_autoptr(GPtrArray) refs = flatpak_dir_find_installed_refs (user_dir, NULL, NULL, opt_arch,
+                                                                     FLATPAK_KINDS_APP,
+                                                                     FIND_MATCHING_REFS_FLAGS_NONE,
+                                                                     &error);
         if (refs == NULL)
           flatpak_completion_debug ("find local refs error: %s", error->message);
-        for (i = 0; refs != NULL && refs[i] != NULL; i++)
-          {
-            g_auto(GStrv) parts = flatpak_decompose_ref (refs[i], NULL);
-            if (parts)
-              flatpak_complete_word (completion, "%s ", parts[1]);
-          }
+
+        flatpak_complete_ref_id (completion, refs);
       }
 
       system_dirs = flatpak_dir_get_system_list (NULL, &error);
@@ -377,18 +368,14 @@ flatpak_complete_run (FlatpakCompletion *completion)
       for (i = 0; i < system_dirs->len; i++)
         {
           FlatpakDir *dir = g_ptr_array_index (system_dirs, i);
-          g_auto(GStrv) refs = flatpak_dir_find_installed_refs (dir, NULL, NULL, opt_arch,
-                                                                FLATPAK_KINDS_APP,
-                                                                FIND_MATCHING_REFS_FLAGS_NONE,
-                                                                &error);
+          g_autoptr(GPtrArray) refs = flatpak_dir_find_installed_refs (dir, NULL, NULL, opt_arch,
+                                                                       FLATPAK_KINDS_APP,
+                                                                       FIND_MATCHING_REFS_FLAGS_NONE,
+                                                                       &error);
           if (refs == NULL)
             flatpak_completion_debug ("find local refs error: %s", error->message);
-          for (j = 0; refs != NULL && refs[j] != NULL; j++)
-            {
-              g_auto(GStrv) parts = flatpak_decompose_ref (refs[j], NULL);
-              if (parts)
-                flatpak_complete_word (completion, "%s ", parts[1]);
-            }
+
+          flatpak_complete_ref_id (completion, refs);
         }
 
       break;

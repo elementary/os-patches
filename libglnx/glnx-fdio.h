@@ -111,6 +111,10 @@ glnx_link_tmpfile_at (GLnxTmpfile *tmpf,
                       GError **error);
 
 gboolean
+glnx_tmpfile_reopen_rdonly (GLnxTmpfile *tmpf,
+                            GError **error);
+
+gboolean
 glnx_openat_rdonly (int             dfd,
                     const char     *path,
                     gboolean        follow,
@@ -139,12 +143,14 @@ glnx_file_get_contents_utf8_at (int                   dfd,
  * GLnxFileReplaceFlags:
  * @GLNX_FILE_REPLACE_DATASYNC_NEW: Call fdatasync() even if the file did not exist
  * @GLNX_FILE_REPLACE_NODATASYNC: Never call fdatasync()
+ * @GLNX_FILE_REPLACE_INCREASING_MTIME: Ensure that st_mtime increases (in second precision)
  *
  * Flags controlling file replacement.
  */
 typedef enum {
   GLNX_FILE_REPLACE_DATASYNC_NEW = (1 << 0),
   GLNX_FILE_REPLACE_NODATASYNC = (1 << 1),
+  GLNX_FILE_REPLACE_INCREASING_MTIME = (1 << 2),
 } GLnxFileReplaceFlags;
 
 gboolean
@@ -189,7 +195,7 @@ typedef enum {
 gboolean
 glnx_file_copy_at (int                   src_dfd,
                    const char           *src_subpath,
-                   struct stat          *src_stbuf,
+                   const struct stat    *src_stbuf,
                    int                   dest_dfd,
                    const char           *dest_subpath,
                    GLnxFileCopyFlags     copyflags,

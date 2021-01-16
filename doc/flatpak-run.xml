@@ -1,6 +1,6 @@
 <?xml version='1.0'?> <!--*-nxml-*-->
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
-    "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 
 <refentry id="flatpak-run">
 
@@ -111,6 +111,13 @@
         <para>
             Flatpak sets the environment variable <envar>FLATPAK_ID</envar> to the application
             ID of the running app.
+        </para>
+        <para>
+            Flatpak also bind-mounts as read-only the host's <filename>/etc/os-release</filename>
+            (if available, or <filename>/usr/lib/os-release</filename> as a fallback) to
+            <filename>/run/host/os-release</filename> in accordance with the
+            <ulink url="https://www.freedesktop.org/software/systemd/man/os-release.html">
+            os-release specification</ulink>.
         </para>
         <para>
             If parental controls support is enabled, flatpak will check the
@@ -403,6 +410,35 @@ key=v1;v2;
             </varlistentry>
 
             <varlistentry>
+                <term><option>--unset-env=VAR</option></term>
+
+                <listitem><para>
+                    Unset an environment variable in the application.
+                    This overrides the unset-environment entry in the [Context]
+                    group of the metadata, and the [Environment] group.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--env-fd=<replaceable>FD</replaceable></option></term>
+
+                <listitem><para>
+                    Read environment variables from the file descriptor
+                    <replaceable>FD</replaceable>, and set them as if
+                    via <option>--env</option>. This can be used to avoid
+                    environment variables and their values becoming visible
+                    to other users.
+                </para><para>
+                    Each environment variable is in the form
+                    <replaceable>VAR</replaceable>=<replaceable>VALUE</replaceable>
+                    followed by a zero byte. This is the same format used by
+                    <literal>env -0</literal> and
+                    <filename>/proc/*/environ</filename>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
                 <term><option>--own-name=NAME</option></term>
 
                 <listitem><para>
@@ -556,7 +592,8 @@ key=v1;v2;
                 <term><option>--parent-pid=PID</option></term>
 
                 <listitem><para>
-                    Specifies the pid of the "parent" flatpak, used by --parent-expose-pids.
+                    Specifies the pid of the "parent" flatpak, used by
+                    --parent-expose-pids and --parent-share-pids.
                 </para></listitem>
             </varlistentry>
 
@@ -566,6 +603,16 @@ key=v1;v2;
                 <listitem><para>
                     Make the processes of the new sandbox visible in the sandbox of the parent flatpak, as defined
                     by --parent-pid.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--parent-share-pids</option></term>
+
+                <listitem><para>
+                    Use the same process ID namespace for the processes of
+                    the new sandbox and the sandbox of the parent flatpak, as
+                    defined by --parent-pid. Implies --parent-expose-pids.
                 </para></listitem>
             </varlistentry>
 

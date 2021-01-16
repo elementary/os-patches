@@ -14,8 +14,8 @@ AC_PREREQ([2.63])
 # on the unstable (ie master), interface age = 0
 
 m4_define([flatpak_major_version], [1])
-m4_define([flatpak_minor_version], [8])
-m4_define([flatpak_micro_version], [3])
+m4_define([flatpak_minor_version], [10])
+m4_define([flatpak_micro_version], [0])
 m4_define([flatpak_extra_version], [])
 m4_define([flatpak_interface_age], [0])
 m4_define([flatpak_binary_age],
@@ -32,7 +32,7 @@ AC_INIT([Flatpak],
 GLIB_REQS=2.44
 SYSTEM_BWRAP_REQS=0.4.0
 SYSTEM_DBUS_PROXY_REQS=0.1.0
-OSTREE_REQS=2018.9
+OSTREE_REQS=2020.8
 
 AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
@@ -64,6 +64,7 @@ dnl This list is shared with https://github.com/ostreedev/ostree
 CC_CHECK_FLAGS_APPEND([WARN_CFLAGS], [CFLAGS], [\
 -pipe \
 -Wall \
+-Werror=shadow \
 -Werror=empty-body \
 -Werror=strict-prototypes \
 -Werror=missing-prototypes \
@@ -120,6 +121,15 @@ AC_ARG_WITH([systemdsystemunitdir],
     dnl .../lib, never .../lib64 or .../lib/x86_64-linux-gnu
     [with_systemdsystemunitdir='${prefix}/lib/systemd/system'])
 AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
+
+AC_ARG_WITH([systemdsystemenvgendir],
+            [AS_HELP_STRING([--with-systemdsystemenvgendir=DIR],
+                            [Directory for systemd system environment generators (default=PREFIX/lib/systemd/system-environment-generators)])],
+    [],
+    dnl This is deliberately not ${libdir}: systemd units always go in
+    dnl .../lib, never .../lib64 or .../lib/x86_64-linux-gnu
+    [with_systemdsystemenvgendir='${prefix}/lib/systemd/system-environment-generators'])
+AC_SUBST([systemdsystemenvgendir], [$with_systemdsystemenvgendir])
 
 AC_ARG_WITH([systemduserenvgendir],
             [AS_HELP_STRING([--with-systemduserenvgendir=DIR],
@@ -392,8 +402,8 @@ if test x$enable_documentation = xyes; then
    fi
 
   dnl check for DocBook DTD in the local catalog
-  JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.1.2//EN],
-     [DocBook XML DTD V4.1.2], [have_docbook_dtd=yes], [have_docbook_dtd=no])
+  JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.5//EN],
+     [DocBook XML DTD V4.5], [have_docbook_dtd=yes], [have_docbook_dtd=no])
   if test "$have_docbook_dtd" != yes; then
     AC_MSG_ERROR([DocBook DTD is required for --enable-documentation])
   fi
@@ -505,6 +515,17 @@ if test x$use_lcov = xyes; then
 
   CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
   LDFLAGS="$LDFLAGS -lgcov"
+fi
+
+AC_ARG_ENABLE(internal-checks,
+  AS_HELP_STRING([--enable-internal-checks],
+                 [enable internal checking]),
+  [use_internal_checks=$enableval], [use_internal_checks=no])
+
+if test x$use_internal_checks = xyes; then
+   AM_CONDITIONAL([ENABLE_INTERNAL_CHECKS], [true])
+else
+   AM_CONDITIONAL([ENABLE_INTERNAL_CHECKS], [false])
 fi
 
 GLIB_TESTS

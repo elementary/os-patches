@@ -2151,8 +2151,10 @@ flatpak_installation_list_unused_refs (<em class="parameter"><code><a class="lin
                                        <em class="parameter"><code><span class="type">GCancellable</span> *cancellable</code></em>,
                                        <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
 <p>Lists the installed references that are not 'used'.</p>
-<p>A reference is used if it is either an application, or an sdk,
-or the runtime of a used ref, or an extension of a used ref.</p>
+<p>A reference is used if it is either an application,
+or the runtime or sdk of a used ref, or an extension of a used ref.
+Pinned runtimes are also considered used; see flatpak-pin(1) and
+<code class="function">flatpak_installation_list_pinned_refs()</code>.</p>
 <div class="refsect3">
 <a name="flatpak-installation-list-unused-refs.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -3899,7 +3901,8 @@ lot more efficient if you're doing many requests.</p>
 <tr>
 <td class="enum_member_name"><p><a name="FLATPAK-QUERY-FLAGS-ONLY-SIDELOADED:CAPS"></a>FLATPAK_QUERY_FLAGS_ONLY_SIDELOADED</p></td>
 <td class="enum_member_description">
-<p>Only list refs available from any eventuall sideload repos. (Snce: 1.7)</p>
+<p>Only list refs available from sideload
+repos; see flatpak(1). (Snce: 1.7)</p>
 </td>
 <td class="enum_member_annotations"> </td>
 </tr>

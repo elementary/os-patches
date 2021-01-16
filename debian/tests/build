@@ -6,13 +6,6 @@ set -x
 
 cd "$AUTOPKGTEST_TMP"
 
-
-if [ -n "${DEB_HOST_GNU_TYPE:-}" ]; then
-    CROSS_COMPILE="$DEB_HOST_GNU_TYPE-"
-else
-    CROSS_COMPILE=
-fi
-
 echo "1..1"
 
 cat > trivial.c <<'EOF'
@@ -28,8 +21,6 @@ int main (void)
 }
 EOF
 
-# Deliberately word-splitting, that's how pkg-config works:
-# shellcheck disable=SC2046
-"${CROSS_COMPILE}gcc" -o trivial trivial.c $("${CROSS_COMPILE}pkg-config" --cflags --libs flatpak)
+gcc -o trivial trivial.c $(pkg-config --cflags --libs flatpak)
 test -x trivial
 ./trivial

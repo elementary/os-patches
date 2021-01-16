@@ -32,11 +32,11 @@
       host to the sandbox. For example, it allows you to restart the
       applications or start a more sandboxed instance.
 
-      The D-Bus interface for the document portal is available under the
+      This portal is available on the D-Bus session bus under the
       bus name org.freedesktop.portal.Flatpak and the object path
       /org/freedesktop/portal/Flatpak.
 
-      This documentation describes version 4 of this interface.
+      This documentation describes version 5 of this interface.
   -->
   <interface name='org.freedesktop.portal.Flatpak'>
     <property name="version" type="u" access="read"/>
@@ -47,9 +47,11 @@
          The following flags values are supported:
          <variablelist>
            <varlistentry>
-             <term>1</term>
+             <term>1 (FLATPAK_SPAWN_SUPPORT_FLAGS_EXPOSE_PIDS)</term>
              <listitem><para>
-               Supports the expose sandbox pids flag of Spawn.
+              Supports the expose sandbox pids flag of Spawn.
+              If the version of this interface is 5 or later, this also
+              indicates that the share sandbox pids flag is available.
              </para></listitem>
            </varlistentry>
          </variablelist>
@@ -68,43 +70,43 @@
          @options: Vardict with optional further information
          @pid: the PID of the new process
 
-         This methods let you start a new instance of your
+         This method lets you start a new instance of your
          application, optionally enabling a tighter sandbox.
 
          The following flags values are supported:
          <variablelist>
            <varlistentry>
-             <term>1</term>
+             <term>1 (FLATPAK_SPAWN_FLAGS_CLEAR_ENV)</term>
              <listitem><para>
                Clear the environment.
              </para></listitem>
            </varlistentry>
            <varlistentry>
-             <term>2</term>
+             <term>2 (FLATPAK_SPAWN_FLAGS_LATEST_VERSION)</term>
              <listitem><para>
                Spawn the latest version of the app.
              </para></listitem>
            </varlistentry>
            <varlistentry>
-             <term>4</term>
+             <term>4 (FLATPAK_SPAWN_FLAGS_SANDBOX)</term>
              <listitem><para>
                Spawn in a sandbox (equivalent of the sandbox option of flatpak run).
              </para></listitem>
            </varlistentry>
            <varlistentry>
-             <term>8</term>
+             <term>8 (FLATPAK_SPAWN_FLAGS_NO_NETWORK)</term>
              <listitem><para>
                Spawn without network (equivalent of the unshare=network option of flatpak run).
              </para></listitem>
            </varlistentry>
            <varlistentry>
-             <term>16</term>
+             <term>16 (FLATPAK_SPAWN_FLAGS_WATCH_BUS)</term>
              <listitem><para>
                Kill the sandbox when the caller disappears from the session bus.
              </para></listitem>
            </varlistentry>
            <varlistentry>
-             <term>32</term>
+             <term>32 (FLATPAK_SPAWN_FLAGS_EXPOSE_PIDS)</term>
              <listitem><para>
                Expose the sandbox pids in the callers sandbox, only supported if using user namespaces for containers (not setuid), see the support property.
                </para><para>
@@ -112,7 +114,7 @@
              </para></listitem>
            </varlistentry>
            <varlistentry>
-             <term>64</term>
+             <term>64 (FLATPAK_SPAWN_FLAGS_NOTIFY_START)</term>
              <listitem><para>
                Emit a SpawnStarted signal once the sandboxed process has been
                fully started.
@@ -120,9 +122,24 @@
                This was added in version 4 of this interface (available from flatpak 1.8.0 and later).
              </para></listitem>
            </varlistentry>
+           <varlistentry>
+             <term>128 (FLATPAK_SPAWN_FLAGS_SHARE_PIDS)</term>
+             <listitem><para>
+              Expose the sandbox process IDs in the caller's sandbox and
+              the caller's process IDs in the new sandbox. Only supported
+              if using user namespaces for containers (not setuid), see the
+              support property.
+             </para><para>
+               This was added in version 5 of this interface (available from flatpak 1.10.0 and later).
+             </para></listitem>
+           </varlistentry>
          </variablelist>
 
-         The following options are supported:
+        Unknown (unsupported) flags are an error and will cause Spawn()
+        to fail.
+
+        Unknown (unsupported) options are ignored.
+        The following options are supported:
          <variablelist>
            <varlistentry>
              <term>sandbox-expose as</term>
@@ -206,6 +223,14 @@
              This was added in version 3 of this interface (available from flatpak 1.6.0 and later).
              </para></listitem>
            </varlistentry>
+           <varlistentry>
+             <term>unset-env as</term>
+             <listitem><para>
+             A list of environment variables to unset (remove from the environment).
+             </para><para>
+             This was added in version 5 of this interface (available from flatpak 1.10.0 and later).
+             </para></listitem>
+           </varlistentry>
          </variablelist>
 
     -->
@@ -222,14 +247,15 @@
 
     <!--
         SpawnSignal:
-        @pid: the PID of the process to send the signal to
-        @signal: the signal to send (see signal(7))
+        @pid: the PID inside the container to signal
+        @signal: the signal to send (see <citerefentry><refentrytitle>signal</refentrytitle><manvolnum>7</manvolnum></citerefentry>)
         @to_process_group: whether to send the signal to the process group
 
-        This methods let you send a Unix signal to a process
+        This method lets you send a Unix signal to a process
         that was started with org.freedesktop.portal.Flatpak.Spawn().
         The @pid argument here should be the PID that is returned
-        by the Spawn() call.
+        by the Spawn() call: it is not necessarily valid in the caller's
+        PID namespace.
       -->
     <method name="SpawnSignal">
       <arg type='u' name='pid' direction='in'/>
@@ -241,7 +267,8 @@
         SpawnStarted:
         @pid: the PID of the process that has been started
         @relpid: the PID of the process relative to the current namespace.
-        This is only non-zero if the expose PIDs flag (32) was passed to
+        This is only non-zero if the expose PIDs flag (32) or the share
+        PIDs flag (128) was passed to
         org.freedesktop.portal.Flatpak.Spawn(), and it may still be zero if
         the process exits before its relative PID could be read.
 
@@ -262,10 +289,18 @@
     <!--
         SpawnExited:
         @pid: the PID of the process that has ended
-        @exit_status: the exit status (see waitpid(2))
+        @exit_status: the wait status (see <citerefentry><refentrytitle>waitpid</refentrytitle><manvolnum>2</manvolnum></citerefentry>)
 
         Emitted when a process started by org.freedesktop.portal.Flatpak.Spawn()
         exits.
+        Use g_spawn_check_exit_status(), or the macros such as
+        WIFEXITED documented in
+        <citerefentry><refentrytitle>waitpid</refentrytitle><manvolnum>2</manvolnum></citerefentry>,
+        to interpret the @exit_status.
+
+        This signal is not emitted for processes that were not launched
+        directly by Spawn(), for example if a process launched by
+        Spawn() runs foreground or background child processes.
     -->
     <signal name="SpawnExited">
       <arg type='u' name='pid' direction='out'/>

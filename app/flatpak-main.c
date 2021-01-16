@@ -50,6 +50,8 @@ static gboolean opt_default_arch;
 static gboolean opt_supported_arches;
 static gboolean opt_gl_drivers;
 static gboolean opt_list_installations;
+static gboolean opt_print_updated_env;
+static gboolean opt_print_system_only;
 static gboolean opt_user;
 static gboolean opt_system;
 static char **opt_installations;
@@ -80,6 +82,7 @@ static FlatpakCommand commands[] = {
   /* Alias remove to uninstall to help users of yum/dnf/apt */
   { "remove", NULL, flatpak_builtin_uninstall, flatpak_complete_uninstall, TRUE },
   { "mask", N_("Mask out updates and automatic installation"), flatpak_builtin_mask, flatpak_complete_mask },
+  { "pin", N_("Pin a runtime to prevent automatic removal"), flatpak_builtin_pin, flatpak_complete_pin },
   { "list", N_("List installed apps and/or runtimes"), flatpak_builtin_list, flatpak_complete_list },
   { "info", N_("Show info for installed app or runtime"), flatpak_builtin_info, flatpak_complete_info },
   { "history", N_("Show history"), flatpak_builtin_history, flatpak_complete_history },
@@ -167,6 +170,8 @@ static GOptionEntry empty_entries[] = {
   { "supported-arches", 0, 0, G_OPTION_ARG_NONE, &opt_supported_arches, N_("Print supported arches and exit"), NULL },
   { "gl-drivers", 0, 0, G_OPTION_ARG_NONE, &opt_gl_drivers, N_("Print active gl drivers and exit"), NULL },
   { "installations", 0, 0, G_OPTION_ARG_NONE, &opt_list_installations, N_("Print paths for system installations and exit"), NULL },
+  { "print-updated-env", 0, 0, G_OPTION_ARG_NONE, &opt_print_updated_env, N_("Print the updated environment needed to run flatpaks"), NULL },
+  { "print-system-only", 0, 0, G_OPTION_ARG_NONE, &opt_print_system_only, N_("Only include the system installation with --print-updated-env"), NULL },
   { NULL }
 };
 
@@ -549,7 +554,7 @@ find_similar_command (const char *word,
       if (!commands[i].fn)
         continue;
 
-      int d1 = flatpak_levenshtein_distance (word, commands[i].name);
+      int d1 = flatpak_levenshtein_distance (word, -1, commands[i].name, -1);
       if (d1 < d)
         {
           d = d1;
@@ -562,7 +567,7 @@ find_similar_command (const char *word,
     {
       for (i = 0; entries[k][i].long_name; i++)
         {
-          int d1 = flatpak_levenshtein_distance (word, entries[k][i].long_name);
+          int d1 = flatpak_levenshtein_distance (word, -1, entries[k][i].long_name, -1);
           if (d1 < d)
             {
               d = d1;
@@ -731,6 +736,59 @@ flatpak_run (int      argc,
                         }
                       exit (EXIT_SUCCESS);
                     }
+                }
+
+              /* systemd environment generator for system and user installations.
+               * Intended to be used only from the scripts in env.d/.
+               * See `man systemd.environment-generator`. */
+              if (opt_print_updated_env)
+                {
+                  g_autoptr(GPtrArray) installations = g_ptr_array_new_with_free_func (g_free);  /* (element-type GFile) */
+                  GPtrArray *system_installation_locations;  /* (element-type GFile) */
+                  const gchar * const *xdg_data_dirs = g_get_system_data_dirs ();
+                  g_autoptr(GPtrArray) new_dirs = g_ptr_array_new_with_free_func (g_free);  /* (element-type filename) */
+                  g_autofree gchar *new_dirs_joined = NULL;
+
+                  /* Work out the set of installations we want in the environment. */
+                  if (!opt_print_system_only)
+                    {
+                      g_autoptr(GFile) home_installation_location = flatpak_get_user_base_dir_location ();
+                      g_ptr_array_add (installations, g_file_get_path (home_installation_location));
+                    }
+
+                  system_installation_locations = flatpak_get_system_base_dir_locations (NULL, &local_error);
+                  if (local_error != NULL)
+                    {
+                      g_printerr ("%s\n", local_error->message);
+                      exit (1);
+                    }
+
+                  for (gsize i = 0; i < system_installation_locations->len; i++)
+                    g_ptr_array_add (installations, g_file_get_path (system_installation_locations->pdata[i]));
+
+                  /* Get the export path for each installation, and filter out
+                   * ones which are already listed in @xdg_data_dirs. */
+                  for (gsize i = 0; i < installations->len; i++)
+                    {
+                      g_autofree gchar *share_path = g_build_filename (installations->pdata[i], "exports", "share", NULL);
+                      g_autofree gchar *share_path_with_slash = g_strconcat (share_path, "/", NULL);
+
+                      if (g_strv_contains (xdg_data_dirs, share_path) || g_strv_contains (xdg_data_dirs, share_path_with_slash))
+                        continue;
+
+                      g_ptr_array_add (new_dirs, g_steal_pointer (&share_path));
+                    }
+
+                  /* Add the rest of the existing @xdg_data_dirs to the new list. */
+                  for (gsize i = 0; xdg_data_dirs[i] != NULL; i++)
+                    g_ptr_array_add (new_dirs, g_strdup (xdg_data_dirs[i]));
+                  g_ptr_array_add (new_dirs, NULL);
+
+                  /* Print in a format suitable for a system environment generator. */
+                  new_dirs_joined = g_strjoinv (":", (gchar **) new_dirs->pdata);
+                  g_print ("XDG_DATA_DIRS=%s\n", new_dirs_joined);
+
+                  exit (EXIT_SUCCESS);
                 }
             }
 

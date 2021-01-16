@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>org.freedesktop.Flatpak.Authenticator: Flatpak Library Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="Flatpak Library Reference Manual">
+<link rel="up" href="ch02.html" title="D-Bus APIs">
+<link rel="prev" href="ch02.html" title="D-Bus APIs">
+<link rel="next" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html" title="org.freedesktop.Flatpak.AuthenticatorRequest">
+<meta name="generator" content="GTK-Doc V1.33.0 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#gdbus-org.freedesktop.Flatpak.Authenticator.description" class="shortcut">Description</a></span><span id="nav_properties">  <span class="dim">|</span> 
+                  <a href="#gdbus-org.freedesktop.Flatpak.Authenticator.properties" class="shortcut">Properties</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="ch02.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="gdbus-org.freedesktop.Flatpak.Authenticator"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="gdbus-interface-org-freedesktop-Flatpak-Authenticator.top_of_page"></a>org.freedesktop.Flatpak.Authenticator</span></h2>
+<p>org.freedesktop.Flatpak.Authenticator</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Methods</h2>
+<pre class="synopsis">
+<a class="link" href="gdbus-org.freedesktop.Flatpak.Authenticator.html#gdbus-method-org-freedesktop-Flatpak-Authenticator.RequestRefTokens" title="The RequestRefTokens() method">RequestRefTokens</a> (IN  s           handle_token,
+                  IN  a{sv}       authenticator_options,
+                  IN  s           remote,
+                  IN  s           remote_uri,
+                  IN  a(ssia{sv}) refs,
+                  IN  a{sv}       options,
+                  IN  s           parent_window,
+                  OUT o           handle);
+</pre>
+</div>
+<div class="refsect1">
+<a name="id-1.3.2.4"></a><h2>Properties</h2>
+<pre class="synopsis">
+<a class="link" href="gdbus-org.freedesktop.Flatpak.Authenticator.html#gdbus-property-org-freedesktop-Flatpak-Authenticator.version" title='The "version" property'>version</a>  readable   u
+</pre>
+</div>
+<div class="refsect1">
+<a name="gdbus-interface-org-freedesktop-Flatpak-Authenticator"></a><h2>Description</h2>
+<p></p>
+</div>
+<div class="refsect1">
+<a name="gdbus-methods-org.freedesktop.Flatpak.Authenticator"></a><h2>Method Details</h2>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-Flatpak-Authenticator.RequestRefTokens"></a><h3>The RequestRefTokens() method</h3>
+<pre class="programlisting">
+RequestRefTokens (IN  s           handle_token,
+                  IN  a{sv}       authenticator_options,
+                  IN  s           remote,
+                  IN  s           remote_uri,
+                  IN  a(ssia{sv}) refs,
+                  IN  a{sv}       options,
+                  IN  s           parent_window,
+                  OUT o           handle);
+</pre>
+<p>              object path element. See the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> documentation for
+              more information about the <em class="parameter"><code>handle</code></em>.
+        <em class="parameter"><code>authenticator_options</code></em>: Data from the xa.authenticator-options key in the configuration for the remote, it is up to the authenticator to interpret this how it wants.
+        <em class="parameter"><code>remote</code></em>: The name of the remote we're pulling from.
+        <em class="parameter"><code>remote_uri</code></em>: The uri of the remote we're pulling from.
+        <em class="parameter"><code>refs</code></em>: An array of ref that flatpak wants to pull and info about each ref.
+        <em class="parameter"><code>options</code></em>: An extensible  dict with extra options.
+        <em class="parameter"><code>parent_window</code></em>: Identifier for the application window, see xdg-desktop-portal docs for details on its format.
+        <em class="parameter"><code>handle</code></em>: Object path for the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> object representing this call.
+</p>
+<p>        Starts a request for resolving the tokens to use for <em class="parameter"><code>refs</code></em> from the <em class="parameter"><code>remote</code></em> (with uri <em class="parameter"><code>remote_uri</code></em>).
+</p>
+<p>        This is not a regular dbus call that blocks until the result is done, instead it creates
+        a org.freedesktop.Flatpak.AuthenticatorRequest object representing the ongoing operation and
+        returns an object path <em class="parameter"><code>handle</code></em> to it. When the operation succeds the Response signal is emitted
+        on the request with a response status and a dict with details.
+</p>
+<p>        The <em class="parameter"><code>refs</code></em> array elements are of type (ssia{sv}) where the items are:
+        </p>
+<table border="0" summary="Simple list" class="simplelist">
+<tr><td>s: The ref being pulled</td></tr>
+<tr><td>s: The exact commit being pulled</td></tr>
+<tr><td>i: The token-type of the commit</td></tr>
+<tr><td>a{sv}: Extra per-ref metadata, currenlty only has summary.* fields which are copied from the summary per-commit metadata.</td></tr>
+</table>
+<p>
+</p>
+<p>        On success (response 0) the returned details should have:
+        </p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term">tokens a{sas}</span></p></td>
+<td><p>
+              A list of tokens (the first element of the struct), and the refs (the second).
+            </p></td>
+</tr></tbody>
+</table></div>
+<p>
+</p>
+<p>        For other response types, see the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> docs.
+</p>
+<p>        Exactly how the authenticator decides on what token to use is up to each implementation, but typically it needs to talk to
+        some kind of network service which in turn may need interaction such as login or entering credit card details.
+        This can be done in two ways:
+</p>
+<p>        The authenticator can use a native ui toolkit directly (as its running in the session). To make this work well the
+        flatpak client can (if its has a UI) pass in the <em class="parameter"><code>parent_window</code></em> argument, allowing the authenticator to open its
+        dialog in a way that is correctly parented.
+</p>
+<p>        Alternatively, if the interaction is web-based, then rather than showing a web browser itself it can emit
+        the WebFlow signal on the request object, which lets the flatpak client show a webview embedded in its ui in a
+        way that works best with its user interface.
+</p>
+<p>        For simple user/password authentication (such as http basic authentication systems) there is also a BasicAuth signal
+        that can be used to get the user to interactively authenticate. This kind of authentication is quite limited, but
+        if used it can allow nice interactive authentication even in the command line case.
+</p>
+<p>        Currently used keys in the <em class="parameter"><code>options</code></em> argument:
+        </p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term">xa.oci-registry-uri s</span></p></td>
+<td><p>
+              For OCI remotes this is extracted from the summary file and contains the uri to the OCI registry that
+              contains the images.
+            </p></td>
+</tr>
+<tr>
+<td><p><span class="term">no-interation b</span></p></td>
+<td><p>
+              If true, the authenticator should not do any interaction (and fail instead if it needs to). This can be enabled by
+              clients that want to run in the background.
+            </p></td>
+</tr>
+</tbody>
+</table></div>
+<p>
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>handle_token</code></em></code>:</span></p></td>
+<td><p>A string that will be used as the last element of the <em class="parameter"><code>handle</code></em>. Must be a valid</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN a{sv} <em class="parameter"><code>authenticator_options</code></em></code>:</span></p></td>
+<td><p></p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>remote</code></em></code>:</span></p></td>
+<td><p></p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>remote_uri</code></em></code>:</span></p></td>
+<td><p></p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN a(ssia{sv}) <em class="parameter"><code>refs</code></em></code>:</span></p></td>
+<td><p></p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN a{sv} <em class="parameter"><code>options</code></em></code>:</span></p></td>
+<td><p></p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>parent_window</code></em></code>:</span></p></td>
+<td><p></p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">OUT o <em class="parameter"><code>handle</code></em></code>:</span></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1">
+<a name="gdbus-properties-org.freedesktop.Flatpak.Authenticator"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-Flatpak-Authenticator.version"></a><h3>The "version" property</h3>
+<pre class="programlisting">
+version  readable   u
+</pre>
+<p></p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.0</div>
+</body>
+</html>

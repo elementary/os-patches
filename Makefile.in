@@ -173,33 +173,35 @@ check_PROGRAMS = $(am__EXEEXT_5) $(am__EXEEXT_6)
 @WITH_SYSTEM_BWRAP_FALSE@am__append_16 = -DHELPER=\"$(libexecdir)/flatpak-bwrap\"
 @WITH_SYSTEM_DBUS_PROXY_TRUE@am__append_17 = -DDBUSPROXY=\"$(DBUS_PROXY)\"
 @WITH_SYSTEM_DBUS_PROXY_FALSE@am__append_18 = -DDBUSPROXY=\"$(libexecdir)/flatpak-dbus-proxy\"
-@HAVE_LIBMALCONTENT_TRUE@am__append_19 = \
+@ENABLE_INTERNAL_CHECKS_TRUE@am__append_19 = --internal-validation
+@HAVE_LIBMALCONTENT_TRUE@am__append_20 = \
 @HAVE_LIBMALCONTENT_TRUE@	common/flatpak-parental-controls.c \
 @HAVE_LIBMALCONTENT_TRUE@	common/flatpak-parental-controls-private.h \
 @HAVE_LIBMALCONTENT_TRUE@	$(NULL)
 
-@HAVE_INTROSPECTION_TRUE@am__append_20 = Flatpak-1.0.gir
-@HAVE_INTROSPECTION_TRUE@am__append_21 = $(nodist_gir_DATA) \
+@HAVE_INTROSPECTION_TRUE@am__append_21 = Flatpak-1.0.gir
+@HAVE_INTROSPECTION_TRUE@am__append_22 = $(nodist_gir_DATA) \
 @HAVE_INTROSPECTION_TRUE@	$(nodist_typelib_DATA)
-@BUILD_SYSTEM_HELPER_TRUE@am__append_22 = \
+@BUILD_SYSTEM_HELPER_TRUE@am__append_23 = \
 @BUILD_SYSTEM_HELPER_TRUE@	flatpak-system-helper \
 @BUILD_SYSTEM_HELPER_TRUE@	$(NULL)
 
-@BUILD_SYSTEM_HELPER_TRUE@am__append_23 = system-helper/org.freedesktop.Flatpak.SystemHelper.service.in \
+@BUILD_SYSTEM_HELPER_TRUE@am__append_24 = system-helper/org.freedesktop.Flatpak.SystemHelper.service.in \
 @BUILD_SYSTEM_HELPER_TRUE@	system-helper/flatpak-system-helper.service.in
-@BUILD_SYSTEM_HELPER_TRUE@am__append_24 = system-helper/flatpak-system-helper.service
-@BUILD_SYSTEM_HELPER_TRUE@am__append_25 = system-helper/org.freedesktop.Flatpak.policy system-helper/org.freedesktop.Flatpak.rules system-helper/flatpak-system-helper.service system-helper/org.freedesktop.Flatpak.SystemHelper.service system-helper/flatpak.conf
-@BUILD_AUTO_SIDELOADING_TRUE@am__append_26 = sideload-repos-systemd/flatpak-sideload-usb-repo.service.in
-@BUILD_AUTO_SIDELOADING_TRUE@am__append_27 = sideload-repos-systemd/flatpak-sideload-usb-repo.service \
+@BUILD_SYSTEM_HELPER_TRUE@am__append_25 = system-helper/flatpak-system-helper.service
+@BUILD_SYSTEM_HELPER_TRUE@am__append_26 = system-helper/org.freedesktop.Flatpak.policy system-helper/org.freedesktop.Flatpak.rules system-helper/flatpak-system-helper.service system-helper/org.freedesktop.Flatpak.SystemHelper.service system-helper/flatpak.conf
+@BUILD_AUTO_SIDELOADING_TRUE@am__append_27 = sideload-repos-systemd/flatpak-sideload-usb-repo.service.in
+@BUILD_AUTO_SIDELOADING_TRUE@am__append_28 = sideload-repos-systemd/flatpak-sideload-usb-repo.service \
 @BUILD_AUTO_SIDELOADING_TRUE@	sideload-repos-systemd/flatpak-sideload-usb-repo.path
-@BUILD_AUTO_SIDELOADING_TRUE@am__append_28 = sideload-repos-systemd/flatpak-sideload-repos-dir.service
 @WITH_SYSTEM_DBUS_PROXY_TRUE@am__append_29 = FLATPAK_DBUSPROXY=$(DBUS_PROXY)
 @WITH_SYSTEM_DBUS_PROXY_FALSE@am__append_30 = FLATPAK_DBUSPROXY=$$(cd $(top_builddir) && pwd)/flatpak-dbus-proxy
 @WITH_SYSTEM_BWRAP_TRUE@am__append_31 = FLATPAK_BWRAP=$(BWRAP)
 @WITH_SYSTEM_BWRAP_FALSE@am__append_32 = FLATPAK_BWRAP=$$(cd $(top_builddir) && pwd)/flatpak-bwrap
-@WITH_SYSTEM_DBUS_PROXY_FALSE@am__append_33 = flatpak-dbus-proxy
+@ENABLE_INSTALLED_TESTS_TRUE@am__append_33 = -rpath $(installed_testdir)
+@ENABLE_INSTALLED_TESTS_FALSE@am__append_34 = -rpath  ${abs_builddir}
+@WITH_SYSTEM_DBUS_PROXY_FALSE@am__append_35 = flatpak-dbus-proxy
 @WITH_SYSTEM_BWRAP_FALSE@bwrap_PROGRAMS = flatpak-bwrap$(EXEEXT)
-@INSTALL_GDM_ENV_FILE_TRUE@am__append_34 = flatpak.env
+@INSTALL_GDM_ENV_FILE_TRUE@am__append_36 = flatpak.env
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/libglnx/libglnx.m4 \
@@ -220,7 +222,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
 	$(dist_triggers_SCRIPTS) $(am__dist_dbusconf_DATA_DIST) \
 	$(am__dist_installed_test_keyring_DATA_DIST) \
 	$(am__dist_installed_test_keyring2_DATA_DIST) \
-	$(flatpakinclude_HEADERS) $(am__DIST_COMMON)
+	$(am__dist_tmpfiles_DATA_DIST) $(flatpakinclude_HEADERS) \
+	$(am__DIST_COMMON)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
@@ -232,13 +235,15 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bwrapdir)" \
 	"$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libexecdir)" \
 	"$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libdir)" \
 	"$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(triggersdir)" \
-	"$(DESTDIR)$(envgendir)" "$(DESTDIR)$(installed_testdir)" \
-	"$(DESTDIR)$(scriptsdir)" "$(DESTDIR)$(bashcompletiondir)" \
+	"$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(scriptsdir)" \
+	"$(DESTDIR)$(systemenvgendir)" "$(DESTDIR)$(userenvgendir)" \
+	"$(DESTDIR)$(bashcompletiondir)" \
 	"$(DESTDIR)$(dbus_servicedir)" \
 	"$(DESTDIR)$(dbussystemservicedir)" "$(DESTDIR)$(dbusconfdir)" \
 	"$(DESTDIR)$(installed_test_keyringdir)" \
 	"$(DESTDIR)$(installed_test_keyring2dir)" \
-	"$(DESTDIR)$(envdir)" "$(DESTDIR)$(fishcompletiondir)" \
+	"$(DESTDIR)$(tmpfilesdir)" "$(DESTDIR)$(envdir)" \
+	"$(DESTDIR)$(fishcompletiondir)" \
 	"$(DESTDIR)$(installed_testdir)" \
 	"$(DESTDIR)$(installed_test_metadir)" \
 	"$(DESTDIR)$(introspectiondir)" \
@@ -252,11 +257,12 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bwrapdir)" \
 	"$(DESTDIR)$(zshcompletiondir)" \
 	"$(DESTDIR)$(flatpakincludedir)" \
 	"$(DESTDIR)$(flatpakincludedir)"
-am__EXEEXT_2 = testlibrary$(EXEEXT) testcommon$(EXEEXT)
+am__EXEEXT_2 = testlibrary$(EXEEXT) testcommon$(EXEEXT) \
+	test-exports$(EXEEXT)
 am__EXEEXT_3 = tests/httpcache$(EXEEXT) \
 	tests/test-update-portal$(EXEEXT) \
 	tests/test-portal-impl$(EXEEXT) \
-	tests/test-authenticator$(EXEEXT)
+	tests/test-authenticator$(EXEEXT) tests/list-unused$(EXEEXT)
 am__EXEEXT_4 = $(am__EXEEXT_2) $(am__EXEEXT_3)
 @ENABLE_ALWAYS_BUILD_TESTS_FALSE@am__EXEEXT_5 = $(am__EXEEXT_4)
 am__EXEEXT_6 = test-libglnx-xattrs$(EXEEXT) test-libglnx-fdio$(EXEEXT) \
@@ -378,7 +384,9 @@ am__libflatpak_common_la_SOURCES_DIST = common/flatpak.h \
 	common/flatpak-oci-registry-private.h \
 	common/flatpak-oci-registry.c common/flatpak-portal-error.c \
 	common/flatpak-progress-private.h common/flatpak-progress.c \
-	common/flatpak-ref.c common/flatpak-related-ref-private.h \
+	common/flatpak-ref.c common/flatpak-ref-utils-private.h \
+	common/flatpak-ref-utils.c \
+	common/flatpak-related-ref-private.h \
 	common/flatpak-related-ref.c common/flatpak-remote-private.h \
 	common/flatpak-remote-ref-private.h \
 	common/flatpak-remote-ref.c common/flatpak-remote.c \
@@ -413,6 +421,7 @@ am_libflatpak_common_la_OBJECTS = $(am__objects_3) \
 	common/libflatpak_common_la-flatpak-portal-error.lo \
 	common/libflatpak_common_la-flatpak-progress.lo \
 	common/libflatpak_common_la-flatpak-ref.lo \
+	common/libflatpak_common_la-flatpak-ref-utils.lo \
 	common/libflatpak_common_la-flatpak-related-ref.lo \
 	common/libflatpak_common_la-flatpak-remote-ref.lo \
 	common/libflatpak_common_la-flatpak-remote.lo \
@@ -456,6 +465,17 @@ libglnx_la_OBJECTS = $(am_libglnx_la_OBJECTS)
 libglnx_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libglnx_la_CFLAGS) \
 	$(CFLAGS) $(libglnx_la_LDFLAGS) $(LDFLAGS) -o $@
+tests_libpreload_la_LIBADD =
+am_tests_libpreload_la_OBJECTS = tests/libpreload.lo
+tests_libpreload_la_OBJECTS = $(am_tests_libpreload_la_OBJECTS)
+tests_libpreload_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(tests_libpreload_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+@ENABLE_ALWAYS_BUILD_TESTS_FALSE@am_tests_libpreload_la_rpath =
+@ENABLE_ALWAYS_BUILD_TESTS_TRUE@am_tests_libpreload_la_rpath =
+@ENABLE_INSTALLED_TESTS_TRUE@am_tests_libpreload_la_rpath = -rpath \
+@ENABLE_INSTALLED_TESTS_TRUE@	$(installed_testdir)
 am__flatpak_SOURCES_DIST = app/flatpak-main.c app/flatpak-builtins.h \
 	app/flatpak-builtins-remote-add.c \
 	app/flatpak-builtins-remote-modify.c \
@@ -466,11 +486,11 @@ am__flatpak_SOURCES_DIST = app/flatpak-main.c app/flatpak-builtins.h \
 	app/flatpak-builtins-install.c app/flatpak-builtins-override.c \
 	app/flatpak-builtins-make-current.c \
 	app/flatpak-builtins-update.c app/flatpak-builtins-uninstall.c \
-	app/flatpak-builtins-mask.c app/flatpak-builtins-list.c \
-	app/flatpak-builtins-info.c app/flatpak-builtins-config.c \
-	app/flatpak-builtins-run.c app/flatpak-builtins-enter.c \
-	app/flatpak-builtins-ps.c app/flatpak-builtins-build-init.c \
-	app/flatpak-builtins-build.c \
+	app/flatpak-builtins-mask.c app/flatpak-builtins-pin.c \
+	app/flatpak-builtins-list.c app/flatpak-builtins-info.c \
+	app/flatpak-builtins-config.c app/flatpak-builtins-run.c \
+	app/flatpak-builtins-enter.c app/flatpak-builtins-ps.c \
+	app/flatpak-builtins-build-init.c app/flatpak-builtins-build.c \
 	app/flatpak-builtins-build-finish.c \
 	app/flatpak-builtins-build-export.c \
 	app/flatpak-builtins-build-bundle.c \
@@ -511,6 +531,7 @@ am_flatpak_OBJECTS = app/flatpak-flatpak-main.$(OBJEXT) \
 	app/flatpak-flatpak-builtins-update.$(OBJEXT) \
 	app/flatpak-flatpak-builtins-uninstall.$(OBJEXT) \
 	app/flatpak-flatpak-builtins-mask.$(OBJEXT) \
+	app/flatpak-flatpak-builtins-pin.$(OBJEXT) \
 	app/flatpak-flatpak-builtins-list.$(OBJEXT) \
 	app/flatpak-flatpak-builtins-info.$(OBJEXT) \
 	app/flatpak-flatpak-builtins-config.$(OBJEXT) \
@@ -665,6 +686,16 @@ revokefs_fuse_DEPENDENCIES = libglnx.la $(am__DEPENDENCIES_1) \
 revokefs_fuse_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(revokefs_fuse_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_test_exports_OBJECTS = tests/test_exports-test-exports.$(OBJEXT)
+test_exports_OBJECTS = $(am_test_exports_OBJECTS)
+am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) libflatpak-app.la libflatpak-common.la \
+	libflatpak-common-base.la libglnx.la $(am__DEPENDENCIES_1)
+test_exports_DEPENDENCIES = $(am__DEPENDENCIES_4)
+test_exports_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(test_exports_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_test_libflatpak_OBJECTS =  \
 	common/test_libflatpak-test-lib.$(OBJEXT) $(am__objects_1)
 test_libflatpak_OBJECTS = $(am_test_libflatpak_OBJECTS)
@@ -674,14 +705,19 @@ test_libflatpak_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_libflatpak_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-am_test_libglnx_errors_OBJECTS = libglnx/tests/test_libglnx_errors-test-libglnx-errors.$(OBJEXT)
+am__objects_9 =  \
+	libglnx/tests/test_libglnx_errors-libglnx-testlib.$(OBJEXT)
+am_test_libglnx_errors_OBJECTS = $(am__objects_9) \
+	libglnx/tests/test_libglnx_errors-test-libglnx-errors.$(OBJEXT)
 test_libglnx_errors_OBJECTS = $(am_test_libglnx_errors_OBJECTS)
 test_libglnx_errors_DEPENDENCIES = $(am__DEPENDENCIES_3) libglnx.la
 test_libglnx_errors_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_libglnx_errors_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_test_libglnx_fdio_OBJECTS =  \
+am__objects_10 =  \
+	libglnx/tests/test_libglnx_fdio-libglnx-testlib.$(OBJEXT)
+am_test_libglnx_fdio_OBJECTS = $(am__objects_10) \
 	libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.$(OBJEXT)
 test_libglnx_fdio_OBJECTS = $(am_test_libglnx_fdio_OBJECTS)
 test_libglnx_fdio_DEPENDENCIES = $(am__DEPENDENCIES_3) libglnx.la
@@ -689,21 +725,30 @@ test_libglnx_fdio_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_libglnx_fdio_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-am_test_libglnx_macros_OBJECTS = libglnx/tests/test_libglnx_macros-test-libglnx-macros.$(OBJEXT)
+am__objects_11 =  \
+	libglnx/tests/test_libglnx_macros-libglnx-testlib.$(OBJEXT)
+am_test_libglnx_macros_OBJECTS = $(am__objects_11) \
+	libglnx/tests/test_libglnx_macros-test-libglnx-macros.$(OBJEXT)
 test_libglnx_macros_OBJECTS = $(am_test_libglnx_macros_OBJECTS)
 test_libglnx_macros_DEPENDENCIES = $(am__DEPENDENCIES_3) libglnx.la
 test_libglnx_macros_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_libglnx_macros_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_test_libglnx_shutil_OBJECTS = libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.$(OBJEXT)
+am__objects_12 =  \
+	libglnx/tests/test_libglnx_shutil-libglnx-testlib.$(OBJEXT)
+am_test_libglnx_shutil_OBJECTS = $(am__objects_12) \
+	libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.$(OBJEXT)
 test_libglnx_shutil_OBJECTS = $(am_test_libglnx_shutil_OBJECTS)
 test_libglnx_shutil_DEPENDENCIES = $(am__DEPENDENCIES_3) libglnx.la
 test_libglnx_shutil_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(test_libglnx_shutil_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_test_libglnx_xattrs_OBJECTS = libglnx/tests/test_libglnx_xattrs-test-libglnx-xattrs.$(OBJEXT)
+am__objects_13 =  \
+	libglnx/tests/test_libglnx_xattrs-libglnx-testlib.$(OBJEXT)
+am_test_libglnx_xattrs_OBJECTS = $(am__objects_13) \
+	libglnx/tests/test_libglnx_xattrs-test-libglnx-xattrs.$(OBJEXT)
 test_libglnx_xattrs_OBJECTS = $(am_test_libglnx_xattrs_OBJECTS)
 test_libglnx_xattrs_DEPENDENCIES = $(am__DEPENDENCIES_3) libglnx.la
 test_libglnx_xattrs_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
@@ -735,6 +780,16 @@ tests_httpcache_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 tests_httpcache_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(tests_httpcache_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
+am_tests_list_unused_OBJECTS =  \
+	tests/list_unused-list-unused.$(OBJEXT)
+tests_list_unused_OBJECTS = $(am_tests_list_unused_OBJECTS)
+tests_list_unused_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	libflatpak-common.la libflatpak-common-base.la libglnx.la
+tests_list_unused_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(tests_list_unused_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 am_tests_test_authenticator_OBJECTS =  \
 	tests/test_authenticator-test-authenticator.$(OBJEXT)
@@ -769,8 +824,8 @@ tests_test_update_portal_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 am__dist_libexec_SCRIPTS_DIST =  \
 	sideload-repos-systemd/flatpak-create-sideload-symlinks.sh
 SCRIPTS = $(dist_libexec_SCRIPTS) $(dist_triggers_SCRIPTS) \
-	$(envgen_SCRIPTS) $(installed_test_SCRIPTS) $(noinst_SCRIPTS) \
-	$(scripts_SCRIPTS)
+	$(installed_test_SCRIPTS) $(noinst_SCRIPTS) $(scripts_SCRIPTS) \
+	$(systemenvgen_SCRIPTS) $(userenvgen_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -816,6 +871,7 @@ am__depfiles_remade =  \
 	app/$(DEPDIR)/flatpak-flatpak-builtins-permission-reset.Po \
 	app/$(DEPDIR)/flatpak-flatpak-builtins-permission-set.Po \
 	app/$(DEPDIR)/flatpak-flatpak-builtins-permission-show.Po \
+	app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Po \
 	app/$(DEPDIR)/flatpak-flatpak-builtins-ps.Po \
 	app/$(DEPDIR)/flatpak-flatpak-builtins-remote-add.Po \
 	app/$(DEPDIR)/flatpak-flatpak-builtins-remote-delete.Po \
@@ -865,6 +921,7 @@ am__depfiles_remade =  \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-parental-controls.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-portal-error.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-progress.Plo \
+	common/$(DEPDIR)/libflatpak_common_la-flatpak-ref-utils.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-ref.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-related-ref.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-remote-ref.Plo \
@@ -889,10 +946,15 @@ am__depfiles_remade =  \
 	libglnx/$(DEPDIR)/la-glnx-lockfile.Plo \
 	libglnx/$(DEPDIR)/la-glnx-shutil.Plo \
 	libglnx/$(DEPDIR)/la-glnx-xattrs.Plo \
+	libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Po \
 	libglnx/tests/$(DEPDIR)/test_libglnx_errors-test-libglnx-errors.Po \
+	libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Po \
 	libglnx/tests/$(DEPDIR)/test_libglnx_fdio-test-libglnx-fdio.Po \
+	libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Po \
 	libglnx/tests/$(DEPDIR)/test_libglnx_macros-test-libglnx-macros.Po \
+	libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Po \
 	libglnx/tests/$(DEPDIR)/test_libglnx_shutil-test-libglnx-shutil.Po \
+	libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Po \
 	libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-test-libglnx-xattrs.Po \
 	oci-authenticator/$(DEPDIR)/flatpak_oci_authenticator-flatpak-oci-authenticator.Po \
 	portal/$(DEPDIR)/flatpak_portal-flatpak-permission-dbus.Po \
@@ -907,7 +969,10 @@ am__depfiles_remade =  \
 	session-helper/$(DEPDIR)/flatpak_session_helper-flatpak-session-helper.Po \
 	system-helper/$(DEPDIR)/flatpak_system_helper-flatpak-system-helper.Po \
 	tests/$(DEPDIR)/httpcache-httpcache.Po \
+	tests/$(DEPDIR)/libpreload.Plo \
+	tests/$(DEPDIR)/list_unused-list-unused.Po \
 	tests/$(DEPDIR)/test_authenticator-test-authenticator.Po \
+	tests/$(DEPDIR)/test_exports-test-exports.Po \
 	tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po \
 	tests/$(DEPDIR)/test_update_portal-test-update-portal.Po \
 	tests/$(DEPDIR)/testcommon-testcommon.Po \
@@ -938,18 +1003,20 @@ SOURCES = $(libflatpak_app_la_SOURCES) \
 	$(libflatpak_common_la_SOURCES) \
 	$(nodist_libflatpak_common_la_SOURCES) \
 	$(libflatpak_la_SOURCES) $(libglnx_la_SOURCES) \
-	$(flatpak_SOURCES) $(nodist_flatpak_SOURCES) \
-	$(flatpak_bwrap_SOURCES) $(flatpak_dbus_proxy_SOURCES) \
+	$(tests_libpreload_la_SOURCES) $(flatpak_SOURCES) \
+	$(nodist_flatpak_SOURCES) $(flatpak_bwrap_SOURCES) \
+	$(flatpak_dbus_proxy_SOURCES) \
 	$(flatpak_oci_authenticator_SOURCES) $(flatpak_portal_SOURCES) \
 	$(nodist_flatpak_portal_SOURCES) \
 	$(flatpak_session_helper_SOURCES) \
 	$(flatpak_system_helper_SOURCES) \
 	$(flatpak_validate_icon_SOURCES) $(revokefs_demo_SOURCES) \
-	$(revokefs_fuse_SOURCES) $(test_libflatpak_SOURCES) \
-	$(test_libglnx_errors_SOURCES) $(test_libglnx_fdio_SOURCES) \
-	$(test_libglnx_macros_SOURCES) $(test_libglnx_shutil_SOURCES) \
-	$(test_libglnx_xattrs_SOURCES) $(testcommon_SOURCES) \
-	$(testlibrary_SOURCES) tests/httpcache.c \
+	$(revokefs_fuse_SOURCES) $(test_exports_SOURCES) \
+	$(test_libflatpak_SOURCES) $(test_libglnx_errors_SOURCES) \
+	$(test_libglnx_fdio_SOURCES) $(test_libglnx_macros_SOURCES) \
+	$(test_libglnx_shutil_SOURCES) $(test_libglnx_xattrs_SOURCES) \
+	$(testcommon_SOURCES) $(testlibrary_SOURCES) tests/httpcache.c \
+	$(tests_list_unused_SOURCES) \
 	$(tests_test_authenticator_SOURCES) \
 	$(tests_test_portal_impl_SOURCES) \
 	$(tests_test_update_portal_SOURCES) \
@@ -958,17 +1025,19 @@ DIST_SOURCES = $(libflatpak_app_la_SOURCES) \
 	$(libflatpak_common_base_la_SOURCES) \
 	$(am__libflatpak_common_la_SOURCES_DIST) \
 	$(libflatpak_la_SOURCES) $(libglnx_la_SOURCES) \
-	$(am__flatpak_SOURCES_DIST) $(am__flatpak_bwrap_SOURCES_DIST) \
+	$(tests_libpreload_la_SOURCES) $(am__flatpak_SOURCES_DIST) \
+	$(am__flatpak_bwrap_SOURCES_DIST) \
 	$(am__flatpak_dbus_proxy_SOURCES_DIST) \
 	$(flatpak_oci_authenticator_SOURCES) $(flatpak_portal_SOURCES) \
 	$(flatpak_session_helper_SOURCES) \
 	$(am__flatpak_system_helper_SOURCES_DIST) \
 	$(flatpak_validate_icon_SOURCES) $(revokefs_demo_SOURCES) \
-	$(revokefs_fuse_SOURCES) $(test_libflatpak_SOURCES) \
-	$(test_libglnx_errors_SOURCES) $(test_libglnx_fdio_SOURCES) \
-	$(test_libglnx_macros_SOURCES) $(test_libglnx_shutil_SOURCES) \
-	$(test_libglnx_xattrs_SOURCES) $(testcommon_SOURCES) \
-	$(testlibrary_SOURCES) tests/httpcache.c \
+	$(revokefs_fuse_SOURCES) $(test_exports_SOURCES) \
+	$(test_libflatpak_SOURCES) $(test_libglnx_errors_SOURCES) \
+	$(test_libglnx_fdio_SOURCES) $(test_libglnx_macros_SOURCES) \
+	$(test_libglnx_shutil_SOURCES) $(test_libglnx_xattrs_SOURCES) \
+	$(testcommon_SOURCES) $(testlibrary_SOURCES) tests/httpcache.c \
+	$(tests_list_unused_SOURCES) \
 	$(tests_test_authenticator_SOURCES) \
 	$(tests_test_portal_impl_SOURCES) \
 	$(tests_test_update_portal_SOURCES)
@@ -992,11 +1061,13 @@ am__dist_installed_test_keyring_DATA_DIST = tests/test-keyring/README \
 am__dist_installed_test_keyring2_DATA_DIST =  \
 	tests/test-keyring2/README tests/test-keyring2/pubring.gpg \
 	tests/test-keyring2/secring.gpg
+am__dist_tmpfiles_DATA_DIST =  \
+	sideload-repos-systemd/tmpfiles.d/flatpak-sideload-repos.conf
 DATA = $(bashcompletion_DATA) $(dbus_service_DATA) \
 	$(dbussystemservice_DATA) $(dist_dbusconf_DATA) \
 	$(dist_installed_test_keyring_DATA) \
-	$(dist_installed_test_keyring2_DATA) $(env_DATA) \
-	$(fishcompletion_DATA) $(installed_test_DATA) \
+	$(dist_installed_test_keyring2_DATA) $(dist_tmpfiles_DATA) \
+	$(env_DATA) $(fishcompletion_DATA) $(installed_test_DATA) \
 	$(installed_test_meta_DATA) $(introspection_DATA) \
 	$(nobase_installed_test_DATA) $(nodist_gir_DATA) \
 	$(nodist_typelib_DATA) $(noinst_DATA) $(pkgconfig_DATA) \
@@ -1200,19 +1271,27 @@ am__EXEEXT_11 = tests/test-run@user,nodeltas.wrap \
 	tests/test-info@user.wrap tests/test-info@system.wrap \
 	tests/test-repo@user.wrap tests/test-repo@system.wrap \
 	tests/test-repo@system-norevokefs.wrap \
+	tests/test-repo@user,oldsummary.wrap \
+	tests/test-repo@system,oldsummary.wrap \
 	tests/test-sideload@user.wrap tests/test-sideload@system.wrap \
 	tests/test-bundle@user.wrap tests/test-bundle@system.wrap \
 	tests/test-bundle@system-norevokefs.wrap \
 	tests/test-oci-registry@user.wrap \
-	tests/test-oci-registry@system.wrap $(am__EXEEXT_1)
+	tests/test-oci-registry@system.wrap \
+	tests/test-update-remote-configuration@newsummary.wrap \
+	tests/test-update-remote-configuration@oldsummary.wrap \
+	tests/test-update-portal@user.wrap \
+	tests/test-update-portal@system.wrap \
+	tests/test-summaries@user.wrap \
+	tests/test-summaries@system.wrap tests/test-subset@user.wrap \
+	tests/test-subset@system.wrap $(am__EXEEXT_1)
 am__EXEEXT_12 = $(am__EXEEXT_11)
 am__EXEEXT_13 = tests/test-basic.sh tests/test-completion.sh \
 	tests/test-config.sh tests/test-build-update-repo.sh \
 	tests/test-http-utils.sh tests/test-default-remotes.sh \
 	tests/test-extensions.sh tests/test-oci.sh \
-	tests/test-update-remote-configuration.sh \
-	tests/test-override.sh tests/test-update-portal.sh \
-	tests/test-auth.sh $(am__EXEEXT_1)
+	tests/test-override.sh tests/test-auth.sh tests/test-unused.sh \
+	$(am__EXEEXT_1)
 am__EXEEXT_14 = $(am__EXEEXT_13)
 TEST_SUITE_LOG = test-suite.log
 TEST_EXTENSIONS = @EXEEXT@ .test
@@ -1522,6 +1601,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
+systemdsystemenvgendir = @systemdsystemenvgendir@
 systemdsystemunitdir = @systemdsystemunitdir@
 systemduserenvgendir = @systemduserenvgendir@
 systemduserunitdir = @systemduserunitdir@
@@ -1544,12 +1624,12 @@ noinst_LTLIBRARIES = $(NULL) $(am__append_1) libglnx.la \
 CLEANFILES = $(NULL) $(am__append_13) $(dbus_service_DATA) \
 	$(systemduserunit_DATA) \
 	$(nodist_libflatpak_common_base_la_SOURCES) \
-	$(nodist_libflatpak_common_la_SOURCES) $(am__append_21) \
+	$(nodist_libflatpak_common_la_SOURCES) $(am__append_22) \
 	app/parse-datetime.c $(flatpak_dbus_built_sources) \
 	$(nodist_flatpak_portal_SOURCES) \
 	$(nodist_flatpak_oci_authenticator_SOURCES)
 MAINTAINERCLEANFILES = $(NULL)
-DISTCLEANFILES = $(NULL) $(am__append_25) flatpak.pp.bz2 \
+DISTCLEANFILES = $(NULL) $(am__append_26) flatpak.pp.bz2 \
 	tests/services/org.freedesktop.Flatpak.service \
 	tests/services/org.freedesktop.Flatpak.SystemHelper.service \
 	tests/services/org.freedesktop.portal.Flatpak.service \
@@ -1585,15 +1665,15 @@ EXTRA_DIST = buildutil/tap-driver.sh buildutil/tap-test \
 	selinux/flatpak.fc selinux/flatpak.if $(NULL) \
 	sideload-repos-systemd/flatpak-sideload-usb-repo.path.in \
 	sideload-repos-systemd/flatpak-sideload-usb-repo.service.in \
-	sideload-repos-systemd/flatpak-sideload-repos-dir.service \
 	tests/flatpak.supp tests/glib.supp \
 	tests/Makefile-test-matrix.am.inc tests/expand-test-matrix.sh \
 	tests/test-wrapper.sh $(bashcompletion_DATA) \
 	$(zshcompletion_DATA) $(fishcompletion_DATA) $(profile_DATA) \
-	env.d/flatpak.env.in env.d/60-flatpak flatpak.pc.in \
+	env.d/flatpak.env.in env.d/60-flatpak \
+	env.d/60-flatpak-system-only flatpak.pc.in \
 	scripts/flatpak-bisect scripts/flatpak-coredumpctl \
-	variant-schema-compiler/variant-schema-compiler README.md \
-	flatpak.png
+	variant-schema-compiler/variant-schema-compiler autogen.sh \
+	README.md flatpak.png
 TESTS_ENVIRONMENT = \
 	G_TEST_SRCDIR="$(abs_srcdir)/tests"	\
 	G_TEST_BUILDDIR="$(abs_builddir)/tests"	\
@@ -1644,20 +1724,20 @@ service_in_files = $(NULL) \
 	session-helper/org.freedesktop.Flatpak.service.in \
 	portal/flatpak-portal.service.in \
 	portal/org.freedesktop.portal.Flatpak.service.in \
-	$(am__append_23) \
+	$(am__append_24) \
 	oci-authenticator/flatpak-oci-authenticator.service.in \
 	oci-authenticator/org.flatpak.Authenticator.Oci.service.in \
-	$(am__append_26)
+	$(am__append_27)
 dbus_service_DATA = $(NULL) \
 	session-helper/org.freedesktop.Flatpak.service \
 	portal/org.freedesktop.portal.Flatpak.service \
 	oci-authenticator/org.flatpak.Authenticator.Oci.service
-systemdsystemunit_DATA = $(NULL) $(am__append_24) $(am__append_28)
+systemdsystemunit_DATA = $(NULL) $(am__append_25)
 systemduserunit_DATA = $(NULL) \
 	session-helper/flatpak-session-helper.service \
 	portal/flatpak-portal.service \
 	oci-authenticator/flatpak-oci-authenticator.service \
-	$(am__append_27)
+	$(am__append_28)
 FLATPAK_BINDIR = $(bindir)
 ACLOCAL_AMFLAGS = -I m4 -I libglnx ${ACLOCAL_FLAGS}
 AM_CPPFLAGS = -DFLATPAK_BINDIR=\"$(FLATPAK_BINDIR)\" \
@@ -1726,19 +1806,20 @@ libglnx_la_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags)
 libglnx_la_LDFLAGS = -avoid-version -Bsymbolic-functions -export-symbols-regex "^glnx_" -no-undefined -export-dynamic 
 libglnx_la_LIBADD = $(libglnx_libs)
 libglnx_tests = test-libglnx-xattrs test-libglnx-fdio test-libglnx-errors test-libglnx-macros test-libglnx-shutil
-test_libglnx_xattrs_SOURCES = libglnx/tests/test-libglnx-xattrs.c
+libglnx_testlib_sources = libglnx/tests/libglnx-testlib.c
+test_libglnx_xattrs_SOURCES = $(libglnx_testlib_sources) libglnx/tests/test-libglnx-xattrs.c
 test_libglnx_xattrs_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags)
 test_libglnx_xattrs_LDADD = $(libglnx_libs) libglnx.la
-test_libglnx_fdio_SOURCES = libglnx/tests/test-libglnx-fdio.c
+test_libglnx_fdio_SOURCES = $(libglnx_testlib_sources) libglnx/tests/test-libglnx-fdio.c
 test_libglnx_fdio_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags)
 test_libglnx_fdio_LDADD = $(libglnx_libs) libglnx.la
-test_libglnx_errors_SOURCES = libglnx/tests/test-libglnx-errors.c
+test_libglnx_errors_SOURCES = $(libglnx_testlib_sources) libglnx/tests/test-libglnx-errors.c
 test_libglnx_errors_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags)
 test_libglnx_errors_LDADD = $(libglnx_libs) libglnx.la
-test_libglnx_macros_SOURCES = libglnx/tests/test-libglnx-macros.c
+test_libglnx_macros_SOURCES = $(libglnx_testlib_sources) libglnx/tests/test-libglnx-macros.c
 test_libglnx_macros_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags)
 test_libglnx_macros_LDADD = $(libglnx_libs) libglnx.la
-test_libglnx_shutil_SOURCES = libglnx/tests/test-libglnx-shutil.c
+test_libglnx_shutil_SOURCES = $(libglnx_testlib_sources) libglnx/tests/test-libglnx-shutil.c
 test_libglnx_shutil_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags)
 test_libglnx_shutil_LDADD = $(libglnx_libs) libglnx.la
 flatpakincludedir = $(includedir)/flatpak
@@ -1768,6 +1849,7 @@ nodist_libflatpak_common_base_la_SOURCES = \
 	$(dbus_built_sources)		\
 	$(NULL)
 
+VARIANT_SCHEMA_COMPILER_FLAGS = $(am__append_19)
 libflatpak_common_base_la_SOURCES = \
 	common/flatpak-utils-base.c \
 	common/flatpak-utils-base-private.h \
@@ -1813,7 +1895,9 @@ libflatpak_common_la_SOURCES = $(flatpakinclude_HEADERS) \
 	common/flatpak-oci-registry.c common/flatpak-portal-error.c \
 	common/flatpak-portal-error.h \
 	common/flatpak-progress-private.h common/flatpak-progress.c \
-	common/flatpak-ref.c common/flatpak-related-ref-private.h \
+	common/flatpak-ref.c common/flatpak-ref-utils-private.h \
+	common/flatpak-ref-utils.c \
+	common/flatpak-related-ref-private.h \
 	common/flatpak-related-ref.c common/flatpak-remote-private.h \
 	common/flatpak-remote-ref-private.h \
 	common/flatpak-remote-ref.c common/flatpak-remote.c \
@@ -1824,7 +1908,7 @@ libflatpak_common_la_SOURCES = $(flatpakinclude_HEADERS) \
 	common/flatpak-utils-http.c common/flatpak-utils-private.h \
 	common/flatpak-utils.c common/flatpak-zstd-decompressor.c \
 	common/flatpak-zstd-decompressor-private.h \
-	common/valgrind-private.h $(NULL) $(am__append_19)
+	common/valgrind-private.h $(NULL) $(am__append_20)
 libflatpak_common_la_CFLAGS = \
 	-DFLATPAK_COMPILATION \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
@@ -1917,7 +2001,7 @@ test_libflatpak_LDADD = \
 	$(NULL)
 
 sources = $(libflatpak_common_la_SOURCES) $(libflatpak_la_SOURCES)
-INTROSPECTION_GIRS = $(am__append_20)
+INTROSPECTION_GIRS = $(am__append_21)
 @HAVE_INTROSPECTION_TRUE@introspected_headers = \
 @HAVE_INTROSPECTION_TRUE@	$(flatpakinclude_HEADERS) \
 @HAVE_INTROSPECTION_TRUE@	$(nodist_flatpakinclude_HEADERS) \
@@ -2005,6 +2089,7 @@ flatpak_SOURCES = \
 	app/flatpak-builtins-update.c \
 	app/flatpak-builtins-uninstall.c \
 	app/flatpak-builtins-mask.c \
+	app/flatpak-builtins-pin.c \
 	app/flatpak-builtins-list.c \
 	app/flatpak-builtins-info.c \
 	app/flatpak-builtins-config.c \
@@ -2168,6 +2253,8 @@ revokefs_demo_LDADD = $(BASE_LIBS)
 @BUILD_SELINUX_MODULE_TRUE@	selinux/flatpak.if
 @BUILD_AUTO_SIDELOADING_TRUE@dist_libexec_SCRIPTS = sideload-repos-systemd/flatpak-create-sideload-symlinks.sh
 @BUILD_AUTO_SIDELOADING_TRUE@path_in_files = sideload-repos-systemd/flatpak-sideload-usb-repo.path.in
+@BUILD_AUTO_SIDELOADING_TRUE@tmpfilesdir = $(prefix)/lib/tmpfiles.d
+@BUILD_AUTO_SIDELOADING_TRUE@dist_tmpfiles_DATA = sideload-repos-systemd/tmpfiles.d/flatpak-sideload-repos.conf
 AM_TESTS_ENVIRONMENT = FLATPAK_TESTS_DEBUG=1 \
 	FLATPAK_CONFIG_DIR=/dev/null FLATPAK_TRIGGERSDIR=$$(cd \
 	$(top_srcdir) && pwd)/triggers FLATPAK_VALIDATE_ICON=$$(cd \
@@ -2221,6 +2308,9 @@ testcommon_LDADD = \
 	$(NULL)
 
 testcommon_SOURCES = tests/testcommon.c
+test_exports_CFLAGS = $(testcommon_CFLAGS)
+test_exports_LDADD = $(testcommon_LDADD)
+test_exports_SOURCES = tests/test-exports.c
 tests_httpcache_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\"
@@ -2247,6 +2337,12 @@ tests_test_authenticator_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) \
 
 tests_test_authenticator_LDADD = $(AM_LDADD) $(BASE_LIBS) libflatpak-common.la libflatpak-common-base.la libglnx.la
 tests_test_authenticator_SOURCES = tests/test-authenticator.c
+tests_list_unused_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) \
+	-DFLATPAK_COMPILATION \
+	-DLOCALEDIR=\"$(localedir)\"
+
+tests_list_unused_LDADD = $(AM_LDADD) $(BASE_LIBS) $(BASE_LIBS) $(OSTREE_LIBS) libflatpak-common.la libflatpak-common-base.la libglnx.la
+tests_list_unused_SOURCES = tests/list-unused.c
 dist_installed_test_data = \
 	tests/libtest.sh \
 	tests/org.test.Hello.png \
@@ -2258,6 +2354,10 @@ dist_installed_test_data = \
 	tests/org.flatpak.Authenticator.test.service.in \
 	$(NULL)
 
+test_ltlibraries = tests/libpreload.la
+tests_libpreload_la_SOURCES = tests/libpreload.c
+tests_libpreload_la_LDFLAGS = -avoid-version -module -no-undefined \
+	$(NULL) $(am__append_33) $(am__append_34)
 installed_test_keyringdir = $(installed_testdir)/test-keyring
 installed_test_keyring2dir = $(installed_testdir)/test-keyring2
 @ENABLE_INSTALLED_TESTS_TRUE@dist_installed_test_keyring_DATA = \
@@ -2282,17 +2382,20 @@ TEST_MATRIX_SOURCE = \
 	tests/test-http-utils.sh \
 	tests/test-run.sh{{user+system+system-norevokefs},{nodeltas+deltas}} \
 	tests/test-info.sh{user+system} \
-	tests/test-repo.sh{user+system+system-norevokefs} \
+	tests/test-repo.sh{{user+system+system-norevokefs}+{{user+system},oldsummary}} \
 	tests/test-sideload.sh{user+system} \
 	tests/test-default-remotes.sh \
 	tests/test-extensions.sh \
 	tests/test-bundle.sh{user+system+system-norevokefs} \
 	tests/test-oci.sh \
-	tests/test-oci-registry.sh{{user+system} \
-	tests/test-update-remote-configuration.sh \
+	tests/test-oci-registry.sh{user+system} \
+	tests/test-update-remote-configuration.sh{newsummary+oldsummary} \
 	tests/test-override.sh \
-	tests/test-update-portal.sh \
+	tests/test-update-portal.sh{user+system} \
 	tests/test-auth.sh \
+	tests/test-unused.sh \
+	tests/test-summaries.sh{user+system} \
+	tests/test-subset.sh{user+system} \
 	$(NULL)
 
 
@@ -2309,6 +2412,8 @@ TEST_MATRIX = \
 	tests/test-repo@user.wrap \
 	tests/test-repo@system.wrap \
 	tests/test-repo@system-norevokefs.wrap \
+	tests/test-repo@user,oldsummary.wrap \
+	tests/test-repo@system,oldsummary.wrap \
 	tests/test-sideload@user.wrap \
 	tests/test-sideload@system.wrap \
 	tests/test-bundle@user.wrap \
@@ -2316,6 +2421,14 @@ TEST_MATRIX = \
 	tests/test-bundle@system-norevokefs.wrap \
 	tests/test-oci-registry@user.wrap \
 	tests/test-oci-registry@system.wrap \
+	tests/test-update-remote-configuration@newsummary.wrap \
+	tests/test-update-remote-configuration@oldsummary.wrap \
+	tests/test-update-portal@user.wrap \
+	tests/test-update-portal@system.wrap \
+	tests/test-summaries@user.wrap \
+	tests/test-summaries@system.wrap \
+	tests/test-subset@user.wrap \
+	tests/test-subset@system.wrap \
 	$(NULL)
 
 TEST_MATRIX_DIST = \
@@ -2327,10 +2440,9 @@ TEST_MATRIX_DIST = \
 	tests/test-default-remotes.sh \
 	tests/test-extensions.sh \
 	tests/test-oci.sh \
-	tests/test-update-remote-configuration.sh \
 	tests/test-override.sh \
-	tests/test-update-portal.sh \
 	tests/test-auth.sh \
+	tests/test-unused.sh \
 	$(NULL)
 
 TEST_MATRIX_EXTRA_DIST = \
@@ -2340,12 +2452,16 @@ TEST_MATRIX_EXTRA_DIST = \
 	tests/test-sideload.sh \
 	tests/test-bundle.sh \
 	tests/test-oci-registry.sh \
+	tests/test-update-remote-configuration.sh \
+	tests/test-update-portal.sh \
+	tests/test-summaries.sh \
+	tests/test-subset.sh \
 	$(NULL)
 
 test_scripts = ${TEST_MATRIX}
 dist_test_scripts = ${TEST_MATRIX_DIST}
-test_programs = testlibrary testcommon
-test_extra_programs = tests/httpcache tests/test-update-portal tests/test-portal-impl tests/test-authenticator
+test_programs = testlibrary testcommon test-exports
+test_extra_programs = tests/httpcache tests/test-update-portal tests/test-portal-impl tests/test-authenticator tests/list-unused
 VALGRIND_SUPPRESSIONS_FILES = tests/flatpak.supp tests/glib.supp
 @WITH_SYSTEM_DBUS_PROXY_FALSE@flatpak_dbus_proxy_SOURCES = \
 @WITH_SYSTEM_DBUS_PROXY_FALSE@	dbus-proxy/flatpak-proxy.c	\
@@ -2381,9 +2497,11 @@ fishcompletion_DATA = completion/flatpak.fish
 profiledir = $(PROFILE_DIR)
 profile_DATA = profile/flatpak.sh
 envdir = $(datadir)/gdm/env.d
-env_DATA = $(am__append_34)
-envgendir = $(systemduserenvgendir)
-envgen_SCRIPTS = env.d/60-flatpak
+env_DATA = $(am__append_36)
+systemenvgendir = $(systemdsystemenvgendir)
+systemenvgen_SCRIPTS = env.d/60-flatpak-system-only
+userenvgendir = $(systemduserenvgendir)
+userenvgen_SCRIPTS = env.d/60-flatpak
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = flatpak.pc
 scriptsdir = $(bindir)
@@ -2823,6 +2941,8 @@ common/libflatpak_common_la-flatpak-progress.lo:  \
 	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
 common/libflatpak_common_la-flatpak-ref.lo: common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
+common/libflatpak_common_la-flatpak-ref-utils.lo:  \
+	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
 common/libflatpak_common_la-flatpak-related-ref.lo:  \
 	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
 common/libflatpak_common_la-flatpak-remote-ref.lo:  \
@@ -2880,6 +3000,17 @@ libglnx/la-glnx-shutil.lo: libglnx/$(am__dirstamp) \
 
 libglnx.la: $(libglnx_la_OBJECTS) $(libglnx_la_DEPENDENCIES) $(EXTRA_libglnx_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libglnx_la_LINK)  $(libglnx_la_OBJECTS) $(libglnx_la_LIBADD) $(LIBS)
+tests/$(am__dirstamp):
+	@$(MKDIR_P) tests
+	@: > tests/$(am__dirstamp)
+tests/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) tests/$(DEPDIR)
+	@: > tests/$(DEPDIR)/$(am__dirstamp)
+tests/libpreload.lo: tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+
+tests/libpreload.la: $(tests_libpreload_la_OBJECTS) $(tests_libpreload_la_DEPENDENCIES) $(EXTRA_tests_libpreload_la_DEPENDENCIES) tests/$(am__dirstamp)
+	$(AM_V_CCLD)$(tests_libpreload_la_LINK) $(am_tests_libpreload_la_rpath) $(tests_libpreload_la_OBJECTS) $(tests_libpreload_la_LIBADD) $(LIBS)
 app/flatpak-flatpak-main.$(OBJEXT): app/$(am__dirstamp) \
 	app/$(DEPDIR)/$(am__dirstamp)
 app/flatpak-flatpak-builtins-remote-add.$(OBJEXT):  \
@@ -2905,6 +3036,8 @@ app/flatpak-flatpak-builtins-update.$(OBJEXT): app/$(am__dirstamp) \
 app/flatpak-flatpak-builtins-uninstall.$(OBJEXT): app/$(am__dirstamp) \
 	app/$(DEPDIR)/$(am__dirstamp)
 app/flatpak-flatpak-builtins-mask.$(OBJEXT): app/$(am__dirstamp) \
+	app/$(DEPDIR)/$(am__dirstamp)
+app/flatpak-flatpak-builtins-pin.$(OBJEXT): app/$(am__dirstamp) \
 	app/$(DEPDIR)/$(am__dirstamp)
 app/flatpak-flatpak-builtins-list.$(OBJEXT): app/$(am__dirstamp) \
 	app/$(DEPDIR)/$(am__dirstamp)
@@ -3111,6 +3244,12 @@ revokefs/fuse-writer.$(OBJEXT): revokefs/$(am__dirstamp) \
 revokefs-fuse$(EXEEXT): $(revokefs_fuse_OBJECTS) $(revokefs_fuse_DEPENDENCIES) $(EXTRA_revokefs_fuse_DEPENDENCIES) 
 	@rm -f revokefs-fuse$(EXEEXT)
 	$(AM_V_CCLD)$(revokefs_fuse_LINK) $(revokefs_fuse_OBJECTS) $(revokefs_fuse_LDADD) $(LIBS)
+tests/test_exports-test-exports.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+
+test-exports$(EXEEXT): $(test_exports_OBJECTS) $(test_exports_DEPENDENCIES) $(EXTRA_test_exports_DEPENDENCIES) 
+	@rm -f test-exports$(EXEEXT)
+	$(AM_V_CCLD)$(test_exports_LINK) $(test_exports_OBJECTS) $(test_exports_LDADD) $(LIBS)
 common/test_libflatpak-test-lib.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
 
@@ -3123,6 +3262,9 @@ libglnx/tests/$(am__dirstamp):
 libglnx/tests/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) libglnx/tests/$(DEPDIR)
 	@: > libglnx/tests/$(DEPDIR)/$(am__dirstamp)
+libglnx/tests/test_libglnx_errors-libglnx-testlib.$(OBJEXT):  \
+	libglnx/tests/$(am__dirstamp) \
+	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
 libglnx/tests/test_libglnx_errors-test-libglnx-errors.$(OBJEXT):  \
 	libglnx/tests/$(am__dirstamp) \
 	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
@@ -3130,6 +3272,9 @@ libglnx/tests/test_libglnx_errors-test-libglnx-errors.$(OBJEXT):  \
 test-libglnx-errors$(EXEEXT): $(test_libglnx_errors_OBJECTS) $(test_libglnx_errors_DEPENDENCIES) $(EXTRA_test_libglnx_errors_DEPENDENCIES) 
 	@rm -f test-libglnx-errors$(EXEEXT)
 	$(AM_V_CCLD)$(test_libglnx_errors_LINK) $(test_libglnx_errors_OBJECTS) $(test_libglnx_errors_LDADD) $(LIBS)
+libglnx/tests/test_libglnx_fdio-libglnx-testlib.$(OBJEXT):  \
+	libglnx/tests/$(am__dirstamp) \
+	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
 libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.$(OBJEXT):  \
 	libglnx/tests/$(am__dirstamp) \
 	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
@@ -3137,6 +3282,9 @@ libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.$(OBJEXT):  \
 test-libglnx-fdio$(EXEEXT): $(test_libglnx_fdio_OBJECTS) $(test_libglnx_fdio_DEPENDENCIES) $(EXTRA_test_libglnx_fdio_DEPENDENCIES) 
 	@rm -f test-libglnx-fdio$(EXEEXT)
 	$(AM_V_CCLD)$(test_libglnx_fdio_LINK) $(test_libglnx_fdio_OBJECTS) $(test_libglnx_fdio_LDADD) $(LIBS)
+libglnx/tests/test_libglnx_macros-libglnx-testlib.$(OBJEXT):  \
+	libglnx/tests/$(am__dirstamp) \
+	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
 libglnx/tests/test_libglnx_macros-test-libglnx-macros.$(OBJEXT):  \
 	libglnx/tests/$(am__dirstamp) \
 	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
@@ -3144,6 +3292,9 @@ libglnx/tests/test_libglnx_macros-test-libglnx-macros.$(OBJEXT):  \
 test-libglnx-macros$(EXEEXT): $(test_libglnx_macros_OBJECTS) $(test_libglnx_macros_DEPENDENCIES) $(EXTRA_test_libglnx_macros_DEPENDENCIES) 
 	@rm -f test-libglnx-macros$(EXEEXT)
 	$(AM_V_CCLD)$(test_libglnx_macros_LINK) $(test_libglnx_macros_OBJECTS) $(test_libglnx_macros_LDADD) $(LIBS)
+libglnx/tests/test_libglnx_shutil-libglnx-testlib.$(OBJEXT):  \
+	libglnx/tests/$(am__dirstamp) \
+	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
 libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.$(OBJEXT):  \
 	libglnx/tests/$(am__dirstamp) \
 	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
@@ -3151,6 +3302,9 @@ libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.$(OBJEXT):  \
 test-libglnx-shutil$(EXEEXT): $(test_libglnx_shutil_OBJECTS) $(test_libglnx_shutil_DEPENDENCIES) $(EXTRA_test_libglnx_shutil_DEPENDENCIES) 
 	@rm -f test-libglnx-shutil$(EXEEXT)
 	$(AM_V_CCLD)$(test_libglnx_shutil_LINK) $(test_libglnx_shutil_OBJECTS) $(test_libglnx_shutil_LDADD) $(LIBS)
+libglnx/tests/test_libglnx_xattrs-libglnx-testlib.$(OBJEXT):  \
+	libglnx/tests/$(am__dirstamp) \
+	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
 libglnx/tests/test_libglnx_xattrs-test-libglnx-xattrs.$(OBJEXT):  \
 	libglnx/tests/$(am__dirstamp) \
 	libglnx/tests/$(DEPDIR)/$(am__dirstamp)
@@ -3158,12 +3312,6 @@ libglnx/tests/test_libglnx_xattrs-test-libglnx-xattrs.$(OBJEXT):  \
 test-libglnx-xattrs$(EXEEXT): $(test_libglnx_xattrs_OBJECTS) $(test_libglnx_xattrs_DEPENDENCIES) $(EXTRA_test_libglnx_xattrs_DEPENDENCIES) 
 	@rm -f test-libglnx-xattrs$(EXEEXT)
 	$(AM_V_CCLD)$(test_libglnx_xattrs_LINK) $(test_libglnx_xattrs_OBJECTS) $(test_libglnx_xattrs_LDADD) $(LIBS)
-tests/$(am__dirstamp):
-	@$(MKDIR_P) tests
-	@: > tests/$(am__dirstamp)
-tests/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) tests/$(DEPDIR)
-	@: > tests/$(DEPDIR)/$(am__dirstamp)
 tests/testcommon-testcommon.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
@@ -3182,6 +3330,12 @@ tests/httpcache-httpcache.$(OBJEXT): tests/$(am__dirstamp) \
 tests/httpcache$(EXEEXT): $(tests_httpcache_OBJECTS) $(tests_httpcache_DEPENDENCIES) $(EXTRA_tests_httpcache_DEPENDENCIES) tests/$(am__dirstamp)
 	@rm -f tests/httpcache$(EXEEXT)
 	$(AM_V_CCLD)$(tests_httpcache_LINK) $(tests_httpcache_OBJECTS) $(tests_httpcache_LDADD) $(LIBS)
+tests/list_unused-list-unused.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
+
+tests/list-unused$(EXEEXT): $(tests_list_unused_OBJECTS) $(tests_list_unused_DEPENDENCIES) $(EXTRA_tests_list_unused_DEPENDENCIES) tests/$(am__dirstamp)
+	@rm -f tests/list-unused$(EXEEXT)
+	$(AM_V_CCLD)$(tests_list_unused_LINK) $(tests_list_unused_OBJECTS) $(tests_list_unused_LDADD) $(LIBS)
 tests/test_authenticator-test-authenticator.$(OBJEXT):  \
 	tests/$(am__dirstamp) tests/$(DEPDIR)/$(am__dirstamp)
 
@@ -3272,41 +3426,6 @@ uninstall-dist_triggersSCRIPTS:
 	files=`for p in $$list; do echo "$$p"; done | \
 	       sed -e 's,.*/,,;$(transform)'`; \
 	dir='$(DESTDIR)$(triggersdir)'; $(am__uninstall_files_from_dir)
-install-envgenSCRIPTS: $(envgen_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	@list='$(envgen_SCRIPTS)'; test -n "$(envgendir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(envgendir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(envgendir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n' \
-	    -e 'h;s|.*|.|' \
-	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
-	      if (++n[d] == $(am__install_max)) { \
-		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
-	    else { print "f", d "/" $$4, $$1 } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	     test -z "$$files" || { \
-	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(envgendir)$$dir'"; \
-	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(envgendir)$$dir" || exit $$?; \
-	     } \
-	; done
-
-uninstall-envgenSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(envgen_SCRIPTS)'; test -n "$(envgendir)" || exit 0; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	       sed -e 's,.*/,,;$(transform)'`; \
-	dir='$(DESTDIR)$(envgendir)'; $(am__uninstall_files_from_dir)
 install-installed_testSCRIPTS: $(installed_test_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(installed_test_SCRIPTS)'; test -n "$(installed_testdir)" || list=; \
@@ -3377,6 +3496,76 @@ uninstall-scriptsSCRIPTS:
 	files=`for p in $$list; do echo "$$p"; done | \
 	       sed -e 's,.*/,,;$(transform)'`; \
 	dir='$(DESTDIR)$(scriptsdir)'; $(am__uninstall_files_from_dir)
+install-systemenvgenSCRIPTS: $(systemenvgen_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	@list='$(systemenvgen_SCRIPTS)'; test -n "$(systemenvgendir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(systemenvgendir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(systemenvgendir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n' \
+	    -e 'h;s|.*|.|' \
+	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
+	      if (++n[d] == $(am__install_max)) { \
+		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
+	    else { print "f", d "/" $$4, $$1 } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	     test -z "$$files" || { \
+	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(systemenvgendir)$$dir'"; \
+	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(systemenvgendir)$$dir" || exit $$?; \
+	     } \
+	; done
+
+uninstall-systemenvgenSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(systemenvgen_SCRIPTS)'; test -n "$(systemenvgendir)" || exit 0; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	       sed -e 's,.*/,,;$(transform)'`; \
+	dir='$(DESTDIR)$(systemenvgendir)'; $(am__uninstall_files_from_dir)
+install-userenvgenSCRIPTS: $(userenvgen_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	@list='$(userenvgen_SCRIPTS)'; test -n "$(userenvgendir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(userenvgendir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(userenvgendir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n' \
+	    -e 'h;s|.*|.|' \
+	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
+	      if (++n[d] == $(am__install_max)) { \
+		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
+	    else { print "f", d "/" $$4, $$1 } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	     test -z "$$files" || { \
+	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(userenvgendir)$$dir'"; \
+	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(userenvgendir)$$dir" || exit $$?; \
+	     } \
+	; done
+
+uninstall-userenvgenSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(userenvgen_SCRIPTS)'; test -n "$(userenvgendir)" || exit 0; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	       sed -e 's,.*/,,;$(transform)'`; \
+	dir='$(DESTDIR)$(userenvgendir)'; $(am__uninstall_files_from_dir)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -3396,6 +3585,7 @@ mostlyclean-compile:
 	-rm -f session-helper/*.$(OBJEXT)
 	-rm -f system-helper/*.$(OBJEXT)
 	-rm -f tests/*.$(OBJEXT)
+	-rm -f tests/*.lo
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -3429,6 +3619,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@app/$(DEPDIR)/flatpak-flatpak-builtins-permission-reset.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@app/$(DEPDIR)/flatpak-flatpak-builtins-permission-set.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@app/$(DEPDIR)/flatpak-flatpak-builtins-permission-show.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@app/$(DEPDIR)/flatpak-flatpak-builtins-ps.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@app/$(DEPDIR)/flatpak-flatpak-builtins-remote-add.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@app/$(DEPDIR)/flatpak-flatpak-builtins-remote-delete.Po@am__quote@ # am--include-marker
@@ -3478,6 +3669,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-parental-controls.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-portal-error.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-progress.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-ref-utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-ref.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-related-ref.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-remote-ref.Plo@am__quote@ # am--include-marker
@@ -3502,10 +3694,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@libglnx/$(DEPDIR)/la-glnx-lockfile.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libglnx/$(DEPDIR)/la-glnx-shutil.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libglnx/$(DEPDIR)/la-glnx-xattrs.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_errors-test-libglnx-errors.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_fdio-test-libglnx-fdio.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_macros-test-libglnx-macros.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_shutil-test-libglnx-shutil.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-test-libglnx-xattrs.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@oci-authenticator/$(DEPDIR)/flatpak_oci_authenticator-flatpak-oci-authenticator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@portal/$(DEPDIR)/flatpak_portal-flatpak-permission-dbus.Po@am__quote@ # am--include-marker
@@ -3520,7 +3717,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@session-helper/$(DEPDIR)/flatpak_session_helper-flatpak-session-helper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@system-helper/$(DEPDIR)/flatpak_system_helper-flatpak-system-helper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/httpcache-httpcache.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/libpreload.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/list_unused-list-unused.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_authenticator-test-authenticator.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_exports-test-exports.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_update_portal-test-update-portal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/testcommon-testcommon.Po@am__quote@ # am--include-marker
@@ -3723,6 +3923,13 @@ common/libflatpak_common_la-flatpak-ref.lo: common/flatpak-ref.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/flatpak-ref.c' object='common/libflatpak_common_la-flatpak-ref.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libflatpak_common_la_CFLAGS) $(CFLAGS) -c -o common/libflatpak_common_la-flatpak-ref.lo `test -f 'common/flatpak-ref.c' || echo '$(srcdir)/'`common/flatpak-ref.c
+
+common/libflatpak_common_la-flatpak-ref-utils.lo: common/flatpak-ref-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libflatpak_common_la_CFLAGS) $(CFLAGS) -MT common/libflatpak_common_la-flatpak-ref-utils.lo -MD -MP -MF common/$(DEPDIR)/libflatpak_common_la-flatpak-ref-utils.Tpo -c -o common/libflatpak_common_la-flatpak-ref-utils.lo `test -f 'common/flatpak-ref-utils.c' || echo '$(srcdir)/'`common/flatpak-ref-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/libflatpak_common_la-flatpak-ref-utils.Tpo common/$(DEPDIR)/libflatpak_common_la-flatpak-ref-utils.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/flatpak-ref-utils.c' object='common/libflatpak_common_la-flatpak-ref-utils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libflatpak_common_la_CFLAGS) $(CFLAGS) -c -o common/libflatpak_common_la-flatpak-ref-utils.lo `test -f 'common/flatpak-ref-utils.c' || echo '$(srcdir)/'`common/flatpak-ref-utils.c
 
 common/libflatpak_common_la-flatpak-related-ref.lo: common/flatpak-related-ref.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libflatpak_common_la_CFLAGS) $(CFLAGS) -MT common/libflatpak_common_la-flatpak-related-ref.lo -MD -MP -MF common/$(DEPDIR)/libflatpak_common_la-flatpak-related-ref.Tpo -c -o common/libflatpak_common_la-flatpak-related-ref.lo `test -f 'common/flatpak-related-ref.c' || echo '$(srcdir)/'`common/flatpak-related-ref.c
@@ -4052,6 +4259,20 @@ app/flatpak-flatpak-builtins-mask.obj: app/flatpak-builtins-mask.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='app/flatpak-builtins-mask.c' object='app/flatpak-flatpak-builtins-mask.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(flatpak_CFLAGS) $(CFLAGS) -c -o app/flatpak-flatpak-builtins-mask.obj `if test -f 'app/flatpak-builtins-mask.c'; then $(CYGPATH_W) 'app/flatpak-builtins-mask.c'; else $(CYGPATH_W) '$(srcdir)/app/flatpak-builtins-mask.c'; fi`
+
+app/flatpak-flatpak-builtins-pin.o: app/flatpak-builtins-pin.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(flatpak_CFLAGS) $(CFLAGS) -MT app/flatpak-flatpak-builtins-pin.o -MD -MP -MF app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Tpo -c -o app/flatpak-flatpak-builtins-pin.o `test -f 'app/flatpak-builtins-pin.c' || echo '$(srcdir)/'`app/flatpak-builtins-pin.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Tpo app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='app/flatpak-builtins-pin.c' object='app/flatpak-flatpak-builtins-pin.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(flatpak_CFLAGS) $(CFLAGS) -c -o app/flatpak-flatpak-builtins-pin.o `test -f 'app/flatpak-builtins-pin.c' || echo '$(srcdir)/'`app/flatpak-builtins-pin.c
+
+app/flatpak-flatpak-builtins-pin.obj: app/flatpak-builtins-pin.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(flatpak_CFLAGS) $(CFLAGS) -MT app/flatpak-flatpak-builtins-pin.obj -MD -MP -MF app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Tpo -c -o app/flatpak-flatpak-builtins-pin.obj `if test -f 'app/flatpak-builtins-pin.c'; then $(CYGPATH_W) 'app/flatpak-builtins-pin.c'; else $(CYGPATH_W) '$(srcdir)/app/flatpak-builtins-pin.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Tpo app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='app/flatpak-builtins-pin.c' object='app/flatpak-flatpak-builtins-pin.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(flatpak_CFLAGS) $(CFLAGS) -c -o app/flatpak-flatpak-builtins-pin.obj `if test -f 'app/flatpak-builtins-pin.c'; then $(CYGPATH_W) 'app/flatpak-builtins-pin.c'; else $(CYGPATH_W) '$(srcdir)/app/flatpak-builtins-pin.c'; fi`
 
 app/flatpak-flatpak-builtins-list.o: app/flatpak-builtins-list.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(flatpak_CFLAGS) $(CFLAGS) -MT app/flatpak-flatpak-builtins-list.o -MD -MP -MF app/$(DEPDIR)/flatpak-flatpak-builtins-list.Tpo -c -o app/flatpak-flatpak-builtins-list.o `test -f 'app/flatpak-builtins-list.c' || echo '$(srcdir)/'`app/flatpak-builtins-list.c
@@ -4809,6 +5030,20 @@ revokefs/fuse-writer.obj: revokefs/writer.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(revokefs_fuse_CFLAGS) $(CFLAGS) -c -o revokefs/fuse-writer.obj `if test -f 'revokefs/writer.c'; then $(CYGPATH_W) 'revokefs/writer.c'; else $(CYGPATH_W) '$(srcdir)/revokefs/writer.c'; fi`
 
+tests/test_exports-test-exports.o: tests/test-exports.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_exports_CFLAGS) $(CFLAGS) -MT tests/test_exports-test-exports.o -MD -MP -MF tests/$(DEPDIR)/test_exports-test-exports.Tpo -c -o tests/test_exports-test-exports.o `test -f 'tests/test-exports.c' || echo '$(srcdir)/'`tests/test-exports.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/test_exports-test-exports.Tpo tests/$(DEPDIR)/test_exports-test-exports.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/test-exports.c' object='tests/test_exports-test-exports.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_exports_CFLAGS) $(CFLAGS) -c -o tests/test_exports-test-exports.o `test -f 'tests/test-exports.c' || echo '$(srcdir)/'`tests/test-exports.c
+
+tests/test_exports-test-exports.obj: tests/test-exports.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_exports_CFLAGS) $(CFLAGS) -MT tests/test_exports-test-exports.obj -MD -MP -MF tests/$(DEPDIR)/test_exports-test-exports.Tpo -c -o tests/test_exports-test-exports.obj `if test -f 'tests/test-exports.c'; then $(CYGPATH_W) 'tests/test-exports.c'; else $(CYGPATH_W) '$(srcdir)/tests/test-exports.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/test_exports-test-exports.Tpo tests/$(DEPDIR)/test_exports-test-exports.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/test-exports.c' object='tests/test_exports-test-exports.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_exports_CFLAGS) $(CFLAGS) -c -o tests/test_exports-test-exports.obj `if test -f 'tests/test-exports.c'; then $(CYGPATH_W) 'tests/test-exports.c'; else $(CYGPATH_W) '$(srcdir)/tests/test-exports.c'; fi`
+
 common/test_libflatpak-test-lib.o: common/test-lib.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libflatpak_CFLAGS) $(CFLAGS) -MT common/test_libflatpak-test-lib.o -MD -MP -MF common/$(DEPDIR)/test_libflatpak-test-lib.Tpo -c -o common/test_libflatpak-test-lib.o `test -f 'common/test-lib.c' || echo '$(srcdir)/'`common/test-lib.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/test_libflatpak-test-lib.Tpo common/$(DEPDIR)/test_libflatpak-test-lib.Po
@@ -4822,6 +5057,20 @@ common/test_libflatpak-test-lib.obj: common/test-lib.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/test-lib.c' object='common/test_libflatpak-test-lib.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libflatpak_CFLAGS) $(CFLAGS) -c -o common/test_libflatpak-test-lib.obj `if test -f 'common/test-lib.c'; then $(CYGPATH_W) 'common/test-lib.c'; else $(CYGPATH_W) '$(srcdir)/common/test-lib.c'; fi`
+
+libglnx/tests/test_libglnx_errors-libglnx-testlib.o: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_errors_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_errors-libglnx-testlib.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_errors-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_errors-libglnx-testlib.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_errors_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_errors-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+
+libglnx/tests/test_libglnx_errors-libglnx-testlib.obj: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_errors_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_errors-libglnx-testlib.obj -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_errors-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_errors-libglnx-testlib.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_errors_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_errors-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
 
 libglnx/tests/test_libglnx_errors-test-libglnx-errors.o: libglnx/tests/test-libglnx-errors.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_errors_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_errors-test-libglnx-errors.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_errors-test-libglnx-errors.Tpo -c -o libglnx/tests/test_libglnx_errors-test-libglnx-errors.o `test -f 'libglnx/tests/test-libglnx-errors.c' || echo '$(srcdir)/'`libglnx/tests/test-libglnx-errors.c
@@ -4837,6 +5086,20 @@ libglnx/tests/test_libglnx_errors-test-libglnx-errors.obj: libglnx/tests/test-li
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_errors_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_errors-test-libglnx-errors.obj `if test -f 'libglnx/tests/test-libglnx-errors.c'; then $(CYGPATH_W) 'libglnx/tests/test-libglnx-errors.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/test-libglnx-errors.c'; fi`
 
+libglnx/tests/test_libglnx_fdio-libglnx-testlib.o: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_fdio_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_fdio-libglnx-testlib.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_fdio-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_fdio-libglnx-testlib.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_fdio_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_fdio-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+
+libglnx/tests/test_libglnx_fdio-libglnx-testlib.obj: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_fdio_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_fdio-libglnx-testlib.obj -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_fdio-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_fdio-libglnx-testlib.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_fdio_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_fdio-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
+
 libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.o: libglnx/tests/test-libglnx-fdio.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_fdio_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_fdio-test-libglnx-fdio.Tpo -c -o libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.o `test -f 'libglnx/tests/test-libglnx-fdio.c' || echo '$(srcdir)/'`libglnx/tests/test-libglnx-fdio.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_fdio-test-libglnx-fdio.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_fdio-test-libglnx-fdio.Po
@@ -4850,6 +5113,20 @@ libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.obj: libglnx/tests/test-libgln
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/test-libglnx-fdio.c' object='libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_fdio_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_fdio-test-libglnx-fdio.obj `if test -f 'libglnx/tests/test-libglnx-fdio.c'; then $(CYGPATH_W) 'libglnx/tests/test-libglnx-fdio.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/test-libglnx-fdio.c'; fi`
+
+libglnx/tests/test_libglnx_macros-libglnx-testlib.o: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_macros_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_macros-libglnx-testlib.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_macros-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_macros-libglnx-testlib.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_macros_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_macros-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+
+libglnx/tests/test_libglnx_macros-libglnx-testlib.obj: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_macros_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_macros-libglnx-testlib.obj -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_macros-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_macros-libglnx-testlib.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_macros_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_macros-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
 
 libglnx/tests/test_libglnx_macros-test-libglnx-macros.o: libglnx/tests/test-libglnx-macros.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_macros_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_macros-test-libglnx-macros.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_macros-test-libglnx-macros.Tpo -c -o libglnx/tests/test_libglnx_macros-test-libglnx-macros.o `test -f 'libglnx/tests/test-libglnx-macros.c' || echo '$(srcdir)/'`libglnx/tests/test-libglnx-macros.c
@@ -4865,6 +5142,20 @@ libglnx/tests/test_libglnx_macros-test-libglnx-macros.obj: libglnx/tests/test-li
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_macros_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_macros-test-libglnx-macros.obj `if test -f 'libglnx/tests/test-libglnx-macros.c'; then $(CYGPATH_W) 'libglnx/tests/test-libglnx-macros.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/test-libglnx-macros.c'; fi`
 
+libglnx/tests/test_libglnx_shutil-libglnx-testlib.o: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_shutil_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_shutil-libglnx-testlib.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_shutil-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_shutil-libglnx-testlib.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_shutil_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_shutil-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+
+libglnx/tests/test_libglnx_shutil-libglnx-testlib.obj: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_shutil_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_shutil-libglnx-testlib.obj -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_shutil-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_shutil-libglnx-testlib.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_shutil_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_shutil-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
+
 libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.o: libglnx/tests/test-libglnx-shutil.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_shutil_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_shutil-test-libglnx-shutil.Tpo -c -o libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.o `test -f 'libglnx/tests/test-libglnx-shutil.c' || echo '$(srcdir)/'`libglnx/tests/test-libglnx-shutil.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_shutil-test-libglnx-shutil.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_shutil-test-libglnx-shutil.Po
@@ -4878,6 +5169,20 @@ libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.obj: libglnx/tests/test-li
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/test-libglnx-shutil.c' object='libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_shutil_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_shutil-test-libglnx-shutil.obj `if test -f 'libglnx/tests/test-libglnx-shutil.c'; then $(CYGPATH_W) 'libglnx/tests/test-libglnx-shutil.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/test-libglnx-shutil.c'; fi`
+
+libglnx/tests/test_libglnx_xattrs-libglnx-testlib.o: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_xattrs_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_xattrs-libglnx-testlib.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_xattrs-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_xattrs-libglnx-testlib.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_xattrs_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_xattrs-libglnx-testlib.o `test -f 'libglnx/tests/libglnx-testlib.c' || echo '$(srcdir)/'`libglnx/tests/libglnx-testlib.c
+
+libglnx/tests/test_libglnx_xattrs-libglnx-testlib.obj: libglnx/tests/libglnx-testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_xattrs_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_xattrs-libglnx-testlib.obj -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Tpo -c -o libglnx/tests/test_libglnx_xattrs-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Tpo libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='libglnx/tests/libglnx-testlib.c' object='libglnx/tests/test_libglnx_xattrs-libglnx-testlib.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_xattrs_CFLAGS) $(CFLAGS) -c -o libglnx/tests/test_libglnx_xattrs-libglnx-testlib.obj `if test -f 'libglnx/tests/libglnx-testlib.c'; then $(CYGPATH_W) 'libglnx/tests/libglnx-testlib.c'; else $(CYGPATH_W) '$(srcdir)/libglnx/tests/libglnx-testlib.c'; fi`
 
 libglnx/tests/test_libglnx_xattrs-test-libglnx-xattrs.o: libglnx/tests/test-libglnx-xattrs.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_libglnx_xattrs_CFLAGS) $(CFLAGS) -MT libglnx/tests/test_libglnx_xattrs-test-libglnx-xattrs.o -MD -MP -MF libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-test-libglnx-xattrs.Tpo -c -o libglnx/tests/test_libglnx_xattrs-test-libglnx-xattrs.o `test -f 'libglnx/tests/test-libglnx-xattrs.c' || echo '$(srcdir)/'`libglnx/tests/test-libglnx-xattrs.c
@@ -4934,6 +5239,20 @@ tests/httpcache-httpcache.obj: tests/httpcache.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/httpcache.c' object='tests/httpcache-httpcache.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_httpcache_CFLAGS) $(CFLAGS) -c -o tests/httpcache-httpcache.obj `if test -f 'tests/httpcache.c'; then $(CYGPATH_W) 'tests/httpcache.c'; else $(CYGPATH_W) '$(srcdir)/tests/httpcache.c'; fi`
+
+tests/list_unused-list-unused.o: tests/list-unused.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_list_unused_CFLAGS) $(CFLAGS) -MT tests/list_unused-list-unused.o -MD -MP -MF tests/$(DEPDIR)/list_unused-list-unused.Tpo -c -o tests/list_unused-list-unused.o `test -f 'tests/list-unused.c' || echo '$(srcdir)/'`tests/list-unused.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/list_unused-list-unused.Tpo tests/$(DEPDIR)/list_unused-list-unused.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/list-unused.c' object='tests/list_unused-list-unused.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_list_unused_CFLAGS) $(CFLAGS) -c -o tests/list_unused-list-unused.o `test -f 'tests/list-unused.c' || echo '$(srcdir)/'`tests/list-unused.c
+
+tests/list_unused-list-unused.obj: tests/list-unused.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_list_unused_CFLAGS) $(CFLAGS) -MT tests/list_unused-list-unused.obj -MD -MP -MF tests/$(DEPDIR)/list_unused-list-unused.Tpo -c -o tests/list_unused-list-unused.obj `if test -f 'tests/list-unused.c'; then $(CYGPATH_W) 'tests/list-unused.c'; else $(CYGPATH_W) '$(srcdir)/tests/list-unused.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/list_unused-list-unused.Tpo tests/$(DEPDIR)/list_unused-list-unused.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/list-unused.c' object='tests/list_unused-list-unused.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_list_unused_CFLAGS) $(CFLAGS) -c -o tests/list_unused-list-unused.obj `if test -f 'tests/list-unused.c'; then $(CYGPATH_W) 'tests/list-unused.c'; else $(CYGPATH_W) '$(srcdir)/tests/list-unused.c'; fi`
 
 tests/test_authenticator-test-authenticator.o: tests/test-authenticator.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_test_authenticator_CFLAGS) $(CFLAGS) -MT tests/test_authenticator-test-authenticator.o -MD -MP -MF tests/$(DEPDIR)/test_authenticator-test-authenticator.Tpo -c -o tests/test_authenticator-test-authenticator.o `test -f 'tests/test-authenticator.c' || echo '$(srcdir)/'`tests/test-authenticator.c
@@ -5129,6 +5448,27 @@ uninstall-dist_installed_test_keyring2DATA:
 	@list='$(dist_installed_test_keyring2_DATA)'; test -n "$(installed_test_keyring2dir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(installed_test_keyring2dir)'; $(am__uninstall_files_from_dir)
+install-dist_tmpfilesDATA: $(dist_tmpfiles_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(dist_tmpfiles_DATA)'; test -n "$(tmpfilesdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(tmpfilesdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(tmpfilesdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(tmpfilesdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(tmpfilesdir)" || exit $$?; \
+	done
+
+uninstall-dist_tmpfilesDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_tmpfiles_DATA)'; test -n "$(tmpfilesdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(tmpfilesdir)'; $(am__uninstall_files_from_dir)
 install-envDATA: $(env_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(env_DATA)'; test -n "$(envdir)" || list=; \
@@ -5814,6 +6154,13 @@ testcommon.log: testcommon$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+test-exports.log: test-exports$(EXEEXT)
+	@p='test-exports$(EXEEXT)'; \
+	b='test-exports'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 tests/test-run@user,nodeltas.wrap.log: tests/test-run@user,nodeltas.wrap
 	@p='tests/test-run@user,nodeltas.wrap'; \
 	b='tests/test-run@user,nodeltas.wrap'; \
@@ -5891,6 +6238,20 @@ tests/test-repo@system-norevokefs.wrap.log: tests/test-repo@system-norevokefs.wr
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-repo@user,oldsummary.wrap.log: tests/test-repo@user,oldsummary.wrap
+	@p='tests/test-repo@user,oldsummary.wrap'; \
+	b='tests/test-repo@user,oldsummary.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-repo@system,oldsummary.wrap.log: tests/test-repo@system,oldsummary.wrap
+	@p='tests/test-repo@system,oldsummary.wrap'; \
+	b='tests/test-repo@system,oldsummary.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 tests/test-sideload@user.wrap.log: tests/test-sideload@user.wrap
 	@p='tests/test-sideload@user.wrap'; \
 	b='tests/test-sideload@user.wrap'; \
@@ -5936,6 +6297,62 @@ tests/test-oci-registry@user.wrap.log: tests/test-oci-registry@user.wrap
 tests/test-oci-registry@system.wrap.log: tests/test-oci-registry@system.wrap
 	@p='tests/test-oci-registry@system.wrap'; \
 	b='tests/test-oci-registry@system.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-update-remote-configuration@newsummary.wrap.log: tests/test-update-remote-configuration@newsummary.wrap
+	@p='tests/test-update-remote-configuration@newsummary.wrap'; \
+	b='tests/test-update-remote-configuration@newsummary.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-update-remote-configuration@oldsummary.wrap.log: tests/test-update-remote-configuration@oldsummary.wrap
+	@p='tests/test-update-remote-configuration@oldsummary.wrap'; \
+	b='tests/test-update-remote-configuration@oldsummary.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-update-portal@user.wrap.log: tests/test-update-portal@user.wrap
+	@p='tests/test-update-portal@user.wrap'; \
+	b='tests/test-update-portal@user.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-update-portal@system.wrap.log: tests/test-update-portal@system.wrap
+	@p='tests/test-update-portal@system.wrap'; \
+	b='tests/test-update-portal@system.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-summaries@user.wrap.log: tests/test-summaries@user.wrap
+	@p='tests/test-summaries@user.wrap'; \
+	b='tests/test-summaries@user.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-summaries@system.wrap.log: tests/test-summaries@system.wrap
+	@p='tests/test-summaries@system.wrap'; \
+	b='tests/test-summaries@system.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-subset@user.wrap.log: tests/test-subset@user.wrap
+	@p='tests/test-subset@user.wrap'; \
+	b='tests/test-subset@user.wrap'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-subset@system.wrap.log: tests/test-subset@system.wrap
+	@p='tests/test-subset@system.wrap'; \
+	b='tests/test-subset@system.wrap'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -5996,13 +6413,6 @@ tests/test-oci.sh.log: tests/test-oci.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/test-update-remote-configuration.sh.log: tests/test-update-remote-configuration.sh
-	@p='tests/test-update-remote-configuration.sh'; \
-	b='tests/test-update-remote-configuration.sh'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 tests/test-override.sh.log: tests/test-override.sh
 	@p='tests/test-override.sh'; \
 	b='tests/test-override.sh'; \
@@ -6010,16 +6420,16 @@ tests/test-override.sh.log: tests/test-override.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/test-update-portal.sh.log: tests/test-update-portal.sh
-	@p='tests/test-update-portal.sh'; \
-	b='tests/test-update-portal.sh'; \
+tests/test-auth.sh.log: tests/test-auth.sh
+	@p='tests/test-auth.sh'; \
+	b='tests/test-auth.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-tests/test-auth.sh.log: tests/test-auth.sh
-	@p='tests/test-auth.sh'; \
-	b='tests/test-auth.sh'; \
+tests/test-unused.sh.log: tests/test-unused.sh
+	@p='tests/test-unused.sh'; \
+	b='tests/test-unused.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -6282,7 +6692,7 @@ install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bwrapdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(triggersdir)" "$(DESTDIR)$(envgendir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(scriptsdir)" "$(DESTDIR)$(bashcompletiondir)" "$(DESTDIR)$(dbus_servicedir)" "$(DESTDIR)$(dbussystemservicedir)" "$(DESTDIR)$(dbusconfdir)" "$(DESTDIR)$(installed_test_keyringdir)" "$(DESTDIR)$(installed_test_keyring2dir)" "$(DESTDIR)$(envdir)" "$(DESTDIR)$(fishcompletiondir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(installed_test_metadir)" "$(DESTDIR)$(introspectiondir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(girdir)" "$(DESTDIR)$(typelibdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(polkit_policydir)" "$(DESTDIR)$(polkit_rulesdir)" "$(DESTDIR)$(profiledir)" "$(DESTDIR)$(selinux_develdir)" "$(DESTDIR)$(selinux_moduledir)" "$(DESTDIR)$(systemdsystemunitdir)" "$(DESTDIR)$(systemduserunitdir)" "$(DESTDIR)$(sysusersdir)" "$(DESTDIR)$(zshcompletiondir)" "$(DESTDIR)$(flatpakincludedir)" "$(DESTDIR)$(flatpakincludedir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bwrapdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(triggersdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(scriptsdir)" "$(DESTDIR)$(systemenvgendir)" "$(DESTDIR)$(userenvgendir)" "$(DESTDIR)$(bashcompletiondir)" "$(DESTDIR)$(dbus_servicedir)" "$(DESTDIR)$(dbussystemservicedir)" "$(DESTDIR)$(dbusconfdir)" "$(DESTDIR)$(installed_test_keyringdir)" "$(DESTDIR)$(installed_test_keyring2dir)" "$(DESTDIR)$(tmpfilesdir)" "$(DESTDIR)$(envdir)" "$(DESTDIR)$(fishcompletiondir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(installed_test_metadir)" "$(DESTDIR)$(introspectiondir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(girdir)" "$(DESTDIR)$(typelibdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(polkit_policydir)" "$(DESTDIR)$(polkit_rulesdir)" "$(DESTDIR)$(profiledir)" "$(DESTDIR)$(selinux_develdir)" "$(DESTDIR)$(selinux_moduledir)" "$(DESTDIR)$(systemdsystemunitdir)" "$(DESTDIR)$(systemduserunitdir)" "$(DESTDIR)$(sysusersdir)" "$(DESTDIR)$(zshcompletiondir)" "$(DESTDIR)$(flatpakincludedir)" "$(DESTDIR)$(flatpakincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -6388,6 +6798,7 @@ distclean: distclean-recursive
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-permission-reset.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-permission-set.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-permission-show.Po
+	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-ps.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-remote-add.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-remote-delete.Po
@@ -6437,6 +6848,7 @@ distclean: distclean-recursive
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-parental-controls.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-portal-error.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-progress.Plo
+	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-ref-utils.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-ref.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-related-ref.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-remote-ref.Plo
@@ -6461,10 +6873,15 @@ distclean: distclean-recursive
 	-rm -f libglnx/$(DEPDIR)/la-glnx-lockfile.Plo
 	-rm -f libglnx/$(DEPDIR)/la-glnx-shutil.Plo
 	-rm -f libglnx/$(DEPDIR)/la-glnx-xattrs.Plo
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_errors-test-libglnx-errors.Po
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_fdio-test-libglnx-fdio.Po
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_macros-test-libglnx-macros.Po
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_shutil-test-libglnx-shutil.Po
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-test-libglnx-xattrs.Po
 	-rm -f oci-authenticator/$(DEPDIR)/flatpak_oci_authenticator-flatpak-oci-authenticator.Po
 	-rm -f portal/$(DEPDIR)/flatpak_portal-flatpak-permission-dbus.Po
@@ -6479,7 +6896,10 @@ distclean: distclean-recursive
 	-rm -f session-helper/$(DEPDIR)/flatpak_session_helper-flatpak-session-helper.Po
 	-rm -f system-helper/$(DEPDIR)/flatpak_system_helper-flatpak-system-helper.Po
 	-rm -f tests/$(DEPDIR)/httpcache-httpcache.Po
+	-rm -f tests/$(DEPDIR)/libpreload.Plo
+	-rm -f tests/$(DEPDIR)/list_unused-list-unused.Po
 	-rm -f tests/$(DEPDIR)/test_authenticator-test-authenticator.Po
+	-rm -f tests/$(DEPDIR)/test_exports-test-exports.Po
 	-rm -f tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po
 	-rm -f tests/$(DEPDIR)/test_update_portal-test-update-portal.Po
 	-rm -f tests/$(DEPDIR)/testcommon-testcommon.Po
@@ -6505,8 +6925,8 @@ install-data-am: install-bashcompletionDATA install-bwrapPROGRAMS \
 	install-dist_dbusconfDATA \
 	install-dist_installed_test_keyring2DATA \
 	install-dist_installed_test_keyringDATA \
-	install-dist_triggersSCRIPTS install-envDATA \
-	install-envgenSCRIPTS install-fishcompletionDATA \
+	install-dist_tmpfilesDATA install-dist_triggersSCRIPTS \
+	install-envDATA install-fishcompletionDATA \
 	install-flatpakincludeHEADERS install-installed_testDATA \
 	install-installed_testLTLIBRARIES \
 	install-installed_testPROGRAMS install-installed_testSCRIPTS \
@@ -6518,7 +6938,8 @@ install-data-am: install-bashcompletionDATA install-bwrapPROGRAMS \
 	install-profileDATA install-scriptsSCRIPTS \
 	install-selinux_develDATA install-selinux_moduleDATA \
 	install-systemdsystemunitDATA install-systemduserunitDATA \
-	install-sysusersDATA install-zshcompletionDATA
+	install-systemenvgenSCRIPTS install-sysusersDATA \
+	install-userenvgenSCRIPTS install-zshcompletionDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
 install-dvi: install-dvi-recursive
@@ -6580,6 +7001,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-permission-reset.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-permission-set.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-permission-show.Po
+	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-pin.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-ps.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-remote-add.Po
 	-rm -f app/$(DEPDIR)/flatpak-flatpak-builtins-remote-delete.Po
@@ -6629,6 +7051,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-parental-controls.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-portal-error.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-progress.Plo
+	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-ref-utils.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-ref.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-related-ref.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-remote-ref.Plo
@@ -6653,10 +7076,15 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f libglnx/$(DEPDIR)/la-glnx-lockfile.Plo
 	-rm -f libglnx/$(DEPDIR)/la-glnx-shutil.Plo
 	-rm -f libglnx/$(DEPDIR)/la-glnx-xattrs.Plo
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_errors-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_errors-test-libglnx-errors.Po
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_fdio-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_fdio-test-libglnx-fdio.Po
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_macros-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_macros-test-libglnx-macros.Po
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_shutil-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_shutil-test-libglnx-shutil.Po
+	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-libglnx-testlib.Po
 	-rm -f libglnx/tests/$(DEPDIR)/test_libglnx_xattrs-test-libglnx-xattrs.Po
 	-rm -f oci-authenticator/$(DEPDIR)/flatpak_oci_authenticator-flatpak-oci-authenticator.Po
 	-rm -f portal/$(DEPDIR)/flatpak_portal-flatpak-permission-dbus.Po
@@ -6671,7 +7099,10 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f session-helper/$(DEPDIR)/flatpak_session_helper-flatpak-session-helper.Po
 	-rm -f system-helper/$(DEPDIR)/flatpak_system_helper-flatpak-system-helper.Po
 	-rm -f tests/$(DEPDIR)/httpcache-httpcache.Po
+	-rm -f tests/$(DEPDIR)/libpreload.Plo
+	-rm -f tests/$(DEPDIR)/list_unused-list-unused.Po
 	-rm -f tests/$(DEPDIR)/test_authenticator-test-authenticator.Po
+	-rm -f tests/$(DEPDIR)/test_exports-test-exports.Po
 	-rm -f tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po
 	-rm -f tests/$(DEPDIR)/test_update_portal-test-update-portal.Po
 	-rm -f tests/$(DEPDIR)/testcommon-testcommon.Po
@@ -6697,8 +7128,8 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 	uninstall-dbussystemserviceDATA uninstall-dist_dbusconfDATA \
 	uninstall-dist_installed_test_keyring2DATA \
 	uninstall-dist_installed_test_keyringDATA \
-	uninstall-dist_libexecSCRIPTS uninstall-dist_triggersSCRIPTS \
-	uninstall-envDATA uninstall-envgenSCRIPTS \
+	uninstall-dist_libexecSCRIPTS uninstall-dist_tmpfilesDATA \
+	uninstall-dist_triggersSCRIPTS uninstall-envDATA \
 	uninstall-fishcompletionDATA uninstall-flatpakincludeHEADERS \
 	uninstall-installed_testDATA \
 	uninstall-installed_testLTLIBRARIES \
@@ -6713,7 +7144,8 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 	uninstall-polkit_rulesDATA uninstall-profileDATA \
 	uninstall-scriptsSCRIPTS uninstall-selinux_develDATA \
 	uninstall-selinux_moduleDATA uninstall-systemdsystemunitDATA \
-	uninstall-systemduserunitDATA uninstall-sysusersDATA \
+	uninstall-systemduserunitDATA uninstall-systemenvgenSCRIPTS \
+	uninstall-sysusersDATA uninstall-userenvgenSCRIPTS \
 	uninstall-zshcompletionDATA
 
 .MAKE: $(am__recursive_targets) all check check-am install install-am \
@@ -6738,9 +7170,9 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 	install-dbussystemserviceDATA install-dist_dbusconfDATA \
 	install-dist_installed_test_keyring2DATA \
 	install-dist_installed_test_keyringDATA \
-	install-dist_libexecSCRIPTS install-dist_triggersSCRIPTS \
-	install-dvi install-dvi-am install-envDATA \
-	install-envgenSCRIPTS install-exec install-exec-am \
+	install-dist_libexecSCRIPTS install-dist_tmpfilesDATA \
+	install-dist_triggersSCRIPTS install-dvi install-dvi-am \
+	install-envDATA install-exec install-exec-am \
 	install-fishcompletionDATA install-flatpakincludeHEADERS \
 	install-html install-html-am install-info install-info-am \
 	install-installed_testDATA install-installed_testLTLIBRARIES \
@@ -6755,18 +7187,20 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 	install-ps-am install-scriptsSCRIPTS install-selinux_develDATA \
 	install-selinux_moduleDATA install-strip \
 	install-systemdsystemunitDATA install-systemduserunitDATA \
-	install-sysusersDATA install-zshcompletionDATA installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	recheck tags tags-am uninstall uninstall-am \
-	uninstall-bashcompletionDATA uninstall-binPROGRAMS \
-	uninstall-bwrapPROGRAMS uninstall-dbus_serviceDATA \
-	uninstall-dbussystemserviceDATA uninstall-dist_dbusconfDATA \
+	install-systemenvgenSCRIPTS install-sysusersDATA \
+	install-userenvgenSCRIPTS install-zshcompletionDATA \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am recheck tags tags-am uninstall \
+	uninstall-am uninstall-bashcompletionDATA \
+	uninstall-binPROGRAMS uninstall-bwrapPROGRAMS \
+	uninstall-dbus_serviceDATA uninstall-dbussystemserviceDATA \
+	uninstall-dist_dbusconfDATA \
 	uninstall-dist_installed_test_keyring2DATA \
 	uninstall-dist_installed_test_keyringDATA \
-	uninstall-dist_libexecSCRIPTS uninstall-dist_triggersSCRIPTS \
-	uninstall-envDATA uninstall-envgenSCRIPTS \
+	uninstall-dist_libexecSCRIPTS uninstall-dist_tmpfilesDATA \
+	uninstall-dist_triggersSCRIPTS uninstall-envDATA \
 	uninstall-fishcompletionDATA uninstall-flatpakincludeHEADERS \
 	uninstall-installed_testDATA \
 	uninstall-installed_testLTLIBRARIES \
@@ -6781,7 +7215,8 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 	uninstall-polkit_rulesDATA uninstall-profileDATA \
 	uninstall-scriptsSCRIPTS uninstall-selinux_develDATA \
 	uninstall-selinux_moduleDATA uninstall-systemdsystemunitDATA \
-	uninstall-systemduserunitDATA uninstall-sysusersDATA \
+	uninstall-systemduserunitDATA uninstall-systemenvgenSCRIPTS \
+	uninstall-sysusersDATA uninstall-userenvgenSCRIPTS \
 	uninstall-zshcompletionDATA
 
 .PRECIOUS: Makefile
@@ -6843,7 +7278,7 @@ common/%-dbus-generated.h: common/%-dbus-generated.c
 	@true # Built as a side-effect of the rules for the .c
 
 common/flatpak-variant-private.h: variant-schema-compiler/variant-schema-compiler  data/flatpak-variants.gv
-	$(AM_V_GEN) $(srcdir)/variant-schema-compiler/variant-schema-compiler --outfile-header common/flatpak-variant-private.h  --outfile common/flatpak-variant-impl-private.h --prefix var $(srcdir)/data/flatpak-variants.gv
+	$(AM_V_GEN) $(srcdir)/variant-schema-compiler/variant-schema-compiler $(VARIANT_SCHEMA_COMPILER_FLAGS)  --outfile-header common/flatpak-variant-private.h  --outfile common/flatpak-variant-impl-private.h --prefix var $(srcdir)/data/flatpak-variants.gv
 
 # Generated by the same tool at the same time
 common/flatpak-variant-impl-private.h: common/flatpak-variant-private.h
@@ -6949,6 +7384,7 @@ install-test-data-hook:
 @ENABLE_INSTALLED_TESTS_TRUE@	$(AM_V_GEN) $(SED) -e "s|\@libexecdir\@|$(libexecdir)|" -e "s|\@extraargs\@| --session --no-idle-exit|" $(top_srcdir)/system-helper/org.freedesktop.Flatpak.SystemHelper.service.in > $(DESTDIR)$(installed_testdir)/services/org.freedesktop.Flatpak.SystemHelper.service
 @ENABLE_INSTALLED_TESTS_TRUE@	$(AM_V_GEN) $(SED) -e "s|\@libexecdir\@|$(installed_testdir)|" $(top_srcdir)/tests/org.freedesktop.impl.portal.desktop.test.service.in > $(DESTDIR)$(installed_testdir)/services/org.freedesktop.impl.portal.desktop.test.service
 @ENABLE_INSTALLED_TESTS_TRUE@	$(AM_V_GEN) $(SED) -e "s|\@libexecdir\@|$(installed_testdir)|" $(top_srcdir)/tests/org.flatpak.Authenticator.test.service.in > $(DESTDIR)$(installed_testdir)/services/org.flatpak.Authenticator.test.service.service
+@ENABLE_INSTALLED_TESTS_TRUE@	$(AM_V_GEN) $(SED) -e "s|\@libexecdir\@|$(libexecdir)|" $(top_srcdir)/oci-authenticator/org.flatpak.Authenticator.Oci.service.in > $(DESTDIR)$(installed_testdir)/services/org.flatpak.Authenticator.Oci.service
 @ENABLE_INSTALLED_TESTS_TRUE@	mkdir -p $(DESTDIR)$(installed_testdir)/share/xdg-desktop-portal/portals
 @ENABLE_INSTALLED_TESTS_TRUE@	install -m644 $(top_srcdir)/tests/test.portal.in $(DESTDIR)$(installed_testdir)/share/xdg-desktop-portal/portals/test.portal
 
@@ -6966,6 +7402,7 @@ tests/test-%.wrap:
 tests/runtime-repo: tests/make-test-runtime.sh flatpak
 	rm -rf tests/runtime-repo
 	PATH=$(abs_top_builddir):$${PATH} $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo org.test.Platform master "" ""
+	PATH=$(abs_top_builddir):$${PATH} $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo org.test.Platform stable "" ""
 
 distclean-local:
 	rm -rf tests/runtime-repo

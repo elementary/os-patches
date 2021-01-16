@@ -22,11 +22,12 @@
 #include <locale.h>
 
 #include "flatpak-auth-private.h"
+#include "flatpak-utils-base-private.h"
 #include "flatpak-dbus-generated.h"
 
 static GMainLoop *main_loop;
 static guint name_owner_id = 0;
-FlatpakAuthenticator *authenticator;
+FlatpakAuthenticator *global_authenticator;
 
 typedef struct {
   FlatpakAuthenticatorRequest *request;
@@ -101,7 +102,7 @@ finish_request_ref_tokens (TokenRequestData *data)
   GVariantBuilder tokens;
   GVariantBuilder results;
 
-  g_assert (data->request != NULL);
+  g_assert_true (data->request != NULL);
 
   required_token = get_required_token ();
 
@@ -126,7 +127,7 @@ http_incoming (GSocketService    *service,
   TokenRequestData *data = user_data;
   g_autoptr(GVariant) options = g_variant_ref_sink (g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0));
 
-  g_assert (data->request != NULL);
+  g_assert_true (data->request != NULL);
 
   /* For the test, just assume any connection is a valid use of the web flow */
   g_debug ("handling incomming http request");
@@ -171,7 +172,7 @@ handle_request_close (FlatpakAuthenticatorRequest *object,
 
   token_request_data_free (data);
 
-  return TRUE;
+  return G_DBUS_METHOD_INVOCATION_HANDLED;
 }
 
 static gboolean
@@ -191,7 +192,6 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
   g_autofree char *uri = NULL;
   g_autofree char *request_path = NULL;
   guint16 port;
-  TokenRequestData *data;
   g_autoptr(GPtrArray) refs = NULL;
   gsize n_refs, i;
   g_autofree char *options_s = NULL;
@@ -213,7 +213,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
       g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
                                              G_DBUS_ERROR_INVALID_ARGS,
                                              "Invalid token");
-      return TRUE;
+      return G_DBUS_METHOD_INVOCATION_HANDLED;
     }
 
   request = flatpak_authenticator_request_skeleton_new ();
@@ -223,7 +223,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
                                          &error))
     {
       g_dbus_method_invocation_return_gerror (invocation, error);
-      return TRUE;
+      return G_DBUS_METHOD_INVOCATION_HANDLED;
     }
 
   server = g_socket_service_new ();
@@ -231,7 +231,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
   if (port == 0)
     {
       g_dbus_method_invocation_return_gerror (invocation, error);
-      return TRUE;
+      return G_DBUS_METHOD_INVOCATION_HANDLED;
     }
 
   refs = g_ptr_array_new_with_free_func (g_free);
@@ -248,6 +248,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
     }
   g_ptr_array_add (refs, NULL);
 
+  TokenRequestData *data;
   data = token_request_data_new (request, server, (const char *const*)refs->pdata);
 
   g_signal_connect (server, "incoming", (GCallback)http_incoming, data);
@@ -268,7 +269,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
       token_request_data_free (data);
     }
 
-  return TRUE;
+  return G_DBUS_METHOD_INVOCATION_HANDLED;
 }
 
 static void
@@ -282,12 +283,12 @@ on_bus_acquired (GDBusConnection *connection,
 
   g_dbus_connection_set_exit_on_close (connection, FALSE);
 
-  authenticator = flatpak_authenticator_skeleton_new ();
-  flatpak_authenticator_set_version (authenticator, 0);
+  global_authenticator = flatpak_authenticator_skeleton_new ();
+  flatpak_authenticator_set_version (global_authenticator, 0);
 
-  g_signal_connect (authenticator, "handle-request-ref-tokens", G_CALLBACK (handle_request_ref_tokens), NULL);
+  g_signal_connect (global_authenticator, "handle-request-ref-tokens", G_CALLBACK (handle_request_ref_tokens), NULL);
 
-  if (!g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (authenticator),
+  if (!g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (global_authenticator),
                                          connection,
                                          FLATPAK_AUTHENTICATOR_OBJECT_PATH,
                                          &error))

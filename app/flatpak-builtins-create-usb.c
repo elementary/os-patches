@@ -96,27 +96,25 @@ get_flatpak_subpaths_from_deploy_subpaths (const char * const *subpaths)
  * printed for related refs that are not installed, and they won't be added to
  * the list. */
 static gboolean
-add_related (GHashTable   *all_refs,
-             GHashTable   *all_collection_ids,
-             const char   *ref,
-             FlatpakDir   *dir,
-             GCancellable *cancellable,
-             GError      **error)
+add_related (GHashTable        *all_refs,
+             GHashTable        *all_collection_ids,
+             FlatpakDecomposed *ref,
+             FlatpakDir        *dir,
+             GCancellable      *cancellable,
+             GError           **error)
 {
   g_autoptr(GBytes) deploy_data = NULL;
   g_autoptr(FlatpakDeploy) deploy = NULL;
   g_autoptr(GKeyFile) metakey = NULL;
-  g_auto(GStrv) parts = NULL;
   const char *commit = NULL;
-  const char *arch = NULL;
-  const char *branch = NULL;
+  g_autofree char *arch = NULL;
+  g_autofree char *branch = NULL;
   GList *extensions, *l;
 
-  g_debug ("Finding related refs for ‘%s’", ref);
+  g_debug ("Finding related refs for ‘%s’", flatpak_decomposed_get_ref (ref));
 
-  parts = g_strsplit (ref, "/", 0);
-  arch = parts[2];
-  branch = parts[3];
+  arch = flatpak_decomposed_dup_arch (ref);
+  branch = flatpak_decomposed_dup_branch (ref);
 
   deploy_data = flatpak_dir_get_deploy_data (dir, ref, FLATPAK_DEPLOY_VERSION_ANY, cancellable, error);
   if (deploy_data == NULL)
@@ -124,7 +122,7 @@ add_related (GHashTable   *all_refs,
 
   if (flatpak_deploy_data_has_subpaths (deploy_data) && !opt_allow_partial)
     g_printerr (_("Warning: Related ref ‘%s’ is partially installed. Use --allow-partial to suppress this message.\n"),
-                ref);
+                flatpak_decomposed_get_ref (ref));
 
   commit = flatpak_deploy_data_get_commit (deploy_data);
 
@@ -156,14 +154,14 @@ add_related (GHashTable   *all_refs,
       if (ext_deploy_data == NULL)
         {
           g_printerr (_("Warning: Omitting related ref ‘%s’ because it is not installed.\n"),
-                      ext->ref);
+                      flatpak_decomposed_get_ref (ext->ref));
           continue;
         }
 
       if (flatpak_deploy_data_has_subpaths (ext_deploy_data) && !opt_allow_partial)
         {
           g_printerr (_("Warning: Related ref ‘%s’ is partially installed. Use --allow-partial to suppress this message.\n"),
-                      ext->ref);
+                      flatpak_decomposed_get_ref (ext->ref));
         }
 
       ext_remote = flatpak_deploy_data_get_origin (ext_deploy_data);
@@ -173,7 +171,7 @@ add_related (GHashTable   *all_refs,
       if (ext_collection_id == NULL)
         {
           g_printerr (_("Warning: Omitting related ref ‘%s’ because its remote ‘%s’ does not have a collection ID set.\n"),
-                      ext->ref, ext_remote);
+                      flatpak_decomposed_get_ref (ext->ref), ext_remote);
           continue;
         }
 
@@ -183,7 +181,7 @@ add_related (GHashTable   *all_refs,
       c_s = commit_and_subpaths_new (ext_commit, (const char * const *) resolved_ext_subpaths);
 
       g_hash_table_insert (all_collection_ids, g_strdup (ext_collection_id), g_strdup (ext_remote));
-      ext_collection_ref = ostree_collection_ref_new (ext_collection_id, ext->ref);
+      ext_collection_ref = ostree_collection_ref_new (ext_collection_id, flatpak_decomposed_get_ref (ext->ref));
       g_hash_table_insert (all_refs, g_steal_pointer (&ext_collection_ref), c_s);
     }
 
@@ -195,20 +193,20 @@ add_related (GHashTable   *all_refs,
 /* Add the runtime and its related refs to @all_refs, also updating
  * @all_collection_ids with any new collection IDs */
 static gboolean
-add_runtime (GHashTable   *all_refs,
-             GHashTable   *all_collection_ids,
-             const char   *ref,
-             FlatpakDir   *dir,
-             GCancellable *cancellable,
-             GError      **error)
+add_runtime (GHashTable        *all_refs,
+             GHashTable        *all_collection_ids,
+             FlatpakDecomposed *ref,
+             FlatpakDir        *dir,
+             GCancellable      *cancellable,
+             GError           **error)
 {
   g_autoptr(GBytes) deploy_data = NULL;
   g_autoptr(GBytes) runtime_deploy_data = NULL;
   g_autoptr(FlatpakDeploy) deploy = NULL;
   g_autoptr(GKeyFile) metakey = NULL;
   g_autoptr(OstreeCollectionRef) runtime_collection_ref = NULL;
-  g_autofree char *runtime = NULL;
-  g_autofree char *runtime_ref = NULL;
+  g_autofree char *runtime_pref = NULL;
+  g_autoptr(FlatpakDecomposed) runtime_ref = NULL;
   g_autofree char *runtime_remote = NULL;
   g_autofree char *runtime_collection_id = NULL;
   g_autofree const char **runtime_subpaths = NULL;
@@ -217,7 +215,8 @@ add_runtime (GHashTable   *all_refs,
   const char *runtime_commit = NULL;
   CommitAndSubpaths *c_s;
 
-  g_debug ("Finding the runtime for ‘%s’", ref);
+
+  g_debug ("Finding the runtime for ‘%s’", flatpak_decomposed_get_ref (ref));
 
   deploy_data = flatpak_dir_get_deploy_data (dir, ref, FLATPAK_DEPLOY_VERSION_ANY, cancellable, error);
   if (deploy_data == NULL)
@@ -231,10 +230,13 @@ add_runtime (GHashTable   *all_refs,
 
   metakey = flatpak_deploy_get_metadata (deploy);
 
-  runtime = g_key_file_get_string (metakey, "Application", "runtime", error);
-  if (!runtime)
+  runtime_pref = g_key_file_get_string (metakey, "Application", "runtime", error);
+  if (runtime_pref == NULL)
     return FALSE;
-  runtime_ref = g_strdup_printf ("runtime/%s", runtime);
+  runtime_ref = flatpak_decomposed_new_from_pref (FLATPAK_KINDS_RUNTIME, runtime_pref, error);
+  if (runtime_ref == NULL)
+    return FALSE;
+
   runtime_deploy_data = flatpak_dir_get_deploy_data (dir, runtime_ref, FLATPAK_DEPLOY_VERSION_ANY, cancellable, error);
   if (runtime_deploy_data == NULL)
     return FALSE;
@@ -245,7 +247,7 @@ add_runtime (GHashTable   *all_refs,
   if (runtime_collection_id == NULL)
     return flatpak_fail (error,
                          _("Remote ‘%s’ does not have a collection ID set, which is required for P2P distribution of ‘%s’."),
-                         runtime_remote, runtime_ref);
+                         runtime_remote, flatpak_decomposed_get_ref (runtime_ref));
 
   runtime_commit = flatpak_deploy_data_get_commit (runtime_deploy_data);
   runtime_subpaths = flatpak_deploy_data_get_subpaths (runtime_deploy_data);
@@ -253,7 +255,7 @@ add_runtime (GHashTable   *all_refs,
   c_s = commit_and_subpaths_new (runtime_commit, (const char * const *) resolved_runtime_subpaths);
 
   g_hash_table_insert (all_collection_ids, g_strdup (runtime_collection_id), g_strdup (runtime_remote));
-  runtime_collection_ref = ostree_collection_ref_new (runtime_collection_id, runtime_ref);
+  runtime_collection_ref = ostree_collection_ref_new (runtime_collection_id, flatpak_decomposed_get_ref (runtime_ref));
   g_hash_table_insert (all_refs, g_steal_pointer (&runtime_collection_ref), c_s);
 
   if (!add_related (all_refs, all_collection_ids, runtime_ref, dir, cancellable, error))
@@ -507,13 +509,12 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
       g_autofree char *branch = NULL;
       g_autoptr(GError) local_error = NULL;
       g_autoptr(GError) first_error = NULL;
-      g_autofree char *installed_ref = NULL;
+      g_autoptr(FlatpakDecomposed) installed_ref = NULL;
       g_autoptr(GPtrArray) dirs_with_ref = NULL;
       FlatpakDir *this_ref_dir = NULL;
       g_autofree char *remote = NULL;
       g_autofree char *ref_collection_id = NULL;
       g_autoptr(OstreeCollectionRef) collection_ref = NULL;
-      g_auto(GStrv) parts = NULL;
       unsigned int j = 0;
       const char **arches;
       FlatpakKinds installed_ref_kind = 0;
@@ -527,12 +528,11 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
       dirs_with_ref = g_ptr_array_new ();
       for (j = 0; j < dirs->len; j++)
         {
-          FlatpakDir *dir = g_ptr_array_index (dirs, j);
-          g_autofree char *ref = NULL;
-          FlatpakKinds kind;
+          FlatpakDir *candidate_dir = g_ptr_array_index (dirs, j);
+          g_autoptr(FlatpakDecomposed) ref = NULL;
 
-          ref = flatpak_dir_find_installed_ref (dir, id, branch, arch,
-                                                kinds, &kind, &local_error);
+          ref = flatpak_dir_find_installed_ref (candidate_dir, id, branch, arch,
+                                                kinds, &local_error);
           if (ref == NULL)
             {
               if (g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_NOT_INSTALLED))
@@ -549,11 +549,11 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
             }
           else
             {
-              g_ptr_array_add (dirs_with_ref, dir);
+              g_ptr_array_add (dirs_with_ref, candidate_dir);
               if (installed_ref == NULL)
                 {
-                  installed_ref = g_strdup (ref);
-                  installed_ref_kind = kind;
+                  installed_ref = flatpak_decomposed_ref (ref);
+                  installed_ref_kind = flatpak_decomposed_get_kinds (ref);
                 }
             }
         }
@@ -571,8 +571,8 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
           g_autoptr(GString) dir_names = g_string_new ("");
           for (j = 0; j < dirs_with_ref->len; j++)
             {
-              FlatpakDir *dir = g_ptr_array_index (dirs_with_ref, j);
-              g_autofree char *dir_name = flatpak_dir_get_name (dir);
+              FlatpakDir *dir_with_ref = g_ptr_array_index (dirs_with_ref, j);
+              g_autofree char *dir_name = flatpak_dir_get_name (dir_with_ref);
               if (j > 0)
                 g_string_append (dir_names, ", ");
               g_string_append (dir_names, dir_name);
@@ -597,11 +597,10 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
         }
 
       g_assert (installed_ref);
-      parts = g_strsplit (installed_ref, "/", 0);
       if (arch == NULL)
-        arch = g_strdup (parts[2]);
+        arch = flatpak_decomposed_dup_arch (installed_ref);
       if (branch == NULL)
-        branch = g_strdup (parts[3]);
+        branch = flatpak_decomposed_dup_branch (installed_ref);
 
       remote = flatpak_dir_get_origin (dir, installed_ref, cancellable, error);
       if (remote == NULL)
@@ -611,7 +610,7 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
       if (ref_collection_id == NULL)
         return flatpak_fail (error,
                              _("Remote ‘%s’ does not have a collection ID set, which is required for P2P distribution of ‘%s’."),
-                             remote, installed_ref);
+                             remote, flatpak_decomposed_get_ref (installed_ref));
 
       arches = g_hash_table_lookup (remote_arch_map, remote);
       if (arches == NULL)
@@ -643,13 +642,13 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
 
         if (flatpak_deploy_data_has_subpaths (deploy_data) && !opt_allow_partial)
           g_printerr (_("Warning: Ref ‘%s’ is partially installed. Use --allow-partial to suppress this message.\n"),
-                      installed_ref);
+                      flatpak_decomposed_get_ref (installed_ref));
 
         commit = flatpak_deploy_data_get_commit (deploy_data);
         c_s = commit_and_subpaths_new (commit, NULL);
 
         g_hash_table_insert (all_collection_ids, g_strdup (ref_collection_id), g_strdup (remote));
-        collection_ref = ostree_collection_ref_new (ref_collection_id, installed_ref);
+        collection_ref = ostree_collection_ref_new (ref_collection_id, flatpak_decomposed_get_ref (installed_ref));
         g_hash_table_insert (all_refs, g_steal_pointer (&collection_ref), c_s);
       }
 
@@ -701,7 +700,7 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
     for (const char **iter = remote_arches; iter != NULL && *iter != NULL; ++iter)
       {
         const char *current_arch = *iter;
-        g_autoptr(GPtrArray) dirs = NULL;
+        g_autoptr(GPtrArray) appstream_dirs = NULL;
         g_autoptr(GError) appstream_error = NULL;
         g_autoptr(GError) appstream2_error = NULL;
         g_autofree char *commit = NULL;
@@ -709,9 +708,9 @@ flatpak_builtin_create_usb (int argc, char **argv, GCancellable *cancellable, GE
 
         /* Try to update the appstream data, but don't fail on error because we
          * want this to work offline. */
-        dirs = g_ptr_array_new ();
-        g_ptr_array_add (dirs, dir);
-        if (!update_appstream (dirs, remote_name, current_arch, 0, TRUE, cancellable, &local_error))
+        appstream_dirs = g_ptr_array_new ();
+        g_ptr_array_add (appstream_dirs, dir);
+        if (!update_appstream (appstream_dirs, remote_name, current_arch, 0, TRUE, cancellable, &local_error))
           {
             g_printerr (_("Warning: Couldn't update appstream data for remote ‘%s’ arch ‘%s’: %s\n"),
                         remote_name, current_arch, local_error->message);

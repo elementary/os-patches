@@ -1,6 +1,6 @@
 <?xml version='1.0'?> <!--*-nxml-*-->
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
-    "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 
 <refentry id="flatpak-build-commit-from">
 
@@ -109,6 +109,16 @@
                     Add an extra collection-ref binding for this collection, in addition to whatever
                     would normally be added due to the destination repository collection id.
                     This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--subset=SUBSET</option></term>
+
+                <listitem><para>
+                    Mark the commit to be included in the named subset. This will cause the commit
+                    to be put in the named subset summary (in addition to the main one), allowing
+                    users to see only this subset instead of the whole repo.
                 </para></listitem>
             </varlistentry>
 

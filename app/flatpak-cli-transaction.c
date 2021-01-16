@@ -39,6 +39,8 @@ struct _FlatpakCliTransaction
   gboolean             non_default_arch;
   GError              *first_operation_error;
 
+  GHashTable          *eol_actions;
+
   int                  rows;
   int                  cols;
   int                  table_width;
@@ -58,6 +60,8 @@ struct _FlatpakCliTransaction
   int                  progress_row;
   char                *progress_msg;
   int                  speed_len;
+
+  gboolean             did_interaction;
 };
 
 struct _FlatpakCliTransactionClass
@@ -79,6 +83,8 @@ choose_remote_for_ref (FlatpakTransaction *transaction,
   const char *pref;
 
   pref = strchr (for_ref, '/') + 1;
+
+  self->did_interaction = TRUE;
 
   if (self->disable_interaction)
     {
@@ -113,6 +119,8 @@ add_new_remote (FlatpakTransaction            *transaction,
                 const char                    *url)
 {
   FlatpakCliTransaction *self = FLATPAK_CLI_TRANSACTION (transaction);
+
+  self->did_interaction = TRUE;
 
   if (self->disable_interaction)
     {
@@ -157,6 +165,8 @@ install_authenticator (FlatpakTransaction            *old_transaction,
       g_warning ("No dir in install_authenticator");
       return;
     }
+
+  old_cli->did_interaction = TRUE;
 
   transaction2 = flatpak_cli_transaction_new (dir, old_cli->disable_interaction, TRUE, FALSE, &local_error);
   if (transaction2 == NULL)
@@ -558,6 +568,8 @@ webflow_start (FlatpakTransaction *transaction,
   g_autoptr(GError) local_error = NULL;
   const char *args[3] = { NULL, url, NULL };
 
+  self->did_interaction = TRUE;
+
   if (!self->disable_interaction)
     {
       g_print (_("Authentication required for remote '%s'\n"), remote);
@@ -612,6 +624,8 @@ basic_auth_start (FlatpakTransaction *transaction,
   if (self->disable_interaction)
     return FALSE;
 
+  self->did_interaction = TRUE;
+
   if (g_variant_lookup (options, "previous-error", "&s", &previous_error))
     g_print ("%s\n", previous_error);
 
@@ -629,47 +643,149 @@ basic_auth_start (FlatpakTransaction *transaction,
 }
 
 
+typedef enum {
+  EOL_UNDECIDED,
+  EOL_IGNORE,        /* Don't do anything, we already printed a warning */
+  EOL_NO_REBASE,     /* Choose to not rebase */
+  EOL_REBASE,        /* Choose to rebase */
+} EolAction;
+
 static gboolean
 end_of_lifed_with_rebase (FlatpakTransaction *transaction,
                           const char         *remote,
-                          const char         *ref,
+                          const char         *ref_str,
                           const char         *reason,
                           const char         *rebased_to_ref,
                           const char        **previous_ids)
 {
   FlatpakCliTransaction *self = FLATPAK_CLI_TRANSACTION (transaction);
-  g_autoptr(FlatpakRef) rref = flatpak_ref_parse (ref, NULL);
+  g_autoptr(FlatpakDecomposed) ref = flatpak_decomposed_new_from_ref (ref_str, NULL);
+  g_autofree char *name = NULL;
+  EolAction action = EOL_UNDECIDED;
+  EolAction old_action = EOL_UNDECIDED;
+  gboolean can_rebase = rebased_to_ref != NULL && remote != NULL;
+  FlatpakInstallation *installation = flatpak_transaction_get_installation (transaction);
+  FlatpakDir *dir = flatpak_installation_get_dir (installation, NULL);
 
-  if (rebased_to_ref)
-    g_print (_("Info: %s is end-of-life, in favor of %s\n"), flatpak_ref_get_name (rref), rebased_to_ref);
-  else if (reason)
-    g_print (_("Info: %s is end-of-life, with reason: %s\n"), flatpak_ref_get_name (rref), reason);
+  if (ref == NULL)
+    return FALSE; /* Shouldn't happen, the ref should be valid */
 
-  if (rebased_to_ref && remote)
+  name = flatpak_decomposed_dup_id (ref);
+
+  self->did_interaction = TRUE;
+
+  if (flatpak_decomposed_id_is_subref (ref))
     {
-      if (self->disable_interaction ||
-          flatpak_yes_no_prompt (TRUE, _("Replace it with %s?"), rebased_to_ref))
+      GLNX_HASH_TABLE_FOREACH_KV (self->eol_actions, FlatpakDecomposed *, eoled_ref, gpointer, value)
         {
-          g_autoptr(GError) error = NULL;
+          guint old_eol_action = GPOINTER_TO_UINT (value);
 
-          if (self->disable_interaction)
-            g_print (_("Updating to rebased version\n"));
-
-          if (!flatpak_transaction_add_uninstall (transaction, ref, &error) ||
-              !flatpak_transaction_add_rebase (transaction, remote, rebased_to_ref, NULL, previous_ids, &error))
-            {
-              g_propagate_prefixed_error (&self->first_operation_error,
-                                          g_error_copy (error),
-                                          _("Failed to rebase %s to %s: "),
-                                          flatpak_ref_get_name (rref), rebased_to_ref);
-              return FALSE;
-            }
-
-          return TRUE;
+          if (flatpak_decomposed_id_is_subref_of (ref, eoled_ref))
+              {
+                old_action = old_eol_action; /* Do the same */
+                break;
+              }
         }
     }
 
-  return FALSE;
+  if (old_action != EOL_UNDECIDED)
+    {
+      switch (old_action)
+        {
+        default:
+        case EOL_IGNORE:
+          if (!can_rebase)
+            action = EOL_IGNORE;
+          /* Else, ask if we want to rebase */
+          break;
+        case EOL_REBASE:
+        case EOL_NO_REBASE:
+          if (can_rebase)
+            action = old_action;
+          else
+            action = EOL_IGNORE;
+        }
+    }
+
+  if (action == EOL_UNDECIDED)
+    {
+      gboolean is_pinned = flatpak_dir_ref_is_pinned (dir, flatpak_decomposed_get_ref (ref));
+      g_autofree char *branch = flatpak_decomposed_dup_branch (ref);
+      action = EOL_IGNORE;
+
+      if (rebased_to_ref)
+        if (is_pinned)
+          g_print (_("Info: (pinned) %s//%s is end-of-life, in favor of %s\n"), name, branch, rebased_to_ref);
+        else
+          g_print (_("Info: %s//%s is end-of-life, in favor of %s\n"), name, branch, rebased_to_ref);
+      else if (reason)
+        {
+          if (is_pinned)
+            g_print (_("Info: (pinned) %s//%s is end-of-life, with reason:\n"), name, branch);
+          else
+            g_print (_("Info: %s//%s is end-of-life, with reason:\n"), name, branch);
+          g_print ("   %s\n", reason);
+        }
+
+      if (flatpak_decomposed_is_runtime (ref))
+        {
+          g_autoptr(GPtrArray) apps = flatpak_dir_list_app_refs_with_runtime (dir, ref, NULL, NULL);
+          if (apps && apps->len > 0)
+            {
+              g_print (_("Applications using this runtime:\n"));
+              g_print ("   ");
+              for (int i = 0; i < apps->len; i++)
+                {
+                  FlatpakDecomposed *app_ref = g_ptr_array_index (apps, i);
+                  g_autofree char *id = flatpak_decomposed_dup_id (app_ref);
+                  if (i != 0)
+                    g_print (", ");
+                  g_print ("%s", id);
+                }
+              g_print ("\n");
+            }
+        }
+
+      if (rebased_to_ref && remote)
+        {
+          if (self->disable_interaction ||
+              flatpak_yes_no_prompt (TRUE, _("Replace it with %s?"), rebased_to_ref))
+            {
+              if (self->disable_interaction)
+                g_print (_("Updating to rebased version\n"));
+
+              action = EOL_REBASE;
+            }
+          else
+            action = EOL_NO_REBASE;
+        }
+    }
+  else
+    {
+        g_debug ("%s is end-of-life, using action from parent ren", name);
+    }
+
+  /* Cache for later comparison and reuse */
+  g_hash_table_insert (self->eol_actions, flatpak_decomposed_ref (ref), GUINT_TO_POINTER (action));
+
+  if (action == EOL_REBASE)
+    {
+      g_autoptr(GError) error = NULL;
+
+      if (!flatpak_transaction_add_rebase (transaction, remote, rebased_to_ref, NULL, previous_ids, &error) ||
+          !flatpak_transaction_add_uninstall (transaction, ref_str, &error))
+        {
+          g_propagate_prefixed_error (&self->first_operation_error,
+                                      g_error_copy (error),
+                                      _("Failed to rebase %s to %s: "),
+                                      name, rebased_to_ref);
+          return FALSE;
+        }
+
+      return TRUE; /* skip update op, in favour of added uninstall */
+    }
+  else /* IGNORE or NO_REBASE */
+    return FALSE;
 }
 
 static int
@@ -941,7 +1057,7 @@ message_handler (const gchar   *log_domain,
 }
 
 static gboolean
-transaction_ready (FlatpakTransaction *transaction)
+transaction_ready_pre_auth (FlatpakTransaction *transaction)
 {
   FlatpakCliTransaction *self = FLATPAK_CLI_TRANSACTION (transaction);
   GList *ops = flatpak_transaction_get_operations (transaction);
@@ -1045,23 +1161,24 @@ transaction_ready (FlatpakTransaction *transaction)
     {
       FlatpakTransactionOperation *op = l->data;
       FlatpakTransactionOperationType type = flatpak_transaction_operation_get_operation_type (op);
-      const char *ref = flatpak_transaction_operation_get_ref (op);
+      FlatpakDecomposed *ref = flatpak_transaction_operation_get_decomposed (op);
       const char *remote = flatpak_transaction_operation_get_remote (op);
-      g_auto(GStrv) parts = flatpak_decompose_ref (ref, NULL);
+      g_autofree char *id = flatpak_decomposed_dup_id (ref);
+      const char *branch = flatpak_decomposed_get_branch (ref);
+      g_autofree char *arch = flatpak_decomposed_dup_arch (ref);
       g_autofree char *rownum = g_strdup_printf ("%2d.", i);
 
       flatpak_table_printer_add_column (printer, rownum);
       flatpak_table_printer_add_column (printer, "   ");
-      flatpak_table_printer_add_column (printer, parts[1]);
-      flatpak_table_printer_add_column (printer, parts[2]);
-      flatpak_table_printer_add_column (printer, parts[3]);
+      flatpak_table_printer_add_column (printer, id);
+      flatpak_table_printer_add_column (printer, arch);
+      flatpak_table_printer_add_column (printer, branch);
       flatpak_table_printer_add_column (printer, op_shorthand[type]);
 
       if (type == FLATPAK_TRANSACTION_OPERATION_INSTALL ||
           type == FLATPAK_TRANSACTION_OPERATION_INSTALL_BUNDLE ||
           type == FLATPAK_TRANSACTION_OPERATION_UPDATE)
         {
-          g_autoptr(FlatpakRef) rref = flatpak_ref_parse (ref, NULL);
           guint64 download_size;
           g_autofree char *formatted = NULL;
           g_autofree char *text = NULL;
@@ -1076,7 +1193,7 @@ transaction_ready (FlatpakTransaction *transaction)
             prefix = "";
 
           flatpak_table_printer_add_column (printer, remote);
-          if (g_str_has_suffix (flatpak_ref_get_name (rref), ".Locale"))
+          if (flatpak_transaction_operation_get_subpaths (op) != NULL)
             text = g_strdup_printf ("%s%s (%s)", prefix, formatted, _("partial"));
           else
             text = g_strdup_printf ("%s%s", prefix, formatted);
@@ -1124,6 +1241,32 @@ transaction_ready (FlatpakTransaction *transaction)
   else
     g_print ("\n\n");
 
+  self->did_interaction = FALSE;
+
+  return TRUE;
+}
+
+static gboolean
+transaction_ready (FlatpakTransaction *transaction)
+{
+  FlatpakCliTransaction *self = FLATPAK_CLI_TRANSACTION (transaction);
+  GList *ops = flatpak_transaction_get_operations (transaction);
+  GList *l;
+  FlatpakTablePrinter *printer;
+
+  if (ops == NULL)
+    return TRUE;
+
+  printer = self->printer;
+
+  if (self->did_interaction)
+    {
+      /* We did some interaction since ready_pre_auth which messes up the formating, so re-print table */
+      flatpak_table_printer_print_full (printer, 0, self->cols,
+                                        &self->table_height, &self->table_width);
+      g_print ("\n\n");
+    }
+
   for (l = ops; l; l = l->next)
     {
       FlatpakTransactionOperation *op = l->data;
@@ -1162,6 +1305,8 @@ flatpak_cli_transaction_finalize (GObject *object)
 
   g_free (self->progress_msg);
 
+  g_hash_table_unref (self->eol_actions);
+
   if (self->printer)
     flatpak_table_printer_free (self->printer);
 
@@ -1171,6 +1316,8 @@ flatpak_cli_transaction_finalize (GObject *object)
 static void
 flatpak_cli_transaction_init (FlatpakCliTransaction *self)
 {
+  self->eol_actions = g_hash_table_new_full ((GHashFunc)flatpak_decomposed_hash, (GEqualFunc)flatpak_decomposed_equal,
+                                             (GDestroyNotify)flatpak_decomposed_unref, NULL);
 }
 
 static gboolean flatpak_cli_transaction_run (FlatpakTransaction *transaction,
@@ -1186,6 +1333,7 @@ flatpak_cli_transaction_class_init (FlatpakCliTransactionClass *klass)
   object_class->finalize = flatpak_cli_transaction_finalize;
   transaction_class->add_new_remote = add_new_remote;
   transaction_class->ready = transaction_ready;
+  transaction_class->ready_pre_auth = transaction_ready_pre_auth;
   transaction_class->new_operation = new_operation;
   transaction_class->operation_done = operation_done;
   transaction_class->operation_error = operation_error;

@@ -16,6 +16,17 @@
       <sub name="Error codes" link="flatpak-Error-codes.html"/>
       <sub name="Version information" link="flatpak-Version-information.html"/>
     </sub>
+    <sub name="D-Bus APIs" link="ch02.html">
+      <sub name="org.freedesktop.Flatpak.Authenticator" link="gdbus-org.freedesktop.Flatpak.Authenticator.html"/>
+      <sub name="org.freedesktop.Flatpak.AuthenticatorRequest" link="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html"/>
+      <sub name="org.freedesktop.Flatpak.Development" link="gdbus-org.freedesktop.Flatpak.Development.html"/>
+      <sub name="org.freedesktop.Flatpak.SessionHelper" link="gdbus-org.freedesktop.Flatpak.SessionHelper.html"/>
+      <sub name="org.freedesktop.Flatpak.SystemHelper" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html"/>
+      <sub name="org.freedesktop.impl.portal.PermissionStore" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html"/>
+      <sub name="org.freedesktop.portal.Documents" link="gdbus-org.freedesktop.portal.Documents.html"/>
+      <sub name="org.freedesktop.portal.Flatpak" link="gdbus-org.freedesktop.portal.Flatpak.html"/>
+      <sub name="org.freedesktop.portal.Flatpak.UpdateMonitor" link="gdbus-org.freedesktop.portal.Flatpak.UpdateMonitor.html"/>
+    </sub>
     <sub name="Object Hierarchy" link="object-tree.html"/>
     <sub name="API Index" link="full-api-index.html"/>
     <sub name="Index of deprecated API" link="deprecated-api-index.html"/>
@@ -194,6 +205,7 @@
     <keyword type="signal" name="The “operation-done” signal" link="FlatpakTransaction.html#FlatpakTransaction-operation-done"/>
     <keyword type="signal" name="The “operation-error” signal" link="FlatpakTransaction.html#FlatpakTransaction-operation-error"/>
     <keyword type="signal" name="The “ready” signal" link="FlatpakTransaction.html#FlatpakTransaction-ready"/>
+    <keyword type="signal" name="The “ready-pre-auth” signal" link="FlatpakTransaction.html#FlatpakTransaction-ready-pre-auth"/>
     <keyword type="signal" name="The “webflow-done” signal" link="FlatpakTransaction.html#FlatpakTransaction-webflow-done"/>
     <keyword type="signal" name="The “webflow-start” signal" link="FlatpakTransaction.html#FlatpakTransaction-webflow-start"/>
     <keyword type="function" name="flatpak_ref_format_ref ()" link="FlatpakRef.html#flatpak-ref-format-ref"/>
@@ -297,6 +309,68 @@
     <keyword type="macro" name="FLATPAK_MAJOR_VERSION" link="flatpak-Version-information.html#FLATPAK-MAJOR-VERSION:CAPS"/>
     <keyword type="macro" name="FLATPAK_MINOR_VERSION" link="flatpak-Version-information.html#FLATPAK-MINOR-VERSION:CAPS"/>
     <keyword type="macro" name="FLATPAK_MICRO_VERSION" link="flatpak-Version-information.html#FLATPAK-MICRO-VERSION:CAPS"/>
+    <keyword type="method" name="The RequestRefTokens() method" link="gdbus-org.freedesktop.Flatpak.Authenticator.html#gdbus-method-org-freedesktop-Flatpak-Authenticator.RequestRefTokens"/>
+    <keyword type="property" name="The &quot;version&quot; property" link="gdbus-org.freedesktop.Flatpak.Authenticator.html#gdbus-property-org-freedesktop-Flatpak-Authenticator.version"/>
+    <keyword type="method" name="The Close() method" link="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-method-org-freedesktop-Flatpak-AuthenticatorRequest.Close"/>
+    <keyword type="method" name="The BasicAuthReply() method" link="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-method-org-freedesktop-Flatpak-AuthenticatorRequest.BasicAuthReply"/>
+    <keyword type="signal" name="The &quot;Webflow&quot; signal" link="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-signal-org-freedesktop-Flatpak-AuthenticatorRequest.Webflow"/>
+    <keyword type="signal" name="The &quot;WebflowDone&quot; signal" link="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-signal-org-freedesktop-Flatpak-AuthenticatorRequest.WebflowDone"/>
+    <keyword type="signal" name="The &quot;BasicAuth&quot; signal" link="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-signal-org-freedesktop-Flatpak-AuthenticatorRequest.BasicAuth"/>
+    <keyword type="signal" name="The &quot;Response&quot; signal" link="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-signal-org-freedesktop-Flatpak-AuthenticatorRequest.Response"/>
+    <keyword type="method" name="The HostCommand() method" link="gdbus-org.freedesktop.Flatpak.Development.html#gdbus-method-org-freedesktop-Flatpak-Development.HostCommand"/>
+    <keyword type="method" name="The HostCommandSignal() method" link="gdbus-org.freedesktop.Flatpak.Development.html#gdbus-method-org-freedesktop-Flatpak-Development.HostCommandSignal"/>
+    <keyword type="signal" name="The &quot;HostCommandExited&quot; signal" link="gdbus-org.freedesktop.Flatpak.Development.html#gdbus-signal-org-freedesktop-Flatpak-Development.HostCommandExited"/>
+    <keyword type="property" name="The &quot;version&quot; property" link="gdbus-org.freedesktop.Flatpak.Development.html#gdbus-property-org-freedesktop-Flatpak-Development.version"/>
+    <keyword type="method" name="The RequestSession() method" link="gdbus-org.freedesktop.Flatpak.SessionHelper.html#gdbus-method-org-freedesktop-Flatpak-SessionHelper.RequestSession"/>
+    <keyword type="property" name="The &quot;version&quot; property" link="gdbus-org.freedesktop.Flatpak.SessionHelper.html#gdbus-property-org-freedesktop-Flatpak-SessionHelper.version"/>
+    <keyword type="method" name="The Deploy() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.Deploy"/>
+    <keyword type="method" name="The DeployAppstream() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.DeployAppstream"/>
+    <keyword type="method" name="The Uninstall() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.Uninstall"/>
+    <keyword type="method" name="The InstallBundle() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.InstallBundle"/>
+    <keyword type="method" name="The ConfigureRemote() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.ConfigureRemote"/>
+    <keyword type="method" name="The Configure() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.Configure"/>
+    <keyword type="method" name="The UpdateRemote() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.UpdateRemote"/>
+    <keyword type="method" name="The RemoveLocalRef() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.RemoveLocalRef"/>
+    <keyword type="method" name="The PruneLocalRepo() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.PruneLocalRepo"/>
+    <keyword type="method" name="The RunTriggers() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.RunTriggers"/>
+    <keyword type="method" name="The EnsureRepo() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.EnsureRepo"/>
+    <keyword type="method" name="The UpdateSummary() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.UpdateSummary"/>
+    <keyword type="method" name="The GenerateOciSummary() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.GenerateOciSummary"/>
+    <keyword type="method" name="The CancelPull() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.CancelPull"/>
+    <keyword type="method" name="The GetRevokefsFd() method" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-method-org-freedesktop-Flatpak-SystemHelper.GetRevokefsFd"/>
+    <keyword type="property" name="The &quot;version&quot; property" link="gdbus-org.freedesktop.Flatpak.SystemHelper.html#gdbus-property-org-freedesktop-Flatpak-SystemHelper.version"/>
+    <keyword type="method" name="The Lookup() method" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.Lookup"/>
+    <keyword type="method" name="The Set() method" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.Set"/>
+    <keyword type="method" name="The Delete() method" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.Delete"/>
+    <keyword type="method" name="The SetValue() method" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.SetValue"/>
+    <keyword type="method" name="The SetPermission() method" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.SetPermission"/>
+    <keyword type="method" name="The DeletePermission() method" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.DeletePermission"/>
+    <keyword type="method" name="The List() method" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.List"/>
+    <keyword type="signal" name="The &quot;Changed&quot; signal" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-signal-org-freedesktop-impl-portal-PermissionStore.Changed"/>
+    <keyword type="property" name="The &quot;version&quot; property" link="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-property-org-freedesktop-impl-portal-PermissionStore.version"/>
+    <keyword type="method" name="The GetMountPoint() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.GetMountPoint"/>
+    <keyword type="method" name="The Add() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.Add"/>
+    <keyword type="method" name="The AddNamed() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.AddNamed"/>
+    <keyword type="method" name="The AddFull() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.AddFull"/>
+    <keyword type="method" name="The AddNamedFull() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.AddNamedFull"/>
+    <keyword type="method" name="The GrantPermissions() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.GrantPermissions"/>
+    <keyword type="method" name="The RevokePermissions() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.RevokePermissions"/>
+    <keyword type="method" name="The Delete() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.Delete"/>
+    <keyword type="method" name="The Lookup() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.Lookup"/>
+    <keyword type="method" name="The Info() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.Info"/>
+    <keyword type="method" name="The List() method" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.List"/>
+    <keyword type="property" name="The &quot;version&quot; property" link="gdbus-org.freedesktop.portal.Documents.html#gdbus-property-org-freedesktop-portal-Documents.version"/>
+    <keyword type="method" name="The Spawn() method" link="gdbus-org.freedesktop.portal.Flatpak.html#gdbus-method-org-freedesktop-portal-Flatpak.Spawn"/>
+    <keyword type="method" name="The SpawnSignal() method" link="gdbus-org.freedesktop.portal.Flatpak.html#gdbus-method-org-freedesktop-portal-Flatpak.SpawnSignal"/>
+    <keyword type="method" name="The CreateUpdateMonitor() method" link="gdbus-org.freedesktop.portal.Flatpak.html#gdbus-method-org-freedesktop-portal-Flatpak.CreateUpdateMonitor"/>
+    <keyword type="signal" name="The &quot;SpawnStarted&quot; signal" link="gdbus-org.freedesktop.portal.Flatpak.html#gdbus-signal-org-freedesktop-portal-Flatpak.SpawnStarted"/>
+    <keyword type="signal" name="The &quot;SpawnExited&quot; signal" link="gdbus-org.freedesktop.portal.Flatpak.html#gdbus-signal-org-freedesktop-portal-Flatpak.SpawnExited"/>
+    <keyword type="property" name="The &quot;version&quot; property" link="gdbus-org.freedesktop.portal.Flatpak.html#gdbus-property-org-freedesktop-portal-Flatpak.version"/>
+    <keyword type="property" name="The &quot;supports&quot; property" link="gdbus-org.freedesktop.portal.Flatpak.html#gdbus-property-org-freedesktop-portal-Flatpak.supports"/>
+    <keyword type="method" name="The Close() method" link="gdbus-org.freedesktop.portal.Flatpak.UpdateMonitor.html#gdbus-method-org-freedesktop-portal-Flatpak-UpdateMonitor.Close"/>
+    <keyword type="method" name="The Update() method" link="gdbus-org.freedesktop.portal.Flatpak.UpdateMonitor.html#gdbus-method-org-freedesktop-portal-Flatpak-UpdateMonitor.Update"/>
+    <keyword type="signal" name="The &quot;UpdateAvailable&quot; signal" link="gdbus-org.freedesktop.portal.Flatpak.UpdateMonitor.html#gdbus-signal-org-freedesktop-portal-Flatpak-UpdateMonitor.UpdateAvailable"/>
+    <keyword type="signal" name="The &quot;Progress&quot; signal" link="gdbus-org.freedesktop.portal.Flatpak.UpdateMonitor.html#gdbus-signal-org-freedesktop-portal-Flatpak-UpdateMonitor.Progress"/>
     <keyword type="constant" name="FLATPAK_QUERY_FLAGS_NONE" link="FlatpakInstallation.html#FLATPAK-QUERY-FLAGS-NONE:CAPS"/>
     <keyword type="constant" name="FLATPAK_QUERY_FLAGS_ONLY_CACHED" link="FlatpakInstallation.html#FLATPAK-QUERY-FLAGS-ONLY-CACHED:CAPS"/>
     <keyword type="constant" name="FLATPAK_QUERY_FLAGS_ONLY_SIDELOADED" link="FlatpakInstallation.html#FLATPAK-QUERY-FLAGS-ONLY-SIDELOADED:CAPS"/>

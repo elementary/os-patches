@@ -82,8 +82,17 @@ make_relative (const char *base, const char *path)
 }
 
 #define FAKE_MODE_DIR -1 /* Ensure a dir, either on tmpfs or mapped parent */
-#define FAKE_MODE_TMPFS 0
+#define FAKE_MODE_TMPFS FLATPAK_FILESYSTEM_MODE_NONE
 #define FAKE_MODE_SYMLINK G_MAXINT
+
+static inline gboolean
+is_export_mode (int mode)
+{
+  return ((mode >= FLATPAK_FILESYSTEM_MODE_NONE
+           && mode <= FLATPAK_FILESYSTEM_MODE_LAST)
+          || mode == FAKE_MODE_DIR
+          || mode == FAKE_MODE_SYMLINK);
+}
 
 typedef struct
 {
@@ -96,7 +105,58 @@ struct _FlatpakExports
   GHashTable           *hash;
   FlatpakFilesystemMode host_etc;
   FlatpakFilesystemMode host_os;
+  int                   host_fd;
 };
+
+/*
+ * When populating /run/host, pretend @fd was the root of the host
+ * filesystem.
+ */
+void
+flatpak_exports_take_host_fd (FlatpakExports *exports,
+                              int fd)
+{
+  glnx_close_fd (&exports->host_fd);
+
+  if (fd >= 0)
+    exports->host_fd = fd;
+}
+
+static gboolean
+flatpak_exports_stat_in_host (FlatpakExports *exports,
+                              const char *abs_path,
+                              struct stat *buf,
+                              int flags,
+                              GError **error)
+{
+  g_return_val_if_fail (abs_path[0] == '/', FALSE);
+
+  if (exports->host_fd >= 0)
+    {
+      /* If abs_path is "/usr", then stat "usr" relative to host_fd.
+       * As a special case, if abs_path is "/", stat host_fd itself,
+       * due to the use of AT_EMPTY_PATH. */
+      return glnx_fstatat (exports->host_fd, &abs_path[1], buf,
+                           AT_EMPTY_PATH | flags,
+                           error);
+    }
+
+  return glnx_fstatat (AT_FDCWD, abs_path, buf, flags, error);
+}
+
+static gchar *
+flatpak_exports_readlink_in_host (FlatpakExports *exports,
+                                  const char *abs_path,
+                                  GError **error)
+{
+  g_return_val_if_fail (abs_path[0] == '/', FALSE);
+
+  if (exports->host_fd >= 0)
+    return glnx_readlinkat_malloc (exports->host_fd, &abs_path[1],
+                                   NULL, error);
+
+  return glnx_readlinkat_malloc (AT_FDCWD, abs_path, NULL, error);
+}
 
 static void
 exported_path_free (ExportedPath *exported_path)
@@ -111,6 +171,7 @@ flatpak_exports_new (void)
   FlatpakExports *exports = g_new0 (FlatpakExports, 1);
 
   exports->hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, (GFreeFunc) exported_path_free);
+  exports->host_fd = -1;
   return exports;
 }
 
@@ -137,6 +198,8 @@ path_parent_is_mapped (const char **keys,
     {
       const char *mounted_path = keys[i];
       ExportedPath *ep = g_hash_table_lookup (hash_table, mounted_path);
+
+      g_assert (is_export_mode (ep->mode));
 
       if (flatpak_has_path_prefix (path, mounted_path) &&
           (strcmp (path, mounted_path) != 0))
@@ -168,6 +231,8 @@ path_is_mapped (const char **keys,
     {
       const char *mounted_path = keys[i];
       ExportedPath *ep = g_hash_table_lookup (hash_table, mounted_path);
+
+      g_assert (is_export_mode (ep->mode));
 
       if (flatpak_has_path_prefix (path, mounted_path))
         {
@@ -232,15 +297,15 @@ path_is_symlink (const char *path)
 typedef struct
 {
   const char *name;
-  GFileTest test;
+  int ifmt;
 } LibsNeedEtc;
 
 static const LibsNeedEtc libs_need_etc[] =
 {
   /* glibc */
-  { "ld.so.cache", G_FILE_TEST_IS_REGULAR },
+  { "ld.so.cache", S_IFREG },
   /* Used for executables and a few libraries on e.g. Debian */
-  { "alternatives", G_FILE_TEST_IS_DIR }
+  { "alternatives", S_IFDIR }
 };
 
 void
@@ -251,6 +316,7 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
   g_autofree const char **keys = (const char **) g_hash_table_get_keys_as_array (exports->hash, &n_keys);
   g_autoptr(GList) eps = NULL;
   GList *l;
+  struct stat buf;
 
   eps = g_hash_table_get_values (exports->hash);
   eps = g_list_sort (eps, (GCompareFunc) compare_eps);
@@ -261,6 +327,8 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
     {
       ExportedPath *ep = l->data;
       const char *path = ep->path;
+
+      g_assert (is_export_mode (ep->mode));
 
       if (ep->mode == FAKE_MODE_SYMLINK)
         {
@@ -301,7 +369,10 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
         }
     }
 
-  if (exports->host_os != 0)
+  g_assert (exports->host_os >= FLATPAK_FILESYSTEM_MODE_NONE);
+  g_assert (exports->host_os <= FLATPAK_FILESYSTEM_MODE_LAST);
+
+  if (exports->host_os != FLATPAK_FILESYSTEM_MODE_NONE)
     {
       const char *os_bind_mode = "--bind";
       int i;
@@ -309,9 +380,17 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
       if (exports->host_os == FLATPAK_FILESYSTEM_MODE_READ_ONLY)
         os_bind_mode = "--ro-bind";
 
-      if (g_file_test ("/usr", G_FILE_TEST_IS_DIR))
+      if (flatpak_exports_stat_in_host (exports, "/usr", &buf, 0, NULL) &&
+          S_ISDIR (buf.st_mode))
         flatpak_bwrap_add_args (bwrap,
                                 os_bind_mode, "/usr", "/run/host/usr", NULL);
+
+      /* /usr/local points to ../var/usrlocal on ostree systems,
+	 so bind-mount that too. */
+      if (flatpak_exports_stat_in_host (exports, "/var/usrlocal", &buf, 0, NULL) &&
+	    S_ISDIR (buf.st_mode))
+        flatpak_bwrap_add_args (bwrap,
+                                os_bind_mode, "/var/usrlocal", "/run/host/var/usrlocal", NULL);
 
       for (i = 0; flatpak_abs_usrmerged_dirs[i] != NULL; i++)
         {
@@ -322,7 +401,7 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
           g_assert (subdir[0] == '/');
           /* e.g. /run/host/lib32 */
           run_host_subdir = g_strconcat ("/run/host", subdir, NULL);
-          target = glnx_readlinkat_malloc (-1, subdir, NULL, NULL);
+          target = flatpak_exports_readlink_in_host (exports, subdir, NULL);
 
           if (target != NULL &&
               g_str_has_prefix (target, "usr/"))
@@ -344,7 +423,8 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
                                       "--symlink", target + 1, run_host_subdir,
                                       NULL);
             }
-          else if (g_file_test (subdir, G_FILE_TEST_IS_DIR))
+          else if (flatpak_exports_stat_in_host (exports, subdir, &buf, 0, NULL) &&
+                   S_ISDIR (buf.st_mode))
             {
               /* e.g. /lib32 is a symlink to /opt/compat/ia32/lib,
                * or is a plain directory because the host OS has not
@@ -355,10 +435,8 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
             }
         }
 
-      if (exports->host_etc == 0)
+      if (exports->host_etc == FLATPAK_FILESYSTEM_MODE_NONE)
         {
-          guint i;
-
           /* We are exposing the host /usr (and friends) but not the
            * host /etc. Additionally expose just enough of /etc to make
            * things that want to read /usr work as expected.
@@ -371,7 +449,9 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
               const LibsNeedEtc *item = &libs_need_etc[i];
               g_autofree gchar *host_path = g_strconcat ("/etc/", item->name, NULL);
 
-              if (g_file_test (host_path, item->test))
+              if (flatpak_exports_stat_in_host (exports, host_path,
+                                                &buf, 0, NULL) &&
+                  (buf.st_mode & S_IFMT) == item->ifmt)
                 {
                   g_autofree gchar *run_host_path = g_strconcat ("/run/host/etc/", item->name, NULL);
 
@@ -383,20 +463,32 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
         }
     }
 
-  if (exports->host_etc != 0)
+  g_assert (exports->host_etc >= FLATPAK_FILESYSTEM_MODE_NONE);
+  g_assert (exports->host_etc <= FLATPAK_FILESYSTEM_MODE_LAST);
+
+  if (exports->host_etc != FLATPAK_FILESYSTEM_MODE_NONE)
     {
       const char *etc_bind_mode = "--bind";
 
       if (exports->host_etc == FLATPAK_FILESYSTEM_MODE_READ_ONLY)
         etc_bind_mode = "--ro-bind";
 
-      if (g_file_test ("/etc", G_FILE_TEST_IS_DIR))
+      if (flatpak_exports_stat_in_host (exports, "/etc", &buf, 0, NULL) &&
+          S_ISDIR (buf.st_mode))
         flatpak_bwrap_add_args (bwrap,
                                 etc_bind_mode, "/etc", "/run/host/etc", NULL);
     }
+
+  /* As per the os-release specification https://www.freedesktop.org/software/systemd/man/os-release.html
+   * always read-only bind-mount /etc/os-release if it exists, or /usr/lib/os-release as a fallback from
+   * the host into the application's /run/host */
+  if (flatpak_exports_stat_in_host (exports, "/etc/os-release", &buf, 0, NULL))
+    flatpak_bwrap_add_args (bwrap, "--ro-bind", "/etc/os-release", "/run/host/os-release", NULL);
+  else if (flatpak_exports_stat_in_host (exports, "/usr/lib/os-release", &buf, 0, NULL))
+    flatpak_bwrap_add_args (bwrap, "--ro-bind", "/usr/lib/os-release", "/run/host/os-release", NULL);
 }
 
-/* Returns 0 if not visible */
+/* Returns FLATPAK_FILESYSTEM_MODE_NONE if not visible */
 FlatpakFilesystemMode
 flatpak_exports_path_get_mode (FlatpakExports *exports,
                                const char     *path)
@@ -441,7 +533,7 @@ flatpak_exports_path_get_mode (FlatpakExports *exports,
                   break;
                 }
 
-              return 0;
+              return FLATPAK_FILESYSTEM_MODE_NONE;
             }
 
           if (S_ISLNK (st.st_mode))
@@ -451,7 +543,7 @@ flatpak_exports_path_get_mode (FlatpakExports *exports,
               int j;
 
               if (resolved == NULL)
-                return 0;
+                return FLATPAK_FILESYSTEM_MODE_NONE;
 
               path2_builder = g_string_new (resolved);
 
@@ -465,7 +557,7 @@ flatpak_exports_path_get_mode (FlatpakExports *exports,
             }
         }
       else if (parts[i + 1] == NULL)
-        return 0; /* Last part was not mapped */
+        return FLATPAK_FILESYSTEM_MODE_NONE; /* Last part was not mapped */
     }
 
   if (is_readonly)
@@ -478,7 +570,7 @@ gboolean
 flatpak_exports_path_is_visible (FlatpakExports *exports,
                                  const char     *path)
 {
-  return flatpak_exports_path_get_mode (exports, path) > 0;
+  return flatpak_exports_path_get_mode (exports, path) > FLATPAK_FILESYSTEM_MODE_NONE;
 }
 
 static gboolean
@@ -500,6 +592,8 @@ do_export_path (FlatpakExports *exports,
 {
   ExportedPath *old_ep = g_hash_table_lookup (exports->hash, path);
   ExportedPath *ep;
+
+  g_return_if_fail (is_export_mode (mode));
 
   ep = g_new0 (ExportedPath, 1);
   ep->path = g_strdup (path);
@@ -595,6 +689,8 @@ _exports_path_expose (FlatpakExports *exports,
   char *slash;
   int i;
   glnx_autofd int o_path_fd = -1;
+
+  g_return_val_if_fail (is_export_mode (mode), FALSE);
 
   if (level > 40) /* 40 is the current kernel ELOOP check */
     {
@@ -704,6 +800,8 @@ flatpak_exports_add_path_expose (FlatpakExports       *exports,
                                  FlatpakFilesystemMode mode,
                                  const char           *path)
 {
+  g_return_if_fail (mode > FLATPAK_FILESYSTEM_MODE_NONE);
+  g_return_if_fail (mode <= FLATPAK_FILESYSTEM_MODE_LAST);
   _exports_path_expose (exports, mode, path, 0);
 }
 
@@ -719,7 +817,10 @@ flatpak_exports_add_path_expose_or_hide (FlatpakExports       *exports,
                                          FlatpakFilesystemMode mode,
                                          const char           *path)
 {
-  if (mode == 0)
+  g_return_if_fail (mode >= FLATPAK_FILESYSTEM_MODE_NONE);
+  g_return_if_fail (mode <= FLATPAK_FILESYSTEM_MODE_LAST);
+
+  if (mode == FLATPAK_FILESYSTEM_MODE_NONE)
     flatpak_exports_add_path_tmpfs (exports, path);
   else
     flatpak_exports_add_path_expose (exports, mode, path);
@@ -736,6 +837,9 @@ void
 flatpak_exports_add_host_etc_expose (FlatpakExports       *exports,
                                      FlatpakFilesystemMode mode)
 {
+  g_return_if_fail (mode > FLATPAK_FILESYSTEM_MODE_NONE);
+  g_return_if_fail (mode <= FLATPAK_FILESYSTEM_MODE_LAST);
+
   exports->host_etc = mode;
 }
 
@@ -743,5 +847,8 @@ void
 flatpak_exports_add_host_os_expose (FlatpakExports       *exports,
                                     FlatpakFilesystemMode mode)
 {
+  g_return_if_fail (mode > FLATPAK_FILESYSTEM_MODE_NONE);
+  g_return_if_fail (mode <= FLATPAK_FILESYSTEM_MODE_LAST);
+
   exports->host_os = mode;
 }

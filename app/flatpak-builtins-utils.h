@@ -39,12 +39,12 @@ typedef struct RemoteDirPair
 
 typedef struct RefDirPair
 {
-  gchar      *ref;
+  FlatpakDecomposed *ref;
   FlatpakDir *dir;
 } RefDirPair;
 
 void         ref_dir_pair_free (RefDirPair *pair);
-RefDirPair * ref_dir_pair_new (const char *ref,
+RefDirPair * ref_dir_pair_new (FlatpakDecomposed *ref,
                                FlatpakDir *dir);
 
 void            remote_dir_pair_free (RemoteDirPair *pair);
@@ -57,17 +57,17 @@ GBytes * flatpak_load_gpg_keys (char        **gpg_import,
                                 GCancellable *cancellable,
                                 GError      **error);
 
-FlatpakDir * flatpak_find_installed_pref (const char   *pref,
-                                          FlatpakKinds  kinds,
-                                          const char   *default_arch,
-                                          const char   *default_branch,
-                                          gboolean      search_all,
-                                          gboolean      search_user,
-                                          gboolean      search_system,
-                                          char        **search_installations,
-                                          char        **out_ref,
-                                          GCancellable *cancellable,
-                                          GError      **error);
+FlatpakDir * flatpak_find_installed_pref (const char         *pref,
+                                          FlatpakKinds        kinds,
+                                          const char         *default_arch,
+                                          const char         *default_branch,
+                                          gboolean            search_all,
+                                          gboolean            search_user,
+                                          gboolean            search_system,
+                                          char              **search_installations,
+                                          FlatpakDecomposed **out_ref,
+                                          GCancellable       *cancellable,
+                                          GError            **error);
 
 gboolean flatpak_resolve_duplicate_remotes (GPtrArray    *dirs,
                                             const char   *remote_name,
@@ -78,7 +78,7 @@ gboolean flatpak_resolve_duplicate_remotes (GPtrArray    *dirs,
 gboolean flatpak_resolve_matching_refs (const char *remote_name,
                                         FlatpakDir *dir,
                                         gboolean    assume_yes,
-                                        char      **refs,
+                                        GPtrArray  *refs,
                                         const char *opt_search_ref,
                                         char      **out_ref,
                                         GError    **error);
@@ -151,6 +151,9 @@ char *  ellipsize_string_full (const char          *text,
 void print_aligned (int         len,
                     const char *title,
                     const char *value);
+void print_aligned_take (int         len,
+                         const char *title,
+                         char       *value);
 
 AsApp *as_store_find_app (AsStore    *store,
                           const char *ref);
@@ -176,8 +179,31 @@ void print_wrapped (int         columns,
 FlatpakRemoteState * get_remote_state (FlatpakDir   *dir,
                                        const char   *remote,
                                        gboolean      cached,
-                                       gboolean      sideloaded,
+                                       gboolean      only_sideloaded,
+                                       const char   *opt_arch,
+                                       const char  **opt_sideload_repos,
                                        GCancellable *cancellable,
                                        GError      **error);
+
+gboolean ensure_remote_state_arch (FlatpakDir         *dir,
+                                   FlatpakRemoteState *state,
+                                   const char         *arch,
+                                   gboolean            cached,
+                                   gboolean            only_sideloaded,
+                                   GCancellable       *cancellable,
+                                   GError            **error);
+gboolean ensure_remote_state_arch_for_ref (FlatpakDir         *dir,
+                                           FlatpakRemoteState *state,
+                                           const char         *ref,
+                                           gboolean            cached,
+                                           gboolean            only_sideloaded,
+                                           GCancellable       *cancellable,
+                                           GError            **error);
+gboolean ensure_remote_state_all_arches (FlatpakDir         *dir,
+                                         FlatpakRemoteState *state,
+                                         gboolean            cached,
+                                         gboolean            only_sideloaded,
+                                         GCancellable       *cancellable,
+                                         GError            **error);
 
 #endif /* __FLATPAK_BUILTINS_UTILS_H__ */

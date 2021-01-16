@@ -1,6 +1,6 @@
 <?xml version='1.0'?> <!--*-nxml-*-->
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
-    "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 
 <refentry id="flatpak-metadata">
 
@@ -210,6 +210,14 @@
                                 Available since 0.3.
                             </para></listitem></varlistentry>
 
+                            <varlistentry><term><option>home/<replaceable>path</replaceable></option></term><listitem><para>
+                                  Alias for <filename>~/path</filename>
+                                  Available since 1.10.
+                                  For better compatibility with older
+                                  Flatpak versions, prefer to write this
+                                  as <filename>~/path</filename>.
+                            </para></listitem></varlistentry>
+
                             <varlistentry><term><option>host</option></term>
                             <listitem><para>
                                 The entire host file system, except for
@@ -382,6 +390,15 @@
                                 directory. Available since 0.3.
                             </para></listitem></varlistentry>
 
+                            <varlistentry><term><option>~</option></term>
+                            <listitem><para>
+                                  The same as <option>home</option>.
+                                  Available since 1.10.
+                                  For better compatibility with older
+                                  Flatpak versions, prefer to write this
+                                  as <option>home</option>.
+                            </para></listitem></varlistentry>
+
                             <varlistentry><term>
                                 One of the above followed by
                                 <option>:ro</option>
@@ -464,6 +481,15 @@
                         indicate the absence of that feature, for example
                         <option>!devel</option> if development and debugging
                         are not allowed.
+                    </para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>unset-environment</option> (list)</term>
+                    <listitem><para>
+                        A list of names of environment variables to unset.
+                        Note that environment variables to set to a value
+                        (possibly empty) appear in the [Environment]
+                        group instead.
                     </para></listitem>
                 </varlistentry>
             </variablelist>
@@ -690,6 +716,12 @@
                 where <option>VAR</option> is the name of an environment variable
                 to set.
             </para>
+            <para>
+                Note that environment variables can also be unset (removed
+                from the environment) by listing them in the
+                <option>unset-environment</option> entry of the
+                [Context] group.
+              </para>
         </refsect2>
         <refsect2>
             <title>[Extension NAME]</title>

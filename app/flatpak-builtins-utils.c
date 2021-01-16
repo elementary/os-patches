@@ -51,11 +51,11 @@ remote_dir_pair_new (const char *remote_name, FlatpakDir *dir)
 }
 
 RefDirPair *
-ref_dir_pair_new (const char *ref, FlatpakDir *dir)
+ref_dir_pair_new (FlatpakDecomposed *ref, FlatpakDir *dir)
 {
   RefDirPair *pair = g_new (RefDirPair, 1);
 
-  pair->ref = g_strdup (ref);
+  pair->ref = flatpak_decomposed_ref (ref);
   pair->dir = g_object_ref (dir);
   return pair;
 }
@@ -63,10 +63,11 @@ ref_dir_pair_new (const char *ref, FlatpakDir *dir)
 void
 ref_dir_pair_free (RefDirPair *pair)
 {
-  g_free (pair->ref);
+  flatpak_decomposed_unref (pair->ref);
   g_object_unref (pair->dir);
   g_free (pair);
 }
+
 
 gboolean
 looks_like_branch (const char *branch)
@@ -76,7 +77,7 @@ looks_like_branch (const char *branch)
   /* In particular, / is not a valid branch char, so
      this lets us distinguish full or partial refs as
      non-branches. */
-  if (!flatpak_is_valid_branch (branch, NULL))
+  if (!flatpak_is_valid_branch (branch, -1, NULL))
     return FALSE;
 
   /* Dots are allowed in branches, but not really used much, while
@@ -95,17 +96,14 @@ looks_like_branch (const char *branch)
 FlatpakDir *
 flatpak_find_installed_pref (const char *pref, FlatpakKinds kinds, const char *default_arch, const char *default_branch,
                              gboolean search_all, gboolean search_user, gboolean search_system, char **search_installations,
-                             char **out_ref, GCancellable *cancellable, GError **error)
+                             FlatpakDecomposed **out_ref, GCancellable *cancellable, GError **error)
 {
   g_autofree char *id = NULL;
   g_autofree char *arch = NULL;
   g_autofree char *branch = NULL;
   g_autoptr(GError) lookup_error = NULL;
-  g_autofree char *ref = NULL;
-  FlatpakKinds kind = 0;
+  g_autoptr(FlatpakDecomposed) ref = NULL;
   g_autoptr(FlatpakDir) dir = NULL;
-  g_autoptr(FlatpakDir) user_dir = NULL;
-  g_autoptr(FlatpakDir) system_dir = NULL;
   g_autoptr(GPtrArray) system_dirs = NULL;
 
   if (!flatpak_split_partial_ref_arg (pref, kinds, default_arch, default_branch,
@@ -114,13 +112,11 @@ flatpak_find_installed_pref (const char *pref, FlatpakKinds kinds, const char *d
 
   if (search_user || search_all)
     {
-      user_dir = flatpak_dir_get_user ();
+      g_autoptr(FlatpakDir) user_dir = flatpak_dir_get_user ();
 
       ref = flatpak_dir_find_installed_ref (user_dir,
-                                            id,
-                                            branch,
-                                            arch,
-                                            kinds, &kind,
+                                            id, branch, arch,
+                                            kinds,
                                             &lookup_error);
       if (ref)
         dir = g_steal_pointer (&user_dir);
@@ -147,10 +143,8 @@ flatpak_find_installed_pref (const char *pref, FlatpakKinds kinds, const char *d
           g_clear_error (&lookup_error);
 
           ref = flatpak_dir_find_installed_ref (system_dir,
-                                                id,
-                                                branch,
-                                                arch,
-                                                kinds, &kind,
+                                                id, branch, arch,
+                                                kinds,
                                                 &lookup_error);
           if (ref)
             {
@@ -184,10 +178,8 @@ flatpak_find_installed_pref (const char *pref, FlatpakKinds kinds, const char *d
                   g_clear_error (&lookup_error);
 
                   ref = flatpak_dir_find_installed_ref (installation_dir,
-                                                        id,
-                                                        branch,
-                                                        arch,
-                                                        kinds, &kind,
+                                                        id, branch, arch,
+                                                        kinds,
                                                         &lookup_error);
                   if (ref)
                     {
@@ -206,15 +198,13 @@ flatpak_find_installed_pref (const char *pref, FlatpakKinds kinds, const char *d
 
       if (ref == NULL && search_system)
         {
-          system_dir = flatpak_dir_get_system_default ();
+          g_autoptr(FlatpakDir) system_dir = flatpak_dir_get_system_default ();
 
           g_clear_error (&lookup_error);
 
           ref = flatpak_dir_find_installed_ref (system_dir,
-                                                id,
-                                                branch,
-                                                arch,
-                                                kinds, &kind,
+                                                id, branch, arch,
+                                                kinds,
                                                 &lookup_error);
 
           if (ref)
@@ -377,34 +367,46 @@ flatpak_resolve_duplicate_remotes (GPtrArray    *dirs,
   return TRUE;
 }
 
+static char **
+decomposed_refs_to_strv (GPtrArray *decomposed)
+{
+  GPtrArray *res = g_ptr_array_new ();
+  for (int i = 0; i < decomposed->len; i++)
+    {
+      FlatpakDecomposed *ref = g_ptr_array_index (decomposed, i);
+      g_ptr_array_add (res, flatpak_decomposed_dup_ref (ref));
+    }
+  g_ptr_array_add (res, NULL);
+
+  return (char **) g_ptr_array_free (res, FALSE);
+}
+
 gboolean
 flatpak_resolve_matching_refs (const char *remote_name,
                                FlatpakDir *dir,
                                gboolean    assume_yes,
-                               char      **refs,
+                               GPtrArray  *refs,
                                const char *opt_search_ref,
                                char      **out_ref,
                                GError    **error)
 {
   guint chosen = 0;
-  guint refs_len;
 
-  refs_len = g_strv_length (refs);
-  g_assert (refs_len > 0);
+  g_assert (refs->len > 0);
 
   /* When there's only one match, we only choose it without user interaction if
    * either the --assume-yes option was used or it's an exact match
    */
-  if (refs_len == 1)
+  if (refs->len == 1)
     {
       if (assume_yes)
         chosen = 1;
       else
         {
-          g_auto(GStrv) parts = NULL;
-          parts = flatpak_decompose_ref (refs[0], NULL);
-          g_assert (parts != NULL);
-          if (opt_search_ref != NULL && strcmp (parts[1], opt_search_ref) == 0)
+          FlatpakDecomposed *ref = g_ptr_array_index (refs, 0);
+          g_autofree char *id = flatpak_decomposed_dup_id (ref);
+
+          if (opt_search_ref != NULL && strcmp (id, opt_search_ref) == 0)
             chosen = 1;
         }
     }
@@ -412,28 +414,33 @@ flatpak_resolve_matching_refs (const char *remote_name,
   if (chosen == 0)
     {
       const char *dir_name = flatpak_dir_get_name_cached (dir);
-      if (refs_len == 1)
+      if (refs->len == 1)
         {
+          FlatpakDecomposed *ref = g_ptr_array_index (refs, 0);
           if (flatpak_yes_no_prompt (TRUE, /* default to yes on Enter */
                                      _("Found ref ‘%s’ in remote ‘%s’ (%s).\nUse this ref?"),
-                                     refs[0], remote_name, dir_name))
+                                     flatpak_decomposed_get_ref (ref), remote_name, dir_name))
             chosen = 1;
           else
             return flatpak_fail (error, _("No ref chosen to resolve matches for ‘%s’"), opt_search_ref);
         }
       else
         {
-          flatpak_format_choices ((const char **) refs,
+          g_auto(GStrv) refs_str = decomposed_refs_to_strv (refs);
+          flatpak_format_choices ((const char **) refs_str,
                                   _("Similar refs found for ‘%s’ in remote ‘%s’ (%s):"),
                                   opt_search_ref, remote_name, dir_name);
-          chosen = flatpak_number_prompt (TRUE, 0, refs_len, _("Which do you want to use (0 to abort)?"));
+          chosen = flatpak_number_prompt (TRUE, 0, refs->len, _("Which do you want to use (0 to abort)?"));
           if (chosen == 0)
             return flatpak_fail (error, _("No ref chosen to resolve matches for ‘%s’"), opt_search_ref);
         }
     }
 
   if (out_ref)
-    *out_ref = g_strdup (refs[chosen - 1]);
+    {
+      FlatpakDecomposed *ref = g_ptr_array_index (refs, chosen - 1);
+      *out_ref = flatpak_decomposed_dup_ref (ref);
+    }
 
   return TRUE;
 }
@@ -477,10 +484,8 @@ flatpak_resolve_matching_installed_refs (gboolean    assume_yes,
       else
         {
           RefDirPair *pair = g_ptr_array_index (ref_dir_pairs, 0);
-          g_auto(GStrv) parts = NULL;
-          parts = flatpak_decompose_ref (pair->ref, NULL);
-          g_assert (parts != NULL);
-          if (opt_search_ref != NULL && strcmp (parts[1], opt_search_ref) == 0)
+          g_autofree char *id = flatpak_decomposed_dup_id (pair->ref);
+          if (opt_search_ref != NULL && strcmp (id, opt_search_ref) == 0)
             chosen = 1;
         }
     }
@@ -498,7 +503,7 @@ flatpak_resolve_matching_installed_refs (gboolean    assume_yes,
           const char *dir_name = flatpak_dir_get_name_cached (pair->dir);
           if (flatpak_yes_no_prompt (TRUE, /* default to yes on Enter */
                                      _("Found installed ref ‘%s’ (%s). Is this correct?"),
-                                     pair->ref, dir_name))
+                                     flatpak_decomposed_get_ref (pair->ref), dir_name))
             chosen = 1;
           else
             return flatpak_fail (error, _("No ref chosen to resolve matches for ‘%s’"), opt_search_ref);
@@ -510,7 +515,7 @@ flatpak_resolve_matching_installed_refs (gboolean    assume_yes,
           for (i = 0; i < ref_dir_pairs->len; i++)
             {
               RefDirPair *pair = g_ptr_array_index (ref_dir_pairs, i);
-              names[i] = g_strdup_printf ("%s (%s)", pair->ref, flatpak_dir_get_name_cached (pair->dir));
+              names[i] = g_strdup_printf ("%s (%s)", flatpak_decomposed_get_ref (pair->ref), flatpak_dir_get_name_cached (pair->dir));
             }
           if (!only_one)
             names[i] = g_strdup_printf (_("All of the above"));
@@ -1183,6 +1188,12 @@ print_aligned (int len, const char *title, const char *value)
   g_print ("%s%*s%s%s %s\n", on, len - (int) cell_width (title), "", title, off, value);
 }
 
+void
+print_aligned_take (int len, const char *title, char *value)
+{
+  print_aligned (len, title, value);
+  g_free (value);
+}
 
 static const char *
 skip_escape_sequence (const char *p)
@@ -1335,14 +1346,16 @@ FlatpakRemoteState *
 get_remote_state (FlatpakDir   *dir,
                   const char   *remote,
                   gboolean      cached,
-                  gboolean      sideloaded,
+                  gboolean      only_sideloaded,
+                  const char   *opt_arch,
+                  const char  **opt_sideload_repos,
                   GCancellable *cancellable,
                   GError      **error)
 {
   g_autoptr(GError) local_error = NULL;
   FlatpakRemoteState *state = NULL;
 
-  if (sideloaded)
+  if (only_sideloaded)
     {
       state = flatpak_dir_get_remote_state_local_only (dir, remote, cancellable, error);
       if (state == NULL)
@@ -1350,11 +1363,11 @@ get_remote_state (FlatpakDir   *dir,
     }
   else
     {
-      state = flatpak_dir_get_remote_state (dir, remote, cached, cancellable, &local_error);
+      state = flatpak_dir_get_remote_state_optional (dir, remote, cached, cancellable, &local_error);
       if (state == NULL && g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_NOT_CACHED))
         {
           g_clear_error (&local_error);
-          state = flatpak_dir_get_remote_state (dir, remote, FALSE, cancellable, &local_error);
+          state = flatpak_dir_get_remote_state_optional (dir, remote, FALSE, cancellable, &local_error);
         }
 
       if (state == NULL)
@@ -1364,5 +1377,75 @@ get_remote_state (FlatpakDir   *dir,
         }
     }
 
+  if (opt_arch != NULL &&
+      !ensure_remote_state_arch (dir, state, opt_arch, cached, only_sideloaded, cancellable, &local_error))
+    return NULL;
+
+  for (int i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
+     {
+      g_autoptr(GFile) f = g_file_new_for_path (opt_sideload_repos[i]);
+      flatpak_remote_state_add_sideload_repo (state, f);
+     }
+
   return state;
+}
+
+gboolean
+ensure_remote_state_arch (FlatpakDir         *dir,
+                          FlatpakRemoteState *state,
+                          const char         *arch,
+                          gboolean            cached,
+                          gboolean            only_sideloaded,
+                          GCancellable       *cancellable,
+                          GError            **error)
+{
+  g_autoptr(GError) local_error = NULL;
+
+  if (only_sideloaded)
+    return TRUE;
+
+  if (flatpak_remote_state_ensure_subsummary (state, dir, arch, cached, cancellable, &local_error))
+    return TRUE;
+
+  if (!g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_NOT_CACHED))
+    {
+      g_propagate_error (error, g_steal_pointer (&local_error));
+      return FALSE;
+    }
+
+  return flatpak_remote_state_ensure_subsummary (state, dir, arch, FALSE, cancellable, error);
+}
+
+gboolean
+ensure_remote_state_arch_for_ref (FlatpakDir         *dir,
+                                  FlatpakRemoteState *state,
+                                  const char         *ref,
+                                  gboolean            cached,
+                                  gboolean            only_sideloaded,
+                                  GCancellable       *cancellable,
+                                  GError            **error)
+{
+  g_autofree char *ref_arch = flatpak_get_arch_for_ref (ref);
+  return ensure_remote_state_arch (dir, state, ref_arch, cached, only_sideloaded,cancellable, error);
+}
+
+gboolean
+ensure_remote_state_all_arches (FlatpakDir         *dir,
+                                FlatpakRemoteState *state,
+                                gboolean            cached,
+                                gboolean            only_sideloaded,
+                                GCancellable       *cancellable,
+                                GError            **error)
+{
+  if (state->index_ht == NULL)
+    return TRUE;
+
+  GLNX_HASH_TABLE_FOREACH (state->index_ht, const char *, arch)
+    {
+      if (!ensure_remote_state_arch (dir, state, arch,
+                                     cached, only_sideloaded,
+                                     cancellable, error))
+        return FALSE;
+    }
+  return TRUE;
 }

@@ -1,280 +1,188 @@
-flatpak (1.8.3-2) unstable; urgency=medium
+flatpak (1.10.0-flatpak1~focal) focal; urgency=medium
 
-  * Preferentially build-depend on libgdk-pixbuf-2.0-dev.
-    We don't need the deprecated Xlib integration that is also pulled in
-    by the older libgdk-pixbuf2.0-dev package (see #974870).
-  * Standards-Version: 4.5.1 (no changes required)
+  * Rebuild for focal
 
- -- Simon McVittie <smcv@debian.org>  Tue, 24 Nov 2020 12:01:18 +0000
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 14 Jan 2021 15:24:08 +0100
 
-flatpak (1.8.3-1) unstable; urgency=medium
+flatpak (1.10.0-flatpak1~bionic) bionic; urgency=medium
 
-  * New upstream release
+  * Update to 1.10.0
 
- -- Simon McVittie <smcv@debian.org>  Thu, 19 Nov 2020 14:51:15 +0000
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 14 Jan 2021 14:59:05 +0100
 
-flatpak (1.8.2-3) unstable; urgency=medium
+flatpak (1.9.3-flatpak1~focal) focal; urgency=medium
 
-  * d/p/Skip-parental-controls-checks-on-ServiceUnknown-or-NameHa.patch:
-    Add proposed patch to skip parental controls if accountsservice is not
-    installed.
-    The malcontent package (which activates parental controls support)
-    depends on accountsservice, but the libmalcontent-0-0 client library
-    does not, so we need to cope gracefully with the case where
-    neither malcontent nor accountsservice is installed. Presumably, in such
-    installations the sysadmin did not want the parental controls feature.
-    Ideally libmalcontent would do this itself (#972145). (Closes: #972138)
-  * Add Depends on dbus, for the well-known system bus service.
-    Now that the parental controls feature is enabled, Flatpak will refuse
-    to run apps if the D-Bus system bus is unavailable. Previously, it would
-    have partially worked (but with severely reduced functionality, in
-    particular only --user installations).
-  * d/control: Canonicalize case of Multi-Arch
-  * Update lintian overrides to silence some false-positives
+  * Rebuild for focal
 
- -- Simon McVittie <smcv@debian.org>  Thu, 15 Oct 2020 09:47:28 +0100
+ -- Alexander Larsson <alexl@redhat.com>  Tue, 22 Dec 2020 15:09:41 +0100
 
-flatpak (1.8.2-2) unstable; urgency=medium
+flatpak (1.9.3-flatpak1~bionic) bionic; urgency=medium
 
-  [ Laurent Bigonville ]
-  * debian/control: Add libmalcontent-0-dev to the build-dependencies.
-    This provides optional parental controls for app installation and
-    launching.
+  * Update to 1.9.3
 
-  [ Simon McVittie ]
-  * Add Suggests on malcontent-gui
+ -- Alexander Larsson <alexl@redhat.com>  Tue, 22 Dec 2020 14:27:30 +0100
 
- -- Simon McVittie <smcv@debian.org>  Sat, 10 Oct 2020 20:10:55 +0100
+flatpak (1.9.2-flatpak1~focal) focal; urgency=medium
 
-flatpak (1.8.2-1) unstable; urgency=medium
+  * Rebuild for focal
 
-  * New upstream release
-    - Drop patch for #964541, applied upstream
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 20 Nov 2020 16:13:46 +0100
 
- -- Simon McVittie <smcv@debian.org>  Tue, 25 Aug 2020 15:57:31 +0100
+flatpak (1.9.2-flatpak1~bionic) bionic; urgency=medium
 
-flatpak (1.8.1-2) unstable; urgency=medium
+  * Update to 1.9.2
 
-  * Include flatpak-bisect and flatpak-coredumpctl in libflatpak-dev
-    - Depends: python3, to be able to run the scripts themselves
-    - Recommends: flatpak, for both scripts
-    - Suggests: gdb and systemd-coredump, for flatpak-coredumpctl
-    - Suggests: python3-gi and ostree, for flatpak-bisect
-  * d/p/Fix-argument-order-of-clone-for-s390x-in-seccomp-filter.patch:
-    Add proposed patch to fix seccomp filtering on s390x.
-    Thanks to Julian Andres Klode. (Closes: #964541, LP: #1886814)
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 20 Nov 2020 15:50:19 +0100
 
- -- Simon McVittie <smcv@debian.org>  Thu, 06 Aug 2020 22:45:21 +0100
+flatpak (1.9.1-flatpak1.6~focal) focal; urgency=medium
 
-flatpak (1.8.1-1) unstable; urgency=medium
+  * Rebuild for focal
 
-  * New upstream stable release
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 20 Nov 2020 09:28:05 +0100
 
- -- Simon McVittie <smcv@debian.org>  Sat, 04 Jul 2020 15:24:14 +0100
+flatpak (1.9.1-flatpak1.6~bionic) bionic; urgency=medium
 
-flatpak (1.8.0-1) unstable; urgency=medium
+  * Debug summary test failure
 
-  * New upstream stable release
-    - Update configure options
-    - Install gdm env.d fragment, but only as an example file.
-      It is harmful on systems where environment.d(5) works (in particular
-      systems using systemd), because it overwrites additions to the
-      XDG_DATA_DIRS coming from other app frameworks like Snap.
-      However, using either this fragment or manual configuration might
-      be necessary on non-systemd systems. See
-      /usr/share/doc/flatpak/README.Debian for more details.
-    - d/flatpak.README.Debian: Add
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 19 Nov 2020 16:21:14 +0100
 
- -- Simon McVittie <smcv@debian.org>  Thu, 25 Jun 2020 12:26:28 +0100
+flatpak (1.9.1-flatpak1.3~bionic) bionic; urgency=medium
 
-flatpak (1.7.3-1) experimental; urgency=medium
+  * Fix builds on non-x86-64
 
-  * New upstream development release
-  * Install new fish completions
-  * Enable new libzstd support
-  * Install new sysusers.d fragment
-  * d/libflatpak0.symbols: Update.
-    Ignore deletion of flatpak_oci_error_quark(), which was not public API.
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 19 Nov 2020 16:21:14 +0100
 
- -- Simon McVittie <smcv@debian.org>  Wed, 10 Jun 2020 19:49:14 +0100
+flatpak (1.9.1-flatpak1.2~bionic) bionic; urgency=medium
 
-flatpak (1.7.1-1) experimental; urgency=medium
+  * Disable revokefs in testlibary to fix pps build
 
-  * New upstream development release
-    - Sideloading apps now works differently.
-      Flatpak no longer supports installing from local network peers, and
-      sideloading from a local USB drive is no longer automatic.
-      Instead of being configured via `flatpak config sideload-repos`,
-      enabling sideloading is now done by creating a symbolic link in
-      /var/lib/flatpak/sideload-repos or /run/flatpak/sideload-repos.
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 19 Nov 2020 16:21:14 +0100
 
- -- Simon McVittie <smcv@debian.org>  Tue, 31 Mar 2020 14:46:05 +0100
+flatpak (1.9.1-flatpak1.1~bionic) bionic; urgency=medium
 
-flatpak (1.6.3-1) unstable; urgency=medium
+  * Add better error message patch to debug test failure
 
-  * New upstream stable release
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 19 Nov 2020 16:21:14 +0100
 
- -- Simon McVittie <smcv@debian.org>  Tue, 31 Mar 2020 11:56:06 +0100
+flatpak (1.8.3-flatpak1~focal) focal; urgency=medium
 
-flatpak (1.7.0~git20200330-1) experimental; urgency=medium
+  * Rebuild for focal
 
-  * New upstream snapshot
-    - d/copyright: Update
-    - Drop all patches, applied upstream
-  * Revert "d/control: Add spurious Build-Conflicts on elogind packages".
-    experimental buildds now use aptitude rather than aspcud, so this
-    particular workaround shouldn't be necessary, even in experimental.
-  * Explicitly build-depend on python3-pyparsing.
-    This is required to generate the variant schema compiler.
-  * d/p/variant-schema-compiler-Disable-optimized-calculation-of-.patch:
-    Disable optimized calculation of offset size.
-    This doesn't seem to be completely portable, and it isn't clear why not,
-    so disable it until we have more answers.
+ -- Alexander Larsson <alexl@redhat.com>  Tue, 17 Nov 2020 15:17:28 +0100
 
- -- Simon McVittie <smcv@debian.org>  Mon, 30 Mar 2020 09:59:00 +0100
+flatpak (1.8.3-flatpak1~bionic) bionic; urgency=medium
 
-flatpak (1.7.0~git20200325-1) experimental; urgency=medium
+  * Update to 1.8.3
 
-  * Branch for 1.7.x and Debian experimental
-    - d/control, d/gbp.conf: Use debian/experimental packaging branch
-    - d/gbp.conf: Use upstream/latest branch
-    - d/watch: Watch for development releases
-  * New upstream snapshot
-  * Build-depend on python3 even when not running tests, for
-    variant-schema-compiler
-  * Update symbols file
-  * d/patches: Add patches proposed upstream to formalize deprecations
-    and fix rebuild of generated files
-  * d/control: Add spurious Build-Conflicts on elogind packages.
-    As in 1.5.0-1, this works around a build-dependency resolver failure
-    when using the same aspcud resolution behaviour as official Debian
-    experimental buildds, and can safely be reverted in distributions
-    that only have elogind, such as Devuan.
+ -- Alexander Larsson <alexl@redhat.com>  Tue, 17 Nov 2020 14:47:27 +0100
 
- -- Simon McVittie <smcv@debian.org>  Wed, 25 Mar 2020 13:44:31 +0000
+flatpak (1.8.2-flatpak1~focal) focal; urgency=medium
 
-flatpak (1.6.2-1) unstable; urgency=medium
+  * Rebuild for focal
 
-  * New upstream stable release
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 21 Aug 2020 15:22:56 +0200
 
- -- Simon McVittie <smcv@debian.org>  Thu, 13 Feb 2020 16:42:14 +0000
+flatpak (1.8.2-flatpak1~bionic) bionic; urgency=medium
 
-flatpak (1.6.1-1) unstable; urgency=medium
+  * Update to 1.8.2
 
-  * New upstream stable release
-  * Use secure URI in Homepage field.
-  * Set upstream metadata fields: Repository.
-  * Remove obsolete field Name from debian/upstream/metadata (already
-    present in machine-readable debian/copyright).
-  * Standards-Version: 4.5.0 (no changes required)
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 21 Aug 2020 15:19:50 +0200
 
- -- Simon McVittie <smcv@debian.org>  Thu, 23 Jan 2020 17:53:52 +0000
+flatpak (1.8.1-flatpak1~focal) focal; urgency=medium
 
-flatpak (1.6.0-1) unstable; urgency=medium
+  * Rebuild for focal
 
-  * New upstream stable release
-    - d/p/testlibrary-Don-t-assert-that-progress-is-signalled.patch:
-      Drop workaround, the leaks that broke this test have been fixed
-    - Drop other patches, applied upstream
-    - Bump xdg-desktop-portal dependency to 1.6.x.
-      That version has new API which Flatpak apps might rely on, so the
-      corresponding versions should be tested and backported together.
-  * d/watch: Only watch for stable releases
-  * Set upstream branch to upstream/1.6.x
-  * Drop xdg-desktop-portal from Depends to Recommends.
-    Installing xdg-desktop-portal 1.6.x is strongly recommended, but
-    strictly speaking it is not required: some of the simpler Flatpak
-    apps can work without it. (Closes: #947022)
-  * tests: Depend on fuse and policykit-1
-  * Revert Build-Conflicts on elogind to be nice to non-systemd derivatives.
-    This was a workaround for the build-dependency resolver used in
-    experimental, and is unnecessary now that I'm targeting unstable.
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 03 Jul 2020 16:19:58 +0200
 
- -- Simon McVittie <smcv@debian.org>  Tue, 24 Dec 2019 16:11:00 +0000
+flatpak (1.8.1-flatpak1~bionic) bionic; urgency=medium
 
-flatpak (1.5.2-1) experimental; urgency=medium
+  * Update to 1.8.1
 
-  * New upstream development release
-    - d/copyright: Update
-    - d/control: Depend on bubblewrap 0.4.0
-    - Update d/libflatpak0.symbols
-  * d/tests/build: Use correct compiler for proposed autopkgtest
-    cross-architecture testing support
-  * Make autopkgtests shellcheck-clean
-  * d/p/debian/Use-Python-3-for-test-web-server.patch:
-    Drop patch, no longer needed.
-    The tests now require Python 3 upstream, and no longer support
-    Python 2.
-  * Depend on xdg-desktop-portal 1.5.4.
-    This is probably not strictly required, but they are likely to be
-    released together and some features will need it.
-  * d/tests/build: Use correct compiler for proposed autopkgtest
-    cross-architecture testing support
-  * Make autopkgtests shellcheck-clean
-  * d/patches:
-    Add proposed patches from upstream PR 3307 to fix memory and fd leaks
-  * d/patches:
-    Add proposed patches from upstream PR 3310, 3311, 3312 to fix some
-    minor memory leaks
-  * d/p/testlibrary-Don-t-assert-that-progress-is-signalled.patch:
-    Remove problematic assertions while the failure is investigated
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 03 Jul 2020 14:58:22 +0200
 
- -- Simon McVittie <smcv@debian.org>  Tue, 17 Dec 2019 11:34:34 +0000
+flatpak (1.8.0-flatpak1~focal) focal; urgency=medium
 
-flatpak (1.5.0-1) experimental; urgency=medium
+  * Rebuild for focal
 
-  * New upstream development release
-    - Update d/libflatpak0.symbols
-  * Standards-Version: 4.4.1 (no changes required)
-  * Set packaging branch to debian/experimental
-  * tests: Depend on socat
-  * d/control: Add spurious Build-Conflicts on elogind packages.
-    This works around a build-dependency resolver failure when using
-    the same aspcud resolution behaviour as official Debian experimental
-    buildds, which for some reason tries to co-install systemd and elogind,
-    causing failure to install build-dependencies.
-    (This can safely be reverted in distributions that only have elogind,
-    such as Devuan.)
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 25 Jun 2020 11:51:00 +0200
 
- -- Simon McVittie <smcv@debian.org>  Mon, 21 Oct 2019 13:14:19 +0100
+flatpak (1.8.0-flatpak1~bionic) bionic; urgency=medium
 
-flatpak (1.4.3-1) unstable; urgency=medium
+  * Update to 1.8.0
 
-  * New upstream stable release
-    - d/p/Don-t-register-polkit-agent-if-we-cannot-connect-to-syste.patch,
-      d/p/tests-Skip-tests-that-use-system-helper-if-uid-or-gid-is-.patch:
-      drop patches, applied upstream
-  * Remove redundant --libexecdir, no longer needed with compat level 12
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 25 Jun 2020 09:57:29 +0200
 
- -- Simon McVittie <smcv@debian.org>  Thu, 19 Sep 2019 16:13:57 +0100
+flatpak (1.7.3-flatpak1~focal) focal; urgency=medium
 
-flatpak (1.4.2-2) unstable; urgency=medium
+  * Rebuild for focal
 
-  * Upload to unstable
-  * d/gbp.conf: Return to debian/master branch
-  * Use debhelper-compat 12
-  * Standards-Version: 4.4.0 (no changes required)
+ -- Alexander Larsson <alexl@redhat.com>  Wed, 10 Jun 2020 13:28:11 +0200
 
- -- Simon McVittie <smcv@debian.org>  Tue, 09 Jul 2019 17:59:57 +0100
+flatpak (1.7.3-flatpak1~bionic) bionic; urgency=medium
 
-flatpak (1.4.2-1) experimental; urgency=medium
+  * Update to 1.7.3
 
-  * New upstream release
-  * d/p/Don-t-register-polkit-agent-if-we-cannot-connect-to-syste.patch:
-    Add proposed patch to avoid crashing if the system bus is unavailable,
-    working around policykit-1 bug #923046
-  * d/salsa-ci.yml: Request standard CI on salsa.debian.org
-  * d/p/tests-Skip-tests-that-use-system-helper-if-uid-or-gid-is-.patch:
-    Avoid testing the system helper if uid or gid is zero.
-    The system helper refuses to run in test mode if it has privileges,
-    but some CI systems (currently including salsa-ci) run as uid or
-    gid 0 in a disposable container.
-  * d/test.sh: Don't run tests under linux32, even if reprotest did the
-    build under linux32
-  * d/test.sh: Don't output non-test logs (notably
-    debian/output/reprotest.log on salsa-ci) after running tests
+ -- Alexander Larsson <alexl@redhat.com>  Wed, 10 Jun 2020 11:26:58 +0200
 
- -- Simon McVittie <smcv@debian.org>  Tue, 02 Jul 2019 16:20:14 +0100
+flatpak (1.7.2-flatpak2~bionic) bionic; urgency=medium
+
+  * Install fish competion file
+
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 03 Apr 2020 17:28:40 +0200
+
+flatpak (1.7.2-flatpak1~bionic) bionic; urgency=medium
+
+  * Update to 1.7.2
+
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 03 Apr 2020 17:28:40 +0200
+
+flatpak (1.7.1-flatpak1~bionic) bionic; urgency=medium
+
+  * Update to 1.7.1
+
+ -- Alexander Larsson <alexl@redhat.com>  Tue, 31 Mar 2020 09:15:48 +0200
+
+flatpak (1.6.2-flatpak1~bionic) bionic; urgency=medium
+
+  * Update to 1.6.2
+
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 13 Feb 2020 16:30:19 +0100
+
+flatpak (1.6.1-flatpak1~bionic) bionic; urgency=medium
+
+  * Update to 1.6.1
+
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 23 Jan 2020 14:10:05 +0100
+
+flatpak (1.6.0-flatpak2.1~bionic) bionic; urgency=medium
+
+  * Add backport for old glib version
+
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 20 Dec 2019 13:22:41 +0100
+
+flatpak (1.6.0-flatpak1~bionic) bionic; urgency=medium
+
+  * Update to 1.6.0
+
+ -- Alexander Larsson <alexl@redhat.com>  Fri, 20 Dec 2019 12:14:49 +0100
+
+flatpak (1.4.3-flatpak1~bionic) bionic; urgency=medium
+
+  * Update to 1.4.3
+
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 19 Sep 2019 15:26:21 +0200
+
+flatpak (1.4.2-flatpak1~bionic) bionic; urgency=medium
+
+  * Update to 1.4.2
+
+ -- Alexander Larsson <alexl@redhat.com>  Sun, 30 Jun 2019 20:21:39 +0200
+
+flatpak (1.4.1-1~bionic) bionic; urgency=medium
+
+  * Rebuild for bionic
+
+ -- Alexander Larsson <alexl@redhat.com>  Mon, 17 Jun 2019 12:53:40 +0200
 
 flatpak (1.4.1-1) experimental; urgency=high
 
@@ -283,14 +191,27 @@ flatpak (1.4.1-1) experimental; urgency=high
 
  -- Simon McVittie <smcv@debian.org>  Thu, 13 Jun 2019 11:45:33 +0100
 
+flatpak (1.4.0-1~bionic) bionic; urgency=medium
+
+  * Import 1.4.0-1 from debian/experimental
+
+ -- Alexander Larsson <alexl@redhat.com>  Wed, 29 May 2019 11:39:42 +0200
+
 flatpak (1.4.0-1) experimental; urgency=medium
 
   * New upstream stable release
 
  -- Simon McVittie <smcv@debian.org>  Tue, 28 May 2019 14:46:34 +0100
 
+flatpak (1.3.4-1~bionic) bionic; urgency=medium
+
+  * Merged 1.3.4 from debian
+
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 16 May 2019 12:33:18 +0200
+
 flatpak (1.3.4-1) experimental; urgency=medium
 
+  [ Simon McVittie ]
   * New upstream development release
     - Incompatible change: /etc/flatpak/remotes.d/*.conf are no longer
       read, and are superseded by /etc/flatpak/remotes.d/*.flatpakrepo
@@ -309,7 +230,13 @@ flatpak (1.3.4-1) experimental; urgency=medium
   * d/copyright: Update
   * d/libflatpak0.symbols: Update
 
- -- Simon McVittie <smcv@debian.org>  Fri, 10 May 2019 13:44:59 +0100
+ -- Alexander Larsson <alexl@redhat.com>  Thu, 16 May 2019 12:33:05 +0200
+
+flatpak (1.3.3-1flatpak1~bionic) bionic; urgency=medium
+
+  * Rebuild  for flatpak ppa
+
+ -- Alexander Larsson <alexl@redhat.com>  Mon, 29 Apr 2019 10:56:40 +0200
 
 flatpak (1.3.3-1) experimental; urgency=medium
 
