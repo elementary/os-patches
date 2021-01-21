@@ -563,7 +563,7 @@ hdy_combo_row_bind_model (HdyComboRow                *self,
   priv->create_widget_func_data = user_data;
   priv->create_widget_func_data_free_func = user_data_free_func;
 
-  g_signal_connect (priv->bound_model, "items-changed", G_CALLBACK (bound_model_changed), self);
+  g_signal_connect_after (priv->bound_model, "items-changed", G_CALLBACK (bound_model_changed), self);
 
   if (g_list_model_get_n_items (priv->bound_model) > 0)
     priv->selected_index = 0;
