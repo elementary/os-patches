@@ -1067,9 +1067,7 @@ start_dbus_proxy (FlatpakBwrap *app_bwrap,
   g_autoptr(FlatpakBwrap) proxy_bwrap = NULL;
   int sync_fds[2] = {-1, -1};
   int proxy_start_index;
-  g_auto(GStrv) minimal_envp = NULL;
 
-  minimal_envp = flatpak_run_get_minimal_env (FALSE, FALSE);
   proxy_bwrap = flatpak_bwrap_new (NULL);
 
   if (!add_bwrap_wrapper (proxy_bwrap, app_info_path, error))
@@ -3437,6 +3435,7 @@ regenerate_ld_cache (GPtrArray    *base_argv_array,
                           "--dev", "/dev",
                           "--bind", flatpak_file_get_path_cached (ld_so_dir), "/run/ld-so-cache-dir",
                           NULL);
+  flatpak_bwrap_envp_to_args (bwrap);
 
   if (!flatpak_bwrap_bundle_args (bwrap, 1, -1, FALSE, error))
     return -1;

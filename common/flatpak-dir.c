@@ -2078,6 +2078,8 @@ flatpak_dir_system_helper_call_deploy (FlatpakDir         *self,
 {
   const char *empty[] = { NULL };
 
+  if (arg_subpaths == NULL)
+    arg_subpaths = empty;
   if (arg_previous_ids == NULL)
     arg_previous_ids = empty;
 
@@ -7847,6 +7849,8 @@ apply_extra_data (FlatpakDir   *self,
                                          app_context, NULL, NULL, NULL, cancellable, error))
     return FALSE;
 
+  flatpak_bwrap_envp_to_args (bwrap);
+
   flatpak_bwrap_add_arg (bwrap, "/app/bin/apply_extra");
 
   flatpak_bwrap_finish (bwrap);
@@ -9684,6 +9688,7 @@ flatpak_dir_update (FlatpakDir                           *self,
 {
   g_autoptr(GBytes) deploy_data = NULL;
   const char **subpaths = NULL;
+  const char *empty_subpaths[] = {NULL};
   g_autofree char *url = NULL;
   FlatpakPullFlags flatpak_flags;
   g_autofree const char **old_subpaths = NULL;
@@ -9706,8 +9711,10 @@ flatpak_dir_update (FlatpakDir                           *self,
 
   if (opt_subpaths)
     subpaths = opt_subpaths;
-  else
+  else if (old_subpaths)
     subpaths = old_subpaths;
+  else
+    subpaths = empty_subpaths;
 
   if (!ostree_repo_remote_get_url (self->repo, state->remote_name, &url, error))
     return FALSE;

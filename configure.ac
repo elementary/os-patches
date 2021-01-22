@@ -15,7 +15,7 @@ AC_PREREQ([2.63])
 
 m4_define([flatpak_major_version], [1])
 m4_define([flatpak_minor_version], [10])
-m4_define([flatpak_micro_version], [0])
+m4_define([flatpak_micro_version], [1])
 m4_define([flatpak_extra_version], [])
 m4_define([flatpak_interface_age], [0])
 m4_define([flatpak_binary_age],
@@ -359,6 +359,13 @@ AC_ARG_ENABLE(sudo,
               AS_HELP_STRING([--enable-sudo],[Use sudo to set setuid flags on binaries during install (only needed if userns disabled)]),
               [SUDO_BIN="sudo"], [SUDO_BIN=""])
 AC_SUBST([SUDO_BIN])
+
+AC_ARG_ENABLE(asan,
+              [AS_HELP_STRING([--enable-asan],
+                              [Use build with address sanitazion])],
+              [],
+              [enable_asan=no])
+AM_CONDITIONAL([ENABLE_ASAN], [test "x$enable_asan" = xyes])
 
 AC_ARG_WITH(system-install-dir,
            [AS_HELP_STRING([--with-system-install-dir=DIR],

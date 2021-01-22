@@ -1752,7 +1752,10 @@ AM_CPPFLAGS = -DFLATPAK_BINDIR=\"$(FLATPAK_BINDIR)\" \
 	-I$(srcdir)/common -I$(builddir)/common -include "config.h" \
 	$(NULL) $(am__append_15) $(am__append_16) $(am__append_17) \
 	$(am__append_18)
-AM_CFLAGS = $(WARN_CFLAGS)
+@ENABLE_ASAN_TRUE@ASAN_FLAGS = -fsanitize=undefined -fsanitize-undefined-trap-on-error -fsanitize=address
+ASAN_FLAGS = 
+AM_CFLAGS = $(WARN_CFLAGS) $(ASAN_FLAGS)
+AM_LDFLAGS = $(ASAN_FLAGS)
 triggersdir = $(pkgdatadir)/triggers
 dist_triggers_SCRIPTS = \
 	triggers/gtk-icon-cache.trigger \
@@ -2210,7 +2213,7 @@ flatpak_portal_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/portal
 @BUILD_SYSTEM_HELPER_TRUE@	$(NULL)
 
 @BUILD_SYSTEM_HELPER_TRUE@flatpak_system_helper_LDADD = $(BASE_LIBS) $(OSTREE_LIBS) $(JSON_LIBS) $(POLKIT_LIBS) libflatpak-common.la libflatpak-common-base.la libglnx.la
-@BUILD_SYSTEM_HELPER_TRUE@flatpak_system_helper_CFLAGS = $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(POLKIT_CFLAGS) -DFLATPAK_COMPILATION -DLIBEXECDIR=\"$(libexecdir)\"
+@BUILD_SYSTEM_HELPER_TRUE@flatpak_system_helper_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(POLKIT_CFLAGS) -DFLATPAK_COMPILATION -DLIBEXECDIR=\"$(libexecdir)\"
 @BUILD_SYSTEM_HELPER_TRUE@polkit_rulesdir = $(datadir)/polkit-1/rules.d
 @BUILD_SYSTEM_HELPER_TRUE@polkit_rules_DATA = \
 @BUILD_SYSTEM_HELPER_TRUE@	system-helper/org.freedesktop.Flatpak.rules
