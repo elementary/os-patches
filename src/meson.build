@@ -133,6 +133,7 @@ src_sources = [
   'hdy-deck.c',
   'hdy-enum-value-object.c',
   'hdy-expander-row.c',
+  'hdy-fading-label.c',
   'hdy-flap.c',
   'hdy-header-bar.c',
   'hdy-header-group.c',

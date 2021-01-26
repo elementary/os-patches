@@ -12,6 +12,7 @@ private_headers = [
     'hdy-css-private.h',
     'hdy-enums.h',
     'hdy-enums-private.h',
+    'hdy-fading-label-private.h',
     'hdy-main-private.h',
     'hdy-nothing-private.h',
     'hdy-keypad-button-private.h',
