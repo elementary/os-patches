@@ -1343,6 +1343,7 @@ hdy_stackable_box_measure (HdyStackableBox *self,
   gdouble visible_child_progress;
   gint child_min, max_min, visible_min, last_visible_min;
   gint child_nat, max_nat, sum_nat;
+  gboolean same_orientation;
   void (*get_preferred_size_static) (GtkWidget *widget,
                                      gint      *minimum_width,
                                      gint      *natural_width);
@@ -1402,8 +1403,11 @@ hdy_stackable_box_measure (HdyStackableBox *self,
 
   visible_child_progress = self->child_transition.interpolate_size ? self->child_transition.progress : 1.0;
 
+  same_orientation =
+    orientation == gtk_orientable_get_orientation (GTK_ORIENTABLE (self->container));
+
   get_preferred_size (minimum, natural,
-                      gtk_orientable_get_orientation (GTK_ORIENTABLE (self->container)) == orientation,
+                      same_orientation && self->can_unfold,
                       self->homogeneous[HDY_FOLD_FOLDED][orientation],
                       self->homogeneous[HDY_FOLD_UNFOLDED][orientation],
                       visible_children, visible_child_progress,
