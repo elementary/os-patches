@@ -59,20 +59,14 @@ text_to_tooltip (GBinding     *binding,
   return TRUE;
 }
 
-static void
-tab_new (GSimpleAction *action,
-         GVariant      *parameter,
-         gpointer       user_data)
+static HdyTabPage *
+add_page (HdyTabViewDemoWindow *self,
+          HdyTabPage           *parent,
+          const gchar          *title,
+          GIcon                *icon)
 {
-  HdyTabViewDemoWindow *self = HDY_TAB_VIEW_DEMO_WINDOW (user_data);
-  g_autofree gchar *title = NULL;
   GtkWidget *content;
   HdyTabPage *page;
-  GIcon *icon;
-  static gint next_page = 1;
-
-  title = g_strdup_printf (_("Tab %d"), next_page);
-  icon = get_random_icon ();
 
   content = g_object_new (GTK_TYPE_ENTRY,
                           "visible", TRUE,
@@ -81,7 +75,7 @@ tab_new (GSimpleAction *action,
                           "valign", GTK_ALIGN_CENTER,
                           NULL);
 
-  page = hdy_tab_view_append (self->view, GTK_WIDGET (content));
+  page = hdy_tab_view_add_page (self->view, GTK_WIDGET (content), parent);
 
   g_object_bind_property (content, "text",
                           page, "title",
@@ -94,6 +88,27 @@ tab_new (GSimpleAction *action,
 
   hdy_tab_page_set_icon (page, icon);
   hdy_tab_page_set_indicator_activatable (page, TRUE);
+
+  return page;
+}
+
+static void
+tab_new (GSimpleAction *action,
+         GVariant      *parameter,
+         gpointer       user_data)
+{
+  HdyTabViewDemoWindow *self = HDY_TAB_VIEW_DEMO_WINDOW (user_data);
+  g_autofree gchar *title = NULL;
+  HdyTabPage *page;
+  GtkWidget *content;
+  GIcon *icon;
+  static gint next_page = 1;
+
+  title = g_strdup_printf (_("Tab %d"), next_page);
+  icon = get_random_icon ();
+
+  page = add_page (self, NULL, title, icon);
+  content = hdy_tab_page_get_child (page);
 
   hdy_tab_view_set_selected_page (self->view, page);
 
@@ -272,6 +287,31 @@ tab_refresh_icon (GSimpleAction *action,
   hdy_tab_page_set_icon (get_current_page (self), icon);
 }
 
+static void
+tab_duplicate (GSimpleAction *action,
+               GVariant      *parameter,
+               gpointer       user_data)
+{
+  HdyTabViewDemoWindow *self = HDY_TAB_VIEW_DEMO_WINDOW (user_data);
+  HdyTabPage *parent = get_current_page (self);
+  HdyTabPage *page;
+
+  page = add_page (self, parent,
+                   hdy_tab_page_get_title (parent),
+                   hdy_tab_page_get_icon (parent));
+
+  hdy_tab_page_set_indicator_icon (page, hdy_tab_page_get_indicator_icon (parent));
+  hdy_tab_page_set_loading (page, hdy_tab_page_get_loading (parent));
+  hdy_tab_page_set_needs_attention (page, hdy_tab_page_get_needs_attention (parent));
+
+  g_object_set_data (G_OBJECT (page),
+                     "hdy-tab-view-demo-muted",
+                     g_object_get_data (G_OBJECT (parent),
+                                        "hdy-tab-view-demo-muted"));
+
+  hdy_tab_view_set_selected_page (self->view, page);
+}
+
 static GActionEntry action_entries[] = {
   { "window-new", window_new },
   { "tab-new", tab_new },
@@ -290,6 +330,7 @@ static GActionEntry tab_action_entries[] = {
   { "indicator", NULL, NULL, "false", tab_change_indicator },
   { "icon", NULL, NULL, "false", tab_change_icon },
   { "refresh-icon", tab_refresh_icon },
+  { "duplicate", tab_duplicate },
 };
 
 static inline void
