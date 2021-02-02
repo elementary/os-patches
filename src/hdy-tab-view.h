@@ -27,6 +27,9 @@ HDY_AVAILABLE_IN_1_1
 GtkWidget *hdy_tab_page_get_child (HdyTabPage *self);
 
 HDY_AVAILABLE_IN_1_1
+HdyTabPage *hdy_tab_page_get_parent (HdyTabPage *self);
+
+HDY_AVAILABLE_IN_1_1
 gboolean hdy_tab_page_get_selected (HdyTabPage *self);
 
 HDY_AVAILABLE_IN_1_1
@@ -135,6 +138,11 @@ HdyTabPage *hdy_tab_view_get_nth_page (HdyTabView *self,
 HDY_AVAILABLE_IN_1_1
 gint hdy_tab_view_get_page_position (HdyTabView *self,
                                      HdyTabPage *page);
+
+HDY_AVAILABLE_IN_1_1
+HdyTabPage *hdy_tab_view_add_page (HdyTabView *self,
+                                   GtkWidget  *child,
+                                   HdyTabPage *parent);
 
 HDY_AVAILABLE_IN_1_1
 HdyTabPage *hdy_tab_view_insert  (HdyTabView *self,

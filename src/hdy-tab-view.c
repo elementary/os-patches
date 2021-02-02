@@ -64,6 +64,7 @@ struct _HdyTabPage
   GObject parent_instance;
 
   GtkWidget *child;
+  HdyTabPage *parent;
   gboolean selected;
   gboolean pinned;
   gchar *title;
@@ -82,6 +83,7 @@ G_DEFINE_TYPE (HdyTabPage, hdy_tab_page, G_TYPE_OBJECT)
 enum {
   PAGE_PROP_0,
   PAGE_PROP_CHILD,
+  PAGE_PROP_PARENT,
   PAGE_PROP_SELECTED,
   PAGE_PROP_PINNED,
   PAGE_PROP_TITLE,
@@ -174,6 +176,57 @@ set_page_pinned (HdyTabPage *self,
   g_object_notify_by_pspec (G_OBJECT (self), page_props[PAGE_PROP_PINNED]);
 }
 
+static void set_page_parent (HdyTabPage *self,
+                             HdyTabPage *parent);
+
+static void
+page_parent_notify_cb (HdyTabPage *self)
+{
+  HdyTabPage *grandparent = hdy_tab_page_get_parent (self->parent);
+
+  self->parent = NULL;
+
+  if (grandparent)
+    set_page_parent (self, grandparent);
+  else
+    g_object_notify_by_pspec (G_OBJECT (self), props[PAGE_PROP_PARENT]);
+}
+
+static void
+set_page_parent (HdyTabPage *self,
+                 HdyTabPage *parent)
+{
+  g_return_if_fail (HDY_IS_TAB_PAGE (self));
+  g_return_if_fail (HDY_IS_TAB_PAGE (parent) || parent == NULL);
+
+  if (self->parent == parent)
+    return;
+
+  if (self->parent)
+    g_object_weak_unref (G_OBJECT (self->parent),
+                         (GWeakNotify) page_parent_notify_cb,
+                         self);
+
+  self->parent = parent;
+
+  if (self->parent)
+    g_object_weak_ref (G_OBJECT (self->parent),
+                       (GWeakNotify) page_parent_notify_cb,
+                       self);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PAGE_PROP_PARENT]);
+}
+
+static void
+hdy_tab_page_dispose (GObject *object)
+{
+  HdyTabPage *self = HDY_TAB_PAGE (object);
+
+  set_page_parent (self, NULL);
+
+  G_OBJECT_CLASS (hdy_tab_page_parent_class)->dispose (object);
+}
+
 static void
 hdy_tab_page_finalize (GObject *object)
 {
@@ -199,6 +252,10 @@ hdy_tab_page_get_property (GObject    *object,
   switch (prop_id) {
   case PAGE_PROP_CHILD:
     g_value_set_object (value, hdy_tab_page_get_child (self));
+    break;
+
+  case PAGE_PROP_PARENT:
+    g_value_set_object (value, hdy_tab_page_get_parent (self));
     break;
 
   case PAGE_PROP_SELECTED:
@@ -255,6 +312,10 @@ hdy_tab_page_set_property (GObject      *object,
     g_set_object (&self->child, g_value_get_object (value));
     break;
 
+  case PAGE_PROP_PARENT:
+    set_page_parent (self, g_value_get_object (value));
+    break;
+
   case PAGE_PROP_TITLE:
     hdy_tab_page_set_title (self, g_value_get_string (value));
     break;
@@ -293,6 +354,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  object_class->dispose = hdy_tab_page_dispose;
   object_class->finalize = hdy_tab_page_finalize;
   object_class->get_property = hdy_tab_page_get_property;
   object_class->set_property = hdy_tab_page_set_property;
@@ -310,6 +372,22 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          _("The child of the page"),
                          GTK_TYPE_WIDGET,
                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
+  /**
+   * HdyTabPage:parent:
+   *
+   * The parent page of the page.
+   *
+   * See hdy_tab_view_add_page() and hdy_tab_view_close_page().
+
+   * Since: 1.1
+   */
+  page_props[PAGE_PROP_PARENT] =
+    g_param_spec_object ("parent",
+                         _("Parent"),
+                         _("The parent page of the page"),
+                         HDY_TYPE_TAB_PAGE,
+                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabPage:selected:
@@ -545,12 +623,33 @@ set_n_pinned_pages (HdyTabView *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_N_PINNED_PAGES]);
 }
 
+static inline gboolean
+page_belongs_to_this_view (HdyTabView *self,
+                           HdyTabPage *page)
+{
+  if (!page)
+    return FALSE;
+
+  return gtk_widget_get_parent (page->child) == GTK_WIDGET (self->stack);
+}
+
+static inline gboolean
+is_descendant_of (HdyTabPage *page,
+                  HdyTabPage *parent)
+{
+  while (page && page != parent)
+    page = hdy_tab_page_get_parent (page);
+
+  return page == parent;
+}
+
 static void
 attach_page (HdyTabView *self,
              HdyTabPage *page,
              gint        position)
 {
   GtkWidget *child = hdy_tab_page_get_child (page);
+  HdyTabPage *parent;
 
   g_list_store_insert (self->pages, position, page);
 
@@ -568,7 +667,54 @@ attach_page (HdyTabView *self,
 
   g_object_thaw_notify (G_OBJECT (self));
 
+  parent = hdy_tab_page_get_parent (page);
+
+  if (parent && !page_belongs_to_this_view (self, parent))
+    set_page_parent (page, NULL);
+
   g_signal_emit (self, signals[SIGNAL_PAGE_ATTACHED], 0, page, position);
+}
+
+static void
+select_previous_page (HdyTabView *self,
+                      HdyTabPage *page)
+{
+  gint pos = hdy_tab_view_get_page_position (self, page);
+  HdyTabPage *parent;
+
+  if (page != self->selected_page)
+    return;
+
+  parent = hdy_tab_page_get_parent (page);
+
+  if (parent && pos > 0) {
+    HdyTabPage *prev_page = hdy_tab_view_get_nth_page (self, pos - 1);
+
+    /* This usually means we opened a few pages from the same page in a row, or
+     * the previous page is the parent. Switch there. */
+    if (is_descendant_of (prev_page, parent)) {
+      hdy_tab_view_set_selected_page (self, prev_page);
+
+      return;
+    }
+
+    /* Pinned pages are special in that opening a page from a pinned parent
+     * will place it not directly after the parent, but after the last pinned
+     * page. This means that if we're closing the first non-pinned page, we need
+     * to jump to the parent directly instead of the previous page which might
+     * be different. */
+    if (hdy_tab_page_get_pinned (prev_page) &&
+        hdy_tab_page_get_pinned (parent)) {
+      hdy_tab_view_set_selected_page (self, parent);
+
+      return;
+    }
+  }
+
+  if (hdy_tab_view_select_next_page (self))
+    return;
+
+  hdy_tab_view_select_previous_page (self);
 }
 
 static void
@@ -577,11 +723,8 @@ detach_page (HdyTabView *self,
 {
   gint pos = hdy_tab_view_get_page_position (self, page);
   GtkWidget *child;
-  gboolean deselect;
 
-  deselect = page == self->selected_page &&
-             !hdy_tab_view_select_next_page (self) &&
-             !hdy_tab_view_select_previous_page (self);
+  select_previous_page (self, page);
 
   child = hdy_tab_page_get_child (page);
 
@@ -597,7 +740,7 @@ detach_page (HdyTabView *self,
   if (hdy_tab_page_get_pinned (page))
     set_n_pinned_pages (self, self->n_pinned_pages - 1);
 
-  if (deselect)
+  if (self->n_pages == 0)
     hdy_tab_view_set_selected_page (self, NULL);
 
   g_object_thaw_notify (G_OBJECT (self));
@@ -613,11 +756,15 @@ detach_page (HdyTabView *self,
 static HdyTabPage *
 insert_page (HdyTabView *self,
              GtkWidget  *child,
+             HdyTabPage *parent,
              gint        position,
              gboolean    pinned)
 {
   g_autoptr (HdyTabPage) page =
-    g_object_new (HDY_TYPE_TAB_PAGE, "child", child, NULL);
+    g_object_new (HDY_TYPE_TAB_PAGE,
+                  "child", child,
+                  "parent", parent,
+                  NULL);
 
   set_page_pinned (page, pinned);
 
@@ -818,16 +965,6 @@ shortcut_key_press_cb (HdyTabView  *self,
   }
 
   return GDK_EVENT_PROPAGATE;
-}
-
-static inline gboolean
-page_belongs_to_this_view (HdyTabView *self,
-                           HdyTabPage *page)
-{
-  if (!page)
-    return FALSE;
-
-  return gtk_widget_get_parent (page->child) == GTK_WIDGET (self->stack);
 }
 
 static void
@@ -1337,6 +1474,26 @@ hdy_tab_page_get_child (HdyTabPage *self)
   g_return_val_if_fail (HDY_IS_TAB_PAGE (self), NULL);
 
   return self->child;
+}
+
+/**
+ * hdy_tab_page_get_parent:
+ * @self: a #HdyTabPage
+ *
+ * Gets the parent page of @self, or %NULL if the @self does not have a parent.
+ *
+ * See hdy_tab_view_add_page() and hdy_tab_view_close_page().
+ *
+ * Returns: (transfer none) (nullable): the parent page of @self, or %NULL
+ *
+ * Since: 1.1
+ */
+HdyTabPage *
+hdy_tab_page_get_parent (HdyTabPage *self)
+{
+  g_return_val_if_fail (HDY_IS_TAB_PAGE (self), NULL);
+
+  return self->parent;
 }
 
 /**
@@ -2304,6 +2461,60 @@ hdy_tab_view_get_page_position (HdyTabView *self,
 }
 
 /**
+ * hdy_tab_view_add_page:
+ * @self: a #HdyTabView
+ * @child: a widget to add
+ * @parent: (nullable): a parent page for @child, or %NULL
+ *
+ * Adds @child to @self with @parent as the parent.
+ *
+ * This function can be used to automatically position new pages, and to select
+ * the correct page when this page is closed while being selected (see
+ * hdy_tab_view_close_page()).
+ *
+ * If @parent is %NULL, this function is equivalent to hdy_tab_view_append().
+ *
+ * Returns: (transfer none): the page object representing @child
+ *
+ * Since: 1.1
+ */
+HdyTabPage *
+hdy_tab_view_add_page (HdyTabView *self,
+                       GtkWidget  *child,
+                       HdyTabPage *parent)
+{
+  gint position;
+
+  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
+  g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
+  g_return_val_if_fail (HDY_IS_TAB_PAGE (parent) || parent == NULL, NULL);
+
+  if (parent) {
+    HdyTabPage *page;
+
+    g_return_val_if_fail (page_belongs_to_this_view (self, parent), NULL);
+
+    if (hdy_tab_page_get_pinned (parent))
+      position = self->n_pinned_pages - 1;
+    else
+      position = hdy_tab_view_get_page_position (self, parent);
+
+    do {
+      position++;
+
+      if (position >= self->n_pages)
+        break;
+
+      page = hdy_tab_view_get_nth_page (self, position);
+    } while (is_descendant_of (page, parent));
+  } else {
+    position = self->n_pages;
+  }
+
+  return insert_page (self, child, parent, position, FALSE);
+}
+
+/**
  * hdy_tab_view_insert:
  * @self: a #HdyTabView
  * @child: a widget to add
@@ -2328,7 +2539,7 @@ hdy_tab_view_insert (HdyTabView *self,
   g_return_val_if_fail (position >= self->n_pinned_pages, NULL);
   g_return_val_if_fail (position <= self->n_pages, NULL);
 
-  return insert_page (self, child, position, FALSE);
+  return insert_page (self, child, NULL, position, FALSE);
 }
 
 /**
@@ -2349,7 +2560,7 @@ hdy_tab_view_prepend (HdyTabView *self,
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
-  return insert_page (self, child, self->n_pinned_pages, FALSE);
+  return insert_page (self, child, NULL, self->n_pinned_pages, FALSE);
 }
 
 /**
@@ -2370,7 +2581,7 @@ hdy_tab_view_append (HdyTabView *self,
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
-  return insert_page (self, child, self->n_pages, FALSE);
+  return insert_page (self, child, NULL, self->n_pages, FALSE);
 }
 
 /**
@@ -2398,7 +2609,7 @@ hdy_tab_view_insert_pinned (HdyTabView *self,
   g_return_val_if_fail (position >= 0, NULL);
   g_return_val_if_fail (position <= self->n_pinned_pages, NULL);
 
-  return insert_page (self, child, position, TRUE);
+  return insert_page (self, child, NULL, position, TRUE);
 }
 
 /**
@@ -2419,7 +2630,7 @@ hdy_tab_view_prepend_pinned (HdyTabView *self,
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
-  return insert_page (self, child, 0, TRUE);
+  return insert_page (self, child, NULL, 0, TRUE);
 }
 
 /**
@@ -2440,7 +2651,7 @@ hdy_tab_view_append_pinned (HdyTabView *self,
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
-  return insert_page (self, child, self->n_pinned_pages, TRUE);
+  return insert_page (self, child, NULL, self->n_pinned_pages, TRUE);
 }
 
 /**
@@ -2460,6 +2671,16 @@ hdy_tab_view_append_pinned (HdyTabView *self,
  * The default handler for #HdyTabView::close-page will immediately confirm
  * closing the page if it's non-pinned, or reject it if it's pinned. This
  * behavior can be changed by registering your own handler for that signal.
+ *
+ * If @page was selected, another page will be selected instead:
+ *
+ * If the #HdyTabPage:parent value is %NULL, the next page will be selected when
+ * possible, or if the page was already last, the previous page will be selected
+ * instead.
+ *
+ * If it's not %NULL, the previous page will be selected if it's a
+ * descendant (possibly indirect) of the parent. If both the previous page and
+ * the parent are pinned, the parent will be selected instead.
  *
  * Since: 1.1
  */

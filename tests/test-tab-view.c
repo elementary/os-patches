@@ -314,7 +314,7 @@ test_hdy_tab_view_select (void)
 }
 
 static void
-test_hdy_tab_view_add_remove (void)
+test_hdy_tab_view_add_basic (void)
 {
   g_autoptr (HdyTabView) view = NULL;
   HdyTabPage *pages[6];
@@ -345,6 +345,98 @@ test_hdy_tab_view_add_remove (void)
   pages[5] = hdy_tab_view_insert_pinned (view, gtk_button_new (), 1);
   assert_page_positions (view, pages, 6, 3,
                          3, 5, 4, 1, 2, 0);
+}
+
+static void
+test_hdy_tab_view_add_auto (void)
+{
+  g_autoptr (HdyTabView) view = NULL;
+  HdyTabPage *pages[17];
+
+  view = g_object_ref_sink (HDY_TAB_VIEW (hdy_tab_view_new ()));
+  g_assert_nonnull (view);
+
+  add_pages (view, pages, 3, 3);
+  assert_page_positions (view, pages, 3, 3,
+                         0, 1, 2);
+
+  /* No parent */
+
+  pages[3] = hdy_tab_view_add_page (view, gtk_button_new (), NULL);
+  g_assert_null (hdy_tab_page_get_parent (pages[3]));
+  assert_page_positions (view, pages, 4, 3,
+                         0, 1, 2, 3);
+
+  pages[4] = hdy_tab_view_add_page (view, gtk_button_new (), NULL);
+  g_assert_null (hdy_tab_page_get_parent (pages[4]));
+  assert_page_positions (view, pages, 5, 3,
+                         0, 1, 2, 3, 4);
+
+  pages[5] = hdy_tab_view_add_page (view, gtk_button_new (), NULL);
+  g_assert_null (hdy_tab_page_get_parent (pages[5]));
+  assert_page_positions (view, pages, 6, 3,
+                         0, 1, 2, 3, 4, 5);
+
+  /* Parent is a regular page */
+
+  pages[6] = hdy_tab_view_add_page (view, gtk_button_new (), pages[4]);
+  g_assert_true (hdy_tab_page_get_parent (pages[6]) == pages[4]);
+  assert_page_positions (view, pages, 7, 3,
+                         0, 1, 2, 3, 4, 6, 5);
+
+  pages[7] = hdy_tab_view_add_page (view, gtk_button_new (), pages[4]);
+  g_assert_true (hdy_tab_page_get_parent (pages[7]) == pages[4]);
+  assert_page_positions (view, pages, 8, 3,
+                         0, 1, 2, 3, 4, 6, 7, 5);
+
+  pages[8] = hdy_tab_view_add_page (view, gtk_button_new (), pages[6]);
+  g_assert_true (hdy_tab_page_get_parent (pages[8]) == pages[6]);
+  assert_page_positions (view, pages, 9, 3,
+                         0, 1, 2, 3, 4, 6, 8, 7, 5);
+
+  pages[9] = hdy_tab_view_add_page (view, gtk_button_new (), pages[6]);
+  g_assert_true (hdy_tab_page_get_parent (pages[9]) == pages[6]);
+  assert_page_positions (view, pages, 10, 3,
+                         0, 1, 2, 3, 4, 6, 8, 9, 7, 5);
+
+  pages[10] = hdy_tab_view_add_page (view, gtk_button_new (), pages[4]);
+  g_assert_true (hdy_tab_page_get_parent (pages[10]) == pages[4]);
+  assert_page_positions (view, pages, 11, 3,
+                         0, 1, 2, 3, 4, 6, 8, 9, 7, 10, 5);
+
+  /* Parent is a pinned page */
+
+  pages[11] = hdy_tab_view_add_page (view, gtk_button_new (), pages[1]);
+  g_assert_true (hdy_tab_page_get_parent (pages[11]) == pages[1]);
+  assert_page_positions (view, pages, 12, 3,
+                         0, 1, 2, 11, 3, 4, 6, 8, 9, 7, 10, 5);
+
+  pages[12] = hdy_tab_view_add_page (view, gtk_button_new (), pages[11]);
+  g_assert_true (hdy_tab_page_get_parent (pages[12]) == pages[11]);
+  assert_page_positions (view, pages, 13, 3,
+                         0, 1, 2, 11, 12, 3, 4, 6, 8, 9, 7, 10, 5);
+
+  pages[13] = hdy_tab_view_add_page (view, gtk_button_new (), pages[1]);
+  g_assert_true (hdy_tab_page_get_parent (pages[13]) == pages[1]);
+  assert_page_positions (view, pages, 14, 3,
+                         0, 1, 2, 11, 12, 13, 3, 4, 6, 8, 9, 7, 10, 5);
+
+  pages[14] = hdy_tab_view_add_page (view, gtk_button_new (), pages[0]);
+  g_assert_true (hdy_tab_page_get_parent (pages[14]) == pages[0]);
+  assert_page_positions (view, pages, 15, 3,
+                         0, 1, 2, 14, 11, 12, 13, 3, 4, 6, 8, 9, 7, 10, 5);
+
+  pages[15] = hdy_tab_view_add_page (view, gtk_button_new (), pages[1]);
+  g_assert_true (hdy_tab_page_get_parent (pages[15]) == pages[1]);
+  assert_page_positions (view, pages, 16, 3,
+                         0, 1, 2, 15, 14, 11, 12, 13, 3, 4, 6, 8, 9, 7, 10, 5);
+
+  /* Parent is the last page */
+
+  pages[16] = hdy_tab_view_add_page (view, gtk_button_new (), pages[5]);
+  g_assert_true (hdy_tab_page_get_parent (pages[16]) == pages[5]);
+  assert_page_positions (view, pages, 17, 3,
+                         0, 1, 2, 15, 14, 11, 12, 13, 3, 4, 6, 8, 9, 7, 10, 5, 16);
 }
 
 static void
@@ -694,6 +786,78 @@ test_hdy_tab_view_close_signal (void)
 }
 
 static void
+test_hdy_tab_view_close_select (void)
+{
+  g_autoptr (HdyTabView) view = NULL;
+  HdyTabPage *pages[14];
+
+  view = g_object_ref_sink (HDY_TAB_VIEW (hdy_tab_view_new ()));
+  g_assert_nonnull (view);
+
+  add_pages (view, pages, 9, 3);
+  pages[9] = hdy_tab_view_add_page (view, gtk_button_new (), pages[4]);
+  pages[10] = hdy_tab_view_add_page (view, gtk_button_new (), pages[4]);
+  pages[11] = hdy_tab_view_add_page (view, gtk_button_new (), pages[9]);
+  pages[12] = hdy_tab_view_add_page (view, gtk_button_new (), pages[1]);
+  pages[13] = hdy_tab_view_add_page (view, gtk_button_new (), pages[1]);
+
+  assert_page_positions (view, pages, 14, 3,
+                         0, 1, 2, 12, 13, 3, 4, 9, 11, 10, 5, 6, 7, 8);
+
+  /* Nothing happens when closing unselected pages */
+
+  hdy_tab_view_set_selected_page (view, pages[0]);
+
+  hdy_tab_view_close_page (view, pages[8]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[0]);
+
+  /* No parent */
+
+  assert_page_positions (view, pages, 13, 3,
+                         0, 1, 2, 12, 13, 3, 4, 9, 11, 10, 5, 6, 7);
+
+  hdy_tab_view_set_selected_page (view, pages[6]);
+
+  hdy_tab_view_close_page (view, pages[6]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[7]);
+
+  hdy_tab_view_close_page (view, pages[7]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[5]);
+
+  /* Regular parent */
+
+  assert_page_positions (view, pages, 11, 3,
+                         0, 1, 2, 12, 13, 3, 4, 9, 11, 10, 5);
+
+  hdy_tab_view_set_selected_page (view, pages[10]);
+
+  hdy_tab_view_close_page (view, pages[10]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[11]);
+
+  hdy_tab_view_close_page (view, pages[11]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[9]);
+
+  hdy_tab_view_close_page (view, pages[9]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[4]);
+
+  hdy_tab_view_close_page (view, pages[4]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[5]);
+
+  /* Pinned parent */
+
+  assert_page_positions (view, pages, 7, 3,
+                         0, 1, 2, 12, 13, 3, 5);
+
+  hdy_tab_view_set_selected_page (view, pages[13]);
+
+  hdy_tab_view_close_page (view, pages[13]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[12]);
+
+  hdy_tab_view_close_page (view, pages[12]);
+  g_assert_true (hdy_tab_view_get_selected_page (view) == pages[1]);
+}
+
+static void
 test_hdy_tab_view_transfer (void)
 {
   g_autoptr (HdyTabView) view1 = NULL;
@@ -957,7 +1121,8 @@ main (gint argc,
   g_test_add_func ("/Handy/TabView/shortcut_widget", test_hdy_tab_view_shortcut_widget);
   g_test_add_func ("/Handy/TabView/pages", test_hdy_tab_view_pages);
   g_test_add_func ("/Handy/TabView/select", test_hdy_tab_view_select);
-  g_test_add_func ("/Handy/TabView/add_remove", test_hdy_tab_view_add_remove);
+  g_test_add_func ("/Handy/TabView/add_basic", test_hdy_tab_view_add_basic);
+  g_test_add_func ("/Handy/TabView/add_auto", test_hdy_tab_view_add_auto);
   g_test_add_func ("/Handy/TabView/reorder", test_hdy_tab_view_reorder);
   g_test_add_func ("/Handy/TabView/reorder_first_last", test_hdy_tab_view_reorder_first_last);
   g_test_add_func ("/Handy/TabView/reorder_forward_backward", test_hdy_tab_view_reorder_forward_backward);
@@ -966,6 +1131,7 @@ main (gint argc,
   g_test_add_func ("/Handy/TabView/close_other", test_hdy_tab_view_close_other);
   g_test_add_func ("/Handy/TabView/close_before_after", test_hdy_tab_view_close_before_after);
   g_test_add_func ("/Handy/TabView/close_signal", test_hdy_tab_view_close_signal);
+  g_test_add_func ("/Handy/TabView/close_select", test_hdy_tab_view_close_select);
   g_test_add_func ("/Handy/TabView/transfer", test_hdy_tab_view_transfer);
   g_test_add_func ("/Handy/TabPage/title", test_hdy_tab_page_title);
   g_test_add_func ("/Handy/TabPage/tooltip", test_hdy_tab_page_tooltip);
