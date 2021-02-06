@@ -131,17 +131,17 @@ case "${THEME_NAME}" in
 		# Make Inter the default sans-serif font
 		if [ -e /usr/share/fonts/opentype/inter/Inter-Regular.otf ]
 		then
-		    sed -i 's|\(<family>DejaVu Sans</family>\)|<family>Inter</family>\1|;' "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
-		    mkdir -p "${DESTDIR}/usr/share/fonts/opentype/inter"
-		    cp -a /usr/share/fonts/opentype/inter/Inter-Regular.otf "${DESTDIR}/usr/share/fonts/opentype/inter"
+			sed -i 's|\(<family>DejaVu Sans</family>\)|<family>Inter</family>\1|;' "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
+			mkdir -p "${DESTDIR}/usr/share/fonts/opentype/inter"
+			cp -a /usr/share/fonts/opentype/inter/Inter-Regular.otf "${DESTDIR}/usr/share/fonts/opentype/inter"
 		fi
 
 		# Make Open sans the default mono font
 		if [ -e /usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf ]
 		then
-		    sed -i 's|\(<family>DejaVu Sans Mono</family>\)|<family>Open Sans</family>\1|;' "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
-		    mkdir -p "${DESTDIR}/usr/share/fonts/truetype/open-sans"
-		    cp -a /usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf "${DESTDIR}/usr/share/fonts/truetype/open-sans"
+			sed -i 's|\(<family>DejaVu Sans Mono</family>\)|<family>Open Sans</family>\1|;' "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
+			mkdir -p "${DESTDIR}/usr/share/fonts/truetype/open-sans"
+			cp -a /usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf "${DESTDIR}/usr/share/fonts/truetype/open-sans"
 		fi
 		fc-cache -s -y "${DESTDIR}" > /dev/null 2>&1
 
