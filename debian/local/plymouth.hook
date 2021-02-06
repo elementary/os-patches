@@ -136,12 +136,12 @@ case "${THEME_NAME}" in
 			cp -a /usr/share/fonts/opentype/inter/Inter-Regular.otf "${DESTDIR}/usr/share/fonts/opentype/inter"
 		fi
 
-		# Make Open sans the default mono font
-		if [ -e /usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf ]
+		# Make Roboto Mono the default mono font
+		if [ -e /usr/share/fonts/truetype/roboto-mono-elementary/RobotoMono-Regular.ttf ]
 		then
-			sed -i 's|\(<family>DejaVu Sans Mono</family>\)|<family>Open Sans</family>\1|;' "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
-			mkdir -p "${DESTDIR}/usr/share/fonts/truetype/open-sans"
-			cp -a /usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf "${DESTDIR}/usr/share/fonts/truetype/open-sans"
+			sed -i 's|\(<family>DejaVu Sans Mono</family>\)|<family>Roboto Mono</family>\1|;' "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
+			mkdir -p "${DESTDIR}/usr/share/fonts/truetype/roboto-mono-elementary"
+			cp -a /usr/share/fonts/truetype/roboto-mono-elementary/RobotoMono-Regular.ttf "${DESTDIR}/usr/share/fonts/truetype/roboto-mono-elementary"
 		fi
 
 		fc-cache -s -y "${DESTDIR}" > /dev/null 2>&1
