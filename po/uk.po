@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libhandy master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/libhandy/issues\n"
-"POT-Creation-Date: 2021-02-04 14:23+0000\n"
-"PO-Revision-Date: 2021-02-04 17:33+0200\n"
+"POT-Creation-Date: 2021-02-06 13:02+0000\n"
+"PO-Revision-Date: 2021-02-06 16:23+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -115,7 +115,7 @@ msgid "The desired number of subtitle lines"
 msgstr "Бажана кількість рядків у підзаголовку"
 
 #: src/hdy-carousel-box.c:1093 src/hdy-carousel-box.c:1094
-#: src/hdy-carousel.c:584 src/hdy-carousel.c:585
+#: src/hdy-carousel.c:584 src/hdy-carousel.c:585 src/hdy-tab-view.c:1104
 msgid "Number of pages"
 msgstr "Кількість сторінок"
 
@@ -169,13 +169,11 @@ msgstr "Визначає, чи можна перетягувати за допо
 
 #: src/hdy-carousel.c:678 src/hdy-swipe-tracker.c:1103
 msgid "Allow long swipes"
-msgstr ""
-"Дозволити довгі змахування"
+msgstr "Дозволити довгі змахування"
 
 #: src/hdy-carousel.c:679
 msgid "Whether to allow swiping for more than one page at a time"
-msgstr ""
-"Визначає, чи дозволено змахування декількох сторінок одним рухом"
+msgstr "Визначає, чи дозволено змахування декількох сторінок одним рухом"
 
 #: src/hdy-carousel-indicator-dots.c:392 src/hdy-carousel-indicator-dots.c:393
 #: src/hdy-carousel-indicator-lines.c:391
@@ -346,6 +344,16 @@ msgstr "Показувати перемикач вмикання"
 msgid "Whether the switch enabling the expansion is visible"
 msgstr "Визначає, чи є видимим перемикач, який вмикає розгортання"
 
+#: src/hdy-fading-label.c:255 src/hdy-fading-label.c:256
+msgid "Label"
+msgstr ""
+"Мітка"
+
+#: src/hdy-fading-label.c:262 src/hdy-fading-label.c:263
+#| msgid "X align"
+msgid "Align"
+msgstr "Вирівнювання"
+
 #: src/hdy-flap.c:1488
 msgid "Content"
 msgstr "Вміст"
@@ -510,7 +518,8 @@ msgstr "Індекс вкладеного елемента у батьківсь
 #: src/hdy-header-bar.c:2100 src/hdy-preferences-group.c:287
 #: src/hdy-preferences-group.c:288 src/hdy-preferences-page.c:193
 #: src/hdy-preferences-page.c:194 src/hdy-preferences-row.c:115
-#: src/hdy-status-page.c:235 src/hdy-view-switcher-title.c:258
+#: src/hdy-status-page.c:235 src/hdy-tab-view.c:432
+#: src/hdy-view-switcher-title.c:258
 msgid "Title"
 msgstr "Заголовок"
 
@@ -920,9 +929,310 @@ msgid "Whether swipe direction is reversed"
 msgstr "Визначає, що напрям змахування є оберненим"
 
 #: src/hdy-swipe-tracker.c:1104
-#| msgid "Whether to allow dragging with mouse pointer"
 msgid "Whether to allow swiping for more than one snap point at a time"
-msgstr "Визначає, чи дозволено змахування декількох точок прилипання одним рухом"
+msgstr ""
+"Визначає, чи дозволено змахування декількох точок прилипання одним рухом"
+
+#: src/hdy-tab-bar.c:515 src/hdy-tab-box.c:3511 src/hdy-tab-box.c:3512
+#: src/hdy-tab.c:860 src/hdy-tab.c:861
+msgid "View"
+msgstr ""
+"Перегляд"
+
+#: src/hdy-tab-bar.c:516
+msgid "The view the tab bar controls."
+msgstr ""
+"Перегляд, яким керує смужка вкладок."
+
+#: src/hdy-tab-bar.c:529
+#| msgid "The start action widget"
+msgid "Start action widget"
+msgstr "Віджет початку дії"
+
+#: src/hdy-tab-bar.c:530
+msgid "The widget shown before the tabs"
+msgstr ""
+"Віджет, який показано до вкладок"
+
+#: src/hdy-tab-bar.c:543
+#| msgid "The end action widget"
+msgid "End action widget"
+msgstr "Віджет завершення дії"
+
+#: src/hdy-tab-bar.c:544
+msgid "The widget shown after the tabs"
+msgstr ""
+"Віджет, який показано після вкладок"
+
+#: src/hdy-tab-bar.c:562
+msgid "Autohide"
+msgstr ""
+"Автоприховування"
+
+#: src/hdy-tab-bar.c:563
+#| msgid "Whether the flap is currently folded"
+msgid "Whether the tabs automatically hide"
+msgstr "Визначає, чи ховатимуться вкладки автоматично"
+
+#: src/hdy-tab-bar.c:578
+msgid "Tabs revealed"
+msgstr ""
+"Вкладки показано"
+
+#: src/hdy-tab-bar.c:579
+#| msgid "Whether the flap is currently folded"
+msgid "Whether the tabs are currently revealed"
+msgstr "Визначає, чи показано зараз вкладки"
+
+#: src/hdy-tab-bar.c:595
+#| msgid "Expanded"
+msgid "Expand tabs"
+msgstr "Розширювати вкладки"
+
+#: src/hdy-tab-bar.c:596
+#| msgid "Whether the row is expanded"
+msgid "Whether tabs expand to full width"
+msgstr "Визначає, чи розгортатимуться вкладки на повну ширину"
+
+#: src/hdy-tab-bar.c:612 src/hdy-tab.c:902 src/hdy-tab.c:903
+msgid "Inverted"
+msgstr ""
+"Інвертування"
+
+#: src/hdy-tab-bar.c:613
+msgid "Whether tabs use inverted layout"
+msgstr ""
+"Визначає, чи використовується для вкладок зворотне компонування"
+
+#: src/hdy-tab-bar.c:635 src/hdy-tab-bar.c:636
+msgid "Extra drag destination targets"
+msgstr ""
+"Додаткові цілі перетягування"
+
+#: src/hdy-tab-bar.c:652
+msgid "Is overflowing"
+msgstr ""
+"Чи переповнено"
+
+#: src/hdy-tab-bar.c:653
+#| msgid "Whether the flap is revealed"
+msgid "Whether the tab bar is overflowing"
+msgstr "Визначає, чи переповнено смужку вкладок"
+
+#: src/hdy-tab-box.c:3497 src/hdy-tab-box.c:3498 src/hdy-tab.c:867
+#: src/hdy-tab.c:868 src/hdy-tab-view.c:415
+msgid "Pinned"
+msgstr ""
+"Пришпилене"
+
+#: src/hdy-tab-box.c:3504 src/hdy-tab-box.c:3505
+msgid "Tab Bar"
+msgstr ""
+"Панель вкладок"
+
+#: src/hdy-tab-box.c:3518 src/hdy-tab-box.c:3519
+msgid "Adjustment"
+msgstr ""
+"Коригування"
+
+#: src/hdy-tab-box.c:3525 src/hdy-tab-box.c:3526
+#| msgid "Needs attention"
+msgid "Needs Attention Left"
+msgstr "Потребує уваги ліворуч"
+
+#: src/hdy-tab-box.c:3532 src/hdy-tab-box.c:3533
+#| msgid "Needs attention"
+msgid "Needs Attention Right"
+msgstr "Потребує уваги праворуч"
+
+#: src/hdy-tab-box.c:3539 src/hdy-tab-box.c:3540
+#| msgid "Resize"
+msgid "Resize Frozen"
+msgstr "Зміну розмірів заморожено"
+
+#: src/hdy-tab.c:874 src/hdy-tab.c:875
+msgid "Dragging"
+msgstr ""
+"Перетягування"
+
+#: src/hdy-tab.c:881 src/hdy-tab.c:882
+msgid "Page"
+msgstr ""
+"Сторінка"
+
+#: src/hdy-tab.c:888 src/hdy-tab.c:889
+msgid "Display Width"
+msgstr ""
+"Ширина показу"
+
+#: src/hdy-tab.c:895 src/hdy-tab.c:896
+msgid "Hovering"
+msgstr ""
+"Наведення"
+
+#: src/hdy-tab-view.c:371
+msgid "Child"
+msgstr ""
+"Дочірній"
+
+#: src/hdy-tab-view.c:372
+#| msgid "The name of the child page"
+msgid "The child of the page"
+msgstr "Дочірній об'єкт сторінки"
+
+#: src/hdy-tab-view.c:387
+msgid "Parent"
+msgstr ""
+"Батьківська"
+
+#: src/hdy-tab-view.c:388
+#| msgid "The name of the child page"
+msgid "The parent page of the page"
+msgstr "Батьківська сторінка сторінки"
+
+#: src/hdy-tab-view.c:401
+#| msgid "Selected index"
+msgid "Selected"
+msgstr "Позначено"
+
+#: src/hdy-tab-view.c:402
+#| msgid "Whether the flap is locked"
+msgid "Whether the page is selected"
+msgstr "Визначає, чи позначено сторінку"
+
+#: src/hdy-tab-view.c:416
+#| msgid "Whether the row is expanded"
+msgid "Whether the page is pinned"
+msgstr "Визначає, чи пришпилено сторінку"
+
+#: src/hdy-tab-view.c:433
+#| msgid "The title of the preference"
+msgid "The title of the page"
+msgstr "Заголовок сторінки"
+
+#: src/hdy-tab-view.c:448
+msgid "Tooltip"
+msgstr ""
+"Підказка"
+
+#: src/hdy-tab-view.c:449
+#| msgid "The name of the child page"
+msgid "The tooltip of the page"
+msgstr "Підказка сторінки"
+
+#: src/hdy-tab-view.c:465
+#| msgid "Icon name"
+msgid "Icon"
+msgstr "Піктограма"
+
+#: src/hdy-tab-view.c:466
+#| msgid "The name of the child page"
+msgid "The icon of the page"
+msgstr "Піктограма сторінки"
+
+#: src/hdy-tab-view.c:484
+msgid "Loading"
+msgstr ""
+"Завантаження"
+
+#: src/hdy-tab-view.c:485
+#| msgid "Whether the flap is locked"
+msgid "Whether the page is loading"
+msgstr "Визначає, чи завантажується сторінка"
+
+#: src/hdy-tab-view.c:509
+#| msgid "Indicator spacing"
+msgid "Indicator icon"
+msgstr "Піктограма-індикатор"
+
+#: src/hdy-tab-view.c:510
+msgid "An indicator icon for the page"
+msgstr ""
+"Піктограма-індикатор для сторінки"
+
+#: src/hdy-tab-view.c:528
+#| msgid "Indicator style"
+msgid "Indicator activatable"
+msgstr "Індикатор можна активувати"
+
+#: src/hdy-tab-view.c:529
+#| msgid "Whether the expansion is enabled"
+msgid "Whether the indicator icon is activatable"
+msgstr "Визначає, чи можна активувати індикатор"
+
+#: src/hdy-tab-view.c:546 src/hdy-view-switcher-button.c:234
+msgid "Needs attention"
+msgstr "Потребує уваги"
+
+#: src/hdy-tab-view.c:547
+#| msgid "Hint the view needs attention"
+msgid "Whether the page needs attention"
+msgstr "Визначає, чи потребує сторінка уваги"
+
+#: src/hdy-tab-view.c:1105
+#| msgid "The name of the icon to be used"
+msgid "The number of pages in the tab view"
+msgstr "Кількість сторінок на панелі із вкладками"
+
+#: src/hdy-tab-view.c:1120
+#| msgid "Number of pages"
+msgid "Number of pinned pages"
+msgstr "Кількість пришпилених сторінок"
+
+#: src/hdy-tab-view.c:1121
+msgid "The number of pinned pages in the tab view"
+msgstr ""
+"Кількість пришпилених сторінок на панелі вкладок"
+
+#: src/hdy-tab-view.c:1140
+msgid "Is transferring page"
+msgstr ""
+"Чи передається сторінка"
+
+#: src/hdy-tab-view.c:1141
+#| msgid "Whether search is enabled"
+msgid "Whether a page is being transferred"
+msgstr "Визначає, чи передається сторінка"
+
+#: src/hdy-tab-view.c:1154
+#| msgid "Selected index"
+msgid "Selected page"
+msgstr "Позначена сторінка"
+
+#: src/hdy-tab-view.c:1155
+#| msgid "The current fold policy"
+msgid "The currently selected page"
+msgstr "Поточна позначена сторінка"
+
+#: src/hdy-tab-view.c:1175
+msgid "Default icon"
+msgstr ""
+"Типова піктограма"
+
+#: src/hdy-tab-view.c:1176
+#| msgid "Default animation duration"
+msgid "Default page icon"
+msgstr "Типова піктограма сторінки"
+
+#: src/hdy-tab-view.c:1193
+msgid "Menu model"
+msgstr ""
+"Модель меню"
+
+#: src/hdy-tab-view.c:1194
+msgid "Tab context menu model"
+msgstr ""
+"Модель контекстного меню вкладки"
+
+#: src/hdy-tab-view.c:1222
+#| msgid "Right action widget"
+msgid "Shortcut widget"
+msgstr "Віджет скорочень"
+
+#: src/hdy-tab-view.c:1223
+#| msgid "The start action widget"
+msgid "Tab shortcut widget"
+msgstr "Віджет скорочень вкладки"
 
 #: src/hdy-title-bar.c:308
 msgid "Selection mode"
@@ -982,10 +1292,6 @@ msgstr "Розмір піктограм"
 msgid "Symbolic size to use for named icon"
 msgstr "Символьний розмір, використовуваний для іменованої піктограми"
 
-#: src/hdy-view-switcher-button.c:234
-msgid "Needs attention"
-msgstr "Потребує уваги"
-
 #: src/hdy-view-switcher-button.c:235
 msgid "Hint the view needs attention"
 msgstr "Підказка про те, що перегляд потребує уваги"
@@ -1035,14 +1341,8 @@ msgstr "Завжди зверху"
 #~ "Цю властивість не буде застосовано, доки не встановлено «Показувати "
 #~ "індикатори»."
 
-#~ msgid "Indicator style"
-#~ msgstr "Стиль індикаторів"
-
 #~ msgid "Page indicator style"
 #~ msgstr "Стиль індикаторів сторінки"
-
-#~ msgid "Indicator spacing"
-#~ msgstr "Інтервал індикатора"
 
 #~ msgid "Spacing between content and indicators"
 #~ msgstr "Інтервал між вмістом та індикаторами"
@@ -1064,9 +1364,6 @@ msgstr "Завжди зверху"
 
 #~ msgid "Entry widget"
 #~ msgstr "Віджет введення"
-
-#~ msgid "Right action widget"
-#~ msgstr "Віджет дії праворуч"
 
 #~ msgid "Left action widget"
 #~ msgstr "Віджет дії ліворуч"
