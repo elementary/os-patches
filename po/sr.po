@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libhandy libhandy-1-0\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/libhandy/issues\n"
-"POT-Creation-Date: 2021-02-04 14:23+0000\n"
-"PO-Revision-Date: 2021-02-05 10:08+0200\n"
+"POT-Creation-Date: 2021-02-06 13:02+0000\n"
+"PO-Revision-Date: 2021-02-06 21:32+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: српски <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
@@ -114,7 +114,7 @@ msgid "The desired number of subtitle lines"
 msgstr "Жељени број редова поднаслова"
 
 #: src/hdy-carousel-box.c:1093 src/hdy-carousel-box.c:1094
-#: src/hdy-carousel.c:584 src/hdy-carousel.c:585
+#: src/hdy-carousel.c:584 src/hdy-carousel.c:585 src/hdy-tab-view.c:1104
 msgid "Number of pages"
 msgstr "Број страница"
 
@@ -342,6 +342,15 @@ msgstr "Приказује прекидач укључења"
 msgid "Whether the switch enabling the expansion is visible"
 msgstr "Да ли је прекидач који укључује ширење видљив"
 
+#: src/hdy-fading-label.c:255 src/hdy-fading-label.c:256
+msgid "Label"
+msgstr "Натпис"
+
+#: src/hdy-fading-label.c:262 src/hdy-fading-label.c:263
+#| msgid "X align"
+msgid "Align"
+msgstr "Поравнање"
+
 #: src/hdy-flap.c:1488
 msgid "Content"
 msgstr "Садржај"
@@ -503,7 +512,8 @@ msgstr "Индекс садржаног елемента у садржаоцу"
 #: src/hdy-header-bar.c:2100 src/hdy-preferences-group.c:287
 #: src/hdy-preferences-group.c:288 src/hdy-preferences-page.c:193
 #: src/hdy-preferences-page.c:194 src/hdy-preferences-row.c:115
-#: src/hdy-status-page.c:235 src/hdy-view-switcher-title.c:258
+#: src/hdy-status-page.c:235 src/hdy-tab-view.c:432
+#: src/hdy-view-switcher-title.c:258
 msgid "Title"
 msgstr "Наслов"
 
@@ -910,10 +920,282 @@ msgid "Whether swipe direction is reversed"
 msgstr "Да ли је смер превлачења обрнут"
 
 #: src/hdy-swipe-tracker.c:1104
-#| msgid "Whether to allow dragging with mouse pointer"
 msgid "Whether to allow swiping for more than one snap point at a time"
 msgstr ""
 "Да ли ће допустити превлачење за више од једне тачке приањања у исто време"
+
+#: src/hdy-tab-bar.c:515 src/hdy-tab-box.c:3511 src/hdy-tab-box.c:3512
+#: src/hdy-tab.c:860 src/hdy-tab.c:861
+msgid "View"
+msgstr "Преглед"
+
+#: src/hdy-tab-bar.c:516
+msgid "The view the tab bar controls."
+msgstr "Контроле прегледа траке језичка."
+
+#: src/hdy-tab-bar.c:529
+#| msgid "The start action widget"
+msgid "Start action widget"
+msgstr "Елемент радње почетка"
+
+#: src/hdy-tab-bar.c:530
+msgid "The widget shown before the tabs"
+msgstr "Елемент приказан пре језичака"
+
+#: src/hdy-tab-bar.c:543
+#| msgid "The end action widget"
+msgid "End action widget"
+msgstr "Елемент радње краја"
+
+#: src/hdy-tab-bar.c:544
+msgid "The widget shown after the tabs"
+msgstr "Елемент приказан после језичака"
+
+#: src/hdy-tab-bar.c:562
+msgid "Autohide"
+msgstr "Самоскривање"
+
+#: src/hdy-tab-bar.c:563
+#| msgid "Whether the flap is currently folded"
+msgid "Whether the tabs automatically hide"
+msgstr "Да ли се језичци сами скривају"
+
+#: src/hdy-tab-bar.c:578
+msgid "Tabs revealed"
+msgstr "Показивање језичака"
+
+#: src/hdy-tab-bar.c:579
+#| msgid "Whether the flap is currently folded"
+msgid "Whether the tabs are currently revealed"
+msgstr "Да ли се језичци тренутно показују"
+
+#: src/hdy-tab-bar.c:595
+#| msgid "Expanded"
+msgid "Expand tabs"
+msgstr "Ширење језичака"
+
+#: src/hdy-tab-bar.c:596
+#| msgid "Whether the row is expanded"
+msgid "Whether tabs expand to full width"
+msgstr "да ли се језичци шире по целој ширини"
+
+#: src/hdy-tab-bar.c:612 src/hdy-tab.c:902 src/hdy-tab.c:903
+msgid "Inverted"
+msgstr "Обрнуто"
+
+#: src/hdy-tab-bar.c:613
+msgid "Whether tabs use inverted layout"
+msgstr "Да ли језичци користе обрнути распоред"
+
+#: src/hdy-tab-bar.c:635 src/hdy-tab-bar.c:636
+msgid "Extra drag destination targets"
+msgstr "Додатне мете одредишта превлачења"
+
+#: src/hdy-tab-bar.c:652
+msgid "Is overflowing"
+msgstr "Препуњеност"
+
+#: src/hdy-tab-bar.c:653
+#| msgid "Whether the flap is revealed"
+msgid "Whether the tab bar is overflowing"
+msgstr "Да ли је трака језичака пренатрпана"
+
+#: src/hdy-tab-box.c:3497 src/hdy-tab-box.c:3498 src/hdy-tab.c:867
+#: src/hdy-tab.c:868 src/hdy-tab-view.c:415
+msgid "Pinned"
+msgstr "Прикачена"
+
+#: src/hdy-tab-box.c:3504 src/hdy-tab-box.c:3505
+msgid "Tab Bar"
+msgstr "Трака језичака"
+
+#: src/hdy-tab-box.c:3518 src/hdy-tab-box.c:3519
+msgid "Adjustment"
+msgstr "Поправка"
+
+#: src/hdy-tab-box.c:3525 src/hdy-tab-box.c:3526
+#| msgid "Needs attention"
+msgid "Needs Attention Left"
+msgstr "Захтева пажњу лево"
+
+#: src/hdy-tab-box.c:3532 src/hdy-tab-box.c:3533
+#| msgid "Needs attention"
+msgid "Needs Attention Right"
+msgstr "Захтева пажњу десно"
+
+#: src/hdy-tab-box.c:3539 src/hdy-tab-box.c:3540
+#| msgid "Resize"
+msgid "Resize Frozen"
+msgstr "Замрзни промену величине"
+
+#: src/hdy-tab.c:874 src/hdy-tab.c:875
+msgid "Dragging"
+msgstr "Превлачење"
+
+#: src/hdy-tab.c:881 src/hdy-tab.c:882
+msgid "Page"
+msgstr "Страна"
+
+#: src/hdy-tab.c:888 src/hdy-tab.c:889
+msgid "Display Width"
+msgstr "Ширина приказа"
+
+#: src/hdy-tab.c:895 src/hdy-tab.c:896
+msgid "Hovering"
+msgstr "Лебдење"
+
+#: src/hdy-tab-view.c:371
+msgid "Child"
+msgstr "Садржани"
+
+#: src/hdy-tab-view.c:372
+#| msgid "The name of the child page"
+msgid "The child of the page"
+msgstr "Садржани странице"
+
+#: src/hdy-tab-view.c:387
+msgid "Parent"
+msgstr "Главни"
+
+#: src/hdy-tab-view.c:388
+#| msgid "The name of the child page"
+msgid "The parent page of the page"
+msgstr "Главна страница странице"
+
+#: src/hdy-tab-view.c:401
+#| msgid "Selected index"
+msgid "Selected"
+msgstr "Изабрана"
+
+#: src/hdy-tab-view.c:402
+#| msgid "Whether the flap is locked"
+msgid "Whether the page is selected"
+msgstr "Да ли је страница изабрана"
+
+#: src/hdy-tab-view.c:416
+#| msgid "Whether the row is expanded"
+msgid "Whether the page is pinned"
+msgstr "Да ли је страница прикачена"
+
+#: src/hdy-tab-view.c:433
+#| msgid "The title of the preference"
+msgid "The title of the page"
+msgstr "Наслов странице"
+
+#: src/hdy-tab-view.c:448
+msgid "Tooltip"
+msgstr "Облачић"
+
+#: src/hdy-tab-view.c:449
+#| msgid "The name of the child page"
+msgid "The tooltip of the page"
+msgstr "Облачић странице"
+
+#: src/hdy-tab-view.c:465
+#| msgid "Icon name"
+msgid "Icon"
+msgstr "Иконица"
+
+#: src/hdy-tab-view.c:466
+#| msgid "The name of the child page"
+msgid "The icon of the page"
+msgstr "Иконица странице"
+
+#: src/hdy-tab-view.c:484
+msgid "Loading"
+msgstr "Учитавање"
+
+#: src/hdy-tab-view.c:485
+#| msgid "Whether the flap is locked"
+msgid "Whether the page is loading"
+msgstr "Да ли се страница учитава"
+
+#: src/hdy-tab-view.c:509
+msgid "Indicator icon"
+msgstr "Иконица показатеља"
+
+#: src/hdy-tab-view.c:510
+msgid "An indicator icon for the page"
+msgstr "Иконица показатеља за страницу"
+
+#: src/hdy-tab-view.c:528
+#| msgid "Interactive"
+msgid "Indicator activatable"
+msgstr "Покретљивост показатеља"
+
+#: src/hdy-tab-view.c:529
+#| msgid "Whether the expansion is enabled"
+msgid "Whether the indicator icon is activatable"
+msgstr "Да ли се иконица показатеља може активирати"
+
+#: src/hdy-tab-view.c:546 src/hdy-view-switcher-button.c:234
+msgid "Needs attention"
+msgstr "Захтева пажњу"
+
+#: src/hdy-tab-view.c:547
+#| msgid "Hint the view needs attention"
+msgid "Whether the page needs attention"
+msgstr "Да ли страница захтева пажњу"
+
+#: src/hdy-tab-view.c:1105
+#| msgid "The name of the icon to be used"
+msgid "The number of pages in the tab view"
+msgstr "Број страница у прегледу језичцима"
+
+#: src/hdy-tab-view.c:1120
+#| msgid "Number of pages"
+msgid "Number of pinned pages"
+msgstr "Број прикачених страница"
+
+#: src/hdy-tab-view.c:1121
+msgid "The number of pinned pages in the tab view"
+msgstr "Број прикачених страница у прегледу језичцима"
+
+#: src/hdy-tab-view.c:1140
+msgid "Is transferring page"
+msgstr "Пребачена страница"
+
+#: src/hdy-tab-view.c:1141
+#| msgid "Whether search is enabled"
+msgid "Whether a page is being transferred"
+msgstr "Да ли је страница пребачена"
+
+#: src/hdy-tab-view.c:1154
+#| msgid "Selected index"
+msgid "Selected page"
+msgstr "Изабрана страница"
+
+#: src/hdy-tab-view.c:1155
+#| msgid "The current fold policy"
+msgid "The currently selected page"
+msgstr "Тренутно изабрана страница"
+
+#: src/hdy-tab-view.c:1175
+msgid "Default icon"
+msgstr "Основна иконица"
+
+#: src/hdy-tab-view.c:1176
+#| msgid "Default animation duration"
+msgid "Default page icon"
+msgstr "Основна иконица странице"
+
+#: src/hdy-tab-view.c:1193
+msgid "Menu model"
+msgstr "Мустра изборника"
+
+#: src/hdy-tab-view.c:1194
+msgid "Tab context menu model"
+msgstr "Мустра језичка изборника контекста"
+
+#: src/hdy-tab-view.c:1222
+#| msgid "The start action widget"
+msgid "Shortcut widget"
+msgstr "Елемент пречице"
+
+#: src/hdy-tab-view.c:1223
+#| msgid "The start action widget"
+msgid "Tab shortcut widget"
+msgstr "Елемент пречице језичка"
 
 #: src/hdy-title-bar.c:308
 msgid "Selection mode"
@@ -972,10 +1254,6 @@ msgstr "Величина иконице"
 #: src/hdy-view-switcher-button.c:218
 msgid "Symbolic size to use for named icon"
 msgstr "Симболичка величина за коришћење за именоване иконице"
-
-#: src/hdy-view-switcher-button.c:234
-msgid "Needs attention"
-msgstr "Захтева пажњу"
 
 #: src/hdy-view-switcher-button.c:235
 msgid "Hint the view needs attention"
