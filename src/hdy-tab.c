@@ -19,6 +19,9 @@
 #define FADE_WIDTH 18
 #define CLOSE_BTN_ANIMATION_DURATION 150
 
+#define BASE_WIDTH 118
+#define BASE_WIDTH_PINNED 28
+
 struct _HdyTab
 {
   GtkContainer parent_instance;
@@ -317,6 +320,8 @@ hdy_tab_measure (GtkWidget      *widget,
   gint min = 0, nat = 0;
 
   if (orientation == GTK_ORIENTATION_HORIZONTAL) {
+    nat = self->pinned ? BASE_WIDTH_PINNED : BASE_WIDTH;
+
     hdy_css_measure (widget, orientation, NULL, &nat);
   } else {
     gint child_min, child_nat;
