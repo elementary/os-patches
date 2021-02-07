@@ -3091,8 +3091,10 @@ hdy_tab_box_drag_end (GtkWidget      *widget,
 
   self->detached_page = NULL;
 
-  gtk_widget_destroy (self->drag_icon->window);
-  g_clear_pointer (&self->drag_icon, g_free);
+  if (self->drag_icon) {
+    gtk_widget_destroy (self->drag_icon->window);
+    g_clear_pointer (&self->drag_icon, g_free);
+  }
 }
 
 static gboolean
