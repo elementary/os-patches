@@ -43,4 +43,7 @@ gboolean hdy_tab_get_inverted (HdyTab *self);
 void     hdy_tab_set_inverted (HdyTab   *self,
                                gboolean  inverted);
 
+void hdy_tab_set_fully_visible (HdyTab   *self,
+                                gboolean  fully_visible);
+
 G_END_DECLS

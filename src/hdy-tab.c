@@ -48,6 +48,7 @@ struct _HdyTab
   gboolean title_inverted;
   gboolean close_overlap;
   gboolean show_close;
+  gboolean fully_visible;
 
   HdyAnimation *close_btn_animation;
   cairo_pattern_t *gradient;
@@ -98,6 +99,7 @@ close_btn_animation_done_cb (HdyTab *self)
 {
   if (!self->show_close)
     gtk_widget_set_child_visible (self->close_btn, FALSE);
+  gtk_widget_set_opacity (self->close_btn, self->show_close ? 1 : 0);
 
   g_clear_pointer (&self->close_btn_animation, hdy_animation_unref);
 }
@@ -119,7 +121,7 @@ update_state (HdyTab *self)
 
   gtk_widget_set_state_flags (GTK_WIDGET (self), new_state, TRUE);
 
-  show_close = self->hovering || self->selected || self->dragging;
+  show_close = (self->hovering && self->fully_visible) || self->selected || self->dragging;
 
   if (self->show_close != show_close) {
     gdouble opacity = gtk_widget_get_opacity (self->close_btn);
@@ -129,11 +131,13 @@ update_state (HdyTab *self)
 
     self->show_close = show_close;
 
-    if (self->show_close)
+    /* gtk_widget_set_child_visible() does not no-op when it's already
+     * visible, avoid extra work */
+    if (show_close && !gtk_widget_get_child_visible (self->close_btn))
       gtk_widget_set_child_visible (self->close_btn, TRUE);
 
     self->close_btn_animation =
-      hdy_animation_new (self->close_btn,
+      hdy_animation_new (GTK_WIDGET (self),
                          opacity,
                          self->show_close ? 1 : 0,
                          CLOSE_BTN_ANIMATION_DURATION,
@@ -206,7 +210,7 @@ static void
 update_indicator (HdyTab *self)
 {
   gboolean activatable = self->page && hdy_tab_page_get_indicator_activatable (self->page);
-  gboolean clickable = activatable && (self->selected || !self->pinned);
+  gboolean clickable = activatable && (self->selected || (!self->pinned && self->fully_visible));
 
   set_style_class (self->indicator_btn, "clickable", clickable);
 }
@@ -267,7 +271,7 @@ indicator_clicked_cb (HdyTab *self)
     return;
 
   clickable = hdy_tab_page_get_indicator_activatable (self->page) &&
-              (self->selected || !self->pinned);
+              (self->selected || (!self->pinned && self->fully_visible));
 
   if (!clickable) {
     hdy_tab_view_set_selected_page (self->view, self->page);
@@ -1116,4 +1120,21 @@ hdy_tab_set_inverted (HdyTab   *self,
   gtk_widget_queue_allocate (GTK_WIDGET (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_INVERTED]);
+}
+
+void
+hdy_tab_set_fully_visible (HdyTab   *self,
+                           gboolean  fully_visible)
+{
+  g_return_if_fail (HDY_IS_TAB (self));
+
+  fully_visible = !!fully_visible;
+
+  if (self->fully_visible == fully_visible)
+    return;
+
+  self->fully_visible = fully_visible;
+
+  update_state (self);
+  update_indicator (self);
 }

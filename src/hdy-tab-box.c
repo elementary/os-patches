@@ -699,7 +699,7 @@ reorder_tab_cb (HdyTabBox        *self,
 /* Scrolling */
 
 static void
-update_needs_attention (HdyTabBox *self)
+update_visible (HdyTabBox *self)
 {
   gboolean left = FALSE, right = FALSE;
   GList *l;
@@ -721,10 +721,14 @@ update_needs_attention (HdyTabBox *self)
     if (!info->page)
       continue;
 
+    pos = get_tab_position (self, info);
+
+    hdy_tab_set_fully_visible (info->tab,
+                               pos + OVERLAP >= value &&
+                               pos + info->width - OVERLAP <= value + page_size);
+
     if (!hdy_tab_page_get_needs_attention (info->page))
       continue;
-
-    pos = get_tab_position (self, info);
 
     if (pos + info->width / 2.0 <= value)
       left = TRUE;
@@ -820,7 +824,7 @@ adjustment_value_changed_cb (HdyTabBox *self)
   self->hover_x += (value - self->adjustment_prev_value);
 
   update_hover (self);
-  update_needs_attention (self);
+  update_visible (self);
 
   if (self->drop_target_tab) {
     self->drop_target_x += (value - self->adjustment_prev_value);
@@ -1647,7 +1651,7 @@ page_attached_cb (HdyTabBox  *self,
   info->notify_needs_attention_id =
     g_signal_connect_object (page,
                              "notify::needs-attention",
-                             G_CALLBACK (update_needs_attention),
+                             G_CALLBACK (update_visible),
                              self,
                              G_CONNECT_SWAPPED);
 
@@ -2539,7 +2543,7 @@ hdy_tab_box_size_allocate (GtkWidget     *widget,
   self->allocated_width = allocation->width;
 
   if (!self->n_tabs)
-      return;
+    return;
 
   if (self->pinned) {
     for (l = self->tabs; l; l = l->next) {
@@ -2630,7 +2634,7 @@ hdy_tab_box_size_allocate (GtkWidget     *widget,
   }
 
   update_hover (self);
-  update_needs_attention (self);
+  update_visible (self);
 }
 
 static gboolean
@@ -3731,14 +3735,14 @@ hdy_tab_box_set_adjustment (HdyTabBox     *self,
 
   if (self->adjustment) {
     g_signal_handlers_disconnect_by_func (self->adjustment, adjustment_value_changed_cb, self);
-    g_signal_handlers_disconnect_by_func (self->adjustment, update_needs_attention, self);
+    g_signal_handlers_disconnect_by_func (self->adjustment, update_visible, self);
   }
 
   g_set_object (&self->adjustment, adjustment);
 
   if (self->adjustment) {
     g_signal_connect_object (self->adjustment, "value-changed", G_CALLBACK (adjustment_value_changed_cb), self, G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->adjustment, "notify::page-size", G_CALLBACK (update_needs_attention), self, G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->adjustment, "notify::page-size", G_CALLBACK (update_visible), self, G_CONNECT_SWAPPED);
   }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ADJUSTMENT]);
