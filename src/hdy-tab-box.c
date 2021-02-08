@@ -1583,17 +1583,11 @@ appear_animation_value_cb (gdouble  value,
                            gpointer user_data)
 {
   TabInfo *info = user_data;
-  GtkWidget *parent;
-
-  if (!GTK_IS_WIDGET (info->tab)) {
-    info->appear_progress = value;
-    return;
-  }
-
-  parent = gtk_widget_get_parent (GTK_WIDGET (info->tab));
 
   info->appear_progress = value;
-  gtk_widget_queue_resize (parent);
+
+  if (GTK_IS_WIDGET (info->tab))
+    gtk_widget_queue_resize (GTK_WIDGET (info->tab));
 }
 
 static void
