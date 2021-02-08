@@ -1624,6 +1624,8 @@ create_tab_info (HdyTabBox  *self,
   if (self->window)
     gtk_widget_set_parent_window (GTK_WIDGET (info->tab), self->window);
 
+  gtk_widget_show (GTK_WIDGET (info->tab));
+
   return info;
 }
 
@@ -1645,8 +1647,6 @@ page_attached_cb (HdyTabBox  *self,
   force_end_reordering (self);
 
   info = create_tab_info (self, page);
-
-  gtk_widget_show (GTK_WIDGET (info->tab));
 
   info->notify_needs_attention_id =
     g_signal_connect_object (page,
@@ -1868,6 +1868,8 @@ insert_placeholder (HdyTabBox  *self,
 
     info = create_tab_info (self, page);
 
+    gtk_widget_set_opacity (GTK_WIDGET (info->tab), 0);
+
     hdy_tab_set_dragging (info->tab, TRUE);
     hdy_tab_set_hovering (info->tab, TRUE);
 
@@ -1934,7 +1936,7 @@ replace_placeholder (HdyTabBox  *self,
   gdouble initial_progress;
 
   self->placeholder_scroll_offset = 0;
-  gtk_widget_show (GTK_WIDGET (self->reorder_placeholder->tab));
+  gtk_widget_set_opacity (GTK_WIDGET (self->reorder_placeholder->tab), 1);
   hdy_tab_set_dragging (info->tab, FALSE);
 
   if (!info->appear_animation) {
@@ -3066,7 +3068,7 @@ hdy_tab_box_drag_begin (GtkWidget      *widget,
   end_dragging (self);
   update_hover (self);
 
-  gtk_widget_hide (GTK_WIDGET (detached_tab));
+  gtk_widget_set_opacity (GTK_WIDGET (detached_tab), 0);
   self->detached_index = hdy_tab_view_get_page_position (self->view, self->detached_page);
 
   hdy_tab_view_detach_page (self->view, self->detached_page);
