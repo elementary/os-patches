@@ -29,6 +29,7 @@ struct _HdyTab
   GtkWidget *title;
   GtkWidget *icon_stack;
   GtkImage *icon;
+  GtkSpinner *spinner;
   GtkImage *indicator_icon;
   GtkWidget *indicator_btn;
   GtkWidget *close_btn;
@@ -186,6 +187,19 @@ update_title (HdyTab *self)
 }
 
 static void
+update_spinner (HdyTab *self)
+{
+  gboolean loading = self->page && hdy_tab_page_get_loading (self->page);
+  gboolean mapped = gtk_widget_get_mapped (GTK_WIDGET (self));
+
+  /* Don't use CPU when not needed */
+  if (loading && mapped)
+    gtk_spinner_start (self->spinner);
+  else
+    gtk_spinner_stop (self->spinner);
+}
+
+static void
 update_icons (HdyTab *self)
 {
   GIcon *gicon = hdy_tab_page_get_icon (self->page);
@@ -226,6 +240,7 @@ static void
 update_loading (HdyTab *self)
 {
   update_icons (self);
+  update_spinner (self);
   set_style_class (GTK_WIDGET (self), "loading",
                    hdy_tab_page_get_loading (self->page));
 }
@@ -583,6 +598,26 @@ hdy_tab_unrealize (GtkWidget *widget)
   self->window = NULL;
 }
 
+static void
+hdy_tab_map (GtkWidget *widget)
+{
+  HdyTab *self = HDY_TAB (widget);
+
+  GTK_WIDGET_CLASS (hdy_tab_parent_class)->map (widget);
+
+  update_spinner (self);
+}
+
+static void
+hdy_tab_unmap (GtkWidget *widget)
+{
+  HdyTab *self = HDY_TAB (widget);
+
+  GTK_WIDGET_CLASS (hdy_tab_parent_class)->unmap (widget);
+
+  update_spinner (self);
+}
+
 static gint
 get_end_padding (HdyTab *self)
 {
@@ -857,6 +892,8 @@ hdy_tab_class_init (HdyTabClass *klass)
   widget_class->size_allocate = hdy_tab_size_allocate;
   widget_class->realize = hdy_tab_realize;
   widget_class->unrealize = hdy_tab_unrealize;
+  widget_class->map = hdy_tab_map;
+  widget_class->unmap = hdy_tab_unmap;
   widget_class->draw = hdy_tab_draw;
   widget_class->direction_changed = hdy_tab_direction_changed;
 
@@ -920,6 +957,7 @@ hdy_tab_class_init (HdyTabClass *klass)
   gtk_widget_class_bind_template_child (widget_class, HdyTab, title);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, icon_stack);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, icon);
+  gtk_widget_class_bind_template_child (widget_class, HdyTab, spinner);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, indicator_icon);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, indicator_btn);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, close_btn);
@@ -979,6 +1017,7 @@ hdy_tab_set_page (HdyTab     *self,
     update_state (self);
     update_title (self);
     update_tooltip (self);
+    update_spinner (self);
     update_icons (self);
     update_indicator (self);
     update_needs_attention (self);
