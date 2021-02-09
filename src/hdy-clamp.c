@@ -217,6 +217,8 @@ hdy_clamp_measure (GtkWidget      *widget,
 
   child = gtk_bin_get_child (bin);
 
+  for_size = hdy_css_adjust_for_size (widget, orientation, for_size);
+
   if (orientation == GTK_ORIENTATION_HORIZONTAL) {
     if (self->orientation == orientation) {
       if (child && gtk_widget_get_visible (child))
