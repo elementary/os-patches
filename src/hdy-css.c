@@ -8,6 +8,40 @@
 
 #include "hdy-css-private.h"
 
+gint
+hdy_css_adjust_for_size (GtkWidget      *widget,
+                         GtkOrientation  orientation,
+                         gint            for_size)
+{
+  GtkStyleContext *style_context = gtk_widget_get_style_context (widget);
+  GtkStateFlags state_flags = gtk_widget_get_state_flags (widget);
+  GtkBorder border, margin, padding;
+  gint css_width, css_height;
+
+  if (for_size < 0)
+    return -1;
+
+  /* Manually apply minimum sizes, the border, the padding and the margin as we
+   * can't use the private GtkGagdet.
+   */
+  gtk_style_context_get (style_context, state_flags,
+                         "min-width", &css_width,
+                         "min-height", &css_height,
+                         NULL);
+  gtk_style_context_get_border (style_context, state_flags, &border);
+  gtk_style_context_get_margin (style_context, state_flags, &margin);
+  gtk_style_context_get_padding (style_context, state_flags, &padding);
+
+  if (orientation == GTK_ORIENTATION_HORIZONTAL)
+    return MAX (for_size, css_width) -
+           border.left - margin.left - padding.left +
+           border.right - margin.right - padding.right;
+  else
+    return MAX (for_size, css_height) -
+           border.top - margin.top - padding.top +
+           border.bottom - margin.bottom - padding.bottom;
+}
+
 void
 hdy_css_measure (GtkWidget      *widget,
                  GtkOrientation  orientation,

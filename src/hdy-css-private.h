@@ -14,6 +14,10 @@
 
 G_BEGIN_DECLS
 
+gint hdy_css_adjust_for_size (GtkWidget      *widget,
+                              GtkOrientation  orientation,
+                              gint            for_size);
+
 void hdy_css_measure (GtkWidget      *widget,
                       GtkOrientation  orientation,
                       gint           *minimum,
