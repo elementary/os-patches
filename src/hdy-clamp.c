@@ -204,7 +204,7 @@ hdy_clamp_measure (GtkWidget      *widget,
   HdyClamp *self = HDY_CLAMP (widget);
   GtkBin *bin = GTK_BIN (widget);
   GtkWidget *child;
-  gint child_size;
+  gint child_size = 0;
 
   if (minimum)
     *minimum = 0;
@@ -216,12 +216,11 @@ hdy_clamp_measure (GtkWidget      *widget,
     *natural_baseline = -1;
 
   child = gtk_bin_get_child (bin);
-  if (!(child && gtk_widget_get_visible (child)))
-    return;
 
   if (orientation == GTK_ORIENTATION_HORIZONTAL) {
     if (self->orientation == orientation) {
-      gtk_widget_get_preferred_width (child, minimum, natural);
+      if (child && gtk_widget_get_visible (child))
+        gtk_widget_get_preferred_width (child, minimum, natural);
 
       return;
     }
@@ -234,7 +233,8 @@ hdy_clamp_measure (GtkWidget      *widget,
                                                natural);
   } else {
     if (self->orientation == orientation) {
-      gtk_widget_get_preferred_height (child, minimum, natural);
+      if (child && gtk_widget_get_visible (child))
+        gtk_widget_get_preferred_height (child, minimum, natural);
 
       return;
     }
