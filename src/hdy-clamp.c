@@ -221,32 +221,28 @@ hdy_clamp_measure (GtkWidget      *widget,
     if (self->orientation == orientation) {
       if (child && gtk_widget_get_visible (child))
         gtk_widget_get_preferred_width (child, minimum, natural);
+    } else {
+      child_size = get_child_size (HDY_CLAMP (widget), for_size, NULL, NULL, NULL, NULL);
 
-      return;
+      gtk_widget_get_preferred_width_for_height (child,
+                                                 child_size,
+                                                 minimum,
+                                                 natural);
     }
-
-    child_size = get_child_size (HDY_CLAMP (widget), for_size, NULL, NULL, NULL, NULL);
-
-    gtk_widget_get_preferred_width_for_height (child,
-                                               child_size,
-                                               minimum,
-                                               natural);
   } else {
     if (self->orientation == orientation) {
       if (child && gtk_widget_get_visible (child))
         gtk_widget_get_preferred_height (child, minimum, natural);
+    } else {
+      child_size = get_child_size (HDY_CLAMP (widget), for_size, NULL, NULL, NULL, NULL);
 
-      return;
+      gtk_widget_get_preferred_height_and_baseline_for_width (child,
+                                                              child_size,
+                                                              minimum,
+                                                              natural,
+                                                              minimum_baseline,
+                                                              natural_baseline);
     }
-
-    child_size = get_child_size (HDY_CLAMP (widget), for_size, NULL, NULL, NULL, NULL);
-
-    gtk_widget_get_preferred_height_and_baseline_for_width (child,
-                                                            child_size,
-                                                            minimum,
-                                                            natural,
-                                                            minimum_baseline,
-                                                            natural_baseline);
   }
 
   hdy_css_measure (widget, orientation, minimum, natural);
