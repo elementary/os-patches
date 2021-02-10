@@ -133,7 +133,7 @@ abi-check:
     # See https://sourceware.org/bugzilla/show_bug.cgi?id=27269
     - rpm -Uvh --oldpackage https://kojipkgs.fedoraproject.org//packages/libabigail/1.7/2.fc33/x86_64/libabigail-1.7-2.fc33.x86_64.rpm
   script:
-    - ./.ci/check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+    - ./.gitlab-ci/check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
 
 build-flatpak:
   extends: '.flatpak'
