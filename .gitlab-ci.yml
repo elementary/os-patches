@@ -129,6 +129,8 @@ abi-check:
     - dnf -y update
     - dnf -y install @development-tools redhat-rpm-config dnf-plugins-core $DEPS
     - dnf -y builddep data/packaging/rpm/libhandy.spec
+    # See https://sourceware.org/bugzilla/show_bug.cgi?id=27269
+    - rpm -Uvh --oldpackage https://kojipkgs.fedoraproject.org//packages/libabigail/1.7/2.fc33/x86_64/libabigail-1.7-2.fc33.x86_64.rpm
   script:
     - ./.ci/check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
 
