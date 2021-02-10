@@ -119,6 +119,19 @@ lintian-debian-buster-package:
     - package-debian-buster
   extends: .l5-lintian-debian-package
 
+abi-check:
+  image: fedora:rawhide
+  stage: build
+  variables:
+    DEPS: libabigail git
+    LAST_ABI_BREAK: "56426a718a6657ed1b73393e7cd02cafcf3adc10"
+  before_script:
+    - dnf -y update
+    - dnf -y install @development-tools redhat-rpm-config dnf-plugins-core $DEPS
+    - dnf -y builddep data/packaging/rpm/libhandy.spec
+  script:
+    - ./.ci/check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+
 build-flatpak:
   extends: '.flatpak'
   stage: build
