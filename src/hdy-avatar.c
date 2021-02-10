@@ -1081,6 +1081,8 @@ hdy_avatar_set_show_initials (HdyAvatar *self,
  *
  * A callback which is called when the custom image need to be reloaded for some
  * reason (e.g. scale-factor changes).
+ *
+ * Deprecated: 1.1: use hdy_avatar_set_loadable_icon() instead.
  */
 void
 hdy_avatar_set_image_load_func (HdyAvatar              *self,

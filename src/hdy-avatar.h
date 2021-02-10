@@ -32,7 +32,10 @@ G_DECLARE_FINAL_TYPE (HdyAvatar, hdy_avatar, HDY, AVATAR, GtkDrawingArea)
  *
  * Returns: (nullable) (transfer full): the #GdkPixbuf to use as a custom avatar
  * or %NULL to fallback to the generated avatar.
+ *
+ * Deprecated: 1.1: use hdy_avatar_set_loadable_icon() instead.
  */
+HDY_DEPRECATED_TYPE_IN_1_1_FOR (hdy_avatar_set_loadable_icon)
 typedef GdkPixbuf *(*HdyAvatarImageLoadFunc) (gint     size,
                                               gpointer user_data);
 
@@ -56,7 +59,7 @@ gboolean     hdy_avatar_get_show_initials   (HdyAvatar              *self);
 HDY_AVAILABLE_IN_ALL
 void         hdy_avatar_set_show_initials   (HdyAvatar              *self,
                                              gboolean                show_initials);
-HDY_AVAILABLE_IN_ALL
+HDY_DEPRECATED_IN_1_1_FOR (hdy_avatar_set_loadable_icon)
 void         hdy_avatar_set_image_load_func (HdyAvatar              *self,
                                              HdyAvatarImageLoadFunc  load_image,
                                              gpointer                user_data,
