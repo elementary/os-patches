@@ -216,6 +216,33 @@ test_hdy_avatar_draw_to_pixbuf (void)
 }
 
 static void
+draw_to_pixbuf_async (HdyAvatar    *avatar,
+                      GAsyncResult *res,
+                      gpointer      user_data)
+{
+  g_autoptr (GdkPixbuf) pixbuf = hdy_avatar_draw_to_pixbuf_finish (avatar, res);
+
+  g_assert_cmpint (gdk_pixbuf_get_width (pixbuf), ==, TEST_SIZE * 2);
+  g_assert_cmpint (gdk_pixbuf_get_height (pixbuf), ==, TEST_SIZE * 2);
+  g_object_unref (avatar);
+}
+
+static void
+test_hdy_avatar_draw_to_pixbuf_async (void)
+{
+  HdyAvatar *avatar = NULL;
+
+  avatar = g_object_ref_sink (HDY_AVATAR (hdy_avatar_new (TEST_SIZE, NULL, TRUE)));
+
+  hdy_avatar_draw_to_pixbuf_async (avatar,
+                                   TEST_SIZE * 2,
+                                   1,
+                                   NULL,
+                                   (GAsyncReadyCallback) draw_to_pixbuf_async,
+                                   NULL);
+}
+
+static void
 test_hdy_avatar_loadable_icon (void)
 {
   GtkWidget* avatar = NULL;
@@ -251,6 +278,7 @@ main (gint argc,
   g_test_add_func ("/Handy/Avatar/text", test_hdy_avatar_text);
   g_test_add_func ("/Handy/Avatar/size", test_hdy_avatar_size);
   g_test_add_func ("/Handy/Avatar/draw_to_pixbuf", test_hdy_avatar_draw_to_pixbuf);
+  g_test_add_func ("/Handy/Avatar/draw_to_pixbuf_async", test_hdy_avatar_draw_to_pixbuf_async);
   g_test_add_func ("/Handy/Avatar/loadable_icon", test_hdy_avatar_loadable_icon);
 
   return g_test_run ();

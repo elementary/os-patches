@@ -74,6 +74,16 @@ GdkPixbuf   *hdy_avatar_draw_to_pixbuf      (HdyAvatar              *self,
                                              gint                    size,
                                              gint                    scale_factor);
 HDY_AVAILABLE_IN_1_1
+void hdy_avatar_draw_to_pixbuf_async        (HdyAvatar              *self,
+                                             gint                    size,
+                                             gint                    scale_factor,
+                                             GCancellable           *cancellable,
+                                             GAsyncReadyCallback     callback,
+                                             gpointer                user_data);
+HDY_AVAILABLE_IN_1_1
+GdkPixbuf *hdy_avatar_draw_to_pixbuf_finish (HdyAvatar              *self,
+                                             GAsyncResult           *async_result);
+HDY_AVAILABLE_IN_1_1
 GLoadableIcon *hdy_avatar_get_loadable_icon (HdyAvatar              *self);
 HDY_AVAILABLE_IN_1_1
 void           hdy_avatar_set_loadable_icon (HdyAvatar              *self,

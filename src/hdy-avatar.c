@@ -73,6 +73,17 @@ enum {
 };
 static GParamSpec *props[PROP_LAST_PROP];
 
+typedef struct {
+  gint size;
+  gint scale_factor;
+} SizeData;
+
+static void
+size_data_free (SizeData *data)
+{
+  g_slice_free (SizeData, data);
+}
+
 static void
 load_icon_async (GLoadableIcon       *icon,
                  gint                 size,
@@ -325,6 +336,27 @@ load_from_gicon_async_for_display_cb (GLoadableIcon *icon,
     g_set_object (&self->round_image, custom_image);
     gtk_widget_queue_draw (GTK_WIDGET (self));
   }
+}
+
+static void
+load_from_gicon_async_for_export_cb (GLoadableIcon *icon,
+                                     GAsyncResult  *res,
+                                     gpointer      *user_data)
+{
+  GTask *task = G_TASK (user_data);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GdkPixbuf) pixbuf = NULL;
+
+  pixbuf = load_from_gicon_async_finish (res, &error);
+
+  if (!g_error_matches (error, HDY_AVATAR_ICON_ERROR, HDY_AVATAR_ICON_ERROR_EMPTY) &&
+      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+    g_warning ("Failed to load icon: %s", error->message);
+  }
+
+  g_task_return_pointer (task,
+                         g_steal_pointer (&pixbuf),
+                         g_object_unref);
 }
 
 static void
@@ -1222,6 +1254,112 @@ hdy_avatar_draw_to_pixbuf (HdyAvatar *self,
   return gdk_pixbuf_get_from_surface (surface, 0, 0,
                                       bounds.width * scale_factor,
                                       bounds.height * scale_factor);
+}
+
+/**
+ * hdy_avatar_draw_to_pixbuf_async:
+ * @self: a #HdyAvatar
+ * @size: The size of the pixbuf
+ * @scale_factor: The scale factor
+ * @cancellable: (nullable): optional #GCancellable object, %NULL to ignore
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the avatar is generated
+ * @user_data: (closure): the data to pass to callback function
+
+ * Renders asynchronously @self into a pixbuf at @size and @scale_factor.
+ * This can be used to export the fallback avatar.
+ *
+ * Since: 1.1
+ */
+void
+hdy_avatar_draw_to_pixbuf_async (HdyAvatar           *self,
+                                 gint                 size,
+                                 gint                 scale_factor,
+                                 GCancellable        *cancellable,
+                                 GAsyncReadyCallback  callback,
+                                 gpointer             user_data)
+{
+  GTask *task = NULL;
+  gint scaled_size = size * scale_factor;
+  SizeData *data;
+
+  g_return_if_fail (HDY_IS_AVATAR (self));
+  g_return_if_fail (size > 0);
+  g_return_if_fail (scale_factor > 0);
+
+  data = g_slice_new (SizeData);
+  data->size = size;
+  data->scale_factor = scale_factor;
+
+  task = g_task_new (self, cancellable, callback, user_data);
+  g_task_set_source_tag (task, hdy_avatar_draw_to_pixbuf_async);
+  g_task_set_task_data (task, data, (GDestroyNotify) size_data_free);
+
+  if (get_icon (self) &&
+      (!self->round_image ||
+       gdk_pixbuf_get_width (self->round_image) != scaled_size ||
+       is_scaled (self->round_image)))
+    load_icon_async (get_icon (self),
+                     scaled_size,
+                     cancellable,
+                     (GAsyncReadyCallback) load_from_gicon_async_for_export_cb,
+                     task);
+  else
+    g_task_return_pointer (task, NULL, NULL);
+}
+
+/**
+ * hdy_avatar_draw_to_pixbuf_finish:
+ * @self: a #HdyAvatar
+ * @async_result: a #GAsyncResult
+ *
+ * Finishes an asynchronous draw of an avatar to a pixbuf.
+ *
+ * Returns: (transfer full): a #GdkPixbuf
+ *
+ * Since: 1.1
+ */
+GdkPixbuf *
+hdy_avatar_draw_to_pixbuf_finish (HdyAvatar    *self,
+                                  GAsyncResult *async_result)
+{
+  GTask *task;
+  g_autoptr (GdkPixbuf) pixbuf_from_icon = NULL;
+  g_autoptr (GdkPixbuf) custom_image = NULL;
+  g_autoptr (cairo_surface_t) surface = NULL;
+  g_autoptr (cairo_t) cr = NULL;
+  SizeData *data;
+  GtkStyleContext *context;
+  GtkAllocation bounds;
+
+  g_return_val_if_fail (G_IS_TASK (async_result), NULL);
+
+  task = G_TASK (async_result);
+
+  g_warn_if_fail (g_task_get_source_tag (task) == hdy_avatar_draw_to_pixbuf_async);
+
+  data = g_task_get_task_data (task);
+
+  context = gtk_widget_get_style_context (GTK_WIDGET (self));
+  gtk_render_background_get_clip (context, 0, 0, data->size, data->size, &bounds);
+
+  surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
+                                        bounds.width * data->scale_factor,
+                                        bounds.height * data->scale_factor);
+  cairo_surface_set_device_scale (surface, data->scale_factor, data->scale_factor);
+  cr = cairo_create (surface);
+
+  cairo_translate (cr, -bounds.x, -bounds.y);
+
+  pixbuf_from_icon = g_task_propagate_pointer (task, NULL);
+  custom_image = update_custom_image (get_icon (self),
+                                      pixbuf_from_icon,
+                                      NULL,
+                                      data->size * data->scale_factor);
+  draw_for_size (self, cr, custom_image, data->size, data->size, data->scale_factor);
+
+  return gdk_pixbuf_get_from_surface (surface, 0, 0,
+                                      bounds.width * data->scale_factor,
+                                      bounds.height * data->scale_factor);
 }
 
 /**
