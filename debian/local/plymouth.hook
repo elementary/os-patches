@@ -120,11 +120,6 @@ case "${THEME_NAME}" in
 		;;
 
 	*)
-		cp /usr/share/plymouth/ubuntu-logo.png "${DESTDIR}/usr/share/plymouth"
-		if [ -d ${DESTDIR}/usr/share/plymouth/themes/spinner ]; then
-			cp /usr/share/plymouth/ubuntu-logo.png "${DESTDIR}/usr/share/plymouth/themes/spinner/watermark.png"
-		fi
-
 		# fontconfig
 		mkdir -p "${DESTDIR}/etc/fonts/conf.d"
 		cp -a /etc/fonts/fonts.conf "${DESTDIR}/etc/fonts"
@@ -132,18 +127,24 @@ case "${THEME_NAME}" in
 		# This is only needed because fc-cache bellow fails if the directory doesn't exist
 		mkdir -p "${DESTDIR}/usr/local/share/fonts"
 
-		# Make Ubuntu the default sans-serif, and mono fonts.  Ubuntu
-		# font is always present if we have python-label installed; if
-		# not installed, then we have no graphical themes that display
-		# text, so that's ok.
-		if [ -e /usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf ]
+		cp /etc/fonts/conf.d/60-latin.conf "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
+
+		# Make Inter the default sans-serif font
+		if [ -e /usr/share/fonts/opentype/inter/Inter-Regular.otf ]
 		then
-		    sed 's|\(<family>DejaVu Sans</family>\)|<family>Ubuntu</family>\1|;s|\(<family>DejaVu Sans Mono</family>\)|<family>Ubuntu Mono</family>\1|;' \
-			/etc/fonts/conf.d/60-latin.conf > "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
-		    mkdir -p "${DESTDIR}/usr/share/fonts/truetype/ubuntu"
-		    cp -a /usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf "${DESTDIR}/usr/share/fonts/truetype/ubuntu"
-		    cp -a /usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf "${DESTDIR}/usr/share/fonts/truetype/ubuntu"
+			sed -i 's|\(<family>DejaVu Sans</family>\)|<family>Inter</family>\1|;' "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
+			mkdir -p "${DESTDIR}/usr/share/fonts/opentype/inter"
+			cp -a /usr/share/fonts/opentype/inter/Inter-Regular.otf "${DESTDIR}/usr/share/fonts/opentype/inter"
 		fi
+
+		# Make Roboto Mono the default mono font
+		if [ -e /usr/share/fonts/truetype/roboto-mono-elementary/RobotoMono-Regular.ttf ]
+		then
+			sed -i 's|\(<family>DejaVu Sans Mono</family>\)|<family>Roboto Mono</family>\1|;' "${DESTDIR}/etc/fonts/conf.d/60-latin.conf"
+			mkdir -p "${DESTDIR}/usr/share/fonts/truetype/roboto-mono-elementary"
+			cp -a /usr/share/fonts/truetype/roboto-mono-elementary/RobotoMono-Regular.ttf "${DESTDIR}/usr/share/fonts/truetype/roboto-mono-elementary"
+		fi
+
 		fc-cache -s -y "${DESTDIR}" > /dev/null 2>&1
 
 		# copy /etc/default/keyboard (needed for keymap detection)
