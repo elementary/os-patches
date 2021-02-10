@@ -31,7 +31,6 @@ G_BEGIN_DECLS
 #include "hdy-clamp.h"
 #include "hdy-combo-row.h"
 #include "hdy-deck.h"
-#include "hdy-deprecation-macros.h"
 #include "hdy-enum-value-object.h"
 #include "hdy-expander-row.h"
 #include "hdy-flap.h"

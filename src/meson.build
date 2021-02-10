@@ -76,7 +76,6 @@ src_headers = [
   'hdy-clamp.h',
   'hdy-combo-row.h',
   'hdy-deck.h',
-  'hdy-deprecation-macros.h',
   'hdy-enum-value-object.h',
   'hdy-expander-row.h',
   'hdy-flap.h',
