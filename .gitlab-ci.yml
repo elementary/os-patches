@@ -120,7 +120,8 @@ lintian-debian-buster-package:
   extends: .l5-lintian-debian-package
 
 abi-check:
-  image: fedora:rawhide
+  # See https://sourceware.org/bugzilla/show_bug.cgi?id=27267
+  image: fedora:33
   stage: build
   variables:
     DEPS: libabigail git
