@@ -1,0 +1,36 @@
+option('libgeoclue',
+        type: 'boolean', value: true,
+        description: 'Enable convenience library')
+option('introspection',
+        type: 'boolean', value: true,
+        description: 'Enable convenience library introspection generation')
+option('gtk-doc',
+       type: 'boolean', value: true,
+       description: 'Whether to generate the API reference for Geocode-GLib')
+option('3g-source',
+       type: 'boolean', value: true,
+       description: 'Enable 3G source (requires ModemManager')
+option('cdma-source',
+       type: 'boolean', value: true,
+       description: 'Enable CDMA source (requires ModemManager')
+option('modem-gps-source',
+       type: 'boolean', value: true,
+       description: 'Enable modem GPS source (requires ModemManager')
+option('nmea-source',
+       type: 'boolean', value: true,
+       description: 'Enable network NMEA source (requires Avahi libraries)')
+option('enable-backend',
+       type: 'boolean', value: true,
+       description: 'Enable backend (the geoclue service)')
+option('demo-agent',
+       type: 'boolean', value: true,
+       description: 'Build demo agent')
+option('dbus-sys-dir',
+       type: 'string',
+       description: 'where D-BUS system.d directory is')
+option('systemd-system-unit-dir',
+       type: 'string',
+       description: 'Directory for systemd service files')
+option('dbus-srv-user',
+       type: 'string', value: 'root',
+       description: 'The user (existing) as which the service will run')

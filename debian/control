@@ -1,0 +1,111 @@
+Source: geoclue-2.0
+Section: utils
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Laurent Bigonville <bigon@debian.org>
+Uploaders: Craig Andrews <candrews@integralblue.com>
+Build-Depends: debhelper (>= 11),
+               gobject-introspection (>= 0.9.6),
+               intltool (>= 0.40.0),
+               libavahi-client-dev (>= 0.6.10),
+               libavahi-glib-dev (>= 0.6.10),
+               libgirepository1.0-dev (>= 0.9.6),
+               libglib2.0-dev (>= 2.44.0),
+               libjson-glib-dev (>= 0.14),
+               libmm-glib-dev (>= 1.6) [linux-any],
+               libnotify-dev,
+               libsoup2.4-dev (>= 2.42),
+               meson (>= 0.47.2),
+               pkg-config,
+               valac
+Build-Depends-Indep: gtk-doc-tools <!nodoc>, libglib2.0-doc <!nodoc>
+Homepage: https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home
+Standards-Version: 4.4.0
+Vcs-Git: https://salsa.debian.org/freedesktop-team/geoclue-2.0.git
+Vcs-Browser: https://salsa.debian.org/freedesktop-team/geoclue-2.0
+
+Package: geoclue-2.0
+Architecture: any
+Depends: adduser, ${misc:Depends}, ${shlibs:Depends}
+Recommends: avahi-daemon,
+            iio-sensor-proxy [linux-any],
+            modemmanager [linux-any],
+            wpasupplicant [!hurd-any]
+Breaks: geoclue (>= 2.0), geoclue-2-demo (<< 2.4.12-2~)
+Replaces: geoclue (>= 2.0), geoclue-2-demo (<< 2.4.12-2~)
+Description: geoinformation service
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+ .
+ This package contains the D-Bus system service for GeoClue.
+
+Package: geoclue-2-demo
+Architecture: any
+Depends: geoclue-2.0 (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
+Breaks: geoclue-2.0 (<< 2.4.10)
+Replaces: geoclue-2.0 (<< 2.4.10)
+Description: geoinformation service (demonstration programs)
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+ .
+ This package contains the demonstration programs.
+
+Package: geoclue-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Build-Profiles: <!nodoc>
+Description: geoinformation service (D-Bus API documentation)
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+ .
+ This package contains the D-Bus API documentation.
+
+Package: libgeoclue-2-0
+Architecture: any
+Section: libs
+Depends: ${misc:Depends}, ${shlibs:Depends}, geoclue-2.0 (= ${binary:Version})
+Multi-Arch: same
+Description: convenience library to interact with geoinformation service
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+ .
+ This package contains the shared library.
+
+Package: libgeoclue-2-dev
+Architecture: any
+Section: libdevel
+Depends: gir1.2-geoclue-2.0 (= ${binary:Version}),
+         libgeoclue-2-0 (= ${binary:Version}),
+         libglib2.0-dev (>= 2.44.0),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Suggests: libgeoclue-doc
+Multi-Arch: same
+Description: convenience library to interact with geoinformation service (devel files)
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+ .
+ This package contains header and development files.
+
+Package: gir1.2-geoclue-2.0
+Section: introspection
+Architecture: any
+Depends: ${gir:Depends}, ${misc:Depends}, ${shlibs:Depends}
+Multi-Arch: same
+Description: convenience library to interact with geoinformation service (introspection)
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+ .
+ This package contains the introspection data.
+
+Package: libgeoclue-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Build-Profiles: <!nodoc>
+Description: convenience library to interact with geoinformation service (API documentation)
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+ .
+ This package contains the library API documentation.

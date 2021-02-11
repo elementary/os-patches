@@ -1,0 +1,40 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+ifneq ($(DEB_BUILD_ARCH_OS),linux)
+  MM_NM_FLAGS := -D3g-source=false \
+                 -Dmodem-gps-source=false \
+                 -Dcdma-source=false
+endif
+
+ifeq ($(shell which gtkdoc-scan),)
+  BUILD_DOC := -Dgtk-doc=false
+endif
+ifneq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
+  BUILD_DOC := -Dgtk-doc=false
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure -- --libexecdir=/usr/libexec \
+                             -Ddbus-srv-user=geoclue \
+                             -Dsystemd-system-unit-dir=/lib/systemd/system \
+			     ${BUILD_DOC} \
+                             ${MM_NM_FLAGS}
+
+override_dh_auto_test:
+	# testsuite fails on missing latitude (et.al)
+	# which is only available when using GeoLiteCity.dat
+	# database, which "geoip-database" package in debian
+	# does not include.
+	dh_auto_test || true
+
+%:
+	dh $@ --with autoreconf,gir
+
+override_dh_missing:
+	dh_missing --list-missing
+
+override_dh_installchangelogs:
+	dh_installchangelogs NEWS
