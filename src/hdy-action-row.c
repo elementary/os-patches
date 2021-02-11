@@ -421,7 +421,7 @@ hdy_action_row_class_init (HdyActionRowClass *klass)
    * The number of lines at the end of which the title label will be ellipsized.
    * Set this property to 0 if you don't want to limit the number of lines.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_TITLE_LINES] =
     g_param_spec_int ("title-lines",
@@ -438,7 +438,7 @@ hdy_action_row_class_init (HdyActionRowClass *klass)
    * ellipsized.
    * Set this property to 0 if you don't want to limit the number of lines.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_SUBTITLE_LINES] =
     g_param_spec_int ("subtitle-lines",
@@ -807,7 +807,7 @@ hdy_action_row_set_use_underline (HdyActionRow *self,
  * Returns: the number of lines at the end of which the title label will be
  *          ellipsized.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gint
 hdy_action_row_get_title_lines (HdyActionRow *self)
@@ -830,7 +830,7 @@ hdy_action_row_get_title_lines (HdyActionRow *self)
  * ellipsized.
  * If the value is 0, the number of lines won't be limited.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_action_row_set_title_lines (HdyActionRow *self,
@@ -865,7 +865,7 @@ hdy_action_row_set_title_lines (HdyActionRow *self,
  * Returns: the number of lines at the end of which the subtitle label will be
  *          ellipsized.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gint
 hdy_action_row_get_subtitle_lines (HdyActionRow *self)
@@ -888,7 +888,7 @@ hdy_action_row_get_subtitle_lines (HdyActionRow *self)
  * ellipsized.
  * If the value is 0, the number of lines won't be limited.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_action_row_set_subtitle_lines (HdyActionRow *self,

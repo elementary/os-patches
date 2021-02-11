@@ -538,7 +538,7 @@ hdy_deck_get_child_by_name (HdyDeck     *self,
  *
  * Inserts @child at the first position in @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_deck_prepend (HdyDeck   *self,
@@ -560,7 +560,7 @@ hdy_deck_prepend (HdyDeck   *self,
  * Inserts @child in the position after @sibling in the list of children.
  * If @sibling is %NULL, insert @child at the first position.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_deck_insert_child_after (HdyDeck   *self,
@@ -586,7 +586,7 @@ hdy_deck_insert_child_after (HdyDeck   *self,
  * Moves @child to the position after @sibling in the list of children.
  * If @sibling is %NULL, move @child to the first position.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_deck_reorder_child_after (HdyDeck   *self,

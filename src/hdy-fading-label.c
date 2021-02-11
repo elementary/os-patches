@@ -20,7 +20,7 @@
  *
  * The HdyFadingLabel widget allows to ellipsize a label with a fading effect.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 
 #define FADE_WIDTH 18

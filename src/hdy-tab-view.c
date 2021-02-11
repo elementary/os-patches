@@ -56,7 +56,7 @@ static const GtkTargetEntry dst_targets [] = {
  *     ╰── widget
  * ]|
  *
- * Since: 1.1
+ * Since: 1.2
  */
 
 struct _HdyTabPage
@@ -364,7 +364,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    *
    * The child of the page.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_CHILD] =
     g_param_spec_object ("child",
@@ -380,7 +380,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    *
    * See hdy_tab_view_add_page() and hdy_tab_view_close_page().
 
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_PARENT] =
     g_param_spec_object ("parent",
@@ -394,7 +394,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    *
    * Whether the page is selected.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_SELECTED] =
     g_param_spec_boolean ("selected",
@@ -408,7 +408,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    *
    * Whether the page is pinned. See hdy_tab_view_set_page_pinned().
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_PINNED] =
     g_param_spec_boolean ("pinned",
@@ -425,7 +425,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    * #HdyTabBar will display it in the center of the tab unless it's pinned,
    * and will use it as a tooltip unless #HdyTabPage:tooltip is set.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_TITLE] =
     g_param_spec_string ("title",
@@ -441,7 +441,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    *
    * If not set, #HdyTabBar will use #HdyTabPage:title as a tooltip instead.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_TOOLTIP] =
     g_param_spec_string ("tooltip",
@@ -458,7 +458,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    * #HdyTabBar will not show the icon if #HdyTabPage:loading is set to %TRUE,
    * or if the page is pinned and #HdyTabPage:indicator-icon is set.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_ICON] =
     g_param_spec_object ("icon",
@@ -477,7 +477,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    * If the page is pinned and #HdyTabPage:indicator-icon is set, the loading
    * status will not be visible.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_LOADING] =
     g_param_spec_boolean ("loading",
@@ -502,7 +502,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    * If #HdyTabPage:indicator-activatable is set to %TRUE, the indicator icon
    * can act as a button.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_INDICATOR_ICON] =
     g_param_spec_object ("indicator-icon",
@@ -521,7 +521,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    *
    * If #HdyTabPage:indicator-icon is not set, does nothing.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_INDICATOR_ACTIVATABLE] =
     g_param_spec_boolean ("indicator-activatable",
@@ -539,7 +539,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    * to %TRUE. If the tab is not visible, the corresponding edge of the tab bar
    * will be highlighted.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   page_props[PAGE_PROP_NEEDS_ATTENTION] =
     g_param_spec_boolean ("needs-attention",
@@ -1097,7 +1097,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    *
    * The number of pages in the tab view.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_N_PAGES] =
     g_param_spec_int ("n-pages",
@@ -1113,7 +1113,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    *
    * See hdy_tab_view_set_page_pinned().
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_N_PINNED_PAGES] =
     g_param_spec_int ("n-pinned-pages",
@@ -1133,7 +1133,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * During the transfer, children cannot receive pointer input and a tab can
    * be safely dropped on the tab view.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_IS_TRANSFERRING_PAGE] =
     g_param_spec_boolean ("is-transferring-page",
@@ -1147,7 +1147,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    *
    * The currently selected page.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_SELECTED_PAGE] =
     g_param_spec_object ("selected-page",
@@ -1168,7 +1168,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * loading, doesn't have an icon and an indicator. Default icon is never used
    * for tabs that aren't pinned.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_DEFAULT_ICON] =
     g_param_spec_object ("default-icon",
@@ -1186,7 +1186,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * provided menu model. Use #HdyTabView::setup-menu signal to set up the menu
    * actions for the particular tab.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_MENU_MODEL] =
     g_param_spec_object ("menu-model",
@@ -1215,7 +1215,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * These shortcuts are always available on @self, this property is useful if
    * they should be available globally.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_SHORTCUT_WIDGET] =
     g_param_spec_object ("shortcut-widget",
@@ -1238,7 +1238,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * A typical reason to connect to this signal would be to connect to page
    * signals for things such as updating window title.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   signals[SIGNAL_PAGE_ATTACHED] =
     g_signal_new ("page-attached",
@@ -1267,7 +1267,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * child dispose handler for that or do it in sync with your
    * hdy_tab_view_close_page_finish() calls.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   signals[SIGNAL_PAGE_DETACHED] =
     g_signal_new ("page-detached",
@@ -1287,7 +1287,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    *
    * This signal is emitted after @page has been reordered to @position.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   signals[SIGNAL_PAGE_REORDERED] =
     g_signal_new ("page-reordered",
@@ -1332,7 +1332,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * A typical reason to connect to this signal is to show a confirmation dialog
    * for closing a tab.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   signals[SIGNAL_CLOSE_PAGE] =
     g_signal_new ("close-page",
@@ -1356,7 +1356,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * It can be used to set up menu actions before showing the menu, for example
    * disable actions not applicable to @page.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   signals[SIGNAL_SETUP_MENU] =
     g_signal_new ("setup-menu",
@@ -1380,7 +1380,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    *
    * Returns: (transfer none) (nullable): the #HdyTabView from the new window
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   signals[SIGNAL_CREATE_WINDOW] =
     g_signal_new ("create-window",
@@ -1401,7 +1401,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    *
    * See #HdyTabPage:indicator-icon and #HdyTabPage:indicator-activatable.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   signals[SIGNAL_INDICATOR_ACTIVATED] =
     g_signal_new ("indicator-activated",
@@ -1466,7 +1466,7 @@ hdy_tab_view_init (HdyTabView *self)
  *
  * Returns: (transfer none): the child of @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_tab_page_get_child (HdyTabPage *self)
@@ -1486,7 +1486,7 @@ hdy_tab_page_get_child (HdyTabPage *self)
  *
  * Returns: (transfer none) (nullable): the parent page of @self, or %NULL
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_page_get_parent (HdyTabPage *self)
@@ -1504,7 +1504,7 @@ hdy_tab_page_get_parent (HdyTabPage *self)
  *
  * Returns: whether @self is selected
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_page_get_selected (HdyTabPage *self)
@@ -1522,7 +1522,7 @@ hdy_tab_page_get_selected (HdyTabPage *self)
  *
  * Returns: whether @self is pinned
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_page_get_pinned (HdyTabPage *self)
@@ -1540,7 +1540,7 @@ hdy_tab_page_get_pinned (HdyTabPage *self)
  *
  * Returns: (nullable): the title of @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 const gchar *
 hdy_tab_page_get_title (HdyTabPage *self)
@@ -1561,7 +1561,7 @@ hdy_tab_page_get_title (HdyTabPage *self)
  * unless it's pinned, and will use it as a tooltip unless #HdyTabPage:tooltip
  * is set.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_page_set_title (HdyTabPage  *self,
@@ -1586,7 +1586,7 @@ hdy_tab_page_set_title (HdyTabPage  *self,
  *
  * Returns: (nullable): the tooltip of @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 const gchar *
 hdy_tab_page_get_tooltip (HdyTabPage *self)
@@ -1605,7 +1605,7 @@ hdy_tab_page_get_tooltip (HdyTabPage *self)
  *
  * If not set, #HdyTabBar will use #HdyTabPage:title as a tooltip instead.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_page_set_tooltip (HdyTabPage  *self,
@@ -1630,7 +1630,7 @@ hdy_tab_page_set_tooltip (HdyTabPage  *self,
  *
  * Returns: (transfer none) (nullable): the icon of @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GIcon *
 hdy_tab_page_get_icon (HdyTabPage *self)
@@ -1650,7 +1650,7 @@ hdy_tab_page_get_icon (HdyTabPage *self)
  * #HdyTabBar will not show the icon if #HdyTabPage:loading is set to %TRUE,
  * or if @self is pinned and #HdyTabPage:indicator-icon is set.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_page_set_icon (HdyTabPage *self,
@@ -1675,7 +1675,7 @@ hdy_tab_page_set_icon (HdyTabPage *self,
  *
  * Returns: whether @self is loading
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_page_get_loading (HdyTabPage *self)
@@ -1697,7 +1697,7 @@ hdy_tab_page_get_loading (HdyTabPage *self)
  * If @self is pinned and #HdyTabPage:indicator-icon is set, the loading status
  * will not be visible.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_page_set_loading (HdyTabPage *self,
@@ -1723,7 +1723,7 @@ hdy_tab_page_set_loading (HdyTabPage *self,
  *
  * Returns: (transfer none) (nullable): the indicator icon of @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GIcon *
 hdy_tab_page_get_indicator_icon (HdyTabPage *self)
@@ -1750,7 +1750,7 @@ hdy_tab_page_get_indicator_icon (HdyTabPage *self)
  * If #HdyTabPage:indicator-activatable is set to %TRUE, indicator icon
  * can act as a button.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_page_set_indicator_icon (HdyTabPage *self,
@@ -1777,7 +1777,7 @@ hdy_tab_page_set_indicator_icon (HdyTabPage *self,
  *
  * Returns: whether the indicator is activatable
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_page_get_indicator_activatable (HdyTabPage *self)
@@ -1799,7 +1799,7 @@ hdy_tab_page_get_indicator_activatable (HdyTabPage *self)
  *
  * If #HdyTabPage:indicator-icon is not set, does nothing.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_page_set_indicator_activatable (HdyTabPage *self,
@@ -1825,7 +1825,7 @@ hdy_tab_page_set_indicator_activatable (HdyTabPage *self,
  *
  * Returns: whether @self needs attention
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_page_get_needs_attention (HdyTabPage *self)
@@ -1846,7 +1846,7 @@ hdy_tab_page_get_needs_attention (HdyTabPage *self)
  * %TRUE. If the tab is not visible, the corresponding edge of the tab bar will
  * be highlighted.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_page_set_needs_attention (HdyTabPage *self,
@@ -1871,7 +1871,7 @@ hdy_tab_page_set_needs_attention (HdyTabPage *self,
  *
  * Returns: a new #HdyTabView
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabView *
 hdy_tab_view_new (void)
@@ -1887,7 +1887,7 @@ hdy_tab_view_new (void)
  *
  * Returns: the number of pages in @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gint
 hdy_tab_view_get_n_pages (HdyTabView *self)
@@ -1907,7 +1907,7 @@ hdy_tab_view_get_n_pages (HdyTabView *self)
  *
  * Returns: the number of pinned pages in @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gint
 hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
@@ -1927,7 +1927,7 @@ hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
  *
  * Returns: whether a page is being transferred
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_view_get_is_transferring_page (HdyTabView *self)
@@ -1945,7 +1945,7 @@ hdy_tab_view_get_is_transferring_page (HdyTabView *self)
  *
  * Returns: (transfer none) (nullable): the selected page in @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_get_selected_page (HdyTabView *self)
@@ -1962,7 +1962,7 @@ hdy_tab_view_get_selected_page (HdyTabView *self)
  *
  * Sets the currently selected page in @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_set_selected_page (HdyTabView *self,
@@ -2004,7 +2004,7 @@ hdy_tab_view_set_selected_page (HdyTabView *self,
  *
  * Returns: %TRUE if the selected page was changed, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_view_select_previous_page (HdyTabView *self)
@@ -2039,7 +2039,7 @@ hdy_tab_view_select_previous_page (HdyTabView *self)
  *
  * Returns: %TRUE if the selected page was changed, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_view_select_next_page (HdyTabView *self)
@@ -2130,7 +2130,7 @@ hdy_tab_view_select_last_page (HdyTabView *self)
  *
  * Returns: (transfer none): the default icon of @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GIcon *
 hdy_tab_view_get_default_icon (HdyTabView *self)
@@ -2156,7 +2156,7 @@ hdy_tab_view_get_default_icon (HdyTabView *self)
  *
  * By default, 'hdy-tab-icon-missing-symbolic' icon is used.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_set_default_icon (HdyTabView *self,
@@ -2181,7 +2181,7 @@ hdy_tab_view_set_default_icon (HdyTabView *self,
  *
  * Returns: (transfer none) (nullable): the tab context menu model for @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GMenuModel *
 hdy_tab_view_get_menu_model (HdyTabView *self)
@@ -2202,7 +2202,7 @@ hdy_tab_view_get_menu_model (HdyTabView *self)
  * provided menu model. Use #HdyTabView::setup-menu signal to set up the menu
  * actions for the particular tab.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_set_menu_model (HdyTabView *self,
@@ -2227,7 +2227,7 @@ hdy_tab_view_set_menu_model (HdyTabView *self,
  *
  * Returns: (transfer none) (nullable): the shortcut widget for @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_tab_view_get_shortcut_widget (HdyTabView *self)
@@ -2261,7 +2261,7 @@ hdy_tab_view_get_shortcut_widget (HdyTabView *self)
  * These shortcuts are always available on @self, this function is useful if
  * they should be available globally.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_set_shortcut_widget (HdyTabView *self,
@@ -2326,7 +2326,7 @@ hdy_tab_view_set_shortcut_widget (HdyTabView *self,
  * Pinned pages cannot be closed by default, see #HdyTabView::close-page for how
  * to override that behavior.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_set_page_pinned (HdyTabView *self,
@@ -2381,7 +2381,7 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
  *
  * Returns: (transfer none): the #HdyTabPage representing @child
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_get_page (HdyTabView *self,
@@ -2412,7 +2412,7 @@ hdy_tab_view_get_page (HdyTabView *self,
  *
  * Returns: (transfer none): the page object at @position
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_get_nth_page (HdyTabView *self,
@@ -2438,7 +2438,7 @@ hdy_tab_view_get_nth_page (HdyTabView *self,
  *
  * Returns: the position of @page in @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gint
 hdy_tab_view_get_page_position (HdyTabView *self,
@@ -2476,7 +2476,7 @@ hdy_tab_view_get_page_position (HdyTabView *self,
  *
  * Returns: (transfer none): the page object representing @child
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_add_page (HdyTabView *self,
@@ -2527,7 +2527,7 @@ hdy_tab_view_add_page (HdyTabView *self,
  *
  * Returns: (transfer none): the page object representing @child
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_insert (HdyTabView *self,
@@ -2551,7 +2551,7 @@ hdy_tab_view_insert (HdyTabView *self,
  *
  * Returns: (transfer none): the page object representing @child
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_prepend (HdyTabView *self,
@@ -2572,7 +2572,7 @@ hdy_tab_view_prepend (HdyTabView *self,
  *
  * Returns: (transfer none): the page object representing @child
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_append (HdyTabView *self,
@@ -2597,7 +2597,7 @@ hdy_tab_view_append (HdyTabView *self,
  *
  * Returns: (transfer none): the page object representing @child
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_insert_pinned (HdyTabView *self,
@@ -2621,7 +2621,7 @@ hdy_tab_view_insert_pinned (HdyTabView *self,
  *
  * Returns: (transfer none): the page object representing @child
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_prepend_pinned (HdyTabView *self,
@@ -2642,7 +2642,7 @@ hdy_tab_view_prepend_pinned (HdyTabView *self,
  *
  * Returns: (transfer none): the page object representing @child
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabPage *
 hdy_tab_view_append_pinned (HdyTabView *self,
@@ -2682,7 +2682,7 @@ hdy_tab_view_append_pinned (HdyTabView *self,
  * descendant (possibly indirect) of the parent. If both the previous page and
  * the parent are pinned, the parent will be selected instead.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_close_page (HdyTabView *self,
@@ -2716,7 +2716,7 @@ hdy_tab_view_close_page (HdyTabView *self,
  * This function should not be called unless a custom handler for
  * #HdyTabView::close-page is used.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_close_page_finish (HdyTabView *self,
@@ -2741,7 +2741,7 @@ hdy_tab_view_close_page_finish (HdyTabView *self,
  *
  * Requests to close all pages other than @page.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_close_other_pages (HdyTabView *self,
@@ -2770,7 +2770,7 @@ hdy_tab_view_close_other_pages (HdyTabView *self,
  *
  * Requests to close all pages before @page.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_close_pages_before (HdyTabView *self,
@@ -2798,7 +2798,7 @@ hdy_tab_view_close_pages_before (HdyTabView *self,
  *
  * Requests to close all pages after @page.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_close_pages_after (HdyTabView *self,
@@ -2832,7 +2832,7 @@ hdy_tab_view_close_pages_after (HdyTabView *self,
  *
  * Returns: %TRUE if @page was moved, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_view_reorder_page (HdyTabView *self,
@@ -2884,7 +2884,7 @@ hdy_tab_view_reorder_page (HdyTabView *self,
  *
  * Returns: %TRUE if @page was moved, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_view_reorder_backward (HdyTabView *self,
@@ -2917,7 +2917,7 @@ hdy_tab_view_reorder_backward (HdyTabView *self,
  *
  * Returns: %TRUE if @page was moved, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_view_reorder_forward (HdyTabView *self,
@@ -2950,7 +2950,7 @@ hdy_tab_view_reorder_forward (HdyTabView *self,
  *
  * Returns: %TRUE if @page was moved, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_view_reorder_first (HdyTabView *self,
@@ -2978,7 +2978,7 @@ hdy_tab_view_reorder_first (HdyTabView *self,
  *
  * Returns: %TRUE if @page was moved, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_view_reorder_last (HdyTabView *self,
@@ -3044,7 +3044,7 @@ hdy_tab_view_attach_page (HdyTabView *self,
  * It's a programmer error to try to insert a pinned page after a non-pinned
  * one, or a non-pinned page before a pinned one.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_view_transfer_page (HdyTabView *self,
@@ -3079,7 +3079,7 @@ hdy_tab_view_transfer_page (HdyTabView *self,
  *
  * Returns: (transfer none): the model containing pages of @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GListModel *
 hdy_tab_view_get_pages (HdyTabView *self)

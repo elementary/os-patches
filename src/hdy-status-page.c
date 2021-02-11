@@ -21,7 +21,7 @@
  *
  * #HdyStatusPage has a main CSS node with name statuspage.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 
 enum {
@@ -214,7 +214,7 @@ hdy_status_page_class_init (HdyStatusPageClass *klass)
    *
    * The name of the icon to be used.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_ICON_NAME] =
     g_param_spec_string ("icon-name",
@@ -228,7 +228,7 @@ hdy_status_page_class_init (HdyStatusPageClass *klass)
    *
    * The title to be displayed below the icon.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_TITLE] =
     g_param_spec_string ("title",
@@ -242,7 +242,7 @@ hdy_status_page_class_init (HdyStatusPageClass *klass)
    *
    * The description to be displayed below the title.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_DESCRIPTION] =
     g_param_spec_string ("description",
@@ -280,7 +280,7 @@ hdy_status_page_init (HdyStatusPage *self)
  *
  * Returns: a new #HdyStatusPage
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_status_page_new (void)
@@ -296,7 +296,7 @@ hdy_status_page_new (void)
  *
  * Returns: (transfer none) (nullable): the icon name for @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 const gchar *
 hdy_status_page_get_icon_name (HdyStatusPage *self)
@@ -311,7 +311,7 @@ hdy_status_page_get_icon_name (HdyStatusPage *self)
  *
  * Sets the icon name for @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_status_page_set_icon_name (HdyStatusPage *self,
@@ -341,7 +341,7 @@ hdy_status_page_set_icon_name (HdyStatusPage *self,
  *
  * Returns: (transfer none) (nullable): the title for @self, or %NULL.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 const gchar *
 hdy_status_page_get_title (HdyStatusPage *self)
@@ -358,7 +358,7 @@ hdy_status_page_get_title (HdyStatusPage *self)
  *
  * Sets the title for @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_status_page_set_title (HdyStatusPage *self,
@@ -383,7 +383,7 @@ hdy_status_page_set_title (HdyStatusPage *self,
  *
  * Returns: (transfer none) (nullable): the description for @self, or %NULL.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 const gchar *
 hdy_status_page_get_description (HdyStatusPage *self)
@@ -400,7 +400,7 @@ hdy_status_page_get_description (HdyStatusPage *self)
  *
  * Sets the description for @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_status_page_set_description (HdyStatusPage *self,

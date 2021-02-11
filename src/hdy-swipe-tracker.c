@@ -1096,7 +1096,7 @@ hdy_swipe_tracker_class_init (HdySwipeTrackerClass *klass)
    * Whether to allow swiping for more than one snap point at a time. If the
    * value is %FALSE, each swipe can only move to the adjacent snap points.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_ALLOW_LONG_SWIPES] =
     g_param_spec_boolean ("allow-long-swipes",
@@ -1370,7 +1370,7 @@ hdy_swipe_tracker_set_allow_mouse_drag (HdySwipeTracker *self,
  *
  * Returns: %TRUE if long swipes are allowed, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_swipe_tracker_get_allow_long_swipes (HdySwipeTracker *self)
@@ -1388,7 +1388,7 @@ hdy_swipe_tracker_get_allow_long_swipes (HdySwipeTracker *self)
  * Sets whether to allow swiping for more than one snap point at a time. If the
  * value is %FALSE, each swipe can only move to the adjacent snap points.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_swipe_tracker_set_allow_long_swipes (HdySwipeTracker *self,

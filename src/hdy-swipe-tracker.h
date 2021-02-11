@@ -46,9 +46,9 @@ HDY_AVAILABLE_IN_ALL
 void             hdy_swipe_tracker_set_allow_mouse_drag (HdySwipeTracker *self,
                                                          gboolean         allow_mouse_drag);
 
-HDY_AVAILABLE_IN_1_1
+HDY_AVAILABLE_IN_1_2
 gboolean         hdy_swipe_tracker_get_allow_long_swipes (HdySwipeTracker *self);
-HDY_AVAILABLE_IN_1_1
+HDY_AVAILABLE_IN_1_2
 void             hdy_swipe_tracker_set_allow_long_swipes (HdySwipeTracker *self,
                                                           gboolean         allow_long_swipes);
 

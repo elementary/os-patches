@@ -671,7 +671,7 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
    * Whether to allow swiping for more than one page at a time. If the value is
    * %FALSE, each swipe can only move to the adjacent pages.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_ALLOW_LONG_SWIPES] =
     g_param_spec_boolean ("allow-long-swipes",
@@ -1093,7 +1093,7 @@ hdy_carousel_set_allow_mouse_drag (HdyCarousel *self,
  *
  * Returns: %TRUE if long swipes are allowed, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_carousel_get_allow_long_swipes (HdyCarousel *self)
@@ -1111,7 +1111,7 @@ hdy_carousel_get_allow_long_swipes (HdyCarousel *self)
  * Sets whether to allow swiping for more than one page at a time. If the value
  * is %FALSE, each swipe can only move to the adjacent pages.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_carousel_set_allow_long_swipes (HdyCarousel *self,

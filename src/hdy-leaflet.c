@@ -582,7 +582,7 @@ hdy_leaflet_get_child_by_name (HdyLeaflet  *self,
  *
  * Inserts @child at the first position in @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_leaflet_prepend (HdyLeaflet *self,
@@ -604,7 +604,7 @@ hdy_leaflet_prepend (HdyLeaflet *self,
  * Inserts @child in the position after @sibling in the list of children.
  * If @sibling is %NULL, insert @child at the first position.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_leaflet_insert_child_after (HdyLeaflet *self,
@@ -630,7 +630,7 @@ hdy_leaflet_insert_child_after (HdyLeaflet *self,
  * Moves @child to the position after @sibling in the list of children.
  * If @sibling is %NULL, move @child to the first position.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_leaflet_reorder_child_after (HdyLeaflet *self,

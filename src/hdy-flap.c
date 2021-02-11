@@ -63,7 +63,7 @@
  * #HdyFlap has a single CSS node with name flap. The node will get the style
  * classes .folded when it is folded, and .unfolded when it's not.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 
 /**
@@ -77,7 +77,7 @@
  * These enumeration values describe the possible folding behavior in a #HdyFlap
  * widget.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 
 /**
@@ -96,7 +96,7 @@
  *
  * New values may be added to this enum over time.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 
 typedef struct {
@@ -1481,7 +1481,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * The content widget, always displayed when unfolded, and partially visible
    * when folded.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_CONTENT] =
     g_param_spec_object ("content",
@@ -1496,7 +1496,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * The flap widget, only visible when #HdyFlap:reveal-progress is greater than
    * 0.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_FLAP] =
     g_param_spec_object ("flap",
@@ -1512,7 +1512,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * shadow to display. When exactly it's visible depends on the
    * #HdyFlap:transition-type value. If %NULL, no separator will be used.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_SEPARATOR] =
     g_param_spec_object ("separator",
@@ -1527,7 +1527,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * The flap position for @self. If @GTK_PACK_START, the flap is displayed
    * before the content, if @GTK_PACK_END, it's displayed after the content.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_FLAP_POSITION] =
     g_param_spec_enum ("flap-position",
@@ -1542,7 +1542,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    *
    * Whether the flap widget is revealed.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_REVEAL_FLAP] =
     g_param_spec_boolean ("reveal-flap",
@@ -1556,7 +1556,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    *
    * The reveal transition animation duration, in milliseconds.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_REVEAL_DURATION] =
     g_param_spec_uint ("reveal-duration",
@@ -1572,7 +1572,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * The current reveal transition progress. 0 means fully hidden, 1 means fully
    * revealed See #HdyFlap:reveal-flap.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_REVEAL_PROGRESS] =
     g_param_spec_double ("reveal-progress",
@@ -1587,7 +1587,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * The current fold policy. See #HdyFlapFoldPolicy for available
    * policies.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_FOLD_POLICY] =
     g_param_spec_enum ("fold-policy",
@@ -1602,7 +1602,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    *
    * The fold transition animation duration, in milliseconds.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_FOLD_DURATION] =
     g_param_spec_uint ("fold-duration",
@@ -1619,7 +1619,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    *
    * See #HdyFlap:fold-policy.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_FOLDED] =
     g_param_spec_boolean ("folded",
@@ -1637,7 +1637,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * unfolding it when the flap is not revealed opens it. If %TRUE,
    * #HdyFlap:reveal-flap value never changes on its own.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_LOCKED] =
     g_param_spec_boolean ("locked",
@@ -1656,7 +1656,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * seen through it with %HDY_FLAP_TRANSITION_TYPE_OVER transitions; add the
    * .background style class to it if this is unwanted.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_TRANSITION_TYPE] =
     g_param_spec_enum ("transition-type",
@@ -1675,7 +1675,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    * pressing Escape key, will close the flap. If %FALSE, clicks are passed
    * through to the content widget.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_MODAL] =
     g_param_spec_boolean ("modal",
@@ -1691,7 +1691,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    *
    * The area that can be swiped depends on the #HdyFlap:transition-type value.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_SWIPE_TO_OPEN] =
     g_param_spec_boolean ("swipe-to-open",
@@ -1707,7 +1707,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
    *
    * The area that can be swiped depends on the #HdyFlap:transition-type value.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_SWIPE_TO_CLOSE] =
     g_param_spec_boolean ("swipe-to-close",
@@ -1976,7 +1976,7 @@ hdy_flap_swipeable_init (HdySwipeableInterface *iface)
  *
  * Returns: a new #HdyFlap
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_flap_new (void)
@@ -1992,7 +1992,7 @@ hdy_flap_new (void)
  *
  * Returns: (transfer none) (nullable): the content widget for @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_flap_get_content (HdyFlap *self)
@@ -2010,7 +2010,7 @@ hdy_flap_get_content (HdyFlap *self)
  * Sets the content widget for @self, always displayed when unfolded, and
  * partially visible when folded.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_content (HdyFlap   *self,
@@ -2043,7 +2043,7 @@ hdy_flap_set_content (HdyFlap   *self,
  *
  * Returns: (transfer none) (nullable): the flap widget for @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_flap_get_flap (HdyFlap *self)
@@ -2061,7 +2061,7 @@ hdy_flap_get_flap (HdyFlap *self)
  * Sets the flap widget for @self, only visible when #HdyFlap:reveal-progress is
  * greater than 0.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_flap (HdyFlap   *self,
@@ -2095,7 +2095,7 @@ hdy_flap_set_flap (HdyFlap   *self,
  *
  * Returns: (transfer none) (nullable): the separator widget for @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_flap_get_separator (HdyFlap *self)
@@ -2114,7 +2114,7 @@ hdy_flap_get_separator (HdyFlap *self)
  * there's no shadow to display. When exactly it's visible depends on the
  * #HdyFlap:transition-type value. If %NULL, no separator will be used.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_separator (HdyFlap   *self,
@@ -2147,7 +2147,7 @@ hdy_flap_set_separator (HdyFlap   *self,
  *
  * Returns: the flap position for @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkPackType
 hdy_flap_get_flap_position (HdyFlap *self)
@@ -2165,7 +2165,7 @@ hdy_flap_get_flap_position (HdyFlap *self)
  * Sets the flap position for @self. If @GTK_PACK_START, the flap is displayed
  * before the content, if @GTK_PACK_END, it's displayed after the content.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_flap_position (HdyFlap     *self,
@@ -2194,7 +2194,7 @@ hdy_flap_set_flap_position (HdyFlap     *self,
  *
  * Returns: %TRUE if the flap widget is revealed, %FALSE otherwise.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_flap_get_reveal_flap (HdyFlap *self)
@@ -2211,7 +2211,7 @@ hdy_flap_get_reveal_flap (HdyFlap *self)
  *
  * Sets whether the flap widget is revealed for @self.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_reveal_flap (HdyFlap  *self,
@@ -2231,7 +2231,7 @@ hdy_flap_set_reveal_flap (HdyFlap  *self,
  *
  * Returns: the reveal transition duration
  *
- * Since: 1.1
+ * Since: 1.2
  */
 guint
 hdy_flap_get_reveal_duration (HdyFlap *self)
@@ -2248,7 +2248,7 @@ hdy_flap_get_reveal_duration (HdyFlap *self)
  *
  * Sets the duration that reveal transitions in @self will take.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_reveal_duration (HdyFlap *self,
@@ -2273,7 +2273,7 @@ hdy_flap_set_reveal_duration (HdyFlap *self,
  *
  * Returns: the current reveal progress for @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gdouble
 hdy_flap_get_reveal_progress (HdyFlap *self)
@@ -2291,7 +2291,7 @@ hdy_flap_get_reveal_progress (HdyFlap *self)
  *
  * Returns: the current fold policy of @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyFlapFoldPolicy
 hdy_flap_get_fold_policy (HdyFlap *self)
@@ -2309,7 +2309,7 @@ hdy_flap_get_fold_policy (HdyFlap *self)
  * Sets the current fold policy for @self. See #HdyFlapFoldPolicy for available
  * policies.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_fold_policy (HdyFlap           *self,
@@ -2352,7 +2352,7 @@ hdy_flap_set_fold_policy (HdyFlap           *self,
  *
  * Returns: the fold transition duration
  *
- * Since: 1.1
+ * Since: 1.2
  */
 guint
 hdy_flap_get_fold_duration (HdyFlap *self)
@@ -2369,7 +2369,7 @@ hdy_flap_get_fold_duration (HdyFlap *self)
  *
  * Sets the duration that fold transitions in @self will take.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_fold_duration (HdyFlap *self,
@@ -2395,7 +2395,7 @@ hdy_flap_set_fold_duration (HdyFlap *self,
  *
  * Returns: %TRUE if @self is currently folded, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_flap_get_folded (HdyFlap *self)
@@ -2413,7 +2413,7 @@ hdy_flap_get_folded (HdyFlap *self)
  *
  * Returns: %TRUE if @self is locked, %FALSE otherwise
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_flap_get_locked (HdyFlap *self)
@@ -2434,7 +2434,7 @@ hdy_flap_get_locked (HdyFlap *self)
  * and unfolding it when the flap is not revealed opens it. If %TRUE,
  * #HdyFlap:reveal-flap value never changes on its own.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_locked (HdyFlap  *self,
@@ -2461,7 +2461,7 @@ hdy_flap_set_locked (HdyFlap  *self,
  *
  * Returns: the current transition type of @self
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyFlapTransitionType
 hdy_flap_get_transition_type (HdyFlap *self)
@@ -2483,7 +2483,7 @@ hdy_flap_get_transition_type (HdyFlap *self)
  * through it with %HDY_FLAP_TRANSITION_TYPE_OVER transitions; add the
  * .background style class to it if this is unwanted.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_transition_type (HdyFlap               *self,
@@ -2513,7 +2513,7 @@ hdy_flap_set_transition_type (HdyFlap               *self,
  *
  * Returns: %TRUE if @self is modal
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_flap_get_modal (HdyFlap *self)
@@ -2534,7 +2534,7 @@ hdy_flap_get_modal (HdyFlap *self)
  * pressing Escape key, will close the flap. If %FALSE, clicks are passed
  * through to the content widget.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_modal (HdyFlap  *self,
@@ -2567,7 +2567,7 @@ hdy_flap_set_modal (HdyFlap  *self,
  *
  * Returns: %TRUE if @self can be opened with a swipe gesture
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_flap_get_swipe_to_open (HdyFlap *self)
@@ -2586,7 +2586,7 @@ hdy_flap_get_swipe_to_open (HdyFlap *self)
  *
  * The area that can be swiped depends on the #HdyFlap:transition-type value.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_swipe_to_open (HdyFlap  *self,
@@ -2614,7 +2614,7 @@ hdy_flap_set_swipe_to_open (HdyFlap  *self,
  *
  * Returns: %TRUE if @self can be closed with a swipe gesture
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_flap_get_swipe_to_close (HdyFlap *self)
@@ -2633,7 +2633,7 @@ hdy_flap_get_swipe_to_close (HdyFlap *self)
  *
  * The area that can be swiped depends on the #HdyFlap:transition-type value.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_flap_set_swipe_to_close (HdyFlap  *self,

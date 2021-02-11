@@ -924,7 +924,7 @@ hdy_avatar_class_init (HdyAvatarClass *klass)
    *
    * A #GLoadableIcon used to load the avatar.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_LOADABLE_ICON] =
     g_param_spec_object ("loadable-icon",
@@ -1114,7 +1114,7 @@ hdy_avatar_set_show_initials (HdyAvatar *self,
  * A callback which is called when the custom image need to be reloaded for some
  * reason (e.g. scale-factor changes).
  *
- * Deprecated: 1.1: use hdy_avatar_set_loadable_icon() instead.
+ * Deprecated: 1.2: use hdy_avatar_set_loadable_icon() instead.
  */
 void
 hdy_avatar_set_image_load_func (HdyAvatar              *self,
@@ -1207,7 +1207,7 @@ hdy_avatar_set_size (HdyAvatar *self,
  *
  * Returns: (transfer full): the pixbuf.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GdkPixbuf *
 hdy_avatar_draw_to_pixbuf (HdyAvatar *self,
@@ -1268,7 +1268,7 @@ hdy_avatar_draw_to_pixbuf (HdyAvatar *self,
  * Renders asynchronously @self into a pixbuf at @size and @scale_factor.
  * This can be used to export the fallback avatar.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_avatar_draw_to_pixbuf_async (HdyAvatar           *self,
@@ -1316,7 +1316,7 @@ hdy_avatar_draw_to_pixbuf_async (HdyAvatar           *self,
  *
  * Returns: (transfer full): a #GdkPixbuf
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GdkPixbuf *
 hdy_avatar_draw_to_pixbuf_finish (HdyAvatar    *self,
@@ -1370,7 +1370,7 @@ hdy_avatar_draw_to_pixbuf_finish (HdyAvatar    *self,
  *
  * Returns: (nullable) (transfer none): the #GLoadableIcon
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GLoadableIcon *
 hdy_avatar_get_loadable_icon (HdyAvatar *self)
@@ -1391,7 +1391,7 @@ hdy_avatar_get_loadable_icon (HdyAvatar *self)
  *
  * The #GLoadableIcon set via this function is prefered over a set #HdyAvatarImageLoadFunc.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_avatar_set_loadable_icon (HdyAvatar     *self,

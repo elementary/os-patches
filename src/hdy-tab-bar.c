@@ -32,7 +32,7 @@
  *
  * #HdyTabBar has a single CSS node with name tabbar.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 
 struct _HdyTabBar
@@ -508,7 +508,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    *
    * The #HdyTabView the tab bar controls.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_VIEW] =
     g_param_spec_object ("view",
@@ -522,7 +522,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    *
    * The widget shown before the tabs.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_START_ACTION_WIDGET] =
     g_param_spec_object ("start-action-widget",
@@ -536,7 +536,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    *
    * The widget shown after the tabs.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_END_ACTION_WIDGET] =
     g_param_spec_object ("end-action-widget",
@@ -555,7 +555,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    *
    * See #HdyTabBar:tabs-revealed.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_AUTOHIDE] =
     g_param_spec_boolean ("autohide",
@@ -571,7 +571,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    *
    * See HdyTabBar:autohide.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_TABS_REVEALED] =
     g_param_spec_boolean ("tabs-revealed",
@@ -588,7 +588,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    * If set to %TRUE, the tabs will always vary width filling the whole width
    * when possible, otherwise tabs will always have the minimum possible size.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_EXPAND_TABS] =
     g_param_spec_boolean ("expand-tabs",
@@ -605,7 +605,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    * If set to %TRUE, non-pinned tabs will have the close button at the
    * beginning and the indicator at the end rather than the opposite.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_INVERTED] =
     g_param_spec_boolean ("inverted",
@@ -628,7 +628,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    * After content is dropped, the #HdyTabBar::extra-drag-data-received signal
    * can be used to retrieve and process the drag data.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_EXTRA_DRAG_DEST_TARGETS] =
     g_param_spec_boxed ("extra-drag-dest-targets",
@@ -645,7 +645,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    * If set to %TRUE, all tabs cannot be displayed at once and require
    * scrolling.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   props[PROP_IS_OVERFLOWING] =
     g_param_spec_boolean ("is-overflowing",
@@ -670,7 +670,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
    *
    * See #GtkWidget::drag-data-received.
    *
-   * Since: 1.1
+   * Since: 1.2
    */
   signals[SIGNAL_EXTRA_DRAG_DATA_RECEIVED] =
     g_signal_new ("extra-drag-data-received",
@@ -786,7 +786,7 @@ hdy_tab_bar_tabs_have_visible_focus (HdyTabBar *self)
  *
  * Returns: a new #HdyTabBar
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabBar *
 hdy_tab_bar_new (void)
@@ -802,7 +802,7 @@ hdy_tab_bar_new (void)
  *
  * Returns: (transfer none) (nullable): the #HdyTabView @self controls
  *
- * Since: 1.1
+ * Since: 1.2
  */
 HdyTabView *
 hdy_tab_bar_get_view (HdyTabBar *self)
@@ -819,7 +819,7 @@ hdy_tab_bar_get_view (HdyTabBar *self)
  *
  * Sets the #HdyTabView @self controls.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_bar_set_view (HdyTabBar  *self,
@@ -898,7 +898,7 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
  *
  * Returns: (transfer none) (nullable): the widget shown before the tabs, or %NULL
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_tab_bar_get_start_action_widget (HdyTabBar *self)
@@ -915,7 +915,7 @@ hdy_tab_bar_get_start_action_widget (HdyTabBar *self)
  *
  * Sets the widget to show before the tabs.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_bar_set_start_action_widget (HdyTabBar *self,
@@ -950,7 +950,7 @@ hdy_tab_bar_set_start_action_widget (HdyTabBar *self,
  *
  * Returns: (transfer none) (nullable): the widget shown after the tabs, or %NULL
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkWidget *
 hdy_tab_bar_get_end_action_widget (HdyTabBar *self)
@@ -967,7 +967,7 @@ hdy_tab_bar_get_end_action_widget (HdyTabBar *self)
  *
  * Sets the widget to show after the tabs.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_bar_set_end_action_widget (HdyTabBar *self,
@@ -1002,7 +1002,7 @@ hdy_tab_bar_set_end_action_widget (HdyTabBar *self,
  *
  * Returns: whether the tabs automatically hide
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_bar_get_autohide (HdyTabBar *self)
@@ -1026,7 +1026,7 @@ hdy_tab_bar_get_autohide (HdyTabBar *self)
  *
  * See #HdyTabBar:tabs-revealed.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_bar_set_autohide (HdyTabBar *self,
@@ -1054,7 +1054,7 @@ hdy_tab_bar_set_autohide (HdyTabBar *self,
  *
  * Returns: whether the tabs are current revealed
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_bar_get_tabs_revealed (HdyTabBar *self)
@@ -1072,7 +1072,7 @@ hdy_tab_bar_get_tabs_revealed (HdyTabBar *self)
  *
  * Returns: whether tabs should expand
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_bar_get_expand_tabs (HdyTabBar *self)
@@ -1095,7 +1095,7 @@ hdy_tab_bar_get_expand_tabs (HdyTabBar *self)
  *
  * Expand is enabled by default.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_bar_set_expand_tabs (HdyTabBar *self,
@@ -1121,7 +1121,7 @@ hdy_tab_bar_set_expand_tabs (HdyTabBar *self,
  *
  * Returns: whether tabs use inverted layout
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_bar_get_inverted (HdyTabBar *self)
@@ -1141,7 +1141,7 @@ hdy_tab_bar_get_inverted (HdyTabBar *self)
  * If @inverted is %TRUE, non-pinned tabs will have the close button at the
  * beginning and the indicator at the end rather than the opposite.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_bar_set_inverted (HdyTabBar *self,
@@ -1168,7 +1168,7 @@ hdy_tab_bar_set_inverted (HdyTabBar *self,
  *
  * Returns: (transfer none) (nullable): extra drag targets, or %NULL
  *
- * Since: 1.1
+ * Since: 1.2
  */
 GtkTargetList *
 hdy_tab_bar_get_extra_drag_dest_targets (HdyTabBar *self)
@@ -1194,7 +1194,7 @@ hdy_tab_bar_get_extra_drag_dest_targets (HdyTabBar *self)
  * After content is dropped, the #HdyTabBar::extra-drag-data-received signal can
  * be used to retrieve and process the drag data.
  *
- * Since: 1.1
+ * Since: 1.2
  */
 void
 hdy_tab_bar_set_extra_drag_dest_targets (HdyTabBar     *self,
@@ -1227,7 +1227,7 @@ hdy_tab_bar_set_extra_drag_dest_targets (HdyTabBar     *self,
  *
  * Returns: whether @self is overflowing
  *
- * Since: 1.1
+ * Since: 1.2
  */
 gboolean
 hdy_tab_bar_get_is_overflowing (HdyTabBar *self)
