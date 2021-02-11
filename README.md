@@ -38,15 +38,25 @@ directly with upstream to include them.
 
 ## Creating a new Patch
 
-1 Create a new orphan branch:
-`git checkout --orphan {pkg-name}-{dist} && git rm -rf .`
+1. Create a new orphan branch
+
+    `git checkout --orphan {pkg-name}-{dist} && git rm -rf .`
+  
 2. Get the source of the package to be patched with `apt-source`. Do not use `sudo`.
-`apt source {pkg-name}`
-3. Remove everything but the unpacked sources:
-`rm *.tar.* *.dsc`
+
+    `apt source {pkg-name}`
+  
+3. Remove everything but the unpacked sources
+
+    `rm *.tar.* *.dsc`
+  
 4. Move the source folder contents up to the pwd and then delete the empty folder
-`cp -r {source-folder-name}/* . && rm -r {source-folder-name}`
+
+    `cp -r {source-folder-name}/* . && rm -r {source-folder-name}`
+  
 5. Add source files, commit, and push
-`git add * && git commit -am "Initial Import, version {pkg-version}"`
+
+    `git add * && git commit -am "Initial Import, version {pkg-version}"`
+  
 6. Create a `-patched` branch, make changes and push
 7. Update the `import-list-{dist}` branch
