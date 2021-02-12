@@ -2,6 +2,9 @@
 <interface>
   <template class="HdyActionRow" parent="HdyPreferencesRow">
     <property name="activatable">False</property>
+    <accessibility>
+      <relation target="title" type="labelled-by"/>
+    </accessibility>
     <child>
       <object class="GtkBox" id="header">
         <property name="can_focus">False</property>
@@ -52,6 +55,9 @@
                 <style>
                   <class name="title"/>
                 </style>
+                <accessibility>
+                  <relation target="HdyActionRow" type="label-for"/>
+                </accessibility>
               </object>
             </child>
             <child>
