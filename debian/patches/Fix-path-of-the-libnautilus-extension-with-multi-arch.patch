@@ -1,0 +1,35 @@
+From: Laurent Bigonville <bigon@debian.org>
+Date: Mon, 11 Apr 2016 18:37:50 +0000
+Subject: Fix path of the libnautilus-extension with multi-arch
+
+---
+ configure.ac           | 2 --
+ properties/Makefile.am | 2 +-
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+
+Index: evince-3.36.4/configure.ac
+===================================================================
+--- evince-3.36.4.orig/configure.ac
++++ evince-3.36.4/configure.ac
+@@ -447,8 +447,6 @@ if test "$enable_nautilus" = "yes" ; the
+   PKG_CHECK_MODULES([NAUTILUS],[gtk+-3.0 $MM gthread-2.0 libnautilus-extension >= $NAUTILUS_REQUIRED],
+                     [],[AC_MSG_ERROR([libnautilus-extension not found; use --disable-nautilus to disable the nautilus extensions])])
+   NAUTILUS_EXTENSION_DIR=`$PKG_CONFIG --variable=extensiondir libnautilus-extension`
+-  NAUTILUS_EXTENSION_DIR=${NAUTILUS_EXTENSION_DIR#`$PKG_CONFIG --variable=libdir libnautilus-extension`}
+-  NAUTILUS_EXTENSION_DIR=${NAUTILUS_EXTENSION_DIR#/}
+   AC_SUBST(NAUTILUS_EXTENSION_DIR)
+   AC_SUBST(NAUTILUS_CFLAGS)
+   AC_SUBST(NAUTILUS_LIBS)
+Index: evince-3.36.4/properties/Makefile.am
+===================================================================
+--- evince-3.36.4.orig/properties/Makefile.am
++++ evince-3.36.4/properties/Makefile.am
+@@ -15,7 +15,7 @@ libevproperties_la_CFLAGS = \
+ 
+ if ENABLE_NAUTILUS
+ 
+-nautilusextensiondir=$(libdir)/$(NAUTILUS_EXTENSION_DIR)
++nautilusextensiondir=$(NAUTILUS_EXTENSION_DIR)
+ nautilusextension_LTLIBRARIES = libevince-properties-page.la
+ 
+ libevince_properties_page_la_SOURCES = 	\

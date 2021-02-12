@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-beamer" xml:lang="ja">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="sixth"/>
+    <desc>LaTeX Beamer クラスでの SyncTeX の利用。</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>Beamer と SyncTeX</title>
+<p>Beamer は、プレゼンテーションのスライドを作成するための LaTeX クラスです。</p>
+<p>SyncTeX を有効にしてコンパイルされた他の TeX ファイルで<link xref="synctex-search">検索</link>を行うのと同様の方法で <em>Beamer-LaTeX</em> で前方および後方検索を実行できます。しかしながら、検索により関連する行ではなく対応するフレーム (スライド) が表示されます。この違いについて、以下に概説します。</p>
+<section id="forward-search">
+    <title>前方検索: Beamer-LaTeX ソースから PDF (<app>gedit</app> から <app>ドキュメントビューアー</app>)</title>
+    <p><link xref="synctex-search#forward-search">前方検索</link>では、Beamer-LaTeX の特定の行をクリックすると PDF の対応するスライドの<em>上部</em>が赤枠で囲まれます。たいていは、<em>フレームタイトル</em>です。</p>
+</section>
+
+<section id="backward-search">
+
+    <title>後方検索: PDF から Beamer-LaTeX ソース (<app>ドキュメントビューアー</app> から <app>gedit</app>)</title>
+     <p><link xref="synctex-search#backward-search">後方検索</link>では、フレームの任意のテキストをクリックすると特に対応するフレームを終了する行がハイライトされます。たいていは、次の行です。</p>
+ <code>\end{frame}</code>
+<p>クリックしたフレームに対応しています。</p>
+
+
+</section>
+
+
+</page>

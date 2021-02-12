@@ -1,0 +1,87 @@
+#ev-fullscreen-toolbar {
+    -GtkToolbar-shadow-type: none;
+}
+
+#ev-loading-message {
+    background-color: @theme_bg_color;
+    color: @theme_fg_color;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.content-view.document-page {
+    border-style: solid;
+    border-width: 3px 3px 6px 4px;
+    border-image: url("resource:///org/gnome/evince/ui/thumbnail-frame.png") 3 3 6 4;
+    background-color: @theme_bg_color;
+}
+
+evview {
+    background-color: @theme_bg_color;
+}
+
+evview:selected {
+    background-color: @theme_selected_bg_color;
+}
+
+evview.document-page {
+    background-color: white;
+    padding: 0;
+}
+
+evview.document-page.inverted {
+    background-color: black;
+}
+
+evsidebarthumbnails.page-thumbnail {
+    background-color: white;
+    border: 1px solid black;
+}
+
+evsidebarthumbnails.page-thumbnail.inverted {
+    background-color: black;
+}
+
+@binding-set MoveCursor {
+    unbind "<Control>p";
+    unbind "<Control>n";
+}
+
+iconview {
+    -gtk-key-bindings: MoveCursor;
+}
+
+@binding-set HorizontalScroll {
+    unbind "<Control>Right";
+    unbind "<Control>Left";
+}
+
+scrolledwindow {
+    -gtk-key-bindings: HorizontalScroll;
+}
+
+evpresentationview {
+    background-color: black;
+}
+
+evpresentationview.white-mode {
+    background-color: white;
+}
+
+.inline-toolbar {
+    border-width: 0 0 1px;
+    border-radius: 0;
+}
+
+evannotationwindow label:backdrop {
+	color: grey;
+}
+
+evannotationwindow label {
+	color: black;
+}
+
+.content-view .combo {
+    padding-left: 2px;
+    padding-right: 2px;
+}

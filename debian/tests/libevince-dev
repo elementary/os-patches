@@ -1,0 +1,58 @@
+#!/bin/sh
+# autopkgtest check: Build and run a program against evince, to verify
+# that the headers and pkg-config file are installed correctly
+# (C) 2012 Canonical Ltd.
+# (C) 2018-2019 Simon McVittie
+# Authors: Martin Pitt, Simon McVittie
+
+set -eux
+
+# Disable gvfs if it happens to be installed
+export GIO_USE_VFS=local
+export GIO_USE_VOLUME_MONITOR=unix
+
+WORKDIR="$(mktemp -d)"
+export HOME="$WORKDIR"
+export XDG_RUNTIME_DIR="$WORKDIR"
+trap 'cd /; rm -rf "$WORKDIR"' 0 INT QUIT ABRT PIPE TERM
+cd "$WORKDIR"
+
+if [ -n "${DEB_HOST_GNU_TYPE:-}" ]; then
+    CROSS_COMPILE="$DEB_HOST_GNU_TYPE-"
+else
+    CROSS_COMPILE=
+fi
+
+cat > document.c <<'EOF'
+#include <evince-document.h>
+
+int main(void)
+{
+    g_assert_true(ev_init());
+    ev_shutdown();
+    return 0;
+}
+EOF
+
+cat > view.c <<'EOF'
+#include <evince-view.h>
+
+int main(void)
+{
+    g_assert_cmpuint(ev_view_get_type(), !=, G_TYPE_INVALID);
+    return 0;
+}
+EOF
+
+for lib in document view; do
+    pkg="evince-${lib}-3.0"
+    src="${lib}.c"
+
+    # Deliberately word-splitting pkg-config's output:
+    # shellcheck disable=SC2046
+    "${CROSS_COMPILE}gcc" -o "${lib}-test" "${src}" $("${CROSS_COMPILE}pkg-config" --cflags --libs "${pkg}")
+    echo "build $lib: OK"
+    [ -x "${lib}-test" ]
+    "./${lib}-test"
+    echo "run $lib: OK"
+done

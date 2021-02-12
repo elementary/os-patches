@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="zh-CN">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>在 <app>文档查看器</app> 和 <app>gedit</app> 之间切换。</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>使用 SyncTeX 进行搜索</title>
+<p>在您 <link xref="synctex-compile">使用 SyncTeX 编译您的 TeX 文件</link> 之后，您就可以进行搜索。SyncTeX 同样支持在以包含的文件中进行向前和向后搜索。</p>
+
+<section id="forward-search">
+    <title>向前搜索：从 TeX 到 PDF(从 <app>gedit</app> 到 <app>文档查看器</app>)</title>
+     <p>向前搜索允许您在 TeX 源代码的特定区域上点击，然后跳转到 PDF 中的相关位置。要执行向前搜索:</p>
+<steps>
+<item>
+<p>在 TeX 文件中的一行上单击。</p>
+</item>
+<item>
+<p>
+  In <app>gedit</app>, click <guiseq><gui>Tools</gui> <gui>Forward Search</gui></guiseq>. The corresponding line in the PDF will be outlined in red.
+</p>
+<p>
+Alternatively, you can press <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq>, or <keyseq><key>Ctrl</key>left click</keyseq>. The corresponding line in the PDF will be outlined in red.
+</p>
+</item>
+</steps>
+<note>
+<p>如果对应的 PDF 文件没有打开，执行向前搜索将会在 <app>文档查看器</app> 中打开这个 PDF 文件。</p>
+</note>
+<p>如果您添加一个包含多个 TeX 文件的复杂项目，您可以将</p>
+<code>% mainfile: mainfile.tex</code>
+<p>加入到每一个被包含的 TeX 文件的头三行或末三行中，然后向前搜索就会有效。即使您不加入这一行，向后搜索也应该有效。</p>
+
+</section>
+
+<section id="backward-search">
+    <title>向后搜索：从 PDF 到 TeX(从 <app>文档查看器</app> 到 <app>gedit</app>）</title>
+     <p>向后搜索允许您在 PDF 文件中的特定区域点击，然后跳转到 TeX 源代码中的相关位置。</p>
+<p>
+You can perform a backward search by pressing <keyseq><key>Ctrl</key>left click</keyseq> in the <app>document viewer</app>. The corresponding line in the TeX source code will be highlighted.
+     </p>
+</section>
+
+</page>

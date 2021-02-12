@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="sv">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Kommandorad</title>
+    <desc>Kommandot <cmd>evince</cmd> kan öppna ett antal filer, på specifika sidor och i olika lägen.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <revision pkgversion="3.24" version="0.2" date="2017-09-17" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons DelaLika 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Nylander</mal:name>
+      <mal:email>po@danielnylander.se</mal:email>
+      <mal:years>2006, 2008, 2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Sebastian Rasmussen</mal:name>
+      <mal:email>sebras@gmail.com</mal:email>
+      <mal:years>2015, 2017</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Anders Jonsson</mal:name>
+      <mal:email>anders.jonsson@norsjovallen.se</mal:email>
+      <mal:years>2018, 2019</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Kommandoraden</title>
+<p>För att starta <app>Dokumentvisare</app> från kommandoraden, skriv <cmd>evince</cmd>. Du kan öppna en specifik fil genom att skriva filnamnet efter evince-kommandot:</p>
+
+<screen>evince fil.pdf</screen>
+<p>Du kan öppna flera filer genom att skriva filnamnen efter evince-kommandot, där filnamnen åtskiljs av ett blanksteg:</p>
+<screen>evince fil1.pdf fil2.pdf</screen>
+<p><app>Dokumentvisare</app> har också stöd för att hantera filer från internet. Du kan till exempel efter evince-kommandot ange platsen för en fil på internet:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Öppna ett dokument på en specifik sida</title>
+    <p>Du kan använda flaggan <cmd>--page-label</cmd> för att öppna ett dokument på en specifik sida. För att till exempel öppna ett dokument på sidan 3, ska du skriva:</p>
+    <screen>evince --page-label=3 fil.pdf</screen>
+    <p>Sidetiketten ska vara i samma format som sidnumret som visas i rubrikraden för <app>Dokumentvisare</app>.</p>
+</section>
+<section id="fullsreen">
+    <title>Öppna ett dokument i helskärmsläge</title>
+    <screen>evince --fullscreen fil.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Öppna ett dokument i presentationsläge</title>
+    <screen>evince --presentation fil.pdf</screen>
+</section>
+<section id="preview">
+    <title>Öppna ett dokument i förhandsgranskningsläge</title>
+    <screen>evince --preview fil.pdf</screen>
+</section>
+</page>

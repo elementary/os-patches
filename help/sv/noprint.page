@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="noprint" xml:lang="sv">
+
+  <info>
+    <link type="guide" xref="index#printing"/>
+    <desc>Upphovsmannen kan ha satt utskriftsrestriktioner på dokumentet.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <revision pkgversion="3.30.2" version="0.2" date="2018-11-25" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons DelaLika 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Daniel Nylander</mal:name>
+      <mal:email>po@danielnylander.se</mal:email>
+      <mal:years>2006, 2008, 2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Sebastian Rasmussen</mal:name>
+      <mal:email>sebras@gmail.com</mal:email>
+      <mal:years>2015, 2017</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Anders Jonsson</mal:name>
+      <mal:email>anders.jonsson@norsjovallen.se</mal:email>
+      <mal:years>2018, 2019</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Jag kan inte skriva ut ett dokument</title>
+<section id="why">
+ <title>Möjliga skäl till att utskrift misslyckas</title>
+<p>Ett dokument kanske inte kan skrivas ut på grund av:</p>
+ <list>
+  <item><p>Skrivarproblem eller,</p></item>
+  <item><p>Restriktioner för utskrift av PDF.</p></item>
+ </list>
+</section>
+
+
+<section id="printer-problems">
+  <title>Skrivarproblem</title>
+  <p>Det finns många skäl till varför din skrivare kanske inte fungerar. Till exempel kan den ha slut på papper eller bläck eller vara frånkopplad eller skadad.</p>
+
+  <p>För att kontrollera om din skrivare kan skriva ut korrekt:</p>
+  <steps>
+    <item>
+      <p>Öppna översiktsvyn <gui href="help:gnome-help/shell-introduction#activities">Aktiviteter</gui> och börja skriva <gui>Inställningar</gui>.</p>
+    </item>
+    <item>
+      <p>Klicka på <gui>Inställningar</gui>.</p>
+    </item>
+    <item>
+      <p>Klicka på <gui>Enheter</gui> i sidopanelen.</p>
+    </item>
+    <item>
+      <p>Klicka på <gui>Skrivare</gui> i sidopanelen för att öppna panelen.</p>
+    </item>
+   <item><p>Klicka på din skrivare i listan.</p></item>
+   <item><p>Klicka på <gui>Skriv ut testsida</gui>. En sida bör skickas till din skrivare.</p>
+<note>
+ <p>Om detta misslyckas, se vidare i <link href="help:gnome-help/printing">Skrivarhjälp</link>. Du kanske också måste konsultera din skrivares handbok för att se om det finns något du kan göra.</p>
+</note>
+
+</item>
+  </steps>
+
+
+</section>
+
+<section id="pdf-restrictions">
+  <title>Restriktioner för utskrift av PDF</title>
+  <p>Vissa PDF-dokument har en inställning som förhindrar dig från att skriva ut dem. Upphovsmän kan ställa in denna utskriftsrestriktion när de skriver ett dokument. Programmet <app>Dokumentvisare</app> åsidosätter denna restriktion som standard, men du kan behöva kontrollera att den inte har inaktiverats:</p>
+
+  <steps>
+    <item>
+      <p>Tryck <keyseq><key>Alt</key><key>F2</key></keyseq> för att öppna fönstret Kör program.</p>
+    </item>
+    <item>
+      <p>Skriv <input>dconf-editor</input> i textrutan och klicka på <gui>Kör</gui>. Konfigurationsredigeraren kommer att öppnas.</p>
+    </item>
+    <item><p>Bläddra till <sys>/org/gnome/evince</sys> visa sidopanelen.</p></item>
+    <item>
+      <p>Säkerställ att inställningen <gui>override_restrictions</gui> är ikryssad.</p>
+    </item>
+    <item>
+      <p>Gå tillbaka till <app>Dokumentvisare</app> och försök att skriva ut dokumentet igen.</p>
+    </item>
+  </steps>
+</section>
+
+</page>

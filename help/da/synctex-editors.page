@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-editors" xml:lang="da">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fourth"/>
+    <desc>Hvilket tekstredigeringsprogram kan man bruge til at redigere TeX-filen med?</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  </info>
+
+<title>Understøttede redigeringsprogrammer</title>
+
+<section id="gedit"><title><app>gedit</app></title>
+<p>Både <link xref="synctex-search#forward-search">Forlæns søgning</link> (fra <app>Gedit</app> til <app>Dokumentfremviser</app>) og <link xref="synctex-search#backward-search">Baglæns søgning</link> (fra <app>Dokumentfremviser</app> til <app>Gedit</app>) er understøttet.</p>
+</section>
+
+<section id="vim-latex"><title>Vim-latex</title>
+<p>
+The <app>gedit</app> plugin contains a python script (<file>evince_dbus.py</file>) that can be used to get SyncTeX working with Vim.
+In order to use vim-latex together with the <app>document viewer</app> you need to follow the next steps:
+</p>
+<steps>
+ <item>
+  <p>
+     Copy the <file>evince_dbus.py</file> to some directory in your path and give it +x permissions.
+
+ </p>
+ </item>
+ <item>
+  <p>
+     Modify your <file>~/.vimrc</file> file and add the following lines.
+    </p>
+<code>
+let g:Tex_ViewRule_pdf = 'evince_dbus.py'
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_CompileRule_pdf = 'pdflatex --synctex=1 -interaction=nonstopmode $*'
+</code>
+
+  </item>
+  <item>
+   <p>Nu kan du bruge forlæns søgning fra vim-latex ved at skrive \ls. Baglæns søgning er endnu ikke understøttet.</p>
+  </item>
+</steps>
+</section>
+</page>

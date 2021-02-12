@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="el">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Εναλλαγή μεταξύ της <app>προβολής εγγράφων</app> και του <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Ελληνική μεταφραστική ομάδα GNOME</mal:name>
+      <mal:email>team@gnome.gr</mal:email>
+      <mal:years>2005-2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Στυλιανός Παπαναστασίου</mal:name>
+      <mal:email>stelios@dcs.gla.ac.uk</mal:email>
+      <mal:years>2005</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Μιχάλης Κοτσαρίνης</mal:name>
+      <mal:email>mk73628@gmail.com</mal:email>
+      <mal:years>2010</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Δημήτρης Σπίγγος</mal:name>
+      <mal:email>dmtrs32@gmail.com</mal:email>
+      <mal:years>2012, 2013</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Θάνος Τρυφωνίδης</mal:name>
+      <mal:email>tomtryf@gmail.com</mal:email>
+      <mal:years>2014, 2015</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Mαρία Μαυρίδου</mal:name>
+      <mal:email>mavridou@gmail.com</mal:email>
+      <mal:years>2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Αναζήτηση με SyncTeX</title>
+<p>Αφού <link xref="synctex-compile">μεταγλωττίσετε το αρχείο σας TeX με SyncTeX</link>, θα μπορείτε να αναζητήσετε. Το SyncTeX ακόμα υποστηρίζει αναζήτηση προς τα εμπρός και προς τα πίσω από περιεχόμενο αρχείο.</p>
+
+<section id="forward-search">
+    <title>Αναζήτηση προς τα εμπρός: από TeX σε PDF (από <app>gedit</app> σε <app>προβολή εγγράφων</app>)</title>
+     <p>Η αναζήτηση προς τα εμπρός επιτρέπει να κάνετε κλικ σε συγκεκριμένη ενότητα του πηγαίου κώδικα TeX και να μεταβείτε στη συσχετισμένη θέση στο PDF. Για εκτέλεση αναζήτησης προς τα εμπρός:</p>
+<steps>
+<item>
+<p>Κλικ σε μια γραμμή στο αρχείο TeX.</p>
+</item>
+<item>
+<p>Στο <app>gedit</app>, κάντε κλικ στα <guiseq><gui>Εργαλεία</gui><gui>Αναζήτηση προς τα εμπρός</gui></guiseq>. Η αντίστοιχη γραμμή στο PDF θα περιγραφεί με κόκκινο.</p>
+<p>Εναλλακτικά, μπορείτε να πατήστε <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq>, ή <keyseq><key>Ctrl</key>αριστερό κλικ</keyseq>. Η αντίστοιχη γραμμή στο PDF θα περιγραφεί με κόκκινο.</p>
+</item>
+</steps>
+<note>
+<p>Εάν το αντίστοιχο αρχείο PDF δεν είναι ανοικτό, εκτελώντας μια αναζήτηση προς τα εμπρός θα ανοίξει το PDF στην <app>προβολή εγγράφων</app>.</p>
+</note>
+<p>Εάν έχετε ένα σύνθετο έργο με πολλά αρχεία TeX μπορείτε να βάλετε</p>
+<code>% mainfile: mainfile.tex</code>
+<p>είτε στις πρώτες ή στις τελευταίες τρεις γραμμές καθενός περιεχομένου αρχείου TeX και η αναζήτηση προς τα εμπρός θα δουλέψει. Η αναζήτηση προς τα πίσω πρέπει να δουλεύει πάντα, ακόμα κι αν δεν προσθέτετε τη γραμμή κατάστασης.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Αναζήτηση προς τα πίσω: από PDF σε TeX (από την <app>προβολή εγγράφων</app> στο <app>gedit</app>)</title>
+     <p>Η αναζήτηση προς τα πίσω επιτρέπει να πατήσετε σε μια συγκεκριμένη γραμμή στο αρχείο PDF και να μεταβείτε σε συσχετισμένη γραμμή στον πηγαίο κώδικα TeX.</p>
+<p>Μπορείτε να εκτελέσετε μια αναζήτηση προς τα πίσω πατώντας <keyseq><key>Ctrl</key>αριστερό κλικ</keyseq> στην <app>προβολή εγγράφων</app>. Η αντίστοιχη γραμμή στον πηγαίο κώδικα TeX θα επισημανθεί.</p>
+</section>
+
+</page>

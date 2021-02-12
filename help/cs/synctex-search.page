@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-search" xml:lang="cs">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="fifth"/>
+    <desc>Jak se přeskakovat mezi aplikacemi <app>prohlížeč dokumentů</app> a <app>gedit</app>.</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Martin Picek</mal:name>
+      <mal:email>picek.martin@gnome-cesko.cz</mal:email>
+      <mal:years>2009</mal:years>
+    </mal:credit>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Marek Černocký</mal:name>
+      <mal:email>marek@manet.cz.</mal:email>
+      <mal:years>2013, 2014</mal:years>
+    </mal:credit>
+  </info>
+
+<title>Hledání pomocí SyncTeX</title>
+<p>Po té, co <link xref="synctex-compile">přeložíte svůj soubor TeX pomocí SyncTeX</link>, budete moci vyhledávat. SyncTeX podporuje dopředné i zpětné hledání z vložených souborů.</p>
+
+<section id="forward-search">
+    <title>Dopředné hledání: z TeX do PDF (z <app>gedit</app> do <app>prohlížeče dokumentů</app>)</title>
+     <p>Dopředné hledání umožňuje kliknout na konkrétní část zdrojového kódu TeX a skočit na odpovídající místo v PDF. Provede se to následovně:</p>
+<steps>
+<item>
+<p>Klikněte na řádek v souboru TeX.</p>
+</item>
+<item>
+<p>V aplikaci <app>gedit</app> klikněte na <guiseq><gui>Nástroje</gui> <gui>Hledat vpřed</gui></guiseq>. Příslušný řádek v dokumentu PDF se červeně orámuje.</p>
+<p>Případně můžete zmáčknout <keyseq><key>Ctrl</key><key>Alt</key><key>F</key></keyseq> nebo <keyseq><key>Ctrl</key>levé kliknutí</keyseq>. Odpovídající řádek v PDF se červeně orámuje.</p>
+</item>
+</steps>
+<note>
+<p>V případě, že odpovídající soubor PDF není otevřen, provádění dopředného hledán jej otevře v <app>prohlížeči dokumentů</app>.</p>
+</note>
+<p>Pokud máte koplexní projekt s několika soubory TeX, můžete vložit</p>
+<code>% mainfile: hlavni_soubor.tex</code>
+<p>buď na první nebo poslední tři řádky každého vloženého souboru TeX a dopředné hledání by mělo fungovat. Zpětné hledání by mělo fungovat vždy, i když nepřidáte modeline.</p>
+
+</section>
+
+<section id="backward-search">
+    <title>Zpětné hledání: z PDF do TeX (z <app>prohlížeče dokumentů</app> do <app>gedit</app>)</title>
+     <p>Zpětné hledání umožňuje kliknout na konkrétní řádek v souboru PDF a skočit na odpovídající řádek ve zdrojovém kódu TeX.</p>
+<p>Zpětné hledání provedete zmáčknutím <keyseq><key>Ctrl</key>levé kliknutí</keyseq> v <app>prohlížeči dokumentů</app>. Odpovídající řádek ve zdrojovém kódu TeX se zvýrazní.</p>
+</section>
+
+</page>

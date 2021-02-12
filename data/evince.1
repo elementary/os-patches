@@ -1,0 +1,76 @@
+.TH evince 1 "19 Jun 2011" "GNOME"
+.SH NAME
+\fBevince\fP \- GNOME document viewer
+
+The Evince Document Viewer application for the GNOME desktop environment
+
+.SH SYNTAX
+.B evince
+.RI [--help]
+.RI [--page-label=PAGE\ |
+.RI --page-index=NUMBER\ |
+.RI --named-dest=DEST]
+.RI [--fullscreen]
+.RI [--presentation]
+.RI [--preview]
+.RI [--find=STRING]
+.RI [filename(s)...]
+.SH DESCRIPTION
+.B evince
+
+Evince is a document viewer capable of displaying multiple and single
+page document formats like PDF and Postscript.  For more general
+information about Evince please visit our website at
+http://www.gnome.org/projects/evince/
+
+.LP
+.SH OPTIONS
+
+.TP
+\fB\-?, \-h, \-\-help\fR
+Prints the command line options.
+.TP
+\fB\-p, \-\-page\-label=PAGE\fR
+Open the document on the page with the specified page label (or page number).
+.TP
+\fB\-i, \-\-page\-index=NUMBER\fR
+Open the document on the page with the specified page index (this is the exact page number, not a page label).
+.TP
+\fB\-n, \-\-named\-dest=DEST\fR
+Open the document on the specified named destination.
+.TP
+\fB\-f, \-\-fullscreen\fR
+Run evince in fullscreen mode.
+.TP
+\fB\-s, \-\-presentation\fR
+Run evince in presentation mode.
+.TP
+\fB\-l, \-\-find=string\fR
+You can pass a word or phrase here. If it exists, evince will display
+the document and the first match.
+.TP
+\fBfilename(s)...\fR
+Specifies the file to open when Evince starts. If this is not
+specified, Evince will open a blank window. Multiple files can be loaded
+if they are separated by spaces.  Evince also supports handling of
+remote files.  For example, you can pass the location on the web or load
+a file from a FTP server, like "ftp://adobe.com/sample.pdf".
+
+.SH Print preview options
+These options are primarily intended for use with the GTK+ print
+preview function. For more information about these options see
+http://developer.gnome.org/gtk3/stable/GtkSettings.html#GtkSettings--gtk-print-preview-command
+.TP
+\fB\-w, \-\-preview\fR
+Run evince as a previewer.
+.TP
+\fB\-\-unlink\-temp\-file\fR
+If evince is run in preview mode, this will unlink the temporary file
+created by GTK+.
+.TP
+\fB\-\-print\-settings %s %f
+This sends the full path of the PDF file, f, and the settings of the
+print dialog, s, to evince.
+
+.SH BUGS
+If you find a bug, please report it at http://bugzilla.gnome.org/enter_bug.cgi?product=evince.

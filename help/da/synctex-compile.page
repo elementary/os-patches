@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-compile" xml:lang="da">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="third"/>
+    <desc>Sådan kompilerer du dit TeX-dokument med SyncTex</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>Kompiler TeX med SyncTex</title>
+<p>Hvis du tilføjer linjen <em>\synctex=1</em> i TeX-filens hoved, udløses der synkronisering med SYncTeX.</p>
+<code>
+\documentclass{article}
+\synctex=1
+\usepackage{fullpage}
+\begin{document}
+...
+</code>
+<p>Eller du kan køre kommandoen pdflatex med tilvalget <em>-synctex=1</em>:</p>
+<screen>pdflatex -synctex=1 dinFil.tex</screen>
+</page>

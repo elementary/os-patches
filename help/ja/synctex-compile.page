@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="synctex-compile" xml:lang="ja">
+
+  <info>
+    <link type="guide" xref="index#synctex" group="third"/>
+    <desc>SyncTeX を有効にして TeX ドキュメントをコンパイルする方法。</desc>
+
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <credit type="author">
+      <name>Tiffany Antopolski</name>
+      <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons Share Alike 3.0</p>
+    </license>
+  </info>
+
+<title>SyncTeX を有効にする TeX のコンパイル</title>
+<p>TeX ファイルの前文に <em>\synctex=1</em> という行を追加することで SyncTeX で同期をとるきっかけとなります。</p>
+<code>
+\documentclass{article}
+\synctex=1
+\usepackage{fullpage}
+\begin{document}
+...
+\end{document}
+</code>
+<p>代わりに、pdflatex コマンドを <em>-synctex=1</em> というオプション付きで実行できます。</p>
+<screen>pdflatex -synctex=1 yourFile.tex</screen>
+</page>

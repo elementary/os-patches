@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/" type="topic" style="task" id="commandline" xml:lang="nl">
+
+  <info>
+    <link type="guide" xref="index#advanced"/>
+    <title type="sort">Opdrachtregel</title>
+    <desc>De <cmd>evince</cmd>-opdracht kan elke hoeveelheid bestanden openen, op specifieke pagina's en in verschillende modi.</desc>
+    <revision pkgversion="3.2" version="0.1" date="2011-09-05" status="final"/>
+    <revision pkgversion="3.24" version="0.2" date="2017-09-17" status="final"/>
+    <credit type="author">
+      <name>Phil Bull</name>
+      <email>philbull@gmail.com</email>
+    </credit>
+    <credit type="editor">
+    <name>Tiffany Antopolski</name>
+    <email>tiffany@antopolski.com</email>
+    </credit>
+    <license>
+      <p>Creative Commons GelijkDelen 3.0</p>
+    </license>
+  
+    <mal:credit xmlns:mal="http://projectmallard.org/1.0/" type="translator copyright">
+      <mal:name>Justin van Steijn</mal:name>
+      <mal:email>jvs@fsfe.org</mal:email>
+      <mal:years>2016, 2017, 2018.</mal:years>
+    </mal:credit>
+  </info>
+
+<title>De opdrachtregel</title>
+<p>Om de <app>Documentweergave</app> te starten vanuit de opdrachtregel, typ <cmd>evince</cmd>. U kunt een specifiek bestand openen door de bestandsnaam achter de evince-opdracht te typen:</p>
+
+<screen>evince file.pdf</screen>
+<p>U kunt meerdere bestanden openen door de bestandsnamen achter de evince-opdracht te typen, waarbij de bestandsnamen door een spatie gescheiden zijn:</p>
+<screen>evince file1.pdf file2.pdf</screen>
+<p>De <app>Documentweergave</app> kan ook omgaan met bestanden op het web. U kunt bijvoorbeeld de bestandslocatie van een bestand op het web na de evince-opdracht typen:</p>
+<screen>evince http://www.claymath.org/millennium/P_vs_NP/pvsnp.pdf</screen>
+<section id="open">
+    <title>Een document op een bepaalde pagina openen</title>
+    <p>U kunt de <cmd>--page-label</cmd>-switch gebruiken om een document op een specifieke pagina te openen. Bijvoorbeeld, om een document op pagina 3 te openen, kunt u het volgende typen:</p>
+    <screen>evince --page-label=3 file.pdf</screen>
+    <p>
+    The page label should be in the same format as the page number displayed in
+    the <app>Document Viewer</app> header bar.
+    </p>
+</section>
+<section id="fullsreen">
+    <title>Een document in modus voor volledig scherm openen</title>
+    <screen>evince --fullscreen file.pdf</screen>
+</section>
+<section id="presentation">
+    <title>Een document in presentatie-modus openen</title>
+    <screen>evince --presentation file.pdf</screen>
+</section>
+<section id="preview">
+    <title>Een document in preview-modus openen</title>
+    <screen>evince --preview file.pdf</screen>
+</section>
+</page>
