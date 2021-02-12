@@ -1,0 +1,40 @@
+From b67cba441eece77123d08105d447128e09593194 Mon Sep 17 00:00:00 2001
+From: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Date: Sat, 6 Jul 2019 11:11:02 +0200
+Subject: lsefisystab: Add support for device tree table
+
+The device tree may passed by the firmware as UEFI configuration
+table. Let lsefisystab display a short text and not only the GUID
+for the device tree.
+
+Here is an example output:
+
+  grub> lsefisystab
+  Address: 0xbff694d8
+  Signature: 5453595320494249 revision: 00020046
+  Vendor: Das U-Boot, Version=20190700
+  2 tables:
+  0xbe741000  eb9d2d31-2d88-11d3-9a160090273fc14d   SMBIOS
+  0x87f00000  b1b621d5-f19c-41a5-830bd9152c69aae0   DEVICE TREE
+
+Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Reviewed-by: Leif Lindholm <leif.lindholm@linaro.org>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+(cherry picked from commit 15cfd02b74e862bda20626a6e4e2f8a1d201733a)
+Patch-Name: cherrypick-lsefisystab-show-dtb.patch
+---
+ grub-core/commands/efi/lsefisystab.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/grub-core/commands/efi/lsefisystab.c b/grub-core/commands/efi/lsefisystab.c
+index 7c039c509..902788250 100644
+--- a/grub-core/commands/efi/lsefisystab.c
++++ b/grub-core/commands/efi/lsefisystab.c
+@@ -40,6 +40,7 @@ static const struct guid_mapping guid_mappings[] =
+     { GRUB_EFI_CRC32_GUIDED_SECTION_EXTRACTION_GUID,
+       "CRC32 GUIDED SECTION EXTRACTION"},
+     { GRUB_EFI_DEBUG_IMAGE_INFO_TABLE_GUID, "DEBUG IMAGE INFO"},
++    { GRUB_EFI_DEVICE_TREE_GUID, "DEVICE TREE"},
+     { GRUB_EFI_DXE_SERVICES_TABLE_GUID, "DXE SERVICES"},
+     { GRUB_EFI_HCDP_TABLE_GUID, "HCDP"},
+     { GRUB_EFI_HOB_LIST_GUID, "HOB LIST"},

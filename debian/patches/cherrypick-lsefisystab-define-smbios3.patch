@@ -1,0 +1,45 @@
+From 7a7aa7f7da952420277726d4e2279716d1738aa6 Mon Sep 17 00:00:00 2001
+From: David Michael <fedora.dm0@gmail.com>
+Date: Fri, 5 Jul 2019 08:47:02 -0400
+Subject: lsefisystab: Define SMBIOS3 entry point structures for EFI
+
+This adds the GUID and includes it in lsefisystab output.
+
+Signed-off-by: David Michael <fedora.dm0@gmail.com>
+Reviewed-by: Leif Lindholm <leif.lindholm@linaro.org>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+(cherry picked from commit 261df54f170c6d87258eb37ef17d62690720696b)
+Patch-Name: cherrypick-lsefisystab-define-smbios3.patch
+---
+ grub-core/commands/efi/lsefisystab.c | 1 +
+ include/grub/efi/api.h               | 5 +++++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/grub-core/commands/efi/lsefisystab.c b/grub-core/commands/efi/lsefisystab.c
+index df1030221..7c039c509 100644
+--- a/grub-core/commands/efi/lsefisystab.c
++++ b/grub-core/commands/efi/lsefisystab.c
+@@ -48,6 +48,7 @@ static const struct guid_mapping guid_mappings[] =
+     { GRUB_EFI_MPS_TABLE_GUID, "MPS"},
+     { GRUB_EFI_SAL_TABLE_GUID, "SAL"},
+     { GRUB_EFI_SMBIOS_TABLE_GUID, "SMBIOS"},
++    { GRUB_EFI_SMBIOS3_TABLE_GUID, "SMBIOS3"},
+     { GRUB_EFI_SYSTEM_RESOURCE_TABLE_GUID, "SYSTEM RESOURCE TABLE"},
+     { GRUB_EFI_TIANO_CUSTOM_DECOMPRESS_GUID, "TIANO CUSTOM DECOMPRESS"},
+     { GRUB_EFI_TSC_FREQUENCY_GUID, "TSC FREQUENCY"},
+diff --git a/include/grub/efi/api.h b/include/grub/efi/api.h
+index 75befd10e..9824fbcd0 100644
+--- a/include/grub/efi/api.h
++++ b/include/grub/efi/api.h
+@@ -314,6 +314,11 @@
+     { 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d } \
+   }
+ 
++#define GRUB_EFI_SMBIOS3_TABLE_GUID	\
++  { 0xf2fd1544, 0x9794, 0x4a2c, \
++    { 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94 } \
++  }
++
+ #define GRUB_EFI_SAL_TABLE_GUID \
+   { 0xeb9d2d32, 0x2d88, 0x11d3, \
+       { 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d } \

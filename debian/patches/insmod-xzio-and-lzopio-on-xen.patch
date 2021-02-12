@@ -1,0 +1,46 @@
+From c58c9d77ccd16511db098247b5cbba5abcaac99f Mon Sep 17 00:00:00 2001
+From: Ian Campbell <ijc@debian.org>
+Date: Sun, 30 Nov 2014 12:12:52 +0000
+Subject: Arrange to insmod xzio and lzopio when booting a kernel as a Xen
+ guest
+
+This is needed in case the Linux kernel is compiled with CONFIG_KERNEL_XZ or
+CONFIG_KERNEL_LZO rather than CONFIG_KERNEL_GZ (gzio is already loaded by
+grub.cfg today).
+
+Signed-off-by: Ian Campbell <ijc@debian.org>
+
+Bug-Debian: https://bugs.debian.org/755256
+Forwarded: http://lists.gnu.org/archive/html/grub-devel/2014-11/msg00091.html
+Last-Update: 2014-11-30
+
+Patch-Name: insmod-xzio-and-lzopio-on-xen.patch
+---
+ util/grub.d/10_linux.in     | 1 +
+ util/grub.d/10_linux_zfs.in | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
+index 2c418c5ec..85b30084a 100644
+--- a/util/grub.d/10_linux.in
++++ b/util/grub.d/10_linux.in
+@@ -166,6 +166,7 @@ linux_entry ()
+   fi
+ 
+   echo "	insmod gzio" | sed "s/^/$submenu_indentation/"
++  echo "	if [ x\$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi" | sed "s/^/$submenu_indentation/"
+ 
+   if [ x$dirname = x/ ]; then
+     if [ -z "${prepare_root_cache}" ]; then
+diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
+index 4477fa606..4c48abef0 100755
+--- a/util/grub.d/10_linux_zfs.in
++++ b/util/grub.d/10_linux_zfs.in
+@@ -838,6 +838,7 @@ zfs_linux_entry () {
+     fi
+ 
+     echo "${submenu_indentation}	insmod gzio"
++    echo "${submenu_indentation}	if [ \"\${grub_platform}\" = xen ]; then insmod xzio; insmod lzopio; fi"
+ 
+     echo "$(prepare_grub_to_access_device_cached "${boot_device}" "${submenu_level}")"
+ 
