@@ -25,6 +25,7 @@ libglade_hdy_sources = [
 libglade_hdy_deps = [
   libhandy_dep,
   gladeui_dep,
+  cc.find_library('m', required: false),
 ]
 
 libglade_hdy_args = []

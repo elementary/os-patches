@@ -190,14 +190,22 @@ libhandy_sources = [
 
 glib_min_version = '>= 2.44'
 
+gio_dep = dependency('gio-2.0', version: glib_min_version)
+gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.1')
+
 libhandy_deps = [
   dependency('glib-2.0', version: glib_min_version),
-  dependency('gio-2.0', version: glib_min_version),
   dependency('gmodule-2.0', version: glib_min_version),
   dependency('fribidi'),
-  dependency('gtk+-3.0', version: '>= 3.24.1'),
+  gio_dep,
+  gtk_dep,
   cc.find_library('m', required: false),
   cc.find_library('rt', required: false),
+]
+
+libhandy_public_deps = [
+  gio_dep,
+  gtk_dep,
 ]
 
 libhandy_c_args = [
@@ -257,7 +265,7 @@ libhandy = shared_library(
 
 libhandy_dep = declare_dependency(
               sources: libhandy_generated_headers,
-         dependencies: libhandy_deps,
+         dependencies: libhandy_public_deps,
             link_with: libhandy,
   include_directories: include_directories('.'),
 )
