@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+include /usr/share/dpkg/pkg-info.mk
+
+%:
+	dh $@
+
+dh_dkms.1: debian/scripts/dh_dkms
+	pod2man \
+		--center "DKMS Debhelper" \
+		--release $(DEB_VERSION_UPSTREAM) \
+		$< > debian/scripts/$@
+
+override_dh_auto_build:
+
+override_dh_install:
+	$(MAKE) install-debian DESTDIR=$(CURDIR)/debian/dkms
+	dh_install

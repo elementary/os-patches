@@ -1,0 +1,96 @@
+#!/bin/sh
+# Common autopkgtest script for testing a dkms source package.
+# Author: Martin Pitt <martin.pitt@ubuntu.com>
+# Copyright: (C) 2014 Canonical Ltd.
+set -eu
+
+run_pkg() {
+    pkg="$1"
+    tmpfile=$(mktemp)
+
+    echo "I: removing binary package $pkg, to get clean state"
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get purge -yq $pkg </dev/null 2>&1 >/dev/null || true
+
+    echo "I: Installing binary package $pkg"
+    export DEBIAN_FRONTEND=noninteractive
+    RC=0
+    apt-get install -yq $pkg </dev/null 2>&1 >"$tmpfile" || RC=$?
+    cat "$tmpfile"
+
+    if ! dkms_conf=$(dpkg -L $pkg | grep 'dkms.conf$'); then
+        echo "I: Package $pkg has no dkms.conf, skipping"
+        return
+    fi
+
+    # Do not continue if dkms build was skipped due to BUILD_EXCLUSIVE
+    # directive
+    excluded=0
+    grep -q "BUILD_EXCLUSIVE" "$tmpfile" && excluded=1
+    rm "$tmpfile"
+    if [ "$excluded" -eq 1 ]; then
+	    echo "I: Package $pkg excluded by BUILD_EXCLUSIVE directive, skipping"
+	    return
+    fi
+
+    # collect build logs as artifacts
+    if [ -d /var/lib/dkms ]; then
+        (cd /var/lib/dkms; find -name "make.log" -print0 | xargs -0 tar c) > "$ADT_ARTIFACTS/$pkg-make-logs.tar"
+    fi
+
+    if [ "$RC" -ne 0 ]; then
+        echo "E: Package $pkg failed to install" >&2
+        exit 1
+    fi
+
+    echo "I: Testing binary package $pkg"
+
+    dkms_pkg=$(bash -c ". $dkms_conf; echo \$PACKAGE_NAME" 2>/dev/null)
+    dkms_ver=$(bash -c ". $dkms_conf; echo \$PACKAGE_VERSION" 2>/dev/null)
+
+    echo "I: Testing if $dkms_pkg modules are correctly installed"
+    dkmsstatus="$(dkms status $dkms_pkg)"
+    if [ -z "$dkmsstatus" ]; then
+        echo "E: dkms status output is empty!" >&2
+        exit 1
+    fi
+    echo "$dkmsstatus"
+
+    if grep -q "Good news! Module version $dkms_ver" /var/log/apt/term.log; then
+        tail -n 50 /var/log/apt/term.log
+        if ! echo "$dkmsstatus" | grep -q "installed"; then
+            echo "E: not installed" >&2
+            exit 1
+        fi
+        exit 0
+    fi
+
+    if ! echo "$dkmsstatus" | grep -q "installed$"; then
+        echo "E: not installed" >&2
+        exit 1
+    fi
+
+    # skip modprobing for now; this fails too often (needs particular
+    # hardware/firmware/etc)
+    # for mod in $(awk -F '"' '/^BUILT_MODULE_NAME/ {print $2}' $dkms_conf); do
+    #     echo "I: modprobe $mod"
+    #     if ! modprobe $mod; then
+    #         echo "E: Failed to modprobe module $mod" >&2
+    #         exit 1
+    #     else
+    #         echo "I: $modname loaded"
+    #     fi
+    # done
+}
+
+# Try and remove dkms to spot packages which miss a dkms dependency
+dpkg --remove dkms || true
+
+for pkg in $(awk '/^Package:/ { print $2 }' debian/control | grep "\-dkms$"); do
+    # package might be arch: restriction or udeb etc.
+    if ! apt-cache show $pkg >/dev/null 2>&1; then
+        echo "I: Skipping unavailable package $pkg"
+        continue
+    fi
+    run_pkg $pkg
+done
