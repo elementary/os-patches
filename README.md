@@ -58,5 +58,6 @@ directly with upstream to include them.
 
     `git add * && git commit -am "Initial Import, version {pkg-version}"`
   
-6. Create a `-patched` branch, make changes and push
-7. Update the `import-list-{dist}` branch
+6. Create a `-patched` branch as a fork of this branch, not an orphan, make changes and push
+7. Create a packaging recipe on Launchpad: https://code.launchpad.net/~elementary-os/elementaryos/+git/os-patches/+recipes
+8. Once the build succeeds and is uploaded, update the `import-list-{dist}` branch. If this is done before the build succeeds, there will be false issue reports filed due to missing packages.
