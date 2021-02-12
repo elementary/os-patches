@@ -35,3 +35,29 @@ e.g. `packagekit:$NEWER_UBUNTU_NAME`
 
 > Note that when possible, we try to discourage the use of OS patches and work
 directly with upstream to include them.
+
+## Creating a new Patch
+
+1. Create a new orphan branch
+
+    `git checkout --orphan {pkg-name}-{dist} && git rm -rf .`
+  
+2. Get the source of the package to be patched with `apt-source`. Do not use `sudo`.
+
+    `apt source {pkg-name}`
+  
+3. Remove everything but the unpacked sources
+
+    `rm *.tar.* *.dsc`
+  
+4. Move the source folder contents up to the pwd and then delete the empty folder
+
+    `cp -r {source-folder-name}/* . && rm -r {source-folder-name}`
+  
+5. Add source files, commit, and push
+
+    `git add * && git commit -am "Initial Import, version {pkg-version}"`
+  
+6. Create a `-patched` branch as a fork of this branch, not an orphan, make changes and push
+7. Create a packaging recipe on Launchpad: https://code.launchpad.net/~elementary-os/elementaryos/+git/os-patches/+recipes
+8. Once the build succeeds and is uploaded, update the `import-list-{dist}` branch. If this is done before the build succeeds, there will be false issue reports filed due to missing packages.
