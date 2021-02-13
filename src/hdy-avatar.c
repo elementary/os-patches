@@ -85,7 +85,7 @@ size_data_free (SizeData *data)
 }
 
 static void
-load_icon_async (GLoadableIcon       *icon,
+load_icon_async (HdyAvatar           *self,
                  gint                 size,
                  GCancellable        *cancellable,
                  GAsyncReadyCallback  callback,
@@ -268,12 +268,15 @@ icon_load_async_cb (GLoadableIcon *icon,
                     GAsyncResult  *res,
                     GTask         *task)
 {
+  GdkPixbufLoader *loader = g_task_get_task_data (task);
   g_autoptr (GInputStream) stream = NULL;
   g_autoptr (GError) error = NULL;
 
   stream = g_loadable_icon_load_finish (icon, res, NULL, &error);
   if (stream == NULL) {
+    gdk_pixbuf_loader_close (loader, NULL);
     g_task_return_error (task, g_steal_pointer (&error));
+    g_object_unref (task);
 
     return;
   }
@@ -296,11 +299,10 @@ load_from_gicon_async_finish (GAsyncResult  *async_result,
 }
 
 static void
-load_from_gicon_async_for_display_cb (GLoadableIcon *icon,
-                                      GAsyncResult  *res,
-                                      gpointer      *user_data)
+load_from_gicon_async_for_display_cb (HdyAvatar    *self,
+                                      GAsyncResult *res,
+                                      gpointer     *user_data)
 {
-  HdyAvatar *self = HDY_AVATAR (user_data);
   g_autoptr (GError) error = NULL;
   g_autoptr (GdkPixbuf) pixbuf = NULL;
 
@@ -325,7 +327,7 @@ load_from_gicon_async_for_display_cb (GLoadableIcon *icon,
     gint scale_factor = gtk_widget_get_scale_factor (GTK_WIDGET (self));
     gint new_size = MIN (width, height) * scale_factor;
 
-    custom_image = update_custom_image (icon,
+    custom_image = update_custom_image (get_icon (self),
                                         pixbuf,
                                         NULL,
                                         new_size);
@@ -339,9 +341,9 @@ load_from_gicon_async_for_display_cb (GLoadableIcon *icon,
 }
 
 static void
-load_from_gicon_async_for_export_cb (GLoadableIcon *icon,
-                                     GAsyncResult  *res,
-                                     gpointer      *user_data)
+load_from_gicon_async_for_export_cb (HdyAvatar    *self,
+                                     GAsyncResult *res,
+                                     gpointer     *user_data)
 {
   GTask *task = G_TASK (user_data);
   g_autoptr (GError) error = NULL;
@@ -357,16 +359,17 @@ load_from_gicon_async_for_export_cb (GLoadableIcon *icon,
   g_task_return_pointer (task,
                          g_steal_pointer (&pixbuf),
                          g_object_unref);
+  g_object_unref (task);
 }
 
 static void
-load_icon_async (GLoadableIcon       *icon,
+load_icon_async (HdyAvatar           *self,
                  gint                 size,
                  GCancellable        *cancellable,
                  GAsyncReadyCallback  callback,
                  gpointer             user_data)
 {
-  GTask *task = g_task_new (icon, cancellable, callback, user_data);
+  GTask *task = g_task_new (self, cancellable, callback, user_data);
   GdkPixbufLoader *loader = gdk_pixbuf_loader_new ();
 
   g_signal_connect (loader, "size-prepared",
@@ -375,7 +378,9 @@ load_icon_async (GLoadableIcon       *icon,
 
   g_task_set_task_data (task, loader, g_object_unref);
 
-  g_loadable_icon_load_async (icon, size, cancellable,
+  g_loadable_icon_load_async (get_icon (self),
+                              size,
+                              cancellable,
                               (GAsyncReadyCallback) icon_load_async_cb,
                               task);
 }
@@ -733,11 +738,11 @@ hdy_avatar_draw (GtkWidget *widget,
       self->currently_loading_size = new_size;
       g_cancellable_cancel (self->cancellable);
       g_set_object (&self->cancellable, g_cancellable_new ());
-      load_icon_async (get_icon (self),
+      load_icon_async (self,
                        new_size,
                        self->cancellable,
                        (GAsyncReadyCallback) load_from_gicon_async_for_display_cb,
-                       self);
+                       NULL);
     }
 
     /* We don't want to draw a broken custom image, because it may be scaled
@@ -1148,11 +1153,11 @@ hdy_avatar_set_image_load_func (HdyAvatar              *self,
 
     self->cancellable = g_cancellable_new ();
     self->currently_loading_size = self->size * scale_factor;
-    load_icon_async (G_LOADABLE_ICON (self->load_func_icon),
+    load_icon_async (self,
                      self->currently_loading_size,
                      self->cancellable,
                      (GAsyncReadyCallback) load_from_gicon_async_for_display_cb,
-                     self);
+                     NULL);
   } else {
     gtk_widget_queue_draw (GTK_WIDGET (self));
   }
@@ -1278,7 +1283,7 @@ hdy_avatar_draw_to_pixbuf_async (HdyAvatar           *self,
                                  GAsyncReadyCallback  callback,
                                  gpointer             user_data)
 {
-  GTask *task = NULL;
+  g_autoptr (GTask) task = NULL;
   gint scaled_size = size * scale_factor;
   SizeData *data;
 
@@ -1298,11 +1303,11 @@ hdy_avatar_draw_to_pixbuf_async (HdyAvatar           *self,
       (!self->round_image ||
        gdk_pixbuf_get_width (self->round_image) != scaled_size ||
        is_scaled (self->round_image)))
-    load_icon_async (get_icon (self),
+    load_icon_async (self,
                      scaled_size,
                      cancellable,
                      (GAsyncReadyCallback) load_from_gicon_async_for_export_cb,
-                     task);
+                     g_steal_pointer (&task));
   else
     g_task_return_pointer (task, NULL, NULL);
 }
@@ -1415,11 +1420,11 @@ hdy_avatar_set_loadable_icon (HdyAvatar     *self,
   if (self->icon) {
     gint scale_factor = gtk_widget_get_scale_factor (GTK_WIDGET (self));
     self->currently_loading_size = self->size * scale_factor;
-    load_icon_async (self->icon,
+    load_icon_async (self,
                      self->currently_loading_size,
                      self->cancellable,
                      (GAsyncReadyCallback) load_from_gicon_async_for_display_cb,
-                     self);
+                     NULL);
   } else {
     gtk_widget_queue_draw (GTK_WIDGET (self));
   }
