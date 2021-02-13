@@ -155,14 +155,10 @@ extract_initials_from_text (const gchar *text)
 }
 
 static GdkPixbuf *
-update_custom_image (GLoadableIcon *icon,
-                     GdkPixbuf     *pixbuf_from_icon,
-                     GdkPixbuf     *round_image,
-                     gint           new_size)
+update_custom_image (GdkPixbuf *pixbuf_from_icon,
+                     GdkPixbuf *round_image,
+                     gint       new_size)
 {
-  if (icon == NULL)
-    return NULL;
-
   if (round_image &&
       gdk_pixbuf_get_width (round_image) == new_size &&
       !is_scaled (round_image))
@@ -327,13 +323,14 @@ load_from_gicon_async_for_display_cb (HdyAvatar    *self,
     gint scale_factor = gtk_widget_get_scale_factor (GTK_WIDGET (self));
     gint new_size = MIN (width, height) * scale_factor;
 
-    custom_image = update_custom_image (get_icon (self),
-                                        pixbuf,
-                                        NULL,
-                                        new_size);
+    if (get_icon (self)) {
+      custom_image = update_custom_image (pixbuf,
+                                          NULL,
+                                          new_size);
 
-    if (!self->round_image && custom_image)
-      gtk_style_context_add_class (context, "image");
+      if (!self->round_image && custom_image)
+        gtk_style_context_add_class (context, "image");
+    }
 
     g_set_object (&self->round_image, custom_image);
     gtk_widget_queue_draw (GTK_WIDGET (self));
@@ -729,7 +726,7 @@ hdy_avatar_draw (GtkWidget *widget,
   gint new_size = MIN (width, height) * scale_factor;
 
   if (get_icon (self)) {
-    custom_image = update_custom_image (get_icon (self), NULL, self->round_image, new_size);
+    custom_image = update_custom_image (NULL, self->round_image, new_size);
 
     if ((!custom_image &&
         !self->loading_error) ||
@@ -1248,9 +1245,9 @@ hdy_avatar_draw_to_pixbuf (HdyAvatar *self,
         is_scaled (self->round_image) ||
         gdk_pixbuf_get_width (self->round_image) != scaled_size) {
       pixbuf_from_icon = load_icon_sync (get_icon (self), scaled_size);
-      custom_image = update_custom_image (get_icon (self), pixbuf_from_icon, NULL, scaled_size);
+      custom_image = update_custom_image (pixbuf_from_icon, NULL, scaled_size);
     } else {
-      custom_image = update_custom_image (get_icon (self), NULL, self->round_image, scaled_size);
+      custom_image = update_custom_image (NULL, self->round_image, scaled_size);
     }
   }
 
@@ -1356,8 +1353,7 @@ hdy_avatar_draw_to_pixbuf_finish (HdyAvatar    *self,
   cairo_translate (cr, -bounds.x, -bounds.y);
 
   pixbuf_from_icon = g_task_propagate_pointer (task, NULL);
-  custom_image = update_custom_image (get_icon (self),
-                                      pixbuf_from_icon,
+  custom_image = update_custom_image (pixbuf_from_icon,
                                       NULL,
                                       data->size * data->scale_factor);
   draw_for_size (self, cr, custom_image, data->size, data->size, data->scale_factor);
