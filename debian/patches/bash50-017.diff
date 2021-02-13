@@ -1,0 +1,205 @@
+                 BASH PATCH REPORT                                              
+                 =================                                              
+                                                                                
+Bash-Release:   5.0                                                             
+Patch-ID:   bash50-017                                                          
+                                                                                
+Bug-Reported-by:    Valentin Lab <valentin.lab@kalysto.org>                     
+Bug-Reference-ID:   <ab981b9c-60a5-46d0-b7e6-a6d88b80df50@kalysto.org>          
+Bug-Reference-URL:  https://lists.gnu.org/archive/html/bug-bash/2020-03/msg00062.html
+                                                                                
+Bug-Description:                                                                
+                                                                                
+There were cases where patch 16 reaped process substitution file descriptors    
+(or FIFOs) and processes to early. This is a better fix for the problem that    
+bash50-016 attempted to solve.
+
+--- a/execute_cmd.c
++++ b/execute_cmd.c
+@@ -564,7 +564,7 @@
+   volatile int save_line_number;
+ #if defined (PROCESS_SUBSTITUTION)
+   volatile int ofifo, nfifo, osize, saved_fifo;
+-  volatile char *ofifo_list;
++  volatile void *ofifo_list;
+ #endif
+ 
+   if (breaking || continuing)
+@@ -750,12 +750,14 @@
+   reap_procsubs ();
+ #  endif
+ 
+-  if (variable_context != 0)	/* XXX - also if sourcelevel != 0? */
++  /* XXX - also if sourcelevel != 0? */
++  if (variable_context != 0)
+     {
+       ofifo = num_fifos ();
+       ofifo_list = copy_fifo_list ((int *)&osize);
+       begin_unwind_frame ("internal_fifos");
+-      add_unwind_protect (xfree, ofifo_list);
++      if (ofifo_list)
++	add_unwind_protect (xfree, ofifo_list);
+       saved_fifo = 1;
+     }
+   else
+@@ -1099,26 +1101,10 @@
+     {
+       nfifo = num_fifos ();
+       if (nfifo > ofifo)
+-	close_new_fifos ((char *)ofifo_list, osize);
++	close_new_fifos ((void *)ofifo_list, osize);
+       free ((void *)ofifo_list);
+       discard_unwind_frame ("internal_fifos");
+     }
+-# if defined (HAVE_DEV_FD)
+-  /* Reap process substitutions at the end of loops */
+-  switch (command->type)
+-    {
+-    case cm_while:
+-    case cm_until:
+-    case cm_for:
+-    case cm_group:
+-#    if defined (ARITH_FOR_COMMAND)
+-    case cm_arith_for:
+-#    endif
+-      reap_procsubs ();
+-    default:
+-      break;
+-    }
+-#  endif /* HAVE_DEV_FD */
+ #endif
+ 
+   /* Invert the return value if we have to */
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 16
++#define PATCHLEVEL 17
+ 
+ #endif /* _PATCHLEVEL_H_ */
+--- a/subst.c
++++ b/subst.c
+@@ -5336,13 +5336,13 @@
+ {
+ }
+ 
+-char *
++void *
+ copy_fifo_list (sizep)
+      int *sizep;
+ {
+   if (sizep)
+     *sizep = 0;
+-  return (char *)NULL;
++  return (void *)NULL;
+ }
+ 
+ static void
+@@ -5408,8 +5408,13 @@
+       for (i = j = 0; i < nfifo; i++)
+ 	if (fifo_list[i].file)
+ 	  {
+-	    fifo_list[j].file = fifo_list[i].file;
+-	    fifo_list[j].proc = fifo_list[i].proc;
++	    if (i != j)
++	      {
++		fifo_list[j].file = fifo_list[i].file;
++		fifo_list[j].proc = fifo_list[i].proc;
++		fifo_list[i].file = (char *)NULL;
++		fifo_list[i].proc = 0;
++	      }
+ 	    j++;
+ 	  }
+       nfifo = j;
+@@ -5425,10 +5430,11 @@
+    case it's larger than fifo_list_size (size of fifo_list). */
+ void
+ close_new_fifos (list, lsize)
+-     char *list;
++     void *list;
+      int lsize;
+ {
+   int i;
++  char *plist;
+ 
+   if (list == 0)
+     {
+@@ -5436,8 +5442,8 @@
+       return;
+     }
+ 
+-  for (i = 0; i < lsize; i++)
+-    if (list[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
++  for (plist = (char *)list, i = 0; i < lsize; i++)
++    if (plist[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
+       unlink_fifo (i);
+ 
+   for (i = lsize; i < fifo_list_size; i++)
+@@ -5559,22 +5565,22 @@
+   nfds = 0;
+ }
+ 
+-char *
++void *
+ copy_fifo_list (sizep)
+      int *sizep;
+ {
+-  char *ret;
++  void *ret;
+ 
+   if (nfds == 0 || totfds == 0)
+     {
+       if (sizep)
+ 	*sizep = 0;
+-      return (char *)NULL;
++      return (void *)NULL;
+     }
+ 
+   if (sizep)
+     *sizep = totfds;
+-  ret = (char *)xmalloc (totfds * sizeof (pid_t));
++  ret = xmalloc (totfds * sizeof (pid_t));
+   return (memcpy (ret, dev_fd_list, totfds * sizeof (pid_t)));
+ }
+ 
+@@ -5647,10 +5653,11 @@
+    totfds (size of dev_fd_list). */
+ void
+ close_new_fifos (list, lsize)
+-     char *list;
++     void *list;
+      int lsize;
+ {
+   int i;
++  pid_t *plist;
+ 
+   if (list == 0)
+     {
+@@ -5658,8 +5665,8 @@
+       return;
+     }
+ 
+-  for (i = 0; i < lsize; i++)
+-    if (list[i] == 0 && i < totfds && dev_fd_list[i])
++  for (plist = (pid_t *)list, i = 0; i < lsize; i++)
++    if (plist[i] == 0 && i < totfds && dev_fd_list[i])
+       unlink_fifo (i);
+ 
+   for (i = lsize; i < totfds; i++)
+--- a/subst.h
++++ b/subst.h
+@@ -273,9 +273,8 @@
+ extern void unlink_fifo_list __P((void));
+ extern void unlink_fifo __P((int));
+ 
+-extern char *copy_fifo_list __P((int *));
+-extern void unlink_new_fifos __P((char *, int));
+-extern void close_new_fifos __P((char *, int));
++extern void *copy_fifo_list __P((int *));
++extern void close_new_fifos __P((void *, int));
+ 
+ extern void clear_fifo_list __P((void));
+ 

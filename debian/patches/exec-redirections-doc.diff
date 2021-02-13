@@ -1,0 +1,29 @@
+Index: b/doc/bash.1
+===================================================================
+--- a/doc/bash.1
++++ b/doc/bash.1
+@@ -3914,6 +3914,10 @@ A failure to open or create a file cause
+ Redirections using file descriptors greater than 9 should be used with
+ care, as they may conflict with file descriptors the shell uses
+ internally.
++.PP
++Note that the
++.B exec
++builtin command can make redirections take effect in the current shell.
+ .SS Redirecting Input
+ .PP
+ Redirection of input causes the file whose name results from
+Index: b/doc/bashref.texi
+===================================================================
+--- a/doc/bashref.texi
++++ b/doc/bashref.texi
+@@ -2743,6 +2743,9 @@ Redirections using file descriptors grea
+ care, as they may conflict with file descriptors the shell uses
+ internally.
+ 
++Note that the @code{exec} builtin command can make redirections take
++effect in the current shell.
++
+ @subsection Redirecting Input
+ Redirection of input causes the file whose name results from
+ the expansion of @var{word}

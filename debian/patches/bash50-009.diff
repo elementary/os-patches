@@ -1,0 +1,35 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	5.0
+Patch-ID:	bash50-009
+
+Bug-Reported-by:	chet.ramey@case.edu
+Bug-Reference-ID:
+Bug-Reference-URL:
+
+Bug-Description:
+
+The history file reading code doesn't close the file descriptor open to
+the history file when it encounters a zero-length file.
+
+--- a/lib/readline/histfile.c
++++ b/lib/readline/histfile.c
+@@ -305,6 +305,7 @@ read_history_range (const char *filename
+   if (file_size == 0)
+     {
+       free (input);
++      close (file);
+       return 0;	/* don't waste time if we don't have to */
+     }
+ 
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 8
++#define PATCHLEVEL 9
+ 
+ #endif /* _PATCHLEVEL_H_ */

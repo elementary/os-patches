@@ -1,0 +1,141 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	5.0
+Patch-ID:	bash50-010
+
+Bug-Reported-by:	Thorsten Glaser <tg@mirbsd.de>
+Bug-Reference-ID:	<156622962831.19438.16374961114836556294.reportbug@tglase.lan.tarent.de>
+Bug-Reference-URL:	https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=935115
+
+Bug-Description:
+
+Bash-5.0 changed the way assignment statements preceding special builtins
+and shell functions were handled in posix mode. They automatically created
+or modified global variables instead of modifying existing local variables
+as in bash-4.4.
+
+The bash-4.4 posix-mode semantics were buggy, and resulted in creating
+local variables where they were not intended and modifying global variables
+and local variables simultaneously.
+
+The bash-5.0 changes were intended to fix this issue, but did not preserve
+enough backwards compatibility. The posix standard also changed what it
+required in these cases, so bash-5.0 is not bound by the strict conformance
+requirements that existed in previous issues of the standard.
+
+This patch modifies the bash-5.0 posix mode behavior in an effort to restore
+some backwards compatibility and rationalize the behavior in the presence of
+local variables. It
+
+1. Changes the assignment semantics to be more similar to standalone assignment
+   statements: assignments preceding a function call or special builtin while
+   executing in a shell function will modify the value of a local variable
+   with the same name for the duration of the function's execution;
+
+2. Changes assignments preceding shell function calls or special builtins
+   from within a shell function to no longer create or modify global variables
+   in the presence of a local variable with the same name;
+
+3. Assignment statements preceding a shell function call or special builtin
+   at the global scope continue to modify the (global) calling environment,
+   but are unaffected by assignments preceding function calls or special
+   builtins within a function, as described in item 2. This is also similar
+   to the behavior of a standalone assignment statement.
+
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 9
++#define PATCHLEVEL 10
+ 
+ #endif /* _PATCHLEVEL_H_ */
+--- a/tests/varenv.right
++++ b/tests/varenv.right
+@@ -146,9 +146,9 @@ declare -x foo="abc"
+ inside: declare -x var="value"
+ outside: declare -- var="one"
+ inside: declare -x var="value"
+-outside: declare -x var="value"
+-inside: declare -- var="local"
+-outside: declare -x var="global"
++outside: declare -- var="outside"
++inside: declare -x var="global"
++outside: declare -- var="outside"
+ foo=<unset> environment foo=
+ foo=foo environment foo=foo
+ foo=foo environment foo=foo
+--- a/variables.c
++++ b/variables.c
+@@ -4460,9 +4460,9 @@ char **tempvar_list;
+ int tvlist_ind;
+ 
+ /* Take a variable from an assignment statement preceding a posix special
+-   builtin (including `return') and create a global variable from it. This
+-   is called from merge_temporary_env, which is only called when in posix
+-   mode. */
++   builtin (including `return') and create a variable from it as if a
++   standalone assignment statement had been performed. This is called from
++   merge_temporary_env, which is only called when in posix mode. */
+ static void
+ push_posix_temp_var (data)
+      PTR_T data;
+@@ -4472,16 +4472,27 @@ push_posix_temp_var (data)
+ 
+   var = (SHELL_VAR *)data;
+ 
+-  binding_table = global_variables->table;
+-  if (binding_table == 0)
+-    binding_table = global_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
+-
+-  v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, ASS_FORCE|ASS_NOLONGJMP);
++  /* Just like do_assignment_internal(). This makes assignments preceding
++     special builtins act like standalone assignment statements when in
++     posix mode, satisfying the posix requirement that this affect the
++     "current execution environment." */
++  v = bind_variable (var->name, value_cell (var), ASS_FORCE|ASS_NOLONGJMP);
++
++  /* If this modifies an existing local variable, v->context will be non-zero.
++     If it comes back with v->context == 0, we bound at the global context.
++     Set binding_table appropriately. It doesn't matter whether it's correct
++     if the variable is local, only that it's not global_variables->table */
++  binding_table = v->context ? shell_variables->table : global_variables->table;
+ 
+   /* global variables are no longer temporary and don't need propagating. */
+-  var->attributes &= ~(att_tempvar|att_propagate);
++  if (binding_table == global_variables->table)
++    var->attributes &= ~(att_tempvar|att_propagate);
++
+   if (v)
+-    v->attributes |= var->attributes;
++    {
++      v->attributes |= var->attributes;
++      v->attributes &= ~att_tempvar;	/* not a temp var now */
++    }
+ 
+   if (find_special_var (var->name) >= 0)
+     tempvar_list[tvlist_ind++] = savestring (var->name);
+@@ -4575,14 +4586,17 @@ dispose_temporary_env (pushf)
+      sh_free_func_t *pushf;
+ {
+   int i;
++  HASH_TABLE *disposer;
+ 
+   tempvar_list = strvec_create (HASH_ENTRIES (temporary_env) + 1);
+   tempvar_list[tvlist_ind = 0] = 0;
+-    
+-  hash_flush (temporary_env, pushf);
+-  hash_dispose (temporary_env);
++
++  disposer = temporary_env;
+   temporary_env = (HASH_TABLE *)NULL;
+ 
++  hash_flush (disposer, pushf);
++  hash_dispose (disposer);
++
+   tempvar_list[tvlist_ind] = 0;
+ 
+   array_needs_making = 1;

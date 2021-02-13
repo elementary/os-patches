@@ -1,0 +1,54 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	5.0
+Patch-ID:	bash50-016
+
+Bug-Reported-by:	sunnycemetery@gmail.com
+Bug-Reference-ID:	<20190316041534.GB22884@midnight>
+Bug-Reference-URL:	https://lists.gnu.org/archive/html/bug-bash/2019-03/msg00070.html
+
+Bug-Description:
+
+Bash waits too long to reap /dev/fd process substitutions used as redirections
+with loops and group commands, which can lead to file descriptor exhaustion.
+
+Index: b/execute_cmd.c
+===================================================================
+--- a/execute_cmd.c
++++ b/execute_cmd.c
+@@ -1103,6 +1103,22 @@ execute_command_internal (command, async
+       free ((void *)ofifo_list);
+       discard_unwind_frame ("internal_fifos");
+     }
++# if defined (HAVE_DEV_FD)
++  /* Reap process substitutions at the end of loops */
++  switch (command->type)
++    {
++    case cm_while:
++    case cm_until:
++    case cm_for:
++    case cm_group:
++#    if defined (ARITH_FOR_COMMAND)
++    case cm_arith_for:
++#    endif
++      reap_procsubs ();
++    default:
++      break;
++    }
++#  endif /* HAVE_DEV_FD */
+ #endif
+ 
+   /* Invert the return value if we have to */
+Index: b/patchlevel.h
+===================================================================
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 15
++#define PATCHLEVEL 16
+ 
+ #endif /* _PATCHLEVEL_H_ */

@@ -1,0 +1,53 @@
+# DP: Move definition of the macro "FN" out of the region of the "ig"
+# DP: macro.  Define macros and registers "zZ" and "zY".
+
+--- a/doc/bash.1
++++ b/doc/bash.1
+@@ -8,6 +8,22 @@
+ .\"	Last Change: Fri Dec  7 09:48:47 EST 2018
+ .\"
+ .\" bash_builtins, strip all but Built-Ins section
++.de zZ
++..
++.de zY
++..
++.\"
++.\" File Name macro.  This used to be `.PN', for Path Name,
++.\" but Sun doesn't seem to like that very much.
++.\"
++.de FN
++\fI\|\\$1\|\fP
++..
++.\" Number register zZ is defined in bash-builtins(7)
++.\" Number register zY is defined in rbash(1)
++.\" This man-page is included in them
++.if !rzZ .nr zZ 0 \" avoid a warning about an undefined register
++.if !rzY .nr zY 0 \" avoid a warning about an undefined register
+ .if \n(zZ=1 .ig zZ
+ .if \n(zY=1 .ig zY
+ .TH BASH 1 "2018 December 7" "GNU Bash 5.0"
+@@ -36,13 +52,6 @@
+ .\" .el \\*(]X\h|\\n()Iu+\\n()Ru\c
+ .\" .}f
+ .\" ..
+-.\"
+-.\" File Name macro.  This used to be `.PN', for Path Name,
+-.\" but Sun doesn't seem to like that very much.
+-.\"
+-.de FN
+-\fI\|\\$1\|\fP
+-..
+ .SH NAME
+ bash \- GNU Bourne-Again SHell
+ .SH SYNOPSIS
+@@ -2417,8 +2426,8 @@ and is set by the administrator who inst
+ .BR bash .
+ A common value is
+ .na
+-.if t \f(CW/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin\fP.
+-.if n ``/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin''.
++.if t \f(CW/usr/local/bin:\:/usr/local/sbin:\:/usr/bin:\:/usr/sbin:\:/bin:\:/sbin\fP.
++.if n ``/usr/local/bin:\:/usr/local/sbin:\:/usr/bin:\:/usr/sbin:\:/bin:\:/sbin''.
+ .ad
+ .TP
+ .B POSIXLY_CORRECT

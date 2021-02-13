@@ -1,0 +1,54 @@
+# make sure redirections do not have access to the temporary environment, even
+# in subshells and command substitutions
+
+a=1
+a=4 b=7 ss=4 echo $a
+
+# use grep to avoid differences due to different system error messages
+a=42
+a=2 echo foo 2>&1 >&$a | { grep -q '\$a: Bad file' || echo 'redir11 bad 1'; }
+a=2 echo foo 2>&1 >&$(echo $a) | { grep -q 'Bad file' || echo 'redir11 bad 2'; }
+
+foo()
+{
+	local -i a
+	local v=0 x=1
+	a+=3
+	echo $a
+}
+
+a=4 b=7 ss=4 declare -i ss
+a=4 b=7 foo
+echo after: $a
+
+unset a
+a=4 echo foo 2>&1 >&$(foo) | { grep -q 'Bad file' || echo 'redir11 bad 3'; }
+a=1 echo foo 2>&1 >&$(foo) | { grep -q 'Bad file' || echo 'redir11 bad 4'; }
+a=1 echo foo 2>&1 >&$(a=4 foo) | { grep -q 'Bad file' || echo 'redir11 bad 5'; }
+echo foo 2>&1 >&$(a=4 foo) | { grep -q 'Bad file' || echo 'redir11 bad 6'; }
+
+a=42
+a=2 echo foo 2>&1 >&$a | { grep -q 'Bad file' || echo 'redir11 bad 7'; }
+a=2 echo foo 2>&1 >&$(echo $a) | { grep -q 'Bad file' || echo 'redir11 bad 8'; }
+
+unset -f foo
+foo()
+{
+	local -i a
+	local v=0 x=1
+	a+=3
+	echo $a >&$(ss= declare -i ss)
+}
+
+a=4 b=7 foo
+echo after: $a
+
+unset a
+typeset -i a
+a=4 eval echo $(echo a+=3)
+a=2
+a=9 echo foo >&$(echo $a)
+a=2
+a=9 eval echo foo >&$(echo $a)
+a=2
+a=9 eval echo foo '2>&1 >&$(echo $a)' | { grep -q 'Bad file' || echo 'redir11 bad 9'; }

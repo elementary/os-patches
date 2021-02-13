@@ -1,0 +1,41 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	5.0
+Patch-ID:	bash50-004
+
+Bug-Reported-by:	Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Bug-Reference-ID:	<87lg0g8aiw.fsf@fifthhorseman.net>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2019-04/msg00076.html
+
+Bug-Description:
+
+In bash-5.0, the `wait' builtin without arguments waits for all children of the
+shell. This includes children it `inherited' at shell invocation time. This
+patch modifies the behavior to not wait for these inherited children, some
+of which might be long-lived.
+
+--- a/jobs.c
++++ b/jobs.c
+@@ -2488,10 +2488,8 @@ wait_for_background_pids ()
+     r = wait_for (last_procsub_child->pid);
+   wait_procsubs ();
+   reap_procsubs ();
+-#if 1
++#if 0
+   /* We don't want to wait indefinitely if we have stopped children. */
+-  /* XXX - should add a loop that goes through the list of process
+-     substitutions and waits for each proc in turn before this code. */
+   if (any_stopped == 0)
+     {
+       /* Check whether or not we have any unreaped children. */
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 3
++#define PATCHLEVEL 4
+ 
+ #endif /* _PATCHLEVEL_H_ */

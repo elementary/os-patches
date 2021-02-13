@@ -1,0 +1,45 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	5.0
+Patch-ID:	bash50-014
+
+Bug-Reported-by:	Johannes Hielscher <jhielscher@posteo.de>
+Bug-Reference-ID:	<20190208205048.77c25a83@hordevm>
+Bug-Reference-URL:	https://lists.gnu.org/archive/html/bug-bash/2019-02/msg00032.html
+
+Bug-Description:
+
+If the current line is empty, using the emacs C-xC-e binding to enter the
+editor will edit the previous command instead of the current (empty) one.
+
+Index: b/bashline.c
+===================================================================
+--- a/bashline.c
++++ b/bashline.c
+@@ -961,11 +961,8 @@ edit_and_execute_command (count, c, edit
+       /* This breaks down when using command-oriented history and are not
+ 	 finished with the command, so we should not ignore the last command */
+       using_history ();
+-      if (rl_line_buffer[0])
+-	{
+-	  current_command_line_count++;	/* for rl_newline above */
+-	  bash_add_history (rl_line_buffer);
+-	}
++      current_command_line_count++;	/* for rl_newline above */
++      bash_add_history (rl_line_buffer);
+       current_command_line_count = 0;	/* for dummy history entry */
+       bash_add_history ("");
+       history_lines_this_session++;
+Index: b/patchlevel.h
+===================================================================
+--- a/patchlevel.h
++++ b/patchlevel.h
+@@ -25,6 +25,6 @@
+    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
+    looks for to find the patch level (for the sccs version string). */
+ 
+-#define PATCHLEVEL 13
++#define PATCHLEVEL 14
+ 
+ #endif /* _PATCHLEVEL_H_ */
