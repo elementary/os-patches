@@ -621,6 +621,7 @@ hdy_avatar_dispose (GObject *object)
 
   g_cancellable_cancel (self->cancellable);
   g_clear_object (&self->icon);
+  g_clear_object (&self->load_func_icon);
 
   G_OBJECT_CLASS (hdy_avatar_parent_class)->dispose (object);
 }
