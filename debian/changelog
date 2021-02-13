@@ -1,0 +1,3246 @@
+language-selector (0.204.2) focal; urgency=medium
+
+  * fontconfig/69-language-selector-ar.conf (LP: #1896397):
+    - Rename to 56-language-selector-ar.conf
+    - Drop binding="strong"
+    - Drop the specification for monospace, and with that fall back to
+      DejaVu for Arabic monospace
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 27 Sep 2020 22:07:12 +0200
+
+language-selector (0.204.1) focal; urgency=medium
+
+  * Provide Noto fonts for rendering Arabic (LP: #1891733)
+    - Let pkg_depends pull fonts-noto-core and fonts-noto-ui-core
+      instead of fonts-arabeyes and fonts-kacst.
+    - Add 69-language-selector-ar.conf but apply that configuration
+      only for users with an Arabic locale, since it gives some Noto
+      fonts higher fontconfig precedence than DejaVu Sans.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 20 Aug 2020 14:10:19 +0200
+
+language-selector (0.204) focal; urgency=medium
+
+  * fontconfig/64-language-selector-prefer.conf:
+    - Add "Lohit Devanagari" since "Raghindi" (stated in
+      65-nonlatin.conf) is not installed by default (LP: #1800965).
+  * Translations from Launchpad
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 13 Apr 2020 01:42:00 +0200
+
+language-selector (0.203) focal; urgency=medium
+
+  * language_support_pkgs.py:
+    - Drop hack for hunspell-gl - hunspell-gl-es is now a dummy and
+      does not conflict with hunspell-gl any longer (LP: #1578821).
+  * debian/control:
+    - Bump Standards-Version to 4.5.0
+    - Build-Depend on debhelper-compat 12 and drop debian/compat
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 05 Mar 2020 22:52:00 +0100
+
+language-selector (0.202) focal; urgency=medium
+
+  * debian/control: VCS fields added
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 18 Feb 2020 21:37:00 +0100
+
+language-selector (0.201) focal; urgency=medium
+
+  * data/pkg_depends:
+    - Add libenchant-2-voikko for fi
+    - Remove xul-ext-mozvoikko, unsupported by recent Mozilla products
+    - Add libenchant-2-voikko and giella-sme for se
+
+ -- Timo Jyrinki <timo.jyrinki@iki.fi>  Tue, 18 Feb 2020 16:39:43 +0200
+
+language-selector (0.200) focal; urgency=medium
+
+  * Drop pyqt4-dev-tools build-dependency, the Qt4 interface was removed
+    in 0.100.
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Tue, 11 Feb 2020 23:07:20 +0300
+
+language-selector (0.199) focal; urgency=medium
+
+  * data/pkg_depends:
+    - Drop fcitx-frontend-qt4
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 26 Oct 2019 17:58:00 +0200
+
+language-selector (0.198) eoan; urgency=medium
+
+  * debian/control, debian/compat:
+    - Bump dh version / compat level to 12.
+  * debian/control:
+    - Bump Standards-Version to 4.4.0.
+  * debian/rules:
+    - Build with pybuild.
+  * debian/language-selector-common.install:
+    - Install *.pyc files to please dh_missing.
+  * debian/pycompat:
+    - Drop (obsolete).
+  * LanguageSelector/ImConfig.py:
+    - Only create ~/.xinputrc at user request (LP: #1839984)
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 13 Aug 2019 16:04:00 +0200
+
+language-selector (0.197) eoan; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    - Use autoConfig for UKUI.
+    - Drop special case for GNOME-Flashback - it's GNOME now.
+  * debian/control:
+    - Bump Standards-Version to 4.3.0.
+  * debian/control, debian/compat:
+    - Bump dh version / compat level to 11.
+  * debian/language-selector-common.postrm:
+    - Dropped - covered by language-selector-common.maintscript.
+  * MANIFEST.in:
+    - Non-existing files removed.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 09 Jul 2019 18:37:00 +0200
+
+language-selector (0.196) eoan; urgency=medium
+
+  * fontconfig/69-language-selector-zh-hk.conf:
+  * fontconfig/64-language-selector-prefer.conf:
+    Correction of the change in verion 0.195: No Serif font for
+    Hongkong yet.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 04 May 2019 05:09:00 +0200
+
+language-selector (0.195) eoan; urgency=medium
+
+  * fontconfig/69-language-selector-zh-hk.conf:
+  * fontconfig/64-language-selector-prefer.conf:
+    Changes because version 2.001 of the Noto CJK fonts includes
+    separate Hongkong fonts.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 04 May 2019 02:47:00 +0200
+
+language-selector (0.194) disco; urgency=medium
+
+  * fontconfig/69-language-selector-ja.conf:
+    Refer to font family more precisely, to prevent that rendering
+    using other fonts is affected unintentionally (LP: #1823461).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 07 Apr 2019 16:16:00 +0200
+
+language-selector (0.193) disco; urgency=medium
+
+  * data/LanguageSelector.ui:
+    - remove obsolete alignment properties which made the button labels
+      not vertically centered, thanks Adolfo Jayme (lp: #1820758)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 19 Mar 2019 16:58:53 +0100
+
+language-selector (0.192) disco; urgency=medium
+
+  * data/pkg_depends:
+    Pull mozc-utils-gui for Japanese explicitly since it has been moved
+    to universe (LP: #1803813).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 20 Nov 2018 16:50:00 +0100
+
+language-selector (0.191) disco; urgency=medium
+
+  * data/pkg_depends:
+    Pull ibus-m17n for Tamil to bring tamil99 (LP: #1674089).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 13 Nov 2018 18:07:00 +0100
+
+language-selector (0.190) cosmic; urgency=medium
+
+  * data/pkg_depends:
+    Stop pulling myspell-lv, since hunspell-lv is available.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 07 Jun 2018 06:05:00 +0200
+
+language-selector (0.189) cosmic; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Prevent crash if LC_CTYPE has a value which Python does not
+    understand (LP: #1772237).
+  * debian/control:
+    Drop obsolete X-Python3-Version field.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 20 May 2018 21:56:00 +0200
+
+language-selector (0.188) bionic; urgency=medium
+
+  * The latest translations exported from Launchpad
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 14 Apr 2018 16:44:00 +0200
+
+language-selector (0.187) bionic; urgency=medium
+
+  * setup.cfg:
+    Change the gettext domain back to "language-selector". Most of the
+    translations are for that template, and the additional
+    "gnome-language-selector" template can then be removed
+    (LP: #1762253).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 09 Apr 2018 00:38:00 +0200
+
+language-selector (0.186) bionic; urgency=medium
+
+  * help/C/index.docbook:
+    Minor updates, including some changes which make the document apply
+    better also to the flavors.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 26 Mar 2018 02:55:00 +0200
+
+language-selector (0.185) bionic; urgency=medium
+
+  * data/pkg_depends:
+    Replace ibus-sunpinyin with ibus-libpinyin (LP: #1735362).
+  * debian/control:
+    Bump Standards-Version to 4.1.2.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 30 Jan 2018 20:48:00 +0100
+
+language-selector (0.184) bionic; urgency=medium
+
+  * data/pkg_depends:
+    - Don't pull fonts-unfonts-core for Korean (LP: #1581160).
+    - Pull hunspell-de-XX-frami for German.
+  * language_support_pkgs.py:
+    - Exclude hunspell-de-XX since they conflict with -frami.
+    - Drop the _hunspell_frami_special() function - not applicable
+      when -frami is pulled by default.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 20 Nov 2017 21:14:00 +0100
+
+language-selector (0.183) bionic; urgency=medium
+
+  * fontconfig/30-cjk-aliases.conf:
+    Complete with Noto fonts (LP: #1581160, LP: #1581151).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 10 Nov 2017 02:38:00 +0100
+
+language-selector (0.182) bionic; urgency=medium
+
+  * data/pkg_depends:
+    Pull Noto fonts for Japanese and Korean (LP: #1581160).
+  * fontconfig/64-language-selector-prefer.conf:
+    Add Korean fonts (LP: #1581160).
+  * fontconfig/69-language-selector-ja.conf:
+    New Japanese config file to control hinting etc. (LP: #1581160).
+  * fontconfig/69-language-selector-zh-??.conf:
+    Make Noto Serif CJK the preferred serif font (LP: #1581151).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 02 Nov 2017 00:13:00 +0100
+
+language-selector (0.181) bionic; urgency=medium
+
+  * LanguageSelector/LocaleInfo.py:
+    Adapt to changed syntax in ~/.pam_environment (LP: #1722151).
+  * LanguageSelector/ImConfig.py:
+    Prevent crash if LC_CTYPE is 'C' (LP: #1723318).
+  * debian/control:
+    Bump Standards-Version to 4.1.1.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 27 Oct 2017 19:40:00 +0200
+
+language-selector (0.180) artful; urgency=medium
+
+  * language_support_pkgs.py:
+    Don't pull Fcitx packages if GNOME desktop.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 20 Sep 2017 00:45:00 +0200
+
+language-selector (0.179) artful; urgency=medium
+
+  * Rename language-selector.desktop to gnome-language-selector.desktop
+    to fix missing icon in GNOME
+  * Build-Depend on dh-python to fix lintian error
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 14 Sep 2017 10:16:41 -0400
+
+language-selector (0.178) artful; urgency=medium
+
+  * fontconfig/64-language-selector-prefer.conf:
+    Add "serif" section with Noto Serif CJK.
+  * data/pkg_depends:
+    Pull fonts-noto-cjk-extra for Chinese.
+  * debian/control:
+    Bump Standards-Version to 4.0.0.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 18 Jul 2017 20:27:00 +0200
+
+language-selector (0.177) artful; urgency=medium
+
+  * data/pkg_depends:
+    Pull GNOME user's guide (LP: #1691872).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 19 May 2017 23:34:00 +0200
+
+language-selector (0.176) zesty; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Prevent crash if XDG_CURRENT_DESKTOP is unset (LP: #1660435).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 11 Mar 2017 21:43:00 +0100
+
+language-selector (0.175) zesty; urgency=medium
+
+  * help/C/index.docbook:
+    Minor updates including mentioning of Fcitx.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 05 Mar 2017 23:36:00 +0100
+
+language-selector (0.174) zesty; urgency=medium
+
+  * language_support_pkgs.py:
+    Prevent check-language-support() from pulling English language
+    support if /usr/share/locale-langpack/en does not exist
+    (LP: #1665627).
+  * data/pkg_depends:
+    Pull Scottish Gaelic word list.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 18 Feb 2017 23:54:00 +0100
+
+language-selector (0.173) zesty; urgency=medium
+
+  * LanguageSelector/LanguageSelector.py:
+    Do not let the LANGUAGE priority list contain any items (except for
+    'en') after 'en_US', since the resulting display language would
+    not likely meet the user's expectations (LP: #1654238).
+  * debian/compat:
+    Bump to 9.
+  * debian/control:
+    Bump debhelper build depend version to >= 9.0.0.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 08 Jan 2017 23:10:00 +0100
+
+language-selector (0.172) yakkety; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    When checking XDG_CURRENT_DESKTOP, consistently take into account
+    that its value may be a multi value list.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 04 Oct 2016 03:52:00 +0200
+
+language-selector (0.171) yakkety; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Use "none" as default for non-CJKV languages on certain flavors
+    instead of "xim" (LP: #1605408).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 22 Jul 2016 15:21:00 +0200
+
+language-selector (0.170) yakkety; urgency=medium
+
+  * Drop fonts-mgopen; superseded by DejaVu's Greek support and removed in
+    yakkety.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 07 Jul 2016 17:34:09 -0700
+
+language-selector (0.169) yakkety; urgency=medium
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py,
+    LanguageSelector/ImConfig.py:
+    Add an explicit XIM input method option, and let "none" be truly
+    "none" (and not "xim") to prevent confusion (LP: #1585797).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 25 May 2016 23:06:00 +0200
+
+language-selector (0.168) yakkety; urgency=medium
+
+  * data/pkg_depends:
+    Don't pull the dummy openoffice.org-hyphenation (LP: #1578880).
+  * language_support_pkgs.py:
+    Drop hack for hunspell-sv-se (no longer in archive).
+  * debian/control:
+    Bump Standards-Version to 3.9.8.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 19 May 2016 18:13:00 +0200
+
+language-selector (0.167) yakkety; urgency=medium
+
+  * language_support_pkgs.py:
+    Hack to exclude hunspell-gl from the installation candidates
+    (LP: #1578821).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 11 May 2016 01:44:00 +0200
+
+language-selector (0.166) yakkety; urgency=medium
+
+  * data/pkg_depends:
+    Replace fonts packages, which were dropped from archive in Xenial,
+    with their replacement packages (LP: #1574835).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 25 Apr 2016 22:15:00 +0200
+
+language-selector (0.165) xenial; urgency=medium
+
+  * Updated translations from launchpad
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 13 Apr 2016 16:26:33 -0600
+
+language-selector (0.164) xenial; urgency=medium
+
+  * fontconfig/69-language-selector-zh-*.conf:
+  * fontconfig/64-language-selector-prefer.conf:
+    Dropped workaround to make "Regular" the default font weight for
+    Noto Sans CJK; fixed in fontconfig 2.11.1-0ubuntu9 (LP: #1468027).
+  * debian/control:
+    Bump Standards-Version to 3.9.7.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 05 Apr 2016 10:35:00 +0200
+
+language-selector (0.163) xenial; urgency=medium
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    Specify version of Gdk and Gtk before importing.
+
+  [ Adolfo Jayme ]
+  * data/LanguageSelector.ui:
+    Deprecated gtk properties replaced (LP: #1470523).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 19 Mar 2016 01:34:00 +0100
+
+language-selector (0.162) xenial; urgency=medium
+
+  * fontconfig/64-language-selector-prefer.conf:
+    Make Japanese contents be rendered using "Noto Sans CJK JP" in
+    case of a non-CJKV locale (LP: #1540063, LP: #1468027).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 16 Mar 2016 15:07:00 +0100
+
+language-selector (0.161) xenial; urgency=medium
+
+  * fontconfig/64-language-selector-prefer.conf,
+    debian/language-selector-common.links:
+    Prevent that UKai and UMing is picked over default Chinese and
+    Japanese fonts when the locale is something else but Chinese or
+    Japanese (LP: #1468027, LP: #1540063).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 13 Mar 2016 14:02:00 +0100
+
+language-selector (0.160) xenial; urgency=medium
+
+  * fontconfig/69-language-selector-zh-*.conf:
+    Make "Regular" the default font weight for "Noto Sans CJK"
+    (LP: #1468027).
+    
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 12 Mar 2016 08:17:00 +0100
+
+language-selector (0.159) xenial; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Make "auto" the system default for Ubuntu GNOME (LP: #1551283).
+  * debian/control:
+    Bump version of the im-config dependency.
+  * data/pkg_depends:
+    Pull IBus IM engines in Ubuntu GNOME (LP: #1551283).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 10 Mar 2016 23:33:00 +0100
+
+language-selector (0.158) xenial; urgency=medium
+
+  * data/pkg_depends:
+    - Stop pulling myspell-* for languages where hunspell-* are made
+      available via libreoffice-dictionaries 1:5.1.0-1ubuntu1
+      (LP: #1510198).
+    - Stop pulling openoffice.org-hyphenation for languages which are
+      not available in version 0.9.
+    - Pull hunspell-no/hyphen-no/mythes-no if nb_NO or nn_NO locale.
+  * language_support_pkgs.py:
+    - Hack to prevent that hunspell-sv-se is pulled by
+      check-language-support.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 04 Mar 2016 02:57:00 +0100
+
+language-selector (0.157) xenial; urgency=medium
+
+  * LanguageSelector/ImConfig.py: Add MATE compatibility. (LP: #1550325)
+
+ -- Martin Wimpress <code@flexion.org>  Fri, 26 Feb 2016 13:17:41 +0000
+
+language-selector (0.156) xenial; urgency=medium
+
+  * data/pkg_depends: install ibus-mozc instead of ibus-anthy (LP: #1547845).
+
+ -- Ikuya Awashiro <ikuya@fruitsbasket.info>  Sat, 20 Feb 2016 21:31:42 +0900
+
+language-selector (0.155) xenial; urgency=medium
+
+  * fontconfig/69-language-selector-zh-*.conf:
+    Prepend "DejaVu Sans Mono" for monospace (LP: #1468027).
+  * fontconfig/30-cjk-aliases.conf:
+    Include "Noto Sans CJK" where applicable (LP: #1468027).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 17 Jan 2016 17:30:00 +0100
+
+language-selector (0.154) xenial; urgency=medium
+
+  * data/pkg_depends, fontconfig/69-language-selector-zh-*.conf:
+    Default font for Chinese changed from "Droid Sans Fallback" to
+    "Noto Sans CJK" (LP: #1468027).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 16 Jan 2016 00:43:00 +0100
+
+language-selector (0.153) xenial; urgency=medium
+
+  * data/cedilla-portuguese.sh, setup.py:
+    Make it easier for pt_PT users to type ccedilla (ç) in the same
+    manner as it works for pt_BR users since version 0.142
+    (LP: #518056).
+  * debian/language-selector-common.maintscript:
+    Renaming from cedilla-brazil.sh to cedilla-portuguese.sh.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 29 Dec 2015 12:59:00 +0100
+
+language-selector (0.152) xenial; urgency=medium
+
+  * data/pkg_depends:
+    Stop pulling myspell-ca, since hunspell-ca is available.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 04 Nov 2015 17:49:00 +0100
+
+language-selector (0.151) wily; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Prevent crash if the locale is broken (LP: #1507369, LP: #1507500).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 19 Oct 2015 18:06:00 +0200
+
+language-selector (0.150) wily; urgency=medium
+
+  * Updated translations from launchpad
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 16 Oct 2015 10:06:31 +0100
+
+language-selector (0.149) wily; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Use "cjkv" instead of "xim" on non-Unity desktops (LP: #1481025).
+  * debian/control:
+    Bump version of the im-config dependency.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 15 Oct 2015 05:53:00 +0200
+
+language-selector (0.148) wily; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Make "xim" (displayed as "none") the system default for non-CJKV
+    locales on non-Unity desktops (LP: #1481025).
+  * debian/control:
+    Bump version of the im-config dependency.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 08 Oct 2015 23:35:00 +0200
+
+language-selector (0.147) wily; urgency=medium
+
+   * data/pkg_depends:
+     - Add support for translated gnome getting started user guide
+       (LP: #1482937)
+
+ -- Tim Lunn <tim@feathertop.org>  Thu, 13 Aug 2015 01:46:00 +0200
+
+language-selector (0.146) wily; urgency=medium
+
+  * data/pkg_depends:
+    Replace fcitx-anthy with fcitx-mozc for Japanese (LP: #1468105).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 28 Jul 2015 15:55:00 +0200
+
+language-selector (0.145build1) wily; urgency=medium
+
+  * No-change rebuild for python3.5 transition
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 22 Jul 2015 17:18:28 +0000
+
+language-selector (0.145) wily; urgency=medium
+
+  * data/pkg_depends:
+    Pull fcitx for Korean and Vietnamese (LP: #1459078, LP: #1459080).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 14 Jun 2015 10:38:00 +0200
+
+language-selector (0.144) wily; urgency=medium
+
+  * data/pkg_depends:
+    Pull fcitx (the framework) for Japanese.
+
+  [ Ikuya Awashiro ]
+  * data/pkg_depends:
+    If a Japanese language is installed (or about to be installed),
+    pull the applicable Japanese fcitx IM engines (LP: #1439006).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 07 May 2015 20:00:00 +0200
+
+language-selector (0.143) vivid; urgency=medium
+
+  * Updated translations from launchpad
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 10 Apr 2015 16:11:04 +0200
+
+language-selector (0.142) vivid; urgency=medium
+
+  * data/cedilla-brazil.sh: Fix broken shell from previous upload.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Wed, 01 Apr 2015 11:47:00 -0600
+
+language-selector (0.141) vivid; urgency=medium
+
+  * data/cedilla-brazil.sh:
+    Make it easier for Brazilian Portuguese users to type ccedilla (ç)
+    - partial solution to LP: #518056.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 01 Apr 2015 09:56:00 +0200
+
+language-selector (0.140) vivid; urgency=medium
+
+  * data/pkg_depends:
+    Pull kde-config-fcitx for Chinese on Kubuntu.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 25 Mar 2015 20:12:00 +0100
+
+language-selector (0.139) vivid; urgency=medium
+
+  * data/pkg_depends:
+    If a Chinese language is installed (or about to be installed):
+    - pull the applicable Chinese fcitx IM engines irrespective of the
+      presence of the fcitx framework, and
+    - pull also fcitx (the framework)
+    (LP: #1435311).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 25 Mar 2015 18:57:00 +0100
+
+language-selector (0.138) vivid; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Capture only the first 3 elements from the "im-config -m" output
+    (needed as from im-config 0.29).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 23 Mar 2015 00:12:00 +0100
+
+language-selector (0.137) vivid; urgency=medium
+
+  * debian/control:
+    Bump Standards-Version to 3.9.6.
+
+  [ Aron Xu ]
+  * data/pkg_depends:
+    Pull fcitx IM engines instead of IBus ditto for Chinese
+    (LP: #1430893).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 18 Mar 2015 19:01:00 +0100
+
+language-selector (0.136) vivid; urgency=medium
+
+  * Remove gir1.2-vte-2.90 dependency, which is unused.
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Fri, 07 Nov 2014 12:48:22 +0000
+
+language-selector (0.135) utopic; urgency=medium
+
+  * Update translations from launchpad
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 17 Oct 2014 17:49:12 +0200
+
+language-selector (0.134) utopic; urgency=low
+
+  * data/pkg_depends:
+    Removed some entries which are no longer needed.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 01 Oct 2014 22:53:00 +0200
+
+language-selector (0.133) utopic; urgency=low
+
+  * fontconfig/69-language-selector-zh-??.conf:
+    Reverse changes in version 0.132 (LP: #1334495, LP: #1351092).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 15 Sep 2014 16:23:00 +0200
+
+language-selector (0.132) utopic; urgency=low
+
+  * fontconfig/69-language-selector-zh-??.conf:
+    Replace "Droid Sans Fallback" with "Droid Sans" (LP: #1335482).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 01 Jul 2014 15:41:00 +0200
+
+language-selector (0.131) utopic; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py, help/C/index.docbook:
+    - Make the "Apply System-Wide" and "Install / Remove Languages..."
+      buttons sensitive also for standard users (LP: #1008344).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 27 Jun 2014 00:06:00 +0200
+
+language-selector (0.130) utopic; urgency=low
+
+  * LanguageSelector/ImConfig.py:
+    - Change in version 0.126 reverted - not needed any longer due to
+      changes in im-config.
+  * debian/control:
+    - Bump version of the im-config dependency.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 29 Apr 2014 13:11:00 +0200
+
+language-selector (0.129) trusty; urgency=medium
+
+  * Update translations from launchpad
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 10 Apr 2014 20:05:44 +0200
+
+language-selector (0.128) trusty; urgency=medium
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - set a minimal height for the details (lp: #1165626)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 09 Apr 2014 18:15:26 +0200
+
+language-selector (0.126) trusty; urgency=medium
+
+  * LanguageSelector/ImConfig.py:
+    Make fcitx the system default if installed (LP: #1297831).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 27 Mar 2014 15:09:00 +0100
+
+language-selector (0.125) trusty; urgency=medium
+
+  * fontconfig/69-language-selector-zh-*.conf:
+    Added 'binding="strong"' when missing (LP: #1227034).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 27 Mar 2014 11:38:00 +0100
+
+language-selector (0.124) trusty; urgency=medium
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    PyGTKDeprecationWarning fixes.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 19 Mar 2014 02:07:00 +0100
+
+language-selector (0.123) trusty; urgency=medium
+
+  * Rewrite the python shebang path to /usr/bin/python3.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 20 Feb 2014 13:10:24 +0100
+
+language-selector (0.122) trusty; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    Enabled grouping in currency format example.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 13 Feb 2014 23:44:00 +0100
+
+language-selector (0.121) trusty; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py,
+    LanguageSelector/ImConfig.py:
+    - Dropped the ambiguous 'default' option in the IM selector.
+  * debian/control:
+    - Bump version of the im-config dependency.
+    - Bump Standards-Version to 3.9.5.
+  * help/C/index.docbook:
+    - Language Support Help updated.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 05 Feb 2014 08:19:00 +0100
+
+language-selector (0.120) trusty; urgency=low
+
+  * fontconfig/69-language-selector-zh-hk.conf, -zh-mo.conf:
+    WenQuanYi Zen Hei fonts dropped (LP: #1270647).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 21 Jan 2014 22:37:00 +0100
+
+language-selector (0.119) trusty; urgency=medium
+
+  * data/language-selector.desktop.in:
+    - Show in both unity-control-center and gnome-control-center (LP: #1257505)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 15 Jan 2014 15:07:58 +1300
+
+language-selector (0.118) trusty; urgency=low
+
+  * data/pkg_depends:
+    ttf-wqy-zenhei replaced with fonts-droid for Chinese (LP: #1173571).
+  * fontconfig/69-language-selector-zh-hk.conf, -zh-cn.conf, -zh-sg.conf:
+    Droid Sans Fallback moved to top.
+  * fontconfig/69-language-selector-zh-tw.conf:
+    Outdated DejaVu bindings removed (LP: #1173571).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 06 Nov 2013 14:58:00 +0100
+
+language-selector (0.117) trusty; urgency=low
+
+  * LanguageSelector/LocaleInfo.py:
+    Fix TypeError (LP: #1194985).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 05 Nov 2013 02:34:00 +0100
+
+language-selector (0.116) saucy; urgency=low
+
+  * Update translations from launchpad
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 04 Oct 2013 11:17:41 +0200
+
+language-selector (0.115) saucy; urgency=low
+
+  * SECURITY UPDATE: possible privilege escalation via policykit UID lookup
+    race.
+    - dbus_backend/ls-dbus-backend: pass system-bus-name as a subject
+      instead of pid so policykit can get the information from the system
+      bus.
+    - CVE-2013-1066
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 18 Sep 2013 12:45:13 -0400
+
+language-selector (0.114) saucy; urgency=low
+
+  * Update for python-distutils-extra changes to help handling
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 23 Jul 2013 12:45:09 -0400
+
+language-selector (0.113) saucy; urgency=low
+
+  * fontconfig/30-cjk-aliases.conf:
+    Stop fontconfig warnings (LP: #1191450).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sun, 16 Jun 2013 07:41:00 +0200
+
+language-selector (0.112) saucy; urgency=low
+
+  * debian/language-selector-common.links:
+    Missing symlinks added.
+  * fontconfig/99-language-selector-zh.conf:
+    Get rid of fontconfig warnings (LP: #1189152).
+  * fontconfig/none:
+    Removed.
+  * fontconfig/README:
+    Cleanup.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Sat, 15 Jun 2013 00:20:00 +0200
+
+language-selector (0.111) saucy; urgency=low
+
+  * data/pkg_depends:
+    - Replace ttf-thai-tlwg with fonts-thai-tlwg.
+    - Replace ttf-arphic-ukai with fonts-arphic-ukai.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Sun, 09 Jun 2013 23:54:04 +0100
+
+language-selector (0.110) raring; urgency=low
+
+  * Updated translations for raring
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 17 Apr 2013 12:28:24 +0200
+
+language-selector (0.109) raring; urgency=low
+
+  * data/LanguageSelector.ui:
+    Make the "Drag languages..." sentence bold (LP: #362204).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 02 Apr 2013 16:10:00 +0100
+
+language-selector (0.108) raring; urgency=low
+
+  * language_support_pkgs.py:
+    Fix of TypeError in _expand_pkg_pattern() (LP: #1161953).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 29 Mar 2013 18:40:00 +0100
+
+language-selector (0.107) raring; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    Prevent crashes like the one in LP: #1154243.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 18 Mar 2013 05:16:00 +0100
+
+language-selector (0.106) raring; urgency=low
+
+  * language_support_pkgs.py:
+    Changes in available_languages() to avoid that users are prompted
+    to install language support for non-installed languages. That
+    could happen if there were other locales on the system but the
+    locales representing the installed languages.
+  * dbus_backend/ls-dbus-backend:
+    Update /etc/papersize when regional formats are applied system
+    wide (LP: #1130690).
+  * debian/control:
+    Bump the accountsservice dependency.
+  * LanguageSelector/LocaleInfo.py:
+    Don't display the @variant portion of a language or locale name
+    as b'variant'.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 22 Feb 2013 07:05:00 +0100
+
+language-selector (0.105) raring; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    Prevent crashes like the one in LP: #1112706.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Thu, 21 Feb 2013 15:15:04 +0100
+
+language-selector (0.104) raring; urgency=low
+
+  * data/pkg_depends:
+    List of input methods for traditional Chinese modified. Thanks to
+    Ma Xiaojun for the proposal (LP: #1120833).
+  * LanguageSelector/LangCache.py:
+    When a language is removed, don't remove packages that are not
+    language specific (LP: #37707).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 12 Feb 2013 05:25:22 +0100
+
+language-selector (0.103) raring; urgency=low
+
+  * LanguageSelector/LanguageSelector.py:
+    Make getMissingLangPacks() return a list instead of a set -
+    fixes regression issue from version 0.102 (LP: #1103547).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 08 Feb 2013 17:12:00 +0100
+
+language-selector (0.102) raring; urgency=low
+
+  [ Martin Pitt ]
+  * tests/test_language_support_pkgs.py: Fix unstable test due to Python's
+    current hash randomization.
+  * Add test case for LP #1103547.
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/LanguageSelector.py:
+    Call missing() in language_support_pkgs.py instead of
+    by_locale(), so the check for missing language support packages
+    is carried out for all the installed languages, not only for the
+    current system language.
+  * language_support_pkgs.py:
+    Hack to prevent that users are prompted to install hunspell-de-xx
+    when the enhanced (and conflicting) hunspell-de-xx-frami is
+    installed (LP: #1103547).
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 08 Feb 2013 11:55:28 +0100
+
+language-selector (0.101) raring; urgency=low
+
+  * This upload is about fixing LP: #1043031. Namely the use of LANG guards
+    introduced in 0.86 was possibly not an entirely correct solution because
+    there is a significant class of users who do not use the 'native' locale
+    of these fonts, yet this is what a LANG guards tests for. We need the
+    fontconfig configurations to apply correctly in these cases too.
+  * Remove Japanese fontconfig file; these have been moved to the individual
+    font packages which will be pulled in by l-s if appropriate.
+  * Switch to using .maintscript file for removing conffiles; version
+    debhelper BD as appropriate. 
+  * 69_zh* - remove wqy-microhei versions. This package now has its own
+    fontconfig configuration.
+  * fontconfig/README: Update to reflect reality of the 69_* files
+  * Remove 'strong' binding and unnecessary fonts from zh_* configuration. 
+
+ -- Iain Lane <iain.lane@canonical.com>  Wed, 06 Feb 2013 15:37:33 +0000
+
+language-selector (0.100) raring; urgency=low
+
+  * help/C/language-selector.xml:
+    Update due to the transition from im-switch to im-config.
+  * LanguageSelector/LanguageSelector.py,
+    LanguageSelector/gtk/GtkLanguageSelector.py:
+    Do not let the LANGUAGE priority list contain non-English items
+    after an English item, since the resulting display language would
+    not likely meet the user's expectations (LP: #1084745).
+  * data/LanguageSelector.ui:
+    Title added to the "Checking available language support" progress
+    dialog (LP: #1113093).
+  * Removal of stuff related to language-selector-kde, since Kubuntu
+    isn't using it any longer.
+  * debian/control:
+    Bump Standards-Version to 3.9.4.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 29 Jan 2013 21:29:00 +0100
+
+language-selector (0.99) raring; urgency=low
+
+  * LanguageSelector/ImConfig.py,
+    LanguageSelector/gtk/GtkLanguageSelector.py:
+    - Get available input methods from im-config (LP: #1090754).
+  * debian/control:
+    - Bump version of the im-config dependency.
+    - yelp added to the Recommends field, since it's needed for the
+      "Help" button to work.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Tue, 18 Dec 2012 21:32:00 +0100
+
+language-selector (0.98) raring; urgency=low
+
+  * debian/control:
+    - Bump version of the im-config dependency.
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Mon, 10 Dec 2012 17:29:00 +0100
+
+language-selector (0.97) raring; urgency=low
+
+  * Restore to version 0.95, now that the im-config MIR is sorted.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Sun, 09 Dec 2012 10:47:01 -0700
+
+language-selector (0.96) raring; urgency=low
+
+  * Revert to 0.94, as the im-switch transition needs MIR approval.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Fri, 07 Dec 2012 15:28:29 -0700
+
+language-selector (0.95) raring; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - Deprecated keyword "type" in Gtk.MessageDialog constructors
+      replaced by "message_type".
+  * debian/control, LanguageSelector/gtk/GtkLanguageSelector.py,
+    LanguageSelector/ImConfig.py, data/LanguageSelector.ui:
+    - Transition from the im-switch framework for handling input
+      method systems to im-config (LP: #1076975).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 30 Nov 2012 05:36:00 +0100
+
+language-selector (0.94) raring; urgency=low
+
+  * data/language-selector.desktop.in:
+    - Use equivalent 'preferences-desktop-locale' icon instead of
+      'config-language' since the High Contrast theme is missing a symlink
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 27 Nov 2012 15:20:11 +0100
+
+language-selector (0.93) raring; urgency=low
+
+  * LanguageSelector/LocaleInfo.py:
+    Look first for a common_name field when grabbing a language name
+    (LP: #991002).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 16 Nov 2012 16:55:39 +0000
+
+language-selector (0.92) raring; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py,
+  gnome-language-selector: Add single instance support for gnome-language-selector
+  and fix the Escape key malfunction when num lock is on.
+
+ -- Shih-Yuan Lee (FourDollars) <sylee@ubuntu.com>  Mon, 12 Nov 2012 09:55:43 +0100
+
+language-selector (0.91) raring; urgency=low
+
+  * Build depend on python3-all.
+
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Fri, 26 Oct 2012 11:56:42 +0100
+
+language-selector (0.90) quantal; urgency=low
+
+  * Updated launchpad translations
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 09 Oct 2012 15:59:39 +0200
+
+language-selector (0.89) quantal; urgency=low
+
+  * check-language-support: De-duplicate output for a single target language
+    (LP: #1056689).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 27 Sep 2012 13:04:24 +0100
+
+language-selector (0.88) quantal; urgency=low
+
+  * data/pkg_depends: Add kdevelop-php-l10n to translations category for
+    kdevelop-php (LP: #1048584).
+  * check-language-support: Print errors to stderr (LP: #1048204).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Wed, 26 Sep 2012 16:51:53 +0100
+
+language-selector (0.87) quantal; urgency=low
+
+  * Fix bad testing sections. LP: #1034928 
+    - fontconfig/69-language-selector-ja-jp.conf: Separate matching
+      patterns for non-bitmap/non-hinting sections. And remove legacy
+      font lists.
+    - fontconfig/69-language-selector-zh-tw.conf: Separate matching
+      patterns at "Bind AR PL UMing with DejaVu Serif" section.
+
+ -- Fumihito YOSHIDA <hito@kugutsu.org>  Wed, 22 Aug 2012 11:35:26 +0900
+
+language-selector (0.86) quantal; urgency=low
+
+  * Apply all (ja-jp, zh-*) fontconfig config files only when locale matches
+  * Remove 69-language-selector-ka-ge.conf — it's going to its corresponding
+    font package fonts-bpg-georgian.
+  * Disable installation/updating of fontconfig-voodoo and remove previously
+    installed symlinks on upgrade.
+  * Enable all config files that might have been previously installed by
+    fontconfig-voodoo now that they are all guarded by locale.
+  * Standards-Version → 3.9.3, no changes required
+
+ -- Iain Lane <iain.lane@canonical.com>  Mon, 13 Aug 2012 11:35:34 +0100
+
+language-selector (0.85) quantal; urgency=low
+
+  * ls-dbus-backend: fix for python3 compatibility.  LP: #1014429.
+  * Do not touch /etc/environment; we should be updating /etc/default/locale
+    exclusively.  On upgrade, clean up any references that have been left
+    behind in /etc/environment. LP: #1035498.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 10 Aug 2012 22:06:35 -0700
+
+language-selector (0.84) quantal-proposed; urgency=low
+
+  * data/pkg_depends: Add fonts-lklug-sinhala for Sinhala.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Thu, 28 Jun 2012 14:44:44 +0100
+
+language-selector (0.83) quantal; urgency=low
+
+  * debian/rules: Override dh_auto_* commands to build with Python 3. (See
+    Debian #597105)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 14 Jun 2012 10:13:04 +0200
+
+language-selector (0.82) quantal; urgency=low
+
+  [ Colin Watson ]
+  * Port to Python 3:
+    - Use Python 3-style print functions.
+    - Use "except Exception as e" syntax rather than the old-style "except
+      Exception, e".
+    - Use "raise Exception(value)" syntax rather than the old-style "raise
+      Exception, value".
+    - Use list comprehensions rather than filter.
+    - Use new-style octal literals.
+    - Use str() rather than unicode() in Python 3.
+    - Open subprocesses with universal_newlines=True when expecting to read
+      text from them.
+    - Cope with changes in dict method return types in Python 3.
+
+  [ Martin Pitt ]
+  * tests/runner.sh: Run with $PYTHON if specified, to make it easier to run
+    with a different Python version.
+  * Consistent str vs. bytes handling, to work with Python 3.
+  * Convert tests to current apt API.
+  * Python 3 compatible import statements.
+  * Properly close files, to avoid ResourceWarnings.
+  * Convert all tabs to spaces.
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Pass a string to setlocale(),
+    not bytes.
+  * LanguageSelector/qt/QtLanguageSelector.py: Fix for Python 3.
+  * LanguageSelector/gtk/GtkLanguageSelector.py: python3-dbus now sometimes
+    calls OpProgress.update() without any argument. Support this and pulsate
+    the progress bar in this case.
+  * Switch all hashbangs and dependencies to Python 3.
+  * debian/control: Drop now obsolete language-selector and
+    language-selector-qt transitional packages.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 14 Jun 2012 09:50:35 +0200
+
+language-selector (0.81) quantal; urgency=low
+
+  * data/pkg_depends: replace cmap-adobe- depends by poppler-data 
+    (lp: #1009052)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 07 Jun 2012 12:45:28 +0200
+
+language-selector (0.80) quantal; urgency=low
+
+  * Add gcompris to pkg_depends (for gcompris-sound-* in Edubuntu)
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Mon, 14 May 2012 17:14:12 -0400
+
+language-selector (0.79) precise; urgency=low
+
+  * Update of help document (LP: #983951).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Wed, 18 Apr 2012 08:09:49 +0200
+
+language-selector (0.78) precise; urgency=low
+
+  * Updated translations from launchpad (lp: #980842)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 13 Apr 2012 16:21:24 +0200
+
+language-selector (0.77) precise; urgency=low
+
+  * dbus_backend/ls-dbus-backend: Set LC_IDENTIFICATION as well, to comply
+    with what Ubiquity does. (LP: #926207)
+  * tests/test_language_support_pkgs.py: Fix
+    test_by_package_and_locale_noinstalled() for current pkg_depends: gedit
+    does not need aspell any more, use abiword as trigger package.
+  * language_support_pkgs.py, _expand_pkg_pattern(): Special-case "zh-han[st]"
+    values for the locale. These are not actual locales, but e. g. Ubiquity
+    assumes this works. So let these mean "zh_CN" and "zh_TW" respectively.
+    Add a test case to tests/test_language_support_pkgs.py. (LP: #963460)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 30 Mar 2012 12:42:15 +0200
+
+language-selector (0.76) precise; urgency=low
+
+  * Add conffile upgrade handling for ko-kr conffiles dropped since lucid.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 26 Mar 2012 22:20:17 -0700
+
+language-selector (0.75) precise; urgency=low
+
+  [ Jinkyu Yi ]
+  * data/pkg_depends:
+    - Add fonts-unfonts-core for fonts-nanum's fallback
+    - Remove ttf-alee, fonts-nanum-extra to reduce ko-related packages
+      (refer to task-korean-desktop at Debian)
+    - remove nabi, Unity can't support it
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 16 Mar 2012 11:27:49 +0100
+
+language-selector (0.74) precise; urgency=low
+
+  * data/pkg_depends: Add fonts-ukij-uyghur for Uyghur. Thanks to Eagle
+    Burkut for pointing this out.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 15 Mar 2012 15:22:54 +0100
+
+language-selector (0.73) precise; urgency=low
+
+  * data/pkg_depends: Add support for translated documentation of amarok
+    and calligra.
+
+ -- Felix Geyer <debfx@ubuntu.com>  Mon, 12 Mar 2012 11:39:45 -0400
+
+language-selector (0.72) precise; urgency=low
+
+  [ Sebastien Bacher ]
+  * data/language-selector.desktop.in:
+    - use official "Keywords" rather than "X-GNOME-Keywords" (LP: #949849)
+
+  [ Martin Pitt ]
+  * LanguageSelector/qt/QtLanguageSelector.py: Kubuntu's package manager is
+    "Muon", not "Adept". Also update all messages in po/*.po to avoid breaking
+    existing translations. (LP: #628653)
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Fix crash in
+    updateLocaleChooserCombo() if tree model is not yet set. (LP: #945494)
+  * debian/language-selector-common.postinst: Do not fail configuring if D-BUS
+    does not give us the PID of a running ls-dbus-backend. (LP: #766672)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 09 Mar 2012 16:34:49 +0100
+
+language-selector (0.71) precise; urgency=low
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    Modified wording of the error message shown if the example box
+    fails to apply the current locale (LP: #930785).
+
+  [ Martin Pitt ]
+  * data/pkg_depends: Drop myspell-ru, we have hunspell-ru now.
+  * data/pkg_depends: Add cmap-adobe-* packages for ghostscript. (LP: #496012)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 02 Mar 2012 06:54:37 +0100
+
+language-selector (0.70) precise; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    Clear the example box values before trying to generate new ones.
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    Call for the no longer existing writeSysLangSetting() function
+    removed (LP: #928400). writeSysLanguageSetting() now sets LANG.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Wed, 15 Feb 2012 07:42:06 +0100
+
+language-selector (0.69) precise; urgency=low
+
+  * LanguageSelector/LocaleInfo.py, getUserDefaultLanguage(): Fix crash if
+    system D-BUS is not running, which happens when running fontconfig-voodoo
+    from casper. (LP: #856975)
+  * debian/control: "Ubuntu Linux" → "Ubuntu". (LP: #919972)
+  * data/pkg_depends: Move mozvoikko to xul-ext-mozvoikko.
+  * data/pkg_depends: gedit and sylpheed use libenchant now, move these from
+    aspell to hunspell dictionaries.
+  * Close window on "Esc". (LP: #614933)
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Intercept errors from
+    aptdaemon transactions and stop waiting for the transaction to finish on
+    an error. (LP: #863875)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 09 Feb 2012 14:41:43 +0100
+
+language-selector (0.68) precise; urgency=low
+
+  * LanguageSelector/qt/QtLanguageSelector.py: Erroneous for loops
+    replaced with simple variable assignments (LP: #926824).
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Wed, 08 Feb 2012 06:15:31 +0100
+
+language-selector (0.67) precise; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Remove call for the
+    dropped function verify_no_unexpected_changes() (LP: #927814).
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Tue, 07 Feb 2012 08:33:33 +0100
+
+language-selector (0.66) precise; urgency=low
+
+  * LanguageSelector/LangCache.py, tests/test_lang_cache.py: Drop some dead
+    code.
+  * data/pkg_depends: Install poppler-data for all languages. (LP: #893920)
+  * tests/test_language_support_pkgs.py: Fix test case for a package which is
+    not a pattern, but a full name ("chromium-browser-l10n").
+  * language_support_pkgs.py: Also consider the pattern itself a package name.
+    Fixes installation of chromium-browser-l10n and poppler-data.
+  * tests/test-data/etc/apt/sources.list*: Use precise.
+  * tests/test_lang_cache.py: Update the cache before the tests, so that they
+    can actually succeed.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 06 Feb 2012 12:33:54 +0100
+
+language-selector (0.65) precise; urgency=low
+
+  [ Colin Watson ]
+  * check-language-support: Ignore errors from locale.setlocale.  We might
+    well be running from the installer before locales have been properly
+    configured (LP: #925330).
+  * Clean up lots of pyflakes warnings.
+  * LanguageSelector/FontConfig.py, LanguageSelector/LocaleInfo.py,
+    LanguageSelector/utils.py: Use string methods rather than deprecated
+    string functions.
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/LocaleInfo.py: Prevent makeEnvString() from
+    processing the empty string (LP: #926049).
+  * fontconfig/30-cjk-aliases.conf: Changes due to Korean migration to
+    fonts-nanum (LP: #792471).
+  * debian/control: pyqt4-dev-tools added to build-depends (the pyuic4
+    program is called from LanguageSelector/qt/Makefile).
+
+  [ Martin Pitt ]
+  * debian/control: Use standard X-Python-Version field.
+  * debian/control: Bump Standards-Version to 3.9.2.
+  * debian/control: Move transitional packages to Priority: Extra to quiesce
+    lintian.
+  * debian/control: Drop Vcs-Bzr. We move to the standard
+    lp:ubuntu/language-selector branch now.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 06 Feb 2012 07:23:43 +0100
+
+language-selector (0.64) precise; urgency=low
+
+  * language_support_pkgs.py: Fix raising of NotImplementedError.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 03 Feb 2012 08:36:57 +0100
+
+language-selector (0.63) precise; urgency=low
+
+  [ Martin Pitt ]
+  * LanguageSelector/LanguageSelector.py: Fix KeyError crash on a nonexisting
+    package. (LP: #843430)
+  * language_support_pkgs.py: Add PackageKit WhatProvides() plugin for
+    "locale()" search. Register it in setup.py.
+  * LanguageSelector/LangCache.py, data/blacklist, setup.py: Drop support for
+    data/blacklist, we haven't needed it for a long time, and don't intend to
+    bring back this hack.
+  * dbus_backend/ls-dbus-backend: Drop GetMissingPackages{,Async} methods. The
+    current code isn't using them, and there is no need to have this in a
+    D-BUS service. language_support_pkgs works fine as user in frontends.
+  * Drop tests/test_dbus_backend.py. It only exercised above method, not the
+    "set system-wide locale" bits.
+  * Drop LanguageSelector/CheckLanguageSupport.py,
+    dbus_backend/ls-dbus-backend: Not used by anything any more, obsoleted by
+    language_support_pkgs.py.
+  * LanguageSelector/LanguageSelector.py: Reimplement getMissingLangPacks()
+    using language_support_pkgs.py. This gets rid of a lot of redundant and
+    bad code.
+  * Change code to use the LanguageSelector.LangCache namespace more
+    explicitly, to make it easier to get rid of LangCache.
+  * LanguageSelector/LangCache.py: Remove yet another copy of the pkg_depends
+    evaluation logic, and some more dead code, rewrite using
+    language_support_pkgs.
+  * Drop tests.moved/. Unused, no automatic tests, not very useful.
+  * LanguageSelector/LangCache.py, LanguageSelector/qt/QtLanguageSelector.py:
+    Drop last remainders of the languageSupport* info, language-support-* were
+    dropped several cycles ago.
+
+  [ Gunnar Hjalmarsson ]
+  * Make the LANG variable, which up to now has represented regional
+    formats, denote the display language instead (LP: #877610).
+  * Make use of accountsservice's FormatsLocale property and
+    SetFormatsLocale method when selecting a user's regional formats.
+    (LP: #866062)
+  * When setting the system-wide language, ensure that the system
+    regional formats locale is set in order to prevent surprise
+    changes of the formats.
+  * data/LanguageSelector.ui: Text about rebooting no longer
+    applicable, so removed.
+  * LanguageSelector/LocaleInfo.py: Encode @variant string in the
+    translate() function as UTF-8 to avoid a UnicodeDecodeError if a
+    locale with @variant is selected for regional formats.
+  * debian/control: Bump accountsservice dependency to >= 0.6.15-2ubuntu3,
+    to ensure that we have the new SetFormatsLocale method.
+  * debian/control: Make im-switch a dependency of language-selector-gnome,
+    since it's no longer a dependency of ibus (LP: #908762).
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 03 Feb 2012 07:01:24 +0100
+
+language-selector (0.62) precise; urgency=low
+
+  [ Colin Watson ]
+  * data/pkg_depends:
+    - Replace ttf-arphic-uming with fonts-arphic-uming.
+  
+  [ Martin Pitt ]
+  * data/pkg_depends: Drop usage of '|'. It unnecessarily complicates the
+    logic, does not add any expressiveness, and was only used once anyway.
+  * data/pkg_depends: Add generic language-pack- pattern (without a trigger
+    package), so that we do not need to special-case it in the code.
+  * Add language_support_pkgs.py and tests/test_language_support_pkgs.py:
+    Complete rewrite of the check-language-support and
+    LanguageSelector/CheckLanguageSupport.py functionality. The old code was
+    terrible and hard to maintain, the new one now makes it very easy to
+    integrate into installers or an aptdaemon plugin and does not have any
+    dependencies to any of the old language-selector code (which will
+    eventually be dropped).
+  * check-language-support: Rewrite using language_support_pkgs. CLI API stays
+    the same.
+  * setup.py, debian/language-selector-common.install: Install
+    language_support_pkgs.py.
+  * language_support_pkgs.py: Add apt_cache_add_language_packs() function
+    which uses LanguageSupport to mark all corresponding language support
+    packages for installation for an apt.Cache() object with to-be-installed
+    packages. This is a suitable function to use as an aptdaemon plugin.
+  * setup.py, debian/rules: Move to python-setuptools, as we are going to need
+    it for registering an aptdaemon plugin through "entry_points". Add
+    python-setuptools build dependency.
+  * setup.py, debian/language-selector-common.install: Register
+    apt_cache_add_language_packs as aptdaemon "modify_cache_after" plugin and
+    install this package's egg-info.  With this, installing a new package
+    through aptdaemon (i. e.  software-center or any other desktop
+    integration) will automatically install the corresponding language packs
+    and support packages as well.  (LP: #396414)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 26 Jan 2012 16:20:53 +0100
+
+language-selector (0.61) precise; urgency=low
+
+  * data/pkg_depends:
+    - Replace ttf-tmuni with fonts-tibetan-machine.
+    - Replace ttf-sil-abyssinica with fonts-sil-abyssinica.
+    - Replace ttf-arabeyes with fonts-arabeyes.
+    - Replace ttf-kacst with fonts-kacst.
+    - Replace ttf-mgopen with fonts-mgopen.
+    - Replace ttf-farsiweb with fonts-farsiweb.
+    - Replace ttf-sil-scheherazade with fonts-sil-scheherazade.
+    - Replace ttf-sil-ezra with fonts-sil-ezra.
+    - Replace ttf-sil-yi with fonts-sil-nuosusil.
+    - Replace ttf-takao-mincho with fonts-takao-mincho.
+    - Replace ttf-takao-gothic with fonts-takao-gothic.
+    - Replace ttf-khmeros with fonts-khmeros.
+    - Replace ttf-lao with fonts-lao.
+    - Replace ttf-manchufont with fonts-manchufont.
+    - Replace ttf-sil-padauk with fonts-sil-padauk.
+    - Replace ttf-nafees with fonts-nafees.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 03 Jan 2012 14:27:27 +0000
+
+language-selector (0.60) precise; urgency=low
+
+  [ Martin Pitt ]
+  * debian/control: Move from transitional python-gobject to python-gi.
+  * Drop fontconfig/69-language-selector-ko-kr.conf: Obsolete now with the
+    move to fonts-nanum.
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Work around python2.7 crash
+    when passing an unicode value to setlocale(). (LP: #905429)
+
+  [ Jinkyu Yi ]
+  * data/pkg_depends: Add fonts-nanum*.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 19 Dec 2011 10:34:41 +0100
+
+language-selector (0.59) precise; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Fix crash if "admin" group
+    does not exist, and also look for membership of "sudo". (LP: #893842)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 29 Nov 2011 14:56:22 +0100
+
+language-selector (0.58) precise; urgency=low
+
+  * debian/control: Add python-distutils-extra build dependency, we use it in
+    setup.py.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 04 Nov 2011 08:11:13 -0400
+
+language-selector (0.57) precise; urgency=low
+
+  [ Martin Pitt ]
+  * data/pkg_depends: Install aspell dictionary for gedit. (LP: #869980)
+  * data/pkg_depends: Install ibus-m17n for "te". (LP: #753476)
+  
+  [ Gabor Kelemen ]
+  * Clean up language-selectors build system (LP: #853501)
+
+  [ Fumihito YOSHIDA ]
+  * fontconfig/69-language-selector-ja-jp.conf:
+    Handle conflict with ttf-unfonts-core (LP: #884645).
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 04 Nov 2011 07:52:38 -0400
+
+language-selector (0.56) oneiric; urgency=low
+
+  * LanguageSelector/LangCache.py: Fix crash when "sys.argv" does not exist,
+    which happens when being called from the KDE control center.
+    (LP: #871922)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 10 Oct 2011 20:03:34 +0200
+
+language-selector (0.55) oneiric; urgency=low
+
+  * Minor tweaking of help/C/language-selector.xml.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Tue, 04 Oct 2011 10:50:43 +0200
+
+language-selector (0.54) oneiric; urgency=low
+
+  * data/LanguageSelector.ui:
+    - Reference to the handler "on_treeview_languages_cursor_changed",
+      which was removed in v. 0.53, dropped (LP: #859961).
+    - Property "relief" for help button reinserted.
+  * LanguageSelector/LangCache.py [change not affecting KDE]:
+    - Don't confuse the UI by testing whether dropped metapackages
+      are installed. Makes a difference on upgraded systems where
+      (traces of) such packages are left on disk from previous
+      language installations (should affect LP: #841712).
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Wed, 28 Sep 2011 17:21:13 +0200
+
+language-selector (0.53) oneiric; urgency=low
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/LocaleInfo.py:
+    - Change of makeEnvString() in v. 0.52 reversed. Didn't work
+      as expected; old simpler code sufficient for now
+      (fixes LP: #858184).
+    - New function for testing whether the user language is set
+      completely.
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - When setting the own regional formats, ensure that the user
+      language is set completely in order to prevent a surprise change
+      of the display language.
+
+  [ Martin Pitt ]
+  * debian/control: Explicitly depend on "dbus", to ensure that it is
+    configured at the time the postinst runs. Might help for bugs like
+    LP #856975.
+  * LanguageSelector/LangCache.py: Add a __str__() method to
+    LanguagePackageStatus class, to ease debugging.
+  * debian/control: Add missing python-kde4 dependency to l-s-kde.
+  * Drop the details expander from the GTK UI for the "fonts/writing
+    aids/etc." checkboxes. These were used to install language-support-*-XX
+    metapackages which got dropped. (LP: #856217)
+  * tests/test_check_language_support.py: Fix test case for current number of
+    language support packages: -ar installs exactly 5, so reduce the "> 5"
+    check to "> 3".
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 26 Sep 2011 15:29:50 +0200
+
+language-selector (0.52) oneiric; urgency=low
+
+  * LanguageSelector/LocaleInfo.py:
+    - getUserDefaultLanguage() modified so that
+      "sudo fontconfig-voodoo --auto" does the right thing even if
+      LANGUAGE cannot be obtained from ~/.profile.
+    - Encoding issue fixed (LP: #832292).
+    - makeEnvString() rewritten to use accountsservice's
+      language-validate script.
+    - New function for testing whether the system language is set
+      completely.
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - When setting the system-wide regional formats, ensure that the
+      system language is set completely in order to prevent surprise
+      changes of the display language.
+  * LanguageSelector/LanguageSelector.py:
+    - Do not let 'root' save user language.
+  * help/C/language-selector.xml:
+    - Oneiric updates.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Thu, 22 Sep 2011 10:26:45 +0200
+
+language-selector (0.51) oneiric; urgency=low
+
+  * data/incomplete-language-support-gnome.note.in:
+    - Guidance how to find Language Support changed (LP: #839880).
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - Guidance how to find Software Sources changed (LP: #839880).
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Sun, 04 Sep 2011 23:23:00 +0200
+
+language-selector (0.50) oneiric; urgency=low
+
+  * data/language-selector.desktop.in:
+    - Include GNOME in the environments that shall show the launcher,
+      so it gets searchable in the Unity dash.
+    - Keywords modified.
+  * LanguageSelector/LocaleInfo.py:
+    - Don't attempt to query AccountsService when run as root.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Thu, 01 Sep 2011 12:20:25 +0200
+
+language-selector (0.49) oneiric; urgency=low
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/LocaleInfo.py:
+    Regression fix: pass "msg" as a string to warnings.warn()
+    (LP: #833090).
+
+  [ Rodrigo Moya ]
+  * Add .desktop magic so that it shows up on the new GNOME Control Center
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Wed, 24 Aug 2011 15:59:32 -0400
+
+language-selector (0.48) oneiric; urgency=low
+
+  * LanguageSelector/LocaleInfo.py:
+    Make any failure in getUserDefaultLanguage(), to get the language
+    from AccountsService, non-fatal (LP: #827412, #830938).
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Wed, 24 Aug 2011 15:31:06 +0200
+
+language-selector (0.47) oneiric; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Move from static gobject to
+    GI GObject module, to be compatible to upcoming pygobject 3.0.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 18 Aug 2011 17:22:50 +0200
+
+language-selector (0.46) oneiric; urgency=low
+
+  * LanguageSelector/LocaleInfo.py: Fix crash if accountsservice does not know
+    information for the invoking user. (LP: #827176)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 17 Aug 2011 15:44:22 +0200
+
+language-selector (0.45) oneiric; urgency=low
+
+  * Use AccountsService to save changes of the user language settings.
+  * data/main-countries:
+    File moved to AccountsService and deleted here.
+  * Use the help files provided by AccountsService when applicable
+    instead of language-selector specific code.
+  * Code for reading from and updating ~/.dmrc dropped.
+  * Fixed collapsed language window within the "Installed Languages"
+    window by specifying the height (LP: #823837).
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Tue, 16 Aug 2011 08:38:20 +0200
+
+language-selector (0.44) oneiric; urgency=low
+
+  * data/pkg_depends: libgnome2-common is not an appropriate indicator for
+    GNOMEish-ness any more, as it fell of the CDs now. Move to gvfs, which is
+    going to be around for a while, and equally used in GNOME 2 and 3
+    desktops.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 21 Jul 2011 17:44:27 +0200
+
+language-selector (0.43) oneiric; urgency=low
+
+  * data/LanguageSelector.ui:
+    Expand the height of the combo box on the "Language" tab.
+  * fontconfig/69-language-selector-zh-tw.conf:
+    Make Chinese fonts be selected before Latin fonts (LP: #713950).
+    Thanks to Cheng-Chia Tseng for the patch!
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Wed, 13 Jul 2011 17:00:04 +0200
+
+language-selector (0.42) oneiric; urgency=low
+
+  [ Romain Perier ]
+  * LanguageSelector/qt/QtLanguageSelectorGUI.ui:
+    Use a translated string as label for the last tab
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    - Don't show the missing language dialog before the GUI is displayed
+    - Change authors
+  * kde-language-selector:
+    Remove old "main" code as the KDE frontend is now a kcmodule
+
+  [ Martin Pitt ]
+  * data/pkg_depends: Fix Chinese match for poppler-data.
+  * data/pkg_depends: Move default zh-hans input support from ibus-pinyin to
+    ibus-sunpinyin (see UbuntuSpec:desktop-o-qin-ubuntu-china). Drop the
+    alternative to ibus-table-wubi, as this breaks check-language-support,
+    and does not help here -- we will only install the preferred alternative
+    anyway.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 12 Jul 2011 14:38:52 +0200
+
+language-selector (0.41) oneiric; urgency=low
+
+  * LanguageSelector/LanguageSelector.py and LanguageSelector/LocaleInfo.py:
+    Take also LightDM's dmrc files into account when reading and saving
+    data (LP: #793366).
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Tue, 21 Jun 2011 14:58:24 +0200
+
+language-selector (0.40) oneiric; urgency=low
+
+  [ Julien Lavergne ]
+  * data/pkg_depends: Add support for translation of chromium and sylpheed,
+    and aspell support for abiword and sylpheed.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 21 Jun 2011 14:52:13 +0200
+
+language-selector (0.39) oneiric; urgency=low
+
+  * help/C/language-selector.xml:
+    Clarification of the input method system section and modifications
+    due to new treatment of LC_CTYPE and LC_COLLATE.
+  * Set LC_CTYPE and LC_COLLATE to the same locale name as LC_MESSAGES
+    (LP: #786986).
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    Show "none" instead of an empty string as the input method system
+    when there is no explicit value for the current language.
+  * "none" option in the input method drop-down list selector made
+    translatable (LP: #531801).
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Tue, 07 Jun 2011 07:43:20 +0200
+
+language-selector (0.38) oneiric; urgency=low
+
+  * LanguageSelector/CheckLanguageSupport.py, LanguageSelector/LangCache.py:
+    Allow pkg_depends to do language/locale suffix patterns for writing aids
+    ('wa') as well. This will make it a lot easier and robust to add hyphen-*,
+    mythes-* and friends.
+  * data/pkg_depends: Replace per-language mythes-*/hyphen-* lists with a
+    pattern.
+  * LanguageSelector/CheckLanguageSupport.py, LanguageSelector/LangCache.py:
+    Support empty dependencies, in which case install the package
+    unconditionally for this language.
+  * LanguageSelector/CheckLanguageSupport.py, LanguageSelector/LangCache.py:
+    Implement missing handling of fonts ("fn:") and input support ("im:") in
+    pkg_depends.
+  * data/pkg_depends: Add all remaining dependencies which we previously
+    carried in language-support-* (which will go away).
+  * data/blacklist: Remove all packages, none of them exist any more.
+  * Remove language-support-* handling, they will go away in oneiric.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 26 May 2011 11:41:04 +0200
+
+language-selector (0.37) oneiric; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py (LP: #663776):
+    - When setting an input method system, map it to the current
+      language, not the current regional formats setting.
+    - When changing the top-most language in the combobox on the first
+      tab, update instantly the active value on the input method system
+      drop down list to reflect the language switch.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Wed, 25 May 2011 09:48:47 +0200
+
+language-selector (0.36) oneiric; urgency=low
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    Hack for Vietnamese users: Make the language names in the list over
+    installable languages be displayed in respective native language when
+    the current language is Vietnamese (LP: #783090).
+  * fontconfig/69-language-selector-ja-jp.conf:
+    Drop DejaVu (LP: #759882).
+
+  [ Martin Pitt ]
+  * data/pkg_depends: Install firefox-locale-*.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Mon, 23 May 2011 14:45:22 +0200
+
+language-selector (0.35) oneiric; urgency=low
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/FontConfig.py:
+    - Make the fontconfig-voodoo --auto option work also when the first
+      LANGUAGE item is just 'ja' or 'ko', i.e. without country code
+      (LP: #778869).
+  * dbus_backend/ls-dbus-backend:
+    - When applying the language settings system-wide, set the fonts
+      configuration also when the first LANGUAGE item is just 'ja' or
+      'ko' (LP: #778869).
+  * fontconfig-voodoo:
+    - Do not require --force when removing the current config using the
+      fontconfig-voodoo -r option.
+    - Print an exception message if the --auto option fails to find a
+      suitable configuration.
+
+  [ Martin Pitt ]
+  * tests/test_check_language_support.py: Fix test case for removed
+    gnome-user-guide-XX packages.
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Stop forcing GTK2, moving to
+    GTK 3 now. Update GIR dependencies to the GTK 3 versions.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 18 May 2011 09:35:29 +0200
+
+language-selector (0.34) natty-proposed; urgency=low
+
+  * data/pkg_depends: Remove gnome-user-guide-*. The per-language packages
+    were removed in gnome-user-docs 2.91.90+git20110306ubuntu1. (LP: #771176)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 26 Apr 2011 13:07:21 +0200
+
+language-selector (0.33) natty; urgency=low
+
+  * dbus_backend/ls-dbus-backend: Actually look at the PolicyKit check result
+    and only proceed if it succeeded. Thanks to Romain Perier for finding this
+    and providing the patch! This fixes a local root privilege escalation, as
+    this allows any authenticated user to write arbitrary shell commands into
+    /etc/default/locale. (LP: #764397) [CVE-2011-0729]
+  * dbus_backend/ls-dbus-backend: Reject locale names with invalid characters
+    in it, to further prevent injecting shell code into /etc/default/locale
+    for authenticated users. Thanks to Felix Geyer for the initial patch!
+    (LP: #764397)
+  * dbus_backend/com.ubuntu.LanguageSelector.conf: Allow access to standard
+    D-BUS introspection and properties interfaces. There's no reason to deny
+    it, and it causes warnings.
+  * debian/language-selector-common.postinst: Stop running D-BUS backend on
+    upgrade.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 19 Apr 2011 20:20:44 +0200
+
+language-selector (0.32) natty; urgency=low
+
+  * help/C/language-selector.xml:
+    - Description of how to open language-selector changed to also fit
+      Unity.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Mon, 18 Apr 2011 10:38:11 +0200
+
+language-selector (0.31) natty; urgency=low
+
+  * help/C/language-selector.xml: Tweaking of help document, LP: #742857
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Mon, 11 Apr 2011 07:24:00 +0200
+
+language-selector (0.30) natty; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Fix crash when
+    double-clicking language row. (LP: #703097)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 08 Apr 2011 18:57:12 +0200
+
+language-selector (0.29) natty; urgency=low
+
+  [ Gunnar Hjalmarsson ]
+  * help/C/language-selector.xml:
+    - Addition of DocBook document with help about Ubuntu i18n handling
+      in general and language-selector in particular (LP: #742857).
+  * data/LanguageSelector.ui:
+    - "Help" button added (LP: #742857).
+    - Title of the main window changed to "Language Support", i.e.
+      same as the name of the app/tool.
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - Modified code for setlocale() exception handling.
+  * data/main-countries:
+    - Changed the main country of English from GB to US. Not that the
+      latter is more 'right' or something, but it may prevent failures
+      in certain situations, since en_US locales are more widespread.
+
+  [ Martin Pitt ]
+  * data/pkg_depends: Add hunspell-sh.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Wed, 06 Apr 2011 11:29:23 +0200
+
+language-selector (0.28) natty; urgency=low
+
+  * data/pkg_depends: Install openoffice.org-hyphenation for the languages
+    that it supports, when libreoffice-common is installed.
+  * data/pkg_depends: Add mythes-pl.
+  * data/pkg_depends: Add hyphen-pl.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 24 Mar 2011 14:14:53 +0100
+
+language-selector (0.27) natty; urgency=low
+
+  * data/pkg_depends: Update for libreoffice and changed thesaurus/hyphenation
+    package names. Update test cases accordingly.
+  * data/pkg_depends: Add poppler-data for Arabic, Chinese, Japanese, and
+    Korean. (LP: #623825)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 18 Mar 2011 18:37:04 +0100
+
+language-selector (0.26) natty; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Fix CONTROL_MASK constant.
+    This brings back Ctrl+W to close the window. (LP: #732484)
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 10 Mar 2011 15:28:57 +0100
+
+language-selector (0.25) natty; urgency=low
+
+  * data/LanguageSelector.ui:
+    - Reinsertion of tooltips that were dropped in version 0.6.3.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Wed, 09 Mar 2011 15:20:41 +0100
+
+language-selector (0.24) natty; urgency=low
+
+  * debian/rules: Drop NO_PKG_MANGLE. This is now fixed properly in
+    pkgbinarymangler, and this fixes LP translations import.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 08 Mar 2011 14:19:34 +0100
+
+language-selector (0.23) natty; urgency=low
+
+  * LanguageSelector/qt/QtLanguageSelector.py:
+   - Enable checkboxes only when the corresponding components are available and
+     not installed yet. Otherwise it cannot be checked
+   - Make apply clickable only when a checkbox is clicked.
+   - Clear checkboxes on item change
+   - Add tooltips in order to be less confusing
+
+ -- Romain Perier <romain.perier@gmail.com>  Wed, 02 Mar 2011 19:38:39 +0100
+
+language-selector (0.22) natty; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Update require_version() call
+    to current pygobject API. Bump python-gobject dependency accordingly.
+  * debian/control: Fix aptdaemon dependency: we actually use and need
+    python-aptdaemon.gtk3widgets (with GI), not gtkwidgets.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 03 Mar 2011 17:23:42 +0100
+
+language-selector (0.21) natty; urgency=low
+
+  [ Timo Jyrinki ]
+  * Replace openoffice.org-voikko with libreoffice-voikko. (LP: #724151)
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/LanguageSelector.py:
+    - Fix of faulty logic in code for updating dmrc.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 02 Mar 2011 10:32:32 +0100
+
+language-selector (0.20) natty; urgency=low
+
+  * debian/control: Replace transitional python-aptdaemon-gtk dependency with
+    the current name python-aptdaemon.gtkwidgets.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 25 Feb 2011 09:51:56 +0100
+
+language-selector (0.19) natty; urgency=low
+
+  * LanguageSelector/qt/QtLanguageSelector.py:
+   - Disable and uncheck installable components on tab change, which are confusing
+   - Code cleanup in self.onTabChangeRevertApply()
+
+ -- Romain Perier <romain.perier@gmail.com>  Thu, 24 Feb 2011 13:18:57 +0100
+
+language-selector (0.18) natty; urgency=low
+
+  * Restore changes from 0.15 which were accidentally dropped in 0.17 due to
+    bzr branch confusion.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Thu, 24 Feb 2011 12:16:21 +0100
+
+language-selector (0.17) natty; urgency=low
+
+  * Clean up after the gratutitous renaming in 0.14:
+    - Bring back language-selector as transitional package for l-s-gnome.
+    - Fix Conflicts/Replaces: to be versioned
+    - Put transitional packages in section oldlibs.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Thu, 24 Feb 2011 09:14:50 +0100
+
+language-selector (0.16) natty; urgency=low
+
+  * Create a transitional binary package for language-selector-qt to install
+    language-selector-kde. Otherwise language-selector-qt just gets
+    uninstalled and international users are just left hanging.
+
+ -- Jonathan Thomas <echidnaman@kubuntu.org>  Wed, 23 Feb 2011 19:17:32 -0500
+
+language-selector (0.15) natty; urgency=low
+
+  [ Romain Perier ]
+  * LanguageSelector/qt/QtLanguageSelector.py:
+   - Unapply changes on changing tab
+  * data/incomplete-language-support-kde.note.in
+   - Run kcontrol module
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/LocaleInfo.py:
+    - Ensure that generated_locales() only returns UTF-8 locales
+      (LP: #533159).
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - Make setlocale() errors non-fatal (LP: #651582).
+  * Changed Korean fonts settings as suggested by jincreator:
+    - fontconfig/29-language-selector-ko-kr.conf removed (LP: #715742).
+    - fontconfig/69-language-selector-ko-kr.conf edited (LP: #716872).
+      Thanks for the patch!
+
+ -- Michael Casadevall <mcasadevall@ubuntu.com>  Wed, 23 Feb 2011 13:49:05 -0800
+
+language-selector (0.14) natty; urgency=low
+
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    - KCModule and kcontrol migration
+    - Add same features than gtk frontend
+    - New GUI
+    - Migrate to polkit (no longer runs as root)
+  * dbus_backend/com.ubuntu.languageselector.policy.in:
+    - Change policy to auth_admin_keep (avoids multiple polkit authentifications)
+  * debian:
+    - Rename language-selector => language-selector-gnome
+    - Rename language-selector-qt => language-selector-kde
+    - Drop language-selector-qt.1 (not required anymore)
+  * data/qt-language-selector.desktop.in:
+    - Rename to kde-language-selector
+    - Make changes to be a kcmodule
+
+ -- Romain Perier <romain.perier@gmail.com>  Tue, 22 Feb 2011 18:58:21 +0100
+
+language-selector (0.13) natty; urgency=low
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - Ensure that main or origin country is included when country
+      specific options for a language are shown (LP: #710148).
+    - Do not let an absent translation directory make the program crash
+      (LP: #714093).
+  * data/LanguageSelector.ui:
+    - Shorter label to describe the second tab (LP: #709855).
+  * LanguageSelector/macros.py:
+    - Use locale names with '.UTF-8' instead of '.utf8' when setting
+      LC_* or LANG environment variables (LP: #666565, #700619).
+      Thanks to Lauri Tirkkonen for the patch!
+
+ -- Evan Dandrea <ev@ubuntu.com>  Mon, 14 Feb 2011 16:13:04 +0000
+
+language-selector (0.12) natty; urgency=low
+
+  [ Gunnar Hjalmarsson ]
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - Show only options corresponding to available translations in the
+      combo box on language-selector's "Language" tab (LP: #693337).
+  * LanguageSelector/LanguageSelector.py:
+    - Skip the encoding part in the dmrc "Language" value. It's not
+      a locale name, so let's not give the impression it is.
+  * data/LanguageSelector.ui:
+    - Clearer labels to describe the second ("Text") tab.
+    - Icon added to taskbar. Thanks to Pavol Klačanský (LP: #648109).
+    - Texts that inform the user about the need to restart for changes
+      to system settings to take effect (LP: #127356, #612991).
+    - Ellipses removed from the labels on the "Apply System-Wide"
+      buttons (LP: #531799).
+    - Layout tweaking of the "Format" (previously "Text") tab
+      (LP: #697606).
+  * data/main-countries:
+    - Provide main or origin country for languages with multiple country
+      codes present among the languages' available locales.
+  * LanguageSelector/utils.py:
+    - Take main country code into account when language2locale()
+      generates a locale name for LC_MESSAGES.
+    - language2locale() rewritten to make use of other language-selector
+      functions.
+
+  [ Martin Pitt ]
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Update ListStore construction
+    to also work with the next pygobject release.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Fri, 28 Jan 2011 15:50:50 +0100
+
+language-selector (0.11) natty; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Force GTK 2 for now, as we do
+    not currently have a real GTK 3 theme, and thus with GTK 3 the application
+    looks very ugly.
+  * debian/control: Depend on gir1.2-gtk-2.0 instead of -3.0. Also bump the
+    python-aptdaemon-gtk dependency to ensure that we have one that works with
+    GTK2.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 10 Jan 2011 23:03:33 -0600
+
+language-selector (0.10) natty; urgency=low
+
+  * LanguageSelector/utils.py:
+    - Ability to deal with @variants in locale names restored.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Thu, 23 Dec 2010 00:19:14 +0100
+
+language-selector (0.9) natty; urgency=low
+
+  * debian/control:
+    - Update Depends for gir abi change
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 16 Dec 2010 13:49:33 -0500
+
+language-selector (0.8) natty; urgency=low
+
+  * Set LC_MESSAGES for applications that don't recognize LANGUAGE
+    (LP: #553162).
+  * GDM related fixes (LP: #553162):
+    - Update dmrc when LANGUAGE and LC_MESSAGES are set, not when LANG
+      is set.
+    - Use the new dmrc fields "Langlist" and "LCMess" to store the
+      LANGUAGE and LC_MESSAGES values on disk.
+
+ -- Gunnar Hjalmarsson <ubuntu@gunnar.cc>  Tue, 14 Dec 2010 22:20:37 +0100
+
+language-selector (0.7) natty; urgency=low
+
+  * gnome-language-selector: Drop unnecessary GTK/glade imports.
+  * Eliminate LanguageSelector/gtk/SimpleGtkbuilderApp.py, and put the
+    GtkBuilder loading into LanguageSelector/gtk/GtkLanguageSelector.py
+    directly. Remove from po/POTFILES.in.
+  * debian/control: Set Maintainer to u-d-d@ mailing list.
+  * dbus_backend/ls-dbus-backend: Fix data type of "start-time" argument for
+    polkit call.
+  * LanguageSelector/gtk/GtkLanguageSelector.py: Port from pygtk2 to GTK 3.0
+    and gobject-introspection. Also port to aptdaemon 0.40 API, as we require
+    the GTK3.0/gi port of python-aptdaemon-gtk.
+  * debian/control: Replace python-gtk2 dependency with python-gobject and
+    gir1.0-gtk-3.0.
+  * debian/control: Wrap build dependencies.
+  * Switch to "3.0 (native)" source package format.
+  * debian/control: Drop unnecessary pyqt4-dev-tools build dependency.
+  * debian/control, debian/rules: Switch from pycentral to dh_python2, drop
+    python-central build dependency. Also specify XS-Python-Version properly.
+  * debian/control: Drop unnecessary shlibs:Depends, this is pure Python.
+  * debian/control: Bump Standards-Version to 3.9.1.
+  * po/Makefile, setup.py: Don't merge po files during build, just update the
+    PO template.
+  * Remove po/language-selector.pot from bzr, it's built automatically and
+    just causes eternal noise.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 07 Dec 2010 11:52:26 +0100
+
+language-selector (0.6.6) maverick; urgency=low
+
+  * debian/rules: Disable pkgbinarymangler, to keep translations in the
+    package. In Natty this blacklisting will happen in the pkgbinarymangler
+    package (so that the programs other than pkgstriptranslations will still
+    apply), but this is a less invasive shortcut for Maverick. (LP: #654548)
+  * po/*: Update translations from Launchpad.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 05 Oct 2010 12:26:19 +0200
+
+language-selector (0.6.5) maverick; urgency=low
+
+  * Switch back to using os.rename in find_string_and_replace, as we require
+    atomicity.  Instead, always create the temporary file in the same
+    directory as the original (thanks, Scott Kitterman; LP: #645774).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 24 Sep 2010 14:29:08 +0100
+
+language-selector (0.6.4) maverick; urgency=low
+
+  * Use shutil.move rather than os.rename in find_string_and_replace
+    (thanks, TualatriX; LP: #645774).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 24 Sep 2010 12:37:07 +0100
+
+language-selector (0.6.3) maverick; urgency=low
+
+  [ Martin Pitt ]
+  * data/LanguageSelector.ui, LanguageSelector/gtk/GtkLanguageSelector.py: Add
+    a Close button. (LP: #345113)
+  
+  [ Michael Vogt ]
+  * fix aptdaemon install/update (LP: #612825)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 03 Sep 2010 18:54:47 +0200
+
+language-selector (0.6.2) maverick; urgency=low
+
+  [ Colin Watson ]
+  * Use 'dh $@ --options' rather than 'dh --options $@', for
+    forward-compatibility with debhelper v8.
+
+  [ Jonathan Thomas ]
+  * Port language-selector-qt to qapt-batch
+  * Replace the dependency on install-package to qapt-batch in
+    debian/control (LP: #497803)
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 13 Jul 2010 10:57:58 +0100
+
+language-selector (0.6.1) maverick; urgency=low
+
+  [ Michael Vogt ]
+  * fix dialog returning too early (issue with latest aptdaemon)
+  * fix deprecation warning
+  * build with include-links
+  * dbus_backend/ls-dbus-backend: move dbus.mainloop.glib integration way up
+    to avoid crash on startup (LP: #598619) (LP: #596603)
+
+  [ Arne Goetje ]
+  * clean up data/pkg-depends:
+    - remove enigmail-locale- (LP: #588254)
+    - remove obsolete kde-i18n- and koffice-i18n- entries, packages have
+      been removed from archive in Lucid.
+  * update fontconfig/69-language-selector-ja-jp.conf: change binding to
+    'strong' (LP: #569442)
+  * LocaleInfo.py: check for file permissions (LP: #598802)
+  * fix depreciation warnings
+  * debian/control: add pyqt4-dev-tools to Build-Depends
+
+ -- Arne Goetje <arne@ubuntu.com>  Fri, 02 Jul 2010 17:21:08 +0800
+
+language-selector (0.6.0) maverick; urgency=low
+
+  [ Michael Vogt ]
+  * add dbus backend, no need for gksu anymore (LP: #290570)
+  * use aptdaemon in the gtk frontend
+  * run tests at build time
+  * fix "installs missing packages without opt-out" (LP: #584438)
+  * code cleanup
+
+  [Arne Goetje]
+  * raise exception and display error when package cache is broken (LP: #331380)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 28 May 2010 22:13:17 +0200
+
+language-selector (0.5.7) lucid; urgency=low
+
+  * Change fontconfig settings:
+    - zh-*: reorder font priority lists, put DejaVu and Bitstream Vera in front
+    (LP: #149944)
+    - zh-*: add WenQuanYi Microhei, Droid Sans Fallback and HYSong
+    - ja: add entries for Takao and IPA fonts, reorder and merge
+    required rendering options from the 29-language-selector-ja-jp.conf file
+    (LP: #535582)
+    - update 30-cjk-aliases.conf to include localized font names and fonts used
+    in Windows 7.
+
+ -- Arne Goetje <arne@ubuntu.com>  Wed, 21 Apr 2010 17:49:18 +0200
+
+language-selector (0.5.6) lucid; urgency=low
+
+  * bugfix: use os.R_OK and os.W_OK to check file permissions.
+    (LP: #564317)
+
+ -- Arne Goetje <arne@ubuntu.com>  Fri, 16 Apr 2010 14:39:58 +0800
+
+language-selector (0.5.5) lucid; urgency=low
+
+  * QtLanguageSelector.py: fix crash when no language is selected
+    in the install window (LP: #553729)
+  * LanguageSelector.py: if gdm is running, write the user LANG setting
+    to ~/.dmrc and /var/cache/gdm/$USER/dmrc (LP: #553162)
+  * updated translations from launchpad
+  * remove dangling ImSwitch symlinks on startup (LP: #500594)
+  * check for write permission on ~/.profile (LP: #560881)
+  * check for read permission on /etc/default/locale and
+    /etc/environment (LP: #554617)
+
+ -- Arne Goetje <arne@ubuntu.com>  Thu, 15 Apr 2010 23:41:40 +0800
+
+language-selector (0.5.4) lucid; urgency=low
+
+  * QtLanguageSelector.py: fix to not need to run language-selector
+    twice in order to install all needed packages (LP: #499381)
+    (LP: #441321)
+
+ -- Arne Goetje <arne@ubuntu.com>  Fri, 26 Mar 2010 14:55:16 +0800
+
+language-selector (0.5.3) lucid; urgency=low
+
+  [ Michael Vogt ]
+  * when checking for is_admin check for uid == 0 too
+
+  [ Arne Goetje ]
+  * GtkLanguageSelector.py: move a Translators comment to the right
+    location, so that it ends up in the.pot file. (LP: #456290)
+  * Added fallback for Frisian (fy_NL and fy_DE) to data/languagelist.
+    (LP: #537540)
+  * check if the dependency package for translations is available in the
+    cache (LP: #527891)
+  * restored --show-installed option in check-language-support
+  * fix language-selector.desktop.in (Thanks to Stéphane Loeuillet)
+    (LP: #146973)
+  * fix a crash when language-selector is run by a non-admin user
+
+ -- Arne Goetje <arne@ubuntu.com>  Fri, 19 Mar 2010 17:54:18 +0800
+
+language-selector (0.5.2) lucid; urgency=low
+
+  * [KDE] It seems that the function we were using to write the system lang/
+    locale got commented out... Use the new API
+  * [GTK] Add missing depends on python-glade2 and gksu
+
+ -- Jonathan Thomas <echidnaman@kubuntu.org>  Wed, 17 Mar 2010 17:19:44 -0400
+
+language-selector (0.5.1) lucid; urgency=low
+
+  * add fallbacks for nds_DE and nds_NL to data/languagelist (LP: #531422)
+  * add fallback for be_BY@latin to data/languagelist (LP: #146681)
+  * fontconfig/*: make the fontconfig snippets valid against the dtd.
+    (LP: #387868)
+  * add openoffice.org-hyphenation* and openoffice.org-thesaurus* do the
+    dynamically generated package list. Change the dependency for gnome-
+    user-guide* from libgnome2-common to gnome-panel (LP: #529048)
+  * stop thunderbird and openoffice.org localization packages to be
+    removed when installing a new language. (LP: #519289)
+
+ -- Arne Goetje <arne@ubuntu.com>  Thu, 11 Mar 2010 21:47:00 +0800
+
+language-selector (0.5.0) lucid; urgency=low
+
+  * new UI to allow separate language and locale settings (LP: #40669)
+    (LP: #210776) (LP: #226155)
+  * fixed locale generation code (LP: #236028)
+
+ -- Arne Goetje <arne@ubuntu.com>  Thu, 25 Feb 2010 05:51:33 +0800
+
+language-selector (0.4.19) lucid; urgency=low
+
+  * move check-language-support code into a separate module
+    (Thanks Michael Vogt)
+  * add -p --package option to check-language-support
+
+ -- Arne Goetje <arne@ubuntu.com>  Fri, 08 Jan 2010 16:15:48 +0800
+
+language-selector (0.4.18) karmic; urgency=low
+
+  * Use dictionary-based format string substitution for "%d to install" and
+    "%d to remove" (now "%(INSTALL)d to install" and "%(REMOVE)d to
+    remove"), so that gnome-language-selector doesn't crash when a
+    translation intentionally uses fixed strings for some of its plural
+    forms (LP: #409785).
+  * Remove fuzzy markers on the respective Arabic and Hebrew translations
+    (see 0.4.16) since they no longer cause a crash.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Fri, 23 Oct 2009 18:50:30 +0100
+
+language-selector (0.4.17) karmic; urgency=low
+
+  * LanguageSelector/LocaleInfo.py:
+    - when running without the LANGUAGE environment, do not
+      witch to english half-way through (LP: #457235)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 21 Oct 2009 17:01:07 +0200
+
+language-selector (0.4.16) karmic; urgency=low
+
+  * Add --show-installed option to check-language-support, so that ubiquity
+    can arrange to keep language support packages installed that are already
+    present in the live filesystem.
+  * Enable translation for check-language-support.
+  * Mark Arabic translations of "%d to install" and "%d to remove" as fuzzy,
+    until such time as they're corrected in Launchpad (LP: #409785).
+  * ... and likewise for Hebrew (LP: #363990).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 20 Oct 2009 13:02:27 +0100
+
+language-selector (0.4.15) karmic; urgency=low
+
+  * Added fa_AF and kk translations
+  * Fix display of the Details box in gnome-language-selector (Thanks to
+    Markus Korn) (LP: #455370)
+
+ -- Arne Goetje <arne@ubuntu.com>  Tue, 20 Oct 2009 09:08:58 +0200
+
+language-selector (0.4.14) karmic; urgency=low
+
+  * add workaround to enable translations (LP: #425368)
+  * Update translations from Launchpad
+
+ -- Arne Goetje <arne@ubuntu.com>  Mon, 19 Oct 2009 11:10:29 +0200
+
+language-selector (0.4.13) karmic; urgency=low
+
+  * Fix typo in check-language-support(1) that caused a Lintian warning.
+  * Print nothing rather than a blank line if check-language-support finds
+    no missing packages.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Wed, 14 Oct 2009 13:18:15 +0100
+
+language-selector (0.4.12) karmic; urgency=low
+
+  * Add openoffice.org-help-* and evolution-documentation-* to the 
+    package dependencies (Thanks to Timo Jyrinki) (LP: #414753)
+  * add /usr/bin/check-language-support to query missing packages for a
+    given language code or all installed languages (LP: #434173)
+  * LanguageSelector/LangInfo.py: don't crash if langcode is not in the
+    ISO639 list (LP: #439728)
+
+ -- Arne Goetje <arne@ubuntu.com>  Wed, 14 Oct 2009 12:42:17 +0100
+
+language-selector (0.4.11) karmic; urgency=low
+
+  * Fix crash in gnome-language-selector (LP: #427716)
+  * Fall back to 'en_US' locale if none has been defined or has been set
+    to 'C'. (LP: #386029) (LP: #346363) (LP: #347240)
+  * Fix crash when ~/.xinput/ is not present (LP: #219218)
+  * Add manpage for gnome-language-selector (Thanks to Alex Lourie)
+   (LP: #426642)
+  * Fix typo in LanguageSelector/FontConfig.py (LP: #219398)
+  * data/languagelist: add fallback codes for all English variations we 
+    have as locales (LP: #47280) (LP: #72952)
+  * Update translations from Launchpad
+  * Really remove now obsolete Chinese entry from language list
+    (LP: #431228)
+
+ -- Arne Goetje <arne@ubuntu.com>  Thu, 17 Sep 2009 22:41:58 +0800
+
+language-selector (0.4.10) karmic; urgency=low
+
+  * Fix crash in Qt's uninstall mode
+
+ -- Harald Sitter <apachelogger@ubuntu.com>  Sun, 13 Sep 2009 14:12:49 +0200
+
+language-selector (0.4.9) karmic; urgency=low
+
+  * Implement input method subsystem into Qt UI
+  * Make the Qt UI's uninstall mode more usable by hiding not-installed
+    languages from the list view
+  * Port package build system to dh 7
+    + Build-depend on debhelper 7
+  * Bump standards version to 3.8.3
+  * Add misc depends to all packages
+  * Revise copyright file
+  * Add manpage for qt-lanaguage-selector (as produced by kdemangen.pl)
+
+ -- Harald Sitter <apachelogger@ubuntu.com>  Thu, 10 Sep 2009 22:50:07 +0200
+
+language-selector (0.4.8) karmic; urgency=low
+
+  * Fix Qt desktop file icon to fit in with app (LP: #316559)
+  * Change Hidden key to NoDisplay key in Qt desktop file (Hidden == Deleted)
+
+ -- Harald Sitter <apachelogger@ubuntu.com>  Tue, 08 Sep 2009 17:16:40 +0200
+
+language-selector (0.4.7) karmic; urgency=low
+
+  * Add support for Chinese language-pack split
+  * Update translations from Launchpad
+  * Remove fontconfig/29-language-selector-zh (LP: #406132)
+  * Remove option to install obsolete language-support-extra-* packages
+  * Replace option to install additional translations
+    (language-support-translations-*) with code to automatically install 
+    additional translation packages on a per need basis.
+  * Added code to install mozvoikko and oo.o-voikko based on already
+    installed mozilla and oo.o packages for finnish users who have
+    "Writing Aids" enabled in language-selector (LP: #409764)
+  * Added combobox to choose the input method engine via im-switch
+  * Patch potfiles.in (Thanks to Gabor Kelemen) (LP: #420224)
+
+ -- Arne Goetje <arne@ubuntu.com>  Sun, 02 Aug 2009 11:29:17 +0100
+
+language-selector (0.4.6) karmic; urgency=low
+
+  * Update is-KDE-installed test for KDE 4
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Wed, 29 Jul 2009 09:58:06 +0100
+
+language-selector (0.4.5) karmic; urgency=low
+
+  [ Loïc Minier ]
+  * Revert the change of 0.4.3 partially: keep parsing both double-quoted and
+    non-quoted lines, but output double-quoted lines as in the past since this
+    is consistent with localechooser, supported by pam_env and now also
+    supported by sudo.
+
+    [ Sebastien Bacher ]
+  * Use gtkbuilder rather than libglade (lp: #403531)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 29 Jul 2009 10:10:55 +0200
+
+language-selector (0.4.4) karmic; urgency=low
+
+  * Fix icon for Gtk+ version; the .glade file would use the icon property
+    instead of icon_name and was still referring to the old
+    language-selector.png icon instead of the current config-language icon
+    (for the Gtk+ version; the Qt version still uses language-selector.png).
+    Also add an icon_name property to the Installed Languages window.
+    LP: #164316.
+  * Use a direct URL to the ubg page of language-selector in Ubuntu when
+    suggesting users to file a bug; point at the System > Administration menu
+    when suggesting to fix software sources instead of "Adminstration"; thanks
+    Данило Шеган; LP: #307474; update po/*.po files.
+  * Bind the delete_event signal of the Installed Languages window to the
+    hide_on_delete callback and call gtk.Widget.hide_on_delete from our
+    wrapper; fixes empty Installed Languages window after closing it with the
+    window manager.
+
+ -- Loic Minier <lool@dooz.org>  Mon, 15 Jun 2009 14:49:10 +0200
+
+language-selector (0.4.3) karmic; urgency=low
+
+  * LanguageSelector/LanguageSelector.py:
+    - fix use of \" in /etc/default/locale (thanks to lool)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 29 May 2009 09:28:36 +0200
+
+language-selector (0.4.2.3) jaunty-proposed; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - escape "'" to workaround problem with gksu and its 
+      parameter parsing (LP: #241904)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 28 Apr 2009 18:50:12 +0200
+
+language-selector (0.4.2.2) jaunty; urgency=low
+
+  * Final import of translations from Rosetta for NonLangPackFreeze
+
+ -- Arne Goetje <arne@ubuntu.com>  Fri, 10 Apr 2009 09:35:11 +0800
+
+language-selector (0.4.2.1) jaunty; urgency=low
+
+  * LanguageSelector/LanguageSelector.py:
+    - do not crash if no default language can be read
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 23 Mar 2009 18:18:42 +0100
+
+language-selector (0.4.2) jaunty; urgency=low
+
+  * UI change: 
+    - move the "Changes will take effect..." message down and rename
+      it to "All changes will take effect..."
+    - center the upper part of the main UI window
+
+ -- Arne Goetje <arne@ubuntu.com>  Wed, 04 Mar 2009 00:33:34 +0800
+
+language-selector (0.4.1) jaunty; urgency=low
+
+  * debian/rules:
+    - update for the new python policy
+  * better key support in langauge treeview (LP: #276737),
+    thanks to István Nyitrai
+  * LanguageSelector/LocaleInfo.py:
+    - fix crash (LP: #336425)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Mar 2009 17:22:23 +0100
+
+language-selector (0.4.0) jaunty; urgency=low
+
+  * gnome-language-selector: GUI overhaul (for details see: 
+    https://wiki.ubuntu.com/JauntyLanguageSelectorImprovements )
+  * allow for different language settings per user
+  * for installed languages use the native language and country names in 
+    the comboboxes (LP: #241317)
+  * get rid of the reboot / session restart notification popup. This 
+    information is now integrated into the main UI. (LP: #260380)
+
+ -- Arne Goetje <arne@ubuntu.com>  Tue, 24 Feb 2009 01:40:14 +0800
+
+language-selector (0.3.21) jaunty; urgency=low
+
+  * suggest to install full language support instead of
+    just basic translations (thanks to Timo Jyrinki)
+    LP: #311228
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 13 Feb 2009 17:22:55 +0100
+
+language-selector (0.3.20) jaunty; urgency=low
+
+  [ Michael Vogt ]
+  * LanguageSelector/LangCache.py, LanguageSelector/LanguageSelector.py:
+    - move verifyPackageLists into the cache and rename it
+      to the havePackageLists property
+  * LanguageSelector/LocaleInfo.py:
+    - honor /etc/default/locale as well
+  * LanguageSelector/gtk/GtkLanguageSelector.py,
+    LanguageSelector/qt/QtLanguageSelector.py:
+    - check if we have a language-pack for the given default language 
+      (LP: #289165)
+  * LanguageSelector/LanguageSelector.py:
+    - move the check what language packs are missing into common 
+      code
+  * debian/rules:
+    - remove arch-build target, bzr-buildpackage is the way to
+      build it
+
+  [ Colin Watson ]
+  * Fix typo (availablity -> availability).
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 15 Dec 2008 15:00:50 +0100
+
+language-selector (0.3.17) intrepid; urgency=low
+
+  * LanguageSelector/LanguageSelector.py:
+    - ignore "security.ubuntu.com" when checking if there are repositories
+      that contain language-packages (LP: #135752)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 27 Oct 2008 10:29:07 +0100
+
+language-selector (0.3.16) intrepid; urgency=low
+
+  [ Michael Vogt ]
+  * LanguageSelector/LanguageSelector.py:
+    - add verifyPackageLists() method that checks if there are
+      actually packages available that are not on CD 
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - offer to update package list if no package information
+      is available (LP: #135752, LP: #277526)
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    - offer to update package list if no package information
+      is available (just like in the gtk frontend)
+  * data/LanguageSelector.glade:
+    - hide the details by default
+
+  [ Colin Watson ]
+  * Rearrange fields in restart_session_required.note.in to avoid a broken
+    Name field there as well (LP: #287573).
+
+  [ Jonathan Riddell ]
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    - imswitch should select scim-bridge, not scim
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 22 Oct 2008 16:19:30 +0200
+
+language-selector (0.3.15) intrepid; urgency=low
+
+  * Rearrange fields in incomplete-language-support-*.note.in so that
+    intltool-merge stops forgetting to newline-separate translations of the
+    Name field (LP: #287046).
+  * Use intltool-debian's version of intltool-merge to generate
+    incomplete-language-support-*.note, since intltool fails to generate
+    translated Description fields.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 21 Oct 2008 18:16:29 +0100
+
+language-selector (0.3.14) intrepid; urgency=low
+
+  * Update translations from Launchpad (see LP #277526).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Sun, 19 Oct 2008 09:03:12 +0100
+
+language-selector (0.3.13) intrepid; urgency=low
+
+  [ Jonathan Riddell ]
+  * QtLanguageSelector.py, fix unicode error
+
+  [ David Gaarenstroom ]
+  * Fix _ function in Qt frontend (LP: #279869).
+
+  [ Colin Watson ]
+  * Fix excessive capitalisation of "ubuntu" in e-mail addresses and URLs in
+    debian/control.
+
+  [ M. Vefa Bicakci ]
+  * Fix handling of Unicode language names in Qt frontend (LP: #266971).
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Thu, 09 Oct 2008 10:47:37 +0100
+
+language-selector (0.3.12) intrepid; urgency=low
+
+  * Port verifyInstalledLangPacks to Qt frontend
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Wed, 08 Oct 2008 00:19:44 +0100
+
+language-selector (0.3.11) intrepid; urgency=low
+
+  * Bugfix: pull extra translation packages when language-packs are going to
+    be installed. (-gnome, -kde, etc.)
+
+ -- Arne Goetje <arne@ubuntu.com>  Fri, 05 Sep 2008 11:46:34 +0800
+
+language-selector (0.3.10) intrepid; urgency=low
+
+  * Fix QtLanguageSelector.py for Arne's changes
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Thu, 04 Sep 2008 22:48:51 +0100
+
+language-selector (0.3.9) intrepid; urgency=low
+
+  * The details checkboxes can only be available when a language is selected
+    and the packages exists in the archive. (LP: #262764)
+
+ -- Arne Goetje <arne@ubuntu.com>  Wed, 03 Sep 2008 16:03:55 +0800
+
+language-selector (0.3.8) intrepid; urgency=low
+
+  * Depend on install-package not adept
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Thu, 28 Aug 2008 13:49:52 +0100
+
+language-selector (0.3.7) intrepid; urgency=low
+
+  * use update-notifier to display "restart session required" message
+  * session restart is enough to apply "complex character support" (LP: #200197)
+  * add a "details" section to gnome-language-selector to let users install
+    only a subset of available laguage-support packages for a given language.
+    (LP: #184028)
+  * rewording in gnome-language-selector UI (LP: #236584)
+
+ -- Arne Goetje <arne@ubuntu.com>  Wed, 27 Aug 2008 21:46:27 +0800
+
+language-selector (0.3.6) intrepid; urgency=low
+
+  * Use install-package instead of old adept_batch
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Tue, 26 Aug 2008 18:51:34 +0100
+
+language-selector (0.3.5) intrepid; urgency=low
+
+  * Port to pyKDE app
+  * Fix upgrade hook for KDE frontend
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Fri, 22 Aug 2008 22:49:35 +0100
+
+language-selector (0.3.4) hardy; urgency=low
+
+  * LanguageSelector/LangCache.py:
+    - drop special case handling that is now handled via 
+      language-support-translations-$lang (LP: #218588)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 17 Apr 2008 14:39:39 +0200
+
+language-selector (0.3.3) hardy; urgency=low
+
+  [ Arne Goetje ]
+  * added .note files for update-notifier do be displayed in 
+    case the language-support is not complete
+  
+  [ Michael Vogt ]
+  * make the .note files translateable
+  * make the build more robust
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 15 Apr 2008 18:23:41 +0200
+
+language-selector (0.3.2) hardy; urgency=low
+
+  [ Michael Vogt ]
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    - fix another charackter encoding problem (LP: #203335)
+    - fix warning dialog if we have broken packages
+  
+  [ Arne Goetje ]
+  * fixes in the Japanese font configuration (LP: #202731)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 18 Mar 2008 11:07:17 +0100
+
+language-selector (0.3.1) hardy; urgency=low
+
+  [ Michale Vogt ]
+  * LanguageSelector/gtk/GtkLanguageSelector.py
+    - use absolute path when calling gksu (LP: #194166)
+  * data/language-selector.desktop.in:
+    - remove X-KDE-SubstituteUID
+  * fix icon inconsistency (LP: #164316)
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    - fix charackter encoding in UI (LP: #186157)
+  * data/Language-selector.glade:
+    - make the main wndow type "Normal" (LP: #148912)
+
+  [ Arne Goetje ]
+  * debian/rules: remove dh_link for locale specific fontconfig files
+  * LanguageSelector/FontConfig.py: link all locale specific fontconfig files
+    only when the locale is called. (LP: #199557)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 12 Mar 2008 13:06:16 +0100
+
+language-selector (0.3.0) hardy; urgency=low
+
+  [ Michael Vogt ]
+  * run gnome-language-selector as non-root by default
+  * make the input method configuration a per-user setting
+  * fix dialog default size
+
+  [ Arne Goetje ]
+  * split up the fontconfig configuration files according to recent fontconfig
+    rules. Install all fontconfig files in /etc/fonts/conf.avail/ and link
+    those which are needed to /etc/fonts/conf.d/ .
+  * data/languages: split up the entries for Chinese (simplified) and Chinese
+    (traditional) into Chinese (China), Chinese (Hong Kong), Chinese
+    (Singapore) and Chinese (Taiwan), to reflect the different locales and
+    dialects.
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 06 Mar 2008 17:35:25 +0100
+
+language-selector (0.2.10) hardy; urgency=low
+
+  * debian/control:
+    - add XS-Vcs-Bzr header
+  * switch over to use the iso-codes xml files and fix i18n issues
+  * remove no longer needed data/countries, data/languages
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 25 Jan 2008 15:13:07 +0000
+
+language-selector (0.2.9) gutsy; urgency=low
+
+  * fontconfig/zh_{CN,HK,SG,TW}:
+    - move AR PL UMing TW, AR PL ShanHeiSun Uni and WenQuanYi Bitmap Song
+      up in the fontconfig priority (thanks to Arne Goetje)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 05 Oct 2007 16:17:04 +0200
+
+language-selector (0.2.8) gutsy; urgency=low
+
+  * fontconfig/*:
+    - updated and unified 
+  * fontconfig/common/CJK_aliases:
+    - added CJK_aliases to match MS font names
+  (thanks to Arne Goetje)
+  
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 28 Sep 2007 11:12:53 +0200
+
+language-selector (0.2.7) gutsy; urgency=low
+
+  * fontconfig/zh_CN:
+    - updated based on the input of ZhengPeng Hou and
+      Arne Goetje (thanks!)
+  * fontconfig/ja_JP:
+    - fix hinting, thanks to  Fumihito YOSHIDA
+      (LP: #139738)
+  * LanguageSelector/LocaleInfo.py:
+    - fix crash in locale output parsing (LP: #139018)
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - do not fail if the system default language is unknown 
+      (LP: #128168)
+    - gray out complex charackter support if im-switch is
+      not available (LP: #111311)
+    - set reboot required flag when new packages got installed 
+      (LP: #127356)
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    - do not crash on broken cache (LP: #108238)
+    - gray out complex charackter support if im-switch is
+      not available (LP: #111311)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 27 Sep 2007 12:47:36 +0200
+
+language-selector (0.2.6) feisty; urgency=low
+
+  [Michael Vogt]
+  * fix not installed completely alert (LP#78655)
+  [Jonathan Riddell]
+  * LanguageSelector/qt/QtLanguageSelectorGUI.py:
+    - Fix encoding error in success norification dialogue
+    - Fix error if input-all_ALL doesn't exist (LP#91329)
+    - Remove some old debugging
+  * LanguageSelector/gtk/GtkLanguageSelectorGUI.py:
+    - Fix error if input-all_ALL doesn't exist
+	
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Fri, 30 Mar 2007 14:06:47 +0100
+
+language-selector (0.2.5) feisty; urgency=low
+
+  * debian/control:
+    - fix the dependencies of qt-langauge-selector
+  * LanguageSelector/qt/QtLanguageSelectorGUI.py:
+    - include in the archive (instead of auto-generating it
+      on each build)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 23 Jan 2007 15:57:10 +0100
+
+language-selector (0.2.4) feisty; urgency=low
+
+  * fix python dependencies
+  * fix GenericName (lp: #78935)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 22 Jan 2007 16:08:53 +0100
+
+language-selector (0.2.3) feisty; urgency=low
+
+  * debian/language-selector-common.postinst:
+    - run #DEBHELPER# earlier (lp: #80238)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 17 Jan 2007 14:22:28 +0100
+
+language-selector (0.2.2) feisty; urgency=low
+
+  * updated to the latest python policy (lp: #79634)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 17 Jan 2007 10:14:11 +0100
+
+language-selector (0.2.1) feisty; urgency=low
+
+  * Implement https://blueprints.launchpad.net/distros/ubuntu/+spec/kubuntu-feisty-language-selector in qt-language-selector
+   - ports to Qt 4
+   - Splits into three modes, install, uninstall and select system default
+   - Launched from KControl language module, so not shown in app menu
+
+ -- Jonathan Riddell <jriddell@ubuntu.com>  Mon, 11 Dec 2006 11:38:24 +0000
+
+language-selector (0.2.0) feisty; urgency=low
+
+  * LanguageSelector/gtk/GtkLanguageSelector.py,
+    - added support to globally switch on input method support 
+      (lp: #34282)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 27 Oct 2006 16:40:07 +0200
+
+language-selector (0.1.30) edgy; urgency=low
+
+  * LanguageSelector/LocaleInfo.py:
+    - deal with missing LANGUAGE in /etc/environment and fall back
+      to LANG then (lp: #49334)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 16 Oct 2006 18:36:51 +0200
+
+language-selector (0.1.29) edgy; urgency=low
+
+  * fontconfig/zh_{CN,HK,SG,TW}:
+    - check if the font has no bold typeface and if not 
+      do synthetic emboldening (lp: #64294)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 16 Oct 2006 14:36:39 +0200
+
+language-selector (0.1.28) edgy; urgency=low
+
+  * fontconfig/ko_KR.po:
+    - updated to match font renaming for ttf-alee (lp: #64796)
+  * LanguageSelector/LanguageSelector.py:
+    - updated /etc/default/locale as well when setting a new
+      language (lp: #64569)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon,  9 Oct 2006 14:36:58 +0200
+
+language-selector (0.1.27) edgy; urgency=low
+
+  * LanguageSelector/LangCache.py:
+    - hide python-apt future warnings
+  * more exact checking for missing langpacks (lp: #63034)
+  * don't set a fontconfig symlink if we have no configuration
+    and deal with newly added fontconfig fragments (lp: #62869)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu,  5 Oct 2006 15:38:17 +0200
+
+language-selector (0.1.26) edgy; urgency=low
+
+  * Add a ka_GE fontconfig fragment
+
+ -- Matthew Garrett <mjg59@srcf.ucam.org>  Thu, 28 Sep 2006 22:39:23 +0100
+
+language-selector (0.1.25) edgy; urgency=low
+
+  * debian/control:
+    - added missing python-apt dependency (lp: #59773)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 11 Sep 2006 13:34:26 +0200
+
+language-selector (0.1.24) edgy; urgency=low
+
+  [Raphael Pinson]
+  * Add support for sword-language-pack-* packages in
+    LanguageSelector/LangCache.py. 
+  [Michael Vogt]
+  * add DontShow/ShowOnlyIn lines to the desktop files to make sure
+    that we don't display two language-selectors (lp: #55170)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 29 Aug 2006 09:43:48 +0200
+
+language-selector (0.1.23) edgy; urgency=low
+
+  * data/languagelist:
+    - don't fallback from en_US to en_GB (lp: #10822)
+    - added Bhutanese (lp: #56966)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 24 Aug 2006 15:01:50 +0200
+
+language-selector (0.1.22) edgy; urgency=low
+
+  * applied patches from danilo (at) kvota.net:
+    - fix incorrect display if no country is given (#55475)
+    - fix serbian entries (#55476)
+    - iso-codes for translations of language and country names (#55483)
+  * data/Makefile:
+    - removed the generation of pot entries for the languages
+  * debian/control:
+    - depend on iso-codes for the translations
+    - updated the python dependencies to reflect the python transition
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon,  7 Aug 2006 15:24:34 +0200
+
+language-selector (0.1.21) edgy; urgency=low
+
+  * fontconfig/zh_TW:
+    - updated, thanks to Lu, Chao-Ming (Tetralet)
+  * LanguageSelector/LangCache.py:
+    - change the key-dependencies for kde, gnome to
+      "kdelibs-data", "libgnome2-common" (thanks to Kamion)
+  * fix code duplication (yeah!)
+  * debian/control:
+    - updated the python dependencies
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu,  3 Aug 2006 10:33:40 +0200
+
+language-selector (0.1.20) dapper; urgency=low
+
+  * updated the desktop file translations (for kde that
+    has no gettext support for its desktop files)
+  * LanguageSelector/qt/QtLanguageSelector.py:
+    - don't explode if no locales are generated on the system 
+      (Ubuntu: #43556)
+  * fontconfig/zh_{TW,HK,SG}:
+    - apply the same test-magic as in zh_CN (ubuntu: #44305)
+  * LanguageSelector/gtk/GtkLanguageSelector.py:
+    - added "-n" option to ignore the check for missing packages 
+      for full language support (ubuntu: #37568)
+  
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 16 May 2006 19:00:44 +0200
+
+language-selector (0.1.19) dapper; urgency=low
+
+  * fix FTBFS because of missing intltool dependency
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue,  2 May 2006 16:01:19 +0200
+
+language-selector (0.1.18) dapper; urgency=low
+
+  * LanguageSelector/LocaleInfo.py:
+    - only return the region/counrty when more than one region exists
+  * LanguageSelector/qt/QtLanguageSelector.ui:
+    - renamed "ok", "cancel" -> "Apply,"close" (ubuntu: #37065)
+  * fontconfig/zh_CN:
+    - updated fontconfig magic (thanks to Jiahua Huang, ubuntu: 42549)
+  * po/POTFILES.in: added missing files
+  * data/LanguageSelector.glade: removed obsolete tooltip (ubuntu: 40823)
+  * i18n fix (ubuntu #41978)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue,  2 May 2006 12:27:57 +0200
+
+language-selector (0.1.17) dapper; urgency=low
+
+  * fontconfig/ko_KR.po: 
+    - updated to the latest version (thanks to the Korean language-team!)
+      (ubuntu: #37410)
+  * LanguageSelector/LangCache.py:
+    - update the openoffice detection (ubuntu: 38717)
+    - purge langpacks on delete
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 11 Apr 2006 10:10:33 +0200
+
+language-selector (0.1.16) dapper; urgency=low
+
+  * LanguageSelector/LangCache.py: fix the detection for langpack-kde
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Sun,  2 Apr 2006 10:44:05 +0200
+
+language-selector (0.1.15) dapper; urgency=low
+
+  * fontconfig/ja_JP: updated to the latest version from Jun Kobayashi  
+  * fontconfig-voodoo: added "--current" and minor fixes
+  * language-selector-qt uses adept_batch now to install stuff
+  * LanguageSelector/LanguageSelector.py: fix a bug in the fontconfig-voodoo
+    setup
+  * qt-language-selector desktop file fix a double entry (#36135)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 27 Mar 2006 10:48:28 +0200
+
+language-selector (0.1.14) dapper; urgency=low
+
+  * reload kdm after langauges got installed
+  * fix version of Replace for langauge-selector-common
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 22 Mar 2006 10:35:28 +0100
+
+language-selector (0.1.13) dapper; urgency=low
+
+  * add a qt fontend 
+  * build langauge-selector-common, language-selector-qt now
+  * only show a single row for both langauge-pack and language-support
+  * fix typo in ko_KR fontconfig voodoo file (ubuntu: #35817)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 21 Mar 2006 14:48:05 +0100
+
+language-selector (0.1.12) dapper; urgency=low
+
+  * debian/dirs: remove bogus dir (ubuntu: #35673)
+  * fix the import in fontconfig-voodoo to not throw exceptions
+    when no X is available (ubuntu: #35481)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 20 Mar 2006 10:19:07 +0100
+
+language-selector (0.1.11) dapper; urgency=low
+
+  * fontconfig/ko_KR: new version from the ubuntu-ko team (thanks!)
+  * fontconfig/jp_JP: disable embedded bitmaps for japanese, thanks
+    to Jun Kobayashi (ubuntu: #35567)
+  * fontconfig/zh_SG: added new configuration (based on zh_CN)
+  * fontconfig-voodoo: add more missing options 
+    (--list, --set, --quiet, --auto, --force)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Sun, 19 Mar 2006 22:06:49 +0100
+
+language-selector (0.1.10) dapper; urgency=low
+
+  * po/fi.po: added Finnish translation (thanks to Timo Jyrinki)
+  * do fontconfig-voodoo setup for CJK languages
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 17 Mar 2006 11:03:17 +0000
+
+language-selector (0.1.9) dapper; urgency=low
+
+  * po/pt_BR.po: updated translation (thanks to
+    Carlos Eduardo Pedroza Santiviago)
+  * data/gnome-language-selector.desktop.in:
+    - use X-Ubuntu-Gettext-Domain
+  * LanguageSelector/LanguageSelector.py:
+    - set synaptic progress windows as transient for language-selector
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 24 Feb 2006 11:13:27 +0100
+
+language-selector (0.1.8) dapper; urgency=low
+
+  * use X-KDE-SubstituteUID=true in desktop file
+  * typo fix
+  * follow localechooser when writing LANGUAGE information (#26435)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue,  7 Feb 2006 23:38:42 +0100
+
+language-selector (0.1.7) dapper; urgency=low
+
+  * typos fixed (#29400)
+  * don't close while the cache is read
+  * be careful to not touch packages that have no candidateVersion (#6506)
+  * register itself as a dialog (like the desktop preferences) (#25698)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue,  7 Feb 2006 10:12:36 +0100
+
+language-selector (0.1.6) dapper; urgency=low
+
+  * data/LanguageSelector.glade, LanguageSelector/LanguageSelector.py:
+    - more HIG compliant by having "Apply, Cancel, Ok"
+    - have a seperate progress window
+    - wording improvments
+    - add an information symbol next to the text
+    (thanks to Sebasitan Heinlein, Ubuntu: #25203)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 16 Jan 2006 11:45:40 +0100
+
+language-selector (0.1.5) dapper; urgency=low
+
+  * print a useful error message and exit if the apt cache is broken 
+    on the system, re-read the apt cache after installing missing
+    packages at startup (ubuntu #21131)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 19 Dec 2005 12:29:28 +0100
+
+language-selector (0.1.4) dapper; urgency=low
+
+  * use gksu in desktop file to gain root and added X-KDE-SubstituteUID 
+    (HideAdminTools spec)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri,  9 Dec 2005 17:14:37 +0100
+
+language-selector (0.1.3) dapper; urgency=low
+
+  * use "locale -a" to get the list of available locales on the system
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu,  1 Dec 2005 16:27:18 +0100
+
+language-selector (0.1.2) dapper; urgency=low
+
+  * po/da.po:
+    - added Danish translation (thanks to Lasse Bang Mikkelsen)
+  * detect more missing translation packages (openoffice, thunderbird, 
+    firefox)
+  * switched to SimpleGladeApp
+  * preview added when missing language-support packages are found
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 28 Nov 2005 11:18:14 +0100
+
+language-selector (0.1.1) breezy-updates; urgency=low
+
+  * data/language-selector.desktop:
+    - updated desktop file translations
+  * exit properly on window-manager delete events (and release
+    package manager lock this way properly)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Oct 2005 13:46:17 +0200
+
+language-selector (0.1) breezy; urgency=low
+
+  * data/language-selector.desktop.in:
+    - updated desktop file translations
+  * LanguageSelector/LanguageSelector.py:
+    - queue a reload of gdm so that on the next login the newly installed
+      languages are usable (ubuntu #16678)
+  * gnome-language-selector:
+    - use explicit python2.4 path
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri,  7 Oct 2005 14:25:43 +0200
+
+language-selector (0.0+baz20050927) breezy; urgency=low
+
+  * added po/get-iso-codes-i18n script that merges the languages/country
+    translations from the iso-codes package
+  * added README.i18n for the translators
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 27 Sep 2005 18:21:45 +0200
+
+language-selector (0.0+baz20050926) breezy; urgency=low
+
+  * LanguageSelector/LanguageSelector.py:
+    - get/check the global packagemanager lock
+  * data/countries:
+    - fix a Taiwan entry (ubuntu #16314)
+  * set the apply button to insensitive if no language is selected
+    or no changes to the system default are made (ubuntu #16270)
+  * changed the string when the language changes have been applied
+    to something more english (Ubuntu #15419)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 23 Sep 2005 16:21:49 +0200
+
+language-selector (0.0+baz20050912) breezy; urgency=low
+
+  * po/cs.po:
+    - added Czech translation (thanks to Ondrej Sury) (ubuntu #15119)
+  * po/pt_BR.po:
+    - added Brasil translation (thanks to Evandro Fernandes Giovanini)
+  * data/LanguageSelector.glade:
+    - use stock apply, close now (ubuntu #15117)
+  * LanguageSelector/LanguageSelector.py:
+    - be more robust about wrong language/country codes (ubuntu #15116)
+    - better support when only translation xor input support is 
+      available (ubuntu #14893)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 12 Sep 2005 13:04:42 +0200
+
+language-selector (0.0+baz20050824) breezy; urgency=low
+
+  * UI improvements (thanks to mpt for his review)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 24 Aug 2005 19:08:08 +0200
+
+language-selector (0.0+baz20050823) breezy; urgency=low
+
+  * data/LanguageSelector.glade:
+    - improved the wording of the short summary
+    - added a icon for the main window
+  * new icon
+  * always check if the language packs are actually installable
+    before calling synpatic
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 23 Aug 2005 20:16:37 +0200
+
+language-selector (0.0+baz20050822) breezy; urgency=low
+
+  * removed ubuntu branding (ubuntu #13503)
+  * give a brief description what language-selector does in the 
+    main window
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 22 Aug 2005 13:42:55 +0200
+
+language-selector (0.0+baz20050819.2) breezy; urgency=low
+
+  * fix a bug when sometimes a non-utf8 locale is written
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 19 Aug 2005 17:20:37 +0200
+
+language-selector (0.0+baz20050819) breezy; urgency=low
+
+  * check if the user has installed language-pack but not
+    updated to the new language-{gnome,kde} yet
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 19 Aug 2005 11:26:36 +0200
+
+language-selector (0.0+baz20050811) breezy; urgency=low
+
+  * typo in source fix (thanks to seb128 for noticing)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 11 Aug 2005 16:15:06 +0200
+
+language-selector (0.0+baz20050808) breezy; urgency=low
+
+  * make it work against the new python-apt API
+  * ported to the new langpack structure
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon,  8 Aug 2005 11:15:27 +0200
+
+language-selector (0.0+baz20050614) breezy; urgency=low
+
+  * fix a bug in the Macedonia country data entry
+  * support l10n now
+  * added german translation
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 14 Jun 2005 12:51:16 +0200
+
+language-selector (0.0+baz20050609) breezy; urgency=low
+
+  * depends on python-glade2 now (ubuntu #11675)
+  * don't file if no /etc/enviroment is present (ubuntu #11676)
+  * sort the list by language names (ubuntu #11677)
+  
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu,  9 Jun 2005 23:06:29 +0200
+
+language-selector (0.0+baz20050531) breezy; urgency=low
+
+  * Initial Release.
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 31 May 2005 16:16:16 +0200
+
