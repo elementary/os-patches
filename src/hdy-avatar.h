@@ -59,11 +59,15 @@ gboolean     hdy_avatar_get_show_initials   (HdyAvatar              *self);
 HDY_AVAILABLE_IN_ALL
 void         hdy_avatar_set_show_initials   (HdyAvatar              *self,
                                              gboolean                show_initials);
+
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 HDY_DEPRECATED_IN_1_2_FOR (hdy_avatar_set_loadable_icon)
 void         hdy_avatar_set_image_load_func (HdyAvatar              *self,
                                              HdyAvatarImageLoadFunc  load_image,
                                              gpointer                user_data,
                                              GDestroyNotify          destroy);
+G_GNUC_END_IGNORE_DEPRECATIONS
+
 HDY_AVAILABLE_IN_ALL
 gint         hdy_avatar_get_size            (HdyAvatar              *self);
 HDY_AVAILABLE_IN_ALL
