@@ -418,7 +418,7 @@ static void
 set_position (HdyCarouselBox *self,
               gdouble         position)
 {
-  gdouble lower, upper;
+  gdouble lower = 0, upper = 0;
 
   hdy_carousel_box_get_range (self, &lower, &upper);
 
@@ -1740,6 +1740,9 @@ hdy_carousel_box_get_page_at_position (HdyCarouselBox *self,
   HdyCarouselBoxChildInfo *child;
 
   g_return_val_if_fail (HDY_IS_CAROUSEL_BOX (self), NULL);
+
+  lower = 0;
+  upper = 0;
 
   hdy_carousel_box_get_range (self, &lower, &upper);
 
