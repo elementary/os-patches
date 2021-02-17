@@ -1,0 +1,26 @@
+What's New In python-apt 1.6
+============================
+
+Changed
+-------
+* Methods of :class:`apt_pkg.DepCache` now raise an exception if passed
+  objects belonging to a different cache, in order to avoid segmentation
+  faults or wrong behavior.
+
+  .. versionchanged:: 1.6.1
+
+    Starting with 1.6.1 and 1.7~alpha1, the exception raised is
+    :class:`apt_pkg.CacheMismatchError`, and :class:`apt.cache.Cache` will
+    automatically remap open packages and versions to a new cache.
+
+* Initial type hints
+
+* :attr:`apt_pkg.SourceRecords.files` now returns a
+  :class:`apt_pkg.SourceRecordsFile` object with getters instead of
+  a tuple (but it also emulates the tuple).
+
+Bugfixes
+--------
+* Various other fixes for segmentation faults
+* apt/auth.py: Protect against race with gpg when removing tmpdir
+  (Closes: #871585)
