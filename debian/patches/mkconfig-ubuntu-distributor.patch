@@ -24,13 +24,13 @@ index fcd303387..19e4df4ad 100644
  if [ "x${GRUB_DISTRIBUTOR}" = "x" ] ; then
    OS=GNU/Linux
  else
--  OS="${GRUB_DISTRIBUTOR} GNU/Linux"
+-  OS="${GRUB_DISTRIBUTOR}"
 +  case ${GRUB_DISTRIBUTOR} in
 +    Ubuntu|Kubuntu)
 +      OS="${GRUB_DISTRIBUTOR}"
 +      ;;
 +    *)
-+      OS="${GRUB_DISTRIBUTOR} GNU/Linux"
++      OS="${GRUB_DISTRIBUTOR}"
 +      ;;
 +  esac
    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1|LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
