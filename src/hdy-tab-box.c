@@ -1786,11 +1786,6 @@ check_dnd_threshold (HdyTabBox *self)
 
   gtk_widget_get_allocation (GTK_WIDGET (self), &alloc);
 
-  alloc.x -= threshold;
-  alloc.y -= threshold;
-  alloc.width += 2 * threshold;
-  alloc.height += 2 * threshold;
-
   return self->hover_x < alloc.x - threshold ||
          self->hover_y < alloc.y - threshold ||
          self->hover_x > alloc.x + alloc.width + threshold ||
