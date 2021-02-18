@@ -1789,7 +1789,7 @@ check_dnd_threshold (HdyTabBox *self)
   return self->hover_x < alloc.x - threshold ||
          self->hover_y < alloc.y - threshold ||
          self->hover_x > alloc.x + alloc.width + threshold ||
-         self->hover_y > alloc.x + alloc.height + threshold;
+         self->hover_y > alloc.y + alloc.height + threshold;
 }
 
 static gint
