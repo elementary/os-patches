@@ -249,7 +249,7 @@ class DistInfo(object):
 
         if not dist:
             try:
-                dist = Popen(["lsb_release", "-i", "-s"],
+                dist = Popen(["lsb_release", "-u", "-i", "-s"],
                              universal_newlines=True,
                              stdout=PIPE).communicate()[0].strip()
             except (OSError, IOError) as exc:
