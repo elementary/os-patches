@@ -82,7 +82,7 @@ add_page (HdyTabViewDemoWindow *self,
                           G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
   g_object_bind_property_full (content, "text",
                                page, "tooltip",
-                               G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL,
+                               G_BINDING_SYNC_CREATE,
                                text_to_tooltip, NULL,
                                NULL, NULL);
 
