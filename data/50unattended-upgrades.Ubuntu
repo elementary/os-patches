@@ -4,17 +4,17 @@
 // from non-security sources (e.g. chromium). By allowing the release
 // pocket these get automatically pulled in.
 Unattended-Upgrade::Allowed-Origins {
-	"${distro_id}:${distro_codename}";
-	"${distro_id}:${distro_codename}-security";
+	"Ubuntu:focal";
+	"Ubuntu:focal-security";
 	// Extended Security Maintenance; doesn't necessarily exist for
 	// every release and this system may not have it installed, but if
 	// available, the policy for updates is such that unattended-upgrades
 	// should also install from here by default.
-	"${distro_id}ESMApps:${distro_codename}-apps-security";
-	"${distro_id}ESM:${distro_codename}-infra-security";
-//	"${distro_id}:${distro_codename}-updates";
-//	"${distro_id}:${distro_codename}-proposed";
-//	"${distro_id}:${distro_codename}-backports";
+	"UbuntuESMApps:focal-apps-security";
+	"UbuntuESM:focal-infra-security";
+//	"Ubuntu:focal-updates";
+//	"Ubuntu:focal-proposed";
+//	"Ubuntu:focal-backports";
 };
 
 // Python regular expressions, matching packages to exclude from upgrading
