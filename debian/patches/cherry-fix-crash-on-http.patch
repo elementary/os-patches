@@ -1,0 +1,33 @@
+From 23f42aa31bed9a6f44f840ea52f5f3e711c19fc0 Mon Sep 17 00:00:00 2001
+From: Gustavo Luiz Duarte <gustavold@linux.vnet.ibm.com>
+Date: Tue, 17 Sep 2019 17:44:58 +0200
+Subject: net: Fix crash on http
+
+Don't free file->data on receiving FIN flag since it is used all over
+without checking. http_close() will be called later to free that memory.
+
+Fixes bug: https://bugzilla.redhat.com/show_bug.cgi?id=860834
+
+Signed-off-by: Gustavo Luiz Duarte <gustavold@linux.vnet.ibm.com>
+Signed-off-by: Javier Martinez Canillas <javierm@redhat.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+(cherry picked from commit fc085f7f1860cb864aa61bb3f248a970565a9055)
+
+Patch-Name: cherry-fix-crash-on-http.patch
+---
+ grub-core/net/http.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/net/http.c b/grub-core/net/http.c
+index f182d7b87..dfa849e85 100644
+--- a/grub-core/net/http.c
++++ b/grub-core/net/http.c
+@@ -405,7 +405,7 @@ http_establish (struct grub_file *file, grub_off_t offset, int initial)
+ 		data->filename, server, port ? port : HTTP_PORT);
+   data->sock = grub_net_tcp_open (server,
+ 				  port ? port : HTTP_PORT, http_receive,
+-				  http_err, http_err,
++				  http_err, NULL,
+ 				  file);
+   if (!data->sock)
+     {

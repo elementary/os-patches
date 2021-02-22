@@ -1,3 +1,15 @@
+grub2 (2.04-1ubuntu26.9) focal; urgency=medium
+
+  * Revert: rhboot-f34-tcp-add-window-scaling-support.patch,
+    rhboot-f34-support-non-ethernet.patch,
+    ubuntu-fixup-rhboot-f34-support-non-ethernet.patch,
+    ubuntu-fixup-rhboot-f34-support-non-ethernet-2.patch: these break MAAS
+    LXD KVM pod deployments. LP: #1915288
+  * Cherrypick fix crash in http LP: #1915288
+  * Fix grub-initrd-fallback.service thanks to JawnSmith LP: #1910815
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 12 Feb 2021 22:03:32 +0000
+
 grub2 (2.04-1ubuntu26.8) focal; urgency=medium
 
   * debian/patches/grub-install-backup-and-restore.patch: Fix-up the patch

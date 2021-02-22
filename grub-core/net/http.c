@@ -405,7 +405,7 @@ http_establish (struct grub_file *file, grub_off_t offset, int initial)
 		data->filename, server, port ? port : HTTP_PORT);
   data->sock = grub_net_tcp_open (server,
 				  port ? port : HTTP_PORT, http_receive,
-				  http_err, http_err,
+				  http_err, NULL,
 				  file);
   if (!data->sock)
     {

@@ -1,4 +1,4 @@
-From 978947c3f5d769ee423c73418783ec4ef8f7ab3b Mon Sep 17 00:00:00 2001
+From a22b12544d06eaffb70fda93e724f47b3face92e Mon Sep 17 00:00:00 2001
 From: Chris Glass <chris.glass@canonical.com>
 Date: Fri, 9 Mar 2018 13:47:07 +0100
 Subject: UBUNTU: Added initrd-less boot capabilities.
@@ -12,10 +12,10 @@ Patch-Name: ubuntu-add-initrd-less-boot-fallback.patch
 ---
  Makefile.am                  |  3 ++
  configure.ac                 | 10 ++++++
- grub-initrd-fallback.service | 12 +++++++
+ grub-initrd-fallback.service | 13 +++++++
  util/grub.d/00_header.in     | 27 ++++++++++++++
  util/grub.d/10_linux.in      | 68 +++++++++++++++++++++++++++---------
- 5 files changed, 104 insertions(+), 16 deletions(-)
+ 5 files changed, 105 insertions(+), 16 deletions(-)
  create mode 100644 grub-initrd-fallback.service
 
 diff --git a/Makefile.am b/Makefile.am
@@ -55,13 +55,14 @@ index 883245553..1819188f9 100644
  #
 diff --git a/grub-initrd-fallback.service b/grub-initrd-fallback.service
 new file mode 100644
-index 000000000..48778c9f7
+index 000000000..fb0b76e19
 --- /dev/null
 +++ b/grub-initrd-fallback.service
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,13 @@
 +[Unit]
 +Description=GRUB failed boot detection
 +After=local-fs.target
++After=grub-common.service
 +
 +[Service]
 +Type=oneshot
