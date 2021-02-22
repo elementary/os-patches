@@ -1,0 +1,108 @@
+#!/bin/sh
+
+# Test for installing all security updates on a the current release in a chroot.
+# On development releases the latest stable release is tested since there are no
+# security updates to test with.
+
+# Also test if packages can be upgraded to -updates and -proposed, but failures
+# in -proposed are ignored since those can be issues in the packages.
+
+set -e
+
+chroot_dir=$AUTOPKGTEST_TMP/chroot
+
+distro="$(lsb_release -c -s)"
+# fall back to latest release on any development release
+if [ "$distro" = sid ] || lsb_release -d -s | grep -q 'development branch' \
+       || ( distro-info -t 2> /dev/null && [ "$(distro-info -t)" = "$distro" ] ) ; then
+    distro="$(distro-info -s)"
+fi
+
+. debian/tests/common-functions
+
+check_arch
+
+env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc 2>&1
+do_debootstrap "$distro" "$chroot_dir"
+
+if [ "$(dpkg-vendor --query Vendor)" = "Ubuntu" ]; then
+    sed -i "s/main/main universe/" "$chroot_dir/etc/apt/sources.list"
+fi
+sed "s/^deb /deb-src /" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/apt/sources.list.d/src.list"
+
+chroot_exec "$chroot_dir" apt-get update
+
+# install mailutils for testing u-u emai and apt-list
+chroot_exec "$chroot_dir" apt-get install -y mailutils exim4-daemon-light apt-listchanges 2>&1
+
+# install valgrind when it is installed on the test system, too
+if which valgrind > /dev/null; then
+    chroot_exec "$chroot_dir" apt-get install -y valgrind 2>&1
+fi
+
+# add package set with many dependencies
+# apt prints "W: APT had planned for dpkg to do more than it reported back" to stderr LP: #1647638
+chroot_exec "$chroot_dir" apt-get install -y xfce4 apparmor hello 2>&1
+chroot_exec "$chroot_dir" apt-mark auto hello
+
+# build and install updated python-apt since the one in the snapshot has memory allocation issues
+upgrade_python_apt "$chroot_dir" "$distro"
+
+# install package version just built
+cp ../unattended-upgrades_*.deb "$chroot_dir/tmp/"
+chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
+
+
+enable_pocket "$chroot_dir" security
+chroot_exec "$chroot_dir" apt-get update
+if ! chroot_exec "$chroot_dir" apt-get dist-upgrade -s | grep -q "^Ins"; then
+    echo "There are no security upgrades, skipping test..."
+    exit 77
+fi
+
+enable_pocket "$chroot_dir" updates
+chroot_exec "$chroot_dir" apt-get update
+
+# test update-motd when it is available
+if chroot_exec "$chroot_dir" apt-cache show update-motd > /dev/null 2>&1; then
+    chroot_exec "$chroot_dir" apt-get -y install update-motd
+    echo "Checking motd snippet of unattended-upgrades..."
+    echo "fake-foo libfoo1" > "$chroot_dir"/var/lib/unattended-upgrades/kept-back
+    chroot_exec "$chroot_dir" update-motd
+    grep -q "2 updates could not be installed automatically" "$chroot_dir"/run/motd || (echo "Motd does not show packgages kept back! Exiting..." && exit 1)
+fi
+
+# save list of manually installed packages
+chroot_exec "$chroot_dir" apt-mark showmanual > "$chroot_dir/tmp/manual"
+
+# clean up to need less space for the test
+chroot_exec "$chroot_dir" apt-get clean
+
+run_u_u "$chroot_dir"
+
+echo "Checking if there is anything left not upgraded:"
+disable_pocket "$chroot_dir" updates
+chroot_exec "$chroot_dir" apt-get update
+chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/tmp/updates-left"
+
+! grep "^Inst" "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
+
+echo "Checking if originally auto-removable packages are kept:"
+chroot_exec "$chroot_dir" dpkg -l hello | grep 'ii  hello'
+
+echo "Checking if /var/lib/unattended-upgrades/kept-back was removed."
+! [ -f "$chroot_dir/var/lib/unattended-upgrades/kept-back" ] || (echo "kept-back file still exists! Exiting..." && exit 1)
+
+echo "Checking if package versions from -updates can be upgraded to as well.."
+enable_pocket "$chroot_dir" updates
+chroot_exec "$chroot_dir" apt-get update
+
+echo 'Unattended-Upgrade::Allowed-Origins:: "*:*";' > "$chroot_dir/etc/apt/apt.conf.d/51u-u-all-origins"
+chroot_exec "$chroot_dir" unattended-upgrade --verbose --debug
+
+echo "Checking if package versions from -proposed can be upgraded to as well."
+echo "Failing here does not make the whole test fail because the root cause can be in other packages in -proposed"
+enable_pocket "$chroot_dir" proposed
+chroot_exec "$chroot_dir" apt-get update
+
+chroot_exec "$chroot_dir" unattended-upgrade --verbose --debug || true

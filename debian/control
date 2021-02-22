@@ -1,0 +1,53 @@
+Source: unattended-upgrades
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Michael Vogt <mvo@debian.org>
+Uploaders: Balint Reczey <rbalint@ubuntu.com>
+Section: admin
+Priority: optional
+Build-Depends: debhelper (>= 9.20160709),
+               equivs,
+               po-debconf,
+               python3,
+               python3-dbus,
+               python3-distutils-extra,
+               python3-gi,
+               python3-setuptools
+Build-Depends-Indep: python3-dev,
+                     python3-coverage,
+                     python3-distro-info,
+                     pycodestyle | pep8,
+#                    powermgmt-base, (tests disable on_ac_power checks)
+                     pyflakes3,
+                     python3-apt (>= 1.9.6~),
+                     python3-mock,
+                     lsb-release
+Standards-Version: 4.1.4
+Vcs-Git: https://github.com/mvo5/unattended-upgrades.git
+
+Package: unattended-upgrades
+Architecture: all
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         debconf,
+         python3,
+         python3-apt (>= 1.9.6~),
+         python3-dbus,
+         python3-distro-info,
+         ucf,
+         lsb-release,
+         lsb-base,
+         xz-utils
+Recommends: systemd-sysv | cron | cron-daemon | anacron
+Suggests: bsd-mailx,
+          default-mta | mail-transport-agent,
+          needrestart,
+          powermgmt-base,
+          python3-gi
+Description: automatic installation of security upgrades
+ This package can download and install security upgrades automatically
+ and unattended, taking care to only install packages from the
+ configured APT source, and checking for dpkg prompts about
+ configuration file changes.
+ .
+ This script is the backend for the APT::Periodic::Unattended-Upgrade
+ option.
