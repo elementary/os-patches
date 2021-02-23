@@ -155,8 +155,7 @@ grub_tpm1_execute (grub_efi_handle_t tpm_handle,
     case GRUB_EFI_NOT_FOUND:
       return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("TPM unavailable"));
     default:
-      grub_dprintf("tpm", "Unknown TPM error: %" PRIdGRUB_SSIZE, status);
-      return 0;
+      return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("Unknown TPM error"));
     }
 }
 
@@ -196,8 +195,7 @@ grub_tpm2_execute (grub_efi_handle_t tpm_handle,
     case GRUB_EFI_NOT_FOUND:
       return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("TPM unavailable"));
     default:
-      grub_dprintf("tpm", "Unknown TPM error: %" PRIdGRUB_SSIZE, status);
-      return 0;
+      return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("Unknown TPM error"));
     }
 }
 
@@ -264,8 +262,7 @@ grub_tpm1_log_event (grub_efi_handle_t tpm_handle, unsigned char *buf,
     case GRUB_EFI_NOT_FOUND:
       return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("TPM unavailable"));
     default:
-      grub_dprintf("tpm", "Unknown TPM error: %" PRIdGRUB_SSIZE, status);
-      return 0;
+      return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("Unknown TPM error"));
     }
 }
 
@@ -315,8 +312,7 @@ grub_tpm2_log_event (grub_efi_handle_t tpm_handle, unsigned char *buf,
     case GRUB_EFI_NOT_FOUND:
       return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("TPM unavailable"));
     default:
-      grub_dprintf("tpm", "Unknown TPM error: %" PRIdGRUB_SSIZE, status);
-      return 0;
+      return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("Unknown TPM error"));
     }
 }
 

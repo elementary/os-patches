@@ -48,7 +48,6 @@
 #include <grub/unicode.h>
 #include <grub/term.h>
 #include <grub/normal.h>
-#include <grub/safemath.h>
 
 #if HAVE_FONT_SOURCE
 #include "widthspec.h"
@@ -204,7 +203,7 @@ grub_utf8_to_ucs4_alloc (const char *msg, grub_uint32_t **unicode_msg,
 {
   grub_size_t msg_len = grub_strlen (msg);
 
-  *unicode_msg = grub_calloc (msg_len, sizeof (grub_uint32_t));
+  *unicode_msg = grub_malloc (msg_len * sizeof (grub_uint32_t));
  
   if (!*unicode_msg)
     return -1;
@@ -465,7 +464,6 @@ grub_unicode_aglomerate_comb (const grub_uint32_t *in, grub_size_t inlen,
 	{
 	  struct grub_unicode_combining *n;
 	  unsigned j;
-	  grub_size_t sz;
 
 	  if (!haveout)
 	    continue;
@@ -479,14 +477,10 @@ grub_unicode_aglomerate_comb (const grub_uint32_t *in, grub_size_t inlen,
 	    n = out->combining_inline;
 	  else if (out->ncomb > (int) ARRAY_SIZE (out->combining_inline))
 	    {
-	      if (grub_add (out->ncomb, 1, &sz) ||
-		  grub_mul (sz, sizeof (n[0]), &sz))
-		goto fail;
-
-	      n = grub_realloc (out->combining_ptr, sz);
+	      n = grub_realloc (out->combining_ptr,
+				sizeof (n[0]) * (out->ncomb + 1));
 	      if (!n)
 		{
- fail:
 		  grub_errno = GRUB_ERR_NONE;
 		  continue;
 		}
@@ -494,7 +488,7 @@ grub_unicode_aglomerate_comb (const grub_uint32_t *in, grub_size_t inlen,
 	    }
 	  else
 	    {
-	      n = grub_calloc (out->ncomb + 1, sizeof (n[0]));
+	      n = grub_malloc (sizeof (n[0]) * (out->ncomb + 1));
 	      if (!n)
 		{
 		  grub_errno = GRUB_ERR_NONE;
@@ -848,7 +842,7 @@ grub_bidi_line_logical_to_visual (const grub_uint32_t *logical,
       }							\
   }
 
-  visual = grub_calloc (logical_len, sizeof (visual[0]));
+  visual = grub_malloc (sizeof (visual[0]) * logical_len);
   if (!visual)
     return -1;
 
@@ -1171,8 +1165,8 @@ grub_bidi_logical_to_visual (const grub_uint32_t *logical,
 {
   const grub_uint32_t *line_start = logical, *ptr;
   struct grub_unicode_glyph *visual_ptr;
-  *visual_out = visual_ptr = grub_calloc (logical_len + 2,
-					  3 * sizeof (visual_ptr[0]));
+  *visual_out = visual_ptr = grub_malloc (3 * sizeof (visual_ptr[0])
+					  * (logical_len + 2));
   if (!visual_ptr)
     return -1;
   for (ptr = logical; ptr <= logical + logical_len; ptr++)

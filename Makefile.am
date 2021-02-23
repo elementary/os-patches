@@ -473,9 +473,6 @@ ChangeLog: FORCE
 		touch $@; \
 	fi
 
-systemdsystemunit_DATA = \
-	grub-initrd-fallback.service
-
 EXTRA_DIST += ChangeLog ChangeLog-2015
 
 syslinux_test: $(top_builddir)/config.status tests/syslinux/ubuntu10.04_grub.cfg

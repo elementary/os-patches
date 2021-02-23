@@ -28,7 +28,6 @@
 #include <grub/fshelp.h>
 #include <grub/charset.h>
 #include <grub/datetime.h>
-#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -332,7 +331,7 @@ grub_iso9660_convert_string (grub_uint8_t *us, int len)
   int i;
   grub_uint16_t t[MAX_NAMELEN / 2 + 1];
 
-  p = grub_calloc (len, GRUB_MAX_UTF8_PER_UTF16 + 1);
+  p = grub_malloc (len * GRUB_MAX_UTF8_PER_UTF16 + 1);
   if (! p)
     return NULL;
 
@@ -532,21 +531,10 @@ add_part (struct iterate_dir_ctx *ctx,
 	  int len2)
 {
   int size = ctx->symlink ? grub_strlen (ctx->symlink) : 0;
-  grub_size_t sz;
-  char *new;
 
-  if (grub_add (size, len2, &sz) ||
-      grub_add (sz, 1, &sz))
+  ctx->symlink = grub_realloc (ctx->symlink, size + len2 + 1);
+  if (! ctx->symlink)
     return;
-
-  new = grub_realloc (ctx->symlink, sz);
-  if (!new)
-    {
-      grub_free (ctx->symlink);
-      ctx->symlink = NULL;
-      return;
-    }
-  ctx->symlink = new;
 
   grub_memcpy (ctx->symlink + size, part, len2);
   ctx->symlink[size + len2] = 0;  
@@ -572,24 +560,17 @@ susp_iterate_dir (struct grub_iso9660_susp_entry *entry,
 	{
 	  grub_size_t off = 0, csize = 1;
 	  char *old;
-	  grub_size_t sz;
-
 	  csize = entry->len - 5;
 	  old = ctx->filename;
 	  if (ctx->filename_alloc)
 	    {
 	      off = grub_strlen (ctx->filename);
-	      if (grub_add (csize, off, &sz) ||
-		  grub_add (sz, 1, &sz))
-		return GRUB_ERR_OUT_OF_RANGE;
-	      ctx->filename = grub_realloc (ctx->filename, sz);
+	      ctx->filename = grub_realloc (ctx->filename, csize + off + 1);
 	    }
 	  else
 	    {
 	      off = 0;
-	      if (grub_add (csize, 1, &sz))
-		return GRUB_ERR_OUT_OF_RANGE;
-	      ctx->filename = grub_zalloc (sz);
+	      ctx->filename = grub_zalloc (csize + 1);
 	    }
 	  if (!ctx->filename)
 	    {
@@ -640,12 +621,7 @@ susp_iterate_dir (struct grub_iso9660_susp_entry *entry,
 		   is the length.  Both are part of the `Component
 		   Record'.  */
 		if (ctx->symlink && !ctx->was_continue)
-		  {
-		    add_part (ctx, "/", 1);
-		    if (grub_errno)
-		      return grub_errno;
-		  }
-
+		  add_part (ctx, "/", 1);
 		add_part (ctx, (char *) &entry->data[pos + 2],
 			  entry->data[pos + 1]);
 		ctx->was_continue = (entry->data[pos] & 1);
@@ -664,11 +640,6 @@ susp_iterate_dir (struct grub_iso9660_susp_entry *entry,
 	      add_part (ctx, "/", 1);
 	      break;
 	    }
-
-	  /* Check if grub_realloc() failed in add_part(). */
-	  if (grub_errno)
-	    return grub_errno;
-
 	  /* In pos + 1 the length of the `Component Record' is
 	     stored.  */
 	  pos += entry->data[pos + 1] + 2;
@@ -805,18 +776,14 @@ grub_iso9660_iterate_dir (grub_fshelp_node_t dir,
 	    if (node->have_dirents >= node->alloc_dirents)
 	      {
 		struct grub_fshelp_node *new_node;
-		grub_size_t sz;
-
-		if (grub_mul (node->alloc_dirents, 2, &node->alloc_dirents) ||
-		    grub_sub (node->alloc_dirents, ARRAY_SIZE (node->dirents), &sz) ||
-		    grub_mul (sz, sizeof (node->dirents[0]), &sz) ||
-		    grub_add (sz, sizeof (struct grub_fshelp_node), &sz))
-		  goto fail_0;
-
-		new_node = grub_realloc (node, sz);
+		node->alloc_dirents *= 2;
+		new_node = grub_realloc (node, 
+					 sizeof (struct grub_fshelp_node)
+					 + ((node->alloc_dirents
+					     - ARRAY_SIZE (node->dirents))
+					    * sizeof (node->dirents[0])));
 		if (!new_node)
 		  {
- fail_0:
 		    if (ctx.filename_alloc)
 		      grub_free (ctx.filename);
 		    grub_free (node);
@@ -832,18 +799,14 @@ grub_iso9660_iterate_dir (grub_fshelp_node_t dir,
 		* sizeof (node->dirents[0]) < grub_strlen (ctx.symlink) + 1)
 	      {
 		struct grub_fshelp_node *new_node;
-		grub_size_t sz;
-
-		if (grub_sub (node->alloc_dirents, ARRAY_SIZE (node->dirents), &sz) ||
-		    grub_mul (sz, sizeof (node->dirents[0]), &sz) ||
-		    grub_add (sz, sizeof (struct grub_fshelp_node) + 1, &sz) ||
-		    grub_add (sz, grub_strlen (ctx.symlink), &sz))
-		  goto fail_1;
-
-		new_node = grub_realloc (node, sz);
+		new_node = grub_realloc (node,
+					 sizeof (struct grub_fshelp_node)
+					 + ((node->alloc_dirents
+					     - ARRAY_SIZE (node->dirents))
+					    * sizeof (node->dirents[0]))
+					 + grub_strlen (ctx.symlink) + 1);
 		if (!new_node)
 		  {
- fail_1:
 		    if (ctx.filename_alloc)
 		      grub_free (ctx.filename);
 		    grub_free (node);

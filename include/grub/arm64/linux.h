@@ -20,8 +20,6 @@
 #define GRUB_ARM64_LINUX_HEADER 1
 
 #define GRUB_LINUX_ARM64_MAGIC_SIGNATURE 0x644d5241 /* 'ARM\x64' */
-#define GRUB_ARM64_LINUX_MAGIC 0x644d5241 /* 'ARM\x64' */
-#define GRUB_EFI_PE_MAGIC	0x5A4D
 
 /* From linux/Documentation/arm64/booting.txt */
 struct linux_arm64_kernel_header

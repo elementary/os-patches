@@ -35,12 +35,10 @@
 #include <grub/ns8250.h>
 #include <grub/bsdlabel.h>
 #include <grub/crypto.h>
-#include <grub/safemath.h>
 #include <grub/verify.h>
 #ifdef GRUB_MACHINE_PCBIOS
 #include <grub/machine/int.h>
 #endif
-#include <grub/efi/sb.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -1014,16 +1012,11 @@ grub_netbsd_add_modules (void)
   struct grub_netbsd_btinfo_modules *mods;
   unsigned i;
   grub_err_t err;
-  grub_size_t sz;
 
   for (mod = netbsd_mods; mod; mod = mod->next)
     modcnt++;
 
-  if (grub_mul (modcnt, sizeof (mods->mods[0]), &sz) ||
-      grub_add (sz, sizeof (*mods), &sz))
-    return GRUB_ERR_OUT_OF_RANGE;
-
-  mods = grub_malloc (sz);
+  mods = grub_malloc (sizeof (*mods) + sizeof (mods->mods[0]) * modcnt);
   if (!mods)
     return grub_errno;
 
@@ -2137,9 +2130,6 @@ static grub_command_t cmd_netbsd_module_elf, cmd_openbsd_ramdisk;
 
 GRUB_MOD_INIT (bsd)
 {
-  if (grub_efi_secure_boot())
-    return;
-
   /* Net and OpenBSD kernels are often compressed.  */
   grub_dl_load ("gzio");
 
@@ -2179,9 +2169,6 @@ GRUB_MOD_INIT (bsd)
 
 GRUB_MOD_FINI (bsd)
 {
-  if (grub_efi_secure_boot())
-    return;
-
   grub_unregister_extcmd (cmd_freebsd);
   grub_unregister_extcmd (cmd_openbsd);
   grub_unregister_extcmd (cmd_netbsd);

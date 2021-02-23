@@ -216,17 +216,10 @@ grub_install_get_default_arm_platform (void);
 const char *
 grub_install_get_default_x86_platform (void);
 
-const char *
-grub_install_get_default_powerpc_machtype (void);
-
-int grub_install_efivar_register_efi (grub_device_t efidir_grub_dev,
-				      const char *efidir,
-				      const char *efifile_path,
-				      const char *efi_distributor);
-
-int grub_install_register_efi (grub_device_t efidir_grub_dev,
-			       const char *efidir, const char *efifile_path,
-			       const char *efi_distributor);
+int
+grub_install_register_efi (grub_device_t efidir_grub_dev,
+			   const char *efifile_path,
+			   const char *efi_distributor);
 
 void
 grub_install_register_ieee1275 (int is_prep, const char *install_device,

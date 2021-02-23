@@ -314,11 +314,6 @@
     { 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d } \
   }
 
-#define GRUB_EFI_SMBIOS3_TABLE_GUID	\
-  { 0xf2fd1544, 0x9794, 0x4a2c, \
-    { 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94 } \
-  }
-
 #define GRUB_EFI_SAL_TABLE_GUID \
   { 0xeb9d2d32, 0x2d88, 0x11d3, \
       { 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d } \
@@ -337,16 +332,6 @@
 #define GRUB_EFI_VENDOR_APPLE_GUID \
   { 0x2B0585EB, 0xD8B8, 0x49A9,	\
       { 0x8B, 0x8C, 0xE2, 0x1B, 0x01, 0xAE, 0xF2, 0xB7 } \
-  }
-
-#define GRUB_EFI_IP4_CONFIG2_PROTOCOL_GUID \
-  { 0x5b446ed1, 0xe30b, 0x4faa, \
-      { 0x87, 0x1a, 0x36, 0x54, 0xec, 0xa3, 0x60, 0x80 } \
-  }
-
-#define GRUB_EFI_IP6_CONFIG_PROTOCOL_GUID \
-  { 0x937fe521, 0x95ae, 0x4d1a, \
-      { 0x89, 0x29, 0x48, 0xbc, 0xd9, 0x0a, 0xd3, 0x1a } \
   }
 
 struct grub_efi_sal_system_table
@@ -640,7 +625,6 @@ typedef struct grub_efi_device_path grub_efi_device_path_protocol_t;
 #define GRUB_EFI_DEVICE_PATH_TYPE(dp)		((dp)->type & 0x7f)
 #define GRUB_EFI_DEVICE_PATH_SUBTYPE(dp)	((dp)->subtype)
 #define GRUB_EFI_DEVICE_PATH_LENGTH(dp)		((dp)->length)
-#define GRUB_EFI_DEVICE_PATH_VALID(dp)		((dp) != NULL && GRUB_EFI_DEVICE_PATH_LENGTH (dp) >= 4)
 
 /* The End of Device Path nodes.  */
 #define GRUB_EFI_END_DEVICE_PATH_TYPE			(0xff & 0x7f)
@@ -649,16 +633,13 @@ typedef struct grub_efi_device_path grub_efi_device_path_protocol_t;
 #define GRUB_EFI_END_THIS_DEVICE_PATH_SUBTYPE		0x01
 
 #define GRUB_EFI_END_ENTIRE_DEVICE_PATH(dp)	\
-  (!GRUB_EFI_DEVICE_PATH_VALID (dp) || \
-   (GRUB_EFI_DEVICE_PATH_TYPE (dp) == GRUB_EFI_END_DEVICE_PATH_TYPE \
-    && (GRUB_EFI_DEVICE_PATH_SUBTYPE (dp) \
-	== GRUB_EFI_END_ENTIRE_DEVICE_PATH_SUBTYPE)))
+  (GRUB_EFI_DEVICE_PATH_TYPE (dp) == GRUB_EFI_END_DEVICE_PATH_TYPE \
+   && (GRUB_EFI_DEVICE_PATH_SUBTYPE (dp) \
+       == GRUB_EFI_END_ENTIRE_DEVICE_PATH_SUBTYPE))
 
 #define GRUB_EFI_NEXT_DEVICE_PATH(dp)	\
-  (GRUB_EFI_DEVICE_PATH_VALID (dp) \
-   ? ((grub_efi_device_path_t *) \
-      ((char *) (dp) + GRUB_EFI_DEVICE_PATH_LENGTH (dp))) \
-   : NULL)
+  ((grub_efi_device_path_t *) ((char *) (dp) \
+                               + GRUB_EFI_DEVICE_PATH_LENGTH (dp)))
 
 /* Hardware Device Path.  */
 #define GRUB_EFI_HARDWARE_DEVICE_PATH_TYPE		1
@@ -844,8 +825,6 @@ struct grub_efi_ipv4_device_path
   grub_efi_uint16_t remote_port;
   grub_efi_uint16_t protocol;
   grub_efi_uint8_t static_ip_address;
-  grub_efi_ipv4_address_t gateway_ip_address;
-  grub_efi_ipv4_address_t subnet_mask;
 } GRUB_PACKED;
 typedef struct grub_efi_ipv4_device_path grub_efi_ipv4_device_path_t;
 
@@ -899,15 +878,6 @@ struct grub_efi_sata_device_path
   grub_efi_uint16_t lun;
 } GRUB_PACKED;
 typedef struct grub_efi_sata_device_path grub_efi_sata_device_path_t;
-
-#define GRUB_EFI_URI_DEVICE_PATH_SUBTYPE		24
-
-struct grub_efi_uri_device_path
-{
-  grub_efi_device_path_t header;
-  grub_efi_uint8_t uri[0];
-} GRUB_PACKED;
-typedef struct grub_efi_uri_device_path grub_efi_uri_device_path_t;
 
 #define GRUB_EFI_VENDOR_MESSAGING_DEVICE_PATH_SUBTYPE	10
 
@@ -1482,67 +1452,14 @@ typedef struct grub_efi_simple_text_output_interface grub_efi_simple_text_output
 
 typedef grub_uint8_t grub_efi_pxe_packet_t[1472];
 
-typedef struct {
-  grub_uint8_t addr[4];
-} grub_efi_pxe_ipv4_address_t;
-
-typedef struct {
-  grub_uint8_t addr[16];
-} grub_efi_pxe_ipv6_address_t;
-
-typedef struct {
-  grub_uint8_t addr[32];
-} grub_efi_pxe_mac_address_t;
-
-typedef union {
-    grub_uint32_t addr[4];
-    grub_efi_pxe_ipv4_address_t v4;
-    grub_efi_pxe_ipv6_address_t v6;
-} grub_efi_pxe_ip_address_t;
-
-#define GRUB_EFI_PXE_BASE_CODE_MAX_IPCNT 8
-typedef struct {
-    grub_uint8_t filters;
-    grub_uint8_t ip_cnt;
-    grub_uint16_t reserved;
-    grub_efi_pxe_ip_address_t ip_list[GRUB_EFI_PXE_BASE_CODE_MAX_IPCNT];
-} grub_efi_pxe_ip_filter_t;
-
-typedef struct {
-    grub_efi_pxe_ip_address_t ip_addr;
-    grub_efi_pxe_mac_address_t mac_addr;
-} grub_efi_pxe_arp_entry_t;
-
-typedef struct {
-    grub_efi_pxe_ip_address_t ip_addr;
-    grub_efi_pxe_ip_address_t subnet_mask;
-    grub_efi_pxe_ip_address_t gw_addr;
-} grub_efi_pxe_route_entry_t;
-
-
-#define GRUB_EFI_PXE_BASE_CODE_MAX_ARP_ENTRIES 8
-#define GRUB_EFI_PXE_BASE_CODE_MAX_ROUTE_ENTRIES 8
-
 typedef struct grub_efi_pxe_mode
 {
-  grub_uint8_t started;
-  grub_uint8_t ipv6_available;
-  grub_uint8_t ipv6_supported;
-  grub_uint8_t using_ipv6;
-  grub_uint8_t unused[16];
-  grub_efi_pxe_ip_address_t station_ip;
-  grub_efi_pxe_ip_address_t subnet_mask;
+  grub_uint8_t unused[52];
   grub_efi_pxe_packet_t dhcp_discover;
   grub_efi_pxe_packet_t dhcp_ack;
   grub_efi_pxe_packet_t proxy_offer;
   grub_efi_pxe_packet_t pxe_discover;
   grub_efi_pxe_packet_t pxe_reply;
-  grub_efi_pxe_packet_t pxe_bis_reply;
-  grub_efi_pxe_ip_filter_t ip_filter;
-  grub_uint32_t arp_cache_entries;
-  grub_efi_pxe_arp_entry_t arp_cache[GRUB_EFI_PXE_BASE_CODE_MAX_ARP_ENTRIES];
-  grub_uint32_t route_table_entries;
-  grub_efi_pxe_route_entry_t route_table[GRUB_EFI_PXE_BASE_CODE_MAX_ROUTE_ENTRIES];
 } grub_efi_pxe_mode_t;
 
 typedef struct grub_efi_pxe
@@ -1767,72 +1684,6 @@ struct grub_efi_block_io
   grub_efi_status_t (*flush_blocks) (struct grub_efi_block_io *this);
 };
 typedef struct grub_efi_block_io grub_efi_block_io_t;
-
-enum grub_efi_ip4_config2_data_type {
-  GRUB_EFI_IP4_CONFIG2_DATA_TYPE_INTERFACEINFO,
-  GRUB_EFI_IP4_CONFIG2_DATA_TYPE_POLICY,
-  GRUB_EFI_IP4_CONFIG2_DATA_TYPE_MANUAL_ADDRESS,
-  GRUB_EFI_IP4_CONFIG2_DATA_TYPE_GATEWAY,
-  GRUB_EFI_IP4_CONFIG2_DATA_TYPE_DNSSERVER,
-  GRUB_EFI_IP4_CONFIG2_DATA_TYPE_MAXIMUM
-};
-typedef enum grub_efi_ip4_config2_data_type grub_efi_ip4_config2_data_type_t;
-
-struct grub_efi_ip4_config2_protocol
-{
-  grub_efi_status_t (*set_data) (struct grub_efi_ip4_config2_protocol *this,
-				 grub_efi_ip4_config2_data_type_t data_type,
-				 grub_efi_uintn_t data_size,
-				 void *data);
-
-  grub_efi_status_t (*get_data) (struct grub_efi_ip4_config2_protocol *this,
-				 grub_efi_ip4_config2_data_type_t data_type,
-				 grub_efi_uintn_t *data_size,
-				 void *data);
-
-  grub_efi_status_t (*register_data_notify) (struct grub_efi_ip4_config2_protocol *this,
-					     grub_efi_ip4_config2_data_type_t data_type,
-					     grub_efi_event_t event);
-
-  grub_efi_status_t (*unregister_datanotify) (struct grub_efi_ip4_config2_protocol *this,
-					     grub_efi_ip4_config2_data_type_t data_type,
-					     grub_efi_event_t event);
-};
-typedef struct grub_efi_ip4_config2_protocol grub_efi_ip4_config2_protocol_t;
-
-enum grub_efi_ip6_config_data_type {
-  GRUB_EFI_IP6_CONFIG_DATA_TYPE_INTERFACEINFO,
-  GRUB_EFI_IP6_CONFIG_DATA_TYPE_ALT_INTERFACEID,
-  GRUB_EFI_IP6_CONFIG_DATA_TYPE_POLICY,
-  GRUB_EFI_IP6_CONFIG_DATA_TYPE_DUP_ADDR_DETECT_TRANSMITS,
-  GRUB_EFI_IP6_CONFIG_DATA_TYPE_MANUAL_ADDRESS,
-  GRUB_EFI_IP6_CONFIG_DATA_TYPE_GATEWAY,
-  GRUB_EFI_IP6_CONFIG_DATA_TYPE_DNSSERVER,
-  GRUB_EFI_IP6_CONFIG_DATA_TYPE_MAXIMUM
-};
-typedef enum grub_efi_ip6_config_data_type grub_efi_ip6_config_data_type_t;
-
-struct grub_efi_ip6_config_protocol
-{
-  grub_efi_status_t (*set_data) (struct grub_efi_ip6_config_protocol *this,
-				 grub_efi_ip6_config_data_type_t data_type,
-				 grub_efi_uintn_t data_size,
-				 void *data);
-
-  grub_efi_status_t (*get_data) (struct grub_efi_ip6_config_protocol *this,
-				 grub_efi_ip6_config_data_type_t data_type,
-				 grub_efi_uintn_t *data_size,
-				 void *data);
-
-  grub_efi_status_t (*register_data_notify) (struct grub_efi_ip6_config_protocol *this,
-					     grub_efi_ip6_config_data_type_t data_type,
-					     grub_efi_event_t event);
-
-  grub_efi_status_t (*unregister_datanotify) (struct grub_efi_ip6_config_protocol *this,
-					     grub_efi_ip6_config_data_type_t data_type,
-					     grub_efi_event_t event);
-};
-typedef struct grub_efi_ip6_config_protocol grub_efi_ip6_config_protocol_t;
 
 #if (GRUB_TARGET_SIZEOF_VOID_P == 4) || defined (__ia64__) \
   || defined (__aarch64__) || defined (__MINGW64__) || defined (__CYGWIN__) \

@@ -32,15 +32,10 @@
 #include <grub/env.h>
 #include <grub/cache.h>
 #include <grub/i18n.h>
-#include <grub/efi/sb.h>
 
 /* Platforms where modules are in a readonly area of memory.  */
 #if defined(GRUB_MACHINE_QEMU)
 #define GRUB_MODULES_MACHINE_READONLY
-#endif
-
-#ifdef GRUB_MACHINE_EFI
-#include <grub/efi/efi.h>
 #endif
 
 
@@ -690,15 +685,6 @@ grub_dl_load_file (const char *filename)
   grub_ssize_t size;
   void *core = 0;
   grub_dl_t mod = 0;
-
-#ifdef GRUB_MACHINE_EFI
-  if (grub_efi_secure_boot ())
-    {
-      grub_error (GRUB_ERR_ACCESS_DENIED,
-		  "Secure Boot forbids loading module from %s", filename);
-      return 0;
-    }
-#endif
 
   grub_boot_time ("Loading module %s", filename);
 

@@ -27,7 +27,6 @@
 #include <grub/auth.h>
 #include <grub/i18n.h>
 #include <grub/charset.h>
-#include <grub/safemath.h>
 
 enum update_mode
   {
@@ -96,8 +95,8 @@ init_line (struct screen *screen, struct line *linep)
 {
   linep->len = 0;
   linep->max_len = 80;
-  linep->buf = grub_calloc (linep->max_len + 1, sizeof (linep->buf[0]));
-  linep->pos = grub_calloc (screen->nterms, sizeof (linep->pos[0]));
+  linep->buf = grub_malloc ((linep->max_len + 1) * sizeof (linep->buf[0]));
+  linep->pos = grub_zalloc (screen->nterms * sizeof (linep->pos[0]));
   if (! linep->buf || !linep->pos)
     {
       grub_free (linep->buf);
@@ -114,18 +113,10 @@ ensure_space (struct line *linep, int extra)
 {
   if (linep->max_len < linep->len + extra)
     {
-      grub_size_t sz0, sz1;
-
-      if (grub_add (linep->len, extra, &sz0) ||
-	  grub_mul (sz0, 2, &sz0) ||
-	  grub_add (sz0, 1, &sz1) ||
-	  grub_mul (sz1, sizeof (linep->buf[0]), &sz1))
-	return 0;
-
-      linep->buf = grub_realloc (linep->buf, sz1);
+      linep->max_len = 2 * (linep->len + extra);
+      linep->buf = grub_realloc (linep->buf, (linep->max_len + 1) * sizeof (linep->buf[0]));
       if (! linep->buf)
 	return 0;
-      linep->max_len = sz0;
     }
 
   return 1;
@@ -296,7 +287,7 @@ update_screen (struct screen *screen, struct per_term_screen *term_screen,
 	  pos = linep->pos + (term_screen - screen->terms);
 
 	  if (!*pos)
-	    *pos = grub_calloc (linep->len + 1, sizeof (**pos));
+	    *pos = grub_zalloc ((linep->len + 1) * sizeof (**pos));
 
 	  if (i == region_start || linep == screen->lines + screen->line
 	      || (i > region_start && mode == ALL_LINES))
@@ -480,7 +471,7 @@ insert_string (struct screen *screen, const char *s, int update)
 
 	  /* Insert the string.  */
 	  current_linep = screen->lines + screen->line;
-	  unicode_msg = grub_calloc (p - s, sizeof (grub_uint32_t));
+	  unicode_msg = grub_malloc ((p - s) * sizeof (grub_uint32_t));
 
 	  if (!unicode_msg)
 	    return 0;
@@ -1032,7 +1023,7 @@ complete (struct screen *screen, int continuous, int update)
   if (completion_buffer.buf)
     {
       buflen = grub_strlen (completion_buffer.buf);
-      ucs4 = grub_calloc (buflen + 1, sizeof (grub_uint32_t));
+      ucs4 = grub_malloc (sizeof (grub_uint32_t) * (buflen + 1));
       
       if (!ucs4)
 	{
@@ -1277,7 +1268,7 @@ grub_menu_entry_run (grub_menu_entry_t entry)
   for (i = 0; i < (unsigned) screen->num_lines; i++)
     {
       grub_free (screen->lines[i].pos);
-      screen->lines[i].pos = grub_calloc (screen->nterms, sizeof (screen->lines[i].pos[0]));
+      screen->lines[i].pos = grub_zalloc (screen->nterms * sizeof (screen->lines[i].pos[0]));
       if (! screen->lines[i].pos)
 	{
 	  grub_print_error ();
@@ -1287,7 +1278,7 @@ grub_menu_entry_run (grub_menu_entry_t entry)
 	}
     }
 
-  screen->terms = grub_calloc (screen->nterms, sizeof (screen->terms[0]));
+  screen->terms = grub_zalloc (screen->nterms * sizeof (screen->terms[0]));
   if (!screen->terms)
     {
       grub_print_error ();

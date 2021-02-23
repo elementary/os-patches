@@ -30,10 +30,6 @@
 #include <grub/linux.h>
 #include <grub/verify.h>
 
-#ifdef GRUB_MACHINE_EFI
-#include <grub/efi/efi.h>
-#endif
-
 GRUB_MOD_LICENSE ("GPLv3+");
 
 static grub_dl_t my_mod;
@@ -82,7 +78,7 @@ linux_prepare_atag (void *target_atag)
 
   /* some place for cmdline, initrd and terminator.  */
   tmp_size = get_atag_size (atag_orig) + 20 + (arg_size) / 4;
-  tmp_atag = grub_calloc (tmp_size, sizeof (grub_uint32_t));
+  tmp_atag = grub_malloc (tmp_size * sizeof (grub_uint32_t));
   if (!tmp_atag)
     return grub_errno;
 
@@ -474,14 +470,6 @@ grub_cmd_devicetree (grub_command_t cmd __attribute__ ((unused)),
 
   if (argc != 1)
     return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
-
-#ifdef GRUB_MACHINE_EFI
-  if (grub_efi_secure_boot ())
-    {
-      return grub_error (GRUB_ERR_ACCESS_DENIED,
-		  "Secure Boot forbids loading devicetree from %s", argv[0]);
-    }
-#endif
 
   dtb = grub_file_open (argv[0], GRUB_FILE_TYPE_DEVICE_TREE_IMAGE);
   if (!dtb)

@@ -40,7 +40,6 @@
 #include <grub/btrfs.h>
 #include <grub/crypto.h>
 #include <grub/diskfilter.h>
-#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -330,13 +329,9 @@ save_ref (struct grub_btrfs_leaf_descriptor *desc,
   if (desc->allocated < desc->depth)
     {
       void *newdata;
-      grub_size_t sz;
-
-      if (grub_mul (desc->allocated, 2, &desc->allocated) ||
-	  grub_mul (desc->allocated, sizeof (desc->data[0]), &sz))
-	return GRUB_ERR_OUT_OF_RANGE;
-
-      newdata = grub_realloc (desc->data, sz);
+      desc->allocated *= 2;
+      newdata = grub_realloc (desc->data, sizeof (desc->data[0])
+			      * desc->allocated);
       if (!newdata)
 	return grub_errno;
       desc->data = newdata;
@@ -418,7 +413,7 @@ lower_bound (struct grub_btrfs_data *data,
     {
       desc->allocated = 16;
       desc->depth = 0;
-      desc->data = grub_calloc (desc->allocated, sizeof (desc->data[0]));
+      desc->data = grub_malloc (sizeof (desc->data[0]) * desc->allocated);
       if (!desc->data)
 	return grub_errno;
     }
@@ -627,21 +622,16 @@ find_device (struct grub_btrfs_data *data, grub_uint64_t id)
   if (data->n_devices_attached > data->n_devices_allocated)
     {
       void *tmp;
-      grub_size_t sz;
-
-      if (grub_mul (data->n_devices_attached, 2, &data->n_devices_allocated) ||
-	  grub_add (data->n_devices_allocated, 1, &data->n_devices_allocated) ||
-	  grub_mul (data->n_devices_allocated, sizeof (data->devices_attached[0]), &sz))
-	goto fail;
-
-      data->devices_attached = grub_realloc (tmp = data->devices_attached, sz);
+      data->n_devices_allocated = 2 * data->n_devices_attached + 1;
+      data->devices_attached
+	= grub_realloc (tmp = data->devices_attached,
+			data->n_devices_allocated
+			* sizeof (data->devices_attached[0]));
       if (!data->devices_attached)
 	{
-	  data->devices_attached = tmp;
-
- fail:
 	  if (ctx.dev_found)
 	    grub_device_close (ctx.dev_found);
+	  data->devices_attached = tmp;
 	  return NULL;
 	}
     }
@@ -762,7 +752,7 @@ raid56_read_retry (struct grub_btrfs_data *data,
   grub_err_t ret = GRUB_ERR_OUT_OF_MEMORY;
   grub_uint64_t i, failed_devices;
 
-  buffers = grub_calloc (nstripes, sizeof (*buffers));
+  buffers = grub_zalloc (sizeof(*buffers) * nstripes);
   if (!buffers)
     goto cleanup;
 
@@ -2170,7 +2160,7 @@ grub_btrfs_embed (grub_device_t device __attribute__ ((unused)),
   *nsectors = 64 * 2 - 1;
   if (*nsectors > max_nsectors)
     *nsectors = max_nsectors;
-  *sectors = grub_calloc (*nsectors, sizeof (**sectors));
+  *sectors = grub_malloc (*nsectors * sizeof (**sectors));
   if (!*sectors)
     return grub_errno;
   for (i = 0; i < *nsectors; i++)

@@ -86,18 +86,6 @@ grub_util_error (const char *fmt, ...)
 }
 
 void *
-xcalloc (grub_size_t nmemb, grub_size_t size)
-{
-  void *p;
-
-  p = calloc (nmemb, size);
-  if (!p)
-    grub_util_error ("%s", _("out of memory"));
-
-  return p;
-}
-
-void *
 xmalloc (grub_size_t size)
 {
   void *p;
@@ -151,10 +139,9 @@ xasprintf (const char *fmt, ...)
 
 #if !defined (GRUB_MACHINE_EMU) || defined (GRUB_UTIL)
 void
-__attribute__ ((noreturn))
-grub_exit (int rc)
+grub_exit (void)
 {
-  exit (rc < 0 ? 1 : rc);
+  exit (1);
 }
 #endif
 

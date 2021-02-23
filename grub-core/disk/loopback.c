@@ -21,12 +21,19 @@
 #include <grub/misc.h>
 #include <grub/file.h>
 #include <grub/disk.h>
-#include <grub/loopback.h>
 #include <grub/mm.h>
 #include <grub/extcmd.h>
 #include <grub/i18n.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
+
+struct grub_loopback
+{
+  char *devname;
+  grub_file_t file;
+  struct grub_loopback *next;
+  unsigned long id;
+};
 
 static struct grub_loopback *loopback_list;
 static unsigned long last_id = 0;
@@ -86,8 +93,7 @@ grub_cmd_loopback (grub_extcmd_context_t ctxt, int argc, char **args)
     return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
 
   file = grub_file_open (args[1], GRUB_FILE_TYPE_LOOPBACK
-			 | GRUB_FILE_TYPE_NO_DECOMPRESS |
-			 GRUB_FILE_TYPE_SKIP_SIGNATURE);
+			 | GRUB_FILE_TYPE_NO_DECOMPRESS);
   if (! file)
     return grub_errno;
 

@@ -11,9 +11,27 @@ GRUB depends on some software packages installed into your system. If
 you don't have any of them, please obtain and install them before
 configuring the GRUB.
 
-* GCC 5.1.0 or later
-  Experimental support for clang 3.8.0 or later (results in much bigger binaries)
+* GCC 4.1.3 or later
+  Note: older versions may work but support is limited
+
+  Experimental support for clang 3.3 or later (results in much bigger binaries)
   for i386, x86_64, arm (including thumb), arm64, mips(el), powerpc, sparc64
+  Note: clang 3.2 or later works for i386 and x86_64 targets but results in
+        much bigger binaries.
+	earlier versions not tested
+  Note: clang 3.2 or later works for arm
+	earlier versions not tested
+  Note: clang on arm64 is not supported due to
+	https://llvm.org/bugs/show_bug.cgi?id=26030
+  Note: clang 3.3 or later works for mips(el)
+	earlier versions fail to generate .reginfo and hence gprel relocations
+	fail.
+  Note: clang 3.2 or later works for powerpc
+	earlier versions not tested
+  Note: clang 3.5 or later works for sparc64
+        earlier versions return "error: unable to interface with target machine"
+  Note: clang has no support for ia64 and hence you can't compile GRUB
+	for ia64 with clang
 * GNU Make
 * GNU Bison 2.3 or later
 * GNU gettext 0.17 or later
@@ -22,11 +40,6 @@ configuring the GRUB.
 * pkg-config
 * Other standard GNU/Unix tools
 * a libc with large file support (e.g. glibc 2.1 or later)
-
-On Unix-based systems, you also need:
-
-* libefivar (recommended)
-* libefiboot (recommended; your OS may ship this together with libefivar)
 
 On GNU/Linux, you also need:
 

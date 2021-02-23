@@ -34,8 +34,6 @@
 #include <grub/env.h>
 #include <grub/i18n.h>
 #include <grub/verify.h>
-#include <grub/efi/sb.h>
-#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -61,17 +59,15 @@ grub_xnu_heap_malloc (int size, void **src, grub_addr_t *target)
 {
   grub_err_t err;
   grub_relocator_chunk_t ch;
-  grub_addr_t tgt;
-
-  if (grub_add (grub_xnu_heap_target_start, grub_xnu_heap_size, &tgt))
-    return GRUB_ERR_OUT_OF_RANGE;
   
-  err = grub_relocator_alloc_chunk_addr (grub_xnu_relocator, &ch, tgt, size);
+  err = grub_relocator_alloc_chunk_addr (grub_xnu_relocator, &ch,
+					 grub_xnu_heap_target_start
+					 + grub_xnu_heap_size, size);
   if (err)
     return err;
 
   *src = get_virtual_current_address (ch);
-  *target = tgt;
+  *target = grub_xnu_heap_target_start + grub_xnu_heap_size;
   grub_xnu_heap_size += size;
   grub_dprintf ("xnu", "val=%p\n", *src);
   return GRUB_ERR_NONE;
@@ -804,7 +800,7 @@ grub_cmd_xnu_mkext (grub_command_t cmd __attribute__ ((unused)),
   if (grub_be_to_cpu32 (head.magic) == GRUB_MACHO_FAT_MAGIC)
     {
       narchs = grub_be_to_cpu32 (head.nfat_arch);
-      archs = grub_calloc (narchs, sizeof (struct grub_macho_fat_arch));
+      archs = grub_malloc (sizeof (struct grub_macho_fat_arch) * narchs);
       if (! archs)
 	{
 	  grub_file_close (file);
@@ -1482,9 +1478,6 @@ static grub_extcmd_t cmd_splash;
 
 GRUB_MOD_INIT(xnu)
 {
-  if (grub_efi_secure_boot())
-    return;
-
   cmd_kernel = grub_register_command ("xnu_kernel", grub_cmd_xnu_kernel, 0,
 				      N_("Load XNU image."));
   cmd_kernel64 = grub_register_command ("xnu_kernel64", grub_cmd_xnu_kernel64,
@@ -1525,9 +1518,6 @@ GRUB_MOD_INIT(xnu)
 
 GRUB_MOD_FINI(xnu)
 {
-  if (grub_efi_secure_boot())
-    return;
-
 #ifndef GRUB_MACHINE_EMU
   grub_unregister_command (cmd_resume);
 #endif

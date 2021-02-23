@@ -26,7 +26,6 @@
 #include <grub/types.h>
 #include <grub/fshelp.h>
 #include <grub/deflate.h>
-#include <grub/safemath.h>
 #include <minilzo.h>
 
 #include "xz.h"
@@ -460,17 +459,7 @@ grub_squash_read_symlink (grub_fshelp_node_t node)
 {
   char *ret;
   grub_err_t err;
-  grub_size_t sz;
-
-  if (grub_add (grub_le_to_cpu32 (node->ino.symlink.namelen), 1, &sz))
-    {
-      grub_error (GRUB_ERR_OUT_OF_RANGE, N_("overflow is detected"));
-      return NULL;
-    }
-
-  ret = grub_malloc (sz);
-  if (!ret)
-    return NULL;
+  ret = grub_malloc (grub_le_to_cpu32 (node->ino.symlink.namelen) + 1);
 
   err = read_chunk (node->data, ret,
 		    grub_le_to_cpu32 (node->ino.symlink.namelen),
@@ -517,16 +506,11 @@ grub_squash_iterate_dir (grub_fshelp_node_t dir,
 
   {
     grub_fshelp_node_t node;
-    grub_size_t sz;
-
-    if (grub_mul (dir->stsize, sizeof (dir->stack[0]), &sz) ||
-	grub_add (sz, sizeof (*node), &sz))
-      return 0;
-
-    node = grub_malloc (sz);
+    node = grub_malloc (sizeof (*node) + dir->stsize * sizeof (dir->stack[0]));
     if (!node)
       return 0;
-    grub_memcpy (node, dir, sz);
+    grub_memcpy (node, dir,
+		 sizeof (*node) + dir->stsize * sizeof (dir->stack[0]));
     if (hook (".", GRUB_FSHELP_DIR, node, hook_data))
       return 1;
 
@@ -534,15 +518,12 @@ grub_squash_iterate_dir (grub_fshelp_node_t dir,
       {
 	grub_err_t err;
 
-	if (grub_mul (dir->stsize, sizeof (dir->stack[0]), &sz) ||
-	    grub_add (sz, sizeof (*node), &sz))
-	  return 0;
-
-	node = grub_malloc (sz);
+	node = grub_malloc (sizeof (*node) + dir->stsize * sizeof (dir->stack[0]));
 	if (!node)
 	  return 0;
 
-	grub_memcpy (node, dir, sz);
+	grub_memcpy (node, dir,
+		     sizeof (*node) + dir->stsize * sizeof (dir->stack[0]));
 
 	node->stsize--;
 	err = read_chunk (dir->data, &node->ino, sizeof (node->ino),
@@ -576,7 +557,6 @@ grub_squash_iterate_dir (grub_fshelp_node_t dir,
 	  enum grub_fshelp_filetype filetype = GRUB_FSHELP_REG;
 	  struct grub_squash_dirent di;
 	  struct grub_squash_inode ino;
-	  grub_size_t sz;
 
 	  err = read_chunk (dir->data, &di, sizeof (di),
 			    grub_le_to_cpu64 (dir->data->sb.diroffset)
@@ -609,16 +589,13 @@ grub_squash_iterate_dir (grub_fshelp_node_t dir,
 	  if (grub_le_to_cpu16 (di.type) == SQUASH_TYPE_SYMLINK)
 	    filetype = GRUB_FSHELP_SYMLINK;
 
-	  if (grub_add (dir->stsize, 1, &sz) ||
-	      grub_mul (sz, sizeof (dir->stack[0]), &sz) ||
-	      grub_add (sz, sizeof (*node), &sz))
-	    return 0;
-
-	  node = grub_malloc (sz);
+	  node = grub_malloc (sizeof (*node)
+			      + (dir->stsize + 1) * sizeof (dir->stack[0]));
 	  if (! node)
 	    return 0;
 
-	  grub_memcpy (node, dir, sz - sizeof(dir->stack[0]));
+	  grub_memcpy (node, dir,
+		       sizeof (*node) + dir->stsize * sizeof (dir->stack[0]));
 
 	  node->ino = ino;
 	  node->stack[node->stsize].ino_chunk = grub_le_to_cpu32 (dh.ino_chunk);

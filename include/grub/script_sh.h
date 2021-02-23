@@ -359,10 +359,13 @@ struct grub_script_function
   /* The script function.  */
   struct grub_script *func;
 
+  /* The flags.  */
+  unsigned flags;
+
   /* The next element.  */
   struct grub_script_function *next;
 
-  unsigned executing;
+  int references;
 };
 typedef struct grub_script_function *grub_script_function_t;
 

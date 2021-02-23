@@ -102,13 +102,6 @@ do
     esac
 done
 
-if fgrep -qs '${GRUB_PREFIX}/video.lst' "${grub_mkconfig_dir}/00_header"; then
-  echo "GRUB >= 2.00 has been unpacked but not yet configured." >&2
-  echo "grub-mkconfig will not work until the upgrade is complete." >&2
-  echo "It should run later as part of configuring the new GRUB packages." >&2
-  exit 0
-fi
-
 if [ "x$EUID" = "x" ] ; then
   EUID=`id -u`
 fi
@@ -162,15 +155,8 @@ if [ "x${GRUB_EARLY_INITRD_LINUX_STOCK}" = "x" ]; then
 fi
 
 if test -f ${sysconfdir}/default/grub ; then
-  gettext_printf "Sourcing file \`%s'\n" "${sysconfdir}/default/grub" 1>&2
   . ${sysconfdir}/default/grub
 fi
-for x in ${sysconfdir}/default/grub.d/*.cfg ; do
-  if [ -e "${x}" ]; then
-    gettext_printf "Sourcing file \`%s'\n" "${x}" 1>&2
-    . "${x}"
-  fi
-done
 
 # XXX: should this be deprecated at some point?
 if [ "x${GRUB_TERMINAL}" != "x" ] ; then
@@ -197,10 +183,6 @@ done
 GRUB_ACTUAL_DEFAULT="$GRUB_DEFAULT"
 
 if [ "x${GRUB_ACTUAL_DEFAULT}" = "xsaved" ] ; then GRUB_ACTUAL_DEFAULT="`"${grub_editenv}" - list | sed -n '/^saved_entry=/ s,^saved_entry=,,p'`" ; fi
-
-if [ "x${GRUB_RECOVERY_TITLE}" = "x" ]; then
-  GRUB_RECOVERY_TITLE="recovery mode"
-fi
 
 
 # These are defined in this script, export them here so that user can
@@ -256,12 +238,7 @@ export GRUB_DEFAULT \
   GRUB_ENABLE_CRYPTODISK \
   GRUB_BADRAM \
   GRUB_OS_PROBER_SKIP_LIST \
-  GRUB_DISABLE_SUBMENU \
-  GRUB_RECORDFAIL_TIMEOUT \
-  GRUB_RECOVERY_TITLE \
-  GRUB_FORCE_PARTUUID \
-  GRUB_DISABLE_INITRD \
-  GRUB_FLAVOUR_ORDER
+  GRUB_DISABLE_SUBMENU
 
 if test "x${grub_cfg}" != "x"; then
   rm -f "${grub_cfg}.new"
@@ -298,10 +275,6 @@ for i in "${grub_mkconfig_dir}"/* ; do
     ;;
   esac
 done
-
-if [ "x${grub_cfg}" != "x" ] && ! grep "^password" ${grub_cfg}.new >/dev/null; then
-  chmod 444 ${grub_cfg}.new || true
-fi
 
 if test "x${grub_cfg}" != "x" ; then
   if ! ${grub_script_check} ${grub_cfg}.new; then
