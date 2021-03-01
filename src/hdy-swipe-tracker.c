@@ -407,6 +407,7 @@ get_end_progress (HdySwipeTracker *self,
   gdouble pos, decel, slope;
   g_autofree gdouble *points = NULL;
   gint n;
+  gdouble lower, upper;
 
   if (self->cancelled)
     return hdy_swipeable_get_cancel_progress (self->swipeable);
@@ -433,13 +434,13 @@ get_end_progress (HdySwipeTracker *self,
   pos = (pos * SIGN (velocity)) + self->progress;
 
   if (!self->allow_long_swipes) {
-    gdouble lower, upper;
 
     get_bounds (self, points, n, self->initial_progress, &lower, &upper);
-
-    pos = CLAMP (pos, lower, upper);
+  } else {
+    get_range (self, &lower, &upper);
   }
 
+  pos = CLAMP (pos, lower, upper);
   pos = points[find_point_for_projection (self, points, n, pos, velocity)];
 
   return pos;
