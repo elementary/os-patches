@@ -744,7 +744,7 @@ update_windows (HdyCarouselBox *self)
   if (self->orientation == GTK_ORIENTATION_VERTICAL)
     offset = (self->distance * self->position) - (alloc.height - self->child_height) / 2.0;
   else if (is_rtl)
-    offset = -(self->distance * self->position) + (alloc.width - self->child_width) / 2.0;
+    offset = -(self->distance * self->position) - (alloc.width - self->child_width) / 2.0;
   else
     offset = (self->distance * self->position) - (alloc.width - self->child_width) / 2.0;
 
