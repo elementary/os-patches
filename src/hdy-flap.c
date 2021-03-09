@@ -355,6 +355,19 @@ set_reveal_flap (HdyFlap  *self,
       hdy_swipeable_emit_child_switched (HDY_SWIPEABLE (self), reveal_flap ? 1 : 0, duration);
   }
 
+  if (self->reveal_flap &&
+      self->content.widget &&
+      self->flap.widget &&
+      self->modal &&
+      self->fold_progress > 0 &&
+      gtk_widget_get_mapped (GTK_WIDGET (self))) {
+    GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (self));
+    GtkWidget *focus = gtk_window_get_focus (GTK_WINDOW (toplevel));
+
+    if (focus && gtk_widget_is_ancestor (focus, self->content.widget))
+      gtk_widget_child_focus (GTK_WIDGET (self), GTK_DIR_TAB_FORWARD);
+  }
+
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_REVEAL_FLAP]);
 }
 
@@ -1265,6 +1278,30 @@ hdy_flap_direction_changed (GtkWidget        *widget,
                                                                previous_direction);
 }
 
+static gboolean
+hdy_flap_focus (GtkWidget        *widget,
+                GtkDirectionType  direction)
+{
+  HdyFlap *self = HDY_FLAP (widget);
+
+  if (!gtk_widget_get_can_focus (widget) &&
+      self->content.widget &&
+      self->flap.widget &&
+      self->modal &&
+      self->reveal_progress > 0 &&
+      self->fold_progress > 0) {
+    if (gtk_widget_child_focus (GTK_WIDGET (self->flap.widget), direction))
+      return GDK_EVENT_STOP;
+
+    if (self->separator.widget)
+      return gtk_widget_child_focus (GTK_WIDGET (self->separator.widget), direction);
+
+    return GDK_EVENT_PROPAGATE;
+  }
+
+  return GTK_WIDGET_CLASS (hdy_flap_parent_class)->focus (widget, direction);
+}
+
 static void
 hdy_flap_forall (GtkContainer *container,
                  gboolean      include_internals,
@@ -1471,6 +1508,7 @@ hdy_flap_class_init (HdyFlapClass *klass)
   widget_class->realize = hdy_flap_realize;
   widget_class->unrealize = hdy_flap_unrealize;
   widget_class->direction_changed = hdy_flap_direction_changed;
+  widget_class->focus = hdy_flap_focus;
 
   container_class->remove = hdy_flap_remove;
   container_class->add = hdy_flap_add;
