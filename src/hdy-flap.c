@@ -984,6 +984,7 @@ hdy_flap_size_allocate (GtkWidget     *widget,
                   self->fold_progress > 0);
 
   gtk_widget_set_clip (widget, alloc);
+  gtk_widget_queue_draw (widget);
 }
 
 /* This private method is prefixed by the call name because it will be a virtual
