@@ -7139,6 +7139,12 @@ export_desktop_file (const char         *app,
                 g_string_append_printf (new_exec, " @@ %s @@", arg);
               else if (strcasecmp (arg, "%u") == 0)
                 g_string_append_printf (new_exec, " @@u %s @@", arg);
+              else if (g_str_has_prefix (arg, "@@"))
+                {
+                  flatpak_fail_error (error, FLATPAK_ERROR_EXPORT_FAILED,
+                                     _("Invalid Exec argument %s"), arg);
+                  goto out;
+                }
               else
                 g_string_append_printf (new_exec, " %s", arg);
             }

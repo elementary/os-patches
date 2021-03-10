@@ -189,6 +189,12 @@ can refer to either of these.</p>
 name, arch and branch, e.g. app/org.gnome.evince/x86_64/master. The functions
 <a class="link" href="FlatpakRef.html#flatpak-ref-parse" title="flatpak_ref_parse ()"><code class="function">flatpak_ref_parse()</code></a> and <a class="link" href="FlatpakRef.html#flatpak-ref-format-ref" title="flatpak_ref_format_ref ()"><code class="function">flatpak_ref_format_ref()</code></a> can be used to convert
 FlatpakRef objects into this string representation and back.</p>
+<p>Note that the identifiers must be unique within a repo (e.g. Flathub) based
+only on the name, arch, and branch 3-tuple, without regard to the kind. In
+other words if app/org.gnome.evince/x86_64/master exists,
+runtime/org.gnome.evince/x86_64/master must not exist. This requirement is
+not enforced by libflatpak but is enforced by GNOME Software's use of
+libappstream, since Appstream IDs are assumed to be unique.</p>
 <p>FlatpakRef objects are immutable and can be passed freely between threads.</p>
 <p>To uniquely identify a particular version of an application or runtime, you
 need a commit.</p>

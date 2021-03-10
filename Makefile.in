@@ -764,10 +764,12 @@ testcommon_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 testcommon_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testcommon_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am_testlibrary_OBJECTS = tests/testlibrary-testlibrary.$(OBJEXT)
+am_testlibrary_OBJECTS = tests/testlibrary-can-use-fuse.$(OBJEXT) \
+	tests/testlibrary-testlibrary.$(OBJEXT) $(am__objects_1)
 testlibrary_OBJECTS = $(am_testlibrary_OBJECTS)
 testlibrary_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	libglnx.la libflatpak.la $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) libglnx.la libflatpak.la \
+	$(am__DEPENDENCIES_1)
 testlibrary_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testlibrary_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -976,6 +978,7 @@ am__depfiles_remade =  \
 	tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po \
 	tests/$(DEPDIR)/test_update_portal-test-update-portal.Po \
 	tests/$(DEPDIR)/testcommon-testcommon.Po \
+	tests/$(DEPDIR)/testlibrary-can-use-fuse.Po \
 	tests/$(DEPDIR)/testlibrary-testlibrary.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -2272,6 +2275,7 @@ AM_TESTS_ENVIRONMENT = FLATPAK_TESTS_DEBUG=1 \
 testlibrary_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(BASE_CFLAGS) \
+	$(FUSE_CFLAGS) \
 	$(OSTREE_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	$(NULL)
@@ -2279,12 +2283,18 @@ testlibrary_CFLAGS = \
 testlibrary_LDADD = \
 	$(AM_LDADD) \
 	$(BASE_LIBS) \
+	$(FUSE_LIBS) \
 	$(OSTREE_LIBS) \
 	libglnx.la \
 	libflatpak.la \
 	$(NULL)
 
-testlibrary_SOURCES = tests/testlibrary.c
+testlibrary_SOURCES = \
+	tests/can-use-fuse.c \
+	tests/can-use-fuse.h \
+	tests/testlibrary.c \
+	$(NULL)
+
 testcommon_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(BASE_CFLAGS) \
@@ -3321,6 +3331,8 @@ tests/testcommon-testcommon.$(OBJEXT): tests/$(am__dirstamp) \
 testcommon$(EXEEXT): $(testcommon_OBJECTS) $(testcommon_DEPENDENCIES) $(EXTRA_testcommon_DEPENDENCIES) 
 	@rm -f testcommon$(EXEEXT)
 	$(AM_V_CCLD)$(testcommon_LINK) $(testcommon_OBJECTS) $(testcommon_LDADD) $(LIBS)
+tests/testlibrary-can-use-fuse.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
 tests/testlibrary-testlibrary.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
@@ -3727,6 +3739,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_update_portal-test-update-portal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/testcommon-testcommon.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/testlibrary-can-use-fuse.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/testlibrary-testlibrary.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -5214,6 +5227,20 @@ tests/testcommon-testcommon.obj: tests/testcommon.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/testcommon.c' object='tests/testcommon-testcommon.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testcommon_CFLAGS) $(CFLAGS) -c -o tests/testcommon-testcommon.obj `if test -f 'tests/testcommon.c'; then $(CYGPATH_W) 'tests/testcommon.c'; else $(CYGPATH_W) '$(srcdir)/tests/testcommon.c'; fi`
+
+tests/testlibrary-can-use-fuse.o: tests/can-use-fuse.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -MT tests/testlibrary-can-use-fuse.o -MD -MP -MF tests/$(DEPDIR)/testlibrary-can-use-fuse.Tpo -c -o tests/testlibrary-can-use-fuse.o `test -f 'tests/can-use-fuse.c' || echo '$(srcdir)/'`tests/can-use-fuse.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/testlibrary-can-use-fuse.Tpo tests/$(DEPDIR)/testlibrary-can-use-fuse.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/can-use-fuse.c' object='tests/testlibrary-can-use-fuse.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -c -o tests/testlibrary-can-use-fuse.o `test -f 'tests/can-use-fuse.c' || echo '$(srcdir)/'`tests/can-use-fuse.c
+
+tests/testlibrary-can-use-fuse.obj: tests/can-use-fuse.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -MT tests/testlibrary-can-use-fuse.obj -MD -MP -MF tests/$(DEPDIR)/testlibrary-can-use-fuse.Tpo -c -o tests/testlibrary-can-use-fuse.obj `if test -f 'tests/can-use-fuse.c'; then $(CYGPATH_W) 'tests/can-use-fuse.c'; else $(CYGPATH_W) '$(srcdir)/tests/can-use-fuse.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/testlibrary-can-use-fuse.Tpo tests/$(DEPDIR)/testlibrary-can-use-fuse.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/can-use-fuse.c' object='tests/testlibrary-can-use-fuse.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -c -o tests/testlibrary-can-use-fuse.obj `if test -f 'tests/can-use-fuse.c'; then $(CYGPATH_W) 'tests/can-use-fuse.c'; else $(CYGPATH_W) '$(srcdir)/tests/can-use-fuse.c'; fi`
 
 tests/testlibrary-testlibrary.o: tests/testlibrary.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -MT tests/testlibrary-testlibrary.o -MD -MP -MF tests/$(DEPDIR)/testlibrary-testlibrary.Tpo -c -o tests/testlibrary-testlibrary.o `test -f 'tests/testlibrary.c' || echo '$(srcdir)/'`tests/testlibrary.c
@@ -6906,6 +6933,7 @@ distclean: distclean-recursive
 	-rm -f tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po
 	-rm -f tests/$(DEPDIR)/test_update_portal-test-update-portal.Po
 	-rm -f tests/$(DEPDIR)/testcommon-testcommon.Po
+	-rm -f tests/$(DEPDIR)/testlibrary-can-use-fuse.Po
 	-rm -f tests/$(DEPDIR)/testlibrary-testlibrary.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -7109,6 +7137,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f tests/$(DEPDIR)/test_portal_impl-test-portal-impl.Po
 	-rm -f tests/$(DEPDIR)/test_update_portal-test-update-portal.Po
 	-rm -f tests/$(DEPDIR)/testcommon-testcommon.Po
+	-rm -f tests/$(DEPDIR)/testlibrary-can-use-fuse.Po
 	-rm -f tests/$(DEPDIR)/testlibrary-testlibrary.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
