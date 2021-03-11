@@ -858,18 +858,6 @@ hdy_deck_unrealize (GtkWidget *widget)
 }
 
 static void
-hdy_deck_map (GtkWidget *widget)
-{
-  hdy_stackable_box_map (HDY_GET_HELPER (widget));
-}
-
-static void
-hdy_deck_unmap (GtkWidget *widget)
-{
-  hdy_stackable_box_unmap (HDY_GET_HELPER (widget));
-}
-
-static void
 hdy_deck_switch_child (HdySwipeable *swipeable,
                        guint         index,
                        gint64        duration)
@@ -930,8 +918,6 @@ hdy_deck_class_init (HdyDeckClass *klass)
 
   widget_class->realize = hdy_deck_realize;
   widget_class->unrealize = hdy_deck_unrealize;
-  widget_class->map = hdy_deck_map;
-  widget_class->unmap = hdy_deck_unmap;
   widget_class->get_preferred_width = hdy_deck_get_preferred_width;
   widget_class->get_preferred_height = hdy_deck_get_preferred_height;
   widget_class->get_preferred_width_for_height = hdy_deck_get_preferred_width_for_height;

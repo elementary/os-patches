@@ -125,8 +125,6 @@ gboolean         hdy_stackable_box_draw (HdyStackableBox *self,
                                          cairo_t         *cr);
 void             hdy_stackable_box_realize (HdyStackableBox *self);
 void             hdy_stackable_box_unrealize (HdyStackableBox *self);
-void             hdy_stackable_box_map (HdyStackableBox *self);
-void             hdy_stackable_box_unmap (HdyStackableBox *self);
 void             hdy_stackable_box_direction_changed (HdyStackableBox  *self,
                                                       GtkTextDirection  previous_direction);
 void             hdy_stackable_box_prepend (HdyStackableBox *self,

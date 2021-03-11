@@ -109,8 +109,6 @@ struct _HdyStackableBox
   HdyStackableBoxChildInfo *visible_child;
   HdyStackableBoxChildInfo *last_visible_child;
 
-  GdkWindow* view_window;
-
   gboolean folded;
 
   gboolean homogeneous[HDY_FOLD_MAX][GTK_ORIENTATION_MAX];
@@ -1955,7 +1953,7 @@ hdy_stackable_box_size_allocate (HdyStackableBox *self,
   gtk_widget_set_allocation (widget, allocation);
 
   if (gtk_widget_get_realized (widget)) {
-    gdk_window_move_resize (self->view_window,
+    gdk_window_move_resize (gtk_widget_get_window (widget),
                             allocation->x, allocation->y,
                             allocation->width, allocation->height);
   }
@@ -2258,7 +2256,7 @@ register_window (HdyStackableBox          *self,
   attributes.event_mask = gtk_widget_get_events (widget) |
                           gtk_widget_get_events (child->widget);
 
-  child->window = gdk_window_new (self->view_window, &attributes, attributes_mask);
+  child->window = gdk_window_new (gtk_widget_get_window (widget), &attributes, attributes_mask);
   gtk_widget_register_window (widget, child->window);
 
   gtk_widget_set_parent_window (child->widget, child->window);
@@ -2483,9 +2481,9 @@ hdy_stackable_box_realize (HdyStackableBox *self)
   GdkWindowAttr attributes = { 0 };
   GdkWindowAttributesType attributes_mask;
   GList *children;
+  GdkWindow *window;
 
   gtk_widget_set_realized (widget, TRUE);
-  gtk_widget_set_window (widget, g_object_ref (gtk_widget_get_parent_window (widget)));
 
   gtk_widget_get_allocation (widget, &allocation);
 
@@ -2499,9 +2497,10 @@ hdy_stackable_box_realize (HdyStackableBox *self)
   attributes.event_mask = gtk_widget_get_events (widget);
   attributes_mask = (GDK_WA_X | GDK_WA_Y) | GDK_WA_VISUAL;
 
-  self->view_window = gdk_window_new (gtk_widget_get_window (widget),
-                                      &attributes, attributes_mask);
-  gtk_widget_register_window (widget, self->view_window);
+  window = gdk_window_new (gtk_widget_get_parent_window (widget),
+                           &attributes, attributes_mask);
+  gtk_widget_set_window (widget, window);
+  gtk_widget_register_window (widget, window);
 
   for (children = self->children; children != NULL; children = children->next)
     register_window (self, children->data);
@@ -2516,27 +2515,7 @@ hdy_stackable_box_unrealize (HdyStackableBox *self)
   for (children = self->children; children != NULL; children = children->next)
     unregister_window (self, children->data);
 
-  gtk_widget_unregister_window (widget, self->view_window);
-  gdk_window_destroy (self->view_window);
-  self->view_window = NULL;
-
   GTK_WIDGET_CLASS (self->klass)->unrealize (widget);
-}
-
-void
-hdy_stackable_box_map (HdyStackableBox *self)
-{
-  GTK_WIDGET_CLASS (self->klass)->map (GTK_WIDGET (self->container));
-
-  gdk_window_show (self->view_window);
-}
-
-void
-hdy_stackable_box_unmap (HdyStackableBox *self)
-{
-  gdk_window_hide (self->view_window);
-
-  GTK_WIDGET_CLASS (self->klass)->unmap (GTK_WIDGET (self->container));
 }
 
 HdySwipeTracker *
@@ -3244,7 +3223,6 @@ hdy_stackable_box_new (GtkContainer      *container,
 
   self->shadow_helper = hdy_shadow_helper_new (widget);
 
-  gtk_widget_set_has_window (widget, FALSE);
   gtk_widget_set_can_focus (widget, FALSE);
   gtk_widget_set_redraw_on_allocate (widget, FALSE);
 

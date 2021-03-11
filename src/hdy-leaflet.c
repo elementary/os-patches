@@ -932,18 +932,6 @@ hdy_leaflet_unrealize (GtkWidget *widget)
 }
 
 static void
-hdy_leaflet_map (GtkWidget *widget)
-{
-  hdy_stackable_box_map (HDY_GET_HELPER (widget));
-}
-
-static void
-hdy_leaflet_unmap (GtkWidget *widget)
-{
-  hdy_stackable_box_unmap (HDY_GET_HELPER (widget));
-}
-
-static void
 hdy_leaflet_switch_child (HdySwipeable *swipeable,
                           guint         index,
                           gint64        duration)
@@ -1004,8 +992,6 @@ hdy_leaflet_class_init (HdyLeafletClass *klass)
 
   widget_class->realize = hdy_leaflet_realize;
   widget_class->unrealize = hdy_leaflet_unrealize;
-  widget_class->map = hdy_leaflet_map;
-  widget_class->unmap = hdy_leaflet_unmap;
   widget_class->get_preferred_width = hdy_leaflet_get_preferred_width;
   widget_class->get_preferred_height = hdy_leaflet_get_preferred_height;
   widget_class->get_preferred_width_for_height = hdy_leaflet_get_preferred_width_for_height;
