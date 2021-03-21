@@ -1668,8 +1668,11 @@ hdy_stackable_box_size_allocate_unfolded (HdyStackableBox *self,
   GtkTextDirection direction;
   gboolean under;
 
-  directed_children = get_directed_children (self);
   visible_child = self->visible_child;
+  if (!visible_child)
+    return;
+
+  directed_children = get_directed_children (self);
 
   box_homogeneous = (self->homogeneous[HDY_FOLD_UNFOLDED][GTK_ORIENTATION_HORIZONTAL] && orientation == GTK_ORIENTATION_HORIZONTAL) ||
                     (self->homogeneous[HDY_FOLD_UNFOLDED][GTK_ORIENTATION_VERTICAL] && orientation == GTK_ORIENTATION_VERTICAL);
