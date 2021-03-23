@@ -1251,6 +1251,7 @@ hdy_flap_realize (GtkWidget *widget)
   register_window (self, &self->separator);
   register_window (self, &self->flap);
 
+  update_child_visibility (self);
   restack_windows (self);
 }
 
