@@ -301,8 +301,6 @@ gclue_locator_finalize (GObject *gsource)
         GList *node;
         GClueMinUINT *threshold;
 
-        G_OBJECT_CLASS (gclue_locator_parent_class)->finalize (gsource);
-
         threshold = gclue_location_source_get_time_threshold
                         (GCLUE_LOCATION_SOURCE (locator));
         g_signal_handlers_disconnect_by_func
@@ -325,7 +323,10 @@ gclue_locator_finalize (GObject *gsource)
         }
         g_list_free_full (priv->sources, g_object_unref);
         priv->sources = NULL;
+        g_list_free (priv->active_sources);
         priv->active_sources = NULL;
+
+        G_OBJECT_CLASS (gclue_locator_parent_class)->finalize (gsource);
 }
 
 static void

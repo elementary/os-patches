@@ -1,0 +1,43 @@
+From: Sujanan Bhathiya <sujananbhathiya@gmail.com>
+Date: Mon, 16 Mar 2020 17:19:30 +0530
+Subject: service: Sync in_use property when apps get connected
+
+Earlier we only synced in_use property when apps
+get deleted from the service. Here we set the in_use
+property when apps get connected to the service as well.
+This fixes the issue #112
+---
+ src/gclue-service-manager.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/src/gclue-service-manager.c b/src/gclue-service-manager.c
+index d7f5e55..849debd 100644
+--- a/src/gclue-service-manager.c
++++ b/src/gclue-service-manager.c
+@@ -140,6 +140,14 @@ delete_client (GClueServiceManager *manager,
+         sync_in_use_property (manager);
+ }
+ 
++static void
++on_client_notify_active (GObject    *gobject,
++                         GParamSpec *pspec,
++                         gpointer    user_data)
++{
++        sync_in_use_property (GCLUE_SERVICE_MANAGER (user_data));
++}
++
+ static void
+ on_peer_vanished (GClueClientInfo *info,
+                   gpointer         user_data)
+@@ -216,6 +224,11 @@ complete_get_client (OnClientInfoNewReadyData *data)
+         }
+         g_debug ("Number of connected clients: %u", priv->num_clients);
+ 
++        g_signal_connect (client,
++                          "notify::active",
++                          G_CALLBACK (on_client_notify_active),
++                          data->manager);
++
+         g_signal_connect (info,
+                           "peer-vanished",
+                           G_CALLBACK (on_peer_vanished),

@@ -447,6 +447,7 @@ handle_post_agent_check_auth (StartData *data)
         GClueConfig *config;
         GClueAppPerm app_perm;
         guint32 uid;
+        gboolean system_app;
 
         uid = gclue_client_info_get_user_id (priv->client_info);
         max_accuracy = gclue_agent_get_max_accuracy_level (priv->agent_proxy);
@@ -471,8 +472,11 @@ handle_post_agent_check_auth (StartData *data)
         app_perm = gclue_config_get_app_perm (config,
                                               data->desktop_id,
                                               priv->client_info);
+        system_app = (gclue_client_info_get_xdg_id (priv->client_info) == NULL);
 
-        if (app_perm == GCLUE_APP_PERM_ALLOWED) {
+        if (app_perm == GCLUE_APP_PERM_ALLOWED || system_app) {
+                /* Since we have no reliable way to identify system apps, no
+                 * need for auth for them. */
                 complete_start (data);
                 return;
         }
@@ -556,7 +560,6 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
         const char *desktop_id;
         GClueAppPerm app_perm;
         guint32 uid;
-        gboolean system_app = FALSE;
 
         if (priv->locator != NULL) {
                 /* Already started */
@@ -569,7 +572,6 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
         if (desktop_id == NULL) {
                 /* Non-xdg app */
                 desktop_id = gclue_dbus_client_get_desktop_id (client);
-                system_app = TRUE;
         }
 
         if (desktop_id == NULL) {
@@ -604,14 +606,6 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
         data->accuracy_level = gclue_dbus_client_get_requested_accuracy_level (client);
         data->accuracy_level = ensure_valid_accuracy_level
                 (data->accuracy_level, GCLUE_ACCURACY_LEVEL_EXACT);
-
-        if (system_app) {
-                /* Since we have no reliable way to identify system apps, no
-                 * need for auth for them. */
-                complete_start (data);
-
-                return TRUE;
-        }
 
         /* No agent == No authorization */
         if (priv->agent_proxy == NULL) {

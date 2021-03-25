@@ -192,6 +192,7 @@ gclue_location_source_finalize (GObject *object)
 
         gclue_location_source_stop (GCLUE_LOCATION_SOURCE (object));
         g_clear_object (&priv->location);
+        g_clear_object (&priv->time_threshold);
 
         G_OBJECT_CLASS (gclue_location_source_parent_class)->finalize (object);
 }

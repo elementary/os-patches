@@ -124,13 +124,28 @@ gclue_mozilla_create_query (GList        *bss_list, /* As in Access Points */
         char *data;
         gsize data_len;
         const char *uri;
+        guint n_non_ignored_bsss;
+        GList *iter;
 
         builder = json_builder_new ();
         json_builder_begin_object (builder);
 
         /* We send pure geoip query using empty object if both bss_list and
          * tower are NULL.
+         *
+         * If the list of non-ignored BSSs is <2, don’t bother submitting the
+         * BSS list as MLS will only do a geoip lookup anyway.
+         * See https://ichnaea.readthedocs.io/en/latest/api/geolocate.html#field-definition
          */
+        n_non_ignored_bsss = 0;
+        for (iter = bss_list; iter != NULL; iter = iter->next) {
+                WPABSS *bss = WPA_BSS (iter->data);
+
+                if (gclue_mozilla_should_ignore_bss (bss))
+                        continue;
+
+                n_non_ignored_bsss++;
+        }
 
         if (tower != NULL) {
                 json_builder_set_member_name (builder, "radioType");
@@ -155,9 +170,7 @@ gclue_mozilla_create_query (GList        *bss_list, /* As in Access Points */
                 json_builder_end_array (builder);
         }
 
-        if (bss_list != NULL) {
-                GList *iter;
-
+        if (n_non_ignored_bsss >= 2) {
                 json_builder_set_member_name (builder, "wifiAccessPoints");
                 json_builder_begin_array (builder);
 

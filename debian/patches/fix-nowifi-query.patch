@@ -1,0 +1,66 @@
+Description: Fix getting a location if the computer has no wifi card
+ This reverts 2 upstream commits: 194529c7e7123b06d41eb8025cd4375aba271068 and
+ 715cfbf5bec8002fb1e9759b6c34bc070f977807
+Origin: vendor
+Bug: https://gitlab.freedesktop.org/geoclue/geoclue/-/issues/142
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=978437
+
+--- a/src/gclue-wifi.c
++++ b/src/gclue-wifi.c
+@@ -837,7 +837,6 @@ gclue_wifi_get_accuracy_level (GClueWifi
+         return wifi->priv->accuracy_level;
+ }
+ 
+-/* Can return NULL without setting @error, signifying an empty BSS list. */
+ static GList *
+ get_bss_list (GClueWifi *wifi,
+               GError   **error)
+@@ -859,22 +858,8 @@ gclue_wifi_create_query (GClueWebSource
+ {
+         GList *bss_list; /* As in Access Points */
+         SoupMessage *msg;
+-        g_autoptr(GError) local_error = NULL;
+ 
+-        bss_list = get_bss_list (GCLUE_WIFI (source), &local_error);
+-        if (local_error != NULL) {
+-                g_propagate_error (error, g_steal_pointer (&local_error));
+-                return NULL;
+-        }
+-
+-        /* Empty list? */
+-        if (bss_list == NULL) {
+-                g_set_error_literal (error,
+-                                     G_IO_ERROR,
+-                                     G_IO_ERROR_FAILED,
+-                                     "No WiFi networks found");
+-                return NULL;
+-        }
++        bss_list = get_bss_list (GCLUE_WIFI (source), NULL);
+ 
+         msg = gclue_mozilla_create_query (bss_list, NULL, error);
+         g_list_free (bss_list);
+@@ -896,22 +881,10 @@ gclue_wifi_create_submit_query (GClueWeb
+ {
+         GList *bss_list; /* As in Access Points */
+         SoupMessage * msg;
+-        g_autoptr(GError) local_error = NULL;
+ 
+-        bss_list = get_bss_list (GCLUE_WIFI (source), &local_error);
+-        if (local_error != NULL) {
+-                g_propagate_error (error, g_steal_pointer (&local_error));
++        bss_list = get_bss_list (GCLUE_WIFI (source), error);
++        if (bss_list == NULL)
+                 return NULL;
+-        }
+-
+-        /* Empty list? */
+-        if (bss_list == NULL) {
+-                g_set_error_literal (error,
+-                                     G_IO_ERROR,
+-                                     G_IO_ERROR_FAILED,
+-                                     "No WiFi networks found");
+-                return NULL;
+-        }
+ 
+         msg = gclue_mozilla_create_submit_query (location,
+                                                  bss_list,

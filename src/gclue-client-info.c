@@ -74,6 +74,7 @@ gclue_client_info_finalize (GObject *object)
                 priv->watch_id = 0;
         }
 
+        g_clear_object (&priv->dbus_proxy);
         g_clear_pointer (&priv->bus_name, g_free);
         g_clear_pointer (&priv->xdg_id, g_free);
         g_clear_object (&priv->connection);
