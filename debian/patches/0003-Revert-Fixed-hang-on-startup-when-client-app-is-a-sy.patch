@@ -1,0 +1,39 @@
+From: Laurent Bigonville <bigon@bigon.be>
+Date: Fri, 25 Dec 2020 13:55:44 +0100
+Subject: Revert "Fixed hang on startup when client app is a system app: avoid
+ wasting 20s waiting on agent."
+
+Now that we are requesting the allowed accuracy from the agent again for
+the system apps, we need to be sure the agent is started and connected
+before denying the request.
+
+This reverts commit 57efed15b09c5c78891f6fa1bfe5a7aee64a8fb8.
+
+Fixes: #139
+---
+ src/gclue-service-manager.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/src/gclue-service-manager.c b/src/gclue-service-manager.c
+index 849debd..020c2af 100644
+--- a/src/gclue-service-manager.c
++++ b/src/gclue-service-manager.c
+@@ -271,7 +271,6 @@ on_client_info_new_ready (GObject      *source_object,
+         GError *error = NULL;
+         guint32 user_id;
+         gint64 now;
+-        gboolean system_app;
+ 
+         info = gclue_client_info_new_finish (res, &error);
+         if (info == NULL) {
+@@ -291,10 +290,7 @@ on_client_info_new_ready (GObject      *source_object,
+         agent_proxy = g_hash_table_lookup (priv->agents,
+                                            GINT_TO_POINTER (user_id));
+         now = g_get_monotonic_time ();
+-
+-        system_app = (gclue_client_info_get_xdg_id (info) == NULL);
+         if (agent_proxy == NULL &&
+-            !system_app &&
+             now < (priv->init_time + AGENT_WAIT_TIMEOUT_USEC)) {
+                 /* Its possible that geoclue was just launched on GetClient
+                  * call, in which case agents need some time to register

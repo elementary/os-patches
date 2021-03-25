@@ -523,7 +523,7 @@ clear_caps (GClueModemManager    *manager,
 
         return mm_modem_location_setup_sync (priv->modem_location,
                                              priv->caps,
-                                             FALSE,
+                                             TRUE,
                                              cancellable,
                                              error);
 }

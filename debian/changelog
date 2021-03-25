@@ -1,13 +1,75 @@
-geoclue-2.0 (2.5.6-0ubuntu1) focal; urgency=medium
+geoclue-2.0 (2.5.7-2ubuntu1) hirsute; urgency=medium
 
-  * New upstream version
   * Resynchronize with Debian. Remaining change:
     - debian/control: Make libgeoclue-2-0 depend on geoclue-2.0, since it is a
       wrapper around the DBus service. This probably breaks Multi-Arch
       coinstallability and we should take a different fix from Debian once
       there is one (See #864305). (LP: #1696171)
 
- -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 28 Feb 2020 15:03:57 +0100
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 11 Jan 2021 16:46:25 +0100
+
+geoclue-2.0 (2.5.7-2) unstable; urgency=medium
+
+  * d/p/fix-nowifi-query.patch: Fix getting a location if the computer has no
+    wifi card (Closes: #978437)
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 31 Dec 2020 04:46:07 +0100
+
+geoclue-2.0 (2.5.7-1) unstable; urgency=medium
+
+  [ Laurent Bigonville ]
+  * New upstream version 2.5.7
+    - Check the maximum allowed accuracy level even for system applications.
+      Respect the value of the user preference concerning the usage of their
+      geolocation. This should fix the privacy and GDPR conformity concerns as
+      the user explicitly needs to enable the option.
+      Note that there is no distinction between the system applications
+      anymore, turning on the option is allowing them all to get the location.
+      (Closes: #924516, #958497)
+  * debian/README.Debian: Add information about MLS and a link to the service
+    Privacy Notice page
+  * Add debian/salsa-ci.yml file
+  * debian/control: Remove Craig Andrews from the Uploaders.
+    He has not been active since 2009, thanks for his previous work on the
+    package
+  * d/p/: Add a patch to make the Mozilla API key configurable
+  * debian/rules: Use the key that has been allocated to debian for MLS queries
+  * d/gbp.conf: Stop adding the commit-id and set multimaint-merge to True
+  * debian/control: Bump Standards-Version to 4.5.1 (no further changes)
+  * d/p: Add an upstream patch to fix the display of the usage indicator
+  * d/p: Remove the remaining differences between system app and flatpak ones.
+    This fix an issue when geoclue is D-Bus activated by a client and also
+    make sure that a running client is disconnected when the user disables
+    the location services (set the accuracy to 0)
+
+  [ Chris McGee ]
+  * debian/control: Add rules requires root
+
+  [ Debian Janitor ]
+  * Refer to specific version of license LGPL-2+.
+  * Apply multi-arch hints.
+    + geoclue-doc, libgeoclue-doc: Add Multi-Arch: foreign.
+
+ -- Laurent Bigonville <bigon@debian.org>  Fri, 25 Dec 2020 14:59:35 +0100
+
+geoclue-2.0 (2.5.6-1) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * [99359d91] Bump debhelper from old 11 to 12.
+  * [f9dd0d99] Set debhelper-compat version in Build-Depends.
+  * [a0d0042a] debian/copyright: use spaces rather than tabs to start
+    continuation lines.
+  * [32c230e4] Set upstream metadata fields: Repository, Repository-Browse.
+  * [3a2f4acf] Drop unnecessary dependency on dh-autoreconf.
+
+  [ Laurent Bigonville ]
+  * [ae0a90ea] debian/control: Bump Standards-Version to 4.5.0 (no further
+    changes)
+
+  [ Will Thompson ]
+  * [d2643a89] New upstream version 2.5.6
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 08 Mar 2020 17:06:02 +0100
 
 geoclue-2.0 (2.5.5-1) unstable; urgency=medium
 

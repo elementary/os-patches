@@ -29,7 +29,7 @@
 #include "gclue-mozilla.h"
 
 #define WIFI_SCAN_TIMEOUT_HIGH_ACCURACY 10
-/* Since this is only used for city-level accuracy, 5 minutes betweeen each
+/* Since this is only used for city-level accuracy, 5 minutes between each
  * scan is more than enough.
  */
 #define WIFI_SCAN_TIMEOUT_LOW_ACCURACY  300
@@ -284,7 +284,7 @@ on_bss_signal_notify (GObject    *gobject,
 
                 get_bssid_from_bss (bss, bssid);
                 g_debug ("WiFi AP '%s' still has very low strength (%u dBm)"
-                         ", ignoring again..",
+                         ", ignoring again…",
                          bssid,
                          wpa_bss_get_signal (bss));
                 return;
@@ -331,7 +331,7 @@ on_bss_proxy_ready (GObject      *source_object,
 
                 get_bssid_from_bss (bss, bssid);
                 g_debug ("WiFi AP '%s' has very low strength (%u dBm)"
-                         ", ignoring for now..",
+                         ", ignoring for now…",
                          bssid,
                          wpa_bss_get_signal (bss));
                 g_signal_connect (G_OBJECT (bss),
@@ -394,6 +394,35 @@ on_bss_removed (WPAInterface *object,
 }
 
 static void
+start_wifi_scan (GClueWifi *wifi)
+{
+        GClueWifiPrivate *priv = wifi->priv;
+        GVariantBuilder builder;
+        GVariant *args;
+
+        g_debug ("Starting WiFi scan…");
+
+        if (priv->scan_done_id == 0)
+                priv->scan_done_id = g_signal_connect
+                                        (priv->interface,
+                                         "scan-done",
+                                         G_CALLBACK (on_scan_done),
+                                         wifi);
+
+        g_variant_builder_init (&builder, G_VARIANT_TYPE_ARRAY);
+        g_variant_builder_add (&builder,
+                               "{sv}",
+                               "Type", g_variant_new ("s", "passive"));
+        args = g_variant_builder_end (&builder);
+
+        wpa_interface_call_scan (WPA_INTERFACE (priv->interface),
+                                 args,
+                                 NULL,
+                                 on_scan_call_done,
+                                 wifi);
+}
+
+static void
 cancel_wifi_scan (GClueWifi *wifi)
 {
         GClueWifiPrivate *priv = wifi->priv;
@@ -415,33 +444,14 @@ on_scan_timeout (gpointer user_data)
 {
         GClueWifi *wifi = GCLUE_WIFI (user_data);
         GClueWifiPrivate *priv = wifi->priv;
-        GVariantBuilder builder;
-        GVariant *args;
 
-        if (priv->interface == NULL)
-                return FALSE;
-
-        g_debug ("WiFi scan timeout. Restarting-scan..");
+        g_debug ("WiFi scan timeout.");
         priv->scan_timeout = 0;
 
-        if (priv->scan_done_id == 0)
-                priv->scan_done_id = g_signal_connect
-                                        (priv->interface,
-                                         "scan-done",
-                                         G_CALLBACK (on_scan_done),
-                                         wifi);
+        if (priv->interface == NULL)
+                return G_SOURCE_REMOVE;
 
-        g_variant_builder_init (&builder, G_VARIANT_TYPE_ARRAY);
-        g_variant_builder_add (&builder,
-                               "{sv}",
-                               "Type", g_variant_new ("s", "passive"));
-        args = g_variant_builder_end (&builder);
-
-        wpa_interface_call_scan (WPA_INTERFACE (priv->interface),
-                                 args,
-                                 NULL,
-                                 on_scan_call_done,
-                                 wifi);
+        start_wifi_scan (wifi);
 
         return FALSE;
 }
@@ -467,8 +477,17 @@ on_scan_done (WPAInterface *object,
 
         if (priv->bss_list_changed) {
                 priv->bss_list_changed = FALSE;
-                g_debug ("Refreshing location..");
+                g_debug ("Refreshing location…");
                 gclue_web_source_refresh (GCLUE_WEB_SOURCE (wifi));
+        }
+
+        /* If there was another scan already scheduled, cancel that and
+         * re-schedule. Regardless of our internal book-keeping, this can happen
+         * if wpa_supplicant emits the `ScanDone` signal due to a scan being
+         * initiated by another client. */
+        if (priv->scan_timeout != 0) {
+                g_source_remove (priv->scan_timeout);
+                priv->scan_timeout = 0;
         }
 
         /* With high-enough accuracy requests, we need to scan more often since
@@ -522,7 +541,7 @@ connect_bss_signals (GClueWifi *wifi)
                 return;
         }
 
-        on_scan_timeout (wifi);
+        start_wifi_scan (wifi);
 
         priv->bss_list_changed = TRUE;
         priv->bss_added_id = g_signal_connect (priv->interface,
@@ -818,6 +837,7 @@ gclue_wifi_get_accuracy_level (GClueWifi *wifi)
         return wifi->priv->accuracy_level;
 }
 
+/* Can return NULL without setting @error, signifying an empty BSS list. */
 static GList *
 get_bss_list (GClueWifi *wifi,
               GError   **error)
@@ -839,8 +859,22 @@ gclue_wifi_create_query (GClueWebSource *source,
 {
         GList *bss_list; /* As in Access Points */
         SoupMessage *msg;
+        g_autoptr(GError) local_error = NULL;
 
-        bss_list = get_bss_list (GCLUE_WIFI (source), NULL);
+        bss_list = get_bss_list (GCLUE_WIFI (source), &local_error);
+        if (local_error != NULL) {
+                g_propagate_error (error, g_steal_pointer (&local_error));
+                return NULL;
+        }
+
+        /* Empty list? */
+        if (bss_list == NULL) {
+                g_set_error_literal (error,
+                                     G_IO_ERROR,
+                                     G_IO_ERROR_FAILED,
+                                     "No WiFi networks found");
+                return NULL;
+        }
 
         msg = gclue_mozilla_create_query (bss_list, NULL, error);
         g_list_free (bss_list);
@@ -862,10 +896,22 @@ gclue_wifi_create_submit_query (GClueWebSource  *source,
 {
         GList *bss_list; /* As in Access Points */
         SoupMessage * msg;
+        g_autoptr(GError) local_error = NULL;
 
-        bss_list = get_bss_list (GCLUE_WIFI (source), error);
-        if (bss_list == NULL)
+        bss_list = get_bss_list (GCLUE_WIFI (source), &local_error);
+        if (local_error != NULL) {
+                g_propagate_error (error, g_steal_pointer (&local_error));
                 return NULL;
+        }
+
+        /* Empty list? */
+        if (bss_list == NULL) {
+                g_set_error_literal (error,
+                                     G_IO_ERROR,
+                                     G_IO_ERROR_FAILED,
+                                     "No WiFi networks found");
+                return NULL;
+        }
 
         msg = gclue_mozilla_create_submit_query (location,
                                                  bss_list,

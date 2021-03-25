@@ -16,12 +16,22 @@ ifneq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
   BUILD_DOC := -Dgtk-doc=false
 endif
 
+# The following API key has been allocated for Debian only
+# If you are a derivative, please request your own key as discussed here:
+# https://gitlab.freedesktop.org/geoclue/geoclue/-/issues/136
+# See also: https://location.services.mozilla.com/api and
+# https://blog.mozilla.org/services/2019/09/03/a-new-policy-for-mozilla-location-service/
+ifeq ($(shell dpkg-vendor --query vendor),Debian)
+  MLS_API_KEY := -Dmozilla-api-key=484bfbac-6433-4492-aed3-16cc094eff93
+endif
+
 override_dh_auto_configure:
 	dh_auto_configure -- --libexecdir=/usr/libexec \
                              -Ddbus-srv-user=geoclue \
                              -Dsystemd-system-unit-dir=/lib/systemd/system \
 			     ${BUILD_DOC} \
-                             ${MM_NM_FLAGS}
+                             ${MM_NM_FLAGS} \
+                             ${MLS_API_KEY}
 
 override_dh_auto_test:
 	# testsuite fails on missing latitude (et.al)
@@ -31,7 +41,7 @@ override_dh_auto_test:
 	dh_auto_test || true
 
 %:
-	dh $@ --with autoreconf,gir
+	dh $@ --with gir
 
 override_dh_missing:
 	dh_missing --list-missing
