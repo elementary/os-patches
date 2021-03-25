@@ -23,6 +23,9 @@ endif
 # https://blog.mozilla.org/services/2019/09/03/a-new-policy-for-mozilla-location-service/
 ifeq ($(shell dpkg-vendor --query vendor),Debian)
   MLS_API_KEY := -Dmozilla-api-key=484bfbac-6433-4492-aed3-16cc094eff93
+else
+# Use elementary key
+  MLS_API_KEY := -Dmozilla-api-key=e8792627-1f81-470e-a407-baecad8c7a4b
 endif
 
 override_dh_auto_configure:
