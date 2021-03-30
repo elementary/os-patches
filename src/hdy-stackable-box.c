@@ -2922,13 +2922,14 @@ hdy_stackable_box_insert_child_after (HdyStackableBox *self,
   } else {
     HdyStackableBoxChildInfo *sibling_info = find_child_info_for_widget (self, sibling);
     gint sibling_info_pos = g_list_index (self->children, sibling_info);
+    gint length = g_list_length (self->children);
 
     self->children =
       g_list_insert (self->children, child_info,
                      sibling_info_pos + 1);
     self->children_reversed =
       g_list_insert (self->children_reversed, child_info,
-                     g_list_length (self->children) - sibling_info_pos - 1);
+                     length - sibling_info_pos - 1);
   }
 
   if (self->visible_child)
