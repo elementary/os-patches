@@ -26,6 +26,11 @@
  * The #HdyPreferencesWindow widget presents an application's preferences
  * gathered into pages and groups. The preferences are searchable by the user.
  *
+ * # CSS nodes
+ *
+ * #HdyPreferencesWindow has a main CSS node with the name window and the style
+ * class .preferences.
+ *
  * Since: 0.0.10
  */
 
