@@ -1154,7 +1154,6 @@ get_loose_centering_allocations (HdyHeaderBar   *self,
   gint side_free_space[2] = { 0 };
   gint center_free_space[2] = { 0 };
   gint nexpand_children[2] = { 0 };
-  gint center_free_space_min;
   GList *l;
   gint i;
   Child *child;
@@ -1230,7 +1229,7 @@ get_loose_centering_allocations (HdyHeaderBar   *self,
    * that space for the expanded children.
    *
    * If the title itself is expanded, then it gets half the spoils from each
-   * side.
+   * side, or all the spoil of that side if no child is expanded there.
    */
   for (packing = GTK_PACK_START; packing <= GTK_PACK_END; packing++) {
     side_free_space[packing] = MIN (MAX (allocation->width / 2 - title_size.natural_size / 2 - decoration_width[packing] - side[packing], 0), width);
@@ -1239,9 +1238,7 @@ get_loose_centering_allocations (HdyHeaderBar   *self,
         side_free_space[packing] / 2 :
         side_free_space[packing];
   }
-  center_free_space_min = MIN (center_free_space[0], center_free_space[1]);
   for (packing = GTK_PACK_START; packing <= GTK_PACK_END; packing++) {
-    center_free_space[packing] = center_free_space_min;
     side_free_space[packing] -= center_free_space[packing];
     width -= side_free_space[packing];
 
