@@ -266,9 +266,15 @@ hdy_combo_row_activate (HdyActionRow *row)
 {
   HdyComboRow *self = HDY_COMBO_ROW (row);
   HdyComboRowPrivate *priv = hdy_combo_row_get_instance_private (self);
+  GtkListBoxRow *selected_row =
+    gtk_list_box_get_row_at_index (GTK_LIST_BOX (priv->list),
+                                   priv->selected_index);
 
   if (gtk_widget_get_visible (GTK_WIDGET (priv->image)))
     gtk_popover_popup (priv->popover);
+
+  if (GTK_IS_WIDGET (selected_row))
+    gtk_widget_grab_focus (GTK_WIDGET (selected_row));
 }
 
 static void
