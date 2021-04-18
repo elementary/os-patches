@@ -348,7 +348,8 @@ load_from_gicon_async_for_export_cb (HdyAvatar    *self,
 
   pixbuf = load_from_gicon_async_finish (res, &error);
 
-  if (!g_error_matches (error, HDY_AVATAR_ICON_ERROR, HDY_AVATAR_ICON_ERROR_EMPTY) &&
+  if (error &&
+      !g_error_matches (error, HDY_AVATAR_ICON_ERROR, HDY_AVATAR_ICON_ERROR_EMPTY) &&
       !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
     g_warning ("Failed to load icon: %s", error->message);
   }
