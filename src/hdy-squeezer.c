@@ -692,9 +692,13 @@ hdy_squeezer_draw_crossfade (GtkWidget *widget,
   if (self->last_visible_surface != NULL) {
     gint width_diff = gtk_widget_get_allocated_width (widget) - self->last_visible_surface_allocation.width;
     gint height_diff = gtk_widget_get_allocated_height (widget) - self->last_visible_surface_allocation.height;
+    float xalign = self->xalign;
+
+    if (gtk_widget_get_direction (widget) == GTK_TEXT_DIR_RTL)
+      xalign = 1 - xalign;
 
     cairo_set_source_surface (cr, self->last_visible_surface,
-                              width_diff * self->xalign,
+                              width_diff * xalign,
                               height_diff * self->yalign);
     cairo_set_operator (cr, CAIRO_OPERATOR_ADD);
     cairo_paint_with_alpha (cr, MAX (1.0 - progress, 0));
