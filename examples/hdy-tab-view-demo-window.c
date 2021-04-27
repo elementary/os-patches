@@ -463,9 +463,22 @@ extra_drag_data_received_cb (HdyTabViewDemoWindow *self,
 }
 
 static void
+hdy_tab_view_demo_window_dispose (GObject *object)
+{
+  HdyTabViewDemoWindow *self = HDY_TAB_VIEW_DEMO_WINDOW (object);
+
+  g_clear_object (&self->tab_action_group);
+
+  G_OBJECT_CLASS (hdy_tab_view_demo_window_parent_class)->dispose (object);
+}
+
+static void
 hdy_tab_view_demo_window_class_init (HdyTabViewDemoWindowClass *klass)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  object_class->dispose = hdy_tab_view_demo_window_dispose;
 
   gtk_widget_class_set_template_from_resource (widget_class, "/sm/puri/Handy/Demo/ui/hdy-tab-view-demo-window.ui");
   gtk_widget_class_bind_template_child (widget_class, HdyTabViewDemoWindow, view);

@@ -1668,8 +1668,11 @@ hdy_stackable_box_size_allocate_unfolded (HdyStackableBox *self,
   GtkTextDirection direction;
   gboolean under;
 
-  directed_children = get_directed_children (self);
   visible_child = self->visible_child;
+  if (!visible_child)
+    return;
+
+  directed_children = get_directed_children (self);
 
   box_homogeneous = (self->homogeneous[HDY_FOLD_UNFOLDED][GTK_ORIENTATION_HORIZONTAL] && orientation == GTK_ORIENTATION_HORIZONTAL) ||
                     (self->homogeneous[HDY_FOLD_UNFOLDED][GTK_ORIENTATION_VERTICAL] && orientation == GTK_ORIENTATION_VERTICAL);
@@ -2919,13 +2922,14 @@ hdy_stackable_box_insert_child_after (HdyStackableBox *self,
   } else {
     HdyStackableBoxChildInfo *sibling_info = find_child_info_for_widget (self, sibling);
     gint sibling_info_pos = g_list_index (self->children, sibling_info);
+    gint length = g_list_length (self->children);
 
     self->children =
       g_list_insert (self->children, child_info,
                      sibling_info_pos + 1);
     self->children_reversed =
       g_list_insert (self->children_reversed, child_info,
-                     g_list_length (self->children) - sibling_info_pos - 1);
+                     length - sibling_info_pos - 1);
   }
 
   if (self->visible_child)

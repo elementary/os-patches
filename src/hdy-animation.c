@@ -34,11 +34,14 @@ struct _HdyAnimation
 
   gint64 start_time; /* ms */
   guint tick_cb_id;
+  gulong unmap_cb_id;
 
   HdyAnimationEasingFunc easing_func;
   HdyAnimationValueCallback value_cb;
   HdyAnimationDoneCallback done_cb;
   gpointer user_data;
+
+  gboolean is_done;
 };
 
 static void
@@ -47,6 +50,16 @@ set_value (HdyAnimation *self,
 {
   self->value = value;
   self->value_cb (value, self->user_data);
+}
+
+static void
+done (HdyAnimation *self)
+{
+  if (self->is_done)
+    return;
+
+  self->is_done = TRUE;
+  self->done_cb (self->user_data);
 }
 
 static gboolean
@@ -62,9 +75,12 @@ tick_cb (GtkWidget     *widget,
 
     set_value (self, self->value_to);
 
-    g_signal_handlers_disconnect_by_func (self->widget, hdy_animation_stop, self);
+    if (self->unmap_cb_id) {
+      g_signal_handler_disconnect (self->widget, self->unmap_cb_id);
+      self->unmap_cb_id = 0;
+    }
 
-    self->done_cb (self->user_data);
+    done (self);
 
     return G_SOURCE_REMOVE;
   }
@@ -113,6 +129,7 @@ hdy_animation_new (GtkWidget                 *widget,
   self->user_data = user_data;
 
   self->value = from;
+  self->is_done = FALSE;
 
   return self;
 }
@@ -146,7 +163,7 @@ hdy_animation_start (HdyAnimation *self)
       self->duration <= 0) {
     set_value (self, self->value_to);
 
-    self->done_cb (self->user_data);
+    done (self);
 
     return;
   }
@@ -156,8 +173,9 @@ hdy_animation_start (HdyAnimation *self)
   if (self->tick_cb_id)
     return;
 
-  g_signal_connect_swapped (self->widget, "unmap",
-                            G_CALLBACK (hdy_animation_stop), self);
+  self->unmap_cb_id =
+    g_signal_connect_swapped (self->widget, "unmap",
+                              G_CALLBACK (hdy_animation_stop), self);
   self->tick_cb_id = gtk_widget_add_tick_callback (self->widget, (GtkTickCallback) tick_cb, self, NULL);
 }
 
@@ -166,15 +184,17 @@ hdy_animation_stop (HdyAnimation *self)
 {
   g_return_if_fail (self != NULL);
 
-  if (!self->tick_cb_id)
-    return;
+  if (self->tick_cb_id) {
+    gtk_widget_remove_tick_callback (self->widget, self->tick_cb_id);
+    self->tick_cb_id = 0;
+  }
 
-  gtk_widget_remove_tick_callback (self->widget, self->tick_cb_id);
-  self->tick_cb_id = 0;
+  if (self->unmap_cb_id) {
+    g_signal_handler_disconnect (self->widget, self->unmap_cb_id);
+    self->unmap_cb_id = 0;
+  }
 
-  g_signal_handlers_disconnect_by_func (self->widget, hdy_animation_stop, self);
-
-  self->done_cb (self->user_data);
+  done (self);
 }
 
 gdouble

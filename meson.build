@@ -1,5 +1,5 @@
 project('libhandy', 'c',
-          version: '1.2.0',
+          version: '1.2.2',
           license: 'LGPL-2.1+',
     meson_version: '>= 0.49.0',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
@@ -103,14 +103,18 @@ add_project_arguments(
 
 # Setup various paths that subdirectory meson.build files need
 package_subdir = get_option('package_subdir') # When used as subproject
-datadir        = get_option('datadir')  / package_subdir
-libdir         = get_option('libdir')  / package_subdir
-girdir         = get_option('datadir') / package_subdir / 'gir-1.0'
-typelibdir     = get_option('libdir')  / package_subdir / 'girepository-1.0'
 if package_subdir != ''
-  vapidir = get_option('datadir') / package_subdir / 'vapi'
+  datadir    = get_option('datadir') / package_subdir
+  libdir     = get_option('libdir')  / package_subdir
+  girdir     = get_option('datadir') / package_subdir / 'gir-1.0'
+  typelibdir = get_option('libdir')  / package_subdir / 'girepository-1.0'
+  vapidir    = get_option('datadir') / package_subdir / 'vapi'
 else
-  vapidir = get_option('datadir') / 'vala' / 'vapi'
+  datadir    = get_option('datadir')
+  libdir     = get_option('libdir')
+  girdir     = get_option('datadir') / 'gir-1.0'
+  typelibdir = get_option('libdir')  / 'girepository-1.0'
+  vapidir    = get_option('datadir') / 'vala' / 'vapi'
 endif
 
 glade_catalog_feature = get_option('glade_catalog')
