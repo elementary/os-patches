@@ -861,12 +861,12 @@ hdy_squeezer_size_allocate (GtkWidget     *widget,
   if (self->visible_child) {
     int min, nat;
 
-    gtk_widget_get_preferred_height_for_width (self->visible_child->widget,
-                                               allocation->width, &min, &nat);
-    child_allocation.width = MAX (child_allocation.width, min);
-
     gtk_widget_get_preferred_width_for_height (self->visible_child->widget,
                                                allocation->height, &min, &nat);
+    child_allocation.width = MAX (child_allocation.width, min);
+
+    gtk_widget_get_preferred_height_for_width (self->visible_child->widget,
+                                               allocation->width, &min, &nat);
     child_allocation.height = MAX (child_allocation.height, min);
 
     if (child_allocation.width > allocation->width) {
