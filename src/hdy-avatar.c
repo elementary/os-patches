@@ -1248,6 +1248,7 @@ hdy_avatar_draw_to_pixbuf (HdyAvatar *self,
         gdk_pixbuf_get_width (self->round_image) != scaled_size) {
       pixbuf_from_icon = load_icon_sync (get_icon (self), scaled_size);
       custom_image = update_custom_image (pixbuf_from_icon, NULL, scaled_size);
+      gtk_style_context_add_class (context, "image");
     } else {
       custom_image = update_custom_image (NULL, self->round_image, scaled_size);
     }
