@@ -391,7 +391,7 @@ hdy_tab_bar_dispose (GObject *object)
 
   hdy_tab_bar_set_view (self, NULL);
 
-  g_clear_object (&self->extra_drag_dest_targets);
+  g_clear_pointer (&self->extra_drag_dest_targets, gtk_target_list_unref);
 
   G_OBJECT_CLASS (hdy_tab_bar_parent_class)->dispose (object);
 }
