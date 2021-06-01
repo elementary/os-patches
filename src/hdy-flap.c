@@ -753,7 +753,6 @@ compute_sizes (HdyFlap       *self,
 
   if (extra > 0 && flap_expand) {
     *flap_size += extra;
-    extra = 0;
 
     if (!revealed)
       *content_size = total;
