@@ -86,7 +86,7 @@ run_pkg() {
 # Try and remove dkms to spot packages which miss a dkms dependency
 dpkg --remove dkms || true
 
-for pkg in $(awk '/^Package:/ { print $2 }' debian/control | grep "\-dkms$"); do
+for pkg in $(grep-dctrl -FDepends -e '(^| )dkms' -o -FPackage -e '\-dkms' debian/control -sPackage -n); do
     # package might be arch: restriction or udeb etc.
     if ! apt-cache show $pkg >/dev/null 2>&1; then
         echo "I: Skipping unavailable package $pkg"
