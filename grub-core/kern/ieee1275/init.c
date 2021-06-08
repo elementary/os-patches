@@ -71,12 +71,11 @@ grub_addr_t grub_ieee1275_original_stack;
 #endif
 
 void
-grub_exit (int rc __attribute__((unused)))
+grub_exit (void)
 {
   grub_ieee1275_exit ();
 }
 
-#ifndef __i386__
 /* Translate an OF filesystem path (separated by backslashes), into a GRUB
    path (separated by forward slashes).  */
 static void
@@ -91,18 +90,9 @@ grub_translate_ieee1275_path (char *filepath)
       backslash = grub_strchr (filepath, '\\');
     }
 }
-#endif
 
 void (*grub_ieee1275_net_config) (const char *dev, char **device, char **path,
                                   char *bootpath);
-#ifdef __i386__
-void
-grub_machine_get_bootlocation (char **device __attribute__ ((unused)),
-			       char **path __attribute__ ((unused)))
-{
-  grub_env_set ("prefix", "(sd,1)/");
-}
-#else
 void
 grub_machine_get_bootlocation (char **device, char **path)
 {
@@ -156,7 +146,6 @@ grub_machine_get_bootlocation (char **device, char **path)
     }
   grub_free (bootpath);
 }
-#endif
 
 /* Claim some available memory in the first /memory node. */
 #ifdef __sparc__

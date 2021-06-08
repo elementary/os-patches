@@ -128,12 +128,6 @@ grub_install_get_default_x86_platform (void)
     return "i386-efi";
 }
 
-const char *
-grub_install_get_default_powerpc_machtype (void)
-{
-  return "generic";
-}
-
 static void *
 get_efi_variable (const wchar_t *varname, ssize_t *len)
 {
@@ -208,7 +202,7 @@ set_efi_variable_bootn (grub_uint16_t n, void *in, grub_size_t len)
 }
 
 int
-grub_install_register_efi (grub_device_t efidir_grub_dev, const char *efidir,
+grub_install_register_efi (grub_device_t efidir_grub_dev,
 			   const char *efifile_path,
 			   const char *efi_distributor)
 {
@@ -231,8 +225,8 @@ grub_install_register_efi (grub_device_t efidir_grub_dev, const char *efidir,
     grub_util_error ("%s", _("no EFI routines are available when running in BIOS mode"));
 
   distrib8_len = grub_strlen (efi_distributor);
-  distributor16 = xcalloc (distrib8_len + 1,
-			   GRUB_MAX_UTF16_PER_UTF8 * sizeof (grub_uint16_t));
+  distributor16 = xmalloc ((distrib8_len + 1) * GRUB_MAX_UTF16_PER_UTF8
+			   * sizeof (grub_uint16_t));
   distrib16_len = grub_utf8_to_utf16 (distributor16, distrib8_len * GRUB_MAX_UTF16_PER_UTF8,
 				      (const grub_uint8_t *) efi_distributor,
 				      distrib8_len, 0);

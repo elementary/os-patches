@@ -133,22 +133,6 @@ prepare_grub_to_access_device ()
     esac
   done
 
-  loop_file=
-  case $1 in
-    /dev/loop/*|/dev/loop[0-9])
-      grub_loop_device="${1#/dev/}"
-      loop_file=`losetup "$1" | sed -e "s/^[^(]*(\([^)]\+\)).*/\1/"`
-      case $loop_file in
-        /dev/*) ;;
-        *)
-          loop_device="$1"
-          shift
-          set -- `"${grub_probe}" --target=device "${loop_file}"` "$@" || return 0
-        ;;
-      esac
-    ;;
-  esac
-
   # Abstraction modules aren't auto-loaded.
   abstraction="`"${grub_probe}" --device $@ --target=abstraction`"
   for module in ${abstraction} ; do
@@ -181,14 +165,6 @@ prepare_grub_to_access_device ()
     echo "fi"
   fi
   IFS="$old_ifs"
-
-  if [ "x${loop_file}" != x ]; then
-    loop_mountpoint="$(awk '"'${loop_file}'" ~ "^"$2 && $2 != "/" { print $2 }' /proc/mounts | tail -n1)"
-    if [ "x${loop_mountpoint}" != x ]; then
-      echo "loopback ${grub_loop_device} ${loop_file#$loop_mountpoint}"
-      echo "set root=(${grub_loop_device})"
-    fi
-  fi
 }
 
 grub_get_device_id ()
@@ -263,34 +239,18 @@ version_test_numeric ()
 
 version_test_gt ()
 {
-  version_test_gt_sedexp="s/[^-]*-//;s/[._-]\(pre\|rc\|test\|git\|old\|trunk\)/~\1/g"
-  version_test_gt_a="`echo "$1" | sed -e "$version_test_gt_sedexp"`"
-  version_test_gt_b="`echo "$2" | sed -e "$version_test_gt_sedexp"`"
+  version_test_gt_a="`echo "$1" | sed -e "s/[^-]*-//"`"
+  version_test_gt_b="`echo "$2" | sed -e "s/[^-]*-//"`"
   version_test_gt_cmp=gt
   if [ "x$version_test_gt_b" = "x" ] ; then
     return 0
   fi
-
-  # GRUB_FLAVOUR_ORDER is an ordered list of kernels, in decreasing
-  # priority. Any items in the list take precedence over other kernels,
-  # and earlier flavours are preferred over later ones.
-  for flavour in ${GRUB_FLAVOUR_ORDER:-}; do
-    version_test_gt_a_preferred=$(echo "$version_test_gt_a" | grep --  "-[0-9]*-$flavour\$")
-    version_test_gt_b_preferred=$(echo "$version_test_gt_b" | grep --  "-[0-9]*-$flavour\$")
-
-    if [ -n "$version_test_gt_a_preferred" -a -z "$version_test_gt_b_preferred" ] ; then
-      return 0
-    elif [ -z "$version_test_gt_a_preferred" -a -n "$version_test_gt_b_preferred" ] ; then
-      return 1
-    fi
-  done
-
   case "$version_test_gt_a:$version_test_gt_b" in
     *.old:*.old) ;;
     *.old:*) version_test_gt_a="`echo "$version_test_gt_a" | sed -e 's/\.old$//'`" ; version_test_gt_cmp=gt ;;
     *:*.old) version_test_gt_b="`echo "$version_test_gt_b" | sed -e 's/\.old$//'`" ; version_test_gt_cmp=ge ;;
   esac
-  dpkg --compare-versions "$version_test_gt_a" "$version_test_gt_cmp" "$version_test_gt_b"
+  version_test_numeric "$version_test_gt_a" "$version_test_gt_cmp" "$version_test_gt_b"
   return "$?"
 }
 

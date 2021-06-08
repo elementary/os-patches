@@ -325,23 +325,6 @@ program = {
 };
 
 program = {
-  name = grub-mkdevicemap;
-  installdir = sbin;
-  mansection = 8;
-
-  common = util/grub-mkdevicemap.c;
-  common = util/deviceiter.c;
-  common = util/devicemap.c;
-  common = grub-core/osdep/init.c;
-
-  ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
-  ldadd = libgrubkern.a;
-  ldadd = grub-core/lib/gnulib/libgnu.a;
-  ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
-};
-
-program = {
   name = grub-probe;
   installdir = sbin;
   mansection = 8;
@@ -500,13 +483,6 @@ script = {
 };
 
 script = {
-  name = '10_linux_zfs';
-  common = util/grub.d/10_linux_zfs.in;
-  installdir = grubconf;
-  condition = COND_HOST_LINUX;
-};
-
-script = {
   name = '10_xnu';
   common = util/grub.d/10_xnu.in;
   installdir = grubconf;
@@ -523,12 +499,6 @@ script = {
 script = {
   name = '30_os-prober';
   common = util/grub.d/30_os-prober.in;
-  installdir = grubconf;
-};
-
-script = {
-  name = '30_uefi-firmware';
-  common = util/grub.d/30_uefi-firmware.in;
   installdir = grubconf;
 };
 
@@ -565,8 +535,6 @@ program = {
   common = grub-core/osdep/compress.c;
   extra_dist = grub-core/osdep/unix/compress.c;
   extra_dist = grub-core/osdep/basic/compress.c;
-  common = grub-core/osdep/efivar.c;
-  extra_dist = grub-core/osdep/unix/efivar.c;
   common = util/editenv.c;
   common = grub-core/osdep/blocklist.c;
   common = grub-core/osdep/config.c;
@@ -580,15 +548,12 @@ program = {
   common = grub-core/kern/emu/argp_common.c;
   common = grub-core/osdep/init.c;
 
-  cflags = '$(EFIVAR_CFLAGS)';
-
   ldadd = '$(LIBLZMA)';
   ldadd = libgrubmods.a;
   ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
-  ldadd = '$(EFIVAR_LIBS)';
 
   condition = COND_HAVE_EXEC;
 };
@@ -617,8 +582,6 @@ program = {
   extra_dist = grub-core/osdep/basic/no_platform.c;
   extra_dist = grub-core/osdep/unix/platform.c;
   common = grub-core/osdep/compress.c;
-  common = grub-core/osdep/efivar.c;
-  extra_dist = grub-core/osdep/unix/efivar.c;
   common = util/editenv.c;
   common = grub-core/osdep/blocklist.c;
   common = grub-core/osdep/config.c;
@@ -632,15 +595,12 @@ program = {
   common = grub-core/kern/emu/argp_common.c;
   common = grub-core/osdep/init.c;
 
-  cflags = '$(EFIVAR_CFLAGS)';
-
   ldadd = '$(LIBLZMA)';
   ldadd = libgrubmods.a;
   ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
-  ldadd = '$(EFIVAR_LIBS)';
 };
 
 program = {
@@ -662,8 +622,6 @@ program = {
   common = grub-core/osdep/platform.c;
   common = grub-core/osdep/platform_unix.c;
   common = grub-core/osdep/compress.c;
-  common = grub-core/osdep/efivar.c;
-  extra_dist = grub-core/osdep/unix/efivar.c;
   common = util/editenv.c;
   common = grub-core/osdep/blocklist.c;
   common = grub-core/osdep/config.c;
@@ -676,15 +634,12 @@ program = {
   common = grub-core/kern/emu/argp_common.c;
   common = grub-core/osdep/init.c;
 
-  cflags = '$(EFIVAR_CFLAGS)';
-
   ldadd = '$(LIBLZMA)';
   ldadd = libgrubmods.a;
   ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
-  ldadd = '$(EFIVAR_LIBS)';
 };
 
 program = {
@@ -706,8 +661,6 @@ program = {
   common = grub-core/osdep/platform.c;
   common = grub-core/osdep/platform_unix.c;
   common = grub-core/osdep/compress.c;
-  common = grub-core/osdep/efivar.c;
-  extra_dist = grub-core/osdep/unix/efivar.c;
   common = util/editenv.c;
   common = grub-core/osdep/blocklist.c;
   common = grub-core/osdep/config.c;
@@ -717,15 +670,12 @@ program = {
   common = grub-core/kern/emu/argp_common.c;
   common = grub-core/osdep/init.c;
 
-  cflags = '$(EFIVAR_CFLAGS)';
-
   ldadd = '$(LIBLZMA)';
   ldadd = libgrubmods.a;
   ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
-  ldadd = '$(EFIVAR_LIBS)';
 };
 
 script = {

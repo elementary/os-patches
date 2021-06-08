@@ -604,30 +604,6 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)
       static struct grub_term_coordinate *pos;
       int entry = -1;
 
-      if (timeout == 0)
-	{
-	  /* If modifier key statuses can't be detected without a delay,
-	     then a hidden timeout of zero cannot be interrupted in any way,
-	     which is not very helpful.  Bump it to three seconds in this
-	     case to give the user a fighting chance.  */
-	  grub_term_input_t term;
-	  int nterms = 0;
-	  int mods_detectable = 1;
-
-	  FOR_ACTIVE_TERM_INPUTS(term)
-	  {
-	    if (!term->getkeystatus)
-	      {
-		mods_detectable = 0;
-		break;
-	      }
-	    else
-	      nterms++;
-	  }
-	  if (!mods_detectable || !nterms)
-	    timeout = 3;
-	}
-
       if (timeout_style == TIMEOUT_STYLE_COUNTDOWN && timeout)
 	{
 	  pos = grub_term_save_pos ();
@@ -639,26 +615,7 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)
       saved_time = grub_get_time_ms ();
       while (1)
 	{
-	  int mods = 0;
-	  grub_term_input_t term;
 	  int key;
-
-	  if (grub_term_poll_usb)
-	    grub_term_poll_usb (0);
-
-	  FOR_ACTIVE_TERM_INPUTS(term)
-	  {
-	    if (term->getkeystatus)
-	      mods |= term->getkeystatus (term);
-	  }
-
-	  if (mods >= 0 &&
-	      (mods & (GRUB_TERM_STATUS_LSHIFT
-		       | GRUB_TERM_STATUS_RSHIFT)) != 0)
-	    {
-	      timeout = -1;
-	      break;
-	    }
 
 	  key = grub_getkey_noblock ();
 	  if (key != GRUB_TERM_NO_KEY)
@@ -851,18 +808,12 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)
 
 /* Callback invoked immediately before a menu entry is executed.  */
 static void
-notify_booting (grub_menu_entry_t entry
-#if QUIET_BOOT
-		__attribute__((unused))
-#endif
-		,
+notify_booting (grub_menu_entry_t entry,
 		void *userdata __attribute__((unused)))
 {
-#if !QUIET_BOOT
   grub_printf ("  ");
   grub_printf_ (N_("Booting `%s'"), entry->title);
   grub_printf ("\n\n");
-#endif
 }
 
 /* Callback invoked when a default menu entry executed because of a timeout
@@ -910,9 +861,6 @@ show_menu (grub_menu_t menu, int nested, int autobooted)
       int boot_entry;
       grub_menu_entry_t e;
       int auto_boot;
-#if QUIET_BOOT
-      int initial_timeout = grub_menu_get_timeout ();
-#endif
 
       boot_entry = run_menu (menu, nested, &auto_boot);
       if (boot_entry < 0)
@@ -922,11 +870,7 @@ show_menu (grub_menu_t menu, int nested, int autobooted)
       if (! e)
 	continue; /* Menu is empty.  */
 
-#if QUIET_BOOT
-      /* Only clear the screen if we drew the menu in the first place.  */
-      if (initial_timeout != 0)
-#endif
-	grub_cls ();
+      grub_cls ();
 
       if (auto_boot)
 	grub_menu_execute_with_fallback (menu, e, autobooted,

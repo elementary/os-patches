@@ -200,7 +200,7 @@ make_device_name (const char *drive)
   char *ret, *ptr;
   const char *iptr;
 
-  ret = xcalloc (2, strlen (drive));
+  ret = xmalloc (strlen (drive) * 2);
   ptr = ret;
   for (iptr = drive; *iptr; iptr++)
     {
@@ -245,20 +245,6 @@ find_partition (grub_disk_t dsk __attribute__ ((unused)),
 
   if (ctx->start == part_start)
     {
-      /* This is dreadfully hardcoded, but there's a limit to what GRUB
-         Legacy was able to deal with anyway.  */
-      if (getenv ("GRUB_LEGACY_0_BASED_PARTITIONS"))
-	{
-	  if (partition->parent)
-	    /* Probably a BSD slice.  */
-	    ctx->partname = xasprintf ("%d,%d", partition->parent->number,
-				       partition->number + 1);
-	  else
-	    ctx->partname = xasprintf ("%d", partition->number);
-
-	  return 1;
-	}
-
       ctx->partname = grub_partition_get_name (partition);
       return 1;
     }

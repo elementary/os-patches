@@ -185,111 +185,36 @@ grub_install_mkdir_p (const char *dst)
   free (t);
 }
 
-static int
-strcmp_ext (const char *a, const char *b, const char *ext)
-{
-  char *bsuffix = grub_util_path_concat_ext (1, b, ext);
-  int r = strcmp (a, bsuffix);
-  free (bsuffix);
-  return r;
-}
-
-enum clean_grub_dir_mode
-{
-  CLEAN = 0,
-  CLEAN_BACKUP = 1,
-  CREATE_BACKUP = 2,
-  RESTORE_BACKUP = 3,
-};
-
 static void
-clean_grub_dir_real (const char *di, enum clean_grub_dir_mode mode)
+clean_grub_dir (const char *di)
 {
   grub_util_fd_dir_t d;
   grub_util_fd_dirent_t de;
-  char suffix[2] = "";
-
-  if ((mode == CLEAN_BACKUP) || (mode == RESTORE_BACKUP))
-    {
-      strcpy (suffix, "-");
-    }
 
   d = grub_util_fd_opendir (di);
   if (!d)
-    {
-      if (mode == CLEAN_BACKUP)
-	return;
-      grub_util_error (_("cannot open directory `%s': %s"),
-		       di, grub_util_fd_strerror ());
-    }
+    grub_util_error (_("cannot open directory `%s': %s"),
+		     di, grub_util_fd_strerror ());
 
   while ((de = grub_util_fd_readdir (d)))
     {
       const char *ext = strrchr (de->d_name, '.');
-      if ((ext && (strcmp_ext (ext, ".mod", suffix) == 0
-		   || strcmp_ext (ext, ".lst", suffix) == 0
-		   || strcmp_ext (ext, ".img", suffix) == 0
-		   || strcmp_ext (ext, ".mo", suffix) == 0)
-	   && strcmp_ext (de->d_name, "menu.lst", suffix) != 0)
-	  || strcmp_ext (de->d_name, "modinfo.sh", suffix) == 0
-	  || strcmp_ext (de->d_name, "efiemu32.o", suffix) == 0
-	  || strcmp_ext (de->d_name, "efiemu64.o", suffix) == 0)
+      if ((ext && (strcmp (ext, ".mod") == 0
+		   || strcmp (ext, ".lst") == 0
+		   || strcmp (ext, ".img") == 0
+		   || strcmp (ext, ".mo") == 0)
+	   && strcmp (de->d_name, "menu.lst") != 0)
+	  || strcmp (de->d_name, "efiemu32.o") == 0
+	  || strcmp (de->d_name, "efiemu64.o") == 0)
 	{
-	  char *srcf = grub_util_path_concat (2, di, de->d_name);
-
-	  if (mode == CREATE_BACKUP)
-	    {
-	      char *dstf = grub_util_path_concat_ext (2, di, de->d_name, "-");
-	      if (grub_util_rename (srcf, dstf) < 0)
-		grub_util_error (_("cannot backup `%s': %s"), srcf,
-				 grub_util_fd_strerror ());
-	      free (dstf);
-	    }
-	  else if (mode == RESTORE_BACKUP)
-	    {
-	      char *dstf = grub_util_path_concat (2, di, de->d_name);
-	      dstf[strlen (dstf) - 1] = 0;
-	      if (grub_util_rename (srcf, dstf) < 0)
-		grub_util_error (_("cannot restore `%s': %s"), dstf,
-				 grub_util_fd_strerror ());
-	      free (dstf);
-	    }
-	  else
-	    {
-	      if (grub_util_unlink (srcf) < 0)
-		grub_util_error (_("cannot delete `%s': %s"), srcf,
-				 grub_util_fd_strerror ());
-	    }
-	  free (srcf);
+	  char *x = grub_util_path_concat (2, di, de->d_name);
+	  if (grub_util_unlink (x) < 0)
+	    grub_util_error (_("cannot delete `%s': %s"), x,
+			     grub_util_fd_strerror ());
+	  free (x);
 	}
     }
   grub_util_fd_closedir (d);
-}
-
-static void
-restore_backup_on_exit (int status, void *arg)
-{
-  if (status == 0)
-    {
-      clean_grub_dir_real ((char *) arg, CLEAN_BACKUP);
-    }
-  else
-    {
-      clean_grub_dir_real ((char *) arg, CLEAN);
-      clean_grub_dir_real ((char *) arg, RESTORE_BACKUP);
-    }
-  free (arg);
-  arg = NULL;
-}
-
-static void
-clean_grub_dir (const char *di)
-{
-  clean_grub_dir_real (di, CLEAN_BACKUP);
-  clean_grub_dir_real (di, CREATE_BACKUP);
-#if defined(HAVE_ON_EXIT)
-  on_exit (restore_backup_on_exit, strdup (di));
-#endif
 }
 
 struct install_list
@@ -361,7 +286,7 @@ handle_install_list (struct install_list *il, const char *val,
       il->n_entries++;
     }
   il->n_alloc = il->n_entries + 1;
-  il->entries = xcalloc (il->n_alloc, sizeof (il->entries[0]));
+  il->entries = xmalloc (il->n_alloc * sizeof (il->entries[0]));
   ptr = val;
   for (ce = il->entries; ; ce++)
     {
@@ -684,25 +609,17 @@ get_localedir (void)
 }
 
 static void
-copy_locales (const char *dstd, int langpack)
+copy_locales (const char *dstd)
 {
   grub_util_fd_dir_t d;
   grub_util_fd_dirent_t de;
   const char *locale_dir = get_localedir ();
-  char *dir;
 
-  if (langpack)
-    dir = xasprintf ("%s-langpack", locale_dir);
-  else
-    dir = xstrdup (locale_dir);
-
-  d = grub_util_fd_opendir (dir);
+  d = grub_util_fd_opendir (locale_dir);
   if (!d)
     {
-      if (!langpack)
-	grub_util_warn (_("cannot open directory `%s': %s"),
-			dir, grub_util_fd_strerror ());
-      free (dir);
+      grub_util_warn (_("cannot open directory `%s': %s"),
+		      locale_dir, grub_util_fd_strerror ());
       return;
     }
 
@@ -719,14 +636,14 @@ copy_locales (const char *dstd, int langpack)
       if (ext && (grub_strcmp (ext, ".mo") == 0
 		  || grub_strcmp (ext, ".gmo") == 0))
 	{
-	  srcf = grub_util_path_concat (2, dir, de->d_name);
+	  srcf = grub_util_path_concat (2, locale_dir, de->d_name);
 	  dstf = grub_util_path_concat (2, dstd, de->d_name);
 	  ext = grub_strrchr (dstf, '.');
 	  grub_strcpy (ext, ".mo");
 	}
       else
 	{
-	  srcf = grub_util_path_concat_ext (4, dir, de->d_name,
+	  srcf = grub_util_path_concat_ext (4, locale_dir, de->d_name,
 					    "LC_MESSAGES", PACKAGE, ".mo");
 	  dstf = grub_util_path_concat_ext (2, dstd, de->d_name, ".mo");
 	}
@@ -735,7 +652,6 @@ copy_locales (const char *dstd, int langpack)
       free (dstf);
     }
   grub_util_fd_closedir (d);
-  free (dir);
 }
 #endif
 
@@ -754,15 +670,13 @@ grub_install_copy_nls(const char *src __attribute__ ((unused)),
     {
       char *srcd = grub_util_path_concat (2, src, "po");
       copy_by_ext (srcd, dst_locale, ".mo", 0);
-      copy_locales (dst_locale, 0);
-      copy_locales (dst_locale, 1);
+      copy_locales (dst_locale);
       free (srcd);
     }
   else
     {
       size_t i;
       const char *locale_dir = get_localedir ();
-      char *locale_langpack_dir = xasprintf ("%s-langpack", locale_dir);
 
       for (i = 0; i < install_locales.n_entries; i++)
       {
@@ -779,16 +693,6 @@ grub_install_copy_nls(const char *src __attribute__ ((unused)),
             continue;
           }
         free (srcf);
-        srcf = grub_util_path_concat_ext (4, locale_langpack_dir,
-                                          install_locales.entries[i],
-                                          "LC_MESSAGES", PACKAGE, ".mo");
-        if (grub_install_compress_file (srcf, dstf, 0))
-          {
-            free (srcf);
-            free (dstf);
-            continue;
-          }
-        free (srcf);
         srcf = grub_util_path_concat_ext (4, locale_dir,
                                           install_locales.entries[i],
                                           "LC_MESSAGES", PACKAGE, ".mo");
@@ -798,8 +702,6 @@ grub_install_copy_nls(const char *src __attribute__ ((unused)),
         free (srcf);
         free (dstf);
       }
-
-      free (locale_langpack_dir);
     }
   free (dst_locale);
 #endif

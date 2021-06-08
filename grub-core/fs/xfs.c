@@ -25,7 +25,6 @@
 #include <grub/dl.h>
 #include <grub/types.h>
 #include <grub/fshelp.h>
-#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -900,7 +899,6 @@ static struct grub_xfs_data *
 grub_xfs_mount (grub_disk_t disk)
 {
   struct grub_xfs_data *data = 0;
-  grub_size_t sz;
 
   data = grub_zalloc (sizeof (struct grub_xfs_data));
   if (!data)
@@ -915,11 +913,10 @@ grub_xfs_mount (grub_disk_t disk)
   if (!grub_xfs_sb_valid(data))
     goto fail;
 
-  if (grub_add (grub_xfs_inode_size (data),
-      sizeof (struct grub_xfs_data) - sizeof (struct grub_xfs_inode) + 1, &sz))
-    goto fail;
-
-  data = grub_realloc (data, sz);
+  data = grub_realloc (data,
+		       sizeof (struct grub_xfs_data)
+		       - sizeof (struct grub_xfs_inode)
+		       + grub_xfs_inode_size(data) + 1);
 
   if (! data)
     goto fail;

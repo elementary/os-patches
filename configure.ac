@@ -305,16 +305,6 @@ AC_SUBST(grubdirname)
 AC_DEFINE_UNQUOTED(GRUB_DIR_NAME, "$grubdirname",
     [Default grub directory name])
 
-##### systemd unit files
-AC_ARG_WITH([systemdsystemunitdir],
-            AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),
-            [],
-            [with_systemdsystemunitdir=/usr/lib/systemd/system],
-            [with_systemdsystemunitdir=no])
-if test "x$with_systemdsystemunitdir" != xno; then
-   AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
-fi
-
 #
 # Checks for build programs.
 #
@@ -420,7 +410,7 @@ else
 fi
 
 # Check for functions and headers.
-AC_CHECK_FUNCS(posix_memalign memalign getextmntent on_exit)
+AC_CHECK_FUNCS(posix_memalign memalign getextmntent)
 AC_CHECK_HEADERS(sys/param.h sys/mount.h sys/mnttab.h limits.h)
 
 # glibc 2.25 still includes sys/sysmacros.h in sys/types.h but emits deprecation
@@ -452,18 +442,6 @@ AC_CHECK_HEADER([util.h], [
   ])
 ])
 AC_SUBST([LIBUTIL])
-
-case "$host_os" in
-  cygwin | windows* | mingw32* | aros*)
-    ;;
-  *)
-    # For setting EFI variables in grub-install.
-    PKG_CHECK_MODULES([EFIVAR], [efivar efiboot], [
-      AC_DEFINE([HAVE_EFIVAR], [1],
-                [Define to 1 if you have the efivar and efiboot libraries.])
-    ], [:])
-    ;;
-esac
 
 AC_CACHE_CHECK([whether -Wtrampolines work], [grub_cv_host_cc_wtrampolines], [
   SAVED_CFLAGS="$CFLAGS"
@@ -1868,61 +1846,6 @@ fi
 AC_SUBST([LIBZFS])
 AC_SUBST([LIBNVPAIR])
 
-AC_ARG_ENABLE([ubuntu-recovery],
-              [AS_HELP_STRING([--enable-ubuntu-recovery],
-                              [adjust boot options for the Ubuntu recovery mode (default=no)])],
-              [], [enable_ubuntu_recovery=no])
-if test x"$enable_ubuntu_recovery" = xyes ; then
-  UBUNTU_RECOVERY=1
-else
-  UBUNTU_RECOVERY=0
-fi
-AC_SUBST([UBUNTU_RECOVERY])
-
-AC_ARG_ENABLE([quiet-boot],
-              [AS_HELP_STRING([--enable-quiet-boot],
-                              [emit fewer messages at boot time (default=no)])],
-              [], [enable_quiet_boot=no])
-if test x"$enable_quiet_boot" = xyes ; then
-  QUIET_BOOT=1
-else
-  QUIET_BOOT=0
-fi
-AC_SUBST([QUIET_BOOT])
-
-AC_ARG_ENABLE([quick-boot],
-              [AS_HELP_STRING([--enable-quick-boot],
-                              [bypass boot menu if possible (default=no)])],
-              [], [enable_quick_boot=no])
-if test x"$enable_quick_boot" = xyes ; then
-  QUICK_BOOT=1
-else
-  QUICK_BOOT=0
-fi
-AC_SUBST([QUICK_BOOT])
-
-AC_ARG_ENABLE([gfxpayload-dynamic],
-              [AS_HELP_STRING([--enable-gfxpayload-dynamic],
-                              [use GRUB_GFXPAYLOAD_LINUX=keep unless explicitly unsupported on current hardware (default=no)])],
-              [], [enable_gfxpayload_dynamic=no])
-if test x"$enable_gfxpayload_dynamic" = xyes ; then
-  GFXPAYLOAD_DYNAMIC=1
-else
-  GFXPAYLOAD_DYNAMIC=0
-fi
-AC_SUBST([GFXPAYLOAD_DYNAMIC])
-
-AC_ARG_ENABLE([vt-handoff],
-              [AS_HELP_STRING([--enable-vt-handoff],
-                              [use Linux vt.handoff option for flicker-free booting (default=no)])],
-              [], [enable_vt_handoff=no])
-if test x"$enable_vt_handoff" = xyes ; then
-  VT_HANDOFF=1
-else
-  VT_HANDOFF=0
-fi
-AC_SUBST([VT_HANDOFF])
-
 LIBS=""
 
 AC_SUBST([FONT_SOURCE])
@@ -2179,11 +2102,6 @@ if test x"$liblzma_excuse" != x ; then
 echo "Without liblzma (no support for XZ-compressed mips images) ($liblzma_excuse)"
 else
 echo "With liblzma from $LIBLZMA (support for XZ-compressed mips images)"
-fi
-if [ x"$enable_quiet_boot" = xyes ]; then
-echo With quiet boot: Yes
-else
-echo With quiet boot: No
 fi
 echo "*******************************************************"
 ]

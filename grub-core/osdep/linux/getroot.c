@@ -168,7 +168,7 @@ grub_util_raid_getmembers (const char *name, int bootable)
   if (ret != 0)
     grub_util_error (_("ioctl GET_ARRAY_INFO error: %s"), strerror (errno));
 
-  devicelist = xcalloc (info.nr_disks + 1, sizeof (char *));
+  devicelist = xmalloc ((info.nr_disks + 1) * sizeof (char *));
 
   for (i = 0, j = 0; j < info.nr_disks; i++)
     {
@@ -241,7 +241,7 @@ grub_find_root_devices_from_btrfs (const char *dir)
       return NULL;
     }
 
-  ret = xcalloc (fsi.num_devices + 1, sizeof (ret[0]));
+  ret = xmalloc ((fsi.num_devices + 1) * sizeof (ret[0]));
 
   for (i = 1; i <= fsi.max_id && j < fsi.num_devices; i++)
     {
@@ -396,7 +396,7 @@ grub_find_root_devices_from_mountinfo (const char *dir, char **relroot)
   if (relroot)
     *relroot = NULL;
 
-  entries = xcalloc (entry_max, sizeof (*entries));
+  entries = xmalloc (entry_max * sizeof (*entries));
 
 again:
   fp = grub_util_fopen ("/proc/self/mountinfo", "r");
@@ -947,19 +947,6 @@ grub_util_part_to_disk (const char *os_dev, struct stat *st,
 	  if (*pp == 'p')
 	    *is_part = 1;
 	  /* /dev/nvme[0-9]+n[0-9]+p[0-9]* */
-	  *pp = '\0';
-	  return path;
-	}
-
-      /* If this is a FusionIO disk.  */
-      if ((strncmp ("fio", p, 3) == 0) && p[3] >= 'a' && p[3] <= 'z')
-	{
-	  char *pp = p + 3;
-	  while (*pp >= 'a' && *pp <= 'z')
-	    pp++;
-	  if (*pp)
-	    *is_part = 1;
-	  /* /dev/fio[a-z]+[0-9]* */
 	  *pp = '\0';
 	  return path;
 	}

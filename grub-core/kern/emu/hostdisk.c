@@ -532,18 +532,6 @@ read_device_map (const char *dev_map)
 	  continue;
 	}
 
-      if (! strncmp (p, "/dev/fd", sizeof ("/dev/fd") - 1))
-	{
-	  char *q = p + sizeof ("/dev/fd") - 1;
-	  if (*q >= '0' && *q <= '9')
-	    {
-	      free (map[drive].drive);
-	      map[drive].drive = NULL;
-	      grub_util_info ("`%s' looks like a floppy drive, skipping", p);
-	      continue;
-	    }
-	}
-
       /* On Linux, the devfs uses symbolic links horribly, and that
 	 confuses the interface very much, so use realpath to expand
 	 symbolic links.  */
@@ -627,7 +615,7 @@ static char *
 grub_util_path_concat_real (size_t n, int ext, va_list ap)
 {
   size_t totlen = 0;
-  char **l = xcalloc (n + ext, sizeof (l[0]));
+  char **l = xmalloc ((n + ext) * sizeof (l[0]));
   char *r, *p, *pi;
   size_t i;
   int first = 1;

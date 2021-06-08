@@ -40,7 +40,6 @@ static const struct guid_mapping guid_mappings[] =
     { GRUB_EFI_CRC32_GUIDED_SECTION_EXTRACTION_GUID,
       "CRC32 GUIDED SECTION EXTRACTION"},
     { GRUB_EFI_DEBUG_IMAGE_INFO_TABLE_GUID, "DEBUG IMAGE INFO"},
-    { GRUB_EFI_DEVICE_TREE_GUID, "DEVICE TREE"},
     { GRUB_EFI_DXE_SERVICES_TABLE_GUID, "DXE SERVICES"},
     { GRUB_EFI_HCDP_TABLE_GUID, "HCDP"},
     { GRUB_EFI_HOB_LIST_GUID, "HOB LIST"},
@@ -49,7 +48,6 @@ static const struct guid_mapping guid_mappings[] =
     { GRUB_EFI_MPS_TABLE_GUID, "MPS"},
     { GRUB_EFI_SAL_TABLE_GUID, "SAL"},
     { GRUB_EFI_SMBIOS_TABLE_GUID, "SMBIOS"},
-    { GRUB_EFI_SMBIOS3_TABLE_GUID, "SMBIOS3"},
     { GRUB_EFI_SYSTEM_RESOURCE_TABLE_GUID, "SYSTEM RESOURCE TABLE"},
     { GRUB_EFI_TIANO_CUSTOM_DECOMPRESS_GUID, "TIANO CUSTOM DECOMPRESS"},
     { GRUB_EFI_TSC_FREQUENCY_GUID, "TSC FREQUENCY"},
@@ -73,8 +71,7 @@ grub_cmd_lsefisystab (struct grub_command *cmd __attribute__ ((unused)),
     grub_printf ("Vendor: ");
     
     for (vendor_utf16 = st->firmware_vendor; *vendor_utf16; vendor_utf16++);
-    /* Allocate extra 3 bytes to simplify math. */
-    vendor = grub_calloc (4, vendor_utf16 - st->firmware_vendor + 1);
+    vendor = grub_malloc (4 * (vendor_utf16 - st->firmware_vendor) + 1);
     if (!vendor)
       return grub_errno;
     *grub_utf16_to_utf8 ((grub_uint8_t *) vendor, st->firmware_vendor,

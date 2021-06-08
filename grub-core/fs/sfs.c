@@ -26,7 +26,6 @@
 #include <grub/types.h>
 #include <grub/fshelp.h>
 #include <grub/charset.h>
-#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -267,7 +266,7 @@ grub_sfs_read_block (grub_fshelp_node_t node, grub_disk_addr_t fileblock)
       node->next_extent = node->block;
       node->cache_size = 0;
 
-      node->cache = grub_calloc (cache_size, sizeof (node->cache[0]));
+      node->cache = grub_malloc (sizeof (node->cache[0]) * cache_size);
       if (!node->cache)
 	{
 	  grub_errno = 0;
@@ -308,15 +307,10 @@ grub_sfs_read_block (grub_fshelp_node_t node, grub_disk_addr_t fileblock)
       if (node->cache && node->cache_size >= node->cache_allocated)
 	{
 	  struct cache_entry *e = node->cache;
-	  grub_size_t sz;
-
-	  if (grub_mul (node->cache_allocated, 2 * sizeof (e[0]), &sz))
-	    goto fail;
-
-	  e = grub_realloc (node->cache, sz);
+	  e = grub_realloc (node->cache,node->cache_allocated * 2
+			    * sizeof (e[0]));
 	  if (!e)
 	    {
- fail:
 	      grub_errno = 0;
 	      grub_free (node->cache);
 	      node->cache = 0;
@@ -483,16 +477,10 @@ grub_sfs_create_node (struct grub_fshelp_node **node,
   grub_size_t len = grub_strlen (name);
   grub_uint8_t *name_u8;
   int ret;
-  grub_size_t sz;
-
-  if (grub_mul (len, GRUB_MAX_UTF8_PER_LATIN1, &sz) ||
-      grub_add (sz, 1, &sz))
-    return 1;
-
   *node = grub_malloc (sizeof (**node));
   if (!*node)
     return 1;
-  name_u8 = grub_malloc (sz);
+  name_u8 = grub_malloc (len * GRUB_MAX_UTF8_PER_LATIN1 + 1);
   if (!name_u8)
     {
       grub_free (*node);
@@ -736,13 +724,8 @@ grub_sfs_label (grub_device_t device, char **label)
   data = grub_sfs_mount (disk);
   if (data)
     {
-      grub_size_t sz, len = grub_strlen (data->label);
-
-      if (grub_mul (len, GRUB_MAX_UTF8_PER_LATIN1, &sz) ||
-	  grub_add (sz, 1, &sz))
-	return GRUB_ERR_OUT_OF_RANGE;
-
-      *label = grub_malloc (sz);
+      grub_size_t len = grub_strlen (data->label);
+      *label = grub_malloc (len * GRUB_MAX_UTF8_PER_LATIN1 + 1);
       if (*label)
 	*grub_latin1_to_utf8 ((grub_uint8_t *) *label,
 			      (const grub_uint8_t *) data->label,

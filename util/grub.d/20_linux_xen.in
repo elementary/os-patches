@@ -27,7 +27,6 @@ export TEXTDOMAIN=@PACKAGE@
 export TEXTDOMAINDIR="@localedir@"
 
 CLASS="--class gnu-linux --class gnu --class os --class xen"
-SUPPORTED_INITS="sysvinit:/lib/sysvinit/init systemd:/lib/systemd/systemd upstart:/sbin/upstart"
 
 if [ "x${GRUB_DISTRIBUTOR}" = "x" ] ; then
   OS=GNU/Linux
@@ -41,11 +40,6 @@ fi
 case ${GRUB_DEVICE} in
   /dev/loop/*|/dev/loop[0-9])
     GRUB_DEVICE=`losetup ${GRUB_DEVICE} | sed -e "s/^[^(]*(\([^)]\+\)).*/\1/"`
-    # We can't cope with devices loop-mounted from files here.
-    case ${GRUB_DEVICE} in
-      /dev/*) ;;
-      *) exit 0 ;;
-    esac
   ;;
 esac
 
@@ -106,9 +100,7 @@ linux_entry ()
   fi
   if [ x$type != xsimple ] ; then
       if [ x$type = xrecovery ] ; then
-	  title="$(gettext_printf "%s, with Xen %s and Linux %s (%s)" "${os}" "${xen_version}" "${version}" "$(gettext "${GRUB_RECOVERY_TITLE}")")"
-      elif [ "${type#init-}" != "$type" ] ; then
-	  title="$(gettext_printf "%s, with Xen %s and Linux %s (%s)" "${os}" "${xen_version}" "${version}" "${type#init-}")"
+	  title="$(gettext_printf "%s, with Xen %s and Linux %s (recovery mode)" "${os}" "${xen_version}" "${version}")"
       else
 	  title="$(gettext_printf "%s, with Xen %s and Linux %s" "${os}" "${xen_version}" "${version}")"
       fi
@@ -313,14 +305,6 @@ while [ "x${xen_list}" != "x" ] ; do
 
 	linux_entry "${OS}" "${version}" "${xen_version}" advanced \
 	    "${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}" "${GRUB_CMDLINE_XEN} ${GRUB_CMDLINE_XEN_DEFAULT}"
-	for supported_init in ${SUPPORTED_INITS}; do
-	    init_path="${supported_init#*:}"
-	    if [ -x "${init_path}" ] && [ "$(readlink -f /sbin/init)" != "$(readlink -f "${init_path}")" ]; then
-		linux_entry "${OS}" "${version}" "${xen_version}" "init-${supported_init%%:*}" \
-		    "${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT} init=${init_path}" "${GRUB_CMDLINE_XEN} ${GRUB_CMDLINE_XEN_DEFAULT}"
-
-	    fi
-	done
 	if [ "x${GRUB_DISABLE_RECOVERY}" != "xtrue" ]; then
 	    linux_entry "${OS}" "${version}" "${xen_version}" recovery \
 		"single ${GRUB_CMDLINE_LINUX}" "${GRUB_CMDLINE_XEN}"

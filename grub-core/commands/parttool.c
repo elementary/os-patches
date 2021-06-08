@@ -59,13 +59,7 @@ grub_parttool_register(const char *part_name,
   for (nargs = 0; args[nargs].name != 0; nargs++);
   cur->nargs = nargs;
   cur->args = (struct grub_parttool_argdesc *)
-    grub_calloc (nargs + 1, sizeof (struct grub_parttool_argdesc));
-  if (!cur->args)
-    {
-      grub_free (cur);
-      curhandle--;
-      return -1;
-    }
+    grub_malloc ((nargs + 1) * sizeof (struct grub_parttool_argdesc));
   grub_memcpy (cur->args, args,
 	       (nargs + 1) * sizeof (struct grub_parttool_argdesc));
 
@@ -263,7 +257,7 @@ grub_cmd_parttool (grub_command_t cmd __attribute__ ((unused)),
 	return err;
       }
 
-  parsed = (int *) grub_calloc (argc, sizeof (int));
+  parsed = (int *) grub_zalloc (argc * sizeof (int));
 
   for (i = 1; i < argc; i++)
     if (! parsed[i])
@@ -296,7 +290,7 @@ grub_cmd_parttool (grub_command_t cmd __attribute__ ((unused)),
 	  }
 	ptool = cur;
 	pargs = (struct grub_parttool_args *)
-	  grub_calloc (ptool->nargs, sizeof (struct grub_parttool_args));
+	  grub_zalloc (ptool->nargs * sizeof (struct grub_parttool_args));
 	for (j = i; j < argc; j++)
 	  if (! parsed[j])
 	    {

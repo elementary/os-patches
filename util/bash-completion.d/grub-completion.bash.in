@@ -166,11 +166,13 @@ _grub_set_entry () {
 }
 
 __grub_set_default_program="@grub_set_default@"
-complete -F _grub_set_entry -o filenames ${__grub_set_default_program}
+have ${__grub_set_default_program} && \
+    complete -F _grub_set_entry -o filenames ${__grub_set_default_program}
 unset __grub_set_default_program
 
 __grub_reboot_program="@grub_reboot@"
-complete -F _grub_set_entry -o filenames ${__grub_reboot_program}
+have ${__grub_reboot_program} && \
+ complete -F _grub_set_entry -o filenames ${__grub_reboot_program}
 unset __grub_reboot_program
 
 
@@ -196,7 +198,8 @@ _grub_editenv () {
 }
 
 __grub_editenv_program="@grub_editenv@"
-complete -F _grub_editenv -o filenames ${__grub_editenv_program}
+have ${__grub_editenv_program} && \
+ complete -F _grub_editenv -o filenames ${__grub_editenv_program}
 unset __grub_editenv_program
 
 
@@ -216,7 +219,8 @@ _grub_mkconfig () {
     fi
 }
 __grub_mkconfig_program="@grub_mkconfig@"
-complete -F _grub_mkconfig -o filenames ${__grub_mkconfig_program}
+have ${__grub_mkconfig_program} && \
+ complete -F _grub_mkconfig -o filenames ${__grub_mkconfig_program}
 unset __grub_mkconfig_program
 
 
@@ -250,11 +254,13 @@ _grub_setup () {
 }
 
 __grub_bios_setup_program="@grub_bios_setup@"
-complete -F _grub_setup -o filenames ${__grub_bios_setup_program}
+have ${__grub_bios_setup_program} && \
+ complete -F _grub_setup -o filenames ${__grub_bios_setup_program}
 unset __grub_bios_setup_program
 
 __grub_sparc64_setup_program="@grub_sparc64_setup@"
-complete -F _grub_setup -o filenames ${__grub_sparc64_setup_program}
+have ${__grub_sparc64_setup_program} && \
+ complete -F _grub_setup -o filenames ${__grub_sparc64_setup_program}
 unset __grub_sparc64_setup_program
 
 
@@ -299,7 +305,8 @@ _grub_install () {
     fi
 }
 __grub_install_program="@grub_install@"
-complete -F _grub_install -o filenames ${__grub_install_program}
+have ${__grub_install_program} && \
+ complete -F _grub_install -o filenames ${__grub_install_program}
 unset __grub_install_program
 
 
@@ -320,7 +327,8 @@ _grub_mkfont () {
     fi
 }
 __grub_mkfont_program="@grub_mkfont@"
-complete -F _grub_mkfont -o filenames ${__grub_mkfont_program}
+have ${__grub_mkfont_program} && \
+ complete -F _grub_mkfont -o filenames ${__grub_mkfont_program}
 unset __grub_mkfont_program
 
 
@@ -350,7 +358,8 @@ _grub_mkrescue () {
     fi
 }
 __grub_mkrescue_program="@grub_mkrescue@"
-complete -F _grub_mkrescue -o filenames ${__grub_mkrescue_program}
+have ${__grub_mkrescue_program} && \
+ complete -F _grub_mkrescue -o filenames ${__grub_mkrescue_program}
 unset __grub_mkrescue_program
 
 
@@ -391,7 +400,8 @@ _grub_mkimage () {
     fi
 }
 __grub_mkimage_program="@grub_mkimage@"
-complete -F _grub_mkimage -o filenames ${__grub_mkimage_program}
+have ${__grub_mkimage_program} && \
+ complete -F _grub_mkimage -o filenames ${__grub_mkimage_program}
 unset __grub_mkimage_program
 
 
@@ -412,7 +422,8 @@ _grub_mkpasswd_pbkdf2 () {
     fi
 }
 __grub_mkpasswd_pbkdf2_program="@grub_mkpasswd_pbkdf2@"
-complete -F _grub_mkpasswd_pbkdf2 -o filenames ${__grub_mkpasswd_pbkdf2_program}
+have ${__grub_mkpasswd_pbkdf2_program} && \
+ complete -F _grub_mkpasswd_pbkdf2 -o filenames ${__grub_mkpasswd_pbkdf2_program}
 unset __grub_mkpasswd_pbkdf2_program
 
 
@@ -449,7 +460,8 @@ _grub_probe () {
     fi
 }
 __grub_probe_program="@grub_probe@"
-complete -F _grub_probe -o filenames ${__grub_probe_program}
+have ${__grub_probe_program} && \
+ complete -F _grub_probe -o filenames ${__grub_probe_program}
 unset __grub_probe_program
 
 
@@ -470,7 +482,8 @@ _grub_script_check () {
     fi
 }
 __grub_script_check_program="@grub_script_check@"
-complete -F _grub_script_check -o filenames ${__grub_script_check_program}
+have ${__grub_script_check_program} && \
+ complete -F _grub_script_check -o filenames ${__grub_script_check_program}
 
 
 # Local variables:

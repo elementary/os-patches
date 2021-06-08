@@ -207,7 +207,6 @@ kernel = {
   i386_multiboot = kern/i386/pc/acpi.c;
   i386_coreboot = kern/acpi.c;
   i386_multiboot = kern/acpi.c;
-  common = kern/efi/sb.c;
 
   x86 = kern/i386/tsc.c;
   x86 = kern/i386/tsc_pit.c;
@@ -547,7 +546,7 @@ image = {
   i386_pc = boot/i386/pc/startup_raw.S;
   i386_pc_nodist = rs_decoder.h;
 
-  objcopyflags = '-O binary -j .text';
+  objcopyflags = '-O binary';
   ldflags = '$(TARGET_IMG_LDFLAGS) $(TARGET_IMG_BASE_LDOPT),0x8200';
   enable = i386_pc;
 };
@@ -973,14 +972,6 @@ module = {
 };
 
 module = {
-  name = hwmatch;
-  i386_pc = commands/i386/pc/hwmatch.c;
-  enable = i386_pc;
-  cflags = '$(CFLAGS_POSIX) $(CFLAGS_GNULIB)';
-  cppflags = '$(CPPFLAGS_POSIX) $(CPPFLAGS_GNULIB)';
-};
-
-module = {
   name = keystatus;
   common = commands/keystatus.c;
 };
@@ -1104,21 +1095,6 @@ module = {
 module = {
   name = sleep;
   common = commands/sleep.c;
-};
-
-module = {
-  name = smbios;
-
-  common = commands/smbios.c;
-  efi = commands/efi/smbios.c;
-  i386_pc = commands/i386/pc/smbios.c;
-  i386_coreboot = commands/i386/pc/smbios.c;
-  i386_multiboot = commands/i386/pc/smbios.c;
-
-  enable = efi;
-  enable = i386_pc;
-  enable = i386_coreboot;
-  enable = i386_multiboot;
 };
 
 module = {
@@ -1806,13 +1782,10 @@ module = {
   ia64_efi = loader/ia64/efi/linux.c;
   arm_coreboot = loader/arm/linux.c;
   arm_efi = loader/arm64/linux.c;
-  arm_efi = loader/efi/linux.c;
   arm_uboot = loader/arm/linux.c;
   arm64 = loader/arm64/linux.c;
-  arm64 = loader/efi/linux.c;
   riscv32 = loader/riscv/linux.c;
   riscv64 = loader/riscv/linux.c;
-  cflags = '-Wno-error=cast-align';
   common = loader/linux.c;
   common = lib/cmdline.c;
   enable = noemu;
@@ -1821,7 +1794,7 @@ module = {
 module = {
   name = fdt;
   efi = loader/efi/fdt.c;
-  fdt = lib/fdt.c;
+  common = lib/fdt.c;
   enable = fdt;
 };
 
@@ -1877,21 +1850,11 @@ module = {
 };
 
 module = {
-  name = linuxefi;
-  efi = loader/i386/efi/linux.c;
-  efi = loader/efi/linux.c;
-  cflags = '-Wno-error=cast-align';
-  enable = i386_efi;
-  enable = x86_64_efi;
-};
-
-module = {
   name = chain;
   efi = loader/efi/chainloader.c;
   i386_pc = loader/i386/pc/chainloader.c;
   i386_coreboot = loader/i386/coreboot/chainloader.c;
   i386_coreboot = lib/LzmaDec.c;
-  cflags = '-Wno-error=cast-align';
   enable = i386_pc;
   enable = i386_coreboot;
   enable = efi;

@@ -120,7 +120,9 @@ debian/stamps/build-grub-efi-amd64 install/grub-efi-amd64: export SB_EFI_NAME :=
 debian/stamps/build-grub-efi-arm64 install/grub-efi-arm64: export SB_PLATFORM := arm64-efi
 debian/stamps/build-grub-efi-arm64 install/grub-efi-arm64: export SB_EFI_NAME := aa64
 SB_PACKAGE :=
+ONLY_BUILD :=
 ifeq (yes,$(shell dpkg-vendor --derives-from Ubuntu && echo yes))
+ONLY_BUILD := -Ngrub-efi-amd64 -Ngrub-efi-amd64-bin -Ngrub-efi-amd64-dbg -Ngrub-efi-arm64 -Ngrub-efi-arm64-bin -Ngrub-efi-arm64-dbg
 ifeq ($(DEB_HOST_ARCH),amd64)
 SB_PACKAGE := grub-efi-amd64
 endif
@@ -566,12 +568,12 @@ LEGACY_DOC_BR := grub-doc (<< 0.97-32), grub-legacy-doc (<< 0.97-59)
 endif
 
 override_dh_gencontrol:
-	dh_gencontrol -- -Vlegacy-doc-br="$(LEGACY_DOC_BR)" -V"efi:Vendor=$(SB_EFI_VENDOR)" -VBuilt-Using="$(BUILT_USING)" $(substvars)
+	dh_gencontrol $(ONLY_BUILD) -- -Vlegacy-doc-br="$(LEGACY_DOC_BR)" -V"efi:Vendor=$(SB_EFI_VENDOR)" -VBuilt-Using="$(BUILT_USING)" $(substvars)
 
 TARNAME := grub2_$(deb_version)_$(DEB_HOST_ARCH).tar.gz
 
 override_dh_builddeb:
-	dh_builddeb
+	dh_builddeb $(ONLY_BUILD)
 ifneq (,$(SB_PACKAGE))
 	echo $(deb_version) > obj/monolithic/$(SB_PACKAGE)/version
 ifeq (yes,$(shell dpkg-vendor --derives-from Ubuntu && echo yes))
@@ -582,7 +584,8 @@ ifeq (yes,$(shell dpkg-vendor --derives-from Ubuntu && echo yes))
 	ln -v obj/monolithic/$(SB_PACKAGE)/* obj/monolithic/$(SB_PACKAGE)/$(deb_version) || :
 endif
 	tar -c -f ../$(TARNAME) -a -C obj/monolithic/$(SB_PACKAGE) -v $(deb_version)
-	dpkg-distaddfile $(TARNAME) raw-uefi -
+	# Disable submitting obsolete grub2 for signing
+	#dpkg-distaddfile $(TARNAME) raw-uefi -
 endif
 
 override_dh_auto_clean:

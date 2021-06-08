@@ -208,7 +208,7 @@ grub_normal_init_page (struct grub_term_output *term,
  
   grub_term_cls (term);
 
-  msg_formatted = grub_xasprintf (_("GNU GRUB  version %s"), VERSION);
+  msg_formatted = grub_xasprintf (_("GNU GRUB  version %s"), PACKAGE_VERSION);
   if (!msg_formatted)
     return;
  
@@ -389,15 +389,6 @@ static grub_err_t
 grub_normal_read_line_real (char **line, int cont, int nested)
 {
   const char *prompt;
-#if QUIET_BOOT
-  static int displayed_intro;
-
-  if (! displayed_intro)
-    {
-      grub_normal_reader_init (nested);
-      displayed_intro = 1;
-    }
-#endif
 
   if (cont)
     /* TRANSLATORS: it's command line prompt.  */
@@ -450,9 +441,7 @@ grub_cmdline_run (int nested, int force_auth)
       return;
     }
 
-#if !QUIET_BOOT
   grub_normal_reader_init (nested);
-#endif
 
   while (1)
     {
@@ -560,9 +549,6 @@ GRUB_MOD_INIT(normal)
   grub_env_export ("grub_cpu");
   grub_env_set ("grub_platform", GRUB_PLATFORM);
   grub_env_export ("grub_platform");
-
-  grub_env_set ("package_version", PACKAGE_VERSION);
-  grub_env_export ("package_version");
 
   grub_boot_time ("Normal module prepared");
 }

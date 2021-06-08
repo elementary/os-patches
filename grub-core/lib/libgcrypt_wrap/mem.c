@@ -4,7 +4,6 @@
 #include <grub/crypto.h>
 #include <grub/dl.h>
 #include <grub/env.h>
-#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -37,10 +36,7 @@ void *
 gcry_xcalloc (size_t n, size_t m)
 {
   void *ret;
-  size_t sz;
-  if (grub_mul (n, m, &sz))
-    grub_fatal ("gcry_xcalloc would overflow");
-  ret = grub_zalloc (sz);
+  ret = grub_zalloc (n * m);
   if (!ret)
     grub_fatal ("gcry_xcalloc failed");
   return ret;
@@ -60,10 +56,7 @@ void *
 gcry_xcalloc_secure (size_t n, size_t m)
 {
   void *ret;
-  size_t sz;
-  if (grub_mul (n, m, &sz))
-    grub_fatal ("gcry_xcalloc would overflow");
-  ret = grub_zalloc (sz);
+  ret = grub_zalloc (n * m);
   if (!ret)
     grub_fatal ("gcry_xcalloc failed");
   return ret;

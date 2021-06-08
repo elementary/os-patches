@@ -35,8 +35,6 @@
 #include <grub/i386/floppy.h>
 #include <grub/lib/cmdline.h>
 #include <grub/linux.h>
-#include <grub/efi/sb.h>
-#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -125,14 +123,13 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
   grub_file_t file = 0;
   struct linux_i386_kernel_header lh;
   grub_uint8_t setup_sects;
-  grub_size_t real_size, kernel_offset = 0;
+  grub_size_t real_size;
   grub_ssize_t len;
   int i;
   char *grub_linux_prot_chunk;
   int grub_linux_is_bzimage;
   grub_addr_t grub_linux_prot_target;
   grub_err_t err;
-  grub_uint8_t *kernel = NULL;
 
   grub_dl_ref (my_mod);
 
@@ -146,24 +143,13 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
   if (! file)
     goto fail;
 
-  len = grub_file_size (file);
-  kernel = grub_malloc (len);
-  if (!kernel)
-    {
-      grub_error (GRUB_ERR_OUT_OF_MEMORY, N_("cannot allocate kernel buffer"));
-      goto fail;
-    }
-
-  if (grub_file_read (file, kernel, len) != len)
+  if (grub_file_read (file, &lh, sizeof (lh)) != sizeof (lh))
     {
       if (!grub_errno)
 	grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"),
 		    argv[0]);
       goto fail;
     }
-
-  grub_memcpy (&lh, kernel, sizeof (lh));
-  kernel_offset = sizeof (lh);
 
   if (lh.boot_flag != grub_cpu_to_le16_compile_time (0xaa55))
     {
@@ -232,12 +218,8 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
     setup_sects = GRUB_LINUX_DEFAULT_SETUP_SECTS;
 
   real_size = setup_sects << GRUB_DISK_SECTOR_BITS;
-  if (grub_sub (grub_file_size (file), real_size, &grub_linux16_prot_size) ||
-      grub_sub (grub_linux16_prot_size, GRUB_DISK_SECTOR_SIZE, &grub_linux16_prot_size))
-    {
-      grub_error (GRUB_ERR_OUT_OF_RANGE, N_("overflow is detected"));
-      goto fail;
-    }
+  grub_linux16_prot_size = grub_file_size (file)
+    - real_size - GRUB_DISK_SECTOR_SIZE;
 
   if (! grub_linux_is_bzimage
       && GRUB_LINUX_ZIMAGE_ADDR + grub_linux16_prot_size
@@ -332,9 +314,13 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
   grub_memmove (grub_linux_real_chunk, &lh, sizeof (lh));
 
   len = real_size + GRUB_DISK_SECTOR_SIZE - sizeof (lh);
-  grub_memcpy (grub_linux_real_chunk + sizeof (lh), kernel + kernel_offset,
-	       len);
-  kernel_offset += len;
+  if (grub_file_read (file, grub_linux_real_chunk + sizeof (lh), len) != len)
+    {
+      if (!grub_errno)
+	grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"),
+		    argv[0]);
+      goto fail;
+    }
 
   if (lh.header != grub_cpu_to_le32_compile_time (GRUB_LINUX_I386_MAGIC_SIGNATURE)
       || grub_le_to_cpu16 (lh.version) < 0x0200)
@@ -372,8 +358,9 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
   }
 
   len = grub_linux16_prot_size;
-  grub_memcpy (grub_linux_prot_chunk, kernel + kernel_offset, len);
-  kernel_offset += len;
+  if (grub_file_read (file, grub_linux_prot_chunk, len) != len && !grub_errno)
+    grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"),
+		argv[0]);
 
   if (grub_errno == GRUB_ERR_NONE)
     {
@@ -382,8 +369,6 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
     }
 
  fail:
-
-  grub_free (kernel);
 
   if (file)
     grub_file_close (file);
@@ -463,8 +448,10 @@ grub_cmd_initrd (grub_command_t cmd __attribute__ ((unused)),
 
   {
     grub_relocator_chunk_t ch;
-    err = grub_relocator_alloc_chunk_align_safe (relocator, &ch, addr_min, addr_max, size,
-						 0x1000, GRUB_RELOCATOR_PREFERENCE_HIGH, 0);
+    err = grub_relocator_alloc_chunk_align (relocator, &ch,
+					    addr_min, addr_max - size,
+					    size, 0x1000,
+					    GRUB_RELOCATOR_PREFERENCE_HIGH, 0);
     if (err)
       return err;
     initrd_chunk = get_virtual_current_address (ch);
@@ -487,9 +474,6 @@ static grub_command_t cmd_linux, cmd_initrd;
 
 GRUB_MOD_INIT(linux16)
 {
-  if (grub_efi_secure_boot())
-    return;
-
   cmd_linux =
     grub_register_command ("linux16", grub_cmd_linux,
 			   0, N_("Load Linux."));
@@ -501,9 +485,6 @@ GRUB_MOD_INIT(linux16)
 
 GRUB_MOD_FINI(linux16)
 {
-  if (grub_efi_secure_boot())
-    return;
-
   grub_unregister_command (cmd_linux);
   grub_unregister_command (cmd_initrd);
 }

@@ -295,7 +295,7 @@ grub_xnu_devprop_add_property_utf8 (struct grub_xnu_devprop_device_descriptor *d
     return grub_errno;
 
   len = grub_strlen (name);
-  utf16 = grub_calloc (len, sizeof (grub_uint16_t));
+  utf16 = grub_malloc (sizeof (grub_uint16_t) * len);
   if (!utf16)
     {
       grub_free (utf8);
@@ -331,7 +331,7 @@ grub_xnu_devprop_add_property_utf16 (struct grub_xnu_devprop_device_descriptor *
   grub_uint16_t *utf16;
   grub_err_t err;
 
-  utf16 = grub_calloc (namelen, sizeof (grub_uint16_t));
+  utf16 = grub_malloc (sizeof (grub_uint16_t) * namelen);
   if (!utf16)
     return grub_errno;
   grub_memcpy (utf16, name, sizeof (grub_uint16_t) * namelen);
@@ -516,15 +516,14 @@ grub_cmd_devprop_load (grub_command_t cmd __attribute__ ((unused)),
 
       devhead = buf;
       buf = devhead + 1;
-      dp = dpstart = buf;
+      dpstart = buf;
 
-      while (GRUB_EFI_DEVICE_PATH_VALID (dp) && buf < bufend)
+      do
 	{
-	  buf = (char *) buf + GRUB_EFI_DEVICE_PATH_LENGTH (dp);
-	  if (GRUB_EFI_END_ENTIRE_DEVICE_PATH (dp))
-	    break;
 	  dp = buf;
+	  buf = (char *) buf + GRUB_EFI_DEVICE_PATH_LENGTH (dp);
 	}
+      while (!GRUB_EFI_END_ENTIRE_DEVICE_PATH (dp) && buf < bufend);
 
       dev = grub_xnu_devprop_add_device (dpstart, (char *) buf
 					 - (char *) dpstart);

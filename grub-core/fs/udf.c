@@ -28,7 +28,6 @@
 #include <grub/charset.h>
 #include <grub/datetime.h>
 #include <grub/udf.h>
-#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -874,7 +873,7 @@ read_string (const grub_uint8_t *raw, grub_size_t sz, char *outbuf)
     {
       unsigned i;
       utf16len = sz - 1;
-      utf16 = grub_calloc (utf16len, sizeof (utf16[0]));
+      utf16 = grub_malloc (utf16len * sizeof (utf16[0]));
       if (!utf16)
 	return NULL;
       for (i = 0; i < utf16len; i++)
@@ -884,26 +883,16 @@ read_string (const grub_uint8_t *raw, grub_size_t sz, char *outbuf)
     {
       unsigned i;
       utf16len = (sz - 1) / 2;
-      utf16 = grub_calloc (utf16len, sizeof (utf16[0]));
+      utf16 = grub_malloc (utf16len * sizeof (utf16[0]));
       if (!utf16)
 	return NULL;
       for (i = 0; i < utf16len; i++)
 	utf16[i] = (raw[2 * i + 1] << 8) | raw[2*i + 2];
     }
   if (!outbuf)
-    {
-      grub_size_t size;
-
-      if (grub_mul (utf16len, GRUB_MAX_UTF8_PER_UTF16, &size) ||
-	  grub_add (size, 1, &size))
-	goto fail;
-
-      outbuf = grub_malloc (size);
-    }
+    outbuf = grub_malloc (utf16len * GRUB_MAX_UTF8_PER_UTF16 + 1);
   if (outbuf)
     *grub_utf16_to_utf8 ((grub_uint8_t *) outbuf, utf16, utf16len) = '\0';
-
- fail:
   grub_free (utf16);
   return outbuf;
 }
@@ -1016,7 +1005,7 @@ grub_udf_read_symlink (grub_fshelp_node_t node)
   grub_size_t sz = U64 (node->block.fe.file_size);
   grub_uint8_t *raw;
   const grub_uint8_t *ptr;
-  char *out = NULL, *optr;
+  char *out, *optr;
 
   if (sz < 4)
     return NULL;
@@ -1024,16 +1013,14 @@ grub_udf_read_symlink (grub_fshelp_node_t node)
   if (!raw)
     return NULL;
   if (grub_udf_read_file (node, NULL, NULL, 0, sz, (char *) raw) < 0)
-    goto fail_1;
+    {
+      grub_free (raw);
+      return NULL;
+    }
 
-  if (grub_mul (sz, 2, &sz) ||
-      grub_add (sz, 1, &sz))
-    goto fail_0;
-
-  out = grub_malloc (sz);
+  out = grub_malloc (sz * 2 + 1);
   if (!out)
     {
- fail_0:
       grub_free (raw);
       return NULL;
     }
@@ -1044,17 +1031,17 @@ grub_udf_read_symlink (grub_fshelp_node_t node)
     {
       grub_size_t s;
       if ((grub_size_t) (ptr - raw + 4) > sz)
-	goto fail_1;
+	goto fail;
       if (!(ptr[2] == 0 && ptr[3] == 0))
-	goto fail_1;
+	goto fail;
       s = 4 + ptr[1];
       if ((grub_size_t) (ptr - raw + s) > sz)
-	goto fail_1;
+	goto fail;
       switch (*ptr)
 	{
 	case 1:
 	  if (ptr[1])
-	    goto fail_1;
+	    goto fail;
 	  /* Fallthrough.  */
 	case 2:
 	  /* in 4 bytes. out: 1 byte.  */
@@ -1079,11 +1066,11 @@ grub_udf_read_symlink (grub_fshelp_node_t node)
 	  if (optr != out)
 	    *optr++ = '/';
 	  if (!read_string (ptr + 4, s - 4, optr))
-	    goto fail_1;
+	    goto fail;
 	  optr += grub_strlen (optr);
 	  break;
 	default:
-	  goto fail_1;
+	  goto fail;
 	}
       ptr += s;
     }
@@ -1091,7 +1078,7 @@ grub_udf_read_symlink (grub_fshelp_node_t node)
   grub_free (raw);
   return out;
 
- fail_1:
+ fail:
   grub_free (raw);
   grub_free (out);
   grub_error (GRUB_ERR_BAD_FS, "invalid symlink");
