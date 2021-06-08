@@ -16,11 +16,11 @@ Patch-Name: install-efi-adjust-distributor.patch
  util/grub-install.c | 4 ++++
  1 file changed, 4 insertions(+)
 
-diff --git a/util/grub-install.c b/util/grub-install.c
-index 5ddd028..3a06718 100644
---- a/util/grub-install.c
-+++ b/util/grub-install.c
-@@ -1123,6 +1123,10 @@ main (int argc, char *argv[])
+Index: os-patches/util/grub-install.c
+===================================================================
+--- os-patches.orig/util/grub-install.c
++++ os-patches/util/grub-install.c
+@@ -1123,6 +1123,12 @@ main (int argc, char *argv[])
        */
        char *t;
        efi_distributor = bootloader_id;
@@ -28,6 +28,8 @@ index 5ddd028..3a06718 100644
 +	efi_distributor = "ubuntu";
 +      else if (strcmp (efi_distributor, "devuan") == 0)
 +	efi_distributor = "debian";
++      else if (strcmp (efi_distributor, "elementary") == 0)
++	efi_distributor = "ubuntu";
        switch (platform)
  	{
  	case GRUB_INSTALL_PLATFORM_I386_EFI:
