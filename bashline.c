@@ -231,7 +231,6 @@ static int bash_possible_variable_completions __P((int, int));
 static int bash_complete_command __P((int, int));
 static int bash_possible_command_completions __P((int, int));
 
-static int completion_glob_pattern __P((char *));
 static char *glob_complete_word __P((const char *, int));
 static int bash_glob_completion_internal __P((int));
 static int bash_glob_complete_word __P((int, int));
@@ -928,8 +927,8 @@ operate_and_get_next (count, c)
    command being entered (if no explicit argument is given), otherwise on
    a command from the history file. */
 
-#define VI_EDIT_COMMAND		"fc -e \"${VISUAL:-${EDITOR:-$(command -v editor || echo vi)}}\""
-#define EMACS_EDIT_COMMAND	"fc -e \"${VISUAL:-${EDITOR:-$(command -v editor || echo emacs)}}\""
+#define VI_EDIT_COMMAND		"fc -e \"${VISUAL:-${EDITOR:-vi}}\""
+#define EMACS_EDIT_COMMAND	"fc -e \"${VISUAL:-${EDITOR:-emacs}}\""
 #define POSIX_VI_EDIT_COMMAND	"fc -e vi"
 
 static int
@@ -961,8 +960,11 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
       /* This breaks down when using command-oriented history and are not
 	 finished with the command, so we should not ignore the last command */
       using_history ();
-      current_command_line_count++;	/* for rl_newline above */
-      bash_add_history (rl_line_buffer);
+      if (rl_line_buffer[0])
+	{
+	  current_command_line_count++;	/* for rl_newline above */
+	  bash_add_history (rl_line_buffer);
+	}
       current_command_line_count = 0;	/* for dummy history entry */
       bash_add_history ("");
       history_lines_this_session++;
@@ -1739,7 +1741,7 @@ bash_default_completion (text, start, end, qc, compflags)
 
   /* This could be a globbing pattern, so try to expand it using pathname
      expansion. */
-  if (!matches && completion_glob_pattern ((char *)text))
+  if (!matches && glob_pattern_p (text))
     {
       matches = rl_completion_matches (text, glob_complete_word);
       /* A glob expression that matches more than one filename is problematic.
@@ -1848,7 +1850,7 @@ command_word_completion_function (hint_text, state)
 	  glob_matches = (char **)NULL;
 	}
 
-      globpat = completion_glob_pattern ((char *)hint_text);
+      globpat = glob_pattern_p (hint_text);
 
       /* If this is an absolute program name, do not check it against
 	 aliases, reserved words, functions or builtins.  We must check
@@ -3711,61 +3713,6 @@ bash_complete_command_internal (what_to_do)
   return bash_specific_completion (what_to_do, command_word_completion_function);
 }
 
-static int
-completion_glob_pattern (string)
-     char *string;
-{
-  register int c;
-  char *send;
-  int open;
-
-  DECLARE_MBSTATE;
-
-  open = 0;
-  send = string + strlen (string);
-
-  while (c = *string++)
-    {
-      switch (c)
-	{
-	case '?':
-	case '*':
-	  return (1);
-
-	case '[':
-	  open++;
-	  continue;
-
-	case ']':
-	  if (open)
-	    return (1);
-	  continue;
-
-	case '+':
-	case '@':
-	case '!':
-	  if (*string == '(')	/*)*/
-	    return (1);
-	  continue;
-
-	case '\\':
-	  if (*string++ == 0)
-	    return (0);	 	  
-	}
-
-      /* Advance one fewer byte than an entire multibyte character to
-	 account for the auto-increment in the loop above. */
-#ifdef HANDLE_MULTIBYTE
-      string--;
-      ADVANCE_CHAR_P (string, send - string);
-      string++;
-#else
-      ADVANCE_CHAR_P (string, send - string);
-#endif
-    }
-  return (0);
-}
-
 static char *globtext;
 static char *globorig;
 
@@ -3930,7 +3877,7 @@ bash_vi_complete (count, key)
       t = substring (rl_line_buffer, p, rl_point);
     }      
 
-  if (t && completion_glob_pattern (t) == 0)
+  if (t && glob_pattern_p (t) == 0)
     rl_explicit_arg = 1;	/* XXX - force glob_complete_word to append `*' */
   FREE (t);
 

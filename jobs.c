@@ -2488,8 +2488,10 @@ wait_for_background_pids ()
     r = wait_for (last_procsub_child->pid);
   wait_procsubs ();
   reap_procsubs ();
-#if 0
+#if 1
   /* We don't want to wait indefinitely if we have stopped children. */
+  /* XXX - should add a loop that goes through the list of process
+     substitutions and waits for each proc in turn before this code. */
   if (any_stopped == 0)
     {
       /* Check whether or not we have any unreaped children. */
@@ -4837,13 +4839,15 @@ void
 end_job_control ()
 {
   if (job_control)
-    terminate_stopped_jobs ();
+    {
+      terminate_stopped_jobs ();
 
-  if (original_pgrp >= 0 && terminal_pgrp != original_pgrp)
-    give_terminal_to (original_pgrp, 1);
+      if (original_pgrp >= 0)
+	give_terminal_to (original_pgrp, 1);
+    }
 
-  if (original_pgrp >= 0 && setpgid (0, original_pgrp) == 0)
-    shell_pgrp = original_pgrp;
+  if (original_pgrp >= 0)
+    setpgid (0, original_pgrp);
 }
 
 /* Restart job control by closing shell tty and reinitializing.  This is

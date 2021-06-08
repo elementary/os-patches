@@ -564,7 +564,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   volatile int save_line_number;
 #if defined (PROCESS_SUBSTITUTION)
   volatile int ofifo, nfifo, osize, saved_fifo;
-  volatile void *ofifo_list;
+  volatile char *ofifo_list;
 #endif
 
   if (breaking || continuing)
@@ -750,14 +750,12 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   reap_procsubs ();
 #  endif
 
-  /* XXX - also if sourcelevel != 0? */
-  if (variable_context != 0)
+  if (variable_context != 0)	/* XXX - also if sourcelevel != 0? */
     {
       ofifo = num_fifos ();
       ofifo_list = copy_fifo_list ((int *)&osize);
       begin_unwind_frame ("internal_fifos");
-      if (ofifo_list)
-	add_unwind_protect (xfree, ofifo_list);
+      add_unwind_protect (xfree, ofifo_list);
       saved_fifo = 1;
     }
   else
@@ -1101,7 +1099,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       nfifo = num_fifos ();
       if (nfifo > ofifo)
-	close_new_fifos ((void *)ofifo_list, osize);
+	close_new_fifos ((char *)ofifo_list, osize);
       free ((void *)ofifo_list);
       discard_unwind_frame ("internal_fifos");
     }
@@ -2769,8 +2767,6 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  ((command->value.Connection->connector == OR_OR) &&
 	   (exec_result != EXECUTION_SUCCESS)))
 	{
-	  optimize_fork (command);
-
 	  second = command->value.Connection->second;
 	  if (ignore_return && second)
 	    second->flags |= CMD_IGNORE_RETURN;

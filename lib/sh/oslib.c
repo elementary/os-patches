@@ -180,8 +180,8 @@ bcopy (s,d,n)
 #  endif
 void
 bzero (s, n)
-     void *s;
-     size_t n;
+     char *s;
+     int n;
 {
   register int i;
   register char *r;

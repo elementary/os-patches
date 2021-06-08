@@ -65,11 +65,11 @@ unquoted_glob_pattern_p (string)
 {
   register int c;
   char *send;
-  int open, bsquote;
+  int open;
 
   DECLARE_MBSTATE;
 
-  open = bsquote = 0;
+  open = 0;
   send = string + strlen (string);
 
   while (c = *string++)
@@ -100,14 +100,7 @@ unquoted_glob_pattern_p (string)
 	   can be removed by the matching engine, so we have to run it through
 	   globbing. */
 	case '\\':
-	  if (*string != '\0' && *string != '/')
-	    {
-	      bsquote = 1;
-	      string++;
-	      continue;
-	    }
-	  else if (*string == 0)
-	    return (0);
+	  return (*string != 0);
 	 	  
 	case CTLESC:
 	  if (*string++ == '\0')
@@ -124,8 +117,7 @@ unquoted_glob_pattern_p (string)
       ADVANCE_CHAR_P (string, send - string);
 #endif
     }
-
-  return (bsquote ? 2 : 0);
+  return (0);
 }
 
 /* Return 1 if C is a character that is `special' in a POSIX ERE and needs to

@@ -3625,9 +3625,7 @@ remove_backslashes (string)
    this case, we quote the string specially for the globbing code.  If
    SPECIAL is 2, this is an rhs argument for the =~ operator, and should
    be quoted appropriately for regcomp/regexec.  The caller is responsible
-   for removing the backslashes if the unquoted word is needed later. In
-   any case, since we don't perform word splitting, we need to do quoted
-   null character removal. */
+   for removing the backslashes if the unquoted word is needed later. */   
 char *
 cond_expand_word (w, special)
      WORD_DESC *w;
@@ -3648,8 +3646,6 @@ cond_expand_word (w, special)
     {
       if (special == 0)			/* LHS */
 	{
-	  if (l->word)
-	    word_list_remove_quoted_nulls (l);
 	  dequote_list (l);
 	  r = string_list (l);
 	}
@@ -5336,13 +5332,13 @@ clear_fifo_list ()
 {
 }
 
-void *
+char *
 copy_fifo_list (sizep)
      int *sizep;
 {
   if (sizep)
     *sizep = 0;
-  return (void *)NULL;
+  return (char *)NULL;
 }
 
 static void
@@ -5408,13 +5404,8 @@ unlink_fifo_list ()
       for (i = j = 0; i < nfifo; i++)
 	if (fifo_list[i].file)
 	  {
-	    if (i != j)
-	      {
-		fifo_list[j].file = fifo_list[i].file;
-		fifo_list[j].proc = fifo_list[i].proc;
-		fifo_list[i].file = (char *)NULL;
-		fifo_list[i].proc = 0;
-	      }
+	    fifo_list[j].file = fifo_list[i].file;
+	    fifo_list[j].proc = fifo_list[i].proc;
 	    j++;
 	  }
       nfifo = j;
@@ -5430,11 +5421,10 @@ unlink_fifo_list ()
    case it's larger than fifo_list_size (size of fifo_list). */
 void
 close_new_fifos (list, lsize)
-     void *list;
+     char *list;
      int lsize;
 {
   int i;
-  char *plist;
 
   if (list == 0)
     {
@@ -5442,8 +5432,8 @@ close_new_fifos (list, lsize)
       return;
     }
 
-  for (plist = (char *)list, i = 0; i < lsize; i++)
-    if (plist[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
+  for (i = 0; i < lsize; i++)
+    if (list[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
       unlink_fifo (i);
 
   for (i = lsize; i < fifo_list_size; i++)
@@ -5565,22 +5555,22 @@ clear_fifo_list ()
   nfds = 0;
 }
 
-void *
+char *
 copy_fifo_list (sizep)
      int *sizep;
 {
-  void *ret;
+  char *ret;
 
   if (nfds == 0 || totfds == 0)
     {
       if (sizep)
 	*sizep = 0;
-      return (void *)NULL;
+      return (char *)NULL;
     }
 
   if (sizep)
     *sizep = totfds;
-  ret = xmalloc (totfds * sizeof (pid_t));
+  ret = (char *)xmalloc (totfds * sizeof (pid_t));
   return (memcpy (ret, dev_fd_list, totfds * sizeof (pid_t)));
 }
 
@@ -5653,11 +5643,10 @@ unlink_fifo_list ()
    totfds (size of dev_fd_list). */
 void
 close_new_fifos (list, lsize)
-     void *list;
+     char *list;
      int lsize;
 {
   int i;
-  pid_t *plist;
 
   if (list == 0)
     {
@@ -5665,8 +5654,8 @@ close_new_fifos (list, lsize)
       return;
     }
 
-  for (plist = (pid_t *)list, i = 0; i < lsize; i++)
-    if (plist[i] == 0 && i < totfds && dev_fd_list[i])
+  for (i = 0; i < lsize; i++)
+    if (list[i] == 0 && i < totfds && dev_fd_list[i])
       unlink_fifo (i);
 
   for (i = lsize; i < totfds; i++)

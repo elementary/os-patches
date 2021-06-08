@@ -91,7 +91,6 @@ should_suppress_fork (command)
   return (startup_state == 2 && parse_and_execute_level == 1 &&
 	  running_trap == 0 &&
 	  *bash_input.location.string == '\0' &&
-	  parser_expanding_alias () == 0 &&
 	  command->type == cm_simple &&
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
 	  signal_is_trapped (ERROR_TRAP) == 0 &&
@@ -101,23 +100,12 @@ should_suppress_fork (command)
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
 }
 
-int
-can_optimize_connection (command)
-     COMMAND *command;
-{
-  return (*bash_input.location.string == '\0' &&
-	  parser_expanding_alias () == 0 &&
-	  (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
-	  command->value.Connection->second->type == cm_simple);
-}
-
 void
 optimize_fork (command)
      COMMAND *command;
 {
   if (command->type == cm_connection &&
-      (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
-      (command->value.Connection->second->flags & CMD_TRY_OPTIMIZING) &&
+      (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR) &&
       should_suppress_fork (command->value.Connection->second))
     {
       command->value.Connection->second->flags |= CMD_NO_FORK;
@@ -292,7 +280,7 @@ parse_and_execute (string, from_file, flags)
 
   with_input_from_string (string, from_file);
   clear_shell_input_line ();
-  while (*(bash_input.location.string) || parser_expanding_alias ())
+  while (*(bash_input.location.string))
     {
       command = (COMMAND *)NULL;
 
@@ -424,18 +412,8 @@ parse_and_execute (string, from_file, flags)
 		  command->flags |= CMD_NO_FORK;
 		  command->value.Simple->flags |= CMD_NO_FORK;
 		}
-
-	      /* Can't optimize forks out here execept for simple commands.
-		 This knows that the parser sets up commands as left-side heavy
-		 (&& and || are left-associative) and after the single parse,
-		 if we are at the end of the command string, the last in a
-		 series of connection commands is
-		 command->value.Connection->second. */
-	      else if (command->type == cm_connection && can_optimize_connection (command))
-		{
-		  command->value.Connection->second->flags |= CMD_TRY_OPTIMIZING;
-		  command->value.Connection->second->value.Simple->flags |= CMD_TRY_OPTIMIZING;
-		}
+	      else if (command->type == cm_connection)
+		optimize_fork (command);
 #endif /* ONESHOT */
 
 	      /* See if this is a candidate for $( <file ). */
@@ -547,7 +525,7 @@ parse_string (string, from_file, flags, endp)
   ostring = string;
 
   with_input_from_string (string, from_file);
-  while (*(bash_input.location.string))		/* XXX - parser_expanding_alias () ? */
+  while (*(bash_input.location.string))
     {
       command = (COMMAND *)NULL;
 
