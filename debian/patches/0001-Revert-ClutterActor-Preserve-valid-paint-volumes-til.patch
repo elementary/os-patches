@@ -1,0 +1,89 @@
+From 76477def5c103f10d62e604305802d7f5506afd4 Mon Sep 17 00:00:00 2001
+From: worldofpeace <worldofpeace@protonmail.ch>
+Date: Sun, 15 Sep 2019 20:14:16 -0400
+Subject: [PATCH] Revert "ClutterActor: Preserve valid paint volumes till the
+ next relayout/repaint"
+
+This causes issues for users of mutter like in gala[0].
+
+Upstream report: https://gitlab.gnome.org/GNOME/mutter/issues/536
+[0]: https://github.com/elementary/gala/issues/605
+---
+ clutter/clutter/clutter-actor.c | 35 +++++----------------------------
+ 1 file changed, 5 insertions(+), 30 deletions(-)
+
+diff --git a/clutter/clutter/clutter-actor.c b/clutter/clutter/clutter-actor.c
+index a67c35f85..bf39b7d52 100644
+--- a/clutter/clutter/clutter-actor.c
++++ b/clutter/clutter/clutter-actor.c
+@@ -851,7 +851,6 @@ struct _ClutterActorPrivate
+   guint needs_compute_expand        : 1;
+   guint needs_x_expand              : 1;
+   guint needs_y_expand              : 1;
+-  guint needs_paint_volume_update   : 1;
+   guint had_effects_on_last_paint_volume_update : 1;
+   guint needs_compute_resource_scale : 1;
+ };
+@@ -1643,7 +1642,6 @@ clutter_actor_real_map (ClutterActor *self)
+ 
+   CLUTTER_ACTOR_SET_FLAGS (self, CLUTTER_ACTOR_MAPPED);
+ 
+-  self->priv->needs_paint_volume_update = TRUE;
+ 
+   clutter_actor_ensure_resource_scale (self);
+ 
+@@ -2890,7 +2888,6 @@ clutter_actor_real_queue_relayout (ClutterActor *self)
+   priv->needs_width_request  = TRUE;
+   priv->needs_height_request = TRUE;
+   priv->needs_allocation     = TRUE;
+-  priv->needs_paint_volume_update = TRUE;
+ 
+   /* reset the cached size requests */
+   memset (priv->width_requests, 0,
+@@ -8845,7 +8842,6 @@ clutter_actor_init (ClutterActor *self)
+   priv->needs_width_request = TRUE;
+   priv->needs_height_request = TRUE;
+   priv->needs_allocation = TRUE;
+-  priv->needs_paint_volume_update = TRUE;
+   priv->needs_compute_resource_scale = TRUE;
+ 
+   priv->cached_width_age = 1;
+@@ -10429,9 +10425,6 @@ clutter_actor_allocate (ClutterActor           *self,
+       return;
+     }
+ 
+-  if (CLUTTER_ACTOR_IS_MAPPED (self))
+-    self->priv->needs_paint_volume_update = TRUE;
+-
+   if (stage_allocation_changed)
+     priv->needs_compute_resource_scale = TRUE;
+ 
+@@ -17581,19 +17574,6 @@ _clutter_actor_get_paint_volume_mutable (ClutterActor *self)
+ 
+   if (priv->paint_volume_valid)
+     {
+-      /* If effects are applied, the actor paint volume
+-       * needs to be recomputed on each paint, since those
+-       * paint volumes could change over the duration of the
+-       * effect.
+-       *
+-       * We also need to update the paint volume if we went
+-       * from having effects to not having effects on the last
+-       * paint volume update. */
+-      if (!priv->needs_paint_volume_update &&
+-          priv->current_effect == NULL &&
+-          !has_paint_volume_override_effects &&
+-          !priv->had_effects_on_last_paint_volume_update)
+-        return &priv->paint_volume;
+       clutter_paint_volume_free (&priv->paint_volume);
+     }
+ 
+@@ -17602,7 +17582,6 @@ _clutter_actor_get_paint_volume_mutable (ClutterActor *self)
+   if (_clutter_actor_get_paint_volume_real (self, &priv->paint_volume))
+     {
+       priv->paint_volume_valid = TRUE;
+-      priv->needs_paint_volume_update = FALSE;
+       return &priv->paint_volume;
+     }
+   else
+
