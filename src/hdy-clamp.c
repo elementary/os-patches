@@ -473,7 +473,7 @@ hdy_clamp_new (void)
  * Gets the maximum size to allocate to the contained child. It is the width if
  * @self is horizontal, or the height if it is vertical.
  *
- * Returns: the maximum width to allocate to the contained child.
+ * Returns: the maximum size to allocate to the contained child.
  *
  * Since: 1.0
  */
