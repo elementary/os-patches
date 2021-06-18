@@ -66,6 +66,12 @@ test_hdy_leaflet_navigate (void)
   leaflet = HDY_LEAFLET (hdy_leaflet_new ());
   g_assert_nonnull (leaflet);
 
+  result = hdy_leaflet_navigate (leaflet, HDY_NAVIGATION_DIRECTION_BACK);
+  g_assert_false (result);
+
+  result = hdy_leaflet_navigate (leaflet, HDY_NAVIGATION_DIRECTION_FORWARD);
+  g_assert_false (result);
+
   for (i = 0; i < 3; i++) {
     children[i] = gtk_label_new ("");
     g_assert_nonnull (children[i]);

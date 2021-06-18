@@ -1197,6 +1197,10 @@ find_swipeable_child (HdyStackableBox        *self,
   HdyStackableBoxChildInfo *child = NULL;
 
   children = g_list_find (self->children, self->visible_child);
+
+  if (children == NULL)
+    return NULL;
+
   do {
     children = (direction == HDY_NAVIGATION_DIRECTION_BACK) ? children->prev : children->next;
 

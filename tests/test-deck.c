@@ -54,6 +54,12 @@ test_hdy_deck_navigate (void)
   deck = HDY_DECK (hdy_deck_new ());
   g_assert_nonnull (deck);
 
+  result = hdy_deck_navigate (deck, HDY_NAVIGATION_DIRECTION_BACK);
+  g_assert_false (result);
+
+  result = hdy_deck_navigate (deck, HDY_NAVIGATION_DIRECTION_FORWARD);
+  g_assert_false (result);
+
   for (i = 0; i < 2; i++) {
     children[i] = gtk_label_new ("");
     g_assert_nonnull (children[i]);
