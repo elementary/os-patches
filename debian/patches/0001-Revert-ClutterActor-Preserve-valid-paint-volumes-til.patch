@@ -58,6 +58,17 @@ index a67c35f85..bf39b7d52 100644
    if (stage_allocation_changed)
      priv->needs_compute_resource_scale = TRUE;
  
+@@ -12992,9 +12984,6 @@ clutter_actor_add_child_internal (ClutterActor              *self,
+       child->priv->needs_height_request = TRUE;
+       child->priv->needs_allocation = TRUE;
+
+-      if (CLUTTER_ACTOR_IS_MAPPED (child))
+-        child->priv->needs_paint_volume_update = TRUE;
+-
+       /* we only queue a relayout here, because any possible
+        * redraw has already been queued either by show() or
+        * by our call to queue_redraw() above
+
 @@ -17581,19 +17574,6 @@ _clutter_actor_get_paint_volume_mutable (ClutterActor *self)
  
    if (priv->paint_volume_valid)
