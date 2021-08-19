@@ -23,6 +23,9 @@ case $1 in
 	[ -s /boot/grub/grubenv ] || rm -f /boot/grub/grubenv
 	mkdir -p /boot/grub
 	grub-editenv /boot/grub/grubenv unset recordfail
+	if [ -s "/boot/efi/EFI/ubuntu/grub/grubenv" ]; then
+		grub-editenv /boot/efi/EFI/ubuntu/grub/grubenv unset recordfail
+	fi
 	log_end_msg $?
 	;;
     stop)
