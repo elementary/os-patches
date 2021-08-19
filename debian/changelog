@@ -1,6 +1,16 @@
+python-apt (2.0.0ubuntu0.20.04.5) focal; urgency=medium
+
+  * debfile: Pass `Name` instead of `Binary` to ExtractTar.
+    Passing the binary causes it to fail trying to find the `false`
+    compressor when a binary for a given compressor is not installed.
+    (LP: #1926437)
+  * Update mirror lists
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 29 Apr 2021 16:12:21 +0200
+
 python-apt (2.0.0ubuntu0.20.04.4) focal; urgency=medium
 
-  * Update mirror lists 
+  * Update mirror lists
 
  -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 21 Jan 2021 16:17:20 +0100
 

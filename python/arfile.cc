@@ -600,7 +600,7 @@ static PyObject *debfile_get_tar(PyDebFileObject *self, const char *Name)
         Member = AR.FindMember(std::string(Name).append(c->Extension).c_str());
         if (Member == NULL)
             continue;
-        Compressor = c->Binary;
+        Compressor = c->Name;
         break;
     }
 
