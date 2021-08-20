@@ -1,3 +1,17 @@
+grub2 (2.02-2ubuntu8.23) bionic; urgency=medium
+
+  [ Dimitri John Ledkov & Steve Langasek ]
+  * Relax dependencies to allow grub-efi be installed with later versions
+    of grub-efi-amd64. Stop building grub-efi-amd64|arm64{-bin,dbg}
+    packages, now provided by src:grub2-unsigned. LP: #1915536
+
+  [ Dimitri John Ledkov ]
+  * Cherrypick 2.02+dfsg1-5 patch for x86-64: Treat R_X86_64_PLT32 as
+    R_X86_64_PC32 to allow processing 2.04 grub modules built with newer
+    binutils.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 24 Feb 2021 19:47:47 +0000
+
 grub2 (2.02-2ubuntu8.21) bionic; urgency=medium
 
   * d/build-efi-images:

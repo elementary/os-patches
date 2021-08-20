@@ -99,7 +99,9 @@ DEFAULT_HIDDEN_TIMEOUT_BOOL := false
 endif
 
 SB_PACKAGE :=
+ONLY_BUILD :=
 ifeq (yes,$(shell dpkg-vendor --derives-from Ubuntu && echo yes))
+ONLY_BUILD := -Ngrub-efi-amd64 -Ngrub-efi-amd64-bin -Ngrub-efi-amd64-dbg -Ngrub-efi-arm64 -Ngrub-efi-arm64-bin -Ngrub-efi-arm64-dbg
 ifeq ($(DEB_HOST_ARCH),amd64)
 SB_PACKAGE := grub-efi-amd64
 SB_PLATFORM := x86_64-efi
@@ -477,12 +479,12 @@ LEGACY_DOC_BR := grub-doc (<< 0.97-32), grub-legacy-doc (<< 0.97-59)
 endif
 
 override_dh_gencontrol:
-	dh_gencontrol -- -Vlegacy-doc-br="$(LEGACY_DOC_BR)" $(substvars)
+	dh_gencontrol $(ONLY_BUILD) -- -Vlegacy-doc-br="$(LEGACY_DOC_BR)" $(substvars)
 
 TARNAME := grub2_$(deb_version)_$(DEB_HOST_ARCH).tar.gz
 
 override_dh_builddeb:
-	dh_builddeb -- -Zxz
+	dh_builddeb $(ONLY_BUILD) -- -Zxz
 ifneq (,$(SB_PACKAGE))
 	debian/build-efi-images \
 		obj/grub-$(COMMON_PLATFORM)/grub-mkimage \
@@ -492,7 +494,8 @@ ifneq (,$(SB_PACKAGE))
 	echo $(deb_version) \
 		> debian/grub2-images/$(deb_version)/version
 	cd debian/grub2-images && tar czvf ../../../$(TARNAME) .
-	dpkg-distaddfile $(TARNAME) raw-uefi -
+	# Disable submitting obsolete grub2 for signing
+	#dpkg-distaddfile $(TARNAME) raw-uefi -
 endif
 
 override_dh_auto_clean:
