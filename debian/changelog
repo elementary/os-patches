@@ -1,154 +1,499 @@
-grub2-signed (1.93.24) bionic; urgency=medium
+grub2-signed (1.167~18.04.5) bionic; urgency=medium
 
-  * Rebuild against grub2 2.02-2ubuntu8.21.
-    - Previous rebuilt (1.93.23) didn't have
-      the build-depends modification.
+  * Rebuild against grub2 2.04-1ubuntu44.1.2.  LP: #1926748.
 
- -- Eric Desrochers <eric.desrochers@canonical.com>  Tue, 12 Jan 2021 14:29:25 -0500
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 07 Jun 2021 13:25:54 -0700
 
-grub2-signed (1.93.23) bionic; urgency=medium
+grub2-signed (1.167~18.04.4) bionic; urgency=medium
 
-  * Rebuild against grub2 2.02-2ubuntu8.21.
+  * Rebuild against grub2 2.04-1ubuntu44.1.1.  LP: #1930742.
 
- -- Eric Desrochers <eric.desrochers@canonical.com>  Thu, 07 Jan 2021 09:40:02 -0500
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 03 Jun 2021 14:49:21 -0700
 
-grub2-signed (1.93.22) bionic; urgency=medium
+grub2-signed (1.167~18.04.3) bionic; urgency=medium
 
-  * Rebuild against grub2 2.02-2ubuntu8.20.
+  * Rebuild against grub2 2.04-1ubuntu44.1.  LP: #1928674.
+  * key on grub-efi-$(DEB_HOST_ARCH) as the binary package for
+    download-signed since grub-efi-* and grub2-common are now built from
+    separate sources.
 
- -- dann frazier <dannf@ubuntu.com>  Fri, 13 Nov 2020 17:46:47 -0700
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 20 May 2021 11:48:10 -0700
 
-grub2-signed (1.93.21) bionic; urgency=medium
+grub2-signed (1.167~18.04.1) bionic; urgency=medium
 
-  * Rebuild against grub2 2.02-2ubuntu8.19.
+  * Use debhelper-compat 9 for ease of SRUs to Bionic and earlier. LP:
+    #1920008
 
- -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 22 Oct 2020 15:08:40 +0100
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 23 Mar 2021 11:01:58 +0000
 
-grub2-signed (1.93.20) bionic; urgency=medium
+grub2-signed (1.167~18.04.0) bionic; urgency=medium
 
-  * Rebuild against grub2 2.02-2ubuntu8.18.
+  * grub-efi-amd64-signed: add depends on grub2-common with support for
+    R_X86_64_PLT32 relocations. LP: #1920008
 
- -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 24 Aug 2020 10:58:52 +0200
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 18 Mar 2021 11:17:14 +0000
 
-grub2-signed (1.93.19) bionic; urgency=medium
+grub2-signed (1.166) hirsute; urgency=medium
 
-  * Rebuild against grub2 2.02-2ubuntu8.17.
+  * Rebuild against grub2 2.04-1ubuntu44.
 
- -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 30 Jul 2020 21:13:54 -0700
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 04 Mar 2021 14:26:28 +0000
 
-grub2-signed (1.93.18) bionic; urgency=medium
+grub2-signed (1.165) hirsute; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu43.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 03 Mar 2021 11:46:22 +0000
+
+grub2-signed (1.164) hirsute; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu42. LP: #1915536
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Mon, 01 Mar 2021 13:19:26 +0000
+
+grub2-signed (1.163) hirsute; urgency=medium
+
+  * Make maintainer scripts compatible with any grub2-common since
+    precise. LP: #1915536
+  * Drop unused config_item function.
+  * Only download signed binaries once.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 23 Feb 2021 14:40:19 +0000
+
+grub2-signed (1.162) hirsute; urgency=medium
+
+  * Rebuild with correct permissions, and higher version number.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 17 Feb 2021 23:50:08 +0000
+
+grub2-signed (1.161) hirsute; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu39
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 12 Feb 2021 00:52:09 +0000
+
+grub2-signed (1.160) hirsute; urgency=medium
+
+  * Fix test directory existence race in download-signed, making FTBFS on
+    arm64:
+    - download-signed is run 3 times in parallel due to Makefile and download
+      assets in a single directory.
+    - testing the directory and then calling makedirs is not done atomically.
+    - long term fix would be to run it once and collect/compared all signed
+      files.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 09 Feb 2021 10:27:02 +0100
+
+grub2-signed (1.159) hirsute; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu38
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 08 Feb 2021 12:57:30 +0100
+
+grub2-signed (1.158) hirsute; urgency=medium
+
+  * Trim trailing whitespace.
+  * Use secure copyright file specification URI.
+  * Bump debhelper from deprecated 9 to 12.
+  * Set debhelper-compat version in Build-Depends.
+  * Drop unused bzr-builddeb.conf
+  * Add postinst for the arm64 package (LP: #1914582)
+  * Set series specific VCS field in debian/control
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 04 Feb 2021 11:32:09 +0000
+
+grub2-signed (1.157) hirsute; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu37
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sat, 12 Dec 2020 00:55:28 +0000
+
+grub2-signed (1.156) hirsute; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu36
+
+ -- dann frazier <dannf@debian.org>  Wed, 11 Nov 2020 14:25:12 +0000
+
+grub2-signed (1.155) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu35
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 01 Oct 2020 23:06:24 +0800
+
+grub2-signed (1.154) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu33
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 14 Sep 2020 01:29:09 -0700
+
+grub2-signed (1.153) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu32
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 11 Sep 2020 20:41:06 +0200
+
+grub2-signed (1.152) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu31
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 11 Sep 2020 12:52:33 +0200
+
+grub2-signed (1.151) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu30.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 03 Sep 2020 14:56:55 +0100
+
+grub2-signed (1.150) groovy; urgency=medium
+
+  * Add check to compare that signed grub, matches monolithic builds, to
+    avoid signing skew when copying grub2/grub2-signed to PPAs.
+  * Rebuild against grub2 2.04-1ubuntu29.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 02 Sep 2020 10:40:26 +0100
+
+grub2-signed (1.149) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu28
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 10 Aug 2020 15:12:58 +0200
+
+grub2-signed (1.148) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu27
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 06 Aug 2020 14:46:26 +0200
+
+grub2-signed (1.147) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu26.2.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 30 Jul 2020 17:41:19 -0700
+
+grub2-signed (1.146) groovy; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu26.1.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 28 Jul 2020 10:43:41 +0100
+
+grub2-signed (1.144) groovy; urgency=medium
+
+  * Fix arm64 download, grub2 package doesn't exist on that arch, use
+    grub2-common instead.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Wed, 20 May 2020 13:53:28 +0100
+
+grub2-signed (1.143) groovy; urgency=medium
 
   * Support downloads from PPAs for additional signatures. LP: #1876875
-  * Rebuild against grub2 2.02-2ubuntu8.16.
-  
- -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 21 Jul 2020 13:56:27 +0100
 
-grub2-signed (1.93.16) bionic; urgency=medium
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 24 Apr 2020 23:48:15 +0100
 
-  * Rebuild against grub2 2.02-2ubuntu8.15. (LP: #1864533)
+grub2-signed (1.142) focal; urgency=medium
 
- -- Julian Andres Klode <juliank@ubuntu.com>  Wed, 11 Mar 2020 22:00:07 +0100
+  * Rebuild against grub2 2.04-1ubuntu26.
 
-grub2-signed (1.93.15) bionic; urgency=medium
+ -- Julian Andres Klode <juliank@ubuntu.com>  Wed, 15 Apr 2020 13:33:36 +0200
 
-  * Rebuild against grub2 2.02-2ubuntu8.14. (LP: #1851190) (LP: #1851897)
+grub2-signed (1.141) focal; urgency=medium
 
- -- dann frazier <dannf@ubuntu.com>  Sat, 09 Nov 2019 08:50:43 -0700
+  * Rebuild against grub2 2.04-1ubuntu25.
 
-grub2-signed (1.93.14) bionic; urgency=medium
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 13 Apr 2020 15:58:30 +0200
 
-  * Rebuild against grub2 2.02-2ubuntu8.13. (LP: #1787630) (LP: #564853)
+grub2-signed (1.140) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 18 Mar 2019 14:24:36 -0400
+  * Fix postinst typpo.
 
-grub2-signed (1.93.13) bionic; urgency=medium
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Thu, 09 Apr 2020 23:53:24 +0100
 
-  * Rebuild against grub2 2.02-2ubuntu8.12.
+grub2-signed (1.139) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 07 Feb 2019 19:28:09 -0500
+  * Rebuild against grub2 2.04-1ubuntu24, enable installing to multiple
+    ESPs (LP: #1871821)
 
-grub2-signed (1.93.12) bionic; urgency=medium
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 09 Apr 2020 13:00:04 +0200
 
-  * Rebuild against grub2 2.02-2ubuntu8.11.
-    (LP: #1401532) (LP: #1814403) (LP: #1814575)
+grub2-signed (1.138) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 05 Feb 2019 12:46:55 -0500
+  * Rebuild against grub2 2.04-1ubuntu23.
 
-grub2-signed (1.93.11) bionic; urgency=medium
+ -- Didier Roche <didrocks@ubuntu.com>  Fri, 03 Apr 2020 16:51:06 +0200
 
-  * Rebuild against grub2 2.02-2ubuntu8.10.
-    (LP: #1789918) (LP: #1800722) (LP: #1812863)
+grub2-signed (1.137) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 22 Jan 2019 11:45:06 -0500
+  *  Rebuild against grub2 2.04-1ubuntu22.
 
-grub2-signed (1.93.10) bionic; urgency=medium
+ -- Julian Andres Klode <juliank@ubuntu.com>  Wed, 11 Mar 2020 17:55:48 +0100
 
-  * Rebuild against grub2 2.02-2ubuntu8.9 (LP: #1784363) (LP: #1788727)
+grub2-signed (1.136) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 08 Nov 2018 10:54:58 -0500
+  * Rebuild against grub2 2.04-1ubuntu21.
 
-grub2-signed (1.93.9) bionic; urgency=medium
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 26 Feb 2020 17:10:28 +0100
 
-  * Rebuild against grub2 2.02-2ubuntu8.8 (LP: #1784363)
+grub2-signed (1.135) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 25 Oct 2018 13:28:44 -0400
+  * Rebuild against grub2 2.04-1ubuntu19.
 
-grub2-signed (1.93.8) bionic; urgency=medium
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Mon, 24 Feb 2020 20:51:12 +0000
 
-  * Rebuild against grub2 2.02-2ubuntu8.7 (LP: #1785033)
+grub2-signed (1.134) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 11 Oct 2018 08:46:20 -0400
+  * Rebuild against grub2 2.04-1ubuntu18.
 
-grub2-signed (1.93.7) bionic; urgency=medium
+ -- Didier Roche <didrocks@ubuntu.com>  Fri, 07 Feb 2020 08:12:34 +0100
 
-  * Rebuild against grub2 2.02-2ubuntu8.6 (LP: #1792575)
+grub2-signed (1.133) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 27 Sep 2018 13:07:26 -0400
+  * Rebuild against grub2 2.04-1ubuntu16.
 
-grub2-signed (1.93.6) bionic; urgency=medium
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sun, 15 Dec 2019 01:33:09 +0000
 
-  * Rebuild against grub2 2.02-2ubuntu8.5 (LP: #788298)
+grub2-signed (1.132) focal; urgency=medium
 
- -- dann frazier <dannf@ubuntu.com>  Tue, 18 Sep 2018 14:56:20 -0600
+  * Rebuild against grub2 2.04-1ubuntu15.
 
-grub2-signed (1.93.5) bionic; urgency=medium
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 13 Dec 2019 13:14:55 +0000
 
-  * Rebuild against grub2 2.02-2ubuntu8.4 (LP: #1785859)
+grub2-signed (1.131) focal; urgency=medium
 
- -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 30 Aug 2018 16:22:15 +0200
+  * Rebuild against grub2 2.04-1ubuntu14.
 
-grub2-signed (1.93.4) bionic; urgency=medium
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 19 Nov 2019 08:14:40 +0100
 
-  * Rebuild against grub2 2.02-2ubuntu8.3 and check kernel is signed on
-    amd64 EFI before installing grub (LP: #1786491).
+grub2-signed (1.130) focal; urgency=medium
 
- -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 13 Aug 2018 12:51:32 +0200
+  * Really rebuild against grub2 2.04-1ubuntu13 this time.
+    (LP: #1845289) (LP: #1848892)
 
-grub2-signed (1.93.3) bionic; urgency=medium
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 01 Nov 2019 12:42:37 -0400
 
-  * Rebuild against grub2 2.02-2ubuntu8.2. (LP: #1258597)
+grub2-signed (1.129) focal; urgency=medium
 
- -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 17 Jul 2018 14:31:57 -0400
+  * Rebuild against grub2 2.04-1ubuntu13. (LP: #1845289) (LP: #1848892)
 
-grub2-signed (1.93.2) bionic; urgency=medium
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 01 Nov 2019 10:04:30 -0400
+
+grub2-signed (1.128) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu12.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Fri, 11 Oct 2019 12:47:39 -0600
+
+grub2-signed (1.127) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu11.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 10 Oct 2019 11:43:40 +0200
+
+grub2-signed (1.126) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu10.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 08 Oct 2019 11:42:21 +0100
+
+grub2-signed (1.125) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu9.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 02 Oct 2019 10:40:56 +0200
+
+grub2-signed (1.124) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu8.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 01 Oct 2019 12:19:31 -0400
+
+grub2-signed (1.123) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu7.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 01 Oct 2019 11:29:19 +0200
+
+grub2-signed (1.122) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu6. (LP: #1845466)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 26 Sep 2019 11:03:18 -0400
+
+grub2-signed (1.121) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu5.
+
+ -- Michael Hudson-Doyle <michael.hudson@ubuntu.com>  Tue, 13 Aug 2019 09:20:15 +1200
+
+grub2-signed (1.120) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu4.
+
+ -- Michael Hudson-Doyle <michael.hudson@ubuntu.com>  Wed, 07 Aug 2019 09:50:22 +1200
+
+grub2-signed (1.119) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu3.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 29 Jul 2019 08:12:17 +0200
+
+grub2-signed (1.118) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu2.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Sun, 21 Jul 2019 11:12:46 -0300
+
+grub2-signed (1.117) eoan; urgency=medium
+
+  * Rebuild against grub2 2.04-1ubuntu1.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 16 Jul 2019 11:37:31 -0400
+
+grub2-signed (1.116) eoan; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-12ubuntu3.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 18 Jun 2019 10:38:41 +0100
+
+grub2-signed (1.115) disco; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-12ubuntu2.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 08 Mar 2019 15:52:22 -0500
+
+grub2-signed (1.114) disco; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-12ubuntu1.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 05 Mar 2019 20:07:38 -0500
+
+grub2-signed (1.113) disco; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu11. (LP: #1814403) (LP: #1814575)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 04 Feb 2019 21:03:18 -0500
+
+grub2-signed (1.112) disco; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu10.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 21 Jan 2019 16:59:26 -0500
+
+grub2-signed (1.111) disco; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu9.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 07 Jan 2019 19:12:17 -0500
+
+grub2-signed (1.110) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu7. (LP: #1798171)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 17 Oct 2018 14:50:02 -0400
+
+grub2-signed (1.109) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu7. (LP: #1784363)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Fri, 12 Oct 2018 11:26:10 -0400
+
+grub2-signed (1.108) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu6. (LP: #1788727)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 03 Oct 2018 15:07:55 -0400
+
+grub2-signed (1.107) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu5.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 25 Sep 2018 16:17:34 -0400
+
+grub2-signed (1.106) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu4. (LP: #1792575)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 17 Sep 2018 08:47:45 -0400
+
+grub2-signed (1.105) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu3. (LP: #788298)
+
+ -- dann frazier <dannf@ubuntu.com>  Thu, 13 Sep 2018 16:00:37 -0600
+
+grub2-signed (1.104) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu2. (LP: #1785033)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Wed, 05 Sep 2018 14:32:39 -0400
+
+grub2-signed (1.103) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02+dfsg1-5ubuntu1.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 23 Aug 2018 17:35:22 -0400
+
+grub2-signed (1.102) cosmic; urgency=medium
+
+  * Call grub-check-signatures before calling grub-install, not after, to
+    avoid overwriting the boot loader on disk with one that will fail to
+    load.  LP: #1786491.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 10 Aug 2018 12:28:40 -0700
+
+grub2-signed (1.101) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02-2ubuntu13.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Thu, 19 Jul 2018 09:53:52 -0400
+
+grub2-signed (1.100) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02-2ubuntu12. (LP: #1258597)
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Tue, 17 Jul 2018 14:19:33 -0400
+
+grub2-signed (1.99) cosmic; urgency=medium
+
+  * debian/grub-efi-amd64-signed.postinst: run grub-check-signatures on update
+    to ensure we have signed kernels installed.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 16 Jul 2018 10:43:25 -0400
+
+grub2-signed (1.98) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02-2ubuntu11.
+
+ -- Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>  Mon, 16 Jul 2018 10:33:59 -0400
+
+grub2-signed (1.97) cosmic; urgency=medium
 
   * debian/control: add a dependency of grub-efi-amd64 | grub-pc to
     grub-efi-amd64-signed to make sure the grub postinst is triggered even for
     cases of old iso (without the fixed installer) installations with
     automatic download of updates enabled (LP: #1780897).
 
- -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Tue, 10 Jul 2018 20:36:23 +0200
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Tue, 10 Jul 2018 19:00:59 +0200
 
-grub2-signed (1.93.1) bionic; urgency=medium
+grub2-signed (1.96) cosmic; urgency=medium
 
   * debian/control: switch the grub-efi-amd64 dependency of
-    grub-efi-amd64-signed to grub-efi-amd64-bin. (LP: #1778848)
+    grub-efi-amd64-signed to grub-efi-amd64-bin.
   * debian/grub-efi-amd64-signed.postinst: invoke grub-install with
-    --auto-nvram and pass the x86_64-efi target to it, making sure we always 
-    install the right target. (LP: #1778848)
-  * debian/control: rebuild against grub2 2.02-2ubuntu8.1.
+    --auto-nvram and pass the x86_64-efi target to it, making sure we always
+    install the right target.
 
- -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 27 Jun 2018 09:01:13 +0200
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 06 Jun 2018 20:09:57 +0200
+
+grub2-signed (1.95) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02-2ubuntu10.
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 06 Jun 2018 15:37:31 +0200
+
+grub2-signed (1.94) cosmic; urgency=medium
+
+  * Rebuild against grub2 2.02-2ubuntu9.
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Tue, 05 Jun 2018 01:01:11 +0200
 
 grub2-signed (1.93) bionic; urgency=medium
 

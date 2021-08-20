@@ -2,8 +2,18 @@
 
 include /usr/share/dpkg/default.mk
 
+ifeq ($(DEB_DISTRIBUTION), trusty)
+GRUB2_COMMON_VERSION:=2.02~beta2-9ubuntu1.22
+else ifeq ($(DEB_DISTRIBUTION), xenial)
+GRUB2_COMMON_VERSION:=2.02~beta2-36ubuntu3.31
+else ifeq ($(DEB_DISTRIBUTION), bionic)
+GRUB2_COMMON_VERSION:=2.02-2ubuntu8.23
+else
+GRUB2_COMMON_VERSION:=2.02+dfsg1-5
+endif
+
 %:
-	dh $@
+	dh $@ --max-parallel=1
 
 destdir := debian/grub-efi-$(DEB_HOST_ARCH)-signed
 docdir  := $(destdir)/usr/share/doc/grub-efi-$(DEB_HOST_ARCH)-signed
@@ -16,7 +26,8 @@ override_dh_installchangelogs:
 
 override_dh_gencontrol:
 	dh_gencontrol -- -v$(DEB_VERSION)+$(shell cat current/version) \
-		-Vgrub2:Version=$(shell cat current/version)
+		-Vgrub2:Version=$(shell cat current/version) \
+		-Vgrub2-common:Version=$(GRUB2_COMMON_VERSION)
 
 override_dh_auto_install:
 	dh_auto_install --destdir=$(destdir)

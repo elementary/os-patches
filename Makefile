@@ -21,7 +21,10 @@ SIGNED := \
 all: $(SIGNED)
 
 $(SIGNED):
-	./download-signed grub2-common current grub2 uefi
+	./download-signed grub-efi-$(DEB_HOST_ARCH) current grub2 uefi
+
+check:
+	cmp current/grub$(EFI_NAME).efi /usr/lib/grub/$(PLATFORM)/monolithic/grub$(EFI_NAME).efi
 
 install: $(SIGNED)
 	install -d $(DESTDIR)/usr/lib/grub/$(PLATFORM)-signed

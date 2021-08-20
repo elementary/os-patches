@@ -106,8 +106,7 @@ class SignedDownloader:
 
     def download_one(self, member, filename, hash_factory=None):
         directory = os.path.dirname(filename)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
         dists_parsed = list(self.dists_parsed)
         dists_parsed[2] = re.sub(r"/pool/.*", "/dists/" + self.package_dir + \
