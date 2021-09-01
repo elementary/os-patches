@@ -1,3 +1,13 @@
+python-apt (1.6.5ubuntu0.6) bionic; urgency=medium
+
+  * debfile: Pass `Name` instead of `Binary` to ExtractTar.
+    Passing the binary causes it to fail trying to find the `false`
+    compressor when a binary for a given compressor is not installed.
+    (LP: #1926437)
+  * Update mirror lists
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 29 Apr 2021 21:33:02 +0200
+
 python-apt (1.6.5ubuntu0.5) bionic-security; urgency=medium
 
   * REGRESSION UPDATE: Passing a file descriptor to apt_inst.ArFile or
