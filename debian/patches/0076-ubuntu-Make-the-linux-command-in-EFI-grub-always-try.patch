@@ -1,4 +1,3 @@
-From 3221dd44405249694ca8583724e7f9a39afb3a13 Mon Sep 17 00:00:00 2001
 From: Chris Coulson <chris.coulson@canonical.com>
 Date: Wed, 11 Mar 2020 16:46:00 +0100
 Subject: ubuntu: Make the linux command in EFI grub always try EFI handover
@@ -13,12 +12,12 @@ builds, regardless of whether secure boot is enabled or not. This also allows
 a fallback to the non-EFI handover path on kernels that don't support it, but
 only if secure boot is disabled.
 ---
- grub-core/loader/i386/efi/linux.c | 14 +++++----
- grub-core/loader/i386/linux.c     | 47 +++++++++++++++++--------------
+ grub-core/loader/i386/efi/linux.c | 14 +++++++-----
+ grub-core/loader/i386/linux.c     | 47 ++++++++++++++++++++++-----------------
  2 files changed, 35 insertions(+), 26 deletions(-)
 
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-index 6b6aef87f..fe3ca2c59 100644
+index 6b6aef8..fe3ca2c 100644
 --- a/grub-core/loader/i386/efi/linux.c
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -27,6 +27,7 @@
@@ -51,7 +50,7 @@ index 6b6aef87f..fe3ca2c59 100644
  
    params = grub_efi_allocate_pages_max (0x3fffffff,
 diff --git a/grub-core/loader/i386/linux.c b/grub-core/loader/i386/linux.c
-index 4328bcbdb..991eb29db 100644
+index 4328bcb..991eb29 100644
 --- a/grub-core/loader/i386/linux.c
 +++ b/grub-core/loader/i386/linux.c
 @@ -658,35 +658,40 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),

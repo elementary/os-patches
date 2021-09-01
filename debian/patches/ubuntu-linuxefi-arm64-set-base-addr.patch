@@ -1,7 +1,7 @@
-From 619882cb80281fd0c1df10be674bb04929163cc1 Mon Sep 17 00:00:00 2001
 From: Javier Martinez Canillas <javierm@redhat.com>
 Date: Thu, 23 Apr 2020 15:06:46 +0200
-Subject: efi: Set image base address before jumping to the PE/COFF entry point
+Subject: efi: Set image base address before jumping to the PE/COFF entry
+ point
 
 Upstream GRUB uses the EFI LoadImage() and StartImage() to boot the Linux
 kernel. But our custom EFI loader that supports Secure Boot instead uses
@@ -34,7 +34,7 @@ Patch-Name: ubuntu-linuxefi-arm64-set-base-addr.patch
  1 file changed, 15 insertions(+)
 
 diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
-index f6d30bcf7..a09479cd6 100644
+index f6d30bc..a09479c 100644
 --- a/grub-core/loader/efi/linux.c
 +++ b/grub-core/loader/efi/linux.c
 @@ -72,6 +72,7 @@ grub_err_t

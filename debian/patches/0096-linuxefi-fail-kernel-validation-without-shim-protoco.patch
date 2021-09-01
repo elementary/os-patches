@@ -1,4 +1,3 @@
-From b4207b495f61d532cf9524df8ac17e8bf92612f5 Mon Sep 17 00:00:00 2001
 From: Dimitri John Ledkov <xnox@ubuntu.com>
 Date: Wed, 22 Jul 2020 11:31:43 +0100
 Subject: linuxefi: fail kernel validation without shim protocol.
@@ -20,7 +19,7 @@ Signed-off-by: Dimitri John Ledkov <xnox@ubuntu.com>
  4 files changed, 12 insertions(+), 5 deletions(-)
 
 diff --git a/grub-core/loader/arm64/linux.c b/grub-core/loader/arm64/linux.c
-index 1a5296a60..3f5496fc5 100644
+index 1a5296a..3f5496f 100644
 --- a/grub-core/loader/arm64/linux.c
 +++ b/grub-core/loader/arm64/linux.c
 @@ -34,6 +34,7 @@
@@ -52,7 +51,7 @@ index 1a5296a60..3f5496fc5 100644
  
    cmdline_size = grub_loader_cmdline_size (argc, argv) + sizeof (LINUX_IMAGE);
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index f8a34cd49..cf89cedf8 100644
+index f8a34cd..cf89ced 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
 @@ -1096,6 +1096,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
@@ -64,7 +63,7 @@ index f8a34cd49..cf89cedf8 100644
    grub_file_close (file);
    grub_device_close (dev);
 diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
-index e372b26a1..f6d30bcf7 100644
+index e372b26..f6d30bc 100644
 --- a/grub-core/loader/efi/linux.c
 +++ b/grub-core/loader/efi/linux.c
 @@ -34,6 +34,7 @@ struct grub_efi_shim_lock
@@ -76,7 +75,7 @@ index e372b26a1..f6d30bcf7 100644
  grub_linuxefi_secure_validate (void *data, grub_uint32_t size)
  {
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-index 2929da7a2..e357bf67c 100644
+index 2929da7..e357bf6 100644
 --- a/grub-core/loader/i386/efi/linux.c
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -199,7 +199,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),

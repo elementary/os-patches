@@ -1,8 +1,7 @@
-From 193f060dd7c98d850e81a0b73383ff19c4374d64 Mon Sep 17 00:00:00 2001
 From: Steve Langasek <steve.langasek@ubuntu.com>
 Date: Tue, 30 Oct 2018 15:04:16 -0700
-Subject: If we don't have writable grubenv and we're on EFI, always show the
- menu
+Subject: If we don't have writable grubenv and we're on EFI,
+ always show the menu
 
 If we don't have writable grubenv, recordfail doesn't work, which means our
 quickboot behavior - with a timeout of 0 - leaves the user without a
@@ -26,7 +25,7 @@ Patch-Name: quick-boot-lvm.patch
  1 file changed, 15 insertions(+), 3 deletions(-)
 
 diff --git a/util/grub.d/00_header.in b/util/grub.d/00_header.in
-index 674a76140..b7135b655 100644
+index 674a761..b7135b6 100644
 --- a/util/grub.d/00_header.in
 +++ b/util/grub.d/00_header.in
 @@ -115,7 +115,7 @@ EOF

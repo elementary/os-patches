@@ -1,4 +1,3 @@
-From 5e83ad86707acfad2d8bdcf44c3b2202251b2252 Mon Sep 17 00:00:00 2001
 From: Dimitri John Ledkov <xnox@ubuntu.com>
 Date: Wed, 27 Nov 2019 23:12:35 +0000
 Subject: UBUNTU: Allow chainloading EFI apps from loop mounts.
@@ -15,7 +14,7 @@ Patch-Name: ubuntu-efi-allow-loopmount-chainload.patch
  create mode 100644 include/grub/loopback.h
 
 diff --git a/grub-core/disk/loopback.c b/grub-core/disk/loopback.c
-index cdf9123fa..ccb4b167c 100644
+index cdf9123..ccb4b16 100644
 --- a/grub-core/disk/loopback.c
 +++ b/grub-core/disk/loopback.c
 @@ -21,20 +21,13 @@
@@ -41,7 +40,7 @@ index cdf9123fa..ccb4b167c 100644
  static unsigned long last_id = 0;
  
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index ec80f415b..04e815c05 100644
+index ec80f41..04e815c 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
 @@ -24,6 +24,7 @@
@@ -91,7 +90,7 @@ index ec80f415b..04e815c05 100644
  
 diff --git a/include/grub/loopback.h b/include/grub/loopback.h
 new file mode 100644
-index 000000000..3b9a9e32e
+index 0000000..3b9a9e3
 --- /dev/null
 +++ b/include/grub/loopback.h
 @@ -0,0 +1,30 @@

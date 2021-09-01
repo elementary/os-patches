@@ -1,4 +1,3 @@
-From 378cc55cc167c93dadbe11b03e688521cc489b3e Mon Sep 17 00:00:00 2001
 From: Dimitri John Ledkov <xnox@ubuntu.com>
 Date: Wed, 19 Aug 2020 01:49:09 +0100
 Subject: grub-install: Add backup and restore
@@ -24,11 +23,11 @@ Signed-off-by: Dimitri John Ledkov <xnox@ubuntu.com>
 Patch-Name: grub-install-backup-and-restore.patch
 ---
  configure.ac               |   2 +-
- util/grub-install-common.c | 105 +++++++++++++++++++++++++++++++------
+ util/grub-install-common.c | 105 ++++++++++++++++++++++++++++++++++++++-------
  2 files changed, 91 insertions(+), 16 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 1819188f9..6a88b9b0c 100644
+index 1819188..6a88b9b 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -420,7 +420,7 @@ else
@@ -41,7 +40,7 @@ index 1819188f9..6a88b9b0c 100644
  
  # glibc 2.25 still includes sys/sysmacros.h in sys/types.h but emits deprecation
 diff --git a/util/grub-install-common.c b/util/grub-install-common.c
-index 447504d3f..61f9075bc 100644
+index 447504d..61f9075 100644
 --- a/util/grub-install-common.c
 +++ b/util/grub-install-common.c
 @@ -185,38 +185,113 @@ grub_install_mkdir_p (const char *dst)

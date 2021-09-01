@@ -1,4 +1,3 @@
-From 7419d200192a1214872a70852200922529baa7b8 Mon Sep 17 00:00:00 2001
 From: Peter Jones <pjones@redhat.com>
 Date: Wed, 24 Apr 2019 10:03:04 -0400
 Subject: Forbid the "devicetree" command when Secure Boot is enabled.
@@ -17,7 +16,7 @@ Patch-Name: no-devicetree-if-secure-boot.patch
  2 files changed, 20 insertions(+)
 
 diff --git a/grub-core/loader/arm/linux.c b/grub-core/loader/arm/linux.c
-index 51684914c..092e8e307 100644
+index 5168491..092e8e3 100644
 --- a/grub-core/loader/arm/linux.c
 +++ b/grub-core/loader/arm/linux.c
 @@ -30,6 +30,10 @@
@@ -47,7 +46,7 @@ index 51684914c..092e8e307 100644
    if (!dtb)
      return grub_errno;
 diff --git a/grub-core/loader/efi/fdt.c b/grub-core/loader/efi/fdt.c
-index ee9c5592c..f0c2d91be 100644
+index ee9c559..f0c2d91 100644
 --- a/grub-core/loader/efi/fdt.c
 +++ b/grub-core/loader/efi/fdt.c
 @@ -123,6 +123,14 @@ grub_cmd_devicetree (grub_command_t cmd __attribute__ ((unused)),

@@ -1,4 +1,3 @@
-From c5375c14deee6e8fd23a018d583495e5c4f95930 Mon Sep 17 00:00:00 2001
 From: Michael Chang <mchang@suse.com>
 Date: Thu, 27 Oct 2016 17:41:04 -0400
 Subject: bootp: New net_bootp6 command
@@ -11,13 +10,13 @@ Signed-off-by: Ken Lin <ken.lin@hpe.com>
 
 Patch-Name: bootp-new-net_bootp6-command.patch
 ---
- grub-core/net/bootp.c | 908 +++++++++++++++++++++++++++++++++++++++++-
- grub-core/net/ip.c    |  39 ++
+ grub-core/net/bootp.c | 908 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ grub-core/net/ip.c    |  39 +++
  include/grub/net.h    |  72 ++++
  3 files changed, 1018 insertions(+), 1 deletion(-)
 
 diff --git a/grub-core/net/bootp.c b/grub-core/net/bootp.c
-index 04cfbb045..21c1824ef 100644
+index 04cfbb0..21c1824 100644
 --- a/grub-core/net/bootp.c
 +++ b/grub-core/net/bootp.c
 @@ -24,6 +24,98 @@
@@ -969,7 +968,7 @@ index 04cfbb045..21c1824ef 100644
 +  grub_unregister_command (cmd_bootp6);
  }
 diff --git a/grub-core/net/ip.c b/grub-core/net/ip.c
-index ea5edf8f1..01410798b 100644
+index ea5edf8..0141079 100644
 --- a/grub-core/net/ip.c
 +++ b/grub-core/net/ip.c
 @@ -239,6 +239,45 @@ handle_dgram (struct grub_net_buff *nb,
@@ -1019,7 +1018,7 @@ index ea5edf8f1..01410798b 100644
        {
  	const struct grub_net_bootp_packet *bootp;
 diff --git a/include/grub/net.h b/include/grub/net.h
-index cc114286e..58cff96d2 100644
+index cc11428..58cff96 100644
 --- a/include/grub/net.h
 +++ b/include/grub/net.h
 @@ -448,6 +448,66 @@ struct grub_net_bootp_packet

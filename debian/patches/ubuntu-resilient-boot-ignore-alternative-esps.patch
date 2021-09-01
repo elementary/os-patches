@@ -1,4 +1,3 @@
-From 68cb301d0ca0b01bfea30e806d8cfc4a9960af24 Mon Sep 17 00:00:00 2001
 From: Julian Andres Klode <julian.klode@canonical.com>
 Date: Fri, 3 Apr 2020 13:43:49 +0200
 Subject: UBUNTU: efivar: Ignore alternative ESPs
@@ -9,11 +8,11 @@ then we ignore those when looking for entries to change/remove.
 
 Patch-Name: ubuntu-resilient-boot-ignore-alternative-esps.patch
 ---
- grub-core/osdep/unix/efivar.c | 130 ++++++++++++++++++++++++++++++++--
+ grub-core/osdep/unix/efivar.c | 130 ++++++++++++++++++++++++++++++++++++++++--
  1 file changed, 125 insertions(+), 5 deletions(-)
 
 diff --git a/grub-core/osdep/unix/efivar.c b/grub-core/osdep/unix/efivar.c
-index 4a58328b4..41d39c448 100644
+index 4a58328..41d39c4 100644
 --- a/grub-core/osdep/unix/efivar.c
 +++ b/grub-core/osdep/unix/efivar.c
 @@ -37,9 +37,11 @@

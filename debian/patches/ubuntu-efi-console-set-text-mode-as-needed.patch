@@ -1,4 +1,3 @@
-From a097dd966d2a0073a3f2f30f868fae351b74fda4 Mon Sep 17 00:00:00 2001
 From: Hans de Goede <hdegoede@redhat.com>
 Date: Tue, 6 Mar 2018 17:11:15 +0100
 Subject: UBUNTU: EFI: Do not set text-mode until we actually need it
@@ -11,11 +10,11 @@ Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 Last-Update: 2019-03-06
 Patch-Name: ubuntu-efi-console-set-text-mode-as-needed.patch
 ---
- grub-core/term/efi/console.c | 68 ++++++++++++++++++++++++------------
+ grub-core/term/efi/console.c | 68 +++++++++++++++++++++++++++++---------------
  1 file changed, 45 insertions(+), 23 deletions(-)
 
 diff --git a/grub-core/term/efi/console.c b/grub-core/term/efi/console.c
-index 4840cc59d..b61da7d0d 100644
+index 4840cc5..b61da7d 100644
 --- a/grub-core/term/efi/console.c
 +++ b/grub-core/term/efi/console.c
 @@ -24,6 +24,11 @@

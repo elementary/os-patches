@@ -1,4 +1,3 @@
-From 28ae4d74249c555c45aa626be317ce285911391f Mon Sep 17 00:00:00 2001
 From: Peter Jones <pjones@redhat.com>
 Date: Mon, 15 Jun 2020 12:26:01 -0400
 Subject: calloc: Use calloc() at most places
@@ -111,7 +110,7 @@ Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
  86 files changed, 176 insertions(+), 175 deletions(-)
 
 diff --git a/grub-core/bus/usb/usbhub.c b/grub-core/bus/usb/usbhub.c
-index 34a7ff1b5..a06cce302 100644
+index 34a7ff1..a06cce3 100644
 --- a/grub-core/bus/usb/usbhub.c
 +++ b/grub-core/bus/usb/usbhub.c
 @@ -149,8 +149,8 @@ grub_usb_add_hub (grub_usb_device_t dev)
@@ -137,7 +136,7 @@ index 34a7ff1b5..a06cce302 100644
      {
        grub_free (hub->devices);
 diff --git a/grub-core/commands/efi/lsefisystab.c b/grub-core/commands/efi/lsefisystab.c
-index 902788250..d29188efa 100644
+index 9027882..d29188e 100644
 --- a/grub-core/commands/efi/lsefisystab.c
 +++ b/grub-core/commands/efi/lsefisystab.c
 @@ -73,7 +73,8 @@ grub_cmd_lsefisystab (struct grub_command *cmd __attribute__ ((unused)),
@@ -151,7 +150,7 @@ index 902788250..d29188efa 100644
        return grub_errno;
      *grub_utf16_to_utf8 ((grub_uint8_t *) vendor, st->firmware_vendor,
 diff --git a/grub-core/commands/legacycfg.c b/grub-core/commands/legacycfg.c
-index db7a8f002..5e3ec0d5e 100644
+index db7a8f0..5e3ec0d 100644
 --- a/grub-core/commands/legacycfg.c
 +++ b/grub-core/commands/legacycfg.c
 @@ -314,7 +314,7 @@ grub_cmd_legacy_kernel (struct grub_command *mycmd __attribute__ ((unused)),
@@ -182,7 +181,7 @@ index db7a8f002..5e3ec0d5e 100644
  	return grub_errno;
        grub_memcpy (newargs + 1, args, argc * sizeof (newargs[0]));
 diff --git a/grub-core/commands/menuentry.c b/grub-core/commands/menuentry.c
-index 2c5363da7..9164df744 100644
+index 2c5363d..9164df7 100644
 --- a/grub-core/commands/menuentry.c
 +++ b/grub-core/commands/menuentry.c
 @@ -154,7 +154,7 @@ grub_normal_add_menu_entry (int argc, const char **args,
@@ -195,7 +194,7 @@ index 2c5363da7..9164df744 100644
      goto fail;
  
 diff --git a/grub-core/commands/nativedisk.c b/grub-core/commands/nativedisk.c
-index 699447d11..7c8f97f6a 100644
+index 699447d..7c8f97f 100644
 --- a/grub-core/commands/nativedisk.c
 +++ b/grub-core/commands/nativedisk.c
 @@ -195,7 +195,7 @@ grub_cmd_nativedisk (grub_command_t cmd __attribute__ ((unused)),
@@ -208,7 +207,7 @@ index 699447d11..7c8f97f6a 100644
      return grub_errno;
  
 diff --git a/grub-core/commands/parttool.c b/grub-core/commands/parttool.c
-index 22b46b187..051e31320 100644
+index 22b46b1..051e313 100644
 --- a/grub-core/commands/parttool.c
 +++ b/grub-core/commands/parttool.c
 @@ -59,7 +59,13 @@ grub_parttool_register(const char *part_name,
@@ -245,7 +244,7 @@ index 22b46b187..051e31320 100644
  	  if (! parsed[j])
  	    {
 diff --git a/grub-core/commands/regexp.c b/grub-core/commands/regexp.c
-index f00b184c8..4019164f3 100644
+index f00b184..4019164 100644
 --- a/grub-core/commands/regexp.c
 +++ b/grub-core/commands/regexp.c
 @@ -116,7 +116,7 @@ grub_cmd_regexp (grub_extcmd_context_t ctxt, int argc, char **args)
@@ -258,7 +257,7 @@ index f00b184c8..4019164f3 100644
      goto fail;
  
 diff --git a/grub-core/commands/search_wrap.c b/grub-core/commands/search_wrap.c
-index d7fd26b94..47fc8eb99 100644
+index d7fd26b..47fc8eb 100644
 --- a/grub-core/commands/search_wrap.c
 +++ b/grub-core/commands/search_wrap.c
 @@ -122,7 +122,7 @@ grub_cmd_search (grub_extcmd_context_t ctxt, int argc, char **args)
@@ -271,7 +270,7 @@ index d7fd26b94..47fc8eb99 100644
      return grub_errno;
    j = 0;
 diff --git a/grub-core/disk/diskfilter.c b/grub-core/disk/diskfilter.c
-index c3b578acf..68ca9e0be 100644
+index c3b578a..68ca9e0 100644
 --- a/grub-core/disk/diskfilter.c
 +++ b/grub-core/disk/diskfilter.c
 @@ -1134,7 +1134,7 @@ grub_diskfilter_make_raid (grub_size_t uuidlen, char *uuid, int nmemb,
@@ -293,7 +292,7 @@ index c3b578acf..68ca9e0be 100644
  	  for (p = disk->partition; p; p = p->parent)
  	    pv->partmaps[s++] = xstrdup (p->partmap->name);
 diff --git a/grub-core/disk/ieee1275/ofdisk.c b/grub-core/disk/ieee1275/ofdisk.c
-index f73257e66..03674cb47 100644
+index f73257e..03674cb 100644
 --- a/grub-core/disk/ieee1275/ofdisk.c
 +++ b/grub-core/disk/ieee1275/ofdisk.c
 @@ -297,7 +297,7 @@ dev_iterate (const struct grub_ieee1275_devalias *alias)
@@ -306,7 +305,7 @@ index f73257e66..03674cb47 100644
        if (!table)
          {
 diff --git a/grub-core/disk/ldm.c b/grub-core/disk/ldm.c
-index 2a22d2d6c..e6323701a 100644
+index 2a22d2d..e632370 100644
 --- a/grub-core/disk/ldm.c
 +++ b/grub-core/disk/ldm.c
 @@ -323,8 +323,8 @@ make_vg (grub_disk_t disk,
@@ -352,7 +351,7 @@ index 2a22d2d6c..e6323701a 100644
  	return grub_errno;
        for (i = 0; i < *nsectors; i++)
 diff --git a/grub-core/disk/luks.c b/grub-core/disk/luks.c
-index 86c50c612..18b3a8bb1 100644
+index 86c50c6..18b3a8b 100644
 --- a/grub-core/disk/luks.c
 +++ b/grub-core/disk/luks.c
 @@ -336,7 +336,7 @@ luks_recover_key (grub_disk_t source,
@@ -365,7 +364,7 @@ index 86c50c612..18b3a8bb1 100644
      return grub_errno;
  
 diff --git a/grub-core/disk/lvm.c b/grub-core/disk/lvm.c
-index 7b265c780..d1df640b3 100644
+index 7b265c7..d1df640 100644
 --- a/grub-core/disk/lvm.c
 +++ b/grub-core/disk/lvm.c
 @@ -173,7 +173,7 @@ grub_lvm_detect (grub_disk_t disk,
@@ -398,7 +397,7 @@ index 7b265c780..d1df640b3 100644
  
  		      p = grub_strstr (p, "stripes = [");
 diff --git a/grub-core/disk/xen/xendisk.c b/grub-core/disk/xen/xendisk.c
-index 48476cbbf..d6612eebd 100644
+index 48476cb..d6612ee 100644
 --- a/grub-core/disk/xen/xendisk.c
 +++ b/grub-core/disk/xen/xendisk.c
 @@ -426,7 +426,7 @@ grub_xendisk_init (void)
@@ -411,7 +410,7 @@ index 48476cbbf..d6612eebd 100644
      return;
    if (grub_xenstore_dir ("device/vbd", fill, &ctr))
 diff --git a/grub-core/efiemu/loadcore.c b/grub-core/efiemu/loadcore.c
-index 44085ef81..2b924623f 100644
+index 44085ef..2b92462 100644
 --- a/grub-core/efiemu/loadcore.c
 +++ b/grub-core/efiemu/loadcore.c
 @@ -201,7 +201,7 @@ grub_efiemu_count_symbols (const Elf_Ehdr *e)
@@ -424,7 +423,7 @@ index 44085ef81..2b924623f 100644
    /* Relocators */
    for (i = 0, s = (Elf_Shdr *) ((char *) e + e->e_shoff);
 diff --git a/grub-core/efiemu/mm.c b/grub-core/efiemu/mm.c
-index 52a032f7b..9b8e0d0ad 100644
+index 52a032f..9b8e0d0 100644
 --- a/grub-core/efiemu/mm.c
 +++ b/grub-core/efiemu/mm.c
 @@ -554,11 +554,11 @@ grub_efiemu_mmap_sort_and_uniq (void)
@@ -451,7 +450,7 @@ index 52a032f7b..9b8e0d0ad 100644
      {
        grub_efiemu_unload ();
 diff --git a/grub-core/font/font.c b/grub-core/font/font.c
-index 85a292557..8e118b315 100644
+index 85a2925..8e118b3 100644
 --- a/grub-core/font/font.c
 +++ b/grub-core/font/font.c
 @@ -293,8 +293,7 @@ load_font_index (grub_file_t file, grub_uint32_t sect_length, struct
@@ -465,7 +464,7 @@ index 85a292557..8e118b315 100644
      return 1;
    font->bmp_idx = grub_malloc (0x10000 * sizeof (grub_uint16_t));
 diff --git a/grub-core/fs/affs.c b/grub-core/fs/affs.c
-index 6b6a2bc91..220b3712f 100644
+index 6b6a2bc..220b371 100644
 --- a/grub-core/fs/affs.c
 +++ b/grub-core/fs/affs.c
 @@ -301,7 +301,7 @@ grub_affs_read_symlink (grub_fshelp_node_t node)
@@ -496,7 +495,7 @@ index 6b6a2bc91..220b3712f 100644
  	*grub_latin1_to_utf8 ((grub_uint8_t *) *label, file.name, len) = '\0';
      }
 diff --git a/grub-core/fs/btrfs.c b/grub-core/fs/btrfs.c
-index 48bd3d04a..11272efc1 100644
+index 48bd3d0..11272ef 100644
 --- a/grub-core/fs/btrfs.c
 +++ b/grub-core/fs/btrfs.c
 @@ -413,7 +413,7 @@ lower_bound (struct grub_btrfs_data *data,
@@ -527,7 +526,7 @@ index 48bd3d04a..11272efc1 100644
      return grub_errno;
    for (i = 0; i < *nsectors; i++)
 diff --git a/grub-core/fs/hfs.c b/grub-core/fs/hfs.c
-index ac0a40990..3fe842b4d 100644
+index ac0a409..3fe842b 100644
 --- a/grub-core/fs/hfs.c
 +++ b/grub-core/fs/hfs.c
 @@ -1360,7 +1360,7 @@ grub_hfs_label (grub_device_t device, char **label)
@@ -540,7 +539,7 @@ index ac0a40990..3fe842b4d 100644
  	macroman_to_utf8 (*label, data->sblock.volname + 1,
  			  len + 1, 0);
 diff --git a/grub-core/fs/hfsplus.c b/grub-core/fs/hfsplus.c
-index 54786bb1c..dae43becc 100644
+index 54786bb..dae43be 100644
 --- a/grub-core/fs/hfsplus.c
 +++ b/grub-core/fs/hfsplus.c
 @@ -720,7 +720,7 @@ list_nodes (void *record, void *hook_arg)
@@ -571,7 +570,7 @@ index 54786bb1c..dae43becc 100644
      {
        grub_free (label_name);
 diff --git a/grub-core/fs/iso9660.c b/grub-core/fs/iso9660.c
-index 49c0c632b..4f1b52a55 100644
+index 49c0c63..4f1b52a 100644
 --- a/grub-core/fs/iso9660.c
 +++ b/grub-core/fs/iso9660.c
 @@ -331,7 +331,7 @@ grub_iso9660_convert_string (grub_uint8_t *us, int len)
@@ -584,7 +583,7 @@ index 49c0c632b..4f1b52a55 100644
      return NULL;
  
 diff --git a/grub-core/fs/ntfs.c b/grub-core/fs/ntfs.c
-index fc4e1f678..2f34f76da 100644
+index fc4e1f6..2f34f76 100644
 --- a/grub-core/fs/ntfs.c
 +++ b/grub-core/fs/ntfs.c
 @@ -556,8 +556,8 @@ get_utf8 (grub_uint8_t *in, grub_size_t len)
@@ -599,7 +598,7 @@ index fc4e1f678..2f34f76da 100644
      {
        grub_free (buf);
 diff --git a/grub-core/fs/sfs.c b/grub-core/fs/sfs.c
-index 50c1fe72f..90f7fb379 100644
+index 50c1fe7..90f7fb3 100644
 --- a/grub-core/fs/sfs.c
 +++ b/grub-core/fs/sfs.c
 @@ -266,7 +266,7 @@ grub_sfs_read_block (grub_fshelp_node_t node, grub_disk_addr_t fileblock)
@@ -612,7 +611,7 @@ index 50c1fe72f..90f7fb379 100644
  	{
  	  grub_errno = 0;
 diff --git a/grub-core/fs/tar.c b/grub-core/fs/tar.c
-index 7d63e0c99..c551ed6b5 100644
+index 7d63e0c..c551ed6 100644
 --- a/grub-core/fs/tar.c
 +++ b/grub-core/fs/tar.c
 @@ -120,7 +120,7 @@ grub_cpio_find_file (struct grub_archelp_data *data, char **name,
@@ -625,7 +624,7 @@ index 7d63e0c99..c551ed6b5 100644
  		return grub_errno;
  	      grub_free (data->linkname);
 diff --git a/grub-core/fs/udf.c b/grub-core/fs/udf.c
-index dc8b6e2d1..a83761674 100644
+index dc8b6e2..a837616 100644
 --- a/grub-core/fs/udf.c
 +++ b/grub-core/fs/udf.c
 @@ -873,7 +873,7 @@ read_string (const grub_uint8_t *raw, grub_size_t sz, char *outbuf)
@@ -647,7 +646,7 @@ index dc8b6e2d1..a83761674 100644
  	return NULL;
        for (i = 0; i < utf16len; i++)
 diff --git a/grub-core/fs/zfs/zfs.c b/grub-core/fs/zfs/zfs.c
-index 2f72e42bf..381dde556 100644
+index 2f72e42..381dde5 100644
 --- a/grub-core/fs/zfs/zfs.c
 +++ b/grub-core/fs/zfs/zfs.c
 @@ -3325,7 +3325,7 @@ dnode_get_fullpath (const char *fullpath, struct subvolume *subvol,
@@ -669,7 +668,7 @@ index 2f72e42bf..381dde556 100644
      return grub_errno;
    for (i = 0; i < *nsectors; i++)
 diff --git a/grub-core/gfxmenu/gui_string_util.c b/grub-core/gfxmenu/gui_string_util.c
-index a9a415e31..ba1e1eab3 100644
+index a9a415e..ba1e1ea 100644
 --- a/grub-core/gfxmenu/gui_string_util.c
 +++ b/grub-core/gfxmenu/gui_string_util.c
 @@ -55,7 +55,7 @@ canonicalize_path (const char *path)
@@ -682,7 +681,7 @@ index a9a415e31..ba1e1eab3 100644
      return 0;
  
 diff --git a/grub-core/gfxmenu/widget-box.c b/grub-core/gfxmenu/widget-box.c
-index b60602889..470597ded 100644
+index b606028..470597d 100644
 --- a/grub-core/gfxmenu/widget-box.c
 +++ b/grub-core/gfxmenu/widget-box.c
 @@ -303,10 +303,10 @@ grub_gfxmenu_create_box (const char *pixmaps_prefix,
@@ -699,7 +698,7 @@ index b60602889..470597ded 100644
    /* Initialize all pixmap pointers to NULL so that proper destruction can
       be performed if an error is encountered partway through construction.  */
 diff --git a/grub-core/io/gzio.c b/grub-core/io/gzio.c
-index 6208a9763..43d98a7bd 100644
+index 6208a97..43d98a7 100644
 --- a/grub-core/io/gzio.c
 +++ b/grub-core/io/gzio.c
 @@ -554,7 +554,7 @@ huft_build (unsigned *b,	/* code lengths in bits (all assumed <= BMAX) */
@@ -712,7 +711,7 @@ index 6208a9763..43d98a7bd 100644
  		{
  		  if (h)
 diff --git a/grub-core/kern/efi/efi.c b/grub-core/kern/efi/efi.c
-index 6e1ceb905..dc31caa21 100644
+index 6e1ceb9..dc31caa 100644
 --- a/grub-core/kern/efi/efi.c
 +++ b/grub-core/kern/efi/efi.c
 @@ -202,7 +202,7 @@ grub_efi_set_variable(const char *var, const grub_efi_guid_t *guid,
@@ -743,7 +742,7 @@ index 6e1ceb905..dc31caa21 100644
  	    {
  	      grub_free (name);
 diff --git a/grub-core/kern/emu/hostdisk.c b/grub-core/kern/emu/hostdisk.c
-index 8ac523953..f90b6c9ce 100644
+index 8ac5239..f90b6c9 100644
 --- a/grub-core/kern/emu/hostdisk.c
 +++ b/grub-core/kern/emu/hostdisk.c
 @@ -627,7 +627,7 @@ static char *
@@ -756,7 +755,7 @@ index 8ac523953..f90b6c9ce 100644
    size_t i;
    int first = 1;
 diff --git a/grub-core/kern/fs.c b/grub-core/kern/fs.c
-index 2b85f4950..f90be6566 100644
+index 2b85f49..f90be65 100644
 --- a/grub-core/kern/fs.c
 +++ b/grub-core/kern/fs.c
 @@ -151,7 +151,7 @@ grub_fs_blocklist_open (grub_file_t file, const char *name)
@@ -769,7 +768,7 @@ index 2b85f4950..f90be6566 100644
      return 0;
  
 diff --git a/grub-core/kern/misc.c b/grub-core/kern/misc.c
-index 18cad5803..83c068d61 100644
+index 18cad58..83c068d 100644
 --- a/grub-core/kern/misc.c
 +++ b/grub-core/kern/misc.c
 @@ -691,7 +691,7 @@ parse_printf_args (const char *fmt0, struct printf_args *args,
@@ -782,7 +781,7 @@ index 18cad5803..83c068d61 100644
  	{
  	  grub_errno = GRUB_ERR_NONE;
 diff --git a/grub-core/kern/parser.c b/grub-core/kern/parser.c
-index 78175aac2..619db3122 100644
+index 78175aa..619db31 100644
 --- a/grub-core/kern/parser.c
 +++ b/grub-core/kern/parser.c
 @@ -213,7 +213,7 @@ grub_parser_split_cmdline (const char *cmdline,
@@ -795,7 +794,7 @@ index 78175aac2..619db3122 100644
      {
        grub_free (args);
 diff --git a/grub-core/kern/uboot/uboot.c b/grub-core/kern/uboot/uboot.c
-index be4816fe6..aac8f9ae1 100644
+index be4816f..aac8f9a 100644
 --- a/grub-core/kern/uboot/uboot.c
 +++ b/grub-core/kern/uboot/uboot.c
 @@ -133,7 +133,7 @@ grub_uboot_dev_enum (void)
@@ -808,7 +807,7 @@ index be4816fe6..aac8f9ae1 100644
      return 0;
  
 diff --git a/grub-core/lib/libgcrypt/cipher/ac.c b/grub-core/lib/libgcrypt/cipher/ac.c
-index f5e946a2d..63f6fcd11 100644
+index f5e946a..63f6fcd 100644
 --- a/grub-core/lib/libgcrypt/cipher/ac.c
 +++ b/grub-core/lib/libgcrypt/cipher/ac.c
 @@ -185,7 +185,7 @@ ac_data_mpi_copy (gcry_ac_mpi_t *data_mpis, unsigned int data_mpis_n,
@@ -848,7 +847,7 @@ index f5e946a2d..63f6fcd11 100644
      {
        err = gcry_error_from_errno (errno);
 diff --git a/grub-core/lib/libgcrypt/cipher/primegen.c b/grub-core/lib/libgcrypt/cipher/primegen.c
-index 2788e349f..b12e79b19 100644
+index 2788e34..b12e79b 100644
 --- a/grub-core/lib/libgcrypt/cipher/primegen.c
 +++ b/grub-core/lib/libgcrypt/cipher/primegen.c
 @@ -383,7 +383,7 @@ prime_generate_internal (int need_q_factor,
@@ -870,7 +869,7 @@ index 2788e349f..b12e79b19 100644
    val_2  = mpi_alloc_set_ui( 2 );
    val_3 = mpi_alloc_set_ui( 3);
 diff --git a/grub-core/lib/libgcrypt/cipher/pubkey.c b/grub-core/lib/libgcrypt/cipher/pubkey.c
-index 910982141..ca087ad75 100644
+index 9109821..ca087ad 100644
 --- a/grub-core/lib/libgcrypt/cipher/pubkey.c
 +++ b/grub-core/lib/libgcrypt/cipher/pubkey.c
 @@ -2941,7 +2941,7 @@ gcry_pk_encrypt (gcry_sexp_t *r_ciph, gcry_sexp_t s_data, gcry_sexp_t s_pkey)
@@ -892,7 +891,7 @@ index 910982141..ca087ad75 100644
          {
            rc = gpg_err_code_from_syserror ();
 diff --git a/grub-core/lib/priority_queue.c b/grub-core/lib/priority_queue.c
-index 659be0b7f..7d5e7c05a 100644
+index 659be0b..7d5e7c0 100644
 --- a/grub-core/lib/priority_queue.c
 +++ b/grub-core/lib/priority_queue.c
 @@ -92,7 +92,7 @@ grub_priority_queue_new (grub_size_t elsize,
@@ -905,7 +904,7 @@ index 659be0b7f..7d5e7c05a 100644
      return 0;
    ret = (struct grub_priority_queue *) grub_malloc (sizeof (*ret));
 diff --git a/grub-core/lib/reed_solomon.c b/grub-core/lib/reed_solomon.c
-index ee9fa7b4f..467305b46 100644
+index ee9fa7b..467305b 100644
 --- a/grub-core/lib/reed_solomon.c
 +++ b/grub-core/lib/reed_solomon.c
 @@ -20,6 +20,7 @@
@@ -931,7 +930,7 @@ index ee9fa7b4f..467305b46 100644
    /* Multiply with X - a^r */
    for (j = 0; j < rs; j++)
 diff --git a/grub-core/lib/relocator.c b/grub-core/lib/relocator.c
-index ea3ebc719..5847aac36 100644
+index ea3ebc7..5847aac 100644
 --- a/grub-core/lib/relocator.c
 +++ b/grub-core/lib/relocator.c
 @@ -495,9 +495,9 @@ malloc_in_range (struct grub_relocator *rel,
@@ -967,7 +966,7 @@ index ea3ebc719..5847aac36 100644
        {
  	grub_free (from);
 diff --git a/grub-core/lib/zstd/fse_decompress.c b/grub-core/lib/zstd/fse_decompress.c
-index 72bbead5b..2227b84bc 100644
+index 72bbead..2227b84 100644
 --- a/grub-core/lib/zstd/fse_decompress.c
 +++ b/grub-core/lib/zstd/fse_decompress.c
 @@ -82,7 +82,7 @@
@@ -980,7 +979,7 @@ index 72bbead5b..2227b84bc 100644
  
  void FSE_freeDTable (FSE_DTable* dt)
 diff --git a/grub-core/loader/arm/linux.c b/grub-core/loader/arm/linux.c
-index 092e8e307..979d425df 100644
+index 092e8e3..979d425 100644
 --- a/grub-core/loader/arm/linux.c
 +++ b/grub-core/loader/arm/linux.c
 @@ -82,7 +82,7 @@ linux_prepare_atag (void *target_atag)
@@ -993,7 +992,7 @@ index 092e8e307..979d425df 100644
      return grub_errno;
  
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index 04e815c05..b9a2df34b 100644
+index 04e815c..b9a2df3 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
 @@ -126,7 +126,7 @@ copy_file_path (grub_efi_file_path_device_path_t *fp,
@@ -1006,7 +1005,7 @@ index 04e815c05..b9a2df34b 100644
      return;
  
 diff --git a/grub-core/loader/i386/bsdXX.c b/grub-core/loader/i386/bsdXX.c
-index af6741d15..a8d8bf7da 100644
+index af6741d..a8d8bf7 100644
 --- a/grub-core/loader/i386/bsdXX.c
 +++ b/grub-core/loader/i386/bsdXX.c
 @@ -48,7 +48,7 @@ read_headers (grub_file_t file, const char *filename, Elf_Ehdr *e, char **shdr)
@@ -1019,7 +1018,7 @@ index af6741d15..a8d8bf7da 100644
      return grub_errno;
  
 diff --git a/grub-core/loader/i386/xnu.c b/grub-core/loader/i386/xnu.c
-index e64ed08f5..b7d176b5d 100644
+index e64ed08..b7d176b 100644
 --- a/grub-core/loader/i386/xnu.c
 +++ b/grub-core/loader/i386/xnu.c
 @@ -295,7 +295,7 @@ grub_xnu_devprop_add_property_utf8 (struct grub_xnu_devprop_device_descriptor *d
@@ -1041,7 +1040,7 @@ index e64ed08f5..b7d176b5d 100644
      return grub_errno;
    grub_memcpy (utf16, name, sizeof (grub_uint16_t) * namelen);
 diff --git a/grub-core/loader/macho.c b/grub-core/loader/macho.c
-index 085f9c689..05710c48e 100644
+index 085f9c6..05710c4 100644
 --- a/grub-core/loader/macho.c
 +++ b/grub-core/loader/macho.c
 @@ -97,7 +97,7 @@ grub_macho_file (grub_file_t file, const char *filename, int is_64bit)
@@ -1054,7 +1053,7 @@ index 085f9c689..05710c48e 100644
  	goto fail;
        if (grub_file_read (macho->file, archs,
 diff --git a/grub-core/loader/multiboot_elfxx.c b/grub-core/loader/multiboot_elfxx.c
-index 70cd1db51..cc6853692 100644
+index 70cd1db..cc68536 100644
 --- a/grub-core/loader/multiboot_elfxx.c
 +++ b/grub-core/loader/multiboot_elfxx.c
 @@ -217,7 +217,7 @@ CONCAT(grub_multiboot_load_elf, XX) (mbi_load_data_t *mld)
@@ -1067,7 +1066,7 @@ index 70cd1db51..cc6853692 100644
  	return grub_errno;
        
 diff --git a/grub-core/loader/xnu.c b/grub-core/loader/xnu.c
-index e0f47e72b..2f0ebd0b8 100644
+index e0f47e7..2f0ebd0 100644
 --- a/grub-core/loader/xnu.c
 +++ b/grub-core/loader/xnu.c
 @@ -801,7 +801,7 @@ grub_cmd_xnu_mkext (grub_command_t cmd __attribute__ ((unused)),
@@ -1080,7 +1079,7 @@ index e0f47e72b..2f0ebd0b8 100644
  	{
  	  grub_file_close (file);
 diff --git a/grub-core/mmap/mmap.c b/grub-core/mmap/mmap.c
-index 6a31cbae3..57b4e9a72 100644
+index 6a31cba..57b4e9a 100644
 --- a/grub-core/mmap/mmap.c
 +++ b/grub-core/mmap/mmap.c
 @@ -143,9 +143,9 @@ grub_mmap_iterate (grub_memory_hook_t hook, void *hook_data)
@@ -1096,7 +1095,7 @@ index 6a31cbae3..57b4e9a72 100644
    if (! ctx.scanline_events || !present)
      {
 diff --git a/grub-core/net/bootp.c b/grub-core/net/bootp.c
-index 558d97ba1..dd0ffcdae 100644
+index 558d97b..dd0ffcd 100644
 --- a/grub-core/net/bootp.c
 +++ b/grub-core/net/bootp.c
 @@ -1559,7 +1559,7 @@ grub_cmd_bootp (struct grub_command *cmd __attribute__ ((unused)),
@@ -1109,7 +1108,7 @@ index 558d97ba1..dd0ffcdae 100644
      return grub_errno;
  
 diff --git a/grub-core/net/dns.c b/grub-core/net/dns.c
-index 5d9afe093..e332d5eb4 100644
+index 5d9afe0..e332d5e 100644
 --- a/grub-core/net/dns.c
 +++ b/grub-core/net/dns.c
 @@ -285,8 +285,8 @@ recv_hook (grub_net_udp_socket_t sock __attribute__ ((unused)),
@@ -1144,7 +1143,7 @@ index 5d9afe093..e332d5eb4 100644
      return grub_errno;
  
 diff --git a/grub-core/net/net.c b/grub-core/net/net.c
-index b917a75d5..fed7bc57c 100644
+index b917a75..fed7bc5 100644
 --- a/grub-core/net/net.c
 +++ b/grub-core/net/net.c
 @@ -333,8 +333,8 @@ grub_cmd_ipv6_autoconf (struct grub_command *cmd __attribute__ ((unused)),
@@ -1159,7 +1158,7 @@ index b917a75d5..fed7bc57c 100644
      {
        grub_free (ifaces);
 diff --git a/grub-core/normal/charset.c b/grub-core/normal/charset.c
-index b0ab47d73..d57fb72fa 100644
+index b0ab47d..d57fb72 100644
 --- a/grub-core/normal/charset.c
 +++ b/grub-core/normal/charset.c
 @@ -203,7 +203,7 @@ grub_utf8_to_ucs4_alloc (const char *msg, grub_uint32_t **unicode_msg,
@@ -1201,7 +1200,7 @@ index b0ab47d73..d57fb72fa 100644
      return -1;
    for (ptr = logical; ptr <= logical + logical_len; ptr++)
 diff --git a/grub-core/normal/cmdline.c b/grub-core/normal/cmdline.c
-index c037d5050..c57242e2e 100644
+index c037d50..c57242e 100644
 --- a/grub-core/normal/cmdline.c
 +++ b/grub-core/normal/cmdline.c
 @@ -41,7 +41,7 @@ grub_err_t
@@ -1268,7 +1267,7 @@ index c037d5050..c57242e2e 100644
  		{
  		  grub_print_error ();
 diff --git a/grub-core/normal/menu_entry.c b/grub-core/normal/menu_entry.c
-index cdf3590a3..1993995be 100644
+index cdf3590..1993995 100644
 --- a/grub-core/normal/menu_entry.c
 +++ b/grub-core/normal/menu_entry.c
 @@ -95,8 +95,8 @@ init_line (struct screen *screen, struct line *linep)
@@ -1328,7 +1327,7 @@ index cdf3590a3..1993995be 100644
      {
        grub_print_error ();
 diff --git a/grub-core/normal/menu_text.c b/grub-core/normal/menu_text.c
-index e22bb91f6..18240e76c 100644
+index e22bb91..18240e7 100644
 --- a/grub-core/normal/menu_text.c
 +++ b/grub-core/normal/menu_text.c
 @@ -78,7 +78,7 @@ grub_print_message_indented_real (const char *msg, int margin_left,
@@ -1350,7 +1349,7 @@ index e22bb91f6..18240e76c 100644
      /* XXX How to show this error?  */
      return;
 diff --git a/grub-core/normal/term.c b/grub-core/normal/term.c
-index a1e5c5a0d..cc8c173b6 100644
+index a1e5c5a..cc8c173 100644
 --- a/grub-core/normal/term.c
 +++ b/grub-core/normal/term.c
 @@ -264,7 +264,7 @@ grub_term_save_pos (void)
@@ -1372,7 +1371,7 @@ index a1e5c5a0d..cc8c173b6 100644
    grub_error_pop ();
  
 diff --git a/grub-core/osdep/linux/getroot.c b/grub-core/osdep/linux/getroot.c
-index 7adc0f30e..a5bd0752f 100644
+index 7adc0f3..a5bd075 100644
 --- a/grub-core/osdep/linux/getroot.c
 +++ b/grub-core/osdep/linux/getroot.c
 @@ -168,7 +168,7 @@ grub_util_raid_getmembers (const char *name, int bootable)
@@ -1403,7 +1402,7 @@ index 7adc0f30e..a5bd0752f 100644
  again:
    fp = grub_util_fopen ("/proc/self/mountinfo", "r");
 diff --git a/grub-core/osdep/unix/config.c b/grub-core/osdep/unix/config.c
-index 5478030fd..89dc70d93 100644
+index 5478030..89dc70d 100644
 --- a/grub-core/osdep/unix/config.c
 +++ b/grub-core/osdep/unix/config.c
 @@ -130,7 +130,7 @@ grub_util_load_config (struct grub_util_config *cfg)
@@ -1416,7 +1415,7 @@ index 5478030fd..89dc70d93 100644
    if (grub_util_is_regular (cfgfile))
      sorted_cfgpaths[i++] = xstrdup (cfgfile);
 diff --git a/grub-core/osdep/windows/getroot.c b/grub-core/osdep/windows/getroot.c
-index 661d95461..eada663b2 100644
+index 661d954..eada663 100644
 --- a/grub-core/osdep/windows/getroot.c
 +++ b/grub-core/osdep/windows/getroot.c
 @@ -59,7 +59,7 @@ grub_get_mount_point (const TCHAR *path)
@@ -1429,7 +1428,7 @@ index 661d95461..eada663b2 100644
    /* When pointing to EFI system partition GetVolumePathName fails
       for ESP root and returns abberant information for everything
 diff --git a/grub-core/osdep/windows/hostdisk.c b/grub-core/osdep/windows/hostdisk.c
-index 355100789..0be327394 100644
+index 3551007..0be3273 100644
 --- a/grub-core/osdep/windows/hostdisk.c
 +++ b/grub-core/osdep/windows/hostdisk.c
 @@ -111,7 +111,7 @@ grub_util_get_windows_path_real (const char *path)
@@ -1451,7 +1450,7 @@ index 355100789..0be327394 100644
    pattern[l] = '\\';
    pattern[l + 1] = '*';
 diff --git a/grub-core/osdep/windows/init.c b/grub-core/osdep/windows/init.c
-index e8ffd62c6..6297de632 100644
+index e8ffd62..6297de6 100644
 --- a/grub-core/osdep/windows/init.c
 +++ b/grub-core/osdep/windows/init.c
 @@ -161,7 +161,7 @@ grub_util_host_init (int *argc __attribute__ ((unused)),
@@ -1464,7 +1463,7 @@ index e8ffd62c6..6297de632 100644
    for (i = 0; i < *argc; i++)
      (*argv)[i] = grub_util_tchar_to_utf8 (targv[i]); 
 diff --git a/grub-core/osdep/windows/platform.c b/grub-core/osdep/windows/platform.c
-index a3f738fb9..b160949d8 100644
+index a3f738f..b160949 100644
 --- a/grub-core/osdep/windows/platform.c
 +++ b/grub-core/osdep/windows/platform.c
 @@ -231,8 +231,8 @@ grub_install_register_efi (grub_device_t efidir_grub_dev, const char *efidir,
@@ -1479,7 +1478,7 @@ index a3f738fb9..b160949d8 100644
  				      (const grub_uint8_t *) efi_distributor,
  				      distrib8_len, 0);
 diff --git a/grub-core/osdep/windows/relpath.c b/grub-core/osdep/windows/relpath.c
-index cb0861744..478e8ef14 100644
+index cb08617..478e8ef 100644
 --- a/grub-core/osdep/windows/relpath.c
 +++ b/grub-core/osdep/windows/relpath.c
 @@ -72,7 +72,7 @@ grub_make_system_path_relative_to_its_root (const char *path)
@@ -1492,7 +1491,7 @@ index cb0861744..478e8ef14 100644
        && dirwindows[offset] != '/'
        && dirwindows[offset])
 diff --git a/grub-core/partmap/gpt.c b/grub-core/partmap/gpt.c
-index 103f6796f..72a2e37cd 100644
+index 103f679..72a2e37 100644
 --- a/grub-core/partmap/gpt.c
 +++ b/grub-core/partmap/gpt.c
 @@ -199,7 +199,7 @@ gpt_partition_map_embed (struct grub_disk *disk, unsigned int *nsectors,
@@ -1505,7 +1504,7 @@ index 103f6796f..72a2e37cd 100644
      return grub_errno;
    for (i = 0; i < *nsectors; i++)
 diff --git a/grub-core/partmap/msdos.c b/grub-core/partmap/msdos.c
-index 7b8e45076..ee3f24982 100644
+index 7b8e450..ee3f249 100644
 --- a/grub-core/partmap/msdos.c
 +++ b/grub-core/partmap/msdos.c
 @@ -337,7 +337,7 @@ pc_partition_map_embed (struct grub_disk *disk, unsigned int *nsectors,
@@ -1518,7 +1517,7 @@ index 7b8e45076..ee3f24982 100644
  	return grub_errno;
        for (i = 0; i < *nsectors; i++)
 diff --git a/grub-core/script/execute.c b/grub-core/script/execute.c
-index ee299fd0e..c8d6806fe 100644
+index ee299fd..c8d6806 100644
 --- a/grub-core/script/execute.c
 +++ b/grub-core/script/execute.c
 @@ -553,7 +553,7 @@ gettext_append (struct grub_script_argv *result, const char *orig_str)
@@ -1531,7 +1530,7 @@ index ee299fd0e..c8d6806fe 100644
    if (parse_string (orig_str, gettext_save_allow, &ctx, 0))
      goto fail;
 diff --git a/grub-core/tests/fake_input.c b/grub-core/tests/fake_input.c
-index 2d6085298..b5eb516be 100644
+index 2d60852..b5eb516 100644
 --- a/grub-core/tests/fake_input.c
 +++ b/grub-core/tests/fake_input.c
 @@ -49,7 +49,7 @@ grub_terminal_input_fake_sequence (int *seq_in, int nseq_in)
@@ -1544,7 +1543,7 @@ index 2d6085298..b5eb516be 100644
      return;
  
 diff --git a/grub-core/tests/video_checksum.c b/grub-core/tests/video_checksum.c
-index 74d5b65e5..44d081069 100644
+index 74d5b65..44d0810 100644
 --- a/grub-core/tests/video_checksum.c
 +++ b/grub-core/tests/video_checksum.c
 @@ -336,7 +336,7 @@ grub_video_capture_write_bmp (const char *fname,
@@ -1575,7 +1574,7 @@ index 74d5b65e5..44d081069 100644
  	grub_uint16_t gmask = ((1 << mode_info->green_mask_size) - 1);
  	grub_uint16_t bmask = ((1 << mode_info->blue_mask_size) - 1);
 diff --git a/grub-core/video/capture.c b/grub-core/video/capture.c
-index 4f83c7441..4d3195e01 100644
+index 4f83c74..4d3195e 100644
 --- a/grub-core/video/capture.c
 +++ b/grub-core/video/capture.c
 @@ -89,7 +89,7 @@ grub_video_capture_start (const struct grub_video_mode_info *mode_info,
@@ -1588,7 +1587,7 @@ index 4f83c7441..4d3195e01 100644
      return grub_errno;
    
 diff --git a/grub-core/video/emu/sdl.c b/grub-core/video/emu/sdl.c
-index a2f639f66..0ebab6f57 100644
+index a2f639f..0ebab6f 100644
 --- a/grub-core/video/emu/sdl.c
 +++ b/grub-core/video/emu/sdl.c
 @@ -172,7 +172,7 @@ grub_video_sdl_set_palette (unsigned int start, unsigned int count,
@@ -1601,7 +1600,7 @@ index a2f639f66..0ebab6f57 100644
  	{
  	  tmp[i].r = palette_data[i].r;
 diff --git a/grub-core/video/i386/pc/vga.c b/grub-core/video/i386/pc/vga.c
-index 01f47112d..b2f776c99 100644
+index 01f4711..b2f776c 100644
 --- a/grub-core/video/i386/pc/vga.c
 +++ b/grub-core/video/i386/pc/vga.c
 @@ -127,7 +127,7 @@ grub_video_vga_setup (unsigned int width, unsigned int height,
@@ -1614,7 +1613,7 @@ index 01f47112d..b2f776c99 100644
    framebuffer.back_page = 0;
    if (!framebuffer.temporary_buffer)
 diff --git a/grub-core/video/readers/png.c b/grub-core/video/readers/png.c
-index 777e71334..61bd64537 100644
+index 777e713..61bd645 100644
 --- a/grub-core/video/readers/png.c
 +++ b/grub-core/video/readers/png.c
 @@ -309,7 +309,7 @@ grub_png_decode_image_header (struct grub_png_data *data)
@@ -1627,7 +1626,7 @@ index 777e71334..61bd64537 100644
          return grub_errno;
  
 diff --git a/include/grub/unicode.h b/include/grub/unicode.h
-index a0403e91f..4de986a85 100644
+index a0403e9..4de986a 100644
 --- a/include/grub/unicode.h
 +++ b/include/grub/unicode.h
 @@ -293,7 +293,7 @@ grub_unicode_glyph_dup (const struct grub_unicode_glyph *in)
@@ -1649,7 +1648,7 @@ index a0403e91f..4de986a85 100644
  	return;
        grub_memcpy (out->combining_ptr, in->combining_ptr,
 diff --git a/util/getroot.c b/util/getroot.c
-index cdd41153c..6ae35ecaa 100644
+index cdd4115..6ae35ec 100644
 --- a/util/getroot.c
 +++ b/util/getroot.c
 @@ -200,7 +200,7 @@ make_device_name (const char *drive)
@@ -1662,7 +1661,7 @@ index cdd41153c..6ae35ecaa 100644
    for (iptr = drive; *iptr; iptr++)
      {
 diff --git a/util/grub-file.c b/util/grub-file.c
-index 50c18b683..b2e7dd69f 100644
+index 50c18b6..b2e7dd6 100644
 --- a/util/grub-file.c
 +++ b/util/grub-file.c
 @@ -54,7 +54,7 @@ main (int argc, char *argv[])
@@ -1675,7 +1674,7 @@ index 50c18b683..b2e7dd69f 100644
    if (argc == 2 && strcmp (argv[1], "--version") == 0)
      {
 diff --git a/util/grub-fstest.c b/util/grub-fstest.c
-index f14e02d97..57246af7c 100644
+index f14e02d..57246af 100644
 --- a/util/grub-fstest.c
 +++ b/util/grub-fstest.c
 @@ -650,7 +650,7 @@ argp_parser (int key, char *arg, struct argp_state *state)
@@ -1697,7 +1696,7 @@ index f14e02d97..57246af7c 100644
    argp_parse (&argp, argc, argv, 0, 0, 0);
  
 diff --git a/util/grub-install-common.c b/util/grub-install-common.c
-index fdfe2c7ea..447504d3f 100644
+index fdfe2c7..447504d 100644
 --- a/util/grub-install-common.c
 +++ b/util/grub-install-common.c
 @@ -286,7 +286,7 @@ handle_install_list (struct install_list *il, const char *val,
@@ -1710,7 +1709,7 @@ index fdfe2c7ea..447504d3f 100644
    for (ce = il->entries; ; ce++)
      {
 diff --git a/util/grub-install.c b/util/grub-install.c
-index f408b1986..843dfc7c8 100644
+index f408b19..843dfc7 100644
 --- a/util/grub-install.c
 +++ b/util/grub-install.c
 @@ -658,7 +658,7 @@ device_map_check_duplicates (const char *dev_map)
@@ -1732,7 +1731,7 @@ index f408b1986..843dfc7c8 100644
    for (curdev = grub_devices, curdrive = grub_drives; *curdev; curdev++,
         curdrive++)
 diff --git a/util/grub-mkimagexx.c b/util/grub-mkimagexx.c
-index bc087c2b5..d97d0e7be 100644
+index bc087c2..d97d0e7 100644
 --- a/util/grub-mkimagexx.c
 +++ b/util/grub-mkimagexx.c
 @@ -2294,10 +2294,8 @@ SUFFIX (grub_mkimage_load_image) (const char *kernel_path,
@@ -1749,7 +1748,7 @@ index bc087c2b5..d97d0e7be 100644
    SUFFIX (locate_sections) (e, kernel_path, &smd, layout, image_target);
  
 diff --git a/util/grub-mkrescue.c b/util/grub-mkrescue.c
-index 45d6140d3..cb972f120 100644
+index 45d6140..cb972f1 100644
 --- a/util/grub-mkrescue.c
 +++ b/util/grub-mkrescue.c
 @@ -441,8 +441,8 @@ main (int argc, char *argv[])
@@ -1764,7 +1763,7 @@ index 45d6140d3..cb972f120 100644
    xorriso_tail_argc = 0;
    /* Program name */
 diff --git a/util/grub-mkstandalone.c b/util/grub-mkstandalone.c
-index 4907d44c0..edf309717 100644
+index 4907d44..edf3097 100644
 --- a/util/grub-mkstandalone.c
 +++ b/util/grub-mkstandalone.c
 @@ -296,7 +296,7 @@ main (int argc, char *argv[])
@@ -1777,7 +1776,7 @@ index 4907d44c0..edf309717 100644
    argp_parse (&argp, argc, argv, 0, 0, 0);
  
 diff --git a/util/grub-pe2elf.c b/util/grub-pe2elf.c
-index 0d4084a10..11331294f 100644
+index 0d4084a..1133129 100644
 --- a/util/grub-pe2elf.c
 +++ b/util/grub-pe2elf.c
 @@ -100,9 +100,9 @@ write_section_data (FILE* fp, const char *name, char *image,
@@ -1817,7 +1816,7 @@ index 0d4084a10..11331294f 100644
    for (i = 0; i < (int) pe_chdr->num_symbols;
         i += pe_symtab->num_aux + 1, pe_symtab += pe_symtab->num_aux + 1)
 diff --git a/util/grub-probe.c b/util/grub-probe.c
-index 81d27eead..cbe6ed94c 100644
+index 81d27ee..cbe6ed9 100644
 --- a/util/grub-probe.c
 +++ b/util/grub-probe.c
 @@ -361,8 +361,8 @@ probe (const char *path, char **device_names, char delim)

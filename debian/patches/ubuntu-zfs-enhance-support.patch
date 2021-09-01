@@ -1,4 +1,3 @@
-From bdc1aad90a89af51e043f5bf9dc84019ad2cb75b Mon Sep 17 00:00:00 2001
 From: Didier Roche <didrocks@ubuntu.com>
 Date: Fri, 12 Jul 2019 11:06:06 -0400
 Subject: UBUNTU: Enhance ZFS grub support
@@ -22,12 +21,12 @@ Signed-off-by: Didier Roche <didier.roche@canonical.com>
 ---
  Makefile.util.def           |   7 +
  util/grub.d/10_linux.in     |   4 +
- util/grub.d/10_linux_zfs.in | 964 ++++++++++++++++++++++++++++++++++++
+ util/grub.d/10_linux_zfs.in | 964 ++++++++++++++++++++++++++++++++++++++++++++
  3 files changed, 975 insertions(+)
  create mode 100755 util/grub.d/10_linux_zfs.in
 
 diff --git a/Makefile.util.def b/Makefile.util.def
-index 969d32f00..bac85e284 100644
+index 969d32f..bac85e2 100644
 --- a/Makefile.util.def
 +++ b/Makefile.util.def
 @@ -482,6 +482,13 @@ script = {
@@ -45,7 +44,7 @@ index 969d32f00..bac85e284 100644
    name = '10_xnu';
    common = util/grub.d/10_xnu.in;
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index 4532266be..a75096609 100644
+index 4532266..a750966 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -71,6 +71,10 @@ case x"$GRUB_FS" in
@@ -61,7 +60,7 @@ index 4532266be..a75096609 100644
  	LINUX_ROOT_DEVICE="ZFS=${rpool}${bootfs%/}"
 diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
 new file mode 100755
-index 000000000..5ec65fa94
+index 0000000..5ec65fa
 --- /dev/null
 +++ b/util/grub.d/10_linux_zfs.in
 @@ -0,0 +1,964 @@

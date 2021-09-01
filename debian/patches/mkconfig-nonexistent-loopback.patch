@@ -1,4 +1,3 @@
-From 0a12aab871f0e938738305d89fc1e32915ea7fda Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@ubuntu.com>
 Date: Mon, 13 Jan 2014 12:13:08 +0000
 Subject: Avoid getting confused by inaccessible loop device backing paths
@@ -14,7 +13,7 @@ Patch-Name: mkconfig-nonexistent-loopback.patch
  2 files changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/util/grub-mkconfig_lib.in b/util/grub-mkconfig_lib.in
-index b05df554d..fe6319abe 100644
+index b05df55..fe6319a 100644
 --- a/util/grub-mkconfig_lib.in
 +++ b/util/grub-mkconfig_lib.in
 @@ -143,7 +143,7 @@ prepare_grub_to_access_device ()
@@ -27,7 +26,7 @@ index b05df554d..fe6319abe 100644
        esac
      ;;
 diff --git a/util/grub.d/30_os-prober.in b/util/grub.d/30_os-prober.in
-index 775ceb2e0..b7e1147c4 100644
+index 775ceb2..b7e1147 100644
 --- a/util/grub.d/30_os-prober.in
 +++ b/util/grub.d/30_os-prober.in
 @@ -219,6 +219,11 @@ EOF

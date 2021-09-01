@@ -1,4 +1,3 @@
-From 77ada294ae9feca7e4202f454ddf56245eee16bf Mon Sep 17 00:00:00 2001
 From: Mario Limonciello <Mario_Limonciello@dell.com>
 Date: Mon, 13 Jan 2014 12:13:14 +0000
 Subject: Remove GNU/Linux from default distributor string for Ubuntu
@@ -17,7 +16,7 @@ Patch-Name: mkconfig-ubuntu-distributor.patch
  2 files changed, 16 insertions(+), 2 deletions(-)
 
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index fcd303387..19e4df4ad 100644
+index fcd3033..19e4df4 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -32,7 +32,14 @@ CLASS="--class gnu-linux --class gnu --class os"
@@ -37,7 +36,7 @@ index fcd303387..19e4df4ad 100644
  fi
  
 diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index de4d21590..7f88e771e 100755
+index de4d215..7f88e77 100755
 --- a/util/grub.d/10_linux_zfs.in
 +++ b/util/grub.d/10_linux_zfs.in
 @@ -790,7 +790,14 @@ generate_grub_menu() {

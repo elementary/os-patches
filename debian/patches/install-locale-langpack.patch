@@ -1,4 +1,3 @@
-From 50921522fab0f4ce529b6c7acd6354b1b3cff2b1 Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@ubuntu.com>
 Date: Mon, 13 Jan 2014 12:13:07 +0000
 Subject: Prefer translations from Ubuntu language packs if available
@@ -13,7 +12,7 @@ Patch-Name: install-locale-langpack.patch
  1 file changed, 30 insertions(+), 7 deletions(-)
 
 diff --git a/util/grub-install-common.c b/util/grub-install-common.c
-index ca0ac612a..fdfe2c7ea 100644
+index ca0ac61..fdfe2c7 100644
 --- a/util/grub-install-common.c
 +++ b/util/grub-install-common.c
 @@ -609,17 +609,25 @@ get_localedir (void)

@@ -1,4 +1,3 @@
-From 521dfb27bc786d0567c97b704381677f57c4cfe4 Mon Sep 17 00:00:00 2001
 From: Michael Chang <mchang@suse.com>
 Date: Thu, 27 Oct 2016 17:43:05 -0400
 Subject: efinet: Setting network from UEFI device path
@@ -29,12 +28,12 @@ Signed-off-by: Ken Lin <ken.lin@hpe.com>
 
 Patch-Name: efinet-set-network-from-uefi-devpath.patch
 ---
- grub-core/net/drivers/efi/efinet.c | 268 ++++++++++++++++++++++++++++-
+ grub-core/net/drivers/efi/efinet.c | 268 +++++++++++++++++++++++++++++++++++--
  include/grub/efi/api.h             |  11 ++
  2 files changed, 270 insertions(+), 9 deletions(-)
 
 diff --git a/grub-core/net/drivers/efi/efinet.c b/grub-core/net/drivers/efi/efinet.c
-index fc90415f2..2d3b00f0e 100644
+index fc90415..2d3b00f 100644
 --- a/grub-core/net/drivers/efi/efinet.c
 +++ b/grub-core/net/drivers/efi/efinet.c
 @@ -23,6 +23,7 @@
@@ -358,7 +357,7 @@ index fc90415f2..2d3b00f0e 100644
    }
  }
 diff --git a/include/grub/efi/api.h b/include/grub/efi/api.h
-index ca6cdc159..664cea37b 100644
+index ca6cdc1..664cea3 100644
 --- a/include/grub/efi/api.h
 +++ b/include/grub/efi/api.h
 @@ -825,6 +825,8 @@ struct grub_efi_ipv4_device_path

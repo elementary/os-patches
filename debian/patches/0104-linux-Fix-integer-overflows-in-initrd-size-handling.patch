@@ -1,4 +1,3 @@
-From 380bd0958d4a608c039655f021c0961223b432a7 Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@debian.org>
 Date: Sat, 25 Jul 2020 12:15:37 +0100
 Subject: linux: Fix integer overflows in initrd size handling
@@ -10,11 +9,11 @@ Fixes: CVE-2020-15707
 Signed-off-by: Colin Watson <cjwatson@debian.org>
 Reviewed-by: Jan Setje-Eilers <jan.setjeeilers@oracle.com>
 ---
- grub-core/loader/linux.c | 74 +++++++++++++++++++++++++++++-----------
+ grub-core/loader/linux.c | 74 +++++++++++++++++++++++++++++++++++-------------
  1 file changed, 54 insertions(+), 20 deletions(-)
 
 diff --git a/grub-core/loader/linux.c b/grub-core/loader/linux.c
-index 25624ebc1..e9f819ee9 100644
+index 25624eb..e9f819e 100644
 --- a/grub-core/loader/linux.c
 +++ b/grub-core/loader/linux.c
 @@ -4,6 +4,7 @@

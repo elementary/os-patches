@@ -1,4 +1,3 @@
-From e65a84829a8b80bc50dd9ee81816ee03d6505f7c Mon Sep 17 00:00:00 2001
 From: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
 Date: Thu, 9 Jul 2020 03:05:23 +0000
 Subject: lzma: Make sure we don't dereference past array
@@ -21,7 +20,7 @@ Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
  1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/grub-core/lib/LzmaEnc.c b/grub-core/lib/LzmaEnc.c
-index f2ec04a8c..753e56a95 100644
+index f2ec04a..753e56a 100644
 --- a/grub-core/lib/LzmaEnc.c
 +++ b/grub-core/lib/LzmaEnc.c
 @@ -1877,13 +1877,19 @@ static SRes LzmaEnc_CodeOneBlock(CLzmaEnc *p, Bool useLimits, UInt32 maxPackSize

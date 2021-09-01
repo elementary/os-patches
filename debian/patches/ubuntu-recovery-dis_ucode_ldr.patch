@@ -1,4 +1,3 @@
-From eadf7d3423b13556336ee7c6d2ed651e4a376f0e Mon Sep 17 00:00:00 2001
 From: Julian Andres Klode <julian.klode@canonical.com>
 Date: Fri, 19 Jun 2020 12:57:19 +0200
 Subject: Pass dis_ucode_ldr to kernel for recovery mode
@@ -19,7 +18,7 @@ Patch-Name: ubuntu-recovery-dis_ucode_ldr.patch
  2 files changed, 19 insertions(+), 9 deletions(-)
 
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index 14a89ba13..49e627228 100644
+index 14a89ba..49e6272 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -334,6 +334,10 @@ case "$machine" in
@@ -34,7 +33,7 @@ index 14a89ba13..49e627228 100644
  prepare_root_cache=
  boot_device_id=
 diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index 712d83280..d9b79e29a 100755
+index 712d832..d9b79e2 100755
 --- a/util/grub.d/10_linux_zfs.in
 +++ b/util/grub.d/10_linux_zfs.in
 @@ -41,6 +41,16 @@ imported_pools=""

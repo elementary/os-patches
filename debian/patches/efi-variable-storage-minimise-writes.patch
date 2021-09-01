@@ -1,4 +1,3 @@
-From b18e6318f49373c1018be8b6d34266a009f10ae8 Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@ubuntu.com>
 Date: Mon, 11 Mar 2019 11:17:43 +0000
 Subject: Minimise writes to EFI variable storage
@@ -51,8 +50,8 @@ Patch-Name: efi-variable-storage-minimise-writes.patch
  Makefile.util.def               |  20 ++
  configure.ac                    |  12 +
  grub-core/osdep/efivar.c        |   3 +
- grub-core/osdep/unix/efivar.c   | 508 ++++++++++++++++++++++++++++++++
- grub-core/osdep/unix/platform.c | 100 +------
+ grub-core/osdep/unix/efivar.c   | 508 ++++++++++++++++++++++++++++++++++++++++
+ grub-core/osdep/unix/platform.c | 100 +-------
  include/grub/util/install.h     |   5 +
  util/grub-install.c             |   4 +-
  8 files changed, 562 insertions(+), 95 deletions(-)
@@ -60,7 +59,7 @@ Patch-Name: efi-variable-storage-minimise-writes.patch
  create mode 100644 grub-core/osdep/unix/efivar.c
 
 diff --git a/INSTALL b/INSTALL
-index 8acb40902..342c158e9 100644
+index 8acb409..342c158 100644
 --- a/INSTALL
 +++ b/INSTALL
 @@ -41,6 +41,11 @@ configuring the GRUB.
@@ -76,7 +75,7 @@ index 8acb40902..342c158e9 100644
  
  * libdevmapper 1.02.34 or later (recommended)
 diff --git a/Makefile.util.def b/Makefile.util.def
-index ce133e694..504d1c058 100644
+index ce133e6..504d1c0 100644
 --- a/Makefile.util.def
 +++ b/Makefile.util.def
 @@ -565,6 +565,8 @@ program = {
@@ -180,7 +179,7 @@ index ce133e694..504d1c058 100644
  
  script = {
 diff --git a/configure.ac b/configure.ac
-index e382c7480..883245553 100644
+index e382c74..8832455 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -443,6 +443,18 @@ AC_CHECK_HEADER([util.h], [
@@ -204,7 +203,7 @@ index e382c7480..883245553 100644
    CFLAGS="$HOST_CFLAGS -Wtrampolines -Werror"
 diff --git a/grub-core/osdep/efivar.c b/grub-core/osdep/efivar.c
 new file mode 100644
-index 000000000..d2750e252
+index 0000000..d2750e2
 --- /dev/null
 +++ b/grub-core/osdep/efivar.c
 @@ -0,0 +1,3 @@
@@ -213,7 +212,7 @@ index 000000000..d2750e252
 +#endif
 diff --git a/grub-core/osdep/unix/efivar.c b/grub-core/osdep/unix/efivar.c
 new file mode 100644
-index 000000000..4a58328b4
+index 0000000..4a58328
 --- /dev/null
 +++ b/grub-core/osdep/unix/efivar.c
 @@ -0,0 +1,508 @@
@@ -726,7 +725,7 @@ index 000000000..4a58328b4
 +
 +#endif /* HAVE_EFIVAR */
 diff --git a/grub-core/osdep/unix/platform.c b/grub-core/osdep/unix/platform.c
-index 9c439326a..b561174ea 100644
+index 9c43932..b561174 100644
 --- a/grub-core/osdep/unix/platform.c
 +++ b/grub-core/osdep/unix/platform.c
 @@ -19,15 +19,12 @@
@@ -856,7 +855,7 @@ index 9c439326a..b561174ea 100644
  
  void
 diff --git a/include/grub/util/install.h b/include/grub/util/install.h
-index 8aeb5c4f2..a521f1663 100644
+index 8aeb5c4..a521f16 100644
 --- a/include/grub/util/install.h
 +++ b/include/grub/util/install.h
 @@ -219,6 +219,11 @@ grub_install_get_default_x86_platform (void);
@@ -872,7 +871,7 @@ index 8aeb5c4f2..a521f1663 100644
  grub_install_register_efi (grub_device_t efidir_grub_dev,
  			   const char *efifile_path,
 diff --git a/util/grub-install.c b/util/grub-install.c
-index 4bad8de61..63462e4e0 100644
+index 4bad8de..63462e4 100644
 --- a/util/grub-install.c
 +++ b/util/grub-install.c
 @@ -2084,7 +2084,7 @@ main (int argc, char *argv[])

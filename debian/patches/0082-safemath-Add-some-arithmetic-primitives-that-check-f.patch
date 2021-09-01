@@ -1,4 +1,3 @@
-From a2bba5d8e79c68b37ce02a67c59c8c91436ea262 Mon Sep 17 00:00:00 2001
 From: Peter Jones <pjones@redhat.com>
 Date: Mon, 15 Jun 2020 10:58:42 -0400
 Subject: safemath: Add some arithmetic primitives that check for overflow
@@ -25,7 +24,7 @@ Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
  create mode 100644 include/grub/safemath.h
 
 diff --git a/INSTALL b/INSTALL
-index 342c158e9..991479b52 100644
+index 342c158..991479b 100644
 --- a/INSTALL
 +++ b/INSTALL
 @@ -11,27 +11,9 @@ GRUB depends on some software packages installed into your system. If
@@ -59,7 +58,7 @@ index 342c158e9..991479b52 100644
  * GNU Bison 2.3 or later
  * GNU gettext 0.17 or later
 diff --git a/include/grub/compiler.h b/include/grub/compiler.h
-index c9e1d7a73..8f3be3ae7 100644
+index c9e1d7a..8f3be3a 100644
 --- a/include/grub/compiler.h
 +++ b/include/grub/compiler.h
 @@ -48,4 +48,12 @@
@@ -77,7 +76,7 @@ index c9e1d7a73..8f3be3ae7 100644
  #endif /* ! GRUB_COMPILER_HEADER */
 diff --git a/include/grub/safemath.h b/include/grub/safemath.h
 new file mode 100644
-index 000000000..c17b89bba
+index 0000000..c17b89b
 --- /dev/null
 +++ b/include/grub/safemath.h
 @@ -0,0 +1,37 @@

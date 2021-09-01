@@ -1,4 +1,3 @@
-From 92f0f99e1e0d9c38a427009831aa8cca278850ec Mon Sep 17 00:00:00 2001
 From: Julian Andres Klode <julian.klode@canonical.com>
 Date: Wed, 8 Apr 2020 11:05:25 +0200
 Subject: UBUNTU: efivar: Correctly handle boot order of multiple ESPs
@@ -22,15 +21,15 @@ primary ESP - that is, mounted to /boot/efi - or not.
 Patch-Name: ubuntu-resilient-boot-boot-order.patch
 ---
  grub-core/osdep/basic/no_platform.c |  2 +-
- grub-core/osdep/unix/efivar.c       | 48 +++++++++++++++++++++++++----
- grub-core/osdep/unix/platform.c     |  6 ++--
+ grub-core/osdep/unix/efivar.c       | 48 ++++++++++++++++++++++++++++++++-----
+ grub-core/osdep/unix/platform.c     |  6 ++---
  grub-core/osdep/windows/platform.c  |  2 +-
- include/grub/util/install.h         | 17 +++++-----
- util/grub-install.c                 |  8 ++---
+ include/grub/util/install.h         | 17 +++++++------
+ util/grub-install.c                 |  8 +++----
  6 files changed, 59 insertions(+), 24 deletions(-)
 
 diff --git a/grub-core/osdep/basic/no_platform.c b/grub-core/osdep/basic/no_platform.c
-index d76c34c14..152a32873 100644
+index d76c34c..152a328 100644
 --- a/grub-core/osdep/basic/no_platform.c
 +++ b/grub-core/osdep/basic/no_platform.c
 @@ -31,7 +31,7 @@ grub_install_register_ieee1275 (int is_prep, const char *install_device,
@@ -43,7 +42,7 @@ index d76c34c14..152a32873 100644
  			   const char *efi_distributor)
  {
 diff --git a/grub-core/osdep/unix/efivar.c b/grub-core/osdep/unix/efivar.c
-index 41d39c448..d34df0f70 100644
+index 41d39c4..d34df0f 100644
 --- a/grub-core/osdep/unix/efivar.c
 +++ b/grub-core/osdep/unix/efivar.c
 @@ -266,9 +266,10 @@ remove_from_boot_order (struct efi_variable *order, uint16_t num)
@@ -142,7 +141,7 @@ index 41d39c448..d34df0f70 100644
    grub_util_info ("setting EFI variable BootOrder");
    rc = set_efi_variable ("BootOrder", order);
 diff --git a/grub-core/osdep/unix/platform.c b/grub-core/osdep/unix/platform.c
-index b561174ea..a5267db68 100644
+index b561174..a5267db 100644
 --- a/grub-core/osdep/unix/platform.c
 +++ b/grub-core/osdep/unix/platform.c
 @@ -76,13 +76,13 @@ get_ofpathname (const char *dev)
@@ -163,7 +162,7 @@ index b561174ea..a5267db68 100644
    grub_util_error ("%s",
  		   _("GRUB was not built with efivar support; "
 diff --git a/grub-core/osdep/windows/platform.c b/grub-core/osdep/windows/platform.c
-index e19a3d9a8..a3f738fb9 100644
+index e19a3d9..a3f738f 100644
 --- a/grub-core/osdep/windows/platform.c
 +++ b/grub-core/osdep/windows/platform.c
 @@ -208,7 +208,7 @@ set_efi_variable_bootn (grub_uint16_t n, void *in, grub_size_t len)
@@ -176,7 +175,7 @@ index e19a3d9a8..a3f738fb9 100644
  			   const char *efi_distributor)
  {
 diff --git a/include/grub/util/install.h b/include/grub/util/install.h
-index a521f1663..b2ed88e38 100644
+index a521f16..b2ed88e 100644
 --- a/include/grub/util/install.h
 +++ b/include/grub/util/install.h
 @@ -219,15 +219,14 @@ grub_install_get_default_x86_platform (void);
@@ -204,7 +203,7 @@ index a521f1663..b2ed88e38 100644
  void
  grub_install_register_ieee1275 (int is_prep, const char *install_device,
 diff --git a/util/grub-install.c b/util/grub-install.c
-index bf8eb65b3..f408b1986 100644
+index bf8eb65..f408b19 100644
 --- a/util/grub-install.c
 +++ b/util/grub-install.c
 @@ -2083,9 +2083,9 @@ main (int argc, char *argv[])

@@ -1,8 +1,7 @@
-From 0a30e40f057d4909ddb9f7d55c47a390d9c322d4 Mon Sep 17 00:00:00 2001
 From: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
 Date: Fri, 25 Oct 2019 10:25:04 -0400
-Subject: tpm: Pass unknown error as non-fatal, but debug print the error we
- got
+Subject: tpm: Pass unknown error as non-fatal,
+ but debug print the error we got
 
 Signed-off-by: Mathieu Trudel-Lapierre <mathieu.trudel-lapierre@canonical.com>
 Patch-Name: ubuntu-tpm-unknown-error-non-fatal.patch
@@ -11,7 +10,7 @@ Patch-Name: ubuntu-tpm-unknown-error-non-fatal.patch
  1 file changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/grub-core/commands/efi/tpm.c b/grub-core/commands/efi/tpm.c
-index 32909c192..fdbaaee19 100644
+index 32909c1..fdbaaee 100644
 --- a/grub-core/commands/efi/tpm.c
 +++ b/grub-core/commands/efi/tpm.c
 @@ -155,7 +155,8 @@ grub_tpm1_execute (grub_efi_handle_t tpm_handle,

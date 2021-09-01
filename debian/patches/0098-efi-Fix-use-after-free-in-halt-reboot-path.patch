@@ -1,4 +1,3 @@
-From 77d24d44ae007d007cd51b02323806fe0fc7dbaa Mon Sep 17 00:00:00 2001
 From: Alexey Makhalov <amakhalov@vmware.com>
 Date: Mon, 20 Jul 2020 23:03:05 +0000
 Subject: efi: Fix use-after-free in halt/reboot path
@@ -52,7 +51,7 @@ Reviewed-by: Darren Kenny <darren.kenny@oracle.com>
  9 files changed, 28 insertions(+), 7 deletions(-)
 
 diff --git a/grub-core/kern/arm/efi/init.c b/grub-core/kern/arm/efi/init.c
-index 06df60e2f..40c3b467f 100644
+index 06df60e..40c3b46 100644
 --- a/grub-core/kern/arm/efi/init.c
 +++ b/grub-core/kern/arm/efi/init.c
 @@ -71,4 +71,7 @@ grub_machine_fini (int flags)
@@ -64,7 +63,7 @@ index 06df60e2f..40c3b467f 100644
 +    grub_efi_memory_fini ();
  }
 diff --git a/grub-core/kern/arm64/efi/init.c b/grub-core/kern/arm64/efi/init.c
-index 6224999ec..5010caefd 100644
+index 6224999..5010cae 100644
 --- a/grub-core/kern/arm64/efi/init.c
 +++ b/grub-core/kern/arm64/efi/init.c
 @@ -57,4 +57,7 @@ grub_machine_fini (int flags)
@@ -76,7 +75,7 @@ index 6224999ec..5010caefd 100644
 +    grub_efi_memory_fini ();
  }
 diff --git a/grub-core/kern/efi/efi.c b/grub-core/kern/efi/efi.c
-index b1a8b39b4..88bbd34ea 100644
+index b1a8b39..88bbd34 100644
 --- a/grub-core/kern/efi/efi.c
 +++ b/grub-core/kern/efi/efi.c
 @@ -157,7 +157,8 @@ grub_efi_get_loaded_image (grub_efi_handle_t image_handle)
@@ -90,7 +89,7 @@ index b1a8b39b4..88bbd34ea 100644
                GRUB_EFI_RESET_COLD, GRUB_EFI_SUCCESS, 0, NULL);
    for (;;) ;
 diff --git a/grub-core/kern/efi/init.c b/grub-core/kern/efi/init.c
-index 3dfdf2d22..2c31847bf 100644
+index 3dfdf2d..2c31847 100644
 --- a/grub-core/kern/efi/init.c
 +++ b/grub-core/kern/efi/init.c
 @@ -80,5 +80,4 @@ grub_efi_fini (void)
@@ -100,7 +99,7 @@ index 3dfdf2d22..2c31847bf 100644
 -  grub_efi_memory_fini ();
  }
 diff --git a/grub-core/kern/i386/efi/init.c b/grub-core/kern/i386/efi/init.c
-index da499aba0..deb2eacd8 100644
+index da499ab..deb2eac 100644
 --- a/grub-core/kern/i386/efi/init.c
 +++ b/grub-core/kern/i386/efi/init.c
 @@ -39,6 +39,11 @@ grub_machine_init (void)
@@ -118,7 +117,7 @@ index da499aba0..deb2eacd8 100644
 +    grub_efi_memory_fini ();
  }
 diff --git a/grub-core/kern/ia64/efi/init.c b/grub-core/kern/ia64/efi/init.c
-index b5ecbd091..f1965571b 100644
+index b5ecbd0..f196557 100644
 --- a/grub-core/kern/ia64/efi/init.c
 +++ b/grub-core/kern/ia64/efi/init.c
 @@ -70,6 +70,11 @@ grub_machine_init (void)
@@ -136,7 +135,7 @@ index b5ecbd091..f1965571b 100644
 +    grub_efi_memory_fini ();
  }
 diff --git a/grub-core/kern/riscv/efi/init.c b/grub-core/kern/riscv/efi/init.c
-index 7eb1969d0..38795fe67 100644
+index 7eb1969..38795fe 100644
 --- a/grub-core/kern/riscv/efi/init.c
 +++ b/grub-core/kern/riscv/efi/init.c
 @@ -73,4 +73,7 @@ grub_machine_fini (int flags)
@@ -148,7 +147,7 @@ index 7eb1969d0..38795fe67 100644
 +    grub_efi_memory_fini ();
  }
 diff --git a/grub-core/lib/efi/halt.c b/grub-core/lib/efi/halt.c
-index 5859f0498..29d413641 100644
+index 5859f04..29d4136 100644
 --- a/grub-core/lib/efi/halt.c
 +++ b/grub-core/lib/efi/halt.c
 @@ -28,7 +28,8 @@
@@ -162,7 +161,7 @@ index 5859f0498..29d413641 100644
      !defined(__riscv)
    grub_acpi_halt ();
 diff --git a/include/grub/loader.h b/include/grub/loader.h
-index 7f82a499f..b20864282 100644
+index 7f82a49..b208642 100644
 --- a/include/grub/loader.h
 +++ b/include/grub/loader.h
 @@ -33,6 +33,7 @@ enum

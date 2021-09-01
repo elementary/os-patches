@@ -1,3 +1,25 @@
+grub2 (2.04-1ubuntu26.13) focal; urgency=medium
+
+  [ Julian Andres Klode ]
+  * unapply all patches, use gbp pq instead of git-dpm
+
+  [ Dimitri John Ledkov ]
+  * 10_linux: emit messages when initrdless boot is configured, attempted and
+    fails triggering fallback. LP: #1901553
+  * grub-common.service: port init.d script to systemd unit. Add warning
+    message, when initrdless boot fails triggering fallback. LP: #1901553
+  * debian/grub-common.service: change type to oneshot, add wantedby
+    sleep.target, after sleep.target. The service will now start after resume
+    from hybernation.  (LP: #1929860)
+  * grub-initrd-fallback.service: add wantedby sleep.target, after
+    sleep.target. The service will now start after resume from hybernation.
+    LP: #1929860
+  * grub-initrd-fallback.service, debian/grub-common.service: only start units
+    when booted with grub. Use presence of /boot/grub/grub.cfg as proxy. LP:
+    #1925507
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 12 Aug 2021 11:18:25 +0200
+
 grub2 (2.04-1ubuntu26.12) focal; urgency=medium
 
   * Bump the version number in the replaces for grub-efi-* to account for

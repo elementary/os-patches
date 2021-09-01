@@ -1,4 +1,3 @@
-From 5d037853169fac31b3c0cfe7a6b6c4eb267879d3 Mon Sep 17 00:00:00 2001
 From: Matthew Garrett <mjg@redhat.com>
 Date: Wed, 27 Feb 2019 12:20:48 -0500
 Subject: UBUNTU: Add support for linuxefi
@@ -322,25 +321,25 @@ Last-Update: 2018-12-07
  grub-core/commands/memrw.c             |   7 +
  grub-core/kern/arm/coreboot/coreboot.S |   6 +
  grub-core/kern/dl.c                    |   1 +
- grub-core/kern/efi/efi.c               |  28 -
- grub-core/kern/efi/mm.c                |  32 +
- grub-core/kern/efi/sb.c                |  66 ++
+ grub-core/kern/efi/efi.c               |  28 --
+ grub-core/kern/efi/mm.c                |  32 ++
+ grub-core/kern/efi/sb.c                |  66 +++
  grub-core/loader/arm64/linux.c         |  16 +
  grub-core/loader/efi/appleloader.c     |   7 +
- grub-core/loader/efi/chainloader.c     | 817 +++++++++++++++++++++++--
+ grub-core/loader/efi/chainloader.c     | 817 ++++++++++++++++++++++++++++++---
  grub-core/loader/efi/fdt.c             |   1 +
- grub-core/loader/efi/linux.c           |  86 +++
+ grub-core/loader/efi/linux.c           |  86 ++++
  grub-core/loader/i386/bsd.c            |   7 +
- grub-core/loader/i386/efi/linux.c      | 379 ++++++++++++
- grub-core/loader/i386/linux.c          |  78 ++-
+ grub-core/loader/i386/efi/linux.c      | 379 +++++++++++++++
+ grub-core/loader/i386/linux.c          |  78 +++-
  grub-core/loader/i386/pc/linux.c       |  40 +-
  grub-core/loader/multiboot.c           |   7 +
  grub-core/loader/xnu.c                 |   7 +
  include/grub/arm64/linux.h             |   2 +
  include/grub/efi/efi.h                 |   4 +-
- include/grub/efi/linux.h               |  31 +
- include/grub/efi/pe32.h                |  52 +-
- include/grub/efi/sb.h                  |  29 +
+ include/grub/efi/linux.h               |  31 ++
+ include/grub/efi/pe32.h                |  52 ++-
+ include/grub/efi/sb.h                  |  29 ++
  include/grub/i386/linux.h              |   7 +-
  include/grub/ia64/linux.h              |   0
  include/grub/mips/linux.h              |   0
@@ -358,7 +357,7 @@ Last-Update: 2018-12-07
  create mode 100644 include/grub/sparc64/linux.h
 
 diff --git a/grub-core/Makefile.am b/grub-core/Makefile.am
-index 3ea8e7ff4..c6ba5b2d7 100644
+index 3ea8e7f..c6ba5b2 100644
 --- a/grub-core/Makefile.am
 +++ b/grub-core/Makefile.am
 @@ -71,6 +71,7 @@ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/command.h
@@ -370,7 +369,7 @@ index 3ea8e7ff4..c6ba5b2d7 100644
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/env_private.h
  KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/err.h
 diff --git a/grub-core/Makefile.core.def b/grub-core/Makefile.core.def
-index aadb4cdff..1731c53f0 100644
+index aadb4cd..1731c53 100644
 --- a/grub-core/Makefile.core.def
 +++ b/grub-core/Makefile.core.def
 @@ -207,6 +207,7 @@ kernel = {
@@ -428,7 +427,7 @@ index aadb4cdff..1731c53f0 100644
    enable = i386_coreboot;
    enable = efi;
 diff --git a/grub-core/commands/iorw.c b/grub-core/commands/iorw.c
-index a0c164e54..41a7f3f04 100644
+index a0c164e..41a7f3f 100644
 --- a/grub-core/commands/iorw.c
 +++ b/grub-core/commands/iorw.c
 @@ -23,6 +23,7 @@
@@ -460,7 +459,7 @@ index a0c164e54..41a7f3f04 100644
    grub_unregister_extcmd (cmd_read_word);
    grub_unregister_extcmd (cmd_read_dword);
 diff --git a/grub-core/commands/memrw.c b/grub-core/commands/memrw.c
-index 98769eadb..088cbe9e2 100644
+index 98769ea..088cbe9 100644
 --- a/grub-core/commands/memrw.c
 +++ b/grub-core/commands/memrw.c
 @@ -22,6 +22,7 @@
@@ -492,7 +491,7 @@ index 98769eadb..088cbe9e2 100644
    grub_unregister_extcmd (cmd_read_word);
    grub_unregister_extcmd (cmd_read_dword);
 diff --git a/grub-core/kern/arm/coreboot/coreboot.S b/grub-core/kern/arm/coreboot/coreboot.S
-index a1104526c..70998c066 100644
+index a110452..70998c0 100644
 --- a/grub-core/kern/arm/coreboot/coreboot.S
 +++ b/grub-core/kern/arm/coreboot/coreboot.S
 @@ -42,3 +42,9 @@ FUNCTION(grub_armv7_get_timer_frequency)
@@ -506,7 +505,7 @@ index a1104526c..70998c066 100644
 +				  void *kernel_param);
 +
 diff --git a/grub-core/kern/dl.c b/grub-core/kern/dl.c
-index 074dfc3c6..d665c10fc 100644
+index 074dfc3..d665c10 100644
 --- a/grub-core/kern/dl.c
 +++ b/grub-core/kern/dl.c
 @@ -32,6 +32,7 @@
@@ -518,7 +517,7 @@ index 074dfc3c6..d665c10fc 100644
  /* Platforms where modules are in a readonly area of memory.  */
  #if defined(GRUB_MACHINE_QEMU)
 diff --git a/grub-core/kern/efi/efi.c b/grub-core/kern/efi/efi.c
-index 96204e39b..6e1ceb905 100644
+index 96204e3..6e1ceb9 100644
 --- a/grub-core/kern/efi/efi.c
 +++ b/grub-core/kern/efi/efi.c
 @@ -273,34 +273,6 @@ grub_efi_get_variable (const char *var, const grub_efi_guid_t *guid,
@@ -557,7 +556,7 @@ index 96204e39b..6e1ceb905 100644
  
  /* Search the mods section from the PE32/PE32+ image. This code uses
 diff --git a/grub-core/kern/efi/mm.c b/grub-core/kern/efi/mm.c
-index b02fab1b1..a9e37108c 100644
+index b02fab1..a9e3710 100644
 --- a/grub-core/kern/efi/mm.c
 +++ b/grub-core/kern/efi/mm.c
 @@ -113,6 +113,38 @@ grub_efi_drop_alloc (grub_efi_physical_address_t address,
@@ -601,7 +600,7 @@ index b02fab1b1..a9e37108c 100644
  grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
 diff --git a/grub-core/kern/efi/sb.c b/grub-core/kern/efi/sb.c
 new file mode 100644
-index 000000000..c14f401d7
+index 0000000..c14f401
 --- /dev/null
 +++ b/grub-core/kern/efi/sb.c
 @@ -0,0 +1,66 @@
@@ -672,7 +671,7 @@ index 000000000..c14f401d7
 +#endif
 +}
 diff --git a/grub-core/loader/arm64/linux.c b/grub-core/loader/arm64/linux.c
-index ef3e9f944..1a5296a60 100644
+index ef3e9f9..1a5296a 100644
 --- a/grub-core/loader/arm64/linux.c
 +++ b/grub-core/loader/arm64/linux.c
 @@ -27,6 +27,7 @@
@@ -720,7 +719,7 @@ index ef3e9f944..1a5296a60 100644
    linux_args = grub_malloc (cmdline_size);
    if (!linux_args)
 diff --git a/grub-core/loader/efi/appleloader.c b/grub-core/loader/efi/appleloader.c
-index 74888c463..69c2a10d3 100644
+index 74888c4..69c2a10 100644
 --- a/grub-core/loader/efi/appleloader.c
 +++ b/grub-core/loader/efi/appleloader.c
 @@ -24,6 +24,7 @@
@@ -751,7 +750,7 @@ index 74888c463..69c2a10d3 100644
    grub_unregister_command (cmd);
  }
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index cd92ea3f2..ec80f415b 100644
+index cd92ea3..ec80f41 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
 @@ -32,6 +32,9 @@
@@ -1701,7 +1700,7 @@ index cd92ea3f2..ec80f415b 100644
  
    return grub_errno;
 diff --git a/grub-core/loader/efi/fdt.c b/grub-core/loader/efi/fdt.c
-index f0c2d91be..5360e6c1f 100644
+index f0c2d91..5360e6c 100644
 --- a/grub-core/loader/efi/fdt.c
 +++ b/grub-core/loader/efi/fdt.c
 @@ -25,6 +25,7 @@
@@ -1714,7 +1713,7 @@ index f0c2d91be..5360e6c1f 100644
  static void *fdt;
 diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
 new file mode 100644
-index 000000000..e372b26a1
+index 0000000..e372b26
 --- /dev/null
 +++ b/grub-core/loader/efi/linux.c
 @@ -0,0 +1,86 @@
@@ -1805,7 +1804,7 @@ index 000000000..e372b26a1
 +  return GRUB_ERR_BUG;
 +}
 diff --git a/grub-core/loader/i386/bsd.c b/grub-core/loader/i386/bsd.c
-index 3730ed382..5b9b92d6b 100644
+index 3730ed3..5b9b92d 100644
 --- a/grub-core/loader/i386/bsd.c
 +++ b/grub-core/loader/i386/bsd.c
 @@ -39,6 +39,7 @@
@@ -1838,7 +1837,7 @@ index 3730ed382..5b9b92d6b 100644
    grub_unregister_extcmd (cmd_netbsd);
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
 new file mode 100644
-index 000000000..6b6aef87f
+index 0000000..6b6aef8
 --- /dev/null
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -0,0 +1,379 @@
@@ -2222,7 +2221,7 @@ index 000000000..6b6aef87f
 +  grub_unregister_command (cmd_initrd);
 +}
 diff --git a/grub-core/loader/i386/linux.c b/grub-core/loader/i386/linux.c
-index d0501e229..4328bcbdb 100644
+index d0501e2..4328bcb 100644
 --- a/grub-core/loader/i386/linux.c
 +++ b/grub-core/loader/i386/linux.c
 @@ -45,6 +45,7 @@ GRUB_MOD_LICENSE ("GPLv3+");
@@ -2390,7 +2389,7 @@ index d0501e229..4328bcbdb 100644
      {
        grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
 diff --git a/grub-core/loader/i386/pc/linux.c b/grub-core/loader/i386/pc/linux.c
-index 47ea2945e..3866f048b 100644
+index 47ea294..3866f04 100644
 --- a/grub-core/loader/i386/pc/linux.c
 +++ b/grub-core/loader/i386/pc/linux.c
 @@ -35,6 +35,7 @@
@@ -2503,7 +2502,7 @@ index 47ea2945e..3866f048b 100644
    grub_unregister_command (cmd_initrd);
  }
 diff --git a/grub-core/loader/multiboot.c b/grub-core/loader/multiboot.c
-index 4a98d7082..3e6ad166d 100644
+index 4a98d70..3e6ad16 100644
 --- a/grub-core/loader/multiboot.c
 +++ b/grub-core/loader/multiboot.c
 @@ -50,6 +50,7 @@
@@ -2535,7 +2534,7 @@ index 4a98d7082..3e6ad166d 100644
    grub_unregister_command (cmd_module);
  }
 diff --git a/grub-core/loader/xnu.c b/grub-core/loader/xnu.c
-index 7f74d1d6f..e0f47e72b 100644
+index 7f74d1d..e0f47e7 100644
 --- a/grub-core/loader/xnu.c
 +++ b/grub-core/loader/xnu.c
 @@ -34,6 +34,7 @@
@@ -2567,7 +2566,7 @@ index 7f74d1d6f..e0f47e72b 100644
    grub_unregister_command (cmd_resume);
  #endif
 diff --git a/include/grub/arm64/linux.h b/include/grub/arm64/linux.h
-index 4269adc6d..cc8174ccd 100644
+index 4269adc..cc8174c 100644
 --- a/include/grub/arm64/linux.h
 +++ b/include/grub/arm64/linux.h
 @@ -20,6 +20,8 @@
@@ -2580,7 +2579,7 @@ index 4269adc6d..cc8174ccd 100644
  /* From linux/Documentation/arm64/booting.txt */
  struct linux_arm64_kernel_header
 diff --git a/include/grub/efi/efi.h b/include/grub/efi/efi.h
-index a237952b3..5b6387581 100644
+index a237952..5b63875 100644
 --- a/include/grub/efi/efi.h
 +++ b/include/grub/efi/efi.h
 @@ -47,6 +47,9 @@ EXPORT_FUNC(grub_efi_allocate_fixed) (grub_efi_physical_address_t address,
@@ -2603,7 +2602,7 @@ index a237952b3..5b6387581 100644
  					     const grub_efi_device_path_t *dp2);
 diff --git a/include/grub/efi/linux.h b/include/grub/efi/linux.h
 new file mode 100644
-index 000000000..0033d9305
+index 0000000..0033d93
 --- /dev/null
 +++ b/include/grub/efi/linux.h
 @@ -0,0 +1,31 @@
@@ -2639,7 +2638,7 @@ index 000000000..0033d9305
 +
 +#endif /* ! GRUB_EFI_LINUX_HEADER */
 diff --git a/include/grub/efi/pe32.h b/include/grub/efi/pe32.h
-index 0ed8781f0..a43adf274 100644
+index 0ed8781..a43adf2 100644
 --- a/include/grub/efi/pe32.h
 +++ b/include/grub/efi/pe32.h
 @@ -223,7 +223,11 @@ struct grub_pe64_optional_header
@@ -2730,7 +2729,7 @@ index 0ed8781f0..a43adf274 100644
    grub_uint32_t page_rva;
 diff --git a/include/grub/efi/sb.h b/include/grub/efi/sb.h
 new file mode 100644
-index 000000000..9629fbb0f
+index 0000000..9629fbb
 --- /dev/null
 +++ b/include/grub/efi/sb.h
 @@ -0,0 +1,29 @@
@@ -2764,7 +2763,7 @@ index 000000000..9629fbb0f
 +
 +#endif /* ! GRUB_EFI_SB_HEADER */
 diff --git a/include/grub/i386/linux.h b/include/grub/i386/linux.h
-index ce30e7fb0..a093679cb 100644
+index ce30e7f..a093679 100644
 --- a/include/grub/i386/linux.h
 +++ b/include/grub/i386/linux.h
 @@ -136,7 +136,12 @@ struct linux_i386_kernel_header
@@ -2783,13 +2782,13 @@ index ce30e7fb0..a093679cb 100644
    grub_uint64_t hardware_subarch_data;
 diff --git a/include/grub/ia64/linux.h b/include/grub/ia64/linux.h
 new file mode 100644
-index 000000000..e69de29bb
+index 0000000..e69de29
 diff --git a/include/grub/mips/linux.h b/include/grub/mips/linux.h
 new file mode 100644
-index 000000000..e69de29bb
+index 0000000..e69de29
 diff --git a/include/grub/powerpc/linux.h b/include/grub/powerpc/linux.h
 new file mode 100644
-index 000000000..e69de29bb
+index 0000000..e69de29
 diff --git a/include/grub/sparc64/linux.h b/include/grub/sparc64/linux.h
 new file mode 100644
-index 000000000..e69de29bb
+index 0000000..e69de29

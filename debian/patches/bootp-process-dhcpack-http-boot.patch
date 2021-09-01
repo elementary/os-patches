@@ -1,4 +1,3 @@
-From 6e1e440798cf53f89f0e5a177d781f0b3d4bc1ca Mon Sep 17 00:00:00 2001
 From: Michael Chang <mchang@suse.com>
 Date: Thu, 27 Oct 2016 17:42:19 -0400
 Subject: bootp: Add processing DHCPACK packet from HTTP Boot
@@ -19,12 +18,12 @@ Signed-off-by: Ken Lin <ken.lin@hpe.com>
 
 Patch-Name: bootp-process-dhcpack-http-boot.patch
 ---
- grub-core/net/bootp.c | 60 ++++++++++++++++++++++++++++++++++++++++++-
+ grub-core/net/bootp.c | 60 ++++++++++++++++++++++++++++++++++++++++++++++++++-
  include/grub/net.h    |  1 +
  2 files changed, 60 insertions(+), 1 deletion(-)
 
 diff --git a/grub-core/net/bootp.c b/grub-core/net/bootp.c
-index 21c1824ef..558d97ba1 100644
+index 21c1824..558d97b 100644
 --- a/grub-core/net/bootp.c
 +++ b/grub-core/net/bootp.c
 @@ -154,7 +154,7 @@ struct grub_dhcp_request_options
@@ -109,7 +108,7 @@ index 21c1824ef..558d97ba1 100644
        },
        GRUB_NET_BOOTP_END,
 diff --git a/include/grub/net.h b/include/grub/net.h
-index 58cff96d2..b5f9e617e 100644
+index 58cff96..b5f9e61 100644
 --- a/include/grub/net.h
 +++ b/include/grub/net.h
 @@ -523,6 +523,7 @@ enum

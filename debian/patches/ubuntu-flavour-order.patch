@@ -1,4 +1,3 @@
-From 2310fddfe741bf77f8721675a679478d0b6a5613 Mon Sep 17 00:00:00 2001
 From: Julian Andres Klode <julian.klode@canonical.com>
 Date: Tue, 9 Jun 2020 11:50:23 +0200
 Subject: UBUNTU: Add GRUB_FLAVOUR_ORDER configuration item
@@ -20,7 +19,7 @@ Patch-Name: ubuntu-flavour-order.patch
  2 files changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/util/grub-mkconfig.in b/util/grub-mkconfig.in
-index 72f1e25a0..6c8988fd6 100644
+index 72f1e25..6c8988f 100644
 --- a/util/grub-mkconfig.in
 +++ b/util/grub-mkconfig.in
 @@ -260,7 +260,8 @@ export GRUB_DEFAULT \
@@ -34,7 +33,7 @@ index 72f1e25a0..6c8988fd6 100644
  if test "x${grub_cfg}" != "x"; then
    rm -f "${grub_cfg}.new"
 diff --git a/util/grub-mkconfig_lib.in b/util/grub-mkconfig_lib.in
-index fe6319abe..7e2d1bc21 100644
+index fe6319a..7e2d1bc 100644
 --- a/util/grub-mkconfig_lib.in
 +++ b/util/grub-mkconfig_lib.in
 @@ -270,6 +270,21 @@ version_test_gt ()

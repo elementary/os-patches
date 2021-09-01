@@ -1,4 +1,3 @@
-From c3bac3061438a6308dc0191e72e295957270c755 Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@debian.org>
 Date: Fri, 16 Nov 2018 16:37:02 +0000
 Subject: bash-completion: Drop "have" checks
@@ -12,11 +11,11 @@ Last-Update: 2018-11-16
 
 Patch-Name: bash-completion-drop-have-checks.patch
 ---
- .../bash-completion.d/grub-completion.bash.in | 39 +++++++------------
+ util/bash-completion.d/grub-completion.bash.in | 39 +++++++++-----------------
  1 file changed, 13 insertions(+), 26 deletions(-)
 
 diff --git a/util/bash-completion.d/grub-completion.bash.in b/util/bash-completion.d/grub-completion.bash.in
-index 44bf135b9..d4235e7ef 100644
+index 44bf135..d4235e7 100644
 --- a/util/bash-completion.d/grub-completion.bash.in
 +++ b/util/bash-completion.d/grub-completion.bash.in
 @@ -166,13 +166,11 @@ _grub_set_entry () {

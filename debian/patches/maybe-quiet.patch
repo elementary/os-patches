@@ -1,4 +1,3 @@
-From 139c9faecee68370e4b46d50ca51d0524029212c Mon Sep 17 00:00:00 2001
 From: Didier Roche <didrocks@ubuntu.com>
 Date: Tue, 31 Mar 2020 15:20:15 +0200
 Subject: Add configure option to reduce visual clutter at boot time
@@ -47,7 +46,7 @@ Patch-Name: maybe-quiet.patch
  10 files changed, 118 insertions(+), 8 deletions(-)
 
 diff --git a/config.h.in b/config.h.in
-index 9e8f9911b..d2c4ce8e5 100644
+index 9e8f991..d2c4ce8 100644
 --- a/config.h.in
 +++ b/config.h.in
 @@ -12,6 +12,8 @@
@@ -60,7 +59,7 @@ index 9e8f9911b..d2c4ce8e5 100644
  /* We don't need those.  */
  #define MINILZO_CFG_SKIP_LZO_PTR 1
 diff --git a/configure.ac b/configure.ac
-index 1e5abc67d..ea00ccd69 100644
+index 1e5abc6..ea00ccd 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -1857,6 +1857,17 @@ else
@@ -93,7 +92,7 @@ index 1e5abc67d..ea00ccd69 100644
  echo "*******************************************************"
  ]
 diff --git a/grub-core/boot/i386/pc/boot.S b/grub-core/boot/i386/pc/boot.S
-index 2bd0b2d28..b0c0f2225 100644
+index 2bd0b2d..b0c0f22 100644
 --- a/grub-core/boot/i386/pc/boot.S
 +++ b/grub-core/boot/i386/pc/boot.S
 @@ -19,6 +19,9 @@
@@ -125,7 +124,7 @@ index 2bd0b2d28..b0c0f2225 100644
  	movw	$disk_address_packet, %si
  
 diff --git a/grub-core/boot/i386/pc/diskboot.S b/grub-core/boot/i386/pc/diskboot.S
-index c1addc0df..9b6d7a7ed 100644
+index c1addc0..9b6d7a7 100644
 --- a/grub-core/boot/i386/pc/diskboot.S
 +++ b/grub-core/boot/i386/pc/diskboot.S
 @@ -18,6 +18,9 @@
@@ -205,7 +204,7 @@ index c1addc0df..9b6d7a7ed 100644
  
  notification_step:	.asciz "."
 diff --git a/grub-core/kern/main.c b/grub-core/kern/main.c
-index 9cad0c448..714b63d67 100644
+index 9cad0c4..714b63d 100644
 --- a/grub-core/kern/main.c
 +++ b/grub-core/kern/main.c
 @@ -264,15 +264,25 @@ reclaim_module_space (void)
@@ -248,7 +247,7 @@ index 9cad0c448..714b63d67 100644
    grub_rescue_run ();
  }
 diff --git a/grub-core/kern/rescue_reader.c b/grub-core/kern/rescue_reader.c
-index dcd7d4439..a93524eab 100644
+index dcd7d44..a93524e 100644
 --- a/grub-core/kern/rescue_reader.c
 +++ b/grub-core/kern/rescue_reader.c
 @@ -78,7 +78,9 @@ grub_rescue_read_line (char **line, int cont,
@@ -262,7 +261,7 @@ index dcd7d4439..a93524eab 100644
    while (1)
      {
 diff --git a/grub-core/normal/main.c b/grub-core/normal/main.c
-index 1b03dfd57..0aa389fa1 100644
+index 1b03dfd..0aa389f 100644
 --- a/grub-core/normal/main.c
 +++ b/grub-core/normal/main.c
 @@ -389,6 +389,15 @@ static grub_err_t
@@ -292,7 +291,7 @@ index 1b03dfd57..0aa389fa1 100644
    while (1)
      {
 diff --git a/grub-core/normal/menu.c b/grub-core/normal/menu.c
-index 3611ee9ea..ebf5a0f10 100644
+index 3611ee9..ebf5a0f 100644
 --- a/grub-core/normal/menu.c
 +++ b/grub-core/normal/menu.c
 @@ -827,12 +827,18 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)
@@ -339,7 +338,7 @@ index 3611ee9ea..ebf5a0f10 100644
        if (auto_boot)
  	grub_menu_execute_with_fallback (menu, e, autobooted,
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index cb1cc200e..479a8bf4e 100644
+index cb1cc20..479a8bf 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -21,6 +21,7 @@ prefix="@prefix@"
@@ -386,7 +385,7 @@ index cb1cc200e..479a8bf4e 100644
  EOF
    fi
 diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index bd4f1a212..3a0e6d103 100755
+index bd4f1a2..3a0e6d1 100755
 --- a/util/grub.d/10_linux_zfs.in
 +++ b/util/grub.d/10_linux_zfs.in
 @@ -20,6 +20,7 @@ set -e

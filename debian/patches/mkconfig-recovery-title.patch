@@ -1,4 +1,3 @@
-From cc1216264113d2471a5ee5d472358e265fde1ab5 Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@ubuntu.com>
 Date: Mon, 13 Jan 2014 12:13:33 +0000
 Subject: Add GRUB_RECOVERY_TITLE option
@@ -22,7 +21,7 @@ Patch-Name: mkconfig-recovery-title.patch
  8 files changed, 21 insertions(+), 11 deletions(-)
 
 diff --git a/docs/grub.texi b/docs/grub.texi
-index a835d0ae4..3ec35d315 100644
+index a835d0a..3ec35d3 100644
 --- a/docs/grub.texi
 +++ b/docs/grub.texi
 @@ -1536,6 +1536,11 @@ a console is restricted or limited.
@@ -38,7 +37,7 @@ index a835d0ae4..3ec35d315 100644
  
  The following options are still accepted for compatibility with existing
 diff --git a/util/grub-mkconfig.in b/util/grub-mkconfig.in
-index 307214310..9c1da6477 100644
+index 3072143..9c1da64 100644
 --- a/util/grub-mkconfig.in
 +++ b/util/grub-mkconfig.in
 @@ -196,6 +196,10 @@ GRUB_ACTUAL_DEFAULT="$GRUB_DEFAULT"
@@ -63,7 +62,7 @@ index 307214310..9c1da6477 100644
  if test "x${grub_cfg}" != "x"; then
    rm -f "${grub_cfg}.new"
 diff --git a/util/grub.d/10_hurd.in b/util/grub.d/10_hurd.in
-index 59a9a48a2..7fa3a3fbd 100644
+index 59a9a48..7fa3a3f 100644
 --- a/util/grub.d/10_hurd.in
 +++ b/util/grub.d/10_hurd.in
 @@ -88,8 +88,8 @@ hurd_entry () {
@@ -78,7 +77,7 @@ index 59a9a48a2..7fa3a3fbd 100644
  	  title="$(gettext_printf "%s, with Hurd %s" "${OS}" "${kernel_base}")"
  	  oldtitle="$OS using $kernel_base"
 diff --git a/util/grub.d/10_kfreebsd.in b/util/grub.d/10_kfreebsd.in
-index 9d8e8fd85..8301d361a 100644
+index 9d8e8fd..8301d36 100644
 --- a/util/grub.d/10_kfreebsd.in
 +++ b/util/grub.d/10_kfreebsd.in
 @@ -76,7 +76,7 @@ kfreebsd_entry ()
@@ -91,7 +90,7 @@ index 9d8e8fd85..8301d361a 100644
  	  title="$(gettext_printf "%s, with kFreeBSD %s" "${os}" "${version}")"
        fi
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index cc2dd855a..2c418c5ec 100644
+index cc2dd85..2c418c5 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -130,7 +130,7 @@ linux_entry ()
@@ -104,7 +103,7 @@ index cc2dd855a..2c418c5ec 100644
  	      title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")" ;;
        esac
 diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index 48a4e6897..4477fa606 100755
+index 48a4e68..4477fa6 100755
 --- a/util/grub.d/10_linux_zfs.in
 +++ b/util/grub.d/10_linux_zfs.in
 @@ -957,7 +957,7 @@ generate_grub_menu() {
@@ -138,7 +137,7 @@ index 48a4e6897..4477fa606 100755
                          fi
  
 diff --git a/util/grub.d/10_netbsd.in b/util/grub.d/10_netbsd.in
-index 874f59969..bb29cc046 100644
+index 874f599..bb29cc0 100644
 --- a/util/grub.d/10_netbsd.in
 +++ b/util/grub.d/10_netbsd.in
 @@ -102,7 +102,7 @@ netbsd_entry ()
@@ -151,7 +150,7 @@ index 874f59969..bb29cc046 100644
  	  title="$(gettext_printf "%s, with kernel %s (via %s)" "${OS}" "$(echo ${kernel} | sed -e 's,^.*/,,')" "${loader}")"
        fi
 diff --git a/util/grub.d/20_linux_xen.in b/util/grub.d/20_linux_xen.in
-index 9a8d42fb5..f2ee0532b 100644
+index 9a8d42f..f2ee053 100644
 --- a/util/grub.d/20_linux_xen.in
 +++ b/util/grub.d/20_linux_xen.in
 @@ -105,7 +105,7 @@ linux_entry ()

@@ -1,4 +1,3 @@
-From 370386aaaed787b4b9082cd75f155f1b21350878 Mon Sep 17 00:00:00 2001
 From: Aaron Miller <aaronmiller@fb.com>
 Date: Thu, 27 Oct 2016 17:39:49 -0400
 Subject: net: read bracketed ipv6 addrs and port numbers
@@ -9,14 +8,14 @@ number
 
 Patch-Name: net-read-bracketed-ipv6-addr.patch
 ---
- grub-core/net/http.c | 21 ++++++++--
- grub-core/net/net.c  | 93 +++++++++++++++++++++++++++++++++++++++++---
- grub-core/net/tftp.c |  6 ++-
+ grub-core/net/http.c | 21 +++++++++---
+ grub-core/net/net.c  | 93 ++++++++++++++++++++++++++++++++++++++++++++++++----
+ grub-core/net/tftp.c |  6 +++-
  include/grub/net.h   |  1 +
  4 files changed, 110 insertions(+), 11 deletions(-)
 
 diff --git a/grub-core/net/http.c b/grub-core/net/http.c
-index 5aa4ad3be..f182d7b87 100644
+index 5aa4ad3..f182d7b 100644
 --- a/grub-core/net/http.c
 +++ b/grub-core/net/http.c
 @@ -312,12 +312,14 @@ http_establish (struct grub_file *file, grub_off_t offset, int initial)
@@ -74,7 +73,7 @@ index 5aa4ad3be..f182d7b87 100644
  				  file);
    if (!data->sock)
 diff --git a/grub-core/net/net.c b/grub-core/net/net.c
-index d5d726a31..b917a75d5 100644
+index d5d726a..b917a75 100644
 --- a/grub-core/net/net.c
 +++ b/grub-core/net/net.c
 @@ -437,6 +437,12 @@ parse_ip6 (const char *val, grub_uint64_t *ip, const char **rest)
@@ -211,7 +210,7 @@ index d5d726a31..b917a75d5 100644
  	  }
        }
 diff --git a/grub-core/net/tftp.c b/grub-core/net/tftp.c
-index 7d90bf66e..a0817a075 100644
+index 7d90bf6..a0817a0 100644
 --- a/grub-core/net/tftp.c
 +++ b/grub-core/net/tftp.c
 @@ -314,6 +314,7 @@ tftp_open (struct grub_file *file, const char *filename)
@@ -241,7 +240,7 @@ index 7d90bf66e..a0817a075 100644
    if (!data->sock)
      {
 diff --git a/include/grub/net.h b/include/grub/net.h
-index 4a9069a14..cc114286e 100644
+index 4a9069a..cc11428 100644
 --- a/include/grub/net.h
 +++ b/include/grub/net.h
 @@ -270,6 +270,7 @@ typedef struct grub_net

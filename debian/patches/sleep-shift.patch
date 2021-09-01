@@ -1,4 +1,3 @@
-From e731dba24511ce3c9a06923db223ddd337798719 Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@ubuntu.com>
 Date: Mon, 13 Jan 2014 12:13:23 +0000
 Subject: Allow Shift to interrupt 'sleep --interruptible'
@@ -17,7 +16,7 @@ Patch-Name: sleep-shift.patch
  2 files changed, 45 insertions(+), 1 deletion(-)
 
 diff --git a/grub-core/commands/sleep.c b/grub-core/commands/sleep.c
-index e77e7900f..3906b1410 100644
+index e77e790..3906b14 100644
 --- a/grub-core/commands/sleep.c
 +++ b/grub-core/commands/sleep.c
 @@ -46,6 +46,31 @@ do_print (int n)
@@ -62,7 +61,7 @@ index e77e7900f..3906b1410 100644
  
    return 0;
 diff --git a/grub-core/normal/menu.c b/grub-core/normal/menu.c
-index d5e0c79a7..3611ee9ea 100644
+index d5e0c79..3611ee9 100644
 --- a/grub-core/normal/menu.c
 +++ b/grub-core/normal/menu.c
 @@ -615,8 +615,27 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)

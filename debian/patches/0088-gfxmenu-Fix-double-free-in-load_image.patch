@@ -1,4 +1,3 @@
-From 4347248e750371ebf77ed7d1ed43a085a67d8a7c Mon Sep 17 00:00:00 2001
 From: Alexey Makhalov <amakhalov@vmware.com>
 Date: Wed, 8 Jul 2020 20:41:56 +0000
 Subject: gfxmenu: Fix double free in load_image()
@@ -15,7 +14,7 @@ Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/grub-core/gfxmenu/gui_image.c b/grub-core/gfxmenu/gui_image.c
-index 29784ed2d..6b2e976f1 100644
+index 29784ed..6b2e976 100644
 --- a/grub-core/gfxmenu/gui_image.c
 +++ b/grub-core/gfxmenu/gui_image.c
 @@ -195,7 +195,10 @@ load_image (grub_gui_image_t self, const char *path)

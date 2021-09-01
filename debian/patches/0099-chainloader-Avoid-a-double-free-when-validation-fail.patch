@@ -1,4 +1,3 @@
-From f850ec1ed3bbd6965b9720ab7e553012b9568cec Mon Sep 17 00:00:00 2001
 From: Chris Coulson <chris.coulson@canonical.com>
 Date: Thu, 23 Jul 2020 14:02:17 +0100
 Subject: chainloader: Avoid a double free when validation fails
@@ -8,7 +7,7 @@ Subject: chainloader: Avoid a double free when validation fails
  1 file changed, 6 insertions(+), 3 deletions(-)
 
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index d0c53077e..144a6549d 100644
+index d0c5307..144a654 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
 @@ -1085,6 +1085,9 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),

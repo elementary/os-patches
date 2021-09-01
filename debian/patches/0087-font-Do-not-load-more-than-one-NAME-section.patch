@@ -1,4 +1,3 @@
-From 7cacd3c51f800a4d7a0809083539ef0992a1be77 Mon Sep 17 00:00:00 2001
 From: Daniel Kiper <daniel.kiper@oracle.com>
 Date: Tue, 7 Jul 2020 15:36:26 +0200
 Subject: font: Do not load more than one NAME section
@@ -16,7 +15,7 @@ Reviewed-by: Jan Setje-Eilers <jan.setjeeilers@oracle.com>
  1 file changed, 6 insertions(+)
 
 diff --git a/grub-core/font/font.c b/grub-core/font/font.c
-index 5edb477ac..d09bb38d8 100644
+index 5edb477..d09bb38 100644
 --- a/grub-core/font/font.c
 +++ b/grub-core/font/font.c
 @@ -532,6 +532,12 @@ grub_font_load (const char *filename)

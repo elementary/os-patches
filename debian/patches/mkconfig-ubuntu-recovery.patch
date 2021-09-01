@@ -1,9 +1,8 @@
-From 51814873e68db3d990a080f705e6562ef140b416 Mon Sep 17 00:00:00 2001
 From: Didier Roche <didrocks@ubuntu.com>
 Date: Tue, 31 Mar 2020 15:16:36 +0200
 Subject: "single" -> "recovery" when friendly-recovery is installed
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
 If configured with --enable-ubuntu-recovery, also set nomodeset for
@@ -24,7 +23,7 @@ Patch-Name: mkconfig-ubuntu-recovery.patch
  4 files changed, 39 insertions(+), 5 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 7656f2434..1e5abc67d 100644
+index 7656f24..1e5abc6 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -1846,6 +1846,17 @@ fi
@@ -46,7 +45,7 @@ index 7656f2434..1e5abc67d 100644
  
  AC_SUBST([FONT_SOURCE])
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index d927b60ae..fcd303387 100644
+index d927b60..fcd3033 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -20,6 +20,7 @@ set -e
@@ -94,7 +93,7 @@ index d927b60ae..fcd303387 100644
  
    list=`echo $list | tr ' ' '\n' | fgrep -vx "$linux" | tr '\n' ' '`
 diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index b24587f0a..de4d21590 100755
+index b24587f..de4d215 100755
 --- a/util/grub.d/10_linux_zfs.in
 +++ b/util/grub.d/10_linux_zfs.in
 @@ -19,6 +19,7 @@ set -e
@@ -141,7 +140,7 @@ index b24587f0a..de4d21590 100755
      # IFS is set to TAB (ASCII 0x09)
      echo "${menu_metadata}" |
 diff --git a/util/grub.d/30_os-prober.in b/util/grub.d/30_os-prober.in
-index 515a68c7a..775ceb2e0 100644
+index 515a68c..775ceb2 100644
 --- a/util/grub.d/30_os-prober.in
 +++ b/util/grub.d/30_os-prober.in
 @@ -220,7 +220,7 @@ EOF

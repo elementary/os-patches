@@ -1,4 +1,3 @@
-From fb66356a8062d553baae7d578dc97c944e4ddba7 Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@debian.org>
 Date: Mon, 27 Jul 2020 14:22:12 +0100
 Subject: efilinux: Fix integer overflows in grub_cmd_initrd
@@ -15,7 +14,7 @@ Signed-off-by: Colin Watson <cjwatson@debian.org>
  1 file changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-index e357bf67c..381459ce0 100644
+index e357bf6..381459c 100644
 --- a/grub-core/loader/i386/efi/linux.c
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -28,6 +28,7 @@

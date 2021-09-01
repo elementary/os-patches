@@ -1,4 +1,3 @@
-From c89a80f695775566c7f184ec19b4ad34f58906bb Mon Sep 17 00:00:00 2001
 From: Colin Watson <cjwatson@ubuntu.com>
 Date: Mon, 13 Jan 2014 12:13:31 +0000
 Subject: Probe FusionIO devices
@@ -14,7 +13,7 @@ Patch-Name: probe-fusionio.patch
  2 files changed, 32 insertions(+)
 
 diff --git a/grub-core/osdep/linux/getroot.c b/grub-core/osdep/linux/getroot.c
-index 90d92d3ad..7adc0f30e 100644
+index 90d92d3..7adc0f3 100644
 --- a/grub-core/osdep/linux/getroot.c
 +++ b/grub-core/osdep/linux/getroot.c
 @@ -950,6 +950,19 @@ grub_util_part_to_disk (const char *os_dev, struct stat *st,
@@ -38,7 +37,7 @@ index 90d92d3ad..7adc0f30e 100644
  
    return path;
 diff --git a/util/deviceiter.c b/util/deviceiter.c
-index a4971ef42..dddc50da7 100644
+index a4971ef..dddc50d 100644
 --- a/util/deviceiter.c
 +++ b/util/deviceiter.c
 @@ -383,6 +383,12 @@ get_nvme_disk_name (char *name, int controller, int namespace)

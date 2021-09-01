@@ -1,7 +1,7 @@
-From fc81f37515154ecdd7add783affb2ff91f2c6b14 Mon Sep 17 00:00:00 2001
 From: Julian Andres Klode <julian.klode@canonical.com>
 Date: Tue, 3 Mar 2020 16:06:34 +0100
-Subject: smbios: Add a --linux argument to apply linux modalias-like filtering
+Subject: smbios: Add a --linux argument to apply linux modalias-like
+ filtering
 
 Linux creates modalias strings by filtering out non-ASCII, space,
 and colon characters. Provide an option that does the same filtering
@@ -16,7 +16,7 @@ Origin: upstream, https://git.savannah.gnu.org/cgit/grub.git/commit/?id=87049f97
  1 file changed, 24 insertions(+)
 
 diff --git a/grub-core/commands/smbios.c b/grub-core/commands/smbios.c
-index 7a6a391fc..1a9086ddd 100644
+index 7a6a391..1a9086d 100644
 --- a/grub-core/commands/smbios.c
 +++ b/grub-core/commands/smbios.c
 @@ -64,6 +64,21 @@ grub_smbios_get_eps3 (void)
