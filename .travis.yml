@@ -1,0 +1,14 @@
+language: cpp
+cache: ccache
+sudo: required
+services:
+  - docker
+env:
+ - DISTRO=ubuntu:eoan
+install:
+ - sed -i -e "s#1000#$(id -u)#g" -e "s#debian:testing#$DISTRO#g" Dockerfile
+ - docker build --tag=apt-ci .
+script:
+ - docker run --rm -w $PWD -v $HOME/.ccache:$HOME/.ccache -v $PWD:$PWD --user=travis apt-ci env ./debian/rules build-arch
+ - docker run --rm -w $PWD -v $PWD:$PWD --user=travis apt-ci env python3 tests/testmanual_pycodestyle.py
+ - docker run --rm -w $PWD -v $PWD:$PWD --user=travis apt-ci env MYPYPATH=$PWD/typehinting/ mypy ./apt
