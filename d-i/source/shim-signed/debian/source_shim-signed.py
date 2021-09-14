@@ -17,7 +17,7 @@ from apport.hookutils import (
 
 efiarch = {'amd64': 'x64',
            'i386': 'ia32',
-           'arm64': 'aarch64'
+           'arm64': 'aa64'
           }
 grubarch = {'amd64': 'x86_64',
             'i386': 'i386',

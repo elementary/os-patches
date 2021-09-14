@@ -1,3 +1,67 @@
+shim-signed (1.37~18.04.11) bionic; urgency=medium
+
+  * Update to shim 15.4-0ubuntu9
+    - Fix booting installer media on some machines (LP: #1937115)
+      + Always fallback to the default loader (PR #393)
+      + Dump load options parsed (PR #393)
+      + Disable load option parsing on removable media path (PR #399)
+    - trivial: Fix a minor overflow in the mok importing code (PR #365)
+    - Fix fall back loader to find the correct boot entry, avoiding potential
+      corruption of firmware (PR #396).
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Tue, 07 Sep 2021 12:03:11 +0200
+
+shim-signed (1.37~18.04.10) bionic; urgency=medium
+
+  * Remove unnecessary efitools dependency that prevented build on arm64
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Mon, 19 Jul 2021 17:01:19 +0200
+
+shim-signed (1.37~18.04.9) bionic; urgency=medium
+
+  * New upstream release 15.4.  LP: #1921134
+  * Synchronize packaging with 1.50, summary
+    - Update packaging to pull fb and mm from shim-signed package as in
+      later releases, dropping the runtime dependency on shim.
+    - Add download-signed script from linux-signed package
+    - Include reworked Makefile from devel to better assert the integrity of
+      the executables.
+    - Dual-signed shim
+    - Set XB-Important: yes on shim-signed package so that it cannot be
+      removed by accident (LP: #1898729)
+    - download-signed: Fetch signed artefacts from versioned URL instead
+      of current/ symlink to work around caching (LP: #1936640)
+  * Update to shim 15.4-0ubuntu5:
+    - Stop addending vendor dbx to MokListXRT during MokListX mirroring. This
+      is causing systems to run out of EFI storage space, or just hang up
+      when trying to write it (LP: #1924605) (LP: #1928434)
+    - Further relax the check for variable mirroring on non-secureboot systems
+      avoiding boot failures on out of space conditons (pull request #372)
+    - Don't unhook ExitBootServices() when EBS protection is disabled
+      (LP: #1931136) (pull request #378)
+  * Update to shim 15.4-0ubuntu7:
+    - Fix load option parsing, and thus fwupd execution (LP: #1929471) (PR #379)
+    - Fix occasional crashes in _relocate() on arm64 (LP: #1928010) (PR #383)
+    - Fix accidental deletion of RT variables (LP: #1934506) (PR #387)
+    - mok: relax the maximum variable size check (LP: #1934780) (PR #369)
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 16 Jul 2021 14:04:10 +0200
+
+shim-signed (1.37~18.04.8) bionic; urgency=medium
+
+  * Followup fix to actually include the updated shimx64.efi (LP: #1862171),
+    as the previous upload accidentally only contained an updated shimaa64.efi
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 27 Aug 2020 13:32:46 +0200
+
+shim-signed (1.37~18.04.7) bionic; urgency=medium
+
+  * Build shim-signed:arm64 (LP: #1890813)
+  * Update to the signed 15+1552672080.a4a1fbe-0ubuntu2 binary from Microsoft.
+    (LP: #1862171)
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 07 Aug 2020 13:57:23 +0200
+
 shim-signed (1.37~18.04.6) bionic; urgency=medium
 
   * Pass --timeout -1 to mokutil in a separate mokutil run (LP: #1869187)

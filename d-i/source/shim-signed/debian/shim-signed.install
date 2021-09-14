@@ -1,4 +1,11 @@
-shimx64.efi.signed /usr/lib/shim
+#! /usr/bin/dh-exec
+
+build/${SHIM_BASE} /usr/lib/shim
+build/${FB_BASE} /usr/lib/shim
+build/${MM_BASE} /usr/lib/shim
+build/BOOT${EFI_ARCH}.CSV /usr/lib/shim
+build/${SHIM_BASE}.signed /usr/lib/shim
+build/${SHIM_BASE}.dualsigned /usr/lib/shim
 openssl.cnf /usr/lib/shim/mok
 debian/source_shim-signed.py /usr/share/apport/package-hooks/
 update-secureboot-policy /usr/sbin/
