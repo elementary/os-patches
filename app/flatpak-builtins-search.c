@@ -60,12 +60,10 @@ get_remote_stores (GPtrArray *dirs, const char *arch, GCancellable *cancellable)
   for (i = 0; i < dirs->len; ++i)
     {
       FlatpakDir *dir = g_ptr_array_index (dirs, i);
-      g_autofree char *install_path = NULL;
       g_auto(GStrv) remotes = NULL;
 
       flatpak_log_dir_access (dir);
 
-      install_path = g_file_get_path (flatpak_dir_get_path (dir));
       remotes = flatpak_dir_list_enumerated_remotes (dir, cancellable, &error);
       if (error)
         {
@@ -245,7 +243,7 @@ print_app (Column *columns, MatchResult *res, FlatpakTablePrinter *printer)
 static void
 print_matches (Column *columns, GSList *matches)
 {
-  FlatpakTablePrinter *printer = NULL;
+  g_autoptr(FlatpakTablePrinter) printer = NULL;
   int rows, cols;
   GSList *s;
 
@@ -262,8 +260,6 @@ print_matches (Column *columns, GSList *matches)
   flatpak_get_window_size (&rows, &cols);
   flatpak_table_printer_print_full (printer, 0, cols, NULL, NULL);
   g_print ("\n");
-
-  flatpak_table_printer_free (printer);
 }
 
 gboolean

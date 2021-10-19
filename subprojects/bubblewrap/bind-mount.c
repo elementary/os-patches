@@ -373,7 +373,7 @@ parse_mountinfo (int  proc_fd,
   return steal_pointer (&mount_tab);
 }
 
-int
+bind_mount_result
 bind_mount (int           proc_fd,
             const char   *src,
             const char   *dest,
@@ -385,34 +385,58 @@ bind_mount (int           proc_fd,
   unsigned long current_flags, new_flags;
   cleanup_mount_tab MountTab mount_tab = NULL;
   cleanup_free char *resolved_dest = NULL;
+  cleanup_free char *dest_proc = NULL;
+  cleanup_free char *oldroot_dest_proc = NULL;
+  cleanup_free char *kernel_case_combination = NULL;
+  cleanup_fd int dest_fd = -1;
   int i;
 
   if (src)
     {
       if (mount (src, dest, NULL, MS_SILENT | MS_BIND | (recursive ? MS_REC : 0), NULL) != 0)
-        return 1;
+        return BIND_MOUNT_ERROR_MOUNT;
     }
 
   /* The mount operation will resolve any symlinks in the destination
      path, so to find it in the mount table we need to do that too. */
   resolved_dest = realpath (dest, NULL);
   if (resolved_dest == NULL)
-    return 2;
+    return BIND_MOUNT_ERROR_REALPATH_DEST;
 
-  mount_tab = parse_mountinfo (proc_fd, resolved_dest);
+  dest_fd = open (resolved_dest, O_PATH | O_CLOEXEC);
+  if (dest_fd < 0)
+    return BIND_MOUNT_ERROR_REOPEN_DEST;
+
+  /* If we are in a case-insensitive filesystem, mountinfo might contain a
+   * different case combination of the path we requested to mount.
+   * This is due to the fact that the kernel, as of the beginning of 2021,
+   * populates mountinfo with whatever case combination first appeared in the
+   * dcache; kernel developers plan to change this in future so that it
+   * reflects the on-disk encoding instead.
+   * To avoid throwing an error when this happens, we use readlink() result
+   * instead of the provided @root_mount, so that we can compare the mountinfo
+   * entries with the same case combination that the kernel is expected to
+   * use. */
+  dest_proc = xasprintf ("/proc/self/fd/%d", dest_fd);
+  oldroot_dest_proc = get_oldroot_path (dest_proc);
+  kernel_case_combination = readlink_malloc (oldroot_dest_proc);
+  if (kernel_case_combination == NULL)
+    return BIND_MOUNT_ERROR_READLINK_DEST_PROC_FD;
+
+  mount_tab = parse_mountinfo (proc_fd, kernel_case_combination);
   if (mount_tab[0].mountpoint == NULL)
     {
       errno = EINVAL;
-      return 2; /* No mountpoint at dest */
+      return BIND_MOUNT_ERROR_FIND_DEST_MOUNT;
     }
 
-  assert (path_equal (mount_tab[0].mountpoint, resolved_dest));
+  assert (path_equal (mount_tab[0].mountpoint, kernel_case_combination));
   current_flags = mount_tab[0].options;
   new_flags = current_flags | (devices ? 0 : MS_NODEV) | MS_NOSUID | (readonly ? MS_RDONLY : 0);
   if (new_flags != current_flags &&
       mount ("none", resolved_dest,
              NULL, MS_SILENT | MS_BIND | MS_REMOUNT | new_flags, NULL) != 0)
-    return 3;
+    return BIND_MOUNT_ERROR_REMOUNT_DEST;
 
   /* We need to work around the fact that a bind mount does not apply the flags, so we need to manually
    * apply the flags to all submounts in the recursive case.
@@ -431,10 +455,92 @@ bind_mount (int           proc_fd,
               /* If we can't read the mountpoint we can't remount it, but that should
                  be safe to ignore because its not something the user can access. */
               if (errno != EACCES)
-                return 5;
+                return BIND_MOUNT_ERROR_REMOUNT_SUBMOUNT;
             }
         }
     }
 
-  return 0;
+  return BIND_MOUNT_SUCCESS;
+}
+
+/**
+ * Return a string representing bind_mount_result, like strerror().
+ * If want_errno_p is non-NULL, *want_errno_p is used to indicate whether
+ * it would make sense to print strerror(saved_errno).
+ */
+const char *
+bind_mount_result_to_string (bind_mount_result res,
+                             bool *want_errno_p)
+{
+  const char *string;
+  bool want_errno = TRUE;
+
+  switch (res)
+    {
+      case BIND_MOUNT_ERROR_MOUNT:
+        string = "Unable to mount source on destination";
+        break;
+
+      case BIND_MOUNT_ERROR_REALPATH_DEST:
+        string = "realpath(destination)";
+        break;
+
+      case BIND_MOUNT_ERROR_REOPEN_DEST:
+        string = "open(destination, O_PATH)";
+        break;
+
+      case BIND_MOUNT_ERROR_READLINK_DEST_PROC_FD:
+        string = "readlink(/proc/self/fd/<destination>)";
+        break;
+
+      case BIND_MOUNT_ERROR_FIND_DEST_MOUNT:
+        string = "Unable to find destination in mount table";
+        want_errno = FALSE;
+        break;
+
+      case BIND_MOUNT_ERROR_REMOUNT_DEST:
+        string = "Unable to remount destination with correct flags";
+        break;
+
+      case BIND_MOUNT_ERROR_REMOUNT_SUBMOUNT:
+        string = "Unable to remount recursively with correct flags";
+        break;
+
+      case BIND_MOUNT_SUCCESS:
+        string = "Success";
+        break;
+
+      default:
+        string = "(unknown/invalid bind_mount_result)";
+        break;
+    }
+
+  if (want_errno_p != NULL)
+    *want_errno_p = want_errno;
+
+  return string;
+}
+
+void
+die_with_bind_result (bind_mount_result res,
+                      int               saved_errno,
+                      const char       *format,
+                      ...)
+{
+  va_list args;
+  bool want_errno = TRUE;
+
+  fprintf (stderr, "bwrap: ");
+
+  va_start (args, format);
+  vfprintf (stderr, format, args);
+  va_end (args);
+
+  fprintf (stderr, ": %s", bind_mount_result_to_string (res, &want_errno));
+
+  if (want_errno)
+    fprintf (stderr, ": %s", strerror (saved_errno));
+
+  fprintf (stderr, "\n");
+  exit (1);
 }

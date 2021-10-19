@@ -7,7 +7,7 @@ desktop applications on Linux.
 
 See https://flatpak.org/ for more information.
 
-Community discussion happens in [#flatpak on Freenode](ircs://chat.freenode.net/flatpak), on [the mailing list](https://lists.freedesktop.org/mailman/listinfo/flatpak), and on [the Flathub Discourse](https://discourse.flathub.org/).
+Community discussion happens in [#flatpak:matrix.org](https://matrix.to/#/#flatpak:matrix.org), on [the mailing list](https://lists.freedesktop.org/mailman/listinfo/flatpak), and on [the Flathub Discourse](https://discourse.flathub.org/).
 
 Read documentation for Flatpak [here](https://docs.flatpak.org/en/latest/index.html).
 
@@ -41,7 +41,7 @@ Most configure arguments are documented in `./configure --help`. However,
 there are some options that are a bit more complicated.
 
 Flatpak relies on a project called [Bubblewrap](https://github.com/containers/bubblewrap) for the
-low-level sandboxing.  By default, an in-tree copy of this is built
+low-level sandboxing. By default, an in-tree copy of this is built
 (distributed in the tarball or using git submodules in the git
 tree). This will build a helper called flatpak-bwrap. If your system
 has a recent enough version of Bubblewrap already, you can use
@@ -49,7 +49,7 @@ has a recent enough version of Bubblewrap already, you can use
 
 Bubblewrap can run in two modes, either using unprivileged user
 namespaces or setuid mode. This requires that the kernel supports this,
-which some distributions disable. For instance, Debian and Arch 
+which some distributions disable. For instance, Debian and Arch
 ([linux](https://www.archlinux.org/packages/?name=linux) kernel v4.14.5
 or later), support user namespaces with the `kernel.unprivileged_userns_clone`
 sysctl enabled.
@@ -102,3 +102,10 @@ quick intro to the major components of the flatpak repo:
 * `dbus-proxy`: a filtering proxy for D-Bus connections, as a submodule
 * `icon-validator`: A small utility that is used to validate icons
 * `revokefs`: A fuse filesystem that is used to transfer files to the system-helper without copying
+
+# Related Projects
+
+Here are some notable projects in the Flatpak ecosystem:
+* [Flatseal](https://github.com/tchx84/flatseal): An app for managing permissions of Flatpak apps without using the CLI
+* [Souk](https://gitlab.gnome.org/haecker-felix/souk): A Flatpak-only app store
+* [Flat-manager](https://github.com/flatpak/flat-manager): A tool for managing Flatpak repositories

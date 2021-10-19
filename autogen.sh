@@ -1,16 +1,16 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
-test -n "$srcdir" || srcdir=`dirname "$0"`
+test -n "$srcdir" || srcdir=$(dirname "$0")
 test -n "$srcdir" || srcdir=.
 
-olddir=`pwd`
+olddir=$(pwd)
 cd "$srcdir"
 
-AUTORECONF=`which autoreconf`
-if test -z $AUTORECONF; then
-        echo "*** No autoreconf found, please install it ***"
-        exit 1
+AUTORECONF=$(which autoreconf)
+if test -z "$AUTORECONF"; then
+    echo "*** No autoreconf found, please install it ***"
+    exit 1
 fi
 
 # INSTALL are required by automake, but may be deleted by clean
@@ -18,15 +18,15 @@ fi
 # regenerated from their corresponding *.in files by ./configure anyway.
 touch INSTALL
 
-if ! test -f libglnx/README.md -a -f bubblewrap/README.md -a -f dbus-proxy/README.md; then
+if ! test -f subprojects/libglnx/README.md -a -f subprojects/bubblewrap/README.md -a -f subprojects/dbus-proxy/README.md; then
     git submodule update --init
 fi
 # Workaround automake bug with subdir-objects and computed paths
-sed -e 's,$(libglnx_srcpath),libglnx,g' < libglnx/Makefile-libglnx.am >libglnx/Makefile-libglnx.am.inc
-sed -e 's,$(bwrap_srcpath),bubblewrap,g' < bubblewrap/Makefile-bwrap.am >bubblewrap/Makefile-bwrap.am.inc
+sed -e 's,$(libglnx_srcpath),subprojects/libglnx,g' < subprojects/libglnx/Makefile-libglnx.am > subprojects/Makefile-libglnx.am.inc
+sed -e 's,$(bwrap_srcpath),subprojects/bubblewrap,g' < subprojects/bubblewrap/Makefile-bwrap.am > subprojects/Makefile-bwrap.am.inc
 
 GTKDOCIZE=$(which gtkdocize 2>/dev/null)
-if test -z $GTKDOCIZE; then
+if test -z "$GTKDOCIZE"; then
     echo "*** You don't have gtk-doc installed, and thus won't be able to generate the documentation. ***"
     rm -f gtk-doc.make
     cat > gtk-doc.make <<EOF

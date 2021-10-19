@@ -14,7 +14,7 @@ AC_PREREQ([2.63])
 # on the unstable (ie master), interface age = 0
 
 m4_define([flatpak_major_version], [1])
-m4_define([flatpak_minor_version], [10])
+m4_define([flatpak_minor_version], [12])
 m4_define([flatpak_micro_version], [2])
 m4_define([flatpak_extra_version], [])
 m4_define([flatpak_interface_age], [0])
@@ -50,7 +50,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.13.4 no-define no-dist-gzip dist-xz tar-ustar foreign subdir-objects])
 AC_PROG_SED
-AC_PROG_YACC
+AC_PROG_BISON
 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.18.2])
@@ -594,7 +594,7 @@ fi
 
 echo ""
 echo "          Flatpak $FLATPAK_VERSION"
-echo "          ============="
+echo "          =============="
 echo ""
 echo "          Build system helper:    $enable_system_helper"
 echo "          Build selinux module:   $enable_selinux_module"

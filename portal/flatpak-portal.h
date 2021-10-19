@@ -21,6 +21,11 @@
 #ifndef __FLATPAK_PORTAL_H__
 #define __FLATPAK_PORTAL_H__
 
+#define FLATPAK_PORTAL_BUS_NAME "org.freedesktop.portal.Flatpak"
+#define FLATPAK_PORTAL_PATH "/org/freedesktop/portal/Flatpak"
+#define FLATPAK_PORTAL_INTERFACE FLATPAK_PORTAL_BUS_NAME
+#define FLATPAK_PORTAL_INTERFACE_UPDATE_MONITOR FLATPAK_PORTAL_BUS_NAME ".UpdateMonitor"
+
 typedef enum {
   FLATPAK_SPAWN_FLAGS_CLEAR_ENV = 1 << 0,
   FLATPAK_SPAWN_FLAGS_LATEST_VERSION = 1 << 1,
@@ -30,6 +35,8 @@ typedef enum {
   FLATPAK_SPAWN_FLAGS_EXPOSE_PIDS = 1 << 5,
   FLATPAK_SPAWN_FLAGS_NOTIFY_START = 1 << 6,
   FLATPAK_SPAWN_FLAGS_SHARE_PIDS = 1 << 7,
+  FLATPAK_SPAWN_FLAGS_EMPTY_APP = 1 << 8,
+  FLATPAK_SPAWN_FLAGS_NONE = 0
 } FlatpakSpawnFlags;
 
 typedef enum {
@@ -38,11 +45,13 @@ typedef enum {
   FLATPAK_SPAWN_SANDBOX_FLAGS_SHARE_GPU = 1 << 2,
   FLATPAK_SPAWN_SANDBOX_FLAGS_ALLOW_DBUS = 1 << 3,
   FLATPAK_SPAWN_SANDBOX_FLAGS_ALLOW_A11Y = 1 << 4,
+  FLATPAK_SPAWN_SANDBOX_FLAGS_NONE = 0
 } FlatpakSpawnSandboxFlags;
 
 
 typedef enum {
   FLATPAK_SPAWN_SUPPORT_FLAGS_EXPOSE_PIDS = 1 << 0,
+  FLATPAK_SPAWN_SUPPORT_FLAGS_NONE = 0
 } FlatpakSpawnSupportFlags;
 
 /* The same flag is reused: this feature is available under the same
@@ -56,7 +65,8 @@ typedef enum {
                                  FLATPAK_SPAWN_FLAGS_WATCH_BUS | \
                                  FLATPAK_SPAWN_FLAGS_EXPOSE_PIDS | \
                                  FLATPAK_SPAWN_FLAGS_NOTIFY_START | \
-                                 FLATPAK_SPAWN_FLAGS_SHARE_PIDS)
+                                 FLATPAK_SPAWN_FLAGS_SHARE_PIDS | \
+                                 FLATPAK_SPAWN_FLAGS_EMPTY_APP)
 
 #define FLATPAK_SPAWN_SANDBOX_FLAGS_ALL (FLATPAK_SPAWN_SANDBOX_FLAGS_SHARE_DISPLAY | \
                                          FLATPAK_SPAWN_SANDBOX_FLAGS_SHARE_SOUND | \

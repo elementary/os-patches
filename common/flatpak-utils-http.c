@@ -43,7 +43,8 @@ typedef struct
 
 typedef struct
 {
-  GMainLoop             *loop;
+  GMainContext          *context;
+  gboolean               done;
   GError                *error;
   gboolean               store_compressed;
 
@@ -350,7 +351,8 @@ stream_closed (GObject *source, GAsyncResult *res, gpointer user_data)
       g_clear_pointer (&data->out, g_object_unref);
     }
 
-  g_main_loop_quit (data->loop);
+  data->done = TRUE;
+  g_main_context_wakeup (data->context);
 }
 
 static void
@@ -418,7 +420,8 @@ load_uri_callback (GObject      *source_object,
   in = soup_request_send_finish (SOUP_REQUEST (request), res, &data->error);
   if (in == NULL)
     {
-      g_main_loop_quit (data->loop);
+      /* data->error has been set */
+      g_main_context_wakeup (data->context);
       return;
     }
 
@@ -483,7 +486,7 @@ load_uri_callback (GObject      *source_object,
                                  "Server returned status %u: %s",
                                  msg->status_code,
                                  soup_status_get_phrase (msg->status_code));
-      g_main_loop_quit (data->loop);
+      g_main_context_wakeup (data->context);
       return;
     }
 
@@ -601,7 +604,6 @@ flatpak_load_http_uri_once (SoupSession           *soup_session,
   GBytes *bytes = NULL;
   g_autoptr(GMainContext) context = NULL;
   g_autoptr(SoupRequestHTTP) request = NULL;
-  g_autoptr(GMainLoop) loop = NULL;
   g_autoptr(GString) content = g_string_new ("");
   LoadUriData data = { NULL };
   SoupMessage *m;
@@ -610,8 +612,7 @@ flatpak_load_http_uri_once (SoupSession           *soup_session,
 
   context = g_main_context_ref_thread_default ();
 
-  loop = g_main_loop_new (context, TRUE);
-  data.loop = loop;
+  data.context = context;
   data.content = content;
   data.progress = progress;
   data.cancellable = cancellable;
@@ -641,7 +642,8 @@ flatpak_load_http_uri_once (SoupSession           *soup_session,
                            cancellable,
                            load_uri_callback, &data);
 
-  g_main_loop_run (loop);
+  while (data.error == NULL && !data.done)
+    g_main_context_iteration (data.context, TRUE);
 
   if (data.error)
     {
@@ -668,6 +670,9 @@ flatpak_load_uri (SoupSession           *soup_session,
 {
   g_autoptr(GError) local_error = NULL;
   guint n_retries_remaining = DEFAULT_N_NETWORK_RETRIES;
+  g_autoptr(GMainContextPopDefault) main_context = NULL;
+
+  main_context = flatpak_main_context_new_default ();
 
   /* Ensure we handle file: uris always */
   if (g_ascii_strncasecmp (uri, "file:", 5) == 0)
@@ -721,7 +726,6 @@ flatpak_download_http_uri_once (SoupSession           *soup_session,
                                 GError               **error)
 {
   g_autoptr(SoupRequestHTTP) request = NULL;
-  g_autoptr(GMainLoop) loop = NULL;
   g_autoptr(GMainContext) context = NULL;
   LoadUriData data = { NULL };
   SoupMessage *m;
@@ -730,8 +734,7 @@ flatpak_download_http_uri_once (SoupSession           *soup_session,
 
   context = g_main_context_ref_thread_default ();
 
-  loop = g_main_loop_new (context, TRUE);
-  data.loop = loop;
+  data.context = context;
   data.out = out;
   data.progress = progress;
   data.cancellable = cancellable;
@@ -758,7 +761,8 @@ flatpak_download_http_uri_once (SoupSession           *soup_session,
                            cancellable,
                            load_uri_callback, &data);
 
-  g_main_loop_run (loop);
+  while (data.error == NULL && !data.done)
+    g_main_context_iteration (data.context, TRUE);
 
   if (out_bytes_written)
     *out_bytes_written = data.downloaded_bytes;
@@ -787,6 +791,9 @@ flatpak_download_http_uri (SoupSession           *soup_session,
 {
   g_autoptr(GError) local_error = NULL;
   guint n_retries_remaining = DEFAULT_N_NETWORK_RETRIES;
+  g_autoptr(GMainContextPopDefault) main_context = NULL;
+
+  main_context = flatpak_main_context_new_default ();
 
   do
     {
@@ -866,7 +873,6 @@ flatpak_cache_http_uri_once (SoupSession           *soup_session,
                              GError               **error)
 {
   g_autoptr(SoupRequestHTTP) request = NULL;
-  g_autoptr(GMainLoop) loop = NULL;
   g_autoptr(GMainContext) context = NULL;
   g_autoptr(CacheHttpData) cache_data = NULL;
   g_autofree char *parent_path = g_path_get_dirname (dest_subpath);
@@ -914,8 +920,7 @@ flatpak_cache_http_uri_once (SoupSession           *soup_session,
 
   context = g_main_context_ref_thread_default ();
 
-  loop = g_main_loop_new (context, TRUE);
-  data.loop = loop;
+  data.context = context;
   data.cache_data = cache_data;
   data.out_tmpfile = &out_tmpfile;
   data.out_tmpfile_parent_dfd = dfd;
@@ -956,7 +961,8 @@ flatpak_cache_http_uri_once (SoupSession           *soup_session,
                            cancellable,
                            load_uri_callback, &data);
 
-  g_main_loop_run (loop);
+  while (data.error == NULL && !data.done)
+    g_main_context_iteration (data.context, TRUE);
 
   if (data.error)
     {
@@ -1032,6 +1038,9 @@ flatpak_cache_http_uri (SoupSession           *soup_session,
 {
   g_autoptr(GError) local_error = NULL;
   guint n_retries_remaining = DEFAULT_N_NETWORK_RETRIES;
+  g_autoptr(GMainContextPopDefault) main_context = NULL;
+
+  main_context = flatpak_main_context_new_default ();
 
   do
     {

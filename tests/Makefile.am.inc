@@ -1,5 +1,6 @@
 AM_TESTS_ENVIRONMENT = FLATPAK_TESTS_DEBUG=1 \
 	FLATPAK_CONFIG_DIR=/dev/null \
+	FLATPAK_PORTAL=$$(cd $(top_builddir) && pwd)/flatpak-portal \
 	FLATPAK_TRIGGERSDIR=$$(cd $(top_srcdir) && pwd)/triggers \
 	FLATPAK_VALIDATE_ICON=$$(cd $(top_builddir) && pwd)/flatpak-validate-icon \
 	FLATPAK_REVOKEFS_FUSE=$$(cd $(top_builddir) && pwd)/revokefs-fuse \
@@ -19,6 +20,22 @@ AM_TESTS_ENVIRONMENT += FLATPAK_BWRAP=$(BWRAP)
 else
 AM_TESTS_ENVIRONMENT += FLATPAK_BWRAP=$$(cd $(top_builddir) && pwd)/flatpak-bwrap
 endif
+
+noinst_LTLIBRARIES += libtestlib.la
+libtestlib_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(BASE_CFLAGS) \
+	-DFLATPAK_COMPILATION \
+	$(NULL)
+libtestlib_la_SOURCES = \
+	tests/testlib.c \
+	tests/testlib.h \
+	$(NULL)
+libtestlib_la_LIBADD = \
+	$(AM_LDADD) \
+	$(BASE_LIBS) \
+	libglnx.la \
+	$(NULL)
 
 testlibrary_CFLAGS = \
 	$(AM_CFLAGS) \
@@ -49,6 +66,7 @@ testcommon_CFLAGS = \
 	$(JSON_CFLAGS) \
 	$(APPSTREAM_GLIB_CFLAGS) \
 	-DFLATPAK_COMPILATION \
+	-DLIBEXECDIR=\"$(libexecdir)\" \
 	-I$(srcdir)/app \
 	-I$(builddir)/app \
 	$(NULL)
@@ -66,15 +84,45 @@ testcommon_LDADD = \
 	$(NULL)
 testcommon_SOURCES = tests/testcommon.c
 
+test_context_CFLAGS = $(testcommon_CFLAGS)
+test_context_LDADD = $(testcommon_LDADD) libtestlib.la
+test_context_SOURCES = tests/test-context.c
+
 test_exports_CFLAGS = $(testcommon_CFLAGS)
-test_exports_LDADD = $(testcommon_LDADD)
+test_exports_LDADD = $(testcommon_LDADD) libtestlib.la
 test_exports_SOURCES = tests/test-exports.c
+
+test_instance_CFLAGS = $(testcommon_CFLAGS)
+test_instance_LDADD = $(testcommon_LDADD) libtestlib.la
+test_instance_SOURCES = \
+	subprojects/libglnx/tests/libglnx-testlib.c \
+	subprojects/libglnx/tests/libglnx-testlib.h \
+	tests/test-instance.c \
+	$(NULL)
+
+test_portal_CFLAGS = $(testcommon_CFLAGS)
+test_portal_LDADD = $(testcommon_LDADD) libtestlib.la
+test_portal_SOURCES = \
+	tests/test-portal.c \
+	$(NULL)
+nodist_test_portal_SOURCES = \
+	portal/flatpak-portal-dbus.c \
+	portal/flatpak-portal-dbus.h \
+	$(NULL)
+
+tests_hold_lock_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS)
+tests_hold_lock_LDADD = $(AM_LDADD) $(BASE_LIBS) libglnx.la
+tests_hold_lock_SOURCES = tests/hold-lock.c
 
 tests_httpcache_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\"
 tests_httpcache_LDADD = $(AM_LDADD) $(BASE_LIBS) $(OSTREE_LIBS) $(SOUP_LIBS) $(JSON_LIBS) $(APPSTREAM_GLIB_LIBS) \
 	libflatpak-common.la libflatpak-common-base.la libglnx.la
+
+tests_mock_flatpak_CFLAGS = $(testcommon_CFLAGS)
+tests_mock_flatpak_LDADD = $(testcommon_LDADD) libtestlib.la
+tests_mock_flatpak_SOURCES = tests/mock-flatpak.c
 
 tests_test_update_portal_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) \
 	-DFLATPAK_COMPILATION \
@@ -227,6 +275,7 @@ TEST_MATRIX_SOURCE = \
 	tests/test-unused.sh \
 	tests/test-summaries.sh{user+system} \
 	tests/test-subset.sh{user+system} \
+	tests/test-prune.sh \
 	$(NULL)
 
 update-test-matrix:
@@ -251,8 +300,24 @@ test_scripts = ${TEST_MATRIX}
 dist_test_scripts = ${TEST_MATRIX_DIST}
 dist_installed_test_extra_scripts += ${TEST_MATRIX_EXTRA_DIST}
 
-test_programs = testlibrary testcommon test-exports
-test_extra_programs = tests/httpcache tests/test-update-portal tests/test-portal-impl tests/test-authenticator tests/list-unused
+test_programs = \
+	test-context \
+	test-exports \
+	test-instance \
+	test-portal \
+	testcommon \
+	testlibrary \
+	$(NULL)
+
+test_extra_programs = \
+	tests/hold-lock \
+	tests/httpcache \
+	tests/list-unused \
+	tests/mock-flatpak \
+	tests/test-authenticator \
+	tests/test-portal-impl \
+	tests/test-update-portal \
+	$(NULL)
 
 @VALGRIND_CHECK_RULES@
 VALGRIND_SUPPRESSIONS_FILES=tests/flatpak.supp tests/glib.supp

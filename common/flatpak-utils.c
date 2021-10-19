@@ -1,4 +1,5 @@
 /*
+ * Copyright © 1995-1998 Free Software Foundation, Inc.
  * Copyright © 2014-2019 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -122,14 +123,11 @@ flatpak_debug2 (const char *format, ...)
 {
   va_list var_args;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
   va_start (var_args, format);
   g_logv (G_LOG_DOMAIN "2",
           G_LOG_LEVEL_DEBUG,
           format, var_args);
   va_end (var_args);
-#pragma GCC diagnostic pop
 }
 
 gboolean
@@ -1412,9 +1410,12 @@ flatpak_switch_symlink_and_remove (const char *symlink_path,
   return flatpak_fail (error, "flatpak_switch_symlink_and_remove looped too many times");
 }
 
-static gboolean
-needs_quoting (const char *arg)
+gboolean
+flatpak_argument_needs_quoting (const char *arg)
 {
+  if (*arg == '\0')
+    return TRUE;
+
   while (*arg != 0)
     {
       char c = *arg;
@@ -1443,7 +1444,7 @@ flatpak_quote_argv (const char *argv[],
       if (i != 0)
         g_string_append_c (res, ' ');
 
-      if (needs_quoting (argv[i]))
+      if (flatpak_argument_needs_quoting (argv[i]))
         {
           g_autofree char *quoted = g_shell_quote (argv[i]);
           g_string_append (res, quoted);
@@ -2285,6 +2286,7 @@ flatpak_parse_repofile (const char   *remote_name,
       decoded = g_base64_decode (gpg_key, &decoded_len);
       if (decoded_len < 10) /* Check some minimal size so we don't get crap */
         {
+          g_free (decoded);
           flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, _("Invalid gpg key"));
           return NULL;
         }
@@ -2299,9 +2301,13 @@ flatpak_parse_repofile (const char   *remote_name,
 
   collection_id = g_key_file_get_string (keyfile, source_group,
                                          FLATPAK_REPO_DEPLOY_COLLECTION_ID_KEY, NULL);
-  if (collection_id == NULL || *collection_id == '\0')
+  if (collection_id != NULL && *collection_id == '\0')
+    g_clear_pointer (&collection_id, g_free);
+  if (collection_id == NULL)
     collection_id = g_key_file_get_string (keyfile, source_group,
                                            FLATPAK_REPO_COLLECTION_ID_KEY, NULL);
+  if (collection_id != NULL && *collection_id == '\0')
+    g_clear_pointer (&collection_id, g_free);
   if (collection_id != NULL)
     {
       if (gpg_key == NULL)
@@ -5084,7 +5090,7 @@ validate_component (FlatpakXml *component,
     }
 
   while ((bundle = flatpak_xml_find (component, "bundle", &prev)) != NULL)
-    flatpak_xml_free (flatpak_xml_unlink (component, bundle));
+    flatpak_xml_free (flatpak_xml_unlink (bundle, prev));
 
   bundle = flatpak_xml_new ("bundle");
   bundle->attribute_names = g_new0 (char *, 2 * 4);
@@ -7337,12 +7343,9 @@ flatpak_prompt (gboolean allow_empty,
   g_autofree char *s = NULL;
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
   va_start (var_args, prompt);
   s = g_strdup_vprintf (prompt, var_args);
   va_end (var_args);
-#pragma GCC diagnostic pop
 
   while (TRUE)
     {
@@ -7373,12 +7376,9 @@ flatpak_password_prompt (const char *prompt, ...)
   gboolean was_echo;
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
   va_start (var_args, prompt);
   s = g_strdup_vprintf (prompt, var_args);
   va_end (var_args);
-#pragma GCC diagnostic pop
 
   while (TRUE)
     {
@@ -7411,12 +7411,9 @@ flatpak_yes_no_prompt (gboolean default_yes, const char *prompt, ...)
   g_autofree char *s = NULL;
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
   va_start (var_args, prompt);
   s = g_strdup_vprintf (prompt, var_args);
   va_end (var_args);
-#pragma GCC diagnostic pop
 
   while (TRUE)
     {
@@ -7698,6 +7695,20 @@ flatpak_subpaths_merge (char **subpaths1,
   return res;
 }
 
+const char * const *
+flatpak_get_locale_categories (void)
+{
+  /* See locale(7) for these categories */
+  static const char * const categories[] = {
+    "LANG", "LC_ALL", "LC_MESSAGES", "LC_ADDRESS", "LC_COLLATE", "LC_CTYPE",
+    "LC_IDENTIFICATION", "LC_MONETARY", "LC_MEASUREMENT", "LC_NAME", "LC_NUMERIC",
+    "LC_PAPER", "LC_TELEPHONE", "LC_TIME",
+    NULL
+  };
+
+  return categories;
+}
+
 char *
 flatpak_get_lang_from_locale (const char *locale)
 {
@@ -7733,18 +7744,339 @@ flatpak_g_ptr_array_contains_string (GPtrArray *array, const char *str)
   return FALSE;
 }
 
+#if !GLIB_CHECK_VERSION (2, 58, 0)
+/* All this code is backported directly from glib 2.66 */
+
+typedef struct _GLanguageNamesCache GLanguageNamesCache;
+
+struct _GLanguageNamesCache {
+  gchar *languages;
+  gchar **language_names;
+};
+
+static void
+language_names_cache_free (gpointer data)
+{
+  GLanguageNamesCache *cache = data;
+  g_free (cache->languages);
+  g_strfreev (cache->language_names);
+  g_free (cache);
+}
+
+/* read an alias file for the locales */
+static void
+read_aliases (const gchar *file,
+              GHashTable  *alias_table)
+{
+  FILE *fp;
+  char buf[256];
+
+  fp = fopen (file,"r");
+  if (!fp)
+    return;
+  while (fgets (buf, 256, fp))
+    {
+      char *p, *q;
+
+      g_strstrip (buf);
+
+      /* Line is a comment */
+      if ((buf[0] == '#') || (buf[0] == '\0'))
+        continue;
+
+      /* Reads first column */
+      for (p = buf, q = NULL; *p; p++) {
+        if ((*p == '\t') || (*p == ' ') || (*p == ':')) {
+          *p = '\0';
+          q = p+1;
+          while ((*q == '\t') || (*q == ' ')) {
+            q++;
+          }
+          break;
+        }
+      }
+      /* The line only had one column */
+      if (!q || *q == '\0')
+        continue;
+
+      /* Read second column */
+      for (p = q; *p; p++) {
+        if ((*p == '\t') || (*p == ' ')) {
+          *p = '\0';
+          break;
+        }
+      }
+
+      /* Add to alias table if necessary */
+      if (!g_hash_table_lookup (alias_table, buf)) {
+        g_hash_table_insert (alias_table, g_strdup (buf), g_strdup (q));
+      }
+    }
+  fclose (fp);
+}
+
+static char *
+unalias_lang (char *lang)
+{
+  static GHashTable *alias_table = NULL;
+  char *p;
+  int i;
+
+  if (g_once_init_enter (&alias_table))
+    {
+      GHashTable *table = g_hash_table_new (g_str_hash, g_str_equal);
+      read_aliases ("/usr/share/locale/locale.alias", table);
+      g_once_init_leave (&alias_table, table);
+    }
+
+  i = 0;
+  while ((p = g_hash_table_lookup (alias_table, lang)) && (strcmp (p, lang) != 0))
+    {
+      lang = p;
+      if (i++ == 30)
+        {
+          static gboolean said_before = FALSE;
+          if (!said_before)
+            g_warning ("Too many alias levels for a locale, "
+                       "may indicate a loop");
+          said_before = TRUE;
+          return lang;
+        }
+    }
+  return lang;
+}
+
+/* Mask for components of locale spec. The ordering here is from
+ * least significant to most significant
+ */
+enum
+{
+  COMPONENT_CODESET =   1 << 0,
+  COMPONENT_TERRITORY = 1 << 1,
+  COMPONENT_MODIFIER =  1 << 2
+};
+
+/* Break an X/Open style locale specification into components
+ */
+static guint
+explode_locale (const gchar *locale,
+                gchar      **language,
+                gchar      **territory,
+                gchar      **codeset,
+                gchar      **modifier)
+{
+  const gchar *uscore_pos;
+  const gchar *at_pos;
+  const gchar *dot_pos;
+
+  guint mask = 0;
+
+  uscore_pos = strchr (locale, '_');
+  dot_pos = strchr (uscore_pos ? uscore_pos : locale, '.');
+  at_pos = strchr (dot_pos ? dot_pos : (uscore_pos ? uscore_pos : locale), '@');
+
+  if (at_pos)
+    {
+      mask |= COMPONENT_MODIFIER;
+      *modifier = g_strdup (at_pos);
+    }
+  else
+    at_pos = locale + strlen (locale);
+
+  if (dot_pos)
+    {
+      mask |= COMPONENT_CODESET;
+      *codeset = g_strndup (dot_pos, at_pos - dot_pos);
+    }
+  else
+    dot_pos = at_pos;
+
+  if (uscore_pos)
+    {
+      mask |= COMPONENT_TERRITORY;
+      *territory = g_strndup (uscore_pos, dot_pos - uscore_pos);
+    }
+  else
+    uscore_pos = dot_pos;
+
+  *language = g_strndup (locale, uscore_pos - locale);
+
+  return mask;
+}
+
+/*
+ * Compute all interesting variants for a given locale name -
+ * by stripping off different components of the value.
+ *
+ * For simplicity, we assume that the locale is in
+ * X/Open format: language[_territory][.codeset][@modifier]
+ *
+ * TODO: Extend this to handle the CEN format (see the GNUlibc docs)
+ *       as well. We could just copy the code from glibc wholesale
+ *       but it is big, ugly, and complicated, so I'm reluctant
+ *       to do so when this should handle 99% of the time...
+ */
+static void
+append_locale_variants (GPtrArray *array,
+                        const gchar *locale)
+{
+  gchar *language = NULL;
+  gchar *territory = NULL;
+  gchar *codeset = NULL;
+  gchar *modifier = NULL;
+
+  guint mask;
+  guint i, j;
+
+  g_return_if_fail (locale != NULL);
+
+  mask = explode_locale (locale, &language, &territory, &codeset, &modifier);
+
+  /* Iterate through all possible combinations, from least attractive
+   * to most attractive.
+   */
+  for (j = 0; j <= mask; ++j)
+    {
+      i = mask - j;
+
+      if ((i & ~mask) == 0)
+        {
+          gchar *val = g_strconcat (language,
+                                    (i & COMPONENT_TERRITORY) ? territory : "",
+                                    (i & COMPONENT_CODESET) ? codeset : "",
+                                    (i & COMPONENT_MODIFIER) ? modifier : "",
+                                    NULL);
+          g_ptr_array_add (array, val);
+        }
+    }
+
+  g_free (language);
+  if (mask & COMPONENT_CODESET)
+    g_free (codeset);
+  if (mask & COMPONENT_TERRITORY)
+    g_free (territory);
+  if (mask & COMPONENT_MODIFIER)
+    g_free (modifier);
+}
+
+/* The following is (partly) taken from the gettext package.
+   Copyright (C) 1995, 1996, 1997, 1998 Free Software Foundation, Inc.  */
+
+static const gchar *
+guess_category_value (const gchar *category_name)
+{
+  const gchar *retval;
+
+  /* The highest priority value is the 'LANGUAGE' environment
+     variable.  This is a GNU extension.  */
+  retval = g_getenv ("LANGUAGE");
+  if ((retval != NULL) && (retval[0] != '\0'))
+    return retval;
+
+  /* 'LANGUAGE' is not set.  So we have to proceed with the POSIX
+     methods of looking to 'LC_ALL', 'LC_xxx', and 'LANG'.  On some
+     systems this can be done by the 'setlocale' function itself.  */
+
+  /* Setting of LC_ALL overwrites all other.  */
+  retval = g_getenv ("LC_ALL");
+  if ((retval != NULL) && (retval[0] != '\0'))
+    return retval;
+
+  /* Next comes the name of the desired category.  */
+  retval = g_getenv (category_name);
+  if ((retval != NULL) && (retval[0] != '\0'))
+    return retval;
+
+  /* Last possibility is the LANG environment variable.  */
+  retval = g_getenv ("LANG");
+  if ((retval != NULL) && (retval[0] != '\0'))
+    return retval;
+
+#ifdef G_PLATFORM_WIN32
+  /* g_win32_getlocale() first checks for LC_ALL, LC_MESSAGES and
+   * LANG, which we already did above. Oh well. The main point of
+   * calling g_win32_getlocale() is to get the thread's locale as used
+   * by Windows and the Microsoft C runtime (in the "English_United
+   * States" format) translated into the Unixish format.
+   */
+  {
+    char *locale = g_win32_getlocale ();
+    retval = g_intern_string (locale);
+    g_free (locale);
+    return retval;
+  }
+#endif
+
+  return NULL;
+}
+
+static const gchar * const *
+g_get_language_names_with_category (const gchar *category_name)
+{
+  static GPrivate cache_private = G_PRIVATE_INIT ((void (*)(gpointer)) g_hash_table_unref);
+  GHashTable *cache = g_private_get (&cache_private);
+  const gchar *languages;
+  GLanguageNamesCache *name_cache;
+
+  g_return_val_if_fail (category_name != NULL, NULL);
+
+  if (!cache)
+    {
+      cache = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                     g_free, language_names_cache_free);
+      g_private_set (&cache_private, cache);
+    }
+
+  languages = guess_category_value (category_name);
+  if (!languages)
+    languages = "C";
+
+  name_cache = (GLanguageNamesCache *) g_hash_table_lookup (cache, category_name);
+  if (!(name_cache && name_cache->languages &&
+        strcmp (name_cache->languages, languages) == 0))
+    {
+      GPtrArray *array;
+      gchar **alist, **a;
+
+      g_hash_table_remove (cache, category_name);
+
+      array = g_ptr_array_sized_new (8);
+
+      alist = g_strsplit (languages, ":", 0);
+      for (a = alist; *a; a++)
+        append_locale_variants (array, unalias_lang (*a));
+      g_strfreev (alist);
+      g_ptr_array_add (array, g_strdup ("C"));
+      g_ptr_array_add (array, NULL);
+
+      name_cache = g_new0 (GLanguageNamesCache, 1);
+      name_cache->languages = g_strdup (languages);
+      name_cache->language_names = (gchar **) g_ptr_array_free (array, FALSE);
+      g_hash_table_insert (cache, g_strdup (category_name), name_cache);
+    }
+
+  return (const gchar * const *) name_cache->language_names;
+}
+
+#endif
+
 char **
 flatpak_get_current_locale_langs (void)
 {
-  const gchar * const *locales = g_get_language_names ();
+  const char * const *categories = flatpak_get_locale_categories ();
   GPtrArray *langs = g_ptr_array_new ();
   int i;
 
-  for (i = 0; locales[i] != NULL; i++)
+  for (; categories != NULL && *categories != NULL; categories++)
     {
-      g_autofree char *lang = flatpak_get_lang_from_locale (locales[i]);
-      if (lang != NULL && !flatpak_g_ptr_array_contains_string (langs, lang))
-        g_ptr_array_add (langs, g_steal_pointer (&lang));
+      const gchar * const *locales = g_get_language_names_with_category (*categories);
+
+      for (i = 0; locales[i] != NULL; i++)
+        {
+          g_autofree char *lang = flatpak_get_lang_from_locale (locales[i]);
+          if (lang != NULL && !flatpak_g_ptr_array_contains_string (langs, lang))
+            g_ptr_array_add (langs, g_steal_pointer (&lang));
+        }
     }
 
   g_ptr_array_sort (langs, flatpak_strcmp0_ptr);
@@ -8611,4 +8943,90 @@ flatpak_dconf_path_is_similar (const char *path1,
   return (path1[i1] == '\0');
 }
 
+/**
+ * flatpak_envp_cmp:
+ * @p1: a `const char * const *`
+ * @p2: a `const char * const *`
+ *
+ * Compare two environment variables, given as pointers to pointers
+ * to the actual `KEY=value` string.
+ *
+ * In particular this is suitable for sorting a #GStrv using `qsort`.
+ *
+ * Returns: negative, 0 or positive if `*p1` compares before, equal to
+ *  or after `*p2`
+ */
+int
+flatpak_envp_cmp (const void *p1,
+                  const void *p2)
+{
+  const char * const * s1 = p1;
+  const char * const * s2 = p2;
+  size_t l1 = strlen (*s1);
+  size_t l2 = strlen (*s2);
+  size_t min;
+  const char *tmp;
+  int ret;
 
+  tmp = strchr (*s1, '=');
+
+  if (tmp != NULL)
+    l1 = tmp - *s1;
+
+  tmp = strchr (*s2, '=');
+
+  if (tmp != NULL)
+    l2 = tmp - *s2;
+
+  min = MIN (l1, l2);
+  ret = strncmp (*s1, *s2, min);
+
+  /* If they differ before the first '=' (if any) in either s1 or s2,
+   * then they are certainly different */
+  if (ret != 0)
+    return ret;
+
+  ret = strcmp (*s1, *s2);
+
+  /* If they do not differ at all, then they are equal */
+  if (ret == 0)
+    return ret;
+
+  /* FOO < FOO=..., and FOO < FOOBAR */
+  if ((*s1)[min] == '\0')
+    return -1;
+
+  /* FOO=... > FOO, and FOOBAR > FOO */
+  if ((*s2)[min] == '\0')
+    return 1;
+
+  /* FOO= < FOOBAR */
+  if ((*s1)[min] == '=' && (*s2)[min] != '=')
+    return -1;
+
+  /* FOOBAR > FOO= */
+  if ((*s2)[min] == '=' && (*s1)[min] != '=')
+    return 1;
+
+  /* Fall back to plain string comparison */
+  return ret;
+}
+
+/*
+ * Return %TRUE if @s consists of one or more digits.
+ * This is the same as Python bytes.isdigit().
+ */
+gboolean
+flatpak_str_is_integer (const char *s)
+{
+  if (s == NULL || *s == '\0')
+    return FALSE;
+
+  for (; *s != '\0'; s++)
+    {
+      if (!g_ascii_isdigit (*s))
+        return FALSE;
+    }
+
+  return TRUE;
+}

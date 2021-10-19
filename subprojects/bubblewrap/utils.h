@@ -62,6 +62,7 @@ void *xrealloc (void  *ptr,
                 size_t size);
 char *xstrdup (const char *str);
 void  strfreev (char **str_array);
+void  xclearenv (void);
 void  xsetenv (const char *name,
                const char *value,
                int         overwrite);
@@ -112,6 +113,8 @@ int   mkdir_with_parents (const char *pathname,
 void create_pid_socketpair (int sockets[2]);
 void send_pid_on_socket (int socket);
 int  read_pid_from_socket (int socket);
+char *get_oldroot_path (const char *path);
+char *readlink_malloc (const char *pathname);
 
 /* syscall wrappers */
 int   raw_clone (unsigned long flags,

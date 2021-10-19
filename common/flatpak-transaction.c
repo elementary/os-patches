@@ -1904,23 +1904,26 @@ FlatpakRemoteState *
 flatpak_transaction_ensure_remote_state (FlatpakTransaction             *self,
                                          FlatpakTransactionOperationType kind,
                                          const char                     *remote,
+                                         const char                     *opt_arch,
                                          GError                        **error)
 {
   FlatpakTransactionPrivate *priv = flatpak_transaction_get_instance_private (self);
-  FlatpakRemoteState *state;
+  g_autoptr(FlatpakRemoteState) state = NULL;
+  FlatpakRemoteState *cached_state;
 
   /* We don't cache local-only states, as we might later need the same state with non-local state */
   if (transaction_is_local_only (self, kind))
     return flatpak_dir_get_remote_state_local_only (priv->dir, remote, NULL, error);
 
-  state = g_hash_table_lookup (priv->remote_states, remote);
-  if (state)
-    return flatpak_remote_state_ref (state);
-
-  state = flatpak_dir_get_remote_state_optional (priv->dir, remote, FALSE, NULL, error);
-
-  if (state)
+  cached_state = g_hash_table_lookup (priv->remote_states, remote);
+  if (cached_state)
+    state = flatpak_remote_state_ref (cached_state);
+  else
     {
+      state = flatpak_dir_get_remote_state_optional (priv->dir, remote, FALSE, NULL, error);
+      if (state == NULL)
+        return NULL;
+
       g_hash_table_insert (priv->remote_states, state->remote_name, flatpak_remote_state_ref (state));
 
       for (int i = 0; i < priv->extra_sideload_repos->len; i++)
@@ -1931,7 +1934,11 @@ flatpak_transaction_ensure_remote_state (FlatpakTransaction             *self,
         }
     }
 
-  return state;
+  if (opt_arch != NULL &&
+      !flatpak_remote_state_ensure_subsummary (state, priv->dir, opt_arch, FALSE, NULL, error))
+    return FALSE;
+
+  return g_steal_pointer (&state);
 }
 
 static gboolean
@@ -2042,7 +2049,7 @@ op_get_related (FlatpakTransaction           *self,
 
   if (op->kind != FLATPAK_TRANSACTION_OPERATION_UNINSTALL)
     {
-      state = flatpak_transaction_ensure_remote_state (self, op->kind, op->remote, error);
+      state = flatpak_transaction_ensure_remote_state (self, op->kind, op->remote, NULL, error);
       if (state == NULL)
         return FALSE;
     }
@@ -2182,6 +2189,7 @@ search_for_dependency (FlatpakTransaction  *self,
 {
   g_autoptr(GPtrArray) found = g_ptr_array_new_with_free_func (g_free);
   int i;
+  g_autofree char *arch = flatpak_decomposed_dup_arch (runtime_ref);
 
   for (i = 0; remotes != NULL && remotes[i] != NULL; i++)
     {
@@ -2189,11 +2197,11 @@ search_for_dependency (FlatpakTransaction  *self,
       g_autoptr(GError) local_error = NULL;
       g_autoptr(FlatpakRemoteState) state = NULL;
 
-      state = flatpak_transaction_ensure_remote_state (self, FLATPAK_TRANSACTION_OPERATION_INSTALL, remote, &local_error);
+      state = flatpak_transaction_ensure_remote_state (self, FLATPAK_TRANSACTION_OPERATION_INSTALL, remote, arch, &local_error);
       if (state == NULL)
         {
-          g_debug ("Can't get state for remote %s: %s", remote, local_error->message);
-          return FALSE;
+          g_debug ("Can't get state for remote %s, ignoring: %s", remote, local_error->message);
+          continue;
         }
 
       if (flatpak_remote_state_lookup_ref (state, flatpak_decomposed_get_ref (runtime_ref), NULL, NULL, NULL, NULL, NULL))
@@ -2510,7 +2518,9 @@ flatpak_transaction_add_ref (FlatpakTransaction             *self,
    * remote to be fatal */
   if (kind != FLATPAK_TRANSACTION_OPERATION_UNINSTALL)
     {
-      state = flatpak_transaction_ensure_remote_state (self, kind, remote, error);
+      g_autofree char *arch = flatpak_decomposed_dup_arch (ref);
+
+      state = flatpak_transaction_ensure_remote_state (self, kind, remote, arch, error);
       if (state == NULL)
         return FALSE;
     }
@@ -2793,7 +2803,7 @@ flatpak_transaction_update_metadata (FlatpakTransaction *self,
       char *remote = remotes[i];
       gboolean updated = FALSE;
       g_autoptr(GError) my_error = NULL;
-      g_autoptr(FlatpakRemoteState) state = flatpak_transaction_ensure_remote_state (self, FLATPAK_TRANSACTION_OPERATION_UPDATE, remote, NULL);
+      g_autoptr(FlatpakRemoteState) state = flatpak_transaction_ensure_remote_state (self, FLATPAK_TRANSACTION_OPERATION_UPDATE, remote, NULL, NULL);
 
       g_debug ("Looking for remote metadata updates for %s", remote);
       if (!flatpak_dir_update_remote_configuration (priv->dir, remote, state, &updated, cancellable, &my_error))
@@ -2854,7 +2864,7 @@ flatpak_transaction_add_auto_install (FlatpakTransaction *self,
           deploy = flatpak_dir_get_if_deployed (priv->dir, auto_install_ref, NULL, cancellable);
           if (deploy == NULL)
             {
-              g_autoptr(FlatpakRemoteState) state = flatpak_transaction_ensure_remote_state (self, FLATPAK_TRANSACTION_OPERATION_UPDATE, remote, NULL);
+              g_autoptr(FlatpakRemoteState) state = flatpak_transaction_ensure_remote_state (self, FLATPAK_TRANSACTION_OPERATION_UPDATE, remote, NULL, NULL);
 
               if (state != NULL &&
                   flatpak_remote_state_lookup_ref (state, flatpak_decomposed_get_ref (auto_install_ref), NULL, NULL, NULL, NULL, NULL))
@@ -2971,8 +2981,12 @@ mark_op_resolved (FlatpakTransactionOperation *op,
   g_assert (commit != NULL);
 
   op->resolved = TRUE;
-  g_free (op->resolved_commit); /* This is already set if we retry resolving to get a token, so free first */
-  op->resolved_commit = g_strdup (commit);
+
+  if (op->resolved_commit != commit)
+    {
+      g_free (op->resolved_commit); /* This is already set if we retry resolving to get a token, so free first */
+      op->resolved_commit = g_strdup (commit);
+    }
 
   if (sideload_path)
     op->resolved_sideload_path = g_object_ref (sideload_path);
@@ -3145,6 +3159,11 @@ resolve_ops (FlatpakTransaction *self,
           /* We resolve to the deployed metadata, because we need it to uninstall related ops */
 
           metadata_bytes = load_deployed_metadata (self, op->ref, &checksum, NULL);
+          if (metadata_bytes == NULL)
+            {
+              op->skip = TRUE;
+              continue;
+            }
           mark_op_resolved (op, checksum, NULL, metadata_bytes, NULL);
           continue;
         }
@@ -3171,7 +3190,7 @@ resolve_ops (FlatpakTransaction *self,
             priv->max_op = MAX (priv->max_op, RUNTIME_INSTALL);
         }
 
-      state = flatpak_transaction_ensure_remote_state (self, op->kind, op->remote, error);
+      state = flatpak_transaction_ensure_remote_state (self, op->kind, op->remote, NULL, error);
       if (state == NULL)
         return FALSE;
 
@@ -4745,7 +4764,7 @@ flatpak_transaction_real_run (FlatpakTransaction *self,
           res = FALSE;
         }
       else if (op->kind != FLATPAK_TRANSACTION_OPERATION_UNINSTALL &&
-               (state = flatpak_transaction_ensure_remote_state (self, op->kind, op->remote, &local_error)) == NULL)
+               (state = flatpak_transaction_ensure_remote_state (self, op->kind, op->remote, NULL, &local_error)) == NULL)
         {
           res = FALSE;
         }

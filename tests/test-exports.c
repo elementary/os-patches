@@ -29,64 +29,7 @@
 #include "flatpak-run-private.h"
 #include "flatpak-utils-base-private.h"
 
-static char *testdir;
-
-static void
-global_setup (void)
-{
-  g_autofree char *cachedir = NULL;
-  g_autofree char *configdir = NULL;
-  g_autofree char *datadir = NULL;
-  g_autofree char *homedir = NULL;
-  g_autofree char *runtimedir = NULL;
-
-  testdir = g_strdup ("/tmp/flatpak-test-XXXXXX");
-  g_mkdtemp (testdir);
-  g_test_message ("testdir: %s", testdir);
-
-  homedir = g_strconcat (testdir, "/home", NULL);
-  g_mkdir_with_parents (homedir, S_IRWXU | S_IRWXG | S_IRWXO);
-
-  g_setenv ("HOME", homedir, TRUE);
-  g_test_message ("setting HOME=%s", homedir);
-
-  cachedir = g_strconcat (testdir, "/home/cache", NULL);
-  g_mkdir_with_parents (cachedir, S_IRWXU | S_IRWXG | S_IRWXO);
-  g_setenv ("XDG_CACHE_HOME", cachedir, TRUE);
-  g_test_message ("setting XDG_CACHE_HOME=%s", cachedir);
-
-  configdir = g_strconcat (testdir, "/home/config", NULL);
-  g_mkdir_with_parents (configdir, S_IRWXU | S_IRWXG | S_IRWXO);
-  g_setenv ("XDG_CONFIG_HOME", configdir, TRUE);
-  g_test_message ("setting XDG_CONFIG_HOME=%s", configdir);
-
-  datadir = g_strconcat (testdir, "/home/share", NULL);
-  g_mkdir_with_parents (datadir, S_IRWXU | S_IRWXG | S_IRWXO);
-  g_setenv ("XDG_DATA_HOME", datadir, TRUE);
-  g_test_message ("setting XDG_DATA_HOME=%s", datadir);
-
-  runtimedir = g_strconcat (testdir, "/runtime", NULL);
-  g_mkdir_with_parents (runtimedir, S_IRWXU);
-  g_setenv ("XDG_RUNTIME_DIR", runtimedir, TRUE);
-  g_test_message ("setting XDG_RUNTIME_DIR=%s", runtimedir);
-
-  g_reload_user_special_dirs_cache ();
-
-  g_assert_cmpstr (g_get_user_cache_dir (), ==, cachedir);
-  g_assert_cmpstr (g_get_user_config_dir (), ==, configdir);
-  g_assert_cmpstr (g_get_user_data_dir (), ==, datadir);
-  g_assert_cmpstr (g_get_user_runtime_dir (), ==, runtimedir);
-}
-
-static void
-global_teardown (void)
-{
-  if (g_getenv ("SKIP_TEARDOWN"))
-    return;
-
-  glnx_shutil_rm_rf_at (-1, testdir, NULL, NULL);
-  g_free (testdir);
-}
+#include "tests/testlib.h"
 
 /*
  * Assert that the next few arguments starting from @i are setting up
@@ -224,6 +167,8 @@ test_empty_context (void)
   g_autoptr(FlatpakBwrap) bwrap = flatpak_bwrap_new (NULL);
   g_autoptr(FlatpakContext) context = flatpak_context_new ();
   g_autoptr(FlatpakExports) exports = NULL;
+  g_autofree char *xdg_dirs_conf = NULL;
+  gboolean home_access = FALSE;
 
   g_assert_cmpuint (g_hash_table_size (context->env_vars), ==, 0);
   g_assert_cmpuint (g_hash_table_size (context->persistent), ==, 0);
@@ -245,13 +190,17 @@ test_empty_context (void)
   g_assert_nonnull (exports);
 
   g_clear_pointer (&exports, flatpak_exports_free);
+  exports = flatpak_context_get_exports_full (context,
+                                              NULL, NULL,
+                                              TRUE, TRUE,
+                                              &xdg_dirs_conf, &home_access);
+  g_assert_nonnull (exports);
+  g_assert_nonnull (xdg_dirs_conf);
   flatpak_context_append_bwrap_filesystem (context, bwrap,
                                            "com.example.App",
-                                           NULL,
-                                           NULL,
-                                           &exports);
+                                           NULL, exports, xdg_dirs_conf,
+                                           home_access);
   print_bwrap (bwrap);
-  g_assert_nonnull (exports);
 }
 
 static void
@@ -263,8 +212,10 @@ test_full_context (void)
   g_autoptr(GError) error = NULL;
   g_autoptr(GKeyFile) keyfile = g_key_file_new ();
   g_autofree gchar *text = NULL;
+  g_autofree char *xdg_dirs_conf = NULL;
   g_auto(GStrv) strv = NULL;
   gsize i, n;
+  gboolean home_access = FALSE;
 
   g_key_file_set_value (keyfile,
                         FLATPAK_METADATA_GROUP_CONTEXT,
@@ -282,7 +233,7 @@ test_full_context (void)
   g_key_file_set_value (keyfile,
                         FLATPAK_METADATA_GROUP_CONTEXT,
                         FLATPAK_METADATA_KEY_FEATURES,
-                        "devel;multiarch;bluetooth;canbus;");
+                        "devel;multiarch;bluetooth;canbus;per-app-dev-shm;");
   g_key_file_set_value (keyfile,
                         FLATPAK_METADATA_GROUP_CONTEXT,
                         FLATPAK_METADATA_KEY_FILESYSTEMS,
@@ -341,7 +292,8 @@ test_full_context (void)
                     (FLATPAK_CONTEXT_FEATURE_DEVEL |
                      FLATPAK_CONTEXT_FEATURE_MULTIARCH |
                      FLATPAK_CONTEXT_FEATURE_BLUETOOTH |
-                     FLATPAK_CONTEXT_FEATURE_CANBUS));
+                     FLATPAK_CONTEXT_FEATURE_CANBUS |
+                     FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM));
   g_assert_cmpuint (context->features_valid, ==, context->features);
 
   g_assert_cmpuint (flatpak_context_get_run_flags (context), ==,
@@ -363,13 +315,17 @@ test_full_context (void)
   g_assert_nonnull (exports);
 
   g_clear_pointer (&exports, flatpak_exports_free);
+  exports = flatpak_context_get_exports_full (context,
+                                              NULL, NULL,
+                                              TRUE, TRUE,
+                                              &xdg_dirs_conf, &home_access);
+  g_assert_nonnull (exports);
+  g_assert_nonnull (xdg_dirs_conf);
   flatpak_context_append_bwrap_filesystem (context, bwrap,
                                            "com.example.App",
-                                           NULL,
-                                           NULL,
-                                           &exports);
+                                           NULL, exports, xdg_dirs_conf,
+                                           home_access);
   print_bwrap (bwrap);
-  g_assert_nonnull (exports);
 
   g_clear_pointer (&keyfile, g_key_file_unref);
   keyfile = g_key_file_new ();
@@ -715,7 +671,7 @@ test_full (void)
   g_autoptr(GError) error = NULL;
   g_autoptr(FlatpakBwrap) bwrap = flatpak_bwrap_new (NULL);
   g_autoptr(FlatpakExports) exports = flatpak_exports_new ();
-  g_autofree gchar *subdir = g_build_filename (testdir, "test_full", NULL);
+  g_autofree gchar *subdir = g_build_filename (isolated_test_dir, "test_full", NULL);
   g_autofree gchar *expose_rw = g_build_filename (subdir, "expose-rw", NULL);
   g_autofree gchar *in_expose_rw = g_build_filename (subdir, "expose-rw",
                                                      "file", NULL);
@@ -937,7 +893,7 @@ create_fake_files (const FakeFile *files)
   for (i = 0; files[i].name != NULL; i++)
     {
       g_autoptr(GError) error = NULL;
-      g_autofree gchar *path = g_build_filename (testdir, "host",
+      g_autofree gchar *path = g_build_filename (isolated_test_dir, "host",
                                                  files[i].name, NULL);
 
       g_assert (files[i].name[0] != '/');
@@ -971,15 +927,14 @@ create_fake_files (const FakeFile *files)
     }
 }
 
-static void
-test_host_exports (const FakeFile *files,
-                   FlatpakBwrap *bwrap,
-                   FlatpakFilesystemMode etc_mode,
-                   FlatpakFilesystemMode os_mode)
+static FlatpakExports *
+test_host_exports_setup (const FakeFile *files,
+                         FlatpakFilesystemMode etc_mode,
+                         FlatpakFilesystemMode os_mode)
 {
   g_autoptr(FlatpakExports) exports = flatpak_exports_new ();
   g_autoptr(GError) error = NULL;
-  g_autofree gchar *host = g_build_filename (testdir, "host", NULL);
+  g_autofree gchar *host = g_build_filename (isolated_test_dir, "host", NULL);
   glnx_autofd int fd = -1;
 
   glnx_shutil_rm_rf_at (-1, host, NULL, &error);
@@ -1002,6 +957,16 @@ test_host_exports (const FakeFile *files,
   if (os_mode > FLATPAK_FILESYSTEM_MODE_NONE)
     flatpak_exports_add_host_os_expose (exports, os_mode);
 
+  return g_steal_pointer (&exports);
+}
+
+static void
+test_host_exports_finish (FlatpakExports *exports,
+                          FlatpakBwrap *bwrap)
+{
+  g_autofree gchar *host = g_build_filename (isolated_test_dir, "host", NULL);
+  g_autoptr(GError) error = NULL;
+
   flatpak_bwrap_add_arg (bwrap, "bwrap");
   flatpak_exports_append_bwrap_args (exports, bwrap);
   flatpak_bwrap_finish (bwrap);
@@ -1014,6 +979,18 @@ test_host_exports (const FakeFile *files,
       g_assert_error (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND);
       g_clear_error (&error);
     }
+}
+
+static void
+test_host_exports (const FakeFile *files,
+                   FlatpakBwrap *bwrap,
+                   FlatpakFilesystemMode etc_mode,
+                   FlatpakFilesystemMode os_mode)
+{
+  g_autoptr(FlatpakExports) exports = NULL;
+
+  exports = test_host_exports_setup (files, etc_mode, os_mode);
+  test_host_exports_finish (exports, bwrap);
 }
 
 /*
@@ -1055,6 +1032,56 @@ test_exports_arch (void)
   i = assert_next_is_symlink (bwrap, i, "usr/lib", "/run/host/lib");
   i = assert_next_is_symlink (bwrap, i, "usr/lib", "/run/host/lib64");
   i = assert_next_is_symlink (bwrap, i, "usr/bin", "/run/host/sbin");
+  i = assert_next_is_bind (bwrap, i, "--ro-bind", "/etc/ld.so.cache",
+                           "/run/host/etc/ld.so.cache");
+
+  g_assert_cmpuint (i, ==, bwrap->argv->len - 1);
+  g_assert_cmpstr (bwrap->argv->pdata[i++], ==, NULL);
+  g_assert_cmpuint (i, ==, bwrap->argv->len);
+}
+
+/*
+ * Test --filesystem=host-os with an OS that looks like Fedora.
+ */
+static void
+test_exports_fedora (void)
+{
+  static const FakeFile files[] =
+  {
+    { "etc", FAKE_DIR },
+    { "etc/ld.so.cache", FAKE_FILE },
+    { "etc/ld.so.conf", FAKE_FILE },
+    { "etc/ld.so.conf.d", FAKE_DIR },
+    { "bin", FAKE_SYMLINK, "usr/bin" },
+    { "lib", FAKE_SYMLINK, "usr/lib" },
+    { "lib64", FAKE_SYMLINK, "usr/lib64" },
+    { "sbin", FAKE_SYMLINK, "usr/sbin" },
+    { "usr/bin", FAKE_DIR },
+    { "usr/lib", FAKE_DIR },
+    { "usr/lib64", FAKE_DIR },
+    { "usr/local", FAKE_SYMLINK, "../var/usrlocal" },
+    { "usr/sbin", FAKE_DIR },
+    { "usr/share", FAKE_DIR },
+    { "var/usrlocal", FAKE_DIR },
+    { NULL }
+  };
+  g_autoptr(FlatpakBwrap) bwrap = flatpak_bwrap_new (NULL);
+  gsize i;
+
+  test_host_exports (files, bwrap, FLATPAK_FILESYSTEM_MODE_NONE,
+                     FLATPAK_FILESYSTEM_MODE_READ_ONLY);
+
+  i = 0;
+  g_assert_cmpuint (i, <, bwrap->argv->len);
+  g_assert_cmpstr (bwrap->argv->pdata[i++], ==, "bwrap");
+
+  i = assert_next_is_bind (bwrap, i, "--ro-bind", "/usr", "/run/host/usr");
+  i = assert_next_is_bind (bwrap, i, "--ro-bind", "/var/usrlocal",
+                           "/run/host/var/usrlocal");
+  i = assert_next_is_symlink (bwrap, i, "usr/bin", "/run/host/bin");
+  i = assert_next_is_symlink (bwrap, i, "usr/lib", "/run/host/lib");
+  i = assert_next_is_symlink (bwrap, i, "usr/lib64", "/run/host/lib64");
+  i = assert_next_is_symlink (bwrap, i, "usr/sbin", "/run/host/sbin");
   i = assert_next_is_bind (bwrap, i, "--ro-bind", "/etc/ld.so.cache",
                            "/run/host/etc/ld.so.cache");
 
@@ -1254,12 +1281,95 @@ test_exports_ignored (void)
   g_assert_cmpuint (i, ==, bwrap->argv->len);
 }
 
+/*
+ * Test various corner-cases using a mock root.
+ */
+static void
+test_exports_unusual (void)
+{
+  static const FakeFile files[] =
+  {
+    { "TMP", FAKE_DIR },
+    { "dangling-link", FAKE_SYMLINK, "nonexistent" },
+    { "etc", FAKE_DIR },
+    { "etc/ld.so.cache", FAKE_FILE },
+    { "etc/ld.so.conf", FAKE_FILE },
+    { "etc/ld.so.conf.d", FAKE_DIR },
+    { "bin", FAKE_SYMLINK, "usr/bin" },
+    { "broken-autofs", FAKE_DIR },
+    { "home", FAKE_SYMLINK, "var/home" },
+    { "lib", FAKE_SYMLINK, "usr/lib" },
+    { "recursion", FAKE_SYMLINK, "recursion" },
+    { "tmp", FAKE_SYMLINK, "TMP" },
+    { "usr/bin", FAKE_DIR },
+    { "usr/lib", FAKE_DIR },
+    { "usr/share", FAKE_DIR },
+    { "var/home/me", FAKE_DIR },
+    { "var/volatile/tmp", FAKE_DIR },
+    { "var/tmp", FAKE_SYMLINK, "volatile/tmp" },
+    { NULL }
+  };
+  g_autoptr(FlatpakBwrap) bwrap = flatpak_bwrap_new (NULL);
+  g_autoptr(FlatpakExports) exports = NULL;
+  gsize i;
+
+  exports = test_host_exports_setup (files,
+                                     FLATPAK_FILESYSTEM_MODE_NONE,
+                                     FLATPAK_FILESYSTEM_MODE_READ_ONLY);
+  flatpak_exports_set_test_flags (exports, FLATPAK_EXPORTS_TEST_FLAGS_AUTOFS);
+  flatpak_exports_add_path_expose (exports,
+                                   FLATPAK_FILESYSTEM_MODE_READ_ONLY,
+                                   "/broken-autofs");
+  flatpak_exports_add_path_expose (exports,
+                                   FLATPAK_FILESYSTEM_MODE_READ_ONLY,
+                                   "/dangling-link");
+  flatpak_exports_add_path_expose (exports,
+                                   FLATPAK_FILESYSTEM_MODE_READ_ONLY,
+                                   "/home/me");
+  flatpak_exports_add_path_expose (exports,
+                                   FLATPAK_FILESYSTEM_MODE_READ_ONLY,
+                                   "/nonexistent");
+  flatpak_exports_add_path_expose (exports,
+                                   FLATPAK_FILESYSTEM_MODE_READ_ONLY,
+                                   "/recursion");
+  flatpak_exports_add_path_expose (exports,
+                                   FLATPAK_FILESYSTEM_MODE_READ_ONLY,
+                                   "/tmp");
+  flatpak_exports_add_path_expose (exports,
+                                   FLATPAK_FILESYSTEM_MODE_READ_WRITE,
+                                   "/var/tmp");
+  flatpak_exports_add_path_expose (exports,
+                                   FLATPAK_FILESYSTEM_MODE_READ_ONLY,
+                                   "not-absolute");
+  test_host_exports_finish (exports, bwrap);
+
+  i = 0;
+  g_assert_cmpuint (i, <, bwrap->argv->len);
+  g_assert_cmpstr (bwrap->argv->pdata[i++], ==, "bwrap");
+
+  i = assert_next_is_bind (bwrap, i, "--symlink", "var/home", "/home");
+  i = assert_next_is_bind (bwrap, i, "--ro-bind", "/tmp", "/tmp");
+  i = assert_next_is_bind (bwrap, i, "--ro-bind", "/var/home/me",
+                           "/var/home/me");
+  i = assert_next_is_bind (bwrap, i, "--bind", "/var/tmp",
+                           "/var/tmp");
+  i = assert_next_is_bind (bwrap, i, "--ro-bind", "/usr", "/run/host/usr");
+  i = assert_next_is_symlink (bwrap, i, "usr/bin", "/run/host/bin");
+  i = assert_next_is_symlink (bwrap, i, "usr/lib", "/run/host/lib");
+  i = assert_next_is_bind (bwrap, i, "--ro-bind", "/etc/ld.so.cache",
+                           "/run/host/etc/ld.so.cache");
+
+  g_assert_cmpuint (i, ==, bwrap->argv->len - 1);
+  g_assert_cmpstr (bwrap->argv->pdata[i++], ==, NULL);
+  g_assert_cmpuint (i, ==, bwrap->argv->len);
+}
+
 int
 main (int argc, char *argv[])
 {
   int res;
 
-  global_setup ();
+  isolated_test_dir_global_setup ();
 
   g_test_init (&argc, &argv, NULL);
 
@@ -1271,11 +1381,13 @@ main (int argc, char *argv[])
   g_test_add_func ("/exports/host/arch", test_exports_arch);
   g_test_add_func ("/exports/host/debian", test_exports_debian);
   g_test_add_func ("/exports/host/debian-usrmerge", test_exports_debian_merged);
+  g_test_add_func ("/exports/host/fedora", test_exports_fedora);
   g_test_add_func ("/exports/ignored", test_exports_ignored);
+  g_test_add_func ("/exports/unusual", test_exports_unusual);
 
   res = g_test_run ();
 
-  global_teardown ();
+  isolated_test_dir_global_teardown ();
 
   return res;
 }

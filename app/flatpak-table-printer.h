@@ -53,7 +53,7 @@ void                flatpak_table_printer_append_with_comma (FlatpakTablePrinter
                                                              const char          *text);
 void                flatpak_table_printer_append_with_comma_printf (FlatpakTablePrinter *printer,
                                                                     const char          *format,
-                                                                    ...);
+                                                                    ...) G_GNUC_PRINTF (2, 3);
 void                flatpak_table_printer_set_key (FlatpakTablePrinter *printer,
                                                    const char          *key);
 void                flatpak_table_printer_finish_row (FlatpakTablePrinter *printer);
@@ -96,5 +96,11 @@ void               flatpak_table_printer_set_column_ellipsize (FlatpakTablePrint
 void               flatpak_table_printer_set_column_skip_unique (FlatpakTablePrinter *printer,
                                                                  int                  column,
                                                                  gboolean             skip_unique);
+void               flatpak_table_printer_set_column_skip_unique_string (FlatpakTablePrinter *printer,
+                                                                        int                  column,
+                                                                        const char          *str);
+
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakTablePrinter, flatpak_table_printer_free)
 
 #endif /* __FLATPAK_TABLE_PRINTER_H__ */

@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Flatpak">
 <link rel="prev" href="FlatpakTransaction.html" title="FlatpakTransaction">
 <link rel="next" href="FlatpakInstalledRef.html" title="FlatpakInstalledRef">
-<meta name="generator" content="GTK-Doc V1.33.0 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -171,7 +171,7 @@
 </div>
 <div class="refsect1">
 <a name="FlatpakRef.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">    GObject
+<pre class="screen">    <a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
     <span class="lineart">╰──</span> FlatpakRef
         <span class="lineart">├──</span> <a class="link" href="FlatpakBundleRef.html" title="FlatpakBundleRef">FlatpakBundleRef</a>
         <span class="lineart">├──</span> <a class="link" href="FlatpakInstalledRef.html" title="FlatpakInstalledRef">FlatpakInstalledRef</a>
@@ -227,7 +227,7 @@ can be parsed by <a class="link" href="FlatpakRef.html#flatpak-ref-parse" title=
 <div class="refsect3">
 <a name="flatpak-ref-format-ref.returns"></a><h4>Returns</h4>
 <p>string representation. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -254,7 +254,7 @@ flatpak_ref_get_arch (<em class="parameter"><code><a class="link" href="FlatpakR
 <div class="refsect3">
 <a name="flatpak-ref-get-arch.returns"></a><h4>Returns</h4>
 <p>the arch. </p>
-<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The data is owned by the callee, which is responsible of freeing it."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -281,7 +281,7 @@ flatpak_ref_get_branch (<em class="parameter"><code><a class="link" href="Flatpa
 <div class="refsect3">
 <a name="flatpak-ref-get-branch.returns"></a><h4>Returns</h4>
 <p>the branch. </p>
-<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The data is owned by the callee, which is responsible of freeing it."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -308,7 +308,7 @@ flatpak_ref_get_collection_id (<em class="parameter"><code><a class="link" href=
 <div class="refsect3">
 <a name="flatpak-ref-get-collection-id.returns"></a><h4>Returns</h4>
 <p>the collection ID. </p>
-<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The data is owned by the callee, which is responsible of freeing it."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -335,7 +335,7 @@ flatpak_ref_get_commit (<em class="parameter"><code><a class="link" href="Flatpa
 <div class="refsect3">
 <a name="flatpak-ref-get-commit.returns"></a><h4>Returns</h4>
 <p>the commit. </p>
-<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The data is owned by the callee, which is responsible of freeing it."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -388,7 +388,7 @@ flatpak_ref_get_name (<em class="parameter"><code><a class="link" href="FlatpakR
 <div class="refsect3">
 <a name="flatpak-ref-get-name.returns"></a><h4>Returns</h4>
 <p>the name. </p>
-<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The data is owned by the callee, which is responsible of freeing it."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -396,7 +396,7 @@ flatpak_ref_get_name (<em class="parameter"><code><a class="link" href="FlatpakR
 <a name="flatpak-ref-parse"></a><h3>flatpak_ref_parse ()</h3>
 <pre class="programlisting"><a class="link" href="FlatpakRef.html" title="FlatpakRef"><span class="returnvalue">FlatpakRef</span></a> *
 flatpak_ref_parse (<em class="parameter"><code>const <span class="type">char</span> *ref</code></em>,
-                   <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+                   <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <p>Tries to parse a full ref name and return a <a class="link" href="FlatpakRef.html" title="FlatpakRef"><span class="type">FlatpakRef</span></a> (without a
 commit set) or fail if the ref is invalid somehow.</p>
 <div class="refsect3">
@@ -415,7 +415,7 @@ commit set) or fail if the ref is invalid somehow.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>return location for a <span class="type">GError</span></p></td>
+<td class="parameter_description"><p>return location for a <a href="https://developer.gnome.org/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a></p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 </tbody>
@@ -423,8 +423,8 @@ commit set) or fail if the ref is invalid somehow.</p>
 </div>
 <div class="refsect3">
 <a name="flatpak-ref-parse.returns"></a><h4>Returns</h4>
-<p>an <a class="link" href="FlatpakRef.html" title="FlatpakRef"><span class="type">FlatpakRef</span></a>, or <code class="literal">NULL</code>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p>an <a class="link" href="FlatpakRef.html" title="FlatpakRef"><span class="type">FlatpakRef</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 </div>
@@ -524,6 +524,6 @@ commit set) or fail if the ref is invalid somehow.</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.33.0</div>
+<hr>Generated by GTK-Doc V1.33.1</div>
 </body>
 </html>

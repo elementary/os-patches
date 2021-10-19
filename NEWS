@@ -1,3 +1,151 @@
+Changes in 1.12.2
+~~~~~~~~~~~~~~~~~
+Released: 2021-10-12
+
+ * Install translations referenced by LANG, LANGUAGE or LC_ALL
+ * Fix error handling for the syscalls that are blocked when not using --devel
+ * Improve diagnostic messages when seccomp rules cannot be applied
+ * Update Polish translation
+
+Changes in 1.12.1
+~~~~~~~~~~~~~~~~~
+Released: 2021-10-08
+
+The security fix in the 1.12.0 release failed when used with some
+older versions of libseccomp (that don't know about the new syscalls).
+
+More specifically, installing modules that use extra-data would fail, and so
+would running applications with the --allow=multiarch feature, such as Steam.
+This release fixes those regressions.
+
+Changes in 1.12.0
+~~~~~~~~~~~~~~~~~
+Released: 2021-10-08
+
+This is the first stable release in the 1.12.x series. The major changes
+in this series is the support for better control of sub-sandboxes, as
+used by the Steam Flatpak app to run Windows games under Proton.
+
+In addition, this release fixes a security vulnerability in the portal
+support. Some recently added syscalls were not blocked by the seccomp rules
+which allowed the application to create sub-sandboxes which can confuse
+the sandboxing verification mechanisms of the portal. This has been
+fixed by extending the seccomp rules. (CVE-2021-41133)
+For details, see:
+  https://github.com/flatpak/flatpak/security/advisories/GHSA-67h7-w3jq-vh4q
+
+Other changes in this version:
+ * Some test fixes
+ * Update translations
+ * Support for specifying the flatpak binary to use during exports
+ * Install translations for all languages in the locale, not just the ones in
+   LC_MESSAGES.
+ * Fix progress reporting in flatpak fsck
+ * Handle cases where /var/tmp is a symlink
+ * Expose /etc/gai.conf to the sandbox
+ * Fix the parental control checks for root
+ * Handle missing /etc/ld.so.cache (musl)
+
+Changes in 1.11.3
+~~~~~~~~~~~~~~~~~
+Released: 2021-08-25
+
+Dependencies:
+
+* For Linux distributions that compile Flatpak to use a separate
+    bubblewrap (bwrap) executable, updating to version 0.5.0 is recommended,
+    but not required. The minimal version is still 0.4.0.
+
+Bug fixes:
+
+* Don't inherit an unusual $XDG_RUNTIME_DIR setting into the sandbox, fixing
+  a regression introduced when CVE-2021-21261 was fixed in 1.8.5 and 1.10.0
+* Update the included copy of bubblewrap (flatpak-bwrap) to 0.5.0
+    - Better diagnostics when a --bind or other bind-mount fails
+    - Create non-directories with safer permissions
+    - Allow mounting an non-directory over an existing non-directory
+    - Silence kernel messages for our bind-mounts
+    - Improve ability to bind-mount directories on case-insensitive filesystems
+* Don't ask user which remote to download from if there is only one option
+* Improve robustness of autogen.sh
+
+Internal changes:
+
+* Improve test coverage
+* Spelling fixes
+
+Translation updates: Brazilian Portuguese, Russian, Spanish, Ukrainian
+
+Changes in 1.11.2
+~~~~~~~~~~~~~~~~~
+Released: 2021-06-17
+
+Bug fixes:
+
+* Fix logic error when migrating AppStream XML
+* Improve error-checking
+* Fix various memory and file descriptor leaks, in particular with
+  flatpak-spawn --env=...
+* Fix fd confusion in flatpak-spawn --env=... --forward-fd=..., which
+  caused "Steam Linux Runtime" containers to fail to start
+* Avoid a crash when looking up summary for a ref without an arch
+* Improve handling of refs belonging to more than one architecture,
+  e.g. for cross-compilation
+* Don't abort uninstall if deploy metadata is missing
+* Don't fail transaction if searching for dependencies fails in one remote
+* Fix test failure when running tests as root
+* Improve error message for 'sudo flatpak run'
+
+Internal changes:
+
+* Improve printf format string validation
+* Improve test coverage
+* Reduce risk of accidentally hard-coding x86 in the tests
+
+Translation updates: Danish, Indonesian, Russian
+
+Changes in 1.11.1
+~~~~~~~~~~~~~~~~~
+Released: 2021-04-26
+
+This is the first unstable release in the series that will lead to 1.12.
+
+New features:
+
+* All instances of the same app-ID share their /tmp directory
+* All instances of the same app-ID share their $XDG_RUNTIME_DIR
+* Instances of the same app-ID can optionally share their /dev/shm directory
+  (enabled by a new --allow flag, --allow=per-app-dev-shm)
+* Allow a subsandbox to have a different /usr and/or /app.
+  Steam will use this to launch games with its own container runtime
+  as /usr (the "Steam Linux Runtime" mechanism).
+* enter: Improve support for TUI programs like gdb
+* build-update-repo: Add a higher-performance reimplementation of
+  `ostree prune` specialized for archive-mode repositories
+
+Bug fixes:
+
+* Fix deploys of local remotes in system-helper
+* Fix test failures on non-x86_64 systems
+* Fix two intermittent test failures
+* Make polkit queries non-interactive when operating in non-interactive mode
+* Use a local main-context when using libsoup in a thread
+* create-usb: Skip copying extra-data flatpaks
+* OCI: Switch to pax-format tar archives
+* history: Handle transaction log entries with empty REF field
+* portal: Fix flatpak-spawn --clear-env on OSs where flatpak is not on
+  the fallback PATH, such as NixOS
+* Fix various issues detected by scan-build
+
+Internal changes:
+
+* Use GNU bison to build parse-datetime.y
+* Add information about security support and security vulnerability
+  reporting (see `SECURITY.md`)
+* Move all git submodules into subprojects/ directory
+* Several sockets are now created in /run/flatpak in the sandbox, with
+  symbolic links in $XDG_RUNTIME_DIR
+
 Changes in 1.10.2
 ~~~~~~~~~~~~~~~~~
 Released: 2021-03-10

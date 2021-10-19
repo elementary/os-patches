@@ -9,18 +9,19 @@ Build-Depends:
  attr <!nocheck>,
  automake (>= 1.14.1),
  bison,
+ bubblewrap (>= 0.4.0),
  ca-certificates <!nocheck>,
  dbus,
- debhelper (>= 9),
+ debhelper-compat (= 13),
  desktop-file-utils <!nocheck>,
  dh-exec (>= 0.23~),
  docbook-xml <!nodoc>,
  docbook-xsl <!nodoc>,
  fuse <!nocheck>,
  gnupg <!nocheck>,
- gobject-introspection,
+ gobject-introspection (>= 1.54.1-2~),
  gtk-doc-tools,
- gtk-update-icon-cache  | libgtk-3-bin <!nocheck>,
+ gtk-update-icon-cache <!nocheck>,
  hicolor-icon-theme <!nocheck>,
  libappstream-glib-dev (>= 0.5.10),
  libarchive-dev (>= 2.8.0),
@@ -39,7 +40,7 @@ Build-Depends:
  libostree-dev (>= 2020.8),
  libpolkit-agent-1-dev,
  libpolkit-gobject-1-dev,
- libseccomp-dev,
+ libseccomp-dev (>= 2.5.2),
  libsoup2.4-dev,
  libsystemd-dev,
  libxau-dev,
@@ -49,27 +50,33 @@ Build-Depends:
  ostree (>= 2020.8) <!nocheck>,
  policykit-1 <!nocheck>,
  procps,
- python3 <!nocheck>,
+ python3:any,
  python3-pyparsing,
  shared-mime-info <!nocheck>,
  socat <!nocheck>,
+ xdg-dbus-proxy (>= 0.1.0),
  xmlto <!nodoc>,
  xsltproc <!nodoc>,
 Build-Depends-Indep:
  libglib2.0-doc,
  libostree-doc,
-Standards-Version: 4.3.0
-Homepage: http://flatpak.org/
+Standards-Version: 4.6.0
+Homepage: https://flatpak.org/
 Vcs-Git: https://salsa.debian.org/debian/flatpak.git
 Vcs-Browser: https://salsa.debian.org/debian/flatpak
+Rules-Requires-Root: no
 
 Package: flatpak
 Architecture: linux-any
 Depends:
  adduser,
+ bubblewrap (>= 0.4.0),
+ dbus,
+ xdg-dbus-proxy (>= 0.1.0),
  ${misc:Depends},
  ${shlibs:Depends},
 Recommends:
+ ca-certificates,
  desktop-file-utils,
  hicolor-icon-theme,
  gtk-update-icon-cache,
@@ -192,6 +199,7 @@ Package: libflatpak0
 Architecture: linux-any
 Section: libs
 Depends:
+ bubblewrap (>= 0.4.0),
  ${misc:Depends},
  ${shlibs:Depends},
 Pre-Depends:

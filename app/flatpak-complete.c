@@ -36,10 +36,7 @@ flatpak_completion_debug (const gchar *format, ...)
   static FILE *f = NULL;
 
   va_start (var_args, format);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
   s = g_strdup_vprintf (format, var_args);
-#pragma GCC diagnostic pop
   if (f == NULL)
     f = fopen ("/tmp/flatpak-completion-debug.txt", "a+");
   fprintf (f, "%s\n", s);
@@ -632,7 +629,7 @@ flatpak_completion_new (const char *arg_line,
 
   flatpak_completion_debug ("completion_argv %i:", completion->original_argc);
   for (i = 0; i < completion->original_argc; i++)
-    flatpak_completion_debug (completion->original_argv[i]);
+    flatpak_completion_debug ("%s", completion->original_argv[i]);
 
   flatpak_completion_debug ("----");
 

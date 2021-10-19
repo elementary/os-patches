@@ -138,6 +138,7 @@ char **flatpak_strv_merge (char   **strv1,
 char **flatpak_subpaths_merge (char **subpaths1,
                                char **subpaths2);
 
+const char * const *flatpak_get_locale_categories (void);
 char *flatpak_get_lang_from_locale (const char *locale);
 char **flatpak_get_current_locale_langs (void);
 
@@ -593,6 +594,7 @@ GList *flatpak_list_extensions (GKeyFile   *metakey,
                                 const char *arch,
                                 const char *branch);
 
+gboolean flatpak_argument_needs_quoting (const char *arg);
 char * flatpak_quote_argv (const char *argv[],
                            gssize      len);
 gboolean flatpak_file_arg_has_suffix (const char *arg,
@@ -679,6 +681,10 @@ flatpak_main_context_pop_default_destroy (void *p)
 
   if (main_context)
     {
+      /* Ensure we don't leave some cleanup callbacks unhandled as we will never iterate this context again. */
+      while (g_main_context_pending (main_context))
+        g_main_context_iteration (main_context, TRUE);
+
       g_main_context_pop_thread_default (main_context);
       g_main_context_unref (main_context);
     }
@@ -901,6 +907,11 @@ null_safe_g_ptr_array_unref (gpointer data)
 {
   g_clear_pointer (&data, g_ptr_array_unref);
 }
+
+int flatpak_envp_cmp (const void *p1,
+                      const void *p2);
+
+gboolean flatpak_str_is_integer (const char *s);
 
 #define FLATPAK_MESSAGE_ID "c7b39b1e006b464599465e105b361485"
 

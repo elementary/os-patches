@@ -115,7 +115,7 @@ test_decompose (void)
   g_autofree char *runtime_branch = NULL;
   gsize len, len2;
 
-  g_assert_null (flatpak_decomposed_new_from_ref ("app/wrong/x86_64/master", &error));
+  g_assert_null (flatpak_decomposed_new_from_ref ("app/wrong/mips64/master", &error));
   g_assert (error != NULL);
   g_assert (error->domain == FLATPAK_ERROR);
   g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
@@ -127,44 +127,44 @@ test_decompose (void)
   g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
   g_clear_error (&error);
 
-  g_assert_null (flatpak_decomposed_new_from_ref ("app/org.the.app/x86_64/@foo", &error));
+  g_assert_null (flatpak_decomposed_new_from_ref ("app/org.the.app/mips64/@foo", &error));
   g_assert (error != NULL);
   g_assert (error->domain == FLATPAK_ERROR);
   g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
   g_clear_error (&error);
 
-  g_assert_null (flatpak_decomposed_new_from_ref ("wrong/org.the.wrong/x86_64/master", &error));
+  g_assert_null (flatpak_decomposed_new_from_ref ("wrong/org.the.wrong/mips64/master", &error));
   g_assert (error != NULL);
   g_assert (error->domain == FLATPAK_ERROR);
   g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
   g_clear_error (&error);
 
-  g_assert_null (flatpak_decomposed_new_from_ref ("app/org.the.app/x86_64/master/extra", &error));
+  g_assert_null (flatpak_decomposed_new_from_ref ("app/org.the.app/mips64/master/extra", &error));
   g_assert (error != NULL);
   g_assert (error->domain == FLATPAK_ERROR);
   g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
   g_clear_error (&error);
 
-  g_assert_null (flatpak_decomposed_new_from_ref ("app/org.the.app/x86_64", &error));
+  g_assert_null (flatpak_decomposed_new_from_ref ("app/org.the.app/mips64", &error));
   g_assert (error != NULL);
   g_assert (error->domain == FLATPAK_ERROR);
   g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
   g_clear_error (&error);
 
-  runtime_ref = flatpak_decomposed_new_from_ref ("runtime/org.the.runtime/x86_64/master", &error);
+  runtime_ref = flatpak_decomposed_new_from_ref ("runtime/org.the.runtime/mips64/master", &error);
   g_assert (runtime_ref != NULL);
   g_assert_null (error);
 
-  g_assert_cmpstr (flatpak_decomposed_get_ref (runtime_ref), ==, "runtime/org.the.runtime/x86_64/master");
-  g_assert_cmpstr (flatpak_decomposed_get_refspec (runtime_ref), ==, "runtime/org.the.runtime/x86_64/master");
+  g_assert_cmpstr (flatpak_decomposed_get_ref (runtime_ref), ==, "runtime/org.the.runtime/mips64/master");
+  g_assert_cmpstr (flatpak_decomposed_get_refspec (runtime_ref), ==, "runtime/org.the.runtime/mips64/master");
   g_assert (flatpak_decomposed_equal (runtime_ref, runtime_ref));
-  g_assert (flatpak_decomposed_hash (runtime_ref) == g_str_hash ("runtime/org.the.runtime/x86_64/master"));
+  g_assert (flatpak_decomposed_hash (runtime_ref) == g_str_hash ("runtime/org.the.runtime/mips64/master"));
   g_assert (!flatpak_decomposed_is_app (runtime_ref));
   g_assert (flatpak_decomposed_is_runtime (runtime_ref));
   g_assert (flatpak_decomposed_get_kinds (runtime_ref) == FLATPAK_KINDS_RUNTIME);
   g_assert (flatpak_decomposed_get_kind (runtime_ref) == FLATPAK_REF_KIND_RUNTIME);
 
-  g_assert_cmpstr (flatpak_decomposed_peek_id (runtime_ref, &len), ==, "org.the.runtime/x86_64/master");
+  g_assert_cmpstr (flatpak_decomposed_peek_id (runtime_ref, &len), ==, "org.the.runtime/mips64/master");
   g_assert (len == strlen("org.the.runtime"));
   runtime_id = flatpak_decomposed_dup_id (runtime_ref);
   g_assert_cmpstr (runtime_id, ==, "org.the.runtime");
@@ -172,13 +172,13 @@ test_decompose (void)
   g_assert (!flatpak_decomposed_is_id (runtime_ref, "org.the.runtim"));
   g_assert (!flatpak_decomposed_is_id (runtime_ref, "org.the.runtimee"));
 
-  g_assert_cmpstr (flatpak_decomposed_peek_arch (runtime_ref, &len), ==, "x86_64/master");
-  g_assert (len == strlen ("x86_64"));
+  g_assert_cmpstr (flatpak_decomposed_peek_arch (runtime_ref, &len), ==, "mips64/master");
+  g_assert (len == strlen ("mips64"));
   runtime_arch = flatpak_decomposed_dup_arch (runtime_ref);
-  g_assert_cmpstr (runtime_arch, ==, "x86_64");
-  g_assert (flatpak_decomposed_is_arch (runtime_ref, "x86_64"));
-  g_assert (!flatpak_decomposed_is_arch (runtime_ref, "x86_6"));
-  g_assert (!flatpak_decomposed_is_arch (runtime_ref, "x86_644"));
+  g_assert_cmpstr (runtime_arch, ==, "mips64");
+  g_assert (flatpak_decomposed_is_arch (runtime_ref, "mips64"));
+  g_assert (!flatpak_decomposed_is_arch (runtime_ref, "mips6"));
+  g_assert (!flatpak_decomposed_is_arch (runtime_ref, "mips644"));
 
   g_assert_cmpstr (flatpak_decomposed_peek_branch (runtime_ref, &len), ==, "master");
   g_assert (len == strlen ("master"));
@@ -188,21 +188,21 @@ test_decompose (void)
   g_assert (!flatpak_decomposed_is_arch (runtime_ref, "maste"));
   g_assert (!flatpak_decomposed_is_arch (runtime_ref, "masterr"));
 
-  app_ref = flatpak_decomposed_new_from_ref ("app/org.the.app/x86_64/master", &error);
+  app_ref = flatpak_decomposed_new_from_ref ("app/org.the.app/mips64/master", &error);
   g_assert (app_ref != NULL);
   g_assert_null (error);
 
-  g_assert_cmpstr (flatpak_decomposed_get_ref (app_ref), ==, "app/org.the.app/x86_64/master");
-  g_assert_cmpstr (flatpak_decomposed_get_refspec (app_ref), ==, "app/org.the.app/x86_64/master");
+  g_assert_cmpstr (flatpak_decomposed_get_ref (app_ref), ==, "app/org.the.app/mips64/master");
+  g_assert_cmpstr (flatpak_decomposed_get_refspec (app_ref), ==, "app/org.the.app/mips64/master");
   g_assert (flatpak_decomposed_equal (app_ref, app_ref));
   g_assert (!flatpak_decomposed_equal (app_ref, runtime_ref));
-  g_assert (flatpak_decomposed_hash (app_ref) == g_str_hash ("app/org.the.app/x86_64/master"));
+  g_assert (flatpak_decomposed_hash (app_ref) == g_str_hash ("app/org.the.app/mips64/master"));
   g_assert (flatpak_decomposed_is_app (app_ref));
   g_assert (!flatpak_decomposed_is_runtime (app_ref));
   g_assert (flatpak_decomposed_get_kinds (app_ref) == FLATPAK_KINDS_APP);
   g_assert (flatpak_decomposed_get_kind (app_ref) == FLATPAK_REF_KIND_APP);
 
-  g_assert_cmpstr (flatpak_decomposed_peek_id (app_ref, &len), ==, "org.the.app/x86_64/master");
+  g_assert_cmpstr (flatpak_decomposed_peek_id (app_ref, &len), ==, "org.the.app/mips64/master");
   g_assert (len == strlen ("org.the.app"));
   app_id = flatpak_decomposed_dup_id (app_ref);
   g_assert_cmpstr (app_id, ==, "org.the.app");
@@ -210,13 +210,13 @@ test_decompose (void)
   g_assert (!flatpak_decomposed_is_id (app_ref, "org.the.ap"));
   g_assert (!flatpak_decomposed_is_id (app_ref, "org.the.appp"));
 
-  g_assert_cmpstr (flatpak_decomposed_peek_arch (app_ref, &len), ==, "x86_64/master");
-  g_assert (len == strlen ("x86_64"));
+  g_assert_cmpstr (flatpak_decomposed_peek_arch (app_ref, &len), ==, "mips64/master");
+  g_assert (len == strlen ("mips64"));
   app_arch = flatpak_decomposed_dup_arch (app_ref);
-  g_assert_cmpstr (app_arch, ==, "x86_64");
-  g_assert (flatpak_decomposed_is_arch (app_ref, "x86_64"));
-  g_assert (!flatpak_decomposed_is_arch (app_ref, "x86_6"));
-  g_assert (!flatpak_decomposed_is_arch (app_ref, "x86_644"));
+  g_assert_cmpstr (app_arch, ==, "mips64");
+  g_assert (flatpak_decomposed_is_arch (app_ref, "mips64"));
+  g_assert (!flatpak_decomposed_is_arch (app_ref, "mips6"));
+  g_assert (!flatpak_decomposed_is_arch (app_ref, "mips644"));
 
   g_assert_cmpstr (flatpak_decomposed_get_branch (app_ref), ==, "master");
   g_assert_cmpstr (flatpak_decomposed_peek_branch (app_ref, &len), ==, "master");
@@ -227,32 +227,32 @@ test_decompose (void)
   g_assert (!flatpak_decomposed_is_arch (app_ref, "maste"));
   g_assert (!flatpak_decomposed_is_arch (app_ref, "masterr"));
 
-  refspec = flatpak_decomposed_new_from_ref ("remote:app/org.the.app/x86_64/master", &error);
+  refspec = flatpak_decomposed_new_from_ref ("remote:app/org.the.app/mips64/master", &error);
   g_assert (refspec == NULL);
   g_assert (error != NULL);
   g_assert (error->domain == FLATPAK_ERROR);
   g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
   g_clear_error (&error);
 
-  refspec = flatpak_decomposed_new_from_refspec ("remote/broken:app/org.the.app/x86_64/master", &error);
+  refspec = flatpak_decomposed_new_from_refspec ("remote/broken:app/org.the.app/mips64/master", &error);
   g_assert (refspec == NULL);
   g_assert (error != NULL);
   g_assert (error->domain == FLATPAK_ERROR);
   g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
   g_clear_error (&error);
 
-  refspec = flatpak_decomposed_new_from_refspec ("remote:app/org.the.app/x86_64/master", &error);
+  refspec = flatpak_decomposed_new_from_refspec ("remote:app/org.the.app/mips64/master", &error);
   g_assert (refspec != NULL);
   g_assert_null (error);
 
-  g_assert_cmpstr (flatpak_decomposed_get_ref (refspec), ==, "app/org.the.app/x86_64/master");
-  g_assert_cmpstr (flatpak_decomposed_get_refspec (refspec), ==, "remote:app/org.the.app/x86_64/master");
+  g_assert_cmpstr (flatpak_decomposed_get_ref (refspec), ==, "app/org.the.app/mips64/master");
+  g_assert_cmpstr (flatpak_decomposed_get_refspec (refspec), ==, "remote:app/org.the.app/mips64/master");
   g_autofree char *refspec_remote = flatpak_decomposed_dup_remote (refspec);
   g_assert_cmpstr (refspec_remote, ==, "remote");
   g_autofree char *refspec_ref = flatpak_decomposed_dup_ref (refspec);
-  g_assert_cmpstr (refspec_ref, ==, "app/org.the.app/x86_64/master");
+  g_assert_cmpstr (refspec_ref, ==, "app/org.the.app/mips64/master");
   g_autofree char *refspec_refspec = flatpak_decomposed_dup_refspec (refspec);
-  g_assert_cmpstr (refspec_refspec, ==, "remote:app/org.the.app/x86_64/master");
+  g_assert_cmpstr (refspec_refspec, ==, "remote:app/org.the.app/mips64/master");
 
   {
     FlatpakDecomposed *old = runtime_ref;
@@ -292,7 +292,7 @@ test_decompose (void)
     g_assert (new != NULL);
     g_assert_null (error);
 
-    g_assert_cmpstr (flatpak_decomposed_get_ref (new), ==, "runtime/org.new.app/x86_64/master");
+    g_assert_cmpstr (flatpak_decomposed_get_ref (new), ==, "runtime/org.new.app/mips64/master");
 
     g_assert (flatpak_decomposed_get_kinds (new) == FLATPAK_KINDS_RUNTIME);
     new_id = flatpak_decomposed_dup_id (new);
@@ -312,11 +312,11 @@ test_decompose (void)
     g_autofree gchar *old_branch = NULL;
     g_autofree gchar *new_branch = NULL;
 
-    g_autoptr(FlatpakDecomposed) new = flatpak_decomposed_new_from_decomposed (old, 0, NULL, "i386", NULL, &error);
+    g_autoptr(FlatpakDecomposed) new = flatpak_decomposed_new_from_decomposed (old, 0, NULL, "m68k", NULL, &error);
     g_assert (new != NULL);
     g_assert_null (error);
 
-    g_assert_cmpstr (flatpak_decomposed_get_ref (new), ==, "app/org.the.app/i386/master");
+    g_assert_cmpstr (flatpak_decomposed_get_ref (new), ==, "app/org.the.app/m68k/master");
 
     g_assert (flatpak_decomposed_get_kinds (new) == FLATPAK_KINDS_APP);
 
@@ -325,7 +325,7 @@ test_decompose (void)
     g_assert_cmpstr (new_id, ==, old_id);
 
     new_arch = flatpak_decomposed_dup_arch (new);
-    g_assert_cmpstr (new_arch, ==, "i386");
+    g_assert_cmpstr (new_arch, ==, "m68k");
 
     new_branch = flatpak_decomposed_dup_branch (new);
     old_branch = flatpak_decomposed_dup_branch (old);
@@ -344,7 +344,7 @@ test_decompose (void)
     g_assert (new != NULL);
     g_assert_null (error);
 
-    g_assert_cmpstr (flatpak_decomposed_get_ref (new), ==, "app/org.the.app/x86_64/beta");
+    g_assert_cmpstr (flatpak_decomposed_get_ref (new), ==, "app/org.the.app/mips64/beta");
 
     g_assert (flatpak_decomposed_get_kinds (new) == FLATPAK_KINDS_APP);
 
@@ -366,17 +366,17 @@ test_decompose (void)
     g_autofree gchar *new_arch = NULL;
     g_autofree gchar *new_branch = NULL;
 
-    g_autoptr(FlatpakDecomposed) new = flatpak_decomposed_new_from_decomposed (old, FLATPAK_KINDS_RUNTIME, "org.new.app", "i386", "beta", &error);
+    g_autoptr(FlatpakDecomposed) new = flatpak_decomposed_new_from_decomposed (old, FLATPAK_KINDS_RUNTIME, "org.new.app", "m68k", "beta", &error);
     g_assert (new != NULL);
     g_assert_null (error);
 
-    g_assert_cmpstr (flatpak_decomposed_get_ref (new), ==, "runtime/org.new.app/i386/beta");
+    g_assert_cmpstr (flatpak_decomposed_get_ref (new), ==, "runtime/org.new.app/m68k/beta");
 
     g_assert (flatpak_decomposed_get_kinds (new) == FLATPAK_KINDS_RUNTIME);
     new_id = flatpak_decomposed_dup_id (new);
     g_assert_cmpstr (new_id, ==, "org.new.app");
     new_arch = flatpak_decomposed_dup_arch (new);
-    g_assert_cmpstr (new_arch, ==, "i386");
+    g_assert_cmpstr (new_arch, ==, "m68k");
     new_branch = flatpak_decomposed_dup_branch (new);
     g_assert_cmpstr (new_branch, ==, "beta");
   }
@@ -387,7 +387,7 @@ test_decompose (void)
     g_autofree gchar *arch = NULL;
     g_autofree gchar *branch = NULL;
 
-    pref = flatpak_decomposed_new_from_pref (FLATPAK_KINDS_RUNTIME, "org.the.@pp.Locale/x86_64/master", &error);
+    pref = flatpak_decomposed_new_from_pref (FLATPAK_KINDS_RUNTIME, "org.the.@pp.Locale/mips64/master", &error);
     g_assert_null (pref);
     g_assert (error != NULL);
     g_assert (error->domain == FLATPAK_ERROR);
@@ -408,40 +408,40 @@ test_decompose (void)
     g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
     g_clear_error (&error);
 
-    pref = flatpak_decomposed_new_from_pref (FLATPAK_KINDS_RUNTIME, "org.the.app.Locale/x86_64", &error);
+    pref = flatpak_decomposed_new_from_pref (FLATPAK_KINDS_RUNTIME, "org.the.app.Locale/mips64", &error);
     g_assert_null (pref);
     g_assert (error != NULL);
     g_assert (error->domain == FLATPAK_ERROR);
     g_assert (error->code == FLATPAK_ERROR_INVALID_REF);
     g_clear_error (&error);
 
-    pref = flatpak_decomposed_new_from_pref (FLATPAK_KINDS_RUNTIME, "org.the.app.Locale/x86_64/master", &error);
+    pref = flatpak_decomposed_new_from_pref (FLATPAK_KINDS_RUNTIME, "org.the.app.Locale/mips64/master", &error);
     if (error)
       g_print ("XXXXXXXX error: %s\n", error->message);
     g_assert_nonnull (pref);
     g_assert (error == NULL);
 
-    g_assert_cmpstr (flatpak_decomposed_get_ref (pref), ==, "runtime/org.the.app.Locale/x86_64/master");
+    g_assert_cmpstr (flatpak_decomposed_get_ref (pref), ==, "runtime/org.the.app.Locale/mips64/master");
 
     g_assert (flatpak_decomposed_get_kinds (pref) == FLATPAK_KINDS_RUNTIME);
     id = flatpak_decomposed_dup_id (pref);
     g_assert_cmpstr (id, ==, "org.the.app.Locale");
     arch = flatpak_decomposed_dup_arch (pref);
-    g_assert_cmpstr (arch, ==, "x86_64");
+    g_assert_cmpstr (arch, ==, "mips64");
     branch = flatpak_decomposed_dup_branch (pref);
     g_assert_cmpstr (branch, ==, "master");
   }
 
 
   {
-    g_autoptr(FlatpakDecomposed) a = flatpak_decomposed_new_from_ref ("app/org.app.A/x86_64/master", NULL);
-    g_autoptr(FlatpakDecomposed) a_l = flatpak_decomposed_new_from_ref ("runtime/org.app.A.Locale/x86_64/master", NULL);
-    g_autoptr(FlatpakDecomposed) b = flatpak_decomposed_new_from_ref ("app/org.app.B/x86_64/master", NULL);
-    g_autoptr(FlatpakDecomposed) b_l = flatpak_decomposed_new_from_ref ("runtime/org.app.B.Locale/x86_64/master", NULL);
-    g_autoptr(FlatpakDecomposed) c = flatpak_decomposed_new_from_ref ("app/org.app.A/i386/master", NULL);
-    g_autoptr(FlatpakDecomposed) c_l = flatpak_decomposed_new_from_ref ("runtime/org.app.A.Locale/i386/master", NULL);
-    g_autoptr(FlatpakDecomposed) d = flatpak_decomposed_new_from_ref ("app/org.app.A/x86_64/beta", NULL);
-    g_autoptr(FlatpakDecomposed) d_l = flatpak_decomposed_new_from_ref ("runtime/org.app.A.Locale/x86_64/beta", NULL);
+    g_autoptr(FlatpakDecomposed) a = flatpak_decomposed_new_from_ref ("app/org.app.A/mips64/master", NULL);
+    g_autoptr(FlatpakDecomposed) a_l = flatpak_decomposed_new_from_ref ("runtime/org.app.A.Locale/mips64/master", NULL);
+    g_autoptr(FlatpakDecomposed) b = flatpak_decomposed_new_from_ref ("app/org.app.B/mips64/master", NULL);
+    g_autoptr(FlatpakDecomposed) b_l = flatpak_decomposed_new_from_ref ("runtime/org.app.B.Locale/mips64/master", NULL);
+    g_autoptr(FlatpakDecomposed) c = flatpak_decomposed_new_from_ref ("app/org.app.A/m68k/master", NULL);
+    g_autoptr(FlatpakDecomposed) c_l = flatpak_decomposed_new_from_ref ("runtime/org.app.A.Locale/m68k/master", NULL);
+    g_autoptr(FlatpakDecomposed) d = flatpak_decomposed_new_from_ref ("app/org.app.A/mips64/beta", NULL);
+    g_autoptr(FlatpakDecomposed) d_l = flatpak_decomposed_new_from_ref ("runtime/org.app.A.Locale/mips64/beta", NULL);
 
     g_assert (flatpak_decomposed_id_is_subref_of (a_l, a));
     g_assert (!flatpak_decomposed_id_is_subref_of (b_l, a));
@@ -1349,6 +1349,7 @@ test_parse_datetime (void)
   g_assert_true (ts.tv_sec == now.tv_sec); // close enough
 
   ret = parse_datetime (&ts, "2018-10-29 00:19:07 +0000", NULL);
+  g_assert_true (ret);
   dt = g_date_time_new_utc (2018, 10, 29, 0, 19, 7);
   g_date_time_to_timeval (dt, &tv);
 
@@ -1435,53 +1436,53 @@ test_filter (void)
     gboolean expected_result;
   } filter_refs[] = {
      /* General denies (org/com)*/
-     { "app/org.filter.this/x86_64/stable", FALSE },
+     { "app/org.filter.this/mips64/stable", FALSE },
      { "app/com.filter.this/arm/stable", FALSE },
      /* But net. not denied */
-     { "app/net.dont.filter.this/x86_64/stable", TRUE },
-     { "runtime/net.dont.filter.this/x86_64/1.0", TRUE },
+     { "app/net.dont.filter.this/mips64/stable", TRUE },
+     { "runtime/net.dont.filter.this/mips64/1.0", TRUE },
 
      /* Special allow overrides */
 
      /* allow com.foo.bar */
-     { "app/com.foo.bar/x86_64/stable", TRUE },
+     { "app/com.foo.bar/mips64/stable", TRUE },
      { "app/com.foo.bar/arm/foo", TRUE },
-     { "runtime/com.foo.bar/x86_64/1.0", TRUE },
+     { "runtime/com.foo.bar/mips64/1.0", TRUE },
 
      /* allow app/com.bar.foo* / * /stable */
-     { "app/com.bar.foo/x86_64/stable", TRUE },
+     { "app/com.bar.foo/mips64/stable", TRUE },
      { "app/com.bar.foo/arm/stable", TRUE },
-     { "app/com.bar.foobar/x86_64/stable", TRUE },
+     { "app/com.bar.foobar/mips64/stable", TRUE },
      { "app/com.bar.foobar/arm/stable", TRUE },
-     { "app/com.bar.foo.bar/x86_64/stable", TRUE },
+     { "app/com.bar.foo.bar/mips64/stable", TRUE },
      { "app/com.bar.foo.bar/arm/stable", TRUE },
-     { "app/com.bar.foo/x86_64/unstable", FALSE },
-     { "app/com.bar.foobar/x86_64/unstable", FALSE },
-     { "runtime/com.bar.foo/x86_64/stable", FALSE },
+     { "app/com.bar.foo/mips64/unstable", FALSE },
+     { "app/com.bar.foobar/mips64/unstable", FALSE },
+     { "runtime/com.bar.foo/mips64/stable", FALSE },
 
      /* allow app/com.armed.foo* /arm */
      { "app/com.armed.foo/arm/stable", TRUE },
      { "app/com.armed.foo/arm/unstable", TRUE },
-     { "app/com.armed.foo/x86_64/stable", FALSE },
-     { "app/com.armed.foo/x86_64/unstable", FALSE },
+     { "app/com.armed.foo/mips64/stable", FALSE },
+     { "app/com.armed.foo/mips64/unstable", FALSE },
      { "app/com.armed.foobar/arm/stable", TRUE },
      { "app/com.armed.foobar/arm/unstable", TRUE },
-     { "app/com.armed.foobar/x86_64/stable", FALSE },
-     { "app/com.armed.foobar/x86_64/unstable", FALSE },
+     { "app/com.armed.foobar/mips64/stable", FALSE },
+     { "app/com.armed.foobar/mips64/unstable", FALSE },
      { "runtime/com.armed.foo/arm/stable", FALSE },
      { "runtime/com.armed.foobar/arm/stable", FALSE },
-     { "runtime/com.armed.foo/x86_64/stable", FALSE },
-     { "runtime/com.armed.foobar/x86_64/stable", FALSE },
+     { "runtime/com.armed.foo/mips64/stable", FALSE },
+     { "runtime/com.armed.foobar/mips64/stable", FALSE },
 
      /* allow runtime/com.gazonk */
      /* allow runtime/com.gazonk.* */
-     { "runtime/com.gazonk/x86_64/1.0", TRUE },
-     { "runtime/com.gazonk.Locale/x86_64/1.0", TRUE },
-     { "runtime/com.gazonked/x86_64/1.0", FALSE },
+     { "runtime/com.gazonk/mips64/1.0", TRUE },
+     { "runtime/com.gazonk.Locale/mips64/1.0", TRUE },
+     { "runtime/com.gazonked/mips64/1.0", FALSE },
      { "runtime/com.gazonk/arm/1.0", TRUE },
      { "runtime/com.gazonk.Locale/arm/1.0", TRUE },
-     { "app/com.gazonk/x86_64/stable", FALSE },
-     { "app/com.gazonk.Locale/x86_64/stable", FALSE },
+     { "app/com.gazonk/mips64/stable", FALSE },
+     { "app/com.gazonk.Locale/mips64/stable", FALSE },
 
   };
 
@@ -1557,6 +1558,206 @@ test_dconf_paths (void)
     }
 }
 
+static void
+test_envp_cmp (void)
+{
+  static const char * const unsorted[] =
+  {
+    "SAME_NAME=2",
+    "EARLY_NAME=a",
+    "SAME_NAME=222",
+    "Z_LATE_NAME=b",
+    "SUFFIX_ADDED=23",
+    "SAME_NAME=1",
+    "SAME_NAME=",
+    "SUFFIX=42",
+    "SAME_NAME=3",
+    "SAME_NAME",
+  };
+  static const char * const sorted[] =
+  {
+    "EARLY_NAME=a",
+    "SAME_NAME",
+    "SAME_NAME=",
+    "SAME_NAME=1",
+    "SAME_NAME=2",
+    "SAME_NAME=222",
+    "SAME_NAME=3",
+    "SUFFIX=42",
+    "SUFFIX_ADDED=23",
+    "Z_LATE_NAME=b",
+  };
+  const char **sort_this = NULL;
+  gsize i, j;
+
+  G_STATIC_ASSERT (G_N_ELEMENTS (sorted) == G_N_ELEMENTS (unsorted));
+
+  for (i = 0; i < G_N_ELEMENTS (sorted); i++)
+    {
+      g_autofree gchar *copy = g_strdup (sorted[i]);
+
+      g_test_message ("%s == %s", copy, sorted[i]);
+      g_assert_cmpint (flatpak_envp_cmp (&copy, &sorted[i]), ==, 0);
+      g_assert_cmpint (flatpak_envp_cmp (&sorted[i], &copy), ==, 0);
+
+      for (j = i + 1; j < G_N_ELEMENTS (sorted); j++)
+        {
+          g_test_message ("%s < %s", sorted[i], sorted[j]);
+          g_assert_cmpint (flatpak_envp_cmp (&sorted[i], &sorted[j]), <, 0);
+          g_assert_cmpint (flatpak_envp_cmp (&sorted[j], &sorted[i]), >, 0);
+        }
+    }
+
+  sort_this = g_new0 (const char *, G_N_ELEMENTS (unsorted));
+
+  for (i = 0; i < G_N_ELEMENTS (unsorted); i++)
+    sort_this[i] = unsorted[i];
+
+  qsort (sort_this, G_N_ELEMENTS (unsorted), sizeof (char *),
+         flatpak_envp_cmp);
+
+  for (i = 0; i < G_N_ELEMENTS (sorted); i++)
+    g_assert_cmpstr (sorted[i], ==, sort_this[i]);
+
+  g_free (sort_this);
+}
+
+static void
+test_needs_quoting (void)
+{
+  static const char * const needs_quoting[] =
+  {
+    "",
+    "$var",
+    "{}",
+    "()",
+    "[]",
+    "*",
+    "?",
+    "`exec`",
+    "has space",
+    "quoted-\"",
+    "quoted-'",
+    "back\\slash",
+    "control\001char",
+  };
+  static const char * const does_not_need_quoting[] =
+  {
+    "foo",
+    "--foo=bar",
+    "-x",
+    "foo@bar:/srv/big_files",
+    "~smcv",
+    "7-zip.org",
+  };
+  gsize i;
+
+  for (i = 0; i < G_N_ELEMENTS (needs_quoting); i++)
+    {
+      const char *orig = needs_quoting[i];
+      g_autoptr(GError) error = NULL;
+      g_autofree char *quoted = NULL;
+      int argc = -1;
+      g_auto(GStrv) argv = NULL;
+      gboolean ok;
+
+      g_assert_true (flatpak_argument_needs_quoting (orig));
+      quoted = flatpak_quote_argv (&orig, 1);
+      g_test_message ("Unquoted: \"%s\"", orig);
+      g_test_message ("  Quoted: \"%s\"", quoted);
+      g_assert_cmpstr (quoted, !=, orig);
+
+      ok = g_shell_parse_argv (quoted, &argc, &argv, &error);
+      g_assert_no_error (error);
+      g_assert_true (ok);
+      g_assert_cmpint (argc, ==, 1);
+      g_assert_nonnull (argv);
+      g_assert_cmpstr (argv[0], ==, orig);
+      g_assert_cmpstr (argv[1], ==, NULL);
+    }
+
+  for (i = 0; i < G_N_ELEMENTS (does_not_need_quoting); i++)
+    {
+      const char *orig = does_not_need_quoting[i];
+      g_autoptr(GError) error = NULL;
+      g_autofree char *quoted = NULL;
+      int argc = -1;
+      g_auto(GStrv) argv = NULL;
+      gboolean ok;
+
+      g_assert_false (flatpak_argument_needs_quoting (orig));
+      quoted = flatpak_quote_argv (&orig, 1);
+      g_assert_cmpstr (quoted, ==, orig);
+
+      ok = g_shell_parse_argv (quoted, &argc, &argv, &error);
+      g_assert_no_error (error);
+      g_assert_true (ok);
+      g_assert_cmpint (argc, ==, 1);
+      g_assert_nonnull (argv);
+      g_assert_cmpstr (argv[0], ==, orig);
+      g_assert_cmpstr (argv[1], ==, NULL);
+    }
+}
+
+static void
+test_quote_argv (void)
+{
+  static const char * const orig[] =
+  {
+    "foo",
+    "--bar",
+    "",
+    "baz",
+    NULL
+  };
+  gsize i;
+  g_autofree char *quoted = NULL;
+  g_autoptr(GError) error = NULL;
+  int argc = -1;
+  g_auto(GStrv) argv = NULL;
+  gboolean ok;
+
+  quoted = flatpak_quote_argv ((const char **) orig, -1);
+  ok = g_shell_parse_argv (quoted, &argc, &argv, &error);
+  g_assert_no_error (error);
+  g_assert_true (ok);
+  g_assert_cmpint (argc, >, 0);
+  g_assert_cmpuint ((gsize) argc, ==, G_N_ELEMENTS (orig) - 1);
+  g_assert_nonnull (argv);
+
+  for (i = 0; i < G_N_ELEMENTS (orig); i++)
+    g_assert_cmpstr (argv[i], ==, orig[i]);
+
+  g_clear_pointer (&quoted, g_free);
+  g_clear_pointer (&argv, g_strfreev);
+
+  quoted = flatpak_quote_argv ((const char **) orig, 3);
+  ok = g_shell_parse_argv (quoted, &argc, &argv, &error);
+  g_assert_no_error (error);
+  g_assert_true (ok);
+  g_assert_cmpint (argc, ==, 3);
+  g_assert_nonnull (argv);
+
+  for (i = 0; i < 3; i++)
+    g_assert_cmpstr (argv[i], ==, orig[i]);
+
+  g_assert_cmpstr (argv[i], ==, NULL);
+}
+
+static void
+test_str_is_integer (void)
+{
+  g_assert_true (flatpak_str_is_integer ("0"));
+  g_assert_true (flatpak_str_is_integer ("1234567890987654356765432121245674"));
+  g_assert_false (flatpak_str_is_integer (NULL));
+  g_assert_false (flatpak_str_is_integer (""));
+  g_assert_false (flatpak_str_is_integer ("0.0"));
+  g_assert_false (flatpak_str_is_integer ("0e0"));
+  g_assert_false (flatpak_str_is_integer ("bees"));
+  g_assert_false (flatpak_str_is_integer ("1234a"));
+  g_assert_false (flatpak_str_is_integer ("a1234"));
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -1585,6 +1786,10 @@ main (int argc, char *argv[])
   g_test_add_func ("/common/dconf-app-id", test_dconf_app_id);
   g_test_add_func ("/common/dconf-paths", test_dconf_paths);
   g_test_add_func ("/common/decompose-ref", test_decompose);
+  g_test_add_func ("/common/envp-cmp", test_envp_cmp);
+  g_test_add_func ("/common/needs-quoting", test_needs_quoting);
+  g_test_add_func ("/common/quote-argv", test_quote_argv);
+  g_test_add_func ("/common/str-is-integer", test_str_is_integer);
 
   g_test_add_func ("/app/looks-like-branch", test_looks_like_branch);
   g_test_add_func ("/app/columns", test_columns);

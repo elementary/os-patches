@@ -57,6 +57,7 @@ typedef enum {
   FLATPAK_CONTEXT_FEATURE_MULTIARCH    = 1 << 1,
   FLATPAK_CONTEXT_FEATURE_BLUETOOTH    = 1 << 2,
   FLATPAK_CONTEXT_FEATURE_CANBUS       = 1 << 3,
+  FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM = 1 << 4,
 } FlatpakContextFeatures;
 
 struct FlatpakContext
@@ -133,13 +134,29 @@ FlatpakContext *flatpak_context_load_for_deploy (FlatpakDeploy *deploy,
 
 FlatpakExports *flatpak_context_get_exports (FlatpakContext *context,
                                              const char     *app_id);
+FlatpakExports *flatpak_context_get_exports_full (FlatpakContext *context,
+                                                  GFile          *app_id_dir,
+                                                  GPtrArray      *extra_app_id_dirs,
+                                                  gboolean        do_create,
+                                                  gboolean        include_default_dirs,
+                                                  gchar         **xdg_dirs_conf,
+                                                  gboolean       *home_access_out);
 
 void flatpak_context_append_bwrap_filesystem (FlatpakContext  *context,
                                               FlatpakBwrap    *bwrap,
                                               const char      *app_id,
                                               GFile           *app_id_dir,
-                                              GPtrArray       *extra_app_id_dirs,
-                                              FlatpakExports **exports_out);
+                                              FlatpakExports  *exports,
+                                              const char      *xdg_dirs_conf,
+                                              gboolean         home_access);
+
+gboolean flatpak_context_parse_env_block (FlatpakContext *context,
+                                          const char *data,
+                                          gsize length,
+                                          GError **error);
+gboolean flatpak_context_parse_env_fd (FlatpakContext *context,
+                                       int fd,
+                                       GError **error);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakContext, flatpak_context_free)
 

@@ -24,6 +24,13 @@
 #include <selinux/selinux.h>
 #endif
 
+#ifndef HAVE_SELINUX_2_3
+/* libselinux older than 2.3 weren't const-correct */
+#define setexeccon(x) setexeccon ((security_context_t) x)
+#define setfscreatecon(x) setfscreatecon ((security_context_t) x)
+#define security_check_context(x) security_check_context ((security_context_t) x)
+#endif
+
 void
 die_with_error (const char *format, ...)
 {
@@ -65,7 +72,7 @@ die_unless_label_valid (const char *label)
 #ifdef HAVE_SELINUX
   if (is_selinux_enabled () == 1)
     {
-      if (security_check_context ((security_context_t) label) < 0)
+      if (security_check_context (label) < 0)
         die_with_error ("invalid label %s", label);
       return;
     }
@@ -228,6 +235,13 @@ has_prefix (const char *str,
             const char *prefix)
 {
   return strncmp (str, prefix, strlen (prefix)) == 0;
+}
+
+void
+xclearenv (void)
+{
+  if (clearenv () != 0)
+    die_with_error ("clearenv failed");
 }
 
 void
@@ -448,9 +462,14 @@ ensure_file (const char *path,
 
   /* We check this ahead of time, otherwise
      the create file will fail in the read-only
-     case with EROFS instead of EEXIST */
+     case with EROFS instead of EEXIST.
+
+     We're trying to set up a mount point for a non-directory, so any
+     non-directory, non-symlink is acceptable - it doesn't necessarily
+     have to be a regular file. */
   if (stat (path, &buf) ==  0 &&
-      S_ISREG (buf.st_mode))
+      !S_ISDIR (buf.st_mode) &&
+      !S_ISLNK (buf.st_mode))
     return 0;
 
   if (create_file (path, mode, NULL) != 0 &&  errno != EEXIST)
@@ -764,6 +783,37 @@ read_pid_from_socket (int socket)
   die ("No pid returned on socket");
 }
 
+/* Sets errno on error (== NULL),
+ * Always ensures terminating zero */
+char *
+readlink_malloc (const char *pathname)
+{
+  size_t size = 50;
+  ssize_t n;
+  cleanup_free char *value = NULL;
+
+  do
+    {
+      size *= 2;
+      value = xrealloc (value, size);
+      n = readlink (pathname, value, size - 1);
+      if (n < 0)
+        return NULL;
+    }
+  while (size - 2 < n);
+
+  value[n] = 0;
+  return steal_pointer (&value);
+}
+
+char *
+get_oldroot_path (const char *path)
+{
+  while (*path == '/')
+    path++;
+  return strconcat ("/oldroot/", path);
+}
+
 int
 raw_clone (unsigned long flags,
            void         *child_stack)
@@ -810,7 +860,7 @@ label_create_file (const char *file_label)
 {
 #ifdef HAVE_SELINUX
   if (is_selinux_enabled () > 0 && file_label)
-    return setfscreatecon ((security_context_t) file_label);
+    return setfscreatecon (file_label);
 #endif
   return 0;
 }
@@ -820,7 +870,7 @@ label_exec (const char *exec_label)
 {
 #ifdef HAVE_SELINUX
   if (is_selinux_enabled () > 0 && exec_label)
-    return setexeccon ((security_context_t) exec_label);
+    return setexeccon (exec_label);
 #endif
   return 0;
 }

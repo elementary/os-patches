@@ -19,4 +19,7 @@ case "$(id -nu)@$(hostname)" in
 		;;
 esac
 
-exec gnome-desktop-testing-runner Flatpak/test-oci
+exec gnome-desktop-testing-runner \
+	Flatpak/test-oci \
+	Flatpak/test-update-portal \
+	${NULL+}

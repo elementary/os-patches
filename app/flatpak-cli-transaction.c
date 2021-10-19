@@ -931,7 +931,7 @@ print_permissions (FlatpakCliTransaction *self,
   g_autoptr(GPtrArray) system_bus_talk = g_ptr_array_new_with_free_func (g_free);
   g_autoptr(GPtrArray) system_bus_own = g_ptr_array_new_with_free_func (g_free);
   g_autoptr(GPtrArray) tags = g_ptr_array_new_with_free_func (g_free);
-  FlatpakTablePrinter *printer;
+  g_autoptr(FlatpakTablePrinter) printer = NULL;
   int max_permission_width;
   int n_permission_cols;
   int i, j;
@@ -1014,7 +1014,6 @@ print_permissions (FlatpakCliTransaction *self,
     flatpak_table_printer_set_column_expand (printer, i, TRUE);
 
   flatpak_table_printer_print_full (printer, 0, cols, &table_rows, &table_cols);
-  flatpak_table_printer_free (printer);
 
   g_print ("\n\n");
 
@@ -1126,7 +1125,10 @@ transaction_ready_pre_auth (FlatpakTransaction *transaction)
 
   flatpak_table_printer_set_column_expand (printer, i, TRUE);
   if (!self->non_default_arch)
-    flatpak_table_printer_set_column_skip_unique (printer, i, TRUE);
+    {
+      flatpak_table_printer_set_column_skip_unique (printer, i, TRUE);
+      flatpak_table_printer_set_column_skip_unique_string (printer, i, flatpak_get_arch ());
+    }
   flatpak_table_printer_set_column_title (printer, i++, _("Arch"));
 
   flatpak_table_printer_set_column_expand (printer, i, TRUE);

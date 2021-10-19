@@ -78,6 +78,7 @@ const char *flatpak_context_features[] = {
   "multiarch",
   "bluetooth",
   "canbus",
+  "per-app-dev-shm",
   NULL
 };
 
@@ -1119,36 +1120,22 @@ option_env_cb (const gchar *option_name,
   return TRUE;
 }
 
-static gboolean
-option_env_fd_cb (const gchar *option_name,
-                  const gchar *value,
-                  gpointer     data,
-                  GError     **error)
+gboolean
+flatpak_context_parse_env_block (FlatpakContext *context,
+                                 const char *data,
+                                 gsize length,
+                                 GError **error)
 {
-  FlatpakContext *context = data;
-  g_autoptr(GBytes) env_block = NULL;
-  gsize remaining;
-  const char *p;
-  guint64 fd;
-  gchar *endptr;
-
-  fd = g_ascii_strtoull (value, &endptr, 10);
-
-  if (endptr == NULL || *endptr != '\0' || fd > G_MAXINT)
-    return glnx_throw (error, "Not a valid file descriptor: %s", value);
-
-  env_block = glnx_fd_readall_bytes ((int) fd, NULL, error);
-
-  if (env_block == NULL)
-    return FALSE;
-
-  p = g_bytes_get_data (env_block, &remaining);
+  const char *p = data;
+  gsize remaining = length;
 
   /* env_block might not be \0-terminated */
   while (remaining > 0)
     {
       size_t len = strnlen (p, remaining);
       const char *equals;
+      g_autofree char *env_var = NULL;
+      g_autofree char *env_value = NULL;
 
       g_assert (len <= remaining);
 
@@ -1158,9 +1145,9 @@ option_env_fd_cb (const gchar *option_name,
         return glnx_throw (error,
                            "Environment variable must be given in the form VARIABLE=VALUE, not %.*s", (int) len, p);
 
-      flatpak_context_set_env_var (context,
-                                   g_strndup (p, equals - p),
-                                   g_strndup (equals + 1, len - (equals - p) - 1));
+      env_var = g_strndup (p, equals - p);
+      env_value = g_strndup (equals + 1, len - (equals - p) - 1);
+      flatpak_context_set_env_var (context, env_var, env_value);
       p += len;
       remaining -= len;
 
@@ -1172,10 +1159,49 @@ option_env_fd_cb (const gchar *option_name,
         }
     }
 
+  return TRUE;
+}
+
+gboolean
+flatpak_context_parse_env_fd (FlatpakContext *context,
+                              int fd,
+                              GError **error)
+{
+  g_autoptr(GBytes) env_block = NULL;
+  const char *data;
+  gsize len;
+
+  env_block = glnx_fd_readall_bytes (fd, NULL, error);
+
+  if (env_block == NULL)
+    return FALSE;
+
+  data = g_bytes_get_data (env_block, &len);
+  return flatpak_context_parse_env_block (context, data, len, error);
+}
+
+static gboolean
+option_env_fd_cb (const gchar *option_name,
+                  const gchar *value,
+                  gpointer     data,
+                  GError     **error)
+{
+  FlatpakContext *context = data;
+  guint64 fd;
+  gchar *endptr;
+  gboolean ret;
+
+  fd = g_ascii_strtoull (value, &endptr, 10);
+
+  if (endptr == NULL || *endptr != '\0' || fd > G_MAXINT)
+    return glnx_throw (error, "Not a valid file descriptor: %s", value);
+
+  ret = flatpak_context_parse_env_fd (context, (int) fd, error);
+
   if (fd >= 3)
     close (fd);
 
-  return TRUE;
+  return ret;
 }
 
 static gboolean
@@ -2064,6 +2090,11 @@ gboolean
 flatpak_context_adds_permissions (FlatpakContext *old,
                                   FlatpakContext *new)
 {
+  /* We allow upgrade to multiarch, that is really not a huge problem.
+   * Similarly, having sensible semantics for /dev/shm is
+   * not a security concern. */
+  guint32 harmless_features = (FLATPAK_CONTEXT_FEATURE_MULTIARCH |
+                               FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM);
   guint32 old_sockets;
 
   if (adds_flags (old->shares & old->shares_valid,
@@ -2085,8 +2116,7 @@ flatpak_context_adds_permissions (FlatpakContext *old,
                   new->devices & new->devices_valid))
     return TRUE;
 
-  /* We allow upgrade to multiarch, that is really not a huge problem */
-  if (adds_flags ((old->features & old->features_valid) | FLATPAK_CONTEXT_FEATURE_MULTIARCH,
+  if (adds_flags ((old->features & old->features_valid) | harmless_features,
                   new->features & new->features_valid))
     return TRUE;
 
@@ -2270,13 +2300,17 @@ flatpak_context_export (FlatpakContext *context,
                         GFile          *app_id_dir,
                         GPtrArray       *extra_app_id_dirs,
                         gboolean        do_create,
-                        GString        *xdg_dirs_conf,
+                        gchar         **xdg_dirs_conf_out,
                         gboolean       *home_access_out)
 {
   gboolean home_access = FALSE;
+  g_autoptr(GString) xdg_dirs_conf = NULL;
   FlatpakFilesystemMode fs_mode, os_mode, etc_mode, home_mode;
   GHashTableIter iter;
   gpointer key, value;
+
+  if (xdg_dirs_conf_out != NULL)
+    xdg_dirs_conf = g_string_new ("");
 
   fs_mode = GPOINTER_TO_INT (g_hash_table_lookup (context->filesystems, "host"));
   if (fs_mode != FLATPAK_FILESYSTEM_MODE_NONE)
@@ -2423,17 +2457,23 @@ flatpak_context_export (FlatpakContext *context,
 
   if (home_access_out != NULL)
     *home_access_out = home_access;
+
+  if (xdg_dirs_conf_out != NULL)
+    {
+      g_assert (xdg_dirs_conf != NULL);
+      *xdg_dirs_conf_out = g_string_free (g_steal_pointer (&xdg_dirs_conf), FALSE);
+    }
 }
 
 FlatpakExports *
 flatpak_context_get_exports (FlatpakContext *context,
                              const char     *app_id)
 {
-  g_autoptr(FlatpakExports) exports = flatpak_exports_new ();
   g_autoptr(GFile) app_id_dir = flatpak_get_data_dir (app_id);
 
-  flatpak_context_export (context, exports, app_id_dir, NULL, FALSE, NULL, NULL);
-  return g_steal_pointer (&exports);
+  return flatpak_context_get_exports_full (context,
+                                           app_id_dir, NULL,
+                                           FALSE, FALSE, NULL, NULL);
 }
 
 FlatpakRunFlags
@@ -2456,22 +2496,48 @@ flatpak_context_get_run_flags (FlatpakContext *context)
   return flags;
 }
 
+FlatpakExports *
+flatpak_context_get_exports_full (FlatpakContext *context,
+                                  GFile          *app_id_dir,
+                                  GPtrArray      *extra_app_id_dirs,
+                                  gboolean        do_create,
+                                  gboolean        include_default_dirs,
+                                  gchar         **xdg_dirs_conf_out,
+                                  gboolean       *home_access_out)
+{
+  g_autoptr(FlatpakExports) exports = flatpak_exports_new ();
+
+  flatpak_context_export (context, exports,
+                          app_id_dir, extra_app_id_dirs,
+                          do_create, xdg_dirs_conf_out, home_access_out);
+
+  if (include_default_dirs)
+    {
+      g_autoptr(GFile) user_flatpak_dir = NULL;
+
+      /* Hide the flatpak dir by default (unless explicitly made visible) */
+      user_flatpak_dir = flatpak_get_user_base_dir_location ();
+      flatpak_exports_add_path_tmpfs (exports, flatpak_file_get_path_cached (user_flatpak_dir));
+
+      /* Ensure we always have a homedir */
+      flatpak_exports_add_path_dir (exports, g_get_home_dir ());
+    }
+
+  return g_steal_pointer (&exports);
+}
+
 void
 flatpak_context_append_bwrap_filesystem (FlatpakContext  *context,
                                          FlatpakBwrap    *bwrap,
                                          const char      *app_id,
                                          GFile           *app_id_dir,
-                                         GPtrArray       *extra_app_id_dirs,
-                                         FlatpakExports **exports_out)
+                                         FlatpakExports  *exports,
+                                         const char      *xdg_dirs_conf,
+                                         gboolean         home_access)
 {
-  g_autoptr(FlatpakExports) exports = flatpak_exports_new ();
-  g_autoptr(GString) xdg_dirs_conf = g_string_new ("");
-  g_autoptr(GFile) user_flatpak_dir = NULL;
-  gboolean home_access = FALSE;
   GHashTableIter iter;
   gpointer key, value;
 
-  flatpak_context_export (context, exports, app_id_dir, extra_app_id_dirs, TRUE, xdg_dirs_conf, &home_access);
   if (app_id_dir != NULL)
     flatpak_run_apply_env_appid (bwrap, app_id_dir);
 
@@ -2495,7 +2561,7 @@ flatpak_context_append_bwrap_filesystem (FlatpakContext  *context,
   if (app_id_dir != NULL)
     {
       g_autofree char *user_runtime_dir = flatpak_get_real_xdg_runtime_dir ();
-      g_autofree char *run_user_app_dst = g_strdup_printf ("/run/user/%d/app/%s", getuid (), app_id);
+      g_autofree char *run_user_app_dst = g_strdup_printf ("/run/flatpak/app/%s", app_id);
       g_autofree char *run_user_app_src = g_build_filename (user_runtime_dir, "app", app_id, NULL);
 
       if (glnx_shutil_mkdir_p_at (AT_FDCWD,
@@ -2506,16 +2572,13 @@ flatpak_context_append_bwrap_filesystem (FlatpakContext  *context,
         flatpak_bwrap_add_args (bwrap,
                                 "--bind", run_user_app_src, run_user_app_dst,
                                 NULL);
+
+      /* Later, we'll make $XDG_RUNTIME_DIR/app a symlink to /run/flatpak/app */
+      flatpak_bwrap_add_runtime_dir_member (bwrap, "app");
     }
 
-  /* Hide the flatpak dir by default (unless explicitly made visible) */
-  user_flatpak_dir = flatpak_get_user_base_dir_location ();
-  flatpak_exports_add_path_tmpfs (exports, flatpak_file_get_path_cached (user_flatpak_dir));
-
-  /* Ensure we always have a homedir */
-  flatpak_exports_add_path_dir (exports, g_get_home_dir ());
-
-  /* This actually outputs the args for the hide/expose operations above */
+  /* This actually outputs the args for the hide/expose operations
+   * in the exports */
   flatpak_exports_append_bwrap_args (exports, bwrap);
 
   /* Special case subdirectories of the cache, config and data xdg
@@ -2564,16 +2627,13 @@ flatpak_context_append_bwrap_filesystem (FlatpakContext  *context,
       if (g_file_test (src_path, G_FILE_TEST_EXISTS))
         flatpak_bwrap_add_bind_arg (bwrap, "--ro-bind", src_path, path);
     }
-  else if (xdg_dirs_conf->len > 0 && app_id_dir != NULL)
+  else if (xdg_dirs_conf != NULL && xdg_dirs_conf[0] != '\0' && app_id_dir != NULL)
     {
       g_autofree char *path =
         g_build_filename (flatpak_file_get_path_cached (app_id_dir),
                           "config/user-dirs.dirs", NULL);
 
       flatpak_bwrap_add_args_data (bwrap, "xdg-config-dirs",
-                                   xdg_dirs_conf->str, xdg_dirs_conf->len, path, NULL);
+                                   xdg_dirs_conf, strlen (xdg_dirs_conf), path, NULL);
     }
-
-  if (exports_out)
-    *exports_out = g_steal_pointer (&exports);
 }

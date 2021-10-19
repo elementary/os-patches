@@ -438,7 +438,7 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
           if (remote_dir_pairs->len == 0)
             return flatpak_fail (error, _("No remote refs found similar to ‘%s’"), argv[1]);
 
-          if (!flatpak_resolve_matching_remotes (opt_yes, remote_dir_pairs, argv[1], &chosen_pair, error))
+          if (!flatpak_resolve_matching_remotes (remote_dir_pairs, argv[1], &chosen_pair, error))
             return FALSE;
 
           remote = g_strdup (chosen_pair->remote_name);
@@ -513,12 +513,8 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
           g_autoptr(FlatpakRemoteState) state = NULL;
 
           state = flatpak_transaction_ensure_remote_state (transaction, FLATPAK_TRANSACTION_OPERATION_INSTALL,
-                                                           remote, error);
+                                                           remote, arch, error);
           if (state == NULL)
-            return FALSE;
-
-          if (arch != NULL &&
-              !flatpak_remote_state_ensure_subsummary (state, dir, arch, FALSE, cancellable, error))
             return FALSE;
 
           refs = flatpak_dir_find_remote_refs (dir, state, id, branch, default_branch, arch,

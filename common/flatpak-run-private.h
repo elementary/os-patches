@@ -54,12 +54,14 @@ gboolean flatpak_run_in_transient_unit (const char *app_id,
 #define FLATPAK_METADATA_GROUP_INSTANCE "Instance"
 #define FLATPAK_METADATA_KEY_INSTANCE_PATH "instance-path"
 #define FLATPAK_METADATA_KEY_INSTANCE_ID "instance-id"
+#define FLATPAK_METADATA_KEY_ORIGINAL_APP_PATH "original-app-path"
 #define FLATPAK_METADATA_KEY_APP_PATH "app-path"
 #define FLATPAK_METADATA_KEY_APP_COMMIT "app-commit"
 #define FLATPAK_METADATA_KEY_APP_EXTENSIONS "app-extensions"
 #define FLATPAK_METADATA_KEY_ARCH "arch"
 #define FLATPAK_METADATA_KEY_BRANCH "branch"
 #define FLATPAK_METADATA_KEY_FLATPAK_VERSION "flatpak-version"
+#define FLATPAK_METADATA_KEY_ORIGINAL_RUNTIME_PATH "original-runtime-path"
 #define FLATPAK_METADATA_KEY_RUNTIME_PATH "runtime-path"
 #define FLATPAK_METADATA_KEY_RUNTIME_COMMIT "runtime-commit"
 #define FLATPAK_METADATA_KEY_RUNTIME_EXTENSIONS "runtime-extensions"
@@ -109,11 +111,16 @@ gboolean flatpak_run_in_transient_unit (const char *app_id,
 #define FLATPAK_METADATA_KEY_DCONF_PATHS "paths"
 #define FLATPAK_METADATA_KEY_DCONF_MIGRATE_PATH "migrate-path"
 
+void     flatpak_run_extend_ld_path       (FlatpakBwrap       *bwrap,
+                                           const char         *prepend,
+                                           const char         *append);
 gboolean flatpak_run_add_extension_args   (FlatpakBwrap       *bwrap,
                                            GKeyFile           *metakey,
                                            FlatpakDecomposed  *ref,
                                            gboolean            use_ld_so_cache,
+                                           const char         *target_path,
                                            char              **extensions_out,
+                                           char              **ld_path_out,
                                            GCancellable       *cancellable,
                                            GError            **error);
 gboolean flatpak_run_add_environment_args (FlatpakBwrap       *bwrap,
@@ -123,6 +130,7 @@ gboolean flatpak_run_add_environment_args (FlatpakBwrap       *bwrap,
                                            FlatpakContext     *context,
                                            GFile              *app_id_dir,
                                            GPtrArray          *previous_app_id_dirs,
+                                           int                 per_app_dir_lock_fd,
                                            FlatpakExports    **exports_out,
                                            GCancellable       *cancellable,
                                            GError            **error);
@@ -150,9 +158,11 @@ gboolean flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
                                       GError        **error);
 gboolean flatpak_run_add_app_info_args (FlatpakBwrap       *bwrap,
                                         GFile              *app_files,
+                                        GFile              *original_app_files,
                                         GBytes             *app_deploy_data,
                                         const char         *app_extensions,
                                         GFile              *runtime_files,
+                                        GFile              *original_runtime_files,
                                         GBytes             *runtime_deploy_data,
                                         const char         *runtime_extensions,
                                         const char         *app_id,
@@ -171,10 +181,12 @@ gboolean flatpak_run_add_app_info_args (FlatpakBwrap       *bwrap,
 
 gboolean flatpak_run_app (FlatpakDecomposed  *app_ref,
                           FlatpakDeploy      *app_deploy,
+                          const char         *custom_app_path,
                           FlatpakContext     *extra_context,
                           const char         *custom_runtime,
                           const char         *custom_runtime_version,
                           const char         *custom_runtime_commit,
+                          const char         *custom_usr_path,
                           int                 parent_pid,
                           FlatpakRunFlags     flags,
                           const char         *cwd,

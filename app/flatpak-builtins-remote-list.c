@@ -64,7 +64,7 @@ static Column all_columns[] = {
 static gboolean
 list_remotes (GPtrArray *dirs, Column *columns, GCancellable *cancellable, GError **error)
 {
-  FlatpakTablePrinter *printer;
+  g_autoptr(FlatpakTablePrinter) printer = NULL;
   int i, j, k;
 
   if (columns[0].name == NULL)
@@ -197,8 +197,10 @@ list_remotes (GPtrArray *dirs, Column *columns, GCancellable *cancellable, GErro
                   if (flatpak_dir_get_remote_noenumerate (dir, remote_name))
                     flatpak_table_printer_append_with_comma (printer, "no-enumerate");
 
-                  ostree_repo_remote_get_gpg_verify (flatpak_dir_get_repo (dir), remote_name,
-                                                     &gpg_verify, NULL);
+                  if (!ostree_repo_remote_get_gpg_verify (flatpak_dir_get_repo (dir), remote_name,
+                                                          &gpg_verify, error))
+                      return FALSE; /* shouldn't happen unless repo config is modified out-of-band */
+
                   if (!gpg_verify)
                     flatpak_table_printer_append_with_comma (printer, "no-gpg-verify");
 
@@ -212,7 +214,6 @@ list_remotes (GPtrArray *dirs, Column *columns, GCancellable *cancellable, GErro
     }
 
   flatpak_table_printer_print (printer);
-  flatpak_table_printer_free (printer);
 
   return TRUE;
 }

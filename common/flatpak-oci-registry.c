@@ -1476,7 +1476,7 @@ flatpak_oci_registry_write_layer (FlatpakOciRegistry *self,
     }
 
   a = archive_write_new ();
-  if (archive_write_set_format_gnutar (a) != ARCHIVE_OK ||
+  if (archive_write_set_format_pax (a) != ARCHIVE_OK ||
       archive_write_add_filter_none (a) != ARCHIVE_OK)
     {
       propagate_libarchive_error (error, a);
@@ -2829,7 +2829,7 @@ load_oci_index (GFile        *index,
   if (json == NULL)
     return NULL;
 
-  if (!g_input_stream_close (G_INPUT_STREAM (in), cancellable, error))
+  if (!g_input_stream_close (G_INPUT_STREAM (in), cancellable, &local_error))
     g_warning ("Error closing http stream: %s", local_error->message);
 
   return (FlatpakOciIndexResponse *) g_steal_pointer (&json);

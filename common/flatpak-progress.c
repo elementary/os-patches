@@ -43,6 +43,10 @@ flatpak_main_context_finish (FlatpakMainContext *self)
   if (self->context == NULL)
     return;
 
+  /* Ensure we don't leave some cleanup callbacks unhandled as we will never iterate this context again. */
+  while (g_main_context_pending (self->context))
+    g_main_context_iteration (self->context, TRUE);
+
   if (self->flatpak_progress)
     flatpak_progress_revoke_ostree_progress (self->flatpak_progress, self->ostree_progress);
   else
@@ -182,14 +186,14 @@ update_status_progress_and_estimating (FlatpakProgress *self)
   gboolean last_was_metadata = self->last_was_metadata;
   g_autofree gchar *formatted_bytes_total_transferred = NULL;
 
-  buf = g_string_new ("");
-
   /* We get some extra calls before we've really started due to the initialization of the
      extra data, so ignore those */
   if (self->requested == 0)
     {
       return;
     }
+
+  buf = g_string_new ("");
 
   /* The heuristic here goes as follows:
    *  - While fetching metadata, grow up to 5%

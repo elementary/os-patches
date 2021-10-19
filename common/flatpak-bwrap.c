@@ -223,6 +223,16 @@ flatpak_bwrap_append_bwrap (FlatpakBwrap *bwrap,
                                  key, eq + 1, TRUE);
         }
     }
+
+  if (other->runtime_dir_members != NULL)
+    {
+      if (bwrap->runtime_dir_members == NULL)
+        bwrap->runtime_dir_members = g_ptr_array_new_with_free_func (g_free);
+
+      for (i = 0; i < other->runtime_dir_members->len; i++)
+        g_ptr_array_add (bwrap->runtime_dir_members,
+                         g_strdup (g_ptr_array_index (other->runtime_dir_members, i)));
+    }
 }
 
 void
@@ -287,6 +297,21 @@ flatpak_bwrap_add_bind_arg (FlatpakBwrap *bwrap,
 }
 
 /*
+ * Sort bwrap->envp. This has no practical effect, but it's easier to
+ * see what is going on in a large environment block if the variables
+ * are sorted.
+ */
+void
+flatpak_bwrap_sort_envp (FlatpakBwrap *bwrap)
+{
+  if (bwrap->envp != NULL)
+    {
+      qsort (bwrap->envp, g_strv_length (bwrap->envp), sizeof (char *),
+             flatpak_envp_cmp);
+    }
+}
+
+/*
  * Convert bwrap->envp into a series of --setenv arguments for bwrap(1),
  * assumed to be applied to an empty environment. Reset envp to be an
  * empty environment.
@@ -347,10 +372,21 @@ flatpak_bwrap_bundle_args (FlatpakBwrap *bwrap,
 
   fd = glnx_steal_fd (&args_tmpf.fd);
 
-  {
-    g_autofree char *commandline = flatpak_quote_argv ((const char **) bwrap->argv->pdata + start, end - start);
-    flatpak_debug2 ("bwrap --args %d = %s", fd, commandline);
-  }
+  flatpak_debug2 ("bwrap --args %d = ...", fd);
+
+  for (i = start; i < end; i++)
+    {
+      if (flatpak_argument_needs_quoting (bwrap->argv->pdata[i]))
+        {
+          g_autofree char *quoted = g_shell_quote (bwrap->argv->pdata[i]);
+
+          flatpak_debug2 ("    %s", quoted);
+        }
+      else
+        {
+          flatpak_debug2 ("    %s", (const char *) bwrap->argv->pdata[i]);
+        }
+    }
 
   flatpak_bwrap_add_fd (bwrap, fd);
   g_ptr_array_remove_range (bwrap->argv, start, end - start);
@@ -365,6 +401,92 @@ flatpak_bwrap_bundle_args (FlatpakBwrap *bwrap,
     }
 
   return TRUE;
+}
+
+/*
+ * Remember that we need to arrange for $XDG_RUNTIME_DIR/$name to be
+ * a symlink to /run/flatpak/$name.
+ */
+void
+flatpak_bwrap_add_runtime_dir_member (FlatpakBwrap *bwrap,
+                                      const char *name)
+{
+  if (bwrap->runtime_dir_members == NULL)
+    bwrap->runtime_dir_members = g_ptr_array_new_with_free_func (g_free);
+
+  g_ptr_array_add (bwrap->runtime_dir_members, g_strdup (name));
+}
+
+static void
+expect_symlink (const char *host_path,
+                const char *target)
+{
+  /* This shouldn't fail in practice, so there's not much point in
+   * translating the warning */
+  if (symlink (target, host_path) < 0 && errno != EEXIST)
+    {
+      g_warning ("Unable to create symlink at %s: %s",
+                 host_path, g_strerror (errno));
+    }
+  else
+    {
+      g_autoptr(GError) local_error = NULL;
+      g_autofree char *got = glnx_readlinkat_malloc (AT_FDCWD,
+                                                     host_path,
+                                                     NULL,
+                                                     &local_error);
+
+      if (got == NULL)
+        g_warning ("%s is not a symlink to \"%s\" as expected: %s",
+                   host_path, target, local_error->message);
+      else if (strcmp (got, target) != 0)
+        g_warning ("%s is a symlink to \"%s\", not \"%s\" as expected",
+                   host_path, got, target);
+    }
+}
+
+void
+flatpak_bwrap_populate_runtime_dir (FlatpakBwrap *bwrap,
+                                    const char *shared_xdg_runtime_dir)
+{
+  if (shared_xdg_runtime_dir != NULL)
+    {
+      g_autofree char *host_path = g_build_filename (shared_xdg_runtime_dir,
+                                                     "flatpak-info", NULL);
+
+      expect_symlink (host_path, "../../../.flatpak-info");
+    }
+  else
+    {
+      flatpak_bwrap_add_arg (bwrap, "--symlink");
+      flatpak_bwrap_add_arg (bwrap, "../../../.flatpak-info");
+      flatpak_bwrap_add_arg_printf (bwrap, "/run/user/%d/flatpak-info", getuid ());
+    }
+
+  if (bwrap->runtime_dir_members != NULL)
+    {
+      gsize i;
+
+      for (i = 0; i < bwrap->runtime_dir_members->len; i++)
+        {
+          const char *member = g_ptr_array_index (bwrap->runtime_dir_members, i);
+          g_autofree char *target = g_strdup_printf ("../../flatpak/%s", member);
+
+          if (shared_xdg_runtime_dir != NULL)
+            {
+              g_autofree char *host_path = g_build_filename (shared_xdg_runtime_dir,
+                                                             member, NULL);
+
+              expect_symlink (host_path, target);
+            }
+          else
+            {
+              flatpak_bwrap_add_arg (bwrap, "--symlink");
+              flatpak_bwrap_add_arg (bwrap, target);
+              flatpak_bwrap_add_arg_printf (bwrap, "/run/user/%d/%s", getuid (), member);
+            }
+        }
+    }
 }
 
 void

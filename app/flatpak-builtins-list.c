@@ -120,7 +120,7 @@ print_table_for_refs (gboolean      print_apps,
                       GCancellable *cancellable,
                       GError      **error)
 {
-  FlatpakTablePrinter *printer;
+  g_autoptr(FlatpakTablePrinter) printer = NULL;
   int i;
   FlatpakKinds match_kinds;
   g_autofree char *match_id = NULL;
@@ -353,8 +353,6 @@ print_table_for_refs (gboolean      print_apps,
       g_print ("\n");
     }
 
-  flatpak_table_printer_free (printer);
-
   return TRUE;
 }
 
@@ -423,6 +421,7 @@ flatpak_builtin_list (int argc, char **argv, GCancellable *cancellable, GError *
   if (dirs->len > 1)
     {
       int c = find_column (all_columns, "installation", NULL);
+      g_assert (c != -1);
       all_columns[c].def = 1;
     }
 

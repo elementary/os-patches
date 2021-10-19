@@ -89,6 +89,8 @@ flatpak_builtin_enter (int           argc,
   g_option_context_set_translation_domain (context, GETTEXT_PACKAGE);
 
   rest_argc = 0;
+  rest_argv_start = 0;
+
   for (i = 1; i < argc; i++)
     {
       /* The non-option is the command, take it out of the arguments */
@@ -109,6 +111,9 @@ flatpak_builtin_enter (int           argc,
       usage_error (context, _("INSTANCE and COMMAND must be specified"), error);
       return FALSE;
     }
+
+  /* If this wasn't true, rest_argc would still be 0 */
+  g_assert (rest_argv_start >= 1);
 
   pid_s = argv[rest_argv_start];
   pid = atoi (pid_s);
@@ -276,6 +281,9 @@ flatpak_builtin_enter (int           argc,
   if (g_file_test ("/run/dbus/system_bus_socket", G_FILE_TEST_EXISTS))
     g_ptr_array_add (envp_array, g_strdup ("DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket"));
 
+  if (getenv ("TERM"))
+    g_ptr_array_add (envp_array, g_strdup_printf ("TERM=%s", getenv ("TERM")));
+
   g_ptr_array_add (envp_array, NULL);
 
   argv_array = g_ptr_array_new_with_free_func (g_free);
@@ -283,6 +291,7 @@ flatpak_builtin_enter (int           argc,
     g_ptr_array_add (argv_array, g_strdup (argv[rest_argv_start + i]));
   g_ptr_array_add (argv_array, NULL);
 
+  signal (SIGINT, SIG_IGN);
   if (!g_spawn_sync (NULL, (char **) argv_array->pdata, (char **) envp_array->pdata,
                      G_SPAWN_SEARCH_PATH_FROM_ENVP | G_SPAWN_CHILD_INHERITS_STDIN,
                      NULL, NULL,
