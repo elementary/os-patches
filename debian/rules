@@ -41,6 +41,7 @@ endif
 	sed -e "s&#OSNAME#&$(OSNAME)&g" etc/issue.net  > $(DESTDIR)/etc/issue.net
 	sed -e "s&#OSNAME#&$(OSNAME)&g" etc/os-release > $(DESTDIR)/etc/os-release
 	mv $(DESTDIR)/etc/os-release $(DESTDIR)/usr/lib/os-release
+	mv $(DESTDIR)/etc/upstream-os-release $(DESTDIR)/usr/lib/upstream-os-release
 	ln -s ../usr/lib/os-release $(DESTDIR)/etc/os-release
 
 override_dh_installsystemd:
