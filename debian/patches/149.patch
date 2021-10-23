@@ -1,0 +1,28 @@
+## Description: add some description
+## Origin/Author: add some origin or author
+## Bug: bug URL
+From e6ee197dcedd7b77acc434c1def9fbbb1fd3f302 Mon Sep 17 00:00:00 2001
+From: Gianfranco Costamagna <costamagnagianfranco@yahoo.it>
+Date: Fri, 9 Apr 2021 14:28:34 +0200
+Subject: [PATCH] Update kernel_install.d_dkms to remove wrong bash path
+
+See:
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=986674
+
+Lintian emits
+
+E: dkms: wrong-path-for-interpreter etc/dkms/kernel_install.d_dkms (#!/usr/bin/bash != /bin/bash)
+---
+ kernel_install.d_dkms | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/kernel_install.d_dkms b/kernel_install.d_dkms
+index c1d6df1..f1b3b38 100755
+--- a/kernel_install.d_dkms
++++ b/kernel_install.d_dkms
+@@ -1,4 +1,4 @@
+-#!/usr/bin/bash
++#!/bin/bash
+ 
+ if [[ "$1" == "add" ]]; then
+ 	/etc/kernel/postinst.d/dkms $2

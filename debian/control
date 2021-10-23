@@ -1,0 +1,37 @@
+Source: dkms
+Section: kernel
+Priority: optional
+Maintainer: Dynamic Kernel Modules Support Team <dkms@packages.debian.org>
+Uploaders: David Paleino <dapal@debian.org>,
+ Petter Reinholdtsen <pere@debian.org>,
+ Aron Xu <aron@debian.org>,
+ Mario Limonciello <Mario_Limonciello@dell.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.5.0
+Homepage: https://github.com/dell-oss/dkms
+Vcs-Git: https://salsa.debian.org/debian/dkms.git
+Vcs-Browser: https://salsa.debian.org/debian/dkms
+Rules-Requires-Root: no
+
+Package: dkms
+Architecture: all
+Provides: dh-sequence-dkms
+Multi-Arch: foreign
+Pre-Depends: lsb-release
+Depends: ${misc:Depends},
+ kmod | kldutils,
+ gcc | c-compiler,
+ dpkg-dev,
+ make | build-essential,
+ coreutils (>= 7.4),
+ patch,
+ dctrl-tools,
+Recommends: fakeroot,
+ sudo,
+ linux-headers-686-pae | linux-headers-amd64 | linux-headers-generic | linux-headers,
+Suggests: menu, e2fsprogs
+Breaks: ${dkms:Breaks}
+Description: Dynamic Kernel Module Support Framework
+ DKMS is a framework designed to allow individual kernel modules to be upgraded
+ without changing the whole kernel. It is also very easy to rebuild modules as
+ you upgrade kernels.
