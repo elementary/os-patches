@@ -1,0 +1,29 @@
+From: Ard Biesheuvel <ard.biesheuvel@arm.com>
+Date: Sun, 25 Oct 2020 14:49:34 +0100
+Subject: arm/linux: Fix ARM Linux header layout
+
+The hdr_offset member of the ARM Linux image header appears at
+offset 0x3c, matching the PE/COFF spec's placement of the COFF
+header offset in the MS-DOS header. We're currently off by four,
+so fix that.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@arm.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+(cherry picked from commit a166484483a94f6a414c09a1e449d51fb1beaf05)
+---
+ include/grub/arm/linux.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/grub/arm/linux.h b/include/grub/arm/linux.h
+index 2e98a66..bcd5a7e 100644
+--- a/include/grub/arm/linux.h
++++ b/include/grub/arm/linux.h
+@@ -30,7 +30,7 @@ struct linux_arm_kernel_header {
+   grub_uint32_t magic;
+   grub_uint32_t start; /* _start */
+   grub_uint32_t end;   /* _edata */
+-  grub_uint32_t reserved2[4];
++  grub_uint32_t reserved2[3];
+   grub_uint32_t hdr_offset;
+ };
+ 

@@ -1,0 +1,25 @@
+From: Dimitri John Ledkov <dimitri.ledkov@canonical.com>
+Date: Fri, 16 Jul 2021 13:49:51 +0100
+Subject: tests/ahci_test.in: Replace ide-drive with ide-hd
+
+Qemu 6.0 removed ide-drive in favor of ide-cdrom or ide-hd.
+
+Signed-off-by: Dimitri John Ledkov <dimitri.ledkov@canonical.com>
+(cherry picked from commit 1855f7a0b5e2f8d134c6f3e7b14255747b6e32a4)
+---
+ tests/ahci_test.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/ahci_test.in b/tests/ahci_test.in
+index 7df5604..d844fe6 100644
+--- a/tests/ahci_test.in
++++ b/tests/ahci_test.in
+@@ -41,7 +41,7 @@ echo "hello" > "$outfile"
+ 
+ tar cf "$imgfile" "$outfile"
+ 
+-if [ "$(echo "nativedisk; source '(ahci0)/$outfile';" | "${grubshell}" --qemu-opts="-drive id=disk,file=$imgfile,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 " | tail -n 1)" != "Hello World" ]; then
++if [ "$(echo "nativedisk; source '(ahci0)/$outfile';" | "${grubshell}" --qemu-opts="-drive id=disk,file=$imgfile,if=none -device ahci,id=ahci -device ide-hd,drive=disk,bus=ahci.0 " | tail -n 1)" != "Hello World" ]; then
+    rm "$imgfile"
+    rm "$outfile"
+    exit 1

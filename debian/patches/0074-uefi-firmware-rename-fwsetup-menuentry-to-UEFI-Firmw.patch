@@ -1,0 +1,25 @@
+From: Dimitri John Ledkov <xnox@ubuntu.com>
+Date: Mon, 24 Feb 2020 20:29:53 +0000
+Subject: uefi-firmware: rename fwsetup menuentry to UEFI Firmware Settings
+
+LP: #1864547
+---
+ util/grub.d/30_uefi-firmware.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/util/grub.d/30_uefi-firmware.in b/util/grub.d/30_uefi-firmware.in
+index 3c9f533..b072d21 100644
+--- a/util/grub.d/30_uefi-firmware.in
++++ b/util/grub.d/30_uefi-firmware.in
+@@ -32,9 +32,9 @@ OsIndications="$efi_vars_dir/OsIndicationsSupported-$EFI_GLOBAL_VARIABLE/data"
+ 
+ if [ -e "$OsIndications" ] && \
+    [ "$(( $(printf 0x%x \'"$(cat $OsIndications | cut -b1)") & 1 ))" = 1 ]; then
+-  LABEL="System setup"
++  LABEL="UEFI Firmware Settings"
+ 
+-  gettext_printf "Adding boot menu entry for EFI firmware configuration\n" >&2
++  gettext_printf "Adding boot menu entry for UEFI Firmware Settings\n" >&2
+ 
+   onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
+ 

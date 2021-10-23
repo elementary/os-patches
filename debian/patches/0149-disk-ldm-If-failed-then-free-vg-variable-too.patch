@@ -1,0 +1,24 @@
+From: Paulo Flabiano Smorigo <pfsmorigo@canonical.com>
+Date: Mon, 7 Dec 2020 10:07:47 -0300
+Subject: disk/ldm: If failed then free vg variable too
+
+Fixes: CID 73809
+
+Signed-off-by: Paulo Flabiano Smorigo <pfsmorigo@canonical.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ grub-core/disk/ldm.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/grub-core/disk/ldm.c b/grub-core/disk/ldm.c
+index 428415f..54713f4 100644
+--- a/grub-core/disk/ldm.c
++++ b/grub-core/disk/ldm.c
+@@ -199,6 +199,7 @@ make_vg (grub_disk_t disk,
+     {
+       grub_free (vg->uuid);
+       grub_free (vg->name);
++      grub_free (vg);
+       return NULL;
+     }
+   grub_memcpy (vg->uuid, label->group_guid, LDM_GUID_STRLEN);

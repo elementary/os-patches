@@ -1,0 +1,64 @@
+From: Darren Kenny <darren.kenny@oracle.com>
+Date: Thu, 5 Nov 2020 10:57:14 +0000
+Subject: gnulib/regexec: Fix possible null-dereference
+
+It appears to be possible that the mctx->state_log field may be NULL,
+and the name of this function, clean_state_log_if_needed(), suggests
+that it should be checking that it is valid to be cleaned before
+assuming that it does.
+
+Fixes: CID 86720
+
+Signed-off-by: Darren Kenny <darren.kenny@oracle.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ conf/Makefile.extra-dist                                  |  1 +
+ grub-core/lib/gnulib-patches/fix-regexec-null-deref.patch | 12 ++++++++++++
+ grub-core/lib/gnulib/regexec.c                            |  3 +++
+ 3 files changed, 16 insertions(+)
+ create mode 100644 grub-core/lib/gnulib-patches/fix-regexec-null-deref.patch
+
+diff --git a/conf/Makefile.extra-dist b/conf/Makefile.extra-dist
+index 96d7e69..d27d3a9 100644
+--- a/conf/Makefile.extra-dist
++++ b/conf/Makefile.extra-dist
+@@ -30,6 +30,7 @@ EXTRA_DIST += grub-core/genemuinitheader.sh
+ 
+ EXTRA_DIST += grub-core/lib/gnulib-patches/fix-null-deref.patch
+ EXTRA_DIST += grub-core/lib/gnulib-patches/fix-null-state-deref.patch
++EXTRA_DIST += grub-core/lib/gnulib-patches/fix-regexec-null-deref.patch
+ EXTRA_DIST += grub-core/lib/gnulib-patches/fix-uninit-structure.patch
+ EXTRA_DIST += grub-core/lib/gnulib-patches/fix-unused-value.patch
+ EXTRA_DIST += grub-core/lib/gnulib-patches/fix-width.patch
+diff --git a/grub-core/lib/gnulib-patches/fix-regexec-null-deref.patch b/grub-core/lib/gnulib-patches/fix-regexec-null-deref.patch
+new file mode 100644
+index 0000000..db6dac9
+--- /dev/null
++++ b/grub-core/lib/gnulib-patches/fix-regexec-null-deref.patch
+@@ -0,0 +1,12 @@
++--- a/lib/regexec.c	2020-10-21 14:25:35.310195912 +0000
+++++ b/lib/regexec.c	2020-11-05 10:55:09.621542984 +0000
++@@ -1692,6 +1692,9 @@
++ {
++   Idx top = mctx->state_log_top;
++
+++  if (mctx->state_log == NULL)
+++    return REG_NOERROR;
+++
++   if ((next_state_log_idx >= mctx->input.bufs_len
++        && mctx->input.bufs_len < mctx->input.len)
++       || (next_state_log_idx >= mctx->input.valid_len
+diff --git a/grub-core/lib/gnulib/regexec.c b/grub-core/lib/gnulib/regexec.c
+index e472e25..be787f0 100644
+--- a/grub-core/lib/gnulib/regexec.c
++++ b/grub-core/lib/gnulib/regexec.c
+@@ -1696,6 +1696,9 @@ clean_state_log_if_needed (re_match_context_t *mctx, Idx next_state_log_idx)
+ {
+   Idx top = mctx->state_log_top;
+ 
++  if (mctx->state_log == NULL)
++    return REG_NOERROR;
++
+   if ((next_state_log_idx >= mctx->input.bufs_len
+        && mctx->input.bufs_len < mctx->input.len)
+       || (next_state_log_idx >= mctx->input.valid_len

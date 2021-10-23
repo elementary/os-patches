@@ -1,0 +1,33 @@
+From: Daniel Axtens <dja@axtens.net>
+Date: Fri, 22 Jan 2021 14:42:21 +1100
+Subject: disk/lvm: Do not allow a LV to be it's own segment's node's LV
+
+This prevents infinite recursion in the diskfilter verification code.
+
+Signed-off-by: Daniel Axtens <dja@axtens.net>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ grub-core/disk/lvm.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/grub-core/disk/lvm.c b/grub-core/disk/lvm.c
+index 630dd6a..f76e2e1 100644
+--- a/grub-core/disk/lvm.c
++++ b/grub-core/disk/lvm.c
+@@ -829,9 +829,13 @@ error_parsing_metadata:
+ 		    }
+ 		if (lv1->segments[i].nodes[j].pv == NULL)
+ 		  for (lv2 = vg->lvs; lv2; lv2 = lv2->next)
+-		    if (grub_strcmp (lv2->name,
+-				     lv1->segments[i].nodes[j].name) == 0)
+-		      lv1->segments[i].nodes[j].lv = lv2;
++		    {
++		      if (lv1 == lv2)
++		        continue;
++		      if (grub_strcmp (lv2->name,
++				       lv1->segments[i].nodes[j].name) == 0)
++			lv1->segments[i].nodes[j].lv = lv2;
++		    }
+ 	      }
+ 	
+       }
