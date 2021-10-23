@@ -19,11 +19,18 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-[ -r /etc/lsb-release ] && . /etc/lsb-release
+[ -r /usr/lib/os-release ] && . /usr/lib/os-release
 
-if [ -z "$DISTRIB_DESCRIPTION" ] && [ -x /usr/bin/lsb_release ]; then
+if [ -z "$PRETTY_NAME" ] && [ -x /usr/bin/lsb_release ]; then
 	# Fall back to using the very slow lsb_release utility
-	DISTRIB_DESCRIPTION=$(lsb_release -s -d)
+	PRETTY_NAME=$(lsb_release -s -d)
+fi
+if [ -z "$UBUNTU_DISTRIB_DESCRIPTION" ] && [ -x /usr/bin/lsb_release ]; then
+	# Fall back to using the very slow lsb_release utility
+	UBUNTU_DISTRIB_DESCRIPTION=$(LSB_OS_RELEASE=/usr/lib/upstream-os-release lsb_release -s -d)
 fi
 
-printf "Welcome to %s (%s %s %s)\n" "$DISTRIB_DESCRIPTION" "$(uname -o)" "$(uname -r)" "$(uname -m)"
+printf "Welcome to %s (%s %s %s)\n" "$PRETTY_NAME" "$(uname -o)" "$(uname -r)" "$(uname -m)"
+if [ -n "$UBUNTU_DISTRIB_DESCRIPTION" ]; then
+        printf "Built on %s\n" "$UBUNTU_DISTRIB_DESCRIPTION"
+fi
