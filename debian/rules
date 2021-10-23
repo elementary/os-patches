@@ -93,7 +93,7 @@ endif
 
 ifeq (yes,$(shell dpkg-vendor --derives-from Ubuntu && echo yes))
 DEFAULT_CMDLINE := quiet splash
-DEFAULT_TIMEOUT := 10
+DEFAULT_TIMEOUT := 5
 ifeq ($(DEB_HOST_ARCH_CPU),ppc64el)
 FLICKER_FREE_BOOT := no
 else ifeq ($(DEB_HOST_ARCH_CPU),riscv64)
