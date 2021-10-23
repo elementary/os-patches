@@ -1,0 +1,84 @@
+#!/usr/bin/make -f
+
+derives_from_ubuntu := $(shell (dpkg-vendor --derives-from Ubuntu && echo "yes") || echo "no")
+
+PY2VERSIONS=$(shell [ -x /usr/bin/pyversions ] && pyversions -vr)
+PY3VERSIONS=$(shell [ -x /usr/bin/py3versions ] && py3versions -vr)
+
+%:
+	dh $@ --with python3
+
+override_dh_auto_build:
+	dh_auto_build
+	ionit -c conf -t init-functions.d
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_ARCH       ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+
+# Map Debian architectures to LSB architectures
+lsbarch=${DEB_HOST_ARCH}
+ifeq (${lsbarch}, i386)
+lsbarch=ia32
+endif
+ifeq (${lsbarch}, powerpc)
+lsbarch=ppc32
+endif
+
+LIBC=libc6 (>> 2.3.5)
+ifeq (${lsbarch}, amd64)
+LIBC=libc6 (>= 2.13-17)
+endif
+ifeq (${lsbarch}, hurd-i386)
+LIBC=libc0.3 (>> 2.3.5)
+endif
+ifeq (${lsbarch}, kfreebsd-amd64)
+LIBC=libc0.1 (>> 2.3.5)
+endif
+ifeq (${lsbarch}, kfreebsd-i386)
+LIBC=libc0.1 (>> 2.3.5)
+endif
+ifeq (${lsbarch}, ia64)
+LIBC=libc6.1 (>> 2.3.5)
+endif
+ifeq (${lsbarch}, alpha)
+LIBC=libc6.1 (>> 2.3.5)
+endif
+
+override_dh_clean:
+	dh_clean
+	rm -f *.py[co]
+	rm -f debian/lsb-base.maintscript
+	rm -rf __pycache__
+	rm -rf test/__pycache__
+
+ifneq ($(filter nocheck,$(DEB_BUILD_OPTIONS)),)
+override_dh_auto_test:
+else
+override_dh_auto_test: $(PY3VERSIONS:%=test-python%) $(PY2VERSIONS:%=test-python%)
+endif
+
+test-python%:
+	PATH=test/:$${PATH} PYTHONPATH=. python$* test/test_lsb_release.py -vv
+	PYTHONPATH=. python$* test/test_initdutils.py -vv
+	rm -rf __pycache__
+	rm -rf test/__pycache__
+	rm -f test/debian_version_*
+
+override_dh_python3:
+	dh_python3
+	dh_python3 /usr/lib/lsb
+
+override_dh_install:
+	dh_install
+ifeq ($(derives_from_ubuntu),yes)
+ifneq (,$(findstring lsb-base, $(shell dh_listpackages)))
+	cp -p init-functions.d/50-ubuntu-logging debian/lsb-base/lib/lsb/init-functions.d/
+endif
+
+override_dh_installdeb:
+	cp debian/lsb-base.maintscript.Ubuntu debian/lsb-base.maintscript
+	dh_installdeb
+endif
