@@ -14,6 +14,8 @@ dh_dkms.1: debian/scripts/dh_dkms
 
 override_dh_auto_build:
 
+override_dh_auto_install:
+
 override_dh_install:
 	$(MAKE) install-debian DESTDIR=$(CURDIR)/debian/dkms
 	dh_install

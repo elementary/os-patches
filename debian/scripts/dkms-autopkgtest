@@ -57,7 +57,7 @@ run_pkg() {
                         ;;
                 esac
         esac
-        
+
         echo "I: Trying to build $dkms_pkg/$dkms_ver for $kver"
         res=0
         dkms build -m "$dkms_pkg" -v "$dkms_ver" -k "$kver" || res=$?

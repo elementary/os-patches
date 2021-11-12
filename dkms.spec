@@ -1,6 +1,6 @@
 Summary: Dynamic Kernel Module Support Framework
 Name: dkms
-Version: [INSERT_VERSION_HERE]
+Version: #RELEASE_VERSION#
 Release: 1%{?dist}
 License: GPLv2+
 BuildArch: noarch
@@ -18,7 +18,7 @@ Requires: grep
 Requires: gzip
 Requires: kernel-devel
 Requires: sed
-Requires: tar 
+Requires: tar
 Requires: which
 Requires: bash > 1.99
 
@@ -162,7 +162,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc sample.spec sample.conf AUTHORS COPYING README.md
+%doc sample.spec sample.conf COPYING README.md
 %if 0%{?fedora} >= 20 || 0%{?rhel} >= 7 || 0%{?suse_version} >= 1210
 %{_unitdir}/%{name}.service
 %else

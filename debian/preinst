@@ -33,5 +33,8 @@ install|upgrade)
 	fi
         rm_conffile dkms "/etc/init/dkms_autoinstaller.conf"
     fi
+    if dpkg --compare-versions "$2" le "2.7.1-5"; then
+	    rm_conffile dkms "/etc/bash_completion.d/dkms"
+    fi
 
 esac

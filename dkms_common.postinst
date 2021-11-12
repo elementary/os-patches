@@ -31,19 +31,11 @@ _check_kernel_dir() {
 
 # Check the existence of a kernel named as $1
 _is_kernel_name_correct() {
-    CORRECT="no"
-    KERNEL_NAME=$1
-
-    for kernel in /boot/config-*; do
-        [ -f "$kernel" ] || continue
-        KERNEL=${kernel#*-}
-        if [ "${KERNEL}" = "${KERNEL_NAME}" ]; then
-            CORRECT="yes"
-            break
-        fi
-    done
-
-    echo $CORRECT
+    if [ -e "/lib/modules/$1" ]; then
+        echo yes
+    else
+        echo no
+    fi
 }
 
 
@@ -82,33 +74,9 @@ _get_newest_kernel_debian() {
     echo "$NEWEST_KERNEL"
 }
 
-# Get the most recent kernel in Rhel based systems. If the current kernel
-# is the most recent kernel then the function will print a null string.
+# Get the most recent kernel in Rhel based systems.
 _get_newest_kernel_rhel() {
-    NEWEST_KERNEL=
-
-    LAST_INSTALLED_KERNEL=$(rpm -q --whatprovides kernel  --last | grep kernel -m1 | cut -f1 -d' ')
-
-    LIK_FORMATTED_NAME=$(rpm -q $LAST_INSTALLED_KERNEL --queryformat="%{VERSION}-%{RELEASE}.%{ARCH}\n")
-
-    if [ `echo $LIK_FORMATTED_NAME | grep 2.6 >/dev/null` ]; then
-        # Fedora and Suse
-        NEWEST_KERNEL=$LIK_FORMATTED_NAME
-    else
-        # Hack for Mandriva where $LIK_FORMATTED_NAME is broken
-        LIK_NAME=$(rpm -q $LAST_INSTALLED_KERNEL --queryformat="%{NAME}\n")
-        LIK_TYPE=${LIK_NAME#kernel-}
-        LIK_TYPE=${LIK_TYPE%%-*}
-        LIK_STRIPPED=${LIK_NAME#kernel-}
-        LIK_STRIPPED=${LIK_STRIPPED#$LIK_TYPE-}
-        LIK_STRIPPED_BASE=${LIK_STRIPPED%%-*}
-        LIK_STRIPPED_END=${LIK_STRIPPED#$LIK_STRIPPED_BASE-}
-        LIK_FINAL=$LIK_STRIPPED_BASE-$LIK_TYPE-$LIK_STRIPPED_END
-
-        NEWEST_KERNEL=$LIK_FINAL
-    fi
-
-    echo $NEWEST_KERNEL
+    rpm -q --qf="%{VERSION}-%{RELEASE}.%{ARCH}\n" --whatprovides kernel | tail -n 1
 }
 
 # Get the newest kernel on Debian and Rhel based systems.
@@ -291,9 +259,8 @@ for KERNEL in $KERNELS; do
     fi
 
     #if the module is built (either pre-built or just now), install it
-    if [ `echo $dkms_status | grep -c ": built"` -eq 1 ] && 
+    if [ `echo $dkms_status | grep -c ": built"` -eq 1 ] &&
        [ `echo $dkms_status | grep -c ": installed"` -eq 0 ]; then
         dkms install -m $NAME -v $VERSION -k $KERNEL $ARCH
     fi
 done
-

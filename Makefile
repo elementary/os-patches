@@ -1,8 +1,9 @@
-RELEASE_DATE := "31-OCT-2019"
+RELEASE_DATE := "01 October 2021"
 RELEASE_MAJOR := 2
 RELEASE_MINOR := 8
+RELEASE_MICRO := 7
 RELEASE_NAME := dkms
-RELEASE_VERSION := $(RELEASE_MAJOR).$(RELEASE_MINOR)
+RELEASE_VERSION := $(RELEASE_MAJOR).$(RELEASE_MINOR).$(RELEASE_MICRO)
 RELEASE_STRING := $(RELEASE_NAME)-$(RELEASE_VERSION)
 DIST := unstable
 SHELL=bash
@@ -28,44 +29,30 @@ TOPDIR := $(shell pwd)
 all: clean tarball rpm debs
 
 clean:
-	-rm -rf *~ dist/ dkms-freshmeat.txt
+	-rm -rf *~ dist/
 
 install:
-	mkdir -m 0755 -p $(VAR) $(SBIN) $(MAN) $(ETC) $(BASHDIR) $(SHAREDIR) $(LIBDIR)
-	sed -e "s/\[INSERT_VERSION_HERE\]/$(RELEASE_VERSION)/" dkms > dkms.versioned
-	mv -f dkms.versioned dkms
+	mkdir -p -m 0755 $(VAR) $(SBIN) $(MAN) $(ETC) $(BASHDIR) $(SHAREDIR) $(LIBDIR)
+	mkdir -p -m 0755 $(KCONF)/install.d $(KCONF)/prerm.d $(KCONF)/postinst.d
 	install -p -m 0755 dkms_common.postinst $(LIBDIR)/common.postinst
 	install -p -m 0755 dkms $(SBIN)
 	install -p -m 0755 dkms_autoinstaller $(LIBDIR)
 	install -p -m 0644 dkms_framework.conf $(ETC)/framework.conf
-	install -p -m 0755 kernel_install.d_dkms $(ETC)
 	install -p -m 0755 sign_helper.sh $(ETC)
 	install -p -m 0644 dkms_dbversion $(VAR)
 	install -p -m 0644 dkms.bash-completion $(BASHDIR)/dkms
-	# install compressed manpage with proper timestamp and permissions
-	gzip -c -9 dkms.8 > $(MAN)/dkms.8.gz
-	chmod 0644 $(MAN)/dkms.8.gz
-	touch --reference=dkms.8 $(MAN)/dkms.8.gz
-	mkdir   -p -m 0755 $(KCONF)/prerm.d $(KCONF)/postinst.d
-	install -p -m 0755 kernel_prerm.d_dkms  $(KCONF)/prerm.d/dkms
+	install -p -m 0644 dkms.8 $(MAN)/dkms.8
+	install -p -m 0755 kernel_install.d_dkms $(KCONF)/install.d/dkms
 	install -p -m 0755 kernel_postinst.d_dkms $(KCONF)/postinst.d/dkms
+	install -p -m 0755 kernel_prerm.d_dkms $(KCONF)/prerm.d/dkms
+	sed -i -e 's/#RELEASE_STRING#/$(RELEASE_STRING)/' -e 's/#RELEASE_DATE#/$(RELEASE_DATE)/' $(SBIN)/dkms $(MAN)/dkms.8
+	gzip -9 $(MAN)/dkms.8
 
-DOCFILES=sample.spec sample.conf AUTHORS COPYING README.md sample-suse-9-mkkmp.spec sample-suse-10-mkkmp.spec
+DOCFILES=sample.spec sample.conf COPYING README.md sample-suse-9-mkkmp.spec sample-suse-10-mkkmp.spec
 
 doc-perms:
 	# ensure doc file permissions ok
 	chmod 0644 $(DOCFILES)
-
-install-redhat-sysv: install doc-perms
-	mkdir -m 0755 -p  $(INITD)
-	install -p -m 0755 dkms_mkkerneldoth $(LIBDIR)/mkkerneldoth
-	install -p -m 0755 dkms_find-provides $(LIBDIR)/find-provides
-	install -p -m 0755 lsb_release $(LIBDIR)/lsb_release
-	install -p -m 0644 template-dkms-mkrpm.spec $(ETC)
-	install -p -m 0644 template-dkms-redhat-kmod.spec $(ETC)
-	install -p -m 0755 dkms_autoinstaller $(INITD)
-	install -p -m 0755 kernel_install.d_dkms $(ETC)
-	install -p -m 0755 sign_helper.sh $(ETC)
 
 install-redhat-systemd: install doc-perms
 	mkdir -m 0755 -p  $(SYSTEMD)
@@ -75,8 +62,6 @@ install-redhat-systemd: install doc-perms
 	install -p -m 0644 template-dkms-mkrpm.spec $(ETC)
 	install -p -m 0644 template-dkms-redhat-kmod.spec $(ETC)
 	install -p -m 0644 dkms.service $(SYSTEMD)
-	install -p -m 0755 kernel_install.d_dkms $(ETC)
-	install -p -m 0755 sign_helper.sh $(ETC)
 
 install-doc:
 	mkdir -m 0755 -p $(DOCDIR)
@@ -98,8 +83,6 @@ install-debian: install install-doc
 	install -p -m 0664 template-dkms-mkbmdeb/Makefile $(ETC)/template-dkms-mkbmdeb/
 	install -p -m 0664 template-dkms-mkbmdeb/debian/* $(ETC)/template-dkms-mkbmdeb/debian/
 	chmod +x $(ETC)/template-dkms-mkbmdeb/debian/rules
-	install -p -m 0755 kernel_install.d_dkms $(ETC)
-	install -p -m 0755 sign_helper.sh $(ETC)
 	rm $(DOCDIR)/COPYING*
 	rm $(DOCDIR)/sample*
 
@@ -111,14 +94,13 @@ $(TARBALL):
 	mkdir -p $(deb_destdir)
 	tmp_dir=`mktemp -d --tmpdir dkms.XXXXXXXX` ; \
 	cp -a ../$(RELEASE_NAME) $${tmp_dir}/$(RELEASE_STRING) ; \
-	sed -e "s/\[INSERT_VERSION_HERE\]/$(RELEASE_VERSION)/" dkms > $${tmp_dir}/$(RELEASE_STRING)/dkms ; \
-	sed -e "s/\[INSERT_VERSION_HERE\]/$(RELEASE_VERSION)/" dkms.spec > $${tmp_dir}/$(RELEASE_STRING)/dkms.spec ; \
+	sed -e "s/#RELEASE_VERSION#/$(RELEASE_VERSION)/" dkms > $${tmp_dir}/$(RELEASE_STRING)/dkms ; \
+	sed -e "s/#RELEASE_VERSION#/$(RELEASE_VERSION)/" dkms.spec > $${tmp_dir}/$(RELEASE_STRING)/dkms.spec ; \
 	find $${tmp_dir}/$(RELEASE_STRING) -depth -name .git -type d -exec rm -rf \{\} \; ; \
 	find $${tmp_dir}/$(RELEASE_STRING) -depth -name dist -type d -exec rm -rf \{\} \; ; \
 	find $${tmp_dir}/$(RELEASE_STRING) -depth -name \*~ -type f -exec rm -f \{\} \; ; \
 	find $${tmp_dir}/$(RELEASE_STRING) -depth -name dkms\*.rpm -type f -exec rm -f \{\} \; ; \
 	find $${tmp_dir}/$(RELEASE_STRING) -depth -name dkms\*.tar.gz -type f -exec rm -f \{\} \; ; \
-	find $${tmp_dir}/$(RELEASE_STRING) -depth -name dkms-freshmeat.txt -type f -exec rm -f \{\} \; ; \
 	rm -rf $${tmp_dir}/$(RELEASE_STRING)/debian ; \
 	sync ; sync ; sync ; \
 	tar cvzf $(TARBALL) -C $${tmp_dir} $(RELEASE_STRING); \
@@ -130,7 +112,7 @@ rpm: $(TARBALL) dkms.spec
 	echo $(tmp_dir); \
 	mkdir -p $${tmp_dir}/{BUILD,RPMS,SRPMS,SPECS,SOURCES} ; \
 	cp $(TARBALL) $${tmp_dir}/SOURCES ; \
-	sed "s/\[INSERT_VERSION_HERE\]/$(RELEASE_VERSION)/" dkms.spec > $${tmp_dir}/SPECS/dkms.spec ; \
+	sed "s/#RELEASE_VERSION#/$(RELEASE_VERSION)/" dkms.spec > $${tmp_dir}/SPECS/dkms.spec ; \
 	pushd $${tmp_dir} > /dev/null 2>&1; \
 	rpmbuild -ba --define "_topdir $${tmp_dir}" SPECS/dkms.spec ; \
 	popd > /dev/null 2>&1; \
@@ -154,6 +136,3 @@ debs:
 	tmp_dir=`mktemp -d --tmpdir dkms.XXXXXXXX` ; \
 	make debmagic DEB_TMP_BUILDDIR=$${tmp_dir} DIST=$(DIST); \
 	rm -rf $${tmp_dir}
-
-fm:
-	sed -e "s/\[INSERT_VERSION_HERE\]/$(RELEASE_VERSION)/" dkms-freshmeat.txt.in > dkms-freshmeat.txt
