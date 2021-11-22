@@ -384,7 +384,9 @@ def get_os_release(upstream=False):
                             distinfo['CODENAME'] = arg.strip()
                         elif var == 'ID':
                             # ID=debian
-                            distinfo['ID'] = arg.strip().title()
+                            distinfo['ID'] = arg.strip()
+                            if upstream:
+                                distinfo['ID'] = arg.strip().title()
                         elif var == 'PRETTY_NAME':
                             distinfo['DESCRIPTION'] = arg.strip()
         except IOError as msg:
