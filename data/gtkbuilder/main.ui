@@ -550,7 +550,18 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Snap package updates are checked routinely and installed automatically.</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
                   </packing>
                 </child>
                 <child>
@@ -564,6 +575,98 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkHBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkLabel" id="label_esm_heading">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="xalign">1</property>
+                                <property name="label" translatable="yes">For other packages, this system has:</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkHBox">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkLabel" id="label_esm_status">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="xalign">0</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label_esm_subscribe">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="xalign">1</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkLabel" id="label_eol_heading">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_eol">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                          </packing>
+                        </child>
                         <child>
                           <object class="GtkHBox" id="hbox_check_for_updates">
                             <property name="visible">True</property>
@@ -604,7 +707,6 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -647,7 +749,6 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -690,7 +791,6 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -699,7 +799,6 @@
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -749,7 +848,6 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -1124,6 +1222,35 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">12</property>
                 <child>
+                  <object class="GtkInfoBar" id="info_bar_ubuntu_pro">
+                    <property name="visible">True</property>
+                    <property name="show-close-button">True</property>
+                    <signal name="response" handler="on_info_bar_ubuntu_pro_response" swapped="no"/>
+                    <child internal-child="content_area">
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Preview: Ubuntu Pro for Desktop&lt;/b&gt;. Automatic security updates to over 30,000 open source software packages.</property>
+                            <property name="use_markup">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="label">&lt;a href="http://ubuntu.com/advantage"&gt;Join the beta programme&lt;/a&gt;.</property>
+                            <property name="use_markup">True</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
                   <object class="GtkLabel" id="label_livepatch_description">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -1136,7 +1263,6 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -1193,7 +1319,6 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -1305,7 +1430,6 @@
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -1322,7 +1446,6 @@
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="pack_type">end</property>
-                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
@@ -1406,6 +1529,8 @@
   </object>
   <object class="GtkSizeGroup" id="sizegroup1">
     <widgets>
+      <widget name="label_esm_heading"/>
+      <widget name="label_eol_heading"/>
       <widget name="label3"/>
       <widget name="label4"/>
       <widget name="label5"/>

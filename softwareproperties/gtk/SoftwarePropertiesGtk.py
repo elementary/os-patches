@@ -27,6 +27,7 @@ from __future__ import absolute_import, print_function
 
 import apt
 import apt_pkg
+import datetime
 import dbus
 from gettext import gettext as _
 import gettext
@@ -56,6 +57,13 @@ import softwareproperties
 import softwareproperties.distro
 from softwareproperties.SoftwareProperties import SoftwareProperties
 import softwareproperties.SoftwareProperties
+
+from softwareproperties.gtk.utils import (
+    get_ua_status,
+    get_ua_service_status,
+    current_distro,
+    is_current_distro_lts,
+)
 
 from UbuntuDrivers import detect
 
@@ -153,6 +161,9 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
             self.settings = None
             self.initial_auto_launch = 0
             self.combobox_other_updates.set_sensitive(False)
+
+        self.sp_settings = Gio.Settings.new('com.ubuntu.SoftwareProperties')
+        self.info_bar_ubuntu_pro.set_visible(self.sp_settings.get_boolean("ubuntu-pro-banner-visible"))
 
         # get the dbus backend
         bus = dbus.SystemBus()
@@ -368,6 +379,57 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
             else:
                 self.vbox_updates.add(checkbox)
             checkbox.show()
+
+        status = get_ua_status()
+        if not is_current_distro_lts():
+                esm_available = False
+                esm_enabled = False
+        else:
+                (infra_available, infra_status) = get_ua_service_status("esm-infra", status=status)
+                (apps_available, apps_status) = get_ua_service_status("esm-apps", status=status)
+                esm_available = bool(infra_available or apps_available)
+                esm_enabled = "enabled" in (infra_status, apps_status)
+        distro = current_distro()
+        if esm_enabled:
+                eol_text = _("Extended Security Maintenance")
+                # EOL date should probably be UA contract expiry.
+                # This is probably sooner than ESM EOL for the distro and
+                # gives software properties dialogs a chance to interact about
+                # renewals if needed.
+                try:
+                        # Ignore timezone to simplify formatting python < 3.7
+                        # 3.7 has datetime.fromisoformat()
+                        dt, _sep, _tz = status.get("expires", "").partition("+")
+                        eol_date = datetime.datetime.strptime(
+                            dt, "%Y-%m-%dT%H:%M:%S"
+                        ).date()
+                except ValueError:
+                        print("Unable to determine UA contract expiry")
+                        eol_date = distro.eol
+        else:
+                eol_text = _("Basic Security Maintenance")
+                eol_date = distro.eol
+        self.label_esm_status.set_markup(eol_text)
+        esm_url = "https://ubuntu.com/esm"  # Non-EOL LTS generic ESM
+        today = datetime.datetime.now().date()
+        if today >= eol_date:
+                if esm_available:
+                        # EOL LTS uses release-specific ESM ubuntu.com/XX-YY
+                        distro_ver = distro.version.replace(' LTS', '')
+                        esm_url = "https://ubuntu.com/%s" % distro_ver.replace(".", "-")
+                eol_expiry_text = _("Ended %s - extend or upgrade now") % eol_date.strftime("%x")
+        elif today >= eol_date - datetime.timedelta(days=60):
+                eol_expiry_text = _("Ends %s - extend or upgrade soon") % eol_date.strftime("%x")
+        else:
+                eol_expiry_text = _("Active until %s") % eol_date.strftime("%x")
+        self.label_eol.set_label(eol_expiry_text)
+        self.label_esm_subscribe.set_markup(
+                "<a href=\"%s\">%s</a>" % (esm_url, _("Extend…"))
+        )
+        self.label_esm_subscribe.set_visible(
+                esm_available and not esm_enabled
+        )
+        eol_expiry_text = _("Ended %s") % eol_date.strftime("%x")
 
         # setup the server chooser
         cell = Gtk.CellRendererText()
@@ -1488,3 +1550,7 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
 
     def init_livepatch(self):
         self.livepatch_page = LivepatchPage(self)
+
+    def on_info_bar_ubuntu_pro_response(self, info_bar, response_id):
+        self.sp_settings.set_boolean("ubuntu-pro-banner-visible", False)
+        info_bar.hide()
