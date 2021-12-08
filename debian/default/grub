@@ -5,7 +5,7 @@
 
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=@DEFAULT_TIMEOUT@
-GRUB_DISTRIBUTOR=`( . /etc/os-release; echo ${NAME:-@DPKG_VENDOR@} ) 2>/dev/null || echo @DPKG_VENDOR@`
+GRUB_DISTRIBUTOR=`lsb_release -d -s 2> /dev/null || echo Debian`
 GRUB_CMDLINE_LINUX_DEFAULT="@DEFAULT_CMDLINE@"
 GRUB_CMDLINE_LINUX=""
 
