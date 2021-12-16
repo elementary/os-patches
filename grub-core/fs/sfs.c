@@ -26,6 +26,7 @@
 #include <grub/types.h>
 #include <grub/fshelp.h>
 #include <grub/charset.h>
+#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -266,7 +267,7 @@ grub_sfs_read_block (grub_fshelp_node_t node, grub_disk_addr_t fileblock)
       node->next_extent = node->block;
       node->cache_size = 0;
 
-      node->cache = grub_malloc (sizeof (node->cache[0]) * cache_size);
+      node->cache = grub_calloc (cache_size, sizeof (node->cache[0]));
       if (!node->cache)
 	{
 	  grub_errno = 0;
@@ -307,10 +308,15 @@ grub_sfs_read_block (grub_fshelp_node_t node, grub_disk_addr_t fileblock)
       if (node->cache && node->cache_size >= node->cache_allocated)
 	{
 	  struct cache_entry *e = node->cache;
-	  e = grub_realloc (node->cache,node->cache_allocated * 2
-			    * sizeof (e[0]));
+	  grub_size_t sz;
+
+	  if (grub_mul (node->cache_allocated, 2 * sizeof (e[0]), &sz))
+	    goto fail;
+
+	  e = grub_realloc (node->cache, sz);
 	  if (!e)
 	    {
+ fail:
 	      grub_errno = 0;
 	      grub_free (node->cache);
 	      node->cache = 0;
@@ -367,6 +373,7 @@ grub_sfs_mount (grub_disk_t disk)
   struct grub_sfs_objc *rootobjc;
   char *rootobjc_data = 0;
   grub_uint32_t blk;
+  unsigned int max_len;
 
   data = grub_malloc (sizeof (*data));
   if (!data)
@@ -415,7 +422,13 @@ grub_sfs_mount (grub_disk_t disk)
   data->diropen.data = data;
   data->diropen.cache = 0;
   data->disk = disk;
-  data->label = grub_strdup ((char *) (rootobjc->objects[0].filename));
+
+  /* We only read 1 block of data, so truncate the name if needed. */
+  max_len = ((GRUB_DISK_SECTOR_SIZE << data->log_blocksize)
+	     - 24    /* offsetof (struct grub_sfs_objc, objects) */
+	     - 25);  /* offsetof (struct grub_sfs_obj, filename) */
+  data->label = grub_zalloc (max_len + 1);
+  grub_strncpy (data->label, (char *) rootobjc->objects[0].filename, max_len);
 
   grub_free (rootobjc_data);
   return data;
@@ -477,10 +490,16 @@ grub_sfs_create_node (struct grub_fshelp_node **node,
   grub_size_t len = grub_strlen (name);
   grub_uint8_t *name_u8;
   int ret;
+  grub_size_t sz;
+
+  if (grub_mul (len, GRUB_MAX_UTF8_PER_LATIN1, &sz) ||
+      grub_add (sz, 1, &sz))
+    return 1;
+
   *node = grub_malloc (sizeof (**node));
   if (!*node)
     return 1;
-  name_u8 = grub_malloc (len * GRUB_MAX_UTF8_PER_LATIN1 + 1);
+  name_u8 = grub_malloc (sz);
   if (!name_u8)
     {
       grub_free (*node);
@@ -724,8 +743,13 @@ grub_sfs_label (grub_device_t device, char **label)
   data = grub_sfs_mount (disk);
   if (data)
     {
-      grub_size_t len = grub_strlen (data->label);
-      *label = grub_malloc (len * GRUB_MAX_UTF8_PER_LATIN1 + 1);
+      grub_size_t sz, len = grub_strlen (data->label);
+
+      if (grub_mul (len, GRUB_MAX_UTF8_PER_LATIN1, &sz) ||
+	  grub_add (sz, 1, &sz))
+	return GRUB_ERR_OUT_OF_RANGE;
+
+      *label = grub_malloc (sz);
       if (*label)
 	*grub_latin1_to_utf8 ((grub_uint8_t *) *label,
 			      (const grub_uint8_t *) data->label,

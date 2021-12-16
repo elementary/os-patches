@@ -262,20 +262,19 @@ grub_xnu_devprop_add_property (struct grub_xnu_devprop_device_descriptor *dev,
   if (!prop)
     return grub_errno;
 
-  prop->name = utf8;
-  prop->name16 = utf16;
-  prop->name16len = utf16len;
-
-  prop->length = datalen;
-  prop->data = grub_malloc (prop->length);
+  prop->data = grub_malloc (datalen);
   if (!prop->data)
     {
-      grub_free (prop->name);
-      grub_free (prop->name16);
       grub_free (prop);
       return grub_errno;
     }
-  grub_memcpy (prop->data, data, prop->length);
+  grub_memcpy (prop->data, data, datalen);
+
+  prop->name = utf8;
+  prop->name16 = utf16;
+  prop->name16len = utf16len;
+  prop->length = datalen;
+
   grub_list_push (GRUB_AS_LIST_P (&dev->properties),
 		  GRUB_AS_LIST (prop));
   return GRUB_ERR_NONE;
@@ -295,7 +294,7 @@ grub_xnu_devprop_add_property_utf8 (struct grub_xnu_devprop_device_descriptor *d
     return grub_errno;
 
   len = grub_strlen (name);
-  utf16 = grub_malloc (sizeof (grub_uint16_t) * len);
+  utf16 = grub_calloc (len, sizeof (grub_uint16_t));
   if (!utf16)
     {
       grub_free (utf8);
@@ -331,7 +330,7 @@ grub_xnu_devprop_add_property_utf16 (struct grub_xnu_devprop_device_descriptor *
   grub_uint16_t *utf16;
   grub_err_t err;
 
-  utf16 = grub_malloc (sizeof (grub_uint16_t) * namelen);
+  utf16 = grub_calloc (namelen, sizeof (grub_uint16_t));
   if (!utf16)
     return grub_errno;
   grub_memcpy (utf16, name, sizeof (grub_uint16_t) * namelen);
@@ -516,14 +515,15 @@ grub_cmd_devprop_load (grub_command_t cmd __attribute__ ((unused)),
 
       devhead = buf;
       buf = devhead + 1;
-      dpstart = buf;
+      dp = dpstart = buf;
 
-      do
+      while (GRUB_EFI_DEVICE_PATH_VALID (dp) && buf < bufend)
 	{
-	  dp = buf;
 	  buf = (char *) buf + GRUB_EFI_DEVICE_PATH_LENGTH (dp);
+	  if (GRUB_EFI_END_ENTIRE_DEVICE_PATH (dp))
+	    break;
+	  dp = buf;
 	}
-      while (!GRUB_EFI_END_ENTIRE_DEVICE_PATH (dp) && buf < bufend);
 
       dev = grub_xnu_devprop_add_device (dpstart, (char *) buf
 					 - (char *) dpstart);

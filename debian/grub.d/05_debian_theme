@@ -37,7 +37,7 @@ set_default_theme(){
 			if [ -e /usr/share/plymouth/themes/default.grub ]; then
 				sed "s/^/${1}/" /usr/share/plymouth/themes/default.grub
 			fi
-			# For plymouth backward compatiblity. Can be removed
+			# For plymouth backward compatibility. Can be removed
 			# after xenial.
 			if [ -e /lib/plymouth/themes/default.grub ]; then
 				sed "s/^/${1}/" /lib/plymouth/themes/default.grub
@@ -95,7 +95,7 @@ set_background_image(){
 	fi
 
 	# Step #5: Check if GRUB can read the background image directly.
-	# If so, we can remove the cache file (if any). Otherwise the backgound
+	# If so, we can remove the cache file (if any). Otherwise the background
 	# image needs to be cached under /boot/grub/.
 	if is_path_readable_by_grub "${1}"; then
 		rm --force "${BACKGROUND_CACHE}.jpeg" \

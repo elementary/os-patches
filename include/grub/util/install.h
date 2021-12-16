@@ -63,6 +63,10 @@
     /* TRANSLATORS: "embed" is a verb (command description).  "*/	\
   { "pubkey",   'k', N_("FILE"), 0,					\
       N_("embed FILE as public key for signature checking"), 0},	\
+  { "sbat", GRUB_INSTALL_OPTIONS_SBAT, N_("FILE"), 0,			\
+      N_("SBAT metadata"), 0 },						\
+  { "disable-shim-lock", GRUB_INSTALL_OPTIONS_DISABLE_SHIM_LOCK, 0, 0,	\
+      N_("disable shim_lock verifier"), 0 },				\
   { "verbose", 'v', 0, 0,						\
     N_("print verbose messages."), 1 }
 
@@ -122,7 +126,9 @@ enum grub_install_options {
   GRUB_INSTALL_OPTIONS_THEMES_DIRECTORY,
   GRUB_INSTALL_OPTIONS_GRUB_MKIMAGE,
   GRUB_INSTALL_OPTIONS_INSTALL_CORE_COMPRESS,
-  GRUB_INSTALL_OPTIONS_DTB
+  GRUB_INSTALL_OPTIONS_DTB,
+  GRUB_INSTALL_OPTIONS_SBAT,
+  GRUB_INSTALL_OPTIONS_DISABLE_SHIM_LOCK
 };
 
 extern char *grub_install_source_directory;
@@ -183,7 +189,8 @@ grub_install_generate_image (const char *dir, const char *prefix,
 			     char *config_path,
 			     const struct grub_install_image_target_desc *image_target,
 			     int note,
-			     grub_compression_t comp, const char *dtb_file);
+			     grub_compression_t comp, const char *dtb_file,
+			     const char *sbat_path, const int disable_shim_lock);
 
 const struct grub_install_image_target_desc *
 grub_install_get_image_target (const char *arg);
@@ -193,13 +200,13 @@ grub_util_bios_setup (const char *dir,
 		      const char *boot_file, const char *core_file,
 		      const char *dest, int force,
 		      int fs_probe, int allow_floppy,
-		      int add_rs_codes);
+		      int add_rs_codes, int warn_short_mbr_gap);
 void
 grub_util_sparc_setup (const char *dir,
 		       const char *boot_file, const char *core_file,
 		       const char *dest, int force,
 		       int fs_probe, int allow_floppy,
-		       int add_rs_codes);
+		       int add_rs_codes, int warn_short_mbr_gap);
 
 char *
 grub_install_get_image_targets_string (void);
@@ -264,5 +271,29 @@ grub_util_get_target_name (const struct grub_install_image_target_desc *t);
 
 extern char *grub_install_copy_buffer;
 #define GRUB_INSTALL_COPY_BUFFER_SIZE 1048576
+
+int
+grub_install_is_short_mbrgap_supported (void);
+
+/*
+ * grub-install-common tries to make backups of modules & auxiliary files,
+ * and restore the backup upon failure to install core.img. There are
+ * platforms with additional actions after modules & core got installed
+ * in place. It is a point of no return, as core.img cannot be reverted
+ * from this point onwards, and new modules should be kept installed.
+ * Before performing these additional actions call grub_set_install_backup_ponr()
+ * to set the grub_install_backup_ponr flag. This way failure to perform
+ * subsequent actions will not result in reverting new modules to the
+ * old ones, e.g. in case efivars updates fails.
+ */
+#ifdef HAVE_ATEXIT
+extern void
+grub_set_install_backup_ponr (void);
+#else
+static inline void
+grub_set_install_backup_ponr (void)
+{
+}
+#endif
 
 #endif

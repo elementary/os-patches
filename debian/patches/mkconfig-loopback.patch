@@ -20,7 +20,7 @@ Patch-Name: mkconfig-loopback.patch
  3 files changed, 34 insertions(+)
 
 diff --git a/util/grub-mkconfig_lib.in b/util/grub-mkconfig_lib.in
-index b6606c1..b05df55 100644
+index 17f9b3e..e62cfc2 100644
 --- a/util/grub-mkconfig_lib.in
 +++ b/util/grub-mkconfig_lib.in
 @@ -133,6 +133,22 @@ prepare_grub_to_access_device ()
@@ -46,8 +46,8 @@ index b6606c1..b05df55 100644
    # Abstraction modules aren't auto-loaded.
    abstraction="`"${grub_probe}" --device $@ --target=abstraction`"
    for module in ${abstraction} ; do
-@@ -165,6 +181,14 @@ prepare_grub_to_access_device ()
-     echo "fi"
+@@ -169,6 +185,14 @@ prepare_grub_to_access_device ()
+     fi
    fi
    IFS="$old_ifs"
 +
@@ -62,7 +62,7 @@ index b6606c1..b05df55 100644
  
  grub_get_device_id ()
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index f839b3b..d927b60 100644
+index 9446d68..46696dd 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -40,6 +40,11 @@ fi
@@ -78,7 +78,7 @@ index f839b3b..d927b60 100644
  esac
  
 diff --git a/util/grub.d/20_linux_xen.in b/util/grub.d/20_linux_xen.in
-index 96179ea..9a8d42f 100644
+index 3b1f470..7620a14 100644
 --- a/util/grub.d/20_linux_xen.in
 +++ b/util/grub.d/20_linux_xen.in
 @@ -40,6 +40,11 @@ fi

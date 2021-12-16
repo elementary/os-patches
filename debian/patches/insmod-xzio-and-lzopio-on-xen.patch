@@ -15,15 +15,14 @@ Last-Update: 2014-11-30
 
 Patch-Name: insmod-xzio-and-lzopio-on-xen.patch
 ---
- util/grub.d/10_linux.in     | 1 +
- util/grub.d/10_linux_zfs.in | 1 +
- 2 files changed, 2 insertions(+)
+ util/grub.d/10_linux.in | 1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index 2c418c5..85b3008 100644
+index f88a2de..635c609 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
-@@ -166,6 +166,7 @@ linux_entry ()
+@@ -162,6 +162,7 @@ linux_entry ()
    fi
  
    echo "	insmod gzio" | sed "s/^/$submenu_indentation/"
@@ -31,15 +30,3 @@ index 2c418c5..85b3008 100644
  
    if [ x$dirname = x/ ]; then
      if [ -z "${prepare_root_cache}" ]; then
-diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index 4bacf6e..735b46a 100755
---- a/util/grub.d/10_linux_zfs.in
-+++ b/util/grub.d/10_linux_zfs.in
-@@ -854,6 +854,7 @@ zfs_linux_entry () {
-     fi
- 
-     echo "${submenu_indentation}	insmod gzio"
-+    echo "${submenu_indentation}	if [ \"\${grub_platform}\" = xen ]; then insmod xzio; insmod lzopio; fi"
- 
-     echo "$(prepare_grub_to_access_device_cached "${boot_device}" "${submenu_level}")"
- 

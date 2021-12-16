@@ -253,6 +253,12 @@ grub_jpeg_decode_quan_table (struct grub_jpeg_data *data)
   next_marker = data->file->offset;
   next_marker += grub_jpeg_get_word (data);
 
+  if (next_marker > data->file->size)
+    {
+      /* Should never be set beyond the size of the file. */
+      return grub_error (GRUB_ERR_BAD_FILE_TYPE, "jpeg: invalid next reference");
+    }
+
   while (data->file->offset + sizeof (data->quan_table[id]) + 1
 	 <= next_marker)
     {
@@ -327,7 +333,11 @@ grub_jpeg_decode_sof (struct grub_jpeg_data *data)
       else if (ss != JPEG_SAMPLING_1x1)
 	return grub_error (GRUB_ERR_BAD_FILE_TYPE,
 			   "jpeg: sampling method not supported");
+
       data->comp_index[id][0] = grub_jpeg_get_byte (data);
+      if (data->comp_index[id][0] > 1)
+	return grub_error (GRUB_ERR_BAD_FILE_TYPE,
+			   "jpeg: too many quantization tables");
     }
 
   if (data->file->offset != next_marker)
@@ -516,6 +526,14 @@ grub_jpeg_decode_du (struct grub_jpeg_data *data, int id, jpeg_data_unit_t du)
       val = grub_jpeg_get_number (data, num & 0xF);
       num >>= 4;
       pos += num;
+
+      if (pos >= ARRAY_SIZE (jpeg_zigzag_order))
+	{
+	  grub_error (GRUB_ERR_BAD_FILE_TYPE,
+		      "jpeg: invalid position in zigzag order!?");
+	  return;
+	}
+
       du[jpeg_zigzag_order[pos]] = val * (int) data->quan_table[qt][pos];
       pos++;
     }
@@ -596,6 +614,10 @@ grub_jpeg_decode_sos (struct grub_jpeg_data *data)
       ht = grub_jpeg_get_byte (data);
       data->comp_index[id][1] = (ht >> 4);
       data->comp_index[id][2] = (ht & 0xF) + 2;
+
+      if ((data->comp_index[id][1] < 0) || (data->comp_index[id][1] > 3) ||
+	  (data->comp_index[id][2] < 0) || (data->comp_index[id][2] > 3))
+	return grub_error (GRUB_ERR_BAD_FILE_TYPE, "jpeg: invalid hufftable index");
     }
 
   grub_jpeg_get_byte (data);	/* Skip 3 unused bytes.  */
@@ -623,6 +645,10 @@ grub_jpeg_decode_data (struct grub_jpeg_data *data)
   hb = 8 << data->log_hs;
   nr1 = (data->image_height + vb - 1) >> (3 + data->log_vs);
   nc1 = (data->image_width + hb - 1)  >> (3 + data->log_hs);
+
+  if (data->bitmap_ptr == NULL)
+    return grub_error(GRUB_ERR_BAD_FILE_TYPE,
+		      "jpeg: attempted to decode data before start of stream");
 
   for (; data->r1 < nr1 && (!data->dri || rst);
        data->r1++, data->bitmap_ptr += (vb * data->image_width - hb * nc1) * 3)

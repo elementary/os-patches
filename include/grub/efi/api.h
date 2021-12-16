@@ -314,24 +314,44 @@
     { 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d } \
   }
 
+#define GRUB_EFI_SMBIOS3_TABLE_GUID	\
+  { 0xf2fd1544, 0x9794, 0x4a2c, \
+    { 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94 } \
+  }
+
 #define GRUB_EFI_SAL_TABLE_GUID \
   { 0xeb9d2d32, 0x2d88, 0x11d3, \
-      { 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d } \
+    { 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d } \
   }
 
 #define GRUB_EFI_HCDP_TABLE_GUID \
   { 0xf951938d, 0x620b, 0x42ef, \
-      { 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98 } \
+    { 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98 } \
+  }
+
+#define GRUB_EFI_RT_PROPERTIES_TABLE_GUID \
+  { 0xeb66918a, 0x7eef, 0x402a, \
+    { 0x84, 0x2e, 0x93, 0x1d, 0x21, 0xc3, 0x8a, 0xe9 } \
   }
 
 #define GRUB_EFI_DEVICE_TREE_GUID \
   { 0xb1b621d5, 0xf19c, 0x41a5, \
-      { 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0 } \
+    { 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0 } \
   }
 
 #define GRUB_EFI_VENDOR_APPLE_GUID \
   { 0x2B0585EB, 0xD8B8, 0x49A9,	\
-      { 0x8B, 0x8C, 0xE2, 0x1B, 0x01, 0xAE, 0xF2, 0xB7 } \
+    { 0x8B, 0x8C, 0xE2, 0x1B, 0x01, 0xAE, 0xF2, 0xB7 } \
+  }
+
+#define GRUB_EFI_SHIM_LOCK_GUID \
+  { 0x605dab50, 0xe046, 0x4300, \
+    { 0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23 } \
+  }
+
+#define GRUB_EFI_RNG_PROTOCOL_GUID \
+  { 0x3152bca5, 0xeade, 0x433d, \
+    { 0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44 } \
   }
 
 struct grub_efi_sal_system_table
@@ -526,7 +546,7 @@ typedef grub_uint64_t grub_efi_uint64_t;
 typedef grub_uint8_t grub_efi_char8_t;
 typedef grub_uint16_t grub_efi_char16_t;
 
-typedef grub_efi_intn_t grub_efi_status_t;
+typedef grub_efi_uintn_t grub_efi_status_t;
 
 #define GRUB_EFI_ERROR_CODE(value)	\
   ((((grub_efi_status_t) 1) << (sizeof (grub_efi_status_t) * 8 - 1)) | (value))
@@ -625,6 +645,7 @@ typedef struct grub_efi_device_path grub_efi_device_path_protocol_t;
 #define GRUB_EFI_DEVICE_PATH_TYPE(dp)		((dp)->type & 0x7f)
 #define GRUB_EFI_DEVICE_PATH_SUBTYPE(dp)	((dp)->subtype)
 #define GRUB_EFI_DEVICE_PATH_LENGTH(dp)		((dp)->length)
+#define GRUB_EFI_DEVICE_PATH_VALID(dp)		((dp) != NULL && GRUB_EFI_DEVICE_PATH_LENGTH (dp) >= 4)
 
 /* The End of Device Path nodes.  */
 #define GRUB_EFI_END_DEVICE_PATH_TYPE			(0xff & 0x7f)
@@ -633,13 +654,16 @@ typedef struct grub_efi_device_path grub_efi_device_path_protocol_t;
 #define GRUB_EFI_END_THIS_DEVICE_PATH_SUBTYPE		0x01
 
 #define GRUB_EFI_END_ENTIRE_DEVICE_PATH(dp)	\
-  (GRUB_EFI_DEVICE_PATH_TYPE (dp) == GRUB_EFI_END_DEVICE_PATH_TYPE \
-   && (GRUB_EFI_DEVICE_PATH_SUBTYPE (dp) \
-       == GRUB_EFI_END_ENTIRE_DEVICE_PATH_SUBTYPE))
+  (!GRUB_EFI_DEVICE_PATH_VALID (dp) || \
+   (GRUB_EFI_DEVICE_PATH_TYPE (dp) == GRUB_EFI_END_DEVICE_PATH_TYPE \
+    && (GRUB_EFI_DEVICE_PATH_SUBTYPE (dp) \
+	== GRUB_EFI_END_ENTIRE_DEVICE_PATH_SUBTYPE)))
 
 #define GRUB_EFI_NEXT_DEVICE_PATH(dp)	\
-  ((grub_efi_device_path_t *) ((char *) (dp) \
-                               + GRUB_EFI_DEVICE_PATH_LENGTH (dp)))
+  (GRUB_EFI_DEVICE_PATH_VALID (dp) \
+   ? ((grub_efi_device_path_t *) \
+      ((char *) (dp) + GRUB_EFI_DEVICE_PATH_LENGTH (dp))) \
+   : NULL)
 
 /* Hardware Device Path.  */
 #define GRUB_EFI_HARDWARE_DEVICE_PATH_TYPE		1
@@ -1290,7 +1314,7 @@ struct grub_efi_runtime_services
   (*convert_pointer) (grub_efi_uintn_t debug_disposition, void **address);
 
 #define GRUB_EFI_GLOBAL_VARIABLE_GUID \
-  { 0x8BE4DF61, 0x93CA, 0x11d2, { 0xAA, 0x0D, 0x00, 0xE0, 0x98, 0x03, 0x2B,0x8C }}
+  { 0x8BE4DF61, 0x93CA, 0x11d2, { 0xAA, 0x0D, 0x00, 0xE0, 0x98, 0x03, 0x2B, 0x8C }}
 
 
   grub_efi_status_t
@@ -1684,6 +1708,26 @@ struct grub_efi_block_io
   grub_efi_status_t (*flush_blocks) (struct grub_efi_block_io *this);
 };
 typedef struct grub_efi_block_io grub_efi_block_io_t;
+
+struct grub_efi_shim_lock_protocol
+{
+  grub_efi_status_t (*verify) (void *buffer, grub_uint32_t size);
+};
+typedef struct grub_efi_shim_lock_protocol grub_efi_shim_lock_protocol_t;
+
+typedef grub_efi_guid_t grub_efi_rng_algorithm_t;
+
+struct grub_efi_rng_protocol
+{
+  grub_efi_status_t (*get_info) (struct grub_efi_rng_protocol *this,
+				 grub_efi_uintn_t *rng_algorithm_list_size,
+				 grub_efi_rng_algorithm_t *rng_algorithm_list);
+  grub_efi_status_t (*get_rng) (struct grub_efi_rng_protocol *this,
+				grub_efi_rng_algorithm_t *rng_algorithm,
+				grub_efi_uintn_t rng_value_length,
+				grub_efi_uint8_t *rng_value);
+};
+typedef struct grub_efi_rng_protocol grub_efi_rng_protocol_t;
 
 #if (GRUB_TARGET_SIZEOF_VOID_P == 4) || defined (__ia64__) \
   || defined (__aarch64__) || defined (__MINGW64__) || defined (__CYGWIN__) \

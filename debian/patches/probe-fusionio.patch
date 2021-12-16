@@ -13,10 +13,10 @@ Patch-Name: probe-fusionio.patch
  2 files changed, 32 insertions(+)
 
 diff --git a/grub-core/osdep/linux/getroot.c b/grub-core/osdep/linux/getroot.c
-index 90d92d3..7adc0f3 100644
+index 001b818..c506f4c 100644
 --- a/grub-core/osdep/linux/getroot.c
 +++ b/grub-core/osdep/linux/getroot.c
-@@ -950,6 +950,19 @@ grub_util_part_to_disk (const char *os_dev, struct stat *st,
+@@ -963,6 +963,19 @@ grub_util_part_to_disk (const char *os_dev, struct stat *st,
  	  *pp = '\0';
  	  return path;
  	}
@@ -37,10 +37,10 @@ index 90d92d3..7adc0f3 100644
  
    return path;
 diff --git a/util/deviceiter.c b/util/deviceiter.c
-index a4971ef..dddc50d 100644
+index b5b9ac6..3a8f277 100644
 --- a/util/deviceiter.c
 +++ b/util/deviceiter.c
-@@ -383,6 +383,12 @@ get_nvme_disk_name (char *name, int controller, int namespace)
+@@ -384,6 +384,12 @@ get_nvme_disk_name (char *name, int controller, int namespace)
  {
    sprintf (name, "/dev/nvme%dn%d", controller, namespace);
  }
@@ -53,7 +53,7 @@ index a4971ef..dddc50d 100644
  #endif
  
  static struct seen_device
-@@ -923,6 +929,19 @@ grub_util_iterate_devices (int (*hook) (const char *, int, void *), void *hook_d
+@@ -929,6 +935,19 @@ grub_util_iterate_devices (int (*hook) (const char *, int, void *), void *hook_d
        }
    }
  

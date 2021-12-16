@@ -8,6 +8,8 @@ DHCPv6 protocol (RFC3315).
 Signed-off-by: Michael Chang <mchang@suse.com>
 Signed-off-by: Ken Lin <ken.lin@hpe.com>
 
+Last-Update: 2021-09-24
+
 Patch-Name: bootp-new-net_bootp6-command.patch
 ---
  grub-core/net/bootp.c | 908 +++++++++++++++++++++++++++++++++++++++++++++++++-
@@ -16,7 +18,7 @@ Patch-Name: bootp-new-net_bootp6-command.patch
  3 files changed, 1018 insertions(+), 1 deletion(-)
 
 diff --git a/grub-core/net/bootp.c b/grub-core/net/bootp.c
-index 04cfbb0..21c1824 100644
+index 6fb5627..00c11af 100644
 --- a/grub-core/net/bootp.c
 +++ b/grub-core/net/bootp.c
 @@ -24,6 +24,98 @@
@@ -118,7 +120,7 @@ index 04cfbb0..21c1824 100644
  
  struct grub_dhcp_discover_options
  {
-@@ -563,6 +655,578 @@ out:
+@@ -607,6 +699,578 @@ out:
    return err;
  }
  
@@ -266,7 +268,7 @@ index 04cfbb0..21c1824 100644
 +	      break;
 +	    }
 +	  dhcp6->num_dns_server = ln = len >> 4;
-+	  dhcp6->dns_server_addrs = la = grub_zalloc (ln * sizeof (*la));
++	  dhcp6->dns_server_addrs = la = grub_calloc (ln, sizeof (*la));
 +
 +	  for (po = opt->data; ln > 0; po += 0x10, la++, ln--)
 +	    {
@@ -423,7 +425,7 @@ index 04cfbb0..21c1824 100644
 +  grub_dhcp6_session_t se;
 +  struct grub_datetime date;
 +  grub_err_t err;
-+  grub_int32_t t = 0;
++  grub_int64_t t = 0;
 +
 +  se = grub_malloc (sizeof (*se));
 +
@@ -697,7 +699,7 @@ index 04cfbb0..21c1824 100644
  /*
   * This is called directly from net/ip.c:handle_dgram(), because those
   * BOOTP/DHCP packets are a bit special due to their improper
-@@ -631,6 +1295,77 @@ grub_net_process_dhcp (struct grub_net_buff *nb,
+@@ -675,6 +1339,77 @@ grub_net_process_dhcp (struct grub_net_buff *nb,
      }
  }
  
@@ -772,10 +774,10 @@ index 04cfbb0..21c1824 100644
 +  return GRUB_ERR_NONE;
 +}
 +
- static char
- hexdigit (grub_uint8_t val)
- {
-@@ -864,7 +1599,174 @@ grub_cmd_bootp (struct grub_command *cmd __attribute__ ((unused)),
+ static grub_err_t
+ grub_cmd_dhcpopt (struct grub_command *cmd __attribute__ ((unused)),
+ 		  int argc, char **args)
+@@ -900,7 +1635,174 @@ grub_cmd_bootp (struct grub_command *cmd __attribute__ ((unused)),
    return err;
  }
  
@@ -951,7 +953,7 @@ index 04cfbb0..21c1824 100644
  
  void
  grub_bootp_init (void)
-@@ -878,6 +1780,9 @@ grub_bootp_init (void)
+@@ -914,6 +1816,9 @@ grub_bootp_init (void)
    cmd_getdhcp = grub_register_command ("net_get_dhcp_option", grub_cmd_dhcpopt,
  				       N_("VAR INTERFACE NUMBER DESCRIPTION"),
  				       N_("retrieve DHCP option and save it into VAR. If VAR is - then print the value."));
@@ -961,7 +963,7 @@ index 04cfbb0..21c1824 100644
  }
  
  void
-@@ -886,4 +1791,5 @@ grub_bootp_fini (void)
+@@ -922,4 +1827,5 @@ grub_bootp_fini (void)
    grub_unregister_command (cmd_getdhcp);
    grub_unregister_command (cmd_bootp);
    grub_unregister_command (cmd_dhcp);
@@ -1018,7 +1020,7 @@ index ea5edf8..0141079 100644
        {
  	const struct grub_net_bootp_packet *bootp;
 diff --git a/include/grub/net.h b/include/grub/net.h
-index cc11428..58cff96 100644
+index 69bfe09..1cb0562 100644
 --- a/include/grub/net.h
 +++ b/include/grub/net.h
 @@ -448,6 +448,66 @@ struct grub_net_bootp_packet
@@ -1088,7 +1090,7 @@ index cc11428..58cff96 100644
  #define	GRUB_NET_BOOTP_RFC1048_MAGIC_0	0x63
  #define	GRUB_NET_BOOTP_RFC1048_MAGIC_1	0x82
  #define	GRUB_NET_BOOTP_RFC1048_MAGIC_2	0x53
-@@ -481,6 +541,14 @@ grub_net_configure_by_dhcp_ack (const char *name,
+@@ -483,6 +543,14 @@ grub_net_configure_by_dhcp_ack (const char *name,
  				grub_size_t size,
  				int is_def, char **device, char **path);
  
@@ -1103,7 +1105,7 @@ index cc11428..58cff96 100644
  grub_err_t
  grub_net_add_ipv4_local (struct grub_net_network_level_interface *inf,
  			 int mask);
-@@ -489,6 +557,10 @@ void
+@@ -491,6 +559,10 @@ void
  grub_net_process_dhcp (struct grub_net_buff *nb,
  		       struct grub_net_network_level_interface *iface);
  

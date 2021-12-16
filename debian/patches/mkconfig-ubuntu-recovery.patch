@@ -1,5 +1,5 @@
-From: Didier Roche <didrocks@ubuntu.com>
-Date: Tue, 31 Mar 2020 15:16:36 +0200
+From: Colin Watson <cjwatson@ubuntu.com>
+Date: Mon, 13 Jan 2014 12:13:06 +0000
 Subject: "single" -> "recovery" when friendly-recovery is installed
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -18,15 +18,14 @@ Patch-Name: mkconfig-ubuntu-recovery.patch
 ---
  configure.ac                | 11 +++++++++++
  util/grub.d/10_linux.in     | 16 ++++++++++++++--
- util/grub.d/10_linux_zfs.in | 15 +++++++++++++--
  util/grub.d/30_os-prober.in |  2 +-
- 4 files changed, 39 insertions(+), 5 deletions(-)
+ 3 files changed, 26 insertions(+), 3 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 7656f24..1e5abc6 100644
+index 7517fc4..74778a6 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1846,6 +1846,17 @@ fi
+@@ -1904,6 +1904,17 @@ fi
  AC_SUBST([LIBZFS])
  AC_SUBST([LIBNVPAIR])
  
@@ -45,7 +44,7 @@ index 7656f24..1e5abc6 100644
  
  AC_SUBST([FONT_SOURCE])
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index d927b60..fcd3033 100644
+index 46696dd..f215e32 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -20,6 +20,7 @@ set -e
@@ -56,7 +55,7 @@ index d927b60..fcd3033 100644
  
  . "$pkgdatadir/grub-mkconfig_lib"
  
-@@ -88,6 +89,15 @@ esac
+@@ -84,6 +85,15 @@ esac
  
  title_correction_code=
  
@@ -72,7 +71,7 @@ index d927b60..fcd3033 100644
  linux_entry ()
  {
    os="$1"
-@@ -127,7 +137,9 @@ linux_entry ()
+@@ -123,7 +133,9 @@ linux_entry ()
        if [ "x$GRUB_GFXPAYLOAD_LINUX" != xtext ]; then
  	  echo "	load_video" | sed "s/^/$submenu_indentation/"
        fi
@@ -83,7 +82,7 @@ index d927b60..fcd3033 100644
    fi
  
    echo "	insmod gzio" | sed "s/^/$submenu_indentation/"
-@@ -284,7 +296,7 @@ while [ "x$list" != "x" ] ; do
+@@ -288,7 +300,7 @@ while [ "x$list" != "x" ] ; do
                "${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}"
    if [ "x${GRUB_DISABLE_RECOVERY}" != "xtrue" ]; then
      linux_entry "${OS}" "${version}" recovery \
@@ -92,58 +91,11 @@ index d927b60..fcd3033 100644
    fi
  
    list=`echo $list | tr ' ' '\n' | fgrep -vx "$linux" | tr '\n' ' '`
-diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index d128b82..302df63 100755
---- a/util/grub.d/10_linux_zfs.in
-+++ b/util/grub.d/10_linux_zfs.in
-@@ -19,6 +19,7 @@ set -e
- 
- prefix="@prefix@"
- datarootdir="@datarootdir@"
-+ubuntu_recovery="@UBUNTU_RECOVERY@"
- 
- . "${pkgdatadir}/grub-mkconfig_lib"
- 
-@@ -764,7 +765,9 @@ zfs_linux_entry () {
-         if [ "${GRUB_GFXPAYLOAD_LINUX}" != "text" ]; then
-             echo "${submenu_indentation}	load_video"
-         fi
--        echo "${submenu_indentation}	set gfxpayload=\${linux_gfx_mode}"
-+        if [ "${ubuntu_recovery}" = 0 ] || [ "${type}" != "recovery" ]; then
-+            echo "${submenu_indentation}	set gfxpayload=\${linux_gfx_mode}"
-+        fi
-     fi
- 
-     echo "${submenu_indentation}	insmod gzio"
-@@ -775,7 +778,7 @@ zfs_linux_entry () {
- 
-     linux_default_args="${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}"
-     if [ ${type} = "recovery" ]; then
--        linux_default_args="single ${GRUB_CMDLINE_LINUX}"
-+        linux_default_args="${GRUB_CMDLINE_LINUX_RECOVERY} ${GRUB_CMDLINE_LINUX}"
-     fi
- 
-     # echo in echo trims end of line spaces
-@@ -808,6 +811,14 @@ generate_grub_menu() {
-         CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1 | LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
-     fi
- 
-+    if [ -x /lib/recovery-mode/recovery-menu ]; then
-+        GRUB_CMDLINE_LINUX_RECOVERY=recovery
-+    else
-+        GRUB_CMDLINE_LINUX_RECOVERY=single
-+    fi
-+    if [ "${ubuntu_recovery}" = 1 ]; then
-+        GRUB_CMDLINE_LINUX_RECOVERY="${GRUB_CMDLINE_LINUX_RECOVERY} nomodeset"
-+    fi
- 
-     # IFS is set to TAB (ASCII 0x09)
-     echo "${menu_metadata}" |
 diff --git a/util/grub.d/30_os-prober.in b/util/grub.d/30_os-prober.in
-index 515a68c..775ceb2 100644
+index 5984e92..37d5f05 100644
 --- a/util/grub.d/30_os-prober.in
 +++ b/util/grub.d/30_os-prober.in
-@@ -220,7 +220,7 @@ EOF
+@@ -223,7 +223,7 @@ EOF
  	fi
  
  	onstr="$(gettext_printf "(on %s)" "${DEVICE}")"

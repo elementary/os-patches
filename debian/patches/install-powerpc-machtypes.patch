@@ -164,7 +164,7 @@ index 55b8f40..9c43932 100644
  
    free (boot_device);
 diff --git a/grub-core/osdep/windows/platform.c b/grub-core/osdep/windows/platform.c
-index 7eb53fe..e19a3d9 100644
+index 253f8d1..d18488f 100644
 --- a/grub-core/osdep/windows/platform.c
 +++ b/grub-core/osdep/windows/platform.c
 @@ -128,6 +128,12 @@ grub_install_get_default_x86_platform (void)
@@ -181,10 +181,10 @@ index 7eb53fe..e19a3d9 100644
  get_efi_variable (const wchar_t *varname, ssize_t *len)
  {
 diff --git a/include/grub/util/install.h b/include/grub/util/install.h
-index 2631b10..8aeb5c4 100644
+index 7df3191..135ba48 100644
 --- a/include/grub/util/install.h
 +++ b/include/grub/util/install.h
-@@ -216,6 +216,9 @@ grub_install_get_default_arm_platform (void);
+@@ -223,6 +223,9 @@ grub_install_get_default_arm_platform (void);
  const char *
  grub_install_get_default_x86_platform (void);
  
@@ -195,10 +195,10 @@ index 2631b10..8aeb5c4 100644
  grub_install_register_efi (grub_device_t efidir_grub_dev,
  			   const char *efifile_path,
 diff --git a/util/grub-install.c b/util/grub-install.c
-index f0d59c1..70d6700 100644
+index 3a06718..4af831f 100644
 --- a/util/grub-install.c
 +++ b/util/grub-install.c
-@@ -1177,7 +1177,18 @@ main (int argc, char *argv[])
+@@ -1187,7 +1187,18 @@ main (int argc, char *argv[])
  
    if (platform == GRUB_INSTALL_PLATFORM_POWERPC_IEEE1275)
      {

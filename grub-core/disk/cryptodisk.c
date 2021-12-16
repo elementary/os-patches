@@ -1,6 +1,6 @@
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 2003,2007,2010,2011  Free Software Foundation, Inc.
+ *  Copyright (C) 2003,2007,2010,2011,2019  Free Software Foundation, Inc.
  *
  *  GRUB is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -224,7 +224,8 @@ lrw_xor (const struct lrw_sector *sec,
 static gcry_err_code_t
 grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 			   grub_uint8_t * data, grub_size_t len,
-			   grub_disk_addr_t sector, int do_encrypt)
+			   grub_disk_addr_t sector, grub_size_t log_sector_size,
+			   int do_encrypt)
 {
   grub_size_t i;
   gcry_err_code_t err;
@@ -237,7 +238,7 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
     return (do_encrypt ? grub_crypto_ecb_encrypt (dev->cipher, data, data, len)
 	    : grub_crypto_ecb_decrypt (dev->cipher, data, data, len));
 
-  for (i = 0; i < len; i += (1U << dev->log_sector_size))
+  for (i = 0; i < len; i += (1U << log_sector_size))
     {
       grub_size_t sz = ((dev->cipher->cipher->blocksize
 			 + sizeof (grub_uint32_t) - 1)
@@ -270,7 +271,7 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 	    if (!ctx)
 	      return GPG_ERR_OUT_OF_MEMORY;
 
-	    tmp = grub_cpu_to_le64 (sector << dev->log_sector_size);
+	    tmp = grub_cpu_to_le64 (sector << log_sector_size);
 	    dev->iv_hash->init (ctx);
 	    dev->iv_hash->write (ctx, dev->iv_prefix, dev->iv_prefix_len);
 	    dev->iv_hash->write (ctx, &tmp, sizeof (tmp));
@@ -281,25 +282,38 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 	  }
 	  break;
 	case GRUB_CRYPTODISK_MODE_IV_PLAIN64:
-	  iv[1] = grub_cpu_to_le32 (sector >> 32);
-	  /* FALLTHROUGH */
 	case GRUB_CRYPTODISK_MODE_IV_PLAIN:
-	  iv[0] = grub_cpu_to_le32 (sector & 0xFFFFFFFF);
+	  /*
+	   * The IV is a 32 or 64 bit value of the dm-crypt native sector
+	   * number. If using 32 bit IV mode, zero out the most significant
+	   * 32 bits.
+	   */
+	  {
+	    grub_uint64_t iv64;
+
+	    iv64 = grub_cpu_to_le64 (sector << (log_sector_size
+						 - GRUB_CRYPTODISK_IV_LOG_SIZE));
+	    grub_set_unaligned64 (iv, iv64);
+	    if (dev->mode_iv == GRUB_CRYPTODISK_MODE_IV_PLAIN)
+	      iv[1] = 0;
+	  }
 	  break;
 	case GRUB_CRYPTODISK_MODE_IV_BYTECOUNT64:
-	  iv[1] = grub_cpu_to_le32 (sector >> (32 - dev->log_sector_size));
-	  iv[0] = grub_cpu_to_le32 ((sector << dev->log_sector_size)
-				    & 0xFFFFFFFF);
+	  /* The IV is the 64 bit byte offset of the sector. */
+	  iv[1] = grub_cpu_to_le32 (sector >> (GRUB_TYPE_BITS (iv[1])
+					       - log_sector_size));
+	  iv[0] = grub_cpu_to_le32 ((sector << log_sector_size)
+				    & GRUB_TYPE_U_MAX (iv[0]));
 	  break;
 	case GRUB_CRYPTODISK_MODE_IV_BENBI:
 	  {
 	    grub_uint64_t num = (sector << dev->benbi_log) + 1;
-	    iv[sz - 2] = grub_cpu_to_be32 (num >> 32);
-	    iv[sz - 1] = grub_cpu_to_be32 (num & 0xFFFFFFFF);
+	    iv[sz - 2] = grub_cpu_to_be32 (num >> GRUB_TYPE_BITS (iv[0]));
+	    iv[sz - 1] = grub_cpu_to_be32 (num & GRUB_TYPE_U_MAX (iv[0]));
 	  }
 	  break;
 	case GRUB_CRYPTODISK_MODE_IV_ESSIV:
-	  iv[0] = grub_cpu_to_le32 (sector & 0xFFFFFFFF);
+	  iv[0] = grub_cpu_to_le32 (sector & GRUB_TYPE_U_MAX (iv[0]));
 	  err = grub_crypto_ecb_encrypt (dev->essiv_cipher, iv, iv,
 					 dev->cipher->cipher->blocksize);
 	  if (err)
@@ -311,10 +325,10 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 	case GRUB_CRYPTODISK_MODE_CBC:
 	  if (do_encrypt)
 	    err = grub_crypto_cbc_encrypt (dev->cipher, data + i, data + i,
-					   (1U << dev->log_sector_size), iv);
+					   ((grub_size_t) 1 << log_sector_size), iv);
 	  else
 	    err = grub_crypto_cbc_decrypt (dev->cipher, data + i, data + i,
-					   (1U << dev->log_sector_size), iv);
+					   ((grub_size_t) 1 << log_sector_size), iv);
 	  if (err)
 	    return err;
 	  break;
@@ -322,10 +336,10 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 	case GRUB_CRYPTODISK_MODE_PCBC:
 	  if (do_encrypt)
 	    err = grub_crypto_pcbc_encrypt (dev->cipher, data + i, data + i,
-					    (1U << dev->log_sector_size), iv);
+					    ((grub_size_t) 1 << log_sector_size), iv);
 	  else
 	    err = grub_crypto_pcbc_decrypt (dev->cipher, data + i, data + i,
-					    (1U << dev->log_sector_size), iv);
+					    ((grub_size_t) 1 << log_sector_size), iv);
 	  if (err)
 	    return err;
 	  break;
@@ -337,7 +351,7 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 	    if (err)
 	      return err;
 	    
-	    for (j = 0; j < (1U << dev->log_sector_size);
+	    for (j = 0; j < (1U << log_sector_size);
 		 j += dev->cipher->cipher->blocksize)
 	      {
 		grub_crypto_xor (data + i + j, data + i + j, iv,
@@ -368,11 +382,11 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 	    if (do_encrypt)
 	      err = grub_crypto_ecb_encrypt (dev->cipher, data + i, 
 					     data + i,
-					     (1U << dev->log_sector_size));
+					     (1U << log_sector_size));
 	    else
 	      err = grub_crypto_ecb_decrypt (dev->cipher, data + i, 
 					     data + i,
-					     (1U << dev->log_sector_size));
+					     (1U << log_sector_size));
 	    if (err)
 	      return err;
 	    lrw_xor (&sec, dev, data + i);
@@ -381,10 +395,10 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 	case GRUB_CRYPTODISK_MODE_ECB:
 	  if (do_encrypt)
 	    err = grub_crypto_ecb_encrypt (dev->cipher, data + i, data + i,
-					   (1U << dev->log_sector_size));
+					   (1U << log_sector_size));
 	  else
 	    err = grub_crypto_ecb_decrypt (dev->cipher, data + i, data + i,
-					   (1U << dev->log_sector_size));
+					   (1U << log_sector_size));
 	  if (err)
 	    return err;
 	  break;
@@ -399,9 +413,174 @@ grub_cryptodisk_endecrypt (struct grub_cryptodisk *dev,
 gcry_err_code_t
 grub_cryptodisk_decrypt (struct grub_cryptodisk *dev,
 			 grub_uint8_t * data, grub_size_t len,
-			 grub_disk_addr_t sector)
+			 grub_disk_addr_t sector, grub_size_t log_sector_size)
 {
-  return grub_cryptodisk_endecrypt (dev, data, len, sector, 0);
+  return grub_cryptodisk_endecrypt (dev, data, len, sector, log_sector_size, 0);
+}
+
+grub_err_t
+grub_cryptodisk_setcipher (grub_cryptodisk_t crypt, const char *ciphername, const char *ciphermode)
+{
+  const char *cipheriv = NULL;
+  grub_crypto_cipher_handle_t cipher = NULL, secondary_cipher = NULL;
+  grub_crypto_cipher_handle_t essiv_cipher = NULL;
+  const gcry_md_spec_t *essiv_hash = NULL;
+  const struct gcry_cipher_spec *ciph;
+  grub_cryptodisk_mode_t mode;
+  grub_cryptodisk_mode_iv_t mode_iv = GRUB_CRYPTODISK_MODE_IV_PLAIN64;
+  int benbi_log = 0;
+  grub_err_t ret = GRUB_ERR_NONE;
+
+  ciph = grub_crypto_lookup_cipher_by_name (ciphername);
+  if (!ciph)
+    {
+      ret = grub_error (GRUB_ERR_FILE_NOT_FOUND, "Cipher %s isn't available",
+		        ciphername);
+      goto err;
+    }
+
+  /* Configure the cipher used for the bulk data.  */
+  cipher = grub_crypto_cipher_open (ciph);
+  if (!cipher)
+  {
+      ret = grub_error (GRUB_ERR_FILE_NOT_FOUND, "Cipher %s could not be initialized",
+		        ciphername);
+      goto err;
+  }
+
+  /* Configure the cipher mode.  */
+  if (grub_strcmp (ciphermode, "ecb") == 0)
+    {
+      mode = GRUB_CRYPTODISK_MODE_ECB;
+      mode_iv = GRUB_CRYPTODISK_MODE_IV_PLAIN;
+      cipheriv = NULL;
+    }
+  else if (grub_strcmp (ciphermode, "plain") == 0)
+    {
+      mode = GRUB_CRYPTODISK_MODE_CBC;
+      mode_iv = GRUB_CRYPTODISK_MODE_IV_PLAIN;
+      cipheriv = NULL;
+    }
+  else if (grub_memcmp (ciphermode, "cbc-", sizeof ("cbc-") - 1) == 0)
+    {
+      mode = GRUB_CRYPTODISK_MODE_CBC;
+      cipheriv = ciphermode + sizeof ("cbc-") - 1;
+    }
+  else if (grub_memcmp (ciphermode, "pcbc-", sizeof ("pcbc-") - 1) == 0)
+    {
+      mode = GRUB_CRYPTODISK_MODE_PCBC;
+      cipheriv = ciphermode + sizeof ("pcbc-") - 1;
+    }
+  else if (grub_memcmp (ciphermode, "xts-", sizeof ("xts-") - 1) == 0)
+    {
+      mode = GRUB_CRYPTODISK_MODE_XTS;
+      cipheriv = ciphermode + sizeof ("xts-") - 1;
+      secondary_cipher = grub_crypto_cipher_open (ciph);
+      if (!secondary_cipher)
+      {
+	  ret = grub_error (GRUB_ERR_FILE_NOT_FOUND,
+			    "Secondary cipher %s isn't available", ciphername);
+	  goto err;
+      }
+      if (cipher->cipher->blocksize != GRUB_CRYPTODISK_GF_BYTES)
+	{
+	  ret = grub_error (GRUB_ERR_BAD_ARGUMENT,
+			    "Unsupported XTS block size: %" PRIuGRUB_SIZE,
+			    cipher->cipher->blocksize);
+	  goto err;
+	}
+      if (secondary_cipher->cipher->blocksize != GRUB_CRYPTODISK_GF_BYTES)
+	{
+	  ret = grub_error (GRUB_ERR_BAD_ARGUMENT,
+			    "Unsupported XTS block size: %" PRIuGRUB_SIZE,
+			    secondary_cipher->cipher->blocksize);
+	  goto err;
+	}
+    }
+  else if (grub_memcmp (ciphermode, "lrw-", sizeof ("lrw-") - 1) == 0)
+    {
+      mode = GRUB_CRYPTODISK_MODE_LRW;
+      cipheriv = ciphermode + sizeof ("lrw-") - 1;
+      if (cipher->cipher->blocksize != GRUB_CRYPTODISK_GF_BYTES)
+	{
+	  ret = grub_error (GRUB_ERR_BAD_ARGUMENT,
+			    "Unsupported LRW block size: %" PRIuGRUB_SIZE,
+			    cipher->cipher->blocksize);
+	  goto err;
+	}
+    }
+  else
+    {
+      ret = grub_error (GRUB_ERR_BAD_ARGUMENT, "Unknown cipher mode: %s",
+		        ciphermode);
+      goto err;
+    }
+
+  if (cipheriv == NULL)
+      ;
+  else if (grub_memcmp (cipheriv, "plain64", sizeof ("plain64") - 1) == 0)
+      mode_iv = GRUB_CRYPTODISK_MODE_IV_PLAIN64;
+  else if (grub_memcmp (cipheriv, "plain", sizeof ("plain") - 1) == 0)
+      mode_iv = GRUB_CRYPTODISK_MODE_IV_PLAIN;
+  else if (grub_memcmp (cipheriv, "benbi", sizeof ("benbi") - 1) == 0)
+    {
+      if (cipher->cipher->blocksize & (cipher->cipher->blocksize - 1)
+	  || cipher->cipher->blocksize == 0)
+	grub_error (GRUB_ERR_BAD_ARGUMENT,
+		    "Unsupported benbi blocksize: %" PRIuGRUB_SIZE,
+		    cipher->cipher->blocksize);
+	/* FIXME should we return an error here? */
+      for (benbi_log = 0;
+	   (cipher->cipher->blocksize << benbi_log) < GRUB_DISK_SECTOR_SIZE;
+	   benbi_log++);
+      mode_iv = GRUB_CRYPTODISK_MODE_IV_BENBI;
+    }
+  else if (grub_memcmp (cipheriv, "null", sizeof ("null") - 1) == 0)
+      mode_iv = GRUB_CRYPTODISK_MODE_IV_NULL;
+  else if (grub_memcmp (cipheriv, "essiv:", sizeof ("essiv:") - 1) == 0)
+    {
+      const char *hash_str = cipheriv + 6;
+
+      mode_iv = GRUB_CRYPTODISK_MODE_IV_ESSIV;
+
+      /* Configure the hash and cipher used for ESSIV.  */
+      essiv_hash = grub_crypto_lookup_md_by_name (hash_str);
+      if (!essiv_hash)
+	{
+	  ret = grub_error (GRUB_ERR_FILE_NOT_FOUND,
+			    "Couldn't load %s hash", hash_str);
+	  goto err;
+	}
+      essiv_cipher = grub_crypto_cipher_open (ciph);
+      if (!essiv_cipher)
+	{
+	  ret = grub_error (GRUB_ERR_FILE_NOT_FOUND,
+			    "Couldn't load %s cipher", ciphername);
+	  goto err;
+	}
+    }
+  else
+    {
+      ret = grub_error (GRUB_ERR_BAD_ARGUMENT, "Unknown IV mode: %s",
+		        cipheriv);
+      goto err;
+    }
+
+  crypt->cipher = cipher;
+  crypt->benbi_log = benbi_log;
+  crypt->mode = mode;
+  crypt->mode_iv = mode_iv;
+  crypt->secondary_cipher = secondary_cipher;
+  crypt->essiv_cipher = essiv_cipher;
+  crypt->essiv_hash = essiv_hash;
+
+err:
+  if (ret)
+    {
+      grub_crypto_cipher_close (cipher);
+      grub_crypto_cipher_close (secondary_cipher);
+    }
+  return ret;
 }
 
 gcry_err_code_t
@@ -538,7 +717,7 @@ grub_cryptodisk_open (const char *name, grub_disk_t disk)
     }
 
   disk->data = dev;
-  disk->total_sectors = dev->total_length;
+  disk->total_sectors = dev->total_sectors;
   disk->max_agglomerate = GRUB_DISK_MAX_MAX_AGGLOMERATE;
   disk->id = dev->id;
   dev->ref++;
@@ -593,12 +772,11 @@ grub_cryptodisk_read (grub_disk_t disk, grub_disk_addr_t sector,
   grub_dprintf ("cryptodisk",
 		"Reading %" PRIuGRUB_SIZE " sectors from sector 0x%"
 		PRIxGRUB_UINT64_T " with offset of %" PRIuGRUB_UINT64_T "\n",
-		size, sector, dev->offset);
+		size, sector, dev->offset_sectors);
 
   err = grub_disk_read (dev->source_disk,
-			(sector << (disk->log_sector_size
-				   - GRUB_DISK_SECTOR_BITS)) + dev->offset, 0,
-			size << disk->log_sector_size, buf);
+			grub_disk_from_native_sector (disk, sector + dev->offset_sectors),
+			0, size << disk->log_sector_size, buf);
   if (err)
     {
       grub_dprintf ("cryptodisk", "grub_disk_read failed with error %d\n", err);
@@ -606,7 +784,7 @@ grub_cryptodisk_read (grub_disk_t disk, grub_disk_addr_t sector,
     }
   gcry_err = grub_cryptodisk_endecrypt (dev, (grub_uint8_t *) buf,
 					size << disk->log_sector_size,
-					sector, 0);
+					sector, dev->log_sector_size, 0);
   return grub_crypto_gcry_error (gcry_err);
 }
 
@@ -643,11 +821,11 @@ grub_cryptodisk_write (grub_disk_t disk, grub_disk_addr_t sector,
   grub_dprintf ("cryptodisk",
 		"Writing %" PRIuGRUB_SIZE " sectors to sector 0x%"
 		PRIxGRUB_UINT64_T " with offset of %" PRIuGRUB_UINT64_T "\n",
-		size, sector, dev->offset);
+		size, sector, dev->offset_sectors);
 
   gcry_err = grub_cryptodisk_endecrypt (dev, (grub_uint8_t *) tmp,
 					size << disk->log_sector_size,
-					sector, 1);
+					sector, disk->log_sector_size, 1);
   if (gcry_err)
     {
       grub_free (tmp);
@@ -655,12 +833,10 @@ grub_cryptodisk_write (grub_disk_t disk, grub_disk_addr_t sector,
     }
 
   /* Since ->write was called so disk.mod is loaded but be paranoid  */
-  
+  sector = sector + dev->offset_sectors;
   if (grub_disk_write_weak)
     err = grub_disk_write_weak (dev->source_disk,
-				(sector << (disk->log_sector_size
-					    - GRUB_DISK_SECTOR_BITS))
-				+ dev->offset,
+				grub_disk_from_native_sector (disk, sector),
 				0, size << disk->log_sector_size, tmp);
   else
     err = grub_error (GRUB_ERR_BUG, "disk.mod not loaded");
@@ -1070,7 +1246,7 @@ luks_script_get (grub_size_t *sz)
 	ptr = grub_stpcpy (ptr, "luks_mount ");
 	ptr = grub_stpcpy (ptr, i->uuid);
 	*ptr++ = ' ';
-	grub_snprintf (ptr, 21, "%" PRIuGRUB_UINT64_T " ", i->offset);
+	grub_snprintf (ptr, 21, "%" PRIuGRUB_UINT64_T " ", i->offset_sectors);
 	while (*ptr)
 	  ptr++;
 	for (iptr = i->cipher->cipher->name; *iptr; iptr++)
@@ -1150,5 +1326,6 @@ GRUB_MOD_FINI (cryptodisk)
 {
   grub_disk_dev_unregister (&grub_cryptodisk_dev);
   cryptodisk_cleanup ();
+  grub_unregister_extcmd (cmd);
   grub_procfs_unregister (&luks_script);
 }

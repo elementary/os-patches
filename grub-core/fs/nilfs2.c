@@ -416,15 +416,35 @@ grub_nilfs2_btree_node_get_key (struct grub_nilfs2_btree_node *node,
 }
 
 static inline int
-grub_nilfs2_btree_node_lookup (struct grub_nilfs2_btree_node *node,
+grub_nilfs2_btree_node_nchildren_max (struct grub_nilfs2_data *data,
+				      struct grub_nilfs2_btree_node *node)
+{
+  int node_children_max = ((NILFS2_BLOCK_SIZE (data) -
+			    sizeof (struct grub_nilfs2_btree_node) -
+			    NILFS_BTREE_NODE_EXTRA_PAD_SIZE) /
+			   (sizeof (grub_uint64_t) + sizeof (grub_uint64_t)));
+
+  return (node->bn_flags & NILFS_BTREE_NODE_ROOT) ? 3 : node_children_max;
+}
+
+static inline int
+grub_nilfs2_btree_node_lookup (struct grub_nilfs2_data *data,
+			       struct grub_nilfs2_btree_node *node,
 			       grub_uint64_t key, int *indexp)
 {
   grub_uint64_t nkey;
-  int index, low, high, s;
+  int index = 0, low, high, s;
 
   low = 0;
+
   high = grub_le_to_cpu16 (node->bn_nchildren) - 1;
-  index = 0;
+  if (high >= grub_nilfs2_btree_node_nchildren_max (data, node))
+    {
+      grub_error (GRUB_ERR_BAD_FS, "too many children");
+      *indexp = index;
+      return 0;
+    }
+
   s = 0;
   while (low <= high)
     {
@@ -457,18 +477,6 @@ grub_nilfs2_btree_node_lookup (struct grub_nilfs2_btree_node *node,
 
   *indexp = index;
   return s == 0;
-}
-
-static inline int
-grub_nilfs2_btree_node_nchildren_max (struct grub_nilfs2_data *data,
-				      struct grub_nilfs2_btree_node *node)
-{
-  int node_children_max = ((NILFS2_BLOCK_SIZE (data) -
-			    sizeof (struct grub_nilfs2_btree_node) -
-			    NILFS_BTREE_NODE_EXTRA_PAD_SIZE) /
-			   (sizeof (grub_uint64_t) + sizeof (grub_uint64_t)));
-
-  return (node->bn_flags & NILFS_BTREE_NODE_ROOT) ? 3 : node_children_max;
 }
 
 static inline grub_uint64_t *
@@ -517,7 +525,11 @@ grub_nilfs2_btree_lookup (struct grub_nilfs2_data *data,
   node = grub_nilfs2_btree_get_root (inode);
   level = grub_nilfs2_btree_get_level (node);
 
-  found = grub_nilfs2_btree_node_lookup (node, key, &index);
+  found = grub_nilfs2_btree_node_lookup (data, node, key, &index);
+
+  if (grub_errno != GRUB_ERR_NONE)
+    goto fail;
+
   ptr = grub_nilfs2_btree_node_get_ptr (data, node, index);
   if (need_translate)
     ptr = grub_nilfs2_dat_translate (data, ptr);
@@ -538,11 +550,12 @@ grub_nilfs2_btree_lookup (struct grub_nilfs2_data *data,
 	}
 
       if (!found)
-	found = grub_nilfs2_btree_node_lookup (node, key, &index);
+	found = grub_nilfs2_btree_node_lookup (data, node, key, &index);
       else
 	index = 0;
 
-      if (index < grub_nilfs2_btree_node_nchildren_max (data, node))
+      if (index < grub_nilfs2_btree_node_nchildren_max (data, node) &&
+	  grub_errno == GRUB_ERR_NONE)
 	{
 	  ptr = grub_nilfs2_btree_node_get_ptr (data, node, index);
 	  if (need_translate)
@@ -569,6 +582,11 @@ grub_nilfs2_btree_lookup (struct grub_nilfs2_data *data,
 static inline grub_uint64_t
 grub_nilfs2_direct_lookup (struct grub_nilfs2_inode *inode, grub_uint64_t key)
 {
+  if (1 + key > 6)
+    {
+      grub_error (GRUB_ERR_BAD_FS, "key is too large");
+      return 0xffffffffffffffff;
+    }
   return grub_le_to_cpu64 (inode->i_bmap[1 + key]);
 }
 
@@ -584,7 +602,7 @@ grub_nilfs2_bmap_lookup (struct grub_nilfs2_data *data,
     {
       grub_uint64_t ptr;
       ptr = grub_nilfs2_direct_lookup (inode, key);
-      if (need_translate)
+      if (ptr != ((grub_uint64_t) 0xffffffffffffffff) && need_translate)
 	ptr = grub_nilfs2_dat_translate (data, ptr);
       return ptr;
     }
@@ -753,7 +771,7 @@ grub_nilfs2_load_sb (struct grub_nilfs2_data *data)
     partition_size = (grub_le_to_cpu64 (data->sblock.s_dev_size)
 		      >> GRUB_DISK_SECTOR_BITS);
   else
-    partition_size = grub_disk_get_size (disk);
+    partition_size = grub_disk_native_sectors (disk);
   if (partition_size != GRUB_DISK_SIZE_UNKNOWN)
     {
       /* Read second super block. */
@@ -1168,7 +1186,7 @@ grub_nilfs2_uuid (grub_device_t device, char **uuid)
 
 /* Get mtime.  */
 static grub_err_t
-grub_nilfs2_mtime (grub_device_t device, grub_int32_t * tm)
+grub_nilfs2_mtime (grub_device_t device, grub_int64_t * tm)
 {
   struct grub_nilfs2_data *data;
   grub_disk_t disk = device->disk;

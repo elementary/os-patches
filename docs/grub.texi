@@ -695,13 +695,6 @@ floppy instead of exposing the USB drive as a hard disk (they call it
 This install doesn't conflict with standard install as long as they are in
 separate directories.
 
-Note that @command{grub-install} is actually just a shell script and the
-real task is done by other tools such as @command{grub-mkimage}. Therefore,
-you may run those commands directly to install GRUB, without using
-@command{grub-install}. Don't do that, however, unless you are very familiar
-with the internals of GRUB. Installing a boot loader on a running OS may be
-extremely dangerous.
-
 On EFI systems for fixed disk install you have to mount EFI System Partition.
 If you mount it at @file{/boot/efi} then you don't need any special arguments:
 
@@ -829,25 +822,46 @@ four primary partitions and additional logical partitions.  With this
 partition table format, there are two ways to install GRUB: it can be
 embedded in the area between the MBR and the first partition (called by
 various names, such as the "boot track", "MBR gap", or "embedding area", and
-which is usually at least 31 KiB), or the core image can be installed in a
+which is usually at least 1000 KiB), or the core image can be installed in a
 file system and a list of the blocks that make it up can be stored in the
 first sector of that partition.
 
-Each of these has different problems.  There is no way to reserve space in
+Modern tools usually leave MBR gap of at least 1023 KiB. This amount is
+sufficient to cover most configurations. Hence this value is recommended
+by the GRUB team.
+
+Historically many tools left only 31 KiB of space. This is not enough to
+parse reliably difficult structures like Btrfs, ZFS, RAID or LVM, or to
+use difficult disk access methods like ahci. Hence GRUB will warn if attempted
+to install into small MBR gap except in a small number of configurations
+that were grandfathered. The grandfathered config must:
+
+* use biosdisk as disk access module for @file{/boot}
+* not use any additional partition maps to access @file{/boot}
+* @file{/boot} must be on one of following filesystems:
+   * AFFS, AFS, BFS, cpio, newc, odc, ext2/3/4, FAT, exFAT,
+   F2FS, HFS, uncompressed HFS+, ISO9660, JFS, Minix, Minix2, Minix3, NILFS2,
+   NTFS, ReiserFS, ROMFS, SFS, tar, UDF, UFS1, UFS2, XFS
+
+MBR gap has few technical problems.  There is no way to reserve space in
 the embedding area with complete safety, and some proprietary software is
 known to use it to make it difficult for users to work around licensing
-restrictions; and systems are sometimes partitioned without leaving enough
-space before the first partition.  On the other hand, installing to a
-filesystem means that GRUB is vulnerable to its blocks being moved around by
-filesystem features such as tail packing, or even by aggressive fsck
-implementations, so this approach is quite fragile; and this approach can
-only be used if the @file{/boot} filesystem is on the same disk that the
-BIOS boots from, so that GRUB does not have to rely on guessing BIOS drive
-numbers.
+restrictions. GRUB works it around by detecting sectors by other software and
+avoiding them and protecting its own sectors using Reed-Solomon encoding.
+
+GRUB team recommends having MBR gap of at least 1000 KiB
+
+Should it be not possible GRUB has support for a fallback solution which is
+heavily recommended against. Installing to a filesystem means that GRUB is
+vulnerable to its blocks being moved around by filesystem features such as
+tail packing, or even by aggressive fsck implementations, so this approach
+is quite fragile; and this approach can only be used if the @file{/boot}
+filesystem is on the same disk that the BIOS boots from, so that GRUB does
+not have to rely on guessing BIOS drive numbers.
 
 The GRUB development team generally recommends embedding GRUB before the
 first partition, unless you have special requirements.  You must ensure that
-the first partition starts at least 31 KiB (63 sectors) from the start of
+the first partition starts at least 1000 KiB (2000 sectors) from the start of
 the disk; on modern disks, it is often a performance advantage to align
 partitions on larger boundaries anyway, so the first partition might start 1
 MiB from the start of the disk.
@@ -894,6 +908,7 @@ magic.
 @menu
 * General boot methods::        How to boot OSes with GRUB generally
 * Loopback booting::            Notes on booting from loopbacks
+* LVM cache booting::           Notes on booting from LVM cache logical volume
 * OS-specific notes::           Notes on some operating systems
 @end menu
 
@@ -990,6 +1005,26 @@ ramdisk or discovering loopback boot in other way and as such not bootable this
 way. Please consider alternative boot methods like copying all files
 from the image to actual partition. Consult your OS documentation for
 more details
+
+@node LVM cache booting
+@section Booting from LVM cache logical volume
+
+The LVM cache logical volume is the logical volume consisting of the original
+and the cache pool logical volume. The original is usually on a larger and
+slower storage device while the cache pool is on a smaller and faster one. The
+performance of the original volume can be improved by storing the frequently
+used data on the cache pool to utilize the greater performance of faster
+device.
+
+GRUB boots from LVM cache logical volume merely by reading it's original
+logical volume so that dirty data in cache pool volume is disregarded. This is
+not a problem for "writethrough" cache mode as it ensures that any data written
+will be stored both on the cache and the origin LV. For the other cache mode
+"writeback", which delays writing from the cache pool back to the origin LV to
+boost performance, GRUB may fail to boot in the wake of accidental power outage
+due to it's inability to assemble the cache device for reading the required
+dirty data left behind. The situation will be improved after adding full
+support to the LVM cache logical volume in the future.
 
 @node OS-specific notes
 @section Some caveats on OS-specific issues
@@ -1092,12 +1127,6 @@ grub> @kbd{initrd16 /initrd}
 @item
 Finally, run the command @command{boot} (@pxref{boot}).
 @end enumerate
-
-@strong{Caution:} If you use an initrd and specify the @samp{mem=}
-option to the kernel to let it use less than actual memory size, you
-will also have to specify the same memory size to GRUB. To let GRUB know
-the size, run the command @command{uppermem} @emph{before} loading the
-kernel. @xref{uppermem}, for more information.
 
 
 @node NetBSD
@@ -1309,12 +1338,12 @@ menu and then wait for the timeout set by @samp{GRUB_TIMEOUT} to expire
 before booting the default entry.  Pressing a key interrupts the timeout.
 
 If this option is set to @samp{countdown} or @samp{hidden}, then, before
-displaying the menu, GRUB will wait for the timeout set by
-@samp{GRUB_TIMEOUT} to expire.  If @key{ESC} is pressed during that time, it
-will display the menu and wait for input.  If a hotkey associated with a
-menu entry is pressed, it will boot the associated menu entry immediately.
-If the timeout expires before either of these happens, it will boot the
-default entry.  In the @samp{countdown} case, it will show a one-line
+displaying the menu, GRUB will wait for the timeout set by @samp{GRUB_TIMEOUT}
+to expire.  If @key{ESC} or @key{F4} are pressed, or @key{SHIFT} is held down
+during that time, it will display the menu and wait for input.  If a hotkey
+associated with a menu entry is pressed, it will boot the associated menu entry
+immediately. If the timeout expires before either of these happens, it will
+boot the default entry.  In the @samp{countdown} case, it will show a one-line
 indication of the remaining time.
 
 @item GRUB_DEFAULT_BUTTON
@@ -1441,6 +1470,15 @@ enable the use of partition UUIDs, set this option to @samp{false}.
 If this option is set to @samp{true}, disable the generation of recovery
 mode menu entries.
 
+@item GRUB_DISABLE_UUID
+Normally, @command{grub-mkconfig} will generate menu entries that use
+universally-unique identifiers (UUIDs) to identify various filesystems to
+search for files.  This is usually more reliable, but in some cases it may
+not be appropriate.  To disable this use of UUIDs, set this option to
+@samp{true}. Setting this option to @samp{true}, will also set the options
+@samp{GRUB_DISABLE_LINUX_UUID} and @samp{GRUB_DISABLE_LINUX_PARTUUID} to
+@samp{true}, unless they have been explicilty set to @samp{false}.
+
 @item GRUB_VIDEO_BACKEND
 If graphical video support is required, either because the @samp{gfxterm}
 graphical terminal is in use or because @samp{GRUB_GFXPAYLOAD_LINUX} is set,
@@ -1481,10 +1519,13 @@ boot sequence.  If you have problems, set this option to @samp{text} and
 GRUB will tell Linux to boot in normal text mode.
 
 @item GRUB_DISABLE_OS_PROBER
-Normally, @command{grub-mkconfig} will try to use the external
-@command{os-prober} program, if installed, to discover other operating
-systems installed on the same system and generate appropriate menu entries
-for them.  Set this option to @samp{true} to disable this.
+The @command{grub-mkconfig} has a feature to use the external
+@command{os-prober} program to discover other operating systems installed on
+the same machine and generate appropriate menu entries for them. It is disabled
+by default since automatic and silent execution of @command{os-prober}, and
+creating boot entries based on that data, is a potential attack vector. Set
+this option to @samp{false} to enable this feature in the
+@command{grub-mkconfig} command.
 
 @item GRUB_OS_PROBER_SKIP_LIST
 List of space-separated FS UUIDs of filesystems to be ignored from os-prober
@@ -1495,7 +1536,7 @@ Normally, @command{grub-mkconfig} will generate top level menu entry for
 the kernel with highest version number and put all other found kernels
 or alternative menu entries for recovery mode in submenu. For entries returned
 by @command{os-prober} first entry will be put on top level and all others
-in submenu. If this option is set to @samp{y}, flat menu with all entries
+in submenu. If this option is set to @samp{true}, flat menu with all entries
 on top level will be generated instead. Changing this option will require
 changing existing values of @samp{GRUB_DEFAULT}, @samp{fallback} (@pxref{fallback})
 and @samp{default} (@pxref{default}) environment variables as well as saved
@@ -1529,16 +1570,16 @@ configurations, but have better replacements:
 
 @table @samp
 @item GRUB_HIDDEN_TIMEOUT
-Wait this many seconds before displaying the menu.  If @key{ESC} is pressed
-during that time, display the menu and wait for input according to
-@samp{GRUB_TIMEOUT}.  If a hotkey associated with a menu entry is pressed,
-boot the associated menu entry immediately.  If the timeout expires before
-either of these happens, display the menu for the number of seconds
-specified in @samp{GRUB_TIMEOUT} before booting the default entry.
+Wait this many seconds before displaying the menu.  If @key{ESC} or @key{F4} are
+pressed, or @key{SHIFT} is held down during that time, display the menu and wait
+for input according to @samp{GRUB_TIMEOUT}.  If a hotkey associated with a menu
+entry is pressed, boot the associated menu entry immediately.  If the timeout
+expires before either of these happens, display the menu for the number of
+seconds specified in @samp{GRUB_TIMEOUT} before booting the default entry.
 
 If you set @samp{GRUB_HIDDEN_TIMEOUT}, you should also set
 @samp{GRUB_TIMEOUT=0} so that the menu is not displayed at all unless
-@key{ESC} is pressed.
+@key{ESC} or @key{F4} are pressed, or @key{SHIFT} is held down.
 
 This option is unset by default, and is deprecated in favour of the less
 confusing @samp{GRUB_TIMEOUT_STYLE=countdown} or
@@ -1812,10 +1853,9 @@ than zero; otherwise 0.
 @section Multi-boot manual config
 
 Currently autogenerating config files for multi-boot environments depends on
-os-prober and has several shortcomings. While fixing it is scheduled for the
-next release, meanwhile you can make use of the power of GRUB syntax and do it
-yourself. A possible configuration is detailed here, feel free to adjust to your
-needs.
+os-prober and has several shortcomings. Due to that it is disabled by default.
+It is advised to use the power of GRUB syntax and do it yourself. A possible
+configuration is detailed here, feel free to adjust to your needs.
 
 First create a separate GRUB partition, big enough to hold GRUB. Some of the
 following entries show how to load OS installer images from this same partition,
@@ -2485,6 +2525,57 @@ grub-mknetdir --net-directory=/srv/tftp --subdir=/boot/grub -d /usr/lib/grub/i38
 
 Then follow instructions printed out by grub-mknetdir on configuring your DHCP
 server.
+
+The grub.cfg file is placed in the same directory as the path output by
+grub-mknetdir hereafter referred to as FWPATH. GRUB will search for its
+configuration files in order using the following rules where the appended
+value corresponds to a value on the client machine.
+
+@example
+@group
+@samp{(FWPATH)}/grub.cfg-@samp{(UUID OF MACHINE)}
+@samp{(FWPATH)}/grub.cfg-@samp{(MAC ADDRESS OF NIC)}
+@samp{(FWPATH)}/grub.cfg-@samp{(IPv4 OR IPv6 ADDRESS)}
+@samp{(FWPATH)}/grub.cfg
+@end group
+@end example
+
+The UUID is the Client Machine Identifier Option Definition as specified in
+RFC 4578. The client will only attempt to loouk up a UUID config file if it
+was provided by the DHCP server.
+
+The client will only attempt to look up an IPv6 address config once, however,
+it will try the IPv4 multiple times. The concrete example below shows what
+would happen under the IPv4 case.
+
+@example
+@group
+UUID: 7726a678-7fc0-4853-a4f6-c85ac36a120a
+MAC:  52:54:00:ec:33:81
+IPV4: 10.0.0.130 (0A000082)
+@end group
+@end example
+
+@example
+@group
+@samp{(FWPATH)}/grub.cfg-7726a678-7fc0-4853-a4f6-c85ac36a120a
+@samp{(FWPATH)}/grub.cfg-52-54-00-ec-33-81
+@samp{(FWPATH)}/grub.cfg-0A000082
+@samp{(FWPATH)}/grub.cfg-0A00008
+@samp{(FWPATH)}/grub.cfg-0A0000
+@samp{(FWPATH)}/grub.cfg-0A000
+@samp{(FWPATH)}/grub.cfg-0A00
+@samp{(FWPATH)}/grub.cfg-0A0
+@samp{(FWPATH)}/grub.cfg-0A
+@samp{(FWPATH)}/grub.cfg-0
+@samp{(FWPATH)}/grub.cfg
+@end group
+@end example
+
+This feature is enabled by default but it can be disabled by setting the
+@samp{feature_net_search_cfg} to @samp{n}. Since this happens before the
+configuration file is read by GRUB, this option has to be disabled in an
+embedded configuration file (@pxref{Embedded configuration}).
 
 After GRUB has started, files on the TFTP server will be accessible via the
 @samp{(tftp)} device.
@@ -3843,7 +3934,7 @@ names active.
 @node terminfo
 @subsection terminfo
 
-@deffn Command terminfo [-a|-u|-v] [term]
+@deffn Command terminfo [@option{-a}|@option{-u}|@option{-v}] [@option{-g WxH}] [term] [type]
 Define the capabilities of your terminal by giving the name of an entry in
 the terminfo database, which should correspond roughly to a @samp{TERM}
 environment variable in Unix.
@@ -3859,6 +3950,8 @@ specifies logically-ordered UTF-8; and @option{-v} specifies
 "visually-ordered UTF-8" (in other words, arranged such that a terminal
 emulator without bidirectional text support will display right-to-left text
 in the proper order; this is not really proper UTF-8, but a workaround).
+
+The @option{-g} (@option{--geometry}) can be used to specify terminal geometry.
 
 If no option or terminal type is specified, the current terminal type is
 printed.
@@ -3892,6 +3985,7 @@ you forget a command, you can run the command @command{help}
 * cpuid::                       Check for CPU features
 * crc::                         Compute or check CRC32 checksums
 * cryptomount::                 Mount a crypto device
+* cutmem::                      Remove memory regions
 * date::                        Display or set current date and time
 * devicetree::                  Load a device tree blob
 * distrust::                    Remove a pubkey from trusted keys
@@ -3930,7 +4024,6 @@ you forget a command, you can run the command @command{help}
 * password_pbkdf2::             Set a hashed password
 * play::                        Play a tune
 * probe::                       Retrieve device info
-* pxe_unload::                  Unload the PXE environment
 * rdmsr::                       Read values from model-specific registers
 * read::                        Read user input
 * reboot::                      Reboot your computer
@@ -3944,12 +4037,12 @@ you forget a command, you can run the command @command{help}
 * sha256sum::                   Compute or check SHA256 hash
 * sha512sum::                   Compute or check SHA512 hash
 * sleep::                       Wait for a specified number of seconds
+* smbios::                      Retrieve SMBIOS information
 * source::                      Read a configuration file in same context
 * test::                        Check file types and compare values
 * true::                        Do nothing, successfully
 * trust::                       Add public key to list of trusted keys
 * unset::                       Unset an environment variable
-* uppermem::                    Set the upper memory size
 @comment * vbeinfo::                     List available video modes
 * verify_detached::             Verify detached digital signature
 * videoinfo::                   List available video modes
@@ -3986,6 +4079,11 @@ Normally, this command will replace the Root System Description Pointer
 (RSDP) in the Extended BIOS Data Area to point to the new tables. If the
 @option{--no-ebda} option is used, the new tables will be known only to
 GRUB, but may be used by GRUB's EFI emulation.
+
+Note: The command is not allowed when lockdown is enforced (@pxref{Lockdown}).
+      Otherwise an attacker can instruct the GRUB to load an SSDT table to
+      overwrite the kernel lockdown configuration and later load and execute
+      unsigned code.
 @end deffn
 
 
@@ -4029,7 +4127,6 @@ can be changed only when using @samp{gfxterm} for terminal output.
 
 @deffn Command badram addr,mask[,addr,mask...]
 Filter out bad RAM.
-@end deffn
 
 This command notifies the memory manager that specified regions of
 RAM ought to be filtered out (usually, because they're damaged).  This
@@ -4045,6 +4142,13 @@ address that are enabled by the mask match with the base address, it means
 this page is to be filtered.  This syntax makes it easy to represent patterns
 that are often result of memory damage, due to physical distribution of memory
 cells.
+
+The command is similar to @command{cutmem} command.
+
+Note: The command is not allowed when lockdown is enforced (@pxref{Lockdown}).
+      This prevents removing EFI memory regions to potentially subvert the
+      security mechanisms provided by the UEFI secure boot.
+@end deffn
 
 @node blocklist
 @subsection blocklist
@@ -4201,10 +4305,33 @@ is requested interactively. Option @var{device} configures specific grub device
 with specified @var{uuid}; option @option{-a} configures all detected encrypted
 devices; option @option{-b} configures all geli containers that have boot flag set.
 
-GRUB suports devices encrypted using LUKS and geli. Note that necessary modules (@var{luks} and @var{geli}) have to be loaded manually before this command can
-be used.
+GRUB suports devices encrypted using LUKS, LUKS2 and geli. Note that necessary
+modules (@var{luks}, @var{luks2} and @var{geli}) have to be loaded manually
+before this command can be used. For LUKS2 only the PBKDF2 key derivation
+function is supported, as Argon2 is not yet supported.
+
+Also, note that, unlike filesystem UUIDs, UUIDs for encrypted devices must be
+specified without dash separators.
 @end deffn
 
+@node cutmem
+@subsection cutmem
+
+@deffn Command cutmem from[K|M|G] to[K|M|G]
+Remove any memory regions in specified range.
+
+This command notifies the memory manager that specified regions of RAM ought to
+be filtered out. This remains in effect after a payload kernel has been loaded
+by GRUB, as long as the loaded kernel obtains its memory map from GRUB. Kernels
+that support this include Linux, GNU Mach, the kernel of FreeBSD and Multiboot
+kernels in general.
+
+The command is similar to @command{badram} command.
+
+Note: The command is not allowed when lockdown is enforced (@pxref{Lockdown}).
+      This prevents removing EFI memory regions to potentially subvert the
+      security mechanisms provided by the UEFI secure boot.
+@end deffn
 
 @node date
 @subsection date
@@ -4220,13 +4347,15 @@ hour, minute, and second unchanged.
 
 
 @node devicetree
-@subsection linux
+@subsection devicetree
 
 @deffn Command devicetree file
 Load a device tree blob (.dtb) from a filesystem, for later use by a Linux
 kernel. Does not perform merging with any device tree supplied by firmware,
 but rather replaces it completely.
-@ref{GNU/Linux}.
+
+Note: The command is not allowed when lockdown is enforced (@pxref{Lockdown}).
+      This is done to prevent subverting various security mechanisms.
 @end deffn
 
 @node distrust
@@ -4423,22 +4552,22 @@ about each of the commands whose names begin with those @var{patterns}.
 @node initrd
 @subsection initrd
 
-@deffn Command initrd file
-Load an initial ramdisk for a Linux kernel image, and set the appropriate
-parameters in the Linux setup area in memory.  This may only be used after
-the @command{linux} command (@pxref{linux}) has been run.  See also
-@ref{GNU/Linux}.
+@deffn Command initrd file [file @dots{}]
+Load, in order, all initial ramdisks for a Linux kernel image, and set
+the appropriate parameters in the Linux setup area in memory.  This may only
+be used after the @command{linux} command (@pxref{linux}) has been run.  See
+also @ref{GNU/Linux}.
 @end deffn
 
 
 @node initrd16
 @subsection initrd16
 
-@deffn Command initrd16 file
-Load an initial ramdisk for a Linux kernel image to be booted in 16-bit
-mode, and set the appropriate parameters in the Linux setup area in memory.
-This may only be used after the @command{linux16} command (@pxref{linux16})
-has been run.  See also @ref{GNU/Linux}.
+@deffn Command initrd16 file [file @dots{}]
+Load, in order, all initial ramdisks for a Linux kernel image to be booted in
+16-bit mode, and set the appropriate parameters in the Linux setup area in
+memory.  This may only be used after the @command{linux16} command
+(@pxref{linux16}) has been run.  See also @ref{GNU/Linux}.
 
 This command is only available on x86 systems.
 @end deffn
@@ -4646,7 +4775,7 @@ be reloaded after using this command (@pxref{module}).
 Some kernels have known problems. You need to specify --quirk-* for those.
 --quirk-bad-kludge is a problem seen in several products that they include
 loading kludge information with invalid data in ELF file. GRUB prior to 0.97
-and some custom builds prefered ELF information while 0.97 and GRUB 2
+and some custom builds preferred ELF information while 0.97 and GRUB 2
 use kludge. Use this option to ignore kludge.
 Known affected systems: old Solaris, SkyOS.
 
@@ -4771,19 +4900,11 @@ a rest.
 @node probe
 @subsection probe
 
-@deffn Command probe [@option{--set} var] @option{--driver}|@option{--partmap}|@option{--fs}|@option{--fs-uuid}|@option{--label} device
+@deffn Command probe [@option{--set} var] @option{--driver}|@option{--partmap}|@option{--fs}|@option{--fs-uuid}|@option{--label}|@option{--part-uuid} device
 Retrieve device information. If option @option{--set} is given, assign result
 to variable @var{var}, otherwise print information on the screen.
-@end deffn
 
-
-@node pxe_unload
-@subsection pxe_unload
-
-@deffn Command pxe_unload
-Unload the PXE environment (@pxref{Network}).
-
-This command is only available on PC BIOS systems.
+The option @option{--part-uuid} is currently only implemented for MSDOS and GPT formatted disks.
 @end deffn
 
 
@@ -5077,9 +5198,84 @@ Alias for @code{hashsum --hash sha512 arg @dots{}}. See command @command{hashsum
 
 @deffn Command sleep [@option{--verbose}] [@option{--interruptible}] count
 Sleep for @var{count} seconds. If option @option{--interruptible} is given,
-allow @key{ESC} to interrupt sleep. With @option{--verbose} show countdown
-of remaining seconds. Exit code is set to 0 if timeout expired and to 1
-if timeout was interrupted by @key{ESC}.
+allow pressing @key{ESC}, @key{F4} or holding down @key{SHIFT} to interrupt
+sleep.  With @option{--verbose} show countdown of remaining seconds. Exit code
+is set to 0 if timeout expired and to 1 if timeout was interrupted using any
+of the mentioned keys.
+@end deffn
+
+
+@node smbios
+@subsection smbios
+
+@deffn Command smbios @
+ [@option{--type} @var{type}] @
+ [@option{--handle} @var{handle}] @
+ [@option{--match} @var{match}] @
+ (@option{--get-byte} | @option{--get-word} | @option{--get-dword} | @
+  @option{--get-qword} | @option{--get-string} | @option{--get-uuid}) @
+ @var{offset} @
+ [@option{--set} @var{variable}]
+Retrieve SMBIOS information.
+
+The @command{smbios} command returns the value of a field in an SMBIOS
+structure.  The following options determine which structure to select.
+
+@itemize @bullet
+@item
+Specifying @option{--type} will select structures with a matching
+@var{type}.  The type can be any integer from 0 to 255.
+@item
+Specifying @option{--handle} will select structures with a matching
+@var{handle}.  The handle can be any integer from 0 to 65535.
+@item
+Specifying @option{--match} will select structure number @var{match} in the
+filtered list of structures; e.g. @code{smbios --type 4 --match 2} will select
+the second Process Information (Type 4) structure.  The list is always ordered
+the same as the hardware's SMBIOS table.  The match number must be a positive
+integer.  If unspecified, the first matching structure will be selected.
+@end itemize
+
+The remaining options determine which field in the selected SMBIOS structure to
+return.  Only one of these options may be specified at a time.
+
+@itemize @bullet
+@item
+When given @option{--get-byte}, return the value of the byte
+at @var{offset} bytes into the selected SMBIOS structure.
+It will be formatted as an unsigned decimal integer.
+@item
+When given @option{--get-word}, return the value of the word (two bytes)
+at @var{offset} bytes into the selected SMBIOS structure.
+It will be formatted as an unsigned decimal integer.
+@item
+When given @option{--get-dword}, return the value of the dword (four bytes)
+at @var{offset} bytes into the selected SMBIOS structure.
+It will be formatted as an unsigned decimal integer.
+@item
+When given @option{--get-qword}, return the value of the qword (eight bytes)
+at @var{offset} bytes into the selected SMBIOS structure.
+It will be formatted as an unsigned decimal integer.
+@item
+When given @option{--get-string}, return the string with its index found
+at @var{offset} bytes into the selected SMBIOS structure.
+@item
+When given @option{--get-uuid}, return the value of the UUID (sixteen bytes)
+at @var{offset} bytes into the selected SMBIOS structure.
+It will be formatted as lower-case hyphenated hexadecimal digits, with the
+first three fields as little-endian, and the rest printed byte-by-byte.
+@end itemize
+
+The default action is to print the value of the requested field to the console,
+but a variable name can be specified with @option{--set} to store the value
+instead of printing it.
+
+For example, this will store and then display the system manufacturer's name.
+
+@example
+smbios --type 1 --get-string 4 --set system_manufacturer
+echo $system_manufacturer
+@end example
 @end deffn
 
 
@@ -5199,12 +5395,6 @@ Unset the environment variable @var{envvar}.
 @end deffn
 
 
-@node uppermem
-@subsection uppermem
-
-This command is not yet implemented for GRUB 2, although it is planned.
-
-
 @ignore
 @node vbeinfo
 @subsection vbeinfo
@@ -5256,6 +5446,9 @@ only applies to the particular cpu/core/thread that runs the command.
 Also, if you specify a reserved or unimplemented MSR address, it will
 cause a general protection exception (which is not currently being handled)
 and the system will reboot.
+
+Note: The command is not allowed when lockdown is enforced (@pxref{Lockdown}).
+      This is done to prevent subverting various security mechanisms.
 @end deffn
 
 @node xen_hypervisor
@@ -5288,10 +5481,11 @@ This command is only available on AArch64 systems.
 * net_add_addr::                Add a network address
 * net_add_dns::                 Add a DNS server
 * net_add_route::               Add routing entry
-* net_bootp::                   Perform a bootp autoconfiguration
+* net_bootp::                   Perform a bootp/DHCP autoconfiguration
 * net_del_addr::                Remove IP address from interface
 * net_del_dns::                 Remove a DNS server
 * net_del_route::               Remove a route entry
+* net_dhcp::                    Perform a DHCP autoconfiguration
 * net_get_dhcp_option::         Retrieve DHCP options
 * net_ipv6_autoconf::           Perform IPv6 autoconfiguration
 * net_ls_addr::                 List interfaces
@@ -5338,8 +5532,44 @@ by @var{shortname} which can be used to remove it (@pxref{net_del_route}).
 @subsection net_bootp
 
 @deffn Command net_bootp [@var{card}]
+Alias for net_dhcp, for compatibility with older Grub versions. Will perform
+the same DHCP handshake with potential fallback to BOOTP as the net_dhcp
+command (@pxref{net_dhcp}).
+
+@end deffn
+
+
+@node net_del_addr
+@subsection net_del_addr
+
+@deffn Command net_del_addr @var{interface}
+Remove configured @var{interface} with associated address.
+@end deffn
+
+
+@node net_del_dns
+@subsection net_del_dns
+
+@deffn Command net_del_dns @var{address}
+Remove @var{address} from list of servers used during name lookup.
+@end deffn
+
+
+@node net_del_route
+@subsection net_del_route
+
+@deffn Command net_del_route @var{shortname}
+Remove route entry identified by @var{shortname}.
+@end deffn
+
+
+@node net_dhcp
+@subsection net_dhcp
+
+@deffn Command net_dhcp [@var{card}]
 Perform configuration of @var{card} using DHCP protocol. If no card name
-is specified, try to configure all existing cards. If configuration was
+is specified, try to configure all existing cards.
+Falls back to the BOOTP protocol, if needed. If configuration was
 successful, interface with name @var{card}@samp{:dhcp} and configured
 address is added to @var{card}.
 @comment If server provided gateway information in
@@ -5366,32 +5596,14 @@ Sets environment variable @samp{net_}@var{<card>}@samp{_dhcp_rootpath}
 @item 18 (Extensions Path)
 Sets environment variable @samp{net_}@var{<card>}@samp{_dhcp_extensionspath}
 (@pxref{net_@var{<interface>}_extensionspath}) to the value of option.
+@item 66 (TFTP Server Name)
+Sets environment variable @samp{net_}@var{<card>}@samp{_dhcp_server_name}
+(@pxref{net_@var{<interface>}_dhcp_server_name}) to the value of option.
+@item 67 (Filename)
+Sets environment variable @samp{net_}@var{<card>}@samp{_boot_file}
+(@pxref{net_@var{<interface>}_boot_file}) to the value of option.
 @end table
 
-@end deffn
-
-
-@node net_del_addr
-@subsection net_del_addr
-
-@deffn Command net_del_addr @var{interface}
-Remove configured @var{interface} with associated address.
-@end deffn
-
-
-@node net_del_dns
-@subsection net_del_dns
-
-@deffn Command net_del_dns @var{address}
-Remove @var{address} from list of servers used during name lookup.
-@end deffn
-
-
-@node net_del_route
-@subsection net_del_route
-
-@deffn Command net_del_route @var{shortname}
-Remove route entry identified by @var{shortname}.
 @end deffn
 
 
@@ -5580,7 +5792,9 @@ environment variables and commands are listed in the same order.
 * Authentication and authorisation:: Users and access control
 * Using digital signatures::         Booting digitally signed code
 * UEFI secure boot and shim::        Booting digitally signed PE files
+* Secure Boot Advanced Targeting::   Embedded information for generation number based revocation
 * Measured Boot::                    Measuring boot components
+* Lockdown::                         Lockdown when booting on a secure setup
 @end menu
 
 @node Authentication and authorisation
@@ -5612,7 +5826,8 @@ the GRUB command line, edit menu entries, and execute any menu entry.  If
 @samp{superusers} is set, then use of the command line and editing of menu
 entries are automatically restricted to superusers. Setting @samp{superusers}
 to empty string effectively disables both access to CLI and editing of menu
-entries.
+entries. Note: The environment variable needs to be exported to also affect
+the section defined by the @samp{submenu} command (@pxref{submenu}).
 
 Other users may be allowed to execute specific menu entries by giving a list of
 usernames (as above) using the @option{--users} option to the
@@ -5672,15 +5887,9 @@ verified with a public key currently trusted by GRUB
 validation fails, then file @file{foo} cannot be opened.  This failure
 may halt or otherwise impact the boot process.
 
-@comment Unfortunately --pubkey is not yet supported by grub-install,
-@comment but we should not bring up internal detail grub-mkimage here
-@comment in the user guide (as opposed to developer's manual).
-
-@comment An initial trusted public key can be embedded within the GRUB
-@comment @file{core.img} using the @code{--pubkey} option to
-@comment @command{grub-mkimage} (@pxref{Invoking grub-install}).  Presently it
-@comment is necessary to write a custom wrapper around @command{grub-mkimage}
-@comment using the @code{--grub-mkimage} flag to @command{grub-install}.
+An initial trusted public key can be embedded within the GRUB @file{core.img}
+using the @code{--pubkey} option to @command{grub-install}
+(@pxref{Invoking grub-install}).
 
 GRUB uses GPG-style detached signatures (meaning that a file
 @file{foo.sig} will be produced when file @file{foo} is signed), and
@@ -5747,15 +5956,37 @@ secure boot chain.
 @section UEFI secure boot and shim support
 
 The GRUB, except the @command{chainloader} command, works with the UEFI secure
-boot and the shim. This functionality is provided by the shim_lock module. It
-is recommend to build in this and other required modules into the @file{core.img}.
-All modules not stored in the @file{core.img} and the ACPI tables for the
-@command{acpi} command have to be signed, e.g. using PGP. Additionally, the
-@command{iorw}, the @command{memrw} and the @command{wrmsr} commands are
-prohibited if the UEFI secure boot is enabled. This is done due to
-security reasons. All above mentioned requirements are enforced by the
-shim_lock module. And itself it is a persistent module which means that
-it cannot be unloaded if it was loaded into the memory.
+boot and the shim. This functionality is provided by the shim_lock verifier. It
+is built into the @file{core.img} and is registered if the UEFI secure boot is
+enabled. The @samp{shim_lock} variable is set to @samp{y} when shim_lock verifier
+is registered. If it is desired to use UEFI secure boot without shim, one can
+disable shim_lock by disabling shim verification with MokSbState UEFI variable
+or by building grub image with @samp{--disable-shim-lock} option.
+
+All GRUB modules not stored in the @file{core.img}, OS kernels, ACPI tables,
+Device Trees, etc. have to be signed, e.g, using PGP. Additionally, the commands
+that can be used to subvert the UEFI secure boot mechanism, such as @command{iorw}
+and @command{memrw} will not be available when the UEFI secure boot is enabled.
+This is done for security reasons and are enforced by the GRUB Lockdown mechanism
+(@pxref{Lockdown}).
+
+@node Secure Boot Advanced Targeting
+@section Embedded information for generation number based revocation
+
+The Secure Boot Advanced Targeting (SBAT) is a mechanism to allow the revocation
+of components in the boot path by using generation numbers embedded into the EFI
+binaries. The SBAT metadata is located in an .sbat data section that has set of
+UTF-8 strings as comma-separated values (CSV). See
+@uref{https://github.com/rhboot/shim/blob/main/SBAT.md} for more details.
+
+To add a data section containing the SBAT information into the binary, the
+@option{--sbat} option of @command{grub-mkimage} command should be used. The content
+of a CSV file, encoded with UTF-8, is copied as is to the .sbat data section into
+the generated EFI binary. The CSV file can be stored anywhere on the file system.
+
+@example
+grub-mkimage -O x86_64-efi -o grubx64.efi -p '(tftp)/grub' --sbat sbat.csv efinet tftp
+@end example
 
 @node Measured Boot
 @section Measuring boot components
@@ -5794,12 +6025,31 @@ into @file{core.img} in order to avoid a potential gap in measurement between
 
 Measured boot is currently only supported on EFI platforms.
 
+@node Lockdown
+@section Lockdown when booting on a secure setup
+
+The GRUB can be locked down when booted on a secure boot environment, for example
+if the UEFI secure boot is enabled. On a locked down configuration, the GRUB will
+be restricted and some operations/commands cannot be executed.
+
+The @samp{lockdown} variable is set to @samp{y} when the GRUB is locked down.
+Otherwise it does not exit.
+
 @node Platform limitations
 @chapter Platform limitations
 
 GRUB2 is designed to be portable and is actually ported across platforms. We
 try to keep all platforms at the level. Unfortunately some platforms are better
 supported than others. This is detailed in current and 2 following sections.
+
+All platforms have an artificially GRUB imposed disk size restriction of 1 EiB.
+In some cases, larger disk sizes can be used, but access will not be allowed
+beyond 1 EiB.
+
+LUKS2 devices with size larger than 16 EiB are currently not supported. They
+can not be created as crypto devices by cryptomount, so can not even be
+partially read from. LUKS have no limitations other than those imposed by the
+format.
 
 ARC platform is unable to change datetime (firmware doesn't seem to provide a
 function for it).
@@ -5819,8 +6069,8 @@ by national encoding compatible only in pseudographics.
 Unicode is the most versatile charset which supports many languages. However
 the actual console may be much more limited depending on firmware
 
-On BIOS network is supported only if the image is loaded through network.
-On sparc64 GRUB is unable to determine which server it was booted from.
+On BIOS, network is supported only if the image is loaded through network.
+On sparc64, GRUB is unable to determine which server it was booted from.
 
 Direct ATA/AHCI support allows to circumvent various firmware limitations but
 isn't needed for normal operation except on baremetal ports.
@@ -5849,7 +6099,7 @@ Bootlocation is ability of GRUB to automatically detect where it boots from.
 ``disk'' means the detection is limited to detecting the disk with partition
 being discovered on install time. ``partition'' means that disk and partiton
 can be automatically discovered. ``file'' means that boot image file name as
-well as disk and partition can be discovered. For consistency default install ignores
+well as disk and partition can be discovered. For consistency, default install ignores
 partition and relies solely on disk detection. If no bootlocation discovery is available
 or boot and grub-root disks are different, UUID is used instead. On ARC if no device
 to install to is specified, UUID is used instead as well.

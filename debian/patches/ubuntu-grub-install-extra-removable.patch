@@ -22,7 +22,7 @@ Patch-Name: ubuntu-grub-install-extra-removable.patch
  1 file changed, 133 insertions(+), 2 deletions(-)
 
 diff --git a/util/grub-install.c b/util/grub-install.c
-index 64c2923..0304646 100644
+index 65277ea..29651bb 100644
 --- a/util/grub-install.c
 +++ b/util/grub-install.c
 @@ -56,6 +56,7 @@
@@ -64,7 +64,7 @@ index 64c2923..0304646 100644
    {0, 0, 0, 0, 0, 0}
  };
  
-@@ -839,6 +848,116 @@ fill_core_services (const char *core_services)
+@@ -847,6 +856,116 @@ fill_core_services (const char *core_services)
    free (sysv_plist);
  }
  
@@ -181,7 +181,7 @@ index 64c2923..0304646 100644
  int
  main (int argc, char *argv[])
  {
-@@ -856,6 +975,7 @@ main (int argc, char *argv[])
+@@ -864,6 +983,7 @@ main (int argc, char *argv[])
    char *relative_grubdir;
    char **efidir_device_names = NULL;
    grub_device_t efidir_grub_dev = NULL;
@@ -189,7 +189,7 @@ index 64c2923..0304646 100644
    char *efidir_grub_devname;
    int efidir_is_mac = 0;
    int is_prep = 0;
-@@ -888,6 +1008,9 @@ main (int argc, char *argv[])
+@@ -896,6 +1016,9 @@ main (int argc, char *argv[])
        bootloader_id = xstrdup ("grub");
      }
  
@@ -199,7 +199,7 @@ index 64c2923..0304646 100644
    if (!grub_install_source_directory)
      {
        if (!target)
-@@ -1107,6 +1230,8 @@ main (int argc, char *argv[])
+@@ -1115,6 +1238,8 @@ main (int argc, char *argv[])
        if (!efidir_is_mac && grub_strcmp (fs->name, "fat") != 0)
  	grub_util_error (_("%s doesn't look like an EFI partition"), efidir);
  
@@ -208,7 +208,7 @@ index 64c2923..0304646 100644
        /* The EFI specification requires that an EFI System Partition must
  	 contain an "EFI" subdirectory, and that OS loaders are stored in
  	 subdirectories below EFI.  Vendors are expected to pick names that do
-@@ -2024,9 +2149,15 @@ main (int argc, char *argv[])
+@@ -2051,9 +2176,15 @@ main (int argc, char *argv[])
  	    fprintf (config_dst_f, "configfile $prefix/grub.cfg\n");
  	    fclose (config_dst_f);
  	    free (config_dst);
@@ -222,6 +222,6 @@ index 64c2923..0304646 100644
 +	    if (!removable && !no_extra_removable)
 +	      also_install_removable(imgfile, base_efidir, efi_suffix, efi_suffix_upper);
 +	  }
- 	free (dst);
-       }
-       if (!removable && update_nvram)
+ 
+ 	grub_set_install_backup_ponr ();
+ 

@@ -34,6 +34,7 @@
 #include <grub/env.h>
 #include <grub/i18n.h>
 #include <grub/verify.h>
+#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -59,15 +60,17 @@ grub_xnu_heap_malloc (int size, void **src, grub_addr_t *target)
 {
   grub_err_t err;
   grub_relocator_chunk_t ch;
+  grub_addr_t tgt;
+
+  if (grub_add (grub_xnu_heap_target_start, grub_xnu_heap_size, &tgt))
+    return GRUB_ERR_OUT_OF_RANGE;
   
-  err = grub_relocator_alloc_chunk_addr (grub_xnu_relocator, &ch,
-					 grub_xnu_heap_target_start
-					 + grub_xnu_heap_size, size);
+  err = grub_relocator_alloc_chunk_addr (grub_xnu_relocator, &ch, tgt, size);
   if (err)
     return err;
 
   *src = get_virtual_current_address (ch);
-  *target = grub_xnu_heap_target_start + grub_xnu_heap_size;
+  *target = tgt;
   grub_xnu_heap_size += size;
   grub_dprintf ("xnu", "val=%p\n", *src);
   return GRUB_ERR_NONE;
@@ -224,26 +227,33 @@ grub_xnu_writetree_toheap (grub_addr_t *target, grub_size_t *size)
   if (! memorymap)
     return grub_errno;
 
-  driverkey = (struct grub_xnu_devtree_key *) grub_malloc (sizeof (*driverkey));
+  driverkey = (struct grub_xnu_devtree_key *) grub_zalloc (sizeof (*driverkey));
   if (! driverkey)
     return grub_errno;
   driverkey->name = grub_strdup ("DeviceTree");
   if (! driverkey->name)
-    return grub_errno;
+    {
+      err = grub_errno;
+      goto fail;
+    }
+
   driverkey->datasize = sizeof (*extdesc);
   driverkey->next = memorymap->first_child;
   memorymap->first_child = driverkey;
   driverkey->data = extdesc
     = (struct grub_xnu_extdesc *) grub_malloc (sizeof (*extdesc));
   if (! driverkey->data)
-    return grub_errno;
+    {
+      err = grub_errno;
+      goto fail;
+    }
 
   /* Allocate the space based on the size with dummy value. */
   *size = grub_xnu_writetree_get_size (grub_xnu_devtree_root, "/");
   err = grub_xnu_heap_malloc (ALIGN_UP (*size + 1, GRUB_XNU_PAGESIZE),
 			      &src, target);
   if (err)
-    return err;
+    goto fail;
 
   /* Put real data in the dummy. */
   extdesc->addr = *target;
@@ -252,6 +262,15 @@ grub_xnu_writetree_toheap (grub_addr_t *target, grub_size_t *size)
   /* Write the tree to heap. */
   grub_xnu_writetree_toheap_real (src, grub_xnu_devtree_root, "/");
   return GRUB_ERR_NONE;
+
+ fail:
+  memorymap->first_child = NULL;
+
+  grub_free (driverkey->data);
+  grub_free (driverkey->name);
+  grub_free (driverkey);
+
+  return err;
 }
 
 /* Find a key or value in parent key. */
@@ -651,6 +670,9 @@ grub_xnu_load_driver (char *infoplistname, grub_file_t binaryfile,
   char *name, *nameend;
   int namelen;
 
+  if (infoplistname == NULL)
+    return grub_error (GRUB_ERR_BAD_FILENAME, N_("missing p-list filename"));
+
   name = get_name_ptr (infoplistname);
   nameend = grub_strchr (name, '/');
 
@@ -682,10 +704,7 @@ grub_xnu_load_driver (char *infoplistname, grub_file_t binaryfile,
   else
     macho = 0;
 
-  if (infoplistname)
-    infoplist = grub_file_open (infoplistname, GRUB_FILE_TYPE_XNU_INFO_PLIST);
-  else
-    infoplist = 0;
+  infoplist = grub_file_open (infoplistname, GRUB_FILE_TYPE_XNU_INFO_PLIST);
   grub_errno = GRUB_ERR_NONE;
   if (infoplist)
     {
@@ -800,7 +819,7 @@ grub_cmd_xnu_mkext (grub_command_t cmd __attribute__ ((unused)),
   if (grub_be_to_cpu32 (head.magic) == GRUB_MACHO_FAT_MAGIC)
     {
       narchs = grub_be_to_cpu32 (head.nfat_arch);
-      archs = grub_malloc (sizeof (struct grub_macho_fat_arch) * narchs);
+      archs = grub_calloc (narchs, sizeof (struct grub_macho_fat_arch));
       if (! archs)
 	{
 	  grub_file_close (file);
@@ -1388,9 +1407,9 @@ grub_xnu_fill_devicetree (void)
     name[len] = 0;
 
     curvalue = grub_xnu_create_value (curkey, name);
+    grub_free (name);
     if (!curvalue)
       return grub_errno;
-    grub_free (name);
    
     data = grub_malloc (grub_strlen (var->value) + 1);
     if (!data)
@@ -1482,20 +1501,23 @@ GRUB_MOD_INIT(xnu)
 				      N_("Load XNU image."));
   cmd_kernel64 = grub_register_command ("xnu_kernel64", grub_cmd_xnu_kernel64,
 					0, N_("Load 64-bit XNU image."));
-  cmd_mkext = grub_register_command ("xnu_mkext", grub_cmd_xnu_mkext, 0,
-				     N_("Load XNU extension package."));
-  cmd_kext = grub_register_command ("xnu_kext", grub_cmd_xnu_kext, 0,
-				    N_("Load XNU extension."));
-  cmd_kextdir = grub_register_command ("xnu_kextdir", grub_cmd_xnu_kextdir,
-				       /* TRANSLATORS: OSBundleRequired is a
-					  variable name in xnu extensions
-					  manifests. It behaves mostly like
-					  GNU/Linux runlevels.
-				       */
-				       N_("DIRECTORY [OSBundleRequired]"),
-				       /* TRANSLATORS: There are many extensions
-					  in extension directory.  */
-				       N_("Load XNU extension directory."));
+  cmd_mkext = grub_register_command_lockdown ("xnu_mkext", grub_cmd_xnu_mkext, 0,
+					      N_("Load XNU extension package."));
+  cmd_kext = grub_register_command_lockdown ("xnu_kext", grub_cmd_xnu_kext, 0,
+					     N_("Load XNU extension."));
+  cmd_kextdir = grub_register_command_lockdown ("xnu_kextdir", grub_cmd_xnu_kextdir,
+						/*
+						 * TRANSLATORS: OSBundleRequired is
+						 * a variable name in xnu extensions
+						 * manifests. It behaves mostly like
+						 * GNU/Linux runlevels.
+						 */
+						N_("DIRECTORY [OSBundleRequired]"),
+						/*
+						 * TRANSLATORS: There are many extensions
+						 * in extension directory.
+						 */
+						N_("Load XNU extension directory."));
   cmd_ramdisk = grub_register_command ("xnu_ramdisk", grub_cmd_xnu_ramdisk, 0,
    /* TRANSLATORS: ramdisk here isn't identifier. It can be translated.  */
 				       N_("Load XNU ramdisk. "

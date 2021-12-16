@@ -49,6 +49,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module argp:
   # Code from module assure:
   # Code from module at-internal:
+  # Code from module base64:
   # Code from module btowc:
   # Code from module builtin-expect:
   # Code from module chdir:
@@ -197,6 +198,7 @@ AC_DEFUN([gl_INIT],
     [AM_][XGETTEXT_OPTION([--flag=argp_error:2:c-format])
      AM_][XGETTEXT_OPTION([--flag=argp_failure:4:c-format])])
   AC_LIBOBJ([openat-proc])
+  gl_FUNC_BASE64
   gl_FUNC_BTOWC
   if test $HAVE_BTOWC = 0 || test $REPLACE_BTOWC = 1; then
     AC_LIBOBJ([btowc])
@@ -704,6 +706,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/argp.h
   lib/asnprintf.c
   lib/assure.h
+  lib/base64.c
+  lib/base64.h
   lib/basename-lgpl.c
   lib/btowc.c
   lib/c++defs.h
@@ -879,6 +883,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/absolute-header.m4
   m4/alloca.m4
   m4/argp.m4
+  m4/base64.m4
   m4/btowc.m4
   m4/builtin-expect.m4
   m4/chdir-long.m4

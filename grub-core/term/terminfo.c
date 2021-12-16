@@ -398,7 +398,7 @@ grub_terminfo_getwh (struct grub_term_output *term)
 }
 
 static void
-grub_terminfo_readkey (struct grub_term_input *term, int *keys, int *len,
+grub_terminfo_readkey (struct grub_term_input *term, int *keys, int *len, int max_len,
 		       int (*readkey) (struct grub_term_input *term))
 {
   int c;
@@ -414,6 +414,9 @@ grub_terminfo_readkey (struct grub_term_input *term, int *keys, int *len,
     if (c == -1)						\
       return;							\
 								\
+    if (*len >= max_len)                                       \
+      return;                                                   \
+                                                                \
     keys[*len] = c;						\
     (*len)++;							\
   }
@@ -602,8 +605,8 @@ grub_terminfo_getkey (struct grub_term_input *termi)
       return ret;
     }
 
-  grub_terminfo_readkey (termi, data->input_buf,
-			 &data->npending, data->readkey);
+  grub_terminfo_readkey (termi, data->input_buf, &data->npending,
+			 GRUB_TERMINFO_READKEY_MAX_LEN, data->readkey);
 
 #if defined(__powerpc__) && defined(GRUB_MACHINE_IEEE1275)
   if (data->npending == 1 && data->input_buf[0] == GRUB_TERM_ESC
@@ -737,7 +740,7 @@ grub_cmd_terminfo (grub_extcmd_context_t ctxt, int argc, char **args)
 
   if (state[OPTION_GEOMETRY].set)
     {
-      char *ptr = state[OPTION_GEOMETRY].arg;
+      const char *ptr = state[OPTION_GEOMETRY].arg;
       w = grub_strtoul (ptr, &ptr, 0);
       if (grub_errno)
 	return grub_errno;
@@ -782,8 +785,8 @@ static grub_extcmd_t cmd;
 GRUB_MOD_INIT(terminfo)
 {
   cmd = grub_register_extcmd ("terminfo", grub_cmd_terminfo, 0,
-			      N_("[[-a|-u|-v] [-g WxH] TERM [TYPE]]"),
-			      N_("Set terminfo type of TERM  to TYPE.\n"),
+			      N_("[[-a|-u|-v] [-g WxH] [TERM] [TYPE]]"),
+			      N_("Set terminfo type of TERM to TYPE.\n"),
 			      options);
 }
 

@@ -75,9 +75,11 @@
 /* These are used to represent the various color states we use.  */
 typedef enum
   {
+    /* Used for uninitialized grub_term_color_state variables */
+    GRUB_TERM_COLOR_UNDEFINED = -1,
     /* The color used to display all text that does not use the
        user defined colors below.  */
-    GRUB_TERM_COLOR_STANDARD,
+    GRUB_TERM_COLOR_STANDARD = 0,
     /* The user defined colors for normal text.  */
     GRUB_TERM_COLOR_NORMAL,
     /* The user defined colors for highlighted text.  */
@@ -327,6 +329,8 @@ grub_term_unregister_output (grub_term_output_t term)
 void grub_putcode (grub_uint32_t code, struct grub_term_output *term);
 int EXPORT_FUNC(grub_getkey) (void);
 int EXPORT_FUNC(grub_getkey_noblock) (void);
+int EXPORT_FUNC(grub_getkeystatus) (void);
+int EXPORT_FUNC(grub_key_is_interrupt) (int key);
 void grub_cls (void);
 void EXPORT_FUNC(grub_refresh) (void);
 void grub_puts_terminal (const char *str, struct grub_term_output *term);

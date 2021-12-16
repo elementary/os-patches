@@ -24,6 +24,16 @@
 #include <grub/efi/api.h>
 #include <grub/efi/console.h>
 
+typedef enum {
+    GRUB_TEXT_MODE_UNDEFINED = -1,
+    GRUB_TEXT_MODE_UNAVAILABLE = 0,
+    GRUB_TEXT_MODE_AVAILABLE
+}
+grub_text_mode;
+
+static grub_text_mode text_mode = GRUB_TEXT_MODE_UNDEFINED;
+static grub_term_color_state text_colorstate = GRUB_TERM_COLOR_UNDEFINED;
+
 static grub_uint32_t
 map_char (grub_uint32_t c)
 {
@@ -66,14 +76,79 @@ map_char (grub_uint32_t c)
 }
 
 static void
-grub_console_putchar (struct grub_term_output *term __attribute__ ((unused)),
+grub_console_setcolorstate (struct grub_term_output *term
+			    __attribute__ ((unused)),
+			    grub_term_color_state state)
+{
+  grub_efi_simple_text_output_interface_t *o;
+
+  if (grub_efi_is_finished)
+    return;
+
+  o = grub_efi_system_table->con_out;
+
+  switch (state) {
+    case GRUB_TERM_COLOR_STANDARD:
+      efi_call_2 (o->set_attributes, o, GRUB_TERM_DEFAULT_STANDARD_COLOR
+		  & 0x7f);
+      break;
+    case GRUB_TERM_COLOR_NORMAL:
+      efi_call_2 (o->set_attributes, o, grub_term_normal_color & 0x7f);
+      break;
+    case GRUB_TERM_COLOR_HIGHLIGHT:
+      efi_call_2 (o->set_attributes, o, grub_term_highlight_color & 0x7f);
+      break;
+    default:
+      break;
+  }
+}
+
+static void
+grub_console_setcursor (struct grub_term_output *term __attribute__ ((unused)),
+			int on)
+{
+  grub_efi_simple_text_output_interface_t *o;
+
+  if (grub_efi_is_finished)
+    return;
+
+  o = grub_efi_system_table->con_out;
+  efi_call_2 (o->enable_cursor, o, on);
+}
+
+static grub_err_t
+grub_prepare_for_text_output (struct grub_term_output *term)
+{
+  if (grub_efi_is_finished)
+    return GRUB_ERR_BAD_DEVICE;
+
+  if (text_mode != GRUB_TEXT_MODE_UNDEFINED)
+    return text_mode ? GRUB_ERR_NONE : GRUB_ERR_BAD_DEVICE;
+
+  if (! grub_efi_set_text_mode (1))
+    {
+      /* This really should never happen */
+      grub_error (GRUB_ERR_BAD_DEVICE, "cannot set text mode");
+      text_mode = GRUB_TEXT_MODE_UNAVAILABLE;
+      return GRUB_ERR_BAD_DEVICE;
+    }
+
+  grub_console_setcursor (term, 1);
+  if (text_colorstate != GRUB_TERM_COLOR_UNDEFINED)
+    grub_console_setcolorstate (term, text_colorstate);
+  text_mode = GRUB_TEXT_MODE_AVAILABLE;
+  return GRUB_ERR_NONE;
+}
+
+static void
+grub_console_putchar (struct grub_term_output *term,
 		      const struct grub_unicode_glyph *c)
 {
   grub_efi_char16_t str[2 + 30];
   grub_efi_simple_text_output_interface_t *o;
   unsigned i, j;
 
-  if (grub_efi_is_finished)
+  if (grub_prepare_for_text_output (term) != GRUB_ERR_NONE)
     return;
 
   o = grub_efi_system_table->con_out;
@@ -152,27 +227,57 @@ grub_console_getkey_con (struct grub_term_input *term __attribute__ ((unused)))
   return grub_efi_translate_key(key);
 }
 
+/*
+ * When more then just modifiers are pressed, our getkeystatus() consumes a
+ * press from the queue, this function buffers the press for the regular
+ * getkey() so that it does not get lost.
+ */
+static grub_err_t
+grub_console_read_key_stroke (
+                   grub_efi_simple_text_input_ex_interface_t *text_input,
+                   grub_efi_key_data_t *key_data_ret, int *key_ret,
+                   int consume)
+{
+  static grub_efi_key_data_t key_data;
+  grub_efi_status_t status;
+  int key;
+
+  if (!text_input)
+    return GRUB_ERR_EOF;
+
+  key = grub_efi_translate_key (key_data.key);
+  if (key == GRUB_TERM_NO_KEY) {
+    status = efi_call_2 (text_input->read_key_stroke, text_input, &key_data);
+    if (status != GRUB_EFI_SUCCESS)
+      return GRUB_ERR_EOF;
+
+    key = grub_efi_translate_key (key_data.key);
+  }
+
+  *key_data_ret = key_data;
+  *key_ret = key;
+
+  if (consume) {
+    key_data.key.scan_code = 0;
+    key_data.key.unicode_char = 0;
+  }
+
+  return GRUB_ERR_NONE;
+}
+
 static int
-grub_console_getkey_ex(struct grub_term_input *term)
+grub_console_getkey_ex (struct grub_term_input *term)
 {
   grub_efi_key_data_t key_data;
-  grub_efi_status_t status;
   grub_efi_uint32_t kss;
+  grub_err_t err;
   int key = -1;
 
-  grub_efi_simple_text_input_ex_interface_t *text_input = term->data;
-
-  status = efi_call_2 (text_input->read_key_stroke, text_input, &key_data);
-
-  if (status != GRUB_EFI_SUCCESS)
+  err = grub_console_read_key_stroke (term->data, &key_data, &key, 1);
+  if (err != GRUB_ERR_NONE || key == GRUB_TERM_NO_KEY)
     return GRUB_TERM_NO_KEY;
 
   kss = key_data.key_state.key_shift_state;
-  key = grub_efi_translate_key(key_data.key);
-
-  if (key == GRUB_TERM_NO_KEY)
-    return GRUB_TERM_NO_KEY;
-
   if (kss & GRUB_EFI_SHIFT_STATE_VALID)
     {
       if ((kss & GRUB_EFI_LEFT_SHIFT_PRESSED
@@ -187,6 +292,39 @@ grub_console_getkey_ex(struct grub_term_input *term)
     }
 
   return key;
+}
+
+static int
+grub_console_getkeystatus (struct grub_term_input *term)
+{
+  grub_efi_key_data_t key_data;
+  grub_efi_uint32_t kss;
+  int key, mods = 0;
+
+  if (grub_efi_is_finished)
+    return 0;
+
+  if (grub_console_read_key_stroke (term->data, &key_data, &key, 0))
+    return 0;
+
+  kss = key_data.key_state.key_shift_state;
+  if (kss & GRUB_EFI_SHIFT_STATE_VALID)
+    {
+      if (kss & GRUB_EFI_LEFT_SHIFT_PRESSED)
+        mods |= GRUB_TERM_STATUS_LSHIFT;
+      if (kss & GRUB_EFI_RIGHT_SHIFT_PRESSED)
+        mods |= GRUB_TERM_STATUS_RSHIFT;
+      if (kss & GRUB_EFI_LEFT_ALT_PRESSED)
+        mods |= GRUB_TERM_STATUS_LALT;
+      if (kss & GRUB_EFI_RIGHT_ALT_PRESSED)
+        mods |= GRUB_TERM_STATUS_RALT;
+      if (kss & GRUB_EFI_LEFT_CONTROL_PRESSED)
+        mods |= GRUB_TERM_STATUS_LCTRL;
+      if (kss & GRUB_EFI_RIGHT_CONTROL_PRESSED)
+        mods |= GRUB_TERM_STATUS_RCTRL;
+    }
+
+  return mods;
 }
 
 static grub_err_t
@@ -223,14 +361,15 @@ grub_console_getkey (struct grub_term_input *term)
 }
 
 static struct grub_term_coordinate
-grub_console_getwh (struct grub_term_output *term __attribute__ ((unused)))
+grub_console_getwh (struct grub_term_output *term)
 {
   grub_efi_simple_text_output_interface_t *o;
   grub_efi_uintn_t columns, rows;
 
   o = grub_efi_system_table->con_out;
-  if (grub_efi_is_finished || efi_call_4 (o->query_mode, o, o->mode->mode,
-					  &columns, &rows) != GRUB_EFI_SUCCESS)
+  if (grub_prepare_for_text_output (term) != GRUB_ERR_NONE ||
+      efi_call_4 (o->query_mode, o, o->mode->mode,
+		  &columns, &rows) != GRUB_EFI_SUCCESS)
     {
       /* Why does this fail?  */
       columns = 80;
@@ -245,7 +384,7 @@ grub_console_getxy (struct grub_term_output *term __attribute__ ((unused)))
 {
   grub_efi_simple_text_output_interface_t *o;
 
-  if (grub_efi_is_finished)
+  if (grub_efi_is_finished || text_mode != GRUB_TEXT_MODE_AVAILABLE)
     return (struct grub_term_coordinate) { 0, 0 };
 
   o = grub_efi_system_table->con_out;
@@ -253,12 +392,12 @@ grub_console_getxy (struct grub_term_output *term __attribute__ ((unused)))
 }
 
 static void
-grub_console_gotoxy (struct grub_term_output *term __attribute__ ((unused)),
+grub_console_gotoxy (struct grub_term_output *term,
 		     struct grub_term_coordinate pos)
 {
   grub_efi_simple_text_output_interface_t *o;
 
-  if (grub_efi_is_finished)
+  if (grub_prepare_for_text_output (term) != GRUB_ERR_NONE)
     return;
 
   o = grub_efi_system_table->con_out;
@@ -271,7 +410,7 @@ grub_console_cls (struct grub_term_output *term __attribute__ ((unused)))
   grub_efi_simple_text_output_interface_t *o;
   grub_efi_int32_t orig_attr;
 
-  if (grub_efi_is_finished)
+  if (grub_efi_is_finished || text_mode != GRUB_TEXT_MODE_AVAILABLE)
     return;
 
   o = grub_efi_system_table->con_out;
@@ -281,60 +420,15 @@ grub_console_cls (struct grub_term_output *term __attribute__ ((unused)))
   efi_call_2 (o->set_attributes, o, orig_attr);
 }
 
-static void
-grub_console_setcolorstate (struct grub_term_output *term
-			    __attribute__ ((unused)),
-			    grub_term_color_state state)
-{
-  grub_efi_simple_text_output_interface_t *o;
-
-  if (grub_efi_is_finished)
-    return;
-
-  o = grub_efi_system_table->con_out;
-
-  switch (state) {
-    case GRUB_TERM_COLOR_STANDARD:
-      efi_call_2 (o->set_attributes, o, GRUB_TERM_DEFAULT_STANDARD_COLOR
-		  & 0x7f);
-      break;
-    case GRUB_TERM_COLOR_NORMAL:
-      efi_call_2 (o->set_attributes, o, grub_term_normal_color & 0x7f);
-      break;
-    case GRUB_TERM_COLOR_HIGHLIGHT:
-      efi_call_2 (o->set_attributes, o, grub_term_highlight_color & 0x7f);
-      break;
-    default:
-      break;
-  }
-}
-
-static void
-grub_console_setcursor (struct grub_term_output *term __attribute__ ((unused)),
-			int on)
-{
-  grub_efi_simple_text_output_interface_t *o;
-
-  if (grub_efi_is_finished)
-    return;
-
-  o = grub_efi_system_table->con_out;
-  efi_call_2 (o->enable_cursor, o, on);
-}
-
-static grub_err_t
-grub_efi_console_output_init (struct grub_term_output *term)
-{
-  grub_efi_set_text_mode (1);
-  grub_console_setcursor (term, 1);
-  return 0;
-}
-
 static grub_err_t
 grub_efi_console_output_fini (struct grub_term_output *term)
 {
+  if (text_mode != GRUB_TEXT_MODE_AVAILABLE)
+    return 0;
+
   grub_console_setcursor (term, 0);
   grub_efi_set_text_mode (0);
+  text_mode = GRUB_TEXT_MODE_UNDEFINED;
   return 0;
 }
 
@@ -342,13 +436,13 @@ static struct grub_term_input grub_console_term_input =
   {
     .name = "console",
     .getkey = grub_console_getkey,
+    .getkeystatus = grub_console_getkeystatus,
     .init = grub_efi_console_input_init,
   };
 
 static struct grub_term_output grub_console_term_output =
   {
     .name = "console",
-    .init = grub_efi_console_output_init,
     .fini = grub_efi_console_output_fini,
     .putchar = grub_console_putchar,
     .getwh = grub_console_getwh,
@@ -364,14 +458,6 @@ static struct grub_term_output grub_console_term_output =
 void
 grub_console_init (void)
 {
-  /* FIXME: it is necessary to consider the case where no console control
-     is present but the default is already in text mode.  */
-  if (! grub_efi_set_text_mode (1))
-    {
-      grub_error (GRUB_ERR_BAD_DEVICE, "cannot set text mode");
-      return;
-    }
-
   grub_term_register_output ("console", &grub_console_term_output);
   grub_term_register_input ("console", &grub_console_term_input);
 }

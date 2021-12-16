@@ -828,7 +828,11 @@ re_search_internal (const regex_t *preg, const char *string, Idx length,
 		    break;
 		  if (__glibc_unlikely (err != REG_NOMATCH))
 		    goto free_return;
+#ifdef DEBUG
+		  /* Only used for assertion below when DEBUG is set, otherwise
+		     it will be over-written when we loop around.  */
 		  match_last = -1;
+#endif
 		}
 	      else
 		break; /* We found a match.  */
@@ -1691,6 +1695,9 @@ static reg_errcode_t
 clean_state_log_if_needed (re_match_context_t *mctx, Idx next_state_log_idx)
 {
   Idx top = mctx->state_log_top;
+
+  if (mctx->state_log == NULL)
+    return REG_NOERROR;
 
   if ((next_state_log_idx >= mctx->input.bufs_len
        && mctx->input.bufs_len < mctx->input.len)

@@ -71,6 +71,7 @@ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/command.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/device.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/disk.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/dl.h
+KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/efi/sb.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/env.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/env_private.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/err.h
@@ -79,6 +80,7 @@ KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/fs.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/i18n.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/kernel.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/list.h
+KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/lockdown.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/misc.h
 if COND_emu
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/compiler-rt-emu.h
@@ -88,8 +90,10 @@ endif
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/mm.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/parser.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/partition.h
+KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/stack_protector.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/term.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/time.h
+KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/verify.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/mm_private.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/net.h
 KERNEL_HEADER_FILES += $(top_srcdir)/include/grub/memory.h
@@ -375,8 +379,10 @@ command.lst: $(MARKER_FILES)
 	  b=`basename $$pp .marker`; \
 	  sed -n \
 	    -e "/EXTCOMMAND_LIST_MARKER *( *\"/{s/.*( *\"\([^\"]*\)\".*/*\1: $$b/;p;}" \
+	    -e "/EXTCOMMAND_LOCKDOWN_LIST_MARKER *( *\"/{s/.*( *\"\([^\"]*\)\".*/*\1: $$b/;p;}" \
 	    -e "/P1COMMAND_LIST_MARKER *( *\"/{s/.*( *\"\([^\"]*\)\".*/*\1: $$b/;p;}" \
-	    -e "/COMMAND_LIST_MARKER *( *\"/{s/.*( *\"\([^\"]*\)\".*/\1: $$b/;p;}" $$pp; \
+	    -e "/COMMAND_LIST_MARKER *( *\"/{s/.*( *\"\([^\"]*\)\".*/\1: $$b/;p;}" \
+	    -e "/COMMAND_LOCKDOWN_LIST_MARKER *( *\"/{s/.*( *\"\([^\"]*\)\".*/\1: $$b/;p;}" $$pp; \
 	done) | sort -u > $@
 platform_DATA += command.lst
 CLEANFILES += command.lst

@@ -463,7 +463,7 @@ SUFFIX (grub_mkimage_generate_elf) (const struct grub_install_image_target_desc 
       grub_util_info ("adding CHRP NOTE segment");
 
       note_ptr->header.n_namesz = grub_host_to_target32 (sizeof (GRUB_IEEE1275_NOTE_NAME));
-      note_ptr->header.n_descsz = grub_host_to_target32 (note_size);
+      note_ptr->header.n_descsz = grub_host_to_target32 (sizeof (struct grub_ieee1275_note_desc));
       note_ptr->header.n_type = grub_host_to_target32 (GRUB_IEEE1275_NOTE_TYPE);
       strcpy (note_ptr->name, GRUB_IEEE1275_NOTE_NAME);
       note_ptr->descriptor.real_mode = grub_host_to_target32 (0xffffffff);
@@ -1232,8 +1232,7 @@ SUFFIX (relocate_addrs) (Elf_Ehdr *e, struct section_metadata *smd,
 		 grub_uint32_t *t32 = (grub_uint32_t *) target;
 		 grub_uint16_t *t16 = (grub_uint16_t *) target;
 		 grub_uint8_t *t8 = (grub_uint8_t *) target;
-		 grub_int64_t off = (long)sym_addr - target_section_addr - offset
-				    - image_target->vaddr_offset;
+		 grub_int64_t off;
 
 		 /*
 		  * Instructions and instruction encoding are documented in the RISC-V
@@ -1243,6 +1242,7 @@ SUFFIX (relocate_addrs) (Elf_Ehdr *e, struct section_metadata *smd,
 		  */
 
 		 sym_addr += addend;
+		 off = sym_addr - target_section_addr - offset - image_target->vaddr_offset;
 
 		 switch (ELF_R_TYPE (info))
 		   {
@@ -2294,10 +2294,8 @@ SUFFIX (grub_mkimage_load_image) (const char *kernel_path,
 		      + grub_host_to_target16 (e->e_shstrndx) * smd.section_entsize);
   smd.strtab = (char *) e + grub_host_to_target_addr (s->sh_offset);
 
-  smd.addrs = xmalloc (sizeof (*smd.addrs) * smd.num_sections);
-  memset (smd.addrs, 0, sizeof (*smd.addrs) * smd.num_sections);
-  smd.vaddrs = xmalloc (sizeof (*smd.vaddrs) * smd.num_sections);
-  memset (smd.vaddrs, 0, sizeof (*smd.vaddrs) * smd.num_sections);
+  smd.addrs = xcalloc (smd.num_sections, sizeof (*smd.addrs));
+  smd.vaddrs = xcalloc (smd.num_sections, sizeof (*smd.vaddrs));
 
   SUFFIX (locate_sections) (e, kernel_path, &smd, layout, image_target);
 
@@ -2390,6 +2388,10 @@ SUFFIX (grub_mkimage_load_image) (const char *kernel_path,
 	  layout->kernel_size += ALIGN_UP (layout->got_size, 16);
 	}
 #endif
+
+      if (image_target->id == IMAGE_EFI)
+        layout->kernel_size = ALIGN_UP (layout->kernel_size,
+                                        GRUB_PE32_FILE_ALIGNMENT);
     }
   else
     {

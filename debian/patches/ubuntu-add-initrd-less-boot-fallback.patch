@@ -18,7 +18,7 @@ Patch-Name: ubuntu-add-initrd-less-boot-fallback.patch
  create mode 100644 grub-initrd-fallback.service
 
 diff --git a/Makefile.am b/Makefile.am
-index 1f4bb9b..e6a2207 100644
+index bf9c1ba..353061e 100644
 --- a/Makefile.am
 +++ b/Makefile.am
 @@ -473,6 +473,9 @@ ChangeLog: FORCE
@@ -32,10 +32,10 @@ index 1f4bb9b..e6a2207 100644
  
  syslinux_test: $(top_builddir)/config.status tests/syslinux/ubuntu10.04_grub.cfg
 diff --git a/configure.ac b/configure.ac
-index 8832455..1819188 100644
+index 22c6cf7..3c87596 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -305,6 +305,16 @@ AC_SUBST(grubdirname)
+@@ -314,6 +314,16 @@ AC_SUBST(grubdirname)
  AC_DEFINE_UNQUOTED(GRUB_DIR_NAME, "$grubdirname",
      [Default grub directory name])
  
@@ -118,7 +118,7 @@ index b7135b6..2642f66 100644
      cat <<EOF
  function recordfail {
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index aa9666e..af1e096 100644
+index dade627..ac6226f 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -118,6 +118,10 @@ if [ "$vt_handoff" = 1 ]; then

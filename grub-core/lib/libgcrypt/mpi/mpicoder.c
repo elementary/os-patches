@@ -379,6 +379,9 @@ gcry_mpi_scan (struct gcry_mpi **ret_mpi, enum gcry_mpi_format format,
   unsigned int len;
   int secure = (buffer && gcry_is_secure (buffer));
 
+  if (!buffer)
+    return gcry_error (GPG_ERR_INV_ARG);
+
   if (format == GCRYMPI_FMT_SSH)
     len = 0;
   else
@@ -458,7 +461,7 @@ gcry_mpi_scan (struct gcry_mpi **ret_mpi, enum gcry_mpi_format format,
       if (len && len < 4)
         return gcry_error (GPG_ERR_TOO_SHORT);
 
-      n = (s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3]);
+      n = ((size_t)s[0] << 24 | (size_t)s[1] << 16 | (size_t)s[2] << 8 | (size_t)s[3]);
       s += 4;
       if (len)
         len -= 4;

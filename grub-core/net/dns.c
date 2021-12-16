@@ -22,6 +22,7 @@
 #include <grub/i18n.h>
 #include <grub/err.h>
 #include <grub/time.h>
+#include <grub/safemath.h>
 
 struct dns_cache_element
 {
@@ -51,9 +52,15 @@ grub_net_add_dns_server (const struct grub_net_network_level_address *s)
     {
       int na = dns_servers_alloc * 2;
       struct grub_net_network_level_address *ns;
+      grub_size_t sz;
+
       if (na < 8)
 	na = 8;
-      ns = grub_realloc (dns_servers, na * sizeof (ns[0]));
+
+      if (grub_mul (na, sizeof (ns[0]), &sz))
+	return GRUB_ERR_OUT_OF_RANGE;
+
+      ns = grub_realloc (dns_servers, sz);
       if (!ns)
 	return grub_errno;
       dns_servers_alloc = na;
@@ -285,8 +292,8 @@ recv_hook (grub_net_udp_socket_t sock __attribute__ ((unused)),
       ptr++;
       ptr += 4;
     }
-  *data->addresses = grub_malloc (sizeof ((*data->addresses)[0])
-				 * grub_be_to_cpu16 (head->ancount));
+  *data->addresses = grub_calloc (grub_be_to_cpu16 (head->ancount),
+				  sizeof ((*data->addresses)[0]));
   if (!*data->addresses)
     {
       grub_errno = GRUB_ERR_NONE;
@@ -406,8 +413,8 @@ recv_hook (grub_net_udp_socket_t sock __attribute__ ((unused)),
       dns_cache[h].addresses = 0;
       dns_cache[h].name = grub_strdup (data->oname);
       dns_cache[h].naddresses = *data->naddresses;
-      dns_cache[h].addresses = grub_malloc (*data->naddresses
-					    * sizeof (dns_cache[h].addresses[0]));
+      dns_cache[h].addresses = grub_calloc (*data->naddresses,
+					    sizeof (dns_cache[h].addresses[0]));
       dns_cache[h].limit_time = grub_get_time_ms () + 1000 * ttl_all;
       if (!dns_cache[h].addresses || !dns_cache[h].name)
 	{
@@ -479,7 +486,7 @@ grub_net_dns_lookup (const char *name,
 	}
     }
 
-  sockets = grub_malloc (sizeof (sockets[0]) * n_servers);
+  sockets = grub_calloc (n_servers, sizeof (sockets[0]));
   if (!sockets)
     return grub_errno;
 

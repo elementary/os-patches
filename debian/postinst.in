@@ -200,7 +200,7 @@ camcontrol_size()
 
 maybe_udevadm()
 {
-  if which udevadm >/dev/null 2>&1; then
+  if command -v udevadm >/dev/null 2>&1; then
     udevadm "$@" || true
   fi
 }
@@ -226,7 +226,7 @@ describe_disk()
         model="$(maybe_udevadm info -n "$disk" -q property | sed -n 's/^DM_NAME=//p')"
         if [ -z "$model" ]; then
           model="$(maybe_udevadm info -n "$disk" -q property | sed -n 's/^MD_NAME=//p')"
-          if [ -z "$model" ] && which dmsetup >/dev/null 2>&1; then
+          if [ -z "$model" ] && command -v dmsetup >/dev/null 2>&1; then
             model="$(dmsetup info -c --noheadings -o name "$disk" 2>/dev/null || true)"
           fi
         fi
@@ -482,7 +482,7 @@ case "$1" in
     fi
 
     env $ucf_env ucf --three-way --debconf-ok --sum-file=/usr/share/grub/default/grub.md5sum "$tmp_default_grub" /etc/default/grub
-    cp -a /usr/share/grub/default/grub /var/lib/grub/ucf/grub.previous
+    cp -aZ /usr/share/grub/default/grub /var/lib/grub/ucf/grub.previous
     package="$(ucfq --with-colons /etc/default/grub | cut -d : -f 2)"
     if echo $package | grep -q "^grub-" ; then
       ucfr --force @PACKAGE@ /etc/default/grub
@@ -637,9 +637,12 @@ case "$1" in
             db_go
             db_get "$question"
             failed_devices=
-            for i in `echo $RET | sed -e 's/, / /g'` ; do
-              real_device="$(readlink -f "$i")"
-              if grub-install --target=i386-pc --force --no-floppy $real_device ; then
+            for i in $RET; do
+              real_device="$(readlink -f "${i%,}")"
+              if [ ! -e "$real_device" ]; then
+                echo "$real_device does not exist, so cannot grub-install to it!" >&2
+                failed_devices="$failed_devices $real_device"
+              elif grub-install --target=i386-pc --force --no-floppy $real_device ; then
                 # We just installed GRUB 2; then also generate grub.cfg.
                 touch /boot/grub/grub.cfg
               else
@@ -674,6 +677,10 @@ case "$1" in
                     exit 1
                   fi
                 else
+                  echo "You must correct your GRUB install devices before proceeding:" >&2
+                  echo >&2
+                  echo "  DEBIAN_FRONTEND=dialog dpkg --configure grub-pc" >&2
+                  echo "  dpkg --configure -a" >&2
                   exit 1 # noninteractive
                 fi
               else
@@ -690,6 +697,10 @@ case "$1" in
                     continue
                   fi
                 else
+                  echo "You must correct your GRUB install devices before proceeding:" >&2
+                  echo >&2
+                  echo "  DEBIAN_FRONTEND=dialog dpkg --configure grub-pc" >&2
+                  echo "  dpkg --configure -a" >&2
                   exit 1 # noninteractive
                 fi
               fi
@@ -713,13 +724,15 @@ case "$1" in
                   db_fset grub-pc/install_devices_empty seen false
                 fi
               else
-                # if question was seen we are done
-                # Otherwise, abort
-                db_fget grub-pc/install_devices_empty seen
+                db_get grub-pc/install_devices_empty
                 if [ "$RET" = true ]; then
                   break
                 else
-                  exit 1
+                  echo "You must correct your GRUB install devices before proceeding:" >&2
+                  echo >&2
+                  echo "  DEBIAN_FRONTEND=dialog dpkg --configure grub-pc" >&2
+                  echo "  dpkg --configure -a" >&2
+                  exit 1 # noninteractive
                 fi
               fi
             else
@@ -751,6 +764,7 @@ case "$1" in
                          cut -d' ' -f1)"
         case $bootloader_id in
           kubuntu) bootloader_id=ubuntu ;;
+          devuan) bootloader_id=debian ;;
         esac
 
         if dpkg --compare-versions "$2" lt-nl 2.02-1~; then

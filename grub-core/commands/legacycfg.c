@@ -32,6 +32,7 @@
 #include <grub/auth.h>
 #include <grub/disk.h>
 #include <grub/partition.h>
+#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -104,13 +105,22 @@ legacy_file (const char *filename)
 	if (newsuffix)
 	  {
 	    char *t;
-	    
+	    grub_size_t sz;
+
+	    if (grub_add (grub_strlen (suffix), grub_strlen (newsuffix), &sz) ||
+		grub_add (sz, 1, &sz))
+	      {
+		grub_errno = GRUB_ERR_OUT_OF_RANGE;
+		goto fail_0;
+	      }
+
 	    t = suffix;
-	    suffix = grub_realloc (suffix, grub_strlen (suffix)
-				   + grub_strlen (newsuffix) + 1);
+	    suffix = grub_realloc (suffix, sz);
 	    if (!suffix)
 	      {
 		grub_free (t);
+
+ fail_0:
 		grub_free (entrysrc);
 		grub_free (parsed);
 		grub_free (newsuffix);
@@ -154,13 +164,22 @@ legacy_file (const char *filename)
 	  else
 	    {
 	      char *t;
+	      grub_size_t sz;
+
+	      if (grub_add (grub_strlen (entrysrc), grub_strlen (parsed), &sz) ||
+		  grub_add (sz, 1, &sz))
+		{
+		  grub_errno = GRUB_ERR_OUT_OF_RANGE;
+		  goto fail_1;
+		}
 
 	      t = entrysrc;
-	      entrysrc = grub_realloc (entrysrc, grub_strlen (entrysrc)
-				       + grub_strlen (parsed) + 1);
+	      entrysrc = grub_realloc (entrysrc, sz);
 	      if (!entrysrc)
 		{
 		  grub_free (t);
+
+ fail_1:
 		  grub_free (parsed);
 		  grub_free (suffix);
 		  return grub_errno;
@@ -314,7 +333,7 @@ grub_cmd_legacy_kernel (struct grub_command *mycmd __attribute__ ((unused)),
   if (argc < 2)
     return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
 
-  cutargs = grub_malloc (sizeof (cutargs[0]) * (argc - 1));
+  cutargs = grub_calloc (argc - 1, sizeof (cutargs[0]));
   if (!cutargs)
     return grub_errno;
   cutargc = argc - 1;
@@ -436,7 +455,7 @@ grub_cmd_legacy_kernel (struct grub_command *mycmd __attribute__ ((unused)),
 	    {
 	      char rbuf[3] = "-r";
 	      bsdargc = cutargc + 2;
-	      bsdargs = grub_malloc (sizeof (bsdargs[0]) * bsdargc);
+	      bsdargs = grub_calloc (bsdargc, sizeof (bsdargs[0]));
 	      if (!bsdargs)
 		{
 		  err = grub_errno;
@@ -559,7 +578,7 @@ grub_cmd_legacy_initrdnounzip (struct grub_command *mycmd __attribute__ ((unused
 	return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("can't find command `%s'"),
 			   "module");
 
-      newargs = grub_malloc ((argc + 1) * sizeof (newargs[0]));
+      newargs = grub_calloc (argc + 1, sizeof (newargs[0]));
       if (!newargs)
 	return grub_errno;
       grub_memcpy (newargs + 1, args, argc * sizeof (newargs[0]));

@@ -31,16 +31,16 @@
 #include <grub/fbfill.h>
 #include <grub/fbutil.h>
 #include <grub/types.h>
+#include <grub/safemath.h>
 #include <grub/video.h>
 
 /* Generic filler that works for every supported mode.  */
 static void
 grub_video_fbfill (struct grub_video_fbblit_info *dst,
 		   grub_video_color_t color, int x, int y,
-		   int width, int height)
+		   unsigned int width, unsigned int height)
 {
-  int i;
-  int j;
+  unsigned int i, j;
 
   for (j = 0; j < height; j++)
     for (i = 0; i < width; i++)
@@ -52,16 +52,17 @@ grub_video_fbfill (struct grub_video_fbblit_info *dst,
 static void
 grub_video_fbfill_direct32 (struct grub_video_fbblit_info *dst,
 			    grub_video_color_t color, int x, int y,
-			    int width, int height)
+			    unsigned int width, unsigned int height)
 {
-  int i;
-  int j;
+  unsigned int i, j;
   grub_uint32_t *dstptr;
   grub_size_t rowskip;
 
   /* Calculate the number of bytes to advance from the end of one line
      to the beginning of the next line.  */
-  rowskip = dst->mode_info->pitch - dst->mode_info->bytes_per_pixel * width;
+  if (grub_mul (dst->mode_info->bytes_per_pixel, width, &rowskip) ||
+      grub_sub (dst->mode_info->pitch, rowskip, &rowskip))
+    return;
 
   /* Get the start address.  */
   dstptr = grub_video_fb_get_video_ptr (dst, x, y);
@@ -81,10 +82,9 @@ grub_video_fbfill_direct32 (struct grub_video_fbblit_info *dst,
 static void
 grub_video_fbfill_direct24 (struct grub_video_fbblit_info *dst,
 			    grub_video_color_t color, int x, int y,
-			    int width, int height)
+			    unsigned int width, unsigned int height)
 {
-  int i;
-  int j;
+  unsigned int i, j;
   grub_size_t rowskip;
   grub_uint8_t *dstptr;
 #ifndef GRUB_CPU_WORDS_BIGENDIAN
@@ -98,7 +98,9 @@ grub_video_fbfill_direct24 (struct grub_video_fbblit_info *dst,
 #endif
   /* Calculate the number of bytes to advance from the end of one line
      to the beginning of the next line.  */
-  rowskip = dst->mode_info->pitch - dst->mode_info->bytes_per_pixel * width;
+  if (grub_mul (dst->mode_info->bytes_per_pixel, width, &rowskip) ||
+      grub_sub (dst->mode_info->pitch, rowskip, &rowskip))
+    return;
 
   /* Get the start address.  */
   dstptr = grub_video_fb_get_video_ptr (dst, x, y);
@@ -122,16 +124,17 @@ grub_video_fbfill_direct24 (struct grub_video_fbblit_info *dst,
 static void
 grub_video_fbfill_direct16 (struct grub_video_fbblit_info *dst,
 			    grub_video_color_t color, int x, int y,
-			    int width, int height)
+			    unsigned int width, unsigned int height)
 {
-  int i;
-  int j;
+  unsigned int i, j;
   grub_size_t rowskip;
   grub_uint16_t *dstptr;
 
   /* Calculate the number of bytes to advance from the end of one line
      to the beginning of the next line.  */
-  rowskip = (dst->mode_info->pitch - dst->mode_info->bytes_per_pixel * width);
+  if (grub_mul (dst->mode_info->bytes_per_pixel, width, &rowskip) ||
+      grub_sub (dst->mode_info->pitch, rowskip, &rowskip))
+    return;
 
   /* Get the start address.  */
   dstptr = grub_video_fb_get_video_ptr (dst, x, y);
@@ -151,17 +154,18 @@ grub_video_fbfill_direct16 (struct grub_video_fbblit_info *dst,
 static void
 grub_video_fbfill_direct8 (struct grub_video_fbblit_info *dst,
 			   grub_video_color_t color, int x, int y,
-			   int width, int height)
+			   unsigned int width, unsigned int height)
 {
-  int i;
-  int j;
+  unsigned int i, j;
   grub_size_t rowskip;
   grub_uint8_t *dstptr;
   grub_uint8_t fill = (grub_uint8_t)color & 0xFF;
 
   /* Calculate the number of bytes to advance from the end of one line
      to the beginning of the next line.  */
-  rowskip = dst->mode_info->pitch - dst->mode_info->bytes_per_pixel * width;
+  if (grub_mul (dst->mode_info->bytes_per_pixel, width, &rowskip) ||
+      grub_sub (dst->mode_info->pitch, rowskip, &rowskip))
+    return;
 
   /* Get the start address.  */
   dstptr = grub_video_fb_get_video_ptr (dst, x, y);

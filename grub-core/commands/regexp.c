@@ -64,7 +64,7 @@ set_matches (char **varnames, char *str, grub_size_t nmatches,
 {
   int i;
   char *p;
-  char *q;
+  const char * q;
   grub_err_t err;
   unsigned long j;
 
@@ -116,7 +116,7 @@ grub_cmd_regexp (grub_extcmd_context_t ctxt, int argc, char **args)
   if (ret)
     goto fail;
 
-  matches = grub_zalloc (sizeof (*matches) * (regex.re_nsub + 1));
+  matches = grub_calloc (regex.re_nsub + 1, sizeof (*matches));
   if (! matches)
     goto fail;
 

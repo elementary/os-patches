@@ -5,10 +5,10 @@ case "$1" in
   purge)
     rm -f /etc/default/grub
 
-    if which ucf >/dev/null ; then
+    if command -v ucf >/dev/null ; then
 	ucf --purge /etc/default/grub
     fi
-    if which ucfr >/dev/null ; then
+    if command -v ucfr >/dev/null ; then
 	ucfr --purge @PACKAGE@ /etc/default/grub || true
     fi
     rm -f /var/lib/grub/ucf/grub.previous

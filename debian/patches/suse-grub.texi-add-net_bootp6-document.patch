@@ -13,18 +13,18 @@ Patch-Name: suse-grub.texi-add-net_bootp6-document.patch
  1 file changed, 17 insertions(+)
 
 diff --git a/docs/grub.texi b/docs/grub.texi
-index d573f32..1d60218 100644
+index 0cc2f24..33cde16 100644
 --- a/docs/grub.texi
 +++ b/docs/grub.texi
-@@ -5396,6 +5396,7 @@ This command is only available on AArch64 systems.
+@@ -5514,6 +5514,7 @@ This command is only available on AArch64 systems.
  * net_add_dns::                 Add a DNS server
  * net_add_route::               Add routing entry
- * net_bootp::                   Perform a bootp autoconfiguration
+ * net_bootp::                   Perform a bootp/DHCP autoconfiguration
 +* net_bootp6::                  Perform a DHCPv6 autoconfiguration
  * net_del_addr::                Remove IP address from interface
  * net_del_dns::                 Remove a DNS server
  * net_del_route::               Remove a route entry
-@@ -5477,6 +5478,22 @@ Sets environment variable @samp{net_}@var{<card>}@samp{_dhcp_extensionspath}
+@@ -5638,6 +5639,22 @@ Sets environment variable @samp{net_}@var{<card>}@samp{_boot_file}
  
  @end deffn
  
@@ -45,5 +45,5 @@ index d573f32..1d60218 100644
 +
 +@end deffn
  
- @node net_del_addr
- @subsection net_del_addr
+ @node net_get_dhcp_option
+ @subsection net_get_dhcp_option

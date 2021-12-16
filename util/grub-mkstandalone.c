@@ -296,7 +296,7 @@ main (int argc, char *argv[])
   grub_util_host_init (&argc, &argv);
   grub_util_disable_fd_syncs ();
 
-  files = xmalloc ((argc + 1) * sizeof (files[0]));
+  files = xcalloc (argc + 1, sizeof (files[0]));
 
   argp_parse (&argp, argc, argv, 0, 0, 0);
 
@@ -317,6 +317,8 @@ main (int argc, char *argv[])
   char *boot_grub = grub_util_path_concat (3, memdisk_dir, "boot", "grub");
   grub_install_copy_files (grub_install_source_directory,
 			   boot_grub, plat);
+
+  grub_set_install_backup_ponr ();
 
   char *memdisk_img = grub_util_make_temporary_file ();
 

@@ -48,6 +48,7 @@
 #  --macro-prefix=gl \
 #  --no-vc-files \
 #  argp \
+#  base64 \
 #  error \
 #  fnmatch \
 #  getdelim \
@@ -143,8 +144,8 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/00gnulib.m4 \
 	$(top_srcdir)/m4/__inline.m4 \
 	$(top_srcdir)/m4/absolute-header.m4 $(top_srcdir)/m4/alloca.m4 \
-	$(top_srcdir)/m4/argp.m4 $(top_srcdir)/m4/btowc.m4 \
-	$(top_srcdir)/m4/builtin-expect.m4 \
+	$(top_srcdir)/m4/argp.m4 $(top_srcdir)/m4/base64.m4 \
+	$(top_srcdir)/m4/btowc.m4 $(top_srcdir)/m4/builtin-expect.m4 \
 	$(top_srcdir)/m4/chdir-long.m4 $(top_srcdir)/m4/close.m4 \
 	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/dirent_h.m4 \
 	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/dirname.m4 \
@@ -231,13 +232,13 @@ am__DEPENDENCIES_1 =
 am__libgnu_a_SOURCES_DIST = argp.h argp-ba.c argp-eexst.c \
 	argp-fmtstream.c argp-fmtstream.h argp-fs-xinl.c argp-help.c \
 	argp-namefrob.h argp-parse.c argp-pin.c argp-pv.c argp-pvh.c \
-	argp-xinl.c cloexec.c dirname-lgpl.c basename-lgpl.c \
-	stripslash.c exitfail.c fd-hook.c fd-safer-flag.c \
-	dup-safer-flag.c filenamecat-lgpl.c getprogname.h \
-	getprogname.c gettext.h hard-locale.c localcharset.c \
-	glthread/lock.h glthread/lock.c malloca.c mbswidth.h \
-	mbswidth.c openat-die.c progname.h progname.c save-cwd.c \
-	size_max.h stat-time.c strnlen1.h strnlen1.c \
+	argp-xinl.c base64.h base64.c cloexec.c dirname-lgpl.c \
+	basename-lgpl.c stripslash.c exitfail.c fd-hook.c \
+	fd-safer-flag.c dup-safer-flag.c filenamecat-lgpl.c \
+	getprogname.h getprogname.c gettext.h hard-locale.c \
+	localcharset.c glthread/lock.h glthread/lock.c malloca.c \
+	mbswidth.h mbswidth.c openat-die.c progname.h progname.c \
+	save-cwd.c size_max.h stat-time.c strnlen1.h strnlen1.c \
 	glthread/threadlib.c unistd.c dup-safer.c fd-safer.c \
 	pipe-safer.c uniwidth/width.c wctype-h.c xsize.h xsize.c
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -246,7 +247,7 @@ am_libgnu_a_OBJECTS = argp-ba.$(OBJEXT) argp-eexst.$(OBJEXT) \
 	argp-fmtstream.$(OBJEXT) argp-fs-xinl.$(OBJEXT) \
 	argp-help.$(OBJEXT) argp-parse.$(OBJEXT) argp-pin.$(OBJEXT) \
 	argp-pv.$(OBJEXT) argp-pvh.$(OBJEXT) argp-xinl.$(OBJEXT) \
-	cloexec.$(OBJEXT) dirname-lgpl.$(OBJEXT) \
+	base64.$(OBJEXT) cloexec.$(OBJEXT) dirname-lgpl.$(OBJEXT) \
 	basename-lgpl.$(OBJEXT) stripslash.$(OBJEXT) \
 	exitfail.$(OBJEXT) fd-hook.$(OBJEXT) fd-safer-flag.$(OBJEXT) \
 	dup-safer-flag.$(OBJEXT) filenamecat-lgpl.$(OBJEXT) \
@@ -1423,15 +1424,15 @@ AM_CFLAGS =
 libgnu_a_SOURCES = argp.h argp-ba.c argp-eexst.c argp-fmtstream.c \
 	argp-fmtstream.h argp-fs-xinl.c argp-help.c argp-namefrob.h \
 	argp-parse.c argp-pin.c argp-pv.c argp-pvh.c argp-xinl.c \
-	cloexec.c dirname-lgpl.c basename-lgpl.c stripslash.c \
-	exitfail.c fd-hook.c fd-safer-flag.c dup-safer-flag.c \
-	filenamecat-lgpl.c getprogname.h getprogname.c gettext.h \
-	hard-locale.c localcharset.c glthread/lock.h glthread/lock.c \
-	malloca.c mbswidth.h mbswidth.c openat-die.c progname.h \
-	progname.c save-cwd.c size_max.h stat-time.c strnlen1.h \
-	strnlen1.c glthread/threadlib.c unistd.c dup-safer.c \
-	fd-safer.c pipe-safer.c $(am__append_1) wctype-h.c xsize.h \
-	xsize.c
+	base64.h base64.c cloexec.c dirname-lgpl.c basename-lgpl.c \
+	stripslash.c exitfail.c fd-hook.c fd-safer-flag.c \
+	dup-safer-flag.c filenamecat-lgpl.c getprogname.h \
+	getprogname.c gettext.h hard-locale.c localcharset.c \
+	glthread/lock.h glthread/lock.c malloca.c mbswidth.h \
+	mbswidth.c openat-die.c progname.h progname.c save-cwd.c \
+	size_max.h stat-time.c strnlen1.h strnlen1.c \
+	glthread/threadlib.c unistd.c dup-safer.c fd-safer.c \
+	pipe-safer.c $(am__append_1) wctype-h.c xsize.h xsize.c
 libgnu_a_LIBADD = $(gl_LIBOBJS) @ALLOCA@
 libgnu_a_DEPENDENCIES = $(gl_LIBOBJS) @ALLOCA@
 EXTRA_libgnu_a_SOURCES = alloca.c openat-proc.c btowc.c chdir-long.c \
@@ -1565,6 +1566,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/argp-pvh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/argp-xinl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/asnprintf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basename-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/btowc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chdir-long.Po@am__quote@

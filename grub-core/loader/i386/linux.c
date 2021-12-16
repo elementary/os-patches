@@ -36,6 +36,7 @@
 #include <grub/lib/cmdline.h>
 #include <grub/linux.h>
 #include <grub/machine/kernel.h>
+#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -45,6 +46,7 @@ GRUB_MOD_LICENSE ("GPLv3+");
 
 #ifdef GRUB_MACHINE_EFI
 #include <grub/efi/efi.h>
+#include <grub/efi/sb.h>
 #define HAS_VGA_TEXT 0
 #define DEFAULT_VIDEO_MODE "auto"
 #define ACCEPTS_PURE_TEXT 0
@@ -180,9 +182,8 @@ allocate_pages (grub_size_t prot_size, grub_size_t *align,
 	for (; err && *align + 1 > min_align; (*align)--)
 	  {
 	    grub_errno = GRUB_ERR_NONE;
-	    err = grub_relocator_alloc_chunk_align (relocator, &ch,
-						    0x1000000,
-						    0xffffffff & ~prot_size,
+	    err = grub_relocator_alloc_chunk_align (relocator, &ch, 0x1000000,
+						    UP_TO_TOP32 (prot_size),
 						    prot_size, 1 << *align,
 						    GRUB_RELOCATOR_PREFERENCE_LOW,
 						    1);
@@ -547,9 +548,13 @@ grub_linux_boot (void)
 
   {
     grub_relocator_chunk_t ch;
+    grub_size_t sz;
+
+    if (grub_add (ctx.real_size, efi_mmap_size, &sz))
+      return GRUB_ERR_OUT_OF_RANGE;
+
     err = grub_relocator_alloc_chunk_addr (relocator, &ch,
-					   ctx.real_mode_target,
-					   (ctx.real_size + efi_mmap_size));
+					   ctx.real_mode_target, sz);
     if (err)
      return err;
     real_mode_mem = get_virtual_current_address (ch);
@@ -579,6 +584,9 @@ grub_linux_boot (void)
     grub_efi_uintn_t efi_desc_size;
     grub_size_t efi_mmap_target;
     grub_efi_uint32_t efi_desc_version;
+
+    ctx.params->secure_boot = grub_efi_get_secureboot ();
+
     err = grub_efi_finish_boot_services (&efi_mmap_size, efi_mmap_buf, NULL,
 					 &efi_desc_size, &efi_desc_version);
     if (err)
@@ -728,7 +736,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
       for (align = 0; align < 32; align++)
 	if (grub_le_to_cpu32 (lh.kernel_alignment) & (1 << align))
 	  break;
-      relocatable = grub_le_to_cpu32 (lh.relocatable);
+      relocatable = lh.relocatable;
     }
   else
     {
@@ -743,14 +751,11 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
       prot_init_space = page_align (prot_size);
       if (relocatable)
 	preferred_address = grub_le_to_cpu64 (lh.pref_address);
-      else
-	preferred_address = GRUB_LINUX_BZIMAGE_ADDR;
     }
   else
     {
       min_align = align;
       prot_size = prot_file_size;
-      preferred_address = GRUB_LINUX_BZIMAGE_ADDR;
       /* Usually, the compression ratio is about 50%.  */
       prot_init_space = page_align (prot_size) * 3;
     }
@@ -761,17 +766,12 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
     goto fail;
 
   grub_memset (&linux_params, 0, sizeof (linux_params));
-  grub_memcpy (&linux_params.setup_sects, &lh.setup_sects, sizeof (lh) - 0x1F1);
-
-  linux_params.code32_start = prot_mode_target + lh.code32_start - GRUB_LINUX_BZIMAGE_ADDR;
-  linux_params.kernel_alignment = (1 << align);
-  linux_params.ps_mouse = linux_params.padding10 =  0;
 
   /*
    * The Linux 32-bit boot protocol defines the setup header end
    * to be at 0x202 + the byte value at 0x201.
    */
-  len = 0x202 + *((char *) &linux_params.jump + 1);
+  len = 0x202 + *((char *) &lh.jump + 1);
 
   /* Verify the struct is big enough so we do not write past the end. */
   if (len > (char *) &linux_params.edd_mbr_sig_buffer - (char *) &linux_params) {
@@ -779,10 +779,13 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
     goto fail;
   }
 
+  grub_memcpy (&linux_params.setup_sects, &lh.setup_sects, len - 0x1F1);
+
   /* We've already read lh so there is no need to read it second time. */
   len -= sizeof(lh);
 
-  if (grub_file_read (file, (char *) &linux_params + sizeof (lh), len) != len)
+  if ((len > 0) &&
+      (grub_file_read (file, (char *) &linux_params + sizeof (lh), len) != len))
     {
       if (!grub_errno)
 	grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"),
@@ -790,6 +793,9 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
       goto fail;
     }
 
+  linux_params.code32_start = prot_mode_target + lh.code32_start - GRUB_LINUX_BZIMAGE_ADDR;
+  linux_params.kernel_alignment = (1 << align);
+  linux_params.ps_mouse = linux_params.padding11 = 0;
   linux_params.type_of_loader = GRUB_LINUX_BOOT_LOADER_TYPE;
 
   /* These two are used (instead of cmd_line_ptr) by older versions of Linux,
@@ -943,7 +949,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
 #endif /* GRUB_MACHINE_PCBIOS */
     if (grub_memcmp (argv[i], "mem=", 4) == 0)
       {
-	char *val = argv[i] + 4;
+	const char *val = argv[i] + 4;
 
 	linux_mem_size = grub_strtoul (val, &val, 0);
 

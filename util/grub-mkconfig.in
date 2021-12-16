@@ -59,7 +59,7 @@ usage () {
     echo
     print_option_help "-o, --output=$(gettext FILE)" "$(gettext "output generated config to FILE [default=stdout]")"
     print_option_help "-h, --help" "$(gettext "print this message and exit")"
-    print_option_help "-v, --version" "$(gettext "print the version information and exit")"
+    print_option_help "-V, --version" "$(gettext "print the version information and exit")"
     echo
     gettext "Report bugs to <bug-grub@gnu.org>."; echo
 }
@@ -140,6 +140,9 @@ GRUB_DEVICE_PARTUUID="`${grub_probe} --device ${GRUB_DEVICE} --target=partuuid 2
 GRUB_DEVICE_BOOT="`${grub_probe} --target=device /boot`"
 GRUB_DEVICE_BOOT_UUID="`${grub_probe} --device ${GRUB_DEVICE_BOOT} --target=fs_uuid 2> /dev/null`" || true
 
+# Disable os-prober by default due to security reasons.
+GRUB_DISABLE_OS_PROBER="true"
+
 # Filesystem for the device containing our userland.  Used for stuff like
 # choosing Hurd filesystem module.
 GRUB_FS="`${grub_probe} --device ${GRUB_DEVICE} --target=fs 2> /dev/null || echo unknown`"
@@ -156,6 +159,15 @@ fi
 
 if test -f ${sysconfdir}/default/grub ; then
   . ${sysconfdir}/default/grub
+fi
+
+if [ "x${GRUB_DISABLE_UUID}" = "xtrue" ]; then
+  if [ -z "${GRUB_DISABLE_LINUX_UUID}" ]; then
+    GRUB_DISABLE_LINUX_UUID="true"
+  fi
+  if [ -z "${GRUB_DISABLE_LINUX_PARTUUID}" ]; then
+    GRUB_DISABLE_LINUX_PARTUUID="true"
+  fi
 fi
 
 # XXX: should this be deprecated at some point?
@@ -192,6 +204,7 @@ export GRUB_DEVICE \
   GRUB_DEVICE_PARTUUID \
   GRUB_DEVICE_BOOT \
   GRUB_DEVICE_BOOT_UUID \
+  GRUB_DISABLE_OS_PROBER \
   GRUB_FS \
   GRUB_FONT \
   GRUB_PRELOAD_MODULES \
@@ -224,6 +237,7 @@ export GRUB_DEFAULT \
   GRUB_TERMINAL_INPUT \
   GRUB_TERMINAL_OUTPUT \
   GRUB_SERIAL_COMMAND \
+  GRUB_DISABLE_UUID \
   GRUB_DISABLE_LINUX_UUID \
   GRUB_DISABLE_LINUX_PARTUUID \
   GRUB_DISABLE_RECOVERY \
@@ -232,7 +246,6 @@ export GRUB_DEFAULT \
   GRUB_BACKGROUND \
   GRUB_THEME \
   GRUB_GFXPAYLOAD_LINUX \
-  GRUB_DISABLE_OS_PROBER \
   GRUB_INIT_TUNE \
   GRUB_SAVEDEFAULT \
   GRUB_ENABLE_CRYPTODISK \
@@ -287,7 +300,8 @@ and /etc/grub.d/* files or please file a bug report with
     exit 1
   else
     # none of the children aborted with error, install the new grub.cfg
-    mv -f ${grub_cfg}.new ${grub_cfg}
+    cat ${grub_cfg}.new > ${grub_cfg}
+    rm -f ${grub_cfg}.new
   fi
 fi
 

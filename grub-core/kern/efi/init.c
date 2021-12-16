@@ -20,11 +20,65 @@
 #include <grub/efi/efi.h>
 #include <grub/efi/console.h>
 #include <grub/efi/disk.h>
+#include <grub/efi/sb.h>
+#include <grub/lockdown.h>
 #include <grub/term.h>
 #include <grub/misc.h>
 #include <grub/env.h>
 #include <grub/mm.h>
 #include <grub/kernel.h>
+#include <grub/stack_protector.h>
+
+#ifdef GRUB_STACK_PROTECTOR
+
+static grub_efi_guid_t rng_protocol_guid = GRUB_EFI_RNG_PROTOCOL_GUID;
+
+/*
+ * Don't put this on grub_efi_init()'s local stack to avoid it
+ * getting a stack check.
+ */
+static grub_efi_uint8_t stack_chk_guard_buf[32];
+
+grub_addr_t __stack_chk_guard;
+
+void __attribute__ ((noreturn))
+__stack_chk_fail (void)
+{
+  /*
+   * Assume it's not safe to call into EFI Boot Services. Sorry, that
+   * means no console message here.
+   */
+  do
+    {
+      /* Do not optimize out the loop. */
+      asm volatile ("");
+    }
+  while (1);
+}
+
+static void
+stack_protector_init (void)
+{
+  grub_efi_rng_protocol_t *rng;
+
+  /* Set up the stack canary. Make errors here non-fatal for now. */
+  rng = grub_efi_locate_protocol (&rng_protocol_guid, NULL);
+  if (rng != NULL)
+    {
+      grub_efi_status_t status;
+
+      status = efi_call_4 (rng->get_rng, rng, NULL, sizeof (stack_chk_guard_buf),
+			   stack_chk_guard_buf);
+      if (status == GRUB_EFI_SUCCESS)
+	grub_memcpy (&__stack_chk_guard, stack_chk_guard_buf, sizeof (__stack_chk_guard));
+    }
+}
+#else
+static void
+stack_protector_init (void)
+{
+}
+#endif
 
 grub_addr_t grub_modbase;
 
@@ -36,8 +90,20 @@ grub_efi_init (void)
      messages.  */
   grub_console_init ();
 
+  stack_protector_init ();
+
   /* Initialize the memory management system.  */
   grub_efi_mm_init ();
+
+  /*
+   * Lockdown the GRUB and register the shim_lock verifier
+   * if the UEFI Secure Boot is enabled.
+   */
+  if (grub_efi_get_secureboot () == GRUB_EFI_SECUREBOOT_MODE_ENABLED)
+    {
+      grub_lockdown ();
+      grub_shim_lock_verifier_setup ();
+    }
 
   efi_call_4 (grub_efi_system_table->boot_services->set_watchdog_timer,
 	      0, 0, 0, NULL);
@@ -80,5 +146,4 @@ grub_efi_fini (void)
 {
   grub_efidisk_fini ();
   grub_console_fini ();
-  grub_efi_memory_fini ();
 }

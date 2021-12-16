@@ -162,7 +162,7 @@ index b561174..a5267db 100644
    grub_util_error ("%s",
  		   _("GRUB was not built with efivar support; "
 diff --git a/grub-core/osdep/windows/platform.c b/grub-core/osdep/windows/platform.c
-index e19a3d9..a3f738f 100644
+index d18488f..b9bcaa2 100644
 --- a/grub-core/osdep/windows/platform.c
 +++ b/grub-core/osdep/windows/platform.c
 @@ -208,7 +208,7 @@ set_efi_variable_bootn (grub_uint16_t n, void *in, grub_size_t len)
@@ -175,10 +175,10 @@ index e19a3d9..a3f738f 100644
  			   const char *efi_distributor)
  {
 diff --git a/include/grub/util/install.h b/include/grub/util/install.h
-index a521f16..b2ed88e 100644
+index 134b862..8f2faad 100644
 --- a/include/grub/util/install.h
 +++ b/include/grub/util/install.h
-@@ -219,15 +219,14 @@ grub_install_get_default_x86_platform (void);
+@@ -226,15 +226,14 @@ grub_install_get_default_x86_platform (void);
  const char *
  grub_install_get_default_powerpc_machtype (void);
  
@@ -203,10 +203,10 @@ index a521f16..b2ed88e 100644
  void
  grub_install_register_ieee1275 (int is_prep, const char *install_device,
 diff --git a/util/grub-install.c b/util/grub-install.c
-index bf8eb65..f408b19 100644
+index 1196685..9e9c93d 100644
 --- a/util/grub-install.c
 +++ b/util/grub-install.c
-@@ -2083,9 +2083,9 @@ main (int argc, char *argv[])
+@@ -2110,9 +2110,9 @@ main (int argc, char *argv[])
  	    {
  	      /* Try to make this image bootable using the EFI Boot Manager, if available.  */
  	      int ret;
@@ -219,7 +219,7 @@ index bf8eb65..f408b19 100644
  	      if (ret)
  	        grub_util_error (_("failed to register the EFI boot entry: %s"),
  				 strerror (ret));
-@@ -2201,7 +2201,7 @@ main (int argc, char *argv[])
+@@ -2231,7 +2231,7 @@ main (int argc, char *argv[])
  			  efidir_grub_dev->disk->name,
  			  (part ? ",": ""), (part ? : ""));
  	  grub_free (part);

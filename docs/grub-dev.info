@@ -1,7 +1,7 @@
 This is grub-dev.info, produced by makeinfo version 6.3 from
 grub-dev.texi.
 
-This developer manual is for GNU GRUB (version 2.04, 24 June 2019).
+This developer manual is for GNU GRUB (version 2.06, 10 May 2021).
 
    Copyright (C) 1999,2000,2001,2002,2004,2005,2006,2008,2009,2010,2011
 Free Software Foundation, Inc.
@@ -25,9 +25,9 @@ This is the developer documentation of GNU GRUB, the GRand Unified
 Bootloader, a flexible and powerful boot loader program for a wide range
 of architectures.
 
-   This edition documents version 2.04.
+   This edition documents version 2.06.
 
-   This developer manual is for GNU GRUB (version 2.04, 24 June 2019).
+   This developer manual is for GNU GRUB (version 2.06, 10 May 2021).
 
    Copyright (C) 1999,2000,2001,2002,2004,2005,2006,2008,2009,2010,2011
 Free Software Foundation, Inc.
@@ -52,6 +52,7 @@ Free Software Foundation, Inc.
 * PFF2 Font File Format::
 * Graphical Menu Software Design::
 * Verifiers framework::
+* Lockdown framework::
 * Copying This Manual::         Copying This Manual
 * Index::
 
@@ -515,9 +516,11 @@ necessary to update it.
 * Menu:
 
 * Gnulib::
+* jsmn::
+* minilzo::
 
 
-File: grub-dev.info,  Node: Gnulib,  Up: Updating External Code
+File: grub-dev.info,  Node: Gnulib,  Next: jsmn,  Up: Updating External Code
 
 5.1 Gnulib
 ==========
@@ -570,6 +573,43 @@ running the './bootstrap' utility:
 
      # Identify characteristics of the host architecture.
 
+
+   It will also be necessary to adjust the patches in
+'po/gettext-patches/' to apply to an older version of gettext.
+
+
+File: grub-dev.info,  Node: jsmn,  Next: minilzo,  Prev: Gnulib,  Up: Updating External Code
+
+5.2 jsmn
+========
+
+jsmn is a minimalistic JSON parser which is implemented in a single
+header file 'jsmn.h'.  To import a different version of the jsmn parser,
+you may simply download the 'jsmn.h' header from the desired tag or
+commit to the target directory:
+
+     curl -L https://raw.githubusercontent.com/zserge/jsmn/v1.1.0/jsmn.h \
+         -o grub-core/lib/json/jsmn.h
+
+
+File: grub-dev.info,  Node: minilzo,  Prev: jsmn,  Up: Updating External Code
+
+5.3 minilzo
+===========
+
+miniLZO is a very lightweight subset of the LZO library intended for
+easy inclusion in other projects.  It is generated automatically from
+the LZO source code and contains the most important LZO functions.
+
+   To upgrade to a new version of the miniLZO library, download the
+release tarball and copy the files into the target directory:
+
+     curl -L -O http://www.oberhumer.com/opensource/lzo/download/minilzo-2.08.tar.gz
+     tar -zxf minilzo-2.08.tar.gz
+     rm minilzo-2.08/testmini.c
+     rm -r grub-core/lib/minilzo/*
+     cp minilzo-2.08/*.[hc] grub-core/lib/minilzo
+     rm -r minilzo-2.08*
 
 
 File: grub-dev.info,  Node: Porting,  Next: Error Handling,  Prev: Updating External Code,  Up: Top
@@ -796,7 +836,7 @@ to be inited in 2 stages: one before (to get at least rudimentary
 console as early as possible) and another after the heap (to get
 full-featured console).  For the input there are string of keys,
 terminfo and direct hardware.  For string of keys look at i386-pc (same
-files), for termino ieee1275 (same files) and for hardware loongson
+files), for terminfo ieee1275 (same files) and for hardware loongson
 (kern/mips/loongson/init.c and term/at_keyboard.c).
 
    For the timer you'll need to call grub_install_get_time_ms (...)
@@ -2097,7 +2137,7 @@ mode that was in use before 'grub_video_setup()' was called might fix
 some of the problems.
 
 
-File: grub-dev.info,  Node: Verifiers framework,  Next: Copying This Manual,  Prev: Graphical Menu Software Design,  Up: Top
+File: grub-dev.info,  Node: Verifiers framework,  Next: Lockdown framework,  Prev: Graphical Menu Software Design,  Up: Top
 
 13 Verifiers framework
 **********************
@@ -2161,7 +2201,32 @@ with just the context.  If you return no error during any of 'init',
 verification.
 
 
-File: grub-dev.info,  Node: Copying This Manual,  Next: Index,  Prev: Verifiers framework,  Up: Top
+File: grub-dev.info,  Node: Lockdown framework,  Next: Copying This Manual,  Prev: Verifiers framework,  Up: Top
+
+14 Lockdown framework
+*********************
+
+The GRUB can be locked down, which is a restricted mode where some
+operations are not allowed.  For instance, some commands cannot be used
+when the GRUB is locked down.
+
+   The function 'grub_lockdown()' is used to lockdown GRUB and the
+function 'grub_is_lockdown()' function can be used to check whether
+lockdown is enabled or not.  When enabled, the function returns
+'GRUB_LOCKDOWN_ENABLED' and 'GRUB_LOCKDOWN_DISABLED' when is not
+enabled.
+
+   The following functions can be used to register the commands that can
+only be used when lockdown is disabled:
+
+   * 'grub_cmd_lockdown()' registers command which should not run when
+     the GRUB is in lockdown mode.
+
+   * 'grub_cmd_lockdown()' registers extended command which should not
+     run when the GRUB is in lockdown mode.
+
+
+File: grub-dev.info,  Node: Copying This Manual,  Next: Index,  Prev: Lockdown framework,  Up: Top
 
 Appendix A Copying This Manual
 ******************************
@@ -2614,43 +2679,46 @@ Index
 
 
 Tag Table:
-Node: Top637
-Node: Getting the source code1777
-Node: Coding style2738
-Node: Naming Conventions3147
-Node: Functions3432
-Node: Variables4306
-Node: Types5421
-Node: Macros6022
-Node: Comments6354
-Node: Multi-Line Comments6963
-Node: Finding your way around7888
-Node: Contributing Changes11204
-Node: Getting started12309
-Node: Typical Developer Experience16361
-Node: When you are approved for write access to project's files17403
-Node: Updating External Code18836
-Node: Gnulib19107
-Node: Porting20969
-Node: Error Handling32733
-Node: Stack and heap size37825
-Node: BIOS port memory map40458
-Node: Video Subsystem41307
-Node: Video API41781
-Node: Example usage of Video API62230
-Node: Bitmap API63810
-Node: PFF2 Font File Format66343
-Node: Introduction66583
-Node: File Structure68086
-Node: Font Metrics73004
-Node: Graphical Menu Software Design74152
-Node: Introduction_274444
-Node: Startup Sequence75178
-Node: GUI Components76029
-Node: Command Line Window78629
-Node: Verifiers framework79581
-Node: Copying This Manual82189
-Node: GNU Free Documentation License82434
-Node: Index104827
+Node: Top636
+Node: Getting the source code1798
+Node: Coding style2759
+Node: Naming Conventions3168
+Node: Functions3453
+Node: Variables4327
+Node: Types5442
+Node: Macros6043
+Node: Comments6375
+Node: Multi-Line Comments6984
+Node: Finding your way around7909
+Node: Contributing Changes11225
+Node: Getting started12330
+Node: Typical Developer Experience16382
+Node: When you are approved for write access to project's files17424
+Node: Updating External Code18857
+Node: Gnulib19149
+Node: jsmn21142
+Node: minilzo21613
+Node: Porting22319
+Node: Error Handling34084
+Node: Stack and heap size39176
+Node: BIOS port memory map41809
+Node: Video Subsystem42658
+Node: Video API43132
+Node: Example usage of Video API63581
+Node: Bitmap API65161
+Node: PFF2 Font File Format67694
+Node: Introduction67934
+Node: File Structure69437
+Node: Font Metrics74355
+Node: Graphical Menu Software Design75503
+Node: Introduction_275795
+Node: Startup Sequence76529
+Node: GUI Components77380
+Node: Command Line Window79980
+Node: Verifiers framework80932
+Node: Lockdown framework83539
+Node: Copying This Manual84481
+Node: GNU Free Documentation License84725
+Node: Index107118
 
 End Tag Table

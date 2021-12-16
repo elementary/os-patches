@@ -19,7 +19,7 @@ Signed-off-by: Dimitri John Ledkov <xnox@ubuntu.com>
  4 files changed, 12 insertions(+), 5 deletions(-)
 
 diff --git a/grub-core/loader/arm64/linux.c b/grub-core/loader/arm64/linux.c
-index 1a5296a..3f5496f 100644
+index 4e9eac3..f60ca2f 100644
 --- a/grub-core/loader/arm64/linux.c
 +++ b/grub-core/loader/arm64/linux.c
 @@ -34,6 +34,7 @@
@@ -30,13 +30,13 @@ index 1a5296a..3f5496f 100644
  
  GRUB_MOD_LICENSE ("GPLv3+");
  
-@@ -342,11 +343,15 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+@@ -345,11 +346,15 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
  
    grub_dprintf ("linux", "kernel @ %p\n", kernel_addr);
  
 -  rc = grub_linuxefi_secure_validate (kernel_addr, kernel_size);
 -  if (rc < 0)
-+  if (grub_efi_secure_boot ())
++  if (grub_efi_get_secureboot() == GRUB_EFI_SECUREBOOT_MODE_ENABLED)
      {
 -      grub_error (GRUB_ERR_INVALID_COMMAND, N_("%s has invalid signature"), argv[0]);
 -      goto fail;
@@ -49,12 +49,12 @@ index 1a5296a..3f5496f 100644
 +        }
      }
  
-   cmdline_size = grub_loader_cmdline_size (argc, argv) + sizeof (LINUX_IMAGE);
+   pe = (void *)((unsigned long)kernel_addr + lh.hdr_offset);
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index f8a34cd..cf89ced 100644
+index cf76f48..d64c851 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
-@@ -1096,6 +1096,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -1098,6 +1098,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
  
        return 0;
      }
@@ -63,7 +63,7 @@ index f8a34cd..cf89ced 100644
    grub_file_close (file);
    grub_device_close (dev);
 diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
-index e372b26..f6d30bc 100644
+index 73a7196..a09479c 100644
 --- a/grub-core/loader/efi/linux.c
 +++ b/grub-core/loader/efi/linux.c
 @@ -34,6 +34,7 @@ struct grub_efi_shim_lock
@@ -75,11 +75,11 @@ index e372b26..f6d30bc 100644
  grub_linuxefi_secure_validate (void *data, grub_uint32_t size)
  {
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-index 2929da7..e357bf6 100644
+index feaedce..4676f8b 100644
 --- a/grub-core/loader/i386/efi/linux.c
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -199,7 +199,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
-   if (grub_efi_secure_boot ())
+   if (grub_efi_get_secureboot() == GRUB_EFI_SECUREBOOT_MODE_ENABLED)
      {
        rc = grub_linuxefi_secure_validate (kernel, filelen);
 -      if (rc < 0)

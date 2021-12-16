@@ -24,6 +24,7 @@
 #include <grub/env.h>
 #include <grub/command.h>
 #include <grub/extcmd.h>
+#include <grub/lockdown.h>
 #include <grub/i18n.h>
 #include <grub/i386/cpuid.h>
 #include <grub/i386/wrmsr.h>
@@ -37,7 +38,7 @@ grub_cmd_msr_write (grub_command_t cmd __attribute__ ((unused)), int argc, char 
 {
   grub_uint32_t manufacturer[3], max_cpuid, a, b, c, features, addr;
   grub_uint64_t value;
-  char *ptr;
+  const char *ptr;
 
   /*
    * The CPUID instruction should be used to determine whether MSRs
@@ -83,8 +84,8 @@ grub_cmd_msr_write (grub_command_t cmd __attribute__ ((unused)), int argc, char 
 
 GRUB_MOD_INIT(wrmsr)
 {
-  cmd_write = grub_register_command ("wrmsr", grub_cmd_msr_write, N_("ADDR VALUE"),
-				     N_("Write a value to a CPU model specific register."));
+  cmd_write = grub_register_command_lockdown ("wrmsr", grub_cmd_msr_write, N_("ADDR VALUE"),
+                                              N_("Write a value to a CPU model specific register."));
 }
 
 GRUB_MOD_FINI(wrmsr)

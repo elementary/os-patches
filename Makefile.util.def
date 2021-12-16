@@ -3,7 +3,7 @@ AutoGen definitions Makefile.tpl;
 library = {
   name = libgrubkern.a;
   cflags = '$(CFLAGS_GNULIB)';
-  cppflags = '$(CPPFLAGS_GNULIB)';
+  cppflags = '$(CPPFLAGS_GNULIB) -I$(srcdir)/grub-core/lib/json';
 
   common = util/misc.c;
   common = grub-core/kern/command.c;
@@ -36,7 +36,9 @@ library = {
   common = grub-core/kern/misc.c;
   common = grub-core/kern/partition.c;
   common = grub-core/lib/crypto.c;
+  common = grub-core/lib/json/json.c;
   common = grub-core/disk/luks.c;
+  common = grub-core/disk/luks2.c;
   common = grub-core/disk/geli.c;
   common = grub-core/disk/cryptodisk.c;
   common = grub-core/disk/AFSplitter.c;
@@ -139,7 +141,7 @@ library = {
   common = grub-core/lib/crc.c;
   common = grub-core/lib/adler32.c;
   common = grub-core/lib/crc64.c;
-  common = grub-core/normal/datetime.c;
+  common = grub-core/lib/datetime.c;
   common = grub-core/normal/misc.c;
   common = grub-core/partmap/acorn.c;
   common = grub-core/partmap/amiga.c;
@@ -201,7 +203,6 @@ program = {
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBLZMA)';
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
-  cppflags = '-DGRUB_PKGLIBDIR=\"$(pkglibdir)\"';
 };
 
 program = {
@@ -240,8 +241,19 @@ program = {
 
   common = util/grub-editenv.c;
   common = util/editenv.c;
+  common = util/grub-install-common.c;
   common = grub-core/osdep/init.c;
+  common = grub-core/osdep/compress.c;
+  extra_dist = grub-core/osdep/unix/compress.c;
+  extra_dist = grub-core/osdep/basic/compress.c;
+  common = util/mkimage.c;
+  common = util/grub-mkimage32.c;
+  common = util/grub-mkimage64.c;
+  common = grub-core/osdep/config.c;
+  common = util/config.c;
+  common = util/resolve.c;
 
+  ldadd = '$(LIBLZMA)';
   ldadd = libgrubmods.a;
   ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
@@ -499,6 +511,12 @@ script = {
 script = {
   name = '30_os-prober';
   common = util/grub.d/30_os-prober.in;
+  installdir = grubconf;
+};
+
+script = {
+  name = '30_uefi-firmware';
+  common = util/grub.d/30_uefi-firmware.in;
   installdir = grubconf;
 };
 

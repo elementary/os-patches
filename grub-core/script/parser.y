@@ -279,7 +279,7 @@ function: "function" "name"
 	    $<scripts>$ = state->scripts;
 	    state->scripts = 0;
           }
-          delimiters0 "{" commands1 delimiters1 "}"
+          newlines0 "{" commands1 delimiters1 "}"
           {
             struct grub_script *script;
             state->func_mem = grub_script_mem_record_stop (state,
@@ -289,7 +289,8 @@ function: "function" "name"
 	      grub_script_mem_free (state->func_mem);
 	    else {
 	      script->children = state->scripts;
-	      grub_script_function_create ($2, script);
+	      if (!grub_script_function_create ($2, script))
+		grub_script_free (script);
 	    }
 
 	    state->scripts = $<scripts>3;

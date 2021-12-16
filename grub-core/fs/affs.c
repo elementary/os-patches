@@ -301,7 +301,7 @@ grub_affs_read_symlink (grub_fshelp_node_t node)
       return 0;
     }
   latin1[symlink_size] = 0;
-  utf8 = grub_malloc (symlink_size * GRUB_MAX_UTF8_PER_LATIN1 + 1);
+  utf8 = grub_calloc (GRUB_MAX_UTF8_PER_LATIN1 + 1, symlink_size);
   if (!utf8)
     {
       grub_free (latin1);
@@ -400,12 +400,12 @@ grub_affs_iterate_dir (grub_fshelp_node_t dir,
 {
   unsigned int i;
   struct grub_affs_file file;
-  struct grub_fshelp_node *node = 0;
+  struct grub_fshelp_node *node, *orig_node;
   struct grub_affs_data *data = dir->data;
   grub_uint32_t *hashtable;
 
   /* Create the directory entries for `.' and `..'.  */
-  node = grub_zalloc (sizeof (*node));
+  node = orig_node = grub_zalloc (sizeof (*node));
   if (!node)
     return 1;
     
@@ -414,15 +414,12 @@ grub_affs_iterate_dir (grub_fshelp_node_t dir,
     return 1;
   if (dir->parent)
     {
-      node = grub_zalloc (sizeof (*node));
-      if (!node)
-	return 1;
       *node = *dir->parent;
       if (hook ("..", GRUB_FSHELP_DIR, node, hook_data))
 	return 1;
     }
 
-  hashtable = grub_zalloc (data->htsize * sizeof (*hashtable));
+  hashtable = grub_calloc (data->htsize, sizeof (*hashtable));
   if (!hashtable)
     return 1;
 
@@ -456,17 +453,18 @@ grub_affs_iterate_dir (grub_fshelp_node_t dir,
 
 	  if (grub_affs_create_node (dir, hook, hook_data, &node, &hashtable,
 				     next, &file))
-	    return 1;
+	    {
+	      /* Node has been replaced in function. */
+	      grub_free (orig_node);
+	      return 1;
+	    }
 
 	  next = grub_be_to_cpu32 (file.next);
 	}
     }
 
-  grub_free (hashtable);
-  return 0;
-
  fail:
-  grub_free (node);
+  grub_free (orig_node);
   grub_free (hashtable);
   return 0;
 }
@@ -628,7 +626,7 @@ grub_affs_label (grub_device_t device, char **label)
       len = file.namelen;
       if (len > sizeof (file.name))
 	len = sizeof (file.name);
-      *label = grub_malloc (len * GRUB_MAX_UTF8_PER_LATIN1 + 1);
+      *label = grub_calloc (GRUB_MAX_UTF8_PER_LATIN1 + 1, len);
       if (*label)
 	*grub_latin1_to_utf8 ((grub_uint8_t *) *label, file.name, len) = '\0';
     }
@@ -643,7 +641,7 @@ grub_affs_label (grub_device_t device, char **label)
 }
 
 static grub_err_t
-grub_affs_mtime (grub_device_t device, grub_int32_t *t)
+grub_affs_mtime (grub_device_t device, grub_int64_t *t)
 {
   struct grub_affs_data *data;
   grub_disk_t disk = device->disk;

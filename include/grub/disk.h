@@ -27,6 +27,8 @@
 #include <grub/device.h>
 /* For NULL.  */
 #include <grub/mm.h>
+/* For ALIGN_UP.  */
+#include <grub/misc.h>
 
 /* These are used to set a device id. When you add a new disk device,
    you must define a new id for it here.  */
@@ -161,6 +163,12 @@ typedef struct grub_disk_memberlist *grub_disk_memberlist_t;
 #define GRUB_DISK_SECTOR_SIZE	0x200
 #define GRUB_DISK_SECTOR_BITS	9
 
+/*
+ * Some drivers have problems with disks above reasonable sizes.
+ * Set max disk size at 1 EiB.
+ */
+#define GRUB_DISK_MAX_SECTORS	(1ULL << (60 - GRUB_DISK_SECTOR_BITS))
+
 /* The maximum number of disk caches.  */
 #define GRUB_DISK_CACHE_NUM	1021
 
@@ -171,8 +179,32 @@ typedef struct grub_disk_memberlist *grub_disk_memberlist_t;
 
 #define GRUB_DISK_MAX_MAX_AGGLOMERATE ((1 << (30 - GRUB_DISK_CACHE_BITS - GRUB_DISK_SECTOR_BITS)) - 1)
 
-/* Return value of grub_disk_get_size() in case disk size is unknown. */
+/* Return value of grub_disk_native_sectors() in case disk size is unknown. */
 #define GRUB_DISK_SIZE_UNKNOWN	 0xffffffffffffffffULL
+
+/* Convert sector number from one sector size to another. */
+static inline grub_disk_addr_t
+grub_convert_sector (grub_disk_addr_t sector,
+		     grub_size_t log_sector_size_from,
+		     grub_size_t log_sector_size_to)
+{
+  if (log_sector_size_from == log_sector_size_to)
+    return sector;
+  else if (log_sector_size_from < log_sector_size_to)
+    {
+      sector = ALIGN_UP (sector, 1 << (log_sector_size_to - log_sector_size_from));
+      return sector >> (log_sector_size_to - log_sector_size_from);
+    }
+  else
+    return sector << (log_sector_size_from - log_sector_size_to);
+}
+
+/* Convert to GRUB native disk sized sector from disk sized sector. */
+static inline grub_disk_addr_t
+grub_disk_from_native_sector (grub_disk_t disk, grub_disk_addr_t sector)
+{
+  return sector << (disk->log_sector_size - GRUB_DISK_SECTOR_BITS);
+}
 
 /* This is called from the memory manager.  */
 void grub_disk_cache_invalidate_all (void);
@@ -212,7 +244,7 @@ extern grub_err_t (*EXPORT_VAR(grub_disk_write_weak)) (grub_disk_t disk,
 						       const void *buf);
 
 
-grub_uint64_t EXPORT_FUNC(grub_disk_get_size) (grub_disk_t disk);
+grub_uint64_t EXPORT_FUNC(grub_disk_native_sectors) (grub_disk_t disk);
 
 #if DISK_CACHE_STATS
 void

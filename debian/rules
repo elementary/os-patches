@@ -15,7 +15,11 @@ export DEB_BUILD_MAINT_OPTIONS = optimize=-lto
 HOST_CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
 # -O3 (default on Ubuntu ppc64el) introduces various -Werror failures, and
 # isn't worth it here.
+ifneq (,$(filter s390x,$(DEB_HOST_ARCH_CPU)))
+HOST_CFLAGS := -Wall -Wno-error=unused-result $(shell dpkg-buildflags --get CFLAGS | perl -pe 's/-O[23]\b/-O1/')
+else
 HOST_CFLAGS := -Wall -Wno-error=unused-result $(shell dpkg-buildflags --get CFLAGS | perl -pe 's/-O3\b/-O2/')
+endif
 HOST_LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
 
 include /usr/share/dpkg/pkg-info.mk
@@ -46,7 +50,7 @@ else
 with_check := yes
 endif
 
-CC := gcc-8
+CC := gcc-10
 
 confflags = \
 	PACKAGE_VERSION="$(deb_version)" PACKAGE_STRING="GRUB $(deb_version)" \
@@ -200,7 +204,7 @@ endif
 SB_EFI_VENDOR ?= $(shell dpkg-vendor --query vendor | tr '[:upper:]' '[:lower:]')
 
 %:
-	dh $@ --with=bash_completion,systemd
+	dh $@ --with=bash_completion
 
 override_dh_auto_configure: $(patsubst %,configure/%,$(BUILD_PACKAGES))
 
@@ -237,26 +241,7 @@ override_dh_autoreconf:
 	env -u DH_OPTIONS GRUB_CONTRIB=$(CURDIR)/debian/grub-extras-enabled \
 		PYTHON=python3 \
 		dh_autoreconf -- ./autogen.sh
-	for patchname in \
-		0001-Support-POTFILES-shell \
-		0002-Handle-gettext_printf-shell-function \
-		0003-Make-msgfmt-output-in-little-endian \
-		0004-Use-SHELL-rather-than-bin-sh; do \
-		patch -d po -p3 \
-		< "debian/gettext-patches/$$patchname.patch"; \
-	done
 	cp /usr/share/lzo/minilzo/*.c /usr/share/lzo/minilzo/*.h grub-core/lib/minilzo/
-
-override_dh_autoreconf_clean:
-	[ ! -e debian/autoreconf.after ] || for patchname in \
-		0004-Use-SHELL-rather-than-bin-sh \
-		0003-Make-msgfmt-output-in-little-endian \
-		0002-Handle-gettext_printf-shell-function \
-		0001-Support-POTFILES-shell; do \
-		patch -d po -p3 -R \
-		< "debian/gettext-patches/$$patchname.patch"; \
-	done
-	dh_autoreconf_clean
 
 debian/stamps/configure-grub-common: debian/stamps/configure-grub-$(COMMON_PLATFORM)
 	touch $@
@@ -309,14 +294,14 @@ ifneq (i386,$(DEB_HOST_ARCH_CPU))
 	grub_dir=`mktemp -d` ; \
 	sed -e "s/@DEB_VERSION@/$(deb_version)/g" \
 		-e "s/@UPSTREAM_VERSION@/$(upstream_version)/g" \
-		<debian/sbat.csv.in \
-		>$${grub_dir}/sbat.csv; \
+		<debian/sbat.$(SB_EFI_VENDOR).csv.in \
+		>$${grub_dir}/sbat.$(SB_EFI_VENDOR).csv; \
 	debian/build-efi-images \
 		obj/grub-$(COMMON_PLATFORM)/grub-mkimage \
 		obj/$(package)/grub-core \
 		obj/monolithic/$(package) \
-		$(DEB_HOST_ARCH) $(SB_PLATFORM) $(SB_EFI_NAME) $${grub_dir}/sbat.csv \
-		$(SB_EFI_VENDOR)
+		$(DEB_HOST_ARCH) $(SB_PLATFORM) $(SB_EFI_NAME) \
+		$${grub_dir}/sbat.$(SB_EFI_VENDOR).csv $(SB_EFI_VENDOR)
 endif
 	touch $@
 

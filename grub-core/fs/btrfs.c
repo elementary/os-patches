@@ -40,6 +40,7 @@
 #include <grub/btrfs.h>
 #include <grub/crypto.h>
 #include <grub/diskfilter.h>
+#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -136,6 +137,8 @@ struct grub_btrfs_chunk_item
 #define GRUB_BTRFS_CHUNK_TYPE_RAID10        0x40
 #define GRUB_BTRFS_CHUNK_TYPE_RAID5         0x80
 #define GRUB_BTRFS_CHUNK_TYPE_RAID6         0x100
+#define GRUB_BTRFS_CHUNK_TYPE_RAID1C3       0x200
+#define GRUB_BTRFS_CHUNK_TYPE_RAID1C4       0x400
   grub_uint8_t dummy2[0xc];
   grub_uint16_t nstripes;
   grub_uint16_t nsubstripes;
@@ -329,9 +332,13 @@ save_ref (struct grub_btrfs_leaf_descriptor *desc,
   if (desc->allocated < desc->depth)
     {
       void *newdata;
-      desc->allocated *= 2;
-      newdata = grub_realloc (desc->data, sizeof (desc->data[0])
-			      * desc->allocated);
+      grub_size_t sz;
+
+      if (grub_mul (desc->allocated, 2, &desc->allocated) ||
+	  grub_mul (desc->allocated, sizeof (desc->data[0]), &sz))
+	return GRUB_ERR_OUT_OF_RANGE;
+
+      newdata = grub_realloc (desc->data, sz);
       if (!newdata)
 	return grub_errno;
       desc->data = newdata;
@@ -376,9 +383,9 @@ next (struct grub_btrfs_data *data,
 
       err = grub_btrfs_read_logical (data, grub_le_to_cpu64 (node.addr),
 				     &head, sizeof (head), 0);
-      check_btrfs_header (data, &head, grub_le_to_cpu64 (node.addr));
       if (err)
 	return -err;
+      check_btrfs_header (data, &head, grub_le_to_cpu64 (node.addr));
 
       save_ref (desc, grub_le_to_cpu64 (node.addr), 0,
 		grub_le_to_cpu32 (head.nitems), !head.level);
@@ -413,7 +420,7 @@ lower_bound (struct grub_btrfs_data *data,
     {
       desc->allocated = 16;
       desc->depth = 0;
-      desc->data = grub_malloc (sizeof (desc->data[0]) * desc->allocated);
+      desc->data = grub_calloc (desc->allocated, sizeof (desc->data[0]));
       if (!desc->data)
 	return grub_errno;
     }
@@ -438,9 +445,9 @@ lower_bound (struct grub_btrfs_data *data,
       /* FIXME: preread few nodes into buffer. */
       err = grub_btrfs_read_logical (data, addr, &head, sizeof (head),
 				     recursion_depth + 1);
-      check_btrfs_header (data, &head, addr);
       if (err)
 	return err;
+      check_btrfs_header (data, &head, addr);
       addr += sizeof (head);
       if (head.level)
 	{
@@ -622,16 +629,21 @@ find_device (struct grub_btrfs_data *data, grub_uint64_t id)
   if (data->n_devices_attached > data->n_devices_allocated)
     {
       void *tmp;
-      data->n_devices_allocated = 2 * data->n_devices_attached + 1;
-      data->devices_attached
-	= grub_realloc (tmp = data->devices_attached,
-			data->n_devices_allocated
-			* sizeof (data->devices_attached[0]));
+      grub_size_t sz;
+
+      if (grub_mul (data->n_devices_attached, 2, &data->n_devices_allocated) ||
+	  grub_add (data->n_devices_allocated, 1, &data->n_devices_allocated) ||
+	  grub_mul (data->n_devices_allocated, sizeof (data->devices_attached[0]), &sz))
+	goto fail;
+
+      data->devices_attached = grub_realloc (tmp = data->devices_attached, sz);
       if (!data->devices_attached)
 	{
+	  data->devices_attached = tmp;
+
+ fail:
 	  if (ctx.dev_found)
 	    grub_device_close (ctx.dev_found);
-	  data->devices_attached = tmp;
 	  return NULL;
 	}
     }
@@ -752,7 +764,7 @@ raid56_read_retry (struct grub_btrfs_data *data,
   grub_err_t ret = GRUB_ERR_OUT_OF_MEMORY;
   grub_uint64_t i, failed_devices;
 
-  buffers = grub_zalloc (sizeof(*buffers) * nstripes);
+  buffers = grub_calloc (nstripes, sizeof (*buffers));
   if (!buffers)
     goto cleanup;
 
@@ -964,14 +976,19 @@ grub_btrfs_read_logical (struct grub_btrfs_data *data, grub_disk_addr_t addr,
 	      csize = (stripen + 1) * stripe_length - off;
 	      break;
 	    }
+	  case GRUB_BTRFS_CHUNK_TYPE_RAID1C4:
+	    redundancy++;
+	    /* fall through */
+	  case GRUB_BTRFS_CHUNK_TYPE_RAID1C3:
+	    redundancy++;
+	    /* fall through */
 	  case GRUB_BTRFS_CHUNK_TYPE_DUPLICATED:
 	  case GRUB_BTRFS_CHUNK_TYPE_RAID1:
 	    {
-	      grub_dprintf ("btrfs", "RAID1\n");
+	      grub_dprintf ("btrfs", "RAID1 (copies: %d)\n", ++redundancy);
 	      stripen = 0;
 	      stripe_offset = off;
 	      csize = grub_le_to_cpu64 (chunk->size) - off;
-	      redundancy = 2;
 	      break;
 	    }
 	  case GRUB_BTRFS_CHUNK_TYPE_RAID0:
@@ -1066,6 +1083,9 @@ grub_btrfs_read_logical (struct grub_btrfs_data *data, grub_disk_addr_t addr,
 	       * stripen is computed without the parities
 	       * (0 for A0, A1, A2, 1 for B0, B1, B2, etc.).
 	       */
+	      if (nparities >= nstripes)
+		return grub_error (GRUB_ERR_BAD_FS,
+				   "invalid RAID5/6: nparities >= nstripes");
 	      high = grub_divmod64 (stripe_nr, nstripes - nparities, &stripen);
 
 	      /*
@@ -2160,7 +2180,7 @@ grub_btrfs_embed (grub_device_t device __attribute__ ((unused)),
   *nsectors = 64 * 2 - 1;
   if (*nsectors > max_nsectors)
     *nsectors = max_nsectors;
-  *sectors = grub_malloc (*nsectors * sizeof (**sectors));
+  *sectors = grub_calloc (*nsectors, sizeof (**sectors));
   if (!*sectors)
     return grub_errno;
   for (i = 0; i < *nsectors; i++)

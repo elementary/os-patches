@@ -261,13 +261,15 @@ static grub_err_t grub_jfs_lookup_symlink (struct grub_jfs_data *data, grub_uint
 static grub_int64_t
 getblk (struct grub_jfs_treehead *treehead,
 	struct grub_jfs_tree_extent *extents,
+	int max_extents,
 	struct grub_jfs_data *data,
 	grub_uint64_t blk)
 {
   int found = -1;
   int i;
 
-  for (i = 0; i < grub_le_to_cpu16 (treehead->count) - 2; i++)
+  for (i = 0; i < grub_le_to_cpu16 (treehead->count) - 2 &&
+	      i < max_extents; i++)
     {
       if (treehead->flags & GRUB_JFS_TREE_LEAF)
 	{
@@ -302,7 +304,16 @@ getblk (struct grub_jfs_treehead *treehead,
 			   << (grub_le_to_cpu16 (data->sblock.log2_blksz)
 			       - GRUB_DISK_SECTOR_BITS), 0,
 			   sizeof (*tree), (char *) tree))
-	ret = getblk (&tree->treehead, &tree->extents[0], data, blk);
+	{
+	  if (grub_memcmp (&tree->treehead, treehead, sizeof (struct grub_jfs_treehead)) ||
+	      grub_memcmp (&tree->extents, extents, 254 * sizeof (struct grub_jfs_tree_extent)))
+	    ret = getblk (&tree->treehead, &tree->extents[0], 254, data, blk);
+	  else
+	    {
+	      grub_error (GRUB_ERR_BAD_FS, "jfs: infinite recursion detected");
+	      ret = -1;
+	    }
+	}
       grub_free (tree);
       return ret;
     }
@@ -316,7 +327,7 @@ static grub_int64_t
 grub_jfs_blkno (struct grub_jfs_data *data, struct grub_jfs_inode *inode,
 		grub_uint64_t blk)
 {
-  return getblk (&inode->file.tree, &inode->file.extents[0], data, blk);
+  return getblk (&inode->file.tree, &inode->file.extents[0], 16, data, blk);
 }
 
 
@@ -567,7 +578,7 @@ grub_jfs_getent (struct grub_jfs_diropen *diro)
 
   /* Move down to the leaf level.  */
   nextent = leaf->next;
-  if (leaf->next != 255)
+  if (leaf->next != 255 && len > 0)
     do
       {
  	next_leaf = &diro->next_leaf[nextent];

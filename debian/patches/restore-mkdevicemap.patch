@@ -9,17 +9,17 @@ would be very complicated.
 
 Author: Dimitri John Ledkov <dimitri.ledkov@canonical.com>
 Forwarded: no
-Last-Update: 2019-05-25
+Last-Update: 2021-09-24
 
 Patch-Name: restore-mkdevicemap.patch
 ---
  Makefile.util.def              |   17 +
  docs/man/grub-mkdevicemap.h2m  |    4 +
  include/grub/util/deviceiter.h |   14 +
- util/deviceiter.c              | 1021 ++++++++++++++++++++++++++++++++++++++++
+ util/deviceiter.c              | 1027 ++++++++++++++++++++++++++++++++++++++++
  util/devicemap.c               |   13 +
  util/grub-mkdevicemap.c        |  181 +++++++
- 6 files changed, 1250 insertions(+)
+ 6 files changed, 1256 insertions(+)
  create mode 100644 docs/man/grub-mkdevicemap.h2m
  create mode 100644 include/grub/util/deviceiter.h
  create mode 100644 util/deviceiter.c
@@ -27,10 +27,10 @@ Patch-Name: restore-mkdevicemap.patch
  create mode 100644 util/grub-mkdevicemap.c
 
 diff --git a/Makefile.util.def b/Makefile.util.def
-index bac85e2..eec1924 100644
+index f8b356c..27f9482 100644
 --- a/Makefile.util.def
 +++ b/Makefile.util.def
-@@ -324,6 +324,23 @@ program = {
+@@ -336,6 +336,23 @@ program = {
    condition = COND_GRUB_MKFONT;
  };
  
@@ -86,10 +86,10 @@ index 0000000..8537497
 +#endif /* ! GRUB_DEVICEITER_MACHINE_UTIL_HEADER */
 diff --git a/util/deviceiter.c b/util/deviceiter.c
 new file mode 100644
-index 0000000..a4971ef
+index 0000000..b5b9ac6
 --- /dev/null
 +++ b/util/deviceiter.c
-@@ -0,0 +1,1021 @@
+@@ -0,0 +1,1027 @@
 +/* deviceiter.c - iterate over system devices */
 +/*
 + *  GRUB  --  GRand Unified Bootloader
@@ -127,6 +127,7 @@ index 0000000..a4971ef
 +#include <grub/list.h>
 +#include <grub/misc.h>
 +#include <grub/emu/misc.h>
++#include <grub/safemath.h>
 +
 +#ifdef __linux__
 +# if !defined(__GLIBC__) || \
@@ -662,7 +663,7 @@ index 0000000..a4971ef
 +	struct device *devs;
 +	size_t devs_len = 0, devs_max = 1024, dev;
 +
-+	devs = xmalloc (devs_max * sizeof (*devs));
++	devs = xcalloc (devs_max, sizeof (*devs));
 +
 +	/* Dump all the directory entries into names, resizing if
 +	   necessary.  */
@@ -684,8 +685,13 @@ index 0000000..a4971ef
 +	      continue;
 +	    if (devs_len >= devs_max)
 +	      {
++		size_t sz;
++
 +		devs_max *= 2;
-+		devs = xrealloc (devs, devs_max * sizeof (*devs));
++		sz = devs_max;
++		if (grub_mul (sz, sizeof (*devs), &sz))
++		  grub_util_error ("%s", _("overflow is detected"));
++		devs = xrealloc (devs, sz);
 +	      }
 +	    devs[devs_len].stable =
 +	      xasprintf ("/dev/disk/by-id/%s", entry->d_name);

@@ -454,22 +454,24 @@ struct grub_net_bootp_packet
 
 enum
   {
-    GRUB_NET_BOOTP_PAD = 0x00,
-    GRUB_NET_BOOTP_NETMASK = 0x01,
-    GRUB_NET_BOOTP_ROUTER = 0x03,
-    GRUB_NET_BOOTP_DNS = 0x06,
-    GRUB_NET_BOOTP_HOSTNAME = 0x0c,
-    GRUB_NET_BOOTP_DOMAIN = 0x0f,
-    GRUB_NET_BOOTP_ROOT_PATH = 0x11,
-    GRUB_NET_BOOTP_EXTENSIONS_PATH = 0x12,
+    GRUB_NET_BOOTP_PAD = 0,
+    GRUB_NET_BOOTP_NETMASK = 1,
+    GRUB_NET_BOOTP_ROUTER = 3,
+    GRUB_NET_BOOTP_DNS = 6,
+    GRUB_NET_BOOTP_HOSTNAME = 12,
+    GRUB_NET_BOOTP_DOMAIN = 15,
+    GRUB_NET_BOOTP_ROOT_PATH = 17,
+    GRUB_NET_BOOTP_EXTENSIONS_PATH = 18,
     GRUB_NET_DHCP_REQUESTED_IP_ADDRESS = 50,
     GRUB_NET_DHCP_OVERLOAD = 52,
     GRUB_NET_DHCP_MESSAGE_TYPE = 53,
     GRUB_NET_DHCP_SERVER_IDENTIFIER = 54,
     GRUB_NET_DHCP_PARAMETER_REQUEST_LIST = 55,
+    GRUB_NET_BOOTP_CLIENT_ID = 61,
     GRUB_NET_DHCP_TFTP_SERVER_NAME = 66,
     GRUB_NET_DHCP_BOOTFILE_NAME = 67,
-    GRUB_NET_BOOTP_END = 0xff
+    GRUB_NET_BOOTP_CLIENT_UUID = 97,
+    GRUB_NET_BOOTP_END = 255
   };
 
 struct grub_net_network_level_interface *
@@ -567,6 +569,8 @@ grub_net_add_dns_server (const struct grub_net_network_level_address *s);
 void
 grub_net_remove_dns_server (const struct grub_net_network_level_address *s);
 
+grub_err_t
+grub_net_search_config_file (char *config);
 
 extern char *grub_net_default_server;
 

@@ -34,6 +34,7 @@
 #  --macro-prefix=gl \
 #  --no-vc-files \
 #  argp \
+#  base64 \
 #  error \
 #  fnmatch \
 #  getdelim \
@@ -136,6 +137,12 @@ EXTRA_DIST += openat-priv.h openat-proc.c
 EXTRA_libgnu_a_SOURCES += openat-proc.c
 
 ## end   gnulib module at-internal
+
+## begin gnulib module base64
+
+libgnu_a_SOURCES += base64.h base64.c
+
+## end   gnulib module base64
 
 ## begin gnulib module btowc
 

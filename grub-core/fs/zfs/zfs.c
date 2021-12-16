@@ -55,6 +55,7 @@
 #include <grub/deflate.h>
 #include <grub/crypto.h>
 #include <grub/i18n.h>
+#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -141,7 +142,10 @@ ZAP_LEAF_NUMCHUNKS (int bs)
 static inline zap_leaf_chunk_t *
 ZAP_LEAF_CHUNK (zap_leaf_phys_t *l, int bs, int idx)
 {
-  return &((zap_leaf_chunk_t *) (l->l_entries 
+  grub_properly_aligned_t *l_entries;
+
+  l_entries = (grub_properly_aligned_t *) ALIGN_UP((grub_addr_t)l->l_hash, sizeof (grub_properly_aligned_t));
+  return &((zap_leaf_chunk_t *) (l_entries
 				 + (ZAP_LEAF_HASH_NUMENTRIES(bs) * 2)
 				 / sizeof (grub_properly_aligned_t)))[idx];
 }
@@ -563,7 +567,7 @@ find_bestub (uberblock_phys_t * ub_array,
       ubptr = (uberblock_phys_t *) ((grub_properly_aligned_t *) ub_array
 				    + ((i << ub_shift)
 				       / sizeof (grub_properly_aligned_t)));
-      err = uberblock_verify (ubptr, offset, 1 << ub_shift);
+      err = uberblock_verify (ubptr, offset, (grub_size_t) 1 << ub_shift);
       if (err)
 	{
 	  grub_errno = GRUB_ERR_NONE;
@@ -773,11 +777,14 @@ fill_vdev_info (struct grub_zfs_data *data,
   if (data->n_devices_attached > data->n_devices_allocated)
     {
       void *tmp;
-      data->n_devices_allocated = 2 * data->n_devices_attached + 1;
-      data->devices_attached
-	= grub_realloc (tmp = data->devices_attached,
-			data->n_devices_allocated
-			* sizeof (data->devices_attached[0]));
+      grub_size_t sz;
+
+      if (grub_mul (data->n_devices_attached, 2, &data->n_devices_allocated) ||
+	  grub_add (data->n_devices_allocated, 1, &data->n_devices_allocated) ||
+	  grub_mul (data->n_devices_allocated, sizeof (data->devices_attached[0]), &sz))
+	return GRUB_ERR_OUT_OF_RANGE;
+
+      data->devices_attached = grub_realloc (tmp = data->devices_attached, sz);
       if (!data->devices_attached)
 	{
 	  data->devices_attached = tmp;
@@ -1168,7 +1175,7 @@ scan_disk (grub_device_t dev, struct grub_zfs_data *data,
   desc.original = original;
 
   /* Don't check back labels on CDROM.  */
-  if (grub_disk_get_size (dev->disk) == GRUB_DISK_SIZE_UNKNOWN)
+  if (grub_disk_native_sectors (dev->disk) == GRUB_DISK_SIZE_UNKNOWN)
     vdevnum = VDEV_LABELS / 2;
 
   for (label = 0; ubbest == NULL && label < vdevnum; label++)
@@ -1177,7 +1184,7 @@ scan_disk (grub_device_t dev, struct grub_zfs_data *data,
 	= label * (sizeof (vdev_label_t) >> SPA_MINBLOCKSHIFT)
 	+ ((VDEV_SKIP_SIZE + VDEV_BOOT_HEADER_SIZE) >> SPA_MINBLOCKSHIFT)
 	+ (label < VDEV_LABELS / 2 ? 0 : 
-	   ALIGN_DOWN (grub_disk_get_size (dev->disk), sizeof (vdev_label_t))
+	   ALIGN_DOWN (grub_disk_native_sectors (dev->disk), sizeof (vdev_label_t))
 	   - VDEV_LABELS * (sizeof (vdev_label_t) >> SPA_MINBLOCKSHIFT));
 
       /* Read in the uberblock ring (128K). */
@@ -1539,7 +1546,7 @@ read_device (grub_uint64_t offset, struct grub_zfs_device_desc *desc,
 
 	    high = grub_divmod64 ((offset >> desc->ashift) + c,
 				  desc->n_children, &devn);
-	    csize = bsize << desc->ashift;
+	    csize = (grub_size_t) bsize << desc->ashift;
 	    if (csize > len)
 	      csize = len;
 
@@ -1631,8 +1638,8 @@ read_device (grub_uint64_t offset, struct grub_zfs_device_desc *desc,
 
 	    while (len > 0)
 	      {
-		grub_size_t csize;
-		csize = ((s / (desc->n_children - desc->nparity))
+		grub_size_t csize = s;
+		csize = ((csize / (desc->n_children - desc->nparity))
 			 << desc->ashift);
 		if (csize > len)
 		  csize = len;
@@ -1862,8 +1869,8 @@ zio_read (blkptr_t *bp, grub_zfs_endian_t endian, void **buf,
     {
       if (BPE_GET_ETYPE(bp) != BP_EMBEDDED_TYPE_DATA)
 	return grub_error (GRUB_ERR_NOT_IMPLEMENTED_YET,
-			   "unsupported embedded BP (type=%u)\n",
-			   BPE_GET_ETYPE(bp));
+			   "unsupported embedded BP (type=%llu)\n",
+			   (long long unsigned int) BPE_GET_ETYPE(bp));
       lsize = BPE_GET_LSIZE(bp);
       psize = BF64_GET_SB(grub_zfs_to_cpu64 ((bp)->blk_prop, endian), 25, 7, 0, 1);
     }
@@ -2663,6 +2670,11 @@ dnode_get (dnode_end_t * mdn, grub_uint64_t objnum, grub_uint8_t type,
   blksz = grub_zfs_to_cpu16 (mdn->dn.dn_datablkszsec, 
 			     mdn->endian) << SPA_MINBLOCKSHIFT;
   epbs = zfs_log2 (blksz) - DNODE_SHIFT;
+
+  /* While this should never happen, we should check that epbs is not negative. */
+  if (epbs < 0)
+    epbs = 0;
+
   blkid = objnum >> epbs;
   idx = objnum & ((1 << epbs) - 1);
 
@@ -2827,8 +2839,8 @@ dnode_get_path (struct subvolume *subvol, const char *path_in, dnode_end_t *dn,
 
       if (dnode_path->dn.dn.dn_type != DMU_OT_DIRECTORY_CONTENTS)
 	{
-	  grub_free (path_buf);
-	  return grub_error (GRUB_ERR_BAD_FILE_TYPE, N_("not a directory"));
+	  err = grub_error (GRUB_ERR_BAD_FILE_TYPE, N_("not a directory"));
+	  break;
 	}
       err = zap_lookup (&(dnode_path->dn), cname, &objnum,
 			data, subvol->case_insensitive);
@@ -2870,11 +2882,18 @@ dnode_get_path (struct subvolume *subvol, const char *path_in, dnode_end_t *dn,
 		       << SPA_MINBLOCKSHIFT);
 
 	      if (blksz == 0)
-		return grub_error(GRUB_ERR_BAD_FS, "0-sized block");
+                {
+                  err = grub_error (GRUB_ERR_BAD_FS, "0-sized block");
+                  break;
+                }
 
 	      sym_value = grub_malloc (sym_sz);
 	      if (!sym_value)
-		return grub_errno;
+		{
+		  err = grub_errno;
+		  break;
+		}
+
 	      for (block = 0; block < (sym_sz + blksz - 1) / blksz; block++)
 		{
 		  void *t;
@@ -2884,7 +2903,7 @@ dnode_get_path (struct subvolume *subvol, const char *path_in, dnode_end_t *dn,
 		  if (err)
 		    {
 		      grub_free (sym_value);
-		      return err;
+		      break;
 		    }
 
 		  movesize = sym_sz - block * blksz;
@@ -2894,6 +2913,8 @@ dnode_get_path (struct subvolume *subvol, const char *path_in, dnode_end_t *dn,
 		  grub_memcpy (sym_value + block * blksz, t, movesize);
 		  grub_free (t);
 		}
+		if (err)
+		  break;
 	      free_symval = 1;
 	    }	    
 	  path = path_buf = grub_malloc (sym_sz + grub_strlen (oldpath) + 1);
@@ -2902,7 +2923,8 @@ dnode_get_path (struct subvolume *subvol, const char *path_in, dnode_end_t *dn,
 	      grub_free (oldpathbuf);
 	      if (free_symval)
 		grub_free (sym_value);
-	      return grub_errno;
+	      err = grub_errno;
+	      break;
 	    }
 	  grub_memcpy (path, sym_value, sym_sz);
 	  if (free_symval)
@@ -2940,11 +2962,12 @@ dnode_get_path (struct subvolume *subvol, const char *path_in, dnode_end_t *dn,
 	      
 	      err = zio_read (bp, dnode_path->dn.endian, &sahdrp, NULL, data);
 	      if (err)
-		return err;
+	        break;
 	    }
 	  else
 	    {
-	      return grub_error (GRUB_ERR_BAD_FS, "filesystem is corrupt");
+	      err = grub_error (GRUB_ERR_BAD_FS, "filesystem is corrupt");
+	      break;
 	    }
 
 	  hdrsize = SA_HDR_SIZE (((sa_hdr_phys_t *) sahdrp));
@@ -2965,7 +2988,8 @@ dnode_get_path (struct subvolume *subvol, const char *path_in, dnode_end_t *dn,
 	      if (!path_buf)
 		{
 		  grub_free (oldpathbuf);
-		  return grub_errno;
+		  err = grub_errno;
+		  break;
 		}
 	      grub_memcpy (path, sym_value, sym_sz);
 	      path [sym_sz] = 0;
@@ -3325,7 +3349,7 @@ dnode_get_fullpath (const char *fullpath, struct subvolume *subvol,
 	}
       subvol->nkeys = 0;
       zap_iterate (&keychain_dn, 8, count_zap_keys, &ctx, data);
-      subvol->keyring = grub_zalloc (subvol->nkeys * sizeof (subvol->keyring[0]));
+      subvol->keyring = grub_calloc (subvol->nkeys, sizeof (subvol->keyring[0]));
       if (!subvol->keyring)
 	{
 	  grub_free (fsname);
@@ -3468,14 +3492,18 @@ grub_zfs_nvlist_lookup_nvlist (const char *nvlist, const char *name)
 {
   char *nvpair;
   char *ret;
-  grub_size_t size;
+  grub_size_t size, sz;
   int found;
 
   found = nvlist_find_value (nvlist, name, DATA_TYPE_NVLIST, &nvpair,
 			     &size, 0);
   if (!found)
     return 0;
-  ret = grub_zalloc (size + 3 * sizeof (grub_uint32_t));
+
+  if (grub_add (size, 3 * sizeof (grub_uint32_t), &sz))
+      return 0;
+
+  ret = grub_zalloc (sz);
   if (!ret)
     return 0;
   grub_memcpy (ret, nvlist, sizeof (grub_uint32_t));
@@ -3743,7 +3771,7 @@ zfs_uuid (grub_device_t device, char **uuid)
 }
 
 static grub_err_t 
-zfs_mtime (grub_device_t device, grub_int32_t *mt)
+zfs_mtime (grub_device_t device, grub_int64_t *mt)
 {
   struct grub_zfs_data *data;
   grub_zfs_endian_t ub_endian = GRUB_ZFS_UNKNOWN_ENDIAN;
@@ -4336,7 +4364,7 @@ grub_zfs_embed (grub_device_t device __attribute__ ((unused)),
   *nsectors = (VDEV_BOOT_SIZE >> GRUB_DISK_SECTOR_BITS);
   if (*nsectors > max_nsectors)
     *nsectors = max_nsectors;
-  *sectors = grub_malloc (*nsectors * sizeof (**sectors));
+  *sectors = grub_calloc (*nsectors, sizeof (**sectors));
   if (!*sectors)
     return grub_errno;
   for (i = 0; i < *nsectors; i++)

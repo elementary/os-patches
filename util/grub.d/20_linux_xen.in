@@ -89,12 +89,29 @@ title_correction_code=
 
 linux_entry ()
 {
+  linux_entry_xsm "$@" false
+  linux_entry_xsm "$@" true
+}
+linux_entry_xsm ()
+{
   os="$1"
   version="$2"
   xen_version="$3"
   type="$4"
   args="$5"
   xen_args="$6"
+  xsm="$7"
+  # If user wants to enable XSM support, make sure there's
+  # corresponding policy file.
+  if ${xsm} ; then
+      xenpolicy="xenpolicy-$xen_version"
+      if test ! -e "${xen_dirname}/${xenpolicy}" ; then
+	  return
+      fi
+      xen_args="$xen_args flask=enforcing"
+      xen_version="$(gettext_printf "%s (XSM enabled)" "$xen_version")"
+      # xen_version is used for messages only; actual file is xen_basename
+  fi
   if [ -z "$boot_device_id" ]; then
       boot_device_id="$(grub_get_device_id "${GRUB_DEVICE}")"
   fi
@@ -148,6 +165,13 @@ EOF
 	${module_loader}	--nounzip   $(echo $initrd_path)
 EOF
   fi
+  if test -n "${xenpolicy}" ; then
+    message="$(gettext_printf "Loading XSM policy ...")"
+    sed "s/^/$submenu_indentation/" << EOF
+	echo	'$(echo "$message" | grub_quote)'
+	${module_loader}     ${rel_dirname}/${xenpolicy}
+EOF
+  fi
   sed "s/^/$submenu_indentation/" << EOF
 }
 EOF
@@ -173,9 +197,13 @@ if [ "x${linux_list}" = "x" ] ; then
     exit 0
 fi
 
-file_is_not_sym () {
+file_is_not_xen_garbage () {
     case "$1" in
 	*/xen-syms-*)
+	    return 1;;
+	*/xenpolicy-*)
+	    return 1;;
+	*/*.config)
 	    return 1;;
 	*)
 	    return 0;;
@@ -184,7 +212,7 @@ file_is_not_sym () {
 
 xen_list=
 for i in /boot/xen*; do
-    if grub_file_is_not_garbage "$i" && file_is_not_sym "$i" ; then xen_list="$xen_list $i" ; fi
+    if grub_file_is_not_garbage "$i" && file_is_not_xen_garbage "$i" ; then xen_list="$xen_list $i" ; fi
 done
 prepare_boot_cache=
 boot_device_id=
@@ -288,7 +316,15 @@ while [ "x${xen_list}" != "x" ] ; do
 	    fi
 	fi
 
-	if [ "x$is_top_level" = xtrue ] && [ "x${GRUB_DISABLE_SUBMENU}" != xy ]; then
+	# The GRUB_DISABLE_SUBMENU option used to be different than others since it was
+	# mentioned in the documentation that has to be set to 'y' instead of 'true' to
+	# enable it. This caused a lot of confusion to users that set the option to 'y',
+	# 'yes' or 'true'. This was fixed but all of these values must be supported now.
+	if [ "x${GRUB_DISABLE_SUBMENU}" = xyes ] || [ "x${GRUB_DISABLE_SUBMENU}" = xy ]; then
+	    GRUB_DISABLE_SUBMENU="true"
+	fi
+
+	if [ "x$is_top_level" = xtrue ] && [ "x${GRUB_DISABLE_SUBMENU}" != xtrue ]; then
 	    linux_entry "${OS}" "${version}" "${xen_version}" simple \
 		"${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}" "${GRUB_CMDLINE_XEN} ${GRUB_CMDLINE_XEN_DEFAULT}"
 

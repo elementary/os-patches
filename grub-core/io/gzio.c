@@ -507,6 +507,7 @@ huft_build (unsigned *b,	/* code lengths in bits (all assumed <= BMAX) */
     }
 
   /* Make a table of values in order of bit lengths */
+  grub_memset (v, N_MAX, ARRAY_SIZE (v));
   p = b;
   i = 0;
   do
@@ -554,7 +555,7 @@ huft_build (unsigned *b,	/* code lengths in bits (all assumed <= BMAX) */
 	      z = 1 << j;	/* table entries for j-bit table */
 
 	      /* allocate and link in new table */
-	      q = (struct huft *) grub_zalloc ((z + 1) * sizeof (struct huft));
+	      q = (struct huft *) grub_calloc (z + 1, sizeof (struct huft));
 	      if (! q)
 		{
 		  if (h)
@@ -588,10 +589,17 @@ huft_build (unsigned *b,	/* code lengths in bits (all assumed <= BMAX) */
 	      r.v.n = (ush) (*p);	/* simple code is just the value */
 	      p++;		/* one compiler does not like *p++ */
 	    }
-	  else
+	  else if (*p < N_MAX)
 	    {
 	      r.e = (uch) e[*p - s];	/* non-simple--look up in lists */
 	      r.v.n = d[*p++ - s];
+	    }
+	  else
+	    {
+	      /* Detected an uninitialised value, abort. */
+	      if (h)
+		huft_free (u[0]);
+	      return 2;
 	    }
 
 	  /* fill code-like entries with r */
@@ -669,6 +677,13 @@ inflate_codes_in_window (grub_gzio_t gzio)
     {
       if (! gzio->code_state)
 	{
+
+	  if (gzio->tl == NULL)
+	    {
+	      grub_error (GRUB_ERR_BAD_COMPRESSED_DATA, "NULL gzio->tl");
+	      return 1;
+	    }
+
 	  NEEDBITS ((unsigned) gzio->bl);
 	  if ((e = (t = gzio->tl + ((unsigned) b & ml))->e) > 16)
 	    do
@@ -706,6 +721,12 @@ inflate_codes_in_window (grub_gzio_t gzio)
 	      NEEDBITS (e);
 	      n = t->v.n + ((unsigned) b & mask_bits[e]);
 	      DUMPBITS (e);
+
+	      if (gzio->td == NULL)
+		{
+		  grub_error (GRUB_ERR_BAD_COMPRESSED_DATA, "NULL gzio->td");
+		  return 1;
+		}
 
 	      /* decode distance of block to copy */
 	      NEEDBITS ((unsigned) gzio->bd);
@@ -917,6 +938,13 @@ init_dynamic_block (grub_gzio_t gzio)
   n = nl + nd;
   m = mask_bits[gzio->bl];
   i = l = 0;
+
+  if (gzio->tl == NULL)
+    {
+      grub_error (GRUB_ERR_BAD_COMPRESSED_DATA, "NULL gzio->tl");
+      return;
+    }
+
   while ((unsigned) i < n)
     {
       NEEDBITS ((unsigned) gzio->bl);
@@ -933,7 +961,7 @@ init_dynamic_block (grub_gzio_t gzio)
 	  if ((unsigned) i + j > n)
 	    {
 	      grub_error (GRUB_ERR_BAD_COMPRESSED_DATA, "too many codes found");
-	      return;
+	      goto fail;
 	    }
 	  while (j--)
 	    ll[i++] = l;
@@ -946,7 +974,7 @@ init_dynamic_block (grub_gzio_t gzio)
 	  if ((unsigned) i + j > n)
 	    {
 	      grub_error (GRUB_ERR_BAD_COMPRESSED_DATA, "too many codes found");
-	      return;
+	      goto fail;
 	    }
 	  while (j--)
 	    ll[i++] = 0;
@@ -961,7 +989,7 @@ init_dynamic_block (grub_gzio_t gzio)
 	  if ((unsigned) i + j > n)
 	    {
 	      grub_error (GRUB_ERR_BAD_COMPRESSED_DATA, "too many codes found");
-	      return;
+	      goto fail;
 	    }
 	  while (j--)
 	    ll[i++] = 0;
@@ -982,6 +1010,7 @@ init_dynamic_block (grub_gzio_t gzio)
   gzio->bl = lbits;
   if (huft_build (ll, nl, 257, cplens, cplext, &gzio->tl, &gzio->bl) != 0)
     {
+      gzio->tl = 0;
       grub_error (GRUB_ERR_BAD_COMPRESSED_DATA,
 		  "failed in building a Huffman code table");
       return;
@@ -991,6 +1020,7 @@ init_dynamic_block (grub_gzio_t gzio)
     {
       huft_free (gzio->tl);
       gzio->tl = 0;
+      gzio->td = 0;
       grub_error (GRUB_ERR_BAD_COMPRESSED_DATA,
 		  "failed in building a Huffman code table");
       return;
@@ -999,6 +1029,12 @@ init_dynamic_block (grub_gzio_t gzio)
   /* indicate we're now working on a block */
   gzio->code_state = 0;
   gzio->block_len++;
+  return;
+
+ fail:
+  huft_free (gzio->tl);
+  gzio->td = NULL;
+  gzio->tl = NULL;
 }
 
 

@@ -78,7 +78,7 @@ linux_prepare_atag (void *target_atag)
 
   /* some place for cmdline, initrd and terminator.  */
   tmp_size = get_atag_size (atag_orig) + 20 + (arg_size) / 4;
-  tmp_atag = grub_malloc (tmp_size * sizeof (grub_uint32_t));
+  tmp_atag = grub_calloc (tmp_size, sizeof (grub_uint32_t));
   if (!tmp_atag)
     return grub_errno;
 
@@ -493,9 +493,9 @@ GRUB_MOD_INIT (linux)
 				     0, N_("Load Linux."));
   cmd_initrd = grub_register_command ("initrd", grub_cmd_initrd,
 				      0, N_("Load initrd."));
-  cmd_devicetree = grub_register_command ("devicetree", grub_cmd_devicetree,
-					  /* TRANSLATORS: DTB stands for device tree blob.  */
-					  0, N_("Load DTB file."));
+  cmd_devicetree = grub_register_command_lockdown ("devicetree", grub_cmd_devicetree,
+						   /* TRANSLATORS: DTB stands for device tree blob. */
+						   0, N_("Load DTB file."));
   my_mod = mod;
   current_fdt = (const void *) grub_arm_firmware_get_boot_data ();
   machine_type = grub_arm_firmware_get_machine_type ();

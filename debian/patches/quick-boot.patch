@@ -28,15 +28,14 @@ Patch-Name: quick-boot.patch
  util/grub-mkconfig.in       |  3 +-
  util/grub.d/00_header.in    | 77 ++++++++++++++++++++++++++++++++++++++-------
  util/grub.d/10_linux.in     |  4 +++
- util/grub.d/10_linux_zfs.in |  5 +++
  util/grub.d/30_os-prober.in | 21 +++++++++++++
- 8 files changed, 146 insertions(+), 13 deletions(-)
+ 7 files changed, 141 insertions(+), 13 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index ea00ccd..7dda5bb 100644
+index 256fc44..c42e4c7 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1868,6 +1868,17 @@ else
+@@ -1926,6 +1926,17 @@ else
  fi
  AC_SUBST([QUIET_BOOT])
  
@@ -55,10 +54,10 @@ index ea00ccd..7dda5bb 100644
  
  AC_SUBST([FONT_SOURCE])
 diff --git a/docs/grub.texi b/docs/grub.texi
-index 8779507..a835d0a 100644
+index f8b4b3b..0b58daf 100644
 --- a/docs/grub.texi
 +++ b/docs/grub.texi
-@@ -1522,6 +1522,20 @@ This option may be set to a list of GRUB module names separated by spaces.
+@@ -1563,6 +1563,20 @@ This option may be set to a list of GRUB module names separated by spaces.
  Each module will be loaded as early as possible, at the start of
  @file{grub.cfg}.
  
@@ -80,10 +79,10 @@ index 8779507..a835d0a 100644
  
  The following options are still accepted for compatibility with existing
 diff --git a/grub-core/normal/menu.c b/grub-core/normal/menu.c
-index ebf5a0f..42c8229 100644
+index e9d8444..0440340 100644
 --- a/grub-core/normal/menu.c
 +++ b/grub-core/normal/menu.c
-@@ -604,6 +604,30 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)
+@@ -603,6 +603,30 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)
        static struct grub_term_coordinate *pos;
        int entry = -1;
  
@@ -115,10 +114,10 @@ index ebf5a0f..42c8229 100644
  	{
  	  pos = grub_term_save_pos ();
 diff --git a/util/grub-mkconfig.in b/util/grub-mkconfig.in
-index e7ef32e..f4ef79b 100644
+index 0265a5a..fa9c53a 100644
 --- a/util/grub-mkconfig.in
 +++ b/util/grub-mkconfig.in
-@@ -250,7 +250,8 @@ export GRUB_DEFAULT \
+@@ -256,7 +256,8 @@ export GRUB_DEFAULT \
    GRUB_ENABLE_CRYPTODISK \
    GRUB_BADRAM \
    GRUB_OS_PROBER_SKIP_LIST \
@@ -258,7 +257,7 @@ index 93a9023..674a761 100644
  EOF
  }
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index 479a8bf..2be66c7 100644
+index 869a7ee..80315a3 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -22,6 +22,7 @@ exec_prefix="@exec_prefix@"
@@ -269,7 +268,7 @@ index 479a8bf..2be66c7 100644
  
  . "$pkgdatadir/grub-mkconfig_lib"
  
-@@ -133,6 +134,9 @@ linux_entry ()
+@@ -129,6 +130,9 @@ linux_entry ()
    else
        echo "menuentry '$(echo "$os" | grub_quote)' ${CLASS} \$menuentry_id_option 'gnulinux-simple-$boot_device_id' {" | sed "s/^/$submenu_indentation/"
    fi      
@@ -279,31 +278,8 @@ index 479a8bf..2be66c7 100644
    if [ x$type != xrecovery ] ; then
        save_default_entry | grub_add_tab
    fi
-diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index caead8a..5aedc6c 100755
---- a/util/grub.d/10_linux_zfs.in
-+++ b/util/grub.d/10_linux_zfs.in
-@@ -21,6 +21,7 @@ prefix="@prefix@"
- datarootdir="@datarootdir@"
- ubuntu_recovery="@UBUNTU_RECOVERY@"
- quiet_boot="@QUIET_BOOT@"
-+quick_boot="@QUICK_BOOT@"
- 
- . "${pkgdatadir}/grub-mkconfig_lib"
- 
-@@ -771,6 +772,10 @@ zfs_linux_entry () {
- 
-     echo "${submenu_indentation}menuentry '$(echo "${title}" | grub_quote)' ${CLASS} \${menuentry_id_option} 'gnulinux-${dataset}-${kernel_version}' {"
- 
-+    if [ "${quick_boot}" = 1 ]; then
-+        echo "${submenu_indentation}	recordfail"
-+    fi
-+
-     if [ "${type}" != "recovery" ] ; then
-         GRUB_SAVEDEFAULT=${GRUB_SAVEDEFAULT:-}
-         default_entry="$(save_default_entry)"
 diff --git a/util/grub.d/30_os-prober.in b/util/grub.d/30_os-prober.in
-index 271044f..da5f288 100644
+index 98aee40..225a3ba 100644
 --- a/util/grub.d/30_os-prober.in
 +++ b/util/grub.d/30_os-prober.in
 @@ -20,12 +20,26 @@ set -e
@@ -331,9 +307,9 @@ index 271044f..da5f288 100644
 +}
 +
  if [ "x${GRUB_DISABLE_OS_PROBER}" = "xtrue" ]; then
+   grub_warn "$(gettext_printf "os-prober will not be executed to detect other bootable partitions.\nSystems on them will not be added to the GRUB boot configuration.\nCheck GRUB_DISABLE_OS_PROBER documentation entry.")"
    exit 0
- fi
-@@ -42,6 +56,7 @@ if [ -z "${OSPROBED}" ] ; then
+@@ -45,6 +59,7 @@ if [ -z "${OSPROBED}" ] ; then
  fi
  
  osx_entry() {
@@ -341,7 +317,7 @@ index 271044f..da5f288 100644
      if [ x$2 = x32 ]; then
          # TRANSLATORS: it refers to kernel architecture (32-bit)
  	bitstr="$(gettext "(32-bit)")"
-@@ -165,6 +180,7 @@ for OS in ${OSPROBED} ; do
+@@ -168,6 +183,7 @@ for OS in ${OSPROBED} ; do
  	  ;;
        esac
  
@@ -349,7 +325,7 @@ index 271044f..da5f288 100644
  	  onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
        cat << EOF
  menuentry '$(echo "${LONGNAME} $onstr" | grub_quote)' $CLASS --class os \$menuentry_id_option 'osprober-chain-$(grub_get_device_id "${DEVICE}")' {
-@@ -195,6 +211,7 @@ EOF
+@@ -198,6 +214,7 @@ EOF
      ;;
      efi)
  
@@ -357,7 +333,7 @@ index 271044f..da5f288 100644
  	EFIPATH=${DEVICE#*@}
  	DEVICE=${DEVICE%@*}
  	onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
-@@ -243,6 +260,7 @@ EOF
+@@ -246,6 +263,7 @@ EOF
  	  [ "${prepare_boot_cache}" ] || continue
  	fi
  
@@ -365,7 +341,7 @@ index 271044f..da5f288 100644
  	onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
  	recovery_params="$(echo "${LPARAMS}" | grep 'single\|recovery')" || true
  	counter=1
-@@ -311,6 +329,7 @@ EOF
+@@ -322,6 +340,7 @@ EOF
        fi
      ;;
      hurd)
@@ -373,7 +349,7 @@ index 271044f..da5f288 100644
        onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
        cat << EOF
  menuentry '$(echo "${LONGNAME} $onstr" | grub_quote)' --class hurd --class gnu --class os \$menuentry_id_option 'osprober-gnuhurd-/boot/gnumach.gz-false-$(grub_get_device_id "${DEVICE}")' {
-@@ -353,3 +372,5 @@ EOF
+@@ -364,3 +383,5 @@ EOF
      ;;
    esac
  done

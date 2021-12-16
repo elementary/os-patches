@@ -120,6 +120,45 @@ grub_getkey (void)
     }
 }
 
+int
+grub_getkeystatus (void)
+{
+  int status = 0;
+  grub_term_input_t term;
+
+  if (grub_term_poll_usb)
+    grub_term_poll_usb (0);
+
+  FOR_ACTIVE_TERM_INPUTS(term)
+  {
+    if (term->getkeystatus)
+      status |= term->getkeystatus (term);
+  }
+
+  return status;
+}
+
+int
+grub_key_is_interrupt (int key)
+{
+  /*
+   * ESC sometimes is the BIOS setup hotkey and may be hard to discover, also
+   * check F4, which was chosen because is not used as a hotkey to enter the
+   * BIOS setup by any vendor.
+   */
+  if (key == GRUB_TERM_ESC || key == GRUB_TERM_KEY_F4)
+    return 1;
+
+  /*
+   * Pressing keys at the right time during boot is hard to time, also allow
+   * interrupting sleeps / the menu countdown by keeping shift pressed.
+   */
+  if (grub_getkeystatus() & (GRUB_TERM_STATUS_LSHIFT | GRUB_TERM_STATUS_RSHIFT))
+    return 1;
+
+  return 0;
+}
+
 void
 grub_refresh (void)
 {

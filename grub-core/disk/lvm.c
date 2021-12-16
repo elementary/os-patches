@@ -25,6 +25,7 @@
 #include <grub/lvm.h>
 #include <grub/partition.h>
 #include <grub/i18n.h>
+#include <grub/safemath.h>
 
 #ifdef GRUB_UTIL
 #include <grub/emu/misc.h>
@@ -33,12 +34,20 @@
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
+struct cache_lv
+{
+  struct grub_diskfilter_lv *lv;
+  char *cache_pool;
+  char *origin;
+  struct cache_lv *next;
+};
+
 
 /* Go the string STR and return the number after STR.  *P will point
    at the number.  In case STR is not found, *P will be NULL and the
    return value will be 0.  */
 static grub_uint64_t
-grub_lvm_getvalue (char **p, const char *str)
+grub_lvm_getvalue (const char ** const p, const char *str)
 {
   *p = grub_strstr (*p, str);
   if (! *p)
@@ -63,12 +72,12 @@ grub_lvm_checkvalue (char **p, char *str, char *tmpl)
 #endif
 
 static int
-grub_lvm_check_flag (char *p, const char *str, const char *flag)
+grub_lvm_check_flag (const char *p, const char *str, const char *flag)
 {
   grub_size_t len_str = grub_strlen (str), len_flag = grub_strlen (flag);
   while (1)
     {
-      char *q;
+      const char *q;
       p = grub_strstr (p, str);
       if (! p)
 	return 0;
@@ -95,6 +104,34 @@ grub_lvm_check_flag (char *p, const char *str, const char *flag)
     }
 }
 
+static void
+grub_lvm_free_cache_lvs (struct cache_lv *cache_lvs)
+{
+  struct cache_lv *cache;
+
+  while ((cache = cache_lvs))
+    {
+      cache_lvs = cache_lvs->next;
+
+      if (cache->lv)
+	{
+	  unsigned int i;
+
+	  for (i = 0; i < cache->lv->segment_count; ++i)
+	    if (cache->lv->segments)
+	      grub_free (cache->lv->segments[i].nodes);
+	  grub_free (cache->lv->segments);
+	  grub_free (cache->lv->fullname);
+	  grub_free (cache->lv->idname);
+	  grub_free (cache->lv->name);
+	}
+      grub_free (cache->lv);
+      grub_free (cache->origin);
+      grub_free (cache->cache_pool);
+      grub_free (cache);
+    }
+}
+
 static struct grub_diskfilter_vg * 
 grub_lvm_detect (grub_disk_t disk,
 		 struct grub_diskfilter_pv_id *id,
@@ -102,10 +139,12 @@ grub_lvm_detect (grub_disk_t disk,
 {
   grub_err_t err;
   grub_uint64_t mda_offset, mda_size;
+  grub_size_t ptr;
   char buf[GRUB_LVM_LABEL_SIZE];
   char vg_id[GRUB_LVM_ID_STRLEN+1];
   char pv_id[GRUB_LVM_ID_STRLEN+1];
-  char *metadatabuf, *p, *q, *vgname;
+  char *metadatabuf, *mda_end, *vgname;
+  const char *p, *q;
   struct grub_lvm_label_header *lh = (struct grub_lvm_label_header *) buf;
   struct grub_lvm_pv_header *pvh;
   struct grub_lvm_disk_locn *dlocn;
@@ -135,6 +174,20 @@ grub_lvm_detect (grub_disk_t disk,
     {
 #ifdef GRUB_UTIL
       grub_util_info ("no LVM signature found");
+#endif
+      goto fail;
+    }
+
+  /*
+   * We read a grub_lvm_pv_header and then 2 grub_lvm_disk_locns that
+   * immediately follow the PV header. Make sure we have space for both.
+   */
+  if (grub_le_to_cpu32 (lh->offset_xl) >=
+      GRUB_LVM_LABEL_SIZE - sizeof (struct grub_lvm_pv_header) -
+      2 * sizeof (struct grub_lvm_disk_locn))
+    {
+#ifdef GRUB_UTIL
+      grub_util_info ("LVM PV header/disk locations are beyond the end of the block");
 #endif
       goto fail;
     }
@@ -173,7 +226,7 @@ grub_lvm_detect (grub_disk_t disk,
      first one.  */
 
   /* Allocate buffer space for the circular worst-case scenario. */
-  metadatabuf = grub_malloc (2 * mda_size);
+  metadatabuf = grub_calloc (2, mda_size);
   if (! metadatabuf)
     goto fail;
 
@@ -195,9 +248,27 @@ grub_lvm_detect (grub_disk_t disk,
     }
 
   rlocn = mdah->raw_locns;
+  if (grub_le_to_cpu64 (rlocn->offset) >= grub_le_to_cpu64 (mda_size))
+    {
+#ifdef GRUB_UTIL
+      grub_util_info ("metadata offset is beyond end of metadata area");
+#endif
+      goto fail2;
+    }
+
   if (grub_le_to_cpu64 (rlocn->offset) + grub_le_to_cpu64 (rlocn->size) >
       grub_le_to_cpu64 (mdah->size))
     {
+      if (2 * mda_size < GRUB_LVM_MDA_HEADER_SIZE ||
+          (grub_le_to_cpu64 (rlocn->offset) + grub_le_to_cpu64 (rlocn->size) -
+	   grub_le_to_cpu64 (mdah->size) > mda_size - GRUB_LVM_MDA_HEADER_SIZE))
+	{
+#ifdef GRUB_UTIL
+	  grub_util_info ("cannot copy metadata wrap in circular buffer");
+#endif
+	  goto fail2;
+	}
+
       /* Metadata is circular. Copy the wrap in place. */
       grub_memcpy (metadatabuf + mda_size,
 		   metadatabuf + GRUB_LVM_MDA_HEADER_SIZE,
@@ -205,18 +276,30 @@ grub_lvm_detect (grub_disk_t disk,
 		   grub_le_to_cpu64 (rlocn->size) -
 		   grub_le_to_cpu64 (mdah->size));
     }
-  p = q = metadatabuf + grub_le_to_cpu64 (rlocn->offset);
 
-  while (*q != ' ' && q < metadatabuf + mda_size)
-    q++;
-
-  if (q == metadatabuf + mda_size)
+  if (grub_add ((grub_size_t)metadatabuf,
+		(grub_size_t)grub_le_to_cpu64 (rlocn->offset),
+		&ptr))
     {
+ error_parsing_metadata:
 #ifdef GRUB_UTIL
       grub_util_info ("error parsing metadata");
 #endif
       goto fail2;
     }
+
+  p = q = (char *)ptr;
+
+  if (grub_add ((grub_size_t)metadatabuf, (grub_size_t)mda_size, &ptr))
+    goto error_parsing_metadata;
+
+  mda_end = (char *)ptr;
+
+  while (*q != ' ' && q < mda_end)
+    q++;
+
+  if (q == mda_end)
+    goto error_parsing_metadata;
 
   vgname_len = q - p;
   vgname = grub_malloc (vgname_len + 1);
@@ -242,6 +325,8 @@ grub_lvm_detect (grub_disk_t disk,
 
   if (! vg)
     {
+      struct cache_lv *cache_lvs = NULL;
+
       /* First time we see this volume group. We've to create the
 	 whole volume group structure. */
       vg = grub_malloc (sizeof (*vg));
@@ -275,16 +360,22 @@ grub_lvm_detect (grub_disk_t disk,
 	  while (1)
 	    {
 	      grub_ssize_t s;
-	      while (grub_isspace (*p))
+	      while (grub_isspace (*p) && p < mda_end)
 		p++;
+
+	      if (p == mda_end)
+		goto fail4;
 
 	      if (*p == '}')
 		break;
 
 	      pv = grub_zalloc (sizeof (*pv));
 	      q = p;
-	      while (*q != ' ')
+	      while (*q != ' ' && q < mda_end)
 		q++;
+
+	      if (q == mda_end)
+		goto pvs_fail_noname;
 
 	      s = q - p;
 	      pv->name = grub_malloc (s + 1);
@@ -328,10 +419,13 @@ grub_lvm_detect (grub_disk_t disk,
 	      continue;
 	    pvs_fail:
 	      grub_free (pv->name);
+	    pvs_fail_noname:
 	      grub_free (pv);
 	      goto fail4;
 	    }
 	}
+      else
+        goto fail4;
 
       p = grub_strstr (p, "logical_volumes {");
       if (p)
@@ -347,8 +441,11 @@ grub_lvm_detect (grub_disk_t disk,
 	      struct grub_diskfilter_segment *seg;
 	      int is_pvmove;
 
-	      while (grub_isspace (*p))
+	      while (grub_isspace (*p) && p < mda_end)
 		p++;
+
+	      if (p == mda_end)
+		goto fail4;
 
 	      if (*p == '}')
 		break;
@@ -356,8 +453,11 @@ grub_lvm_detect (grub_disk_t disk,
 	      lv = grub_zalloc (sizeof (*lv));
 
 	      q = p;
-	      while (*q != ' ')
+	      while (*q != ' ' && q < mda_end)
 		q++;
+
+	      if (q == mda_end)
+		goto lvs_fail;
 
 	      s = q - p;
 	      lv->name = grub_strndup (p, s);
@@ -367,8 +467,26 @@ grub_lvm_detect (grub_disk_t disk,
 	      {
 		const char *iptr;
 		char *optr;
-		lv->fullname = grub_malloc (sizeof ("lvm/") - 1 + 2 * vgname_len
-					    + 1 + 2 * s + 1);
+
+		/*
+		 * This is kind of hard to read with our safe (but rather
+		 * baroque) math primatives, but it boils down to:
+		 *
+		 *   sz0 = vgname_len * 2 + 1 +
+		 *         s * 2 + 1 +
+		 *         sizeof ("lvm/") - 1;
+		 */
+		grub_size_t sz0 = vgname_len, sz1 = s;
+
+		if (grub_mul (sz0, 2, &sz0) ||
+		    grub_add (sz0, 1, &sz0) ||
+		    grub_mul (sz1, 2, &sz1) ||
+		    grub_add (sz1, 1, &sz1) ||
+		    grub_add (sz0, sz1, &sz0) ||
+		    grub_add (sz0, sizeof ("lvm/") - 1, &sz0))
+		  goto lvs_fail;
+
+		lv->fullname = grub_malloc (sz0);
 		if (!lv->fullname)
 		  goto lvs_fail;
 
@@ -426,7 +544,7 @@ grub_lvm_detect (grub_disk_t disk,
 #endif
 		  goto lvs_fail;
 		}
-	      lv->segments = grub_zalloc (sizeof (*seg) * lv->segment_count);
+	      lv->segments = grub_calloc (lv->segment_count, sizeof (*seg));
 	      seg = lv->segments;
 
 	      for (i = 0; i < lv->segment_count; i++)
@@ -481,10 +599,19 @@ grub_lvm_detect (grub_disk_t disk,
 			}
 
 		      if (seg->node_count != 1)
-			seg->stripe_size = grub_lvm_getvalue (&p, "stripe_size = ");
+			{
+			  seg->stripe_size = grub_lvm_getvalue (&p, "stripe_size = ");
+			  if (p == NULL)
+			    {
+#ifdef GRUB_UTIL
+			      grub_util_info ("unknown stripe_size");
+#endif
+			      goto lvs_segment_fail;
+			    }
+			}
 
-		      seg->nodes = grub_zalloc (sizeof (*stripe)
-						* seg->node_count);
+		      seg->nodes = grub_calloc (seg->node_count,
+						sizeof (*stripe));
 		      stripe = seg->nodes;
 
 		      p = grub_strstr (p, "stripes = [");
@@ -501,10 +628,13 @@ grub_lvm_detect (grub_disk_t disk,
 			{
 			  p = grub_strchr (p, '"');
 			  if (p == NULL)
-			    continue;
+			    goto lvs_segment_fail2;
 			  q = ++p;
-			  while (*q != '"')
+			  while (q < mda_end && *q != '"')
 			    q++;
+
+			  if (q == mda_end)
+			    goto lvs_segment_fail2;
 
 			  s = q - p;
 
@@ -520,7 +650,10 @@ grub_lvm_detect (grub_disk_t disk,
 			  stripe->start = grub_lvm_getvalue (&p, ",")
 			    * vg->extent_size;
 			  if (p == NULL)
-			    continue;
+			    {
+			      grub_free (stripe->name);
+			      goto lvs_segment_fail2;
+			    }
 
 			  stripe++;
 			}
@@ -557,10 +690,13 @@ grub_lvm_detect (grub_disk_t disk,
 
 			  p = grub_strchr (p, '"');
 			  if (p == NULL)
-			    continue;
+			    goto lvs_segment_fail2;
 			  q = ++p;
-			  while (*q != '"')
+			  while (q < mda_end && *q != '"')
 			    q++;
+
+			  if (q == mda_end)
+			    goto lvs_segment_fail2;
 
 			  s = q - p;
 
@@ -645,7 +781,7 @@ grub_lvm_detect (grub_disk_t disk,
 			  p = p ? grub_strchr (p + 1, '"') : 0;
 			  p = p ? grub_strchr (p + 1, '"') : 0;
 			  if (p == NULL)
-			    continue;
+			    goto lvs_segment_fail2;
 			  q = ++p;
 			  while (*q != '"')
 			    q++;
@@ -670,6 +806,110 @@ grub_lvm_detect (grub_disk_t disk,
 					* (seg->node_count - 1));
 			  seg->nodes[seg->node_count - 1].name = tmp;
 			}
+		    }
+		  else if (grub_memcmp (p, "cache\"",
+				   sizeof ("cache\"") - 1) == 0)
+		    {
+		      struct cache_lv *cache = NULL;
+
+		      char *p2, *p3;
+		      grub_size_t sz;
+
+		      cache = grub_zalloc (sizeof (*cache));
+		      if (!cache)
+			goto cache_lv_fail;
+		      cache->lv = grub_zalloc (sizeof (*cache->lv));
+		      if (!cache->lv)
+			goto cache_lv_fail;
+		      grub_memcpy (cache->lv, lv, sizeof (*cache->lv));
+
+		      if (lv->fullname)
+			{
+			  cache->lv->fullname = grub_strdup (lv->fullname);
+			  if (!cache->lv->fullname)
+			    goto cache_lv_fail;
+			}
+		      if (lv->idname)
+			{
+			  cache->lv->idname = grub_strdup (lv->idname);
+			  if (!cache->lv->idname)
+			    goto cache_lv_fail;
+			}
+		      if (lv->name)
+			{
+			  cache->lv->name = grub_strdup (lv->name);
+			  if (!cache->lv->name)
+			    goto cache_lv_fail;
+			}
+
+		      skip_lv = 1;
+
+		      p2 = grub_strstr (p, "cache_pool = \"");
+		      if (!p2)
+			goto cache_lv_fail;
+
+		      p2 = grub_strchr (p2, '"');
+		      if (!p2)
+			goto cache_lv_fail;
+
+		      p3 = ++p2;
+		      if (p3 == mda_end)
+			goto cache_lv_fail;
+		      p3 = grub_strchr (p3, '"');
+		      if (!p3)
+			goto cache_lv_fail;
+
+		      sz = p3 - p2;
+
+		      cache->cache_pool = grub_malloc (sz + 1);
+		      if (!cache->cache_pool)
+			goto cache_lv_fail;
+		      grub_memcpy (cache->cache_pool, p2, sz);
+		      cache->cache_pool[sz] = '\0';
+
+		      p2 = grub_strstr (p, "origin = \"");
+		      if (!p2)
+			goto cache_lv_fail;
+
+		      p2 = grub_strchr (p2, '"');
+		      if (!p2)
+			goto cache_lv_fail;
+
+		      p3 = ++p2;
+		      if (p3 == mda_end)
+			goto cache_lv_fail;
+		      p3 = grub_strchr (p3, '"');
+		      if (!p3)
+			goto cache_lv_fail;
+
+		      sz = p3 - p2;
+
+		      cache->origin = grub_malloc (sz + 1);
+		      if (!cache->origin)
+			goto cache_lv_fail;
+		      grub_memcpy (cache->origin, p2, sz);
+		      cache->origin[sz] = '\0';
+
+		      cache->next = cache_lvs;
+		      cache_lvs = cache;
+		      break;
+
+		    cache_lv_fail:
+		      if (cache)
+			{
+			  grub_free (cache->origin);
+			  grub_free (cache->cache_pool);
+			  if (cache->lv)
+			    {
+			      grub_free (cache->lv->fullname);
+			      grub_free (cache->lv->idname);
+			      grub_free (cache->lv->name);
+			    }
+			  grub_free (cache->lv);
+			  grub_free (cache);
+			}
+		      grub_lvm_free_cache_lvs (cache_lvs);
+		      goto fail4;
 		    }
 		  else
 		    {
@@ -741,12 +981,68 @@ grub_lvm_detect (grub_disk_t disk,
 		    }
 		if (lv1->segments[i].nodes[j].pv == NULL)
 		  for (lv2 = vg->lvs; lv2; lv2 = lv2->next)
-		    if (grub_strcmp (lv2->name,
-				     lv1->segments[i].nodes[j].name) == 0)
-		      lv1->segments[i].nodes[j].lv = lv2;
+		    {
+		      if (lv1 == lv2)
+		        continue;
+		      if (grub_strcmp (lv2->name,
+				       lv1->segments[i].nodes[j].name) == 0)
+			lv1->segments[i].nodes[j].lv = lv2;
+		    }
 	      }
 	
       }
+
+      {
+	struct cache_lv *cache;
+
+	for (cache = cache_lvs; cache; cache = cache->next)
+	  {
+	    struct grub_diskfilter_lv *lv;
+
+	    for (lv = vg->lvs; lv; lv = lv->next)
+	      if (grub_strcmp (lv->name, cache->origin) == 0)
+		break;
+	    if (lv)
+	      {
+		cache->lv->segments = grub_calloc (lv->segment_count, sizeof (*lv->segments));
+		if (!cache->lv->segments)
+		  {
+		    grub_lvm_free_cache_lvs (cache_lvs);
+		    goto fail4;
+		  }
+		grub_memcpy (cache->lv->segments, lv->segments, lv->segment_count * sizeof (*lv->segments));
+
+		for (i = 0; i < lv->segment_count; ++i)
+		  {
+		    struct grub_diskfilter_node *nodes = lv->segments[i].nodes;
+		    grub_size_t node_count = lv->segments[i].node_count;
+
+		    cache->lv->segments[i].nodes = grub_calloc (node_count, sizeof (*nodes));
+		    if (!cache->lv->segments[i].nodes)
+		      {
+			for (j = 0; j < i; ++j)
+			  grub_free (cache->lv->segments[j].nodes);
+			grub_free (cache->lv->segments);
+			cache->lv->segments = NULL;
+			grub_lvm_free_cache_lvs (cache_lvs);
+			goto fail4;
+		      }
+		    grub_memcpy (cache->lv->segments[i].nodes, nodes, node_count * sizeof (*nodes));
+		  }
+
+		if (cache->lv->segments)
+		  {
+		    cache->lv->segment_count = lv->segment_count;
+		    cache->lv->vg = vg;
+		    cache->lv->next = vg->lvs;
+		    vg->lvs = cache->lv;
+		    cache->lv = NULL;
+		  }
+	      }
+	  }
+      }
+
+      grub_lvm_free_cache_lvs (cache_lvs);
       if (grub_diskfilter_vg_register (vg))
 	goto fail4;
     }

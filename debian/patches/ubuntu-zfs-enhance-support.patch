@@ -26,10 +26,10 @@ Signed-off-by: Didier Roche <didier.roche@canonical.com>
  create mode 100755 util/grub.d/10_linux_zfs.in
 
 diff --git a/Makefile.util.def b/Makefile.util.def
-index 969d32f..bac85e2 100644
+index a3d134b..a6204f6 100644
 --- a/Makefile.util.def
 +++ b/Makefile.util.def
-@@ -482,6 +482,13 @@ script = {
+@@ -511,6 +511,13 @@ script = {
    condition = COND_HOST_LINUX;
  };
  
@@ -44,10 +44,10 @@ index 969d32f..bac85e2 100644
    name = '10_xnu';
    common = util/grub.d/10_xnu.in;
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index 4532266..a750966 100644
+index 4e09797..9a23c3a 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
-@@ -71,6 +71,10 @@ case x"$GRUB_FS" in
+@@ -89,6 +89,10 @@ case x"$GRUB_FS" in
  	    GRUB_CMDLINE_LINUX="rootflags=subvol=${rootsubvol} ${GRUB_CMDLINE_LINUX}"
  	fi;;
      xzfs)

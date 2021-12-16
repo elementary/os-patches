@@ -125,12 +125,25 @@ grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
 
   /* Limit the memory access to less than 4GB for 32-bit platforms.  */
   if (address > GRUB_EFI_MAX_USABLE_ADDRESS)
-    return 0;
+    {
+      char inv_addr[17], max_addr[17]; /* log16(2^64) = 16, plus NUL. */
+
+      grub_snprintf (inv_addr, sizeof (inv_addr) - 1, "%" PRIxGRUB_UINT64_T,
+		     address);
+      grub_snprintf (max_addr, sizeof (max_addr) - 1, "%" PRIxGRUB_UINT64_T,
+		     (grub_efi_uint64_t) GRUB_EFI_MAX_USABLE_ADDRESS);
+      grub_error (GRUB_ERR_BAD_ARGUMENT,
+		  N_("invalid memory address (0x%s > 0x%s)"), inv_addr, max_addr);
+      return NULL;
+    }
 
   b = grub_efi_system_table->boot_services;
   status = efi_call_4 (b->allocate_pages, alloctype, memtype, pages, &address);
   if (status != GRUB_EFI_SUCCESS)
-    return 0;
+    {
+      grub_error (GRUB_ERR_OUT_OF_MEMORY, N_("out of memory"));
+      return NULL;
+    }
 
   if (address == 0)
     {
@@ -140,7 +153,10 @@ grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
       status = efi_call_4 (b->allocate_pages, alloctype, memtype, pages, &address);
       grub_efi_free_pages (0, pages);
       if (status != GRUB_EFI_SUCCESS)
-	return 0;
+	{
+	  grub_error (GRUB_ERR_OUT_OF_MEMORY, N_("out of memory"));
+	  return NULL;
+	}
     }
 
   grub_efi_store_alloc (address, pages);
@@ -328,15 +344,24 @@ grub_efi_get_memory_map (grub_efi_uintn_t *memory_map_size,
   if (grub_efi_is_finished)
     {
       int ret = 1;
-      if (*memory_map_size < finish_mmap_size)
+
+      if (memory_map != NULL)
 	{
-	  grub_memcpy (memory_map, finish_mmap_buf, *memory_map_size);
-	  ret = 0;
+	  if (*memory_map_size < finish_mmap_size)
+	    {
+	      grub_memcpy (memory_map, finish_mmap_buf, *memory_map_size);
+	      ret = 0;
+	    }
+          else
+	    grub_memcpy (memory_map, finish_mmap_buf, finish_mmap_size);
 	}
       else
 	{
-	  grub_memcpy (memory_map, finish_mmap_buf, finish_mmap_size);
-	  ret = 1;
+	  /*
+	   * Incomplete, no buffer to copy into, same as
+	   * GRUB_EFI_BUFFER_TOO_SMALL below.
+	   */
+	  ret = 0;
 	}
       *memory_map_size = finish_mmap_size;
       if (map_key)

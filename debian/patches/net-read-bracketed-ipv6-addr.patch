@@ -6,6 +6,8 @@ Allow specifying port numbers for http and tftp paths, and allow ipv6 addresses
 to be recognized with brackets around them, which is required to specify a port
 number
 
+Last-Update: 2021-09-24
+
 Patch-Name: net-read-bracketed-ipv6-addr.patch
 ---
  grub-core/net/http.c | 21 +++++++++---
@@ -15,7 +17,7 @@ Patch-Name: net-read-bracketed-ipv6-addr.patch
  4 files changed, 110 insertions(+), 11 deletions(-)
 
 diff --git a/grub-core/net/http.c b/grub-core/net/http.c
-index 5aa4ad3..f182d7b 100644
+index b616cf4..3fe155f 100644
 --- a/grub-core/net/http.c
 +++ b/grub-core/net/http.c
 @@ -312,12 +312,14 @@ http_establish (struct grub_file *file, grub_off_t offset, int initial)
@@ -69,14 +71,14 @@ index 5aa4ad3..f182d7b 100644
 +		data->filename, server, port ? port : HTTP_PORT);
 +  data->sock = grub_net_tcp_open (server,
 +				  port ? port : HTTP_PORT, http_receive,
- 				  http_err, http_err,
+ 				  http_err, NULL,
  				  file);
    if (!data->sock)
 diff --git a/grub-core/net/net.c b/grub-core/net/net.c
-index d5d726a..b917a75 100644
+index 4d3eb5c..15a2f29 100644
 --- a/grub-core/net/net.c
 +++ b/grub-core/net/net.c
-@@ -437,6 +437,12 @@ parse_ip6 (const char *val, grub_uint64_t *ip, const char **rest)
+@@ -442,6 +442,12 @@ parse_ip6 (const char *val, grub_uint64_t *ip, const char **rest)
    grub_uint16_t newip[8];
    const char *ptr = val;
    int word, quaddot = -1;
@@ -89,7 +91,7 @@ index d5d726a..b917a75 100644
  
    if (ptr[0] == ':' && ptr[1] != ':')
      return 0;
-@@ -475,6 +481,9 @@ parse_ip6 (const char *val, grub_uint64_t *ip, const char **rest)
+@@ -480,6 +486,9 @@ parse_ip6 (const char *val, grub_uint64_t *ip, const char **rest)
        grub_memset (&newip[quaddot], 0, (7 - word) * sizeof (newip[0]));
      }
    grub_memcpy (ip, newip, 16);
@@ -99,7 +101,7 @@ index d5d726a..b917a75 100644
    if (rest)
      *rest = ptr;
    return 1;
-@@ -1260,8 +1269,10 @@ grub_net_open_real (const char *name)
+@@ -1265,8 +1274,10 @@ grub_net_open_real (const char *name)
  {
    grub_net_app_level_t proto;
    const char *protname, *server;
@@ -110,7 +112,7 @@ index d5d726a..b917a75 100644
  
    if (grub_strncmp (name, "pxe:", sizeof ("pxe:") - 1) == 0)
      {
-@@ -1299,6 +1310,72 @@ grub_net_open_real (const char *name)
+@@ -1304,6 +1315,72 @@ grub_net_open_real (const char *name)
        return NULL;
      }  
  
@@ -183,7 +185,7 @@ index d5d726a..b917a75 100644
    for (try = 0; try < 2; try++)
      {
        FOR_NET_APP_LEVEL (proto)
-@@ -1308,15 +1385,19 @@ grub_net_open_real (const char *name)
+@@ -1313,15 +1390,19 @@ grub_net_open_real (const char *name)
  	  {
  	    grub_net_t ret = grub_zalloc (sizeof (*ret));
  	    if (!ret)
@@ -210,10 +212,10 @@ index d5d726a..b917a75 100644
  	  }
        }
 diff --git a/grub-core/net/tftp.c b/grub-core/net/tftp.c
-index 7d90bf6..a0817a0 100644
+index 7f44b30..f3e7879 100644
 --- a/grub-core/net/tftp.c
 +++ b/grub-core/net/tftp.c
-@@ -314,6 +314,7 @@ tftp_open (struct grub_file *file, const char *filename)
+@@ -295,6 +295,7 @@ tftp_open (struct grub_file *file, const char *filename)
    grub_err_t err;
    grub_uint8_t *nbd;
    grub_net_network_level_address_t addr;
@@ -221,14 +223,13 @@ index 7d90bf6..a0817a0 100644
  
    data = grub_zalloc (sizeof (*data));
    if (!data)
-@@ -382,13 +383,16 @@ tftp_open (struct grub_file *file, const char *filename)
+@@ -361,12 +362,15 @@ tftp_open (struct grub_file *file, const char *filename)
    err = grub_net_resolve_address (file->device->net->server, &addr);
    if (err)
      {
 +      grub_dprintf ("tftp", "file_size is %llu, block_size is %llu\n",
 +		    (unsigned long long)data->file_size,
 +		    (unsigned long long)data->block_size);
-       destroy_pq (data);
        grub_free (data);
        return err;
      }
@@ -240,7 +241,7 @@ index 7d90bf6..a0817a0 100644
    if (!data->sock)
      {
 diff --git a/include/grub/net.h b/include/grub/net.h
-index 4a9069a..cc11428 100644
+index 7ae4b6b..69bfe09 100644
 --- a/include/grub/net.h
 +++ b/include/grub/net.h
 @@ -270,6 +270,7 @@ typedef struct grub_net

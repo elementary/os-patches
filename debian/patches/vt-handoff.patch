@@ -12,16 +12,15 @@ Last-Update: 2013-12-25
 
 Patch-Name: vt-handoff.patch
 ---
- configure.ac                | 11 +++++++++++
- util/grub.d/10_linux.in     | 28 +++++++++++++++++++++++++++-
- util/grub.d/10_linux_zfs.in | 28 +++++++++++++++++++++++++++-
- 3 files changed, 65 insertions(+), 2 deletions(-)
+ configure.ac            | 11 +++++++++++
+ util/grub.d/10_linux.in | 28 +++++++++++++++++++++++++++-
+ 2 files changed, 38 insertions(+), 1 deletion(-)
 
 diff --git a/configure.ac b/configure.ac
-index dbc429c..e382c74 100644
+index 947fd52..e11df6b 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1890,6 +1890,17 @@ else
+@@ -1948,6 +1948,17 @@ else
  fi
  AC_SUBST([GFXPAYLOAD_DYNAMIC])
  
@@ -40,7 +39,7 @@ index dbc429c..e382c74 100644
  
  AC_SUBST([FONT_SOURCE])
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index 09393c2..cc2dd85 100644
+index d46d785..64204c2 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -24,6 +24,7 @@ ubuntu_recovery="@UBUNTU_RECOVERY@"
@@ -51,7 +50,7 @@ index 09393c2..cc2dd85 100644
  
  . "$pkgdatadir/grub-mkconfig_lib"
  
-@@ -108,6 +109,14 @@ if [ "$ubuntu_recovery" = 1 ]; then
+@@ -104,6 +105,14 @@ if [ "$ubuntu_recovery" = 1 ]; then
      GRUB_CMDLINE_LINUX_RECOVERY="$GRUB_CMDLINE_LINUX_RECOVERY nomodeset"
  fi
  
@@ -66,7 +65,7 @@ index 09393c2..cc2dd85 100644
  linux_entry ()
  {
    os="$1"
-@@ -153,7 +162,7 @@ linux_entry ()
+@@ -149,7 +158,7 @@ linux_entry ()
    fi
    if ([ "$ubuntu_recovery" = 0 ] || [ x$type != xrecovery ]) && \
       ([ "x$GRUB_GFXPAYLOAD_LINUX" != x ] || [ "$gfxpayload_dynamic" = 1 ]); then
@@ -75,7 +74,7 @@ index 09393c2..cc2dd85 100644
    fi
  
    echo "	insmod gzio" | sed "s/^/$submenu_indentation/"
-@@ -232,6 +241,23 @@ prepare_root_cache=
+@@ -228,6 +237,23 @@ prepare_root_cache=
  boot_device_id=
  title_correction_code=
  
@@ -99,63 +98,3 @@ index 09393c2..cc2dd85 100644
  # Use ELILO's generic "efifb" when it's known to be available.
  # FIXME: We need an interface to select vesafb in case efifb can't be used.
  if [ "x$GRUB_GFXPAYLOAD_LINUX" != x ] || [ "$gfxpayload_dynamic" = 0 ]; then
-diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index ee1d1d2..055a542 100755
---- a/util/grub.d/10_linux_zfs.in
-+++ b/util/grub.d/10_linux_zfs.in
-@@ -23,6 +23,7 @@ ubuntu_recovery="@UBUNTU_RECOVERY@"
- quiet_boot="@QUIET_BOOT@"
- quick_boot="@QUICK_BOOT@"
- gfxpayload_dynamic="@GFXPAYLOAD_DYNAMIC@"
-+vt_handoff="@VT_HANDOFF@"
- 
- . "${pkgdatadir}/grub-mkconfig_lib"
- 
-@@ -737,6 +738,23 @@ generate_grub_menu_metadata() {
- # Note:
- #   If 10_linux runs these part will be defined twice in grub configuration
- print_menu_prologue() {
-+    cat << 'EOF'
-+function gfxmode {
-+	set gfxpayload="${1}"
-+EOF
-+    if [ "${vt_handoff}" = 1 ]; then
-+        cat << 'EOF'
-+	if [ "${1}" = "keep" ]; then
-+		set vt_handoff=vt.handoff=1
-+	else
-+		set vt_handoff=
-+	fi
-+EOF
-+    fi
-+    cat << EOF
-+}
-+EOF
-+
-     # Use ELILO's generic "efifb" when it's known to be available.
-     # FIXME: We need an interface to select vesafb in case efifb can't be used.
-     GRUB_GFXPAYLOAD_LINUX="${GRUB_GFXPAYLOAD_LINUX:-}"
-@@ -832,7 +850,7 @@ zfs_linux_entry () {
- 
-     if ([ "${ubuntu_recovery}" = 0 ] || [ "${type}" != "recovery" ]) && \
-         ([ "${GRUB_GFXPAYLOAD_LINUX}" != "" ] || [ "${gfxpayload_dynamic}" = 1 ]); then
--        echo "${submenu_indentation}	set gfxpayload=\${linux_gfx_mode}"
-+        echo "${submenu_indentation}	gfxmode \${linux_gfx_mode}"
-     fi
- 
-     echo "${submenu_indentation}	insmod gzio"
-@@ -896,6 +914,14 @@ generate_grub_menu() {
-         GRUB_CMDLINE_LINUX_RECOVERY="${GRUB_CMDLINE_LINUX_RECOVERY} nomodeset"
-     fi
- 
-+    if [ "${vt_handoff}" = 1 ]; then
-+        for word in ${GRUB_CMDLINE_LINUX_DEFAULT}; do
-+            if [ "${word}" = splash ]; then
-+                GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} \${vt_handoff}"
-+            fi
-+        done
-+    fi
-+
-     print_menu_prologue
- 
-     # IFS is set to TAB (ASCII 0x09)

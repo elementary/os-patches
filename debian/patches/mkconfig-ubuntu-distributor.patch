@@ -11,12 +11,11 @@ Last-Update: 2013-12-25
 
 Patch-Name: mkconfig-ubuntu-distributor.patch
 ---
- util/grub.d/10_linux.in     | 9 ++++++++-
- util/grub.d/10_linux_zfs.in | 9 ++++++++-
- 2 files changed, 16 insertions(+), 2 deletions(-)
+ util/grub.d/10_linux.in | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index fcd3033..19e4df4 100644
+index f215e32..1603a75 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -32,7 +32,14 @@ CLASS="--class gnu-linux --class gnu --class os"
@@ -34,24 +33,4 @@ index fcd3033..19e4df4 100644
 +  esac
    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1|LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
  fi
- 
-diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index 302df63..2149864 100755
---- a/util/grub.d/10_linux_zfs.in
-+++ b/util/grub.d/10_linux_zfs.in
-@@ -807,7 +807,14 @@ generate_grub_menu() {
-     if [ "${GRUB_DISTRIBUTOR}" = "" ] ; then
-         OS=GNU/Linux
-     else
--        OS="${GRUB_DISTRIBUTOR} GNU/Linux"
-+        case ${GRUB_DISTRIBUTOR} in
-+            Ubuntu|Kubuntu)
-+            OS="${GRUB_DISTRIBUTOR}"
-+            ;;
-+            *)
-+            OS="${GRUB_DISTRIBUTOR} GNU/Linux"
-+            ;;
-+        esac
-         CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1 | LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
-     fi
  

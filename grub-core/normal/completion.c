@@ -284,7 +284,8 @@ complete_file (void)
 
       /* Cut away the filename part.  */
       dirfile = grub_strrchr (dir, '/');
-      dirfile[1] = '\0';
+      if (dirfile)
+	dirfile[1] = '\0';
 
       /* Iterate the directory.  */
       (fs->fs_dir) (dev, dir, iterate_dir, NULL);
@@ -400,8 +401,8 @@ char *
 grub_normal_do_completion (char *buf, int *restore,
 			   void (*hook) (const char *, grub_completion_type_t, int))
 {
-  int argc;
-  char **argv;
+  int argc = 0;
+  char **argv = NULL;
 
   /* Initialize variables.  */
   match = 0;
@@ -516,10 +517,8 @@ grub_normal_do_completion (char *buf, int *restore,
 
  fail:
   if (argc != 0)
-    {
-      grub_free (argv[0]);
-      grub_free (argv);
-    }
+    grub_free (argv[0]);
+  grub_free (argv);
   grub_free (match);
   grub_errno = GRUB_ERR_NONE;
 

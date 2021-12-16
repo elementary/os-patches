@@ -1,5 +1,5 @@
-From: Chris Coulson <chris.coulson@canonical.com>
-Date: Wed, 11 Mar 2020 16:46:00 +0100
+From: Julian Andres Klode <julian.klode@canonical.com>
+Date: Thu, 2 Dec 2021 12:25:37 +0100
 Subject: ubuntu: Make the linux command in EFI grub always try EFI handover
 
 The previous implementation only boots via the EFI handover protocol when
@@ -17,7 +17,7 @@ only if secure boot is disabled.
  2 files changed, 35 insertions(+), 26 deletions(-)
 
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-index 6b6aef8..fe3ca2c 100644
+index b805bec..95db589 100644
 --- a/grub-core/loader/i386/efi/linux.c
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -27,6 +27,7 @@
@@ -34,7 +34,7 @@ index 6b6aef8..fe3ca2c 100644
  
 -  rc = grub_linuxefi_secure_validate (kernel, filelen);
 -  if (rc < 0)
-+  if (grub_efi_secure_boot ())
++  if (grub_efi_get_secureboot() == GRUB_EFI_SECUREBOOT_MODE_ENABLED)
      {
 -      grub_error (GRUB_ERR_ACCESS_DENIED, N_("%s has invalid signature"),
 -		  argv[0]);
@@ -50,14 +50,14 @@ index 6b6aef8..fe3ca2c 100644
  
    params = grub_efi_allocate_pages_max (0x3fffffff,
 diff --git a/grub-core/loader/i386/linux.c b/grub-core/loader/i386/linux.c
-index 4328bcb..991eb29 100644
+index d55b7cd..1649342 100644
 --- a/grub-core/loader/i386/linux.c
 +++ b/grub-core/loader/i386/linux.c
-@@ -658,35 +658,40 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+@@ -665,35 +665,40 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
  
  #ifdef GRUB_MACHINE_EFI
    using_linuxefi = 0;
--  if (grub_efi_secure_boot ())
+-  if (grub_efi_get_secureboot() == GRUB_EFI_SECUREBOOT_MODE_ENABLED)
 -    {
 -      /* linuxefi requires a successful signature check and then hand over
 -	 to the kernel without calling ExitBootServices. */
@@ -91,7 +91,7 @@ index 4328bcb..991eb29 100644
 +	      using_linuxefi = 1;
 +	      return GRUB_ERR_NONE;
 +	    }
-+	  else if (grub_efi_secure_boot ())
++	  else if (grub_efi_get_secureboot() == GRUB_EFI_SECUREBOOT_MODE_ENABLED)
  	    {
 -	      (linuxefi_cmd->func) (linuxefi_cmd, argc, argv);
 -	      if (grub_errno == GRUB_ERR_NONE)
@@ -107,7 +107,7 @@ index 4328bcb..991eb29 100644
  	}
      }
 +
-+  if (grub_efi_secure_boot ())
++  if (grub_efi_get_secureboot() == GRUB_EFI_SECUREBOOT_MODE_ENABLED)
 +    {
 +      grub_dprintf("linux", "Unable to hand off to linuxefi and secure boot is enabled\n");
 +      goto fail;

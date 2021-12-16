@@ -82,7 +82,7 @@ grub_usb_hub_add_dev (grub_usb_controller_t controller,
   if (i == GRUB_USBHUB_MAX_DEVICES)
     {
       grub_error (GRUB_ERR_IO, "can't assign address to USB device");
-      for (i = 0; i < 8; i++)
+      for (i = 0; i < GRUB_USB_MAX_CONF; i++)
         grub_free (dev->config[i].descconf);
       grub_free (dev);
       return NULL;
@@ -96,7 +96,7 @@ grub_usb_hub_add_dev (grub_usb_controller_t controller,
 			      i, 0, 0, NULL);
   if (err)
     {
-      for (i = 0; i < 8; i++)
+      for (i = 0; i < GRUB_USB_MAX_CONF; i++)
         grub_free (dev->config[i].descconf);
       grub_free (dev);
       return NULL;
@@ -149,8 +149,8 @@ grub_usb_add_hub (grub_usb_device_t dev)
   grub_usb_set_configuration (dev, 1);
 
   dev->nports = hubdesc.portcnt;
-  dev->children = grub_zalloc (hubdesc.portcnt * sizeof (dev->children[0]));
-  dev->ports = grub_zalloc (dev->nports * sizeof (dev->ports[0]));
+  dev->children = grub_calloc (hubdesc.portcnt, sizeof (dev->children[0]));
+  dev->ports = grub_calloc (dev->nports, sizeof (dev->ports[0]));
   if (!dev->children || !dev->ports)
     {
       grub_free (dev->children);
@@ -268,8 +268,8 @@ grub_usb_controller_dev_register_iter (grub_usb_controller_t controller, void *d
 
   /* Query the number of ports the root Hub has.  */
   hub->nports = controller->dev->hubports (controller);
-  hub->devices = grub_zalloc (sizeof (hub->devices[0]) * hub->nports);
-  hub->ports = grub_zalloc (sizeof (hub->ports[0]) * hub->nports);
+  hub->devices = grub_calloc (hub->nports, sizeof (hub->devices[0]));
+  hub->ports = grub_calloc (hub->nports, sizeof (hub->ports[0]));
   if (!hub->devices || !hub->ports)
     {
       grub_free (hub->devices);

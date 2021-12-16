@@ -4,7 +4,7 @@ Subject: Avoid getting confused by inaccessible loop device backing paths
 
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/938724
 Forwarded: no
-Last-Update: 2013-12-20
+Last-Update: 2021-09-24
 
 Patch-Name: mkconfig-nonexistent-loopback.patch
 ---
@@ -13,7 +13,7 @@ Patch-Name: mkconfig-nonexistent-loopback.patch
  2 files changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/util/grub-mkconfig_lib.in b/util/grub-mkconfig_lib.in
-index b05df55..fe6319a 100644
+index e62cfc2..b6a1d7d 100644
 --- a/util/grub-mkconfig_lib.in
 +++ b/util/grub-mkconfig_lib.in
 @@ -143,7 +143,7 @@ prepare_grub_to_access_device ()
@@ -26,10 +26,10 @@ index b05df55..fe6319a 100644
        esac
      ;;
 diff --git a/util/grub.d/30_os-prober.in b/util/grub.d/30_os-prober.in
-index 775ceb2..b7e1147 100644
+index 37d5f05..e2ec80e 100644
 --- a/util/grub.d/30_os-prober.in
 +++ b/util/grub.d/30_os-prober.in
-@@ -219,6 +219,11 @@ EOF
+@@ -222,6 +222,11 @@ EOF
  	  LINITRD="${LINITRD#/boot}"
  	fi
  
@@ -41,7 +41,7 @@ index 775ceb2..b7e1147 100644
  	onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
  	recovery_params="$(echo "${LPARAMS}" | grep 'single\|recovery')" || true
  	counter=1
-@@ -230,10 +235,6 @@ EOF
+@@ -233,10 +238,6 @@ EOF
  	fi
  	used_osprober_linux_ids="$used_osprober_linux_ids 'osprober-gnulinux-$LKERNEL-${recovery_params}-$counter-$boot_device_id'"
  
@@ -49,6 +49,6 @@ index 775ceb2..b7e1147 100644
 -	  prepare_boot_cache="$(prepare_grub_to_access_device ${LBOOT} | grub_add_tab)"
 -	fi
 -
- 	if [ "x$is_top_level" = xtrue ] && [ "x${GRUB_DISABLE_SUBMENU}" != xy ]; then
-             cat << EOF
- menuentry '$(echo "$OS $onstr" | grub_quote)' $CLASS --class gnu-linux --class gnu --class os \$menuentry_id_option 'osprober-gnulinux-simple-$boot_device_id' {
+ 	# The GRUB_DISABLE_SUBMENU option used to be different than others since it was
+ 	# mentioned in the documentation that has to be set to 'y' instead of 'true' to
+ 	# enable it. This caused a lot of confusion to users that set the option to 'y',

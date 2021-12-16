@@ -28,10 +28,10 @@
 #include <grub/compiler.h>
 
 #define ALIGN_UP(addr, align) \
-	((addr + (typeof (addr)) align - 1) & ~((typeof (addr)) align - 1))
+	(((addr) + (typeof (addr)) (align) - 1) & ~((typeof (addr)) (align) - 1))
 #define ALIGN_UP_OVERHEAD(addr, align) ((-(addr)) & ((typeof (addr)) (align) - 1))
 #define ALIGN_DOWN(addr, align) \
-	((addr) & ~((typeof (addr)) align - 1))
+	((addr) & ~((typeof (addr)) (align) - 1))
 #define ARRAY_SIZE(array) (sizeof (array) / sizeof (array[0]))
 #define COMPILE_TIME_ASSERT(cond) switch (0) { case 1: case !(cond): ; }
 
@@ -243,11 +243,29 @@ grub_strncasecmp (const char *s1, const char *s2, grub_size_t n)
     - (int) grub_tolower ((grub_uint8_t) *s2);
 }
 
-unsigned long EXPORT_FUNC(grub_strtoul) (const char *str, char **end, int base);
-unsigned long long EXPORT_FUNC(grub_strtoull) (const char *str, char **end, int base);
+/*
+ * Note that these differ from the C standard's definitions of strtol,
+ * strtoul(), and strtoull() by the addition of two const qualifiers on the end
+ * pointer, which make the declaration match the *semantic* requirements of
+ * their behavior.  This means that instead of:
+ *
+ *  char *s = "1234 abcd";
+ *  char *end;
+ *  unsigned long l;
+ *
+ *  l = grub_strtoul(s, &end, 10);
+ *
+ * We must one of:
+ *
+ *  const char *end;
+ *  ... or ...
+ *  l = grub_strtoul(s, (const char ** const)&end, 10);
+ */
+unsigned long EXPORT_FUNC(grub_strtoul) (const char * restrict str, const char ** const restrict end, int base);
+unsigned long long EXPORT_FUNC(grub_strtoull) (const char * restrict str, const char ** const restrict end, int base);
 
 static inline long
-grub_strtol (const char *str, char **end, int base)
+grub_strtol (const char * restrict str, const char ** const restrict end, int base)
 {
   int negative = 0;
   unsigned long long magnitude;
@@ -322,6 +340,7 @@ grub_puts (const char *s)
 }
 
 int EXPORT_FUNC(grub_puts_) (const char *s);
+int EXPORT_FUNC(grub_debug_enabled) (const char *condition);
 void EXPORT_FUNC(grub_real_dprintf) (const char *file,
                                      const int line,
                                      const char *condition,
@@ -440,6 +459,22 @@ grub_error_load (const struct grub_error_saved *save)
   grub_errno = save->grub_errno;
 }
 
+/*
+ * grub_printf_fmt_checks() a fmt string for printf() against an expected
+ * format. It is intended for cases where the fmt string could come from
+ * an outside source and cannot be trusted.
+ *
+ * While expected fmt accepts a printf() format string it should be kept
+ * as simple as possible. The printf() format strings with positional
+ * parameters are NOT accepted, neither for fmt nor for fmt_expected.
+ *
+ * The fmt is accepted if it has equal or less arguments than fmt_expected
+ * and if the type of all arguments match.
+ *
+ * Returns GRUB_ERR_NONE if fmt is acceptable.
+ */
+grub_err_t EXPORT_FUNC (grub_printf_fmt_check) (const char *fmt, const char *fmt_expected);
+
 #if BOOT_TIME_STATS
 struct grub_boot_time
 {
@@ -462,5 +497,7 @@ void EXPORT_FUNC(grub_real_boot_time) (const char *file,
 
 #define grub_max(a, b) (((a) > (b)) ? (a) : (b))
 #define grub_min(a, b) (((a) < (b)) ? (a) : (b))
+
+#define grub_log2ull(n) (GRUB_TYPE_BITS (grub_uint64_t) - __builtin_clzll (n) - 1)
 
 #endif /* ! GRUB_MISC_HEADER */

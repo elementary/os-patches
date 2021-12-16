@@ -36,12 +36,6 @@ V6:
   * Don't force grub_print_error if no best route found as boot process
     could be interrupted by logged error. The default interface will be
     used as fallback in this case
-
-Orign: SUSE
-UEFI HTTP and related network protocol support (FATE#320130)
-Patch420:       0001-add-support-for-UEFI-network-protocols.patch
-
-Patch-Name: suse-add-support-for-UEFI-network-protocols.patch
 ---
  grub-core/Makefile.core.def        |    6 +
  grub-core/io/bufio.c               |    2 +-
@@ -70,10 +64,10 @@ Patch-Name: suse-add-support-for-UEFI-network-protocols.patch
  create mode 100644 include/grub/net/efi.h
 
 diff --git a/grub-core/Makefile.core.def b/grub-core/Makefile.core.def
-index 9b20f33..20be185 100644
+index 98cda49..a47c403 100644
 --- a/grub-core/Makefile.core.def
 +++ b/grub-core/Makefile.core.def
-@@ -2308,6 +2308,12 @@ module = {
+@@ -2322,6 +2322,12 @@ module = {
    common = net/ethernet.c;
    common = net/arp.c;
    common = net/netbuff.c;
@@ -100,10 +94,10 @@ index a458c3a..1637731 100644
    if (file->offset + res < next_buf)
      {
 diff --git a/grub-core/kern/efi/efi.c b/grub-core/kern/efi/efi.c
-index 7cf003f..ff200a0 100644
+index ae9885e..a3cae1e 100644
 --- a/grub-core/kern/efi/efi.c
 +++ b/grub-core/kern/efi/efi.c
-@@ -732,7 +732,7 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
+@@ -755,7 +755,7 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
  	      {
  		grub_efi_ipv4_device_path_t *ipv4
  		  = (grub_efi_ipv4_device_path_t *) dp;
@@ -112,7 +106,7 @@ index 7cf003f..ff200a0 100644
  			     (unsigned) ipv4->local_ip_address[0],
  			     (unsigned) ipv4->local_ip_address[1],
  			     (unsigned) ipv4->local_ip_address[2],
-@@ -745,33 +745,60 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
+@@ -768,33 +768,60 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
  			     (unsigned) ipv4->remote_port,
  			     (unsigned) ipv4->protocol,
  			     (unsigned) ipv4->static_ip_address);
@@ -190,7 +184,7 @@ index 7cf003f..ff200a0 100644
  	      }
  	      break;
  	    case GRUB_EFI_INFINIBAND_DEVICE_PATH_SUBTYPE:
-@@ -811,6 +838,39 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
+@@ -834,6 +861,39 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
  	      dump_vendor_path ("Messaging",
  				(grub_efi_vendor_device_path_t *) dp);
  	      break;
@@ -709,7 +703,7 @@ index 0000000..4001c04
 +grub_command_func_t grub_efi_net_bootp6 = grub_cmd_efi_bootp6;
 diff --git a/grub-core/net/efi/http.c b/grub-core/net/efi/http.c
 new file mode 100644
-index 0000000..5fb472c
+index 0000000..ee78e17
 --- /dev/null
 +++ b/grub-core/net/efi/http.c
 @@ -0,0 +1,424 @@
@@ -899,7 +893,7 @@ index 0000000..5fb472c
 +  if (status != GRUB_EFI_SUCCESS)
 +    {
 +      grub_free (request_data.url);
-+      return grub_error (GRUB_ERR_IO, "Fail to create an event! status=0x%x\n", status);
++      return grub_error (GRUB_ERR_IO, "Fail to create an event! status=0x%" PRIxGRUB_SIZE, status);
 +    }
 +
 +  status = efi_call_2 (http->request, http, &request_token);
@@ -908,7 +902,7 @@ index 0000000..5fb472c
 +    {
 +      efi_call_1 (b->close_event, request_token.event);
 +      grub_free (request_data.url);
-+      return grub_error (GRUB_ERR_IO, "Fail to send a request! status=0x%x\n", status);
++      return grub_error (GRUB_ERR_IO, "Fail to send a request! status=0x%" PRIxGRUB_SIZE, status);
 +    }
 +  /* TODO: Add Timeout */
 +  while (!request_callback_done)
@@ -936,7 +930,7 @@ index 0000000..5fb472c
 +    {
 +      efi_call_1 (b->close_event, request_token.event);
 +      grub_free (request_data.url);
-+      return grub_error (GRUB_ERR_IO, "Fail to create an event! status=0x%x\n", status);
++      return grub_error (GRUB_ERR_IO, "Fail to create an event! status=0x%" PRIxGRUB_SIZE, status);
 +    }
 +
 +  response_token.status = GRUB_EFI_SUCCESS;
@@ -1139,7 +1133,7 @@ index 0000000..5fb472c
 +  };
 diff --git a/grub-core/net/efi/ip4_config.c b/grub-core/net/efi/ip4_config.c
 new file mode 100644
-index 0000000..cbed31a
+index 0000000..40238d4
 --- /dev/null
 +++ b/grub-core/net/efi/ip4_config.c
 @@ -0,0 +1,409 @@
@@ -1211,7 +1205,7 @@ index 0000000..cbed31a
 +  for (i = 0; i < 4; i++)
 +    {
 +      unsigned long t;
-+      t = grub_strtoul (ptr, (char **) &ptr, 0);
++      t = grub_strtoul (ptr, &ptr, 0);
 +      if (grub_errno)
 +	{
 +	  grub_errno = GRUB_ERR_NONE;
@@ -1554,7 +1548,7 @@ index 0000000..cbed31a
 +  };
 diff --git a/grub-core/net/efi/ip6_config.c b/grub-core/net/efi/ip6_config.c
 new file mode 100644
-index 0000000..df92b69
+index 0000000..a9d995d
 --- /dev/null
 +++ b/grub-core/net/efi/ip6_config.c
 @@ -0,0 +1,430 @@
@@ -1645,7 +1639,7 @@ index 0000000..df92b69
 +	  ptr++;
 +	  continue;
 +	}
-+      t = grub_strtoul (ptr, (char **) &ptr, 16);
++      t = grub_strtoul (ptr, &ptr, 16);
 +      if (grub_errno)
 +	{
 +	  grub_errno = GRUB_ERR_NONE;
@@ -1990,7 +1984,7 @@ index 0000000..df92b69
 +  };
 diff --git a/grub-core/net/efi/net.c b/grub-core/net/efi/net.c
 new file mode 100644
-index 0000000..2fe5fb6
+index 0000000..3154c55
 --- /dev/null
 +++ b/grub-core/net/efi/net.c
 @@ -0,0 +1,1440 @@
@@ -2709,7 +2703,7 @@ index 0000000..2fe5fb6
 +  status = efi_call_2 (service->create_child, service, &child_dev);
 +  if (status != GRUB_EFI_SUCCESS)
 +    {
-+      grub_error (GRUB_ERR_IO, N_("Failed to create child device of http service %x"), status);
++      grub_error (GRUB_ERR_IO, N_("Failed to create child device of http service %" PRIxGRUB_SIZE), status);
 +      return NULL;
 +    }
 +
@@ -2732,7 +2726,7 @@ index 0000000..2fe5fb6
 +	{
 +	  grub_uint32_t subnet_mask_size;
 +
-+	  subnet_mask_size = grub_strtoul (rest + 1, (char **) &rest, 0);
++	  subnet_mask_size = grub_strtoul (rest + 1, &rest, 0);
 +
 +	  if (!grub_errno && subnet_mask_size <= 32 && *rest == 0)
 +	    {
@@ -2761,7 +2755,7 @@ index 0000000..2fe5fb6
 +	{
 +	  grub_efi_uint8_t prefix_length;
 +
-+	  prefix_length = grub_strtoul (rest + 1, (char **) &rest, 0);
++	  prefix_length = grub_strtoul (rest + 1, &rest, 0);
 +	  if (!grub_errno && prefix_length <= 128 && *rest == 0)
 +	    {
 +	      ip6->prefix_length = prefix_length;
@@ -3436,7 +3430,7 @@ index 0000000..2fe5fb6
 +}
 diff --git a/grub-core/net/efi/pxe.c b/grub-core/net/efi/pxe.c
 new file mode 100644
-index 0000000..4b6b48c
+index 0000000..f5b661f
 --- /dev/null
 +++ b/grub-core/net/efi/pxe.c
 @@ -0,0 +1,424 @@
@@ -3629,7 +3623,7 @@ index 0000000..4b6b48c
 +	  ptr++;
 +	  continue;
 +	}
-+      t = grub_strtoul (ptr, (char **) &ptr, 16);
++      t = grub_strtoul (ptr, &ptr, 16);
 +      if (grub_errno)
 +	{
 +	  grub_errno = GRUB_ERR_NONE;
@@ -3667,7 +3661,7 @@ index 0000000..4b6b48c
 +	  int type __attribute__((unused)))
 +{
 +  int i;
-+  char *p;
++  const char *p;
 +  grub_efi_status_t status;
 +  grub_efi_pxe_ip_address_t server_ip;
 +  grub_efi_uint64_t file_size = 0;
@@ -3755,7 +3749,7 @@ index 0000000..4b6b48c
 +	  grub_size_t len)
 +{
 +  int i;
-+  char *p;
++  const char *p;
 +  grub_efi_status_t status;
 +  grub_efi_pxe_t *pxe = (prefer_ip6) ? dev->ip6_pxe : dev->ip4_pxe;
 +  grub_efi_uint64_t bufsz = len;
@@ -3865,7 +3859,7 @@ index 0000000..4b6b48c
 +  };
 +
 diff --git a/grub-core/net/net.c b/grub-core/net/net.c
-index fed7bc5..2f86939 100644
+index 15a2f29..34bf04f 100644
 --- a/grub-core/net/net.c
 +++ b/grub-core/net/net.c
 @@ -32,6 +32,9 @@
@@ -3878,7 +3872,7 @@ index fed7bc5..2f86939 100644
  
  GRUB_MOD_LICENSE ("GPLv3+");
  
-@@ -1822,8 +1825,49 @@ static grub_command_t cmd_addaddr, cmd_deladdr, cmd_addroute, cmd_delroute;
+@@ -1959,8 +1962,49 @@ static grub_command_t cmd_addaddr, cmd_deladdr, cmd_addroute, cmd_delroute;
  static grub_command_t cmd_lsroutes, cmd_lscards;
  static grub_command_t cmd_lsaddr, cmd_slaac;
  
@@ -3928,7 +3922,7 @@ index fed7bc5..2f86939 100644
    grub_register_variable_hook ("net_default_server", defserver_get_env,
  			       defserver_set_env);
    grub_env_export ("net_default_server");
-@@ -1871,10 +1915,37 @@ GRUB_MOD_INIT(net)
+@@ -2008,10 +2052,37 @@ GRUB_MOD_INIT(net)
  						grub_net_restore_hw,
  						GRUB_LOADER_PREBOOT_HOOK_PRIO_DISK);
    grub_net_poll_cards_idle = grub_net_poll_cards_idle_real;
@@ -3966,7 +3960,7 @@ index fed7bc5..2f86939 100644
    grub_register_variable_hook ("net_default_server", 0, 0);
    grub_register_variable_hook ("pxe_default_server", 0, 0);
  
-@@ -1893,4 +1964,7 @@ GRUB_MOD_FINI(net)
+@@ -2030,4 +2101,7 @@ GRUB_MOD_FINI(net)
    grub_net_fini_hw (0);
    grub_loader_unregister_preboot_hook (fini_hnd);
    grub_net_poll_cards_idle = grub_net_poll_cards_idle_real;
@@ -3975,10 +3969,10 @@ index fed7bc5..2f86939 100644
 +#endif
  }
 diff --git a/include/grub/efi/api.h b/include/grub/efi/api.h
-index 08bff60..49275e4 100644
+index 9cab1a5..3b2f2e3 100644
 --- a/include/grub/efi/api.h
 +++ b/include/grub/efi/api.h
-@@ -593,6 +593,23 @@ typedef grub_uint16_t grub_efi_ipv6_address_t[8];
+@@ -608,6 +608,23 @@ typedef grub_uint16_t grub_efi_ipv6_address_t[8];
  typedef grub_uint8_t grub_efi_ip_address_t[8] __attribute__ ((aligned(4)));
  typedef grub_efi_uint64_t grub_efi_physical_address_t;
  typedef grub_efi_uint64_t grub_efi_virtual_address_t;
@@ -4002,7 +3996,7 @@ index 08bff60..49275e4 100644
  
  struct grub_efi_guid
  {
-@@ -860,6 +877,8 @@ struct grub_efi_ipv6_device_path
+@@ -875,6 +892,8 @@ struct grub_efi_ipv6_device_path
    grub_efi_uint16_t remote_port;
    grub_efi_uint16_t protocol;
    grub_efi_uint8_t static_ip_address;
@@ -4011,7 +4005,7 @@ index 08bff60..49275e4 100644
  } GRUB_PACKED;
  typedef struct grub_efi_ipv6_device_path grub_efi_ipv6_device_path_t;
  
-@@ -909,6 +928,15 @@ struct grub_efi_uri_device_path
+@@ -924,6 +943,15 @@ struct grub_efi_uri_device_path
  } GRUB_PACKED;
  typedef struct grub_efi_uri_device_path grub_efi_uri_device_path_t;
  
@@ -4027,7 +4021,7 @@ index 08bff60..49275e4 100644
  #define GRUB_EFI_VENDOR_MESSAGING_DEVICE_PATH_SUBTYPE	10
  
  /* Media Device Path.  */
-@@ -991,6 +1019,23 @@ struct grub_efi_bios_device_path
+@@ -1006,6 +1034,23 @@ struct grub_efi_bios_device_path
  } GRUB_PACKED;
  typedef struct grub_efi_bios_device_path grub_efi_bios_device_path_t;
  
@@ -4051,7 +4045,7 @@ index 08bff60..49275e4 100644
  struct grub_efi_open_protocol_information_entry
  {
    grub_efi_handle_t agent_handle;
-@@ -1482,23 +1527,28 @@ typedef struct grub_efi_simple_text_output_interface grub_efi_simple_text_output
+@@ -1497,23 +1542,28 @@ typedef struct grub_efi_simple_text_output_interface grub_efi_simple_text_output
  
  typedef grub_uint8_t grub_efi_pxe_packet_t[1472];
  
@@ -4094,7 +4088,7 @@ index 08bff60..49275e4 100644
  
  #define GRUB_EFI_PXE_BASE_CODE_MAX_IPCNT 8
  typedef struct {
-@@ -1548,17 +1598,31 @@ typedef struct grub_efi_pxe_mode
+@@ -1563,17 +1613,31 @@ typedef struct grub_efi_pxe_mode
  typedef struct grub_efi_pxe
  {
    grub_uint64_t rev;
@@ -4130,7 +4124,7 @@ index 08bff60..49275e4 100644
    void (*setpackets) (void);
    struct grub_efi_pxe_mode *mode;
  } grub_efi_pxe_t;
-@@ -1800,6 +1864,44 @@ struct grub_efi_ip4_config2_protocol
+@@ -1835,6 +1899,44 @@ struct grub_efi_ip4_config2_protocol
  };
  typedef struct grub_efi_ip4_config2_protocol grub_efi_ip4_config2_protocol_t;
  
@@ -4175,7 +4169,7 @@ index 08bff60..49275e4 100644
  enum grub_efi_ip6_config_data_type {
    GRUB_EFI_IP6_CONFIG_DATA_TYPE_INTERFACEINFO,
    GRUB_EFI_IP6_CONFIG_DATA_TYPE_ALT_INTERFACEID,
-@@ -1834,6 +1936,49 @@ struct grub_efi_ip6_config_protocol
+@@ -1869,6 +1971,49 @@ struct grub_efi_ip6_config_protocol
  };
  typedef struct grub_efi_ip6_config_protocol grub_efi_ip6_config_protocol_t;
  

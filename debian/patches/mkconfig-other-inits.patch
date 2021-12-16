@@ -17,7 +17,7 @@ Patch-Name: mkconfig-other-inits.patch
  2 files changed, 21 insertions(+)
 
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index 85b3008..dff84ed 100644
+index 635c609..4e09797 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -32,6 +32,7 @@ export TEXTDOMAIN=@PACKAGE@
@@ -28,7 +28,7 @@ index 85b3008..dff84ed 100644
  
  if [ "x${GRUB_DISTRIBUTOR}" = "x" ] ; then
    OS=GNU/Linux
-@@ -131,6 +132,8 @@ linux_entry ()
+@@ -127,6 +128,8 @@ linux_entry ()
        case $type in
  	  recovery)
  	      title="$(gettext_printf "%s, with Linux %s (%s)" "${os}" "${version}" "$(gettext "${GRUB_RECOVERY_TITLE}")")" ;;
@@ -37,7 +37,7 @@ index 85b3008..dff84ed 100644
  	  *)
  	      title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")" ;;
        esac
-@@ -385,6 +388,13 @@ while [ "x$list" != "x" ] ; do
+@@ -389,6 +392,13 @@ while [ "x$list" != "x" ] ; do
  
    linux_entry "${OS}" "${version}" advanced \
                "${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}"
@@ -52,7 +52,7 @@ index 85b3008..dff84ed 100644
      linux_entry "${OS}" "${version}" recovery \
                  "${GRUB_CMDLINE_LINUX_RECOVERY} ${GRUB_CMDLINE_LINUX}"
 diff --git a/util/grub.d/20_linux_xen.in b/util/grub.d/20_linux_xen.in
-index f2ee053..81e5f0d 100644
+index 64e26e4..d99751a 100644
 --- a/util/grub.d/20_linux_xen.in
 +++ b/util/grub.d/20_linux_xen.in
 @@ -27,6 +27,7 @@ export TEXTDOMAIN=@PACKAGE@
@@ -63,7 +63,7 @@ index f2ee053..81e5f0d 100644
  
  if [ "x${GRUB_DISTRIBUTOR}" = "x" ] ; then
    OS=GNU/Linux
-@@ -106,6 +107,8 @@ linux_entry ()
+@@ -123,6 +124,8 @@ linux_entry_xsm ()
    if [ x$type != xsimple ] ; then
        if [ x$type = xrecovery ] ; then
  	  title="$(gettext_printf "%s, with Xen %s and Linux %s (%s)" "${os}" "${xen_version}" "${version}" "$(gettext "${GRUB_RECOVERY_TITLE}")")"
@@ -72,7 +72,7 @@ index f2ee053..81e5f0d 100644
        else
  	  title="$(gettext_printf "%s, with Xen %s and Linux %s" "${os}" "${xen_version}" "${version}")"
        fi
-@@ -310,6 +313,14 @@ while [ "x${xen_list}" != "x" ] ; do
+@@ -346,6 +349,14 @@ while [ "x${xen_list}" != "x" ] ; do
  
  	linux_entry "${OS}" "${version}" "${xen_version}" advanced \
  	    "${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}" "${GRUB_CMDLINE_XEN} ${GRUB_CMDLINE_XEN_DEFAULT}"

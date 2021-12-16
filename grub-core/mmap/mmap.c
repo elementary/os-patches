@@ -20,6 +20,7 @@
 #include <grub/memory.h>
 #include <grub/machine/memory.h>
 #include <grub/err.h>
+#include <grub/lockdown.h>
 #include <grub/misc.h>
 #include <grub/mm.h>
 #include <grub/command.h>
@@ -143,9 +144,9 @@ grub_mmap_iterate (grub_memory_hook_t hook, void *hook_data)
 
   /* Initialize variables. */
   ctx.scanline_events = (struct grub_mmap_scan *)
-    grub_malloc (sizeof (struct grub_mmap_scan) * 2 * mmap_num);
+    grub_calloc (mmap_num, sizeof (struct grub_mmap_scan) * 2);
 
-  present = grub_zalloc (sizeof (present[0]) * current_priority);
+  present = grub_calloc (current_priority, sizeof (present[0]));
 
   if (! ctx.scanline_events || !present)
     {
@@ -269,6 +270,7 @@ grub_mmap_iterate (grub_memory_hook_t hook, void *hook_data)
 		   hook_data))
 	{
 	  grub_free (ctx.scanline_events);
+	  grub_free (present);
 	  return GRUB_ERR_NONE;
 	}
 
@@ -281,6 +283,7 @@ grub_mmap_iterate (grub_memory_hook_t hook, void *hook_data)
     }
 
   grub_free (ctx.scanline_events);
+  grub_free (present);
   return GRUB_ERR_NONE;
 }
 
@@ -423,7 +426,7 @@ static grub_err_t
 grub_cmd_badram (grub_command_t cmd __attribute__ ((unused)),
 		 int argc, char **args)
 {
-  char * str;
+  const char *str;
   struct badram_entry entry;
 
   if (argc != 1)
@@ -465,7 +468,7 @@ static grub_uint64_t
 parsemem (const char *str)
 {
   grub_uint64_t ret;
-  char *ptr;
+  const char *ptr;
 
   ret = grub_strtoul (str, &ptr, 0);
 
@@ -534,12 +537,12 @@ static grub_command_t cmd, cmd_cut;
 
 GRUB_MOD_INIT(mmap)
 {
-  cmd = grub_register_command ("badram", grub_cmd_badram,
-			       N_("ADDR1,MASK1[,ADDR2,MASK2[,...]]"),
-			       N_("Declare memory regions as faulty (badram)."));
-  cmd_cut = grub_register_command ("cutmem", grub_cmd_cutmem,
-				   N_("FROM[K|M|G] TO[K|M|G]"),
-				   N_("Remove any memory regions in specified range."));
+  cmd = grub_register_command_lockdown ("badram", grub_cmd_badram,
+                                        N_("ADDR1,MASK1[,ADDR2,MASK2[,...]]"),
+                                        N_("Declare memory regions as faulty (badram)."));
+  cmd_cut = grub_register_command_lockdown ("cutmem", grub_cmd_cutmem,
+                                            N_("FROM[K|M|G] TO[K|M|G]"),
+                                            N_("Remove any memory regions in specified range."));
 
 }
 

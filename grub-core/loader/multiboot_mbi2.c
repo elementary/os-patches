@@ -48,6 +48,12 @@
 #define HAS_VGA_TEXT 0
 #endif
 
+#if defined (__i386__) || defined (__x86_64__)
+#define MBI_MIN_ADDR 0x1000
+#else
+#define MBI_MIN_ADDR 0
+#endif
+
 struct module
 {
   struct module *next;
@@ -295,10 +301,10 @@ grub_multiboot2_load (grub_file_t file, const char *filename)
 	      return grub_error (GRUB_ERR_BAD_OS, "invalid min/max address and/or load size");
 	    }
 
-	  err = grub_relocator_alloc_chunk_align (grub_multiboot2_relocator, &ch,
-						  mld.min_addr, mld.max_addr - code_size,
-						  code_size, mld.align ? mld.align : 1,
-						  mld.preference, keep_bs);
+	  err = grub_relocator_alloc_chunk_align_safe (grub_multiboot2_relocator, &ch,
+						       mld.min_addr, mld.max_addr,
+						       code_size, mld.align ? mld.align : 1,
+						       mld.preference, keep_bs);
 	}
       else
 	err = grub_relocator_alloc_chunk_addr (grub_multiboot2_relocator,
@@ -708,7 +714,7 @@ grub_multiboot2_make_mbi (grub_uint32_t *target)
   COMPILE_TIME_ASSERT (MULTIBOOT_TAG_ALIGN % sizeof (grub_properly_aligned_t) == 0);
 
   err = grub_relocator_alloc_chunk_align (grub_multiboot2_relocator, &ch,
-					  0, 0xffffffff - bufsize,
+					  MBI_MIN_ADDR, UP_TO_TOP32 (bufsize),
 					  bufsize, MULTIBOOT_TAG_ALIGN,
 					  GRUB_RELOCATOR_PREFERENCE_NONE, 1);
   if (err)
@@ -1070,7 +1076,11 @@ grub_multiboot2_add_module (grub_addr_t start, grub_size_t size,
   err = grub_create_loader_cmdline (argc, argv, newmod->cmdline,
 				    newmod->cmdline_size, GRUB_VERIFY_MODULE_CMDLINE);
   if (err)
-    return err;
+    {
+      grub_free (newmod->cmdline);
+      grub_free (newmod);
+      return err;
+    }
 
   if (modules_last)
     modules_last->next = newmod;

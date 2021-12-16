@@ -25,6 +25,9 @@
 #include <grub/msdos_partition.h>
 #include <grub/gpt_partition.h>
 #include <grub/i18n.h>
+#ifdef GRUB_UTIL
+#include <grub/emu/misc.h>
+#endif
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -169,7 +172,8 @@ static grub_err_t
 gpt_partition_map_embed (struct grub_disk *disk, unsigned int *nsectors,
 			 unsigned int max_nsectors,
 			 grub_embed_type_t embed_type,
-			 grub_disk_addr_t **sectors)
+			 grub_disk_addr_t **sectors,
+			 int warn_short)
 {
   struct gpt_partition_map_embed_ctx ctx = {
     .start = 0,
@@ -191,6 +195,9 @@ gpt_partition_map_embed (struct grub_disk *disk, unsigned int *nsectors,
 		       N_("this GPT partition label contains no BIOS Boot Partition;"
 			  " embedding won't be possible"));
 
+  if (ctx.len < GRUB_MIN_RECOMMENDED_MBR_GAP)
+    grub_util_warn ("Your BIOS Boot Partition is under 1 MiB, please increase its size.");
+
   if (ctx.len < *nsectors)
     return grub_error (GRUB_ERR_OUT_OF_RANGE,
 		       N_("your BIOS Boot Partition is too small;"
@@ -199,7 +206,7 @@ gpt_partition_map_embed (struct grub_disk *disk, unsigned int *nsectors,
   *nsectors = ctx.len;
   if (*nsectors > max_nsectors)
     *nsectors = max_nsectors;
-  *sectors = grub_malloc (*nsectors * sizeof (**sectors));
+  *sectors = grub_calloc (*nsectors, sizeof (**sectors));
   if (!*sectors)
     return grub_errno;
   for (i = 0; i < *nsectors; i++)

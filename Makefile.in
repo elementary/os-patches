@@ -247,8 +247,8 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/00gnulib.m4 \
 	$(top_srcdir)/m4/__inline.m4 \
 	$(top_srcdir)/m4/absolute-header.m4 $(top_srcdir)/m4/alloca.m4 \
-	$(top_srcdir)/m4/argp.m4 $(top_srcdir)/m4/btowc.m4 \
-	$(top_srcdir)/m4/builtin-expect.m4 \
+	$(top_srcdir)/m4/argp.m4 $(top_srcdir)/m4/base64.m4 \
+	$(top_srcdir)/m4/btowc.m4 $(top_srcdir)/m4/builtin-expect.m4 \
 	$(top_srcdir)/m4/chdir-long.m4 $(top_srcdir)/m4/close.m4 \
 	$(top_srcdir)/m4/codeset.m4 $(top_srcdir)/m4/dirent_h.m4 \
 	$(top_srcdir)/m4/dirfd.m4 $(top_srcdir)/m4/dirname.m4 \
@@ -391,7 +391,9 @@ am_libgrubkern_a_OBJECTS = util/libgrubkern_a-misc.$(OBJEXT) \
 	grub-core/kern/libgrubkern_a-misc.$(OBJEXT) \
 	grub-core/kern/libgrubkern_a-partition.$(OBJEXT) \
 	grub-core/lib/libgrubkern_a-crypto.$(OBJEXT) \
+	grub-core/lib/json/libgrubkern_a-json.$(OBJEXT) \
 	grub-core/disk/libgrubkern_a-luks.$(OBJEXT) \
+	grub-core/disk/libgrubkern_a-luks2.$(OBJEXT) \
 	grub-core/disk/libgrubkern_a-geli.$(OBJEXT) \
 	grub-core/disk/libgrubkern_a-cryptodisk.$(OBJEXT) \
 	grub-core/disk/libgrubkern_a-AFSplitter.$(OBJEXT) \
@@ -487,7 +489,7 @@ am_libgrubmods_a_OBJECTS =  \
 	grub-core/lib/libgrubmods_a-crc.$(OBJEXT) \
 	grub-core/lib/libgrubmods_a-adler32.$(OBJEXT) \
 	grub-core/lib/libgrubmods_a-crc64.$(OBJEXT) \
-	grub-core/normal/libgrubmods_a-datetime.$(OBJEXT) \
+	grub-core/lib/libgrubmods_a-datetime.$(OBJEXT) \
 	grub-core/normal/libgrubmods_a-misc.$(OBJEXT) \
 	grub-core/partmap/libgrubmods_a-acorn.$(OBJEXT) \
 	grub-core/partmap/libgrubmods_a-amiga.$(OBJEXT) \
@@ -604,14 +606,23 @@ grub_bios_setup_LINK = $(CCLD) $(grub_bios_setup_CFLAGS) $(CFLAGS) \
 	$(grub_bios_setup_LDFLAGS) $(LDFLAGS) -o $@
 am_grub_editenv_OBJECTS = util/grub_editenv-grub-editenv.$(OBJEXT) \
 	util/grub_editenv-editenv.$(OBJEXT) \
-	grub-core/osdep/grub_editenv-init.$(OBJEXT)
+	util/grub_editenv-grub-install-common.$(OBJEXT) \
+	grub-core/osdep/grub_editenv-init.$(OBJEXT) \
+	grub-core/osdep/grub_editenv-compress.$(OBJEXT) \
+	util/grub_editenv-mkimage.$(OBJEXT) \
+	util/grub_editenv-grub-mkimage32.$(OBJEXT) \
+	util/grub_editenv-grub-mkimage64.$(OBJEXT) \
+	grub-core/osdep/grub_editenv-config.$(OBJEXT) \
+	util/grub_editenv-config.$(OBJEXT) \
+	util/grub_editenv-resolve.$(OBJEXT)
 nodist_grub_editenv_OBJECTS =
 grub_editenv_OBJECTS = $(am_grub_editenv_OBJECTS) \
 	$(nodist_grub_editenv_OBJECTS)
-grub_editenv_DEPENDENCIES = libgrubmods.a libgrubgcry.a libgrubkern.a \
-	grub-core/lib/gnulib/libgnu.a $(am__DEPENDENCIES_1) \
+grub_editenv_DEPENDENCIES = $(am__DEPENDENCIES_1) libgrubmods.a \
+	libgrubgcry.a libgrubkern.a grub-core/lib/gnulib/libgnu.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 grub_editenv_LINK = $(CCLD) $(grub_editenv_CFLAGS) $(CFLAGS) \
 	$(grub_editenv_LDFLAGS) $(LDFLAGS) -o $@
 am_grub_file_OBJECTS = util/grub_file-grub-file.$(OBJEXT) \
@@ -1241,11 +1252,11 @@ am__dist_noinst_DATA_DIST = grub-core/kern/disk_common.c \
 	grub-core/lib/libgcrypt-grub/cipher/ChangeLog \
 	grub-core/osdep/aros/config.c grub-core/osdep/windows/config.c \
 	grub-core/osdep/unix/config.c util/grub-mkimagexx.c \
-	util/setup.c grub-core/osdep/generic/blocklist.c \
+	grub-core/osdep/unix/compress.c \
+	grub-core/osdep/basic/compress.c util/setup.c \
+	grub-core/osdep/generic/blocklist.c \
 	grub-core/osdep/linux/blocklist.c \
 	grub-core/osdep/windows/blocklist.c \
-	grub-core/osdep/unix/compress.c \
-	grub-core/osdep/basic/compress.c \
 	grub-core/osdep/linux/platform.c \
 	grub-core/osdep/windows/platform.c \
 	grub-core/osdep/basic/platform.c \
@@ -1255,14 +1266,14 @@ am__dist_noinst_DATA_DIST = grub-core/kern/disk_common.c \
 	util/grub.d/10_kfreebsd.in util/grub.d/10_illumos.in \
 	util/grub.d/10_netbsd.in util/grub.d/10_linux.in \
 	util/grub.d/10_xnu.in util/grub.d/20_linux_xen.in \
-	util/grub.d/30_os-prober.in util/grub.d/40_custom.in \
-	util/grub.d/41_custom.in util/grub-mkconfig.in \
-	util/grub-set-default.in util/grub-reboot.in \
-	util/grub-mkconfig_lib.in util/grub-kbdcomp.in \
-	tests/util/grub-shell.in tests/util/grub-shell-tester.in \
-	tests/util/grub-fs-tester.in tests/ext234_test.in \
-	tests/squashfs_test.in tests/iso9660_test.in \
-	tests/hfsplus_test.in tests/ntfs_test.in \
+	util/grub.d/30_os-prober.in util/grub.d/30_uefi-firmware.in \
+	util/grub.d/40_custom.in util/grub.d/41_custom.in \
+	util/grub-mkconfig.in util/grub-set-default.in \
+	util/grub-reboot.in util/grub-mkconfig_lib.in \
+	util/grub-kbdcomp.in tests/util/grub-shell.in \
+	tests/util/grub-shell-tester.in tests/util/grub-fs-tester.in \
+	tests/ext234_test.in tests/squashfs_test.in \
+	tests/iso9660_test.in tests/hfsplus_test.in tests/ntfs_test.in \
 	tests/reiserfs_test.in tests/fat_test.in tests/minixfs_test.in \
 	tests/xfs_test.in tests/f2fs_test.in tests/nilfs2_test.in \
 	tests/romfs_test.in tests/exfat_test.in tests/tar_test.in \
@@ -2617,7 +2628,9 @@ CPPFLAGS_PARTTOOL_LIST = -Dgrub_parttool_register=PARTTOOL_LIST_MARKER
 CPPFLAGS_TERMINAL_LIST = '-Dgrub_term_register_input(...)=INPUT_TERMINAL_LIST_MARKER(__VA_ARGS__)' \
 	'-Dgrub_term_register_output(...)=OUTPUT_TERMINAL_LIST_MARKER(__VA_ARGS__)'
 CPPFLAGS_COMMAND_LIST = '-Dgrub_register_command(...)=COMMAND_LIST_MARKER(__VA_ARGS__)' \
+	'-Dgrub_register_command_lockdown(...)=COMMAND_LOCKDOWN_LIST_MARKER(__VA_ARGS__)' \
 	'-Dgrub_register_extcmd(...)=EXTCOMMAND_LIST_MARKER(__VA_ARGS__)' \
+	'-Dgrub_register_extcmd_lockdown(...)=EXTCOMMAND_LOCKDOWN_LIST_MARKER(__VA_ARGS__)' \
 	'-Dgrub_register_command_p1(...)=P1COMMAND_LIST_MARKER(__VA_ARGS__)'
 CPPFLAGS_FDT_LIST := '-Dgrub_fdtbus_register(...)=FDT_DRIVER_LIST_MARKER(__VA_ARGS__)'
 CPPFLAGS_MARKER = $(CPPFLAGS_FS_LIST) $(CPPFLAGS_VIDEO_LIST) \
@@ -2668,7 +2681,7 @@ noinst_SCRIPTS = grub-mkconfig_lib grub-shell grub-shell-tester \
 grubconf_SCRIPTS = 00_header $(am__append_57) $(am__append_61) \
 	$(am__append_65) $(am__append_69) $(am__append_73) \
 	$(am__append_77) $(am__append_81) $(am__append_85) \
-	30_os-prober 40_custom 41_custom
+	30_os-prober 30_uefi-firmware 40_custom 41_custom
 noinst_LIBRARIES = libgrubkern.a libgrubmods.a libgrubgcry.a
 dist_noinst_DATA = grub-core/kern/disk_common.c \
 	grub-core/osdep/unix/relpath.c grub-core/osdep/aros/relpath.c \
@@ -2676,8 +2689,10 @@ dist_noinst_DATA = grub-core/kern/disk_common.c \
 	grub-core/lib/libgcrypt-grub/cipher/ChangeLog \
 	grub-core/osdep/aros/config.c grub-core/osdep/windows/config.c \
 	grub-core/osdep/unix/config.c util/grub-mkimagexx.c \
-	$(am__append_13) $(am__append_21) $(am__append_27) \
-	util/setup.c grub-core/osdep/generic/blocklist.c \
+	grub-core/osdep/unix/compress.c \
+	grub-core/osdep/basic/compress.c $(am__append_13) \
+	$(am__append_21) $(am__append_27) util/setup.c \
+	grub-core/osdep/generic/blocklist.c \
 	grub-core/osdep/linux/blocklist.c \
 	grub-core/osdep/windows/blocklist.c $(am__append_40) \
 	grub-core/osdep/linux/platform.c \
@@ -2688,14 +2703,14 @@ dist_noinst_DATA = grub-core/kern/disk_common.c \
 	util/grub.d/00_header.in $(am__append_60) $(am__append_64) \
 	$(am__append_68) $(am__append_72) $(am__append_76) \
 	$(am__append_80) $(am__append_84) $(am__append_88) \
-	util/grub.d/30_os-prober.in util/grub.d/40_custom.in \
-	util/grub.d/41_custom.in util/grub-mkconfig.in \
-	util/grub-set-default.in util/grub-reboot.in \
-	util/grub-mkconfig_lib.in util/grub-kbdcomp.in \
-	tests/util/grub-shell.in tests/util/grub-shell-tester.in \
-	tests/util/grub-fs-tester.in tests/ext234_test.in \
-	tests/squashfs_test.in tests/iso9660_test.in \
-	tests/hfsplus_test.in tests/ntfs_test.in \
+	util/grub.d/30_os-prober.in util/grub.d/30_uefi-firmware.in \
+	util/grub.d/40_custom.in util/grub.d/41_custom.in \
+	util/grub-mkconfig.in util/grub-set-default.in \
+	util/grub-reboot.in util/grub-mkconfig_lib.in \
+	util/grub-kbdcomp.in tests/util/grub-shell.in \
+	tests/util/grub-shell-tester.in tests/util/grub-fs-tester.in \
+	tests/ext234_test.in tests/squashfs_test.in \
+	tests/iso9660_test.in tests/hfsplus_test.in tests/ntfs_test.in \
 	tests/reiserfs_test.in tests/fat_test.in tests/minixfs_test.in \
 	tests/xfs_test.in tests/f2fs_test.in tests/nilfs2_test.in \
 	tests/romfs_test.in tests/exfat_test.in tests/tar_test.in \
@@ -2739,7 +2754,13 @@ EXTRA_DIST = autogen.sh geninit.sh gentpl.py Makefile.util.def \
 	grub-core/genmoddep.awk grub-core/genmod.sh.in \
 	grub-core/gensyminfo.sh.in grub-core/gensymlist.sh \
 	grub-core/genemuinit.sh grub-core/genemuinitheader.sh \
+	grub-core/lib/gnulib-patches/fix-base64.patch \
 	grub-core/lib/gnulib-patches/fix-null-deref.patch \
+	grub-core/lib/gnulib-patches/fix-null-state-deref.patch \
+	grub-core/lib/gnulib-patches/fix-regcomp-uninit-token.patch \
+	grub-core/lib/gnulib-patches/fix-regexec-null-deref.patch \
+	grub-core/lib/gnulib-patches/fix-uninit-structure.patch \
+	grub-core/lib/gnulib-patches/fix-unused-value.patch \
 	grub-core/lib/gnulib-patches/fix-width.patch \
 	grub-core/lib/gnulib-patches/no-abort.patch \
 	grub-core/lib/libgcrypt \
@@ -2779,6 +2800,13 @@ EXTRA_DIST = autogen.sh geninit.sh gentpl.py Makefile.util.def \
 	grub-core/osdep/windows/password.c \
 	grub-core/osdep/windows/random.c \
 	grub-core/osdep/windows/sleep.c \
+	po/gettext-patches/0001-Support-POTFILES-shell.patch \
+	po/gettext-patches/0002-Handle-gettext_printf-shell-function.patch \
+	po/gettext-patches/0003-Make-msgfmt-output-in-little-endian.patch \
+	po/gettext-patches/0004-Use-SHELL-rather-than-bin-sh.patch \
+	po/POTFILES-shell.in po/README po/Rules-translit \
+	po/Rules-windowsdir po/arabic.sed po/cyrillic.sed po/greek.sed \
+	po/grub.d.sed po/hebrew.sed \
 	tests/dfly-mbr-mbexample.mbr.img.gz \
 	tests/dfly-mbr-mbexample.dfly.img.gz coreboot.cfg \
 	tests/file_filter/file tests/file_filter/file.gz \
@@ -2868,8 +2896,8 @@ CLEANFILES = $(nodist_libgrubkern_a_SOURCES) \
 	$(nodist_grub_file_SOURCES) 00_header $(am__append_58) \
 	$(am__append_62) $(am__append_66) $(am__append_70) \
 	$(am__append_74) $(am__append_78) $(am__append_82) \
-	$(am__append_86) 30_os-prober 40_custom 41_custom \
-	$(am__append_89) grub-mkconfig $(am__append_90) \
+	$(am__append_86) 30_os-prober 30_uefi-firmware 40_custom \
+	41_custom $(am__append_89) grub-mkconfig $(am__append_90) \
 	grub-set-default $(am__append_91) grub-reboot \
 	grub-mkconfig_lib $(am__append_92) grub-kbdcomp grub-shell \
 	grub-shell-tester grub-fs-tester ext234_test squashfs_test \
@@ -2946,7 +2974,8 @@ libgrubkern_a_SOURCES = util/misc.c grub-core/kern/command.c \
 	grub-core/kern/err.c grub-core/kern/file.c grub-core/kern/fs.c \
 	grub-core/kern/list.c grub-core/kern/misc.c \
 	grub-core/kern/partition.c grub-core/lib/crypto.c \
-	grub-core/disk/luks.c grub-core/disk/geli.c \
+	grub-core/lib/json/json.c grub-core/disk/luks.c \
+	grub-core/disk/luks2.c grub-core/disk/geli.c \
 	grub-core/disk/cryptodisk.c grub-core/disk/AFSplitter.c \
 	grub-core/lib/pbkdf2.c grub-core/commands/extcmd.c \
 	grub-core/lib/arg.c grub-core/disk/ldm.c \
@@ -2956,7 +2985,7 @@ libgrubkern_a_SOURCES = util/misc.c grub-core/kern/command.c \
 nodist_libgrubkern_a_SOURCES =
 libgrubkern_a_CFLAGS = $(AM_CFLAGS) $(CFLAGS_LIBRARY) $(CFLAGS_GNULIB)
 libgrubkern_a_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS_LIBRARY) \
-	$(CPPFLAGS_GNULIB)
+	$(CPPFLAGS_GNULIB) -I$(srcdir)/grub-core/lib/json
 libgrubkern_a_CCASFLAGS = $(AM_CCASFLAGS) $(CCASFLAGS_LIBRARY)
 libgrubmods_a_SOURCES = grub-core/commands/blocklist.c \
 	grub-core/commands/macbless.c grub-core/commands/xnu_uuid.c \
@@ -2993,7 +3022,7 @@ libgrubmods_a_SOURCES = grub-core/commands/blocklist.c \
 	grub-core/lib/hexdump.c grub-core/lib/LzFind.c \
 	grub-core/lib/LzmaEnc.c grub-core/lib/crc.c \
 	grub-core/lib/adler32.c grub-core/lib/crc64.c \
-	grub-core/normal/datetime.c grub-core/normal/misc.c \
+	grub-core/lib/datetime.c grub-core/normal/misc.c \
 	grub-core/partmap/acorn.c grub-core/partmap/amiga.c \
 	grub-core/partmap/apple.c grub-core/partmap/sun.c \
 	grub-core/partmap/plan.c grub-core/partmap/dvh.c \
@@ -3056,7 +3085,7 @@ nodist_grub_mkimage_SOURCES =
 grub_mkimage_LDADD = libgrubmods.a libgrubgcry.a libgrubkern.a grub-core/lib/gnulib/libgnu.a $(LIBLZMA) $(LIBINTL) $(LIBDEVMAPPER) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM) 
 grub_mkimage_CFLAGS = $(AM_CFLAGS) $(CFLAGS_PROGRAM) 
 grub_mkimage_LDFLAGS = $(AM_LDFLAGS) $(LDFLAGS_PROGRAM) 
-grub_mkimage_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS_PROGRAM) -DGRUB_PKGLIBDIR=\"$(pkglibdir)\" 
+grub_mkimage_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS_PROGRAM) 
 grub_mkimage_CCASFLAGS = $(AM_CCASFLAGS) $(CCASFLAGS_PROGRAM) 
 grub_mkrelpath_SOURCES = util/grub-mkrelpath.c grub-core/kern/emu/argp_common.c grub-core/osdep/init.c 
 nodist_grub_mkrelpath_SOURCES = 
@@ -3072,9 +3101,9 @@ grub_script_check_CFLAGS = $(AM_CFLAGS) $(CFLAGS_PROGRAM)
 grub_script_check_LDFLAGS = $(AM_LDFLAGS) $(LDFLAGS_PROGRAM) 
 grub_script_check_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS_PROGRAM) 
 grub_script_check_CCASFLAGS = $(AM_CCASFLAGS) $(CCASFLAGS_PROGRAM) 
-grub_editenv_SOURCES = util/grub-editenv.c util/editenv.c grub-core/osdep/init.c 
+grub_editenv_SOURCES = util/grub-editenv.c util/editenv.c util/grub-install-common.c grub-core/osdep/init.c grub-core/osdep/compress.c util/mkimage.c util/grub-mkimage32.c util/grub-mkimage64.c grub-core/osdep/config.c util/config.c util/resolve.c 
 nodist_grub_editenv_SOURCES = 
-grub_editenv_LDADD = libgrubmods.a libgrubgcry.a libgrubkern.a grub-core/lib/gnulib/libgnu.a $(LIBINTL) $(LIBDEVMAPPER) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM) 
+grub_editenv_LDADD = $(LIBLZMA) libgrubmods.a libgrubgcry.a libgrubkern.a grub-core/lib/gnulib/libgnu.a $(LIBINTL) $(LIBDEVMAPPER) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM) 
 grub_editenv_CFLAGS = $(AM_CFLAGS) $(CFLAGS_PROGRAM) 
 grub_editenv_LDFLAGS = $(AM_LDFLAGS) $(LDFLAGS_PROGRAM) 
 grub_editenv_CPPFLAGS = $(AM_CPPFLAGS) $(CPPFLAGS_PROGRAM) 
@@ -3598,6 +3627,15 @@ grub-core/kern/libgrubkern_a-partition.$(OBJEXT):  \
 grub-core/lib/libgrubkern_a-crypto.$(OBJEXT):  \
 	grub-core/lib/$(am__dirstamp) \
 	grub-core/lib/$(DEPDIR)/$(am__dirstamp)
+grub-core/lib/json/$(am__dirstamp):
+	@$(MKDIR_P) grub-core/lib/json
+	@: > grub-core/lib/json/$(am__dirstamp)
+grub-core/lib/json/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) grub-core/lib/json/$(DEPDIR)
+	@: > grub-core/lib/json/$(DEPDIR)/$(am__dirstamp)
+grub-core/lib/json/libgrubkern_a-json.$(OBJEXT):  \
+	grub-core/lib/json/$(am__dirstamp) \
+	grub-core/lib/json/$(DEPDIR)/$(am__dirstamp)
 grub-core/disk/$(am__dirstamp):
 	@$(MKDIR_P) grub-core/disk
 	@: > grub-core/disk/$(am__dirstamp)
@@ -3605,6 +3643,9 @@ grub-core/disk/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) grub-core/disk/$(DEPDIR)
 	@: > grub-core/disk/$(DEPDIR)/$(am__dirstamp)
 grub-core/disk/libgrubkern_a-luks.$(OBJEXT):  \
+	grub-core/disk/$(am__dirstamp) \
+	grub-core/disk/$(DEPDIR)/$(am__dirstamp)
+grub-core/disk/libgrubkern_a-luks2.$(OBJEXT):  \
 	grub-core/disk/$(am__dirstamp) \
 	grub-core/disk/$(DEPDIR)/$(am__dirstamp)
 grub-core/disk/libgrubkern_a-geli.$(OBJEXT):  \
@@ -3944,9 +3985,9 @@ grub-core/lib/libgrubmods_a-adler32.$(OBJEXT):  \
 grub-core/lib/libgrubmods_a-crc64.$(OBJEXT):  \
 	grub-core/lib/$(am__dirstamp) \
 	grub-core/lib/$(DEPDIR)/$(am__dirstamp)
-grub-core/normal/libgrubmods_a-datetime.$(OBJEXT):  \
-	grub-core/normal/$(am__dirstamp) \
-	grub-core/normal/$(DEPDIR)/$(am__dirstamp)
+grub-core/lib/libgrubmods_a-datetime.$(OBJEXT):  \
+	grub-core/lib/$(am__dirstamp) \
+	grub-core/lib/$(DEPDIR)/$(am__dirstamp)
 grub-core/normal/libgrubmods_a-misc.$(OBJEXT):  \
 	grub-core/normal/$(am__dirstamp) \
 	grub-core/normal/$(DEPDIR)/$(am__dirstamp)
@@ -4321,9 +4362,27 @@ util/grub_editenv-grub-editenv.$(OBJEXT): util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
 util/grub_editenv-editenv.$(OBJEXT): util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
+util/grub_editenv-grub-install-common.$(OBJEXT): util/$(am__dirstamp) \
+	util/$(DEPDIR)/$(am__dirstamp)
 grub-core/osdep/grub_editenv-init.$(OBJEXT):  \
 	grub-core/osdep/$(am__dirstamp) \
 	grub-core/osdep/$(DEPDIR)/$(am__dirstamp)
+grub-core/osdep/grub_editenv-compress.$(OBJEXT):  \
+	grub-core/osdep/$(am__dirstamp) \
+	grub-core/osdep/$(DEPDIR)/$(am__dirstamp)
+util/grub_editenv-mkimage.$(OBJEXT): util/$(am__dirstamp) \
+	util/$(DEPDIR)/$(am__dirstamp)
+util/grub_editenv-grub-mkimage32.$(OBJEXT): util/$(am__dirstamp) \
+	util/$(DEPDIR)/$(am__dirstamp)
+util/grub_editenv-grub-mkimage64.$(OBJEXT): util/$(am__dirstamp) \
+	util/$(DEPDIR)/$(am__dirstamp)
+grub-core/osdep/grub_editenv-config.$(OBJEXT):  \
+	grub-core/osdep/$(am__dirstamp) \
+	grub-core/osdep/$(DEPDIR)/$(am__dirstamp)
+util/grub_editenv-config.$(OBJEXT): util/$(am__dirstamp) \
+	util/$(DEPDIR)/$(am__dirstamp)
+util/grub_editenv-resolve.$(OBJEXT): util/$(am__dirstamp) \
+	util/$(DEPDIR)/$(am__dirstamp)
 
 grub-editenv$(EXEEXT): $(grub_editenv_OBJECTS) $(grub_editenv_DEPENDENCIES) $(EXTRA_grub_editenv_DEPENDENCIES) 
 	@rm -f grub-editenv$(EXEEXT)
@@ -5107,6 +5166,7 @@ mostlyclean-compile:
 	-rm -f grub-core/kern/ia64/*.$(OBJEXT)
 	-rm -f grub-core/lib/*.$(OBJEXT)
 	-rm -f grub-core/lib/i386/pc/*.$(OBJEXT)
+	-rm -f grub-core/lib/json/*.$(OBJEXT)
 	-rm -f grub-core/lib/libgcrypt-grub/cipher/*.$(OBJEXT)
 	-rm -f grub-core/lib/minilzo/*.$(OBJEXT)
 	-rm -f grub-core/lib/xzembed/*.$(OBJEXT)
@@ -5159,6 +5219,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/disk/$(DEPDIR)/libgrubkern_a-geli.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/disk/$(DEPDIR)/libgrubkern_a-ldm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/disk/$(DEPDIR)/libgrubkern_a-luks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@grub-core/disk/$(DEPDIR)/libgrubkern_a-luks2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/disk/$(DEPDIR)/libgrubmods_a-dmraid_nvidia.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/disk/$(DEPDIR)/libgrubmods_a-loopback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/disk/$(DEPDIR)/libgrubmods_a-lvm.Po@am__quote@
@@ -5291,10 +5352,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/$(DEPDIR)/libgrubmods_a-adler32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/$(DEPDIR)/libgrubmods_a-crc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/$(DEPDIR)/libgrubmods_a-crc64.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/$(DEPDIR)/libgrubmods_a-datetime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/$(DEPDIR)/libgrubmods_a-envblk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/$(DEPDIR)/libgrubmods_a-hexdump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/$(DEPDIR)/priority_queue_unit_test-priority_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/i386/pc/$(DEPDIR)/grub_menulst2cfg-vesa_modes_table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/json/$(DEPDIR)/libgrubkern_a-json.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/libgcrypt-grub/cipher/$(DEPDIR)/libgrubgcry_a-arcfour.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/libgcrypt-grub/cipher/$(DEPDIR)/libgrubgcry_a-blowfish.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/lib/libgcrypt-grub/cipher/$(DEPDIR)/libgrubgcry_a-camellia-glue.Po@am__quote@
@@ -5338,10 +5401,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/loader/i386/$(DEPDIR)/grub_file-xen_file32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/loader/i386/$(DEPDIR)/grub_file-xen_file64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/normal/$(DEPDIR)/libgrubmods_a-charset.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@grub-core/normal/$(DEPDIR)/libgrubmods_a-datetime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/normal/$(DEPDIR)/libgrubmods_a-misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/osdep/$(DEPDIR)/grub_bios_setup-blocklist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/osdep/$(DEPDIR)/grub_bios_setup-init.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@grub-core/osdep/$(DEPDIR)/grub_editenv-compress.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@grub-core/osdep/$(DEPDIR)/grub_editenv-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/osdep/$(DEPDIR)/grub_editenv-init.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/osdep/$(DEPDIR)/grub_file-init.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@grub-core/osdep/$(DEPDIR)/grub_fstest-init.Po@am__quote@
@@ -5448,8 +5512,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@tests/lib/$(DEPDIR)/priority_queue_unit_test-unit_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_bios_setup-grub-setup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_bios_setup-setup_bios.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_editenv-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_editenv-editenv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_editenv-grub-editenv.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_editenv-grub-install-common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_editenv-grub-mkimage32.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_editenv-grub-mkimage64.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_editenv-mkimage.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_editenv-resolve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_file-grub-file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_file-render-label.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/grub_fstest-grub-fstest.Po@am__quote@
@@ -6229,6 +6299,20 @@ grub-core/lib/libgrubkern_a-crypto.obj: grub-core/lib/crypto.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -c -o grub-core/lib/libgrubkern_a-crypto.obj `if test -f 'grub-core/lib/crypto.c'; then $(CYGPATH_W) 'grub-core/lib/crypto.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/lib/crypto.c'; fi`
 
+grub-core/lib/json/libgrubkern_a-json.o: grub-core/lib/json/json.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -MT grub-core/lib/json/libgrubkern_a-json.o -MD -MP -MF grub-core/lib/json/$(DEPDIR)/libgrubkern_a-json.Tpo -c -o grub-core/lib/json/libgrubkern_a-json.o `test -f 'grub-core/lib/json/json.c' || echo '$(srcdir)/'`grub-core/lib/json/json.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/lib/json/$(DEPDIR)/libgrubkern_a-json.Tpo grub-core/lib/json/$(DEPDIR)/libgrubkern_a-json.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/lib/json/json.c' object='grub-core/lib/json/libgrubkern_a-json.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -c -o grub-core/lib/json/libgrubkern_a-json.o `test -f 'grub-core/lib/json/json.c' || echo '$(srcdir)/'`grub-core/lib/json/json.c
+
+grub-core/lib/json/libgrubkern_a-json.obj: grub-core/lib/json/json.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -MT grub-core/lib/json/libgrubkern_a-json.obj -MD -MP -MF grub-core/lib/json/$(DEPDIR)/libgrubkern_a-json.Tpo -c -o grub-core/lib/json/libgrubkern_a-json.obj `if test -f 'grub-core/lib/json/json.c'; then $(CYGPATH_W) 'grub-core/lib/json/json.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/lib/json/json.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/lib/json/$(DEPDIR)/libgrubkern_a-json.Tpo grub-core/lib/json/$(DEPDIR)/libgrubkern_a-json.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/lib/json/json.c' object='grub-core/lib/json/libgrubkern_a-json.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -c -o grub-core/lib/json/libgrubkern_a-json.obj `if test -f 'grub-core/lib/json/json.c'; then $(CYGPATH_W) 'grub-core/lib/json/json.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/lib/json/json.c'; fi`
+
 grub-core/disk/libgrubkern_a-luks.o: grub-core/disk/luks.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -MT grub-core/disk/libgrubkern_a-luks.o -MD -MP -MF grub-core/disk/$(DEPDIR)/libgrubkern_a-luks.Tpo -c -o grub-core/disk/libgrubkern_a-luks.o `test -f 'grub-core/disk/luks.c' || echo '$(srcdir)/'`grub-core/disk/luks.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/disk/$(DEPDIR)/libgrubkern_a-luks.Tpo grub-core/disk/$(DEPDIR)/libgrubkern_a-luks.Po
@@ -6242,6 +6326,20 @@ grub-core/disk/libgrubkern_a-luks.obj: grub-core/disk/luks.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/disk/luks.c' object='grub-core/disk/libgrubkern_a-luks.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -c -o grub-core/disk/libgrubkern_a-luks.obj `if test -f 'grub-core/disk/luks.c'; then $(CYGPATH_W) 'grub-core/disk/luks.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/disk/luks.c'; fi`
+
+grub-core/disk/libgrubkern_a-luks2.o: grub-core/disk/luks2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -MT grub-core/disk/libgrubkern_a-luks2.o -MD -MP -MF grub-core/disk/$(DEPDIR)/libgrubkern_a-luks2.Tpo -c -o grub-core/disk/libgrubkern_a-luks2.o `test -f 'grub-core/disk/luks2.c' || echo '$(srcdir)/'`grub-core/disk/luks2.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/disk/$(DEPDIR)/libgrubkern_a-luks2.Tpo grub-core/disk/$(DEPDIR)/libgrubkern_a-luks2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/disk/luks2.c' object='grub-core/disk/libgrubkern_a-luks2.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -c -o grub-core/disk/libgrubkern_a-luks2.o `test -f 'grub-core/disk/luks2.c' || echo '$(srcdir)/'`grub-core/disk/luks2.c
+
+grub-core/disk/libgrubkern_a-luks2.obj: grub-core/disk/luks2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -MT grub-core/disk/libgrubkern_a-luks2.obj -MD -MP -MF grub-core/disk/$(DEPDIR)/libgrubkern_a-luks2.Tpo -c -o grub-core/disk/libgrubkern_a-luks2.obj `if test -f 'grub-core/disk/luks2.c'; then $(CYGPATH_W) 'grub-core/disk/luks2.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/disk/luks2.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/disk/$(DEPDIR)/libgrubkern_a-luks2.Tpo grub-core/disk/$(DEPDIR)/libgrubkern_a-luks2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/disk/luks2.c' object='grub-core/disk/libgrubkern_a-luks2.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -c -o grub-core/disk/libgrubkern_a-luks2.obj `if test -f 'grub-core/disk/luks2.c'; then $(CYGPATH_W) 'grub-core/disk/luks2.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/disk/luks2.c'; fi`
 
 grub-core/disk/libgrubkern_a-geli.o: grub-core/disk/geli.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) $(libgrubkern_a_CFLAGS) $(CFLAGS) -MT grub-core/disk/libgrubkern_a-geli.o -MD -MP -MF grub-core/disk/$(DEPDIR)/libgrubkern_a-geli.Tpo -c -o grub-core/disk/libgrubkern_a-geli.o `test -f 'grub-core/disk/geli.c' || echo '$(srcdir)/'`grub-core/disk/geli.c
@@ -7489,19 +7587,19 @@ grub-core/lib/libgrubmods_a-crc64.obj: grub-core/lib/crc64.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -c -o grub-core/lib/libgrubmods_a-crc64.obj `if test -f 'grub-core/lib/crc64.c'; then $(CYGPATH_W) 'grub-core/lib/crc64.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/lib/crc64.c'; fi`
 
-grub-core/normal/libgrubmods_a-datetime.o: grub-core/normal/datetime.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -MT grub-core/normal/libgrubmods_a-datetime.o -MD -MP -MF grub-core/normal/$(DEPDIR)/libgrubmods_a-datetime.Tpo -c -o grub-core/normal/libgrubmods_a-datetime.o `test -f 'grub-core/normal/datetime.c' || echo '$(srcdir)/'`grub-core/normal/datetime.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/normal/$(DEPDIR)/libgrubmods_a-datetime.Tpo grub-core/normal/$(DEPDIR)/libgrubmods_a-datetime.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/normal/datetime.c' object='grub-core/normal/libgrubmods_a-datetime.o' libtool=no @AMDEPBACKSLASH@
+grub-core/lib/libgrubmods_a-datetime.o: grub-core/lib/datetime.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -MT grub-core/lib/libgrubmods_a-datetime.o -MD -MP -MF grub-core/lib/$(DEPDIR)/libgrubmods_a-datetime.Tpo -c -o grub-core/lib/libgrubmods_a-datetime.o `test -f 'grub-core/lib/datetime.c' || echo '$(srcdir)/'`grub-core/lib/datetime.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/lib/$(DEPDIR)/libgrubmods_a-datetime.Tpo grub-core/lib/$(DEPDIR)/libgrubmods_a-datetime.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/lib/datetime.c' object='grub-core/lib/libgrubmods_a-datetime.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -c -o grub-core/normal/libgrubmods_a-datetime.o `test -f 'grub-core/normal/datetime.c' || echo '$(srcdir)/'`grub-core/normal/datetime.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -c -o grub-core/lib/libgrubmods_a-datetime.o `test -f 'grub-core/lib/datetime.c' || echo '$(srcdir)/'`grub-core/lib/datetime.c
 
-grub-core/normal/libgrubmods_a-datetime.obj: grub-core/normal/datetime.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -MT grub-core/normal/libgrubmods_a-datetime.obj -MD -MP -MF grub-core/normal/$(DEPDIR)/libgrubmods_a-datetime.Tpo -c -o grub-core/normal/libgrubmods_a-datetime.obj `if test -f 'grub-core/normal/datetime.c'; then $(CYGPATH_W) 'grub-core/normal/datetime.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/normal/datetime.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/normal/$(DEPDIR)/libgrubmods_a-datetime.Tpo grub-core/normal/$(DEPDIR)/libgrubmods_a-datetime.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/normal/datetime.c' object='grub-core/normal/libgrubmods_a-datetime.obj' libtool=no @AMDEPBACKSLASH@
+grub-core/lib/libgrubmods_a-datetime.obj: grub-core/lib/datetime.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -MT grub-core/lib/libgrubmods_a-datetime.obj -MD -MP -MF grub-core/lib/$(DEPDIR)/libgrubmods_a-datetime.Tpo -c -o grub-core/lib/libgrubmods_a-datetime.obj `if test -f 'grub-core/lib/datetime.c'; then $(CYGPATH_W) 'grub-core/lib/datetime.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/lib/datetime.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/lib/$(DEPDIR)/libgrubmods_a-datetime.Tpo grub-core/lib/$(DEPDIR)/libgrubmods_a-datetime.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/lib/datetime.c' object='grub-core/lib/libgrubmods_a-datetime.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -c -o grub-core/normal/libgrubmods_a-datetime.obj `if test -f 'grub-core/normal/datetime.c'; then $(CYGPATH_W) 'grub-core/normal/datetime.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/normal/datetime.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -c -o grub-core/lib/libgrubmods_a-datetime.obj `if test -f 'grub-core/lib/datetime.c'; then $(CYGPATH_W) 'grub-core/lib/datetime.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/lib/datetime.c'; fi`
 
 grub-core/normal/libgrubmods_a-misc.o: grub-core/normal/misc.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(CPPFLAGS) $(libgrubmods_a_CFLAGS) $(CFLAGS) -MT grub-core/normal/libgrubmods_a-misc.o -MD -MP -MF grub-core/normal/$(DEPDIR)/libgrubmods_a-misc.Tpo -c -o grub-core/normal/libgrubmods_a-misc.o `test -f 'grub-core/normal/misc.c' || echo '$(srcdir)/'`grub-core/normal/misc.c
@@ -8343,6 +8441,20 @@ util/grub_editenv-editenv.obj: util/editenv.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-editenv.obj `if test -f 'util/editenv.c'; then $(CYGPATH_W) 'util/editenv.c'; else $(CYGPATH_W) '$(srcdir)/util/editenv.c'; fi`
 
+util/grub_editenv-grub-install-common.o: util/grub-install-common.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-grub-install-common.o -MD -MP -MF util/$(DEPDIR)/grub_editenv-grub-install-common.Tpo -c -o util/grub_editenv-grub-install-common.o `test -f 'util/grub-install-common.c' || echo '$(srcdir)/'`util/grub-install-common.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-grub-install-common.Tpo util/$(DEPDIR)/grub_editenv-grub-install-common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/grub-install-common.c' object='util/grub_editenv-grub-install-common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-grub-install-common.o `test -f 'util/grub-install-common.c' || echo '$(srcdir)/'`util/grub-install-common.c
+
+util/grub_editenv-grub-install-common.obj: util/grub-install-common.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-grub-install-common.obj -MD -MP -MF util/$(DEPDIR)/grub_editenv-grub-install-common.Tpo -c -o util/grub_editenv-grub-install-common.obj `if test -f 'util/grub-install-common.c'; then $(CYGPATH_W) 'util/grub-install-common.c'; else $(CYGPATH_W) '$(srcdir)/util/grub-install-common.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-grub-install-common.Tpo util/$(DEPDIR)/grub_editenv-grub-install-common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/grub-install-common.c' object='util/grub_editenv-grub-install-common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-grub-install-common.obj `if test -f 'util/grub-install-common.c'; then $(CYGPATH_W) 'util/grub-install-common.c'; else $(CYGPATH_W) '$(srcdir)/util/grub-install-common.c'; fi`
+
 grub-core/osdep/grub_editenv-init.o: grub-core/osdep/init.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT grub-core/osdep/grub_editenv-init.o -MD -MP -MF grub-core/osdep/$(DEPDIR)/grub_editenv-init.Tpo -c -o grub-core/osdep/grub_editenv-init.o `test -f 'grub-core/osdep/init.c' || echo '$(srcdir)/'`grub-core/osdep/init.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/osdep/$(DEPDIR)/grub_editenv-init.Tpo grub-core/osdep/$(DEPDIR)/grub_editenv-init.Po
@@ -8356,6 +8468,104 @@ grub-core/osdep/grub_editenv-init.obj: grub-core/osdep/init.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/osdep/init.c' object='grub-core/osdep/grub_editenv-init.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o grub-core/osdep/grub_editenv-init.obj `if test -f 'grub-core/osdep/init.c'; then $(CYGPATH_W) 'grub-core/osdep/init.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/osdep/init.c'; fi`
+
+grub-core/osdep/grub_editenv-compress.o: grub-core/osdep/compress.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT grub-core/osdep/grub_editenv-compress.o -MD -MP -MF grub-core/osdep/$(DEPDIR)/grub_editenv-compress.Tpo -c -o grub-core/osdep/grub_editenv-compress.o `test -f 'grub-core/osdep/compress.c' || echo '$(srcdir)/'`grub-core/osdep/compress.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/osdep/$(DEPDIR)/grub_editenv-compress.Tpo grub-core/osdep/$(DEPDIR)/grub_editenv-compress.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/osdep/compress.c' object='grub-core/osdep/grub_editenv-compress.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o grub-core/osdep/grub_editenv-compress.o `test -f 'grub-core/osdep/compress.c' || echo '$(srcdir)/'`grub-core/osdep/compress.c
+
+grub-core/osdep/grub_editenv-compress.obj: grub-core/osdep/compress.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT grub-core/osdep/grub_editenv-compress.obj -MD -MP -MF grub-core/osdep/$(DEPDIR)/grub_editenv-compress.Tpo -c -o grub-core/osdep/grub_editenv-compress.obj `if test -f 'grub-core/osdep/compress.c'; then $(CYGPATH_W) 'grub-core/osdep/compress.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/osdep/compress.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/osdep/$(DEPDIR)/grub_editenv-compress.Tpo grub-core/osdep/$(DEPDIR)/grub_editenv-compress.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/osdep/compress.c' object='grub-core/osdep/grub_editenv-compress.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o grub-core/osdep/grub_editenv-compress.obj `if test -f 'grub-core/osdep/compress.c'; then $(CYGPATH_W) 'grub-core/osdep/compress.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/osdep/compress.c'; fi`
+
+util/grub_editenv-mkimage.o: util/mkimage.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-mkimage.o -MD -MP -MF util/$(DEPDIR)/grub_editenv-mkimage.Tpo -c -o util/grub_editenv-mkimage.o `test -f 'util/mkimage.c' || echo '$(srcdir)/'`util/mkimage.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-mkimage.Tpo util/$(DEPDIR)/grub_editenv-mkimage.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/mkimage.c' object='util/grub_editenv-mkimage.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-mkimage.o `test -f 'util/mkimage.c' || echo '$(srcdir)/'`util/mkimage.c
+
+util/grub_editenv-mkimage.obj: util/mkimage.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-mkimage.obj -MD -MP -MF util/$(DEPDIR)/grub_editenv-mkimage.Tpo -c -o util/grub_editenv-mkimage.obj `if test -f 'util/mkimage.c'; then $(CYGPATH_W) 'util/mkimage.c'; else $(CYGPATH_W) '$(srcdir)/util/mkimage.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-mkimage.Tpo util/$(DEPDIR)/grub_editenv-mkimage.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/mkimage.c' object='util/grub_editenv-mkimage.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-mkimage.obj `if test -f 'util/mkimage.c'; then $(CYGPATH_W) 'util/mkimage.c'; else $(CYGPATH_W) '$(srcdir)/util/mkimage.c'; fi`
+
+util/grub_editenv-grub-mkimage32.o: util/grub-mkimage32.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-grub-mkimage32.o -MD -MP -MF util/$(DEPDIR)/grub_editenv-grub-mkimage32.Tpo -c -o util/grub_editenv-grub-mkimage32.o `test -f 'util/grub-mkimage32.c' || echo '$(srcdir)/'`util/grub-mkimage32.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-grub-mkimage32.Tpo util/$(DEPDIR)/grub_editenv-grub-mkimage32.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/grub-mkimage32.c' object='util/grub_editenv-grub-mkimage32.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-grub-mkimage32.o `test -f 'util/grub-mkimage32.c' || echo '$(srcdir)/'`util/grub-mkimage32.c
+
+util/grub_editenv-grub-mkimage32.obj: util/grub-mkimage32.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-grub-mkimage32.obj -MD -MP -MF util/$(DEPDIR)/grub_editenv-grub-mkimage32.Tpo -c -o util/grub_editenv-grub-mkimage32.obj `if test -f 'util/grub-mkimage32.c'; then $(CYGPATH_W) 'util/grub-mkimage32.c'; else $(CYGPATH_W) '$(srcdir)/util/grub-mkimage32.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-grub-mkimage32.Tpo util/$(DEPDIR)/grub_editenv-grub-mkimage32.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/grub-mkimage32.c' object='util/grub_editenv-grub-mkimage32.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-grub-mkimage32.obj `if test -f 'util/grub-mkimage32.c'; then $(CYGPATH_W) 'util/grub-mkimage32.c'; else $(CYGPATH_W) '$(srcdir)/util/grub-mkimage32.c'; fi`
+
+util/grub_editenv-grub-mkimage64.o: util/grub-mkimage64.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-grub-mkimage64.o -MD -MP -MF util/$(DEPDIR)/grub_editenv-grub-mkimage64.Tpo -c -o util/grub_editenv-grub-mkimage64.o `test -f 'util/grub-mkimage64.c' || echo '$(srcdir)/'`util/grub-mkimage64.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-grub-mkimage64.Tpo util/$(DEPDIR)/grub_editenv-grub-mkimage64.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/grub-mkimage64.c' object='util/grub_editenv-grub-mkimage64.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-grub-mkimage64.o `test -f 'util/grub-mkimage64.c' || echo '$(srcdir)/'`util/grub-mkimage64.c
+
+util/grub_editenv-grub-mkimage64.obj: util/grub-mkimage64.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-grub-mkimage64.obj -MD -MP -MF util/$(DEPDIR)/grub_editenv-grub-mkimage64.Tpo -c -o util/grub_editenv-grub-mkimage64.obj `if test -f 'util/grub-mkimage64.c'; then $(CYGPATH_W) 'util/grub-mkimage64.c'; else $(CYGPATH_W) '$(srcdir)/util/grub-mkimage64.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-grub-mkimage64.Tpo util/$(DEPDIR)/grub_editenv-grub-mkimage64.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/grub-mkimage64.c' object='util/grub_editenv-grub-mkimage64.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-grub-mkimage64.obj `if test -f 'util/grub-mkimage64.c'; then $(CYGPATH_W) 'util/grub-mkimage64.c'; else $(CYGPATH_W) '$(srcdir)/util/grub-mkimage64.c'; fi`
+
+grub-core/osdep/grub_editenv-config.o: grub-core/osdep/config.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT grub-core/osdep/grub_editenv-config.o -MD -MP -MF grub-core/osdep/$(DEPDIR)/grub_editenv-config.Tpo -c -o grub-core/osdep/grub_editenv-config.o `test -f 'grub-core/osdep/config.c' || echo '$(srcdir)/'`grub-core/osdep/config.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/osdep/$(DEPDIR)/grub_editenv-config.Tpo grub-core/osdep/$(DEPDIR)/grub_editenv-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/osdep/config.c' object='grub-core/osdep/grub_editenv-config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o grub-core/osdep/grub_editenv-config.o `test -f 'grub-core/osdep/config.c' || echo '$(srcdir)/'`grub-core/osdep/config.c
+
+grub-core/osdep/grub_editenv-config.obj: grub-core/osdep/config.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT grub-core/osdep/grub_editenv-config.obj -MD -MP -MF grub-core/osdep/$(DEPDIR)/grub_editenv-config.Tpo -c -o grub-core/osdep/grub_editenv-config.obj `if test -f 'grub-core/osdep/config.c'; then $(CYGPATH_W) 'grub-core/osdep/config.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/osdep/config.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) grub-core/osdep/$(DEPDIR)/grub_editenv-config.Tpo grub-core/osdep/$(DEPDIR)/grub_editenv-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='grub-core/osdep/config.c' object='grub-core/osdep/grub_editenv-config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o grub-core/osdep/grub_editenv-config.obj `if test -f 'grub-core/osdep/config.c'; then $(CYGPATH_W) 'grub-core/osdep/config.c'; else $(CYGPATH_W) '$(srcdir)/grub-core/osdep/config.c'; fi`
+
+util/grub_editenv-config.o: util/config.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-config.o -MD -MP -MF util/$(DEPDIR)/grub_editenv-config.Tpo -c -o util/grub_editenv-config.o `test -f 'util/config.c' || echo '$(srcdir)/'`util/config.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-config.Tpo util/$(DEPDIR)/grub_editenv-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/config.c' object='util/grub_editenv-config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-config.o `test -f 'util/config.c' || echo '$(srcdir)/'`util/config.c
+
+util/grub_editenv-config.obj: util/config.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-config.obj -MD -MP -MF util/$(DEPDIR)/grub_editenv-config.Tpo -c -o util/grub_editenv-config.obj `if test -f 'util/config.c'; then $(CYGPATH_W) 'util/config.c'; else $(CYGPATH_W) '$(srcdir)/util/config.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-config.Tpo util/$(DEPDIR)/grub_editenv-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/config.c' object='util/grub_editenv-config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-config.obj `if test -f 'util/config.c'; then $(CYGPATH_W) 'util/config.c'; else $(CYGPATH_W) '$(srcdir)/util/config.c'; fi`
+
+util/grub_editenv-resolve.o: util/resolve.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-resolve.o -MD -MP -MF util/$(DEPDIR)/grub_editenv-resolve.Tpo -c -o util/grub_editenv-resolve.o `test -f 'util/resolve.c' || echo '$(srcdir)/'`util/resolve.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-resolve.Tpo util/$(DEPDIR)/grub_editenv-resolve.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/resolve.c' object='util/grub_editenv-resolve.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-resolve.o `test -f 'util/resolve.c' || echo '$(srcdir)/'`util/resolve.c
+
+util/grub_editenv-resolve.obj: util/resolve.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -MT util/grub_editenv-resolve.obj -MD -MP -MF util/$(DEPDIR)/grub_editenv-resolve.Tpo -c -o util/grub_editenv-resolve.obj `if test -f 'util/resolve.c'; then $(CYGPATH_W) 'util/resolve.c'; else $(CYGPATH_W) '$(srcdir)/util/resolve.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/grub_editenv-resolve.Tpo util/$(DEPDIR)/grub_editenv-resolve.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='util/resolve.c' object='util/grub_editenv-resolve.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_editenv_CPPFLAGS) $(CPPFLAGS) $(grub_editenv_CFLAGS) $(CFLAGS) -c -o util/grub_editenv-resolve.obj `if test -f 'util/resolve.c'; then $(CYGPATH_W) 'util/resolve.c'; else $(CYGPATH_W) '$(srcdir)/util/resolve.c'; fi`
 
 util/grub_file-grub-file.o: util/grub-file.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(grub_file_CPPFLAGS) $(CPPFLAGS) $(grub_file_CFLAGS) $(CFLAGS) -MT util/grub_file-grub-file.o -MD -MP -MF util/$(DEPDIR)/grub_file-grub-file.Tpo -c -o util/grub_file-grub-file.o `test -f 'util/grub-file.c' || echo '$(srcdir)/'`util/grub-file.c
@@ -12391,6 +12601,8 @@ distclean-generic:
 	-rm -f grub-core/lib/$(am__dirstamp)
 	-rm -f grub-core/lib/i386/pc/$(DEPDIR)/$(am__dirstamp)
 	-rm -f grub-core/lib/i386/pc/$(am__dirstamp)
+	-rm -f grub-core/lib/json/$(DEPDIR)/$(am__dirstamp)
+	-rm -f grub-core/lib/json/$(am__dirstamp)
 	-rm -f grub-core/lib/libgcrypt-grub/cipher/$(DEPDIR)/$(am__dirstamp)
 	-rm -f grub-core/lib/libgcrypt-grub/cipher/$(am__dirstamp)
 	-rm -f grub-core/lib/minilzo/$(DEPDIR)/$(am__dirstamp)
@@ -12442,7 +12654,7 @@ clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf ./$(DEPDIR) grub-core/$(DEPDIR) grub-core/commands/$(DEPDIR) grub-core/disk/$(DEPDIR) grub-core/font/$(DEPDIR) grub-core/fs/$(DEPDIR) grub-core/fs/zfs/$(DEPDIR) grub-core/gfxmenu/$(DEPDIR) grub-core/io/$(DEPDIR) grub-core/kern/$(DEPDIR) grub-core/kern/arm/$(DEPDIR) grub-core/kern/arm64/$(DEPDIR) grub-core/kern/emu/$(DEPDIR) grub-core/kern/ia64/$(DEPDIR) grub-core/lib/$(DEPDIR) grub-core/lib/i386/pc/$(DEPDIR) grub-core/lib/libgcrypt-grub/cipher/$(DEPDIR) grub-core/lib/minilzo/$(DEPDIR) grub-core/lib/xzembed/$(DEPDIR) grub-core/lib/zstd/$(DEPDIR) grub-core/loader/$(DEPDIR) grub-core/loader/i386/$(DEPDIR) grub-core/normal/$(DEPDIR) grub-core/osdep/$(DEPDIR) grub-core/osdep/devmapper/$(DEPDIR) grub-core/osdep/unix/$(DEPDIR) grub-core/partmap/$(DEPDIR) grub-core/script/$(DEPDIR) grub-core/tests/lib/$(DEPDIR) grub-core/video/$(DEPDIR) grub-core/video/fb/$(DEPDIR) tests/$(DEPDIR) tests/lib/$(DEPDIR) util/$(DEPDIR) util/ieee1275/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) grub-core/$(DEPDIR) grub-core/commands/$(DEPDIR) grub-core/disk/$(DEPDIR) grub-core/font/$(DEPDIR) grub-core/fs/$(DEPDIR) grub-core/fs/zfs/$(DEPDIR) grub-core/gfxmenu/$(DEPDIR) grub-core/io/$(DEPDIR) grub-core/kern/$(DEPDIR) grub-core/kern/arm/$(DEPDIR) grub-core/kern/arm64/$(DEPDIR) grub-core/kern/emu/$(DEPDIR) grub-core/kern/ia64/$(DEPDIR) grub-core/lib/$(DEPDIR) grub-core/lib/i386/pc/$(DEPDIR) grub-core/lib/json/$(DEPDIR) grub-core/lib/libgcrypt-grub/cipher/$(DEPDIR) grub-core/lib/minilzo/$(DEPDIR) grub-core/lib/xzembed/$(DEPDIR) grub-core/lib/zstd/$(DEPDIR) grub-core/loader/$(DEPDIR) grub-core/loader/i386/$(DEPDIR) grub-core/normal/$(DEPDIR) grub-core/osdep/$(DEPDIR) grub-core/osdep/devmapper/$(DEPDIR) grub-core/osdep/unix/$(DEPDIR) grub-core/partmap/$(DEPDIR) grub-core/script/$(DEPDIR) grub-core/tests/lib/$(DEPDIR) grub-core/video/$(DEPDIR) grub-core/video/fb/$(DEPDIR) tests/$(DEPDIR) tests/lib/$(DEPDIR) util/$(DEPDIR) util/ieee1275/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -12494,7 +12706,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf ./$(DEPDIR) grub-core/$(DEPDIR) grub-core/commands/$(DEPDIR) grub-core/disk/$(DEPDIR) grub-core/font/$(DEPDIR) grub-core/fs/$(DEPDIR) grub-core/fs/zfs/$(DEPDIR) grub-core/gfxmenu/$(DEPDIR) grub-core/io/$(DEPDIR) grub-core/kern/$(DEPDIR) grub-core/kern/arm/$(DEPDIR) grub-core/kern/arm64/$(DEPDIR) grub-core/kern/emu/$(DEPDIR) grub-core/kern/ia64/$(DEPDIR) grub-core/lib/$(DEPDIR) grub-core/lib/i386/pc/$(DEPDIR) grub-core/lib/libgcrypt-grub/cipher/$(DEPDIR) grub-core/lib/minilzo/$(DEPDIR) grub-core/lib/xzembed/$(DEPDIR) grub-core/lib/zstd/$(DEPDIR) grub-core/loader/$(DEPDIR) grub-core/loader/i386/$(DEPDIR) grub-core/normal/$(DEPDIR) grub-core/osdep/$(DEPDIR) grub-core/osdep/devmapper/$(DEPDIR) grub-core/osdep/unix/$(DEPDIR) grub-core/partmap/$(DEPDIR) grub-core/script/$(DEPDIR) grub-core/tests/lib/$(DEPDIR) grub-core/video/$(DEPDIR) grub-core/video/fb/$(DEPDIR) tests/$(DEPDIR) tests/lib/$(DEPDIR) util/$(DEPDIR) util/ieee1275/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) grub-core/$(DEPDIR) grub-core/commands/$(DEPDIR) grub-core/disk/$(DEPDIR) grub-core/font/$(DEPDIR) grub-core/fs/$(DEPDIR) grub-core/fs/zfs/$(DEPDIR) grub-core/gfxmenu/$(DEPDIR) grub-core/io/$(DEPDIR) grub-core/kern/$(DEPDIR) grub-core/kern/arm/$(DEPDIR) grub-core/kern/arm64/$(DEPDIR) grub-core/kern/emu/$(DEPDIR) grub-core/kern/ia64/$(DEPDIR) grub-core/lib/$(DEPDIR) grub-core/lib/i386/pc/$(DEPDIR) grub-core/lib/json/$(DEPDIR) grub-core/lib/libgcrypt-grub/cipher/$(DEPDIR) grub-core/lib/minilzo/$(DEPDIR) grub-core/lib/xzembed/$(DEPDIR) grub-core/lib/zstd/$(DEPDIR) grub-core/loader/$(DEPDIR) grub-core/loader/i386/$(DEPDIR) grub-core/normal/$(DEPDIR) grub-core/osdep/$(DEPDIR) grub-core/osdep/devmapper/$(DEPDIR) grub-core/osdep/unix/$(DEPDIR) grub-core/partmap/$(DEPDIR) grub-core/script/$(DEPDIR) grub-core/tests/lib/$(DEPDIR) grub-core/video/$(DEPDIR) grub-core/video/fb/$(DEPDIR) tests/$(DEPDIR) tests/lib/$(DEPDIR) util/$(DEPDIR) util/ieee1275/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -12709,6 +12921,10 @@ $(top_srcdir)/grub-core/Makefile.core.am: $(top_srcdir)/gentpl.py $(top_srcdir)/
 30_os-prober: $(top_builddir)/config.status util/grub.d/30_os-prober.in 
 	(for x in util/grub.d/30_os-prober.in ; do cat $(srcdir)/"$$x"; done) | $(top_builddir)/config.status --file=$@:-
 	chmod a+x 30_os-prober
+
+30_uefi-firmware: $(top_builddir)/config.status util/grub.d/30_uefi-firmware.in 
+	(for x in util/grub.d/30_uefi-firmware.in ; do cat $(srcdir)/"$$x"; done) | $(top_builddir)/config.status --file=$@:-
+	chmod a+x 30_uefi-firmware
 
 40_custom: $(top_builddir)/config.status util/grub.d/40_custom.in 
 	(for x in util/grub.d/40_custom.in ; do cat $(srcdir)/"$$x"; done) | $(top_builddir)/config.status --file=$@:-
@@ -13085,7 +13301,7 @@ grub_script.yy.h: $(top_srcdir)/grub-core/script/yylex.l
 grub_script.yy.c: grub_script.yy.h
 
 # For libgrub.a
-libgrub.pp: grub_script.tab.h grub_script.yy.h $(libgrubmods_a_SOURCES) $(libgrubkern_a_SOURCES)
+libgrub.pp: config-util.h grub_script.tab.h grub_script.yy.h $(libgrubmods_a_SOURCES) $(libgrubkern_a_SOURCES)
 	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgrubmods_a_CPPFLAGS) $(libgrubkern_a_CPPFLAGS) $(CPPFLAGS) \
 	  -D'GRUB_MOD_INIT(x)=@MARKER@x@' $^ > $@ || (rm -f $@; exit 1)
 

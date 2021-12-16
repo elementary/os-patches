@@ -16,10 +16,10 @@ Patch-Name: ubuntu-linuxefi-arm64.patch
  1 file changed, 56 insertions(+), 50 deletions(-)
 
 diff --git a/grub-core/loader/arm64/linux.c b/grub-core/loader/arm64/linux.c
-index 3f5496f..130e9c0 100644
+index 1a5296a..4e9eac3 100644
 --- a/grub-core/loader/arm64/linux.c
 +++ b/grub-core/loader/arm64/linux.c
-@@ -43,6 +43,8 @@ static int loaded;
+@@ -42,6 +42,8 @@ static int loaded;
  
  static void *kernel_addr;
  static grub_uint64_t kernel_size;
@@ -28,7 +28,7 @@ index 3f5496f..130e9c0 100644
  
  static char *linux_args;
  static grub_uint32_t cmdline_size;
-@@ -76,7 +78,8 @@ grub_arch_efi_linux_check_image (struct linux_arch_kernel_header * lh)
+@@ -75,7 +77,8 @@ grub_arch_efi_linux_check_image (struct linux_arch_kernel_header * lh)
  static grub_err_t
  finalize_params_linux (void)
  {
@@ -38,7 +38,7 @@ index 3f5496f..130e9c0 100644
  
    void *fdt;
  
-@@ -111,6 +114,27 @@ finalize_params_linux (void)
+@@ -110,6 +113,27 @@ finalize_params_linux (void)
    if (grub_fdt_install() != GRUB_ERR_NONE)
      goto failure;
  
@@ -66,7 +66,7 @@ index 3f5496f..130e9c0 100644
    return GRUB_ERR_NONE;
  
  failure:
-@@ -118,70 +142,48 @@ failure:
+@@ -117,70 +141,48 @@ failure:
    return grub_error(GRUB_ERR_BAD_OS, "failed to install/update FDT");
  }
  
@@ -164,7 +164,7 @@ index 3f5496f..130e9c0 100644
    return (grub_arch_efi_linux_boot_image((grub_addr_t)kernel_addr,
                                            kernel_size, linux_args));
  }
-@@ -297,6 +299,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+@@ -296,6 +298,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
  {
    grub_file_t file = 0;
    struct linux_arch_kernel_header lh;
@@ -172,8 +172,8 @@ index 3f5496f..130e9c0 100644
    grub_err_t err;
    int rc;
  
-@@ -354,6 +357,9 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
-         }
+@@ -349,6 +352,9 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+       goto fail;
      }
  
 +  pe = (void *)((unsigned long)kernel_addr + lh.hdr_offset);

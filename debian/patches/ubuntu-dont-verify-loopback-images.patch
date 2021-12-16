@@ -21,11 +21,11 @@ Patch-Name: ubuntu-dont-verify-loopback-images.patch
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/grub-core/disk/loopback.c b/grub-core/disk/loopback.c
-index ccb4b16..210201d 100644
+index 99f4792..6ca3012 100644
 --- a/grub-core/disk/loopback.c
 +++ b/grub-core/disk/loopback.c
-@@ -86,7 +86,8 @@ grub_cmd_loopback (grub_extcmd_context_t ctxt, int argc, char **args)
-     return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
+@@ -91,7 +91,8 @@ grub_cmd_loopback (grub_extcmd_context_t ctxt, int argc, char **args)
+       return grub_error (GRUB_ERR_BAD_ARGUMENT, "device name already exists");
  
    file = grub_file_open (args[1], GRUB_FILE_TYPE_LOOPBACK
 -			 | GRUB_FILE_TYPE_NO_DECOMPRESS);

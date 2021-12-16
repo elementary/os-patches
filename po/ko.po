@@ -11,15 +11,16 @@
 # Revised:
 #
 # Changwoo Ryu <cwryu@debian.org>, 2010.
+# JeongHoon Lee <leejh9226@gmail.com>, 2019.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: grub 1.97+20100124\n"
+"Project-Id-Version: grub 2.04-pre1\n"
 "Report-Msgid-Bugs-To: bug-grub@gnu.org\n"
-"POT-Creation-Date: 2019-07-04 16:09+0200\n"
-"PO-Revision-Date: 2010-10-24 23:37+0900\n"
-"Last-Translator: Changwoo Ryu <cwryu@debian.org>\n"
-"Language-Team: Korean <translation-team-ko@lists.sourceforge.net>\n"
+"POT-Creation-Date: 2021-06-08 16:49+0200\n"
+"PO-Revision-Date: 2019-11-22 20:12+0900\n"
+"Last-Translator: JeongHoon Lee <leejh9226@gmail.com>\n"
+"Language-Team: Korean <translation-team-ko@googlegroups.com>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,90 +29,84 @@ msgstr ""
 
 #: grub-core/bus/usb/serial/ftdi.c:145 grub-core/bus/usb/serial/pl2303.c:158
 #: grub-core/term/ieee1275/escc.c:169 grub-core/term/ns8250.c:202
-#, fuzzy
 msgid "unsupported serial port speed"
-msgstr "시리얼 포트 속도를 정합니다."
+msgstr "지원하지 않는 시리얼 포트 속도입니다"
 
 #: grub-core/bus/usb/serial/ftdi.c:151 grub-core/bus/usb/serial/pl2303.c:164
 #: grub-core/term/efi/serial.c:116 grub-core/term/ieee1275/escc.c:175
 #: grub-core/term/ns8250.c:208 grub-core/term/serial.c:227
 #: grub-core/term/serial.c:243
-#, fuzzy
 msgid "unsupported serial port parity"
-msgstr "시리얼 포트 패리티를 정합니다."
+msgstr "지원하지 않는 시리얼 포트 패리티입니다"
 
 #: grub-core/bus/usb/serial/ftdi.c:157 grub-core/bus/usb/serial/pl2303.c:170
 #: grub-core/term/efi/serial.c:122 grub-core/term/ieee1275/escc.c:181
 #: grub-core/term/ns8250.c:213 grub-core/term/serial.c:267
-#, fuzzy
 msgid "unsupported serial port stop bits number"
-msgstr "시리얼 포트 스톱 비트를 정합니다."
+msgstr "지원하지 않는 시리얼 포트 스톱 비트입니다"
 
 #: grub-core/bus/usb/serial/ftdi.c:161 grub-core/bus/usb/serial/pl2303.c:174
 #: grub-core/term/efi/serial.c:126 grub-core/term/ieee1275/escc.c:185
 #: grub-core/term/ns8250.c:217
-#, fuzzy
 msgid "unsupported serial port word length"
-msgstr "시리얼 포트 워드 길이를 정합니다."
+msgstr "지원하지 않는 시리얼 포트 워드 길이입니다"
 
-#: grub-core/commands/acpi.c:42
+#: grub-core/commands/acpi.c:43
 msgid "Don't load host tables specified by comma-separated list."
 msgstr "쉼표(,)로 구분한 호스트 테이블을 읽어들이지 않습니다."
 
-#: grub-core/commands/acpi.c:45
+#: grub-core/commands/acpi.c:46
 msgid "Load only tables specified by comma-separated list."
 msgstr "쉼표(,)로 구분한 테이블을 읽어들입니다."
 
-#: grub-core/commands/acpi.c:46
-msgid "Export version 1 tables to the OS."
-msgstr ""
-
 #: grub-core/commands/acpi.c:47
-#, fuzzy
-msgid "Export version 2 and version 3 tables to the OS."
-msgstr "v2와 v3 테이블을 보여줍니다."
+msgid "Export version 1 tables to the OS."
+msgstr "버전 1 테이블을 OS로 내보냅니다."
 
 #: grub-core/commands/acpi.c:48
+msgid "Export version 2 and version 3 tables to the OS."
+msgstr "버전 2 및 버전 3 테이블을 OS로 내보냅니다."
+
+#: grub-core/commands/acpi.c:49
 msgid "Set OEMID of RSDP, XSDT and RSDT."
 msgstr "RSDP와 XSDT, RSDT의 OEMID를 설정합니다."
 
-#: grub-core/commands/acpi.c:50
+#: grub-core/commands/acpi.c:51
 msgid "Set OEMTABLE ID of RSDP, XSDT and RSDT."
 msgstr "RSDP와 XSDT, RSDT의 OEMTABLE ID를 설정합니다."
 
-#: grub-core/commands/acpi.c:52
+#: grub-core/commands/acpi.c:53
 msgid "Set OEMTABLE revision of RSDP, XSDT and RSDT."
 msgstr "RSDP와 XSDT, RSDT의 OEMTABLE 수정 사항을 설정합니다."
 
-#: grub-core/commands/acpi.c:54
+#: grub-core/commands/acpi.c:55
 msgid "Set creator field of RSDP, XSDT and RSDT."
 msgstr "RSDP와 XSDT, RSDT의 생성자 필드를 설정합니다."
 
-#: grub-core/commands/acpi.c:56
+#: grub-core/commands/acpi.c:57
 msgid "Set creator revision of RSDP, XSDT and RSDT."
 msgstr "RSDP와 XSDT, RSDT의 생성자 수정 사항을 설정합니다."
 
 #. TRANSLATORS: "hangs" here is a noun, not a verb.
-#: grub-core/commands/acpi.c:58
-#, fuzzy
+#: grub-core/commands/acpi.c:59
 msgid ""
 "Don't update EBDA. May fix failures or hangs on some BIOSes but makes it "
 "ineffective with OS not receiving RSDP from GRUB."
 msgstr ""
-"EBDA를 업데이트 하지 않습니다. 장애를 수리하거나 어떤 것은 멈출수도 있습니"
-"다. BIOS는 OS가 GRUB에서 RSDP를 못 받게하여 이것을 무력화합니다."
+"EBDA를 업데이트 하지 않습니다. 일부 BIOS에서 오류 또는 멈춤을 수정 할 수 있지"
+"만, GRUB에서 RSDP를 수신하지 않는 OS에서는 효과가 없습니다."
 
-#: grub-core/commands/acpi.c:650 grub-core/commands/acpi.c:667
+#: grub-core/commands/acpi.c:651 grub-core/commands/acpi.c:668
 #: grub-core/commands/i386/pc/play.c:105 grub-core/commands/keylayouts.c:230
 #: grub-core/commands/keylayouts.c:245 grub-core/commands/keylayouts.c:263
-#: grub-core/commands/verifiers.c:156 grub-core/efiemu/loadcore.c:350
-#: grub-core/kern/elf.c:117 grub-core/kern/elfXX.c:29
-#: grub-core/kern/elfXX.c:156 grub-core/loader/arm/linux.c:319
+#: grub-core/efiemu/loadcore.c:350 grub-core/kern/elf.c:117
+#: grub-core/kern/elfXX.c:29 grub-core/kern/elfXX.c:156
+#: grub-core/kern/verifiers.c:156 grub-core/loader/arm/linux.c:319
 #: grub-core/loader/arm64/linux.c:330 grub-core/loader/arm64/xen_boot.c:356
-#: grub-core/loader/efi/chainloader.c:276
-#: grub-core/loader/efi/chainloader.c:297
-#: grub-core/loader/efi/chainloader.c:329 grub-core/loader/efi/fdt.c:138
-#: grub-core/loader/i386/bsd.c:1276 grub-core/loader/i386/bsd.c:2116
+#: grub-core/loader/efi/chainloader.c:292
+#: grub-core/loader/efi/chainloader.c:313
+#: grub-core/loader/efi/chainloader.c:345 grub-core/loader/efi/fdt.c:142
+#: grub-core/loader/i386/bsd.c:1282 grub-core/loader/i386/bsd.c:2123
 #: grub-core/loader/i386/bsdXX.c:20 grub-core/loader/i386/bsdXX.c:36
 #: grub-core/loader/i386/bsdXX.c:63 grub-core/loader/i386/bsdXX.c:357
 #: grub-core/loader/i386/bsdXX.c:376 grub-core/loader/i386/bsdXX.c:519
@@ -120,16 +115,16 @@ msgstr ""
 #: grub-core/loader/i386/coreboot/chainloader.c:112
 #: grub-core/loader/i386/coreboot/chainloader.c:148
 #: grub-core/loader/i386/coreboot/chainloader.c:170
-#: grub-core/loader/i386/linux.c:667 grub-core/loader/i386/linux.c:788
-#: grub-core/loader/i386/linux.c:1005 grub-core/loader/i386/multiboot_mbi.c:171
+#: grub-core/loader/i386/linux.c:675 grub-core/loader/i386/linux.c:791
+#: grub-core/loader/i386/linux.c:1011 grub-core/loader/i386/multiboot_mbi.c:171
 #: grub-core/loader/i386/pc/chainloader.c:202
-#: grub-core/loader/i386/pc/linux.c:149 grub-core/loader/i386/pc/linux.c:320
-#: grub-core/loader/i386/pc/linux.c:362 grub-core/loader/i386/pc/plan9.c:457
+#: grub-core/loader/i386/pc/linux.c:150 grub-core/loader/i386/pc/linux.c:326
+#: grub-core/loader/i386/pc/linux.c:368 grub-core/loader/i386/pc/plan9.c:457
 #: grub-core/loader/i386/pc/plan9.c:550 grub-core/loader/i386/pc/plan9.c:566
-#: grub-core/loader/i386/xen.c:934 grub-core/loader/i386/xen_file.c:72
+#: grub-core/loader/i386/xen.c:942 grub-core/loader/i386/xen_file.c:72
 #: grub-core/loader/i386/xen_fileXX.c:43 grub-core/loader/i386/xen_fileXX.c:186
 #: grub-core/loader/i386/xen_fileXX.c:339 grub-core/loader/ia64/efi/linux.c:423
-#: grub-core/loader/ia64/efi/linux.c:471 grub-core/loader/linux.c:286
+#: grub-core/loader/ia64/efi/linux.c:471 grub-core/loader/linux.c:319
 #: grub-core/loader/macho.c:84 grub-core/loader/macho.c:109
 #: grub-core/loader/machoXX.c:33 grub-core/loader/machoXX.c:46
 #: grub-core/loader/machoXX.c:76 grub-core/loader/machoXX.c:116
@@ -137,17 +132,17 @@ msgstr ""
 #: grub-core/loader/machoXX.c:196 grub-core/loader/machoXX.c:317
 #: grub-core/loader/multiboot.c:434 grub-core/loader/multiboot_elfxx.c:171
 #: grub-core/loader/multiboot_elfxx.c:234
-#: grub-core/loader/multiboot_elfxx.c:278 grub-core/loader/multiboot_mbi2.c:129
-#: grub-core/loader/xnu.c:737 grub-core/loader/xnu.c:795
-#: grub-core/loader/xnu.c:816 grub-core/loader/xnu.c:871
-#: grub-core/loader/xnu.c:914 grub-core/loader/xnu.c:952
+#: grub-core/loader/multiboot_elfxx.c:278 grub-core/loader/multiboot_mbi2.c:135
+#: grub-core/loader/xnu.c:756 grub-core/loader/xnu.c:814
+#: grub-core/loader/xnu.c:835 grub-core/loader/xnu.c:890
+#: grub-core/loader/xnu.c:933 grub-core/loader/xnu.c:971
 #: grub-core/loader/xnu_resume.c:68 grub-core/loader/xnu_resume.c:153
 #: grub-core/loader/xnu_resume.c:165 util/grub-mkimagexx.c:2288
 #, c-format
 msgid "premature end of file %s"
-msgstr ""
+msgstr "예기치 못한 파일의 끝 %s"
 
-#: grub-core/commands/acpi.c:779
+#: grub-core/commands/acpi.c:780
 #, fuzzy
 msgid ""
 "[-1|-2] [--exclude=TABLE1,TABLE2|--load-only=TABLE1,TABLE2] FILE1 [FILE2] "
@@ -156,57 +151,57 @@ msgstr ""
 "[-1|-2] [--exclude=<테이블1>,<테이블2>|--load-only=<테이블1>,<테이블2>] <파일"
 "1> [<파일2>] [...]"
 
-#: grub-core/commands/acpi.c:782
+#: grub-core/commands/acpi.c:783
 msgid "Load host ACPI tables and tables specified by arguments."
 msgstr "호스트 ACPI 테이블과 인자로 주어진 테이블을 읽어들입니다."
 
 #: grub-core/commands/acpihalt.c:368 grub-core/kern/err.c:110
 #, c-format
 msgid "error: %s.\n"
-msgstr ""
+msgstr "에러: %s\n"
 
-#: grub-core/commands/acpihalt.c:368 grub-core/kern/emu/misc.c:95
-#: grub-core/kern/emu/misc.c:105 grub-core/kern/emu/misc.c:134
-#: grub-core/kern/emu/mm.c:34 grub-core/kern/emu/mm.c:62
-#: grub-core/kern/mm.c:374 grub-core/lib/relocator.c:1282
+#: grub-core/commands/acpihalt.c:368 grub-core/kern/efi/mm.c:144
+#: grub-core/kern/efi/mm.c:157 grub-core/kern/emu/misc.c:95
+#: grub-core/kern/emu/misc.c:107 grub-core/kern/emu/misc.c:117
+#: grub-core/kern/emu/misc.c:146 grub-core/kern/emu/mm.c:34
+#: grub-core/kern/emu/mm.c:44 grub-core/kern/emu/mm.c:73
+#: grub-core/kern/mm.c:376 grub-core/lib/relocator.c:1282
 #: grub-core/lib/relocator.c:1439 grub-core/lib/relocator.c:1538
 #: grub-core/loader/arm/linux.c:259 grub-core/loader/arm64/linux.c:265
 #: grub-core/loader/arm64/linux.c:321 grub-core/loader/arm64/linux.c:340
 #: grub-core/loader/arm64/xen_boot.c:344 grub-core/loader/arm64/xen_boot.c:367
-#: grub-core/loader/efi/chainloader.c:289 grub-core/osdep/unix/dl.c:48
-#: grub-core/osdep/windows/dl.c:46 grub-core/script/lexer.c:156
-#: grub-core/script/lexer.c:182
-#, fuzzy
+#: grub-core/loader/efi/chainloader.c:305 grub-core/osdep/unix/dl.c:48
+#: grub-core/osdep/windows/dl.c:46 grub-core/script/lexer.c:161
+#: grub-core/script/lexer.c:197
 msgid "out of memory"
-msgstr "메모리를 덤프합니다."
+msgstr "메모리 부족"
 
-#: grub-core/commands/acpihalt.c:374 grub-core/disk/cryptodisk.c:587
-#: grub-core/disk/cryptodisk.c:632 grub-core/kern/emu/hostdisk.c:307
-#: grub-core/kern/emu/hostfs.c:149 grub-core/kern/emu/misc.c:200
+#: grub-core/commands/acpihalt.c:374 grub-core/disk/cryptodisk.c:766
+#: grub-core/disk/cryptodisk.c:810 grub-core/kern/emu/hostdisk.c:307
+#: grub-core/kern/emu/hostfs.c:149 grub-core/kern/emu/misc.c:212
 #: grub-core/osdep/linux/ofpath.c:195 grub-core/osdep/linux/ofpath.c:521
-#: grub-core/osdep/linux/ofpath.c:534 util/glue-efi.c:80 util/glue-efi.c:94
-#: util/grub-editenv.c:155 util/grub-fstest.c:577
-#: util/grub-install-common.c:943 util/grub-mkrescue.c:634
-#: util/grub-mkrescue.c:888 util/grub-mount.c:506 util/grub-render-label.c:176
-#: util/misc.c:95 util/setup.c:814 util/setup.c:833
-#, fuzzy, c-format
+#: grub-core/osdep/linux/ofpath.c:534 util/glue-efi.c:90 util/glue-efi.c:104
+#: util/grub-editenv.c:161 util/grub-fstest.c:577
+#: util/grub-install-common.c:1108 util/grub-mkrescue.c:637
+#: util/grub-mkrescue.c:891 util/grub-mount.c:506 util/grub-render-label.c:176
+#: util/misc.c:95 util/setup.c:817 util/setup.c:836
+#, c-format
 msgid "cannot read `%s': %s"
-msgstr "올바르게 `%s'을(를) 읽을 수 없습니다"
+msgstr "`%s'을(를) 읽을 수 없습니다: %s"
 
 #. TRANSLATORS: It's computer shutdown using ACPI, not disabling ACPI.
 #: grub-core/commands/acpihalt.c:452
 msgid "ACPI shutdown failed"
-msgstr ""
+msgstr "ACPI 종료에 실패했습니다"
 
 #: grub-core/commands/arc/lsdev.c:51
-#, fuzzy
 msgid "List devices."
-msgstr "PCI 장치를 열거합니다."
+msgstr "장치를 열거합니다."
 
 #: grub-core/commands/blocklist.c:122 grub-core/commands/cat.c:57
 #: grub-core/commands/configfile.c:35 grub-core/commands/efi/loadbios.c:168
-#: grub-core/commands/file.c:159 grub-core/commands/hexdump.c:47
-#: grub-core/commands/legacycfg.c:209 grub-core/commands/legacycfg.c:315
+#: grub-core/commands/file.c:160 grub-core/commands/hexdump.c:47
+#: grub-core/commands/legacycfg.c:228 grub-core/commands/legacycfg.c:334
 #: grub-core/commands/minicmd.c:44 grub-core/commands/syslinuxcfg.c:146
 #: grub-core/commands/testload.c:58 grub-core/commands/testspeed.c:52
 #: grub-core/disk/loopback.c:93 grub-core/efiemu/main.c:293
@@ -215,18 +210,18 @@ msgstr "PCI 장치를 열거합니다."
 #: grub-core/loader/arm/linux.c:472 grub-core/loader/arm64/linux.c:243
 #: grub-core/loader/arm64/linux.c:297 grub-core/loader/arm64/xen_boot.c:398
 #: grub-core/loader/arm64/xen_boot.c:411 grub-core/loader/arm64/xen_boot.c:462
-#: grub-core/loader/efi/chainloader.c:216 grub-core/loader/i386/bsd.c:1462
-#: grub-core/loader/i386/bsd.c:1807 grub-core/loader/i386/bsd.c:2085
+#: grub-core/loader/efi/chainloader.c:232 grub-core/loader/i386/bsd.c:1468
+#: grub-core/loader/i386/bsd.c:1813 grub-core/loader/i386/bsd.c:2091
 #: grub-core/loader/i386/coreboot/chainloader.c:438
-#: grub-core/loader/i386/linux.c:656 grub-core/loader/i386/linux.c:1041
+#: grub-core/loader/i386/linux.c:664 grub-core/loader/i386/linux.c:1047
 #: grub-core/loader/i386/pc/chainloader.c:290
-#: grub-core/loader/i386/pc/freedos.c:105 grub-core/loader/i386/pc/linux.c:138
-#: grub-core/loader/i386/pc/linux.c:400 grub-core/loader/i386/pc/ntldr.c:85
+#: grub-core/loader/i386/pc/freedos.c:105 grub-core/loader/i386/pc/linux.c:139
+#: grub-core/loader/i386/pc/linux.c:406 grub-core/loader/i386/pc/ntldr.c:85
 #: grub-core/loader/i386/pc/plan9.c:409
 #: grub-core/loader/i386/pc/pxechainloader.c:94
-#: grub-core/loader/i386/pc/truecrypt.c:96 grub-core/loader/i386/xen.c:641
-#: grub-core/loader/i386/xen.c:768 grub-core/loader/i386/xen.c:844
-#: grub-core/loader/i386/xen.c:854 grub-core/loader/i386/xnu.c:488
+#: grub-core/loader/i386/pc/truecrypt.c:96 grub-core/loader/i386/xen.c:643
+#: grub-core/loader/i386/xen.c:776 grub-core/loader/i386/xen.c:852
+#: grub-core/loader/i386/xen.c:862 grub-core/loader/i386/xnu.c:487
 #: grub-core/loader/ia64/efi/linux.c:459 grub-core/loader/ia64/efi/linux.c:539
 #: grub-core/loader/mips/linux.c:238 grub-core/loader/mips/linux.c:429
 #: grub-core/loader/multiboot.c:322 grub-core/loader/multiboot.c:374
@@ -234,42 +229,44 @@ msgstr "PCI 장치를 열거합니다."
 #: grub-core/loader/powerpc/ieee1275/linux.c:269
 #: grub-core/loader/powerpc/ieee1275/linux.c:341
 #: grub-core/loader/sparc64/ieee1275/linux.c:305
-#: grub-core/loader/sparc64/ieee1275/linux.c:381 grub-core/loader/xnu.c:351
-#: grub-core/loader/xnu.c:460 grub-core/loader/xnu.c:778
-#: grub-core/loader/xnu.c:892 grub-core/loader/xnu.c:1277
-#: grub-core/loader/xnu.c:1427 grub-core/loader/xnu.c:1453
-#: grub-core/video/readers/jpeg.c:812 grub-core/video/readers/png.c:1123
+#: grub-core/loader/sparc64/ieee1275/linux.c:381 grub-core/loader/xnu.c:370
+#: grub-core/loader/xnu.c:479 grub-core/loader/xnu.c:797
+#: grub-core/loader/xnu.c:911 grub-core/loader/xnu.c:1296
+#: grub-core/loader/xnu.c:1446 grub-core/loader/xnu.c:1472
+#: grub-core/video/readers/jpeg.c:838 grub-core/video/readers/png.c:1132
 msgid "filename expected"
-msgstr ""
+msgstr "파일 이름이 와야합니다"
 
 #. TRANSLATORS: "embed" is a verb (command description).  "
 #: grub-core/commands/blocklist.c:154 grub-core/commands/cat.c:163
 #: grub-core/commands/configfile.c:65 grub-core/commands/configfile.c:68
 #: grub-core/commands/configfile.c:74 grub-core/commands/configfile.c:80
 #: grub-core/commands/configfile.c:86 grub-core/commands/hashsum.c:34
-#: grub-core/commands/legacycfg.c:834 grub-core/commands/legacycfg.c:841
-#: grub-core/commands/legacycfg.c:846 grub-core/commands/legacycfg.c:851
-#: grub-core/commands/macbless.c:222 grub-core/commands/minicmd.c:198
+#: grub-core/commands/legacycfg.c:853 grub-core/commands/legacycfg.c:860
+#: grub-core/commands/legacycfg.c:865 grub-core/commands/legacycfg.c:870
+#: grub-core/commands/macbless.c:222 grub-core/commands/minicmd.c:201
 #: grub-core/commands/syslinuxcfg.c:186 grub-core/commands/syslinuxcfg.c:194
 #: grub-core/commands/syslinuxcfg.c:200 grub-core/commands/syslinuxcfg.c:206
 #: grub-core/commands/testload.c:163 grub-core/efiemu/main.c:312
 #: grub-core/kern/emu/main.c:100 grub-core/kern/emu/main.c:103
-#: grub-core/loader/i386/bsd.c:2137 grub-core/loader/i386/bsd.c:2140
-#: grub-core/loader/i386/bsd.c:2143
+#: grub-core/loader/i386/bsd.c:2144 grub-core/loader/i386/bsd.c:2147
+#: grub-core/loader/i386/bsd.c:2150
 #: grub-core/loader/i386/coreboot/chainloader.c:505
 #: grub-core/loader/ia64/efi/linux.c:594 include/grub/util/install.h:32
-#: include/grub/util/install.h:64 util/grub-glue-efi.c:52
-#: util/grub-glue-efi.c:54 util/grub-glue-efi.c:56 util/grub-install.c:254
-#: util/grub-install.c:301 util/grub-mkfont.c:936 util/grub-mkimage.c:68
-#: util/grub-mkimage.c:74 util/grub-mkimage.c:76 util/grub-mkimage.c:78
-#: util/grub-mkimage.c:81 util/grub-mklayout.c:52 util/grub-mklayout.c:54
-#: util/grub-mkrescue.c:97 util/grub-mkrescue.c:101 util/grub-mkrescue.c:104
-#: util/grub-mkrescue.c:105 util/grub-mkrescue.c:106
-#: util/grub-mkstandalone.c:47 util/grub-mkstandalone.c:49
-#: util/grub-probe.c:732 util/grub-render-label.c:59
-#: util/grub-render-label.c:70 util/grub-render-label.c:72 util/grub-setup.c:78
-#: util/grub-setup.c:80 util/grub-setup.c:84 util/grub-syslinux2cfg.c:74
-#: util/grub-syslinux2cfg.c:147
+#: include/grub/util/install.h:64 include/grub/util/install.h:66
+#: util/grub-glue-efi.c:52 util/grub-glue-efi.c:54 util/grub-glue-efi.c:56
+#: util/grub-install.c:254 util/grub-install.c:301 util/grub-mkfont.c:936
+#: util/grub-mkimage.c:68 util/grub-mkimage.c:74 util/grub-mkimage.c:76
+#: util/grub-mkimage.c:78 util/grub-mkimage.c:81 util/grub-mkimage.c:84
+#: util/grub-mklayout.c:52 util/grub-mklayout.c:54 util/grub-mkrescue.c:97
+#: util/grub-mkrescue.c:101 util/grub-mkrescue.c:104 util/grub-mkrescue.c:105
+#: util/grub-mkrescue.c:106 util/grub-mkstandalone.c:47
+#: util/grub-mkstandalone.c:49 util/grub-probe.c:732
+#: util/grub-render-label.c:59 util/grub-render-label.c:70
+#: util/grub-render-label.c:72 util/grub-setup.c:78 util/grub-setup.c:80
+#: util/grub-setup.c:84 util/grub-syslinux2cfg.c:74
+#: util/grub-syslinux2cfg.c:147 util/grub-kbdcomp.in:29
+#: util/grub-mkconfig.in:60
 msgid "FILE"
 msgstr "<파일>"
 
@@ -277,22 +274,22 @@ msgstr "<파일>"
 msgid "Print a block list."
 msgstr "블럭 목록을 출력합니다."
 
-#: grub-core/commands/boot.c:147 grub-core/commands/legacycfg.c:533
-#: grub-core/commands/legacycfg.c:574 grub-core/loader/arm64/linux.c:250
-#: grub-core/loader/i386/bsd.c:1799 grub-core/loader/i386/bsd.c:1900
-#: grub-core/loader/i386/bsd.c:2007 grub-core/loader/i386/bsd.c:2040
-#: grub-core/loader/i386/bsd.c:2089 grub-core/loader/i386/linux.c:1047
-#: grub-core/loader/i386/pc/linux.c:406 grub-core/loader/i386/xen.c:775
-#: grub-core/loader/i386/xen.c:859 grub-core/loader/ia64/efi/linux.c:545
+#: grub-core/commands/boot.c:147 grub-core/commands/legacycfg.c:552
+#: grub-core/commands/legacycfg.c:593 grub-core/loader/arm64/linux.c:250
+#: grub-core/loader/i386/bsd.c:1805 grub-core/loader/i386/bsd.c:1906
+#: grub-core/loader/i386/bsd.c:2013 grub-core/loader/i386/bsd.c:2046
+#: grub-core/loader/i386/bsd.c:2095 grub-core/loader/i386/linux.c:1053
+#: grub-core/loader/i386/pc/linux.c:412 grub-core/loader/i386/xen.c:783
+#: grub-core/loader/i386/xen.c:867 grub-core/loader/ia64/efi/linux.c:545
 #: grub-core/loader/mips/linux.c:432 grub-core/loader/multiboot.c:388
 #: grub-core/loader/powerpc/ieee1275/linux.c:347
-#: grub-core/loader/sparc64/ieee1275/linux.c:387 grub-core/loader/xnu.c:572
-#: grub-core/loader/xnu.c:665 grub-core/loader/xnu.c:781
-#: grub-core/loader/xnu.c:895 grub-core/loader/xnu.c:1091
-#: grub-core/loader/xnu.c:1258 grub-core/loader/xnu.c:1289
-#: grub-core/loader/xnu.c:1430
+#: grub-core/loader/sparc64/ieee1275/linux.c:387 grub-core/loader/xnu.c:591
+#: grub-core/loader/xnu.c:687 grub-core/loader/xnu.c:800
+#: grub-core/loader/xnu.c:914 grub-core/loader/xnu.c:1110
+#: grub-core/loader/xnu.c:1277 grub-core/loader/xnu.c:1308
+#: grub-core/loader/xnu.c:1449
 msgid "you need to load the kernel first"
-msgstr ""
+msgstr "커널을 우선 로드해야 합니다"
 
 #: grub-core/commands/boot.c:189
 msgid "Boot an operating system."
@@ -317,46 +314,45 @@ msgid "No disk cache statistics available\n"
 msgstr ""
 
 #: grub-core/commands/cacheinfo.c:56
-#, fuzzy
 msgid "Get disk cache info."
-msgstr "장치 정보를 검색합니다."
+msgstr "디스크 캐시 정보를 얻어옵니다."
 
 #: grub-core/commands/cat.c:33
 msgid "Accept DOS-style CR/NL line endings."
 msgstr ""
 
-#: grub-core/commands/cat.c:163 grub-core/commands/minicmd.c:198
+#: grub-core/commands/cat.c:163 grub-core/commands/minicmd.c:201
 msgid "Show the contents of a file."
 msgstr "파일의 내용을 표시합니다."
 
 #: grub-core/commands/cmp.c:43 grub-core/commands/i386/pc/drivemap.c:239
-#: grub-core/commands/i386/wrmsr.c:60 grub-core/commands/iorw.c:85
-#: grub-core/commands/memrw.c:84 grub-core/commands/password.c:75
+#: grub-core/commands/i386/wrmsr.c:61 grub-core/commands/iorw.c:86
+#: grub-core/commands/memrw.c:85 grub-core/commands/password.c:75
 #: grub-core/commands/password_pbkdf2.c:94 grub-core/commands/pgp.c:826
-#: grub-core/commands/regexp.c:113 grub-core/mmap/mmap.c:517
-#: grub-core/net/dns.c:639
+#: grub-core/commands/regexp.c:113 grub-core/mmap/mmap.c:520
+#: grub-core/net/dns.c:646
 msgid "two arguments expected"
-msgstr ""
+msgstr "두개의 인자가 필요합니다"
 
 #: grub-core/commands/cmp.c:45
 #, c-format
 msgid "Compare file `%s' with `%s':\n"
-msgstr ""
+msgstr "파일 '%s'와 '%s'를 비교합니다:\n"
 
 #: grub-core/commands/cmp.c:54
 #, c-format
 msgid "Files differ in size: %llu [%s], %llu [%s]\n"
-msgstr ""
+msgstr "파일의 크기가 다름: %llu [%s], %llu [%s]\n"
 
 #: grub-core/commands/cmp.c:81
 #, c-format
 msgid "Files differ at the offset %llu: 0x%x [%s], 0x%x [%s]\n"
-msgstr ""
+msgstr "파일이 오프셋 %llu에서 다름: 0x%x [%s], 0x%x [%s]\n"
 
 #. TRANSLATORS: it's always exactly 2 files.
 #: grub-core/commands/cmp.c:93
 msgid "The files are identical.\n"
-msgstr ""
+msgstr "파일이 일치합니다.\n"
 
 #: grub-core/commands/cmp.c:113
 msgid "FILE1 FILE2"
@@ -385,14 +381,13 @@ msgstr "문맥의 변환없이 다른 설정 파일을 읽어들입니다."
 msgid "Load another config file but take only menu entries."
 msgstr "문맥의 변환없이 다른 설정 파일을 읽어들입니다."
 
-#: grub-core/commands/date.c:141
+#: grub-core/commands/date.c:142
 msgid "[[year-]month-day] [hour:minute[:second]]"
 msgstr "[[년-]월-일] [시:분[:초]]"
 
-#: grub-core/commands/date.c:142
-#, fuzzy
+#: grub-core/commands/date.c:143
 msgid "Display/set current datetime."
-msgstr "현재 일시를 표시/설정하는 명령."
+msgstr "현재 일시를 표시/설정."
 
 #: grub-core/commands/echo.c:30
 msgid "Do not output the trailing newline."
@@ -439,56 +434,41 @@ msgstr ""
 msgid "Load BIOS dump."
 msgstr "바이오스 덤프를 읽어들입니다."
 
-#: grub-core/commands/efi/shim_lock.c:76
-#, c-format
-msgid "module cannot be loaded in UEFI secure boot mode: %s"
-msgstr ""
-
-#: grub-core/commands/efi/shim_lock.c:98
-#, c-format
-msgid "cannot boot due to dangerous module in memory: %s"
-msgstr ""
-
-#: grub-core/commands/efi/shim_lock.c:116
-msgid "bad shim signature"
-msgstr ""
-
-#: grub-core/commands/efi/tpm.c:149 grub-core/commands/efi/tpm.c:189
-#: grub-core/commands/efi/tpm.c:256 grub-core/commands/efi/tpm.c:306
+#: grub-core/commands/efi/tpm.c:140
 msgid "Command failed"
 msgstr ""
 
-#: grub-core/commands/efi/tpm.c:151 grub-core/commands/efi/tpm.c:191
-#: grub-core/commands/efi/tpm.c:258 grub-core/commands/efi/tpm.c:308
+#: grub-core/commands/efi/tpm.c:142
 msgid "Invalid parameter"
 msgstr ""
 
-#: grub-core/commands/efi/tpm.c:154 grub-core/commands/efi/tpm.c:194
-#: grub-core/commands/efi/tpm.c:261 grub-core/commands/efi/tpm.c:311
+#: grub-core/commands/efi/tpm.c:144
 msgid "Output buffer too small"
 msgstr ""
 
-#: grub-core/commands/efi/tpm.c:156 grub-core/commands/efi/tpm.c:196
-#: grub-core/commands/efi/tpm.c:263 grub-core/commands/efi/tpm.c:313
+#: grub-core/commands/efi/tpm.c:146
 msgid "TPM unavailable"
-msgstr ""
+msgstr "TPM을 사용할 수 없음"
 
-#: grub-core/commands/efi/tpm.c:158 grub-core/commands/efi/tpm.c:198
-#: grub-core/commands/efi/tpm.c:265 grub-core/commands/efi/tpm.c:315
+#: grub-core/commands/efi/tpm.c:148
 msgid "Unknown TPM error"
-msgstr ""
+msgstr "알 수 없는 TPM에러"
 
-#: grub-core/commands/efi/tpm.c:240 grub-core/commands/efi/tpm.c:288
+#: grub-core/commands/efi/tpm.c:173 grub-core/commands/efi/tpm.c:207
 msgid "cannot allocate TPM event buffer"
-msgstr ""
+msgstr "TPM 이벤트 버퍼를 할당할 수 없음"
 
 #: grub-core/commands/eval.c:63
-#, fuzzy
 msgid "STRING ..."
-msgstr "[패턴 ...]"
+msgstr "문자열 ..."
 
 #: grub-core/commands/eval.c:64
 msgid "Evaluate arguments as GRUB commands"
+msgstr ""
+
+#: grub-core/commands/extcmd.c:120 grub-core/kern/command.c:88
+#, c-format
+msgid "%s: the command is not allowed when lockdown is enforced"
 msgstr ""
 
 #: grub-core/commands/file.c:41
@@ -504,102 +484,100 @@ msgid "Check if FILE can be used as Xen x86 privileged guest kernel"
 msgstr ""
 
 #: grub-core/commands/file.c:48
-#, fuzzy
 msgid "Check if FILE can be used as x86 multiboot kernel"
-msgstr "multiboot 커널을 읽어들입니다."
+msgstr "파일이 x86 multiboot 커널로 사용될 수 있는지 확인합니다"
 
 #: grub-core/commands/file.c:50
-#, fuzzy
 msgid "Check if FILE can be used as x86 multiboot2 kernel"
-msgstr "multiboot 2 커널을 읽어들입니다."
+msgstr "파일이 x86 multiboot2 커널로 사용될 수 있는지 확인합니다"
 
 #: grub-core/commands/file.c:52
 msgid "Check if FILE is ARM Linux"
-msgstr ""
+msgstr "파일이 ARM 리눅스인지 확인합니다"
 
 #: grub-core/commands/file.c:54
 msgid "Check if FILE is ARM64 Linux"
-msgstr ""
+msgstr "파일이 ARM64 리눅스인지 확인합니다"
 
 #: grub-core/commands/file.c:56
 msgid "Check if FILE is IA64 Linux"
-msgstr ""
+msgstr "파일이 IA64 리눅스인지 확인합니다"
 
 #: grub-core/commands/file.c:58
 msgid "Check if FILE is MIPS Linux"
-msgstr ""
+msgstr "파일이 MIPS 리눅스인지 확인합니다"
 
 #: grub-core/commands/file.c:60
 msgid "Check if FILE is MIPSEL Linux"
-msgstr ""
+msgstr "파일이 MIPSEL 리눅스인지 확인합니다"
 
 #: grub-core/commands/file.c:62
 msgid "Check if FILE is SPARC64 Linux"
-msgstr ""
+msgstr "파일이 SPARC64 리눅스인지 확인합니다"
 
 #: grub-core/commands/file.c:64
 msgid "Check if FILE is POWERPC Linux"
-msgstr ""
+msgstr "파일이 POWERPC 리눅스인지 확인합니다"
 
 #: grub-core/commands/file.c:66
 msgid "Check if FILE is x86 Linux"
-msgstr ""
+msgstr "파일이 x86 리눅스인지 확인합니다"
 
 #: grub-core/commands/file.c:68
 msgid "Check if FILE is x86 Linux supporting 32-bit protocol"
-msgstr ""
+msgstr "파일이 32-bit 프로토콜을 지원하는 x86 Linux인지 확인합니다"
 
 #: grub-core/commands/file.c:70
 msgid "Check if FILE is x86 kFreeBSD"
-msgstr ""
+msgstr "파일이 x86 kFreeBSD인지 확인합니다"
 
 #: grub-core/commands/file.c:72
 msgid "Check if FILE is i386 kFreeBSD"
-msgstr ""
+msgstr "파일이 i386 kFreeBSD인지 확인합니다"
 
 #: grub-core/commands/file.c:74
 msgid "Check if FILE is x86_64 kFreeBSD"
-msgstr ""
+msgstr "파일이 x86_64 kFreeBSD인지 확인합니다"
 
 #: grub-core/commands/file.c:77
 msgid "Check if FILE is x86 kNetBSD"
-msgstr ""
+msgstr "파일이 x86 kNetBSD인지 확인합니다"
 
 #: grub-core/commands/file.c:79
 msgid "Check if FILE is i386 kNetBSD"
-msgstr ""
+msgstr "파일이 i386 kNetBSD인지 확인합니다"
 
 #: grub-core/commands/file.c:81
 msgid "Check if FILE is x86_64 kNetBSD"
-msgstr ""
+msgstr "파일이 x86_64 kNetBSD인지 확인합니다"
 
 #: grub-core/commands/file.c:84
 msgid "Check if FILE is i386 EFI file"
-msgstr ""
+msgstr "파일이 i386 EFI파일인지 확인합니다"
 
 #: grub-core/commands/file.c:86
 msgid "Check if FILE is x86_64 EFI file"
-msgstr ""
+msgstr "파일이 x86_64 EFI파일인지 확인합니다"
 
 #: grub-core/commands/file.c:88
 msgid "Check if FILE is IA64 EFI file"
-msgstr ""
+msgstr "파일이 IA64 EFI파일인지 확인합니다"
 
 #: grub-core/commands/file.c:90
 msgid "Check if FILE is ARM64 EFI file"
-msgstr ""
+msgstr "파일이 ARM64 EFI인지 확인합니다"
 
 #: grub-core/commands/file.c:92
 msgid "Check if FILE is ARM EFI file"
-msgstr ""
+msgstr "파일이 ARM EFI파일인지 확인합니다"
 
 #: grub-core/commands/file.c:94
 msgid "Check if FILE is RISC-V 32bit EFI file"
-msgstr ""
+msgstr "파일이 RISC_V 32bit EFI파일인지 확인합니다"
 
 #: grub-core/commands/file.c:96
 msgid "Check if FILE is RISC-V 64bit EFI file"
-msgstr ""
+msgstr "파일이 RISC_V 64bit EFI파일인지 확인합니다"
 
 #: grub-core/commands/file.c:98
 msgid "Check if FILE is hiberfil.sys in hibernated state"
@@ -619,33 +597,31 @@ msgstr ""
 
 #: grub-core/commands/file.c:106
 msgid "Check if FILE is BIOS bootsector"
-msgstr ""
+msgstr "파일이 바이오스 부트 섹터인지 확인합니다"
 
 #. TRANSLATORS: it's a standalone boolean value,
 #. opposite of "true".
-#: grub-core/commands/file.c:675 grub-core/commands/i386/cmostest.c:63
-#: grub-core/commands/i386/cpuid.c:71 grub-core/commands/keystatus.c:83
-#: grub-core/commands/keystatus.c:87 grub-core/commands/keystatus.c:96
+#: grub-core/commands/file.c:677 grub-core/commands/i386/cmostest.c:63
+#: grub-core/commands/i386/cpuid.c:71 grub-core/commands/keystatus.c:65
+#: grub-core/commands/keystatus.c:69 grub-core/commands/keystatus.c:78
 #: grub-core/commands/test.c:436 grub-core/commands/true.c:39
-#: grub-core/script/execute.c:247 grub-core/script/execute.c:1039
+#: grub-core/script/execute.c:247 grub-core/script/execute.c:1044
 msgid "false"
 msgstr ""
 
-#: grub-core/commands/file.c:684
-#, fuzzy
+#: grub-core/commands/file.c:686
 msgid "OPTIONS FILE"
-msgstr "[옵션] 디스크"
+msgstr "<옵션> <파일>"
 
-#: grub-core/commands/file.c:685
+#: grub-core/commands/file.c:687
 msgid "Check if FILE is of specified type."
 msgstr ""
 
 #. TRANSLATORS: It means that the specified partition e.g.
 #. hd0,msdos1=/dev/sda1 doesn't exist.
 #: grub-core/commands/gptsync.c:140 grub-core/kern/disk.c:258
-#, fuzzy
 msgid "no such partition"
-msgstr "도스 방식의 파티션이 발견되지 않았습니다."
+msgstr "그러한 파티션이 발견되지 않았습니다"
 
 #: grub-core/commands/gptsync.c:240
 #, c-format
@@ -659,16 +635,15 @@ msgstr "<장치> [<파티션>[+/-[<유형>]]] ..."
 #. TRANSLATORS: MBR type is one-byte partition
 #. type id.
 #: grub-core/commands/gptsync.c:255
-#, fuzzy
 msgid ""
 "Fill hybrid MBR of GPT drive DEVICE. Specified partitions will be a part of "
 "hybrid MBR. Up to 3 partitions are allowed. TYPE is an MBR type. + means "
 "that partition is active. Only one partition can be active."
 msgstr ""
-"GPT 드라이브 장치의 하이브리드 MBR을 채우시오. 특정한 파티션은 하이브리드 MBR"
-"의 일부가 될 것입니다. 3개의 파티션까지 허용되니다. TYPE은 MBR 형식입니다. "
-"+는 파티션이 활성화되었다는 것을 의미합니다. 한 개의 파티션만을 활성화할 수 "
-"있습니다."
+"GPT 드라이브 장치의 하이브리드 MBR을 채우십시오. 특정한 파티션은 하이브리드 "
+"MBR의 일부가 될 것입니다. 3개의 파티션까지 허용됩니다. TYPE은 MBR 형식입니"
+"다. +는 파티션이 활성화되었다는 것을 의미합니다. 한 개의 파티션만을 활성화할 "
+"수 있습니다."
 
 #: grub-core/commands/halt.c:40
 msgid ""
@@ -683,7 +658,7 @@ msgstr ""
 
 #: grub-core/commands/hashsum.c:32
 msgid "HASH"
-msgstr ""
+msgstr "<해시>"
 
 #: grub-core/commands/hashsum.c:33
 msgid "Check hashes of files with hash list FILE."
@@ -704,6 +679,7 @@ msgstr ""
 #: util/grub-mknetdir.c:46 util/grub-mknetdir.c:48 util/grub-mkrescue.c:99
 #: util/grub-setup.c:82 util/grub-syslinux2cfg.c:63 util/grub-syslinux2cfg.c:65
 #: util/grub-syslinux2cfg.c:67 util/grub-syslinux2cfg.c:71
+#: util/grub-reboot.in:54 util/grub-set-default.in:54
 msgid "DIR"
 msgstr ""
 
@@ -715,37 +691,37 @@ msgstr ""
 msgid "Uncompress file before checksumming."
 msgstr ""
 
-#: grub-core/commands/hashsum.c:163
+#: grub-core/commands/hashsum.c:172
 #, c-format
 msgid "%s: READ ERROR\n"
 msgstr ""
 
-#: grub-core/commands/hashsum.c:177
+#: grub-core/commands/hashsum.c:186
 #, c-format
 msgid "%s: HASH MISMATCH\n"
-msgstr ""
+msgstr "%s: 해시 불일치\n"
 
-#: grub-core/commands/hashsum.c:188
+#: grub-core/commands/hashsum.c:197
 #, c-format
 msgid "%s: OK\n"
 msgstr ""
 
-#: grub-core/commands/hashsum.c:282
+#: grub-core/commands/hashsum.c:291
 msgid "-h HASH [-c FILE [-p PREFIX]] [FILE1 [FILE2 ...]]"
 msgstr ""
 
 #. TRANSLATORS: "hash checksum" is just to
 #. be a bit more precise, you can treat it as
 #. just "hash".
-#: grub-core/commands/hashsum.c:287 grub-core/commands/hashsum.c:292
-#: grub-core/commands/hashsum.c:297 grub-core/commands/hashsum.c:302
-#: grub-core/commands/hashsum.c:307 grub-core/commands/hashsum.c:313
+#: grub-core/commands/hashsum.c:296 grub-core/commands/hashsum.c:301
+#: grub-core/commands/hashsum.c:306 grub-core/commands/hashsum.c:311
+#: grub-core/commands/hashsum.c:316 grub-core/commands/hashsum.c:322
 msgid "Compute or check hash checksum."
 msgstr ""
 
-#: grub-core/commands/hashsum.c:290 grub-core/commands/hashsum.c:295
-#: grub-core/commands/hashsum.c:300 grub-core/commands/hashsum.c:305
-#: grub-core/commands/hashsum.c:311
+#: grub-core/commands/hashsum.c:299 grub-core/commands/hashsum.c:304
+#: grub-core/commands/hashsum.c:309 grub-core/commands/hashsum.c:314
+#: grub-core/commands/hashsum.c:320
 msgid "[-c FILE [-p PREFIX]] [FILE1 [FILE2 ...]]"
 msgstr ""
 
@@ -767,9 +743,8 @@ msgid "Freeze ATA security settings until reset."
 msgstr "리셋하기 전까지 ATA 보안 설정을 정지시킵니다."
 
 #: grub-core/commands/hdparm.c:39
-#, fuzzy
 msgid "Display SMART health status."
-msgstr "SMART 건강 상태를 체크합니다."
+msgstr "SMART 건강 상태를 출력합니다."
 
 #: grub-core/commands/hdparm.c:40
 msgid ""
@@ -800,9 +775,8 @@ msgid "Print drive identity and settings."
 msgstr "드라이브 ID와 설정을 출력합니다."
 
 #: grub-core/commands/hdparm.c:50
-#, fuzzy
 msgid "Show raw contents of ATA IDENTIFY sector."
-msgstr "ATA IDENTIFY 영역의 내용을 덤프합니다."
+msgstr "ATA IDENTIFY 영역의 원본 내용을 보여줍니다."
 
 #: grub-core/commands/hdparm.c:52
 msgid "Disable/enable SMART (0/1)."
@@ -813,16 +787,16 @@ msgid "Do not print messages."
 msgstr "메시지를 출력하지 마십시오."
 
 #: grub-core/commands/hdparm.c:286 grub-core/commands/i386/rdmsr.c:68
-#: grub-core/commands/iorw.c:47 grub-core/commands/legacycfg.c:760
-#: grub-core/commands/legacycfg.c:812 grub-core/commands/macbless.c:190
-#: grub-core/commands/memrw.c:47 grub-core/commands/pgp.c:738
+#: grub-core/commands/iorw.c:48 grub-core/commands/legacycfg.c:779
+#: grub-core/commands/legacycfg.c:831 grub-core/commands/macbless.c:190
+#: grub-core/commands/memrw.c:48 grub-core/commands/pgp.c:738
 #: grub-core/commands/pgp.c:792 grub-core/commands/search.c:304
-#: grub-core/commands/search_wrap.c:179 grub-core/commands/setpci.c:243
+#: grub-core/commands/search_wrap.c:179 grub-core/commands/setpci.c:242
 #: grub-core/commands/sleep.c:71 grub-core/fs/zfs/zfsinfo.c:279
 #: grub-core/fs/zfs/zfsinfo.c:358 grub-core/gettext/gettext.c:492
 #: grub-core/kern/corecmd.c:65 grub-core/kern/corecmd.c:79
-#: grub-core/mmap/mmap.c:430 grub-core/net/dns.c:713 grub-core/net/dns.c:745
-#: grub-core/net/net.c:694 grub-core/net/net.c:1052
+#: grub-core/mmap/mmap.c:433 grub-core/net/dns.c:720 grub-core/net/dns.c:752
+#: grub-core/net/net.c:699 grub-core/net/net.c:1057
 #: grub-core/normal/context.c:194 grub-core/script/execute.c:131
 #: grub-core/term/gfxterm_background.c:136
 msgid "one argument expected"
@@ -830,14 +804,13 @@ msgstr ""
 
 #: grub-core/commands/hdparm.c:440
 msgid "[OPTIONS] DISK"
-msgstr "[옵션] 디스크"
+msgstr "[옵션] <디스크>"
 
 #: grub-core/commands/hdparm.c:441
 msgid "Get/set ATA disk parameters."
 msgstr "ATA 디스크 매개 변수를 얻거나 설정합니다."
 
-#: grub-core/commands/help.c:132 grub-core/lib/arg.c:109
-#: grub-core/lib/gnulib/argp-help.c:1616
+#: grub-core/commands/help.c:132 grub-core/lib/arg.c:110
 msgid "Usage:"
 msgstr "사용법:"
 
@@ -862,9 +835,8 @@ msgid "[OPTIONS] FILE_OR_DEVICE"
 msgstr "[옵션] <파일또는장치>"
 
 #: grub-core/commands/hexdump.c:126
-#, fuzzy
 msgid "Show raw contents of a file or memory."
-msgstr "파일 또는 메모리의 내용을 덤프합니다."
+msgstr "파일 또는 메모리의 raw데이터를 보여줍니다."
 
 #: grub-core/commands/i386/cmosdump.c:58
 msgid "Show raw dump of the CMOS contents."
@@ -900,9 +872,8 @@ msgstr ""
 #. TRANSLATORS: "(default)" at the end means that this option is used if
 #. no argument is specified.
 #: grub-core/commands/i386/cpuid.c:36
-#, fuzzy
 msgid "Check if CPU supports 64-bit (long) mode (default)."
-msgstr "긴 모드 플래그에 대해 확인합니다 (기본값)."
+msgstr "CPU가 64-bit (long) 모드를 지원하는지 확인합니다 (기본값)."
 
 #: grub-core/commands/i386/cpuid.c:37
 msgid "Check if CPU supports Physical Address Extension."
@@ -957,7 +928,7 @@ msgstr "APM이 사용 가능하다면 시스템을 중지시킵니다."
 
 #: grub-core/commands/i386/pc/lsapm.c:75
 msgid "no APM found"
-msgstr ""
+msgstr "APM을 찾을 수 없음"
 
 #: grub-core/commands/i386/pc/lsapm.c:77
 #, c-format
@@ -970,19 +941,19 @@ msgstr ""
 
 #: grub-core/commands/i386/pc/lsapm.c:86
 msgid "16-bit protected interface supported\n"
-msgstr ""
+msgstr "16비트 보호 인터페이스 지원\n"
 
 #: grub-core/commands/i386/pc/lsapm.c:87
 msgid "16-bit protected interface unsupported\n"
-msgstr ""
+msgstr "16비트 보호 인터페이스 지원되지 않음\n"
 
 #: grub-core/commands/i386/pc/lsapm.c:89
 msgid "32-bit protected interface supported\n"
-msgstr ""
+msgstr "32비트 보호 인터페이스 지원\n"
 
 #: grub-core/commands/i386/pc/lsapm.c:90
 msgid "32-bit protected interface unsupported\n"
-msgstr ""
+msgstr "32비트 보호 인터페이스 지원되지 않음\n"
 
 #: grub-core/commands/i386/pc/lsapm.c:92
 msgid "CPU Idle slows down processor\n"
@@ -1027,18 +998,18 @@ msgstr "유효하지 않은 장치 `%s'.\n"
 
 #: grub-core/commands/i386/pc/play.c:151 grub-core/commands/macbless.c:172
 #: grub-core/fs/archelp.c:260 grub-core/fs/bfs.c:621 grub-core/fs/bfs.c:704
-#: grub-core/fs/btrfs.c:1726 grub-core/fs/btrfs.c:1755
-#: grub-core/fs/btrfs.c:1799 grub-core/fs/btrfs.c:1882
-#: grub-core/fs/btrfs.c:1906 grub-core/fs/fshelp.c:257 grub-core/fs/jfs.c:696
-#: grub-core/fs/minix.c:426 grub-core/fs/ufs.c:544 grub-core/fs/zfs/zfs.c:2083
-#: grub-core/fs/zfs/zfs.c:2095 grub-core/fs/zfs/zfs.c:2301
+#: grub-core/fs/btrfs.c:1746 grub-core/fs/btrfs.c:1775
+#: grub-core/fs/btrfs.c:1819 grub-core/fs/btrfs.c:1902
+#: grub-core/fs/btrfs.c:1926 grub-core/fs/fshelp.c:257 grub-core/fs/jfs.c:707
+#: grub-core/fs/minix.c:428 grub-core/fs/ufs.c:544 grub-core/fs/zfs/zfs.c:2090
+#: grub-core/fs/zfs/zfs.c:2102 grub-core/fs/zfs/zfs.c:2308
 #: grub-core/net/http.c:120
 #, c-format
 msgid "file `%s' not found"
-msgstr ""
+msgstr "파일 '%s'를 찾을 수 없습니다"
 
 #: grub-core/commands/i386/pc/play.c:162 grub-core/commands/i386/pc/play.c:171
-#: grub-core/kern/misc.c:419 grub-core/script/execute.c:138
+#: grub-core/kern/misc.c:437 grub-core/script/execute.c:138
 #: grub-core/script/execute.c:244
 msgid "unrecognized number"
 msgstr ""
@@ -1053,71 +1024,71 @@ msgstr "소리를 재생합니다."
 
 #: grub-core/commands/i386/pc/sendkey.c:39
 msgid "set numlock mode"
-msgstr ""
+msgstr "numlock모드 설정"
 
 #: grub-core/commands/i386/pc/sendkey.c:40
 msgid "set capslock mode"
-msgstr ""
+msgstr "capslock모드 설정"
 
 #: grub-core/commands/i386/pc/sendkey.c:41
 msgid "set scrolllock mode"
-msgstr ""
+msgstr "scrolllock모드 설정"
 
 #: grub-core/commands/i386/pc/sendkey.c:42
 msgid "set insert mode"
-msgstr ""
+msgstr "insert모드 설정"
 
 #: grub-core/commands/i386/pc/sendkey.c:43
 msgid "set pause mode"
-msgstr ""
+msgstr "pause모드 설정"
 
 #: grub-core/commands/i386/pc/sendkey.c:44
 msgid "press left shift"
-msgstr ""
+msgstr "왼쪽 shift 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:45
 msgid "press right shift"
-msgstr ""
+msgstr "오른쪽 shift 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:46
 msgid "press SysRq"
-msgstr ""
+msgstr "SysRq누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:47
 msgid "press NumLock key"
-msgstr ""
+msgstr "numlock키 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:48
 msgid "press CapsLock key"
-msgstr ""
+msgstr "capslock키 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:49
 msgid "press ScrollLock key"
-msgstr ""
+msgstr "ScrollLock키 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:50
 msgid "press Insert key"
-msgstr ""
+msgstr "insert키 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:51
 msgid "press left alt"
-msgstr ""
+msgstr "왼쪽 alt 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:52
 msgid "press right alt"
-msgstr ""
+msgstr "오른쪽 alt 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:53
 msgid "press left ctrl"
-msgstr ""
+msgstr "왼쪽 ctrl 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:54
 msgid "press right ctrl"
-msgstr ""
+msgstr "오른쪽 ctrl 누름"
 
 #: grub-core/commands/i386/pc/sendkey.c:55
 msgid "don't update LED state"
-msgstr ""
+msgstr "LED상태를 업데이트하지 않습니다"
 
 #: grub-core/commands/i386/pc/sendkey.c:372
 msgid "[KEYSTROKE1] [KEYSTROKE2] ..."
@@ -1129,112 +1100,103 @@ msgstr ""
 msgid "Emulate a keystroke sequence"
 msgstr ""
 
-#: grub-core/commands/i386/rdmsr.c:37 grub-core/commands/iorw.c:34
-#: grub-core/commands/memrw.c:33 grub-core/commands/setpci.c:73
+#: grub-core/commands/i386/rdmsr.c:37 grub-core/commands/iorw.c:35
+#: grub-core/commands/memrw.c:34 grub-core/commands/setpci.c:73
 msgid "Save read value into variable VARNAME."
 msgstr "읽어들인 값을 <변수이름> 변수로 저장합니다."
 
-#: grub-core/commands/i386/rdmsr.c:38 grub-core/commands/iorw.c:35
-#: grub-core/commands/memrw.c:34 grub-core/commands/probe.c:40
+#: grub-core/commands/i386/rdmsr.c:38 grub-core/commands/iorw.c:36
+#: grub-core/commands/memrw.c:35 grub-core/commands/probe.c:42
 #: grub-core/commands/search_wrap.c:40 grub-core/commands/setpci.c:74
 #: grub-core/commands/tr.c:32
 msgid "VARNAME"
-msgstr ""
+msgstr "<변수명>"
 
 #: grub-core/commands/i386/rdmsr.c:55 grub-core/commands/i386/rdmsr.c:60
-#: grub-core/commands/i386/rdmsr.c:65 grub-core/commands/i386/wrmsr.c:47
-#: grub-core/commands/i386/wrmsr.c:52 grub-core/commands/i386/wrmsr.c:57
+#: grub-core/commands/i386/rdmsr.c:65 grub-core/commands/i386/wrmsr.c:48
+#: grub-core/commands/i386/wrmsr.c:53 grub-core/commands/i386/wrmsr.c:58
 msgid "unsupported instruction"
 msgstr ""
 
-#: grub-core/commands/i386/rdmsr.c:77 grub-core/commands/i386/wrmsr.c:69
-#: grub-core/commands/i386/wrmsr.c:77 grub-core/net/dns.c:727
+#: grub-core/commands/i386/rdmsr.c:77 grub-core/commands/i386/wrmsr.c:70
+#: grub-core/commands/i386/wrmsr.c:78 grub-core/net/dns.c:734
 msgid "invalid argument"
-msgstr ""
+msgstr "유효하지 않은 인자 값"
 
-#: grub-core/commands/i386/rdmsr.c:94 grub-core/commands/memrw.c:125
-#: grub-core/commands/memrw.c:129 grub-core/commands/memrw.c:133
+#: grub-core/commands/i386/rdmsr.c:94 grub-core/commands/memrw.c:126
+#: grub-core/commands/memrw.c:130 grub-core/commands/memrw.c:134
 msgid "ADDR"
 msgstr "<주소>"
 
 #: grub-core/commands/i386/rdmsr.c:95
 msgid "Read a CPU model specific register."
-msgstr ""
-
-#: grub-core/commands/i386/wrmsr.c:86
-#, fuzzy
-msgid "ADDR VALUE"
-msgstr "<주소> <값> [마스크]"
+msgstr "MSR(model specific register)을 읽습니다."
 
 #: grub-core/commands/i386/wrmsr.c:87
+msgid "ADDR VALUE"
+msgstr "<주소> <값>"
+
+#: grub-core/commands/i386/wrmsr.c:88
 msgid "Write a value to a CPU model specific register."
-msgstr ""
+msgstr "MSR(model specific register)에 값을 씁니다."
 
 #: grub-core/commands/ieee1275/suspend.c:34
 msgid "Run `go' to resume GRUB."
 msgstr ""
 
 #: grub-core/commands/ieee1275/suspend.c:45
-#, fuzzy
 msgid "Return to IEEE1275 prompt."
-msgstr "오픈 펌웨어 프롬프트로 되돌아 갑니다."
+msgstr "오픈 펌웨어(IEEE1275) 프롬프트로 되돌아 갑니다."
 
-#: grub-core/commands/iorw.c:123 grub-core/commands/iorw.c:127
-#: grub-core/commands/iorw.c:131 grub-core/gdb/gdb.c:79
+#: grub-core/commands/iorw.c:124 grub-core/commands/iorw.c:128
+#: grub-core/commands/iorw.c:132 grub-core/gdb/gdb.c:79
 msgid "PORT"
-msgstr ""
+msgstr "<포트>"
 
-#: grub-core/commands/iorw.c:123
-#, fuzzy
+#: grub-core/commands/iorw.c:124
 msgid "Read 8-bit value from PORT."
-msgstr "<주소>에서 바이트를 읽습니다."
+msgstr "<포트>에서 8비트 값을 읽습니다."
 
-#: grub-core/commands/iorw.c:127
-#, fuzzy
+#: grub-core/commands/iorw.c:128
 msgid "Read 16-bit value from PORT."
-msgstr "<주소>에서 바이트를 읽습니다."
+msgstr "<포트>에서 16비트 값을 읽습니다."
 
-#: grub-core/commands/iorw.c:131
-#, fuzzy
+#: grub-core/commands/iorw.c:132
 msgid "Read 32-bit value from PORT."
-msgstr "<주소>에서 바이트를 읽습니다."
+msgstr "<포트>에서 32비트 값을 읽습니다."
 
-#: grub-core/commands/iorw.c:135 grub-core/commands/iorw.c:139
-#, fuzzy
+#: grub-core/commands/iorw.c:136 grub-core/commands/iorw.c:140
 msgid "PORT VALUE [MASK]"
-msgstr "<주소> <값> [마스크]"
+msgstr "<포트> <값> [마스크]"
 
-#: grub-core/commands/iorw.c:136
-#, fuzzy
+#: grub-core/commands/iorw.c:137
 msgid "Write 8-bit VALUE to PORT."
-msgstr "<주소>에 <값> 바이트를 씁니다."
+msgstr "<포트>에 8비트<값>을 씁니다."
 
-#: grub-core/commands/iorw.c:140
-#, fuzzy
+#: grub-core/commands/iorw.c:141
 msgid "Write 16-bit VALUE to PORT."
-msgstr "<주소>에 <값> 바이트를 씁니다."
+msgstr "<포트>에 16비트<값>을 씁니다."
 
-#: grub-core/commands/iorw.c:143 grub-core/commands/memrw.c:137
-#: grub-core/commands/memrw.c:141 grub-core/commands/memrw.c:145
+#: grub-core/commands/iorw.c:144 grub-core/commands/memrw.c:138
+#: grub-core/commands/memrw.c:142 grub-core/commands/memrw.c:146
 msgid "ADDR VALUE [MASK]"
 msgstr "<주소> <값> [마스크]"
 
-#: grub-core/commands/iorw.c:144
-#, fuzzy
+#: grub-core/commands/iorw.c:145
 msgid "Write 32-bit VALUE to PORT."
-msgstr "<주소>에 <값> 바이트를 씁니다."
+msgstr "<포트>에 32비트<값>을 씁니다."
 
 #: grub-core/commands/keylayouts.c:215 grub-core/commands/loadenv.c:61
 #: grub-core/commands/nativedisk.c:189 grub-core/efiemu/main.c:235
-#: grub-core/font/font.c:428 grub-core/gfxmenu/gfxmenu.c:63
-#: grub-core/kern/device.c:42 grub-core/kern/dl.c:740
+#: grub-core/font/font.c:432 grub-core/gfxmenu/gfxmenu.c:63
+#: grub-core/kern/device.c:42 grub-core/kern/dl.c:749
 #, c-format
 msgid "variable `%s' isn't set"
-msgstr ""
+msgstr "변수 '%s'가 설정되지 않았습니다"
 
 #: grub-core/commands/keylayouts.c:301
 msgid "Load a keyboard layout."
-msgstr ""
+msgstr "키보드 레이아웃을 불러옵니다."
 
 #. TRANSLATORS: "Check" in a sense that if this key is pressed then
 #. "true" is returned, otherwise "false".
@@ -1251,70 +1213,70 @@ msgid "Check Alt key."
 msgstr "ALt 키를 확인합니다."
 
 #. TRANSLATORS: there are 3 modifiers.
-#: grub-core/commands/keystatus.c:106
+#: grub-core/commands/keystatus.c:88
 msgid "Check key modifier status."
 msgstr "키 수정자 상태를 확인."
 
-#: grub-core/commands/legacycfg.c:512 grub-core/commands/legacycfg.c:526
-#: grub-core/commands/legacycfg.c:546 grub-core/commands/legacycfg.c:559
-#: grub-core/commands/time.c:43 grub-core/script/function.c:109
+#: grub-core/commands/legacycfg.c:531 grub-core/commands/legacycfg.c:545
+#: grub-core/commands/legacycfg.c:565 grub-core/commands/legacycfg.c:578
+#: grub-core/commands/time.c:43 grub-core/script/function.c:119
 #: util/grub-file.c:100 util/grub-fstest.c:57 util/grub-mount.c:69
-#, fuzzy, c-format
+#, c-format
 msgid "can't find command `%s'"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "명령어'%s'을(를) 찾을 수 없습니다"
 
-#: grub-core/commands/legacycfg.c:813 grub-core/normal/auth.c:225
+#: grub-core/commands/legacycfg.c:832 grub-core/normal/auth.c:225
 #: util/grub-mkpasswd-pbkdf2.c:139
 msgid "Enter password: "
 msgstr "암호를 입력하십시오: "
 
 #. TRANSLATORS: "legacy config" means
 #. "config as used by grub-legacy".
-#: grub-core/commands/legacycfg.c:837
+#: grub-core/commands/legacycfg.c:856
 msgid "Parse legacy config in same context"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:842
+#: grub-core/commands/legacycfg.c:861
 msgid "Parse legacy config in new context"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:847
+#: grub-core/commands/legacycfg.c:866
 msgid "Parse legacy config in same context taking only menu entries"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:852
+#: grub-core/commands/legacycfg.c:871
 msgid "Parse legacy config in new context taking only menu entries"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:856
+#: grub-core/commands/legacycfg.c:875
 msgid "[--no-mem-option] [--type=TYPE] FILE [ARG ...]"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:857
+#: grub-core/commands/legacycfg.c:876
 msgid "Simulate grub-legacy `kernel' command"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:861 grub-core/commands/legacycfg.c:865
+#: grub-core/commands/legacycfg.c:880 grub-core/commands/legacycfg.c:884
 msgid "FILE [ARG ...]"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:862
+#: grub-core/commands/legacycfg.c:881
 msgid "Simulate grub-legacy `initrd' command"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:866
+#: grub-core/commands/legacycfg.c:885
 msgid "Simulate grub-legacy `modulenounzip' command"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:870 grub-core/commands/legacycfg.c:875
+#: grub-core/commands/legacycfg.c:889 grub-core/commands/legacycfg.c:894
 msgid "[--md5] PASSWD [FILE]"
-msgstr ""
+msgstr "[--md5] 암호 [파일]"
 
-#: grub-core/commands/legacycfg.c:871
+#: grub-core/commands/legacycfg.c:890
 msgid "Simulate grub-legacy `password' command"
 msgstr ""
 
-#: grub-core/commands/legacycfg.c:876
+#: grub-core/commands/legacycfg.c:895
 msgid "Simulate grub-legacy `password' command in menu entry mode"
 msgstr ""
 
@@ -1367,28 +1329,27 @@ msgstr "파일의 목록을 보여줍니다."
 
 #: grub-core/commands/ls.c:73
 msgid "Network protocols:"
-msgstr ""
+msgstr "네트워크 프로토콜:"
 
 #: grub-core/commands/ls.c:295
-#, fuzzy
 msgid "[-l|-h|-a] [FILE ...]"
-msgstr "[-l|-h|-a] [<파일>]"
+msgstr "[-l|-h|-a] [<파일...>]"
 
 #: grub-core/commands/ls.c:296
 msgid "List devices and files."
-msgstr "장치와 파일을 목록으로 만듭니다."
+msgstr "장치와 파일을 열거합니다."
 
 #: grub-core/commands/lsacpi.c:255
 msgid "Show version 1 tables only."
-msgstr ""
+msgstr "버전 1 테이블만 표시합니다."
 
 #: grub-core/commands/lsacpi.c:256
 msgid "Show version 2 and version 3 tables only."
-msgstr ""
+msgstr "버전 2 및 버전 3 테이블만 표시합니다."
 
 #: grub-core/commands/lsacpi.c:306
 msgid "Show ACPI information."
-msgstr ""
+msgstr "ACPI 정보를 표시합니다."
 
 #: grub-core/commands/lsmmap.c:31
 msgid "available RAM"
@@ -1456,35 +1417,29 @@ msgstr ""
 msgid "Bless DIR of HFS or HFS+ partition for PPC macs."
 msgstr ""
 
-#: grub-core/commands/memrw.c:125
-#, fuzzy
+#: grub-core/commands/memrw.c:126
 msgid "Read 8-bit value from ADDR."
-msgstr "<주소>에서 바이트를 읽습니다."
+msgstr "<주소>에서 8비트 값을 읽습니다."
 
-#: grub-core/commands/memrw.c:129
-#, fuzzy
+#: grub-core/commands/memrw.c:130
 msgid "Read 16-bit value from ADDR."
-msgstr "<주소>에서 바이트를 읽습니다."
+msgstr "<주소>에서 16비트 값을 읽습니다."
 
-#: grub-core/commands/memrw.c:133
-#, fuzzy
+#: grub-core/commands/memrw.c:134
 msgid "Read 32-bit value from ADDR."
-msgstr "<주소>에서 바이트를 읽습니다."
+msgstr "<주소>에서 32비트 값을 읽습니다."
 
-#: grub-core/commands/memrw.c:138
-#, fuzzy
+#: grub-core/commands/memrw.c:139
 msgid "Write 8-bit VALUE to ADDR."
-msgstr "<주소>에 <값> 바이트를 씁니다."
+msgstr "<주소>에 8비트<값>을 씁니다."
 
-#: grub-core/commands/memrw.c:142
-#, fuzzy
+#: grub-core/commands/memrw.c:143
 msgid "Write 16-bit VALUE to ADDR."
-msgstr "<주소>에 <값> 바이트를 씁니다."
+msgstr "<주소>에 16비트<값>을 씁니다."
 
-#: grub-core/commands/memrw.c:146
-#, fuzzy
+#: grub-core/commands/memrw.c:147
 msgid "Write 32-bit VALUE to ADDR."
-msgstr "<주소>에 <값> 바이트를 씁니다."
+msgstr "<주소>에 32비트<값>을 씁니다."
 
 #: grub-core/commands/menuentry.c:31
 msgid "Menu entry type."
@@ -1495,9 +1450,8 @@ msgstr ""
 #: util/grub-fstest.c:520 util/grub-install.c:291 util/grub-install.c:304
 #: util/grub-mknetdir.c:51 util/grub-mkrescue.c:109 util/grub-mkrescue.c:110
 #: util/grub-mount.c:453 util/grub-render-label.c:65
-#, fuzzy
 msgid "STRING"
-msgstr "[-e|-n] 문자열"
+msgstr "문자열"
 
 #: grub-core/commands/menuentry.c:33
 msgid "List of users allowed to boot this entry."
@@ -1549,37 +1503,36 @@ msgstr ""
 #. (how many modules or open descriptors use it).
 #. Dependencies are the other modules it uses.
 #.
-#: grub-core/commands/minicmd.c:162
+#: grub-core/commands/minicmd.c:165
 msgid "Name\tRef Count\tDependencies\n"
 msgstr ""
 
-#: grub-core/commands/minicmd.c:201
+#: grub-core/commands/minicmd.c:204
 msgid "Show this message."
 msgstr "이 메시지를 보여줍니다."
 
-#: grub-core/commands/minicmd.c:204
+#: grub-core/commands/minicmd.c:207
 msgid "ADDR [SIZE]"
-msgstr ""
+msgstr "<주소> [크기]"
 
-#: grub-core/commands/minicmd.c:204
-#, fuzzy
+#: grub-core/commands/minicmd.c:207
 msgid "Show memory contents."
-msgstr "파일의 내용을 표시합니다."
+msgstr "메모리의 내용을 표시합니다."
 
-#: grub-core/commands/minicmd.c:207 grub-core/kern/corecmd.c:188
+#: grub-core/commands/minicmd.c:210 grub-core/kern/corecmd.c:188
 #: util/grub-install.c:275
 msgid "MODULE"
 msgstr "<모듈>"
 
-#: grub-core/commands/minicmd.c:207
+#: grub-core/commands/minicmd.c:210
 msgid "Remove a module."
 msgstr "모듈을 제거합니다."
 
-#: grub-core/commands/minicmd.c:210
+#: grub-core/commands/minicmd.c:213
 msgid "Show loaded modules."
 msgstr "읽어들인 모듈을 보여줍니다."
 
-#: grub-core/commands/minicmd.c:213
+#: grub-core/commands/minicmd.c:216
 msgid "Exit from GRUB."
 msgstr "GRUB에서 나갑니다."
 
@@ -1606,7 +1559,7 @@ msgstr ""
 #: grub-core/commands/mips/loongson/lsspd.c:66
 #, c-format
 msgid "RAM slot number %d\n"
-msgstr ""
+msgstr "RAM슬롯 번호 %d\n"
 
 #: grub-core/commands/mips/loongson/lsspd.c:73
 #, c-format
@@ -1620,24 +1573,23 @@ msgstr ""
 
 #: grub-core/commands/mips/loongson/lsspd.c:79
 msgid "Memory type: DDR2."
-msgstr ""
+msgstr "메모리 유형: DDR2."
 
 #: grub-core/commands/mips/loongson/lsspd.c:83
-#, fuzzy, c-format
+#, c-format
 msgid "Part no: %s.\n"
-msgstr "파티션 %s:"
+msgstr "파티션 번호: %s.\n"
 
 #: grub-core/commands/mips/loongson/lsspd.c:86
 msgid "Memory type: Unknown."
-msgstr ""
+msgstr "메모리 유형: 알 수 없음."
 
 #: grub-core/commands/mips/loongson/lsspd.c:97
-#, fuzzy
 msgid "Print Memory information."
-msgstr "더 많은 정보를 보려면 `%s --help' 하십시오.\n"
+msgstr "메모리 정보를 출력합니다."
 
-#: grub-core/commands/nativedisk.c:118 grub-core/commands/probe.c:118
-#: grub-core/commands/probe.c:124 util/grub-probe.c:450
+#: grub-core/commands/nativedisk.c:118 grub-core/commands/probe.c:171
+#: grub-core/commands/probe.c:177 util/grub-probe.c:450
 #, c-format
 msgid "%s does not support UUIDs"
 msgstr ""
@@ -1658,24 +1610,24 @@ msgid ""
 "Use `parttool PARTITION help' for the list of available commands."
 msgstr ""
 
-#: grub-core/commands/parttool.c:123
+#: grub-core/commands/parttool.c:129
 msgid "=VAL"
 msgstr ""
 
-#: grub-core/commands/parttool.c:136
+#: grub-core/commands/parttool.c:142
 #, c-format
 msgid "Sorry, no parttool is available for %s\n"
 msgstr ""
 
-#: grub-core/commands/parttool.c:288 grub-core/lib/arg.c:285
-#: grub-core/lib/arg.c:351
-#, fuzzy, c-format
+#: grub-core/commands/parttool.c:294 grub-core/lib/arg.c:292
+#: grub-core/lib/arg.c:371
+#, c-format
 msgid "unknown argument `%s'"
-msgstr "알 수 없는 추가적인 인자 값 `%s'.\n"
+msgstr "알 수 없는 추가적인 인자 값 `%s'"
 
-#: grub-core/commands/parttool.c:344
+#: grub-core/commands/parttool.c:350
 msgid "PARTITION COMMANDS"
-msgstr "파티션 명령어"
+msgstr "<파티션> <명령어>"
 
 #: grub-core/commands/password.c:85
 msgid "USER PASSWORD"
@@ -1722,19 +1674,19 @@ msgstr ""
 msgid "[bus]:[slot][.func]"
 msgstr ""
 
-#: grub-core/commands/pcidump.c:109 grub-core/commands/pcidump.c:138
-#: grub-core/commands/setpci.c:183 grub-core/commands/setpci.c:214
-#: grub-core/fs/zfs/zfs.c:3794 grub-core/kern/emu/hostdisk.c:458
+#: grub-core/commands/pcidump.c:109 grub-core/commands/pcidump.c:137
+#: grub-core/commands/setpci.c:183 grub-core/commands/setpci.c:213
+#: grub-core/fs/zfs/zfs.c:3822 grub-core/kern/emu/hostdisk.c:458
 #: grub-core/kern/emu/hostdisk.c:473 grub-core/kern/file.c:44
 #, c-format
 msgid "missing `%c' symbol"
 msgstr ""
 
-#: grub-core/commands/pcidump.c:168
+#: grub-core/commands/pcidump.c:167
 msgid "[-s POSITION] [-d DEVICE]"
 msgstr ""
 
-#: grub-core/commands/pcidump.c:169
+#: grub-core/commands/pcidump.c:168
 msgid "Show raw dump of the PCI configuration space."
 msgstr ""
 
@@ -1759,17 +1711,21 @@ msgstr ""
 msgid "bad signature"
 msgstr ""
 
-#. TRANSLATORS: %08x is 32-bit key id.
-#: grub-core/commands/pgp.c:636 grub-core/commands/pgp.c:812
-#, c-format
-msgid "public key %08x not found"
+#: grub-core/commands/pgp.c:637
+msgid "public key %08"
 msgstr ""
 
 #: grub-core/commands/pgp.c:651 grub-core/disk/diskfilter.c:772
 #: grub-core/disk/diskfilter.c:782 grub-core/fs/ntfs.c:404
-#: grub-core/fs/zfs/zfs.c:1933 grub-core/normal/menu.c:428
+#: grub-core/fs/zfs/zfs.c:1940 grub-core/normal/menu.c:427
 #, c-format
 msgid "module `%s' isn't loaded"
+msgstr ""
+
+#. TRANSLATORS: %08x is 32-bit key id.
+#: grub-core/commands/pgp.c:812
+#, c-format
+msgid "public key %08x not found"
 msgstr ""
 
 #: grub-core/commands/pgp.c:994
@@ -1800,44 +1756,49 @@ msgstr ""
 msgid "Remove PUBKEY_ID from trusted keys."
 msgstr ""
 
-#: grub-core/commands/probe.c:40 grub-core/commands/tr.c:32
+#: grub-core/commands/probe.c:42 grub-core/commands/tr.c:32
 msgid "Set a variable to return value."
 msgstr "어떤 값을 리턴 값으로 설정합니다."
 
 #. TRANSLATORS: It's a driver that is currently in use to access
 #. the diven disk.
-#: grub-core/commands/probe.c:43
+#: grub-core/commands/probe.c:45
 msgid "Determine driver."
 msgstr "드라이버를 결정합니다."
 
-#: grub-core/commands/probe.c:44
+#: grub-core/commands/probe.c:46
 msgid "Determine partition map type."
 msgstr "파티션 맵 유형을 결정합니다."
 
-#: grub-core/commands/probe.c:45
+#: grub-core/commands/probe.c:47
 msgid "Determine filesystem type."
 msgstr "파일 시스템의 종류를 결정합니다."
 
-#: grub-core/commands/probe.c:46
+#: grub-core/commands/probe.c:48
 msgid "Determine filesystem UUID."
 msgstr "파일 시스템 UUID를 결정합니다."
 
-#: grub-core/commands/probe.c:47
+#: grub-core/commands/probe.c:49
 msgid "Determine filesystem label."
 msgstr "파일 시스템의 라벨(label)을 결정합니다."
 
-#: grub-core/commands/probe.c:139 grub-core/commands/probe.c:146
+#: grub-core/commands/probe.c:50
+#, fuzzy
+msgid "Determine partition UUID."
+msgstr "파티션 맵 유형을 결정합니다."
+
+#: grub-core/commands/probe.c:192 grub-core/commands/probe.c:199
 #: util/grub-probe.c:462
 #, c-format
 msgid "filesystem `%s' does not support labels"
-msgstr ""
+msgstr "파일 시스템 '%s'(이)가 라벨(label)을 지원하지 않습니다"
 
-#: grub-core/commands/probe.c:165 grub-core/fs/zfs/zfsinfo.c:430
-#: grub-core/loader/i386/bsd.c:169 util/grub-setup.c:223
+#: grub-core/commands/probe.c:218 grub-core/fs/zfs/zfsinfo.c:430
+#: grub-core/loader/i386/bsd.c:170 util/grub-setup.c:223
 msgid "DEVICE"
 msgstr "<장치>"
 
-#: grub-core/commands/probe.c:166
+#: grub-core/commands/probe.c:219
 msgid "Retrieve device info."
 msgstr "장치 정보를 검색합니다."
 
@@ -1882,9 +1843,8 @@ msgid "Test if REGEXP matches STRING."
 msgstr ""
 
 #: grub-core/commands/search.c:324
-#, fuzzy
 msgid "NAME [VARIABLE] [HINTS]"
-msgstr "<이름> [<변수>]"
+msgstr "<이름> [<변수>] [<힌트>]"
 
 #: grub-core/commands/search_file.c:4
 msgid ""
@@ -1899,8 +1859,8 @@ msgid ""
 "Search devices by label. If VARIABLE is specified, the first device found is "
 "set to a variable."
 msgstr ""
-"레이블로 장치를 찾습니다. 만약 <변수>가 명시되지 않으면, 첫 번째로 발견되는 "
-"장치가 변수로 지정됩니다."
+"레이블로 장치를 찾습니다. 만약 <변수>가 명시되면, 첫 번째로 발견되는 장치가 "
+"변수로 지정됩니다."
 
 #: grub-core/commands/search_uuid.c:4
 msgid ""
@@ -1916,14 +1876,12 @@ msgid "Search devices by a file."
 msgstr "파일 장치를 만듭니다."
 
 #: grub-core/commands/search_wrap.c:35
-#, fuzzy
 msgid "Search devices by a filesystem label."
-msgstr "파일 시스템의 라벨(label)을 결정합니다."
+msgstr "파일 시스템 라벨(label)을 통해 장치를 찾습니다."
 
 #: grub-core/commands/search_wrap.c:37
-#, fuzzy
 msgid "Search devices by a filesystem UUID."
-msgstr "파일 시스템 UUID를 결정합니다."
+msgstr "파일 시스템 UUID를 통해 장치를 찾습니다."
 
 #: grub-core/commands/search_wrap.c:40
 #, fuzzy
@@ -1980,35 +1938,33 @@ msgid "[-f|-l|-u|-s|-n] [--hint HINT [--hint HINT] ...] NAME"
 msgstr ""
 
 #: grub-core/commands/search_wrap.c:209
-#, fuzzy
 msgid ""
 "Search devices by file, filesystem label or filesystem UUID. If --set is "
 "specified, the first device found is set to a variable. If no variable name "
 "is specified, `root' is used."
 msgstr ""
-"레이블로 장치를 찾습니다. 만약 <변수>가 명시되지 않으면, 첫 번째로 발견되는 "
-"장치가 변수로 지정됩니다."
+"파일, 파일 시스템 라벨, 파일 시스템 UUID로 장치를 찾습니다. 만약 --set이 명시"
+"되면, 첫 번째로 발견되는 장치가 변수로 지정됩니다. 만약 어떠한 변수명도 지정"
+"되지 않으면, 'root'가 사용됩니다."
 
 #: grub-core/commands/setpci.c:132
 #, c-format
 msgid "Register %x of %x:%02x.%x is %x\n"
 msgstr ""
 
-#: grub-core/commands/setpci.c:333
+#: grub-core/commands/setpci.c:332
 msgid "[-s POSITION] [-d DEVICE] [-v VAR] REGISTER[=VALUE[:MASK]]"
 msgstr ""
 
-#: grub-core/commands/setpci.c:335
-#, fuzzy
+#: grub-core/commands/setpci.c:334
 msgid "Manipulate PCI devices."
-msgstr "PCI 장치를 열거합니다."
+msgstr "PCI 장치를 조작합니다."
 
 #: grub-core/commands/sleep.c:32
 msgid "Verbose countdown."
 msgstr "자세한 카운트 다운."
 
 #: grub-core/commands/sleep.c:33
-#, fuzzy
 msgid "Allow to interrupt with ESC."
 msgstr "ESC로 중단 가능."
 
@@ -2019,6 +1975,127 @@ msgstr "<초 수>"
 #: grub-core/commands/sleep.c:110
 msgid "Wait for a specified number of seconds."
 msgstr "지정된 초 만큼 기다립니다."
+
+#: grub-core/commands/smbios.c:197
+msgid "Match structures with the given type."
+msgstr ""
+
+#: grub-core/commands/smbios.c:198 grub-core/loader/i386/bsd.c:490
+#: grub-core/loader/i386/bsd.c:556
+msgid "type"
+msgstr ""
+
+#: grub-core/commands/smbios.c:199
+msgid "Match structures with the given handle."
+msgstr ""
+
+#: grub-core/commands/smbios.c:200
+msgid "handle"
+msgstr ""
+
+#: grub-core/commands/smbios.c:201
+msgid "Select a structure when several match."
+msgstr ""
+
+#: grub-core/commands/smbios.c:202
+#, fuzzy
+msgid "match"
+msgstr "일치하지 않음"
+
+#: grub-core/commands/smbios.c:203
+msgid "Get the byte's value at the given offset."
+msgstr ""
+
+#: grub-core/commands/smbios.c:204 grub-core/commands/smbios.c:206
+#: grub-core/commands/smbios.c:208 grub-core/commands/smbios.c:210
+#: grub-core/commands/smbios.c:212 grub-core/commands/smbios.c:214
+msgid "offset"
+msgstr ""
+
+#: grub-core/commands/smbios.c:205
+msgid "Get two bytes' value at the given offset."
+msgstr ""
+
+#: grub-core/commands/smbios.c:207
+msgid "Get four bytes' value at the given offset."
+msgstr ""
+
+#: grub-core/commands/smbios.c:209
+msgid "Get eight bytes' value at the given offset."
+msgstr ""
+
+#: grub-core/commands/smbios.c:211
+msgid "Get the string specified at the given offset."
+msgstr ""
+
+#: grub-core/commands/smbios.c:213
+msgid "Get the UUID's value at the given offset."
+msgstr ""
+
+#: grub-core/commands/smbios.c:215
+#, fuzzy
+msgid "Store the value in the given variable name."
+msgstr "읽어들인 값을 <변수이름> 변수로 저장합니다."
+
+#: grub-core/commands/smbios.c:216 grub-core/commands/smbios.c:218
+#, fuzzy
+msgid "variable"
+msgstr "변수를 지정합니다."
+
+#: grub-core/commands/smbios.c:217
+msgid "Filter the result like linux does."
+msgstr ""
+
+#: grub-core/commands/smbios.c:289
+msgid "the SMBIOS entry point structure was not found"
+msgstr ""
+
+#: grub-core/commands/smbios.c:297
+msgid "the type must be between 0 and 255"
+msgstr ""
+
+#: grub-core/commands/smbios.c:305
+msgid "the handle must be between 0 and 65535"
+msgstr ""
+
+#: grub-core/commands/smbios.c:313
+msgid "the match must be a positive integer"
+msgstr ""
+
+#: grub-core/commands/smbios.c:323
+msgid "only one --get option is usable at a time"
+msgstr ""
+
+#: grub-core/commands/smbios.c:330
+msgid "one of the --get options is required"
+msgstr ""
+
+#: grub-core/commands/smbios.c:336
+msgid "no structure matched the given options"
+msgstr ""
+
+#: grub-core/commands/smbios.c:342
+msgid "the given offset is outside the structure"
+msgstr ""
+
+#: grub-core/commands/smbios.c:348
+msgid "the field ends outside the structure"
+msgstr ""
+
+#: grub-core/commands/smbios.c:354
+#, fuzzy
+msgid "failed to retrieve the structure field"
+msgstr "코어 이미지 섹터를 읽기 실패 했습니다"
+
+#: grub-core/commands/smbios.c:389
+msgid ""
+"[-t type] [-h handle] [-m match] (-b|-w|-d|-q|-s|-u) offset [--set variable]"
+msgstr ""
+
+#: grub-core/commands/smbios.c:392
+#, fuzzy
+msgid "Retrieve SMBIOS information."
+msgstr "메모리 정보를 출력합니다."
 
 #: grub-core/commands/syslinuxcfg.c:50 util/grub-syslinux2cfg.c:66
 msgid "root directory of the syslinux disk [default=/]."
@@ -2124,17 +2201,17 @@ msgstr ""
 #: grub-core/commands/testspeed.c:80
 #, c-format
 msgid "File size: %s\n"
-msgstr ""
+msgstr "파일 크기: %s\n"
 
 #: grub-core/commands/testspeed.c:83
 #, c-format
 msgid "Elapsed time: %d.%03d s \n"
-msgstr ""
+msgstr "경과 시간: %d.%03d s \n"
 
 #: grub-core/commands/testspeed.c:92
 #, c-format
 msgid "Speed: %s \n"
-msgstr ""
+msgstr "속도: %s \n"
 
 #: grub-core/commands/testspeed.c:107
 msgid "[-s SIZE] FILENAME"
@@ -2142,9 +2219,9 @@ msgstr ""
 
 #: grub-core/commands/testspeed.c:108
 msgid "Test file read speed."
-msgstr ""
+msgstr "파일 읽기 속도를 테스트 합니다."
 
-#: grub-core/commands/time.c:38 grub-core/script/execute.c:974
+#: grub-core/commands/time.c:38 grub-core/script/execute.c:979
 #, fuzzy
 msgid "no command is specified"
 msgstr "알려진 장치가 없음.\n"
@@ -2152,11 +2229,11 @@ msgstr "알려진 장치가 없음.\n"
 #: grub-core/commands/time.c:50
 #, c-format
 msgid "Elapsed time: %d.%03d seconds \n"
-msgstr ""
+msgstr "경과 시간: %d.%03d 초 \n"
 
 #: grub-core/commands/time.c:61
 msgid "COMMAND [ARGS]"
-msgstr ""
+msgstr "<명령> [인자]"
 
 #: grub-core/commands/time.c:62
 msgid "Measure time used by COMMAND"
@@ -2191,15 +2268,6 @@ msgstr "불행하게도 아무일도 하지 않습니다."
 #: grub-core/commands/usbtest.c:221
 msgid "Test USB support."
 msgstr "USB 지원여부를 테스트 합니다."
-
-#: grub-core/commands/verifiers.c:120
-#, c-format
-msgid "verification requested but nobody cares: %s"
-msgstr ""
-
-#: grub-core/commands/verifiers.c:140
-msgid "big file signature isn't implemented yet"
-msgstr ""
 
 #: grub-core/commands/videoinfo.c:61
 msgid "Text-only "
@@ -2258,7 +2326,7 @@ msgstr ""
 #: grub-core/commands/videoinfo.c:116
 #, c-format
 msgid "  EDID version: %u.%u\n"
-msgstr ""
+msgstr "  EDID 버전: %u.%u\n"
 
 #: grub-core/commands/videoinfo.c:120
 #, c-format
@@ -2320,9 +2388,8 @@ msgstr ""
 #. TRANSLATORS: Here, on the other hand, it's
 #. nicer to use unicode cross instead of x.
 #: grub-core/commands/videotest.c:228
-#, fuzzy
 msgid "Test video subsystem in mode WxH."
-msgstr "비디오 서브시스템을 테스트 합니다."
+msgstr "WxH모드로 비디오 서브시스템을 테스트합니다."
 
 #: grub-core/commands/videotest.c:231
 msgid "Test video subsystem."
@@ -2339,9 +2406,8 @@ msgstr ""
 #. TRANSLATORS: GRUBUUID stands for "filesystem
 #. UUID as used in GRUB".
 #: grub-core/commands/xnu_uuid.c:110
-#, fuzzy
 msgid "[-l] GRUBUUID [VARNAME]"
-msgstr "GRUBUUID [<변수이름>]"
+msgstr "[-l] GRUBUUID [<변수이름>]"
 
 #: grub-core/commands/xnu_uuid.c:111
 #, fuzzy
@@ -2379,48 +2445,48 @@ msgstr ""
 
 #. TRANSLATORS: The first %s is the file being looked at, the second %s is
 #. the error message.
-#: grub-core/disk/cryptodisk.c:526 grub-core/kern/emu/hostdisk.c:152
+#: grub-core/disk/cryptodisk.c:705 grub-core/kern/emu/hostdisk.c:152
 #: grub-core/kern/emu/hostdisk.c:262 grub-core/kern/emu/hostdisk.c:434
-#: grub-core/kern/emu/misc.c:168 grub-core/kern/emu/misc.c:174
-#: grub-core/kern/emu/misc.c:196 grub-core/osdep/bsd/getroot.c:92
+#: grub-core/kern/emu/misc.c:180 grub-core/kern/emu/misc.c:186
+#: grub-core/kern/emu/misc.c:208 grub-core/osdep/bsd/getroot.c:92
 #: grub-core/osdep/bsd/getroot.c:168 grub-core/osdep/hurd/getroot.c:68
 #: grub-core/osdep/linux/blocklist.c:65 grub-core/osdep/linux/getroot.c:150
-#: grub-core/osdep/linux/hostdisk.c:194 grub-core/osdep/linux/hostdisk.c:421
+#: grub-core/osdep/linux/hostdisk.c:194 grub-core/osdep/linux/hostdisk.c:424
 #: grub-core/osdep/linux/ofpath.c:417 grub-core/osdep/linux/ofpath.c:422
 #: grub-core/osdep/linux/ofpath.c:517 grub-core/osdep/linux/ofpath.c:530
 #: grub-core/osdep/sun/getroot.c:110 grub-core/osdep/windows/blocklist.c:98
-#: grub-core/tests/video_checksum.c:279 util/editenv.c:46 util/glue-efi.c:115
-#: util/glue-efi.c:120 util/glue-efi.c:130 util/grub-editenv.c:138
-#: util/grub-editenv.c:192 util/grub-file.c:83 util/grub-fstest.c:128
+#: grub-core/tests/video_checksum.c:279 util/editenv.c:54 util/glue-efi.c:125
+#: util/glue-efi.c:130 util/glue-efi.c:140 util/grub-editenv.c:139
+#: util/grub-editenv.c:198 util/grub-file.c:83 util/grub-fstest.c:128
 #: util/grub-fstest.c:568 util/grub-install-common.c:92
 #: util/grub-install-common.c:94 util/grub-install-common.c:101
-#: util/grub-install-common.c:529 util/grub-menulst2cfg.c:53
-#: util/grub-menulst2cfg.c:68 util/grub-mkimage.c:292 util/grub-mklayout.c:504
+#: util/grub-install-common.c:694 util/grub-menulst2cfg.c:53
+#: util/grub-menulst2cfg.c:68 util/grub-mkimage.c:307 util/grub-mklayout.c:504
 #: util/grub-mklayout.c:516 util/grub-mknetdir.c:133 util/grub-mknetdir.c:151
-#: util/grub-mkrescue.c:627 util/grub-mkrescue.c:631 util/grub-mkrescue.c:879
-#: util/grub-mkrescue.c:883 util/grub-mkstandalone.c:253 util/grub-mount.c:498
+#: util/grub-mkrescue.c:630 util/grub-mkrescue.c:634 util/grub-mkrescue.c:882
+#: util/grub-mkrescue.c:886 util/grub-mkstandalone.c:253 util/grub-mount.c:498
 #: util/grub-render-label.c:169 util/grub-script-check.c:175
 #: util/grub-syslinux2cfg.c:181 util/grub-syslinux2cfg.c:191
 #: util/grub-syslinux2cfg.c:212 util/grub-syslinux2cfg.c:228 util/misc.c:91
 #: util/render-label.c:76 util/render-label.c:163 util/render-label.c:174
-#: util/resolve.c:246 util/setup.c:783
-#, fuzzy, c-format
+#: util/resolve.c:246 util/setup.c:786
+#, c-format
 msgid "cannot open `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'을(를) 열 수 없습니다: %s"
 
-#: grub-core/disk/cryptodisk.c:583 grub-core/disk/cryptodisk.c:628
+#: grub-core/disk/cryptodisk.c:762 grub-core/disk/cryptodisk.c:806
 #: grub-core/kern/emu/hostdisk.c:270 grub-core/kern/emu/hostfs.c:142
-#: grub-core/osdep/linux/hostdisk.c:456 util/grub-editenv.c:143
-#: util/grub-editenv.c:149 util/grub-fstest.c:320 util/misc.c:111
-#, fuzzy, c-format
+#: grub-core/osdep/linux/hostdisk.c:459 util/grub-editenv.c:144
+#: util/grub-editenv.c:155 util/grub-fstest.c:320 util/misc.c:111
+#, c-format
 msgid "cannot seek `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'을(를) 찾을 수 없습니다: %s"
 
-#: grub-core/disk/cryptodisk.c:1144
+#: grub-core/disk/cryptodisk.c:1320
 msgid "SOURCE|-u UUID|-a|-b"
 msgstr ""
 
-#: grub-core/disk/cryptodisk.c:1145
+#: grub-core/disk/cryptodisk.c:1321
 #, fuzzy
 msgid "Mount a crypto device."
 msgstr "루트 장치를 정합니다."
@@ -2443,52 +2509,53 @@ msgid "physical volume %s not found"
 msgstr ""
 
 #: grub-core/disk/efi/efidisk.c:600 grub-core/disk/efi/efidisk.c:623
-#, fuzzy, c-format
+#, c-format
 msgid "no media in `%s'"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'에 미디어가 없습니다"
 
 #: grub-core/disk/geli.c:75
 msgid "Couldn't load sha256"
-msgstr ""
+msgstr "sha256을 로드할 수 없습니다."
 
 #: grub-core/disk/geli.c:85
 msgid "Couldn't load sha512"
-msgstr ""
+msgstr "sha512를 로드할 수 없습니다."
 
 #: grub-core/disk/geli.c:216 grub-core/disk/geli.c:220
 msgid "couldn't read ELI metadata"
-msgstr ""
+msgstr "ELI 메타데이터를 읽을 수 없습니다."
 
 #: grub-core/disk/geli.c:231
 msgid "wrong ELI magic or version"
 msgstr ""
 
-#: grub-core/disk/geli.c:435 grub-core/disk/luks.c:329
+#: grub-core/disk/geli.c:435 grub-core/disk/luks.c:172
 msgid "Attempting to decrypt master key..."
 msgstr ""
 
-#: grub-core/disk/geli.c:441 grub-core/disk/luks.c:347
+#: grub-core/disk/geli.c:441 grub-core/disk/luks.c:190
+#: grub-core/disk/luks2.c:587
 #, c-format
 msgid "Enter passphrase for %s%s%s (%s): "
 msgstr ""
 
 #. TRANSLATORS: It's a cryptographic key slot: one element of an array
 #. where each element is either empty or holds a key.
-#: grub-core/disk/geli.c:530 grub-core/disk/luks.c:451
+#: grub-core/disk/geli.c:530 grub-core/disk/luks.c:295
 #, c-format
 msgid "Slot %d opened\n"
 msgstr ""
 
 #: grub-core/disk/i386/pc/biosdisk.c:470 grub-core/disk/i386/pc/biosdisk.c:524
-#: grub-core/disk/i386/pc/biosdisk.c:534 grub-core/kern/disk_common.c:47
-#, fuzzy, c-format
+#: grub-core/disk/i386/pc/biosdisk.c:534 grub-core/kern/disk_common.c:48
+#, c-format
 msgid "attempt to read or write outside of disk `%s'"
-msgstr "GRUB의 `%s' 코어 이미지 읽기를 시도합니다"
+msgstr "디스크 '%s'외부에 읽기 또는 쓰기를 시도합니다"
 
 #: grub-core/disk/i386/pc/biosdisk.c:491 grub-core/disk/i386/pc/biosdisk.c:611
 #: grub-core/disk/scsi.c:726
 msgid "cannot write to CD-ROM"
-msgstr ""
+msgstr "CD-ROM에 쓸 수 없습니다"
 
 #: grub-core/disk/i386/pc/biosdisk.c:662
 msgid ""
@@ -2501,21 +2568,15 @@ msgstr ""
 #. usable for bootloaders (called generically
 #. "embedding zone") and this operation is
 #. called "embedding".
-#: grub-core/disk/ldm.c:1015
-#, fuzzy
+#: grub-core/disk/ldm.c:1073
 msgid "your LDM Embedding Partition is too small; embedding won't be possible"
-msgstr ""
-"이러한 msdos-방식의 파티션 레이블은  post-MBR 공간이 없습니다; 끼워넣기가 불"
-"가능합니다!"
+msgstr "LDM 임베딩 파티션의 크기가 너무 작습니다; 임베딩이 불가능합니다"
 
 #. TRANSLATORS: it's a partition for embedding,
 #. not a partition embed into something.
-#: grub-core/disk/ldm.c:1033
-#, fuzzy
+#: grub-core/disk/ldm.c:1091
 msgid "this LDM has no Embedding Partition; embedding won't be possible"
-msgstr ""
-"GPT 파티션 라벨이 BIOS 부트 파티션을 가지고 있지 않습니다;임베딩이 불가능합니"
-"다!"
+msgstr "LDM이 임베딩 파티션을 가지고 있지 않습니다; 임베딩이 불가능합니다"
 
 #. TRANSLATORS: The disk is simply removed from the list of available ones,
 #. not wiped, avoid to scare user.
@@ -2524,40 +2585,50 @@ msgstr ""
 msgid "Delete the specified loopback drive."
 msgstr "루프백 장치 엔트리를 제거합니다."
 
-#: grub-core/disk/loopback.c:237
-#, fuzzy
+#: grub-core/disk/loopback.c:229
 msgid "[-d] DEVICENAME FILE."
-msgstr "[-d|-p] <장치이름> <파일>."
+msgstr "[-d] <장치이름> <파일>."
 
 #. TRANSLATORS: The file itself is not destroyed
 #. or transformed into drive.
-#: grub-core/disk/loopback.c:240
-#, fuzzy
+#: grub-core/disk/loopback.c:232
 msgid "Make a virtual drive from a file."
-msgstr "파일 장치를 만듭니다."
+msgstr "파일로부터 가상 드라이브를 생성합니다."
 
-#: grub-core/efiemu/i386/loadcore32.c:111
-#: grub-core/efiemu/i386/loadcore64.c:125 grub-core/kern/arm/dl.c:256
-#: grub-core/kern/arm64/dl.c:187 grub-core/kern/i386/dl.c:75
-#: grub-core/kern/ia64/dl.c:140 grub-core/kern/mips/dl.c:258
-#: grub-core/kern/powerpc/dl.c:163 grub-core/kern/riscv/dl.c:334
-#: grub-core/kern/sparc64/dl.c:180 grub-core/kern/x86_64/dl.c:110
-#: util/grub-mkimagexx.c:756 util/grub-mkimagexx.c:881
-#: util/grub-mkimagexx.c:945 util/grub-mkimagexx.c:1026
-#: util/grub-mkimagexx.c:1120 util/grub-mkimagexx.c:1222
-#: util/grub-mkimagexx.c:1413 util/grub-mkimagexx.c:1628
-#: util/grub-mkimagexx.c:1665 util/grub-mkimagexx.c:1697
-#: util/grub-mkimagexx.c:1767 util/grub-mkimagexx.c:1797
+#. TRANSLATORS: It's a cryptographic key slot: one element of an array
+#. where each element is either empty or holds a key.
+#.
+#: grub-core/disk/luks2.c:741
+#, c-format
+msgid "Slot \"%s\" opened\n"
+msgstr ""
+
+#: grub-core/efiemu/i386/loadcore32.c:111 grub-core/kern/arm/dl.c:256
+#: grub-core/kern/i386/dl.c:75 grub-core/kern/mips/dl.c:258
+#: grub-core/kern/powerpc/dl.c:163 util/grub-mkimagexx.c:756
+#: util/grub-mkimagexx.c:881 util/grub-mkimagexx.c:945
+#: util/grub-mkimagexx.c:1026 util/grub-mkimagexx.c:1120
+#: util/grub-mkimagexx.c:1222 util/grub-mkimagexx.c:1413
+#: util/grub-mkimagexx.c:1628 util/grub-mkimagexx.c:1665
+#: util/grub-mkimagexx.c:1697 util/grub-mkimagexx.c:1767
+#: util/grub-mkimagexx.c:1797
 #, c-format
 msgid "relocation 0x%x is not implemented yet"
 msgstr ""
 
+#: grub-core/efiemu/i386/loadcore64.c:130 grub-core/kern/arm64/dl.c:192
+#: grub-core/kern/ia64/dl.c:145 grub-core/kern/riscv/dl.c:339
+#: grub-core/kern/sparc64/dl.c:185 grub-core/kern/x86_64/dl.c:115
+#, c-format
+msgid "relocation 0x%s is not implemented yet"
+msgstr ""
+
 #: grub-core/efiemu/loadcore.c:200 grub-core/efiemu/loadcore.c:237
-#: grub-core/loader/i386/bsdXX.c:317 util/grub-mkimagexx.c:2360
+#: grub-core/loader/i386/bsdXX.c:317 util/grub-mkimagexx.c:2358
 msgid "no symbol table"
 msgstr ""
 
-#: grub-core/efiemu/loadcore.c:346 grub-core/kern/dl.c:609
+#: grub-core/efiemu/loadcore.c:346 grub-core/kern/dl.c:618
 #: grub-core/loader/ia64/efi/linux.c:345 grub-core/loader/mips/linux.c:248
 #: grub-core/loader/multiboot_elfxx.c:76
 #: grub-core/loader/powerpc/ieee1275/linux.c:280
@@ -2574,113 +2645,124 @@ msgid "Finalize loading of EFI emulator."
 msgstr ""
 
 #: grub-core/efiemu/main.c:320
-#, fuzzy
 msgid "Unload EFI emulator."
-msgstr "PXE 환경 제거."
+msgstr "EFI 에뮬레이터 제거."
 
 #: grub-core/efiemu/symbols.c:92 grub-core/kern/dl.c:376
 #, c-format
 msgid "symbol `%s' not found"
-msgstr ""
+msgstr "기호 '%s'를 찾을 수 없습니다"
 
 #: grub-core/font/font_cmd.c:52
 msgid "Loaded fonts:"
-msgstr ""
+msgstr "로드된 글꼴:"
 
 #: grub-core/font/font_cmd.c:74
-#, fuzzy
 msgid "FILE..."
-msgstr "<파일>"
+msgstr "<파일...>"
 
 #: grub-core/font/font_cmd.c:75
 msgid "Specify one or more font files to load."
-msgstr ""
+msgstr "로드할 하나 이상의 글꼴 파일을 지정합니다."
 
 #: grub-core/font/font_cmd.c:78
 msgid "List the loaded fonts."
-msgstr ""
+msgstr "로드된 글꼴을 열거합니다."
 
 #: grub-core/fs/archelp.c:216 grub-core/fs/archelp.c:278
-#: grub-core/fs/btrfs.c:1815 grub-core/fs/fshelp.c:227 grub-core/fs/jfs.c:736
-#: grub-core/fs/minix.c:369 grub-core/fs/ufs.c:454
+#: grub-core/fs/btrfs.c:1835 grub-core/fs/fshelp.c:227 grub-core/fs/jfs.c:747
+#: grub-core/fs/minix.c:371 grub-core/fs/ufs.c:454
 msgid "too deep nesting of symlinks"
 msgstr ""
 
-#: grub-core/fs/bfs.c:228 grub-core/fs/fshelp.c:368 grub-core/fs/minix.c:270
+#: grub-core/fs/bfs.c:228 grub-core/fs/fshelp.c:380 grub-core/fs/minix.c:272
 #: grub-core/kern/file.c:156
 msgid "attempt to read past the end of file"
 msgstr ""
 
-#: grub-core/fs/btrfs.c:1698 grub-core/fs/btrfs.c:1957
-#: grub-core/fs/fshelp.c:189 grub-core/fs/fshelp.c:309 grub-core/fs/jfs.c:431
-#: grub-core/fs/minix.c:414 grub-core/fs/minix.c:562
+#: grub-core/fs/btrfs.c:1718 grub-core/fs/btrfs.c:1977
+#: grub-core/fs/fshelp.c:189 grub-core/fs/fshelp.c:309 grub-core/fs/jfs.c:442
+#: grub-core/fs/minix.c:416 grub-core/fs/minix.c:578
 #: grub-core/fs/reiserfs.c:732 grub-core/fs/ufs.c:531 grub-core/fs/ufs.c:671
-#: grub-core/fs/zfs/zfs.c:2831 grub-core/fs/zfs/zfs.c:4247
+#: grub-core/fs/zfs/zfs.c:2842 grub-core/fs/zfs/zfs.c:4275
 msgid "not a directory"
 msgstr ""
 
-#: grub-core/fs/btrfs.c:2063 grub-core/fs/fshelp.c:307 grub-core/fs/jfs.c:835
-#: grub-core/fs/zfs/zfs.c:3801
+#: grub-core/fs/btrfs.c:2083 grub-core/fs/fshelp.c:307 grub-core/fs/jfs.c:846
+#: grub-core/fs/zfs/zfs.c:3829
 msgid "not a regular file"
 msgstr ""
 
-#: grub-core/fs/btrfs.c:2157 grub-core/fs/zfs/zfs.c:4333
-#: grub-core/partmap/msdos.c:400
-#, fuzzy
+#: grub-core/fs/btrfs.c:2177 grub-core/fs/zfs/zfs.c:4361
+#: grub-core/partmap/msdos.c:404
 msgid "your core.img is unusually large.  It won't fit in the embedding area"
-msgstr "core.img가 비정상적으로 큽니다. 끼워넣기 공간에 맞지 않습니다."
+msgstr "core.img가 비정상적으로 큽니다. 끼워넣기 공간에 맞지 않습니다"
 
-#: grub-core/fs/fshelp.c:281 grub-core/fs/minix.c:630 grub-core/fs/ufs.c:661
-#: grub-core/fs/ufs.c:757 grub-core/kern/fs.c:168 grub-core/kern/fs.c:180
-#, fuzzy, c-format
+#: grub-core/fs/ext2.c:724 grub-core/fs/squash4.c:467
+#: grub-core/kern/buffer.c:108 grub-core/kern/misc.c:364
+#: grub-core/kern/misc.c:422 grub-core/kern/mm.c:392 grub-core/lib/arg.c:224
+#: grub-core/lib/arg.c:471 grub-core/loader/i386/pc/linux.c:225
+#: grub-core/loader/linux.c:139 grub-core/loader/linux.c:248
+#: grub-core/script/lexer.c:179 grub-core/video/bitmap.c:145
+#: grub-core/video/readers/png.c:307 grub-core/video/readers/png.c:312
+#: include/grub/buffer.h:79 include/grub/buffer.h:117 include/grub/misc.h:287
+#: include/grub/misc.h:296
+msgid "overflow is detected"
+msgstr "오버플로우가 감지됨"
+
+#: grub-core/fs/fshelp.c:281 grub-core/fs/minix.c:646 grub-core/fs/ufs.c:661
+#: grub-core/fs/ufs.c:757 grub-core/kern/fs.c:170 grub-core/kern/fs.c:182
+#, c-format
 msgid "invalid file name `%s'"
-msgstr "유효하지 않은 루트 장치 `%s'"
+msgstr "유효하지 않은 파일명 `%s'"
 
-#: grub-core/fs/zfs/zfs.c:453
-msgid "checksum verification failed"
+#: grub-core/fs/fshelp.c:373
+msgid "blocksize too large"
 msgstr ""
 
-#: grub-core/fs/zfs/zfs.c:1465
+#: grub-core/fs/zfs/zfs.c:457
+msgid "checksum verification failed"
+msgstr "체크섬 인증 실패"
+
+#: grub-core/fs/zfs/zfs.c:1472
 msgid "couldn't find a necessary member device of multi-device filesystem"
 msgstr ""
 
-#: grub-core/fs/zfs/zfscrypt.c:292
+#: grub-core/fs/zfs/zfscrypt.c:297
 msgid "no decryption key available"
 msgstr ""
 
-#: grub-core/fs/zfs/zfscrypt.c:304
+#: grub-core/fs/zfs/zfscrypt.c:309
 msgid "MAC verification failed"
-msgstr ""
+msgstr "MAC 인증 실패"
 
-#: grub-core/fs/zfs/zfscrypt.c:413
+#: grub-core/fs/zfs/zfscrypt.c:418
 msgid "Assume input is raw."
-msgstr ""
+msgstr "입력값을 raw로 가정합니다."
 
-#: grub-core/fs/zfs/zfscrypt.c:414
+#: grub-core/fs/zfs/zfscrypt.c:419
 msgid "Assume input is hex."
-msgstr ""
+msgstr "입력값을 hex로 가정합니다."
 
-#: grub-core/fs/zfs/zfscrypt.c:415
+#: grub-core/fs/zfs/zfscrypt.c:420
 msgid "Assume input is passphrase."
 msgstr ""
 
-#: grub-core/fs/zfs/zfscrypt.c:437 util/grub-fstest.c:553 util/grub-mount.c:483
-#, fuzzy
+#: grub-core/fs/zfs/zfscrypt.c:442 util/grub-fstest.c:553 util/grub-mount.c:483
 msgid "Enter ZFS password: "
-msgstr "암호를 입력하십시오: "
+msgstr "ZFS 암호를 입력하십시오: "
 
-#: grub-core/fs/zfs/zfscrypt.c:476
-#, fuzzy
+#: grub-core/fs/zfs/zfscrypt.c:481
 msgid "[-h|-p|-r] [FILE]"
-msgstr "[-l|-h|-a] [<파일>]"
+msgstr "[-h|-p|-r] [<파일>]"
 
-#: grub-core/fs/zfs/zfscrypt.c:477
+#: grub-core/fs/zfs/zfscrypt.c:482
 msgid "Import ZFS wrapping key stored in FILE."
 msgstr ""
 
 #: grub-core/fs/zfs/zfsinfo.c:51
 msgid "Virtual device is removed"
-msgstr ""
+msgstr "가상장치 제거됨"
 
 #: grub-core/fs/zfs/zfsinfo.c:57
 msgid "Virtual device is faulted"
@@ -2688,7 +2770,7 @@ msgstr ""
 
 #: grub-core/fs/zfs/zfsinfo.c:63
 msgid "Virtual device is offline"
-msgstr ""
+msgstr "가상장치가 오프라인임"
 
 #. TRANSLATORS: degraded doesn't mean broken but that some of
 #. component are missing but virtual device as whole is still usable.
@@ -2698,7 +2780,7 @@ msgstr ""
 
 #: grub-core/fs/zfs/zfsinfo.c:73
 msgid "Virtual device is online"
-msgstr ""
+msgstr "가상장치가 온라인임"
 
 #: grub-core/fs/zfs/zfsinfo.c:89
 msgid "Incorrect virtual device: no type available"
@@ -2715,30 +2797,30 @@ msgstr ""
 
 #: grub-core/fs/zfs/zfsinfo.c:113
 msgid "Bootpath: unavailable\n"
-msgstr ""
+msgstr "부트경로: 사용할 수 없음\n"
 
 #: grub-core/fs/zfs/zfsinfo.c:115
 #, c-format
 msgid "Bootpath: %s\n"
-msgstr ""
+msgstr "부트경로: %s\n"
 
 #: grub-core/fs/zfs/zfsinfo.c:120
 msgid "Path: unavailable"
-msgstr ""
+msgstr "경로: 사용할 수 없음"
 
 #: grub-core/fs/zfs/zfsinfo.c:122
 #, c-format
 msgid "Path: %s\n"
-msgstr ""
+msgstr "경로: %s\n"
 
 #: grub-core/fs/zfs/zfsinfo.c:127
 msgid "Devid: unavailable"
 msgstr ""
 
 #: grub-core/fs/zfs/zfsinfo.c:129
-#, fuzzy, c-format
+#, c-format
 msgid "Devid: %s\n"
-msgstr "장치 %s:"
+msgstr "장치 %s\n"
 
 #: grub-core/fs/zfs/zfsinfo.c:148
 msgid "This VDEV is a mirror"
@@ -2778,7 +2860,7 @@ msgstr ""
 #: grub-core/fs/zfs/zfsinfo.c:193
 #, c-format
 msgid "Unknown virtual device type: %s\n"
-msgstr ""
+msgstr "알 수 없는 가상 장치 유형: %s\n"
 
 #. TRANSLATORS: Here we speak about ZFS pools it's semi-marketing,
 #. semi-technical term by Sun/Oracle and should be translated in sync with
@@ -2853,9 +2935,8 @@ msgid "Print ZFS info about DEVICE."
 msgstr ""
 
 #: grub-core/fs/zfs/zfsinfo.c:433
-#, fuzzy
 msgid "FILESYSTEM [VARIABLE]"
-msgstr "<이름> [<변수>]"
+msgstr "<파일시스템> [<변수>]"
 
 #: grub-core/fs/zfs/zfsinfo.c:434
 msgid "Print ZFS-BOOTFSOBJ or store it into VARIABLE"
@@ -2871,18 +2952,20 @@ msgstr ""
 #. GDB functionality running on local host
 #. which allows remote debugger to
 #. connect to it.
-#: grub-core/gdb/gdb.c:84
+#.
+#: grub-core/gdb/gdb.c:86
 msgid "Start GDB stub on given port"
 msgstr ""
 
 #. TRANSLATORS: this refers to triggering
 #. a breakpoint so that the user will land
 #. into GDB.
-#: grub-core/gdb/gdb.c:89
+#.
+#: grub-core/gdb/gdb.c:93
 msgid "Break into GDB"
 msgstr ""
 
-#: grub-core/gdb/gdb.c:91
+#: grub-core/gdb/gdb.c:95
 msgid "Stop GDB stub"
 msgstr ""
 
@@ -2899,23 +2982,21 @@ msgid "Translates the string with the current settings."
 msgstr ""
 
 #: grub-core/gfxmenu/gui_label.c:186 grub-core/normal/menu_text.c:184
-#, fuzzy
 msgid ""
 "Press enter to boot the selected OS, `e' to edit the commands before booting "
 "or `c' for a command-line. ESC to return previous menu."
 msgstr ""
 "Enter 키를 누르면 선택된 OS로 부팅되며, 부팅전에 'e' 키를 누르면 옵션을 편집"
 "할 수 있고 'c' 키를 누르면 명령어를 직접 입력할 수 있습니다. 이전 메뉴로 돌아"
-"가려면 ESC 키를 누르십시오.\n"
+"가려면 ESC 키를 누르십시오."
 
 #: grub-core/gfxmenu/gui_label.c:190 grub-core/normal/menu_text.c:192
-#, fuzzy
 msgid ""
 "Press enter to boot the selected OS, `e' to edit the commands before booting "
 "or `c' for a command-line."
 msgstr ""
 "Enter 키를 누르면 선택된 OS로 부팅되며, 부팅전에 'e' 키를 누르면 옵션을 편집"
-"할 수 있고 'c' 키를 누르면 명령어를 직접 입력할 수 있습니다.\n"
+"할 수 있고 'c' 키를 누르면 명령어를 직접 입력할 수 있습니다."
 
 #: grub-core/gfxmenu/gui_label.c:194
 msgid "enter: boot, `e': options, `c': cmd-line"
@@ -2945,17 +3026,15 @@ msgstr ""
 
 #: grub-core/gfxmenu/view.c:103
 msgid "GRUB Boot Menu"
-msgstr ""
+msgstr "GRUB 부트메뉴"
 
 #: grub-core/hello/hello.c:36
-#, fuzzy
 msgid "Hello World"
-msgstr "인사합니다  \"여러분 안녕\"."
+msgstr "여러분 안녕"
 
 #: grub-core/hello/hello.c:45
-#, fuzzy
 msgid "Say `Hello World'."
-msgstr "인사합니다  \"여러분 안녕\"."
+msgstr "인사합니다 '여러분 안녕'."
 
 #: grub-core/io/gzio.c:409 grub-core/kern/file.c:210
 msgid "attempt to seek outside of the file"
@@ -2963,11 +3042,11 @@ msgstr ""
 
 #. TRANSLATORS: It's about given file having some strange format, not
 #. complete lack of gzip support.
-#: grub-core/io/gzio.c:1228 grub-core/io/gzio.c:1237 grub-core/io/gzio.c:1244
+#: grub-core/io/gzio.c:1264 grub-core/io/gzio.c:1273 grub-core/io/gzio.c:1280
 msgid "unsupported gzip format"
-msgstr ""
+msgstr "지원하지 않는 gzip 포맷"
 
-#: grub-core/io/lzopio.c:511
+#: grub-core/io/lzopio.c:507
 msgid "lzop file corrupted"
 msgstr ""
 
@@ -2979,7 +3058,7 @@ msgstr ""
 #: grub-core/kern/i386/dl.c:36 grub-core/kern/ia64/dl.c:41
 #: grub-core/kern/mips/dl.c:48 grub-core/kern/powerpc/dl.c:36
 #: grub-core/kern/riscv/dl.c:47 grub-core/kern/sparc64/dl.c:36
-#: grub-core/kern/x86_64/dl.c:36 grub-core/loader/i386/bsd.c:1445
+#: grub-core/kern/x86_64/dl.c:36 grub-core/loader/i386/bsd.c:1451
 #: grub-core/loader/i386/bsdXX.c:49 grub-core/loader/ia64/efi/linux.c:341
 #: grub-core/loader/mips/linux.c:298 grub-core/loader/multiboot.c:232
 #: grub-core/loader/multiboot_elfxx.c:73
@@ -2988,43 +3067,47 @@ msgstr ""
 msgid "invalid arch-dependent ELF magic"
 msgstr ""
 
-#: grub-core/kern/corecmd.c:178
+#: grub-core/kern/buffer.c:71
 #, fuzzy
+msgid "requested buffer size is too large"
+msgstr "'%s'의 크기가 너무 큽니다"
+
+#: grub-core/kern/buffer.c:112
+msgid "new read is position beyond the end of the written data"
+msgstr ""
+
+#: grub-core/kern/corecmd.c:178
 msgid "[ENVVAR=VALUE]"
-msgstr "[환경변수]"
+msgstr "[환경변수=값]"
 
 #: grub-core/kern/corecmd.c:179
-#, fuzzy
 msgid "Set an environment variable."
-msgstr "값을 환경 블록 파일로 저장합니다."
+msgstr "환경 변수를 설정합니다."
 
 #: grub-core/kern/corecmd.c:183
-#, fuzzy
 msgid "ENVVAR"
-msgstr "[환경변수]"
+msgstr "환경변수"
 
 #: grub-core/kern/corecmd.c:184
 msgid "Remove an environment variable."
-msgstr ""
+msgstr "환경변수를 삭제합니다."
 
 #: grub-core/kern/corecmd.c:186
 msgid "[ARG]"
 msgstr ""
 
 #: grub-core/kern/corecmd.c:186
-#, fuzzy
 msgid "List devices or files."
-msgstr "장치와 파일을 목록으로 만듭니다."
+msgstr "장치와 파일을 열거합니다."
 
 #: grub-core/kern/corecmd.c:188
-#, fuzzy
 msgid "Insert a module."
-msgstr "모듈을 제거합니다."
+msgstr "모듈을 삽입합니다."
 
-#: grub-core/kern/disk.c:236 grub-core/net/net.c:1390
+#: grub-core/kern/disk.c:236 grub-core/net/net.c:1395
 #, c-format
 msgid "disk `%s' not found"
-msgstr ""
+msgstr "디스크 '%s'를 찾을 수 없습니다"
 
 #: grub-core/kern/disk_common.c:27
 msgid "attempt to read or write outside of partition"
@@ -3036,17 +3119,30 @@ msgstr ""
 msgid "invalid arch-independent ELF magic"
 msgstr ""
 
+#: grub-core/kern/efi/mm.c:136
+#, c-format
+msgid "invalid memory address (0x%s > 0x%s)"
+msgstr ""
+
+#: grub-core/kern/efi/sb.c:147
+msgid "shim_lock protocol not found"
+msgstr ""
+
+#: grub-core/kern/efi/sb.c:150
+msgid "bad shim signature"
+msgstr ""
+
 #. TRANSLATORS: it refers to the lack of free slots.
 #: grub-core/kern/emu/hostdisk.c:208 grub-core/kern/emu/hostdisk.c:466
 msgid "device count exceeds limit"
 msgstr ""
 
-#: grub-core/kern/emu/hostdisk.c:342 util/editenv.c:54 util/grub-editenv.c:197
+#: grub-core/kern/emu/hostdisk.c:342 util/editenv.c:66 util/grub-editenv.c:203
 #: util/grub-fstest.c:191 util/grub-mkfont.c:796 util/misc.c:114
-#: util/misc.c:129 util/setup.c:788
-#, fuzzy, c-format
+#: util/misc.c:129 util/setup.c:791
+#, c-format
 msgid "cannot write to `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'을(를) 쓸 수 없습니다\" %s"
 
 #. TRANSLATORS: Only one entry is ignored. However the suggestion
 #. is to correct/delete the whole file.
@@ -3077,17 +3173,16 @@ msgid ""
 msgstr ""
 
 #: grub-core/kern/emu/hostfs.c:76 grub-core/kern/emu/hostfs.c:109
-#, fuzzy, c-format
+#, c-format
 msgid "can't open `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'을(를) 열 수 없습니다: %s"
 
 #: grub-core/kern/emu/main.c:99 util/grub-fstest.c:516 util/grub-mount.c:452
-#, fuzzy
 msgid "DEVICE_NAME"
-msgstr "<장치>"
+msgstr "<장치이름>"
 
-#: grub-core/kern/emu/main.c:99 grub-core/loader/i386/bsd.c:136
-#: grub-core/loader/i386/bsd.c:169 util/grub-fstest.c:516 util/grub-mount.c:452
+#: grub-core/kern/emu/main.c:99 grub-core/loader/i386/bsd.c:137
+#: grub-core/loader/i386/bsd.c:170 util/grub-fstest.c:516 util/grub-mount.c:452
 msgid "Set root device."
 msgstr "루트 장치를 정합니다."
 
@@ -3107,17 +3202,16 @@ msgstr ""
 msgid "use GRUB files in the directory DIR [default=%s]"
 msgstr ""
 
-#: grub-core/kern/emu/main.c:108 include/grub/util/install.h:67
+#: grub-core/kern/emu/main.c:108 include/grub/util/install.h:71
 #: util/grub-editenv.c:58 util/grub-fstest.c:525 util/grub-glue-efi.c:58
-#: util/grub-macbless.c:104 util/grub-mkfont.c:962 util/grub-mkimage.c:84
+#: util/grub-macbless.c:104 util/grub-mkfont.c:962 util/grub-mkimage.c:86
 #: util/grub-mklayout.c:56 util/grub-mount.c:458 util/grub-probe.c:735
 #: util/grub-render-label.c:74 util/grub-script-check.c:52 util/grub-setup.c:90
 #: util/grub-syslinux2cfg.c:78
-#, fuzzy
 msgid "print verbose messages."
-msgstr "부팅시 자세한 메시지를 출력합니다."
+msgstr "자세한 메시지를 출력합니다."
 
-#: grub-core/kern/emu/main.c:109 grub-core/lib/gnulib/argp-parse.c:85
+#: grub-core/kern/emu/main.c:109
 msgid "SECS"
 msgstr ""
 
@@ -3128,23 +3222,23 @@ msgstr ""
 #: grub-core/kern/emu/main.c:171 util/grub-macbless.c:143
 #: util/grub-mkrelpath.c:61 util/grub-probe.c:874 util/grub-script-check.c:75
 #: util/grub-setup.c:203
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown extra argument `%s'."
-msgstr "알 수 없는 추가적인 인자 값 `%s'.\n"
+msgstr "알 수 없는 추가적인 인자 값 `%s'."
 
 #: grub-core/kern/emu/main.c:185
 msgid "GRUB emulator."
 msgstr ""
 
-#: grub-core/kern/emu/main.c:213 util/grub-editenv.c:262
+#: grub-core/kern/emu/main.c:213 util/grub-editenv.c:268
 #: util/grub-glue-efi.c:110 util/grub-macbless.c:173 util/grub-mkfont.c:1177
-#: util/grub-mkimage.c:266 util/grub-mklayout.c:494
+#: util/grub-mkimage.c:281 util/grub-mklayout.c:494
 #: util/grub-mkpasswd-pbkdf2.c:132 util/grub-mkrelpath.c:96
 #: util/grub-probe.c:863 util/grub-render-label.c:152
 #: util/grub-script-check.c:160 util/grub-setup.c:262
 #: util/grub-syslinux2cfg.c:163
 msgid "Error in parsing command line arguments\n"
-msgstr ""
+msgstr "커맨드라인 인자 파싱 오류\n"
 
 #. TRANSLATORS: In this case GRUB tells user what he has to do.
 #: grub-core/kern/emu/main.c:248
@@ -3155,26 +3249,25 @@ msgstr ""
 #: grub-core/kern/emu/misc.c:48
 #, c-format
 msgid "%s: warning:"
-msgstr ""
+msgstr "%s: 경고:"
 
 #: grub-core/kern/emu/misc.c:64
 #, c-format
 msgid "%s: info:"
-msgstr ""
+msgstr "%s: 정보:"
 
 #: grub-core/kern/emu/misc.c:79 util/grub-fstest.c:567 util/grub-fstest.c:576
 #: util/grub-mount.c:497 util/grub-mount.c:505
 #, c-format
 msgid "%s: error:"
-msgstr ""
+msgstr "%s: 에러:"
 
-#: grub-core/kern/emu/misc.c:176
-#, fuzzy, c-format
+#: grub-core/kern/emu/misc.c:188
+#, c-format
 msgid "file `%s' is too big"
-msgstr "'%s'의 크기가 너무 큽니다."
+msgstr "'%s'의 크기가 너무 큽니다"
 
 #: grub-core/kern/fs.c:120
-#, fuzzy
 msgid "unknown filesystem"
 msgstr "알 수 없는 파일 시스템"
 
@@ -3186,40 +3279,44 @@ msgstr ""
 msgid "Exit failed"
 msgstr ""
 
-#: grub-core/kern/misc.c:351 grub-core/kern/misc.c:408 include/grub/misc.h:269
-#: include/grub/misc.h:278
-msgid "overflow is detected"
-msgstr ""
-
 #: grub-core/kern/partition.c:51 grub-core/partmap/bsdlabel.c:108
 #, c-format
 msgid "Discarding improperly nested partition (%s,%s,%s%d)"
 msgstr ""
 
-#: grub-core/kern/rescue_parser.c:73 util/grub-editenv.c:292
-#, fuzzy, c-format
+#: grub-core/kern/rescue_parser.c:73 util/grub-editenv.c:298
+#, c-format
 msgid "Unknown command `%s'.\n"
-msgstr "알 수 없는 추가적인 인자 값 `%s'.\n"
+msgstr "알 수 없는 명령 `%s'.\n"
 
-#: grub-core/lib/arg.c:31
+#: grub-core/kern/verifiers.c:120
+#, c-format
+msgid "verification requested but nobody cares: %s"
+msgstr ""
+
+#: grub-core/kern/verifiers.c:140
+msgid "big file signature isn't implemented yet"
+msgstr ""
+
+#: grub-core/lib/arg.c:32
 msgid "Display this help and exit."
 msgstr "이 도움말을 보이고 종료합니다."
 
-#: grub-core/lib/arg.c:33
+#: grub-core/lib/arg.c:34
 msgid "Display the usage of this command and exit."
 msgstr "이 명령의 사용법을 보이고 종료합니다."
 
-#: grub-core/lib/arg.c:362
+#: grub-core/lib/arg.c:310 grub-core/lib/arg.c:382
 #, c-format
 msgid "missing mandatory option for `%s'"
-msgstr ""
+msgstr "'%s'에 대한 필수 옵션이 없습니다"
 
-#: grub-core/lib/arg.c:384
+#: grub-core/lib/arg.c:404
 #, c-format
 msgid "the argument `%s' requires an integer"
 msgstr ""
 
-#: grub-core/lib/arg.c:407
+#: grub-core/lib/arg.c:427
 #, c-format
 msgid ""
 "a value was assigned to the argument `%s' while it doesn't require an "
@@ -3231,214 +3328,32 @@ msgstr ""
 msgid "Print backtrace."
 msgstr "블럭 목록을 출력합니다."
 
-#: grub-core/lib/gnulib/argp-help.c:149
-#, c-format
-msgid "ARGP_HELP_FMT: %s value is less than or equal to %s"
+#: grub-core/lib/datetime.c:27
+msgid "Sunday"
 msgstr ""
 
-#: grub-core/lib/gnulib/argp-help.c:225
-#, c-format
-msgid "%.*s: ARGP_HELP_FMT parameter requires a value"
+#: grub-core/lib/datetime.c:28
+msgid "Monday"
 msgstr ""
 
-#: grub-core/lib/gnulib/argp-help.c:235
-#, c-format
-msgid "%.*s: Unknown ARGP_HELP_FMT parameter"
+#: grub-core/lib/datetime.c:29
+msgid "Tuesday"
 msgstr ""
 
-#: grub-core/lib/gnulib/argp-help.c:248
-#, c-format
-msgid "Garbage in ARGP_HELP_FMT: %s"
+#: grub-core/lib/datetime.c:30
+msgid "Wednesday"
 msgstr ""
 
-#: grub-core/lib/gnulib/argp-help.c:1229
-msgid ""
-"Mandatory or optional arguments to long options are also mandatory or "
-"optional for any corresponding short options."
+#: grub-core/lib/datetime.c:31
+msgid "Thursday"
 msgstr ""
 
-#: grub-core/lib/gnulib/argp-help.c:1620
-msgid "  or: "
+#: grub-core/lib/datetime.c:32
+msgid "Friday"
 msgstr ""
 
-#: grub-core/lib/gnulib/argp-help.c:1632
-#, fuzzy
-msgid " [OPTION...]"
-msgstr "[옵션...]"
-
-#: grub-core/lib/gnulib/argp-help.c:1659
-#, fuzzy, c-format
-msgid "Try '%s --help' or '%s --usage' for more information.\n"
-msgstr "더 많은 정보를 보려면 `%s --help' 하십시오.\n"
-
-#: grub-core/lib/gnulib/argp-help.c:1687
-#, c-format
-msgid "Report bugs to %s.\n"
-msgstr ""
-
-#: grub-core/lib/gnulib/argp-help.c:1888 grub-core/lib/gnulib/error.c:195
-#, fuzzy
-msgid "Unknown system error"
-msgstr "알 수 없는 파일 시스템"
-
-#: grub-core/lib/gnulib/argp-parse.c:81
-#, fuzzy
-msgid "give this help list"
-msgstr "이 도움말을 보이고 종료합니다."
-
-#: grub-core/lib/gnulib/argp-parse.c:82
-msgid "give a short usage message"
-msgstr ""
-
-#: grub-core/lib/gnulib/argp-parse.c:83 util/grub-mkfont.c:946
-msgid "NAME"
-msgstr ""
-
-#: grub-core/lib/gnulib/argp-parse.c:84
-msgid "set the program name"
-msgstr ""
-
-#: grub-core/lib/gnulib/argp-parse.c:86
-msgid "hang for SECS seconds (default 3600)"
-msgstr ""
-
-#: grub-core/lib/gnulib/argp-parse.c:143
-msgid "print program version"
-msgstr ""
-
-#: grub-core/lib/gnulib/argp-parse.c:160
-msgid "(PROGRAM ERROR) No version known!?"
-msgstr ""
-
-#: grub-core/lib/gnulib/argp-parse.c:613
-#, c-format
-msgid "%s: Too many arguments\n"
-msgstr ""
-
-#: grub-core/lib/gnulib/argp-parse.c:759
-msgid "(PROGRAM ERROR) Option should have been recognized!?"
-msgstr ""
-
-#: grub-core/lib/gnulib/getopt.c:278
-#, c-format
-msgid "%s: option '%s%s' is ambiguous\n"
-msgstr ""
-
-#: grub-core/lib/gnulib/getopt.c:284
-#, c-format
-msgid "%s: option '%s%s' is ambiguous; possibilities:"
-msgstr ""
-
-#: grub-core/lib/gnulib/getopt.c:319
-#, c-format
-msgid "%s: unrecognized option '%s%s'\n"
-msgstr ""
-
-#: grub-core/lib/gnulib/getopt.c:345
-#, c-format
-msgid "%s: option '%s%s' doesn't allow an argument\n"
-msgstr ""
-
-#: grub-core/lib/gnulib/getopt.c:360
-#, c-format
-msgid "%s: option '%s%s' requires an argument\n"
-msgstr ""
-
-#: grub-core/lib/gnulib/getopt.c:621
-#, c-format
-msgid "%s: invalid option -- '%c'\n"
-msgstr ""
-
-#: grub-core/lib/gnulib/getopt.c:636 grub-core/lib/gnulib/getopt.c:682
-#, c-format
-msgid "%s: option requires an argument -- '%c'\n"
-msgstr ""
-
-#: grub-core/lib/gnulib/openat-die.c:38
-#, c-format
-msgid "unable to record current working directory"
-msgstr ""
-
-#: grub-core/lib/gnulib/openat-die.c:57
-#, c-format
-msgid "failed to return to initial working directory"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:135 grub-core/osdep/aros/hostdisk.c:523
-msgid "Success"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:138
-msgid "No match"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:141
-#, fuzzy
-msgid "Invalid regular expression"
-msgstr "표현식으로 평가함."
-
-#: grub-core/lib/gnulib/regcomp.c:144
-msgid "Invalid collation character"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:147
-msgid "Invalid character class name"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:150
-msgid "Trailing backslash"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:153
-msgid "Invalid back reference"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:156
-msgid "Unmatched [, [^, [:, [., or [="
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:159
-msgid "Unmatched ( or \\("
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:162
-msgid "Unmatched \\{"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:165
-msgid "Invalid content of \\{\\}"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:168
-msgid "Invalid range end"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:171
-msgid "Memory exhausted"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:174
-msgid "Invalid preceding regular expression"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:177
-msgid "Premature end of regular expression"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:180
-msgid "Regular expression too big"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:183
-msgid "Unmatched ) or \\)"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:531
-msgid "unknown regexp error"
-msgstr ""
-
-#: grub-core/lib/gnulib/regcomp.c:676
-msgid "No previous regular expression"
+#: grub-core/lib/datetime.c:33
+msgid "Saturday"
 msgstr ""
 
 #: grub-core/lib/i386/halt.c:77
@@ -3458,7 +3373,7 @@ msgstr "유효하지 않은 루트 장치 `%s'"
 
 #: grub-core/lib/mips/arc/reboot.c:32 grub-core/lib/mips/loongson/reboot.c:61
 msgid "Reboot failed"
-msgstr ""
+msgstr "재부팅 실패"
 
 #: grub-core/lib/random.c:113
 msgid "[LENGTH]"
@@ -3476,15 +3391,14 @@ msgstr ""
 msgid "invalid zImage"
 msgstr ""
 
-#: grub-core/loader/arm/linux.c:450 grub-core/loader/efi/fdt.c:144
-#, fuzzy
+#: grub-core/loader/arm/linux.c:450 grub-core/loader/efi/fdt.c:148
 msgid "invalid device tree"
-msgstr "유효하지 않은 장치 `%s'.\n"
+msgstr "유효하지 않은 장치 트리"
 
 #: grub-core/loader/arm/linux.c:493 grub-core/loader/arm64/linux.c:383
-#: grub-core/loader/i386/linux.c:1125 grub-core/loader/i386/pc/linux.c:479
-#: grub-core/loader/i386/xen.c:962 grub-core/loader/i386/xen.c:964
-#: grub-core/loader/ia64/efi/linux.c:591 grub-core/loader/mips/linux.c:501
+#: grub-core/loader/i386/linux.c:1131 grub-core/loader/i386/pc/linux.c:483
+#: grub-core/loader/i386/xen.c:970 grub-core/loader/i386/xen.c:972
+#: grub-core/loader/ia64/efi/linux.c:591 grub-core/loader/mips/linux.c:498
 #: grub-core/loader/powerpc/ieee1275/linux.c:383
 #: grub-core/loader/riscv/linux.c:50
 #: grub-core/loader/sparc64/ieee1275/linux.c:511
@@ -3492,9 +3406,9 @@ msgid "Load Linux."
 msgstr "리눅스를 읽어들입니다."
 
 #: grub-core/loader/arm/linux.c:495 grub-core/loader/arm64/linux.c:385
-#: grub-core/loader/i386/linux.c:1127 grub-core/loader/i386/pc/linux.c:482
-#: grub-core/loader/i386/xen.c:966 grub-core/loader/ia64/efi/linux.c:594
-#: grub-core/loader/mips/linux.c:503
+#: grub-core/loader/i386/linux.c:1133 grub-core/loader/i386/pc/linux.c:486
+#: grub-core/loader/i386/xen.c:974 grub-core/loader/ia64/efi/linux.c:594
+#: grub-core/loader/mips/linux.c:500
 #: grub-core/loader/powerpc/ieee1275/linux.c:385
 #: grub-core/loader/riscv/linux.c:52
 #: grub-core/loader/sparc64/ieee1275/linux.c:513
@@ -3502,10 +3416,9 @@ msgid "Load initrd."
 msgstr "initrd를 읽어들입니다."
 
 #. TRANSLATORS: DTB stands for device tree blob.
-#: grub-core/loader/arm/linux.c:498 grub-core/loader/efi/fdt.c:169
-#, fuzzy
+#: grub-core/loader/arm/linux.c:498 grub-core/loader/efi/fdt.c:173
 msgid "Load DTB file."
-msgstr "XNU 이미지를 읽어들입니다."
+msgstr "DTB파일을 읽어들입니다."
 
 #: grub-core/loader/arm64/linux.c:59
 msgid ""
@@ -3525,12 +3438,10 @@ msgid "Load a xen hypervisor."
 msgstr ""
 
 #: grub-core/loader/arm64/xen_boot.c:519
-#, fuzzy
 msgid "Load a xen module."
-msgstr "multiboot 모듈을 읽어들입니다."
+msgstr "xen 모듈을 읽어들입니다."
 
 #: grub-core/loader/efi/appleloader.c:231
-#, fuzzy
 msgid "[OPTS]"
 msgstr "[옵션...]"
 
@@ -3538,171 +3449,161 @@ msgstr "[옵션...]"
 #. switch to BIOS mode and boot the OS requiring
 #. BIOS.
 #: grub-core/loader/efi/appleloader.c:235
-#, fuzzy
 msgid "Boot BIOS-based system."
-msgstr "레거시 시스템을 부팅합니다."
+msgstr "BIOS기반 시스템을 부팅합니다."
 
-#: grub-core/loader/efi/chainloader.c:421
+#: grub-core/loader/efi/chainloader.c:437
 #: grub-core/loader/i386/pc/chainloader.c:303
 msgid "Load another boot loader."
 msgstr "또 다른 부트로더를 읽어들입니다."
 
-#: grub-core/loader/i386/bsd.c:103
+#: grub-core/loader/i386/bsd.c:104
 msgid "Display output on all consoles."
 msgstr "모든 콘솔상의 출력을 보입니다."
 
-#: grub-core/loader/i386/bsd.c:104 grub-core/loader/i386/bsd.c:138
-#: grub-core/loader/i386/bsd.c:171
+#: grub-core/loader/i386/bsd.c:105 grub-core/loader/i386/bsd.c:139
+#: grub-core/loader/i386/bsd.c:172
 msgid "Use serial console."
 msgstr "시리얼 콘솔을 사용합니다."
 
-#: grub-core/loader/i386/bsd.c:105 grub-core/loader/i386/bsd.c:131
-#: grub-core/loader/i386/bsd.c:159
+#: grub-core/loader/i386/bsd.c:106 grub-core/loader/i386/bsd.c:132
+#: grub-core/loader/i386/bsd.c:160
 msgid "Ask for file name to reboot from."
 msgstr "재부팅할 파일명을 묻습니다."
 
-#: grub-core/loader/i386/bsd.c:106
-#, fuzzy
+#: grub-core/loader/i386/bsd.c:107
 msgid "Use CD-ROM as root."
 msgstr "루트사용자로 CDROM을 사용합니다."
 
-#: grub-core/loader/i386/bsd.c:107
+#: grub-core/loader/i386/bsd.c:108
 msgid "Invoke user configuration routing."
 msgstr "사용자 설정 라우팅을 호출합니다."
 
-#: grub-core/loader/i386/bsd.c:108 grub-core/loader/i386/bsd.c:135
-#: grub-core/loader/i386/bsd.c:162
+#: grub-core/loader/i386/bsd.c:109 grub-core/loader/i386/bsd.c:136
+#: grub-core/loader/i386/bsd.c:163
 msgid "Enter in KDB on boot."
 msgstr "부팅시 KDB 모드로 진입합니다."
 
-#: grub-core/loader/i386/bsd.c:109
+#: grub-core/loader/i386/bsd.c:110
 msgid "Use GDB remote debugger instead of DDB."
 msgstr "DDB 대신 GDB 원격 디버거를 사용합니다."
 
-#: grub-core/loader/i386/bsd.c:110
+#: grub-core/loader/i386/bsd.c:111
 msgid "Disable all boot output."
 msgstr "모든 부팅 메시지 출력을 하지 않습니다."
 
-#: grub-core/loader/i386/bsd.c:112
+#: grub-core/loader/i386/bsd.c:113
 msgid "Wait for keypress after every line of output."
 msgstr "출력 행마다 키 입력을 기다립니다."
 
-#: grub-core/loader/i386/bsd.c:114
-#, fuzzy
+#: grub-core/loader/i386/bsd.c:115
 msgid "Use compiled-in root device."
-msgstr "compiled-in rootdev를 사용합니다."
+msgstr "compiled-in root device를 사용합니다."
 
-#: grub-core/loader/i386/bsd.c:115 grub-core/loader/i386/bsd.c:134
-#: grub-core/loader/i386/bsd.c:165
+#: grub-core/loader/i386/bsd.c:116 grub-core/loader/i386/bsd.c:135
+#: grub-core/loader/i386/bsd.c:166
 msgid "Boot into single mode."
 msgstr "단일 모드로 부트합니다."
 
-#: grub-core/loader/i386/bsd.c:116 grub-core/loader/i386/bsd.c:166
+#: grub-core/loader/i386/bsd.c:117 grub-core/loader/i386/bsd.c:167
 msgid "Boot with verbose messages."
 msgstr "부팅시 자세한 메시지를 출력합니다."
 
-#: grub-core/loader/i386/bsd.c:132 grub-core/loader/i386/bsd.c:160
+#: grub-core/loader/i386/bsd.c:133 grub-core/loader/i386/bsd.c:161
 msgid "Don't reboot, just halt."
 msgstr "재부팅 하지 마십시오, 단지 중지만 시키십시오."
 
-#: grub-core/loader/i386/bsd.c:133 grub-core/loader/i386/bsd.c:161
+#: grub-core/loader/i386/bsd.c:134 grub-core/loader/i386/bsd.c:162
 msgid "Change configured devices."
 msgstr "구성된 장치를 변경합니다."
 
 #. TRANSLATORS: "com" is static and not to be translated. It refers to
 #. serial ports e.g. com1.
 #.
-#: grub-core/loader/i386/bsd.c:142
+#: grub-core/loader/i386/bsd.c:143
 msgid "comUNIT[,SPEED]"
 msgstr ""
 
-#: grub-core/loader/i386/bsd.c:157
+#: grub-core/loader/i386/bsd.c:158
 msgid "Disable SMP."
 msgstr "SMP 비활성화."
 
-#: grub-core/loader/i386/bsd.c:158
+#: grub-core/loader/i386/bsd.c:159
 msgid "Disable ACPI."
 msgstr "ACPI 비활성화."
 
-#: grub-core/loader/i386/bsd.c:164
+#: grub-core/loader/i386/bsd.c:165
 msgid "Don't display boot diagnostic messages."
 msgstr "부트 진단 메시지를 보이지 마십시요."
 
-#: grub-core/loader/i386/bsd.c:167
+#: grub-core/loader/i386/bsd.c:168
 msgid "Boot with debug messages."
 msgstr "부팅시 디버그 메시지를 표시합니다."
 
-#: grub-core/loader/i386/bsd.c:168
-#, fuzzy
+#: grub-core/loader/i386/bsd.c:169
 msgid "Suppress normal output (warnings remain)."
-msgstr "일반 출력 메시지를 안보이게 합니다( 경고는 남습니다)."
+msgstr "일반 출력 메시지를 안보이게 합니다 (경고는 남습니다)."
 
 #. TRANSLATORS: "com" is static and not to be translated. It refers to
 #. serial ports e.g. com1.
 #.
-#: grub-core/loader/i386/bsd.c:175
+#: grub-core/loader/i386/bsd.c:176
 msgid "[ADDR|comUNIT][,SPEED]"
 msgstr ""
 
-#: grub-core/loader/i386/bsd.c:489 grub-core/loader/i386/bsd.c:555
+#: grub-core/loader/i386/bsd.c:490 grub-core/loader/i386/bsd.c:556
 msgid "name"
 msgstr ""
 
-#: grub-core/loader/i386/bsd.c:489 grub-core/loader/i386/bsd.c:555
-msgid "type"
-msgstr ""
-
-#: grub-core/loader/i386/bsd.c:489 grub-core/loader/i386/bsd.c:555
+#: grub-core/loader/i386/bsd.c:490 grub-core/loader/i386/bsd.c:556
 msgid "addr"
 msgstr ""
 
-#: grub-core/loader/i386/bsd.c:490 grub-core/loader/i386/bsd.c:556
+#: grub-core/loader/i386/bsd.c:491 grub-core/loader/i386/bsd.c:557
 msgid "size"
 msgstr ""
 
-#: grub-core/loader/i386/bsd.c:1147 grub-core/loader/i386/linux.c:466
+#: grub-core/loader/i386/bsd.c:1153 grub-core/loader/i386/linux.c:467
 #: grub-core/loader/i386/xnu.c:1030
 #, fuzzy
 msgid "Booting in blind mode"
 msgstr "단일 모드로 부트합니다."
 
-#: grub-core/loader/i386/bsd.c:2137
+#: grub-core/loader/i386/bsd.c:2144
 msgid "Load kernel of FreeBSD."
 msgstr "FreeBSD 커널을 읽어들입니다."
 
-#: grub-core/loader/i386/bsd.c:2140
+#: grub-core/loader/i386/bsd.c:2147
 msgid "Load kernel of OpenBSD."
 msgstr "OpenBSD 커널을 읽어들입니다."
 
-#: grub-core/loader/i386/bsd.c:2143
+#: grub-core/loader/i386/bsd.c:2150
 msgid "Load kernel of NetBSD."
 msgstr "NetBSD 커널을 읽어들입니다."
 
-#: grub-core/loader/i386/bsd.c:2147
+#: grub-core/loader/i386/bsd.c:2154
 msgid "Load FreeBSD env."
 msgstr "FreeBSD env를 읽어들입니다."
 
-#: grub-core/loader/i386/bsd.c:2150
+#: grub-core/loader/i386/bsd.c:2157
 msgid "Load FreeBSD kernel module."
 msgstr "FreeBSD 커널 모듈을 읽어들입니다."
 
-#: grub-core/loader/i386/bsd.c:2153
-#, fuzzy
+#: grub-core/loader/i386/bsd.c:2160
 msgid "Load NetBSD kernel module."
-msgstr "FreeBSD 커널 모듈을 읽어들입니다."
+msgstr "NetBSD 커널 모듈을 읽어들입니다."
 
-#: grub-core/loader/i386/bsd.c:2156
-#, fuzzy
+#: grub-core/loader/i386/bsd.c:2163
 msgid "Load NetBSD kernel module (ELF)."
-msgstr "FreeBSD  커널 모듈을 (ELF) 읽어들입니다."
+msgstr "NetBSD  커널 모듈을 (ELF) 읽어들입니다."
 
-#: grub-core/loader/i386/bsd.c:2159
+#: grub-core/loader/i386/bsd.c:2166
 msgid "Load FreeBSD kernel module (ELF)."
 msgstr "FreeBSD  커널 모듈을 (ELF) 읽어들입니다."
 
 #. TRANSLATORS: ramdisk isn't identifier,
 #. it can be translated.
-#: grub-core/loader/i386/bsd.c:2165
+#: grub-core/loader/i386/bsd.c:2172
 #, fuzzy
 msgid "Load kOpenBSD ramdisk."
 msgstr "OpenBSD 커널을 읽어들입니다."
@@ -3716,19 +3617,19 @@ msgstr "OpenBSD 커널을 읽어들입니다."
 msgid "Load another coreboot payload"
 msgstr "또 다른 부트로더를 읽어들입니다."
 
-#: grub-core/loader/i386/linux.c:876
+#: grub-core/loader/i386/linux.c:882
 msgid "Legacy `ask' parameter no longer supported."
 msgstr ""
 
-#: grub-core/loader/i386/linux.c:892 grub-core/loader/i386/linux.c:902
-#: grub-core/loader/i386/linux.c:932
+#: grub-core/loader/i386/linux.c:898 grub-core/loader/i386/linux.c:908
+#: grub-core/loader/i386/linux.c:938
 #, c-format
 msgid "%s is deprecated. Use set gfxpayload=%s before linux command instead.\n"
 msgstr ""
 
 #. TRANSLATORS: "x" has to be entered in, like an identifier,
 #. so please don't use better Unicode codepoints.
-#: grub-core/loader/i386/linux.c:915
+#: grub-core/loader/i386/linux.c:921
 #, c-format
 msgid ""
 "%s is deprecated. VGA mode %d isn't recognized. Use set "
@@ -3739,10 +3640,10 @@ msgstr ""
 msgid "[--force|--bpb] FILE"
 msgstr ""
 
-#: grub-core/loader/i386/pc/freedos.c:148 util/setup.c:293
+#: grub-core/loader/i386/pc/freedos.c:148 util/setup.c:297
 #, c-format
 msgid "the size of `%s' is too large"
-msgstr "'%s'의 크기가 너무 큽니다."
+msgstr "'%s'의 크기가 너무 큽니다"
 
 #: grub-core/loader/i386/pc/freedos.c:183
 #, fuzzy
@@ -3772,40 +3673,35 @@ msgid "KERNEL ARGS"
 msgstr ""
 
 #: grub-core/loader/i386/pc/plan9.c:599
-#, fuzzy
 msgid "Load Plan9 kernel."
-msgstr "multiboot 커널을 읽어들입니다."
+msgstr "Plan9 커널을 읽어들입니다."
 
 #: grub-core/loader/i386/pc/pxechainloader.c:161
-#, fuzzy
 msgid "Load a PXE image."
-msgstr "XNU 이미지를 읽어들입니다."
+msgstr "PXE 이미지를 읽어들입니다."
 
 #: grub-core/loader/i386/pc/truecrypt.c:226
 msgid "Load Truecrypt ISO."
 msgstr ""
 
-#: grub-core/loader/i386/xen.c:781 grub-core/loader/i386/xen.c:865
+#: grub-core/loader/i386/xen.c:789 grub-core/loader/i386/xen.c:873
 msgid "initrd already loaded"
 msgstr ""
 
-#: grub-core/loader/i386/xen.c:968
-#, fuzzy
+#: grub-core/loader/i386/xen.c:976
 msgid "Load module."
-msgstr "모듈을 제거합니다."
+msgstr "모듈을 읽어들입니다."
 
 #: grub-core/loader/i386/xnu.c:1003
-#, fuzzy
 msgid "Press any key to launch xnu"
-msgstr "계속하려면 아무 키나 누르십시오..."
+msgstr "xnu를 실행하려면 아무 키나 누르십시오..."
 
 #. TRANSLATORS: `device-properties'
 #. is a variable name,
 #. not a program.
 #: grub-core/loader/i386/xnu.c:1159
-#, fuzzy
 msgid "Load `device-properties' dump."
-msgstr "device-properties 덤프를 읽어들입니다."
+msgstr "'device-properties' 덤프를 읽어들입니다."
 
 #: grub-core/loader/ia64/efi/linux.c:124
 msgid "Could not locate FPSWA driver"
@@ -3826,7 +3722,7 @@ msgstr ""
 
 #: grub-core/loader/ia64/efi/linux.c:591
 msgid "FILE [ARGS...]"
-msgstr ""
+msgstr "파일 [인자...]"
 
 #: grub-core/loader/ia64/efi/linux.c:597
 msgid "Display FPSWA version."
@@ -3856,7 +3752,11 @@ msgstr "multiboot 모듈을 읽어들입니다."
 msgid "Linux not supported yet"
 msgstr ""
 
-#: grub-core/loader/xnu.c:1416 grub-core/term/gfxterm_background.c:45
+#: grub-core/loader/xnu.c:674
+msgid "missing p-list filename"
+msgstr ""
+
+#: grub-core/loader/xnu.c:1435 grub-core/term/gfxterm_background.c:45
 msgid "Background image mode."
 msgstr ""
 
@@ -3869,189 +3769,188 @@ msgstr ""
 #. may not know the word stretch or normal I recommend
 #. putting the translation either here or in "Background image mode."
 #. string.
-#: grub-core/loader/xnu.c:1416 grub-core/term/gfxterm_background.c:55
+#: grub-core/loader/xnu.c:1435 grub-core/term/gfxterm_background.c:55
 msgid "stretch|normal"
 msgstr ""
 
-#: grub-core/loader/xnu.c:1482
+#: grub-core/loader/xnu.c:1501
 msgid "Load XNU image."
 msgstr "XNU 이미지를 읽어들입니다."
 
-#: grub-core/loader/xnu.c:1484
+#: grub-core/loader/xnu.c:1503
 msgid "Load 64-bit XNU image."
 msgstr "64-bit XNU 이미지를 읽어들입니다."
 
-#: grub-core/loader/xnu.c:1486
+#: grub-core/loader/xnu.c:1505
 msgid "Load XNU extension package."
 msgstr "XNU 확장 패키지를 읽어들입니다."
 
-#: grub-core/loader/xnu.c:1488
+#: grub-core/loader/xnu.c:1507
 msgid "Load XNU extension."
 msgstr "XNU 확장팩을 읽어들입니다."
 
-#. TRANSLATORS: OSBundleRequired is a
-#. variable name in xnu extensions
+#. TRANSLATORS: OSBundleRequired is
+#. a variable name in xnu extensions
 #. manifests. It behaves mostly like
 #. GNU/Linux runlevels.
 #.
-#: grub-core/loader/xnu.c:1495
+#: grub-core/loader/xnu.c:1515
 msgid "DIRECTORY [OSBundleRequired]"
 msgstr "디렉터리 [OS요구번들]"
 
 #. TRANSLATORS: There are many extensions
 #. in extension directory.
-#: grub-core/loader/xnu.c:1498
+#.
+#: grub-core/loader/xnu.c:1520
 msgid "Load XNU extension directory."
 msgstr "XNU 확장 디렉터리를 읽어들입니다."
 
 #. TRANSLATORS: ramdisk here isn't identifier. It can be translated.
-#: grub-core/loader/xnu.c:1501
+#: grub-core/loader/xnu.c:1523
 msgid "Load XNU ramdisk. It will be available in OS as md0."
 msgstr ""
 
-#: grub-core/loader/xnu.c:1505
+#: grub-core/loader/xnu.c:1527
 msgid "Load a splash image for XNU."
 msgstr "XNU의 스플래시 화면이미지를 읽어들입니다."
 
-#: grub-core/loader/xnu.c:1510
+#: grub-core/loader/xnu.c:1532
 #, fuzzy
 msgid "Load an image of hibernated XNU."
 msgstr "XNU의 스플래시 화면이미지를 읽어들입니다."
 
-#: grub-core/mmap/mmap.c:538
+#: grub-core/mmap/mmap.c:541
 msgid "ADDR1,MASK1[,ADDR2,MASK2[,...]]"
 msgstr ""
 
-#: grub-core/mmap/mmap.c:539
+#: grub-core/mmap/mmap.c:542
 msgid "Declare memory regions as faulty (badram)."
 msgstr ""
 
-#: grub-core/mmap/mmap.c:541
+#: grub-core/mmap/mmap.c:544
 msgid "FROM[K|M|G] TO[K|M|G]"
 msgstr ""
 
-#: grub-core/mmap/mmap.c:542
+#: grub-core/mmap/mmap.c:545
 msgid "Remove any memory regions in specified range."
 msgstr ""
 
-#: grub-core/net/bootp.c:653
+#: grub-core/net/bootp.c:689
 msgid "four arguments expected"
 msgstr ""
 
-#: grub-core/net/bootp.c:661 grub-core/net/net.c:1155
+#: grub-core/net/bootp.c:697 grub-core/net/net.c:1160
 #, c-format
 msgid "unrecognised network interface `%s'"
 msgstr ""
 
-#: grub-core/net/bootp.c:664
+#: grub-core/net/bootp.c:700
 msgid "no DHCP info found"
 msgstr ""
 
-#: grub-core/net/bootp.c:674
-#, fuzzy
+#: grub-core/net/bootp.c:710
 msgid "no DHCP options found"
-msgstr "도스 방식의 파티션이 발견되지 않았습니다."
+msgstr "DHCP 옵션이 발견되지 않았습니다"
 
-#: grub-core/net/bootp.c:682
+#: grub-core/net/bootp.c:718
 msgid "invalid DHCP option code"
 msgstr ""
 
-#: grub-core/net/bootp.c:686
-#, fuzzy, c-format
+#: grub-core/net/bootp.c:722
+#, c-format
 msgid "no DHCP option %u found"
-msgstr "도스 방식의 파티션이 발견되지 않았습니다."
+msgstr "DHCP 옵션 %u(이)가 발견되지 않았습니다"
 
-#: grub-core/net/bootp.c:743
+#: grub-core/net/bootp.c:779
 #, c-format
 msgid "unrecognised DHCP option format specification `%s'"
 msgstr ""
 
-#: grub-core/net/bootp.c:767
+#: grub-core/net/bootp.c:803
 msgid "no network card found"
 msgstr ""
 
-#: grub-core/net/bootp.c:859 grub-core/net/net.c:389
+#: grub-core/net/bootp.c:895 grub-core/net/net.c:394
 #, c-format
 msgid "couldn't autoconfigure %s"
 msgstr ""
 
-#: grub-core/net/bootp.c:873 grub-core/net/bootp.c:876
+#: grub-core/net/bootp.c:909 grub-core/net/bootp.c:912
 msgid "[CARD]"
 msgstr ""
 
-#: grub-core/net/bootp.c:874
+#: grub-core/net/bootp.c:910
 msgid "perform a bootp autoconfiguration"
 msgstr ""
 
-#: grub-core/net/bootp.c:877
+#: grub-core/net/bootp.c:913
 msgid "perform a DHCP autoconfiguration"
 msgstr ""
 
-#: grub-core/net/bootp.c:879
+#: grub-core/net/bootp.c:915
 msgid "VAR INTERFACE NUMBER DESCRIPTION"
 msgstr ""
 
-#: grub-core/net/bootp.c:880
+#: grub-core/net/bootp.c:916
 msgid ""
 "retrieve DHCP option and save it into VAR. If VAR is - then print the value."
 msgstr ""
 
-#: grub-core/net/dns.c:459
+#: grub-core/net/dns.c:466
 msgid "no DNS servers configured"
 msgstr ""
 
-#: grub-core/net/dns.c:522
+#: grub-core/net/dns.c:529
 msgid "domain name component is too long"
 msgstr ""
 
-#: grub-core/net/dns.c:618 grub-core/net/dns.c:666
+#: grub-core/net/dns.c:625 grub-core/net/dns.c:673
 msgid "no DNS record found"
 msgstr ""
 
-#: grub-core/net/dns.c:626
+#: grub-core/net/dns.c:633
 msgid "no DNS reply received"
 msgstr ""
 
-#: grub-core/net/dns.c:682
+#: grub-core/net/dns.c:689
 msgid "only ipv4"
-msgstr ""
+msgstr "ipv4만"
 
-#: grub-core/net/dns.c:686
+#: grub-core/net/dns.c:693
 msgid "only ipv6"
-msgstr ""
+msgstr "ipv6만"
 
-#: grub-core/net/dns.c:690
+#: grub-core/net/dns.c:697
 msgid "prefer ipv4"
-msgstr ""
+msgstr "ipv4우선"
 
-#: grub-core/net/dns.c:694
+#: grub-core/net/dns.c:701
 msgid "prefer ipv6"
-msgstr ""
+msgstr "ipv6우선"
 
-#: grub-core/net/dns.c:759
+#: grub-core/net/dns.c:766
 msgid "ADDRESS DNSSERVER"
 msgstr ""
 
-#: grub-core/net/dns.c:760
+#: grub-core/net/dns.c:767
 msgid "Perform a DNS lookup"
 msgstr ""
 
-#: grub-core/net/dns.c:762 grub-core/net/dns.c:765
+#: grub-core/net/dns.c:769 grub-core/net/dns.c:772
 msgid "DNSSERVER"
 msgstr ""
 
-#: grub-core/net/dns.c:763
+#: grub-core/net/dns.c:770
 msgid "Add a DNS server"
-msgstr ""
+msgstr "DNS서버를 추가합니다"
 
-#: grub-core/net/dns.c:766
+#: grub-core/net/dns.c:773
 msgid "Remove a DNS server"
-msgstr ""
+msgstr "DNS서버를 삭제합니다"
 
-#: grub-core/net/dns.c:768
-#, fuzzy
+#: grub-core/net/dns.c:775
 msgid "List DNS servers"
-msgstr "PCI 장치를 열거합니다."
+msgstr "DNS서버를 열거합니다"
 
 #: grub-core/net/drivers/efi/efinet.c:49 grub-core/net/drivers/efi/efinet.c:65
 #: grub-core/net/drivers/efi/efinet.c:77 grub-core/net/drivers/emu/emunet.c:62
@@ -4068,158 +3967,157 @@ msgstr ""
 
 #: grub-core/net/drivers/ieee1275/ofnet.c:336
 msgid "alloc-mem failed"
-msgstr ""
+msgstr "메모리할당 실패"
 
 #: grub-core/net/drivers/ieee1275/ofnet.c:370
 msgid "free-mem failed"
-msgstr ""
+msgstr "메모리해제 실패"
 
 #: grub-core/net/http.c:105
 msgid "unsupported HTTP response"
-msgstr ""
+msgstr "지원하지 않는 HTTP 응답"
 
 #. TRANSLATORS: GRUB HTTP code is pretty young. So even perfectly
 #. valid answers like 403 will trigger this very generic message.
 #: grub-core/net/http.c:126
 #, c-format
 msgid "unsupported HTTP error %d: %s"
-msgstr ""
+msgstr "지원하지 않는 HTTP 응답 %d: %s"
 
-#: grub-core/net/http.c:429 grub-core/net/tftp.c:420
-#, fuzzy, c-format
+#: grub-core/net/http.c:429 grub-core/net/tftp.c:396
+#, c-format
 msgid "time out opening `%s'"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'을(를) 여는동안 시간초과"
 
-#: grub-core/net/net.c:179
+#: grub-core/net/net.c:184
 msgid "timeout: could not resolve hardware address"
 msgstr ""
 
-#: grub-core/net/net.c:548
+#: grub-core/net/net.c:553
 #, c-format
 msgid "unresolvable address %s"
 msgstr ""
 
-#: grub-core/net/net.c:594
+#: grub-core/net/net.c:599
 #, c-format
 msgid "unrecognised network address `%s'"
 msgstr ""
 
-#: grub-core/net/net.c:661
+#: grub-core/net/net.c:666
 msgid "destination unreachable"
 msgstr ""
 
 #. TRANSLATORS: route loop is a condition when e.g.
 #. to contact server A you need to go through B
 #. and to contact B you need to go through A.
-#: grub-core/net/net.c:684
+#: grub-core/net/net.c:689
 msgid "route loop detected"
 msgstr ""
 
-#: grub-core/net/net.c:700
+#: grub-core/net/net.c:705
 msgid "address not found"
 msgstr ""
 
-#: grub-core/net/net.c:704
+#: grub-core/net/net.c:709
 msgid "you can't delete this address"
 msgstr ""
 
-#: grub-core/net/net.c:776 grub-core/net/net.c:792
+#: grub-core/net/net.c:781 grub-core/net/net.c:797
 #, c-format
 msgid "Unsupported hw address type %d\n"
-msgstr ""
+msgstr "지원하지 않는 하드웨어 주소 유형 %d\n"
 
-#: grub-core/net/net.c:813
+#: grub-core/net/net.c:818
 #, c-format
 msgid "Unsupported address type %d\n"
 msgstr ""
 
-#: grub-core/net/net.c:1017 grub-core/net/net.c:1131
+#: grub-core/net/net.c:1022 grub-core/net/net.c:1136
 msgid "three arguments expected"
 msgstr ""
 
-#: grub-core/net/net.c:1023
+#: grub-core/net/net.c:1028
 msgid "card not found"
 msgstr ""
 
 #. TRANSLATORS: it refers to the network address.
-#: grub-core/net/net.c:1167
+#: grub-core/net/net.c:1172
 msgid "temporary"
 msgstr ""
 
-#: grub-core/net/net.c:1190
-#, fuzzy, c-format
+#: grub-core/net/net.c:1195
+#, c-format
 msgid "Unknown address type %d\n"
-msgstr "알 수 없는 파일 시스템"
+msgstr "알 수 없는 주소 유형 %d\n"
 
-#: grub-core/net/net.c:1298
+#: grub-core/net/net.c:1303
 #, fuzzy
 msgid "no server is specified"
 msgstr "알려진 장치가 없음.\n"
 
-#: grub-core/net/net.c:1637
+#: grub-core/net/net.c:1642
 #, c-format
 msgid "timeout reading `%s'"
 msgstr ""
 
 #. TRANSLATORS: HWADDRESS stands for
 #. "hardware address".
-#: grub-core/net/net.c:1762
+#: grub-core/net/net.c:1899
 msgid "SHORTNAME CARD ADDRESS [HWADDRESS]"
 msgstr ""
 
-#: grub-core/net/net.c:1763
+#: grub-core/net/net.c:1900
 msgid "Add a network address."
 msgstr ""
 
-#: grub-core/net/net.c:1766
+#: grub-core/net/net.c:1903
 msgid "[CARD [HWADDRESS]]"
 msgstr ""
 
-#: grub-core/net/net.c:1767
+#: grub-core/net/net.c:1904
 msgid "Perform an IPV6 autoconfiguration"
 msgstr ""
 
-#: grub-core/net/net.c:1770 grub-core/net/net.c:1777
+#: grub-core/net/net.c:1907 grub-core/net/net.c:1914
 msgid "SHORTNAME"
 msgstr ""
 
-#: grub-core/net/net.c:1771
-#, fuzzy
+#: grub-core/net/net.c:1908
 msgid "Delete a network address."
-msgstr "시리얼 포트 주소를 정합니다."
+msgstr "네트워크 주소를 삭제합니다."
 
 #. TRANSLATORS: "gw" is a keyword.
-#: grub-core/net/net.c:1774
+#: grub-core/net/net.c:1911
 msgid "SHORTNAME NET [INTERFACE| gw GATEWAY]"
 msgstr ""
 
-#: grub-core/net/net.c:1775
+#: grub-core/net/net.c:1912
 msgid "Add a network route."
-msgstr ""
+msgstr "네트워크 경로를 추가합니다."
 
-#: grub-core/net/net.c:1778
+#: grub-core/net/net.c:1915
 msgid "Delete a network route."
-msgstr ""
+msgstr "네트워크 경로를 삭제합니다."
 
-#: grub-core/net/net.c:1780
+#: grub-core/net/net.c:1917
 msgid "list network routes"
 msgstr ""
 
-#: grub-core/net/net.c:1782
+#: grub-core/net/net.c:1919
 msgid "list network cards"
 msgstr ""
 
-#: grub-core/net/net.c:1784
+#: grub-core/net/net.c:1921
 msgid "list network addresses"
 msgstr ""
 
 #: grub-core/net/tcp.c:681
 msgid "connection refused"
-msgstr ""
+msgstr "연결이 거부됨"
 
 #: grub-core/net/tcp.c:684
 msgid "connection timeout"
-msgstr ""
+msgstr "연결 시간초과"
 
 #: grub-core/normal/auth.c:220
 msgid "Enter username: "
@@ -4227,36 +4125,36 @@ msgstr "사용자 이름을 입력하십시오: "
 
 #: grub-core/normal/auth.c:269
 msgid "[USERLIST]"
-msgstr ""
+msgstr "[사용자목록]"
 
 #: grub-core/normal/auth.c:270
 msgid "Check whether user is in USERLIST."
-msgstr ""
+msgstr "사용자가 USERLIST에 있는지 확인합니다."
 
-#: grub-core/normal/cmdline.c:174 grub-core/normal/menu_entry.c:1068
+#: grub-core/normal/cmdline.c:175 grub-core/normal/menu_entry.c:1077
 msgid "Possible commands are:"
 msgstr "가능한 명령은:"
 
-#: grub-core/normal/cmdline.c:177 grub-core/normal/menu_entry.c:1072
+#: grub-core/normal/cmdline.c:178 grub-core/normal/menu_entry.c:1081
 msgid "Possible devices are:"
 msgstr "가능한 장치는:"
 
-#: grub-core/normal/cmdline.c:180 grub-core/normal/menu_entry.c:1076
+#: grub-core/normal/cmdline.c:181 grub-core/normal/menu_entry.c:1085
 msgid "Possible files are:"
 msgstr "가능한 파일은:"
 
-#: grub-core/normal/cmdline.c:183 grub-core/normal/menu_entry.c:1080
+#: grub-core/normal/cmdline.c:184 grub-core/normal/menu_entry.c:1089
 msgid "Possible partitions are:"
 msgstr "가능한 파티션은:"
 
-#: grub-core/normal/cmdline.c:186 grub-core/normal/menu_entry.c:1084
+#: grub-core/normal/cmdline.c:187 grub-core/normal/menu_entry.c:1093
 msgid "Possible arguments are:"
 msgstr "가능한 인자값은:"
 
 #. TRANSLATORS: this message is used if none of above matches.
 #. This shouldn't happen but please use the general term for
 #. "thing" or "object".
-#: grub-core/normal/cmdline.c:192 grub-core/normal/menu_entry.c:1088
+#: grub-core/normal/cmdline.c:193 grub-core/normal/menu_entry.c:1097
 msgid "Possible things are:"
 msgstr "가능한 것은:"
 
@@ -4277,125 +4175,94 @@ msgstr "경고: 잘못된 배경 색 `%s'\n"
 
 #: grub-core/normal/context.c:206
 msgid "ENVVAR [ENVVAR] ..."
-msgstr ""
+msgstr "환경변수 [환경변수] ..."
 
 #: grub-core/normal/context.c:207
-#, fuzzy
 msgid "Export variables."
-msgstr "v1 테이블을 보여줍니다."
-
-#: grub-core/normal/datetime.c:25
-msgid "Sunday"
-msgstr ""
-
-#: grub-core/normal/datetime.c:26
-msgid "Monday"
-msgstr ""
-
-#: grub-core/normal/datetime.c:27
-msgid "Tuesday"
-msgstr ""
-
-#: grub-core/normal/datetime.c:28
-msgid "Wednesday"
-msgstr ""
-
-#: grub-core/normal/datetime.c:29
-msgid "Thursday"
-msgstr ""
-
-#: grub-core/normal/datetime.c:30
-msgid "Friday"
-msgstr ""
-
-#: grub-core/normal/datetime.c:31
-msgid "Saturday"
-msgstr ""
+msgstr "변수를 내보냅니다."
 
 #: grub-core/normal/dyncmd.c:187
-#, fuzzy
 msgid "module isn't loaded"
-msgstr "로드 안됨."
+msgstr "모듈이 로드되지 않음"
 
-#: grub-core/normal/main.c:211
+#: grub-core/normal/main.c:212
 #, c-format
 msgid "GNU GRUB  version %s"
 msgstr "GNU GRUB  버전 %s"
 
-#: grub-core/normal/main.c:360
+#: grub-core/normal/main.c:378
 msgid "ESC at any time exits."
 msgstr "ESC 언제든지 종료합니다."
 
-#: grub-core/normal/main.c:363
+#: grub-core/normal/main.c:381
 #, c-format
 msgid ""
 "Minimal BASH-like line editing is supported. For the first word, TAB lists "
 "possible command completions. Anywhere else TAB lists possible device or "
 "file completions. %s"
 msgstr ""
-"최소한의 BASH 형태의 라인 편집을 지원합니다. TAB을 누르시면 사용 가능한 명령"
-"어 목록을 표시합니다. 장치나 파일도 마찬가지로 어느 곳에서든지 TAB을 통해 목"
-"록을 보실 수 있습니다. %s"
+"최소한의 BASH-like 라인 편집을 지원합니다. TAB을 누르시면 사용 가능한 명령어 "
+"목록을 표시합니다. 장치나 파일도 마찬가지로 어느 곳에서든지 TAB을 통해 목록"
+"을 보실 수 있습니다. %s"
 
 #. TRANSLATORS: it's command line prompt.
-#: grub-core/normal/main.c:395
+#: grub-core/normal/main.c:413
 msgid ">"
 msgstr ""
 
 #. TRANSLATORS: it's command line prompt.
-#: grub-core/normal/main.c:398
+#: grub-core/normal/main.c:416
 msgid "grub>"
 msgstr ""
 
-#: grub-core/normal/main.c:518
+#: grub-core/normal/main.c:536
 msgid "Clear the screen."
 msgstr "화면을 지웁니다."
 
-#: grub-core/normal/main.c:527
+#: grub-core/normal/main.c:545
 msgid "Enter normal mode."
 msgstr "일반 모드에 진입합니다."
 
-#: grub-core/normal/main.c:529
+#: grub-core/normal/main.c:547
 msgid "Exit from normal mode."
 msgstr "일반 모드에서 나갑니다."
 
-#: grub-core/normal/menu.c:66 grub-core/normal/menu_entry.c:1449
+#: grub-core/normal/menu.c:66 grub-core/normal/menu_entry.c:1458
 msgid "Press any key to continue..."
 msgstr "계속하려면 아무 키나 누르십시오..."
 
-#: grub-core/normal/menu.c:815
+#: grub-core/normal/menu.c:814
 #, c-format
 msgid "Booting `%s'"
-msgstr ""
+msgstr "부팅 `%s'"
 
-#: grub-core/normal/menu.c:827
+#: grub-core/normal/menu.c:826
 #, c-format
 msgid "Falling back to `%s'"
 msgstr ""
 
-#: grub-core/normal/menu.c:843
+#: grub-core/normal/menu.c:842
 msgid "Failed to boot both default and fallback entries.\n"
 msgstr ""
 
-#: grub-core/normal/menu_entry.c:1171
+#: grub-core/normal/menu_entry.c:1180
 msgid "Booting a command list"
 msgstr "명령행을 부팅"
 
 #: grub-core/normal/menu_text.c:160
-#, fuzzy
 msgid ""
 "Minimum Emacs-like screen editing is supported. TAB lists completions. Press "
 "Ctrl-x or F10 to boot, Ctrl-c or F2 for a command-line or ESC to discard "
 "edits and return to the GRUB menu."
 msgstr ""
 "이맥스와 같은 편집 기능을 최소한으로 지원합니다. 탭은 완성 기능을 지원합니"
-"다. F1은 부팅, F2=Ctrl-a, F3=Ctrl-e, F4는 명령행 또는 ESC는 현재 편집한 것을 "
+"다. Ctrl-x 또는 F10은 부팅, Ctrl-c 또는 F2는 명령행, ESC는 현재 편집한 것을 "
 "취소하고 GRUB으로 되돌아갑니다."
 
 #: grub-core/normal/menu_text.c:170
-#, fuzzy, c-format
+#, c-format
 msgid "Use the %C and %C keys to select which entry is highlighted."
-msgstr "%C 및 %C 키를 이용하여 원하는 항목이 밝게 표시되도록 선택하십시오.\n"
+msgstr "%C 및 %C 키를 이용하여 원하는 항목이 밝게 표시되도록 선택하십시오."
 
 #. TRANSLATORS: that's the list of binary unit prefixes.
 #: grub-core/normal/misc.c:38
@@ -4480,7 +4347,7 @@ msgstr "장치 %s:"
 
 #: grub-core/normal/misc.c:107
 msgid "Filesystem cannot be accessed"
-msgstr "파일 시스템에 접근할 수 없습니다."
+msgstr "파일 시스템에 접근할 수 없습니다"
 
 #: grub-core/normal/misc.c:121
 #, c-format
@@ -4488,9 +4355,9 @@ msgid "Filesystem type %s"
 msgstr "파일 시스템 종류 %s"
 
 #: grub-core/normal/misc.c:131
-#, fuzzy, c-format
+#, c-format
 msgid "- Label `%s'"
-msgstr "- 레이블 \"%s\""
+msgstr "- 레이블 '%s'"
 
 #. TRANSLATORS: Arguments are year, month, day, hour, minute,
 #. second, day of the week (translated).
@@ -4500,9 +4367,8 @@ msgid "- Last modification time %d-%02d-%02d %02d:%02d:%02d %s"
 msgstr "- 마지막으로 수정된 시간 %d-%02d-%02d %02d:%02d:%02d %s"
 
 #: grub-core/normal/misc.c:171
-#, fuzzy
 msgid "No known filesystem detected"
-msgstr "알 수 없는 파일 시스템"
+msgstr "알려진 파일 시스템이 감지되지 않음"
 
 #: grub-core/normal/misc.c:174
 #, c-format
@@ -4516,18 +4382,18 @@ msgstr ""
 
 #: grub-core/normal/misc.c:180
 msgid " - Total size unknown"
-msgstr ""
+msgstr " - 총 크기 알수없음"
 
 #: grub-core/normal/misc.c:182
 #, c-format
 msgid " - Total size %llu%sKiB"
-msgstr ""
+msgstr " - 총 크기 %llu%sKiB"
 
 #. TRANSLATORS: Replace dot with appropriate decimal separator for
 #. your language.
 #: grub-core/normal/misc.c:186
 msgid ".5"
-msgstr ""
+msgstr ".5"
 
 #. TRANSLATORS: This has to fit on one line.  It's ok to include few
 #. words but don't write poems.
@@ -4539,7 +4405,11 @@ msgstr ""
 #: grub-core/osdep/windows/config.c:55
 #, c-format
 msgid "cannot open configuration file `%s': %s"
-msgstr ""
+msgstr "설정 파일 '%s'을(를) 열 수 없습니다: %s"
+
+#: grub-core/osdep/aros/hostdisk.c:523
+msgid "Success"
+msgstr "성공"
 
 #: grub-core/osdep/basic/compress.c:8 grub-core/osdep/basic/compress.c:14
 #: grub-core/osdep/basic/compress.c:20
@@ -4620,9 +4490,8 @@ msgid "cannot read `%s' correctly"
 msgstr "올바르게 `%s'을(를) 읽을 수 없습니다"
 
 #: grub-core/osdep/generic/blocklist.c:126
-#, fuzzy
 msgid "failed to read the sectors of the core image"
-msgstr "코어 이미지의 나머지 섹터 부분읽기에 실패 했습니다"
+msgstr "코어 이미지 섹터를 읽기 실패 했습니다"
 
 #. TRANSLATORS: On GNU/Hurd, a "translator" is similar to a filesystem
 #. mount, but handled by a userland daemon, whose invocation command line
@@ -4690,7 +4559,7 @@ msgstr ""
 msgid "invalid zero blocksize"
 msgstr ""
 
-#: grub-core/osdep/linux/blocklist.c:90 util/setup.c:744
+#: grub-core/osdep/linux/blocklist.c:90 util/setup.c:747
 msgid "can't retrieve blocklists"
 msgstr ""
 
@@ -4702,7 +4571,7 @@ msgstr ""
 #: grub-core/osdep/linux/getroot.c:160 grub-core/osdep/linux/getroot.c:164
 #, c-format
 msgid "unsupported RAID version: %d.%d"
-msgstr ""
+msgstr "지원하지 않는 RAID version: %d.%d"
 
 #: grub-core/osdep/linux/getroot.c:169
 #, c-format
@@ -4722,10 +4591,10 @@ msgstr ""
 msgid "Unable to open stream from %s: %s"
 msgstr ""
 
-#: grub-core/osdep/linux/getroot.c:1033
-#, fuzzy, c-format
+#: grub-core/osdep/linux/getroot.c:1046
+#, c-format
 msgid "unknown kind of RAID device `%s'"
-msgstr "유효하지 않은 루트 장치 `%s'"
+msgstr "알 수 없는 유형의 RAID장치 `%s'"
 
 #: grub-core/osdep/linux/ofpath.c:181
 #, c-format
@@ -4734,7 +4603,7 @@ msgstr ""
 
 #: grub-core/osdep/linux/ofpath.c:222 grub-core/osdep/unix/getroot.c:505
 #: grub-core/osdep/unix/getroot.c:529 grub-core/osdep/unix/relpath.c:49
-#: util/grub-install.c:984 util/grub-install.c:1331 util/grub-probe.c:323
+#: util/grub-install.c:992 util/grub-install.c:1339 util/grub-probe.c:323
 #, c-format
 msgid "failed to get canonical path of `%s'"
 msgstr ""
@@ -4747,7 +4616,7 @@ msgstr ""
 #: grub-core/osdep/linux/ofpath.c:758 util/ieee1275/grub-ofpathname.c:39
 #, c-format
 msgid "Usage: %s DEVICE\n"
-msgstr ""
+msgstr "사용법: %s <장치>\n"
 
 #: grub-core/osdep/unix/exec.c:86 grub-core/osdep/unix/exec.c:172
 #: grub-core/osdep/unix/exec.c:217
@@ -4766,28 +4635,27 @@ msgstr ""
 
 #: grub-core/osdep/unix/getroot.c:423 grub-core/osdep/unix/getroot.c:480
 #: grub-core/osdep/unix/getroot.c:489
-#, fuzzy
 msgid "cannot restore the original directory"
-msgstr "커널 이미지 압축을 할 수 없습니다"
+msgstr "원본 디렉토리를 복원할 수 없습니다"
 
 #. TRANSLATORS: "stat" comes from the name of POSIX function.
 #: grub-core/osdep/unix/getroot.c:551 grub-core/osdep/unix/hostdisk.c:61
 #: grub-core/osdep/unix/relpath.c:73 grub-core/osdep/unix/relpath.c:97
-#: util/getroot.c:160 util/getroot.c:162 util/grub-install.c:774
+#: util/getroot.c:160 util/getroot.c:162 util/grub-install.c:782
 #: util/grub-macbless.c:70
 #, fuzzy, c-format
 msgid "cannot stat `%s': %s"
 msgstr "'%s'을(를) 열 수 없습니다."
 
-#: grub-core/osdep/unix/hostdisk.c:293
+#: grub-core/osdep/unix/hostdisk.c:296
 #, c-format
 msgid "cannot make temporary file: %s"
-msgstr ""
+msgstr "임시 파일을 만들 수 없습니다: %s"
 
-#: grub-core/osdep/unix/hostdisk.c:311
+#: grub-core/osdep/unix/hostdisk.c:314
 #, c-format
 msgid "cannot make temporary directory: %s"
-msgstr ""
+msgstr "임시 디렉토리를 만들 수 없습니다: %s"
 
 #: grub-core/osdep/unix/platform.c:77
 #, c-format
@@ -4822,13 +4690,13 @@ msgstr ""
 #. we're in trouble and throw this error.
 #: grub-core/osdep/unix/relpath.c:90
 msgid "no `/' in canonical filename"
-msgstr ""
+msgstr "캐노니컬 파일명에 '/'가 없습니다"
 
 #: grub-core/osdep/windows/hostdisk.c:151
 msgid "cygwin_conv_path() failed"
 msgstr ""
 
-#: grub-core/osdep/windows/hostdisk.c:501 util/grub-install.c:570
+#: grub-core/osdep/windows/hostdisk.c:501 util/grub-install.c:578
 msgid "couldn't retrieve random data"
 msgstr ""
 
@@ -4842,27 +4710,23 @@ msgstr ""
 
 #: grub-core/osdep/windows/platform.c:240
 msgid "unexpected EFI error"
-msgstr ""
+msgstr "예기치 않은 EFI에러"
 
 #: grub-core/osdep/windows/platform.c:315
 msgid "Couldn't find a free BootNNNN slot"
 msgstr ""
 
-#: grub-core/partmap/gpt.c:191
-#, fuzzy
+#: grub-core/partmap/gpt.c:195
 msgid ""
 "this GPT partition label contains no BIOS Boot Partition; embedding won't be "
 "possible"
 msgstr ""
-"GPT 파티션 라벨이 BIOS 부트 파티션을 가지고 있지 않습니다;임베딩이 불가능합니"
-"다!"
+"GPT 파티션 라벨이 BIOS 부트 파티션을 가지고 있지 않습니다; 임베딩이 불가능합"
+"니다"
 
-#: grub-core/partmap/gpt.c:196
-#, fuzzy
+#: grub-core/partmap/gpt.c:203
 msgid "your BIOS Boot Partition is too small; embedding won't be possible"
-msgstr ""
-"GPT 파티션 라벨이 BIOS 부트 파티션을 가지고 있지 않습니다;임베딩이 불가능합니"
-"다!"
+msgstr "BIOS부트 파티션이 너무 작습니다; 임베딩이 불가능합니다"
 
 #. TRANSLATORS: MBR gap and boot track is the same thing and is the space
 #. between MBR and first partitition. If your language translates well only
@@ -4885,31 +4749,28 @@ msgid ""
 "not to store data in the boot track"
 msgstr ""
 
-#: grub-core/partmap/msdos.c:384
+#: grub-core/partmap/msdos.c:385
 msgid ""
 "other software is using the embedding area, and there is not enough room for "
 "core.img.  Such software is often trying to store data in a way that avoids "
 "detection.  We recommend you investigate"
 msgstr ""
 
-#: grub-core/partmap/msdos.c:395
-#, fuzzy
+#: grub-core/partmap/msdos.c:399
 msgid ""
 "this msdos-style partition label has no post-MBR gap; embedding won't be "
 "possible"
 msgstr ""
-"이러한 msdos-방식의 파티션 레이블은  post-MBR 공간이 없습니다; 끼워넣기가 불"
-"가능합니다!"
+"이 msdos-방식의 파티션 레이블은 post-MBR 공간이 없습니다; 임베딩이 불가능합니"
+"다"
 
-#: grub-core/partmap/msdos.c:404
-#, fuzzy
+#: grub-core/partmap/msdos.c:408
 msgid "your embedding area is unusually small.  core.img won't fit in it."
-msgstr "끼워넣기 공간이 비정상적으로 작습니다.  core.img가 맞지 않습니다."
+msgstr "임베딩 공간이 비정상적으로 작습니다.  core.img가 맞지 않습니다."
 
 #: grub-core/parttool/msdospart.c:39
-#, fuzzy
 msgid "Make partition active"
-msgstr "가능한 파티션은:"
+msgstr "파티션을 활성화 합니다"
 
 #: grub-core/parttool/msdospart.c:51
 msgid "not a primary partition"
@@ -4926,14 +4787,12 @@ msgid "Cleared active flag on %d. \n"
 msgstr ""
 
 #: grub-core/parttool/msdospart.c:87
-#, fuzzy
 msgid "Change partition type"
-msgstr "파티션 맵 유형을 결정합니다."
+msgstr "파티션 유형을 변경합니다"
 
 #: grub-core/parttool/msdospart.c:88
-#, fuzzy
 msgid "Set `hidden' flag in partition type"
-msgstr "파티션 맵 유형을 결정합니다."
+msgstr "파티션 유형에 '숨김' 플래그를 설정합니다"
 
 #: grub-core/parttool/msdospart.c:130
 #, c-format
@@ -4942,10 +4801,10 @@ msgstr ""
 
 #. TRANSLATORS: In this case we're actually writing to the disk and actively
 #. modifying partition type rather than just defining it.
-#: grub-core/parttool/msdospart.c:137
-#, fuzzy, c-format
+#: grub-core/parttool/msdospart.c:136
+#, c-format
 msgid "Setting partition type to 0x%x\n"
-msgstr "파티션 맵 유형을 결정합니다."
+msgstr "파티션 맵 유형을 0x%x(으)로 설정합니다\n"
 
 #. TRANSLATORS: 0 is a quantifier. "break" (similar to bash)
 #. can be used e.g. to break 3 loops at once.
@@ -4963,17 +4822,21 @@ msgid "not in function body"
 msgstr ""
 
 #: grub-core/script/execute.c:371
-#, fuzzy, c-format
+#, c-format
 msgid "invalid variable name `%s'"
-msgstr "유효하지 않은 루트 장치 `%s'"
+msgstr "유효하지 변수명 `%s'"
 
-#: grub-core/script/execute.c:953
+#: grub-core/script/execute.c:958
 msgid "cannot allocate command buffer"
 msgstr ""
 
-#: grub-core/script/lexer.c:144 util/grub-fstest.c:330
-msgid "unexpected end of file"
+#: grub-core/script/function.c:68
+msgid "attempt to redefine a function being executed"
 msgstr ""
+
+#: grub-core/script/lexer.c:149 util/grub-fstest.c:330
+msgid "unexpected end of file"
+msgstr "예기치 않은 파일의 끝"
 
 #: grub-core/script/main.c:55 grub-core/script/main.c:57
 #: grub-core/script/main.c:59 grub-core/script/main.c:67
@@ -4981,9 +4844,8 @@ msgid "[NUM]"
 msgstr ""
 
 #: grub-core/script/main.c:55
-#, fuzzy
 msgid "Exit from loops"
-msgstr "GRUB에서 나갑니다."
+msgstr "루프에서 나갑니다."
 
 #: grub-core/script/main.c:57
 msgid "Continue loops"
@@ -5090,11 +4952,11 @@ msgstr "직렬 포트를 설정합니다."
 msgid "unknown terminfo type `%s'"
 msgstr "알 수 없는 추가적인 인자 값 `%s'.\n"
 
-#: grub-core/term/terminfo.c:668
+#: grub-core/term/terminfo.c:671
 msgid "ASCII"
 msgstr ""
 
-#: grub-core/term/terminfo.c:671
+#: grub-core/term/terminfo.c:674
 msgid "UTF-8"
 msgstr ""
 
@@ -5102,55 +4964,55 @@ msgstr ""
 #. based on UTF-8 with right-to-left languages written in reverse.
 #. Used on some terminals. Normal UTF-8 is refered as
 #. "logically-ordered UTF-8" by opposition.
-#: grub-core/term/terminfo.c:677
+#: grub-core/term/terminfo.c:680
 msgid "visually-ordered UTF-8"
 msgstr ""
 
-#: grub-core/term/terminfo.c:680
+#: grub-core/term/terminfo.c:683
 msgid "Unknown encoding"
 msgstr ""
 
-#: grub-core/term/terminfo.c:684
+#: grub-core/term/terminfo.c:687
 msgid "Current terminfo types:"
 msgstr ""
 
-#: grub-core/term/terminfo.c:699
+#: grub-core/term/terminfo.c:702
 msgid "Terminal is ASCII-only [default]."
 msgstr ""
 
-#: grub-core/term/terminfo.c:700
+#: grub-core/term/terminfo.c:703
 msgid "Terminal is logical-ordered UTF-8."
 msgstr ""
 
-#: grub-core/term/terminfo.c:701
+#: grub-core/term/terminfo.c:704
 msgid "Terminal is visually-ordered UTF-8."
 msgstr ""
 
-#: grub-core/term/terminfo.c:703
+#: grub-core/term/terminfo.c:706
 msgid "Terminal has specified geometry."
 msgstr ""
 
 #. TRANSLATORS: "x" has to be entered in, like an identifier, so please don't
 #. use better Unicode codepoints.
-#: grub-core/term/terminfo.c:706
+#: grub-core/term/terminfo.c:709
 msgid "WIDTHxHEIGHT."
 msgstr ""
 
-#: grub-core/term/terminfo.c:746
+#: grub-core/term/terminfo.c:749
 msgid "incorrect terminal dimensions specification"
 msgstr ""
 
-#: grub-core/term/terminfo.c:776
+#: grub-core/term/terminfo.c:779
 #, c-format
 msgid "terminal %s isn't found or it's not handled by terminfo"
 msgstr ""
 
-#: grub-core/term/terminfo.c:785
-msgid "[[-a|-u|-v] [-g WxH] TERM [TYPE]]"
+#: grub-core/term/terminfo.c:788
+msgid "[[-a|-u|-v] [-g WxH] [TERM] [TYPE]]"
 msgstr ""
 
-#: grub-core/term/terminfo.c:786
-msgid "Set terminfo type of TERM  to TYPE.\n"
+#: grub-core/term/terminfo.c:789
+msgid "Set terminfo type of TERM to TYPE.\n"
 msgstr ""
 
 #. TRANSLATORS: this is the BLOCK-argument, not
@@ -5162,7 +5024,7 @@ msgstr "블럭 목록을 출력합니다."
 
 #. TRANSLATORS: We're speaking about bitmap images like
 #. JPEG or PNG.
-#: grub-core/video/bitmap.c:209
+#: grub-core/video/bitmap.c:216
 #, c-format
 msgid "bitmap file `%s' is of unsupported format"
 msgstr ""
@@ -5175,18 +5037,21 @@ msgstr ""
 #: grub-core/video/i386/pc/vbe.c:1198
 #, c-format
 msgid "              total memory: %d KiB\n"
-msgstr ""
+msgstr "              총 메모리: %d KiB\n"
 
 #: grub-core/video/video.c:596 grub-core/video/video.c:762
 msgid "no suitable video mode found"
 msgstr ""
 
-#: include/grub/crypto.h:403
-msgid "access denied"
+#: include/grub/buffer.h:123
+msgid "peek out of range"
 msgstr ""
 
+#: include/grub/crypto.h:402
+msgid "access denied"
+msgstr "접근 거부됨"
+
 #: include/grub/util/install.h:30 include/grub/util/install.h:35
-#, fuzzy
 msgid "MODULES"
 msgstr "<모듈>"
 
@@ -5204,21 +5069,21 @@ msgstr ""
 
 #: include/grub/util/install.h:37
 msgid "THEMES"
-msgstr ""
+msgstr "테마"
 
 #: include/grub/util/install.h:38
 #, c-format
 msgid "install THEMES [default=%s]"
-msgstr ""
+msgstr "테마 설치 [default=%s]"
 
 #: include/grub/util/install.h:39
 msgid "FONTS"
-msgstr ""
+msgstr "글꼴"
 
 #: include/grub/util/install.h:40
 #, c-format
 msgid "install FONTS [default=%s]"
-msgstr ""
+msgstr "글꼴 설치 [default=%s]"
 
 #: include/grub/util/install.h:41
 msgid "LOCALES"
@@ -5233,9 +5098,8 @@ msgid "compress GRUB files [optional]"
 msgstr ""
 
 #: include/grub/util/install.h:48 util/grub-mkimage.c:83
-#, fuzzy
 msgid "choose the compression to use for core image"
-msgstr "커널 이미지 압축을 할 수 없습니다"
+msgstr "코어 이미지 압축 유형을 선택합니다"
 
 #. TRANSLATORS: platform here isn't identifier. It can be translated.
 #: include/grub/util/install.h:51 include/grub/util/install.h:54
@@ -5258,16 +5122,29 @@ msgstr ""
 msgid "embed FILE as public key for signature checking"
 msgstr ""
 
-#: util/editenv.c:59 util/grub-editenv.c:201 util/grub-install-common.c:535
-#: util/grub-mkimage.c:315 util/setup.c:791
+#: include/grub/util/install.h:67 util/grub-mkimage.c:84
+msgid "SBAT metadata"
+msgstr ""
+
+#: include/grub/util/install.h:69 util/grub-mkimage.c:85
+msgid "disable shim_lock verifier"
+msgstr ""
+
+#: util/editenv.c:71 util/grub-editenv.c:207 util/grub-install-common.c:700
+#: util/grub-mkimage.c:331 util/setup.c:794
 #, fuzzy, c-format
 msgid "cannot sync `%s': %s"
 msgstr "'%s'을(를) 열 수 없습니다."
 
-#: util/editenv.c:64
+#: util/editenv.c:77
 #, c-format
 msgid "cannot rename the file %s to %s"
-msgstr ""
+msgstr "파일 %s의 이름을 %s로 변경할 수 없습니다"
+
+#: util/editenv.c:94 util/editenv.c:131
+#, fuzzy, c-format
+msgid "cannot rename the file %s to %s: %m"
+msgstr "파일 %s의 이름을 %s로 변경할 수 없습니다"
 
 #: util/getroot.c:402
 #, c-format
@@ -5279,29 +5156,26 @@ msgid "Commands:"
 msgstr ""
 
 #: util/grub-editenv.c:47
-#, fuzzy
 msgid "Create a blank environment block file."
-msgstr "값을 환경 블록 파일로 저장합니다."
+msgstr "빈 환경 블록 파일을 생성합니다."
 
 #: util/grub-editenv.c:49
-#, fuzzy
 msgid "List the current variables."
-msgstr "현재의 매핑을 보입니다."
+msgstr "현재 변수를 열거합니다."
 
 #. TRANSLATORS: "set" is a keyword. It's a summary of "set" subcommand.
 #: util/grub-editenv.c:51
 msgid "set [NAME=VALUE ...]"
-msgstr ""
+msgstr "지정 [이름 = 값 ...]"
 
 #: util/grub-editenv.c:52
-#, fuzzy
 msgid "Set variables."
-msgstr "변수를 사용자 입력으로 지정합니다."
+msgstr "변수를 지정합니다."
 
 #. TRANSLATORS: "unset" is a keyword. It's a summary of "unset" subcommand.
 #: util/grub-editenv.c:54
 msgid "unset [NAME ...]"
-msgstr ""
+msgstr "지정해제 [이름 ...]"
 
 #: util/grub-editenv.c:55
 msgid "Delete variables."
@@ -5320,9 +5194,8 @@ msgid "FILENAME COMMAND"
 msgstr ""
 
 #: util/grub-editenv.c:114
-#, fuzzy
 msgid "Tool to edit environment block."
-msgstr "값을 환경 블록 파일로 저장합니다."
+msgstr "환경 블록을 편집할 도구"
 
 #: util/grub-editenv.c:116
 #, c-format
@@ -5333,17 +5206,21 @@ msgid ""
 "block, use `rm %s'."
 msgstr ""
 
-#: util/grub-editenv.c:162
-#, fuzzy
-msgid "invalid environment block"
-msgstr "환경 블록 파일로부터 값을 열거합니다."
-
-#: util/grub-editenv.c:217
+#: util/grub-editenv.c:149
 #, fuzzy, c-format
-msgid "invalid parameter %s"
-msgstr "유효하지 않은 루트 장치 `%s'"
+msgid "cannot get file location `%s': %s"
+msgstr "'%s'을(를) 쓸 수 없습니다\" %s"
 
-#: util/grub-editenv.c:222
+#: util/grub-editenv.c:168
+msgid "invalid environment block"
+msgstr "유효하지 않은 환경 블록"
+
+#: util/grub-editenv.c:223
+#, c-format
+msgid "invalid parameter %s"
+msgstr "유효하지 인자 `%s'"
+
+#: util/grub-editenv.c:228
 msgid "environment block too small"
 msgstr ""
 
@@ -5363,9 +5240,9 @@ msgid "read error at offset %llu: %s"
 msgstr ""
 
 #: util/grub-fstest.c:210
-#, fuzzy, c-format
+#, c-format
 msgid "cannot open OS file `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "OS 파일'%s'을(를) 열 수 없습니다: %s"
 
 #: util/grub-fstest.c:225 util/misc.c:126
 #, c-format
@@ -5398,58 +5275,51 @@ msgstr ""
 
 #: util/grub-fstest.c:507
 msgid "ls PATH"
-msgstr ""
+msgstr "ls <경로>"
 
 #: util/grub-fstest.c:507
-#, fuzzy
 msgid "List files in PATH."
-msgstr "파일의 목록을 보여줍니다."
+msgstr "<경로>의 파일을 열거합니다."
 
 #: util/grub-fstest.c:508
 msgid "cp FILE LOCAL"
-msgstr ""
+msgstr "cp <파일> <주소>"
 
 #: util/grub-fstest.c:508
 msgid "Copy FILE to local file LOCAL."
-msgstr ""
+msgstr "<파일>을 <주소>의 로컬 파일로 복사합니다."
 
 #: util/grub-fstest.c:509
-#, fuzzy
 msgid "cat FILE"
-msgstr "<파일>"
+msgstr "cat <파일>"
 
 #: util/grub-fstest.c:509
 msgid "Copy FILE to standard output."
-msgstr ""
+msgstr "<FILE>을 표준 출력으로 복사합니다."
 
 #: util/grub-fstest.c:510
 msgid "cmp FILE LOCAL"
-msgstr ""
+msgstr "cmp <파일> <주소>"
 
 #: util/grub-fstest.c:510
-#, fuzzy
 msgid "Compare FILE with local file LOCAL."
-msgstr "두개의 파일을 비교합니다."
+msgstr "<FILE>과 <주소>의 로컬 파일을 비교합니다."
 
 #: util/grub-fstest.c:511
-#, fuzzy
 msgid "hex FILE"
-msgstr "<파일>"
+msgstr "hex <파일>"
 
 #: util/grub-fstest.c:511
-#, fuzzy
 msgid "Show contents of FILE in hex."
-msgstr "파일의 내용을 표시합니다."
+msgstr "<파일>의 내용을 16진수로 표시합니다."
 
 #: util/grub-fstest.c:512
-#, fuzzy
 msgid "crc FILE"
-msgstr "<파일>"
+msgstr "crc <파일>"
 
 #: util/grub-fstest.c:512
-#, fuzzy
 msgid "Get crc32 checksum of FILE."
-msgstr "파일의 CRC32 체크섬을 계산합니다."
+msgstr "<파일>의 CRC32 체크섬을 얻어옵니다."
 
 #: util/grub-fstest.c:513
 msgid "blocklist FILE"
@@ -5477,9 +5347,8 @@ msgid "NUM"
 msgstr ""
 
 #: util/grub-fstest.c:517
-#, fuzzy
 msgid "Skip N bytes from output file."
-msgstr "파일 첫부분의 오프셋 바이트를 건너뜁니다."
+msgstr "출력 파일에서 N byte만큼 생략합니다."
 
 #: util/grub-fstest.c:518
 msgid "Handle N bytes in output file."
@@ -5505,11 +5374,11 @@ msgstr ""
 
 #: util/grub-fstest.c:524 util/grub-mount.c:457
 msgid "Load zfs crypto key."
-msgstr ""
+msgstr "zfs암호키를 읽어들입니다."
 
 #: util/grub-fstest.c:526
 msgid "Uncompress data."
-msgstr ""
+msgstr "데이터 압축해제"
 
 #: util/grub-fstest.c:605
 #, fuzzy
@@ -5530,17 +5399,16 @@ msgstr "알려진 장치가 없음.\n"
 
 #: util/grub-fstest.c:638
 msgid "Not enough parameters to command.\n"
-msgstr ""
+msgstr "명령 인자가 모자랍니다.\n"
 
 #: util/grub-fstest.c:711
-#, fuzzy, c-format
+#, c-format
 msgid "Invalid command %s.\n"
-msgstr "유효하지 않은 장치 `%s'.\n"
+msgstr "유효하지 않은 명령 `%s'.\n"
 
 #: util/grub-fstest.c:724
-#, fuzzy
 msgid "IMAGE_PATH COMMANDS"
-msgstr "파티션 명령어"
+msgstr "<이미지경로> <명령어>"
 
 #: util/grub-fstest.c:725 util/grub-mount.c:553
 #, fuzzy
@@ -5561,9 +5429,8 @@ msgstr ""
 
 #: util/grub-glue-efi.c:94 util/grub-mklayout.c:476
 #: util/grub-mkpasswd-pbkdf2.c:86 util/grub-render-label.c:131
-#, fuzzy
 msgid "[OPTIONS]"
-msgstr "[옵션...]"
+msgstr "[옵션]"
 
 #: util/grub-glue-efi.c:95
 msgid "Glue 32-bit and 64-bit binary into Apple universal one."
@@ -5574,64 +5441,74 @@ msgid "Missing input file\n"
 msgstr ""
 
 #: util/grub-install-common.c:127 util/grub-install-common.c:151
-#, fuzzy, c-format
+#, c-format
 msgid "cannot copy `%s' to `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'을(를) '%s'로 복사할 수 없습니다\" %s"
 
 #: util/grub-install-common.c:147
-#, fuzzy, c-format
+#, c-format
 msgid "can't compress `%s' to `%s'"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'을(를) '%s'로 압축 할 수 없습니다"
 
-#: util/grub-install-common.c:196 util/grub-install-common.c:552
-#: util/grub-install-common.c:579 util/grub-install-common.c:621
-#, fuzzy, c-format
+#: util/grub-install-common.c:234 util/grub-install-common.c:717
+#: util/grub-install-common.c:744 util/grub-install-common.c:786
+#, c-format
 msgid "cannot open directory `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "디렉토리 '%s'을(를) 열 수 없습니다: %s"
 
-#: util/grub-install-common.c:212
+#: util/grub-install-common.c:259
 #, fuzzy, c-format
-msgid "cannot delete `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgid "cannot backup `%s': %s"
+msgstr "`%s'을(를) 읽을 수 없습니다: %s"
 
-#: util/grub-install-common.c:324 util/grub-mkimage.c:209
+#: util/grub-install-common.c:269
+#, fuzzy, c-format
+msgid "cannot restore `%s': %s"
+msgstr "'%s'을(를) 쓸 수 없습니다\" %s"
+
+#: util/grub-install-common.c:276
+#, c-format
+msgid "cannot delete `%s': %s"
+msgstr "'%s'을(를) 삭제할 수 없습니다: %s"
+
+#: util/grub-install-common.c:477 util/grub-mkimage.c:213
 msgid "grub-mkimage is compiled without XZ support"
 msgstr ""
 
-#: util/grub-install-common.c:332 util/grub-mkimage.c:217
+#: util/grub-install-common.c:485 util/grub-mkimage.c:221
 #, c-format
 msgid "Unknown compression format %s"
 msgstr ""
 
-#: util/grub-install-common.c:400
+#: util/grub-install-common.c:562
 #, c-format
 msgid "Unrecognized compression `%s'"
 msgstr ""
 
-#: util/grub-install-common.c:509
-#, fuzzy, c-format
+#: util/grub-install-common.c:673
+#, c-format
 msgid "unknown target format %s"
-msgstr "알 수 없는 추가적인 인자 값 `%s'.\n"
+msgstr "알 수 없는 타겟 형식 %s"
 
-#: util/grub-install-common.c:700
+#: util/grub-install-common.c:865
 #, fuzzy, c-format
 msgid "cannot find locale `%s'"
 msgstr "'%s'을(를) 열 수 없습니다."
 
-#: util/grub-install-common.c:939
+#: util/grub-install-common.c:1104
 #, c-format
 msgid "%s doesn't exist. Please specify --target or --directory"
 msgstr ""
 
-#: util/grub-install-common.c:948 util/grub-install-common.c:951
+#: util/grub-install-common.c:1113 util/grub-install-common.c:1116
 #, fuzzy, c-format
 msgid "invalid modinfo file `%s'"
 msgstr "유효하지 않은 루트 장치 `%s'"
 
-#: util/grub-install-common.c:966
-#, fuzzy, c-format
+#: util/grub-install-common.c:1131
+#, c-format
 msgid "Unknown platform `%s-%s'"
-msgstr "알 수 없는 추가적인 인자 값 `%s'.\n"
+msgstr "알 수 없는 플랫폼 '%s-%s'"
 
 #: util/grub-install.c:238
 msgid "More than one install device?"
@@ -5738,16 +5615,15 @@ msgstr ""
 msgid "use STRING as product version"
 msgstr ""
 
-#: util/grub-install.c:361
-#, fuzzy
+#: util/grub-install.c:369
 msgid "[OPTION] [INSTALL_DEVICE]"
-msgstr "[옵션] <파일또는장치>"
+msgstr "[옵션] <설치하려는장치>"
 
-#: util/grub-install.c:362
+#: util/grub-install.c:370
 msgid "Install GRUB on your drive."
 msgstr ""
 
-#: util/grub-install.c:363
+#: util/grub-install.c:371
 #, c-format
 msgid ""
 "INSTALL_DEVICE must be system device filename.\n"
@@ -5755,107 +5631,107 @@ msgid ""
 "into the boot sector."
 msgstr ""
 
-#: util/grub-install.c:672
+#: util/grub-install.c:680
 #, c-format
 msgid "the drive %s is defined multiple times in the device map %s"
 msgstr ""
 
-#: util/grub-install.c:878
+#: util/grub-install.c:886
 msgid "Unable to determine your platform. Use --target."
 msgstr ""
 
-#: util/grub-install.c:891
+#: util/grub-install.c:899
 #, c-format
 msgid "Installing for %s platform.\n"
 msgstr ""
 
-#: util/grub-install.c:939
+#: util/grub-install.c:947
 #, fuzzy
 msgid "install device isn't specified"
 msgstr "알려진 장치가 없음.\n"
 
-#: util/grub-install.c:1057
+#: util/grub-install.c:1065
 msgid "cannot find EFI directory"
-msgstr ""
+msgstr "EFI 디렉토리를 찾을 수 없음"
 
-#: util/grub-install.c:1060 util/grub-install.c:1209 util/grub-install.c:1254
-#: util/grub-macbless.c:76 util/grub-probe.c:329 util/setup.c:316
+#: util/grub-install.c:1068 util/grub-install.c:1217 util/grub-install.c:1262
+#: util/grub-macbless.c:76 util/grub-probe.c:329 util/setup.c:320
 #, c-format
 msgid "cannot find a device for %s (is /dev mounted?)"
-msgstr ""
+msgstr "장치 %s을(를) 찾을 수 없습니다 (/dev가 마운트 되어 있는지 확인)"
 
-#: util/grub-install.c:1069 util/grub-install.c:1217 util/grub-install.c:1270
-#: util/grub-install.c:1365 util/grub-macbless.c:80 util/grub-probe.c:372
+#: util/grub-install.c:1077 util/grub-install.c:1225 util/grub-install.c:1278
+#: util/grub-install.c:1373 util/grub-macbless.c:80 util/grub-probe.c:372
 #, c-format
 msgid "cannot find a GRUB drive for %s.  Check your device.map"
-msgstr ""
+msgstr "GRUB장치 %s을(를) 찾을 수 없습니다. device.map을 확인하십시오"
 
-#: util/grub-install.c:1087
+#: util/grub-install.c:1095
 #, c-format
 msgid "%s doesn't look like an EFI partition"
 msgstr ""
 
-#: util/grub-install.c:1129 util/grub-install.c:1614
+#: util/grub-install.c:1137 util/grub-install.c:1622
 msgid "You've found a bug"
 msgstr ""
 
-#: util/grub-install.c:1231
+#: util/grub-install.c:1239
 #, c-format
 msgid "filesystem on %s is neither HFS nor HFS+"
 msgstr ""
 
-#: util/grub-install.c:1299
+#: util/grub-install.c:1307
 #, c-format
 msgid ""
 "attempt to install to encrypted disk without cryptodisk enabled. Set `%s' in "
 "file `%s'"
 msgstr ""
 
-#: util/grub-install.c:1410 util/grub-install.c:1772 util/grub-install.c:1872
+#: util/grub-install.c:1418 util/grub-install.c:1791 util/grub-install.c:1895
 #, c-format
 msgid "Can't create file: %s"
 msgstr ""
 
-#: util/grub-install.c:1491
+#: util/grub-install.c:1499
 msgid "no hints available for your platform. Expect reduced performance"
 msgstr ""
 
 #. TRANSLATORS: This is a prefix in the log to indicate that usually
 #. a command would be executed but due to an option was skipped.
-#: util/grub-install.c:1702
+#: util/grub-install.c:1710
 msgid "NOT RUNNING: "
 msgstr ""
 
-#: util/grub-install.c:1806
+#: util/grub-install.c:1827
 msgid "the chosen partition is not a PReP partition"
 msgstr ""
 
-#: util/grub-install.c:1811
+#: util/grub-install.c:1832
 msgid "failed to copy Grub to the PReP partition"
 msgstr ""
 
-#: util/grub-install.c:1816
+#: util/grub-install.c:1837
 #, c-format
 msgid ""
 "the PReP partition is not empty. If you are sure you want to use it, run dd "
 "to clear it: `%s'"
 msgstr ""
 
-#: util/grub-install.c:1888 util/grub-install.c:1932
+#: util/grub-install.c:1913 util/grub-install.c:1960
 #, c-format
 msgid "efibootmgr failed to register the boot entry: %s"
 msgstr ""
 
-#: util/grub-install.c:1916
+#: util/grub-install.c:1944
 #, fuzzy
 msgid "EFI bootloader id isn't specified."
 msgstr "알려진 장치가 없음.\n"
 
-#: util/grub-install.c:1950
+#: util/grub-install.c:1978
 msgid "WARNING: no platform-specific install was performed"
 msgstr ""
 
-#: util/grub-install.c:1957
+#: util/grub-install.c:1993
 msgid "Installation finished. No error reported."
 msgstr ""
 
@@ -5897,15 +5773,15 @@ msgstr ""
 #. rightmost is the initial.
 #: util/grub-mkfont.c:165
 msgid " (medial)"
-msgstr ""
+msgstr " (가운데 맞춤)"
 
 #: util/grub-mkfont.c:166
 msgid " (leftmost)"
-msgstr ""
+msgstr " (왼쪽 맞춤)"
 
 #: util/grub-mkfont.c:167
 msgid " (rightmost)"
-msgstr ""
+msgstr " (오른쪽 맞춤)"
 
 #: util/grub-mkfont.c:481
 #, c-format
@@ -5941,6 +5817,7 @@ msgid "WARNING: unsupported font feature parameters: %x\n"
 msgstr ""
 
 #: util/grub-mkfont.c:936 util/grub-mkrescue.c:98 util/grub-mkstandalone.c:48
+#: util/grub-kbdcomp.in:29
 msgid "save output in FILE [required]"
 msgstr ""
 
@@ -5960,6 +5837,10 @@ msgstr ""
 msgid "set font range"
 msgstr ""
 
+#: util/grub-mkfont.c:946
+msgid "NAME"
+msgstr ""
+
 #. TRANSLATORS: "family name" for font is just a generic name without suffix
 #. like "Bold".
 #: util/grub-mkfont.c:949
@@ -5972,7 +5853,7 @@ msgstr ""
 
 #: util/grub-mkfont.c:950
 msgid "set font size"
-msgstr ""
+msgstr "폰트 크기 설정"
 
 #: util/grub-mkfont.c:951
 #, fuzzy
@@ -5985,7 +5866,7 @@ msgstr ""
 
 #: util/grub-mkfont.c:953
 msgid "convert to bold font"
-msgstr ""
+msgstr "굵은 폰트로 변경"
 
 #: util/grub-mkfont.c:954
 msgid "force autohint"
@@ -6009,16 +5890,15 @@ msgid "invalid font range"
 msgstr ""
 
 #: util/grub-mkfont.c:1151
-#, fuzzy
 msgid "[OPTIONS] FONT_FILES"
-msgstr "[옵션] 디스크"
+msgstr "[옵션] <폰트 파일>"
 
 #: util/grub-mkfont.c:1152
 msgid "Convert common font file formats into PF2"
 msgstr ""
 
 #: util/grub-mkfont.c:1182 util/grub-mkrescue.c:483
-#: util/grub-mkstandalone.c:306
+#: util/grub-mkstandalone.c:306 util/grub-kbdcomp.in:70
 #, fuzzy
 msgid "output file must be specified"
 msgstr "알려진 장치가 없음.\n"
@@ -6071,40 +5951,41 @@ msgstr ""
 msgid "FORMAT"
 msgstr ""
 
-#: util/grub-mkimage.c:100 util/grub-mkstandalone.c:62
+#: util/grub-mkimage.c:102 util/grub-mkstandalone.c:62
 msgid "generate an image in FORMAT"
 msgstr ""
 
-#: util/grub-mkimage.c:101 util/grub-mkstandalone.c:63
+#: util/grub-mkimage.c:103 util/grub-mkstandalone.c:63
 msgid "available formats:"
 msgstr ""
 
-#: util/grub-mkimage.c:152 util/grub-mkstandalone.c:96
-#, fuzzy, c-format
+#: util/grub-mkimage.c:156 util/grub-mkstandalone.c:96
+#, c-format
 msgid "unknown target format %s\n"
-msgstr "알 수 없는 추가적인 인자 값 `%s'.\n"
+msgstr ""
+"알 수 없는 타겟 형식 %s\n"
+"\n"
 
-#: util/grub-mkimage.c:242
-#, fuzzy
+#: util/grub-mkimage.c:257
 msgid "[OPTION]... [MODULES]"
-msgstr "[옵션...]"
+msgstr "[옵션]... [모듈]"
 
-#: util/grub-mkimage.c:243
+#: util/grub-mkimage.c:258
 msgid "Make a bootable image of GRUB."
 msgstr ""
 
-#: util/grub-mkimage.c:273 util/grub-mkstandalone.c:309
+#: util/grub-mkimage.c:288 util/grub-mkstandalone.c:309
 msgid "Target format not specified (use the -O option)."
 msgstr ""
 
-#: util/grub-mkimage.c:282
+#: util/grub-mkimage.c:297
 msgid "Prefix not specified (use the -p option)."
 msgstr ""
 
-#: util/grub-mkimage.c:318 util/setup.c:793
-#, fuzzy, c-format
+#: util/grub-mkimage.c:334 util/setup.c:796
+#, c-format
 msgid "cannot close `%s': %s"
-msgstr "'%s'을(를) 열 수 없습니다."
+msgstr "'%s'을(를) 닫을 수 없습니다: %s"
 
 #: util/grub-mkimagexx.c:2191
 #, c-format
@@ -6157,10 +6038,10 @@ msgstr ""
 #: util/grub-mknetdir.c:146
 #, c-format
 msgid "unsupported platform %s"
-msgstr ""
+msgstr "지원하지 않는 플랫폼 %s"
 
 #. TRANSLATORS: First %s is replaced by platform name. Second one by filename.
-#: util/grub-mknetdir.c:165
+#: util/grub-mknetdir.c:168
 #, c-format
 msgid ""
 "Netboot directory for %s created. Configure your DHCP server to point to %s\n"
@@ -6187,9 +6068,8 @@ msgid "failure to read password"
 msgstr ""
 
 #: util/grub-mkpasswd-pbkdf2.c:146
-#, fuzzy
 msgid "Reenter password: "
-msgstr "암호를 입력하십시오: "
+msgstr "암호를 재입력하십시오: "
 
 #: util/grub-mkpasswd-pbkdf2.c:160
 msgid "passwords don't match"
@@ -6216,7 +6096,7 @@ msgstr "알려진 장치가 없음.\n"
 
 #: util/grub-mkrelpath.c:78
 msgid "PATH"
-msgstr ""
+msgstr "<경로>"
 
 #: util/grub-mkrelpath.c:79
 msgid "Transform a system filename into GRUB one."
@@ -6269,11 +6149,10 @@ msgid "Mail xorriso support requests to <bug-xorriso@gnu.org>."
 msgstr ""
 
 #: util/grub-mkrescue.c:221 util/grub-mkstandalone.c:114
-#, fuzzy
 msgid "[OPTION] SOURCE..."
-msgstr "[옵션...]"
+msgstr "[옵션] <소스...>"
 
-#: util/grub-mkrescue.c:257 util/grub-mkrescue.c:300 util/grub-mkrescue.c:588
+#: util/grub-mkrescue.c:257 util/grub-mkrescue.c:300 util/grub-mkrescue.c:591
 #, c-format
 msgid "enabling %s support ..."
 msgstr ""
@@ -6282,13 +6161,13 @@ msgstr ""
 msgid "xorriso not found"
 msgstr ""
 
-#: util/grub-mkrescue.c:623
+#: util/grub-mkrescue.c:626
 msgid ""
 "Your xorriso doesn't support `--grub2-boot-info'. Some features are "
 "disabled. Please use xorriso 1.2.9 or later."
 msgstr ""
 
-#: util/grub-mkrescue.c:650
+#: util/grub-mkrescue.c:653
 msgid ""
 "Your xorriso doesn't support `--grub2-boot-info'. Your core image is too "
 "big. Boot as disk is disabled. Please use xorriso 1.2.9 or later."
@@ -6333,9 +6212,8 @@ msgid "available targets:"
 msgstr ""
 
 #: util/grub-probe.c:839
-#, fuzzy
 msgid "[OPTION]... [PATH|DEVICE]"
-msgstr "[옵션] <파일또는장치>"
+msgstr "[옵션]... [경로|장치]"
 
 #: util/grub-probe.c:840
 msgid ""
@@ -6344,9 +6222,8 @@ msgid ""
 msgstr ""
 
 #: util/grub-render-label.c:60
-#, fuzzy
 msgid "read text from FILE."
-msgstr "<주소>에서 바이트를 읽습니다."
+msgstr "<주소>에서 텍스트를 읽습니다."
 
 #: util/grub-render-label.c:62
 msgid "use COLOR for text"
@@ -6376,13 +6253,12 @@ msgid "Render Apple .disk_label."
 msgstr ""
 
 #: util/grub-render-label.c:158 util/grub-syslinux2cfg.c:169
-#, fuzzy
 msgid "Missing arguments\n"
-msgstr "가능한 인자값은:"
+msgstr "인자가 누락됨\n"
 
 #: util/grub-script-check.c:87
 msgid "[PATH]"
-msgstr ""
+msgstr "[경로]"
 
 #: util/grub-script-check.c:88
 msgid "Checks GRUB script configuration file for syntax errors."
@@ -6391,22 +6267,23 @@ msgstr ""
 #: util/grub-script-check.c:207
 #, c-format
 msgid "Syntax error at line %u\n"
-msgstr ""
+msgstr "%u번째 행에서 문법 오류 발생\n"
 
 #: util/grub-script-check.c:212
 #, c-format
 msgid "Script `%s' contains no commands and will do nothing\n"
 msgstr ""
+"스크립트 '%s' 는 어떠한 명령도 포함하지 않기 때문에 아무것도 하지 않습니다\n"
 
 #: util/grub-setup.c:79
 #, c-format
 msgid "use FILE as the boot image [default=%s]"
-msgstr ""
+msgstr "<FILE>을 부트 이미지로 사용합니다 [default=%s]"
 
 #: util/grub-setup.c:81
 #, c-format
 msgid "use FILE as the core image [default=%s]"
-msgstr ""
+msgstr "<FILE>을 코어 이미지로 사용합니다 [default=%s]"
 
 #: util/grub-setup.c:210
 msgid "No device is specified.\n"
@@ -6450,40 +6327,48 @@ msgstr ""
 msgid "cannot compress the kernel image"
 msgstr "커널 이미지 압축을 할 수 없습니다"
 
-#: util/mkimage.c:766 util/mkimage.c:1077
+#: util/mkimage.c:766 util/mkimage.c:1141
 #, c-format
 msgid "unknown compression %d"
 msgstr ""
 
-#: util/mkimage.c:1088
+#: util/mkimage.c:833
+#, c-format
+msgid "section name %s length is bigger than %lu"
+msgstr ""
+
+#: util/mkimage.c:930
+msgid ".sbat section can be embedded into EFI images only"
+msgstr ""
+
+#: util/mkimage.c:1152
 #, fuzzy
 msgid "Decompressor is too big"
 msgstr "코어 이미지가 너무 큽니다"
 
-#: util/mkimage.c:1133
-#, fuzzy, c-format
+#: util/mkimage.c:1197
+#, c-format
 msgid "core image is too big (0x%x > 0x%x)"
-msgstr "코어 이미지가 너무 큽니다  (%p > %p)"
+msgstr "코어 이미지가 너무 큽니다 (0x%x > 0x%x)"
 
-#: util/mkimage.c:1140
-#, fuzzy, c-format
+#: util/mkimage.c:1204
+#, c-format
 msgid "kernel image is too big (0x%x > 0x%x)"
-msgstr "코어 이미지가 너무 큽니다  (%p > %p)"
+msgstr "커널 이미지가 너무 큽니다 (0x%x > 0x%x)"
 
-#: util/mkimage.c:1220 util/mkimage.c:1501
+#: util/mkimage.c:1284 util/mkimage.c:1532
 #, c-format
 msgid "diskboot.img size must be %u bytes"
 msgstr "diskboot.img 크기는 반드시 %u 바이트이어야 합니다"
 
-#: util/mkimage.c:1571
+#: util/mkimage.c:1602
 msgid ""
 "fwstart.img doesn't match the known good version. proceed at your own risk"
 msgstr ""
 
-#: util/mkimage.c:1575 util/mkimage.c:1601
-#, fuzzy
+#: util/mkimage.c:1606 util/mkimage.c:1632
 msgid "firmware image is too big"
-msgstr "코어 이미지가 너무 큽니다"
+msgstr "펌웨어 이미지가 너무 큽니다"
 
 #: util/resolve.c:93
 #, c-format
@@ -6496,38 +6381,36 @@ msgstr "코어 파일의 첫 섹터 부분이 sector-aligned가 아닙니다"
 
 #: util/setup.c:177
 msgid "non-sector-aligned data is found in the core file"
-msgstr ""
-"Copy text   \t\r\n"
-"non-sector-aligned 데이터가 코어 파일에서 발견되었습니다"
+msgstr "non-sector-aligned 데이터가 코어 파일에서 발견되었습니다"
 
 #: util/setup.c:199
 msgid "the sectors of the core file are too fragmented"
 msgstr "코어 파일의 섹터가 너무 잘려져 있습니다"
 
-#: util/setup.c:280
+#: util/setup.c:284
 #, c-format
 msgid "the size of `%s' is not %u"
-msgstr "'%s'의 크기는 %u이(가) 아닙니다."
+msgstr "'%s'의 크기는 %u이(가) 아닙니다"
 
-#: util/setup.c:290
+#: util/setup.c:294
 #, c-format
 msgid "the size of `%s' is too small"
-msgstr "'%s'의 크기가 너무 작습니다."
+msgstr "'%s'의 크기가 너무 작습니다"
 
-#: util/setup.c:428
+#: util/setup.c:432
 #, fuzzy
 msgid ""
 "Attempting to install GRUB to a disk with multiple partition labels or both "
 "partition label and filesystem.  This is not supported yet."
 msgstr "파티션되지 않은 디스크에 GRUB 설치를 시도합니다. 좋지 않은 방법입니다."
 
-#: util/setup.c:441
+#: util/setup.c:445
 #, c-format
 msgid "unable to identify a filesystem in %s; safety check can't be performed"
 msgstr "%s 상의 파일 시스템을 알 수 없습니다; 안전 점검을 수행할 수 없습니다"
 
 #. TRANSLATORS: Filesystem may reserve the space just GRUB isn't sure about it.
-#: util/setup.c:445
+#: util/setup.c:449
 #, c-format
 msgid ""
 "%s appears to contain a %s filesystem which isn't known to reserve space for "
@@ -6542,7 +6425,7 @@ msgstr ""
 "probe 옵션은 이러한 점검을 하지 않습니다. 책임은 전적으로 당신에게 있습니다)"
 
 #. TRANSLATORS: Partition map may reserve the space just GRUB isn't sure about it.
-#: util/setup.c:458
+#: util/setup.c:462
 #, fuzzy, c-format
 msgid ""
 "%s appears to contain a %s partition map which isn't known to reserve space "
@@ -6556,7 +6439,7 @@ msgstr ""
 "FILESYSTEM DESTRUCTION 파일 시스템 파괴를 가져올 수 있습니다.(--skip-fs-"
 "probe 옵션은 이러한 점검을 하지 않습니다. 책임은 전적으로 당신에게 있습니다)"
 
-#: util/setup.c:465
+#: util/setup.c:469
 #, fuzzy, c-format
 msgid ""
 "%s appears to contain a %s partition map and LDM which isn't known to be a "
@@ -6570,91 +6453,516 @@ msgstr ""
 "FILESYSTEM DESTRUCTION 파일 시스템 파괴를 가져올 수 있습니다.(--skip-fs-"
 "probe 옵션은 이러한 점검을 하지 않습니다. 책임은 전적으로 당신에게 있습니다)"
 
-#: util/setup.c:478
-#, fuzzy
+#: util/setup.c:482
 msgid ""
 "Attempting to install GRUB to a partitionless disk or to a partition.  This "
 "is a BAD idea."
-msgstr "파티션되지 않은 디스크에 GRUB 설치를 시도합니다. 좋지 않은 방법입니다."
+msgstr ""
+"파티션되지 않은 디스크 또는 파티션에 GRUB 설치를 시도합니다.  좋지 않은 방법"
+"입니다."
 
-#: util/setup.c:483
+#: util/setup.c:487
 #, fuzzy
 msgid ""
 "Attempting to install GRUB to a disk with multiple partition labels.  This "
 "is not supported yet."
 msgstr "파티션되지 않은 디스크에 GRUB 설치를 시도합니다. 좋지 않은 방법입니다."
 
-#: util/setup.c:489
+#: util/setup.c:493
 #, c-format
 msgid "Partition style `%s' doesn't support embedding"
 msgstr ""
 
-#: util/setup.c:496
+#: util/setup.c:500
 #, c-format
 msgid "File system `%s' doesn't support embedding"
 msgstr ""
 
-#: util/setup.c:537
+#: util/setup.c:541
 msgid "Your embedding area is unusually small.  core.img won't fit in it."
-msgstr "끼워넣기 공간이 비정상적으로 작습니다.  core.img가 맞지 않습니다."
+msgstr "임베딩 공간이 비정상적으로 작습니다.  core.img가 맞지 않습니다."
 
-#: util/setup.c:559 util/setup.c:725 util/setup.c:844
+#: util/setup.c:563 util/setup.c:729 util/setup.c:847
 msgid "no terminator in the core image"
 msgstr "코어 이미지내에 종료문자가 없습니다"
 
-#: util/setup.c:622
+#: util/setup.c:626
 msgid "core.img version mismatch"
 msgstr ""
 
-#: util/setup.c:675
-#, fuzzy
+#: util/setup.c:679
 msgid ""
 "embedding is not possible, but this is required for RAID and LVM install"
 msgstr ""
-"끼워넣기가 불가능합니다, 하지만 루트 장치가 RAID 어레이 혹은 LVM 볼륨에 들어 "
-"있다면 끼워넣기가 필요합니다."
+"임베딩이 불가능합니다, 하지만 RAID와 LVM설치를 위해 임베딩이 필요합니다"
 
-#: util/setup.c:682
+#: util/setup.c:686
 #, fuzzy, c-format
 msgid "can't determine filesystem on %s"
 msgstr "파일 시스템의 종류를 결정합니다."
 
-#: util/setup.c:685
+#: util/setup.c:689
 #, c-format
 msgid "filesystem `%s' doesn't support blocklists"
 msgstr ""
 
 #. TRANSLATORS: cross-disk refers to /boot being on one disk
 #. but MBR on another.
-#: util/setup.c:694
-#, fuzzy
+#: util/setup.c:698
 msgid "embedding is not possible, but this is required for cross-disk install"
 msgstr ""
-"끼워넣기가 불가능합니다, 하지만 루트 장치가 RAID 어레이 혹은 LVM 볼륨에 들어 "
-"있다면 끼워넣기가 필요합니다."
+"임베딩이 불가능합니다, 하지만 cross-disk설치를 위해 임베딩이 필요합니다"
 
-#: util/setup.c:700
-#, fuzzy
+#: util/setup.c:704
 msgid ""
 "Embedding is not possible.  GRUB can only be installed in this setup by "
 "using blocklists.  However, blocklists are UNRELIABLE and their use is "
 "discouraged."
 msgstr ""
-"임베딩이 불가능합니다. 차단목록을 사용하여 이 설정으로 GRUB을 설치만 할 수 있"
-"습니다. 하지만, 차단목록을 신뢰할 수 없고 이것의 사용을 불허합니다."
+"임베딩이 불가능합니다.  차단목록을 사용하여 이 설정으로 GRUB을 설치만 할 수 "
+"있습니다.  하지만, 차단목록을 신뢰할 수 없고 이것의 사용을 불허합니다."
 
 #. TRANSLATORS: Here GRUB refuses to continue with blocklist install.
-#: util/setup.c:705
+#: util/setup.c:709
 msgid "will not proceed with blocklists"
 msgstr ""
 
-#: util/setup.c:817 util/setup.c:837
+#: util/setup.c:820 util/setup.c:840
 msgid "blocklists are invalid"
 msgstr ""
 
-#: util/setup.c:847
+#: util/setup.c:850
 msgid "blocklists are incomplete"
 msgstr ""
+
+#: util/grub-kbdcomp.in:24
+msgid "Usage: %s -o OUTPUT CKBMAP_ARGUMENTS...\\n"
+msgstr ""
+
+#: util/grub-kbdcomp.in:25
+#, fuzzy
+msgid "Make GRUB keyboard layout file."
+msgstr "키보드 레이아웃을 불러옵니다."
+
+#: util/grub-kbdcomp.in:27 util/grub-mkconfig.in:61 util/grub-reboot.in:51
+#: util/grub-set-default.in:51
+#, fuzzy
+msgid "print this message and exit"
+msgstr "이 도움말을 보이고 종료합니다."
+
+#: util/grub-kbdcomp.in:28 util/grub-mkconfig.in:62 util/grub-reboot.in:52
+#: util/grub-set-default.in:52
+#, fuzzy
+msgid "print the version information and exit"
+msgstr "메모리 정보를 출력합니다."
+
+#: util/grub-kbdcomp.in:31
+msgid "%s generates a keyboard layout for GRUB using ckbcomp\\n"
+msgstr ""
+
+#: util/grub-kbdcomp.in:33 util/grub-mkconfig.in:64 util/grub-reboot.in:64
+#: util/grub-set-default.in:58
+msgid "Report bugs to <bug-grub@gnu.org>."
+msgstr ""
+
+#: util/grub-kbdcomp.in:41 util/grub-mkconfig.in:72 util/grub-reboot.in:72
+#: util/grub-set-default.in:66
+msgid "%s: option requires an argument -- `%s'\\n"
+msgstr ""
+
+#: util/grub-mkconfig.in:57
+msgid "Usage: %s [OPTION]\\n"
+msgstr ""
+
+#: util/grub-mkconfig.in:58
+#, fuzzy
+msgid "Generate a grub config file"
+msgstr "다른 설정파일을 읽어들입니다."
+
+#: util/grub-mkconfig.in:60
+msgid "output generated config to FILE [default=stdout]"
+msgstr ""
+
+#: util/grub-mkconfig.in:97 util/grub-reboot.in:104 util/grub-set-default.in:98
+msgid "Unrecognized option `%s'\\n"
+msgstr ""
+
+#: util/grub-mkconfig.in:121
+msgid "%s: You must run this as root\\n"
+msgstr ""
+
+#: util/grub-mkconfig.in:130
+#, fuzzy
+msgid "%s: Not found.\\n"
+msgstr "파일 '%s'를 찾을 수 없습니다"
+
+#: util/grub-mkconfig.in:262
+msgid "Generating grub configuration file ..."
+msgstr ""
+
+#. TRANSLATORS: %s is replaced by filename
+#: util/grub-mkconfig.in:295
+msgid ""
+"Syntax errors are detected in generated GRUB config file.\n"
+"Ensure that there are no errors in /etc/default/grub\n"
+"and /etc/grub.d/* files or please file a bug report with\n"
+"%s file attached."
+msgstr ""
+
+#: util/grub-mkconfig.in:308
+msgid "done"
+msgstr ""
+
+#: util/grub-mkconfig_lib.in:47
+#, fuzzy
+msgid "Warning:"
+msgstr "%s: 경고:"
+
+#: util/grub-reboot.in:49 util/grub-set-default.in:47
+msgid "Usage: %s [OPTION] MENU_ENTRY\\n"
+msgstr ""
+
+#: util/grub-reboot.in:50
+msgid "Set the default boot menu entry for GRUB, for the next boot only."
+msgstr ""
+
+#: util/grub-reboot.in:53 util/grub-set-default.in:53
+msgid ""
+"expect GRUB images under the directory DIR/%s instead of the %s directory"
+msgstr ""
+
+#: util/grub-reboot.in:56
+msgid ""
+"MENU_ENTRY is a number, a menu item title or a menu item identifier. Please "
+"note that menu items in\n"
+"submenus or sub-submenus require specifying the submenu components and then "
+"the\n"
+"menu item component. The titles should be separated using the greater-than\n"
+"character (>) with no extra spaces. Depending on your shell some characters "
+"including > may need escaping. More information about this is available\n"
+"in the GRUB Manual in the section about the 'default' command. "
+msgstr ""
+
+#: util/grub-reboot.in:62
+msgid ""
+"NOTE: In cases where GRUB cannot write to the environment block, such as "
+"when it is stored on an MDRAID or LVM device, the chosen boot menu entry "
+"will remain the default even after reboot. "
+msgstr ""
+
+#: util/grub-reboot.in:110 util/grub-set-default.in:104
+msgid "More than one menu entry?"
+msgstr ""
+
+#: util/grub-reboot.in:120 util/grub-set-default.in:114
+#, fuzzy
+msgid "Menu entry not specified."
+msgstr "알려진 장치가 없음.\n"
+
+#: util/grub-reboot.in:143
+msgid "%s will remain the default boot entry until manually cleared with:\\n"
+msgstr ""
+
+#: util/grub-set-default.in:48
+msgid "Set the default boot menu entry for GRUB."
+msgstr ""
+
+#: util/grub-set-default.in:49
+msgid "This requires setting GRUB_DEFAULT=saved in %s/default/grub.\\n"
+msgstr ""
+
+#: util/grub-set-default.in:56
+msgid "MENU_ENTRY is a number, a menu item title or a menu item identifier."
+msgstr ""
+
+#: util/grub.d/00_header.in:141
+#, c-format
+msgid ""
+"Requested serial terminal but GRUB_SERIAL_COMMAND is unspecified. Default "
+"parameters will be used."
+msgstr ""
+
+#: util/grub.d/00_header.in:232
+#, c-format
+msgid "Found theme: %s\\n"
+msgstr ""
+
+#: util/grub.d/00_header.in:268
+#, c-format
+msgid "Found background: %s\\n"
+msgstr ""
+
+#: util/grub.d/00_header.in:273
+#, fuzzy, c-format
+msgid "Unsupported image format"
+msgstr "지원하지 않는 gzip 포맷"
+
+#: util/grub.d/00_header.in:292
+#, c-format
+msgid ""
+"Setting GRUB_TIMEOUT to a non-zero value when GRUB_HIDDEN_TIMEOUT is set is "
+"no longer supported."
+msgstr ""
+
+#: util/grub.d/10_hurd.in:48
+#, c-format
+msgid "Found GNU Mach: %s"
+msgstr ""
+
+#: util/grub.d/10_hurd.in:63
+#, c-format
+msgid "Found Hurd module: %s"
+msgstr ""
+
+#: util/grub.d/10_hurd.in:77
+#, c-format
+msgid "Some Hurd stuff found, but not enough to boot."
+msgstr ""
+
+#: util/grub.d/10_hurd.in:91
+#, c-format
+msgid "%s, with Hurd %s (recovery mode)"
+msgstr ""
+
+#: util/grub.d/10_hurd.in:94
+#, c-format
+msgid "%s, with Hurd %s"
+msgstr ""
+
+#: util/grub.d/10_hurd.in:100 util/grub.d/10_kfreebsd.in:87
+#: util/grub.d/10_linux.in:103 util/grub.d/10_netbsd.in:113
+#: util/grub.d/20_linux_xen.in:128 util/grub.d/30_os-prober.in:289
+#, c-format
+msgid ""
+"Please don't use old title `%s' for GRUB_DEFAULT, use `%s' (for versions "
+"before 2.00) or `%s' (for 2.00 or later)"
+msgstr ""
+
+#: util/grub.d/10_hurd.in:112
+#, fuzzy, c-format
+msgid "Loading GNU Mach ..."
+msgstr "리눅스를 읽어들입니다."
+
+#: util/grub.d/10_hurd.in:128
+#, fuzzy, c-format
+msgid "Loading the Hurd ..."
+msgstr "initrd를 읽어들입니다."
+
+#. TRANSLATORS: %s is replaced with an OS name
+#: util/grub.d/10_hurd.in:172 util/grub.d/10_kfreebsd.in:233
+#: util/grub.d/10_linux.in:282 util/grub.d/10_netbsd.in:176
+#: util/grub.d/30_os-prober.in:265
+#, fuzzy, c-format
+msgid "Advanced options for %s"
+msgstr "'%s'에 대한 필수 옵션이 없습니다"
+
+#: util/grub.d/10_illumos.in:40
+#, fuzzy, c-format
+msgid "Loading kernel of Illumos ..."
+msgstr "FreeBSD 커널을 읽어들입니다."
+
+#: util/grub.d/10_kfreebsd.in:79
+#, c-format
+msgid "%s, with kFreeBSD %s (recovery mode)"
+msgstr ""
+
+#: util/grub.d/10_kfreebsd.in:81
+#, c-format
+msgid "%s, with kFreeBSD %s"
+msgstr ""
+
+#: util/grub.d/10_kfreebsd.in:101
+#, fuzzy, c-format
+msgid "Loading kernel of FreeBSD %s ..."
+msgstr "FreeBSD 커널을 읽어들입니다."
+
+#: util/grub.d/10_kfreebsd.in:164
+#, fuzzy, c-format
+msgid "Found kernel of FreeBSD: %s\\n"
+msgstr "FreeBSD 커널을 읽어들입니다."
+
+#: util/grub.d/10_kfreebsd.in:213
+#, fuzzy, c-format
+msgid "Found kernel module directory: %s\\n"
+msgstr "임시 디렉토리를 만들 수 없습니다: %s"
+
+#: util/grub.d/10_linux.in:95
+#, c-format
+msgid "%s, with Linux %s (recovery mode)"
+msgstr ""
+
+#: util/grub.d/10_linux.in:97
+#, c-format
+msgid "%s, with Linux %s"
+msgstr ""
+
+#: util/grub.d/10_linux.in:141 util/grub.d/20_linux_xen.in:144
+#, fuzzy, c-format
+msgid "Loading Linux %s ..."
+msgstr "리눅스를 읽어들입니다."
+
+#. TRANSLATORS: ramdisk isn't identifier. Should be translated.
+#: util/grub.d/10_linux.in:148 util/grub.d/20_linux_xen.in:158
+#, fuzzy, c-format
+msgid "Loading initial ramdisk ..."
+msgstr "initrd를 읽어들입니다."
+
+#: util/grub.d/10_linux.in:197 util/grub.d/20_linux_xen.in:274
+#, c-format
+msgid "Found linux image: %s\\n"
+msgstr ""
+
+#: util/grub.d/10_linux.in:236 util/grub.d/20_linux_xen.in:305
+#, c-format
+msgid "Found initrd image: %s\\n"
+msgstr ""
+
+#: util/grub.d/10_netbsd.in:105
+#, c-format
+msgid "%s, with kernel %s (via %s, recovery mode)"
+msgstr ""
+
+#: util/grub.d/10_netbsd.in:107
+#, c-format
+msgid "%s, with kernel %s (via %s)"
+msgstr ""
+
+#: util/grub.d/10_netbsd.in:158
+#, fuzzy, c-format
+msgid "Found NetBSD kernel: %s\\n"
+msgstr "NetBSD 커널 모듈을 읽어들입니다."
+
+#: util/grub.d/10_windows.in:70
+#, c-format
+msgid "Windows Vista/7 (loader)"
+msgstr ""
+
+#: util/grub.d/10_windows.in:74
+#, c-format
+msgid "Windows NT/2000/XP (loader)"
+msgstr ""
+
+#: util/grub.d/10_windows.in:85
+#, c-format
+msgid "Found %s on %s (%s)\\n"
+msgstr ""
+
+#. TRANSLATORS: it refers to kernel architecture (32-bit)
+#: util/grub.d/10_xnu.in:32 util/grub.d/30_os-prober.in:50
+#, c-format
+msgid "(32-bit)"
+msgstr ""
+
+#. TRANSLATORS: it refers to kernel architecture (64-bit)
+#: util/grub.d/10_xnu.in:35 util/grub.d/30_os-prober.in:53
+#, c-format
+msgid "(64-bit)"
+msgstr ""
+
+#. TRANSLATORS: it refers on the OS residing on device %s
+#: util/grub.d/10_xnu.in:38 util/grub.d/30_os-prober.in:56
+#: util/grub.d/30_os-prober.in:152 util/grub.d/30_os-prober.in:184
+#: util/grub.d/30_os-prober.in:225 util/grub.d/30_os-prober.in:305
+#, c-format
+msgid "(on %s)"
+msgstr ""
+
+#: util/grub.d/20_linux_xen.in:112
+#, c-format
+msgid "%s (XSM enabled)"
+msgstr ""
+
+#: util/grub.d/20_linux_xen.in:120
+#, c-format
+msgid "%s, with Xen %s and Linux %s (recovery mode)"
+msgstr ""
+
+#: util/grub.d/20_linux_xen.in:122
+#, c-format
+msgid "%s, with Xen %s and Linux %s"
+msgstr ""
+
+#: util/grub.d/20_linux_xen.in:132
+#, c-format
+msgid "%s, with Xen hypervisor"
+msgstr ""
+
+#: util/grub.d/20_linux_xen.in:143
+#, fuzzy, c-format
+msgid "Loading Xen %s ..."
+msgstr "리눅스를 읽어들입니다."
+
+#: util/grub.d/20_linux_xen.in:169
+#, fuzzy, c-format
+msgid "Loading XSM policy ..."
+msgstr "리눅스를 읽어들입니다."
+
+#: util/grub.d/20_linux_xen.in:249 util/grub.d/20_linux_xen.in:338
+#, c-format
+msgid "Xen hypervisor, version %s"
+msgstr ""
+
+#. TRANSLATORS: %s is replaced with an OS name
+#: util/grub.d/20_linux_xen.in:337
+#, c-format
+msgid "Advanced options for %s (with Xen hypervisor)"
+msgstr ""
+
+#: util/grub.d/30_os-prober.in:30
+#, c-format
+msgid ""
+"os-prober will not be executed to detect other bootable partitions."
+"\\nSystems on them will not be added to the GRUB boot configuration.\\nCheck "
+"GRUB_DISABLE_OS_PROBER documentation entry."
+msgstr ""
+
+#: util/grub.d/30_os-prober.in:39
+#, c-format
+msgid ""
+"os-prober will be executed to detect other bootable partitions.\\nIts output "
+"will be used to detect bootable binaries on them and create new boot entries."
+msgstr ""
+
+#: util/grub.d/30_os-prober.in:147
+#, c-format
+msgid "Found %s on %s\\n"
+msgstr ""
+
+#. TRANSLATORS: %s is replaced by OS name.
+#: util/grub.d/30_os-prober.in:343
+#, c-format
+msgid "%s is not yet supported by grub-mkconfig.\\n"
+msgstr ""
+
+#: util/grub.d/30_uefi-firmware.in:37
+#, c-format
+msgid "Adding boot menu entry for UEFI Firmware Settings ...\\n"
+msgstr ""
+
+#~ msgid " [OPTION...]"
+#~ msgstr " [옵션...]"
+
+#~ msgid "Try '%s --help' or '%s --usage' for more information.\n"
+#~ msgstr ""
+#~ "더 많은 정보를 보려면 `%s --help' 또는 '%s --usage'를 입력하십시오.\n"
+
+#~ msgid "Unknown system error"
+#~ msgstr "알 수 없는 시스템 에러"
+
+#~ msgid "give this help list"
+#~ msgstr "이 도움말을 보이고 종료합니다"
+
+#~ msgid "Invalid regular expression"
+#~ msgstr "유효하지 않은 정규표현식"
+
+#~ msgid "Premature end of regular expression"
+#~ msgstr "예기치 못한 정규표현식의 끝"
+
+#~ msgid "Regular expression too big"
+#~ msgstr "정규표현식이 너무 큼"
+
+#~ msgid "unknown regexp error"
+#~ msgstr "알 수 없는 정규표현식 에러"
 
 #~ msgid "Fake BIOS."
 #~ msgstr "바이오스를 흉내냅니다."
@@ -6810,15 +7118,3 @@ msgstr ""
 
 #~ msgid "cannot guess the root device. Specify the option `--root-device'"
 #~ msgstr "루트 장치같지 않음. `--root-device' 옵션을 사용해 지정하십시오."
-
-#, fuzzy
-#~ msgid "Loading kernel of FreeBSD %s ..."
-#~ msgstr "FreeBSD 커널을 읽어들입니다."
-
-#, fuzzy
-#~ msgid "Loading Linux %s ..."
-#~ msgstr "리눅스를 읽어들입니다."
-
-#, fuzzy
-#~ msgid "Loading initial ramdisk ..."
-#~ msgstr "initrd를 읽어들입니다."

@@ -154,7 +154,7 @@ grub_normal_add_menu_entry (int argc, const char **args,
     goto fail;
 
   /* Save argc, args to pass as parameters to block arg later. */
-  menu_args = grub_malloc (sizeof (char*) * (argc + 1));
+  menu_args = grub_calloc (argc + 1, sizeof (char *));
   if (! menu_args)
     goto fail;
 
@@ -230,7 +230,7 @@ setparams_prefix (int argc, char **args)
       len += 3; /* 3 = 1 space + 2 quotes */
       p = args[i];
       while (*p)
-	len += (*p++ == '\'' ? 3 : 1);
+	len += (*p++ == '\'' ? 4 : 1);
     }
 
   result = grub_malloc (len + 2);

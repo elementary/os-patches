@@ -86,8 +86,13 @@ grub_net_link_layer_add_address (struct grub_net_card *card,
 
   /* Add sender to cache table.  */
   if (card->link_layer_table == NULL)
-    card->link_layer_table = grub_zalloc (LINK_LAYER_CACHE_SIZE
-					  * sizeof (card->link_layer_table[0]));
+    {
+      card->link_layer_table = grub_zalloc (LINK_LAYER_CACHE_SIZE
+					    * sizeof (card->link_layer_table[0]));
+      if (card->link_layer_table == NULL)
+	return;
+    }
+
   entry = &(card->link_layer_table[card->new_ll_entry]);
   entry->avail = 1;
   grub_memcpy (&entry->ll_address, ll, sizeof (entry->ll_address));
@@ -333,8 +338,8 @@ grub_cmd_ipv6_autoconf (struct grub_command *cmd __attribute__ ((unused)),
     ncards++;
   }
 
-  ifaces = grub_zalloc (ncards * sizeof (ifaces[0]));
-  slaacs = grub_zalloc (ncards * sizeof (slaacs[0]));
+  ifaces = grub_calloc (ncards, sizeof (ifaces[0]));
+  slaacs = grub_calloc (ncards, sizeof (slaacs[0]));
   if (!ifaces || !slaacs)
     {
       grub_free (ifaces);
@@ -406,7 +411,7 @@ parse_ip (const char *val, grub_uint32_t *ip, const char **rest)
   for (i = 0; i < 4; i++)
     {
       unsigned long t;
-      t = grub_strtoul (ptr, (char **) &ptr, 0);
+      t = grub_strtoul (ptr, &ptr, 0);
       if (grub_errno)
 	{
 	  grub_errno = GRUB_ERR_NONE;
@@ -453,7 +458,7 @@ parse_ip6 (const char *val, grub_uint64_t *ip, const char **rest)
 	  ptr++;
 	  continue;
 	}
-      t = grub_strtoul (ptr, (char **) &ptr, 16);
+      t = grub_strtoul (ptr, &ptr, 16);
       if (grub_errno)
 	{
 	  grub_errno = GRUB_ERR_NONE;
@@ -563,7 +568,7 @@ grub_net_resolve_net_address (const char *name,
       addr->type = GRUB_NET_NETWORK_LEVEL_PROTOCOL_IPV4;
       if (*rest == '/')
 	{
-	  addr->ipv4.masksize = grub_strtoul (rest + 1, (char **) &rest, 0);
+	  addr->ipv4.masksize = grub_strtoul (rest + 1, &rest, 0);
 	  if (!grub_errno && *rest == 0)
 	    return GRUB_ERR_NONE;
 	  grub_errno = GRUB_ERR_NONE;
@@ -579,7 +584,7 @@ grub_net_resolve_net_address (const char *name,
       addr->type = GRUB_NET_NETWORK_LEVEL_PROTOCOL_IPV6;
       if (*rest == '/')
 	{
-	  addr->ipv6.masksize = grub_strtoul (rest + 1, (char **) &rest, 0);
+	  addr->ipv6.masksize = grub_strtoul (rest + 1, &rest, 0);
 	  if (!grub_errno && *rest == 0)
 	    return GRUB_ERR_NONE;
 	  grub_errno = GRUB_ERR_NONE;
@@ -1732,6 +1737,138 @@ grub_net_fini_hw (int noreturn __attribute__ ((unused)))
 static grub_err_t
 grub_net_restore_hw (void)
 {
+  return GRUB_ERR_NONE;
+}
+
+static int
+grub_config_search_through (char *config, char *suffix,
+			    grub_size_t num_tries, grub_size_t slice_size)
+{
+  while (num_tries-- > 0)
+    {
+      grub_file_t file;
+
+      grub_dprintf ("net", "attempt to fetch config %s\n", config);
+
+      file = grub_file_open (config, GRUB_FILE_TYPE_CONFIG);
+
+      if (file)
+        {
+          grub_file_close (file);
+          return 0;
+        }
+      else
+        {
+          if (grub_errno == GRUB_ERR_IO)
+            grub_errno = GRUB_ERR_NONE;
+        }
+
+      if (grub_strlen (suffix) < slice_size)
+        break;
+
+      config[grub_strlen (config) - slice_size] = '\0';
+    }
+
+  return 1;
+}
+
+grub_err_t
+grub_net_search_config_file (char *config)
+{
+  grub_size_t config_len;
+  char *suffix;
+
+  config_len = grub_strlen (config);
+  config[config_len] = '-';
+  suffix = config + config_len + 1;
+
+  struct grub_net_network_level_interface *inf;
+  FOR_NET_NETWORK_LEVEL_INTERFACES (inf)
+    {
+      /* By the Client UUID. */
+      char *ptr;
+      int client_uuid_len;
+      char *client_uuid_var;
+      const char *client_uuid;
+
+      client_uuid_len = sizeof ("net_") + grub_strlen (inf->name) +
+                        sizeof ("_clientuuid") + 1;
+
+      client_uuid_var = grub_zalloc (client_uuid_len);
+      if (!client_uuid_var)
+        return grub_errno;
+
+      grub_snprintf (client_uuid_var, client_uuid_len,
+                     "net_%s_clientuuid", inf->name);
+
+      client_uuid = grub_env_get (client_uuid_var);
+      grub_free (client_uuid_var);
+
+      if (client_uuid)
+        {
+          grub_strcpy (suffix, client_uuid);
+          if (grub_config_search_through (config, suffix, 1, 0) == 0)
+            return GRUB_ERR_NONE;
+        }
+
+      /* By the MAC address. */
+
+      /* Add ethernet type */
+      grub_strcpy (suffix, "01-");
+
+      grub_net_hwaddr_to_str (&inf->hwaddress, suffix + 3);
+
+      for (ptr = suffix; *ptr; ptr++)
+        if (*ptr == ':')
+          *ptr = '-';
+
+      if (grub_config_search_through (config, suffix, 1, 0) == 0)
+        return GRUB_ERR_NONE;
+
+      /* By IP address */
+
+      switch ((&inf->address)->type)
+        {
+        case GRUB_NET_NETWORK_LEVEL_PROTOCOL_IPV4:
+          {
+            grub_uint32_t n = grub_be_to_cpu32 ((&inf->address)->ipv4);
+
+            grub_snprintf (suffix, GRUB_NET_MAX_STR_ADDR_LEN, "%02X%02X%02X%02X", \
+                           ((n >> 24) & 0xff), ((n >> 16) & 0xff),      \
+                           ((n >> 8) & 0xff), ((n >> 0) & 0xff));
+
+            if (grub_config_search_through (config, suffix, 8, 1) == 0)
+              return GRUB_ERR_NONE;
+            break;
+          }
+        case GRUB_NET_NETWORK_LEVEL_PROTOCOL_IPV6:
+          {
+            char buf[GRUB_NET_MAX_STR_ADDR_LEN];
+            struct grub_net_network_level_address base;
+            base.type = GRUB_NET_NETWORK_LEVEL_PROTOCOL_IPV6;
+            grub_memcpy (&base.ipv6, ((&inf->address)->ipv6), 16);
+            grub_net_addr_to_str (&base, buf);
+
+            for (ptr = buf; *ptr; ptr++)
+              if (*ptr == ':')
+                *ptr = '-';
+
+            grub_snprintf (suffix, GRUB_NET_MAX_STR_ADDR_LEN, "%s", buf);
+            if (grub_config_search_through (config, suffix, 1, 0) == 0)
+              return GRUB_ERR_NONE;
+            break;
+          }
+        case GRUB_NET_NETWORK_LEVEL_PROTOCOL_DHCP_RECV:
+          return grub_error (GRUB_ERR_BUG, "shouldn't reach here");
+        default:
+          return grub_error (GRUB_ERR_BUG,
+                             "unsupported address type %d", (&inf->address)->type);
+        }
+    }
+
+  /* Remove the remaining minus sign at the end. */
+  config[config_len] = '\0';
+
   return GRUB_ERR_NONE;
 }
 

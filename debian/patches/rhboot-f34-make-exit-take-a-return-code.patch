@@ -28,10 +28,10 @@ Patch-Name: rhboot-f34-make-exit-take-a-return-code.patch
  14 files changed, 48 insertions(+), 21 deletions(-)
 
 diff --git a/grub-core/commands/minicmd.c b/grub-core/commands/minicmd.c
-index 6bbce31..6d66b7c 100644
+index fa49893..2bd3ac7 100644
 --- a/grub-core/commands/minicmd.c
 +++ b/grub-core/commands/minicmd.c
-@@ -179,12 +179,24 @@ grub_mini_cmd_lsmod (struct grub_command *cmd __attribute__ ((unused)),
+@@ -182,12 +182,24 @@ grub_mini_cmd_lsmod (struct grub_command *cmd __attribute__ ((unused)),
  }
  
  /* exit */
@@ -61,7 +61,7 @@ index 6bbce31..6d66b7c 100644
  }
  
 diff --git a/grub-core/kern/efi/efi.c b/grub-core/kern/efi/efi.c
-index 88bbd34..d4a4be5 100644
+index 8cff7be..05d8237 100644
 --- a/grub-core/kern/efi/efi.c
 +++ b/grub-core/kern/efi/efi.c
 @@ -165,11 +165,16 @@ grub_reboot (void)
@@ -153,7 +153,7 @@ index 8b089b4..085a6a3 100644
    grub_ieee1275_exit ();
  }
 diff --git a/grub-core/kern/mips/arc/init.c b/grub-core/kern/mips/arc/init.c
-index 3834a14..86b3a25 100644
+index 2ed3ff3..5c40c34 100644
 --- a/grub-core/kern/mips/arc/init.c
 +++ b/grub-core/kern/mips/arc/init.c
 @@ -276,7 +276,7 @@ grub_halt (void)
@@ -192,10 +192,10 @@ index be88b77..8b6c55f 100644
    grub_halt ();
  }
 diff --git a/grub-core/kern/misc.c b/grub-core/kern/misc.c
-index 83c068d..e742f56 100644
+index 3af336e..63b586d 100644
 --- a/grub-core/kern/misc.c
 +++ b/grub-core/kern/misc.c
-@@ -1098,9 +1098,18 @@ grub_abort (void)
+@@ -1209,9 +1209,18 @@ grub_abort (void)
        grub_getkey ();
      }
  
@@ -254,10 +254,10 @@ index 782ca72..708b060 100644
    struct sched_shutdown arg;
  
 diff --git a/include/grub/misc.h b/include/grub/misc.h
-index ee48eb7..f9135b6 100644
+index 7d2b551..fd18e63 100644
 --- a/include/grub/misc.h
 +++ b/include/grub/misc.h
-@@ -334,7 +334,7 @@ int EXPORT_FUNC(grub_vsnprintf) (char *str, grub_size_t n, const char *fmt,
+@@ -353,7 +353,7 @@ int EXPORT_FUNC(grub_vsnprintf) (char *str, grub_size_t n, const char *fmt,
  char *EXPORT_FUNC(grub_xasprintf) (const char *fmt, ...)
       __attribute__ ((format (GNU_PRINTF, 1, 2))) WARN_UNUSED_RESULT;
  char *EXPORT_FUNC(grub_xvasprintf) (const char *fmt, va_list args) WARN_UNUSED_RESULT;

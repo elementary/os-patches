@@ -30,6 +30,7 @@
 #include <grub/unicode.h>
 #include <grub/fontformat.h>
 #include <grub/env.h>
+#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -293,8 +294,7 @@ load_font_index (grub_file_t file, grub_uint32_t sect_length, struct
   font->num_chars = sect_length / FONT_CHAR_INDEX_ENTRY_SIZE;
 
   /* Allocate the character index array.  */
-  font->char_index = grub_malloc (font->num_chars
-				  * sizeof (struct char_index_entry));
+  font->char_index = grub_calloc (font->num_chars, sizeof (struct char_index_entry));
   if (!font->char_index)
     return 1;
   font->bmp_idx = grub_malloc (0x10000 * sizeof (grub_uint16_t));
@@ -361,9 +361,13 @@ static char *
 read_section_as_string (struct font_file_section *section)
 {
   char *str;
+  grub_size_t sz;
   grub_ssize_t ret;
 
-  str = grub_malloc (section->length + 1);
+  if (grub_add (section->length, 1, &sz))
+    return NULL;
+
+  str = grub_malloc (sz);
   if (!str)
     return 0;
 
@@ -528,6 +532,12 @@ grub_font_load (const char *filename)
       if (grub_memcmp (section.name, FONT_FORMAT_SECTION_NAMES_FONT_NAME,
 		       sizeof (FONT_FORMAT_SECTION_NAMES_FONT_NAME) - 1) == 0)
 	{
+	  if (font->name != NULL)
+	    {
+	      grub_error (GRUB_ERR_BAD_FONT, "invalid font file: too many NAME sections");
+	      goto fail;
+	    }
+
 	  font->name = read_section_as_string (&section);
 	  if (!font->name)
 	    goto fail;

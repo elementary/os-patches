@@ -27,13 +27,16 @@ export TEXTDOMAINDIR="@localedir@"
 . "$pkgdatadir/grub-mkconfig_lib"
 
 if [ "x${GRUB_DISABLE_OS_PROBER}" = "xtrue" ]; then
+  grub_warn "$(gettext_printf "os-prober will not be executed to detect other bootable partitions.\nSystems on them will not be added to the GRUB boot configuration.\nCheck GRUB_DISABLE_OS_PROBER documentation entry.")"
   exit 0
 fi
 
-if [ -z "`which os-prober 2> /dev/null`" ] || [ -z "`which linux-boot-prober 2> /dev/null`" ] ; then
+if ! command -v os-prober > /dev/null || ! command -v linux-boot-prober > /dev/null ; then
   # missing os-prober and/or linux-boot-prober
   exit 0
 fi
+
+grub_warn "$(gettext_printf "os-prober will be executed to detect other bootable partitions.\nIts output will be used to detect bootable binaries on them and create new boot entries.")"
 
 OSPROBED="`os-prober | tr ' ' '^' | paste -s -d ' '`"
 if [ -z "${OSPROBED}" ] ; then
@@ -234,7 +237,15 @@ EOF
 	  prepare_boot_cache="$(prepare_grub_to_access_device ${LBOOT} | grub_add_tab)"
 	fi
 
-	if [ "x$is_top_level" = xtrue ] && [ "x${GRUB_DISABLE_SUBMENU}" != xy ]; then
+	# The GRUB_DISABLE_SUBMENU option used to be different than others since it was
+	# mentioned in the documentation that has to be set to 'y' instead of 'true' to
+	# enable it. This caused a lot of confusion to users that set the option to 'y',
+	# 'yes' or 'true'. This was fixed but all of these values must be supported now.
+	if [ "x${GRUB_DISABLE_SUBMENU}" = xyes ] || [ "x${GRUB_DISABLE_SUBMENU}" = xy ]; then
+	    GRUB_DISABLE_SUBMENU="true"
+	fi
+
+	if [ "x$is_top_level" = xtrue ] && [ "x${GRUB_DISABLE_SUBMENU}" != xtrue ]; then
             cat << EOF
 menuentry '$(echo "$OS $onstr" | grub_quote)' $CLASS --class gnu-linux --class gnu --class os \$menuentry_id_option 'osprober-gnulinux-simple-$boot_device_id' {
 EOF

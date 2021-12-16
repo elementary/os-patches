@@ -1,7 +1,7 @@
 /* parser.c - the part of the parser that can return partial tokens */
 /*
  *  GRUB  --  GRand Unified Bootloader
- *  Copyright (C) 2005,2007,2009  Free Software Foundation, Inc.
+ *  Copyright (C) 2005,2007,2009,2021  Free Software Foundation, Inc.
  *
  *  GRUB is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  */
 
 #include <grub/parser.h>
+#include <grub/buffer.h>
 #include <grub/env.h>
 #include <grub/misc.h>
 #include <grub/mm.h>
@@ -107,8 +108,8 @@ check_varstate (grub_parser_state_t s)
 }
 
 
-static void
-add_var (char *varname, char **bp, char **vp,
+static grub_err_t
+add_var (grub_buffer_t varname, grub_buffer_t buf,
 	 grub_parser_state_t state, grub_parser_state_t newstate)
 {
   const char *val;
@@ -116,17 +117,74 @@ add_var (char *varname, char **bp, char **vp,
   /* Check if a variable was being read in and the end of the name
      was reached.  */
   if (!(check_varstate (state) && !check_varstate (newstate)))
-    return;
+    return GRUB_ERR_NONE;
 
-  *((*vp)++) = '\0';
-  val = grub_env_get (varname);
-  *vp = varname;
+  if (grub_buffer_append_char (varname, '\0') != GRUB_ERR_NONE)
+    return grub_errno;
+
+  val = grub_env_get ((const char *) grub_buffer_peek_data (varname));
+  grub_buffer_reset (varname);
   if (!val)
-    return;
+    return GRUB_ERR_NONE;
 
   /* Insert the contents of the variable in the buffer.  */
-  for (; *val; val++)
-    *((*bp)++) = *val;
+  return grub_buffer_append_data (buf, val, grub_strlen (val));
+}
+
+static grub_err_t
+terminate_arg (grub_buffer_t buffer, int *argc)
+{
+  grub_size_t unread = grub_buffer_get_unread_bytes (buffer);
+
+  if (unread == 0)
+    return GRUB_ERR_NONE;
+
+  if (*(const char *) grub_buffer_peek_data_at (buffer, unread - 1) == '\0')
+    return GRUB_ERR_NONE;
+
+  if (grub_buffer_append_char (buffer, '\0') != GRUB_ERR_NONE)
+    return grub_errno;
+
+  (*argc)++;
+
+  return GRUB_ERR_NONE;
+}
+
+static grub_err_t
+process_char (char c, grub_buffer_t buffer, grub_buffer_t varname,
+	      grub_parser_state_t state, int *argc,
+	      grub_parser_state_t *newstate)
+{
+  char use;
+
+  *newstate = grub_parser_cmdline_state (state, c, &use);
+
+  /*
+   * If a variable was being processed and this character does
+   * not describe the variable anymore, write the variable to
+   * the buffer.
+   */
+  if (add_var (varname, buffer, state, *newstate) != GRUB_ERR_NONE)
+    return grub_errno;
+
+  if (check_varstate (*newstate))
+    {
+      if (use)
+        return grub_buffer_append_char (varname, use);
+    }
+  else if (*newstate == GRUB_PARSER_STATE_TEXT &&
+	   state != GRUB_PARSER_STATE_ESC && grub_isspace (use))
+    {
+      /*
+       * Don't add more than one argument if multiple
+       * spaces are used.
+       */
+      return terminate_arg (buffer, argc);
+    }
+  else if (use)
+    return grub_buffer_append_char (buffer, use);
+
+  return GRUB_ERR_NONE;
 }
 
 grub_err_t
@@ -135,23 +193,36 @@ grub_parser_split_cmdline (const char *cmdline,
 			   int *argc, char ***argv)
 {
   grub_parser_state_t state = GRUB_PARSER_STATE_TEXT;
-  /* XXX: Fixed size buffer, perhaps this buffer should be dynamically
-     allocated.  */
-  char buffer[1024];
-  char *bp = buffer;
+  grub_buffer_t buffer, varname;
   char *rd = (char *) cmdline;
-  char varname[200];
-  char *vp = varname;
-  char *args;
+  char *rp = rd;
   int i;
 
   *argc = 0;
+  *argv = NULL;
+
+  buffer = grub_buffer_new (1024);
+  if (buffer == NULL)
+    return grub_errno;
+
+  varname = grub_buffer_new (200);
+  if (varname == NULL)
+    goto fail;
+
   do
     {
-      if (!rd || !*rd)
+      if (rp == NULL || *rp == '\0')
 	{
+	  if (rd != cmdline)
+	    {
+	      grub_free (rd);
+	      rd = rp = NULL;
+	    }
 	  if (getline)
-	    getline (&rd, 1, getline_data);
+	    {
+	      getline (&rd, 1, getline_data);
+	      rp = rd;
+	    }
 	  else
 	    break;
 	}
@@ -159,39 +230,14 @@ grub_parser_split_cmdline (const char *cmdline,
       if (!rd)
 	break;
 
-      for (; *rd; rd++)
+      for (; *rp != '\0'; rp++)
 	{
 	  grub_parser_state_t newstate;
-	  char use;
 
-	  newstate = grub_parser_cmdline_state (state, *rd, &use);
+	  if (process_char (*rp, buffer, varname, state, argc,
+			    &newstate) != GRUB_ERR_NONE)
+	    goto fail;
 
-	  /* If a variable was being processed and this character does
-	     not describe the variable anymore, write the variable to
-	     the buffer.  */
-	  add_var (varname, &bp, &vp, state, newstate);
-
-	  if (check_varstate (newstate))
-	    {
-	      if (use)
-		*(vp++) = use;
-	    }
-	  else
-	    {
-	      if (newstate == GRUB_PARSER_STATE_TEXT
-		  && state != GRUB_PARSER_STATE_ESC && grub_isspace (use))
-		{
-		  /* Don't add more than one argument if multiple
-		     spaces are used.  */
-		  if (bp != buffer && *(bp - 1))
-		    {
-		      *(bp++) = '\0';
-		      (*argc)++;
-		    }
-		}
-	      else if (use)
-		*(bp++) = use;
-	    }
 	  state = newstate;
 	}
     }
@@ -199,39 +245,60 @@ grub_parser_split_cmdline (const char *cmdline,
 
   /* A special case for when the last character was part of a
      variable.  */
-  add_var (varname, &bp, &vp, state, GRUB_PARSER_STATE_TEXT);
+  if (add_var (varname, buffer, state, GRUB_PARSER_STATE_TEXT) != GRUB_ERR_NONE)
+    goto fail;
 
-  if (bp != buffer && *(bp - 1))
+  /* Ensure that the last argument is terminated. */
+  if (terminate_arg (buffer, argc) != GRUB_ERR_NONE)
+    goto fail;
+
+  /* If there are no args, then we're done. */
+  if (!*argc)
     {
-      *(bp++) = '\0';
-      (*argc)++;
+      grub_errno = GRUB_ERR_NONE;
+      goto out;
     }
 
-  /* Reserve memory for the return values.  */
-  args = grub_malloc (bp - buffer);
-  if (!args)
-    return grub_errno;
-  grub_memcpy (args, buffer, bp - buffer);
-
-  *argv = grub_malloc (sizeof (char *) * (*argc + 1));
+  *argv = grub_calloc (*argc + 1, sizeof (char *));
   if (!*argv)
-    {
-      grub_free (args);
-      return grub_errno;
-    }
+    goto fail;
 
   /* The arguments are separated with 0's, setup argv so it points to
      the right values.  */
-  bp = args;
   for (i = 0; i < *argc; i++)
     {
-      (*argv)[i] = bp;
-      while (*bp)
-	bp++;
-      bp++;
+      char *arg;
+
+      if (i > 0)
+	{
+	  if (grub_buffer_advance_read_pos (buffer, 1) != GRUB_ERR_NONE)
+	    goto fail;
+	}
+
+      arg = (char *) grub_buffer_peek_data (buffer);
+      if (arg == NULL ||
+	  grub_buffer_advance_read_pos (buffer, grub_strlen (arg)) != GRUB_ERR_NONE)
+	goto fail;
+
+      (*argv)[i] = arg;
     }
 
-  return 0;
+  /* Keep memory for the return values. */
+  grub_buffer_take_data (buffer);
+
+  grub_errno = GRUB_ERR_NONE;
+
+ out:
+  if (rd != cmdline)
+    grub_free (rd);
+  grub_buffer_free (buffer);
+  grub_buffer_free (varname);
+
+  return grub_errno;
+
+ fail:
+  grub_free (*argv);
+  goto out;
 }
 
 /* Helper for grub_parser_execute.  */

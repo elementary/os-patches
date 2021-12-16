@@ -39,6 +39,7 @@
 #  --macro-prefix=gl \
 #  --no-vc-files \
 #  argp \
+#  base64 \
 #  error \
 #  fnmatch \
 #  getdelim \
@@ -55,6 +56,7 @@
 gl_LOCAL_DIR([gl])
 gl_MODULES([
   argp
+  base64
   error
   fnmatch
   getdelim

@@ -122,7 +122,7 @@ replace_scope (struct grub_script_scope *new_scope)
 grub_err_t
 grub_script_break (grub_command_t cmd, int argc, char *argv[])
 {
-  char *p = 0;
+  const char *p = NULL;
   unsigned long count;
 
   if (argc == 0)
@@ -154,7 +154,7 @@ grub_err_t
 grub_script_shift (grub_command_t cmd __attribute__((unused)),
 		   int argc, char *argv[])
 {
-  char *p = 0;
+  const char *p = NULL;
   unsigned long n = 0;
 
   if (! scope)
@@ -215,7 +215,7 @@ grub_err_t
 grub_script_return (grub_command_t cmd __attribute__((unused)),
 		    int argc, char *argv[])
 {
-  char *p;
+  const char *p = NULL;
   unsigned long n;
 
   if (! scope || argc > 1)
@@ -485,7 +485,7 @@ gettext_putvar (const char *str, grub_size_t len,
     return 0;
 
   /* Enough for any number.  */
-  if (len == 1 && str[0] == '#')
+  if (len == 1 && str[0] == '#' && scope != NULL)
     {
       grub_snprintf (*ptr, 30, "%u", scope->argv.argc);
       *ptr += grub_strlen (*ptr);
@@ -553,7 +553,7 @@ gettext_append (struct grub_script_argv *result, const char *orig_str)
   for (iptr = orig_str; *iptr; iptr++)
     if (*iptr == '$')
       dollar_cnt++;
-  ctx.allowed_strings = grub_malloc (sizeof (ctx.allowed_strings[0]) * dollar_cnt);
+  ctx.allowed_strings = grub_calloc (dollar_cnt, sizeof (ctx.allowed_strings[0]));
 
   if (parse_string (orig_str, gettext_save_allow, &ctx, 0))
     goto fail;
@@ -623,6 +623,9 @@ grub_script_arglist_to_argv (struct grub_script_arglist *arglist,
   char **values = 0;
   struct grub_script_arg *arg = 0;
   struct grub_script_argv result = { 0, 0, 0 };
+
+  if (arglist == NULL)
+    return 1;
 
   for (; arglist && arglist->arg; arglist = arglist->next)
     {
@@ -838,7 +841,9 @@ grub_script_function_call (grub_script_function_t func, int argc, char **args)
   old_scope = scope;
   scope = &new_scope;
 
+  func->executing++;
   ret = grub_script_execute (func->func);
+  func->executing--;
 
   function_return = 0;
   active_loops = loops;
@@ -938,7 +943,7 @@ grub_script_execute_cmdline (struct grub_script_cmd *cmd)
   struct grub_script_argv argv = { 0, 0, 0 };
 
   /* Lookup the command.  */
-  if (grub_script_arglist_to_argv (cmdline->arglist, &argv) || ! argv.args[0])
+  if (grub_script_arglist_to_argv (cmdline->arglist, &argv) || ! argv.args || ! argv.args[0])
     return grub_errno;
 
   for (i = 0; i < argv.argc; i++)

@@ -4,28 +4,29 @@ Subject: Read /etc/default/grub.d/*.cfg after /etc/default/grub
 
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/901600
 Forwarded: no
-Last-Update: 2014-01-28
+Last-Update: 2021-09-24
 
 Patch-Name: default-grub-d.patch
 ---
- grub-core/osdep/unix/config.c | 114 ++++++++++++++++++++++++++++++++++--------
+ grub-core/osdep/unix/config.c | 128 +++++++++++++++++++++++++++++++++++-------
  util/grub-mkconfig.in         |   5 ++
- 2 files changed, 98 insertions(+), 21 deletions(-)
+ 2 files changed, 112 insertions(+), 21 deletions(-)
 
 diff --git a/grub-core/osdep/unix/config.c b/grub-core/osdep/unix/config.c
-index 65effa9..5478030 100644
+index 7d63251..545d64b 100644
 --- a/grub-core/osdep/unix/config.c
 +++ b/grub-core/osdep/unix/config.c
-@@ -24,6 +24,8 @@
+@@ -24,6 +24,9 @@
  #include <grub/emu/config.h>
  #include <grub/util/install.h>
  #include <grub/util/misc.h>
 +#include <grub/list.h>
++#include <grub/safemath.h>
 +#include <assert.h>
  #include <string.h>
  #include <sys/types.h>
  #include <sys/wait.h>
-@@ -61,13 +63,27 @@ grub_util_get_localedir (void)
+@@ -61,13 +64,27 @@ grub_util_get_localedir (void)
    return LOCALEDIR;
  }
  
@@ -54,7 +55,7 @@ index 65effa9..5478030 100644
    FILE *f = NULL;
    int fd;
    const char *v;
-@@ -83,29 +99,75 @@ grub_util_load_config (struct grub_util_config *cfg)
+@@ -83,29 +100,88 @@ grub_util_load_config (struct grub_util_config *cfg)
      cfg->grub_distributor = xstrdup (v);
  
    cfgfile = grub_util_get_config_filename ();
@@ -62,8 +63,14 @@ index 65effa9..5478030 100644
 -    return;
 +  if (grub_util_is_regular (cfgfile))
 +    {
++      size_t sz;
++
 +      ++num_cfgpaths;
-+      len_cfgpaths += strlen (cfgfile) * 4 + sizeof (". ''; ") - 1;
++      sz = strlen (cfgfile);
++      if (grub_mul (sz, 4, &sz) ||
++	  grub_add (sz, sizeof (". ''; ") - 1, &sz) ||
++	  grub_add (len_cfgpaths, sz, &len_cfgpaths))
++	grub_util_error ("%s", _("overflow is detected"));
 +    }
 +
 +  cfgdir = xasprintf ("%s.d", cfgfile);
@@ -75,6 +82,7 @@ index 65effa9..5478030 100644
 +      while ((de = grub_util_fd_readdir (d)))
 +	{
 +	  const char *ext = strrchr (de->d_name, '.');
++	  size_t sz;
 +
 +	  if (!ext || strcmp (ext, ".cfg") != 0)
 +	    continue;
@@ -83,7 +91,11 @@ index 65effa9..5478030 100644
 +	  cfgpath->path = grub_util_path_concat (2, cfgdir, de->d_name);
 +	  grub_list_push (GRUB_AS_LIST_P (&cfgpaths), GRUB_AS_LIST (cfgpath));
 +	  ++num_cfgpaths;
-+	  len_cfgpaths += strlen (cfgpath->path) * 4 + sizeof (". ''; ") - 1;
++	  sz = strlen (cfgpath->path);
++	  if (grub_mul (sz, 4, &sz) ||
++	      grub_add (sz, sizeof (". ''; ") - 1, &sz) ||
++	      grub_add (len_cfgpaths, sz, &len_cfgpaths))
++	    grub_util_error ("%s", _("overflow is detected"));
 +	}
 +      grub_util_fd_closedir (d);
 +    }
@@ -91,7 +103,7 @@ index 65effa9..5478030 100644
 +  if (num_cfgpaths == 0)
 +    goto out;
 +
-+  sorted_cfgpaths = xmalloc (num_cfgpaths * sizeof (*sorted_cfgpaths));
++  sorted_cfgpaths = xcalloc (num_cfgpaths, sizeof (*sorted_cfgpaths));
 +  i = 0;
 +  if (grub_util_is_regular (cfgfile))
 +    sorted_cfgpaths[i++] = xstrdup (cfgfile);
@@ -107,8 +119,10 @@ index 65effa9..5478030 100644
    argv[0] = "sh";
    argv[1] = "-c";
  
--  script = xmalloc (4 * strlen (cfgfile) + 300);
-+  script = xmalloc (len_cfgpaths + 300);
+-  script = xcalloc (4, strlen (cfgfile) + 300);
++  if (grub_add (len_cfgpaths, 300, &len_cfgpaths))
++    grub_util_error ("%s", _("overflow is detected"));
++  script = xmalloc (len_cfgpaths);
  
    ptr = script;
 -  memcpy (ptr, ". '", 3);
@@ -142,7 +156,7 @@ index 65effa9..5478030 100644
  	  "\"$GRUB_ENABLE_CRYPTODISK\" \"$GRUB_DISTRIBUTOR\"");
  
    argv[2] = script;
-@@ -125,15 +187,25 @@ grub_util_load_config (struct grub_util_config *cfg)
+@@ -125,15 +201,25 @@ grub_util_load_config (struct grub_util_config *cfg)
        waitpid (pid, NULL, 0);
      }
    if (f)
@@ -177,10 +191,10 @@ index 65effa9..5478030 100644
 +  free (cfgdir);
  }
 diff --git a/util/grub-mkconfig.in b/util/grub-mkconfig.in
-index 5d29aa4..e7ef32e 100644
+index 0fd618e..0265a5a 100644
 --- a/util/grub-mkconfig.in
 +++ b/util/grub-mkconfig.in
-@@ -164,6 +164,11 @@ fi
+@@ -160,6 +160,11 @@ fi
  if test -f ${sysconfdir}/default/grub ; then
    . ${sysconfdir}/default/grub
  fi
@@ -190,5 +204,5 @@ index 5d29aa4..e7ef32e 100644
 +  fi
 +done
  
- # XXX: should this be deprecated at some point?
- if [ "x${GRUB_TERMINAL}" != "x" ] ; then
+ if [ "x${GRUB_DISABLE_UUID}" = "xtrue" ]; then
+   if [ -z "${GRUB_DISABLE_LINUX_UUID}" ]; then

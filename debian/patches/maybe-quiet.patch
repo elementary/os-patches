@@ -1,5 +1,5 @@
-From: Didier Roche <didrocks@ubuntu.com>
-Date: Tue, 31 Mar 2020 15:20:15 +0200
+From: Colin Watson <cjwatson@ubuntu.com>
+Date: Mon, 13 Jan 2014 12:13:26 +0000
 Subject: Add configure option to reduce visual clutter at boot time
 
 If this option is enabled, then do all of the following:
@@ -29,7 +29,7 @@ Author: Will Thompson <will@willthompson.co.uk>
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/386922
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/861048
 Forwarded: (partial) http://lists.gnu.org/archive/html/grub-devel/2009-09/msg00056.html
-Last-Update: 2019-06-24
+Last-Update: 2021-09-24
 
 Patch-Name: maybe-quiet.patch
 ---
@@ -42,8 +42,7 @@ Patch-Name: maybe-quiet.patch
  grub-core/normal/main.c           | 11 +++++++++++
  grub-core/normal/menu.c           | 17 +++++++++++++++--
  util/grub.d/10_linux.in           | 15 +++++++++++----
- util/grub.d/10_linux_zfs.in       |  9 +++++++--
- 10 files changed, 118 insertions(+), 8 deletions(-)
+ 9 files changed, 111 insertions(+), 6 deletions(-)
 
 diff --git a/config.h.in b/config.h.in
 index 9e8f991..d2c4ce8 100644
@@ -59,10 +58,10 @@ index 9e8f991..d2c4ce8 100644
  /* We don't need those.  */
  #define MINILZO_CFG_SKIP_LZO_PTR 1
 diff --git a/configure.ac b/configure.ac
-index 1e5abc6..ea00ccd 100644
+index 74778a6..256fc44 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1857,6 +1857,17 @@ else
+@@ -1915,6 +1915,17 @@ else
  fi
  AC_SUBST([UBUNTU_RECOVERY])
  
@@ -80,9 +79,9 @@ index 1e5abc6..ea00ccd 100644
  LIBS=""
  
  AC_SUBST([FONT_SOURCE])
-@@ -2114,5 +2125,10 @@ echo "Without liblzma (no support for XZ-compressed mips images) ($liblzma_excus
+@@ -2177,5 +2188,10 @@ echo "With stack smashing protector: Yes"
  else
- echo "With liblzma from $LIBLZMA (support for XZ-compressed mips images)"
+ echo "With stack smashing protector: No"
  fi
 +if [ x"$enable_quiet_boot" = xyes ]; then
 +echo With quiet boot: Yes
@@ -204,10 +203,10 @@ index c1addc0..9b6d7a7 100644
  
  notification_step:	.asciz "."
 diff --git a/grub-core/kern/main.c b/grub-core/kern/main.c
-index 9cad0c4..714b63d 100644
+index 73967e2..2879d64 100644
 --- a/grub-core/kern/main.c
 +++ b/grub-core/kern/main.c
-@@ -264,15 +264,25 @@ reclaim_module_space (void)
+@@ -265,15 +265,25 @@ reclaim_module_space (void)
  void __attribute__ ((noreturn))
  grub_main (void)
  {
@@ -231,9 +230,9 @@ index 9cad0c4..714b63d 100644
    grub_setcolorstate (GRUB_TERM_COLOR_STANDARD);
 +#endif
  
-   grub_load_config ();
- 
-@@ -308,5 +318,12 @@ grub_main (void)
+   /* Init verifiers API. */
+   grub_verifiers_init ();
+@@ -312,5 +322,12 @@ grub_main (void)
    grub_boot_time ("After execution of embedded config. Attempt to go to normal mode");
  
    grub_load_normal_mode ();
@@ -261,10 +260,10 @@ index dcd7d44..a93524e 100644
    while (1)
      {
 diff --git a/grub-core/normal/main.c b/grub-core/normal/main.c
-index 1b03dfd..0aa389f 100644
+index c4ebe9e..a1750e0 100644
 --- a/grub-core/normal/main.c
 +++ b/grub-core/normal/main.c
-@@ -389,6 +389,15 @@ static grub_err_t
+@@ -407,6 +407,15 @@ static grub_err_t
  grub_normal_read_line_real (char **line, int cont, int nested)
  {
    const char *prompt;
@@ -280,7 +279,7 @@ index 1b03dfd..0aa389f 100644
  
    if (cont)
      /* TRANSLATORS: it's command line prompt.  */
-@@ -441,7 +450,9 @@ grub_cmdline_run (int nested, int force_auth)
+@@ -459,7 +468,9 @@ grub_cmdline_run (int nested, int force_auth)
        return;
      }
  
@@ -291,10 +290,10 @@ index 1b03dfd..0aa389f 100644
    while (1)
      {
 diff --git a/grub-core/normal/menu.c b/grub-core/normal/menu.c
-index 3611ee9..ebf5a0f 100644
+index 8397886..e9d8444 100644
 --- a/grub-core/normal/menu.c
 +++ b/grub-core/normal/menu.c
-@@ -827,12 +827,18 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)
+@@ -807,12 +807,18 @@ run_menu (grub_menu_t menu, int nested, int *auto_boot)
  
  /* Callback invoked immediately before a menu entry is executed.  */
  static void
@@ -314,7 +313,7 @@ index 3611ee9..ebf5a0f 100644
  }
  
  /* Callback invoked when a default menu entry executed because of a timeout
-@@ -880,6 +886,9 @@ show_menu (grub_menu_t menu, int nested, int autobooted)
+@@ -860,6 +866,9 @@ show_menu (grub_menu_t menu, int nested, int autobooted)
        int boot_entry;
        grub_menu_entry_t e;
        int auto_boot;
@@ -324,7 +323,7 @@ index 3611ee9..ebf5a0f 100644
  
        boot_entry = run_menu (menu, nested, &auto_boot);
        if (boot_entry < 0)
-@@ -889,7 +898,11 @@ show_menu (grub_menu_t menu, int nested, int autobooted)
+@@ -869,7 +878,11 @@ show_menu (grub_menu_t menu, int nested, int autobooted)
        if (! e)
  	continue; /* Menu is empty.  */
  
@@ -338,7 +337,7 @@ index 3611ee9..ebf5a0f 100644
        if (auto_boot)
  	grub_menu_execute_with_fallback (menu, e, autobooted,
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index cb1cc20..479a8bf 100644
+index 1b8c6e1..869a7ee 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
 @@ -21,6 +21,7 @@ prefix="@prefix@"
@@ -349,7 +348,7 @@ index cb1cc20..479a8bf 100644
  
  . "$pkgdatadir/grub-mkconfig_lib"
  
-@@ -162,10 +163,12 @@ linux_entry ()
+@@ -158,10 +159,12 @@ linux_entry ()
      fi
      printf '%s\n' "${prepare_boot_cache}" | sed "s/^/$submenu_indentation/"
    fi
@@ -364,7 +363,7 @@ index cb1cc20..479a8bf 100644
    if test -d /sys/firmware/efi && test -e "${linux}.efi.signed"; then
      sed "s/^/$submenu_indentation/" << EOF
  	linux	${rel_dirname}/${basename}.efi.signed root=${linux_root_device_thisversion} ro ${args}
-@@ -177,13 +180,17 @@ EOF
+@@ -173,13 +176,17 @@ EOF
    fi
    if test -n "${initrd}" ; then
      # TRANSLATORS: ramdisk isn't identifier. Should be translated.
@@ -384,37 +383,3 @@ index cb1cc20..479a8bf 100644
  	initrd	$(echo $initrd_path)
  EOF
    fi
-diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index 511c182..caead8a 100755
---- a/util/grub.d/10_linux_zfs.in
-+++ b/util/grub.d/10_linux_zfs.in
-@@ -20,6 +20,7 @@ set -e
- prefix="@prefix@"
- datarootdir="@datarootdir@"
- ubuntu_recovery="@UBUNTU_RECOVERY@"
-+quiet_boot="@QUIET_BOOT@"
- 
- . "${pkgdatadir}/grub-mkconfig_lib"
- 
-@@ -795,7 +796,9 @@ zfs_linux_entry () {
- 
-     echo "$(prepare_grub_to_access_device_cached "${boot_device}" "${submenu_level}")"
- 
--    echo "${submenu_indentation}	echo $(gettext_printf "Loading Linux %s ..." ${kernel_version} | grub_quote)"
-+    if [ "${quiet_boot}" = 0 ] || [ "${type}" != simple ]; then
-+        echo "${submenu_indentation}	echo $(gettext_printf "Loading Linux %s ..." ${kernel_version} | grub_quote)"
-+    fi
- 
-     linux_default_args="${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}"
-     if [ ${type} = "recovery" ]; then
-@@ -805,7 +808,9 @@ zfs_linux_entry () {
-     # echo in echo trims end of line spaces
-     echo "${submenu_indentation}	linux	\"${kernel}\" root=ZFS=\"${dataset}\" ro $(echo ${linux_default_args} ${kernel_additional_args})"
- 
--    echo "${submenu_indentation}	echo '$(gettext_printf "Loading initial ramdisk ..." | grub_quote)'"
-+    if [ "${quiet_boot}" = 0 ] || [ "${type}" != simple ]; then
-+        echo "${submenu_indentation}	echo '$(gettext_printf "Loading initial ramdisk ..." | grub_quote)'"
-+    fi
-     echo "${submenu_indentation}	initrd	\"${initrd}\""
-     echo "${submenu_indentation}}"
- }

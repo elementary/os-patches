@@ -4,7 +4,7 @@ Subject: If GRUB Legacy is still around, tell packaging to ignore it
 
 Bug-Debian: http://bugs.debian.org/586143
 Forwarded: not-needed
-Last-Update: 2013-12-25
+Last-Update: 2021-09-24
 
 Patch-Name: install-stage2-confusion.patch
 ---
@@ -12,7 +12,7 @@ Patch-Name: install-stage2-confusion.patch
  1 file changed, 14 insertions(+)
 
 diff --git a/util/grub-install.c b/util/grub-install.c
-index 8a55ad4..3b4606e 100644
+index 0fbe7f7..48e2d37 100644
 --- a/util/grub-install.c
 +++ b/util/grub-install.c
 @@ -42,6 +42,7 @@
@@ -23,10 +23,10 @@ index 8a55ad4..3b4606e 100644
  
  #include <string.h>
  
-@@ -1714,6 +1715,19 @@ main (int argc, char *argv[])
- 	  grub_util_bios_setup (platdir, "boot.img", "core.img",
- 				install_drive, force,
- 				fs_probe, allow_floppy, add_rs_codes);
+@@ -1727,6 +1728,19 @@ main (int argc, char *argv[])
+ 
+ 	    grub_set_install_backup_ponr ();
+ 	  }
 +
 +	/* If vestiges of GRUB Legacy still exist, tell the Debian packaging
 +	   that they can ignore them.  */

@@ -31,6 +31,7 @@
 #include <grub/hfs.h>
 #include <grub/charset.h>
 #include <grub/hfsplus.h>
+#include <grub/safemath.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -176,6 +177,17 @@ grub_hfsplus_read_block (grub_fshelp_node_t node, grub_disk_addr_t fileblock)
 	  break;
 	}
 
+      /*
+       * If the extent overflow tree isn't ready yet, we can't look
+       * in it. This can happen where the catalog file is corrupted.
+       */
+      if (!node->data->extoverflow_tree_ready)
+	{
+	  grub_error (GRUB_ERR_BAD_FS,
+		      "attempted to read extent overflow tree before loading");
+	  break;
+	}
+
       /* Set up the key to look for in the extent overflow file.  */
       extoverflow.extkey.fileid = node->fileid;
       extoverflow.extkey.type = 0;
@@ -187,7 +199,8 @@ grub_hfsplus_read_block (grub_fshelp_node_t node, grub_disk_addr_t fileblock)
 	  || !nnode)
 	{
 	  grub_error (GRUB_ERR_READ_ERROR,
-		      "no block found for the file id 0x%x and the block offset 0x%x",
+		      "no block found for the file id 0x%x and the block"
+		      " offset 0x%" PRIuGRUB_UINT64_T,
 		      node->fileid, fileblock);
 	  break;
 	}
@@ -240,6 +253,7 @@ grub_hfsplus_mount (grub_disk_t disk)
     return 0;
 
   data->disk = disk;
+  data->extoverflow_tree_ready = 0;
 
   /* Read the bootblock.  */
   grub_disk_read (disk, GRUB_HFSPLUS_SBLOCK, 0, sizeof (volheader),
@@ -355,6 +369,8 @@ grub_hfsplus_mount (grub_disk_t disk)
 
   if (data->extoverflow_tree.nodesize < 2)
     goto fail;
+
+  data->extoverflow_tree_ready = 1;
 
   if (grub_hfsplus_read_file (&data->attr_tree.file, 0, 0,
 			      sizeof (struct grub_hfsplus_btnode),
@@ -475,8 +491,12 @@ grub_hfsplus_read_symlink (grub_fshelp_node_t node)
 {
   char *symlink;
   grub_ssize_t numread;
+  grub_size_t sz = node->size;
 
-  symlink = grub_malloc (node->size + 1);
+  if (grub_add (sz, 1, &sz))
+    return NULL;
+
+  symlink = grub_malloc (sz);
   if (!symlink)
     return 0;
 
@@ -630,6 +650,10 @@ grub_hfsplus_btree_search (struct grub_hfsplus_btree *btree,
 	      pointer = ((char *) currkey
 			 + grub_be_to_cpu16 (currkey->keylen)
 			 + 2);
+
+	      if ((char *) pointer > node + btree->nodesize - 2)
+		return grub_error (GRUB_ERR_BAD_FS, "HFS+ key beyond end of node");
+
 	      currnode = grub_be_to_cpu32 (grub_get_unaligned32 (pointer));
 	      match = 1;
 	    }
@@ -715,12 +739,12 @@ list_nodes (void *record, void *hook_arg)
   if (type == GRUB_FSHELP_UNKNOWN)
     return 0;
 
-  filename = grub_malloc (grub_be_to_cpu16 (catkey->namelen)
-			  * GRUB_MAX_UTF8_PER_UTF16 + 1);
+  filename = grub_calloc (grub_be_to_cpu16 (catkey->namelen),
+			  GRUB_MAX_UTF8_PER_UTF16 + 1);
   if (! filename)
     return 0;
 
-  keyname = grub_malloc (grub_be_to_cpu16 (catkey->namelen) * sizeof (*keyname));
+  keyname = grub_calloc (grub_be_to_cpu16 (catkey->namelen), sizeof (*keyname));
   if (!keyname)
     {
       grub_free (filename);
@@ -1007,7 +1031,16 @@ grub_hfsplus_label (grub_device_t device, char **label)
     grub_hfsplus_btree_recptr (&data->catalog_tree, node, ptr);
 
   label_len = grub_be_to_cpu16 (catkey->namelen);
-  label_name = grub_malloc (label_len * sizeof (*label_name));
+
+  /* Ensure that the length is >= 0. */
+  if (label_len < 0)
+    label_len = 0;
+
+  /* Ensure label length is at most 255 Unicode characters. */
+  if (label_len > 255)
+    label_len = 255;
+
+  label_name = grub_calloc (label_len, sizeof (*label_name));
   if (!label_name)
     {
       grub_free (node);
@@ -1029,7 +1062,7 @@ grub_hfsplus_label (grub_device_t device, char **label)
 	}
     }
 
-  *label = grub_malloc (label_len * GRUB_MAX_UTF8_PER_UTF16 + 1);
+  *label = grub_calloc (label_len, GRUB_MAX_UTF8_PER_UTF16 + 1);
   if (! *label)
     {
       grub_free (label_name);
@@ -1050,7 +1083,7 @@ grub_hfsplus_label (grub_device_t device, char **label)
 
 /* Get mtime.  */
 static grub_err_t
-grub_hfsplus_mtime (grub_device_t device, grub_int32_t *tm)
+grub_hfsplus_mtime (grub_device_t device, grub_int64_t *tm)
 {
   struct grub_hfsplus_data *data;
   grub_disk_t disk = device->disk;

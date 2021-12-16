@@ -12,10 +12,17 @@ the full text of the license.
 
 from __future__ import print_function
 
-from apport.hookutils import *
 import os
-import subprocess
 import re
+import subprocess
+
+from apport.hookutils import (
+    attach_default_grub,
+    attach_file,
+    attach_file_if_exists,
+    path_to_key,
+)
+
 
 def check_shell_syntax(path):
     ''' Check the syntax of a shell script '''
@@ -25,6 +32,7 @@ def check_shell_syntax(path):
     except subprocess.CalledProcessError:
         return False
     return True
+
 
 def check_shell_syntax_harder(path):
     ''' Check the syntax of a shell script '''
@@ -55,7 +63,7 @@ def check_shell_syntax_harder(path):
 def add_info(report):
     if report['ProblemType'] == 'Package':
         # To detect if root fs is a loop device
-        attach_file(report, '/proc/cmdline','ProcCmdLine')
+        attach_file(report, '/proc/cmdline', 'ProcCmdLine')
         attach_default_grub(report, 'EtcDefaultGrub')
         attach_file_if_exists(report, '/boot/grub/device.map', 'DeviceMap')
         try:
@@ -74,9 +82,9 @@ def add_info(report):
 
         # Check scripts in /etc/grub.d since some users directly change
         # configuration there
-        grubdir='/etc/grub.d'
+        grubdir = '/etc/grub.d'
         for f in os.listdir(grubdir):
-            fullpath=os.path.join(grubdir, f)
+            fullpath = os.path.join(grubdir, f)
             if f != 'README' and os.access(fullpath, os.X_OK) \
                and not check_shell_syntax(fullpath):
                 invalid_grub_script.append(fullpath)
@@ -86,6 +94,7 @@ def add_info(report):
         # and if he still wants to report it
         if invalid_grub_script:
             report['InvalidGrubScript'] = ' '.join(invalid_grub_script)
+
 
 if __name__ == '__main__':
     r = {}

@@ -15,16 +15,15 @@ Patch-Name: mkconfig-recovery-title.patch
  util/grub.d/10_hurd.in      | 4 ++--
  util/grub.d/10_kfreebsd.in  | 2 +-
  util/grub.d/10_linux.in     | 2 +-
- util/grub.d/10_linux_zfs.in | 8 ++++----
  util/grub.d/10_netbsd.in    | 2 +-
  util/grub.d/20_linux_xen.in | 2 +-
- 8 files changed, 21 insertions(+), 11 deletions(-)
+ 7 files changed, 17 insertions(+), 7 deletions(-)
 
 diff --git a/docs/grub.texi b/docs/grub.texi
-index a835d0a..3ec35d3 100644
+index 0b58daf..86e46f3 100644
 --- a/docs/grub.texi
 +++ b/docs/grub.texi
-@@ -1536,6 +1536,11 @@ a console is restricted or limited.
+@@ -1577,6 +1577,11 @@ a console is restricted or limited.
  This option is only effective when GRUB was configured with the
  @option{--enable-quick-boot} option.
  
@@ -37,10 +36,10 @@ index a835d0a..3ec35d3 100644
  
  The following options are still accepted for compatibility with existing
 diff --git a/util/grub-mkconfig.in b/util/grub-mkconfig.in
-index f4ef79b..aaef3ab 100644
+index fa9c53a..0d39c8f 100644
 --- a/util/grub-mkconfig.in
 +++ b/util/grub-mkconfig.in
-@@ -196,6 +196,10 @@ GRUB_ACTUAL_DEFAULT="$GRUB_DEFAULT"
+@@ -201,6 +201,10 @@ GRUB_ACTUAL_DEFAULT="$GRUB_DEFAULT"
  
  if [ "x${GRUB_ACTUAL_DEFAULT}" = "xsaved" ] ; then GRUB_ACTUAL_DEFAULT="`"${grub_editenv}" - list | sed -n '/^saved_entry=/ s,^saved_entry=,,p'`" ; fi
  
@@ -51,7 +50,7 @@ index f4ef79b..aaef3ab 100644
  
  # These are defined in this script, export them here so that user can
  # override them.
-@@ -251,7 +255,8 @@ export GRUB_DEFAULT \
+@@ -257,7 +261,8 @@ export GRUB_DEFAULT \
    GRUB_BADRAM \
    GRUB_OS_PROBER_SKIP_LIST \
    GRUB_DISABLE_SUBMENU \
@@ -62,7 +61,7 @@ index f4ef79b..aaef3ab 100644
  if test "x${grub_cfg}" != "x"; then
    rm -f "${grub_cfg}.new"
 diff --git a/util/grub.d/10_hurd.in b/util/grub.d/10_hurd.in
-index 59a9a48..7fa3a3f 100644
+index 3663d36..8f60418 100644
 --- a/util/grub.d/10_hurd.in
 +++ b/util/grub.d/10_hurd.in
 @@ -88,8 +88,8 @@ hurd_entry () {
@@ -77,7 +76,7 @@ index 59a9a48..7fa3a3f 100644
  	  title="$(gettext_printf "%s, with Hurd %s" "${OS}" "${kernel_base}")"
  	  oldtitle="$OS using $kernel_base"
 diff --git a/util/grub.d/10_kfreebsd.in b/util/grub.d/10_kfreebsd.in
-index 9d8e8fd..8301d36 100644
+index 199b20e..bbd63cf 100644
 --- a/util/grub.d/10_kfreebsd.in
 +++ b/util/grub.d/10_kfreebsd.in
 @@ -76,7 +76,7 @@ kfreebsd_entry ()
@@ -90,10 +89,10 @@ index 9d8e8fd..8301d36 100644
  	  title="$(gettext_printf "%s, with kFreeBSD %s" "${os}" "${version}")"
        fi
 diff --git a/util/grub.d/10_linux.in b/util/grub.d/10_linux.in
-index cc2dd85..2c418c5 100644
+index 64204c2..f88a2de 100644
 --- a/util/grub.d/10_linux.in
 +++ b/util/grub.d/10_linux.in
-@@ -130,7 +130,7 @@ linux_entry ()
+@@ -126,7 +126,7 @@ linux_entry ()
    if [ x$type != xsimple ] ; then
        case $type in
  	  recovery)
@@ -102,42 +101,8 @@ index cc2dd85..2c418c5 100644
  	  *)
  	      title="$(gettext_printf "%s, with Linux %s" "${os}" "${version}")" ;;
        esac
-diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
-index 055a542..4bacf6e 100755
---- a/util/grub.d/10_linux_zfs.in
-+++ b/util/grub.d/10_linux_zfs.in
-@@ -974,7 +974,7 @@ generate_grub_menu() {
- 
-                     GRUB_DISABLE_RECOVERY=${GRUB_DISABLE_RECOVERY:-}
-                     if [ "${GRUB_DISABLE_RECOVERY}" != "true" ]; then
--                        title="$(gettext_printf "%s%s, with Linux %s (recovery mode)" "${last_booted_kernel_marker}" "${name}" "${kernel_version}")"
-+                        title="$(gettext_printf "%s%s, with Linux %s (%s)" "${last_booted_kernel_marker}" "${name}" "${kernel_version}" "$(gettext "${GRUB_RECOVERY_TITLE}")")"
-                         zfs_linux_entry 1 "${title}" "recovery" "${dataset}" "${device}" "${initrd}" "${kernel}"
-                     fi
-                     at_least_one_entry=1
-@@ -1002,9 +1002,9 @@ generate_grub_menu() {
- 
-                         GRUB_DISABLE_RECOVERY="${GRUB_DISABLE_RECOVERY:-}"
-                         if [ "${GRUB_DISABLE_RECOVERY}" != "true" ]; then
--                            title="$(gettext_printf "Revert system only (recovery mode)")"
-+                            title="$(gettext_printf "Revert system only (%s)" "$(gettext "${GRUB_RECOVERY_TITLE}")")"
-                             zfs_linux_entry 2 "${title}" "recovery" "${dataset}" "${device}" "${initrd}" "${kernel}"
--                            title="$(gettext_printf "Revert system and user data (recovery mode)")"
-+                            title="$(gettext_printf "Revert system and user data (%s)" "$(gettext "${GRUB_RECOVERY_TITLE}")")"
-                             zfs_linux_entry 2 "${title}" "recovery" "${dataset}" "${device}" "${initrd}" "${kernel}" "zsys-revert=userdata"
-                         fi
-                     # Non-zsys: boot temporarly on snapshots or rollback (destroying intermediate snapshots)
-@@ -1014,7 +1014,7 @@ generate_grub_menu() {
- 
-                         GRUB_DISABLE_RECOVERY="${GRUB_DISABLE_RECOVERY:-}"
-                         if [ "${GRUB_DISABLE_RECOVERY}" != "true" ]; then
--                            title="$(gettext_printf "One time boot (recovery mode)")"
-+                            title="$(gettext_printf "One time boot (%s)" "$(gettext "${GRUB_RECOVERY_TITLE}")")"
-                             zfs_linux_entry 2 "${title}" "recovery" "${dataset}" "${device}" "${initrd}" "${kernel}"
-                         fi
- 
 diff --git a/util/grub.d/10_netbsd.in b/util/grub.d/10_netbsd.in
-index 874f599..bb29cc0 100644
+index dc0cd1b..3368950 100644
 --- a/util/grub.d/10_netbsd.in
 +++ b/util/grub.d/10_netbsd.in
 @@ -102,7 +102,7 @@ netbsd_entry ()
@@ -150,10 +115,10 @@ index 874f599..bb29cc0 100644
  	  title="$(gettext_printf "%s, with kernel %s (via %s)" "${OS}" "$(echo ${kernel} | sed -e 's,^.*/,,')" "${loader}")"
        fi
 diff --git a/util/grub.d/20_linux_xen.in b/util/grub.d/20_linux_xen.in
-index 9a8d42f..f2ee053 100644
+index 7620a14..64e26e4 100644
 --- a/util/grub.d/20_linux_xen.in
 +++ b/util/grub.d/20_linux_xen.in
-@@ -105,7 +105,7 @@ linux_entry ()
+@@ -122,7 +122,7 @@ linux_entry_xsm ()
    fi
    if [ x$type != xsimple ] ; then
        if [ x$type = xrecovery ] ; then
