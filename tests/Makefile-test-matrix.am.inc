@@ -36,12 +36,15 @@ TEST_MATRIX_DIST= \
 	tests/test-build-update-repo.sh \
 	tests/test-http-utils.sh \
 	tests/test-default-remotes.sh \
+	tests/test-metadata-validation.sh \
 	tests/test-extensions.sh \
 	tests/test-oci.sh \
 	tests/test-override.sh \
 	tests/test-auth.sh \
 	tests/test-unused.sh \
 	tests/test-prune.sh \
+	tests/test-seccomp.sh \
+	tests/test-repair.sh \
 	$(NULL)
 TEST_MATRIX_EXTRA_DIST= \
 	tests/test-run.sh \

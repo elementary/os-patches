@@ -143,6 +143,10 @@ tests_test_authenticator_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) \
 tests_test_authenticator_LDADD = $(AM_LDADD) $(BASE_LIBS) libflatpak-common.la libflatpak-common-base.la libglnx.la
 tests_test_authenticator_SOURCES = tests/test-authenticator.c
 
+tests_try_syscall_CFLAGS = $(AM_CFLAGS)
+tests_try_syscall_LDADD = $(AM_LDADD)
+tests_try_syscall_SOURCES = tests/try-syscall.c
+
 tests_list_unused_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\"
@@ -264,6 +268,7 @@ TEST_MATRIX_SOURCE = \
 	tests/test-repo.sh{{user+system+system-norevokefs}+{{user+system},oldsummary}} \
 	tests/test-sideload.sh{user+system} \
 	tests/test-default-remotes.sh \
+	tests/test-metadata-validation.sh \
 	tests/test-extensions.sh \
 	tests/test-bundle.sh{user+system+system-norevokefs} \
 	tests/test-oci.sh \
@@ -276,10 +281,12 @@ TEST_MATRIX_SOURCE = \
 	tests/test-summaries.sh{user+system} \
 	tests/test-subset.sh{user+system} \
 	tests/test-prune.sh \
+	tests/test-seccomp.sh \
+	tests/test-repair.sh \
 	$(NULL)
 
 update-test-matrix:
-	$(srcdir)/tests/expand-test-matrix.sh "$(TEST_MATRIX_SOURCE)" > tests/Makefile-test-matrix.am.inc
+	$(srcdir)/tests/expand-test-matrix.sh "$(TEST_MATRIX_SOURCE)" > $(srcdir)/tests/Makefile-test-matrix.am.inc
 
 tests/test-%.wrap:
 	@true
@@ -317,6 +324,7 @@ test_extra_programs = \
 	tests/test-authenticator \
 	tests/test-portal-impl \
 	tests/test-update-portal \
+	tests/try-syscall \
 	$(NULL)
 
 @VALGRIND_CHECK_RULES@

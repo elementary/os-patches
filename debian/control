@@ -11,7 +11,7 @@ Build-Depends:
  bison,
  bubblewrap (>= 0.4.0),
  ca-certificates <!nocheck>,
- dbus,
+ dbus-daemon,
  debhelper-compat (= 13),
  desktop-file-utils <!nocheck>,
  dh-exec (>= 0.23~),
@@ -71,7 +71,7 @@ Architecture: linux-any
 Depends:
  adduser,
  bubblewrap (>= 0.4.0),
- dbus,
+ default-dbus-system-bus | dbus-system-bus,
  xdg-dbus-proxy (>= 0.1.0),
  ${misc:Depends},
  ${shlibs:Depends},
@@ -86,6 +86,7 @@ Recommends:
  shared-mime-info,
  xdg-desktop-portal (>= 1.6),
  xdg-desktop-portal-gtk (>= 1.6) | xdg-desktop-portal-backend,
+ xdg-user-dirs,
 Suggests:
  avahi-daemon,
  malcontent-gui,
@@ -117,6 +118,7 @@ Section: misc
 Depends:
  attr,
  ca-certificates,
+ dbus-daemon,
  desktop-file-utils,
  flatpak (= ${binary:Version}),
  fuse,

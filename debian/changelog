@@ -1,3 +1,61 @@
+flatpak (1.12.3-1) unstable; urgency=high
+
+  * New upstream stable release
+  * Security fixes:
+    - Prevent a malicious repository from arranging for permissions to be
+      granted without being correctly displayed during installation
+      (CVE-2021-43860, GHSA-qpjc-vq3c-572j)
+    - Prevent a malicious build in flatpak-builder creating directories
+      outside the build directory (GHSA-8ch7-5j3h-g4fx)
+  * Behaviour changes, as a result of how GHSA-8ch7-5j3h-g4fx was fixed:
+    - --nofilesystem=host is now special-cased to negate all --filesystem
+      permissions. Previously, it would cancel out --filesystem=host but
+      not --filesystem=/some/dir.
+    - --nofilesystem=home is now special-cased to negate several
+      home-directory-related filesystem permssions such as
+      --filesystem=xdg-config/foo, not just --filesystem=host.
+  * Other bug fixes:
+    - Extra-data downloading now properly handles compressed
+      content-encodings, which fixes checksum verification
+    - Avoid unnecessary polkit prompt due to auto-pinning when installing
+      runtimes
+    - Better handling of updates of extensions that exist in multiple
+      repositories
+    - Fixed (initial) installation of apps with renamed app-IDs
+    - Support more pulseaudio configuration, including the one used in WSL2
+    - Fixed regression in updates from no-enumerate remotes
+    - We now verify checksums of summary caches, to better handle local file
+      corruption
+    - Improved CLI output for non-terminal targets
+    - Flatpak run --session-bus now works
+    - Fix build with PyParsing >= 3.0.4
+    - bash auto completion now doesn't complete on command name aliases
+    - Minor improvements to the search command
+    - Minor improvements to the list command
+    - Minor improvements to the repair command
+    - Add more tests
+    - Updated translations and docs
+  * d/copyright: Update
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 12 Jan 2022 13:33:12 +0000
+
+flatpak (1.12.2-2) unstable; urgency=medium
+
+  * flatpak Recommends xdg-user-dirs.
+    If we don't have this, the XDG special directories for documents, music,
+    downloads etc. will not be listed in ~/.config/user-dirs.dirs unless
+    configured manually; this means that app permissions that would normally
+    share those directories with the host, such as --filesystem=xdg-download,
+    will have no practical effect. (Closes: #1000609)
+  * Build/test-depend on dbus-daemon.
+    We don't necessarily need a full implementation for the unit tests, but
+    we do need to be able to run dbus-daemon --session.
+  * Depend on default-dbus-system-bus | dbus-system-bus instead of dbus.
+    Any implementation of the system bus will do.
+  * Adjust Lintian overrides for current Lintian
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 13 Dec 2021 13:22:23 +0000
+
 flatpak (1.12.2-1) unstable; urgency=medium
 
   * New upstream stable release

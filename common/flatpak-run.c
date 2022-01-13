@@ -575,6 +575,11 @@ flatpak_run_get_pulseaudio_server (void)
   return NULL;
 }
 
+/*
+ * Parse a PulseAudio server string, as documented on
+ * https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/ServerStrings/.
+ * Returns the first supported server address, or NULL if none are supported.
+ */
 static char *
 flatpak_run_parse_pulse_server (const char *value)
 {
@@ -586,13 +591,22 @@ flatpak_run_parse_pulse_server (const char *value)
       const char *server = servers[i];
       if (g_str_has_prefix (server, "{"))
         {
+          /*
+           * TODO: compare the value within {} to the local hostname and D-Bus machine ID,
+           * and skip if it matches neither.
+           */
           const char * closing = strstr (server, "}");
           if (closing == NULL)
             continue;
           server = closing + 1;
         }
+
       if (g_str_has_prefix (server, "unix:"))
         return g_strdup (server + 5);
+      if (server[0] == '/')
+        return g_strdup (server);
+
+      /* TODO: Support TCP connections? */
     }
 
   return NULL;

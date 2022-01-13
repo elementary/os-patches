@@ -124,7 +124,7 @@ add_new_remote (FlatpakTransaction            *transaction,
 
   if (self->disable_interaction)
     {
-      g_print (_("Configuring %s as new remote '%s'"), url, remote_name);
+      g_print (_("Configuring %s as new remote '%s'\n"), url, remote_name);
       return TRUE;
     }
 
@@ -397,7 +397,7 @@ progress_changed_cb (FlatpakTransactionProgress *progress,
         g_print ("\r%s", str->str); /* redraw failed, just update the progress */
     }
   else
-    g_print ("\n%s", str->str);
+    g_print ("%s\n", str->str);
 }
 
 static void
@@ -455,7 +455,7 @@ new_operation (FlatpakTransaction          *transaction,
       redraw (self);
     }
   else
-    g_print ("\r%-*s", self->table_width, text);
+    g_print ("%s\n", text);
 
   g_free (self->progress_msg);
   self->progress_msg = g_steal_pointer (&text);
@@ -509,7 +509,7 @@ operation_error (FlatpakTransaction            *transaction,
           redraw (self);
         }
       else
-        g_print ("\r%-*s\n", self->table_width, msg); /* override progress, and go to next line */
+        g_print ("%s\n", msg);
 
       return TRUE;
     }
@@ -548,7 +548,7 @@ operation_error (FlatpakTransaction            *transaction,
       redraw (self);
     }
   else
-    g_printerr ("\r%-*s\n", self->table_width, text);
+    g_printerr ("%s\n", text);
 
   if (!non_fatal && self->stop_on_first_error)
     return FALSE;
@@ -772,8 +772,7 @@ end_of_lifed_with_rebase (FlatpakTransaction *transaction,
     {
       g_autoptr(GError) error = NULL;
 
-      if (!flatpak_transaction_add_rebase (transaction, remote, rebased_to_ref, NULL, previous_ids, &error) ||
-          !flatpak_transaction_add_uninstall (transaction, ref_str, &error))
+      if (!flatpak_transaction_add_rebase (transaction, remote, rebased_to_ref, NULL, previous_ids, &error))
         {
           g_propagate_prefixed_error (&self->first_operation_error,
                                       g_error_copy (error),
@@ -782,7 +781,22 @@ end_of_lifed_with_rebase (FlatpakTransaction *transaction,
           return FALSE;
         }
 
-      return TRUE; /* skip update op, in favour of added uninstall */
+      if (!flatpak_transaction_add_uninstall (transaction, ref_str, &error))
+        {
+          /* NOT_INSTALLED error is expected in case the op that triggered this was install not update */
+          if (g_error_matches (error, FLATPAK_ERROR, FLATPAK_ERROR_NOT_INSTALLED))
+            g_clear_error (&error);
+          else
+            {
+              g_propagate_prefixed_error (&self->first_operation_error,
+                                          g_error_copy (error),
+                                          _("Failed to uninstall %s for rebase to %s: "),
+                                          name, rebased_to_ref);
+              return FALSE;
+            }
+        }
+
+      return TRUE; /* skip install/update op of end-of-life ref */
     }
   else /* IGNORE or NO_REBASE */
     return FALSE;
@@ -1052,7 +1066,7 @@ message_handler (const gchar   *log_domain,
       redraw (self);
     }
   else
-    g_print ("\r%-*s\n", self->table_width, text);
+    g_print ("%s\n", text);
 }
 
 static gboolean
@@ -1414,7 +1428,7 @@ flatpak_cli_transaction_run (FlatpakTransaction *transaction,
           redraw (self);
         }
       else
-        g_print ("\r%-*s", self->table_width, text);
+        g_print ("%s", text);
 
       g_print ("\n");
     }

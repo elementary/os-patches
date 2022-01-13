@@ -1792,19 +1792,28 @@ static gboolean
 validate_commit_metadata (GVariant   *commit_data,
                           const char *ref,
                           const char *required_metadata,
-                          gboolean   require_xa_metadata,
+                          gsize       required_metadata_size,
                           GError   **error)
 {
   g_autoptr(GVariant) commit_metadata = NULL;
+  g_autoptr(GVariant) xa_metadata_v = NULL;
   const char *xa_metadata = NULL;
+  gsize xa_metadata_size = 0;
 
   commit_metadata = g_variant_get_child_value (commit_data, 0);
 
   if (commit_metadata != NULL)
-    g_variant_lookup (commit_metadata, "xa.metadata", "&s", &xa_metadata);
+    {
+      xa_metadata_v = g_variant_lookup_value (commit_metadata,
+                                              "xa.metadata",
+                                              G_VARIANT_TYPE_STRING);
+      if (xa_metadata_v)
+        xa_metadata = g_variant_get_string (xa_metadata_v, &xa_metadata_size);
+    }
 
-  if ((xa_metadata == NULL && require_xa_metadata) ||
-      (xa_metadata != NULL && g_strcmp0 (required_metadata, xa_metadata) != 0))
+  if (xa_metadata == NULL ||
+      xa_metadata_size != required_metadata_size ||
+      memcmp (xa_metadata, required_metadata, xa_metadata_size) != 0)
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED,
                    _("Commit metadata for %s not matching expected metadata"), ref);
@@ -3513,6 +3522,7 @@ upgrade_deploy_data (GBytes             *deploy_data,
       g_autoptr(GKeyFile) keyfile = NULL;
       g_autoptr(GFile) metadata_file = NULL;
       g_autofree char *metadata_contents = NULL;
+      gsize metadata_size = 0;
       g_autofree char *id = flatpak_decomposed_dup_id (ref);
 
       /* Add fields from commit metadata to deploy */
@@ -3526,9 +3536,9 @@ upgrade_deploy_data (GBytes             *deploy_data,
       keyfile = g_key_file_new ();
       metadata_file = g_file_resolve_relative_path (deploy_dir, "metadata");
       if (!g_file_load_contents (metadata_file, cancellable,
-                                 &metadata_contents, NULL, NULL, error))
+                                 &metadata_contents, &metadata_size, NULL, error))
         return NULL;
-      if (!g_key_file_load_from_data (keyfile, metadata_contents, -1, 0, error))
+      if (!g_key_file_load_from_data (keyfile, metadata_contents, metadata_size, 0, error))
         return NULL;
       add_metadata_to_deploy_data (&metadata_dict, keyfile);
 
@@ -5831,8 +5841,12 @@ flatpak_dir_pull (FlatpakDir                           *self,
     {
       g_autoptr(GVariant) commit_data = NULL;
       if (!ostree_repo_load_commit (repo, rev, &commit_data, NULL, error) ||
-          !validate_commit_metadata (commit_data, ref, (const char *)g_bytes_get_data (require_metadata, NULL), TRUE, error))
-        return FALSE;
+          !validate_commit_metadata (commit_data,
+                                     ref,
+                                     (const char *)g_bytes_get_data (require_metadata, NULL),
+                                     g_bytes_get_size (require_metadata),
+                                     error))
+        goto out;
     }
 
   if (!flatpak_dir_pull_extra_data (self, repo,
@@ -8153,7 +8167,7 @@ flatpak_dir_deploy (FlatpakDir          *self,
   g_auto(GLnxLockFile) lock = { 0, };
   g_autoptr(GFile) metadata_file = NULL;
   g_autofree char *metadata_contents = NULL;
-  gboolean is_oci;
+  gsize metadata_size = 0;
   const char *flatpak;
 
   if (!flatpak_dir_ensure_repo (self, cancellable, error))
@@ -8363,11 +8377,12 @@ flatpak_dir_deploy (FlatpakDir          *self,
   keyfile = g_key_file_new ();
   metadata_file = g_file_resolve_relative_path (checkoutdir, "metadata");
   if (g_file_load_contents (metadata_file, NULL,
-                            &metadata_contents, NULL, NULL, NULL))
+                            &metadata_contents,
+                            &metadata_size, NULL, NULL))
     {
       if (!g_key_file_load_from_data (keyfile,
                                       metadata_contents,
-                                      -1,
+                                      metadata_size,
                                       0, error))
         return FALSE;
 
@@ -8378,12 +8393,9 @@ flatpak_dir_deploy (FlatpakDir          *self,
   /* Check the metadata in the commit to make sure it matches the actual
    * deployed metadata, in case we relied on the one in the commit for
    * a decision
-   * Note: For historical reason we don't enforce commits to contain xa.metadata
-   * since this was lacking in fedora builds.
    */
-  is_oci = flatpak_dir_get_remote_oci (self, origin);
   if (!validate_commit_metadata (commit_data, flatpak_decomposed_get_ref (ref),
-                                 metadata_contents, !is_oci, error))
+                                 metadata_contents, metadata_size, error))
     return FALSE;
 
   dotref = g_file_resolve_relative_path (checkoutdir, "files/.ref");
@@ -8560,6 +8572,7 @@ flatpak_dir_deploy_install (FlatpakDir        *self,
                             const char       **subpaths,
                             const char       **previous_ids,
                             gboolean           reinstall,
+                            gboolean           pin_on_deploy,
                             GCancellable      *cancellable,
                             GError           **error)
 {
@@ -8655,6 +8668,14 @@ flatpak_dir_deploy_install (FlatpakDir        *self,
   flatpak_dir_cleanup_removed (self, cancellable, NULL);
 
   if (!flatpak_dir_mark_changed (self, error))
+    goto out;
+
+  /* Pin runtimes that are installed explicitly rather than pulled as
+   * dependencies so they are not automatically removed. */
+  if (pin_on_deploy &&
+      !flatpak_dir_config_append_pattern (self, "pinned",
+                                          flatpak_decomposed_get_ref (ref),
+                                          TRUE, NULL, error))
     goto out;
 
   ret = TRUE;
@@ -9061,6 +9082,7 @@ flatpak_dir_install (FlatpakDir          *self,
                      gboolean             no_static_deltas,
                      gboolean             reinstall,
                      gboolean             app_hint,
+                     gboolean             pin_on_deploy,
                      FlatpakRemoteState  *state,
                      FlatpakDecomposed   *ref,
                      const char          *opt_commit,
@@ -9270,6 +9292,9 @@ flatpak_dir_install (FlatpakDir          *self,
       if (app_hint)
         helper_flags |= FLATPAK_HELPER_DEPLOY_FLAGS_APP_HINT;
 
+      if (pin_on_deploy)
+        helper_flags |= FLATPAK_HELPER_DEPLOY_FLAGS_UPDATE_PINNED;
+
       helper_flags |= FLATPAK_HELPER_DEPLOY_FLAGS_INSTALL_HINT;
 
       if (!flatpak_dir_system_helper_call_deploy (self,
@@ -9299,7 +9324,8 @@ flatpak_dir_install (FlatpakDir          *self,
   if (!no_deploy)
     {
       if (!flatpak_dir_deploy_install (self, ref, state->remote_name, opt_subpaths,
-                                       opt_previous_ids, reinstall, cancellable, error))
+                                       opt_previous_ids, reinstall, pin_on_deploy,
+                                       cancellable, error))
         return FALSE;
     }
 
@@ -9342,6 +9368,13 @@ flatpak_dir_ensure_bundle_remote (FlatpakDir         *self,
                                   error);
   if (metadata == NULL)
     return NULL;
+
+  /* If we rely on metadata (to e.g. print permissions), check it exists before creating the remote */
+  if (out_metadata && fp_metadata == NULL)
+    {
+      flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, "No metadata in bundler header");
+      return NULL;
+    }
 
   gpg_data = extra_gpg_data ? extra_gpg_data : included_gpg_data;
 
@@ -9576,7 +9609,7 @@ flatpak_dir_install_bundle (FlatpakDir         *self,
     }
   else
     {
-      if (!flatpak_dir_deploy_install (self, ref, remote, NULL, NULL, FALSE, cancellable, error))
+      if (!flatpak_dir_deploy_install (self, ref, remote, NULL, NULL, FALSE, FALSE, cancellable, error))
         return FALSE;
     }
 
@@ -11387,6 +11420,7 @@ flatpak_dir_remote_save_cached_summary (FlatpakDir   *self,
 static gboolean
 flatpak_dir_remote_load_cached_summary (FlatpakDir   *self,
                                         const char   *basename,
+                                        const char   *checksum,
                                         const char   *main_ext,
                                         const char   *sig_ext,
                                         GBytes      **out_main,
@@ -11400,6 +11434,8 @@ flatpak_dir_remote_load_cached_summary (FlatpakDir   *self,
   g_autoptr(GFile) sig_cache_file = flatpak_build_file (self->cache_dir, "summaries", sig_file_name, NULL);
   g_autoptr(GMappedFile) mfile = NULL;
   g_autoptr(GMappedFile) sig_mfile = NULL;
+  g_autoptr(GBytes) mfile_bytes = NULL;
+  g_autofree char *sha256 = NULL;
 
   mfile = g_mapped_file_new (flatpak_file_get_path_cached (main_cache_file), FALSE, NULL);
   if (mfile == NULL)
@@ -11412,7 +11448,29 @@ flatpak_dir_remote_load_cached_summary (FlatpakDir   *self,
   if (out_sig)
     sig_mfile = g_mapped_file_new (flatpak_file_get_path_cached (sig_cache_file), FALSE, NULL);
 
-  *out_main = g_mapped_file_get_bytes (mfile);
+  mfile_bytes = g_mapped_file_get_bytes (mfile);
+
+  /* The checksum would've already been verified before the file was written,
+   * but check again in case something went wrong during disk I/O. This is
+   * especially important since the variant-schema-compiler code assumes the
+   * GVariant data is well formed and asserts otherwise.
+   */
+  if (checksum != NULL)
+    {
+      sha256 = g_compute_checksum_for_bytes (G_CHECKSUM_SHA256, mfile_bytes);
+      if (strcmp (sha256, checksum) != 0)
+        {
+          g_file_delete (main_cache_file, NULL, NULL);
+          if (sig_ext)
+            g_file_delete (sig_cache_file, NULL, NULL);
+
+          return flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA,
+                                     _("Invalid checksum for indexed summary %s read from %s"),
+                                     checksum, flatpak_file_get_path_cached (main_cache_file));
+        }
+    }
+
+  *out_main = g_steal_pointer (&mfile_bytes);
   if (sig_mfile)
     *out_sig = g_mapped_file_get_bytes (sig_mfile);
 
@@ -11463,7 +11521,7 @@ flatpak_dir_remote_fetch_summary (FlatpakDir   *self,
     {
       if (only_cached)
         {
-          if (!flatpak_dir_remote_load_cached_summary (self, name_or_uri, NULL, ".sig",
+          if (!flatpak_dir_remote_load_cached_summary (self, name_or_uri, NULL, NULL, ".sig",
                                                        &summary, &summary_sig, cancellable, error))
             return FALSE;
           g_debug ("Loaded summary from cache for remote ‘%s’", name_or_uri);
@@ -11620,7 +11678,7 @@ flatpak_dir_remote_fetch_summary_index (FlatpakDir   *self,
   if (error == NULL)
     error = &local_error;
 
-  flatpak_dir_remote_load_cached_summary (self, name_or_uri, ".idx", ".idx.sig",
+  flatpak_dir_remote_load_cached_summary (self, name_or_uri, NULL, ".idx", ".idx.sig",
                                           &cached_index, &cached_index_sig, cancellable, &cache_error);
 
   if (only_cached)
@@ -11771,7 +11829,7 @@ flatpak_dir_remote_fetch_indexed_summary (FlatpakDir   *self,
   cache_name = g_strconcat (name_or_uri, "-", arch, "-", checksum, NULL);
 
   /* First look for an on-disk cache */
-  if (!flatpak_dir_remote_load_cached_summary (self, cache_name, ".sub", NULL,
+  if (!flatpak_dir_remote_load_cached_summary (self, cache_name, checksum, ".sub", NULL,
                                                &summary, NULL, cancellable, &cache_error))
     {
       g_autofree char *old_checksum = NULL;
@@ -11783,6 +11841,10 @@ flatpak_dir_remote_fetch_indexed_summary (FlatpakDir   *self,
           g_propagate_error (error, g_steal_pointer (&cache_error));
           return FALSE;
         }
+
+      /* Warn if the on-disk cache is corrupt; perhaps the write was interrupted? */
+      if (g_error_matches (cache_error, FLATPAK_ERROR, FLATPAK_ERROR_INVALID_DATA))
+        g_warning ("%s", cache_error->message);
 
       /* Look for first applicable deltas */
       VarArrayofChecksumRef history = var_subsummary_get_history (subsummary_info);
@@ -11797,7 +11859,7 @@ flatpak_dir_remote_fetch_indexed_summary (FlatpakDir   *self,
 
           old_checksum = ostree_checksum_from_bytes (var_checksum_peek (old));
           old_cache_name = g_strconcat (name_or_uri, "-", arch, "-", old_checksum, NULL);
-          if (flatpak_dir_remote_load_cached_summary (self, old_cache_name, ".sub", NULL,
+          if (flatpak_dir_remote_load_cached_summary (self, old_cache_name, old_checksum, ".sub", NULL,
                                                       &old_summary, NULL, cancellable, NULL))
             break;
         }
@@ -11826,7 +11888,7 @@ flatpak_dir_remote_fetch_indexed_summary (FlatpakDir   *self,
                 {
                   sha256 = g_compute_checksum_for_bytes (G_CHECKSUM_SHA256, applied);
                   if (strcmp (sha256, checksum) != 0)
-                    g_warning ("Appliying delta gave wrong checksum, falling backn");
+                    g_warning ("Applying delta gave wrong checksum, falling back");
                   else
                     summary = g_steal_pointer (&applied);
                 }
@@ -12281,7 +12343,11 @@ flatpak_dir_list_all_remote_refs (FlatpakDir         *self,
         {
           summary = var_summary_from_gvariant (subsummary);
           ref_map = var_summary_get_ref_map (summary);
-          populate_hash_table_from_refs_map (ret_all_refs, NULL, ref_map, NULL, state);
+
+          /* NOTE: collection id is NULL here not state->collection_id, see the
+           * note on flatpak_decomposed_get_collection_id()
+           */
+          populate_hash_table_from_refs_map (ret_all_refs, NULL, ref_map, NULL /* collection id */, state);
         }
     }
   else if (state->summary != NULL)
@@ -13705,14 +13771,12 @@ parse_ref_file (GKeyFile *keyfile,
                 char    **name_out,
                 char    **branch_out,
                 char    **url_out,
-                char    **title_out,
                 GBytes  **gpg_data_out,
                 gboolean *is_runtime_out,
                 char    **collection_id_out,
                 GError  **error)
 {
   g_autofree char *url = NULL;
-  g_autofree char *title = NULL;
   g_autofree char *name = NULL;
   g_autofree char *branch = NULL;
   g_autofree char *version = NULL;
@@ -13724,7 +13788,6 @@ parse_ref_file (GKeyFile *keyfile,
   *name_out = NULL;
   *branch_out = NULL;
   *url_out = NULL;
-  *title_out = NULL;
   *gpg_data_out = NULL;
   *is_runtime_out = FALSE;
 
@@ -13750,9 +13813,6 @@ parse_ref_file (GKeyFile *keyfile,
                                   FLATPAK_REF_BRANCH_KEY, NULL);
   if (branch == NULL)
     branch = g_strdup ("master");
-
-  title = g_key_file_get_string (keyfile, FLATPAK_REF_GROUP,
-                                 FLATPAK_REF_TITLE_KEY, NULL);
 
   is_runtime = g_key_file_get_boolean (keyfile, FLATPAK_REF_GROUP,
                                        FLATPAK_REF_IS_RUNTIME_KEY, NULL);
@@ -13791,7 +13851,6 @@ parse_ref_file (GKeyFile *keyfile,
   *name_out = g_steal_pointer (&name);
   *branch_out = g_steal_pointer (&branch);
   *url_out = g_steal_pointer (&url);
-  *title_out = g_steal_pointer (&title);
   *gpg_data_out = g_steal_pointer (&gpg_data);
   *is_runtime_out = is_runtime;
   *collection_id_out = g_steal_pointer (&collection_id);
@@ -13812,14 +13871,13 @@ flatpak_dir_create_remote_for_ref_file (FlatpakDir         *self,
   g_autofree char *name = NULL;
   g_autofree char *branch = NULL;
   g_autofree char *url = NULL;
-  g_autofree char *title = NULL;
   g_autofree char *remote = NULL;
   gboolean is_runtime = FALSE;
   g_autofree char *collection_id = NULL;
   g_autoptr(GFile) deploy_dir = NULL;
   g_autoptr(FlatpakDecomposed) ref = NULL;
 
-  if (!parse_ref_file (keyfile, &name, &branch, &url, &title, &gpg_data, &is_runtime, &collection_id, error))
+  if (!parse_ref_file (keyfile, &name, &branch, &url, &gpg_data, &is_runtime, &collection_id, error))
     return FALSE;
 
   ref = flatpak_decomposed_new_from_parts (is_runtime ? FLATPAK_KINDS_RUNTIME : FLATPAK_KINDS_APP,
@@ -13842,7 +13900,8 @@ flatpak_dir_create_remote_for_ref_file (FlatpakDir         *self,
 
   if (remote == NULL)
     {
-      remote = flatpak_dir_create_origin_remote (self, url, name, title, flatpak_decomposed_get_ref (ref),
+      /* title is NULL because the title from the ref file is the title of the app not the remote */
+      remote = flatpak_dir_create_origin_remote (self, url, name, NULL, flatpak_decomposed_get_ref (ref),
                                                  gpg_data, collection_id, NULL, NULL, error);
       if (remote == NULL)
         return FALSE;
@@ -14361,7 +14420,13 @@ flatpak_dir_list_remote_refs (FlatpakDir         *self,
       while (g_hash_table_iter_next (&hash_iter, &key, NULL))
         {
           const char *refspec = key;
-          g_autoptr(FlatpakDecomposed) d = flatpak_decomposed_new_from_refspec (refspec, NULL);
+          g_autofree char *ref = NULL;
+          g_autoptr(FlatpakDecomposed) d = NULL;
+
+          if (!ostree_parse_refspec (refspec, NULL, &ref, error))
+            return FALSE;
+
+          d = flatpak_decomposed_new_from_ref (ref, NULL);
           if (d)
             g_hash_table_insert (decomposed_local_refs, g_steal_pointer (&d), NULL);
         }
@@ -14678,6 +14743,7 @@ flatpak_dir_update_remote_configuration (FlatpakDir   *self,
 void
 flatpak_related_free (FlatpakRelated *self)
 {
+  g_free (self->remote);
   flatpak_decomposed_unref (self->ref);
   g_free (self->commit);
   g_strfreev (self->subpaths);
@@ -14687,6 +14753,7 @@ flatpak_related_free (FlatpakRelated *self)
 static void
 add_related (FlatpakDir        *self,
              GPtrArray         *related,
+             const char        *remote,
              const char        *extension,
              FlatpakDecomposed *extension_ref,
              const char        *checksum,
@@ -14716,7 +14783,12 @@ add_related (FlatpakDir        *self,
   branch = flatpak_decomposed_dup_branch (extension_ref);
 
   if (deploy_data)
-    old_subpaths = flatpak_deploy_data_get_subpaths (deploy_data);
+    {
+      old_subpaths = flatpak_deploy_data_get_subpaths (deploy_data);
+      /* If the extension is installed already, its origin overrides the remote
+       * that would otherwise be used */
+      remote = flatpak_deploy_data_get_origin (deploy_data);
+    }
 
   /* Only respect no-autodownload/download-if for uninstalled refs, we
      always want to update if you manually installed something */
@@ -14762,6 +14834,7 @@ add_related (FlatpakDir        *self,
   subpaths = flatpak_subpaths_merge ((char **) old_subpaths, extra_subpaths);
 
   rel = g_new0 (FlatpakRelated, 1);
+  rel->remote = g_strdup (remote);
   rel->ref = flatpak_decomposed_ref (extension_ref);
   rel->commit = g_strdup (checksum);
   rel->subpaths = g_steal_pointer (&subpaths);
@@ -14975,7 +15048,7 @@ flatpak_dir_find_remote_related_for_metadata (FlatpakDir         *self,
               if (flatpak_remote_state_lookup_ref (state, flatpak_decomposed_get_ref (extension_ref), &checksum, NULL, NULL, NULL, NULL))
                 {
                   if (flatpak_filters_allow_ref (NULL, masked, flatpak_decomposed_get_ref (extension_ref)))
-                    add_related (self, related, extension, extension_ref, checksum,
+                    add_related (self, related, state->remote_name, extension, extension_ref, checksum,
                                  no_autodownload, download_if, autoprune_unless, autodelete, locale_subset);
                 }
               else if (subdirectories)
@@ -14989,7 +15062,7 @@ flatpak_dir_find_remote_related_for_metadata (FlatpakDir         *self,
                       if (flatpak_remote_state_lookup_ref (state, flatpak_decomposed_get_ref (subref_ref),
                                                            &subref_checksum, NULL, NULL, NULL, NULL) &&
                           flatpak_filters_allow_ref (NULL, masked,  flatpak_decomposed_get_ref (subref_ref)))
-                        add_related (self, related, extension, subref_ref, subref_checksum,
+                        add_related (self, related, state->remote_name, extension, subref_ref, subref_checksum,
                                      no_autodownload, download_if, autoprune_unless, autodelete, locale_subset);
                     }
                 }
@@ -15228,7 +15301,7 @@ flatpak_dir_find_local_related_for_metadata (FlatpakDir        *self,
                                             NULL,
                                             NULL))
                 {
-                  add_related (self, related, extension, extension_ref,
+                  add_related (self, related, remote_name, extension, extension_ref,
                                checksum, no_autodownload, download_if, autoprune_unless, autodelete, locale_subset);
                 }
               else if ((deploy_data = flatpak_dir_get_deploy_data (self, extension_ref,
@@ -15241,8 +15314,10 @@ flatpak_dir_find_local_related_for_metadata (FlatpakDir        *self,
                    * --force
                    */
                   checksum = g_strdup (flatpak_deploy_data_get_commit (deploy_data));
-                  add_related (self, related, extension, extension_ref,
-                               checksum, no_autodownload, download_if, autoprune_unless, autodelete, locale_subset);
+                  add_related (self, related,
+                               flatpak_deploy_data_get_origin (deploy_data),
+                               extension, extension_ref, checksum,
+                               no_autodownload, download_if, autoprune_unless, autodelete, locale_subset);
                 }
               else if (subdirectories)
                 {
@@ -15262,7 +15337,7 @@ flatpak_dir_find_local_related_for_metadata (FlatpakDir        *self,
                                                     NULL,
                                                     NULL))
                         {
-                          add_related (self, related, extension, match, match_checksum,
+                          add_related (self, related, remote_name, extension, match, match_checksum,
                                        no_autodownload, download_if, autoprune_unless, autodelete, locale_subset);
                         }
                       else if ((match_deploy_data = flatpak_dir_get_deploy_data (self, match,
@@ -15274,7 +15349,9 @@ flatpak_dir_find_local_related_for_metadata (FlatpakDir        *self,
                            * not have a ref in the repo
                            */
                           match_checksum = g_strdup (flatpak_deploy_data_get_commit (match_deploy_data));
-                          add_related (self, related, extension, match, match_checksum,
+                          add_related (self, related,
+                                       flatpak_deploy_data_get_origin (match_deploy_data),
+                                       extension, match, match_checksum,
                                        no_autodownload, download_if, autoprune_unless, autodelete, locale_subset);
                         }
                     }
