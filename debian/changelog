@@ -1,3 +1,21 @@
+flatpak (1.12.4-1) unstable; urgency=medium
+
+  * New upstream stable release
+  * Alter the solution to CVE-2022-21682 to avoid regressions:
+    - Revert semantics of --nofilesystem=host to be the same as 1.12.2
+    - Revert semantics of --nofilesystem=home to be the same as 1.12.2
+    - Add --nofilesystem=host:reset which means the same thing that
+      --nofilesystem=host did in 1.12.3
+    - Users of flatpak-builder should update it to 1.2.2 to resolve
+      CVE-2022-21682
+  * Other bug fixes:
+    - Clarify documentation related to CVE-2022-21682
+    - Improve test coverage related to CVE-2022-21682
+    - Restore compatibility with older appstream-glib versions, for backports
+  * Set high urgency to resolve regressions in 1.12.3
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 18 Jan 2022 18:01:05 +0000
+
 flatpak (1.12.3-1) unstable; urgency=high
 
   * New upstream stable release
@@ -6,8 +24,8 @@ flatpak (1.12.3-1) unstable; urgency=high
       granted without being correctly displayed during installation
       (CVE-2021-43860, GHSA-qpjc-vq3c-572j)
     - Prevent a malicious build in flatpak-builder creating directories
-      outside the build directory (GHSA-8ch7-5j3h-g4fx)
-  * Behaviour changes, as a result of how GHSA-8ch7-5j3h-g4fx was fixed:
+      outside the build directory (CVE-2022-21682, GHSA-8ch7-5j3h-g4fx)
+  * Behaviour changes, as a result of how CVE-2022-21682 was fixed:
     - --nofilesystem=host is now special-cased to negate all --filesystem
       permissions. Previously, it would cancel out --filesystem=host but
       not --filesystem=/some/dir.
