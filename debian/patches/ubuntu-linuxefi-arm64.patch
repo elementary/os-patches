@@ -12,23 +12,22 @@ Bug-Ubuntu: https://bugs.launchpad.net/1862279
 Origin: vendor, https://github.com/rhboot/grub2/commit/2786ab864cf00c15123320671f653e9a36ba12b4
 Patch-Name: ubuntu-linuxefi-arm64.patch
 ---
- grub-core/loader/arm64/linux.c | 106 ++++++++++++++++++++++-------------------
- 1 file changed, 56 insertions(+), 50 deletions(-)
+ grub-core/loader/efi/linux.c | 101 ++++++++++++++++++++++---------------------
+ 1 file changed, 51 insertions(+), 50 deletions(-)
 
-diff --git a/grub-core/loader/arm64/linux.c b/grub-core/loader/arm64/linux.c
-index 1a5296a..4e9eac3 100644
---- a/grub-core/loader/arm64/linux.c
-+++ b/grub-core/loader/arm64/linux.c
-@@ -42,6 +42,8 @@ static int loaded;
+diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
+index d81e7be..93e4cfc 100644
+--- a/grub-core/loader/efi/linux.c
++++ b/grub-core/loader/efi/linux.c
+@@ -42,6 +42,7 @@ static int loaded;
  
  static void *kernel_addr;
  static grub_uint64_t kernel_size;
 +static grub_uint32_t handover_offset;
-+
  
  static char *linux_args;
  static grub_uint32_t cmdline_size;
-@@ -75,7 +77,8 @@ grub_arch_efi_linux_check_image (struct linux_arch_kernel_header * lh)
+@@ -99,7 +100,8 @@ grub_arch_efi_linux_check_image (struct linux_arch_kernel_header * lh)
  static grub_err_t
  finalize_params_linux (void)
  {
@@ -36,9 +35,9 @@ index 1a5296a..4e9eac3 100644
 +  grub_efi_loaded_image_t *loaded_image = NULL;
 +  int node, retval, len;
  
-   void *fdt;
+   void *fdt = NULL;
  
-@@ -110,6 +113,27 @@ finalize_params_linux (void)
+@@ -134,6 +136,27 @@ finalize_params_linux (void)
    if (grub_fdt_install() != GRUB_ERR_NONE)
      goto failure;
  
@@ -66,28 +65,14 @@ index 1a5296a..4e9eac3 100644
    return GRUB_ERR_NONE;
  
  failure:
-@@ -117,70 +141,48 @@ failure:
+@@ -141,62 +164,36 @@ failure:
    return grub_error(GRUB_ERR_BAD_OS, "failed to install/update FDT");
  }
  
+-grub_err_t
+-grub_arch_efi_linux_boot_image (grub_addr_t addr, grub_size_t size, char *args)
 +static void
 +free_params (void)
-+{
-+  grub_efi_loaded_image_t *loaded_image = NULL;
-+  loaded_image = grub_efi_get_loaded_image (grub_efi_image_handle);
-+  if (loaded_image)
-+    {
-+      if (loaded_image->load_options)
-+      grub_efi_free_pages ((grub_efi_physical_address_t)(grub_efi_uintn_t)
-+			      loaded_image->load_options,
-+			     GRUB_EFI_BYTES_TO_PAGES (loaded_image->load_options_size));
-+      loaded_image->load_options = NULL;
-+      loaded_image->load_options_size = 0;
-+    }
-+}
-+
- grub_err_t
- grub_arch_efi_linux_boot_image (grub_addr_t addr, grub_size_t size, char *args)
  {
 -  grub_efi_memory_mapped_device_path_t *mempath;
 -  grub_efi_handle_t image_handle;
@@ -106,21 +91,35 @@ index 1a5296a..4e9eac3 100644
 -  mempath[0].memory_type = GRUB_EFI_LOADER_DATA;
 -  mempath[0].start_address = addr;
 -  mempath[0].end_address = addr + size;
-+  grub_err_t retval;
- 
+-
 -  mempath[1].header.type = GRUB_EFI_END_DEVICE_PATH_TYPE;
 -  mempath[1].header.subtype = GRUB_EFI_END_ENTIRE_DEVICE_PATH_SUBTYPE;
 -  mempath[1].header.length = sizeof (grub_efi_device_path_t);
--
++  grub_efi_loaded_image_t *loaded_image = NULL;
++  loaded_image = grub_efi_get_loaded_image (grub_efi_image_handle);
++  if (loaded_image)
++    {
++      if (loaded_image->load_options)
++      grub_efi_free_pages ((grub_efi_physical_address_t)(grub_efi_uintn_t)
++			      loaded_image->load_options,
++			     GRUB_EFI_BYTES_TO_PAGES (loaded_image->load_options_size));
++      loaded_image->load_options = NULL;
++      loaded_image->load_options_size = 0;
++    }
++}
+ 
 -  b = grub_efi_system_table->boot_services;
 -  status = b->load_image (0, grub_efi_image_handle,
 -			  (grub_efi_device_path_t *) mempath,
 -			  (void *) addr, size, &image_handle);
 -  if (status != GRUB_EFI_SUCCESS)
 -    return grub_error (GRUB_ERR_BAD_OS, "cannot load image");
-+  retval = finalize_params_linux ();
-+  if (retval != GRUB_ERR_NONE)
-+    return grub_errno;
++grub_err_t
++grub_arch_efi_linux_boot_image (grub_addr_t addr __attribute__((unused)),
++				grub_size_t size __attribute__((unused)),
++				char *args)
++{
++  grub_err_t retval;
  
    grub_dprintf ("linux", "linux command line: '%s'\n", args);
  
@@ -136,35 +135,23 @@ index 1a5296a..4e9eac3 100644
 -  loaded_image->load_options_size =
 -    2 * grub_utf8_to_utf16 (loaded_image->load_options, len,
 -			    (grub_uint8_t *) args, len, NULL);
-+  (void) addr;
-+  (void) size;
- 
+-
 -  grub_dprintf ("linux", "starting image %p\n", image_handle);
 -  status = b->start_image (image_handle, 0, NULL);
++  retval = grub_efi_linux_boot (kernel_addr, handover_offset, kernel_addr);
  
--  /* When successful, not reached */
+   /* When successful, not reached */
 -  b->unload_image (image_handle);
 -  grub_efi_free_pages ((grub_addr_t) loaded_image->load_options,
 -		       GRUB_EFI_BYTES_TO_PAGES (loaded_image->load_options_size));
-+  retval = grub_efi_linux_boot ((char *)kernel_addr, handover_offset,
-+				kernel_addr);
- 
+-
 -  return grub_errno;
-+  /* Never reached... */
 +  free_params();
 +  return retval;
  }
  
  static grub_err_t
- grub_linux_boot (void)
- {
--  if (finalize_params_linux () != GRUB_ERR_NONE)
--    return grub_errno;
--
-   return (grub_arch_efi_linux_boot_image((grub_addr_t)kernel_addr,
-                                           kernel_size, linux_args));
- }
-@@ -296,6 +298,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+@@ -411,6 +408,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
  {
    grub_file_t file = 0;
    struct linux_arch_kernel_header lh;
@@ -172,7 +159,7 @@ index 1a5296a..4e9eac3 100644
    grub_err_t err;
    int rc;
  
-@@ -349,6 +352,9 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+@@ -464,6 +462,9 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
        goto fail;
      }
  

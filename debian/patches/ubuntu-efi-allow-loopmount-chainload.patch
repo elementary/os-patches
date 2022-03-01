@@ -40,7 +40,7 @@ index 41bebd1..99f4792 100644
  static unsigned long last_id = 0;
  
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index 9e301f2..cf76f48 100644
+index c3144de..2b74d79 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
 @@ -24,6 +24,7 @@
@@ -51,7 +51,7 @@ index 9e301f2..cf76f48 100644
  #include <grub/misc.h>
  #include <grub/charset.h>
  #include <grub/mm.h>
-@@ -906,6 +907,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -905,6 +906,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
    grub_efi_status_t status;
    grub_efi_boot_services_t *b;
    grub_device_t dev = 0;
@@ -59,7 +59,7 @@ index 9e301f2..cf76f48 100644
    grub_efi_device_path_t *dp = 0;
    char *filename;
    void *boot_image = 0;
-@@ -963,6 +965,15 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -962,6 +964,15 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
    if (! dev)
      goto fail;
  
@@ -75,7 +75,7 @@ index 9e301f2..cf76f48 100644
    if (dev->disk)
      dev_handle = grub_efidisk_get_device_handle (dev->disk);
    else if (dev->net && dev->net->server)
-@@ -1092,6 +1103,12 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -1091,6 +1102,12 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
    grub_device_close (dev);
  
  fail:

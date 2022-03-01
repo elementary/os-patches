@@ -30,13 +30,13 @@ Origin: https://github.com/rhboot/grub2/commit/1d5ef08216edec4d31d0e10cfdb30b5eb
 Last-Updated: 2020-11-09
 Patch-Name: ubuntu-linuxefi-arm64-set-base-addr.patch
 ---
- grub-core/loader/efi/linux.c | 15 +++++++++++++++
+ grub-core/loader/efi/linux_sb.c | 15 +++++++++++++++
  1 file changed, 15 insertions(+)
 
-diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
+diff --git a/grub-core/loader/efi/linux_sb.c b/grub-core/loader/efi/linux_sb.c
 index e372b26..73a7196 100644
---- a/grub-core/loader/efi/linux.c
-+++ b/grub-core/loader/efi/linux.c
+--- a/grub-core/loader/efi/linux_sb.c
++++ b/grub-core/loader/efi/linux_sb.c
 @@ -71,6 +71,7 @@ grub_err_t
  grub_efi_linux_boot (void *kernel_addr, grub_off_t handover_offset,
  		     void *kernel_params)

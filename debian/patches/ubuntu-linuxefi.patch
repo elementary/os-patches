@@ -318,17 +318,17 @@ Last-Update: 2018-12-07
 Updated 2021-12-13: If we cannot allocate kernel at preferred address,
 reset errno so that we do not fail erroneously with out of memory.
 ---
- grub-core/Makefile.core.def            |  15 +-
+ grub-core/Makefile.core.def            |  17 +-
  grub-core/commands/iorw.c              |   7 +
  grub-core/commands/memrw.c             |   7 +
  grub-core/kern/arm/coreboot/coreboot.S |   6 +
  grub-core/kern/dl.c                    |   1 +
  grub-core/kern/efi/mm.c                |  32 ++
- grub-core/loader/arm64/linux.c         |  16 +
  grub-core/loader/efi/appleloader.c     |   7 +
- grub-core/loader/efi/chainloader.c     | 816 ++++++++++++++++++++++++++++++---
+ grub-core/loader/efi/chainloader.c     | 815 ++++++++++++++++++++++++++++++---
  grub-core/loader/efi/fdt.c             |   1 +
- grub-core/loader/efi/linux.c           |  86 ++++
+ grub-core/loader/efi/linux.c           |  16 +
+ grub-core/loader/efi/linux_sb.c        |  86 ++++
  grub-core/loader/i386/bsd.c            |   7 +
  grub-core/loader/i386/efi/linux.c      | 382 +++++++++++++++
  grub-core/loader/i386/linux.c          |  78 +++-
@@ -344,8 +344,8 @@ reset errno so that we do not fail erroneously with out of memory.
  include/grub/mips/linux.h              |   0
  include/grub/powerpc/linux.h           |   0
  include/grub/sparc64/linux.h           |   0
- 26 files changed, 1510 insertions(+), 100 deletions(-)
- create mode 100644 grub-core/loader/efi/linux.c
+ 26 files changed, 1511 insertions(+), 100 deletions(-)
+ create mode 100644 grub-core/loader/efi/linux_sb.c
  create mode 100644 grub-core/loader/i386/efi/linux.c
  create mode 100644 include/grub/efi/linux.h
  create mode 100644 include/grub/ia64/linux.h
@@ -354,24 +354,26 @@ reset errno so that we do not fail erroneously with out of memory.
  create mode 100644 include/grub/sparc64/linux.h
 
 diff --git a/grub-core/Makefile.core.def b/grub-core/Makefile.core.def
-index 8022e1c..715d137 100644
+index 0536575..1a3ead6 100644
 --- a/grub-core/Makefile.core.def
 +++ b/grub-core/Makefile.core.def
-@@ -1807,10 +1807,13 @@ module = {
+@@ -1807,10 +1807,15 @@ module = {
    ia64_efi = loader/ia64/efi/linux.c;
    arm_coreboot = loader/arm/linux.c;
-   arm_efi = loader/arm64/linux.c;
-+  arm_efi = loader/efi/linux.c;
+   arm_efi = loader/efi/linux.c;
++  arm_efi = loader/efi/linux_sb.c;
    arm_uboot = loader/arm/linux.c;
-   arm64 = loader/arm64/linux.c;
-+  arm64 = loader/efi/linux.c;
-   riscv32 = loader/riscv/linux.c;
-   riscv64 = loader/riscv/linux.c;
+   arm64 = loader/efi/linux.c;
++  arm64 = loader/efi/linux_sb.c;
+   riscv32 = loader/efi/linux.c;
++  riscv32 = loader/efi/linux_sb.c;
+   riscv64 = loader/efi/linux.c;
++  riscv64 = loader/efi/linux_sb.c;
 +  cflags = '-Wno-error=cast-align';
    common = loader/linux.c;
    common = lib/cmdline.c;
    enable = noemu;
-@@ -1819,7 +1822,7 @@ module = {
+@@ -1819,7 +1824,7 @@ module = {
  module = {
    name = fdt;
    efi = loader/efi/fdt.c;
@@ -380,14 +382,14 @@ index 8022e1c..715d137 100644
    enable = fdt;
  };
  
-@@ -1874,12 +1877,22 @@ module = {
+@@ -1874,12 +1879,22 @@ module = {
    enable = x86_64_efi;
  };
  
 +module = {
 +  name = linuxefi;
 +  efi = loader/i386/efi/linux.c;
-+  efi = loader/efi/linux.c;
++  efi = loader/efi/linux_sb.c;
 +  cflags = '-Wno-error=cast-align';
 +  enable = i386_efi;
 +  enable = x86_64_efi;
@@ -536,54 +538,6 @@ index 9838fb2..f6aef0e 100644
  /* Allocate pages. Return the pointer to the first of allocated pages.  */
  void *
  grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
-diff --git a/grub-core/loader/arm64/linux.c b/grub-core/loader/arm64/linux.c
-index ef3e9f9..1a5296a 100644
---- a/grub-core/loader/arm64/linux.c
-+++ b/grub-core/loader/arm64/linux.c
-@@ -27,6 +27,7 @@
- #include <grub/types.h>
- #include <grub/cpu/linux.h>
- #include <grub/efi/efi.h>
-+#include <grub/efi/linux.h>
- #include <grub/efi/fdtload.h>
- #include <grub/efi/memory.h>
- #include <grub/efi/pe32.h>
-@@ -48,6 +49,13 @@ static grub_uint32_t cmdline_size;
- static grub_addr_t initrd_start;
- static grub_addr_t initrd_end;
- 
-+struct grub_arm64_linux_pe_header
-+{
-+  grub_uint32_t magic;
-+  struct grub_pe32_coff_header coff;
-+  struct grub_pe64_optional_header opt;
-+};
-+
- grub_err_t
- grub_arch_efi_linux_check_image (struct linux_arch_kernel_header * lh)
- {
-@@ -289,6 +297,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
-   grub_file_t file = 0;
-   struct linux_arch_kernel_header lh;
-   grub_err_t err;
-+  int rc;
- 
-   grub_dl_ref (my_mod);
- 
-@@ -333,6 +342,13 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
- 
-   grub_dprintf ("linux", "kernel @ %p\n", kernel_addr);
- 
-+  rc = grub_linuxefi_secure_validate (kernel_addr, kernel_size);
-+  if (rc < 0)
-+    {
-+      grub_error (GRUB_ERR_INVALID_COMMAND, N_("%s has invalid signature"), argv[0]);
-+      goto fail;
-+    }
-+
-   cmdline_size = grub_loader_cmdline_size (argc, argv) + sizeof (LINUX_IMAGE);
-   linux_args = grub_malloc (cmdline_size);
-   if (!linux_args)
 diff --git a/grub-core/loader/efi/appleloader.c b/grub-core/loader/efi/appleloader.c
 index 74888c4..07677f0 100644
 --- a/grub-core/loader/efi/appleloader.c
@@ -616,7 +570,7 @@ index 74888c4..07677f0 100644
    grub_unregister_command (cmd);
  }
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index 2bd80f4..9e301f2 100644
+index 2bd80f4..c3144de 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
 @@ -32,6 +32,9 @@
@@ -652,7 +606,7 @@ index 2bd80f4..9e301f2 100644
  
    grub_dl_unref (my_mod);
    return GRUB_ERR_NONE;
-@@ -213,20 +222,694 @@ make_file_path (grub_efi_device_path_t *dp, const char *filename)
+@@ -213,20 +222,693 @@ make_file_path (grub_efi_device_path_t *dp, const char *filename)
    return file_path;
  }
  
@@ -767,6 +721,8 @@ index 2bd80f4..9e301f2 100644
 +  GRUB_PE32_MACHINE_I386;
 +#elif defined(__ia64__)
 +  GRUB_PE32_MACHINE_IA64;
++#elif defined(__riscv) && __riscv_xlen == 64
++  GRUB_PE32_MACHINE_RISCV64;
 +#else
 +#error this architecture is not supported by grub2
 +#endif
@@ -782,9 +738,7 @@ index 2bd80f4..9e301f2 100644
 +  char *fixup, *fixup_base, *fixup_data = NULL;
 +  grub_efi_uint16_t *fixup_16;
 +  grub_efi_uint32_t *fixup_32;
-+#if defined(__x86_64__) || defined(__aarch64__)
 +  grub_efi_uint64_t *fixup_64;
-+#endif /* defined(__x86_64__) || defined(__aarch64__) */
 +  grub_efi_uint64_t size = context->image_size;
 +  void *image_end = (char *)orig + size;
 +  int n = 0;
@@ -911,7 +865,6 @@ index 2bd80f4..9e301f2 100644
 +                    fixup_data += sizeof (grub_uint32_t);
 +                  }
 +                break;
-+#if defined(__x86_64__) || defined(__aarch64__)
 +              case GRUB_PE32_REL_BASED_DIR64:
 +                fixup_64 = (grub_uint64_t *)fixup;
 +                *fixup_64 = *fixup_64 + (grub_uint64_t)adjust;
@@ -922,7 +875,7 @@ index 2bd80f4..9e301f2 100644
 +                    fixup_data += sizeof (grub_uint64_t);
 +                  }
 +                break;
-+#endif /* defined(__x86_64__) || defined(__aarch64__) */
++              /* TODO: GRUB_PE32_REL_BASED_RISCV_HI20, GRUB_PE32_REL_BASED_RISCV_LOW12I/S */	
 +              default:
 +                grub_error (GRUB_ERR_BAD_ARGUMENT,
 +			    "Reloc %d unknown relocation type %d",
@@ -1350,7 +1303,7 @@ index 2bd80f4..9e301f2 100644
  
    if (argc == 0)
      return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
-@@ -238,15 +921,45 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -238,15 +920,45 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
    address = 0;
    image_handle = 0;
    file_path = 0;
@@ -1398,7 +1351,7 @@ index 2bd80f4..9e301f2 100644
    if (! dev)
      goto fail;
  
-@@ -283,17 +996,14 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -283,17 +995,14 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
    if (! file_path)
      goto fail;
  
@@ -1419,7 +1372,7 @@ index 2bd80f4..9e301f2 100644
  
    status = efi_call_4 (b->allocate_pages, GRUB_EFI_ALLOCATE_ANY_PAGES,
  			      GRUB_EFI_LOADER_CODE,
-@@ -307,7 +1017,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -307,7 +1016,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
      }
  
    boot_image = (void *) ((grub_addr_t) address);
@@ -1428,7 +1381,7 @@ index 2bd80f4..9e301f2 100644
      {
        if (grub_errno == GRUB_ERR_NONE)
  	grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"),
-@@ -317,7 +1027,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -317,7 +1026,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
      }
  
  #if defined (__i386__) || defined (__x86_64__)
@@ -1437,7 +1390,7 @@ index 2bd80f4..9e301f2 100644
      {
        struct grub_macho_fat_header *head = boot_image;
        if (head->magic
-@@ -326,6 +1036,14 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -326,6 +1035,14 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
  	  grub_uint32_t i;
  	  struct grub_macho_fat_arch *archs
  	    = (struct grub_macho_fat_arch *) (head + 1);
@@ -1452,7 +1405,7 @@ index 2bd80f4..9e301f2 100644
  	  for (i = 0; i < grub_cpu_to_le32 (head->nfat_arch); i++)
  	    {
  	      if (GRUB_MACHO_CPUTYPE_IS_HOST_CURRENT (archs[i].cputype))
-@@ -340,79 +1058,40 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -340,79 +1057,40 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
  	      > ~grub_cpu_to_le32 (archs[i].size)
  	      || grub_cpu_to_le32 (archs[i].offset)
  	      + grub_cpu_to_le32 (archs[i].size)
@@ -1547,7 +1500,7 @@ index 2bd80f4..9e301f2 100644
    if (dev)
      grub_device_close (dev);
  
-@@ -424,6 +1103,9 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -424,6 +1102,9 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
    if (address)
      efi_call_2 (b->free_pages, address, pages);
  
@@ -1558,7 +1511,7 @@ index 2bd80f4..9e301f2 100644
  
    return grub_errno;
 diff --git a/grub-core/loader/efi/fdt.c b/grub-core/loader/efi/fdt.c
-index c86f283..7858d35 100644
+index 771d455..971e84d 100644
 --- a/grub-core/loader/efi/fdt.c
 +++ b/grub-core/loader/efi/fdt.c
 @@ -26,6 +26,7 @@
@@ -1570,10 +1523,58 @@ index c86f283..7858d35 100644
  static void *loaded_fdt;
  static void *fdt;
 diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
+index 3292cab..d81e7be 100644
+--- a/grub-core/loader/efi/linux.c
++++ b/grub-core/loader/efi/linux.c
+@@ -27,6 +27,7 @@
+ #include <grub/types.h>
+ #include <grub/cpu/linux.h>
+ #include <grub/efi/efi.h>
++#include <grub/efi/linux.h>
+ #include <grub/efi/fdtload.h>
+ #include <grub/efi/memory.h>
+ #include <grub/efi/pe32.h>
+@@ -54,6 +55,13 @@ static int initrd_use_loadfile2;
+ static grub_efi_guid_t load_file2_guid = GRUB_EFI_LOAD_FILE2_PROTOCOL_GUID;
+ static grub_efi_guid_t device_path_guid = GRUB_EFI_DEVICE_PATH_GUID;
+ 
++struct grub_arm64_linux_pe_header
++{
++  grub_uint32_t magic;
++  struct grub_pe32_coff_header coff;
++  struct grub_pe64_optional_header opt;
++};
++
+ grub_err_t
+ grub_arch_efi_linux_check_image (struct linux_arch_kernel_header * lh)
+ {
+@@ -404,6 +412,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+   grub_file_t file = 0;
+   struct linux_arch_kernel_header lh;
+   grub_err_t err;
++  int rc;
+ 
+   grub_dl_ref (my_mod);
+ 
+@@ -448,6 +457,13 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+ 
+   grub_dprintf ("linux", "kernel @ %p\n", kernel_addr);
+ 
++  rc = grub_linuxefi_secure_validate (kernel_addr, kernel_size);
++  if (rc < 0)
++    {
++      grub_error (GRUB_ERR_INVALID_COMMAND, N_("%s has invalid signature"), argv[0]);
++      goto fail;
++    }
++
+   cmdline_size = grub_loader_cmdline_size (argc, argv) + sizeof (LINUX_IMAGE);
+   linux_args = grub_malloc (cmdline_size);
+   if (!linux_args)
+diff --git a/grub-core/loader/efi/linux_sb.c b/grub-core/loader/efi/linux_sb.c
 new file mode 100644
 index 0000000..e372b26
 --- /dev/null
-+++ b/grub-core/loader/efi/linux.c
++++ b/grub-core/loader/efi/linux_sb.c
 @@ -0,0 +1,86 @@
 +/*
 + *  GRUB  --  GRand Unified Bootloader
@@ -1695,7 +1696,7 @@ index 5f3290c..690e366 100644
    grub_unregister_extcmd (cmd_netbsd);
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
 new file mode 100644
-index 0000000..b805bec
+index 0000000..382ff52
 --- /dev/null
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -0,0 +1,382 @@
@@ -2058,7 +2059,7 @@ index 0000000..b805bec
 +
 +  if (params && !loaded)
 +    grub_efi_free_pages ((grub_efi_physical_address_t)(grub_addr_t)params,
-+			 BYTES_TO_PAGES(16384));
++			 sizeof(*params));
 +
 +  return grub_errno;
 +}
@@ -2082,7 +2083,7 @@ index 0000000..b805bec
 +  grub_unregister_command (cmd_initrd);
 +}
 diff --git a/grub-core/loader/i386/linux.c b/grub-core/loader/i386/linux.c
-index 9f74a96..d55b7cd 100644
+index f30a158..b6c13d7 100644
 --- a/grub-core/loader/i386/linux.c
 +++ b/grub-core/loader/i386/linux.c
 @@ -78,6 +78,8 @@ static grub_size_t maximal_cmdline_size;
@@ -2243,7 +2244,7 @@ index 9f74a96..d55b7cd 100644
      {
        grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
 diff --git a/grub-core/loader/i386/pc/linux.c b/grub-core/loader/i386/pc/linux.c
-index 2a29952..f4ab6ad 100644
+index efeeeb2..69db786 100644
 --- a/grub-core/loader/i386/pc/linux.c
 +++ b/grub-core/loader/i386/pc/linux.c
 @@ -36,6 +36,7 @@
@@ -2420,7 +2421,7 @@ index 1c0cf6a..c5ba84c 100644
    grub_unregister_command (cmd_resume);
  #endif
 diff --git a/include/grub/arm64/linux.h b/include/grub/arm64/linux.h
-index 7e22b4a..6785b78 100644
+index effd870..9efd37a 100644
 --- a/include/grub/arm64/linux.h
 +++ b/include/grub/arm64/linux.h
 @@ -22,6 +22,8 @@

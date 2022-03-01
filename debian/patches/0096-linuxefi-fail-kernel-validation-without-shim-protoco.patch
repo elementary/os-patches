@@ -12,16 +12,28 @@ CVE-2020-15705
 Reported-by: Mathieu Trudel-Lapierre <cyphermox@ubuntu.com>
 Signed-off-by: Dimitri John Ledkov <xnox@ubuntu.com>
 ---
- grub-core/loader/arm64/linux.c     | 13 +++++++++----
  grub-core/loader/efi/chainloader.c |  1 +
- grub-core/loader/efi/linux.c       |  1 +
+ grub-core/loader/efi/linux.c       | 13 +++++++++----
+ grub-core/loader/efi/linux_sb.c    |  1 +
  grub-core/loader/i386/efi/linux.c  |  2 +-
  4 files changed, 12 insertions(+), 5 deletions(-)
 
-diff --git a/grub-core/loader/arm64/linux.c b/grub-core/loader/arm64/linux.c
-index 4e9eac3..f60ca2f 100644
---- a/grub-core/loader/arm64/linux.c
-+++ b/grub-core/loader/arm64/linux.c
+diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
+index 2b74d79..9042603 100644
+--- a/grub-core/loader/efi/chainloader.c
++++ b/grub-core/loader/efi/chainloader.c
+@@ -1097,6 +1097,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+ 
+       return 0;
+     }
++  // -1 fall-through to fail
+ 
+   grub_file_close (file);
+   grub_device_close (dev);
+diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
+index 93e4cfc..56d6745 100644
+--- a/grub-core/loader/efi/linux.c
++++ b/grub-core/loader/efi/linux.c
 @@ -34,6 +34,7 @@
  #include <grub/i18n.h>
  #include <grub/lib/cmdline.h>
@@ -30,7 +42,7 @@ index 4e9eac3..f60ca2f 100644
  
  GRUB_MOD_LICENSE ("GPLv3+");
  
-@@ -345,11 +346,15 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+@@ -455,11 +456,15 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
  
    grub_dprintf ("linux", "kernel @ %p\n", kernel_addr);
  
@@ -50,22 +62,10 @@ index 4e9eac3..f60ca2f 100644
      }
  
    pe = (void *)((unsigned long)kernel_addr + lh.hdr_offset);
-diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index cf76f48..d64c851 100644
---- a/grub-core/loader/efi/chainloader.c
-+++ b/grub-core/loader/efi/chainloader.c
-@@ -1098,6 +1098,7 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
- 
-       return 0;
-     }
-+  // -1 fall-through to fail
- 
-   grub_file_close (file);
-   grub_device_close (dev);
-diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
+diff --git a/grub-core/loader/efi/linux_sb.c b/grub-core/loader/efi/linux_sb.c
 index 73a7196..a09479c 100644
---- a/grub-core/loader/efi/linux.c
-+++ b/grub-core/loader/efi/linux.c
+--- a/grub-core/loader/efi/linux_sb.c
++++ b/grub-core/loader/efi/linux_sb.c
 @@ -34,6 +34,7 @@ struct grub_efi_shim_lock
  };
  typedef struct grub_efi_shim_lock grub_efi_shim_lock_t;
@@ -75,7 +75,7 @@ index 73a7196..a09479c 100644
  grub_linuxefi_secure_validate (void *data, grub_uint32_t size)
  {
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-index feaedce..4676f8b 100644
+index c7dc08b..262d357 100644
 --- a/grub-core/loader/i386/efi/linux.c
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -199,7 +199,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),

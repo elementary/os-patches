@@ -16,7 +16,7 @@ Patch-Name: no-devicetree-if-secure-boot.patch
  2 files changed, 20 insertions(+)
 
 diff --git a/grub-core/loader/arm/linux.c b/grub-core/loader/arm/linux.c
-index ed23dc7..2c85ca8 100644
+index 1f7ab75..feb707b 100644
 --- a/grub-core/loader/arm/linux.c
 +++ b/grub-core/loader/arm/linux.c
 @@ -30,6 +30,10 @@
@@ -46,10 +46,10 @@ index ed23dc7..2c85ca8 100644
    if (!dtb)
      return grub_errno;
 diff --git a/grub-core/loader/efi/fdt.c b/grub-core/loader/efi/fdt.c
-index 7858d35..9b05e7e 100644
+index 971e84d..b846bf3 100644
 --- a/grub-core/loader/efi/fdt.c
 +++ b/grub-core/loader/efi/fdt.c
-@@ -128,6 +128,14 @@ grub_cmd_devicetree (grub_command_t cmd __attribute__ ((unused)),
+@@ -131,6 +131,14 @@ grub_cmd_devicetree (grub_command_t cmd __attribute__ ((unused)),
        return GRUB_ERR_NONE;
      }
  

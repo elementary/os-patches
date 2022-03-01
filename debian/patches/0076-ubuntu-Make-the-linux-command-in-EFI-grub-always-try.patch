@@ -17,7 +17,7 @@ only if secure boot is disabled.
  2 files changed, 35 insertions(+), 26 deletions(-)
 
 diff --git a/grub-core/loader/i386/efi/linux.c b/grub-core/loader/i386/efi/linux.c
-index b805bec..95db589 100644
+index 382ff52..9241fed 100644
 --- a/grub-core/loader/i386/efi/linux.c
 +++ b/grub-core/loader/i386/efi/linux.c
 @@ -27,6 +27,7 @@
@@ -50,7 +50,7 @@ index b805bec..95db589 100644
  
    params = grub_efi_allocate_pages_max (0x3fffffff,
 diff --git a/grub-core/loader/i386/linux.c b/grub-core/loader/i386/linux.c
-index d55b7cd..1649342 100644
+index b6c13d7..e764e2a 100644
 --- a/grub-core/loader/i386/linux.c
 +++ b/grub-core/loader/i386/linux.c
 @@ -665,35 +665,40 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),

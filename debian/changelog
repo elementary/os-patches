@@ -1,3 +1,24 @@
+grub2 (2.06-2ubuntu5) jammy; urgency=medium
+
+  [ Julian Andres Klode ]
+  * Free correct size when freeing params, rather than 16 Ki (LP: #1958623)
+  * Build with FUSE3 (LP: #1935659)
+  * Only run os-prober on first run and if it previously found other OS
+    (LP: #1955109)
+
+  [ Heinrich Schuchardt ]
+  * Rename grub-core/loader/efi/linux.c
+  * Add patches for GRUB on RISC-V
+  * fat: fix listing the root directory
+  * Enable building for RISC-V (LP: #1876620)
+
+  [ Julian Andres Klode ]
+  * Re-enable peimage code on other archs outside secure boot; this
+    fixes LP: #1947046 when not booting in secure boot mode (secure
+    boot pending security review of the code)
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 18 Feb 2022 17:21:16 +0100
+
 grub2 (2.06-2ubuntu4) jammy; urgency=medium
 
   * UBUNTU: Move verifiers after decompressors (LP: #1954683)

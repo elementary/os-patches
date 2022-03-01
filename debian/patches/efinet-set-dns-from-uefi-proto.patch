@@ -245,10 +245,10 @@ index 2d3b00f..82a28fb 100644
      }
  
 diff --git a/include/grub/efi/api.h b/include/grub/efi/api.h
-index 4b4652c..9cab1a5 100644
+index d67c3f1..479c2a8 100644
 --- a/include/grub/efi/api.h
 +++ b/include/grub/efi/api.h
-@@ -354,6 +354,16 @@
+@@ -359,6 +359,16 @@
      { 0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44 } \
    }
  
@@ -265,9 +265,9 @@ index 4b4652c..9cab1a5 100644
  struct grub_efi_sal_system_table
  {
    grub_uint32_t signature;
-@@ -1793,6 +1803,72 @@ struct grub_efi_rng_protocol
+@@ -1808,6 +1818,72 @@ struct grub_efi_load_file2
  };
- typedef struct grub_efi_rng_protocol grub_efi_rng_protocol_t;
+ typedef struct grub_efi_load_file2 grub_efi_load_file2_t;
  
 +enum grub_efi_ip4_config2_data_type {
 +  GRUB_EFI_IP4_CONFIG2_DATA_TYPE_INTERFACEINFO,

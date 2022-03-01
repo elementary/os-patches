@@ -7,10 +7,10 @@ Subject: chainloader: Avoid a double free when validation fails
  1 file changed, 6 insertions(+), 3 deletions(-)
 
 diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
-index d64c851..8515f89 100644
+index 9042603..4a85f41 100644
 --- a/grub-core/loader/efi/chainloader.c
 +++ b/grub-core/loader/efi/chainloader.c
-@@ -1086,6 +1086,9 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -1085,6 +1085,9 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
    if (rc > 0)
      {
        grub_file_close (file);
@@ -20,7 +20,7 @@ index d64c851..8515f89 100644
        grub_loader_set (grub_secureboot_chainloader_boot,
  		       grub_secureboot_chainloader_unload, 0);
        return 0;
-@@ -1094,15 +1097,15 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+@@ -1093,15 +1096,15 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
      {
        grub_load_and_start_image(boot_image);
        grub_file_close (file);
