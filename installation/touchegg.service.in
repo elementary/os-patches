@@ -1,0 +1,13 @@
+[Unit]
+Description=Touchégg Daemon
+Documentation=https://github.com/JoseExposito/touchegg/tree/master/installation#readme
+
+[Service]
+Type=simple
+Group=input
+ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/touchegg --daemon
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
