@@ -1,6 +1,54 @@
+Changes in 1.12.7
+~~~~~~~~~~~~~~~~~
+Released: 2022-03-14
+
+ * We now allow networked access to X11 and PulseAudio services
+   if that is configured, and the application has network access.
+   (#397, #3908, #4702)
+ * Absolute paths in WAYLAND_DISPLAY now work (#4752)
+ * Allow apps that were built with Flatpak 1.13.x to export
+   AppStream metadata in share/metainfo (#4350, #4599)
+ * Most commands now work if /var/lib/flatpak exists but /var/lib/flatpak/repo
+   does not, and will automatically populate the repo directory if
+   possible (#4111)
+ * Consistently pass relative subpaths to libostree, working around a bug
+   in libostree < 2021.6 when used with GLib >= 2.71 (#4805)
+ * Fix some memory leaks in GVariant data processing
+
+Changes in 1.12.6
+~~~~~~~~~~~~~~~~~
+Released: 2022-02-21
+
+ * Fix a bug that sometimes caused repo corruption in case downloads are
+   interrupted or canceled, necessitating a "flatpak repair" to recover
+   (#3479, #4258)
+ * More reliably detect the GTK theme (#4754)
+ * Fix history command unit test in some edge cases (#4764)
+ * Improve NEWS for 1.12.5
+ * Translation update: pt_BR
+
+Changes in 1.12.5
+~~~~~~~~~~~~~~~~~
+Released: 2022-02-11
+
+ * Fixed a case where temporary data was sometimes left in
+   /var/lib/flatpak/appstream, and we now detect such leftover data and
+   remove it. (#4735)
+ * Fix regressions in `flatpak history` since 1.9.1 (#4121, #4332)
+   - Don't display the appstream branch used internally
+   - Don't display temporary repositories used internally
+   - Warn instead of failing if other non-app, non-runtime refs are found
+   - Don't set up an unnecessary polkit agent for `flatpak history`
+   - Add test coverage
+ * Don't propagate GStreamer-related environment variables into
+   sandbox (#4728)
+ * Fix a typo in an error message
+ * Fix incorrect year in NEWS for 1.12.4 release
+ * Translation update: pl
+
 Changes in 1.12.4
 ~~~~~~~~~~~~~~~~~
-Released: 2021-01-18
+Released: 2022-01-18
 
 This is a regression fix update, reverting non-backwards-compatible
 behaviour changes in the solution previously chosen for CVE-2022-21682.

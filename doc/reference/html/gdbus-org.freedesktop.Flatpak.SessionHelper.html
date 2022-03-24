@@ -46,25 +46,29 @@
 </div>
 <div class="refsect1">
 <a name="gdbus-interface-org-freedesktop-Flatpak-SessionHelper"></a><h2>Description</h2>
-<p>      The Flatpak session service is used by the
-      <span class="command"><strong>flatpak run</strong></span> command
-      to bridge various resources from the host system into Flatpak
-      sandboxes. It is not intended to be contacted by third-party
-      applications or libraries.
+<p>
+The Flatpak session service is used by the
+<span class="command"><strong>flatpak run</strong></span> command
+to bridge various resources from the host system into Flatpak
+sandboxes. It is not intended to be contacted by third-party
+applications or libraries.
 </p>
-<p>      This interface is provided on the D-Bus session bus by the
-      well-known D-Bus name org.freedesktop.Flatpak,
-      at the object path /org/freedesktop/Flatpak/SessionHelper.
+<p>
+This interface is provided on the D-Bus session bus by the
+well-known D-Bus name org.freedesktop.Flatpak,
+at the object path /org/freedesktop/Flatpak/SessionHelper.
 </p>
-<p>      Note that the service owning the org.freedesktop.Flatpak
-      well-known name also exports the
-      org.freedesktop.Flatpak.Development interface. As a result,
-      letting a sandboxed application contact that well-known name
-      is a sandbox escape, which must only be allowed for trusted
-      applications where there is not intended to be any security
-      boundary between sandbox and host system.
+<p>
+Note that the service owning the org.freedesktop.Flatpak
+well-known name also exports the
+org.freedesktop.Flatpak.Development interface. As a result,
+letting a sandboxed application contact that well-known name
+is a sandbox escape, which must only be allowed for trusted
+applications where there is not intended to be any security
+boundary between sandbox and host system.
 </p>
-<p>      This documentation describes version 1 of this interface.
+<p>
+This documentation describes version 1 of this interface.
 </p>
 </div>
 <div class="refsect1">
@@ -74,9 +78,10 @@
 <pre class="programlisting">
 RequestSession (OUT a{sv} data);
 </pre>
-<p>        Set up monitoring and resources for a
-        <span class="command"><strong>flatpak run</strong></span> session.
-        See the Flatpak source code for details.
+<p>
+Set up monitoring and resources for a
+<span class="command"><strong>flatpak run</strong></span> session.
+See the Flatpak source code for details.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -85,7 +90,9 @@ RequestSession (OUT a{sv} data);
 </colgroup>
 <tbody><tr>
 <td><p><span class="term"><code class="literal">OUT a{sv} <em class="parameter"><code>data</code></em></code>:</span></p></td>
-<td><p>Information about the new session</p></td>
+<td><p>
+Information about the new session
+</p></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -97,8 +104,9 @@ RequestSession (OUT a{sv} data);
 <pre class="programlisting">
 version  readable   u
 </pre>
-<p>        The API version number.
-        This documentation describes version 1 of this interface.
+<p>
+The API version number.
+This documentation describes version 1 of this interface.
 </p>
 </div>
 </div>

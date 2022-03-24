@@ -160,15 +160,33 @@ print_history (GPtrArray    *dirs,
     while ((reverse && sd_journal_previous (j) > 0) ||
            (!reverse && sd_journal_next (j) > 0))
       {
+        g_autofree char *ref_str = NULL;
+        g_autofree char *remote = NULL;
+
         /* determine whether to skip this entry */
+
+        ref_str = get_field (j, "REF", error);
+        if (*error)
+          return FALSE;
+
+        /* Appstream pulls are probably not interesting, and they are confusing
+         * since by default we include the Application column which shows up blank.
+         */
+        if (ref_str && ref_str[0] && g_str_has_prefix (ref_str, "appstream"))
+          continue;
+
+        remote = get_field (j, "REMOTE", error);
+        if (*error)
+          return FALSE;
+
+        /* Exclude pull to temp repo */
+        if (remote && remote[0] == '/')
+          continue;
 
         if (dirs)
           {
             gboolean include = FALSE;
             g_autofree char *installation = get_field (j, "INSTALLATION", NULL);
-
-            if (installation && installation[0] == '/')
-              include = TRUE; /* pull to a temp repo */
 
             for (i = 0; i < dirs->len && !include; i++)
               {
@@ -217,24 +235,24 @@ print_history (GPtrArray    *dirs,
                      strcmp (columns[k].name, "arch") == 0 ||
                      strcmp (columns[k].name, "branch") == 0)
               {
-                g_autoptr(FlatpakDecomposed) ref = NULL;
-                g_autofree char *ref_str = get_field (j, "REF", error);
-                if (*error)
-                  return FALSE;
+                g_autofree char *value = NULL;
 
-                if (ref_str && ref_str[0])
-                  {
-                    ref = flatpak_decomposed_new_from_ref (ref_str, error);
-                    if (ref == NULL)
-                      return FALSE;
-                  }
+                if (ref_str && ref_str[0] &&
+                    !is_flatpak_ref (ref_str) &&
+                    g_strcmp0 (ref_str, OSTREE_REPO_METADATA_REF) != 0)
+                  g_warning ("Unknown ref in history: %s", ref_str);
 
                 if (strcmp (columns[k].name, "ref") == 0)
-                  flatpak_table_printer_add_column (printer, ref_str);
-                else
+                  value = g_strdup (ref_str);
+                else if (ref_str && ref_str[0] &&
+                         (g_str_has_prefix (ref_str, "app/") ||
+                          g_str_has_prefix (ref_str, "runtime/")))
                   {
-                    g_autofree char *value = NULL;
-                    if (ref)
+                    g_autoptr(FlatpakDecomposed) ref = NULL;
+                    ref = flatpak_decomposed_new_from_ref (ref_str, NULL);
+                    if (ref == NULL)
+                      g_warning ("Invalid ref in history: %s", ref_str);
+                    else
                       {
                         if (strcmp (columns[k].name, "application") == 0)
                           value = flatpak_decomposed_dup_id (ref);
@@ -243,9 +261,9 @@ print_history (GPtrArray    *dirs,
                         else
                           value = flatpak_decomposed_dup_branch (ref);
                       }
-
-                    flatpak_table_printer_add_column (printer, value);
                   }
+
+                  flatpak_table_printer_add_column (printer, value);
               }
             else if (strcmp (columns[k].name, "installation") == 0)
               {
@@ -256,9 +274,6 @@ print_history (GPtrArray    *dirs,
               }
             else if (strcmp (columns[k].name, "remote") == 0)
               {
-                g_autofree char *remote = get_field (j, "REMOTE", error);
-                if (*error)
-                  return FALSE;
                 flatpak_table_printer_add_column (printer, remote);
               }
             else if (strcmp (columns[k].name, "commit") == 0)

@@ -55,7 +55,10 @@
 </div>
 <div class="refsect1">
 <a name="gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest"></a><h2>Description</h2>
-<p></p>
+<p>
+</p>
+<p>
+</p>
 </div>
 <div class="refsect1">
 <a name="gdbus-methods-org.freedesktop.Flatpak.AuthenticatorRequest"></a><h2>Method Details</h2>
@@ -64,13 +67,15 @@
 <pre class="programlisting">
 Close ();
 </pre>
-<p>        Closes the authenticator request to which this object refers and ends all
-        related user interaction (dialogs, webflows etc).
+<p>
+Closes the authenticator request to which this object refers and ends all
+related user interaction (dialogs, webflows etc).
 </p>
-<p>        A Response signal with the cancelled response will be emitted if the operation
-        was cancelled. There is still a posibility of a race, so the operation might succeed
-        or fail before processing the close request, so there is no guarantee that the
-        operation will be cancelled.
+<p>
+A Response signal with the cancelled response will be emitted if the operation
+was cancelled. There is still a posibility of a race, so the operation might succeed
+or fail before processing the close request, so there is no guarantee that the
+operation will be cancelled.
 </p>
 </div>
 <hr>
@@ -81,7 +86,8 @@ BasicAuthReply (IN  s     user,
                 IN  s     password,
                 IN  a{sv} options);
 </pre>
-<p>        Call to finish the request started with the BasicAuth signal.
+<p>
+Call to finish the request started with the BasicAuth signal.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -91,15 +97,21 @@ BasicAuthReply (IN  s     user,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>user</code></em></code>:</span></p></td>
-<td><p>The user</p></td>
+<td><p>
+The user
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>password</code></em></code>:</span></p></td>
-<td><p>The password</p></td>
+<td><p>
+The password
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN a{sv} <em class="parameter"><code>options</code></em></code>:</span></p></td>
-<td><p>An extensible dict with extra options.</p></td>
+<td><p>
+An extensible dict with extra options.
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -113,15 +125,17 @@ BasicAuthReply (IN  s     user,
 Webflow (s     uri,
          a{sv} options);
 </pre>
-<p>        Emitted by the authenticator when it needs to do web-based interaction. The
-        client handles this by showing the URI in a graphical web view. Typically the uri
-        includes information about a final redirect to a localhost uri that will happen
-        when the operation is finished allowing the authenticator to get the result of
-        the operation. This is similar to how OAUTH2 webflows typically work.
+<p>
+Emitted by the authenticator when it needs to do web-based interaction. The
+client handles this by showing the URI in a graphical web view. Typically the uri
+includes information about a final redirect to a localhost uri that will happen
+when the operation is finished allowing the authenticator to get the result of
+the operation. This is similar to how OAUTH2 webflows typically work.
 </p>
-<p>        If at any point the user closes or otherwise dismisses the web view the client
-        should call the org.freedesktop.Flatpak.AuthenticatorRequest.Close method to
-        tell the authenticator that the operation is aborted.
+<p>
+If at any point the user closes or otherwise dismisses the web view the client
+should call the org.freedesktop.Flatpak.AuthenticatorRequest.Close method to
+tell the authenticator that the operation is aborted.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -131,11 +145,15 @@ Webflow (s     uri,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">s <em class="parameter"><code>uri</code></em></code>:</span></p></td>
-<td><p>The uri to show</p></td>
+<td><p>
+The uri to show
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">a{sv} <em class="parameter"><code>options</code></em></code>:</span></p></td>
-<td><p>An extensible dict with extra options.</p></td>
+<td><p>
+An extensible dict with extra options.
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -146,8 +164,9 @@ Webflow (s     uri,
 <pre class="programlisting">
 WebflowDone (a{sv} options);
 </pre>
-<p>        Emitted by the authenticator when the web view is done, at this point the client
-        can close the WebView.
+<p>
+Emitted by the authenticator when the web view is done, at this point the client
+can close the WebView.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -156,7 +175,9 @@ WebflowDone (a{sv} options);
 </colgroup>
 <tbody><tr>
 <td><p><span class="term"><code class="literal">a{sv} <em class="parameter"><code>options</code></em></code>:</span></p></td>
-<td><p>An extensible dict with extra options.</p></td>
+<td><p>
+An extensible dict with extra options.
+</p></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -167,10 +188,11 @@ WebflowDone (a{sv} options);
 BasicAuth (s     realm,
            a{sv} options);
 </pre>
-<p>        Emitted by the authenticator when it needs to do a simple user + password authentication.
-        This is only useful for very simple authentication interaction, but this is still used (for
-        instance for http basic access authentication), and for those cases this allows a nicely
-        integrated UI and CLI experience.
+<p>
+Emitted by the authenticator when it needs to do a simple user + password authentication.
+This is only useful for very simple authentication interaction, but this is still used (for
+instance for http basic access authentication), and for those cases this allows a nicely
+integrated UI and CLI experience.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -180,11 +202,15 @@ BasicAuth (s     realm,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">s <em class="parameter"><code>realm</code></em></code>:</span></p></td>
-<td><p>String showing what the auth is for, similar to http basic auth realm.</p></td>
+<td><p>
+String showing what the auth is for, similar to http basic auth realm.
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">a{sv} <em class="parameter"><code>options</code></em></code>:</span></p></td>
-<td><p>An extensible dict with extra options.</p></td>
+<td><p>
+An extensible dict with extra options.
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -196,17 +222,18 @@ BasicAuth (s     realm,
 Response (u     response,
           a{sv} results);
 </pre>
-<p>        Emitted when the user interaction for a portal request is over.
-        The <em class="parameter"><code>response</code></em> indicates how the user interaction ended:
-            </p>
+<p>
+Emitted when the user interaction for a portal request is over.
+The <em class="parameter"><code>response</code></em> indicates how the user interaction ended:
+</p>
 <table border="0" summary="Simple list" class="simplelist">
 <tr><td>0: Success, the request is carried out</td></tr>
 <tr><td>1: The user cancelled the interaction</td></tr>
 <tr><td>2: The user interaction was ended in some other way</td></tr>
 </table>
 <p>
-        In the case of an error (response 2) <em class="parameter"><code>results</code></em> can contain a error-message value
-        describing what went wrong.
+In the case of an error (response 2) <em class="parameter"><code>results</code></em> can contain a error-message value
+describing what went wrong.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -216,11 +243,15 @@ Response (u     response,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">u <em class="parameter"><code>response</code></em></code>:</span></p></td>
-<td><p>Numeric response</p></td>
+<td><p>
+Numeric response
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">a{sv} <em class="parameter"><code>results</code></em></code>:</span></p></td>
-<td><p>Vardict with results. The keys and values in the vardict depend on the request.</p></td>
+<td><p>
+Vardict with results. The keys and values in the vardict depend on the request.
+</p></td>
 </tr>
 </tbody>
 </table></div>

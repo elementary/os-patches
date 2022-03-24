@@ -202,7 +202,6 @@ tests/package_version.txt: Makefile
 tests/test-basic.sh: tests/package_version.txt
 
 dist_installed_test_extra_scripts += \
-	buildutil/tap-driver.sh \
 	tests/http-utils-test-server.py \
 	tests/oci-registry-server.py \
 	tests/oci-registry-client.py \
@@ -266,6 +265,7 @@ TEST_MATRIX_SOURCE = \
 	tests/test-run.sh{{user+system+system-norevokefs},{nodeltas+deltas}} \
 	tests/test-info.sh{user+system} \
 	tests/test-repo.sh{{user+system+system-norevokefs}+{{user+system},oldsummary}} \
+	tests/test-history.sh \
 	tests/test-sideload.sh{user+system} \
 	tests/test-default-remotes.sh \
 	tests/test-metadata-validation.sh \

@@ -82,29 +82,35 @@
 </div>
 <div class="refsect1">
 <a name="gdbus-interface-org-freedesktop-portal-Documents"></a><h2>Description</h2>
-<p>      The document portal allows to make files from the outside world
-      available to sandboxed applications in a controlled way.
+<p>
+The document portal allows to make files from the outside world
+available to sandboxed applications in a controlled way.
 </p>
-<p>      Exported files will be made accessible to the application via
-      a fuse filesystem that gets mounted at /run/user/$UID/doc/. The
-      filesystem gets mounted both outside and inside the sandbox, but
-      the view inside the sandbox is restricted to just those files
-      that the application is allowed to access.
+<p>
+Exported files will be made accessible to the application via
+a fuse filesystem that gets mounted at /run/user/$UID/doc/. The
+filesystem gets mounted both outside and inside the sandbox, but
+the view inside the sandbox is restricted to just those files
+that the application is allowed to access.
 </p>
-<p>      Individual files will appear at /run/user/$UID/doc/$DOC_ID/filename,
-      where $DOC_ID is the ID of the file in the document store. It is
-      returned by the <a class="link" href="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.Add" title="The Add() method">Add()</a> and
-      <a class="link" href="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.AddNamed" title="The AddNamed() method">AddNamed()</a> calls.
+<p>
+Individual files will appear at /run/user/$UID/doc/$DOC_ID/filename,
+where $DOC_ID is the ID of the file in the document store. It is
+returned by the <a class="link" href="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.Add" title="The Add() method">Add()</a> and
+<a class="link" href="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.AddNamed" title="The AddNamed() method">AddNamed()</a> calls.
 </p>
-<p>      The permissions that the application has for a document store entry
-      (see <a class="link" href="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.GrantPermissions" title="The GrantPermissions() method">GrantPermissions()</a>) are reflected
-      in the POSIX mode bits in the fuse filesystem.
+<p>
+The permissions that the application has for a document store entry
+(see <a class="link" href="gdbus-org.freedesktop.portal.Documents.html#gdbus-method-org-freedesktop-portal-Documents.GrantPermissions" title="The GrantPermissions() method">GrantPermissions()</a>) are reflected
+in the POSIX mode bits in the fuse filesystem.
 </p>
-<p>      The D-Bus interface for the document portal is available under the
-      bus name org.freedesktop.portal.Documents and the object path
-      /org/freedesktop/portal/documents.
+<p>
+The D-Bus interface for the document portal is available under the
+bus name org.freedesktop.portal.Documents and the object path
+/org/freedesktop/portal/documents.
 </p>
-<p>      This documentation describes version 3 of this interface.
+<p>
+This documentation describes version 3 of this interface.
 </p>
 </div>
 <div class="refsect1">
@@ -114,8 +120,9 @@
 <pre class="programlisting">
 GetMountPoint (OUT ay path);
 </pre>
-<p>        Returns the path at which the document store fuse filesystem
-        is mounted. This will typically be /run/user/$UID/doc/.
+<p>
+Returns the path at which the document store fuse filesystem
+is mounted. This will typically be /run/user/$UID/doc/.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -124,7 +131,9 @@ GetMountPoint (OUT ay path);
 </colgroup>
 <tbody><tr>
 <td><p><span class="term"><code class="literal">OUT ay <em class="parameter"><code>path</code></em></code>:</span></p></td>
-<td><p>the path at which the fuse filesystem is mounted</p></td>
+<td><p>
+the path at which the fuse filesystem is mounted
+</p></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -137,9 +146,10 @@ Add (IN  h o_path_fd,
      IN  b persistent,
      OUT s doc_id);
 </pre>
-<p>        Adds a file to the document store. The file is passed in the
-        form of an open file descriptor to prove that the caller has
-        access to the file.
+<p>
+Adds a file to the document store. The file is passed in the
+form of an open file descriptor to prove that the caller has
+access to the file.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -149,19 +159,27 @@ Add (IN  h o_path_fd,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN h <em class="parameter"><code>o_path_fd</code></em></code>:</span></p></td>
-<td><p>open file descriptor for the file to add</p></td>
+<td><p>
+open file descriptor for the file to add
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>reuse_existing</code></em></code>:</span></p></td>
-<td><p>whether to reuse an existing document store entry for the file</p></td>
+<td><p>
+whether to reuse an existing document store entry for the file
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>persistent</code></em></code>:</span></p></td>
-<td><p>whether to add the file only for this session or permanently</p></td>
+<td><p>
+whether to add the file only for this session or permanently
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT s <em class="parameter"><code>doc_id</code></em></code>:</span></p></td>
-<td><p>the ID of the file in the document store</p></td>
+<td><p>
+the ID of the file in the document store
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -176,7 +194,8 @@ AddNamed (IN  h  o_path_parent_fd,
           IN  b  persistent,
           OUT s  doc_id);
 </pre>
-<p>        Creates an entry in the document store for writing a new file.
+<p>
+Creates an entry in the document store for writing a new file.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -186,23 +205,33 @@ AddNamed (IN  h  o_path_parent_fd,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN h <em class="parameter"><code>o_path_parent_fd</code></em></code>:</span></p></td>
-<td><p>open file descriptor for the parent directory</p></td>
+<td><p>
+open file descriptor for the parent directory
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN ay <em class="parameter"><code>filename</code></em></code>:</span></p></td>
-<td><p>the basename for the file</p></td>
+<td><p>
+the basename for the file
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>reuse_existing</code></em></code>:</span></p></td>
-<td><p>whether to reuse an existing document store entry for the file</p></td>
+<td><p>
+whether to reuse an existing document store entry for the file
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>persistent</code></em></code>:</span></p></td>
-<td><p>whether to add the file only for this session or permanently</p></td>
+<td><p>
+whether to add the file only for this session or permanently
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT s <em class="parameter"><code>doc_id</code></em></code>:</span></p></td>
-<td><p>the ID of the file in the document store</p></td>
+<td><p>
+the ID of the file in the document store
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -218,23 +247,28 @@ AddFull (IN  ah    o_path_fds,
          OUT as    doc_ids,
          OUT a{sv} extra_out);
 </pre>
-<p>        Adds multiple files to the document store. The file is passed in the
-        form of an open file descriptor to prove that the caller has
-        access to the file.
+<p>
+Adds multiple files to the document store. The file is passed in the
+form of an open file descriptor to prove that the caller has
+access to the file.
 </p>
-<p>        If the as-needed-by-app flag is given, files will only be added to
-        the document store if the application does not already have access to them.
-        For files that are not added to the document store, the doc_ids array will
-        contain an empty string.
+<p>
+If the as-needed-by-app flag is given, files will only be added to
+the document store if the application does not already have access to them.
+For files that are not added to the document store, the doc_ids array will
+contain an empty string.
 </p>
-<p>        Additionally, if app_id is specified, it will be given the permissions
-        listed in GrantPermission.
+<p>
+Additionally, if app_id is specified, it will be given the permissions
+listed in GrantPermission.
 </p>
-<p>        The method also returns some extra info that can be used to avoid
-        multiple roundtrips. For now it only contains as "mountpoint", the
-        fuse mountpoint of the document portal.
+<p>
+The method also returns some extra info that can be used to avoid
+multiple roundtrips. For now it only contains as "mountpoint", the
+fuse mountpoint of the document portal.
 </p>
-<p>        This method was added in version 2 of the org.freedesktop.portal.Documents interface.
+<p>
+This method was added in version 2 of the org.freedesktop.portal.Documents interface.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -244,27 +278,42 @@ AddFull (IN  ah    o_path_fds,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN ah <em class="parameter"><code>o_path_fds</code></em></code>:</span></p></td>
-<td><p>open file descriptors for the files to export</p></td>
+<td><p>
+open file descriptors for the files to export
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN u <em class="parameter"><code>flags</code></em></code>:</span></p></td>
-<td><p>flags, 1 == reuse_existing, 2 == persistent, 4 == as-needed-by-app</p></td>
+<td><p>
+flags, 1 == reuse_existing, 2 == persistent, 4 == as-needed-by-app
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app_id</code></em></code>:</span></p></td>
-<td><p>an application ID, or empty string</p></td>
+<td><p>
+an application ID, or empty string
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN as <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
-<td><p>the permissions to grant, possible values are 'read', 'write', 'grant-permissions' and 'delete'</p></td>
+<td><p>
+the permissions to grant, possible values are 'read', 'write', 'grant-permissions' and 'delete'
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT as <em class="parameter"><code>doc_ids</code></em></code>:</span></p></td>
-<td><p>the IDs of the files in the document store</p></td>
+<td><p>
+the IDs of the files in the document store
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT a{sv} <em class="parameter"><code>extra_out</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 </tbody>
 </table></div>
@@ -281,21 +330,26 @@ AddNamedFull (IN  h     o_path_fd,
               OUT s     doc_id,
               OUT a{sv} extra_out);
 </pre>
-<p>        Creates an entry in the document store for writing a new file.
+<p>
+Creates an entry in the document store for writing a new file.
 </p>
-<p>        If the as-needed-by-app flag is given, file will only be added to
-        the document store if the application does not already have access to it.
-        For file that is not added to the document store, the doc_id will
-        contain an empty string.
+<p>
+If the as-needed-by-app flag is given, file will only be added to
+the document store if the application does not already have access to it.
+For file that is not added to the document store, the doc_id will
+contain an empty string.
 </p>
-<p>        Additionally, if app_id is specified, it will be given the permissions
-        listed in GrantPermission.
+<p>
+Additionally, if app_id is specified, it will be given the permissions
+listed in GrantPermission.
 </p>
-<p>        The method also returns some extra info that can be used to avoid
-        multiple roundtrips. For now it only contains as "mountpoint", the
-        fuse mountpoint of the document portal.
+<p>
+The method also returns some extra info that can be used to avoid
+multiple roundtrips. For now it only contains as "mountpoint", the
+fuse mountpoint of the document portal.
 </p>
-<p>        This method was added in version 3 of the org.freedesktop.portal.Documents interface.
+<p>
+This method was added in version 3 of the org.freedesktop.portal.Documents interface.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -305,31 +359,51 @@ AddNamedFull (IN  h     o_path_fd,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN h <em class="parameter"><code>o_path_fd</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN ay <em class="parameter"><code>filename</code></em></code>:</span></p></td>
-<td><p>the basename for the file</p></td>
+<td><p>
+the basename for the file
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN u <em class="parameter"><code>flags</code></em></code>:</span></p></td>
-<td><p>flags, 1 == reuse_existing, 2 == persistent, 4 == as-needed-by-app</p></td>
+<td><p>
+flags, 1 == reuse_existing, 2 == persistent, 4 == as-needed-by-app
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app_id</code></em></code>:</span></p></td>
-<td><p>an application ID, or empty string</p></td>
+<td><p>
+an application ID, or empty string
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN as <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
-<td><p>the permissions to grant, possible values are 'read', 'write', 'grant-permissions' and 'delete'</p></td>
+<td><p>
+the permissions to grant, possible values are 'read', 'write', 'grant-permissions' and 'delete'
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT s <em class="parameter"><code>doc_id</code></em></code>:</span></p></td>
-<td><p>the ID of the file in the document store</p></td>
+<td><p>
+the ID of the file in the document store
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT a{sv} <em class="parameter"><code>extra_out</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 </tbody>
 </table></div>
@@ -342,11 +416,13 @@ GrantPermissions (IN  s  doc_id,
                   IN  s  app_id,
                   IN  as permissions);
 </pre>
-<p>        Grants access permissions for a file in the document store
-        to an application.
+<p>
+Grants access permissions for a file in the document store
+to an application.
 </p>
-<p>        This call is available inside the sandbox if the application
-        has the 'grant-permissions' permission for the document.
+<p>
+This call is available inside the sandbox if the application
+has the 'grant-permissions' permission for the document.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -356,15 +432,21 @@ GrantPermissions (IN  s  doc_id,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>doc_id</code></em></code>:</span></p></td>
-<td><p>the ID of the file in the document store</p></td>
+<td><p>
+the ID of the file in the document store
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app_id</code></em></code>:</span></p></td>
-<td><p>the ID of the application to which permissions are granted</p></td>
+<td><p>
+the ID of the application to which permissions are granted
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN as <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
-<td><p>the permissions to grant, possible values are 'read', 'write', 'grant-permissions' and 'delete'</p></td>
+<td><p>
+the permissions to grant, possible values are 'read', 'write', 'grant-permissions' and 'delete'
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -377,11 +459,13 @@ RevokePermissions (IN  s  doc_id,
                    IN  s  app_id,
                    IN  as permissions);
 </pre>
-<p>        Revokes access permissions for a file in the document store
-        from an application.
+<p>
+Revokes access permissions for a file in the document store
+from an application.
 </p>
-<p>        This call is available inside the sandbox if the application
-        has the 'grant-permissions' permission for the document.
+<p>
+This call is available inside the sandbox if the application
+has the 'grant-permissions' permission for the document.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -391,15 +475,21 @@ RevokePermissions (IN  s  doc_id,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>doc_id</code></em></code>:</span></p></td>
-<td><p>the ID of the file in the document store</p></td>
+<td><p>
+the ID of the file in the document store
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app_id</code></em></code>:</span></p></td>
-<td><p>the ID of the application from which permissions are revoked</p></td>
+<td><p>
+the ID of the application from which permissions are revoked
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN as <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
-<td><p>the permissions to revoke, possible values are 'read', 'write', 'grant-permissions' and 'delete'</p></td>
+<td><p>
+the permissions to revoke, possible values are 'read', 'write', 'grant-permissions' and 'delete'
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -410,11 +500,13 @@ RevokePermissions (IN  s  doc_id,
 <pre class="programlisting">
 Delete (IN  s doc_id);
 </pre>
-<p>        Removes an entry from the document store. The file itself is
-        not deleted.
+<p>
+Removes an entry from the document store. The file itself is
+not deleted.
 </p>
-<p>        This call is available inside the sandbox if the application
-        has the 'delete' permission for the document.
+<p>
+This call is available inside the sandbox if the application
+has the 'delete' permission for the document.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -423,7 +515,9 @@ Delete (IN  s doc_id);
 </colgroup>
 <tbody><tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>doc_id</code></em></code>:</span></p></td>
-<td><p>the ID of the file in the document store</p></td>
+<td><p>
+the ID of the file in the document store
+</p></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -434,9 +528,11 @@ Delete (IN  s doc_id);
 Lookup (IN  ay filename,
         OUT s  doc_id);
 </pre>
-<p>        Looks up the document ID for a file.
+<p>
+Looks up the document ID for a file.
 </p>
-<p>        This call is not available inside the sandbox.
+<p>
+This call is not available inside the sandbox.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -446,11 +542,15 @@ Lookup (IN  ay filename,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN ay <em class="parameter"><code>filename</code></em></code>:</span></p></td>
-<td><p>a path in the host filesystem</p></td>
+<td><p>
+a path in the host filesystem
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT s <em class="parameter"><code>doc_id</code></em></code>:</span></p></td>
-<td><p>the ID of the file in the document store, or '' if the file is not in the document store</p></td>
+<td><p>
+the ID of the file in the document store, or '' if the file is not in the document store
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -463,10 +563,12 @@ Info (IN  s      doc_id,
       OUT ay     path,
       OUT a{sas} apps);
 </pre>
-<p>        Gets the filesystem path and application permissions for a document store
-        entry.
+<p>
+Gets the filesystem path and application permissions for a document store
+entry.
 </p>
-<p>        This call is not available inside the sandbox.
+<p>
+This call is not available inside the sandbox.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -476,15 +578,21 @@ Info (IN  s      doc_id,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>doc_id</code></em></code>:</span></p></td>
-<td><p>the ID of the file in the document store</p></td>
+<td><p>
+the ID of the file in the document store
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT ay <em class="parameter"><code>path</code></em></code>:</span></p></td>
-<td><p>the path for the file in the host filesystem</p></td>
+<td><p>
+the path for the file in the host filesystem
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT a{sas} <em class="parameter"><code>apps</code></em></code>:</span></p></td>
-<td><p>a dictionary mapping application IDs to the permissions for that application</p></td>
+<td><p>
+a dictionary mapping application IDs to the permissions for that application
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -496,10 +604,12 @@ Info (IN  s      doc_id,
 List (IN  s      app_id,
       OUT a{say} docs);
 </pre>
-<p>        Lists documents in the document store for an application (or for
-        all applications).
+<p>
+Lists documents in the document store for an application (or for
+all applications).
 </p>
-<p>        This call is not available inside the sandbox.
+<p>
+This call is not available inside the sandbox.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -509,11 +619,15 @@ List (IN  s      app_id,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app_id</code></em></code>:</span></p></td>
-<td><p>an application ID, or '' to list all documents</p></td>
+<td><p>
+an application ID, or '' to list all documents
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT a{say} <em class="parameter"><code>docs</code></em></code>:</span></p></td>
-<td><p>a dictonary mapping document IDs to their filesystem path</p></td>
+<td><p>
+a dictonary mapping document IDs to their filesystem path
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -526,7 +640,10 @@ List (IN  s      app_id,
 <pre class="programlisting">
 version  readable   u
 </pre>
-<p></p>
+<p>
+</p>
+<p>
+</p>
 </div>
 </div>
 </div>

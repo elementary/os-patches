@@ -1373,7 +1373,8 @@ am__EXEEXT_11 = tests/test-run@user,nodeltas.wrap \
 am__EXEEXT_12 = $(am__EXEEXT_11)
 am__EXEEXT_13 = tests/test-basic.sh tests/test-completion.sh \
 	tests/test-config.sh tests/test-build-update-repo.sh \
-	tests/test-http-utils.sh tests/test-default-remotes.sh \
+	tests/test-http-utils.sh tests/test-history.sh \
+	tests/test-default-remotes.sh \
 	tests/test-metadata-validation.sh tests/test-extensions.sh \
 	tests/test-oci.sh tests/test-override.sh tests/test-auth.sh \
 	tests/test-unused.sh tests/test-prune.sh tests/test-seccomp.sh \
@@ -1704,7 +1705,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 NULL = 
-dist_installed_test_extra_scripts = $(NULL) buildutil/tap-driver.sh \
+dist_installed_test_extra_scripts = $(NULL) \
 	tests/http-utils-test-server.py tests/oci-registry-server.py \
 	tests/oci-registry-client.py \
 	tests/make-multi-collection-id-repo.sh tests/make-test-app.sh \
@@ -2542,6 +2543,7 @@ TEST_MATRIX_SOURCE = \
 	tests/test-run.sh{{user+system+system-norevokefs},{nodeltas+deltas}} \
 	tests/test-info.sh{user+system} \
 	tests/test-repo.sh{{user+system+system-norevokefs}+{{user+system},oldsummary}} \
+	tests/test-history.sh \
 	tests/test-sideload.sh{user+system} \
 	tests/test-default-remotes.sh \
 	tests/test-metadata-validation.sh \
@@ -2600,6 +2602,7 @@ TEST_MATRIX_DIST = \
 	tests/test-config.sh \
 	tests/test-build-update-repo.sh \
 	tests/test-http-utils.sh \
+	tests/test-history.sh \
 	tests/test-default-remotes.sh \
 	tests/test-metadata-validation.sh \
 	tests/test-extensions.sh \
@@ -6805,6 +6808,13 @@ tests/test-build-update-repo.sh.log: tests/test-build-update-repo.sh
 tests/test-http-utils.sh.log: tests/test-http-utils.sh
 	@p='tests/test-http-utils.sh'; \
 	b='tests/test-http-utils.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tests/test-history.sh.log: tests/test-history.sh
+	@p='tests/test-history.sh'; \
+	b='tests/test-history.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

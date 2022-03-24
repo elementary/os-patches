@@ -81,20 +81,24 @@
 </div>
 <div class="refsect1">
 <a name="gdbus-interface-org-freedesktop-impl-portal-PermissionStore"></a><h2>Description</h2>
-<p>      The permission store can be used by portals to store permissions
-      that sandboxed applications have to various resources, such as
-      files outside the sandbox.
+<p>
+The permission store can be used by portals to store permissions
+that sandboxed applications have to various resources, such as
+files outside the sandbox.
 </p>
-<p>      Since the resources managed by portals can be varied, the permission
-      store is fairly free-form: there can be multiple tables; resources are
-      identified by an ID, as are applications, and permissions are stored as
-      string arrays. None of these strings are interpreted by the permission
-      store in any way.
+<p>
+Since the resources managed by portals can be varied, the permission
+store is fairly free-form: there can be multiple tables; resources are
+identified by an ID, as are applications, and permissions are stored as
+string arrays. None of these strings are interpreted by the permission
+store in any way.
 </p>
-<p>      In addition, the permission store allows to associate extra data
-      (in the form of a GVariant) with each resource.
+<p>
+In addition, the permission store allows to associate extra data
+(in the form of a GVariant) with each resource.
 </p>
-<p>      This document describes version 2 of the permission store interface.
+<p>
+This document describes version 2 of the permission store interface.
 </p>
 </div>
 <div class="refsect1">
@@ -107,8 +111,9 @@ Lookup (IN  s      table,
         OUT a{sas} permissions,
         OUT v      data);
 </pre>
-<p>        Looks up the entry for a resource in one of the tables and returns
-        all associated application permissions and data.
+<p>
+Looks up the entry for a resource in one of the tables and returns
+all associated application permissions and data.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -118,19 +123,27 @@ Lookup (IN  s      table,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
-<td><p>the name of the table to use</p></td>
+<td><p>
+the name of the table to use
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
-<td><p>the resource ID to look up</p></td>
+<td><p>
+the resource ID to look up
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT a{sas} <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
-<td><p>map from application ID to permissions</p></td>
+<td><p>
+map from application ID to permissions
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT v <em class="parameter"><code>data</code></em></code>:</span></p></td>
-<td><p>data that is associated with the resource</p></td>
+<td><p>
+data that is associated with the resource
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -145,7 +158,8 @@ Set (IN  s      table,
      IN  a{sas} app_permissions,
      IN  v      data);
 </pre>
-<p>        Writes the entry for a resource in the given table.
+<p>
+Writes the entry for a resource in the given table.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -155,23 +169,33 @@ Set (IN  s      table,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
-<td><p>the name of the table to use</p></td>
+<td><p>
+the name of the table to use
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>create</code></em></code>:</span></p></td>
-<td><p>whether to create the table if it does not exist</p></td>
+<td><p>
+whether to create the table if it does not exist
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
-<td><p>the resource ID to modify</p></td>
+<td><p>
+the resource ID to modify
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN a{sas} <em class="parameter"><code>app_permissions</code></em></code>:</span></p></td>
-<td><p>map from application ID to permissions</p></td>
+<td><p>
+map from application ID to permissions
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN v <em class="parameter"><code>data</code></em></code>:</span></p></td>
-<td><p>data to associate with the resource</p></td>
+<td><p>
+data to associate with the resource
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -183,7 +207,8 @@ Set (IN  s      table,
 Delete (IN  s table,
         IN  s id);
 </pre>
-<p>        Removes the entry for a resource in the given table.
+<p>
+Removes the entry for a resource in the given table.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -193,11 +218,15 @@ Delete (IN  s table,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
-<td><p>the name of the table to use</p></td>
+<td><p>
+the name of the table to use
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
-<td><p>the resource ID to delete</p></td>
+<td><p>
+the resource ID to delete
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -211,7 +240,8 @@ SetValue (IN  s table,
           IN  s id,
           IN  v data);
 </pre>
-<p>        Sets just the data for a resource in the given table.
+<p>
+Sets just the data for a resource in the given table.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -221,19 +251,27 @@ SetValue (IN  s table,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
-<td><p>the name of the table to use</p></td>
+<td><p>
+the name of the table to use
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>create</code></em></code>:</span></p></td>
-<td><p>whether to create the table if it does not exist</p></td>
+<td><p>
+whether to create the table if it does not exist
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
-<td><p>the resource ID to modify</p></td>
+<td><p>
+the resource ID to modify
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN v <em class="parameter"><code>data</code></em></code>:</span></p></td>
-<td><p>data to associate with the resource</p></td>
+<td><p>
+data to associate with the resource
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -248,8 +286,9 @@ SetPermission (IN  s  table,
                IN  s  app,
                IN  as permissions);
 </pre>
-<p>        Sets the permissions for an application and a resource
-        in the given table.
+<p>
+Sets the permissions for an application and a resource
+in the given table.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -259,23 +298,33 @@ SetPermission (IN  s  table,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
-<td><p>the name of the table to use</p></td>
+<td><p>
+the name of the table to use
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>create</code></em></code>:</span></p></td>
-<td><p>whether to create the table if it does not exist</p></td>
+<td><p>
+whether to create the table if it does not exist
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
-<td><p>the resource ID to modify</p></td>
+<td><p>
+the resource ID to modify
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app</code></em></code>:</span></p></td>
-<td><p>the application ID to modify</p></td>
+<td><p>
+the application ID to modify
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN as <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
-<td><p>permissions to set</p></td>
+<td><p>
+permissions to set
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -288,10 +337,12 @@ DeletePermission (IN  s table,
                   IN  s id,
                   IN  s app);
 </pre>
-<p>        Removes the entry for an application and a resource
-        in the given table.
+<p>
+Removes the entry for an application and a resource
+in the given table.
 </p>
-<p>        This method was added in version 2.
+<p>
+This method was added in version 2.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -301,15 +352,21 @@ DeletePermission (IN  s table,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
-<td><p>the name of the table to use</p></td>
+<td><p>
+the name of the table to use
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
-<td><p>the resource ID to modify</p></td>
+<td><p>
+the resource ID to modify
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app</code></em></code>:</span></p></td>
-<td><p>the application ID to modify</p></td>
+<td><p>
+the application ID to modify
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -321,7 +378,8 @@ DeletePermission (IN  s table,
 List (IN  s  table,
       OUT as ids);
 </pre>
-<p>        Returns all the resources that are present in the table.
+<p>
+Returns all the resources that are present in the table.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -331,11 +389,15 @@ List (IN  s  table,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
-<td><p>the name of the table to use</p></td>
+<td><p>
+the name of the table to use
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT as <em class="parameter"><code>ids</code></em></code>:</span></p></td>
-<td><p>IDs of all resources that are present in the table</p></td>
+<td><p>
+IDs of all resources that are present in the table
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -352,10 +414,11 @@ Changed (s      table,
          v      data,
          a{sas} permissions);
 </pre>
-<p>        The Changed signal is emitted when the entry for a resource
-        is modified or deleted. If the entry was deleted, then <em class="parameter"><code>data</code></em>
-        and <em class="parameter"><code>permissions</code></em> contain the last values that were found in the
-        database. If the entry was modified, they contain the new values.
+<p>
+The Changed signal is emitted when the entry for a resource
+is modified or deleted. If the entry was deleted, then <em class="parameter"><code>data</code></em>
+and <em class="parameter"><code>permissions</code></em> contain the last values that were found in the
+database. If the entry was modified, they contain the new values.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -365,23 +428,36 @@ Changed (s      table,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">s <em class="parameter"><code>table</code></em></code>:</span></p></td>
-<td><p>the name of the table</p></td>
+<td><p>
+the name of the table
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">s <em class="parameter"><code>id</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">b <em class="parameter"><code>deleted</code></em></code>:</span></p></td>
-<td><p>whether the resource was deleted</p></td>
+<td><p>
+whether the resource was deleted
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">v <em class="parameter"><code>data</code></em></code>:</span></p></td>
-<td><p>the data that is associated the resource</p></td>
+<td><p>
+the data that is associated the resource
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">a{sas} <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
-<td><p>the permissions that are associated with the resource</p></td>
+<td><p>
+the permissions that are associated with the resource
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -394,7 +470,10 @@ Changed (s      table,
 <pre class="programlisting">
 version  readable   u
 </pre>
-<p></p>
+<p>
+</p>
+<p>
+</p>
 </div>
 </div>
 </div>

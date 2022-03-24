@@ -62,28 +62,33 @@
 </div>
 <div class="refsect1">
 <a name="gdbus-interface-org-freedesktop-Flatpak-Development"></a><h2>Description</h2>
-<p>      The Development interface lets any client, possibly in a sandbox if
-      it has access to the session helper, spawn a process on the host,
-      outside any sandbox.
+<p>
+The Development interface lets any client, possibly in a sandbox if
+it has access to the session helper, spawn a process on the host,
+outside any sandbox.
 </p>
-<p>      Clearly this is not something you typically want a sandboxed app to
-      do: it is a sandbox escape allowing arbitrary code execution,
-      and must not be allowed for applications where sandboxing is
-      intended to be a security boundary.
+<p>
+Clearly this is not something you typically want a sandboxed app to
+do: it is a sandbox escape allowing arbitrary code execution,
+and must not be allowed for applications where sandboxing is
+intended to be a security boundary.
 </p>
-<p>      However, it is very useful when using Flatpak for distribution and
-      choice of runtime library stack, without intending to create a
-      security boundary. For instance, if an IDE like GNOME Builder is
-      distributed as a trusted Flatpak app and will be used to build other
-      Flatpak apps, it needs to use this facility to launch a Flatpak
-      build operation inside the sandbox, because otherwise recursive
-      calls to flatpak will not work.
+<p>
+However, it is very useful when using Flatpak for distribution and
+choice of runtime library stack, without intending to create a
+security boundary. For instance, if an IDE like GNOME Builder is
+distributed as a trusted Flatpak app and will be used to build other
+Flatpak apps, it needs to use this facility to launch a Flatpak
+build operation inside the sandbox, because otherwise recursive
+calls to flatpak will not work.
 </p>
-<p>      This interface is provided on the D-Bus session bus by the
-      well-known D-Bus name org.freedesktop.Flatpak,
-      at the object path /org/freedesktop/Flatpak/Development.
+<p>
+This interface is provided on the D-Bus session bus by the
+well-known D-Bus name org.freedesktop.Flatpak,
+at the object path /org/freedesktop/Flatpak/Development.
 </p>
-<p>      This documentation describes version 1 of this interface.
+<p>
+This documentation describes version 1 of this interface.
 </p>
 </div>
 <div class="refsect1">
@@ -98,13 +103,16 @@ HostCommand (IN  ay    cwd_path,
              IN  u     flags,
              OUT u     pid);
 </pre>
-<p>        This method lets trusted applications (insider or outside a
-        sandbox) run arbitrary commands in the user's session, outside
-        any sandbox.
+<p>
+This method lets trusted applications (insider or outside a
+sandbox) run arbitrary commands in the user's session, outside
+any sandbox.
 </p>
-<p>        The following flags values are supported:
+<p>
+The following flags values are supported:
 </p>
-<p>        </p>
+<p>
+</p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
 <col align="left" valign="top">
@@ -114,24 +122,26 @@ HostCommand (IN  ay    cwd_path,
 <tr>
 <td><p><span class="term">1 (FLATPAK_HOST_COMMAND_FLAGS_CLEAR_ENV)</span></p></td>
 <td><p>
-              Clear the environment.
-            </p></td>
+Clear the environment.
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term">2 (FLATPAK_HOST_COMMAND_FLAGS_WATCH_BUS)</span></p></td>
 <td><p>
-              Kill the sandbox when the caller disappears from the session bus.
-            </p></td>
+Kill the sandbox when the caller disappears from the session bus.
+</p></td>
 </tr>
 </tbody>
 </table></div>
 <p>
 </p>
-<p>        Unknown (unsupported) flags are an error and will cause HostCommand()
-        to fail.
+<p>
+Unknown (unsupported) flags are an error and will cause HostCommand()
+to fail.
 </p>
-<p>        Note that unlike org.freedesktop.portal.Flatpak.Spawn(), there
-        is no options parameter here.
+<p>
+Note that unlike org.freedesktop.portal.Flatpak.Spawn(), there
+is no options parameter here.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -141,27 +151,39 @@ HostCommand (IN  ay    cwd_path,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN ay <em class="parameter"><code>cwd_path</code></em></code>:</span></p></td>
-<td><p>the working directory for the new process</p></td>
+<td><p>
+the working directory for the new process
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN aay <em class="parameter"><code>argv</code></em></code>:</span></p></td>
-<td><p>the argv for the new process, starting with the executable to launch</p></td>
+<td><p>
+the argv for the new process, starting with the executable to launch
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN a{uh} <em class="parameter"><code>fds</code></em></code>:</span></p></td>
-<td><p>an array of file descriptors to pass to the new process</p></td>
+<td><p>
+an array of file descriptors to pass to the new process
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN a{ss} <em class="parameter"><code>envs</code></em></code>:</span></p></td>
-<td><p>an array of variable/value pairs for the environment of the new process</p></td>
+<td><p>
+an array of variable/value pairs for the environment of the new process
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN u <em class="parameter"><code>flags</code></em></code>:</span></p></td>
-<td><p>flags</p></td>
+<td><p>
+flags
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT u <em class="parameter"><code>pid</code></em></code>:</span></p></td>
-<td><p>the PID of the new process</p></td>
+<td><p>
+the PID of the new process
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -174,11 +196,12 @@ HostCommandSignal (IN  u pid,
                    IN  u signal,
                    IN  b to_process_group);
 </pre>
-<p>        This method lets you send a Unix signal to a process
-        that was started with <a class="link" href="gdbus-org.freedesktop.Flatpak.Development.html#gdbus-method-org-freedesktop-Flatpak-Development.HostCommand" title="The HostCommand() method">HostCommand()</a>.
-        The <em class="parameter"><code>pid</code></em> argument here must be a PID that was returned by a
-        call to HostCommand() from the same sender: terminating unrelated
-        processes is not allowed.
+<p>
+This method lets you send a Unix signal to a process
+that was started with <a class="link" href="gdbus-org.freedesktop.Flatpak.Development.html#gdbus-method-org-freedesktop-Flatpak-Development.HostCommand" title="The HostCommand() method">HostCommand()</a>.
+The <em class="parameter"><code>pid</code></em> argument here must be a PID that was returned by a
+call to HostCommand() from the same sender: terminating unrelated
+processes is not allowed.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -188,15 +211,21 @@ HostCommandSignal (IN  u pid,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN u <em class="parameter"><code>pid</code></em></code>:</span></p></td>
-<td><p>the process ID on the host system</p></td>
+<td><p>
+the process ID on the host system
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN u <em class="parameter"><code>signal</code></em></code>:</span></p></td>
-<td><p>the signal to send (see <span class="citerefentry"><span class="refentrytitle">signal</span>(7)</span>)</p></td>
+<td><p>
+the signal to send (see <span class="citerefentry"><span class="refentrytitle">signal</span>(7)</span>)
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>to_process_group</code></em></code>:</span></p></td>
-<td><p>whether to send the signal to the process group</p></td>
+<td><p>
+whether to send the signal to the process group
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -210,16 +239,18 @@ HostCommandSignal (IN  u pid,
 HostCommandExited (u pid,
                    u exit_status);
 </pre>
-<p>        Emitted when a process started by
-        <a class="link" href="gdbus-org.freedesktop.Flatpak.Development.html#gdbus-method-org-freedesktop-Flatpak-Development.HostCommand" title="The HostCommand() method">HostCommand()</a> exits.
-        Use g_spawn_check_exit_status(), or the macros such as
-        WIFEXITED documented in
-        <span class="citerefentry"><span class="refentrytitle">waitpid</span>(2)</span>,
-        to interpret the <em class="parameter"><code>exit_status</code></em>.
+<p>
+Emitted when a process started by
+<a class="link" href="gdbus-org.freedesktop.Flatpak.Development.html#gdbus-method-org-freedesktop-Flatpak-Development.HostCommand" title="The HostCommand() method">HostCommand()</a> exits.
+Use g_spawn_check_exit_status(), or the macros such as
+WIFEXITED documented in
+<span class="citerefentry"><span class="refentrytitle">waitpid</span>(2)</span>,
+to interpret the <em class="parameter"><code>exit_status</code></em>.
 </p>
-<p>        This signal is not emitted for processes that were not launched
-        directly by HostCommand(), for example if a process launched by
-        HostCommand() runs foreground or background child processes.
+<p>
+This signal is not emitted for processes that were not launched
+directly by HostCommand(), for example if a process launched by
+HostCommand() runs foreground or background child processes.
 </p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
@@ -229,11 +260,15 @@ HostCommandExited (u pid,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">u <em class="parameter"><code>pid</code></em></code>:</span></p></td>
-<td><p>the PID of the process that has ended</p></td>
+<td><p>
+the PID of the process that has ended
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">u <em class="parameter"><code>exit_status</code></em></code>:</span></p></td>
-<td><p>the wait status (see <span class="citerefentry"><span class="refentrytitle">waitpid</span>(2)</span>)</p></td>
+<td><p>
+the wait status (see <span class="citerefentry"><span class="refentrytitle">waitpid</span>(2)</span>)
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -246,8 +281,9 @@ HostCommandExited (u pid,
 <pre class="programlisting">
 version  readable   u
 </pre>
-<p>        The API version number.
-        This documentation describes version 1 of this interface.
+<p>
+The API version number.
+This documentation describes version 1 of this interface.
 </p>
 </div>
 </div>

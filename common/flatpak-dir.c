@@ -3919,6 +3919,48 @@ apply_new_flatpakrepo (const char *remote_name,
 }
 
 static gboolean
+system_helper_maybe_ensure_repo (FlatpakDir *self,
+                                 FlatpakHelperEnsureRepoFlags flags,
+                                 gboolean allow_empty,
+                                 GCancellable *cancellable,
+                                 GError **error)
+{
+  g_autoptr(GError) local_error = NULL;
+  const char *installation = flatpak_dir_get_id (self);
+
+  if (!flatpak_dir_system_helper_call_ensure_repo (self,
+                                                   flags,
+                                                   installation ? installation : "",
+                                                   cancellable, &local_error))
+    {
+      if (allow_empty)
+        return TRUE;
+
+      g_propagate_error (error, g_steal_pointer (&local_error));
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
+ensure_repo_opened (OstreeRepo *repo,
+                    GCancellable *cancellable,
+                    GError **error)
+{
+  if (!ostree_repo_open (repo, cancellable, error))
+    {
+      g_autofree char *repopath = NULL;
+
+      repopath = g_file_get_path (ostree_repo_get_path (repo));
+      g_prefix_error (error, _("While opening repository %s: "), repopath);
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
 _flatpak_dir_ensure_repo (FlatpakDir   *self,
                           gboolean      allow_empty,
                           GCancellable *cancellable,
@@ -3929,28 +3971,21 @@ _flatpak_dir_ensure_repo (FlatpakDir   *self,
   g_autoptr(GError) my_error = NULL;
   g_autoptr(GFile) cache_dir = NULL;
   g_autoptr(GHashTable) flatpakrepos = NULL;
+  FlatpakHelperEnsureRepoFlags ensure_flags = FLATPAK_HELPER_ENSURE_REPO_FLAGS_NONE;
 
   if (self->repo != NULL)
     return TRUE;
+
+  /* Don't trigger polkit prompts if we are just doing this opportunistically */
+  if (allow_empty)
+    ensure_flags |= FLATPAK_HELPER_ENSURE_REPO_FLAGS_NO_INTERACTION;
 
   if (!g_file_query_exists (self->basedir, cancellable))
     {
       if (flatpak_dir_use_system_helper (self, NULL))
         {
-          g_autoptr(GError) local_error = NULL;
-          const char *installation = flatpak_dir_get_id (self);
-
-          if (!flatpak_dir_system_helper_call_ensure_repo (self,
-                                                           FLATPAK_HELPER_ENSURE_REPO_FLAGS_NONE,
-                                                           installation ? installation : "",
-                                                           NULL, &local_error))
-            {
-              if (allow_empty)
-                return TRUE;
-
-              g_propagate_error (error, g_steal_pointer (&local_error));
-              return FALSE;
-            }
+          if (!system_helper_maybe_ensure_repo (self, ensure_flags, allow_empty, cancellable, error))
+            return FALSE;
         }
       else
         {
@@ -3976,34 +4011,51 @@ _flatpak_dir_ensure_repo (FlatpakDir   *self,
          that still user bare-user */
       OstreeRepoMode mode = OSTREE_REPO_MODE_BARE_USER_ONLY;
 
-      if (!ostree_repo_create (repo, mode, cancellable, &my_error))
+      if (flatpak_dir_use_system_helper (self, NULL))
         {
-          flatpak_rm_rf (repodir, cancellable, NULL);
+          if (!system_helper_maybe_ensure_repo (self, ensure_flags, allow_empty, cancellable, error))
+            return FALSE;
 
-          if (allow_empty)
-            return TRUE;
-
-          g_propagate_error (error, g_steal_pointer (&my_error));
-          return FALSE;
+          if (!ensure_repo_opened (repo, cancellable, error))
+            return FALSE;
         }
-
-      /* Create .changed file early to avoid polling non-existing file in monitor */
-      if (!flatpak_dir_mark_changed (self, &my_error))
+      else
         {
-          g_warning ("Error marking directory as changed: %s", my_error->message);
-          g_clear_error (&my_error);
+          if (!ostree_repo_create (repo, mode, cancellable, &my_error))
+            {
+              const char *repo_path = flatpak_file_get_path_cached (repodir);
+
+              flatpak_rm_rf (repodir, cancellable, NULL);
+
+              if (allow_empty)
+                return TRUE;
+
+              /* As of 2022, the error message from libostree is not the most helpful:
+               * Creating repo: mkdirat: Permission denied
+               * If the repository path is in the error message, assume this
+               * has been fixed. If not, add it. */
+              if (strstr (my_error->message, repo_path) != NULL)
+                g_propagate_error (error, g_steal_pointer (&my_error));
+              else
+                g_set_error (error, my_error->domain, my_error->code,
+                             "Unable to create repository at %s (%s)",
+                             repo_path, my_error->message);
+
+              return FALSE;
+            }
+
+          /* Create .changed file early to avoid polling non-existing file in monitor */
+          if (!flatpak_dir_mark_changed (self, &my_error))
+            {
+              g_warning ("Error marking directory as changed: %s", my_error->message);
+              g_clear_error (&my_error);
+            }
         }
     }
   else
     {
-      if (!ostree_repo_open (repo, cancellable, error))
-        {
-          g_autofree char *repopath = NULL;
-
-          repopath = g_file_get_path (repodir);
-          g_prefix_error (error, _("While opening repository %s: "), repopath);
-          return FALSE;
-        }
+      if (!ensure_repo_opened (repo, cancellable, error))
+        return FALSE;
     }
 
   /* In the system-helper case we're directly using the global repo, and we can't write any
@@ -4083,18 +4135,8 @@ _flatpak_dir_ensure_repo (FlatpakDir   *self,
     {
       if (flatpak_dir_use_system_helper (self, NULL))
         {
-          const char *installation = flatpak_dir_get_id (self);
-          if (!flatpak_dir_system_helper_call_ensure_repo (self,
-                                                           FLATPAK_HELPER_ENSURE_REPO_FLAGS_NONE,
-                                                           installation ? installation : "",
-                                                           NULL, &my_error))
-            {
-              if (allow_empty)
-                return TRUE;
-
-              g_propagate_error (error, g_steal_pointer (&my_error));
-              return FALSE;
-            }
+          if (!system_helper_maybe_ensure_repo (self, ensure_flags, allow_empty, cancellable, error))
+            return FALSE;
 
           if (!ostree_repo_reload_config (repo, cancellable, error))
             return FALSE;
@@ -4360,6 +4402,73 @@ flatpak_dir_remove_appstream (FlatpakDir   *self,
   return TRUE;
 }
 
+#define SECS_PER_MINUTE (60)
+#define SECS_PER_HOUR   (60 * SECS_PER_MINUTE)
+#define SECS_PER_DAY    (24 * SECS_PER_HOUR)
+
+/* This looks for old temporary files created by previous versions of
+   flatpak_dir_deploy_appstream(). These are all either directories
+   starting with a dot, or symlinks starting with a dot. Such temp
+   files if found can be from a concurrent deploy, so we only remove
+   any such files older than a day to avoid races.
+*/
+static void
+remove_old_appstream_tmpdirs (GFile *dir)
+{
+  g_auto(GLnxDirFdIterator) dir_iter = { 0 };
+  time_t now = time (NULL);
+
+  if (!glnx_dirfd_iterator_init_at (AT_FDCWD, flatpak_file_get_path_cached (dir),
+                                    FALSE, &dir_iter, NULL))
+    return;
+
+  while (TRUE)
+    {
+      struct stat stbuf;
+      struct dirent *dent;
+      g_autoptr(GFile) tmp = NULL;
+
+      if (!glnx_dirfd_iterator_next_dent_ensure_dtype (&dir_iter, &dent, NULL, NULL))
+        break;
+
+      if (dent == NULL)
+        break;
+
+      /* We ignore non-dotfiles and .timestamps as they are not tempfiles */
+      if (dent->d_name[0] != '.' ||
+          strcmp (dent->d_name, ".timestamp") == 0)
+        continue;
+
+      /* Check for right types and names */
+      if (dent->d_type == DT_DIR)
+        {
+          if (strlen (dent->d_name) != 72 ||
+              dent->d_name[65] != '-')
+            continue;
+        }
+      else if (dent->d_type == DT_LNK)
+        {
+          if (!g_str_has_prefix (dent->d_name, ".active-"))
+            continue;
+        }
+      else
+        continue;
+
+      /* Check that the file is at least a day old to avoid races */
+      if (!glnx_fstatat (dir_iter.fd, dent->d_name, &stbuf, AT_SYMLINK_NOFOLLOW, NULL))
+        continue;
+
+      if (stbuf.st_mtime >= now ||
+          now - stbuf.st_mtime < SECS_PER_DAY)
+        continue;
+
+      tmp = g_file_get_child (dir, dent->d_name);
+
+      /* We ignore errors here, no need to worry anyone */
+      (void)flatpak_rm_rf (tmp, NULL, NULL);
+    }
+}
+
 gboolean
 flatpak_dir_deploy_appstream (FlatpakDir   *self,
                               const char   *remote,
@@ -4384,7 +4493,6 @@ flatpak_dir_deploy_appstream (FlatpakDir   *self,
   g_autoptr(GFile) active_tmp_link = NULL;
   g_autoptr(GError) tmp_error = NULL;
   g_autofree char *new_dir = NULL;
-  g_autofree char *checkout_dir_path = NULL;
   OstreeRepoCheckoutAtOptions options = { 0, };
   glnx_autofd int dfd = -1;
   g_autoptr(GFileInfo) file_info = NULL;
@@ -4396,6 +4504,8 @@ flatpak_dir_deploy_appstream (FlatpakDir   *self,
   g_autoptr(GRegex) allow_refs = NULL;
   g_autoptr(GRegex) deny_refs = NULL;
   g_autofree char *subset = NULL;
+  g_auto(GLnxTmpDir) tmpdir = { 0, };
+  g_autoptr(FlatpakTempDir) tmplink = NULL;
 
   /* Keep a shared repo lock to avoid prunes removing objects we're relying on
    * while we do the checkout. This could happen if the ref changes after we
@@ -4485,15 +4595,13 @@ flatpak_dir_deploy_appstream (FlatpakDir   *self,
   {
     g_autofree char *template = g_strdup_printf (".%s-XXXXXX", new_dir);
     g_autoptr(GFile) tmp_dir_template = g_file_get_child (arch_dir, template);
-    checkout_dir_path = g_file_get_path (tmp_dir_template);
-    if (g_mkdtemp_full (checkout_dir_path, 0755) == NULL)
-      {
-        g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
-                     _("Can't create deploy directory"));
-        return FALSE;
-      }
+
+    if (!glnx_mkdtempat (AT_FDCWD, flatpak_file_get_path_cached (tmp_dir_template), 0755,
+                         &tmpdir, error))
+      return FALSE;
   }
-  checkout_dir = g_file_new_for_path (checkout_dir_path);
+
+  checkout_dir = g_file_new_for_path (tmpdir.path);
 
   options.mode = OSTREE_REPO_CHECKOUT_MODE_USER;
   options.overwrite_mode = OSTREE_REPO_CHECKOUT_OVERWRITE_UNION_FILES;
@@ -4501,7 +4609,7 @@ flatpak_dir_deploy_appstream (FlatpakDir   *self,
   options.bareuseronly_dirs = TRUE; /* https://github.com/ostreedev/ostree/pull/927 */
 
   if (!ostree_repo_checkout_at (self->repo, &options,
-                                AT_FDCWD, checkout_dir_path, new_checksum,
+                                AT_FDCWD, tmpdir.path, new_checksum,
                                 cancellable, error))
     return FALSE;
 
@@ -4594,6 +4702,9 @@ flatpak_dir_deploy_appstream (FlatpakDir   *self,
   if (!g_file_make_symbolic_link (active_tmp_link, new_dir, cancellable, error))
     return FALSE;
 
+   /* This is a link, not a dir, but it will remove the same way on destroy */
+  tmplink = g_object_ref (active_tmp_link);
+
   if (syncfs (dfd) != 0)
     {
       glnx_set_error_from_errno (error);
@@ -4607,6 +4718,9 @@ flatpak_dir_deploy_appstream (FlatpakDir   *self,
                     cancellable, NULL, NULL, error))
     return FALSE;
 
+  /* Don't delete tmpdir now that it's moved */
+  glnx_tmpdir_unset (&tmpdir);
+
   if (syncfs (dfd) != 0)
     {
       glnx_set_error_from_errno (error);
@@ -4617,6 +4731,9 @@ flatpak_dir_deploy_appstream (FlatpakDir   *self,
                             active_link,
                             cancellable, error))
     return FALSE;
+
+  /* Don't delete tmplink now that it's moved */
+  g_object_unref (g_steal_pointer (&tmplink));
 
   if (old_dir != NULL &&
       g_strcmp0 (old_dir, new_dir) != 0)
@@ -4637,6 +4754,10 @@ flatpak_dir_deploy_appstream (FlatpakDir   *self,
       g_autofree char *appstream_dir_path = g_file_get_path (appstream_dir);
       utime (appstream_dir_path, NULL);
     }
+
+  /* There used to be an bug here where temporary files where not removed, which could use
+   * quite a lot of space over time, so we check for these and remove them. */
+  remove_old_appstream_tmpdirs (arch_dir);
 
   if (out_changed)
     *out_changed = TRUE;
@@ -5143,7 +5264,7 @@ repo_pull (OstreeRepo                           *self,
            FlatpakRemoteState                   *state,
            const char                          **dirs_to_pull,
            const char                           *ref_to_fetch,
-           const char                           *rev_to_fetch, /* (nullable) */
+           const char                           *rev_to_fetch,
            GFile                                *sideload_repo,
            const char                           *token,
            FlatpakPullFlags                      flatpak_flags,
@@ -5162,6 +5283,9 @@ repo_pull (OstreeRepo                           *self,
   g_autoptr(GVariant) options = NULL;
   const char *refs_to_fetch[2];
   g_autofree char *sideload_url = NULL;
+
+  g_return_val_if_fail (ref_to_fetch != NULL, FALSE);
+  g_return_val_if_fail (rev_to_fetch != NULL, FALSE);
 
   /* The ostree fetcher asserts if error is NULL */
   if (error == NULL)
@@ -5734,6 +5858,7 @@ flatpak_dir_pull (FlatpakDir                           *self,
                   GError                              **error)
 {
   gboolean ret = FALSE;
+  gboolean have_commit = FALSE;
   g_autofree char *rev = NULL;
   g_autofree char *url = NULL;
   g_autoptr(GPtrArray) subdirs_arg = NULL;
@@ -5819,6 +5944,23 @@ flatpak_dir_pull (FlatpakDir                           *self,
                                      cancellable,
                                      error))
     goto out;
+
+  /* Work around a libostree bug where the pull may succeed but the pulled
+   * commit will be incomplete by preemptively marking the commit partial.
+   * Note this has to be done before ostree_repo_prepare_transaction() so we
+   * aren't checking the staging dir for the commit.
+   * https://github.com/flatpak/flatpak/issues/3479
+   * https://github.com/ostreedev/ostree/pull/2549
+   */
+  {
+    g_autoptr(GError) local_error = NULL;
+
+    if (!ostree_repo_has_object (repo, OSTREE_OBJECT_TYPE_COMMIT, rev, &have_commit, NULL, &local_error))
+      g_warning ("Encountered error checking for commit object %s: %s", rev, local_error->message);
+    else if (!have_commit &&
+             !ostree_repo_mark_commit_partial (repo, rev, TRUE, &local_error))
+      g_warning ("Encountered error marking commit partial: %s: %s", rev, local_error->message);
+  }
 
   if (!ostree_repo_prepare_transaction (repo, NULL, cancellable, error))
     goto out;
@@ -7539,6 +7681,7 @@ flatpak_export_dir (GFile        *source,
     "share/dbus-1/services",               "../../..",
     "share/gnome-shell/search-providers",  "../../..",
     "share/mime/packages",                 "../../..",
+    "share/metainfo",                      "../..",
     "bin",                                 "..",
   };
   int i;
@@ -8263,7 +8406,7 @@ flatpak_dir_deploy (FlatpakDir          *self,
       if (!g_file_make_directory_with_parents (files, cancellable, error))
         return FALSE;
 
-      options.subpath = "/metadata";
+      options.subpath = "metadata";
 
       if (!ostree_repo_checkout_at (self->repo, &options,
                                     AT_FDCWD, checkoutdirpath,
@@ -8276,7 +8419,7 @@ flatpak_dir_deploy (FlatpakDir          *self,
 
       for (i = 0; subpaths[i] != NULL; i++)
         {
-          g_autofree char *subpath = g_build_filename ("/files", subpaths[i], NULL);
+          g_autofree char *subpath = g_build_filename ("files", subpaths[i], NULL);
           g_autofree char *dstpath = g_build_filename (checkoutdirpath, "/files", subpaths[i], NULL);
           g_autofree char *dstpath_parent = g_path_get_dirname (dstpath);
           g_autoptr(GFile) child = NULL;
@@ -9372,7 +9515,7 @@ flatpak_dir_ensure_bundle_remote (FlatpakDir         *self,
   /* If we rely on metadata (to e.g. print permissions), check it exists before creating the remote */
   if (out_metadata && fp_metadata == NULL)
     {
-      flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, "No metadata in bundler header");
+      flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, "No metadata in bundle header");
       return NULL;
     }
 

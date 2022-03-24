@@ -1,3 +1,41 @@
+flatpak (1.12.7-1) unstable; urgency=medium
+
+  * New upstream stable release
+    - Pass through a remote X11 display if the app has --share=network
+    - Pass through a remote PulseAudio server if the app has --share=network
+    - WAYLAND_DISPLAY can be an absolute path
+    - Accept /app/share/metainfo/*.xml exports from apps that were built
+      with Flatpak 1.13.x
+    - Automatically set up /var/lib/flatpak/repo if required
+    - Work around a bug in libostree < 2021.6 when used with GLib >= 2.71
+    - Fix some memory leaks in GVariant data processing
+  * d/gbp.conf: Use upstream/1.12.x branch for upstream imports
+  * d/watch: Only watch for upstream stable releases
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 14 Mar 2022 17:37:10 +0000
+
+flatpak (1.12.6-1) unstable; urgency=medium
+
+  * New upstream stable release
+    - Better robustness against downloads being interrupted or cancelled
+    - Detect the GTK theme more reliably
+    - Fix history command unit test when not using persistent systemd journal
+    - Translation update: pt_BR
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 22 Feb 2022 10:58:48 +0000
+
+flatpak (1.12.5-1) unstable; urgency=medium
+
+  * New upstream stable release
+    - Don't propagate GStreamer-related environment variables into sandbox
+    - Fix regressions in `flatpak history` since 1.9.1
+    - Remove temporary files from /var/lib/flatpak/appstream
+  * Stop installing flatpak-bisect and flatpak-coredumpctl as examples.
+    Since 1.8.1-2 they're installed into PATH, in libflatpak-dev.
+  * d/flatpak.docs: Use debhelper 11 dh_installdoc instead of dh-exec
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 11 Feb 2022 17:16:22 +0000
+
 flatpak (1.12.4-1) unstable; urgency=medium
 
   * New upstream stable release

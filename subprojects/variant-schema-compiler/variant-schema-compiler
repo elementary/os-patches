@@ -1,5 +1,28 @@
 #!/usr/bin/env python3
 
+# Copyright © 2020-2021 Red Hat
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice (including the next
+# paragraph) shall be included in all copies or substantial portions of the
+# Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+# This license also covers the generated code created by the app
+
 import argparse
 import sys
 import os
@@ -111,6 +134,26 @@ typedef struct {{
 } )
 
     C("""
+/* Make sure generated code works with older glib versions without g_memdup2 */
+static inline gpointer
+_{prefix_}memdup2(gconstpointer mem, gsize byte_size)
+{{
+#if GLIB_CHECK_VERSION(2, 68, 0)
+    return g_memdup2(mem, byte_size);
+#else
+    gpointer new_mem;
+
+    if (mem && byte_size != 0) {{
+        new_mem = g_malloc(byte_size);
+        memcpy(new_mem, mem, byte_size);
+    }} else {{
+        new_mem = NULL;
+    }}
+
+    return new_mem;
+#endif
+}}
+
 #define {PREFIX_}REF_READ_FRAME_OFFSET(_v, _index) {prefix_}ref_read_unaligned_le ((guchar*)((_v).base) + (_v).size - (offset_size * ((_index) + 1)), offset_size)
 #define {PREFIX_}REF_ALIGN(_offset, _align_to) ((_offset + _align_to - 1) & ~(gsize)(_align_to - 1))
 
@@ -353,7 +396,8 @@ static inline {Prefix}VariantRef
 static inline GVariant *
 {prefix_}variant_dup_to_gvariant ({Prefix}VariantRef v)
 {{
-  return g_variant_new_from_data (G_VARIANT_TYPE_VARIANT, g_memdup (v.base, v.size), v.size, TRUE, g_free, NULL);
+  guint8 *duped = _{prefix_}memdup2 (v.base, v.size);
+  return g_variant_new_from_data (G_VARIANT_TYPE_VARIANT, duped, v.size, TRUE, g_free, duped);
 }}
 
 static inline GVariant *
@@ -361,7 +405,7 @@ static inline GVariant *
                               GDestroyNotify      notify,
                               gpointer            user_data)
 {{
-  return g_variant_new_from_data (G_VARIANT_TYPE_VARIANT, g_memdup (v.base, v.size), v.size, TRUE, notify, user_data);
+  return g_variant_new_from_data (G_VARIANT_TYPE_VARIANT, v.base, v.size, TRUE, notify, user_data);
 }}
 
 static inline GVariant *
@@ -391,7 +435,8 @@ static inline GVariant *
 {{
   const GVariantType  *type;
   {Prefix}Ref child = {prefix_}variant_get_child (v, &type);
-  return g_variant_new_from_data (type, g_memdup (child.base, child.size), child.size, TRUE, g_free, NULL);
+  guint8 *duped = _{prefix_}memdup2 (child.base, child.size);
+  return g_variant_new_from_data (type, duped, child.size, TRUE, g_free, duped);
 }}
 
 static inline GVariant *
@@ -615,7 +660,8 @@ static inline {TypeNameRef}
 static inline GVariant *
 {type_name_}dup_to_gvariant ({TypeNameRef} v)
 {{
-  return g_variant_new_from_data ({TYPE_NAME_}TYPEFORMAT, g_memdup (v.base, v.size), v.size, TRUE, g_free, NULL);
+  guint8 *duped = _{prefix_}memdup2 (v.base, v.size);
+  return g_variant_new_from_data ({TYPE_NAME_}TYPEFORMAT, duped, v.size, TRUE, g_free, duped);
 }}
 
 static inline GVariant *

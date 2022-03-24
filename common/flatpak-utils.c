@@ -632,7 +632,7 @@ flatpak_get_gtk_theme (void)
       else
         {
           schema = g_settings_schema_source_lookup (source,
-                                                    "org.gnome.desktop.interface", FALSE);
+                                                    "org.gnome.desktop.interface", TRUE);
 
           if (schema == NULL)
             g_once_init_leave (&gtk_theme, g_strdup (""));
@@ -730,6 +730,10 @@ flatpak_get_allowed_exports (const char     *source_path,
       g_ptr_array_add (allowed_extensions, g_strdup (".ini"));
     }
   else if (strcmp (source_path, "share/mime/packages") == 0)
+    {
+      g_ptr_array_add (allowed_extensions, g_strdup (".xml"));
+    }
+  else if (strcmp (source_path, "share/metainfo") == 0)
     {
       g_ptr_array_add (allowed_extensions, g_strdup (".xml"));
     }
@@ -3169,7 +3173,7 @@ flatpak_repo_save_digested_summary_delta (OstreeRepo   *repo,
 }
 
 
-static gboolean
+gboolean
 is_flatpak_ref (const char *ref)
 {
   return

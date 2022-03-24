@@ -53,7 +53,10 @@
 </div>
 <div class="refsect1">
 <a name="gdbus-interface-org-freedesktop-Flatpak-Authenticator"></a><h2>Description</h2>
-<p></p>
+<p>
+</p>
+<p>
+</p>
 </div>
 <div class="refsect1">
 <a name="gdbus-methods-org.freedesktop.Flatpak.Authenticator"></a><h2>Method Details</h2>
@@ -69,25 +72,29 @@ RequestRefTokens (IN  s           handle_token,
                   IN  s           parent_window,
                   OUT o           handle);
 </pre>
-<p>              object path element. See the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> documentation for
-              more information about the <em class="parameter"><code>handle</code></em>.
-        <em class="parameter"><code>authenticator_options</code></em>: Data from the xa.authenticator-options key in the configuration for the remote, it is up to the authenticator to interpret this how it wants.
-        <em class="parameter"><code>remote</code></em>: The name of the remote we're pulling from.
-        <em class="parameter"><code>remote_uri</code></em>: The uri of the remote we're pulling from.
-        <em class="parameter"><code>refs</code></em>: An array of ref that flatpak wants to pull and info about each ref.
-        <em class="parameter"><code>options</code></em>: An extensible  dict with extra options.
-        <em class="parameter"><code>parent_window</code></em>: Identifier for the application window, see xdg-desktop-portal docs for details on its format.
-        <em class="parameter"><code>handle</code></em>: Object path for the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> object representing this call.
+<p>
+object path element. See the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> documentation for
+more information about the <em class="parameter"><code>handle</code></em>.
+<em class="parameter"><code>authenticator_options</code></em>: Data from the xa.authenticator-options key in the configuration for the remote, it is up to the authenticator to interpret this how it wants.
+<em class="parameter"><code>remote</code></em>: The name of the remote we're pulling from.
+<em class="parameter"><code>remote_uri</code></em>: The uri of the remote we're pulling from.
+<em class="parameter"><code>refs</code></em>: An array of ref that flatpak wants to pull and info about each ref.
+<em class="parameter"><code>options</code></em>: An extensible  dict with extra options.
+<em class="parameter"><code>parent_window</code></em>: Identifier for the application window, see xdg-desktop-portal docs for details on its format.
+<em class="parameter"><code>handle</code></em>: Object path for the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> object representing this call.
 </p>
-<p>        Starts a request for resolving the tokens to use for <em class="parameter"><code>refs</code></em> from the <em class="parameter"><code>remote</code></em> (with uri <em class="parameter"><code>remote_uri</code></em>).
+<p>
+Starts a request for resolving the tokens to use for <em class="parameter"><code>refs</code></em> from the <em class="parameter"><code>remote</code></em> (with uri <em class="parameter"><code>remote_uri</code></em>).
 </p>
-<p>        This is not a regular dbus call that blocks until the result is done, instead it creates
-        a org.freedesktop.Flatpak.AuthenticatorRequest object representing the ongoing operation and
-        returns an object path <em class="parameter"><code>handle</code></em> to it. When the operation succeds the Response signal is emitted
-        on the request with a response status and a dict with details.
+<p>
+This is not a regular dbus call that blocks until the result is done, instead it creates
+a org.freedesktop.Flatpak.AuthenticatorRequest object representing the ongoing operation and
+returns an object path <em class="parameter"><code>handle</code></em> to it. When the operation succeds the Response signal is emitted
+on the request with a response status and a dict with details.
 </p>
-<p>        The <em class="parameter"><code>refs</code></em> array elements are of type (ssia{sv}) where the items are:
-        </p>
+<p>
+The <em class="parameter"><code>refs</code></em> array elements are of type (ssia{sv}) where the items are:
+</p>
 <table border="0" summary="Simple list" class="simplelist">
 <tr><td>s: The ref being pulled</td></tr>
 <tr><td>s: The exact commit being pulled</td></tr>
@@ -96,8 +103,9 @@ RequestRefTokens (IN  s           handle_token,
 </table>
 <p>
 </p>
-<p>        On success (response 0) the returned details should have:
-        </p>
+<p>
+On success (response 0) the returned details should have:
+</p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
 <col align="left" valign="top">
@@ -106,32 +114,38 @@ RequestRefTokens (IN  s           handle_token,
 <tbody><tr>
 <td><p><span class="term">tokens a{sas}</span></p></td>
 <td><p>
-              A list of tokens (the first element of the struct), and the refs (the second).
-            </p></td>
+A list of tokens (the first element of the struct), and the refs (the second).
+</p></td>
 </tr></tbody>
 </table></div>
 <p>
 </p>
-<p>        For other response types, see the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> docs.
+<p>
+For other response types, see the <a class="link" href="gdbus-org.freedesktop.Flatpak.AuthenticatorRequest.html#gdbus-interface-org-freedesktop-Flatpak-AuthenticatorRequest.top_of_page">org.freedesktop.Flatpak.AuthenticatorRequest</a> docs.
 </p>
-<p>        Exactly how the authenticator decides on what token to use is up to each implementation, but typically it needs to talk to
-        some kind of network service which in turn may need interaction such as login or entering credit card details.
-        This can be done in two ways:
+<p>
+Exactly how the authenticator decides on what token to use is up to each implementation, but typically it needs to talk to
+some kind of network service which in turn may need interaction such as login or entering credit card details.
+This can be done in two ways:
 </p>
-<p>        The authenticator can use a native ui toolkit directly (as its running in the session). To make this work well the
-        flatpak client can (if its has a UI) pass in the <em class="parameter"><code>parent_window</code></em> argument, allowing the authenticator to open its
-        dialog in a way that is correctly parented.
+<p>
+The authenticator can use a native ui toolkit directly (as its running in the session). To make this work well the
+flatpak client can (if its has a UI) pass in the <em class="parameter"><code>parent_window</code></em> argument, allowing the authenticator to open its
+dialog in a way that is correctly parented.
 </p>
-<p>        Alternatively, if the interaction is web-based, then rather than showing a web browser itself it can emit
-        the WebFlow signal on the request object, which lets the flatpak client show a webview embedded in its ui in a
-        way that works best with its user interface.
+<p>
+Alternatively, if the interaction is web-based, then rather than showing a web browser itself it can emit
+the WebFlow signal on the request object, which lets the flatpak client show a webview embedded in its ui in a
+way that works best with its user interface.
 </p>
-<p>        For simple user/password authentication (such as http basic authentication systems) there is also a BasicAuth signal
-        that can be used to get the user to interactively authenticate. This kind of authentication is quite limited, but
-        if used it can allow nice interactive authentication even in the command line case.
+<p>
+For simple user/password authentication (such as http basic authentication systems) there is also a BasicAuth signal
+that can be used to get the user to interactively authenticate. This kind of authentication is quite limited, but
+if used it can allow nice interactive authentication even in the command line case.
 </p>
-<p>        Currently used keys in the <em class="parameter"><code>options</code></em> argument:
-        </p>
+<p>
+Currently used keys in the <em class="parameter"><code>options</code></em> argument:
+</p>
 <div class="variablelist"><table border="0" class="variablelist">
 <colgroup>
 <col align="left" valign="top">
@@ -141,16 +155,16 @@ RequestRefTokens (IN  s           handle_token,
 <tr>
 <td><p><span class="term">xa.oci-registry-uri s</span></p></td>
 <td><p>
-              For OCI remotes this is extracted from the summary file and contains the uri to the OCI registry that
-              contains the images.
-            </p></td>
+For OCI remotes this is extracted from the summary file and contains the uri to the OCI registry that
+contains the images.
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term">no-interation b</span></p></td>
 <td><p>
-              If true, the authenticator should not do any interaction (and fail instead if it needs to). This can be enabled by
-              clients that want to run in the background.
-            </p></td>
+If true, the authenticator should not do any interaction (and fail instead if it needs to). This can be enabled by
+clients that want to run in the background.
+</p></td>
 </tr>
 </tbody>
 </table></div>
@@ -164,35 +178,72 @@ RequestRefTokens (IN  s           handle_token,
 <tbody>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>handle_token</code></em></code>:</span></p></td>
-<td><p>A string that will be used as the last element of the <em class="parameter"><code>handle</code></em>. Must be a valid</p></td>
+<td><p>
+A string that will be used as the last element of the <em class="parameter"><code>handle</code></em>. Must be a valid
+</p></td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN a{sv} <em class="parameter"><code>authenticator_options</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>remote</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>remote_uri</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN a(ssia{sv}) <em class="parameter"><code>refs</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN a{sv} <em class="parameter"><code>options</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>parent_window</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 <tr>
 <td><p><span class="term"><code class="literal">OUT o <em class="parameter"><code>handle</code></em></code>:</span></p></td>
-<td><p></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
 </tr>
 </tbody>
 </table></div>
@@ -205,7 +256,10 @@ RequestRefTokens (IN  s           handle_token,
 <pre class="programlisting">
 version  readable   u
 </pre>
-<p></p>
+<p>
+</p>
+<p>
+</p>
 </div>
 </div>
 </div>

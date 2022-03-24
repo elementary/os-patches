@@ -101,26 +101,38 @@ extract_unix_path_from_dbus_address (const char *address)
   return g_strndup (path, path_end - path);
 }
 
+/* This is part of the X11 protocol, so we can safely hard-code it here */
+#define FamilyInternet6 (6)
+
 #ifdef ENABLE_XAUTH
 static gboolean
-auth_streq (char *str,
-            char *au_str,
-            int   au_len)
+auth_streq (const char *str,
+            const char *au_str,
+            size_t      au_len)
 {
   return au_len == strlen (str) && memcmp (str, au_str, au_len) == 0;
 }
 
 static gboolean
-xauth_entry_should_propagate (Xauth *xa,
-                              char  *hostname,
-                              char  *number)
+xauth_entry_should_propagate (const Xauth *xa,
+                              int          family,
+                              const char  *remote_hostname,
+                              const char  *local_hostname,
+                              const char  *number)
 {
-  /* ensure entry isn't for remote access */
-  if (xa->family != FamilyLocal && xa->family != FamilyWild)
+  /* ensure entry isn't for a different type of access */
+  if (family != FamilyWild && xa->family != family && xa->family != FamilyWild)
+    return FALSE;
+
+  /* ensure entry isn't for remote access, except that if remote_hostname
+   * is specified, then remote access to that hostname is OK */
+  if (xa->family != FamilyWild && xa->family != FamilyLocal &&
+      (remote_hostname == NULL ||
+       !auth_streq (remote_hostname, xa->address, xa->address_length)))
     return FALSE;
 
   /* ensure entry is for this machine */
-  if (xa->family == FamilyLocal && !auth_streq (hostname, xa->address, xa->address_length))
+  if (xa->family == FamilyLocal && !auth_streq (local_hostname, xa->address, xa->address_length))
     {
       /* OpenSUSE inherits the hostname value from DHCP without updating
        * its X11 authentication cookie. The old hostname value can still
@@ -148,7 +160,11 @@ xauth_entry_should_propagate (Xauth *xa,
 }
 
 static void
-write_xauth (char *number, FILE *output)
+write_xauth (int family,
+             const char *remote_host,
+             const char *number,
+             const char *replace_number,
+             FILE       *output)
 {
   Xauth *xa, local_xa;
   char *filename;
@@ -171,13 +187,14 @@ write_xauth (char *number, FILE *output)
       xa = XauReadAuth (f);
       if (xa == NULL)
         break;
-      if (xauth_entry_should_propagate (xa, unames.nodename, number))
+      if (xauth_entry_should_propagate (xa, family, remote_host,
+                                        unames.nodename, number))
         {
           local_xa = *xa;
-          if (local_xa.number)
+          if (local_xa.number != NULL && replace_number != NULL)
             {
-              local_xa.number = "99";
-              local_xa.number_length = 2;
+              local_xa.number = (char *) replace_number;
+              local_xa.number_length = strlen (replace_number);
             }
 
           if (local_xa.family == FamilyLocal &&
@@ -200,14 +217,76 @@ write_xauth (char *number, FILE *output)
 
   fclose (f);
 }
-#endif /* ENABLE_XAUTH */
+#else /* !ENABLE_XAUTH */
+
+/* When not doing Xauth, any distinct values will do, but use the same
+ * ones Xauth does so that we can refer to them in our unit test. */
+#define FamilyLocal (256)
+#define FamilyWild (65535)
+
+#endif /* !ENABLE_XAUTH */
+
+/*
+ * @family: (out) (not optional):
+ * @x11_socket: (out) (not optional):
+ * @display_nr_out: (out) (not optional):
+ */
+gboolean
+flatpak_run_parse_x11_display (const char  *display,
+                               int         *family,
+                               char       **x11_socket,
+                               char       **remote_host,
+                               char       **display_nr_out,
+                               GError     **error)
+{
+  const char *colon;
+  const char *display_nr;
+  const char *display_nr_end;
+
+  /* Use the last ':', not the first, to cope with [::1]:0 */
+  colon = strrchr (display, ':');
+
+  if (colon == NULL)
+    return glnx_throw (error, "No colon found in DISPLAY=%s", display);
+
+  if (!g_ascii_isdigit (colon[1]))
+    return glnx_throw (error, "Colon not followed by a digit in DISPLAY=%s", display);
+
+  display_nr = &colon[1];
+  display_nr_end = display_nr;
+
+  while (g_ascii_isdigit (*display_nr_end))
+    display_nr_end++;
+
+  *display_nr_out = g_strndup (display_nr, display_nr_end - display_nr);
+
+  if (display == colon || g_str_has_prefix (display, "unix:"))
+    {
+      *family = FamilyLocal;
+      *x11_socket = g_strdup_printf ("/tmp/.X11-unix/X%s", *display_nr_out);
+    }
+  else if (display[0] == '[' && display[colon - display - 1] == ']')
+    {
+      *family = FamilyInternet6;
+      *remote_host = g_strndup (display + 1, colon - display - 2);
+    }
+  else
+    {
+      *family = FamilyWild;
+      *remote_host = g_strndup (display, colon - display);
+    }
+
+  return TRUE;
+}
 
 static void
-flatpak_run_add_x11_args (FlatpakBwrap *bwrap,
-                          gboolean      allowed)
+flatpak_run_add_x11_args (FlatpakBwrap         *bwrap,
+                          gboolean              allowed,
+                          FlatpakContextShares  shares)
 {
   g_autofree char *x11_socket = NULL;
   const char *display;
+  g_autoptr(GError) local_error = NULL;
 
   /* Always cover /tmp/.X11-unix, that way we never see the host one in case
    * we have access to the host /tmp. If you request X access we'll put the right
@@ -243,22 +322,62 @@ flatpak_run_add_x11_args (FlatpakBwrap *bwrap,
   g_debug ("Allowing x11 access");
 
   display = g_getenv ("DISPLAY");
-  if (display && display[0] == ':' && g_ascii_isdigit (display[1]))
+
+  if (display != NULL)
     {
-      const char *display_nr = &display[1];
-      const char *display_nr_end = display_nr;
-      g_autofree char *d = NULL;
+      g_autofree char *remote_host = NULL;
+      g_autofree char *original_display_nr = NULL;
+      const char *replace_display_nr = NULL;
+      int family = -1;
 
-      while (g_ascii_isdigit (*display_nr_end))
-        display_nr_end++;
+      if (!flatpak_run_parse_x11_display (display, &family, &x11_socket,
+                                          &remote_host, &original_display_nr,
+                                          &local_error))
+        {
+          g_warning ("%s", local_error->message);
+          flatpak_bwrap_unset_env (bwrap, "DISPLAY");
+          return;
+        }
 
-      d = g_strndup (display_nr, display_nr_end - display_nr);
-      x11_socket = g_strdup_printf ("/tmp/.X11-unix/X%s", d);
+      g_assert (original_display_nr != NULL);
 
-      flatpak_bwrap_add_args (bwrap,
-                              "--ro-bind", x11_socket, "/tmp/.X11-unix/X99",
-                              NULL);
-      flatpak_bwrap_set_env (bwrap, "DISPLAY", ":99.0", TRUE);
+      if (x11_socket != NULL
+          && g_file_test (x11_socket, G_FILE_TEST_EXISTS))
+        {
+          flatpak_bwrap_add_args (bwrap,
+                                  "--ro-bind", x11_socket, "/tmp/.X11-unix/X99",
+                                  NULL);
+          flatpak_bwrap_set_env (bwrap, "DISPLAY", ":99.0", TRUE);
+          replace_display_nr = "99";
+        }
+      else if ((shares & FLATPAK_CONTEXT_SHARED_NETWORK) == 0)
+        {
+          /* If DISPLAY is for example :42 but /tmp/.X11-unix/X42
+           * doesn't exist, then the only way this is going to work
+           * is if the app can connect to abstract socket
+           * @/tmp/.X11-unix/X42 or to TCP port localhost:6042,
+           * either of which requires a shared network namespace.
+           *
+           * Alternatively, if DISPLAY is othermachine:23, then we
+           * definitely need access to TCP port othermachine:6023. */
+          if (x11_socket != NULL)
+            g_warning ("X11 socket %s does not exist in filesystem.",
+                       x11_socket);
+          else
+            g_warning ("Remote X11 display detected.");
+
+          g_warning ("X11 access will require --share=network permission.");
+        }
+      else if (x11_socket != NULL)
+        {
+          g_warning ("X11 socket %s does not exist in filesystem, "
+                     "trying to use abstract socket instead.",
+                     x11_socket);
+        }
+      else
+        {
+          flatpak_debug2 ("Assuming --share=network gives access to remote X11");
+        }
 
 #ifdef ENABLE_XAUTH
       g_auto(GLnxTmpfile) xauth_tmpf  = { 0, };
@@ -274,7 +393,8 @@ flatpak_run_add_x11_args (FlatpakBwrap *bwrap,
                 {
                   static const char dest[] = "/run/flatpak/Xauthority";
 
-                  write_xauth (d, output);
+                  write_xauth (family, remote_host, original_display_nr,
+                               replace_display_nr, output);
                   flatpak_bwrap_add_args_data_fd (bwrap, "--ro-bind-data", tmp_fd, dest);
 
                   flatpak_bwrap_set_env (bwrap, "XAUTHORITY", dest, TRUE);
@@ -308,7 +428,10 @@ flatpak_run_add_wayland_args (FlatpakBwrap *bwrap)
   if (!wayland_display)
     wayland_display = "wayland-0";
 
-  wayland_socket = g_build_filename (user_runtime_dir, wayland_display, NULL);
+  if (wayland_display[0] == '/')
+    wayland_socket = g_strdup (wayland_display);
+  else
+    wayland_socket = g_build_filename (user_runtime_dir, wayland_display, NULL);
 
   if (!g_str_has_prefix (wayland_display, "wayland-") ||
       strchr (wayland_display, '/') != NULL)
@@ -578,10 +701,12 @@ flatpak_run_get_pulseaudio_server (void)
 /*
  * Parse a PulseAudio server string, as documented on
  * https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/ServerStrings/.
- * Returns the first supported server address, or NULL if none are supported.
+ * Returns the first supported server address, or NULL if none are supported,
+ * or NULL with @remote set if @value points to a remote server.
  */
 static char *
-flatpak_run_parse_pulse_server (const char *value)
+flatpak_run_parse_pulse_server (const char *value,
+                                gboolean   *remote)
 {
   g_auto(GStrv) servers = g_strsplit (value, " ", 0);
   gsize i;
@@ -606,7 +731,11 @@ flatpak_run_parse_pulse_server (const char *value)
       if (server[0] == '/')
         return g_strdup (server);
 
-      /* TODO: Support TCP connections? */
+      if (g_str_has_prefix (server, "tcp:"))
+        {
+          *remote = TRUE;
+          return NULL;
+        }
     }
 
   return NULL;
@@ -721,16 +850,19 @@ flatpak_run_get_pulse_runtime_dir (void)
 }
 
 static void
-flatpak_run_add_pulseaudio_args (FlatpakBwrap *bwrap)
+flatpak_run_add_pulseaudio_args (FlatpakBwrap         *bwrap,
+                                 FlatpakContextShares  shares)
 {
   g_autofree char *pulseaudio_server = flatpak_run_get_pulseaudio_server ();
   g_autofree char *pulseaudio_socket = NULL;
   g_autofree char *pulse_runtime_dir = flatpak_run_get_pulse_runtime_dir ();
+  gboolean remote = FALSE;
 
   if (pulseaudio_server)
-    pulseaudio_socket = flatpak_run_parse_pulse_server (pulseaudio_server);
+    pulseaudio_socket = flatpak_run_parse_pulse_server (pulseaudio_server,
+                                                        &remote);
 
-  if (!pulseaudio_socket)
+  if (pulseaudio_socket == NULL && !remote)
     {
       pulseaudio_socket = g_build_filename (pulse_runtime_dir, "native", NULL);
 
@@ -738,7 +870,7 @@ flatpak_run_add_pulseaudio_args (FlatpakBwrap *bwrap)
         g_clear_pointer (&pulseaudio_socket, g_free);
     }
 
-  if (!pulseaudio_socket)
+  if (pulseaudio_socket == NULL && !remote)
     {
       pulseaudio_socket = realpath ("/var/run/pulse/native", NULL);
 
@@ -748,7 +880,18 @@ flatpak_run_add_pulseaudio_args (FlatpakBwrap *bwrap)
 
   flatpak_bwrap_unset_env (bwrap, "PULSE_SERVER");
 
-  if (pulseaudio_socket && g_file_test (pulseaudio_socket, G_FILE_TEST_EXISTS))
+  if (remote)
+    {
+      if ((shares & FLATPAK_CONTEXT_SHARED_NETWORK) == 0)
+        {
+          g_warning ("Remote PulseAudio server configured.");
+          g_warning ("PulseAudio access will require --share=network permission.");
+        }
+
+      g_debug ("Using remote PulseAudio server \"%s\"", pulseaudio_server);
+      flatpak_bwrap_set_env (bwrap, "PULSE_SERVER", pulseaudio_server, TRUE);
+    }
+  else if (pulseaudio_socket && g_file_test (pulseaudio_socket, G_FILE_TEST_EXISTS))
     {
       static const char sandbox_socket_path[] = "/run/flatpak/pulse/native";
       static const char pulse_server[] = "unix:/run/flatpak/pulse/native";
@@ -776,7 +919,7 @@ flatpak_run_add_pulseaudio_args (FlatpakBwrap *bwrap)
    * since we don't want to add more permissions for something we plan to replace with
    * portals/pipewire going forward we reinterpret pulseaudio to also mean ALSA.
    */
-  if (g_file_test ("/dev/snd", G_FILE_TEST_IS_DIR))
+  if (!remote && g_file_test ("/dev/snd", G_FILE_TEST_IS_DIR))
     flatpak_bwrap_add_args (bwrap, "--dev-bind", "/dev/snd", "/dev/snd", NULL);
 }
 
@@ -1624,7 +1767,7 @@ flatpak_run_add_environment_args (FlatpakBwrap    *bwrap,
   else
     allow_x11 = (context->sockets & FLATPAK_CONTEXT_SOCKET_X11) != 0;
 
-  flatpak_run_add_x11_args (bwrap, allow_x11);
+  flatpak_run_add_x11_args (bwrap, allow_x11, context->shares);
 
   if (context->sockets & FLATPAK_CONTEXT_SOCKET_SSH_AUTH)
     {
@@ -1634,7 +1777,7 @@ flatpak_run_add_environment_args (FlatpakBwrap    *bwrap,
   if (context->sockets & FLATPAK_CONTEXT_SOCKET_PULSEAUDIO)
     {
       g_debug ("Allowing pulseaudio access");
-      flatpak_run_add_pulseaudio_args (bwrap);
+      flatpak_run_add_pulseaudio_args (bwrap, context->shares);
     }
 
   if (context->sockets & FLATPAK_CONTEXT_SOCKET_PCSC)
@@ -1698,6 +1841,18 @@ static const ExportData default_exports[] = {
   {"PERLLIB", NULL},
   {"PERL5LIB", NULL},
   {"XCURSOR_PATH", NULL},
+  {"GST_PLUGIN_PATH_1_0", NULL},
+  {"GST_REGISTRY", NULL},
+  {"GST_REGISTRY_1_0", NULL},
+  {"GST_PLUGIN_PATH", NULL},
+  {"GST_PLUGIN_SYSTEM_PATH", NULL},
+  {"GST_PLUGIN_SCANNER", NULL},
+  {"GST_PLUGIN_SCANNER_1_0", NULL},
+  {"GST_PLUGIN_SYSTEM_PATH_1_0", NULL},
+  {"GST_PRESET_PATH", NULL},
+  {"GST_PTP_HELPER", NULL},
+  {"GST_PTP_HELPER_1_0", NULL},
+  {"GST_INSTALL_PLUGINS_HELPER", NULL},
 };
 
 static const ExportData no_ld_so_cache_exports[] = {
