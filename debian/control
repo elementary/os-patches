@@ -1,0 +1,108 @@
+Source: python-apt
+Section: python
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: APT Development Team <deity@lists.debian.org>
+Uploaders: Michael Vogt <mvo@debian.org>, Julian Andres Klode <jak@debian.org>
+Rules-Requires-Root: no
+Standards-Version: 4.5.0
+Build-Depends: apt (>= 1.0.9.4),
+               apt-utils <!nocheck>,
+               debhelper-compat (= 12),
+               dh-python,
+               distro-info-data <!nocheck>,
+               fakeroot,
+               libapt-pkg-dev (>= 1.9.11~),
+               python3-all (>= 3.3),
+               python3-all-dev (>= 3.3),
+               python3-all-dbg (>= 3.3),
+               python3-distutils,
+               python3-distutils-extra (>= 2.0),
+               python3-setuptools,
+               python3-sphinx (>= 0.5),
+               gnupg <!nocheck>,
+               dirmngr <!nocheck> | gnupg (<< 2) <!nocheck>,
+               pycodestyle <!nocheck>,
+               pyflakes3 <!nocheck>,
+Vcs-Git: https://salsa.debian.org/apt-team/python-apt.git
+Vcs-Browser: https://salsa.debian.org/apt-team/python-apt
+
+Package: python-apt-doc
+Architecture: all
+Section: doc
+Depends: libjs-jquery, libjs-underscore, ${misc:Depends}, ${sphinxdoc:Depends}
+Enhances: python-apt
+Replaces: python-apt (<< 0.7.94)
+Description: Python interface to libapt-pkg (API documentation)
+ The apt_pkg Python interface will provide full access to the internal
+ libapt-pkg structures allowing Python programs to easily perform a
+ variety of functions.
+ .
+ This package contains the API documentation of python-apt.
+
+Package: python-apt-dev
+Architecture: all
+Depends: python3-apt (>= ${source:Version}), libapt-pkg-dev (>= 0.7.10),
+         ${misc:Depends}
+Recommends: python3-dev
+Description: Python interface to libapt-pkg (development files)
+ The apt_pkg Python interface will provide full access to the internal
+ libapt-pkg structures allowing Python programs to easily perform a
+ variety of functions.
+ .
+ This package contains the header files needed to use python-apt objects from
+ C++ applications.
+
+Package: python-apt-common
+Architecture: all
+Depends: ${misc:Depends}
+Enhances: python-apt, python3-apt
+Breaks: python-apt (<< 0.7.98+nmu1)
+Replaces: python-apt (<< 0.7.98+nmu1)
+Multi-Arch: foreign
+Description: Python interface to libapt-pkg (locales)
+ The apt_pkg Python interface will provide full access to the internal
+ libapt-pkg structures allowing Python programs to easily perform a
+ variety of functions.
+ .
+ This package contains locales.
+
+Package: python3-apt
+Architecture: any
+Multi-Arch: allowed
+Depends: ${python3:Depends}, ${shlibs:Depends}, ${misc:Depends}, python-apt-common, distro-info-data
+Recommends: lsb-release, iso-codes
+Provides: ${python3:Provides}
+Suggests: python3-apt-dbg, python-apt-doc, apt
+Breaks: python-apt (<< 0.7.98+nmu1),
+        apt-xapian-index (<< 0.51~),
+        kthresher (<= 1.4.0-1)
+Replaces: python-apt (<< 0.7.98+nmu1)
+Description: Python 3 interface to libapt-pkg
+ The apt_pkg Python 3 interface will provide full access to the internal
+ libapt-pkg structures allowing Python 3 programs to easily perform a
+ variety of functions, such as:
+ .
+  - Access to the APT configuration system
+  - Access to the APT package information database
+  - Parsing of Debian package control files, and other files with a
+    similar structure
+ .
+ The included 'aptsources' Python interface provides an abstraction of
+ the sources.list configuration on the repository and the distro level.
+
+Package: python3-apt-dbg
+Architecture: any
+Multi-Arch: allowed
+Section: debug
+Breaks: python-apt (<< 0.7.98+nmu1)
+Replaces: python-apt (<< 0.7.98+nmu1)
+Depends: ${python3:Depends}, python3-apt (= ${binary:Version}), ${shlibs:Depends},
+         ${misc:Depends}
+Provides: ${python3:Provides}
+Description: Python 3 interface to libapt-pkg (debug extension)
+ The apt_pkg Python 3 interface will provide full access to the internal
+ libapt-pkg structures allowing Python 3 programs to easily perform a
+ variety of functions.
+ .
+ This package contains the extension built for the Python debug interpreter.

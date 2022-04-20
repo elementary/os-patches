@@ -1,0 +1,95 @@
+_ChangelogURI: http://packages.debian.org/changelogs/pool/%s/%s/%s/%s_%s/changelog
+X-Exclude-Suites: buzz, rex, bo, hamm, slink, potato, woody, experimental
+
+Suite: {series}
+RepositoryType: deb
+BaseURI: http://deb.debian.org/debian/
+MatchURI: ((http|ftp)[0-9]*\.([a-z]*\.){{0,1}}|deb\.|httpredir\.)debian\.org
+MirrorsFile: Debian.mirrors
+_Description: Debian {version} '{codename}'
+Component: main
+_CompDescription: Officially supported
+Component: contrib
+_CompDescription: DFSG-compatible Software with Non-Free Dependencies
+Component: non-free
+_CompDescription: Non-DFSG-compatible Software
+
+Suite: {series}-security
+RepositoryType: deb
+BaseURI: http://security.debian.org/
+MatchURI: security\.debian\.org
+ParentSuite: {series}
+_Description: Security updates
+X-Version: ge 11
+
+Suite: {series}/updates
+RepositoryType: deb
+BaseURI: http://security.debian.org/
+MatchURI: security\.debian\.org
+ParentSuite: {series}
+_Description: Security updates
+X-Version: le 10
+
+Suite: {series}-updates
+RepositoryType: deb
+ParentSuite: {series}
+_Description: Recommended updates
+X-Version: ge 7
+
+Suite: {series}-proposed-updates
+RepositoryType: deb
+ParentSuite: {series}
+_Description: Proposed updates
+
+Suite: stable
+RepositoryType: deb
+BaseURI: http://http.us.debian.org/debian/
+MatchURI: ftp[0-9]*\.([a-z]*\.){0,1}debian\.org
+MirrorsFile: Debian.mirrors
+_Description: Debian current stable release
+Component: main
+_CompDescription: Officially supported
+Component: contrib
+_CompDescription: DFSG-compatible Software with Non-Free Dependencies
+Component: non-free
+_CompDescription: Non-DFSG-compatible Software
+
+Suite: testing
+RepositoryType: deb
+BaseURI: http://http.us.debian.org/debian/
+MatchURI: ftp[0-9]*\.([a-z]*\.){0,1}debian\.org
+MirrorsFile: Debian.mirrors
+_Description: Debian testing
+Component: main
+_CompDescription: Officially supported
+Component: contrib
+_CompDescription: DFSG-compatible Software with Non-Free Dependencies
+Component: non-free
+_CompDescription: Non-DFSG-compatible Software
+
+Suite: sid
+RepositoryType: deb
+BaseURI: http://http.us.debian.org/debian/
+MatchURI: ftp[0-9]*\.([a-z]*\.){0,1}debian\.org
+MirrorsFile: Debian.mirrors
+_Description: Debian 'Sid' (unstable)
+Component: main
+_CompDescription: Officially supported
+Component: contrib
+_CompDescription: DFSG-compatible Software with Non-Free Dependencies
+Component: non-free
+_CompDescription: Non-DFSG-compatible Software
+
+Suite: unstable
+RepositoryType: deb
+BaseURI: http://http.us.debian.org/debian/
+MatchURI: ftp[0-9]*\.([a-z]*\.){0,1}debian\.org
+MirrorsFile: Debian.mirrors
+_Description: Debian 'Sid' (unstable)
+Component: main
+_CompDescription: Officially supported
+Component: contrib
+_CompDescription: DFSG-compatible Software with Non-Free Dependencies
+Component: non-free
+_CompDescription: Non-DFSG-compatible Software
+
