@@ -1,3 +1,13 @@
+bash (4.4.18-2ubuntu1.3) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: privilege gain via setuid
+    - debian/patches/CVE-2019-18276.patch: replace the use of
+      setuid and setgid when possible with setresuid and setresgid,
+      respectively.
+    - CVE-2019-18276
+
+ -- David Fernandez Gonzalez <david.fernandezgonzalez@canonical.com>  Mon, 18 Apr 2022 17:08:18 +0200
+
 bash (4.4.18-2ubuntu1.2) bionic; urgency=medium
 
   * d/p/bash44-020.diff: Add fix for hang on 'wait' statement
