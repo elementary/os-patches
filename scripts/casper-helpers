@@ -1,0 +1,439 @@
+## Casper helper functions, used by casper on boot and by casper-snapshot
+
+if [ "${BUILD_SYSTEM}" = "Debian" ] || [ "${BUILD_SYSTEM}" = "Ubuntu" ]; then
+    MP_QUIET="-q"
+else
+    MP_QUIET=""
+fi
+
+if [ ! -x "/bin/fstype" ]; then
+    # klibc not in path -> not in initramfs
+    export PATH="${PATH}:/usr/lib/klibc/bin"
+fi
+
+sys2dev() {
+    sysdev=${1#/sys}
+    echo "/dev/$(udevadm info -q name -p ${sysdev} 2>/dev/null|| echo ${sysdev##*/})"
+}
+
+subdevices() {
+    sysblock=$1
+    r=""
+    # When booting off a "hybrid image" you can mount the whole device
+    # or the first partition (which has offset 0). It's generally
+    # better to mount the partition if we can so that we can mount
+    # other partitions on the device (e.g. the persistence partition),
+    # so try those first.
+    for dev in "${sysblock}"/* "${sysblock}"; do
+        if [ -e "${dev}/dev" ]; then
+            r="${r} ${dev}"
+        fi
+    done
+    echo ${r}
+}
+
+is_supported_fs () {
+    # FIXME: do something better like the scan of supported filesystems
+    fstype="${1}"
+    case ${fstype} in
+        vfat|iso9660|udf|ext2|ext3|ext4|btrfs|ntfs)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+get_fstype() {
+    local FSTYPE
+    local FSSIZE
+    eval $(fstype < $1)
+    if [ "$FSTYPE" != "unknown" ]; then
+        echo $FSTYPE
+        return 0
+    fi
+    /sbin/blkid -s TYPE -o value $1 2>/dev/null
+}
+
+where_is_mounted() {
+    device=$1
+    if grep -q "^$device " /proc/mounts; then
+        mountpoint="$(grep "^$device " /proc/mounts | awk '{print $2; exit}')"
+        grep "^$device " /proc/mounts | read d mountpoint rest
+        echo $mountpoint
+        return 0
+    fi
+    return 1
+}
+
+what_is_mounted() {
+    cat /proc/mounts | awk -v P=$1 '$2 == P { print $1 }'
+}
+
+lastline() {
+    while read lines ; do
+        line=${lines}
+    done
+    echo "${line}"
+}
+
+base_path ()
+{
+    testpath="${1}"
+    mounts="$(awk '{print $2}' /proc/mounts)"
+    testpath="$(busybox realpath ${testpath})"
+
+    while true ; do
+        if echo "${mounts}" | grep -qs "^${testpath}" ; then
+            set -- `echo "${mounts}" | grep "^${testpath}" | lastline`
+            echo ${1}
+            break
+        else
+            testpath=`dirname $testpath`
+        fi
+    done
+}
+
+fs_size ()
+{
+    # Returns used/free fs kbytes + 5% more
+    # You could pass a block device as $1 or the mount point as $2
+
+    dev="${1}"
+    mountp="${2}"
+    used="${3}"
+
+    if [ -z "${mountp}" ]; then
+        mountp=$(where_is_mounted "${dev}")
+        if [ "$?" -gt 0 ]; then
+            mountp="/mnt/tmp_fs_size"
+            mkdir -p "${mountp}"
+            mount -t $(get_fstype "${dev}") -o ro "${dev}" "${mountp}"
+            doumount=1
+        fi
+    fi
+
+    if [ "${used}" = "used" ]; then
+        size=$(du -ks ${mountp} | cut -f1)
+        size=$(expr ${size} + ${size} / 20 ) # FIXME: 5% more to be sure
+    else
+        # free space
+        size="$(df -k | grep -s ${mountp} | awk '{print $4}')"
+    fi
+
+    if [ -n "${doumount}" ]; then
+        umount "${mountp}"
+        rmdir "${mountp}"
+    fi
+    echo "${size}"
+}
+
+setup_loop() {
+    local fspath=$1
+    local module=$2
+    local pattern=$3
+    local offset=$4
+
+    modprobe ${MP_QUIET} -b "$module"
+    udevadm settle
+
+    if [ "$module" = loop ]; then
+        if [ ! -e /dev/loop0 ]; then
+            # temporary workaround for kernel bug
+            for i in 0 1 2 3 4 5 6 7; do
+                mknod "/dev/loop$i" b 7 "$i" || true
+            done
+        fi
+
+        dev="$(losetup -f)"
+        if [ "$dev" ]; then
+            if [ -n "$offset" ]; then
+                losetup -o "$offset" "$dev" "$fspath"
+            else
+                losetup "$dev" "$fspath"
+            fi
+            echo "$dev"
+            return 0
+        else
+            panic "No loop devices available"
+        fi
+    else
+        for loopdev in $pattern; do
+            if [ "$(cat $loopdev/size)" -eq 0 ]; then
+                dev=$(sys2dev "${loopdev}")
+                if [ -n "$offset" ]; then
+                    losetup -o "$offset" "$dev" "$fspath"
+                else
+                    losetup "$dev" "$fspath"
+                fi
+                echo "$dev"
+                return 0
+            fi
+        done
+        panic "No loop devices available"
+    fi
+}
+
+# casper itself no longer uses this function, but it's used by third parties
+# in installers: https://bugs.launchpad.net/ubuntu/+source/casper/+bug/1845535
+#
+# Returns 0 on success
+# panics if remount- or bind-mount fails
+# returns 1 on failure otherwise
+try_mount ()
+{
+    dev="${1}"
+    mountp="${2}"
+    opts="${3}"
+
+    if where_is_mounted ${dev} > /dev/null; then
+        if [ "${opts}" != "ro" ]; then
+            mount -o remount,"${opts}" ${dev} $(where_is_mounted ${dev}) || panic "Remounting failed"
+            return 0
+        fi
+        mount -o bind $(where_is_mounted ${dev}) ${mountp} || panic "Cannot bind-mount"
+        return 0
+    else
+        mount -t $(get_fstype "${dev}") -o "${opts}" "${dev}" "${mountp}"
+        ret=$?
+        if [ $ret -ne 0 ]; then
+            log_warning_msg "Cannot mount ${dev} on ${mountp}"
+            return 1
+        fi
+        return 0
+    fi
+}
+
+find_cow_device() {
+    pers_label="${1}"
+
+    udevadm settle
+
+    if [ -e "/dev/disk/by-label/${pers_label}" ]; then
+        echo /dev/disk/by-label/${pers_label}
+        return 0
+    fi
+
+    cow_backing="/${pers_label}-backing"
+
+    if [ -z "${PERSISTENT_PATH}" ]; then
+        pers_fpath=${pers_label}
+    else
+        pers_fpath=${PERSISTENT_PATH}/${pers_label}
+    fi
+
+    for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v loop); do
+	# do not ever probe floppies, probing nonexistant ones delays the boot to half an hour and longer
+        n=${sysblock##*/}
+        if [ "${n#fd}" != "$n" ]; then
+            continue
+        fi
+        for dev in $(subdevices "${sysblock}"); do
+            devname=$(sys2dev "${dev}")
+            # Do not add any filesystem types here that might be able to
+            # mount a journalled filesystem and replay the journal. Doing so
+            # will cause data loss when a live CD is booted on a system
+            # where filesystems are in use by hibernated operating systems.
+            case "$(get_fstype ${devname})" in
+                vfat)
+                    :;;
+                *)
+                    continue;;
+            esac
+            where_mounted=$(where_is_mounted "${devname}")
+            if [ $? -eq 0 ]; then
+                if [ -e "${where_mounted}/${pers_fpath}" ]; then
+                    mount -o remount,rw ${devname} ${where_mounted} || continue
+                    echo $(setup_loop "${where_mounted}/${pers_fpath}" "loop" "/sys/block/loop*")
+                fi
+            else
+                mkdir -p "${cow_backing}"
+                mount -w "${devname}" "${cow_backing}" || continue
+                if [ -e "${cow_backing}/${pers_fpath}" ]; then
+                    echo $(setup_loop "${cow_backing}/${pers_fpath}" "loop" "/sys/block/loop*")
+                    return 0
+                else
+                    umount ${cow_backing}
+                fi
+            fi
+        done
+    done
+}
+
+root_persistence=
+
+# The default persistence label in 20.04+ is 'writable' but if there
+# is no filesystem with that label and there is one with the old
+# 'casper-rw' label, we use that instead.
+#
+# We delay checking for the writable/casper-rw partitions for as long
+# as possible as it can take a long time for the block devices to show
+# up.
+root_persistence_label () {
+    if [ -z "$root_persistence" ]; then
+        if [ ! -e "/dev/disk/by-label/writable" ] && [ -e "/dev/disk/by-label/casper-rw" ]; then
+            root_persistence=casper-rw
+        else
+            root_persistence=writable
+        fi
+    fi
+    echo $root_persistence
+}
+
+# find_or_create_persistent_partition $dev looks for a partition with
+# the label $(root_persistence_label) (usually writable). If it does
+# not find one, and there is at least 100MiB space on $dev, it creates
+# one there.
+find_or_create_persistent_partition () {
+    local DEVICE newpartno maxend start sectorsize size
+    DEVICE=$1
+
+    udevadm settle
+
+    if [ -e "/dev/disk/by-label/$(root_persistence_label)" ]; then
+        return
+    fi
+    newpartno=$(sfdisk -l $DEVICE -q | wc -l)
+    maxend=$(sfdisk $DEVICE -l -q -o end | tail -n +2 | sort -n | tail -n1)
+    start=$(((maxend + 1 + 0xfff) & ~0xfff))
+    sectorsize=$(blockdev --getss $DEVICE)
+    size=$(blockdev --getsize64 $DEVICE)
+    # Do not bother creating a partition less than 100MiB
+    if [ $((size - start*sectorsize)) -lt $((100*1024*1024)) ]; then
+        return
+    fi
+    echo "start=$start" | sfdisk --no-reread -q $DEVICE -a || return
+
+    # If our partition table is GPT, we have a protective MBR; ensure that
+    # after adding a new partition, if there is a protective MBR, we
+    # recreate a bootable partition, the same as xorriso does, for
+    # compatibility. (GRUB doesn't actually care which partition is marked
+    # bootable, but some BIOSes care that it exists).
+    if sfdisk -d $DEVICE | grep -q 'label: gpt'; then
+        # detection of dash vs busybox/bash
+        if [ "$(echo -e foo)" = "-e foo" ]; then
+            escape_arg=""
+        else
+            escape_arg=-e
+        fi
+        echo $escape_arg -n '\0200\00\01\00\00\00\01\00\00\00\00\00\01\00\00\00' \
+        | dd of=$DEVICE bs=1 seek=462 conv=notrunc count=16
+    fi
+    for d in ${DEVICE}$newpartno ${DEVICE}p$newpartno ${DEVICE}-part$newpartno; do
+        if [ -e $d ]; then
+            mkfs.ext4 -q -L "$(root_persistence_label)" -F $d
+            break
+        fi
+    done
+    udevadm trigger
+    udevadm settle
+}
+
+find_files()
+# return the first of $filenames found on vfat and ext2 devices
+# FIXME: merge with above function
+{
+    filenames="${1}"
+    for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v loop); do
+        for dev in $(subdevices "${sysblock}"); do
+            devname=$(sys2dev "${dev}")
+            case "$(get_fstype ${devname})" in
+                vfat|ext2)
+                    :;;
+                *)
+                    continue;;
+            esac
+            doumount=
+            mntpoint=$(where_is_mounted "${devname}")
+            if [ $? -ne 0 ]; then
+                doumount=1
+                mntpoint="/snap-backing"
+                mkdir -p "${mntpoint}"
+                mount -o ro "${devname}" "${mntpoint}"
+            fi
+            for filename in ${filenames}; do
+                if [ -e "${mntpoint}/${filename}" ]; then
+                    echo "${devname} ${mntpoint} ${filename}"
+                    return 0
+                fi
+            done
+            if [ -n "${doumount}" ]; then
+                umount "${mntpoint}"
+            fi
+        done
+    done
+}
+
+# Helpers originally from lupin-helpers
+is_supported_fs(){
+    [ -z "${1}" ] && return 1
+    case ${1} in
+        ext2|ext3|ext4|xfs|jfs|reiserfs|vfat|ntfs|iso9660|btrfs)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+wait_for_devs(){
+    if [ -e /dev/.initramfs/lupin-waited-for-devs ]; then
+        return
+    fi
+    [ "$quiet" != "y" ] && log_begin_msg "...waiting for devs..."
+    udevadm trigger --subsystem-match=block
+    udevadm settle
+    #TBD, modprobe on demand?
+    modprobe ext3
+    modprobe ext4
+    modprobe reiserfs
+    modprobe xfs
+    modprobe jfs
+    modprobe vfat
+    modprobe fuse
+    [ "$quiet" != "y" ] && log_end_msg "...devs loaded..."
+    touch /dev/.initramfs/lupin-waited-for-devs
+}
+
+find_path()
+{
+    local path="${1}"
+    # must match find_path_cleanup
+    local default_mountpoint="${2:-/tmpmountpoint}"
+    local mountoptions="${3:-ro}"
+    local mountpoint=
+    local dev devname devfstype
+    local trial_number
+    FOUNDDEV=
+    FOUNDPATH=
+    [ -z "${path}" ] && return 1
+    wait_for_devs
+    mkdir -p "${default_mountpoint}"
+    for trial_number in 1 2 3; do
+        [ $trial_number -gt 1 ] && sleep 3
+        for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v /ram | grep -v /loop | grep -v /fd); do
+            for dev in $(subdevices "${sysblock}"); do
+                devname=$(sys2dev "${dev}")
+                devfstype="$(get_fstype ${devname})"
+                if is_supported_fs "${devfstype}" ; then
+                                    #if device is already mounted, do not remount
+                    if grep -q "^${devname} " /proc/mounts; then
+                        mountpoint=$(grep "^${devname} " /proc/mounts|cut -d ' ' -f 2)
+                        unmount=false
+                    else
+                        mountpoint="${default_mountpoint}"
+                        try_mount "$devname" "$mountpoint" "$mountoptions" || continue
+                        unmount=true
+                    fi
+                    if [ -e "${mountpoint}${path}" ]; then
+                        FOUNDDEV="${devname}"
+                        FOUNDPATH="${mountpoint}${path}"
+                        return 0
+                    fi
+                    [ "${unmount}" = "true" ] && umount ${mountpoint} 2> /dev/null || true
+                fi
+            done
+        done
+    done
+    return 1
+}
+
+

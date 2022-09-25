@@ -1,0 +1,33 @@
+#!/bin/sh
+
+PREREQ=""
+DESCRIPTION="Configuring pollinate..."
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+. /scripts/casper-functions
+
+log_begin_msg "$DESCRIPTION"
+
+if [ ! -d /root/etc/pollinate ] || [ ! -e /root/cdrom/.disk/info ]; then
+    exit 0;
+fi
+
+SERIAL=$(sed -e 's/.*(\(.*\))$/\1/' /root/cdrom/.disk/info)
+
+if [ -n "$SERIAL" ]; then
+    echo live/$SERIAL >> /root/etc/pollinate/add-user-agent
+fi
+
+log_end_msg

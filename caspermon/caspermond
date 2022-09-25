@@ -1,0 +1,9 @@
+#!/bin/sh
+
+STATEFILE=/var/run/caspermond/status.casper-snapshot
+
+while true; do
+    dmsetup status /dev/mapper/casper-snapshot > $STATEFILE.new
+    mv $STATEFILE.new $STATEFILE
+    sleep 60
+done

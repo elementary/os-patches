@@ -1,0 +1,28 @@
+#!/bin/sh
+# Fix for LP#1824177
+
+PREREQ=""
+DESCRIPTION="Overriding 71-nvidia.rules..."
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+. /scripts/casper-functions
+
+log_begin_msg "$DESCRIPTION"
+
+mkdir -p /run/udev/rules.d/
+touch /run/udev/rules.d/71-nvidia.rules
+
+log_end_msg
+

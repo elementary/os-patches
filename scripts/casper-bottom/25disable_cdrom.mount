@@ -1,0 +1,46 @@
+#!/bin/sh
+
+PREREQ=""
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+# Disable bounding mount points to sr0 device
+# As there is no way to make sr0 be active&plugged on cold boot
+# Thus systemd always tries to unmount cdrom.mount even before udev
+# coldplug got processed
+sed -i '/SYSTEMD_MOUNT_DEVICE_BOUND/d' /lib/udev/rules.d/60-cdrom_id.rules /root/lib/udev/rules.d/60-cdrom_id.rules
+
+# Correct udevadm settings
+[ -e /dev/sr0 ] && udevadm trigger /dev/sr0
+# Make cdrom.mount not have defaultdependencies, thus it should not be
+# unmounted on shutdown. And make sure that it is ordered after
+# casper.service, to not be unmounted before casper service shows the
+# RIM & Reboot message.
+
+## Seems to fail autopkgtests, revert back to ln -s /dev/null for now.
+# And we specify BindsTo= to nothing, again, despite udev rule, as it
+# is not enough on the server iso for some reason. Weird.
+#cat <<EOF >/root/lib/systemd/system/cdrom.mount
+#[Unit]
+#DefaultDependencies=no
+#After=casper.service
+#BindsTo=
+
+#[Mount]
+#Where=/cdrom
+#What=/dev/sr0
+#LazyUnmount=yes
+#EOF
+
+ln -s /dev/null /root/lib/systemd/system/cdrom.mount

@@ -1,0 +1,55 @@
+#!/bin/sh
+
+PREREQ=""
+DESCRIPTION="Setting up netowrking for ubuntu-server..."
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+. /scripts/casper-functions
+
+case "$USERNAME" in
+    ubuntu-server)
+    ;;
+    *)
+        exit 0
+        ;;
+esac
+
+log_begin_msg "$DESCRIPTION"
+
+# This hook should not exist
+
+# subiquity images can have ephemeral networking setup via kernel
+# cmdline with vlan, which also generate ipconfig status files and
+# netplan.yaml. But they also have cloud-init trying to (re-)parse all
+# of those. And subiquity also tries to reparse them.
+#
+# Currently work is in progress in cloud-init to reconcile all of
+# this, in the meantime, we try to hack around all of them, by
+# creating a sane state of things.
+
+# Move netplan configs, to be become cloud-init cloud.cfg network config
+# cloud-init will later write it out to /etc/netplan/
+for f in /run/netplan/*.yaml
+do
+    [ -f "$f" ] || continue
+    mv $f /root/etc/cloud/cloud.cfg.d/"$(basename $f .yaml)".cfg
+    # cloud-init doesn't understand renderer key
+    sed '/renderer/d' -i /root/etc/cloud/cloud.cfg.d/"$(basename $f .yaml)".cfg
+done
+
+# Remove ipconfig left-overs, to neutralize cloud-init/cloudinit/net/cmdline.py
+rm -f /run/net-*.conf /run/net6-*.conf
+
+log_end_msg

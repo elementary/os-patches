@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# prep-image $IMAGE $report_cmds preps an image that, when booted with
+# boot=casper, will run $report_cmds in the live environment and shut down.
+# Specifically it:
+#
+# 1. creates an overlay over images/root.squashfs (which is assumed to exist)
+# 2. overwites /sbin/init with a script that executes $report_cmds and shuts
+#    the machine down.
+# 3. creates an image at $IMAGE containing a single partition
+# 4. packs images/root.squashfs and the squashed overlay into /casper in this
+#    partition
+#
+# Because the live environment is by default ephemeral, $report_cmds has
+# access to a function 'o' that smuggles the output of commands out of the
+# live session via the instance's serial console and a slightly ridiculous
+# protocol. Basically, running
+#
+#  o filename.txt $command
+#
+# in $report_cmds and then running the image with run-image will result in
+# $command's output being put into a file called result/filename.txt
+
+set -eux
+IMAGE="$1"
+rm -rf tmp
+mkdir -p tmp
+mount -t tmpfs none tmp/
+mkdir -p tmp/{overlay,work,root,mnt}
+mount -t squashfs images/root.squashfs tmp/root
+mount -t overlay overlay -o lowerdir=tmp/root,upperdir=tmp/overlay,workdir=tmp/work tmp/mnt
+rm -f tmp/mnt/sbin/init
+cat > tmp/mnt/sbin/init << \EOF
+#!/bin/sh
+set -x
+o () {
+  f=$1
+  shift
+  echo '--FILE '"${f}"' FILE--'
+  eval "$@" | sed -e 's/^/--OUT '"${f}"' BEGIN-- /g' -e 's/$/ --END--/g'
+}
+EOF
+echo "$2" >> tmp/mnt/sbin/init
+cat >> tmp/mnt/sbin/init <<EOF
+exec /lib/systemd/systemd-shutdown poweroff
+EOF
+chmod u+x tmp/mnt/sbin/init
+umount tmp/mnt
+umount tmp/root
+
+mksquashfs tmp/overlay tmp/overlay.squashfs
+
+rm -rf "$IMAGE"
+truncate -s 1G "$IMAGE"
+parted --script --align optimal "$IMAGE" -- mklabel gpt mkpart primary ext4 1MiB -2048s
+
+dev="$(losetup -Pf --show "$IMAGE")"
+mke2fs -L rootfs -q "${dev}p1"
+mkdir -p tmp/mnt
+mount "${dev}p1" tmp/mnt
+if [ -n "${3-}" ]; then
+    (cd tmp/mnt; eval "$3")
+fi
+mkdir tmp/mnt/casper
+cp images/root.squashfs tmp/mnt/casper/0_root.squashfs
+cp tmp/overlay.squashfs tmp/mnt/casper/1_overlay.squashfs
+umount tmp/mnt
+umount tmp
+losetup -d "$dev"

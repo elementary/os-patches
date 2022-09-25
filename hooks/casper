@@ -1,0 +1,94 @@
+#!/bin/sh -e
+# initramfs hook for casper
+
+PREREQS=""
+
+# Output pre-requisites
+prereqs()
+{
+       echo "$PREREQS"
+}
+
+case "$1" in
+    prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+manual_add_modules overlay
+
+# We need losetup, mkfs.ext4 & sfdisk
+copy_exec /sbin/losetup /sbin
+copy_exec /sbin/mkfs.ext4 /sbin
+copy_exec /sbin/sfdisk /sbin
+
+# Casper hooks
+mkdir -p ${DESTDIR}/lib/casper
+copy_exec /usr/share/casper/casper-reconfigure /bin
+copy_exec /usr/share/casper/casper-preseed /bin
+copy_exec /usr/share/casper/casper-set-selections /bin
+
+mkdir -p ${DESTDIR}/lib/udev/rules.d
+cp -p /lib/udev/rules.d/60-cdrom_id.rules ${DESTDIR}/lib/udev/rules.d/
+copy_exec /lib/udev/cdrom_id /lib/udev
+copy_exec /usr/bin/eject /bin
+copy_exec /sbin/swapon /sbin
+
+# cifs boot
+if [ -x /sbin/mount.cifs ]; then
+    copy_exec /sbin/mount.cifs /sbin
+    for x in cifs md4 des_generic; do
+        manual_add_modules ${x}
+    done
+fi
+
+# HMC s390x boot
+if [ -x /usr/bin/hmcdrvfs ]; then
+    mkdir -p ${DESTDIR}/usr/bin
+    copy_exec /usr/bin/hmcdrvfs /usr/bin
+    manual_add_modules hmcdrv
+fi
+
+# squashfs
+manual_add_modules squashfs
+manual_add_modules loop
+
+# random file system modules
+manual_add_modules vfat
+manual_add_modules ext3
+manual_add_modules ext4
+manual_add_modules btrfs
+# needed for vfat. :-/
+manual_add_modules nls_cp437
+manual_add_modules nls_utf8
+manual_add_modules nls_iso8859-1
+
+# cdrom modules
+manual_add_modules sr_mod
+manual_add_modules ide-cd
+manual_add_modules sbp2
+manual_add_modules ohci1394
+
+cp /usr/share/initramfs-tools/scripts/casper-functions $DESTDIR/scripts
+cp /usr/share/initramfs-tools/scripts/casper-helpers $DESTDIR/scripts
+
+auto_add_modules net
+
+if [ -e /etc/casper.conf ]; then
+    mkdir -p ${DESTDIR}/etc
+    cp /etc/casper.conf ${DESTDIR}/etc
+fi
+
+if [ "$CASPER_GENERATE_UUID" ]; then
+    # Unique ID
+    mkdir -p $DESTDIR/conf $DESTDIR/conf/conf.d
+    uuidgen -r > $DESTDIR/conf/uuid.conf
+    cat <<EOF > $DESTDIR/conf/conf.d/default-boot-to-casper.conf
+if [ -z "\$BOOT" ]; then
+    export BOOT=casper
+fi
+EOF
+fi

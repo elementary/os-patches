@@ -1,0 +1,40 @@
+#!/bin/sh
+
+PREREQ=""
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+    prereqs)
+           prereqs
+           exit 0
+           ;;
+esac
+
+. /scripts/casper-functions
+. /scripts/casper-helpers
+
+iso_path=
+for x in $(cat /proc/cmdline); do
+    case ${x} in
+        iso-scan/filename=*)
+            iso_path=${x#iso-scan/filename=}
+            ;;
+    esac
+done
+if [ "$iso_path" ]; then
+    if find_path "${iso_path}" /isodevice rw; then
+        echo "LIVEMEDIA=${FOUNDPATH}" >> /conf/param.conf
+        if [ -f "${FOUNDPATH}" ]; then
+            echo "LIVEMEDIA_OFFSET=0" >> /conf/param.conf
+        fi
+    else
+        panic "
+Could not find the ISO $iso_path
+"
+    fi
+fi

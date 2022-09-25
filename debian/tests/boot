@@ -1,0 +1,405 @@
+#!/bin/bash
+
+set -ux
+
+# Some simple tests of a capser-ized initramfs.
+
+# The basic idea is to make an image that has /sbin/init overwritten
+# to just gather some data and shutdown again and boot it in qemu
+# system emulation (not KVM, so it can be run in the autopkgtest
+# infrastructure without hoping nested kvm works).
+
+# The current qemu command lines only work on intel. That should be
+# fixed :)
+
+arch=$(dpkg --print-architecture)
+[ $arch = amd64 ] || [ $arch = i386 ] || exit 0
+
+./debian/tests/download-image
+ret=$?
+if [ $ret -eq 100 ]; then
+        # This indicates that a rootfs was not found (maybe very early
+        # in development for this cycle?), skip in this case.
+        exit 0
+elif [ $ret -ne 0 ]; then
+        exit $ret
+fi
+
+set -e
+
+basecmdline="boot=casper console=ttyS0"
+
+kvers="$(dpkg -l linux-image-generic | awk '/^ii/ { print $3 }' | sed -e 's/+.*//; s/\.[0-9]\+$//; s/\.\([0-9]\+\)$/-\1/')"-generic
+kernel=$(echo /boot/vmlinu*-"$kvers")
+
+mkinitramfs -o casper-initrd "$kvers"
+
+## Helper functions
+
+run () {
+    image=$1
+    shift
+    cmdline="$basecmdline ${1-}"
+    shift
+    ./debian/tests/run-image kernel=$kernel initrd=casper-initrd \
+                             image="$image" cmdline="$cmdline" \
+                             output=result "$@"
+}
+
+partcount () {
+    # Count the partitions in a disk image.
+    local img=$1
+    local linecount=$(sfdisk -ql $1 | wc -l)
+    echo $((linecount - 1))
+}
+
+expand_image () {
+    # Expand image so there is space for persistence partition
+    local img=$1
+    size=$(stat --format=%s $1)
+    truncate -s $((size*2)) $1
+}
+
+_loop_devs=()
+_mounts=()
+
+setup_image () {
+    local dev
+    dev="$(losetup -Pf --show $1)"
+    _loop_devs=("${dev}" "${_loop_devs[@]}")
+    partprobe $dev
+    udevadm settle
+    echo $dev
+}
+
+do_mount () {
+    local mountpoint="${!#}"
+    mkdir "${mountpoint}"
+    mount "$@"
+    _mounts=("${mountpoint}" "${_mounts[@]}")
+
+}
+
+cleanup_mounts_and_devices () {
+    for mount in "${_mounts[@]}"; do
+        umount "$mount" || true
+        rm -rf "$mount"
+    done
+    _mounts=()
+    for dev in "${_loop_devs[@]}"; do
+        losetup -d "$dev"
+    done
+    _loop_devs=()
+}
+
+check_files_exist () {
+    local mountpoint=$1
+    shift
+    for file in "${@}"; do
+        if [ ! -e $mountpoint/$file ]; then
+                echo "file $file not found under $mountpoint"
+                ls -lR $mountpoint
+                exit 1
+        fi
+    done
+}
+
+## Tests
+
+# Casper creates log directories with paths based on the current
+# day. If we roll over into another day while these tests are running
+# they might fail spuriously. So if it's within half an hour of
+# midnight, wait until tomorrow!
+secs_til_tomorrow=$(( $(date -ud "tomorrow 0:00" +%s) - $(date +%s) ))
+if [ $secs_til_tomorrow -le 1800 ]; then
+    sleep $((secs_til_tomorrow + 10))
+fi
+D=$(date -uIdate)
+
+test_basic () {
+    echo "### Running basic test"
+
+    ./debian/tests/prep-image image.img "
+o lsblk.txt lsblk
+o add-user-agent.txt cat /etc/pollinate/add-user-agent" "
+mkdir -p .disk
+echo -n 'Ubuntu-Server 19.10 \"Eoan Ermine\" - Alpha amd64 (20190829)' > .disk/info
+"
+    run image.img ""
+    grep -q /rofs result/lsblk.txt
+    grep -q '^live/20190829$' result/add-user-agent.txt
+}
+
+test_auto_log_persistence () {
+    echo "### Testing auto log persistence"
+
+    ./debian/tests/prep-image image.img "touch /var/log/hello /var/crash/report.crash"
+
+    expand_image image.img
+
+    partsbefore=$(partcount image.img)
+
+    run image.img ""
+
+    partsafter=$(partcount image.img)
+    if [ $((partsafter - partsbefore)) -ne 1 ]; then
+            echo "did not create extra partition"
+            exit 1
+    fi
+
+    dev="$(setup_image image.img)"
+    lsblk "${dev}p${partsafter}"
+    label=$(lsblk -no label "${dev}p${partsafter}")
+    if [ "$label" != writable ]; then
+            echo "created filesystem does not have correct label"
+            exit 1
+    fi
+
+    do_mount "${dev}p${partsafter}" mnt
+    check_files_exist mnt install-logs-$D.0/log/hello install-logs-$D.0/crash/report.crash
+}
+
+test_uses_casper_rw_partition () {
+    echo "### casper will use an existing casper-rw filesystem even though"
+    echo "### it creates filesystems with the label writable now"
+
+    ./debian/tests/prep-image image.img "touch /var/log/hello"
+
+    expand_image image.img
+    parts=$(partcount image.img)
+    casperrwpart=$((parts + 1))
+    dev="$(setup_image image.img)"
+    maxend=$(sfdisk $dev -l -q -o end | tail -n +2 | sort -n | tail -n1)
+    start=$(((maxend + 1 + 0xfff) & ~0xfff))
+    echo "start=$start,size=100MiB" | sfdisk $dev -a
+    mkfs.ext4 -L "casper-rw" -F "${dev}p${casperrwpart}"
+    cleanup_mounts_and_devices
+
+    run image.img ""
+
+    if [ "$(partcount image.img)" -ne $casperrwpart ]; then
+       echo "casper created partition even though casper-rw was there"
+       exit 1
+    fi
+
+    dev="$(setup_image image.img)"
+    do_mount "${dev}p${casperrwpart}" mnt
+    check_files_exist mnt install-logs-$D.0/log/hello
+    rm -rf mnt/*
+    cleanup_mounts_and_devices
+
+    dev="$(setup_image image.img)"
+    maxend=$(sfdisk $dev -l -q -o end | tail -n +2 | sort -n | tail -n1)
+    writablepart=$((parts + 2))
+    start=$(((maxend + 1 + 0xfff) & ~0xfff))
+    echo "start=$start,size=100MiB" | sfdisk $dev -a
+    mkfs.ext4 -L "writable" -F "${dev}p${writablepart}"
+    cleanup_mounts_and_devices
+
+    run image.img ""
+
+    dev="$(setup_image image.img)"
+    do_mount "${dev}p${casperrwpart}" mnt1
+    if [ "$(ls mnt | wc -l)" -ne "0" ]; then
+        echo "files created in casper-rw when writable was present"
+        exit 1
+    fi
+    do_mount "${dev}p${writablepart}" mnt2
+    check_files_exist mnt2 install-logs-$D.0/log/hello
+}
+
+test_clean_log_directory_each_boot () {
+    echo "### Testing that changes to /var/log do not persist into next boot"
+
+    ./debian/tests/prep-image image.img "
+if [ -e /var/log/hello ]; then
+    o result.txt echo 'hello exists'
+else
+    o result.txt echo 'hello does not exist'
+fi
+touch /var/log/hello
+"
+
+    expand_image image.img
+
+    run image.img ""
+    partsafter=$(partcount image.img)
+
+    if [ "$(cat result/result.txt)" != "hello does not exist" ]; then
+        echo "/var/log/hello existed on first boot??"
+        exit 1
+    fi
+
+    dev="$(setup_image image.img)"
+    do_mount "${dev}p${partsafter}" mnt
+    check_files_exist mnt install-logs-$D.0/log/hello
+    cleanup_mounts_and_devices
+
+    run image.img ""
+
+    if [ "$(cat result/result.txt)" != "hello does not exist" ]; then
+        echo "/var/log/hello existed on second boot"
+        exit 1
+    fi
+    dev="$(setup_image image.img)"
+    do_mount "${dev}p${partsafter}" mnt
+    check_files_exist mnt install-logs-$D.0/log/hello install-logs-$D.1/log/hello
+}
+
+test_explicit_persistence () {
+    echo "### Testing explicit persistence "
+
+    ./debian/tests/prep-image image.img "if [ -e /hello ]; then o hello.txt cat /hello; else echo content > /hello; fi"
+
+    expand_image image.img
+
+    run image.img "persistent"
+
+    partsafter=$(partcount image.img)
+
+    dev="$(setup_image image.img)"
+    do_mount "${dev}p${partsafter}" mnt
+    check_files_exist mnt upper/hello
+    cleanup_mounts_and_devices
+
+    run image.img "persistent"
+    grep -q content result/hello.txt
+}
+
+
+test_implicit_then_explicit_persistence () {
+    echo "### Testing implicit then explicit persistence "
+
+    ./debian/tests/prep-image image.img "touch /hello; touch /var/log/hello"
+
+    expand_image image.img
+
+    run image.img ""
+
+    partsafter=$(partcount image.img)
+    dev="$(setup_image image.img)"
+    do_mount "${dev}p${partsafter}" mnt
+    check_files_exist mnt install-logs-$D.0/log/hello
+    cleanup_mounts_and_devices
+
+    run image.img "persistent"
+
+    partsafter=$(partcount image.img)
+    dev="$(setup_image image.img)"
+    do_mount "${dev}p${partsafter}" mnt
+    check_files_exist mnt install-logs-$D.0/log/hello upper/hello upper/var/log/hello
+}
+
+test_no_persistence () {
+    echo "### Testing disabling of automatic persistence"
+
+    ./debian/tests/prep-image image.img "touch /var/log/hello"
+
+    expand_image image.img
+
+    partsbefore=$(partcount image.img)
+
+    run image.img "nopersistent"
+
+    partsafter=$(partcount image.img)
+    if [ $partsafter -ne $partsbefore ]; then
+            echo "nopersistent did not suppress creation of partition"
+            exit 1
+    fi
+
+    dev="$(setup_image image.img)"
+    maxend=$(sfdisk $dev -l -q -o end | tail -n +2 | sort -n | tail -n1)
+    start=$(((maxend + 1 + 0xfff) & ~0xfff))
+    echo "start=$start" | sfdisk $dev -a
+    mkfs.ext4 -L "writable" -F "${dev}p$((partsafter+1))"
+    cleanup_mounts_and_devices
+
+    run image.img "nopersistent"
+
+    partsafter=$(partcount image.img)
+    dev="$(setup_image image.img)"
+    do_mount "${dev}p${partsafter}" mnt
+    if [ -e install-logs-$D.0/log/hello ]; then
+        echo "nopersistent did not suppress use of writable partition"
+        exit 1
+    fi
+}
+
+test_todisk () {
+    echo "### todisk does not mount any part of the boot media"
+    # We test todisk rather than toram because the latter requires
+    # more RAM that the default autopkgtest runner has.
+
+    ./debian/tests/prep-image image.img '
+o cdrom-fstype.txt findmnt -no fstype /cdrom
+dev=$(readlink -f /dev/disk/by-label/rootfs)
+dev=${dev%%[0-9]*}
+# lsblk -no mountpoints $dev will output a line for each partition of $dev
+# use grep . to filter out the empty lines
+lsblk -no mountpoint $dev | grep . > mountpoints.txt
+o mountpoints.txt cat mountpoints.txt
+touch /hello
+'
+
+    expand_image image.img
+
+    # Create a disk image with a partition to use as a todisk target
+    truncate -s1G image2.img
+    parted --script --align optimal "image2.img" -- mklabel gpt mkpart primary ext4 1MiB -2048s
+    dev="$(setup_image image2.img)"
+    wipefs -a "${dev}p1"
+    mkfs -t ext4 -L scratch -q "${dev}p1"
+    cleanup_mounts_and_devices
+
+    partsbefore=$(partcount image.img)
+
+    # todisk suppresses the default log/crash file persistence
+
+    run image.img "todisk=/dev/disk/by-label/scratch" image="image2.img"
+
+    partsafter=$(partcount image.img)
+    if [ $partsafter -ne $partsbefore ]; then
+            echo "todisk did not suppress creation of partition"
+            exit 1
+    fi
+
+    check_files_exist result cdrom-fstype.txt mountpoints.txt
+
+    if [ `cat result/cdrom-fstype.txt` != ext4 ]; then
+        echo "/cdrom not ext4 with todisk"
+        exit 1
+    fi
+
+    if [ `cat result/mountpoints.txt` != '' ]; then
+        echo "install media still mounted"
+        exit 1
+    fi
+
+    # Create a disk image with a partition to use as a todisk target
+    # (again) but also a writable partition.
+    rm image2.img
+    truncate -s2G image2.img
+    parted --script --align optimal "image2.img" -- mklabel gpt mkpart primary ext4 1MiB 1GiB mkpart primary ext4 1GiB -2048s
+    dev="$(setup_image image2.img)"
+    wipefs -a "${dev}p1"
+    mkfs -t ext4 -L scratch -q "${dev}p1"
+    mkfs -t ext4 -L writable -q "${dev}p2"
+    cleanup_mounts_and_devices
+
+    # explicit persistence is still honoured
+
+    run image.img "persistent todisk=/dev/disk/by-label/scratch" image="image2.img"
+
+    dev="$(setup_image image2.img)"
+    do_mount "${dev}p2" mnt
+    check_files_exist mnt upper/hello
+}
+
+TESTS="test_basic test_auto_log_persistence test_clean_log_directory_each_boot
+       test_explicit_persistence test_implicit_then_explicit_persistence
+       test_no_persistence test_todisk test_uses_casper_rw_partition"
+
+for f in $TESTS; do
+    eval $f
+    cleanup_mounts_and_devices
+done

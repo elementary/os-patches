@@ -1,0 +1,10 @@
+[Unit]
+Description=casper-md5check Verify Live ISO checksums
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/casper/casper-md5check /cdrom /cdrom/md5sum.txt
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -eux
+if [ ! -f images/root.squashfs ]; then
+    series=$(lsb_release -sc)
+    url=http://cloud-images.ubuntu.com/$series/current/$series-server-cloudimg-$(dpkg --print-architecture).squashfs
+    mkdir -p images
+    status=$(curl --silent --write-out "%{http_code}\n" --output images/root.squashfs "$url")
+    if [ "$status" = 404 ]; then
+        exit 100
+    fi
+fi
