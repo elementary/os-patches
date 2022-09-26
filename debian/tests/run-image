@@ -39,7 +39,7 @@ for IMG in $IMAGES; do
 done
 
 timeout --foreground 10m \
-        "$qemu" "${archopts[@]}" -m 768m \
+        "$qemu" "${archopts[@]}" -m 1024m \
         -kernel "$KERNEL" -initrd "$INITRD" \
         -append "$CMDLINE" \
         -device nec-usb-xhci,id=xhci $devices \
