@@ -1,5 +1,5 @@
 # Looking in which build system we are
-BUILD_SYSTEM := $(shell lsb_release --short --id)
+BUILD_SYSTEM := $(shell export LSB_OS_RELEASE="/usr/lib/upstream-os-release"; lsb_release --short --id)
 
 all:
 	# Setting BUILD_SYSTEM in the binary package
