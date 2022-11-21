@@ -1,32 +1,53 @@
-grub2-signed (1.167~18.04.5) bionic; urgency=medium
+grub2-signed (1.173.2~18.04.1) bionic; urgency=medium
 
-  * Rebuild against grub2 2.04-1ubuntu44.1.2.  LP: #1926748.
+  * No change rebuild against grub 2.04-1ubuntu47.4.
 
- -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 07 Jun 2021 13:25:54 -0700
+ -- Chris Coulson <chris.coulson@canonical.com>  Thu, 07 Jul 2022 12:43:07 +0100
 
-grub2-signed (1.167~18.04.4) bionic; urgency=medium
+grub2-signed (1.173) impish; urgency=medium
 
-  * Rebuild against grub2 2.04-1ubuntu44.1.1.  LP: #1930742.
+  * Actual no change rebuild against grub 2.04-1ubuntu47.
 
- -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 03 Jun 2021 14:49:21 -0700
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 09 Sep 2021 17:46:11 +0200
 
-grub2-signed (1.167~18.04.3) bionic; urgency=medium
+grub2-signed (1.172) impish; urgency=medium
 
-  * Rebuild against grub2 2.04-1ubuntu44.1.  LP: #1928674.
+  * No change rebuild against grub 2.04-1ubuntu47.
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Thu, 02 Sep 2021 14:45:29 +0200
+
+grub2-signed (1.171) impish; urgency=medium
+
+  * No change rebuild against grub 2.04-1ubuntu46.
+  * Update Vcs-Git to impish-devel.
+
+ -- Dimitri John Ledkov <dimitri.ledkov@canonical.com>  Mon, 19 Jul 2021 10:10:07 +0100
+
+grub2-signed (1.170) impish; urgency=medium
+
   * key on grub-efi-$(DEB_HOST_ARCH) as the binary package for
     download-signed since grub-efi-* and grub2-common are now built from
     separate sources.
 
- -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 20 May 2021 11:48:10 -0700
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Thu, 20 May 2021 08:42:00 -0700
 
-grub2-signed (1.167~18.04.1) bionic; urgency=medium
+grub2-signed (1.169) hirsute; urgency=medium
+
+  * No chnage rebuild against grub 2.04-1ubuntu45.
+  * Change branch name in VCS field to just $suite-devel.
+  * Forward port debian/rules ifeq/else statement fixes from
+    bionic&xenial.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 30 Mar 2021 12:43:08 +0100
+
+grub2-signed (1.168) hirsute; urgency=medium
 
   * Use debhelper-compat 9 for ease of SRUs to Bionic and earlier. LP:
     #1920008
 
  -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 23 Mar 2021 11:01:58 +0000
 
-grub2-signed (1.167~18.04.0) bionic; urgency=medium
+grub2-signed (1.167) hirsute; urgency=medium
 
   * grub-efi-amd64-signed: add depends on grub2-common with support for
     R_X86_64_PLT32 relocations. LP: #1920008
