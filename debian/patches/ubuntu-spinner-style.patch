@@ -1,0 +1,31 @@
+# Description: Ubuntu style for the spinner/bgrt theme
+# use the Ubuntu font, display the password entry under the bios logo
+# Upstream: not-needed
+Index: plymouth-0.9.4git20200323/themes/bgrt/bgrt.plymouth.desktop
+===================================================================
+--- plymouth-0.9.4git20200323.orig/themes/bgrt/bgrt.plymouth.desktop
++++ plymouth-0.9.4git20200323/themes/bgrt/bgrt.plymouth.desktop
+@@ -4,11 +4,11 @@ Description=Jimmac's spinner theme using
+ ModuleName=two-step
+ 
+ [two-step]
+-Font=Cantarell 12
+-TitleFont=Cantarell Light 30
++Font=Ubuntu 12
++TitleFont=Ubuntu Light 30
+ ImageDir=@PLYMOUTH_THEME_PATH@/spinner
+ DialogHorizontalAlignment=.5
+-DialogVerticalAlignment=.382
++DialogVerticalAlignment=.7
+ TitleHorizontalAlignment=.5
+ TitleVerticalAlignment=.382
+ HorizontalAlignment=.5
+@@ -21,7 +21,7 @@ BackgroundStartColor=0x000000
+ BackgroundEndColor=0x000000
+ ProgressBarBackgroundColor=0x606060
+ ProgressBarForegroundColor=0xffffff
+-DialogClearsFirmwareBackground=true
++DialogClearsFirmwareBackground=false
+ MessageBelowAnimation=true
+ 
+ [boot-up]
