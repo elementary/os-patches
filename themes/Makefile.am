@@ -1,2 +1,2 @@
-SUBDIRS = spinfinity fade-in text details solar glow script spinner tribar ubuntu-logo bgrt ubuntu-text
+SUBDIRS = spinfinity fade-in text details solar glow script spinner tribar bgrt
 MAINTAINERCLEANFILES = Makefile.in

@@ -52,7 +52,6 @@ struct _ply_pixel_display
         unsigned long                    width;
         unsigned long                    height;
         int                              device_scale;
-        unsigned int                     bits_per_pixel;
 
         ply_pixel_display_draw_handler_t draw_handler;
         void                            *draw_handler_user_data;
@@ -80,9 +79,6 @@ ply_pixel_display_new (ply_renderer_t      *renderer,
         display->width = size.width;
         display->height = size.height;
         display->device_scale = ply_pixel_buffer_get_device_scale (pixel_buffer);
-
-        display->bits_per_pixel = ply_renderer_get_bits_per_pixel_for_head (renderer,
-                                                                            head);
 
         return display;
 }
@@ -115,12 +111,6 @@ int
 ply_pixel_display_get_device_scale (ply_pixel_display_t *display)
 {
         return display->device_scale;
-}
-
-unsigned int
-ply_pixel_display_get_bits_per_pixel (ply_pixel_display_t *display)
-{
-  return display->bits_per_pixel;
 }
 
 static void

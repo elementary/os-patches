@@ -637,16 +637,6 @@ get_buffer_for_head (ply_renderer_backend_t *backend,
         return backend->head.pixel_buffer;
 }
 
-static unsigned int
-get_bits_per_pixel_for_head (ply_renderer_backend_t *backend,
-                             ply_renderer_head_t    *head)
-{
-  if (head != &backend->head)
-    return 0;
-
-  return backend->bytes_per_pixel * 8;
-}
-
 static bool
 has_input_source (ply_renderer_backend_t      *backend,
                   ply_renderer_input_source_t *input_source)
@@ -763,7 +753,6 @@ ply_renderer_backend_get_interface (void)
                 .flush_head                   = flush_head,
                 .get_heads                    = get_heads,
                 .get_buffer_for_head          = get_buffer_for_head,
-                .get_bits_per_pixel_for_head  = get_bits_per_pixel_for_head,
                 .get_input_source             = get_input_source,
                 .open_input_source            = open_input_source,
                 .set_handler_for_input_source = set_handler_for_input_source,

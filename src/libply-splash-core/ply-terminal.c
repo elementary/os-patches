@@ -131,9 +131,9 @@ ply_terminal_parse_keymap_conf (ply_terminal_t *terminal)
         if (keymap)
                 return keymap;
 
-        vconsole_conf = ply_key_file_new ("/etc/default/keyboard");
+        vconsole_conf = ply_key_file_new ("/etc/vconsole.conf");
         if (ply_key_file_load_groupless_file (vconsole_conf))
-                keymap = ply_key_file_get_value (vconsole_conf, NULL, "XKBLAYOUT");
+                keymap = ply_key_file_get_value (vconsole_conf, NULL, "KEYMAP");
         ply_key_file_free (vconsole_conf);
 
         /* The keymap name in vconsole.conf might be quoted, strip these */
