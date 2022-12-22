@@ -1,0 +1,38 @@
+Description: Implement update status (U) splash plugin function for details plugins
+Author: Dmitrijs Ledkovs <xnox@ubuntu.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/540645
+
+Index: testbuild/src/plugins/splash/details/plugin.c
+===================================================================
+--- testbuild.orig/src/plugins/splash/details/plugin.c
++++ testbuild/src/plugins/splash/details/plugin.c
+@@ -81,6 +81,9 @@ struct _ply_boot_splash_plugin
+         ply_buffer_t                  *boot_buffer;
+ };
+ 
++static void display_message (ply_boot_splash_plugin_t *plugin,
++                             const char               *message);
++
+ static view_t *
+ view_new (ply_boot_splash_plugin_t *plugin,
+           ply_text_display_t       *display)
+@@ -311,6 +314,19 @@ update_status (ply_boot_splash_plugin_t
+         assert (plugin != NULL);
+ 
+         ply_trace ("status update");
++
++        int progress = 0;
++
++        if (! strncmp("fsck:", status, 5)) {
++                /* Chop localised formatted string */
++                /* fsck:sda1:50:Checking disk %1$d of %2$d (%3$d%% complete) */
++                sscanf(status, "fsck:.*:%d:.*", &progress);
++                char *end = strrchr(status, ':');
++                strncpy (end, "%\0", 2);
++        }
++
++        if (progress < 100)
++               display_message (plugin, status);
+ }
+ 
+ static void

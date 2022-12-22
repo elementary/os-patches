@@ -1,0 +1,32 @@
+From f311eafc7b769d0097d3f9812bea5540c0dbbc19 Mon Sep 17 00:00:00 2001
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Wed, 15 Sep 2021 17:32:52 +0800
+Subject: [PATCH] plymouth-switch-root-initramfs: Preload text rendering libs
+ before switching
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1942987
+Forwarded: not-needed
+Last-Update: 2021-09-15
+---
+ systemd-units/plymouth-switch-root-initramfs.service.in | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/systemd-units/plymouth-switch-root-initramfs.service.in b/systemd-units/plymouth-switch-root-initramfs.service.in
+index 0610803c..311b6ccf 100644
+--- a/systemd-units/plymouth-switch-root-initramfs.service.in
++++ b/systemd-units/plymouth-switch-root-initramfs.service.in
+@@ -10,6 +10,11 @@ ConditionPathExists=/run/initramfs/bin/sh
+ [Service]
+ Type=oneshot
+ RemainAfterExit=yes
++# Emit a blank message to force a dynamic load of all graphics libraries
++# required for rendering text since it's a non-trivially large set, too large
++# to manage manually in the initramfs. This will allow casper to render text
++# like the live media ejection message after the jump...
++ExecStart=-@PLYMOUTH_CLIENT_DIR@/plymouth message --text=""
+ ExecStart=-@PLYMOUTH_CLIENT_DIR@/plymouth update-root-fs --new-root-dir=/run/initramfs
+ Type=oneshot
+ RemainAfterExit=yes
+-- 
+2.32.0
+

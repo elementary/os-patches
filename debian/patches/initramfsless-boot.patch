@@ -1,0 +1,49 @@
+Author: Steve Langasek <steve.langasek@canonical.com>
+Description: support initramfsless boot
+ Don't fail if --attach-to-session is passed and /dev/pts isn't mounted
+ yet, as this breaks booting without an initramfs.
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/981314
+
+Index: testbuild/src/main.c
+===================================================================
+--- testbuild.orig/src/main.c
++++ testbuild/src/main.c
+@@ -1795,6 +1795,7 @@ attach_to_running_session (state_t *stat
+                 session = ply_terminal_session_new (NULL);
+ 
+                 ply_terminal_session_attach_to_event_loop (session, state->loop);
++                state->session = session;
+         } else {
+                 session = state->session;
+                 ply_trace ("session already created");
+@@ -1806,12 +1807,6 @@ attach_to_running_session (state_t *stat
+                                           (ply_terminal_session_hangup_handler_t)
+                                           (should_be_redirected ? on_session_hangup : NULL),
+                                           -1, state)) {
+-                ply_save_errno ();
+-                ply_terminal_session_free (session);
+-                ply_buffer_free (state->boot_buffer);
+-                state->boot_buffer = NULL;
+-                ply_restore_errno ();
+-
+                 state->is_redirected = false;
+                 state->is_attached = false;
+                 return false;
+@@ -1823,7 +1818,6 @@ attach_to_running_session (state_t *stat
+ 
+         state->is_redirected = should_be_redirected;
+         state->is_attached = true;
+-        state->session = session;
+ 
+         return true;
+ }
+@@ -2316,9 +2310,6 @@ main (int    argc,
+                 state.should_be_attached = attach_to_session;
+                 if (!attach_to_running_session (&state)) {
+                         ply_trace ("could not redirect console session: %m");
+-                        if (!no_daemon)
+-                                ply_detach_daemon (daemon_handle, EX_UNAVAILABLE);
+-                        return EX_UNAVAILABLE;
+                 }
+         }
+ 

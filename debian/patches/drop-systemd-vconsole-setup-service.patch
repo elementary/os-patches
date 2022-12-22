@@ -1,0 +1,21 @@
+Description: Remove systemd-vconsole-setup.service as it's not shipped in Debian
+ Remove systemd-vconsole-setup.service as it's not shipped in Debian and add
+ After=keyboard-setup.service
+Author: Laurent Bigonville <bigon@debian.org>
+Forwarded: not-needed
+
+Index: plymouth-0.9.4git20190712/systemd-units/plymouth-start.service.in
+===================================================================
+--- plymouth-0.9.4git20190712.orig/systemd-units/plymouth-start.service.in
++++ plymouth-0.9.4git20190712/systemd-units/plymouth-start.service.in
+@@ -1,8 +1,8 @@
+ [Unit]
+ Description=Show Plymouth Boot Screen
+ DefaultDependencies=no
+-Wants=systemd-ask-password-plymouth.path systemd-vconsole-setup.service
+-After=systemd-vconsole-setup.service systemd-udev-trigger.service systemd-udevd.service
++Wants=systemd-ask-password-plymouth.path
++After=systemd-udev-trigger.service systemd-udevd.service keyboard-setup.service
+ Before=systemd-ask-password-plymouth.service
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash

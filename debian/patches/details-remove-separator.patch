@@ -1,0 +1,21 @@
+Description: Removed explicit printing of ':'
+ Removed the explicit printing of ':'. Expected to be a part of the prompt.
+Author: Surbhi Palande <surbhi.palande@canonical.com>
+
+Index: testbuild/src/plugins/splash/details/plugin.c
+===================================================================
+--- testbuild.orig/src/plugins/splash/details/plugin.c
++++ testbuild/src/plugins/splash/details/plugin.c
+@@ -385,10 +385,8 @@ display_password (ply_boot_splash_plugin
+                                 strlen (prompt));
+         else
+                 write_on_views (plugin,
+-                                "Password",
+-                                strlen ("Password"));
+-
+-        write_on_views (plugin, ":", strlen (":"));
++                                "Password:",
++                                strlen ("Password:"));
+ 
+         for (i = 0; i < bullets; i++) {
+                 write_on_views (plugin, "*", strlen ("*"));

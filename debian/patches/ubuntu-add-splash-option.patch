@@ -1,0 +1,102 @@
+Description: Ensure that we only show plymouth when splash option is provided
+ Consequently (with debian and ubuntu's patch), plymouth is only triggered if:
+ - plymouth.enable=0 isn't set
+ - nosplash isn't set
+ - we set splash (like on desktop flavors) on the kernel cmdline
+Author: Didier Roche <didrocks@ubuntu.com>
+Forwarded: not-needed
+
+---
+ systemd-units/plymouth-halt.service.in                 |    1 +
+ systemd-units/plymouth-kexec.service.in                |    1 +
+ systemd-units/plymouth-poweroff.service.in             |    1 +
+ systemd-units/plymouth-reboot.service.in               |    1 +
+ systemd-units/plymouth-start.service.in                |    1 +
+ systemd-units/systemd-ask-password-plymouth.path.in    |    1 +
+ systemd-units/systemd-ask-password-plymouth.service.in |    1 +
+ 7 files changed, 7 insertions(+)
+
+Index: plymouth-0.9.5git20210629/systemd-units/plymouth-halt.service.in
+===================================================================
+--- plymouth-0.9.5git20210629.orig/systemd-units/plymouth-halt.service.in
++++ plymouth-0.9.5git20210629/systemd-units/plymouth-halt.service.in
+@@ -5,6 +5,7 @@ Before=systemd-halt.service
+ DefaultDependencies=no
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ 
+ [Service]
+Index: plymouth-0.9.5git20210629/systemd-units/plymouth-kexec.service.in
+===================================================================
+--- plymouth-0.9.5git20210629.orig/systemd-units/plymouth-kexec.service.in
++++ plymouth-0.9.5git20210629/systemd-units/plymouth-kexec.service.in
+@@ -5,6 +5,7 @@ Before=systemd-kexec.service
+ DefaultDependencies=no
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ 
+ [Service]
+Index: plymouth-0.9.5git20210629/systemd-units/plymouth-poweroff.service.in
+===================================================================
+--- plymouth-0.9.5git20210629.orig/systemd-units/plymouth-poweroff.service.in
++++ plymouth-0.9.5git20210629/systemd-units/plymouth-poweroff.service.in
+@@ -5,6 +5,7 @@ Before=systemd-poweroff.service
+ DefaultDependencies=no
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ 
+ [Service]
+Index: plymouth-0.9.5git20210629/systemd-units/plymouth-reboot.service.in
+===================================================================
+--- plymouth-0.9.5git20210629.orig/systemd-units/plymouth-reboot.service.in
++++ plymouth-0.9.5git20210629/systemd-units/plymouth-reboot.service.in
+@@ -5,6 +5,7 @@ Before=systemd-reboot.service
+ DefaultDependencies=no
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ 
+ [Service]
+Index: plymouth-0.9.5git20210629/systemd-units/plymouth-start.service.in
+===================================================================
+--- plymouth-0.9.5git20210629.orig/systemd-units/plymouth-start.service.in
++++ plymouth-0.9.5git20210629/systemd-units/plymouth-start.service.in
+@@ -6,6 +6,7 @@ After=systemd-udev-trigger.service syste
+ Before=systemd-ask-password-plymouth.service
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ IgnoreOnIsolate=true
+ 
+Index: plymouth-0.9.5git20210629/systemd-units/systemd-ask-password-plymouth.path.in
+===================================================================
+--- plymouth-0.9.5git20210629.orig/systemd-units/systemd-ask-password-plymouth.path.in
++++ plymouth-0.9.5git20210629/systemd-units/systemd-ask-password-plymouth.path.in
+@@ -7,6 +7,7 @@ After=plymouth-start.service
+ Before=basic.target shutdown.target
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionPathExists=/run/plymouth/pid
+ ConditionVirtualization=!container
+ 
+Index: plymouth-0.9.5git20210629/systemd-units/systemd-ask-password-plymouth.service.in
+===================================================================
+--- plymouth-0.9.5git20210629.orig/systemd-units/systemd-ask-password-plymouth.service.in
++++ plymouth-0.9.5git20210629/systemd-units/systemd-ask-password-plymouth.service.in
+@@ -7,6 +7,7 @@ After=plymouth-start.service
+ Before=shutdown.target
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ ConditionPathExists=@plymouthruntimedir@/pid
+ 
