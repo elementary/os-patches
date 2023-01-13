@@ -225,6 +225,8 @@ usable_efi_system_partitions()
   last_partition=
   (
   for partition in /dev/disk/by-id/*; do
+    ID_PART_ENTRY_TYPE=""
+    ID_PART_ENTRY_SCHEME=""
     eval "$(udevadm info -q property -n "$partition" | grep -E '^ID_PART_ENTRY_(TYPE|SCHEME)=')"
     if [ -z "$ID_PART_ENTRY_TYPE" -o -z "$ID_PART_ENTRY_SCHEME" -o \
     \( "$ID_PART_ENTRY_SCHEME" != gpt -a "$ID_PART_ENTRY_SCHEME" != dos \) -o \
