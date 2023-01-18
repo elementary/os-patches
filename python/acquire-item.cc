@@ -241,18 +241,18 @@ static PyObject *acquirefile_new(PyTypeObject *type, PyObject *Args, PyObject * 
     HashStringList hashes;
     const char *uri, *descr, *shortDescr;
     PyApt_Filename destDir, destFile;
-    int size = 0;
+    unsigned long long size = 0;
     uri = descr = shortDescr = destDir = destFile = "";
 
     char *kwlist[] = {"owner", "uri", "hash", "size", "descr", "short_descr",
                       "destdir", "destfile", NULL
                      };
 #if PY_MAJOR_VERSION >= 3
-    const char *fmt = "O!s|OissO&O&";
+    const char *fmt = "O!s|OKssO&O&";
 #else
     // no "$" support to indicate that the remaining args are keyword only
     // in py2.x :/
-    const char *fmt = "O!s|OissO&O&";
+    const char *fmt = "O!s|OKssO&O&";
 #endif
     if (PyArg_ParseTupleAndKeywords(Args, kwds, fmt, kwlist,
                                     &PyAcquire_Type, &pyfetcher, &uri,
