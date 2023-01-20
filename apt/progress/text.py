@@ -105,7 +105,7 @@ class AcquireProgress(base.AcquireProgress, TextProgress):
         # type: (Optional[io.TextIOBase]) -> None
         TextProgress.__init__(self, outfile)
         base.AcquireProgress.__init__(self)
-        self._signal = None  # type: Union[Callable[[signal.Signals, types.FrameType], None], int, signal.Handlers, None] # noqa
+        self._signal = None  # type: Union[Callable[[int, Optional[types.FrameType]], None], int, signal.Handlers, None] # noqa
         self._width = 80
         self._id = 1
 

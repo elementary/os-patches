@@ -1,0 +1,35 @@
+image: ubuntu:jammy
+variables:
+  DEBIAN_FRONTEND: noninteractive
+
+typing:
+  script:
+  - apt update
+  - apt install -q -y python3-pip
+  - python3 -m pip install -U mypy==0.942
+  - env MYPYPATH=$PWD/typehinting/ mypy --strict ./apt
+
+pep8:
+  script:
+  - apt update
+  - apt install -q -y pycodestyle
+  - env python3 tests/testmanual_pycodestyle.py
+
+test:
+  script:
+  - apt update
+  - apt build-dep -q -y ./
+  - dpkg-buildpackage
+  artifacts:
+    paths:
+    - build/sphinx/html/
+
+pages:
+  stage: deploy
+  script:
+  - mv build/sphinx/html/ public
+  artifacts:
+    paths:
+    - public
+  rules:
+  - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
