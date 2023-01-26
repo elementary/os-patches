@@ -475,8 +475,12 @@ def _lsb_release():
     result = {'Codename': 'sid', 'Distributor ID': 'Debian',
               'Description': 'Debian GNU/Linux unstable (sid)',
               'Release': 'unstable'}
+    env = None
+    if os.path.exists("/usr/lib/upstream-os-release"):
+        env={"LSB_OS_RELEASE": "/usr/lib/upstream-os-release"}
+
     try:
-        out = Popen(['lsb_release', '-idrc'], stdout=PIPE).communicate()[0]
+        out = Popen(['lsb_release', '-idrc'], env=env, stdout=PIPE).communicate()[0]
         # Convert to unicode string, needed for Python 3.1
         out = out.decode("utf-8")
         result.update(l.split(":\t") for l in out.split("\n") if ':\t' in l)
