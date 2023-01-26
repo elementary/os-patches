@@ -248,9 +248,14 @@ class DistInfo(object):
         #match_mirror_line = re.compile(r".+")
 
         if not dist:
+            env = None
+            if os.path.exists("/usr/lib/upstream-os-release"):
+                env={"LSB_OS_RELEASE": "/usr/lib/upstream-os-release"}
+
             try:
                 dist = Popen(["lsb_release", "-i", "-s"],
                              universal_newlines=True,
+                             env=env,
                              stdout=PIPE).communicate()[0].strip()
             except (OSError, IOError) as exc:
                 if exc.errno != errno.ENOENT:
