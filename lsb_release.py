@@ -361,7 +361,10 @@ def get_os_release(upstream=False):
     distinfo = {}
     path = os.environ.get('LSB_OS_RELEASE', '/usr/lib/os-release')
     if upstream:
-        path = '/etc/upstream-release/lsb-release'
+        if os.path.exists('/usr/lib/upstream-os-release'):
+            path = os.environ.get('LSB_OS_RELEASE', '/usr/lib/upstream-os-release')
+        else:
+            path = '/etc/upstream-release/lsb-release'
     if os.path.exists(path):
         try:
             with open(path) as os_release_file:
