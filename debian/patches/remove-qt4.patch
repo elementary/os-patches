@@ -1,0 +1,246 @@
+Description: Drop Qt 4 support, it's been unsupported since 2015
+Author: Robert Ancell <robert.ancell@canonical.com>
+Origin: upstream
+Last-Update: 2019-10-18
+
+--- lightdm-1.30.0.orig/configure.ac
++++ lightdm-1.30.0/configure.ac
+@@ -87,40 +87,6 @@ PKG_CHECK_MODULES(LIBLIGHTDM_GOBJECT, [
+     x11
+ ])
+ 
+-AC_ARG_ENABLE(liblightdm-qt,
+-	AS_HELP_STRING([--enable-liblightdm-qt],[Enable LightDM client Qt4 libraries [[default=auto]]]),
+-	[enable_liblightdm_qt4=$enableval],
+-	[enable_liblightdm_qt4="auto"])
+-compile_liblightdm_qt4=no
+-if test x"$enable_liblightdm_qt4" != "xno" ; then
+-    PKG_CHECK_MODULES(LIBLIGHTDM_QT4, [
+-        QtCore
+-        QtDBus
+-        QtGui
+-    ],
+-    [compile_liblightdm_qt4=yes],
+-    [if test "x$enable_liblightdm_qt4" != xauto; then
+-        AC_MSG_FAILURE(
+-          [--enable-liblightdm-qt was given, but test for Qt4 failed])
+-      fi
+-    ])
+-
+-    AC_CHECK_TOOLS(MOC4, [moc-qt4 moc])
+-    if test x$MOC4 = x; then
+-        compile_liblightdm_qt4=no
+-        if test "x$enable_liblightdm_qt4" != xauto; then
+-            AC_MSG_FAILURE(
+-              [--enable-liblightdm-qt4 was given, but MOC not found])
+-        fi
+-    fi
+-    if test x"$MOC4" = xmoc; then
+-        if test x"$(readlink $(which $MOC4))" = xqtchooser; then
+-            MOC4="$MOC4 --qt=4"
+-        fi
+-    fi
+-fi
+-AM_CONDITIONAL(COMPILE_LIBLIGHTDM_QT4, test x"$compile_liblightdm_qt4" != "xno")
+-
+ AC_ARG_ENABLE(liblightdm-qt5,
+ 	AS_HELP_STRING([--enable-liblightdm-qt5],[Enable LightDM client Qt5 libraries [[default=auto]]]),
+ 	[enable_liblightdm_qt5=$enableval],
+@@ -245,7 +211,6 @@ help/Makefile
+ liblightdm-gobject/liblightdm-gobject-1.pc
+ liblightdm-gobject/Makefile
+ liblightdm-qt/Makefile
+-liblightdm-qt/liblightdm-qt-3.pc
+ liblightdm-qt/liblightdm-qt5-3.pc
+ po/Makefile.in
+ src/Makefile
+@@ -268,7 +233,6 @@ echo "
+         User session:             $DEFAULT_USER_SESSION
+         GObject introspection:    $found_introspection
+         Vala bindings:            $enable_vala
+-        liblightdm-qt:            $compile_liblightdm_qt4
+         liblightdm-qt5:           $compile_liblightdm_qt5
+         libaudit support:         $use_libaudit
+         Enable tests:             $enable_tests
+--- lightdm-1.30.0.orig/liblightdm-qt/Makefile.am
++++ lightdm-1.30.0/liblightdm-qt/Makefile.am
+@@ -1,9 +1,6 @@
+ common_libadd = \
+ 	-L$(top_builddir)/liblightdm-gobject \
+ 	-llightdm-gobject-1
+-liblightdm_qt_3_la_LIBADD = \
+-	$(LIBLIGHTDM_QT4_LIBS) \
+-	$(common_libadd)
+ liblightdm_qt5_3_la_LIBADD = \
+ 	$(LIBLIGHTDM_QT5_LIBS) \
+ 	$(common_libadd)
+@@ -13,9 +10,6 @@ common_cflags = \
+ 	-I$(top_srcdir)/liblightdm-gobject \
+ 	$(GLIB_CFLAGS) \
+ 	-DQT_NO_KEYWORDS
+-liblightdm_qt_3_la_CXXFLAGS = \
+-	$(LIBLIGHTDM_QT4_CFLAGS) \
+-	$(common_cflags)
+ liblightdm_qt5_3_la_CXXFLAGS = \
+ 	-fPIC \
+ 	-DQT_DISABLE_DEPRECATED_BEFORE="QT_VERSION_CHECK(4, 0, 0)" \
+@@ -32,7 +26,6 @@ common_headers = \
+ 	QLightDM/sessionsmodel.h \
+ 	QLightDM/usersmodel.h
+ 
+-liblightdm_qt_3includedir=$(includedir)/lightdm-qt-3/QLightDM
+ liblightdm_qt5_3includedir=$(includedir)/lightdm-qt5-3/QLightDM
+ 
+ common_sources = \
+@@ -59,13 +52,6 @@ lib_LTLIBRARIES =
+ BUILT_SOURCES =
+ pkgconfig_DATA =
+ 
+-if COMPILE_LIBLIGHTDM_QT4
+-lib_LTLIBRARIES += liblightdm-qt-3.la
+-liblightdm_qt_3include_HEADERS = $(common_headers)
+-BUILT_SOURCES += $(common_sources:.cpp=_moc4.cpp)
+-pkgconfig_DATA += liblightdm-qt-3.pc
+-endif
+-
+ if COMPILE_LIBLIGHTDM_QT5
+ lib_LTLIBRARIES += liblightdm-qt5-3.la
+ liblightdm_qt5_3include_HEADERS = $(common_headers)
+@@ -74,12 +60,6 @@ pkgconfig_DATA += liblightdm-qt5-3.pc
+ endif
+ 
+ # Support pretty printing MOC
+-AM_V_MOC4 = $(am__v_MOC4_$(V))
+-am__v_MOC4_ = $(am__v_MOC4_$(AM_DEFAULT_VERBOSITY))
+-am__v_MOC4_0 = @echo "  MOC4    " $@;
+-%_moc4.cpp: QLightDM/%.h
+-	$(AM_V_MOC4) $(MOC4) $< -o $@
+-
+ AM_V_MOC5 = $(am__v_MOC5_$(V))
+ am__v_MOC5_ = $(am__v_MOC5_$(AM_DEFAULT_VERBOSITY))
+ am__v_MOC5_0 = @echo "  MOC5    " $@;
+--- lightdm-1.30.0.orig/tests/Makefile.am
++++ lightdm-1.30.0/tests/Makefile.am
+@@ -297,42 +297,6 @@ TESTS += \
+ 	test-login-remote-session-python \
+ 	test-power-python
+ 
+-if COMPILE_LIBLIGHTDM_QT4
+-TESTS += \
+-	test-autologin-timeout-qt4 \
+-	test-autologin-guest-timeout-qt4 \
+-	test-autologin-session-timeout-qt4 \
+-	test-cancel-authentication-qt4 \
+-	test-login-qt4 \
+-	test-login-manual-qt4 \
+-	test-login-manual-previous-session-qt4 \
+-	test-login-no-password-qt4 \
+-	test-login-long-username-qt4 \
+-	test-login-long-password-qt4 \
+-	test-login-two-factor-qt4 \
+-	test-login-new-authtok-qt4 \
+-	test-login-info-prompt-qt4 \
+-	test-login-multi-info-prompt-qt4 \
+-	test-login-previous-session-qt4 \
+-	test-login-wrong-password-qt4 \
+-	test-login-invalid-user-qt4 \
+-	test-login-invalid-session-qt4 \
+-	test-login-logout-qt4 \
+-	test-login-pick-session-qt4 \
+-	test-login-remember-session-qt4 \
+-	test-login-manual-remember-session-qt4 \
+-	test-login-guest-qt4 \
+-	test-login-guest-pick-session-qt4 \
+-	test-login-guest-disabled-qt4 \
+-	test-login-guest-no-setup-script-qt4 \
+-	test-login-guest-fail-setup-script-qt4 \
+-	test-login-guest-logout-qt4 \
+-	test-login-remote-session-qt4 \
+-	test-sessions-qt4 \
+-	test-users-qt4 \
+-	test-power-qt4
+-endif
+-
+ if COMPILE_LIBLIGHTDM_QT5
+ TESTS += \
+ 	test-autologin-timeout-qt5 \
+@@ -377,7 +341,6 @@ EXTRA_DIST = \
+ 	data/greeters/test-gobject-greeter.desktop \
+ 	data/greeters/test-mir-greeter.desktop \
+ 	data/greeters/test-python-greeter.desktop \
+-	data/greeters/test-qt4-greeter.desktop \
+ 	data/greeters/test-qt5-greeter.desktop \
+ 	data/greeters/test-wayland-greeter.desktop \
+ 	data/keys.conf \
+--- lightdm-1.30.0.orig/tests/src/Makefile.am
++++ lightdm-1.30.0/tests/src/Makefile.am
+@@ -32,10 +32,6 @@ libsystem_la_LIBADD = -ldl $(GLIB_LIBS)
+ # but produces a shared library (instead of just a static library)
+ libsystem_la_LDFLAGS = -rpath /nowhere
+ 
+-if COMPILE_LIBLIGHTDM_QT4
+-noinst_PROGRAMS += test-qt4-greeter
+-endif
+-
+ if COMPILE_LIBLIGHTDM_QT5
+ noinst_PROGRAMS += test-qt5-greeter
+ endif
+@@ -137,30 +133,22 @@ test_script_hook_LDADD = \
+ 	$(GLIB_LIBS) \
+ 	$(GIO_UNIX_LIBS)
+ 
+-test-qt4-greeter_moc4.cpp: test-qt-greeter.h
+-	$(am__v_MOC4_$(V)) $(MOC4) $< -o $@
+ test-qt5-greeter_moc5.cpp: test-qt-greeter.h
+ 	$(am__v_MOC5_$(V)) $(MOC5) $< -o $@
+ common_qt_sources = test-qt-greeter.cpp test-qt-greeter.h status.c status.h
+-test_qt4_greeter_SOURCES = $(common_qt_sources)
+ test_qt5_greeter_SOURCES = $(common_qt_sources)
+-nodist_test_qt4_greeter_SOURCES = test-qt4-greeter_moc4.cpp
+ nodist_test_qt5_greeter_SOURCES = test-qt5-greeter_moc5.cpp
+ common_qt_cflags = \
+ 	$(WARN_CXXFLAGS) \
+ 	$(GLIB_CFLAGS) \
+ 	$(GIO_UNIX_CFLAGS) \
+ 	$(XCB_CFLAGS)
+-test_qt4_greeter_CFLAGS = $(common_qt_cflags)
+ test_qt5_greeter_CFLAGS = $(common_qt_cflags)
+ common_qt_cxxflags = \
+ 	-fPIC \
+ 	-DQT_DISABLE_DEPRECATED_BEFORE="QT_VERSION_CHECK(4, 0, 0)" \
+ 	-I$(top_srcdir)/liblightdm-qt \
+ 	$(GLIB_CFLAGS)
+-test_qt4_greeter_CXXFLAGS = \
+-	$(common_qt_cxxflags) \
+-	$(LIBLIGHTDM_QT4_CFLAGS)
+ test_qt5_greeter_CXXFLAGS = \
+ 	$(common_qt_cxxflags) \
+ 	$(LIBLIGHTDM_QT5_CFLAGS)
+@@ -171,10 +159,6 @@ common_qt_ldadd = \
+ 	$(GLIB_LIBS) \
+ 	$(GIO_UNIX_LIBS) \
+ 	$(XCB_LIBS)
+-test_qt4_greeter_LDADD = \
+-	$(common_qt_ldadd) \
+-	-llightdm-qt-3 \
+-	$(LIBLIGHTDM_QT4_LIBS)
+ test_qt5_greeter_LDADD = \
+ 	$(common_qt_ldadd) \
+ 	-llightdm-qt5-3 \
+@@ -224,16 +208,9 @@ vnc_client_LDADD = \
+ 	$(GIO_UNIX_LIBS)
+ 
+ CLEANFILES = \
+-	test-qt4-greeter_moc4.cpp \
+ 	test-qt5-greeter_moc5.cpp
+ 
+ # Support pretty printing MOC
+-AM_V_MOC4 = $(am__v_MOC4_$(V))
+-am__v_MOC4_ = $(am__v_MOC4_$(AM_DEFAULT_VERBOSITY))
+-am__v_MOC4_0 = @echo "  MOC4    " $@;
+-%_moc4.cpp: QLightDM/%.h
+-	$(AM_V_MOC4) $(MOC4) $< -o $@
+-
+ AM_V_MOC5 = $(am__v_MOC5_$(V))
+ am__v_MOC5_ = $(am__v_MOC5_$(AM_DEFAULT_VERBOSITY))
+ am__v_MOC5_0 = @echo "  MOC5    " $@;

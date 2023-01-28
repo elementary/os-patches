@@ -1,0 +1,17 @@
+Description: Fix ICEauthority error in guest session
+Author: Gunnar Hjalmarsson <gunnarhj@ubuntu.com>
+Bug-Ubuntu: https://launchpad.net/bugs/1921655
+Forwarded: https://github.com/canonical/lightdm/issues/185
+
+--- a/data/apparmor/lightdm-guest-session.in
++++ b/data/apparmor/lightdm-guest-session.in
+@@ -7,6 +7,9 @@
+   # Most applications are confined via the main abstraction
+   #include <abstractions/lightdm>
+ 
++  # Prevent ICEauthority error in e.g. MATE
++  owner /{,var/}run/user/[0-9]*/ICEauthority* l,
++
+   # chromium-browser needs special confinement due to its sandboxing
+   #include <abstractions/lightdm_chromium-browser>
+ 
