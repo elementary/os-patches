@@ -1,0 +1,118 @@
+--- a/src/seat-local.c
++++ b/src/seat-local.c
+@@ -175,9 +175,7 @@
+     if (command)
+         x_server_local_set_command (x_server, command);
+ 
+-    g_autofree gchar *number = g_strdup_printf ("%d", x_server_get_display_number (X_SERVER (x_server)));
+-    g_autoptr(XAuthority) cookie = x_authority_new_local_cookie (number);
+-    x_server_set_authority (X_SERVER (x_server), cookie);
++    x_server_set_local_authority (X_SERVER (x_server));
+ 
+     const gchar *layout = seat_get_string_property (SEAT (seat), "xserver-layout");
+     if (layout)
+--- a/src/seat-xvnc.c
++++ b/src/seat-xvnc.c
+@@ -57,9 +57,7 @@
+ 
+     g_autoptr(XServerXVNC) x_server = x_server_xvnc_new ();
+     priv->x_server = g_object_ref (x_server);
+-    g_autofree gchar *number = g_strdup_printf ("%d", x_server_get_display_number (X_SERVER (x_server)));
+-    g_autoptr(XAuthority) cookie = x_authority_new_local_cookie (number);
+-    x_server_set_authority (X_SERVER (x_server), cookie);
++    x_server_set_local_authority (X_SERVER (x_server));
+     x_server_xvnc_set_socket (x_server, g_socket_get_fd (priv->connection));
+ 
+     const gchar *command = config_get_string (config_get_instance (), "VNCServer", "command");
+--- a/src/x-authority.c
++++ b/src/x-authority.c
+@@ -65,14 +65,6 @@
+     return x_authority_new (family, address, address_length, number, "MIT-MAGIC-COOKIE-1", cookie, 16);
+ }
+ 
+-XAuthority *
+-x_authority_new_local_cookie (const gchar *number)
+-{
+-    gchar hostname[1024];
+-    gethostname (hostname, 1024);
+-    return x_authority_new_cookie (XAUTH_FAMILY_LOCAL, (guint8 *) hostname, strlen (hostname), number);
+-}
+-
+ void
+ x_authority_set_family (XAuthority *auth, guint16 family)
+ {
+--- a/src/x-authority.h
++++ b/src/x-authority.h
+@@ -55,8 +55,6 @@
+ 
+ XAuthority *x_authority_new_cookie (guint16 family, const guint8 *address, gsize address_length, const gchar *number);
+ 
+-XAuthority *x_authority_new_local_cookie (const gchar *number);
+-
+ void x_authority_set_family (XAuthority *auth, guint16 family);
+ 
+ guint16 x_authority_get_family (XAuthority *auth);
+--- a/src/x-server.c
++++ b/src/x-server.c
+@@ -27,6 +27,9 @@
+     /* Authority */
+     XAuthority *authority;
+ 
++    /* Cached hostname for the authority */
++    gchar local_hostname[1024];
++
+     /* Connection to this X server */
+     xcb_connection_t *connection;
+ } XServerPrivate;
+@@ -91,6 +94,21 @@
+         priv->authority = g_object_ref (authority);
+ }
+ 
++void
++x_server_set_local_authority (XServer *server)
++{
++    XServerPrivate *priv = x_server_get_instance_private (server);
++
++    g_return_if_fail (server != NULL);
++
++    g_clear_object (&priv->authority);
++    char display_number[12];
++    g_snprintf(display_number, sizeof(display_number), "%d", x_server_get_display_number (server));
++
++    gethostname (priv->local_hostname, 1024);
++    priv->authority = x_authority_new_cookie (XAUTH_FAMILY_LOCAL, (guint8 *) priv->local_hostname, strlen (priv->local_hostname), display_number);
++}
++
+ XAuthority *
+ x_server_get_authority (XServer *server)
+ {
+@@ -108,7 +126,17 @@
+ static gboolean
+ x_server_get_can_share (DisplayServer *server)
+ {
+-    return TRUE;
++    XServerPrivate *priv = x_server_get_instance_private ((XServer*) server);
++    gchar actual_local_hostname[1024];
++
++    g_return_val_if_fail (server != NULL, FALSE);
++
++    if (priv->local_hostname[0] == '\0')
++        return TRUE;
++
++    gethostname (actual_local_hostname, 1024);
++    return g_strcmp0 (actual_local_hostname, priv->local_hostname) == 0;
++
+ }
+ 
+ static gboolean
+--- a/src/x-server.h
++++ b/src/x-server.h
+@@ -55,6 +55,8 @@
+ 
+ void x_server_set_authority (XServer *server, XAuthority *authority);
+ 
++void x_server_set_local_authority (XServer *server);
++
+ XAuthority *x_server_get_authority (XServer *server);
+ 
+ G_END_DECLS
