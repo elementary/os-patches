@@ -63,7 +63,7 @@ update_languages (void)
     if (have_languages)
         return;
 
-    const gchar *command = "locale -a";
+    const gchar *command = "/usr/share/language-tools/language-options";
     g_autofree gchar *stdout_text = NULL;
     g_autofree gchar *stderr_text = NULL;
     gint exit_status;
@@ -150,14 +150,30 @@ get_locale_name (const gchar *code)
 LightDMLanguage *
 lightdm_get_language (void)
 {
-    const gchar *lang = g_getenv ("LANG");
-    if (!lang)
-        return NULL;
+    static const gchar *short_lang = NULL;
+    if (!short_lang)
+    {
+        const gchar *lang = g_getenv ("LANG");
+        if (!lang)
+            return NULL;
+
+        /* Convert to a short form language code */
+        g_autofree gchar *command = g_strconcat ("/usr/share/language-tools/language-validate ", lang, NULL);
+        g_autofree gchar *out = NULL;
+        g_autoptr(GError) error = NULL;
+        if (g_spawn_command_line_sync (command, &out, NULL, NULL, &error))
+            short_lang = g_strdup (g_strchomp (out));
+        else
+        {
+            g_warning ("Failed to run '%s': %s", command, error->message);
+            return NULL;
+        }
+    }
 
     for (GList *link = lightdm_get_languages (); link; link = link->next)
     {
         LightDMLanguage *language = link->data;
-        if (lightdm_language_matches (language, lang))
+        if (lightdm_language_matches (language, short_lang))
             return language;
     }
 

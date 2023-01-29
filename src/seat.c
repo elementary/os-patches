@@ -987,7 +987,10 @@ configure_session (Session *session, SessionConfig *config, const gchar *session
     }
     if (language && language[0] != '\0')
     {
-        session_set_env (session, "LANG", language);
+        /* Only set LANGUAGE if not in a live session
+           https://launchpad.net/bugs/1861481 */
+        if (system ("df | grep -q ^/cow") != 0)
+            session_set_env (session, "LANGUAGE", language);
         session_set_env (session, "GDM_LANG", language);
     }
 }
