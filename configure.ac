@@ -29,7 +29,6 @@ if test "x$GCC" = xyes; then
                  -Werror=pointer-arith \
                  -Werror=init-self \
                  -Werror=format-security \
-                 -Werror=format=2 \
                  -Werror=missing-include-dirs"
     WARN_CXXFLAGS="-Wall"
 fi
