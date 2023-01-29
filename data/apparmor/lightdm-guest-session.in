@@ -7,6 +7,9 @@
   # Most applications are confined via the main abstraction
   #include <abstractions/lightdm>
 
+  # Prevent ICEauthority error in e.g. MATE
+  owner /{,var/}run/user/[0-9]*/ICEauthority* l,
+
   # chromium-browser needs special confinement due to its sandboxing
   #include <abstractions/lightdm_chromium-browser>
 
