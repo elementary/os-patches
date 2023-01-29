@@ -1014,7 +1014,12 @@ create_user_session (Seat *seat, const gchar *username, gboolean autostart)
     if (autostart)
     {
         const gchar *autologin_session_name = seat_get_string_property (seat, "autologin-session");
-        if (autologin_session_name)
+        /* Workaround faulty setting from Ubuntu user-setup package
+         * See https://bugs.launchpad.net/bugs/1484083
+         */
+        if (autologin_session_name && strcmp (autologin_session_name, "lightdm-autologin") == 0)
+            l_debug (seat, "Ignoring invalid autologin-session option (LP: #1484083)");
+        else if (autologin_session_name)
             session_name = autologin_session_name;
     }
 
