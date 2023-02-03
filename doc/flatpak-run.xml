@@ -1,0 +1,739 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<refentry id="flatpak-run">
+
+    <refentryinfo>
+        <title>flatpak run</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak run</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-run</refname>
+        <refpurpose>Run an application or open a shell in a runtime</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak run</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="plain">REF</arg>
+                <arg choice="opt" rep="repeat">ARG</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            If <arg choice="plain">REF</arg> names an installed application,
+            flatpak runs the application in a sandboxed environment. Extra
+            arguments are passed on to the application.
+        </para>
+        <para>
+            If <arg choice="plain">REF</arg> names a runtime, a shell is opened in the
+            runtime. This is useful for development and testing.
+        </para>
+        <para>
+            By default, flatpak will look for the application or runtime in all per-user
+            and system installations. This can be overridden with the <option>--user</option>,
+            <option>--system</option> and <option>--installation</option> options.
+        </para>
+        <para>
+            flatpak creates a sandboxed environment for the application to run in
+            by mounting the right runtime at <filename>/usr</filename> and a writable
+            directory at <filename>/var</filename>, whose content is preserved between
+            application runs. The application itself is mounted at <filename>/app</filename>.
+        </para>
+        <para>
+            The details of the sandboxed environment are controlled by the application
+            metadata and various options like <option>--share</option> and <option>--socket</option>
+            that are passed to the run command: Access is allowed if it was requested either
+            in the application metadata file or with an option and the user hasn't overridden it.
+        </para>
+        <para>
+            The remaining arguments are passed to the command that gets run in the sandboxed
+            environment. See the <option>--file-forwarding</option> option for handling of file
+            arguments.
+        </para>
+        <para>
+            Environment variables are generally passed on to the sandboxed application, with
+            certain exceptions. The application metadata can override environment variables,
+            as well as the <option>--env</option> option. Apart from that, Flatpak always
+            unsets or overrides the following variables, since their session values
+            are likely to interfere with the functioning of the sandbox:
+        </para>
+        <simplelist>
+            <member>PATH</member>
+            <member>LD_LIBRARY_PATH</member>
+            <member>XDG_CONFIG_DIRS</member>
+            <member>XDG_DATA_DIRS</member>
+            <member>SHELL</member>
+            <member>TMPDIR</member>
+            <member>PYTHONPATH</member>
+            <member>PERLLIB</member>
+            <member>PERL5LIB</member>
+            <member>XCURSOR_PATH</member>
+        </simplelist>
+        <para>
+            Flatpak also overrides the XDG environment variables to point sandboxed applications
+            at their writable filesystem locations below <filename>~/.var/app/$APPID/</filename>:
+        </para>
+        <simplelist>
+            <member>XDG_DATA_HOME</member>
+            <member>XDG_CONFIG_HOME</member>
+            <member>XDG_CACHE_HOME</member>
+        </simplelist>
+        <para>
+            The host values of these variables are made available inside the sandbox via these
+            HOST_-prefixed variables:
+        </para>
+        <simplelist>
+            <member>HOST_XDG_DATA_HOME</member>
+            <member>HOST_XDG_CONFIG_HOME</member>
+            <member>HOST_XDG_CACHE_HOME</member>
+        </simplelist>
+        <para>
+            Flatpak sets the environment variable <envar>FLATPAK_ID</envar> to the application
+            ID of the running app.
+        </para>
+        <para>
+            Flatpak also bind-mounts as read-only the host's <filename>/etc/os-release</filename>
+            (if available, or <filename>/usr/lib/os-release</filename> as a fallback) to
+            <filename>/run/host/os-release</filename> in accordance with the
+            <ulink url="https://www.freedesktop.org/software/systemd/man/os-release.html">
+            os-release specification</ulink>.
+        </para>
+        <para>
+            If parental controls support is enabled, flatpak will check the
+            current user’s parental controls settings, and will refuse to
+            run an app if it is blocklisted for the current user.
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    Look for the application and runtime in per-user installations.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    Look for the application and runtime in the default system-wide installations.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    Look for the application and runtime in the system-wide installation specified
+                    by <arg choice="plain">NAME</arg>
+                    among those defined in <filename>/etc/flatpak/installations.d/</filename>.
+                    Using <option>--installation=default</option> is equivalent to using
+                    <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--arch=ARCH</option></term>
+
+                <listitem><para>
+                    The architecture to run. See <command>flatpak --supported-arches</command>
+                    for architectures supported by the host.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--command=COMMAND</option></term>
+
+                <listitem><para>
+                    The command to run instead of the one listed in the application metadata.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--cwd=DIR</option></term>
+
+                <listitem><para>
+                    The directory to run the command in. Note that this must be a directory
+                    inside the sandbox.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--branch=BRANCH</option></term>
+
+                <listitem><para>
+                    The branch to use.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-d</option></term>
+                <term><option>--devel</option></term>
+
+                <listitem><para>
+                    Use the devel runtime that is specified in the application metadata instead of the regular runtime, and use a seccomp profile that is less likely to break development tools.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--runtime=RUNTIME</option></term>
+
+                <listitem><para>
+                  Use this runtime instead of the one that is specified in the application metadata.
+                  This is a full tuple, like for example <arg choice="plain">org.freedesktop.Sdk/x86_64/1.2</arg>, but
+                  partial tuples are allowed. Any empty or missing parts are filled in with the corresponding
+                  values specified by the app.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--runtime-version=VERSION</option></term>
+
+                <listitem><para>
+                  Use this version of the runtime instead of the one that is specified in the application metadata.
+                  This overrides any version specified with the --runtime option.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--share=SUBSYSTEM</option></term>
+
+                <listitem><para>
+                    Share a subsystem with the host session. This overrides
+                    the Context section from the application metadata.
+                    <arg choice="plain">SUBSYSTEM</arg> must be one of: network, ipc.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--unshare=SUBSYSTEM</option></term>
+
+                <listitem><para>
+                    Don't share a subsystem with the host session. This overrides
+                    the Context section from the application metadata.
+                    <arg choice="plain">SUBSYSTEM</arg> must be one of: network, ipc.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--socket=SOCKET</option></term>
+
+                <listitem><para>
+                    Expose a well known socket to the application. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
+                    ssh-auth, pcsc, cups.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--nosocket=SOCKET</option></term>
+
+                <listitem><para>
+                    Don't expose a well known socket to the application. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
+                    ssh-auth, pcsc, cups.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--device=DEVICE</option></term>
+
+                <listitem><para>
+                    Expose a device to the application. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">DEVICE</arg> must be one of: dri, kvm, shm, all.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--nodevice=DEVICE</option></term>
+
+                <listitem><para>
+                    Don't expose a device to the application. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">DEVICE</arg> must be one of: dri, kvm, shm, all.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--allow=FEATURE</option></term>
+
+                <listitem><para>
+                    Allow access to a specific feature. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">FEATURE</arg> must be one of: devel, multiarch, bluetooth.
+                    This option can be used multiple times.
+                    </para><para>
+                    See <citerefentry><refentrytitle>flatpak-build-finish</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+                    for the meaning of the various features.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--disallow=FEATURE</option></term>
+
+                <listitem><para>
+                    Disallow access to a specific feature. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">FEATURE</arg> must be one of: devel, multiarch, bluetooth.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--filesystem=FILESYSTEM</option></term>
+
+                <listitem><para>
+                    Allow the application access to a subset of the filesystem.
+                    This overrides to the Context section from the application metadata.
+                    <arg choice="plain">FILESYSTEM</arg> can be one of: home, host, host-os, host-etc, xdg-desktop, xdg-documents, xdg-download,
+                    xdg-music, xdg-pictures, xdg-public-share, xdg-templates, xdg-videos,
+                    xdg-run, xdg-config, xdg-cache, xdg-data,
+                    an absolute path, or a homedir-relative path like ~/dir or paths
+                    relative to the xdg dirs, like xdg-download/subdir.
+                    The optional :ro suffix indicates that the location will be read-only.
+                    The optional :create suffix indicates that the location will be read-write and created if it doesn't exist.
+                    This option can be used multiple times.
+                    See the "[Context] filesystems" list in
+                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+                    for details of the meanings of these filesystems.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--nofilesystem=FILESYSTEM</option></term>
+
+                <listitem><para>
+                    Undo the effect of a previous
+                    <option>--filesystem=</option><arg choice="plain">FILESYSTEM</arg>
+                    in the app's manifest and/or the overrides set up with
+                    <citerefentry><refentrytitle>flatpak-override</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+                    This overrides the Context section of the
+                    application metadata.
+                    <arg choice="plain">FILESYSTEM</arg> can take the same
+                    values as for <option>--filesystem</option>, but the
+                    <arg choice="plain">:ro</arg> and
+                    <arg choice="plain">:create</arg> suffixes are not
+                    used here.
+                    This option can be used multiple times.
+                </para><para>
+                    This option does not prevent access to a more
+                    narrowly-scoped <option>--filesystem</option>.
+                    For example, if an application has the equivalent of
+                    <option>--filesystem=xdg-config/MyApp</option> in
+                    its manifest or as a system-wide override, and
+                    <literal>flatpak override --user --nofilesystem=home</literal>
+                    as a per-user override, then it will be prevented from
+                    accessing most of the home directory, but it will still
+                    be allowed to access
+                    <filename>$XDG_CONFIG_HOME/MyApp</filename>.
+                </para><para>
+                    As a special case,
+                    <option>--nofilesystem=host:reset</option>
+                    will ignore all <option>--filesystem</option>
+                    permissions inherited from the app manifest or
+                    <citerefentry><refentrytitle>flatpak-override</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+                    in addition to having the behaviour of
+                    <option>--nofilesystem=host</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--add-policy=SUBSYSTEM.KEY=VALUE</option></term>
+
+                <listitem><para>
+                    Add generic policy option. For example, "--add-policy=subsystem.key=v1 --add-policy=subsystem.key=v2" would map to this metadata:
+<programlisting>
+[Policy subsystem]
+key=v1;v2;
+</programlisting>
+                </para></listitem>
+                <listitem><para>
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--remove-policy=SUBSYSTEM.KEY=VALUE</option></term>
+
+                <listitem><para>
+                    Remove generic policy option. This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--env=VAR=VALUE</option></term>
+
+                <listitem><para>
+                    Set an environment variable in the application.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--unset-env=VAR</option></term>
+
+                <listitem><para>
+                    Unset an environment variable in the application.
+                    This overrides the unset-environment entry in the [Context]
+                    group of the metadata, and the [Environment] group.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--env-fd=<replaceable>FD</replaceable></option></term>
+
+                <listitem><para>
+                    Read environment variables from the file descriptor
+                    <replaceable>FD</replaceable>, and set them as if
+                    via <option>--env</option>. This can be used to avoid
+                    environment variables and their values becoming visible
+                    to other users.
+                </para><para>
+                    Each environment variable is in the form
+                    <replaceable>VAR</replaceable>=<replaceable>VALUE</replaceable>
+                    followed by a zero byte. This is the same format used by
+                    <literal>env -0</literal> and
+                    <filename>/proc/*/environ</filename>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--own-name=NAME</option></term>
+
+                <listitem><para>
+                    Allow the application to own the well known name <arg choice="plain">NAME</arg> on the session bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to own all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--talk-name=NAME</option></term>
+
+                <listitem><para>
+                    Allow the application to talk to the well known name <arg choice="plain">NAME</arg> on the session bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to talk to all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-talk-name=NAME</option></term>
+
+                <listitem><para>
+                    Don't allow the application to talk to the well known name <arg choice="plain">NAME</arg> on the session bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to talk to all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system-own-name=NAME</option></term>
+
+                <listitem><para>
+                    Allow the application to own the well known name <arg choice="plain">NAME</arg> on the system bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to own all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system-talk-name=NAME</option></term>
+
+                <listitem><para>
+                    Allow the application to talk to the well known name <arg choice="plain">NAME</arg> on the system bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to talk to all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system-no-talk-name=NAME</option></term>
+
+                <listitem><para>
+                    Don't allow the application to talk to the well known name <arg choice="plain">NAME</arg> on the system bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to talk to all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--persist=FILENAME</option></term>
+
+                <listitem><para>
+                    If the application doesn't have access to the real homedir, make the (homedir-relative) path
+                    <arg choice="plain">FILENAME</arg> a bind mount to the corresponding path in the per-application directory,
+                    allowing that location to be used for persistent data.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-session-bus</option></term>
+
+                <listitem><para>
+                    Run this instance without the filtered access to the session dbus connection. Note, this is the default when run with --sandbox.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--session-bus</option></term>
+
+                <listitem><para>
+                  Allow filtered access to the session dbus connection. This is the default, except when run with --sandbox.
+                  </para><para>
+                  Isandbox mode, even if you allow access to the session bus the sandbox cannot talk to or own
+                  the application ids (org.the.App.*) on the bus (unless explicitly added), only names in the
+                  .Sandbox subset (org.the.App.Sandbox.*).
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-a11y-bus</option></term>
+
+                <listitem><para>
+                    Run this instance without the access to the accessibility bus. Note, this is the default when run with --sandbox.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--a11y-bus</option></term>
+
+                <listitem><para>
+                    Allow access to the accessibility bus. This is the default, except when run with --sandbox.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--sandbox</option></term>
+
+                <listitem><para>
+                  Run the application in sandboxed mode, which means dropping all the extra permissions it would otherwise have, as
+                  well as access to the session/system/a11y busses and document portal.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--log-session-bus</option></term>
+
+                <listitem><para>
+                    Log session bus traffic. This can be useful to see what access you need to allow in
+                    your D-Bus policy.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--log-system-bus</option></term>
+
+                <listitem><para>
+                    Log system bus traffic. This can be useful to see what access you need to allow in
+                    your D-Bus policy.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-p</option></term>
+                <term><option>--die-with-parent</option></term>
+
+                <listitem><para>
+                    Kill the entire sandbox when the launching process dies.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--parent-pid=PID</option></term>
+
+                <listitem><para>
+                    Specifies the pid of the "parent" flatpak, used by
+                    --parent-expose-pids and --parent-share-pids.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--parent-expose-pids</option></term>
+
+                <listitem><para>
+                    Make the processes of the new sandbox visible in the sandbox of the parent flatpak, as defined
+                    by --parent-pid.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--parent-share-pids</option></term>
+
+                <listitem><para>
+                    Use the same process ID namespace for the processes of
+                    the new sandbox and the sandbox of the parent flatpak, as
+                    defined by --parent-pid. Implies --parent-expose-pids.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--instance-id-fd</option></term>
+
+                <listitem><para>
+                    Write the instance ID string to the given file descriptor.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--file-forwarding</option></term>
+
+                <listitem><para>
+                    If this option is specified, the remaining arguments are scanned, and all arguments
+                    that are enclosed between a pair of '@@' arguments are interpreted as file paths,
+                    exported in the document store, and passed to the command in the form of the
+                    resulting document path. Arguments between '@@u' and '@@' are considered uris,
+                    and any file: uris are exported. The exports are non-persistent and with read and write
+                    permissions for the application.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--app-path=<replaceable>PATH</replaceable></option></term>
+                <listitem><para>
+                    Instead of mounting the app's content on
+                    <filename>/app</filename> in the sandbox, mount
+                    <replaceable>PATH</replaceable> on <filename>/app</filename>,
+                    and the app's content on
+                    <filename>/run/parent/app</filename>.
+                    If the app has extensions, they will also be redirected
+                    into <filename>/run/parent/app</filename>, and will not
+                    be included in the <envar>LD_LIBRARY_PATH</envar> inside
+                    the sandbox.
+                </para></listitem>
+            </varlistentry>
+            <varlistentry>
+                <term><option>--app-path=</option></term>
+                <listitem><para>
+                    As a special case, <option>--app-path=</option>
+                    (with an empty <replaceable>PATH</replaceable>)
+                    results in an empty directory being mounted on
+                    <filename>/app</filename>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--usr-path=<replaceable>PATH</replaceable></option></term>
+                <listitem><para>
+                    Instead of mounting the runtime's files on
+                    <filename>/usr</filename> in the sandbox, mount
+                    <replaceable>PATH</replaceable> on
+                    <filename>/usr</filename>,
+                    and the runtime's normal files on
+                    <filename>/run/parent/usr</filename>.
+                    If the runtime has extensions, they will also be redirected
+                    into <filename>/run/parent/usr</filename>, and will not
+                    be included in the <envar>LD_LIBRARY_PATH</envar> inside
+                    the sandbox.
+                </para></listitem>
+                <listitem><para>
+                    This option will usually only be useful if it is
+                    combined with <option>--app-path=</option> and
+                    <option>--env=LD_LIBRARY_PATH=<replaceable>...</replaceable></option>.
+                </para></listitem>
+            </varlistentry>
+
+        </variablelist>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak run org.gnome.gedit</command>
+        </para>
+        <para>
+            <command>$ flatpak run --devel --command=bash org.gnome.Builder</command>
+        </para>
+        <para>
+            <command>$ flatpak run --command=bash org.gnome.Sdk</command>
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+        <para>
+            <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-override</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-enter</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
+
+    </refsect1>
+
+</refentry>

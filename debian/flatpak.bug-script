@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+if [ -d /usr/share/bug/bubblewrap ]; then
+    if [ -x /usr/share/bug/bubblewrap/script ]; then
+        /usr/share/bug/bubblewrap/script
+    fi
+elif [ -x /usr/share/bug/bubblewrap ]; then
+    /usr/share/bug/bubblewrap
+fi

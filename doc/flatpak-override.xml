@@ -1,0 +1,458 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<refentry id="flatpak-override">
+
+    <refentryinfo>
+        <title>flatpak override</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak override</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-override</refname>
+        <refpurpose>Override application requirements</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak override</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="opt">APP</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            Overrides the application specified runtime requirements. This can be used
+            to grant a sandboxed application more or less resources than it requested.
+        </para>
+        <para>
+            By default the application gets access to the resources it
+            requested when it is started. But the user can override it
+            on a particular instance by specifying extra arguments to
+            flatpak run, or every time by using flatpak override.
+        </para>
+        <para>
+            If the application id is not specified then the overrides affect all applications,
+            but the per-application overrides can override the global overrides.
+        </para>
+        <para>
+            Unless overridden with the <option>--user</option> or <option>--installation</option> options, this command
+            changes the default system-wide installation.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    Update a per-user installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    Update the default system-wide installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    Updates a system-wide installation specified by <arg choice="plain">NAME</arg>
+                    among those defined in <filename>/etc/flatpak/installations.d/</filename>.
+                    Using <option>--installation=default</option> is equivalent to using
+                    <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--share=SUBSYSTEM</option></term>
+
+                <listitem><para>
+                    Share a subsystem with the host session. This overrides
+                    the Context section from the application metadata.
+                    <arg choice="plain">SUBSYSTEM</arg> must be one of: network, ipc.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--unshare=SUBSYSTEM</option></term>
+
+                <listitem><para>
+                    Don't share a subsystem with the host session. This overrides
+                    the Context section from the application metadata.
+                    <arg choice="plain">SUBSYSTEM</arg> must be one of: network, ipc.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--socket=SOCKET</option></term>
+
+                <listitem><para>
+                    Expose a well-known socket to the application. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
+                    ssh-auth, pcsc, cups.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--nosocket=SOCKET</option></term>
+
+                <listitem><para>
+                    Don't expose a well-known socket to the application. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
+                    ssh-auth, pcsc, cups.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--device=DEVICE</option></term>
+
+                <listitem><para>
+                    Expose a device to the application. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">DEVICE</arg> must be one of: dri, kvm, shm, all.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--nodevice=DEVICE</option></term>
+
+                <listitem><para>
+                    Don't expose a device to the application. This overrides to
+                    the Context section from the application metadata.
+                    <arg choice="plain">DEVICE</arg> must be one of: dri, kvm, shm, all.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--allow=FEATURE</option></term>
+
+                <listitem><para>
+                    Allow access to a specific feature. This updates
+                    the [Context] group in the metadata.
+                    <arg choice="plain">FEATURE</arg> must be one of:
+                    devel, multiarch, bluetooth, canbus,
+                    per-app-dev-shm.
+                    This option can be used multiple times.
+                 </para><para>
+                    See <citerefentry><refentrytitle>flatpak-build-finish</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+                    for the meaning of the various features.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--disallow=FEATURE</option></term>
+
+                <listitem><para>
+                    Disallow access to a specific feature. This updates
+                    the [Context] group in the metadata.
+                    <arg choice="plain">FEATURE</arg> must be one of:
+                    devel, multiarch, bluetooth, canbus,
+                    per-app-dev-shm.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--filesystem=FILESYSTEM</option></term>
+
+                <listitem><para>
+                    Allow the application access to a subset of the filesystem.
+                    This overrides to the Context section from the application metadata.
+                    <arg choice="plain">FILESYSTEM</arg> can be one of: home, host, host-os, host-etc, xdg-desktop, xdg-documents, xdg-download,
+                    xdg-music, xdg-pictures, xdg-public-share, xdg-templates, xdg-videos, xdg-run,
+                    xdg-config, xdg-cache, xdg-data,
+                    an absolute path, or a homedir-relative path like ~/dir or paths
+                    relative to the xdg dirs, like xdg-download/subdir.
+                    The optional :ro suffix indicates that the location will be read-only.
+                    The optional :create suffix indicates that the location will be read-write and created if it doesn't exist.
+                    This option can be used multiple times.
+                    See the "[Context] filesystems" list in
+                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+                    for details of the meanings of these filesystems.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--nofilesystem=FILESYSTEM</option></term>
+
+                <listitem><para>
+                    Undo the effect of a previous
+                    <option>--filesystem=</option><arg choice="plain">FILESYSTEM</arg>
+                    in the app's manifest or a lower-precedence layer of
+                    overrides, and/or remove a previous
+                    <option>--filesystem=</option><arg choice="plain">FILESYSTEM</arg>
+                    from this layer of overrides.
+                    This overrides the Context section of the
+                    application metadata.
+                    <arg choice="plain">FILESYSTEM</arg> can take the same
+                    values as for <option>--filesystem</option>, but the
+                    <arg choice="plain">:ro</arg> and
+                    <arg choice="plain">:create</arg> suffixes are not
+                    used here.
+                    This option can be used multiple times.
+                </para><para>
+                    This option does not prevent access to a more
+                    narrowly-scoped <option>--filesystem</option>.
+                    For example, if an application has the equivalent of
+                    <option>--filesystem=xdg-config/MyApp</option> in
+                    its manifest or as a system-wide override, and
+                    <literal>flatpak override --user --nofilesystem=home</literal>
+                    as a per-user override, then it will be prevented from
+                    accessing most of the home directory, but it will still
+                    be allowed to access
+                    <filename>$XDG_CONFIG_HOME/MyApp</filename>.
+                </para><para>
+                    As a special case,
+                    <option>--nofilesystem=host:reset</option>
+                    will ignore all <option>--filesystem</option>
+                    permissions inherited from the app manifest or a
+                    lower-precedence layer of overrides, in addition to
+                    having the behaviour of
+                    <option>--nofilesystem=host</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--add-policy=SUBSYSTEM.KEY=VALUE</option></term>
+
+                <listitem><para>
+                    Add generic policy option. For example, "--add-policy=subsystem.key=v1 --add-policy=subsystem.key=v2" would map to this metadata:
+<programlisting>
+[Policy subsystem]
+key=v1;v2;
+</programlisting>
+                </para></listitem>
+                <listitem><para>
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--remove-policy=SUBSYSTEM.KEY=VALUE</option></term>
+
+                <listitem><para>
+                    Remove generic policy option. This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--env=VAR=VALUE</option></term>
+
+                <listitem><para>
+                    Set an environment variable in the application.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--unset-env=VAR</option></term>
+
+                <listitem><para>
+                    Unset an environment variable in the application.
+                    This overrides the unset-environment entry in the [Context]
+                    group of the metadata, and the [Environment] group.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--env-fd=<replaceable>FD</replaceable></option></term>
+
+                <listitem><para>
+                    Read environment variables from the file descriptor
+                    <replaceable>FD</replaceable>, and set them as if
+                    via <option>--env</option>. This can be used to avoid
+                    environment variables and their values becoming visible
+                    to other users.
+                </para><para>
+                    Each environment variable is in the form
+                    <replaceable>VAR</replaceable>=<replaceable>VALUE</replaceable>
+                    followed by a zero byte. This is the same format used by
+                    <literal>env -0</literal> and
+                    <filename>/proc/*/environ</filename>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--own-name=NAME</option></term>
+
+                <listitem><para>
+                    Allow the application to own the well-known name <arg choice="plain">NAME</arg> on the session bus.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--talk-name=NAME</option></term>
+
+                <listitem><para>
+                    Allow the application to talk to the well-known name <arg choice="plain">NAME</arg> on the session bus.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-talk-name=NAME</option></term>
+
+                <listitem><para>
+                    Don't allow the application to talk to the well-known name <arg choice="plain">NAME</arg> on the session bus.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system-own-name=NAME</option></term>
+
+                <listitem><para>
+                    Allow the application to own the well known name <arg choice="plain">NAME</arg> on the system bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to own all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system-talk-name=NAME</option></term>
+
+                <listitem><para>
+                    Allow the application to talk to the well known name <arg choice="plain">NAME</arg> on the system bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to talk to all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system-no-talk-name=NAME</option></term>
+
+                <listitem><para>
+                    Don't allow the application to talk to the well known name <arg choice="plain">NAME</arg> on the system bus.
+                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to talk to all matching names.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--persist=FILENAME</option></term>
+
+                <listitem><para>
+                    If the application doesn't have access to the real homedir, make the (homedir-relative) path
+                    <arg choice="plain">FILENAME</arg> a bind mount to the corresponding path in the per-application directory,
+                    allowing that location to be used for persistent data.
+                    This overrides to the Context section from the application metadata.
+                    This option can be used multiple times.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--reset</option></term>
+
+                <listitem><para>
+                    Remove overrides. If an <arg choice="plain">APP</arg> is given, remove the overrides for that
+                    application, otherwise remove the global overrides.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--show</option></term>
+
+                <listitem><para>
+                    Shows overrides. If an <arg choice="plain">APP</arg> is given, shows the overrides for that
+                    application, otherwise shows the global overrides.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak override --nosocket=wayland org.gnome.gedit</command>
+        </para>
+        <para>
+            <command>$ flatpak override --filesystem=home org.mozilla.Firefox</command>
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+        <para>
+            <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-run</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
+
+    </refsect1>
+
+</refentry>

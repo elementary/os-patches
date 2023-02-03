@@ -1,0 +1,207 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<refentry id="flatpak-remote">
+
+    <refentryinfo>
+        <title>flatpak remote</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak remote</refentrytitle>
+        <manvolnum>5</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-remote</refname>
+        <refpurpose>Configuration for a remote</refpurpose>
+    </refnamediv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            Flatpak stores information about configured remotes for an installation location in
+            <filename>$installation/repo/config</filename>. For example, the remotes for the
+            default system-wide installation are in
+            <filename>$prefix/var/lib/flatpak/repo/config</filename>, and the remotes for the
+            per-user installation are in <filename>$HOME/.local/share/flatpak/repo/config</filename>.
+       </para>
+
+       <para>
+            Normally, it is not necessary to edit remote config files directly, the
+            <command>flatpak remote-modify</command> command should be used to change properties of remotes.
+       </para>
+
+       <para>
+            System-wide remotes can be statically preconfigured by dropping
+            flatpakref files into <filename>/etc/flatpak/remotes.d/</filename>.
+       </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>File format</title>
+
+        <para>
+            The remote config file format is using the same .ini file format that is used for systemd
+            unit files or application .desktop files.
+        </para>
+
+        <refsect2>
+            <title>[remote …]</title>
+            <para>
+                All the configuration for the the remote with name NAME is contained in the
+                [remote "NAME"] group.
+            </para>
+            <para>
+                The following keys are recognized by OSTree, among others:
+            </para>
+            <variablelist>
+                <varlistentry>
+                    <term><option>url</option> (string)</term>
+                    <listitem><para>
+                      The url for the remote. An URL of the form oci+https:// or oci+http://
+                      is a Flatpak extension that indicates that the remote is not an ostree
+                      repository, but is rather an URL to an index of OCI images that are stored
+                      within a container image registry.
+                    </para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>gpg-verify</option> (boolean)</term>
+                    <listitem><para>Whether to use GPG verification for content from this remote.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>gpg-verify-summary</option> (boolean)</term>
+                    <listitem>
+                        <para>Whether to use GPG verification for the summary of this remote.</para>
+                        <para>This is ignored if <option>collection-id</option> is set, as refs are verified in commit metadata in that case. Enabling <option>gpg-verify-summary</option> would break peer to peer distribution of refs.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>collection-id</option> (string)</term>
+                    <listitem><para>The globally unique identifier for the upstream collection repository, to allow mirrors to be grouped.</para></listitem>
+                </varlistentry>
+            </variablelist>
+            <para>
+                All flatpak-specific keys have a xa. prefix:
+            </para>
+            <variablelist>
+                <varlistentry>
+                    <term><option>xa.disable</option> (boolean)</term>
+                    <listitem><para>Whether the remote is disabled. Defaults to false.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.prio</option> (integer)</term>
+                    <listitem><para>The priority for the remote. This is used when listing remotes, and when
+                    searching them for the runtime needed by an app. The remote providing the app is
+                    searched for its runtime before others with equal priority. Defaults to 1.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.noenumerate</option> (boolean)</term>
+                    <listitem><para>Whether this remote should be ignored when presenting available apps/runtimes,
+                    or when searching for a runtime dependency. Defaults to false.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.nodeps</option> (boolean)</term>
+                    <listitem><para>Whether this remote should be excluded when searching for dependencies. Defaults to false.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.title</option> (string)</term>
+                    <listitem><para>An optional title to use when presenting this remote in a UI.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.title-is-set</option> (boolean)</term>
+                    <listitem><para>This key is set to true if <option>xa.title</option> has been explicitly set.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.comment</option> (string)</term>
+                    <listitem><para>An optional single-line comment to use when presenting this remote in a UI.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.comment-is-set</option> (boolean)</term>
+                    <listitem><para>This key is set to true if <option>xa.comment</option> has been explicitly set.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.description</option> (string)</term>
+                    <listitem><para>An optional full-paragraph of text to use when presenting this remote in a UI.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.description-is-set</option> (boolean)</term>
+                    <listitem><para>This key is set to true if <option>xa.description</option> has been explicitly set.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.homepage</option> (string)</term>
+                    <listitem><para>An optional URL that points to a website for this repository to use when presenting this remote in a UI.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.homepage-is-set</option> (boolean)</term>
+                    <listitem><para>This key is set to true if <option>xa.homepage</option> has been explicitly set.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.icon</option> (string)</term>
+                    <listitem><para>An optional URL that points to an icon for this repository to use when presenting this remote in a UI.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.icon-is-set</option> (boolean)</term>
+                    <listitem><para>This key is set to true if <option>xa.icon</option> has been explicitly set.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.default-branch</option> (string)</term>
+                    <listitem><para>The default branch to use when installing from this remote.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.default-branch-is-set</option> (boolean)</term>
+                    <listitem><para>This key is set to true if <option>xa.default-branch</option> has been explicitly set.</para></listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><option>xa.main-ref</option> (string)</term>
+                    <listitem><para>The main reference served by this remote. This is used for origin remotes of applications installed via a flatpakref file.</para></listitem>
+                </varlistentry>
+            </variablelist>
+        </refsect2>
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+<programlisting>
+[remote "gnome-nightly-apps"]
+gpg-verify=true
+gpg-verify-summary=true
+url=https://sdk.gnome.org/nightly/repo-apps/
+xa.title=GNOME Applications
+</programlisting>
+
+<programlisting>
+[remote "flathub"]
+gpg-verify=true
+gpg-verify-summary=false
+collection-id=org.flathub.Stable
+url=https://dl.flathub.org/repo/
+xa.title=Flathub
+</programlisting>
+
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+        <para>
+            <citerefentry><refentrytitle>flatpak-remote-modify</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
+
+    </refsect1>
+
+</refentry>

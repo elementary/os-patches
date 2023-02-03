@@ -1,0 +1,11 @@
+[Install Flatpak apps and runtimes]
+Identity=unix-group:sudo
+Action=org.freedesktop.Flatpak.app-install;org.freedesktop.Flatpak.runtime-install;org.freedesktop.Flatpak.app-uninstall;org.freedesktop.Flatpak.runtime-uninstall;org.freedesktop.Flatpak.modify-repo;
+ResultActive=yes
+
+[Override parental controls for Flatpak apps]
+Identity=unix-user:*
+Action=org.freedesktop.Flatpak.override-parental-controls
+ResultAny=auth_admin
+ResultActive=auth_admin
+ResultInactive=auth_admin

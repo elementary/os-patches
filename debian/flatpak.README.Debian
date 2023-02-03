@@ -1,0 +1,46 @@
+Flatpak in Debian
+=================
+
+Flathub
+-------
+
+Flathub is a reference app-store for Flatpak apps. It is not enabled by
+default in Debian, in order to keep the Debian distribution self-contained
+and entirely Free Software. See https://flatpak.org/setup/Debian/ for
+more information on how to add Flathub as a source of apps and runtimes.
+
+Note that Flathub includes both Free Software and non-Free apps.
+
+Adding Flatpak apps to search paths
+-----------------------------------
+
+This is mostly done automatically on systems that implement
+environment.d(5), and in particular systems that use systemd. It is also
+done automatically on systems that source /etc/profile.d.
+
+On systems that do not implement environment.d(5) or source
+/etc/profile.d, you will need to amend the XDG_DATA_DIRS environment
+variable so that desktop environments will find Flatpak apps. Add the
+following paths:
+
+- $XDG_DATA_HOME/flatpak/exports/share, for Flatpak apps installed in the
+  user's home directory (the default for $XDG_DATA_HOME is ~/.local/share)
+
+- /var/lib/flatpak/export/share, for Flatpak apps installed system-wide
+
+- The exports/share subdirectory of any extra installations configured in
+  /etc/flatpak/installations.d/ (see flatpak-installation(5) for details)
+
+If XDG_DATA_HOME is set to a non-default value, you might need to add
+$XDG_DATA_HOME/flatpak/exports/share to the search path yourself, or be
+careful with the order in which environment variables are set. Using the
+default is encouraged.
+
+On systems using GNOME's gdm display manager (the gdm3 Debian
+package), adding /usr/share/doc/flatpak/examples/etc/gdm3/flatpak.env
+to /etc/gdm3/env.d/ might be helpful. However, if you use other app
+frameworks that also need to amend the search path (such as Canonical's
+Snap), due to limitations in gdm's env.d mechanism, it will be necessary
+to construct a single search path that combines the search paths for
+Flatpak and the other app framework(s). environment.d(5) does not have
+these limitations, and is recommended.

@@ -1,0 +1,329 @@
+<!DOCTYPE node PUBLIC
+"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+
+<!--
+ Copyright (C) 2015 Red Hat, Inc.
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General
+ Public License along with this library; if not, write to the
+ Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ Boston, MA 02110-1301, USA.
+
+ Author: Alexander Larsson <alexl@redhat.com>
+-->
+
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+  <!--
+      org.freedesktop.Flatpak.SessionHelper:
+      @short_description: Flatpak session service
+
+      The Flatpak session service is used by the
+      <command>flatpak run</command> command
+      to bridge various resources from the host system into Flatpak
+      sandboxes. It is not intended to be contacted by third-party
+      applications or libraries.
+
+      This interface is provided on the D-Bus session bus by the
+      well-known D-Bus name org.freedesktop.Flatpak,
+      at the object path /org/freedesktop/Flatpak/SessionHelper.
+
+      Note that the service owning the org.freedesktop.Flatpak
+      well-known name also exports the
+      org.freedesktop.Flatpak.Development interface. As a result,
+      letting a sandboxed application contact that well-known name
+      is a sandbox escape, which must only be allowed for trusted
+      applications where there is not intended to be any security
+      boundary between sandbox and host system.
+
+      This documentation describes version 1 of this interface.
+  -->
+  <interface name='org.freedesktop.Flatpak.SessionHelper'>
+    <!--
+        version:
+
+        The API version number.
+        This documentation describes version 1 of this interface.
+    -->
+    <property name="version" type="u" access="read"/>
+
+    <!--
+        RequestSession:
+        @data: Information about the new session
+
+        Set up monitoring and resources for a
+        <command>flatpak run</command> session.
+        See the Flatpak source code for details.
+    -->
+    <method name="RequestSession">
+      <arg type='a{sv}' name='data' direction='out'/>
+    </method>
+  </interface>
+
+  <!--
+      org.freedesktop.Flatpak.Development:
+      @short_description: Flatpak development interface
+
+      The Development interface lets any client, possibly in a sandbox if
+      it has access to the session helper, spawn a process on the host,
+      outside any sandbox.
+
+      Clearly this is not something you typically want a sandboxed app to
+      do: it is a sandbox escape allowing arbitrary code execution,
+      and must not be allowed for applications where sandboxing is
+      intended to be a security boundary.
+
+      However, it is very useful when using Flatpak for distribution and
+      choice of runtime library stack, without intending to create a
+      security boundary. For instance, if an IDE like GNOME Builder is
+      distributed as a trusted Flatpak app and will be used to build other
+      Flatpak apps, it needs to use this facility to launch a Flatpak
+      build operation inside the sandbox, because otherwise recursive
+      calls to flatpak will not work.
+
+      This interface is provided on the D-Bus session bus by the
+      well-known D-Bus name org.freedesktop.Flatpak,
+      at the object path /org/freedesktop/Flatpak/Development.
+
+      This documentation describes version 1 of this interface.
+  -->
+  <interface name='org.freedesktop.Flatpak.Development'>
+    <!--
+        version:
+
+        The API version number.
+        This documentation describes version 1 of this interface.
+    -->
+    <property name="version" type="u" access="read"/>
+
+    <!--
+        HostCommand:
+        @cwd_path: the working directory for the new process
+        @argv: the argv for the new process, starting with the executable to launch
+        @fds: an array of file descriptors to pass to the new process
+        @envs: an array of variable/value pairs for the environment of the new process
+        @flags: flags
+        @pid: the PID of the new process
+
+        This method lets trusted applications (insider or outside a
+        sandbox) run arbitrary commands in the user's session, outside
+        any sandbox.
+
+        The following flags values are supported:
+
+        <variablelist>
+          <varlistentry>
+            <term>1 (FLATPAK_HOST_COMMAND_FLAGS_CLEAR_ENV)</term>
+            <listitem><para>
+              Clear the environment.
+            </para></listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>2 (FLATPAK_HOST_COMMAND_FLAGS_WATCH_BUS)</term>
+            <listitem><para>
+              Kill the sandbox when the caller disappears from the session bus.
+            </para></listitem>
+          </varlistentry>
+        </variablelist>
+
+        Unknown (unsupported) flags are an error and will cause HostCommand()
+        to fail.
+
+        Note that unlike org.freedesktop.portal.Flatpak.Spawn(), there
+        is no options parameter here.
+    -->
+    <method name="HostCommand">
+      <annotation name="org.gtk.GDBus.C.UnixFD" value="true"/>
+      <arg type='ay' name='cwd_path' direction='in'/>
+      <arg type='aay' name='argv' direction='in'/>
+      <arg type='a{uh}' name='fds' direction='in'/>
+      <arg type='a{ss}' name='envs' direction='in'/>
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='u' name='pid' direction='out'/>
+    </method>
+
+    <!--
+        HostCommandSignal:
+        @pid: the process ID on the host system
+        @signal: the signal to send (see <citerefentry><refentrytitle>signal</refentrytitle><manvolnum>7</manvolnum></citerefentry>)
+        @to_process_group: whether to send the signal to the process group
+
+        This method lets you send a Unix signal to a process
+        that was started with org.freedesktop.Flatpak.Development.HostCommand().
+        The @pid argument here must be a PID that was returned by a
+        call to HostCommand() from the same sender: terminating unrelated
+        processes is not allowed.
+    -->
+    <method name="HostCommandSignal">
+      <arg type='u' name='pid' direction='in'/>
+      <arg type='u' name='signal' direction='in'/>
+      <arg type='b' name='to_process_group' direction='in'/>
+    </method>
+
+    <!--
+        HostCommandExited:
+        @pid: the PID of the process that has ended
+        @exit_status: the wait status (see <citerefentry><refentrytitle>waitpid</refentrytitle><manvolnum>2</manvolnum></citerefentry>)
+
+        Emitted when a process started by
+        org.freedesktop.Flatpak.Development.HostCommand() exits.
+        Use g_spawn_check_exit_status(), or the macros such as
+        WIFEXITED documented in
+        <citerefentry><refentrytitle>waitpid</refentrytitle><manvolnum>2</manvolnum></citerefentry>,
+        to interpret the @exit_status.
+
+        This signal is not emitted for processes that were not launched
+        directly by HostCommand(), for example if a process launched by
+        HostCommand() runs foreground or background child processes.
+    -->
+    <signal name="HostCommandExited">
+      <arg type='u' name='pid' direction='out'/>
+      <arg type='u' name='exit_status' direction='out'/>
+    </signal>
+
+  </interface>
+
+  <!--
+      org.freedesktop.Flatpak.SystemHelper:
+      @short_description: Flatpak system service
+
+      The Flatpak system service is used by the libflatpak library
+      to manipulate Flatpak applications and runtimes that are installed
+      system-wide, for example when implementing
+      <command>flatpak install</command>.
+      It is not intended to be contacted by third-party applications
+      or libraries. See the Flatpak source code for more
+      details of this interface's methods.
+
+      This interface is provided on the D-Bus system bus by the
+      well-known D-Bus name org.freedesktop.Flatpak.SystemHelper,
+      at the object path /org/freedesktop/Flatpak/SystemHelper.
+
+      The system helper runs as a privileged user at the system level,
+      and receives method calls from less-privileged users.
+      Authorization for method calls on this interface is mediated by
+      polkit (formerly PolicyKit) using the policy configuration
+      org.freedesktop.Flatpak.policy, and can be configured by
+      system administrators in the same way as for any other system service
+      that uses polkit.
+  -->
+  <interface name='org.freedesktop.Flatpak.SystemHelper'>
+    <property name="version" type="u" access="read"/>
+
+    <method name="Deploy">
+      <arg type='ay' name='repo_path' direction='in'/>
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='ref' direction='in'/>
+      <arg type='s' name='origin' direction='in'/>
+      <arg type='as' name='subpaths' direction='in'/>
+      <arg type='as' name='previous_ids' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="DeployAppstream">
+      <arg type='ay' name='repo_path' direction='in'/>
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='origin' direction='in'/>
+      <arg type='s' name='arch' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="Uninstall">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='ref' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="InstallBundle">
+      <arg type='ay' name='bundle_path' direction='in'/>
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='remote' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+      <arg type='s' name='ref' direction='out'/>
+    </method>
+
+    <method name="ConfigureRemote">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='remote' direction='in'/>
+      <arg type='s' name='config' direction='in'/>
+      <arg type='ay' name='gpg_key' direction='in'>
+        <annotation name="org.gtk.GDBus.C.ForceGVariant" value="true"/>
+      </arg>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="Configure">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='key' direction='in'/>
+      <arg type='s' name='value' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="UpdateRemote">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='remote' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+      <arg type='ay' name='summary_path' direction='in'/>
+      <arg type='ay' name='summary_sig_path' direction='in'/>
+    </method>
+
+    <method name="RemoveLocalRef">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='remote' direction='in'/>
+      <arg type='s' name='ref' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="PruneLocalRepo">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="RunTriggers">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="EnsureRepo">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="UpdateSummary">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="GenerateOciSummary">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='origin' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+    </method>
+
+    <method name="CancelPull">
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+      <arg type='s' name='src_dir' direction='in'/>
+    </method>
+
+    <method name="GetRevokefsFd">
+      <annotation name="org.gtk.GDBus.C.UnixFD" value="true"/>
+      <arg type='u' name='flags' direction='in'/>
+      <arg type='s' name='installation' direction='in'/>
+      <arg type='h' name='fd_index' direction='out'/>
+      <arg type='s' name='src_dir' direction='out'/>
+    </method>
+
+  </interface>
+
+</node>
