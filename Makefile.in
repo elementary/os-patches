@@ -207,14 +207,15 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/subprojects/libglnx/libglnx.m4 \
 	$(top_srcdir)/m4/attributes.m4 $(top_srcdir)/m4/gettext.m4 \
-	$(top_srcdir)/m4/glibtests.m4 $(top_srcdir)/m4/iconv.m4 \
-	$(top_srcdir)/m4/intlmacosx.m4 $(top_srcdir)/m4/lib-ld.m4 \
-	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/nls.m4 \
-	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/glibtests.m4 $(top_srcdir)/m4/gtk-doc.m4 \
+	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/intlmacosx.m4 \
+	$(top_srcdir)/m4/lib-ld.m4 $(top_srcdir)/m4/lib-link.m4 \
+	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/po.m4 \
+	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -350,7 +351,8 @@ libflatpak_common_base_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libflatpak_common_base_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 libflatpak_common_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -1507,6 +1509,8 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEP_GPGME_CFLAGS = @DEP_GPGME_CFLAGS@
 DEP_GPGME_LIBS = @DEP_GPGME_LIBS@
+DEP_GPGME_PTHREAD_CFLAGS = @DEP_GPGME_PTHREAD_CFLAGS@
+DEP_GPGME_PTHREAD_LIBS = @DEP_GPGME_PTHREAD_LIBS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -1541,8 +1545,16 @@ GMSGFMT_015 = @GMSGFMT_015@
 GPGME_CONFIG = @GPGME_CONFIG@
 GPGME_PTHREAD_CFLAGS = @GPGME_PTHREAD_CFLAGS@
 GPGME_PTHREAD_LIBS = @GPGME_PTHREAD_LIBS@
+GPGRT_CONFIG = @GPGRT_CONFIG@
 GREP = @GREP@
+GTKDOC_CHECK = @GTKDOC_CHECK@
+GTKDOC_CHECK_PATH = @GTKDOC_CHECK_PATH@
+GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
+GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
+GTKDOC_MKPDF = @GTKDOC_MKPDF@
+GTKDOC_REBASE = @GTKDOC_REBASE@
 HIDDEN_VISIBILITY_CFLAGS = @HIDDEN_VISIBILITY_CFLAGS@
+HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -1678,6 +1690,7 @@ host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
 htmldir = @htmldir@
+http_backend = @http_backend@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -1869,10 +1882,11 @@ dist_triggers_SCRIPTS = \
 
 
 # This canonicalizes the PKG_CHECK_MODULES or AM_PATH_GPGME results
-INTERNAL_GPGME_CFLAGS = $(DEP_GPGME_CFLAGS) $(GPGME_PTHREAD_CFLAGS)
-INTERNAL_GPGME_LIBS = $(DEP_GPGME_LIBS) $(GPGME_PTHREAD_LIBS)
+INTERNAL_GPGME_CFLAGS = $(DEP_GPGME_CFLAGS) $(DEP_GPGME_PTHREAD_CFLAGS) $(GPGME_PTHREAD_CFLAGS)
+INTERNAL_GPGME_LIBS = $(DEP_GPGME_LIBS) $(DEP_GPGME_PTHREAD_LIBS) $(GPGME_PTHREAD_LIBS)
 lib_LTLIBRARIES = libflatpak.la
 libglnx_srcpath := $(srcdir)/subprojects/libglnx
+# This intentionally does not include AM_CFLAGS, libglnx always uses those
 libglnx_cflags := \
 	$(BASE_CFLAGS) \
 	"-I$(libglnx_srcpath)" \
@@ -2350,12 +2364,12 @@ flatpak_oci_authenticator_CFLAGS = \
 flatpak_oci_authenticator_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/oci-authenticator
 flatpak_validate_icon_SOURCES = icon-validator/validate-icon.c
 flatpak_validate_icon_LDADD = $(GDK_PIXBUF_LIBS)
-flatpak_validate_icon_CFLAGS = $(GDK_PIXBUF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\"
+flatpak_validate_icon_CFLAGS = $(AM_CFLAGS) $(GDK_PIXBUF_CFLAGS) -DLIBEXECDIR=\"$(libexecdir)\"
 revokefs_fuse_SOURCES = revokefs/main.c revokefs/writer.c revokefs/writer.h
-revokefs_fuse_CFLAGS = $(BASE_CFLAGS) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(FUSE_CFLAGS) -I$(srcdir)/libglnx
+revokefs_fuse_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(FUSE_CFLAGS)
 revokefs_fuse_LDADD = libglnx.la $(BASE_LIBS) $(FUSE_LIBS)
 revokefs_demo_SOURCES = revokefs/demo.c
-revokefs_demo_CFLAGS = $(BASE_CFLAGS)
+revokefs_demo_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS)
 revokefs_demo_LDADD = $(BASE_LIBS)
 @BUILD_SELINUX_MODULE_TRUE@selinux_moduledir = ${datadir}/selinux/packages
 @BUILD_SELINUX_MODULE_TRUE@selinux_module_DATA = $(NULL) \

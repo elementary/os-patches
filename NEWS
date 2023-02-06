@@ -1,3 +1,66 @@
+Changes in 1.14.2
+~~~~~~~~~~~~~~~~~
+Released: 2023-02-06
+
+Bug fixes:
+
+* Display the intended messages for `flatpak repair` (#5204)
+* Exporting an app to an existing repository on a CIFS filesystem
+  now works as intended (#5257)
+* Unset $GIO_EXTRA_MODULES for apps, avoiding misbehaviour in some GLib
+  apps when set to a path on the host (#5206)
+* Unset $XKB_CONFIG_ROOT for apps, avoiding crashes in GTK and Qt apps
+  under Wayland when this variable is set to a path not available in the
+  sandbox (#5194)
+* Unset $KRB5CCNAME for apps
+* When using the fish shell, avoid duplicate XDG_DATA_DIRS entries if the
+  profile script is sourced more than once (#5198)
+
+Internal changes:
+
+* The INFO log level is now treated the same as the DEBUG log level
+  by `flatpak -v`, to make backports from 1.15.x simpler
+
+Changes in 1.14.1
+~~~~~~~~~~~~~~~~~
+Released: 2022-11-18
+
+New features:
+
+* Add a httpbackend variable to flatpak.pc, allowing dependent projects
+  like GNOME Software to detect whether they are compatible with libflatpak
+  (#5054)
+
+Bug fixes:
+
+* Terminate the flatpak-session-helper and flatpak-portal services when the
+  session ends, so that applications will not inherit outdated Wayland
+  and X11 socket addresses (#5068)
+* When using `fish` shell, don't overwrite a previously-set XDG_DATA_DIRS
+  (#5123)
+* Don't try to enable HTTP 2 if linked to a libcurl version that doesn't
+  support it (#5074)
+* Stop systemd reporting the session-helper as failed when terminated by
+  a signal (#5129)
+* Fix a warning when listing a document with no permissions (#5055)
+* Fix compilation with GLib 2.66.x (as used in Debian 11) (#5062)
+* Fix compilation with GLib 2.58.x (as used in Debian 10) (#5066)
+* Fix a compiler warning on 32-bit architectures (#5148)
+* If an app update is blocked by parental controls policies, clean up the
+  temporary deploy directory (#5146)
+* Fix Autotools build with versions of gpgme that no longer provide
+  gpgme-config(1) (#5173)
+* When building with Autotools, be more consistent about applying compiler
+  warning flags (#5149)
+* Unset $TEMP, $TEMPDIR and $TMP for apps, the same as $TMPDIR (#5168)
+* Treat /efi the same as /boot/efi (#5155)
+* Make generated files more reproducible (#5085)
+* Translation updates: cs, id, pl, pt_BR (#5052, #5056, #5059, #5126)
+
+Internal changes:
+
+* Update project logo in README (#5119)
+
 Changes in 1.14.0
 ~~~~~~~~~~~~~~~~~
 Released: 2022-08-22

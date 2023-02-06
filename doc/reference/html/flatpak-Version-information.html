@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Version information: Flatpak Library Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="Flatpak Library Reference Manual">
+<link rel="up" href="ch01.html" title="Flatpak">
+<link rel="prev" href="flatpak-Error-codes.html" title="Error codes">
+<link rel="next" href="ch02.html" title="D-Bus APIs">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#flatpak-Version-information.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="flatpak-Error-codes.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="ch02.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="flatpak-Version-information"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="flatpak-Version-information.top_of_page"></a>Version information</span></h2>
+<p>Version information</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="flatpak-Version-information.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
+</colgroup>
+<tbody><tr>
+<td class="define_keyword">#define</td>
+<td class="function_name">
+<a class="link" href="flatpak-Version-information.html#FLATPAK-CHECK-VERSION:CAPS" title="FLATPAK_CHECK_VERSION()">FLATPAK_CHECK_VERSION</a><span class="c_punctuation">()</span>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="flatpak-Version-information.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="flatpak-Version-information.html#FLATPAK-MAJOR-VERSION:CAPS" title="FLATPAK_MAJOR_VERSION">FLATPAK_MAJOR_VERSION</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="flatpak-Version-information.html#FLATPAK-MINOR-VERSION:CAPS" title="FLATPAK_MINOR_VERSION">FLATPAK_MINOR_VERSION</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="flatpak-Version-information.html#FLATPAK-MICRO-VERSION:CAPS" title="FLATPAK_MICRO_VERSION">FLATPAK_MICRO_VERSION</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="flatpak-Version-information.description"></a><h2>Description</h2>
+<p>These macros can be used to check the library version in use.</p>
+</div>
+<div class="refsect1">
+<a name="flatpak-Version-information.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="FLATPAK-CHECK-VERSION:CAPS"></a><h3>FLATPAK_CHECK_VERSION()</h3>
+<pre class="programlisting">#define             FLATPAK_CHECK_VERSION(major,minor,micro)</pre>
+<p>Check that the current version is at least <em class="parameter"><code>major</code></em>
+.<em class="parameter"><code>minor</code></em>
+.<em class="parameter"><code>micro</code></em>
+.</p>
+<div class="refsect3">
+<a name="FLATPAK-CHECK-VERSION.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>major</p></td>
+<td class="parameter_description"><p>major version to compare against</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>minor</p></td>
+<td class="parameter_description"><p>minor version to compare against</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>micro</p></td>
+<td class="parameter_description"><p>micro version to compare against</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="flatpak-Version-information.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="FLATPAK-MAJOR-VERSION:CAPS"></a><h3>FLATPAK_MAJOR_VERSION</h3>
+<pre class="programlisting">#define FLATPAK_MAJOR_VERSION (1)
+</pre>
+<p>The major version.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="FLATPAK-MINOR-VERSION:CAPS"></a><h3>FLATPAK_MINOR_VERSION</h3>
+<pre class="programlisting">#define FLATPAK_MINOR_VERSION (14)
+</pre>
+<p>The minor version.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="FLATPAK-MICRO-VERSION:CAPS"></a><h3>FLATPAK_MICRO_VERSION</h3>
+<pre class="programlisting">#define FLATPAK_MICRO_VERSION (2)
+</pre>
+<p>The micro version.</p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.1</div>
+</body>
+</html>

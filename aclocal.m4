@@ -21,7 +21,7 @@ If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically 'autoreconf'.])])
 
 # gpgme.m4 - autoconf macro to detect GPGME.
-# Copyright (C) 2002, 2003, 2004, 2014, 2018 g10 Code GmbH
+# Copyright (C) 2002, 2003, 2004, 2014, 2018, 2022 g10 Code GmbH
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -31,13 +31,102 @@ To do so, use the procedure documented by the package, typically 'autoreconf'.])
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Last-changed: 2020-11-20
+# Last-changed: 2022-11-15
 
 
-AC_DEFUN([_AM_PATH_GPGME_CONFIG],
-[ AC_ARG_WITH(gpgme-prefix,
-            AS_HELP_STRING([--with-gpgme-prefix=PFX],
-                           [prefix where GPGME is installed (optional)]),
+dnl
+dnl Find gpgrt-config, which uses .pc file
+dnl (minimum pkg-config functionality, supporting cross build)
+dnl
+dnl _AM_PATH_GPGRT_CONFIG
+AC_DEFUN([_AM_PATH_GPGRT_CONFIG],[dnl
+  AC_PATH_PROG(GPGRT_CONFIG, gpgrt-config, no, [$prefix/bin:$PATH])
+  if test "$GPGRT_CONFIG" != "no"; then
+    # Determine gpgrt_libdir
+    #
+    # Get the prefix of gpgrt-config assuming it's something like:
+    #   <PREFIX>/bin/gpgrt-config
+    gpgrt_prefix=${GPGRT_CONFIG%/*/*}
+    possible_libdir1=${gpgrt_prefix}/lib
+    # Determine by using system libdir-format with CC, it's like:
+    #   Normal style: /usr/lib
+    #   GNU cross style: /usr/<triplet>/lib
+    #   Debian style: /usr/lib/<multiarch-name>
+    #   Fedora/openSUSE style: /usr/lib, /usr/lib32 or /usr/lib64
+    # It is assumed that CC is specified to the one of host on cross build.
+    if libdir_candidates=$(${CC:-cc} -print-search-dirs | \
+          sed -n -e "/^libraries/{s/libraries: =//;s/:/\\
+/g;p;}"); then
+      # From the output of -print-search-dirs, select valid pkgconfig dirs.
+      libdir_candidates=$(for dir in $libdir_candidates; do
+        if p=$(cd $dir 2>/dev/null && pwd); then
+          test -d "$p/pkgconfig" && echo $p;
+        fi
+      done)
+
+      for possible_libdir0 in $libdir_candidates; do
+        # possible_libdir0:
+        #   Fallback candidate, the one of system-installed (by $CC)
+        #   (/usr/<triplet>/lib, /usr/lib/<multiarch-name> or /usr/lib32)
+        # possible_libdir1:
+        #   Another candidate, user-locally-installed
+        #   (<gpgrt_prefix>/lib)
+        # possible_libdir2
+        #   Most preferred
+        #   (<gpgrt_prefix>/<triplet>/lib,
+        #    <gpgrt_prefix>/lib/<multiarch-name> or <gpgrt_prefix>/lib32)
+        if test "${possible_libdir0##*/}" = "lib"; then
+          possible_prefix0=${possible_libdir0%/lib}
+          possible_prefix0_triplet=${possible_prefix0##*/}
+          if test -z "$possible_prefix0_triplet"; then
+            continue
+          fi
+          possible_libdir2=${gpgrt_prefix}/$possible_prefix0_triplet/lib
+        else
+          possible_prefix0=${possible_libdir0%%/lib*}
+          possible_libdir2=${gpgrt_prefix}${possible_libdir0#$possible_prefix0}
+        fi
+        if test -f ${possible_libdir2}/pkgconfig/gpg-error.pc; then
+          gpgrt_libdir=${possible_libdir2}
+        elif test -f ${possible_libdir1}/pkgconfig/gpg-error.pc; then
+          gpgrt_libdir=${possible_libdir1}
+        elif test -f ${possible_libdir0}/pkgconfig/gpg-error.pc; then
+          gpgrt_libdir=${possible_libdir0}
+        fi
+        if test -n "$gpgrt_libdir"; then break; fi
+      done
+      if test -z "$libdir_candidates"; then
+        # No valid pkgconfig dir in any of the system directories, fallback
+        gpgrt_libdir=${possible_libdir1}
+      fi
+    else
+      # When we cannot determine system libdir-format, use this:
+      gpgrt_libdir=${possible_libdir1}
+    fi
+  else
+    unset GPGRT_CONFIG
+  fi
+
+  if test -n "$gpgrt_libdir"; then
+    GPGRT_CONFIG="$GPGRT_CONFIG --libdir=$gpgrt_libdir"
+    if $GPGRT_CONFIG gpg-error >/dev/null 2>&1; then
+      GPG_ERROR_CONFIG="$GPGRT_CONFIG gpg-error"
+      AC_MSG_NOTICE([Use gpgrt-config with $gpgrt_libdir as gpg-error-config])
+      gpg_error_config_version=`$GPG_ERROR_CONFIG --modversion`
+    else
+      unset GPGRT_CONFIG
+    fi
+  elif test "$GPG_ERROR_CONFIG" != "no"; then
+    gpg_error_config_version=`$GPG_ERROR_CONFIG --version`
+    unset GPGRT_CONFIG
+  fi
+])
+
+AC_DEFUN([_AM_PATH_GPGME_CONFIG],[dnl
+AC_REQUIRE([_AM_PATH_GPGRT_CONFIG])dnl
+  AC_ARG_WITH(gpgme-prefix,
+              AS_HELP_STRING([--with-gpgme-prefix=PFX],
+                             [prefix where GPGME is installed (optional)]),
      gpgme_config_prefix="$withval", gpgme_config_prefix="")
   if test x"${GPGME_CONFIG}" = x ; then
      if test x"${gpgme_config_prefix}" != x ; then
@@ -59,7 +148,7 @@ AC_DEFUN([_AM_PATH_GPGME_CONFIG],
   fi
 
   use_gpgrt_config=""
-  if test x"${GPGME_CONFIG}" = x -a x"$GPGRT_CONFIG" != x -a "$GPGRT_CONFIG" != "no"; then
+  if test x"$GPGRT_CONFIG" != x -a "$GPGRT_CONFIG" != "no"; then
     if $GPGRT_CONFIG gpgme --exists; then
       GPGME_CONFIG="$GPGRT_CONFIG gpgme"
       AC_MSG_NOTICE([Use gpgrt-config as gpgme-config])
@@ -485,8 +574,8 @@ AC_DEFUN([GOBJECT_INTROSPECTION_REQUIRE],
   _GOBJECT_INTROSPECTION_CHECK_INTERNAL([$1], [require])
 ])
 
-# pkg.m4 - Macros to locate and utilise pkg-config.   -*- Autoconf -*-
-# serial 11 (pkg-config-0.29.1)
+# pkg.m4 - Macros to locate and use pkg-config.   -*- Autoconf -*-
+# serial 12 (pkg-config-0.29.2)
 
 dnl Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
 dnl Copyright © 2012-2015 Dan Nicholson <dbn.lists@gmail.com>
@@ -528,7 +617,7 @@ dnl
 dnl See the "Since" comment for each macro you use to see what version
 dnl of the macros you require.
 m4_defun([PKG_PREREQ],
-[m4_define([PKG_MACROS_VERSION], [0.29.1])
+[m4_define([PKG_MACROS_VERSION], [0.29.2])
 m4_if(m4_version_compare(PKG_MACROS_VERSION, [$1]), -1,
     [m4_fatal([pkg.m4 version $1 or higher is required but ]PKG_MACROS_VERSION[ found])])
 ])dnl PKG_PREREQ
@@ -573,7 +662,7 @@ dnl Check to see whether a particular set of modules exists. Similar to
 dnl PKG_CHECK_MODULES(), but does not set variables or print errors.
 dnl
 dnl Please remember that m4 expands AC_REQUIRE([PKG_PROG_PKG_CONFIG])
-dnl only at the first occurence in configure.ac, so if the first place
+dnl only at the first occurrence in configure.ac, so if the first place
 dnl it's called might be skipped (such as if it is within an "if", you
 dnl have to call PKG_CHECK_EXISTS manually
 AC_DEFUN([PKG_CHECK_EXISTS],
@@ -629,7 +718,7 @@ AC_ARG_VAR([$1][_CFLAGS], [C compiler flags for $1, overriding pkg-config])dnl
 AC_ARG_VAR([$1][_LIBS], [linker flags for $1, overriding pkg-config])dnl
 
 pkg_failed=no
-AC_MSG_CHECKING([for $1])
+AC_MSG_CHECKING([for $2])
 
 _PKG_CONFIG([$1][_CFLAGS], [cflags], [$2])
 _PKG_CONFIG([$1][_LIBS], [libs], [$2])
@@ -639,17 +728,17 @@ and $1[]_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details.])
 
 if test $pkg_failed = yes; then
-   	AC_MSG_RESULT([no])
+        AC_MSG_RESULT([no])
         _PKG_SHORT_ERRORS_SUPPORTED
         if test $_pkg_short_errors_supported = yes; then
-	        $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "$2" 2>&1`
-        else 
-	        $1[]_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "$2" 2>&1`
+                $1[]_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "$2" 2>&1`
+        else
+                $1[]_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "$2" 2>&1`
         fi
-	# Put the nasty error message in config.log where it belongs
-	echo "$$1[]_PKG_ERRORS" >&AS_MESSAGE_LOG_FD
+        # Put the nasty error message in config.log where it belongs
+        echo "$$1[]_PKG_ERRORS" >&AS_MESSAGE_LOG_FD
 
-	m4_default([$4], [AC_MSG_ERROR(
+        m4_default([$4], [AC_MSG_ERROR(
 [Package requirements ($2) were not met:
 
 $$1_PKG_ERRORS
@@ -660,8 +749,8 @@ installed software in a non-standard prefix.
 _PKG_TEXT])[]dnl
         ])
 elif test $pkg_failed = untried; then
-     	AC_MSG_RESULT([no])
-	m4_default([$4], [AC_MSG_FAILURE(
+        AC_MSG_RESULT([no])
+        m4_default([$4], [AC_MSG_FAILURE(
 [The pkg-config script could not be found or is too old.  Make sure it
 is in your PATH or set the PKG_CONFIG environment variable to the full
 path to pkg-config.
@@ -671,10 +760,10 @@ _PKG_TEXT
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.])[]dnl
         ])
 else
-	$1[]_CFLAGS=$pkg_cv_[]$1[]_CFLAGS
-	$1[]_LIBS=$pkg_cv_[]$1[]_LIBS
+        $1[]_CFLAGS=$pkg_cv_[]$1[]_CFLAGS
+        $1[]_LIBS=$pkg_cv_[]$1[]_LIBS
         AC_MSG_RESULT([yes])
-	$3
+        $3
 fi[]dnl
 ])dnl PKG_CHECK_MODULES
 
@@ -1997,6 +2086,7 @@ m4_include([subprojects/libglnx/libglnx.m4])
 m4_include([m4/attributes.m4])
 m4_include([m4/gettext.m4])
 m4_include([m4/glibtests.m4])
+m4_include([m4/gtk-doc.m4])
 m4_include([m4/iconv.m4])
 m4_include([m4/intlmacosx.m4])
 m4_include([m4/lib-ld.m4])

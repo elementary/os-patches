@@ -84,12 +84,13 @@ dist_triggers_SCRIPTS = \
 	$(NULL)
 
 # This canonicalizes the PKG_CHECK_MODULES or AM_PATH_GPGME results
-INTERNAL_GPGME_CFLAGS = $(DEP_GPGME_CFLAGS) $(GPGME_PTHREAD_CFLAGS)
-INTERNAL_GPGME_LIBS = $(DEP_GPGME_LIBS) $(GPGME_PTHREAD_LIBS)
+INTERNAL_GPGME_CFLAGS = $(DEP_GPGME_CFLAGS) $(DEP_GPGME_PTHREAD_CFLAGS) $(GPGME_PTHREAD_CFLAGS)
+INTERNAL_GPGME_LIBS = $(DEP_GPGME_LIBS) $(DEP_GPGME_PTHREAD_LIBS) $(GPGME_PTHREAD_LIBS)
 
 lib_LTLIBRARIES =
 noinst_LTLIBRARIES += libglnx.la
 libglnx_srcpath := $(srcdir)/subprojects/libglnx
+# This intentionally does not include AM_CFLAGS, libglnx always uses those
 libglnx_cflags := \
 	$(BASE_CFLAGS) \
 	"-I$(libglnx_srcpath)" \
