@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2021 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or
@@ -32,8 +32,8 @@
 #include "flatpak-instance-private.h"
 #include "flatpak-run-private.h"
 
-#include "libglnx/libglnx.h"
-#include "libglnx/tests/libglnx-testlib.h"
+#include "libglnx.h"
+#include "tests/libglnx-testlib.h"
 
 #include "testlib.h"
 

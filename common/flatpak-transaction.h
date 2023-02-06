@@ -235,6 +235,8 @@ FLATPAK_EXTERN
 void                flatpak_transaction_set_reinstall (FlatpakTransaction *self,
                                                        gboolean            reinstall);
 FLATPAK_EXTERN
+gboolean            flatpak_transaction_get_no_interaction (FlatpakTransaction *self);
+FLATPAK_EXTERN
 void                flatpak_transaction_set_no_interaction (FlatpakTransaction *self,
                                                             gboolean            no_interaction);
 FLATPAK_EXTERN
@@ -254,6 +256,16 @@ void                flatpak_transaction_set_include_unused_uninstall_ops (Flatpa
 FLATPAK_EXTERN
 gboolean            flatpak_transaction_get_include_unused_uninstall_ops (FlatpakTransaction *self);
 FLATPAK_EXTERN
+void                flatpak_transaction_set_auto_install_sdk (FlatpakTransaction *self,
+                                                              gboolean            auto_install_sdk);
+FLATPAK_EXTERN
+gboolean            flatpak_transaction_get_auto_install_sdk (FlatpakTransaction *self);
+FLATPAK_EXTERN
+void                flatpak_transaction_set_auto_install_debug (FlatpakTransaction *self,
+                                                                gboolean            auto_install_debug);
+FLATPAK_EXTERN
+gboolean            flatpak_transaction_get_auto_install_debug (FlatpakTransaction *self);
+FLATPAK_EXTERN
 void                flatpak_transaction_add_dependency_source (FlatpakTransaction  *self,
                                                                FlatpakInstallation *installation);
 FLATPAK_EXTERN
@@ -267,6 +279,11 @@ gboolean            flatpak_transaction_run (FlatpakTransaction *transaction,
                                              GError            **error);
 FLATPAK_EXTERN
 FlatpakTransactionOperation *flatpak_transaction_get_current_operation (FlatpakTransaction *self);
+FLATPAK_EXTERN
+FlatpakTransactionOperation *flatpak_transaction_get_operation_for_ref (FlatpakTransaction  *self,
+                                                                        const char          *remote,
+                                                                        const char          *ref,
+                                                                        GError             **error);
 FLATPAK_EXTERN
 FlatpakInstallation *flatpak_transaction_get_installation (FlatpakTransaction *self);
 FLATPAK_EXTERN

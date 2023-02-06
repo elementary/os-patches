@@ -1,5 +1,6 @@
 /* bubblewrap
  * Copyright (C) 2016 Alexander Larsson
+ * SPDX-License-Identifier: LGPL-2.0-or-later
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -160,11 +161,6 @@ struct _LockFile
   LockFile   *next;
 };
 
-static SetupOp *ops = NULL;
-static SetupOp *last_op = NULL;
-static LockFile *lock_files = NULL;
-static LockFile *last_lock_file = NULL;
-
 enum {
   PRIV_SEP_OP_DONE,
   PRIV_SEP_OP_BIND_MOUNT,
@@ -185,43 +181,109 @@ typedef struct
   uint32_t arg2_offset;
 } PrivSepOp;
 
+/*
+ * DEFINE_LINKED_LIST:
+ * @Type: A struct with a `Type *next` member
+ * @name: Used to form the names of variables and functions
+ *
+ * Define a global linked list of @Type structures, with pointers
+ * `NAMEs` to the head of the list and `last_NAME` to the tail of the
+ * list.
+ *
+ * A new zero-filled item can be allocated and appended to the list
+ * by calling `_NAME_append_new()`, which returns the new item.
+ */
+#define DEFINE_LINKED_LIST(Type, name) \
+static Type *name ## s = NULL; \
+static Type *last_ ## name = NULL; \
+\
+static inline Type * \
+_ ## name ## _append_new (void) \
+{ \
+  Type *self = xcalloc (sizeof (Type)); \
+\
+  if (last_ ## name != NULL) \
+    last_ ## name ->next = self; \
+  else \
+    name ## s = self; \
+\
+  last_ ## name = self; \
+  return self; \
+}
+
+DEFINE_LINKED_LIST (SetupOp, op)
+
 static SetupOp *
 setup_op_new (SetupOpType type)
 {
-  SetupOp *op = xcalloc (sizeof (SetupOp));
+  SetupOp *op = _op_append_new ();
 
   op->type = type;
   op->fd = -1;
   op->flags = 0;
-  if (last_op != NULL)
-    last_op->next = op;
-  else
-    ops = op;
-
-  last_op = op;
   return op;
 }
+
+DEFINE_LINKED_LIST (LockFile, lock_file)
 
 static LockFile *
 lock_file_new (const char *path)
 {
-  LockFile *lock = xcalloc (sizeof (LockFile));
+  LockFile *lock = _lock_file_append_new ();
 
   lock->path = path;
-  if (last_lock_file != NULL)
-    last_lock_file->next = lock;
-  else
-    lock_files = lock;
-
-  last_lock_file = lock;
   return lock;
 }
 
+typedef struct _SeccompProgram SeccompProgram;
+
+struct _SeccompProgram
+{
+  struct sock_fprog  program;
+  SeccompProgram    *next;
+};
+
+DEFINE_LINKED_LIST (SeccompProgram, seccomp_program)
+
+static SeccompProgram *
+seccomp_program_new (int *fd)
+{
+  SeccompProgram *self = _seccomp_program_append_new ();
+  cleanup_free char *data = NULL;
+  size_t len;
+
+  data = load_file_data (*fd, &len);
+
+  if (data == NULL)
+    die_with_error ("Can't read seccomp data");
+
+  close (*fd);
+  *fd = -1;
+
+  if (len % 8 != 0)
+    die ("Invalid seccomp data, must be multiple of 8");
+
+  self->program.len = len / 8;
+  self->program.filter = (struct sock_filter *) steal_pointer (&data);
+  return self;
+}
+
+static void
+seccomp_programs_apply (void)
+{
+  SeccompProgram *program;
+
+  for (program = seccomp_programs; program != NULL; program = program->next)
+    {
+      if (prctl (PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program->program) != 0)
+        die_with_error ("prctl(PR_SET_SECCOMP)");
+    }
+}
 
 static void
 usage (int ecode, FILE *out)
 {
-  fprintf (out, "usage: %s [OPTIONS...] [--] COMMAND [ARGS...]\n\n", argv0);
+  fprintf (out, "usage: %s [OPTIONS...] [--] COMMAND [ARGS...]\n\n", argv0 ? argv0 : "bwrap");
 
   fprintf (out,
            "    --help                       Print this help\n"
@@ -267,7 +329,8 @@ usage (int ecode, FILE *out)
            "    --bind-data FD DEST          Copy from FD to file which is bind-mounted on DEST\n"
            "    --ro-bind-data FD DEST       Copy from FD to file which is readonly bind-mounted on DEST\n"
            "    --symlink SRC DEST           Create symlink at DEST with target SRC\n"
-           "    --seccomp FD                 Load and use seccomp rules from FD\n"
+           "    --seccomp FD                 Load and use seccomp rules from FD (not repeatable)\n"
+           "    --add-seccomp-fd FD          Load and use seccomp rules from FD (repeatable)\n"
            "    --block-fd FD                Block on FD until some data to read is available\n"
            "    --userns-block-fd FD         Block on FD until the user namespace is ready\n"
            "    --info-fd FD                 Write information about the running container to FD\n"
@@ -501,7 +564,7 @@ monitor_child (int event_fd, pid_t child_pid, int setup_finished_fd)
  * When there are no other processes in the sandbox the wait will return
  * ECHILD, and we then exit pid 1 to clean up the sandbox. */
 static int
-do_init (int event_fd, pid_t initial_pid, struct sock_fprog *seccomp_prog)
+do_init (int event_fd, pid_t initial_pid)
 {
   int initial_exit_status = 1;
   LockFile *lock;
@@ -529,9 +592,7 @@ do_init (int event_fd, pid_t initial_pid, struct sock_fprog *seccomp_prog)
   /* Optionally bind our lifecycle to that of the caller */
   handle_die_with_parent ();
 
-  if (seccomp_prog != NULL &&
-      prctl (PR_SET_SECCOMP, SECCOMP_MODE_FILTER, seccomp_prog) != 0)
-    die_with_error ("prctl(PR_SET_SECCOMP)");
+  seccomp_programs_apply ();
 
   while (TRUE)
     {
@@ -1167,7 +1228,7 @@ setup_newroot (bool unshare_pid,
              problematic (for instance /proc/sysrq-trigger lets you shut down the machine
              if you have write access). We should not have access to these as a non-privileged
              user, but lets cover them anyway just to make sure */
-          const char *cover_proc_dirs[] = { "sys", "sysrq-trigger", "irq", "bus" };
+          static const char * const cover_proc_dirs[] = { "sys", "sysrq-trigger", "irq", "bus" };
           for (i = 0; i < N_ELEMENTS (cover_proc_dirs); i++)
             {
               cleanup_free char *subdir = strconcat3 (dest, "/", cover_proc_dirs[i]);
@@ -1536,6 +1597,12 @@ takes_perms (const char *next_option)
 }
 
 static void
+warn_only_last_option (const char *name)
+{
+  warn ("Only the last %s option will take effect", name);
+}
+
+static void
 parse_args_recurse (int          *argcp,
                     const char ***argvp,
                     bool          in_file,
@@ -1692,6 +1759,9 @@ parse_args_recurse (int          *argcp,
           if (argc < 2)
             die ("--chdir takes one argument");
 
+          if (opt_chdir_path != NULL)
+            warn_only_last_option ("--chdir");
+
           opt_chdir_path = argv[1];
           argv++;
           argc--;
@@ -1767,6 +1837,10 @@ parse_args_recurse (int          *argcp,
         {
           if (argc < 2)
             die ("--exec-label takes an argument");
+
+          if (opt_exec_label != NULL)
+            warn_only_last_option ("--exec-label");
+
           opt_exec_label = argv[1];
           die_unless_label_valid (opt_exec_label);
 
@@ -1777,6 +1851,10 @@ parse_args_recurse (int          *argcp,
         {
           if (argc < 2)
             die ("--file-label takes an argument");
+
+          if (opt_file_label != NULL)
+            warn_only_last_option ("--file-label");
+
           opt_file_label = argv[1];
           die_unless_label_valid (opt_file_label);
           if (label_create_file (opt_file_label))
@@ -1956,6 +2034,9 @@ parse_args_recurse (int          *argcp,
           if (argc < 2)
             die ("--sync-fd takes an argument");
 
+          if (opt_sync_fd != -1)
+            warn_only_last_option ("--sync-fd");
+
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
             die ("Invalid fd: %s", argv[1]);
@@ -1972,6 +2053,9 @@ parse_args_recurse (int          *argcp,
 
           if (argc < 2)
             die ("--block-fd takes an argument");
+
+          if (opt_block_fd != -1)
+            warn_only_last_option ("--block-fd");
 
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
@@ -1990,6 +2074,9 @@ parse_args_recurse (int          *argcp,
           if (argc < 2)
             die ("--userns-block-fd takes an argument");
 
+          if (opt_userns_block_fd != -1)
+            warn_only_last_option ("--userns-block-fd");
+
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
             die ("Invalid fd: %s", argv[1]);
@@ -2006,6 +2093,9 @@ parse_args_recurse (int          *argcp,
 
           if (argc < 2)
             die ("--info-fd takes an argument");
+
+          if (opt_info_fd != -1)
+            warn_only_last_option ("--info-fd");
 
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
@@ -2024,6 +2114,9 @@ parse_args_recurse (int          *argcp,
           if (argc < 2)
             die ("--json-status-fd takes an argument");
 
+          if (opt_json_status_fd != -1)
+            warn_only_last_option ("--json-status-fd");
+
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
             die ("Invalid fd: %s", argv[1]);
@@ -2041,11 +2134,38 @@ parse_args_recurse (int          *argcp,
           if (argc < 2)
             die ("--seccomp takes an argument");
 
+          if (seccomp_programs != NULL)
+            die ("--seccomp cannot be combined with --add-seccomp-fd");
+
+          if (opt_seccomp_fd != -1)
+            warn_only_last_option ("--seccomp");
+
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
             die ("Invalid fd: %s", argv[1]);
 
           opt_seccomp_fd = the_fd;
+
+          argv += 1;
+          argc -= 1;
+        }
+      else if (strcmp (arg, "--add-seccomp-fd") == 0)
+        {
+          int the_fd;
+          char *endptr;
+
+          if (argc < 2)
+            die ("--add-seccomp-fd takes an argument");
+
+          if (opt_seccomp_fd != -1)
+            die ("--add-seccomp-fd cannot be combined with --seccomp");
+
+          the_fd = strtol (argv[1], &endptr, 10);
+          if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
+            die ("Invalid fd: %s", argv[1]);
+
+          /* takes ownership of fd */
+          seccomp_program_new (&the_fd);
 
           argv += 1;
           argc -= 1;
@@ -2057,6 +2177,9 @@ parse_args_recurse (int          *argcp,
 
           if (argc < 2)
             die ("--userns takes an argument");
+
+          if (opt_userns_fd != -1)
+            warn_only_last_option ("--userns");
 
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
@@ -2075,6 +2198,9 @@ parse_args_recurse (int          *argcp,
           if (argc < 2)
             die ("--userns2 takes an argument");
 
+          if (opt_userns2_fd != -1)
+            warn_only_last_option ("--userns2");
+
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
             die ("Invalid fd: %s", argv[1]);
@@ -2091,6 +2217,9 @@ parse_args_recurse (int          *argcp,
 
           if (argc < 2)
             die ("--pidns takes an argument");
+
+          if (opt_pidns_fd != -1)
+            warn_only_last_option ("--pidns");
 
           the_fd = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_fd < 0)
@@ -2133,6 +2262,9 @@ parse_args_recurse (int          *argcp,
           if (argc < 2)
             die ("--uid takes an argument");
 
+          if (opt_sandbox_uid != -1)
+            warn_only_last_option ("--uid");
+
           the_uid = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_uid < 0)
             die ("Invalid uid: %s", argv[1]);
@@ -2150,6 +2282,9 @@ parse_args_recurse (int          *argcp,
           if (argc < 2)
             die ("--gid takes an argument");
 
+          if (opt_sandbox_gid != -1)
+            warn_only_last_option ("--gid");
+
           the_gid = strtol (argv[1], &endptr, 10);
           if (argv[1][0] == 0 || endptr[0] != 0 || the_gid < 0)
             die ("Invalid gid: %s", argv[1]);
@@ -2163,6 +2298,9 @@ parse_args_recurse (int          *argcp,
         {
           if (argc < 2)
             die ("--hostname takes an argument");
+
+          if (opt_sandbox_hostname != NULL)
+            warn_only_last_option ("--hostname");
 
           op = setup_op_new (SETUP_SET_HOSTNAME);
           op->dest = argv[1];
@@ -2414,10 +2552,7 @@ main (int    argc,
   struct stat sbuf;
   uint64_t val;
   int res UNUSED;
-  cleanup_free char *seccomp_data = NULL;
-  size_t seccomp_len;
-  struct sock_fprog seccomp_prog;
-  cleanup_free char *args_data = NULL;
+  cleanup_free char *args_data UNUSED = NULL;
   int intermediate_pids_sockets[2] = {-1, -1};
 
   /* Handle --version early on before we try to acquire/drop
@@ -2451,7 +2586,7 @@ main (int    argc,
   argv++;
   argc--;
 
-  if (argc == 0)
+  if (argc <= 0)
     usage (EXIT_FAILURE, stderr);
 
   parse_args (&argc, (const char ***) &argv);
@@ -2485,7 +2620,7 @@ main (int    argc,
    * because (as described in acquire_privs()) setuid bwrap causes
    * root to own the namespaces that it creates, so you will not be
    * able to access these namespaces anyway. So, best just not support
-   * it anway.
+   * it anyway.
    */
   if (opt_userns_fd != -1 && is_privileged)
     die ("--userns doesn't work in setuid mode");
@@ -2535,7 +2670,7 @@ main (int    argc,
         opt_unshare_user = TRUE;
     }
 
-  if (argc == 0)
+  if (argc <= 0)
     usage (EXIT_FAILURE, stderr);
 
   __debug__ (("Creating root mount point\n"));
@@ -2933,8 +3068,8 @@ main (int    argc,
      * Both runc and LXC are using this "alternative" method for
      * setting up the root of the container:
      *
-     * https://github.com/opencontainers/runc/blob/master/libcontainer/rootfs_linux.go#L671
-     * https://github.com/lxc/lxc/blob/master/src/lxc/conf.c#L1121
+     * https://github.com/opencontainers/runc/blob/HEAD/libcontainer/rootfs_linux.go#L671
+     * https://github.com/lxc/lxc/blob/HEAD/src/lxc/conf.c#L1121
      */
     if (pivot_root (".", ".") != 0)
       die_with_error ("pivot_root(/newroot)");
@@ -2980,17 +3115,9 @@ main (int    argc,
 
   if (opt_seccomp_fd != -1)
     {
-      seccomp_data = load_file_data (opt_seccomp_fd, &seccomp_len);
-      if (seccomp_data == NULL)
-        die_with_error ("Can't read seccomp data");
-
-      if (seccomp_len % 8 != 0)
-        die ("Invalid seccomp data, must be multiple of 8");
-
-      seccomp_prog.len = seccomp_len / 8;
-      seccomp_prog.filter = (struct sock_filter *) seccomp_data;
-
-      close (opt_seccomp_fd);
+      assert (seccomp_programs == NULL);
+      /* takes ownership of fd */
+      seccomp_program_new (&opt_seccomp_fd);
     }
 
   umask (old_umask);
@@ -3059,7 +3186,7 @@ main (int    argc,
             fdwalk (proc_fd, close_extra_fds, dont_close);
           }
 
-          return do_init (event_fd, pid, seccomp_data != NULL ? &seccomp_prog : NULL);
+          return do_init (event_fd, pid);
         }
     }
 
@@ -3087,9 +3214,7 @@ main (int    argc,
 
   /* Should be the last thing before execve() so that filters don't
    * need to handle anything above */
-  if (seccomp_data != NULL &&
-      prctl (PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &seccomp_prog) != 0)
-    die_with_error ("prctl(PR_SET_SECCOMP)");
+  seccomp_programs_apply ();
 
   if (setup_finished_pipe[1] != -1)
     {

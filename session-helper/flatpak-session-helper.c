@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2014-2019 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -31,11 +31,6 @@
 #include "flatpak-dbus-generated.h"
 #include "flatpak-session-helper.h"
 #include "flatpak-utils-base-private.h"
-
-typedef enum {
-  FLATPAK_HOST_COMMAND_FLAGS_CLEAR_ENV = 1 << 0,
-  FLATPAK_HOST_COMMAND_FLAGS_WATCH_BUS = 1 << 1,
-} FlatpakHostCommandFlags;
 
 static char *monitor_dir;
 static char *p11_kit_server_socket_path;

@@ -1,4 +1,5 @@
 # Copyright (C) 2015 Colin Walters <walters@verbum.org>
+# SPDX-License-Identifier: LGPL-2.0-or-later
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -18,8 +19,15 @@
 EXTRA_DIST += \
 	subprojects/libglnx/README.md \
 	subprojects/libglnx/COPYING \
+	subprojects/libglnx/LICENSES/LGPL-2.0-or-later.txt \
+	subprojects/libglnx/LICENSES/LGPL-2.1-or-later.txt \
 	subprojects/libglnx/libglnx.m4 \
 	$(NULL)
+
+BUILT_SOURCES += $(top_builddir)/libglnx-config.h
+CLEANFILES += $(top_builddir)/libglnx-config.h
+$(top_builddir)/libglnx-config.h: Makefile.am
+	echo '#include "config.h"' > $@
 
 libglnx_la_SOURCES = \
 	subprojects/libglnx/glnx-macros.h \
@@ -49,7 +57,7 @@ libglnx_la_SOURCES = \
 	subprojects/libglnx/tests/libglnx-testlib.h \
 	$(NULL)
 
-libglnx_la_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags)
+libglnx_la_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags) -I$(builddir)
 libglnx_la_LDFLAGS = -avoid-version -Bsymbolic-functions -export-symbols-regex "^glnx_" -no-undefined -export-dynamic 
 libglnx_la_LIBADD = $(libglnx_libs)
 

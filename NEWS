@@ -1,19 +1,179 @@
-Changes in 1.12.7
+Changes in 1.14.0
+~~~~~~~~~~~~~~~~~
+Released: 2022-08-22
+
+Known issues:
+* There may be an issue where non-primary architecture builds don't show up
+  (https://github.com/flatpak/flatpak/issues/5045)
+* There is a new security advisory on Flatpak but all supported versions are
+  not affected due to using new enough versions of libostree
+  (https://github.com/flatpak/flatpak/security/advisories/GHSA-45jq-5658-v38x)
+
+Dependencies:
+
+* Conditional on a build time option, revokefs will now use version 3 of the
+  FUSE API rather than version 2 (#4326)
+* Libappstream should be updated to at least 0.15.3 to avoid critical warning
+  messages when using the "flatpak search" command
+  (https://github.com/ximion/appstream/issues/384)
+
+New features:
+
+* A new key "DeploySideloadCollectionID" is now supported in flatpakref and
+  flatpakrepo files, to allow setting a collection ID at the time a remote is
+  added from one of those files, rather than when metadata is pulled from the
+  remote, and without affecting versions of Flatpak with the older pre-sideload
+  P2P implementation (#4826)
+* Allow sub-sandboxes to own MPRIS names on the session bus (#5023)
+* Commands that accept "--user" will now also take "-u" as an alias for that
+  (#5014)
+* The CLI now properly informs the user of which apps are (indirectly) using
+  end-of-life runtime extensions in end-of-life info messages (#4835)
+* The CLI now takes into account operations in the pending transaction when
+  printing end-of-life messages (#4835)
+* The uninstall command now asks for confirmation before removing in-use
+  runtimes or runtime extensions (#4835)
+* A "--socket=gpg-agent" option is now recognized by "flatpak run" and related
+  commands (#4958)
+
+Bug fixes:
+
+* Fix a memory corruption issue caused by use of libcurl in an unsafe way
+  (#5046)
+* Update selinux policy to cover symbolic links in /var/lib/flatpak (#4992)
+* Fix a crash in case a .desktop file processed by the build-export command has
+  no Exec= key, and some related fixes for handling such .desktop files (#4817)
+* Preserve the X11 display number rather than redirecting it to :99 (#5034)
+
+Other changes:
+
+* Various improvements to the unit tests, CI infra, and documentation
+* Some changes were made to ensure translators can work on full sentences
+  rather than fragments in several places
+* Translation updates: de, ru, sv, tr, uk, zh_CN
+
+Changes in 1.13.3
+~~~~~~~~~~~~~~~~~
+Released: 2022-06-16
+
+Dependencies:
+
+ * Support curl 7.29 or later as an additional, and the default, HTTP backend
+   alongwith libsoup 2.x (#4943)
+ * Clarify that glib 2.46 or later is now required (#4944)
+
+New features:
+
+ * Implement support for rewriting dynamic launchers when an app is renamed
+   (#4703)
+ * Add --include-sdk/debug options to install command to install SDK/debuginfo
+   along with a ref (#4777)
+ * Improve --sideload-repo option to take create-usb dirs (#4843)
+ * Add a new library API flatpak_transaction_get_operation_for_ref() (#4947)
+
+Bug fixes:
+
+ * Update the SELinux module to explicitly permit the system helper have read
+   access to /etc/passwd and systemd-userdbd, read and lock access to
+   /var/lib/flatpak, and watch files inside $libexecdir (#4852, #4855, #4892)
+ * Fix the error messages and the exit code of the 'uninstall' command when
+   non-existent refs are specified (#4857)
+ * Be more careful with errors when creating directories and deleting files,
+   and address some memory errors (#4930)
+ * Fix support for --noninteractive in the 'uninstall' command (#4947)
+
+Other changes:
+
+ * Cosmetic improvements to end-of-life messages and other aspects of the CLI
+   output (#4947)
+ * Speed up the tests by not installing the polkit agent (#4942)
+ * Disable fuzzy ref matching when ID has a period or a slash, or when the
+   standard input or output is not a TTY (#4829, #4848)
+ * Update the icon-validator to print the format and size for consumption by
+   the dynamic launcher portal (#4803, #4808)
+ * Remove a pointless test (#4856)
+ * Improve various details of the GitHub workflows (#4870)
+ * Prepare for the addition of a Meson build (#4842, #4871, #4888, #4889, #4890)
+ * Only add the specified 'summary-arches' to the compat summary. This is
+   important since we're nearing the 10MB size limit for Flathub's legacy
+   summary files. (#4880)
+ * Translation updates: id, pt, sv, tr, uk
+
+Changes in 1.13.2
 ~~~~~~~~~~~~~~~~~
 Released: 2022-03-14
 
+Bug fixes:
+
+ * Consistently pass relative subpaths to libostree, working around a bug
+   in libostree < 2021.6 when used with GLib >= 2.71 (#4805)
+ * Document have-kernel-module-* as having been added in 1.13.1
+ * Fix some memory leaks in GVariant data processing
+
+Changes in 1.13.1
+~~~~~~~~~~~~~~~~~
+Released: 2022-03-01
+
+Dependencies:
+
+ * libappstream 0.12.0 or later is now required
+ * appstream-glib is no longer required
+ * In distributions that compile Flatpak to use a separate bubblewrap (bwrap)
+   executable, version 0.5.0 is now required
+
+New features:
+
+ * Create a directory for XDG_STATE_HOME and set the environment variable
+   (#4477)
+   - Apps requiring a state directory without a dependency on this updated
+     Flatpak version can get similar functionality by using:
+     --persist=.local/state --unset-env=XDG_STATE_HOME
+     which will use the same storage location
+ * Set HOST_XDG_STATE_HOME environment variable (#4477)
+ * Add have-kernel-module-foo family of conditionals for extensions, a
+   generalization of have-intel-gpu (which is now mostly equivalent to
+   have-kernel-module-i915) (#4647)
+ * Add `flatpak document-unexport --doc-id=...` (#1897)
+ * Export Appstream metadata for host system to use (#4350, #4599)
+ * Add command-line completion for the Fish shell (#3109)
+ * Add FlatpakTransaction:no-interaction API (#4699)
  * We now allow networked access to X11 and PulseAudio services
    if that is configured, and the application has network access.
    (#397, #3908, #4702)
- * Absolute paths in WAYLAND_DISPLAY now work (#4752)
- * Allow apps that were built with Flatpak 1.13.x to export
-   AppStream metadata in share/metainfo (#4350, #4599)
+ * `flatpak build-init` automatically sets the build directory to be
+   ignored by git (#4741)
+
+Other changes:
+
+ * Updated bundled xdg-dbus-proxy to 0.1.3 (#4737)
+ * Updated bundled bubblewrap to 0.6.1 (#4779)
+ * The default branch in the Github repository is now named 'main'
+ * Don't offer options in CLI tab completion unless the user typed a '-'
+   (#4753)
+ * Disable fancy output (e.g. progress bars that get redrawn) when
+   G_MESSAGES_DEBUG is set in the environment (#4767)
  * Most commands now work if /var/lib/flatpak exists but /var/lib/flatpak/repo
    does not, and will automatically populate the repo directory if
    possible (#4111)
- * Consistently pass relative subpaths to libostree, working around a bug
-   in libostree < 2021.6 when used with GLib >= 2.71 (#4805)
- * Fix some memory leaks in GVariant data processing
+ * Disable session bus access for `flatpak-spawn --sandbox` as intended
+   (#4630)
+ * Make `sudo flatpak --user ...` fail with an error message, since acting
+   on root's per-user installation is unlikely to be what was intended
+   (#4638)
+ * Don't mention "negative" permissions like !host in /.flatpak-info (#4691)
+ * Improve performance when finding related refs
+ * Use SHA256 instead of SHA1 to avoid false-positives from static analysis
+   (in fact the use of SHA1 was not security-sensitive here) (#4716)
+ * Create sandbox's XDG_RUNTIME_DIR with 0700 permissions (#3397)
+ * Always create /.flatpak-info with 0600 permissions
+ * Absolute paths in WAYLAND_DISPLAY now work (#4752)
+ * Improve reliability of detecting the current GTK theme (#4754)
+ * Fix some error code paths when deploying malformed apps
+ * Improve some error messages
+ * Use URN for fontconfig DTD, consistent with fontconfig itself (#4617)
+ * Use `type -P` or `command -v` in preference to which(1) (#4696)
+ * Improve measurement of test coverage (#4681)
+ * Translation updates: de, fr, hi, hr, id, oc, pl, pt_BR, sv, uk, zh_CN
 
 Changes in 1.12.6
 ~~~~~~~~~~~~~~~~~

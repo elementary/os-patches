@@ -1,6 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
  *
  * Copyright (C) 2014,2015 Colin Walters <walters@verbum.org>.
+ * SPDX-License-Identifier: LGPL-2.0-or-later
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -66,6 +67,7 @@ gboolean glnx_dirfd_iterator_next_dent_ensure_dtype (GLnxDirFdIterator  *dfd_ite
                                                      struct dirent     **out_dent,
                                                      GCancellable       *cancellable,
                                                      GError            **error);
+void glnx_dirfd_iterator_rewind (GLnxDirFdIterator  *dfd_iter);
 void glnx_dirfd_iterator_clear (GLnxDirFdIterator *dfd_iter);
 
 G_DEFINE_AUTO_CLEANUP_CLEAR_FUNC(GLnxDirFdIterator, glnx_dirfd_iterator_clear)

@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2018 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -18,10 +18,18 @@
  *       Matthias Clasen <mclasen@redhat.com>
  */
 
+/* The canonical copy of this file is in:
+ * - https://github.com/flatpak/flatpak at icon-validator/validate-icon.c
+ * Known copies of this file are in:
+ * - https://github.com/flatpak/xdg-desktop-portal at src/validate-icon.c
+ */
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib/gstdio.h>
 #include <errno.h>
 #include <unistd.h>
+
+#define ICON_VALIDATOR_GROUP "Icon Validator"
 
 static int
 validate_icon (const char *arg_width,
@@ -35,6 +43,8 @@ validate_icon (const char *arg_width,
   const char *allowed_formats[] = { "png", "jpeg", "svg", NULL };
   g_autoptr(GdkPixbuf) pixbuf = NULL;
   g_autoptr(GError) error = NULL;
+  g_autoptr(GKeyFile) key_file = NULL;
+  g_autofree char *key_file_data = NULL;
 
   format = gdk_pixbuf_get_file_info (filename, &width, &height);
   if (format == NULL)
@@ -85,6 +95,23 @@ validate_icon (const char *arg_width,
       return 1;
     }
 
+  if (width != height)
+    {
+      g_printerr ("Expected a square icon but got: %dx%d\n", width, height);
+      return 1;
+    }
+
+  /* Print the format and size for consumption by (at least) the dynamic
+   * launcher portal. xdg-desktop-portal has a copy of this file. Use a
+   * GKeyFile so the output can be easily extended in the future in a backwards
+   * compatible way.
+   */
+  key_file = g_key_file_new ();
+  g_key_file_set_string (key_file, ICON_VALIDATOR_GROUP, "format", name);
+  g_key_file_set_integer (key_file, ICON_VALIDATOR_GROUP, "width", width);
+  key_file_data = g_key_file_to_data (key_file, NULL, NULL);
+  g_print ("%s", key_file_data);
+
   return 0;
 }
 
@@ -101,7 +128,7 @@ add_args (GPtrArray *argv_array, ...)
   va_end (args);
 }
 
-const char *
+static const char *
 flatpak_get_bwrap (void)
 {
   const char *e = g_getenv ("FLATPAK_BWRAP");

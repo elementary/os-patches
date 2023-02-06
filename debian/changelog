@@ -1,3 +1,69 @@
+flatpak (1.14.0-2) unstable; urgency=medium
+
+  * d/control: Add dependency on fuse3, for fusermount3.
+    Strictly speaking this is only needed for system installations, but
+    those are the default, and a missing fusermount3 produces unclear
+    symptoms.
+  * d/control: Depend on polkitd in preference to transitional policykit-1.
+    This package doesn't need pkexec.
+  * Update Lintian overrides
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 02 Sep 2022 08:59:06 +0100
+
+flatpak (1.14.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * d/copyright: Update
+  * Build with libfuse3
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 23 Aug 2022 20:26:06 +0100
+
+flatpak (1.13.3-2) experimental; urgency=medium
+
+  * Build with libcurl http backend.
+    This avoids library conflicts during the transition to GNOME 43, in
+    which core apps and libraries have switched to libsoup3, which conflicts
+    with libsoup2.4. See #1016589.
+  * d/control: Remove backwards-compat with libgdk-pixbuf2.0-dev.
+    libgdk-pixbuf-2.0-dev was released in bullseye, and official backports
+    to old distributions need to swap the dependency anyway, because of
+    how buildds resolve alternative dependencies.
+  * Set correct Vcs-Git field for experimental branch
+  * Standards-Version: 4.6.1 (no changes required)
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 05 Aug 2022 10:06:16 +0100
+
+flatpak (1.13.3-1) experimental; urgency=medium
+
+  * New upstream development release
+  * Drop workaround for #1006684
+  * Continue to use libsoup http backend for now
+  * d/libflatpak0.symbols: Update
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 17 Jun 2022 17:32:52 +0100
+
+flatpak (1.13.2-1) experimental; urgency=medium
+
+  * New upstream development release
+  * d/p/tests-Don-t-install-tap-driver.sh-in-the-installed-tests.patch:
+    Drop patch that was applied upstream
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 14 Mar 2022 15:37:10 +0000
+
+flatpak (1.13.1-1) experimental; urgency=medium
+
+  * New upstream development release
+  * Build-depend on libappstream-dev instead of libappstream-glib-dev
+  * Increase dependency on bubblewrap
+  * Install fish profile snippet
+  * Add patch to work around #1006684 in libappstream
+  * Update symbols file
+  * Add patch to avoid unnecessarily installing tap-driver.sh.
+    As well as being unnecessary, this file triggers some Lintian
+    false-positives.
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 02 Mar 2022 13:27:15 +0000
+
 flatpak (1.12.7-1) unstable; urgency=medium
 
   * New upstream stable release

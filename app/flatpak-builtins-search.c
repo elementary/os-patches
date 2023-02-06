@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2017 Patrick Griffis
  *
  * This program is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@
 #include "config.h"
 
 #include <glib/gi18n.h>
-#include <appstream-glib.h>
+#include <appstream.h>
 
 #include "flatpak-builtins.h"
 #include "flatpak-builtins-utils.h"
@@ -43,9 +43,7 @@ static Column all_columns[] = {
   { "description", N_("Description"), N_("Show the description"),        1, FLATPAK_ELLIPSIZE_MODE_END, 1, 1 },
   { "application", N_("Application ID"), N_("Show the application ID"),     1, FLATPAK_ELLIPSIZE_MODE_START, 1, 1 },
   { "version",     N_("Version"),     N_("Show the version"),            1, FLATPAK_ELLIPSIZE_MODE_NONE, 1, 1 },
-#if AS_CHECK_VERSION (0, 6, 1)
   { "branch",      N_("Branch"),      N_("Show the application branch"), 1, FLATPAK_ELLIPSIZE_MODE_NONE, 1, 1 },
-#endif
   { "remotes",     N_("Remotes"),     N_("Show the remotes"),            1, FLATPAK_ELLIPSIZE_MODE_NONE, 1, 1 },
   { NULL }
 };
@@ -76,14 +74,9 @@ get_remote_stores (GPtrArray *dirs, const char *arch, GCancellable *cancellable)
 
       for (j = 0; remotes[j]; ++j)
         {
-          g_autoptr(AsStore) store = as_store_new ();
+          g_autoptr(AsMetadata) mdata = as_metadata_new ();
 
-#if AS_CHECK_VERSION (0, 6, 1)
-          // We want to see multiple versions/branches of same app-id's, e.g. org.gnome.Platform
-          as_store_set_add_flags (store, as_store_get_add_flags (store) | AS_STORE_ADD_FLAG_USE_UNIQUE_ID);
-#endif
-
-          flatpak_dir_load_appstream_store (dir, remotes[j], arch, store, cancellable, &error);
+          flatpak_dir_load_appstream_store (dir, remotes[j], arch, mdata, cancellable, &error);
 
           if (error)
             {
@@ -91,26 +84,18 @@ get_remote_stores (GPtrArray *dirs, const char *arch, GCancellable *cancellable)
               g_clear_error (&error);
             }
 
-          g_object_set_data_full (G_OBJECT (store), "remote-name", g_strdup (remotes[j]), g_free);
-          g_ptr_array_add (ret, g_steal_pointer (&store));
+          g_object_set_data_full (G_OBJECT (mdata), "remote-name", g_strdup (remotes[j]), g_free);
+          g_ptr_array_add (ret, g_steal_pointer (&mdata));
         }
     }
   return ret;
 }
 
-static void
-clear_app_arches (AsApp *app)
-{
-  GPtrArray *arches = as_app_get_architectures (app);
-
-  g_ptr_array_set_size (arches, 0);
-}
-
 typedef struct MatchResult
 {
-  AsApp     *app;
-  GPtrArray *remotes;
-  guint      score;
+  AsComponent *app;
+  GPtrArray   *remotes;
+  guint        score;
 } MatchResult;
 
 static void
@@ -122,15 +107,13 @@ match_result_free (MatchResult *result)
 }
 
 static MatchResult *
-match_result_new (AsApp *app, guint score)
+match_result_new (AsComponent *app, guint score)
 {
   MatchResult *result = g_new (MatchResult, 1);
 
   result->app = g_object_ref (app);
   result->remotes = g_ptr_array_new_with_free_func (g_free);
   result->score = score;
-
-  clear_app_arches (result->app);
 
   return result;
 }
@@ -156,104 +139,56 @@ compare_by_score (MatchResult *a, MatchResult *b, gpointer user_data)
   return (int) b->score - (int) a->score;
 }
 
-#if !AS_CHECK_VERSION (0, 6, 1)
-/* Roughly copied directly from appstream-glib */
-
-static const gchar *
-as_app_fix_unique_nullable (const gchar *tmp)
-{
-  if (tmp == NULL || tmp[0] == '\0')
-    return "*";
-  return tmp;
-}
-
-static char *
-as_app_get_unique_id (AsApp *app)
-{
-  const gchar *id_str = NULL;
-  const gchar *kind_str = NULL;
-  AsAppKind kind = as_app_get_kind (app);
-
-  if (kind != AS_APP_KIND_UNKNOWN)
-    kind_str = as_app_kind_to_string (kind);
-  id_str = as_app_get_id_no_prefix (app);
-  return g_strdup_printf ("%s/%s",
-                          as_app_fix_unique_nullable (kind_str),
-                          as_app_fix_unique_nullable (id_str));
-}
-
 static gboolean
-as_app_equal (AsApp *app1, AsApp *app2)
+as_app_equal (AsComponent *app1, AsComponent *app2)
 {
   if (app1 == app2)
     return TRUE;
 
-  g_autofree char *app1_id = as_app_get_unique_id (app1);
-  g_autofree char *app2_id = as_app_get_unique_id (app2);
-  return strcmp (app1_id, app2_id) == 0;
-}
-#endif
+  FlatpakDecomposed *app1_decomposed = g_object_get_data (G_OBJECT (app1), "decomposed");
+  FlatpakDecomposed *app2_decomposed = g_object_get_data (G_OBJECT (app2), "decomposed");
 
-static char *
-_app_get_id_no_suffix (AsApp *app)
-{
-  const char *id_stripped = NULL;
-#if AS_CHECK_VERSION (0, 5, 15)
-  GPtrArray *bundles = NULL;
-
-  /* First try using the <bundle> ID which is unambiguously the flatpak ref */
-  bundles = as_app_get_bundles (app);
-  for (guint i = 0; i < bundles->len; i++)
-    {
-      g_autoptr(FlatpakDecomposed) decomposed = NULL;
-      AsBundle *bundle = g_ptr_array_index (bundles, i);
-      if (as_bundle_get_kind (bundle) != AS_BUNDLE_KIND_FLATPAK)
-        continue;
-
-      decomposed = flatpak_decomposed_new_from_ref (as_bundle_get_id (bundle), NULL);
-      if (decomposed != NULL)
-        return flatpak_decomposed_dup_id (decomposed);
-    }
-#endif
-
-  /* Fall back to using the <id> field, which is required by appstream spec,
-   * but make sure the .desktop suffix isn't stripped overzealously
-   * https://github.com/hughsie/appstream-glib/issues/420
+  /* Ignore arch when comparing since it's not shown in the search output and
+   * we don't want duplicate results for the same app with different arches.
    */
-  id_stripped = as_app_get_id_filename (app);
-  if (flatpak_is_valid_name (id_stripped, -1, NULL))
-    return g_strdup (id_stripped);
-  else
-    {
-      g_autofree char *id_with_desktop = g_strconcat (id_stripped, ".desktop", NULL);
-      const char *id_with_suffix = as_app_get_id_no_prefix (app);
-      if (flatpak_is_valid_name (id_with_desktop, -1, NULL) &&
-          g_strcmp0 (id_with_suffix, id_with_desktop) == 0)
-        return g_strdup (id_with_suffix);
-      else
-        return g_strdup (id_stripped);
-    }
+  return flatpak_decomposed_equal_except_arch (app1_decomposed, app2_decomposed);
 }
 
 static int
-compare_apps (MatchResult *a, AsApp *b)
+compare_apps (MatchResult *a, AsComponent *b)
 {
-  /* For now we want to ignore arch when comparing applications
-   * It may be valuable to show runtime arches in the future though.
-   * This is a naughty hack but for our purposes totally fine.
-   */
-  clear_app_arches (b);
-
   return !as_app_equal (a->app, b);
+}
+
+/* as_component_get_id() returns the appstream component ID which doesn't
+ * necessarily match the flatpak app ID (e.g. sometimes there's a .desktop
+ * suffix on the appstream ID) so this gets the flatpak app ID via the bundle
+ * element
+ */
+static char *
+component_get_flatpak_id (AsComponent *app)
+{
+  FlatpakDecomposed *app_decomposed = g_object_get_data (G_OBJECT (app), "decomposed");
+  return flatpak_decomposed_dup_id (app_decomposed);
+}
+
+/* as_component_get_branch() seems to return NULL in practice, so use the
+ * bundle id to get the branch
+ */
+static const char *
+component_get_branch (AsComponent *app)
+{
+  FlatpakDecomposed *app_decomposed = g_object_get_data (G_OBJECT (app), "decomposed");
+  return flatpak_decomposed_get_branch (app_decomposed);
 }
 
 static void
 print_app (Column *columns, MatchResult *res, FlatpakTablePrinter *printer)
 {
   const char *version = as_app_get_version (res->app);
-  g_autofree char *id = _app_get_id_no_suffix (res->app);
-  const char *name = as_app_get_localized_name (res->app);
-  const char *comment = as_app_get_localized_comment (res->app);
+  g_autofree char *id = component_get_flatpak_id (res->app);
+  const char *name = as_component_get_name (res->app);
+  const char *comment = as_component_get_summary (res->app);
   guint i;
 
   for (i = 0; columns[i].name; i++)
@@ -266,10 +201,8 @@ print_app (Column *columns, MatchResult *res, FlatpakTablePrinter *printer)
         flatpak_table_printer_add_column (printer, id);
       else if (strcmp (columns[i].name, "version") == 0)
         flatpak_table_printer_add_column (printer, version);
-#if AS_CHECK_VERSION (0, 6, 1)
       else if (strcmp (columns[i].name, "branch") == 0)
-        flatpak_table_printer_add_column (printer, as_app_get_branch (res->app));
-#endif
+        flatpak_table_printer_add_column (printer, component_get_branch (res->app));
       else if (strcmp (columns[i].name, "remotes") == 0)
         {
           int j;
@@ -334,21 +267,36 @@ flatpak_builtin_search (int argc, char **argv, GCancellable *cancellable, GError
   guint j;
 
   // We want a store for each remote so we keep the remote information
-  // as AsApp doesn't currently contain that information
+  // as AsComponent doesn't currently contain that information
   g_autoptr(GPtrArray) remote_stores = get_remote_stores (dirs, opt_arch, cancellable);
   for (j = 0; j < remote_stores->len; ++j)
     {
-      AsStore *store = g_ptr_array_index (remote_stores, j);
-      GPtrArray *apps = as_store_get_apps (store);
+      AsMetadata *mdata = g_ptr_array_index (remote_stores, j);
+      GPtrArray *apps = as_metadata_get_components (mdata);
       guint i;
 
       for (i = 0; i < apps->len; ++i)
         {
-          AsApp *app = g_ptr_array_index (apps, i);
-          guint score = as_app_search_matches (app, search_text);
+          AsComponent *app = g_ptr_array_index (apps, i);
+          const char *remote_name = g_object_get_data (G_OBJECT (mdata), "remote-name");
+          g_autoptr(FlatpakDecomposed) decomposed = NULL;
+
+          AsBundle *bundle = as_component_get_bundle (app, AS_BUNDLE_KIND_FLATPAK);
+          if (bundle == NULL || as_bundle_get_id (bundle) == NULL ||
+              (decomposed = flatpak_decomposed_new_from_ref (as_bundle_get_id (bundle), NULL)) == NULL)
+            {
+              g_debug ("Ignoring app %s from remote %s as it lacks a flatpak bundle",
+                       as_component_get_id (app), remote_name);
+              continue;
+            }
+
+          g_object_set_data_full (G_OBJECT (app), "decomposed", g_steal_pointer (&decomposed),
+                                  (GDestroyNotify) flatpak_decomposed_unref);
+
+          guint score = as_component_search_matches (app, search_text);
           if (score == 0)
             {
-              g_autofree char *app_id = _app_get_id_no_suffix (app);
+              g_autofree char *app_id = component_get_flatpak_id (app);
               if (strcasestr (app_id, search_text) != NULL)
                 score = 50;
               else
@@ -367,8 +315,7 @@ flatpak_builtin_search (int argc, char **argv, GCancellable *cancellable, GError
               matches = g_slist_insert_sorted_with_data (matches, result,
                                                          (GCompareDataFunc) compare_by_score, NULL);
             }
-          match_result_add_remote (result,
-                                   g_object_get_data (G_OBJECT (store), "remote-name"));
+          match_result_add_remote (result, remote_name);
         }
     }
 

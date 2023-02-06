@@ -1,6 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
  *
  * Copyright (C) 2013,2014,2015 Colin Walters <walters@verbum.org>
+ * SPDX-License-Identifier: LGPL-2.0-or-later
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -18,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
+#include "libglnx-config.h"
 
 #include "glnx-console.h"
 
@@ -142,7 +143,7 @@ glnx_console_lines (void)
 }
 
 static void
-on_sigwinch (int signum)
+on_sigwinch (G_GNUC_UNUSED int signum)
 {
   cached_columns = 0;
   cached_lines = 0;
@@ -261,7 +262,7 @@ text_percent_internal (const char *text,
       const guint textlen = MIN (input_textlen, ncolumns - bar_min);
       const guint barlen = MIN (MAX_PROGRESSBAR_COLUMNS, ncolumns - (textlen + 1));
 
-      if (textlen > 0)
+      if (text && textlen > 0)
         {
           fwrite (text, 1, textlen, stdout);
           fputc (' ', stdout);

@@ -42,20 +42,27 @@
 
         <para>
             If <arg choice="plain">REF</arg> names an installed application,
-            flatpak runs the application in a sandboxed environment. Extra
-            arguments are passed on to the application.
+            Flatpak runs the application in a sandboxed environment. Extra
+            arguments are passed on to the application. The current branch and arch of
+            the application is used unless otherwise specified with <option>--branch</option>
+            or <option>--arch</option>. See
+            <citerefentry><refentrytitle>flatpak-make-current</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
         </para>
         <para>
             If <arg choice="plain">REF</arg> names a runtime, a shell is opened in the
-            runtime. This is useful for development and testing.
+            runtime. This is useful for development and testing. If there is ambiguity about
+            which branch to use, you will be prompted to choose. Use <option>--branch</option>
+            to avoid this. The primary arch is used unless otherwise specified with
+            <option>--arch</option>.
         </para>
         <para>
-            By default, flatpak will look for the application or runtime in all per-user
-            and system installations. This can be overridden with the <option>--user</option>,
-            <option>--system</option> and <option>--installation</option> options.
+            By default, Flatpak will look for the application or runtime in the per-user
+            installation first, then in all system installations. This can be overridden
+            with the <option>--user</option>, <option>--system</option> and
+            <option>--installation</option> options.
         </para>
         <para>
-            flatpak creates a sandboxed environment for the application to run in
+            Flatpak creates a sandboxed environment for the application to run in
             by mounting the right runtime at <filename>/usr</filename> and a writable
             directory at <filename>/var</filename>, whose content is preserved between
             application runs. The application itself is mounted at <filename>/app</filename>.
@@ -83,6 +90,7 @@
             <member>LD_LIBRARY_PATH</member>
             <member>XDG_CONFIG_DIRS</member>
             <member>XDG_DATA_DIRS</member>
+            <member>XDG_RUNTIME_DIR</member>
             <member>SHELL</member>
             <member>TMPDIR</member>
             <member>PYTHONPATH</member>
@@ -91,6 +99,10 @@
             <member>XCURSOR_PATH</member>
         </simplelist>
         <para>
+            Also several environment variables with the prefix "GST_" that are used by gstreamer
+            are unset (since Flatpak 1.12.5).
+        </para>
+        <para>
             Flatpak also overrides the XDG environment variables to point sandboxed applications
             at their writable filesystem locations below <filename>~/.var/app/$APPID/</filename>:
         </para>
@@ -98,7 +110,14 @@
             <member>XDG_DATA_HOME</member>
             <member>XDG_CONFIG_HOME</member>
             <member>XDG_CACHE_HOME</member>
+            <member>XDG_STATE_HOME (since Flatpak 1.13)</member>
         </simplelist>
+        <para>
+            Apps can use the <option>--persist=.local/state</option> and
+            <option>--unset-env=XDG_STATE_HOME</option> options to get a
+            Flatpak 1.13-compatible <filename>~/.local/state</filename>
+            on older versions of Flatpak.
+        </para>
         <para>
             The host values of these variables are made available inside the sandbox via these
             HOST_-prefixed variables:
@@ -107,6 +126,7 @@
             <member>HOST_XDG_DATA_HOME</member>
             <member>HOST_XDG_CONFIG_HOME</member>
             <member>HOST_XDG_CACHE_HOME</member>
+            <member>HOST_XDG_STATE_HOME (since Flatpak 1.13)</member>
         </simplelist>
         <para>
             Flatpak sets the environment variable <envar>FLATPAK_ID</envar> to the application
@@ -142,6 +162,7 @@
             </varlistentry>
 
             <varlistentry>
+                <term><option>-u</option></term>
                 <term><option>--user</option></term>
 
                 <listitem><para>
@@ -278,7 +299,7 @@
                     Expose a well known socket to the application. This overrides to
                     the Context section from the application metadata.
                     <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups.
+                    ssh-auth, pcsc, cups, gpg-agent.
                     This option can be used multiple times.
                 </para></listitem>
             </varlistentry>
@@ -290,7 +311,7 @@
                     Don't expose a well known socket to the application. This overrides to
                     the Context section from the application metadata.
                     <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups.
+                    ssh-auth, pcsc, cups, gpg-agent.
                     This option can be used multiple times.
                 </para></listitem>
             </varlistentry>
@@ -554,9 +575,9 @@ key=v1;v2;
                 <listitem><para>
                   Allow filtered access to the session dbus connection. This is the default, except when run with --sandbox.
                   </para><para>
-                  Isandbox mode, even if you allow access to the session bus the sandbox cannot talk to or own
+                  In sandbox mode, even if you allow access to the session bus the sandbox cannot talk to or own
                   the application ids (org.the.App.*) on the bus (unless explicitly added), only names in the
-                  .Sandbox subset (org.the.App.Sandbox.*).
+                  .Sandboxed subset (org.the.App.Sandboxed.* and org.mpris.MediaPlayer2.org.the.App.Sandboxed.*).
                 </para></listitem>
             </varlistentry>
 

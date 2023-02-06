@@ -17,6 +17,7 @@
 # GLIB - Library of useful C routines
 
 # Copyright (C) 2015 Colin Walters <walters@verbum.org>
+# SPDX-License-Identifier: LGPL-2.0-or-later
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -206,15 +207,14 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/subprojects/libglnx/libglnx.m4 \
 	$(top_srcdir)/m4/attributes.m4 $(top_srcdir)/m4/gettext.m4 \
-	$(top_srcdir)/m4/glibtests.m4 $(top_srcdir)/m4/gtk-doc.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/intlmacosx.m4 \
-	$(top_srcdir)/m4/lib-ld.m4 $(top_srcdir)/m4/lib-link.m4 \
-	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/po.m4 \
-	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/glibtests.m4 $(top_srcdir)/m4/iconv.m4 \
+	$(top_srcdir)/m4/intlmacosx.m4 $(top_srcdir)/m4/lib-ld.m4 \
+	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/nls.m4 \
+	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -243,7 +243,7 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bwrapdir)" \
 	"$(DESTDIR)$(installed_test_keyringdir)" \
 	"$(DESTDIR)$(installed_test_keyring2dir)" \
 	"$(DESTDIR)$(tmpfilesdir)" "$(DESTDIR)$(envdir)" \
-	"$(DESTDIR)$(fishcompletiondir)" \
+	"$(DESTDIR)$(fishcompletiondir)" "$(DESTDIR)$(fishconfdir)" \
 	"$(DESTDIR)$(installed_testdir)" \
 	"$(DESTDIR)$(installed_test_metadir)" \
 	"$(DESTDIR)$(introspectiondir)" \
@@ -315,8 +315,7 @@ am__DEPENDENCIES_1 =
 libflatpak_app_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 =
 am_libflatpak_app_la_OBJECTS =  \
@@ -359,7 +358,8 @@ libflatpak_common_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__libflatpak_common_la_SOURCES_DIST = common/flatpak.h \
 	common/flatpak-ref.h common/flatpak-error.h \
 	common/flatpak-installed-ref.h common/flatpak-remote-ref.h \
@@ -399,7 +399,8 @@ am__libflatpak_common_la_SOURCES_DIST = common/flatpak.h \
 	common/flatpak-transaction.c \
 	common/flatpak-utils-http-private.h \
 	common/flatpak-utils-http.c common/flatpak-utils-private.h \
-	common/flatpak-utils.c common/flatpak-prune.c \
+	common/flatpak-utils.c common/flatpak-uri-private.h \
+	common/flatpak-uri.c common/flatpak-prune.c \
 	common/flatpak-prune-private.h \
 	common/flatpak-zstd-decompressor.c \
 	common/flatpak-zstd-decompressor-private.h \
@@ -435,6 +436,7 @@ am_libflatpak_common_la_OBJECTS = $(am__objects_3) \
 	common/libflatpak_common_la-flatpak-transaction.lo \
 	common/libflatpak_common_la-flatpak-utils-http.lo \
 	common/libflatpak_common_la-flatpak-utils.lo \
+	common/libflatpak_common_la-flatpak-uri.lo \
 	common/libflatpak_common_la-flatpak-prune.lo \
 	common/libflatpak_common_la-flatpak-zstd-decompressor.lo \
 	$(am__objects_1) $(am__objects_4)
@@ -453,7 +455,8 @@ libflatpak_common_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 libflatpak_la_DEPENDENCIES = libflatpak-common.la \
 	libflatpak-common-base.la libglnx.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_libflatpak_la_OBJECTS = common/libflatpak_la-flatpak.lo \
 	$(am__objects_1)
 libflatpak_la_OBJECTS = $(am_libflatpak_la_OBJECTS)
@@ -591,10 +594,9 @@ nodist_flatpak_OBJECTS = $(am__objects_7) $(am__objects_1)
 flatpak_OBJECTS = $(am_flatpak_OBJECTS) $(nodist_flatpak_OBJECTS)
 flatpak_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) libglnx.la libflatpak-app.la \
-	libflatpak-common.la libflatpak-common-base.la \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) libglnx.la \
+	libflatpak-app.la libflatpak-common.la \
+	libflatpak-common-base.la $(am__DEPENDENCIES_1)
 flatpak_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(flatpak_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -713,9 +715,9 @@ revokefs_fuse_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 am_test_context_OBJECTS = tests/test_context-test-context.$(OBJEXT)
 test_context_OBJECTS = $(am_test_context_OBJECTS)
 am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) libflatpak-app.la libflatpak-common.la \
-	libflatpak-common-base.la libglnx.la $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) libflatpak-app.la \
+	libflatpak-common.la libflatpak-common-base.la libglnx.la \
+	$(am__DEPENDENCIES_1)
 test_context_DEPENDENCIES = $(am__DEPENDENCIES_4) libtestlib.la
 test_context_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(test_context_CFLAGS) \
@@ -801,13 +803,14 @@ test_portal_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 am_testcommon_OBJECTS = tests/testcommon-testcommon.$(OBJEXT)
 testcommon_OBJECTS = $(am_testcommon_OBJECTS)
 testcommon_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) libflatpak-app.la libflatpak-common.la \
-	libflatpak-common-base.la libglnx.la $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) libflatpak-app.la \
+	libflatpak-common.la libflatpak-common-base.la libglnx.la \
+	$(am__DEPENDENCIES_1)
 testcommon_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(testcommon_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_testlibrary_OBJECTS = tests/testlibrary-can-use-fuse.$(OBJEXT) \
+	tests/testlibrary-testlib.$(OBJEXT) \
 	tests/testlibrary-testlibrary.$(OBJEXT) $(am__objects_1)
 testlibrary_OBJECTS = $(am_testlibrary_OBJECTS)
 testlibrary_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -826,7 +829,6 @@ tests_hold_lock_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 tests_httpcache_SOURCES = tests/httpcache.c
 tests_httpcache_OBJECTS = tests/httpcache-httpcache.$(OBJEXT)
 tests_httpcache_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	libflatpak-common.la libflatpak-common-base.la libglnx.la
 tests_httpcache_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
@@ -994,6 +996,7 @@ am__depfiles_remade =  \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-run.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-systemd-dbus-generated.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-transaction.Plo \
+	common/$(DEPDIR)/libflatpak_common_la-flatpak-uri.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-utils-http.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-utils.Plo \
 	common/$(DEPDIR)/libflatpak_common_la-flatpak-zstd-decompressor.Plo \
@@ -1054,6 +1057,7 @@ am__depfiles_remade =  \
 	tests/$(DEPDIR)/test_update_portal-test-update-portal.Po \
 	tests/$(DEPDIR)/testcommon-testcommon.Po \
 	tests/$(DEPDIR)/testlibrary-can-use-fuse.Po \
+	tests/$(DEPDIR)/testlibrary-testlib.Po \
 	tests/$(DEPDIR)/testlibrary-testlibrary.Po \
 	tests/$(DEPDIR)/try_syscall-try-syscall.Po
 am__mv = mv -f
@@ -1154,12 +1158,12 @@ DATA = $(bashcompletion_DATA) $(dbus_service_DATA) \
 	$(dbussystemservice_DATA) $(dist_dbusconf_DATA) \
 	$(dist_installed_test_keyring_DATA) \
 	$(dist_installed_test_keyring2_DATA) $(dist_tmpfiles_DATA) \
-	$(env_DATA) $(fishcompletion_DATA) $(installed_test_DATA) \
-	$(installed_test_meta_DATA) $(introspection_DATA) \
-	$(nobase_installed_test_DATA) $(nodist_gir_DATA) \
-	$(nodist_typelib_DATA) $(noinst_DATA) $(pkgconfig_DATA) \
-	$(polkit_policy_DATA) $(polkit_rules_DATA) $(profile_DATA) \
-	$(selinux_devel_DATA) $(selinux_module_DATA) \
+	$(env_DATA) $(fishcompletion_DATA) $(fishconf_DATA) \
+	$(installed_test_DATA) $(installed_test_meta_DATA) \
+	$(introspection_DATA) $(nobase_installed_test_DATA) \
+	$(nodist_gir_DATA) $(nodist_typelib_DATA) $(noinst_DATA) \
+	$(pkgconfig_DATA) $(polkit_policy_DATA) $(polkit_rules_DATA) \
+	$(profile_DATA) $(selinux_devel_DATA) $(selinux_module_DATA) \
 	$(systemdsystemunit_DATA) $(systemduserunit_DATA) \
 	$(sysusers_DATA) $(zshcompletion_DATA)
 HEADERS = $(flatpakinclude_HEADERS) $(nodist_flatpakinclude_HEADERS)
@@ -1467,8 +1471,10 @@ distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
-APPSTREAM_GLIB_CFLAGS = @APPSTREAM_GLIB_CFLAGS@
-APPSTREAM_GLIB_LIBS = @APPSTREAM_GLIB_LIBS@
+APPSTREAM_0_14_0_CFLAGS = @APPSTREAM_0_14_0_CFLAGS@
+APPSTREAM_0_14_0_LIBS = @APPSTREAM_0_14_0_LIBS@
+APPSTREAM_CFLAGS = @APPSTREAM_CFLAGS@
+APPSTREAM_LIBS = @APPSTREAM_LIBS@
 AR = @AR@
 ARCHIVE_CFLAGS = @ARCHIVE_CFLAGS@
 ARCHIVE_LIBS = @ARCHIVE_LIBS@
@@ -1489,6 +1495,8 @@ CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
+CURL_CFLAGS = @CURL_CFLAGS@
+CURL_LIBS = @CURL_LIBS@
 CYGPATH_W = @CYGPATH_W@
 DBUS_CONFIG_DIR = @DBUS_CONFIG_DIR@
 DBUS_PROXY = @DBUS_PROXY@
@@ -1509,11 +1517,14 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 FLATPAK_INTERFACE_AGE = @FLATPAK_INTERFACE_AGE@
 FLATPAK_MAJOR_VERSION = @FLATPAK_MAJOR_VERSION@
 FLATPAK_MICRO_VERSION = @FLATPAK_MICRO_VERSION@
 FLATPAK_MINOR_VERSION = @FLATPAK_MINOR_VERSION@
 FLATPAK_VERSION = @FLATPAK_VERSION@
+FUSE3_CFLAGS = @FUSE3_CFLAGS@
+FUSE3_LIBS = @FUSE3_LIBS@
 FUSE_CFLAGS = @FUSE_CFLAGS@
 FUSE_LIBS = @FUSE_LIBS@
 GDBUS_CODEGEN = @GDBUS_CODEGEN@
@@ -1531,14 +1542,7 @@ GPGME_CONFIG = @GPGME_CONFIG@
 GPGME_PTHREAD_CFLAGS = @GPGME_PTHREAD_CFLAGS@
 GPGME_PTHREAD_LIBS = @GPGME_PTHREAD_LIBS@
 GREP = @GREP@
-GTKDOC_CHECK = @GTKDOC_CHECK@
-GTKDOC_CHECK_PATH = @GTKDOC_CHECK_PATH@
-GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
-GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
-GTKDOC_MKPDF = @GTKDOC_MKPDF@
-GTKDOC_REBASE = @GTKDOC_REBASE@
 HIDDEN_VISIBILITY_CFLAGS = @HIDDEN_VISIBILITY_CFLAGS@
-HTML_DIR = @HTML_DIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -1716,7 +1720,7 @@ noinst_LTLIBRARIES = $(NULL) $(am__append_1) libglnx.la \
 	libflatpak-common-base.la libflatpak-common.la \
 	libflatpak-app.la libtestlib.la
 CLEANFILES = $(NULL) $(am__append_13) $(dbus_service_DATA) \
-	$(systemduserunit_DATA) \
+	$(systemduserunit_DATA) $(top_builddir)/libglnx-config.h \
 	$(nodist_libflatpak_common_base_la_SOURCES) \
 	$(nodist_libflatpak_common_la_SOURCES) $(am__append_22) \
 	app/parse-datetime.c $(flatpak_dbus_built_sources) \
@@ -1732,15 +1736,19 @@ DISTCLEANFILES = $(NULL) $(am__append_26) flatpak.pp.bz2 \
 	tests/services/org.flatpak.Authenticator.Oci.service \
 	tests/share/xdg-desktop-portal/portals/test.portal \
 	tests/package_version.txt $(NULL) flatpak.env
-BUILT_SOURCES = $(NULL) $(nodist_libflatpak_common_base_la_SOURCES) \
+BUILT_SOURCES = $(NULL) $(top_builddir)/libglnx-config.h \
+	$(nodist_libflatpak_common_base_la_SOURCES) \
 	$(nodist_libflatpak_common_la_SOURCES) \
 	$(flatpak_dbus_built_sources) $(nodist_flatpak_portal_SOURCES) \
 	$(nodist_flatpak_oci_authenticator_SOURCES)
 EXTRA_DIST = buildutil/tap-driver.sh buildutil/tap-test \
 	$(all_dist_test_scripts) $(all_dist_test_data) \
 	$(service_in_files) subprojects/libglnx/README.md \
-	subprojects/libglnx/COPYING subprojects/libglnx/libglnx.m4 \
-	$(NULL) common/flatpak-enum-types.c.template \
+	subprojects/libglnx/COPYING \
+	subprojects/libglnx/LICENSES/LGPL-2.0-or-later.txt \
+	subprojects/libglnx/LICENSES/LGPL-2.1-or-later.txt \
+	subprojects/libglnx/libglnx.m4 $(NULL) \
+	common/flatpak-enum-types.c.template \
 	common/flatpak-enum-types.h.template \
 	data/org.freedesktop.portal.Documents.xml \
 	data/org.freedesktop.impl.portal.PermissionStore.xml \
@@ -1755,14 +1763,16 @@ EXTRA_DIST = buildutil/tap-driver.sh buildutil/tap-test \
 	system-helper/org.freedesktop.Flatpak.rules.in \
 	system-helper/org.freedesktop.Flatpak.SystemHelper.service.in \
 	system-helper/flatpak-system-helper.service.in \
-	system-helper/flatpak.conf.in selinux/flatpak.te \
-	selinux/flatpak.fc selinux/flatpak.if $(NULL) \
+	system-helper/flatpak.conf.in selinux/build-selinux.sh \
+	selinux/flatpak.te selinux/flatpak.fc selinux/flatpak.if \
+	$(NULL) \
 	sideload-repos-systemd/flatpak-sideload-usb-repo.path.in \
 	sideload-repos-systemd/flatpak-sideload-usb-repo.service.in \
-	tests/flatpak.supp tests/glib.supp \
 	tests/Makefile-test-matrix.am.inc tests/expand-test-matrix.sh \
-	tests/test-wrapper.sh $(bashcompletion_DATA) \
-	$(zshcompletion_DATA) $(fishcompletion_DATA) $(profile_DATA) \
+	tests/flatpak.supp tests/glib.supp tests/make-runtime-repos \
+	tests/test-wrapper.sh tests/update-test-matrix $(NULL) \
+	$(bashcompletion_DATA) $(zshcompletion_DATA) \
+	$(fishcompletion_DATA) $(profile_DATA) $(fishconf_DATA) \
 	env.d/flatpak.env.in env.d/60-flatpak \
 	env.d/60-flatpak-system-only flatpak.pc.in \
 	scripts/flatpak-bisect scripts/flatpak-coredumpctl \
@@ -1786,7 +1796,7 @@ noinst_SCRIPTS = $(am__append_3)
 noinst_DATA = $(am__append_4)
 check_LTLIBRARIES = $(am__append_5)
 check_SCRIPTS = $(am__append_7)
-check_DATA = $(am__append_8) tests/runtime-repo
+check_DATA = $(am__append_8) tests/runtime-repo.stamp
 
 # Note: build even the installed-only targets during 'make check' to ensure that they still work.
 # We need to do a bit of trickery here and manage dist-ing via EXTRA_DIST instead of using dist_ prefixes to
@@ -1842,10 +1852,9 @@ AM_CPPFLAGS = -DFLATPAK_BINDIR=\"$(FLATPAK_BINDIR)\" \
 	-DSYSTEM_FONTS_DIR=\"$(SYSTEM_FONTS_DIR)\" \
 	-DSYSTEM_HELPER_USER=\"$(SYSTEM_HELPER_USER)\" \
 	-DSYSTEM_FONT_CACHE_DIRS=\"$(SYSTEM_FONT_CACHE_DIRS)\" \
-	-DG_LOG_DOMAIN=\"flatpak\" -I$(srcdir)/subprojects \
-	-I$(srcdir)/subprojects/libglnx -I$(srcdir)/common \
-	-I$(builddir)/common -include "config.h" $(NULL) \
-	$(am__append_15) $(am__append_16) $(am__append_17) \
+	-DG_LOG_DOMAIN=\"flatpak\" -I$(srcdir)/subprojects/libglnx \
+	-I$(srcdir)/common -I$(builddir)/common -include "config.h" \
+	$(NULL) $(am__append_15) $(am__append_16) $(am__append_17) \
 	$(am__append_18)
 @ENABLE_ASAN_TRUE@ASAN_FLAGS = -fsanitize=undefined -fsanitize-undefined-trap-on-error -fsanitize=address
 ASAN_FLAGS = 
@@ -1900,7 +1909,7 @@ libglnx_la_SOURCES = \
 	subprojects/libglnx/tests/libglnx-testlib.h \
 	$(NULL)
 
-libglnx_la_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags)
+libglnx_la_CFLAGS = $(AM_CFLAGS) $(libglnx_cflags) -I$(builddir)
 libglnx_la_LDFLAGS = -avoid-version -Bsymbolic-functions -export-symbols-regex "^glnx_" -no-undefined -export-dynamic 
 libglnx_la_LIBADD = $(libglnx_libs)
 libglnx_tests = test-libglnx-xattrs test-libglnx-fdio test-libglnx-errors test-libglnx-macros test-libglnx-shutil
@@ -2005,7 +2014,8 @@ libflatpak_common_la_SOURCES = $(flatpakinclude_HEADERS) \
 	common/flatpak-transaction.c common/flatpak-transaction.h \
 	common/flatpak-utils-http-private.h \
 	common/flatpak-utils-http.c common/flatpak-utils-private.h \
-	common/flatpak-utils.c common/flatpak-prune.c \
+	common/flatpak-utils.c common/flatpak-uri-private.h \
+	common/flatpak-uri.c common/flatpak-prune.c \
 	common/flatpak-prune-private.h \
 	common/flatpak-zstd-decompressor.c \
 	common/flatpak-zstd-decompressor-private.h \
@@ -2013,7 +2023,6 @@ libflatpak_common_la_SOURCES = $(flatpakinclude_HEADERS) \
 libflatpak_common_la_CFLAGS = \
 	-DFLATPAK_COMPILATION \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
-	-I$(srcdir)/subprojects/dbus-proxy \
 	$(AM_CFLAGS) \
 	$(ARCHIVE_CFLAGS) \
 	$(ZSTD_CFLAGS) \
@@ -2026,6 +2035,7 @@ libflatpak_common_la_CFLAGS = \
 	$(MALCONTENT_CFLAGS) \
 	$(OSTREE_CFLAGS) \
 	$(POLKIT_CFLAGS) \
+	$(CURL_CFLAGS) \
 	$(SOUP_CFLAGS) \
 	$(SYSTEMD_CFLAGS) \
 	$(XAUTH_CFLAGS) \
@@ -2044,6 +2054,7 @@ libflatpak_common_la_LIBADD = \
 	$(MALCONTENT_LIBS) \
 	$(OSTREE_LIBS) \
 	$(POLKIT_LIBS) \
+	$(CURL_LIBS) \
 	$(SOUP_LIBS) \
 	$(SYSTEMD_LIBS) \
 	$(XAUTH_LIBS) \
@@ -2062,6 +2073,7 @@ libflatpak_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(BASE_CFLAGS) \
 	$(OSTREE_CFLAGS) \
+	$(CURL_CFLAGS) \
 	$(SOUP_CFLAGS) \
 	$(JSON_CFLAGS) \
 	$(NULL)
@@ -2080,6 +2092,7 @@ libflatpak_la_LIBADD = \
 	libglnx.la \
 	$(BASE_LIBS)	\
 	$(OSTREE_LIBS)	\
+	$(CURL_LIBS)	\
 	$(SOUP_LIBS)	\
 	$(JSON_LIBS)    \
 	$(NULL)
@@ -2153,9 +2166,8 @@ libflatpak_app_la_LIBADD = \
 	$(AM_LDADD) \
 	$(BASE_LIBS) \
 	$(OSTREE_LIBS) \
-	$(SOUP_LIBS) \
 	$(JSON_LIBS) \
-	$(APPSTREAM_GLIB_LIBS) \
+	$(APPSTREAM_LIBS) \
 	$(SYSTEMD_LIBS) \
 	$(POLKIT_LIBS) \
 	$(NULL)
@@ -2164,9 +2176,8 @@ libflatpak_app_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(BASE_CFLAGS) \
 	$(OSTREE_CFLAGS) \
-	$(SOUP_CFLAGS) \
 	$(JSON_CFLAGS) \
-	$(APPSTREAM_GLIB_CFLAGS) \
+	$(APPSTREAM_CFLAGS) \
 	 $(SYSTEMD_CFLAGS) \
 	$(POLKIT_CFLAGS) \
 	-DFLATPAK_COMPILATION \
@@ -2239,9 +2250,8 @@ flatpak_LDADD = \
 	$(AM_LDADD) \
 	$(BASE_LIBS) \
 	$(OSTREE_LIBS) \
-	$(SOUP_LIBS) \
 	$(JSON_LIBS) \
-	$(APPSTREAM_GLIB_LIBS) \
+	$(APPSTREAM_LIBS) \
 	$(SYSTEMD_LIBS) \
 	$(POLKIT_LIBS) \
 	libglnx.la \
@@ -2254,9 +2264,8 @@ flatpak_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(BASE_CFLAGS) \
 	$(OSTREE_CFLAGS) \
-	$(SOUP_CFLAGS) \
 	$(JSON_CFLAGS) \
-	$(APPSTREAM_GLIB_CFLAGS) \
+	$(APPSTREAM_CFLAGS) \
 	$(SYSTEMD_CFLAGS) \
 	$(POLKIT_CFLAGS) \
 	-DFLATPAK_COMPILATION \
@@ -2313,7 +2322,7 @@ flatpak_portal_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/portal
 @BUILD_SYSTEM_HELPER_TRUE@	$(NULL)
 
 @BUILD_SYSTEM_HELPER_TRUE@flatpak_system_helper_LDADD = $(BASE_LIBS) $(OSTREE_LIBS) $(JSON_LIBS) $(POLKIT_LIBS) libflatpak-common.la libflatpak-common-base.la libglnx.la
-@BUILD_SYSTEM_HELPER_TRUE@flatpak_system_helper_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(POLKIT_CFLAGS) -DFLATPAK_COMPILATION -DLIBEXECDIR=\"$(libexecdir)\"
+@BUILD_SYSTEM_HELPER_TRUE@flatpak_system_helper_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(APPSTREAM_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(POLKIT_CFLAGS) -DFLATPAK_COMPILATION -DLIBEXECDIR=\"$(libexecdir)\"
 @BUILD_SYSTEM_HELPER_TRUE@polkit_rulesdir = $(datadir)/polkit-1/rules.d
 @BUILD_SYSTEM_HELPER_TRUE@polkit_rules_DATA = \
 @BUILD_SYSTEM_HELPER_TRUE@	system-helper/org.freedesktop.Flatpak.rules
@@ -2407,6 +2416,7 @@ testlibrary_LDADD = \
 testlibrary_SOURCES = \
 	tests/can-use-fuse.c \
 	tests/can-use-fuse.h \
+	tests/testlib.c \
 	tests/testlibrary.c \
 	$(NULL)
 
@@ -2414,9 +2424,8 @@ testcommon_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(BASE_CFLAGS) \
 	$(OSTREE_CFLAGS) \
-	$(SOUP_CFLAGS) \
 	$(JSON_CFLAGS) \
-	$(APPSTREAM_GLIB_CFLAGS) \
+	$(APPSTREAM_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
 	-I$(srcdir)/app \
@@ -2427,9 +2436,8 @@ testcommon_LDADD = \
 	$(AM_LDADD) \
 	$(BASE_LIBS) \
 	$(OSTREE_LIBS) \
-	$(SOUP_LIBS) \
 	$(JSON_LIBS) \
-	$(APPSTREAM_GLIB_LIBS) \
+	$(APPSTREAM_LIBS) \
 	libflatpak-app.la \
 	libflatpak-common.la \
 	libflatpak-common-base.la \
@@ -2465,11 +2473,11 @@ nodist_test_portal_SOURCES = \
 tests_hold_lock_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS)
 tests_hold_lock_LDADD = $(AM_LDADD) $(BASE_LIBS) libglnx.la
 tests_hold_lock_SOURCES = tests/hold-lock.c
-tests_httpcache_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) \
+tests_httpcache_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(JSON_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\"
 
-tests_httpcache_LDADD = $(AM_LDADD) $(BASE_LIBS) $(OSTREE_LIBS) $(SOUP_LIBS) $(JSON_LIBS) $(APPSTREAM_GLIB_LIBS) \
+tests_httpcache_LDADD = $(AM_LDADD) $(BASE_LIBS) $(OSTREE_LIBS) $(JSON_LIBS) \
 	libflatpak-common.la libflatpak-common-base.la libglnx.la
 
 tests_mock_flatpak_CFLAGS = $(testcommon_CFLAGS)
@@ -2497,7 +2505,7 @@ tests_test_authenticator_SOURCES = tests/test-authenticator.c
 tests_try_syscall_CFLAGS = $(AM_CFLAGS)
 tests_try_syscall_LDADD = $(AM_LDADD)
 tests_try_syscall_SOURCES = tests/try-syscall.c
-tests_list_unused_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) \
+tests_list_unused_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\"
 
@@ -2533,38 +2541,7 @@ installed_test_keyring2dir = $(installed_testdir)/test-keyring2
 @ENABLE_INSTALLED_TESTS_TRUE@	$(NULL)
 
 
-# Run make update-test-matrix after changing this
-TEST_MATRIX_SOURCE = \
-	tests/test-basic.sh \
-	tests/test-completion.sh \
-	tests/test-config.sh \
-	tests/test-build-update-repo.sh \
-	tests/test-http-utils.sh \
-	tests/test-run.sh{{user+system+system-norevokefs},{nodeltas+deltas}} \
-	tests/test-info.sh{user+system} \
-	tests/test-repo.sh{{user+system+system-norevokefs}+{{user+system},oldsummary}} \
-	tests/test-history.sh \
-	tests/test-sideload.sh{user+system} \
-	tests/test-default-remotes.sh \
-	tests/test-metadata-validation.sh \
-	tests/test-extensions.sh \
-	tests/test-bundle.sh{user+system+system-norevokefs} \
-	tests/test-oci.sh \
-	tests/test-oci-registry.sh{user+system} \
-	tests/test-update-remote-configuration.sh{newsummary+oldsummary} \
-	tests/test-override.sh \
-	tests/test-update-portal.sh{user+system} \
-	tests/test-auth.sh \
-	tests/test-unused.sh \
-	tests/test-summaries.sh{user+system} \
-	tests/test-subset.sh{user+system} \
-	tests/test-prune.sh \
-	tests/test-seccomp.sh \
-	tests/test-repair.sh \
-	$(NULL)
-
-
-# This file is autogenerated by make update-test-matrix, don't edit
+# This file is autogenerated by ./tests/update-test-matrix, don't edit
 TEST_MATRIX = \
 	tests/test-run@user,nodeltas.wrap \
 	tests/test-run@user,deltas.wrap \
@@ -2684,6 +2661,8 @@ fishcompletiondir = $(datadir)/fish/vendor_completions.d
 fishcompletion_DATA = completion/flatpak.fish
 profiledir = $(PROFILE_DIR)
 profile_DATA = profile/flatpak.sh
+fishconfdir = $(datadir)/fish/vendor_conf.d
+fishconf_DATA = profile/flatpak.fish
 envdir = $(datadir)/gdm/env.d
 env_DATA = $(am__append_36)
 systemenvgendir = $(systemdsystemenvgendir)
@@ -3145,6 +3124,8 @@ common/libflatpak_common_la-flatpak-utils-http.lo:  \
 	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
 common/libflatpak_common_la-flatpak-utils.lo: common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
+common/libflatpak_common_la-flatpak-uri.lo: common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
 common/libflatpak_common_la-flatpak-prune.lo: common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
 common/libflatpak_common_la-flatpak-zstd-decompressor.lo:  \
@@ -3548,6 +3529,8 @@ testcommon$(EXEEXT): $(testcommon_OBJECTS) $(testcommon_DEPENDENCIES) $(EXTRA_te
 	$(AM_V_CCLD)$(testcommon_LINK) $(testcommon_OBJECTS) $(testcommon_LDADD) $(LIBS)
 tests/testlibrary-can-use-fuse.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
+tests/testlibrary-testlib.$(OBJEXT): tests/$(am__dirstamp) \
+	tests/$(DEPDIR)/$(am__dirstamp)
 tests/testlibrary-testlibrary.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
@@ -3922,6 +3905,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-run.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-systemd-dbus-generated.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-transaction.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-uri.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-utils-http.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/libflatpak_common_la-flatpak-zstd-decompressor.Plo@am__quote@ # am--include-marker
@@ -3982,6 +3966,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/test_update_portal-test-update-portal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/testcommon-testcommon.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/testlibrary-can-use-fuse.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/testlibrary-testlib.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/testlibrary-testlibrary.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/try_syscall-try-syscall.Po@am__quote@ # am--include-marker
 
@@ -4238,6 +4223,13 @@ common/libflatpak_common_la-flatpak-utils.lo: common/flatpak-utils.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/flatpak-utils.c' object='common/libflatpak_common_la-flatpak-utils.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libflatpak_common_la_CFLAGS) $(CFLAGS) -c -o common/libflatpak_common_la-flatpak-utils.lo `test -f 'common/flatpak-utils.c' || echo '$(srcdir)/'`common/flatpak-utils.c
+
+common/libflatpak_common_la-flatpak-uri.lo: common/flatpak-uri.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libflatpak_common_la_CFLAGS) $(CFLAGS) -MT common/libflatpak_common_la-flatpak-uri.lo -MD -MP -MF common/$(DEPDIR)/libflatpak_common_la-flatpak-uri.Tpo -c -o common/libflatpak_common_la-flatpak-uri.lo `test -f 'common/flatpak-uri.c' || echo '$(srcdir)/'`common/flatpak-uri.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/libflatpak_common_la-flatpak-uri.Tpo common/$(DEPDIR)/libflatpak_common_la-flatpak-uri.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/flatpak-uri.c' object='common/libflatpak_common_la-flatpak-uri.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libflatpak_common_la_CFLAGS) $(CFLAGS) -c -o common/libflatpak_common_la-flatpak-uri.lo `test -f 'common/flatpak-uri.c' || echo '$(srcdir)/'`common/flatpak-uri.c
 
 common/libflatpak_common_la-flatpak-prune.lo: common/flatpak-prune.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libflatpak_common_la_CFLAGS) $(CFLAGS) -MT common/libflatpak_common_la-flatpak-prune.lo -MD -MP -MF common/$(DEPDIR)/libflatpak_common_la-flatpak-prune.Tpo -c -o common/libflatpak_common_la-flatpak-prune.lo `test -f 'common/flatpak-prune.c' || echo '$(srcdir)/'`common/flatpak-prune.c
@@ -5569,6 +5561,20 @@ tests/testlibrary-can-use-fuse.obj: tests/can-use-fuse.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -c -o tests/testlibrary-can-use-fuse.obj `if test -f 'tests/can-use-fuse.c'; then $(CYGPATH_W) 'tests/can-use-fuse.c'; else $(CYGPATH_W) '$(srcdir)/tests/can-use-fuse.c'; fi`
 
+tests/testlibrary-testlib.o: tests/testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -MT tests/testlibrary-testlib.o -MD -MP -MF tests/$(DEPDIR)/testlibrary-testlib.Tpo -c -o tests/testlibrary-testlib.o `test -f 'tests/testlib.c' || echo '$(srcdir)/'`tests/testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/testlibrary-testlib.Tpo tests/$(DEPDIR)/testlibrary-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/testlib.c' object='tests/testlibrary-testlib.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -c -o tests/testlibrary-testlib.o `test -f 'tests/testlib.c' || echo '$(srcdir)/'`tests/testlib.c
+
+tests/testlibrary-testlib.obj: tests/testlib.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -MT tests/testlibrary-testlib.obj -MD -MP -MF tests/$(DEPDIR)/testlibrary-testlib.Tpo -c -o tests/testlibrary-testlib.obj `if test -f 'tests/testlib.c'; then $(CYGPATH_W) 'tests/testlib.c'; else $(CYGPATH_W) '$(srcdir)/tests/testlib.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/testlibrary-testlib.Tpo tests/$(DEPDIR)/testlibrary-testlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='tests/testlib.c' object='tests/testlibrary-testlib.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -c -o tests/testlibrary-testlib.obj `if test -f 'tests/testlib.c'; then $(CYGPATH_W) 'tests/testlib.c'; else $(CYGPATH_W) '$(srcdir)/tests/testlib.c'; fi`
+
 tests/testlibrary-testlibrary.o: tests/testlibrary.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testlibrary_CFLAGS) $(CFLAGS) -MT tests/testlibrary-testlibrary.o -MD -MP -MF tests/$(DEPDIR)/testlibrary-testlibrary.Tpo -c -o tests/testlibrary-testlibrary.o `test -f 'tests/testlibrary.c' || echo '$(srcdir)/'`tests/testlibrary.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/testlibrary-testlibrary.Tpo tests/$(DEPDIR)/testlibrary-testlibrary.Po
@@ -5910,6 +5916,27 @@ uninstall-fishcompletionDATA:
 	@list='$(fishcompletion_DATA)'; test -n "$(fishcompletiondir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(fishcompletiondir)'; $(am__uninstall_files_from_dir)
+install-fishconfDATA: $(fishconf_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(fishconf_DATA)'; test -n "$(fishconfdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(fishconfdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(fishconfdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(fishconfdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(fishconfdir)" || exit $$?; \
+	done
+
+uninstall-fishconfDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(fishconf_DATA)'; test -n "$(fishconfdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(fishconfdir)'; $(am__uninstall_files_from_dir)
 install-installed_testDATA: $(installed_test_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(installed_test_DATA)'; test -n "$(installed_testdir)" || list=; \
@@ -7158,7 +7185,7 @@ install-installedtestLTLIBRARIES: install-libLTLIBRARIES
 
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bwrapdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(triggersdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(scriptsdir)" "$(DESTDIR)$(systemenvgendir)" "$(DESTDIR)$(userenvgendir)" "$(DESTDIR)$(bashcompletiondir)" "$(DESTDIR)$(dbus_servicedir)" "$(DESTDIR)$(dbussystemservicedir)" "$(DESTDIR)$(dbusconfdir)" "$(DESTDIR)$(installed_test_keyringdir)" "$(DESTDIR)$(installed_test_keyring2dir)" "$(DESTDIR)$(tmpfilesdir)" "$(DESTDIR)$(envdir)" "$(DESTDIR)$(fishcompletiondir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(installed_test_metadir)" "$(DESTDIR)$(introspectiondir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(girdir)" "$(DESTDIR)$(typelibdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(polkit_policydir)" "$(DESTDIR)$(polkit_rulesdir)" "$(DESTDIR)$(profiledir)" "$(DESTDIR)$(selinux_develdir)" "$(DESTDIR)$(selinux_moduledir)" "$(DESTDIR)$(systemdsystemunitdir)" "$(DESTDIR)$(systemduserunitdir)" "$(DESTDIR)$(sysusersdir)" "$(DESTDIR)$(zshcompletiondir)" "$(DESTDIR)$(flatpakincludedir)" "$(DESTDIR)$(flatpakincludedir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bwrapdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(triggersdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(scriptsdir)" "$(DESTDIR)$(systemenvgendir)" "$(DESTDIR)$(userenvgendir)" "$(DESTDIR)$(bashcompletiondir)" "$(DESTDIR)$(dbus_servicedir)" "$(DESTDIR)$(dbussystemservicedir)" "$(DESTDIR)$(dbusconfdir)" "$(DESTDIR)$(installed_test_keyringdir)" "$(DESTDIR)$(installed_test_keyring2dir)" "$(DESTDIR)$(tmpfilesdir)" "$(DESTDIR)$(envdir)" "$(DESTDIR)$(fishcompletiondir)" "$(DESTDIR)$(fishconfdir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(installed_test_metadir)" "$(DESTDIR)$(introspectiondir)" "$(DESTDIR)$(installed_testdir)" "$(DESTDIR)$(girdir)" "$(DESTDIR)$(typelibdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(polkit_policydir)" "$(DESTDIR)$(polkit_rulesdir)" "$(DESTDIR)$(profiledir)" "$(DESTDIR)$(selinux_develdir)" "$(DESTDIR)$(selinux_moduledir)" "$(DESTDIR)$(systemdsystemunitdir)" "$(DESTDIR)$(systemduserunitdir)" "$(DESTDIR)$(sysusersdir)" "$(DESTDIR)$(zshcompletiondir)" "$(DESTDIR)$(flatpakincludedir)" "$(DESTDIR)$(flatpakincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -7320,6 +7347,7 @@ distclean: distclean-recursive
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-run.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-systemd-dbus-generated.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-transaction.Plo
+	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-uri.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-utils-http.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-utils.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-zstd-decompressor.Plo
@@ -7380,6 +7408,7 @@ distclean: distclean-recursive
 	-rm -f tests/$(DEPDIR)/test_update_portal-test-update-portal.Po
 	-rm -f tests/$(DEPDIR)/testcommon-testcommon.Po
 	-rm -f tests/$(DEPDIR)/testlibrary-can-use-fuse.Po
+	-rm -f tests/$(DEPDIR)/testlibrary-testlib.Po
 	-rm -f tests/$(DEPDIR)/testlibrary-testlibrary.Po
 	-rm -f tests/$(DEPDIR)/try_syscall-try-syscall.Po
 	-rm -f Makefile
@@ -7405,8 +7434,8 @@ install-data-am: install-bashcompletionDATA install-bwrapPROGRAMS \
 	install-dist_installed_test_keyringDATA \
 	install-dist_tmpfilesDATA install-dist_triggersSCRIPTS \
 	install-envDATA install-fishcompletionDATA \
-	install-flatpakincludeHEADERS install-installed_testDATA \
-	install-installed_testLTLIBRARIES \
+	install-fishconfDATA install-flatpakincludeHEADERS \
+	install-installed_testDATA install-installed_testLTLIBRARIES \
 	install-installed_testPROGRAMS install-installed_testSCRIPTS \
 	install-installed_test_metaDATA install-introspectionDATA \
 	install-nobase_installed_testDATA \
@@ -7534,6 +7563,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-run.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-systemd-dbus-generated.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-transaction.Plo
+	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-uri.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-utils-http.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-utils.Plo
 	-rm -f common/$(DEPDIR)/libflatpak_common_la-flatpak-zstd-decompressor.Plo
@@ -7594,6 +7624,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f tests/$(DEPDIR)/test_update_portal-test-update-portal.Po
 	-rm -f tests/$(DEPDIR)/testcommon-testcommon.Po
 	-rm -f tests/$(DEPDIR)/testlibrary-can-use-fuse.Po
+	-rm -f tests/$(DEPDIR)/testlibrary-testlib.Po
 	-rm -f tests/$(DEPDIR)/testlibrary-testlibrary.Po
 	-rm -f tests/$(DEPDIR)/try_syscall-try-syscall.Po
 	-rm -f Makefile
@@ -7619,8 +7650,8 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 	uninstall-dist_installed_test_keyringDATA \
 	uninstall-dist_libexecSCRIPTS uninstall-dist_tmpfilesDATA \
 	uninstall-dist_triggersSCRIPTS uninstall-envDATA \
-	uninstall-fishcompletionDATA uninstall-flatpakincludeHEADERS \
-	uninstall-installed_testDATA \
+	uninstall-fishcompletionDATA uninstall-fishconfDATA \
+	uninstall-flatpakincludeHEADERS uninstall-installed_testDATA \
 	uninstall-installed_testLTLIBRARIES \
 	uninstall-installed_testPROGRAMS \
 	uninstall-installed_testSCRIPTS \
@@ -7662,9 +7693,10 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 	install-dist_libexecSCRIPTS install-dist_tmpfilesDATA \
 	install-dist_triggersSCRIPTS install-dvi install-dvi-am \
 	install-envDATA install-exec install-exec-am \
-	install-fishcompletionDATA install-flatpakincludeHEADERS \
-	install-html install-html-am install-info install-info-am \
-	install-installed_testDATA install-installed_testLTLIBRARIES \
+	install-fishcompletionDATA install-fishconfDATA \
+	install-flatpakincludeHEADERS install-html install-html-am \
+	install-info install-info-am install-installed_testDATA \
+	install-installed_testLTLIBRARIES \
 	install-installed_testPROGRAMS install-installed_testSCRIPTS \
 	install-installed_test_metaDATA install-introspectionDATA \
 	install-libLTLIBRARIES install-libexecPROGRAMS install-man \
@@ -7690,8 +7722,8 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 	uninstall-dist_installed_test_keyringDATA \
 	uninstall-dist_libexecSCRIPTS uninstall-dist_tmpfilesDATA \
 	uninstall-dist_triggersSCRIPTS uninstall-envDATA \
-	uninstall-fishcompletionDATA uninstall-flatpakincludeHEADERS \
-	uninstall-installed_testDATA \
+	uninstall-fishcompletionDATA uninstall-fishconfDATA \
+	uninstall-flatpakincludeHEADERS uninstall-installed_testDATA \
 	uninstall-installed_testLTLIBRARIES \
 	uninstall-installed_testPROGRAMS \
 	uninstall-installed_testSCRIPTS \
@@ -7726,6 +7758,8 @@ uninstall-am: uninstall-bashcompletionDATA uninstall-binPROGRAMS \
 		-e "s|\@localstatedir\@|$(localstatedir)|" \
 		-e "s|\@media_dir\@|$(RUN_MEDIA_DIR)|" \
 		-e "s|\@extraargs\@||" $< > $@
+$(top_builddir)/libglnx-config.h: Makefile.am
+	echo '#include "config.h"' > $@
 
 common/flatpak-enum-types.h: $(flatpakinclude_HEADERS) common/flatpak-enum-types.h.template
 	$(AM_V_GEN) $(GLIB_MKENUMS) --template $(filter %.template,$^) $(filter-out %.template,$^) > \
@@ -7825,13 +7859,8 @@ portal/%-dbus.h: portal/%-dbus.c
 @BUILD_SYSTEM_HELPER_TRUE@	  -e "s|\@SYSTEM_HELPER_USER\@|$(SYSTEM_HELPER_USER)|" \
 @BUILD_SYSTEM_HELPER_TRUE@	  $< > $@
 
-@BUILD_SELINUX_MODULE_TRUE@flatpak.pp.bz2: selinux/flatpak.te selinux/flatpak.fc
-@BUILD_SELINUX_MODULE_TRUE@	$(eval TMP := $(shell mktemp -d selinux-build-XXXXXX))
-@BUILD_SELINUX_MODULE_TRUE@	cp $^ $(TMP)/
-@BUILD_SELINUX_MODULE_TRUE@	cd $(TMP) && make -f /usr/share/selinux/devel/Makefile flatpak.pp
-@BUILD_SELINUX_MODULE_TRUE@	bzip2 -9 $(TMP)/flatpak.pp
-@BUILD_SELINUX_MODULE_TRUE@	cp $(TMP)/flatpak.pp.bz2 .
-@BUILD_SELINUX_MODULE_TRUE@	rm -rf $(TMP)
+@BUILD_SELINUX_MODULE_TRUE@flatpak.pp.bz2: selinux/flatpak.te selinux/flatpak.fc selinux/build-selinux.sh
+@BUILD_SELINUX_MODULE_TRUE@	$(srcdir)/selinux/build-selinux.sh . $^
 
 @BUILD_AUTO_SIDELOADING_TRUE@%.path: %.path.in config.log
 @BUILD_AUTO_SIDELOADING_TRUE@	$(AM_V_GEN) $(SED) -e "s|\@media_dir\@|$(RUN_MEDIA_DIR)|" $< > $@
@@ -7883,18 +7912,17 @@ tests/package_version.txt: Makefile
 tests/test-basic.sh: tests/package_version.txt
 
 update-test-matrix:
-	$(srcdir)/tests/expand-test-matrix.sh "$(TEST_MATRIX_SOURCE)" > $(srcdir)/tests/Makefile-test-matrix.am.inc
+	$(srcdir)/tests/update-test-matrix
 
 tests/test-%.wrap:
 	@true
 
-tests/runtime-repo: tests/make-test-runtime.sh flatpak
-	rm -rf tests/runtime-repo
-	PATH=$(abs_top_builddir):$${PATH} $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo org.test.Platform master "" ""
-	PATH=$(abs_top_builddir):$${PATH} $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo org.test.Platform stable "" ""
+tests/runtime-repo.stamp: tests/make-runtime-repos tests/make-test-runtime.sh flatpak
+	$< $(abs_top_builddir) $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo tests/runtime-repo.stamp
 
 distclean-local:
 	rm -rf tests/runtime-repo
+	rm -rf tests/runtime-repo.stamp
 
 @VALGRIND_CHECK_RULES@
 
@@ -7912,7 +7940,7 @@ flatpak.env: env.d/flatpak.env.in
 
 coverage:
 	$(AM_V_GEN) $(MAKE) $(AM_MAKEFLAGS) lcov-clean
-	$(AM_V_GEN) $(MAKE) check
+	$(AM_V_GEN) FLATPAK_TEST_COVERAGE=1 $(MAKE) check
 	$(AM_V_GEN) $(MAKE) $(AM_MAKEFLAGS) genlcov
 
 lcov-clean:

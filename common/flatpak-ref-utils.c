@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2014-2020 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -94,8 +94,6 @@ find_last_char (const char *str, gsize len, int c)
  * 2) DBus names require only two elements
  *
  * Returns: %TRUE if valid, %FALSE otherwise.
- *
- * Since: 2.26
  */
 gboolean
 flatpak_is_valid_name (const char *string,
@@ -362,8 +360,6 @@ is_valid_branch_character (gint c)
  * Branch names must contain at least one character.
  *
  * Returns: %TRUE if valid, %FALSE otherwise.
- *
- * Since: 2.26
  */
 gboolean
 flatpak_is_valid_branch (const char *string,
@@ -1100,6 +1096,16 @@ flatpak_decomposed_equal_except_branch (FlatpakDecomposed  *ref_a,
     g_strcmp0 (ref_a->collection_id, ref_b->collection_id) == 0;
 }
 
+gboolean
+flatpak_decomposed_equal_except_arch (FlatpakDecomposed  *ref_a,
+                                      FlatpakDecomposed  *ref_b)
+{
+  return
+    ref_a->arch_offset == ref_b->arch_offset &&
+    strncmp (ref_a->data, ref_b->data, ref_a->arch_offset) == 0 &&
+    strcmp (&ref_a->data[ref_a->branch_offset], &ref_b->data[ref_b->branch_offset]) == 0 &&
+    g_strcmp0 (ref_a->collection_id, ref_b->collection_id) == 0;
+}
 
 guint
 flatpak_decomposed_hash (FlatpakDecomposed  *ref)

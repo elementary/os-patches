@@ -1,5 +1,6 @@
 /* bubblewrap
  * Copyright (C) 2016 Alexander Larsson
+ * SPDX-License-Identifier: LGPL-2.0-or-later
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -85,7 +86,7 @@ decode_mountoptions (const char *options)
   int i;
   unsigned long flags = 0;
   static const struct  { int   flag;
-                         char *name;
+                         const char *name;
   } flags_data[] = {
     { 0, "rw" },
     { MS_RDONLY, "ro" },

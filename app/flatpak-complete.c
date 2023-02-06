@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2018 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -265,7 +265,7 @@ flatpak_complete_partial_ref (FlatpakCompletion *completion,
           if (last_dot == NULL)
             continue; /* Shouldn't really happen */
 
-          /* Only complete to subrefs is fully matching real part.
+          /* Only complete to subrefs if fully matching real part.
            * For example, only match org.foo.Bar.Sources for
            * "org.foo.Bar", "org.foo.Bar." or "org.foo.Bar.S", but
            * not for "org.foo" or other shorter prefixes.
@@ -338,6 +338,9 @@ flatpak_complete_options (FlatpakCompletion *completion,
 {
   GOptionEntry *e = entries;
   int i;
+
+  if (completion->cur == NULL || completion->cur[0] != '-')
+    return;
 
   while (e->long_name != NULL)
     {

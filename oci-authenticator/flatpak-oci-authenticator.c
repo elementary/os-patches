@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2019 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@ FlatpakAuthenticator *authenticator;
 static GMainLoop *main_loop = NULL;
 static guint name_owner_id = 0;
 static gboolean no_idle_exit = FALSE;
-static SoupSession *http_session = NULL;
+static FlatpakHttpSession *http_session = NULL;
 
 #define IDLE_TIMEOUT_SECS 10 * 60
 
@@ -411,7 +411,7 @@ lookup_auth_from_config (const char *oci_registry_uri)
   const char *flatpak_global_path = "/etc/flatpak/oci-auth.json";
 
   /* These are what skopeo & co use as per:
-     https://github.com/containers/image/blob/master/pkg/docker/config/config.go#L34
+     https://github.com/containers/image/blob/HEAD/pkg/docker/config/config.go#L34
   */
   g_autofree char *user_container_path = g_build_filename (g_get_user_runtime_dir (), "containers/auth.json", NULL);
   g_autofree char *container_path = g_strdup_printf ("/run/containers/%d/auth.json", getuid ());
@@ -769,7 +769,7 @@ main (int    argc,
 
   g_debug ("Started flatpak-authenticator");
 
-  http_session = flatpak_create_soup_session (PACKAGE_STRING);
+  http_session = flatpak_create_http_session (PACKAGE_STRING);
 
   session_bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
   if (session_bus == NULL)

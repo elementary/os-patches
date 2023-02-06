@@ -1,4 +1,3 @@
-
 bwrap_SOURCES = \
 	subprojects/bubblewrap/bubblewrap.c \
 	subprojects/bubblewrap/bind-mount.h \

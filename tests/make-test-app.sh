@@ -113,9 +113,8 @@ mkdir -p ${DIR}/files/share/icons/HighContrast/64x64/apps
 cp $(dirname $0)/org.test.Hello.png ${DIR}/files/share/icons/HighContrast/64x64/apps/${APP_ID}.png
 
 
-mkdir -p ${DIR}/files/share/app-info/xmls
-mkdir -p ${DIR}/files/share/app-info/icons/flatpak/64x64
-gzip -c > ${DIR}/files/share/app-info/xmls/${APP_ID}.xml.gz <<EOF
+mkdir -p ${DIR}/files/share/metainfo
+cat <<EOF > ${DIR}/files/share/metainfo/${APP_ID}.metainfo.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <components version="0.8">
   <component type="desktop">
@@ -133,6 +132,27 @@ gzip -c > ${DIR}/files/share/app-info/xmls/${APP_ID}.xml.gz <<EOF
   </component>
 </components>
 EOF
+
+# Also check that the legacy path works
+mkdir -p ${DIR}/files/share/appdata
+cat <<EOF > ${DIR}/files/share/appdata/${APP_ID}.cmd.appdata.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<components version="0.8">
+  <component type="console-application">
+    <id>$APP_ID.cmd</id>
+    <name>Command line client for Hello world test app</name>
+    <summary>Adds cool functionality</summary>
+    <provides>
+      <binary>hello</binary>
+    </provides>
+  </component>
+</components>
+EOF
+
+mkdir -p ${DIR}/files/share/app-info/xmls
+mkdir -p ${DIR}/files/share/app-info/icons/flatpak/64x64
+gzip -c ${DIR}/files/share/metainfo/${APP_ID}.metainfo.xml > ${DIR}/files/share/app-info/xmls/${APP_ID}.xml.gz
+gzip -c ${DIR}/files/share/appdata/${APP_ID}.cmd.appdata.xml > ${DIR}/files/share/app-info/xmls/${APP_ID}.cmd.xml.gz
 cp $(dirname $0)/org.test.Hello.png ${DIR}/files/share/app-info/icons/flatpak/64x64/${APP_ID}.png
 
 if [ x$COLLECTION_ID != x ]; then
@@ -147,9 +167,9 @@ ln -s -t ${DIR}/files/share/locale ../../share/runtime/locale/de/share/de
 mkdir -p ${DIR}/files/share/runtime/locale/fr
 ln -s -t ${DIR}/files/share/locale ../../share/runtime/locale/fr/share/fr
 
-flatpak build-finish ${BUILD_FINISH_ARGS-} --command=hello.sh ${DIR}
+flatpak build-finish ${BUILD_FINISH_ARGS-} --command=hello.sh ${DIR} >&2
 mkdir -p repos
-flatpak build-export --no-update-summary --disable-sandbox ${collection_args} ${GPGARGS-} ${EXPORT_ARGS-} ${REPO} ${DIR} ${BRANCH}
+flatpak build-export --no-update-summary --disable-sandbox ${collection_args} ${GPGARGS-} ${EXPORT_ARGS-} ${REPO} ${DIR} ${BRANCH} >&2
 rm -rf ${DIR}
 
 # build a locale extension
@@ -178,9 +198,9 @@ EOF
 mkdir -p ${DIR}/files/fr/share/fr/LC_MESSAGES
 msgfmt --output-file ${DIR}/files/fr/share/fr/LC_MESSAGES/helloworld.mo fr.po
 
-flatpak build-finish ${DIR}
+flatpak build-finish ${DIR} >&2
 mkdir -p repos
-flatpak build-export --no-update-summary --runtime ${collection_args} ${GPGARGS-} ${EXPORT_ARGS-} ${REPO} ${DIR} ${BRANCH}
+flatpak build-export --no-update-summary --runtime ${collection_args} ${GPGARGS-} ${EXPORT_ARGS-} ${REPO} ${DIR} ${BRANCH} >&2
 rm -rf ${DIR}
 
 # build a plugin extension
@@ -198,13 +218,13 @@ EOF
 
 mkdir -p ${DIR}/files/plug-ins/fun
 
-flatpak build-finish ${DIR}
+flatpak build-finish ${DIR} >&2
 mkdir -p repos
 
 if [ "$EXTRA" = "EXTENSIONS" ]; then
-  flatpak build-export --no-update-summary --runtime ${collection_args} ${GPGARGS-} ${EXPORT_ARGS-} ${REPO} ${DIR} v2
+  flatpak build-export --no-update-summary --runtime ${collection_args} ${GPGARGS-} ${EXPORT_ARGS-} ${REPO} ${DIR} v2 >&2
 else
-  flatpak build-export --no-update-summary --runtime ${collection_args} ${GPGARGS-} ${EXPORT_ARGS-} ${REPO} ${DIR} v1
+  flatpak build-export --no-update-summary --runtime ${collection_args} ${GPGARGS-} ${EXPORT_ARGS-} ${REPO} ${DIR} v1 >&2
 fi
 
 rm -rf ${DIR}

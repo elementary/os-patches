@@ -21,10 +21,16 @@
 #ifndef __FLATPAK_CONTEXT_H__
 #define __FLATPAK_CONTEXT_H__
 
-#include "libglnx/libglnx.h"
-#include "dbus-proxy/flatpak-proxy.h"
+#include "libglnx.h"
 #include <flatpak-common-types-private.h>
 #include "flatpak-exports-private.h"
+
+typedef enum {
+  FLATPAK_POLICY_NONE,
+  FLATPAK_POLICY_SEE,
+  FLATPAK_POLICY_TALK,
+  FLATPAK_POLICY_OWN
+} FlatpakPolicy;
 
 typedef struct FlatpakContext FlatpakContext;
 
@@ -43,6 +49,7 @@ typedef enum {
   FLATPAK_CONTEXT_SOCKET_SSH_AUTH    = 1 << 6,
   FLATPAK_CONTEXT_SOCKET_PCSC        = 1 << 7,
   FLATPAK_CONTEXT_SOCKET_CUPS        = 1 << 8,
+  FLATPAK_CONTEXT_SOCKET_GPG_AGENT   = 1 << 9,
 } FlatpakContextSockets;
 
 typedef enum {

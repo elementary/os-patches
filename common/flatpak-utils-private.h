@@ -23,7 +23,7 @@
 
 #include <string.h>
 
-#include "libglnx/libglnx.h"
+#include "libglnx.h"
 #include <flatpak-common-types-private.h>
 #include <gio/gio.h>
 #include <gio/gunixfdlist.h>
@@ -133,6 +133,7 @@ gboolean flatpak_extension_matches_reason (const char *extension_id,
 
 const char * flatpak_get_bwrap (void);
 
+char **flatpak_strv_sort_by_length (const char * const *strv);
 char **flatpak_strv_merge (char   **strv1,
                            char   **strv2);
 char **flatpak_subpaths_merge (char **subpaths1,
@@ -358,6 +359,20 @@ g_hash_table_steal_extended (GHashTable    *hash_table,
 }
 #endif
 
+#if !GLIB_CHECK_VERSION (2, 62, 0)
+void g_ptr_array_extend (GPtrArray        *array_to_extend,
+                         GPtrArray        *array,
+                         GCopyFunc         func,
+                         gpointer          user_data);
+#endif
+
+#if !GLIB_CHECK_VERSION (2, 68, 0)
+guint g_string_replace (GString     *string,
+                        const gchar *find,
+                        const gchar *replace,
+                        guint        limit);
+#endif
+
 gboolean flatpak_g_ptr_array_contains_string (GPtrArray  *array,
                                               const char *str);
 
@@ -398,6 +413,10 @@ flatpak_auto_lock_helper (GMutex *mutex)
 gboolean flatpak_switch_symlink_and_remove (const char *symlink_path,
                                             const char *target,
                                             GError    **error);
+
+char *flatpak_keyfile_get_string_non_empty (GKeyFile *keyfile,
+                                            const char *group,
+                                            const char *key);
 
 GKeyFile * flatpak_parse_repofile (const char   *remote_name,
                                    gboolean      from_ref,
@@ -730,14 +749,6 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakRepoTransaction, flatpak_repo_transaction_
 
 #define AUTOLOCK(name) G_GNUC_UNUSED __attribute__((cleanup (flatpak_auto_unlock_helper))) GMutex * G_PASTE (auto_unlock, __LINE__) = flatpak_auto_lock_helper (&G_LOCK_NAME (name))
 
-#if !defined(SOUP_AUTOCLEANUPS_H) && !defined(__SOUP_AUTOCLEANUPS_H__)
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupSession, g_object_unref)
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupMessage, g_object_unref)
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupRequest, g_object_unref)
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupRequestHTTP, g_object_unref)
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupURI, soup_uri_free)
-#endif
-
 #if !JSON_CHECK_VERSION (1, 1, 2)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (JsonArray, json_array_unref)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (JsonBuilder, g_object_unref)
@@ -758,8 +769,8 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (GUnixFDList, g_object_unref)
  */
 typedef FlatpakSessionHelper AutoFlatpakSessionHelper;
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (AutoFlatpakSessionHelper, g_object_unref)
-
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (XdpDbusDocuments, g_object_unref)
+typedef XdpDbusDocuments AutoXdpDbusDocuments;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (AutoXdpDbusDocuments, g_object_unref)
 
 typedef struct FlatpakXml FlatpakXml;
 
@@ -833,6 +844,7 @@ gboolean flatpak_allocate_tmpdir (int           tmpdir_dfd,
                                   GCancellable *cancellable,
                                   GError      **error);
 
+gboolean flatpak_allow_fuzzy_matching (const char *term);
 
 char * flatpak_prompt (gboolean allow_empty,
                        const char *prompt,
@@ -912,6 +924,11 @@ int flatpak_envp_cmp (const void *p1,
                       const void *p2);
 
 gboolean flatpak_str_is_integer (const char *s);
+
+gboolean flatpak_uri_equal (const char *uri1,
+                            const char *uri2);
+
+gboolean running_under_sudo (void);
 
 #define FLATPAK_MESSAGE_ID "c7b39b1e006b464599465e105b361485"
 

@@ -10,6 +10,7 @@ USE_SYSTEMDIR=yes
 
 skip_without_bwrap
 skip_revokefs_without_fuse
+skip_without_libsystemd
 
 HISTORY_START_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 sleep 1
@@ -37,23 +38,27 @@ EOF
 setup_repo_no_add
 port=$(cat httpd-port)
 ${FLATPAK} --installation=history-installation remote-add \
-    --gpg-import=${FL_GPG_HOMEDIR}/pubring.gpg test-repo "http://127.0.0.1:${port}/test"
-${FLATPAK} --installation=history-installation install -y test-repo org.test.Hello master
+    --gpg-import=${FL_GPG_HOMEDIR}/pubring.gpg test-repo "http://127.0.0.1:${port}/test" >&2
+${FLATPAK} --installation=history-installation install -y test-repo org.test.Hello master >&2
 
 # appstream update shouldn't show up in history
-${FLATPAK} ${U} --appstream update test-repo
+${FLATPAK} ${U} --appstream update test-repo >&2
 
 # update, uninstall, and remote-delete should show up
 EXPORT_ARGS="" make_updated_app
-${FLATPAK} --installation=history-installation update -y org.test.Hello
-${FLATPAK} --installation=history-installation uninstall -y org.test.Platform org.test.Hello
-${FLATPAK} --installation=history-installation remote-delete test-repo
+${FLATPAK} --installation=history-installation update -y org.test.Hello >&2
+${FLATPAK} --installation=history-installation uninstall -y org.test.Platform org.test.Hello >&2
+${FLATPAK} --installation=history-installation remote-delete test-repo >&2
 
 # need --since and --columns here to make the test idempotent
-${FLATPAK} --installation=history-installation history --since="${HISTORY_START_TIME}" \
-    --columns=change,application,branch,installation,remote > history-log 2>&1
+if ! ${FLATPAK} --installation=history-installation history --since="${HISTORY_START_TIME}" \
+    --columns=change,application,branch,installation,remote > history-log 2>&1; then
+    cat history-log >&2
+    echo "Bail out! 'flatpak history' failed"
+    exit 1
+fi
 
-diff history-log - << EOF
+diff history-log - >&2 << EOF
 add remote			system (history-installation)	test-repo
 deploy install	org.test.Hello.Locale	master	system (history-installation)	test-repo
 deploy install	org.test.Platform	master	system (history-installation)	test-repo

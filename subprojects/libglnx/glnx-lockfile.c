@@ -7,6 +7,7 @@
 
   Copyright 2010 Lennart Poettering
   Copyright 2015 Colin Walters <walters@verbum.org>
+  SPDX-License-Identifier: LGPL-2.1-or-later
 
   systemd is free software; you can redistribute it and/or modify it
   under the terms of the GNU Lesser General Public License as published by
@@ -22,7 +23,7 @@
   along with systemd; If not, see <http://www.gnu.org/licenses/>.
 ***/
 
-#include "config.h"
+#include "libglnx-config.h"
 
 #include <stdlib.h>
 #include <stdbool.h>

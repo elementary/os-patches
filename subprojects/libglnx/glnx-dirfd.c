@@ -1,6 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
  *
  * Copyright (C) 2014,2015 Colin Walters <walters@verbum.org>.
+ * SPDX-License-Identifier: LGPL-2.0-or-later
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
+#include "libglnx-config.h"
 
 #include <string.h>
 
@@ -171,6 +172,24 @@ glnx_dirfd_iterator_next_dent (GLnxDirFdIterator  *dfd_iter,
               strcmp ((*out_dent)->d_name, "..") == 0));
 
   return TRUE;
+}
+
+/**
+ * glnx_dirfd_iterator_rewind:
+ * @dfd_iter: A directory iterator
+ *
+ * Rewind to the beginning of @dfd_iter. The next call to
+ * glnx_dirfd_iterator_next_dent() will provide the first entry in the
+ * directory.
+ */
+void
+glnx_dirfd_iterator_rewind (GLnxDirFdIterator  *dfd_iter)
+{
+  GLnxRealDirfdIterator *real_dfd_iter = (GLnxRealDirfdIterator*) dfd_iter;
+
+  g_return_if_fail (dfd_iter->initialized);
+
+  rewinddir (real_dfd_iter->d);
 }
 
 /**

@@ -1,6 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
  *
  * Copyright (C) 2014,2015 Colin Walters <walters@verbum.org>.
+ * SPDX-License-Identifier: LGPL-2.0-or-later
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +44,7 @@ G_BEGIN_DECLS
 static inline
 const char *glnx_basename (const char *path)
 {
-  gchar *base = strrchr (path, G_DIR_SEPARATOR);
+  const gchar *base = strrchr (path, G_DIR_SEPARATOR);
 
   if (base)
     return base + 1;
@@ -55,7 +56,7 @@ const char *glnx_basename (const char *path)
 static inline void
 glnx_stdio_file_cleanup (void *filep)
 {
-  FILE *f = filep;
+  FILE *f = (FILE*)filep;
   if (f)
     fclose (f);
 }
@@ -189,7 +190,8 @@ glnx_regfile_copy_bytes (int fdf, int fdt, off_t max_bytes);
 typedef enum {
   GLNX_FILE_COPY_OVERWRITE = (1 << 0),
   GLNX_FILE_COPY_NOXATTRS = (1 << 1),
-  GLNX_FILE_COPY_DATASYNC = (1 << 2)
+  GLNX_FILE_COPY_DATASYNC = (1 << 2),
+  GLNX_FILE_COPY_NOCHOWN = (1 << 3)
 } GLnxFileCopyFlags;
 
 gboolean
@@ -207,6 +209,7 @@ int glnx_renameat2_noreplace (int olddirfd, const char *oldpath,
 int glnx_renameat2_exchange (int olddirfd, const char *oldpath,
                              int newdirfd, const char *newpath);
 
+#ifdef _GNU_SOURCE
 /**
  * glnx_try_fallocate:
  * @fd: File descriptor
@@ -238,6 +241,7 @@ glnx_try_fallocate (int      fd,
 
   return TRUE;
 }
+#endif
 
 /**
  * glnx_fstat:

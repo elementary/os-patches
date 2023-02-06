@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright 2021 Simon McVittie
  * SPDX-License-Identifier: LGPL-2.0-or-later
  *
@@ -7,6 +7,9 @@
  *
  * In general, we pass a bad fd or pointer to each syscall that will
  * accept one, so that it will fail with EBADF or EFAULT without side-effects.
+ *
+ * This helper is used for regression tests in both bubblewrap and flatpak.
+ * Please keep both copies in sync.
  */
 
 #include <errno.h>
@@ -21,11 +24,11 @@
 #include <sys/types.h>
 
 #if defined(_MIPS_SIM)
-# if _MIPS_SIM == _MIPS_SIM_ABI32
+# if _MIPS_SIM == _ABIO32
 #   define MISSING_SYSCALL_BASE 4000
-# elif _MIPS_SIM == _MIPS_SIM_ABI64
+# elif _MIPS_SIM == _ABI64
 #   define MISSING_SYSCALL_BASE 5000
-# elif _MIPS_SIM == _MIPS_SIM_NABI32
+# elif _MIPS_SIM == _ABIN32
 #   define MISSING_SYSCALL_BASE 6000
 # else
 #   error "Unknown MIPS ABI"
@@ -67,6 +70,10 @@
  * An invalid pointer that will cause syscalls to fail with EFAULT
  */
 #define WRONG_POINTER ((char *) 1)
+
+#ifndef PR_GET_CHILD_SUBREAPER
+#define PR_GET_CHILD_SUBREAPER 37
+#endif
 
 int
 main (int argc, char **argv)

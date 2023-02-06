@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2019 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include <gio/gio.h>
-#include "libglnx/libglnx.h"
+#include "libglnx.h"
 
 char *
 flatpak_get_timezone (void)

@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2014 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -27,7 +27,7 @@
 
 #include <glib/gi18n.h>
 
-#include "libglnx/libglnx.h"
+#include "libglnx.h"
 
 #include "flatpak-builtins.h"
 #include "flatpak-builtins-utils.h"
@@ -269,7 +269,10 @@ flatpak_builtin_update (int           argc,
     }
 
   if (!has_updates)
-    g_print (_("Nothing to do.\n"));
+    {
+      g_print ("\n");
+      g_print (_("Nothing to do.\n"));
+    }
 
   if (n_prefs == 0)
     {

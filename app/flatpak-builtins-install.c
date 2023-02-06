@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2014 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -29,7 +29,7 @@
 
 #include <gio/gunixinputstream.h>
 
-#include "libglnx/libglnx.h"
+#include "libglnx.h"
 
 #include "flatpak-builtins.h"
 #include "flatpak-builtins-utils.h"
@@ -51,6 +51,8 @@ static gboolean opt_no_deps;
 static gboolean opt_no_static_deltas;
 static gboolean opt_runtime;
 static gboolean opt_app;
+static gboolean opt_include_sdk;
+static gboolean opt_include_debug;
 static gboolean opt_bundle;
 static gboolean opt_from;
 static gboolean opt_yes;
@@ -69,6 +71,8 @@ static GOptionEntry options[] = {
   { "no-static-deltas", 0, 0, G_OPTION_ARG_NONE, &opt_no_static_deltas, N_("Don't use static deltas"), NULL },
   { "runtime", 0, 0, G_OPTION_ARG_NONE, &opt_runtime, N_("Look for runtime with the specified name"), NULL },
   { "app", 0, 0, G_OPTION_ARG_NONE, &opt_app, N_("Look for app with the specified name"), NULL },
+  { "include-sdk", 0, 0, G_OPTION_ARG_NONE, &opt_include_sdk, N_("Additionally install the SDK used to build the given refs") },
+  { "include-debug", 0, 0, G_OPTION_ARG_NONE, &opt_include_debug, N_("Additionally install the debug info for the given refs and their dependencies") },
   { "bundle", 0, 0, G_OPTION_ARG_NONE, &opt_bundle, N_("Assume LOCATION is a .flatpak single-file bundle"), NULL },
   { "from", 0, 0, G_OPTION_ARG_NONE, &opt_from, N_("Assume LOCATION is a .flatpakref application description"), NULL },
   { "gpg-file", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &opt_gpg_file, N_("Check bundle signatures with GPG key from FILE (- for stdin)"), N_("FILE") },
@@ -171,6 +175,8 @@ install_bundle (FlatpakDir *dir,
   flatpak_transaction_set_disable_related (transaction, opt_no_related);
   flatpak_transaction_set_disable_auto_pin (transaction, opt_no_auto_pin);
   flatpak_transaction_set_reinstall (transaction, opt_reinstall);
+  flatpak_transaction_set_auto_install_sdk (transaction, opt_include_sdk);
+  flatpak_transaction_set_auto_install_debug (transaction, opt_include_debug);
 
   for (int i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
     flatpak_transaction_add_sideload_repo (transaction, opt_sideload_repos[i]);
@@ -215,9 +221,9 @@ install_from (FlatpakDir *dir,
   if (g_str_has_prefix (filename, "http:") ||
       g_str_has_prefix (filename, "https:"))
     {
-      g_autoptr(SoupSession) soup_session = NULL;
-      soup_session = flatpak_create_soup_session (PACKAGE_STRING);
-      file_data = flatpak_load_uri (soup_session, filename, 0, NULL, NULL, NULL, NULL, cancellable, error);
+      g_autoptr(FlatpakHttpSession) http_session = NULL;
+      http_session = flatpak_create_http_session (PACKAGE_STRING);
+      file_data = flatpak_load_uri (http_session, filename, 0, NULL, NULL, NULL, NULL, cancellable, error);
       if (file_data == NULL)
         {
           g_prefix_error (error, "Can't load uri %s: ", filename);
@@ -249,6 +255,8 @@ install_from (FlatpakDir *dir,
   flatpak_transaction_set_disable_auto_pin (transaction, opt_no_auto_pin);
   flatpak_transaction_set_reinstall (transaction, opt_reinstall);
   flatpak_transaction_set_default_arch (transaction, opt_arch);
+  flatpak_transaction_set_auto_install_sdk (transaction, opt_include_sdk);
+  flatpak_transaction_set_auto_install_debug (transaction, opt_include_debug);
 
   for (int i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
     flatpak_transaction_add_sideload_repo (transaction, opt_sideload_repos[i]);
@@ -318,6 +326,9 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
   if (opt_noninteractive)
     opt_yes = TRUE; /* Implied */
 
+  if (opt_include_sdk || opt_include_debug)
+    opt_or_update = TRUE;
+
   kinds = flatpak_kinds_from_bools (opt_app, opt_runtime);
 
   if (!opt_noninteractive)
@@ -376,10 +387,16 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
               FlatpakDir *this_dir = g_ptr_array_index (dirs, i);
               g_auto(GStrv) remotes = NULL;
               guint j = 0;
+              FindMatchingRefsFlags matching_refs_flags;
 
               remotes = flatpak_dir_list_remotes (this_dir, cancellable, error);
               if (remotes == NULL)
                 return FALSE;
+
+              if (!flatpak_allow_fuzzy_matching (argv[1]))
+                matching_refs_flags = FIND_MATCHING_REFS_FLAGS_NONE;
+              else
+                matching_refs_flags = FIND_MATCHING_REFS_FLAGS_FUZZY;
 
               for (j = 0; remotes[j] != NULL; j++)
                 {
@@ -404,7 +421,7 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
                   if (opt_no_pull)
                     refs = flatpak_dir_find_local_refs (this_dir, this_remote, id, branch, this_default_branch, arch,
                                                         flatpak_get_default_arch (),
-                                                        matched_kinds, FIND_MATCHING_REFS_FLAGS_FUZZY,
+                                                        matched_kinds, matching_refs_flags,
                                                         cancellable, &local_error);
                   else
                     {
@@ -416,7 +433,7 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
 
                       refs = flatpak_dir_find_remote_refs (this_dir, state, id, branch, this_default_branch, arch,
                                                            flatpak_get_default_arch (),
-                                                           matched_kinds, FIND_MATCHING_REFS_FLAGS_FUZZY,
+                                                           matched_kinds, matching_refs_flags,
                                                            cancellable, &local_error);
                       if (refs == NULL)
                         {
@@ -436,7 +453,7 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
             }
 
           if (remote_dir_pairs->len == 0)
-            return flatpak_fail (error, _("No remote refs found similar to ‘%s’"), argv[1]);
+            return flatpak_fail (error, _("No remote refs found for ‘%s’"), argv[1]);
 
           if (!flatpak_resolve_matching_remotes (remote_dir_pairs, argv[1], &chosen_pair, error))
             return FALSE;
@@ -481,6 +498,8 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
   flatpak_transaction_set_disable_related (transaction, opt_no_related);
   flatpak_transaction_set_disable_auto_pin (transaction, opt_no_auto_pin);
   flatpak_transaction_set_reinstall (transaction, opt_reinstall);
+  flatpak_transaction_set_auto_install_sdk (transaction, opt_include_sdk);
+  flatpak_transaction_set_auto_install_debug (transaction, opt_include_debug);
 
   for (i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
     flatpak_transaction_add_sideload_repo (transaction, opt_sideload_repos[i]);
@@ -495,18 +514,33 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
       g_autofree char *ref = NULL;
       g_autoptr(GPtrArray) refs = NULL;
       g_autoptr(GError) local_error = NULL;
+      FindMatchingRefsFlags matching_refs_flags;
 
-      flatpak_split_partial_ref_arg_novalidate (pref, kinds, opt_arch, target_branch,
-                                                &matched_kinds, &id, &arch, &branch);
+      if (!flatpak_allow_fuzzy_matching (pref))
+        matching_refs_flags = FIND_MATCHING_REFS_FLAGS_NONE;
+      else
+        matching_refs_flags = FIND_MATCHING_REFS_FLAGS_FUZZY;
 
-      /* We used _novalidate so that the id can be partial, but we can still validate the branch */
-      if (branch != NULL && !flatpak_is_valid_branch (branch, -1, &local_error))
-        return flatpak_fail_error (error, FLATPAK_ERROR_INVALID_REF, _("Invalid branch %s: %s"), branch, local_error->message);
+      if (matching_refs_flags & FIND_MATCHING_REFS_FLAGS_FUZZY)
+        {
+          flatpak_split_partial_ref_arg_novalidate (pref, kinds, opt_arch, target_branch,
+                                                    &matched_kinds, &id, &arch, &branch);
+
+          /* We used _novalidate so that the id can be partial, but we can still validate the branch */
+          if (branch != NULL && !flatpak_is_valid_branch (branch, -1, &local_error))
+            return flatpak_fail_error (error, FLATPAK_ERROR_INVALID_REF,
+                                       _("Invalid branch %s: %s"), branch, local_error->message);
+        }
+      else if (!flatpak_split_partial_ref_arg (pref, kinds, opt_arch, target_branch,
+                                               &matched_kinds, &id, &arch, &branch, error))
+        {
+          return FALSE;
+        }
 
       if (opt_no_pull)
         refs = flatpak_dir_find_local_refs (dir, remote, id, branch, default_branch, arch,
                                             flatpak_get_default_arch (),
-                                            matched_kinds, FIND_MATCHING_REFS_FLAGS_FUZZY,
+                                            matched_kinds, matching_refs_flags,
                                             cancellable, error);
       else
         {
@@ -519,7 +553,7 @@ flatpak_builtin_install (int argc, char **argv, GCancellable *cancellable, GErro
 
           refs = flatpak_dir_find_remote_refs (dir, state, id, branch, default_branch, arch,
                                                flatpak_get_default_arch (),
-                                               matched_kinds, FIND_MATCHING_REFS_FLAGS_FUZZY,
+                                               matched_kinds, matching_refs_flags,
                                                cancellable, error);
           if (refs == NULL)
             return FALSE;

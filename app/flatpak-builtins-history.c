@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2018 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -29,7 +29,7 @@
 
 #include <glib/gi18n.h>
 
-#include "libglnx/libglnx.h"
+#include "libglnx.h"
 
 #ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-journal.h>
@@ -238,7 +238,7 @@ print_history (GPtrArray    *dirs,
                 g_autofree char *value = NULL;
 
                 if (ref_str && ref_str[0] &&
-                    !is_flatpak_ref (ref_str) &&
+                    !flatpak_is_app_runtime_or_appstream_ref (ref_str) &&
                     g_strcmp0 (ref_str, OSTREE_REPO_METADATA_REF) != 0)
                   g_warning ("Unknown ref in history: %s", ref_str);
 

@@ -44,10 +44,10 @@
             <arg choice="plain">DIRECTORY</arg> is the name of the directory.
         </para>
         <para>
-            The result of this command is that desktop files, icons and
-            D-Bus service files from the <filename>files</filename> subdirectory
-            are copied to a new <filename>export</filename> subdirectory. In the
-            <filename>metadata</filename> file, the command key is set in the
+            The result of this command is that desktop files, icons, D-Bus service
+            files, and AppStream metainfo files from the <filename>files</filename>
+            subdirectory are copied to a new <filename>export</filename> subdirectory.
+            In the <filename>metadata</filename> file, the command key is set in the
             [Application] group, and the supported keys in the [Environment]
             group are set according to the options.
         </para>
@@ -134,7 +134,7 @@
                     Expose a well-known socket to the application. This updates
                     the [Context] group in the metadata.
                     SOCKET must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups.
+                    ssh-auth, pcsc, cups, gpg-agent.
                     This option can be used multiple times.
                 </para><para>
                     The fallback-x11 option makes the X11 socket available only if
@@ -151,7 +151,7 @@
                     Don't expose a well known socket to the application. This updates
                     the [Context] group in the metadata.
                     SOCKET must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups.
+                    ssh-auth, pcsc, cups, gpg-agent.
                     This option can be used multiple times.
                 </para></listitem>
             </varlistentry>

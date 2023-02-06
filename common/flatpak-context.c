@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2014-2018 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -35,10 +35,9 @@
 #include <glib/gi18n-lib.h>
 
 #include <gio/gio.h>
-#include "libglnx/libglnx.h"
+#include "libglnx.h"
 
 #include "flatpak-run-private.h"
-#include "flatpak-proxy.h"
 #include "flatpak-utils-private.h"
 #include "flatpak-dir-private.h"
 #include "flatpak-systemd-dbus-generated.h"
@@ -62,6 +61,7 @@ const char *flatpak_context_sockets[] = {
   "ssh-auth",
   "pcsc",
   "cups",
+  "gpg-agent",
   NULL
 };
 
@@ -1963,13 +1963,17 @@ flatpak_context_save_metadata (FlatpakContext *context,
                                         NULL, &value))
         {
           g_warn_if_fail (GPOINTER_TO_INT (value) == FLATPAK_FILESYSTEM_MODE_NONE);
-          g_ptr_array_add (array, g_strdup ("!host:reset"));
+          if (!flatten)
+            g_ptr_array_add (array, g_strdup ("!host:reset"));
         }
 
       g_hash_table_iter_init (&iter, context->filesystems);
       while (g_hash_table_iter_next (&iter, &key, &value))
         {
           FlatpakFilesystemMode mode = GPOINTER_TO_INT (value);
+
+          if (flatten && mode == FLATPAK_FILESYSTEM_MODE_NONE)
+            continue;
 
           /* We already did this */
           if (g_str_equal (key, "host-reset"))
@@ -2358,7 +2362,10 @@ flatpak_context_add_bus_filters (FlatpakContext *context,
           flatpak_bwrap_add_arg_printf (bwrap, "--own=org.mpris.MediaPlayer2.%s.*", app_id);
         }
       else
-        flatpak_bwrap_add_arg_printf (bwrap, "--own=%s.Sandboxed.*", app_id);
+        {
+          flatpak_bwrap_add_arg_printf (bwrap, "--own=%s.Sandboxed.*", app_id);
+          flatpak_bwrap_add_arg_printf (bwrap, "--own=org.mpris.MediaPlayer2.%s.Sandboxed.*", app_id);
+        }
     }
 
   if (session_bus)
@@ -2535,7 +2542,10 @@ flatpak_context_export (FlatpakContext *context,
           subpath = g_build_filename (path, rest, NULL);
 
           if (mode == FLATPAK_FILESYSTEM_MODE_CREATE && do_create)
-            g_mkdir_with_parents (subpath, 0755);
+            {
+              if (g_mkdir_with_parents (subpath, 0755) != 0)
+                g_debug ("Unable to create directory %s", subpath);
+            }
 
           if (g_file_test (subpath, G_FILE_TEST_EXISTS))
             {
@@ -2553,7 +2563,10 @@ flatpak_context_export (FlatpakContext *context,
           path = g_build_filename (g_get_home_dir (), filesystem + 2, NULL);
 
           if (mode == FLATPAK_FILESYSTEM_MODE_CREATE && do_create)
-            g_mkdir_with_parents (path, 0755);
+            {
+              if (g_mkdir_with_parents (path, 0755) != 0)
+                g_debug ("Unable to create directory %s", path);
+            }
 
           if (g_file_test (path, G_FILE_TEST_EXISTS))
             flatpak_exports_add_path_expose_or_hide (exports, mode, path);
@@ -2561,7 +2574,10 @@ flatpak_context_export (FlatpakContext *context,
       else if (g_str_has_prefix (filesystem, "/"))
         {
           if (mode == FLATPAK_FILESYSTEM_MODE_CREATE && do_create)
-            g_mkdir_with_parents (filesystem, 0755);
+            {
+              if (g_mkdir_with_parents (filesystem, 0755) != 0)
+                g_debug ("Unable to create directory %s", filesystem);
+            }
 
           if (g_file_test (filesystem, G_FILE_TEST_EXISTS))
             flatpak_exports_add_path_expose_or_hide (exports, mode, filesystem);
@@ -2690,7 +2706,8 @@ flatpak_context_append_bwrap_filesystem (FlatpakContext  *context,
           g_autofree char *src = g_build_filename (g_get_home_dir (), ".var/app", app_id, persist, NULL);
           g_autofree char *dest = g_build_filename (g_get_home_dir (), persist, NULL);
 
-          g_mkdir_with_parents (src, 0755);
+          if (g_mkdir_with_parents (src, 0755) != 0)
+            g_debug ("Unable to create directory %s", src);
 
           flatpak_bwrap_add_bind_arg (bwrap, "--bind", src, dest);
         }

@@ -55,6 +55,7 @@ testlibrary_LDADD = \
 testlibrary_SOURCES = \
 	tests/can-use-fuse.c \
 	tests/can-use-fuse.h \
+	tests/testlib.c \
 	tests/testlibrary.c \
 	$(NULL)
 
@@ -62,9 +63,8 @@ testcommon_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(BASE_CFLAGS) \
 	$(OSTREE_CFLAGS) \
-	$(SOUP_CFLAGS) \
 	$(JSON_CFLAGS) \
-	$(APPSTREAM_GLIB_CFLAGS) \
+	$(APPSTREAM_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLIBEXECDIR=\"$(libexecdir)\" \
 	-I$(srcdir)/app \
@@ -74,9 +74,8 @@ testcommon_LDADD = \
 	$(AM_LDADD) \
 	$(BASE_LIBS) \
 	$(OSTREE_LIBS) \
-	$(SOUP_LIBS) \
 	$(JSON_LIBS) \
-	$(APPSTREAM_GLIB_LIBS) \
+	$(APPSTREAM_LIBS) \
 	libflatpak-app.la \
 	libflatpak-common.la \
 	libflatpak-common-base.la \
@@ -114,10 +113,10 @@ tests_hold_lock_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS)
 tests_hold_lock_LDADD = $(AM_LDADD) $(BASE_LIBS) libglnx.la
 tests_hold_lock_SOURCES = tests/hold-lock.c
 
-tests_httpcache_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) \
+tests_httpcache_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(JSON_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\"
-tests_httpcache_LDADD = $(AM_LDADD) $(BASE_LIBS) $(OSTREE_LIBS) $(SOUP_LIBS) $(JSON_LIBS) $(APPSTREAM_GLIB_LIBS) \
+tests_httpcache_LDADD = $(AM_LDADD) $(BASE_LIBS) $(OSTREE_LIBS) $(JSON_LIBS) \
 	libflatpak-common.la libflatpak-common-base.la libglnx.la
 
 tests_mock_flatpak_CFLAGS = $(testcommon_CFLAGS)
@@ -147,7 +146,7 @@ tests_try_syscall_CFLAGS = $(AM_CFLAGS)
 tests_try_syscall_LDADD = $(AM_LDADD)
 tests_try_syscall_SOURCES = tests/try-syscall.c
 
-tests_list_unused_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) $(SOUP_CFLAGS) $(JSON_CFLAGS) $(APPSTREAM_GLIB_CFLAGS) \
+tests_list_unused_CFLAGS = $(AM_CFLAGS) $(BASE_CFLAGS) $(OSTREE_CFLAGS) \
 	-DFLATPAK_COMPILATION \
 	-DLOCALEDIR=\"$(localedir)\"
 tests_list_unused_LDADD = $(AM_LDADD) $(BASE_LIBS) $(BASE_LIBS) $(OSTREE_LIBS) libflatpak-common.la libflatpak-common-base.la libglnx.la
@@ -255,51 +254,20 @@ dist_installed_test_keyring2_DATA = \
 	$(NULL)
 endif
 
-# Run make update-test-matrix after changing this
-TEST_MATRIX_SOURCE = \
-	tests/test-basic.sh \
-	tests/test-completion.sh \
-	tests/test-config.sh \
-	tests/test-build-update-repo.sh \
-	tests/test-http-utils.sh \
-	tests/test-run.sh{{user+system+system-norevokefs},{nodeltas+deltas}} \
-	tests/test-info.sh{user+system} \
-	tests/test-repo.sh{{user+system+system-norevokefs}+{{user+system},oldsummary}} \
-	tests/test-history.sh \
-	tests/test-sideload.sh{user+system} \
-	tests/test-default-remotes.sh \
-	tests/test-metadata-validation.sh \
-	tests/test-extensions.sh \
-	tests/test-bundle.sh{user+system+system-norevokefs} \
-	tests/test-oci.sh \
-	tests/test-oci-registry.sh{user+system} \
-	tests/test-update-remote-configuration.sh{newsummary+oldsummary} \
-	tests/test-override.sh \
-	tests/test-update-portal.sh{user+system} \
-	tests/test-auth.sh \
-	tests/test-unused.sh \
-	tests/test-summaries.sh{user+system} \
-	tests/test-subset.sh{user+system} \
-	tests/test-prune.sh \
-	tests/test-seccomp.sh \
-	tests/test-repair.sh \
-	$(NULL)
-
 update-test-matrix:
-	$(srcdir)/tests/expand-test-matrix.sh "$(TEST_MATRIX_SOURCE)" > $(srcdir)/tests/Makefile-test-matrix.am.inc
+	$(srcdir)/tests/update-test-matrix
 
 tests/test-%.wrap:
 	@true
 
-tests/runtime-repo: tests/make-test-runtime.sh flatpak
-	rm -rf tests/runtime-repo
-	PATH=$(abs_top_builddir):$${PATH} $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo org.test.Platform master "" ""
-	PATH=$(abs_top_builddir):$${PATH} $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo org.test.Platform stable "" ""
+tests/runtime-repo.stamp: tests/make-runtime-repos tests/make-test-runtime.sh flatpak
+	$< $(abs_top_builddir) $(top_srcdir)/tests/make-test-runtime.sh tests/runtime-repo tests/runtime-repo.stamp
 
-check_DATA += tests/runtime-repo
+check_DATA += tests/runtime-repo.stamp
 
 distclean-local:
 	rm -rf tests/runtime-repo
+	rm -rf tests/runtime-repo.stamp
 
 include tests/Makefile-test-matrix.am.inc
 
@@ -329,7 +297,15 @@ test_extra_programs = \
 
 @VALGRIND_CHECK_RULES@
 VALGRIND_SUPPRESSIONS_FILES=tests/flatpak.supp tests/glib.supp
-EXTRA_DIST += tests/flatpak.supp tests/glib.supp tests/Makefile-test-matrix.am.inc tests/expand-test-matrix.sh tests/test-wrapper.sh
+EXTRA_DIST += \
+	tests/Makefile-test-matrix.am.inc \
+	tests/expand-test-matrix.sh \
+	tests/flatpak.supp \
+	tests/glib.supp \
+	tests/make-runtime-repos \
+	tests/test-wrapper.sh \
+	tests/update-test-matrix \
+	$(NULL)
 DISTCLEANFILES += \
 	tests/services/org.freedesktop.Flatpak.service \
 	tests/services/org.freedesktop.Flatpak.SystemHelper.service \

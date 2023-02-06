@@ -1,4 +1,4 @@
-/*
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2014 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
@@ -27,7 +27,7 @@
 
 #include <glib/gi18n.h>
 
-#include "libglnx/libglnx.h"
+#include "libglnx.h"
 
 #include "flatpak-builtins.h"
 #include "flatpak-builtins-utils.h"
@@ -162,7 +162,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
       FlatpakDir *dir = remote_state_dir_pair->dir;
       FlatpakRemoteState *state = remote_state_dir_pair->state;
       const char *remote = state->remote_name;
-      g_autoptr(AsStore) store = NULL;
+      g_autoptr(AsMetadata) mdata = NULL;
       g_autoptr(GHashTable) pref_hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL); /* value owned by refs */
       g_autoptr(GHashTable) names = g_hash_table_new_full ((GHashFunc)flatpak_decomposed_hash, (GEqualFunc)flatpak_decomposed_equal, (GDestroyNotify)flatpak_decomposed_unref, g_free);
 
@@ -230,13 +230,8 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
 
       if (need_appstream_data)
         {
-          store = as_store_new ();
-
-#if AS_CHECK_VERSION (0, 6, 1)
-          as_store_set_add_flags (store, as_store_get_add_flags (store) | AS_STORE_ADD_FLAG_USE_UNIQUE_ID);
-#endif
-
-          flatpak_dir_load_appstream_store (dir, remote, NULL, store, NULL, NULL);
+          mdata = as_metadata_new ();
+          flatpak_dir_load_appstream_store (dir, remote, NULL, mdata, NULL, NULL);
         }
 
       keys = (FlatpakDecomposed **) g_hash_table_get_keys_as_array (names, &n_keys);
@@ -249,7 +244,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
           guint64 installed_size;
           guint64 download_size;
           g_autofree char *runtime = NULL;
-          AsApp *app = NULL;
+          AsComponent *app = NULL;
           gboolean has_sparse_cache;
           VarMetadataRef sparse_cache;
           g_autofree char *id = flatpak_decomposed_dup_id (ref);
@@ -283,7 +278,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
             }
 
           if (need_appstream_data)
-            app = as_store_find_app (store, ref_str);
+            app = as_store_find_app (mdata, ref_str);
 
           if (app_runtime && runtime)
             {
@@ -302,7 +297,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
                   g_autofree char *readable_id = NULL;
 
                   if (app)
-                    name = as_app_get_localized_name (app);
+                    name = as_component_get_name (app);
 
                   if (name == NULL)
                     readable_id = flatpak_decomposed_dup_readable_id (ref);
@@ -313,7 +308,7 @@ ls_remote (GHashTable *refs_hash, const char **arches, const char *app_runtime, 
                 {
                   const char *comment = NULL;
                   if (app)
-                      comment = as_app_get_localized_comment (app);
+                      comment = as_component_get_summary (app);
 
                   flatpak_table_printer_add_column (printer, comment);
                 }

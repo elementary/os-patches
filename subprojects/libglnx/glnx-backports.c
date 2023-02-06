@@ -1,6 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
  *
  * Copyright (C) 2015 Colin Walters <walters@verbum.org>
+ * SPDX-License-Identifier: LGPL-2.0-or-later
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -18,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
+#include "libglnx-config.h"
 
 #include "glnx-backports.h"
 

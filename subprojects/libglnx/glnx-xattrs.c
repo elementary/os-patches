@@ -1,6 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*-
  *
  * Copyright (C) 2014,2015 Colin Walters <walters@verbum.org>.
+ * SPDX-License-Identifier: LGPL-2.0-or-later
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "config.h"
+#include "libglnx-config.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -140,7 +141,7 @@ static gboolean
 get_xattrs_impl (const char      *path,
                  int              fd,
                  GVariant       **out_xattrs,
-                 GCancellable    *cancellable,
+                 G_GNUC_UNUSED GCancellable *cancellable,
                  GError         **error)
 {
   gboolean ret = FALSE;
@@ -181,7 +182,7 @@ get_xattrs_impl (const char      *path,
         {
           if (errno == ERANGE)
             {
-              g_free (xattr_names);
+              g_free (g_steal_pointer (&xattr_names));
               goto again;
             }
           glnx_set_prefix_error_from_errno (error, "%s", "llistxattr");
@@ -268,7 +269,7 @@ glnx_dfd_name_get_all_xattrs (int            dfd,
 static gboolean
 set_all_xattrs_for_path (const char    *path,
                          GVariant      *xattrs,
-                         GCancellable  *cancellable,
+                         G_GNUC_UNUSED GCancellable *cancellable,
                          GError       **error)
 {
   const guint n = g_variant_n_children (xattrs);
@@ -336,7 +337,7 @@ glnx_dfd_name_set_all_xattrs (int            dfd,
 gboolean
 glnx_fd_set_all_xattrs (int            fd,
                         GVariant      *xattrs,
-                        GCancellable  *cancellable,
+                        G_GNUC_UNUSED GCancellable *cancellable,
                         GError       **error)
 {
   const guint n = g_variant_n_children (xattrs);

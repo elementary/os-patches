@@ -29,6 +29,10 @@
 #include <gio/gunixconnection.h>
 #include <gio/gunixfdmessage.h>
 
+#if !GLIB_CHECK_VERSION(2, 58, 0)
+# define G_SOURCE_FUNC(f) ((GSourceFunc) (void (*)(void)) (f))
+#endif
+
 /**
  * The proxy listens to a unix domain socket, and for each new
  * connection it opens up a new connection to a specified dbus bus
@@ -742,6 +746,15 @@ flatpak_proxy_get_property (GObject    *object,
     }
 }
 
+/* Buffer contains a default size of data that is 16 bytes, so that
+   it can be used on the stack for reading the header. However we
+   also support passing in sizes smaller that 16, which will allocate
+   a smaller object than the full Buffer object. This is safe as we
+   respect the size member, however there is no way for GCC to know this,
+   so we silence it manually.
+*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
 static Buffer *
 buffer_new (gsize size, Buffer *old)
 {
@@ -764,6 +777,7 @@ buffer_new (gsize size, Buffer *old)
 
   return buffer;
 }
+#pragma GCC diagnostic pop
 
 static ProxySide *
 get_other_side (ProxySide *side)
@@ -817,7 +831,7 @@ buffer_read (ProxySide *side,
              Buffer    *buffer,
              GSocket   *socket)
 {
-  gssize res;
+  gsize received;
   GInputVector v;
   GError *error = NULL;
   GSocketControlMessage **messages;
@@ -828,14 +842,15 @@ buffer_read (ProxySide *side,
       gsize extra_size;
       const guchar *extra_bytes = g_bytes_get_data (side->extra_input_data, &extra_size);
 
-      res = MIN (extra_size, buffer->size - buffer->pos);
-      memcpy (&buffer->data[buffer->pos], extra_bytes, res);
+      g_assert (buffer->size >= buffer->pos);
+      received = MIN (extra_size, buffer->size - buffer->pos);
+      memcpy (&buffer->data[buffer->pos], extra_bytes, received);
 
-      if (res < extra_size)
+      if (received < extra_size)
         {
           side->extra_input_data =
-            g_bytes_new_with_free_func (extra_bytes + res,
-                                        extra_size - res,
+            g_bytes_new_with_free_func (extra_bytes + received,
+                                        extra_size - received,
                                         (GDestroyNotify) g_bytes_unref,
                                         side->extra_input_data);
         }
@@ -846,6 +861,7 @@ buffer_read (ProxySide *side,
     }
   else
     {
+      gssize res;
       int flags = 0;
       v.buffer = &buffer->data[buffer->pos];
       v.size = buffer->size - buffer->pos;
@@ -872,13 +888,16 @@ buffer_read (ProxySide *side,
           return FALSE;
         }
 
+      /* We now know res is strictly positive */
+      received = (gsize) res;
+
       for (i = 0; i < num_messages; i++)
         buffer->control_messages = g_list_append (buffer->control_messages, messages[i]);
 
       g_free (messages);
     }
 
-  buffer->pos += res;
+  buffer->pos += received;
   return TRUE;
 }
 
@@ -1031,7 +1050,7 @@ queue_outgoing_buffer (ProxySide *side, Buffer *buffer)
 
       socket = g_socket_connection_get_socket (side->connection);
       side->out_source = g_socket_create_source (socket, G_IO_OUT, NULL);
-      g_source_set_callback (side->out_source, (GSourceFunc) side_out_cb, side, NULL);
+      g_source_set_callback (side->out_source, G_SOURCE_FUNC (side_out_cb), side, NULL);
       g_source_attach (side->out_source, NULL);
       g_source_unref (side->out_source);
     }
@@ -1766,6 +1785,13 @@ policy_from_handler (BusHandler handler)
     case HANDLE_VALIDATE_SEE:
       return FLATPAK_POLICY_SEE;
 
+    case HANDLE_DENY:
+    case HANDLE_FILTER_GET_OWNER_REPLY:
+    case HANDLE_FILTER_HAS_OWNER_REPLY:
+    case HANDLE_FILTER_NAME_LIST_REPLY:
+    case HANDLE_HIDE:
+    case HANDLE_PASS:
+    case HANDLE_VALIDATE_MATCH:
     default:
       return FLATPAK_POLICY_NONE;
     }
@@ -2137,7 +2163,6 @@ got_buffer_from_client (FlatpakProxyClient *client, ProxySide *side, Buffer *buf
   if (client->authenticated && client->proxy->filter)
     {
       g_autoptr(Header) header = NULL;
-      ;
       BusHandler handler;
 
       /* Filter and rewrite outgoing messages as needed */
@@ -2306,7 +2331,6 @@ got_buffer_from_bus (FlatpakProxyClient *client, ProxySide *side, Buffer *buffer
   if (client->authenticated && client->proxy->filter)
     {
       g_autoptr(Header) header = NULL;
-      ;
       GDBusMessage *rewritten;
       FlatpakPolicy policy;
       ExpectedReplyType expected_reply;
@@ -2332,17 +2356,15 @@ got_buffer_from_bus (FlatpakProxyClient *client, ProxySide *side, Buffer *buffer
         {
           expected_reply = steal_expected_reply (get_other_side (side), header->reply_serial);
 
-          /* We only allow replies we expect */
-          if (expected_reply == EXPECTED_REPLY_NONE)
+          switch (expected_reply)
             {
+            case EXPECTED_REPLY_NONE:
+              /* We only allow replies we expect */
               if (client->proxy->log_messages)
                 g_print ("*Unexpected reply*\n");
               buffer_unref (buffer);
               return;
-            }
 
-          switch (expected_reply)
-            {
             case EXPECTED_REPLY_HELLO:
               /* When we get the initial reply to Hello, allow all
                  further communications to our own unique id. */
@@ -2350,8 +2372,10 @@ got_buffer_from_bus (FlatpakProxyClient *client, ProxySide *side, Buffer *buffer
                 {
                   g_autofree char *my_id = get_arg0_string (buffer);
                   flatpak_proxy_client_update_unique_id_policy (client, my_id, FLATPAK_POLICY_TALK);
-                  break;
                 }
+              /* ... else it's an ERROR or something. Either way, pass it
+               * through to the client unedited. */
+              break;
 
             case EXPECTED_REPLY_REWRITE:
               /* Replace a roundtrip ping with the rewritten message */
@@ -2566,7 +2590,7 @@ find_auth_end (FlatpakProxyClient *client, Buffer *buffer)
                          AUTH_LINE_SENTINEL, strlen (AUTH_LINE_SENTINEL));
       if (line_end) /* Found end of line */
         {
-          offset = (line_end + strlen (AUTH_LINE_SENTINEL) - line_start);
+          offset = (line_end + strlen (AUTH_LINE_SENTINEL) - client->auth_buffer->data);
 
           if (!auth_line_is_valid (line_start, line_end))
             return FIND_AUTH_END_ABORT;
@@ -2710,7 +2734,7 @@ start_reading (ProxySide *side)
 
   socket = g_socket_connection_get_socket (side->connection);
   side->in_source = g_socket_create_source (socket, G_IO_IN, NULL);
-  g_source_set_callback (side->in_source, (GSourceFunc) side_in_cb, side, NULL);
+  g_source_set_callback (side->in_source, G_SOURCE_FUNC (side_in_cb), side, NULL);
   g_source_attach (side->in_source, NULL);
   g_source_unref (side->in_source);
 }
@@ -2825,7 +2849,6 @@ flatpak_proxy_start (FlatpakProxy *proxy, GError **error)
 
   address = g_unix_socket_address_new (proxy->socket_path);
 
-  error = NULL;
   res = g_socket_listener_add_address (G_SOCKET_LISTENER (proxy),
                                        address,
                                        G_SOCKET_TYPE_STREAM,

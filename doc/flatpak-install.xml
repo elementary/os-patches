@@ -63,7 +63,8 @@
           prompted to choose one of them. You will also be prompted with choices if
           <arg choice="plain">REF</arg> doesn't match anything in the remote exactly but is
           similar to one or more refs in the remote (e.g. "devhelp" is similar to
-          "org.gnome.Devhelp").
+          "org.gnome.Devhelp"), but this fuzzy matching behavior is disabled if
+          <arg choice="plain">REF</arg> contains any slashes or periods.
         </para>
         <para>
           By default this looks for both apps and runtimes with the given
@@ -78,10 +79,10 @@
         </para>
         <para>
           If the specified <arg choice="plain">REMOTE</arg> has a collection ID configured on it,
-          flatpak will search mounted filesystems such as USB drives as well as Avahi services
-          advertised on the local network for the needed refs, in order to support
-          offline updates. See <citerefentry><refentrytitle>ostree-find-remotes</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-          for more information.
+          Flatpak will search the <filename>sideload-repos</filename> directories configured
+          either with the <option>--sideload-repo</option> option, or on a per-installation or
+          system-wide basis (see
+          <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>).
         </para>
         <para>
           The alternative form of the command (with <option>--from</option> or
@@ -147,6 +148,7 @@
             </varlistentry>
 
             <varlistentry>
+                <term><option>-u</option></term>
                 <term><option>--user</option></term>
 
                 <listitem><para>
@@ -256,15 +258,35 @@
                     Assume that all <arg choice="plain">REF</arg>s are runtimes if not explicitly specified.
                 </para></listitem>
             </varlistentry>
- 
+
             <varlistentry>
                 <term><option>--sideload-repo=PATH</option></term>
 
                 <listitem><para>
-                  Adds an extra local ostree repo as source for installation. This is equivalent
-                  to using the sideload-repos directories (see flatpak(1)), but can be done on a
-                  per-command basis. Any path added here is used in addition to ones in those
-                  directories.
+                    Adds an extra local ostree repo as a source for installation. This is equivalent
+                    to using the <filename>sideload-repos</filename> directories (see
+                    <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>),
+                    but can be done on a per-command basis. Any path added here is used in addition
+                    to ones in those directories.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--include-sdk</option></term>
+
+                <listitem><para>
+                  For each app being installed, also installs the SDK that was used to build it.
+                  Implies <option>--or-update</option>; incompatible with <option>--no-deps</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--include-debug</option></term>
+
+                <listitem><para>
+                  For each ref being installed, as well as all dependencies, also installs its
+                  debug info. Implies <option>--or-update</option>; incompatible with
+                  <option>--no-deps</option>.
                 </para></listitem>
             </varlistentry>
 
