@@ -1,3 +1,12 @@
+casper (1.470.2) jammy; urgency=medium
+
+  [ Dan Bungert ]
+  * d/casper.casper-md5check.service: order it After=multi-user.target.
+    This should allow us to reach multi-user.target sooner, especially for
+    users where the md5 check is slow. (LP: #1986781)
+
+ -- Mauricio Faria de Oliveira <mfo@canonical.com>  Fri, 27 Jan 2023 15:31:09 -0300
+
 casper (1.470.1) jammy; urgency=medium
 
   * Increase memory for qemu autopkgtest instances to 1G (LP: #1976287)
