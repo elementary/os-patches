@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="3.16"/>
+  <object class="GtkDialog" id="dialog_ua_attach">
+    <property name="can-focus">False</property>
+    <property name="border-width">18</property>
+    <property name="title" translatable="yes">Enable Ubuntu Pro</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="type-hint">dialog</property>
+    <property name="skip-taskbar-hint">True</property>
+    <!-- interface-requires gtk+ 3.0 -->
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="no-show-all">True</property>
+        <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="label" translatable="yes">To upgrade to Ubuntu Pro, use your existing free personal, or company Ubuntu One account, or provide a token. &lt;a href="https://ubuntu.com/login"&gt;Register a new account&lt;/a&gt;.</property>
+                <property name="use-markup">True</property>
+                <property name="wrap">True</property>
+                <property name="max-width-chars">130</property>
+              </object>
+            </child>
+        <child>
+          <object class="GtkRadioButton" id="magic_radio">
+            <property name="label" translatable="yes">Enter code on ubuntu.com/pro/attach</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="margin-top">30</property>
+            <property name="xalign">0</property>
+            <property name="group">magic_radio</property>
+            <signal name="toggled" handler="on_radio_toggled" swapped="no"/>
+            <signal name="clicked" handler="on_magic_radio_clicked" swapped="no"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkBox" id="pin_label_box">
+                <property name="visible">True</property>
+                <property name="margin-left">20</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">8</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkLabel" id="pin_label">
+                    <property name="label">      </property>
+                    <property name="visible">True</property>
+                    <property name="selectable">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="margin-left">6</property>
+                    <property name="margin-right">6</property>
+                    <property name="margin-top">4</property>
+                    <property name="margin-bottom">4</property>
+                    <attributes>
+                      <attribute name="scale" value="2"/>
+                    </attributes>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFixed">
+                <property name="visible">True</property>
+                <property name="valign">center</property>
+                <property name="margin">3</property>
+                <property name="margin-left">9</property>
+                <child>
+                  <object class="GtkSpinner" id="pin_spinner">
+                    <property name="visible">True</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkImage" id="pin_status_icon">
+                    <property name="visible">False</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="pin_status">
+                <property name="margin">3</property>
+                <property name="visible">True</property>
+                <property name="valign">center</property>
+                <property name="use-markup">True</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="token_radio">
+            <property name="label" translatable="yes">Or add token manually</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="margin-top">6</property>
+            <property name="xalign">0</property>
+            <property name="group">magic_radio</property>
+            <signal name="toggled" handler="on_radio_toggled" swapped="no"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="no-show-all">True</property>
+            <child>
+              <object class="GtkEntry" id="token_field">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can-focus">True</property>
+                <property name="margin-left">20</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
+                <property name="margin-right">4</property>
+                <property name="width-chars">35</property>
+                <property name="placeholder-text" translatable="yes">Token</property>
+                <property name="halign">start</property>
+                <signal name="activate" handler="on_token_entry_activate" swapped="no"/>
+                <signal name="changed" handler="on_token_typing" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFixed">
+                <property name="visible">True</property>
+                <property name="valign">center</property>
+                <property name="margin">3</property>
+                <child>
+                  <object class="GtkSpinner" id="token_spinner">
+                    <property name="visible">True</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkImage" id="token_status_icon">
+                    <property name="visible">False</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="token_status">
+                <property name="margin">3</property>
+                <property name="visible">True</property>
+                <property name="valign">center</property>
+                <property name="use-markup">True</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="halign">start</property>
+            <property name="margin-left">20</property>
+            <property name="use-markup">True</property>
+            <property name="label" translatable="yes">From your admin, or from &lt;a href="https://ubuntu.com/pro"&gt;ubuntu.com/pro&lt;/a&gt;</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="orientation">horizontal</property>
+            <property name="halign">end</property>
+            <child>
+              <object class="GtkButton" id="cancel">
+                <property name="visible">True</property>
+                <property name="margin-right">10</property>
+                <property name="label" translatable="yes">Cancel</property>
+                <signal name="clicked" handler="on_cancel_clicked" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="confirm">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Confirm</property>
+                <property name="sensitive">False</property>
+                <signal name="clicked" handler="on_confirm_clicked" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

@@ -51,7 +51,7 @@ from .DialogMirror import DialogMirror
 from .DialogEdit import DialogEdit
 from .DialogCacheOutdated import DialogCacheOutdated
 from .DialogAddSourcesList import DialogAddSourcesList
-from .LivepatchPage import LivepatchPage
+from .UbuntuProPage import UbuntuProPage
 
 import softwareproperties
 import softwareproperties.distro
@@ -162,9 +162,6 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
             self.initial_auto_launch = 0
             self.combobox_other_updates.set_sensitive(False)
 
-        self.sp_settings = Gio.Settings.new('com.ubuntu.SoftwareProperties')
-        self.info_bar_ubuntu_pro.set_visible(self.sp_settings.get_boolean("ubuntu-pro-banner-visible"))
-
         # get the dbus backend
         bus = dbus.SystemBus()
         proxy = bus.get_object("com.ubuntu.SoftwareProperties", "/")
@@ -208,8 +205,8 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
         self.show_distro()
         # Setup and show the Additonal Drivers tab
         self.init_drivers()
-        # Setup and show the LivePatch tab
-        self.init_livepatch()
+        # Setup and show the Ubuntu Pro tab
+        self.init_ubuntu_pro()
 
         # Connect to switch-page before setting initial tab. Otherwise the
         # first switch goes unnoticed.
@@ -229,6 +226,9 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
             os.path.abspath(file) != "%s%s" % (apt_pkg.config.find_dir("Dir::Etc"),
                                                apt_pkg.config.find("Dir::Etc::sourcelist"))):
             self.open_file(file)
+
+        # Make sure window is as small as possible initially.
+        self.window_main.resize(1, 1)
 
     def on_main_notebook_page_switched(self, notebook, page, page_num):
         # On the additional drivers page, don't show the backend revert button.
@@ -1098,7 +1098,7 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
     def on_delete_event(self, widget, args):
         """Close the window if requested"""
         self.on_close_button(widget)
-        return self.quit_when_livepatch_responds
+        return False
 
     def on_close_button(self, widget):
         """Show a dialog that a reload of the channel information is required
@@ -1109,12 +1109,7 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
                                     self.datadir)
             d.run()
 
-        self.quit_when_livepatch_responds = False
-        if self.livepatch_page.waiting_livepatch_response:
-            self.quit_when_livepatch_responds = True
-            self.hide()
-        else:
-            self.quit()
+        self.quit()
 
     def on_button_add_cdrom_clicked(self, widget):
         """ when a cdrom is requested for adding """
@@ -1548,9 +1543,5 @@ class SoftwarePropertiesGtk(SoftwareProperties, SimpleGtkbuilderApp):
         else:
             self.label_driver_action.set_label(_("No proprietary drivers are in use."))
 
-    def init_livepatch(self):
-        self.livepatch_page = LivepatchPage(self)
-
-    def on_info_bar_ubuntu_pro_response(self, info_bar, response_id):
-        self.sp_settings.set_boolean("ubuntu-pro-banner-visible", False)
-        info_bar.hide()
+    def init_ubuntu_pro(self):
+        self.ubuntu_pro_page = UbuntuProPage(self)

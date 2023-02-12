@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<interface>
+  <object class="GtkDialog" id="dialog_ua_detach">
+    <property name="border_width">18</property>
+    <property name="title" translatable="yes">Disable Ubuntu Pro</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">18</property>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">18</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Disabling Ubuntu Pro will detach your subscription from this machine. Do you want to proceed?</property>
+                <property name="use_markup">True</property>
+                <property name="xalign">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label_detach_error">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="foreground" value="red"/>
+                  <attribute name="scale" value="0.9"/>
+                </attributes>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkHButtonBox">
+        <property name="visible">True</property>
+        <property name="layout_style">end</property>
+        <child>
+          <object class="GtkButton">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">No, go _back</property>
+            <property name="use_underline">True</property>
+            <signal name="clicked" handler="on_cancel_clicked"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_detach">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">_Disable Ubuntu Pro</property>
+            <property name="use_underline">True</property>
+            <signal name="clicked" handler="on_detach_clicked"/>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

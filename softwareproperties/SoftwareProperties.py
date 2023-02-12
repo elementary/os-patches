@@ -137,7 +137,8 @@ class SoftwareProperties(object):
     " wait for all running threads (PPA key fetchers) to exit "
     for t in threading.enumerate():
       if t.ident != threading.current_thread().ident:
-        t.join()
+        if not t.daemon:
+            t.join()
 
   def backup_apt_conf(self):
     """Backup all apt configuration options"""

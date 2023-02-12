@@ -24,7 +24,7 @@ import distro_info
 from functools import wraps
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gio, Gtk
+from gi.repository import Gio, Gtk, GLib
 import json
 import os
 import subprocess
@@ -180,3 +180,14 @@ def retry(exceptions, tries=10, delay=0.1, backoff=2):
         return f_retry  # true decorator
 
     return deco_retry
+
+def is_dark_theme(widget):
+    env_gtk_theme = GLib.getenv("GTK_THEME")
+    if env_gtk_theme != None:
+        return GLib.str_has_suffix(env_gtk_theme, "dark")
+    screen = Gtk.Widget.get_screen(widget)
+    settings = Gtk.Settings.get_for_screen(screen)
+    theme_name = settings.get_property("gtk-theme-name")
+    if theme_name != None:
+        return GLib.str_has_suffix(theme_name, "dark")
+    return False
