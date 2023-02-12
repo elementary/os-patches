@@ -2,14 +2,14 @@ Source: grub2-signed
 Section: utils
 Priority: optional
 Maintainer: Colin Watson <cjwatson@ubuntu.com>
-Build-Depends: debhelper (>= 9), lsb-release, python3, python3-apt, grub-efi-amd64-bin (>= 2.04-1ubuntu47) [amd64], grub-efi-arm64-bin (>= 2.04-1ubuntu47) [arm64]
+Build-Depends: debhelper (>= 9), lsb-release, python3, python3-apt, grub-efi-amd64-bin (>= 2.06-2ubuntu14) [amd64], grub-efi-arm64-bin (>= 2.06-2ubuntu14) [arm64]
 Standards-Version: 3.9.5
 Vcs-Browser: https://code.launchpad.net/~ubuntu-core-dev/ubuntu/+source/grub2-signed/+git/grub2-signed/+ref/impish-devel
 Vcs-Git: https://git.launchpad.net/~ubuntu-core-dev/ubuntu/+source/grub2-signed -b impish-devel
 
 Package: grub-efi-amd64-signed
 Architecture: amd64
-Depends: ${misc:Depends}, grub-efi-amd64-bin (= ${grub2:Version}), grub-efi-amd64 | grub-pc, grub2-common (>= ${grub2-common:Version})
+Depends: ${misc:Depends}, debconf (>= 0.5) | debconf-2.0, grub-efi-amd64-bin (= ${grub2:Version}), grub-efi-amd64 | grub-pc, grub2-common (>= ${grub2-common:Version})
 Recommends: secureboot-db
 Built-Using: grub2 (= ${grub2:Version})
 Description: GRand Unified Bootloader, version 2 (EFI-AMD64 version, signed)
@@ -27,7 +27,7 @@ Description: GRand Unified Bootloader, version 2 (EFI-AMD64 version, signed)
 
 Package: grub-efi-arm64-signed
 Architecture: arm64
-Depends: ${misc:Depends}, grub-efi-arm64 (= ${grub2:Version})
+Depends: ${misc:Depends}, debconf (>= 0.5) | debconf-2.0, grub-efi-arm64 (= ${grub2:Version})
 Recommends: secureboot-db
 Built-Using: grub2 (= ${grub2:Version})
 Description: GRand Unified Bootloader, version 2 (EFI-ARM64 version, signed)
