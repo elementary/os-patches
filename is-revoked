@@ -1,0 +1,23 @@
+#! /bin/sh
+set -e
+
+exit=1
+for kernel in "$@"; do
+    signer="$(sbverify --list $kernel | grep subject | grep -o "CN=[^/]*")"
+    revoked=$(grep -xF "$signer" << EOF
+CN=Canonical Ltd. Secure Boot Signing
+CN=Canonical Ltd. Secure Boot Signing (2017)
+CN=Canonical Ltd. Secure Boot Signing (ESM 2018)
+CN=Canonical Ltd. Secure Boot Signing (2019)
+CN=Canonical Ltd. Secure Boot Signing (Ubuntu Core 2019)
+CN=Canonical Ltd. Secure Boot Signing (2021 v1)
+CN=Canonical Ltd. Secure Boot Signing (2021 v2)
+CN=Canonical Ltd. Secure Boot Signing (2021 v3)
+EOF
+)
+    if [ "$revoked" ]; then
+        echo E: $kernel: revoked key $revoked used
+        exit=0
+    fi
+done
+exit $exit

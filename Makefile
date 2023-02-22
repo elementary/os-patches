@@ -25,6 +25,7 @@ $(SIGNED):
 
 check:
 	cmp current/grub$(EFI_NAME).efi /usr/lib/grub/$(PLATFORM)/monolithic/grub$(EFI_NAME).efi
+	! ./is-revoked $(SIGNED)
 
 install: $(SIGNED)
 	install -d $(DESTDIR)/usr/lib/grub/$(PLATFORM)-signed
