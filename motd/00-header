@@ -31,6 +31,6 @@ if [ -z "$UBUNTU_DISTRIB_DESCRIPTION" ] && [ -x /usr/bin/lsb_release ]; then
 fi
 
 printf "Welcome to %s (%s %s %s)\n" "$PRETTY_NAME" "$(uname -o)" "$(uname -r)" "$(uname -m)"
-if [ -z "$UBUNTU_DISTRIB_DESCRIPTION" ]
-	printf "Built on %s\n" "$UBUNTU_DISTRIB_DESCRIPTION"
+if [ -n "$UBUNTU_DISTRIB_DESCRIPTION" ]; then
+        printf "Built on %s\n" "$UBUNTU_DISTRIB_DESCRIPTION"
 fi
