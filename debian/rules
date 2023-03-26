@@ -22,6 +22,11 @@ configure_options += --enable-lockdown
 # https://github.com/flatpak/xdg-desktop-portal-gtk/issues/355
 configure_options += --enable-settings
 
+# We can safely enable features for elementary OS until this is enabled by
+# the Pantheon portal.
+configure_options += --enable-wallpaper
+configure_options += --enable-screencast
+
 %:
 	dh $@
 
