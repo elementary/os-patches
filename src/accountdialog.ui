@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="xdg-desktop-portal-gtk">
+  <!-- interface-requires gtk+ 3.22 -->
+  <template class="AccountDialog" parent="GtkWindow">
+    <property name="type-hint">dialog</property>
+    <property name="resizable">0</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="titlebar">
+        <property name="visible">1</property>
+        <property name="title" translatable="yes">Share Details</property>
+        <child>
+          <object class="GtkButton" id="cancel_button">
+            <property name="visible">1</property>
+            <property name="label" translatable="yes">_Cancel</property>
+            <property name="use-underline">1</property>
+            <signal name="clicked" handler="button_clicked"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="accept_button">
+            <property name="visible">1</property>
+            <property name="label" translatable="yes">_Share</property>
+            <property name="use-underline">1</property>
+            <signal name="clicked" handler="button_clicked"/>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+          <packing>
+            <property name="pack-type">end</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">1</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">1</property>
+            <property name="row-spacing">10</property>
+            <property name="column-spacing">10</property>
+            <property name="margin">20</property>
+            <property name="halign">center</property>
+            <child>
+              <object class="GtkStack" id="name_stack">
+                <property name="visible">1</property>
+                <child>
+                  <object class="GtkLabel" id="name_readonly">
+                    <property name="visible">1</property>
+                    <property name="xalign">0</property>
+                    <property name="valign">start</property>
+                    <property name="margin-start">10</property>
+                  </object>
+                  <packing>
+                    <property name="name">show</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="name">
+                    <property name="visible">1</property>
+                  </object>
+                  <packing>
+                    <property name="name">edit</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkStack" id="fullname_stack">
+                <property name="visible">1</property>
+                <child>
+                  <object class="GtkLabel" id="fullname_readonly">
+                    <property name="visible">1</property>
+                    <property name="xalign">0</property>
+                    <property name="margin-start">10</property>
+                    <attributes>
+                      <attribute name="scale" value="1.44"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="name">show</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="fullname">
+                    <property name="visible">1</property>
+                  </object>
+                  <packing>
+                    <property name="name">edit</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkStack" id="image_stack">
+                <property name="visible">1</property>
+                <property name="halign">start</property>
+                <child>
+                  <object class="GtkImage" id="image_readonly">
+                    <property name="visible">1</property>
+                    <property name="halign">fill</property>
+                    <property name="valign">fill</property>
+                    <style> <class name="frame"/> </style>
+                  </object>
+                  <packing>
+                    <property name="name">show</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="button">
+                    <property name="visible">1</property>
+                    <property name="halign">fill</property>
+                    <property name="valign">fill</property>
+                    <signal name="clicked" handler="image_button_clicked" swapped="yes"/>
+                    <child>
+                      <object class="GtkImage" id="image">
+                        <property name="visible">1</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">edit</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+                <property name="height">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="override_button">
+                <property name="visible">1</property>
+                <property name="halign">end</property>
+                <property name="valign">center</property>
+                <property name="relief">none</property>
+                <property name="tooltip-text" translatable="yes">Make changes before sharing the information</property>
+                <signal name="clicked" handler="override_button_clicked"/>
+                <style>
+                  <class name="image-button"/>
+                  <class name="circular"/>
+                </style>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">1</property>
+                    <property name="icon-name">document-edit-symbolic</property>
+                    <property name="icon-size">1</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">0</property>
+                <property name="height">2</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+            <child>
+              <object class="GtkLabel" id="heading">
+                <property name="visible">1</property>
+                <property name="wrap">1</property>
+                <property name="xalign">0</property>
+                <property name="max-width-chars">26</property>
+                <property name="width-chars">26</property>
+                <property name="valign">start</property>
+                <property name="margin">20</property>
+                <property name="margin-top">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="reason">
+                <property name="visible">1</property>
+                <property name="wrap">1</property>
+                <property name="xalign">0</property>
+                <property name="max-width-chars">26</property>
+                <property name="width-chars">26</property>
+                <property name="valign">start</property>
+                <property name="margin">20</property>
+                <property name="margin-top">0</property>
+              </object>
+            </child>
+      </object>
+    </child>
+  </template>
+</interface>

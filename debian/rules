@@ -1,0 +1,32 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+include /usr/share/dpkg/default.mk
+
+configure_options =
+
+# Required if we want to provide OpenURI on otherwise unsupported desktops
+# like XFCE; no additional dependencies.
+configure_options += --enable-appchooser
+
+# Not entirely GNOME-specific (used in gvfs which is pulled in by non-GNOME
+# desktops). This adds a dependency on gsettings-desktop-schemas, but we'll
+# need that for Settings anyway.
+configure_options += --enable-lockdown
+
+# Required if we want GTK applications on non-GNOME desktops to have the
+# same antialiasing, etc. in Flatpak apps as in native apps.
+# This adds a dependency on fontconfig and gsettings-desktop-schemas,
+# but that seems unavoidable. See
+# https://github.com/flatpak/xdg-desktop-portal-gtk/issues/355
+configure_options += --enable-settings
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(configure_options)
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/tmp

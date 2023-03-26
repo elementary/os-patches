@@ -1,0 +1,44 @@
+Source: xdg-desktop-portal-gtk
+Section: gnome
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
+Uploaders:
+ Simon McVittie <smcv@debian.org>,
+Build-Depends:
+ dbus,
+ debhelper-compat (= 13),
+ gsettings-desktop-schemas-dev,
+ libdbus-1-dev,
+ libfontconfig-dev,
+ libglib2.0-dev (>= 2.44),
+ libgtk-3-dev (>= 3.14),
+ xdg-desktop-portal-dev (>= 1.14.0),
+ xmlto,
+Rules-Requires-Root: no
+Standards-Version: 4.6.0
+Homepage: https://flatpak.org/
+Vcs-Git: https://salsa.debian.org/debian/xdg-desktop-portal-gtk.git
+Vcs-Browser: https://salsa.debian.org/debian/xdg-desktop-portal-gtk
+
+Package: xdg-desktop-portal-gtk
+Architecture: linux-any
+Multi-arch: foreign
+Depends:
+ dbus-user-session | dbus-x11,
+ gsettings-desktop-schemas,
+ xdg-desktop-portal (>= 1.14.0),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Suggests:
+ accountsservice,
+ evince,
+ xdg-desktop-portal-gnome,
+Provides:
+ xdg-desktop-portal-backend (= 1.14.0),
+Description: GTK+/GNOME portal backend for xdg-desktop-portal
+ xdg-desktop-portal-gtk provides a GTK+/GNOME implementation for the
+ desktop-agnostic xdg-desktop-portal service. This allows sandboxed
+ applications to request services from outside the sandbox using
+ GTK+ GUIs (app chooser, file chooser, print dialog) or using GNOME
+ services (session manager, screenshot provider).
