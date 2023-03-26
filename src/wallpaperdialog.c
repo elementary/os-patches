@@ -119,7 +119,7 @@ on_image_loaded_cb (GObject *source_object,
   WallpaperDialog *self = data;
   GFileIOStream *stream = NULL;
   GFile *image_file = G_FILE (source_object);
-  GFile *tmp = g_file_new_tmp ("XXXXXX", &stream, NULL);
+  g_autoptr(GFile) tmp = g_file_new_tmp ("XXXXXX", &stream, NULL);
   g_autoptr(GError) error = NULL;
   gchar *contents = NULL;
   gsize length = 0;
@@ -133,9 +133,13 @@ on_image_loaded_cb (GObject *source_object,
       return;
     }
 
-  g_file_replace_contents (tmp, contents, length, NULL, FALSE, G_FILE_CREATE_REPLACE_DESTINATION, NULL, NULL, &error);
+  if (!g_file_replace_contents (tmp, contents, length, NULL, FALSE, G_FILE_CREATE_REPLACE_DESTINATION, NULL, NULL, &error))
+    {
+      g_warning ("Failed to store image: %s", error->message);
+      return;
+    }
 
-  self->picture_uri = g_strdup (g_file_get_uri (tmp));
+  self->picture_uri = g_file_get_uri (tmp);
   wallpaper_preview_set_image (self->desktop_preview,
                                self->picture_uri);
 }

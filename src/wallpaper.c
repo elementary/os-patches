@@ -90,7 +90,6 @@ on_file_copy_cb (GObject *source_object,
   GFile *picture_file = G_FILE (source_object);
   g_autoptr(GError) error = NULL;
   g_autofree gchar *uri = NULL;
-  g_autofree gchar *dest_path = NULL;
   gchar *contents = NULL;
   gsize length = 0;
 
@@ -105,13 +104,17 @@ on_file_copy_cb (GObject *source_object,
     }
 
   destination = g_file_new_for_path (handle->picture_uri);
-  g_file_replace_contents (destination,
-                           contents,
-                           length,
-                           NULL, FALSE,
-                           G_FILE_CREATE_REPLACE_DESTINATION,
-                           NULL, NULL,
-                           &error);
+  if (!g_file_replace_contents (destination,
+                                contents,
+                                length,
+                                NULL, FALSE,
+                                G_FILE_CREATE_REPLACE_DESTINATION,
+                                NULL, NULL,
+                                &error))
+    {
+      g_warning ("Failed to store image as '%s': %s", handle->picture_uri, error->message);
+      goto out;
+    }
 
   if (set_gsettings (BACKGROUND_SCHEMA, handle->picture_uri))
     handle->response = 0;
@@ -196,7 +199,7 @@ handle_set_wallpaper_uri (XdpImplWallpaper *object,
 
   if (!show_preview)
     {
-      set_wallpaper (handle, g_strdup (arg_uri));
+      set_wallpaper (handle, arg_uri);
       goto out;
     }
 
