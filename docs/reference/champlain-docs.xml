@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY version SYSTEM "version.xml">
+]>
+<book id="index" xmlns:xi="http://www.w3.org/2003/XInclude">
+  <bookinfo>
+    <title>libchamplain Reference Manual</title>
+    <releaseinfo>
+      for libchamplain &version;
+      <para>
+      The latest version of this documentation can be found on-line at
+      <ulink role="online-location" url="https://gnome.pages.gitlab.gnome.org/libchamplain/champlain/">https://gnome.pages.gitlab.gnome.org/libchamplain/champlain/</ulink>.
+      </para>
+    </releaseinfo>
+    <copyright>
+      <year>2008-2013</year>
+      <holder>libchamplain contributors</holder>
+    </copyright>
+    <legalnotice>
+      <para>
+        Permission is granted to copy, distribute and/or modify this
+        document under the terms of the <citetitle>GNU Free
+        Documentation License</citetitle>, Version 1.1 or any later
+        version published by the Free Software Foundation with no
+        Invariant Sections, no Front-Cover Texts, and no Back-Cover
+        Texts. You may obtain a copy of the <citetitle>GNU Free
+        Documentation License</citetitle> from the Free Software
+        Foundation by visiting <ulink type="http"
+        url="http://www.fsf.org">their Web site</ulink> or by writing
+        to:
+
+        <address>
+          The Free Software Foundation, Inc.,
+          <street>59 Temple Place</street> - Suite 330,
+          <city>Boston</city>, <state>MA</state> <postcode>02111-1307</postcode>,
+          <country>USA</country>
+        </address>
+      </para>
+    </legalnotice>
+  </bookinfo>
+
+  <part>
+    <title>Core API</title>
+    <xi:include href="xml/gtk-champlain-embed.xml"/>
+    <xi:include href="xml/champlain-view.xml"/>
+  </part>
+  <part>
+    <title>Layers, Markers and Locations</title>
+    <chapter>
+      <title>Layers</title>
+      <xi:include href="xml/champlain-layer.xml"/>
+      <xi:include href="xml/champlain-marker-layer.xml"/>
+      <xi:include href="xml/champlain-path-layer.xml"/>
+    </chapter>
+    <chapter>
+      <title>Markers</title>
+      <xi:include href="xml/champlain-marker.xml"/>
+      <xi:include href="xml/champlain-label.xml"/>
+      <xi:include href="xml/champlain-point.xml"/>
+      <xi:include href="xml/champlain-custom-marker.xml"/>
+    </chapter>
+    <chapter>
+      <title>Locations</title>
+      <xi:include href="xml/champlain-location.xml"/>
+      <xi:include href="xml/champlain-coordinate.xml"/>
+    </chapter>
+  </part>
+  <part>
+    <title>Widgets</title>
+    <xi:include href="xml/champlain-license.xml"/>
+    <xi:include href="xml/champlain-scale.xml"/>
+  </part>
+  <part>
+    <title>Map Source API</title>
+    <xi:include href="xml/champlain-map-source.xml"/>
+    <chapter>
+      <title>Tile Sources</title>
+      <xi:include href="xml/champlain-tile-source.xml"/>
+      <xi:include href="xml/champlain-network-tile-source.xml"/>
+      <xi:include href="xml/champlain-null-tile-source.xml"/>
+      <xi:include href="xml/champlain-file-tile-source.xml"/>
+      <xi:include href="xml/champlain-network-bbox-tile-source.xml"/>
+    </chapter>
+    <chapter>
+      <title>Tile Caches</title>
+      <xi:include href="xml/champlain-tile-cache.xml"/>
+      <xi:include href="xml/champlain-file-cache.xml"/>
+      <xi:include href="xml/champlain-memory-cache.xml"/>
+    </chapter>
+    <chapter>
+      <title>Map Source Utilities</title>
+      <xi:include href="xml/champlain-map-source-chain.xml"/>
+      <xi:include href="xml/champlain-map-source-factory.xml"/>
+      <xi:include href="xml/champlain-map-source-desc.xml"/>
+    </chapter>
+  </part>
+  <part>
+    <title>Renderer API</title>
+    <xi:include href="xml/champlain-renderer.xml"/>
+    <xi:include href="xml/champlain-image-renderer.xml"/>
+    <xi:include href="xml/champlain-error-tile-renderer.xml"/>
+  </part>
+  <part>
+    <title>Others</title>
+    <xi:include href="xml/champlain-tile.xml"/>
+    <xi:include href="xml/champlain-bounding-box.xml"/>
+    <xi:include href="xml/champlain-exportable.xml"/>
+    <xi:include href="xml/champlain-version.xml"/>
+  </part>
+
+  <part>
+    <title>Annotation Glossary</title>
+    <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
+  </part>
+
+  <index>
+    <title>Index of all symbols</title>
+    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <index role="deprecated">
+    <title>Index of deprecated symbols</title>
+    <xi:include href="xml/api-index-deprecated.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <index role="0.12.10">
+    <title>Index of new symbols in 0.12.10</title>
+    <xi:include href="xml/api-index-0.12.10.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <index role="0.12.11">
+    <title>Index of new symbols in 0.12.11</title>
+    <xi:include href="xml/api-index-0.12.11.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <index role="0.12.12">
+    <title>Index of new symbols in 0.12.12</title>
+    <xi:include href="xml/api-index-0.12.12.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <index role="0.12.14">
+    <title>Index of new symbols in 0.12.14</title>
+    <xi:include href="xml/api-index-0.12.14.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <index role="0.12.16">
+    <title>Index of new symbols in 0.12.16</title>
+    <xi:include href="xml/api-index-0.12.16.xml"><xi:fallback /></xi:include>
+  </index>
+
+</book>

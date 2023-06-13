@@ -1,0 +1,36 @@
+#!/bin/sh
+# autopkgtest check: Build and run a program against champlain, to verify
+# that the headers and pkg-config file are installed correctly
+# (C) 2012 Canonical Ltd.
+# (C) 2018-2019 Simon McVittie
+# Authors: Martin Pitt, Simon McVittie
+
+set -eux
+
+# Disable gvfs if it happens to be installed
+export GIO_USE_VFS=local
+export GIO_USE_VOLUME_MONITOR=unix
+
+srcdir="$(pwd)"
+WORKDIR="$(mktemp -d)"
+export HOME="$WORKDIR"
+export XDG_RUNTIME_DIR="$WORKDIR"
+trap 'cd /; rm -rf "$WORKDIR"' 0 INT QUIT ABRT PIPE TERM
+cd "$WORKDIR"
+
+# Deliberately word-splitting pkg-config's output:
+# shellcheck disable=SC2046
+gcc -o minimal "${srcdir}/debian/tests/minimal.c" $(pkg-config --cflags --libs champlain-0.12)
+echo "build: OK"
+[ -x ./minimal ]
+set -- ./minimal
+
+if [ -z "${TEST_INTERACTIVE-}" ]; then
+    echo "Doing noninteractive test. Try TEST_INTERACTIVE=1 if debugging"
+    set -- xvfb-run -a dbus-run-session -- timeout --kill-after=3 30 "$@"
+else
+    echo "Doing interactive test. Close window to continue"
+fi
+
+"$@"
+echo "run: OK"

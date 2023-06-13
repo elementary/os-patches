@@ -1,0 +1,897 @@
+libchamplain 0.12.20 (2019-10-28)
+=================================
+
+Stable release
+
+Changes:
+
+* Remove autotools-based build and all the related files (Jiří Techet)
+* Fix gtk-doc module name (Mart Raudsepp)
+* Add missing gdk required dependency (Mart Raudsepp)
+* Make the build reproducible (Chris Lamb)
+
+libchamplain 0.12.19 (2019-03-03)
+=================================
+
+Stable release
+
+Changes:
+
+* Fix incorrect Requires in pc files when using meson (Jan Alexander Steffens)
+* Various meson-related fixes and cleanups (Jan Alexander Steffens)
+
+libchamplain 0.12.18 (2019-02-21)
+=================================
+
+Stable release
+
+Changes:
+
+* Fix incorrect so version when using meson (Jiří Techet)
+* Avoid exporting marshaler functions by dropping the use of glib-genmarshal and
+  using the generic marshaler instead (Jiří Techet)
+* Don't use glib-mkenums for champlain-gtk where it's not needed (Jiří Techet)
+
+libchamplain 0.12.17 (2019-02-20)
+=================================
+
+Stable release
+
+Changes:
+
+* Use of meson build system, CI tests and automatized generation of
+  documentation (Martin Blanchard)
+* Various map wrapping fixes (Tomasz Miąsko, Jiří Techet)
+* Pass data as uint8 pointer in champlain_renderer_set_data() and make this
+  function introspectable (James Westman)
+* Bump versions of some dependencies - clutter (1.24), glib (2.38) - and fix
+  depreciation warnings (Jiří Techet)
+* Use https for all map sources that support it (Jiří Techet)
+* Don't version-control generated vapi files (Jiří Techet)
+* Combine champlain and champlain-gtk documentations into one (Jiří Techet)
+* More helpful README.md with links to pages related to libchamplain
+  (Jiří Techet)
+* Various housekeeping and cleanups (Jiří Techet, Andre Klapper)
+
+libchamplain 0.12.16 (2017-09-06)
+=================================
+
+Stable release
+
+Changes:
+
+* Add possibility to set User-Agent for requests (Jens Georg)
+* Fix touch gesture zoom (Jan-Michael Brummer)
+* Python demo fixes and cleanups (Chris Mayo)
+
+libchamplain 0.12.15 (2017-03-08)
+=================================
+
+Stable release
+
+Changes:
+
+* Fix path layer surface exporting when no clone is visible (Marius Stanciu)
+* Fix printing in gnome-maps (Marcus Lundblad)
+* Fix build on RHEL 7.3 (Matthias Clasen)
+* Minor example updates (Jiří Techet)
+
+libchamplain 0.12.14 (2016-09-06)
+=================================
+
+Stable release
+
+Changes:
+
+* Add support for horizontal map wrapping (Marius Stanciu, Jonas Danielsson,
+  Jiří Techet)
+* Make the number of parallel connections of network tile source configurable
+  (Mattias Bengtsson)
+* Remove Mapquest map source as the tile server is not accessible any more
+  (Nayan Deshmukh, Jiří Techet)
+* Remove Maemo-related code (Jiří Techet)
+* Fix small memory leaks (Marius Stanciu)
+* Bump libsoup dependency requirement to 2.42 and drop deprecated function
+  calls (Nayan Deshmukh)
+* Various minor improvements, fixes, depreciaton warning removals and cleanups
+  (Nayan Deshmukh, Marius Stanciu, Mattias Bengtsson, Jiří Techet)
+
+libchamplain 0.12.13 (2016-02-25)
+=================================
+
+Stable release
+
+Changes:
+
+* Implement ChamplainExportable in MarkerLayer and ChamplainPoint
+  (Jonas Danielsson)
+* Avoid runtime warnings due to the use of deprecated API (Cosimo Cecchi)
+* Make sure enums are introspectable (Jonas Danielsson)
+* Fix occasional crash when closing map with layers (Jonas Danielsson)
+* Various minor fixes and improvements (Emmanuele Bassi, Hashem Nasarat,
+  Pavel Machek, Jiří Techet)
+
+libchamplain 0.12.12 (2015-12-02)
+=================================
+
+Stable release
+
+Changes:
+
+* Add possibility to export maps (Jonas Danielsson)
+* Fix map getting blank after some mouse actions (Carlos Garnacho)
+* Fix tile loading at higher zoom levels (Rémy Oudompheng)
+* Improve mouse wheel zoom handling (Carlos Garnacho, Jiri Techet)
+
+libchamplain 0.12.11 (2015-09-18)
+=================================
+
+Stable release
+
+Changes:
+
+* Improved touch-screen support, pinch-to-zoom (Carlos Garnacho)
+* Add champlain_view_set_world() to limit the world to the specified bounding
+  box (Jonas Danielsson)
+* Various minor fixes (Jonas Danielsson, Ting-Wei Lan, Jiří Techet)
+
+libchamplain 0.12.10 (2015-03-18)
+=================================
+
+Stable release
+
+Changes:
+
+* Improve key-press event handling to better support custom keybindings
+  (Jonas Danielsson)
+* Add a simple demo demonstrating custom keybindings (Jiří Techet)
+* Handle CLUTTER_SCROLL_SMOOTH to fix moouse-wheel zooming with newer clutter
+  versions (Jonas Danielsson)
+* Make ChamplainLabel shadow optional (Chris Mayo)
+* Emit animation-completed::zoom signal when zoom ends (Jonas Danielsson)
+
+libchamplain 0.12.9 (2014-09-18)
+================================
+
+Stable release
+
+Changes:
+
+* For privacy reasons use https instead of http in map sources 
+  that support it (Jiří Techet)
+* Fixed leaked idle function in ChamplainPathLayer and ChamplainScale 
+  (Damián Nohales, Jiří Techet)
+* Don't deselect all markers when a marker got deselected (Damián Nohales)
+* Various minor fixes and compilation warning removal (Jiří Techet)
+
+libchamplain 0.12.8 (2014-07-01)
+================================
+
+Stable release
+
+Changes:
+
+* Fix crash when changing a map source (Jonas Danielsson)
+* Drop the dependency on libsoup-gnome by using libsoup 2.34 or newer 
+  (Jonas Danielsson)
+* Add basic touchscreen support (Reyad Attiyat)
+
+libchamplain 0.12.7 (2014-02-06)
+================================
+
+Stable release
+
+Changes:
+
+* Use correct LIBRARY_VERSION string
+
+libchamplain 0.12.6 (2014-02-04)
+================================
+
+Stable release
+
+Changes:
+
+- Make sure Maemo is disabled when --disable-maemo is used.
+- Add the new weather map sources for Maemo builds as well.
+- ChamplainView
+  - More reliable notifications for max/min-zoom-level properties.
+  - Add API to determine appropriate zoom-level for a particular
+    bounding box.
+- Update project homepage link.
+- Fixes to build.
+
+libchamplain 0.12.5 (2013-09-16)
+===============================
+
+Stable release
+
+Changes:
+
+* Add properties for animation mode & duration (Jonas Danielsson)
+* Add support for OpenWeatherMap overlays (Giovanni Campagna)
+* Performance improvements (Jiří Techet)
+* Minor fixes and improvements (Marvin Schmidt, Colin Walters, Jiří Techet)
+
+libchamplain 0.12.4 (2013-05-16)
+===============================
+
+Stable release
+
+Changes:
+
+* Add dependency on clutter 1.12 and fix all the depreciation warnings 
+  (Jiří Techet, Zeeshan Ali)
+* Many internal cleanups and minor improvements (Jiří Techet)
+* Fix gtk and libsoup depreciation warnings (Jiří Techet)
+* Deprecate CHAMPLAIN_MAP_SOURCE_OSM_OSMARENDER and CHAMPLAIN_MAP_SOURCE_OAM 
+  which don't exist any more and remove them from the factory (Jiří Techet)
+* Deprecate ChamplainCustomMarker (Jiří Techet)
+* Deprecate champlain_view_bin_layout_add() (Zeeshan Ali)
+* Fix blurry map when view resized (Jiří Techet)
+* Use more neutral map background color (Jiří Techet)
+* Add champlain_view_get_bounding_box() and champlain_bounding_box_covers() (Zeeshan Ali)
+* Add a possibility to set a background texture (Nirbheek Chauhan)
+* Add Mapquest Open Aerial map source (Zeeshan Ali)
+* Added the possibility to use TMS correct y-axis (Samuel Gyger)
+* Minor fixes and improvements (Zeeshan Ali, Evan Nemerson, Jiří Techet)
+
+libchamplain 0.12.3 (2012-07-14)
+===============================
+
+Stable release
+
+Changes:
+* Fix OpenCycleMap source URL (Thomas Bechtold)
+* Fix ChmplainPoint resizing issue (Jiří Techet)
+* Many minor documentation improvements (Pablo Castellano)
+* New polygons.py Python demo
+* Other minor fixes and improvements (Pablo Castellano, Jiří Techet)
+
+libchamplain 0.12.2 (2012-03-12)
+===============================
+
+Stable release
+
+Changes:
+* Call vapigen with --pkg cogl-pango-1.0 (Alexandre Rostovtsev) 
+* Don't call vapigen during distcheck and use pre-generated vapi
+  instead to become independent of vala version during distcheck 
+  (Jiří Techet)
+* Minor changes here and there (Jiří Techet)
+
+libchamplain 0.12.1 (2011-12-20)
+===============================
+
+Stable release
+
+Changes:
+* Fix scale drawing (Jiří Techet)
+* Don't call g_thread_init (Colin Walters)
+* Redraw path when its properties change (Jiří Techet)
+* Fix crashes on ChamplainView destruction (Jiří Techet)
+* Add dashed lines drawing to paths (Jiří Techet)
+* Fix factory methods for introspection-based bindings (Jiří Techet)
+* Fix wrong zoom actor placement at low zoom levels (Jiří Techet)
+* Minor fixes and improvements (Jiří Techet)
+
+libchamplain 0.12.0 (2011-09-17)
+===============================
+
+Stable release
+
+Changes:
+* Some minor fixes (Javier Jardón, Jiří Techet)
+
+libchamplain 0.11.0 (2011-09-03)
+===============================
+
+Unstable release
+
+Changes:
+* Animated zoom-in/out (Jiří Techet)
+* Various fixes (Andreas Henriksson, Frédéric Péters, Jiří Techet)
+
+libchamplain 0.10.0 (2011-04-04)
+===============================
+
+Stable release
+
+Changes:
+* Vala bindings generated from gir's (Lorenzo Masini)
+* Various build-related fixes (Jiří Techet, Danilo Segan)
+* Performance improvements in path node and marker addition code (Jiří Techet)
+
+libchamplain 0.9.1 (2011-03-28)
+===============================
+
+Unstable release
+Vala bindings have not been updated yet.
+
+Changes:
+* Fix the redrawing bug caused by more aggressive clutter clipping (Jiří Techet)
+* Return to tidy from mx - it's less code which has to be maintained (Jiří Techet)
+* Port event handling from mx to tidy (Jiří Techet)
+* Reduce the amount of tidy source files and move them to the champlain
+  directory (Jiří Techet)
+* Custom pick implementation for markers so markers are selected only
+  when clicked inside them (Jiří Techet)
+* Fixes of several memory leaks on object destruction (Jiří Techet)
+* Deprecated symbols removal from ChamplainGtk (Jiří Techet)
+* Minimal Python demo added (Jiří Techet)
+* Minor bugfixes, cleanups, documentation additions, alignment fixes (Jiří Techet)
+
+libchamplain 0.9.0 (2011-02-21)
+===============================
+
+Unstable release
+Vala bindings have not been updated yet.
+
+Changes:
+* Port to GTK3 (William Jon McCann, Jiří Techet)
+* Rethink layer, marker, polygon and custom widget hierarchy (Jiří Techet)
+* Make ChamplainView more independent of layers and polygons (Jiří Techet)
+* Move license and scale actors outside of ChamplainView
+* Add possibility to align custom widget actors to different positions of 
+  ChamplainView (Jiří Techet)
+* Inherit all libchamplain actors from ClutterActor instead of ClutterGroup (Jiří Techet)
+* Replace tidy with mx (Jiří Techet)
+* Make markers and paths movable (Jiří Techet)
+* Change ChamplainMapSourceDesc to be a class (Jiří Techet)
+* Speed up marker addition by using custom ClutterGroup without depth ordering (Jiří Techet)
+* Depend on clutter 1.2 (needed for alignment) and clutter-gtk 1.0 (needed by GTK 3
+  port) (Jiří Techet)
+* Many other fixes, cleanups, renames, improvements and new bugs (Jiří Techet)
+
+libchamplain 0.8.1 (2011-01-18)
+===============================
+
+Stable release
+
+Changes:
+* Include MapQuest renderer for OSM (Tomaž Vajngerl)
+* Improve introspection annotations (Patrick Salecker, Jiří Techet)
+* Remove static python bindings, use introspection-based instead (William Jon McCann)
+* Improve Vala bindings (Tomaž Vajngerl, Andreas Brauchli)
+* Fix marker positioning problems by not ordering them by latitude (Jiří Techet)
+* Fire latitude and longitude signals independently of viewport shift (Jiří Techet, Tomaž Vajngerl)
+
+libchamplain 0.8.0 (2010-09-27)
+===============================
+
+Stable release
+Python bindings have not been updated yet.
+
+Changes:
+* No changes since 0.7.2
+
+libchamplain 0.7.2 (2010-09-17)
+===============================
+
+Unstable release
+Python bindings have not been updated yet.
+
+Changes:
+* Added missing header file for vala bindings generation (Lorenzo Masini)
+* Big makefile cleanup - should fix a problem when some generated sources
+  were distributed and libchamplain did not compile because of different
+  settings (Jiří Techet)
+* Fixed documentation creation when compiled without memphis (Jiří Techet)
+* --strip-prefix option removed for instrospection generation to be compatible
+  with newer gir scanners (Jiří Techet)
+
+libchamplain 0.7.1 (2010-08-26)
+===============================
+
+Unstable release
+Bindings have not been updated yet.
+
+Changes:
+* Fix #623043 champlain.pc file has too much requires (Laurent Bigonville)
+* Layer speedup by using clutter functions for marker ordering (Russell Strong)
+* Use the renderer to render cached tiles (Jiří Techet)
+* Fixed crashes caused by improper tile loading termination (Jiří Techet)
+* Fixed many memory leaks (Jiří Techet)
+* Use memory cache in addition to file cache by default (Jiří Techet)
+* Use memphis_renderer_tile_has_data() as it works with libmemphis 0.2.1 
+  (Jiří Techet)
+* On double click center to the clicked area (Jiří Techet)
+* Make ChamplainRenderer inherit from GInitiallyUnowned (Jiří Techet)
+* Access the elements in memory cache directly, not sequentially (Jiří Techet)
+* Updated documentation (Jiří Techet)
+* Use stable api version in soname also in development releases (Jiří Techet)
+* Minor fixes and cleanups (Jiří Techet)
+
+libchamplain 0.7.0 (2010-08-03)
+===============================
+
+Unstable release
+Bindings have not been updated yet.
+
+Changes:
+* Separation of map sources and renderers - map sources read data from somewhere
+  (file, network, ...), renderers generate tiles based on the data (Jiří Techet)
+* Add null tile source (a dummy data source not reading any data) and error
+  tile renderer (renderer always generating error tile). Remove error tile
+  source (Jiří Techet)
+* Get rid of non-persistent file tile cache and introduce memory cache -
+  temporary cache stored in memory only (Jiří Techet)
+* Whitespace cleanups - use uncrustify beautifier for this task and correct
+  problems manually (Jiří Techet)
+* Minor fixes and cleanups (Jiří Techet)
+  
+libchamplain 0.6.1 (2010-06-26)
+===============================
+
+Stable release
+GObject-introspection, Vala (Tomaž Vajngerl) and Python (Victor Godoy Poluceno) 
+bindings are in a working state.
+
+Changes:
+* New Vala bindings (Tomaž Vajngerl)
+* Updated Python bindings (Victor Godoy Poluceno)
+* Do not distribute gir files (Yaakov Selkowitz)
+* Minimal libchamplain usage demos (Jiří Techet)
+* Minor fixes and improvements (Jiří Techet)
+
+libchamplain 0.6 (2010-05-25)
+===============================
+
+Stable release
+GObject-introspection and Python (Victor Godoy Poluceno) bindings 
+are in a working state (without local rendering support yet).
+
+Changes:
+* Add dummy ChangeLog file (Łukasz Jernaś)
+* Fix a problem on some machines when tiles are being destroyed (Jiří Techet)
+* Add minimal demos (Jiří Techet)
+* Some other minor fixes (Jiří Techet)
+
+libchamplain 0.5.2 (2010-05-18)
+===============================
+
+Unstable release
+GObject-introspection and Python (Victor Godoy Poluceno) bindings 
+are in a working state (without local rendering support yet).
+
+Changes:
+* libchamplain has a new maintainer: Jiří Techet
+* Different tile reference management eliminating tile leaks 
+  (Jiří Techet)
+* General performance improvements (Jiří Techet)
+* Tile download cancellation when tile not displayed any more
+  (Jiří Techet)
+* Build process improvements, libmemphis dependency made optional,
+  documentation updates (Jiří Techet)
+* Removal of unmaintained mono bindings, removal of perl bindings 
+  (will be distributed separately) 
+* New demo using introspection written in javascript (Simon Wenner)
+* Many bugfixes and cleanups - for details see ChangeLog 
+  (Pierre-Luc Beaudoin, Jiří Techet, Emmanuel Rodriguez, Rob Bradford, 
+   Fridrich Štrba, Simon Wenner, Brian Cameron, Lorenzo Masini)
+
+libchamplain 0.5.1 (2010-01-25)
+===============================
+
+Unstable release
+Bindings have not been updated yet.
+The API is not settled yet.
+
+Fixes:
+* Disable Python and Instrospection until libMemphis gets bindings
+  (Pierre-Luc Beaudoin)
+* Add missing files in tarball (Pierre-Luc Beaudoin)
+* Remove generated headers from build (Götz Waschk)
+
+libchamplain 0.5.0 (2010-01-24)
+===============================
+
+Unstable release
+Bindings have not been updated yet.
+The API is not settled yet.
+
+Additions:
+* Add local rendering of OpenStreetMap data (Simon Wenner, Google Summer of
+  Code 2009)
+* New map source infrastructure (à la Pipe and Filter) (Jiří Techet)
+* ChamplainPolygon and ChamplainMapSource inherit from GInitiallyUnowned
+
+libchamplain 0.4.7 (2010-08-20)
+===============================
+
+Stable release
+GObject-introspection, Python (Victor Godoy Poluceno), Perl
+(Emmanuel Rodriguez), Vala (Tomaž Vajngerl) bindings are in a working state.
+
+Changes:
+* In the previous release some generated python binding sources had zero size
+  which caused that the python bindings weren't working at all. This release
+  just repacks the distributed files correctly.
+
+libchamplain 0.4.6 (2010-06-01)
+===============================
+
+Stable release
+GObject-introspection, Python (Victor Godoy Poluceno), Perl
+(Emmanuel Rodriguez), Vala (Tomaž Vajngerl) bindings are in a working state.
+
+Changes:
+* Vala bindings (Tomaž Vajngerl)
+* Demo and fixes for Vala bindings (Simon Wenner)
+* Fix crash when rendering polygons (Jiří Techet)
+* Use a better mechanism for error tile (Rob Bradford)
+* Various minor fixes (Jiří Techet, Koop Mast)
+
+libchamplain 0.4.5 (2010-03-10)
+===============================
+
+Stable release
+GObject-introspection, Python (Victor Godoy Poluceno) and Perl
+(Emmanuel Rodriguez) bindings are in a working state.
+
+Fixes:
+* Fix missing lat/lon property notifications (Jonathon Jongsma)
+* Remove the need to explicitly set the size of actors (Rob Bradford)
+* Properly get rid of marker's previous image (Pierre-Luc Beaudoin)
+
+libchamplain 0.4.4 (2010-01-28)
+===============================
+
+Stable release
+GObject-introspection, Python (Victor Godoy Poluceno) and Perl
+(Emmanuel Rodriguez) bindings are in a working state.
+
+Fixes:
+* 580372: Get rid of champlain_view_set_size, replaced by
+  clutter_actor_set_size (Pierre-luc Beaudoin)
+* Fix the Python demos to use ChamplainEmbed instead of ClutterEmbed (Lorenzo
+  Masini)
+* Ship all the python .defs files in tarballs, fixes the Python bindings
+  (Lorenzo Masini)
+* Simplification of the internal licence displaying code (Pierre-Luc Beaudoin)
+* Optimize the initialization process, now loads only the needed tiles
+  (Pierre-Luc Beaudoin)
+* Limit further more the number of times the scale is redrawn (Pierre-Luc
+  Beaudoin)
+* Limit the internal operations that happen when the user moves (Pierre-Luc
+  Beaudoin)
+* Async loading of tiles from the cache (Pierre-Luc Beaudoin)
+* Use the shared tile cache paths when built with --enable-maemo (Pierre-Luc
+  Beaudoin)
+* 606393: The display of tiles looks very programmatic, they now load in spiral
+  order (Jason Woofenden)
+* Limit the number of times notify::latitude and notify::longitude are emited
+  (Pierre-Luc Beaudoin)
+
+libchamplain 0.4.3 (2010-01-09)
+===============================
+
+Stable release
+GObject-introspection, Python (Victor Godoy Poluceno) and Perl
+(Emmanuel Rodriguez) bindings are in a working state.
+
+Additions:
+* A scale (Tollef Fog Heen and Pierre-Luc Beaudoin)
+* User configurable additional license text to view
+* An option to highligh points in Polygons (Andreas Henriksson)
+
+Fixes:
+* Also report as loading when validating the cache
+* Debian Bug #555082: fix linking with gold (Laurent Bigonville)
+* 604784: SIGSEGV in function cairo_set_operator
+* Fix segfault when polygon has been delete before redraw
+* Make queue_redraw visible to subclasses
+* Some memory usage improvements by reusing images already loaded
+* Don't eat clicks on the map when using ChamplainSelectionLayer
+
+libchamplain 0.4.2 (2009-10-26)
+===============================
+
+Stable release
+GObject-introspection, Python and Perl bindings are in a working state.
+
+Fixes:
+
+* 595552: ChamplainView "decel-rate" accepts values below 1.0
+  (Pierre-Luc Beaudoin)
+* 598942: Fix champlain-gtk GObject introspection (Koop Mast)
+* Fix compiler warning "function declaration isn't a prototype"
+  (Pierre-Luc Beaudoin)
+
+libchamplain 0.4.1 (2009-10-18)
+===============================
+
+Stable release
+GObject-introspection, Python and Perl bindings are in a working state.
+
+Enhancements:
+
+* Added champlain_view_remove_layer (Pierre-Luc Beaudoin)
+* ChamplainSelectionLayer now have a "changed" signal (Pierre-Luc Beaudoin)
+* Added champlain_marker_set_highlighted_text_color (Pierre-Luc Beaudoin)
+* Added champlain_marker_get_highlighted_text_color (Pierre-Luc Beaudoin)
+* Added champlain_marker_get_highlighted_color (Pierre-Luc Beaudoin)
+
+Fixes:
+
+* Selection color is always blue (Pierre-Luc Beaudoin)
+* 595534: Fix building on Solaris (Halton Huo)
+* Emit map-source notifications (Pierre-Luc Beaudoin)
+* Don't emit invalid lat and lon notifications (Pierre-Luc Beaudoin)
+* 597272: Adjust the typedefs to to keep the C++ bindings happy (Debarshi Ray)
+* Fix OSM licences (Bruce Cowan)
+* Fix slowdowns with big caches (Pierre-Luc Beaudoin)
+* 598106: champlain plugin: map isn't displayed (Pierre-Luc Beaudoin)
+
+libchamplain 0.4 (2009-09-14)
+===============================
+
+Stable release
+Only the Python bindings are in a working state.
+
+Enhancements:
+
+* Updated documentation (Pierre-Luc Beaudoin)
+* Down reload tiles if we are zooming at a level we just left
+  (Pierre-Luc Beaudoin)
+
+Fixes:
+
+* Remove OpenAerialMap from available sources (Pierre-Luc Beaudoin)
+* Get rid of black lines between tiles at high zoom levels
+  (Pierre-Luc Beaudoin)
+* Fix polygon not visible at higher zoom levels (Pierre-Luc Beaudoin)
+* 594963: Initial scrolling results in map being in Antarctica
+  (Pierre-Luc Beaudoin)
+* Make default selection mode in ChamplainSelectionMode single to match Gtk+
+  (Pierre-Luc Beaudoin)
+* Remove deprecated symbols introduced in 0.3 and removed in 0.3
+  (Pierre-Luc Beaudoin)
+
+libchamplain 0.3.92 (2009-09-03)
+===============================
+
+Eigth development release leading to 0.4
+Only the Python bindings work at this stage.
+
+Enhancements:
+
+* New marker downloading demo: url-marker (Emmanuel Rodriguez)
+* ChamplainView now has keyboard shortcuts (but not when used with
+  GtkChamplainEmbed) (Pierre-Luc Beaudoin)
+* Updated to PyClutter 1.0 Python bindings (Victor Godoy Poluceno)
+
+Fixes:
+
+* 594003: invalid write of size 4 (Felix Freimann)
+* Memory leaks in ChamplainLayer (Pierre-Luc Beaudoin)
+* 577592: Use _priv instead of the GET_PRIVATE macro (many contributors)
+* 590692: Workaround for X error when using GtkChamplainEmbed
+  (Pierre-Luc Beaudoin)
+* 592096: champlain_map_source_desc_copy and _free are incomplete
+  (Pierre-Luc Beaudoin)
+* 585754: Nicer compilation output with AM_SILENT_RULES automake option
+  (Javier Jardón)
+* Tiles are now loaded if view is resized vertically only
+  (Pierre-Luc Beaudoin)
+* Comment misleading event on markers in demos (Pierre-Luc Beaudoin)
+* 591132: Attempting to remove actor when zooming in/out (Pierre-Luc Beaudoin)
+* Respect OSM tile usage policy (Pierre-Luc Beaudoin)
+* 593505: Memory leak in ChamplainLayer (Felix Freimann)
+* 590727: Events are not send until the mouse move (Pierre-Luc Beaudoin)
+* Use 0.4 pc files and include path (Pierre-Luc Beaudoin)
+
+libchamplain 0.3.91 (2009-08-24)
+===============================
+
+Seventh development release leading to 0.4
+This release has no working bindings until Clutter gets some.
+
+Fixes:
+
+* Improved documentation (Simon Wenner)
+* Fix in animation being an out animation (Pierre-Luc Beaudoin)
+* Simplified flickr Perl demo (Emmanuel Rodriguez)
+
+libchamplain 0.3.90 (2009-08-10)
+===============================
+
+Sixth development release leading to 0.4
+This release has no working bindings until Clutter gets some.
+
+Fixes:
+
+* Fix Bug 591128: Perl bindings are not provided in the tar.gz
+  (Pierre-Luc Beaudoin)
+
+libchamplain 0.3.6 (2009-08-03)
+===============================
+
+Fifth development release leading to 0.4
+This is the first release depending on Clutter 1.0
+This release has no working bindings until Clutter gets some.
+This release should have the last API changes before 0.4 release.
+
+Enhancements:
+
+* New marker animation API (Pierre-Luc Beaudoin)
+
+Fixes:
+
+* 576391: Port to Clutter 1.0 (Pierre-Luc Beaudoin)
+* 586029: ChamplainPolygon should inherit from GInitiallyUnowned
+  (Pierre-Luc Beaudoin)
+* Make buildable with Gtk 2.12 instead of 2.14 (Emmanuel Rodriguez)
+
+libchamplain 0.3.5 (2009-08-01)
+===============================
+
+Fourth development release leading to 0.4
+This is really the last release depending on Clutter 0.8
+
+Fixes:
+
+* Fix a division by 0 experienced by MacBooks users (Emmanuel Rodriguez)
+
+libchamplain 0.3.4 (2009-07-31)
+===============================
+
+Third development release leading to 0.4
+This is the last release depending on Clutter 0.8
+
+Enhancements:
+
+* 577909: Marker selection API
+* Updated Perl bindings (Emmanuel Rodriguez)
+* Updated Python bindings (Victor Godoy Poluceno)
+
+Fixes:
+
+* 585854: Make distcheck required --enable-python but doesn't say so
+* 588224: Does not build with automake 1.11
+* 586157: libchamplain-gtk does not build with GTK 2.2
+* And numerous other fixes
+
+libchamplain 0.3.3 (2009-06-14)
+===============================
+
+Second development release leading to 0.4
+(Note: there was no 0.3.1 and no 0.3.2 to match Gnome's Schedule)
+
+Enhancements:
+
+* Widget responsiveness improvements
+* Now opens more connections to server, lowers loading time
+* 572377: Draw routes/lines
+* 582448: Provide uninstalled.pc files
+* 584149: libchamplain should set the user agent on libsoup
+
+Fixes:
+* 582786: champlain_network_map_source_fill_tile should be private
+* 584365: "longitude" and "latitude" properties are reversed
+* 584390: Cache doesn't work on first run
+* 584368: Implement singleton using Gobject constructors
+* 583502: Center_on can be wrong
+* 584775: build system installs "uninstalled" version of the packages
+* 585698: Use accessor functions instead direct access
+* And numerous other fixes
+
+libchamplain 0.3 (2009-05-04)
+===============================
+
+First development release leading to 0.4
+
+Enhancements:
+
+* Add a way to have custom map sources
+* Add a way to list available map sources
+* Add a way to disable double click to zoom
+* Add a way to access convert x,y in the view to lat,lon
+* The code now follows more closely the coding style guidelines
+* The code is now much easier to bind to other languages
+* Now include (but broken for this release): Perl, C# and Python bindings
+* 569944: No Python bindings
+* 557641: Smooth movement to a new position
+* 557642: Keep the center of the map in the center after a resize
+* 557644: Double click to zoom
+* 557965: Add a way to know the maximum and minimum zoom level
+* 577666: Replace error.svg with a cairo drawing
+* 568931: No disk cache management
+* 574809: Provide a way to make visible a bunch of markers
+* 576055: Implement advanced markers
+* 571702: Host application should be able to limit the maximum and ... 
+* 559522: Lack of user feedback during loading of tiles
+
+Fixes:
+
+* 558026: zoom in + center_on != center_on + zoom in
+* 575902: ChamplainNetworkMapSource crashes when setting "proxy-uri"
+* 576698: Segfault on 32bits platform
+* 561700: The map is glued to the center
+* 575133: Position lost on zoom out (from level 7 to 6)
+* 579846: All property changes cause the marker to be rerendered
+* 557531: champlain_view_new contains initialization code
+* 557532: champlain_view_embed_new contains initialization code
+* 558177: center_on + setting the zoom level can give the wrong result
+* 567594: config.h.in should not be in VCS
+* 569984: Current position lost on window resize
+* 570314: Zoom-in zooms at the wrong place if actor is not position...
+* 574167: Callbacks of demos/launcher.c return no values
+* 575138: It is possible to zoom below zoom level 0
+* 575139: Corrupted map when double clicking at max level
+* 575140: launcher-gtk ignores zoom-level on startup
+* 576159: Various memory management fixes for ChamplainTile
+* 576204: Properties latitude and longitude are registered are not ...
+* 576206: Getter for the properties latitude and longitude returns ...
+* 576287: Zooming doesn't stay within the map-source boundaries
+* 576733: animated-marker.py not working and not very pythonistic
+* 577169: There is no way to tell when a champlain_view_go_to is done
+* 580371: demos/launcher doesn't start at the right position
+* 573937: Support proxies
+* 576860: launcher.py demo should be more "pythonistic"
+* 558020: Unwanted wrap effect when panning at zoom level >= 8
+* 575601: Return const gchar* insted of gchar*
+* 576677: Demos are not compilable out of the tree
+* 576680: Introduce versionning functions and constants
+* 576831: ensure_visible is not fool proof
+* 559446: OpenStreetMap Mapnik is missing a zoom level
+* 575645: Properties enum has same comment as the signals enum
+* 575903: Memory leaks in champlain-network-map-source.c
+* 576695: Missing "Index of all symbols"
+* 576832: Any go_to should stop a previous and not yet finished go_to
+* 580785: decel-rate of a view is not set correctly
+
+
+libchamplain 0.2.10 (2009-04-02)
+===============================
+ 
+Fixes:
+
+* Fix symbols' export (some tidy_* were left)
+* Get rid of the svg file
+
+
+libchamplain 0.2.9 (2009-02-26)
+===============================
+
+Enhancements:
+
+* Add a new animated marker demo
+
+Fixes:
+
+* Fix symbols' export
+* Fix bug 567594 (config.h.in in DVCS)
+* Fix a strange bug where the elastic effect is wrong
+* Don't generate a million criticals if the error tile image is not found
+
+libchamplain 0.2.8 (2009-01-10)
+===============================
+
+Enhancements:
+
+* Add a new constructor for ChamplainMarkers made of an image. (Lorenzo Masini)
+
+Fixes:
+
+* Fix map recenter
+* Fix licence hiding
+* Fix map centering on startup
+
+libchamplain 0.2.7 (2008-11-16)
+===============================
+
+Enhancements:
+
+* Double clicking on the map will now zoom and recenter. 
+* When resizing a ChamplainView, the centered content will still be
+  centered after the resizing.  Can be disabled.
+* The Map's license is displayed by default on the lower right corner. 
+
+Fixes:
+
+* Fix a memory leak
+* Some code clean-up
+* Fix Bug 558026 – zoom in + center_on != center_on + zoom in
+* Fix missing zoom level in OpenStreetMap Mapnik
+
