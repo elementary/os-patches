@@ -1,6 +1,6 @@
 project(
   'libchamplain', 'c',
-  version: '0.12.20',
+  version: '0.12.21',
   license: 'LGPLv2.1+',
   meson_version: '>= 0.49.0',
   default_options: [
@@ -51,13 +51,14 @@ cc = meson.get_compiler('c')
 
 libm_dep = cc.find_library('m', required: true)
 
-glib_req = '>= 2.38'
+glib_req = '>= 2.68'
 gtk_req = '>= 3.0'
 clutter_req = '>= 1.24'
 clutter_gtk_req = '>= 1.0'
 cairo_req = '>= 1.4'
 sqlite_req = '>= 3.0'
-libsoup_req = '>= 2.42'
+libsoup2_req = '>= 2.42'
+libsoup3_req = '>= 3.0'
 memphis_req = '>= 0.2.1'
 introspection_req = '>= 0.6.3'
 vala_req = '>= 0.11.0'
@@ -70,7 +71,13 @@ gdk_dep = dependency('gdk-3.0', version: gtk_req)
 clutter_dep = dependency('clutter-1.0', version: clutter_req)
 cairo_dep = dependency('cairo', version: cairo_req)
 sqlite_dep = dependency('sqlite3', version: sqlite_req)
-libsoup_dep = dependency('libsoup-2.4', version: libsoup_req)
+if get_option('libsoup3')
+  libsoup_dep = dependency('libsoup-3.0', version: libsoup3_req)
+  libsoup_api_version = '3.0'
+else
+  libsoup_dep = dependency('libsoup-2.4', version: libsoup2_req)
+  libsoup_api_version = '2.4'
+endif
 
 gtk_dep = dependency('gtk+-3.0', version: gtk_req, required: false)
 clutter_gtk_dep = dependency('clutter-gtk-1.0', version: clutter_gtk_req, required: false)

@@ -112,6 +112,12 @@ libchamplain_c_args = [
   '-DG_LOG_DOMAIN="@0@"'.format(meson.project_name()),
 ]
 
+if get_option('libsoup3')
+  libchamplain_c_args += [
+    '-DCHAMPLAIN_LIBSOUP_3',
+  ]
+endif
+
 libchamplain_link_args = [
 ]
 
@@ -244,4 +250,7 @@ libchamplain_pc = pkg.generate(
   description: 'Map View for Clutter',
   subdirs: package_string,
   requires: libchamplain_requires,
+  variables: [
+    'soupapiversion=@0@'.format(libsoup_api_version),
+  ],
 )

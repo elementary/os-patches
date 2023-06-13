@@ -28,6 +28,7 @@ typedef struct
   gdouble longitude;
 } MarkerData;
 
+#ifndef CHAMPLAIN_LIBSOUP_3
 /**
  * Returns a GdkPixbuf from a given SoupMessage. This function assumes that the
  * message has completed successfully.
@@ -86,7 +87,7 @@ cleanup:
 
   return pixbuf;
 }
-
+#endif
 
 static ClutterActor *
 texture_new_from_pixbuf (GdkPixbuf *pixbuf, GError **error)
@@ -116,6 +117,31 @@ texture_new_from_pixbuf (GdkPixbuf *pixbuf, GError **error)
   return texture;
 }
 
+static void
+add_marker_with_pixbuf (MarkerData  *marker_data,
+                        GdkPixbuf   *pixbuf)
+{
+  ClutterActor *texture = NULL;
+  ClutterActor *marker = NULL;
+  GError *error = NULL;
+
+  /* Transform the pixbuf into a texture */
+  texture = texture_new_from_pixbuf (pixbuf, &error);
+  if (error != NULL)
+    {
+      g_print ("Failed to convert the image into a texture: %s\n",
+          error->message);
+      return;
+    }
+
+  /* Create a marker with the texture */
+  marker = champlain_label_new_with_image (texture);
+  champlain_location_set_location (CHAMPLAIN_LOCATION (marker),
+      marker_data->latitude, marker_data->longitude);
+  champlain_marker_layer_add_marker (marker_data->layer, CHAMPLAIN_MARKER (marker));
+
+  g_clear_object (&texture);
+}
 
 /**
  * Called when an image has been downloaded. This callback will transform the
@@ -125,6 +151,41 @@ texture_new_from_pixbuf (GdkPixbuf *pixbuf, GError **error)
  *
  * This callback expects the parameter data to be a valid ChamplainMarkerLayer.
  */
+#ifdef CHAMPLAIN_LIBSOUP_3
+static void
+image_downloaded_cb (GObject *source_object,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  MarkerData *marker_data = (MarkerData *) user_data;
+  GError *error = NULL;
+  GdkPixbuf *pixbuf = NULL;
+  GInputStream *stream;
+
+  stream = soup_session_send_finish (SOUP_SESSION (source_object), res, &error);
+  if (error != NULL) {
+    g_print ("Failed to download image: %s\n", error->message);
+    goto cleanup;
+  }
+
+  pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &error);
+  if (error != NULL)
+    {
+      g_print ("Failed to parse the image: %s\n", error->message);
+      goto cleanup;
+    }
+
+  add_marker_with_pixbuf (marker_data, pixbuf);
+
+cleanup:
+  if (marker_data)
+    g_clear_object (&marker_data->layer);
+  g_slice_free (MarkerData, marker_data);
+
+  g_clear_error (&error);
+  g_clear_object (&pixbuf);
+}
+#else
 static void
 image_downloaded_cb (SoupSession *session,
     SoupMessage *message,
@@ -135,8 +196,6 @@ image_downloaded_cb (SoupSession *session,
   char *url = NULL;
   GError *error = NULL;
   GdkPixbuf *pixbuf = NULL;
-  ClutterActor *texture = NULL;
-  ClutterActor *marker = NULL;
 
   if (data == NULL)
     goto cleanup;
@@ -159,37 +218,18 @@ image_downloaded_cb (SoupSession *session,
       goto cleanup;
     }
 
-  /* Then transform the pixbuf into a texture */
-  texture = texture_new_from_pixbuf (pixbuf, &error);
-  if (error != NULL)
-    {
-      g_print ("Failed to convert %s into a texture: %s\n", url,
-          error->message);
-      goto cleanup;
-    }
-
-  /* Finally create a marker with the texture */
-  marker = champlain_label_new_with_image (texture);
-  texture = NULL;
-  champlain_location_set_location (CHAMPLAIN_LOCATION (marker),
-      marker_data->latitude, marker_data->longitude);
-  champlain_marker_layer_add_marker (marker_data->layer, CHAMPLAIN_MARKER (marker));
+  add_marker_with_pixbuf (marker_data, pixbuf);
 
 cleanup:
   if (marker_data)
-    g_object_unref (marker_data->layer);
+    g_clear_object (&marker_data->layer);
   g_slice_free (MarkerData, marker_data);
   g_free (url);
 
-  if (error != NULL)
-    g_error_free (error);
-
-  if (pixbuf != NULL)
-    g_object_unref (G_OBJECT (pixbuf));
-
-  if (texture != NULL)
-    clutter_actor_destroy (CLUTTER_ACTOR (texture));
+  g_clear_error (&error);
+  g_clear_object (&pixbuf);
 }
+#endif
 
 
 /**
@@ -212,8 +252,14 @@ create_marker_from_url (ChamplainMarkerLayer *layer,
   data->latitude = latitude;
   data->longitude = longitude;
 
-  message = soup_message_new ("GET", url);
+  message = soup_message_new (SOUP_METHOD_GET, url);
+#ifdef CHAMPLAIN_LIBSOUP_3
+  soup_session_send_async (session, message, G_PRIORITY_DEFAULT_IDLE, NULL,
+      image_downloaded_cb, data);
+  g_object_unref (message);
+#else
   soup_session_queue_message (session, message, image_downloaded_cb, data);
+#endif
 }
 
 

@@ -7,6 +7,13 @@ libchamplain_demos = [
   ['create_destroy_test', 'create-destroy-test.c', []],
 ]
 
+libchamplain_demos_c_args = []
+if get_option('libsoup3')
+  libchamplain_demos_c_args += [
+    '-DCHAMPLAIN_LIBSOUP_3',
+  ]
+endif
+
 foreach demo: libchamplain_demos
   demo_name = demo.get(0)
   demo_sources = demo.get(1)
@@ -17,6 +24,7 @@ foreach demo: libchamplain_demos
     demo_sources,
     install: false,
     dependencies: demo_deps + [libchamplain_dep],
+    c_args: libchamplain_demos_c_args,
   )
 endforeach
 
@@ -85,6 +93,7 @@ if build_with_memphis and build_gtk_widgetry
       dependencies: [
         libchamplain_dep,
         libchamplain_gtk_dep,
+        memphis_dep,
       ]
     )
   endforeach

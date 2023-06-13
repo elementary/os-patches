@@ -116,8 +116,16 @@ champlain_network_bbox_tile_source_set_property (GObject *object,
 
       priv->proxy_uri = g_value_dup_string (value);
       if (priv->soup_session)
-        g_object_set (G_OBJECT (priv->soup_session), "proxy-uri",
-            soup_uri_new (priv->proxy_uri), NULL);
+        {
+#ifdef CHAMPLAIN_LIBSOUP_3
+          GProxyResolver *resolver = soup_session_get_proxy_resolver (priv->soup_session);
+          if (resolver && G_IS_SIMPLE_PROXY_RESOLVER (resolver))
+            g_simple_proxy_resolver_set_default_proxy (G_SIMPLE_PROXY_RESOLVER (resolver), priv->proxy_uri);
+#else
+          g_object_set (G_OBJECT (priv->soup_session), "proxy-uri",
+              soup_uri_new (priv->proxy_uri), NULL);
+#endif
+        }
       break;
 
     case PROP_STATE:
@@ -253,6 +261,13 @@ champlain_network_bbox_tile_source_init (ChamplainNetworkBboxTileSource *self)
 
   priv->api_uri = g_strdup ("https://www.informationfreeway.org/api/0.6");
   /* informationfreeway.org is a load-balancer for different api servers */
+#ifdef CHAMPLAIN_LIBSOUP_3
+  priv->soup_session = soup_session_new_with_options (
+        "user-agent", "libchamplain/" CHAMPLAIN_VERSION_S,
+      "max-conns-per-host", 2,
+      NULL
+  );
+#else
   priv->proxy_uri = g_strdup ("");
   priv->soup_session = soup_session_new_with_options (
         "proxy-uri", soup_uri_new (priv->proxy_uri),
@@ -265,10 +280,10 @@ champlain_network_bbox_tile_source_init (ChamplainNetworkBboxTileSource *self)
       "libchamplain/" CHAMPLAIN_VERSION_S,
       "max-conns-per-host", 2, 
       NULL);
+#endif
 
   priv->state = CHAMPLAIN_STATE_NONE;
 }
-
 
 /**
  * champlain_network_bbox_tile_source_new_full:
@@ -314,14 +329,52 @@ champlain_network_bbox_tile_source_new_full (const gchar *id,
   return source;
 }
 
+static void
+map_data_loaded (ChamplainNetworkBboxTileSource *self,
+                 const guint8                   *data,
+                 gsize                           size)
+{
+  ChamplainRenderer *renderer;
+  g_object_set (G_OBJECT (self), "state", CHAMPLAIN_STATE_DONE, NULL);
 
+  renderer = champlain_map_source_get_renderer (CHAMPLAIN_MAP_SOURCE (self));
+  champlain_renderer_set_data (renderer, data, size);
+}
+
+#ifdef CHAMPLAIN_LIBSOUP_3
+static void
+load_map_data_cb (GObject *source_object,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  ChamplainNetworkBboxTileSource *self =
+    CHAMPLAIN_NETWORK_BBOX_TILE_SOURCE (user_data);
+  GBytes *bytes;
+  GError *error = NULL;
+  gsize size;
+  gconstpointer data;
+
+  bytes = soup_session_send_and_read_finish (SOUP_SESSION (source_object), res, &error);
+
+  if (error != NULL)
+    {
+      DEBUG ("Unable to download file: %s", error->message);
+
+      g_clear_error (&error);
+      return;
+    }
+
+  data = g_bytes_get_data (bytes, &size);
+  map_data_loaded (self, data, size);
+  g_bytes_unref (bytes);
+}
+#else
 static void
 load_map_data_cb (G_GNUC_UNUSED SoupSession *session, SoupMessage *msg,
     gpointer user_data)
 {
   ChamplainNetworkBboxTileSource *self =
     CHAMPLAIN_NETWORK_BBOX_TILE_SOURCE (user_data);
-  ChamplainRenderer *renderer;
 
   if (!SOUP_STATUS_IS_SUCCESSFUL (msg->status_code))
     {
@@ -331,11 +384,11 @@ load_map_data_cb (G_GNUC_UNUSED SoupSession *session, SoupMessage *msg,
       return;
     }
 
-  g_object_set (G_OBJECT (self), "state", CHAMPLAIN_STATE_DONE, NULL);
-
-  renderer = champlain_map_source_get_renderer (CHAMPLAIN_MAP_SOURCE (self));
-  champlain_renderer_set_data (renderer, (guint8*) msg->response_body->data, msg->response_body->length);
+  map_data_loaded (self,
+                   (const guint8*) msg->response_body->data,
+                   msg->response_body->length);
 }
+#endif
 
 
 /**
@@ -370,7 +423,7 @@ champlain_network_bbox_tile_source_load_map_data (
   url = g_strdup_printf (
         "https://api.openstreetmap.org/api/0.6/map?bbox=%f,%f,%f,%f",
         bbox->left, bbox->bottom, bbox->right, bbox->top);
-  msg = soup_message_new ("GET", url);
+  msg = soup_message_new (SOUP_METHOD_GET, url);
 
   DEBUG ("Request BBox data: '%s'", url);
 
@@ -378,7 +431,12 @@ champlain_network_bbox_tile_source_load_map_data (
 
   g_object_set (G_OBJECT (self), "state", CHAMPLAIN_STATE_LOADING, NULL);
 
+#ifdef CHAMPLAIN_LIBSOUP_3
+  soup_session_send_and_read_async (priv->soup_session, msg, G_PRIORITY_DEFAULT_IDLE, NULL, load_map_data_cb, self);
+  g_object_unref (msg);
+#else
   soup_session_queue_message (priv->soup_session, msg, load_map_data_cb, self);
+#endif
 }
 
 
