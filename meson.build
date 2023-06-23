@@ -1,5 +1,5 @@
 project('iio-sensor-proxy', [ 'c' ],
-        version: '3.3',
+        version: '3.4',
         license: 'GPLv3+',
         default_options: [
           'buildtype=debugoptimized',
@@ -44,6 +44,10 @@ if get_option('gtk-tests')
 endif
 gio_dep = dependency('gio-2.0')
 gudev_dep = dependency('gudev-1.0', version: '>= 237')
+polkit_gobject_dep = dependency('polkit-gobject-1', version: '>= 0.91')
+polkit_policy_directory = polkit_gobject_dep.get_pkgconfig_variable('policydir')
+
+xmllint = find_program('xmllint', required: false)
 
 gnome = import('gnome')
 
@@ -62,4 +66,19 @@ if get_option('gtk_doc')
   subdir('docs')
 endif
 
-subdir('tests')
+if get_option('tests')
+  # Python 3 required modules
+  python3_required_modules = ['psutil', 'dbusmock', 'gi']
+
+  python = import('python')
+  python3 = python.find_installation('python3')
+  foreach p : python3_required_modules
+    # Source: https://docs.python.org/3/library/importlib.html#checking-if-a-module-can-be-imported
+    script = 'import importlib.util; import sys; exit(1) if importlib.util.find_spec(\''+ p +'\') is None else exit(0)'
+    if run_command(python3, '-c', script, check: false).returncode() != 0
+      error('Python3 module \'' + p + '\' required for running tests but not found')
+    endif
+  endforeach
+
+  subdir('tests')
+endif

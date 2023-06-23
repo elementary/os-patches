@@ -77,6 +77,8 @@ static inline gboolean
 driver_discover (SensorDriver *driver,
 		 GUdevDevice  *device)
 {
+	AccelLocation location;
+
 	g_return_val_if_fail (driver, FALSE);
 	g_return_val_if_fail (driver->discover, FALSE);
 	g_return_val_if_fail (device, FALSE);
@@ -87,7 +89,13 @@ driver_discover (SensorDriver *driver,
 	if (driver->type != DRIVER_TYPE_ACCEL)
 		return TRUE;
 
-	return (setup_accel_location (device) == ACCEL_LOCATION_DISPLAY);
+	location = setup_accel_location (device);
+	if (location == ACCEL_LOCATION_DISPLAY)
+		return TRUE;
+
+	g_debug ("Ignoring accelerometer in location '%s'",
+		 accel_location_to_string (location));
+	return FALSE;
 }
 
 static inline SensorDevice *

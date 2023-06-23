@@ -157,7 +157,7 @@ setup_uinput (OrientationData *data)
 		return FALSE;
 	}
 
-	data->uinput = fd;
+	data->uinput = g_steal_fd (&fd);
 
 	return TRUE;
 }

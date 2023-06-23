@@ -117,3 +117,16 @@ get_accel_scale (GUdevDevice *device,
 	reset_accel_scale (scale_vec);
 	return TRUE;
 }
+
+const char *
+accel_location_to_string (AccelLocation location)
+{
+	switch (location) {
+	case ACCEL_LOCATION_DISPLAY:
+		return "display";
+	case ACCEL_LOCATION_BASE:
+		return "base";
+	default:
+		g_assert_not_reached ();
+	}
+}

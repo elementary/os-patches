@@ -21,32 +21,27 @@
 import os
 import sys
 import dbus
+import dbusmock
+import gi
 import tempfile
-import subprocess
 import psutil
+import subprocess
 import unittest
 import time
 
 try:
-    import gi
     from gi.repository import GLib
     from gi.repository import Gio
 except ImportError as e:
-    sys.stderr.write('Skipping tests, PyGobject not available for Python 3, or missing GI typelibs: %s\n' % str(e))
-    sys.exit(0)
+    sys.stderr.write('PyGobject not available for Python 3, or missing GI typelibs: %s\n' % str(e))
+    sys.exit(1)
 
 try:
     gi.require_version('UMockdev', '1.0')
     from gi.repository import UMockdev
 except ImportError:
-    sys.stderr.write('Skipping tests, umockdev not available (https://github.com/martinpitt/umockdev)\n')
-    sys.exit(0)
-
-try:
-    import dbusmock
-except ImportError:
-    sys.stderr.write('Skipping tests, python-dbusmock not available (http://pypi.python.org/pypi/python-dbusmock).\n')
-    sys.exit(0)
+    sys.stderr.write('umockdev not available (https://github.com/martinpitt/umockdev)\n')
+    sys.exit(1)
 
 
 SP = 'net.hadess.SensorProxy'
@@ -108,22 +103,33 @@ class Tests(dbusmock.DBusTestCase):
         The testbed is initially empty.
         '''
         self.testbed = UMockdev.Testbed.new()
+        self.polkitd, obj_polkit = self.spawn_server_template(
+            'polkitd', {}, stdout=subprocess.PIPE)
+        obj_polkit.SetAllowed(['net.hadess.SensorProxy.claim-sensor'])
 
         self.proxy = None
         self.log = None
         self.daemon = None
 
-    def tearDown(self):
-        del self.testbed
-        self.stop_daemon()
-
-        # on failures, print daemon log
-        errors = [x[1] for x in self._outcome.errors if x[1]]
-        if errors and self.log:
+    def run(self, result=None):
+        super(Tests, self).run(result)
+        if result and len(result.errors) + len(result.failures) > 0 and self.log:
             with open(self.log.name) as f:
                 sys.stderr.write('\n-------------- daemon log: ----------------\n')
                 sys.stderr.write(f.read())
                 sys.stderr.write('------------------------------\n')
+
+    def tearDown(self):
+        del self.testbed
+        self.stop_daemon()
+
+        if self.polkitd:
+            try:
+                self.polkitd.kill()
+            except OSError:
+                pass
+            self.polkitd.wait()
+        self.polkitd = None
 
     #
     # Daemon control and D-BUS I/O
@@ -143,12 +149,14 @@ class Tests(dbusmock.DBusTestCase):
         # have to do that ourselves
         env['UMOCKDEV_DIR'] = self.testbed.get_root_dir()
         self.log = tempfile.NamedTemporaryFile()
+        timeout_multiplier = 1
         if wrapper:
             daemon_path = wrapper + [ self.daemon_path ]
         else:
             daemon_path = [ self.daemon_path ]
         if os.getenv('VALGRIND') != None:
             daemon_path = ['valgrind'] + daemon_path + ['-v']
+            timeout_multiplier = 10
         else:
             daemon_path = daemon_path + ['-v']
 
@@ -157,7 +165,7 @@ class Tests(dbusmock.DBusTestCase):
                                        stderr=subprocess.STDOUT)
 
         # wait until the daemon gets online
-        timeout = 100
+        timeout = 100 * timeout_multiplier
         while timeout > 0:
             time.sleep(0.1)
             timeout -= 1

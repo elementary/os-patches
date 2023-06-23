@@ -25,6 +25,16 @@ static AccelVec3 id_matrix[3] = {
 static char axis_names[] = "xyz";
 
 AccelVec3 *
+get_id_matrix (void)
+{
+#if GLIB_CHECK_VERSION(2, 68, 0)
+	return g_memdup2 (id_matrix, sizeof(id_matrix));
+#else
+	return g_memdup (id_matrix, sizeof(id_matrix));
+#endif
+}
+
+AccelVec3 *
 setup_mount_matrix (GUdevDevice *device)
 {
 	AccelVec3 *ret = NULL;
@@ -83,8 +93,7 @@ setup_mount_matrix (GUdevDevice *device)
 	}
 
 	g_debug ("Failed to auto-detect mount matrix, falling back to identity");
-	parse_mount_matrix (NULL, &ret);
-	return ret;
+	return get_id_matrix ();
 }
 
 static char **
@@ -115,14 +124,9 @@ parse_mount_matrix (const char  *mtx,
 
 	g_return_val_if_fail (vecs != NULL, FALSE);
 
-
 	/* Empty string means we use the identity matrix */
 	if (mtx == NULL || *mtx == '\0') {
-#if GLIB_CHECK_VERSION(2, 68, 0)
-		*vecs = g_memdup2 (id_matrix, sizeof(id_matrix));
-#else
-		*vecs = g_memdup (id_matrix, sizeof(id_matrix));
-#endif
+		*vecs = get_id_matrix ();
 		return TRUE;
 	}
 

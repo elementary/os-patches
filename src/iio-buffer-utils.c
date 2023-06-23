@@ -55,7 +55,7 @@ struct iio_channel_info {
 static char *
 iioutils_break_up_name (const char *name)
 {
-	char **items, *ret;
+	g_auto(GStrv) items = NULL;
 	guint i;
 
 	items = g_strsplit (name, "_", -1);
@@ -66,10 +66,7 @@ iioutils_break_up_name (const char *name)
 		}
 	}
 
-	ret = g_strjoinv ("_", items);
-	g_strfreev (items);
-
-	return ret;
+	return g_strjoinv ("_", items);
 }
 
 /**
@@ -95,27 +92,25 @@ iioutils_get_type (unsigned   *is_signed,
 		   const char *generic_name)
 {
 	int ret;
-	char *builtname;
-	char *filename;
+	g_autofree char *builtname = NULL;
+	g_autofree char *filename = NULL;
 	char signchar, endianchar;
 	unsigned padint;
 	g_autoptr(FILE) sysfsfp = NULL;
 
 	builtname = g_strdup_printf ("%s_type", name);
 	filename = g_build_filename (device_dir, "scan_elements", builtname, NULL);
-	g_free (builtname);
 
 	sysfsfp = fopen (filename, "r");
 	if (sysfsfp == NULL) {
+		g_clear_pointer (&builtname, g_free);
+		g_clear_pointer (&filename, g_free);
 		builtname = g_strdup_printf ("%s_type", generic_name);
 		filename = g_build_filename (device_dir, "scan_elements", builtname, NULL);
-		g_free (builtname);
 
 		sysfsfp = fopen (filename, "r");
-		if (sysfsfp == NULL) {
-			g_free (filename);
+		if (sysfsfp == NULL)
 			return FALSE;
-		}
 	}
 
 	/* See `iio_show_fixed_type()` in the IIO core for the format */
@@ -128,7 +123,6 @@ iioutils_get_type (unsigned   *is_signed,
 
 	if (ret < 0 || ret != 5) {
 		g_warning ("Failed to pass scan type description for %s", filename);
-		g_free (filename);
 		return FALSE;
 	}
 
@@ -143,8 +137,6 @@ iioutils_get_type (unsigned   *is_signed,
 	g_debug ("Got type for %s: is signed: %d, bytes: %d, bits_used: %d, shift: %d, mask: 0x%" G_GUINT64_FORMAT ", be: %d",
 		 name, *is_signed, *bytes, *bits_used, *shift, *mask, *be);
 
-	g_free (filename);
-
 	return TRUE;
 }
 
@@ -155,16 +147,15 @@ iioutils_get_param_float (float      *output,
 			  const char *name,
 			  const char *generic_name)
 {
-	char *builtname, *filename;
+	g_autofree char *builtname = NULL;
+	g_autofree char *filename = NULL;
 	g_autofree char *contents = NULL;
 	g_autoptr(GError) error = NULL;
-	int ret = 0;
 
 	g_debug ("Trying to read '%s_%s' (name) from dir '%s'", name, param_name, device_dir);
 
 	builtname = g_strdup_printf ("%s_%s", name, param_name);
 	filename = g_build_filename (device_dir, builtname, NULL);
-	g_free (builtname);
 
 	if (g_file_get_contents (filename, &contents, NULL, &error)) {
 		char *endptr;
@@ -172,38 +163,37 @@ iioutils_get_param_float (float      *output,
 		if (*output != 0.0 || endptr != contents)
 			return 0;
 		g_warning ("Couldn't convert '%s' from %s to float", g_strchomp (contents), filename);
-		g_clear_pointer (&contents, g_free);
 	} else {
 		g_debug ("Failed to read float from %s: %s", filename, error->message);
 		g_clear_error (&error);
 	}
-	g_free (filename);
 
 	g_debug ("Trying to read '%s_%s' (generic name) from dir '%s'", generic_name, param_name, device_dir);
 
+	g_clear_pointer (&builtname, g_free);
+	g_clear_pointer (&filename, g_free);
 	builtname = g_strdup_printf ("%s_%s", generic_name, param_name);
 	filename = g_build_filename (device_dir, builtname, NULL);
-	g_free (builtname);
 
+	g_clear_pointer (&contents, g_free);
 	if (g_file_get_contents (filename, &contents, NULL, &error)) {
 		char *endptr;
 		*output = g_ascii_strtod (contents, &endptr);
 		if (*output == 0.0 && endptr == contents) {
 			g_warning ("Couldn't convert '%s' from %s to float", g_strchomp (contents), filename);
-			ret = -EINVAL;
+			return -EINVAL;
 		}
 	} else {
 		if (g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-			ret = -ENOENT;
 			g_debug ("Failed to read float from non-existent %s", filename);
+			return -ENOENT;
 		} else {
-			ret = -EINVAL;
 			g_warning ("Failed to read float from %s: %s", filename, error->message);
+			return -EINVAL;
 		}
 	}
-	g_free (filename);
 
-	return ret;
+	return 0;
 }
 
 static void
@@ -222,6 +212,8 @@ compare_channel_index (gconstpointer a, gconstpointer b)
 
 	return (int) (info_1->index - info_2->index);
 }
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(iio_channel_info, channel_info_free)
 
 /* build_channel_array() - function to figure out what channels are present */
 static iio_channel_info **
@@ -252,22 +244,20 @@ build_channel_array (const char        *device_dir,
 	while ((name = g_dir_read_name (dp)) != NULL) {
 		if (g_str_has_suffix (name, "_en")) {
 			g_autoptr(FILE) sysfsfp = NULL;
-			char *filename, *index_name;
-			iio_channel_info *current;
+			g_autofree char *filename = NULL;
+			g_autofree char *index_name = NULL;
+			g_autoptr(iio_channel_info) current = NULL;
 
 			filename = g_build_filename (scan_el_dir, name, NULL);
 			sysfsfp = fopen (filename, "r");
 			if (sysfsfp == NULL) {
 				g_debug ("Could not open scan_elements file '%s'", filename);
-				g_free (filename);
 				continue;
 			}
 			if (fscanf (sysfsfp, "%d", &ret) != 1) {
 				g_debug ("Could not read from scan_elements file '%s'", filename);
-				g_free (filename);
 				continue;
 			}
-			g_free (filename);
 			g_clear_pointer (&sysfsfp, fclose);
 
 			current = g_new0 (iio_channel_info, 1);
@@ -281,14 +271,13 @@ build_channel_array (const char        *device_dir,
 			}
 
 			index_name = g_strdup_printf ("%s_index", current->name);
+			g_clear_pointer (&filename, g_free);
 			filename = g_build_filename (scan_el_dir, index_name, NULL);
-			g_free (index_name);
 
 			sysfsfp = fopen (filename, "r");
 			if (sysfsfp == NULL)
 				goto error;
 			ret = fscanf (sysfsfp, "%u", &current->index);
-			g_free (filename);
 			if (ret != 1)
 				goto error;
 
@@ -325,7 +314,7 @@ build_channel_array (const char        *device_dir,
 				g_warning ("Could not parse name %s, generic name %s",
 					   current->name, current->generic_name);
 			} else {
-				g_ptr_array_add (array, current);
+				g_ptr_array_add (array, g_steal_pointer (&current));
 			}
 		}
 	}
@@ -411,38 +400,29 @@ _write_sysfs_string (const char *filename,
 		     const char *val,
 		     int         verify)
 {
-	int ret = 0;
 	g_autoptr(FILE) sysfsfp = NULL;
-	char *temp;
+	g_autofree char *temp = NULL;
+	g_autofree char *contents = NULL;
 
 	temp = g_build_filename (basedir, filename, NULL);
 	sysfsfp = fopen (temp, "w");
 	if (sysfsfp == NULL) {
-		ret = -errno;
-		goto error_free;
+		return -errno;
 	}
 	fprintf(sysfsfp, "%s", val);
-	g_clear_pointer (&sysfsfp, fclose);
 
 	/* Verify? */
 	if (!verify)
-		goto error_free;
-	sysfsfp = fopen(temp, "r");
-	if (sysfsfp == NULL) {
-		ret = -errno;
-		goto error_free;
-	}
-	if (fscanf(sysfsfp, "%s", temp) != 1 ||
-	    strcmp(temp, val) != 0) {
-		g_warning ("Possible failure in string write of %s Should be %s written to %s\\%s\n",
-			   temp, val, basedir, filename);
-		ret = -1;
+		return 0;
+	g_clear_pointer (&sysfsfp, fclose);
+	if (!g_file_get_contents (temp, &contents, NULL, NULL) ||
+	    g_strcmp0 (g_strchomp (contents), val) != 0) {
+		g_warning ("Possible failure in string write of '%s' Should be '%s' written to %s\n",
+			   contents ?: "(null)", val, temp);
+		return -1;
 	}
 
-error_free:
-	g_free(temp);
-
-	return ret;
+	return 0;
 }
 
 /**
@@ -748,6 +728,7 @@ buffer_drv_data_free (BufferDrvData *buffer_data)
 	for (i = 0; i < buffer_data->channels_count; i++)
 		channel_info_free (buffer_data->channels[i]);
 	g_free (buffer_data->channels);
+	g_free (buffer_data);
 }
 
 BufferDrvData *

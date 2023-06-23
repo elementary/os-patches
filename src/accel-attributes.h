@@ -24,5 +24,6 @@ gboolean parse_accel_location (const char    *location,
                                AccelLocation *value);
 gboolean parse_accel_label (const char    *location,
                             AccelLocation *value);
+const char *accel_location_to_string (AccelLocation location);
 
 gboolean get_accel_scale (GUdevDevice *device, AccelScale *scale_vec);

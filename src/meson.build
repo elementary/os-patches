@@ -1,4 +1,11 @@
-deps = [ gio_dep, gudev_dep, mathlib_dep ]
+config_h = configuration_data()
+config_h.set_quoted('VERSION', meson.project_version())
+config_h_files = configure_file(
+  output: 'config.h',
+  configuration: config_h
+)
+
+deps = [ gio_dep, gudev_dep, mathlib_dep, polkit_gobject_dep ]
 
 resources = gnome.compile_resources(
     'iio-sensor-proxy-resources', 'iio-sensor-proxy.gresource.xml',
@@ -27,6 +34,7 @@ sources = [
   'accel-attributes.c',
   'utils.c',
   resources,
+  config_h_files,
 ]
 
 executable('iio-sensor-proxy',

@@ -12,7 +12,11 @@ Installation
 $ meson _build -Dprefix=/usr
 $ ninja -v -C _build install
 ```
-It requires libgudev and systemd (>= 233 for the accelerometer quirks).
+It requires libgudev, systemd (>= 233 for the accelerometer quirks) and polkit-gobject.
+
+Running the tests will require gobject-introspection support for Python,
+[python-dbusmock](https://github.com/martinpitt/python-dbusmock/),
+[umockdev](https://github.com/martinpitt/umockdev) and [psutil](https://github.com/giampaolo/psutil).
 
 Usage
 -----
@@ -106,7 +110,7 @@ correct that reading to match the expected orientation, whether:
    x_2 & y_2 & z_2\\
    x_3 & y_3 & z_3\\
   \end{array} } \right]
- = 
+ =
   \left[ {\begin{array}{ccc}
    corrected~x & corrected~y & corrected~z\\
   \end{array} } \right]
@@ -152,6 +156,14 @@ one-line representation of the matrix above:
 x_1, y_1, z_1; x_2, y_2, z_2; x_3, y_3, z_3
 ```
 
+Accelerometer testing (without an accelerometer)
+------------------------------------------------
+
+If your hardware lacks an accelerometer, you can run the `fake-input-accelerometer` binary as root.
+This should create a new virtual device on the system, which can be interacted through `monitor-sensor`,
+`evtest`, or raw D-Bus. Use the printed keyboard commands to change the calculated orientation
+of that accelerometer.
+
 Compass testing
 ---------------
 
@@ -178,8 +190,8 @@ no good device-independent default.
 `PROXIMITY_NEAR_LEVEL` udev property. See [60-sensor.hwdb](https://github.com/systemd/systemd/blob/master/hwdb.d/60-sensor.hwdb)
 for details.
 
-For device-tree based devices, exporting the information through the kernel is still
-[a work in progress](https://lore.kernel.org/linux-iio/cover.1581947007.git.agx@sigxcpu.org/)
+For device-tree based devices, exporting the information through the kernel is done
+via the [near-level property](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/devicetree/bindings/iio/common.yaml#n22).
 
 Known problems
 --------------

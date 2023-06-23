@@ -20,3 +20,18 @@ configure_file(
   configuration: data_conf,
   install_dir: dbusconfdir
 )
+
+polkit_policy = 'net.hadess.SensorProxy.policy'
+if xmllint.found()
+  test(polkit_policy,
+       xmllint,
+       args: [
+           '--noout',
+           meson.source_root() / 'data' / polkit_policy,
+       ])
+endif
+
+install_data(
+  polkit_policy,
+  install_dir: polkit_policy_directory,
+)

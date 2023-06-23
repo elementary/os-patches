@@ -9,10 +9,6 @@ export DH_OPTIONS
 
 %:
 	dh $@
-	
-override_dh_auto_test:
-ifeq (,$(filter $(DEB_HOST_ARCH), s390x))
-	cd obj-$(DEB_HOST_GNU_TYPE); LC_ALL= ninja test
-else
-	cd obj-$(DEB_HOST_GNU_TYPE); LC_ALL= ninja test || true
-endif
+
+#override_dh_auto_configure:
+#	./autogen.sh --prefix=/ --exec-prefix=/usr

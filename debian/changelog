@@ -1,65 +1,24 @@
-iio-sensor-proxy (3.3-0ubuntu6) jammy; urgency=medium
+iio-sensor-proxy (3.4-2) unstable; urgency=medium
 
-  * d/p/0003-prefer-buffer-driver-to-polling-driver.patch:
-      Prefer buffer driver to polling driver for ALS
-      (lp: #1963628)
-  * d/p/0002-force-iio-buffer-als-on-some-dell-models.patch:
-      Removed in favor of the patch above
+  * Team upload
+  * Bump debhelper from old 12 to 13
+  * debian/control: Remove obsolete constraint
+  * Update standards version to 4.6.2, no changes needed
+  * Release to unstable
 
- -- Yao Wei (魏銘廷) <yao.wei@canonical.com>  Fri, 18 Mar 2022 12:02:27 +0800
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 15 Jun 2023 12:07:58 -0400
 
-iio-sensor-proxy (3.3-0ubuntu5) jammy; urgency=medium
+iio-sensor-proxy (3.4-1) experimental; urgency=medium
 
-  * d/p/0002-force-iio-buffer-als-on-some-dell-models.patch:
-      Force IIO_SENSOR_PROXY_TYPE to iio-buffer-als only for certain Dell
-      models (LP: #1947955)
+  * Upload to experimental
+  * New upstream release
+  * Drop patches. Appplied upstream
+  * d/control: Update build-dependencies
+  * d/gbp.conf: Use upstream-vcs
+  * d/watch: Make it match fdo gitlab
+  * Add myself as uploader
 
- -- Yao Wei (魏銘廷) <yao.wei@canonical.com>  Fri, 04 Mar 2022 15:19:47 +0800
-
-iio-sensor-proxy (3.3-0ubuntu3.2) impish; urgency=medium
-
-  * debian/patches/ubuntu_tests_timeout.patch:
-    - increase the tests timeout to avoid failing on riscv
-
- -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 03 Sep 2021 11:03:01 +0200
-
-iio-sensor-proxy (3.3-0ubuntu3.1) impish; urgency=medium
-
-  * Build-Depends on language-pack-fr and unset the locale for tests
-
- -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 26 Aug 2021 16:37:10 +0200
-
-iio-sensor-proxy (3.3-0ubuntu3) impish; urgency=medium
-
-  * Build using libudev
-
- -- Sebastien Bacher <seb128@debian.org>  Mon, 23 Aug 2021 17:31:03 +0200
-
-iio-sensor-proxy (3.3-0ubuntu1) impish; urgency=medium
-
-  * New upstream version
-  * debian/control:
-    - updated libgudev requirement
-
- -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 23 Aug 2021 16:17:25 +0200
-
-iio-sensor-proxy (3.1-0ubuntu2) impish; urgency=medium
-
-  * debian/rules: 
-    - workaround the s390x build failure, the package is not going to be
-      used on this architecture anyway
-
- -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 15 Jun 2021 16:06:25 +0200
-
-iio-sensor-proxy (3.1-0ubuntu1) impish; urgency=medium
-
-  * New upstream version
-  * debian/control.in:
-    - updated Build-Depends for the new integration tests
-  * debian/patches/proximity-Get-near-level-from-sysfs-if-available.patch:
-    - remove patch included in the new version
-
- -- Sebastien Bacher <seb128@debian.org>  Tue, 15 Jun 2021 15:23:07 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 01 Apr 2023 15:14:41 +0200
 
 iio-sensor-proxy (3.0-2) unstable; urgency=medium
 
