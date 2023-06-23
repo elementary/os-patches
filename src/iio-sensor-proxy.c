@@ -25,6 +25,11 @@
 
 #include "iio-sensor-proxy-resources.h"
 
+#if GLIB_CHECK_VERSION(2, 44, 0)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PolkitSubject, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PolkitAuthorizationResult, g_object_unref)
+#endif
+
 #define SENSOR_PROXY_DBUS_NAME          "net.hadess.SensorProxy"
 #define SENSOR_PROXY_DBUS_PATH          "/net/hadess/SensorProxy"
 #define SENSOR_PROXY_COMPASS_DBUS_PATH  "/net/hadess/SensorProxy/Compass"
