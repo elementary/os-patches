@@ -1,0 +1,39 @@
+image: fedora:rawhide
+
+variables:
+  DEPENDENCIES: gcc
+                glibc-langpack-fr
+                gtk-doc
+                pkgconfig(udev)
+                pkgconfig(systemd)
+                pkgconfig(gio-2.0)
+                pkgconfig(gudev-1.0)
+                systemd
+                gtk3-devel
+                meson
+                git
+                python3-gobject
+                python3-dbusmock
+                python3-psutil
+                umockdev
+
+build_stable:
+  before_script:
+    # Undo delangification present in the Fedora Docker images
+    - rm -f /etc/rpm/macros.image-language-conf
+    - dnf update -y && dnf install -y $DEPENDENCIES
+    - dnf reinstall -y glib2
+    - rpm -Uvh https://kojipkgs.fedoraproject.org//work/tasks/4390/73864390/libgudev-237-1.fc36.x86_64.rpm https://kojipkgs.fedoraproject.org//work/tasks/4390/73864390/libgudev-devel-237-1.fc36.x86_64.rpm
+  script:
+    - meson -Dgtk_doc=true -Dgtk-tests=true _build
+    - ninja -v -C _build
+    - ninja -v -C _build install
+    - ninja -v -C _build uninstall
+    - ninja -v -C _build dist
+    - meson test -C _build
+  artifacts:
+    when: always
+    name: "iio-sensor-proxy-${CI_COMMIT_REF_NAME}"
+    paths:
+      - "${CI_PROJECT_DIR}/_build/meson-logs"
+      - "${CI_PROJECT_DIR}/_build/meson-dist"

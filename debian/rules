@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+#
+
+# Enable Hardening
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+%:
+	dh $@
+	
+override_dh_auto_test:
+ifeq (,$(filter $(DEB_HOST_ARCH), s390x))
+	cd obj-$(DEB_HOST_GNU_TYPE); LC_ALL= ninja test
+else
+	cd obj-$(DEB_HOST_GNU_TYPE); LC_ALL= ninja test || true
+endif

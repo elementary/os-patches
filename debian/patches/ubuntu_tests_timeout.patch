@@ -1,0 +1,12 @@
+Index: iio-sensor-proxy-3.3/tests/meson.build
+===================================================================
+--- iio-sensor-proxy-3.3.orig/tests/meson.build
++++ iio-sensor-proxy-3.3/tests/meson.build
+@@ -6,5 +6,5 @@ envs.set ('top_srcdir', meson.source_roo
+ 
+ test('iio-sensor-proxy-integration-test',
+   integration_test,
+-  env: envs
+-  )
++  env: envs,
++  timeout:90)

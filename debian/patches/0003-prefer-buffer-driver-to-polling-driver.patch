@@ -1,0 +1,35 @@
+From 716ee37d514db965f9e10b070a3a2ce1c7629e76 Mon Sep 17 00:00:00 2001
+From: Bastien Nocera <hadess@hadess.net>
+Date: Tue, 15 Mar 2022 10:57:26 +0100
+Subject: [PATCH] main: Prefer buffer driver to polling driver
+Origin: upstream, https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/merge_requests/355
+
+In c7fb43e0, we added a buffer driver for ambient light sensors, but we
+added it to the list of drivers in a way that would favour polling
+drivers. Since we started using IIO_SENSOR_PROXY_TYPE to tag devices,
+and as those can support multiple drivers, we need to prefer the buffer
+driver as it's the one that doesn't require constant monitoring.
+
+This also fixes operations on some Dell laptops where the polling driver
+is completely broken.
+
+See https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/merge_requests/352
+
+---
+ src/iio-sensor-proxy.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: iio-sensor-proxy-3.3/src/iio-sensor-proxy.c
+===================================================================
+--- iio-sensor-proxy-3.3.orig/src/iio-sensor-proxy.c
++++ iio-sensor-proxy-3.3/src/iio-sensor-proxy.c
+@@ -61,8 +61,8 @@ static const SensorDriver * const driver
+ 	&iio_buffer_accel,
+ 	&iio_poll_accel,
+ 	&input_accel,
+-	&iio_poll_light,
+ 	&iio_buffer_light,
++	&iio_poll_light,
+ 	&hwmon_light,
+ 	&fake_compass,
+ 	&fake_light,

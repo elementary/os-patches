@@ -1,0 +1,52 @@
+Source: iio-sensor-proxy
+Section: utils
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Ritesh Raj Sarraf <rrs@debian.org>
+Build-Depends:
+	debhelper-compat (= 12),
+	language-pack-fr,
+	libgudev-1.0-dev (>= 1:237),
+	libudev-dev,
+	udev,
+	systemd,
+	gtk-doc-tools (>= 1.0),
+	libgtk-3-dev,
+	meson,
+	gir1.2-umockdev-1.0,
+	python3-dbusmock,
+	python3-gi,
+	python3-psutil,
+	umockdev,
+Standards-Version: 4.5.1
+Rules-Requires-Root: no
+Homepage: https://gitlab.freedesktop.org/hadess/iio-sensor-proxy
+Vcs-Git: https://salsa.debian.org/debian/iio-sensor-proxy.git
+Vcs-Browser: https://salsa.debian.org/debian/iio-sensor-proxy/
+
+Package: iio-sensor-proxy
+Architecture: linux-any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: systemd
+Description: IIO sensors to D-Bus proxy
+ Industrial I/O subsystem is intended to provide support for devices
+ that in some sense are analog to digital or digital to analog convertors
+ .
+ Devices that fall into this category are:
+  * ADCs
+  * Accelerometers
+  * Gyros
+  * IMUs
+  * Capacitance to Digital Converters (CDCs)
+  * Pressure Sensors
+  * Color, Light and Proximity Sensors
+  * Temperature Sensors
+  * Magnetometers
+  * DACs
+  * DDS (Direct Digital Synthesis)
+  * PLLs (Phase Locked Loops)
+  * Variable/Programmable Gain Amplifiers (VGA, PGA)
+ .
+ Many ultrabooks ship with some of these devices. iio-sensor-proxy is
+ intended to serve as a proxy, providing access to these devices through
+ a D-Bus interface
