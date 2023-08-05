@@ -20,7 +20,7 @@ import os
 from gettext import gettext as _
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk,GLib
+from gi.repository import Gtk,GLib,Gio
 from softwareproperties.gtk.utils import setup_ui
 from uaclient.api.u.pro.attach.magic.initiate.v1 import initiate
 from uaclient.api.u.pro.attach.magic.wait.v1 import MagicAttachWaitOptions, wait
@@ -39,8 +39,13 @@ class DialogUaAttach:
         self.contract_token = None
         self.attaching = False
         self.poll = None
+        self.pin = ""
 
-        self.start_magic_attach()
+        self.net_monitor = Gio.network_monitor_get_default()
+        self.net_monitor.connect("network-changed", self.net_status_changed, 0)
+        self.net_status_changed(
+            self.net_monitor, self.net_monitor.get_network_available(), 1
+        )
 
     def run(self):
         self.dialog.run()
@@ -145,6 +150,8 @@ class DialogUaAttach:
             GLib.idle_add(self.update_state, 'pin_validated')
         except MagicAttachTokenError:
             GLib.idle_add(self.update_state, 'expired')
+        except Exception as e:
+            print("Error getting the Ubuntu Pro token: ", e, flush = True)
         finally:
             self.poll = None
 
@@ -163,16 +170,32 @@ class DialogUaAttach:
             self.pin = response.user_code
             self.req_id = response.token
         except Exception as e:
-            print(e)
+            print("Error retrieving magic token: ", e)
             return
         self.update_state()
-        threading.Thread(target=self.poll_for_magic_token, daemon=True).start()
+        self.poll = threading.Thread(target=self.poll_for_magic_token, daemon=True)
+        self.poll.start()
 
     def on_radio_toggled(self, button):
         self.update_state()
 
     def on_magic_radio_clicked(self, button):
         self.start_magic_attach()
+
+    # Do not control the radio buttons and confirm button widgets directly,
+    # since those former are controlled by update_state and this function must
+    # be logically independent of it. Control the net_control_box'es instead.
+    def net_status_changed(self, monitor, available, first_run):
+        self.no_connection.set_visible(not available)
+        self.radio_net_control_box.set_sensitive(available)
+        self.confirm_net_control_box.set_sensitive(available)
+        if available:
+            if self.pin == "":
+                self.start_magic_attach()
+            elif self.poll == None:
+                # wait() timed out without internet; Restart polling.
+                self.poll = threading.Thread(target=self.poll_for_magic_token, daemon=True)
+                self.poll.start()
 
     def finish(self):
         self.dialog.response(Gtk.ResponseType.OK)

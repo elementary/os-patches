@@ -26,6 +26,10 @@
                 <property name="max-width-chars">130</property>
               </object>
             </child>
+      <child>
+        <object class="GtkBox" id="radio_net_control_box">
+          <property name="visible">True</property>
+          <property name="orientation">vertical</property>
         <child>
           <object class="GtkRadioButton" id="magic_radio">
             <property name="label" translatable="yes">Enter code on ubuntu.com/pro/attach</property>
@@ -170,6 +174,30 @@
             <property name="label" translatable="yes">From your admin, or from &lt;a href="https://ubuntu.com/pro"&gt;ubuntu.com/pro&lt;/a&gt;</property>
           </object>
         </child>
+              </object>
+            </child>
+        <child>
+          <object class="GtkBox" id="no_connection">
+            <property name="visible">False</property>
+            <property name="margin-left">5</property>
+            <property name="margin-top">18</property>
+            <property name="margin-bottom">18</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="margin-right">5</property>
+                <property name="stock">gtk-dialog-warning</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="wrap">True</property>
+                <property name="label" translatable="yes">Unable to connect to Ubuntu Pro servers. Check your internet connection.</property>
+              </object>
+            </child>
+          </object>
+        </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
@@ -184,11 +212,16 @@
               </object>
             </child>
             <child>
+              <object class="GtkBox" id="confirm_net_control_box">
+                <property name="visible">True</property>
+            <child>
               <object class="GtkButton" id="confirm">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Confirm</property>
                 <property name="sensitive">False</property>
                 <signal name="clicked" handler="on_confirm_clicked" swapped="no"/>
+              </object>
+            </child>
               </object>
             </child>
           </object>
