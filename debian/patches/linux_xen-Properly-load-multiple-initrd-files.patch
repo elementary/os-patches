@@ -1,0 +1,123 @@
+From: Mauricio Faria de Oliveira <mfo@canonical.com>
+Date: Sat, 6 Aug 2022 20:46:48 -0300
+Subject: templates/linux_xen: Properly load multiple initrd files
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+The linux_xen template can put multiple initrd files in the
+same multiboot[2] module[2] command, which is against specs.
+
+This causes ONLY the _first_ initrd file to be loaded; other
+files just have filenames in a "cmdline" string of the first
+initrd file and are NOT loaded.
+
+Fix this by inserting a module[2] command per initrd file.
+
+Before:
+
+    # touch /boot/xen /boot/microcode.cpio
+    # grub-mkconfig 2>/dev/null | grep -P '^\t(multiboot|module)'
+            multiboot       /boot/xen ...
+            module  /boot/vmlinuz-5.4.0-122-generic ...
+            module  --nounzip   /boot/microcode.cpio /boot/initrd.img-5.4.0-122-generic
+
+After:
+
+    # touch /boot/xen /boot/microcode.cpio
+    # grub-mkconfig 2>/dev/null | grep -P '^\t(multiboot|module)'
+            multiboot      /boot/xen ...
+            module  /boot/vmlinuz-5.4.0-122-generic ...
+            module  --nounzip   /boot/microcode.cpio
+            module  --nounzip   /boot/initrd.img-5.4.0-122-generic
+
+Cause:
+
+The code was copied from the linux template, which is *apparently*
+equivalent.. but its backing command grub_cmd_initrd() *supports*
+multiple files (see grub_initrd_init()), while grub_cmd_module()
+*does not* (see grub_multiboot[2]_add_module()).
+
+See commit e86f6aafb8de ("grub-mkconfig/20_linux_xen: Support multiple early initrd images"):
+    'This is basically a copy of a698240d "grub-mkconfig/10_linux:
+     Support multiple early initrd images" ...'
+
+Specs:
+
+Both multiboot and multiboot2 specifications mention support for
+'multiple boot modules' (struct/tag used for kernel/initrd files):
+
+    "Boot loaders don’t have to support multiple boot modules,
+     but they are strongly encouraged to" [1,2]
+
+However, there is a 1:1 relationship between boot modules and files,
+more or less clearly; note the usage of singular/plural "module(s)".
+(Multiboot2, clearly: "One tag appears per module".)
+
+  Multiboot [1]:
+
+    "the ‘mods’ fields indicate ... what boot modules
+     were loaded ..., and where they can be found.
+     ‘mods_count’ contains the number of modules loaded"
+
+    "The first two fields contain the start and end addresses
+     of the boot module itself."
+
+  Multiboot2 [2]:
+
+    "This tag indicates ... what boot module was loaded ...,
+     and where it can be found."
+
+    "The ‘mod_start’ and ‘mod_end’ contain the start and end
+     physical addresses of the boot module itself."
+
+    "One tag appears per module.
+     This tag type may appear multiple times."
+
+And both clearly mention the 'string' field of a boot module,
+which is to be used by the operating system, not boot loader:
+
+     "The ‘string’ field provides an arbitrary string to be
+      associated with that particular boot module ...
+      its exact use is specific to the operating system."
+
+Links:
+
+[1] https://www.gnu.org/software/grub/manual/multiboot/multiboot.html
+    3.3 Boot information format
+
+[2] https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
+    3.6.6 Modules
+
+Fixes: e86f6aafb8de ("grub-mkconfig/20_linux_xen: Support multiple early initrd images")
+
+Signed-off-by: Mauricio Faria de Oliveira <mfo@canonical.com>
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1987567
+Origin: backport, https://git.savannah.gnu.org/cgit/grub.git/commit/?id=b4b4acaf4ec7af1a78d122c10baed4e85187e2a5
+[mfo: backport: refresh lower context lines.]
+LP: #1987567
+---
+ util/grub.d/20_linux_xen.in | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/util/grub.d/20_linux_xen.in b/util/grub.d/20_linux_xen.in
+index a12780e..6f38c5d 100644
+--- a/util/grub.d/20_linux_xen.in
++++ b/util/grub.d/20_linux_xen.in
+@@ -166,12 +166,12 @@ EOF
+     message="$(gettext_printf "Loading initial ramdisk ...")"
+     initrd_path=
+     for i in ${initrd}; do
+-       initrd_path="${initrd_path} ${rel_dirname}/${i}"
+-    done
+-    sed "s/^/$submenu_indentation/" << EOF
++       initrd_path="${rel_dirname}/${i}"
++       sed "s/^/$submenu_indentation/" << EOF
+ 	echo	'$(echo "$message" | grub_quote)'
+ 	${module_loader}	--nounzip   $(echo $initrd_path)
+ EOF
++    done
+   fi
+   if ${xsm} && test -n "${xenpolicy}" ; then
+     message="$(gettext_printf "Loading XSM policy ...")"
