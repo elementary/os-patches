@@ -54,8 +54,13 @@ extract_known_keys() {
 
 # Check if a given kernel image is signed
 is_signed() {
+	kernel=$1
 	tmp=$(mktemp)
-	sbattach --detach $tmp $1 >/dev/null 2>/dev/null 	# that's ugly...
+	kernel_tmp=$(mktemp)
+	if zcat $kernel > $kernel_tmp 2>/dev/null; then
+		kernel=$kernel_tmp
+	fi
+	sbattach --detach $tmp $kernel >/dev/null 2>/dev/null 	# that's ugly...
 	test "$(wc -c < $tmp)" -ge 16	# Just _some_ minimum size
 	result=$?
 	if [ $result -eq 0 ]; then
@@ -64,9 +69,10 @@ is_signed() {
 	rm $tmp
 	if [ $result -eq 0 ]; then
 		for crtfile in $tmpdir/*.crt; do
-			sbverify --cert $crtfile $1 >/dev/null 2>/dev/null
+			sbverify --cert $crtfile $kernel >/dev/null 2>/dev/null
 			result=$?
 			if [ $result -eq 0 ]; then
+				rm "$kernel_tmp"
 				return $result;
 			fi
 		done
@@ -75,6 +81,7 @@ is_signed() {
 	else
 		echo "$1 is unsigned." >&2
 	fi
+	rm "$kernel_tmp"
 	return $result
 }
 
