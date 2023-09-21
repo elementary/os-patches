@@ -1,0 +1,79 @@
+From: Mauricio Faria de Oliveira <mfo@canonical.com>
+Date: Sat, 6 Aug 2022 22:07:58 -0300
+Subject: templates/linux_xen: Properly order the multiple initrd files
+
+The linux_xen template orders the "early" initrd file(s) _first_
+(i.e., before the "real" initrd files) and that seems reasonable,
+as microcode updates usually come first.
+
+However, this usually breaks Linux boot with initrd under Xen
+because Xen assumes the real initrd is the first multiboot[2]
+module after the kernel, passing its address over to Linux.
+
+So, if a microcode-only initrd (i.e., without init/userspace)
+is found by grub-mkconfig, it ends up considered as a normal
+initrd by the Linux kernel, which cannot do anything with it
+(as it has no other files) and panic()s unable to mount root
+if it depends on a initrd to do that (e.g., root=UUID=...).
+
+...
+
+Well, since Xen doesn't actually use the provided microcode
+by default / unless the 'ucode=<module number|scan>' option
+is enabled, this isn't used in the general case (and breaks).
+
+Additionally, if an user enables the 'ucode=' option, that
+either specifies which module is to be used for microcode,
+or scans all modules (regardless of being first) for that.
+
+Thus, for Xen:
+- it is *not required* to have microcode first,
+- but it is *required* to have real initrd first
+
+So, fix it by ordering the real initrd before early initrd(s).
+
+...
+
+Corner case specific to Xen implementation details:
+
+It is actually _possible_ to have a microcode initrd first,
+but that requires a non-default option (so can't rely on it),
+and it turns out to be inconsistent with its counterpart
+(really shouldn't rely on it, as it may get confusing; below).
+
+'ucode=1' does manually specify the first module is microcode
+_AND_ clears its bit in the module bitmap. The next module is
+now the 'new first', and gets passed to Linux as initrd. Good.
+
+'ucode=scan' checks all modules for microcode, but does _NOT_
+clear a bit if it finds one (reasonable, as it can find that
+prepended in a "real" initrd anyway, which needs to be used).
+The first module still gets passed to Linux as initrd. Bad.
+
+Fixes: e86f6aafb8de ("grub-mkconfig/20_linux_xen: Support multiple early initrd images")
+
+Signed-off-by: Mauricio Faria de Oliveira <mfo@canonical.com>
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1987567
+Origin: upstream, https://git.savannah.gnu.org/cgit/grub.git/commit/?id=18d8eafdea2322dc80c37e826a75e4d62094fecc
+LP: #1987567
+---
+ util/grub.d/20_linux_xen.in | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/util/grub.d/20_linux_xen.in b/util/grub.d/20_linux_xen.in
+index 6f38c5d..0629890 100644
+--- a/util/grub.d/20_linux_xen.in
++++ b/util/grub.d/20_linux_xen.in
+@@ -304,7 +304,10 @@ while [ "x${xen_list}" != "x" ] ; do
+ 
+ 	initrd=
+ 	if test -n "${initrd_early}" || test -n "${initrd_real}"; then
+-	    initrd="${initrd_early} ${initrd_real}"
++	    # Xen assumes the real initrd is the first module after the kernel.
++	    # Additional (later) initrds can also be used for microcode update,
++	    # with Xen option 'ucode=<scan|module number> (non-default anyway).
++	    initrd="${initrd_real} ${initrd_early}"
+ 
+ 	    initrd_display=
+ 	    for i in ${initrd}; do
