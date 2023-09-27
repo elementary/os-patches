@@ -81,6 +81,7 @@ enum
   PROP_0,
 
   PROP_SCANOUT_CANDIDATE,
+  PROP_WINDOW,
 
   N_PROPS
 };
@@ -1757,6 +1758,9 @@ meta_wayland_surface_get_property (GObject    *object,
     case PROP_SCANOUT_CANDIDATE:
       g_value_set_object (value, surface->scanout_candidate);
       break;
+    case PROP_WINDOW:
+      g_value_set_object (value, meta_wayland_surface_get_window (surface));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -1775,6 +1779,12 @@ meta_wayland_surface_class_init (MetaWaylandSurfaceClass *klass)
                          "scanout-candidate",
                          "Scanout candidate for given CRTC",
                          META_TYPE_CRTC,
+                         G_PARAM_READABLE |
+                         G_PARAM_STATIC_STRINGS);
+
+  obj_props[PROP_WINDOW] =
+    g_param_spec_object ("window", NULL, NULL,
+                         META_TYPE_WINDOW,
                          G_PARAM_READABLE |
                          G_PARAM_STATIC_STRINGS);
   g_object_class_install_properties (object_class, N_PROPS, obj_props);
