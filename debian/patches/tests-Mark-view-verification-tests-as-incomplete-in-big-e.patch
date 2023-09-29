@@ -1,0 +1,48 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 15 Jun 2021 20:38:01 +0200
+Subject: tests: Mark view-verification tests as incomplete in big-endian
+ archs
+
+Saved pixmaps are invalid in big-endian architectures, so let's disable
+the tests for now, checking only the basic metadata but not comparing
+the contents.
+
+Bug: https://gitlab.gnome.org/GNOME/mutter/-/issues/1850
+Applied-upstream: no, this is a workaround
+---
+ src/tests/meta-ref-test.c   | 5 +++++
+ src/tests/ref-test-sanity.c | 5 +++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/src/tests/meta-ref-test.c b/src/tests/meta-ref-test.c
+index 84ac887..78a5a74 100644
+--- a/src/tests/meta-ref-test.c
++++ b/src/tests/meta-ref-test.c
+@@ -508,6 +508,11 @@ meta_ref_test_verify_view (ClutterStageView *view,
+       g_assert_cmpint (ref_status, ==, CAIRO_STATUS_SUCCESS);
+       ensure_expected_format (&ref_image);
+ 
++#if G_BYTE_ORDER == G_BIG_ENDIAN
++  g_test_incomplete ("View comparison is not supported by this architecture");
++  return;
++#endif
++
+       if (!compare_images (ref_image, view_image, &gl_fuzz,
+                            &diff_stat))
+         {
+diff --git a/src/tests/ref-test-sanity.c b/src/tests/ref-test-sanity.c
+index 0776270..4ef8d25 100644
+--- a/src/tests/ref-test-sanity.c
++++ b/src/tests/ref-test-sanity.c
+@@ -106,6 +106,11 @@ meta_test_ref_test_sanity (void)
+   clutter_actor_set_background_color (actor2, CLUTTER_COLOR_SkyBlue);
+   clutter_actor_add_child (stage, actor2);
+ 
++#if G_BYTE_ORDER == G_BIG_ENDIAN
++  g_test_incomplete ("View comparison is not supported by this architecture");
++  return;
++#endif
++
+   g_test_expect_message ("libmutter-test",
+                          G_LOG_LEVEL_CRITICAL,
+                          "Pixel difference exceeds limits*");

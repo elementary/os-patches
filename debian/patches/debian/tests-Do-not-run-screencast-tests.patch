@@ -1,0 +1,26 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 May 2021 02:42:12 +0200
+Subject: tests: Do not run screencast tests
+
+They require to have a full running pipewire (that requires a system
+dbus daemon) so, we can't easily get one up and running while building.
+
+So let's disable this for now
+---
+ src/tests/native-headless.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/tests/native-headless.c b/src/tests/native-headless.c
+index 0c94255..9dcad93 100644
+--- a/src/tests/native-headless.c
++++ b/src/tests/native-headless.c
+@@ -28,7 +28,8 @@ static void
+ init_tests (void)
+ {
+   init_virtual_monitor_tests ();
+-  init_screen_cast_tests ();
++  // init_screen_cast_tests ();
++  (void) init_screen_cast_tests;
+ }
+ 
+ int

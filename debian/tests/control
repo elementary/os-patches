@@ -1,0 +1,14 @@
+Tests: libmutter-10-dev
+Depends: build-essential,
+         dbus,
+         libmutter-10-dev,
+         xauth,
+         xvfb
+Restrictions: allow-stderr superficial
+
+Test-Command: gnome-desktop-testing-runner mutter-10
+Features: test-name=installed-tests
+Classes: desktop
+Depends: gnome-desktop-testing,
+         mutter-10-tests
+Restrictions: allow-stderr

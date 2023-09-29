@@ -1,0 +1,57 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Wed, 22 Dec 2021 19:22:17 +0000
+Subject: Consistently pass timestamp as uint64 when creating
+ MetaStartupSequence
+
+Passing the wrong type to a varargs function can cause a mismatch
+between marshalling and unmarshalling on the stack, particularly on
+32-bit architectures. This results in a build-time test failure.
+
+Signed-off-by: Simon McVittie <smcv@debian.org>
+Bug: https://gitlab.gnome.org/GNOME/mutter/-/issues/2065
+Forwarded: https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2182
+---
+ src/core/meta-launch-context.c        | 2 +-
+ src/wayland/meta-wayland-activation.c | 2 +-
+ src/wayland/meta-wayland-gtk-shell.c  | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/core/meta-launch-context.c b/src/core/meta-launch-context.c
+index 984338c..7be30ea 100644
+--- a/src/core/meta-launch-context.c
++++ b/src/core/meta-launch-context.c
+@@ -180,7 +180,7 @@ meta_launch_context_get_startup_notify_id (GAppLaunchContext *launch_context,
+                           "application-id", application_id,
+                           "name", g_app_info_get_name (info),
+                           "workspace", workspace_idx,
+-                          "timestamp", context->timestamp,
++                          "timestamp", (guint64) context->timestamp,
+                           NULL);
+ 
+       meta_startup_notification_add_sequence (sn, seq);
+diff --git a/src/wayland/meta-wayland-activation.c b/src/wayland/meta-wayland-activation.c
+index 5741b95..ca39197 100644
+--- a/src/wayland/meta-wayland-activation.c
++++ b/src/wayland/meta-wayland-activation.c
+@@ -146,7 +146,7 @@ token_commit (struct wl_client   *client,
+   MetaXdgActivationToken *token = wl_resource_get_user_data (resource);
+   MetaWaylandActivation *activation = token->activation;
+   MetaDisplay *display = meta_get_display ();
+-  uint32_t timestamp;
++  uint64_t timestamp;
+ 
+   if (token->committed)
+     {
+diff --git a/src/wayland/meta-wayland-gtk-shell.c b/src/wayland/meta-wayland-gtk-shell.c
+index 3d85c3f..5fd1d80 100644
+--- a/src/wayland/meta-wayland-gtk-shell.c
++++ b/src/wayland/meta-wayland-gtk-shell.c
+@@ -535,7 +535,7 @@ gtk_shell_notify_launch (struct wl_client   *client,
+ {
+   MetaDisplay *display = meta_get_display ();
+   MetaStartupSequence *sequence;
+-  uint32_t timestamp;
++  uint64_t timestamp;
+ 
+   sequence = meta_startup_notification_lookup_sequence (display->startup_notification,
+                                                         startup_id);

@@ -1,0 +1,27 @@
+From: =?utf-8?q?Jonas_=C3=85dahl?= <jadahl@gmail.com>
+Date: Fri, 27 May 2022 17:00:35 +0200
+Subject: backends/x11: Return zero Hz instead of -nan Hz for incomplete modes
+
+Bug-Ubuntu: https://launchpad.net/bugs/2020782
+Origin: https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2434,
+        https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3062
+Forwarded: not-needed
+Last-Update: 2023-06-30
+---
+ src/backends/x11/meta-gpu-xrandr.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/backends/x11/meta-gpu-xrandr.c b/src/backends/x11/meta-gpu-xrandr.c
+index d0dcf04..87474e6 100644
+--- a/src/backends/x11/meta-gpu-xrandr.c
++++ b/src/backends/x11/meta-gpu-xrandr.c
+@@ -105,6 +105,9 @@ calculate_xrandr_refresh_rate (XRRModeInfo *xmode)
+   float h_total;
+   float v_total;
+ 
++  if (xmode->hTotal == 0 || xmode->vTotal == 0)
++    return 0.0;
++
+   h_total = (float) xmode->hTotal;
+   v_total = (float) xmode->vTotal;
+ 

@@ -1,0 +1,99 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 6 Apr 2022 18:28:42 +0200
+Subject: wayland-data-device: Allow any drag timestamp as drag start serial
+
+In some scenarios under wayland DnD may not work because the start-drag
+serial is not matching the one we expect for the pointer that we set
+when handling the button event.
+
+This is because since commit 26676a82 we're repeatedly pinging the
+windows at each event to ensure that they're still alive, but we're
+using the event timestamp for that, and this makes wayland to use such
+value as the start-drag serial.
+
+To avoid this, let's keep track of all the grab timestamps we got while
+dragging and accept a serial to match any of these.
+
+Fixes #2216
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/mutter/+bug/1964541
+---
+ src/wayland/meta-wayland-data-device.c | 15 ++++++++++++++-
+ src/wayland/meta-wayland-pointer.c     |  9 +++++++++
+ src/wayland/meta-wayland-pointer.h     |  1 +
+ 3 files changed, 24 insertions(+), 1 deletion(-)
+
+diff --git a/src/wayland/meta-wayland-data-device.c b/src/wayland/meta-wayland-data-device.c
+index c8cf8f5..03ce90b 100644
+--- a/src/wayland/meta-wayland-data-device.c
++++ b/src/wayland/meta-wayland-data-device.c
+@@ -660,6 +660,15 @@ meta_wayland_data_device_end_drag (MetaWaylandDataDevice *data_device)
+     data_device_end_drag_grab (data_device->current_grab);
+ }
+ 
++static int
++compare_times (gconstpointer a, gconstpointer b)
++{
++  const uint32_t *_a = a;
++  const uint32_t *_b = b;
++
++  return *_a - *_b;
++}
++
+ static void
+ data_device_start_drag (struct wl_client *client,
+                         struct wl_resource *resource,
+@@ -680,7 +689,11 @@ data_device_start_drag (struct wl_client *client,
+     return;
+ 
+   if (seat->pointer->button_count == 0 ||
+-      seat->pointer->grab_serial != serial ||
++      (seat->pointer->grab_serial != serial &&
++       !g_array_binary_search (seat->pointer->grab_times,
++                               &serial,
++                               compare_times,
++                               NULL)) ||
+       !seat->pointer->focus_surface ||
+       seat->pointer->focus_surface != surface)
+     return;
+diff --git a/src/wayland/meta-wayland-pointer.c b/src/wayland/meta-wayland-pointer.c
+index 3b8b104..f1115ec 100644
+--- a/src/wayland/meta-wayland-pointer.c
++++ b/src/wayland/meta-wayland-pointer.c
+@@ -692,6 +692,9 @@ notify_motion (MetaWaylandPointer *pointer,
+                const ClutterEvent *event)
+ {
+   pointer->grab->interface->motion (pointer->grab, event);
++
++  if (pointer->grab_times)
++    g_array_append_val (pointer->grab_times, event->any.time);
+ }
+ 
+ static void
+@@ -712,8 +715,14 @@ handle_button_event (MetaWaylandPointer *pointer,
+     {
+       pointer->grab_button = clutter_event_get_button (event);
+       pointer->grab_time = clutter_event_get_time (event);
++      pointer->grab_times = g_array_new (FALSE, TRUE, sizeof (uint32_t));
++      g_array_append_val (pointer->grab_times, event->any.time);
+       clutter_event_get_coords (event, &pointer->grab_x, &pointer->grab_y);
+     }
++  else if (event->type == CLUTTER_BUTTON_RELEASE && pointer->button_count == 0)
++    {
++      g_clear_pointer (&pointer->grab_times, g_array_unref);
++    }
+ 
+   pointer->grab->interface->button (pointer->grab, event);
+ 
+diff --git a/src/wayland/meta-wayland-pointer.h b/src/wayland/meta-wayland-pointer.h
+index 088312f..7070be2 100644
+--- a/src/wayland/meta-wayland-pointer.h
++++ b/src/wayland/meta-wayland-pointer.h
+@@ -84,6 +84,7 @@ struct _MetaWaylandPointer
+   guint32 grab_button;
+   guint32 grab_serial;
+   guint32 grab_time;
++  GArray* grab_times;
+   float grab_x, grab_y;
+ 
+   ClutterInputDevice *device;

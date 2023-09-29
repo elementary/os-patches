@@ -1,0 +1,22 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 18 Feb 2022 01:16:20 +0100
+Subject: meson: Do not mark CI test tools as required
+
+This way we can mark them as nocheck without build issues.
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 2e95ede..2ae3dd4 100644
+--- a/meson.build
++++ b/meson.build
+@@ -354,7 +354,7 @@ if have_tests
+     ],
+     exe_wrapper: [
+       default_test_wrappers,
+-      find_program('xvfb-run'), '-a', '-s', '+iglx -noreset',
++      find_program('xvfb-run', required: false), '-a', '-s', '+iglx -noreset',
+     ],
+     timeout_multiplier: 10,
+   )

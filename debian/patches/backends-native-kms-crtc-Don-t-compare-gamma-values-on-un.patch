@@ -1,0 +1,35 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 12 Apr 2022 19:44:10 +0200
+Subject: backends/native/kms-crtc: Don't compare gamma values on unitialized
+ memory
+
+On hotplugs, to check if we had a gamma change we compare the gamma
+states values, and we assumed that the gamma pointers were initialized
+by KMS, however drmModeCrtcGetGamma may not set those values, leaving
+the gamma values not initialized.
+
+And this may lead meta_kms_crtc_state_changes() to return wrong values.
+
+Origin: https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2371
+---
+ src/backends/native/meta-kms-crtc.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/backends/native/meta-kms-crtc.c b/src/backends/native/meta-kms-crtc.c
+index e9bd930..d19db04 100644
+--- a/src/backends/native/meta-kms-crtc.c
++++ b/src/backends/native/meta-kms-crtc.c
+@@ -114,6 +114,13 @@ read_gamma_state (MetaKmsCrtc       *crtc,
+   crtc_state->gamma.green = g_new0 (uint16_t, drm_crtc->gamma_size);
+   crtc_state->gamma.blue = g_new0 (uint16_t, drm_crtc->gamma_size);
+ 
++      memset (crtc_state->gamma.red, 0,
++              crtc_state->gamma.size * sizeof (uint16_t));
++      memset (crtc_state->gamma.green, 0,
++              crtc_state->gamma.size * sizeof (uint16_t));
++      memset (crtc_state->gamma.blue, 0,
++              crtc_state->gamma.size * sizeof (uint16_t));
++
+   drmModeCrtcGetGamma (meta_kms_impl_device_get_fd (impl_device),
+                        crtc->id,
+                        crtc_state->gamma.size,
