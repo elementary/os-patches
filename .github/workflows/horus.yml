@@ -1,0 +1,38 @@
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/elementary/docker:stable
+
+    steps:
+    - name: Checkout the import-list
+      uses: actions/checkout@v4
+      with:
+        ref: import-list-jammy
+        fetch-depth: 1
+    - name: Get the list of packages
+      run: |
+        cp jammy/packages_to_import /tmp/patched-packages
+    - name: Install Dependencies
+      run: |
+        apt update
+        apt install -y git python3-launchpadlib python3-apt python3-github
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - name: Verify that we are shipping the latest version
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: elementary/os-patches
+      run: |
+        while IFS=":" read -r line upstream_series; do
+            echo "Checking version for $line"
+            python3 ./get-latest-version.py "$line" "jammy" "$upstream_series"
+        done < "/tmp/patched-packages"

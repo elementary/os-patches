@@ -1,0 +1,62 @@
+Source: distinst
+Section: admin
+Priority: optional
+Maintainer: Jeremy Soller <jeremy@system76.com>
+Build-Depends:
+  debhelper (>=9),
+  cargo,
+  clang,
+  gettext,
+  libclang-dev,
+  libdbus-1-dev,
+  libparted-dev
+Standards-Version: 4.1.1
+Homepage: https://github.com/pop-os/distinst
+
+Package: distinst
+Architecture: linux-any
+Depends:
+  libdistinst (= ${binary:Version}),
+  ${misc:Depends},
+  ${shlibs:Depends}
+Description: Distribution Installer CLI
+
+Package: libdistinst
+Architecture: linux-any
+Depends:
+  apt,
+  btrfs-progs,
+  coreutils,
+  cryptsetup,
+  dmsetup,
+  dmraid,
+  dosfstools,
+  e2fsprogs,
+  f2fs-tools,
+  fatresize,
+  gettext,
+  grub2-common,
+  iso-codes,
+  kpartx,
+  kpartx-boot,
+  libparted-fs-resize0,
+  locales,
+  lvm2,
+  mount,
+  ntfs-3g,
+  parted,
+  rsync,
+  squashfs-tools,
+  systemd-container,
+  util-linux,
+  xfsprogs,
+  ${misc:Depends},
+  ${shlibs:Depends}
+Description: Distribution Installer Library
+
+Package: libdistinst-dev
+Architecture: linux-any
+Depends:
+  libdistinst (= ${binary:Version}),
+  ${misc:Depends}
+Description: Distribution Installer Development Files
