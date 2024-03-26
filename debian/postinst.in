@@ -111,6 +111,18 @@ if [ "$1" = "configure" ] && [ "$2" != "" ]; then
   fi
 fi
 
+if [ "$1" = triggered ]; then
+	for d in lib32 lib64 libo32 libx32; do
+		if test -d "$DPKG_ROOT/usr/$d"; then
+			test -h "$DPKG_ROOT/$d" && continue
+			ln -s "usr/$d" "$DPKG_ROOT/$d"
+		else
+			test -h "$DPKG_ROOT/$d" || continue
+			rm "$DPKG_ROOT/$d"
+		fi
+	done
+fi
+
 # special case of having /etc/default/motd-news removed by hand
 # signal the motd-news-config package that this happened, so that
 # it does not put back the file with default contents which would

@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+include /usr/share/dpkg/architecture.mk
+
 OSNAME = "GNU/`uname | sed -e 's/GNU\///'`"
 ifeq ($(DEB_HOST_GNU_SYSTEM),linux)
   OSNAME=GNU/Linux
@@ -11,6 +13,13 @@ endif
 VENDORFILE = ubuntu
 DESTDIR = debian/base-files
 
+USR_MERGE = bin lib sbin
+ifneq (,$(filter $(DEB_HOST_ARCH),amd64 loong64 mips64el ppc64 ppc64el sparc64))
+USR_MERGE += lib64
+else ifneq (,$(filter $(DEB_HOST_ARCH),x32))
+USR_MERGE += libx32
+endif
+
 %:
 	dh $@
 
@@ -20,6 +29,16 @@ locale-check:
 override_dh_auto_build: locale-check
 	sh debian/check-md5sum-etc profile
 	sed -e "s/#VENDORFILE#/$(VENDORFILE)/g" debian/postinst.in > debian/postinst
+	set -e; { \
+		echo "# Triggers for creating multilib aliasing symlinks on demand"; \
+		for d in $(foreach d,lib32 lib64 libo32 libx32,$(if $(filter $(d),$(USR_MERGE)),,$(d))); do \
+			echo "interest-noawait $$d"; \
+		done; \
+	} > debian/triggers
+
+execute_after_dh_installdirs:
+	dh_installdirs $(foreach d,$(USR_MERGE),usr/$(d))
+ 
 
 override_dh_auto_install:
 	install -p -m 644 etc/*      $(DESTDIR)/etc
@@ -54,6 +73,8 @@ override_dh_installsystemd:
 
 override_dh_link:
 	dh_link -X os-release
+	# We want these links to be relative, so we cannot use dh_link.
+	$(foreach d,$(USR_MERGE),ln -s usr/$(d) debian/base-files/$(d) &&) :
 
 override_dh_compress:
 	dh_compress -X README

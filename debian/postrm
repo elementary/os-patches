@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+USR_MERGE="bin lib lib32 lib64 libo32 lib64 sbin"
+
+if [ "$1" = remove ]; then
+	for d in $USR_MERGE; do
+		# Remove DEP17 M4 protective diversions
+		dpkg-divert --quiet --package base-files --remove --no-rename --divert /$d.usr-is-merged /$d
+	done
+fi
+
+#DEBHELPER#
