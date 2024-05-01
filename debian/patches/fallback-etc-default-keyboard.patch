@@ -1,0 +1,25 @@
+From: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Date: Tue, 2 Jan 2024 10:23:29 +0100
+Subject: Use /etc/default/keyboard instead of /etc/vconsole.conf
+
+Forwarded: not-needed
+---
+ src/libply-splash-core/ply-device-manager.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/src/libply-splash-core/ply-device-manager.c
++++ b/src/libply-splash-core/ply-device-manager.c
+@@ -826,11 +826,11 @@ parse_vconsole_conf (ply_device_manager_
+         if (!keymap)
+                 keymap = ply_kernel_command_line_get_key_value ("vconsole.keymap=");
+
+-        vconsole_conf = ply_key_file_new ("/etc/vconsole.conf");
++        vconsole_conf = ply_key_file_new ("/etc/default/keyboard");
+         if (ply_key_file_load_groupless_file (vconsole_conf)) {
+                 /* The values in vconsole.conf might be quoted, strip these */
+                 if (!keymap) {
+-                        keymap = ply_key_file_get_value (vconsole_conf, NULL, "KEYMAP");
++                        keymap = ply_key_file_get_value (vconsole_conf, NULL, "XKBLAYOUT");
+                         keymap = strip_quotes (keymap);
+                 }
+                 xkb_layout = ply_key_file_get_value (vconsole_conf, NULL, "XKBLAYOUT");

@@ -1,0 +1,385 @@
+From: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Date: Tue, 2 Jan 2024 10:23:29 +0100
+Subject: Undocumented changes
+
+Last-Update: 2011-01-21
+
+This patch contains undocumented changes accumulated during previous
+versions of the Ubuntu plymouth package, that have not yet been split up
+into individually-documented patches.  Please try not to add further things
+to this patch.  Using quilt for new changes is recommended, but if you
+don't, they'll end up in a separate debian-changes patch at the end of the
+patch series.
+---
+ src/client/ply-boot-client.c                  | 30 +++++++++++++-----
+ src/libply-splash-core/ply-pixel-display.c    | 10 ++++++
+ src/libply-splash-core/ply-pixel-display.h    |  2 ++
+ src/libply-splash-core/ply-renderer-plugin.h  |  3 +-
+ src/libply-splash-core/ply-renderer.c         | 15 +++++++++
+ src/libply-splash-core/ply-renderer.h         |  2 ++
+ src/main.c                                    | 34 +++++++++++++++++---
+ src/plugins/renderers/frame-buffer/plugin.c   | 11 +++++++
+ src/plugins/splash/script/script-lib-image.c  |  2 +-
+ src/plugins/splash/script/script-lib-sprite.c | 45 +++++++++++++++++++++++++++
+ src/plugins/splash/text/plugin.c              |  4 ++-
+ 11 files changed, 143 insertions(+), 15 deletions(-)
+
+diff --git a/src/client/ply-boot-client.c b/src/client/ply-boot-client.c
+index c9d5e81..34a5b86 100644
+--- a/src/client/ply-boot-client.c
++++ b/src/client/ply-boot-client.c
+@@ -261,14 +261,30 @@ ply_boot_client_process_incoming_replies (ply_boot_client_t *client)
+                 return;
+         }
+ 
+-        request_node = ply_list_get_first_node (client->requests_waiting_for_replies);
+-        assert (request_node != NULL);
+-
+-        request = (ply_boot_client_request_t *) ply_list_node_get_data (request_node);
+-        assert (request != NULL);
++        if (!ply_read (client->socket_fd, byte, sizeof(uint8_t))) {
++                ply_error ("could not read response from boot status daemon");
++                return;
++        }
+ 
+-        if (!ply_read (client->socket_fd, byte, sizeof(uint8_t)))
+-                goto out;
++        for (request_node = ply_list_get_first_node (client->requests_waiting_for_replies);
++             ; request_node = ply_list_get_next_node (client->requests_waiting_for_replies, request_node)) {
++                assert (request_node != NULL);
++                request = (ply_boot_client_request_t *) ply_list_node_get_data (request_node);
++                assert (request != NULL);
++
++                if (! strcmp (request->command, PLY_BOOT_PROTOCOL_REQUEST_TYPE_PASSWORD)
++                    || ! strcmp (request->command, PLY_BOOT_PROTOCOL_REQUEST_TYPE_CACHED_PASSWORD)
++                    || ! strcmp (request->command, PLY_BOOT_PROTOCOL_REQUEST_TYPE_QUESTION)
++                    || ! strcmp (request->command, PLY_BOOT_PROTOCOL_REQUEST_TYPE_KEYSTROKE)) {
++                        if (! memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_ANSWER, sizeof (uint8_t))
++                            || ! memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_NO_ANSWER, sizeof (uint8_t)))
++                                break;
++                } else {
++                        if (memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_ANSWER, sizeof (uint8_t))
++                            && memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_NO_ANSWER, sizeof (uint8_t)))
++                                break;
++                }
++        }
+ 
+         if (memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_ACK, sizeof(uint8_t)) == 0) {
+                 if (request->handler != NULL)
+diff --git a/src/libply-splash-core/ply-pixel-display.c b/src/libply-splash-core/ply-pixel-display.c
+index 6239803..d6adb7b 100644
+--- a/src/libply-splash-core/ply-pixel-display.c
++++ b/src/libply-splash-core/ply-pixel-display.c
+@@ -51,6 +51,7 @@ struct _ply_pixel_display
+         unsigned long                    width;
+         unsigned long                    height;
+         int                              device_scale;
++        unsigned int                     bits_per_pixel;
+ 
+         ply_pixel_display_draw_handler_t draw_handler;
+         void                            *draw_handler_user_data;
+@@ -79,6 +80,9 @@ ply_pixel_display_new (ply_renderer_t      *renderer,
+         display->height = size.height;
+         display->device_scale = ply_pixel_buffer_get_device_scale (pixel_buffer);
+ 
++        display->bits_per_pixel = ply_renderer_get_bits_per_pixel_for_head (renderer,
++                                                                            head);
++
+         return display;
+ }
+ 
+@@ -112,6 +116,12 @@ ply_pixel_display_get_device_scale (ply_pixel_display_t *display)
+         return display->device_scale;
+ }
+ 
++unsigned int
++ply_pixel_display_get_bits_per_pixel (ply_pixel_display_t *display)
++{
++  return display->bits_per_pixel;
++}
++
+ static void
+ ply_pixel_display_flush (ply_pixel_display_t *display)
+ {
+diff --git a/src/libply-splash-core/ply-pixel-display.h b/src/libply-splash-core/ply-pixel-display.h
+index 5fff2e4..8b71a97 100644
+--- a/src/libply-splash-core/ply-pixel-display.h
++++ b/src/libply-splash-core/ply-pixel-display.h
+@@ -49,6 +49,8 @@ void ply_pixel_display_free (ply_pixel_display_t *display);
+ ply_renderer_t *ply_pixel_display_get_renderer (ply_pixel_display_t *display);
+ ply_renderer_head_t *ply_pixel_display_get_renderer_head (ply_pixel_display_t *display);
+ 
++unsigned int ply_pixel_display_get_bits_per_pixel (ply_pixel_display_t *display);
++
+ unsigned long ply_pixel_display_get_width (ply_pixel_display_t *display);
+ unsigned long ply_pixel_display_get_height (ply_pixel_display_t *display);
+ int ply_pixel_display_get_device_scale (ply_pixel_display_t *display);
+diff --git a/src/libply-splash-core/ply-renderer-plugin.h b/src/libply-splash-core/ply-renderer-plugin.h
+index 483ad27..7cde954 100644
+--- a/src/libply-splash-core/ply-renderer-plugin.h
++++ b/src/libply-splash-core/ply-renderer-plugin.h
+@@ -56,7 +56,8 @@ typedef struct
+ 
+         ply_pixel_buffer_t * (*get_buffer_for_head)(ply_renderer_backend_t *backend,
+                                                     ply_renderer_head_t    *head);
+-
++        unsigned int (*get_bits_per_pixel_for_head)(ply_renderer_backend_t * backend,
++                                                    ply_renderer_head_t * head);
+         ply_renderer_input_source_t * (*get_input_source)(ply_renderer_backend_t *backend);
+         bool (*open_input_source)(ply_renderer_backend_t      *backend,
+                                   ply_renderer_input_source_t *input_source);
+diff --git a/src/libply-splash-core/ply-renderer.c b/src/libply-splash-core/ply-renderer.c
+index 40a2c81..169e2e3 100644
+--- a/src/libply-splash-core/ply-renderer.c
++++ b/src/libply-splash-core/ply-renderer.c
+@@ -353,6 +353,21 @@ ply_renderer_get_buffer_for_head (ply_renderer_t      *renderer,
+                                                                 head);
+ }
+ 
++unsigned int
++ply_renderer_get_bits_per_pixel_for_head (ply_renderer_t      *renderer,
++                                          ply_renderer_head_t *head)
++{
++  assert (renderer != NULL);
++  assert (renderer->plugin_interface != NULL);
++  assert (head != NULL);
++
++  if (!renderer->plugin_interface->get_bits_per_pixel_for_head)
++    return 0;
++
++  return renderer->plugin_interface->get_bits_per_pixel_for_head (renderer->backend,
++                                                                  head);
++}
++
+ void
+ ply_renderer_flush_head (ply_renderer_t      *renderer,
+                          ply_renderer_head_t *head)
+diff --git a/src/libply-splash-core/ply-renderer.h b/src/libply-splash-core/ply-renderer.h
+index 5fbf819..b6cf95a 100644
+--- a/src/libply-splash-core/ply-renderer.h
++++ b/src/libply-splash-core/ply-renderer.h
+@@ -65,6 +65,8 @@ const char *ply_renderer_get_device_name (ply_renderer_t *renderer);
+ ply_list_t *ply_renderer_get_heads (ply_renderer_t *renderer);
+ ply_pixel_buffer_t *ply_renderer_get_buffer_for_head (ply_renderer_t      *renderer,
+                                                       ply_renderer_head_t *head);
++unsigned int ply_renderer_get_bits_per_pixel_for_head (ply_renderer_t      *renderer,
++                                                       ply_renderer_head_t *head);
+ 
+ void ply_renderer_flush_head (ply_renderer_t      *renderer,
+                               ply_renderer_head_t *head);
+diff --git a/src/main.c b/src/main.c
+index ead5ec5..279e54a 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -119,6 +119,7 @@ typedef struct
+         const char             *default_tty;
+ 
+         int                     number_of_errors;
++        ply_list_t             *pending_messages;
+ } state_t;
+ 
+ static void show_splash (state_t *state);
+@@ -188,8 +189,9 @@ on_update (state_t    *state,
+            const char *status)
+ {
+         ply_trace ("updating status to '%s'", status);
+-        ply_progress_status_update (state->progress,
+-                                    status);
++        if (strncmp (status, "fsck:", 5))
++                ply_progress_status_update (state->progress,
++                                            status);
+         if (state->boot_splash != NULL)
+                 ply_boot_splash_update_status (state->boot_splash,
+                                                status);
+@@ -248,6 +250,25 @@ on_system_update (state_t *state,
+         }
+ }
+ 
++static void
++flush_pending_messages (state_t *state)
++{
++  ply_list_node_t *node = ply_list_get_first_node (state->pending_messages);
++  while (node != NULL)
++    {
++      ply_list_node_t *next_node;
++      char *message = ply_list_node_get_data (node);
++
++      ply_trace ("displaying queued message");
++
++      ply_boot_splash_display_message (state->boot_splash, message);
++      next_node = ply_list_get_next_node (state->pending_messages, node);
++      ply_list_remove_node (state->pending_messages, node);
++      free(message);
++      node = next_node;
++    }
++}
++
+ static void
+ show_messages (state_t *state)
+ {
+@@ -477,7 +498,7 @@ show_default_splash (state_t *state)
+         if (state->boot_splash == NULL) {
+                 ply_trace ("Could not start default splash screen,"
+                            "showing text splash screen");
+-                state->boot_splash = show_theme (state, PLYMOUTH_THEME_PATH "text/text.plymouth");
++                state->boot_splash = show_theme (state, PLYMOUTH_THEME_PATH "text.plymouth");
+         }
+ 
+         if (state->boot_splash == NULL) {
+@@ -487,7 +508,8 @@ show_default_splash (state_t *state)
+         }
+ 
+         if (state->boot_splash == NULL) {
+-                ply_error ("plymouthd: could not start boot splash: %m");
++                if (errno != ENOENT)
++                        ply_error ("plymouthd: could not start boot splash: %m");
+                 return;
+         }
+ 
+@@ -574,8 +596,8 @@ on_display_message (state_t    *state,
+                 ply_boot_splash_display_message (state->boot_splash, message);
+         } else {
+                 ply_trace ("not displaying message %s as no splash", message);
++                ply_list_append_data (state->messages, strdup (message));
+         }
+-        ply_list_append_data (state->messages, strdup (message));
+ }
+ 
+ static void
+@@ -821,6 +843,7 @@ prepare_logging (state_t *state)
+                 if (state->number_of_errors > 0)
+                         spool_error (state);
+         }
++        flush_pending_messages (state);
+ }
+ 
+ static void
+@@ -2111,6 +2134,7 @@ initialize_environment (state_t *state)
+         state->keystroke_triggers = ply_list_new ();
+         state->entry_triggers = ply_list_new ();
+         state->entry_buffer = ply_buffer_new ();
++        state->pending_messages = ply_list_new ();
+         state->messages = ply_list_new ();
+ 
+         if (!ply_is_tracing_to_terminal ())
+diff --git a/src/plugins/renderers/frame-buffer/plugin.c b/src/plugins/renderers/frame-buffer/plugin.c
+index 2141990..23e8e84 100644
+--- a/src/plugins/renderers/frame-buffer/plugin.c
++++ b/src/plugins/renderers/frame-buffer/plugin.c
+@@ -647,6 +647,16 @@ get_buffer_for_head (ply_renderer_backend_t *backend,
+         return backend->head.pixel_buffer;
+ }
+ 
++static unsigned int
++get_bits_per_pixel_for_head (ply_renderer_backend_t *backend,
++                             ply_renderer_head_t    *head)
++{
++  if (head != &backend->head)
++    return 0;
++
++  return backend->bytes_per_pixel * 8;
++}
++
+ static bool
+ has_input_source (ply_renderer_backend_t      *backend,
+                   ply_renderer_input_source_t *input_source)
+@@ -927,6 +937,7 @@ ply_renderer_backend_get_interface (void)
+                 .flush_head                   = flush_head,
+                 .get_heads                    = get_heads,
+                 .get_buffer_for_head          = get_buffer_for_head,
++                .get_bits_per_pixel_for_head  = get_bits_per_pixel_for_head,
+                 .get_input_source             = get_input_source,
+                 .open_input_source            = open_input_source,
+                 .set_handler_for_input_source = set_handler_for_input_source,
+diff --git a/src/plugins/splash/script/script-lib-image.c b/src/plugins/splash/script/script-lib-image.c
+index f83ab5e..aacbe41 100644
+--- a/src/plugins/splash/script/script-lib-image.c
++++ b/src/plugins/splash/script/script-lib-image.c
+@@ -200,7 +200,7 @@ static script_return_t image_text (script_state_t *state,
+ 
+         alpha_obj = script_obj_hash_peek_element (state->local, "alpha");
+ 
+-        if (script_obj_is_number (alpha_obj))
++        if (alpha_obj && script_obj_is_number (alpha_obj))
+                 alpha = CLAMP (script_obj_as_number (alpha_obj), 0, 1);
+         else
+                 alpha = 1;
+diff --git a/src/plugins/splash/script/script-lib-sprite.c b/src/plugins/splash/script/script-lib-sprite.c
+index b9d7165..0806f7f 100644
+--- a/src/plugins/splash/script/script-lib-sprite.c
++++ b/src/plugins/splash/script/script-lib-sprite.c
+@@ -366,6 +366,45 @@ static script_return_t sprite_window_set_y (script_state_t *state,
+         return script_return_obj_null ();
+ }
+ 
++static script_return_t sprite_window_get_bits_per_pixel (script_state_t *state,
++                                                         void           *user_data)
++{
++  script_lib_sprite_data_t *data = user_data;
++  ply_list_node_t *node;
++  int index;
++  script_obj_t *index_obj;
++  script_lib_display_t *display;
++  unsigned int bits_per_pixel;
++
++  index_obj = script_obj_hash_peek_element (state->local, "window");
++
++  if (index_obj)
++    {
++      index = script_obj_as_number (index_obj);
++      script_obj_unref(index_obj);
++      if (index < 0)
++        return script_return_obj_null ();
++      node = ply_list_get_nth_node (data->displays, index);
++      if (node == NULL)
++        return script_return_obj_null ();
++      display = ply_list_node_get_data (node);
++      bits_per_pixel = ply_pixel_display_get_bits_per_pixel (display->pixel_display);
++      return script_return_obj (script_obj_new_number (bits_per_pixel));
++    }
++
++  bits_per_pixel = 0;
++  for (node = ply_list_get_first_node (data->displays);
++       node;
++       node = ply_list_get_next_node (data->displays, node))
++    {
++      display = ply_list_node_get_data (node);
++      bits_per_pixel = ply_pixel_display_get_bits_per_pixel (display->pixel_display);
++      if (bits_per_pixel)
++        break;
++    }
++  return script_return_obj (script_obj_new_number (bits_per_pixel));
++}
++
+ static uint32_t extract_rgb_color (script_state_t *state)
+ {
+         uint8_t red = CLAMP (255 * script_obj_hash_get_number (state->local, "red"), 0, 255);
+@@ -666,6 +705,12 @@ script_lib_sprite_data_t *script_lib_sprite_setup (script_state_t *state,
+                                     "window",
+                                     "value",
+                                     NULL);
++        script_add_native_function (window_hash,
++                                    "GetBitsPerPixel",
++                                    sprite_window_get_bits_per_pixel,
++                                    data,
++                                    "window",
++                                    NULL);
+         script_add_native_function (window_hash,
+                                     "SetBackgroundTopColor",
+                                     sprite_window_set_background_top_color,
+diff --git a/src/plugins/splash/text/plugin.c b/src/plugins/splash/text/plugin.c
+index 30a2743..c2f8451 100644
+--- a/src/plugins/splash/text/plugin.c
++++ b/src/plugins/splash/text/plugin.c
+@@ -463,8 +463,10 @@ add_text_display (ply_boot_splash_plugin_t *plugin,
+         view = view_new (plugin, display);
+ 
+         terminal = ply_text_display_get_terminal (view->display);
+-        if (ply_terminal_open (terminal))
++        if (ply_terminal_open (terminal)) {
++                ply_terminal_set_mode (terminal, PLY_TERMINAL_MODE_TEXT);
+                 ply_terminal_activate_vt (terminal);
++        }
+ 
+         ply_text_display_set_draw_handler (view->display,
+                                            (ply_text_display_draw_handler_t)

@@ -1,0 +1,292 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 27 Mar 2020 18:47:39 +0800
+Subject: [PATCH] two-step: Add support for fsck status messages
+
+Related to https://gitlab.freedesktop.org/plymouth/plymouth/-/issues/62 but
+not a full solution. Only supports two-step right now.
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1867130
+---
+ src/plugins/splash/two-step/plugin.c | 163 +++++++++++++++++++++++++++++++----
+ 1 file changed, 148 insertions(+), 15 deletions(-)
+
+diff --git a/src/plugins/splash/two-step/plugin.c b/src/plugins/splash/two-step/plugin.c
+index 83a1a58..18b7e4e 100644
+--- a/src/plugins/splash/two-step/plugin.c
++++ b/src/plugins/splash/two-step/plugin.c
+@@ -186,6 +186,12 @@ struct _ply_boot_splash_plugin
+         ply_trigger_t                      *idle_trigger;
+         ply_trigger_t                      *stop_trigger;
+ 
++        char                               *main_message;
++        char                               *fsck_message;
++        char                               *footer;
++        char                               *fsck_device;
++        int                                 fsck_percent;
++
+         uint32_t                            root_is_mounted : 1;
+         uint32_t                            needs_redraw : 1;
+         uint32_t                            is_visible : 1;
+@@ -195,6 +201,8 @@ struct _ply_boot_splash_plugin
+         uint32_t                            background_image_is_scaled : 1;
+         uint32_t                            dialog_clears_firmware_background : 1;
+         uint32_t                            message_below_animation : 1;
++        uint32_t                            transient_progress_bar : 1;
++        uint32_t                            in_fsck : 1;
+ 
+         char                               *monospace_font;
+         uint32_t                            plugin_console_messages_updating : 1;
+@@ -213,6 +221,9 @@ static void become_idle (ply_boot_splash_plugin_t *plugin,
+                          ply_trigger_t            *idle_trigger);
+ static void view_show_message (view_t     *view,
+                                const char *message);
++static void update_message (ply_boot_splash_plugin_t *plugin);
++static void update_progress_animation (ply_boot_splash_plugin_t *plugin,
++                                       double                    percent_done);
+ static bool validate_input (ply_boot_splash_plugin_t *plugin,
+                             const char               *entry_text,
+                             const char               *add_text);
+@@ -890,6 +901,20 @@ on_view_throbber_stopped (view_t *view)
+         view->end_trigger = NULL;
+ }
+ 
++static bool
++use_progress_bar (const ply_boot_splash_plugin_t *plugin)
++{
++        return plugin->transient_progress_bar ||
++               plugin->mode_settings[plugin->mode].use_progress_bar;
++}
++
++static bool
++use_animation (const ply_boot_splash_plugin_t *plugin)
++{
++        return !plugin->transient_progress_bar &&
++               plugin->mode_settings[plugin->mode].use_animation;
++}
++
+ static void
+ view_start_progress_animation (view_t *view)
+ {
+@@ -911,7 +936,7 @@ view_start_progress_animation (view_t *view)
+         ply_pixel_display_draw_area (view->display, 0, 0,
+                                      screen_width, screen_height);
+ 
+-        if (plugin->mode_settings[plugin->mode].use_progress_bar) {
++        if (use_progress_bar (plugin)) {
+                 if (plugin->progress_bar_width != -1)
+                         width = plugin->progress_bar_width;
+                 else
+@@ -925,8 +950,7 @@ view_start_progress_animation (view_t *view)
+                 view->animation_bottom = y + height;
+         }
+ 
+-        if (plugin->mode_settings[plugin->mode].use_animation &&
+-            view->throbber != NULL) {
++        if (use_animation (plugin) && view->throbber != NULL) {
+                 width = ply_throbber_get_width (view->throbber);
+                 height = ply_throbber_get_height (view->throbber);
+                 x = plugin->animation_horizontal_alignment * screen_width - width / 2.0;
+@@ -945,8 +969,7 @@ view_start_progress_animation (view_t *view)
+             plugin->mode == PLY_BOOT_SPLASH_MODE_REBOOT)
+                 return;
+ 
+-        if (plugin->mode_settings[plugin->mode].use_animation &&
+-            view->progress_animation != NULL) {
++        if (use_animation (plugin) && view->progress_animation != NULL) {
+                 width = ply_progress_animation_get_width (view->progress_animation);
+                 height = ply_progress_animation_get_height (view->progress_animation);
+                 x = plugin->animation_horizontal_alignment * screen_width - width / 2.0;
+@@ -1446,6 +1469,10 @@ destroy_plugin (ply_boot_splash_plugin_t *plugin)
+         free (plugin->title_font);
+         free (plugin->monospace_font);
+         free (plugin->animation_dir);
++        free (plugin->main_message);
++        free (plugin->fsck_message);
++        free (plugin->footer);
++        free (plugin->fsck_device);
+         free_views (plugin);
+         free (plugin);
+ }
+@@ -1457,7 +1484,7 @@ start_end_animation (ply_boot_splash_plugin_t *plugin,
+         ply_list_node_t *node;
+         view_t *view;
+ 
+-        if (!plugin->mode_settings[plugin->mode].use_animation) {
++        if (!use_animation (plugin)) {
+                 ply_trigger_pull (trigger, NULL);
+                 return;
+         }
+@@ -1693,24 +1720,21 @@ on_draw (view_t             *view,
+                 ply_pixel_buffer_fill_with_argb32_data (pixel_buffer,
+                                                         &view->lock_area,
+                                                         lock_data);
+-        } else if (!plugin->should_show_console_messages) {
+-                if (plugin->mode_settings[plugin->mode].use_progress_bar)
++        } else {
++                if (use_progress_bar (plugin))
+                         ply_progress_bar_draw_area (view->progress_bar, pixel_buffer,
+                                                     x, y, width, height);
+ 
+-                if (plugin->mode_settings[plugin->mode].use_animation &&
+-                    view->throbber != NULL)
++                if (use_animation (plugin) && view->throbber != NULL)
+                         ply_throbber_draw_area (view->throbber, pixel_buffer,
+                                                 x, y, width, height);
+ 
+-                if (plugin->mode_settings[plugin->mode].use_animation &&
+-                    view->progress_animation != NULL)
++                if (use_animation (plugin) && view->progress_animation != NULL)
+                         ply_progress_animation_draw_area (view->progress_animation,
+                                                           pixel_buffer,
+                                                           x, y, width, height);
+ 
+-                if (plugin->mode_settings[plugin->mode].use_animation &&
+-                    view->end_animation != NULL)
++                if (use_animation (plugin) && view->end_animation != NULL)
+                         ply_animation_draw_area (view->end_animation,
+                                                  pixel_buffer,
+                                                  x, y, width, height);
+@@ -1932,11 +1956,77 @@ show_splash_screen (ply_boot_splash_plugin_t *plugin,
+         return true;
+ }
+ 
++static void
++update_fsck (ply_boot_splash_plugin_t *plugin,
++             const char               *device_name,
++             float                     percent,
++             const char               *message)
++{
++        if (!plugin->in_fsck) {
++                stop_animation (plugin);
++                plugin->transient_progress_bar = true;
++                start_progress_animation (plugin);
++                plugin->in_fsck = true;
++        }
++
++        free (plugin->fsck_device);
++        plugin->fsck_device = device_name ? strdup (device_name) : NULL;
++
++        free (plugin->fsck_message);
++        plugin->fsck_message = message ? strdup (message) : message;
++
++        plugin->fsck_percent = percent;
++
++        update_message (plugin);
++        update_progress_animation (plugin, percent / 100.);
++}
++
++static void
++set_footer (ply_boot_splash_plugin_t *plugin,
++            const char               *message)
++{
++        free (plugin->footer);
++        plugin->footer = strdup (message);
++}
++
++static void
++end_fsck (ply_boot_splash_plugin_t *plugin)
++{
++        if (!plugin->in_fsck)
++                return;
++
++        stop_animation (plugin);
++        plugin->in_fsck = false;
++        plugin->transient_progress_bar = false;
++        set_footer (plugin, "");
++        update_message (plugin);
++
++        if (use_animation (plugin))
++                start_progress_animation (plugin);
++}
++
+ static void
+ update_status (ply_boot_splash_plugin_t *plugin,
+                const char               *status)
+ {
++        char fsck_device[1024] = "";
++        char fsck_message[1024] = "";
++        float fsck_percent = 0.f;
++
+         assert (plugin != NULL);
++
++        if (sscanf (status, "fsck:%1023[^:]:%f",
++                    fsck_device, &fsck_percent) == 2) {
++                ply_trace ("fsck of `%s' at %.1f%%", fsck_device, fsck_percent);
++                update_fsck (plugin, fsck_device, fsck_percent, NULL);
++        } else if (sscanf (status, "fsckd:%*d:%f:%1023[^\x01]",
++                           &fsck_percent, fsck_message) == 2) {
++                ply_trace ("fsckd at %.1f%% [%s]", fsck_percent, fsck_message);
++                update_fsck (plugin, NULL, fsck_percent, fsck_message);
++        }
++
++        if (fsck_percent >= 100)
++                end_fsck (plugin);
+ }
+ 
+ static void
+@@ -1993,6 +2083,9 @@ on_boot_progress (ply_boot_splash_plugin_t *plugin,
+         if (plugin->is_idle)
+                 return;
+ 
++        if (plugin->transient_progress_bar)
++                return;
++
+         /*
+          * If we do not have an end animation, we keep showing progress until
+          * become_idle gets called.
+@@ -2164,6 +2257,37 @@ show_message (ply_boot_splash_plugin_t *plugin,
+         }
+ }
+ 
++static void
++update_message (ply_boot_splash_plugin_t *plugin)
++{
++        char message[4096];
++        size_t len = 0;
++
++        if (plugin->in_fsck) {
++                const char *device = plugin->fsck_device;
++
++                if (!device || !device[0])
++                        device = _("disks");
++
++                len += snprintf (message + len, sizeof(message) - 1 - len,
++                                 _("Checking %s: %d%% complete\n\n"),
++                                 device, plugin->fsck_percent);
++        }
++
++        if (plugin->in_fsck && plugin->fsck_message && len < sizeof(message))
++                len += snprintf (message + len, sizeof(message) - 1 - len,
++                                 "%s\n\n", plugin->fsck_message);
++        else if (plugin->main_message && len < sizeof(message))
++                len += snprintf (message + len, sizeof(message) - 1 - len,
++                                 "%s\n\n", plugin->main_message);
++
++        if (plugin->footer && len < sizeof(message))
++                len += snprintf (message + len, sizeof(message) - 1 - len,
++                                 "%s", plugin->footer);
++
++        show_message (plugin, message);
++}
++
+ static void
+ system_update (ply_boot_splash_plugin_t *plugin,
+                int                       progress)
+@@ -2242,7 +2366,16 @@ static void
+ display_message (ply_boot_splash_plugin_t *plugin,
+                  const char               *message)
+ {
+-        show_message (plugin, message);
++        if (!strncmp (message, "fsckd-cancel-msg:", 17))
++                set_footer (plugin, message + 17);
++        else if (!strncmp (message, "keys:", 5))
++                set_footer (plugin, message + 5);
++        else {
++                free (plugin->main_message);
++                plugin->main_message = strdup (message);
++        }
++
++        update_message (plugin);
+ }
+ 
+ static bool

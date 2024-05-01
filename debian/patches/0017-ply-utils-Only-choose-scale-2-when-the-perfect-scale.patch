@@ -1,0 +1,32 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Tue, 5 Mar 2024 17:51:11 +0800
+Subject: ply-utils: Only choose scale 2 when the perfect scale would be >=
+ 1.75
+
+This is the intended design documented in:
+https://gitlab.gnome.org/GNOME/mutter/-/commit/d03dce43786d
+
+And discussed in:
+https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/3616
+
+Origin: Upstream commit 3b8e918479f47a845d4f88d281f7dfe412195628
+Improves: https://bugs.launchpad.net/bugs/2054769
+Forwarded: not-needed
+Last-Update: 2024-03-08
+---
+ src/libply/ply-utils.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/libply/ply-utils.c b/src/libply/ply-utils.c
+index ad816f1..44a9309 100644
+--- a/src/libply/ply-utils.c
++++ b/src/libply/ply-utils.c
+@@ -1057,7 +1057,7 @@ get_device_scale (uint32_t width,
+         target_dpi = (diag_inches >= 20.f) ? 110 : 135;
+ 
+         perfect_scale = physical_dpi / target_dpi;
+-        device_scale = (perfect_scale > 1.5f) ? 2 : 1;
++        device_scale = (perfect_scale >= 1.75f) ? 2 : 1;
+ 
+         return device_scale;
+ }

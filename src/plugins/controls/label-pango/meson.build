@@ -1,0 +1,15 @@
+label_plugin = shared_module('label-pango',
+  'plugin.c',
+  dependencies: [
+    libcairo_dep,
+    libpango_dep,
+    libpangocairo_dep,
+    libply_dep,
+    libply_splash_core_dep,
+    libply_splash_graphics_dep,
+  ],
+  include_directories: config_h_inc,
+  name_prefix: '',
+  install: true,
+  install_dir: plymouth_plugin_path,
+)

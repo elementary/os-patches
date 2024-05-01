@@ -1,0 +1,104 @@
+From: Didier Roche <didrocks@ubuntu.com>
+Date: Tue, 2 Jan 2024 10:23:29 +0100
+Subject: Ensure that we only show plymouth when splash option is provided
+
+Forwarded: not-needed
+
+Consequently (with debian and ubuntu's patch), plymouth is only triggered if:
+- plymouth.enable=0 isn't set
+- nosplash isn't set
+- we set splash (like on desktop flavors) on the kernel cmdline
+---
+ systemd-units/plymouth-halt.service.in                 | 1 +
+ systemd-units/plymouth-kexec.service.in                | 1 +
+ systemd-units/plymouth-poweroff.service.in             | 1 +
+ systemd-units/plymouth-reboot.service.in               | 1 +
+ systemd-units/plymouth-start.service.in                | 1 +
+ systemd-units/systemd-ask-password-plymouth.path.in    | 1 +
+ systemd-units/systemd-ask-password-plymouth.service.in | 1 +
+ 7 files changed, 7 insertions(+)
+
+diff --git a/systemd-units/plymouth-halt.service.in b/systemd-units/plymouth-halt.service.in
+index 1581143..81cd9a3 100644
+--- a/systemd-units/plymouth-halt.service.in
++++ b/systemd-units/plymouth-halt.service.in
+@@ -5,6 +5,7 @@ Before=systemd-halt.service
+ DefaultDependencies=no
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ 
+ [Service]
+diff --git a/systemd-units/plymouth-kexec.service.in b/systemd-units/plymouth-kexec.service.in
+index c09aa44..8713d3f 100644
+--- a/systemd-units/plymouth-kexec.service.in
++++ b/systemd-units/plymouth-kexec.service.in
+@@ -5,6 +5,7 @@ Before=systemd-kexec.service
+ DefaultDependencies=no
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ 
+ [Service]
+diff --git a/systemd-units/plymouth-poweroff.service.in b/systemd-units/plymouth-poweroff.service.in
+index 1a521a3..d13944b 100644
+--- a/systemd-units/plymouth-poweroff.service.in
++++ b/systemd-units/plymouth-poweroff.service.in
+@@ -5,6 +5,7 @@ Before=systemd-poweroff.service
+ DefaultDependencies=no
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ 
+ [Service]
+diff --git a/systemd-units/plymouth-reboot.service.in b/systemd-units/plymouth-reboot.service.in
+index f864ea8..d33bce7 100644
+--- a/systemd-units/plymouth-reboot.service.in
++++ b/systemd-units/plymouth-reboot.service.in
+@@ -5,6 +5,7 @@ Before=systemd-reboot.service
+ DefaultDependencies=no
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ 
+ [Service]
+diff --git a/systemd-units/plymouth-start.service.in b/systemd-units/plymouth-start.service.in
+index 960f54d..437b023 100644
+--- a/systemd-units/plymouth-start.service.in
++++ b/systemd-units/plymouth-start.service.in
+@@ -6,6 +6,7 @@ After=systemd-udev-trigger.service systemd-udevd.service keyboard-setup.service
+ Before=systemd-ask-password-plymouth.service
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ IgnoreOnIsolate=true
+ 
+diff --git a/systemd-units/systemd-ask-password-plymouth.path.in b/systemd-units/systemd-ask-password-plymouth.path.in
+index a343db8..0ae009f 100644
+--- a/systemd-units/systemd-ask-password-plymouth.path.in
++++ b/systemd-units/systemd-ask-password-plymouth.path.in
+@@ -7,6 +7,7 @@ After=plymouth-start.service
+ Before=basic.target shutdown.target
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionPathExists=/run/plymouth/pid
+ ConditionVirtualization=!container
+ 
+diff --git a/systemd-units/systemd-ask-password-plymouth.service.in b/systemd-units/systemd-ask-password-plymouth.service.in
+index aa8094c..d1c55da 100644
+--- a/systemd-units/systemd-ask-password-plymouth.service.in
++++ b/systemd-units/systemd-ask-password-plymouth.service.in
+@@ -7,6 +7,7 @@ After=plymouth-start.service
+ Before=shutdown.target
+ ConditionKernelCommandLine=!plymouth.enable=0
+ ConditionKernelCommandLine=!nosplash
++ConditionKernelCommandLine=splash
+ ConditionVirtualization=!container
+ ConditionPathExists=@plymouthruntimedir@/pid
+ 

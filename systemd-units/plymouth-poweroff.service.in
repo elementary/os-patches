@@ -1,0 +1,13 @@
+[Unit]
+Description=Show Plymouth Power Off Screen
+After=getty@tty1.service display-manager.service plymouth-start.service
+Before=systemd-poweroff.service
+DefaultDependencies=no
+ConditionKernelCommandLine=!plymouth.enable=0
+ConditionVirtualization=!container
+
+[Service]
+ExecStart=@PLYMOUTH_DAEMON_DIR@/plymouthd --mode=shutdown --attach-to-session
+ExecStartPost=-@PLYMOUTH_CLIENT_DIR@/plymouth show-splash
+Type=forking
+RemainAfterExit=yes

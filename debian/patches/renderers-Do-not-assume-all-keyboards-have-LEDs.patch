@@ -1,0 +1,108 @@
+From 709f21e80199ee51badff2d9b5dc6bae8af2a1a1 Mon Sep 17 00:00:00 2001
+From: n3rdopolis <bluescreen_avenger@verizon.net>
+Date: Wed, 31 Jan 2024 08:38:38 -0500
+Subject: [PATCH] renderers: Do not assume all keyboards have LEDs
+
+This is an attempt to fix #245
+
+Bug: https://gitlab.freedesktop.org/plymouth/plymouth/-/issues/245
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2050743
+---
+ src/plugins/renderers/drm/plugin.c          | 22 +++++++++++++++++++--
+ src/plugins/renderers/frame-buffer/plugin.c | 22 +++++++++++++++++++--
+ 2 files changed, 40 insertions(+), 4 deletions(-)
+
+Index: plymouth-23.360.11/src/plugins/renderers/drm/plugin.c
+===================================================================
+--- plymouth-23.360.11.orig/src/plugins/renderers/drm/plugin.c
++++ plymouth-23.360.11/src/plugins/renderers/drm/plugin.c
+@@ -1971,6 +1971,17 @@ get_panel_properties (ply_renderer_backe
+ }
+ 
+ static ply_input_device_t *
++get_any_input_device (ply_renderer_backend_t *backend)
++{
++        ply_list_node_t *node = ply_list_get_first_node (backend->input_source.input_devices);
++
++        if (node != NULL)
++                return ply_list_node_get_data (node);
++
++        return NULL;
++}
++
++static ply_input_device_t *
+ get_any_input_device_with_leds (ply_renderer_backend_t *backend)
+ {
+         ply_list_node_t *node;
+@@ -1992,6 +2003,9 @@ get_capslock_state (ply_renderer_backend
+ {
+         if (using_input_device (&backend->input_source)) {
+                 ply_input_device_t *dev = get_any_input_device_with_leds (backend);
++                if (!dev)
++                        return false;
++
+                 return ply_input_device_get_capslock_state (dev);
+         }
+         if (!backend->terminal)
+@@ -2004,8 +2018,12 @@ static const char *
+ get_keymap (ply_renderer_backend_t *backend)
+ {
+         if (using_input_device (&backend->input_source)) {
+-                ply_input_device_t *dev = get_any_input_device_with_leds (backend);
+-                const char *keymap = ply_input_device_get_keymap (dev);
++                const char *keymap;
++                ply_input_device_t *dev = get_any_input_device (backend);
++                if (!dev)
++                        return NULL;
++
++                keymap = ply_input_device_get_keymap (dev);
+                 if (keymap != NULL) {
+                         return keymap;
+                 }
+Index: plymouth-23.360.11/src/plugins/renderers/frame-buffer/plugin.c
+===================================================================
+--- plymouth-23.360.11.orig/src/plugins/renderers/frame-buffer/plugin.c
++++ plymouth-23.360.11/src/plugins/renderers/frame-buffer/plugin.c
+@@ -830,6 +830,17 @@ close_input_source (ply_renderer_backend
+ }
+ 
+ static ply_input_device_t *
++get_any_input_device (ply_renderer_backend_t *backend)
++{
++        ply_list_node_t *node = ply_list_get_first_node (backend->input_source.input_devices);
++
++        if (node != NULL)
++                return ply_list_node_get_data (node);
++
++        return NULL;
++}
++
++static ply_input_device_t *
+ get_any_input_device_with_leds (ply_renderer_backend_t *backend)
+ {
+         ply_list_node_t *node;
+@@ -851,6 +862,9 @@ get_capslock_state (ply_renderer_backend
+ {
+         if (using_input_device (&backend->input_source)) {
+                 ply_input_device_t *dev = get_any_input_device_with_leds (backend);
++                if (!dev)
++                        return false;
++
+                 return ply_input_device_get_capslock_state (dev);
+         }
+         if (!backend->terminal)
+@@ -863,8 +877,12 @@ static const char *
+ get_keymap (ply_renderer_backend_t *backend)
+ {
+         if (using_input_device (&backend->input_source)) {
+-                ply_input_device_t *dev = get_any_input_device_with_leds (backend);
+-                const char *keymap = ply_input_device_get_keymap (dev);
++                const char *keymap;
++                ply_input_device_t *dev = get_any_input_device (backend);
++                if (!dev)
++                        return NULL;
++
++                keymap = ply_input_device_get_keymap (dev);
+                 if (keymap != NULL) {
+                         return keymap;
+                 }

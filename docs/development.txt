@@ -1,0 +1,394 @@
+//
+// Translate into HTML with /usr/bin/asciidoc -a toc DEVELOPMENT.asciidoc
+//
+
+Developer Information for Plymouth
+==================================
+
+:toc:
+:icons:
+:numbered:
+:website: http://www.freedesktop.org/wiki/Software/Plymouth
+
+This article gives useful information for developers of plymouth.  It
+tries to explain the overall architecture, the most important data
+structures, and basic walk throughs for debugging. It is
+not meant to be a API documentation. In the future the authors try to
+use gtkdoc for a detailed documentation of the various functions
+inside the code.
+
+
+.Please improve
+**********************************************************************
+This document is a work in progress. Feel free to improve it. Send
+contributions to http://bugs.freedesktop.org or to the plymouth mailing
+list (http://lists.freedesktop.org/mailman/listinfo/plymouth)
+**********************************************************************
+
+
+Introduction
+------------
+
+Plymouth is an application that runs very early in the boot process
+(even before the root filesystem is mounted!) that provides a
+graphical boot animation while the boot process happens in the
+background.
+
+plymouth ships with two binaries: /sbin/plymouthd and /bin/plymouth
+
+The first one, +plymouthd+, does all the heavy lifting. It logs the
+session and shows the splash screen. The second one, +/bin/plymouth+, is
+the control interface to plymouthd.
+
+It supports things like +plymouth show-splash+, or +plymouth
+ask-for-password+, which trigger the associated action in plymouthd.
+
+Plymouth supports various "splash" themes which are analogous to
+screensavers, but happen at boot time. There are several sample themes
+shipped with plymouth, but most distributions that use plymouth ship
+something customized for their distribution.
+
+
+Controlling plymouth
+--------------------
+
+plymouthd is run as early as possible in the boot process. It gets
+normally started from the initial ramdisk loaded by the boot loader
+(e.g. GRUB).
+
+The behavior of plymouthd can be somewhat controlled thorugh the
+kernel command line, normally passed to the kernel from grub.
+
+
+Splash screen selection
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Use the following options to control the selection of a splash screen.
+
+ * +plymouth.splash=<name-of-splash-to-use>+ Select the splash screen to use.
+
+ * +plymouth.force-splash+ Force a splash screen, even if plymouth would
+   normally switch it off.
+
+ * +plymouth.ignore-show-splash+ ?
+
+ * +plymouth.ignore-serial-consoles+ ?
+
+
+Logging
+~~~~~~~
+
+Plymouth has built-in logging which is normally turned off. It can be
+turned on by giving the kernel a number of boot arguments which
+influence plymouth.
+
+ * +plymouth.debug+ Use this argument to turn debug output on. The
+   output is stored in /var/log/plymouth-debug.log. As long as the
+   root filesystem is not available or read-only, all debug output is
+   collected in memory.  If the filesystem gets available (signalled
+   with +plymouth update-root-fs --read-write+) then the memory gets
+   flushed to the file and all subsequent debug output will be written
+   to the file immediately.
+
+ * +plymouth.debug=file:<name-of-file>+ If you append a filename to
+   the option, all output will be written to that file instead of
+   the default file.
+
+ * +plymouth.debug=stream:<name-of-stream>+ This will send the logging
+   output to a stream which is normally not a file but a character device.
+   If you use e.g. "/dev/ttyS0" as the name of the stream, then all
+   logging messages will be sent to the serial port.
+
+ * +plymouth.nolog+ Disable logging.
+
+
+Keyboard commands
+~~~~~~~~~~~~~~~~~
+
+plymouthd can be controlled with the keyboard. Use the following keys:
+
+ * +Esc+: Toggle between system console and plymouth boot animation.
+
+ * +Ctrl-V+: Toogle verbose mode on and off.
+
+ * +Ctrl-U+ or +Ctrl-W+: erase a line
+
+
+Debugging
+---------
+
+There are three different environments that can be used to troubleshoot the plymouth daemon:
+
+ * executing plymouth inside a running X11 window session without booting the system.
+
+ * executing plymouth on a VT in a running system
+
+ * a live system executing plymouth during boot time
+
+Debugging inside X11
+~~~~~~~~~~~~~~~~~~~~
+
+This is the easiest way to debug, as you have a complete running system
+and you are not running in a restricted boot environment.
+
+This works automatically if plymouth detects and X server running, and
+finds the "x11" renderer plugin". Depending on your system this requires
+installing an additional package, sometimes called "plymouth-devel".
+
+Start by executing plymouthd as root with the appropriate options.
+
+    # /sbin/plymouthd --no-daemon --debug --tty=/dev/tty
+
+Then use plymouth to start the splash screen and control plymouthd.
+
+    # /bin/plymouth show-splash
+    # /bin/plymouth quit
+
+If this works as expected then you can attach to it with a debugger.
+There are various frontends for GDB, the GNU debugger, though, it's
+often simplest to use gdb's built-in text mode interface:
+
+    # gdb attach $(/sbin/pidof plymouthd)
+
+You can also start plymouthd in the debugger directly:
+
+    # gdb /sbin/plymouthd
+    GNU gdb (GDB) Fedora (7.3.50.20110722-13.fc16)
+    Copyright (C) 2011 Free Software Foundation, Inc.
+    License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+    This is free software: you are free to change and redistribute it.
+    There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+    and "show warranty" for details.
+    This GDB was configured as "x86_64-redhat-linux-gnu".
+    For bug reporting instructions, please see:
+    <http://www.gnu.org/software/gdb/bugs/>...
+    Reading symbols from /sbin/plymouthd...(no debugging symbols found)...done.
+    Missing separate debuginfos, use: debuginfo-install plymouth-0.8.4-0.20110822.3.fc16.x86_64
+    (gdb) run --no-daemon --debug
+
+See the GDB manual for more information.
+
+Debugging plymouth without X11
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sometimes it's necessary to debug parts of the plymouthd daemon that don't
+get exercised when using the "x11" renderer plugin. (For instance, drm handling
+code).
+
+For these cases it's possible to debug plymouth by first sshing into the machine
+from another machine 3 times, and then stopping X:
+
+# init 3
+
+Then, stopping any gettys using tty 1. This step may require running initctl,
+systemctl, or editing an init config file.
+
+Then, running plymouthd from one of ssh sessions:
+
+    # /sbin/plymouthd --no-daemon --debug
+
+Then, attaching with gdb from another ssh session:
+
+    # gdb attach $(/sbin/pidof plymouthd)
+
+Then controlling plymouth from the third ssh session:
+
+    # /bin/plymouth show-splash
+    # /bin/plymouth quit
+
+
+Debugging the booting live system
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It's not easy to debug plymouthd while the system is booting. When possible,
+it's better to try to reproduce problems in one of the more controlled
+environments mentioned above.
+
+The best tactic is to boot with +plymouth.debug+ on the kernel command line.
+This will make plymouth spew messages that can be seen by hitting the escape
+key.  They can also be seen in +/var/log/plymouth-debug.log+ after boot up.
+Frequently, when debugging new problems, the existing logging will be
+insufficient to figure out the issue.  In those cases, it may be necessary to
+instrument the plymouthd code with more ply_trace() calls.
+
+Anytime plymouthd is changed, to test those changes on a live system, it's
+important to rebuild the initial ramdisk.  This can be done by running the
++/usr/libexec/plymouth/plymouth-update-initrd+ command.
+
+**********************************************************************
+Please improve this part and describe how to use GDB to debug the
+running system.
+**********************************************************************
+
+Implementation
+--------------
+
+This chapter presents the source code and its structure.
+
+Modules and source code organization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+plymouthd consists of a binary executable, three shared libraries linked
+at build time, and a number plugins which are loaded on demand as DSOs using
+dlopen(3).
+
+  ./src
+  ├── client                   # plymouth
+  ├── libply                   # runtime library (utility functions)
+  ├── libply-splash-core       # splash plugin APIS
+  ├── libply-splash-graphics   # graphical splash plugin specific APIs
+  ├── plugins                  # plugins as shared libraries
+  │   ├── controls             # graphical widgets
+  │   │   └── label            # text label for text output
+  │   ├── renderers            # the different graphical backends
+  │   │   ├── drm
+  │   │   ├── frame-buffer
+  │   │   └── x11
+  │   └── splash               # the different splash plugins
+  │       ├── details
+  │       ├── fade-throbber
+  │       ├── script
+  │       ├── space-flares
+  │       ├── text
+  │       ├── throbgress
+  │       └── two-step
+  └── upstart-bridge           # code for interfacing with the upstart init system
+
+  ./themes                     # example themes that use the various splash plugins
+
+
+Communication between plymouth and plymouthd
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When plymouthd starts, it opens an abstract UNIX domain socket,
+called "/org/freedesktop/plymouthd" where it listens for commands.
+
+plymouth and plymouthd use a simple binary protocol to exchange
+commands and arguments defined in src/ply-boot-protocol.h.
+
+Triggers
+~~~~~~~~
+
+Plymouth is written in C, using object oriented programming practices,
+a centralized, file descriptor based event loop, and callbacks, similar
+to many graphical programs (that, for instance, use toolkits such
+as GTK+).
+
+In plymouth, callback handling is facilitated using the _trigger_ APIs.
+Triggers are objects that provide
+'http://en.wikipedia.org/wiki/Closure_%28computer_science%29[closures]'
+for plymouth.
+
+A trigger consists of a list of _handlers_. A handler is basically a
+pointer to a function taking some arguments. These functions are a
+kind of callback. The lifecycle of a trigger starts with its creation,
+then follows with the trigger's creator setting one or handlers on the
+trigger. Then the trigger gets passed off to otherwise independent
+parts of the code.  That code later "pulls" the trigger which causes
+the trigger's handlers to be called.
+
+The handler is called with 3 arguments: +user_data+, +trigger_data+ and
++trigger+. Both data arguments are for transfering _context_ or _state_
+to the handler. They are generic void pointers.  The +user_data+ argument
+is passed to the trigger at the time a handler is added to the
+trigger. It's a way for creator of the trigger to recover its state
+when the handler is called.  The +trigger_data+ argument transfers
+information from the code pulling the trigger. It can be thought of as
+a payload or result to be sent from the code pulling the trigger to
+the code watching the trigger.  The third argument, +trigger+, is
+the trigger itself. It's passed as a convenience, so the same handler
+can be used for multiple triggers, and the handler can differentiate
+which trigger fired.
+
+When are triggers used? They're used any time two independently
+contained parts of the code need to talk to each other.
+
+As an example, when a user needs to input a password, the plymouth
+client asks the plymouth daemon to ask the user for a password.  The
+daemon can't respond to the client until the user has typed the password.
+The code that handles communication with the client sets up a trigger
+that the keyboard reading code pulls when the user hits enter.  When
+that trigger fires, a function set up by the code that communicates
+with the client is called and it can reply to the client with the
+password delivered from the keyboard reading code through the trigger.
+
+This allows for a flexible, encapsulated program architecture.
+However, triggers have drawbacks. The code flow of the application can
+be hard to follow. There's no longer a direct, linear progression of
+function calls. Programs without callbacks/triggers run sequentially.
+It's always easy to see code flow.  With triggers, it's not always
+obvious at point in the code where a trigger is pulled, what other
+parts of the code are going to get called into.
+
+So here is a simple example.
+
+[literal]
+   #include "ply-trigger.h"
+
+   /* The function creates a trigger and adds a handler to be called back. */
+   ply_trigger_t *
+   trigger_creator (void)
+   {
+       /* [1] Create the trigger */
+       ply_trigger_t *on_exit_trigger = ply_trigger_new (NULL);
+
+       /* [2] Prepare the user_data to give to the handler when pulled. */
+       char *user_data = "These are greetings from trigger_creator.";
+
+       /* [3] Add handler and user data to trigger. */
+       ply_trigger_add_handler (onexit_trigger,
+                                (ply_trigger_handler_t)
+                                onexit_handler,
+                                user_data);
+
+       return on_exit_trigger;
+   }
+
+   /* This function pulls the trigger. */
+   void
+   trigger_puller (ply_trigger_t *trigger)
+   {
+       char *data = "trigger_puller pulled you.";
+       ply_trigger_pull (trigger, data);
+   }
+
+   /* This is the handler which gets called back when the trigger is pulled. */
+   void
+   onexit_handler (char          *user_data,
+                   char          *trigger_data,
+                   ply_trigger_t *trigger)
+   {
+       printf ("Greetings: %s\n", user_data);
+       printf ("Puller   : %s\n", trigger_data);
+   }
+
+   int
+   main (void)
+   {
+       ply_trigger_t *trigger = trigger_creator();
+
+       trigger_puller (trigger);
+
+       return 0;
+   }
+
+This program will print out
+
+   Greetings: These are greetings from trigger_creator.
+   Puller   : trigger_puller pulled you.
+
+This shows how to transfer data from the different places to the
+handler. The general case is typically for user_data and data to be
+pointer to a struct containing multiple variables. Sometimes even
+primitive data types (like +int+ or +bool+) are transferred to the
+handler by casting them to +void*+. This is certainly only possible if
++sizeof(datatype) <= sizeof(void*)+.
+
+The handler +on_exit_handler+ expects +char*+ and is therefore not
+identical (but compatible) to the expected function type
++ply_trigger_handler_t+. This is a very typical case and therefore
+we need the cast in +ply_trigger_add_handler+.
+
+One advanced aspect of a trigger is its ignore counter. This allows a
+caller to ignore one or more pulls before really pulling the
+trigger. Every call to +ply_trigger_ignore_next_pull+ will increase
+this counter and will result in one more pull to be ignored.

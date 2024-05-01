@@ -1,0 +1,85 @@
+option('logo',
+  type: 'string',
+  value: '',
+  description: 'Full path for logo used by boot splash plugin (if empty, uses a fallback logo)',
+)
+option('background-color',
+  type: 'string',
+  value: '0x5d5950',
+  description: 'Background color used by boot splash plugins',
+)
+option('background-start-color-stop',
+  type: 'string',
+  value: '0x807c71',
+  description: 'First color stop in background gradients used by boot splash plugins',
+)
+option('background-end-color-stop',
+  type: 'string',
+  value: '0x3a362f',
+  description: 'Last color end in background gradients used by boot splash plugins',
+)
+option('release-file',
+  type: 'string',
+  value: '/etc/system-release',
+  description: 'Release file to use to detect distribution',
+)
+option('runstatedir',
+  type: 'string',
+  value: '/run',
+  description: 'runstatedir',
+)
+option('boot-tty',
+  type: 'string',
+  value: '/dev/tty1',
+  description: 'TTY to use in boot mode',
+)
+option('shutdown-tty',
+  type: 'string',
+  value: '/dev/tty63',
+  description: 'TTY to use in shutdown mode',
+)
+option('tracing',
+  type: 'boolean',
+  value: true,
+  description: 'Build with verbose debug tracing spew',
+)
+option('upstart-monitoring',
+  type: 'boolean',
+  value: false,
+  description: 'Listen for messages on the Upstart D-Bus interface',
+)
+option('systemd-integration',
+  type: 'boolean',
+  value: true,
+  description: 'Coordinate boot up with systemd',
+)
+option('udev',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build with udev support',
+)
+option('pango',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Build with pango support (if enabled, used for encryption prompts)',
+)
+option('freetype',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Build with freetype support (if enabled, used for encryption prompts)',
+)
+option('gtk',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Build with GTK support (if disabled, there is no X11 support)',
+)
+option('drm',
+  type: 'boolean',
+  value: true,
+  description: 'Build with drm kms support',
+)
+option('docs',
+  type: 'boolean',
+  value: true,
+  description: 'Build documentation',
+)
