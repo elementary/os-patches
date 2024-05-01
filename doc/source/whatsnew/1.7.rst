@@ -1,0 +1,42 @@
+What's New In python-apt 1.7
+============================
+
+Changed
+--------
+* Starting with 1.6.1 and 1.7~alpha1, the exception raised when
+  passing objects of a different cache to :class:`apt_pkg.DepCache`
+  is :class:`apt_pkg.CacheMismatchError`, and :class:`apt.cache.Cache` will
+  automatically remap open packages and versions to a new cache.
+
+* :meth:`apt_pkg.Policy.get_priority()` now accepts :class:`apt_pkg.Version`
+  objects in addition to :class:`apt_pkg.Package` and :class:`apt_pkg.PackageFile`
+  ones.
+
+* :attr:`apt.package.Version.policy_priority` now returns the priority
+  for that version rather than the highest priority for one of its
+  package files.
+
+* :meth:`apt.Cache.commit` and :meth:`apt_pkg.DepCache.commit` now use
+  frontend locking to run dpkg.
+
+Added
+------
+* The class :class:`apt_pkg.PackageRecords` can now lookup custom fields
+  using ``records[key]`` and ``key in records``.
+
+
+* All code is now statically typed. Some methods from :mod:`apt_pkg`
+  and :mod:`apt_inst` might still be missing or more strict than
+  necessary.
+
+* A new method :meth:`apt.cache.Cache.fix_broken` has been added.
+
+* New methods for frontend locking have been added:
+  :meth:`apt_pkg.pkgsystem_lock_inner`,
+  :meth:`apt_pkg.pkgsystem_unlock_inner`,
+  :meth:`apt_pkg.pkgsystem_is_locked` (starting in alpha 3).
+
+Deprecated
+----------
+* :meth:`apt_pkg.Policy.get_priority()` accepting :class:`apt_pkg.Package`
+  is deprecated.

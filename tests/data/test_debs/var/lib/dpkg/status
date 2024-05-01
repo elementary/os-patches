@@ -1,0 +1,92 @@
+Package: apt
+Status: install ok installed
+Priority: important
+Section: admin
+Installed-Size: 5456
+Maintainer: APT Development Team <deity@lists.debian.org>
+Architecture: i386
+Version: 0.7.25.3
+Replaces: libapt-pkg-dev (<< 0.3.7), libapt-pkg-doc (<< 0.3.7)
+Provides: libapt-pkg-libc6.10-6-4.8
+Description: Advanced front-end for dpkg
+ This is Debian's next generation front-end for the dpkg package manager.
+ It provides the apt-get utility and APT dselect method that provides a
+ simpler, safer way to install and upgrade packages.
+ .
+ APT features complete installation ordering, multiple source capability
+ and several other unique features, see the Users Guide in apt-doc.
+
+Package: postfix
+Status: install ok installed
+Priority: extra
+Section: mail
+Installed-Size: 3488
+Maintainer: LaMont Jones <lamont@debian.org>
+Architecture: i386
+Version: 2.7.0-1
+Replaces: mail-transport-agent, postfix-tls
+Provides: default-mta, mail-transport-agent, postfix-tls
+Recommends: python
+Conflicts: libnss-db (<< 2.2-3), mail-transport-agent, postfix-tls, smail
+Description: High-performance mail transport agent
+ Postfix is Wietse Venema's mail transport agent that started life as an
+  alternative to the widely-used Sendmail program.  Postfix attempts to
+  be fast, easy to administer, and secure, while at the same time being
+  sendmail compatible enough to not upset existing users. Thus, the outside
+  has a sendmail-ish flavor, but the inside is completely different.
+
+Package: debconf
+Status: install ok installed
+Priority: important
+Section: admin
+Installed-Size: 924
+Maintainer: Debconf Developers <debconf-devel@lists.alioth.debian.org>
+Architecture: all
+Version: 1.5.28
+Replaces: debconf-tiny
+Provides: debconf-2.0
+Recommends: apt-utils (>= 0.5.1)
+Conflicts: apt (<< 0.3.12.1), cdebconf (<< 0.96), debconf-tiny, debconf-utils (<< 1.3.22), dialog (<< 0.9b-20020814-1), menu (<= 2.1.3-1), whiptail (<< 0.51.4-11), whiptail-utf8 (<= 0.50.17-13)
+Description: Debian configuration management system
+ Debconf is a configuration management system for debian packages. Packages
+ use Debconf to ask questions when they are installed.
+Python-Version: 2.6, 3.1
+
+Package: testdep-same
+Status: install ok installed
+Source: testdep
+Version: 1.0-1
+Architecture: amd64
+Maintainer: Francois Gouget <fgouget@codeweavers.com>
+Installed-Size: 25
+Provides: testdep-virtual-same
+Section: unknown
+Priority: extra
+Multi-Arch: same
+Description: Multi-arch = same package, no dependency
+ This is a multiarch package that can only satisfy dependencies for the same
+ architecture. But multiple instances of this package can be co-installed,
+ one for each architecture.
+ .
+ Library and development packages typically fall into this category.
+
+Package: testdep-allowed
+Status: install ok installed
+Source: testdep
+Version: 1.0-1
+Architecture: amd64
+Maintainer: Francois Gouget <fgouget@codeweavers.com>
+Installed-Size: 25
+Provides: testdep-virtual-allowed
+Section: unknown
+Priority: extra
+Multi-Arch: allowed
+Description: Multi-arch = allowed package, no dependency
+ This is a multiarch package. By default it can only satisfy dependencies for
+ packages of the same architecture but that can be changed with ':any'
+ dependencies.
+ .
+ It can only be installed for one architecture at a time. Trying to install the
+ same package for another architecture will remove the first one.
+ .
+ Packages providing tools or shells typically fall into this category.
