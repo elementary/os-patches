@@ -1,0 +1,75 @@
+What's New In python-apt 1.0
+==============================
+Python-Apt 1.0 fixes several issues and use of deprecated methods. Most
+importantly, it introduces large file support
+
+New features
+------------
+* :class:`apt_pkg.AcquireFile` can now take a hash string that is not an
+  md5 value, using the new `hash` argument.
+* A new a :meth:`apt_pkg.TagFile.close` method was added
+* :class:`apt_pkg.TagFile` is now a context manager
+
+* The high-level cache class, :class:`apt.cache.Cache` and it's companion
+  :class:`apt.cache.FilteredCache` now support package
+  names with special architecture qualifiers such as :all and :native.
+
+* The method :meth:`apt.cache.Cache.connect2` allows connecting callbacks on
+  cache changes that take the cache as their first argument, reducing the
+  potential for reference cycles.
+
+* The property :attr:`apt.package.Version.is_installed` was added.
+* The properties :attr:`apt.package.BaseDependency.installed_target_versions`
+  and :attr:`apt.package.Dependency.installed_target_versions` were added.
+
+* The property :class:`apt.Dependency.rawtype` was added to give the raw type
+  of a dependency, such as 'Depends'.
+
+* The attribute :attr:`apt_pkg.Dependency.comp_type_deb` and the property
+  :attr:`apt.Dependency.relation_deb` were added, they return a Debian-style
+  comparison operator instead of a mathematical-style one.
+
+* A new filter for filtered caches is provided, :class:`apt.cache.InstalledFilter`.
+
+Backward-incompatible changes
+-----------------------------
+* :class:`apt.Version` now compares package names in addition to version only
+  when checking for equality. This was broken previously.
+
+Deprecated
+----------
+The following features are deprecated, starting with this release:
+
+* The `section` member of :class:`apt_pkg.Package`
+* The `files` member of of :class:`apt_pkg.SourceRecords`
+* The `md5` argument to :class:`apt_pkg.AcquireFile`, it is replaced by
+  the `hash` argument.
+* The method :meth:`apt.cache.Cache.connect` has been deprecated. It is
+  replaced by :meth:`apt.cache.Cache.connect2` which is more flexible and
+  less prone to reference cycles.
+* The attribute :attr:`apt_pkg.AcquireItem.mode` has been replaced by
+  :attr:`apt_pkg.AcquireItem.active_subprocess`
+* The class :class:`apt_pkg.IndexRecords` has been deprecated and will
+  be removed in the next release.
+
+Removed
+-------
+* The module :mod:`apt.progress.gtk2` has been removed. There were no
+  users in the Debian archive, its last update was in 2013, and it was buggy
+  already. Apart from that, it suggested that it is OK to run a graphical
+  application as root, and used the unmaintained GTK+ 2 version.
+
+  Therefore, there is no replacement, please use PackageKit or aptdaemon
+  for installation in graphical environments.
+* The attribute :attr:`apt_pkg.Package.auto` was not set anymore, and thus
+  removed.
+
+Maintenance
+-----------
+* The classes :class:`apt.cache.Cache` and :class:`apt.cache.FilteredCache` no
+  longer store cyclic references to/between them. This fixes a huge issue,
+  because a cache can have tens of open file descriptors, causing the maximum
+  of file descriptors to be reached easily.
+
+* :mod:`apt_inst` now supports ar and tar archives that are larger than 4 GiB
+* Various smaller bug fixes

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+
+# from debian/rules
+for python in $(py3versions -s); do
+    $python tests/test_all.py -q
+done
