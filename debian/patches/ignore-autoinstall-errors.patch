@@ -1,0 +1,42 @@
+--- a/dkms_autoinstaller
++++ b/dkms_autoinstaller
+@@ -74,6 +74,11 @@
+ 			log_action_msg "$prog: running auto installation service for kernel $kernel"
+ 			dkms autoinstall --kernelver $kernel
+ 			res=$?
++			if [ "$res" != "0" ] && { [ -f /etc/dkms/no-autoinstall-errors ] || \
++			   [ "$RELEASE_UPGRADE_IN_PROGRESS" = "1" ]; }; then
++				log_action_msg "$prog: ignore autoinstall errors for dkms modules"
++				res=0
++			fi
+ 			log_daemon_msg "$prog: autoinstall for kernel" "$kernel"
+ 			log_end_msg $res
+ 		fi
+--- a/dkms_common.postinst
++++ b/dkms_common.postinst
+@@ -237,7 +237,8 @@
+             echo "Building initial module for $KERNEL"
+             set +e
+             dkms build -m $NAME -v $VERSION -k $KERNEL $ARCH > /dev/null
+-            case $? in
++            res=$?
++            case "$res" in
+             77)
+                 set -e
+                 echo "Skipped."
+@@ -248,7 +249,14 @@
+                 echo "Done."
+                 ;;
+             *)
+-                exit $?
++                if [ -f /etc/dkms/no-autoinstall-errors ] || \
++                   [ "$RELEASE_UPGRADE_IN_PROGRESS" = "1" ]; then
++                    set -e
++                    echo "Ignored."
++                    continue
++                else
++                    exit $res
++                fi
+                 ;;
+             esac
+             dkms_status=$(dkms status -m $NAME -v $VERSION -k $KERNEL $ARCH)

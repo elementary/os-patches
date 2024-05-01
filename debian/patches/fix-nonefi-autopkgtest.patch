@@ -1,0 +1,62 @@
+Description: Support running tests on systems with module signing
+  but without update-secureboot-policy.
+Author: Dimitri John Ledkov <dimitri.ledkov@canonical.com>
+
+Index: dkms-3.0.11/run_test.sh
+===================================================================
+--- dkms-3.0.11.orig/run_test.sh
++++ dkms-3.0.11/run_test.sh
+@@ -139,6 +139,8 @@ set_signing_message() {
+     # $3: module file name if not the same as $1
+     if (( NO_SIGNING_TOOL == 0 )); then
+         SIGNING_MESSAGE="Signing module /var/lib/dkms/$1/$2/build/${3:-$1}.ko"$'\n'
++    else
++        SIGNING_MESSAGE=""
+     fi
+ }
+ 
+@@ -184,9 +186,8 @@ genericize_expected_output() {
+         sed -i '/^Certificate or key are missing, generating self signed certificate for MOK...$/d' ${output_log}
+     else
+         sed -i "/^The kernel is be built without module signing facility, modules won't be signed$/d" ${output_log}
++        sed -i '/^Sign command:/d' ${output_log}
+         sed -i "/^Binary .* not found, modules won't be signed$/d" ${output_log}
+-        # Uncomment the following line to run this script with --no-signing-tool on platforms where the sign-file tool exists
+-        # sed -i '/^Signing module \/var\/lib\/dkms\/dkms_test\/1.0\/build\/dkms_test.ko$/d' ${output_log}
+     fi
+     # OpenSSL non-critical errors while signing. Remove them to be more generic
+     sed -i '/^At main.c:/d' ${output_log}
+@@ -403,6 +404,9 @@ EOF
+ fi
+ 
+ cp test/framework/temp_key_cert.conf /etc/dkms/framework.conf.d/dkms_test_framework.conf
++save_NO_SIGNING_TOOL=$NO_SIGNING_TOOL
++NO_SIGNING_TOOL=0
++set_signing_message "dkms_test" "1.0"
+ 
+ echo 'Building the test module again by force'
+ run_with_expected_output dkms build -k "${KERNEL_VER}" -m dkms_test -v 1.0 --force << EOF
+@@ -679,7 +683,7 @@ echo "Running dkms autoinstall for a ker
+ run_with_expected_error 11 dkms autoinstall -k "${KERNEL_VER}-noheaders" << EOF
+ Error! Your kernel headers for kernel ${KERNEL_VER}-noheaders cannot be found at /lib/modules/${KERNEL_VER}-noheaders/build or /lib/modules/${KERNEL_VER}-noheaders/source.
+ Please install the linux-headers-${KERNEL_VER}-noheaders package or use the --kernelsourcedir option to tell DKMS where it's located.
+-dkms autoinstall on ${KERNEL_VER}-noheaders/x86_64 failed for dkms_test(1)
++dkms autoinstall on ${KERNEL_VER}-noheaders/${KERNEL_ARCH} failed for dkms_test(1)
+ Error! One or more modules failed to install during autoinstall.
+ Refer to previous errors for more information.
+ EOF
+@@ -701,10 +705,11 @@ run_status_with_expected_output 'dkms_te
+ EOF
+ 
+ echo 'Removing temporary files'
+-if (( NO_SIGNING_TOOL == 0 )); then
+-    rm /tmp/dkms_test_private_key /tmp/dkms_test_certificate
+-fi
++rm /tmp/dkms_test_private_key /tmp/dkms_test_certificate
++
+ rm /etc/dkms/framework.conf.d/dkms_test_framework.conf
++NO_SIGNING_TOOL=$save_NO_SIGNING_TOOL
++set_signing_message "dkms_test" "1.0"
+ 
+ echo 'Removing /usr/src/dkms_test-1.0'
+ rm -r /usr/src/dkms_test-1.0

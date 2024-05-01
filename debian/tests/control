@@ -1,0 +1,59 @@
+Test-Command: sh debian/tests/run_test_wrapper.sh
+Features: test-name=run_test.sh
+Depends:
+ dkms,
+ openssl,
+ linux-headers-generic (>= 6.5.0)
+ | linux-headers-rpi [armel]
+ ,
+Restrictions:
+ allow-stderr,
+ needs-root,
+ breaks-testbed,
+ skip-not-installable,
+
+# install some-dkms after linux-headers
+Test-Command: apt-get install -yf dkms-test-dkms
+Features: test-name=install_some-dkms_after_linux-headers
+Architecture: amd64
+Depends:
+ dkms,
+ linux-headers-generic (>= 6.5.0),
+Restrictions:
+ allow-stderr,
+ needs-root,
+ breaks-testbed,
+
+# install linux-headers after some-dkms
+Test-Command: apt-get install -yf linux-headers-generic
+Features: test-name=install_linux-headers_after_some-dkms
+Architecture: amd64
+Depends:
+ dkms-test-dkms,
+Restrictions:
+ allow-stderr,
+ needs-root,
+ breaks-testbed,
+
+# install some-dkms after linux-image w/o linux-headers
+Test-Command: apt-get install -yf dkms-test-dkms
+Features: test-name=install_some-dkms_after_linux-image_without_linux-headers
+Architecture: amd64
+Depends:
+ dkms,
+ linux-image-generic (>= 6.5.0),
+Restrictions:
+ allow-stderr,
+ needs-root,
+ breaks-testbed,
+
+# install linux-image after some-dkms w/o linux-headers
+Test-Command: apt-get install -yf linux-image-generic
+Features: test-name=install_linux-image_after_some-dkms_without_linux-headers
+Architecture: amd64
+Depends:
+ dkms-test-dkms,
+Restrictions:
+ allow-stderr,
+ needs-root,
+ breaks-testbed,

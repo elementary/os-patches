@@ -1,0 +1,68 @@
+Source: dkms
+Section: kernel
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Dynamic Kernel Module System Team <dkms@packages.debian.org>
+Uploaders: David Paleino <dapal@debian.org>,
+ Petter Reinholdtsen <pere@debian.org>,
+ Aron Xu <aron@debian.org>,
+ Mario Limonciello <Mario_Limonciello@dell.com>,
+ Andreas Beckmann <anbe@debian.org>,
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/dell/dkms
+Vcs-Git: https://salsa.debian.org/debian/dkms.git
+Vcs-Browser: https://salsa.debian.org/debian/dkms
+Rules-Requires-Root: no
+Testsuite: autopkgtest-pkg-dkms
+
+Package: dkms
+Architecture: all
+Multi-Arch: foreign
+Pre-Depends: lsb-release
+Depends: ${misc:Depends},
+ kmod | kldutils,
+ gcc, gcc-13,
+ dpkg-dev,
+ make | build-essential,
+ patch,
+Recommends: fakeroot,
+ sudo,
+ linux-headers-generic | linux-headers-686-pae | linux-headers-amd64 | linux-headers,
+Suggests: menu, e2fsprogs
+Provides:
+ dkms-autopkgtest (= ${binary:Version}),
+Description: Dynamic Kernel Module System (DKMS)
+ DKMS is a framework designed to allow individual kernel modules to be upgraded
+ without changing the whole kernel. It is also very easy to rebuild modules as
+ you upgrade kernels.
+
+Package: dh-dkms
+Architecture: all
+Multi-Arch: foreign
+Depends:
+ ${perl:Depends},
+ ${misc:Depends},
+Breaks:
+ dkms (<< 3.0.3-3~),
+Replaces:
+ dkms (<< 3.0.3-3~),
+Provides:
+ dh-sequence-dkms,
+Description: debhelper addon for the Dynamic Kernel Module System (DKMS)
+ DKMS is a framework designed to allow individual kernel modules to be upgraded
+ without changing the whole kernel. It is also very easy to rebuild modules as
+ you upgrade kernels.
+ .
+ This package provides a debhelper add-on 'dkms' that simplifies packaging of
+ dkms kernel module source packages.
+
+Package: dkms-test-dkms
+Architecture: amd64
+Depends:
+ ${misc:Depends},
+Description: trivial dkms test kernel module
+ This package provides the dkms source code for the dkms-test kernel module.
+ .
+ This package is only intended for ci tests and not expected to be installed
+ on regular systems

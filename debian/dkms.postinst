@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+if dpkg --compare-versions "$2" lt-nl "3.0.3-3~" ; then
+	for d in /etc/dkms/template-dkms-mkdeb/debian /etc/dkms/template-dkms-mkdeb /etc/dkms/template-dkms-mkbmdeb/debian /etc/dkms/template-dkms-mkbmdeb
+	do
+		test ! -d $d || rmdir --ignore-fail-on-non-empty $d
+	done
+fi
+
+if dpkg --compare-versions "$2" lt-nl "3.0.10-8~" ; then
+	for f in /boot/*.old-dkms
+	do
+		test ! -f "$f" || rm -fv "$f"
+	done
+fi

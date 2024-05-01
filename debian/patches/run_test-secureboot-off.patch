@@ -1,0 +1,16 @@
+Description: Support systems with secure boot off
+Author: Dimitri John Ledkov <dimitri.ledkov@canonical.com>
+
+
+Index: dkms-3.0.11/run_test.sh
+===================================================================
+--- dkms-3.0.11.orig/run_test.sh
++++ dkms-3.0.11/run_test.sh
+@@ -176,6 +176,7 @@ genericize_expected_output() {
+     if (( NO_SIGNING_TOOL == 0 )); then
+         sed -i '/^EFI variables are not supported on this system/d' ${output_log}
+         sed -i '/^\/sys\/firmware\/efi\/efivars not found, aborting./d' ${output_log}
++        sed -i '/^Secure Boot not enabled on this system./d' ${output_log}
+         sed -i '/^Sign command:/d' ${output_log}
+         sed -i '/^Signing key:/d' ${output_log}
+         sed -i '/^Public certificate (MOK):/d' ${output_log}

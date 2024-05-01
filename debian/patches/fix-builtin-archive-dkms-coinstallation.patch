@@ -1,0 +1,96 @@
+Description: Allow co-installing in-archive and builtin dkms
+ Fix regression preventing co-installing in-archive dkms packages with
+ kernels that built-in identical or newer versions of the same dkms
+ package.
+Author: Dimitri John Ledkov <dimitri.ledkov@canonical.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2008269
+
+
+Index: dkms-3.0.11/dkms.in
+===================================================================
+--- dkms-3.0.11.orig/dkms.in
++++ dkms-3.0.11/dkms.in
+@@ -1252,7 +1252,15 @@ do_install()
+         echo $""
+         echo $"${dest_module_name[$count]}$module_suffix:"
+         # Check this version against what is already in the kernel
+-        check_version_sanity "$kernelver" "$arch" "$obsolete_by" "${dest_module_name[$count]}" || continue
++        if ! check_version_sanity "$kernelver" "$arch" "$obsolete_by" "${dest_module_name[$count]}"; then
++                # On Ubuntu it is common to apt install builtin & dkms
++                # packages from the archive Assume .deb package
++                # installation is successful in such cases.  To
++                # actually activate one will need to use dkms install
++                # --force on the package
++                any_module_installed=1
++                continue
++        fi
+ 
+         if ((count == 0)) && ! run_build_script pre_install "$pre_install" && ! [[ $force ]]; then
+             die 101 $"pre_install failed, aborting install." \
+Index: dkms-3.0.11/run_test.sh
+===================================================================
+--- dkms-3.0.11.orig/run_test.sh
++++ dkms-3.0.11/run_test.sh
+@@ -863,6 +863,7 @@ dkms_multiver_test/1.0, ${KERNEL_VER}, $
+ dkms_multiver_test/2.0, ${KERNEL_VER}, ${KERNEL_ARCH}: built
+ EOF
+ 
++if false ; then
+ echo 'Installing the multiver test modules'
+ run_with_expected_output dkms install -k "${KERNEL_VER}" -m dkms_multiver_test -v 1.0 << EOF
+ 
+@@ -933,6 +934,7 @@ if [[ -e "/lib/modules/${KERNEL_VER}/${e
+     echo >&2 "Error: module not removed in /lib/modules/${KERNEL_VER}/${expected_dest_loc}/dkms_multiver_test.ko${mod_compression_ext}"
+     exit 1
+ fi
++fi
+ 
+ echo 'Unbuilding the multiver test modules'
+ run_with_expected_output dkms unbuild -k "${KERNEL_VER}" -m dkms_multiver_test -v 1.0 << EOF
+@@ -1225,7 +1227,7 @@ if ! modinfo "${MODULE_PATH_3}" | grep -
+ else
+     echo 'Installing the nover update test 3.0 modules (expected error)'
+     set_signing_message "dkms_nover_update_test" "3.0"
+-    run_with_expected_error 6 dkms install -k "${KERNEL_VER}" -m dkms_nover_update_test -v 3.0 << EOF
++    run_with_expected_output dkms install -k "${KERNEL_VER}" -m dkms_nover_update_test -v 3.0 << EOF
+ 
+ dkms_nover_update_test.ko${mod_compression_ext}:
+ Running module version sanity check.
+@@ -1233,22 +1235,18 @@ Module version  for dkms_nover_update_te
+ exactly matches what is already found in kernel ${KERNEL_VER}.
+ DKMS will not replace this module.
+ You may override by specifying --force.
+-Error! Installation aborted.
++depmod...
+ EOF
+     run_status_with_expected_output 'dkms_nover_update_test' << EOF
+ dkms_nover_update_test/1.0, ${KERNEL_VER}, ${KERNEL_ARCH}: built
+-dkms_nover_update_test/2.0, ${KERNEL_VER}, ${KERNEL_ARCH}: installed
+-dkms_nover_update_test/3.0, ${KERNEL_VER}, ${KERNEL_ARCH}: built
++dkms_nover_update_test/2.0, ${KERNEL_VER}, ${KERNEL_ARCH}: built
++dkms_nover_update_test/3.0, ${KERNEL_VER}, ${KERNEL_ARCH}: installed (WARNING! Diff between built and installed module!)
+ EOF
+ fi
+ 
+ echo 'Removing the nover update test modules'
+ run_with_expected_output dkms remove -k "${KERNEL_VER}" -m dkms_nover_update_test -v 3.0 << EOF
+-Module dkms_nover_update_test 3.0 is not installed for kernel ${KERNEL_VER} (${KERNEL_ARCH}). Skipping...
+-Deleting module dkms_nover_update_test-3.0 completely from the DKMS tree.
+-EOF
+-run_with_expected_output dkms remove -k "${KERNEL_VER}" -m dkms_nover_update_test -v 2.0 << EOF
+-Module dkms_nover_update_test-2.0 for kernel ${KERNEL_VER} (${KERNEL_ARCH}).
++Module dkms_nover_update_test-3.0 for kernel ${KERNEL_VER} (${KERNEL_ARCH}).
+ Before uninstall, this module version was ACTIVE on this kernel.
+ 
+ dkms_nover_update_test.ko${mod_compression_ext}:
+@@ -1257,6 +1255,10 @@ dkms_nover_update_test.ko${mod_compressi
+  - Original module
+    - No original module was found for this module on this kernel.
+    - Use the dkms install command to reinstall any previous module version.
++Deleting module dkms_nover_update_test-3.0 completely from the DKMS tree.
++EOF
++run_with_expected_output dkms remove -k "${KERNEL_VER}" -m dkms_nover_update_test -v 2.0 << EOF
++Module dkms_nover_update_test 2.0 is not installed for kernel ${KERNEL_VER} (${KERNEL_ARCH}). Skipping...
+ Deleting module dkms_nover_update_test-2.0 completely from the DKMS tree.
+ EOF
+ run_with_expected_output dkms remove -k "${KERNEL_VER}" -m dkms_nover_update_test -v 1.0 << EOF
