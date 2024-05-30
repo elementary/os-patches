@@ -1,0 +1,19 @@
+#! /bin/bash
+
+set -e
+
+# This should never happen.
+if [ ! -e /bin/sh ]; then
+    ln -s bash /bin/sh
+fi
+
+update-alternatives --install \
+    /usr/share/man/man7/builtins.7.gz \
+    builtins.7.gz \
+    /usr/share/man/man7/bash-builtins.7.gz \
+    10 \
+  || true
+
+#DEBHELPER#
+
+exit 0
