@@ -936,8 +936,8 @@ hostnames_matching (text)
    command being entered (if no explicit argument is given), otherwise on
    a command from the history file. */
 
-#define VI_EDIT_COMMAND		"fc -e \"${VISUAL:-${EDITOR:-$(command -v editor || echo vi)}}\""
-#define EMACS_EDIT_COMMAND	"fc -e \"${VISUAL:-${EDITOR:-$(command -v editor || echo emacs)}}\""
+#define VI_EDIT_COMMAND		"fc -e \"${VISUAL:-${EDITOR:-vi}}\""
+#define EMACS_EDIT_COMMAND	"fc -e \"${VISUAL:-${EDITOR:-emacs}}\""
 #define POSIX_VI_EDIT_COMMAND	"fc -e vi"
 
 static int

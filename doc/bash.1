@@ -8,22 +8,6 @@
 .\"	Last Change: Mon Sep 19 11:13:21 EDT 2022
 .\"
 .\" bash_builtins, strip all but Built-Ins section
-.de zZ
-..
-.de zY
-..
-.\"
-.\" File Name macro.  This used to be `.PN', for Path Name,
-.\" but Sun doesn't seem to like that very much.
-.\"
-.de FN
-\fI\|\\$1\|\fP
-..
-.\" Number register zZ is defined in bash-builtins(7)
-.\" Number register zY is defined in rbash(1)
-.\" This man-page is included in them
-.if !rzZ .nr zZ 0 \" avoid a warning about an undefined register
-.if !rzY .nr zY 0 \" avoid a warning about an undefined register
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
 .TH BASH 1 "2022 September 19" "GNU Bash 5.2"
@@ -52,6 +36,13 @@
 .\" .el \\*(]X\h|\\n()Iu+\\n()Ru\c
 .\" .}f
 .\" ..
+.\"
+.\" File Name macro.  This used to be `.PN', for Path Name,
+.\" but Sun doesn't seem to like that very much.
+.\"
+.de FN
+\fI\|\\$1\|\fP
+..
 .SH NAME
 bash \- GNU Bourne-Again SHell
 .SH SYNOPSIS
@@ -131,12 +122,6 @@ This option allows the positional parameters to be set
 when invoking an interactive shell or when reading input
 through a pipe.
 .TP
-.B \-v
-Print shell input lines as they are read.
-.TP
-.B \-x
-Print commands and their arguments as they are executed.
-.TP
 .B \-D
 A list of all double-quoted strings preceded by \fB$\fP
 is printed on the standard output.
@@ -202,9 +187,7 @@ Display a usage message on standard output and exit successfully.
 .PD
 Execute commands from
 .I file
-instead of the system wide initialization file
-.I /etc/bash.bashrc
-and the standard personal initialization file
+instead of the standard personal initialization file
 .I ~/.bashrc
 if the shell is interactive (see
 .SM
@@ -235,9 +218,7 @@ reads these files when it is invoked as a login shell (see
 below).
 .TP
 .B \-\-norc
-Do not read and execute the system wide initialization file
-.I /etc/bash.bashrc
-and the personal initialization file
+Do not read and execute the personal initialization file
 .I ~/.bashrc
 if the shell is interactive.
 This option is on by default if the shell is invoked as
@@ -352,15 +333,13 @@ exists.
 .PP
 When an interactive shell that is not a login shell is started,
 .B bash
-reads and executes commands from \fI/etc/bash.bashrc\fP and \fI~/.bashrc\fP,
-if these files exist.
+reads and executes commands from \fI~/.bashrc\fP, if that file exists.
 This may be inhibited by using the
 .B \-\-norc
 option.
 The \fB\-\-rcfile\fP \fIfile\fP option will force
 .B bash
-to read and execute commands from \fIfile\fP instead of
-\fI/etc/bash.bashrc\fP and \fI~/.bashrc\fP.
+to read and execute commands from \fIfile\fP instead of \fI~/.bashrc\fP.
 .PP
 When
 .B bash
@@ -447,8 +426,8 @@ or the secure shell daemon \fIsshd\fP.
 If
 .B bash
 determines it is being run non-interactively in this fashion,
-it reads and executes commands from \fI/etc/bash.bashrc\fP and \fI~/.bashrc\fP,
-if these files exist and are readable.
+it reads and executes commands from \fI~/.bashrc\fP,
+if that file exists and is readable.
 It will not do this if invoked as \fBsh\fP.
 The
 .B \-\-norc
@@ -750,10 +729,6 @@ as primaries.
 .if n .sp 1
 When used with \fB[[\fP, the \fB<\fP and \fB>\fP operators sort
 lexicographically using the current locale.
-.PP
-See the description of the \fItest\fP builtin command (section SHELL
-BUILTIN COMMANDS below) for the handling of parameters (i.e.
-missing parameters).
 .if t .sp 0.5
 .if n .sp 1
 When the \fB==\fP and \fB!=\fP operators are used, the string to the
@@ -2257,9 +2232,7 @@ A filename whose suffix matches one of the entries in
 is excluded from the list of matched filenames.
 A sample value is
 .if t \f(CW".o:~"\fP.
-.if n ".o:~"
-(Quoting is needed when assigning a value to this variable,
-which contains tildes).
+.if n ".o:~".
 .TP
 .B FUNCNEST
 If set to a numeric value greater than 0, defines a maximum function
@@ -2545,8 +2518,8 @@ and is set by the administrator who installs
 .BR bash .
 A common value is
 .na
-.if t \f(CW/usr/local/bin:\:/usr/local/sbin:\:/usr/bin:\:/usr/sbin:\:/bin:\:/sbin\fP.
-.if n ``/usr/local/bin:\:/usr/local/sbin:\:/usr/bin:\:/usr/sbin:\:/bin:\:/sbin''.
+.if t \f(CW/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin\fP.
+.if n ``/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin''.
 .ad
 .TP
 .B POSIXLY_CORRECT
@@ -3619,9 +3592,6 @@ and the substitution of the result.  The format for arithmetic expansion is:
 \fB$((\fP\fIexpression\fP\fB))\fP
 .RE
 .PP
-The old format \fB$[\fP\fIexpression\fP\fB]\fP is deprecated and will
-be removed in upcoming versions of bash.
-.PP
 The
 .I expression
 undergoes the same expansions
@@ -3784,10 +3754,6 @@ If the shell option
 .B nocaseglob
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Note that when using range expressions like
-[a-z] (see below), letters of the other case may be included,
-depending on the setting of
-.B LC_COLLATE.
 When a pattern is used for pathname expansion,
 the character
 .B ``.''
@@ -4155,10 +4121,6 @@ A failure to open or create a file causes the redirection to fail.
 Redirections using file descriptors greater than 9 should be used with
 care, as they may conflict with file descriptors the shell uses
 internally.
-.PP
-Note that the
-.B exec
-builtin command can make redirections take effect in the current shell.
 .SS Redirecting Input
 Redirection of input causes the file whose name results from
 the expansion of
@@ -11704,12 +11666,6 @@ The \fBbash\fP executable
 .TP
 .FN /etc/profile
 The systemwide initialization file, executed for login shells
-.TP
-.FN /etc/bash.bashrc
-The systemwide per-interactive-shell startup file
-.TP
-.FN /etc/bash.bash.logout
-The systemwide login shell cleanup file, executed when a login shell exits
 .TP
 .FN ~/.bash_profile
 The personal initialization file, executed for login shells

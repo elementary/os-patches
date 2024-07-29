@@ -41,20 +41,20 @@ repeat ()
 { 
     local count="$1" i;
     shift;
-    for i in $(_seq 1 "$count");
+    for i in $(seq 1 "$count");
     do
         eval "$@";
     done
 }
 
 # Subfunction needed by `repeat'.
-_seq ()
+seq ()
 { 
     local lower upper output;
     lower=$1 upper=$2;
 
     if [ $lower -ge $upper ]; then return; fi
-    while [ $lower -lt $upper ];
+    while [ $lower -le $upper ];
     do
 	echo -n "$lower "
         lower=$(($lower + 1))

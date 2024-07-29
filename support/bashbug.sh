@@ -117,7 +117,6 @@ alpha*|beta*|devel*|rc*)
 		esac ;;
 esac
 
-BUGBASH="${BUGBASH},bash@packages.debian.org"
 BUGADDR="${1-$BUGBASH}"
 
 if [ -z "$DEFEDITOR" ] && [ -z "$EDITOR" ]; then

@@ -204,4 +204,4 @@
 /******************************************************************/
 
 /* If you don't want bash to provide a default mail file to check. */
-#undef DEFAULT_MAIL_DIRECTORY
+/* #undef DEFAULT_MAIL_DIRECTORY */

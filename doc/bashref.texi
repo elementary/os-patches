@@ -3059,9 +3059,6 @@ Redirections using file descriptors greater than 9 should be used with
 care, as they may conflict with file descriptors the shell uses
 internally.
 
-Note that the @code{exec} builtin command can make redirections take
-effect in the current shell.
-
 @subsection Redirecting Input
 Redirection of input causes the file whose name results from
 the expansion of @var{word}
@@ -7341,10 +7338,6 @@ The @code{test} command uses ASCII ordering.
 
 Unless otherwise specified, primaries that operate on files follow symbolic
 links and operate on the target of the link, rather than the link itself.
-
-See the description of the @code{test} builtin command (section
-@pxref{Bash Builtins} below) for the handling of parameters
-(i.e. missing parameters).
 
 @table @code
 @item -a @var{file}
