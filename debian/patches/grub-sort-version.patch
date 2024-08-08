@@ -1,0 +1,52 @@
+From: Julian Andres Klode <julian.klode@canonical.com>
+Date: Mon, 25 Sep 2023 10:24:11 +0200
+Subject: grub-mkconfig: Use grub-sort-version
+
+We need to have support for GRUB_FLAVOUR_ORDER and it's arguably
+the easiest way to hook this in, although you might be able to
+write this as an awk script or something.
+---
+ util/grub-mkconfig.in     |  3 ++-
+ util/grub-mkconfig_lib.in | 15 +--------------
+ 2 files changed, 3 insertions(+), 15 deletions(-)
+
+diff --git a/util/grub-mkconfig.in b/util/grub-mkconfig.in
+index 46b036b..0b1adf5 100644
+--- a/util/grub-mkconfig.in
++++ b/util/grub-mkconfig.in
+@@ -270,7 +270,8 @@ export GRUB_DEFAULT \
+   GRUB_RECORDFAIL_TIMEOUT \
+   GRUB_RECOVERY_TITLE \
+   GRUB_FORCE_PARTUUID \
+-  GRUB_DISABLE_INITRD
++  GRUB_DISABLE_INITRD \
++  GRUB_FLAVOUR_ORDER
+ 
+ if test "x${grub_cfg}" != "x"; then
+   rm -f "${grub_cfg}.new"
+diff --git a/util/grub-mkconfig_lib.in b/util/grub-mkconfig_lib.in
+index 121df9a..cabac83 100644
+--- a/util/grub-mkconfig_lib.in
++++ b/util/grub-mkconfig_lib.in
+@@ -226,20 +226,7 @@ grub_file_is_not_garbage ()
+ 
+ version_sort ()
+ {
+-  case $version_sort_sort_has_v in
+-    yes)
+-      LC_ALL=C sort -V "$@";;
+-    no)
+-      LC_ALL=C sort -n "$@";;
+-    *)
+-      if sort -V </dev/null > /dev/null 2>&1; then
+-        version_sort_sort_has_v=yes
+-	LC_ALL=C sort -V "$@"
+-      else
+-        version_sort_sort_has_v=no
+-        LC_ALL=C sort -n "$@"
+-      fi;;
+-   esac
++  LC_ALL=C /usr/lib/grub/grub-sort-version "$@"
+ }
+ 
+ # Given an item as the first argument and a list as the subsequent arguments,

@@ -1,0 +1,36 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 13 Feb 2024 16:23:08 +0000
+Subject: Revert "kern/ieee1275/init/ppc64: Return allocated address using
+ context"
+
+This reverts commit fe5d5e85711e765199853739e7e787621804778b.
+---
+ grub-core/kern/ieee1275/init.c | 2 --
+ include/grub/ieee1275/alloc.h  | 1 -
+ 2 files changed, 3 deletions(-)
+
+diff --git a/grub-core/kern/ieee1275/init.c b/grub-core/kern/ieee1275/init.c
+index 2d1b0f1..389a75d 100644
+--- a/grub-core/kern/ieee1275/init.c
++++ b/grub-core/kern/ieee1275/init.c
+@@ -531,8 +531,6 @@ regions_claim (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+       if (rcr->init_region)
+           grub_mm_init_region ((void *) (grub_addr_t) addr, len);
+       rcr->total -= len;
+-
+-      rcr->addr = addr;
+     }
+ 
+   *(grub_uint32_t *) data = rcr->total;
+diff --git a/include/grub/ieee1275/alloc.h b/include/grub/ieee1275/alloc.h
+index f3065ff..523f51f 100644
+--- a/include/grub/ieee1275/alloc.h
++++ b/include/grub/ieee1275/alloc.h
+@@ -29,7 +29,6 @@ struct regions_claim_request {
+   unsigned int flags;     /* GRUB_MM_ADD_REGION_(NONE|CONSECUTIVE) */
+   grub_uint32_t total;    /* number of requested bytes */
+   bool init_region;       /* whether to add memory to the heap using grub_mm_init_region() */
+-  grub_uint64_t addr;     /* result address */
+ };
+ 
+ #endif /* GRUB_IEEE1275_ALLOC_HEADER */

@@ -1,0 +1,58 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 13 Feb 2024 16:23:07 +0000
+Subject: Revert "kern/ieee1275/init/ppc64: Rename regions_claim() to
+ grub_regions_claim()"
+
+This reverts commit 679691a13ef583a0342888c1fcca99f663a71c68.
+---
+ grub-core/kern/ieee1275/init.c | 10 +++++-----
+ include/grub/ieee1275/alloc.h  |  3 ---
+ 2 files changed, 5 insertions(+), 8 deletions(-)
+
+diff --git a/grub-core/kern/ieee1275/init.c b/grub-core/kern/ieee1275/init.c
+index db2aff6..019532a 100644
+--- a/grub-core/kern/ieee1275/init.c
++++ b/grub-core/kern/ieee1275/init.c
+@@ -331,9 +331,9 @@ count_free (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+   return 0;
+ }
+ 
+-int
+-grub_regions_claim (grub_uint64_t addr, grub_uint64_t len,
+-		    grub_memory_type_t type, void *data)
++static int
++regions_claim (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
++	       void *data)
+ {
+   struct regions_claim_request *rcr = data;
+   grub_uint64_t linux_rmo_save;
+@@ -568,7 +568,7 @@ heap_init (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+   };
+   int ret;
+ 
+-  ret = grub_regions_claim (addr, len, type, &rcr);
++  ret = regions_claim (addr, len, type, &rcr);
+ 
+   *(grub_uint32_t *) data = rcr.total;
+ 
+@@ -586,7 +586,7 @@ region_claim (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+   };
+   int ret;
+ 
+-  ret = grub_regions_claim (addr, len, type, &rcr);
++  ret = regions_claim (addr, len, type, &rcr);
+ 
+   *(grub_uint32_t *) data = rcr.total;
+ 
+diff --git a/include/grub/ieee1275/alloc.h b/include/grub/ieee1275/alloc.h
+index 67a7856..e314c98 100644
+--- a/include/grub/ieee1275/alloc.h
++++ b/include/grub/ieee1275/alloc.h
+@@ -33,7 +33,4 @@ struct regions_claim_request {
+   grub_size_t align;      /* alignment restrictions */
+ };
+ 
+-int EXPORT_FUNC(grub_regions_claim) (grub_uint64_t addr, grub_uint64_t len,
+-				     grub_memory_type_t type, void *data);
+-
+ #endif /* GRUB_IEEE1275_ALLOC_HEADER */

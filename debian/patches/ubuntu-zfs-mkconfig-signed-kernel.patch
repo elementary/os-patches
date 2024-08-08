@@ -1,0 +1,93 @@
+From: Julian Andres Klode <julian.klode@canonical.com>
+Date: Tue, 30 Nov 2021 17:02:37 +0100
+Subject: zsys: Generate configuration for signed UEFI kernels if available
+
+Forwarded: no
+Last-Update: 2013-12-25
+
+Patch-Name: mkconfig-signed-kernel.patch
+---
+ util/grub.d/10_linux_zfs.in | 35 +++++++++++++++++++++++++++++++++--
+ 1 file changed, 33 insertions(+), 2 deletions(-)
+
+diff --git a/util/grub.d/10_linux_zfs.in b/util/grub.d/10_linux_zfs.in
+index 893c73f..de30605 100755
+--- a/util/grub.d/10_linux_zfs.in
++++ b/util/grub.d/10_linux_zfs.in
+@@ -20,6 +20,8 @@ set -e
+ prefix="@prefix@"
+ datarootdir="@datarootdir@"
+ ubuntu_recovery="@UBUNTU_RECOVERY@"
++quiet_boot="@QUIET_BOOT@"
++quick_boot="@QUICK_BOOT@"
+ 
+ . "${pkgdatadir}/grub-mkconfig_lib"
+ 
+@@ -338,6 +340,16 @@ try_default_layout_bpool() {
+     validate_system_dataset "${candidate_dataset}" "boot" "${mntdir}" "${snapshot_name}"
+ }
+ 
++# Return if secure boot is enabled on that system
++is_secure_boot_enabled() {
++    if LANG=C mokutil --sb-state 2>/dev/null | grep -qi enabled; then
++        echo "true"
++        return
++    fi
++    echo "false"
++    return
++}
++
+ # Given a filesystem or snapshot dataset, returns dataset|machine id|pretty name|last used
+ # $1 is dataset we want information from
+ # $2 is the temporary mount directory to use
+@@ -417,6 +429,17 @@ get_dataset_info() {
+             continue
+         fi
+ 
++        # Filters entry if efi/non efi.
++        # Note that for now we allow kernel without .efi.signed as those are signed kernel
++        # on ubuntu, loaded by the shim.
++        case "${linux}" in
++            *.efi.signed)
++                if [ "$(is_secure_boot_enabled)" = "false" ]; then
++                    continue
++                fi
++            ;;
++        esac
++
+         linux_basename=$(basename "${linux}")
+         linux_dirname=$(dirname "${linux}")
+         version=$(echo "${linux_basename}" | sed -e "s,^[^0-9]*-,,g")
+@@ -749,6 +772,10 @@ zfs_linux_entry () {
+ 
+     echo "${submenu_indentation}menuentry '$(echo "${title}" | grub_quote)' ${CLASS} \${menuentry_id_option} 'gnulinux-${dataset}-${kernel_version}' {"
+ 
++    if [ "${quick_boot}" = 1 ]; then
++        echo "${submenu_indentation}	recordfail"
++    fi
++
+     if [ "${type}" != "recovery" ] ; then
+         GRUB_SAVEDEFAULT=${GRUB_SAVEDEFAULT:-}
+         default_entry="$(save_default_entry)"
+@@ -778,7 +805,9 @@ zfs_linux_entry () {
+ 
+     echo "$(prepare_grub_to_access_device_cached "${boot_device}" "${submenu_level}")"
+ 
+-    echo "${submenu_indentation}	echo $(gettext_printf "Loading Linux %s ..." ${kernel_version} | grub_quote)"
++    if [ "${quiet_boot}" = 0 ] || [ "${type}" != simple ]; then
++        echo "${submenu_indentation}	echo $(gettext_printf "Loading Linux %s ..." ${kernel_version} | grub_quote)"
++    fi
+ 
+     linux_default_args="${GRUB_CMDLINE_LINUX} ${GRUB_CMDLINE_LINUX_DEFAULT}"
+     if [ ${type} = "recovery" ]; then
+@@ -788,7 +817,9 @@ zfs_linux_entry () {
+     # echo in echo trims end of line spaces
+     echo "${submenu_indentation}	linux	\"${kernel}\" root=ZFS=\"${dataset}\" ro $(echo ${linux_default_args} ${kernel_additional_args})"
+ 
+-    echo "${submenu_indentation}	echo '$(gettext_printf "Loading initial ramdisk ..." | grub_quote)'"
++    if [ "${quiet_boot}" = 0 ] || [ "${type}" != simple ]; then
++        echo "${submenu_indentation}	echo '$(gettext_printf "Loading initial ramdisk ..." | grub_quote)'"
++    fi
+     echo "${submenu_indentation}	initrd	\"${initrd}\""
+     echo "${submenu_indentation}}"
+ }

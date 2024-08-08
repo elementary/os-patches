@@ -1,0 +1,48 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 13 Feb 2024 16:23:08 +0000
+Subject: Revert "kern/ieee1275/init/ppc64: Add support for alignment
+ requirements"
+
+This reverts commit d49e86db2c15dd20f42262c0977f739ddf7bd6f6.
+---
+ grub-core/kern/ieee1275/init.c | 14 --------------
+ include/grub/ieee1275/alloc.h  |  1 -
+ 2 files changed, 15 deletions(-)
+
+diff --git a/grub-core/kern/ieee1275/init.c b/grub-core/kern/ieee1275/init.c
+index 019532a..2d1b0f1 100644
+--- a/grub-core/kern/ieee1275/init.c
++++ b/grub-core/kern/ieee1275/init.c
+@@ -515,20 +515,6 @@ regions_claim (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+             }
+         }
+     }
+-
+-  /* Honor alignment restrictions on candidate addr */
+-  if (rcr->align)
+-    {
+-      grub_uint64_t align_addr = ALIGN_UP (addr, rcr->align);
+-      grub_uint64_t d = align_addr - addr;
+-
+-      if (d > len)
+-        return 0;
+-
+-      len -= d;
+-      addr = align_addr;
+-    }
+-
+   if (rcr->flags & GRUB_MM_ADD_REGION_CONSECUTIVE && len < rcr->total)
+     return 0;
+ 
+diff --git a/include/grub/ieee1275/alloc.h b/include/grub/ieee1275/alloc.h
+index e314c98..f3065ff 100644
+--- a/include/grub/ieee1275/alloc.h
++++ b/include/grub/ieee1275/alloc.h
+@@ -30,7 +30,6 @@ struct regions_claim_request {
+   grub_uint32_t total;    /* number of requested bytes */
+   bool init_region;       /* whether to add memory to the heap using grub_mm_init_region() */
+   grub_uint64_t addr;     /* result address */
+-  grub_size_t align;      /* alignment restrictions */
+ };
+ 
+ #endif /* GRUB_IEEE1275_ALLOC_HEADER */

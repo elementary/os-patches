@@ -1,0 +1,52 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 13 Feb 2024 16:23:05 +0000
+Subject: Revert "kern/ieee1275/ieee1275: Display successful memory claims
+ when debugging"
+
+This reverts commit dc569b0777d002d92be9a7421dca763e60c528e9.
+---
+ grub-core/kern/ieee1275/ieee1275.c       | 3 ---
+ include/grub/powerpc/ieee1275/ieee1275.h | 3 ---
+ include/grub/sparc64/ieee1275/ieee1275.h | 3 ---
+ 3 files changed, 9 deletions(-)
+
+diff --git a/grub-core/kern/ieee1275/ieee1275.c b/grub-core/kern/ieee1275/ieee1275.c
+index 36ca2db..db870db 100644
+--- a/grub-core/kern/ieee1275/ieee1275.c
++++ b/grub-core/kern/ieee1275/ieee1275.c
+@@ -590,9 +590,6 @@ grub_ieee1275_claim (grub_addr_t addr, grub_size_t size, unsigned int align,
+     *result = args.base;
+   if (args.base == IEEE1275_CELL_INVALID)
+     return -1;
+-  grub_dprintf ("mmap", "CLAIMED: 0x%" PRIxGRUB_IEEE1275_CELL_T " (%"
+-		PRIuGRUB_IEEE1275_CELL_T " MiB)  size: %" PRIuGRUB_SIZE " MiB\n",
+-		args.base, args.base >> 20, ALIGN_UP (size, 1 << 20) >> 20);
+   return 0;
+ }
+ 
+diff --git a/include/grub/powerpc/ieee1275/ieee1275.h b/include/grub/powerpc/ieee1275/ieee1275.h
+index 4eb2070..3c7683f 100644
+--- a/include/grub/powerpc/ieee1275/ieee1275.h
++++ b/include/grub/powerpc/ieee1275/ieee1275.h
+@@ -25,7 +25,4 @@
+ #define GRUB_IEEE1275_CELL_SIZEOF 4
+ typedef grub_uint32_t grub_ieee1275_cell_t;
+ 
+-#define PRIxGRUB_IEEE1275_CELL_T	PRIxGRUB_UINT32_T
+-#define PRIuGRUB_IEEE1275_CELL_T	PRIuGRUB_UINT32_T
+-
+ #endif /* ! GRUB_IEEE1275_MACHINE_HEADER */
+diff --git a/include/grub/sparc64/ieee1275/ieee1275.h b/include/grub/sparc64/ieee1275/ieee1275.h
+index ccc71aa..4b18468 100644
+--- a/include/grub/sparc64/ieee1275/ieee1275.h
++++ b/include/grub/sparc64/ieee1275/ieee1275.h
+@@ -25,9 +25,6 @@
+ #define GRUB_IEEE1275_CELL_SIZEOF 8
+ typedef grub_uint64_t grub_ieee1275_cell_t;
+ 
+-#define PRIxGRUB_IEEE1275_CELL_T	PRIxGRUB_UINT64_T
+-#define PRIuGRUB_IEEE1275_CELL_T	PRIuGRUB_UINT64_T
+-
+ /* Encoding of 'mode' argument to grub_ieee1275_map_physical() */
+ #define IEEE1275_MAP_WRITE	0x0001 /* Writable */
+ #define IEEE1275_MAP_READ	0x0002 /* Readable */

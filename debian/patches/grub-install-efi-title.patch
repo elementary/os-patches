@@ -1,0 +1,165 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Wed, 21 Feb 2024 15:42:32 +0000
+Subject: grub-install: Use `GRUB_DISTRIBUTOR` value as EFI boot option title
+
+- Allow entries to be called things like "Ubuntu".
+- If there is no `GRUB_DISTRIBUTOR` assume it is "GRUB".
+- When searching for a variable to re-use, allow matching against both
+  the old "efi_distributor" value and the new "efi_title" one.
+- Dynamically generate `BOOT{ARCH}.CSV` with the option title
+---
+ grub-core/osdep/unix/efivar.c   |  6 +++---
+ grub-core/osdep/unix/platform.c |  6 ++++--
+ include/grub/util/install.h     |  6 ++++--
+ util/grub-install.c             | 31 +++++++++++++++++++++++--------
+ 4 files changed, 34 insertions(+), 15 deletions(-)
+
+diff --git a/grub-core/osdep/unix/efivar.c b/grub-core/osdep/unix/efivar.c
+index 19b6550..906f8ea 100644
+--- a/grub-core/osdep/unix/efivar.c
++++ b/grub-core/osdep/unix/efivar.c
+@@ -540,7 +540,7 @@ devices_equal (const_efidp a, const_efidp b)
+ int
+ grub_install_efivar_register_efi (grub_device_t efidir_grub_dev,
+ 				  const char *efidir, const char *efifile_path,
+-				  const char *efi_distributor)
++				  const char *efi_distributor, const char *efi_title)
+ {
+   const char *efidir_disk;
+   int efidir_part;
+@@ -619,7 +619,7 @@ grub_install_efivar_register_efi (grub_device_t efidir_grub_dev,
+       if (entry->num < 0)
+ 	continue;
+       label = (const char *) efi_loadopt_desc (load_option, entry->data_size);
+-      if (strcasecmp (label, efi_distributor) != 0)
++      if (strcasecmp (label, efi_title) != 0 && strcasecmp (label, efi_distributor) != 0)
+ 	continue;
+ 
+       path = efi_loadopt_path (load_option, entry->data_size);
+@@ -671,7 +671,7 @@ grub_install_efivar_register_efi (grub_device_t efidir_grub_dev,
+   if (entry_num == -1)
+     entry_num = find_free_boot_num (entries);
+   entry = make_boot_variable (entry_num, efidir_disk, efidir_part,
+-			      efifile_path, efi_distributor);
++			      efifile_path, efi_title);
+   if (!entry)
+     goto err;
+ 
+diff --git a/grub-core/osdep/unix/platform.c b/grub-core/osdep/unix/platform.c
+index 947cb7c..6ac822e 100644
+--- a/grub-core/osdep/unix/platform.c
++++ b/grub-core/osdep/unix/platform.c
+@@ -78,11 +78,13 @@ get_ofpathname (const char *dev)
+ int
+ grub_install_register_efi (grub_device_t efidir_grub_dev, const char *efidir,
+ 			   const char *efifile_path,
+-			   const char *efi_distributor)
++			   const char *efi_distributor,
++			   const char *efi_title)
+ {
+ #ifdef HAVE_EFIVAR
+   return grub_install_efivar_register_efi (efidir_grub_dev, efidir,
+-					   efifile_path, efi_distributor);
++					   efifile_path, efi_distributor,
++					   efi_title);
+ #else
+   grub_util_error ("%s",
+ 		   _("GRUB was not built with efivar support; "
+diff --git a/include/grub/util/install.h b/include/grub/util/install.h
+index 92ff0bf..b865dd8 100644
+--- a/include/grub/util/install.h
++++ b/include/grub/util/install.h
+@@ -230,11 +230,13 @@ grub_install_get_default_powerpc_machtype (void);
+ int grub_install_efivar_register_efi (grub_device_t efidir_grub_dev,
+ 				      const char *efidir,
+ 				      const char *efifile_path,
+-				      const char *efi_distributor);
++				      const char *efi_distributor,
++				      const char *efi_title);
+ 
+ int grub_install_register_efi (grub_device_t efidir_grub_dev,
+ 			       const char *efidir, const char *efifile_path,
+-			       const char *efi_distributor);
++			       const char *efi_distributor,
++			       const char *efi_title);
+ 
+ void
+ grub_install_register_ieee1275 (int is_prep, const char *install_device,
+diff --git a/util/grub-install.c b/util/grub-install.c
+index 03fb195..fb92bef 100644
+--- a/util/grub-install.c
++++ b/util/grub-install.c
+@@ -986,7 +986,7 @@ int
+ main (int argc, char *argv[])
+ {
+   int is_efi = 0;
+-  const char *efi_distributor = NULL;
++  const char *efi_distributor = NULL, *efi_title = NULL;
+   const char *efi_suffix = NULL, *efi_suffix_upper = NULL;
+   char *efi_file = NULL;
+   char **grub_devices;
+@@ -1290,6 +1290,13 @@ main (int argc, char *argv[])
+ 	efi_distributor = "ubuntu";
+       else if (strcmp (efi_distributor, "devuan") == 0)
+ 	efi_distributor = "debian";
++      efi_title = config.grub_distributor;
++      if (!efi_title || efi_title[0] == '\0')
++	efi_title = "GRUB";
++      else if (strcasecmp (efi_title, "kubuntu") == 0)
++	efi_title = "Ubuntu";
++      else if (strcasecmp (efi_title, "devuan") == 0)
++	efi_title = "Debian";
+       switch (platform)
+ 	{
+ 	case GRUB_INSTALL_PLATFORM_I386_EFI:
+@@ -2153,7 +2160,7 @@ main (int argc, char *argv[])
+ 	      int ret;
+ 	      ret = grub_install_register_efi (
+ 		  efidir_grub_dev, efidir, "\\System\\Library\\CoreServices",
+-		  efi_distributor);
++		  efi_distributor, efi_title);
+ 	      if (ret)
+ 	        grub_util_error (_("failed to register the EFI boot entry: %s"),
+ 				 strerror (ret));
+@@ -2188,7 +2195,10 @@ main (int argc, char *argv[])
+ 	    if (grub_util_is_regular (shim_signed))
+ 	      {
+ 		char *chained_base, *chained_dst;
+-		char *mok_src, *mok_dst, *bootcsv_src, *bootcsv_dst;
++		char *mok_src, *mok_dst, *bootcsv_dst, *bootcsv_utf8;
++		grub_ssize_t bootcsv_utf16_len;
++		grub_uint16_t *bootcsv_utf16;
++		FILE *bootcsv_dst_f;
+ 
+ 		/* Install grub as our chained bootloader */
+ 		chained_base = xasprintf ("grub%s.efi", efi_suffix);
+@@ -2222,11 +2232,15 @@ main (int argc, char *argv[])
+ 		free (mok_dst);
+ 
+ 		/* Also try to install boot.csv for fallback */
+-		bootcsv_src = grub_util_path_concat (2, "/usr/lib/shim/",
+-						     bootcsv);
+ 		bootcsv_dst = grub_util_path_concat (2, efidir, bootcsv);
+-		grub_install_copy_file (bootcsv_src, bootcsv_dst, 0);
+-		free (bootcsv_src);
++		bootcsv_utf8 = xasprintf("shim%s.efi,%s,,This is the boot entry for %s\n",
++			 		 efi_suffix, efi_title, efi_title);
++		bootcsv_utf16_len = grub_utf8_to_utf16_alloc (bootcsv_utf8, &bootcsv_utf16, NULL);
++		bootcsv_dst_f = grub_util_fopen (bootcsv_dst, "wb");
++		fwrite (bootcsv_utf16, bootcsv_utf16_len, sizeof *bootcsv_utf16, bootcsv_dst_f);
++		fclose (bootcsv_dst_f);
++		free (bootcsv_utf16);
++		free (bootcsv_utf8);
+ 		free (bootcsv_dst);
+ 	      }
+ 	    else
+@@ -2274,7 +2288,8 @@ main (int argc, char *argv[])
+ 			  (part ? ",": ""), (part ? : ""));
+ 	  grub_free (part);
+ 	  ret = grub_install_register_efi (efidir_grub_dev, efidir,
+-					   efifile_path, efi_distributor);
++					   efifile_path, efi_distributor,
++					   efi_title);
+ 	  if (ret)
+ 	    grub_util_error (_("failed to register the EFI boot entry: %s"),
+ 			     strerror (ret));

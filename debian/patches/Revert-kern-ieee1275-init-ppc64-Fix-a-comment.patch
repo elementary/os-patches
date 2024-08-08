@@ -1,0 +1,22 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 13 Feb 2024 16:23:04 +0000
+Subject: Revert "kern/ieee1275/init/ppc64: Fix a comment"
+
+This reverts commit 5f8e091b6a668f89de4f40b15b0712bafa053cbe.
+---
+ grub-core/kern/ieee1275/init.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/kern/ieee1275/init.c b/grub-core/kern/ieee1275/init.c
+index dc78357..db2aff6 100644
+--- a/grub-core/kern/ieee1275/init.c
++++ b/grub-core/kern/ieee1275/init.c
+@@ -485,7 +485,7 @@ grub_regions_claim (grub_uint64_t addr, grub_uint64_t len,
+               /* We must not exceed the upper_mem_limit (assuming it's >= RMO_ADDR_MAX) */
+               if (addr + len > upper_mem_limit)
+                 {
+-                  /* Take the bigger chunk from either below linux_rmo_save or above RMO_ADDR_MAX. */
++                  /* take the bigger chunk from either below linux_rmo_save or above upper_mem_limit */
+                   len = upper_mem_limit - addr;
+                   if (orig_addr < linux_rmo_save && linux_rmo_save - orig_addr > len)
+                     {

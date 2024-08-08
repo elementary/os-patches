@@ -1,0 +1,24 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 13 Feb 2024 16:23:02 +0000
+Subject: Revert "kern/ieee1275/init/ppc64: Display upper_mem_limit when
+ debugging"
+
+This reverts commit 17c68472d1e7746a043b174afb8aab44bda109da.
+---
+ grub-core/kern/ieee1275/init.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/grub-core/kern/ieee1275/init.c b/grub-core/kern/ieee1275/init.c
+index c32b5f4..dc78357 100644
+--- a/grub-core/kern/ieee1275/init.c
++++ b/grub-core/kern/ieee1275/init.c
+@@ -467,9 +467,6 @@ grub_regions_claim (grub_uint64_t addr, grub_uint64_t len,
+ 
+           check_kernel_dump (&upper_mem_limit);
+ 
+-          grub_dprintf ("ieee1275", "upper_mem_limit is at %llx (%lld MiB)\n",
+-                        upper_mem_limit, upper_mem_limit >> 20);
+-
+           /*
+            * we order these cases to prefer higher addresses and avoid some
+            * splitting issues

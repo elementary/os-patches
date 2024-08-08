@@ -1,0 +1,60 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 13 Feb 2024 16:23:09 +0000
+Subject: Revert "kern/ieee1275/init/ppc64: Decide by request whether to
+ initialize region"
+
+This reverts commit ea2c93484943e4f6e217e1768df38ce74986fc59.
+---
+ grub-core/kern/ieee1275/init.c | 5 +----
+ include/grub/ieee1275/alloc.h  | 3 ---
+ 2 files changed, 1 insertion(+), 7 deletions(-)
+
+diff --git a/grub-core/kern/ieee1275/init.c b/grub-core/kern/ieee1275/init.c
+index 389a75d..e995fbf 100644
+--- a/grub-core/kern/ieee1275/init.c
++++ b/grub-core/kern/ieee1275/init.c
+@@ -528,8 +528,7 @@ regions_claim (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+       err = grub_claimmap (addr, len);
+       if (err)
+ 	return err;
+-      if (rcr->init_region)
+-          grub_mm_init_region ((void *) (grub_addr_t) addr, len);
++      grub_mm_init_region ((void *) (grub_addr_t) addr, len);
+       rcr->total -= len;
+     }
+ 
+@@ -548,7 +547,6 @@ heap_init (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+   struct regions_claim_request rcr = {
+     .flags = GRUB_MM_ADD_REGION_NONE,
+     .total = *(grub_uint32_t *) data,
+-    .init_region = true,
+   };
+   int ret;
+ 
+@@ -566,7 +564,6 @@ region_claim (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+   struct regions_claim_request rcr = {
+     .flags = GRUB_MM_ADD_REGION_CONSECUTIVE,
+     .total = *(grub_uint32_t *) data,
+-    .init_region = true,
+   };
+   int ret;
+ 
+diff --git a/include/grub/ieee1275/alloc.h b/include/grub/ieee1275/alloc.h
+index 523f51f..12fade5 100644
+--- a/include/grub/ieee1275/alloc.h
++++ b/include/grub/ieee1275/alloc.h
+@@ -21,14 +21,11 @@
+ #ifndef GRUB_IEEE1275_ALLOC_HEADER
+ #define GRUB_IEEE1275_ALLOC_HEADER	1
+ 
+-#include <stdbool.h>
+-
+ #include <grub/memory.h>
+ 
+ struct regions_claim_request {
+   unsigned int flags;     /* GRUB_MM_ADD_REGION_(NONE|CONSECUTIVE) */
+   grub_uint32_t total;    /* number of requested bytes */
+-  bool init_region;       /* whether to add memory to the heap using grub_mm_init_region() */
+ };
+ 
+ #endif /* GRUB_IEEE1275_ALLOC_HEADER */
