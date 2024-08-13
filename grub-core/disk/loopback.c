@@ -102,7 +102,7 @@ grub_cmd_loopback (grub_extcmd_context_t ctxt, int argc, char **args)
     if (grub_strcmp (newdev->devname, args[0]) == 0)
       return grub_error (GRUB_ERR_BAD_ARGUMENT, "device name already exists");
 
-  file = grub_file_open (args[1], type | GRUB_FILE_TYPE_SKIP_SIGNATURE);
+  file = grub_file_open (args[1], type);
   if (! file)
     return grub_errno;
 

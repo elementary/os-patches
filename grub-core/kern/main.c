@@ -29,9 +29,7 @@
 #include <grub/command.h>
 #include <grub/reader.h>
 #include <grub/parser.h>
-#ifndef GRUB_MACHINE_PCBIOS
 #include <grub/verify.h>
-#endif
 
 #ifdef GRUB_MACHINE_PCBIOS
 #include <grub/machine/memory.h>
@@ -130,24 +128,16 @@ grub_set_prefix_and_root (void)
 
   grub_machine_get_bootlocation (&fwdevice, &fwpath);
 
-  if (fwdevice && fwpath)
+  if (fwdevice)
     {
-      char *fw_path;
-      char separator[3] = ")";
+      char *cmdpath;
 
-      grub_dprintf ("fw_path", "\n");
-      grub_dprintf ("fw_path", "fwdevice:\"%s\" fwpath:\"%s\"\n", fwdevice, fwpath);
-
-      if (!grub_strncmp(fwdevice, "http", 4) && fwpath[0] != '/')
-	grub_strcpy(separator, ")/");
-
-      fw_path = grub_xasprintf ("(%s%s%s", fwdevice, separator, fwpath);
-      if (fw_path)
+      cmdpath = grub_xasprintf ("(%s)%s", fwdevice, fwpath ? : "");
+      if (cmdpath)
 	{
-	  grub_env_set ("fw_path", fw_path);
-	  grub_env_export ("fw_path");
-	  grub_dprintf ("fw_path", "fw_path:\"%s\"\n", fw_path);
-	  grub_free (fw_path);
+	  grub_env_set ("cmdpath", cmdpath);
+	  grub_env_export ("cmdpath");
+	  grub_free (cmdpath);
 	}
     }
 
@@ -275,20 +265,11 @@ reclaim_module_space (void)
 void __attribute__ ((noreturn))
 grub_main (void)
 {
-#if QUIET_BOOT
-  struct grub_term_output *term;
-#endif
-
   /* First of all, initialize the machine.  */
   grub_machine_init ();
 
   grub_boot_time ("After machine init.");
 
-#if QUIET_BOOT
-  /* Disable the cursor until we need it.  */
-  FOR_ACTIVE_TERM_OUTPUTS(term)
-    grub_term_setcursor (term, 0);
-#else
   /* This breaks flicker-free boot on EFI systems, so disable it there. */
 #ifndef GRUB_MACHINE_EFI
   /* Hello.  */
@@ -296,12 +277,9 @@ grub_main (void)
   grub_printf ("Welcome to GRUB!\n\n");
   grub_setcolorstate (GRUB_TERM_COLOR_STANDARD);
 #endif
-#endif
 
-#ifndef GRUB_MACHINE_PCBIOS
   /* Init verifiers API. */
   grub_verifiers_init ();
-#endif
 
   grub_load_config ();
 
@@ -337,12 +315,5 @@ grub_main (void)
   grub_boot_time ("After execution of embedded config. Attempt to go to normal mode");
 
   grub_load_normal_mode ();
-
-#if QUIET_BOOT
-  /* If we have to enter rescue mode, enable the cursor again.  */
-  FOR_ACTIVE_TERM_OUTPUTS(term)
-    grub_term_setcursor (term, 1);
-#endif
-
   grub_rescue_run ();
 }
