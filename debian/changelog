@@ -1,0 +1,533 @@
+distro-info-data (0.60ubuntu0.1) noble; urgency=medium
+
+  [ Jeremy Bícha ]
+  * debian.csv: Fix EOL date for 2.2
+
+  [ Benjamin Drung ]
+  * Add Ubuntu 24.10 "Oracular Oriole" (LP: #2064136)
+  * Update year in debian/copyright
+  * Name autopkgtest "up-to-date"
+  * up-to-date: Replace deprecated datetime.utcnow() by datetime.now(UTC)
+
+ -- Benjamin Drung <bdrung@ubuntu.com>  Tue, 30 Apr 2024 12:48:41 +0200
+
+distro-info-data (0.60) unstable; urgency=medium
+
+  [ Santiago Ruano Rincón ]
+  * Declare LTS and ELTS intentions for bullseye and bookworm.
+
+  [ Utkarsh Gupta ]
+  * debian: Fix LTS EOL date for bullseye.
+
+ -- Utkarsh Gupta <utkarsh@debian.org>  Mon, 27 Nov 2023 12:23:55 +0000
+
+distro-info-data (0.59) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * Clean .pyc files and mypy cache.
+
+  [ Benjamin Drung ]
+  * Add Ubuntu 24.04 LTS Noble Numbat (LP: #2041662).
+  * Correct Ubuntu 6.10 EOL date to 2008-04-25
+  * Correct Ubuntu 16.04 ESM begin to 2021-04-30
+  * Move Ubuntu 12.04 ESM end date back to Friday, 2019-04-26
+  * Correct Debian 3.1 EOL date to 2008-03-31
+  * Correct Debian 7 EOL date to 2016-04-25
+  * Move Debian 9 EOL to the 9.13 release date 2020-07-18
+  * Move Debian 10 EOL to the 10.13 release date 2022-09-10
+
+ -- Benjamin Drung <bdrung@debian.org>  Fri, 27 Oct 2023 15:17:07 +0200
+
+distro-info-data (0.58) unstable; urgency=medium
+
+  * Add Ubuntu 23.10 Mantic Minotaur (LP: #2018028)
+  * Set the planned release date for Debian bookworm (and an EoL based on it).
+  * Adjust trixie's creation date to match bookworm's release.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 28 Apr 2023 19:24:30 -0400
+
+distro-info-data (0.57) unstable; urgency=medium
+
+  [ Dimitri John Ledkov ]
+  * Document Ubuntu ESM overlap period (LP: #2003949)
+
+  [ Stefano Rivera ]
+  * Tighten validate-csv-data heuristics, to limit Ubuntu EoLs to Tue-Thursday
+  * Correct error message for EoL date weekdays
+  * Ensure Ubuntu LTS releases have some overlap with ESM
+  * Correct exit code for EoL date weekdays
+
+  [ Benjamin Drung ]
+  * Format Python code with black
+  * Some refactoring in validate-csv-data for better readability
+  * Update year in debian/copyright
+  * Bump Standards-Version to 4.6.2
+
+ -- Benjamin Drung <bdrung@debian.org>  Wed, 22 Feb 2023 15:45:05 +0100
+
+distro-info-data (0.56) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * Add Debian 14 "forky" with a vague creation date.
+
+  [ Brian Murray ]
+  * Correct Update 23.04 release date to 2023-04-20
+
+ -- Benjamin Drung <bdrung@debian.org>  Mon, 31 Oct 2022 14:51:00 +0100
+
+distro-info-data (0.55) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * Mark python3 Build-Depend as <!nocheck>.
+
+  [ Thomas Bechtold ]
+  * Add dates for Ubuntu 23.04, Lunar Lobster (LP: #1993667)
+
+ -- Benjamin Drung <bdrung@debian.org>  Fri, 28 Oct 2022 11:09:05 +0200
+
+distro-info-data (0.54) unstable; urgency=medium
+
+  * Update Debian ELTS dates to ~10 years of support (Closes: #1014837)
+  * Correct release date of Debian 8 (jessie) to 2015-04-26
+  * Restrict maximum line length to 79 characters
+  * Fix all pylint complaints (except too-many-branches)
+  * Switch to debhelper 13
+  * Bump Standards-Version to 4.6.1 (no changes needed)
+
+ -- Benjamin Drung <bdrung@debian.org>  Sat, 23 Jul 2022 17:31:19 +0200
+
+distro-info-data (0.53) unstable; urgency=medium
+
+  * Add Ubuntu 22.10, Kinetic Kudu.
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 25 Apr 2022 11:48:33 -0400
+
+distro-info-data (0.52) unstable; urgency=medium
+
+  * Extend Ubuntu 14.04 and 16.04 ESM out to 10 years in total.
+  * Add Ubuntu 22.04 LTS, Jammy Jellyfish.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 15 Oct 2021 06:01:00 -0700
+
+distro-info-data (0.51) unstable; urgency=medium
+
+  * Update bullseye's release date, bookworm's creation date, and buster's EoL
+    date based on the updated planned bullseye release date.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 23 Jul 2021 20:41:20 -0400
+
+distro-info-data (0.50) unstable; urgency=medium
+
+  * Update buster's EOL day to bullseye's (tentative) release date +1y.
+  * Add ELTS dates for stretch and buster at LTS + 2 years, this seems likely.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 17 Jun 2021 11:01:52 -0400
+
+distro-info-data (0.49) unstable; urgency=medium
+
+  * Move Ubuntu EoLs off weekends.
+  * Validate that Ubuntu EoLs occur during the week.
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 15 Jun 2021 13:46:40 -0400
+
+distro-info-data (0.48) unstable; urgency=medium
+
+  * Correct typo in changelog.
+  * Set a release date for Debian bullseye (and bookworm creation), based on
+    the release team's tentative estimate.
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 14 Jun 2021 17:47:09 -0400
+
+distro-info-data (0.47) unstable; urgency=medium
+
+  * Add Ubuntu 21.10, Impish Indri.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 22 Apr 2021 10:30:18 -0400
+
+distro-info-data (0.46) unstable; urgency=medium
+
+  * Add "eol-server" dates matching "eol", for LTS releases, as there hasn't
+    been a distinction between the two, for a while.
+    (Closes: #922090, LP: #1814976).
+  * Add "eol-esm" column: EOL for Ubuntu Extended Security Maintenance support.
+    (LP: #1808038)
+  * Drop ancient Replaces: distro-info (<< 0.3~). No longer needed.
+  * Add "eol-lts" for Debian LTS (Closes: #782685)
+  * Add estimated dates for Buster EOL and Buster LTS EOL.
+  * Publish the data to GitLab pages. (Closes: #973904)
+  * Bump Standards-Version to 4.5.1, no changes needed.
+  * Bump copyright years.
+  * Correct the EOL date for Debian Jessie.
+  * Add Debian 13 "Trixie", with a rough date.
+  * Add "up-to-date" testing tool.
+  * Add an autopkgtest, running the validation and up-to-date tests.
+  * "black" Python.
+  * Add "eol-elts" for Debian ELTS.
+  * Tweak eol and eol-esm dates, by a couple of days, for Ubuntu 6.10, 9.10,
+    10.04, 12.04, 15.04, 15.10, 19.04 to match announced EOL dates.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 29 Jan 2021 13:41:20 -0700
+
+distro-info-data (0.45) unstable; urgency=medium
+
+  * Add Ubuntu 21.04, Hirsute Hippo.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 29 Oct 2020 13:21:12 -0700
+
+distro-info-data (0.44) unstable; urgency=medium
+
+  * Add Ubuntu 20.10, Groovy Gorilla.
+  * Add a guessed EOL date for Debian Stretch.
+  * Bump Standards-Version to 4.5.0, no changes needed.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 24 Apr 2020 08:29:10 -0700
+
+distro-info-data (0.43) unstable; urgency=medium
+
+  * Add Ubuntu 20.04 LTS, Focal Fossa.
+  * Bump Standards-Version to 4.4.1, no changes needed.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 17 Oct 2019 13:10:30 -0700
+
+distro-info-data (0.42) unstable; urgency=medium
+
+  * validate-csv-data:
+    - Switch to Python 3
+    - Switch from optparse to argparse
+    - Fix pylint issues
+  * Bump Standards-Version to 4.4.0
+  * Switch to debhelper 12
+
+ -- Benjamin Drung <bdrung@debian.org>  Tue, 23 Jul 2019 12:29:47 +0200
+
+distro-info-data (0.41) unstable; urgency=medium
+
+  * Add final animal name for Ubuntu 19.10 Eoan Ermine.
+  * Set release date for Buster (and matching creation date for Bullseye).
+    It has been announced.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 14 Jun 2019 10:50:04 -0700
+
+distro-info-data (0.40) unstable; urgency=medium
+
+  * Correct EOL date for trusty. (LP: #1825553)
+  * Add Ubuntu 19.10, with a provisional animal name. (LP: #1825379)
+  * Bump Standards-Version to 4.3.0, no changes needed.
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 23 Apr 2019 12:14:38 -0700
+
+distro-info-data (0.39) unstable; urgency=medium
+
+  * Add Ubuntu 19.04 Disco Dingo. (LP: #1800656)
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 30 Oct 2018 06:33:17 -0700
+
+distro-info-data (0.38) unstable; urgency=medium
+
+  * Migrate VCS to salsa.debian.org.
+  * Add Ubuntu 18.10 Cosmic Cuttlefish. (LP: #1769992)
+  * Correct EOL date for zesty. (LP: #1743936)
+  * Adjust provisional creation date for Debian 11 Bullseye to August 2019.
+    The release-team expects Buster to release "some time mid-2019".
+  * Add Debian 12 Bookworm, with a provisional creation date.
+  * Declare: Rules-Requires-Root: no.
+  * Switch copyright Format URL to https.
+  * Update copyright.
+  * Bump Standards-Version to 4.1.4, no changes needed.
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 08 May 2018 12:34:42 -0700
+
+distro-info-data (0.37) unstable; urgency=medium
+
+  * Add Ubuntu 18.04 LTS Bionic Beaver. (LP: #1727046)
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 24 Oct 2017 13:11:56 -0700
+
+distro-info-data (0.36) unstable; urgency=medium
+
+  * Set EOL date for Debian Wheezy. This excludes LTS, which we haven't
+    supported in distro-info yet, for Debian, but matches what we did for
+    Squeeze.
+  * Set (provisional) EOL date for Debian Jessie.
+  * Set release date for Stretch (and matching creation date for Buster). It
+    has been announced.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 04 Jun 2017 07:20:00 -0700
+
+distro-info-data (0.35) unstable; urgency=medium
+
+  * Correct Ubuntu Zesty release date.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 20 Apr 2017 19:43:47 -0700
+
+distro-info-data (0.34) unstable; urgency=medium
+
+  * Add Ubuntu 17.10, Artful Aardvark.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 20 Apr 2017 16:42:23 -0700
+
+distro-info-data (0.33) unstable; urgency=medium
+
+  * Add Debian 11 codename (with provisional creation date) (Closes: #851447)
+
+ -- Benjamin Drung <bdrung@debian.org>  Mon, 16 Jan 2017 00:53:52 +0100
+
+distro-info-data (0.32) unstable; urgency=medium
+
+  * Mark distro-info-data Multi-Arch: foreign. Thanks to Helmut Grohne.
+    (Closes: #841648)
+
+ -- Benjamin Drung <bdrung@debian.org>  Sat, 22 Oct 2016 00:50:39 +0200
+
+distro-info-data (0.31) unstable; urgency=medium
+
+  [ Martin Pitt ]
+  * Fix EOL date of Ubuntu 17.04 (9 months, not 18).
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 18 Oct 2016 08:22:31 -0700
+
+distro-info-data (0.30) unstable; urgency=medium
+
+  [ Martin Pitt ]
+  * Fix release date of Ubuntu 16.10.
+  * Add Ubuntu 17.04, Zesty Zapus, with provisional release date.
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 17 Oct 2016 12:44:19 -0700
+
+distro-info-data (0.29) unstable; urgency=medium
+
+  * Add Ubuntu 16.10, Yakkety Yak.
+  * Bump Standards-Version to 3.9.8, no changes needed.
+  * Switch VCS URLs to https.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 22 Apr 2016 13:16:49 -0700
+
+distro-info-data (0.28) unstable; urgency=medium
+
+  * Update Ubuntu 15.10 release date.
+  * Add Ubuntu 16.04, with a provisional release date.
+
+ -- Stefano Rivera <stefanor@debian.org>  Wed, 21 Oct 2015 19:59:33 -0700
+
+distro-info-data (0.27) unstable; urgency=medium
+
+  * Add Ubuntu 15.10, with a provisional release date.
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 04 May 2015 07:56:52 -0700
+
+distro-info-data (0.26) unstable; urgency=medium
+
+  * Update Ubuntu 15.04, Vivid Vervet release date.
+
+ -- Stefano Rivera <stefanor@debian.org>  Wed, 15 Apr 2015 18:03:41 -0400
+
+distro-info-data (0.25) unstable; urgency=medium
+
+  * Update Debian 9 target release date.
+
+ -- Stefano Rivera <stefanor@debian.org>  Wed, 15 Apr 2015 16:41:11 -0400
+
+distro-info-data (0.24) unstable; urgency=medium
+
+  * Add Debian 9 and 10 codenames (with provisional creation dates)
+
+ -- Benjamin Drung <bdrung@debian.org>  Mon, 10 Nov 2014 12:36:20 +0100
+
+distro-info-data (0.23) unstable; urgency=medium
+
+  [ Colin Watson ]
+  * Add Ubuntu 15.04, Vivid Vervet (with provisional release date).
+
+ -- Benjamin Drung <bdrung@debian.org>  Mon, 20 Oct 2014 16:33:46 +0200
+
+distro-info-data (0.22) unstable; urgency=medium
+
+  * Correct release date of Ubuntu 14.10 "utopic" to 2014-10-23
+  * Bump Standards-Version to 3.9.6
+
+ -- Benjamin Drung <bdrung@debian.org>  Wed, 15 Oct 2014 11:59:18 +0200
+
+distro-info-data (0.21) unstable; urgency=medium
+
+  * Correct EOL date of Debian 6.0 "Squeeze" to 2014-05-31.
+
+ -- Benjamin Drung <bdrung@debian.org>  Mon, 12 May 2014 22:58:41 +0200
+
+distro-info-data (0.20) unstable; urgency=medium
+
+  * Update EOL date of Ubuntu 12.10 "Quantal Quetzal" to 2014-05-16.
+
+ -- Benjamin Drung <bdrung@debian.org>  Thu, 01 May 2014 13:25:21 +0200
+
+distro-info-data (0.19) unstable; urgency=medium
+
+  * Add Ubuntu 14.10, Utopic Unicorn.
+
+ -- Stefano Rivera <stefanor@debian.org>  Wed, 23 Apr 2014 23:53:31 +0200
+
+distro-info-data (0.18) unstable; urgency=medium
+
+  * Update EOL date of Ubuntu 13.04 "Raring Ringtai" to 2014-01-27.
+  * Bump Standards-Version to 3.9.5.
+  * Use just the stable release version without the point release suffix,
+    i.e. 6.0 for squeeze, 7 for wheezy, and 8 for jessie. (Closes: #724557)
+
+ -- Benjamin Drung <bdrung@debian.org>  Wed, 08 Jan 2014 00:20:59 +0100
+
+distro-info-data (0.17) unstable; urgency=low
+
+  * Add Ubuntu 14.04, Trusty Tahr (Closes: #726696)
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 18 Oct 2013 16:52:25 +0200
+
+distro-info-data (0.16) unstable; urgency=low
+
+  * Correct current Debian testing series from experimental to jessie.
+  * Correct release date of Debian 7.0 "Wheezy".
+
+ -- Benjamin Drung <bdrung@debian.org>  Wed, 08 May 2013 11:33:31 +0200
+
+distro-info-data (0.15) unstable; urgency=low
+
+  * Debian wheezy released. Update squeeze EOL.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 05 May 2013 10:42:16 +0200
+
+distro-info-data (0.14) unstable; urgency=low
+
+  * Add Ubuntu 13.10, Saucy Salamander. Thanks Iain Lane.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 25 Apr 2013 17:11:17 +0200
+
+distro-info-data (0.13) unstable; urgency=low
+
+  * Update EOL dates of Ubuntu 8.04 LTS, 10.04 LTS, and 11.10 to 2013-05-09.
+
+ -- Benjamin Drung <bdrung@debian.org>  Sat, 30 Mar 2013 22:05:32 +0100
+
+distro-info-data (0.12) unstable; urgency=low
+
+  * Ubuntu 13.04 "Raring Ringtail" will only be supported for 9 month.
+  * Switch to debhelper 9.
+  * Bum Standards-Version to 3.9.4 (no changes needed).
+
+ -- Benjamin Drung <bdrung@debian.org>  Tue, 19 Mar 2013 23:16:52 +0100
+
+distro-info-data (0.11) unstable; urgency=low
+
+  [ Benjamin Drung ]
+  * Add Debian 8.0 "Jessie".
+
+  [ Stefano Rivera ]
+  * Add Ubuntu Raring Ringtail.
+
+ -- Benjamin Drung <bdrung@debian.org>  Thu, 18 Oct 2012 11:20:58 +0200
+
+distro-info-data (0.10) unstable; urgency=low
+
+  * Add a README.Debian explaining how to deal with outdated data.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 01 Jun 2012 18:42:15 +0200
+
+distro-info-data (0.9) unstable; urgency=low
+
+  * Add Ubuntu Quantal Quetzal.
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 23 Apr 2012 17:21:58 +0200
+
+distro-info-data (0.8) unstable; urgency=low
+
+  * Add validate-csv-data script to validate data on build time.
+
+ -- Benjamin Drung <bdrung@debian.org>  Tue, 03 Apr 2012 15:41:01 +0200
+
+distro-info-data (0.7) unstable; urgency=low
+
+  * Use full dates (add days for future EOL dates of Ubuntu).
+
+ -- Benjamin Drung <bdrung@debian.org>  Fri, 23 Mar 2012 15:29:11 +0100
+
+distro-info-data (0.6) unstable; urgency=low
+
+  * Put data into separate source package to avoid a full source rebuild for
+    just updating the data.
+
+ -- Benjamin Drung <bdrung@debian.org>  Fri, 23 Mar 2012 00:16:02 +0100
+
+distro-info (0.5.1) unstable; urgency=low
+
+  [ Stefano Rivera ]
+  * Bump Standards-Version to 3.9.3, no changes needed.
+  * Update machine-readable copyright Format to 1.0.
+
+  [ Benjamin Drung ]
+  * DebianDistroInfo.hs, UbuntuDistroInfo.hs: Replace System import by
+    System.Environment and System.Exit import to fix build failure.
+
+ -- Benjamin Drung <bdrung@debian.org>  Sat, 25 Feb 2012 16:11:25 +0100
+
+distro-info (0.5) unstable; urgency=low
+
+  * Allow retrieving the release version and full name with the Python module.
+    (Closes: #647951)
+
+ -- Benjamin Drung <bdrung@debian.org>  Mon, 23 Jan 2012 19:18:50 +0100
+
+distro-info (0.4) unstable; urgency=low
+
+  [ Stefano Rivera ]
+  * Add is_lts method to UbuntuDistroInfo
+
+  [ Benjamin Drung ]
+  * Enable optimization for Haskell code.
+  * Break old ubuntu-dev-tools package instead of recommending
+    python-distro-info.
+
+ -- Benjamin Drung <bdrung@debian.org>  Tue, 25 Oct 2011 23:19:56 +0200
+
+distro-info (0.3) unstable; urgency=low
+
+  [ Stefano Rivera ]
+  * Add basic Perl module, API-compatible with the Python one.
+  * Add liblist-compare-perl as a Build-Dependency for the Perl test suite.
+
+  [ Benjamin Drung ]
+  * Improve speed by rewriting scripts in Haskell (LP: #796317).
+  * Allow printing of release version and full name (LP: #807644).
+  * Split scripts, Perl and Python libraries in separate binary packages.
+
+ -- Benjamin Drung <bdrung@debian.org>  Tue, 11 Oct 2011 23:55:18 +0200
+
+distro-info (0.2.3) unstable; urgency=low
+
+  * "old" is not a Debian suite alias, but "oldstable" is.
+  * Add myself to Uploaders.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 07 Oct 2011 22:24:08 +0200
+
+distro-info (0.2.2) unstable; urgency=low
+
+  * Add 12.04 LTS "Precise Pangolin" to Ubuntu list.
+
+ -- Benjamin Drung <bdrung@debian.org>  Thu, 06 Oct 2011 01:07:36 +0200
+
+distro-info (0.2.1) unstable; urgency=low
+
+  * Correct release and EOL dates of old Ubuntu releases by reviewing
+    ubuntu-announce emails.
+
+ -- Benjamin Drung <bdrung@debian.org>  Sat, 23 Jul 2011 15:55:23 +0200
+
+distro-info (0.2) unstable; urgency=low
+
+  * Make sure all DistroInfo classes have a .codename method.
+  * Add experimental to list of Debian distributions.
+  * Bump Breaks and Replaceses for ubuntu-dev-tools.
+
+ -- Benjamin Drung <bdrung@debian.org>  Sat, 25 Jun 2011 16:30:59 +0200
+
+distro-info (0.1) unstable; urgency=low
+
+  * Initial release (Closes: #559761)
+
+ -- Benjamin Drung <bdrung@debian.org>  Sun, 19 Jun 2011 00:08:57 +0200

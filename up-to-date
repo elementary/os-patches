@@ -1,0 +1,75 @@
+#!/usr/bin/python3
+
+# Copyright (C) 2012, Benjamin Drung <bdrung@debian.org>
+#               2018, Stefano Rivera <stefanor@debian.org>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# pylint: disable=invalid-name
+# pylint: enable=invalid-name
+
+"""Validates that the data is up-to-date."""
+
+import datetime
+import sys
+
+from lib.tools import convert_date, get_csv_dict_reader, main
+
+ROLLING_FOREVER = {"debian": ("sid", "experimental"), "ubuntu": ()}
+
+
+def validate(filename, distro):
+    """Validates that the given CSV file is current.
+
+    Returns True if the given CSV file is current and otherwise False.
+    """
+    csvreader = get_csv_dict_reader(filename)
+    today = datetime.datetime.now(tz=datetime.UTC).date()
+
+    last_release = None
+    dev_releases = []
+    for row in csvreader:
+        created = False
+        released = False
+        if row["series"] in ROLLING_FOREVER[distro]:
+            continue
+        if row["created"]:
+            created = today >= convert_date(row["created"])
+        if row["release"]:
+            released = today >= convert_date(row["release"])
+        if created:
+            if not released:
+                dev_releases.append(row["codename"])
+            else:
+                last_release = row["codename"]
+
+    if len(dev_releases) == 1:
+        return True
+
+    if len(dev_releases) > 1:
+        print(
+            f"Multiple current development {distro} releases: {dev_releases}",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            f"No current development {distro} release."
+            f" {last_release} is now released.",
+            file=sys.stderr,
+        )
+
+    return False
+
+
+if __name__ == "__main__":
+    sys.exit(main(validate))

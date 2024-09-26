@@ -1,0 +1,23 @@
+---
+include:
+  - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/debian.yml
+
+# Add a deploy stage to the end
+stages:
+  - provisioning
+  - build
+  - publish
+  - test
+  - deploy
+
+pages:
+  image: debian:stable
+  stage: deploy
+  script:
+    - mkdir public
+    - cp ubuntu.csv debian.csv public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

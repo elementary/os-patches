@@ -1,0 +1,23 @@
+Source: distro-info-data
+Section: devel
+Priority: optional
+Maintainer: Benjamin Drung <bdrung@debian.org>
+Uploaders: Stefano Rivera <stefanor@debian.org>
+Build-Depends: debhelper-compat (= 13), python3 <!nocheck>
+Standards-Version: 4.6.2
+Vcs-Git: https://salsa.debian.org/debian/distro-info-data.git
+Vcs-Browser: https://salsa.debian.org/debian/distro-info-data
+Rules-Requires-Root: no
+
+Package: distro-info-data
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Breaks: distro-info (<< 1.0~)
+Description: information about the distributions' releases (data files)
+ Information about all releases of Debian and Ubuntu. The distro-info script
+ will give you the codename for e.g. the latest stable release of your
+ distribution. To get information about a specific distribution there are the
+ debian-distro-info and the ubuntu-distro-info scripts.
+ .
+ This package contains the data files.

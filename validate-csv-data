@@ -1,0 +1,203 @@
+#!/usr/bin/python3
+
+# Copyright (C) 2012, Benjamin Drung <bdrung@debian.org>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# pylint: disable=invalid-name
+# pylint: enable=invalid-name
+
+"""Validates a given Debian or Ubuntu distro-info CSV file."""
+
+import csv
+import sys
+import typing
+from datetime import date, timedelta
+
+from lib.tools import convert_date, get_csv_dict_reader, main
+
+_COLUMNS = {
+    "debian": (
+        "version",
+        "codename",
+        "series",
+        "created",
+        "release",
+        "eol",
+        "eol-lts",
+        "eol-elts",
+    ),
+    "ubuntu": (
+        "version",
+        "codename",
+        "series",
+        "created",
+        "release",
+        "eol",
+        "eol-server",
+        "eol-esm",
+    ),
+}
+_DATES = ("created", "release", "eol", "eol-server", "eol-esm", "eol-lts", "eol-elts")
+_EARLIER_DATES = (
+    ("created", "release"),
+    ("release", "eol"),
+    ("eol", "eol-server"),
+    ("eol", "eol-esm"),
+    ("eol", "eol-lts"),
+    ("eol-lts", "eol-elts"),
+)
+_STRINGS = {
+    "debian": ("codename", "series"),
+    "ubuntu": ("version", "codename", "series"),
+}
+RowDict = dict[str, typing.Union[None, date, str]]
+
+
+class ErrorLogger:  # pylint: disable=too-few-public-methods
+    """Print an error message and count failures."""
+
+    def __init__(self, csvreader: csv.DictReader, filename: str) -> None:
+        self.csvreader = csvreader
+        self.filename = filename
+        self.failures = 0
+
+    def __call__(self, message: str) -> None:
+        print(f"{self.filename}:{self.csvreader.line_num}: {message}.", file=sys.stderr)
+        self.failures += 1
+
+
+def _check_for_missing_columns(row: RowDict, error: ErrorLogger, distro: str) -> None:
+    for column in _COLUMNS[distro]:
+        if column not in row:
+            msg = f"Column `{column}' is missing"
+            error(msg)
+
+
+def _check_for_additinal_columns(row: RowDict, error: ErrorLogger, distro: str) -> None:
+    for column in row:
+        if column not in _COLUMNS[distro]:
+            msg = f"Additional column `{column}' is specified"
+            error(msg)
+
+
+def _check_required_strings_columns(
+    row: RowDict, error: ErrorLogger, distro: str
+) -> None:
+    for column in _STRINGS[distro]:
+        if column in row and not row[column]:
+            msg = f"Empty column `{column}' specified"
+            error(msg)
+
+
+def _convert_dates(row: RowDict, error: ErrorLogger) -> None:
+    for column in _DATES:
+        if column in row:
+            try:
+                row[column] = convert_date(row[column])
+            except ValueError:
+                msg = f"Invalid date `{row[column]}' in column `{column}'"
+                error(msg)
+                row[column] = None
+
+
+def _check_required_date_columns(row: RowDict, error: ErrorLogger) -> None:
+    column = "created"
+    if column in row and not row[column]:
+        msg = f"No date specified in column `{column}'"
+        error(msg)
+
+
+def _compare_dates(row: RowDict, error: ErrorLogger) -> None:
+    for (date1_column, date2_column) in _EARLIER_DATES:
+        date2 = row.get(date2_column)
+        if date2 is None:
+            continue
+        date1 = row.get(date1_column)
+        if date1 is None:
+            # date1 needs to be specified if date2 is specified
+            msg = (
+                f"A date needs to be specified in column `{date1_column}'"
+                f" due to the given date in column `{date2_column}'"
+            )
+            error(msg)
+            continue
+        assert isinstance(date1, date)
+        assert isinstance(date2, date)
+        # date1 needs to be earlier than date2
+        if date1 > date2:
+            msg = (
+                f"Date {date2.isoformat()} of column"
+                f" `{date2_column}' needs to be >= than"
+                f" {date1.isoformat()} of column `{date1_column}'"
+            )
+            error(msg)
+
+
+def _check_that_eol_lands_on_a_weekday(row: RowDict, error: ErrorLogger) -> None:
+    for column, eol_date in row.items():
+        if not column.startswith("eol"):
+            continue
+        if not eol_date:
+            continue
+        assert isinstance(eol_date, date)
+        if eol_date >= date(2021, 5, 1):
+            if eol_date.weekday() == 0 or eol_date.weekday() >= 4:
+                msg = (
+                    f"{column} for {row['codename']}"
+                    f" lands outside Tuesday-Thursday ({eol_date})"
+                )
+                error(msg)
+
+
+def _check_that_esm_has_overlap_period(row: RowDict, error: ErrorLogger) -> None:
+    version = row.get("version")
+    release = row.get("release")
+    assert isinstance(version, str)
+    assert isinstance(release, date)
+    if version.endswith("LTS") and release >= date(2018, 1, 1):
+        eol_date = row["eol"]
+        assert isinstance(eol_date, date)
+        assert eol_date == row["eol-server"]
+        june = eol_date.replace(day=1, month=6)
+        if june - eol_date > timedelta(days=7):
+            msg = (
+                f"eol for {row['codename']}"
+                f" is missing ESM overlap period ({eol_date})"
+            )
+            error(msg)
+
+
+def validate(filename, distro):
+    """Validates a given CSV file.
+
+    Returns True if the given CSV file is valid and otherwise False.
+    """
+    csvreader = get_csv_dict_reader(filename)
+    error = ErrorLogger(csvreader, filename)
+    for row in csvreader:
+        _check_for_missing_columns(row, error, distro)
+        _check_for_additinal_columns(row, error, distro)
+        _check_required_strings_columns(row, error, distro)
+        _convert_dates(row, error)
+        _check_required_date_columns(row, error)
+        _compare_dates(row, error)
+        if distro == "ubuntu":
+            _check_that_eol_lands_on_a_weekday(row, error)
+            _check_that_esm_has_overlap_period(row, error)
+
+    return error.failures == 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(validate))
