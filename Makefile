@@ -11,7 +11,9 @@ build:
 
 install:
 	install -d $(DESTDIR)$(PREFIX)/share/distro-info
-	install -m 644 $(wildcard *.csv) $(DESTDIR)$(PREFIX)/share/distro-info
+	install -m 644 debian.csv $(DESTDIR)$(PREFIX)/share/distro-info
+	install -m 644 ubuntu.csv $(DESTDIR)$(PREFIX)/share/distro-info
+	install -m 644 "elementary os.csv" $(DESTDIR)$(PREFIX)/share/distro-info
 
 clean:
 	rm -rf .mypy_cache/ lib/__pycache__/
