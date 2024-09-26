@@ -86,7 +86,7 @@ for pocket in pockets:
     if len(found_sources) > 0:
         pocket_version = found_sources[0].source_package_version
         if apt_pkg.version_compare(pocket_version, patched_version) > 0:
-            issue_title = "New version of %s available" % (component_name)
+            issue_title = "New version of %s available [%s]" % (component_name, upstream_series_name)
             if not github_issue_exists(issue_title):
                 issue = repo.create_issue(issue_title, "The package `%s` in `%s` can be upgraded to version `%s`" % (component_name, upstream_series_name, pocket_version))
                 print("The patched package `%s` has a new version `%s` (was version `%s`) - Created issue %d" % (component_name, pocket_version, patched_version, issue.number))
