@@ -1,7 +1,8 @@
 on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron:  '0 0 * * *'
+  # schedule:
+  #   # * is a special character in YAML so you have to quote this string
+  #   - cron:  '0 0 * * *'
+  push
 
 jobs:
   build:
@@ -22,7 +23,7 @@ jobs:
     - name: Install Dependencies
       run: |
         apt update
-        apt install -y git python3-launchpadlib python3-apt python3-github
+        apt install -y git python3-launchpadlib python3-apt python3-github python3-debian
     - name: Checkout the repository
       uses: actions/checkout@v4
       with:
