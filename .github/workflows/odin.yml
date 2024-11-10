@@ -30,7 +30,7 @@ jobs:
     - name: Verify that we are shipping the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REPOSITORY: elementary/os-patches
+        GITHUB_REPOSITORY: ${{ github.event.repository.name }}
       run: |
         while IFS=":" read -r line upstream_series; do
             echo "Checking version for $line"
