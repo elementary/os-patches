@@ -97,6 +97,7 @@ def extract_archive(file_path, extract_to='.'):
         else:
             # If multiple top-level items, extract the whole archive
             tar.extractall(path=extract_to)
+    os.remove(file_path)
 
 
 
