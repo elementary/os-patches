@@ -64,14 +64,14 @@ subprocess.run(["git", "config", "--global", "user.email", "github-actions[bot]@
 subprocess.run(["git", "config", "--global", "user.name", "github-actions[bot]"], check=False)
 subprocess.run(["git", "config", "--global", "--add", "safe.directory", "/__w/os-patches/os-patches"], check=False)
 
-# Method for checking if GitHub Actions has already opened an issue with this title
+
 def github_issue_exists(title):
+    """Method for checking if GitHub Actions has already opened an issue with this title"""
     open_issues = repo.get_issues(state="open")
     for open_issue in open_issues:
         if open_issue.title == title and open_issue.user.login == "github-actions[bot]":
             return True
     return False
-
 
 def download_file(url, local_filename):
     # Open the URL and download the file
@@ -121,17 +121,13 @@ def get_upstream_sources():
 
 
 if len(get_patched_sources()) == 0:
-    issue_title = "Package `%s` not found in os-patches PPA" % (component_name)
+    issue_title = f"Package {component_name} not found in os-patches PPA"
     if not github_issue_exists(issue_title):
         issue = repo.create_issue(
             issue_title,
-            "`%s` found in the import list, but not in the PPA. Not deployed yet or removed by accident?"
-            % (component_name),
+            f"{component_name} found in the import list, but not in the PPA. Not deployed yet or removed by accident?",
         )
-        print(
-            "Package `%s` not found in elementary os-patches! - Created issue %d"
-            % (component_name, issue.number)
-        )
+        print(f"Package {component_name} not found in elementary os-patches! - Created issue {issue.number}")
     sys.exit(0)
 
 patched_version = get_patched_sources()[0].source_package_version
@@ -142,28 +138,22 @@ for pocket in ["Release", "Security", "Updates"]:
     if len(upstream_sources) > 0:
         pocket_version = upstream_sources[0].source_package_version
         if apt_pkg.version_compare(pocket_version, patched_version) > 0:
-            issue_title = "New version of %s available [%s]" % (
-                component_name,
-                upstream_series_name,
-            )
+            issue_title = "New version of {component_name} available [{upstream_series_name}]"
             if not github_issue_exists(issue_title):
-                # issue = repo.create_issue(
-                #     issue_title,
-                #     "The package `%s` in `%s` can be upgraded to version `%s`"
-                #     % (component_name, upstream_series_name, pocket_version),
-                # )
-                # print(
-                #     "The patched package `%s` has a new version `%s` (was version `%s`) - Created issue %d"
-                #     % (component_name, pocket_version, patched_version, issue.number)
-                # )
+                issue = repo.create_issue(
+                    issue_title,
+                    f"""The package `{component_name}` in `{upstream_series_name}` can be upgraded
+                    to version `{pocket_version}`.\nPrevious version: `{patched_version}`
+                    """
+                )
+                print(f"""The patched package {component_name} has a new version {pocket_version}
+                      (was version {patched_version}) - Created issue {issue.number}"""
+                )
+                web_link = ubuntu_archive.web_link
+                package_name = upstream_sources[0].source_package_name
+                dsc_url = f"{web_link}/+files/{package_name}_{pocket_version}.dsc"
 
-                url = "%s/+files/%s_%s.dsc" % (
-                        ubuntu_archive.web_link,
-                        upstream_sources[0].source_package_name,
-                        pocket_version,
-                    )
-                
-                with urllib.request.urlopen(url) as file_handle:
+                with urllib.request.urlopen(dsc_url) as file_handle:
                     # Read the contents 
                     content = file_handle.read().decode('utf-8')
                     dsc = deb822.Dsc(content)
@@ -177,20 +167,23 @@ for pocket in ["Release", "Security", "Updates"]:
                 base_branch = f"{component_name}-{upstream_series_name}"
                 new_branch = f"bot/update/{component_name}-{upstream_series_name}"
 
-                subprocess.run(["git", "fetch", "--all"])
-                subprocess.run(["git", "switch", base_branch])
+                subprocess.run(["git", "fetch", "--all"], check=True)
+                subprocess.run(["git", "switch", base_branch], check=True)
 
-                subprocess.run(["git", "checkout", "-b", new_branch])
+                subprocess.run(["git", "checkout", "-b", new_branch], check=True)
                 extract_archive(filename, extract_to="./")
                 # Add all changes
-                subprocess.run(["git", "add", "."])
+                subprocess.run(["git", "add", "."], check=True)
                 # Commit the changes
-                subprocess.run(["git", "commit", "-m", "Apply source files from extracted archive"])
+                subprocess.run(["git", "commit", "-m", f"Update to {filename}"], check=True)
                 # Push the new branch to the remote repository
-                subprocess.run(["git", "push", "origin", new_branch])
+                subprocess.run(["git", "push", "origin", new_branch], check=True)
                 pr = repo.create_pull(
                     base=base_branch,
                     head=new_branch,
-                    title=f"Update {component_name}",
+                    title=f"🆙 Update {component_name}",
+                    body=f"""A new version of `{filename}` replaces `{patched_version}` \n\n
+                    This will fix issue {issue.number}.
+                    """
                 )
-                subprocess.run(["git", "switch", "master"])
+                subprocess.run(["git", "switch", "master"], check=True)
