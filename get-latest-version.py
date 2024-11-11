@@ -181,7 +181,7 @@ for pocket in ["Release", "Security", "Updates"]:
                     base=base_branch,
                     head=new_branch,
                     title=f"📦 Update {component_name}",
-                    issue=issue.number,
-                    body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`."""
+                    body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`.
+                    Fixes #{issue.number}."""
                 )
                 subprocess.run(["git", "switch", "master"], check=True)
