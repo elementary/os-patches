@@ -142,8 +142,8 @@ for pocket in ["Release", "Security", "Updates"]:
             if not github_issue_exists(issue_title):
                 issue = repo.create_issue(
                     issue_title,
-                    f"""The package `{component_name}` in `{upstream_series_name}` can be upgraded"""
-                    f"""to version `{pocket_version}`.\nPrevious version: `{patched_version}`"""
+                    f"""The package `{component_name}` in `{upstream_series_name}` can be upgraded """
+                    f"""to version `{pocket_version}`.\nPrevious version: `{patched_version}`."""
                 )
                 print(
                     f"""The patched package {component_name} has a new version {pocket_version}"""
@@ -175,14 +175,14 @@ for pocket in ["Release", "Security", "Updates"]:
                 # Add all changes
                 subprocess.run(["git", "add", "."], check=True)
                 # Commit the changes
-                subprocess.run(["git", "commit", "-m", f"Update to {filename}"], check=True)
+                subprocess.run(["git", "commit", "-m", f"Update to {component_name} {pocket_version}"], check=True)
                 # Push the new branch to the remote repository
                 subprocess.run(["git", "push", "origin", new_branch], check=True)
                 pr = repo.create_pull(
                     base=base_branch,
                     head=new_branch,
                     title=f"📦 Update {component_name}",
-                    issue=issue,
+                    issue=issue.number,
                     body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`."""
                 )
                 subprocess.run(["git", "switch", "master"], check=True)
