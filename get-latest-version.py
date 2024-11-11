@@ -11,7 +11,7 @@ from debian import deb822
 from github import Github
 from launchpadlib.launchpad import Launchpad
 
-DEFAULT_SERIES_NAME = "bionic"
+DEFAULT_SERIES_NAME = "noble"
 
 # Process the command line arguments
 if len(sys.argv) < 2:
@@ -80,7 +80,6 @@ def download_file(url, local_filename):
             out_file.write(response.read())
 
 def extract_archive(file_path, extract_to='.'):
-    # Open the archive file
     with tarfile.open(file_path, 'r:xz') as tar:
         members = tar.getmembers()
         # Check if there's only one top-level folder
