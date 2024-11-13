@@ -83,11 +83,11 @@ subprocess.run(
 )
 
 
-def github_issue_exists(title):
-    """Method for checking if GitHub Actions has already opened an issue with this title"""
-    open_issues = repo.get_issues(state="open")
-    for open_issue in open_issues:
-        if open_issue.title == title and open_issue.user.login == "github-actions[bot]":
+def github_pull_exists(title):
+    """Method for checking if GitHub Actions has already opened an PR with this title"""
+    open_pulls = repo.get_pulls(state="open")
+    for open_pull in open_pulls:
+        if open_pull.title == title and open_pull.user.login == "github-actions[bot]":
             return True
     return False
 
@@ -115,7 +115,7 @@ def get_upstream_sources():
 
 if len(get_patched_sources()) == 0:
     issue_title = f"Package {component_name} not found in os-patches PPA"
-    if not github_issue_exists(issue_title):
+    if not github_pull_exists(issue_title):
         issue = repo.create_issue(
             issue_title,
             f"{component_name} found in the import list, but not in the PPA. Not deployed yet or removed by accident?",
@@ -136,17 +136,7 @@ for pocket in ["Release", "Security", "Updates"]:
             issue_title = (
                 f"📦 New version of {component_name} available [{upstream_series_name}]"
             )
-            if not github_issue_exists(issue_title):
-                issue = repo.create_issue(
-                    issue_title,
-                    f"""The package `{component_name}` in `{upstream_series_name}` can be upgraded """
-                    f"""to version `{pocket_version}`.\nPrevious version: `{patched_version}`.""",
-                )
-                print(
-                    f"""The patched package {component_name} has a new version {pocket_version}"""
-                    f"""(was version {patched_version}) - Created issue {issue.number}"""
-                )
-
+            if not github_pull_exists(issue_title):
                 base_branch = f"{component_name}-{upstream_series_name}"
                 new_branch = f"bot/update/{component_name}-{upstream_series_name}"
 
@@ -198,7 +188,6 @@ for pocket in ["Release", "Security", "Updates"]:
                     base=base_branch,
                     head=new_branch,
                     title=f"📦 Update {component_name}",
-                    body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`.
-                    Fixes #{issue.number}.""",
+                    body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`."""
                 )
                 subprocess.run(["git", "switch", "master"], check=True)
