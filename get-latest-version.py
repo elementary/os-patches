@@ -3,8 +3,7 @@
 import os
 import subprocess
 import sys
-import tarfile
-import urllib.request
+import glob
 
 import apt_pkg
 from debian import deb822
@@ -133,9 +132,10 @@ for pocket in ["Release", "Security", "Updates"]:
                 subprocess.run(["git", "checkout", "-b", new_branch], check=True)
 
                 subprocess.run(["apt", "source", component_name], check=True)
+                print(glob.glob("./*"))
                 # subprocess.run(["rm", "*.tar.*", "*.dsc"], check=True)
 
-                subprocess.run(["cp", "-r", f"{component_name}/*", "."], check=True)
+                subprocess.run(["cp", "-r", f"{component_name}_{pocket_version}/*", "."], check=True)
                 subprocess.run(["rm", "-r", f"{component_name}"], check=True)
 
                 # Add all changes
