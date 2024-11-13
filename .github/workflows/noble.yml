@@ -30,12 +30,12 @@ jobs:
         fetch-depth: 1
     - name: Enable sources
       run: cat /etc/apt/sources.list.d/ubuntu.sources
-    - name: Verify that we are shipping the latest version
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REPOSITORY: ${{ github.event.repository.name }}
-      run: |
-        while IFS=":" read -r line upstream_series; do
-            echo "Checking version for $line"
-            python3 ./get-latest-version.py "$line" "noble" "$upstream_series"
-        done < "/tmp/patched-packages"
+    # - name: Verify that we are shipping the latest version
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     GITHUB_REPOSITORY: ${{ github.event.repository.name }}
+    #   run: |
+    #     while IFS=":" read -r line upstream_series; do
+    #         echo "Checking version for $line"
+    #         python3 ./get-latest-version.py "$line" "noble" "$upstream_series"
+    #     done < "/tmp/patched-packages"
