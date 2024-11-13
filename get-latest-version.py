@@ -133,8 +133,8 @@ for pocket in ["Release", "Security", "Updates"]:
     if len(upstream_sources) > 0:
         pocket_version = upstream_sources[0].source_package_version
         if apt_pkg.version_compare(pocket_version, patched_version) > 0:
-            issue_title = (
-                f"📦 New version of {component_name} available [{upstream_series_name}]"
+            pull_title = (
+                f"📦 Update {component_name} [{upstream_series_name}]"
             )
             if not github_pull_exists(issue_title):
                 base_branch = f"{component_name}-{upstream_series_name}"
@@ -187,7 +187,7 @@ for pocket in ["Release", "Security", "Updates"]:
                 pr = repo.create_pull(
                     base=base_branch,
                     head=new_branch,
-                    title=f"📦 Update {component_name}",
+                    title=pull_title,
                     body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`."""
                 )
                 subprocess.run(["git", "switch", "master"], check=True)
