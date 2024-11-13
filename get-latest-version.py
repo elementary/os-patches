@@ -3,8 +3,6 @@
 import os
 import subprocess
 import sys
-import tarfile
-import urllib.request
 
 import apt_pkg
 from debian import deb822
