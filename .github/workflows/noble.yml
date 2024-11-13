@@ -29,7 +29,8 @@ jobs:
       with:
         fetch-depth: 1
     - name: Enable sources
-      run: sed -i 's/Types: deb/Types: deb deb-src/g' /etc/apt/sources.list.d/ubuntu.sources
+      run: |
+        sed -i 's/Types: deb/Types: deb deb-src/g' /etc/apt/sources.list.d/ubuntu.sources
     - name: Verify that we are shipping the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
