@@ -3,7 +3,8 @@
 import os
 import subprocess
 import sys
-import glob
+import tarfile
+import urllib.request
 
 import apt_pkg
 from debian import deb822
@@ -39,10 +40,7 @@ apt_pkg.init_system()
 
 # Initialize Launchpad variables
 launchpad = Launchpad.login_anonymously(
-    "elementary daily test",
-    "production",
-    "~/.launchpadlib/cache/",
-    version="devel"
+    "elementary daily test", "production", "~/.launchpadlib/cache/", version="devel"
 )
 
 ubuntu = launchpad.distributions["ubuntu"]
@@ -59,9 +57,30 @@ github_repo = os.environ["GITHUB_REPOSITORY"]
 github = Github(github_token)
 repo = github.get_repo(github_repo)
 
-subprocess.run(["git", "config", "--global", "user.email", "github-actions[bot]@users.noreply.github.com"], check=False)
-subprocess.run(["git", "config", "--global", "user.name", "github-actions[bot]"], check=False)
-subprocess.run(["git", "config", "--global", "--add", "safe.directory", "/__w/os-patches/os-patches"], check=False)
+subprocess.run(
+    [
+        "git",
+        "config",
+        "--global",
+        "user.email",
+        "github-actions[bot]@users.noreply.github.com",
+    ],
+    check=False,
+)
+subprocess.run(
+    ["git", "config", "--global", "user.name", "github-actions[bot]"], check=False
+)
+subprocess.run(
+    [
+        "git",
+        "config",
+        "--global",
+        "--add",
+        "safe.directory",
+        "/__w/os-patches/os-patches",
+    ],
+    check=False,
+)
 
 
 def github_issue_exists(title):
@@ -72,6 +91,7 @@ def github_issue_exists(title):
             return True
     return False
 
+
 def get_patched_sources():
     """Get the current version of a package in elementary os patches PPA"""
     return patches_archive.getPublishedSources(
@@ -80,6 +100,7 @@ def get_patched_sources():
         status="Published",
         distro_series=series,
     )
+
 
 def get_upstream_sources():
     """Get the current version of a package in upstream PPA"""
@@ -99,7 +120,9 @@ if len(get_patched_sources()) == 0:
             issue_title,
             f"{component_name} found in the import list, but not in the PPA. Not deployed yet or removed by accident?",
         )
-        print(f"Package {component_name} not found in elementary os-patches! - Created issue {issue.number}")
+        print(
+            f"Package {component_name} not found in elementary os-patches! - Created issue {issue.number}"
+        )
     sys.exit(0)
 
 patched_version = get_patched_sources()[0].source_package_version
@@ -110,18 +133,19 @@ for pocket in ["Release", "Security", "Updates"]:
     if len(upstream_sources) > 0:
         pocket_version = upstream_sources[0].source_package_version
         if apt_pkg.version_compare(pocket_version, patched_version) > 0:
-            issue_title = f"📦 New version of {component_name} available [{upstream_series_name}]"
+            issue_title = (
+                f"📦 New version of {component_name} available [{upstream_series_name}]"
+            )
             if not github_issue_exists(issue_title):
                 issue = repo.create_issue(
                     issue_title,
                     f"""The package `{component_name}` in `{upstream_series_name}` can be upgraded """
-                    f"""to version `{pocket_version}`.\nPrevious version: `{patched_version}`."""
+                    f"""to version `{pocket_version}`.\nPrevious version: `{patched_version}`.""",
                 )
                 print(
                     f"""The patched package {component_name} has a new version {pocket_version}"""
                     f"""(was version {patched_version}) - Created issue {issue.number}"""
                 )
-
 
                 base_branch = f"{component_name}-{upstream_series_name}"
                 new_branch = f"bot/update/{component_name}-{upstream_series_name}"
@@ -132,16 +156,42 @@ for pocket in ["Release", "Security", "Updates"]:
                 subprocess.run(["git", "checkout", "-b", new_branch], check=True)
 
                 subprocess.run(["apt", "source", component_name], check=True)
-                print(glob.glob("./*"))
-                # subprocess.run(["rm", "*.tar.*", "*.dsc"], check=True)
+                subprocess.run(
+                    "rm *.tar.* *.dsc",
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    check=True
+                )
 
-                subprocess.run(["cp", "-r", f"{component_name}_{pocket_version}/*", "."], check=True)
-                subprocess.run(["rm", "-r", f"{component_name}"], check=True)
+                subprocess.run(
+                    f"cp -r {component_name}-{pocket_version}/*",
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    check=True
+                )
+
+                subprocess.run(
+                    f"rm -r {component_name}-{pocket_version}",
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    check=True
+                )
 
                 # Add all changes
                 subprocess.run(["git", "add", "."], check=True)
                 # Commit the changes
-                subprocess.run(["git", "commit", "-m", f"Update to {component_name} {pocket_version}"], check=True)
+                subprocess.run(
+                    [
+                        "git",
+                        "commit",
+                        "-m",
+                        f"Update to {component_name} {pocket_version}",
+                    ],
+                    check=True,
+                )
                 # Push the new branch to the remote repository
                 subprocess.run(["git", "push", "origin", new_branch], check=True)
                 pr = repo.create_pull(
@@ -149,6 +199,6 @@ for pocket in ["Release", "Security", "Updates"]:
                     head=new_branch,
                     title=f"📦 Update {component_name}",
                     body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`.
-                    Fixes #{issue.number}."""
+                    Fixes #{issue.number}.""",
                 )
                 subprocess.run(["git", "switch", "master"], check=True)
