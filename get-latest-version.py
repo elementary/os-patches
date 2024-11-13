@@ -148,20 +148,7 @@ for pocket in ["Release", "Security", "Updates"]:
                     f"""The patched package {component_name} has a new version {pocket_version}"""
                     f"""(was version {patched_version}) - Created issue {issue.number}"""
                 )
-                web_link = ubuntu_archive.web_link
-                package_name = upstream_sources[0].source_package_name
-                dsc_url = f"{web_link}/+files/{package_name}_{pocket_version}.dsc"
 
-                with urllib.request.urlopen(dsc_url) as file_handle:
-                    # Read the contents 
-                    content = file_handle.read().decode('utf-8')
-                    dsc = deb822.Dsc(content)
-                    # print(dsc["Files"][0]["name"])
-                    filename = dsc["Files"][0]["name"]
-
-                package_url = f"https://code.launchpad.net/ubuntu/+archive/primary/+sourcefiles/{component_name}/{pocket_version}/{filename}"
-                print(package_url)
-                download_file(package_url, filename)
 
                 base_branch = f"{component_name}-{upstream_series_name}"
                 new_branch = f"bot/update/{component_name}-{upstream_series_name}"
@@ -170,7 +157,13 @@ for pocket in ["Release", "Security", "Updates"]:
                 subprocess.run(["git", "switch", base_branch], check=True)
 
                 subprocess.run(["git", "checkout", "-b", new_branch], check=True)
-                extract_archive(filename, extract_to="./")
+
+                subprocess.run(["apt", "source", component_name], check=True)
+                subprocess.run(["rm", "*.tar.*", "*.dsc"], check=True)
+
+                subprocess.run(["cp", "-r", f"{component_name}.*/*", "."], check=True)
+                subprocess.run(["rm", "-r", f"{component_name}.*"], check=True)
+
                 # Add all changes
                 subprocess.run(["git", "add", "."], check=True)
                 # Commit the changes
