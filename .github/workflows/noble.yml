@@ -20,17 +20,15 @@ jobs:
     - name: Get the list of packages
       run: |
         cp noble/packages_to_import /tmp/patched-packages
-    - name: Install Dependencies
+    - name: Install Dependencies and enable Sources
       run: |
+        sed -i 's/Types: deb/Types: deb deb-src/g' /etc/apt/sources.list.d/ubuntu.sources
         apt update
         apt install -y git python3-launchpadlib python3-apt python3-github python3-debian
     - name: Checkout the repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
-    - name: Enable sources
-      run: |
-        sed -i 's/Types: deb/Types: deb deb-src/g' /etc/apt/sources.list.d/ubuntu.sources
     - name: Verify that we are shipping the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
