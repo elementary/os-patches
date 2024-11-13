@@ -21,6 +21,7 @@ jobs:
         cp focal/packages_to_import /tmp/patched-packages
     - name: Install Dependencies
       run: |
+        sed -i 's/^\(Types: deb\)$/\1 deb-src/g' /etc/apt/sources.list.d/ubuntu.sources
         apt update
         apt install -y git python3-launchpadlib python3-apt python3-github python3-debian
     - name: Checkout the repository
