@@ -132,7 +132,7 @@ for pocket in ["Release", "Security", "Updates"]:
 
                 subprocess.run(["git", "checkout", "-b", new_branch], check=True)
 
-                subprocess.run(["sed", "-i", "'s/^#\s*\(deb-src.*\)/\1/'", "/etc/apt/sources.list"], check=True)
+                subprocess.run(["sed", "-i", r"'s/^#\s*\(deb-src.*\)/\1/'", "/etc/apt/sources.list"], check=True)
 
                 subprocess.run(["apt", "source", component_name], check=True)
                 subprocess.run(["rm", "*.tar.*", "*.dsc"], check=True)
