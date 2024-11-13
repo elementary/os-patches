@@ -165,7 +165,7 @@ for pocket in ["Release", "Security", "Updates"]:
                 )
 
                 subprocess.run(
-                    f"cp -r {component_name}-{pocket_version}/*",
+                    f"cp -r {component_name}-{pocket_version}/* .",
                     shell=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
