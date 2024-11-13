@@ -133,7 +133,7 @@ for pocket in ["Release", "Security", "Updates"]:
                 subprocess.run(["git", "checkout", "-b", new_branch], check=True)
 
                 subprocess.run(["apt", "source", component_name], check=True)
-                subprocess.run(["rm", "*.tar.*", "*.dsc"], check=True)
+                # subprocess.run(["rm", "*.tar.*", "*.dsc"], check=True)
 
                 subprocess.run(["cp", "-r", f"{component_name}/*", "."], check=True)
                 subprocess.run(["rm", "-r", f"{component_name}"], check=True)
