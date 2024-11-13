@@ -73,32 +73,6 @@ def github_issue_exists(title):
             return True
     return False
 
-def download_file(url, local_filename):
-    # Open the URL and download the file
-    with urllib.request.urlopen(url) as response:
-        with open(local_filename, 'wb') as out_file:
-            out_file.write(response.read())
-
-def extract_archive(file_path, extract_to='.'):
-    with tarfile.open(file_path, 'r:xz') as tar:
-        members = tar.getmembers()
-        # Check if there's only one top-level folder
-        top_level_dirs = [member for member in members if member.isdir() and '/' not in member.name.strip('/')]
-
-        if len(top_level_dirs) == 1:
-            # If only one top-level directory, extract its contents
-            top_level_dir_name = top_level_dirs[0].name
-            for member in members:
-                if member.name.startswith(top_level_dir_name):
-                    # Adjust the member name to remove the top-level directory
-                    member.name = member.name[len(top_level_dir_name):].strip('/')
-                    tar.extract(member, extract_to)
-        else:
-            # If multiple top-level items, extract the whole archive
-            tar.extractall(path=extract_to)
-    os.remove(file_path)
-
-
 def get_patched_sources():
     """Get the current version of a package in elementary os patches PPA"""
     return patches_archive.getPublishedSources(
