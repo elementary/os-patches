@@ -136,7 +136,7 @@ for pocket in ["Release", "Security", "Updates"]:
             pull_title = (
                 f"📦 Update {component_name} [{upstream_series_name}]"
             )
-            if not github_pull_exists(issue_title):
+            if not github_pull_exists(pull_title):
                 base_branch = f"{component_name}-{upstream_series_name}"
                 new_branch = f"bot/update/{component_name}-{upstream_series_name}"
 
