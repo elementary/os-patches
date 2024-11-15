@@ -99,6 +99,7 @@ def get_patched_sources():
         distro_series=series,
     )
 
+patched_sources = get_patched_sources()
 
 def get_upstream_sources():
     """Get the current version of a package in upstream PPA"""
@@ -111,7 +112,7 @@ def get_upstream_sources():
     )
 
 
-if len(get_patched_sources()) == 0:
+if len(patched_sources) == 0:
     issue_title = f"Package {component_name} not found in os-patches PPA"
     if not github_pull_exists(issue_title):
         issue = repo.create_issue(
@@ -123,7 +124,7 @@ if len(get_patched_sources()) == 0:
         )
     sys.exit(0)
 
-patched_version = get_patched_sources()[0].source_package_version
+patched_version = patched_sources[0].source_package_version
 
 # Search for a new version in the Ubuntu repositories
 for pocket in ["Release", "Security", "Updates"]:
