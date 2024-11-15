@@ -99,7 +99,9 @@ def get_patched_sources():
         distro_series=series,
     )
 
+
 patched_sources = get_patched_sources()
+
 
 def get_upstream_sources():
     """Get the current version of a package in upstream PPA"""
@@ -129,64 +131,69 @@ patched_version = patched_sources[0].source_package_version
 # Search for a new version in the Ubuntu repositories
 for pocket in ["Release", "Security", "Updates"]:
     upstream_sources = get_upstream_sources()
-    if len(upstream_sources) > 0:
-        pocket_version = upstream_sources[0].source_package_version
-        if apt_pkg.version_compare(pocket_version, patched_version) > 0:
-            pull_title = (
-                f"📦 Update {component_name} [{upstream_series_name}]"
-            )
-            if not github_pull_exists(pull_title):
-                base_branch = f"{component_name}-{upstream_series_name}"
-                new_branch = f"bot/update/{component_name}-{upstream_series_name}"
 
-                subprocess.run(["git", "fetch", "--all"], check=True)
-                subprocess.run(["git", "switch", base_branch], check=True)
+    if len(upstream_sources) <= 0:
+        continue
 
-                subprocess.run(["git", "checkout", "-b", new_branch], check=True)
+    pocket_version = upstream_sources[0].source_package_version
+    if apt_pkg.version_compare(pocket_version, patched_version) <= 0:
+        continue
 
-                subprocess.run(["apt", "source", component_name], check=True)
-                subprocess.run(
-                    "rm *.tar.* *.dsc",
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    check=True
-                )
+    pull_title = f"📦 Update {component_name} [{upstream_series_name}]"
+    if github_pull_exists(pull_title):
+        continue
 
-                subprocess.run(
-                    f"cp -r {component_name}-{pocket_version}/* .",
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    check=True
-                )
+    base_branch = f"{component_name}-{upstream_series_name}"
+    new_branch = f"bot/update/{component_name}-{upstream_series_name}"
 
-                subprocess.run(
-                    f"rm -r {component_name}-{pocket_version}",
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    check=True
-                )
+    subprocess.run(["git", "fetch", "--all"], check=True)
 
-                # Add all changes
-                subprocess.run(["git", "add", "."], check=True)
-                # Commit the changes
-                subprocess.run(
-                    [
-                        "git",
-                        "commit",
-                        "-m",
-                        f"Update to {component_name} {pocket_version}",
-                    ],
-                    check=True,
-                )
-                # Push the new branch to the remote repository
-                subprocess.run(["git", "push", "origin", new_branch], check=True)
-                pr = repo.create_pull(
-                    base=base_branch,
-                    head=new_branch,
-                    title=pull_title,
-                    body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`."""
-                )
-                subprocess.run(["git", "switch", "master"], check=True)
+    subprocess.run(["git", "switch", base_branch], check=True)
+    subprocess.run(["git", "checkout", "-b", new_branch], check=True)
+
+    subprocess.run(["apt", "source", component_name], check=True)
+    subprocess.run(
+        "rm *.tar.* *.dsc",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+
+    subprocess.run(
+        f"cp -r {component_name}-{pocket_version}/* .",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+
+    subprocess.run(
+        f"rm -r {component_name}-{pocket_version}",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+
+    # Add all changes
+    subprocess.run(["git", "add", "."], check=True)
+    # Commit the changes
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "-m",
+            f"Update to {component_name} {pocket_version}",
+        ],
+        check=True,
+    )
+    # Push the new branch to the remote repository
+    subprocess.run(["git", "push", "origin", new_branch], check=True)
+    pr = repo.create_pull(
+        base=base_branch,
+        head=new_branch,
+        title=pull_title,
+        body=f"""A new version of `{component_name} {pocket_version}` replaces `{patched_version}`.""",
+    )
+    subprocess.run(["git", "switch", "master"], check=True)
