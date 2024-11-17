@@ -5,7 +5,6 @@ import subprocess
 import sys
 
 import apt_pkg
-from debian import deb822
 from github import Github
 from launchpadlib.launchpad import Launchpad
 
