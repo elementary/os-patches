@@ -82,7 +82,7 @@ subprocess.run(
 
 
 def github_pull_exists(title):
-    """Method for checking if GitHub Actions has already opened an PR with this title"""
+    """Method for checking if GitHub Actions has already opened a PR with this title"""
     open_pulls = repo.get_pulls(state="open")
     for open_pull in open_pulls:
         if open_pull.title == title and open_pull.user.login == "github-actions[bot]":
