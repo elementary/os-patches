@@ -1,6 +1,6 @@
 # OS Patches metarepository
 
-This repository contains all the sources for the elementary specific patches
+This repository contains all the sources for the elementary specific patches.
 
 The packages are included into the [OS Patches Repository](https://launchpad.net/~elementary-os/+archive/ubuntu/os-patches).
 
@@ -8,7 +8,7 @@ The packages are included into the [OS Patches Repository](https://launchpad.net
 
 The `master` branch is composed of GitHub Workflows that are running daily to
 check for any new version in the Ubuntu repositories of the patched components.
-If a newer version of a package is found in the Ubuntu repositories, a GitHub issue
+If a newer version of a package is found in the Ubuntu repositories, a Pull Request
 will be opened in this repository to let the team know to rebase patches and push
 and update.
 
