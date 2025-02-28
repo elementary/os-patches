@@ -10,16 +10,21 @@ jobs:
     container:
       image: ghcr.io/elementary/docker:stable
 
+    env:
+      PACKAGES_TO_IMPORT_PATH: '/tmp/patched-packages'
+
     steps:
     - name: Checkout the import-list
       uses: actions/checkout@v4
       with:
         ref: import-list-noble
         fetch-depth: 1
+
     - name: Get the list of packages
       run: |
-        cp noble/packages_to_import /tmp/patched-packages
-    - name: Install dependencies and enable sources
+        cp noble/packages_to_import $PACKAGES_TO_IMPORT_PATH
+
+    - name: Install Dependencies and enable Sources
       run: |
         sed -i 's/^\(Types: deb\)$/\1 deb-src/g' /etc/apt/sources.list.d/ubuntu.sources
         apt update
@@ -29,6 +34,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
+
     - name: Verify that we are shipping the latest version
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

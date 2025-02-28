@@ -10,6 +10,9 @@ jobs:
     container:
       image: ghcr.io/elementary/docker:stable
 
+    env:
+      PACKAGES_TO_IMPORT_PATH: '/tmp/patched-packages'
+
     steps:
     - name: Checkout the import-list
       uses: actions/checkout@v4
@@ -18,7 +21,7 @@ jobs:
         fetch-depth: 1
     - name: Get the list of packages
       run: |
-        cp jammy/packages_to_import /tmp/patched-packages
+        cp jammy/packages_to_import $PACKAGES_TO_IMPORT_PATH
     - name: Install dependencies and enable sources
       run: |
         sed -i 's/^\(Types: deb\)$/\1 deb-src/g' /etc/apt/sources.list.d/ubuntu.sources

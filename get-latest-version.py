@@ -11,9 +11,10 @@ from launchpadlib.launchpad import Launchpad
 
 DEFAULT_SERIES_NAME = "noble"
 
+PACKAGES_TO_IMPORT_PATH = os.environ.get("PACKAGES_TO_IMPORT_PATH", "/tmp/patched-packages")
 
 def get_packages_list() -> list:
-    with open("/tmp/patched-packages", "r", encoding="utf-8") as file:
+    with open(PACKAGES_TO_IMPORT_PATH, "r", encoding="utf-8") as file:
         items = file.read().splitlines()
     return items
 
@@ -70,6 +71,7 @@ def main():
             upstream_series_name[0] if upstream_series_name else series_name
         )
         print(package_name, upstream_series_name)
+
         
         upstream_series = ubuntu.getSeries(name_or_version=upstream_series_name)
 
