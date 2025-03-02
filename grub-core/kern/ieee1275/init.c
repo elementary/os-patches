@@ -46,9 +46,6 @@
 #ifdef __sparc__
 #include <grub/machine/kernel.h>
 #endif
-#if defined(__powerpc__) || defined(__i386__)
-#include <grub/ieee1275/alloc.h>
-#endif
 
 /* The maximum heap size we're going to claim at boot. Not used by sparc. */
 #ifdef __i386__
@@ -114,11 +111,12 @@ grub_addr_t grub_ieee1275_original_stack;
 #define BYTE22              (DY_MEM_V2 | DRC_INFO)
 
 void
-grub_exit (void)
+grub_exit (int rc __attribute__((unused)))
 {
   grub_ieee1275_exit ();
 }
 
+#ifndef __i386__
 /* Translate an OF filesystem path (separated by backslashes), into a GRUB
    path (separated by forward slashes).  */
 static void
@@ -133,9 +131,18 @@ grub_translate_ieee1275_path (char *filepath)
       backslash = grub_strchr (filepath, '\\');
     }
 }
+#endif
 
 void (*grub_ieee1275_net_config) (const char *dev, char **device, char **path,
                                   char *bootpath);
+#ifdef __i386__
+void
+grub_machine_get_bootlocation (char **device __attribute__ ((unused)),
+			       char **path __attribute__ ((unused)))
+{
+  grub_env_set ("prefix", "(sd,1)/");
+}
+#else
 void
 grub_machine_get_bootlocation (char **device, char **path)
 {
@@ -170,25 +177,28 @@ grub_machine_get_bootlocation (char **device, char **path)
       grub_free (canon);
     }
   else
-    *device = grub_ieee1275_encode_devname (bootpath);
-  grub_free (type);
-
-  filename = grub_ieee1275_get_filename (bootpath);
-  if (filename)
     {
-      char *lastslash = grub_strrchr (filename, '\\');
-
-      /* Truncate at last directory.  */
-      if (lastslash)
+      filename = grub_ieee1275_get_filename (bootpath);
+      if (filename)
         {
-	  *lastslash = '\0';
-	  grub_translate_ieee1275_path (filename);
+          char *lastslash = grub_strrchr (filename, '\\');
 
-	  *path = filename;
-	}
+          /* Truncate at last directory.  */
+          if (lastslash)
+            {
+              *lastslash = '\0';
+              grub_translate_ieee1275_path (filename);
+
+              *path = filename;
+            }
+        }
+      *device = grub_ieee1275_encode_devname (bootpath);
     }
+
+  grub_free (type);
   grub_free (bootpath);
 }
+#endif
 
 /* Claim some available memory in the first /memory node. */
 #ifdef __sparc__
@@ -318,11 +328,11 @@ count_free (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
   return 0;
 }
 
-int
-grub_regions_claim (grub_uint64_t addr, grub_uint64_t len,
-		    grub_memory_type_t type, void *data)
+static int
+regions_claim (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
+	      unsigned int flags, void *data)
 {
-  struct regions_claim_request *rcr = data;
+  grub_uint32_t total = *(grub_uint32_t *) data;
   grub_uint64_t linux_rmo_save;
 
   if (type != GRUB_MEMORY_AVAILABLE)
@@ -454,9 +464,6 @@ grub_regions_claim (grub_uint64_t addr, grub_uint64_t len,
 
           check_kernel_dump (&upper_mem_limit);
 
-          grub_dprintf ("ieee1275", "upper_mem_limit is at %llx (%lld MiB)\n",
-                        upper_mem_limit, upper_mem_limit >> 20);
-
           /*
            * we order these cases to prefer higher addresses and avoid some
            * splitting issues
@@ -475,7 +482,7 @@ grub_regions_claim (grub_uint64_t addr, grub_uint64_t len,
               /* We must not exceed the upper_mem_limit (assuming it's >= RMO_ADDR_MAX) */
               if (addr + len > upper_mem_limit)
                 {
-                  /* Take the bigger chunk from either below linux_rmo_save or above RMO_ADDR_MAX. */
+                  /* take the bigger chunk from either below linux_rmo_save or above upper_mem_limit */
                   len = upper_mem_limit - addr;
                   if (orig_addr < linux_rmo_save && linux_rmo_save - orig_addr > len)
                     {
@@ -505,25 +512,11 @@ grub_regions_claim (grub_uint64_t addr, grub_uint64_t len,
             }
         }
     }
-
-  /* Honor alignment restrictions on candidate addr */
-  if (rcr->align)
-    {
-      grub_uint64_t align_addr = ALIGN_UP (addr, rcr->align);
-      grub_uint64_t d = align_addr - addr;
-
-      if (d > len)
-        return 0;
-
-      len -= d;
-      addr = align_addr;
-    }
-
-  if (rcr->flags & GRUB_MM_ADD_REGION_CONSECUTIVE && len < rcr->total)
+  if (flags & GRUB_MM_ADD_REGION_CONSECUTIVE && len < total)
     return 0;
 
-  if (len > rcr->total)
-    len = rcr->total;
+  if (len > total)
+    len = total;
 
   if (len)
     {
@@ -532,16 +525,13 @@ grub_regions_claim (grub_uint64_t addr, grub_uint64_t len,
       err = grub_claimmap (addr, len);
       if (err)
 	return err;
-      if (rcr->init_region)
-          grub_mm_init_region ((void *) (grub_addr_t) addr, len);
-      rcr->total -= len;
-
-      rcr->addr = addr;
+      grub_mm_init_region ((void *) (grub_addr_t) addr, len);
+      total -= len;
     }
 
-  *(grub_uint32_t *) data = rcr->total;
+  *(grub_uint32_t *) data = total;
 
-  if (rcr->total == 0)
+  if (total == 0)
     return 1;
 
   return 0;
@@ -551,36 +541,14 @@ static int
 heap_init (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
 	   void *data)
 {
-  struct regions_claim_request rcr = {
-    .flags = GRUB_MM_ADD_REGION_NONE,
-    .total = *(grub_uint32_t *) data,
-    .init_region = true,
-  };
-  int ret;
-
-  ret = grub_regions_claim (addr, len, type, &rcr);
-
-  *(grub_uint32_t *) data = rcr.total;
-
-  return ret;
+  return regions_claim (addr, len, type, GRUB_MM_ADD_REGION_NONE, data);
 }
 
 static int
 region_claim (grub_uint64_t addr, grub_uint64_t len, grub_memory_type_t type,
 	   void *data)
 {
-  struct regions_claim_request rcr = {
-    .flags = GRUB_MM_ADD_REGION_CONSECUTIVE,
-    .total = *(grub_uint32_t *) data,
-    .init_region = true,
-  };
-  int ret;
-
-  ret = grub_regions_claim (addr, len, type, &rcr);
-
-  *(grub_uint32_t *) data = rcr.total;
-
-  return ret;
+  return regions_claim (addr, len, type, GRUB_MM_ADD_REGION_CONSECUTIVE, data);
 }
 
 static grub_err_t

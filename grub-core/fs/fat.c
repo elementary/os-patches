@@ -901,6 +901,18 @@ grub_fat_timestamp (grub_uint16_t time, grub_uint16_t date, grub_int64_t *nix) {
     .second = (time & 0x001F) * 2,
   };
 
+  /*
+   * The modification time of the root directory is never set by Linux.
+   * Creation and access time are optional and can be zero.
+   * Follow Linux and render FAT initial timestamps as the start of the epoch.
+   */
+  if (date == 0 && time == 0)
+    {
+      datetime.year = 1970;
+      datetime.month = 1;
+      datetime.day = 1;
+    }
+
   /* The conversion below allows seconds=60, so don't trust its validation. */
   if ((time & 0x1F) > 29)
     return 0;

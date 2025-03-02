@@ -1,0 +1,34 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Fri, 2 Aug 2024 11:48:16 +0100
+Subject: efi/chainloader: Do not print device path of chainloaded file
+
+Users have no reason to see this without explictily asking for it, and
+it can break graphical boot.
+
+Signed-off-by: Mate Kukri <mate.kukri@canonical.com>
+---
+ grub-core/loader/efi/chainloader.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/grub-core/loader/efi/chainloader.c b/grub-core/loader/efi/chainloader.c
+index eb833b6..11b64ac 100644
+--- a/grub-core/loader/efi/chainloader.c
++++ b/grub-core/loader/efi/chainloader.c
+@@ -183,7 +183,6 @@ make_file_path (grub_efi_device_path_t *dp, const char *filename)
+   /* Fill the file path for the directory.  */
+   d = (grub_efi_device_path_t *) ((char *) file_path
+ 				  + ((char *) d - (char *) dp));
+-  grub_efi_print_device_path (d);
+   if (copy_file_path ((grub_efi_file_path_device_path_t *) d,
+ 		      dir_start, dir_end - dir_start) != GRUB_ERR_NONE)
+     {
+@@ -270,9 +269,6 @@ grub_cmd_chainloader (grub_command_t cmd __attribute__ ((unused)),
+       file_path = make_file_path (dp, filename);
+       if (file_path == NULL)
+ 	goto fail;
+-
+-      grub_printf ("file path: ");
+-      grub_efi_print_device_path (file_path);
+     }
+ 
+   size = grub_file_size (file);
