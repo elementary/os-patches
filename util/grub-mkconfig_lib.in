@@ -133,6 +133,22 @@ prepare_grub_to_access_device ()
     esac
   done
 
+  loop_file=
+  case $1 in
+    /dev/loop/*|/dev/loop[0-9])
+      grub_loop_device="${1#/dev/}"
+      loop_file=`losetup "$1" | sed -e "s/^[^(]*(\([^)]\+\)).*/\1/"`
+      case $loop_file in
+        /dev/*) ;;
+        *)
+          loop_device="$1"
+          shift
+          set -- `"${grub_probe}" --target=device "${loop_file}"` "$@" || return 0
+        ;;
+      esac
+    ;;
+  esac
+
   # Abstraction modules aren't auto-loaded.
   abstraction="`"${grub_probe}" --device $@ --target=abstraction`"
   for module in ${abstraction} ; do
@@ -169,6 +185,14 @@ prepare_grub_to_access_device ()
     fi
   fi
   IFS="$old_ifs"
+
+  if [ "x${loop_file}" != x ]; then
+    loop_mountpoint="$(awk '"'${loop_file}'" ~ "^"$2 && $2 != "/" { print $2 }' /proc/mounts | tail -n1)"
+    if [ "x${loop_mountpoint}" != x ]; then
+      echo "loopback ${grub_loop_device} ${loop_file#$loop_mountpoint}"
+      echo "set root=(${grub_loop_device})"
+    fi
+  fi
 }
 
 grub_get_device_id ()
@@ -202,20 +226,7 @@ grub_file_is_not_garbage ()
 
 version_sort ()
 {
-  case $version_sort_sort_has_v in
-    yes)
-      LC_ALL=C sort -V "$@";;
-    no)
-      LC_ALL=C sort -n "$@";;
-    *)
-      if sort -V </dev/null > /dev/null 2>&1; then
-        version_sort_sort_has_v=yes
-	LC_ALL=C sort -V "$@"
-      else
-        version_sort_sort_has_v=no
-        LC_ALL=C sort -n "$@"
-      fi;;
-   esac
+  LC_ALL=C /usr/lib/grub/grub-sort-version "$@"
 }
 
 # Given an item as the first argument and a list as the subsequent arguments,

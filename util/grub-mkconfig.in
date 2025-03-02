@@ -141,7 +141,7 @@ GRUB_DEVICE_BOOT="`${grub_probe} --target=device /boot`"
 GRUB_DEVICE_BOOT_UUID="`${grub_probe} --device ${GRUB_DEVICE_BOOT} --target=fs_uuid 2> /dev/null`" || true
 
 # Disable os-prober by default due to security reasons.
-GRUB_DISABLE_OS_PROBER="true"
+GRUB_DISABLE_OS_PROBER="auto"
 
 # Filesystem for the device containing our userland.  Used for stuff like
 # choosing Hurd filesystem module.
@@ -158,8 +158,15 @@ if [ "x${GRUB_EARLY_INITRD_LINUX_STOCK}" = "x" ]; then
 fi
 
 if test -f ${sysconfdir}/default/grub ; then
+  gettext_printf "Sourcing file \`%s'\n" "${sysconfdir}/default/grub" 1>&2
   . ${sysconfdir}/default/grub
 fi
+for x in ${sysconfdir}/default/grub.d/*.cfg ; do
+  if [ -e "${x}" ]; then
+    gettext_printf "Sourcing file \`%s'\n" "${x}" 1>&2
+    . "${x}"
+  fi
+done
 
 if [ "x${GRUB_DISABLE_UUID}" = "xtrue" ]; then
   if [ -z "${GRUB_DISABLE_LINUX_UUID}" ]; then
@@ -195,6 +202,10 @@ done
 GRUB_ACTUAL_DEFAULT="$GRUB_DEFAULT"
 
 if [ "x${GRUB_ACTUAL_DEFAULT}" = "xsaved" ] ; then GRUB_ACTUAL_DEFAULT="`"${grub_editenv}" - list | sed -n '/^saved_entry=/ s,^saved_entry=,,p'`" ; fi
+
+if [ "x${GRUB_RECOVERY_TITLE}" = "x" ]; then
+  GRUB_RECOVERY_TITLE="recovery mode"
+fi
 
 
 # These are defined in this script, export them here so that user can
@@ -255,7 +266,12 @@ export GRUB_DEFAULT \
   GRUB_ENABLE_CRYPTODISK \
   GRUB_BADRAM \
   GRUB_OS_PROBER_SKIP_LIST \
-  GRUB_DISABLE_SUBMENU
+  GRUB_DISABLE_SUBMENU \
+  GRUB_RECORDFAIL_TIMEOUT \
+  GRUB_RECOVERY_TITLE \
+  GRUB_FORCE_PARTUUID \
+  GRUB_DISABLE_INITRD \
+  GRUB_FLAVOUR_ORDER
 
 if test "x${grub_cfg}" != "x"; then
   rm -f "${grub_cfg}.new"
