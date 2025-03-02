@@ -72,9 +72,9 @@ size_t FSE_readNCount (short* normalizedCounter, unsigned* maxSVPtr, unsigned* t
     unsigned charnum = 0;
     int previous0 = 0;
 
-    if (hbSize < 4) {
+    if (hbSize < 8) {
         /* This function only works when hbSize >= 4 */
-        char buffer[4];
+        char buffer[8];
         memset(buffer, 0, sizeof(buffer));
         memcpy(buffer, headerBuffer, hbSize);
         {   size_t const countSize = FSE_readNCount(normalizedCounter, maxSVPtr, tableLogPtr,
@@ -83,7 +83,7 @@ size_t FSE_readNCount (short* normalizedCounter, unsigned* maxSVPtr, unsigned* t
             if (countSize > hbSize) return ERROR(corruption_detected);
             return countSize;
     }   }
-    assert(hbSize >= 4);
+    assert(hbSize >= 8);
 
     /* init */
     memset(normalizedCounter, 0, (*maxSVPtr+1) * sizeof(normalizedCounter[0]));   /* all symbols not present in NCount have a frequency of 0 */

@@ -209,7 +209,7 @@ grub_normal_init_page (struct grub_term_output *term,
 
   grub_term_cls (term);
 
-  msg_formatted = grub_xasprintf (_("GNU GRUB  version %s"), PACKAGE_VERSION);
+  msg_formatted = grub_xasprintf (_("GNU GRUB  version %s"), VERSION);
   if (!msg_formatted)
     return;
 
@@ -310,52 +310,123 @@ grub_enter_normal_mode (const char *config)
   grub_boot_time ("Exiting normal mode");
 }
 
+static grub_err_t
+grub_try_normal_prefix (const char *prefix)
+{
+    char *config;
+    grub_err_t err = GRUB_ERR_FILE_NOT_FOUND;
+    const char *net_search_cfg;
+    int disable_net_search = 0;
+
+    net_search_cfg = grub_env_get ("feature_net_search_cfg");
+    if (net_search_cfg && net_search_cfg[0] == 'n')
+      disable_net_search = 1;
+
+    if (grub_strncmp (prefix + 1, "tftp", sizeof ("tftp") - 1) == 0 &&
+        !disable_net_search)
+      {
+       grub_size_t config_len;
+       config_len = grub_strlen (prefix) +
+         sizeof ("/grub.cfg-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX");
+       config = grub_malloc (config_len);
+
+       if (! config)
+         return err;
+
+       grub_snprintf (config, config_len, "%s/grub.cfg", prefix);
+       err = grub_net_search_config_file (config);
+      }
+
+    if (err != GRUB_ERR_NONE)
+      {
+       config = grub_xasprintf ("%s/grub.cfg", prefix);
+       if (config)
+         {
+           grub_file_t file;
+           file = grub_file_open (config, GRUB_FILE_TYPE_CONFIG);
+           if (file)
+             {
+               grub_file_close (file);
+               err = GRUB_ERR_NONE;
+             }
+         }
+      }
+
+    if (err == GRUB_ERR_NONE)
+      grub_enter_normal_mode (config);
+
+    grub_errno = 0;
+    grub_free (config);
+    return err;
+}
+
+static int
+grub_try_normal_dev (const char *name, void *data)
+{
+  grub_err_t err;
+  const char *prefix = grub_xasprintf ("(%s)%s", name, (char *) data);
+
+  if (!prefix)
+    return 0;
+
+  err = grub_try_normal_prefix (prefix);
+  if (err == GRUB_ERR_NONE)
+    return 1;
+
+  return 0;
+}
+
+static grub_err_t
+grub_try_normal_discover (void)
+{
+  const char *prefix = grub_env_get ("prefix");
+  grub_err_t err = GRUB_ERR_FILE_NOT_FOUND;
+
+  if (!prefix)
+    return err;
+
+  if (grub_device_iterate (grub_try_normal_dev, (void *) prefix))
+    return GRUB_ERR_NONE;
+
+  return err;
+}
+
+static grub_err_t
+grub_try_normal (const char *variable)
+{
+  grub_err_t err = GRUB_ERR_FILE_NOT_FOUND;
+  const char *prefix;
+
+  if (!variable)
+    return err;
+
+  prefix = grub_env_get (variable);
+  if (!prefix)
+    return err;
+
+  return grub_try_normal_prefix (prefix);
+}
+
 /* Enter normal mode from rescue mode.  */
 static grub_err_t
 grub_cmd_normal (struct grub_command *cmd __attribute__ ((unused)),
 		 int argc, char *argv[])
 {
-  if (argc == 0)
-    {
-      /* Guess the config filename. It is necessary to make CONFIG static,
-	 so that it won't get broken by longjmp.  */
-      char *config;
-      const char *prefix;
-
-      prefix = grub_env_get ("prefix");
-      if (prefix)
-        {
-          grub_size_t config_len;
-          int disable_net_search = 0;
-          const char *net_search_cfg;
-
-          config_len = grub_strlen (prefix) +
-                       sizeof ("/grub.cfg-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX");
-          config = grub_malloc (config_len);
-
-          if (!config)
-            goto quit;
-
-          grub_snprintf (config, config_len, "%s/grub.cfg", prefix);
-
-          net_search_cfg = grub_env_get ("feature_net_search_cfg");
-          if (net_search_cfg && net_search_cfg[0] == 'n')
-            disable_net_search = 1;
-
-          if (grub_strncmp (prefix + 1, "tftp", sizeof ("tftp") - 1) == 0 &&
-              !disable_net_search)
-            grub_net_search_config_file (config);
-
-	  grub_enter_normal_mode (config);
-	  grub_free (config);
-	}
-      else
-	grub_enter_normal_mode (0);
-    }
-  else
+  if (argc)
     grub_enter_normal_mode (argv[0]);
+  else
+    {
+      /* Guess the config filename. */
+      grub_err_t err;
+      err = grub_try_normal ("fw_path");
+      if (err == GRUB_ERR_FILE_NOT_FOUND)
+        err = grub_try_normal ("prefix");
+      if (err == GRUB_ERR_FILE_NOT_FOUND)
+        err = grub_try_normal_discover ();
+      if (err == GRUB_ERR_FILE_NOT_FOUND)
+        grub_enter_normal_mode (0);
+    }
 
-quit:
   return 0;
 }
 
@@ -408,6 +479,15 @@ static grub_err_t
 grub_normal_read_line_real (char **line, int cont, int nested)
 {
   const char *prompt;
+#if QUIET_BOOT
+  static int displayed_intro;
+
+  if (! displayed_intro)
+    {
+      grub_normal_reader_init (nested);
+      displayed_intro = 1;
+    }
+#endif
 
   if (cont)
     /* TRANSLATORS: it's command line prompt.  */
@@ -460,7 +540,9 @@ grub_cmdline_run (int nested, int force_auth)
       return;
     }
 
+#if !QUIET_BOOT
   grub_normal_reader_init (nested);
+#endif
 
   while (1)
     {
@@ -568,6 +650,9 @@ GRUB_MOD_INIT(normal)
   grub_env_export ("grub_cpu");
   grub_env_set ("grub_platform", GRUB_PLATFORM);
   grub_env_export ("grub_platform");
+
+  grub_env_set ("package_version", PACKAGE_VERSION);
+  grub_env_export ("package_version");
 
   grub_boot_time ("Normal module prepared");
 }

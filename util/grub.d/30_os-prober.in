@@ -20,19 +20,39 @@ set -e
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 datarootdir="@datarootdir@"
+quick_boot="@QUICK_BOOT@"
 
 export TEXTDOMAIN=@PACKAGE@
 export TEXTDOMAINDIR="@localedir@"
 
 . "$pkgdatadir/grub-mkconfig_lib"
 
-if [ "x${GRUB_DISABLE_OS_PROBER}" = "xtrue" ]; then
-  grub_warn "$(gettext_printf "os-prober will not be executed to detect other bootable partitions.\nSystems on them will not be added to the GRUB boot configuration.\nCheck GRUB_DISABLE_OS_PROBER documentation entry.")"
-  exit 0
+found_other_os=
+
+adjust_timeout () {
+  if [ "$quick_boot" = 1 ] && [ "x${found_other_os}" != "x" ]; then
+    cat << EOF
+set timeout_style=menu
+if [ "\${timeout}" = 0 ]; then
+  set timeout=10
 fi
+EOF
+  fi
+}
 
 if ! command -v os-prober > /dev/null || ! command -v linux-boot-prober > /dev/null ; then
   # missing os-prober and/or linux-boot-prober
+  exit 0
+elif [ "x${GRUB_DISABLE_OS_PROBER}" = "xauto" ]; then
+  # UBUNTU: We do not want to disable os-prober on upgrades if we found items before.
+  if test -e /boot/grub/grub.cfg && ! grep -q osprober /boot/grub/grub.cfg; then
+    grub_warn "$(gettext_printf "os-prober will not be executed to detect other bootable partitions.\nSystems on them will not be added to the GRUB boot configuration.\nCheck GRUB_DISABLE_OS_PROBER documentation entry.")"
+    exit 0
+  fi
+fi
+
+if [ "x${GRUB_DISABLE_OS_PROBER}" = "xtrue" ]; then
+  grub_warn "$(gettext_printf "os-prober will not be executed to detect other bootable partitions.\nSystems on them will not be added to the GRUB boot configuration.\nCheck GRUB_DISABLE_OS_PROBER documentation entry.")"
   exit 0
 fi
 
@@ -45,6 +65,7 @@ if [ -z "${OSPROBED}" ] ; then
 fi
 
 osx_entry() {
+    found_other_os=1
     if [ x$2 = x32 ]; then
         # TRANSLATORS: it refers to kernel architecture (32-bit)
 	bitstr="$(gettext "(32-bit)")"
@@ -183,6 +204,7 @@ EOF
     ;;
     efi)
 
+	found_other_os=1
 	EFIPATH=${DEVICE#*@}
 	DEVICE=${DEVICE%@*}
 	onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
@@ -226,8 +248,14 @@ EOF
 	  LINITRD="${LINITRD#/boot}"
 	fi
 
+	if [ -z "${prepare_boot_cache}" ]; then
+	  prepare_boot_cache="$(prepare_grub_to_access_device ${LBOOT} | grub_add_tab)"
+	  [ "${prepare_boot_cache}" ] || continue
+	fi
+
+	found_other_os=1
 	onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
-	recovery_params="$(echo "${LPARAMS}" | grep single)" || true
+	recovery_params="$(echo "${LPARAMS}" | grep 'single\|recovery')" || true
 	counter=1
 	while echo "$used_osprober_linux_ids" | grep 'osprober-gnulinux-$LKERNEL-${recovery_params}-$counter-$boot_device_id' > /dev/null; do
 	    counter=$((counter+1));
@@ -236,10 +264,6 @@ EOF
 	    boot_device_id="$(grub_get_device_id "${DEVICE}")"
 	fi
 	used_osprober_linux_ids="$used_osprober_linux_ids 'osprober-gnulinux-$LKERNEL-${recovery_params}-$counter-$boot_device_id'"
-
-	if [ -z "${prepare_boot_cache}" ]; then
-	  prepare_boot_cache="$(prepare_grub_to_access_device ${LBOOT} | grub_add_tab)"
-	fi
 
 	# The GRUB_DISABLE_SUBMENU option used to be different than others since it was
 	# mentioned in the documentation that has to be set to 'y' instead of 'true' to
@@ -306,6 +330,7 @@ EOF
       fi
     ;;
     hurd)
+      found_other_os=1
       onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
       cat << EOF
 menuentry '$(echo "${LONGNAME} $onstr" | grub_quote)' --class hurd --class gnu --class os \$menuentry_id_option 'osprober-gnuhurd-/boot/gnumach.gz-false-$(grub_get_device_id "${DEVICE}")' {
@@ -348,3 +373,5 @@ EOF
     ;;
   esac
 done
+
+adjust_timeout
