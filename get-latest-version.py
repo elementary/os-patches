@@ -136,6 +136,17 @@ def main():
                 stderr=subprocess.PIPE,
                 check=True,
             )
+
+            # Remove all files/directories excluding ".", "..", and ".git" before copying upstream source
+            # to prevent files/directories removed in upstream from being leftover
+            subprocess.run(
+                f"ls -a | grep -v -E '^\.$|^\.\.$|^\.git$' | xargs rm -rf",
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True,
+            )
+
             subprocess.run(
                 f"cp -r {extraction_dest}/* .",
                 shell=True,
