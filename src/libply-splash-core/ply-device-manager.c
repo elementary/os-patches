@@ -826,11 +826,11 @@ parse_vconsole_conf (ply_device_manager_t *manager)
         if (!keymap)
                 keymap = ply_kernel_command_line_get_key_value ("vconsole.keymap=");
 
-        vconsole_conf = ply_key_file_new ("/etc/vconsole.conf");
+        vconsole_conf = ply_key_file_new ("/etc/default/keyboard");
         if (ply_key_file_load_groupless_file (vconsole_conf)) {
                 /* The values in vconsole.conf might be quoted, strip these */
                 if (!keymap) {
-                        keymap = ply_key_file_get_value (vconsole_conf, NULL, "KEYMAP");
+                        keymap = ply_key_file_get_value (vconsole_conf, NULL, "XKBLAYOUT");
                         keymap = strip_quotes (keymap);
                 }
                 xkb_layout = ply_key_file_get_value (vconsole_conf, NULL, "XKBLAYOUT");

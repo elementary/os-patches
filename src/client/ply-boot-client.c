@@ -261,14 +261,30 @@ ply_boot_client_process_incoming_replies (ply_boot_client_t *client)
                 return;
         }
 
-        request_node = ply_list_get_first_node (client->requests_waiting_for_replies);
-        assert (request_node != NULL);
+        if (!ply_read (client->socket_fd, byte, sizeof(uint8_t))) {
+                ply_error ("could not read response from boot status daemon");
+                return;
+        }
 
-        request = (ply_boot_client_request_t *) ply_list_node_get_data (request_node);
-        assert (request != NULL);
+        for (request_node = ply_list_get_first_node (client->requests_waiting_for_replies);
+             ; request_node = ply_list_get_next_node (client->requests_waiting_for_replies, request_node)) {
+                assert (request_node != NULL);
+                request = (ply_boot_client_request_t *) ply_list_node_get_data (request_node);
+                assert (request != NULL);
 
-        if (!ply_read (client->socket_fd, byte, sizeof(uint8_t)))
-                goto out;
+                if (! strcmp (request->command, PLY_BOOT_PROTOCOL_REQUEST_TYPE_PASSWORD)
+                    || ! strcmp (request->command, PLY_BOOT_PROTOCOL_REQUEST_TYPE_CACHED_PASSWORD)
+                    || ! strcmp (request->command, PLY_BOOT_PROTOCOL_REQUEST_TYPE_QUESTION)
+                    || ! strcmp (request->command, PLY_BOOT_PROTOCOL_REQUEST_TYPE_KEYSTROKE)) {
+                        if (! memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_ANSWER, sizeof (uint8_t))
+                            || ! memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_NO_ANSWER, sizeof (uint8_t)))
+                                break;
+                } else {
+                        if (memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_ANSWER, sizeof (uint8_t))
+                            && memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_NO_ANSWER, sizeof (uint8_t)))
+                                break;
+                }
+        }
 
         if (memcmp (byte, PLY_BOOT_PROTOCOL_RESPONSE_TYPE_ACK, sizeof(uint8_t)) == 0) {
                 if (request->handler != NULL)
