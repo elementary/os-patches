@@ -52,7 +52,7 @@ directly with upstream to include them.
   
 4. Move the source folder contents up to the pwd and then delete the empty folder
 
-    `cp -r {source-folder-name}/* . && rm -r {source-folder-name}`
+    `cp -r {source-folder-name}/. . && rm -r {source-folder-name}`
   
 5. Add source files, commit, and push
 
