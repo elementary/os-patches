@@ -137,7 +137,7 @@ def main():
                 check=True,
             )
             subprocess.run(
-                f"cp -r {extraction_dest}/* .",
+                f"cp -r {extraction_dest}/. .",
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
