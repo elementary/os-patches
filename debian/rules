@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-O1 -Wl,-z,defs
+
+%:
+	dh $@ --with gnome
+
+override_dh_autoreconf:
+	dh_autoreconf
+	cp /usr/share/automake-*/mkinstalldirs .
+
+override_dh_auto_build:
+	dh_auto_build
+	$(MAKE) -C po update-gmo
+
+override_dh_clean:
+	rm -f po/*.gmo
+	dh_clean

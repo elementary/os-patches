@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+]>
+<refentry id="user-dirs.defaults">
+
+<refentryinfo>
+  <title>user-dirs.defaults</title>
+  <productname>XDG</productname>
+  <authorgroup>
+    <author>
+      <contrib>Developer</contrib>
+      <firstname>Alexander</firstname>
+      <surname>Larsson</surname>
+      <email>alexl@redhat.com</email>
+    </author>
+  </authorgroup>
+</refentryinfo>
+
+<refmeta>
+  <refentrytitle>user-dirs.defaults</refentrytitle>
+  <manvolnum>5</manvolnum>
+  <refmiscinfo class="manual">File Formats</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+  <refname>user-dirs.defaults</refname>
+  <refpurpose>default settings for XDG user dirs</refpurpose>
+</refnamediv>
+
+<refsect1><title>Description</title>
+<para>The <filename>/etc/xdg/user-dirs.defaults</filename> file is a
+text file that contains the default values for the XDG user dirs which
+are used by the xdg-user-dirs-update command.</para>
+<para>This file contains lines of the form
+<screen>
+<replaceable>NAME</replaceable>=<replaceable>VALUE</replaceable>
+</screen>
+</para>
+<para>The following names are recognised:
+<simplelist>
+    <member>DESKTOP</member>
+    <member>DOWNLOAD</member>
+    <member>TEMPLATES</member>
+    <member>PUBLICSHARE</member>
+    <member>DOCUMENTS</member>
+    <member>MUSIC</member>
+    <member>PICTURES</member>
+    <member>VIDEOS</member>
+</simplelist></para>
+<para>The values are relative pathnames from the home directory and
+will be translated on a per-path-element basis into the users locale.</para>
+<para>Lines beginning with a # character are ignored.</para>
+</refsect1>
+
+<refsect1><title>Environment</title>
+<variablelist>
+<varlistentry>
+<term><envar>XDG_CONFIG_DIRS</envar></term>
+<listitem><para>The <filename>user-dirs.defaults</filename> file
+is located in this directory. The default is <filename>/etc/xdg</filename>.</para></listitem>
+</varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1><title>See Also</title>
+  <para>
+    <citerefentry><refentrytitle>xdg-user-dirs-update</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+  </para>
+</refsect1>
+
+</refentry>
