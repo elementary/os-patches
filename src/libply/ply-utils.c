@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <locale.h>
+#include <math.h>
 #include <poll.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -1001,8 +1002,6 @@ ply_set_device_scale (int device_scale)
         ply_trace ("Device scale is set to %d", device_scale);
 }
 
-/* The minimum resolution at which we turn on a device-scale of 2 */
-#define HIDPI_LIMIT 192
 #define HIDPI_MIN_HEIGHT 1200
 #define HIDPI_MIN_WIDTH 2560 /* For heuristic / guessed device-scale */
 
@@ -1019,8 +1018,8 @@ get_device_scale (uint32_t width,
                   uint32_t height_mm,
                   bool     guess)
 {
-        int device_scale;
-        double dpi_x, dpi_y;
+        int device_scale, target_dpi;
+        float diag_inches, diag_pixels, physical_dpi, perfect_scale;
         const char *force_device_scale;
 
         device_scale = 1;
@@ -1031,11 +1030,10 @@ get_device_scale (uint32_t width,
         if (overridden_device_scale != 0)
                 return overridden_device_scale;
 
-        if (height < HIDPI_MIN_HEIGHT)
-                return 1;
-
-        if (guess)
-                return (width >= HIDPI_MIN_WIDTH) ? 2 : 1;
+        if (guess) {
+                return (width >= HIDPI_MIN_WIDTH &&
+                        height >= HIDPI_MIN_HEIGHT) ? 2 : 1;
+        }
 
         /* Somebody encoded the aspect ratio (16/9 or 16/10)
          * instead of the physical size */
@@ -1045,15 +1043,21 @@ get_device_scale (uint32_t width,
             (width_mm == 16 && height_mm == 10))
                 return 1;
 
-        if (width_mm > 0 && height_mm > 0) {
-                dpi_x = (double) width / (width_mm / 25.4);
-                dpi_y = (double) height / (height_mm / 25.4);
-                /* We don't completely trust these values so both
-                 * must be high, and never pick higher ratio than
-                 * 2 automatically */
-                if (dpi_x > HIDPI_LIMIT && dpi_y > HIDPI_LIMIT)
-                        device_scale = 2;
-        }
+        if (width_mm == 0 || height_mm == 0)
+                return 1;
+
+        diag_inches = sqrtf (width_mm * width_mm + height_mm * height_mm) /
+                      25.4f;
+        diag_pixels = sqrtf (width * width + height * height);
+        physical_dpi = diag_pixels / diag_inches;
+
+        /* These constants are copied from Mutter's meta-monitor.c in order
+         * to match the default scale choice of the login screen.
+         */
+        target_dpi = (diag_inches >= 20.f) ? 110 : 135;
+
+        perfect_scale = physical_dpi / target_dpi;
+        device_scale = (perfect_scale >= 1.75f) ? 2 : 1;
 
         return device_scale;
 }

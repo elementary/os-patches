@@ -1972,6 +1972,17 @@ get_panel_properties (ply_renderer_backend_t      *backend,
 }
 
 static ply_input_device_t *
+get_any_input_device (ply_renderer_backend_t *backend)
+{
+        ply_list_node_t *node = ply_list_get_first_node (backend->input_source.input_devices);
+
+        if (node != NULL)
+                return ply_list_node_get_data (node);
+
+        return NULL;
+}
+
+static ply_input_device_t *
 get_any_input_device_with_leds (ply_renderer_backend_t *backend)
 {
         ply_list_node_t *node;
@@ -1993,6 +2004,9 @@ get_capslock_state (ply_renderer_backend_t *backend)
 {
         if (using_input_device (&backend->input_source)) {
                 ply_input_device_t *dev = get_any_input_device_with_leds (backend);
+                if (!dev)
+                        return false;
+
                 return ply_input_device_get_capslock_state (dev);
         }
         if (!backend->terminal)
@@ -2005,8 +2019,12 @@ static const char *
 get_keymap (ply_renderer_backend_t *backend)
 {
         if (using_input_device (&backend->input_source)) {
-                ply_input_device_t *dev = get_any_input_device_with_leds (backend);
-                const char *keymap = ply_input_device_get_keymap (dev);
+                const char *keymap;
+                ply_input_device_t *dev = get_any_input_device (backend);
+                if (!dev)
+                        return NULL;
+
+                keymap = ply_input_device_get_keymap (dev);
                 if (keymap != NULL) {
                         return keymap;
                 }

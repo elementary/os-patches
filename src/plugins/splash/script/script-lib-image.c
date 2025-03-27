@@ -200,7 +200,7 @@ static script_return_t image_text (script_state_t *state,
 
         alpha_obj = script_obj_hash_peek_element (state->local, "alpha");
 
-        if (script_obj_is_number (alpha_obj))
+        if (alpha_obj && script_obj_is_number (alpha_obj))
                 alpha = CLAMP (script_obj_as_number (alpha_obj), 0, 1);
         else
                 alpha = 1;

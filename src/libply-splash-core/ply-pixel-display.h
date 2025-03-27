@@ -49,6 +49,8 @@ void ply_pixel_display_free (ply_pixel_display_t *display);
 ply_renderer_t *ply_pixel_display_get_renderer (ply_pixel_display_t *display);
 ply_renderer_head_t *ply_pixel_display_get_renderer_head (ply_pixel_display_t *display);
 
+unsigned int ply_pixel_display_get_bits_per_pixel (ply_pixel_display_t *display);
+
 unsigned long ply_pixel_display_get_width (ply_pixel_display_t *display);
 unsigned long ply_pixel_display_get_height (ply_pixel_display_t *display);
 int ply_pixel_display_get_device_scale (ply_pixel_display_t *display);

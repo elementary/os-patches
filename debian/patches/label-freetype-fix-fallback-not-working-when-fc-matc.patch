@@ -1,0 +1,52 @@
+From: Ferdinand Bachmann <ferdinand.bachmann@yrlf.at>
+Date: Tue, 16 Jan 2024 01:52:11 +0100
+Subject: label-freetype: fix fallback not working when fc-match isn't
+ available
+
+The new font loading functions introduced in
+544e62ac41a490f04d8e6b4e85f8b9fa1171b0cc assume that popen() returns
+NULL when fc-match is unavailable or fails. This is incorrect, since
+popen() will always start a shell to run the passed command and return a
+stream to that shell's stdin and stdout.
+
+This results in an non-null but empty font name being passed to
+FT_New_Face(), which fails.
+
+This commit fixes this by also using the fallback font when the font
+path read from the popen() stream is empty.
+
+Fixes #239
+Fixes regression caused by 544e62ac41a490f04d8e6b4e85f8b9fa1171b0cc
+
+Bug: https://gitlab.freedesktop.org/plymouth/plymouth/-/issues/239
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2096806
+Forwarded: not-needed
+Last-Update: 2025-02-20
+---
+ src/plugins/controls/label-freetype/plugin.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/plugins/controls/label-freetype/plugin.c b/src/plugins/controls/label-freetype/plugin.c
+index 917b04c..be20620 100644
+--- a/src/plugins/controls/label-freetype/plugin.c
++++ b/src/plugins/controls/label-freetype/plugin.c
+@@ -135,6 +135,9 @@ find_default_font_path (void)
+ 
+         pclose (fp);
+ 
++        if (strcmp (fc_match_out, "") == 0)
++                return FONT_FALLBACK;
++
+         return fc_match_out;
+ }
+ 
+@@ -152,6 +155,9 @@ find_default_monospace_font_path (void)
+ 
+         pclose (fp);
+ 
++        if (strcmp (fc_match_out, "") == 0)
++                return FONT_FALLBACK;
++
+         return fc_match_out;
+ }
+ 

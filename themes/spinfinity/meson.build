@@ -53,8 +53,3 @@ install_data(
   'throbber-33.png',
   install_dir: plymouth_theme_path / 'spinfinity',
 )
-
-install_symlink('header-image.png',
-  install_dir: plymouth_theme_path / 'spinfinity',
-  pointing_to: plymouth_logo_file,
-)
