@@ -83,7 +83,7 @@ grub_util_error (const char *fmt, ...)
   vfprintf (stderr, fmt, ap);
   va_end (ap);
   fprintf (stderr, ".\n");
-  grub_exit (1);
+  grub_exit ();
 }
 
 void *
@@ -152,13 +152,12 @@ xasprintf (const char *fmt, ...)
 
 #if !defined (GRUB_MACHINE_EMU) || defined (GRUB_UTIL)
 void
-__attribute__ ((noreturn))
-grub_exit (int rc)
+grub_exit (void)
 {
 #if defined (GRUB_KERNEL)
   grub_reboot ();
 #endif
-  exit (rc < 0 ? 1 : rc);
+  exit (1);
 }
 #endif
 

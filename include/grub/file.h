@@ -126,7 +126,6 @@ enum grub_file_type
     GRUB_FILE_TYPE_FS_SEARCH,
     GRUB_FILE_TYPE_AUDIO,
     GRUB_FILE_TYPE_VBE_DUMP,
-    GRUB_FILE_TYPE_HWMATCH,
 
     GRUB_FILE_TYPE_LOADENV,
     GRUB_FILE_TYPE_SAVEENV,
@@ -183,13 +182,13 @@ extern grub_disk_read_hook_t EXPORT_VAR(grub_file_progress_hook);
 /* Filters with lower ID are executed first.  */
 typedef enum grub_file_filter_id
   {
+    GRUB_FILE_FILTER_VERIFY,
     GRUB_FILE_FILTER_GZIO,
     GRUB_FILE_FILTER_XZIO,
     GRUB_FILE_FILTER_LZOPIO,
+    GRUB_FILE_FILTER_MAX,
     GRUB_FILE_FILTER_COMPRESSION_FIRST = GRUB_FILE_FILTER_GZIO,
     GRUB_FILE_FILTER_COMPRESSION_LAST = GRUB_FILE_FILTER_LZOPIO,
-    GRUB_FILE_FILTER_VERIFY,
-    GRUB_FILE_FILTER_MAX,
   } grub_file_filter_id_t;
 
 typedef grub_file_t (*grub_file_filter_t) (grub_file_t in, enum grub_file_type type);

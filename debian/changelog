@@ -1,3 +1,62 @@
+grub2 (2.12-1ubuntu7.3) noble; urgency=medium
+
+  * Drop NTFS patches that seem to be causing regressions
+
+ -- Mate Kukri <mate.kukri@canonical.com>  Mon, 17 Mar 2025 13:20:09 +0000
+
+grub2 (2.12-1ubuntu7.2) noble; urgency=medium
+
+  * Cherry-pick upstream vulnerability fixes
+  * Cherry-pick extfs regression patch
+  * Cherry-pick xfs regression patches
+  * Bump SBAT level to grub,5
+  * d/rules: Also build monolithic images for riscv64 (LP: #2091706)
+  * SECURITY UPDATE: video/readers/jpeg: Do not permit duplicate SOF0 markers in JPEG
+    - CVE-2024-45774
+  * SECURITY UPDATE: commands/extcmd: Missing check for failed allocation
+    - CVE-2024-45775
+  * SECURITY UPDATE: gettext: Integer overflow leads to heap OOB write or read
+    - CVE-2024-45776
+  * SECURITY UPDATE: gettext: Integer overflow leads to heap OOB write
+    - CVE-2024-45777
+  * SECURITY UPDATE: fs/bfs: Integer overflow
+    - CVE-2024-45778
+  * SECURITY UPDATE: fs/bfs: integer overflow leads to heap OOB read
+    - CVE-2024-45779
+  * SECURITY UPDATE: fs/tar: Integer overflow leads to heap OOB write
+    - CVE-2024-45780
+  * SECURITY UPDATE: fs/ufs: `strcpy` use leading to heap OOB write
+    - CVE-2024-45781
+  * SECURITY UPDATE: fs/hfs: `strcpy` use leading to potential heap OOB write
+    - CVE-2024-45782
+  * SECURITY UPDATE: fs/hfsplus: incorrect refcount handling leading to UAF
+    - CVE-2024-45783
+  * SECURITY UPDATE: command/gpg: Use-after-free due to hooks not being removed on module unload
+    - CVE-2025-0622
+  * SECURITY UPDATE: net: Out-of-bounds write in grub_net_search_config_file()
+    - CVE-2025-0624
+  * SECURITY UPDATE: UFS: Integer overflow may lead to heap based out-of-bounds write when handling symlinks
+    - CVE-2025-0677
+  * SECURITY UPDATE: squash4: Integer overflow may lead to heap based out-of-bounds write when reading data
+    - CVE-2025-0678
+  * SECURITY UPDATE: reiserfs: Integer overflow when handling symlinks may lead to heap based out-of-bounds write when reading data
+    - CVE-2025-0684
+  * SECURITY UODATE: jfs: Integer overflow when handling symlinks may lead to heap based out-of-bounds write when reading data
+    - CVE-2025-0685
+  * SECURITY UPDATE: romfs: Integer overflow when handling symlinks may lead to heap based out-of-bounds write when reading data
+    - CVE-2025-0686
+  * SECURITY UPDATE: udf: Heap based buffer overflow  in grub_udf_read_block() may lead to arbitrary code execution
+    - CVE-2025-0689
+  * SECURITY UPDATE: read: Integer overflow may lead to out-of-bounds write
+    - CVE-2025-0690
+  * SECURITY UPDATE: commands/dump: The dump command is not in lockdown when secure boot is enabled
+    - CVE-2025-1118
+  * SECURITY UPDATE: fs/hfs: Integer overflow may lead to heap based out-of-bounds write
+    - CVE-2025-1125
+  * SECURITY UPDATE: insmod: incorrect refcount handling leading to UAF [LP: #2055835]
+
+ -- Mate Kukri <mate.kukri@canonical.com>  Fri, 17 Jan 2025 11:33:01 +0000
+
 grub2 (2.12-1ubuntu7.1) noble; urgency=medium
 
   * riscv: use time register in grub_efi_get_time_ms() (LP: #2076651)

@@ -16,7 +16,6 @@
  *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <grub/env.h>
 #include <grub/misc.h>
 #include <grub/net/tcp.h>
 #include <grub/net/ip.h>
@@ -31,7 +30,6 @@
 GRUB_MOD_LICENSE ("GPLv3+");
 
 #define HTTP_PORT	((grub_uint16_t) 80)
-#define HTTP_MAX_CHUNK_SIZE 0x80000000
 
 typedef struct http_data
 {
@@ -84,8 +82,6 @@ parse_line (grub_file_t file, http_data_t data, char *ptr, grub_size_t len)
   if (data->in_chunk_len == 2)
     {
       data->chunk_rem = grub_strtoul (ptr, 0, 16);
-      if (data->chunk_rem > HTTP_MAX_CHUNK_SIZE)
-	  return GRUB_ERR_NET_PACKET_TOO_BIG;
       grub_errno = GRUB_ERR_NONE;
       if (data->chunk_rem == 0)
 	{
@@ -295,9 +291,7 @@ http_receive (grub_net_tcp_socket_t sock __attribute__ ((unused)),
 	  nb2 = grub_netbuff_alloc (data->chunk_rem);
 	  if (!nb2)
 	    return grub_errno;
-	  err = grub_netbuff_put (nb2, data->chunk_rem);
-	  if (err)
-	    return grub_errno;
+	  grub_netbuff_put (nb2, data->chunk_rem);
 	  grub_memcpy (nb2->data, nb->data, data->chunk_rem);
 	  if (file->device->net->packs.count >= 20)
 	    {
@@ -502,20 +496,13 @@ http_open (struct grub_file *file, const char *filename)
 {
   grub_err_t err;
   struct http_data *data;
-  const char *http_path;
 
   data = grub_zalloc (sizeof (*data));
   if (!data)
     return grub_errno;
   file->size = GRUB_FILE_SIZE_UNKNOWN;
 
-  /* If path is relative, prepend http_path */
-  http_path = grub_env_get ("http_path");
-  if (http_path && filename[0] != '/')
-    data->filename = grub_xasprintf ("%s/%s", http_path, filename);
-  else
-    data->filename = grub_strdup (filename);
-
+  data->filename = grub_strdup (filename);
   if (!data->filename)
     {
       grub_free (data);

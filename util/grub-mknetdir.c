@@ -82,6 +82,7 @@ argp_parser (int key, char *arg, struct argp_state *state)
     }
 }
 
+
 struct argp argp = {
   options, argp_parser, NULL,
   "\v"N_("Prepares GRUB network boot images at net_directory/subdir "
@@ -91,7 +92,7 @@ struct argp argp = {
 
 static char *base;
 
-static struct
+static const struct
 {
   const char *mkimage_target;
   const char *netmodule;
@@ -156,7 +157,6 @@ process_input_dir (const char *input_dir, enum grub_install_plat platform)
   grub_install_push_module (targets[platform].netmodule);
 
   output = grub_util_path_concat_ext (2, grubdir, "core", targets[platform].ext);
-
   grub_install_make_image_wrap (input_dir, prefix, output,
 				0, load_cfg,
 				targets[platform].mkimage_target, 0);
@@ -197,7 +197,6 @@ main (int argc, char *argv[])
   grub_install_mkdir_p (base);
 
   grub_install_push_module ("tftp");
-  grub_install_push_module ("http");
 
   if (!grub_install_source_directory)
     {
