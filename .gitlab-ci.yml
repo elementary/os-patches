@@ -1,0 +1,34 @@
+stages:
+  - build
+  - shellcheck
+
+.check-format: &check-format
+  script:
+    - scripts/check-format.sh
+
+.meson-build: &meson-build
+  script:
+    - CFLAGS="-Wl,--no-undefined" meson _build
+    - cd _build
+    - ninja dist
+    - shellcheck -S error scripts/plymouth-*
+
+fedora-x86_64:
+  stage: build
+  image: 'registry.fedoraproject.org/fedora:37'
+  before_script:
+    - dnf install -y gcc gtk3-devel git libpng-devel gettext-devel libxslt docbook-style-xsl cairo-devel systemd-devel systemd-udev kernel-headers libdrm-devel pango-devel make ShellCheck uncrustify patchutils meson binutils-gold xkeyboard-config-devel libevdev-devel
+    - alternatives --set ld /usr/bin/ld.gold
+  <<: [ *check-format, *meson-build ]
+  only:
+    - merge_requests
+
+debian-unstable-x86_64:
+  stage: build
+  image: debian:unstable
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq --no-install-recommends bc build-essential docbook-xsl gcc gettext git libdrm-dev libgtk-3-dev libpango1.0-dev libpng-dev libudev-dev make pkg-config libsystemd-dev udev xsltproc shellcheck uncrustify patchutils meson xkb-data libevdev-dev
+  <<: *meson-build
+  only:
+    - merge_requests

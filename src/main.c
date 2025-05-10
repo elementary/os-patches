@@ -121,7 +121,6 @@ typedef struct
         const char             *default_tty;
 
         int                     number_of_errors;
-        ply_list_t             *pending_messages;
 } state_t;
 
 static void show_splash (state_t *state);
@@ -191,9 +190,8 @@ on_update (state_t    *state,
            const char *status)
 {
         ply_trace ("updating status to '%s'", status);
-        if (strncmp (status, "fsck:", 5))
-                ply_progress_status_update (state->progress,
-                                            status);
+        ply_progress_status_update (state->progress,
+                                    status);
         if (state->boot_splash != NULL)
                 ply_boot_splash_update_status (state->boot_splash,
                                                status);
@@ -250,25 +248,6 @@ on_system_update (state_t *state,
                 ply_trace ("failed to update splash");
                 return;
         }
-}
-
-static void
-flush_pending_messages (state_t *state)
-{
-  ply_list_node_t *node = ply_list_get_first_node (state->pending_messages);
-  while (node != NULL)
-    {
-      ply_list_node_t *next_node;
-      char *message = ply_list_node_get_data (node);
-
-      ply_trace ("displaying queued message");
-
-      ply_boot_splash_display_message (state->boot_splash, message);
-      next_node = ply_list_get_next_node (state->pending_messages, node);
-      ply_list_remove_node (state->pending_messages, node);
-      free(message);
-      node = next_node;
-    }
 }
 
 static void
@@ -500,7 +479,7 @@ show_default_splash (state_t *state)
         if (state->boot_splash == NULL) {
                 ply_trace ("Could not start default splash screen,"
                            "showing text splash screen");
-                state->boot_splash = show_theme (state, PLYMOUTH_THEME_PATH "text.plymouth");
+                state->boot_splash = show_theme (state, PLYMOUTH_THEME_PATH "text/text.plymouth");
         }
 
         if (state->boot_splash == NULL) {
@@ -510,8 +489,7 @@ show_default_splash (state_t *state)
         }
 
         if (state->boot_splash == NULL) {
-                if (errno != ENOENT)
-                        ply_error ("plymouthd: could not start boot splash: %m");
+                ply_error ("plymouthd: could not start boot splash: %m");
                 return;
         }
 
@@ -598,8 +576,8 @@ on_display_message (state_t    *state,
                 ply_boot_splash_display_message (state->boot_splash, message);
         } else {
                 ply_trace ("not displaying message %s as no splash", message);
-                ply_list_append_data (state->messages, strdup (message));
         }
+        ply_list_append_data (state->messages, strdup (message));
 }
 
 static void
@@ -845,7 +823,6 @@ prepare_logging (state_t *state)
                 if (state->number_of_errors > 0)
                         spool_error (state);
         }
-        flush_pending_messages (state);
 }
 
 static void
@@ -1902,7 +1879,6 @@ attach_to_running_session (state_t *state)
                 session = ply_terminal_session_new (NULL);
 
                 ply_terminal_session_attach_to_event_loop (session, state->loop);
-                state->session = session;
         } else {
                 session = state->session;
                 ply_trace ("session already created");
@@ -1914,6 +1890,12 @@ attach_to_running_session (state_t *state)
                                           (ply_terminal_session_hangup_handler_t)
                                           (should_be_redirected ? on_session_hangup : NULL),
                                           -1, state)) {
+                ply_save_errno ();
+                ply_terminal_session_free (session);
+                ply_buffer_free (state->boot_buffer);
+                state->boot_buffer = NULL;
+                ply_restore_errno ();
+
                 state->is_redirected = false;
                 state->is_attached = false;
                 return false;
@@ -1937,6 +1919,7 @@ attach_to_running_session (state_t *state)
 
         state->is_redirected = should_be_redirected;
         state->is_attached = true;
+        state->session = session;
 
         return true;
 }
@@ -2133,7 +2116,6 @@ initialize_environment (state_t *state)
         state->keystroke_triggers = ply_list_new ();
         state->entry_triggers = ply_list_new ();
         state->entry_buffer = ply_buffer_new ();
-        state->pending_messages = ply_list_new ();
         state->messages = ply_list_new ();
 
         if (!ply_is_tracing_to_terminal ())
@@ -2526,6 +2508,9 @@ main (int    argc,
                 state.should_be_attached = attach_to_session;
                 if (!attach_to_running_session (&state)) {
                         ply_trace ("could not redirect console session: %m");
+                        if (!no_daemon)
+                                ply_detach_daemon (daemon_handle, EX_UNAVAILABLE);
+                        return EX_UNAVAILABLE;
                 }
         }
 
@@ -2548,10 +2533,6 @@ main (int    argc,
         find_override_splash (&state);
         find_system_default_splash (&state);
         find_distribution_default_splash (&state);
-
-        /* Device timeout may not be NAN or zero */
-        if (isnan (state.device_timeout) || state.device_timeout <= 0.0)
-                state.device_timeout = 8.0;
 
         if (ply_kernel_command_line_has_argument ("plymouth.ignore-serial-consoles") ||
             ignore_serial_consoles == true)

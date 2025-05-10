@@ -1,12 +1,10 @@
 [Unit]
 Description=Show Plymouth Boot Screen
 DefaultDependencies=no
-Wants=systemd-ask-password-plymouth.path
-After=systemd-udev-trigger.service systemd-udevd.service keyboard-setup.service
+Wants=systemd-ask-password-plymouth.path systemd-vconsole-setup.service
+After=systemd-vconsole-setup.service systemd-udev-trigger.service systemd-udevd.service
 Before=systemd-ask-password-plymouth.service
 ConditionKernelCommandLine=!plymouth.enable=0
-ConditionKernelCommandLine=!nosplash
-ConditionKernelCommandLine=splash
 ConditionVirtualization=!container
 IgnoreOnIsolate=true
 
