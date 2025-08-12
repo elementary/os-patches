@@ -6,6 +6,7 @@ import sys
 import apt_pkg
 import git
 import git.config
+import argparse
 from github import Github
 from launchpadlib.launchpad import Launchpad
 
@@ -29,24 +30,35 @@ def github_pull_exists(title, repo):
 
 
 def main():
-    series_name = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SERIES_NAME
+    parser = argparse.ArgumentParser(description='Check for and create package updates')
+    parser.add_argument('series_name', metavar='series name', nargs='?',
+                        help=f'Codename of Ubuntu to check package updates on. Defaults to {DEFAULT_SERIES_NAME}.',
+                        default=DEFAULT_SERIES_NAME)
+    parser.add_argument('-p', '--enable-push', dest='enable_push', action='store_true',
+                        help='Push and create Pull Requests after checking package updates.')
 
-    # Configuring this repo to be able to commit as a bot
+    args = parser.parse_args()
+    series_name = args.series_name
+    enable_push = args.enable_push
+
     current_repo = git.Repo(".")
-    with current_repo.config_writer(config_level="global") as git_config:
-        git_config.set_value(
-            "user", "email", "github-actions[bot]@users.noreply.github.com"
-        )
-        git_config.set_value("user", "name", "github-actions[bot]")
-        git_config.set_value("checkout", "defaultRemote", "origin")
-        git_config.add_value("safe", "directory", "/__w/os-patches/os-patches")
+
+    if enable_push:
+        # Configuring this repo to be able to commit as a bot
+        with current_repo.config_writer(config_level="global") as git_config:
+            git_config.set_value(
+                "user", "email", "github-actions[bot]@users.noreply.github.com"
+            )
+            git_config.set_value("user", "name", "github-actions[bot]")
+            git_config.set_value("checkout", "defaultRemote", "origin")
+            git_config.add_value("safe", "directory", "/__w/os-patches/os-patches")
+
+        github_token = os.environ["GITHUB_TOKEN"]
+        github_repo = os.environ["GITHUB_REPOSITORY"]
+        github = Github(github_token)
+        repo = github.get_repo(github_repo)
 
     current_repo.git.fetch("--all")
-
-    github_token = os.environ["GITHUB_TOKEN"]
-    github_repo = os.environ["GITHUB_REPOSITORY"]
-    github = Github(github_token)
-    repo = github.get_repo(github_repo)
 
     # Initialize APT
     apt_pkg.init_system()
@@ -72,7 +84,6 @@ def main():
         )
         print(package_name, upstream_series_name)
 
-        
         upstream_series = ubuntu.getSeries(name_or_version=upstream_series_name)
 
         patched_sources = patches_archive.getPublishedSources(
@@ -102,8 +113,9 @@ def main():
                 continue
 
             pull_title = f"📦 Update {package_name} [{upstream_series_name}]"
-            if github_pull_exists(pull_title, repo):
-                continue
+            if enable_push:
+                if github_pull_exists(pull_title, repo):
+                    continue
 
             base_branch = f"{package_name}-{upstream_series_name}"
             new_branch = f"bot/update/{package_name}-{upstream_series_name}"
@@ -165,13 +177,15 @@ def main():
 
             current_repo.git.add(A=True)
             current_repo.index.commit(f"Update to {package_name} {pocket_version}")
-            current_repo.git.push("origin", new_branch)
-            pr = repo.create_pull(
-                base=base_branch,
-                head=new_branch,
-                title=pull_title,
-                body=f"""A new version of `{package_name} {pocket_version}` replaces `{patched_version}`.""",
-            )
+            if enable_push:
+                current_repo.git.push("origin", new_branch)
+                pr = repo.create_pull(
+                    base=base_branch,
+                    head=new_branch,
+                    title=pull_title,
+                    body=f"""A new version of `{package_name} {pocket_version}` replaces `{patched_version}`.""",
+                )
+
             current_repo.git.checkout("master")
 
 
