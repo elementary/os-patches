@@ -18,7 +18,7 @@ jobs:
 
     steps:
     - name: Checkout the import-list
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         ref: import-list-${{ matrix.ubuntu-codename }}
         fetch-depth: 1
@@ -34,7 +34,7 @@ jobs:
         apt install -y git python3-launchpadlib python3-apt python3-github python3-git
 
     - name: Checkout the repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 1
 
