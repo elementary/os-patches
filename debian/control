@@ -53,6 +53,7 @@ Build-Depends: debhelper-compat (= 13),
 # suite.  Rust tests will be skipped if rustc is not available.  This
 # stanza makes dep dep solver install rustc whenever it is available
 # and when not it installs a harmless filler package.
+  clang [i386 amd64 arm64 armhf] <!nocheck> | bash-doc <!nocheck>,
   rustc [i386 amd64 arm64 armhf] <!nocheck> | bash-doc <!nocheck>,
   bindgen [i386 amd64 arm64 armhf] <!nocheck> | bash-doc <!nocheck>,
   rustfmt [i386 amd64 arm64 armhf] <!nocheck> | bash-doc <!nocheck>,
