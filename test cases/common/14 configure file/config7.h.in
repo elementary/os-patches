@@ -1,0 +1,11 @@
+/* cmake substitions cannot be escaped */
+#define MESSAGE1 "${var1}"
+#define MESSAGE2 "\${var1}"
+#define MESSAGE3 "\\\\${var1}"
+#define MESSAGE4 "\\\\\${var1}"
+#define MESSAGE5 "@var1@"
+#define MESSAGE6 "\\@var1@"
+#define MESSAGE7 "\\\\@var1@"
+
+/* backslash is an invalid variable character */
+#define MESSAGE8 "@var1\@"

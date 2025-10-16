@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+cd "${AUTOPKGTEST_TMP:-/tmp}"
+mkdir testproject
+cd testproject
+cat >meson.build <<EOF
+project('crosstest', 'c')
+executable('demo', 'main.c')
+EOF
+cat >main.c <<EOF
+#include<stdio.h>
+int main(int argc, char **argv) {
+  printf("Hello there.\n");
+  return 0;
+}
+EOF
+mkdir build
+cd build
+/usr/share/meson/debcrossgen --arch armhf -o cross-file.txt
+meson --cross-file cross-file.txt ..
+ninja

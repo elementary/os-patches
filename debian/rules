@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+
+# Print all logging info to stdout so it
+# shows up in build logs.
+export MESON_PRINT_TEST_OUTPUT=1
+
+export QT_SELECT=qt5
+
+# We're not in 1963 anymore, Toto!
+export LC_ALL=C.UTF-8
+
+export PYBUILD_NAME=meson
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild --with bash-completion
+
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+override_dh_auto_test:
+	./run_tests.py
+endif
