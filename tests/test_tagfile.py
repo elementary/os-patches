@@ -135,6 +135,11 @@ class TestTagSection(testcommon.TestCase):
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
 
+    def test_invalid_unicode_key(self):
+        ts = apt_pkg.TagSection(b"T\xc3st: Value\n", bytes=True)
+        self.assertEqual(len(ts), 1)
+        self.assertRaises(UnicodeDecodeError, ts.keys)
+
     def test_write(self):
         ts = apt_pkg.TagSection("a: 1\nb: 2\nc: 3\n")
         outpath = os.path.join(self.temp_dir, "test")
