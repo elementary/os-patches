@@ -280,8 +280,10 @@ static PyObject *TagSecKeys(PyObject *Self,PyObject *Args)
       const char *End = Start;
       for (; End < Stop && *End != ':'; End++);
 
-      PyObject *Obj;
-      PyList_Append(List,Obj = PyString_FromStringAndSize(Start,End-Start));
+      PyObject *Obj = PyString_FromStringAndSize(Start, End-Start);
+      if (Obj == nullptr)
+          return Py_DECREF(List), nullptr;
+      PyList_Append(List, Obj);
       Py_DECREF(Obj);
    }
    return List;
