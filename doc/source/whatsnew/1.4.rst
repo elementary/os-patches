@@ -1,0 +1,16 @@
+What's New In python-apt 1.4
+============================
+This release is built against APT 1.4, see :doc:`1.1` for the other changes
+since 1.0, the last series with a feature-complete release. There are no 1.2
+or 1.3 series.
+
+Added
+------
+* The methods :meth:`apt_pkg.parse_depends` and :meth:`apt_pkg.parse_src_depends`
+  gained a new parameter *architecture* to change the architecture the dependency lines
+  are interpreted for, matching the change in apt 1.4~beta3.
+
+  This only really makes sense for the latter option right now, as it only
+  affects the parsing of architecture lists.
+
+  By default, the host architecture is used.

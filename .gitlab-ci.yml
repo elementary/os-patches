@@ -1,0 +1,25 @@
+image: debian:unstable
+variables:
+  DEBIAN_FRONTEND: noninteractive
+pre-commit:
+  script:
+    - apt update
+    - apt install -q -y pre-commit git
+    - pre-commit run -a --show-diff-on-failure
+test:
+  script:
+    - apt update
+    - apt build-dep -q -y ./
+    - dpkg-buildpackage
+  artifacts:
+    paths:
+      - build/sphinx/html/
+pages:
+  stage: deploy
+  script:
+    - mv build/sphinx/html/ public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'

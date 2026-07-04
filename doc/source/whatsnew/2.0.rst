@@ -1,0 +1,37 @@
+What's New In python-apt 2.0
+============================
+Changes since 1.8.
+
+Added
+-----
+* The method :meth:`apt_pkg.TagSection.write()` has been added
+* The attribute :attr:`apt_pkg.HashString.hashvalue` has been added
+* The constructor :class:`apt_pkg.AcquireFile` now accepts an
+  :class:`apt_pkg.HashStringList` as the *hash* argument.
+
+* The classes :class:`apt_pkg.HashString` and :class:`apt_pkg.HashStringList`
+  gained a new ``usable`` property.
+
+Removed
+-------
+* The methods called `install_protect` have been removed
+* The `section` attribute has been removed from :class:`apt_pkg.Package`
+  and :class:`apt.package.Package`
+* The method :meth:`apt_pkg.rewrite_section` has been removed
+* The attributes :attr:`apt_pkg.Hashes.md5`, :attr:`apt_pkg.Hashes.sha1`, :attr:`apt_pkg.Hashes.sha256` have been removed
+* The method :meth:`apt_pkg.Policy.get_match` has been removed.
+* The constructor :class:`apt_pkg.AcquireFile` no longer takes an *md5* argument.
+
+Changed
+-------
+* In :class:`apt_pkg.SourceRecords`, the tuple view of files now always contains
+  None where it previously contained the md5 hash.
+* The method :meth:`apt_pkg.Policy.get_priority()` no longer accepts :class:`apt_pkg.Package` instances.
+* Instances of :class:`apt_pkg.HashString` can now be compared for equality
+* :class:`apt.progress.base.InstallProgress` is now a context manager, use it in
+  a ``with`` statement to avoid leaking file descriptors.
+
+Bug fixes
+---------
+
+* Fixed unterminated ``char*`` array in :class:`apt_pkg.TagRemove` constructor.
