@@ -1,0 +1,390 @@
+From: Vladimir Serbinenko <phcoder@gmail.com>
+Date: Wed, 19 Jul 2023 15:09:47 +0200
+Subject: Add "noescape" argument to cmdline creation
+
+If OS parses in a way different from sh-like that GRUB does, escaping does
+more harm than good. Note that allows to specify entire command line in a
+single argument e.g. multiboot --noescape /kernel "a b c".
+---
+ grub-core/lib/cmdline.c                   | 40 ++++++++++++++++++-------------
+ grub-core/loader/arm/linux.c              |  4 ++--
+ grub-core/loader/arm64/xen_boot.c         |  4 ++--
+ grub-core/loader/efi/linux.c              |  4 ++--
+ grub-core/loader/i386/linux.c             |  2 +-
+ grub-core/loader/i386/multiboot_mbi.c     |  8 +++----
+ grub-core/loader/i386/pc/linux.c          |  2 +-
+ grub-core/loader/i386/xen.c               |  6 ++---
+ grub-core/loader/mips/linux.c             |  4 ++--
+ grub-core/loader/multiboot_mbi2.c         |  8 +++----
+ grub-core/loader/powerpc/ieee1275/linux.c |  4 ++--
+ grub-core/loader/sparc64/ieee1275/linux.c |  4 ++--
+ include/grub/lib/cmdline.h                |  5 ++--
+ 13 files changed, 52 insertions(+), 43 deletions(-)
+
+diff --git a/grub-core/lib/cmdline.c b/grub-core/lib/cmdline.c
+index ed0b149..cc1083e 100644
+--- a/grub-core/lib/cmdline.c
++++ b/grub-core/lib/cmdline.c
+@@ -45,14 +45,14 @@ static unsigned int check_arg (char *c, int *has_space)
+   return size;
+ }
+ 
+-unsigned int grub_loader_cmdline_size (int argc, char *argv[])
++unsigned int grub_loader_cmdline_size (int argc, char *argv[], int noescape)
+ {
+   int i;
+   unsigned int size = 0;
+ 
+   for (i = 0; i < argc; i++)
+     {
+-      size += check_arg (argv[i], 0);
++      size += noescape ? grub_strlen(argv[i]) : check_arg (argv[i], 0);
+       size++; /* Separator space or NULL.  */
+     }
+ 
+@@ -64,16 +64,17 @@ unsigned int grub_loader_cmdline_size (int argc, char *argv[])
+ 
+ grub_err_t
+ grub_create_loader_cmdline (int argc, char *argv[], char *buf,
+-			    grub_size_t size, enum grub_verify_string_type type)
++			    grub_size_t size, enum grub_verify_string_type type,
++			    int noescape)
+ {
+-  int i, space;
++  int i, space = 0;
+   unsigned int arg_size;
+   char *c, *orig_buf = buf;
+ 
+   for (i = 0; i < argc; i++)
+     {
+       c = argv[i];
+-      arg_size = check_arg(argv[i], &space);
++      arg_size = noescape ? grub_strlen(argv[i]) : check_arg(argv[i], &space);
+       arg_size++; /* Separator space or NULL.  */
+ 
+       if (size < arg_size)
+@@ -81,21 +82,28 @@ grub_create_loader_cmdline (int argc, char *argv[], char *buf,
+ 
+       size -= arg_size;
+ 
+-      if (space)
+-	*buf++ = '"';
+-
+-      while (*c)
++      if (noescape)
+ 	{
+-	  if (*c == '\\' || *c == '\'' || *c == '"')
+-	    *buf++ = '\\';
+-
+-	  *buf++ = *c;
+-	  c++;
++	  grub_memcpy(buf, c, arg_size);
++	  buf += arg_size;
+ 	}
++      else
++	{
++	  if (space)
++	    *buf++ = '"';
+ 
+-      if (space)
+-	*buf++ = '"';
++	  while (*c)
++	    {
++	      if (*c == '\\' || *c == '\'' || *c == '"')
++		*buf++ = '\\';
+ 
++	      *buf++ = *c;
++	      c++;
++	    }
++
++	  if (space)
++	    *buf++ = '"';
++	}
+       *buf++ = ' ';
+     }
+ 
+diff --git a/grub-core/loader/arm/linux.c b/grub-core/loader/arm/linux.c
+index 19ddedb..6a052a0 100644
+--- a/grub-core/loader/arm/linux.c
++++ b/grub-core/loader/arm/linux.c
+@@ -375,7 +375,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+ 
+   grub_loader_set (linux_boot, linux_unload, 0);
+ 
+-  size = grub_loader_cmdline_size (argc, argv);
++  size = grub_loader_cmdline_size (argc, argv, 0);
+   linux_args = grub_malloc (size + sizeof (LINUX_IMAGE));
+   if (!linux_args)
+     {
+@@ -387,7 +387,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+   grub_memcpy (linux_args, LINUX_IMAGE, sizeof (LINUX_IMAGE));
+   err = grub_create_loader_cmdline (argc, argv,
+ 				    linux_args + sizeof (LINUX_IMAGE) - 1, size,
+-				    GRUB_VERIFY_KERNEL_CMDLINE);
++				    GRUB_VERIFY_KERNEL_CMDLINE, 0);
+   if (err)
+     goto fail;
+ 
+diff --git a/grub-core/loader/arm64/xen_boot.c b/grub-core/loader/arm64/xen_boot.c
+index ed22b49..295de7e 100644
+--- a/grub-core/loader/arm64/xen_boot.c
++++ b/grub-core/loader/arm64/xen_boot.c
+@@ -349,7 +349,7 @@ xen_boot_binary_load (struct xen_boot_binary *binary, grub_file_t file,
+ 
+   if (argc > 1)
+     {
+-      binary->cmdline_size = grub_loader_cmdline_size (argc - 1, argv + 1);
++      binary->cmdline_size = grub_loader_cmdline_size (argc - 1, argv + 1, 0);
+       binary->cmdline = grub_zalloc (binary->cmdline_size);
+       if (!binary->cmdline)
+ 	{
+@@ -359,7 +359,7 @@ xen_boot_binary_load (struct xen_boot_binary *binary, grub_file_t file,
+ 	}
+       grub_create_loader_cmdline (argc - 1, argv + 1, binary->cmdline,
+ 				  binary->cmdline_size,
+-				  GRUB_VERIFY_KERNEL_CMDLINE);
++				  GRUB_VERIFY_KERNEL_CMDLINE, 0);
+       grub_dprintf ("xen_loader",
+ 		    "Xen_boot cmdline @ %p %s, size: %d\n",
+ 		    binary->cmdline, binary->cmdline, binary->cmdline_size);
+diff --git a/grub-core/loader/efi/linux.c b/grub-core/loader/efi/linux.c
+index bd38f20..adf8b9e 100644
+--- a/grub-core/loader/efi/linux.c
++++ b/grub-core/loader/efi/linux.c
+@@ -538,7 +538,7 @@ fallback:
+ 
+   grub_dprintf ("linux", "kernel @ %p\n", kernel_addr);
+ 
+-  cmdline_size = grub_loader_cmdline_size (argc, argv) + sizeof (LINUX_IMAGE);
++  cmdline_size = grub_loader_cmdline_size (argc, argv, 0) + sizeof (LINUX_IMAGE);
+   linux_args = grub_malloc (cmdline_size);
+   if (!linux_args)
+     {
+@@ -549,7 +549,7 @@ fallback:
+   err = grub_create_loader_cmdline (argc, argv,
+ 				    linux_args + sizeof (LINUX_IMAGE) - 1,
+ 				    cmdline_size,
+-				    GRUB_VERIFY_KERNEL_CMDLINE);
++				    GRUB_VERIFY_KERNEL_CMDLINE, 0);
+   if (err)
+     goto fail;
+ 
+diff --git a/grub-core/loader/i386/linux.c b/grub-core/loader/i386/linux.c
+index d6e291b..df21021 100644
+--- a/grub-core/loader/i386/linux.c
++++ b/grub-core/loader/i386/linux.c
+@@ -1030,7 +1030,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+ 				      + sizeof (LINUX_IMAGE) - 1,
+ 				      maximal_cmdline_size
+ 				      - (sizeof (LINUX_IMAGE) - 1),
+-				      GRUB_VERIFY_KERNEL_CMDLINE);
++				      GRUB_VERIFY_KERNEL_CMDLINE, 0);
+     if (err)
+       goto fail;
+   }
+diff --git a/grub-core/loader/i386/multiboot_mbi.c b/grub-core/loader/i386/multiboot_mbi.c
+index bdaf67a..3268270 100644
+--- a/grub-core/loader/i386/multiboot_mbi.c
++++ b/grub-core/loader/i386/multiboot_mbi.c
+@@ -668,7 +668,7 @@ grub_multiboot_init_mbi (int argc, char *argv[])
+ 
+   grub_multiboot_free_mbi ();
+ 
+-  len = grub_loader_cmdline_size (argc, argv);
++  len = grub_loader_cmdline_size (argc, argv, 0);
+ 
+   cmdline = grub_malloc (len);
+   if (! cmdline)
+@@ -676,7 +676,7 @@ grub_multiboot_init_mbi (int argc, char *argv[])
+   cmdline_size = len;
+ 
+   return grub_create_loader_cmdline (argc, argv, cmdline,
+-				     cmdline_size, GRUB_VERIFY_KERNEL_CMDLINE);
++				     cmdline_size, GRUB_VERIFY_KERNEL_CMDLINE, 0);
+ }
+ 
+ grub_err_t
+@@ -694,7 +694,7 @@ grub_multiboot_add_module (grub_addr_t start, grub_size_t size,
+   newmod->size = size;
+   newmod->next = 0;
+ 
+-  len = grub_loader_cmdline_size (argc, argv);
++  len = grub_loader_cmdline_size (argc, argv, 0);
+ 
+   newmod->cmdline = grub_malloc (len);
+   if (! newmod->cmdline)
+@@ -706,7 +706,7 @@ grub_multiboot_add_module (grub_addr_t start, grub_size_t size,
+   total_modcmd += ALIGN_UP (len, 4);
+ 
+   err = grub_create_loader_cmdline (argc, argv, newmod->cmdline,
+-				    newmod->cmdline_size, GRUB_VERIFY_MODULE_CMDLINE);
++				    newmod->cmdline_size, GRUB_VERIFY_MODULE_CMDLINE, 0);
+   if (err)
+     {
+       grub_free (newmod);
+diff --git a/grub-core/loader/i386/pc/linux.c b/grub-core/loader/i386/pc/linux.c
+index 0c2a4ae..6254e6b 100644
+--- a/grub-core/loader/i386/pc/linux.c
++++ b/grub-core/loader/i386/pc/linux.c
+@@ -345,7 +345,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+ 				    + GRUB_LINUX_CL_OFFSET + sizeof (LINUX_IMAGE) - 1,
+ 				    maximal_cmdline_size
+ 				    - (sizeof (LINUX_IMAGE) - 1),
+-				    GRUB_VERIFY_KERNEL_CMDLINE);
++				    GRUB_VERIFY_KERNEL_CMDLINE, 0);
+   if (err)
+     goto fail;
+ 
+diff --git a/grub-core/loader/i386/xen.c b/grub-core/loader/i386/xen.c
+index dcdf005..0d31a65 100644
+--- a/grub-core/loader/i386/xen.c
++++ b/grub-core/loader/i386/xen.c
+@@ -649,7 +649,7 @@ grub_cmd_xen (grub_command_t cmd __attribute__ ((unused)),
+   err = grub_create_loader_cmdline (argc - 1, argv + 1,
+ 				    (char *) xen_state.next_start.cmd_line,
+ 				    sizeof (xen_state.next_start.cmd_line) - 1,
+-				    GRUB_VERIFY_KERNEL_CMDLINE);
++				    GRUB_VERIFY_KERNEL_CMDLINE, 0);
+   if (err)
+     return err;
+ 
+@@ -909,7 +909,7 @@ grub_cmd_module (grub_command_t cmd __attribute__ ((unused)),
+     return grub_errno;
+   size = grub_file_size (file);
+ 
+-  cmdline_len = grub_loader_cmdline_size (argc - 1, argv + 1);
++  cmdline_len = grub_loader_cmdline_size (argc - 1, argv + 1, 0);
+ 
+   err = grub_relocator_alloc_chunk_addr (xen_state.relocator, &ch,
+ 					 xen_state.max_addr, cmdline_len);
+@@ -918,7 +918,7 @@ grub_cmd_module (grub_command_t cmd __attribute__ ((unused)),
+ 
+   err = grub_create_loader_cmdline (argc - 1, argv + 1,
+ 				    get_virtual_current_address (ch), cmdline_len,
+-				    GRUB_VERIFY_MODULE_CMDLINE);
++				    GRUB_VERIFY_MODULE_CMDLINE, 0);
+   if (err)
+     goto fail;
+ 
+diff --git a/grub-core/loader/mips/linux.c b/grub-core/loader/mips/linux.c
+index 7264ba2..dedf612 100644
+--- a/grub-core/loader/mips/linux.c
++++ b/grub-core/loader/mips/linux.c
+@@ -304,7 +304,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+ 
+ #ifdef GRUB_MACHINE_MIPS_QEMU_MIPS
+   /* Create kernel command line.  */
+-  size = grub_loader_cmdline_size(argc, argv);
++  size = grub_loader_cmdline_size(argc, argv, 0);
+   params = grub_malloc (size + sizeof (LINUX_IMAGE));
+   if (! params)
+     {
+@@ -314,7 +314,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+ 
+   grub_memcpy (params, LINUX_IMAGE, sizeof (LINUX_IMAGE));
+   grub_create_loader_cmdline (argc, argv, params + sizeof (LINUX_IMAGE) - 1,
+-			      size, GRUB_VERIFY_KERNEL_CMDLINE);
++			      size, GRUB_VERIFY_KERNEL_CMDLINE, 0);
+ #else
+   linux_argv = extra;
+   argv_off = (grub_uint8_t *) linux_argv - (grub_uint8_t *) playground;
+diff --git a/grub-core/loader/multiboot_mbi2.c b/grub-core/loader/multiboot_mbi2.c
+index 00a4841..8a81a03 100644
+--- a/grub-core/loader/multiboot_mbi2.c
++++ b/grub-core/loader/multiboot_mbi2.c
+@@ -1037,7 +1037,7 @@ grub_multiboot2_init_mbi (int argc, char *argv[])
+ 
+   grub_multiboot2_free_mbi ();
+ 
+-  len = grub_loader_cmdline_size (argc, argv);
++  len = grub_loader_cmdline_size (argc, argv, 0);
+ 
+   cmdline = grub_malloc (len);
+   if (! cmdline)
+@@ -1045,7 +1045,7 @@ grub_multiboot2_init_mbi (int argc, char *argv[])
+   cmdline_size = len;
+ 
+   return grub_create_loader_cmdline (argc, argv, cmdline, cmdline_size,
+-				     GRUB_VERIFY_KERNEL_CMDLINE);
++				     GRUB_VERIFY_KERNEL_CMDLINE, 0);
+ }
+ 
+ grub_err_t
+@@ -1062,7 +1062,7 @@ grub_multiboot2_add_module (grub_addr_t start, grub_size_t size,
+   newmod->start = start;
+   newmod->size = size;
+ 
+-  len = grub_loader_cmdline_size (argc, argv);
++  len = grub_loader_cmdline_size (argc, argv, 0);
+ 
+   newmod->cmdline = grub_malloc (len);
+   if (! newmod->cmdline)
+@@ -1074,7 +1074,7 @@ grub_multiboot2_add_module (grub_addr_t start, grub_size_t size,
+   total_modcmd += ALIGN_UP (len, MULTIBOOT_TAG_ALIGN);
+ 
+   err = grub_create_loader_cmdline (argc, argv, newmod->cmdline,
+-				    newmod->cmdline_size, GRUB_VERIFY_MODULE_CMDLINE);
++				    newmod->cmdline_size, GRUB_VERIFY_MODULE_CMDLINE, 0);
+   if (err)
+     {
+       grub_free (newmod->cmdline);
+diff --git a/grub-core/loader/powerpc/ieee1275/linux.c b/grub-core/loader/powerpc/ieee1275/linux.c
+index 4864e5f..45461f2 100644
+--- a/grub-core/loader/powerpc/ieee1275/linux.c
++++ b/grub-core/loader/powerpc/ieee1275/linux.c
+@@ -306,7 +306,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+       goto out;
+     }
+ 
+-  size = grub_loader_cmdline_size(argc, argv);
++  size = grub_loader_cmdline_size(argc, argv, 0);
+   linux_args = grub_malloc (size + sizeof (LINUX_IMAGE));
+   if (! linux_args)
+     goto out;
+@@ -314,7 +314,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+   /* Create kernel command line.  */
+   grub_memcpy (linux_args, LINUX_IMAGE, sizeof (LINUX_IMAGE));
+   if (grub_create_loader_cmdline (argc, argv, linux_args + sizeof (LINUX_IMAGE) - 1,
+-				  size, GRUB_VERIFY_KERNEL_CMDLINE))
++				  size, GRUB_VERIFY_KERNEL_CMDLINE, 0))
+     goto out;
+ 
+ out:
+diff --git a/grub-core/loader/sparc64/ieee1275/linux.c b/grub-core/loader/sparc64/ieee1275/linux.c
+index ac2206f..de31a07 100644
+--- a/grub-core/loader/sparc64/ieee1275/linux.c
++++ b/grub-core/loader/sparc64/ieee1275/linux.c
+@@ -332,7 +332,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+       goto out;
+     }
+ 
+-  size = grub_loader_cmdline_size(argc, argv);
++  size = grub_loader_cmdline_size(argc, argv, 0);
+ 
+   linux_args = grub_malloc (size + sizeof (LINUX_IMAGE));
+   if (! linux_args)
+@@ -341,7 +341,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
+   /* Create kernel command line.  */
+   grub_memcpy (linux_args, LINUX_IMAGE, sizeof (LINUX_IMAGE));
+   if (grub_create_loader_cmdline (argc, argv, linux_args + sizeof (LINUX_IMAGE) - 1,
+-				  size, GRUB_VERIFY_KERNEL_CMDLINE))
++				  size, GRUB_VERIFY_KERNEL_CMDLINE, 0))
+     goto out;
+ 
+ out:
+diff --git a/include/grub/lib/cmdline.h b/include/grub/lib/cmdline.h
+index cdca09b..c1210ec 100644
+--- a/include/grub/lib/cmdline.h
++++ b/include/grub/lib/cmdline.h
+@@ -25,8 +25,9 @@
+ 
+ #define LINUX_IMAGE "BOOT_IMAGE="
+ 
+-unsigned int grub_loader_cmdline_size (int argc, char *argv[]);
++unsigned int grub_loader_cmdline_size (int argc, char *argv[], int noescape);
+ grub_err_t grub_create_loader_cmdline (int argc, char *argv[], char *buf,
+-				       grub_size_t size, enum grub_verify_string_type type);
++				       grub_size_t size, enum grub_verify_string_type type,
++				       int noescape);
+ 
+ #endif /* ! GRUB_CMDLINE_HEADER */

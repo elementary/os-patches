@@ -1,0 +1,782 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 10 Feb 2026 11:20:07 +0000
+Subject: efi: Drop support for UGA Draw and Console Control protocols
+
+Let's stop GRUB from becoming a software museum and drop support for
+deprecated EFI protocols.
+
+- UGA Draw protocol was deprecated in UEFI 2.0 in 2006.
+- Console Control protocol was an implementation detail of
+  the deprecated Intel EDK (not EDK II).
+
+Signed-off-by: Mate Kukri <mate.kukri@canonical.com>
+---
+ docs/grub.texi                     |   8 +-
+ grub-core/Makefile.core.def        |   7 -
+ grub-core/commands/efi/lsefi.c     |   4 -
+ grub-core/kern/efi/efi.c           |  25 ---
+ grub-core/loader/i386/linux.c      |   1 -
+ grub-core/term/efi/console.c       |   9 -
+ grub-core/video/efi_uga.c          | 369 -------------------------------------
+ include/grub/efi/console_control.h |  59 ------
+ include/grub/efi/efi.h             |   1 -
+ include/grub/efi/uga_draw.h        |  76 --------
+ include/grub/video.h               |   1 -
+ po/exclude.pot                     |   8 -
+ util/grub.d/00_header.in           |   2 -
+ 13 files changed, 1 insertion(+), 569 deletions(-)
+ delete mode 100644 grub-core/video/efi_uga.c
+ delete mode 100644 include/grub/efi/console_control.h
+ delete mode 100644 include/grub/efi/uga_draw.h
+
+diff --git a/docs/grub.texi b/docs/grub.texi
+index 1616495..78b5308 100644
+--- a/docs/grub.texi
++++ b/docs/grub.texi
+@@ -1664,7 +1664,7 @@ confusing @samp{GRUB_TIMEOUT_STYLE=countdown} or
+ @item GRUB_FORCE_EFI_ALL_VIDEO
+ When set to true, this will allow grub-mkconfig to generate a GRUB config
+ that supports loading the all_video module on the EFI platform instead of
+-just the efi_gop and efi_uga modules.
++just the efi_gop module.
+ 
+ This option is unset by default.
+ 
+@@ -4114,7 +4114,6 @@ Modules can be loaded via the @command{insmod} (@pxref{insmod}) command.
+ * dsa_sexp_test_module::
+ * echo_module::
+ * efi_gop_module::
+-* efi_uga_module::
+ * efiemu_module::
+ * efifwsetup_module::
+ * efinet_module::
+@@ -4711,11 +4710,6 @@ This module provides support for the @command{echo} to display a line of text.
+ This module provides support for the UEFI video output protocol "Graphics
+ Output Protocol" (GOP).
+ 
+-@node efi_uga_module
+-@section efi_uga
+-This module provides support for the EFI video protocol "Universal Graphic
+-Adapter" (UGA).
+-
+ @node efiemu_module
+ @section efiemu
+ This module provides support for the commands @command{efiemu_loadcore},
+diff --git a/grub-core/Makefile.core.def b/grub-core/Makefile.core.def
+index 70a5bcf..a35290a 100644
+--- a/grub-core/Makefile.core.def
++++ b/grub-core/Makefile.core.def
+@@ -2387,13 +2387,6 @@ module = {
+   enable = efi;
+ };
+ 
+-module = {
+-  name = efi_uga;
+-  efi = video/efi_uga.c;
+-  enable = i386_efi;
+-  enable = x86_64_efi;
+-};
+-
+ module = {
+   name = jpeg;
+   common = video/readers/jpeg.c;
+diff --git a/grub-core/commands/efi/lsefi.c b/grub-core/commands/efi/lsefi.c
+index f4c1039..4d32efe 100644
+--- a/grub-core/commands/efi/lsefi.c
++++ b/grub-core/commands/efi/lsefi.c
+@@ -22,9 +22,7 @@
+ #include <grub/efi/edid.h>
+ #include <grub/efi/pci.h>
+ #include <grub/efi/efi.h>
+-#include <grub/efi/uga_draw.h>
+ #include <grub/efi/graphics_output.h>
+-#include <grub/efi/console_control.h>
+ #include <grub/command.h>
+ 
+ GRUB_MOD_LICENSE ("GPLv3+");
+@@ -47,11 +45,9 @@ static struct known_protocol
+     { GRUB_EFI_EDID_DISCOVERED_GUID, "discovered EDID" },
+     { GRUB_EFI_EDID_OVERRIDE_GUID, "override EDID" },
+     { GRUB_EFI_GOP_GUID, "GOP" },
+-    { GRUB_EFI_UGA_DRAW_GUID, "UGA draw" },
+     { GRUB_EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL_GUID, "simple text output" },
+     { GRUB_EFI_SIMPLE_TEXT_INPUT_PROTOCOL_GUID, "simple text input" },
+     { GRUB_EFI_SIMPLE_POINTER_PROTOCOL_GUID, "simple pointer" },
+-    { GRUB_EFI_CONSOLE_CONTROL_GUID, "console control" },
+     { GRUB_EFI_ABSOLUTE_POINTER_PROTOCOL_GUID, "absolute pointer" },
+     { GRUB_EFI_DRIVER_BINDING_PROTOCOL_GUID, "EFI driver binding" },
+     { GRUB_EFI_LOAD_FILE_PROTOCOL_GUID, "load file" },
+diff --git a/grub-core/kern/efi/efi.c b/grub-core/kern/efi/efi.c
+index 1e330a2..1f236e3 100644
+--- a/grub-core/kern/efi/efi.c
++++ b/grub-core/kern/efi/efi.c
+@@ -21,7 +21,6 @@
+ #include <grub/charset.h>
+ #include <grub/efi/api.h>
+ #include <grub/efi/efi.h>
+-#include <grub/efi/console_control.h>
+ #include <grub/efi/pe32.h>
+ #include <grub/time.h>
+ #include <grub/term.h>
+@@ -35,7 +34,6 @@ grub_efi_handle_t grub_efi_image_handle;
+ /* The pointer to a system table. Filled in by the startup code.  */
+ grub_efi_system_table_t *grub_efi_system_table;
+ 
+-static grub_guid_t console_control_guid = GRUB_EFI_CONSOLE_CONTROL_GUID;
+ static grub_guid_t loaded_image_guid = GRUB_EFI_LOADED_IMAGE_GUID;
+ static grub_guid_t device_path_guid = GRUB_EFI_DEVICE_PATH_GUID;
+ 
+@@ -126,29 +124,6 @@ grub_efi_close_protocol (grub_efi_handle_t handle, grub_guid_t *protocol)
+   return b->close_protocol (handle, protocol, grub_efi_image_handle, NULL);
+ }
+ 
+-int
+-grub_efi_set_text_mode (int on)
+-{
+-  grub_efi_console_control_protocol_t *c;
+-  grub_efi_screen_mode_t mode, new_mode;
+-
+-  c = grub_efi_locate_protocol (&console_control_guid, 0);
+-  if (! c)
+-    /* No console control protocol instance available, assume it is
+-       already in text mode. */
+-    return 1;
+-
+-  if (c->get_mode (c, &mode, 0, 0) != GRUB_EFI_SUCCESS)
+-    return 0;
+-
+-  new_mode = on ? GRUB_EFI_SCREEN_TEXT : GRUB_EFI_SCREEN_GRAPHICS;
+-  if (mode != new_mode)
+-    if (c->set_mode (c, new_mode) != GRUB_EFI_SUCCESS)
+-      return 0;
+-
+-  return 1;
+-}
+-
+ void
+ grub_efi_stall (grub_efi_uintn_t microseconds)
+ {
+diff --git a/grub-core/loader/i386/linux.c b/grub-core/loader/i386/linux.c
+index df21021..935a061 100644
+--- a/grub-core/loader/i386/linux.c
++++ b/grub-core/loader/i386/linux.c
+@@ -301,7 +301,6 @@ grub_linux_setup_video (struct linux_kernel_params *params)
+ 	  params->screen_info.orig_video_isVGA = GRUB_VIDEO_LINUX_TYPE_VESA;
+ 	  break;
+ 
+-	case GRUB_VIDEO_DRIVER_EFI_UGA:
+ 	case GRUB_VIDEO_DRIVER_EFI_GOP:
+ 	  params->screen_info.orig_video_isVGA = GRUB_VIDEO_LINUX_TYPE_EFIFB;
+ 	  break;
+diff --git a/grub-core/term/efi/console.c b/grub-core/term/efi/console.c
+index 37c4e51..2d15402 100644
+--- a/grub-core/term/efi/console.c
++++ b/grub-core/term/efi/console.c
+@@ -146,14 +146,6 @@ grub_prepare_for_text_output (struct grub_term_output *term)
+   if (text_mode != GRUB_TEXT_MODE_UNDEFINED)
+     return text_mode ? GRUB_ERR_NONE : GRUB_ERR_BAD_DEVICE;
+ 
+-  if (! grub_efi_set_text_mode (1))
+-    {
+-      /* This really should never happen */
+-      grub_error (GRUB_ERR_BAD_DEVICE, "cannot set text mode");
+-      text_mode = GRUB_TEXT_MODE_UNAVAILABLE;
+-      return GRUB_ERR_BAD_DEVICE;
+-    }
+-
+   if (cursor_mode != GRUB_CURSOR_MODE_UNDEFINED)
+     grub_console_setcursor (term, cursor_mode);
+   if (text_colorstate != GRUB_TERM_COLOR_UNDEFINED)
+@@ -452,7 +444,6 @@ grub_efi_console_output_fini (struct grub_term_output *term)
+     return 0;
+ 
+   grub_console_setcursor (term, 0);
+-  grub_efi_set_text_mode (0);
+   text_mode = GRUB_TEXT_MODE_UNDEFINED;
+   return 0;
+ }
+diff --git a/grub-core/video/efi_uga.c b/grub-core/video/efi_uga.c
+deleted file mode 100644
+index d53079e..0000000
+--- a/grub-core/video/efi_uga.c
++++ /dev/null
+@@ -1,369 +0,0 @@
+-/*
+- *  GRUB  --  GRand Unified Bootloader
+- *  Copyright (C) 2005,2006,2007,2008,2009  Free Software Foundation, Inc.
+- *
+- *  GRUB is free software: you can redistribute it and/or modify
+- *  it under the terms of the GNU General Public License as published by
+- *  the Free Software Foundation, either version 3 of the License, or
+- *  (at your option) any later version.
+- *
+- *  GRUB is distributed in the hope that it will be useful,
+- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- *  GNU General Public License for more details.
+- *
+- *  You should have received a copy of the GNU General Public License
+- *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
+- */
+-
+-#define grub_video_render_target grub_video_fbrender_target
+-
+-#include <grub/err.h>
+-#include <grub/types.h>
+-#include <grub/dl.h>
+-#include <grub/misc.h>
+-#include <grub/mm.h>
+-#include <grub/video.h>
+-#include <grub/video_fb.h>
+-#include <grub/efi/api.h>
+-#include <grub/efi/efi.h>
+-#include <grub/efi/uga_draw.h>
+-#include <grub/pci.h>
+-
+-GRUB_MOD_LICENSE ("GPLv3+");
+-
+-static grub_guid_t uga_draw_guid = GRUB_EFI_UGA_DRAW_GUID;
+-static struct grub_efi_uga_draw_protocol *uga;
+-static grub_uint64_t uga_fb;
+-static grub_uint32_t uga_pitch;
+-
+-static struct
+-{
+-  struct grub_video_mode_info mode_info;
+-  struct grub_video_render_target *render_target;
+-  grub_uint8_t *ptr;
+-} framebuffer;
+-
+-#define RGB_MASK	0xffffff
+-#define RGB_MAGIC	0x121314
+-#define LINE_MIN	800
+-#define LINE_MAX	4096
+-#define FBTEST_STEP	(0x10000 >> 2)
+-#define FBTEST_COUNT	8
+-
+-static int
+-find_line_len (grub_uint64_t *fb_base, grub_uint32_t *line_len)
+-{
+-  grub_uint32_t *base = (grub_uint32_t *) (grub_addr_t) *fb_base;
+-  int i;
+-
+-  for (i = 0; i < FBTEST_COUNT; i++, base += FBTEST_STEP)
+-    {
+-      if ((*base & RGB_MASK) == RGB_MAGIC)
+-	{
+-	  int j;
+-
+-	  for (j = LINE_MIN; j <= LINE_MAX; j++)
+-	    {
+-	      if ((base[j] & RGB_MASK) == RGB_MAGIC)
+-		{
+-		  *fb_base = (grub_uint64_t) (grub_addr_t) base;
+-		  *line_len = j << 2;
+-
+-		  return 1;
+-		}
+-	    }
+-
+-	  break;
+-	}
+-    }
+-
+-  return 0;
+-}
+-
+-/* Context for find_framebuf.  */
+-struct find_framebuf_ctx
+-{
+-  grub_uint64_t *fb_base;
+-  grub_uint32_t *line_len;
+-  int found;
+-};
+-
+-/* Helper for find_framebuf.  */
+-static int
+-find_card (grub_pci_device_t dev, grub_pci_id_t pciid, void *data)
+-{
+-  struct find_framebuf_ctx *ctx = data;
+-  grub_pci_address_t addr, rcaddr;
+-  grub_uint32_t subclass;
+-
+-  addr = grub_pci_make_address (dev, GRUB_PCI_REG_CLASS);
+-  subclass = (grub_pci_read (addr) >> 16) & 0xffff;
+-
+-  if (subclass != GRUB_PCI_CLASS_DISPLAY_VGA)
+-    return 0;
+-
+-  /* Enable MEM address spaces */
+-  rcaddr = grub_pci_make_address (dev, GRUB_PCI_REG_COMMAND);
+-  grub_pci_write_word (rcaddr, grub_pci_read_word (rcaddr) | GRUB_PCI_COMMAND_MEM_ENABLED);
+-
+-    {
+-      int i;
+-
+-      grub_dprintf ("video", "Display controller: %d:%d.%d\nDevice id: %x\n",
+-		    grub_pci_get_bus (dev), grub_pci_get_device (dev),
+-		    grub_pci_get_function (dev), pciid);
+-      addr += 8;
+-      for (i = 0; i < 6; i++, addr += 4)
+-	{
+-	  grub_uint32_t old_bar1, old_bar2, type;
+-	  grub_uint64_t base64;
+-
+-	  old_bar1 = grub_pci_read (addr);
+-	  if ((! old_bar1) || (old_bar1 & GRUB_PCI_ADDR_SPACE_IO))
+-	    continue;
+-
+-	  type = old_bar1 & GRUB_PCI_ADDR_MEM_TYPE_MASK;
+-	  if (type == GRUB_PCI_ADDR_MEM_TYPE_64)
+-	    {
+-	      if (i == 5)
+-		break;
+-
+-	      i++;
+-	      addr += 4;
+-	      old_bar2 = grub_pci_read (addr);
+-	    }
+-	  else
+-	    old_bar2 = 0;
+-
+-	  base64 = old_bar2;
+-	  base64 <<= 32;
+-	  base64 |= (old_bar1 & GRUB_PCI_ADDR_MEM_MASK);
+-
+-	  grub_dprintf ("video", "%s(%d): 0x%" PRIxGRUB_UINT64_T "\n",
+-			((old_bar1 & GRUB_PCI_ADDR_MEM_PREFETCH) ?
+-			"VMEM" : "MMIO"), type == GRUB_PCI_ADDR_MEM_TYPE_64 ? i - 1 : i,
+-			base64);
+-
+-#if GRUB_CPU_SIZEOF_VOID_P == 4
+-	  if (old_bar2)
+-	    continue;
+-#endif
+-
+-	  if ((old_bar1 & GRUB_PCI_ADDR_MEM_PREFETCH) && (! ctx->found))
+-	    {
+-	      *ctx->fb_base = base64;
+-	      if (find_line_len (ctx->fb_base, ctx->line_len))
+-		ctx->found++;
+-	    }
+-	}
+-    }
+-
+-  return ctx->found;
+-}
+-
+-static int
+-find_framebuf (grub_uint64_t *fb_base, grub_uint32_t *line_len)
+-{
+-  struct find_framebuf_ctx ctx = {
+-    .fb_base = fb_base,
+-    .line_len = line_len,
+-    .found = 0
+-  };
+-
+-  grub_pci_iterate (find_card, &ctx);
+-  return ctx.found;
+-}
+-
+-static int
+-check_protocol (void)
+-{
+-  grub_efi_uga_draw_protocol_t *c;
+-
+-  c = grub_efi_locate_protocol (&uga_draw_guid, 0);
+-  if (c)
+-    {
+-      grub_uint32_t width, height, depth, rate, pixel;
+-      int ret;
+-
+-      if (c->get_mode (c, &width, &height, &depth, &rate))
+-	return 0;
+-
+-      grub_efi_set_text_mode (0);
+-      pixel = RGB_MAGIC;
+-      c->blt (c, (struct grub_efi_uga_pixel *) &pixel,
+-	      GRUB_EFI_UGA_VIDEO_FILL, 0, 0, 0, 0, 1, height, 0);
+-      ret = find_framebuf (&uga_fb, &uga_pitch);
+-      grub_efi_set_text_mode (1);
+-
+-      if (ret)
+-	{
+-	  uga = c;
+-	  return 1;
+-	}
+-    }
+-
+-  return 0;
+-}
+-
+-static grub_err_t
+-grub_video_uga_init (void)
+-{
+-  grub_memset (&framebuffer, 0, sizeof(framebuffer));
+-  return grub_video_fb_init ();
+-}
+-
+-static grub_err_t
+-grub_video_uga_fini (void)
+-{
+-  return grub_video_fb_fini ();
+-}
+-
+-static grub_err_t
+-grub_video_uga_setup (unsigned int width, unsigned int height,
+-		      unsigned int mode_type,
+-		      unsigned int mode_mask __attribute__ ((unused)))
+-{
+-  unsigned int depth;
+-  int found = 0;
+-
+-  depth = (mode_type & GRUB_VIDEO_MODE_TYPE_DEPTH_MASK)
+-    >> GRUB_VIDEO_MODE_TYPE_DEPTH_POS;
+-
+-  {
+-    grub_uint32_t w;
+-    grub_uint32_t h;
+-    grub_uint32_t d;
+-    grub_uint32_t r;
+-
+-    if ((! uga->get_mode (uga, &w, &h, &d, &r)) &&
+-	((! width) || (width == w)) &&
+-	((! height) || (height == h)) &&
+-	((! depth) || (depth == d)))
+-      {
+-	framebuffer.mode_info.width = w;
+-	framebuffer.mode_info.height = h;
+-	framebuffer.mode_info.pitch = uga_pitch;
+-	framebuffer.ptr = (grub_uint8_t *) (grub_addr_t) uga_fb;
+-
+-	found = 1;
+-      }
+-  }
+-
+-  if (found)
+-    {
+-      grub_err_t err;
+-
+-      framebuffer.mode_info.mode_type = GRUB_VIDEO_MODE_TYPE_RGB;
+-      framebuffer.mode_info.bpp = 32;
+-      framebuffer.mode_info.bytes_per_pixel = 4;
+-      framebuffer.mode_info.number_of_colors = 256;
+-      framebuffer.mode_info.red_mask_size = 8;
+-      framebuffer.mode_info.red_field_pos = 16;
+-      framebuffer.mode_info.green_mask_size = 8;
+-      framebuffer.mode_info.green_field_pos = 8;
+-      framebuffer.mode_info.blue_mask_size = 8;
+-      framebuffer.mode_info.blue_field_pos = 0;
+-      framebuffer.mode_info.reserved_mask_size = 8;
+-      framebuffer.mode_info.reserved_field_pos = 24;
+-
+-      framebuffer.mode_info.blit_format =
+-	grub_video_get_blit_format (&framebuffer.mode_info);
+-
+-      err = grub_video_fb_create_render_target_from_pointer
+-	(&framebuffer.render_target,
+-	 &framebuffer.mode_info,
+-	 framebuffer.ptr);
+-
+-      if (err)
+-	return err;
+-
+-      err = grub_video_fb_set_active_render_target
+-	(framebuffer.render_target);
+-
+-      if (err)
+-	return err;
+-
+-      err = grub_video_fb_set_palette (0, GRUB_VIDEO_FBSTD_NUMCOLORS,
+-				       grub_video_fbstd_colors);
+-
+-      return err;
+-    }
+-
+-  return grub_error (GRUB_ERR_UNKNOWN_DEVICE, "no matching mode found");
+-}
+-
+-static grub_err_t
+-grub_video_uga_swap_buffers (void)
+-{
+-  /* TODO: Implement buffer swapping.  */
+-  return GRUB_ERR_NONE;
+-}
+-
+-static grub_err_t
+-grub_video_uga_set_active_render_target (struct grub_video_render_target *target)
+-{
+-  if (target == GRUB_VIDEO_RENDER_TARGET_DISPLAY)
+-    target = framebuffer.render_target;
+-
+-  return grub_video_fb_set_active_render_target (target);
+-}
+-
+-static grub_err_t
+-grub_video_uga_get_info_and_fini (struct grub_video_mode_info *mode_info,
+-				  void **framebuf)
+-{
+-  grub_memcpy (mode_info, &(framebuffer.mode_info), sizeof (*mode_info));
+-  *framebuf = (char *) framebuffer.ptr;
+-
+-  grub_video_fb_fini ();
+-
+-  return GRUB_ERR_NONE;
+-}
+-
+-static struct grub_video_adapter grub_video_uga_adapter =
+-  {
+-    .name = "EFI UGA driver",
+-    .id = GRUB_VIDEO_DRIVER_EFI_UGA,
+-
+-    .prio = GRUB_VIDEO_ADAPTER_PRIO_FIRMWARE_DIRTY,
+-
+-    .init = grub_video_uga_init,
+-    .fini = grub_video_uga_fini,
+-    .setup = grub_video_uga_setup,
+-    .get_info = grub_video_fb_get_info,
+-    .get_info_and_fini = grub_video_uga_get_info_and_fini,
+-    .set_palette = grub_video_fb_set_palette,
+-    .get_palette = grub_video_fb_get_palette,
+-    .set_viewport = grub_video_fb_set_viewport,
+-    .get_viewport = grub_video_fb_get_viewport,
+-    .set_region = grub_video_fb_set_region,
+-    .get_region = grub_video_fb_get_region,
+-    .set_area_status = grub_video_fb_set_area_status,
+-    .get_area_status = grub_video_fb_get_area_status,
+-    .map_color = grub_video_fb_map_color,
+-    .map_rgb = grub_video_fb_map_rgb,
+-    .map_rgba = grub_video_fb_map_rgba,
+-    .unmap_color = grub_video_fb_unmap_color,
+-    .fill_rect = grub_video_fb_fill_rect,
+-    .blit_bitmap = grub_video_fb_blit_bitmap,
+-    .blit_render_target = grub_video_fb_blit_render_target,
+-    .scroll = grub_video_fb_scroll,
+-    .swap_buffers = grub_video_uga_swap_buffers,
+-    .create_render_target = grub_video_fb_create_render_target,
+-    .delete_render_target = grub_video_fb_delete_render_target,
+-    .set_active_render_target = grub_video_uga_set_active_render_target,
+-    .get_active_render_target = grub_video_fb_get_active_render_target,
+-  };
+-
+-GRUB_MOD_INIT(efi_uga)
+-{
+-  if (check_protocol ())
+-    grub_video_register (&grub_video_uga_adapter);
+-}
+-
+-GRUB_MOD_FINI(efi_uga)
+-{
+-  if (uga)
+-    grub_video_unregister (&grub_video_uga_adapter);
+-}
+diff --git a/include/grub/efi/console_control.h b/include/grub/efi/console_control.h
+deleted file mode 100644
+index 008ac58..0000000
+--- a/include/grub/efi/console_control.h
++++ /dev/null
+@@ -1,59 +0,0 @@
+-/* console_control.h - definitions of the console control protocol */
+-/*
+- *  GRUB  --  GRand Unified Bootloader
+- *  Copyright (C) 2006,2007  Free Software Foundation, Inc.
+- *
+- *  GRUB is free software: you can redistribute it and/or modify
+- *  it under the terms of the GNU General Public License as published by
+- *  the Free Software Foundation, either version 3 of the License, or
+- *  (at your option) any later version.
+- *
+- *  GRUB is distributed in the hope that it will be useful,
+- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- *  GNU General Public License for more details.
+- *
+- *  You should have received a copy of the GNU General Public License
+- *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
+- */
+-
+-/* The console control protocol is not a part of the EFI spec,
+-   but defined in Intel's Sample Implementation.  */
+-
+-#ifndef GRUB_EFI_CONSOLE_CONTROL_HEADER
+-#define GRUB_EFI_CONSOLE_CONTROL_HEADER	1
+-
+-#include <grub/efi/api.h>
+-
+-#define GRUB_EFI_CONSOLE_CONTROL_GUID	\
+-  { 0xf42f7782, 0x12e, 0x4c12, \
+-    { 0x99, 0x56, 0x49, 0xf9, 0x43, 0x4, 0xf7, 0x21 } \
+-  }
+-
+-enum grub_efi_screen_mode
+-  {
+-    GRUB_EFI_SCREEN_TEXT,
+-    GRUB_EFI_SCREEN_GRAPHICS,
+-    GRUB_EFI_SCREEN_TEXT_MAX_VALUE
+-  };
+-typedef enum grub_efi_screen_mode grub_efi_screen_mode_t;
+-
+-struct grub_efi_console_control_protocol
+-{
+-  grub_efi_status_t
+-  (__grub_efi_api *get_mode) (struct grub_efi_console_control_protocol *this,
+-			      grub_efi_screen_mode_t *mode,
+-			      grub_efi_boolean_t *uga_exists,
+-			      grub_efi_boolean_t *std_in_locked);
+-
+-  grub_efi_status_t
+-  (__grub_efi_api *set_mode) (struct grub_efi_console_control_protocol *this,
+-			      grub_efi_screen_mode_t mode);
+-
+-  grub_efi_status_t
+-  (__grub_efi_api *lock_std_in) (struct grub_efi_console_control_protocol *this,
+-				 grub_efi_char16_t *password);
+-};
+-typedef struct grub_efi_console_control_protocol grub_efi_console_control_protocol_t;
+-
+-#endif /* ! GRUB_EFI_CONSOLE_CONTROL_HEADER */
+diff --git a/include/grub/efi/efi.h b/include/grub/efi/efi.h
+index b4d2f2d..0851258 100644
+--- a/include/grub/efi/efi.h
++++ b/include/grub/efi/efi.h
+@@ -49,7 +49,6 @@ void *EXPORT_FUNC(grub_efi_open_protocol) (grub_efi_handle_t handle,
+ 					   grub_efi_uint32_t attributes);
+ grub_efi_status_t
+ EXPORT_FUNC(grub_efi_close_protocol) (grub_efi_handle_t handle, grub_guid_t *protocol);
+-int EXPORT_FUNC(grub_efi_set_text_mode) (int on);
+ void EXPORT_FUNC(grub_efi_stall) (grub_efi_uintn_t microseconds);
+ void *
+ EXPORT_FUNC(grub_efi_allocate_pages_real) (grub_efi_physical_address_t address,
+diff --git a/include/grub/efi/uga_draw.h b/include/grub/efi/uga_draw.h
+deleted file mode 100644
+index 1ea157a..0000000
+--- a/include/grub/efi/uga_draw.h
++++ /dev/null
+@@ -1,76 +0,0 @@
+-/* uga_draw.h - definitions of the uga draw protocol */
+-/*
+- *  GRUB  --  GRand Unified Bootloader
+- *  Copyright (C) 2008  Free Software Foundation, Inc.
+- *
+- *  GRUB is free software: you can redistribute it and/or modify
+- *  it under the terms of the GNU General Public License as published by
+- *  the Free Software Foundation, either version 3 of the License, or
+- *  (at your option) any later version.
+- *
+- *  GRUB is distributed in the hope that it will be useful,
+- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- *  GNU General Public License for more details.
+- *
+- *  You should have received a copy of the GNU General Public License
+- *  along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
+- */
+-
+-/* The console control protocol is not a part of the EFI spec,
+-   but defined in Intel's Sample Implementation.  */
+-
+-#ifndef GRUB_EFI_UGA_DRAW_HEADER
+-#define GRUB_EFI_UGA_DRAW_HEADER	1
+-
+-#define GRUB_EFI_UGA_DRAW_GUID \
+-  { 0x982c298b, 0xf4fa, 0x41cb, { 0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39 }}
+-
+-enum grub_efi_uga_blt_operation
+-{
+-  GRUB_EFI_UGA_VIDEO_FILL,
+-  GRUB_EFI_UGA_VIDEO_TO_BLT,
+-  GRUB_EFI_UGA_BLT_TO_VIDEO,
+-  GRUB_EFI_UGA_VIDEO_TO_VIDEO,
+-  GRUB_EFI_UGA_BLT_MAX
+-};
+-
+-struct grub_efi_uga_pixel
+-{
+-  grub_uint8_t Blue;
+-  grub_uint8_t Green;
+-  grub_uint8_t Red;
+-  grub_uint8_t Reserved;
+-};
+-
+-struct grub_efi_uga_draw_protocol
+-{
+-  grub_efi_status_t
+-  (__grub_efi_api *get_mode) (struct grub_efi_uga_draw_protocol *this,
+-			      grub_uint32_t *width,
+-			      grub_uint32_t *height,
+-			      grub_uint32_t *depth,
+-			      grub_uint32_t *refresh_rate);
+-
+-  grub_efi_status_t
+-  (__grub_efi_api *set_mode) (struct grub_efi_uga_draw_protocol *this,
+-			      grub_uint32_t width,
+-			      grub_uint32_t height,
+-			      grub_uint32_t depth,
+-			      grub_uint32_t refresh_rate);
+-
+-  grub_efi_status_t
+-  (__grub_efi_api *blt) (struct grub_efi_uga_draw_protocol *this,
+-			 struct grub_efi_uga_pixel *blt_buffer,
+-			 enum grub_efi_uga_blt_operation blt_operation,
+-			 grub_efi_uintn_t src_x,
+-			 grub_efi_uintn_t src_y,
+-			 grub_efi_uintn_t dest_x,
+-			 grub_efi_uintn_t dest_y,
+-			 grub_efi_uintn_t width,
+-			 grub_efi_uintn_t height,
+-			 grub_efi_uintn_t delta);
+-};
+-typedef struct grub_efi_uga_draw_protocol grub_efi_uga_draw_protocol_t;
+-
+-#endif /* ! GRUB_EFI_UGA_DRAW_HEADER */
+diff --git a/include/grub/video.h b/include/grub/video.h
+index 761ee99..c014f5a 100644
+--- a/include/grub/video.h
++++ b/include/grub/video.h
+@@ -279,7 +279,6 @@ typedef enum grub_video_driver_id
+   {
+     GRUB_VIDEO_DRIVER_NONE,
+     GRUB_VIDEO_DRIVER_VBE,
+-    GRUB_VIDEO_DRIVER_EFI_UGA,
+     GRUB_VIDEO_DRIVER_EFI_GOP,
+     GRUB_VIDEO_DRIVER_SM712,
+     GRUB_VIDEO_DRIVER_VGA,
+diff --git a/po/exclude.pot b/po/exclude.pot
+index 816089c..9cfc0df 100644
+--- a/po/exclude.pot
++++ b/po/exclude.pot
+@@ -2984,14 +2984,6 @@ msgstr ""
+ msgid "agp-internal-edid"
+ msgstr ""
+ 
+-#: grub-core/video/efi_uga.c:134
+-msgid "VMEM"
+-msgstr ""
+-
+-#: grub-core/video/efi_uga.c:134
+-msgid "MMIO"
+-msgstr ""
+-
+ #: grub-core/video/ieee1275.c:74
+ msgid "display"
+ msgstr ""
+diff --git a/util/grub.d/00_header.in b/util/grub.d/00_header.in
+index fddf384..729272f 100644
+--- a/util/grub.d/00_header.in
++++ b/util/grub.d/00_header.in
+@@ -183,7 +183,6 @@ else # GRUB_FORCE_EFI_ALL_VIDEO is not set true
+     cat <<EOF
+   if [ x\$grub_platform = xefi ]; then
+     insmod efi_gop
+-    insmod efi_uga
+   elif [ x\$feature_all_video_module = xy ]; then
+ EOF
+ fi # end GRUB_FORCE_EFI_ALL_VIDEO
+@@ -193,7 +192,6 @@ cat <<EOF
+     insmod all_video
+   else
+     insmod efi_gop
+-    insmod efi_uga
+     insmod ieee1275_fb
+     insmod vbe
+     insmod vga

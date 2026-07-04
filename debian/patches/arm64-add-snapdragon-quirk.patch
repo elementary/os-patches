@@ -1,0 +1,228 @@
+From: Tobias Heider <tobias.heider@canonical.com>
+Date: Sun, 27 Jul 2025 17:30:13 +0200
+Subject: UBUNTU: arm64: Add Snapdragon quirk to reduce max usable EFI address
+
+On Snapdragon X Elite latops the memory range 0x8800000000-0x8fffffffff
+cannot be used because of a firmware bug causing the device to crash.
+
+Detect affected machines by looking at the SMBIOS processor version entry
+and limit the maximum address before memory management is initialized.
+---
+ grub-core/kern/efi/mm.c        | 81 +++++++++++++++++++++++++++++++++++++-----
+ grub-core/kern/main.c          |  5 +++
+ grub-core/loader/efi/fdt.c     |  2 +-
+ grub-core/loader/efi/peimage.c |  2 +-
+ include/grub/efi/memory.h      |  3 ++
+ 5 files changed, 83 insertions(+), 10 deletions(-)
+
+diff --git a/grub-core/kern/efi/mm.c b/grub-core/kern/efi/mm.c
+index df238b1..0b281d3 100644
+--- a/grub-core/kern/efi/mm.c
++++ b/grub-core/kern/efi/mm.c
+@@ -21,7 +21,9 @@
+ #include <grub/mm.h>
+ #include <grub/efi/api.h>
+ #include <grub/efi/efi.h>
++#include <grub/efi/memory.h>
+ #include <grub/cpu/efi/memory.h>
++#include <grub/smbios.h>
+ 
+ #if defined (__i386__) || defined (__x86_64__)
+ #include <grub/pci.h>
+@@ -125,14 +127,14 @@ grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
+   grub_efi_boot_services_t *b;
+ 
+   /* Limit the memory access to less than 4GB for 32-bit platforms.  */
+-  if (address > GRUB_EFI_MAX_USABLE_ADDRESS)
++  if (address > grub_efi_max_usable_address)
+     {
+       char inv_addr[17], max_addr[17]; /* log16(2^64) = 16, plus NUL. */
+ 
+       grub_snprintf (inv_addr, sizeof (inv_addr) - 1, "%" PRIxGRUB_UINT64_T,
+ 		     address);
+       grub_snprintf (max_addr, sizeof (max_addr) - 1, "%" PRIxGRUB_UINT64_T,
+-		     (grub_efi_uint64_t) GRUB_EFI_MAX_USABLE_ADDRESS);
++		     (grub_efi_uint64_t) grub_efi_max_usable_address);
+       grub_error (GRUB_ERR_BAD_ARGUMENT,
+ 		  N_("invalid memory address (0x%s > 0x%s)"), inv_addr, max_addr);
+       return NULL;
+@@ -150,7 +152,7 @@ grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
+     {
+       /* Uggh, the address 0 was allocated... This is too annoying,
+ 	 so reallocate another one.  */
+-      address = GRUB_EFI_MAX_USABLE_ADDRESS;
++      address = grub_efi_max_usable_address;
+       status = b->allocate_pages (alloctype, memtype, pages, &address);
+       b->free_pages (0, pages);
+       if (status != GRUB_EFI_SUCCESS)
+@@ -168,7 +170,7 @@ grub_efi_allocate_pages_real (grub_efi_physical_address_t address,
+ void *
+ grub_efi_allocate_any_pages (grub_efi_uintn_t pages)
+ {
+-  return grub_efi_allocate_pages_real (GRUB_EFI_MAX_USABLE_ADDRESS,
++  return grub_efi_allocate_pages_real (grub_efi_max_usable_address,
+ 				       pages, GRUB_EFI_ALLOCATE_MAX_ADDRESS,
+ 				       GRUB_EFI_LOADER_DATA);
+ }
+@@ -453,7 +455,7 @@ filter_memory_map (grub_efi_memory_descriptor_t *memory_map,
+     {
+       if (desc->type == GRUB_EFI_CONVENTIONAL_MEMORY
+ #if 1
+-	  && desc->physical_start <= GRUB_EFI_MAX_USABLE_ADDRESS
++	  && desc->physical_start <= grub_efi_max_usable_address
+ #endif
+ 	  && desc->physical_start + PAGES_TO_BYTES (desc->num_pages) > 0x100000
+ 	  && desc->num_pages != 0)
+@@ -471,9 +473,9 @@ filter_memory_map (grub_efi_memory_descriptor_t *memory_map,
+ #if 1
+ 	  if (BYTES_TO_PAGES (filtered_desc->physical_start)
+ 	      + filtered_desc->num_pages
+-	      > BYTES_TO_PAGES_DOWN (GRUB_EFI_MAX_USABLE_ADDRESS))
++	      > BYTES_TO_PAGES_DOWN (grub_efi_max_usable_address))
+ 	    filtered_desc->num_pages
+-	      = (BYTES_TO_PAGES_DOWN (GRUB_EFI_MAX_USABLE_ADDRESS)
++	      = (BYTES_TO_PAGES_DOWN (grub_efi_max_usable_address)
+ 		 - BYTES_TO_PAGES (filtered_desc->physical_start));
+ #endif
+ 
+@@ -656,9 +658,72 @@ grub_efi_mm_add_regions (grub_size_t required_bytes, unsigned int flags)
+   return GRUB_ERR_NONE;
+ }
+ 
++#if defined (__aarch64__)
++static void
++grub_arm64_snapdragon_x_quirk(void)
++{
++  const grub_guid_t smbios3_guid = GRUB_EFI_SMBIOS3_TABLE_GUID;
++  const char *proc_version = NULL;
++  const grub_uint8_t *table_end, *ptr;
++  struct grub_smbios_eps3 *eps3;
++  grub_uint8_t i;
++
++  /* Find smbios table */
++  eps3 = grub_efi_find_configuration_table (&smbios3_guid);
++  if (!eps3)
++	return;
++
++  table_end = (grub_uint8_t *)eps3->table_address + eps3->maximum_table_length;
++  ptr = (grub_uint8_t *)eps3->table_address;
++
++  /* Find ProcessorInformation structure */
++  while (ptr < table_end && ptr[1] >= 4)
++    {
++      if (ptr[0] == 4)
++	break;
++      ptr += ptr[1];
++      while ((*ptr++ != 0 || *ptr++ != 0) && ptr < table_end);
++    }
++  /* Give up if we didn't find one*/
++  if (ptr[0] != 4)
++    return;
++
++  /* Find ProcessorType string */
++  const grub_uint8_t referenced_string_number = ptr[16];
++  ptr += ptr[1];
++  for (i = 1; *ptr != 0 && ptr < table_end; i++)
++    {
++      if (i == referenced_string_number)
++        {
++          proc_version = (const char *)ptr;
++          while (*ptr++ != 0)
++            if (ptr >= table_end)
++              return; /* The string isn't terminated. */
++          break;
++        }
++      while (*ptr++ != 0 && ptr < table_end);
++    }
++  if (proc_version == NULL)
++    return;
++
++  if (grub_strncmp(proc_version, "Snapdragon(R) X ", 16))
++    return;
++
++  grub_efi_max_usable_address = 0xfffffffffu;
++}
++#endif
++
+ void
+ grub_efi_mm_init (void)
+ {
++#if defined (__aarch64__)
++  /*
++   * Work around a firmware bug that Snapdragon X Elite firmware crash when
++   * upper 32 GB of memory are used.
++   */
++  grub_arm64_snapdragon_x_quirk();
++#endif
++
+   if (grub_efi_mm_add_regions (DEFAULT_HEAP_SIZE, GRUB_MM_ADD_REGION_NONE) != GRUB_ERR_NONE)
+     grub_fatal ("%s", grub_errmsg);
+   grub_mm_add_region_fn = grub_efi_mm_add_regions;
+@@ -684,7 +749,7 @@ grub_efi_get_ram_base(grub_addr_t *base_addr)
+   if (ret < 1)
+     return GRUB_ERR_BUG;
+ 
+-  for (desc = memory_map, *base_addr = GRUB_EFI_MAX_USABLE_ADDRESS;
++  for (desc = memory_map, *base_addr = grub_efi_max_usable_address;
+        (grub_addr_t) desc < ((grub_addr_t) memory_map + memory_map_size);
+        desc = NEXT_MEMORY_DESCRIPTOR (desc, desc_size))
+     if (desc->attribute & GRUB_EFI_MEMORY_WB)
+diff --git a/grub-core/kern/main.c b/grub-core/kern/main.c
+index 3789282..723bdd6 100644
+--- a/grub-core/kern/main.c
++++ b/grub-core/kern/main.c
+@@ -42,6 +42,11 @@
+ static bool cli_disabled = false;
+ static bool cli_need_auth = false;
+ 
++#ifdef GRUB_MACHINE_EFI
++#include <grub/cpu/efi/memory.h>
++grub_efi_physical_address_t grub_efi_max_usable_address = GRUB_EFI_MAX_USABLE_ADDRESS;
++#endif
++
+ grub_addr_t
+ grub_modules_get_end (void)
+ {
+diff --git a/grub-core/loader/efi/fdt.c b/grub-core/loader/efi/fdt.c
+index 948ef7e..2c4c5d1 100644
+--- a/grub-core/loader/efi/fdt.c
++++ b/grub-core/loader/efi/fdt.c
+@@ -107,7 +107,7 @@ grub_fdt_load (grub_size_t additional_size)
+   size += additional_size;
+ 
+   grub_dprintf ("linux", "allocating %d bytes for fdt\n", size);
+-  fdt = grub_efi_allocate_pages_real (GRUB_EFI_MAX_USABLE_ADDRESS,
++  fdt = grub_efi_allocate_pages_real (grub_efi_max_usable_address,
+ 				      GRUB_EFI_BYTES_TO_PAGES (size),
+ 				      GRUB_EFI_ALLOCATE_MAX_ADDRESS,
+ 				      GRUB_EFI_ACPI_RECLAIM_MEMORY);
+diff --git a/grub-core/loader/efi/peimage.c b/grub-core/loader/efi/peimage.c
+index 0d73081..5bb4ed1 100644
+--- a/grub-core/loader/efi/peimage.c
++++ b/grub-core/loader/efi/peimage.c
+@@ -249,7 +249,7 @@ load_sections (struct image_info *info)
+   info->alloc_pages = GRUB_EFI_BYTES_TO_PAGES (info->image_size + (align_mask & ~0xfffUL));
+ 
+   info->alloc_addr = grub_efi_allocate_pages_real (
+-      GRUB_EFI_MAX_USABLE_ADDRESS, info->alloc_pages,
++      grub_efi_max_usable_address, info->alloc_pages,
+       GRUB_EFI_ALLOCATE_MAX_ADDRESS, GRUB_EFI_LOADER_CODE);
+   if (!info->alloc_addr)
+     return GRUB_EFI_OUT_OF_RESOURCES;
+diff --git a/include/grub/efi/memory.h b/include/grub/efi/memory.h
+index 08fe622..f03dba6 100644
+--- a/include/grub/efi/memory.h
++++ b/include/grub/efi/memory.h
+@@ -19,9 +19,12 @@
+ #ifndef GRUB_MEMORY_MACHINE_HEADER
+ #define GRUB_MEMORY_MACHINE_HEADER	1
+ 
++#include <grub/efi/api.h>
+ #include <grub/err.h>
+ #include <grub/types.h>
+ 
++extern grub_efi_physical_address_t EXPORT_VAR(grub_efi_max_usable_address);
++
+ /* The term "page" in UEFI refers only to a 4 KiB-aligned 4 KiB size region of
+    memory. It is not concerned with underlying translation management concepts,
+    but only used as the granule for memory allocations. */

@@ -1,0 +1,685 @@
+2026-01-14  Automatic import tool
+
+	Imported ciphers to GRUB
+
+	* Makefile.am: Removed
+	* arcfour-amd64.S: Removed
+	* arcfour.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(elftest): Removed declaration.
+	(selftest): Removed.
+	(GRUB_MOD_INIT(gcry_arcfour)): New function
+
+	Register cipher _gcry_cipher_spec_arcfour
+	(GRUB_MOD_FINI(gcry_arcfour)): New function
+
+	Unregister cipher _gcry_cipher_spec_arcfour
+	* aria-aesni-avx-amd64.S: Removed
+	* aria-aesni-avx2-amd64.S: Removed
+	* aria-gfni-avx512-amd64.S: Removed
+	* aria.c: Removed including of config.h
+	(GRUB_MOD_INIT(gcry_aria)): New function
+
+	Register cipher _gcry_cipher_spec_aria128
+	Register cipher _gcry_cipher_spec_aria192
+	Register cipher _gcry_cipher_spec_aria256
+	(GRUB_MOD_FINI(gcry_aria)): New function
+
+	Unregister cipher _gcry_cipher_spec_aria128
+	Unregister cipher _gcry_cipher_spec_aria192
+	Unregister cipher _gcry_cipher_spec_aria256
+	* blake2.c: Removed including of config.h
+	Removed including of string.h
+	(selftests_blake2b): Removed.
+	(selftests_blake2s): Removed.
+	(GRUB_MOD_INIT(gcry_blake2)): New function
+
+	Register digest _gcry_digest_spec_blake2b_512
+	Register digest _gcry_digest_spec_blake2b_384
+	Register digest _gcry_digest_spec_blake2b_256
+	Register digest _gcry_digest_spec_blake2b_160
+	Register digest _gcry_digest_spec_blake2s_256
+	Register digest _gcry_digest_spec_blake2s_224
+	Register digest _gcry_digest_spec_blake2s_160
+	Register digest _gcry_digest_spec_blake2s_128
+	(GRUB_MOD_FINI(gcry_blake2)): New function
+
+	Unregister MD _gcry_digest_spec_blake2b_512
+	Unregister MD _gcry_digest_spec_blake2b_384
+	Unregister MD _gcry_digest_spec_blake2b_256
+	Unregister MD _gcry_digest_spec_blake2b_160
+	Unregister MD _gcry_digest_spec_blake2s_256
+	Unregister MD _gcry_digest_spec_blake2s_224
+	Unregister MD _gcry_digest_spec_blake2s_160
+	Unregister MD _gcry_digest_spec_blake2s_128
+	* blake2b-amd64-avx2.S: Removed
+	* blake2b-amd64-avx512.S: Removed
+	* blake2s-amd64-avx.S: Removed
+	* blake2s-amd64-avx512.S: Removed
+	* blowfish-amd64.S: Removed
+	* blowfish-arm.S: Removed
+	* blowfish.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(selftest): Removed.
+	(GRUB_MOD_INIT(gcry_blowfish)): New function
+
+	Register cipher _gcry_cipher_spec_blowfish
+	(GRUB_MOD_FINI(gcry_blowfish)): New function
+
+	Unregister cipher _gcry_cipher_spec_blowfish
+	* camellia-aarch64-ce.c: Removed
+	* camellia-aarch64.S: Removed
+	* camellia-aesni-avx-amd64.S: Removed
+	* camellia-aesni-avx2-amd64.S: Removed
+	* camellia-arm.S: Removed
+	* camellia-gfni-avx2-amd64.S: Removed
+	* camellia-gfni-avx512-amd64.S: Removed
+	* camellia-glue.c: Removed including of config.h
+	Removed including of config.h
+	(elftest): Removed declaration.
+	(selftest): Removed.
+	(GRUB_MOD_INIT(gcry_camellia)): New function
+
+	Register cipher _gcry_cipher_spec_camellia128
+	Register cipher _gcry_cipher_spec_camellia192
+	Register cipher _gcry_cipher_spec_camellia256
+	(GRUB_MOD_FINI(gcry_camellia)): New function
+
+	Unregister cipher _gcry_cipher_spec_camellia128
+	Unregister cipher _gcry_cipher_spec_camellia192
+	Unregister cipher _gcry_cipher_spec_camellia256
+	* camellia-ppc8le.c: Removed
+	* camellia-ppc9le.c: Removed
+	* camellia-vaes-avx2-amd64.S: Removed
+	* cast5-amd64.S: Removed
+	* cast5-arm.S: Removed
+	* cast5.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(selftest): Removed.
+	(GRUB_MOD_INIT(gcry_cast5)): New function
+
+	Register cipher _gcry_cipher_spec_cast5
+	(GRUB_MOD_FINI(gcry_cast5)): New function
+
+	Unregister cipher _gcry_cipher_spec_cast5
+	* chacha20-aarch64.S: Removed
+	* chacha20-amd64-avx2.S: Removed
+	* chacha20-amd64-avx512.S: Removed
+	* chacha20-amd64-ssse3.S: Removed
+	* chacha20-armv7-neon.S: Removed
+	* chacha20-p10le-8x.s: Removed
+	* chacha20-ppc.c: Removed
+	* chacha20-s390x.S: Removed
+	* chacha20.c: Removed
+	* cipher-aeswrap.c: Removed
+	* cipher-cbc.c: Removed
+	* cipher-ccm.c: Removed
+	* cipher-cfb.c: Removed
+	* cipher-cmac.c: Removed
+	* cipher-ctr.c: Removed
+	* cipher-eax.c: Removed
+	* cipher-gcm-armv7-neon.S: Removed
+	* cipher-gcm-armv8-aarch32-ce.S: Removed
+	* cipher-gcm-armv8-aarch64-ce.S: Removed
+	* cipher-gcm-intel-pclmul.c: Removed
+	* cipher-gcm-ppc.c: Removed
+	* cipher-gcm-siv.c: Removed
+	* cipher-gcm.c: Removed
+	* cipher-ocb.c: Removed
+	* cipher-ofb.c: Removed
+	* cipher-poly1305.c: Removed
+	* cipher-siv.c: Removed
+	* cipher-xts.c: Removed
+	* cipher.c: Removed
+	* crc-armv8-aarch64-ce.S: Removed
+	* crc-armv8-ce.c: Removed
+	* crc-intel-pclmul.c: Removed
+	* crc-ppc.c: Removed
+	* crc.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(GRUB_MOD_INIT(gcry_crc)): New function
+
+	Register digest _gcry_digest_spec_crc32
+	Register digest _gcry_digest_spec_crc32_rfc1510
+	Register digest _gcry_digest_spec_crc24_rfc2440
+	(GRUB_MOD_FINI(gcry_crc)): New function
+
+	Unregister MD _gcry_digest_spec_crc32
+	Unregister MD _gcry_digest_spec_crc32_rfc1510
+	Unregister MD _gcry_digest_spec_crc24_rfc2440
+	* des-amd64.S: Removed
+	* des.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of string.h
+	(elftest): Removed declaration.
+	(weak_keys_chksum): Removed.
+	(tripledes_set2keys): Removed.
+	(selftest): Removed.
+	(do_tripledes_set_extra_info): Removed.
+	(selftest_fips): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_des)): New function
+
+	Register cipher _gcry_cipher_spec_des
+	Register cipher _gcry_cipher_spec_tripledes
+	(GRUB_MOD_FINI(gcry_des)): New function
+
+	Unregister cipher _gcry_cipher_spec_des
+	Unregister cipher _gcry_cipher_spec_tripledes
+	* dsa.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(test_keys): Removed declaration.
+	(progress_cb): Removed declaration.
+	(progress_cb): Removed declaration.
+	(_gcry_register_pk_dsa_progress): Removed.
+	(progress): Removed.
+	(test_keys): Removed.
+	(generate): Removed.
+	(generate_fips186): Removed.
+	(sign): Removed.
+	(dsa_generate): Removed.
+	(dsa_sign): Removed.
+	(selftest_sign): Removed.
+	(selftests_dsa_2048): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_dsa)): New function
+
+	Register pk _gcry_pubkey_spec_dsa
+	(GRUB_MOD_FINI(gcry_dsa)): New function
+
+	Unregister pk _gcry_pubkey_spec_dsa
+	* ecc-curves.c: Removed
+	* ecc-ecdh.c: Removed
+	* ecc-ecdsa.c: Removed
+	* ecc-eddsa.c: Removed
+	* ecc-gost.c: Removed
+	* ecc-misc.c: Removed
+	* ecc-sm2.c: Removed
+	* ecc.c: Removed
+	* elgamal.c: Removed
+	* gost-s-box.c: Removed
+	* gost28147.c: Removed including of config.h
+	(GRUB_MOD_INIT(gcry_gost28147)): New function
+
+	Register cipher _gcry_cipher_spec_gost28147
+	Register cipher _gcry_cipher_spec_gost28147_mesh
+	(GRUB_MOD_FINI(gcry_gost28147)): New function
+
+	Unregister cipher _gcry_cipher_spec_gost28147
+	Unregister cipher _gcry_cipher_spec_gost28147_mesh
+	* gostr3411-94.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(GRUB_MOD_INIT(gcry_gostr3411_94)): New function
+
+	Register digest _gcry_digest_spec_gost3411_94
+	Register digest _gcry_digest_spec_gost3411_cp
+	(GRUB_MOD_FINI(gcry_gostr3411_94)): New function
+
+	Unregister MD _gcry_digest_spec_gost3411_94
+	Unregister MD _gcry_digest_spec_gost3411_cp
+	* idea.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	Removed including of assert.h
+	(elftest): Removed declaration.
+	(selftest): Removed.
+	(GRUB_MOD_INIT(gcry_idea)): New function
+
+	Register cipher _gcry_cipher_spec_idea
+	(GRUB_MOD_FINI(gcry_idea)): New function
+
+	Unregister cipher _gcry_cipher_spec_idea
+	* kdf.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	Removed including of errno.h
+	(openpgp_s2k): Removed.
+	(_gcry_kdf_pkdf2): Removed.
+	(_gcry_kdf_derive): Removed.
+	(prng_aes_ctr_init): Removed.
+	(prng_aes_ctr_get_rand64): Removed.
+	(prng_aes_ctr_fini): Removed.
+	(ballon_context_size): Removed.
+	(balloon_open): Removed.
+	(balloon_xor_block): Removed.
+	(balloon_compress): Removed.
+	(balloon_expand): Removed.
+	(balloon_compute_fill): Removed.
+	(balloon_compute_mix): Removed.
+	(balloon_compute): Removed.
+	(balloon_compute_all): Removed.
+	(balloon_final): Removed.
+	(balloon_close): Removed.
+	(onestep_kdf_open): Removed.
+	(onestep_kdf_compute): Removed.
+	(onestep_kdf_final): Removed.
+	(onestep_kdf_close): Removed.
+	(onestep_kdf_mac_open): Removed.
+	(onestep_kdf_mac_compute): Removed.
+	(onestep_kdf_mac_final): Removed.
+	(onestep_kdf_mac_close): Removed.
+	(hkdf_open): Removed.
+	(hkdf_compute): Removed.
+	(hkdf_final): Removed.
+	(hkdf_close): Removed.
+	(x963_kdf_open): Removed.
+	(x963_kdf_compute): Removed.
+	(x963_kdf_final): Removed.
+	(x963_kdf_close): Removed.
+	(check_one): Removed.
+	(selftest_pbkdf2): Removed.
+	(_gcry_kdf_selftest): Removed.
+	* keccak-amd64-avx512.S: Removed
+	* keccak-armv7-neon.S: Removed
+	* keccak.c: Removed including of config.h
+	Removed including of string.h
+	(_gcry_sha3_hash_buffers): Removed.
+	(_gcry_sha3_224_hash_buffers): Removed.
+	(_gcry_sha3_256_hash_buffers): Removed.
+	(_gcry_sha3_384_hash_buffers): Removed.
+	(_gcry_sha3_512_hash_buffers): Removed.
+	(_gcry_shake128_hash_buffers): Removed.
+	(_gcry_shake256_hash_buffers): Removed.
+	(cshake_hash_buffers): Removed.
+	(_gcry_cshake128_hash_buffers): Removed.
+	(_gcry_cshake256_hash_buffers): Removed.
+	(selftests_keccak): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_keccak)): New function
+
+	Register digest _gcry_digest_spec_sha3_224
+	Register digest _gcry_digest_spec_sha3_256
+	Register digest _gcry_digest_spec_sha3_384
+	Register digest _gcry_digest_spec_sha3_512
+	Register digest _gcry_digest_spec_shake128
+	Register digest _gcry_digest_spec_shake256
+	Register digest _gcry_digest_spec_cshake128
+	Register digest _gcry_digest_spec_cshake256
+	(GRUB_MOD_FINI(gcry_keccak)): New function
+
+	Unregister MD _gcry_digest_spec_sha3_224
+	Unregister MD _gcry_digest_spec_sha3_256
+	Unregister MD _gcry_digest_spec_sha3_384
+	Unregister MD _gcry_digest_spec_sha3_512
+	Unregister MD _gcry_digest_spec_shake128
+	Unregister MD _gcry_digest_spec_shake256
+	Unregister MD _gcry_digest_spec_cshake128
+	Unregister MD _gcry_digest_spec_cshake256
+	* kem-ecc.c: Removed
+	* kem.c: Removed
+	* kyber-common.c: Removed
+	* kyber-kdep.c: Removed
+	* kyber.c: Removed
+	* mac-cmac.c: Removed
+	* mac-gmac.c: Removed
+	* mac-hmac.c: Removed
+	* mac-poly1305.c: Removed
+	* mac.c: Removed
+	* mceliece6688128f.c: Removed
+	* md4.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(GRUB_MOD_INIT(gcry_md4)): New function
+
+	Register digest _gcry_digest_spec_md4
+	(GRUB_MOD_FINI(gcry_md4)): New function
+
+	Unregister MD _gcry_digest_spec_md4
+	* md5.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(GRUB_MOD_INIT(gcry_md5)): New function
+
+	Register digest _gcry_digest_spec_md5
+	(GRUB_MOD_FINI(gcry_md5)): New function
+
+	Unregister MD _gcry_digest_spec_md5
+	* poly1305-amd64-avx512.S: Removed
+	* poly1305-p10le.s: Removed
+	* poly1305-s390x.S: Removed
+	* poly1305.c: Removed
+	* primegen.c: Removed
+	* pubkey.c: Removed
+	* rfc2268.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(elftest): Removed declaration.
+	(selftest): Removed.
+	(GRUB_MOD_INIT(gcry_rfc2268)): New function
+
+	Register cipher _gcry_cipher_spec_rfc2268_40
+	Register cipher _gcry_cipher_spec_rfc2268_128
+	(GRUB_MOD_FINI(gcry_rfc2268)): New function
+
+	Unregister cipher _gcry_cipher_spec_rfc2268_40
+	Unregister cipher _gcry_cipher_spec_rfc2268_128
+	* rijndael-aarch64.S: Removed
+	* rijndael-aesni.c: Removed
+	* rijndael-amd64.S: Removed
+	* rijndael-arm.S: Removed
+	* rijndael-armv8-aarch32-ce.S: Removed
+	* rijndael-armv8-aarch64-ce.S: Removed
+	* rijndael-armv8-ce.c: Removed
+	* rijndael-gcm-p10le.s: Removed
+	* rijndael-p10le.c: Removed
+	* rijndael-padlock.c: Removed
+	* rijndael-ppc.c: Removed
+	* rijndael-ppc9le.c: Removed
+	* rijndael-s390x.c: Removed
+	* rijndael-ssse3-amd64-asm.S: Removed
+	* rijndael-ssse3-amd64.c: Removed
+	* rijndael-vaes-avx2-amd64.S: Removed
+	* rijndael-vaes-avx2-i386.S: Removed
+	* rijndael-vaes-i386.c: Removed
+	* rijndael-vaes.c: Removed
+	* rijndael.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(elftest): Removed declaration.
+	(selftest_basic_128): Removed.
+	(selftest_basic_192): Removed.
+	(selftest_basic_256): Removed.
+	(selftest): Removed.
+	(selftest_fips_128_38a): Removed.
+	(selftest_fips_128): Removed.
+	(selftest_fips_192): Removed.
+	(selftest_fips_256): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_rijndael)): New function
+
+	Register cipher _gcry_cipher_spec_aes
+	Register cipher _gcry_cipher_spec_aes192
+	Register cipher _gcry_cipher_spec_aes256
+	(GRUB_MOD_FINI(gcry_rijndael)): New function
+
+	Unregister cipher _gcry_cipher_spec_aes
+	Unregister cipher _gcry_cipher_spec_aes192
+	Unregister cipher _gcry_cipher_spec_aes256
+	* rmd160.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(_gcry_rmd160_hash_buffers): Removed.
+	(GRUB_MOD_INIT(gcry_rmd160)): New function
+
+	Register digest _gcry_digest_spec_rmd160
+	(GRUB_MOD_FINI(gcry_rmd160)): New function
+
+	Unregister MD _gcry_digest_spec_rmd160
+	* rsa.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	Removed including of errno.h
+	(test_keys): Removed declaration.
+	(secret): Removed declaration.
+	(test_keys): Removed.
+	(test_keys_fips): Removed.
+	(check_exponent): Removed.
+	(generate_std): Removed.
+	(generate_fips): Removed.
+	(gen_x931_parm_xp): Removed.
+	(gen_x931_parm_xi): Removed.
+	(generate_x931): Removed.
+	(secret_core_std): Removed.
+	(secret_core_crt): Removed.
+	(secret): Removed.
+	(secret_blinded): Removed.
+	(rsa_generate): Removed.
+	(rsa_decrypt): Removed.
+	(rsa_sign): Removed.
+	(selftest_hash_sign_2048): Removed.
+	(selftest_sign_2048): Removed.
+	(extract_a_from_sexp): Removed.
+	(selftest_encr_2048): Removed.
+	(selftests_rsa): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_rsa)): New function
+
+	Register pk _gcry_pubkey_spec_rsa
+	(GRUB_MOD_FINI(gcry_rsa)): New function
+
+	Unregister pk _gcry_pubkey_spec_rsa
+	* salsa20-amd64.S: Removed
+	* salsa20-armv7-neon.S: Removed
+	* salsa20.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(elftest): Removed declaration.
+	(selftest): Removed.
+	(GRUB_MOD_INIT(gcry_salsa20)): New function
+
+	Register cipher _gcry_cipher_spec_salsa20
+	Register cipher _gcry_cipher_spec_salsa20r12
+	(GRUB_MOD_FINI(gcry_salsa20)): New function
+
+	Unregister cipher _gcry_cipher_spec_salsa20
+	Unregister cipher _gcry_cipher_spec_salsa20r12
+	* scrypt.c: Removed
+	* seed.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	(elftest): Removed declaration.
+	(selftest): Removed.
+	(GRUB_MOD_INIT(gcry_seed)): New function
+
+	Register cipher _gcry_cipher_spec_seed
+	(GRUB_MOD_FINI(gcry_seed)): New function
+
+	Unregister cipher _gcry_cipher_spec_seed
+	* serpent-armv7-neon.S: Removed
+	* serpent-avx2-amd64.S: Removed
+	* serpent-avx512-x86.c: Removed
+	* serpent-sse2-amd64.S: Removed
+	* serpent.c: Removed including of config.h
+	Removed including of string.h
+	Removed including of stdio.h
+	(serpent_test): Removed.
+	(GRUB_MOD_INIT(gcry_serpent)): New function
+
+	Register cipher _gcry_cipher_spec_serpent128
+	Register cipher _gcry_cipher_spec_serpent192
+	Register cipher _gcry_cipher_spec_serpent256
+	(GRUB_MOD_FINI(gcry_serpent)): New function
+
+	Unregister cipher _gcry_cipher_spec_serpent128
+	Unregister cipher _gcry_cipher_spec_serpent192
+	Unregister cipher _gcry_cipher_spec_serpent256
+	* sha1-armv7-neon.S: Removed
+	* sha1-armv8-aarch32-ce.S: Removed
+	* sha1-armv8-aarch64-ce.S: Removed
+	* sha1-avx-amd64.S: Removed
+	* sha1-avx-bmi2-amd64.S: Removed
+	* sha1-avx2-bmi2-amd64.S: Removed
+	* sha1-intel-shaext.c: Removed
+	* sha1-ssse3-amd64.S: Removed
+	* sha1.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	Removed including of stdint.h
+	(_gcry_sha1_hash_buffers): Removed.
+	(_gcry_sha1_hash_buffer): Removed.
+	(selftests_sha1): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_sha1)): New function
+
+	Register digest _gcry_digest_spec_sha1
+	(GRUB_MOD_FINI(gcry_sha1)): New function
+
+	Unregister MD _gcry_digest_spec_sha1
+	* sha256-armv8-aarch32-ce.S: Removed
+	* sha256-armv8-aarch64-ce.S: Removed
+	* sha256-avx-amd64.S: Removed
+	* sha256-avx2-bmi2-amd64.S: Removed
+	* sha256-intel-shaext.c: Removed
+	* sha256-ppc.c: Removed
+	* sha256-ssse3-amd64.S: Removed
+	* sha256.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(_gcry_sha256_hash_buffers): Removed.
+	(_gcry_sha224_hash_buffers): Removed.
+	(selftests_sha224): Removed.
+	(selftests_sha256): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_sha256)): New function
+
+	Register digest _gcry_digest_spec_sha224
+	Register digest _gcry_digest_spec_sha256
+	(GRUB_MOD_FINI(gcry_sha256)): New function
+
+	Unregister MD _gcry_digest_spec_sha224
+	Unregister MD _gcry_digest_spec_sha256
+	* sha512-arm.S: Removed
+	* sha512-armv7-neon.S: Removed
+	* sha512-armv8-aarch64-ce.S: Removed
+	* sha512-avx-amd64.S: Removed
+	* sha512-avx2-bmi2-amd64.S: Removed
+	* sha512-avx512-amd64.S: Removed
+	* sha512-ppc.c: Removed
+	* sha512-ssse3-amd64.S: Removed
+	* sha512-ssse3-i386.c: Removed
+	* sha512.c: Removed including of config.h
+	Removed including of string.h
+	(_gcry_sha512_hash_buffers): Removed.
+	(_gcry_sha384_hash_buffers): Removed.
+	(_gcry_sha512_256_hash_buffers): Removed.
+	(_gcry_sha512_224_hash_buffers): Removed.
+	(selftests_sha384): Removed.
+	(selftests_sha512): Removed.
+	(selftests_sha512_224): Removed.
+	(selftests_sha512_256): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_sha512)): New function
+
+	Register digest _gcry_digest_spec_sha512
+	Register digest _gcry_digest_spec_sha384
+	Register digest _gcry_digest_spec_sha512_256
+	Register digest _gcry_digest_spec_sha512_224
+	(GRUB_MOD_FINI(gcry_sha512)): New function
+
+	Unregister MD _gcry_digest_spec_sha512
+	Unregister MD _gcry_digest_spec_sha384
+	Unregister MD _gcry_digest_spec_sha512_256
+	Unregister MD _gcry_digest_spec_sha512_224
+	* sm3-aarch64.S: Removed
+	* sm3-armv8-aarch64-ce.S: Removed
+	* sm3-avx-bmi2-amd64.S: Removed
+	* sm3.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(_gcry_sm3_hash_buffers): Removed.
+	(selftests_sm3): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_sm3)): New function
+
+	Register digest _gcry_digest_spec_sm3
+	(GRUB_MOD_FINI(gcry_sm3)): New function
+
+	Unregister MD _gcry_digest_spec_sm3
+	* sm4-aarch64.S: Removed
+	* sm4-aesni-avx-amd64.S: Removed
+	* sm4-aesni-avx2-amd64.S: Removed
+	* sm4-armv8-aarch64-ce.S: Removed
+	* sm4-armv9-aarch64-sve-ce.S: Removed
+	* sm4-gfni-avx2-amd64.S: Removed
+	* sm4-gfni-avx512-amd64.S: Removed
+	* sm4-ppc.c: Removed
+	* sm4.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	(sm4_selftest): Removed.
+	(run_selftests): Removed.
+	(GRUB_MOD_INIT(gcry_sm4)): New function
+
+	Register cipher _gcry_cipher_spec_sm4
+	(GRUB_MOD_FINI(gcry_sm4)): New function
+
+	Unregister cipher _gcry_cipher_spec_sm4
+	* sntrup761.c: Removed
+	* stribog.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(GRUB_MOD_INIT(gcry_stribog)): New function
+
+	Register digest _gcry_digest_spec_stribog_256
+	Register digest _gcry_digest_spec_stribog_512
+	(GRUB_MOD_FINI(gcry_stribog)): New function
+
+	Unregister MD _gcry_digest_spec_stribog_256
+	Unregister MD _gcry_digest_spec_stribog_512
+	* tiger.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(GRUB_MOD_INIT(gcry_tiger)): New function
+
+	Register digest _gcry_digest_spec_tiger
+	Register digest _gcry_digest_spec_tiger1
+	Register digest _gcry_digest_spec_tiger2
+	(GRUB_MOD_FINI(gcry_tiger)): New function
+
+	Unregister MD _gcry_digest_spec_tiger
+	Unregister MD _gcry_digest_spec_tiger1
+	Unregister MD _gcry_digest_spec_tiger2
+	* twofish-aarch64.S: Removed
+	* twofish-amd64.S: Removed
+	* twofish-arm.S: Removed
+	* twofish-avx2-amd64.S: Removed
+	* twofish.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(elftest): Removed declaration.
+	(selftest): Removed.
+	Removed including of stdio.h
+	Removed including of string.h
+	Removed including of time.h
+	(GRUB_MOD_INIT(gcry_twofish)): New function
+
+	Register cipher _gcry_cipher_spec_twofish
+	Register cipher _gcry_cipher_spec_twofish128
+	(GRUB_MOD_FINI(gcry_twofish)): New function
+
+	Unregister cipher _gcry_cipher_spec_twofish
+	Unregister cipher _gcry_cipher_spec_twofish128
+	* whirlpool-sse2-amd64.S: Removed
+	* whirlpool.c: Removed including of config.h
+	Removed including of stdio.h
+	Removed including of stdlib.h
+	Removed including of string.h
+	(GRUB_MOD_INIT(gcry_whirlpool)): New function
+
+	Register digest _gcry_digest_spec_whirlpool
+	(GRUB_MOD_FINI(gcry_whirlpool)): New function
+
+	Unregister MD _gcry_digest_spec_whirlpool
+	* crypto.lst: New file.
+	* types.h: New file.
+	* memory.h: New file.
+	* cipher.h: Likewise.
+	* g10lib.h: Likewise.
+

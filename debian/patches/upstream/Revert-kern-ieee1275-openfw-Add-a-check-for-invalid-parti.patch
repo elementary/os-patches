@@ -1,0 +1,47 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Fri, 6 Mar 2026 14:03:50 +0000
+Subject: Revert "kern/ieee1275/openfw: Add a check for invalid partition
+ number"
+
+This reverts commit e37d0215830b1221c7a0c62f4642716b142f8f5c.
+
+Revert this commit because it breaks ISO boot.
+---
+ grub-core/kern/ieee1275/openfw.c | 17 ++---------------
+ 1 file changed, 2 insertions(+), 15 deletions(-)
+
+diff --git a/grub-core/kern/ieee1275/openfw.c b/grub-core/kern/ieee1275/openfw.c
+index 06757f5..3b492dd 100644
+--- a/grub-core/kern/ieee1275/openfw.c
++++ b/grub-core/kern/ieee1275/openfw.c
+@@ -512,20 +512,7 @@ grub_ieee1275_encode_devname (const char *path)
+     }
+   if (partition && partition[0])
+     {
+-      unsigned long partno;
+-      const char *endptr;
+-
+-      partno = grub_strtoul (partition, &endptr, 0);
+-      grub_errno = GRUB_ERR_NONE;
+-      if (*endptr != '\0' || partno > 65535 ||
+-          (partno == 0 && ! grub_ieee1275_test_flag (GRUB_IEEE1275_FLAG_0_BASED_PARTITIONS)))
+-        {
+-          grub_free (partition);
+-          grub_free (device);
+-          grub_free (encoding);
+-          grub_error (GRUB_ERR_BAD_ARGUMENT, N_("invalid partition number"));
+-          return NULL;
+-        }
++      unsigned int partno = grub_strtoul (partition, 0, 0);
+ 
+       *optr++ = ',';
+ 
+@@ -533,7 +520,7 @@ grub_ieee1275_encode_devname (const char *path)
+ 	/* GRUB partition 1 is OF partition 0.  */
+ 	partno++;
+ 
+-      grub_snprintf (optr, sizeof ("XXXXXXXXXXXX"), "%lu", partno);
++      grub_snprintf (optr, sizeof ("XXXXXXXXXXXX"), "%d", partno);
+     }
+   else
+     *optr = '\0';

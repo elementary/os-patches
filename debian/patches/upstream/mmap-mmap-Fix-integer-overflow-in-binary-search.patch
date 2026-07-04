@@ -1,0 +1,29 @@
+From: Wanda Phinode <wanda@phinode.net>
+Date: Thu, 15 Jan 2026 01:22:27 +0100
+Subject: mmap/mmap: Fix integer overflow in binary search
+
+The integer overflow triggered for simple masks in the "badram"
+command, such as "badram 0x0000000012340000,0xfffffffffffffff8".
+This resulted in an infinite loop, locking up the machine.
+
+Signed-off-by: Wanda Phinode <wanda@phinode.net>
+Reviewed-by: Vladimir Serbinenko <phcoder@gmail.com>
+Reviewed-by: Sudhakar Kuppusamy <sudhakar@linux.ibm.com>
+Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ grub-core/mmap/mmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/mmap/mmap.c b/grub-core/mmap/mmap.c
+index 7c7d391..d348f3e 100644
+--- a/grub-core/mmap/mmap.c
++++ b/grub-core/mmap/mmap.c
+@@ -409,7 +409,7 @@ badram_iter (grub_uint64_t addr, grub_uint64_t size,
+       */
+       while (high - low > 1)
+ 	{
+-	  cur = (low + high) / 2;
++	  cur = low + (high - low) / 2;
+ 	  if (fill_mask (entry, cur) >= addr)
+ 	    high = cur;
+ 	  else

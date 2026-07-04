@@ -1,0 +1,28 @@
+From: Mate Kukri <mate.kukri@canonical.com>
+Date: Tue, 9 Sep 2025 13:45:26 +0100
+Subject: UBUNTU: Do not attempt to load the bli module
+
+Ubuntu does not support bli nor does it sign the module, the error
+message about failed verification ruins the flicker free boot experience
+on Secure Boot enabled systems.
+---
+ Makefile.util.def | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/Makefile.util.def b/Makefile.util.def
+index 59b6721..9c28760 100644
+--- a/Makefile.util.def
++++ b/Makefile.util.def
+@@ -566,12 +566,6 @@ script = {
+   condition = COND_HOST_LINUX;
+ };
+ 
+-script = {
+-  name = '25_bli';
+-  common = util/grub.d/25_bli.in;
+-  installdir = grubconf;
+-};
+-
+ script = {
+   name = '30_os-prober';
+   common = util/grub.d/30_os-prober.in;

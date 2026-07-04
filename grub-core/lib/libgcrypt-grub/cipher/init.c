@@ -1,0 +1,127 @@
+#include <grub/crypto.h>
+extern void grub_gcry_arcfour_init (void);
+extern void grub_gcry_arcfour_fini (void);
+extern void grub_gcry_aria_init (void);
+extern void grub_gcry_aria_fini (void);
+extern void grub_gcry_blake2_init (void);
+extern void grub_gcry_blake2_fini (void);
+extern void grub_gcry_blowfish_init (void);
+extern void grub_gcry_blowfish_fini (void);
+extern void grub_gcry_camellia_init (void);
+extern void grub_gcry_camellia_fini (void);
+extern void grub_gcry_cast5_init (void);
+extern void grub_gcry_cast5_fini (void);
+extern void grub_gcry_crc_init (void);
+extern void grub_gcry_crc_fini (void);
+extern void grub_gcry_des_init (void);
+extern void grub_gcry_des_fini (void);
+extern void grub_gcry_gost28147_init (void);
+extern void grub_gcry_gost28147_fini (void);
+extern void grub_gcry_gostr3411_94_init (void);
+extern void grub_gcry_gostr3411_94_fini (void);
+extern void grub_gcry_idea_init (void);
+extern void grub_gcry_idea_fini (void);
+extern void grub_gcry_keccak_init (void);
+extern void grub_gcry_keccak_fini (void);
+extern void grub_gcry_md4_init (void);
+extern void grub_gcry_md4_fini (void);
+extern void grub_gcry_md5_init (void);
+extern void grub_gcry_md5_fini (void);
+extern void grub_gcry_rfc2268_init (void);
+extern void grub_gcry_rfc2268_fini (void);
+extern void grub_gcry_rijndael_init (void);
+extern void grub_gcry_rijndael_fini (void);
+extern void grub_gcry_rmd160_init (void);
+extern void grub_gcry_rmd160_fini (void);
+extern void grub_gcry_salsa20_init (void);
+extern void grub_gcry_salsa20_fini (void);
+extern void grub_gcry_seed_init (void);
+extern void grub_gcry_seed_fini (void);
+extern void grub_gcry_serpent_init (void);
+extern void grub_gcry_serpent_fini (void);
+extern void grub_gcry_sha1_init (void);
+extern void grub_gcry_sha1_fini (void);
+extern void grub_gcry_sha256_init (void);
+extern void grub_gcry_sha256_fini (void);
+extern void grub_gcry_sha512_init (void);
+extern void grub_gcry_sha512_fini (void);
+extern void grub_gcry_sm3_init (void);
+extern void grub_gcry_sm3_fini (void);
+extern void grub_gcry_sm4_init (void);
+extern void grub_gcry_sm4_fini (void);
+extern void grub_gcry_stribog_init (void);
+extern void grub_gcry_stribog_fini (void);
+extern void grub_gcry_tiger_init (void);
+extern void grub_gcry_tiger_fini (void);
+extern void grub_gcry_twofish_init (void);
+extern void grub_gcry_twofish_fini (void);
+extern void grub_gcry_whirlpool_init (void);
+extern void grub_gcry_whirlpool_fini (void);
+
+void
+grub_gcry_init_all (void)
+{
+  grub_gcry_arcfour_init ();
+  grub_gcry_aria_init ();
+  grub_gcry_blake2_init ();
+  grub_gcry_blowfish_init ();
+  grub_gcry_camellia_init ();
+  grub_gcry_cast5_init ();
+  grub_gcry_crc_init ();
+  grub_gcry_des_init ();
+  grub_gcry_gost28147_init ();
+  grub_gcry_gostr3411_94_init ();
+  grub_gcry_idea_init ();
+  grub_gcry_keccak_init ();
+  grub_gcry_md4_init ();
+  grub_gcry_md5_init ();
+  grub_gcry_rfc2268_init ();
+  grub_gcry_rijndael_init ();
+  grub_gcry_rmd160_init ();
+  grub_gcry_salsa20_init ();
+  grub_gcry_seed_init ();
+  grub_gcry_serpent_init ();
+  grub_gcry_sha1_init ();
+  grub_gcry_sha256_init ();
+  grub_gcry_sha512_init ();
+  grub_gcry_sm3_init ();
+  grub_gcry_sm4_init ();
+  grub_gcry_stribog_init ();
+  grub_gcry_tiger_init ();
+  grub_gcry_twofish_init ();
+  grub_gcry_whirlpool_init ();
+}
+
+void
+grub_gcry_fini_all (void)
+{
+  grub_gcry_arcfour_fini ();
+  grub_gcry_aria_fini ();
+  grub_gcry_blake2_fini ();
+  grub_gcry_blowfish_fini ();
+  grub_gcry_camellia_fini ();
+  grub_gcry_cast5_fini ();
+  grub_gcry_crc_fini ();
+  grub_gcry_des_fini ();
+  grub_gcry_gost28147_fini ();
+  grub_gcry_gostr3411_94_fini ();
+  grub_gcry_idea_fini ();
+  grub_gcry_keccak_fini ();
+  grub_gcry_md4_fini ();
+  grub_gcry_md5_fini ();
+  grub_gcry_rfc2268_fini ();
+  grub_gcry_rijndael_fini ();
+  grub_gcry_rmd160_fini ();
+  grub_gcry_salsa20_fini ();
+  grub_gcry_seed_fini ();
+  grub_gcry_serpent_fini ();
+  grub_gcry_sha1_fini ();
+  grub_gcry_sha256_fini ();
+  grub_gcry_sha512_fini ();
+  grub_gcry_sm3_fini ();
+  grub_gcry_sm4_fini ();
+  grub_gcry_stribog_fini ();
+  grub_gcry_tiger_fini ();
+  grub_gcry_twofish_fini ();
+  grub_gcry_whirlpool_fini ();
+}
