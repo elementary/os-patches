@@ -1,0 +1,11 @@
+--- a/lib/readline/Makefile.in
++++ b/lib/readline/Makefile.in
+@@ -57,7 +57,7 @@ DEBUG = @DEBUG@
+ ADDON_CFLAGS = 
+ 
+ CFLAGS = @CFLAGS@
+-LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG}
++LOCAL_CFLAGS = @LOCAL_CFLAGS@ ${DEBUG} -DNEED_EXTERN_PC
+ STYLE_CFLAGS = @STYLE_CFLAGS@
+ CPPFLAGS = @CPPFLAGS@
+ LDFLAGS = @LDFLAGS@

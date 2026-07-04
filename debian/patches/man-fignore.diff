@@ -1,0 +1,15 @@
+# DP: bash(1): mention quoting when assigning to FIGNORE
+
+--- a/doc/bash.1
++++ b/doc/bash.1
+@@ -2491,7 +2491,9 @@ A filename whose suffix matches one of t
+ .B FIGNORE
+ is excluded from the list of matched filenames.
+ A sample value is
+-.Q .o:\*~ .
++.Q .o:\*~ 
++(Quoting is needed when assigning a value to this variable,
++which contains tildes).
+ .TP
+ .B FUNCNEST
+ If set to a numeric value greater than 0, defines a maximum function
