@@ -123,7 +123,7 @@ xterm*|rxvt*)
         __el_FIRSTPART=""
         __el_SECONDPART=""
         if [ "$PWD" == "$HOME" ]; then
-            __el_FIRSTPART=$(gettext --domain="pantheon-files" "Home")
+            __el_FIRSTPART=$(gettext --domain="io.elementary.files" "Home")
         else
             if [ "$PWD" == "/" ]; then
                 __el_FIRSTPART="/"
