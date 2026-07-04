@@ -1,0 +1,19 @@
+[Unit]
+Description=Show Plymouth Boot Screen
+DefaultDependencies=no
+Wants=systemd-ask-password-plymouth.path
+After=systemd-udev-trigger.service systemd-udevd.service keyboard-setup.service
+Before=systemd-ask-password-plymouth.service
+ConditionKernelCommandLine=!plymouth.enable=0
+ConditionKernelCommandLine=!nosplash
+ConditionKernelCommandLine=splash
+ConditionVirtualization=!container
+IgnoreOnIsolate=true
+
+[Service]
+ExecStart=@PLYMOUTH_DAEMON_DIR@/plymouthd --mode=boot --pid-file=@plymouthruntimedir@/pid --attach-to-session
+ExecStartPost=-@PLYMOUTH_CLIENT_DIR@/plymouth show-splash
+Type=forking
+RemainAfterExit=yes
+KillMode=mixed
+SendSIGKILL=no

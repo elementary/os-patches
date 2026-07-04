@@ -1,0 +1,351 @@
+<?xml version='1.0'?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+        "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<refentry id="plymouth-set-default-theme">
+
+        <refentryinfo>
+                <title>plymouth</title>
+                <productname>plymouth</productname>
+
+                <authorgroup>
+                        <author>
+                                <contrib>Developer</contrib>
+                                <firstname>Kristian</firstname>
+                                <surname>Høgsberg</surname>
+                        </author>
+                        <author>
+                                <contrib>Developer</contrib>
+                                <firstname>Ray</firstname>
+                                <surname>Strode</surname>
+                        </author>
+                </authorgroup>
+
+        </refentryinfo>
+
+        <refmeta>
+                <refentrytitle>plymouth</refentrytitle>
+                <manvolnum>1</manvolnum>
+                <refmiscinfo class="manual">User Commands</refmiscinfo>
+        </refmeta>
+
+        <refnamediv>
+                <refname>plymouth</refname>
+                <refpurpose>Send commands to plymouthd</refpurpose>
+        </refnamediv>
+
+        <refsynopsisdiv>
+                <cmdsynopsis>
+                        <command>plymouth <arg choice="opt" rep="repeat">OPTION</arg></command>
+                </cmdsynopsis>
+                <cmdsynopsis>
+                        <command>plymouth <arg choice="plain">COMMAND <arg choice="opt" rep="repeat">OPTION</arg></arg></command>
+                </cmdsynopsis>
+        </refsynopsisdiv>
+
+        <refsect1>
+                <title>Description</title>
+
+<para>
+The <command>plymouth</command> sends commands to a running
+<command>plymouthd</command>. This is used during the boot
+process to control the display of the graphical boot splash.
+</para>
+
+        </refsect1>
+
+        <refsect1>
+                <title>Options</title>
+
+                <para>
+The following options are understood. These options are supported
+for compatibility with the old <command>rhgb-client</command> interface,
+and have been replaced by the commands that are described in the
+next section.
+</para>
+
+                <variablelist>
+                        <varlistentry>
+                                <term><option>--help</option></term>
+                                <listitem><para>Show summary of options.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--debug</option></term>
+                                <listitem><para>Enable verbose debug logging.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--get-splash-plugin-path</option></term>
+                                <listitem><para>Get directory where splash plugins are installed.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--newroot=<arg>STRING</arg></option></term>
+                                <listitem><para>Tell plymouthd that the new root filesystem is mounted.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--quit</option></term>
+                                <listitem><para>Tell plymouthd to quit.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--ping</option></term>
+                                <listitem><para>Check if plymouthd is running.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--has-active-vt</option></term>
+                                <listitem><para>Check if plymouthd has an active vt.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--sysinit</option></term>
+                                <listitem><para>Tell plymouthd root filesystem is mounted read-write.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--show-splash</option></term>
+                                <listitem><para>Show the splash screen.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--hide-splash</option></term>
+                                <listitem><para>Hide the splash screen.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--ask-for-password</option></term>
+                                <listitem><para>Ask the user for a password.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--ignore-keystroke=<arg>STRING</arg></option></term>
+                                <listitem><para>Remove sensitivity to a keystroke.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--update=<arg>STRING</arg></option></term>
+                                <listitem><para>Tell plymouthd an update about boot progress.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--details</option></term>
+                                <listitem><para>Tell plymouthd there were errors during boot.</para></listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                                <term><option>--wait</option></term>
+                                <listitem><para>Wait for plymouthd to quit.</para></listitem>
+                        </varlistentry>
+                </variablelist>
+        </refsect1>
+
+        <refsect1>
+		<title>Commands</title>
+
+<para>
+The following commands are understood:
+</para>
+                <variablelist>
+                        <varlistentry>
+                                <term><command>change-mode <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Change the operation mode.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--boot-up</option></term>
+  <listitem><para>Start the system up</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--shutdown</option></term>
+  <listitem><para>Shutting the system up</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--updates</option></term>
+  <listitem><para>Applying updates</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>system-update <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Tell plymouthd about boot progress.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--progress=INTEGER</option></term>
+  <listitem><para>The percentage progress of the updates</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>update <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Tell plymouthd about boot status changes.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--status=STRING</option></term>
+  <listitem><para>Tell plymouthd the current boot status</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>update-root-fs <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Tell plymouthd about root filesystem changes.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--new-root-dir=STRING</option></term>
+  <listitem><para>Root filesystem is about to change</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--read-write</option></term>
+  <listitem><para>Root filesystem is no longer read-only</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>show-splash</command></term>
+                                <listitem><para>Tell plymouthd to show splash screen.</para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>hide-splash</command></term>
+                                <listitem><para>Tell plymouthd to hide splash screen.</para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>ask-for-password <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Ask the user for a password.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--command=STRING</option></term>
+  <listitem><para>Command to send password to via standard input</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--prompt=STRING</option></term>
+  <listitem><para>Message to display when asking for password</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--number-of-tries=INTEGER</option></term>
+  <listitem><para>Number of times to ask before giving up (requires <option>--command</option>)</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--dont-pause-progress</option></term>
+  <listitem><para>Don't pause boot progress bar while asking</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>ask-question</command></term>
+                                <listitem><para>Ask the user a question.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--command=STRING</option></term>
+  <listitem><para>Command to send the answer to via standard input</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--prompt=STRING</option></term>
+  <listitem><para>Message to display when asking the question</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--dont-pause-progress</option></term>
+  <listitem><para>Don't pause boot progress bar while asking</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>display-message <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Display a message.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--text=STRING</option></term>
+  <listitem><para>The message text</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>hide-message <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Hide a message.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--text=STRING</option></term>
+  <listitem><para>The message text</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>watch-keystroke <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Become sensitive to a keystroke.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--command=STRING</option></term>
+  <listitem><para>Command to send keystroke to via standard input</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>--keys=STRING</option></term>
+  <listitem><para>Keys to become sensitive to</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>ignore-keystroke <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Remove sensitivity to a keystroke.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--keys=STRING</option></term>
+  <listitem><para>Keys to remove sensitivity from</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>pause-progress</command></term>
+                                <listitem><para>Pause boot progress bar.</para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>unpause-progress</command></term>
+                                <listitem><para>Unpause boot progress bar.</para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>report-error</command></term>
+                                <listitem><para>Tell plymouthd there were errors during boot.</para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>deactivate</command></term>
+                                <listitem><para>Tell plymouthd to deactivate.</para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>reactivate</command></term>
+                                <listitem><para>Tell plymouthd to reactivate.</para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                                <term><command>quit <arg choice="plain">OPTION</arg></command></term>
+                                <listitem><para>Tell plymouthd to quit.</para>
+<variablelist>
+<varlistentry>
+  <term><option>--retain-splash</option></term>
+  <listitem><para>Don't explicitly hide boot splash on exit</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+                        </varlistentry>
+                </variablelist>
+
+        </refsect1>
+
+        <refsect1>
+                <title>See Also</title>
+                <para>
+                        <citerefentry><refentrytitle>grub</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+                        <citerefentry><refentrytitle>plymouth</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+                        <citerefentry><refentrytitle>plymouthd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+                        <ulink url="http://www.freedesktop.org/wiki/Software/Plymouth">http://www.freedesktop.org/wiki/Software/Plymouth</ulink>
+                </para>
+        </refsect1>
+
+</refentry>

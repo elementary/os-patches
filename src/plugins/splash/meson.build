@@ -1,0 +1,8 @@
+subdir('fade-throbber')
+subdir('text')
+subdir('details')
+subdir('space-flares')
+subdir('two-step')
+subdir('script')
+subdir('tribar')
+subdir('ubuntu-text')
