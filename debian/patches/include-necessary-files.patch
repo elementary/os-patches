@@ -1,0 +1,33 @@
+From: Simon Quigley <tsimonq2@ubuntu.com>
+Date: Tue, 8 Jul 2025 15:49:34 +0800
+Subject: Include all necessary files in the initrd for a graphical theme
+
+Origin: vendor
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/dracut/+bug/1596220
+Last-Update: 2024-11-21
+
+Last-Update: 2024-11-21
+---
+ scripts/plymouth-populate-initrd.in | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/scripts/plymouth-populate-initrd.in b/scripts/plymouth-populate-initrd.in
+index a9bb070..05d1ccf 100755
+--- a/scripts/plymouth-populate-initrd.in
++++ b/scripts/plymouth-populate-initrd.in
+@@ -470,10 +470,15 @@ inst ${PLYMOUTH_DATADIR}/plymouth/themes/text/text.plymouth $INITRDDIR
+ inst ${PLYMOUTH_PLUGIN_PATH}/text.so $INITRDDIR
+ inst ${PLYMOUTH_DATADIR}/plymouth/themes/details/details.plymouth $INITRDDIR
+ inst ${PLYMOUTH_PLUGIN_PATH}/details.so $INITRDDIR
++inst ${PLYMOUTH_PLUGIN_PATH}/label-pango.so $INITRDDIR
++inst ${PLYMOUTH_PLUGIN_PATH}/ubuntu-text.so $INITRDDIR
++inst_recur /usr/share/fonts/truetype/ubuntu $INITRDDIR
+ inst ${PLYMOUTH_LOGO_FILE} $INITRDDIR
+ inst @RELEASE_FILE@ $INITRDDIR
+ inst ${PLYMOUTH_POLICYDIR}/plymouthd.defaults $INITRDDIR
+ inst ${PLYMOUTH_CONFDIR}/plymouthd.conf $INITRDDIR
++inst /etc/alternatives/default.plymouth $INITRDDIR
++inst /etc/default/keyboard $INITRDDIR
+ 
+ # Install xkb info
+ if [ -d "${X11_DIRECTORY}" ]; then

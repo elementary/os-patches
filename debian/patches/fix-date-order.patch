@@ -1,0 +1,29 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 20 Feb 2026 15:43:51 +0800
+Subject: generate-version: Specify options before format
+
+This is strongly implied in the command line help and man page.
+
+While GNU date doesn't care about ordering, uutils (Rust) date does
+enforce the ordering (in current releases). Use the ordering suggested
+by date's own documentation and supported by all implementations.
+
+It was fixed upstream this week:
+https://github.com/uutils/coreutils/issues/10972
+https://github.com/uutils/coreutils/issues/10910
+
+Origin: https://gitlab.freedesktop.org/plymouth/plymouth/-/merge_requests/377
+---
+ scripts/generate-version.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/generate-version.sh b/scripts/generate-version.sh
+index 8ad6e2a..c6aa51a 100755
+--- a/scripts/generate-version.sh
++++ b/scripts/generate-version.sh
+@@ -21,4 +21,4 @@ fi
+ # If it is from a git checkout, derive the version from the date of the last commit, and the number
+ # of commits since the last release.
+ COMMITS_SINCE_LAST_RELEASE=$(git rev-list $(git describe --abbrev=0)..HEAD --count)
+-date +%y.%j.${COMMITS_SINCE_LAST_RELEASE} -d "@$(git log -1 --pretty=format:%ct)"
++date -d "@$(git log -1 --pretty=format:%ct)" +%y.%j.${COMMITS_SINCE_LAST_RELEASE}

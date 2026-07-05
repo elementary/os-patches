@@ -1,0 +1,31 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Mon, 18 Aug 2025 22:10:23 +0200
+Subject: plymouthd.defaults, plymouthd.conf: Drop Theme config
+
+Ubuntu uses `alternatives` to configure the plymouth theme.
+
+Forwarded: not-needed
+---
+ src/plymouthd.conf     | 1 -
+ src/plymouthd.defaults | 1 -
+ 2 files changed, 2 deletions(-)
+
+diff --git a/src/plymouthd.conf b/src/plymouthd.conf
+index 66a92d2..deafefb 100644
+--- a/src/plymouthd.conf
++++ b/src/plymouthd.conf
+@@ -1,3 +1,2 @@
+ # Administrator customizations go in this file
+ #[Daemon]
+-#Theme=fade-in
+diff --git a/src/plymouthd.defaults b/src/plymouthd.defaults
+index 7f247fd..1a6327f 100644
+--- a/src/plymouthd.defaults
++++ b/src/plymouthd.defaults
+@@ -1,6 +1,5 @@
+ # Distribution defaults. Changes to this file will get overwritten during
+ # upgrades.
+ [Daemon]
+-Theme=spinner
+ ShowDelay=0
+ DeviceTimeout=8

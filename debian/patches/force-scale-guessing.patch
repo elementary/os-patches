@@ -1,0 +1,48 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 6 Mar 2026 15:14:48 +0800
+Subject: ply-utils: Always "guess" the device scale
+
+Actually the naming here is misleading because "guessing" makes the
+decision more reliable and always determined by the screen resolution.
+
+If "guessing" is disallowed then you get a less predictable algorithm
+which will change its answer depending on the physical DPI of the screen.
+However, the availability of DPI information will change depending on
+when the daemon is started.
+
+During early boot using 'simpledrm', DPI information is not available
+so we are always "guessing" and get a predictable result based on
+resolution alone. After booting, such as during shutdown, we have full
+DRM drivers available and so also now have DPI information. This means
+we no longer need to "guess" the best scale and can use the DPI to
+decide to change scale 2.0 back to 1.0 if the physical display is large
+enough. But this results in a shutdown splash that's a different size
+to the boot splash, and also a shutdown splash that's too small in the
+case of 4K displays if those displays are also physically large.
+
+This patch is a one-liner to minimize conflicts and make patch maintenance
+easy, but it won't be upstreamed in this form. Instead we will be
+proposing a larger patch upstream later to remove the non-guessing code
+path because it's never actually helpful, causes inconsistency and
+adds complexity.
+
+Bug: https://gitlab.freedesktop.org/plymouth/plymouth/-/issues/308
+Ubuntu-Bug: https://bugs.launchpad.net/bugs/2116296
+Forwarded: no
+---
+ src/libply/ply-utils.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/libply/ply-utils.c b/src/libply/ply-utils.c
+index 7524b3c..d79fef4 100644
+--- a/src/libply/ply-utils.c
++++ b/src/libply/ply-utils.c
+@@ -1069,7 +1069,7 @@ get_device_scale (uint32_t width,
+         if (overridden_device_scale != 0)
+                 return overridden_device_scale;
+ 
+-        if (guess)
++        if (true)
+                 return get_device_scale_guess (width, height);
+ 
+         /* Somebody encoded the aspect ratio (16/9 or 16/10)

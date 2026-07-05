@@ -1,0 +1,22 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Mon, 18 Aug 2025 22:21:35 +0200
+Subject: plymouthd.defaults: Enable UseSimpledrm=1
+
+Show the splash screen as soon as possible.
+
+Bug: https://gitlab.freedesktop.org/plymouth/plymouth/-/issues/110
+Bug-Ubuntu: https://launchpad.net/bugs/1869655
+Forwarded: not-needed
+---
+ src/plymouthd.defaults | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/plymouthd.defaults b/src/plymouthd.defaults
+index 1a6327f..7b80691 100644
+--- a/src/plymouthd.defaults
++++ b/src/plymouthd.defaults
+@@ -3,3 +3,4 @@
+ [Daemon]
+ ShowDelay=0
+ DeviceTimeout=8
++UseSimpledrm=1

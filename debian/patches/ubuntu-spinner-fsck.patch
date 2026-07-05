@@ -1,0 +1,638 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 27 Mar 2020 18:47:39 +0800
+Subject: [PATCH] two-step: Add support for fsck status messages
+
+Related to https://gitlab.freedesktop.org/plymouth/plymouth/-/issues/62 but
+not a full solution. Only supports two-step right now.
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1867130
+---
+ src/libply/ply-utils.c               |   3 +-
+ src/libply/ply-utils.h               |   3 +
+ src/plugins/splash/two-step/plugin.c | 171 +++++++++++++++++++++++++---
+ src/ply-boot-server.c                | 213 ++++++++++++++++++++++++++++++++++-
+ 4 files changed, 373 insertions(+), 17 deletions(-)
+
+diff --git a/src/libply/ply-utils.c b/src/libply/ply-utils.c
+index f227589..7524b3c 100644
+--- a/src/libply/ply-utils.c
++++ b/src/libply/ply-utils.c
+@@ -333,7 +333,7 @@ ply_write_uint32 (int      fd,
+         return ply_write (fd, buffer, 4 * sizeof(uint8_t));
+ }
+ 
+-static ssize_t
++ssize_t
+ ply_read_some_bytes (int    fd,
+                      void  *buffer,
+                      size_t max_bytes)
+@@ -342,6 +342,7 @@ ply_read_some_bytes (int    fd,
+         size_t total_bytes_read = 0;
+ 
+         assert (fd >= 0);
++        assert (buffer != NULL);
+ 
+         bytes_left_to_read = max_bytes;
+ 
+diff --git a/src/libply/ply-utils.h b/src/libply/ply-utils.h
+index c9f74e1..320edaf 100644
+--- a/src/libply/ply-utils.h
++++ b/src/libply/ply-utils.h
+@@ -100,6 +100,9 @@ bool ply_write_uint32 (int      fd,
+ bool ply_read (int    fd,
+                void  *buffer,
+                size_t number_of_bytes);
++ssize_t ply_read_some_bytes (int    fd,
++                             void  *buffer,
++                             size_t max_bytes);
+ bool ply_read_uint32 (int       fd,
+                       uint32_t *value);
+ 
+diff --git a/src/plugins/splash/two-step/plugin.c b/src/plugins/splash/two-step/plugin.c
+index c810564..31f7a81 100644
+--- a/src/plugins/splash/two-step/plugin.c
++++ b/src/plugins/splash/two-step/plugin.c
+@@ -186,6 +186,12 @@ struct _ply_boot_splash_plugin
+         ply_trigger_t                      *idle_trigger;
+         ply_trigger_t                      *stop_trigger;
+ 
++        char                               *main_message;
++        char                               *footer;
++        char                               *fsck_device;
++        int                                 fsck_percent;
++        int                                 fsck_num_devices;
++
+         uint32_t                            root_is_mounted : 1;
+         uint32_t                            needs_redraw : 1;
+         uint32_t                            is_visible : 1;
+@@ -195,6 +201,8 @@ struct _ply_boot_splash_plugin
+         uint32_t                            background_image_is_scaled : 1;
+         uint32_t                            dialog_clears_firmware_background : 1;
+         uint32_t                            message_below_animation : 1;
++        uint32_t                            transient_progress_bar : 1;
++        uint32_t                            in_fsck : 1;
+ 
+         char                               *monospace_font;
+         uint32_t                            plugin_console_messages_updating : 1;
+@@ -214,6 +222,9 @@ static void become_idle (ply_boot_splash_plugin_t *plugin,
+                          ply_trigger_t            *idle_trigger);
+ static void view_show_message (view_t     *view,
+                                const char *message);
++static void update_message (ply_boot_splash_plugin_t *plugin);
++static void update_progress_animation (ply_boot_splash_plugin_t *plugin,
++                                       double                    percent_done);
+ static bool validate_input (ply_boot_splash_plugin_t *plugin,
+                             const char               *entry_text,
+                             const char               *add_text);
+@@ -890,6 +901,20 @@ on_view_throbber_stopped (view_t *view)
+         view->end_trigger = NULL;
+ }
+ 
++static bool
++use_progress_bar (const ply_boot_splash_plugin_t *plugin)
++{
++        return plugin->transient_progress_bar ||
++               plugin->mode_settings[plugin->mode].use_progress_bar;
++}
++
++static bool
++use_animation (const ply_boot_splash_plugin_t *plugin)
++{
++        return !plugin->transient_progress_bar &&
++               plugin->mode_settings[plugin->mode].use_animation;
++}
++
+ static void
+ view_start_progress_animation (view_t *view)
+ {
+@@ -911,7 +936,7 @@ view_start_progress_animation (view_t *view)
+         ply_pixel_display_draw_area (view->display, 0, 0,
+                                      screen_width, screen_height);
+ 
+-        if (plugin->mode_settings[plugin->mode].use_progress_bar) {
++        if (use_progress_bar (plugin)) {
+                 if (plugin->progress_bar_width != -1)
+                         width = plugin->progress_bar_width;
+                 else
+@@ -925,8 +950,7 @@ view_start_progress_animation (view_t *view)
+                 view->animation_bottom = y + height;
+         }
+ 
+-        if (plugin->mode_settings[plugin->mode].use_animation &&
+-            view->throbber != NULL) {
++        if (use_animation (plugin) && view->throbber != NULL) {
+                 width = ply_throbber_get_width (view->throbber);
+                 height = ply_throbber_get_height (view->throbber);
+                 x = plugin->animation_horizontal_alignment * screen_width - width / 2.0;
+@@ -945,8 +969,7 @@ view_start_progress_animation (view_t *view)
+             plugin->mode == PLY_BOOT_SPLASH_MODE_REBOOT)
+                 return;
+ 
+-        if (plugin->mode_settings[plugin->mode].use_animation &&
+-            view->progress_animation != NULL) {
++        if (use_animation (plugin) && view->progress_animation != NULL) {
+                 width = ply_progress_animation_get_width (view->progress_animation);
+                 height = ply_progress_animation_get_height (view->progress_animation);
+                 x = plugin->animation_horizontal_alignment * screen_width - width / 2.0;
+@@ -1469,6 +1492,9 @@ destroy_plugin (ply_boot_splash_plugin_t *plugin)
+         free (plugin->title_font);
+         free (plugin->monospace_font);
+         free (plugin->animation_dir);
++        free (plugin->main_message);
++        free (plugin->footer);
++        free (plugin->fsck_device);
+         free_views (plugin);
+         free (plugin);
+ }
+@@ -1480,7 +1506,7 @@ start_end_animation (ply_boot_splash_plugin_t *plugin,
+         ply_list_node_t *node;
+         view_t *view;
+ 
+-        if (!plugin->mode_settings[plugin->mode].use_animation) {
++        if (!use_animation (plugin)) {
+                 ply_trigger_pull (trigger, NULL);
+                 return;
+         }
+@@ -1714,24 +1740,21 @@ on_draw (view_t             *view,
+                 ply_pixel_buffer_fill_with_argb32_data (pixel_buffer,
+                                                         &view->lock_area,
+                                                         lock_data);
+-        } else if (!plugin->should_show_console_messages) {
+-                if (plugin->mode_settings[plugin->mode].use_progress_bar)
++        } else {
++                if (use_progress_bar (plugin))
+                         ply_progress_bar_draw_area (view->progress_bar, pixel_buffer,
+                                                     x, y, width, height);
+ 
+-                if (plugin->mode_settings[plugin->mode].use_animation &&
+-                    view->throbber != NULL)
++                if (use_animation (plugin) && view->throbber != NULL)
+                         ply_throbber_draw_area (view->throbber, pixel_buffer,
+                                                 x, y, width, height);
+ 
+-                if (plugin->mode_settings[plugin->mode].use_animation &&
+-                    view->progress_animation != NULL)
++                if (use_animation (plugin) && view->progress_animation != NULL)
+                         ply_progress_animation_draw_area (view->progress_animation,
+                                                           pixel_buffer,
+                                                           x, y, width, height);
+ 
+-                if (plugin->mode_settings[plugin->mode].use_animation &&
+-                    view->end_animation != NULL)
++                if (use_animation (plugin) && view->end_animation != NULL)
+                         ply_animation_draw_area (view->end_animation,
+                                                  pixel_buffer,
+                                                  x, y, width, height);
+@@ -1954,11 +1977,80 @@ show_splash_screen (ply_boot_splash_plugin_t *plugin,
+         return true;
+ }
+ 
++static void
++update_fsck (ply_boot_splash_plugin_t *plugin,
++             const char               *device_name,
++             int                       num_devices,
++             float                     percent)
++{
++        if (!plugin->in_fsck) {
++                stop_animation (plugin);
++                plugin->transient_progress_bar = true;
++                start_progress_animation (plugin);
++                plugin->in_fsck = true;
++        }
++
++        free (plugin->fsck_device);
++        plugin->fsck_device = device_name ? strdup (device_name) : NULL;
++
++        plugin->fsck_percent = percent;
++        plugin->fsck_num_devices = num_devices;
++
++        update_message (plugin);
++        update_progress_animation (plugin, percent / 100.);
++}
++
++static void
++set_footer (ply_boot_splash_plugin_t *plugin,
++            const char               *message)
++{
++        free (plugin->footer);
++        plugin->footer = strdup (message);
++}
++
++static void
++end_fsck (ply_boot_splash_plugin_t *plugin)
++{
++        if (!plugin->in_fsck)
++                return;
++
++        stop_animation (plugin);
++        plugin->in_fsck = false;
++        plugin->transient_progress_bar = false;
++        set_footer (plugin, "");
++        update_message (plugin);
++
++        if (use_animation (plugin))
++                start_progress_animation (plugin);
++}
++
+ static void
+ update_status (ply_boot_splash_plugin_t *plugin,
+                const char               *status)
+ {
++        char fsck_device[1024] = "";
++        float fsck_percent = 0.f;
++        int fsck_num_devices = 0;
++
+         assert (plugin != NULL);
++
++        if (sscanf (status, "fsck:%1023[^:]:%f",
++                    fsck_device, &fsck_percent) == 2) {
++                ply_trace ("fsck of `%s' at %.1f%%", fsck_device, fsck_percent);
++                update_fsck (plugin, fsck_device, 0, fsck_percent);
++        } else if (sscanf (status, "fsckd:%d:%f",
++                           &fsck_num_devices, &fsck_percent) == 2) {
++
++                ply_trace ("fsck of %d device%s at %.1f%%",
++                           fsck_num_devices,
++                           fsck_num_devices > 1 ? "s" : "",
++                           fsck_percent);
++
++                update_fsck (plugin, NULL, fsck_num_devices, fsck_percent);
++        }
++
++        if (fsck_percent >= 100)
++                end_fsck (plugin);
+ }
+ 
+ static void
+@@ -2015,6 +2107,9 @@ on_boot_progress (ply_boot_splash_plugin_t *plugin,
+         if (plugin->is_idle)
+                 return;
+ 
++        if (plugin->transient_progress_bar)
++                return;
++
+         /*
+          * If we do not have an end animation, we keep showing progress until
+          * become_idle gets called.
+@@ -2187,6 +2282,43 @@ show_message (ply_boot_splash_plugin_t *plugin,
+         }
+ }
+ 
++static void
++update_message (ply_boot_splash_plugin_t *plugin)
++{
++        char message[4096];
++        size_t len = 0;
++
++        if (plugin->in_fsck) {
++                const char *device = plugin->fsck_device;
++                int num_devices = plugin->fsck_num_devices;
++
++                if (num_devices > 0) {
++                        const char *disks = _(num_devices > 1 ? "disks" : "disk");
++
++                        len += snprintf (message + len, sizeof(message) - 1 - len,
++                                         _("Checking %d %s: %d%% complete\n\n"),
++                                         num_devices, disks, plugin->fsck_percent);
++                } else {
++                        if (!device || !device[0])
++                                device = _("disks");
++
++                        len += snprintf (message + len, sizeof(message) - 1 - len,
++                                         _("Checking %s: %d%% complete\n\n"),
++                                         device, plugin->fsck_percent);
++                }
++        }
++
++        if (plugin->main_message && len < sizeof(message))
++                len += snprintf (message + len, sizeof(message) - 1 - len,
++                                 "%s\n\n", plugin->main_message);
++
++        if (plugin->footer && len < sizeof(message))
++                len += snprintf (message + len, sizeof(message) - 1 - len,
++                                 "%s", plugin->footer);
++
++        show_message (plugin, message);
++}
++
+ static void
+ system_update (ply_boot_splash_plugin_t *plugin,
+                int                       progress)
+@@ -2265,7 +2397,16 @@ static void
+ display_message (ply_boot_splash_plugin_t *plugin,
+                  const char               *message)
+ {
+-        show_message (plugin, message);
++        if (!strncmp (message, "fsckd-cancel-msg:", 17))
++                set_footer (plugin, message + 17);
++        else if (!strncmp (message, "keys:", 5))
++                set_footer (plugin, message + 5);
++        else {
++                free (plugin->main_message);
++                plugin->main_message = strdup (message);
++        }
++
++        update_message (plugin);
+ }
+ 
+ static bool
+diff --git a/src/ply-boot-server.c b/src/ply-boot-server.c
+index a2c42ab..78df804 100644
+--- a/src/ply-boot-server.c
++++ b/src/ply-boot-server.c
+@@ -23,6 +23,8 @@
+ 
+ #include <assert.h>
+ #include <errno.h>
++#include <fcntl.h>
++#include <limits.h>
+ #include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -33,6 +35,7 @@
+ 
+ #include "ply-buffer.h"
+ #include "ply-event-loop.h"
++#include "ply-hashtable.h"
+ #include "ply-list.h"
+ #include "ply-logger.h"
+ #include "ply-trigger.h"
+@@ -58,6 +61,7 @@ struct _ply_boot_server
+         ply_list_t                                   *connections;
+         ply_list_t                                   *cached_passwords;
+         int                                           socket_fd;
++        int                                           fsck_progress_fd;
+ 
+         ply_boot_server_update_handler_t              update_handler;
+         ply_boot_server_change_mode_handler_t         change_mode_handler;
+@@ -83,6 +87,7 @@ struct _ply_boot_server
+         void                                         *user_data;
+ 
+         uint32_t                                      is_listening : 1;
++        ply_hashtable_t                               *fsck_progress_by_dev;
+ };
+ 
+ ply_boot_server_t *
+@@ -138,12 +143,21 @@ ply_boot_server_new (ply_boot_server_update_handler_t              update_handle
+         server->has_active_vt_handler = has_active_vt_handler;
+         server->reload_handler = reload_handler;
+         server->user_data = user_data;
++        server->fsck_progress_by_dev = ply_hashtable_new (ply_hashtable_string_hash,
++                                                          ply_hashtable_string_compare);
+ 
+         return server;
+ }
+ 
+ static void ply_boot_connection_on_hangup (ply_boot_connection_t *connection);
+ 
++static void
++ply_boot_fsck_progress_by_dev_free_foreach (void *key, void *data, void *user_data)
++{
++        free (key);
++        free (data);
++}
++
+ void
+ ply_boot_server_free (ply_boot_server_t *server)
+ {
+@@ -157,6 +171,10 @@ ply_boot_server_free (ply_boot_server_t *server)
+         }
+         ply_list_free (server->connections);
+         ply_list_free (server->cached_passwords);
++        ply_hashtable_foreach (server->fsck_progress_by_dev,
++                               ply_boot_fsck_progress_by_dev_free_foreach,
++                               NULL);
++        ply_hashtable_free (server->fsck_progress_by_dev);
+         free (server);
+ }
+ 
+@@ -214,7 +232,12 @@ ply_boot_server_listen (ply_boot_server_t *server)
+                 ply_listen_to_unix_socket (PLY_BOOT_PROTOCOL_TRIMMED_ABSTRACT_SOCKET_PATH,
+                                            PLY_UNIX_SOCKET_TYPE_TRIMMED_ABSTRACT);
+ 
+-        if (server->socket_fd < 0)
++        unlink ("/run/systemd/fsck.progress");
++        server->fsck_progress_fd =
++                ply_listen_to_unix_socket ("/run/systemd/fsck.progress",
++                                           PLY_UNIX_SOCKET_TYPE_CONCRETE);
++
++        if (server->socket_fd < 0 || server->fsck_progress_fd < 0)
+                 return false;
+ 
+         return true;
+@@ -752,6 +775,159 @@ ply_boot_connection_on_request (ply_boot_connection_t *connection)
+         free (command);
+ }
+ 
++static double
++compute_fsck_percent(int pass, size_t cur, size_t max)
++{
++        /* Values stolen from e2fsck */
++        static const double pass_table[6] = {
++                0, 70, 90, 92, 95, 100
++        };
++
++        if (pass <= 0)
++                return 0.0;
++
++        if (pass >= 6 /* length of pass_table */ || max == 0)
++                return 100.0;
++
++        return pass_table[pass-1] +
++                (pass_table[pass] - pass_table[pass-1]) *
++                (double) cur / max;
++}
++
++static void
++fsck_progress_by_dev_compare_foreach(void *key, void *data, void *user_data)
++{
++        double *current_percent = user_data, *dev_percent = data;
++
++        *current_percent = MIN(*dev_percent, *current_percent);
++}
++
++static void
++fsck_progress_by_dev_remove_complete_foreach(void *key, void *data, void *user_data)
++{
++        ply_boot_server_t *server = user_data;
++        char *dev = key;
++        double *percent = data;
++
++        if (*percent >= 100.0) {
++                ply_hashtable_remove (server->fsck_progress_by_dev, dev);
++                free(dev);
++                free(percent);
++        }
++}
++
++static void
++ply_boot_update_fsck_progress(ply_boot_server_t *server)
++{
++        char *argument = NULL;
++        double current_percent = 100;
++        int num_devices;
++
++        assert (server != NULL);
++
++        ply_hashtable_foreach (server->fsck_progress_by_dev,
++                               fsck_progress_by_dev_remove_complete_foreach,
++                               server);
++
++        ply_hashtable_foreach (server->fsck_progress_by_dev,
++                               fsck_progress_by_dev_compare_foreach,
++                               &current_percent);
++
++        num_devices = ply_hashtable_get_size (server->fsck_progress_by_dev);
++
++        if (asprintf (&argument, "fsckd:%d:%3.1f", num_devices, current_percent) < 0)
++                return;
++
++        server->update_handler (server->user_data, argument, server);
++
++        free(argument);
++}
++
++static void
++ply_boot_connection_on_fsck_progress (ply_boot_connection_t *connection)
++{
++        ply_boot_server_t *server;
++        int flags;
++        uint8_t buf[LINE_MAX] = {};
++        ssize_t n;
++
++        assert (connection != NULL);
++        assert (connection->fd >= 0);
++
++        server = connection->server;
++        assert (server != NULL);
++
++        if (!ply_get_credentials_from_fd (connection->fd, &connection->pid, &connection->uid, NULL)) {
++                ply_trace ("couldn't read credentials from connection: %m");
++                return;
++        }
++        connection->credentials_read = true;
++
++        if (!ply_boot_connection_is_from_root (connection)) {
++                ply_error ("request came from non-root user");
++                return;
++        }
++
++        if (server->update_handler == NULL)
++                return;
++
++        flags = fcntl (connection->fd, F_GETFL);
++        if (flags < 0) {
++                ply_error ("failed to read fd flags: %m");
++                return;
++        }
++
++        if (fcntl (connection->fd, F_SETFL, flags | O_NONBLOCK) < 0) {
++                ply_error ("failed to set fd flags: %m");
++                return;
++        }
++
++        n = ply_read_some_bytes(connection->fd, buf, sizeof(buf) - sizeof(uint8_t));
++        if (n < 0) {
++                ply_trace("could not read bytes: %m");
++                return;
++        }
++        assert (n < LINE_MAX);
++
++        for (char *p = buf; p; p = strchr (p + 1, '\n')) {
++                char *dev = NULL;
++                size_t cur, max;
++                int pass, r;
++
++                r = sscanf (p, "%i %zu %zu %ms", &pass, &cur, &max, &dev);
++                if (r == 4) {
++                        double *percent = ply_hashtable_lookup (server->fsck_progress_by_dev, (void *) dev);
++
++                        if (percent)
++                                *percent = compute_fsck_percent (pass, cur, max);
++                        else {
++                                char *key = NULL;
++
++                                percent = calloc(1, sizeof(double));
++                                if (!percent) {
++                                        ply_trace("out of memory");
++                                        return;
++                                }
++
++                                key = strdup(dev);
++                                if (!key) {
++                                        ply_trace("out of memory");
++                                        return;
++                                }
++
++                                *percent = compute_fsck_percent (pass, cur, max);
++
++                                ply_hashtable_insert (server->fsck_progress_by_dev, key, percent);
++                        }
++                } else if (r != EOF)
++                        ply_trace ("sscanf failed to read fsck progress");
++
++                free (dev);
++        }
++
++        ply_boot_update_fsck_progress (server);
++}
++
+ static void
+ ply_boot_connection_on_hangup (ply_boot_connection_t *connection)
+ {
+@@ -800,6 +976,33 @@ ply_boot_server_on_new_connection (ply_boot_server_t *server)
+         ply_list_append_data (server->connections, connection);
+ }
+ 
++static void
++ply_boot_server_on_new_fsck_progress_connection (ply_boot_server_t *server)
++{
++        ply_boot_connection_t *connection;
++        int fd;
++
++        assert (server != NULL);
++
++        fd = accept4 (server->fsck_progress_fd, NULL, NULL, SOCK_CLOEXEC);
++
++        if (fd < 0)
++                return;
++
++        connection = ply_boot_connection_new (server, fd);
++
++        connection->watch =
++                ply_event_loop_watch_fd (server->loop, fd,
++                                         PLY_EVENT_LOOP_FD_STATUS_HAS_DATA,
++                                         (ply_event_handler_t)
++                                         ply_boot_connection_on_fsck_progress,
++                                         (ply_event_handler_t)
++                                         ply_boot_connection_on_hangup,
++                                         connection);
++
++        ply_list_append_data (server->connections, connection);
++}
++
+ static void
+ ply_boot_server_on_hangup (ply_boot_server_t *server)
+ {
+@@ -821,6 +1024,7 @@ ply_boot_server_attach_to_event_loop (ply_boot_server_t *server,
+         assert (loop != NULL);
+         assert (server->loop == NULL);
+         assert (server->socket_fd >= 0);
++        assert (server->fsck_progress_fd >= 0);
+ 
+         server->loop = loop;
+ 
+@@ -831,6 +1035,13 @@ ply_boot_server_attach_to_event_loop (ply_boot_server_t *server,
+                                  (ply_event_handler_t)
+                                  ply_boot_server_on_hangup,
+                                  server);
++        ply_event_loop_watch_fd (loop, server->fsck_progress_fd,
++                                 PLY_EVENT_LOOP_FD_STATUS_HAS_DATA,
++                                 (ply_event_handler_t)
++                                 ply_boot_server_on_new_fsck_progress_connection,
++                                 (ply_event_handler_t)
++                                 ply_boot_server_on_hangup,
++                                 server);
+         ply_event_loop_watch_for_exit (loop, (ply_event_loop_exit_handler_t)
+                                        ply_boot_server_detach_from_event_loop,
+                                        server);

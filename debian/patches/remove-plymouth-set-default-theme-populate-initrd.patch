@@ -1,0 +1,29 @@
+From: Simon Quigley <tsimonq2@ubuntu.com>
+Date: Tue, 8 Jul 2025 15:49:34 +0800
+Subject: Do not use plymouth-set-default-theme in populate-initrd
+
+Origin: vendor
+Forwarded: not-needed
+Last-Update: 2024-11-21
+
+We do not ship plymouth-set-default-theme, instead opting for an
+alternatives-based approach. Ensure plymouth-populate-initrd works
+Last-Update: 2024-11-21
+---
+ scripts/plymouth-populate-initrd.in | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/plymouth-populate-initrd.in b/scripts/plymouth-populate-initrd.in
+index 20614a2..a9bb070 100755
+--- a/scripts/plymouth-populate-initrd.in
++++ b/scripts/plymouth-populate-initrd.in
+@@ -17,7 +17,8 @@
+ [ -z "$PLYMOUTH_PLUGIN_PATH" ] && PLYMOUTH_PLUGIN_PATH="$(plymouth --get-splash-plugin-path)"
+ [ -z "$PLYMOUTH_LOGO_FILE" ] && PLYMOUTH_LOGO_FILE="@PLYMOUTH_LOGO_FILE@"
+ [ -n "$PLYMOUTH_THEME_NAME" ] && THEME_OVERRIDE=1
+-[ -z "$PLYMOUTH_THEME_NAME" ] && PLYMOUTH_THEME_NAME=$(plymouth-set-default-theme)
++[ -z "$PLYMOUTH_THEME_PATH" ] && PLYMOUTH_THEME_PATH=$(update-alternatives --query default.plymouth 2>/dev/null | sed -e '/^Value:/!d' -e 's/^Value: \(.*\)/\1/')
++[ -z "$PLYMOUTH_THEME_NAME" ] && PLYMOUTH_THEME_NAME=$(basename ${PLYMOUTH_THEME_PATH:-none} .plymouth || true)
+ [ -n "$PLYMOUTH_CONFIGURED_DIR_PATH" ] && THEME_DIR_OVERRIDE=1
+ [ -z "$PLYMOUTH_CONFDIR" ] && PLYMOUTH_CONFDIR="@PLYMOUTH_CONF_DIR@"
+ [ -z "$PLYMOUTH_POLICYDIR" ] && PLYMOUTH_POLICYDIR="@PLYMOUTH_POLICY_DIR@"
