@@ -1,0 +1,49 @@
+Origin: upstream, https://gitlab.freedesktop.org/plymouth/plymouth/-/commit/63597f92d108237a3ab7d2343a602a95edddd4e5
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/plymouth/+bug/2103533
+Bug: https://gitlab.freedesktop.org/plymouth/plymouth/-/issues/288
+Applied-Upstream: 26.134.222
+
+From 63597f92d108237a3ab7d2343a602a95edddd4e5 Mon Sep 17 00:00:00 2001
+From: nerdopolis <bluescreen_avenger@verizon.net>
+Date: Thu, 4 Jan 2024 21:06:50 -0500
+Subject: ply-terminal: Fix crash on vt-less kernels when checking the enabled
+ state
+
+---
+ src/libply-splash-core/ply-terminal.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/libply-splash-core/ply-terminal.c b/src/libply-splash-core/ply-terminal.c
+index 84ec91ee..1a9ec353 100644
+--- a/src/libply-splash-core/ply-terminal.c
++++ b/src/libply-splash-core/ply-terminal.c
+@@ -241,7 +241,7 @@ ply_terminal_set_unbuffered_input (ply_terminal_t *terminal)
+ 
+         ply_terminal_unlock (terminal);
+ 
+-        if (terminal->is_disabled) {
++        if (terminal && terminal->is_disabled) {
+                 ply_trace ("terminal input is getting enabled in unbuffered mode");
+ 
+                 if (ply_terminal_is_vt (terminal))
+@@ -280,7 +280,7 @@ ply_terminal_set_buffered_input (ply_terminal_t *terminal)
+ {
+         struct termios term_attributes;
+ 
+-        if (terminal->is_disabled) {
++        if (terminal && terminal->is_disabled) {
+                 ply_trace ("terminal input is getting enabled in buffered mode");
+ 
+                 if (ply_terminal_is_vt (terminal))
+@@ -332,7 +332,7 @@ ply_terminal_set_buffered_input (ply_terminal_t *terminal)
+ bool
+ ply_terminal_set_disabled_input (ply_terminal_t *terminal)
+ {
+-        if (!terminal->is_disabled) {
++        if (terminal && !terminal->is_disabled) {
+                 ply_trace ("terminal input is getting disabled from %s mode",
+                            terminal->is_unbuffered? "unbuffered" : "buffered");
+ 
+-- 
+cgit v1.2.3
+
