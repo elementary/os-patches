@@ -80,6 +80,9 @@ struct _ply_boot_splash_plugin
         ply_buffer_t                  *boot_buffer;
 };
 
+static void display_message (ply_boot_splash_plugin_t *plugin,
+                             const char               *message);
+
 static view_t *
 view_new (ply_boot_splash_plugin_t *plugin,
           ply_text_display_t       *display)
@@ -325,6 +328,19 @@ update_status (ply_boot_splash_plugin_t *plugin,
         assert (plugin != NULL);
 
         ply_trace ("status update");
+
+        int progress = 0;
+
+        if (! strncmp("fsck:", status, 5)) {
+                /* Chop localised formatted string */
+                /* fsck:sda1:50:Checking disk %1$d of %2$d (%3$d%% complete) */
+                sscanf(status, "fsck:.*:%d:.*", &progress);
+                char *end = strrchr(status, ':');
+                strncpy (end, "%\0", 2);
+        }
+
+        if (progress < 100)
+               display_message (plugin, status);
 }
 
 static void
@@ -399,10 +415,8 @@ display_password (ply_boot_splash_plugin_t *plugin,
                                 strlen (prompt));
         else
                 write_on_views (plugin,
-                                "Password",
-                                strlen ("Password"));
-
-        write_on_views (plugin, ":", strlen (":"));
+                                "Password:",
+                                strlen ("Password:"));
 
         for (i = 0; i < bullets; i++) {
                 write_on_views (plugin, "*", strlen ("*"));

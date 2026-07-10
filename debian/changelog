@@ -1,3 +1,15 @@
+plymouth (24.004.60-1ubuntu7.2) noble; urgency=medium
+
+  * Fix plymouthd SIGSEGV at boot on terminal-less secondary DRM heads
+    (NVIDIA multi-GPU, and DisplayLink/evdi connectors reported
+    connected with an empty EDID). Guard the NULL backend->terminal in
+    ply_terminal_set_disabled_input(), _unbuffered_input() and
+    _buffered_input(), and in the DRM and frame-buffer renderers'
+    close_input_source(). Cherry-pick of upstream 63597f92 and 5c10072a
+    (already in 25.04 and Fedora). (LP: #2103533)
+
+ -- Gary T. Giesen <ggiesen@giesen.me>  Thu, 25 Jun 2026 09:09:54 -0400
+
 plymouth (24.004.60-1ubuntu7.1) noble; urgency=medium
 
   * Add label-freetype-fix-fallback-not-working-when-fc-matc.patch to
