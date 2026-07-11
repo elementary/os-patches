@@ -1,0 +1,85 @@
+Source: gpgme1.0
+Priority: optional
+Section: libs
+Maintainer: Debian GnuPG Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
+Uploaders:
+ Daniel Kahn Gillmor <dkg@fifthhorseman.net>,
+ Andreas Metzler <ametzler@debian.org>,
+Build-Depends:
+ automake (>= 1.14),
+ debhelper-compat (= 13),
+ dpkg-dev (>= 1.22.5),
+ gnupg-agent,
+ gnupg2 | gnupg (>= 2),
+ gpgrt-tools,
+ gpgsm,
+ libassuan-dev (>= 2.4.2),
+ libgpg-error-dev (>= 1.36),
+ pkgconf,
+ scdaemon,
+ texinfo,
+Standards-Version: 4.7.0
+Homepage: https://gnupg.org/software/gpgme/
+Vcs-Git: https://salsa.debian.org/debian/gpgme.git -b debian/unstable
+Vcs-Browser: https://salsa.debian.org/debian/gpgme/tree/debian/unstable
+Rules-Requires-Root: no
+
+Package: gpgme-json
+Section: utils
+Architecture: any
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: Use GnuPG with web browser extensions
+ GPGME is a wrapper library which provides a C API to access some of the
+ GnuPG functions, such as encrypt, decrypt, sign, verify, ...
+ .
+ This package contains the gpgme-json binary to access GPGME over a
+ json based interface (e.g., by browser extensions).
+ .
+ Manifest files enabling GnuPG's use with Mailvelope (https://mailvelope.com)
+ on Chromium and Firefox are also provided in this package.
+
+Package: libgpgme-dev
+Section: libdevel
+Architecture: any
+Depends:
+ libassuan-dev,
+ libc6-dev,
+ libgpg-error-dev,
+ libgpgme45 (= ${binary:Version}),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Breaks:
+ libgpgme11-dev,
+Replaces:
+ libgpgme11-dev,
+Provides:
+ libgpgme11-dev (= ${binary:Version}),
+Description: GPGME - GnuPG Made Easy (development files)
+ GPGME is a wrapper library which provides a C API to access some of the
+ GnuPG functions, such as encrypt, decrypt, sign, verify, ...
+ .
+ This package contains the headers and other files needed to compile
+ against this library.
+
+Package: libgpgme45
+Architecture: any
+Multi-Arch: same
+Pre-Depends:
+ ${misc:Pre-Depends},
+Depends:
+ gnupg (>= 2.1.21-4) | gpg,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Recommends:
+ dirmngr,
+ gpg-agent,
+ gpg-wks-client,
+ gpgsm,
+Description: GPGME - GnuPG Made Easy (library)
+ GPGME is a wrapper library which provides a C API to access some of the
+ GnuPG functions, such as encrypt, decrypt, sign, verify, ...
+ .
+ This package contains the library.

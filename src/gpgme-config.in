@@ -1,0 +1,214 @@
+#!/bin/sh
+# Copyright (C) 1999, 2002, 2003 Free Software Foundation, Inc.
+#
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This file is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+version="@PACKAGE_VERSION@"
+api_version="@GPGME_CONFIG_API_VERSION@"
+my_host="@GPGME_CONFIG_HOST@"
+
+# Make sure that no weird locale setting messes up our sed regexps etc.
+LC_COLLATE=C
+LC_ALL=C
+LANG=C
+
+# GPGME's own cflags and libs
+cflags="-I@includedir@"
+libs="-L@libdir@"
+
+# Network libraries.
+assuan_cflags="@LIBASSUAN_CFLAGS@"
+assuan_libs="@LIBASSUAN_LIBS@"
+
+# Configure libgpg-error.
+gpg_error_cflags="@GPG_ERROR_CFLAGS@"
+gpg_error_libs="@GPG_ERROR_LIBS@"
+
+# Configure thread packages.
+thread_modules=""
+
+# For compatibility we keep proving the
+# thread modules variable.
+thread_modules="$thread_modules pthread"
+libs_pthread="-lpthread"
+cflags_pthread=""
+
+avail_lang='c @GPGME_CONFIG_AVAIL_LANG@'
+
+# Configure glib.
+libs_glib="@GLIB_LIBS@"
+cflags_glib="@GLIB_CFLAGS@"
+with_glib=
+
+output=""
+
+usage()
+{
+    cat <<EOF
+Usage: gpgme-config [OPTIONS]
+Options:
+	--prefix
+	--exec-prefix
+	--version
+        --api-version
+        --host
+	--libs
+	--cflags
+        --print-lang           Print available language bindings
+        --have-lang=LANG       Return success if LANG is available
+EOF
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1 1>&2
+fi
+
+while test $# -gt 0; do
+    case "$1" in
+	-*=*)
+	    optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+	    ;;
+	*)
+	    optarg=
+	    ;;
+    esac
+
+    case $1 in
+        --prefix=*)
+            # For compatibility reasons with old M4 macros, we ignore
+            # setting of prefix.
+            ;;
+        --prefix)
+	    output="$output $prefix"
+	    ;;
+        --exec-prefix=*)
+            ;;
+        --exec-prefix)
+	    output="$output $exec_prefix"
+	    ;;
+	--glib)
+	    with_glib=yes
+	    ;;
+        --version)
+            echo "$version"
+	    exit 0
+	    ;;
+        --api-version)
+	    echo "$api_version"
+	    exit 0
+	    ;;
+        --host)
+	    echo "$my_host"
+	    exit 0
+	    ;;
+        --cflags)
+            result=
+            tmp_c=
+            tmp_g=
+	    case "$thread_module" in
+	        pthread) tmp_c="$cflags_pthread" ;;
+	    esac
+	    test "x$with_glib" = "xyes" && tmp_g="$cflags_glib"
+            for i in $cflags $tmp_c $assuan_cflags $gpg_error_cflags $tmp_g ; do
+              skip=no
+              case $i in
+                  -I/usr/include|-I/include)
+                      skip=yes
+                      ;;
+                  -I*)
+                      for j in $result ; do
+                          if test x"$j" = x"$i" ; then
+                              skip=yes
+                              break;
+                          fi
+                      done
+                      ;;
+              esac
+              if test $skip = no ; then
+                  result="$result $i"
+              fi
+            done
+            output="$output $result"
+            ;;
+	--libs)
+            result=
+            tmp_x=
+	    case "$thread_module" in
+            # deprecated
+	        pthread) tmp_l="-lgpgme" ;;
+		*)
+		    if test "x$with_glib" = "xyes" ; then
+		         tmp_l="-lgpgme-glib"
+                         tmp_x="$libs_glib"
+		    else
+			 tmp_l="-lgpgme"
+		    fi
+		    ;;
+	    esac
+            for i in $libs $tmp_l $assuan_libs $gpg_error_libs $tmp_x; do
+              skip=no
+              case $i in
+                  -L/usr/lib|-L/lib)
+                      skip=yes
+                      ;;
+                  -L*|-l*)
+                      for j in $result ; do
+                          if test x"$j" = x"$i" ; then
+                              skip=yes
+                              break;
+                          fi
+                      done
+                      ;;
+              esac
+              if test $skip = no ; then
+                  result="$result $i"
+              fi
+            done
+            output="$output $result"
+	    ;;
+	--thread=*)
+            for thread_mod in $thread_modules; do
+	    if test "$thread_mod" = "$optarg"; then
+		thread_module="$optarg";
+	    fi
+	    done
+	    if test "x$thread_module" = "x"; then
+		usage 1 1>&2
+	    fi
+	    ;;
+	--print-lang)
+            output="$avail_lang"
+	    ;;
+	--have-lang=*)
+            for lang in $avail_lang; do
+                if test x"$lang" = x"$optarg"; then
+                    exit 0
+                fi
+            done
+            exit 1
+	    ;;
+        --get-gpg)
+            # Deprecated
+            output="$output @GPG@"
+            ;;
+        --get-gpgsm)
+            # Deprecated
+            output="$output @GPGSM@"
+            ;;
+	*)
+            usage 1 1>&2
+	    ;;
+    esac
+    shift
+done
+
+echo $output

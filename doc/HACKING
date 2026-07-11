@@ -1,0 +1,126 @@
+# HACKING                                                       -*- org -*-
+#+TITLE: Hacking notes for GPGME
+#+STARTUP: showall
+
+* How to contribute
+** No more ChangeLog files
+
+  Do not modify any of the ChangeLog files in GPGME.  Starting
+  on December 1st, 2011 we put change information only in the GIT
+  commit log, and generate a top-level ChangeLog file from logs at
+  "make dist" time.  As such, there are strict requirements on the
+  form of the commit log messages.  The old ChangeLog files have all
+  be renamed to ChangeLog-2011
+
+
+** Commit log requirements
+
+  Your commit log should always start with a one-line summary, the
+  second line should be blank, and the remaining lines are usually
+  ChangeLog-style entries for all affected files.  However, it's fine
+  -- even recommended -- to write a few lines of prose describing the
+  change, when the summary and ChangeLog entries don't give enough of
+  the big picture.  Omit the leading TABs that you're used to seeing
+  in a "real" ChangeLog file, but keep the maximum line length at 72
+  or smaller, so that the generated ChangeLog lines, each with its
+  leading TAB, will not exceed 80 columns.  If you want to add text
+  which shall not be copied to the ChangeLog, separate it by a line
+  consisting of two dashes at the begin of a line.
+
+  Note that ./autogen.sh installs a git hook to do some basic syntax
+  checking on the commit log message.
+
+  Typo fixes and documentation updates don't need a ChangeLog entry;
+  thus you would use a commit message like
+
+  #+begin_example
+  Fix typo in a comment
+
+  --
+  #+end_example
+
+  The marker line here is important; without it the first line would
+  appear in the ChangeLog.
+
+  If you exceptionally need to have longer lines in a commit log you may
+  do this after this scissor line:
+  #+begin_example
+  # ------------------------ >8 ------------------------
+  #+end_example
+  (hash, blank, 24 dashes, blank, scissor, blank, 24 dashes).
+  Note that such a comment will be removed if the git commit option
+  =--cleanup-scissor= is used.
+
+** License policy
+
+  GPGME is currently licensed under the LGPLv2.1+ with tools and the
+  manual being under the GPLv3+.  We may eventually update to a newer
+  version of the licenses or a combination of them.  It is thus
+  important, that all contributed code allows for an update of the
+  license; for example we can't accept code under the LGPLv2(only).
+
+  If you want to contribute code or documentation to GPGME you are
+  asked to assert that the contribution is in accordance to the "GPGME
+  Developer's Certificate of Origin" as found in the file "DCO".
+  Except for a slight wording change, this DCO is identical to the one
+  used by the Linux kernel.  Please take these simple steps:
+
+  - Decide which mail address you want to use.  Please have your real
+    name in the address and not a pseudonym.  Anonymous contributions
+    can only be done if you find a proxy who certifies for you.
+
+  - If your employer or school might claim ownership of code written
+    by you; you need to talk to them to make sure that you have the
+    right to contribute under the DCO.
+
+  - Send an OpenPGP signed mail to the gnupg-devel@gnupg.org public
+    mailing list from your mail address.  Include a copy of the DCO as
+    found in the official master branch.  Insert your name and email
+    address into the DCO in the same way you want to use it later.
+    Example:
+
+      Signed-off-by: Joe R. Hacker <joe@example.org>
+
+    If you need it, you may perform simple transformations on the mail
+    address: Replacing "@" by " at " or "." by " dot ".)
+
+  - That's it.  From now on you only need to add a "Signed-off-by:"
+    line with your name and mail address to the GIT commit message.
+    It is recommended to send the patches using a PGP/MIME signed
+    mail.
+
+** Coding standards
+
+  Please follow the GNU coding standards.  If you are in doubt consult
+  the existing code as an example.  Do no re-indent code without a
+  need.  If you really need to do it, use a separate commit for such a
+  change.
+
+  - C99 syntax should not be used; stick to C90.
+  - Please do not use C++ =//= style comments.
+  - Try to fit lines into 80 columns.
+  - Ignore signed/unsigned pointer mismatches
+  - No arithmetic on void pointers; cast to char* first.
+
+** Commit log keywords
+
+  - GnuPG-bug-id :: Values are comma or space delimited bug numbers
+                    from bug.gnupg.org pertaining to this commit.
+  - Debian-bug-id :: Same as above but from the Debian bug tracker.
+  - CVE-id :: CVE id number pertaining to this commit.
+  - Regression-due-to :: Commit id of the regression fixed by this commit.
+  - Fixes-commit :: Commit id this commit fixes.
+  - Reported-by :: Value is a name or mail address of a bug reporte.
+  - Suggested-by :: Value is a name or mail address of someone how
+                    suggested this change.
+  - Co-authored-by :: Name or mail address of a co-author
+  - Some-comments-by :: Name or mail address of the author of
+                        additional comments (commit log or code).
+  - Proofread-by :: Sometimes used by translation commits.
+  - Signed-off-by :: Name or mail address of the developer
+
+* Debug hints
+
+  - Use gpgme-tool for manual tests.
+  - The envvar GPGME_DEBUG enables debugging; see debug.[ch] for
+    details.

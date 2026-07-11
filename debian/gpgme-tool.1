@@ -1,0 +1,111 @@
+.TH GPGME\-TOOL "1" "September 2016" "gpgme-tool 1.7.0" "User Commands"
+.SH NAME
+gpgme\-tool \- Assuan server exposing GnuPG Made Easy operations
+
+.SH SYNOPSIS
+.B  gpgme\-tool
+.RB [ \-\-server | \-s ]
+.RB [ \-\-gpgme\-binary =\fIFILE\fR]
+.RB [ \-\-lib\-version ]
+.RB [ \-\-usage ]
+.RB [ \-\-version | \-V ]
+.RB [ \-\-help | \-? ]
+
+.SH DESCRIPTION
+.PP
+\fBgpgme\-tool\fP is a test interface that can exercise the library
+functionality of \fIGPGME\fP. It is not currently intended for
+production use, but it can be a useful way to dynamically understand
+and experiment with the functionality available from the library.
+
+Running this tool in Server mode (the default mode) results in a
+text-based, command-driven session.  When the tool produces (on its
+standard output) a line beginning with
+.BR OK " or " ERR ,
+you can provide it with a command on its standard input.  Try the
+command
+.B HELP
+to see a list of available commands.  Commands are case-insensitive.
+
+Status lines begin with an
+.BR S ,
+and data lines begin with a
+.BR D .
+
+.SH OPTIONS
+.PP
+\fBgpgme\-tool\fP accepts the following options on the command line:
+.TP
+.SH OPTIONS
+.TP
+.BR \-s , \-\-server
+Server mode (default)
+.TP
+.BR \-\-gpg\-binary =FILE
+Use FILE for the GPG backend
+.TP
+.B \-\-lib\-version
+Show library version and terminate
+.TP
+.BR \-V , \-\-version
+Print the currently installed version of \fIGPGME\fP to standard output.
+.TP
+.BR \-? , \-\-help
+Print a list of command\-line options.
+.TP
+.B \-\-usage
+Print a synopsis of \fBgpgme\-tool\fR's command line.
+
+.SH EXAMPLE
+.PP
+Below is an example interaction from a POSIX shell, with user-typed
+lines in \fIitalics\fR, and data returned by \fBgpgme\-tool\fR in
+\fBbold\fR:
+
+.nf
+user@host:~$ \fIgpgme\-tool
+.B OK GPGME\-Tool 1.7.0 ready
+.I strerror 20
+.B D Unknown compression algorithm <Unspecified source>
+.B OK
+.I version
+.B D 1.7.0
+.B OK
+.I armor
+.B S ARMOR false
+.B OK
+.I armor true
+.B OK
+.I armor
+.B S ARMOR true
+.B OK
+.I bye
+.B OK closing connection
+user@host:~$
+.ad
+
+.SH AUTHORS
+.PP
+The
+.I GPGME
+library is written by many contributors, including Werner Koch, Marcus
+Brinkmann, Andre Heinecke, Justus Winter, and Karl-Heinz Zimmer.
+.PP
+This manual page page was written by Daniel Kahn Gillmor for the
+Debian distribution (but may be used by others).
+
+.SH BUGS
+.PP
+Please report bugs to <https://bugs.gnupg.org>.
+
+.SH COPYRIGHT
+\fBgpgme\-tool\fP is Copyright \(co 2015-2016 g10 Code GmbH License
+GPLv2+: GNU GPL version 2 or later <https://www.gnu.org/licenses/>
+.PP
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+.SH "SEE ALSO"
+.BR gpgme\-config (1),
+.BR /usr/include/gpgme.h ,
+.B info gpgme

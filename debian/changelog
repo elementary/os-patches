@@ -1,0 +1,1350 @@
+gpgme1.0 (2.0.1-2build1) resolute; urgency=medium
+
+  * No-change rebuild to drop Python 3.13 bits.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 20 Mar 2026 12:03:38 +0100
+
+gpgme1.0 (2.0.1-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 13 Nov 2025 16:27:39 +0100
+
+gpgme1.0 (2.0.1-1) experimental; urgency=low
+
+  * New upstream version.
+  * Unfuzz patch
+  * Do not ship gnupg-key-manage binary, but its sources.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 04 Oct 2025 14:12:16 +0200
+
+gpgme1.0 (2.0.0-1) experimental; urgency=medium
+
+  * New upstream version after qt/C++/python split-off.
+  * soname bumped, rename library package
+  * update symbol file
+  * update copyright file
+  * drop symlink from libgpgme-pthread.so.NN -> libgpgme.so.NN
+    (Originally introduced in 2016 when the separate pthread packages were
+    dropped)
+  * unfuzz patches
+  * Update symbol file for 2.0 release
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 07 Jun 2025 06:52:21 +0200
+
+gpgme1.0 (1.24.2-3) unstable; urgency=medium
+
+  * Fix hanging state machine.
+    https://dev.gnupg.org/T7600 Fix picked from gpgme-1.24-branch
+  * Fix 64bit time_t overflow bug on 32 bit archs (Closes: #1103787) (Also
+    from upstream gpgme-1.24-branch)
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 07 May 2025 17:49:48 +0200
+
+gpgme1.0 (1.24.2-2) unstable; urgency=medium
+
+  * Adapt testsuite to changed gnupg 2.4 defaults in Debian.
+    (Closes: #1103189)
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 20 Apr 2025 12:08:55 +0200
+
+gpgme1.0 (1.24.2-1) unstable; urgency=medium
+
+  * New upstream version.
+    + Drop superfluous patches, unfuzz.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 16 Feb 2025 13:32:04 +0100
+
+gpgme1.0 (1.24.1-4) unstable; urgency=high
+
+  * Fix regression in 1.24.1 for RSA in gpgme_pubkey_algo_string.
+    https://dev.gnupg.org/T7508
+
+ -- Andreas Metzler <ametzler@debian.org>  Thu, 06 Feb 2025 06:53:51 +0100
+
+gpgme1.0 (1.24.1-3) unstable; urgency=medium
+
+  * Cherry-pick fix for testsuite timebomb from upstream (Closes: 1091499)
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 01 Feb 2025 13:16:51 +0100
+
+gpgme1.0 (1.24.1-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 23 Dec 2024 11:36:48 +0100
+
+gpgme1.0 (1.24.1-1) experimental; urgency=low
+
+  * New upstream version.
+  * Update libgpgme11t64 symbol file for extension of gpgme_pubkey_algo_t.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 14 Dec 2024 07:42:09 +0100
+
+gpgme1.0 (1.24.0-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 13 Nov 2024 17:47:53 +0100
+
+gpgme1.0 (1.24.0-1) experimental; urgency=medium
+
+  * New upstream version.
+  * Update patches for 1.24.0, drop superfluous ones.
+  * Run wrap-and-sort -ast
+  * Ship newly available gpgmepp pkg-config file in libgpgmepp-dev.
+  * Add new symbols to libgpgme11t64 symbol file.
+  * Simplify package build/test/install. 1.24.0 supports building qt5 and
+    qt6 bindings in one go.
+  * Update copyright info for 1.24.0.
+  * Ship newly available upstream version of gpgme-json.1.  Also add a b-d on
+    gpgrt-tools since yat2m is needed to generate the manpage.
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 11 Nov 2024 13:28:58 +0100
+
+gpgme1.0 (1.23.2-5) unstable; urgency=low
+
+  * Add b-d on python3-setuptools. Closes: #1080871
+  * Upload to unstable.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 20 Oct 2024 14:29:00 +0200
+
+gpgme1.0 (1.23.2-4) experimental; urgency=medium
+
+  [ Sébastien Noel ]
+  * Add a new gpgme-json package. Closes: #911189,#1028160
+
+  [ Daniel Kahn Gillmor ]
+  * clean up build-qt6/
+  * update copyright years in gpgme-json.1
+  * wrap-and-sort -ast
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 03 Sep 2024 19:16:58 -0400
+
+gpgme1.0 (1.23.2-3) experimental; urgency=medium
+
+  * tell gpg to --verify (Closes: #1080430)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 03 Sep 2024 18:28:07 -0400
+
+gpgme1.0 (1.23.2-2) experimental; urgency=medium
+
+  * Add dependency on libgpg-error-dev to libgpgmepp-dev.  Closes: #1078464
+  * Cherry-pick patch from upstream GIT master to fix FTBFS against
+    python3-setuptools 73.0.1 Closes: #1079928
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 03 Sep 2024 19:19:03 +0200
+
+gpgme1.0 (1.23.2-1) experimental; urgency=low
+
+  * New upstream version.
+    + Unfuzz patches, drop cherry-picked patches.
+    + Update libgpgme11t64 symbol file.
+    + Update copyright info.
+  * b-d on pkgconf instead of pkg-config.
+  * Use wildcards in no-symbols-control-file overrides.
+  * Bump Standards-Version to 4.7.0.
+  * Split off libqgpgme-dev (QT5) package from libgpgmepp-dev.
+    Closes: #863149
+  * Fix README links in lib(q)gpgme development packages (broken by t64
+    package rename).
+  * Package QT6 bindings, cherrypicking the upstream change to install QT5 and
+    QT6 headers in separate directories. Closes: #1073255
+  * Update gpgme.m4 from upstream GIT master.
+  * Add myself to uploaders.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 10 Aug 2024 13:28:58 +0200
+
+gpgme1.0 (1.18.0-6) unstable; urgency=high
+
+  * Delete outdated m4/libassuan.m4 to allow building against libassuan 3.
+  * Cherry-pick patch from upstream GIT master to fix FTBFS against
+    python3-setuptools 73.0.1 Closes: #1079928
+
+ -- Andreas Metzler <ametzler@debian.org>  Tue, 03 Sep 2024 19:06:41 +0200
+
+gpgme1.0 (1.18.0-5) unstable; urgency=medium
+
+  * Add dependency on libgpg-error-dev to libgpgmepp-dev. -
+    libgpgmepp-dev's error.h #includes gpg-error.h. (Thanks, John Scott)
+    Closes: #1078464
+  * Let libgpgmepp-dev Provide libqgpgme-dev, the latter has been
+    split-off to a separate package in experimental. (See #863149)
+  * Add myself to uploaders.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 11 Aug 2024 10:12:45 +0200
+
+gpgme1.0 (1.18.0-4.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename libraries for 64-bit time_t transition.  Closes: #1062119
+
+ -- Steve Langasek <vorlon@debian.org>  Wed, 28 Feb 2024 23:10:53 +0000
+
+gpgme1.0 (1.18.0-4) unstable; urgency=medium
+
+  * Team upload.
+  * Patch Makefile.am to invoke setup.py with --install-layout=deb and
+    --root "$(DESTDIR)" (instead of setting prefix) and adapt paths in
+    python3-gpg.install to allow building with python3-setuptools.
+    Closes: #1039724, #1054786
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 01 Nov 2023 18:11:31 +0100
+
+gpgme1.0 (1.18.0-3) unstable; urgency=medium
+
+  * Acknowledge NMU.  Thanks very much to Andreas Metzler!
+  * Refresh patches
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sun, 20 Nov 2022 18:16:16 -0500
+
+gpgme1.0 (1.18.0-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Cherrypicked from upstream GIT:
+    + 0015-build-Prefer-gpgrt-config-when-available.patch,
+      0016-gpgme.m4-Include-_AM_PATH_GPGRT_CONFIG-implementatio.patch: Update
+      gpgme.m4 to prefer gpgrt-config even if gpgme-config was available and
+      to find gpgrt-config when AM_PATH_GPG_ERROR was not used.
+    + 0017-doc-Update-documentation-for-gpgme.pc-and-pkg-config.patch:
+      Document pkg-config instead of gpgme-config in manual.
+
+ -- Andreas Metzler <ametzler@debian.org>  Sun, 20 Nov 2022 07:16:46 +0100
+
+gpgme1.0 (1.18.0-2) unstable; urgency=medium
+
+  [ Andreas Metzler ]
+  * Fix FTBFS after removal of gpg-error-config (Closes: #1022348)
+  * gpgme-config not installed anymore
+
+  [ Jelmer Vernooĳ ]
+  * debian/upstream/metadata: Set Repository and Repository-Browse.
+
+  [ Daniel Kahn Gillmor ]
+  * d/upstream/metadata: add upstream bug reporting details
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 02 Nov 2022 10:54:12 -0400
+
+gpgme1.0 (1.18.0-1) unstable; urgency=medium
+
+  * new upstream version
+    (acknowledge NMU -- thanks, Paul and Alexandre!)
+  * d/upstream/signing-key.asc: add gniibe's key (working around #1010955)
+  * drop patch already upstream
+  * refresh patches
+  * Standards-Version: bump to 4.6.1 (no changes needed)
+  * update lintian overrides
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 28 Sep 2022 20:31:10 -0400
+
+gpgme1.0 (1.17.1-4.1) unstable; urgency=medium
+
+  * Non-maintainer upload
+  * fix FTBFS caused by missing PYTHON (Closes: #1015995)
+    (Original patch by Alexandre Ghiti)
+
+ -- Paul Gevers <elbrus@debian.org>  Tue, 06 Sep 2022 20:59:56 +0200
+
+gpgme1.0 (1.17.1-4) unstable; urgency=medium
+
+  * release to unstable
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 15 Jun 2022 13:02:47 -0400
+
+gpgme1.0 (1.17.1-3) experimental; urgency=medium
+
+  * adopt upstream patch to fix build in 32-bit platforms
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sat, 21 May 2022 02:03:55 -0400
+
+gpgme1.0 (1.17.1-2) experimental; urgency=medium
+
+  * avoid -unknown suffix (Closes: #1004742)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 20 May 2022 23:55:23 -0400
+
+gpgme1.0 (1.17.1-1) experimental; urgency=medium
+
+  * New upstream release
+  * move to DEP-14 branch naming
+  * drop patches already upstream
+  * refresh patches
+  * update symbols
+  * d/libgpgmepp6.lintian-overrides: update
+  * qgpgme: ABI bump: Change from libqgpgme7 to libqgpgme15
+  * move to experimental to test transition to libqgpgme15
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sun, 01 May 2022 01:14:54 -0400
+
+gpgme1.0 (1.16.0-1.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Patch: Avoid a hardcoded list of known Python versions. (Closes: #998471)
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 23 Nov 2021 22:23:52 -0400
+
+gpgme1.0 (1.16.0-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Cherry-pick upstream fixes for test failures on 32bit archs:
+    - d/patches/upstream-e0494c54-fix-use-after-free-in-test.patch
+    - d/patches/upstream-72a2487a-expiration-date-as-unsigned.patch
+    (Closes: #992922)
+
+ -- Norbert Preining <norbert@preining.info>  Wed, 15 Sep 2021 14:31:55 +0900
+
+gpgme1.0 (1.16.0-1) unstable; urgency=medium
+
+  * new upstream release
+  * drop already-upstream patches
+  * refresh remaining patches
+  * update lintian overrides
+  * drop dh-exec, relying instead on debhelper 13 for substitutions
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 23 Aug 2021 11:07:50 -0400
+
+gpgme1.0 (1.15.1-3) unstable; urgency=medium
+
+  * move back to unstable
+  * Standards-Version: bump to 4.6.0 (no changes needed)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 20 Aug 2021 17:55:28 -0400
+
+gpgme1.0 (1.15.1-2) experimental; urgency=medium
+
+  * Avoid sending --with-keygrip unconditionally (Closes: #984594)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 05 Mar 2021 22:39:56 -0500
+
+gpgme1.0 (1.15.1-1) experimental; urgency=medium
+
+  * new upstream release
+  * update upstream signing key for Werner Koch
+  * Standards-Version: bump to 4.5.1 (no changes needed)
+  * refresh patches
+  * avoid shipping experimental feature GPGME_EXPORTMODE_NOUID
+  * update gpg-error dependency to require 1.36
+  * refresh lintian overrides
+  * update exported symbols to include new expiration and revocation
+  * note that patches are forwarded upstream
+  * drop directives for missing package python-gpg
+  * python3-gpg: ship howto/ folder of examples
+  * ship all python example scripts with python3 shebang
+  * move to packaging branch debian/experimental
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 12 Feb 2021 09:52:46 -0500
+
+gpgme1.0 (1.14.0-1) unstable; urgency=medium
+
+  * new upstream release
+  * gbp: use debian/sid branch to track unstable
+  * refresh patches
+  * d/copyright: clean up
+  * updated lintian-overrides for new C++ library versions
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 10 Aug 2020 18:51:50 -0400
+
+gpgme1.0 (1.13.1-9) unstable; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * fix test sadness on 32bit systems due to bad bash syntax (Closes: #963782)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 01 Jul 2020 14:50:20 -0400
+
+gpgme1.0 (1.13.1-8) unstable; urgency=medium
+
+  * 32-bit ulong platforms can ignore failures until 2031 (Closes: #953800)
+  * d/changelog: correct closing #952797
+  * move to dh 13
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 24 Jun 2020 15:13:19 -0400
+
+gpgme1.0 (1.13.1-7) unstable; urgency=medium
+
+  [ Helmut Grohne ]
+  * Adapt cross building for python3.8 (Closes: #952797)
+
+  [ Daniel Kahn Gillmor ]
+  * Mark libgpgmepp-{doc,dev} with Multi-Arch: {foreign,same}
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 09 Mar 2020 12:55:53 -0400
+
+gpgme1.0 (1.13.1-6) unstable; urgency=medium
+
+  * brown paper bag bugfix to debian/tests :(
+  * try to improve reproducibility for generated docs
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 30 Jan 2020 11:37:08 -0500
+
+gpgme1.0 (1.13.1-5) unstable; urgency=medium
+
+  * checky2106 should not cause the build to fail
+  * Standards-Version: bump to 4.5.0 (no changes needed)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 29 Jan 2020 13:27:30 -0500
+
+gpgme1.0 (1.13.1-4) unstable; urgency=medium
+
+  * fix up tests, cover all supported python3 versions
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 28 Jan 2020 14:06:56 -0500
+
+gpgme1.0 (1.13.1-3) unstable; urgency=medium
+
+  * drop ${python3:Versions} from python3-gpg, i clearly don't know how to
+    use it properly.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 23 Jan 2020 17:46:46 -0500
+
+gpgme1.0 (1.13.1-2) unstable; urgency=medium
+
+  * rebuild, pulling in python 3.8 (Closes: #944774)
+   - requires patching upstream, changes to cross-building logic
+  * Update standards version to 4.4.1, no changes needed.
+  * add buildtime and runtime tests for platform time limits
+  * remove python-gpg autopkgtest entirely (Closes: #943390, #943111)
+  * update lintian-overrides for untracked C++ symbols
+  * fix json tests
+  * d/control: drop unused ${shlibs:Depends} from libgpgmepp-dev
+  * d/control: added ${python3:Versions} to python3-gpg
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 23 Jan 2020 17:11:25 -0500
+
+gpgme1.0 (1.13.1-1) unstable; urgency=medium
+
+  * new upstream release
+  * release to unstable
+  * d/{control,gpb.conf}: fix up Vcs branch name for DEP-14
+  * make sure to test python decryption and verification
+  * Standards-Version: bump to 4.4.0 (no changes needed)
+  * Drop python2 support, only build for python3
+  * go with upstream python, ignoring intermittent decrypt problems
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 26 Aug 2019 15:24:31 -0400
+
+gpgme1.0 (1.13.0-2) experimental; urgency=medium
+
+  * refresh patches
+  * fix signature verification failure when decrypting with session keys
+  * ship pkgconfig file gpgme.pc
+  * Definitively avoid shipping gpgme-glib.pc
+  * dh_missing --fail-missing
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 29 May 2019 18:28:35 -0400
+
+gpgme1.0 (1.13.0-1) experimental; urgency=medium
+
+  [ Helmut Grohne ]
+  * Fix FTCBFS (Closes: #912898)
+
+  [ Daniel Kahn Gillmor ]
+  * new upstream release to experimental due to the freeze
+  * move to DEP-14 debian/experimental branch
+  * move to debhelper 12
+  * standards-version: bump to 4.3.0 (no changes needed)
+  * refresh patches (dropping those already upstream)
+  * refresh lintian-overrides
+  * add Build-Depends-Package field to libgpgme11.symbols
+  * gbp import-orig: filter out generated VERSION file and emacs turds
+  * Re-export upstream signing key without extra signatures.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 03 May 2019 08:28:07 -0400
+
+gpgme1.0 (1.12.0-6) unstable; urgency=medium
+
+  * Team upload.
+  * d/tests: Fix autopkgtest by removing test for python3.6, and
+    python3.7, since we already have test for python3.
+
+ -- Roger Shimizu <rosh@debian.org>  Wed, 23 Jan 2019 20:19:53 +0900
+
+gpgme1.0 (1.12.0-5) unstable; urgency=medium
+
+  * Team upload.
+  * Backport upstream patch to fix RC bug that TofuInfoTest key expires
+    on 2019-Jan-06 (Closes: #919293).
+
+ -- Roger Shimizu <rosh@debian.org>  Sun, 20 Jan 2019 00:11:50 +0900
+
+gpgme1.0 (1.12.0-4) unstable; urgency=medium
+
+  * no need to clean up build-py3.7 any longer
+  * Fix test suite on arches with 32-bit time_t
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 18 Oct 2018 11:54:17 -0400
+
+gpgme1.0 (1.12.0-3) unstable; urgency=medium
+
+  * use upstream patches to build all versions of python
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 18 Oct 2018 00:55:22 -0400
+
+gpgme1.0 (1.12.0-2) unstable; urgency=medium
+
+  * clean up residue of older build reorganization
+  * do out-of-tree builds
+  * hide HAVE_CXX11 from python bindings
+  * perform an extra configuration and build to get python 3.7 working
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 17 Oct 2018 22:58:20 -0400
+
+gpgme1.0 (1.12.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * refresh patches
+  * update .symbols
+  * refresh gpgmepp6.lintian-overrides
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 16 Oct 2018 18:28:51 -0400
+
+gpgme1.0 (1.11.1-2) unstable; urgency=medium
+
+  * acknowledge NMU (thanks, Adrian!)
+  * allow rebuild with older versions of libgpg-error
+  * drop python3.5, try to add 3.7
+  * d/changelog: strip trailing whitespace
+  * Standards-Version: bump to 4.2.1 (no changes needed)
+  * use dh_missing explicitly
+  * avoid shipping gpgme-json yet (we will ship it next release)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 09 Oct 2018 01:42:48 -0400
+
+gpgme1.0 (1.11.1-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Bump the libgpg-error-dev build dependency to >= 1.28.
+    (Closes: #898120)
+
+ -- Adrian Bunk <bunk@debian.org>  Sun, 23 Sep 2018 12:57:39 +0300
+
+gpgme1.0 (1.11.1-1) unstable; urgency=medium
+
+  * New upstream release
+  * use DEP-14 branch naming
+  * d/control: add Rules-Requires-Root: no
+  * refresh patches
+  * add symbols
+  * clean up lintian overrides
+  * standards-version: bump to 4.1.4 (no changes needed)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 23 Apr 2018 01:11:09 -0400
+
+gpgme1.0 (1.10.0-2) unstable; urgency=medium
+
+  * move to debhelper 11
+  * Standards-Version: bump to 4.1.3 (no changes needed)
+  * d/control: move Vcs*: to salsa
+  * ship examples in python-gpg and python3-gpg
+  * libgpgmepp-doc: repoint doc-base to
+    /usr/share/doc/libgpgmepp-dev
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 05 Feb 2018 23:49:10 -0500
+
+gpgme1.0 (1.10.0-1) unstable; urgency=medium
+
+  * new upstream release
+  * update build-dependencies
+  * drop patches already upstream
+  * add new symbols
+  * update debian/copyright
+  * add explicit lintian overrides for things i have no plans to fix
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 14 Dec 2017 13:31:49 -0500
+
+gpgme1.0 (1.9.0-8) unstable; urgency=medium
+
+  * clean up wrap-and-sort
+  * loosen dependencies (Closes: #872368)
+  * only build against latest python3 (Closes: #866555)
+  * Standards-Version: bump to 4.1.2 (no changes needed)
+  * refresh patches
+  * cherry-pick bugfixes from upstream
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 04 Dec 2017 17:46:39 -0500
+
+gpgme1.0 (1.9.0-7) unstable; urgency=medium
+
+  * force-build python 3.5 now that python3 is 3.6 in unstable
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 25 Oct 2017 18:54:17 -0400
+
+gpgme1.0 (1.9.0-6) unstable; urgency=medium
+
+  * point to correct qgpgme README (Closes: #857529)
+  * use getdents64 instead of getdents (Closes: #876538)
+  * Standards-Version: bump to 4.1.1 (no changes needed)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 10 Oct 2017 23:25:45 -0400
+
+gpgme1.0 (1.9.0-5) unstable; urgency=medium
+
+  * Import more bugfixes from upstream.
+  * Adopt Colin Watson's optimization for reducing the number of spurious
+    close() calls on Linux platforms.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 19 Sep 2017 10:10:37 -0400
+
+gpgme1.0 (1.9.0-4) unstable; urgency=medium
+
+  * complete upstream python file reorg (Closes: #872519)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 18 Aug 2017 01:38:35 -0400
+
+gpgme1.0 (1.9.0-3) unstable; urgency=medium
+
+  * imported cleanup+bugfixes from upstream
+  * removed unnecessary b-d on autoreconf
+  * drop unneeded DEBIAN_VERSION from debian/rules
+  * ship constants.tofu (Closes: #871465)
+  * Standards-Version: bump to 4.0.1 (extra -> optional)
+  * try to force python 3.6
+  * strip debian revision from new 1.9.0 symbols
+  * add the simplest possible python burn-in autopkgtest
+  * release to unstable
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 17 Aug 2017 22:16:47 -0400
+
+gpgme1.0 (1.9.0-2) experimental; urgency=medium
+
+  * Remove Jose Carlos Garcia Sogo from Uploaders (Closes: #862622)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 16 May 2017 20:17:38 -0400
+
+gpgme1.0 (1.9.0-1) experimental; urgency=medium
+
+  * New upstream version (to experimental)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 25 Apr 2017 20:30:13 -0400
+
+gpgme1.0 (1.8.0-3) unstable; urgency=medium
+
+  * Reduce priority of most packages (closes: #845803)
+  * added versioned Provides for libgpgme11-dev to ease transition
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 06 Dec 2016 10:28:24 -0500
+
+gpgme1.0 (1.8.0-2) unstable; urgency=medium
+
+  * pull a cleanup patch from upstream
+  * move to unstable
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 23 Nov 2016 01:39:59 -0500
+
+gpgme1.0 (1.8.0-1) experimental; urgency=medium
+
+  * new upstream release
+   - drops gpgme-pthread variant (we replace .so with symlink)
+   - moves python binding name from "pyme" to "gpg"
+  * no need for pasv in debian/watch
+  * filter another auto-generated file at import-orig
+  * re-enable pie, it is needed to build Qt properly now
+  * avoid installing python bytecode and unnecessary package metadata
+  * update build-dep gpg-error version requirements to track configure.ac
+  * add new symbols
+  * drop C++ and QT .symbols files, do only strict versioning.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 18 Nov 2016 19:15:37 -0500
+
+gpgme1.0 (1.7.1-3) experimental; urgency=medium
+
+  [ Sandro Knauß ]
+  * Add pkgkde-symbolshelper to handle c++ bindings
+  * consolidate main dh rule
+
+  [ Daniel Kahn Gillmor ]
+  * libgpgmepp-dev Breaks+Replaces: kdepimlibs5 (Closes: #842061)
+  * convert C++ symbols files to something readable
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 01 Nov 2016 04:24:29 -0400
+
+gpgme1.0 (1.7.1-2) experimental; urgency=medium
+
+  * more general cleanup of upstream tarball in debian/gbp.conf
+  * ensure that source version makes it through to python-pyme-dbgsym
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 25 Oct 2016 12:21:41 -0400
+
+gpgme1.0 (1.7.1-1) experimental; urgency=medium
+
+  * new upstream release.
+   - change from libqgpgme6 to libqgpgme7
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 20 Oct 2016 00:06:13 -0400
+
+gpgme1.0 (1.7.0-5) experimental; urgency=medium
+
+  * apply debian patches ahead of upstream patches.
+  * more fixes from upstream for 32-bit platforms
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 14 Oct 2016 21:36:25 -0400
+
+gpgme1.0 (1.7.0-4) experimental; urgency=medium
+
+  * avoid failures on 32-bit platforms (along with more
+    upsteam python fixes)
+  * avoid shipping unready pdf documentation
+  * ensure that python-pyme-dbgsym has the right versioning
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 14 Oct 2016 16:28:30 -0400
+
+gpgme1.0 (1.7.0-3) experimental; urgency=medium
+
+  * improve dependencies for libgpgmepp-dev package
+  * fix Vcs-Browser link
+  * fix debian/watch
+  * Add an epoch to python-pyme
+  * ship documentation as well in an arch:all package
+  * avoid irreproducible documentation
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 12 Oct 2016 18:46:16 -0400
+
+gpgme1.0 (1.7.0-2) experimental; urgency=medium
+
+  [ Daniel Kahn Gillmor ]
+  * avoid -pie since it conflicts with -fpic when building
+  * add python3-pyme and python-pyme binary packages
+  * clean up autogenerated files
+  * bump to debhelper 10
+  * rename binary package from libgpgme11-dev to libgpgme-dev
+
+  [ Sandro Knauß ]
+  * Enable cpp and qt lang support
+
+  [ Daniel Kahn Gillmor ]
+  * avoid lintian warnings about executable cmake files
+  * prepare new libgpgmepp-dev package
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 12 Oct 2016 07:28:59 -0400
+
+gpgme1.0 (1.7.0-1) unstable; urgency=medium
+
+  * new upstream release
+    - avoid building language bindings until we have C available
+    - add new symbols
+  * use https for debian/watch
+  * hand-write gpg-tool(1) rather than relying on help2man
+  * improvements in gpgme-config(1)
+  * updated debian/copyright to DEP5
+  * use hardening flags
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 22 Sep 2016 17:18:21 -0400
+
+gpgme1.0 (1.6.0-3) unstable; urgency=medium
+
+  * change order of gnupg2 | gnupg (>= 2) build-dep so that sbuild is OK
+    (while gnupg (>= 2) is still only in experimental).
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 20 Apr 2016 08:36:10 -0400
+
+gpgme1.0 (1.6.0-2) unstable; urgency=medium
+
+  * updated debian/watch to version 4
+  * depend on gnupg from version 2 or later, instead of gnupg2
+  * bumped Standards-Version to 3.9.8 (no changes needed)
+  * updated Vcs-* fields
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 19 Apr 2016 17:34:59 -0400
+
+gpgme1.0 (1.6.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 17 Sep 2015 03:40:48 -0400
+
+gpgme1.0 (1.5.5-3) unstable; urgency=medium
+
+  * reproducibility: remove BUILD_TIMESTAMP
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 08 Jul 2015 13:18:46 -0400
+
+gpgme1.0 (1.5.5-2) unstable; urgency=medium
+
+  * use installed libgpgme to get help2man to work on minimal build
+    systems.  Thanks, James Cowgill! (Closes: #789042)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 17 Jun 2015 08:21:10 -0400
+
+gpgme1.0 (1.5.5-1) unstable; urgency=medium
+
+  * new upstream version
+  * ship /usr/bin/gpgme-tool in the -dev package.
+  * enable file descriptor passing
+  * use autoreconf
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 11 Jun 2015 18:18:30 -0400
+
+gpgme1.0 (1.5.1-6) unstable; urgency=medium
+
+  * corrected Vcs-Browser
+  * ensure the same aclocal is used as automake (Closes: #762553)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 23 Sep 2014 11:57:09 -0400
+
+gpgme1.0 (1.5.1-5) unstable; urgency=medium
+
+  * require automake1.11 to try to avoid test failures during parallelized
+    build. (Thanks, NIIBE Yutaka)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 08 Sep 2014 00:27:48 -0400
+
+gpgme1.0 (1.5.1-4) unstable; urgency=medium
+
+  * add texinfo to build-depends to deal with the modified .texi
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sun, 07 Sep 2014 01:15:34 -0400
+
+gpgme1.0 (1.5.1-3) unstable; urgency=medium
+
+  * switch from autotools-dev to dh-autoreconf (Closes: #752831)
+  * patch doc/gpl.texi to avoid complaints during rebuild
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 05 Sep 2014 17:20:32 -0400
+
+gpgme1.0 (1.5.1-2) unstable; urgency=medium
+
+  * wrap-and-sort for cleaner revision tracking
+  * move to git
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sat, 30 Aug 2014 13:06:55 -0700
+
+gpgme1.0 (1.5.1-1) unstable; urgency=medium
+
+  * New upstream release
+  * placing package under team maintenance after discussion with Jose
+    Carlos Garcia Sogo on #752683.  Thanks Jose!
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 04 Aug 2014 16:45:58 -0400
+
+gpgme1.0 (1.5.0-0.1) unstable; urgency=low
+
+  * NMU
+  * New upstream release (Closes: #748096, #752683)
+  * check upstream signatures (Closes: #752675)
+  * bumped Standards-Version to 3.9.5 (no changes needed)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 25 Jun 2014 10:27:37 -0400
+
+gpgme1.0 (1.4.3-0.1) unstable; urgency=low
+
+  * NMU
+  * New upstream release.
+  * debian/control (Build-Depends): Dropped dirmngr (closes: #712813). It is
+    not necessary for the build.
+    (Vcs-Browser, Vcs-Svn): Fixed vcs-field-not-canonical.
+  * debian/libgpgme11.symbols: Updated symbols file.
+
+ -- Daniel Leidert <dleidert@debian.org>  Mon, 12 Aug 2013 22:33:16 +0200
+
+gpgme1.0 (1.4.2-0.1) unstable; urgency=low
+
+  * NMU
+  * New upstream release.
+
+ -- Daniel Leidert <dleidert@debian.org>  Wed, 29 May 2013 18:33:42 +0200
+
+gpgme1.0 (1.4.1-0.1) unstable; urgency=low
+
+  * NMU
+  * New upstream version (closes: #570804).
+    - Increases size of notify_table to MAX_SLAFD (closes: #513907).
+    - Tests are compatible with newer gnupg versions (closes: #699245).
+  * debian/compat: Raised compatibility level to 9.
+  * debian/control: Enable multiarch support (closes: #698970).
+    (Priority): Raised to standard (closes: #623353).
+    (Section): Changed to libs. Fixed binary-control-field-duplicates-source.
+    (Standards-Version): Bumped to 3.9.4.
+    (Vcs-Git, Vcs-Browser): Adjusted to point to svn tree (closes: #610737).
+    (Build-Depends, Depends): Added new dependencies including libassuan-dev.
+    Fixed debhelper-but-no-misc-depends. Dropped dpatch and obsolete
+    libpth-dev. Replaced gnupg by gnupg2.
+    (Description): Fixed several lintian hints.
+  * debian/copyright: Fixed copyright-refers-to-versionless-license-file.
+  * debian/gpgme-config.1: Fixed a few errors/warnings. Updated.
+  * debian/libgpgme11.files: Renamed to debian/libgpgme11.install, adjusted.
+  * debian/libgpgme11-dev.files: Likewise. Dropped .la (LP: #728497).
+  * debian/libgpgme11.dirs, debian/libgpgme11-dev.dirs: Dropped useless files.
+  * debian/libgpgme11-dev.info: Ditto.
+  * debian/libgpgme11-dev.doc-base (Section): Fixed.
+  * debian/libgpgme11.symbols: Updated. Removed symbols of libgpgme-pth.so.11.
+  * debian/rules: Complete rewrite for debhelper. Enabled hardening and
+    checks (closes: #515800). Set path to gnupg2 binaries (closes: #563623).
+  * debian/watch: Added (closes: #570802).
+  * debian/patches/ld-no-add-needed.patch: Dropped (not necessary).
+  * debian/patches/gpgme-config.dpatch: Dropped (merged upstream).
+  * debian/patches/10_relibtoolize.dpatch: Dropped.
+  * debian/patches/00list: Ditto.
+  * debian/source/format: Changed to dpkg-source-v3/quilt (closes: #699247).
+
+ -- Daniel Leidert <dleidert@debian.org>  Tue, 14 May 2013 20:29:20 +0200
+
+gpgme1.0 (1.2.0-1.4) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Remove references to other libraries from dependency_libs field
+    (Closes: #619218).
+
+ -- Luk Claes <luk@debian.org>  Sun, 29 May 2011 23:04:40 +0200
+
+gpgme1.0 (1.2.0-1.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Add ld-no-add-needed.dpatch from Matthias Klose to fix FTBFS
+    (Closes: #554735) (Closes: #616682), thanks!
+
+ -- Thorsten Glaser <tg@mirbsd.de>  Sun, 01 May 2011 16:12:11 +0000
+
+gpgme1.0 (1.2.0-1.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Enable support for gpgconf (Closes: #510567)
+
+ -- Stefano Zacchiroli <zack@debian.org>  Wed, 02 Dec 2009 11:17:17 +0100
+
+gpgme1.0 (1.2.0-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Do not ship with /usr/share/info/dir.gz (Closes: 546015)
+  * do not claim in debian/rules configure-stamp can be run parallel
+    with build-stamp (Closes: 551783)
+  * update symbols file for 1.2.0
+
+ -- Bernhard R. Link <brlink@debian.org>  Mon, 02 Nov 2009 14:16:57 +0100
+
+gpgme1.0 (1.2.0-1) unstable; urgency=low
+
+  * New Upstream Version (Closes: #545671)
+  * As there are new symbols introduced in this version, bump shlibs info.
+  * Bump Standards-Version to 3.8.3, no changes.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Tue, 08 Sep 2009 14:30:11 +0200
+
+gpgme1.0 (1.1.8-3) unstable; urgency=low
+
+  * Add libgpgme11.symbols file as provided by Bernhard R. Link
+    <brlink@debian.org>, adressing the problem caused by 1.1.8-2 by bumping
+    shlibs info as a new symbol was added (Closes: #512221)
+  * Change section of doc-base from Apps/programming to Programming/C (and make
+    lintian happy)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Tue, 20 Jan 2009 23:58:45 +0100
+
+gpgme1.0 (1.1.8-2) unstable; urgency=low
+
+  * New symbol introduced in version 1.1.7; bumped shlibs info (Closes: #510796)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Mon, 12 Jan 2009 23:13:23 +0100
+
+gpgme1.0 (1.1.8-1) unstable; urgency=low
+
+  * New Upstream Version
+    + Close file descriptors leaked on seahorse-agent (Closes: #492551)
+    + Pthread support is back again.
+  * debian/patches:
+    + Disabled gpgme-config patch as it is now included upstream.
+  * Upstream changelog was moved to src/, change dh_intallchangelog call
+    for it to get it from new location.
+  * Bump Standards-Version to 3.8.0
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Thu, 25 Dec 2008 14:16:26 +0100
+
+gpgme1.0 (1.1.6-2) unstable; urgency=medium
+
+  * Bump shlibs info, as this version added some new symbols (Closes: #469534)
+  * Urgency set to medium, as this package has yet transitioned to lenny.
+  * debian/control: add Vcs-Browser info
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 08 Mar 2008 14:06:34 +0100
+
+gpgme1.0 (1.1.6-1) unstable; urgency=low
+
+  * New Upstream Version
+  * debian/control:
+    + Update Standards-Version to 3.7.3, no changes needed
+    + Add Vcs-Git field
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 13 Jan 2008 23:59:49 +0100
+
+gpgme1.0 (1.1.5-2) unstable; urgency=low
+
+  * Add dependency on libpth-dev to libgpgme11-dev package (Closes: #440265)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 01 Sep 2007 10:39:50 +0200
+
+gpgme1.0 (1.1.5-1) unstable; urgency=low
+
+  * New upstream version (Closes: #434800)
+  * Use binary:Version to make the package bin-NMU safe. (Closes: #432935)
+  * As we bumped debhelper compat level to 5, we have to build-depend on a
+    debhelper >= 5.0.0
+  * Compile always with libpth20 support. (Closes: #432635)
+  * 10_relibtoolize patch disabled. Should not fail when building twice in a
+    row (Closes: #424365)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 15 Jul 2007 21:53:17 +0200
+
+gpgme1.0 (1.1.4-1) unstable; urgency=low
+
+  * New upstream version
+     + multiple_messages.dpatch: disabled, applied upstream
+  * Bump debhelper compat level to 5. Disable line setting it in debian/rules
+    file, which conflicts with debian/compat
+  * Call distclean target only if Makefile exists, and don't ignore other
+    errors.
+  * Use ${source:Version}. Make the package bin-NMU safe.
+  * Bump Standards-Version to 3.7.2. No changes needed.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 08 Jul 2007 21:48:34 +0200
+
+gpgme1.0 (1.1.2-5) unstable; urgency=low
+
+  * The "I need more sleep" release
+  * Roll back some stuff of latest two versions as are not suitable for etch:
+    + 10_relibtoolize: roll back to 1.1.2-2 version and disable
+    + debian/control: do not build depend on libpth-dev
+    + debian/rules: we should still use compat version 3 to avoid unexpected
+    changes in how the package is built.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Thu, 22 Mar 2007 23:30:24 +0100
+
+gpgme1.0 (1.1.2-4) unstable; urgency=low
+
+  * Build Depend on libpth-dev, as some arches are not building the package
+    without it (Closes: #415233)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 18 Mar 2007 01:24:14 +0100
+
+gpgme1.0 (1.1.2-3) unstable; urgency=high
+
+  * Urgency high due to security bug.
+  * multiple_messages.dpatch: new, includes patch for multiple messages
+    problem in GnuPG (Closes: #413923)
+  * debian/control: depend on gnupg >= 1.4.6-2, as it is patched for the above
+    bug as well.
+  * debian/rules: don't use DH_COMPAT var, as we are using compat file
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 17 Mar 2007 00:52:16 +0100
+
+gpgme1.0 (1.1.2-2) unstable; urgency=low
+
+  * deian/patches:
+     + gpgme-config: Fix gpgme-config as incidentally pthread
+       support was removed. (Closes: #358303)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 15 Apr 2006 12:00:20 +0200
+
+gpgme1.0 (1.1.2-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat,  4 Mar 2006 16:03:24 +0100
+
+gpgme1.0 (1.1.0-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat,  8 Oct 2005 14:26:01 +0200
+
+gpgme1.0 (1.0.3-1) unstable; urgency=low
+
+  * New upstream version (Closes: #327357)
+     + Break fd processing after an error. (Closes: #301432)
+  * Suggest gpgsm (Closes: #281261)
+  * Bumped Standards-Version to 3.6.2. No changes needed.
+  * Updated FSF address.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 17 Sep 2005 00:09:49 +0200
+
+gpgme1.0 (1.0.2-1) unstable; urgency=low
+
+  * New upstream version.
+  * copyright: This library is now licensed under LGPL.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 15 Jan 2005 15:14:12 +0100
+
+gpgme1.0 (1.0.1-2) unstable; urgency=low
+
+  * debian/rules:
+     + Bumped shlibs to 1.0.1, as this package exposes new symbols that could
+       be started to be used by programs, making them incompatible with older
+       libraries.
+
+  * Yay! I forgot to close the "new release" bug. (Closes: #274357)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Tue, 16 Nov 2004 21:36:40 +0100
+
+gpgme1.0 (1.0.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/rules:
+     + Set a default path for gpgsm. This will enable it if present at run
+     time.
+  * debian/docs:
+     + There is no README-alpha file now.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 23 Oct 2004 11:16:09 +0200
+
+gpgme1.0 (1.0.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/control, debian/rules:
+      + Changed source package name to gpgme1.0, as we still need to keep in the
+        archive the old 0.3.x versions.
+  * debian/README.Debian: removed.
+  * debian/patches:
+      + 10_relibtoolize: updated (and disabled)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Thu, 30 Sep 2004 19:03:03 +0200
+
+gpgme0.4 (0.9.0-1) unstable; urgency=low
+
+  * New upstream version.
+    - Version has been bumped to 0.9.0, but for now tha package will be called
+    gpgme0.4 as habitual for this branch.
+  * debian/control: removed not needed texinfo build-dependency.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 19 Jun 2004 14:31:02 +0200
+
+gpgme0.4 (0.4.7-1) unstable; urgency=low
+
+  * New upstream version.
+  * debian/rules && debian/control: using dpatch now
+  * debian/patches:
+     + 10_relibtoolize.dpatch: new (For #242950)
+  * debian/rules:
+     + Added missing --enable-static to configure call.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 23 May 2004 22:33:41 +0200
+
+gpgme0.4 (0.4.6-1) unstable; urgency=low
+
+  * New upstream version.
+  * debian/rules:
+     - Stick shlibs to version 0.4.5 as nothing has changed in
+     this new version, only bugs fixed.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 18 Apr 2004 15:50:46 +0200
+
+gpgme0.4 (0.4.5-1) unstable; urgency=low
+
+  * New upstream version.
+  * Build Depends on libgpg-error (>= 0.7-1)
+  * This version is compiled with LFS support. This is a ABI break, but
+    following the comments in NEWS file, version won't be modified, so please,
+    test your packages.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Tue, 16 Mar 2004 23:58:26 +0100
+
+gpgme0.4 (0.4.3-1) unstable; urgency=low
+
+  * ACK of previous NMUs.
+  * The last NMU should have closed #220887, as the last version was packaged.
+    (Closes: #220887)
+  * Standars-Version bumped to 3.6.1. No changes needed.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 21 Dec 2003 12:59:38 +0100
+
+gpgme0.4 (0.4.3-0.1) unstable; urgency=low
+
+  * NMU with permission of maintainer
+  * new upstream version
+    - build-dep against libgpg-error-dev (>= 0.5)
+    - don't longer install doc/gpgme-*.info
+  * remote dh_undocumented call
+
+ -- Bastian Blank <waldi@debian.org>  Mon, 17 Nov 2003 20:21:47 +0100
+
+gpgme0.4 (0.4.1-1.2) unstable; urgency=low
+
+  * NMU
+  * brown-paoer bag release, perhaps I should start by checking the packages I
+    upload.
+  * Don't ship /usr/share/info/dir*, see #213524 (Closes: #218083).
+
+ -- Andreas Metzler <ametzler@debian.org>  Wed, 29 Oct 2003 12:58:48 +0100
+
+gpgme0.4 (0.4.1-1.1) unstable; urgency=low
+
+  * NMU
+  * gpgme.h in libgpgme11-dev includes a header from libgpg-error-dev. Change
+    dependencies to reflect this. (Closes: #203989)
+
+ -- Andreas Metzler <ametzler@debian.org>  Mon, 20 Oct 2003 16:21:10 +0200
+
+gpgme0.4 (0.4.1-1) unstable; urgency=low
+
+  * New upstream release.
+     - API changes, soname bumped to 11.
+     - New dependency on libgpg-error0.
+  * Standars-Version bumped to 3.5.10. No changes needed.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Mon, 23 Jun 2003 16:00:46 +0200
+
+gpgme0.4 (0.4.0-1) unstable; urgency=low
+
+  * New upstream version (0.4.x branch).
+  * Chaged source to gpgme0.4.
+  * Bump libgpgme soname to 10.
+  * Changed libgpgme-dev to libgpgme10-dev to go on supportig 0.3.x branch.
+  * Bump Standars-Version to 3.5.8
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 12 Jan 2003 10:59:19 +0100
+
+gpgme (0.3.14-1) unstable; urgency=low
+
+  * Another upstream release: fixes a segv.
+  * GPGME-Plug stuff is now in "cryptplug" package. Look at ITP #171097
+  I'll close 144068 and 163246 bugs with cryptplug upload.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Wed,  4 Dec 2002 21:09:16 +0100
+
+gpgme (0.3.13-1) unstable; urgency=low
+
+  * New upstream released.
+  * (PACKAGE NOT UPLOADED)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Thu, 21 Nov 2002 19:12:49 +0100
+
+gpgme (0.3.12-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Thu, 17 Oct 2002 18:11:05 +0200
+
+gpgme (0.3.11-2) unstable; urgency=low
+
+  * Updated config.[guess,sub] files. (Closes: #164527)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 13 Oct 2002 12:27:57 +0200
+
+gpgme (0.3.11-1) unstable; urgency=low
+
+  * New upstream release.
+  * Standars-Version to 3.5.7
+  * Depends on GnuPG >= 1.2.0
+  * gpgme-config manpage written. (Closes: #99179)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat, 12 Oct 2002 18:48:29 +0200
+
+gpgme (0.3.10-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Mon,  2 Sep 2002 21:17:54 +0200
+
+gpgme (0.3.8-1) unstable; urgency=low
+
+  * New upstream release (another one ;)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Wed,  3 Jul 2002 00:35:53 +0200
+
+gpgme (0.3.7-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Tue, 11 Jun 2002 12:41:59 +0200
+
+gpgme (0.3.6-1) unstable; urgency=low
+
+  * New upstream release. (Closes: #141990, #144761)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat,  4 May 2002 13:23:40 +0200
+
+gpgme (0.3.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * Added a dot in doc/gpgme.info* files to solve the problem with
+    install-info complainig about bad entries. (Closes: #139631)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Mon,  1 Apr 2002 20:15:00 +0200
+
+gpgme (0.3.4-2) unstable; urgency=low
+
+  * Moved to main.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 24 Mar 2002 20:13:24 +0100
+
+gpgme (0.3.4-1) unstable; urgency=low
+
+  * New upstream release.
+  * Registered info files using dh_installinfo. (Closes: #137023)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sat,  9 Mar 2002 11:13:48 +0100
+
+gpgme (0.3.3-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Wed, 13 Feb 2002 15:10:27 +0100
+
+gpgme (0.3.2-1) unstable; urgency=low
+
+  * New upstream version.
+  * Now we have really documentation, so I'm removing from the package the
+  tests/ dir.
+  * Install info documentation.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Sun, 10 Feb 2002 17:24:04 +0100
+
+gpgme (0.3.0-3) unstable; urgency=medium
+
+  * Changed debian/copyright file to reflect that this software is under
+  the GNU GPL v2 or later. (Closes: #131230)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Mon, 28 Jan 2002 12:18:52 +0100
+
+gpgme (0.3.0-2) unstable; urgency=low
+
+  * I forgot to change the dependency in libgpgme-dev from libgpgme0
+  to libgpgme5. That happens to me for doing things fast.
+  Thanks to Gustavo Norhona for pointing it.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Wed, 19 Dec 2001 23:32:02 +0100
+
+gpgme (0.3.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * Bumped soname's lib package to 5.
+  * Fixed a typo in libgpgme and libgpgme-dev packages description.
+  (Closes: #124970,#124971)
+  * Removed the build-dependency on gnupg. Now we can specify the
+  path for gpg bin with --with-gpg option.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Wed, 19 Dec 2001 16:59:50 +0100
+
+gpgme (0.2.3-2) unstable; urgency=low
+
+  * Applied a patch to from Marcus Brinkman to make gpgme compile
+  in alpha. This patch has been applied in CVS version.
+  * Applied another patch to solve a bad initialization. (Closes: #119573)
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Wed, 14 Nov 2001 16:36:45 +0100
+
+gpgme (0.2.3-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Applied a little patch to keylist.c file to solve a little problem.
+  The patch is yet applied in upstream CVS.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Tue, 18 Sep 2001 13:17:19 +0200
+
+gpgme (0.2.2-2) unstable; urgency=low
+
+  * Added 'tests' dir from upstream to libgpgme-dev package, as it works
+  like some kind of documentation for this package. (Closes: #111164)
+
+  * Changed the maintainer field to show the Debian email address.
+
+ -- Jose Carlos Garcia Sogo <jsogo@debian.org>  Thu,  6 Sep 2001 20:03:05 +0200
+
+gpgme (0.2.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Updated config.{guess,sub} files. (closes: #98159)
+
+ -- Jose Carlos Garcia Sogo <jose@jaimedelamo.eu.org>  Tue, 12 Jun 2001 16:34:05 +0200
+
+gpgme (0.2.1-1) unstable; urgency=low
+
+  * Initial Release (closes: #84233)
+
+ -- Jose Carlos Garcia Sogo <jose@jaimedelamo.eu.org>  Mon, 30 Apr 2001 19:34:26 +0200

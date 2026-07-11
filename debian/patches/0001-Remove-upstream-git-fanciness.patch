@@ -1,0 +1,126 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Thu, 11 Jun 2015 18:26:16 -0400
+Subject: Remove upstream git fanciness
+
+Debian needs to be able to build libgpg-error while using git for
+tracking the debian packaging itself.  Debian also wants to autoreconf
+this stuff.  However, Debian does *not* need to conform exactly to
+upstream's git configurations.
+
+This avoids mistakes like accidentally identifying running code as a
+beta.
+
+This is the same approach taken in debian's libgpg-error packaging
+since 2017.
+
+Forwarded: not-needed
+---
+ autogen.sh | 76 ++++----------------------------------------------------------
+ 1 file changed, 4 insertions(+), 72 deletions(-)
+
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -257,42 +257,16 @@ if [ "$myhost" = "find-version" ]; then
+       vers="$major.$minor.$micro"
+     fi
+     matchexcl="--exclude $package-*beta*"
+ 
+     beta=no
+-    if [ -e .git ]; then
+-      ingit=yes
+-      tmp=$(git describe --match "${matchstr1}" $matchexcl --long 2>/dev/null)
+-      if [ -n "$tmp" ]; then
+-          tmp=$(echo "$tmp" | sed s/^"$package"// \
+-                    | awk -F- '$3!=0 && $3 !~ /^beta/ {print"-beta"$3}')
+-      else
+-          # (due tof "-base" in the tag we need to take the 4th field)
+-          tmp=$(git describe --match "${matchstr2}" $matchexcl --long 2>/dev/null)
+-          if [ -n "$tmp" ]; then
+-              tmp=$(echo "$tmp" | sed s/^"$package"// \
+-                        | awk -F- '$4!=0 && $4 !~ /^beta/ {print"-beta"$4}')
+-          elif [ -n "${matchstr3}" ]; then
+-              tmp=$(git describe --match "${matchstr3}" $matchexcl --long 2>/dev/null)
+-              if [ -n "$tmp" ]; then
+-                  tmp=$(echo "$tmp" | sed s/^"$package"// \
+-                          | awk -F- '$4!=0 && $4 !~ /^beta/ {print"-beta"$4}')
+-              fi
+-          fi
+-      fi
+-      [ -n "$tmp" ] && beta=yes
+-      cid=$(git rev-parse --verify HEAD | tr -d '\n\r')
+-      rev=$(git rev-parse --short HEAD | tr -d '\n\r')
+-      rvd=$((0x$(echo ${rev} | dd bs=1 count=4 2>/dev/null)))
+-    else
+-      ingit=no
+-      beta=yes
+-      tmp="-unknown"
+-      cid="0000000"
+-      rev="0000000"
+-      rvd="0"
+-    fi
++
++    ingit=no
++    tmp=""
++    rvd="$(wc -l < debian/changelog)"
++    rev="$(printf %07x $rvd)"
++    cid="$rev"
+ 
+     echo "$package-$vers$tmp:$beta:$ingit:$vers$tmp:$vers:$tmp:$rev:$rvd:$cid:"
+     exit 0
+ fi
+ # **** end FIND VERSION ****
+@@ -473,54 +447,10 @@ the corresponding environment variables;
+ 
+ EOF
+     die_p
+ fi
+ 
+-# Check the git setup.
+-if [ -d .git ]; then
+-  CP="cp -p"
+-  # If we have a GNU cp we can add -v
+-  if cp --version >/dev/null 2>/dev/null; then
+-    [ -z "${SILENT}" ] && CP="$CP -v"
+-  fi
+-  if [ -f .git/hooks/pre-commit.sample ] \
+-      && [ ! -f .git/hooks/pre-commit ]; then
+-    [ -z "${SILENT}" ] && cat <<EOF
+-*** Activating trailing whitespace git pre-commit hook. ***
+-    For more information see this thread:
+-      https://mail.gnome.org/archives/desktop-devel-list/2009-May/msg00084.html
+-    To deactivate this pre-commit hook again move .git/hooks/pre-commit
+-    and .git/hooks/pre-commit.sample out of the way.
+-EOF
+-      $CP .git/hooks/pre-commit.sample .git/hooks/pre-commit
+-      chmod +x  .git/hooks/pre-commit
+-  fi
+-
+-  if [ "$gettext_vers" != "n/a" ]; then
+-    tmp=$(git config --get filter.cleanpo.clean)
+-    if [ "$tmp" != \
+-          "awk '/^\"POT-Creation-Date:/&&!s{s=1;next};!/^#: /{print}'" ]
+-    then
+-      info "*** Adding GIT filter.cleanpo.clean configuration."
+-      git config --add filter.cleanpo.clean \
+-        "awk '/^\"POT-Creation-Date:/&&!s{s=1;next};!/^#: /{print}'"
+-    fi
+-  fi
+-  if [ -f build-aux/git-hooks/commit-msg ] \
+-     && [ ! -f .git/hooks/commit-msg ]; then
+-      [ -z "${SILENT}" ] && cat <<EOF
+-*** Activating commit log message check hook. ***
+-EOF
+-      $CP build-aux/git-hooks/commit-msg .git/hooks/commit-msg
+-      chmod +x  .git/hooks/commit-msg
+-      if [ x"${display_name}" != x ]; then
+-         git config format.subjectPrefix "PATCH ${display_name}"
+-         git config sendemail.to "${patches_to}"
+-      fi
+-  fi
+-fi
+-
+ aclocal_flags="-I m4"
+ if [ -n "${extra_aclocal_flags}" ]; then
+   aclocal_flags="${aclocal_flags} ${extra_aclocal_flags}"
+ fi
+ if [ -n "${ACLOCAL_FLAGS}" ]; then

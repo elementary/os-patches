@@ -1,0 +1,36 @@
+#!/bin/bash
+set -e
+workdir=$(mktemp -d)
+cleanup() {
+    rm -rf "$workdir"
+}
+trap cleanup EXIT
+gcc --pedantic -Wall -Werror -o "$workdir/checky2106" -x c - <<EOF
+#include <stdio.h>
+int main() { printf("%zu\n", sizeof(unsigned long)); return 0; }
+EOF
+sz=$("$workdir/checky2106")
+if [ "$sz" -lt 8 ]; then
+    limit='in the far future'
+    if [ "$sz" -eq 4 ]; then
+        limit='after 2106-02-07 06:28:16Z'
+    fi
+    printf "unsigned long on this platform is %d octets.
+This means that GPGME will fail when encountering expiration
+dates %s.
+
+Please see https://dev.gnupg.org/T4766 and https://dev.gnupg.org/T4826
+for more details.
+" "$sz" "$limit"
+    if [ "$(dpkg-architecture -qDEB_HOST_ARCH_BITS)" == 32 ] &&
+        [ $(date +%s) -lt $(TZ=UTC date +%s --date='2031-02-07') ]; then
+        printf "We permit skipping this test during autopkgtest until 75 years
+before the cutoff.
+
+Hopefully upstream will address the issue before that time, to be 
+able to gracefully handle 75-year expiration dates."
+        exit 77
+    else
+        exit 1
+    fi
+fi
