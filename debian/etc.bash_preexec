@@ -1,5 +1,9 @@
 #!/bin/bash
 #
+# NOTE: Make sure to preserve the shebang, this comment, the copyright header,
+# and "elementary modification" parts when rebasing this file with newer version
+# of bash-preexec.
+#
 # The MIT License
 #
 # Copyright (c) 2017 Ryan Caloras and contributors (see https://github.com/rcaloras/bash-preexec)
@@ -393,6 +397,25 @@ __bp_install_after_session_init() {
     # shellcheck disable=SC2179 # PROMPT_COMMAND is not an array in bash <= 5.0
     PROMPT_COMMAND+=${__bp_install_string}
 }
+
+################################
+# elementary modification begin
+################################
+if [ -n $FLATPAK_ID ]; then
+    # Do not install bash-preexec in case of the sandboxed terminal launched
+    # with "flatpak run --command=sh <APP>" to prevent the following warnings
+    # are shown in the terminal:
+    #
+    #     sh: __bp_precmd_invoke_cmd: command not found
+    #     sh: __bp_interactive_mode: command not found
+    #
+    # Probablly this happens because the sandboxed apps don't have access to
+    # /etc/bash_preexec of the host.
+    return
+fi
+################################
+# elementary modification end
+################################
 
 # Run our install so long as we're not delaying it.
 if [[ -z "${__bp_delay_install:-}" ]]; then
