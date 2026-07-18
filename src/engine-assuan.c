@@ -285,7 +285,6 @@ llass_new (void **engine, const char *file_name, const char *home_dir,
         free (dft_display);
     }
 
-
   if (llass->opt.gpg_agent)
     err = _gpgme_getenv ("GPG_TTY", &env_tty);
 
