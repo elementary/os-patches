@@ -737,7 +737,7 @@ gpg_new (void **engine, const char *file_name, const char *home_dir,
 	      if (rc)
 		goto leave;
 
-              if (dft_ttytype)
+              if (dft_ttytype && *dft_ttytype)
                 rc = add_gpg_arg_with_value (gpg, "--ttytype=", dft_ttytype, 0);
 
 	      free (dft_ttytype);

@@ -526,7 +526,7 @@ gpgsm_new (void **engine, const char *file_name, const char *home_dir,
 	  err = _gpgme_getenv ("TERM", &dft_ttytype);
 	  if (err)
 	    goto leave;
-	  if (dft_ttytype)
+	  if (dft_ttytype && *dft_ttytype)
 	    {
 	      if (gpgrt_asprintf (&optstr, "OPTION ttytype=%s", dft_ttytype)< 0)
 		{
@@ -542,6 +542,8 @@ gpgsm_new (void **engine, const char *file_name, const char *home_dir,
 	      if (err)
 		goto leave;
 	    }
+          else
+            free (dft_ttytype);
 	}
     }
 
