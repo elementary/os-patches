@@ -6,7 +6,7 @@ The packages are included into the [OS Patches Repository](https://launchpad.net
 
 ## How is this repository working
 
-The `master` branch is composed of GitHub Workflows that are running daily to
+The `main` branch is composed of GitHub Workflows that are running daily to
 check for any new version in the Ubuntu repositories of the patched components.
 If a newer version of a package is found in the Ubuntu repositories, a Pull Request
 will be opened in this repository to let the team know to rebase patches and push

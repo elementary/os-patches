@@ -172,7 +172,7 @@ def main():
                 title=pull_title,
                 body=f"""A new version of `{package_name} {pocket_version}` replaces `{patched_version}`.""",
             )
-            current_repo.git.checkout("master")
+            current_repo.git.checkout("main")
 
 
 if __name__ == "__main__":
