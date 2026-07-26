@@ -1,0 +1,251 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<refentry id="flatpak-info">
+
+    <refentryinfo>
+        <title>flatpak info</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak info</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-info</refname>
+        <refpurpose>Show information about an installed application or runtime</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak info</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="plain">NAME</arg>
+                <arg choice="opt">BRANCH</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            Show info about an installed application or runtime.
+        </para>
+        <para>
+            By default, the output is formatted in a friendly format.
+            If you specify any of the <option>--show-…</option> or
+            <option>--file-access</option> options, the output is instead
+            formatted in a machine-readable format.
+        </para>
+        <para>
+            By default, both per-user and system-wide installations are queried.
+            Use the <option>--user</option>, <option>--system</option>
+            or <option>--installation</option> options to change this.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-u</option></term>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    Query per-user installations.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    Query the default system-wide installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    Query a system-wide installation by <arg choice="plain">NAME</arg> among
+                    those defined in <filename>/etc/flatpak/installations.d/</filename>.
+                    Using <option>--installation=default</option> is equivalent to using
+                    <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--arch=ARCH</option></term>
+
+                <listitem><para>
+                    Query for this architecture. See <command>flatpak --supported-arches</command>
+                    for architectures supported by the host.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-r</option></term>
+                <term><option>--show-ref</option></term>
+
+                <listitem><para>
+                    Show the installed ref.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-o</option></term>
+                <term><option>--show-origin</option></term>
+
+                <listitem><para>
+                    Show the remote the ref is installed from.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-c</option></term>
+                <term><option>--show-commit</option></term>
+
+                <listitem><para>
+                    Show the installed commit id.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-s</option></term>
+                <term><option>--show-size</option></term>
+
+                <listitem><para>
+                    Show the installed size.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-m</option></term>
+                <term><option>--show-metadata</option></term>
+
+                <listitem><para>
+                    Show the metadata.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--show-runtime</option></term>
+
+                <listitem><para>
+                    Show the runtime.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--show-sdk</option></term>
+
+                <listitem><para>
+                    Show the SDK.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-M</option></term>
+                <term><option>--show-permissions</option></term>
+
+                <listitem><para>
+                    Show the permissions.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--file-access=PATH</option></term>
+
+                <listitem><para>
+                    Show the level of access to the given path.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-e</option></term>
+                <term><option>--show-extensions</option></term>
+
+                <listitem><para>
+                    Show the matching extensions.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-l</option></term>
+                <term><option>--show-location</option></term>
+
+                <listitem><para>
+                    Show the on-disk location of the app or runtime. See the
+                    examples below.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak info org.gnome.Builder//master</command>
+        </para>
+        <para>
+            <command>$ tree `flatpak info -l org.gnome.Builder//master`/files</command>
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+        <para>
+            <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-install</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-update</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
+
+    </refsect1>
+
+</refentry>

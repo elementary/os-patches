@@ -1,0 +1,3576 @@
+/* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
+ * Copyright © 2014-2019 Red Hat, Inc
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Authors:
+ *       Alexander Larsson <alexl@redhat.com>
+ */
+
+#include "config.h"
+
+#include <glib/gi18n-lib.h>
+#include <gio/gunixoutputstream.h>
+#include <gio/gunixinputstream.h>
+
+#include "libglnx.h"
+
+#include <archive.h>
+#include <archive_entry.h>
+#include "flatpak-image-source-private.h"
+#include "flatpak-oci-registry-private.h"
+#include "flatpak-oci-signatures-private.h"
+#include "flatpak-repo-utils-private.h"
+#include "flatpak-utils-base-private.h"
+#include "flatpak-utils-private.h"
+#include "flatpak-uri-private.h"
+#include "flatpak-variant-private.h"
+#include "flatpak-variant-impl-private.h"
+#include "flatpak-dir-private.h"
+#include "flatpak-xml-utils-private.h"
+#include "flatpak-zstd-compressor-private.h"
+#include "flatpak-zstd-decompressor-private.h"
+
+#define MAX_JSON_SIZE (1024 * 1024)
+
+typedef struct archive FlatpakAutoArchiveWrite;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakAutoArchiveWrite, archive_write_free)
+
+typedef struct archive FlatpakAutoArchiveRead;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakAutoArchiveRead, archive_read_free)
+
+static void flatpak_oci_registry_initable_iface_init (GInitableIface *iface);
+
+/* A FlatpakOciRegistry represents either:
+ *
+ *  A local directory with a layout corresponding to the OCI image specification -
+ *    we usually use this to store a single image, but it could be used for multiple
+ *    images.
+ *  A remote docker registry.
+ *
+ * This code used to support OCI image layouts on remote HTTP servers, but that's not
+ * really a thing anybody does. It would be inefficient for storing large numbers of
+ * images, since all versions need to be listed in index.json.
+ */
+struct FlatpakOciRegistry
+{
+  GObject  parent;
+
+  gboolean for_write;
+  gboolean valid;
+  gboolean is_docker;
+  char    *uri;
+  GFile   *archive;
+  int      tmp_dfd;
+  char    *token;
+  char    *signature_lookaside;
+
+  /* Local repos */
+  int dfd;
+  GLnxTmpDir *tmp_dir;
+
+  /* Remote repos */
+  FlatpakHttpSession *http_session;
+  GUri *base_uri;
+  FlatpakCertificates *certificates;
+};
+
+typedef struct
+{
+  GObjectClass parent_class;
+} FlatpakOciRegistryClass;
+
+enum {
+  PROP_0,
+
+  PROP_URI,
+  PROP_ARCHIVE,
+  PROP_FOR_WRITE,
+  PROP_TMP_DFD,
+};
+
+G_DEFINE_TYPE_WITH_CODE (FlatpakOciRegistry, flatpak_oci_registry, G_TYPE_OBJECT,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                flatpak_oci_registry_initable_iface_init))
+
+static void
+glnx_tmpdir_free (GLnxTmpDir *tmpf)
+{
+  (void)glnx_tmpdir_delete (tmpf, NULL, NULL);
+  g_free (tmpf);
+}
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(GLnxTmpDir, glnx_tmpdir_free)
+
+static gchar *
+parse_relative_uri (GUri *base_uri,
+                    const char *subpath,
+                    GError **error)
+{
+  g_autoptr(GUri) uri = NULL;
+
+  uri = g_uri_parse_relative (base_uri, subpath, FLATPAK_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, error);
+  if (uri == NULL)
+    return NULL;
+
+  return g_uri_to_string_partial (uri, G_URI_HIDE_PASSWORD);
+}
+
+static void
+flatpak_oci_registry_finalize (GObject *object)
+{
+  FlatpakOciRegistry *self = FLATPAK_OCI_REGISTRY (object);
+
+  if (self->dfd != -1)
+    close (self->dfd);
+
+  g_clear_pointer (&self->http_session, flatpak_http_session_free);
+  g_clear_pointer (&self->base_uri, g_uri_unref);
+  g_clear_pointer (&self->uri, g_free);
+  g_clear_pointer (&self->token, g_free);
+  g_clear_object (&self->archive);
+  g_clear_pointer (&self->tmp_dir, glnx_tmpdir_free);
+  g_clear_pointer (&self->certificates, flatpak_certificates_free);
+  g_clear_pointer (&self->signature_lookaside, g_free);
+
+  G_OBJECT_CLASS (flatpak_oci_registry_parent_class)->finalize (object);
+}
+
+static void
+flatpak_oci_registry_set_property (GObject      *object,
+                                   guint         prop_id,
+                                   const GValue *value,
+                                   GParamSpec   *pspec)
+{
+  FlatpakOciRegistry *self = FLATPAK_OCI_REGISTRY (object);
+  const char *uri;
+
+  switch (prop_id)
+    {
+    case PROP_URI:
+      /* Ensure the base uri ends with a / so relative urls work */
+      uri = g_value_get_string (value);
+      if (uri)
+        {
+        if (g_str_has_suffix (uri, "/"))
+          self->uri = g_strdup (uri);
+        else
+          self->uri = g_strconcat (uri, "/", NULL);
+        }
+      break;
+
+    case PROP_ARCHIVE:
+      self->archive = g_value_dup_object (value);
+      break;
+
+    case PROP_FOR_WRITE:
+      self->for_write = g_value_get_boolean (value);
+      break;
+
+    case PROP_TMP_DFD:
+      self->tmp_dfd = g_value_get_int (value);
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
+flatpak_oci_registry_get_property (GObject    *object,
+                                   guint       prop_id,
+                                   GValue     *value,
+                                   GParamSpec *pspec)
+{
+  FlatpakOciRegistry *self = FLATPAK_OCI_REGISTRY (object);
+
+  switch (prop_id)
+    {
+    case PROP_URI:
+      g_value_set_string (value, self->uri);
+      break;
+
+    case PROP_ARCHIVE:
+      g_value_set_object (value, self->archive);
+      break;
+
+    case PROP_FOR_WRITE:
+      g_value_set_boolean (value, self->for_write);
+      break;
+
+    case PROP_TMP_DFD:
+      g_value_set_int (value, self->tmp_dfd);
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
+flatpak_oci_registry_class_init (FlatpakOciRegistryClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->finalize = flatpak_oci_registry_finalize;
+  object_class->get_property = flatpak_oci_registry_get_property;
+  object_class->set_property = flatpak_oci_registry_set_property;
+
+  g_object_class_install_property (object_class,
+                                   PROP_URI,
+                                   g_param_spec_string ("uri",
+                                                        "",
+                                                        "",
+                                                        NULL,
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+  g_object_class_install_property (object_class,
+                                   PROP_ARCHIVE,
+                                   g_param_spec_object ("archive",
+                                                        "",
+                                                        "",
+                                                        G_TYPE_FILE,
+                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+  g_object_class_install_property (object_class,
+                                   PROP_TMP_DFD,
+                                   g_param_spec_int ("tmp-dfd",
+                                                     "",
+                                                     "",
+                                                     -1, G_MAXINT, -1,
+                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+  g_object_class_install_property (object_class,
+                                   PROP_FOR_WRITE,
+                                   g_param_spec_boolean ("for-write",
+                                                         "",
+                                                         "",
+                                                         FALSE,
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+}
+
+static void
+flatpak_oci_registry_init (FlatpakOciRegistry *self)
+{
+  self->dfd = -1;
+  self->tmp_dfd = -1;
+}
+
+gboolean
+flatpak_oci_registry_is_local (FlatpakOciRegistry *self)
+{
+  return self->dfd != -1;
+}
+
+const char *
+flatpak_oci_registry_get_uri (FlatpakOciRegistry *self)
+{
+  return self->uri;
+}
+
+void
+flatpak_oci_registry_set_token (FlatpakOciRegistry *self,
+                                const char *token)
+{
+  g_free (self->token);
+  self->token = g_strdup (token);
+
+  if (self->token)
+    (void)glnx_file_replace_contents_at (self->dfd, ".token",
+                                         (guchar *)self->token,
+                                         strlen (self->token),
+                                         0, NULL, NULL);
+}
+
+void
+flatpak_oci_registry_set_signature_lookaside (FlatpakOciRegistry *self,
+                                              const char         *signature_lookaside)
+{
+  g_set_str (&self->signature_lookaside, signature_lookaside);
+
+  if (self->signature_lookaside != NULL)
+    {
+      size_t last = strlen (self->signature_lookaside) - 1;
+
+      if (self->signature_lookaside[last] == '/')
+        self->signature_lookaside[last] = '\0';
+    }
+}
+
+FlatpakOciRegistry *
+flatpak_oci_registry_new (const char   *uri,
+                          gboolean      for_write,
+                          int           tmp_dfd,
+                          GCancellable *cancellable,
+                          GError      **error)
+{
+  FlatpakOciRegistry *oci_registry;
+
+  oci_registry = g_initable_new (FLATPAK_TYPE_OCI_REGISTRY,
+                                 cancellable, error,
+                                 "uri", uri,
+                                 "for-write", for_write,
+                                 "tmp-dfd", tmp_dfd,
+                                 NULL);
+
+  return oci_registry;
+}
+
+FlatpakOciRegistry *
+flatpak_oci_registry_new_for_archive (GFile        *archive,
+                                      GCancellable *cancellable,
+                                      GError      **error)
+{
+  FlatpakOciRegistry *oci_registry;
+
+  oci_registry = g_initable_new (FLATPAK_TYPE_OCI_REGISTRY,
+                                 cancellable, error,
+                                 "archive", archive,
+                                 NULL);
+
+  return oci_registry;
+}
+
+/* We just support the first http uri for now */
+static char *
+choose_alt_uri (GUri        *base_uri,
+                const char **alt_uris)
+{
+  int i;
+
+  if (alt_uris == NULL)
+    return NULL;
+
+  for (i = 0; alt_uris[i] != NULL; i++)
+    {
+      const char *alt_uri = alt_uris[i];
+      if (g_str_has_prefix (alt_uri, "http:") || g_str_has_prefix (alt_uri, "https:"))
+        return g_strdup (alt_uri);
+    }
+
+  return NULL;
+}
+
+static GBytes *
+remote_load_file (FlatpakOciRegistry *self,
+                  const char         *subpath,
+                  const char        **alt_uris,
+                  char              **out_content_type,
+                  GCancellable       *cancellable,
+                  GError            **error)
+{
+  g_autoptr(GBytes) bytes = NULL;
+  g_autofree char *uri_s = NULL;
+
+  uri_s = choose_alt_uri (self->base_uri, alt_uris);
+  if (uri_s == NULL)
+    {
+      uri_s = parse_relative_uri (self->base_uri, subpath, error);
+      if (uri_s == NULL)
+        return NULL;
+    }
+
+  bytes = flatpak_load_uri_full (self->http_session,
+                                 uri_s, self->certificates, FLATPAK_HTTP_FLAGS_ACCEPT_OCI,
+                                 NULL, self->token,
+                                 NULL, NULL, NULL, out_content_type, NULL,
+                                 cancellable, error);
+  if (bytes == NULL)
+    return NULL;
+
+  return g_steal_pointer (&bytes);
+}
+
+static GBytes *
+flatpak_oci_registry_load_file (FlatpakOciRegistry *self,
+                                const char         *subpath,
+                                const char        **alt_uris,
+                                char              **out_content_type,
+                                GCancellable       *cancellable,
+                                GError            **error)
+{
+  if (self->dfd != -1)
+    return flatpak_load_file_at (self->dfd, subpath, cancellable, error);
+  else
+    return remote_load_file (self, subpath, alt_uris, out_content_type, cancellable, error);
+}
+
+static JsonNode *
+parse_json (GBytes *bytes, GCancellable *cancellable, GError **error)
+{
+  g_autoptr(JsonParser) parser = NULL;
+  JsonNode *root = NULL;
+
+  parser = json_parser_new ();
+  if (!json_parser_load_from_data (parser,
+                                   g_bytes_get_data (bytes, NULL),
+                                   g_bytes_get_size (bytes),
+                                   error))
+    return NULL;
+
+  root = json_parser_get_root (parser);
+  if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, "Invalid json, no root object");
+      return NULL;
+    }
+
+  return json_node_copy (root);
+}
+
+static gboolean
+verify_oci_version (GBytes *oci_layout_bytes, gboolean *not_json, GCancellable *cancellable, GError **error)
+{
+  const char *version;
+  g_autoptr(JsonNode) node = NULL;
+  JsonObject *oci_layout;
+
+  node = parse_json (oci_layout_bytes, cancellable, error);
+  if (node == NULL)
+    {
+      *not_json = TRUE;
+      return FALSE;
+    }
+
+  *not_json = FALSE;
+  oci_layout = json_node_get_object (node);
+
+  version = json_object_get_string_member (oci_layout, "imageLayoutVersion");
+  if (version == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA, "Unsupported oci repo: oci-layout version missing");
+      return FALSE;
+    }
+
+  if (strcmp (version, "1.0.0") != 0)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "Unsupported existing oci-layout version %s (only 1.0.0 supported)", version);
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+/*
+ * Code to extract an archive such as a tarfile into a temporary directory
+ *
+ * Based on: https://github.com/libarchive/libarchive/wiki/Examples#A_Complete_Extractor
+ *
+ * We treat ARCHIVE_WARNING as fatal - while this might be too strict, it
+ * will avoid surprises.
+ */
+
+static gboolean
+propagate_libarchive_error (GError         **error,
+                            struct archive  *a)
+{
+  g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+               "%s", archive_error_string (a));
+  return FALSE;
+}
+
+static gboolean
+copy_data (struct archive  *ar,
+           struct archive  *aw,
+           GError         **error)
+{
+  int r;
+  const void *buff;
+  size_t size;
+  gint64 offset;
+
+  while (TRUE)
+    {
+      r = archive_read_data_block (ar, &buff, &size, &offset);
+
+      if (r == ARCHIVE_EOF)
+        return TRUE;
+
+      if (r == ARCHIVE_RETRY)
+        continue;
+
+      if (r != ARCHIVE_OK)
+        return propagate_libarchive_error (error, ar);
+
+      while (TRUE)
+        {
+          r = archive_write_data_block (aw, buff, size, offset);
+
+          if (r == ARCHIVE_RETRY)
+            continue;
+
+          if (r == ARCHIVE_OK)
+            break;
+
+          return propagate_libarchive_error (error, aw);
+        }
+    }
+}
+
+static gboolean
+unpack_archive (GFile   *archive,
+                char    *destination,
+                GError **error)
+{
+  g_autoptr(FlatpakAutoArchiveRead) a = NULL;
+  g_autoptr(FlatpakAutoArchiveWrite) ext = NULL;
+  g_autofree char *archive_path = NULL;
+  int flags;
+  int r;
+
+  flags = 0;
+  flags |= ARCHIVE_EXTRACT_SECURE_NODOTDOT;
+  flags |= ARCHIVE_EXTRACT_SECURE_SYMLINKS;
+
+  a = archive_read_new ();
+  archive_read_support_format_all (a);
+  archive_read_support_filter_all (a);
+
+  ext = archive_write_disk_new ();
+  archive_write_disk_set_options (ext, flags);
+  archive_write_disk_set_standard_lookup (ext);
+
+  archive_path = g_file_get_path (archive);
+  r = archive_read_open_filename (a, archive_path, 10240);
+  if (r != ARCHIVE_OK)
+    return propagate_libarchive_error (error, a);
+
+  while (TRUE)
+    {
+      g_autofree char *target_path = NULL;
+      struct archive_entry *entry;
+
+      r = archive_read_next_header (a, &entry);
+      if (r == ARCHIVE_EOF)
+        break;
+
+      if (r != ARCHIVE_OK)
+        return propagate_libarchive_error (error, a);
+
+      target_path = g_build_filename (destination, archive_entry_pathname (entry), NULL);
+      archive_entry_set_pathname (entry, target_path);
+
+      r = archive_write_header (ext, entry);
+      if (r != ARCHIVE_OK)
+        return propagate_libarchive_error (error, ext);
+
+      if (archive_entry_size (entry) > 0)
+        {
+          if (!copy_data (a, ext, error))
+            return FALSE;
+        }
+
+      r = archive_write_finish_entry (ext);
+      if (r != ARCHIVE_OK)
+        return propagate_libarchive_error (error, ext);
+    }
+
+  r = archive_read_close (a);
+  if (r != ARCHIVE_OK)
+    return propagate_libarchive_error (error, a);
+
+  r = archive_write_close (ext);
+  if (r != ARCHIVE_OK)
+    return propagate_libarchive_error (error, ext);
+
+  return TRUE;
+}
+
+static const char *
+get_download_tmpdir (void)
+{
+  /* We don't use TMPDIR because the downloaded artifacts can be
+   * very big, and we want to prefer /var/tmp to /tmp.
+   */
+  const char *tmpdir = g_getenv ("FLATPAK_DOWNLOAD_TMPDIR");
+  if (tmpdir)
+    return tmpdir;
+
+  return "/var/tmp";
+}
+
+static GLnxTmpDir *
+download_tmpdir_new (GError **error)
+{
+  g_autoptr(GLnxTmpDir) tmp_dir = g_new0 (GLnxTmpDir, 1);
+  glnx_autofd int base_dfd = -1;
+
+  if (!glnx_opendirat (AT_FDCWD, get_download_tmpdir (), TRUE, &base_dfd, error))
+    return NULL;
+
+  if (!glnx_mkdtempat (base_dfd, "oci-XXXXXX", 0700, tmp_dir, error))
+    return NULL;
+
+  return g_steal_pointer (&tmp_dir);
+}
+
+static gboolean
+flatpak_oci_registry_ensure_local (FlatpakOciRegistry *self,
+                                   gboolean            for_write,
+                                   GCancellable       *cancellable,
+                                   GError            **error)
+{
+  g_autoptr(GLnxTmpDir) local_tmp_dir = NULL;
+  glnx_autofd int local_dfd = -1;
+  int dfd;
+  g_autoptr(GError) local_error = NULL;
+  g_autoptr(GBytes) oci_layout_bytes = NULL;
+  g_autoptr(GBytes) token_bytes = NULL;
+  gboolean not_json;
+
+  if (self->dfd != -1)
+    {
+      dfd = self->dfd;
+    }
+  else if (self->archive)
+    {
+      local_tmp_dir = download_tmpdir_new (error);
+      if (!local_tmp_dir)
+        return FALSE;
+
+      if (!unpack_archive (self->archive, local_tmp_dir->path, error))
+        return FALSE;
+
+      if (!glnx_opendirat (AT_FDCWD, local_tmp_dir->path,
+                           TRUE, &local_dfd, error))
+        return FALSE;
+
+      dfd = local_dfd;
+    }
+  else
+    {
+      g_autoptr(GFile) dir = g_file_new_for_uri (self->uri);
+
+      if (!glnx_opendirat (AT_FDCWD, flatpak_file_get_path_cached (dir),
+                           TRUE, &local_dfd, &local_error))
+        {
+          if (for_write && g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+            {
+              g_clear_error (&local_error);
+
+              if (!glnx_shutil_mkdir_p_at (AT_FDCWD, flatpak_file_get_path_cached (dir), 0755, cancellable, error))
+                return FALSE;
+
+              if (!glnx_opendirat (AT_FDCWD, flatpak_file_get_path_cached (dir),
+                                   TRUE, &local_dfd, error))
+                return FALSE;
+            }
+          else
+            {
+              g_propagate_error (error, g_steal_pointer (&local_error));
+              return FALSE;
+            }
+        }
+
+      dfd = local_dfd;
+    }
+
+  if (for_write)
+    {
+      if (!glnx_shutil_mkdir_p_at (dfd, "blobs/sha256", 0755, cancellable, error))
+        return FALSE;
+    }
+
+  oci_layout_bytes = flatpak_load_file_at (dfd, "oci-layout", cancellable, &local_error);
+  if (oci_layout_bytes == NULL)
+    {
+      if (for_write && g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        {
+          const char *new_layout_data = "{\"imageLayoutVersion\": \"1.0.0\"}";
+
+          g_clear_error (&local_error);
+
+          if (!glnx_file_replace_contents_at (dfd, "oci-layout",
+                                              (const guchar *) new_layout_data,
+                                              strlen (new_layout_data),
+                                              0,
+                                              cancellable, error))
+            return FALSE;
+        }
+      else
+        {
+          g_propagate_error (error, g_steal_pointer (&local_error));
+          return FALSE;
+        }
+    }
+  else if (!verify_oci_version (oci_layout_bytes, &not_json, cancellable, error))
+    return FALSE;
+
+  if (self->dfd != -1)
+    {
+      token_bytes = flatpak_load_file_at (self->dfd, ".token", cancellable, NULL);
+      if (token_bytes != NULL)
+        self->token = g_strndup (g_bytes_get_data (token_bytes, NULL), g_bytes_get_size (token_bytes));
+    }
+
+  if (self->dfd == -1)
+    {
+      self->dfd = g_steal_fd (&local_dfd);
+      self->tmp_dir = g_steal_pointer (&local_tmp_dir);
+    }
+
+  return TRUE;
+}
+
+static gboolean
+flatpak_oci_registry_ensure_remote (FlatpakOciRegistry *self,
+                                    gboolean            for_write,
+                                    GCancellable       *cancellable,
+                                    GError            **error)
+{
+  g_autoptr(GUri) baseuri = NULL;
+  g_autoptr(GError) local_error = NULL;
+
+  if (for_write)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "Writes are not supported for remote OCI registries");
+      return FALSE;
+    }
+
+  self->http_session = flatpak_create_http_session (PACKAGE_STRING);
+  baseuri = g_uri_parse (self->uri, FLATPAK_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+  if (baseuri == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                   "Invalid url %s", self->uri);
+      return FALSE;
+    }
+
+  self->is_docker = TRUE;
+  self->base_uri = g_steal_pointer (&baseuri);
+
+  self->certificates = flatpak_get_certificates_for_uri (self->uri, &local_error);
+  if (local_error)
+    {
+      g_propagate_error (error, g_steal_pointer (&local_error));
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
+flatpak_oci_registry_initable_init (GInitable    *initable,
+                                    GCancellable *cancellable,
+                                    GError      **error)
+{
+  FlatpakOciRegistry *self = FLATPAK_OCI_REGISTRY (initable);
+  gboolean res;
+
+  g_warn_if_fail (self->archive || self->uri);
+
+  if (self->tmp_dfd == -1)
+    {
+      if (!glnx_opendirat (AT_FDCWD, get_download_tmpdir (), TRUE, &self->tmp_dfd, error))
+        return FALSE;
+    }
+
+  if (self->archive || g_str_has_prefix (self->uri, "file:/"))
+    res = flatpak_oci_registry_ensure_local (self, self->for_write, cancellable, error);
+  else
+    res = flatpak_oci_registry_ensure_remote (self, self->for_write, cancellable, error);
+
+  if (!res)
+    return FALSE;
+
+  self->valid = TRUE;
+
+  return TRUE;
+}
+
+static void
+flatpak_oci_registry_initable_iface_init (GInitableIface *iface)
+{
+  iface->init = flatpak_oci_registry_initable_init;
+}
+
+FlatpakOciIndex *
+flatpak_oci_registry_load_index (FlatpakOciRegistry *self,
+                                 GCancellable       *cancellable,
+                                 GError            **error)
+{
+  g_autoptr(GBytes) bytes = NULL;
+  g_autoptr(GError) local_error = NULL;
+
+  g_assert (self->valid);
+
+  bytes = flatpak_oci_registry_load_file (self, "index.json", NULL, NULL, cancellable, &local_error);
+  if (bytes == NULL)
+    {
+      g_propagate_error (error, g_steal_pointer (&local_error));
+      return NULL;
+    }
+
+  return (FlatpakOciIndex *) flatpak_json_from_bytes (bytes, FLATPAK_TYPE_OCI_INDEX, error);
+}
+
+gboolean
+flatpak_oci_registry_save_index (FlatpakOciRegistry *self,
+                                 FlatpakOciIndex    *index,
+                                 GCancellable       *cancellable,
+                                 GError            **error)
+{
+  g_autoptr(GBytes) bytes = NULL;
+
+  g_assert (self->valid);
+
+  bytes = flatpak_json_to_bytes (FLATPAK_JSON (index));
+
+  if (!glnx_file_replace_contents_at (self->dfd, "index.json",
+                                      g_bytes_get_data (bytes, NULL),
+                                      g_bytes_get_size (bytes),
+                                      0, cancellable, error))
+    return FALSE;
+
+  return TRUE;
+}
+
+static gboolean
+write_update_checksum (GOutputStream *out,
+                       gconstpointer  data,
+                       gsize          len,
+                       gsize         *out_bytes_written,
+                       GChecksum     *checksum,
+                       GCancellable  *cancellable,
+                       GError       **error)
+{
+  if (out)
+    {
+      if (!g_output_stream_write_all (out, data, len, out_bytes_written,
+                                      cancellable, error))
+        return FALSE;
+    }
+  else if (out_bytes_written)
+    {
+      *out_bytes_written = len;
+    }
+
+  if (checksum)
+    g_checksum_update (checksum, data, len);
+
+  return TRUE;
+}
+
+static gboolean
+splice_update_checksum (GOutputStream *out,
+                        GInputStream  *in,
+                        GChecksum     *checksum,
+                        GCancellable  *cancellable,
+                        GError       **error)
+{
+  g_return_val_if_fail (out != NULL || checksum != NULL, FALSE);
+
+  if (checksum != NULL)
+    {
+      gsize bytes_read, bytes_written;
+      char buf[4096];
+      do
+        {
+          if (!g_input_stream_read_all (in, buf, sizeof (buf), &bytes_read, cancellable, error))
+            return FALSE;
+          if (!write_update_checksum (out, buf, bytes_read, &bytes_written, checksum,
+                                      cancellable, error))
+            return FALSE;
+        }
+      while (bytes_read > 0);
+    }
+  else if (out != NULL)
+    {
+      if (g_output_stream_splice (out, in, 0, cancellable, error) < 0)
+        return FALSE;
+    }
+
+  return TRUE;
+}
+
+static char *
+get_digest_subpath (FlatpakOciRegistry *self,
+                    const char         *repository,
+                    gboolean            is_manifest,
+                    gboolean            allow_tag,
+                    const char         *digest,
+                    GError            **error)
+{
+  g_autoptr(GString) s = g_string_new ("");
+
+  if (!g_str_has_prefix (digest, "sha256:"))
+    {
+      if (!allow_tag)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                       "Unsupported digest type %s", digest);
+          return NULL;
+        }
+
+      if (!self->is_docker)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                       "Tags not supported for local oci dirs");
+          return NULL;
+        }
+    }
+
+  if (self->is_docker)
+    g_string_append (s, "v2/");
+
+  if (repository)
+    {
+      g_string_append (s, repository);
+      g_string_append (s, "/");
+    }
+
+  if (self->is_docker)
+    {
+      if (is_manifest)
+        g_string_append (s, "manifests/");
+      else
+        g_string_append (s, "blobs/");
+      g_string_append (s, digest);
+    }
+  else
+    {
+      /* As per above checks this is guaranteed to be a digest */
+      g_string_append (s, "blobs/sha256/");
+      g_string_append (s, digest + strlen ("sha256:"));
+    }
+
+  return g_string_free (g_steal_pointer (&s), FALSE);
+}
+
+static char *
+checksum_fd (int fd, GCancellable *cancellable, GError **error)
+{
+  g_autoptr(GChecksum) checksum = NULL;
+  g_autoptr(GInputStream) in = g_unix_input_stream_new (fd, FALSE);
+
+  checksum = g_checksum_new (G_CHECKSUM_SHA256);
+
+  if (!splice_update_checksum (NULL, in, checksum, cancellable, error))
+    return NULL;
+
+  return g_strdup (g_checksum_get_string (checksum));
+}
+
+int
+flatpak_oci_registry_download_blob (FlatpakOciRegistry    *self,
+                                    const char            *repository,
+                                    gboolean               manifest,
+                                    const char            *digest,
+                                    const char           **alt_uris,
+                                    FlatpakLoadUriProgress progress_cb,
+                                    gpointer               user_data,
+                                    GCancellable          *cancellable,
+                                    GError               **error)
+{
+  g_autofree char *subpath = NULL;
+  glnx_autofd int fd = -1;
+
+  g_assert (self->valid);
+
+  subpath = get_digest_subpath (self, repository, manifest, FALSE, digest, error);
+  if (subpath == NULL)
+    return -1;
+
+  if (self->dfd != -1)
+    {
+      /* Local case, trust checksum */
+      fd = flatpak_open_file_at (self->dfd, subpath, NULL, cancellable, error);
+      if (fd == -1)
+        return -1;
+    }
+  else
+    {
+      g_autofree char *uri_s = NULL;
+      g_autofree char *checksum = NULL;
+      g_autofree char *tmpfile_name = g_strdup_printf ("oci-layer-XXXXXX");
+      g_autoptr(GOutputStream) out_stream = NULL;
+
+      /* remote case, download and verify */
+
+      uri_s = choose_alt_uri (self->base_uri, alt_uris);
+      if (uri_s == NULL)
+        {
+          uri_s = parse_relative_uri (self->base_uri, subpath, error);
+          if (uri_s == NULL)
+            return -1;
+        }
+
+      if (!flatpak_open_in_tmpdir_at (self->tmp_dfd, 0600, tmpfile_name,
+                                      &out_stream, cancellable, error))
+        return -1;
+
+      fd = flatpak_open_file_at (self->tmp_dfd, tmpfile_name, NULL, cancellable, error);
+      (void) unlinkat (self->tmp_dfd, tmpfile_name, 0);
+
+      if (fd == -1)
+        return -1;
+
+      if (!flatpak_download_http_uri (self->http_session, uri_s,
+                                      self->certificates,
+                                      FLATPAK_HTTP_FLAGS_ACCEPT_OCI,
+                                      out_stream,
+                                      self->token,
+                                      progress_cb, user_data,
+                                      cancellable, error))
+        return -1;
+
+      if (!g_output_stream_close (out_stream, cancellable, error))
+        return -1;
+
+      checksum = checksum_fd (fd, cancellable, error);
+      if (checksum == NULL)
+        return -1;
+
+      if (strcmp (checksum, digest + strlen ("sha256:")) != 0)
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                       "Checksum digest did not match (%s != %s)", digest, checksum);
+          return -1;
+        }
+
+      lseek (fd, 0, SEEK_SET);
+    }
+
+  return g_steal_fd (&fd);
+}
+
+gboolean
+flatpak_oci_registry_mirror_blob (FlatpakOciRegistry    *self,
+                                  FlatpakOciRegistry    *source_registry,
+                                  const char            *repository,
+                                  gboolean               manifest,
+                                  const char            *digest,
+                                  const char           **alt_uris,
+                                  FlatpakLoadUriProgress progress_cb,
+                                  gpointer               user_data,
+                                  GCancellable          *cancellable,
+                                  GError               **error)
+{
+  g_autofree char *src_subpath = NULL;
+  g_autofree char *dst_subpath = NULL;
+  g_auto(GLnxTmpfile) tmpf = { 0 };
+  g_autoptr(GOutputStream) out_stream = NULL;
+  struct stat stbuf;
+  g_autofree char *checksum = NULL;
+
+  g_assert (self->valid);
+
+  if (!self->for_write)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "Write not supported to registry");
+      return FALSE;
+    }
+
+  src_subpath = get_digest_subpath (source_registry, repository, manifest, FALSE, digest, error);
+  if (src_subpath == NULL)
+    return FALSE;
+
+  dst_subpath = get_digest_subpath (self, NULL, manifest, FALSE, digest, error);
+  if (dst_subpath == NULL)
+    return FALSE;
+
+  /* Check if its already available */
+  if (fstatat (self->dfd, dst_subpath, &stbuf, AT_SYMLINK_NOFOLLOW) == 0)
+    return TRUE;
+
+  if (!glnx_open_tmpfile_linkable_at (self->dfd, "blobs/sha256",
+                                      O_RDWR | O_CLOEXEC | O_NOCTTY,
+                                      &tmpf, error))
+    return FALSE;
+
+  if (source_registry->dfd != -1)
+    {
+      glnx_autofd int src_fd = -1;
+
+      src_fd = flatpak_open_file_at (source_registry->dfd, src_subpath, NULL, cancellable, error);
+      if (src_fd == -1)
+        return FALSE;
+
+      if (glnx_regfile_copy_bytes (src_fd, tmpf.fd, (off_t) -1) < 0)
+        return glnx_throw_errno_prefix (error, "copyfile");
+    }
+  else
+    {
+      g_autofree char *uri_s = parse_relative_uri (source_registry->base_uri, src_subpath, error);
+      if (uri_s == NULL)
+        return FALSE;
+
+      out_stream = g_unix_output_stream_new (tmpf.fd, FALSE);
+
+      if (!flatpak_download_http_uri (source_registry->http_session,
+                                      uri_s, source_registry->certificates,
+                                      FLATPAK_HTTP_FLAGS_ACCEPT_OCI, out_stream,
+                                      self->token,
+                                      progress_cb, user_data,
+                                      cancellable, error))
+        return FALSE;
+
+      if (!g_output_stream_close (out_stream, cancellable, error))
+        return FALSE;
+    }
+
+  lseek (tmpf.fd, 0, SEEK_SET);
+
+  checksum = checksum_fd (tmpf.fd, cancellable, error);
+  if (checksum == NULL)
+    return FALSE;
+
+  if (strcmp (checksum, digest + strlen ("sha256:")) != 0)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "Checksum digest did not match (%s != %s)", digest, checksum);
+      return FALSE;
+    }
+
+  if (!glnx_link_tmpfile_at (&tmpf,
+                             GLNX_LINK_TMPFILE_NOREPLACE_IGNORE_EXIST,
+                             self->dfd, dst_subpath,
+                             error))
+    return FALSE;
+
+  return TRUE;
+}
+
+static const char *
+object_get_string_member_with_default (JsonNode *json,
+                                       const char *member_name,
+                                       const char *default_value)
+{
+  JsonNode *node;
+
+  if (json == NULL || !JSON_NODE_HOLDS_OBJECT(json))
+    return default_value;
+
+  node = json_object_get_member (json_node_get_object (json), member_name);
+
+  if (node == NULL || JSON_NODE_HOLDS_NULL (node) || JSON_NODE_TYPE (node) != JSON_NODE_VALUE)
+    return default_value;
+
+  return json_node_get_string (node);
+}
+
+static const char *
+object_find_error_string (JsonNode *json)
+{
+  const char *error_detail = NULL;
+  error_detail = object_get_string_member_with_default (json, "details", NULL);
+  if (error_detail == NULL)
+    error_detail = object_get_string_member_with_default (json, "message", NULL);
+  if (error_detail == NULL)
+    error_detail = object_get_string_member_with_default (json, "error", NULL);
+  return error_detail;
+}
+
+static char *
+get_token_for_www_auth (FlatpakOciRegistry *self,
+                        const char    *repository,
+                        const char    *www_authenticate,
+                        const char    *auth,
+                        GCancellable  *cancellable,
+                        GError        **error)
+{
+  g_autoptr(GHashTable) params = NULL;
+  g_autoptr(GString) args = NULL;
+  const char *realm, *service, *scope, *token, *body_data;
+  g_autofree char *default_scope = NULL;
+  g_autoptr(GUri) auth_uri = NULL;
+  g_autofree char *auth_uri_s = NULL;
+  g_autoptr(GBytes) body = NULL;
+  g_autoptr(JsonNode) json = NULL;
+  GUri *tmp_uri;
+  int http_status;
+
+  if (g_ascii_strncasecmp (www_authenticate, "Bearer ", strlen ("Bearer ")) != 0)
+    {
+      flatpak_fail (error, _("Only Bearer authentication supported"));
+      return NULL;
+    }
+
+  params = flatpak_parse_http_header_param_list (www_authenticate + strlen ("Bearer "));
+
+  realm = g_hash_table_lookup (params, "realm");
+  if (realm == NULL)
+    {
+      flatpak_fail (error, _("Only realm in authentication request"));
+      return NULL;
+    }
+
+  auth_uri = g_uri_parse (realm, FLATPAK_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+  if (auth_uri == NULL)
+    {
+      flatpak_fail (error, _("Invalid realm in authentication request"));
+      return NULL;
+    }
+
+  args = g_string_new (NULL);
+
+  service = g_hash_table_lookup (params, "service");
+  if (service)
+    flatpak_uri_encode_query_arg (args, "service", (char *)service);
+
+  scope = g_hash_table_lookup (params, "scope");
+  if (scope == NULL)
+    scope = default_scope = g_strdup_printf("repository:%s:pull", repository);
+
+  flatpak_uri_encode_query_arg (args, "scope", (char *)scope);
+
+  tmp_uri = g_uri_build (g_uri_get_flags (auth_uri) | G_URI_FLAGS_ENCODED_QUERY,
+                         g_uri_get_scheme (auth_uri),
+                         g_uri_get_userinfo (auth_uri),
+                         g_uri_get_host (auth_uri),
+                         g_uri_get_port (auth_uri),
+                         g_uri_get_path (auth_uri),
+                         args->str,
+                         g_uri_get_fragment (auth_uri));
+  g_uri_unref (auth_uri);
+  auth_uri = tmp_uri;
+  auth_uri_s = g_uri_to_string_partial (auth_uri, G_URI_HIDE_PASSWORD);
+
+  body = flatpak_load_uri_full (self->http_session,
+                                auth_uri_s,
+                                self->certificates,
+                                FLATPAK_HTTP_FLAGS_NOCHECK_STATUS,
+                                auth, NULL,
+                                NULL, NULL,
+                                &http_status, NULL, NULL,
+                                cancellable, error);
+  if (body == NULL)
+    return NULL;
+
+  body_data = (char *)g_bytes_get_data (body, NULL);
+
+  if (http_status < 200 || http_status >= 300)
+    {
+      const char *error_detail = NULL;
+      json = json_from_string (body_data, NULL);
+      if (json)
+        {
+          error_detail = object_find_error_string (json);
+          if (error_detail == NULL && JSON_NODE_HOLDS_OBJECT(json))
+            {
+              JsonNode *errors = json_object_get_member (json_node_get_object (json), "errors");
+              if (errors && JSON_NODE_HOLDS_ARRAY (errors))
+                {
+                  JsonArray *array = json_node_get_array (errors);
+                  for (int i = 0; i < json_array_get_length (array); i++)
+                    {
+                      error_detail = object_find_error_string (json_array_get_element (array, i));
+                      if (error_detail != 0)
+                        break;
+                    }
+                }
+            }
+        }
+
+      if (error_detail == NULL)
+        g_info ("Unhandled error body format: %s", body_data);
+
+      if (http_status == 401 /* UNAUTHORIZED */)
+        {
+          if (error_detail)
+            flatpak_fail_error (error, FLATPAK_ERROR_NOT_AUTHORIZED, _("Authorization failed: %s"), error_detail);
+          else
+            flatpak_fail_error (error, FLATPAK_ERROR_NOT_AUTHORIZED, _("Authorization failed"));
+          return NULL;
+        }
+
+      flatpak_fail (error, _("Unexpected response status %d when requesting token: %s"), http_status, (char *)g_bytes_get_data (body, NULL));
+      return NULL;
+    }
+
+  json = json_from_string (body_data, error);
+  if (json == NULL)
+    return NULL;
+
+  token = object_get_string_member_with_default (json, "token", NULL);
+  if (token == NULL)
+    {
+      flatpak_fail (error, _("Invalid authentication request response"));
+      return NULL;
+    }
+
+  return g_strdup (token);
+}
+
+char *
+flatpak_oci_registry_get_token (FlatpakOciRegistry *self,
+                                const char         *repository,
+                                const char         *digest,
+                                const char         *basic_auth,
+                                GCancellable       *cancellable,
+                                GError            **error)
+{
+  g_autofree char *subpath = NULL;
+  g_autofree char *uri_s = NULL;
+  g_autofree char *www_authenticate = NULL;
+  g_autofree char *token = NULL;
+  g_autoptr(GBytes) body = NULL;
+  int http_status;
+
+  g_assert (self->valid);
+
+  subpath = get_digest_subpath (self, repository, TRUE, FALSE, digest, error);
+  if (subpath == NULL)
+    return NULL;
+
+  if (self->dfd != -1)
+    return g_strdup (""); // No tokens for local repos
+
+  uri_s = parse_relative_uri (self->base_uri, subpath, error);
+  if (uri_s == NULL)
+    return NULL;
+
+  body = flatpak_load_uri_full (self->http_session, uri_s, self->certificates,
+                                FLATPAK_HTTP_FLAGS_ACCEPT_OCI | FLATPAK_HTTP_FLAGS_HEAD | FLATPAK_HTTP_FLAGS_NOCHECK_STATUS,
+                                NULL, NULL,
+                                NULL, NULL,
+                                &http_status, NULL, &www_authenticate,
+                                cancellable, error);
+  if (body == NULL)
+    return NULL;
+
+  if (http_status >= 200 && http_status < 300)
+    return g_strdup ("");
+
+  if (http_status != 401 /* UNAUTHORIZED */)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "Unexpected response status %d from repo", http_status);
+      return NULL;
+    }
+
+  /* Need www-authenticated header */
+  if (www_authenticate == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "No WWW-Authenticate header from repo");
+      return NULL;
+    }
+
+  token = get_token_for_www_auth (self, repository, www_authenticate, basic_auth, cancellable, error);
+  if (token == NULL)
+    return NULL;
+
+  return g_steal_pointer (&token);
+}
+
+GBytes *
+flatpak_oci_registry_load_blob (FlatpakOciRegistry *self,
+                                const char         *repository,
+                                gboolean            manifest,
+                                const char         *digest, /* Note: Can be tag for remote registries */
+                                const char        **alt_uris,
+                                char              **out_content_type,
+                                GCancellable       *cancellable,
+                                GError            **error)
+{
+  g_autofree char *subpath = NULL;
+  g_autoptr(GBytes) bytes = NULL;
+  g_autofree char *json_checksum = NULL;
+
+  g_assert (self->valid);
+
+  // Note: Allow tags here, means we have to check that its a digest before verifying below
+  subpath = get_digest_subpath (self, repository, manifest, TRUE, digest, error);
+  if (subpath == NULL)
+    return NULL;
+
+  bytes = flatpak_oci_registry_load_file (self, subpath, alt_uris, out_content_type, cancellable, error);
+  if (bytes == NULL)
+    return NULL;
+
+  json_checksum = g_compute_checksum_for_bytes (G_CHECKSUM_SHA256, bytes);
+
+  if (g_str_has_prefix (digest, "sha256:") &&
+      strcmp (json_checksum, digest + strlen ("sha256:")) != 0)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                   "Checksum for digest %s is wrong (was %s)", digest, json_checksum);
+      return NULL;
+    }
+
+  return g_steal_pointer (&bytes);
+}
+
+char *
+flatpak_oci_registry_store_blob (FlatpakOciRegistry *self,
+                                 GBytes             *data,
+                                 GCancellable       *cancellable,
+                                 GError            **error)
+{
+  g_autofree char *sha256 = g_compute_checksum_for_bytes (G_CHECKSUM_SHA256, data);
+  g_autofree char *subpath = NULL;
+
+  g_assert (self->valid);
+
+  subpath = g_strdup_printf ("blobs/sha256/%s", sha256);
+  if (!glnx_file_replace_contents_at (self->dfd, subpath,
+                                      g_bytes_get_data (data, NULL),
+                                      g_bytes_get_size (data),
+                                      0, cancellable, error))
+    return NULL;
+
+  return g_strdup_printf ("sha256:%s", sha256);
+}
+
+FlatpakOciDescriptor *
+flatpak_oci_registry_store_json (FlatpakOciRegistry *self,
+                                 FlatpakJson        *json,
+                                 GCancellable       *cancellable,
+                                 GError            **error)
+{
+  g_autoptr(GBytes) bytes = flatpak_json_to_bytes (json);
+  g_autofree char *digest = NULL;
+
+  digest = flatpak_oci_registry_store_blob (self, bytes, cancellable, error);
+  if (digest == NULL)
+    return NULL;
+
+  return flatpak_oci_descriptor_new (FLATPAK_JSON_CLASS (FLATPAK_JSON_GET_CLASS (json))->mediatype, digest, g_bytes_get_size (bytes));
+}
+
+FlatpakOciVersioned *
+flatpak_oci_registry_load_versioned (FlatpakOciRegistry *self,
+                                     const char         *repository,
+                                     const char         *digest,
+                                     const char        **alt_uris,
+                                     gsize              *out_size,
+                                     GCancellable       *cancellable,
+                                     GError            **error)
+{
+  g_autoptr(GBytes) bytes = NULL;
+  g_autofree char *content_type = NULL;
+
+  g_assert (self->valid);
+
+  bytes = flatpak_oci_registry_load_blob (self, repository, TRUE, digest, alt_uris, &content_type, cancellable, error);
+  if (bytes == NULL)
+    return NULL;
+
+  if (out_size)
+    *out_size = g_bytes_get_size (bytes);
+  return flatpak_oci_versioned_from_json (bytes, content_type, error);
+}
+
+FlatpakOciImage *
+flatpak_oci_registry_load_image_config (FlatpakOciRegistry *self,
+                                        const char         *repository,
+                                        const char         *digest,
+                                        const char        **alt_uris,
+                                        gsize              *out_size,
+                                        GCancellable       *cancellable,
+                                        GError            **error)
+{
+  g_autoptr(GBytes) bytes = NULL;
+
+  g_assert (self->valid);
+
+  bytes = flatpak_oci_registry_load_blob (self, repository, FALSE, digest, alt_uris, NULL, cancellable, error);
+  if (bytes == NULL)
+    return NULL;
+
+  if (out_size)
+    *out_size = g_bytes_get_size (bytes);
+  return flatpak_oci_image_from_json (bytes, error);
+}
+
+struct FlatpakOciLayerWriter
+{
+  GObject             parent;
+
+  FlatpakOciRegistry       *registry;
+  FlatpakOciWriteLayerFlags flags;
+
+  GChecksum          *uncompressed_checksum;
+  GChecksum          *compressed_checksum;
+  struct archive     *archive;
+  GConverter         *compressor;
+  guint64             uncompressed_size;
+  guint64             compressed_size;
+  GLnxTmpfile         tmpf;
+};
+
+typedef struct
+{
+  GObjectClass parent_class;
+} FlatpakOciLayerWriterClass;
+
+G_DEFINE_TYPE (FlatpakOciLayerWriter, flatpak_oci_layer_writer, G_TYPE_OBJECT)
+
+static void
+flatpak_oci_layer_writer_reset (FlatpakOciLayerWriter *self)
+{
+  glnx_tmpfile_clear (&self->tmpf);
+
+  g_checksum_reset (self->uncompressed_checksum);
+  g_checksum_reset (self->compressed_checksum);
+
+  if (self->archive)
+    {
+      archive_write_free (self->archive);
+      self->archive = NULL;
+    }
+
+  g_clear_object (&self->compressor);
+}
+
+static void
+flatpak_oci_layer_writer_finalize (GObject *object)
+{
+  FlatpakOciLayerWriter *self = FLATPAK_OCI_LAYER_WRITER (object);
+
+  flatpak_oci_layer_writer_reset (self);
+
+  g_checksum_free (self->compressed_checksum);
+  g_checksum_free (self->uncompressed_checksum);
+  glnx_tmpfile_clear (&self->tmpf);
+
+  g_clear_object (&self->registry);
+
+  G_OBJECT_CLASS (flatpak_oci_layer_writer_parent_class)->finalize (object);
+}
+
+static void
+flatpak_oci_layer_writer_class_init (FlatpakOciLayerWriterClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->finalize = flatpak_oci_layer_writer_finalize;
+}
+
+static void
+flatpak_oci_layer_writer_init (FlatpakOciLayerWriter *self)
+{
+  self->uncompressed_checksum = g_checksum_new (G_CHECKSUM_SHA256);
+  self->compressed_checksum = g_checksum_new (G_CHECKSUM_SHA256);
+}
+
+static int
+flatpak_oci_layer_writer_open_cb (struct archive *archive,
+                                  void           *client_data)
+{
+  return ARCHIVE_OK;
+}
+
+static gssize
+flatpak_oci_layer_writer_compress (FlatpakOciLayerWriter *self,
+                                   const void            *buffer,
+                                   size_t                 length,
+                                   gboolean               at_end)
+{
+  guchar compressed_buffer[8192];
+  GConverterResult res;
+  gsize total_bytes_read, bytes_read, bytes_written, to_write_len;
+  guchar *to_write;
+  g_autoptr(GError) local_error = NULL;
+  GConverterFlags flags = 0;
+  bytes_read = 0;
+
+  total_bytes_read = 0;
+
+  if (at_end)
+    flags |= G_CONVERTER_INPUT_AT_END;
+
+  do
+    {
+      res = g_converter_convert (self->compressor,
+                                 buffer, length,
+                                 compressed_buffer, sizeof (compressed_buffer),
+                                 flags, &bytes_read, &bytes_written,
+                                 &local_error);
+      if (res == G_CONVERTER_ERROR)
+        {
+          archive_set_error (self->archive, EIO, "%s", local_error->message);
+          return -1;
+        }
+
+      g_checksum_update (self->uncompressed_checksum, buffer, bytes_read);
+      g_checksum_update (self->compressed_checksum, compressed_buffer, bytes_written);
+      self->uncompressed_size += bytes_read;
+      self->compressed_size += bytes_written;
+
+      to_write_len = bytes_written;
+      to_write = compressed_buffer;
+      while (to_write_len > 0)
+        {
+          ssize_t result = write (self->tmpf.fd, to_write, to_write_len);
+          if (result <= 0)
+            {
+              if (errno == EINTR)
+                continue;
+              archive_set_error (self->archive, errno, "Write error");
+              return -1;
+            }
+
+          to_write_len -= result;
+          to_write += result;
+        }
+
+      total_bytes_read += bytes_read;
+    }
+  while ((length > 0 && bytes_read == 0) || /* Repeat if we consumed nothing */
+         (at_end && res != G_CONVERTER_FINISHED)); /* Or until finished if at_end */
+
+  return total_bytes_read;
+}
+
+static ssize_t
+flatpak_oci_layer_writer_write_cb (struct archive *archive,
+                                   void           *client_data,
+                                   const void     *buffer,
+                                   size_t          length)
+{
+  FlatpakOciLayerWriter *self = FLATPAK_OCI_LAYER_WRITER (client_data);
+
+  return flatpak_oci_layer_writer_compress (self, buffer, length, FALSE);
+}
+
+static int
+flatpak_oci_layer_writer_close_cb (struct archive *archive,
+                                   void           *client_data)
+{
+  FlatpakOciLayerWriter *self = FLATPAK_OCI_LAYER_WRITER (client_data);
+  gssize res;
+  char buffer[1] = {0};
+
+  res = flatpak_oci_layer_writer_compress (self, &buffer, 0, TRUE);
+  if (res < 0)
+    return ARCHIVE_FATAL;
+
+  return ARCHIVE_OK;
+}
+
+FlatpakOciLayerWriter *
+flatpak_oci_registry_write_layer (FlatpakOciRegistry         *self,
+                                  FlatpakOciWriteLayerFlags  flags,
+                                  GCancellable               *cancellable,
+                                  GError                    **error)
+{
+  g_autoptr(FlatpakOciLayerWriter) oci_layer_writer = NULL;
+  g_autoptr(FlatpakAutoArchiveWrite) a = NULL;
+  g_auto(GLnxTmpfile) tmpf = { 0 };
+
+  g_assert (self->valid);
+
+  if (!self->for_write)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "Write not supported to registry");
+      return NULL;
+    }
+
+  oci_layer_writer = g_object_new (FLATPAK_TYPE_OCI_LAYER_WRITER, NULL);
+  oci_layer_writer->registry = g_object_ref (self);
+  oci_layer_writer->flags = flags;
+
+  if (!glnx_open_tmpfile_linkable_at (self->dfd,
+                                      "blobs/sha256",
+                                      O_WRONLY,
+                                      &tmpf,
+                                      error))
+    return NULL;
+
+  if (fchmod (tmpf.fd, 0644) != 0)
+    {
+      glnx_set_error_from_errno (error);
+      return NULL;
+    }
+
+  a = archive_write_new ();
+  if (archive_write_set_format_pax (a) != ARCHIVE_OK ||
+      archive_write_add_filter_none (a) != ARCHIVE_OK)
+    {
+      propagate_libarchive_error (error, a);
+      return NULL;
+    }
+
+  if (archive_write_open (a, oci_layer_writer,
+                          flatpak_oci_layer_writer_open_cb,
+                          flatpak_oci_layer_writer_write_cb,
+                          flatpak_oci_layer_writer_close_cb) != ARCHIVE_OK)
+    {
+      propagate_libarchive_error (error, a);
+      return NULL;
+    }
+
+  flatpak_oci_layer_writer_reset (oci_layer_writer);
+
+  oci_layer_writer->archive = g_steal_pointer (&a);
+  /* Transfer ownership of the tmpfile */
+  oci_layer_writer->tmpf = tmpf;
+  tmpf.initialized = 0;
+
+  if ((flags & FLATPAK_OCI_WRITE_LAYER_FLAGS_ZSTD) != 0)
+    {
+      /*
+       * For the Fedora Flatpak Runtime:
+       *
+       *  gzip -6 (default) 83s  712 MiB
+       *  zlib-ng -6        38s  741 MiB (bsdtar internal)
+       *  zstd -3            9s  670 MiB
+       *  zstd -6           22s  627 MiB
+       *  zstd -9           34s  584 MiB
+       *
+       * So, even -9 is 240% faster, while producing a 18% smaller result.
+       */
+#ifdef HAVE_ZSTD
+      oci_layer_writer->compressor =
+        G_CONVERTER (flatpak_zstd_compressor_new (9));
+#else
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   _("Flatpak was compiled without zstd support"));
+      return NULL;
+#endif
+    }
+  else
+    {
+      oci_layer_writer->compressor =
+        G_CONVERTER (g_zlib_compressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP, -1));
+    }
+
+  return g_steal_pointer (&oci_layer_writer);
+}
+
+gboolean
+flatpak_oci_layer_writer_close (FlatpakOciLayerWriter *self,
+                                char                 **uncompressed_digest_out,
+                                FlatpakOciDescriptor **res_out,
+                                GCancellable          *cancellable,
+                                GError               **error)
+{
+  g_autofree char *path = NULL;
+
+  if (archive_write_close (self->archive) != ARCHIVE_OK)
+    return propagate_libarchive_error (error, self->archive);
+
+  path = g_strdup_printf ("blobs/sha256/%s",
+                          g_checksum_get_string (self->compressed_checksum));
+
+  if (!glnx_link_tmpfile_at (&self->tmpf,
+                             GLNX_LINK_TMPFILE_REPLACE,
+                             self->registry->dfd,
+                             path,
+                             error))
+    return FALSE;
+
+  if (uncompressed_digest_out != NULL)
+    *uncompressed_digest_out = g_strdup_printf ("sha256:%s", g_checksum_get_string (self->uncompressed_checksum));
+  if (res_out != NULL)
+    {
+      g_autofree char *digest = g_strdup_printf ("sha256:%s", g_checksum_get_string (self->compressed_checksum));
+      const char *media_type;
+
+      if ((self->flags & FLATPAK_OCI_WRITE_LAYER_FLAGS_ZSTD) != 0)
+        media_type = FLATPAK_OCI_MEDIA_TYPE_IMAGE_LAYER_ZSTD;
+      else
+        media_type = FLATPAK_OCI_MEDIA_TYPE_IMAGE_LAYER_GZIP;
+
+      *res_out = flatpak_oci_descriptor_new (media_type, digest, self->compressed_size);
+    }
+
+  return TRUE;
+}
+
+struct archive *
+flatpak_oci_layer_writer_get_archive (FlatpakOciLayerWriter *self)
+{
+  return self->archive;
+}
+
+typedef struct
+{
+  int        fd;
+  GChecksum *checksum;
+  char       buffer[16 * 1024];
+  gboolean   at_end;
+} FlatpakArchiveReadWithChecksum;
+
+static int
+checksum_open_cb (struct archive *a, void *user_data)
+{
+  return ARCHIVE_OK;
+}
+
+static ssize_t
+checksum_read_cb (struct archive *a, void *user_data, const void **buff)
+{
+  FlatpakArchiveReadWithChecksum *data = user_data;
+  ssize_t bytes_read;
+
+  *buff = &data->buffer;
+  do
+    bytes_read = read (data->fd, &data->buffer, sizeof (data->buffer));
+  while (G_UNLIKELY (bytes_read == -1 && errno == EINTR));
+
+  if (bytes_read <= 0)
+    data->at_end = TRUE; /* Failed or eof */
+
+  if (bytes_read < 0)
+    {
+      archive_set_error (a, errno, "Read error on fd %d", data->fd);
+      return -1;
+    }
+
+  g_checksum_update (data->checksum, (guchar *) data->buffer, bytes_read);
+
+  return bytes_read;
+}
+
+static int64_t
+checksum_skip_cb (struct archive *a, void *user_data, int64_t request)
+{
+  FlatpakArchiveReadWithChecksum *data = user_data;
+  int64_t old_offset, new_offset;
+
+  if (((old_offset = lseek (data->fd, 0, SEEK_CUR)) >= 0) &&
+      ((new_offset = lseek (data->fd, request, SEEK_CUR)) >= 0))
+    return new_offset - old_offset;
+
+  archive_set_error (a, errno, "Error seeking");
+  return -1;
+}
+
+static int
+checksum_close_cb (struct archive *a, void *user_data)
+{
+  FlatpakArchiveReadWithChecksum *data = user_data;
+
+  /* Checksum to the end to ensure we got everything, even if libarchive didn't read it all */
+  if (!data->at_end)
+    {
+      while (TRUE)
+        {
+          ssize_t bytes_read;
+          do
+            bytes_read = read (data->fd, &data->buffer, sizeof (data->buffer));
+          while (G_UNLIKELY (bytes_read == -1 && errno == EINTR));
+
+          if (bytes_read > 0)
+            g_checksum_update (data->checksum, (guchar *) data->buffer, bytes_read);
+          else
+            break;
+        }
+    }
+
+  g_free (data);
+
+  return ARCHIVE_OK;
+}
+
+gboolean
+flatpak_archive_read_open_fd_with_checksum (struct archive *a,
+                                            int             fd,
+                                            GChecksum      *checksum,
+                                            GError        **error)
+{
+  FlatpakArchiveReadWithChecksum *data = g_new0 (FlatpakArchiveReadWithChecksum, 1);
+
+  data->fd = fd;
+  data->checksum = checksum;
+
+  if (archive_read_open2 (a, data,
+                          checksum_open_cb,
+                          checksum_read_cb,
+                          checksum_skip_cb,
+                          checksum_close_cb) != ARCHIVE_OK)
+    return propagate_libarchive_error (error, a);
+
+  return TRUE;
+}
+
+enum {
+      DELTA_OP_DATA = 0,
+      DELTA_OP_OPEN = 1,
+      DELTA_OP_COPY = 2,
+      DELTA_OP_ADD_DATA = 3,
+      DELTA_OP_SEEK = 4,
+};
+
+#define DELTA_HEADER "tardf1\n\0"
+#define DELTA_HEADER_LEN 8
+
+#define DELTA_BUFFER_SIZE (64*1024)
+
+static gboolean
+delta_read_byte (GInputStream   *in,
+                 guint8         *out,
+                 gboolean       *eof,
+                 GCancellable   *cancellable,
+                 GError        **error)
+{
+  gssize res = g_input_stream_read (in, out, 1, cancellable, error);
+
+  if (eof)
+    *eof = FALSE;
+
+  if (res < 0)
+    return FALSE;
+
+  if (res == 0)
+    {
+      if (eof)
+        *eof = TRUE;
+      return flatpak_fail (error, _("Invalid delta file format"));
+    }
+
+  return TRUE;
+}
+
+static gboolean
+delta_read_varuint (GInputStream   *in,
+                    guint64        *out,
+                    GCancellable   *cancellable,
+                    GError        **error)
+{
+  guint64 res = 0;
+  guint32 index = 0;
+  gboolean more_data;
+
+  do
+    {
+      guchar byte;
+      guint64 data;
+
+      if (!delta_read_byte (in, &byte, NULL, cancellable, error))
+        return FALSE;
+
+      data = byte & 0x7f;
+      res |= data << index;
+      index += 7;
+
+      more_data = (byte & 0x80) != 0;
+    }
+  while (more_data);
+
+  *out = res;
+  return TRUE;
+}
+
+static gboolean
+delta_copy_data (GInputStream   *in,
+                 GOutputStream  *out,
+                 guint64         size,
+                 guchar         *buffer,
+                 GCancellable   *cancellable,
+                 GError        **error)
+{
+  while (size > 0)
+    {
+      gssize n_read = g_input_stream_read (in, buffer, MIN(size, DELTA_BUFFER_SIZE), cancellable, error);
+
+      if (n_read == -1)
+        return FALSE;
+
+      if (n_read == 0)
+        return flatpak_fail (error, _("Invalid delta file format"));
+
+      if (!g_output_stream_write_all (out, buffer, n_read, NULL, cancellable, error))
+        return FALSE;
+
+      size -= n_read;
+    }
+
+  return TRUE;
+}
+
+static gboolean
+delta_add_data (GInputStream   *in1,
+                GInputStream   *in2,
+                GOutputStream  *out,
+                guint64         size,
+                guchar         *buffer1,
+                guchar         *buffer2,
+                GCancellable   *cancellable,
+                GError        **error)
+{
+  while (size > 0)
+    {
+      gssize i;
+      gssize n_read = g_input_stream_read (in1, buffer1, MIN(size, DELTA_BUFFER_SIZE), cancellable, error);
+
+      if (n_read == -1)
+        return FALSE;
+      if (n_read == 0)
+        return flatpak_fail (error, _("Invalid delta file format"));
+
+      if (!g_input_stream_read_all (in2, buffer2, n_read, NULL, cancellable, error))
+        return FALSE;
+
+      for (i = 0; i < n_read; i++)
+        buffer1[i] = ((guint32)buffer1[i] + (guint32)buffer2[i]) & 0xff;
+
+      if (!g_output_stream_write_all (out, buffer1, n_read, NULL, cancellable, error))
+        return FALSE;
+
+      size -= n_read;
+    }
+
+  return TRUE;
+}
+
+static guchar *
+delta_read_data (GInputStream   *in,
+                 guint64         size,
+                 GCancellable   *cancellable,
+                 GError        **error)
+{
+  g_autofree guchar *buf = g_malloc (size+1);
+
+  if (!g_input_stream_read_all (in, buf, size, NULL, cancellable, error))
+    return NULL;
+
+  buf[size] = 0;
+  return g_steal_pointer (&buf);
+}
+
+static char *
+delta_clean_path (const char *path)
+{
+  g_autofree char *abs_path = NULL;
+  g_autofree char *canonical_path = NULL;
+  const char *rel_canonical_path = NULL;
+
+  /* Canonicallize this as if it was absolute (to avoid ever going out of the top dir) */
+  abs_path = g_strconcat ("/", path, NULL);
+  canonical_path = flatpak_canonicalize_filename (abs_path);
+
+  /* Then convert back to relative */
+  rel_canonical_path = canonical_path;
+  while (*rel_canonical_path == '/')
+    rel_canonical_path++;
+  return g_strdup (rel_canonical_path);
+}
+
+static gboolean
+delta_ensure_file (GFileInputStream *content_file,
+                   GError          **error)
+{
+  if (content_file == NULL)
+    return flatpak_fail (error, _("Invalid delta file format"));
+  return TRUE;
+}
+
+static GFileInputStream *
+copy_stream_to_file (FlatpakOciRegistry    *self,
+                     GInputStream          *in,
+                     GCancellable          *cancellable,
+                     GError               **error)
+{
+  g_autofree char *tmpfile_name = g_strdup_printf ("oci-delta-source-XXXXXX");
+  g_autoptr(GOutputStream) tmp_out_stream = NULL;
+  g_autofree char *proc_pid_path = NULL;
+  g_autoptr(GFile) proc_pid_file = NULL;
+  g_autoptr(GFileInputStream) res = NULL;
+
+  if (!flatpak_open_in_tmpdir_at (self->tmp_dfd, 0600, tmpfile_name,
+                                  &tmp_out_stream, cancellable, error))
+    return NULL;
+
+  (void) unlinkat (self->tmp_dfd, tmpfile_name, 0);
+
+  proc_pid_path = g_strdup_printf ("/proc/self/fd/%d", g_unix_output_stream_get_fd (G_UNIX_OUTPUT_STREAM (tmp_out_stream)));
+  proc_pid_file = g_file_new_for_path (proc_pid_path);
+  res = g_file_read (proc_pid_file, cancellable, error);
+  if (res == NULL)
+    return NULL;
+
+  if (g_output_stream_splice (tmp_out_stream, in,
+                              G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET,
+                              cancellable, error) < 0)
+    return NULL;
+
+  return g_steal_pointer (&res);
+}
+
+static gboolean
+flatpak_oci_registry_apply_delta_stream (FlatpakOciRegistry    *self,
+                                         int                    delta_fd,
+                                         GFile                 *content_dir,
+                                         GOutputStream         *out,
+                                         GCancellable          *cancellable,
+                                         GError               **error)
+{
+  g_autoptr(GInputStream) in_raw = g_unix_input_stream_new (delta_fd, FALSE);
+  g_autoptr(GInputStream) in = NULL;
+  FlatpakZstdDecompressor *zstd;
+  char header[8];
+  g_autofree guchar *buffer1 = g_malloc (DELTA_BUFFER_SIZE);
+  g_autofree guchar *buffer2 = g_malloc (DELTA_BUFFER_SIZE);
+  g_autoptr(GFileInputStream) content_file = NULL;
+
+  if (!g_input_stream_read_all (in_raw, header, sizeof(header), NULL, cancellable, error))
+    return FALSE;
+
+  if (memcmp (header, DELTA_HEADER, DELTA_HEADER_LEN) != 0)
+    return flatpak_fail (error, _("Invalid delta file format"));
+
+  zstd = flatpak_zstd_decompressor_new ();
+  in = g_converter_input_stream_new (in_raw, G_CONVERTER (zstd));
+  g_object_unref (zstd);
+
+  while (TRUE)
+    {
+      guint8 op;
+      guint64 size;
+      g_autofree char *path = NULL;
+      g_autofree char *clean_path = NULL;
+      g_autoptr(GError) local_error = NULL;
+      gboolean eof;
+
+      if (!delta_read_byte (in, &op, &eof, cancellable, &local_error))
+        {
+          if (eof)
+            break;
+          g_propagate_error (error, g_steal_pointer (&local_error));
+          return FALSE;
+        }
+
+      if (!delta_read_varuint (in, &size, cancellable, error))
+        return FALSE;
+
+      switch (op)
+        {
+        case DELTA_OP_DATA:
+          if (!delta_copy_data (in, out, size, buffer1, cancellable, error))
+            return FALSE;
+          break;
+
+        case DELTA_OP_OPEN:
+          path = (char *)delta_read_data (in, size, cancellable, error);
+          if (path == NULL)
+            return FALSE;
+          clean_path = delta_clean_path (path);
+
+          g_clear_object (&content_file);
+
+          {
+            g_autoptr(GFile) child = g_file_resolve_relative_path (content_dir, clean_path);
+            g_autoptr(GFileInputStream) child_in = NULL;
+
+            child_in = g_file_read (child, cancellable, error);
+            if (child_in == NULL)
+              return FALSE;
+
+            /* We can't seek in the ostree repo file, so copy it to temp file */
+            content_file = copy_stream_to_file (self, G_INPUT_STREAM (child_in), cancellable, error);
+            if (content_file == NULL)
+              return FALSE;
+          }
+          break;
+
+        case DELTA_OP_COPY:
+          if (!delta_ensure_file (content_file, error))
+            return FALSE;
+          if (!delta_copy_data (G_INPUT_STREAM (content_file), out, size, buffer1, cancellable, error))
+            return FALSE;
+          break;
+
+        case DELTA_OP_ADD_DATA:
+          if (!delta_ensure_file (content_file, error))
+            return FALSE;
+          if (!delta_add_data (G_INPUT_STREAM (content_file), in, out, size, buffer1, buffer2, cancellable, error))
+            return FALSE;
+          break;
+
+        case DELTA_OP_SEEK:
+          if (!delta_ensure_file (content_file, error))
+            return FALSE;
+          if (!g_seekable_seek (G_SEEKABLE (content_file), size, G_SEEK_SET, cancellable, error))
+            return FALSE;
+          break;
+
+        default:
+          return flatpak_fail (error, _("Invalid delta file format"));
+        }
+    }
+
+  return TRUE;
+}
+
+int
+flatpak_oci_registry_apply_delta (FlatpakOciRegistry    *self,
+                                  int                    delta_fd,
+                                  GFile                 *content_dir,
+                                  GCancellable          *cancellable,
+                                  GError               **error)
+{
+  g_autoptr(GOutputStream) out = NULL;
+  g_autofree char *tmpfile_name = g_strdup_printf ("oci-delta-layer-XXXXXX");
+  glnx_autofd int fd = -1;
+
+  if (!flatpak_open_in_tmpdir_at (self->tmp_dfd, 0600, tmpfile_name,
+                                  &out, cancellable, error))
+    return -1;
+
+  // This is the read-only version we return
+  // Note: that we need to open this before we unlink it
+  fd = flatpak_open_file_at (self->tmp_dfd, tmpfile_name, NULL, cancellable, error);
+  (void) unlinkat (self->tmp_dfd, tmpfile_name, 0);
+  if (fd == -1)
+    return -1;
+
+  if (!flatpak_oci_registry_apply_delta_stream (self, delta_fd, content_dir, out, cancellable, error))
+    return -1;
+
+  return g_steal_fd (&fd);
+}
+
+char *
+flatpak_oci_registry_apply_delta_to_blob (FlatpakOciRegistry    *self,
+                                          int                    delta_fd,
+                                          GFile                 *content_dir,
+                                          GCancellable          *cancellable,
+                                          GError               **error)
+{
+  g_autofree char *dst_subpath = NULL;
+  g_autofree char *checksum = NULL;
+  g_autofree char *digest = NULL;
+  g_auto(GLnxTmpfile) tmpf = { 0 };
+  g_autoptr(GOutputStream) out = NULL;
+
+  if (!glnx_open_tmpfile_linkable_at (self->dfd, "blobs/sha256",
+                                      O_RDWR | O_CLOEXEC | O_NOCTTY,
+                                      &tmpf, error))
+    return NULL;
+
+  out = g_unix_output_stream_new (tmpf.fd, FALSE);
+
+  if (!flatpak_oci_registry_apply_delta_stream (self, delta_fd, content_dir, out, cancellable, error))
+    return NULL;
+
+  /* Seek to start to get checksum */
+  lseek (tmpf.fd, 0, SEEK_SET);
+
+  checksum = checksum_fd (tmpf.fd, cancellable, error);
+  if (checksum == NULL)
+    return FALSE;
+
+  digest = g_strconcat ("sha256:", checksum, NULL);
+
+  dst_subpath = get_digest_subpath (self, NULL, FALSE, FALSE, digest, error);
+  if (dst_subpath == NULL)
+    return FALSE;
+
+  if (!glnx_link_tmpfile_at (&tmpf,
+                             GLNX_LINK_TMPFILE_NOREPLACE_IGNORE_EXIST,
+                             self->dfd, dst_subpath,
+                             error))
+    return FALSE;
+
+  return g_steal_pointer (&digest);
+}
+
+FlatpakOciManifest *
+flatpak_oci_registry_find_delta_manifest (FlatpakOciRegistry    *registry,
+                                          const char            *oci_repository,
+                                          const char            *for_digest,
+                                          const char            *delta_manifest_url,
+                                          GCancellable          *cancellable)
+{
+  g_autoptr(FlatpakOciVersioned) deltaindexv = NULL;
+  FlatpakOciDescriptor *delta_desc;
+
+#ifndef HAVE_ZSTD
+  if (TRUE)
+    return NULL; /* Don't find deltas if we can't apply them */
+#endif
+
+  if (delta_manifest_url != NULL)
+    {
+      g_autoptr(GBytes) bytes = NULL;
+      g_autofree char *uri_s = parse_relative_uri (registry->base_uri, delta_manifest_url, NULL);
+
+      if (uri_s != NULL)
+        bytes = flatpak_load_uri_full (registry->http_session,
+                                       uri_s, registry->certificates, FLATPAK_HTTP_FLAGS_ACCEPT_OCI,
+                                       NULL, registry->token,
+                                       NULL, NULL, NULL, NULL, NULL,
+                                       cancellable, NULL);
+      if (bytes != NULL)
+        {
+          g_autoptr(FlatpakOciVersioned) versioned =
+            flatpak_oci_versioned_from_json (bytes, FLATPAK_OCI_MEDIA_TYPE_IMAGE_MANIFEST, NULL);
+
+          if (versioned != NULL && G_TYPE_CHECK_INSTANCE_TYPE (versioned, FLATPAK_TYPE_OCI_MANIFEST))
+            {
+              g_autoptr(FlatpakOciManifest) delta_manifest = (FlatpakOciManifest *)g_steal_pointer (&versioned);
+
+              /* We resolved using a mutable location (not via digest), so ensure its still valid for this target */
+              if (delta_manifest->annotations)
+                {
+                  const char *target = g_hash_table_lookup (delta_manifest->annotations, "io.github.containers.delta.target");
+                  if (g_strcmp0 (target, for_digest) == 0)
+                    return g_steal_pointer (&delta_manifest);
+                }
+            }
+        }
+    }
+
+  deltaindexv = flatpak_oci_registry_load_versioned (registry, oci_repository, "_deltaindex",
+                                                     NULL, NULL, cancellable, NULL);
+  if (deltaindexv == NULL)
+    return NULL;
+
+  if (!G_TYPE_CHECK_INSTANCE_TYPE (deltaindexv, FLATPAK_TYPE_OCI_INDEX))
+    return NULL;
+
+  delta_desc = flatpak_oci_index_find_delta_for ((FlatpakOciIndex *)deltaindexv, for_digest);
+  if (delta_desc && delta_desc->digest != NULL)
+    {
+      const char *delta_manifest_digest = delta_desc->digest;
+      g_autoptr(FlatpakOciVersioned) deltamanifest = NULL;
+
+      deltamanifest = flatpak_oci_registry_load_versioned (registry, oci_repository, delta_manifest_digest,
+                                                           (const char **)delta_desc->urls, NULL, cancellable, NULL);
+      if (deltamanifest != NULL && G_TYPE_CHECK_INSTANCE_TYPE (deltamanifest, FLATPAK_TYPE_OCI_MANIFEST))
+        return (FlatpakOciManifest *)g_steal_pointer (&deltamanifest);
+    }
+
+  return NULL;
+}
+
+static FlatpakOciSignatures *
+remote_load_signatures (FlatpakOciRegistry *self,
+                        const char         *oci_repository,
+                        const char         *digest,
+                        GCancellable       *cancellable,
+                        GError            **error)
+{
+  g_autoptr(FlatpakOciSignatures) signatures = flatpak_oci_signatures_new ();
+  g_autofree char *digest_algorithm = NULL;
+  g_autofree char *digest_value = NULL;
+  guint i;
+  const char *colon;
+
+  if (self->signature_lookaside == NULL)
+    return g_steal_pointer (&signatures);
+
+  /*
+   * Look for signatures via the containers/image separate storage protocol:
+   *
+   * https://github.com/containers/image/blob/main/docs/signature-protocols.md
+   */
+
+  colon = strchr (digest, ':');
+  if (colon == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "can't parse digest %s", digest);
+      return NULL;
+    }
+
+  digest_algorithm = g_strndup (digest, colon - digest);
+  digest_value = g_strdup (colon + 1);
+
+  for (i = 1; i < G_MAXUINT; i++)
+    {
+      g_autoptr(GBytes) bytes = NULL;
+      g_autoptr(GError) local_error = NULL;
+      g_autofree char *uri_s = NULL;
+
+      uri_s = g_strdup_printf ("%s/%s@%s=%s/signature-%u", self->signature_lookaside,
+                               oci_repository, digest_algorithm, digest_value, i);
+
+      bytes = flatpak_load_uri (self->http_session,
+                                uri_s, FLATPAK_HTTP_FLAGS_ACCEPT_OCI,
+                                NULL,
+                                NULL, NULL, NULL,
+                                cancellable, &local_error);
+      if (bytes == NULL)
+        {
+          if (g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+            break;
+          else
+            {
+              g_propagate_error (error, g_steal_pointer (&local_error));
+              return NULL;
+            }
+        }
+
+        g_info ("Found OCI signature at %s", uri_s);
+        flatpak_oci_signatures_add_signature (signatures, g_steal_pointer (&bytes));
+    }
+
+  return g_steal_pointer (&signatures);
+}
+
+static FlatpakOciSignatures *
+flatpak_oci_registry_load_signatures (FlatpakOciRegistry *self,
+                                      const char         *oci_repository,
+                                      const char         *digest,
+                                      GCancellable       *cancellable,
+                                      GError            **error)
+{
+  if (self->dfd != -1)
+    {
+      g_autoptr(FlatpakOciSignatures) signatures = flatpak_oci_signatures_new ();
+
+      if (!flatpak_oci_signatures_load_from_dfd (signatures, self->dfd, cancellable, error))
+        return NULL;
+
+      return g_steal_pointer (&signatures);
+    }
+  else
+    return remote_load_signatures (self, oci_repository, digest, cancellable, error);
+}
+
+static const char *
+get_image_metadata (FlatpakOciIndexImage *img, const char *key)
+{
+  if (img->labels != NULL)
+    {
+      const char *ref = g_hash_table_lookup (img->labels, key);
+      if (ref)
+        return ref;
+    }
+  return NULL;
+}
+
+static const char *
+get_image_ref (FlatpakOciIndexImage *img)
+{
+  return get_image_metadata (img, "org.flatpak.ref");
+}
+
+typedef struct
+{
+  char                 *repository;
+  FlatpakOciIndexImage *image;
+} ImageInfo;
+
+static gint
+compare_image_by_ref (ImageInfo *a,
+                      ImageInfo *b)
+{
+  const char *a_ref = get_image_ref (a->image);
+  const char *b_ref = get_image_ref (b->image);
+
+  return g_strcmp0 (a_ref, b_ref);
+}
+
+gboolean
+flatpak_oci_index_ensure_cached (FlatpakHttpSession *http_session,
+                                 const char         *uri,
+                                 GFile              *index,
+                                 char              **index_uri_out,
+                                 GCancellable       *cancellable,
+                                 GError            **error)
+{
+  g_autofree char *index_path = g_file_get_path (index);
+  g_autoptr(GUri) base_uri = NULL;
+  g_autoptr(GUri) query_uri = NULL;
+  g_autofree char *query_uri_s = NULL;
+  g_autoptr(GString) query = NULL;
+  g_autoptr(GString) path = NULL;
+  g_autofree char *tag = NULL;
+  const char *oci_arch = NULL;
+  gboolean success = FALSE;
+  g_autoptr(FlatpakCertificates) certificates = NULL;
+  g_autoptr(GError) local_error = NULL;
+  GUri *tmp_uri;
+
+  if (!g_str_has_prefix (uri, "oci+http:") && !g_str_has_prefix (uri, "oci+https:"))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                   "OCI Index URI %s does not start with oci+http(s)://", uri);
+      return FALSE;
+    }
+
+  base_uri = g_uri_parse (uri + 4, FLATPAK_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+  if (base_uri == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                   "Cannot parse index url %s", uri);
+      return FALSE;
+    }
+
+  path = g_string_new (g_uri_get_path (base_uri));
+
+  /* Append /index/static or /static to the path.
+   */
+  if (!g_str_has_suffix (path->str, "/"))
+    g_string_append_c (path, '/');
+
+  if (!g_str_has_suffix (path->str, "/index/"))
+    g_string_append (path, "index/");
+
+  g_string_append (path, "static");
+
+  /* Replace path */
+  tmp_uri = g_uri_build (g_uri_get_flags (base_uri),
+                         g_uri_get_scheme (base_uri),
+                         g_uri_get_userinfo (base_uri),
+                         g_uri_get_host (base_uri),
+                         g_uri_get_port (base_uri),
+                         path->str,
+                         g_uri_get_query (base_uri),
+                         g_uri_get_fragment (base_uri));
+  g_uri_unref (base_uri);
+  base_uri = tmp_uri;
+
+  /* The fragment of the URI defines a tag to look for; if absent
+   * or empty, we use 'latest'
+   */
+  tag = g_strdup (g_uri_get_fragment (base_uri));
+  if (tag == NULL || tag[0] == '\0')
+    {
+      g_clear_pointer (&tag, g_free);
+      tag = g_strdup ("latest");
+    }
+
+  /* Remove fragment */
+  tmp_uri = g_uri_build (g_uri_get_flags (base_uri),
+                         g_uri_get_scheme (base_uri),
+                         g_uri_get_userinfo (base_uri),
+                         g_uri_get_host (base_uri),
+                         g_uri_get_port (base_uri),
+                         g_uri_get_path (base_uri),
+                         g_uri_get_query (base_uri),
+                         NULL);
+  g_uri_unref (base_uri);
+  base_uri = tmp_uri;
+
+  oci_arch = flatpak_arch_to_oci_arch (flatpak_get_arch ());
+
+  query = g_string_new (NULL);
+  flatpak_uri_encode_query_arg (query, "label:org.flatpak.ref:exists", "1");
+  flatpak_uri_encode_query_arg (query, "architecture", oci_arch);
+  flatpak_uri_encode_query_arg (query, "os", "linux");
+  flatpak_uri_encode_query_arg (query, "tag", tag);
+
+  query_uri = g_uri_build (g_uri_get_flags (base_uri) | G_URI_FLAGS_ENCODED_QUERY,
+                           g_uri_get_scheme (base_uri),
+                           g_uri_get_userinfo (base_uri),
+                           g_uri_get_host (base_uri),
+                           g_uri_get_port (base_uri),
+                           g_uri_get_path (base_uri),
+                           query->str,
+                           g_uri_get_fragment (base_uri));
+
+  query_uri_s = g_uri_to_string_partial (query_uri, G_URI_HIDE_PASSWORD);
+
+  certificates = flatpak_get_certificates_for_uri (query_uri_s, &local_error);
+  if (local_error)
+    {
+      g_propagate_error (error, g_steal_pointer (&local_error));
+      return FALSE;
+    }
+
+  success = flatpak_cache_http_uri (http_session,
+                                    query_uri_s,
+                                    certificates,
+                                    FLATPAK_HTTP_FLAGS_STORE_COMPRESSED,
+                                    AT_FDCWD, index_path,
+                                    NULL, NULL,
+                                    cancellable, &local_error);
+
+  if (success ||
+      g_error_matches (local_error, FLATPAK_HTTP_ERROR, FLATPAK_HTTP_ERROR_NOT_CHANGED))
+    {
+      if (index_uri_out)
+        *index_uri_out = g_uri_to_string_partial (base_uri, G_URI_HIDE_PASSWORD);
+    }
+  else
+    {
+      if (index_uri_out)
+        *index_uri_out = NULL;
+    }
+
+  if (!success)
+    g_propagate_error (error, g_steal_pointer (&local_error));
+
+  return success;
+}
+
+static FlatpakOciIndexResponse *
+load_oci_index (GFile        *index,
+                GCancellable *cancellable,
+                GError      **error)
+{
+  g_autoptr(GFileInputStream) in = NULL;
+  g_autoptr(GZlibDecompressor) decompressor = NULL;
+  g_autoptr(GInputStream) converter = NULL;
+  g_autoptr(GError) local_error = NULL;
+  g_autoptr(FlatpakJson) json = NULL;
+
+  in = g_file_read (index, cancellable, error);
+  if (in == NULL)
+    return FALSE;
+
+  decompressor = g_zlib_decompressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP);
+  converter = g_converter_input_stream_new (G_INPUT_STREAM (in), G_CONVERTER (decompressor));
+
+  json = flatpak_json_from_stream (G_INPUT_STREAM (converter), FLATPAK_TYPE_OCI_INDEX_RESPONSE,
+                                   cancellable, error);
+  if (json == NULL)
+    return NULL;
+
+  if (!g_input_stream_close (G_INPUT_STREAM (in), cancellable, &local_error))
+    g_warning ("Error closing http stream: %s", local_error->message);
+
+  return (FlatpakOciIndexResponse *) g_steal_pointer (&json);
+}
+
+static GVariant *
+maybe_variant_from_base64 (const char *base64)
+{
+  guchar *bin;
+  gsize bin_len;
+
+  if (base64 == NULL)
+    return NULL;
+
+  bin = g_base64_decode (base64, &bin_len);
+  return g_variant_ref_sink (g_variant_new_from_data (G_VARIANT_TYPE ("v"),
+                                                      bin, bin_len, FALSE,
+                                                      g_free, bin));
+}
+
+GVariant *
+flatpak_oci_index_make_summary (GFile        *index,
+                                const char   *index_uri,
+                                GCancellable *cancellable,
+                                GError      **error)
+{
+  g_autoptr(FlatpakOciIndexResponse) response = NULL;
+  g_autofree char *registry_uri_s = NULL;
+  int i;
+  g_autoptr(GArray) images = g_array_new (FALSE, TRUE, sizeof (ImageInfo));
+  g_autoptr(GVariantBuilder) refs_builder = NULL;
+  g_autoptr(GVariantBuilder) additional_metadata_builder = NULL;
+  g_autoptr(GVariantBuilder) ref_sparse_data_builder = NULL;
+  g_autoptr(GVariantBuilder) summary_builder = NULL;
+  g_autoptr(GVariant) summary = NULL;
+  g_autoptr(GVariantBuilder) ref_data_builder = NULL;
+  g_autoptr(GUri) uri = NULL;
+
+  response = load_oci_index (index, cancellable, error);
+  if (!response)
+    return NULL;
+
+  uri = g_uri_parse (index_uri, FLATPAK_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+  registry_uri_s = parse_relative_uri (uri, response->registry, error);
+  if (registry_uri_s == NULL)
+    return NULL;
+
+  for (i = 0; response->results != NULL && response->results[i] != NULL; i++)
+    {
+      FlatpakOciIndexRepository *r = response->results[i];
+      int j;
+      ImageInfo info = { r->name };
+
+      for (j = 0; r->images != NULL && r->images[j] != NULL; j++)
+        {
+          info.image = r->images[j];
+          g_array_append_val (images, info);
+        }
+
+      for (j = 0; r->lists != NULL && r->lists[j] != NULL; j++)
+        {
+          FlatpakOciIndexImageList *list =  r->lists[j];
+          int k;
+
+          for (k = 0; list->images != NULL && list->images[k] != NULL; k++)
+            {
+              info.image = list->images[k];
+              g_array_append_val (images, info);
+            }
+        }
+    }
+
+  refs_builder = g_variant_builder_new (G_VARIANT_TYPE ("a(s(taya{sv}))"));
+  ref_data_builder = g_variant_builder_new (G_VARIANT_TYPE ("a{s(tts)}"));
+  additional_metadata_builder = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
+  ref_sparse_data_builder = g_variant_builder_new (G_VARIANT_TYPE ("a{sa{sv}}"));
+
+  /* The summary has to be sorted by ref */
+  g_array_sort (images, (GCompareFunc) compare_image_by_ref);
+
+  for (i = 0; i < images->len; i++)
+    {
+      ImageInfo *info = &g_array_index (images, ImageInfo, i);
+      FlatpakOciIndexImage *image = info->image;
+      const char *ref = get_image_ref (image);
+      const char *fake_commit;
+      guint64 installed_size = 0;
+      guint64 download_size = 0;
+      const char *delta_url;
+      const char *installed_size_str;
+      const char *download_size_str;
+      const char *token_type_base64;
+      const char *endoflife_base64;
+      const char *endoflife_rebase_base64 = NULL;
+      const char *metadata_contents = NULL;
+      g_autoptr(GVariantBuilder) ref_metadata_builder = NULL;
+      g_autoptr(GVariant) token_type_v = NULL;
+      g_autoptr(GVariant) endoflife_v = NULL;
+      g_autoptr(GVariant) endoflife_rebase_v = NULL;
+
+      if (ref == NULL)
+        continue;
+
+      metadata_contents = get_image_metadata (image, "org.flatpak.metadata");
+      if (metadata_contents == NULL && !g_str_has_prefix (ref, "appstream/"))
+        continue; /* Not a flatpak, skip */
+
+      if (!g_str_has_prefix (image->digest, "sha256:"))
+        {
+          g_info ("Ignoring digest type %s", image->digest);
+          continue;
+        }
+
+      fake_commit = image->digest + strlen ("sha256:");
+
+      installed_size_str = get_image_metadata (image, "org.flatpak.installed-size");
+      if (installed_size_str)
+        installed_size = g_ascii_strtoull (installed_size_str, NULL, 10);
+
+      download_size_str = get_image_metadata (image, "org.flatpak.download-size");
+      if (download_size_str)
+        download_size = g_ascii_strtoull (download_size_str, NULL, 10);
+
+      ref_metadata_builder = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
+
+      g_variant_builder_add (ref_metadata_builder, "{sv}", "xa.oci-repository",
+                             g_variant_new_string (info->repository));
+
+      delta_url = get_image_metadata (image, "io.github.containers.DeltaUrl");
+      if (delta_url)
+        g_variant_builder_add (ref_metadata_builder, "{sv}", "xa.delta-url",
+                               g_variant_new_string (delta_url));
+
+      g_variant_builder_add_value (refs_builder,
+                                   g_variant_new ("(s(t@ay@a{sv}))", ref,
+                                                  (guint64) 0,
+                                                  ostree_checksum_to_bytes_v (fake_commit),
+                                                  g_variant_builder_end (ref_metadata_builder)));
+      g_variant_builder_add (ref_data_builder, "{s(tts)}",
+                             ref,
+                             GUINT64_TO_BE (installed_size),
+                             GUINT64_TO_BE (download_size),
+                             metadata_contents ? metadata_contents : "");
+
+      token_type_base64 = get_image_metadata (image, "org.flatpak.commit-metadata.xa.token-type");
+      token_type_v = maybe_variant_from_base64 (token_type_base64);
+      endoflife_base64 = get_image_metadata (image, "org.flatpak.commit-metadata.ostree.endoflife");
+      endoflife_v = maybe_variant_from_base64 (endoflife_base64);
+      endoflife_rebase_base64 = get_image_metadata (image, "org.flatpak.commit-metadata.ostree.endoflife-rebase");
+      endoflife_rebase_v = maybe_variant_from_base64 (endoflife_rebase_base64);
+
+      if (token_type_v != NULL ||
+          endoflife_v != NULL ||
+          endoflife_rebase_v != NULL)
+        {
+          g_autoptr(GVariantBuilder) sparse_builder = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
+
+          if (token_type_v != NULL)
+            g_variant_builder_add (sparse_builder, "{s@v}", FLATPAK_SPARSE_CACHE_KEY_TOKEN_TYPE, token_type_v);
+          if (endoflife_v != NULL)
+            g_variant_builder_add (sparse_builder, "{s@v}", FLATPAK_SPARSE_CACHE_KEY_ENDOFLIFE, endoflife_v);
+          if (endoflife_rebase_v != NULL)
+            g_variant_builder_add (sparse_builder, "{s@v}", FLATPAK_SPARSE_CACHE_KEY_ENDOFLIFE_REBASE, endoflife_rebase_v);
+
+          g_variant_builder_add (ref_sparse_data_builder, "{s@a{sv}}",
+                                 ref, g_variant_builder_end (sparse_builder));
+        }
+    }
+
+  g_variant_builder_add (additional_metadata_builder, "{sv}", "xa.cache",
+                         g_variant_new_variant (g_variant_builder_end (ref_data_builder)));
+  g_variant_builder_add (additional_metadata_builder, "{sv}", "xa.sparse-cache",
+                         g_variant_builder_end (ref_sparse_data_builder));
+  g_variant_builder_add (additional_metadata_builder, "{sv}", "xa.oci-registry-uri",
+                         g_variant_new_string (registry_uri_s));
+
+  summary_builder = g_variant_builder_new (OSTREE_SUMMARY_GVARIANT_FORMAT);
+
+  g_variant_builder_add_value (summary_builder, g_variant_builder_end (refs_builder));
+  g_variant_builder_add_value (summary_builder, g_variant_builder_end (additional_metadata_builder));
+
+  summary = g_variant_ref_sink (g_variant_builder_end (summary_builder));
+
+  return g_steal_pointer (&summary);
+}
+
+static gboolean
+add_icon_image (FlatpakHttpSession  *http_session,
+                const char          *index_uri,
+                FlatpakCertificates *certificates,
+                int                  icons_dfd,
+                GHashTable          *used_icons,
+                const char          *subdir,
+                const char          *id,
+                const char          *icon_data,
+                GCancellable        *cancellable,
+                GError             **error)
+{
+  g_autofree char *icon_name = g_strconcat (id, ".png", NULL);
+  g_autofree char *icon_path = g_build_filename (subdir, icon_name, NULL);
+
+  /* Create the destination directory */
+
+  if (!glnx_shutil_mkdir_p_at (icons_dfd, subdir, 0755, cancellable, error))
+    return FALSE;
+
+  if (g_str_has_prefix (icon_data, "data:"))
+    {
+      if (g_str_has_prefix (icon_data, "data:image/png;base64,"))
+        {
+          const char *base64_data = icon_data + strlen ("data:image/png;base64,");
+          gsize decoded_size;
+          g_autofree guint8 *decoded = g_base64_decode (base64_data, &decoded_size);
+
+          if (!glnx_file_replace_contents_at (icons_dfd, icon_path,
+                                              decoded, decoded_size,
+                                              0 /* flags */, cancellable, error))
+            return FALSE;
+
+          g_hash_table_replace (used_icons, g_steal_pointer (&icon_path), GUINT_TO_POINTER (1));
+
+          return TRUE;
+        }
+      else
+        {
+          g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                       "Data URI for icon has an unsupported type");
+          return FALSE;
+        }
+    }
+  else
+    {
+      g_autoptr(GUri) base_uri = g_uri_parse (index_uri, FLATPAK_HTTP_URI_FLAGS | G_URI_FLAGS_PARSE_RELAXED, NULL);
+      g_autofree char *icon_uri_s = NULL;
+      g_autoptr(GError) local_error = NULL;
+
+      icon_uri_s = parse_relative_uri (base_uri, icon_data, error);
+      if (icon_uri_s == NULL)
+        return FALSE;
+
+      if (!flatpak_cache_http_uri (http_session, icon_uri_s, certificates,
+                                   0 /* flags */,
+                                   icons_dfd, icon_path,
+                                   NULL, NULL,
+                                   cancellable, &local_error) &&
+          !g_error_matches (local_error, FLATPAK_HTTP_ERROR, FLATPAK_HTTP_ERROR_NOT_CHANGED))
+        {
+          g_propagate_error (error, g_steal_pointer (&local_error));
+          return FALSE;
+        }
+
+      g_hash_table_replace (used_icons, g_steal_pointer (&icon_path), GUINT_TO_POINTER (1));
+
+      return TRUE;
+    }
+}
+
+static void
+add_image_to_appstream (FlatpakHttpSession        *http_session,
+                        const char                *index_uri,
+                        FlatpakCertificates       *certificates,
+                        FlatpakXml                *appstream_root,
+                        int                        icons_dfd,
+                        GHashTable                *used_icons,
+                        FlatpakOciIndexRepository *repository,
+                        FlatpakOciIndexImage      *image,
+                        GCancellable              *cancellable)
+{
+  g_autoptr(GInputStream) in = NULL;
+  g_autoptr(GError) error = NULL;
+  g_autoptr(FlatpakXml) xml_root = NULL;
+  g_auto(GStrv) ref_parts = NULL;
+  const char *ref;
+  const char *id = NULL;
+  FlatpakXml *source_components;
+  FlatpakXml *dest_components;
+  FlatpakXml *component;
+  FlatpakXml *prev_component;
+  const char *appdata;
+  int i;
+
+  static struct
+  {
+    const char *label;
+    const char *subdir;
+  } icon_sizes[] = {
+    { "org.freedesktop.appstream.icon-64", "64x64" },
+    { "org.freedesktop.appstream.icon-128", "128x128" },
+  };
+
+  ref = get_image_ref (image);
+  if (!ref)
+    return;
+
+  ref_parts = g_strsplit (ref, "/", -1);
+  if (g_strv_length (ref_parts) != 4 ||
+      (strcmp (ref_parts[0], "app") != 0 && strcmp (ref_parts[0], "runtime") != 0))
+    return;
+
+  id = ref_parts[1];
+
+  appdata = get_image_metadata (image, "org.freedesktop.appstream.appdata");
+  if (!appdata)
+    return;
+
+  in = g_memory_input_stream_new_from_data (appdata, -1, NULL);
+
+  xml_root = flatpak_xml_parse (in, FALSE, cancellable, &error);
+  if (xml_root == NULL)
+    {
+      g_print ("%s: Failed to parse appdata annotation: %s\n",
+               repository->name,
+               error->message);
+      return;
+    }
+
+  if (xml_root->first_child == NULL ||
+      xml_root->first_child->next_sibling != NULL ||
+      g_strcmp0 (xml_root->first_child->element_name, "components") != 0)
+    {
+      return;
+    }
+
+  source_components = xml_root->first_child;
+  dest_components = appstream_root->first_child;
+
+  component = source_components->first_child;
+  prev_component = NULL;
+  while (component != NULL)
+    {
+      FlatpakXml *next = component->next_sibling;
+
+      if (g_strcmp0 (component->element_name, "component") == 0)
+        {
+          flatpak_xml_add (dest_components,
+                           flatpak_xml_unlink (component, prev_component));
+        }
+      else
+        {
+          prev_component = component;
+        }
+
+      component = next;
+    }
+
+  for (i = 0; i < G_N_ELEMENTS (icon_sizes); i++)
+    {
+      const char *icon_data = get_image_metadata (image, icon_sizes[i].label);
+      if (icon_data)
+        {
+          if (!add_icon_image (http_session,
+                               index_uri,
+                               certificates,
+                               icons_dfd,
+                               used_icons,
+                               icon_sizes[i].subdir, id, icon_data,
+                               cancellable, &error))
+            {
+              g_print ("%s: Failed to add %s icon: %s\n",
+                       repository->name,
+                       icon_sizes[i].subdir,
+                       error->message);
+              g_clear_error (&error);
+            }
+        }
+    }
+}
+
+static gboolean
+clean_unused_icons_recurse (int           icons_dfd,
+                            const char   *dirpath,
+                            GHashTable   *used_icons,
+                            gboolean     *any_found_parent,
+                            GCancellable *cancellable,
+                            GError      **error)
+{
+  g_auto(GLnxDirFdIterator) iter = { 0, };
+  gboolean any_found = FALSE;
+
+  if (!glnx_dirfd_iterator_init_at (icons_dfd,
+                                    dirpath ? dirpath : ".",
+                                    FALSE, &iter, error))
+    return FALSE;
+
+  while (TRUE)
+    {
+      struct dirent *out_dent;
+      g_autofree char *subpath = NULL;
+
+      if (!glnx_dirfd_iterator_next_dent (&iter, &out_dent, cancellable, error))
+        return FALSE;
+
+      if (out_dent == NULL)
+        break;
+
+      if (dirpath)
+        subpath = g_build_filename (dirpath, out_dent->d_name, NULL);
+      else
+        subpath = g_strdup (out_dent->d_name);
+
+      if (out_dent->d_type == DT_DIR)
+        clean_unused_icons_recurse (icons_dfd, subpath, used_icons, &any_found, cancellable, error);
+      else if (g_hash_table_lookup (used_icons, subpath) == NULL)
+        {
+          if (!glnx_unlinkat (icons_dfd, subpath, 0, error))
+            return FALSE;
+        }
+      else
+        any_found = TRUE;
+    }
+
+  if (any_found)
+    {
+      if (any_found_parent)
+        *any_found_parent = TRUE;
+    }
+  else
+    {
+      if (dirpath) /* Don't remove the toplevel icons/ directory */
+        if (!glnx_unlinkat (icons_dfd, dirpath, AT_REMOVEDIR, error))
+          return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
+clean_unused_icons (int           icons_dfd,
+                    GHashTable   *used_icons,
+                    GCancellable *cancellable,
+                    GError      **error)
+{
+  return clean_unused_icons_recurse (icons_dfd, NULL, used_icons, NULL, cancellable, error);
+}
+
+GBytes *
+flatpak_oci_index_make_appstream (FlatpakHttpSession *http_session,
+                                  GFile              *index,
+                                  const char         *index_uri,
+                                  const char         *arch,
+                                  int                 icons_dfd,
+                                  GCancellable       *cancellable,
+                                  GError            **error)
+{
+  g_autoptr(FlatpakOciIndexResponse) response = NULL;
+  g_autoptr(FlatpakXml) appstream_root = NULL;
+  g_autoptr(GBytes) bytes = NULL;
+  g_autoptr(GHashTable) used_icons = NULL;
+  g_autoptr(FlatpakCertificates) certificates = NULL;
+  g_autoptr(GError) local_error = NULL;
+  int i;
+
+  const char *oci_arch = flatpak_arch_to_oci_arch (arch);
+
+  response = load_oci_index (index, cancellable, error);
+  if (!response)
+    return NULL;
+
+  used_icons = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                      g_free, NULL);
+
+  appstream_root = flatpak_appstream_xml_new ();
+
+  certificates = flatpak_get_certificates_for_uri (index_uri, &local_error);
+  if (local_error)
+    {
+      g_print ("Failed to load certificates for %s: %s",
+               index_uri, local_error->message);
+      g_clear_error (&local_error);
+    }
+
+  for (i = 0; response->results != NULL && response->results[i] != NULL; i++)
+    {
+      FlatpakOciIndexRepository *r = response->results[i];
+      int j;
+
+      for (j = 0; r->images != NULL && r->images[j] != NULL; j++)
+        {
+          FlatpakOciIndexImage *image = r->images[j];
+          if (g_strcmp0 (image->architecture, oci_arch) == 0)
+            add_image_to_appstream (http_session,
+                                    index_uri, certificates,
+                                    appstream_root, icons_dfd, used_icons,
+                                    r, image,
+                                    cancellable);
+        }
+
+      for (j = 0; r->lists != NULL && r->lists[j] != NULL; j++)
+        {
+          FlatpakOciIndexImageList *list =  r->lists[j];
+          int k;
+
+          for (k = 0; list->images != NULL && list->images[k] != NULL; k++)
+            {
+              FlatpakOciIndexImage *image = list->images[k];
+              if (g_strcmp0 (image->architecture, oci_arch) == 0)
+                add_image_to_appstream (http_session,
+                                        index_uri, certificates,
+                                        appstream_root, icons_dfd, used_icons,
+                                        r, image,
+                                        cancellable);
+            }
+        }
+    }
+
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    return NULL;
+
+  if (!flatpak_appstream_xml_root_to_data (appstream_root,
+                                           &bytes, NULL, error))
+    return NULL;
+
+  if (!clean_unused_icons (icons_dfd, used_icons, cancellable, error))
+    return FALSE;
+
+  return g_steal_pointer (&bytes);
+}
+
+typedef struct
+{
+  FlatpakOciPullProgress progress_cb;
+  gpointer               progress_user_data;
+  guint64                total_size;
+  guint64                previous_layers_size;
+  guint32                n_layers;
+  guint32                pulled_layers;
+} FlatpakOciPullProgressData;
+
+static void
+oci_layer_progress (guint64  downloaded_bytes,
+                    gpointer user_data)
+{
+  FlatpakOciPullProgressData *progress_data = user_data;
+
+  if (progress_data->progress_cb)
+    progress_data->progress_cb (progress_data->total_size, progress_data->previous_layers_size + downloaded_bytes,
+                                progress_data->n_layers, progress_data->pulled_layers,
+                                progress_data->progress_user_data);
+}
+
+gboolean
+flatpak_mirror_image_from_oci (FlatpakOciRegistry    *dst_registry,
+                               FlatpakImageSource    *image_source,
+                               const char            *remote,
+                               const char            *ref,
+                               OstreeRepo            *repo,
+                               FlatpakOciPullProgress progress_cb,
+                               gpointer               progress_user_data,
+                               GCancellable          *cancellable,
+                               GError               **error)
+{
+  FlatpakOciPullProgressData progress_data = { progress_cb, progress_user_data };
+  FlatpakOciRegistry *registry = flatpak_image_source_get_registry (image_source);
+  const char *oci_repository = flatpak_image_source_get_oci_repository (image_source);
+  const char *digest = flatpak_image_source_get_digest (image_source);
+  FlatpakOciManifest *manifest = flatpak_image_source_get_manifest (image_source);
+  const char *delta_url = flatpak_image_source_get_delta_url (image_source);
+  FlatpakOciImage *image_config = flatpak_image_source_get_image_config (image_source);
+  g_autoptr(FlatpakOciDescriptor) manifest_desc = NULL;
+  g_autoptr(FlatpakOciManifest) delta_manifest = NULL;
+  g_autofree char *old_checksum = NULL;
+  g_autoptr(GVariant) old_commit = NULL;
+  g_autoptr(GFile) old_root = NULL;
+  OstreeRepoCommitState old_state = 0;
+  g_autofree char *old_diffid = NULL;
+  g_autoptr(FlatpakOciIndex) index = NULL;
+  g_autoptr(FlatpakOciSignatures) signatures = NULL;
+  int n_layers;
+  int i;
+
+  if (!flatpak_oci_registry_mirror_blob (dst_registry, registry, oci_repository, TRUE, digest, NULL, NULL, NULL, cancellable, error))
+    return FALSE;
+
+  if (!flatpak_oci_registry_mirror_blob (dst_registry, registry, oci_repository, FALSE, manifest->config.digest, (const char **)manifest->config.urls, NULL, NULL, cancellable, error))
+    return FALSE;
+
+  /* For deltas we ensure that the diffid and regular layers exists and match up */
+  n_layers = flatpak_oci_manifest_get_n_layers (manifest);
+  if (n_layers == 0 || n_layers != flatpak_oci_image_get_n_layers (image_config))
+    return flatpak_fail (error, _("Invalid OCI image config"));
+
+  /* Look for delta manifest, and if it exists, the current (old) commit and its recorded diffid */
+  if (flatpak_repo_resolve_rev (repo, NULL, remote, ref, FALSE, &old_checksum, NULL, NULL) &&
+      ostree_repo_load_commit (repo, old_checksum, &old_commit, &old_state, NULL) &&
+      (old_state == OSTREE_REPO_COMMIT_STATE_NORMAL) &&
+      ostree_repo_read_commit (repo, old_checksum, &old_root, NULL, NULL, NULL))
+    {
+      delta_manifest = flatpak_oci_registry_find_delta_manifest (registry, oci_repository, digest, delta_url, cancellable);
+      if (delta_manifest)
+        {
+          VarMetadataRef commit_metadata = var_commit_get_metadata (var_commit_from_gvariant (old_commit));
+          const char *raw_old_diffid = var_metadata_lookup_string (commit_metadata, "xa.diff-id", NULL);
+          if (raw_old_diffid != NULL)
+            old_diffid = g_strconcat ("sha256:", raw_old_diffid, NULL);
+        }
+    }
+
+  for (i = 0; manifest->layers[i] != NULL; i++)
+    {
+      FlatpakOciDescriptor *layer = manifest->layers[i];
+      FlatpakOciDescriptor *delta_layer = NULL;
+
+      if (delta_manifest)
+        delta_layer = flatpak_oci_manifest_find_delta_for (delta_manifest, old_diffid, image_config->rootfs.diff_ids[i]);
+
+      if (delta_layer)
+        progress_data.total_size += delta_layer->size;
+      else
+        progress_data.total_size += layer->size;
+      progress_data.n_layers++;
+    }
+
+  if (progress_cb)
+    progress_cb (progress_data.total_size, 0,
+                 progress_data.n_layers, progress_data.pulled_layers,
+                 progress_user_data);
+
+  for (i = 0; manifest->layers[i] != NULL; i++)
+    {
+      FlatpakOciDescriptor *layer = manifest->layers[i];
+      FlatpakOciDescriptor *delta_layer = NULL;
+
+      if (delta_manifest)
+        delta_layer = flatpak_oci_manifest_find_delta_for (delta_manifest, old_diffid, image_config->rootfs.diff_ids[i]);
+
+      if (delta_layer)
+        {
+          g_info ("Using OCI delta %s for layer %s", delta_layer->digest, layer->digest);
+          g_autofree char *delta_digest = NULL;
+          glnx_autofd int delta_fd = flatpak_oci_registry_download_blob (registry, oci_repository, FALSE,
+                                                                         delta_layer->digest, (const char **)delta_layer->urls,
+                                                                         oci_layer_progress, &progress_data,
+                                                                         cancellable, error);
+          if (delta_fd == -1)
+            return FALSE;
+
+          delta_digest = flatpak_oci_registry_apply_delta_to_blob (dst_registry, delta_fd, old_root, cancellable, error);
+          if (delta_digest == NULL)
+            return FALSE;
+
+          if (g_strcmp0 (delta_digest, image_config->rootfs.diff_ids[i]) != 0)
+            return flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, _("Wrong layer checksum, expected %s, was %s"), image_config->rootfs.diff_ids[i], delta_digest);
+        }
+      else
+        {
+          if (!flatpak_oci_registry_mirror_blob (dst_registry, registry, oci_repository, FALSE, layer->digest, (const char **)layer->urls,
+                                                 oci_layer_progress, &progress_data,
+                                                 cancellable, error))
+            return FALSE;
+        }
+
+      progress_data.pulled_layers++;
+      progress_data.previous_layers_size += delta_layer ? delta_layer->size : layer->size;
+    }
+
+  index = flatpak_oci_registry_load_index (dst_registry, NULL, NULL);
+  if (index == NULL)
+    index = flatpak_oci_index_new ();
+
+  manifest_desc = flatpak_oci_descriptor_new (manifest->parent.mediatype, digest,
+                                              flatpak_image_source_get_manifest_size (image_source));
+
+  flatpak_oci_index_add_manifest (index, ref, manifest_desc);
+
+  if (!flatpak_oci_registry_save_index (dst_registry, index, cancellable, error))
+    return FALSE;
+
+  signatures = flatpak_oci_registry_load_signatures (registry, oci_repository, digest,
+                                                     cancellable, error);
+  if (!signatures)
+    return FALSE;
+
+  if (!flatpak_oci_signatures_save_to_dfd (signatures, dst_registry->dfd, cancellable, error))
+    return FALSE;
+
+  return TRUE;
+}
+
+char *
+flatpak_pull_from_oci (OstreeRepo            *repo,
+                       FlatpakImageSource    *image_source,
+                       FlatpakImageSource    *opt_dst_image_source,
+                       const char            *remote,
+                       const char            *ref,
+                       FlatpakPullFlags       flags,
+                       FlatpakOciPullProgress progress_cb,
+                       gpointer               progress_user_data,
+                       GCancellable          *cancellable,
+                       GError               **error)
+{
+  FlatpakOciRegistry *registry = flatpak_image_source_get_registry (image_source);
+  const char *oci_repository = flatpak_image_source_get_oci_repository (image_source);
+  const char *digest = flatpak_image_source_get_digest (image_source);
+  FlatpakOciManifest *manifest = flatpak_image_source_get_manifest (image_source);
+  const char *delta_url = flatpak_image_source_get_delta_url (image_source);
+  FlatpakOciImage *image_config = flatpak_image_source_get_image_config (image_source);
+  gboolean force_disable_deltas = (flags & FLATPAK_PULL_FLAGS_NO_STATIC_DELTAS) != 0;
+  g_autoptr(OstreeMutableTree) archive_mtree = NULL;
+  g_autoptr(GFile) archive_root = NULL;
+  g_autoptr(FlatpakOciManifest) delta_manifest = NULL;
+  g_autofree char *old_checksum = NULL;
+  g_autoptr(GVariant) old_commit = NULL;
+  g_autoptr(GFile) old_root = NULL;
+  OstreeRepoCommitState old_state = 0;
+  g_autofree char *old_diffid = NULL;
+  g_autofree char *commit_checksum = NULL;
+  const char *parent = NULL;
+  const char *manifest_ref = NULL;
+  g_autofree char *full_ref = NULL;
+  const char *diffid;
+  FlatpakOciPullProgressData progress_data = { progress_cb, progress_user_data };
+  g_autoptr(GVariantBuilder) metadata_builder = g_variant_builder_new (G_VARIANT_TYPE ("a{sv}"));
+  g_autoptr(GVariant) metadata = NULL;
+  g_autoptr(FlatpakOciSignatures) signatures = NULL;
+  FlatpakOciRegistry *dst_registry = opt_dst_image_source ?
+    flatpak_image_source_get_registry (opt_dst_image_source) : registry;
+  const char *dest_oci_repository = opt_dst_image_source ?
+    flatpak_image_source_get_oci_repository (opt_dst_image_source) : oci_repository;
+  int n_layers;
+  int i;
+
+  g_assert (g_str_has_prefix (digest, "sha256:"));
+
+  signatures = flatpak_oci_registry_load_signatures (dst_registry,
+                                                     dest_oci_repository,
+                                                     digest,
+                                                     cancellable, error);
+  if (!signatures)
+    return FALSE;
+
+  if (!flatpak_oci_signatures_verify (signatures, repo, remote,
+                                      dst_registry->uri,
+                                      dest_oci_repository,
+                                      digest,
+                                      error))
+    return FALSE;
+
+  manifest_ref = flatpak_image_source_get_ref (image_source);
+  if (manifest_ref == NULL)
+    {
+      flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, _("No ref specified for OCI image %s"), digest);
+      return NULL;
+    }
+
+  if (ref == NULL)
+    {
+      ref = manifest_ref;
+    }
+  else if (g_strcmp0 (manifest_ref, ref) != 0)
+    {
+      flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, _("Wrong ref (%s) specified for OCI image %s, expected %s"), manifest_ref, digest, ref);
+      return NULL;
+    }
+
+  flatpak_image_source_build_commit_metadata (image_source, metadata_builder);
+
+  g_variant_builder_add (metadata_builder, "{s@v}", "xa.alt-id",
+                         g_variant_new_variant (g_variant_new_string (digest + strlen ("sha256:"))));
+
+  /* For deltas we ensure that the diffid and regular layers exists and match up */
+  n_layers = flatpak_oci_manifest_get_n_layers (manifest);
+  if (n_layers == 0 || n_layers != flatpak_oci_image_get_n_layers (image_config))
+    {
+      flatpak_fail (error, _("Invalid OCI image config"));
+      return NULL;
+    }
+
+  /* Assuming everything looks good, we record the uncompressed checksum (the diff-id) of the last layer,
+     because that is what we can read back easily from the deploy dir, and thus is easy to use for applying deltas */
+  diffid = image_config->rootfs.diff_ids[n_layers-1];
+  if (diffid != NULL && g_str_has_prefix (diffid, "sha256:"))
+    g_variant_builder_add (metadata_builder, "{s@v}", "xa.diff-id",
+                           g_variant_new_variant (g_variant_new_string (diffid + strlen ("sha256:"))));
+
+  /* Look for delta manifest, and if it exists, the current (old) commit and its recorded diffid */
+  if (!force_disable_deltas &&
+      !flatpak_oci_registry_is_local (registry) &&
+      flatpak_repo_resolve_rev (repo, NULL, remote, ref, FALSE, &old_checksum, NULL, NULL) &&
+      ostree_repo_load_commit (repo, old_checksum, &old_commit, &old_state, NULL) &&
+      (old_state == OSTREE_REPO_COMMIT_STATE_NORMAL) &&
+      ostree_repo_read_commit (repo, old_checksum, &old_root, NULL, NULL, NULL))
+    {
+      delta_manifest = flatpak_oci_registry_find_delta_manifest (registry, oci_repository, digest, delta_url, cancellable);
+      if (delta_manifest)
+        {
+          VarMetadataRef commit_metadata = var_commit_get_metadata (var_commit_from_gvariant (old_commit));
+          const char *raw_old_diffid = var_metadata_lookup_string (commit_metadata, "xa.diff-id", NULL);
+          if (raw_old_diffid != NULL)
+            old_diffid = g_strconcat ("sha256:", raw_old_diffid, NULL);
+        }
+    }
+
+  if (!ostree_repo_prepare_transaction (repo, NULL, cancellable, error))
+    return NULL;
+
+  /* There is no way to write a subset of the archive to a mtree, so instead
+     we write all of it and then build a new mtree with the subset */
+  archive_mtree = ostree_mutable_tree_new ();
+
+  for (i = 0; manifest->layers[i] != NULL; i++)
+    {
+      FlatpakOciDescriptor *layer = manifest->layers[i];
+      FlatpakOciDescriptor *delta_layer = NULL;
+
+      if (delta_manifest)
+        delta_layer = flatpak_oci_manifest_find_delta_for (delta_manifest, old_diffid, image_config->rootfs.diff_ids[i]);
+
+      if (delta_layer)
+        progress_data.total_size += delta_layer->size;
+      else
+        progress_data.total_size += layer->size;
+
+      progress_data.n_layers++;
+    }
+
+  if (progress_cb)
+    progress_cb (progress_data.total_size, 0,
+                 progress_data.n_layers, progress_data.pulled_layers,
+                 progress_user_data);
+
+  for (i = 0; manifest->layers[i] != NULL; i++)
+    {
+      FlatpakOciDescriptor *layer = manifest->layers[i];
+      FlatpakOciDescriptor *delta_layer = NULL;
+      OstreeRepoImportArchiveOptions opts = { 0, };
+      g_autoptr(FlatpakAutoArchiveRead) a = NULL;
+      glnx_autofd int layer_fd = -1;
+      glnx_autofd int blob_fd = -1;
+      g_autoptr(GChecksum) checksum = g_checksum_new (G_CHECKSUM_SHA256);
+      g_autoptr(GError) local_error = NULL;
+      const char *layer_checksum;
+      const char *expected_digest;
+
+      if (delta_manifest)
+        delta_layer = flatpak_oci_manifest_find_delta_for (delta_manifest, old_diffid, image_config->rootfs.diff_ids[i]);
+
+      opts.autocreate_parents = TRUE;
+      opts.ignore_unsupported_content = TRUE;
+
+      if (delta_layer)
+        {
+          g_info ("Using OCI delta %s for layer %s", delta_layer->digest, layer->digest);
+          expected_digest = image_config->rootfs.diff_ids[i]; /* The delta recreates the uncompressed tar so use that digest */
+        }
+      else
+        {
+          layer_fd = g_steal_fd (&blob_fd);
+          expected_digest = layer->digest;
+        }
+
+      blob_fd = flatpak_oci_registry_download_blob (registry, oci_repository, FALSE,
+                                                    delta_layer ? delta_layer->digest : layer->digest,
+                                                    (const char **)(delta_layer ? delta_layer->urls : layer->urls),
+                                                    oci_layer_progress, &progress_data,
+                                                    cancellable, &local_error);
+
+      if (blob_fd == -1 && delta_layer == NULL &&
+          flatpak_oci_registry_is_local (registry) &&
+          g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+        {
+          /* Pulling regular layer from local repo and its not there, try the uncompressed version.
+           * This happens when we deploy via system helper using oci deltas */
+          expected_digest = image_config->rootfs.diff_ids[i];
+          blob_fd = flatpak_oci_registry_download_blob (registry, oci_repository, FALSE,
+                                                        image_config->rootfs.diff_ids[i], NULL,
+                                                        oci_layer_progress, &progress_data,
+                                                        cancellable, NULL); /* No error here, we report the first error if this fails */
+        }
+
+      if (blob_fd == -1)
+        {
+          g_propagate_error (error, g_steal_pointer (&local_error));
+          goto error;
+        }
+
+      g_clear_error (&local_error);
+
+      if (delta_layer)
+        {
+          layer_fd = flatpak_oci_registry_apply_delta (registry, blob_fd, old_root, cancellable, error);
+          if (layer_fd == -1)
+            goto error;
+        }
+      else
+        {
+          layer_fd = g_steal_fd (&blob_fd);
+        }
+
+      a = archive_read_new ();
+#ifdef HAVE_ARCHIVE_READ_SUPPORT_FILTER_ALL
+      archive_read_support_filter_all (a);
+#else
+      archive_read_support_compression_all (a);
+#endif
+      archive_read_support_format_all (a);
+
+      if (!flatpak_archive_read_open_fd_with_checksum (a, layer_fd, checksum, error))
+        goto error;
+
+      if (!ostree_repo_import_archive_to_mtree (repo, &opts, a, archive_mtree, NULL, cancellable, error))
+        goto error;
+
+      if (archive_read_close (a) != ARCHIVE_OK)
+        {
+          propagate_libarchive_error (error, a);
+          goto error;
+        }
+
+      layer_checksum = g_checksum_get_string (checksum);
+      if (!g_str_has_prefix (expected_digest, "sha256:") ||
+          strcmp (expected_digest + strlen ("sha256:"), layer_checksum) != 0)
+        {
+          flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, _("Wrong layer checksum, expected %s, was %s"), expected_digest, layer_checksum);
+          goto error;
+        }
+
+      progress_data.pulled_layers++;
+      progress_data.previous_layers_size += delta_layer ? delta_layer->size : layer->size;
+    }
+
+  if (!ostree_repo_write_mtree (repo, archive_mtree, &archive_root, cancellable, error))
+    goto error;
+
+  if (!ostree_repo_file_ensure_resolved ((OstreeRepoFile *) archive_root, error))
+    goto error;
+
+  metadata = g_variant_ref_sink (g_variant_builder_end (metadata_builder));
+  if (!ostree_repo_write_commit_with_time (repo,
+                                           parent,
+                                           flatpak_image_source_get_commit_subject (image_source),
+                                           flatpak_image_source_get_commit_body (image_source),
+                                           metadata,
+                                           OSTREE_REPO_FILE (archive_root),
+                                           flatpak_image_source_get_commit_timestamp (image_source),
+                                           &commit_checksum,
+                                           cancellable, error))
+    goto error;
+
+  if (remote)
+    full_ref = g_strdup_printf ("%s:%s", remote, ref);
+  else
+    full_ref = g_strdup (ref);
+
+  /* Don’t need to set the collection ID here, since the ref is bound to a
+   * collection via its remote. */
+  ostree_repo_transaction_set_ref (repo, NULL, full_ref, commit_checksum);
+
+  if (!ostree_repo_commit_transaction (repo, NULL, cancellable, error))
+    return NULL;
+
+  return g_steal_pointer (&commit_checksum);
+
+error:
+
+  ostree_repo_abort_transaction (repo, cancellable, NULL);
+  return NULL;
+}
+

@@ -1,0 +1,370 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<refentry id="flatpak-remote-ls">
+
+    <refentryinfo>
+        <title>flatpak remote-ls</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak remote-ls</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-remote-ls</refname>
+        <refpurpose>Show available runtimes and applications</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak remote-ls</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="opt">REMOTE</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            Shows runtimes and applications that are available in the
+            remote repository with the name <arg choice="plain">REMOTE</arg>,
+            or all remotes if one isn't specified. You can find all configured
+            remote repositories with <command>flatpak remotes</command>.
+        </para>
+        <para>
+            <arg choice="plain">REMOTE</arg> can be a file:// URI pointing to a
+            local repository instead of a remote name.
+        </para>
+        <para>
+            Unless overridden with the <option>--system</option>, <option>--user</option>, or <option>--installation</option> options,
+            this command uses either the default system-wide installation or the
+            per-user one, depending on which has the specified
+            <arg choice="plain">REMOTE</arg>.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-u</option></term>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    Use the per-user configuration.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    Use the default system-wide configuration.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    Use a system-wide installation specified by <arg choice="plain">NAME</arg>
+                    among those defined in <filename>/etc/flatpak/installations.d/</filename>.
+                    Using <option>--installation=default</option> is equivalent to using
+                    <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--cached</option></term>
+
+                <listitem><para>
+                  Prefer to use locally cached information if possible, even though it
+                  may be out of date. This is faster, but risks returning stale information.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-d</option></term>
+                <term><option>--show-details</option></term>
+
+                <listitem><para>
+                    Show arches, branches and commit ids, in addition to the names.
+                    Equivalent to <option>--columns=all</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--runtime</option></term>
+
+                <listitem><para>
+                    Show only runtimes, omit applications.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--app</option></term>
+
+                <listitem><para>
+                    Show only applications, omit runtimes.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--all</option></term>
+                <term><option>-a</option></term>
+
+                <listitem><para> Show everything. By default locale and
+                debug extensions as well as secondary arches when the primary
+                arch is available are hidden.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--updates</option></term>
+
+                <listitem><para>
+                    Show only those which have updates available.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--arch=ARCH</option></term>
+
+                <listitem><para>
+                    Show only those matching the specified architecture. By default, only
+                    supported architectures are shown. Use <option>--arch=*</option> to show all architectures.
+                    See <command>flatpak --supported-arches</command> for architectures supported by the host.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--app-runtime=RUNTIME</option></term>
+
+                <listitem><para>
+                    List applications that use the given runtime
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--columns=FIELD,…</option></term>
+
+                <listitem><para>
+                    Specify what information to show about each ref. You can
+                    list multiple fields, or use this option multiple times.
+                </para><para>
+                    Append :s[tart], :m[iddle], :e[nd] or :f[ull] to column
+                    names to change ellipsization.
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+
+   <refsect1>
+        <title>Fields</title>
+
+        <para>The following fields are understood by the <option>--columns</option> option:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term>name</term>
+
+                <listitem><para>
+                    Show the name
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>description</term>
+
+                <listitem><para>
+                    Show the application description
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>application</term>
+
+                <listitem><para>
+                    Show the application or runtime ID
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>arch</term>
+
+                <listitem><para>
+                    Show the arch
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>branch</term>
+
+                <listitem><para>
+                    Show the branch 
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>version</term>
+
+                <listitem><para>
+                    Show the version
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>ref</term>
+
+                <listitem><para>
+                    Show the ref
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>origin</term>
+
+                <listitem><para>
+                    Show the origin remote
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>commit</term>
+
+                <listitem><para>
+                    Show the active commit
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>runtime</term>
+
+                <listitem><para>
+                    Show the used runtime
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>installed-size</term>
+
+                <listitem><para>
+                    Show the installed size
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>download-size</term>
+
+                <listitem><para>
+                    Show the download size
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>options</term>
+
+                <listitem><para>
+                    Show options
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>all</term>
+
+                <listitem><para>
+                    Show all columns
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>help</term>
+
+                <listitem><para>
+                    Show the list of available columns
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+
+        <para>
+          Note that field names can be abbreviated to a unique prefix.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak --user remote-ls --app testrepo</command>
+        </para>
+<programlisting>
+Ref
+org.gnome.Builder
+org.freedesktop.glxgears
+</programlisting>
+
+        <para>
+            <command>$ flatpak remote-ls file:///run/media/mwleeds/d4d37026-cde2-4e5e-8bcc-d23ebbf231f9/.ostree/repo</command>
+        </para>
+<programlisting>
+Ref
+org.kde.Khangman
+</programlisting>
+
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+            <para>
+                <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+                <citerefentry><refentrytitle>flatpak-remotes</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+            </para>
+    </refsect1>
+
+</refentry>

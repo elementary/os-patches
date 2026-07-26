@@ -1,0 +1,8 @@
+[Unit]
+Description=flatpak portal
+PartOf=graphical-session.target
+
+[Service]
+BusName=org.freedesktop.portal.Flatpak
+ExecStart=@libexecdir@/flatpak-portal
+Type=dbus

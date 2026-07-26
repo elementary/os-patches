@@ -1,0 +1,217 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<refentry id="flatpak-create-usb">
+
+    <refentryinfo>
+        <title>flatpak create-usb</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Matthew</firstname>
+                <surname>Leeds</surname>
+                <email>matthew.leeds@endlessm.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak create-usb</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-create-usb</refname>
+        <refpurpose>Copy apps and/or runtimes onto removable media.</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak create-usb</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="plain">MOUNT-PATH</arg>
+                <arg choice="plain" rep="repeat">REF</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            Copies the specified apps and/or runtimes <arg choice="plain">REF</arg>s onto the removable
+            media mounted at <arg choice="plain">MOUNT-PATH</arg>, along with all the dependencies and
+            metadata needed for installing them. This is one way of transferring flatpaks
+            between computers that doesn't require an Internet connection. After using
+            this command, the USB drive can be connected to another computer which already has the
+            relevant remote(s) configured, and Flatpak will install or update from the drive offline
+            (see below). If online, the drive will be used as a cache, meaning some objects will be
+            pulled from it and others from the Internet. For this process to work a collection ID
+            must be configured on the relevant remotes on both the source and destination computers,
+            and on the remote server.
+        </para>
+        <para>
+            On the destination computer one can install from the USB (or any mounted filesystem)
+            using the <option>--sideload-repo</option> option with <command>flatpak install</command>.
+            It's also possible to configure sideload paths using symlinks; see
+            <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+            Flatpak also includes systemd units to automatically sideload from hot-plugged USB drives,
+            but these may or may not be enabled depending on your Linux distribution.
+        </para>
+        <para>
+            Each <arg choice="plain">REF</arg> argument is a full or partial identifier in the
+            flatpak ref format, which looks like "(app|runtime)/ID/ARCH/BRANCH". All elements
+            except ID are optional and can be left out, including the slashes,
+            so most of the time you need only specify ID. Any part left out will be matched
+            against what is installed, and if there are multiple matches an error message
+            will list the alternatives.
+        </para>
+        <para>
+            By default this looks for both installed apps and runtimes
+            with the given <arg choice="plain">REF</arg>, but you can
+            limit this by using the <option>--app</option> or <option>--runtime</option> option.
+        </para>
+        <para>
+            All <arg choice="plain">REF</arg>s must be in the same installation (user, system, or other).
+            Otherwise it's ambiguous which repository metadata refs to put on the USB drive.
+        </para>
+        <para>
+            By default <command>flatpak create-usb</command> uses <filename>.ostree/repo</filename>
+            as the destination directory under <arg choice="plain">MOUNT-PATH</arg> but if you
+            specify another location using <option>--destination-repo</option>
+            a symbolic link will be created for you in <filename>.ostree/repos.d</filename>.
+            This ensures that either way the repository will be found by flatpak (and other
+            consumers of libostree) for install/update operations.
+        </para>
+        <para>
+            Unless overridden with the <option>--system</option>, <option>--user</option>, or <option>--installation</option>
+            options, this command searches both the system-wide installation
+            and the per-user one for <arg choice="plain">REF</arg> and errors
+            out if it exists in more than one.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-u</option></term>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    Copy refs from the per-user installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    Copy refs from the default system-wide installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    Copy refs from a system-wide installation specified by
+                    <arg choice="plain">NAME</arg> among those defined in
+                    <filename>/etc/flatpak/installations.d/</filename>.  Using
+                    <option>--installation=default</option> is
+                    equivalent to using <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--app</option></term>
+
+                <listitem><para>
+                    Assume that all <arg choice="plain">REF</arg>s are apps if not explicitly specified.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--runtime</option></term>
+                <listitem><para>
+                    Assume that all <arg choice="plain">REF</arg>s are runtimes if not explicitly specified.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--destination-repo</option>=DEST</term>
+
+                <listitem><para>
+                  Create the repository in <arg choice="plain">DEST</arg> under <arg choice="plain">MOUNT-PATH</arg>, rather than
+                  the default location.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--allow-partial</option></term>
+
+                <listitem><para>
+                  Don't print a warning when exporting partially installed commits, for example locale extensions without all
+                  languages. These can cause problems when installing them, for example if the language config is different
+                  on the installing side.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+        </variablelist>
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak create-usb /run/media/mwleeds/1a9b4cb2-a7ef-4d9b-91a5-6eaf8fdd2bf6/ com.endlessm.wiki_art.en</command>
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+        <para>
+            <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak remote-modify</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-install</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-list</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>ostree-create-usb</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
+
+    </refsect1>
+
+</refentry>

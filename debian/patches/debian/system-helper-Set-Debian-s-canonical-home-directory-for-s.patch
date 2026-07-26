@@ -1,0 +1,17 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Mon, 10 Mar 2025 10:56:07 +0000
+Subject: system-helper: Set Debian's canonical home directory for system
+ users
+
+Forwarded: not-needed
+---
+ system-helper/flatpak.conf.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/system-helper/flatpak.conf.in b/system-helper/flatpak.conf.in
+index 9cc212e..8244290 100644
+--- a/system-helper/flatpak.conf.in
++++ b/system-helper/flatpak.conf.in
+@@ -1 +1 @@
+-u @SYSTEM_HELPER_USER@ - "Flatpak system helper" -
++u @SYSTEM_HELPER_USER@ - "Flatpak system helper" /nonexistent

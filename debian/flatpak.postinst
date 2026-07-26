@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+if [ "$1" = configure ]; then
+    # Run a do-nothing command (it just lists configured remotes) for
+    # its side-effect of initializing the shared system-wide repository.
+    flatpak remote-list --system >/dev/null || :
+fi
+
+exit 0
+
+# vim:set sw=4 sts=4 et:

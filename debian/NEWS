@@ -1,0 +1,22 @@
+flatpak (1.3.4-1) experimental; urgency=medium
+
+  This version of flatpak has an incompatible change to the way default
+  remotes can be configured in /etc/flatpak/remotes.d.
+
+  Previous versions would read *.conf files from that directory and
+  treat them as preconfigured remotes for the system-wide installation
+  in /var/lib/flatpak, which could not be reconfigured or removed in the
+  usual way through UIs like flatpak(1).
+
+  From this version, default remotes are instead configured by
+  placing an ordinary .flatpakrepo file (see flatpak-flatpakrepo(5))
+  in /etc/flatpak/remotes.d. These are automatically imported into the
+  system-wide installation as if via flatpak-remote-add(1) the first time
+  flatpak is run.
+
+  flatpak remembers which remotes were already added in this way,
+  so sysadmins can delete them in the usual way, for instance using
+  flatpak-remote-delete(1), and they will not be re-added. They can also
+  be reconfigured with flatpak-remote-modify(1) as usual.
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 10 May 2019 11:44:56 +0100

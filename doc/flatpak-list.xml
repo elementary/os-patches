@@ -1,0 +1,356 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<refentry id="flatpak-list">
+
+    <refentryinfo>
+        <title>flatpak list</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak list</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-list</refname>
+        <refpurpose>List installed applications and/or runtimes</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak list</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            Lists the names of the installed applications and runtimes.
+        </para>
+        <para>
+            By default, both apps and runtimes are shown, but you can
+            change this by using the <option>--app</option> or
+            <option>--runtime</option> options.
+        </para>
+        <para>
+            By default, both per-user and system-wide installations are shown.
+            Use the <option>--user</option>, <option>--installation</option> or
+            <option>--system</option> options to change this.
+        </para>
+        <para>
+            The list command can also be used to find installed apps that
+            use a certain runtime, with the <option>--app-runtime</option> option.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-u</option></term>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    List per-user installations.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    List the default system-wide installations.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    List a system-wide installation specified by <arg choice="plain">NAME</arg>
+                    among those defined in <filename>/etc/flatpak/installations.d/</filename>.
+                    Using <option>--installation=default</option> is equivalent to using
+                    <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--arch=ARCH</option></term>
+
+                <listitem><para>
+                    List apps/runtimes for this architecture. See <command>flatpak --supported-arches</command>
+                    for architectures supported by the host.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-d</option></term>
+                <term><option>--show-details</option></term>
+
+                <listitem><para>
+                    Show origin, sizes and other extra information.
+                    Equivalent to <option>--columns=all</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--app</option></term>
+
+                <listitem><para>
+                    List applications.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--runtime</option></term>
+
+                <listitem><para>
+                    List runtimes.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--all</option></term>
+                <term><option>-a</option></term>
+
+                <listitem><para>
+                    List all installed runtimes, including locale and debug extensions. These are hidden by default.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--app-runtime=RUNTIME</option></term>
+
+                <listitem><para>
+                    List applications that use the given runtime.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--columns=FIELD,…</option></term>
+
+                <listitem><para>
+                    Specify what information to show about each ref. You can
+                    list multiple fields, or use this option multiple times.
+                </para><para>
+                    Append :s[tart], :m[iddle], :e[nd] or :f[ull] to column
+                    names to change ellipsization.
+                </para></listitem>
+            </varlistentry>
+
+        </variablelist>
+    </refsect1>
+
+   <refsect1>
+        <title>Fields</title>
+
+        <para>The following fields are understood by the <option>--columns</option> option:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term>name</term>
+
+                <listitem><para>
+                    Show the name
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>description</term>
+
+                <listitem><para>
+                    Show the description
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>application</term>
+
+                <listitem><para>
+                    Show the application or runtime ID
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>arch</term>
+
+                <listitem><para>
+                    Show the architecture
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>branch</term>
+
+                <listitem><para>
+                    Show the branch
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>runtime</term>
+
+                <listitem><para>
+                    Show the used runtime
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>version</term>
+
+                <listitem><para>
+                    Show the version
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>ref</term>
+
+                <listitem><para>
+                    Show the ref
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>origin</term>
+
+                <listitem><para>
+                    Show the origin remote
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>installation</term>
+
+                <listitem><para>
+                    Show the installation
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>active</term>
+
+                <listitem><para>
+                    Show the active commit
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>latest</term>
+
+                <listitem><para>
+                    Show the latest commit
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>size</term>
+
+                <listitem><para>
+                    Show the installed size
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>options</term>
+
+                <listitem><para>
+                    Show options
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>all</term>
+
+                <listitem><para>
+                    Show all columns
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>help</term>
+
+                <listitem><para>
+                    Show the list of available columns
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+
+        <para>
+          Note that field names can be abbreviated to a unique prefix.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak --user --columns=app list</command>
+        </para>
+<programlisting>
+<command>Application</command>
+org.gnome.Builder
+org.freedesktop.glxgears
+org.gnome.MyApp
+org.gnome.gedit
+</programlisting>
+
+    </refsect1>
+
+    <refsect1>
+        <title>See also</title>
+
+        <para>
+            <citerefentry><refentrytitle>flatpak</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-install</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>flatpak-update</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
+
+    </refsect1>
+
+</refentry>

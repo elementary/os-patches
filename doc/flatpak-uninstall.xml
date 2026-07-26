@@ -1,0 +1,244 @@
+<?xml version='1.0'?> <!--*-nxml-*-->
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<refentry id="flatpak-uninstall">
+
+    <refentryinfo>
+        <title>flatpak uninstall</title>
+        <productname>flatpak</productname>
+
+        <authorgroup>
+            <author>
+                <contrib>Developer</contrib>
+                <firstname>Alexander</firstname>
+                <surname>Larsson</surname>
+                <email>alexl@redhat.com</email>
+            </author>
+        </authorgroup>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>flatpak uninstall</refentrytitle>
+        <manvolnum>1</manvolnum>
+    </refmeta>
+
+    <refnamediv>
+        <refname>flatpak-uninstall</refname>
+        <refpurpose>Uninstall an application or runtime</refpurpose>
+    </refnamediv>
+
+    <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>flatpak uninstall</command>
+                <arg choice="opt" rep="repeat">OPTION</arg>
+                <arg choice="opt" rep="repeat">REF</arg>
+            </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+
+        <para>
+            Uninstalls an application or runtime. <arg choice="plain">REF</arg> is a reference to the
+            application or runtime to uninstall.
+        </para>
+        <para>
+            Each <arg choice="plain">REF</arg> argument is a full or partial identifier in the
+            flatpak ref format, which looks like "(app|runtime)/ID/ARCH/BRANCH". All elements
+            except ID are optional and can be left out, including the slashes,
+            so most of the time you need only specify ID. Any part left out will be matched
+            against what is installed, and if there are multiple matches you will be prompted
+            to choose between them. You will also be prompted if <arg choice="plain">REF</arg>
+            doesn't match any installed ref exactly but is similar (e.g. "gedit" is similar to
+            "org.gnome.gedit"), but this fuzzy matching behavior is disabled if
+            <arg choice="plain">REF</arg> contains any slashes or periods.
+        </para>
+        <para>
+            By default this looks for both installed apps and runtimes with the given
+            <arg choice="plain">REF</arg>, but you can limit this by using the <option>--app</option>
+            or <option>--runtime</option> option, or by supplying the initial element in the <arg choice="plain">REF</arg>.
+        </para>
+        <para>
+            Normally, this command removes the ref for this application/runtime from the
+            local OSTree repository and purges any objects that are no longer
+            needed to free up disk space. If the same application is later
+            reinstalled, the objects will be pulled from the remote repository
+            again. The <option>--keep-ref</option> option can be used to prevent this.
+        </para>
+        <para>
+            When <option>--delete-data</option> is specified while removing an app, its
+            data directory in <filename>~/.var/app</filename> and any permissions it might
+            have are removed. When <option>--delete-data</option> is used without a
+            <arg choice="plain">REF</arg>, all 'unowned' app data is removed.
+        </para>
+        <para>
+            Unless overridden with the <option>--system</option>, <option>--user</option>, or <option>--installation</option>
+            options, this command searches both the system-wide installation
+            and the per-user one for <arg choice="plain">REF</arg> and errors
+            out if it exists in more than one.
+        </para>
+
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+
+        <para>The following options are understood:</para>
+
+        <variablelist>
+            <varlistentry>
+                <term><option>-h</option></term>
+                <term><option>--help</option></term>
+
+                <listitem><para>
+                    Show help options and exit.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--keep-ref</option></term>
+
+                <listitem><para>
+                    Keep the ref for the application and the objects belonging to it
+                    in the local repository.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-u</option></term>
+                <term><option>--user</option></term>
+
+                <listitem><para>
+                    Uninstalls from a per-user installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--system</option></term>
+
+                <listitem><para>
+                    Uninstalls from the default system-wide installation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--installation=NAME</option></term>
+
+                <listitem><para>
+                    Uninstalls from a system-wide installation specified by
+                    <arg choice="plain">NAME</arg> among those defined in
+                    <filename>/etc/flatpak/installations.d/</filename>.  Using
+                    <option>--installation=default</option> is
+                    equivalent to using <option>--system</option>.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--arch=ARCH</option></term>
+
+                <listitem><para>
+                    The architecture to uninstall, instead of the architecture of
+                    the host system. See <command>flatpak --supported-arches</command>
+                    for architectures supported by the host.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--all</option></term>
+                <listitem><para>
+                    Remove all refs on the system.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--unused</option></term>
+                <listitem><para>
+                    Remove unused refs on the system.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-y</option></term>
+                <term><option>--assumeyes</option></term>
+                <listitem><para>
+                    Automatically answer yes to all questions. This is useful for automation.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--noninteractive</option></term>
+                <listitem><para>
+                    Produce minimal output and avoid most questions. This is suitable for use in
+                    non-interactive situations, e.g. in a build script.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--app</option></term>
+
+                <listitem><para>
+                    Only look for an app with the given name.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--runtime</option></term>
+
+                <listitem><para>
+                    Only look for a runtime with the given name.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--no-related</option></term>
+
+                <listitem><para>
+                    Don't uninstall related extensions, such as the locale data.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--force-remove</option></term>
+                <listitem><para>
+                    Remove files even if they're in use by a running application.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--delete-data</option></term>
+                <listitem><para>
+                    Remove app data in <filename>~/.var/app</filename> and in
+                    the permission store.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>-v</option></term>
+                <term><option>--verbose</option></term>
+
+                <listitem><para>
+                    Print debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term><option>--ostree-verbose</option></term>
+
+                <listitem><para>
+                    Print OSTree debug information during command processing.
+                </para></listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+
+    <refsect1>
+        <title>Examples</title>
+
+        <para>
+            <command>$ flatpak --user uninstall org.gnome.gedit</command>
+        </para>
+
+    </refsect1>
+
+</refentry>
