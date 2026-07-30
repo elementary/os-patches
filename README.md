@@ -19,6 +19,10 @@ deb http://ftp.debian.org/debian stable-updates main
 
 On Ubuntu, it is:
 deb http://archive.ubuntu.com/ubuntu $RELEASE-updates main
+
+On eLxr, it is:
+deb https://mirror.elxr.dev/elxr $RELEASE-updates main
+
 where $RELEASE is the name of your release.
 
 If there isn't an update available yet, you should be able to install the
@@ -32,6 +36,7 @@ This data is available publicly at:
 
 * https://debian.pages.debian.net/distro-info-data/debian.csv
 * https://debian.pages.debian.net/distro-info-data/ubuntu.csv
+* https://debian.pages.debian.net/distro-info-data/elxr.csv
 
 ## Data format
 

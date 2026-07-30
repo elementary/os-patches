@@ -8,17 +8,29 @@ install:
 	install -m 644 $(wildcard *.csv) $(DESTDIR)$(PREFIX)/share/distro-info
 
 test:
-	./validate-csv-data -d debian.csv
-	./validate-csv-data -u ubuntu.csv
+	./validate-csv-data debian.csv
+	./validate-csv-data devuan.csv
+	./validate-csv-data elxr.csv
+	./validate-csv-data ubuntu.csv
 
 up-to-date:
-	./up-to-date -d debian.csv
-	./up-to-date -u ubuntu.csv
+	./up-to-date debian.csv
+	./up-to-date devuan.csv
+	./up-to-date elxr.csv
+	./up-to-date ubuntu.csv
+
+lint: isort black mypy pylint
 
 black:
-	black -C $(PYTHON_SOURCES)
+	black -C --check --diff $(PYTHON_SOURCES)
+
+isort:
+	isort --check-only --diff $(PYTHON_SOURCES)
+
+mypy:
+	mypy --scripts-are-modules $(PYTHON_SOURCES)
 
 pylint:
 	pylint $(PYTHON_SOURCES)
 
-.PHONY: black build install pylint test up-to-date
+.PHONY: black build install isort lint mypy pylint test up-to-date

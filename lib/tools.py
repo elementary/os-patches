@@ -17,19 +17,20 @@
 import argparse
 import csv
 import datetime
+from pathlib import Path
+from typing import Callable
 
 
-def convert_date(string):
+def convert_date(string: str) -> datetime.date:
     """Convert a date string in ISO 8601 into a datetime object."""
-    if not string:
-        date = None
+    parts = [int(x) for x in string.split("-")]
+    if len(parts) == 3:
+        year, month, day = parts
+        date = datetime.date(year, month, day)
     else:
-        parts = [int(x) for x in string.split("-")]
-        if len(parts) == 3:
-            (year, month, day) = parts
-            date = datetime.date(year, month, day)
-        else:
-            raise ValueError("Date not in ISO 8601 format.")
+        raise ValueError("Date not in ISO 8601 format.")
+    if date.isoformat() != string:
+        raise ValueError("Date is not in canonical ISO 8601 format.")
     return date
 
 
@@ -44,38 +45,21 @@ def get_csv_dict_reader(filename: str) -> csv.DictReader:
     for counter, line in enumerate(content):
         if line.startswith("#"):
             content[counter] = "\n"
-    return csv.DictReader(content)
+    return csv.DictReader(content, strict=True)
 
 
-def main(validation_function):
+def main(validation_function: Callable[[str, str], bool]) -> int:
     """Main function with command line parameter parsing."""
-    parser = argparse.ArgumentParser(usage="%(prog)s [-h] -d|-u csv-file")
+    parser = argparse.ArgumentParser(usage="%(prog)s [-h] csv-file")
 
     parser.add_argument(
-        "-d",
-        "--debian",
-        dest="debian",
-        action="store_true",
-        default=False,
-        help="validate a Debian CSV file",
+        "csv_file", metavar="csv-file", type=Path, help="CSV file to validate"
     )
-    parser.add_argument(
-        "-u",
-        "--ubuntu",
-        dest="ubuntu",
-        action="store_true",
-        default=False,
-        help="validate an Ubuntu CSV file",
-    )
-    parser.add_argument("csv_file", metavar="csv-file", help="CSV file to validate")
 
     args = parser.parse_args()
-    if len([x for x in [args.debian, args.ubuntu] if x]) != 1:
-        parser.error("You have to select exactly one of --debian, --ubuntu.")
+    if not args.csv_file.exists():
+        parser.error(f"{args.csv_file} does not exist.")
 
-    if args.debian:
-        distro = "debian"
-    else:
-        distro = "ubuntu"
+    distro = args.csv_file.stem
 
-    return int(not validation_function(args.csv_file, distro))
+    return int(not validation_function(str(args.csv_file), distro))
