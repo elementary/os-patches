@@ -1,0 +1,29 @@
+Add elementary OS informations
+--- a/Makefile
++++ b/Makefile
+@@ -5,7 +5,7 @@
+ 
+ install:
+ 	install -d $(DESTDIR)$(PREFIX)/share/distro-info
+-	install -m 644 $(wildcard *.csv) $(DESTDIR)$(PREFIX)/share/distro-info
++	install -m 644 $(filter %.csv,debian.csv ubuntu.csv elementary.csv) $(DESTDIR)$(PREFIX)/share/distro-info
+ 
+ test:
+ 	./validate-csv-data debian.csv
+--- /dev/null
++++ b/elementary.csv
+@@ -0,0 +1,14 @@
++version,codename,series,created,release,eol,eol-server,eol-esm,eol-legacy
++0.1,Jupiter,maverick,2010-04-29,2010-10-10,2012-04-10
++0.2,Luna,precise,2011-10-13,2012-04-26,2017-04-28,2017-04-28,2019-04-26
++0.3,Freya,trusty,2013-10-17,2014-04-17,2019-04-25,2019-04-25,2024-04-25,2029-04-26
++0.4,Loki,xenial,2015-10-22,2016-04-21,2021-04-30,2021-04-30,2026-04-23,2031-04-30
++5,Juno,bionic,2017-10-19,2018-04-26,2023-05-31,2023-05-31,2028-04-26,2033-04-28
++5.1,Hera,bionic,2017-10-19,2018-04-26,2023-05-31,2023-05-31,2028-04-26,2033-04-28
++6,Odin,focal,2019-10-17,2020-04-23,2025-05-29,2025-05-29,2030-04-23,2035-04-26
++6.1,Jólnir,focal,2019-10-17,2020-04-23,2025-05-29,2025-05-29,2030-04-23,2035-04-26
++7,Horus,jammy,2021-10-14,2022-04-21,2027-06-01,2027-06-01,2032-04-21,2037-04-30
++7.1,Horus,jammy,2021-10-14,2022-04-21,2027-06-01,2027-06-01,2032-04-21,2037-04-30
++8,Circe,noble,2023-10-12,2024-04-25,2029-05-31,2029-05-31,2034-04-25,2039-04-28
++8.1,Circe,noble,2023-10-12,2024-04-25,2029-05-31,2029-05-31,2034-04-25,2039-04-28
++9,Tanit,resolute,2025-10-09,2026-04-23,2031-05-29,2031-05-29,2036-04-23,2041-04-30
