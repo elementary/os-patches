@@ -2,7 +2,9 @@ distro-info
 ===========
 
 The distro-info package provides centralized lists of code-names and release
-history for the supported distributions (Currently: Debian and Ubuntu).
+history for the supported distributions (Currently: Debian, Devuan, eLxr, and
+Ubuntu).
+
 The distro-info data (in the distro-info-data package) can be updated once,
 and all the packages using it will have the latest data. This avoids having to
 hard-code current development release names (and other such volatile data)
@@ -19,6 +21,10 @@ deb http://ftp.debian.org/debian stable-updates main
 
 On Ubuntu, it is:
 deb http://archive.ubuntu.com/ubuntu $RELEASE-updates main
+
+On eLxr, it is:
+deb https://mirror.elxr.dev/elxr $RELEASE-updates main
+
 where $RELEASE is the name of your release.
 
 If there isn't an update available yet, you should be able to install the
@@ -27,4 +33,6 @@ latest version from Debian/unstable.
 Or pull it from the Internet at:
 
 * https://debian.pages.debian.net/distro-info-data/debian.csv
+* https://debian.pages.debian.net/distro-info-data/devuan.csv
+* https://debian.pages.debian.net/distro-info-data/elxr.csv
 * https://debian.pages.debian.net/distro-info-data/ubuntu.csv
