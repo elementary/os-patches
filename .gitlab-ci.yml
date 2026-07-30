@@ -2,13 +2,26 @@
 include:
   - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/debian.yml
 
-# Add a deploy stage to the end
+variables:
+  SALSA_CI_DISABLE_USCAN: 1
+
+# Add a lint stage to the beginning and a deploy stage to the end
 stages:
+  - lint
   - provisioning
   - build
   - publish
   - test
   - deploy
+
+lint:
+  image: debian:unstable
+  stage: lint
+  before_script:
+    - apt-get update
+    - apt-get install -y black isort make mypy pylint
+  script:
+    - make lint
 
 pages:
   image: debian:stable

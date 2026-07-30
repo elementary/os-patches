@@ -33,13 +33,13 @@ ROLLING_FOREVER = {
 }
 
 
-def validate(filename, distro):
+def validate(filename: str, distro: str) -> bool:
     """Validates that the given CSV file is current.
 
     Returns True if the given CSV file is current and otherwise False.
     """
     csvreader = get_csv_dict_reader(filename)
-    today = datetime.datetime.now(tz=datetime.UTC).date()
+    today = datetime.datetime.now(tz=datetime.timezone.utc).date()
 
     last_release = None
     dev_releases = []

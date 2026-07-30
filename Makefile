@@ -19,10 +19,18 @@ up-to-date:
 	./up-to-date elxr.csv
 	./up-to-date ubuntu.csv
 
+lint: isort black mypy pylint
+
 black:
-	black -C $(PYTHON_SOURCES)
+	black -C --check --diff $(PYTHON_SOURCES)
+
+isort:
+	isort --check-only --diff $(PYTHON_SOURCES)
+
+mypy:
+	mypy --scripts-are-modules $(PYTHON_SOURCES)
 
 pylint:
 	pylint $(PYTHON_SOURCES)
 
-.PHONY: black build install pylint test up-to-date
+.PHONY: black build install isort lint mypy pylint test up-to-date
