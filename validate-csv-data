@@ -23,8 +23,20 @@ import csv
 import sys
 import typing
 from datetime import date, timedelta
+from typing import Dict
 
 from lib.tools import convert_date, get_csv_dict_reader, main
+
+
+# not a dataclass to support Python 3.6, pylint: disable-next=too-few-public-methods
+class _Derivative:
+    def __init__(
+        self, parent: str, column_map: Dict[str, str], series_map: Dict[str, str]
+    ) -> None:
+        self.parent = parent
+        self.column_map = column_map
+        self.series_map = series_map
+
 
 _COLUMNS = {
     "debian": (
@@ -86,23 +98,24 @@ _STRINGS = {
     "ubuntu": ("version", "codename", "series"),
 }
 _DERIVATIVES = {
-    "devuan": {
-        "parent": "debian",
-        "column_map": {"eol": "eol-lts"},
-        "series_map": {
+    "devuan": _Derivative(
+        parent="debian",
+        column_map={"eol": "eol-lts"},
+        series_map={
             "daedalus": "bookworm",
             "chimaera": "bullseye",
             "beowulf": "buster",
             "ascii": "stretch",
             "jessie": "jessie",
             "excalibur": "trixie",
+            "freia": "forky",
+            "gryphon": "duke",
             "ceres": "sid",
             "experimental": "experimental",
         },
-    }
+    )
 }
-RowDict = dict[str, typing.Union[None, date, str]]
-_parent_data_cache = {}
+RowDict = Dict[str, typing.Union[None, date, str]]
 
 
 class ErrorLogger:  # pylint: disable=too-few-public-methods
@@ -144,10 +157,13 @@ def _check_required_strings_columns(
 def _convert_dates(row: RowDict, error: ErrorLogger) -> None:
     for column in _DATES:
         if column in row:
+            value = row[column]
+            if value is None or isinstance(value, date):
+                continue
             try:
-                row[column] = convert_date(row[column])
+                row[column] = convert_date(value)
             except ValueError:
-                msg = f"Invalid date `{row[column]}' in column `{column}'"
+                msg = f"Invalid date `{value}' in column `{column}'"
                 error(msg)
                 row[column] = None
 
@@ -219,30 +235,29 @@ def _check_that_esm_has_overlap_period(row: RowDict, error: ErrorLogger) -> None
             error(msg)
 
 
-def _parent_data(distro: str, error: ErrorLogger) -> dict[str, str | date]:
-    global _parent_data_cache
-    if distro not in _parent_data_cache:
-        data = {}
-        for row in get_csv_dict_reader(f"{distro}.csv"):
-            _convert_dates(row, error)
-            data[row["series"]] = row
-        _parent_data_cache[distro] = data
-    return _parent_data_cache[distro]
+def _get_parent_data(distro: str, error: ErrorLogger) -> Dict[str, RowDict]:
+    data = {}
+    for row in get_csv_dict_reader(f"{distro}.csv"):
+        _convert_dates(row, error)
+        data[row["series"]] = row
+    return data
 
 
 def _check_that_derivative_matches(
     row: RowDict, error: ErrorLogger, distro: str
 ) -> None:
     series = row["series"]
-    parent = _DERIVATIVES[distro]["parent"]
-    parent_series = _DERIVATIVES[distro]["series_map"].get(series)
+    assert isinstance(series, str)
+    derivative = _DERIVATIVES[distro]
+    parent = derivative.parent
+    parent_series = derivative.series_map.get(series)
     if parent_series is None:
         error(f"Unknown derivation for {series}")
         return
     if row["release"] is None:
         return
-    parent_data = _parent_data(parent, error)
-    for child_col, parent_col in _DERIVATIVES[distro]["column_map"].items():
+    parent_data = _get_parent_data(parent, error)
+    for child_col, parent_col in derivative.column_map.items():
         child_value = row[child_col]
         parent_value = parent_data[parent_series][parent_col]
         if child_value != parent_value:
@@ -253,7 +268,7 @@ def _check_that_derivative_matches(
             )
 
 
-def validate(filename, distro):
+def validate(filename: str, distro: str) -> bool:
     """Validates a given CSV file.
 
     Returns True if the given CSV file is valid and otherwise False.
