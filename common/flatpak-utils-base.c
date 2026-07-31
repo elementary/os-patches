@@ -28,23 +28,13 @@
 #include <gio/gio.h>
 #include "libglnx.h"
 
-const char *
-flatpak_get_tzdir (void)
-{
-  const gchar *tzdir;
-
-  tzdir = getenv ("TZDIR");
-  if (tzdir)
-    return tzdir;
-
-  return "/usr/share/zoneinfo";
-}
-
 char *
 flatpak_get_timezone (void)
 {
   g_autofree gchar *symlink = NULL;
   gchar *etc_timezone = NULL;
+  const gchar *tzdir;
+  const gchar *default_tzdir = "/usr/share/zoneinfo";
 
   symlink = flatpak_resolve_link ("/etc/localtime", NULL);
   if (symlink != NULL)
@@ -52,12 +42,22 @@ flatpak_get_timezone (void)
       /* Resolve relative path */
       g_autofree gchar *canonical = flatpak_canonicalize_filename (symlink);
       char *canonical_suffix;
-      const gchar *tzdir = flatpak_get_tzdir ();
 
       /* Strip the prefix and slashes if possible. */
-      if (g_str_has_prefix (canonical, tzdir))
+
+      tzdir = getenv ("TZDIR");
+      if (tzdir != NULL && g_str_has_prefix (canonical, tzdir))
         {
           canonical_suffix = canonical + strlen (tzdir);
+          while (*canonical_suffix == '/')
+            canonical_suffix++;
+
+          return g_strdup (canonical_suffix);
+        }
+
+      if (g_str_has_prefix (canonical, default_tzdir))
+        {
+          canonical_suffix = canonical + strlen (default_tzdir);
           while (*canonical_suffix == '/')
             canonical_suffix++;
 
@@ -100,29 +100,6 @@ flatpak_resolve_link (const char *path,
   return g_build_filename (dirname, link, NULL);
 }
 
-char *
-flatpak_realpath (const char  *path,
-                  GError     **error)
-{
-  struct stat stbuf;
-
-  if (!glnx_fstatat (AT_FDCWD, path, &stbuf, AT_SYMLINK_NOFOLLOW, error))
-    return NULL;
-
-  if (S_ISLNK (stbuf.st_mode))
-    {
-      g_autofree char *resolved = NULL;
-
-      resolved = flatpak_resolve_link (path, error);
-      if (!resolved)
-        return NULL;
-
-      return flatpak_canonicalize_filename (resolved);
-    }
-
-  return flatpak_canonicalize_filename (path);
-}
-
 /*
  * Syntactically canonicalize a filename, similar to
  * g_canonicalize_filename() in newer GLib.
@@ -134,4 +111,20 @@ flatpak_canonicalize_filename (const char *path)
 {
   g_autoptr(GFile) file = g_file_new_for_path (path);
   return g_file_get_path (file);
+}
+
+/* There is a dead-lock in glib versions before 2.60 when it closes
+ * the fds. See:  https://gitlab.gnome.org/GNOME/glib/merge_requests/490
+ * This was hitting the test-suite a lot, so we work around it by using
+ * the G_SPAWN_LEAVE_DESCRIPTORS_OPEN/G_SUBPROCESS_FLAGS_INHERIT_FDS flag
+ * and setting CLOEXEC ourselves.
+ */
+void
+flatpak_close_fds_workaround (int start_fd)
+{
+  int max_open_fds = sysconf (_SC_OPEN_MAX);
+  int fd;
+
+  for (fd = start_fd; fd < max_open_fds; fd++)
+    fcntl (fd, F_SETFD, FD_CLOEXEC);
 }

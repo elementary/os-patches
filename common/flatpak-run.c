@@ -1,6 +1,5 @@
 /* vi:set et sw=2 sts=2 cin cino=t0,f0,(0,{s,>2s,n-s,^-s,e-s:
  * Copyright © 2014-2019 Red Hat, Inc
- * Copyright © 2024 GNOME Foundation, Inc.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +16,6 @@
  *
  * Authors:
  *       Alexander Larsson <alexl@redhat.com>
- *       Hubert Figuière <hub@figuiere.net>
  */
 
 #include "config.h"
@@ -50,19 +48,18 @@
 #include <seccomp.h>
 #endif
 
+#ifdef ENABLE_XAUTH
+#include <X11/Xauth.h>
+#endif
+
 #include <glib/gi18n-lib.h>
 
 #include <gio/gio.h>
 #include "libglnx.h"
 
-#include "flatpak-dbus-generated.h"
-#include "flatpak-run-dbus-private.h"
 #include "flatpak-run-private.h"
-#include "flatpak-run-sockets-private.h"
-#include "flatpak-run-wayland-private.h"
 #include "flatpak-utils-base-private.h"
 #include "flatpak-dir-private.h"
-#include "flatpak-dir-utils-private.h"
 #include "flatpak-instance-private.h"
 #include "flatpak-systemd-dbus-generated.h"
 #include "flatpak-document-dbus-generated.h"
@@ -71,21 +68,1317 @@
 
 #define DEFAULT_SHELL "/bin/sh"
 
-typedef FlatpakSessionHelper AutoFlatpakSessionHelper;
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (AutoFlatpakSessionHelper, g_object_unref)
+const char * const abs_usrmerged_dirs[] =
+{
+  "/bin",
+  "/lib",
+  "/lib32",
+  "/lib64",
+  "/sbin",
+  NULL
+};
+const char * const *flatpak_abs_usrmerged_dirs = abs_usrmerged_dirs;
 
-typedef XdpDbusDocuments AutoXdpDbusDocuments;
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (AutoXdpDbusDocuments, g_object_unref)
+static char *
+extract_unix_path_from_dbus_address (const char *address)
+{
+  const char *path, *path_end;
 
-/* flags enum for org.freedesktop.portal.Documents.AddFull */
-typedef enum {
-  DOCUMENT_ADD_FLAGS_REUSE_EXISTING             = (1 << 0),
-  DOCUMENT_ADD_FLAGS_PERSISTENT                 = (1 << 1),
-  DOCUMENT_ADD_FLAGS_AS_NEEDED_BY_APP           = (1 << 2),
-  DOCUMENT_ADD_FLAGS_DIRECTORY                  = (1 << 3),
+  if (address == NULL)
+    return NULL;
 
-  DOCUMENT_ADD_FLAGS_FLAGS_ALL                  = ((1 << 4) - 1)
-} DocumentAddFullFlags;
+  if (!g_str_has_prefix (address, "unix:"))
+    return NULL;
+
+  path = strstr (address, "path=");
+  if (path == NULL)
+    return NULL;
+  path += strlen ("path=");
+  path_end = path;
+  while (*path_end != 0 && *path_end != ',')
+    path_end++;
+
+  return g_strndup (path, path_end - path);
+}
+
+/* This is part of the X11 protocol, so we can safely hard-code it here */
+#define FamilyInternet6 (6)
+
+#ifdef ENABLE_XAUTH
+static gboolean
+auth_streq (const char *str,
+            const char *au_str,
+            size_t      au_len)
+{
+  return au_len == strlen (str) && memcmp (str, au_str, au_len) == 0;
+}
+
+static gboolean
+xauth_entry_should_propagate (const Xauth *xa,
+                              int          family,
+                              const char  *remote_hostname,
+                              const char  *local_hostname,
+                              const char  *number)
+{
+  /* ensure entry isn't for a different type of access */
+  if (family != FamilyWild && xa->family != family && xa->family != FamilyWild)
+    return FALSE;
+
+  /* ensure entry isn't for remote access, except that if remote_hostname
+   * is specified, then remote access to that hostname is OK */
+  if (xa->family != FamilyWild && xa->family != FamilyLocal &&
+      (remote_hostname == NULL ||
+       !auth_streq (remote_hostname, xa->address, xa->address_length)))
+    return FALSE;
+
+  /* ensure entry is for this machine */
+  if (xa->family == FamilyLocal && !auth_streq (local_hostname, xa->address, xa->address_length))
+    {
+      /* OpenSUSE inherits the hostname value from DHCP without updating
+       * its X11 authentication cookie. The old hostname value can still
+       * be found in the environment variable XAUTHLOCALHOSTNAME.
+       * For reference:
+       * https://bugzilla.opensuse.org/show_bug.cgi?id=262309
+       * For this reason if we have a cookie whose address is equal to the
+       * variable XAUTHLOCALHOSTNAME, we still need to propagate it, but
+       * we also need to change its address to `unames.nodename`.
+       */
+      const char *xauth_local_hostname;
+      xauth_local_hostname = g_getenv ("XAUTHLOCALHOSTNAME");
+      if (xauth_local_hostname == NULL)
+        return FALSE;
+
+      if (!auth_streq ((char *) xauth_local_hostname, xa->address, xa->address_length))
+        return FALSE;
+    }
+
+  /* ensure entry is for this session */
+  if (xa->number != NULL && !auth_streq (number, xa->number, xa->number_length))
+    return FALSE;
+
+  return TRUE;
+}
+
+static void
+write_xauth (int family,
+             const char *remote_host,
+             const char *number,
+             FILE       *output)
+{
+  Xauth *xa, local_xa;
+  char *filename;
+  FILE *f;
+  struct utsname unames;
+
+  if (uname (&unames))
+    {
+      g_warning ("uname failed");
+      return;
+    }
+
+  filename = XauFileName ();
+  f = fopen (filename, "rb");
+  if (f == NULL)
+    return;
+
+  while (TRUE)
+    {
+      xa = XauReadAuth (f);
+      if (xa == NULL)
+        break;
+      if (xauth_entry_should_propagate (xa, family, remote_host,
+                                        unames.nodename, number))
+        {
+          local_xa = *xa;
+
+          if (local_xa.family == FamilyLocal &&
+              !auth_streq (unames.nodename, local_xa.address, local_xa.address_length))
+            {
+              /* If we decided to propagate this cookie, but its address
+               * doesn't match `unames.nodename`, we need to change it or
+               * inside the container it will not work.
+               */
+              local_xa.address = unames.nodename;
+              local_xa.address_length = strlen (local_xa.address);
+            }
+
+          if (!XauWriteAuth (output, &local_xa))
+            g_warning ("xauth write error");
+        }
+
+      XauDisposeAuth (xa);
+    }
+
+  fclose (f);
+}
+#else /* !ENABLE_XAUTH */
+
+/* When not doing Xauth, any distinct values will do, but use the same
+ * ones Xauth does so that we can refer to them in our unit test. */
+#define FamilyLocal (256)
+#define FamilyWild (65535)
+
+#endif /* !ENABLE_XAUTH */
+
+/*
+ * @family: (out) (not optional):
+ * @x11_socket: (out) (not optional):
+ * @display_nr_out: (out) (not optional):
+ */
+gboolean
+flatpak_run_parse_x11_display (const char  *display,
+                               int         *family,
+                               char       **x11_socket,
+                               char       **remote_host,
+                               char       **display_nr_out,
+                               GError     **error)
+{
+  const char *colon;
+  const char *display_nr;
+  const char *display_nr_end;
+
+  /* Use the last ':', not the first, to cope with [::1]:0 */
+  colon = strrchr (display, ':');
+
+  if (colon == NULL)
+    return glnx_throw (error, "No colon found in DISPLAY=%s", display);
+
+  if (!g_ascii_isdigit (colon[1]))
+    return glnx_throw (error, "Colon not followed by a digit in DISPLAY=%s", display);
+
+  display_nr = &colon[1];
+  display_nr_end = display_nr;
+
+  while (g_ascii_isdigit (*display_nr_end))
+    display_nr_end++;
+
+  *display_nr_out = g_strndup (display_nr, display_nr_end - display_nr);
+
+  if (display == colon || g_str_has_prefix (display, "unix:"))
+    {
+      *family = FamilyLocal;
+      *x11_socket = g_strdup_printf ("/tmp/.X11-unix/X%s", *display_nr_out);
+    }
+  else if (display[0] == '[' && display[colon - display - 1] == ']')
+    {
+      *family = FamilyInternet6;
+      *remote_host = g_strndup (display + 1, colon - display - 2);
+    }
+  else
+    {
+      *family = FamilyWild;
+      *remote_host = g_strndup (display, colon - display);
+    }
+
+  return TRUE;
+}
+
+static void
+flatpak_run_add_x11_args (FlatpakBwrap         *bwrap,
+                          gboolean              allowed,
+                          FlatpakContextShares  shares)
+{
+  g_autofree char *x11_socket = NULL;
+  const char *display;
+  g_autoptr(GError) local_error = NULL;
+
+  /* Always cover /tmp/.X11-unix, that way we never see the host one in case
+   * we have access to the host /tmp. If you request X access we'll put the right
+   * thing in this anyway.
+   *
+   * We need to be a bit careful here, because there are two situations in
+   * which potentially hostile processes have access to /tmp and could
+   * create symlinks, which in principle could cause us to create the
+   * directory and mount the tmpfs at the target of the symlink instead
+   * of in the intended place:
+   *
+   * - With --filesystem=/tmp, it's the host /tmp - but because of the
+   *   special historical status of /tmp/.X11-unix, we can assume that
+   *   it is pre-created by the host system before user code gets to run.
+   *
+   * - When /tmp is shared between all instances of the same app ID,
+   *   in principle the app has control over what's in /tmp, but in
+   *   practice it can't interfere with /tmp/.X11-unix, because we do
+   *   this unconditionally - therefore by the time app code runs,
+   *   /tmp/.X11-unix is already a mount point, meaning the app cannot
+   *   rename or delete it.
+   */
+  flatpak_bwrap_add_args (bwrap,
+                          "--tmpfs", "/tmp/.X11-unix",
+                          NULL);
+
+  if (!allowed)
+    {
+      flatpak_bwrap_unset_env (bwrap, "DISPLAY");
+      return;
+    }
+
+  g_debug ("Allowing x11 access");
+
+  display = g_getenv ("DISPLAY");
+
+  if (display != NULL)
+    {
+      g_autofree char *remote_host = NULL;
+      g_autofree char *display_nr = NULL;
+      int family = -1;
+
+      if (!flatpak_run_parse_x11_display (display, &family, &x11_socket,
+                                          &remote_host, &display_nr,
+                                          &local_error))
+        {
+          g_warning ("%s", local_error->message);
+          flatpak_bwrap_unset_env (bwrap, "DISPLAY");
+          return;
+        }
+
+      g_assert (display_nr != NULL);
+
+      if (x11_socket != NULL
+          && g_file_test (x11_socket, G_FILE_TEST_EXISTS))
+        {
+          g_assert (g_str_has_prefix (x11_socket, "/tmp/.X11-unix/X"));
+          flatpak_bwrap_add_args (bwrap,
+                                  "--ro-bind", x11_socket, x11_socket,
+                                  NULL);
+          flatpak_bwrap_set_env (bwrap, "DISPLAY", display, TRUE);
+        }
+      else if ((shares & FLATPAK_CONTEXT_SHARED_NETWORK) == 0)
+        {
+          /* If DISPLAY is for example :42 but /tmp/.X11-unix/X42
+           * doesn't exist, then the only way this is going to work
+           * is if the app can connect to abstract socket
+           * @/tmp/.X11-unix/X42 or to TCP port localhost:6042,
+           * either of which requires a shared network namespace.
+           *
+           * Alternatively, if DISPLAY is othermachine:23, then we
+           * definitely need access to TCP port othermachine:6023. */
+          if (x11_socket != NULL)
+            g_warning ("X11 socket %s does not exist in filesystem.",
+                       x11_socket);
+          else
+            g_warning ("Remote X11 display detected.");
+
+          g_warning ("X11 access will require --share=network permission.");
+        }
+      else if (x11_socket != NULL)
+        {
+          g_warning ("X11 socket %s does not exist in filesystem, "
+                     "trying to use abstract socket instead.",
+                     x11_socket);
+        }
+      else
+        {
+          flatpak_debug2 ("Assuming --share=network gives access to remote X11");
+        }
+
+#ifdef ENABLE_XAUTH
+      g_auto(GLnxTmpfile) xauth_tmpf  = { 0, };
+
+      if (glnx_open_anonymous_tmpfile_full (O_RDWR | O_CLOEXEC, "/tmp", &xauth_tmpf, NULL))
+        {
+          FILE *output = fdopen (xauth_tmpf.fd, "wb");
+          if (output != NULL)
+            {
+              /* fd is now owned by output, steal it from the tmpfile */
+              int tmp_fd = dup (glnx_steal_fd (&xauth_tmpf.fd));
+              if (tmp_fd != -1)
+                {
+                  static const char dest[] = "/run/flatpak/Xauthority";
+
+                  write_xauth (family, remote_host, display_nr, output);
+                  flatpak_bwrap_add_args_data_fd (bwrap, "--ro-bind-data", tmp_fd, dest);
+
+                  flatpak_bwrap_set_env (bwrap, "XAUTHORITY", dest, TRUE);
+                }
+
+              fclose (output);
+
+              if (tmp_fd != -1)
+                lseek (tmp_fd, 0, SEEK_SET);
+            }
+        }
+#endif
+    }
+  else
+    {
+      flatpak_bwrap_unset_env (bwrap, "DISPLAY");
+    }
+}
+
+static gboolean
+flatpak_run_add_wayland_args (FlatpakBwrap *bwrap)
+{
+  const char *wayland_display;
+  g_autofree char *user_runtime_dir = flatpak_get_real_xdg_runtime_dir ();
+  g_autofree char *wayland_socket = NULL;
+  g_autofree char *sandbox_wayland_socket = NULL;
+  gboolean res = FALSE;
+  struct stat statbuf;
+
+  wayland_display = g_getenv ("WAYLAND_DISPLAY");
+  if (!wayland_display)
+    wayland_display = "wayland-0";
+
+  if (wayland_display[0] == '/')
+    wayland_socket = g_strdup (wayland_display);
+  else
+    wayland_socket = g_build_filename (user_runtime_dir, wayland_display, NULL);
+
+  if (!g_str_has_prefix (wayland_display, "wayland-") ||
+      strchr (wayland_display, '/') != NULL)
+    {
+      wayland_display = "wayland-0";
+      flatpak_bwrap_set_env (bwrap, "WAYLAND_DISPLAY", wayland_display, TRUE);
+    }
+
+  sandbox_wayland_socket = g_strdup_printf ("/run/flatpak/%s", wayland_display);
+
+  if (stat (wayland_socket, &statbuf) == 0 &&
+      (statbuf.st_mode & S_IFMT) == S_IFSOCK)
+    {
+      res = TRUE;
+      flatpak_bwrap_add_args (bwrap,
+                              "--ro-bind", wayland_socket, sandbox_wayland_socket,
+                              NULL);
+      flatpak_bwrap_add_runtime_dir_member (bwrap, wayland_display);
+    }
+  return res;
+}
+
+static void
+flatpak_run_add_ssh_args (FlatpakBwrap *bwrap)
+{
+  static const char sandbox_auth_socket[] = "/run/flatpak/ssh-auth";
+  const char * auth_socket;
+
+  auth_socket = g_getenv ("SSH_AUTH_SOCK");
+
+  if (!auth_socket)
+    return; /* ssh agent not present */
+
+  if (!g_file_test (auth_socket, G_FILE_TEST_EXISTS))
+    {
+      /* Let's clean it up, so that the application will not try to connect */
+      flatpak_bwrap_unset_env (bwrap, "SSH_AUTH_SOCK");
+      return;
+    }
+
+  flatpak_bwrap_add_args (bwrap,
+                          "--ro-bind", auth_socket, sandbox_auth_socket,
+                          NULL);
+  flatpak_bwrap_set_env (bwrap, "SSH_AUTH_SOCK", sandbox_auth_socket, TRUE);
+}
+
+static void
+flatpak_run_add_pcsc_args (FlatpakBwrap *bwrap)
+{
+  const char * pcsc_socket;
+  const char * sandbox_pcsc_socket = "/run/pcscd/pcscd.comm";
+
+  pcsc_socket = g_getenv ("PCSCLITE_CSOCK_NAME");
+  if (pcsc_socket)
+    {
+      if (!g_file_test (pcsc_socket, G_FILE_TEST_EXISTS))
+        {
+          flatpak_bwrap_unset_env (bwrap, "PCSCLITE_CSOCK_NAME");
+          return;
+        }
+    }
+  else
+    {
+      pcsc_socket = "/run/pcscd/pcscd.comm";
+      if (!g_file_test (pcsc_socket, G_FILE_TEST_EXISTS))
+        return;
+    }
+
+  flatpak_bwrap_add_args (bwrap,
+                          "--ro-bind", pcsc_socket, sandbox_pcsc_socket,
+                          NULL);
+  flatpak_bwrap_set_env (bwrap, "PCSCLITE_CSOCK_NAME", sandbox_pcsc_socket, TRUE);
+}
+
+static gboolean
+flatpak_run_cups_check_server_is_socket (const char *server)
+{
+  if (g_str_has_prefix (server, "/") && strstr (server, ":") == NULL)
+    return TRUE;
+
+  return FALSE;
+}
+
+/* Try to find a default server from a cups confguration file */
+static char *
+flatpak_run_get_cups_server_name_config (const char *path)
+{
+  g_autoptr(GFile) file = g_file_new_for_path (path);
+  g_autoptr(GError) my_error = NULL;
+  g_autoptr(GFileInputStream) input_stream = NULL;
+  g_autoptr(GDataInputStream) data_stream = NULL;
+  size_t len;
+
+  input_stream = g_file_read (file, NULL, &my_error);
+  if (my_error)
+    {
+      g_debug ("CUPS configuration file '%s': %s", path, my_error->message);
+      return NULL;
+    }
+
+  data_stream = g_data_input_stream_new (G_INPUT_STREAM (input_stream));
+
+  while (TRUE)
+    {
+      g_autofree char *line = g_data_input_stream_read_line (data_stream, &len, NULL, NULL);
+      if (line == NULL)
+        break;
+
+      g_strchug (line);
+
+      if ((*line  == '\0') || (*line == '#'))
+        continue;
+
+      g_auto(GStrv) tokens = g_strsplit (line, " ", 2);
+
+      if ((tokens[0] != NULL) && (tokens[1] != NULL))
+        {
+          if (strcmp ("ServerName", tokens[0]) == 0)
+            {
+              g_strchug (tokens[1]);
+
+              if (flatpak_run_cups_check_server_is_socket (tokens[1]))
+                return g_strdup (tokens[1]);
+            }
+        }
+    }
+
+    return NULL;
+}
+
+static char *
+flatpak_run_get_cups_server_name (void)
+{
+  g_autofree char * cups_server = NULL;
+  g_autofree char * cups_config_path = NULL;
+
+  /* TODO
+   * we don't currently support cups servers located on the network, if such
+   * server is detected, we simply ignore it and in the worst case we fallback
+   * to the default socket
+   */
+  cups_server = g_strdup (g_getenv ("CUPS_SERVER"));
+  if (cups_server && flatpak_run_cups_check_server_is_socket (cups_server))
+    return g_steal_pointer (&cups_server);
+  g_clear_pointer (&cups_server, g_free);
+
+  cups_config_path = g_build_filename (g_get_home_dir (), ".cups/client.conf", NULL);
+  cups_server = flatpak_run_get_cups_server_name_config (cups_config_path);
+  if (cups_server && flatpak_run_cups_check_server_is_socket (cups_server))
+    return g_steal_pointer (&cups_server);
+  g_clear_pointer (&cups_server, g_free);
+
+  cups_server = flatpak_run_get_cups_server_name_config ("/etc/cups/client.conf");
+  if (cups_server && flatpak_run_cups_check_server_is_socket (cups_server))
+    return g_steal_pointer (&cups_server);
+
+  // Fallback to default socket
+  return g_strdup ("/var/run/cups/cups.sock");
+}
+
+static void
+flatpak_run_add_cups_args (FlatpakBwrap *bwrap)
+{
+  g_autofree char * sandbox_server_name = g_strdup ("/var/run/cups/cups.sock");
+  g_autofree char * cups_server_name = flatpak_run_get_cups_server_name ();
+
+  if (!g_file_test (cups_server_name, G_FILE_TEST_EXISTS))
+    {
+      g_debug ("Could not find CUPS server");
+      return;
+    }
+
+  flatpak_bwrap_add_args (bwrap,
+                          "--ro-bind", cups_server_name, sandbox_server_name,
+                          NULL);
+}
+
+static void
+flatpak_run_add_gpg_agent_args (FlatpakBwrap *bwrap)
+{
+  const char * agent_socket;
+  g_autofree char * sandbox_agent_socket = NULL;
+  g_autoptr(GError) gpgconf_error = NULL;
+  g_autoptr(GSubprocess) process = NULL;
+  GInputStream *base_stream = NULL;
+  g_autoptr(GDataInputStream) data_stream = NULL;
+
+  process = g_subprocess_new (G_SUBPROCESS_FLAGS_STDOUT_PIPE,
+                    &gpgconf_error,
+                    "gpgconf", "--list-dir", "agent-socket", NULL);
+
+  if (gpgconf_error)
+    {
+      g_debug ("GPG-Agent directories: %s", gpgconf_error->message);
+      return;
+    }
+
+  base_stream = g_subprocess_get_stdout_pipe (process);
+  data_stream = g_data_input_stream_new (base_stream);
+
+  agent_socket = g_data_input_stream_read_line (data_stream,
+                                                NULL, NULL,
+                                                &gpgconf_error);
+
+  if (!agent_socket || gpgconf_error)
+    {
+      g_debug ("GPG-Agent directories: %s", gpgconf_error->message);
+      return;
+    }
+
+  sandbox_agent_socket = g_strdup_printf ("/run/user/%d/gnupg/S.gpg-agent", getuid ());
+
+  flatpak_bwrap_add_args (bwrap,
+                          "--ro-bind-try", agent_socket, sandbox_agent_socket,
+                          NULL);
+}
+
+/* Try to find a default server from a pulseaudio confguration file */
+static char *
+flatpak_run_get_pulseaudio_server_user_config (const char *path)
+{
+  g_autoptr(GFile) file = g_file_new_for_path (path);
+  g_autoptr(GError) my_error = NULL;
+  g_autoptr(GFileInputStream) input_stream = NULL;
+  g_autoptr(GDataInputStream) data_stream = NULL;
+  size_t len;
+
+  input_stream = g_file_read (file, NULL, &my_error);
+  if (my_error)
+    {
+      g_debug ("Pulseaudio user configuration file '%s': %s", path, my_error->message);
+      return NULL;
+    }
+
+  data_stream = g_data_input_stream_new (G_INPUT_STREAM (input_stream));
+
+  while (TRUE)
+    {
+      g_autofree char *line = g_data_input_stream_read_line (data_stream, &len, NULL, NULL);
+      if (line == NULL)
+        break;
+
+      g_strchug (line);
+
+      if ((*line  == '\0') || (*line == ';') || (*line == '#'))
+        continue;
+
+      if (g_str_has_prefix (line, ".include "))
+        {
+          g_autofree char *rec_path = g_strdup (line + 9);
+          g_strstrip (rec_path);
+          char *found = flatpak_run_get_pulseaudio_server_user_config (rec_path);
+          if (found)
+            return found;
+        }
+      else if (g_str_has_prefix (line, "["))
+        {
+          return NULL;
+        }
+      else
+        {
+          g_auto(GStrv) tokens = g_strsplit (line, "=", 2);
+
+          if ((tokens[0] != NULL) && (tokens[1] != NULL))
+            {
+              g_strchomp (tokens[0]);
+              if (strcmp ("default-server", tokens[0]) == 0)
+                {
+                  g_strstrip (tokens[1]);
+                  g_debug ("Found pulseaudio socket from configuration file '%s': %s", path, tokens[1]);
+                  return g_strdup (tokens[1]);
+                }
+            }
+        }
+    }
+
+  return NULL;
+}
+
+static char *
+flatpak_run_get_pulseaudio_server (void)
+{
+  const char * pulse_clientconfig;
+  char *pulse_server;
+  g_autofree char *pulse_user_config = NULL;
+
+  pulse_server = g_strdup (g_getenv ("PULSE_SERVER"));
+  if (pulse_server)
+    return pulse_server;
+
+  pulse_clientconfig = g_getenv ("PULSE_CLIENTCONFIG");
+  if (pulse_clientconfig)
+    return flatpak_run_get_pulseaudio_server_user_config (pulse_clientconfig);
+
+  pulse_user_config = g_build_filename (g_get_user_config_dir (), "pulse/client.conf", NULL);
+  pulse_server = flatpak_run_get_pulseaudio_server_user_config (pulse_user_config);
+  if (pulse_server)
+    return pulse_server;
+
+  pulse_server = flatpak_run_get_pulseaudio_server_user_config ("/etc/pulse/client.conf");
+  if (pulse_server)
+    return pulse_server;
+
+  return NULL;
+}
+
+/*
+ * Parse a PulseAudio server string, as documented on
+ * https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/ServerStrings/.
+ * Returns the first supported server address, or NULL if none are supported,
+ * or NULL with @remote set if @value points to a remote server.
+ */
+static char *
+flatpak_run_parse_pulse_server (const char *value,
+                                gboolean   *remote)
+{
+  g_auto(GStrv) servers = g_strsplit (value, " ", 0);
+  gsize i;
+
+  for (i = 0; servers[i] != NULL; i++)
+    {
+      const char *server = servers[i];
+      if (g_str_has_prefix (server, "{"))
+        {
+          /*
+           * TODO: compare the value within {} to the local hostname and D-Bus machine ID,
+           * and skip if it matches neither.
+           */
+          const char * closing = strstr (server, "}");
+          if (closing == NULL)
+            continue;
+          server = closing + 1;
+        }
+
+      if (g_str_has_prefix (server, "unix:"))
+        return g_strdup (server + 5);
+      if (server[0] == '/')
+        return g_strdup (server);
+
+      if (g_str_has_prefix (server, "tcp:"))
+        {
+          *remote = TRUE;
+          return NULL;
+        }
+    }
+
+  return NULL;
+}
+
+/*
+ * Get the machine ID as used by PulseAudio. This is the systemd/D-Bus
+ * machine ID, or failing that, the hostname.
+ */
+static char *
+flatpak_run_get_pulse_machine_id (void)
+{
+  static const char * const machine_ids[] =
+  {
+    "/etc/machine-id",
+    "/var/lib/dbus/machine-id",
+  };
+  gsize i;
+
+  for (i = 0; i < G_N_ELEMENTS (machine_ids); i++)
+    {
+      g_autofree char *ret = NULL;
+
+      if (g_file_get_contents (machine_ids[i], &ret, NULL, NULL))
+        {
+          gsize j;
+
+          g_strstrip (ret);
+
+          for (j = 0; ret[j] != '\0'; j++)
+            {
+              if (!g_ascii_isxdigit (ret[j]))
+                break;
+            }
+
+          if (ret[0] != '\0' && ret[j] == '\0')
+            return g_steal_pointer (&ret);
+        }
+    }
+
+  return g_strdup (g_get_host_name ());
+}
+
+/*
+ * Get the directory used by PulseAudio for its configuration.
+ */
+static char *
+flatpak_run_get_pulse_home (void)
+{
+  /* Legacy path ~/.pulse is tried first, for compatibility */
+  {
+    const char *parent = g_get_home_dir ();
+    g_autofree char *ret = g_build_filename (parent, ".pulse", NULL);
+
+    if (g_file_test (ret, G_FILE_TEST_IS_DIR))
+      return g_steal_pointer (&ret);
+  }
+
+  /* The more modern path, usually ~/.config/pulse */
+  {
+    const char *parent = g_get_user_config_dir ();
+    /* Usually ~/.config/pulse */
+    g_autofree char *ret = g_build_filename (parent, "pulse", NULL);
+
+    if (g_file_test (ret, G_FILE_TEST_IS_DIR))
+      return g_steal_pointer (&ret);
+  }
+
+  return NULL;
+}
+
+/*
+ * Get the runtime directory used by PulseAudio for its socket.
+ */
+static char *
+flatpak_run_get_pulse_runtime_dir (void)
+{
+  const char *val = NULL;
+
+  val = g_getenv ("PULSE_RUNTIME_PATH");
+
+  if (val != NULL)
+    return realpath (val, NULL);
+
+  {
+    const char *user_runtime_dir = g_get_user_runtime_dir ();
+
+    if (user_runtime_dir != NULL)
+      {
+        g_autofree char *dir = g_build_filename (user_runtime_dir, "pulse", NULL);
+
+        if (g_file_test (dir, G_FILE_TEST_IS_DIR))
+          return realpath (dir, NULL);
+      }
+  }
+
+  {
+    g_autofree char *pulse_home = flatpak_run_get_pulse_home ();
+    g_autofree char *machine_id = flatpak_run_get_pulse_machine_id ();
+
+    if (pulse_home != NULL && machine_id != NULL)
+      {
+        /* This is usually a symlink, but we take its realpath() anyway */
+        g_autofree char *dir = g_strdup_printf ("%s/%s-runtime", pulse_home, machine_id);
+
+        if (g_file_test (dir, G_FILE_TEST_IS_DIR))
+          return realpath (dir, NULL);
+      }
+  }
+
+  return NULL;
+}
+
+static void
+flatpak_run_add_pulseaudio_args (FlatpakBwrap         *bwrap,
+                                 FlatpakContextShares  shares)
+{
+  g_autofree char *pulseaudio_server = flatpak_run_get_pulseaudio_server ();
+  g_autofree char *pulseaudio_socket = NULL;
+  g_autofree char *pulse_runtime_dir = flatpak_run_get_pulse_runtime_dir ();
+  gboolean remote = FALSE;
+
+  if (pulseaudio_server)
+    pulseaudio_socket = flatpak_run_parse_pulse_server (pulseaudio_server,
+                                                        &remote);
+
+  if (pulseaudio_socket == NULL && !remote)
+    {
+      pulseaudio_socket = g_build_filename (pulse_runtime_dir, "native", NULL);
+
+      if (!g_file_test (pulseaudio_socket, G_FILE_TEST_EXISTS))
+        g_clear_pointer (&pulseaudio_socket, g_free);
+    }
+
+  if (pulseaudio_socket == NULL && !remote)
+    {
+      pulseaudio_socket = realpath ("/var/run/pulse/native", NULL);
+
+      if (pulseaudio_socket && !g_file_test (pulseaudio_socket, G_FILE_TEST_EXISTS))
+        g_clear_pointer (&pulseaudio_socket, g_free);
+    }
+
+  flatpak_bwrap_unset_env (bwrap, "PULSE_SERVER");
+
+  if (remote)
+    {
+      if ((shares & FLATPAK_CONTEXT_SHARED_NETWORK) == 0)
+        {
+          g_warning ("Remote PulseAudio server configured.");
+          g_warning ("PulseAudio access will require --share=network permission.");
+        }
+
+      g_debug ("Using remote PulseAudio server \"%s\"", pulseaudio_server);
+      flatpak_bwrap_set_env (bwrap, "PULSE_SERVER", pulseaudio_server, TRUE);
+    }
+  else if (pulseaudio_socket && g_file_test (pulseaudio_socket, G_FILE_TEST_EXISTS))
+    {
+      static const char sandbox_socket_path[] = "/run/flatpak/pulse/native";
+      static const char pulse_server[] = "unix:/run/flatpak/pulse/native";
+      static const char config_path[] = "/run/flatpak/pulse/config";
+      gboolean share_shm = FALSE; /* TODO: When do we add this? */
+      g_autofree char *client_config = g_strdup_printf ("enable-shm=%s\n", share_shm ? "yes" : "no");
+
+      /* FIXME - error handling */
+      if (!flatpak_bwrap_add_args_data (bwrap, "pulseaudio", client_config, -1, config_path, NULL))
+        return;
+
+      flatpak_bwrap_add_args (bwrap,
+                              "--ro-bind", pulseaudio_socket, sandbox_socket_path,
+                              NULL);
+
+      flatpak_bwrap_set_env (bwrap, "PULSE_SERVER", pulse_server, TRUE);
+      flatpak_bwrap_set_env (bwrap, "PULSE_CLIENTCONFIG", config_path, TRUE);
+      flatpak_bwrap_add_runtime_dir_member (bwrap, "pulse");
+    }
+  else
+    g_debug ("Could not find pulseaudio socket");
+
+  /* Also allow ALSA access. This was added in 1.8, and is not ideally named. However,
+   * since the practical permission of ALSA and PulseAudio are essentially the same, and
+   * since we don't want to add more permissions for something we plan to replace with
+   * portals/pipewire going forward we reinterpret pulseaudio to also mean ALSA.
+   */
+  if (!remote && g_file_test ("/dev/snd", G_FILE_TEST_IS_DIR))
+    flatpak_bwrap_add_args (bwrap, "--dev-bind", "/dev/snd", "/dev/snd", NULL);
+}
+
+static void
+flatpak_run_add_resolved_args (FlatpakBwrap *bwrap)
+{
+  const char *resolved_socket = "/run/systemd/resolve/io.systemd.Resolve";
+
+  if (g_file_test (resolved_socket, G_FILE_TEST_EXISTS))
+    flatpak_bwrap_add_args (bwrap, "--bind", resolved_socket, resolved_socket, NULL);
+}
+
+static void
+flatpak_run_add_journal_args (FlatpakBwrap *bwrap)
+{
+  g_autofree char *journal_socket_socket = g_strdup ("/run/systemd/journal/socket");
+  g_autofree char *journal_stdout_socket = g_strdup ("/run/systemd/journal/stdout");
+
+  if (g_file_test (journal_socket_socket, G_FILE_TEST_EXISTS))
+    {
+      flatpak_bwrap_add_args (bwrap,
+                              "--ro-bind", journal_socket_socket, journal_socket_socket,
+                              NULL);
+    }
+  if (g_file_test (journal_stdout_socket, G_FILE_TEST_EXISTS))
+    {
+      flatpak_bwrap_add_args (bwrap,
+                              "--ro-bind", journal_stdout_socket, journal_stdout_socket,
+                              NULL);
+    }
+}
+
+static char *
+create_proxy_socket (char *template)
+{
+  g_autofree char *user_runtime_dir = flatpak_get_real_xdg_runtime_dir ();
+  g_autofree char *proxy_socket_dir = g_build_filename (user_runtime_dir, ".dbus-proxy", NULL);
+  g_autofree char *proxy_socket = g_build_filename (proxy_socket_dir, template, NULL);
+  int fd;
+
+  if (!glnx_shutil_mkdir_p_at (AT_FDCWD, proxy_socket_dir, 0755, NULL, NULL))
+    return NULL;
+
+  fd = g_mkstemp (proxy_socket);
+  if (fd == -1)
+    return NULL;
+
+  close (fd);
+
+  return g_steal_pointer (&proxy_socket);
+}
+
+static gboolean
+flatpak_run_add_system_dbus_args (FlatpakBwrap   *app_bwrap,
+                                  FlatpakBwrap   *proxy_arg_bwrap,
+                                  FlatpakContext *context,
+                                  FlatpakRunFlags flags)
+{
+  gboolean unrestricted, no_proxy;
+  const char *dbus_address = g_getenv ("DBUS_SYSTEM_BUS_ADDRESS");
+  g_autofree char *real_dbus_address = NULL;
+  g_autofree char *dbus_system_socket = NULL;
+
+  unrestricted = (context->sockets & FLATPAK_CONTEXT_SOCKET_SYSTEM_BUS) != 0;
+  if (unrestricted)
+    g_debug ("Allowing system-dbus access");
+
+  no_proxy = (flags & FLATPAK_RUN_FLAG_NO_SYSTEM_BUS_PROXY) != 0;
+
+  if (dbus_address != NULL)
+    dbus_system_socket = extract_unix_path_from_dbus_address (dbus_address);
+  else if (g_file_test ("/var/run/dbus/system_bus_socket", G_FILE_TEST_EXISTS))
+    dbus_system_socket = g_strdup ("/var/run/dbus/system_bus_socket");
+
+  if (dbus_system_socket != NULL && unrestricted)
+    {
+      flatpak_bwrap_add_args (app_bwrap,
+                              "--ro-bind", dbus_system_socket, "/run/dbus/system_bus_socket",
+                              NULL);
+      flatpak_bwrap_set_env (app_bwrap, "DBUS_SYSTEM_BUS_ADDRESS", "unix:path=/run/dbus/system_bus_socket", TRUE);
+
+      return TRUE;
+    }
+  else if (!no_proxy && flatpak_context_get_needs_system_bus_proxy (context))
+    {
+      g_autofree char *proxy_socket = create_proxy_socket ("system-bus-proxy-XXXXXX");
+
+      if (proxy_socket == NULL)
+        return FALSE;
+
+      if (dbus_address)
+        real_dbus_address = g_strdup (dbus_address);
+      else
+        real_dbus_address = g_strdup_printf ("unix:path=%s", dbus_system_socket);
+
+      flatpak_bwrap_add_args (proxy_arg_bwrap, real_dbus_address, proxy_socket, NULL);
+
+      if (!unrestricted)
+        flatpak_context_add_bus_filters (context, NULL, FALSE, flags & FLATPAK_RUN_FLAG_SANDBOX, proxy_arg_bwrap);
+
+      if ((flags & FLATPAK_RUN_FLAG_LOG_SYSTEM_BUS) != 0)
+        flatpak_bwrap_add_args (proxy_arg_bwrap, "--log", NULL);
+
+      flatpak_bwrap_add_args (app_bwrap,
+                              "--ro-bind", proxy_socket, "/run/dbus/system_bus_socket",
+                              NULL);
+      flatpak_bwrap_set_env (app_bwrap, "DBUS_SYSTEM_BUS_ADDRESS", "unix:path=/run/dbus/system_bus_socket", TRUE);
+
+      return TRUE;
+    }
+  return FALSE;
+}
+
+static gboolean
+flatpak_run_add_session_dbus_args (FlatpakBwrap   *app_bwrap,
+                                   FlatpakBwrap   *proxy_arg_bwrap,
+                                   FlatpakContext *context,
+                                   FlatpakRunFlags flags,
+                                   const char     *app_id)
+{
+  static const char sandbox_socket_path[] = "/run/flatpak/bus";
+  static const char sandbox_dbus_address[] = "unix:path=/run/flatpak/bus";
+  gboolean unrestricted, no_proxy;
+  const char *dbus_address = g_getenv ("DBUS_SESSION_BUS_ADDRESS");
+  g_autofree char *dbus_session_socket = NULL;
+
+  unrestricted = (context->sockets & FLATPAK_CONTEXT_SOCKET_SESSION_BUS) != 0;
+
+  if (dbus_address != NULL)
+    {
+      dbus_session_socket = extract_unix_path_from_dbus_address (dbus_address);
+    }
+  else
+    {
+      g_autofree char *user_runtime_dir = flatpak_get_real_xdg_runtime_dir ();
+      struct stat statbuf;
+
+      dbus_session_socket = g_build_filename (user_runtime_dir, "bus", NULL);
+
+      if (stat (dbus_session_socket, &statbuf) < 0
+          || (statbuf.st_mode & S_IFMT) != S_IFSOCK
+          || statbuf.st_uid != getuid ())
+        return FALSE;
+    }
+
+  if (unrestricted)
+    g_debug ("Allowing session-dbus access");
+
+  no_proxy = (flags & FLATPAK_RUN_FLAG_NO_SESSION_BUS_PROXY) != 0;
+
+  if (dbus_session_socket != NULL && unrestricted)
+    {
+      flatpak_bwrap_add_args (app_bwrap,
+                              "--ro-bind", dbus_session_socket, sandbox_socket_path,
+                              NULL);
+      flatpak_bwrap_set_env (app_bwrap, "DBUS_SESSION_BUS_ADDRESS", sandbox_dbus_address, TRUE);
+      flatpak_bwrap_add_runtime_dir_member (app_bwrap, "bus");
+
+      return TRUE;
+    }
+  else if (!no_proxy && dbus_address != NULL)
+    {
+      g_autofree char *proxy_socket = create_proxy_socket ("session-bus-proxy-XXXXXX");
+
+      if (proxy_socket == NULL)
+        return FALSE;
+
+      flatpak_bwrap_add_args (proxy_arg_bwrap, dbus_address, proxy_socket, NULL);
+
+      if (!unrestricted)
+        {
+          flatpak_context_add_bus_filters (context, app_id, TRUE, flags & FLATPAK_RUN_FLAG_SANDBOX, proxy_arg_bwrap);
+
+          /* Allow calling any interface+method on all portals, but only receive broadcasts under /org/desktop/portal */
+          flatpak_bwrap_add_arg (proxy_arg_bwrap,
+                                 "--call=org.freedesktop.portal.*=*");
+          flatpak_bwrap_add_arg (proxy_arg_bwrap,
+                                 "--broadcast=org.freedesktop.portal.*=@/org/freedesktop/portal/*");
+        }
+
+      if ((flags & FLATPAK_RUN_FLAG_LOG_SESSION_BUS) != 0)
+        flatpak_bwrap_add_args (proxy_arg_bwrap, "--log", NULL);
+
+      flatpak_bwrap_add_args (app_bwrap,
+                              "--ro-bind", proxy_socket, sandbox_socket_path,
+                              NULL);
+      flatpak_bwrap_set_env (app_bwrap, "DBUS_SESSION_BUS_ADDRESS", sandbox_dbus_address, TRUE);
+      flatpak_bwrap_add_runtime_dir_member (app_bwrap, "bus");
+
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+static gboolean
+flatpak_run_add_a11y_dbus_args (FlatpakBwrap   *app_bwrap,
+                                FlatpakBwrap   *proxy_arg_bwrap,
+                                FlatpakContext *context,
+                                FlatpakRunFlags flags)
+{
+  static const char sandbox_socket_path[] = "/run/flatpak/at-spi-bus";
+  static const char sandbox_dbus_address[] = "unix:path=/run/flatpak/at-spi-bus";
+  g_autoptr(GDBusConnection) session_bus = NULL;
+  g_autofree char *a11y_address = NULL;
+  g_autoptr(GError) local_error = NULL;
+  g_autoptr(GDBusMessage) reply = NULL;
+  g_autoptr(GDBusMessage) msg = NULL;
+  g_autofree char *proxy_socket = NULL;
+
+  if ((flags & FLATPAK_RUN_FLAG_NO_A11Y_BUS_PROXY) != 0)
+    return FALSE;
+
+  session_bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
+  if (session_bus == NULL)
+    return FALSE;
+
+  msg = g_dbus_message_new_method_call ("org.a11y.Bus", "/org/a11y/bus", "org.a11y.Bus", "GetAddress");
+  g_dbus_message_set_body (msg, g_variant_new ("()"));
+  reply =
+    g_dbus_connection_send_message_with_reply_sync (session_bus, msg,
+                                                    G_DBUS_SEND_MESSAGE_FLAGS_NONE,
+                                                    30000,
+                                                    NULL,
+                                                    NULL,
+                                                    NULL);
+  if (reply)
+    {
+      if (g_dbus_message_to_gerror (reply, &local_error))
+        {
+          if (!g_error_matches (local_error, G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN))
+            g_message ("Can't find a11y bus: %s", local_error->message);
+        }
+      else
+        {
+          g_variant_get (g_dbus_message_get_body (reply),
+                         "(s)", &a11y_address);
+        }
+    }
+
+  if (!a11y_address)
+    return FALSE;
+
+  proxy_socket = create_proxy_socket ("a11y-bus-proxy-XXXXXX");
+  if (proxy_socket == NULL)
+    return FALSE;
+
+  flatpak_bwrap_add_args (proxy_arg_bwrap,
+                          a11y_address,
+                          proxy_socket, "--filter", "--sloppy-names",
+                          "--call=org.a11y.atspi.Registry=org.a11y.atspi.Socket.Embed@/org/a11y/atspi/accessible/root",
+                          "--call=org.a11y.atspi.Registry=org.a11y.atspi.Socket.Unembed@/org/a11y/atspi/accessible/root",
+                          "--call=org.a11y.atspi.Registry=org.a11y.atspi.Registry.GetRegisteredEvents@/org/a11y/atspi/registry",
+                          "--call=org.a11y.atspi.Registry=org.a11y.atspi.DeviceEventController.GetKeystrokeListeners@/org/a11y/atspi/registry/deviceeventcontroller",
+                          "--call=org.a11y.atspi.Registry=org.a11y.atspi.DeviceEventController.GetDeviceEventListeners@/org/a11y/atspi/registry/deviceeventcontroller",
+                          "--call=org.a11y.atspi.Registry=org.a11y.atspi.DeviceEventController.NotifyListenersSync@/org/a11y/atspi/registry/deviceeventcontroller",
+                          "--call=org.a11y.atspi.Registry=org.a11y.atspi.DeviceEventController.NotifyListenersAsync@/org/a11y/atspi/registry/deviceeventcontroller",
+                          NULL);
+
+  if ((flags & FLATPAK_RUN_FLAG_LOG_A11Y_BUS) != 0)
+    flatpak_bwrap_add_args (proxy_arg_bwrap, "--log", NULL);
+
+  flatpak_bwrap_add_args (app_bwrap,
+                          "--ro-bind", proxy_socket, sandbox_socket_path,
+                          NULL);
+  flatpak_bwrap_set_env (app_bwrap, "AT_SPI_BUS_ADDRESS", sandbox_dbus_address, TRUE);
+
+  return TRUE;
+}
+
+/* This wraps the argv in a bwrap call, primary to allow the
+   command to be run with a proper /.flatpak-info with data
+   taken from app_info_path */
+static gboolean
+add_bwrap_wrapper (FlatpakBwrap *bwrap,
+                   const char   *app_info_path,
+                   GError      **error)
+{
+  glnx_autofd int app_info_fd = -1;
+  g_auto(GLnxDirFdIterator) dir_iter = { 0 };
+  struct dirent *dent;
+  g_autofree char *user_runtime_dir = flatpak_get_real_xdg_runtime_dir ();
+  g_autofree char *proxy_socket_dir = g_build_filename (user_runtime_dir, ".dbus-proxy/", NULL);
+
+  app_info_fd = open (app_info_path, O_RDONLY | O_CLOEXEC);
+  if (app_info_fd == -1)
+    return glnx_throw_errno_prefix (error, _("Failed to open app info file"));
+
+  if (!glnx_dirfd_iterator_init_at (AT_FDCWD, "/", FALSE, &dir_iter, error))
+    return FALSE;
+
+  flatpak_bwrap_add_arg (bwrap, flatpak_get_bwrap ());
+
+  while (TRUE)
+    {
+      glnx_autofd int o_path_fd = -1;
+      struct statfs stfs;
+
+      if (!glnx_dirfd_iterator_next_dent_ensure_dtype (&dir_iter, &dent, NULL, error))
+        return FALSE;
+
+      if (dent == NULL)
+        break;
+
+      if (strcmp (dent->d_name, ".flatpak-info") == 0)
+        continue;
+
+      /* O_PATH + fstatfs is the magic that we need to statfs without automounting the target */
+      o_path_fd = openat (dir_iter.fd, dent->d_name, O_PATH | O_NOFOLLOW | O_CLOEXEC);
+      if (o_path_fd == -1 || fstatfs (o_path_fd, &stfs) != 0 || stfs.f_type == AUTOFS_SUPER_MAGIC)
+        continue; /* AUTOFS mounts are risky and can cause us to block (see issue #1633), so ignore it. Its unlikely the proxy needs such a directory. */
+
+      if (dent->d_type == DT_DIR)
+        {
+          if (strcmp (dent->d_name, "tmp") == 0 ||
+              strcmp (dent->d_name, "var") == 0 ||
+              strcmp (dent->d_name, "run") == 0)
+            flatpak_bwrap_add_arg (bwrap, "--bind");
+          else
+            flatpak_bwrap_add_arg (bwrap, "--ro-bind");
+
+          flatpak_bwrap_add_arg_printf (bwrap, "/%s", dent->d_name);
+          flatpak_bwrap_add_arg_printf (bwrap, "/%s", dent->d_name);
+        }
+      else if (dent->d_type == DT_LNK)
+        {
+          g_autofree gchar *target = NULL;
+
+          target = glnx_readlinkat_malloc (dir_iter.fd, dent->d_name,
+                                           NULL, error);
+          if (target == NULL)
+            return FALSE;
+          flatpak_bwrap_add_args (bwrap, "--symlink", target, NULL);
+          flatpak_bwrap_add_arg_printf (bwrap, "/%s", dent->d_name);
+        }
+    }
+
+  flatpak_bwrap_add_args (bwrap, "--bind", proxy_socket_dir, proxy_socket_dir, NULL);
+
+  /* This is a file rather than a bind mount, because it will then
+     not be unmounted from the namespace when the namespace dies. */
+  flatpak_bwrap_add_args (bwrap, "--perms", "0600", NULL);
+  flatpak_bwrap_add_args_data_fd (bwrap, "--file", glnx_steal_fd (&app_info_fd), "/.flatpak-info");
+
+  if (!flatpak_bwrap_bundle_args (bwrap, 1, -1, FALSE, error))
+    return FALSE;
+
+  /* End of options: the next argument will be the executable name */
+  flatpak_bwrap_add_arg (bwrap, "--");
+
+  return TRUE;
+}
+
+static gboolean
+start_dbus_proxy (FlatpakBwrap *app_bwrap,
+                  FlatpakBwrap *proxy_arg_bwrap,
+                  const char   *app_info_path,
+                  GError      **error)
+{
+  char x = 'x';
+  const char *proxy;
+  g_autofree char *commandline = NULL;
+  g_autoptr(FlatpakBwrap) proxy_bwrap = NULL;
+  int sync_fds[2] = {-1, -1};
+  int proxy_start_index;
+
+  proxy_bwrap = flatpak_bwrap_new (NULL);
+
+  if (!add_bwrap_wrapper (proxy_bwrap, app_info_path, error))
+    return FALSE;
+
+  proxy = g_getenv ("FLATPAK_DBUSPROXY");
+  if (proxy == NULL)
+    proxy = DBUSPROXY;
+
+  flatpak_bwrap_add_arg (proxy_bwrap, proxy);
+
+  proxy_start_index = proxy_bwrap->argv->len;
+
+  if (pipe2 (sync_fds, O_CLOEXEC) < 0)
+    {
+      g_set_error_literal (error, G_IO_ERROR, g_io_error_from_errno (errno),
+                           _("Unable to create sync pipe"));
+      return FALSE;
+    }
+
+  /* read end goes to app */
+  flatpak_bwrap_add_args_data_fd (app_bwrap, "--sync-fd", sync_fds[0], NULL);
+
+  /* write end goes to proxy */
+  flatpak_bwrap_add_fd (proxy_bwrap, sync_fds[1]);
+  flatpak_bwrap_add_arg_printf (proxy_bwrap, "--fd=%d", sync_fds[1]);
+
+  /* Note: This steals the fds from proxy_arg_bwrap */
+  flatpak_bwrap_append_bwrap (proxy_bwrap, proxy_arg_bwrap);
+
+  if (!flatpak_bwrap_bundle_args (proxy_bwrap, proxy_start_index, -1, TRUE, error))
+    return FALSE;
+
+  flatpak_bwrap_finish (proxy_bwrap);
+
+  commandline = flatpak_quote_argv ((const char **) proxy_bwrap->argv->pdata, -1);
+  g_debug ("Running '%s'", commandline);
+
+  /* We use LEAVE_DESCRIPTORS_OPEN to work around dead-lock, see flatpak_close_fds_workaround */
+  if (!g_spawn_async (NULL,
+                      (char **) proxy_bwrap->argv->pdata,
+                      NULL,
+                      G_SPAWN_SEARCH_PATH | G_SPAWN_LEAVE_DESCRIPTORS_OPEN,
+                      flatpak_bwrap_child_setup_cb, proxy_bwrap->fds,
+                      NULL, error))
+    return FALSE;
+
+  /* The write end can be closed now, otherwise the read below will hang of xdg-dbus-proxy
+     fails to start. */
+  g_clear_pointer (&proxy_bwrap, flatpak_bwrap_free);
+
+  /* Sync with proxy, i.e. wait until its listening on the sockets */
+  if (read (sync_fds[0], &x, 1) != 1)
+    {
+      g_set_error_literal (error, G_IO_ERROR, g_io_error_from_errno (errno),
+                           _("Failed to sync with dbus proxy"));
+      return FALSE;
+    }
+
+  return TRUE;
+}
 
 static int
 flatpak_extension_compare_by_path (gconstpointer _a,
@@ -166,12 +1459,12 @@ flatpak_run_add_extension_args (FlatpakBwrap      *bwrap,
         {
           g_autofree char *parent = g_path_get_dirname (directory);
 
-          if (!g_hash_table_contains (mounted_tmpfs, parent))
+          if (g_hash_table_lookup (mounted_tmpfs, parent) == NULL)
             {
               flatpak_bwrap_add_args (bwrap,
                                       "--tmpfs", parent,
                                       NULL);
-              g_hash_table_add (mounted_tmpfs, g_steal_pointer (&parent));
+              g_hash_table_insert (mounted_tmpfs, g_steal_pointer (&parent), "mounted");
             }
         }
 
@@ -242,13 +1535,13 @@ flatpak_run_add_extension_args (FlatpakBwrap      *bwrap,
                 {
                   g_autofree char *symlink_path = g_build_filename (merge_dir, dent->d_name, NULL);
                   /* Only create the first, because extensions are listed in prio order */
-                  if (!g_hash_table_contains (created_symlink, symlink_path))
+                  if (g_hash_table_lookup (created_symlink, symlink_path) == NULL)
                     {
                       g_autofree char *symlink = g_build_filename (directory, ext->merge_dirs[i], dent->d_name, NULL);
                       flatpak_bwrap_add_args (bwrap,
                                               "--symlink", symlink, symlink_path,
                                               NULL);
-                      g_hash_table_add (created_symlink, g_steal_pointer (&symlink_path));
+                      g_hash_table_insert (created_symlink, g_steal_pointer (&symlink_path), "created");
                     }
                 }
             }
@@ -266,116 +1559,45 @@ flatpak_run_add_extension_args (FlatpakBwrap      *bwrap,
   return TRUE;
 }
 
-static gboolean
-check_usb_portal (void)
-{
-  g_autoptr(GDBusConnection) bus = NULL;
-  g_autoptr(GVariant) ret = NULL;
-  g_autoptr(GError) error = NULL;
-
-  bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
-  if (!bus)
-    return FALSE;
-
-  ret = g_dbus_connection_call_sync (bus,
-                                     "org.freedesktop.portal.Desktop",
-                                     "/org/freedesktop/portal/desktop",
-                                     "org.freedesktop.DBus.Properties",
-                                     "Get",
-                                     g_variant_new ("(ss)",
-                                                    "org.freedesktop.portal.Usb",
-                                                    "version"),
-                                     G_VARIANT_TYPE ("(v)"),
-                                     G_DBUS_CALL_FLAGS_NONE,
-                                     -1,
-                                     NULL,
-                                     &error);
-  if (ret)
-    return TRUE;
-
-  if (!g_error_matches (error, G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS) &&
-      !g_error_matches (error, G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN) &&
-      !g_error_matches (error, G_DBUS_ERROR, G_DBUS_ERROR_NAME_HAS_NO_OWNER))
-    g_warning ("Querying availability of USB Portal failed: %s", error->message);
-
-  return FALSE;
-}
-
-static gboolean
-flatpak_run_has_usb_portal (void)
-{
-  static gsize usb_portal_once = 0;
-  enum {
-    HAS_USB_PORTAL_TRUE = 1,
-    HAS_USB_PORTAL_FALSE = 2
-  };
-
-  if (g_once_init_enter (&usb_portal_once))
-    {
-      g_once_init_leave (&usb_portal_once, check_usb_portal () ?
-                                           HAS_USB_PORTAL_TRUE :
-                                           HAS_USB_PORTAL_FALSE);
-    }
-
-  return usb_portal_once == HAS_USB_PORTAL_TRUE;
-}
-
-static gboolean
-flatpak_run_evaluate_conditions (FlatpakContextConditions condition)
-{
-  switch (condition)
-    {
-    case FLATPAK_CONTEXT_CONDITION_HAS_WAYLAND:
-      return flatpak_run_has_wayland ();
-    case FLATPAK_CONTEXT_CONDITION_HAS_USB_PORTAL:
-      return flatpak_run_has_usb_portal ();
-    default:
-      return FALSE;
-    }
-}
-
 /*
  * @per_app_dir_lock_fd: If >= 0, make use of per-app directories in
  *  the host's XDG_RUNTIME_DIR to share /tmp between instances.
  */
 gboolean
-flatpak_run_add_environment_args (FlatpakBwrap           *bwrap,
-                                  const char             *app_info_path,
-                                  FlatpakRunFlags         flags,
-                                  const char             *app_id,
-                                  FlatpakContext         *context,
-                                  FlatpakContextShares    shares,
-                                  FlatpakContextDevices   devices,
-                                  FlatpakContextSockets   sockets,
-                                  FlatpakContextFeatures  features,
-                                  GFile                  *app_id_dir,
-                                  GPtrArray              *previous_app_id_dirs,
-                                  int                     per_app_dir_lock_fd,
-                                  const char             *instance_id,
-                                  FlatpakExports        **exports_out,
-                                  GCancellable           *cancellable,
-                                  GError                **error)
+flatpak_run_add_environment_args (FlatpakBwrap    *bwrap,
+                                  const char      *app_info_path,
+                                  FlatpakRunFlags  flags,
+                                  const char      *app_id,
+                                  FlatpakContext  *context,
+                                  GFile           *app_id_dir,
+                                  GPtrArray       *previous_app_id_dirs,
+                                  int              per_app_dir_lock_fd,
+                                  FlatpakExports **exports_out,
+                                  GCancellable    *cancellable,
+                                  GError         **error)
 {
   g_autoptr(GError) my_error = NULL;
   g_autoptr(FlatpakExports) exports = NULL;
   g_autoptr(FlatpakBwrap) proxy_arg_bwrap = flatpak_bwrap_new (flatpak_bwrap_empty_env);
   g_autofree char *xdg_dirs_conf = NULL;
+  gboolean has_wayland = FALSE;
+  gboolean allow_x11 = FALSE;
   gboolean home_access = FALSE;
   gboolean sandboxed = (flags & FLATPAK_RUN_FLAG_SANDBOX) != 0;
 
-  if ((shares & FLATPAK_CONTEXT_SHARED_IPC) == 0)
+  if ((context->shares & FLATPAK_CONTEXT_SHARED_IPC) == 0)
     {
-      g_info ("Disallowing ipc access");
+      g_debug ("Disallowing ipc access");
       flatpak_bwrap_add_args (bwrap, "--unshare-ipc", NULL);
     }
 
-  if ((shares & FLATPAK_CONTEXT_SHARED_NETWORK) == 0)
+  if ((context->shares & FLATPAK_CONTEXT_SHARED_NETWORK) == 0)
     {
-      g_info ("Disallowing network access");
+      g_debug ("Disallowing network access");
       flatpak_bwrap_add_args (bwrap, "--unshare-net", NULL);
     }
 
-  if (devices & FLATPAK_CONTEXT_DEVICE_ALL)
+  if (context->devices & FLATPAK_CONTEXT_DEVICE_ALL)
     {
       flatpak_bwrap_add_args (bwrap,
                               "--dev-bind", "/dev", "/dev",
@@ -383,13 +1605,13 @@ flatpak_run_add_environment_args (FlatpakBwrap           *bwrap,
       /* Don't expose the host /dev/shm, just the device nodes, unless explicitly allowed */
       if (g_file_test ("/dev/shm", G_FILE_TEST_IS_DIR))
         {
-          if (devices & FLATPAK_CONTEXT_DEVICE_SHM)
+          if (context->devices & FLATPAK_CONTEXT_DEVICE_SHM)
             {
               /* Don't do anything special: include shm in the
                * shared /dev. The host and all sandboxes and subsandboxes
                * all share /dev/shm */
             }
-          else if ((features & FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM)
+          else if ((context->features & FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM)
                    && per_app_dir_lock_fd >= 0)
             {
               g_autofree char *shared_dev_shm = NULL;
@@ -425,14 +1647,14 @@ flatpak_run_add_environment_args (FlatpakBwrap           *bwrap,
              mount on top of it. */
           if (g_strcmp0 (link, "/run/shm") == 0)
             {
-              if (devices & FLATPAK_CONTEXT_DEVICE_SHM &&
+              if (context->devices & FLATPAK_CONTEXT_DEVICE_SHM &&
                   g_file_test ("/run/shm", G_FILE_TEST_IS_DIR))
                 {
                   flatpak_bwrap_add_args (bwrap,
                                           "--bind", "/run/shm", "/run/shm",
                                           NULL);
                 }
-              else if ((features & FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM)
+              else if ((context->features & FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM)
                        && per_app_dir_lock_fd >= 0)
                 {
                   g_autofree char *shared_dev_shm = NULL;
@@ -466,24 +1688,12 @@ flatpak_run_add_environment_args (FlatpakBwrap           *bwrap,
       flatpak_bwrap_add_args (bwrap,
                               "--dev", "/dev",
                               NULL);
-
-      flatpak_bwrap_add_args (bwrap, "--dev-bind-try", "/dev/ntsync", "/dev/ntsync", NULL);
-
-      if (devices & FLATPAK_CONTEXT_DEVICE_USB)
+      if (context->devices & FLATPAK_CONTEXT_DEVICE_DRI)
         {
-          g_info ("Allowing USB device access.");
-
-          if (g_file_test ("/dev/bus/usb", G_FILE_TEST_IS_DIR))
-              flatpak_bwrap_add_args (bwrap, "--dev-bind", "/dev/bus/usb", "/dev/bus/usb", NULL);
-        }
-
-      if (devices & FLATPAK_CONTEXT_DEVICE_DRI)
-        {
-          g_info ("Allowing dri access");
+          g_debug ("Allowing dri access");
           int i;
-          static const char * const dri_devices[] = {
+          char *dri_devices[] = {
             "/dev/dri",
-            "/dev/udmabuf",
             /* mali */
             "/dev/mali",
             "/dev/mali0",
@@ -494,8 +1704,6 @@ flatpak_run_add_environment_args (FlatpakBwrap           *bwrap,
             /* nvidia OpenCL/CUDA */
             "/dev/nvidia-uvm",
             "/dev/nvidia-uvm-tools",
-            /* AMD ROCm/OpenCL */
-            "/dev/kfd",
           };
 
           for (i = 0; i < G_N_ELEMENTS (dri_devices); i++)
@@ -515,31 +1723,23 @@ flatpak_run_add_environment_args (FlatpakBwrap           *bwrap,
             }
         }
 
-      if (devices & FLATPAK_CONTEXT_DEVICE_INPUT)
+      if (context->devices & FLATPAK_CONTEXT_DEVICE_KVM)
         {
-          g_info ("Allowing input device access. Note: raw and virtual input currently require --device=all");
-
-          if (g_file_test ("/dev/input", G_FILE_TEST_IS_DIR))
-              flatpak_bwrap_add_args (bwrap, "--dev-bind", "/dev/input", "/dev/input", NULL);
-        }
-
-      if (devices & FLATPAK_CONTEXT_DEVICE_KVM)
-        {
-          g_info ("Allowing kvm access");
+          g_debug ("Allowing kvm access");
           if (g_file_test ("/dev/kvm", G_FILE_TEST_EXISTS))
             flatpak_bwrap_add_args (bwrap, "--dev-bind", "/dev/kvm", "/dev/kvm", NULL);
         }
 
-      if (devices & FLATPAK_CONTEXT_DEVICE_SHM)
+      if (context->devices & FLATPAK_CONTEXT_DEVICE_SHM)
         {
           /* This is a symlink to /run/shm on debian, so bind to real target */
           g_autofree char *real_dev_shm = realpath ("/dev/shm", NULL);
 
-          g_info ("Allowing /dev/shm access (as %s)", real_dev_shm);
+          g_debug ("Allowing /dev/shm access (as %s)", real_dev_shm);
           if (real_dev_shm != NULL)
               flatpak_bwrap_add_args (bwrap, "--bind", real_dev_shm, "/dev/shm", NULL);
         }
-      else if ((features & FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM)
+      else if ((context->features & FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM)
                && per_app_dir_lock_fd >= 0)
         {
           g_autofree char *shared_dev_shm = NULL;
@@ -592,26 +1792,61 @@ flatpak_run_add_environment_args (FlatpakBwrap           *bwrap,
   flatpak_context_append_bwrap_filesystem (context, bwrap, app_id, app_id_dir,
                                            exports, xdg_dirs_conf, home_access);
 
-  flatpak_run_add_socket_args_environment (bwrap, shares, sockets, app_id, instance_id);
-  flatpak_run_add_session_dbus_args (bwrap, proxy_arg_bwrap, sockets, context, flags, app_id);
-  flatpak_run_add_system_dbus_args (bwrap, proxy_arg_bwrap, sockets, context, flags);
-  flatpak_run_add_a11y_dbus_args (bwrap, proxy_arg_bwrap, context, flags, app_id);
+  if (context->sockets & FLATPAK_CONTEXT_SOCKET_WAYLAND)
+    {
+      g_debug ("Allowing wayland access");
+      has_wayland = flatpak_run_add_wayland_args (bwrap);
+    }
+
+  if ((context->sockets & FLATPAK_CONTEXT_SOCKET_FALLBACK_X11) != 0)
+    allow_x11 = !has_wayland;
+  else
+    allow_x11 = (context->sockets & FLATPAK_CONTEXT_SOCKET_X11) != 0;
+
+  flatpak_run_add_x11_args (bwrap, allow_x11, context->shares);
+
+  if (context->sockets & FLATPAK_CONTEXT_SOCKET_SSH_AUTH)
+    {
+      flatpak_run_add_ssh_args (bwrap);
+    }
+
+  if (context->sockets & FLATPAK_CONTEXT_SOCKET_PULSEAUDIO)
+    {
+      g_debug ("Allowing pulseaudio access");
+      flatpak_run_add_pulseaudio_args (bwrap, context->shares);
+    }
+
+  if (context->sockets & FLATPAK_CONTEXT_SOCKET_PCSC)
+    {
+      flatpak_run_add_pcsc_args (bwrap);
+    }
+
+  if (context->sockets & FLATPAK_CONTEXT_SOCKET_CUPS)
+    {
+      flatpak_run_add_cups_args (bwrap);
+    }
+
+  if (context->sockets & FLATPAK_CONTEXT_SOCKET_GPG_AGENT)
+    {
+      flatpak_run_add_gpg_agent_args (bwrap);
+    }
+
+  flatpak_run_add_session_dbus_args (bwrap, proxy_arg_bwrap, context, flags, app_id);
+  flatpak_run_add_system_dbus_args (bwrap, proxy_arg_bwrap, context, flags);
+  flatpak_run_add_a11y_dbus_args (bwrap, proxy_arg_bwrap, context, flags);
 
   /* Must run this before spawning the dbus proxy, to ensure it
      ends up in the app cgroup */
-  if (instance_id)
+  if (!flatpak_run_in_transient_unit (app_id, &my_error))
     {
-      if (!flatpak_run_in_transient_unit (app_id, instance_id, &my_error))
-        {
-          /* We still run along even if we don't get a cgroup, as nothing
-             really depends on it. Its just nice to have */
-          g_info ("Failed to run in transient scope: %s", my_error->message);
-          g_clear_error (&my_error);
-        }
+      /* We still run along even if we don't get a cgroup, as nothing
+         really depends on it. Its just nice to have */
+      g_debug ("Failed to run in transient scope: %s", my_error->message);
+      g_clear_error (&my_error);
     }
 
-  if (!flatpak_run_maybe_start_dbus_proxy (bwrap, proxy_arg_bwrap,
-                                           app_info_path, error))
+  if (!flatpak_bwrap_is_empty (proxy_arg_bwrap) &&
+      !start_dbus_proxy (bwrap, proxy_arg_bwrap, app_info_path, error))
     return FALSE;
 
   if (exports_out)
@@ -628,13 +1863,10 @@ typedef struct
 
 static const ExportData default_exports[] = {
   {"PATH", "/app/bin:/usr/bin"},
-  /* We always want to unset LD variables to avoid inheriting weird
-   * dependencies from the host. But if not using ld.so.cache LD_LIBRARY_PATH
-   is later set. */
+  /* We always want to unset LD_LIBRARY_PATH to avoid inheriting weird
+   * dependencies from the host. But if not using ld.so.cache this is
+   * later set. */
   {"LD_LIBRARY_PATH", NULL},
-  {"LD_PRELOAD", NULL},
-  {"LD_AUDIT", NULL},
-
   {"XDG_CONFIG_DIRS", "/app/etc/xdg:/etc/xdg"},
   {"XDG_DATA_DIRS", "/app/share:/usr/share"},
   {"SHELL", "/bin/sh"},
@@ -647,18 +1879,11 @@ static const ExportData default_exports[] = {
    * outside the sandbox is somewhere else. Don't allow a different
    * setting from outside the sandbox to overwrite this. */
   {"XDG_RUNTIME_DIR", NULL},
-  /* Ensure our container environment variable takes precedence over the one
-   * set by a container manager. */
-  {"container", NULL},
-  /* We always make the zoneinfo available at /usr/share/zoneinfo even if it
-   * is somewhere else outside of the sandbox. */
-  {"TZDIR", NULL},
 
   /* Some env vars are common enough and will affect the sandbox badly
      if set on the host. We clear these always. If updating this list,
      also update the list in flatpak-run.xml. */
   {"PYTHONPATH", NULL},
-  {"PYTHONPYCACHEPREFIX", NULL},
   {"PERLLIB", NULL},
   {"PERL5LIB", NULL},
   {"XCURSOR_PATH", NULL},
@@ -678,15 +1903,8 @@ static const ExportData default_exports[] = {
   {"XKB_CONFIG_ROOT", NULL},
   {"GIO_EXTRA_MODULES", NULL},
   {"GDK_BACKEND", NULL},
-  {"VK_ADD_DRIVER_FILES", NULL},
-  {"VK_ADD_LAYER_PATH", NULL},
   {"VK_DRIVER_FILES", NULL},
   {"VK_ICD_FILENAMES", NULL},
-  {"VK_LAYER_PATH", NULL},
-  {"__EGL_EXTERNAL_PLATFORM_CONFIG_DIRS", NULL},
-  {"__EGL_EXTERNAL_PLATFORM_CONFIG_FILENAMES", NULL},
-  {"__EGL_VENDOR_LIBRARY_DIRS", NULL},
-  {"__EGL_VENDOR_LIBRARY_FILENAMES", NULL},
 };
 
 static const ExportData no_ld_so_cache_exports[] = {
@@ -805,15 +2023,6 @@ apply_exports (char            **envp,
   return envp;
 }
 
-static void
-flatpak_run_apply_env_clear (FlatpakBwrap *bwrap, gboolean clear_env)
-{
-  if (!clear_env)
-    return;
-
-  flatpak_bwrap_add_args (bwrap, "--clearenv", NULL);
-}
-
 void
 flatpak_run_apply_env_default (FlatpakBwrap *bwrap, gboolean use_ld_so_cache)
 {
@@ -834,6 +2043,37 @@ flatpak_run_apply_env_prompt (FlatpakBwrap *bwrap, const char *app_id)
 }
 
 void
+flatpak_run_apply_env_appid (FlatpakBwrap *bwrap,
+                             GFile        *app_dir)
+{
+  g_autoptr(GFile) app_dir_data = NULL;
+  g_autoptr(GFile) app_dir_config = NULL;
+  g_autoptr(GFile) app_dir_cache = NULL;
+  g_autoptr(GFile) app_dir_state = NULL;
+
+  app_dir_data = g_file_get_child (app_dir, "data");
+  app_dir_config = g_file_get_child (app_dir, "config");
+  app_dir_cache = g_file_get_child (app_dir, "cache");
+  /* Yes, this is inconsistent with data, config and cache. However, using
+   * this path lets apps provide backwards-compatibility with older Flatpak
+   * versions by using `--persist=.local/state --unset-env=XDG_STATE_DIR`. */
+  app_dir_state = g_file_get_child (app_dir, ".local/state");
+  flatpak_bwrap_set_env (bwrap, "XDG_DATA_HOME", flatpak_file_get_path_cached (app_dir_data), TRUE);
+  flatpak_bwrap_set_env (bwrap, "XDG_CONFIG_HOME", flatpak_file_get_path_cached (app_dir_config), TRUE);
+  flatpak_bwrap_set_env (bwrap, "XDG_CACHE_HOME", flatpak_file_get_path_cached (app_dir_cache), TRUE);
+  flatpak_bwrap_set_env (bwrap, "XDG_STATE_HOME", flatpak_file_get_path_cached (app_dir_state), TRUE);
+
+  if (g_getenv ("XDG_DATA_HOME"))
+    flatpak_bwrap_set_env (bwrap, "HOST_XDG_DATA_HOME", g_getenv ("XDG_DATA_HOME"), TRUE);
+  if (g_getenv ("XDG_CONFIG_HOME"))
+    flatpak_bwrap_set_env (bwrap, "HOST_XDG_CONFIG_HOME", g_getenv ("XDG_CONFIG_HOME"), TRUE);
+  if (g_getenv ("XDG_CACHE_HOME"))
+    flatpak_bwrap_set_env (bwrap, "HOST_XDG_CACHE_HOME", g_getenv ("XDG_CACHE_HOME"), TRUE);
+  if (g_getenv ("XDG_STATE_HOME"))
+    flatpak_bwrap_set_env (bwrap, "HOST_XDG_STATE_HOME", g_getenv ("XDG_STATE_HOME"), TRUE);
+}
+
+void
 flatpak_run_apply_env_vars (FlatpakBwrap *bwrap, FlatpakContext *context)
 {
   GHashTableIter iter;
@@ -850,6 +2090,15 @@ flatpak_run_apply_env_vars (FlatpakBwrap *bwrap, FlatpakContext *context)
       else
         flatpak_bwrap_unset_env (bwrap, var);
     }
+}
+
+GFile *
+flatpak_get_data_dir (const char *app_id)
+{
+  g_autoptr(GFile) home = g_file_new_for_path (g_get_home_dir ());
+  g_autoptr(GFile) var_app = g_file_resolve_relative_path (home, ".var/app");
+
+  return g_file_get_child (var_app, app_id);
 }
 
 gboolean
@@ -920,16 +2169,13 @@ systemd_unit_name_escape (const gchar *in)
 }
 
 gboolean
-flatpak_run_in_transient_unit (const char  *app_id,
-                               const char  *instance_id,
-                               GError     **error)
+flatpak_run_in_transient_unit (const char *appid, GError **error)
 {
   g_autoptr(GDBusConnection) conn = NULL;
   g_autofree char *path = NULL;
   g_autofree char *address = NULL;
   g_autofree char *name = NULL;
-  g_autofree char *app_id_escaped = NULL;
-  g_autofree char *instance_id_escaped = NULL;
+  g_autofree char *appid_escaped = NULL;
   g_autofree char *job = NULL;
   SystemdManager *manager = NULL;
   GVariantBuilder builder;
@@ -940,9 +2186,6 @@ flatpak_run_in_transient_unit (const char  *app_id,
   struct JobData data;
   gboolean res = FALSE;
   g_autoptr(GMainContextPopDefault) main_context = NULL;
-
-  g_return_val_if_fail (app_id != NULL, FALSE);
-  g_return_val_if_fail (instance_id != NULL, FALSE);
 
   path = g_strdup_printf ("/run/user/%d/systemd/private", getuid ());
 
@@ -970,11 +2213,8 @@ flatpak_run_in_transient_unit (const char  *app_id,
   if (!manager)
     goto out;
 
-  app_id_escaped = systemd_unit_name_escape (app_id);
-  instance_id_escaped = systemd_unit_name_escape (instance_id);
-  name = g_strdup_printf ("app-flatpak-%s-%s.scope",
-                          app_id_escaped,
-                          instance_id_escaped);
+  appid_escaped = systemd_unit_name_escape (appid);
+  name = g_strdup_printf ("app-flatpak-%s-%d.scope", appid_escaped, getpid ());
 
   g_variant_builder_init (&builder, G_VARIANT_TYPE ("a(sv)"));
 
@@ -982,7 +2222,8 @@ flatpak_run_in_transient_unit (const char  *app_id,
   g_variant_builder_add (&builder, "(sv)",
                          "PIDs",
                          g_variant_new_fixed_array (G_VARIANT_TYPE ("u"),
-                                                    &pid, 1, sizeof (guint32)));
+                                                    &pid, 1, sizeof (guint32))
+                        );
 
   properties = g_variant_builder_end (&builder);
 
@@ -1169,15 +2410,12 @@ flatpak_app_compute_permissions (GKeyFile *app_metadata,
 
       /* Don't inherit any permissions from the runtime, only things like env vars. */
       flatpak_context_reset_permissions (app_context);
-
-      flatpak_context_dump (app_context, "Metadata from runtime");
     }
 
   if (app_metadata != NULL &&
       !flatpak_context_load_metadata (app_context, app_metadata, error))
     return NULL;
 
-  flatpak_context_dump (app_context, "Metadata from app manifest");
   return g_steal_pointer (&app_context);
 }
 
@@ -1269,17 +2507,17 @@ get_dconf_data (const char  *app_id,
 
   if (migrate_path)
     {
-      g_info ("Add values in dir '%s', prefix is '%s'", migrate_path, prefix);
+      g_debug ("Add values in dir '%s', prefix is '%s'", migrate_path, prefix);
       if (flatpak_dconf_path_is_similar (migrate_path, prefix))
         add_dconf_dir_to_keyfile (values_data, client, migrate_path, DCONF_READ_USER_VALUE);
       else
         g_warning ("Ignoring D-Conf migrate-path setting %s", migrate_path);
     }
 
-  g_info ("Add defaults in dir %s", prefix);
+  g_debug ("Add defaults in dir %s", prefix);
   add_dconf_dir_to_keyfile (defaults_data, client, prefix, DCONF_READ_DEFAULT_VALUE);
 
-  g_info ("Add locks in dir %s", prefix);
+  g_debug ("Add locks in dir %s", prefix);
   add_dconf_locks_to_list (locks_data, client, prefix);
 
   /* We allow extra paths for defaults and locks, but not for user values */
@@ -1290,15 +2528,15 @@ get_dconf_data (const char  *app_id,
         {
           if (dconf_is_dir (paths[i], NULL))
             {
-              g_info ("Add defaults in dir %s", paths[i]);
+              g_debug ("Add defaults in dir %s", paths[i]);
               add_dconf_dir_to_keyfile (defaults_data, client, paths[i], DCONF_READ_DEFAULT_VALUE);
 
-              g_info ("Add locks in dir %s", paths[i]);
+              g_debug ("Add locks in dir %s", paths[i]);
               add_dconf_locks_to_list (locks_data, client, paths[i]);
             }
           else if (dconf_is_key (paths[i], NULL))
             {
-              g_info ("Add individual key %s", paths[i]);
+              g_debug ("Add individual key %s", paths[i]);
               add_dconf_key_to_keyfile (defaults_data, client, paths[i], DCONF_READ_DEFAULT_VALUE);
               add_dconf_key_to_keyfile (values_data, client, paths[i], DCONF_READ_USER_VALUE);
             }
@@ -1382,7 +2620,7 @@ flatpak_run_add_dconf_args (FlatpakBwrap *bwrap,
                                    "config/glib-2.0/settings/keyfile",
                                    NULL);
 
-      g_info ("writing D-Conf values to %s", filename);
+      g_debug ("writing D-Conf values to %s", filename);
 
       if (values_size != 0 && !g_file_test (filename, G_FILE_TEST_EXISTS))
         {
@@ -1405,93 +2643,46 @@ flatpak_run_add_dconf_args (FlatpakBwrap *bwrap,
   return TRUE;
 }
 
-static gboolean
-flatpak_run_save_environ (const char * const  *run_environ,
-                          const char          *dir,
-                          GCancellable        *cancellable,
-                          GError             **error)
-{
-  g_autoptr(GByteArray) buffer = g_byte_array_new ();
-  int i;
-  glnx_autofd int dir_fd = -1;
-
-  g_assert (run_environ != NULL);
-
-  for (i = 0; run_environ[i] != NULL; i++)
-    {
-      gsize size = strlen (run_environ[i]) + 1;
-
-      g_byte_array_append (buffer,
-                           (const guint8 *) run_environ[i],
-                           size);
-    }
-
-  if (!glnx_opendirat (AT_FDCWD, dir, TRUE,
-                       &dir_fd,
-                       error))
-    return FALSE;
-
-  if (!glnx_file_replace_contents_with_perms_at (dir_fd, "run-environ",
-                                                 buffer->data, buffer->len,
-                                                 (mode_t) 0400,
-                                                 (uid_t) -1, (gid_t) -1,
-                                                 0,
-                                                 cancellable, error))
-    return FALSE;
-
-  return TRUE;
-}
-
 gboolean
-flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
-                               GFile                  *app_files,
-                               GFile                  *original_app_files,
-                               GBytes                 *app_deploy_data,
-                               const char             *app_extensions,
-                               GFile                  *runtime_files,
-                               GFile                  *original_runtime_files,
-                               GBytes                 *runtime_deploy_data,
-                               const char             *runtime_extensions,
-                               const char             *app_id,
-                               const char             *app_branch,
-                               FlatpakDecomposed      *runtime_ref,
-                               GFile                  *app_id_dir,
-                               FlatpakContext         *final_app_context,
-                               FlatpakContext         *cmdline_context,
-                               FlatpakContextSockets   sockets,
-                               gboolean                sandbox,
-                               gboolean                build,
-                               gboolean                devel,
-                               char                  **app_info_path_out,
-                               int                     instance_id_fd_arg,
-                               char                  **instance_id_host_dir_out,
-                               char                  **instance_id_host_private_dir_out,
-                               char                  **instance_id_out,
-                               GError                **error)
+flatpak_run_add_app_info_args (FlatpakBwrap       *bwrap,
+                               GFile              *app_files,
+                               GFile              *original_app_files,
+                               GBytes             *app_deploy_data,
+                               const char         *app_extensions,
+                               GFile              *runtime_files,
+                               GFile              *original_runtime_files,
+                               GBytes             *runtime_deploy_data,
+                               const char         *runtime_extensions,
+                               const char         *app_id,
+                               const char         *app_branch,
+                               FlatpakDecomposed  *runtime_ref,
+                               GFile              *app_id_dir,
+                               FlatpakContext     *final_app_context,
+                               FlatpakContext     *cmdline_context,
+                               gboolean            sandbox,
+                               gboolean            build,
+                               gboolean            devel,
+                               char              **app_info_path_out,
+                               int                 instance_id_fd,
+                               char              **instance_id_host_dir_out,
+                               GError             **error)
 {
   g_autofree char *info_path = NULL;
   g_autofree char *bwrapinfo_path = NULL;
-  glnx_autofd int fd1 = -1;
-  glnx_autofd int fd2 = -1;
-  glnx_autofd int fd3 = -1;
-  int info_fd;
-  glnx_autofd int instance_id_fd = instance_id_fd_arg;
+  int fd, fd2, fd3;
   g_autoptr(GKeyFile) keyfile = NULL;
   g_autofree char *runtime_path = NULL;
   const char *group;
   g_autofree char *instance_id = NULL;
   glnx_autofd int lock_fd = -1;
   g_autofree char *instance_id_host_dir = NULL;
-  g_autofree char *instance_id_host_private_dir = NULL;
   g_autofree char *instance_id_sandbox_dir = NULL;
   g_autofree char *instance_id_lock_file = NULL;
   g_autofree char *arch = flatpak_decomposed_dup_arch (runtime_ref);
 
   g_return_val_if_fail (app_id != NULL, FALSE);
 
-  instance_id = flatpak_instance_allocate_id (&instance_id_host_dir,
-                                              &instance_id_host_private_dir,
-                                              &lock_fd);
+  instance_id = flatpak_instance_allocate_id (&instance_id_host_dir, &lock_fd);
   if (instance_id == NULL)
     return flatpak_fail_error (error, FLATPAK_ERROR_SETUP_FAILED, _("Unable to allocate instance id"));
 
@@ -1507,7 +2698,7 @@ flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
                           NULL);
   flatpak_bwrap_add_runtime_dir_member (bwrap, ".flatpak");
   /* Keep the .ref lock held until we've started bwrap to avoid races */
-  flatpak_bwrap_add_noinherit_fd (bwrap, g_steal_fd (&lock_fd));
+  flatpak_bwrap_add_noinherit_fd (bwrap, glnx_steal_fd (&lock_fd));
 
   info_path = g_build_filename (instance_id_host_dir, "info", NULL);
 
@@ -1577,11 +2768,11 @@ flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
   g_key_file_set_string (keyfile, FLATPAK_METADATA_GROUP_INSTANCE,
                          FLATPAK_METADATA_KEY_FLATPAK_VERSION, PACKAGE_VERSION);
 
-  if ((sockets & FLATPAK_CONTEXT_SOCKET_SESSION_BUS) == 0)
+  if ((final_app_context->sockets & FLATPAK_CONTEXT_SOCKET_SESSION_BUS) == 0)
     g_key_file_set_boolean (keyfile, FLATPAK_METADATA_GROUP_INSTANCE,
                             FLATPAK_METADATA_KEY_SESSION_BUS_PROXY, TRUE);
 
-  if ((sockets & FLATPAK_CONTEXT_SOCKET_SYSTEM_BUS) == 0)
+  if ((final_app_context->sockets & FLATPAK_CONTEXT_SOCKET_SYSTEM_BUS) == 0)
     g_key_file_set_boolean (keyfile, FLATPAK_METADATA_GROUP_INSTANCE,
                             FLATPAK_METADATA_KEY_SYSTEM_BUS_PROXY, TRUE);
 
@@ -1624,8 +2815,8 @@ flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
      This way even if the bind-mount is unmounted we can find the real data.
    */
 
-  fd1 = info_fd = open (info_path, O_RDONLY);
-  if (fd1 == -1)
+  fd = open (info_path, O_RDONLY);
+  if (fd == -1)
     {
       int errsv = errno;
       g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errsv),
@@ -1636,6 +2827,7 @@ flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
   fd2 = open (info_path, O_RDONLY);
   if (fd2 == -1)
     {
+      close (fd);
       int errsv = errno;
       g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errsv),
                    _("Failed to open flatpak-info file: %s"), g_strerror (errsv));
@@ -1644,9 +2836,9 @@ flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
 
   flatpak_bwrap_add_args (bwrap, "--perms", "0600", NULL);
   flatpak_bwrap_add_args_data_fd (bwrap,
-                                  "--file", g_steal_fd (&fd1), "/.flatpak-info");
+                                  "--file", fd, "/.flatpak-info");
   flatpak_bwrap_add_args_data_fd (bwrap,
-                                  "--ro-bind-data", g_steal_fd (&fd2), "/.flatpak-info");
+                                  "--ro-bind-data", fd2, "/.flatpak-info");
 
   /* Tell the application that it's running under Flatpak in a generic way. */
   flatpak_bwrap_add_args (bwrap,
@@ -1663,6 +2855,8 @@ flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
   fd3 = open (bwrapinfo_path, O_RDWR | O_CREAT, 0644);
   if (fd3 == -1)
     {
+      close (fd);
+      close (fd2);
       int errsv = errno;
       g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errsv),
                    _("Failed to open bwrapinfo.json file: %s"), g_strerror (errsv));
@@ -1685,6 +2879,10 @@ flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
               if (errsv == EINTR)
                 continue;
 
+              close (fd);
+              close (fd2);
+              close (fd3);
+
               g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errsv),
                            _("Failed to write to instance id fd: %s"), g_strerror (errsv));
               return FALSE;
@@ -1694,85 +2892,53 @@ flatpak_run_add_app_info_args (FlatpakBwrap           *bwrap,
           instance_id_size -= bytes_written;
         }
 
-      /* explicitly close this as soon as we're done to notify the other side */
-      g_clear_fd (&instance_id_fd, NULL);
+      close (instance_id_fd);
     }
 
-  flatpak_bwrap_add_args_data_fd (bwrap, "--info-fd", g_steal_fd (&fd3), NULL);
+  flatpak_bwrap_add_args_data_fd (bwrap, "--info-fd", fd3, NULL);
 
   if (app_info_path_out != NULL)
-    *app_info_path_out = g_strdup_printf ("/proc/self/fd/%d", info_fd);
+    *app_info_path_out = g_strdup_printf ("/proc/self/fd/%d", fd);
 
   if (instance_id_host_dir_out != NULL)
     *instance_id_host_dir_out = g_steal_pointer (&instance_id_host_dir);
 
-  if (instance_id_host_private_dir_out != NULL)
-    *instance_id_host_private_dir_out = g_steal_pointer (&instance_id_host_private_dir);
-
-  if (instance_id_out != NULL)
-    *instance_id_out = g_steal_pointer (&instance_id);
-
   return TRUE;
 }
 
-/*
- * @runtime_fd: the /usr for the runtime, or -1 if running with no runtime,
- *  perhaps to unpack extra-data
- */
 static void
 add_tzdata_args (FlatpakBwrap *bwrap,
-                 int           runtime_fd)
+                 GFile *runtime_files)
 {
-  g_autofree char *raw_timezone = NULL;
-  g_autofree char *timezone_content = NULL;
-  g_autofree char *localtime_content = NULL;
-  const char *tzdir;
-  glnx_autofd int tzdir_fd = -1;
-  glnx_autofd int zoneinfo_fd = -1;
-  g_autoptr(GError) error = NULL;
+  g_autofree char *raw_timezone = flatpak_get_timezone ();
+  g_autofree char *timezone_content = g_strdup_printf ("%s\n", raw_timezone);
+  g_autofree char *localtime_content = g_strconcat ("../usr/share/zoneinfo/", raw_timezone, NULL);
+  g_autoptr(GFile) runtime_zoneinfo = NULL;
 
-  g_return_if_fail (runtime_fd >= -1);
+  if (runtime_files)
+    runtime_zoneinfo = g_file_resolve_relative_path (runtime_files, "share/zoneinfo");
 
-  raw_timezone = flatpak_get_timezone ();
-  timezone_content = g_strdup_printf ("%s\n", raw_timezone);
-  localtime_content = g_strconcat ("../usr/share/zoneinfo/", raw_timezone, NULL);
-
-  tzdir = flatpak_get_tzdir ();
-
-  tzdir_fd = glnx_chaseat (AT_FDCWD, tzdir, GLNX_CHASE_MUST_BE_DIRECTORY, NULL);
-
-  if (runtime_fd >= 0)
-    zoneinfo_fd = glnx_chaseat (runtime_fd, "share/zoneinfo",
-                                GLNX_CHASE_RESOLVE_BENEATH |
-                                GLNX_CHASE_MUST_BE_DIRECTORY,
-                                NULL);
-
-  /* Check for host /usr/share/zoneinfo */
-  if (tzdir_fd >= 0 && zoneinfo_fd >= 0)
+  /* Check for runtime /usr/share/zoneinfo */
+  if (runtime_zoneinfo != NULL && g_file_query_exists (runtime_zoneinfo, NULL))
     {
-      /* Here we assume the host timezone file exist in the host data */
-      flatpak_bwrap_add_args (bwrap,
-                              "--ro-bind", tzdir, "/usr/share/zoneinfo",
-                              "--symlink", localtime_content, "/etc/localtime",
-                              NULL);
-    }
-  else if (runtime_fd >= 0)
-    {
-      g_autofree char *runtime_zoneinfo = NULL;
-      glnx_autofd int runtime_zoneinfo_fd = -1;
-
-      runtime_zoneinfo = g_strconcat ("share/zoneinfo/", raw_timezone, NULL);
-
-      /* Check for runtime /usr/share/zoneinfo */
-      runtime_zoneinfo_fd = glnx_chaseat (runtime_fd, runtime_zoneinfo,
-                                          GLNX_CHASE_RESOLVE_BENEATH |
-                                          GLNX_CHASE_MUST_BE_REGULAR,
-                                          NULL);
-      if (runtime_zoneinfo_fd >= 0)
+      /* Check for host /usr/share/zoneinfo */
+      if (g_file_test ("/usr/share/zoneinfo", G_FILE_TEST_IS_DIR))
         {
+          /* Here we assume the host timezone file exist in the host data */
           flatpak_bwrap_add_args (bwrap,
+                                  "--ro-bind", "/usr/share/zoneinfo", "/usr/share/zoneinfo",
                                   "--symlink", localtime_content, "/etc/localtime",
                                   NULL);
+        }
+      else
+        {
+          g_autoptr(GFile) runtime_tzfile = g_file_resolve_relative_path (runtime_zoneinfo, raw_timezone);
+
+          /* Check if host timezone file exist in the runtime tzdata */
+          if (g_file_query_exists (runtime_tzfile, NULL))
+            flatpak_bwrap_add_args (bwrap,
+                                    "--symlink", localtime_content, "/etc/localtime",
+                                    NULL);
         }
     }
 
@@ -1885,7 +3051,7 @@ add_document_portal_args (FlatpakBwrap *bwrap,
           if (g_dbus_message_to_gerror (reply, &local_error))
             {
               if (g_error_matches (local_error, G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN))
-                g_info ("Document portal not available, not mounting /run/flatpak/doc");
+                g_debug ("Document portal not available, not mounting /run/flatpak/doc");
               else
                 g_message ("Can't get document portal: %s", local_error->message);
             }
@@ -1969,22 +3135,34 @@ setup_seccomp (FlatpakBwrap   *bwrap,
 
   /**** BEGIN NOTE ON CODE SHARING
    *
-   * This code was originally part of the obsolete linux-user-chroot project,
-   * which was itself heavily influenced by Sandstorm's seccomp filters.
-   * Nowadays, the canonical upstream location for this code is Flatpak:
+   * There are today a number of different Linux container
+   * implementations.  That will likely continue for long into the
+   * future.  But we can still try to share code, and it's important
+   * to do so because it affects what library and application writers
+   * can do, and we should support code portability between different
+   * container tools.
    *
-   *   https://github.com/flatpak/flatpak/blob/main/common/flatpak-run.c
+   * This syscall blocklist is copied from linux-user-chroot, which was in turn
+   * clearly influenced by the Sandstorm.io blocklist.
    *
-   * Here is a list of projects that have directly copied Flatpak's sandbox
-   * filters. These projects aim to exactly or almost exactly match what Flatpak
-   * is doing, so we almost always need to update them whenever the code here is
-   * touched:
+   * If you make any changes here, I suggest sending the changes along
+   * to other sandbox maintainers.  Using the libseccomp list is also
+   * an appropriate venue:
+   * https://groups.google.com/forum/#!forum/libseccomp
    *
-   *   https://github.com/WebKit/WebKit/blob/main/Source/WebKit/UIProcess/Launcher/glib/BubblewrapLauncher.cpp
-   *   https://gitlab.gnome.org/GNOME/gnome-desktop/-/blob/master/libgnome-desktop/gnome-desktop-thumbnail-script.c
+   * A non-exhaustive list of links to container tooling that might
+   * want to share this blocklist:
    *
-   * (We perhaps ought to split this code out of Flatpak into a subproject, to
-   * make code sharing easier and reduce the need for manual copy/pasting.)
+   *  https://github.com/sandstorm-io/sandstorm
+   *    in src/sandstorm/supervisor.c++
+   *  https://github.com/flatpak/flatpak.git
+   *    in common/flatpak-run.c
+   *  https://git.gnome.org/browse/linux-user-chroot
+   *    in src/setup-seccomp.c
+   *
+   * Other useful resources:
+   * https://github.com/systemd/systemd/blob/HEAD/src/shared/seccomp-util.c
+   * https://github.com/moby/moby/blob/HEAD/profiles/seccomp/default.json
    *
    **** END NOTE ON CODE SHARING
    */
@@ -2000,6 +3178,9 @@ setup_seccomp (FlatpakBwrap   *bwrap,
     {SCMP_SYS (uselib), EPERM},
     /* Don't allow disabling accounting */
     {SCMP_SYS (acct), EPERM},
+    /* 16-bit code is unnecessary in the sandbox, and modify_ldt is a
+       historic source of interesting information leaks. */
+    {SCMP_SYS (modify_ldt), EPERM},
     /* Don't allow reading current quota use */
     {SCMP_SYS (quotactl), EPERM},
 
@@ -2042,13 +3223,13 @@ setup_seccomp (FlatpakBwrap   *bwrap,
     /* seccomp can't look into clone3()'s struct clone_args to check whether
      * the flags are OK, so we have no choice but to block clone3().
      * Return ENOSYS so user-space will fall back to clone().
-     * (CVE-2021-41133; see also https://github.com/moby/moby/commit/9f6b562d) */
+     * (GHSA-67h7-w3jq-vh4q; see also https://github.com/moby/moby/commit/9f6b562d) */
     {SCMP_SYS (clone3), ENOSYS},
 
     /* New mount manipulation APIs can also change our VFS. There's no
      * legitimate reason to do these in the sandbox, so block all of them
      * rather than thinking about which ones might be dangerous.
-     * (CVE-2021-41133) */
+     * (GHSA-67h7-w3jq-vh4q) */
     {SCMP_SYS (open_tree), ENOSYS},
     {SCMP_SYS (move_mount), ENOSYS},
     {SCMP_SYS (fsopen), ENOSYS},
@@ -2169,25 +3350,8 @@ setup_seccomp (FlatpakBwrap   *bwrap,
        * libseccomp cannot map the syscall number to a name and back to a
        * number for the non-native architecture. */
       if (r == -EFAULT)
-        g_debug ("Unable to block syscall %d: syscall not known to libseccomp?",
-                 scall);
-      else if (r < 0)
-        return flatpak_fail_error (error, FLATPAK_ERROR_SETUP_FAILED, _("Failed to block syscall %d: %s"), scall, flatpak_seccomp_strerror (r));
-    }
-
-  if (!multiarch)
-    {
-      /* modify_ldt is a historic source of interesting information leaks,
-       * so it's disabled as a hardening measure.
-       * However, it is required to run old 16-bit applications
-       * as well as some Wine patches, so it's allowed in multiarch. */
-      int scall = SCMP_SYS (modify_ldt);
-      r = seccomp_rule_add (seccomp, SCMP_ACT_ERRNO (EPERM), scall, 0);
-
-      /* See above for the meaning of EFAULT. */
-      if (r == -EFAULT)
-        g_debug ("Unable to block syscall %d: syscall not known to libseccomp?",
-                 scall);
+        flatpak_debug2 ("Unable to block syscall %d: syscall not known to libseccomp?",
+                        scall);
       else if (r < 0)
         return flatpak_fail_error (error, FLATPAK_ERROR_SETUP_FAILED, _("Failed to block syscall %d: %s"), scall, flatpak_seccomp_strerror (r));
     }
@@ -2208,8 +3372,8 @@ setup_seccomp (FlatpakBwrap   *bwrap,
 
           /* See above for the meaning of EFAULT. */
           if (r == -EFAULT)
-            g_debug ("Unable to block syscall %d: syscall not known to libseccomp?",
-                     scall);
+            flatpak_debug2 ("Unable to block syscall %d: syscall not known to libseccomp?",
+                            scall);
           else if (r < 0)
             return flatpak_fail_error (error, FLATPAK_ERROR_SETUP_FAILED, _("Failed to block syscall %d: %s"), scall, flatpak_seccomp_strerror (r));
         }
@@ -2249,53 +3413,32 @@ setup_seccomp (FlatpakBwrap   *bwrap,
   lseek (seccomp_tmpf.fd, 0, SEEK_SET);
 
   flatpak_bwrap_add_args_data_fd (bwrap,
-                                  "--seccomp", g_steal_fd (&seccomp_tmpf.fd), NULL);
+                                  "--seccomp", glnx_steal_fd (&seccomp_tmpf.fd), NULL);
 
   return TRUE;
 }
 #endif
 
-/*
- * @runtime_fd: the /usr for the runtime, or -1 if running with no runtime,
- *  perhaps to unpack extra-data
- */
 static void
 flatpak_run_setup_usr_links (FlatpakBwrap *bwrap,
-                             int          runtime_fd,
+                             GFile        *runtime_files,
                              const char   *sysroot)
 {
   int i;
 
-  g_return_if_fail (runtime_fd >= -1);
-
-  if (runtime_fd < 0)
+  if (runtime_files == NULL)
     return;
 
   for (i = 0; flatpak_abs_usrmerged_dirs[i] != NULL; i++)
     {
       const char *subdir = flatpak_abs_usrmerged_dirs[i];
-      glnx_autofd int runtime_subdir_fd = -1;
-      g_autoptr(GError) local_error = NULL;
+      g_autoptr(GFile) runtime_subdir = NULL;
 
       g_assert (subdir[0] == '/');
-
       /* Skip the '/' when using as a subdirectory of the runtime */
-      runtime_subdir_fd = glnx_chaseat (runtime_fd, subdir + 1,
-                                        GLNX_CHASE_RESOLVE_BENEATH |
-                                        GLNX_CHASE_NOFOLLOW,
-                                        &local_error);
+      runtime_subdir = g_file_get_child (runtime_files, subdir + 1);
 
-      if (runtime_subdir_fd < 0 &&
-          !g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-        {
-          g_warning ("Checking for usrmerged dir %s failed: %s",
-                     subdir, local_error->message);
-        }
-      else if (runtime_subdir_fd < 0)
-        {
-          g_info ("%s does not exist in runtime", subdir);
-        }
-      else
+      if (g_file_query_exists (runtime_subdir, NULL))
         {
           g_autofree char *link = g_strconcat ("usr", subdir, NULL);
           g_autofree char *create = NULL;
@@ -2309,26 +3452,17 @@ flatpak_run_setup_usr_links (FlatpakBwrap *bwrap,
                                   "--symlink", link, create,
                                   NULL);
         }
+      else
+        {
+          g_debug ("%s does not exist",
+                   flatpak_file_get_path_cached (runtime_subdir));
+        }
     }
 }
 
-/* Directories in /sys to share with the sandbox if accessible. */
-static const char *const sysfs_dirs[] =
-{
-  "/sys/block",
-  "/sys/bus",
-  "/sys/class",
-  "/sys/dev",
-  "/sys/devices"
-};
-
-/*
- * @runtime_fd: the /usr for the runtime, or -1 if running with no runtime,
- *  perhaps to unpack extra-data
- */
 gboolean
 flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
-                             int             runtime_fd,
+                             GFile          *runtime_files,
                              GFile          *app_id_dir,
                              const char     *arch,
                              FlatpakRunFlags flags,
@@ -2341,41 +3475,7 @@ flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
   struct group *g;
   gulong pers;
   gid_t gid = getgid ();
-  gboolean parent_expose_pids = (flags & FLATPAK_RUN_FLAG_PARENT_EXPOSE_PIDS) != 0;
-  gboolean parent_share_pids = (flags & FLATPAK_RUN_FLAG_PARENT_SHARE_PIDS) != 0;
-  gboolean bwrap_unprivileged = flatpak_bwrap_is_unprivileged ();
-  gsize i;
-
-  g_return_val_if_fail (runtime_fd >= -1, FALSE);
-
-  /* Disable recursive userns for all flatpak processes, as we need this
-   * to guarantee that the sandbox can't restructure the filesystem.
-   * Allowing to change e.g. /.flatpak-info would allow sandbox escape
-   * via portals.
-   *
-   * This is also done via seccomp, but here we do it using userns
-   * unsharing in combination with max_user_namespaces.
-   *
-   * If bwrap is setuid, then --disable-userns will not work, which
-   * makes the seccomp filter security-critical.
-   */
-  if (bwrap_unprivileged)
-    {
-      if (parent_expose_pids || parent_share_pids)
-        {
-          /* If we're joining an existing sandbox's user and process
-           * namespaces, then it should already have creation of
-           * nested user namespaces disabled. */
-          flatpak_bwrap_add_arg (bwrap, "--assert-userns-disabled");
-        }
-      else
-        {
-          /* This is a new sandbox, so we need to disable creation of
-           * nested user namespaces. */
-          flatpak_bwrap_add_arg (bwrap, "--unshare-user");
-          flatpak_bwrap_add_arg (bwrap, "--disable-userns");
-        }
-    }
+  g_autoptr(GFile) etc = NULL;
 
   run_dir = g_strdup_printf ("/run/user/%d", getuid ());
 
@@ -2415,20 +3515,15 @@ flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
                           "--perms", "0700", "--dir", run_dir,
                           "--setenv", "XDG_RUNTIME_DIR", run_dir,
                           "--symlink", "../run", "/var/run",
+                          "--ro-bind", "/sys/block", "/sys/block",
+                          "--ro-bind", "/sys/bus", "/sys/bus",
+                          "--ro-bind", "/sys/class", "/sys/class",
+                          "--ro-bind", "/sys/dev", "/sys/dev",
+                          "--ro-bind", "/sys/devices", "/sys/devices",
                           "--ro-bind-try", "/proc/self/ns/user", "/run/.userns",
                           /* glib uses this like /etc/timezone */
                           "--symlink", "/etc/timezone", "/var/db/zoneinfo",
                           NULL);
-
-  for (i = 0; i < G_N_ELEMENTS (sysfs_dirs); i++)
-    {
-      const char *dir = sysfs_dirs[i];
-
-      if (access (dir, R_OK|X_OK) == 0)
-        flatpak_bwrap_add_args (bwrap, "--ro-bind", dir, dir, NULL);
-      else
-        g_info ("Not sharing %s with sandbox: %s", dir, g_strerror (errno));
-    }
 
   if (flags & FLATPAK_RUN_FLAG_DIE_WITH_PARENT)
     flatpak_bwrap_add_args (bwrap,
@@ -2455,26 +3550,22 @@ flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
   else if (g_file_test ("/var/lib/dbus/machine-id", G_FILE_TEST_EXISTS))
     flatpak_bwrap_add_args (bwrap, "--ro-bind", "/var/lib/dbus/machine-id", "/etc/machine-id", NULL);
 
-  if (runtime_fd >= 0
-      && (flags & FLATPAK_RUN_FLAG_WRITABLE_ETC) == 0)
+  if (runtime_files)
+    etc = g_file_get_child (runtime_files, "etc");
+  if (etc != NULL &&
+      (flags & FLATPAK_RUN_FLAG_WRITABLE_ETC) == 0 &&
+      g_file_query_exists (etc, NULL))
     {
       g_auto(GLnxDirFdIterator) dfd_iter = { 0, };
       struct dirent *dent;
       gboolean inited;
-      g_autoptr(GError) local_error = NULL;
 
-      inited = glnx_dirfd_iterator_init_at (runtime_fd, "etc", FALSE, &dfd_iter, &local_error);
-      if (!inited && !g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-        {
-          g_propagate_error (error, g_steal_pointer (&local_error));
-          return FALSE;
-        }
+      inited = glnx_dirfd_iterator_init_at (AT_FDCWD, flatpak_file_get_path_cached (etc), FALSE, &dfd_iter, NULL);
 
       while (inited)
         {
+          g_autofree char *src = NULL;
           g_autofree char *dest = NULL;
-          glnx_autofd int src_fd = -1;
-          struct stat statbuf;
 
           if (!glnx_dirfd_iterator_next_dent_ensure_dtype (&dfd_iter, &dent, NULL, NULL) || dent == NULL)
             break;
@@ -2491,19 +3582,9 @@ flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
               strcmp (dent->d_name, "pkcs11") == 0)
             continue;
 
+          src = g_build_filename (flatpak_file_get_path_cached (etc), dent->d_name, NULL);
           dest = g_build_filename ("/etc", dent->d_name, NULL);
-
-          src_fd = glnx_chaseat (dfd_iter.fd, dent->d_name,
-                                 GLNX_CHASE_NOFOLLOW |
-                                 GLNX_CHASE_RESOLVE_BENEATH,
-                                 error);
-          if (src_fd < 0)
-            return FALSE;
-
-          if (!glnx_fstat (src_fd, &statbuf, error))
-            return FALSE;
-
-          if (S_ISLNK (statbuf.st_mode))
+          if (dent->d_type == DT_LNK)
             {
               g_autofree char *target = NULL;
 
@@ -2514,12 +3595,9 @@ flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
 
               flatpak_bwrap_add_args (bwrap, "--symlink", target, dest, NULL);
             }
-          else if (src_fd >= 0)
+          else
             {
-              flatpak_bwrap_add_args_data_fd (bwrap,
-                                              "--ro-bind-fd",
-                                              g_steal_fd (&src_fd),
-                                              dest);
+              flatpak_bwrap_add_args (bwrap, "--ro-bind", src, dest, NULL);
             }
         }
     }
@@ -2540,16 +3618,16 @@ flatpak_run_setup_base_argv (FlatpakBwrap   *bwrap,
                               NULL);
     }
 
-  flatpak_run_setup_usr_links (bwrap, runtime_fd, NULL);
+  flatpak_run_setup_usr_links (bwrap, runtime_files, NULL);
 
-  add_tzdata_args (bwrap, runtime_fd);
+  add_tzdata_args (bwrap, runtime_files);
 
   pers = PER_LINUX;
 
   if ((flags & FLATPAK_RUN_FLAG_SET_PERSONALITY) &&
       flatpak_is_linux32_arch (arch))
     {
-      g_info ("Setting personality linux32");
+      g_debug ("Setting personality linux32");
       pers = PER_LINUX32;
     }
 
@@ -2575,9 +3653,6 @@ forward_file (XdpDbusDocuments *documents,
               GError          **error)
 {
   int fd, fd_id;
-  struct stat stbuf;
-  guint portal_version;
-  gboolean is_dir = FALSE;
   g_autofree char *doc_id = NULL;
   g_autoptr(GUnixFDList) fd_list = NULL;
   const char *perms[] = { "read", "write", NULL };
@@ -2588,74 +3663,33 @@ forward_file (XdpDbusDocuments *documents,
 
   fd_list = g_unix_fd_list_new ();
   fd_id = g_unix_fd_list_append (fd_list, fd, error);
-  if (fstat (fd, &stbuf) == 0 && S_ISDIR (stbuf.st_mode))
-    is_dir = TRUE;
   close (fd);
 
-  portal_version = xdp_dbus_documents_get_version (documents);
-  if (portal_version < 4 && is_dir)
-      return flatpak_fail (error, _("Directory forwarding needs version 4 of the document portal (have version %d)"), portal_version);
-
-  if (portal_version >= 2)
+  if (!xdp_dbus_documents_call_add_sync (documents,
+                                         g_variant_new ("h", fd_id),
+                                         TRUE, /* reuse */
+                                         FALSE, /* not persistent */
+                                         fd_list,
+                                         &doc_id,
+                                         NULL,
+                                         NULL,
+                                         error))
     {
-      guint flags = DOCUMENT_ADD_FLAGS_REUSE_EXISTING;
-      g_auto(GStrv) doc_ids = NULL;
-
-      if (is_dir)
-        flags |= DOCUMENT_ADD_FLAGS_DIRECTORY;
-
-      if (!xdp_dbus_documents_call_add_full_sync (documents,
-                                                  g_variant_new_fixed_array (G_VARIANT_TYPE_HANDLE, &fd_id, 1, sizeof (gint32)),
-                                                  flags,
-                                                  app_id,
-                                                  perms,
-                                                  fd_list,
-                                                  &doc_ids,
-                                                  NULL,
-                                                  NULL,
-                                                  NULL,
-                                                  error))
-        {
-          if (error)
-            g_dbus_error_strip_remote_error (*error);
-          return FALSE;
-        }
-
-      /* doc_ids should have value when xdp_dbus_documents_call_add_full_sync succeeds. */
-      g_assert (doc_ids && doc_ids[0]);
-      doc_id = g_strdup (doc_ids[0]);
+      if (error)
+        g_dbus_error_strip_remote_error (*error);
+      return FALSE;
     }
-  else
-    {
-      /* Fallback to plain org.freedesktop.portal.Documents.Add and
-         org.freedesktop.portal.Documents.GrantPermissions if interface version is older.
-         This does not support directory export. */
-      if (!xdp_dbus_documents_call_add_sync (documents,
-                                             g_variant_new ("h", fd_id),
-                                             TRUE, /* reuse */
-                                             FALSE, /* not persistent */
-                                             fd_list,
-                                             &doc_id,
-                                             NULL,
-                                             NULL,
-                                             error))
-        {
-          if (error)
-            g_dbus_error_strip_remote_error (*error);
-          return FALSE;
-        }
 
-      if (!xdp_dbus_documents_call_grant_permissions_sync (documents,
-                                                           doc_id,
-                                                           app_id,
-                                                           perms,
-                                                           NULL,
-                                                           error))
-        {
-          if (error)
-            g_dbus_error_strip_remote_error (*error);
-          return FALSE;
-        }
+  if (!xdp_dbus_documents_call_grant_permissions_sync (documents,
+                                                       doc_id,
+                                                       app_id,
+                                                       perms,
+                                                       NULL,
+                                                       error))
+    {
+      if (error)
+        g_dbus_error_strip_remote_error (*error);
+      return FALSE;
     }
 
   *out_doc_id = g_steal_pointer (&doc_id);
@@ -2747,7 +3781,7 @@ add_rest_args (FlatpakBwrap   *bwrap,
               g_assert (doc_path != NULL);
             }
 
-          g_info ("Forwarding file '%s' as '%s' to %s", args[i], doc_path, app_id);
+          g_debug ("Forwarding file '%s' as '%s' to %s", args[i], doc_path, app_id);
           flatpak_bwrap_add_arg (bwrap, doc_path);
         }
       else
@@ -2813,7 +3847,7 @@ regenerate_ld_cache (GPtrArray    *base_argv_array,
                      GArray       *base_fd_array,
                      GFile        *app_id_dir,
                      const char   *checksum,
-                     int           runtime_fd,
+                     GFile        *runtime_files,
                      gboolean      generate_ld_so_conf,
                      GCancellable *cancellable,
                      GError      **error)
@@ -2841,9 +3875,9 @@ regenerate_ld_cache (GPtrArray    *base_argv_array,
   ld_so_cache = g_file_get_child (ld_so_dir, checksum);
   ld_so_fd = open (flatpak_file_get_path_cached (ld_so_cache), O_RDONLY);
   if (ld_so_fd >= 0)
-    return g_steal_fd (&ld_so_fd);
+    return glnx_steal_fd (&ld_so_fd);
 
-  g_info ("Regenerating ld.so.cache %s", flatpak_file_get_path_cached (ld_so_cache));
+  g_debug ("Regenerating ld.so.cache %s", flatpak_file_get_path_cached (ld_so_cache));
 
   if (!flatpak_mkdir_p (ld_so_dir, cancellable, error))
     return FALSE;
@@ -2853,7 +3887,7 @@ regenerate_ld_cache (GPtrArray    *base_argv_array,
 
   flatpak_bwrap_append_args (bwrap, base_argv_array);
 
-  flatpak_run_setup_usr_links (bwrap, runtime_fd, NULL);
+  flatpak_run_setup_usr_links (bwrap, runtime_files, NULL);
 
   if (generate_ld_so_conf)
     {
@@ -2891,14 +3925,13 @@ regenerate_ld_cache (GPtrArray    *base_argv_array,
   flatpak_bwrap_finish (bwrap);
 
   commandline = flatpak_quote_argv ((const char **) bwrap->argv->pdata, -1);
-  g_info ("Running: '%s'", commandline);
+  g_debug ("Running: '%s'", commandline);
 
   combined_fd_array = g_array_new (FALSE, TRUE, sizeof (int));
   g_array_append_vals (combined_fd_array, base_fd_array->data, base_fd_array->len);
   g_array_append_vals (combined_fd_array, bwrap->fds->data, bwrap->fds->len);
 
-  /* We use LEAVE_DESCRIPTORS_OPEN and close them in the child_setup
-   * to work around a deadlock in GLib < 2.60 */
+  /* We use LEAVE_DESCRIPTORS_OPEN to work around dead-lock, see flatpak_close_fds_workaround */
   if (!g_spawn_sync (NULL,
                      (char **) bwrap->argv->pdata,
                      bwrap->envp,
@@ -2946,7 +3979,7 @@ regenerate_ld_cache (GPtrArray    *base_argv_array,
         return -1;
     }
 
-  return g_steal_fd (&ld_so_fd);
+  return glnx_steal_fd (&ld_so_fd);
 }
 
 /* Check that this user is actually allowed to run this app. When running
@@ -2965,37 +3998,25 @@ check_parental_controls (FlatpakDecomposed *app_ref,
   g_autoptr(GDesktopAppInfo) app_info = NULL;
   gboolean allowed = FALSE;
 
-  system_bus = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &local_error);
+  system_bus = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, error);
   if (system_bus == NULL)
-    {
-      /* Since the checks below allow access when malcontent or
-       * accounts-service aren't available on the bus, this whole routine can
-       * be trivially bypassed by setting DBUS_SYSTEM_BUS_ADDRESS to a
-       * temporary dbus-daemon. Not being able to connect to the system bus is
-       * basically equivalent.
-       */
-      g_debug ("Skipping parental controls check for %s since D-Bus system "
-               "bus connection failed: %s",
-               flatpak_decomposed_get_ref (app_ref),
-               local_error ? local_error->message : "unknown reason");
-      return TRUE;
-    }
+    return FALSE;
 
   manager = mct_manager_new (system_bus);
   app_filter = mct_manager_get_app_filter (manager, getuid (),
-                                           MCT_MANAGER_GET_VALUE_FLAGS_INTERACTIVE,
+                                           MCT_GET_APP_FILTER_FLAGS_INTERACTIVE,
                                            cancellable, &local_error);
-  if (g_error_matches (local_error, MCT_MANAGER_ERROR, MCT_MANAGER_ERROR_DISABLED))
+  if (g_error_matches (local_error, MCT_APP_FILTER_ERROR, MCT_APP_FILTER_ERROR_DISABLED))
     {
-      g_info ("Skipping parental controls check for %s since parental "
-              "controls are disabled globally", flatpak_decomposed_get_ref (app_ref));
+      g_debug ("Skipping parental controls check for %s since parental "
+               "controls are disabled globally", flatpak_decomposed_get_ref (app_ref));
       return TRUE;
     }
   else if (g_error_matches (local_error, G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN) ||
            g_error_matches (local_error, G_DBUS_ERROR, G_DBUS_ERROR_NAME_HAS_NO_OWNER))
     {
-      g_info ("Skipping parental controls check for %s since a required "
-              "service was not found", flatpak_decomposed_get_ref (app_ref));
+      g_debug ("Skipping parental controls check for %s since a required "
+               "service was not found", flatpak_decomposed_get_ref (app_ref));
       return TRUE;
     }
   else if (local_error != NULL)
@@ -3068,60 +4089,34 @@ open_namespace_fd_if_needed (const char *path,
   return -1;
 }
 
-FlatpakContextShares
-flatpak_run_compute_allowed_shares (FlatpakContext *context)
-{
-  return flatpak_context_compute_allowed_shares (context,
-                                                 flatpak_run_evaluate_conditions);
-}
-
-FlatpakContextDevices
-flatpak_run_compute_allowed_devices (FlatpakContext *context)
-{
-  return flatpak_context_compute_allowed_devices (context,
-                                                  flatpak_run_evaluate_conditions);
-}
-
-FlatpakContextSockets
-flatpak_run_compute_allowed_sockets (FlatpakContext *context)
-{
-  return flatpak_context_compute_allowed_sockets (context,
-                                                  flatpak_run_evaluate_conditions);
-}
-
-FlatpakContextFeatures
-flatpak_run_compute_allowed_features (FlatpakContext *context)
-{
-  return flatpak_context_compute_allowed_features (context,
-                                                   flatpak_run_evaluate_conditions);
-}
-
 gboolean
-flatpak_run_app (FlatpakDecomposed   *app_ref,
-                 FlatpakDeploy       *app_deploy,
-                 int                  custom_app_fd,
-                 FlatpakContext      *extra_context,
-                 const char          *custom_runtime,
-                 const char          *custom_runtime_version,
-                 const char          *custom_runtime_commit,
-                 int                  custom_runtime_fd,
-                 int                  parent_pid,
-                 FlatpakRunFlags      flags,
-                 const char          *cwd,
-                 const char          *custom_command,
-                 char                *args[],
-                 int                  n_args,
-                 int                  instance_id_fd,
-                 const char * const  *run_environ,
-                 char               **instance_dir_out,
-                 GArray              *bind_fds,
-                 GArray              *ro_bind_fds,
-                 GCancellable        *cancellable,
-                 GError             **error)
+flatpak_run_app (FlatpakDecomposed *app_ref,
+                 FlatpakDeploy     *app_deploy,
+                 const char        *custom_app_path,
+                 FlatpakContext    *extra_context,
+                 const char        *custom_runtime,
+                 const char        *custom_runtime_version,
+                 const char        *custom_runtime_commit,
+                 const char        *custom_usr_path,
+                 int                parent_pid,
+                 FlatpakRunFlags    flags,
+                 const char        *cwd,
+                 const char        *custom_command,
+                 char              *args[],
+                 int                n_args,
+                 int                instance_id_fd,
+                 char             **instance_dir_out,
+                 GCancellable      *cancellable,
+                 GError           **error)
 {
   g_autoptr(FlatpakDeploy) runtime_deploy = NULL;
   g_autoptr(GBytes) runtime_deploy_data = NULL;
   g_autoptr(GBytes) app_deploy_data = NULL;
+  g_autoptr(GFile) app_files = NULL;
+  g_autoptr(GFile) original_app_files = NULL;
+  g_autoptr(GFile) runtime_files = NULL;
+  g_autoptr(GFile) original_runtime_files = NULL;
+  g_autoptr(GFile) bin_ldconfig = NULL;
   g_autoptr(GFile) app_id_dir = NULL;
   g_autoptr(GFile) real_app_id_dir = NULL;
   g_autofree char *default_runtime_pref = NULL;
@@ -3140,8 +4135,6 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
   g_autofree char *app_info_path = NULL;
   g_autofree char *app_ld_path = NULL;
   g_autofree char *instance_id_host_dir = NULL;
-  g_autofree char *instance_id_host_private_dir = NULL;
-  g_autofree char *instance_id = NULL;
   g_autoptr(FlatpakContext) app_context = NULL;
   g_autoptr(FlatpakContext) overrides = NULL;
   g_autoptr(FlatpakExports) exports = NULL;
@@ -3155,49 +4148,22 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
   g_autofree char *per_app_dir_lock_path = NULL;
   g_autofree char *shared_xdg_runtime_dir = NULL;
   int ld_so_fd = -1;
+  g_autoptr(GFile) runtime_ld_so_conf = NULL;
   gboolean generate_ld_so_conf = TRUE;
   gboolean use_ld_so_cache = TRUE;
   gboolean sandboxed = (flags & FLATPAK_RUN_FLAG_SANDBOX) != 0;
   gboolean parent_expose_pids = (flags & FLATPAK_RUN_FLAG_PARENT_EXPOSE_PIDS) != 0;
   gboolean parent_share_pids = (flags & FLATPAK_RUN_FLAG_PARENT_SHARE_PIDS) != 0;
-  FlatpakContextShares shares;
-  FlatpakContextDevices devices;
-  FlatpakContextSockets sockets;
-  FlatpakContextFeatures features;
-  glnx_autofd int original_runtime_fd = -1;
-  g_autoptr(GFile) original_runtime_files = NULL;
-  g_autoptr(GFile) custom_runtime_files = NULL;
-  /* borrows from either original_runtime_fd or custom_runtime_fd */
-  int runtime_fd = -1;
-  /* borrows from either original_runtime_files or custom_runtime_files */
-  GFile *runtime_files = NULL;
-  const char *original_runtime_target_path = NULL;
-  glnx_autofd int original_app_fd = -1;
-  g_autoptr(GFile) original_app_files = NULL;
-  g_autoptr(GFile) custom_app_files = NULL;
-  /* borrows from either original_app_fd or custom_app_fd */
-  int app_fd = -1;
-  /* borrows from either original_app_files or custom_app_files */
-  GFile *app_files = NULL;
-  const char *original_app_target_path = NULL;
-
-  g_assert (run_environ != NULL);
+  const char *app_target_path = "/app";
+  const char *runtime_target_path = "/usr";
+  struct stat s;
 
   g_return_val_if_fail (app_ref != NULL, FALSE);
-
-  g_return_val_if_fail (custom_app_fd == FLATPAK_RUN_APP_DEPLOY_APP_ORIGINAL ||
-                        custom_app_fd == FLATPAK_RUN_APP_DEPLOY_APP_EMPTY ||
-                        custom_app_fd >= 0,
-                        FALSE);
-
-  g_return_val_if_fail (custom_runtime_fd == FLATPAK_RUN_APP_DEPLOY_USR_ORIGINAL ||
-                        custom_runtime_fd >= 0,
-                        FALSE);
 
   /* This check exists to stop accidental usage of `sudo flatpak run`
      and is not to prevent running as root.
    */
-  if (running_under_sudo_root ())
+  if (running_under_sudo ())
     return flatpak_fail_error (error, FLATPAK_ERROR,
                                _("\"flatpak run\" is not intended to be run as `sudo flatpak run`. "
                                  "Use `sudo -i` or `su -l` instead and invoke \"flatpak run\" from "
@@ -3306,58 +4272,35 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
     }
 
   if (sandboxed)
-    {
-      flatpak_context_make_sandboxed (app_context);
-      flatpak_context_dump (app_context, "After making sandboxed");
-    }
+    flatpak_context_make_sandboxed (app_context);
 
   if (extra_context)
-    {
-      flatpak_context_dump (extra_context, "Command-line overrides");
-      flatpak_context_merge (app_context, extra_context);
-    }
-
-  flatpak_context_dump (app_context, "Final context");
-
-  shares = flatpak_run_compute_allowed_shares (app_context);
-  devices = flatpak_run_compute_allowed_devices (app_context);
-  sockets = flatpak_run_compute_allowed_sockets (app_context);
-  features = flatpak_run_compute_allowed_features (app_context);
+    flatpak_context_merge (app_context, extra_context);
 
   original_runtime_files = flatpak_deploy_get_files (runtime_deploy);
-  original_runtime_fd = open (flatpak_file_get_path_cached (original_runtime_files),
-                              O_PATH | O_CLOEXEC);
-  if (original_runtime_fd < 0)
-    return glnx_throw_errno_prefix (error, "Failed to open original runtime");
 
-  if (custom_runtime_fd >= 0)
+  if (custom_usr_path != NULL)
     {
-      g_autofree char *path = NULL;
-
-      path = flatpak_get_path_for_fd (custom_runtime_fd, &my_error);
-      if (path == NULL)
-        {
-          return flatpak_fail_error (error, FLATPAK_ERROR,
-                                     "Cannot convert custom usr fd to path: %s",
-                                     my_error->message);
-        }
-
-      custom_runtime_files = g_file_new_for_path (path);
-
-      original_runtime_target_path = "/run/parent/usr";
-      runtime_fd = custom_runtime_fd;
-      runtime_files = custom_runtime_files;
-    }
-  else if (custom_runtime_fd == FLATPAK_RUN_APP_DEPLOY_USR_ORIGINAL)
-    {
-      original_runtime_target_path = "/usr";
-      runtime_fd = original_runtime_fd;
-      runtime_files = original_runtime_files;
+      runtime_files = g_file_new_for_path (custom_usr_path);
+      /* Mount the original runtime below here instead of /usr */
+      runtime_target_path = "/run/parent/usr";
     }
   else
     {
-      g_assert_not_reached ();
+      runtime_files = g_object_ref (original_runtime_files);
     }
+
+  bin_ldconfig = g_file_resolve_relative_path (runtime_files, "bin/ldconfig");
+  if (!g_file_query_exists (bin_ldconfig, NULL))
+    use_ld_so_cache = FALSE;
+
+  /* We can't use the ld.so cache if we are using a custom /usr or /app,
+   * because we don't have a unique ID for the /usr or /app, so we can't
+   * do cache-invalidation correctly. The caller can either build their
+   * own ld.so.cache before supplying us with the runtime, or supply
+   * their own LD_LIBRARY_PATH. */
+  if (custom_usr_path != NULL || custom_app_path != NULL)
+    use_ld_so_cache = FALSE;
 
   if (app_deploy != NULL)
     {
@@ -3365,13 +4308,8 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
       gsize len = 0;
       gboolean do_migrate;
 
-      original_app_files = flatpak_deploy_get_files (app_deploy);
-      original_app_fd = open (flatpak_file_get_path_cached (original_app_files),
-                              O_PATH | O_CLOEXEC | O_NOFOLLOW);
-      if (original_app_fd < 0)
-        return glnx_throw_errno_prefix (error, "Failed to open original runtime");
-
       real_app_id_dir = flatpak_get_data_dir (app_id);
+      original_app_files = flatpak_deploy_get_files (app_deploy);
 
       previous_app_id_dirs = g_ptr_array_new_with_free_func (g_object_unref);
       previous_ids = flatpak_deploy_data_get_previous_ids (app_deploy_data, &len);
@@ -3423,12 +4361,6 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
             {
               do_migrate = FALSE; /* Don't migrate older things, they are likely symlinks to this dir */
 
-              /* Don't migrate a symlink pointing to the new data dir. It was likely left over
-               * from a previous migration and would end up pointing to itself */
-              if (g_file_info_get_is_symlink (previous_app_id_dir_info) &&
-                  g_strcmp0 (g_file_info_get_symlink_target (previous_app_id_dir_info), app_id) == 0)
-                break;
-
               if (!flatpak_file_rename (previous_app_id_dir, real_app_id_dir, cancellable, &local_error))
                 {
                   g_warning (_("Failed to migrate old app data directory %s to new name %s: %s"),
@@ -3458,64 +4390,21 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
         app_id_dir = g_object_ref (real_app_id_dir);
     }
 
-  if (custom_app_fd >= 0)
+  if (custom_app_path != NULL)
     {
-      g_autofree char *path = NULL;
+      if (strcmp (custom_app_path, "") == 0)
+        app_files = NULL;
+      else
+        app_files = g_file_new_for_path (custom_app_path);
 
-      path = flatpak_get_path_for_fd (custom_app_fd, error);
-      if (path == NULL)
-        return glnx_prefix_error (error, "Cannot convert custom app fd to path");
-
-      custom_app_files = g_file_new_for_path (path);
-
-      original_app_target_path = "/run/parent/app";
-      app_fd = custom_app_fd;
-      app_files = custom_app_files;
+      /* Mount the original app below here */
+      app_target_path = "/run/parent/app";
     }
-  else if (custom_app_fd == FLATPAK_RUN_APP_DEPLOY_APP_ORIGINAL)
+  else if (original_app_files != NULL)
     {
-      original_app_target_path = "/app";
-      app_fd = original_app_fd;
-      app_files = original_app_files;
-    }
-  else if (custom_app_fd == FLATPAK_RUN_APP_DEPLOY_APP_EMPTY)
-    {
-      original_app_target_path = "/run/parent/app";
-      app_fd = -1;
-      app_files = NULL;
-    }
-  else
-    {
-      g_assert_not_reached ();
+      app_files = g_object_ref (original_app_files);
     }
 
-  /* We can't use the ld.so cache if we are using a custom /usr or /app,
-   * because we don't have a unique ID for the /usr or /app, so we can't
-   * do cache-invalidation correctly. The caller can either build their
-   * own ld.so.cache before supplying us with the runtime, or supply
-   * their own LD_LIBRARY_PATH. */
-  if (runtime_fd == custom_runtime_fd || app_fd == custom_app_fd)
-    {
-      use_ld_so_cache = FALSE;
-    }
-  else
-    {
-      glnx_autofd int ldconfig_fd = -1;
-
-      ldconfig_fd = glnx_chaseat (runtime_fd, "bin/ldconfig",
-                                  GLNX_CHASE_RESOLVE_BENEATH |
-                                  GLNX_CHASE_MUST_BE_REGULAR,
-                                  &my_error);
-      if (ldconfig_fd < 0)
-        {
-          use_ld_so_cache = FALSE;
-          g_debug ("bin/ldconfig not found in runtime: %s", my_error->message);
-        }
-
-      g_clear_error (&my_error);
-    }
-
-  flatpak_run_apply_env_clear (bwrap, !!(flags & FLATPAK_RUN_FLAG_CLEAR_ENV));
   flatpak_run_apply_env_default (bwrap, use_ld_so_cache);
   flatpak_run_apply_env_vars (bwrap, app_context);
   flatpak_run_apply_env_prompt (bwrap, app_id);
@@ -3526,85 +4415,74 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
       flatpak_bwrap_set_env (bwrap, "FLATPAK_SANDBOX_DIR", flatpak_file_get_path_cached (sandbox_dir), TRUE);
     }
 
-  if (!flatpak_bwrap_add_args_data_fd_dup (bwrap,
-                                           "--ro-bind-fd", runtime_fd, "/usr",
-                                           error))
-    return FALSE;
+  flatpak_bwrap_add_args (bwrap,
+                          "--ro-bind", flatpak_file_get_path_cached (runtime_files), "/usr",
+                          NULL);
 
-  {
-    glnx_autofd int runtime_ref_fd = -1;
+  if (runtime_files == original_runtime_files)
+    {
+      /* All true Flatpak runtimes have files/.ref */
+      flatpak_bwrap_add_args (bwrap,
+                              "--lock-file", "/usr/.ref",
+                              NULL);
+    }
+  else
+    {
+      g_autoptr(GFile) runtime_child = NULL;
 
-    runtime_ref_fd = glnx_chaseat (runtime_fd, ".ref",
-                                   GLNX_CHASE_RESOLVE_BENEATH |
-                                   GLNX_CHASE_MUST_BE_REGULAR,
-                                   NULL);
-    if (runtime_ref_fd >= 0)
-      {
+      runtime_child = g_file_get_child (runtime_files, ".ref");
+
+      /* Lock ${usr}/.ref if it exists */
+      if (g_file_query_exists (runtime_child, NULL))
         flatpak_bwrap_add_args (bwrap,
                                 "--lock-file", "/usr/.ref",
                                 NULL);
-      }
-  }
-
-  if (runtime_fd == custom_runtime_fd)
-    {
-      glnx_autofd int original_runtime_ref_fd = -1;
-      glnx_autofd int original_runtime_etc_fd = -1;
 
       /* Put the real Flatpak runtime in /run/parent, so that the
        * replacement /usr can have symlinks into /run/parent in order
        * to use the Flatpak runtime's graphics drivers etc. if desired */
-      if (!flatpak_bwrap_add_args_data_fd_dup (bwrap,
-                                               "--ro-bind-fd",
-                                               original_runtime_fd,
-                                               "/run/parent/usr",
-                                               error))
-        return FALSE;
-
-      original_runtime_ref_fd = glnx_chaseat (original_runtime_fd, ".ref",
-                                              GLNX_CHASE_RESOLVE_BENEATH |
-                                              GLNX_CHASE_MUST_BE_REGULAR,
-                                              NULL);
-      if (original_runtime_ref_fd >= 0)
-        {
-          flatpak_bwrap_add_args (bwrap,
-                                  "--lock-file", "/run/parent/usr/.ref",
-                                  NULL);
-        }
-
-      original_runtime_etc_fd = glnx_chaseat (original_runtime_fd, "etc",
-                                              GLNX_CHASE_RESOLVE_BENEATH |
-                                              GLNX_CHASE_MUST_BE_REGULAR,
-                                              NULL);
-      if (original_runtime_etc_fd >= 0)
-        {
-          flatpak_bwrap_add_args (bwrap,
-                                  "--symlink", "usr/etc", "/run/parent/etc",
-                                  NULL);
-        }
-
-      flatpak_run_setup_usr_links (bwrap, original_runtime_fd,
+      flatpak_bwrap_add_args (bwrap,
+                              "--ro-bind",
+                              flatpak_file_get_path_cached (original_runtime_files),
+                              "/run/parent/usr",
+                              "--lock-file", "/run/parent/usr/.ref",
+                              NULL);
+      flatpak_run_setup_usr_links (bwrap, original_runtime_files,
                                    "/run/parent");
+
+      g_clear_object (&runtime_child);
+      runtime_child = g_file_get_child (original_runtime_files, "etc");
+
+      if (g_file_query_exists (runtime_child, NULL))
+        flatpak_bwrap_add_args (bwrap,
+                                "--symlink", "usr/etc", "/run/parent/etc",
+                                NULL);
     }
 
-  if (app_fd >= 0)
+  if (app_files != NULL)
     {
-      glnx_autofd int app_ref_fd = -1;
+      flatpak_bwrap_add_args (bwrap,
+                              "--ro-bind", flatpak_file_get_path_cached (app_files), "/app",
+                              NULL);
 
-      if (!flatpak_bwrap_add_args_data_fd_dup (bwrap,
-                                               "--ro-bind-fd", app_fd, "/app",
-                                               error))
-        return FALSE;
-
-      app_ref_fd = glnx_chaseat (app_fd, ".ref",
-                                 GLNX_CHASE_RESOLVE_BENEATH |
-                                 GLNX_CHASE_MUST_BE_REGULAR,
-                                 NULL);
-      if (app_ref_fd >= 0)
+      if (app_files == original_app_files)
         {
+          /* All true Flatpak apps have files/.ref */
           flatpak_bwrap_add_args (bwrap,
                                   "--lock-file", "/app/.ref",
                                   NULL);
+        }
+      else
+        {
+          g_autoptr(GFile) app_child = NULL;
+
+          app_child = g_file_get_child (app_files, ".ref");
+
+          /* Lock ${app}/.ref if it exists */
+          if (g_file_query_exists (app_child, NULL))
+            flatpak_bwrap_add_args (bwrap,
+                                    "--lock-file", "/app/.ref",
+                                    NULL);
         }
     }
   else
@@ -3614,7 +4492,7 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
                               NULL);
     }
 
-  if (original_app_fd >= 0 && original_app_fd != app_fd)
+  if (original_app_files != NULL && app_files != original_app_files)
     {
       /* Put the real Flatpak app in /run/parent/app */
       flatpak_bwrap_add_args (bwrap,
@@ -3627,37 +4505,26 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
 
   if (metakey != NULL &&
       !flatpak_run_add_extension_args (bwrap, metakey, app_ref,
-                                       use_ld_so_cache, original_app_target_path,
+                                       use_ld_so_cache, app_target_path,
                                        &app_extensions, &app_ld_path,
                                        cancellable, error))
     return FALSE;
 
   if (!flatpak_run_add_extension_args (bwrap, runtime_metakey, runtime_ref,
-                                       use_ld_so_cache, original_runtime_target_path,
+                                       use_ld_so_cache, runtime_target_path,
                                        &runtime_extensions, &runtime_ld_path,
                                        cancellable, error))
     return FALSE;
 
-  if (runtime_fd == original_runtime_fd)
+  if (custom_usr_path == NULL)
     flatpak_run_extend_ld_path (bwrap, NULL, runtime_ld_path);
 
-  if (app_fd == original_app_fd)
+  if (custom_app_path == NULL)
     flatpak_run_extend_ld_path (bwrap, app_ld_path, NULL);
 
-  {
-    glnx_autofd int ld_so_conf_fd = -1;
-    struct glnx_statx stx;
-
-    ld_so_conf_fd = glnx_chase_and_statxat (runtime_fd, "etc/ld.so.conf",
-                                            GLNX_CHASE_RESOLVE_BENEATH |
-                                            GLNX_CHASE_MUST_BE_REGULAR,
-                                            GLNX_STATX_SIZE,
-                                            &stx, NULL);
-    if (ld_so_conf_fd < 0 ||
-        !(stx.stx_mask & GLNX_STATX_SIZE) ||
-        stx.stx_size != 0)
-      generate_ld_so_conf = FALSE;
-  }
+  runtime_ld_so_conf = g_file_resolve_relative_path (runtime_files, "etc/ld.so.conf");
+  if (lstat (flatpak_file_get_path_cached (runtime_ld_so_conf), &s) == 0)
+    generate_ld_so_conf = S_ISREG (s.st_mode) && s.st_size == 0;
 
   /* At this point we have the minimal argv set up, with just the app, runtime and extensions.
      We can reuse this to generate the ld.so.cache (if needed) */
@@ -3669,7 +4536,7 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
                                       bwrap->fds,
                                       app_id_dir,
                                       checksum,
-                                      runtime_fd,
+                                      runtime_files,
                                       generate_ld_so_conf,
                                       cancellable, error);
       if (ld_so_fd == -1)
@@ -3677,9 +4544,9 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
       flatpak_bwrap_add_fd (bwrap, ld_so_fd);
     }
 
-  flags |= flatpak_context_features_to_run_flags (features);
+  flags |= flatpak_context_get_run_flags (app_context);
 
-  if (!flatpak_run_setup_base_argv (bwrap, runtime_fd, app_id_dir, app_arch, flags, error))
+  if (!flatpak_run_setup_base_argv (bwrap, runtime_files, app_id_dir, app_arch, flags, error))
     return FALSE;
 
   if (generate_ld_so_conf)
@@ -3700,19 +4567,10 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
                                       app_files, original_app_files, app_deploy_data, app_extensions,
                                       runtime_files, original_runtime_files, runtime_deploy_data, runtime_extensions,
                                       app_id, flatpak_decomposed_get_branch (app_ref),
-                                      runtime_ref, app_id_dir,
-                                      app_context, extra_context, sockets,
+                                      runtime_ref, app_id_dir, app_context, extra_context,
                                       sandboxed, FALSE, flags & FLATPAK_RUN_FLAG_DEVEL,
-                                      &app_info_path,
-                                      g_steal_fd (&instance_id_fd),
-                                      &instance_id_host_dir, &instance_id_host_private_dir,
-                                      &instance_id, error))
-    return FALSE;
-
-  if (!flatpak_run_save_environ (run_environ,
-                                 instance_id_host_private_dir,
-                                 cancellable,
-                                 error))
+                                      &app_info_path, instance_id_fd, &instance_id_host_dir,
+                                      error))
     return FALSE;
 
   if (!sandboxed)
@@ -3741,10 +4599,8 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
     add_document_portal_args (bwrap, app_id, &doc_mount_path);
 
   if (!flatpak_run_add_environment_args (bwrap, app_info_path, flags,
-                                         app_id, app_context,
-                                         shares, devices, sockets, features,
-                                         app_id_dir, previous_app_id_dirs,
-                                         per_app_dir_lock_fd, instance_id,
+                                         app_id, app_context, app_id_dir, previous_app_id_dirs,
+                                         per_app_dir_lock_fd,
                                          &exports, cancellable, error))
     return FALSE;
 
@@ -3758,7 +4614,10 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
                               NULL);
     }
 
-  flatpak_run_add_socket_args_late (bwrap, shares);
+  if ((app_context->shares & FLATPAK_CONTEXT_SHARED_NETWORK) != 0)
+    flatpak_run_add_resolved_args (bwrap);
+
+  flatpak_run_add_journal_args (bwrap);
   add_font_path_args (bwrap);
   add_icon_path_args (bwrap);
 
@@ -3767,40 +4626,6 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
                           "--symlink", "/app/lib/debug/source", "/run/build",
                           "--symlink", "/usr/lib/debug/source", "/run/build-runtime",
                           NULL);
-
-  for (i = 0; bind_fds && i < bind_fds->len; i++)
-    {
-      int fd = g_array_index (bind_fds, int, i);
-      g_autofree char *path = NULL;
-
-      /* We get the path the fd refers to, to determine to mount point
-       * destination inside the sandbox */
-      path = flatpak_get_path_for_fd (fd, error);
-      if (!path)
-        return FALSE;
-
-      if (!flatpak_bwrap_add_args_data_fd_dup (bwrap,
-                                               "--bind-fd", fd, path,
-                                               error))
-        return FALSE;
-    }
-
-  for (i = 0; ro_bind_fds && i < ro_bind_fds->len; i++)
-    {
-      int fd = g_array_index (ro_bind_fds, int, i);
-      g_autofree char *path = NULL;
-
-      /* We get the path the fd refers to, to determine to mount point
-       * destination inside the sandbox */
-      path = flatpak_get_path_for_fd (fd, error);
-      if (!path)
-        return FALSE;
-
-      if (!flatpak_bwrap_add_args_data_fd_dup (bwrap,
-                                               "--ro-bind-fd", fd, path,
-                                               error))
-        return FALSE;
-    }
 
   if (cwd)
     flatpak_bwrap_add_args (bwrap, "--chdir", cwd, NULL);
@@ -3869,12 +4694,12 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
     return FALSE;
 
   /* Hold onto the lock until we execute bwrap */
-  flatpak_bwrap_add_noinherit_fd (bwrap, g_steal_fd (&per_app_dir_lock_fd));
+  flatpak_bwrap_add_noinherit_fd (bwrap, glnx_steal_fd (&per_app_dir_lock_fd));
 
   flatpak_bwrap_finish (bwrap);
 
   commandline = flatpak_quote_argv ((const char **) bwrap->argv->pdata, -1);
-  g_info ("Running '%s'", commandline);
+  g_debug ("Running '%s'", commandline);
 
   if ((flags & (FLATPAK_RUN_FLAG_BACKGROUND)) != 0 ||
       g_getenv ("FLATPAK_TEST_COVERAGE") != NULL)
@@ -3883,21 +4708,13 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
       char pid_str[64];
       g_autofree char *pid_path = NULL;
       GSpawnFlags spawn_flags;
-      GSpawnChildSetupFunc child_setup;
 
       spawn_flags = G_SPAWN_SEARCH_PATH;
       if (flags & FLATPAK_RUN_FLAG_DO_NOT_REAP ||
           (flags & FLATPAK_RUN_FLAG_BACKGROUND) == 0)
         spawn_flags |= G_SPAWN_DO_NOT_REAP_CHILD;
 
-      if (flags & FLATPAK_RUN_FLAG_BACKGROUND)
-        child_setup = flatpak_bwrap_child_setup_cb;
-      else
-        child_setup = flatpak_bwrap_child_setup_inherit_fds_cb;
-
-      /* Even in the case where we want them closed, we use
-       * LEAVE_DESCRIPTORS_OPEN and close them in the child_setup
-       * to work around a deadlock in GLib < 2.60 */
+      /* We use LEAVE_DESCRIPTORS_OPEN to work around dead-lock, see flatpak_close_fds_workaround */
       spawn_flags |= G_SPAWN_LEAVE_DESCRIPTORS_OPEN;
 
       /* flatpak_bwrap_envp_to_args() moved the environment variables to
@@ -3910,7 +4727,7 @@ flatpak_run_app (FlatpakDecomposed   *app_ref,
                           (char **) bwrap->argv->pdata,
                           bwrap->envp,
                           spawn_flags,
-                          child_setup, bwrap->fds,
+                          flatpak_bwrap_child_setup_cb, bwrap->fds,
                           &child_pid,
                           error))
         return FALSE;

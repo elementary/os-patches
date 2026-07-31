@@ -38,10 +38,6 @@ else
     test_builddir=$(dirname $0)
 fi
 
-if [ -e "$test_srcdir/installed-tests.sh" ]; then
-    . "$test_srcdir/installed-tests.sh"
-fi
-
 # All the asserts and ok functions below are wrapped such that they
 # don't output any set -x traces of their internals (but still echo
 # errors to stderr). This way the log output focuses on tracing what
@@ -105,7 +101,6 @@ export FLATPAK_SYSTEM_DIR=${TEST_DATA_DIR}/system
 export FLATPAK_SYSTEM_CACHE_DIR=${TEST_DATA_DIR}/system-cache
 export FLATPAK_SYSTEM_HELPER_ON_SESSION=1
 export FLATPAK_CONFIG_DIR=${TEST_DATA_DIR}/config
-export FLATPAK_DATA_DIR=${TEST_DATA_DIR}/datadir
 export FLATPAK_RUN_DIR=${TEST_DATA_DIR}/run
 export FLATPAK_FANCY_OUTPUT=0
 export FLATPAK_FORCE_ALLOW_FUZZY_MATCHING=1
@@ -276,20 +271,11 @@ assert_remote_has_config () {
 
 assert_remote_has_no_config () {
     { { local BASH_XTRACEFD=3; } 2> /dev/null
-    if ostree config --repo=$FL_DIR/repo get --group 'remote "'"$1"'"' "$2" &> /dev/null; then
+    if ostree config --repo=$FL_DIR/repo get --group 'remote "'"$1"'"' "$2" > /dev/null &> /dev/null; then
         echo 1>&2 "Remote '$1' unexpectedly has key '$2' at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}"
         exit 1
     fi
     } 3> /dev/null
-}
-
-assert_fail () {
-    if "$@"; then
-        { { local BASH_XTRACEFD=3; } 2> /dev/null
-            echo "Command '$*' should not have succeeded at $(basename ${BASH_SOURCE[1]}):${BASH_LINENO[0]}" >&2
-            exit 1
-        } 3> /dev/null
-    fi
 }
 
 export FL_GPG_HOMEDIR=${TEST_DATA_DIR}/gpghome
@@ -304,31 +290,8 @@ export FL_GPG_ID=7B0961FD
 export FL_GPG_ID2=B2314EFC
 export FL_GPGARGS="--gpg-homedir=${FL_GPG_HOMEDIR} --gpg-sign=${FL_GPG_ID}"
 export FL_GPGARGS2="--gpg-homedir=${FL_GPG_HOMEDIR2} --gpg-sign=${FL_GPG_ID2}"
-export FL_GPGCMDARGS="--homedir ${FL_GPG_HOMEDIR} -u ${FL_GPG_ID}"
-export FL_GPGCMDARGS2="--homedir ${FL_GPG_HOMEDIR2} -u ${FL_GPG_ID2}"
 export FL_GPG_BASE64="mQENBFbPBvoBCADWbz5O+XzuyN+dDExK81pci+gIzBNWB+7SsN0EgoJppKgwBCX+Bd6ERe9Yz0nJbJB/tjazRp7MnnoPnh6fXnhIbHA766/Eciy4sL5X8laqDmWmROCqCe79QZH/w6vYTKsDmoLQrw9eKRP1ilCvECNGcVdhIyfTDlNrU//uy5U4h2PVUz1/Al87lvaJnrj5423m5GnX+qpEG8mmpmcw52lvXNPuC95ykylPQJjI0WnOuaTcxzRhm5eHPkqKQ+nPIS+66iw1SFdobYuye/vg/rDiyp8uyQkh7FWXnzHxz4J8ovesnrCM7pKI4VEHCnZ4/sj2v9E3l0wJlqZxLTULaV3lABEBAAG0D1hkZy1hcHAgdGVzdGluZ4kBOAQTAQIAIgUCVs8G+gIbAwYLCQgHAwIGFQgCCQoLBBYCAwECHgECF4AACgkQE4sx4HsJYf2DiAf7BQ8anU3CgYpJjuO2rT8jQPO0jGRCNaPyaeAcBx8IjFkjf8daKMPCAt6gQioEpC8OhDig86Bl5piYOB7L7JSB53mgUrADJXhgC/dG4soCt7/U4wW30MseXdlXSOqHGApblF/bIs4B30OBGReBj3DcWIqyb48GraSKlPlaCpkZFySNEAcGUCeCqbbygxCQAM8MDq9FgVRk5oVrE/nAUm6oScEBhseoB7+CaHaRTmLoe/SBs0z2AJ7alIH1Sv4X3mQXpfsAIcWf3Zu2MZydF/Vuh8vTMROwPYtOVEtGxZvEBN3h5uc88dHSk928maqsop9T6oEwM43mBKCOu1gdAOw4OLkBDQRWzwb6AQgAx/XuEaQvdI3J2YYmOE6RY0jJZXLauXH46cJR4q70mlDev/OqYKTSLlo4q06D4ozCwzTYflppDak7kmjWMN224/u1koqFOtF76LsglAeLaQmweWmX0ecbPrzFYaX30kaQAqQ9Wk0PRe0+arRzWDWfUv3qX3y1decKUrBCuEC6WvVVwooWs+zX0cUBS8CROhazTjvXFAz36mhK0u+B3WCBlK+T2tIPOjLjlYgzYARw+X7/J6B3C798r2Hw/yXqCDcKLrq7WWUB33kv3buuG2G6LUamctdD8IsTBxi+nIjAvQITFqq4cPbbXAJGaAnWGuLOddQ9e/GhCOI4JjopRnnjOwARAQABiQEfBBgBAgAJBQJWzwb6AhsMAAoJEBOLMeB7CWH9TC8H/A6oreCxeiL8DPOWN29OaQ5sEw7Dg7bnLSZLu8aREgwfCiFSv0numOABjn/G89Y5M6NiEXFZZhUa+SXOALiBLUy98O84lyp9hlP9qGbWRgBXwe5vOAJERqtoUwR5bygpAw5Nc4y3wddPC4vH7upJ8ftU/eEFtPdI0cKrrAZDFdhXFp3RxdCC6fD62wbofE0mo1Ea1iD3xqVh2t7jfWN1RhMV308htHRGkkmWcEbbvHqugwL6dWZEvQmLYi6/7tQyA1KdG4AZksBP/MBi3t2hthRqQx1v52JwdCaZNuItuEe5rWXhfvoGxPoqYZt9ZPjna6yJfcfJwPbMfjNwX2LR4p4="
 export FL_GPG_BASE642="mQENBFkSyx4BCACq/8XFcF+NTpJKfoo8F6YyR8RQXww6kCV47zN78Dt7aCh43WSYLRUBRt1tW5MRT8R60pwCsGvKnFiNS2Vqe4T1IW4mDnFMZIZJXdNVwKUqVBPL/jzkIDnQ9NXtuPNH0qET6VhYnb9aykLo/MiBmx6q+4MvYd/qwiN8kstRifRIxjjZx6wsg+muY6yx9fZKxlgvhc3nsrl3oyDo7/+V+b3heYLtMCQFwlHRKz3Yf2X9H0aUSbDYcgTy6w3q94HVNCpJSqeiR+kBG175BQYKR2l7WYdaVPFf5LMEvAJh0SGnqu77X+8TYYRQiiBB5fYjGOeHfOh6uH5GAJRQymVIJwy/ABEBAAG0KkZsYXRwYWsgKFRlc3Qga2V5IDIpIDxmbGF0cGFrQGZsYXRwYWsub3JnPokBOAQTAQIAIgUCWRLLHgIbAwYLCQgHAwIGFQgCCQoLBBYCAwECHgECF4AACgkQdZ9f0LIxTvyeUQf/euAZpipXBkGWxeW4G10r1QRi2tZAWNeLpy8SB17eo9E6yB61SdH80jALborVs/plnZzKcFf+nLvjCn51FLMh6QPL3S+079WHsed//qtUWfbJ85hLevfCMTZMLktUmqwwUh238WW/gKtbUjYOqr1IZSMBoMiQtc0iOVBP7HUdhYigxTKvs/MBEGHANeQkY07ZnX9oFXElOo+EIPAHScwEOSwEVrXUVHpQODzIfjOoPUHWAZtM1yJT+iWmVHe4HtU8CyBnPyUcnTmTWKr92QmgfWkb1T7ugT5gXt/6ZlYAaZGnr9yNuSk3MMhDMOyldtJBM5Zl8eScE9KBf7pRJoxnMLkBDQRZEsseAQgAvA29IyiJpB+jUHj3MOyVyTBOmvLme+0Ndhpt/mTh+swchJUvzb0IzQS9Le5yVAvn+ppAtDCMb+bV4Xh5zrbiH0Hu0qwK4Qk+KcIKRE8ImDiUM8NFE2SZoomZSsgZ1NBWbAdEyVpkBfrt3Dd8FssMrwPF6kqo02TZr7Pxng+BEHUZT6jPCxueqyXyv2cLbQMe1H0U7klsxPmnnIYUqdwOmPxUspVEYP9oJb5y123mx0yj5JuYdZMjWbP3cRLox1RKIlFWgQqOn2yJiEoWzpqdbtb7sE3ggnbZKJED0ZxUZIakjnyMhX+GAEA8ZMZ6+HfDt1iHV8qHcYiLW5A3AQTxZwARAQABiQEfBBgBAgAJBQJZEsseAhsMAAoJEHWfX9CyMU78Ns4IAJRQ5UJ9KkeZClHm1EjYlgsAq1UJr9wgbyBFKTEkGZ/CAvVmgg+BUXcN/SPAkELbEAOJZTyv8C5cuJC49iFHOxUbRZXZ5eN2SvhZzl+5gep2uHwVLdqRIxFDTHbLWnmtHxPeU7IRA9u86q3wV1N0pD7kreNN7BWKY3/tI33hY2/XVVFy0MN5sutPn+lVK66MqAHqtode5xqqz9Z8LmS7LlqokQkAytcGd6Xqsx99NTk8kk3bnk9HWsAvDO8tRZroeseKeRNmbhGvCNUxPSB6bpYBJLvQtjA9ZVv6sNm0E+SuiXKizZkBGO5AH50pDoy0+MCGoOhwwXeY5+1kZAOzkMI="
-
-make_oci_signature () {
-    DIGEST="$1"
-    REFERENCE="$2"
-    GPGARGS="${3:-${FL_GPGCMDARGS}}"
-
-    gpg ${GPGARGS} --sign - <<EOF
-{
-    "critical": {
-        "type": "atomic container signature",
-        "image": {
-            "docker-manifest-digest": "$DIGEST"
-        },
-        "identity": {
-            "docker-reference": "$REFERENCE"
-        }
-    },
-    "optional": {}
-}
-EOF
-}
 
 make_runtime () {
     REPONAME="$1"
@@ -345,7 +308,7 @@ make_runtime () {
         RUNTIME_REPO=${TEST_DATA_DIR}/runtime-repo
         (
             flock -s 200
-            if [ ! -f "${RUNTIME_REPO}/refs/heads/${RUNTIME_REF}" ]; then
+            if [ ! -d ${RUNTIME_REPO} ]; then
                 $(dirname $0)/make-test-runtime.sh ${RUNTIME_REPO} org.test.Platform ${BRANCH} "" "" > /dev/null
             fi
         ) 200>${TEST_DATA_DIR}/runtime-repo-lock
@@ -365,16 +328,12 @@ make_runtime () {
 }
 
 httpd () {
-    if [ $# -eq 0 ] ; then
-        set web-server.py repos
-    fi
-
-    COMMAND=$1
-    shift
+    COMMAND=${1:-web-server.py}
+    DIR=${2:-repos}
 
     rm -f httpd-pipe
     mkfifo httpd-pipe
-    PYTHONUNBUFFERED=1 $(dirname $0)/$COMMAND "$@" 3> httpd-pipe 2>&1 | tee -a httpd-log >&2 &
+    PYTHONUNBUFFERED=1 $(dirname $0)/$COMMAND "$DIR" 3> httpd-pipe 2>&1 | tee --append httpd-log >&2 &
     read < httpd-pipe
 }
 
@@ -558,11 +517,6 @@ else
     _flatpak_bwrap_works=true
 fi
 
-have_working_bwrap() {
-    [[ "${_flatpak_bwrap_works}" == "true" ]]
-    return $?
-}
-
 # Use to skip all of these tests
 skip() {
     echo "1..0 # SKIP" "$@"
@@ -588,7 +542,7 @@ skip_one_without_bwrap () {
 }
 
 skip_without_fuse () {
-    "${FUSERMOUNT}" --version >/dev/null 2>&1 || skip "no fusermount"
+    fusermount --version >/dev/null 2>&1 || skip "no fusermount"
 
     capsh --print | grep -q 'Bounding set.*[^a-z]cap_sys_admin' || \
         skip "No cap_sys_admin in bounding set, can't use FUSE"
@@ -631,15 +585,10 @@ skip_without_libsystemd () {
   fi
 }
 
-FLATPAK_SYSTEM_CERTS_D=$(pwd)/certs.d
-export FLATPAK_SYSTEM_CERTS_D
-
 sed s#@testdir@#${test_builddir}# ${test_srcdir}/session.conf.in > session.conf
 dbus-daemon --fork --config-file=session.conf --print-address=3 --print-pid=4 \
     3> dbus-session-bus-address 4> dbus-session-bus-pid
-
-DBUS_SESSION_BUS_ADDRESS="$(cat dbus-session-bus-address)"
-export DBUS_SESSION_BUS_ADDRESS
+export DBUS_SESSION_BUS_ADDRESS="$(cat dbus-session-bus-address)"
 DBUS_SESSION_BUS_PID="$(cat dbus-session-bus-pid)"
 
 if ! /bin/kill -0 "$DBUS_SESSION_BUS_PID"; then
@@ -659,7 +608,7 @@ commit_to_path () {
 cleanup () {
     /bin/kill -9 $DBUS_SESSION_BUS_PID
     gpg-connect-agent --homedir "${FL_GPG_HOMEDIR}" killagent /bye >&2 || true
-    "${FUSERMOUNT}" -u $XDG_RUNTIME_DIR/doc >&2 || :
+    fusermount -u $XDG_RUNTIME_DIR/doc >&2 || :
     kill $(jobs -p) &> /dev/null || true
     if test -n "${TEST_SKIP_CLEANUP:-}"; then
         echo "# Skipping cleanup of ${TEST_DATA_DIR}"

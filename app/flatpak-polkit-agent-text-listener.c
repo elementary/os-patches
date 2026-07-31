@@ -33,7 +33,6 @@
 
 #include "flatpak-polkit-agent-text-listener.h"
 
-#include "flatpak-tty-utils-private.h"
 #include "flatpak-utils-private.h"
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -422,7 +421,7 @@ flatpak_polkit_agent_text_listener_initiate_authentication (PolkitAgentListener 
 
   fprintf (listener->tty, "%s\n", message);
 
-  /* handle multiple identities by asking which one to use */
+  /* handle multiple identies by asking which one to use */
   if (g_list_length (identities) > 1)
     {
       identity = choose_identity (listener, identities);

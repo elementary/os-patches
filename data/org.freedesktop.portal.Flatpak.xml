@@ -36,7 +36,7 @@
       bus name org.freedesktop.portal.Flatpak and the object path
       /org/freedesktop/portal/Flatpak.
 
-      This documentation describes version 8 of this interface.
+      This documentation describes version 6 of this interface.
   -->
   <interface name='org.freedesktop.portal.Flatpak'>
     <property name="version" type="u" access="read"/>
@@ -152,11 +152,11 @@
            </varlistentry>
          </variablelist>
 
-         Unknown (unsupported) flags are an error and will cause Spawn()
-         to fail.
+        Unknown (unsupported) flags are an error and will cause Spawn()
+        to fail.
 
-         Unknown (unsupported) options are ignored.
-         The following options are supported:
+        Unknown (unsupported) options are ignored.
+        The following options are supported:
          <variablelist>
            <varlistentry>
              <term>sandbox-expose as</term>
@@ -234,53 +234,10 @@
                    Allow sandbox access to accessibility bus.
                  </para></listitem>
                </varlistentry>
-               <varlistentry>
-                 <term>32</term>
-                 <listitem><para>
-                   Allow sandbox access to input devices.
-                 </para></listitem>
-               </varlistentry>
-               <varlistentry>
-                 <term>64</term>
-                 <listitem><para>
-                   Allow sandbox access to USB devices.
-                 </para></listitem>
-               </varlistentry>
-               <varlistentry>
-                 <term>128</term>
-                 <listitem><para>
-                   Allow sandbox access to KVM.
-                 </para></listitem>
-               </varlistentry>
-               <varlistentry>
-                 <term>256</term>
-                 <listitem><para>
-                   Allow sandbox access to shared memory.
-                 </para></listitem>
-               </varlistentry>
-               <varlistentry>
-                 <term>512</term>
-                 <listitem><para>
-                   Allow sandbox access to all devices.
-                 </para></listitem>
-               </varlistentry>
              </variablelist>
 
              </para><para>
              This was added in version 3 of this interface (available from flatpak 1.6.0 and later).
-             </para></listitem>
-           </varlistentry>
-           <varlistentry>
-             <term>sandbox-a11y-own-names as</term>
-             <listitem><para>
-               An array of D-Bus names to be owned on the accessibility bus. The
-               names must have the app id as prefix.
-             </para><para>
-               Only applies when `sandbox-flags` contains access to the accessibility
-               bus as well.
-             </para><para>
-               This was added in version 7 of this interface (available from
-               flatpak 1.16.0 and later).
              </para></listitem>
            </varlistentry>
            <varlistentry>

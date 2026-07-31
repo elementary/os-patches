@@ -1,14 +1,15 @@
-#include "libglnx.h"
-#include "common/flatpak-utils-http-private.h"
 #include "common/flatpak-utils-private.h"
 
 int
 main (int argc, char *argv[])
 {
   g_autoptr(FlatpakHttpSession) session = flatpak_create_http_session (PACKAGE_STRING);
-  g_autoptr(GError) error = NULL;
+  GError *error = NULL;
   const char *url, *dest;
   int flags = 0;
+
+  /* Avoid weird recursive type initialization deadlocks from libsoup */
+  g_type_ensure (G_TYPE_SOCKET);
 
   if (argc == 3)
     {
@@ -29,7 +30,7 @@ main (int argc, char *argv[])
 
 
   if (!flatpak_cache_http_uri (session,
-                               url, NULL,
+                               url,
                                flags,
                                AT_FDCWD, dest,
                                NULL, NULL, NULL, &error))

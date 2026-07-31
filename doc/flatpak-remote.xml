@@ -46,11 +46,7 @@
 
        <para>
             System-wide remotes can be statically preconfigured by dropping
-            <citerefentry><refentrytitle>flatpakrepo</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-            files into <filename>/usr/share/flatpak/remotes.d/</filename> and
-            <filename>/etc/flatpak/remotes.d/</filename>. Ifa file with
-            the same name exists in both, the file under
-            <filename>/etc</filename> will take precedence.
+            flatpakref files into <filename>/etc/flatpak/remotes.d/</filename>.
        </para>
 
     </refsect1>
@@ -80,12 +76,6 @@
                       is a Flatpak extension that indicates that the remote is not an ostree
                       repository, but is rather an URL to an index of OCI images that are stored
                       within a container image registry.
-                    </para>
-                    <para>
-                      For OCI remotes, client and CA certificates are read from
-                      <filename>/etc/containers/certs.d</filename> and
-                      <filename>~/.config/containers/certs.d</filename> as documented in
-                      <citerefentry><refentrytitle>containers-certs.d</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
                     </para></listitem>
                 </varlistentry>
                 <varlistentry>
@@ -178,13 +168,6 @@
                 <varlistentry>
                     <term><option>xa.main-ref</option> (string)</term>
                     <listitem><para>The main reference served by this remote. This is used for origin remotes of applications installed via a flatpakref file.</para></listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><option>xa.signature-lookaside</option> (string)</term>
-                    <listitem><para>URL to load signatures from (OCI remotes only),
-                    using the <ulink url="https://github.com/containers/image/blob/main/docs/signature-protocols.md">
-                    containers/image separate storage mechanism.</ulink>
-                    </para></listitem>
                 </varlistentry>
             </variablelist>
         </refsect2>

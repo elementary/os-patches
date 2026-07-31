@@ -225,7 +225,7 @@ flatpak_builtin_info (int argc, char **argv, GCancellable *cancellable, GError *
       if (collection_id != NULL)
         len = MAX (len, g_utf8_strlen (_("Collection:"), -1));
       len = MAX (len, g_utf8_strlen (_("Installation:"), -1));
-      len = MAX (len, g_utf8_strlen (_("Installed Size:"), -1));
+      len = MAX (len, g_utf8_strlen (_("Installed:"), -1));
       if (flatpak_decomposed_is_app (ref))
         {
           len = MAX (len, g_utf8_strlen (_("Runtime:"), -1));
@@ -268,7 +268,7 @@ flatpak_builtin_info (int argc, char **argv, GCancellable *cancellable, GError *
       if (collection_id)
         print_aligned (len, _("Collection:"), collection_id);
       print_aligned (len, _("Installation:"), flatpak_dir_get_name_cached (dir));
-      print_aligned (len, _("Installed Size:"), formatted_size);
+      print_aligned (len, _("Installed:"), formatted_size);
       if (flatpak_decomposed_is_app (ref))
         {
           g_autofree char *runtime = NULL;
@@ -455,8 +455,7 @@ flatpak_builtin_info (int argc, char **argv, GCancellable *cancellable, GError *
       len = MAX (len, g_utf8_strlen (_("ID:"), -1));
       len = MAX (len, g_utf8_strlen (_("Origin:"), -1));
       len = MAX (len, g_utf8_strlen (_("Commit:"), -1));
-      len = MAX (len, g_utf8_strlen (_("Installation:"), -1));
-      len = MAX (len, g_utf8_strlen (_("Installed Size:"), -1));
+      len = MAX (len, g_utf8_strlen (_("Installed:"), -1));
       len = MAX (len, g_utf8_strlen (_("Subpaths:"), -1));
 
       flatpak_get_window_size (&rows, &cols);
@@ -471,34 +470,24 @@ flatpak_builtin_info (int argc, char **argv, GCancellable *cancellable, GError *
           g_autofree char *formatted = NULL;
           g_autofree char *ext_formatted_size = NULL;
           g_autofree char *formatted_commit = NULL;
-          g_autofree char *ext_installation = NULL;
 
           if (ext->is_unmaintained)
             {
               formatted_commit = g_strdup (_("unmaintained"));
               origin = NULL;
-              ext_installation = g_strdup (_("unknown"));
               size = 0;
               ext_formatted_size = g_strdup (_("unknown"));
               ext_subpaths = NULL;
             }
           else
             {
-              g_autoptr(GFile) ext_deploy_dir = NULL;
-              g_autoptr(FlatpakDir) ext_dir = NULL;
-
-              ext_deploy_dir = flatpak_find_deploy_dir_for_ref (ext->ref, &ext_dir, cancellable, error);
-              if (ext_deploy_dir == NULL)
-                return FALSE;
-
-              ext_deploy_data = flatpak_dir_get_deploy_data (ext_dir, ext->ref, FLATPAK_DEPLOY_VERSION_CURRENT, cancellable, error);
+              ext_deploy_data = flatpak_dir_get_deploy_data (dir, ext->ref, FLATPAK_DEPLOY_VERSION_CURRENT, cancellable, error);
               if (ext_deploy_data == NULL)
                 return FALSE;
 
               commit = flatpak_deploy_data_get_commit (ext_deploy_data);
               formatted_commit = ellipsize_string (commit, width);
               origin = flatpak_deploy_data_get_origin (ext_deploy_data);
-              ext_installation = flatpak_dir_get_name (ext_dir);
               size = flatpak_deploy_data_get_installed_size (ext_deploy_data);
               formatted = g_format_size (size);
               ext_subpaths = flatpak_deploy_data_get_subpaths (ext_deploy_data);
@@ -513,8 +502,7 @@ flatpak_builtin_info (int argc, char **argv, GCancellable *cancellable, GError *
           print_aligned (len, _("ID:"), ext->id);
           print_aligned (len, _("Origin:"), origin ? origin : "-");
           print_aligned (len, _("Commit:"), formatted_commit);
-          print_aligned (len, _("Installation:"), ext_installation);
-          print_aligned (len, _("Installed Size:"), ext_formatted_size);
+          print_aligned (len, _("Installed:"), ext_formatted_size);
 
           if (ext_subpaths && ext_subpaths[0])
             {

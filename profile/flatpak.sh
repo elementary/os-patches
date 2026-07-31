@@ -1,4 +1,3 @@
-# shellcheck shell=sh
 if command -v flatpak > /dev/null; then
     # set XDG_DATA_DIRS to include Flatpak installations
 
@@ -24,6 +23,4 @@ if command -v flatpak > /dev/null; then
 
     export XDG_DATA_DIRS
     XDG_DATA_DIRS="${new_dirs:+${new_dirs}:}${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
-
-    unset new_dirs
 fi

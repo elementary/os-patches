@@ -30,7 +30,7 @@ main (int argc, char *argv[])
   socket_0 = g_strdup_printf ("--socket=%d", sockets[0]);
   socket_1 = g_strdup_printf ("--socket=%d", sockets[1]);
 
-  const char * const backend_argv[] =
+  char *backend_argv[] =
     {
      "./revokefs-fuse",
      "--backend",
@@ -42,7 +42,7 @@ main (int argc, char *argv[])
   /* Don't inherit fuse socket in backend */
   fcntl (sockets[1], F_SETFD, FD_CLOEXEC);
   if (!g_spawn_async (NULL,
-                      (char **) backend_argv,
+                      backend_argv,
                       NULL,
                       G_SPAWN_LEAVE_DESCRIPTORS_OPEN,
                       NULL, NULL,
@@ -53,7 +53,7 @@ main (int argc, char *argv[])
     }
   close (sockets[0]); /* Close backend side now so it doesn't get into the fuse child */
 
-  const char * const fuse_argv[] =
+  char *fuse_argv[] =
     {
      "./revokefs-fuse",
      socket_1,
@@ -63,7 +63,7 @@ main (int argc, char *argv[])
     };
 
   if (!g_spawn_async (NULL,
-                      (char **) fuse_argv,
+                      fuse_argv,
                       NULL,
                       G_SPAWN_LEAVE_DESCRIPTORS_OPEN,
                       NULL, NULL,

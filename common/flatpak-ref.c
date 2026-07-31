@@ -22,7 +22,6 @@
 
 #include "flatpak-utils-private.h"
 #include "flatpak-ref.h"
-#include "flatpak-ref-utils-private.h"
 #include "flatpak-enum-types.h"
 
 /**

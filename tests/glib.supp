@@ -1,4 +1,4 @@
-# Based on the libhif suppressions
+# Based on the libhif supressions
 {
    gobject_init_1
    Memcheck:Leak
@@ -594,6 +594,15 @@
    fun:calloc
    fun:_dl_allocate_tls
    fun:pthread_create*
+}
+{
+   soup_callback_1
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   fun:g_source_set_callback
+   fun:soup_add_completion_reffed
+   fun:soup_session_real_kick_queue
 }
 {
    gio_namespace_cache_leak_ns_info

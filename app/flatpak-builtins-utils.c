@@ -28,7 +28,6 @@
 
 #include "flatpak-ref.h"
 #include "flatpak-builtins-utils.h"
-#include "flatpak-tty-utils-private.h"
 #include "flatpak-utils-private.h"
 #include "flatpak-run-private.h"
 
@@ -300,7 +299,6 @@ flatpak_load_gpg_keys (char        **gpg_import,
 gboolean
 flatpak_resolve_duplicate_remotes (GPtrArray    *dirs,
                                    const char   *remote_name,
-                                   gboolean      opt_noninteractive,
                                    FlatpakDir  **out_dir,
                                    GCancellable *cancellable,
                                    GError      **error)
@@ -333,9 +331,6 @@ flatpak_resolve_duplicate_remotes (GPtrArray    *dirs,
     chosen = 1;
   else if (dirs_with_remote->len > 1)
     {
-      if (opt_noninteractive)
-        return flatpak_fail (error, _("Remote ‘%s’ found in multiple installations, unable to proceed in non-interactive mode"), remote_name);
-
       g_auto(GStrv) names = g_new0 (char *, dirs_with_remote->len + 1);
       for (i = 0; i < dirs_with_remote->len; i++)
         {
@@ -392,16 +387,12 @@ flatpak_resolve_matching_refs (const char *remote_name,
                                gboolean    assume_yes,
                                GPtrArray  *refs,
                                const char *opt_search_ref,
-                               gboolean    opt_noninteractive,
                                char      **out_ref,
                                GError    **error)
 {
   guint chosen = 0;
 
   g_assert (refs->len > 0);
-
-  if (opt_noninteractive && refs->len > 1)
-    return flatpak_fail (error, _("Multiple refs match ‘%s’, unable to proceed in non-interactive mode"), opt_search_ref);
 
   /* When there's only one match, we only choose it without user interaction if
    * either the --assume-yes option was used or it's an exact match
@@ -474,7 +465,6 @@ flatpak_resolve_matching_installed_refs (gboolean    assume_yes,
                                          gboolean    only_one,
                                          GPtrArray  *ref_dir_pairs,
                                          const char *opt_search_ref,
-                                         gboolean    opt_noninteractive,
                                          GPtrArray  *out_pairs,
                                          GError    **error)
 {
@@ -483,9 +473,6 @@ flatpak_resolve_matching_installed_refs (gboolean    assume_yes,
   guint i, k;
 
   g_assert (ref_dir_pairs->len > 0);
-
-  if (opt_noninteractive && ref_dir_pairs->len > 1)
-    return flatpak_fail (error, _("Multiple installed refs match ‘%s’, unable to proceed in non-interactive mode"), opt_search_ref);
 
   /* When there's only one match, we only choose it without user interaction if
    * either the --assume-yes option was used or it's an exact match
@@ -567,37 +554,47 @@ flatpak_resolve_matching_installed_refs (gboolean    assume_yes,
 gboolean
 flatpak_resolve_matching_remotes (GPtrArray      *remote_dir_pairs,
                                   const char     *opt_search_ref,
-                                  gboolean        opt_noninteractive,
                                   RemoteDirPair **out_pair,
                                   GError        **error)
 {
   guint chosen = 0; /* 1 indexed */
+  guint i;
 
   g_assert (remote_dir_pairs->len > 0);
-
-  if (opt_noninteractive && remote_dir_pairs->len > 1)
-    return flatpak_fail (error, _("Multiple remotes have refs matching ‘%s’, unable to proceed in non-interactive mode"), opt_search_ref);
 
   /* Here we use the only matching remote even if --assumeyes wasn't specified
    * because the user will still be asked to confirm the operation in the next
    * step after the dependencies are resolved.
    */
   if (remote_dir_pairs->len == 1)
+    chosen = 1;
+
+  if (chosen == 0)
     {
-      chosen = 1;
-    }
-  else
-    {
-      g_auto(GStrv) names = g_new0 (char *, remote_dir_pairs->len + 1);
-      for (guint i = 0; i < remote_dir_pairs->len; i++)
+      if (remote_dir_pairs->len == 1)
         {
-          RemoteDirPair *pair = g_ptr_array_index (remote_dir_pairs, i);
-          names[i] = g_strdup_printf ("‘%s’ (%s)", pair->remote_name, flatpak_dir_get_name_cached (pair->dir));
+          RemoteDirPair *pair = g_ptr_array_index (remote_dir_pairs, 0);
+          const char *dir_name = flatpak_dir_get_name_cached (pair->dir);
+          if (flatpak_yes_no_prompt (TRUE, /* default to yes on Enter */
+                                     _("Found similar ref(s) for ‘%s’ in remote ‘%s’ (%s).\nUse this remote?"),
+                                     opt_search_ref, pair->remote_name, dir_name))
+            chosen = 1;
+          else
+            return flatpak_fail (error, _("No remote chosen to resolve matches for ‘%s’"), opt_search_ref);
         }
-      flatpak_format_choices ((const char **) names, _("Remotes found with refs similar to ‘%s’:"), opt_search_ref);
-      chosen = flatpak_number_prompt (TRUE, 0, remote_dir_pairs->len, _("Which do you want to use (0 to abort)?"));
-      if (chosen == 0)
-        return flatpak_fail (error, _("No remote chosen to resolve matches for ‘%s’"), opt_search_ref);
+      else
+        {
+          g_auto(GStrv) names = g_new0 (char *, remote_dir_pairs->len + 1);
+          for (i = 0; i < remote_dir_pairs->len; i++)
+            {
+              RemoteDirPair *pair = g_ptr_array_index (remote_dir_pairs, i);
+              names[i] = g_strdup_printf ("‘%s’ (%s)", pair->remote_name, flatpak_dir_get_name_cached (pair->dir));
+            }
+          flatpak_format_choices ((const char **) names, _("Remotes found with refs similar to ‘%s’:"), opt_search_ref);
+          chosen = flatpak_number_prompt (TRUE, 0, remote_dir_pairs->len, _("Which do you want to use (0 to abort)?"));
+          if (chosen == 0)
+            return flatpak_fail (error, _("No remote chosen to resolve matches for ‘%s’"), opt_search_ref);
+        }
     }
 
   if (out_pair)
@@ -680,11 +677,11 @@ update_appstream (GPtrArray    *dirs,
               ts_file_age = get_appstream_timestamp (dir, remotes[i], arch);
               if (ts_file_age < ttl)
                 {
-                  g_info ("%s:%s appstream age %" G_GUINT64_FORMAT " is less than ttl %" G_GUINT64_FORMAT, remotes[i], arch, ts_file_age, ttl);
+                  g_debug ("%s:%s appstream age %" G_GUINT64_FORMAT " is less than ttl %" G_GUINT64_FORMAT, remotes[i], arch, ts_file_age, ttl);
                   continue;
                 }
               else
-                g_info ("%s:%s appstream age %" G_GUINT64_FORMAT " is greater than ttl %" G_GUINT64_FORMAT, remotes[i], arch, ts_file_age, ttl);
+                g_debug ("%s:%s appstream age %" G_GUINT64_FORMAT " is greater than ttl %" G_GUINT64_FORMAT, remotes[i], arch, ts_file_age, ttl);
 
               if (flatpak_dir_get_remote_disabled (dir, remotes[i]) ||
                   flatpak_dir_get_remote_noenumerate (dir, remotes[i]))
@@ -693,7 +690,7 @@ update_appstream (GPtrArray    *dirs,
               if (flatpak_dir_is_user (dir))
                 {
                   if (quiet)
-                    g_info (_("Updating appstream data for user remote %s"), remotes[i]);
+                    g_debug (_("Updating appstream data for user remote %s"), remotes[i]);
                   else
                     {
                       g_print (_("Updating appstream data for user remote %s"), remotes[i]);
@@ -703,7 +700,7 @@ update_appstream (GPtrArray    *dirs,
               else
                 {
                   if (quiet)
-                    g_info (_("Updating appstream data for remote %s"), remotes[i]);
+                    g_debug (_("Updating appstream data for remote %s"), remotes[i]);
                   else
                     {
                       g_print (_("Updating appstream data for remote %s"), remotes[i]);
@@ -714,7 +711,7 @@ update_appstream (GPtrArray    *dirs,
                                                  NULL, cancellable, &local_error))
                 {
                   if (quiet)
-                    g_info ("%s: %s", _("Error updating"), local_error->message);
+                    g_debug ("%s: %s", _("Error updating"), local_error->message);
                   else
                     g_printerr ("%s: %s\n", _("Error updating"), local_error->message);
                 }
@@ -738,11 +735,11 @@ update_appstream (GPtrArray    *dirs,
               ts_file_age = get_appstream_timestamp (dir, remote, arch);
               if (ts_file_age < ttl)
                 {
-                  g_info ("%s:%s appstream age %" G_GUINT64_FORMAT " is less than ttl %" G_GUINT64_FORMAT, remote, arch, ts_file_age, ttl);
+                  g_debug ("%s:%s appstream age %" G_GUINT64_FORMAT " is less than ttl %" G_GUINT64_FORMAT, remote, arch, ts_file_age, ttl);
                   continue;
                 }
               else
-                g_info ("%s:%s appstream age %" G_GUINT64_FORMAT " is greater than ttl %" G_GUINT64_FORMAT, remote, arch, ts_file_age, ttl);
+                g_debug ("%s:%s appstream age %" G_GUINT64_FORMAT " is greater than ttl %" G_GUINT64_FORMAT, remote, arch, ts_file_age, ttl);
 
               if (!flatpak_dir_update_appstream (dir, remote, arch, &changed,
                                                  NULL, cancellable, error))
@@ -824,7 +821,7 @@ find_column (Column     *columns,
 {
   int i;
   int candidate;
-  const char *p = strchr (name, ':');
+  char *p = strchr (name, ':');
 
   candidate = -1;
   for (i = 0; columns[i].name; i++)
@@ -1413,8 +1410,6 @@ ensure_remote_state_arch (FlatpakDir         *dir,
 {
   g_autoptr(GError) local_error = NULL;
 
-  g_return_val_if_fail (arch != NULL, FALSE);
-
   if (only_sideloaded)
     return TRUE;
 
@@ -1428,6 +1423,19 @@ ensure_remote_state_arch (FlatpakDir         *dir,
     }
 
   return flatpak_remote_state_ensure_subsummary (state, dir, arch, FALSE, cancellable, error);
+}
+
+gboolean
+ensure_remote_state_arch_for_ref (FlatpakDir         *dir,
+                                  FlatpakRemoteState *state,
+                                  const char         *ref,
+                                  gboolean            cached,
+                                  gboolean            only_sideloaded,
+                                  GCancellable       *cancellable,
+                                  GError            **error)
+{
+  g_autofree char *ref_arch = flatpak_get_arch_for_ref (ref);
+  return ensure_remote_state_arch (dir, state, ref_arch, cached, only_sideloaded,cancellable, error);
 }
 
 /* Note: cached == TRUE here means prefer-cache, not only-cache */
@@ -1452,39 +1460,6 @@ ensure_remote_state_all_arches (FlatpakDir         *dir,
   /* Then download rest */
   if (!flatpak_remote_state_ensure_subsummary_all_arches (state, dir, FALSE, cancellable, error))
     return FALSE;
-
-  return TRUE;
-}
-
-gboolean
-setup_sideload_repositories (FlatpakTransaction *transaction,
-                             char              **opt_sideload_repos,
-                             GCancellable       *cancellable,
-                             GError            **error)
-{
-  for (int i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
-    {
-      const char *repo = opt_sideload_repos[i];
-      if (g_str_has_prefix (repo, "oci:") || g_str_has_prefix (repo, "oci-archive:"))
-        {
-          if (!flatpak_transaction_add_sideload_image_collection (transaction, repo, cancellable, error))
-            return FALSE;
-        }
-      else if (g_str_has_prefix (repo, "file:"))
-        {
-          g_autoptr(GFile) file = g_file_new_for_uri (repo);
-          const char *path = flatpak_file_get_path_cached (file);
-          flatpak_transaction_add_sideload_repo (transaction, path);
-        }
-      else
-        {
-          if (g_regex_match_simple ("^[A-Za-z][A-Za-z0-9+.-]*:", repo,
-                                    G_REGEX_DEFAULT, G_REGEX_MATCH_DEFAULT))
-            return flatpak_fail (error, _("Unknown scheme in sideload location %s"), repo);
-
-          flatpak_transaction_add_sideload_repo (transaction, repo);
-        }
-    }
 
   return TRUE;
 }

@@ -32,10 +32,6 @@ gboolean glnx_throw (GError **error, const char *fmt, ...) G_GNUC_PRINTF (2,3);
 #define glnx_null_throw(error, args...) \
   ({glnx_throw (error, args); NULL;})
 
-/* Like glnx_throw(), but yields -1 (invalid fd). */
-#define glnx_fd_throw(error, args...) \
-  ({glnx_throw (error, args); -1;})
-
 /* Implementation detail of glnx_throw_prefix() */
 void glnx_real_set_prefix_error_va (GError     *error,
                                     const char *format,
@@ -101,7 +97,7 @@ glnx_throw_errno (GError **error)
                        g_strerror (errsv));
   /* We also restore the value of errno, since that's
    * what was done in a long-ago libgsystem commit
-   * https://gitlab.gnome.org/Archive/libgsystem/-/commit/ed106741f7a0596dc8b960b31fdae671d31d666d
+   * https://git.gnome.org/browse/libgsystem/commit/?id=ed106741f7a0596dc8b960b31fdae671d31d666d
    * but I certainly can't remember now why I did that.
    */
   errno = errsv;
@@ -111,10 +107,6 @@ glnx_throw_errno (GError **error)
 /* Like glnx_throw_errno(), but yields a NULL pointer. */
 #define glnx_null_throw_errno(error) \
   ({glnx_throw_errno (error); NULL;})
-
-/* Like glnx_throw_errno(), but yields -1 (invalid fd). */
-#define glnx_fd_throw_errno(error) \
-  ({glnx_throw_errno (error); -1;})
 
 /* Implementation detail of glnx_throw_errno_prefix() */
 void glnx_real_set_prefix_error_from_errno_va (GError     **error,
@@ -127,10 +119,6 @@ gboolean glnx_throw_errno_prefix (GError **error, const char *fmt, ...) G_GNUC_P
 /* Like glnx_throw_errno_prefix(), but yields a NULL pointer. */
 #define glnx_null_throw_errno_prefix(error, args...) \
   ({glnx_throw_errno_prefix (error, args); NULL;})
-
-/* Like glnx_throw_errno_prefix(), but yields -1 (invalid fd). */
-#define glnx_fd_throw_errno_prefix(error, args...) \
-  ({glnx_throw_errno_prefix (error, args); -1;})
 
 /* BEGIN LEGACY APIS */
 

@@ -36,90 +36,36 @@
 #include "flatpak-builtins.h"
 #include "flatpak-instance.h"
 
-#define FLATPAK_BUILTIN_KILL_N_RETRIES 5
-#define FLATPAK_BUILTIN_KILL_RETRY_SLEEP_USEC (G_USEC_PER_SEC / 10)
-
 static GOptionEntry options[] = {
   { NULL }
 };
 
 static gboolean
-instance_equal (FlatpakInstance *a,
-                FlatpakInstance *b)
+kill_instance (const char *id,
+               GError    **error)
 {
-  return g_strcmp0 (flatpak_instance_get_id (a),
-                    flatpak_instance_get_id (b)) == 0;
-}
+  g_autoptr(GPtrArray) instances = NULL;
+  int j;
+  int killed = 0;
 
-static GPtrArray *
-kill_instances (GPtrArray *kill_list)
-{
-  g_autoptr(GPtrArray) instances = flatpak_instance_get_all ();
-  g_autoptr(GPtrArray) remaining =
-    g_ptr_array_new_with_free_func (g_object_unref);
+  instances = flatpak_instance_get_all ();
 
-  for (size_t i = 0; i < kill_list->len; i++)
+  for (j = 0; j < instances->len; j++)
     {
-      FlatpakInstance *to_kill = g_ptr_array_index (kill_list, i);
-      pid_t pid;
-
-      if (!g_ptr_array_find_with_equal_func (instances, to_kill,
-                                             (GEqualFunc) instance_equal,
-                                             NULL))
+      FlatpakInstance *instance = (FlatpakInstance *) g_ptr_array_index (instances, j);
+      if (g_strcmp0 (id, flatpak_instance_get_app (instance)) == 0 ||
+          strcmp (id, flatpak_instance_get_id (instance)) == 0)
         {
-          g_info ("Instance %s disappeared", flatpak_instance_get_id (to_kill));
-          continue;
-        }
-
-      pid = flatpak_instance_get_child_pid (to_kill);
-      if (pid != 0)
-        {
+          pid_t pid = flatpak_instance_get_child_pid (instance);
           kill (pid, SIGKILL);
-          g_info ("Instance %s killed", flatpak_instance_get_id (to_kill));
-          continue;
+          killed++;
         }
-
-      g_ptr_array_add (remaining, g_object_ref (to_kill));
     }
 
-  return g_steal_pointer (&remaining);
-}
+  g_debug ("Killed %d instances", killed);
 
-static gboolean
-kill_id (const char  *id,
-         GError     **error)
-{
-  g_autoptr(GPtrArray) instances = flatpak_instance_get_all ();
-  g_autoptr(GPtrArray) kill_list =
-    g_ptr_array_new_with_free_func (g_object_unref);
-
-  for (size_t i = 0; i < instances->len; i++)
-    {
-      FlatpakInstance *instance = g_ptr_array_index (instances, i);
-
-      if (g_strcmp0 (id, flatpak_instance_get_app (instance)) != 0 &&
-          g_strcmp0 (id, flatpak_instance_get_id (instance)) != 0)
-        continue;
-
-      g_info ("Found instance %s to kill", flatpak_instance_get_id (instance));
-
-      g_ptr_array_add (kill_list, g_object_ref (instance));
-    }
-
-  if (kill_list->len == 0)
+  if (killed == 0)
     return flatpak_fail (error, _("%s is not running"), id);
-
-  for (size_t i = 0; i < FLATPAK_BUILTIN_KILL_N_RETRIES && kill_list->len > 0; i++)
-    {
-      g_autoptr (GPtrArray) remaining = NULL;
-
-      if (i > 0)
-        g_usleep (FLATPAK_BUILTIN_KILL_RETRY_SLEEP_USEC);
-
-      remaining = kill_instances (kill_list);
-      g_clear_pointer (&kill_list, g_ptr_array_unref);
-      kill_list = g_steal_pointer (&remaining);
-    }
 
   return TRUE;
 }
@@ -131,7 +77,7 @@ flatpak_builtin_kill (int           argc,
                       GError      **error)
 {
   g_autoptr(GOptionContext) context = NULL;
-  const char *id;
+  const char *instance;
 
   context = g_option_context_new (_("INSTANCE - Stop a running application"));
   g_option_context_set_translation_domain (context, GETTEXT_PACKAGE);
@@ -151,9 +97,9 @@ flatpak_builtin_kill (int           argc,
       return FALSE;
     }
 
-  id = argv[1];
+  instance = argv[1];
 
-  return kill_id (id, error);
+  return kill_instance (instance, error);
 }
 
 gboolean

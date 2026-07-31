@@ -180,8 +180,8 @@ confirm_runtime_removal (gboolean           yes_opt,
                                                                &udir->extension_app_map,
                                                                ref, NULL, &local_error);
       if (apps == NULL)
-        g_info ("Unable to list apps using extension %s: %s\n",
-                flatpak_decomposed_get_ref (ref), local_error->message);
+        g_debug ("Unable to list apps using extension %s: %s\n",
+                 flatpak_decomposed_get_ref (ref), local_error->message);
     }
   else
     {
@@ -189,8 +189,8 @@ confirm_runtime_removal (gboolean           yes_opt,
                                                      &udir->runtime_app_map,
                                                      ref, NULL, &local_error);
       if (apps == NULL)
-        g_info ("Unable to list apps using runtime %s: %s\n",
-                flatpak_decomposed_get_ref (ref), local_error->message);
+        g_debug ("Unable to list apps using runtime %s: %s\n",
+                 flatpak_decomposed_get_ref (ref), local_error->message);
     }
 
   if (apps == NULL || apps->len == 0)
@@ -345,7 +345,7 @@ flatpak_builtin_uninstall (int argc, char **argv, GCancellable *cancellable, GEr
 
           udir = uninstall_dir_ensure (uninstall_dirs, dir);
 
-          unused = flatpak_dir_list_unused_refs (dir, opt_arch, NULL, NULL, NULL, FLATPAK_DIR_FILTER_NONE, cancellable, error);
+          unused = flatpak_dir_list_unused_refs (dir, opt_arch, NULL, NULL, NULL, FALSE, cancellable, error);
           if (unused == NULL)
             return FALSE;
 
@@ -472,7 +472,7 @@ flatpak_builtin_uninstall (int argc, char **argv, GCancellable *cancellable, GEr
 
           chosen_pairs = g_ptr_array_new ();
 
-          if (!flatpak_resolve_matching_installed_refs (opt_yes, FALSE, ref_dir_pairs, match_id, opt_noninteractive, chosen_pairs, error))
+          if (!flatpak_resolve_matching_installed_refs (opt_yes, FALSE, ref_dir_pairs, match_id, chosen_pairs, error))
             return FALSE;
 
           for (i = 0; i < chosen_pairs->len; i++)
@@ -520,7 +520,7 @@ flatpak_builtin_uninstall (int argc, char **argv, GCancellable *cancellable, GEr
           * is limited to checking within the same installation; it won't
           * prompt for a user app depending on a system runtime.
          */
-        if (!opt_force_remove && !opt_unused &&
+        if (!opt_force_remove &&
             !confirm_runtime_removal (opt_yes, udir, ref))
           {
             uninstall_dir_remove_ref (udir, ref);
@@ -561,7 +561,6 @@ flatpak_builtin_uninstall (int argc, char **argv, GCancellable *cancellable, GEr
       g_autoptr(GFileEnumerator) enumerator = NULL;
       g_autofree char *path = g_build_filename (g_get_home_dir (), ".var", "app", NULL);
       g_autoptr(GFile) app_dir = g_file_new_for_path (path);
-      gboolean found_data_to_delete = FALSE;
 
       enumerator = g_file_enumerate_children (app_dir,
                                               G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
@@ -589,14 +588,9 @@ flatpak_builtin_uninstall (int argc, char **argv, GCancellable *cancellable, GEr
           if (ref)
             continue;
 
-          found_data_to_delete = TRUE;
-
           if (!flatpak_delete_data (opt_yes, g_file_info_get_name (info), error))
             return FALSE;
         }
-
-      if (!found_data_to_delete)
-          g_print (_("No app data to delete\n"));
     }
 
   return TRUE;

@@ -128,36 +128,13 @@
             </varlistentry>
 
             <varlistentry>
-                <term><option>--share-if=SUBSYSTEM:CONDITION</option></term>
-
-                <listitem><para>
-                    Share a subsystem with the host session conditionally,
-                    only when the specified condition is met at runtime.
-                    This updates the [Context] group in the metadata.
-                    <arg choice="plain">SUBSYSTEM</arg> must be one of: network, ipc.
-                    <arg choice="plain">CONDITION</arg> must be one of:
-                    <option>true</option>, <option>false</option>,
-                    <option>has-input-device</option>, <option>has-wayland</option>,
-                    <option>has-usb-device</option>, <option>has-usb-portal</option>.
-                    Conditions can be negated with <literal>!</literal>,
-                    for example <option>!has-input-device</option>.
-                    This option can be used multiple times.
-                    Available since 1.17.
-                </para><para>
-                    See the Conditional Permissions section in
-                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-                    for more details.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
                 <term><option>--socket=SOCKET</option></term>
 
                 <listitem><para>
                     Expose a well-known socket to the application. This updates
                     the [Context] group in the metadata.
                     SOCKET must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups, gpg-agent, inherit-wayland-socket.
+                    ssh-auth, pcsc, cups, gpg-agent.
                     This option can be used multiple times.
                 </para><para>
                     The fallback-x11 option makes the X11 socket available only if
@@ -174,29 +151,8 @@
                     Don't expose a well known socket to the application. This updates
                     the [Context] group in the metadata.
                     SOCKET must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups, gpg-agent, inherit-wayland-socket.
+                    ssh-auth, pcsc, cups, gpg-agent.
                     This option can be used multiple times.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--socket-if=SOCKET:CONDITION</option></term>
-
-                <listitem><para>
-                    Expose a well-known socket to the application conditionally,
-                    only when the specified condition is met at runtime.
-                    This updates the [Context] group in the metadata.
-                    SOCKET must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups, gpg-agent, inherit-wayland-socket.
-                    CONDITION must be one of: true, false, has-input-device, has-wayland, has-usb-device, has-usb-portal.
-                    Conditions can be negated with <literal>!</literal>,
-                    for example <option>!has-wayland</option>.
-                    This option can be used multiple times.
-                    Available since 1.17.
-                </para><para>
-                    See the Conditional Permissions section in
-                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-                    for more details.
                 </para></listitem>
             </varlistentry>
 
@@ -206,7 +162,7 @@
                 <listitem><para>
                     Expose a device to the application. This updates
                     the [Context] group in the metadata.
-                    DEVICE must be one of: dri, input, usb, kvm, shm, all.
+                    DEVICE must be one of: dri, kvm, shm, all.
                     This option can be used multiple times.
                 </para></listitem>
             </varlistentry>
@@ -217,28 +173,8 @@
                 <listitem><para>
                     Don't expose a device to the application. This updates
                     the [Context] group in the metadata.
-                    DEVICE must be one of: dri, input, usb, kvm, shm, all.
+                    DEVICE must be one of: dri, kvm, shm, all.
                     This option can be used multiple times.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--device-if=DEVICE:CONDITION</option></term>
-
-                <listitem><para>
-                    Expose a device to the application conditionally,
-                    only when the specified condition is met at runtime.
-                    This updates the [Context] group in the metadata.
-                    DEVICE must be one of: dri, input, usb, kvm, shm, all.
-                    CONDITION must be one of: true, false, has-input-device, has-wayland, has-usb-device, has-usb-portal.
-                    Conditions can be negated with <literal>!</literal>,
-                    for example <option>!has-input-device</option>.
-                    This option can be used multiple times.
-                    Available since 1.17.
-                </para><para>
-                    See the Conditional Permissions section in
-                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-                    for more details.
                 </para></listitem>
             </varlistentry>
 
@@ -293,35 +229,12 @@
             </varlistentry>
 
             <varlistentry>
-                <term><option>--allow-if=FEATURE:CONDITION</option></term>
-
-                <listitem><para>
-                    Allow access to a specific feature conditionally,
-                    only when the specified condition is met at runtime.
-                    This updates the [Context] group in the metadata.
-                    <arg choice="plain">FEATURE</arg> must be one of: devel, multiarch, bluetooth.
-                    <arg choice="plain">CONDITION</arg> must be one of:
-                    <option>true</option>, <option>false</option>,
-                    <option>has-input-device</option>, <option>has-wayland</option>,
-                    <option>has-usb-device</option>, <option>has-usb-portal</option>.
-                    Conditions can be negated with <literal>!</literal>,
-                    for example <option>!has-input-device</option>.
-                    This option can be used multiple times.
-                    Available since 1.17.
-                </para><para>
-                    See the Conditional Permissions section in
-                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-                    for more details.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
                 <term><option>--filesystem=FS</option></term>
 
                 <listitem><para>
                     Allow the application access to a subset of the filesystem.
                     This updates the [Context] group in the metadata.
-                    FS can be one of: home, host, host-os, host-etc, host-root, xdg-desktop, xdg-documents, xdg-download,
+                    FS can be one of: home, host, host-os, host-etc, xdg-desktop, xdg-documents, xdg-download,
                     xdg-music, xdg-pictures, xdg-public-share, xdg-templates, xdg-videos, xdg-run,
                     xdg-config, xdg-cache, xdg-data, an absolute path, or a homedir-relative
                     path like ~/dir or paths relative to the xdg dirs, like xdg-download/subdir.
@@ -341,7 +254,7 @@
                     Remove access to the specified subset of the filesystem from
                     the application. This overrides to the Context section from the
                     application metadata.
-                    FILESYSTEM can be one of: home, host, host-os, host-etc, host-root, xdg-desktop, xdg-documents, xdg-download,
+                    FILESYSTEM can be one of: home, host, host-os, host-etc, xdg-desktop, xdg-documents, xdg-download,
                     xdg-music, xdg-pictures, xdg-public-share, xdg-templates, xdg-videos,
                     an absolute path, or a homedir-relative path like ~/dir.
                     This option can be used multiple times.
@@ -357,7 +270,8 @@
 [Policy subsystem]
 key=v1;v2;
 </programlisting>
-                </para><para>
+                </para></listitem>
+                <listitem><para>
                     This option can be used multiple times.
                 </para></listitem>
             </varlistentry>
@@ -367,108 +281,6 @@ key=v1;v2;
 
                 <listitem><para>
                     Remove generic policy option. This option can be used multiple times.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--usb=TYPE[:DATA]</option></term>
-
-                <listitem><para>
-                    Makes USB devices matching the query visible to the
-                    USB portal by adding the query to the application
-                    metadata. This does not have any effect on the
-                    devices exposed in /dev.
-                    <arg choice="plain">TYPE</arg> must be one of: all, cls,
-                    dev, vnd.
-                </para><variablelist>
-                    <varlistentry>
-                        <term><option>all</option></term>
-
-                        <listitem><para>
-                            Match all devices.
-                        </para></listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term><option>cls</option></term>
-
-                        <listitem><para>
-                            A device class and subclass query. <arg choice="plain">DATA</arg>
-                            must be in the form of <arg choice="plain">CLASS:SUBCLASS</arg> where
-                            both <arg choice="plain">CLASS</arg> and <arg choice="plain">SUBCLASS</arg>
-                            must valid 2-digit hexadecimal class id numbers. Alternatively,
-                            <arg choice="plain">SUBCLASS</arg> may be <literal>*</literal> to match
-                            all subclasses.
-                        </para></listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term><option>dev</option></term>
-
-                        <listitem><para>
-                            A device product id query. <arg choice="plain">DATA</arg>
-                            must be a valid 4-character hexadecimal product id
-                            number, for example <option>0a1b</option>. It
-                            requires a <option>vnd</option> filter in the query.
-                        </para></listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term><option>vnd</option></term>
-
-                        <listitem><para>
-                            A device vendor id query. <arg choice="plain">DATA</arg>
-                            must be a valid 4-character hexadecimal vendor id number
-                            greater than zero, for example <option>0fab</option>.
-                        </para></listitem>
-                    </varlistentry>
-
-                </variablelist><para>
-                    It is possible to compose multiple device queries together
-                    with the <literal>+</literal> sign, for example
-                    <option>--usb=vnd:0123+dev:4567</option>. The <arg choice="plain">dev</arg>
-                    filter requires a <arg choice="plain">vnd</arg>.
-                    Available since 1.15.11.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--nousb=TYPE[:DATA]</option></term>
-
-                <listitem><para>
-                    Hides USB devices matching the query from the USB portal by
-                    adding the query to the application metadata. Queries hiding
-                    devices take precedence over queries making devices visible
-                    (see <option>--usb</option>). The syntax is exactly equal to
-                    <option>--usb</option>. This does not have any effect on the
-                    devices exposed in /dev. Available since 1.15.11.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--usb-list-file=FILENAME</option></term>
-
-                <listitem><para>
-                    Adds USB device queries to the application metadata from the file
-                    <arg choice="plain">FILE_NAME</arg>. The line syntax is exactly
-                    equal to <option>--usb</option>. Additionally, if it starts
-                    with ! then the query is like for <option>--nousb</option>.
-                    Lines sthat starts with <literal>#</literal> are ignored,
-                    like a comment. Comments will not be persisted.
-                    Available since 1.15.11.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--usb-list=LIST</option></term>
-
-                <listitem><para>
-                    Adds USB device queries to the application metadata from
-                    <arg choice="plain">LIST</arg>. The syntax is exactly equal to
-                    <option>--usb</option> with queries separated by
-                    <literal>;</literal>. Additionally, if the query starts with
-                    <literal>!</literal> then the query is like for
-                    <option>--nousb</option>. Available since 1.15.11.
                 </para></listitem>
             </varlistentry>
 
@@ -671,7 +483,7 @@ key=v1;v2;
         <title>Examples</title>
 
         <para>
-            <command>$ flatpak build-finish /build/my-app --socket=x11 --share=ipc --usb=vnd:0fd9</command>
+            <command>$ flatpak build-finish /build/my-app --socket=x11 --share=ipc</command>
         </para>
 <programlisting>
 Exporting share/applications/gnome-calculator.desktop
@@ -680,14 +492,6 @@ More than one executable
 Using gcalccmd as command
 Please review the exported files and the metadata
 </programlisting>
-
-        <para>
-            <command>$ flatpak build-finish /build/my-app --socket=wayland --socket-if=x11:!has-wayland --share=ipc</command>
-        </para>
-        <para>
-            This grants Wayland access unconditionally and X11 access only when not running in a Wayland session,
-            allowing the application to fall back to X11 when needed.
-        </para>
 
     </refsect1>
 

@@ -89,7 +89,6 @@ static FlatpakCommand commands[] = {
   { "config", N_("Configure flatpak"), flatpak_builtin_config, flatpak_complete_config },
   { "repair", N_("Repair flatpak installation"), flatpak_builtin_repair, flatpak_complete_repair },
   { "create-usb", N_("Put applications or runtimes onto removable media"), flatpak_builtin_create_usb, flatpak_complete_create_usb },
-  { "preinstall", N_("Install flatpaks that are part of the operating system"), flatpak_builtin_preinstall, flatpak_complete_preinstall },
 
   /* translators: please keep the leading newline and space */
   { N_("\n Find applications and runtimes") },
@@ -359,24 +358,22 @@ flatpak_option_context_parse (GOptionContext     *context,
   else
     {
       if (opt_verbose > 0)
-        g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_INFO, message_handler, NULL);
+        g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, message_handler, NULL);
       if (opt_verbose > 1)
-        g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, message_handler, NULL);
+        g_log_set_handler (G_LOG_DOMAIN "2", G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, message_handler, NULL);
 
       if (opt_ostree_verbose)
         g_log_set_handler ("OSTree", G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, message_handler, NULL);
 
       if (opt_verbose > 0 || opt_ostree_verbose)
         flatpak_disable_fancy_output ();
-
-      flatpak_set_debugging (opt_verbose > 1);
     }
 
   /* sudo flatpak --user ... would operate on the root user's installation,
    * which is almost certainly not what the user intended so just consider it
    * an error.
    */
-  if (opt_user && running_under_sudo_root ())
+  if (opt_user && running_under_sudo ())
     return flatpak_fail_error (error, FLATPAK_ERROR,
                                _("Refusing to operate under sudo with --user. "
                                  "Omit sudo to operate on the user installation, "
@@ -605,8 +602,6 @@ install_polkit_agent (void)
   g_autoptr(GError) local_error = NULL;
   g_autoptr(GDBusConnection) bus = NULL;
   const char *on_session;
-  const char *env;
-  const char *distro_name;
 
   on_session = g_getenv ("FLATPAK_SYSTEM_HELPER_ON_SESSION");
   if (on_session != NULL)
@@ -616,7 +611,7 @@ install_polkit_agent (void)
 
   if (bus == NULL)
     {
-      g_info ("Unable to connect to system bus: %s", local_error->message);
+      g_debug ("Unable to connect to system bus: %s", local_error->message);
       return NULL;
     }
 
@@ -624,7 +619,7 @@ install_polkit_agent (void)
   listener = flatpak_polkit_agent_text_listener_new (NULL, &local_error);
   if (listener == NULL)
     {
-      g_info ("Failed to create polkit agent listener: %s", local_error->message);
+      g_debug ("Failed to create polkit agent listener: %s", local_error->message);
     }
   else
     {
@@ -635,11 +630,7 @@ install_polkit_agent (void)
       subject = polkit_unix_process_new_for_owner (getpid (), 0, getuid ());
 
       g_variant_builder_init (&opt_builder, G_VARIANT_TYPE_VARDICT);
-      env = g_getenv ("WSL_INTEROP");
-      distro_name = g_getenv ("WSL_DISTRO_NAME");
-      if ((env == NULL || *env == '\0') &&
-          (distro_name == NULL || *distro_name == '\0') &&
-          g_strcmp0 (g_getenv ("FLATPAK_FORCE_TEXT_AUTH"), "1") != 0)
+      if (g_strcmp0 (g_getenv ("FLATPAK_FORCE_TEXT_AUTH"), "1") != 0)
         g_variant_builder_add (&opt_builder, "{sv}", "fallback", g_variant_new_boolean (TRUE));
       options = g_variant_ref_sink (g_variant_builder_end (&opt_builder));
 
@@ -652,7 +643,7 @@ install_polkit_agent (void)
                                                            &local_error);
       if (agent == NULL)
         {
-          g_info ("Failed to register polkit agent listener: %s", local_error->message);
+          g_debug ("Failed to register polkit agent listener: %s", local_error->message);
         }
       g_object_unref (listener);
     }
@@ -688,7 +679,7 @@ flatpak_run (int      argc,
 
   if (!command->fn)
     {
-      g_autoptr(GOptionContext) context = NULL;
+      GOptionContext *context;
       g_autofree char *hint = NULL;
       g_autofree char *msg = NULL;
 
@@ -720,13 +711,13 @@ flatpak_run (int      argc,
               if (opt_version)
                 {
                   g_print ("%s\n", PACKAGE_STRING);
-                  return EXIT_SUCCESS;
+                  exit (EXIT_SUCCESS);
                 }
 
               if (opt_default_arch)
                 {
                   g_print ("%s\n", flatpak_get_arch ());
-                  return EXIT_SUCCESS;
+                  exit (EXIT_SUCCESS);
                 }
 
               if (opt_supported_arches)
@@ -735,7 +726,7 @@ flatpak_run (int      argc,
                   int i;
                   for (i = 0; arches[i] != NULL; i++)
                     g_print ("%s\n", arches[i]);
-                  return EXIT_SUCCESS;
+                  exit (EXIT_SUCCESS);
                 }
 
               if (opt_gl_drivers)
@@ -744,7 +735,7 @@ flatpak_run (int      argc,
                   int i;
                   for (i = 0; drivers[i] != NULL; i++)
                     g_print ("%s\n", drivers[i]);
-                  return EXIT_SUCCESS;
+                  exit (EXIT_SUCCESS);
                 }
 
               if (opt_list_installations)
@@ -760,7 +751,7 @@ flatpak_run (int      argc,
                           GFile *file = paths->pdata[i];
                           g_print ("%s\n", flatpak_file_get_path_cached (file));
                         }
-                      return EXIT_SUCCESS;
+                      exit (EXIT_SUCCESS);
                     }
                 }
 
@@ -786,7 +777,7 @@ flatpak_run (int      argc,
                   if (local_error != NULL)
                     {
                       g_printerr ("%s\n", local_error->message);
-                      return 1;
+                      exit (1);
                     }
 
                   for (gsize i = 0; i < system_installation_locations->len; i++)
@@ -814,7 +805,7 @@ flatpak_run (int      argc,
                   new_dirs_joined = g_strjoinv (":", (gchar **) new_dirs->pdata);
                   g_print ("XDG_DATA_DIRS=%s\n", new_dirs_joined);
 
-                  return EXIT_SUCCESS;
+                  exit (EXIT_SUCCESS);
                 }
             }
 
@@ -823,6 +814,8 @@ flatpak_run (int      argc,
           else
             msg = g_strdup (_("No command specified"));
         }
+
+      g_option_context_free (context);
 
       g_set_error (&error, G_IO_ERROR, G_IO_ERROR_FAILED, "%s\n\n%s", msg, hint);
 
@@ -961,6 +954,9 @@ main (int    argc,
   g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_WARNING, message_handler, NULL);
 
   g_set_prgname (argv[0]);
+
+  /* Avoid weird recursive type initialization deadlocks from libsoup */
+  g_type_ensure (G_TYPE_SOCKET);
 
   if (argc >= 4 && strcmp (argv[1], "complete") == 0)
     return complete (argc, argv);

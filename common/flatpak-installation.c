@@ -106,6 +106,9 @@ flatpak_installation_class_init (FlatpakInstallationClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->finalize = flatpak_installation_finalize;
+
+  /* Avoid weird recursive type initialization deadlocks from libsoup */
+  g_type_ensure (G_TYPE_SOCKET);
 }
 
 static void
@@ -317,11 +320,11 @@ flatpak_installation_new_system_with_id (const char   *id,
                                                    &local_error);
   if (installation == NULL)
     {
-      g_info ("Error creating Flatpak installation: %s", local_error->message);
+      g_debug ("Error creating Flatpak installation: %s", local_error->message);
       g_propagate_error (error, g_steal_pointer (&local_error));
     }
 
-  g_info ("Found Flatpak installation for '%s'", id);
+  g_debug ("Found Flatpak installation for '%s'", id);
   return g_steal_pointer (&installation);
 }
 
@@ -670,14 +673,11 @@ flatpak_installation_launch_full (FlatpakInstallation *self,
                                   GCancellable        *cancellable,
                                   GError             **error)
 {
-  g_auto(GStrv) run_environ = NULL;
   g_autoptr(FlatpakDir) dir = NULL;
   g_autoptr(FlatpakDeploy) app_deploy = NULL;
   g_autoptr(FlatpakDecomposed) app_ref = NULL;
   g_autofree char *instance_dir = NULL;
   FlatpakRunFlags run_flags;
-
-  run_environ = g_get_environ ();
 
   dir = flatpak_installation_get_dir (self, error);
   if (dir == NULL)
@@ -700,18 +700,15 @@ flatpak_installation_launch_full (FlatpakInstallation *self,
 
   if (!flatpak_run_app (app_ref,
                         app_deploy,
-                        FLATPAK_RUN_APP_DEPLOY_APP_ORIGINAL,
                         NULL,
+                        NULL, NULL,
                         NULL, NULL, NULL,
-                        FLATPAK_RUN_APP_DEPLOY_USR_ORIGINAL,
                         0,
                         run_flags,
                         NULL,
                         NULL,
                         NULL, 0, -1,
-                        (const char * const *) run_environ,
                         &instance_dir,
-                        NULL, NULL,
                         cancellable, error))
     return FALSE;
 
@@ -990,8 +987,9 @@ end_of_lifed_with_rebase (FlatpakTransaction *transaction,
   if (rebased_to_ref == NULL || remote == NULL)
     return FALSE;
 
-  /* No need to call flatpak_transaction_add_rebase_and_uninstall() here since
-   * we only care about what needs an update
+  /* No need to call flatpak_transaction_add_uninstall() and
+   * flatpak_transaction_add_rebase() here since we only care about what needs
+   * an update
    */
   g_ptr_array_add (*eol_rebase_refs, g_strdup (ref));
   return TRUE;
@@ -1015,7 +1013,7 @@ transaction_ready (FlatpakTransaction  *transaction,
       if (type == FLATPAK_TRANSACTION_OPERATION_UNINSTALL)
         {
           const char *ref = flatpak_transaction_operation_get_ref (op);
-          g_info ("Update transaction wants to uninstall %s", ref);
+          g_debug ("Update transaction wants to uninstall %s", ref);
           continue;
         }
 
@@ -1107,7 +1105,7 @@ flatpak_installation_list_installed_refs_for_update (FlatpakInstallation *self,
 
       if (g_error_matches (local_error, FLATPAK_ERROR, FLATPAK_ERROR_REMOTE_NOT_FOUND))
         {
-          g_info ("%s: Unable to update %s: %s", G_STRFUNC, ref, local_error->message);
+          g_debug ("%s: Unable to update %s: %s", G_STRFUNC, ref, local_error->message);
           g_clear_error (&local_error);
         }
       else
@@ -1161,7 +1159,7 @@ flatpak_installation_list_installed_refs_for_update (FlatpakInstallation *self,
           if (!g_hash_table_contains (installed_refs_for_update_set, op_ref))
             {
               g_hash_table_add (installed_refs_for_update_set, (char *)op_ref);
-              g_info ("%s: Installed ref %s needs update", G_STRFUNC, op_ref);
+              g_debug ("%s: Installed ref %s needs update", G_STRFUNC, op_ref);
               g_ptr_array_add (installed_refs_for_update,
                                g_object_ref (installed_ref));
             }
@@ -1179,7 +1177,7 @@ flatpak_installation_list_installed_refs_for_update (FlatpakInstallation *self,
                   if (installed_ref != NULL)
                     {
                       g_hash_table_add (installed_refs_for_update_set, (char *)related_op_ref);
-                      g_info ("%s: Installed ref %s needs update", G_STRFUNC, related_op_ref);
+                      g_debug ("%s: Installed ref %s needs update", G_STRFUNC, related_op_ref);
                       g_ptr_array_add (installed_refs_for_update,
                                        g_object_ref (installed_ref));
                     }
@@ -1202,7 +1200,7 @@ flatpak_installation_list_installed_refs_for_update (FlatpakInstallation *self,
           if (!g_hash_table_contains (installed_refs_for_update_set, rebased_ref))
             {
               g_hash_table_add (installed_refs_for_update_set, (char *)rebased_ref);
-              g_info ("%s: Installed ref %s needs update", G_STRFUNC, rebased_ref);
+              g_debug ("%s: Installed ref %s needs update", G_STRFUNC, rebased_ref);
               g_ptr_array_add (installed_refs_for_update,
                                g_object_ref (installed_ref));
             }
@@ -1234,7 +1232,7 @@ flatpak_installation_list_installed_refs_for_update (FlatpakInstallation *self,
  * Lists only the remotes whose type is included in the @types argument.
  *
  * Since flatpak 1.7 this will never return any types except FLATPAK_REMOTE_TYPE_STATIC.
- * Equivalent functionality to FLATPAK_REMOTE_TYPE_USB can be had by listing remote refs
+ * Equivalent functionallity to FLATPAK_REMOTE_TYPE_USB can be had by listing remote refs
  * with FLATPAK_QUERY_FLAGS_ONLY_SIDELOADED.
  *
  * Returns: (transfer container) (element-type FlatpakRemote): a GPtrArray of
@@ -1727,8 +1725,8 @@ flatpak_installation_load_app_overrides (FlatpakInstallation *self,
  * flatpak_installation_install_bundle:
  * @self: a #FlatpakInstallation
  * @file: a #GFile that is an flatpak bundle
- * @progress: (scope call) (closure progress_data) (nullable): progress callback
- * @progress_data: (nullable): user data passed to @progress
+ * @progress: (scope call) (nullable): progress callback
+ * @progress_data: (closure progress) (nullable): user data passed to @progress
  * @cancellable: (nullable): a #GCancellable
  * @error: return location for a #GError
  *
@@ -1774,7 +1772,7 @@ flatpak_installation_install_bundle (FlatpakInstallation    *self,
   if (!flatpak_dir_ensure_repo (dir_clone, cancellable, error))
     return NULL;
 
-  if (!flatpak_dir_install_bundle (dir_clone, FALSE, file, remote, NULL,
+  if (!flatpak_dir_install_bundle (dir_clone, file, remote, NULL,
                                    cancellable, error))
     return NULL;
 
@@ -1853,8 +1851,8 @@ flatpak_installation_install_ref_file (FlatpakInstallation *self,
  * @arch: (nullable): which architecture to fetch (default: current architecture)
  * @branch: (nullable): which branch to fetch (default: 'master')
  * @subpaths: (nullable) (array zero-terminated=1): A list of subpaths to fetch, or %NULL for everything
- * @progress: (scope call) (closure progress_data) (nullable): progress callback
- * @progress_data: (nullable): user data passed to @progress
+ * @progress: (scope call) (nullable): progress callback
+ * @progress_data: (closure progress) (nullable): user data passed to @progress
  * @cancellable: (nullable): a #GCancellable
  * @error: return location for a #GError
  *
@@ -1928,8 +1926,8 @@ flatpak_installation_install_full (FlatpakInstallation    *self,
                             (flags & FLATPAK_INSTALL_FLAGS_NO_PULL) != 0,
                             (flags & FLATPAK_INSTALL_FLAGS_NO_DEPLOY) != 0,
                             (flags & FLATPAK_INSTALL_FLAGS_NO_STATIC_DELTAS) != 0,
-                            FALSE, FALSE, FALSE, FALSE, state,
-                            ref, NULL, (const char **) subpaths, NULL, NULL, NULL, NULL, NULL,
+                            FALSE, FALSE, FALSE, state,
+                            ref, NULL, (const char **) subpaths, NULL, NULL, NULL, NULL,
                             progress, cancellable, error))
     return NULL;
 
@@ -1958,8 +1956,8 @@ flatpak_installation_install_full (FlatpakInstallation    *self,
  * @name: name of the app/runtime to fetch
  * @arch: (nullable): which architecture to fetch (default: current architecture)
  * @branch: (nullable): which branch to fetch (default: 'master')
- * @progress: (scope call) (closure progress_data) (nullable): progress callback
- * @progress_data: (nullable): user data passed to @progress
+ * @progress: (scope call) (nullable): progress callback
+ * @progress_data: (closure progress) (nullable): user data passed to @progress
  * @cancellable: (nullable): a #GCancellable
  * @error: return location for a #GError
  *
@@ -2009,8 +2007,8 @@ flatpak_installation_install (FlatpakInstallation    *self,
  * @arch: (nullable): architecture of the app or runtime to update (default: current architecture)
  * @branch: (nullable): name of the branch of the app or runtime to update (default: master)
  * @subpaths: (nullable) (array zero-terminated=1): A list of subpaths to fetch, or %NULL for everything
- * @progress: (scope call) (closure progress_data) (nullable): the callback
- * @progress_data: (nullable): user data passed to @progress
+ * @progress: (scope call) (nullable): the callback
+ * @progress_data: (closure progress) (nullable): user data passed to @progress
  * @cancellable: (nullable): a #GCancellable
  * @error: return location for a #GError
  *
@@ -2097,7 +2095,7 @@ flatpak_installation_update_full (FlatpakInstallation    *self,
                            (flags & FLATPAK_UPDATE_FLAGS_NO_STATIC_DELTAS) != 0,
                            FALSE, FALSE, FALSE, state,
                            ref, target_commit,
-                           (const char **) subpaths, NULL, NULL, NULL, NULL, NULL,
+                           (const char **) subpaths, NULL, NULL, NULL, NULL,
                            progress, cancellable, error))
     return NULL;
 
@@ -2124,8 +2122,8 @@ flatpak_installation_update_full (FlatpakInstallation    *self,
  * @name: name of the app or runtime to update
  * @arch: (nullable): architecture of the app or runtime to update (default: current architecture)
  * @branch: (nullable): name of the branch of the app or runtime to update (default: master)
- * @progress: (scope call) (closure progress_data) (nullable): the callback
- * @progress_data: (nullable): user data passed to @progress
+ * @progress: (scope call) (nullable): the callback
+ * @progress_data: (closure progress) (nullable): user data passed to @progress
  * @cancellable: (nullable): a #GCancellable
  * @error: return location for a #GError
  *
@@ -2172,8 +2170,8 @@ flatpak_installation_update (FlatpakInstallation    *self,
  *  %NULL, flatpak_get_default_arch() is assumed
  * @branch: (nullable): name of the branch of the app or runtime to uninstall;
  *  if %NULL, `master` is assumed
- * @progress: (scope call) (closure progress_data) (nullable): the callback
- * @progress_data: (nullable): user data passed to @progress
+ * @progress: (scope call) (nullable): the callback
+ * @progress_data: (closure progress) (nullable): user data passed to @progress
  * @cancellable: (nullable): a #GCancellable
  * @error: return location for a #GError
  *
@@ -2215,8 +2213,8 @@ flatpak_installation_uninstall (FlatpakInstallation    *self,
  *  %NULL, flatpak_get_default_arch() is assumed
  * @branch: (nullable): name of the branch of the app or runtime to uninstall;
  *  if %NULL, `master` is assumed
- * @progress: (scope call) (closure progress_data) (nullable): the callback
- * @progress_data: (nullable): user data passed to @progress
+ * @progress: (scope call) (nullable): the callback
+ * @progress_data: (closure progress) (nullable): user data passed to @progress
  * @cancellable: (nullable): a #GCancellable
  * @error: return location for a #GError
  *
@@ -2603,8 +2601,8 @@ flatpak_installation_update_appstream_sync (FlatpakInstallation *self,
  * @self: a #FlatpakInstallation
  * @remote_name: the name of the remote
  * @arch: (nullable): Architecture to update, or %NULL for the local machine arch
- * @progress: (scope call) (closure progress_data) (nullable): progress callback
- * @progress_data: (nullable): user data passed to @progress
+ * @progress: (scope call) (nullable): progress callback
+ * @progress_data: (closure progress) (nullable): user data passed to @progress
  * @out_changed: (nullable): Set to %TRUE if the contents of the appstream changed, %FALSE if nothing changed
  * @cancellable: (nullable): a #GCancellable
  * @error: return location for a #GError
@@ -2673,41 +2671,6 @@ flatpak_installation_create_monitor (FlatpakInstallation *self,
 
   return g_file_monitor_file (path, G_FILE_MONITOR_NONE,
                               cancellable, error);
-}
-
-/**
- * flatpak_installation_get_timestamp:
- * @self: a #FlatpakInstallation
- *
- * Gets the modification time of the installation, based on the file monitored by
- * flatpak_installation_create_monitor(). This can be used to detect when
- * applications or runtimes have been installed, uninstalled, or updated, or when
- * remotes have been added, removed, or modified, to aid cache invalidation.
- *
- * Returns: the modification time (seconds since the Unix epoch) of the
- *   installation configuration, or %G_MAXUINT64 if unavailable
- *
- * Since: 1.18.0
- */
-guint64
-flatpak_installation_get_timestamp (FlatpakInstallation *self)
-{
-  g_autoptr(FlatpakDir) dir = NULL;
-  g_autoptr(GFile) changed_file = NULL;
-  g_autoptr(GFileInfo) info = NULL;
-
-  dir = flatpak_installation_get_dir_maybe_no_repo (self);
-  changed_file = flatpak_dir_get_changed_path (dir);
-
-  info = g_file_query_info (changed_file,
-                            G_FILE_ATTRIBUTE_TIME_MODIFIED,
-                            G_FILE_QUERY_INFO_NONE,
-                            NULL,
-                            NULL);
-  if (info == NULL)
-    return G_MAXUINT64;
-
-  return g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
 }
 
 
@@ -3105,11 +3068,10 @@ flatpak_installation_list_unused_refs (FlatpakInstallation *self,
  *
  *   * exclude-refs (as): Act as if these refs are not installed even if they
  *       are when determining the set of unused refs
- *   * filter-by-eol (b): Return refs as unused if they are End-Of-Life.
- *       Note that if this option is combined with other filters then non-EOL refs may also be returned.
- *   * filter-by-autoprune (b): Return refs as unused if they should be autopruned.
- *       Note that if this option is combined with other filters then non-autoprune refs may also be returned.
-
+ *   * filter-by-eol (b): Only return refs as unused if they are End-Of-Life.
+ *       Note that if this option is combined with other filters (of which there
+ *       are none currently) non-EOL refs may also be returned.
+ *
  * Returns: (transfer container) (element-type FlatpakInstalledRef): a GPtrArray of
  *   #FlatpakInstalledRef instances
  *
@@ -3128,28 +3090,19 @@ flatpak_installation_list_unused_refs_with_options (FlatpakInstallation *self,
   g_auto(GStrv) refs_strv = NULL;
   g_autofree char **refs_to_exclude = NULL;
   gboolean filter_by_eol = FALSE;
-  gboolean filter_by_autoprune = FALSE;
-  FlatpakDirFilterFlags filter_flags = FLATPAK_DIR_FILTER_NONE;
 
   if (options)
     {
       (void) g_variant_lookup (options, "exclude-refs", "^a&s", &refs_to_exclude);
       (void) g_variant_lookup (options, "filter-by-eol", "b", &filter_by_eol);
-      (void) g_variant_lookup (options, "filter-by-autoprune", "b", &filter_by_autoprune);
     }
 
   dir = flatpak_installation_get_dir (self, error);
   if (dir == NULL)
     return NULL;
 
-  if (filter_by_eol)
-    filter_flags |= FLATPAK_DIR_FILTER_EOL;
-  if (filter_by_autoprune)
-    filter_flags |= FLATPAK_DIR_FILTER_AUTOPRUNE;
-
   refs_strv = flatpak_dir_list_unused_refs (dir, arch, metadata_injection, NULL,
-                                            (const char * const *)refs_to_exclude,
-                                            filter_flags,
+                                            (const char * const *)refs_to_exclude, filter_by_eol,
                                             cancellable, error);
   if (refs_strv == NULL)
     return NULL;
@@ -3159,25 +3112,14 @@ flatpak_installation_list_unused_refs_with_options (FlatpakInstallation *self,
     {
       g_autoptr(GError) local_error = NULL;
       FlatpakInstalledRef *ref = NULL;
-      g_autoptr(FlatpakDecomposed) decomposed = NULL;
+      g_autoptr(FlatpakDecomposed) decomposed = flatpak_decomposed_new_from_ref (*iter, &local_error);
+      if (decomposed)
+        ref = get_ref (dir, decomposed, cancellable, &local_error);
 
-      decomposed = flatpak_decomposed_new_from_ref (*iter, &local_error);
-      if (decomposed == NULL)
-        {
-          g_warning ("Unexpected failure parsing ref %s: %s", *iter, local_error->message);
-          continue;
-        }
-
-      ref = get_ref (dir, decomposed, cancellable, &local_error);
-      if (ref == NULL)
-        {
-          g_warning ("Unexpected failure getting ref for %s: %s",
-                     flatpak_decomposed_get_ref (decomposed),
-                     local_error->message);
-          continue;
-        }
-
-      g_ptr_array_add (refs, ref);
+      if (ref != NULL)
+        g_ptr_array_add (refs, ref);
+      else
+        g_warning ("Unexpected failure getting ref for %s: %s", flatpak_decomposed_get_ref (decomposed), local_error->message);
     }
 
   return g_steal_pointer (&refs);

@@ -102,7 +102,7 @@ child_watch_died (GPid     pid,
   PidData *pid_data = user_data;
   g_autoptr(GVariant) signal_variant = NULL;
 
-  g_info ("Client Pid %d died", pid_data->pid);
+  g_debug ("Client Pid %d died", pid_data->pid);
 
   signal_variant = g_variant_ref_sink (g_variant_new ("(uu)", pid, status));
   g_dbus_connection_emit_signal (session_bus,
@@ -189,8 +189,8 @@ child_setup_func (gpointer user_data)
           if (fd_map[i].from == data->tty)
             {
               if (ioctl (fd_map[i].final, TIOCSCTTY, 0) == -1)
-                g_info ("ioctl(%d, TIOCSCTTY, 0) failed: %s",
-                        fd_map[i].final, strerror (errno));
+                g_debug ("ioctl(%d, TIOCSCTTY, 0) failed: %s",
+                         fd_map[i].final, strerror (errno));
               break;
             }
         }
@@ -215,7 +215,7 @@ handle_host_command (FlatpakDevelopment    *object,
   gsize i, j, n_fds, n_envs;
   const gint *fds;
   g_autofree FdMapEntry *fd_map = NULL;
-  g_auto(GStrv) env = NULL;
+  gchar **env;
   gint32 max_fd;
 
   if (*arg_cwd_path == 0)
@@ -240,7 +240,7 @@ handle_host_command (FlatpakDevelopment    *object,
       return G_DBUS_METHOD_INVOCATION_HANDLED;
     }
 
-  g_info ("Running host command %s", arg_argv[0]);
+  g_debug ("Running host command %s", arg_argv[0]);
 
   n_fds = 0;
   fds = NULL;
@@ -355,7 +355,7 @@ handle_host_command (FlatpakDevelopment    *object,
                                                   pid_data,
                                                   NULL);
 
-  g_info ("Client Pid is %d", pid_data->pid);
+  g_debug ("Client Pid is %d", pid_data->pid);
 
   g_hash_table_replace (client_pid_data_hash, GUINT_TO_POINTER (pid_data->pid),
                         pid_data);
@@ -385,7 +385,7 @@ handle_host_command_signal (FlatpakDevelopment    *object,
       return G_DBUS_METHOD_INVOCATION_HANDLED;
     }
 
-  g_info ("Sending signal %d to client pid %d", arg_signal, arg_pid);
+  g_debug ("Sending signal %d to client pid %d", arg_signal, arg_pid);
 
   if (to_process_group)
     killpg (pid_data->pid, arg_signal);
@@ -563,15 +563,12 @@ static void file_changed (GFileMonitor     *monitor,
 static void
 update_real_monitor (MonitorData *data)
 {
-  char *real = NULL;
-  g_autoptr(GError) error = NULL;
-
-  real = flatpak_realpath (data->source, &error);
+  char *real = realpath (data->source, NULL);
 
   if (real == NULL)
     {
-      g_info ("unable to get real path to monitor host file %s: %s", data->source,
-              error->message);
+      g_debug ("unable to get real path to monitor host file %s: %s", data->source,
+               g_strerror (errno));
       return;
     }
 
@@ -610,7 +607,7 @@ update_real_monitor (MonitorData *data)
   data->monitor_real = g_file_monitor_file (r, G_FILE_MONITOR_NONE, NULL, &err);
   if (!data->monitor_real)
     {
-      g_info ("failed to monitor host file %s (real path of %s): %s",
+      g_debug ("failed to monitor host file %s (real path of %s): %s",
                real, data->source, err->message);
       return;
     }
@@ -629,7 +626,7 @@ file_monitor_do (MonitorData *data)
       /* We can't update the /etc/localtime symlink at runtime, nor can we make it a of the
        * correct form "../usr/share/zoneinfo/$timezone". So, instead we use the old debian
        * /etc/timezone file for telling the sandbox the timezone. */
-      g_autofree char *dest = g_build_filename (monitor_dir, "timezone", NULL);
+      char *dest = g_build_filename (monitor_dir, "timezone", NULL);
       g_autofree char *raw_timezone = flatpak_get_timezone ();
       g_autofree char *timezone_content = g_strdup_printf ("%s\n", raw_timezone);
 
@@ -669,7 +666,7 @@ setup_file_monitor (const char *source)
     }
   else
     {
-      g_info ("failed to monitor host file %s: %s", source, err->message);
+      g_debug ("failed to monitor host file %s: %s", source, err->message);
     }
 
   file_monitor_do (data);
@@ -700,7 +697,7 @@ start_p11_kit_server (const char *flatpak_dir)
   g_autoptr(GError) local_error = NULL;
   g_auto(GStrv) stdout_lines = NULL;
   int i;
-  const char * const p11_argv[] = {
+  char *p11_argv[] = {
     "p11-kit", "server",
     /* We explicitly request --sh here, because we then fail on earlier versions that doesn't support
      * this flag. This is good, because those earlier versions did not properly daemonize and caused
@@ -713,11 +710,10 @@ start_p11_kit_server (const char *flatpak_dir)
     NULL
   };
 
-  g_info ("starting p11-kit server");
+  g_debug ("starting p11-kit server");
 
   if (!g_spawn_sync (NULL,
-                     (char **) p11_argv, NULL,
-                     G_SPAWN_SEARCH_PATH | G_SPAWN_STDERR_TO_DEV_NULL,
+                     p11_argv, NULL, G_SPAWN_SEARCH_PATH | G_SPAWN_STDERR_TO_DEV_NULL,
                      NULL, NULL,
                      &p11_kit_stdout, NULL,
                      &exit_status, &local_error))
@@ -755,11 +751,11 @@ start_p11_kit_server (const char *flatpak_dir)
 
   if (p11_kit_server_pid != 0)
     {
-      g_info ("Using p11-kit socket path %s, pid %d", socket_path, p11_kit_server_pid);
+      g_debug ("Using p11-kit socket path %s, pid %d", socket_path, p11_kit_server_pid);
       p11_kit_server_socket_path = g_steal_pointer (&socket_path);
     }
   else
-    g_info ("Not using p11-kit due to older version");
+    g_debug ("Not using p11-kit due to older version");
 }
 
 int
@@ -771,9 +767,8 @@ main (int    argc,
   gboolean replace;
   gboolean verbose;
   gboolean show_version;
-  g_autoptr(GOptionContext) context = NULL;
+  GOptionContext *context;
   GBusNameOwnerFlags flags;
-  g_autofree char *pk11_program = NULL;
   g_autofree char *flatpak_dir = NULL;
   g_autoptr(GError) error = NULL;
   const GOptionEntry options[] = {
@@ -789,7 +784,7 @@ main (int    argc,
                          m_localtime = NULL;
   struct sigaction action;
 
-  /* Save the environment before changing anything, so that subprocesses
+  /* Save the enviroment before changing anything, so that subprocesses
    * can get the unchanged version */
   original_environ = g_get_environ ();
 
@@ -825,10 +820,9 @@ main (int    argc,
       g_printerr ("Try \"%s --help\" for more information.",
                   g_get_prgname ());
       g_printerr ("\n");
+      g_option_context_free (context);
       return 1;
     }
-
-  g_clear_pointer (&context, g_option_context_free);
 
   if (show_version)
     {
@@ -837,7 +831,7 @@ main (int    argc,
     }
 
   if (verbose)
-    g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_INFO, message_handler, NULL);
+    g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, message_handler, NULL);
 
   client_pid_data_hash = g_hash_table_new_full (NULL, NULL, NULL, (GDestroyNotify) pid_data_free);
 
@@ -855,11 +849,10 @@ main (int    argc,
       exit (1);
     }
 
-  pk11_program = g_find_program_in_path ("p11-kit");
-  if (pk11_program)
+  if (g_find_program_in_path ("p11-kit"))
     start_p11_kit_server (flatpak_dir);
   else
-    g_info ("p11-kit not found");
+    g_debug ("p11-kit not found");
 
   monitor_dir = g_build_filename (flatpak_dir, "monitor", NULL);
   if (g_mkdir_with_parents (monitor_dir, 0755) != 0)

@@ -23,10 +23,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "flatpak-json-backports-private.h"
-#include "flatpak-metadata-private.h"
 #include "flatpak-utils-base-private.h"
 #include "flatpak-utils-private.h"
+#include "flatpak-run-private.h"
 #include "flatpak-instance.h"
 #include "flatpak-instance-private.h"
 #include "flatpak-enum-types.h"
@@ -61,7 +60,6 @@ struct _FlatpakInstancePrivate
 {
   char     *id;
   char     *dir;
-  char     *private_dir;
 
   GKeyFile *info;
   char     *app;
@@ -85,7 +83,6 @@ flatpak_instance_finalize (GObject *object)
 
   g_free (priv->id);
   g_free (priv->dir);
-  g_free (priv->private_dir);
   g_free (priv->app);
   g_free (priv->arch);
   g_free (priv->branch);
@@ -313,27 +310,6 @@ flatpak_instance_get_info (FlatpakInstance *self)
   return priv->info;
 }
 
-GStrv
-flatpak_instance_get_run_environ (FlatpakInstance *self, GError **error)
-{
-  FlatpakInstancePrivate *priv = flatpak_instance_get_instance_private (self);
-  g_autofree char *file = NULL;
-  g_autofree char *environ_data = NULL;
-  gsize environ_size;
-  g_auto(GStrv) env_vars = NULL;
-
-  file = g_build_filename (priv->private_dir, "run-environ", NULL);
-
-  if (!g_file_get_contents (file, &environ_data, &environ_size, error))
-    return NULL;
-
-  env_vars = flatpak_parse_env_block (environ_data, environ_size, error);
-  if (env_vars == NULL)
-    return NULL;
-
-  return g_steal_pointer (&env_vars);
-}
-
 static GKeyFile *
 get_instance_info (const char *dir)
 {
@@ -346,7 +322,7 @@ get_instance_info (const char *dir)
   key_file = g_key_file_new ();
   if (!g_key_file_load_from_file (key_file, file, G_KEY_FILE_NONE, &error))
     {
-      g_info ("Failed to load instance info file '%s': %s", file, error->message);
+      g_debug ("Failed to load instance info file '%s': %s", file, error->message);
       return NULL;
     }
 
@@ -368,21 +344,21 @@ get_child_pid (const char *dir)
 
   if (!g_file_get_contents (file, &contents, &length, &error))
     {
-      g_info ("Failed to load bwrapinfo.json file '%s': %s", file, error->message);
+      g_debug ("Failed to load bwrapinfo.json file '%s': %s", file, error->message);
       return 0;
     }
 
   parser = json_parser_new ();
   if (!json_parser_load_from_data (parser, contents, length, &error))
     {
-      g_info ("Failed to parse bwrapinfo.json file '%s': %s", file, error->message);
+      g_debug ("Failed to parse bwrapinfo.json file '%s': %s", file, error->message);
       return 0;
     }
 
   node = json_parser_get_root (parser);
   if (!node)
     {
-      g_info ("Failed to parse bwrapinfo.json file '%s': %s", file, "empty");
+      g_debug ("Failed to parse bwrapinfo.json file '%s': %s", file, "empty");
       return 0;
     }
 
@@ -402,7 +378,7 @@ get_pid (const char *dir)
 
   if (!g_file_get_contents (file, &contents, NULL, &error))
     {
-      g_info ("Failed to load pid file '%s': %s", file, error->message);
+      g_debug ("Failed to load pid file '%s': %s", file, error->message);
       return 0;
     }
 
@@ -416,7 +392,6 @@ flatpak_instance_new (const char *dir)
   FlatpakInstancePrivate *priv = flatpak_instance_get_instance_private (self);
 
   priv->dir = g_strdup (dir);
-  priv->private_dir = g_strdup_printf ("%s-private", dir);
   priv->id = g_path_get_basename (dir);
 
   priv->pid = get_pid (priv->dir);
@@ -554,7 +529,7 @@ flatpak_instance_ensure_per_app_dir (const char *app_id,
                                     _("Unable to lock %s"),
                                     lock_path);
 
-  *lock_fd_out = g_steal_fd (&lock_fd);
+  *lock_fd_out = glnx_steal_fd (&lock_fd);
   *lock_path_out = g_steal_pointer (&lock_path);
   return TRUE;
 }
@@ -596,10 +571,15 @@ flatpak_instance_ensure_per_app_dev_shm (const char *app_id,
   per_app_parent = flatpak_instance_get_apps_directory ();
 
   per_app_dir = g_build_filename (per_app_parent, app_id, NULL);
-  if (!glnx_opendirat (AT_FDCWD, per_app_dir, TRUE,
-                       &per_app_dir_fd,
-                       error))
-    return FALSE;
+  per_app_dir_fd = openat (AT_FDCWD, per_app_dir,
+                           O_PATH | O_DIRECTORY | O_CLOEXEC);
+
+  /* This can't happen under normal circumstances: if we have the lock,
+   * then the directory it's in had better exist. */
+  if (per_app_dir_fd < 0)
+    return glnx_throw_errno_prefix (error,
+                                    _("Unable to open directory %s"),
+                                    per_app_dir);
 
   /* If there's an existing symlink to a suitable directory, we can
    * reuse it (carefully). This gives us the sharing we wanted between
@@ -732,32 +712,6 @@ flatpak_instance_ensure_per_app_xdg_runtime_dir (const char *app_id,
   return TRUE;
 }
 
-static int
-flatpak_instance_create_lock_file (const char *instance_dir)
-{
-  g_autofree char *lock_file = g_build_filename (instance_dir, ".ref", NULL);
-  glnx_autofd int lock_fd = -1;
-  struct flock l = {
-    .l_type = F_RDLCK,
-    .l_whence = SEEK_SET,
-    .l_start = 0,
-    .l_len = 0
-  };
-
-  /* Take a file lock inside the dir, hold that during setup
-   * and in bwrap. Anyone trying to clean up unused directories
-   * need to first verify that there is a .ref file and take a
-   * write lock on .ref to ensure it is not in use.
-   */
-  lock_fd = open (lock_file, O_RDWR | O_CREAT | O_CLOEXEC, 0644);
-  /* There is a tiny race here between the open creating the file and the lock succeeding.
-     We work around that by only gc:ing "old" .ref files */
-  if (lock_fd == -1 || fcntl (lock_fd, F_SETLK, &l) != 0)
-    return -1;
-
-  return g_steal_fd (&lock_fd);
-}
-
 /*
  * @host_dir_out: (not optional): used to return the directory on the host
  *  system representing this instance
@@ -766,16 +720,13 @@ flatpak_instance_create_lock_file (const char *instance_dir)
  */
 char *
 flatpak_instance_allocate_id (char **host_dir_out,
-                              char **host_private_dir_out,
-                              int   *lock_fd_out)
+                              int *lock_fd_out)
 {
   g_autofree char *base_dir = flatpak_instance_get_instances_directory ();
   int count;
 
   g_return_val_if_fail (host_dir_out != NULL, NULL);
   g_return_val_if_fail (*host_dir_out == NULL, NULL);
-  g_return_val_if_fail (host_private_dir_out != NULL, NULL);
-  g_return_val_if_fail (*host_private_dir_out == NULL, NULL);
   g_return_val_if_fail (lock_fd_out != NULL, NULL);
   g_return_val_if_fail (*lock_fd_out == -1, NULL);
 
@@ -788,34 +739,39 @@ flatpak_instance_allocate_id (char **host_dir_out,
     {
       g_autofree char *instance_id = NULL;
       g_autofree char *instance_dir = NULL;
-      g_autofree char *instance_private_dir = NULL;
-      glnx_autofd int lock_fd = -1;
 
       instance_id = g_strdup_printf ("%u", g_random_int ());
 
       instance_dir = g_build_filename (base_dir, instance_id, NULL);
-      instance_private_dir = g_strdup_printf ("%s-private", instance_dir);
 
       /* We use an atomic mkdir to ensure the instance id is unique */
-      if (mkdir (instance_dir, 0755) != 0)
-        continue;
-
-      lock_fd = flatpak_instance_create_lock_file (instance_dir);
-      if (lock_fd == -1)
-        continue;
-
-      if (mkdir (instance_private_dir, 0700) != 0)
+      if (mkdir (instance_dir, 0755) == 0)
         {
-          g_warning ("Could not create private instance directory '%s': %s",
-                     instance_private_dir, g_strerror (errno));
-          continue;
-        }
+          g_autofree char *lock_file = g_build_filename (instance_dir, ".ref", NULL);
+          glnx_autofd int lock_fd = -1;
+          struct flock l = {
+            .l_type = F_RDLCK,
+            .l_whence = SEEK_SET,
+            .l_start = 0,
+            .l_len = 0
+          };
 
-      *lock_fd_out = g_steal_fd (&lock_fd);
-      g_info ("Allocated instance id %s", instance_id);
-      *host_dir_out = g_steal_pointer (&instance_dir);
-      *host_private_dir_out = g_steal_pointer (&instance_private_dir);
-      return g_steal_pointer (&instance_id);
+          /* Then we take a file lock inside the dir, hold that during
+           * setup and in bwrap. Anyone trying to clean up unused
+           * directories need to first verify that there is a .ref
+           * file and take a write lock on .ref to ensure its not in
+           * use. */
+          lock_fd = open (lock_file, O_RDWR | O_CREAT | O_CLOEXEC, 0644);
+          /* There is a tiny race here between the open creating the file and the lock succeeding.
+             We work around that by only gc:ing "old" .ref files */
+          if (lock_fd != -1 && fcntl (lock_fd, F_SETLK, &l) == 0)
+            {
+              *lock_fd_out = glnx_steal_fd (&lock_fd);
+              g_debug ("Allocated instance id %s", instance_id);
+              *host_dir_out = g_steal_pointer (&instance_dir);
+              return g_steal_pointer (&instance_id);
+            }
+        }
     }
 
   return NULL;
@@ -927,11 +883,13 @@ flatpak_instance_claim_per_app_temp_directory (const char *app_id,
     return glnx_throw (error, "%s does not start with %s/flatpak-%s-",
                        reuse_path, parent, app_id);
 
-  /* Avoid symlink attacks by not following symlinks */
-  if (!glnx_opendirat (AT_FDCWD, reuse_path, FALSE,
-                       &dfd,
-                       error))
-    return FALSE;
+  /* Avoid symlink attacks via O_NOFOLLOW */
+  dfd = openat (AT_FDCWD, reuse_path,
+                O_PATH | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+
+  if (dfd < 0)
+    return glnx_throw_errno_prefix (error, "opening %s O_DIRECTORY|O_NOFOLLOW",
+                                    reuse_path);
 
   if (fstat (dfd, &statbuf) < 0)
     return glnx_throw_errno_prefix (error, "fstat %s", reuse_path);
@@ -1006,10 +964,11 @@ flatpak_instance_gc_per_app_dirs (const char *instance_id,
   /* Take an exclusive lock so we don't race with other instances */
 
   per_app_dir = g_build_filename (per_app_parent, app_id, NULL);
-  if (!glnx_opendirat (AT_FDCWD, per_app_dir, TRUE,
-                       &per_app_dir_fd,
-                       error))
-    return FALSE;
+  per_app_dir_fd = openat (AT_FDCWD, per_app_dir,
+                           O_PATH | O_DIRECTORY | O_CLOEXEC);
+
+  if (per_app_dir_fd < 0)
+    return glnx_throw_errno_prefix (error, "open %s", per_app_dir);
 
   per_app_dir_lock_fd = openat (per_app_dir_fd, ".ref",
                                 O_RDWR | O_CREAT | O_CLOEXEC, 0600);
@@ -1031,7 +990,7 @@ flatpak_instance_gc_per_app_dirs (const char *instance_id,
   if (statbuf.st_mtime + 3 >= time (NULL))
     return glnx_throw (error, "lock file too recent, avoiding race condition");
 
-  g_info ("Cleaning up per-app-ID state for %s", app_id);
+  g_debug ("Cleaning up per-app-ID state for %s", app_id);
 
   /* /dev/shm is offloaded onto the host's /dev/shm to get consistent
    * free space behaviour and make sure it's actually in RAM. It could
@@ -1059,13 +1018,13 @@ flatpak_instance_gc_per_app_dirs (const char *instance_id,
           g_assert (g_str_has_prefix (path, "/dev/shm/"));
 
           if (unlinkat (per_app_dir_fd, "dev-shm", 0) != 0)
-            g_info ("Unable to clean up %s/%s: %s",
-                    per_app_dir, "dev-shm", g_strerror (errno));
+            g_debug ("Unable to clean up %s/%s: %s",
+                     per_app_dir, "dev-shm", g_strerror (errno));
 
           if (!glnx_shutil_rm_rf_at (AT_FDCWD, path, NULL, &local_error))
             {
-              g_info ("Unable to clean up %s: %s",
-                      path, local_error->message);
+              g_debug ("Unable to clean up %s: %s",
+                       path, local_error->message);
               g_clear_error (&local_error);
             }
         }
@@ -1076,9 +1035,9 @@ flatpak_instance_gc_per_app_dirs (const char *instance_id,
         }
       else
         {
-          g_info ("%s/%s no longer points to the expected directory and "
-                  "was removed: %s",
-                  per_app_dir, "dev-shm", local_error->message);
+          g_debug ("%s/%s no longer points to the expected directory and "
+                   "was removed: %s",
+                   per_app_dir, "dev-shm", local_error->message);
           g_clear_error (&local_error);
         }
     }
@@ -1090,8 +1049,8 @@ flatpak_instance_gc_per_app_dirs (const char *instance_id,
    * and not a symlink. If it's a symlink, we'll just unlink it. */
   if (!glnx_shutil_rm_rf_at (per_app_dir_fd, "tmp", NULL, &local_error))
     {
-      g_info ("Unable to clean up %s/tmp: %s", per_app_dir,
-              local_error->message);
+      g_debug ("Unable to clean up %s/tmp: %s", per_app_dir,
+               local_error->message);
       g_clear_error (&local_error);
     }
 
@@ -1125,8 +1084,7 @@ flatpak_instance_iterate_all_and_gc (GPtrArray *out_instances)
 
       if (dent->d_type == DT_DIR)
         {
-          const char *instance_id = dent->d_name;
-          g_autofree char *ref_file = g_strconcat (instance_id, "/.ref", NULL);
+          g_autofree char *ref_file = g_strconcat (dent->d_name, "/.ref", NULL);
           struct stat statbuf;
           struct flock l = {
             .l_type = F_WRLCK,
@@ -1144,16 +1102,14 @@ flatpak_instance_iterate_all_and_gc (GPtrArray *out_instances)
               l.l_type == F_UNLCK)
             {
               g_autoptr(GError) local_error = NULL;
-              g_autofree char *instance_id_private = g_strdup_printf ("%s-private", instance_id);
 
               /* The instance is not used, remove it */
-              g_info ("Cleaning up unused container id %s", instance_id);
+              g_debug ("Cleaning up unused container id %s", dent->d_name);
 
-              if (!flatpak_instance_gc_per_app_dirs (instance_id, &local_error))
-                g_debug ("Not cleaning up per-app dir: %s", local_error->message);
+              if (!flatpak_instance_gc_per_app_dirs (dent->d_name, &local_error))
+                flatpak_debug2 ("Not cleaning up per-app dir: %s", local_error->message);
 
-              glnx_shutil_rm_rf_at (iter.fd, instance_id_private, NULL, NULL);
-              glnx_shutil_rm_rf_at (iter.fd, instance_id, NULL, NULL);
+              glnx_shutil_rm_rf_at (iter.fd, dent->d_name, NULL, NULL);
               continue;
             }
 

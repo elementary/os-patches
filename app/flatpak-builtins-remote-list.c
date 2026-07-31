@@ -37,13 +37,11 @@
 static gboolean opt_show_details;
 static gboolean opt_show_disabled;
 static const char **opt_cols;
-static gboolean opt_json;
 
 static GOptionEntry options[] = {
   { "show-details", 'd', 0, G_OPTION_ARG_NONE, &opt_show_details, N_("Show remote details"), NULL },
   { "show-disabled", 0, 0, G_OPTION_ARG_NONE, &opt_show_disabled, N_("Show disabled remotes"), NULL },
   { "columns", 0, 0, G_OPTION_ARG_STRING_ARRAY, &opt_cols, N_("What information to show"), N_("FIELD,…") },
-  { "json", 'j', 0, G_OPTION_ARG_NONE, &opt_json, N_("Show output in JSON format"), NULL },
   { NULL }
 };
 
@@ -215,7 +213,7 @@ list_remotes (GPtrArray *dirs, Column *columns, GCancellable *cancellable, GErro
         }
     }
 
-  opt_json ? flatpak_table_printer_print_json (printer) : flatpak_table_printer_print (printer);
+  flatpak_table_printer_print (printer);
 
   return TRUE;
 }

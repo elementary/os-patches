@@ -61,7 +61,7 @@
                 <listitem><para>
                    The languages that are included when installing Locale extensions.
                    The value is a semicolon-separated list of two-letter language codes,
-                   or one of the special values <literal>*</literal> or <literal>*all*</literal>. If this key is unset, flatpak
+                   or one of the special values <literal>*</literal> or <literal>all</literal>. If this key is unset, flatpak
                    defaults to including the <varname>extra-languages</varname> key and the current locale.
                 </para></listitem>
             </varlistentry>
@@ -74,16 +74,6 @@
                    (language, optional locale, optional codeset, optional modifier) as documented by
                    <citerefentry><refentrytitle>setlocale</refentrytitle><manvolnum>3</manvolnum></citerefentry>
                    (for example, <literal>en;en_DK;zh_HK.big5hkscs;uz_UZ.utf8@cyrillic</literal>).
-                </para></listitem>
-            </varlistentry>
-            <varlistentry>
-                <term><varname>report-os-info</varname></term>
-                <listitem><para>
-                   If this key is set to <literal>false</literal> or the <filename>no-report-os-info</filename>
-                   file exists at <envar>FLATPAK_CONFIG_DIR</envar> Flatpak will not report the OS name,
-                   version, and architecture from <filename>/etc/os-release</filename> to the Flatpak
-                   remote via the <literal>Flatpak-Os-Info</literal> HTTP header when pulling objects.
-                   The default value of the key if unset is <literal>true</literal>.
                 </para></listitem>
             </varlistentry>
         </variablelist>

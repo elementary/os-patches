@@ -149,9 +149,11 @@ mkdir_p_at_internal (int              dfd,
  again:
   if (mkdirat (dfd, path, mode) == -1)
     {
-      if (errno == ENOENT && !did_recurse)
+      if (errno == ENOENT)
         {
           char *lastslash;
+
+          g_assert (!did_recurse);
 
           lastslash = strrchr (path, '/');
           if (lastslash == NULL)

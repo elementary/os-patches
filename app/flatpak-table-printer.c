@@ -21,10 +21,8 @@
 #include "config.h"
 
 #include <glib/gi18n.h>
-#include <json-glib/json-glib.h>
-#include <json-glib/json-gobject.h>
+
 #include "flatpak-table-printer.h"
-#include "flatpak-tty-utils-private.h"
 #include "flatpak-utils-private.h"
 
 #include <string.h>
@@ -615,7 +613,7 @@ flatpak_table_printer_print_full (FlatpakTablePrinter *printer,
       for (i = 0; i < printer->columns->len && i < printer->n_columns; i++)
         {
           TableColumn *col = g_ptr_array_index (printer->columns, i);
-          const char *title = col && col->title ? col->title : "";
+          char *title = col && col->title ? col->title : "";
           gboolean expand = col ? col->expand : FALSE;
           gboolean ellipsize = col ? col->ellipsize : FALSE;
           int len = widths[i];
@@ -637,7 +635,7 @@ flatpak_table_printer_print_full (FlatpakTablePrinter *printer,
           if (shrinks[i] > 0 && ellipsize)
             {
               len -= shrinks[i];
-              title = freeme = ellipsize_string (title, len);
+              freeme = title = ellipsize_string (title, len);
             }
 
           if (i > 0)
@@ -718,43 +716,8 @@ flatpak_table_printer_print_full (FlatpakTablePrinter *printer,
 void
 flatpak_table_printer_print (FlatpakTablePrinter *printer)
 {
-  int rows, cols;
-
-  flatpak_get_window_size (&rows, &cols);
-  flatpak_table_printer_print_full (printer, 0, cols, NULL, NULL);
+  flatpak_table_printer_print_full (printer, 0, 80, NULL, NULL);
   g_print ("\n");
-}
-
-void
-flatpak_table_printer_print_json (FlatpakTablePrinter *printer)
-{
-  g_autoptr(JsonArray) json_array = json_array_new ();
-  g_autoptr(JsonNode) root_node = NULL;
-  g_autofree gchar *json_string = NULL;
-
-  for (size_t i = 0; i < printer->rows->len; i++)
-    {
-      g_autoptr(JsonObject) json_object = json_object_new ();
-      Row *row = g_ptr_array_index (printer->rows, i);
-      
-      for (size_t j = 0; j < row->cells->len; j++)
-        {
-          Cell *cell = g_ptr_array_index (row->cells, j);
-          TableColumn *col = peek_table_column (printer, j);
-          const char *title = col && col->title ? col->title : "";
-          g_autofree gchar *normalized_title = g_ascii_strdown (title, -1);
-          g_strdelimit (normalized_title, " ", '_');
-          json_object_set_string_member (json_object, normalized_title, cell->text);
-        }
-      
-      json_array_add_object_element (json_array, g_steal_pointer (&json_object));
-    }
-
-  root_node = json_node_new (JSON_NODE_ARRAY);
-  json_node_take_array (root_node, g_steal_pointer (&json_array));
-
-  json_string = json_to_string (root_node, TRUE);
-  g_print ("%s\n", json_string);
 }
 
 int

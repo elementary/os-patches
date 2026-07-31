@@ -30,7 +30,7 @@
 
 #include "flatpak.h"
 #include "flatpak-instance-private.h"
-#include "flatpak-metadata-private.h"
+#include "flatpak-run-private.h"
 
 #include "libglnx.h"
 #include "tests/libglnx-testlib.h"
@@ -439,10 +439,6 @@ test_claim_per_app_temp_directory (void)
       g_assert_null (result);
       g_assert_false (ok);
       g_clear_error (&error);
-    }
-  else
-    {
-      g_test_message ("pre-create /tmp/flatpak-com.example.App-OwnedByRoot as root to enable this check");
     }
 
   glnx_close_fd (&fd);

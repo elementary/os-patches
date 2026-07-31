@@ -38,7 +38,6 @@ static gboolean opt_show_details;
 static gboolean opt_runtime;
 static gboolean opt_app;
 static gboolean opt_all;
-static gboolean opt_json;
 static char *opt_arch;
 static char *opt_app_runtime;
 static const char **opt_cols;
@@ -49,7 +48,6 @@ static GOptionEntry options[] = {
   { "app", 0, 0, G_OPTION_ARG_NONE, &opt_app, N_("List installed applications"), NULL },
   { "arch", 0, 0, G_OPTION_ARG_STRING, &opt_arch, N_("Arch to show"), N_("ARCH") },
   { "all", 'a', 0, G_OPTION_ARG_NONE, &opt_all, N_("List all refs (including locale/debug)"), NULL },
-  { "json", 'j', 0, G_OPTION_ARG_NONE, &opt_json, N_("Show output in JSON format"), NULL },
   { "app-runtime", 0, 0, G_OPTION_ARG_STRING, &opt_app_runtime, N_("List all applications using RUNTIME"), N_("RUNTIME") },
   { "columns", 0, 0, G_OPTION_ARG_STRING_ARRAY, &opt_cols, N_("What information to show"), N_("FIELD,…")  },
   { NULL }
@@ -114,6 +112,7 @@ print_table_for_refs (gboolean      print_apps,
   g_autofree char *match_id = NULL;
   g_autofree char *match_arch = NULL;
   g_autofree char *match_branch = NULL;
+  int rows, cols;
 
   if (columns[0].name == NULL)
     return TRUE;
@@ -357,7 +356,9 @@ print_table_for_refs (gboolean      print_apps,
 
   if (flatpak_table_printer_get_current_row (printer) > 0)
     {
-      opt_json ? flatpak_table_printer_print_json (printer) : flatpak_table_printer_print (printer);
+      flatpak_get_window_size (&rows, &cols);
+      flatpak_table_printer_print_full (printer, 0, cols, NULL, NULL);
+      g_print ("\n");
     }
 
   return TRUE;

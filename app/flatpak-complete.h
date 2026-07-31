@@ -47,7 +47,7 @@ FlatpakCompletion *flatpak_completion_new (const char *arg_line,
                                            const char *arg_point,
                                            const char *arg_cur);
 void               flatpak_complete_word (FlatpakCompletion *completion,
-                                          const char        *format,
+                                          char              *format,
                                           ...) G_GNUC_PRINTF (2, 3);
 void               flatpak_complete_ref (FlatpakCompletion *completion,
                                          OstreeRepo        *repo);

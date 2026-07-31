@@ -30,10 +30,8 @@
 #include "libglnx.h"
 
 #include "flatpak-builtins.h"
-#include "flatpak-image-source-private.h"
-#include "flatpak-oci-registry-private.h"
-#include "flatpak-repo-utils-private.h"
 #include "flatpak-utils-private.h"
+#include "flatpak-oci-registry-private.h"
 
 static char *opt_ref;
 static gboolean opt_oci = FALSE;
@@ -59,22 +57,78 @@ import_oci (OstreeRepo *repo, GFile *file,
             GCancellable *cancellable, GError **error)
 {
   g_autofree char *commit_checksum = NULL;
-  g_autoptr(FlatpakImageSource) image_source = NULL;
-  const char *ref;
+  g_autofree char *dir_uri = NULL;
+  g_autofree char *target_ref = NULL;
+  const char *oci_digest;
+  g_autoptr(FlatpakOciRegistry) registry = NULL;
+  g_autoptr(FlatpakOciVersioned) versioned = NULL;
+  g_autoptr(FlatpakOciImage) image_config = NULL;
+  FlatpakOciManifest *manifest = NULL;
+  g_autoptr(FlatpakOciIndex) index = NULL;
+  const FlatpakOciManifestDescriptor *desc;
+  GHashTable *labels;
 
-  image_source = flatpak_image_source_new_local (file, opt_ref, cancellable, error);
-  if (image_source == NULL)
+  dir_uri = g_file_get_uri (file);
+  registry = flatpak_oci_registry_new (dir_uri, FALSE, -1, cancellable, error);
+  if (registry == NULL)
     return NULL;
 
-  ref = flatpak_image_source_get_ref (image_source);
+  index = flatpak_oci_registry_load_index (registry, cancellable, error);
+  if (index == NULL)
+    return NULL;
 
-  commit_checksum = flatpak_pull_from_oci (repo, image_source, NULL, NULL,
-                                           ref, FLATPAK_PULL_FLAGS_NONE,
-                                           NULL, NULL, cancellable, error);
+  if (opt_ref)
+    {
+      desc = flatpak_oci_index_get_manifest (index, opt_ref);
+      if (desc == NULL)
+        {
+          flatpak_fail (error, _("Ref '%s' not found in registry"), opt_ref);
+          return NULL;
+        }
+    }
+  else
+    {
+      desc = flatpak_oci_index_get_only_manifest (index);
+      if (desc == NULL)
+        {
+          flatpak_fail (error, _("Multiple images in registry, specify a ref with --ref"));
+          return NULL;
+        }
+    }
+
+  oci_digest = desc->parent.digest;
+
+  versioned = flatpak_oci_registry_load_versioned (registry, NULL,
+                                                   oci_digest, NULL, NULL,
+                                                   cancellable, error);
+  if (versioned == NULL)
+    return NULL;
+
+  manifest = FLATPAK_OCI_MANIFEST (versioned);
+
+  image_config = flatpak_oci_registry_load_image_config (registry, NULL,
+                                                         manifest->config.digest, NULL,
+                                                         NULL, cancellable, error);
+  if (image_config == NULL)
+    return FALSE;
+
+  labels = flatpak_oci_image_get_labels (image_config);
+  if (labels)
+    flatpak_oci_parse_commit_labels (labels, NULL, NULL, NULL,
+                                     &target_ref, NULL, NULL, NULL);
+  if (target_ref == NULL)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "The OCI image didn't specify a ref, use --ref to specify one");
+      return NULL;
+    }
+
+  commit_checksum = flatpak_pull_from_oci (repo, registry, NULL, oci_digest, NULL, manifest, image_config,
+                                           NULL, target_ref, FLATPAK_PULL_FLAGS_NONE, NULL, NULL, cancellable, error);
   if (commit_checksum == NULL)
     return NULL;
 
-  g_print (_("Importing %s (%s)\n"), ref, commit_checksum);
+  g_print (_("Importing %s (%s)\n"), target_ref, commit_checksum);
 
   return g_strdup (commit_checksum);
 }
@@ -194,7 +248,7 @@ flatpak_builtin_build_import (int argc, char **argv, GCancellable *cancellable, 
       if (opt_no_summary_index)
         flags |= FLATPAK_REPO_UPDATE_FLAG_DISABLE_INDEX;
 
-      g_info ("Updating summary");
+      g_debug ("Updating summary");
       if (!flatpak_repo_update (repo, flags,
                                 (const char **) opt_gpg_key_ids,
                                 opt_gpg_homedir,

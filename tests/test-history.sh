@@ -15,12 +15,13 @@ skip_without_libsystemd
 HISTORY_START_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 sleep 1
 
-MESSAGE="Checking whether Flatpak can use the journal..."
-if ! logger "${MESSAGE}"; then
+if ! logger "Checking whether Flatpak can use the journal..."; then
     skip "Cannot write to Journal with logger"
 fi
 
-if ! journalctl --user --since="${HISTORY_START_TIME}" | grep -q "${MESSAGE}"; then
+messages="$(journalctl --user --since="${HISTORY_START_TIME}" || true)"
+
+if [ -z "$messages" ]; then
     skip "Cannot read back from Journal with journalctl"
 fi
 
@@ -68,88 +69,6 @@ uninstall	org.test.Hello	master	system (history-installation)
 uninstall	org.test.Platform	master	system (history-installation)
 uninstall	org.test.Hello.Locale	master	system (history-installation)
 remove remote			system (history-installation)	test-repo
-EOF
-
-if ! ${FLATPAK} --installation=history-installation history --since="${HISTORY_START_TIME}" \
-    --columns=change,application,branch,installation,remote --json > history-log 2>&1; then
-    cat history-log >&2
-    echo "Bail out! 'flatpak history' failed"
-    exit 1
-fi
-
-diff history-log - >&2 << EOF
-[
-  {
-    "change" : "add remote",
-    "application" : "",
-    "branch" : "",
-    "installation" : "system (history-installation)",
-    "remote" : "test-repo"
-  },
-  {
-    "change" : "deploy install",
-    "application" : "org.test.Hello.Locale",
-    "branch" : "master",
-    "installation" : "system (history-installation)",
-    "remote" : "test-repo"
-  },
-  {
-    "change" : "deploy install",
-    "application" : "org.test.Platform",
-    "branch" : "master",
-    "installation" : "system (history-installation)",
-    "remote" : "test-repo"
-  },
-  {
-    "change" : "deploy install",
-    "application" : "org.test.Hello",
-    "branch" : "master",
-    "installation" : "system (history-installation)",
-    "remote" : "test-repo"
-  },
-  {
-    "change" : "deploy update",
-    "application" : "org.test.Hello.Locale",
-    "branch" : "master",
-    "installation" : "system (history-installation)",
-    "remote" : "test-repo"
-  },
-  {
-    "change" : "deploy update",
-    "application" : "org.test.Hello",
-    "branch" : "master",
-    "installation" : "system (history-installation)",
-    "remote" : "test-repo"
-  },
-  {
-    "change" : "uninstall",
-    "application" : "org.test.Hello",
-    "branch" : "master",
-    "installation" : "system (history-installation)",
-    "remote" : ""
-  },
-  {
-    "change" : "uninstall",
-    "application" : "org.test.Platform",
-    "branch" : "master",
-    "installation" : "system (history-installation)",
-    "remote" : ""
-  },
-  {
-    "change" : "uninstall",
-    "application" : "org.test.Hello.Locale",
-    "branch" : "master",
-    "installation" : "system (history-installation)",
-    "remote" : ""
-  },
-  {
-    "change" : "remove remote",
-    "application" : "",
-    "branch" : "",
-    "installation" : "system (history-installation)",
-    "remote" : "test-repo"
-  }
-]
 EOF
 
 rm -f ${FLATPAK_CONFIG_DIR}/installations.d/history-inst.conf

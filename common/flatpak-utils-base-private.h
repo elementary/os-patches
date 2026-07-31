@@ -29,16 +29,13 @@
 # define G_DBUS_METHOD_INVOCATION_UNHANDLED FALSE
 #endif
 
-const char * flatpak_get_tzdir (void);
-
-char * flatpak_get_timezone (void);
+char *flatpak_get_timezone (void);
 
 char * flatpak_readlink (const char *path,
                          GError    **error);
 char * flatpak_resolve_link (const char *path,
                              GError    **error);
-char * flatpak_realpath (const char  *path,
-                         GError     **error);
 char * flatpak_canonicalize_filename (const char *path);
+void   flatpak_close_fds_workaround (int start_fd);
 
 #endif /* __FLATPAK_UTILS_BASE_H__ */

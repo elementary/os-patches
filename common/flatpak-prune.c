@@ -34,7 +34,6 @@
 
 #include "flatpak-error.h"
 #include "flatpak-prune-private.h"
-#include "flatpak-variant-private.h"
 #include "flatpak-variant-impl-private.h"
 #include "libglnx.h"
 #include "valgrind-private.h"
@@ -202,7 +201,7 @@ get_repo_lock (OstreeRepo          *repo,
   if (!do_repo_lock (lock_fd, flags))
     return glnx_throw_errno_prefix (error, "Locking repo failed (%s)", (flags & LOCK_EX) != 0 ? "exclusive" : "shared");
 
-  *out_lock_fd = g_steal_fd (&lock_fd);
+  *out_lock_fd = glnx_steal_fd (&lock_fd);
   return TRUE;
 }
 
@@ -382,10 +381,10 @@ flatpak_ostree_object_name_hash (gconstpointer a)
      those are the ones that will be first compared on a hash collision,
      so if they were always the same that would waste 4 comparisons. */
   return
-    ((guint32) data[32]) |
-    ((guint32) data[31]) << 8 |
-    ((guint32) data[30]) << 16 |
-    ((guint32) data[29]) << 24;
+    data[32] |
+    data[31] << 8 |
+    data[30] << 16 |
+    data[29] << 24;
 }
 
 static gboolean
@@ -518,7 +517,7 @@ traverse_reachable_refs_unlocked (OstreeRepo                  *repo,
       if (object_name_bag_contains (reachable, &commit_name))
         continue;
 
-      g_debug ("Finding objects to keep for commit %s", checksum);
+      flatpak_debug2 ("Finding objects to keep for commit %s", checksum);
 
       if (!load_extra_commitmeta (repo, checksum, &extra_commitmeta, cancellable, error))
         return FALSE;
@@ -609,8 +608,8 @@ prune_loose_object (OtPruneData          *data,
 {
   guint64 storage_size = 0;
 
-  g_debug ("Pruning unneeded object %s.%s", checksum,
-           ostree_object_type_to_string (objtype));
+  flatpak_debug2 ("Pruning unneeded object %s.%s", checksum,
+                  ostree_object_type_to_string (objtype));
 
   if (!ostree_repo_query_object_storage_size (data->repo, objtype, checksum,
                                               &storage_size, cancellable, error))
@@ -768,62 +767,58 @@ flatpak_repo_prune (OstreeRepo    *repo,
       return FALSE;
 
     timer = g_timer_new ();
-    g_info ("Finding reachable objects, unlocked (depth=%d)", depth);
+    g_debug ("Finding reachable objects, unlocked (depth=%d)", depth);
     g_timer_start (timer);
 
     if (!traverse_reachable_refs_unlocked (repo, depth, reachable, cancellable, error))
       return FALSE;
 
     g_timer_stop (timer);
-    g_info ("Elapsed time: %.1f sec",  g_timer_elapsed (timer, NULL));
-    g_clear_pointer (&timer, g_timer_destroy);
+    g_debug ("Elapsed time: %.1f sec",  g_timer_elapsed (timer, NULL));
   }
 
-  if (!dry_run)
-    {
-      /* exclusive lock in this region, see locking strategy above */
-      glnx_autofd int lock_fd = -1;
+  {
+    /* exclusive lock in this region, see locking strategy above */
+    glnx_autofd int lock_fd = -1;
 
-      if (!get_repo_lock (repo, LOCK_EX, &lock_fd, cancellable, error))
-        return FALSE;
+    if (!get_repo_lock (repo, LOCK_EX, &lock_fd, cancellable, error))
+      return FALSE;
 
-      timer = g_timer_new ();
-      g_info ("Finding reachable objects, locked (depth=%d)", depth);
-      g_timer_start (timer);
+    timer = g_timer_new ();
+    g_debug ("Finding reachable objects, locked (depth=%d)", depth);
+    g_timer_start (timer);
 
-      if (!traverse_reachable_refs_unlocked (repo, depth, reachable, cancellable, error))
-        return FALSE;
+    if (!traverse_reachable_refs_unlocked (repo, depth, reachable, cancellable, error))
+      return FALSE;
 
-      data.repo = repo;
-      data.reachable = reachable;
-      data.dont_prune = dry_run;
+    data.repo = repo;
+    data.reachable = reachable;
+    data.dont_prune = dry_run;
 
-      g_timer_stop (timer);
-      g_info ("Elapsed time: %.1f sec",  g_timer_elapsed (timer, NULL));
+    g_timer_stop (timer);
+    g_debug ("Elapsed time: %.1f sec",  g_timer_elapsed (timer, NULL));
 
-      {
-        g_info ("Pruning unreachable objects");
-        g_timer_start (timer);
+    g_debug ("Pruning unreachable objects");
+    g_timer_start (timer);
 
-        if (!prune_unreachable_loose_objects (repo, &data, cancellable, error))
-          return FALSE;
+    if (!prune_unreachable_loose_objects (repo, &data, cancellable, error))
+      return FALSE;
 
-        g_timer_stop (timer);
-        g_info ("Elapsed time: %.1f sec",  g_timer_elapsed (timer, NULL));
-      }
-    }
+    g_timer_stop (timer);
+    g_debug ("Elapsed time: %.1f sec",  g_timer_elapsed (timer, NULL));
+  }
 
   /* Prune static deltas outside lock to avoid conflict with its exclusive lock */
   if (!dry_run)
     {
-      g_info ("Pruning static deltas");
+      g_debug ("Pruning static deltas");
       g_timer_start (timer);
 
       if (!ostree_repo_prune_static_deltas (repo, NULL, cancellable, error))
         return FALSE;
 
       g_timer_stop (timer);
-      g_info ("Elapsed time: %.1f sec",  g_timer_elapsed (timer, NULL));
+      g_debug ("Elapsed time: %.1f sec",  g_timer_elapsed (timer, NULL));
     }
 
   *out_objects_total = data.n_reachable + data.n_unreachable;

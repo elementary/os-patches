@@ -39,7 +39,7 @@ validate_icon (const char *arg_width,
   GdkPixbufFormat *format;
   int max_width, max_height;
   int width, height;
-  g_autofree char *name = NULL;
+  const char *name;
   const char *allowed_formats[] = { "png", "jpeg", "svg", NULL };
   g_autoptr(GdkPixbuf) pixbuf = NULL;
   g_autoptr(GError) error = NULL;
@@ -228,12 +228,12 @@ rerun_in_sandbox (const char *arg_width,
   if (g_getenv ("G_MESSAGES_PREFIXED"))
     add_args (args, "--setenv", "G_MESSAGES_PREFIXED", g_getenv ("G_MESSAGES_PREFIXED"), NULL);
 
-  add_args (args, "--", validate_icon, arg_width, arg_height, filename, NULL);
+  add_args (args, validate_icon, arg_width, arg_height, filename, NULL);
   g_ptr_array_add (args, NULL);
 
   {
     g_autofree char *cmdline = g_strjoinv (" ", (char **) args->pdata);
-    g_info ("Icon validation: Spawning %s", cmdline);
+    g_debug ("Icon validation: Spawning %s", cmdline);
   }
 
   execvpe (flatpak_get_bwrap (), (char **) args->pdata, NULL);
@@ -252,8 +252,8 @@ static GOptionEntry entries[] = {
 int
 main (int argc, char *argv[])
 {
-  g_autoptr(GOptionContext) context = NULL;
-  g_autoptr(GError) error = NULL;
+  GOptionContext *context;
+  GError *error = NULL;
 
   context = g_option_context_new ("WIDTH HEIGHT PATH");
   g_option_context_add_main_entries (context, entries, NULL);

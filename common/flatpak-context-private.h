@@ -1,6 +1,5 @@
 /*
  * Copyright © 2014-2018 Red Hat, Inc
- * Copyright © 2024 GNOME Foundation, Inc.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +16,6 @@
  *
  * Authors:
  *       Alexander Larsson <alexl@redhat.com>
- *       Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
- *       Hubert Figuière <hub@figuiere.net>
  */
 
 #ifndef __FLATPAK_CONTEXT_H__
@@ -27,13 +24,6 @@
 #include "libglnx.h"
 #include <flatpak-common-types-private.h>
 #include "flatpak-exports-private.h"
-#include "flatpak-usb-private.h"
-
-typedef enum {
-  FLATPAK_SESSION_BUS,
-  FLATPAK_SYSTEM_BUS,
-  FLATPAK_A11Y_BUS,
-} FlatpakBus;
 
 typedef enum {
   FLATPAK_POLICY_NONE,
@@ -55,12 +45,11 @@ typedef enum {
   FLATPAK_CONTEXT_SOCKET_PULSEAUDIO  = 1 << 2,
   FLATPAK_CONTEXT_SOCKET_SESSION_BUS = 1 << 3,
   FLATPAK_CONTEXT_SOCKET_SYSTEM_BUS  = 1 << 4,
-  FLATPAK_CONTEXT_SOCKET_FALLBACK_X11 = 1 << 5, /* For backwards compat, not used internally */
+  FLATPAK_CONTEXT_SOCKET_FALLBACK_X11 = 1 << 5, /* For backwards compat, also set SOCKET_X11 */
   FLATPAK_CONTEXT_SOCKET_SSH_AUTH    = 1 << 6,
   FLATPAK_CONTEXT_SOCKET_PCSC        = 1 << 7,
   FLATPAK_CONTEXT_SOCKET_CUPS        = 1 << 8,
   FLATPAK_CONTEXT_SOCKET_GPG_AGENT   = 1 << 9,
-  FLATPAK_CONTEXT_SOCKET_INHERIT_WAYLAND_SOCKET = 1 << 10,
 } FlatpakContextSockets;
 
 typedef enum {
@@ -68,8 +57,6 @@ typedef enum {
   FLATPAK_CONTEXT_DEVICE_ALL         = 1 << 1,
   FLATPAK_CONTEXT_DEVICE_KVM         = 1 << 2,
   FLATPAK_CONTEXT_DEVICE_SHM         = 1 << 3,
-  FLATPAK_CONTEXT_DEVICE_INPUT       = 1 << 4,
-  FLATPAK_CONTEXT_DEVICE_USB         = 1 << 5,
 } FlatpakContextDevices;
 
 typedef enum {
@@ -80,34 +67,23 @@ typedef enum {
   FLATPAK_CONTEXT_FEATURE_PER_APP_DEV_SHM = 1 << 4,
 } FlatpakContextFeatures;
 
-typedef enum {
-  FLATPAK_CONTEXT_CONDITION_TRUE          = 1 << 0,
-  FLATPAK_CONTEXT_CONDITION_FALSE         = 1 << 1,
-  FLATPAK_CONTEXT_CONDITION_HAS_INPUT_DEV = 1 << 2,
-  FLATPAK_CONTEXT_CONDITION_HAS_USB_DEV   = 1 << 3,
-  FLATPAK_CONTEXT_CONDITION_HAS_WAYLAND   = 1 << 4,
-  FLATPAK_CONTEXT_CONDITION_HAS_USB_PORTAL = 1 << 5,
-} FlatpakContextConditions;
-
 struct FlatpakContext
 {
-  GHashTable            *shares_permissions;
-  GHashTable            *socket_permissions;
-  GHashTable            *device_permissions;
-  GHashTable            *features_permissions;
+  FlatpakContextShares   shares;
+  FlatpakContextShares   shares_valid;
+  FlatpakContextSockets  sockets;
+  FlatpakContextSockets  sockets_valid;
+  FlatpakContextDevices  devices;
+  FlatpakContextDevices  devices_valid;
+  FlatpakContextFeatures features;
+  FlatpakContextFeatures features_valid;
   GHashTable            *env_vars;
   GHashTable            *persistent;
   GHashTable            *filesystems;
   GHashTable            *session_bus_policy;
   GHashTable            *system_bus_policy;
-  GHashTable            *a11y_bus_policy;
   GHashTable            *generic_policy;
-  GHashTable            *enumerable_usb_devices;
-  GHashTable            *hidden_usb_devices;
 };
-
-/* Gets a single condition as param and returns whether the condition is true. */
-typedef gboolean (*FlatpakContextConditionEvaluator) (FlatpakContextConditions condition);
 
 extern const char *flatpak_context_sockets[];
 extern const char *flatpak_context_devices[];
@@ -122,8 +98,6 @@ gboolean       flatpak_context_parse_filesystem (const char             *filesys
 
 FlatpakContext *flatpak_context_new (void);
 void           flatpak_context_free (FlatpakContext *context);
-void           flatpak_context_dump (FlatpakContext *context,
-                                     const char     *title);
 void           flatpak_context_merge (FlatpakContext *context,
                                       FlatpakContext *other);
 GOptionEntry  *flatpak_context_get_option_entries (void);
@@ -134,6 +108,7 @@ gboolean       flatpak_context_load_metadata (FlatpakContext *context,
 void           flatpak_context_save_metadata (FlatpakContext *context,
                                               gboolean        flatten,
                                               GKeyFile       *metakey);
+void           flatpak_context_allow_host_fs (FlatpakContext *context);
 void           flatpak_context_set_session_bus_policy (FlatpakContext *context,
                                                        const char     *name,
                                                        FlatpakPolicy   policy);
@@ -141,17 +116,12 @@ GStrv          flatpak_context_get_session_bus_policy_allowed_own_names (Flatpak
 void           flatpak_context_set_system_bus_policy (FlatpakContext *context,
                                                       const char     *name,
                                                       FlatpakPolicy   policy);
-void           flatpak_context_set_a11y_bus_policy (FlatpakContext *context,
-                                                    const char     *name,
-                                                    FlatpakPolicy   policy);
-char *         flatpak_context_devices_to_usb_list (GHashTable *devices,
-                                                    gboolean hidden);
 void           flatpak_context_to_args (FlatpakContext *context,
                                         GPtrArray      *args);
-FlatpakRunFlags flatpak_context_features_to_run_flags (FlatpakContextFeatures features);
+FlatpakRunFlags flatpak_context_get_run_flags (FlatpakContext *context);
 void           flatpak_context_add_bus_filters (FlatpakContext *context,
                                                 const char     *app_id,
-                                                FlatpakBus      bus,
+                                                gboolean        session_bus,
                                                 gboolean        sandboxed,
                                                 FlatpakBwrap   *bwrap);
 
@@ -163,6 +133,9 @@ gboolean       flatpak_context_adds_permissions (FlatpakContext *old_context,
 void           flatpak_context_reset_permissions (FlatpakContext *context);
 void           flatpak_context_reset_non_permissions (FlatpakContext *context);
 void           flatpak_context_make_sandboxed (FlatpakContext *context);
+
+gboolean       flatpak_context_allows_features (FlatpakContext        *context,
+                                                FlatpakContextFeatures features);
 
 FlatpakContext *flatpak_context_load_for_deploy (FlatpakDeploy *deploy,
                                                  GError       **error);
@@ -194,25 +167,5 @@ gboolean flatpak_context_parse_env_fd (FlatpakContext *context,
                                        GError **error);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakContext, flatpak_context_free)
-
-GFile *flatpak_get_user_base_dir_location (void);
-GFile *flatpak_get_data_dir (const char *app_id);
-
-gboolean flatpak_context_get_allowed_exports (FlatpakContext *context,
-                                              const char     *source_path,
-                                              const char     *app_id,
-                                              char         ***allowed_extensions_out,
-                                              char         ***allowed_prefixes_out,
-                                              gboolean       *require_exact_match_out);
-
-
-FlatpakContextShares flatpak_context_compute_allowed_shares (FlatpakContext                   *context,
-                                                              FlatpakContextConditionEvaluator  evaluator);
-FlatpakContextSockets flatpak_context_compute_allowed_sockets (FlatpakContext                   *context,
-                                                               FlatpakContextConditionEvaluator  evaluator);
-FlatpakContextDevices flatpak_context_compute_allowed_devices (FlatpakContext                   *context,
-                                                               FlatpakContextConditionEvaluator  evaluator);
-FlatpakContextFeatures flatpak_context_compute_allowed_features (FlatpakContext                   *context,
-                                                                FlatpakContextConditionEvaluator  evaluator);
 
 #endif /* __FLATPAK_CONTEXT_H__ */

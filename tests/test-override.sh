@@ -17,7 +17,7 @@ reset_overrides () {
     assert_file_empty info
 }
 
-echo "1..20"
+echo "1..18"
 
 setup_repo
 install_repo
@@ -29,19 +29,9 @@ ${FLATPAK} override --user --nosocket=ssh-auth org.test.Hello
 ${FLATPAK} override --user --show org.test.Hello > override
 
 assert_file_has_content override "^\[Context\]$"
-assert_file_has_content override "^sockets=!ssh-auth;wayland;$"
+assert_file_has_content override "^sockets=wayland;!ssh-auth;$"
 
 ok "override --socket"
-
-reset_overrides
-
-${FLATPAK} override --user --socket-if=wayland:!has-wayland org.test.Hello
-${FLATPAK} override --user --socket-if=wayland:true org.test.Hello
-${FLATPAK} override --user --show org.test.Hello > override
-
-assert_file_has_content override "^\[Context\]$"
-assert_file_has_content override "^sockets=wayland;if:wayland:!has-wayland;if:wayland:true;$"
-ok "override --socket-if"
 
 reset_overrides
 
@@ -61,22 +51,9 @@ ${FLATPAK} override --user --unshare=ipc org.test.Hello
 ${FLATPAK} override --user --show org.test.Hello > override
 
 assert_file_has_content override "^\[Context\]$"
-assert_file_has_content override "^shared=!ipc;network;$"
+assert_file_has_content override "^shared=network;!ipc;$"
 
 ok "override --share"
-
-reset_overrides
-
-${FLATPAK} override --user --device-if=dri:a org.test.Hello
-${FLATPAK} override --user --device-if=kvm:x --device-if=dri:b org.test.Hello
-${FLATPAK} override --user --device-if=dri:!c --device-if=dri:!d org.test.Hello
-${FLATPAK} override --user --show org.test.Hello > override
-
-assert_file_has_content override "^\[Context\]$"
-assert_file_has_content override "^devices=dri;if:dri:!c;if:dri:!d;if:dri:a;if:dri:b;kvm;if:kvm:x;$"
-ok "override --device-if"
-
-reset_overrides
 
 reset_overrides
 
@@ -85,7 +62,7 @@ ${FLATPAK} override --user --disallow=bluetooth org.test.Hello
 ${FLATPAK} override --user --show org.test.Hello > override
 
 assert_file_has_content override "^\[Context\]$"
-assert_file_has_content override "^features=!bluetooth;multiarch;$"
+assert_file_has_content override "^features=multiarch;!bluetooth;$"
 
 ok "override --allow"
 

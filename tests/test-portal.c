@@ -78,7 +78,7 @@ launcher_stdout_to_our_stderr (GSubprocessLauncher *launcher)
   stderr_copy = dup (STDERR_FILENO);
   g_assert_no_errno (stderr_copy);
   g_assert_no_errno (fcntl (stderr_copy, F_SETFD, FD_CLOEXEC));
-  g_subprocess_launcher_take_stdout_fd (launcher, g_steal_fd (&stderr_copy));
+  g_subprocess_launcher_take_stdout_fd (launcher, glnx_steal_fd (&stderr_copy));
 }
 
 static GSubprocessLauncher *
@@ -226,7 +226,7 @@ count_successful_exit_cb (PortalFlatpak *proxy,
 {
   gsize *times_exited_p = user_data;
 
-  g_info ("Process %u exited with wait status %u", pid, wait_status);
+  g_debug ("Process %u exited with wait status %u", pid, wait_status);
   g_assert_true (WIFEXITED (wait_status));
   g_assert_cmpuint (WEXITSTATUS (wait_status), ==, 0);
   (*times_exited_p) += 1;
@@ -249,7 +249,7 @@ test_basic (Fixture *f,
   /* We can't easily tell whether EXPOSE_PIDS ought to be set or not */
   g_assert_cmpuint ((portal_flatpak_get_supports (f->proxy) &
                      (~FLATPAK_SPAWN_SUPPORT_FLAGS_EXPOSE_PIDS)), ==, 0);
-  g_assert_cmpuint (portal_flatpak_get_version (f->proxy), ==, 8);
+  g_assert_cmpuint (portal_flatpak_get_version (f->proxy), ==, 6);
 
   handler_id = g_signal_connect (f->proxy, "spawn-exited",
                                  G_CALLBACK (count_successful_exit_cb),
@@ -466,7 +466,6 @@ teardown (Fixture *f,
   tests_dbus_daemon_teardown (&f->dbus_daemon);
   g_clear_object (&f->portal);
   g_free (f->portal_path);
-  g_free (f->mock_flatpak);
 }
 
 int

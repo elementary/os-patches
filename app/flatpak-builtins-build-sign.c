@@ -30,7 +30,6 @@
 #include "libglnx.h"
 
 #include "flatpak-builtins.h"
-#include "flatpak-repo-utils-private.h"
 #include "flatpak-utils-private.h"
 
 static char *opt_arch;

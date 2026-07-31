@@ -33,8 +33,7 @@ ensure_app_infos (void)
 {
   if (app_infos == NULL)
     app_infos = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                       g_free,
-                                       (GDestroyNotify) g_key_file_unref);
+                                       NULL, (GDestroyNotify) g_key_file_unref);
 }
 
 static GKeyFile *
@@ -63,7 +62,7 @@ static void
 add_cached_app_info_by_sender (const char *sender, GKeyFile *keyfile)
 {
   G_LOCK (app_infos);
-  g_hash_table_insert (app_infos, g_strdup (sender), g_key_file_ref (keyfile));
+  g_hash_table_add (app_infos, g_key_file_ref (keyfile));
   G_UNLOCK (app_infos);
 }
 
@@ -81,14 +80,13 @@ parse_app_id_from_fileinfo (int pid)
   g_autoptr(GKeyFile) metadata = NULL;
 
   root_path = g_strdup_printf ("/proc/%u/root", pid);
-  if (!glnx_opendirat (AT_FDCWD, root_path, TRUE,
-                       &root_fd,
-                       &local_error))
+  root_fd = openat (AT_FDCWD, root_path, O_RDONLY | O_NONBLOCK | O_DIRECTORY | O_CLOEXEC | O_NOCTTY);
+  if (root_fd == -1)
     {
       /* Not able to open the root dir shouldn't happen. Probably the app died and
        * we're failing due to /proc/$pid not existing. In that case fail instead
          of treating this as privileged. */
-      g_info ("Unable to open process root directory: %s", local_error->message);
+      g_debug ("Unable to open %s", root_path);
       return NULL;
     }
 
@@ -200,9 +198,7 @@ name_owner_changed (GDBusConnection *connection,
                     GVariant        *parameters,
                     gpointer         user_data)
 {
-  g_autofree char *name = NULL;
-  g_autofree char *from = NULL;
-  g_autofree char *to = NULL;
+  const char *name, *from, *to;
 
   g_variant_get (parameters, "(sss)", &name, &from, &to);
 

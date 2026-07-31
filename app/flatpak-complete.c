@@ -73,8 +73,7 @@ flatpak_complete_dir (FlatpakCompletion *completion)
 
 void
 flatpak_complete_word (FlatpakCompletion *completion,
-                       const char *format,
-                       ...)
+                       char *format, ...)
 {
   va_list args;
   const char *rest;
@@ -180,7 +179,7 @@ find_current_element (const char *str)
   else if (g_str_has_prefix (str, "runtime/"))
     str += strlen ("runtime/");
 
-  while (str != NULL)
+  while (str != NULL && count <= 3)
     {
       str = strchr (str, '/');
       count++;
@@ -211,8 +210,6 @@ flatpak_complete_partial_ref (FlatpakCompletion *completion,
 
   pref = completion->cur;
   element = find_current_element (pref);
-  if (element > 3)
-    return;
 
   flatpak_split_partial_ref_arg_novalidate (pref, kinds,
                                             NULL, NULL,
@@ -230,7 +227,7 @@ flatpak_complete_partial_ref (FlatpakCompletion *completion,
       if (state != NULL)
         refs = flatpak_dir_find_remote_refs (dir, state,
                                              (element > 1) ? id : NULL,
-                                             NULL, /* branch */
+                                             (element > 3) ? branch : NULL,
                                              NULL, /* default branch */
                                              (element > 2) ? arch : only_arch,
                                              NULL, /* default arch */
@@ -242,7 +239,7 @@ flatpak_complete_partial_ref (FlatpakCompletion *completion,
     {
       refs = flatpak_dir_find_installed_refs (dir,
                                               (element > 1) ? id : NULL,
-                                              NULL, /* branch */
+                                              (element > 3) ? branch : NULL,
                                               (element > 2) ? arch : only_arch,
                                               matched_kinds,
                                               FIND_MATCHING_REFS_FLAGS_NONE,
@@ -558,8 +555,8 @@ parse_completion_line_to_argv (const char        *initial_completion_line,
 
   /* Make a shallow copy of argv, which will be our "working set" */
   completion->argc = completion->original_argc;
-  completion->argv = g_memdup2 (completion->original_argv,
-                                sizeof (gchar *) * (completion->original_argc + 1));
+  completion->argv = g_memdup (completion->original_argv,
+                               sizeof (gchar *) * (completion->original_argc + 1));
 
   return parse_result;
 }

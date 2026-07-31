@@ -1,4 +1,4 @@
-# Use this to suppress "possibly lost" for global statistics
+# Use this to suppress "possibly lost" for global statics
 {
    handle_reflink
    Memcheck:Param
@@ -128,6 +128,16 @@
   fun:g_thread_pool_thread_proxy
 }
 
+# libsoup thing
+{
+  ignore_libsoup_file_leak
+  Memcheck:Leak
+  fun:calloc
+  ...
+  fun:_g_local_file_new
+  fun:soup_request_file_ensure_file
+}
+
 # glibc valgrind fnmatch issue (https://www.mail-archive.com/kde-bugs-dist@kde.org/msg214842.html)
 {
   ignore_glibc_fnmatch
@@ -243,14 +253,6 @@
    ...
    fun:g_file_new_for_path
    fun:flatpak_get_user_base_dir_location
-}
-# Deliberately leaking once per process
-{
-   flatpak_get_system_default_base_dir_location
-   Memcheck:Leak
-   ...
-   fun:g_file_new_for_path
-   fun:flatpak_get_system_default_base_dir_location
 }
 
 # https://github.com/ostreedev/ostree/issues/2592

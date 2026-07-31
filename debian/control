@@ -1,44 +1,43 @@
 Source: flatpak
 Section: admin
-Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
 Uploaders:
  Matthias Klumpp <mak@debian.org>,
  Simon McVittie <smcv@debian.org>,
-# We need polkitd, socat, etc. if !nocheck || !noinsttest
 Build-Depends:
+ attr <!nocheck>,
+ automake (>= 1.14.1),
+ bison,
+ bubblewrap (>= 0.9.0-1ubuntu0.1),
+ ca-certificates <!nocheck>,
+ dbus-daemon,
  debhelper (>= 13.11.6~),
  debhelper-compat (= 13),
- dh-exec (>= 0.23~),
- dh-sequence-gir,
- dh-sequence-installsysusers,
- attr <!nocheck>,
- bison,
- bubblewrap (>= 0.10.0~),
- ca-certificates <!nocheck>,
- curl <!nocheck>,
- dbus-daemon,
  desktop-file-utils <!nocheck>,
+ dh-exec (>= 0.23~),
  docbook-xml <!nodoc>,
  docbook-xsl <!nodoc>,
- file <!nocheck>,
- fuse3,
+ fuse3 <!nocheck>,
  gir1.2-gio-2.0-dev,
  gir1.2-gobject-2.0-dev,
  gnupg <!nocheck>,
- gobject-introspection (>= 1.80),
+ gobject-introspection (>= 1.54.1-2~),
+ gtk-doc-tools,
  gtk-update-icon-cache <!nocheck>,
  hicolor-icon-theme <!nocheck>,
- jq <!nocheck>,
  libappstream-dev (>= 0.12.0),
  libarchive-dev (>= 2.8.0),
  libattr1-dev,
  libcap-dev,
- libcurl4-openssl-dev | libcurl-dev,
+ libcurl4-gnutls-dev | libcurl-dev,
  libdconf-dev,
  libdw-dev,
  libelf-dev,
  libfuse3-dev (>= 3.1.1),
  libgdk-pixbuf-2.0-dev,
+ libgirepository1.0-dev,
  libglib2.0-dev (>= 2.44),
  libgpgme-dev (>= 1.1.8),
  libjson-glib-dev,
@@ -48,48 +47,45 @@ Build-Depends:
  libpolkit-gobject-1-dev,
  libseccomp-dev (>= 2.5.2),
  libsystemd-dev,
- libwayland-dev,
  libxau-dev,
  libxml2-dev (>= 2.4),
  libxml2-utils,
  libzstd-dev,
- meson (>= 0.53.0),
  ostree (>= 2020.8) <!nocheck>,
  pkgconf,
- polkitd <!nocheck> <!noinsttest>,
+ polkitd <!nocheck>,
  procps,
- python3-pyparsing,
  python3:any,
+ python3-pyparsing,
  shared-mime-info <!nocheck>,
- socat <!nocheck> <!noinsttest>,
- wayland-protocols,
+ socat <!nocheck>,
  xdg-dbus-proxy (>= 0.1.0),
  xmlto <!nodoc>,
  xsltproc <!nodoc>,
 Build-Depends-Indep:
- gtk-doc-tools <!nodoc>,
- libglib2.0-doc <!nodoc>,
- libostree-doc <!nodoc>,
-Standards-Version: 4.7.4
+ libglib2.0-doc,
+ libostree-doc,
+Standards-Version: 4.6.2
 Homepage: https://flatpak.org/
 Vcs-Git: https://salsa.debian.org/debian/flatpak.git
 Vcs-Browser: https://salsa.debian.org/debian/flatpak
-X-Style: black
+Rules-Requires-Root: no
 
 Package: flatpak
 Architecture: linux-any
 Depends:
- bubblewrap (>= 0.10.0~),
+ adduser,
+ bubblewrap (>= 0.9.0-1ubuntu0.1),
+ default-dbus-system-bus | dbus-system-bus,
  fuse3,
  xdg-dbus-proxy (>= 0.1.0),
  ${misc:Depends},
  ${shlibs:Depends},
 Recommends:
  ca-certificates,
- default-dbus-system-bus | dbus-system-bus,
  desktop-file-utils,
- gtk-update-icon-cache,
  hicolor-icon-theme,
+ gtk-update-icon-cache,
  libpam-systemd,
  p11-kit,
  polkitd,
@@ -123,23 +119,19 @@ Description: Application deployment framework for desktop apps
  limited access to resources outside the sandbox.
 
 Package: flatpak-tests
-Build-Profiles: <!noinsttest>
 Architecture: linux-any
 Section: misc
 Depends:
  attr,
  ca-certificates,
- curl,
  dbus-daemon,
  desktop-file-utils,
- file,
  flatpak (= ${binary:Version}),
  gnupg,
  gtk-update-icon-cache,
  hicolor-icon-theme,
- jq,
  ostree (>= 2020.8),
- polkitd,
+ polkitd | policykit-1,
  shared-mime-info,
  socat,
  ${misc:Depends},
@@ -171,24 +163,12 @@ Architecture: linux-any
 Multi-Arch: same
 Section: libdevel
 Depends:
- gir1.2-flatpak-1.0 (= ${binary:Version}),
  gir1.2-glib-2.0,
- libarchive-dev (>= 2.8.0),
- libcurl4-openssl-dev | libcurl-dev,
- libdconf-dev,
+ gir1.2-flatpak-1.0 (= ${binary:Version}),
  libflatpak0 (= ${binary:Version}),
  libglib2.0-dev,
- libgpgme-dev (>= 1.1.8),
- libjson-glib-dev,
- libmalcontent-0-dev (>= 0.4.0),
  libostree-dev (>= 2020.8),
- libpolkit-agent-1-dev,
- libseccomp-dev (>= 2.5.2),
- libsystemd-dev,
- libwayland-dev,
- libxau-dev,
  libxml2-dev (>= 2.4),
- libzstd-dev,
  pkgconf,
  python3:any,
  ${gir:Depends},
@@ -229,7 +209,7 @@ Package: libflatpak0
 Architecture: linux-any
 Section: libs
 Depends:
- bubblewrap (>= 0.10.0~),
+ bubblewrap (>= 0.9.0-1ubuntu0.1),
  ${misc:Depends},
  ${shlibs:Depends},
 Pre-Depends:

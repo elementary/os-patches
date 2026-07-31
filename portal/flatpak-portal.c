@@ -31,7 +31,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <glib-unix.h>
 #include <glib/gi18n-lib.h>
 #include <gio/gio.h>
 #include <gio/gunixfdlist.h>
@@ -64,6 +63,7 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (PortalFlatpakUpdateMonitorSkeleton, g_object_unre
 /* Should be roughly 2 seconds */
 #define CHILD_STATUS_CHECK_ATTEMPTS 20
 
+static GStrv original_environ = NULL;
 static GHashTable *client_pid_data_hash = NULL;
 static GDBusConnection *session_bus = NULL;
 static GNetworkMonitor *network_monitor = NULL;
@@ -76,7 +76,7 @@ static int opt_poll_timeout;
 static gboolean opt_poll_when_metered;
 static FlatpakSpawnSupportFlags supports = 0;
 
-G_LOCK_DEFINE_STATIC (update_monitors); /* This protects the three variables below */
+G_LOCK_DEFINE (update_monitors); /* This protects the three variables below */
 static GHashTable *update_monitors;
 static guint update_monitors_timeout = 0;
 static gboolean update_monitors_timeout_running_thread = FALSE;
@@ -134,7 +134,7 @@ static gboolean           handle_update            (PortalFlatpakUpdateMonitor *
 static void
 skeleton_died_cb (gpointer data)
 {
-  g_info ("skeleton finalized, exiting");
+  g_debug ("skeleton finalized, exiting");
   g_main_loop_quit (main_loop);
 }
 
@@ -143,7 +143,7 @@ unref_skeleton_in_timeout_cb (gpointer user_data)
 {
   static gboolean unreffed = FALSE;
 
-  g_info ("unreffing portal main ref");
+  g_debug ("unreffing portal main ref");
   if (!unreffed)
     {
       g_object_unref (portal);
@@ -177,7 +177,7 @@ idle_timeout_cb (gpointer user_data)
       g_hash_table_size (client_pid_data_hash) == 0 &&
       !has_update_monitors ())
     {
-      g_info ("Idle - unowning name");
+      g_debug ("Idle - unowning name");
       unref_skeleton_in_timeout ();
     }
 
@@ -226,7 +226,7 @@ child_watch_died (GPid     pid,
   PidData *pid_data = user_data;
   g_autoptr(GVariant) signal_variant = NULL;
 
-  g_info ("Client Pid %d died", pid_data->pid);
+  g_debug ("Client Pid %d died", pid_data->pid);
 
   signal_variant = g_variant_ref_sink (g_variant_new ("(uu)", pid, status));
   g_dbus_connection_emit_signal (session_bus,
@@ -387,7 +387,7 @@ check_child_pid_status (void *user_data)
       else
         timeout = timeouts[MIN (data->attempt, G_N_ELEMENTS (timeouts) - 1)];
 
-      g_info ("Failed to read child PID, trying again in %d ms", timeout);
+      g_debug ("Failed to read child PID, trying again in %d ms", timeout);
 
       /* The timer source only needs to be re-added if the timeout has changed,
           which won't happen while staying on the 100 or 1000ms timeouts.
@@ -418,7 +418,7 @@ check_child_pid_status (void *user_data)
         g_warning ("Failed to find relative PID for %d: %s", child_pid, error->message);
     }
 
-  g_info ("Emitting SpawnStarted(%u, %d)", pid, relative_child_pid);
+  g_debug ("Emitting SpawnStarted(%u, %d)", pid, relative_child_pid);
 
   signal_variant = g_variant_ref_sink (g_variant_new ("(uu)", pid, relative_child_pid));
   g_dbus_connection_emit_signal (session_bus,
@@ -482,7 +482,7 @@ child_setup_func (gpointer user_data)
   sigset_t set;
   gsize i;
 
-  g_fdwalk_set_cloexec (3);
+  flatpak_close_fds_workaround (3);
 
   if (data->instance_id_fd != -1)
     drop_cloexec (data->instance_id_fd);
@@ -542,8 +542,8 @@ child_setup_func (gpointer user_data)
           if (fd_map[i].from == data->tty)
             {
               if (ioctl (fd_map[i].final, TIOCSCTTY, 0) == -1)
-                g_info ("ioctl(%d, TIOCSCTTY, 0) failed: %s",
-                        fd_map[i].final, strerror (errno));
+                g_debug ("ioctl(%d, TIOCSCTTY, 0) failed: %s",
+                         fd_map[i].final, strerror (errno));
               break;
             }
         }
@@ -551,80 +551,195 @@ child_setup_func (gpointer user_data)
 }
 
 static gboolean
-validate_opath_fd (int        fd,
-                   gboolean   needs_writable,
-                   GError   **error)
+is_valid_expose (const char *expose,
+                 GError    **error)
 {
-  int fd_flags;
-  struct stat st_buf;
-  struct stat real_st_buf;
-  int access_mode;
-  g_autofree char *path = NULL;
-
-  /* Must be able to get fd flags */
-  fd_flags = fcntl (fd, F_GETFL);
-  if (fd_flags < 0)
-    return glnx_throw_errno_prefix (error, "Failed to get fd flags");
-
-  /* Must be O_PATH */
-  if ((fd_flags & O_PATH) != O_PATH)
+  /* No subdirs or absolute paths */
+  if (expose[0] == '/')
     {
-      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
-                           "File descriptor is not O_PATH");
+      g_set_error (error, G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS,
+                   "Invalid sandbox expose: absolute paths not allowed");
+      return FALSE;
+    }
+  else if (strchr (expose, '/'))
+    {
+      g_set_error (error, G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS,
+                   "Invalid sandbox expose: subdirectories not allowed");
       return FALSE;
     }
 
+  return TRUE;
+}
+
+static char *
+filesystem_arg (const char *path,
+                gboolean    readonly)
+{
+  g_autoptr(GString) s = g_string_new ("--filesystem=");
+  const char *p;
+
+  for (p = path; *p != 0; p++)
+    {
+      if (*p == ':')
+        g_string_append (s, "\\:");
+      else
+        g_string_append_c (s, *p);
+    }
+
+  if (readonly)
+    g_string_append (s, ":ro");
+
+  return g_string_free (g_steal_pointer (&s), FALSE);
+}
+
+
+static char *
+filesystem_sandbox_arg (const char *path,
+                        const char *sandbox,
+                        gboolean    readonly)
+{
+  g_autoptr(GString) s = g_string_new ("--filesystem=");
+  const char *p;
+
+  for (p = path; *p != 0; p++)
+    {
+      if (*p == ':')
+        g_string_append (s, "\\:");
+      else
+        g_string_append_c (s, *p);
+    }
+
+  g_string_append (s, "/sandbox/");
+
+  for (p = sandbox; *p != 0; p++)
+    {
+      if (*p == ':')
+        g_string_append (s, "\\:");
+      else
+        g_string_append_c (s, *p);
+    }
+
+  if (readonly)
+    g_string_append (s, ":ro");
+
+  return g_string_free (g_steal_pointer (&s), FALSE);
+}
+
+static char *
+bubblewrap_remap_path (const char *path)
+{
+  if (g_str_has_prefix (path, "/newroot/"))
+    path = path + strlen ("/newroot");
+  return g_strdup (path);
+}
+
+static char *
+verify_proc_self_fd (const char *proc_path,
+                     GError **error)
+{
+  char path_buffer[PATH_MAX + 1];
+  ssize_t symlink_size;
+
+  symlink_size = readlink (proc_path, path_buffer, PATH_MAX);
+  if (symlink_size < 0)
+    return glnx_null_throw_errno_prefix (error, "readlink");
+
+  path_buffer[symlink_size] = 0;
+
+  /* All normal paths start with /, but some weird things
+     don't, such as socket:[27345] or anon_inode:[eventfd].
+     We don't support any of these */
+  if (path_buffer[0] != '/')
+    return glnx_null_throw (error, "%s resolves to non-absolute path %s",
+                            proc_path, path_buffer);
+
+  /* File descriptors to actually deleted files have " (deleted)"
+     appended to them. This also happens to some fake fd types
+     like shmem which are "/<name> (deleted)". All such
+     files are considered invalid. Unfortunatelly this also
+     matches files with filenames that actually end in " (deleted)",
+     but there is not much to do about this. */
+  if (g_str_has_suffix (path_buffer, " (deleted)"))
+    return glnx_null_throw (error, "%s resolves to deleted path %s",
+                            proc_path, path_buffer);
+
+  /* remap from sandbox to host if needed */
+  return bubblewrap_remap_path (path_buffer);
+}
+
+static char *
+get_path_for_fd (int fd,
+                 gboolean *writable_out,
+                 GError **error)
+{
+  g_autofree char *proc_path = NULL;
+  int fd_flags;
+  struct stat st_buf;
+  struct stat real_st_buf;
+  g_autofree char *path = NULL;
+  gboolean writable = FALSE;
+  int read_access_mode;
+
+  /* Must be able to get fd flags */
+  fd_flags = fcntl (fd, F_GETFL);
+  if (fd_flags == -1)
+    return glnx_null_throw_errno_prefix (error, "fcntl F_GETFL");
+
+  /* Must be O_PATH */
+  if ((fd_flags & O_PATH) != O_PATH)
+    return glnx_null_throw (error, "not opened with O_PATH");
+
+  /* We don't want to allow exposing symlinks, because if they are
+   * under the callers control they could be changed between now and
+   * starting the child allowing it to point anywhere, so enforce NOFOLLOW.
+   * and verify that stat is not a link.
+   */
+  if ((fd_flags & O_NOFOLLOW) != O_NOFOLLOW)
+    return glnx_null_throw (error, "not opened with O_NOFOLLOW");
+
   /* Must be able to fstat */
   if (fstat (fd, &st_buf) < 0)
-    return glnx_throw_errno_prefix (error, "Failed to fstat");
+    return glnx_null_throw_errno_prefix (error, "fstat");
 
-  path = flatpak_get_path_for_fd (fd, error);
+  /* As per above, no symlinks */
+  if (S_ISLNK (st_buf.st_mode))
+    return glnx_null_throw (error, "is a symbolic link");
+
+  proc_path = g_strdup_printf ("/proc/self/fd/%d", fd);
+
+  /* Must be able to read valid path from /proc/self/fd */
+  /* This is an absolute and (at least at open time) symlink-expanded path */
+  path = verify_proc_self_fd (proc_path, error);
   if (path == NULL)
-    return FALSE;
+    return NULL;
 
-  /* Verify that this is the same file as the app opened.
-   * Note that this is not security relevant because flatpak-run/bwrap will
-   * check things and abort if something is off. We do this only for backwards
-   * compatibility reasons: we need to be able to ignore the issue instead of
-   * aborting the entire sandbox setup later. */
+  /* Verify that this is the same file as the app opened */
   if (stat (path, &real_st_buf) < 0 ||
       st_buf.st_dev != real_st_buf.st_dev ||
       st_buf.st_ino != real_st_buf.st_ino)
     {
       /* Different files on the inside and the outside, reject the request */
-      return glnx_throw (error,
-                         "different file inside and outside sandbox");
+      return glnx_null_throw (error,
+                              "different file inside and outside sandbox");
     }
 
-  access_mode = R_OK;
+  read_access_mode = R_OK;
   if (S_ISDIR (st_buf.st_mode))
-    access_mode |= X_OK;
+    read_access_mode |= X_OK;
 
-  if (needs_writable)
-    access_mode |= W_OK;
+  /* Must be able to access the path via the sandbox supplied O_PATH fd,
+     which applies the sandbox side mount options (like readonly). */
+  if (access (proc_path, read_access_mode) != 0)
+    return glnx_null_throw (error, "not %s in sandbox",
+                            read_access_mode & X_OK ? "accessible" : "readable");
 
-  /* Must be able to access readable and potentially writable */
-  if (faccessat (fd, "", access_mode, AT_EMPTY_PATH | AT_SYMLINK_NOFOLLOW) != 0)
-    return glnx_throw_errno_prefix (error, "Bad access mode");
+  if (access (proc_path, W_OK) == 0)
+    writable = TRUE;
 
-  return TRUE;
-}
+  if (writable_out != NULL)
+    *writable_out = writable;
 
-static int
-fd_map_remap_fd (GArray *fd_map,
-                 int    *max_fd_in_out,
-                 int     fd)
-{
-  FdMapEntry fd_map_entry;
-
-  /* Use a fd that hasn't been used yet. We might have to reshuffle
-   * fd_map_entry.to, a bit later. */
-  fd_map_entry.from = fd;
-  fd_map_entry.to = ++(*max_fd_in_out);
-  fd_map_entry.final = fd_map_entry.to;
-  g_array_append_val (fd_map, fd_map_entry);
-
-  return fd_map_entry.final;
+  return g_steal_pointer (&path);
 }
 
 static gboolean
@@ -659,7 +774,6 @@ handle_spawn (PortalFlatpak         *object,
   g_auto(GStrv) runtime_parts = NULL;
   g_autofree char *runtime_commit = NULL;
   g_autofree char *instance_path = NULL;
-  g_autofree char *instance_id = NULL;
   g_auto(GStrv) extra_args = NULL;
   g_auto(GStrv) shares = NULL;
   g_auto(GStrv) sockets = NULL;
@@ -667,8 +781,6 @@ handle_spawn (PortalFlatpak         *object,
   g_auto(GStrv) unset_env = NULL;
   g_auto(GStrv) sandbox_expose = NULL;
   g_auto(GStrv) sandbox_expose_ro = NULL;
-  g_auto(GStrv) sandbox_a11y_own_names = NULL;
-  g_autoptr(FlatpakInstance) instance = NULL;
   g_autoptr(GVariant) sandbox_expose_fd = NULL;
   g_autoptr(GVariant) sandbox_expose_fd_ro = NULL;
   g_autoptr(GVariant) app_fd = NULL;
@@ -682,13 +794,9 @@ handle_spawn (PortalFlatpak         *object,
   gboolean devel;
   gboolean empty_app;
   g_autoptr(GString) env_string = g_string_new ("");
+  glnx_autofd int env_fd = -1;
   const char *flatpak;
   gboolean testing = FALSE;
-  g_autofree char *app_id_prefix = NULL;
-  g_autoptr(GArray) owned_fds = NULL;
-  g_autoptr(GArray) expose_fds = NULL;
-  g_autoptr(GArray) expose_fds_ro = NULL;
-  glnx_autofd int instance_sandbox_fd = -1;
 
   child_setup_data.instance_id_fd = -1;
   child_setup_data.env_fd = -1;
@@ -704,13 +812,13 @@ handle_spawn (PortalFlatpak         *object,
                                   FLATPAK_METADATA_KEY_NAME, NULL);
   g_assert (app_id != NULL);
 
-  g_info ("spawn() called from app: '%s'", app_id);
+  g_debug ("spawn() called from app: '%s'", app_id);
 
   if (*app_id == 0 && g_getenv ("FLATPAK_PORTAL_MOCK_FLATPAK") != NULL)
     {
       /* Pretend we had been called from an app for test purposes */
       testing = TRUE;
-      g_info ("In unit tests, behaving as though app ID was com.example.App");
+      g_debug ("In unit tests, behaving as though app ID was com.example.App");
       g_clear_pointer (&app_id, g_free);
       app_id = g_strdup ("com.example.App");
     }
@@ -788,7 +896,6 @@ handle_spawn (PortalFlatpak         *object,
   g_variant_lookup (arg_options, "sandbox-expose", "^as", &sandbox_expose);
   g_variant_lookup (arg_options, "sandbox-expose-ro", "^as", &sandbox_expose_ro);
   g_variant_lookup (arg_options, "sandbox-flags", "u", &sandbox_flags);
-  g_variant_lookup (arg_options, "sandbox-a11y-own-names", "^as", &sandbox_a11y_own_names);
   sandbox_expose_fd = g_variant_lookup_value (arg_options, "sandbox-expose-fd", G_VARIANT_TYPE ("ah"));
   sandbox_expose_fd_ro = g_variant_lookup_value (arg_options, "sandbox-expose-fd-ro", G_VARIANT_TYPE ("ah"));
   g_variant_lookup (arg_options, "unset-env", "^as", &unset_env);
@@ -812,27 +919,30 @@ handle_spawn (PortalFlatpak         *object,
       return G_DBUS_METHOD_INVOCATION_HANDLED;
     }
 
-  app_id_prefix = g_strdup_printf ("%s.", app_id);
-  for (i = 0; sandbox_a11y_own_names != NULL && sandbox_a11y_own_names[i] != NULL; i++)
+  for (i = 0; sandbox_expose != NULL && sandbox_expose[i] != NULL; i++)
     {
-      if (!(sandbox_flags & FLATPAK_SPAWN_SANDBOX_FLAGS_ALLOW_A11Y))
-        {
-          g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                                 G_DBUS_ERROR_INVALID_ARGS,
-                                                 "Invalid sandbox a11y own name, accessibility disabled in the sandbox");
-          return G_DBUS_METHOD_INVOCATION_HANDLED;
-        }
+      const char *expose = sandbox_expose[i];
 
-      if (!g_str_has_prefix (sandbox_a11y_own_names[i], app_id_prefix))
+      g_debug ("exposing %s", expose);
+      if (!is_valid_expose (expose, &error))
         {
-          g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                                 G_DBUS_ERROR_INVALID_ARGS,
-                                                 "Invalid sandbox a11y own name: '%s' doesn't match app id", sandbox_a11y_own_names[i]);
+          g_dbus_method_invocation_return_gerror (invocation, error);
           return G_DBUS_METHOD_INVOCATION_HANDLED;
         }
     }
 
-  g_info ("Running spawn command %s", arg_argv[0]);
+  for (i = 0; sandbox_expose_ro != NULL && sandbox_expose_ro[i] != NULL; i++)
+    {
+      const char *expose = sandbox_expose_ro[i];
+      g_debug ("exposing %s", expose);
+      if (!is_valid_expose (expose, &error))
+        {
+          g_dbus_method_invocation_return_gerror (invocation, error);
+          return G_DBUS_METHOD_INVOCATION_HANDLED;
+        }
+    }
+
+  g_debug ("Running spawn command %s", arg_argv[0]);
 
   n_fds = 0;
   if (fds != NULL)
@@ -879,32 +989,19 @@ handle_spawn (PortalFlatpak         *object,
       max_fd = MAX (max_fd, fd_map_entry.from);
     }
 
-  if (testing)
+  /* TODO: Ideally we should let `flatpak run` inherit the portal's
+   * environment, in case e.g. a LD_LIBRARY_PATH is needed to be able
+   * to run `flatpak run`, but tell it to start from a blank environment
+   * when running the Flatpak app; but this isn't currently possible, so
+   * for now we preserve existing behaviour. */
+  if (arg_flags & FLATPAK_SPAWN_FLAGS_CLEAR_ENV)
     {
-      instance_id = g_strdup ("11223344");
+      char *empty[] = { NULL };
+      env = g_strdupv (empty);
     }
   else
     {
-      instance_id = g_key_file_get_string (app_info,
-                                           FLATPAK_METADATA_GROUP_INSTANCE,
-                                           FLATPAK_METADATA_KEY_INSTANCE_ID, NULL);
-    }
-
-  if (!instance_id)
-    {
-      g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                             G_DBUS_ERROR_INVALID_ARGS,
-                                             "Caller has no instance id");
-      return G_DBUS_METHOD_INVOCATION_HANDLED;
-    }
-
-  instance = flatpak_instance_new_for_id (instance_id);
-  if (!instance)
-    {
-      g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                             G_DBUS_ERROR_FAILED,
-                                             "Could not access caller instance");
-      return G_DBUS_METHOD_INVOCATION_HANDLED;
+      env = g_strdupv (original_environ);
     }
 
   if ((flatpak = g_getenv ("FLATPAK_PORTAL_MOCK_FLATPAK")) != NULL)
@@ -915,47 +1012,6 @@ handle_spawn (PortalFlatpak         *object,
     g_ptr_array_add (flatpak_argv, g_strdup (FLATPAK_BINDIR "/flatpak"));
 
   g_ptr_array_add (flatpak_argv, g_strdup ("run"));
-
-  /* If we don't clear the env, the flatpak portal service environment would
-   * leak into the flatpak instance. By default we reuse the environment of
-   * the calling instance by passing it as arguments after the --clear-env.
-   */
-  g_ptr_array_add (flatpak_argv, g_strdup ("--clear-env"));
-
-  if (!(arg_flags & FLATPAK_SPAWN_FLAGS_CLEAR_ENV))
-    {
-      static const char * const mock_run_environ[] = { "FOO=bar", NULL };
-
-      if (testing)
-        env = g_strdupv ((GStrv) mock_run_environ);
-      else
-        env = flatpak_instance_get_run_environ (instance, &error);
-
-      if (env == NULL)
-        {
-          if (g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
-            {
-              g_warning ("Environment for \"flatpak run\" was not found, "
-                         "falling back to a clean environment");
-            }
-          else
-            {
-              g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                                     G_DBUS_ERROR_INVALID_ARGS,
-                                                     "Could not load environment for \"flatpak run\": %s",
-                                                     error->message);
-              return G_DBUS_METHOD_INVOCATION_HANDLED;
-            }
-        }
-      else
-        {
-          for (i = 0; env != NULL && env[i] != NULL; i++)
-            {
-              g_string_append (env_string, env[i]);
-              g_string_append_c (env_string, '\0');
-            }
-        }
-    }
 
   sandboxed = (arg_flags & FLATPAK_SPAWN_FLAGS_SANDBOX) != 0;
 
@@ -988,49 +1044,10 @@ handle_spawn (PortalFlatpak         *object,
                g_strv_contains ((const char * const *) devices, "all")))
             g_ptr_array_add (flatpak_argv, g_strdup ("--device=dri"));
         }
-      if (sandbox_flags & FLATPAK_SPAWN_SANDBOX_FLAGS_SHARE_INPUT)
-        {
-          if (devices != NULL &&
-              (g_strv_contains ((const char * const *) devices, "input") ||
-               g_strv_contains ((const char * const *) devices, "all")))
-            g_ptr_array_add (flatpak_argv, g_strdup ("--device=input"));
-        }
-      if (sandbox_flags & FLATPAK_SPAWN_SANDBOX_FLAGS_SHARE_USB)
-        {
-          if (devices != NULL &&
-              (g_strv_contains ((const char * const *) devices, "usb") ||
-               g_strv_contains ((const char * const *) devices, "all")))
-            g_ptr_array_add (flatpak_argv, g_strdup ("--device=usb"));
-        }
-      if (sandbox_flags & FLATPAK_SPAWN_SANDBOX_FLAGS_SHARE_KVM)
-        {
-          if (devices != NULL &&
-              (g_strv_contains ((const char * const *) devices, "kvm") ||
-               g_strv_contains ((const char * const *) devices, "all")))
-            g_ptr_array_add (flatpak_argv, g_strdup ("--device=kvm"));
-        }
-      if (sandbox_flags & FLATPAK_SPAWN_SANDBOX_FLAGS_SHARE_SHM)
-        {
-          if (devices != NULL &&
-              (g_strv_contains ((const char * const *) devices, "shm")))
-            g_ptr_array_add (flatpak_argv, g_strdup ("--device=shm"));
-        }
-      if (sandbox_flags & FLATPAK_SPAWN_SANDBOX_FLAGS_SHARE_DEVICES)
-        {
-          if (devices != NULL &&
-              (g_strv_contains ((const char * const *) devices, "all")))
-            g_ptr_array_add (flatpak_argv, g_strdup ("--device=all"));
-        }
       if (sandbox_flags & FLATPAK_SPAWN_SANDBOX_FLAGS_ALLOW_DBUS)
         g_ptr_array_add (flatpak_argv, g_strdup ("--session-bus"));
-
       if (sandbox_flags & FLATPAK_SPAWN_SANDBOX_FLAGS_ALLOW_A11Y)
-        {
-          g_ptr_array_add (flatpak_argv, g_strdup ("--a11y-bus"));
-
-          for (i = 0; sandbox_a11y_own_names != NULL && sandbox_a11y_own_names[i] != NULL; i++)
-            g_ptr_array_add (flatpak_argv, g_strdup_printf ("--a11y-own-name=%s", sandbox_a11y_own_names[i]));
-        }
+        g_ptr_array_add (flatpak_argv, g_strdup ("--a11y-bus"));
     }
   else
     {
@@ -1098,14 +1115,10 @@ handle_spawn (PortalFlatpak         *object,
       g_string_append_c (env_string, '\0');
     }
 
-  owned_fds = g_array_new (FALSE, FALSE, sizeof (int));
-  g_array_set_clear_func (owned_fds, (GDestroyNotify) glnx_close_fd);
-
   if (env_string->len > 0)
     {
+      FdMapEntry fd_map_entry;
       g_auto(GLnxTmpfile) env_tmpf  = { 0, };
-      int env_fd = -1;
-      int remapped_fd;
 
       if (!flatpak_buffer_to_sealed_memfd_or_tmpfile (&env_tmpf, "environ",
                                                       env_string->str,
@@ -1115,13 +1128,17 @@ handle_spawn (PortalFlatpak         *object,
           return G_DBUS_METHOD_INVOCATION_HANDLED;
         }
 
-      env_fd = g_steal_fd (&env_tmpf.fd);
-      g_array_append_val (owned_fds, env_fd);
+      env_fd = glnx_steal_fd (&env_tmpf.fd);
 
-      remapped_fd = fd_map_remap_fd (fd_map, &max_fd, env_fd);
+      /* Use a fd that hasn't been used yet. We might have to reshuffle
+       * fd_map_entry.to, a bit later. */
+      fd_map_entry.from = env_fd;
+      fd_map_entry.to = ++max_fd;
+      fd_map_entry.final = fd_map_entry.to;
+      g_array_append_val (fd_map, fd_map_entry);
 
       g_ptr_array_add (flatpak_argv,
-                       g_strdup_printf ("--env-fd=%d", remapped_fd));
+                       g_strdup_printf ("--env-fd=%d", fd_map_entry.final));
     }
 
   for (i = 0; unset_env != NULL && unset_env[i] != NULL; i++)
@@ -1153,6 +1170,7 @@ handle_spawn (PortalFlatpak         *object,
 
   if (expose_pids || share_pids)
     {
+      g_autofree char *instance_id = NULL;
       int sender_pid1 = 0;
 
       if (!(supports & FLATPAK_SPAWN_SUPPORT_FLAGS_EXPOSE_PIDS))
@@ -1163,7 +1181,16 @@ handle_spawn (PortalFlatpak         *object,
           return G_DBUS_METHOD_INVOCATION_HANDLED;
         }
 
-      sender_pid1 = flatpak_instance_get_child_pid (instance);
+      instance_id = g_key_file_get_string (app_info,
+                                           FLATPAK_METADATA_GROUP_INSTANCE,
+                                           FLATPAK_METADATA_KEY_INSTANCE_ID, NULL);
+
+      if (instance_id)
+        {
+          g_autoptr(FlatpakInstance) instance = flatpak_instance_new_for_id (instance_id);
+          sender_pid1 = flatpak_instance_get_child_pid (instance);
+        }
+
       if (sender_pid1 == 0)
         {
           g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
@@ -1206,7 +1233,6 @@ handle_spawn (PortalFlatpak         *object,
 
       g_ptr_array_add (flatpak_argv, g_strdup_printf ("--instance-id-fd=%d", pipe_fds[1]));
       child_setup_data.instance_id_fd = pipe_fds[1];
-      max_fd = MAX(max_fd, pipe_fds[1]);
     }
 
   if (devel)
@@ -1220,108 +1246,56 @@ handle_spawn (PortalFlatpak         *object,
   else
     g_ptr_array_add (flatpak_argv, g_strdup ("--unshare=network"));
 
-  expose_fds = g_array_new (FALSE, FALSE, sizeof (int));
-  expose_fds_ro = g_array_new (FALSE, FALSE, sizeof (int));
 
-  if (instance_path != NULL)
+  if (instance_path)
     {
-      glnx_autofd int instance_fd = -1;
-
-      instance_fd = glnx_chaseat (AT_FDCWD, instance_path,
-                                  GLNX_CHASE_DEFAULT,
-                                  &error);
-      if (instance_fd < 0)
-        {
-          g_dbus_method_invocation_return_gerror (invocation, error);
-          return G_DBUS_METHOD_INVOCATION_HANDLED;
-        }
-
-      if (!glnx_ensure_dir (instance_fd, "sandbox", 0700, &error))
-        {
-          g_warning ("Unable to create %s/sandbox: %s", instance_path, error->message);
-          g_clear_error (&error);
-        }
-
-      instance_sandbox_fd = glnx_chaseat (instance_fd, "sandbox",
-                                          GLNX_CHASE_RESOLVE_NO_SYMLINKS,
-                                          &error);
-      if (instance_sandbox_fd < 0)
-        {
-          g_dbus_method_invocation_return_gerror (invocation, error);
-          return G_DBUS_METHOD_INVOCATION_HANDLED;
-        }
-    }
-
-  for (i = 0; sandbox_expose != NULL && sandbox_expose[i] != NULL; i++)
-    {
-      int expose_fd;
-
-      g_assert (instance_sandbox_fd >= 0);
-
-      expose_fd = glnx_chaseat (instance_sandbox_fd, sandbox_expose[i],
-                                GLNX_CHASE_RESOLVE_NO_SYMLINKS |
-                                GLNX_CHASE_RESOLVE_BENEATH,
-                                &error);
-      if (expose_fd < 0)
-        {
-          g_dbus_method_invocation_return_gerror (invocation, error);
-          return G_DBUS_METHOD_INVOCATION_HANDLED;
-        }
-
-      g_array_append_val (expose_fds, expose_fd);
-      /* transfers ownership, can't g_steal_fd with g_array_append_val */
-      g_array_append_val (owned_fds, expose_fd);
+      for (i = 0; sandbox_expose != NULL && sandbox_expose[i] != NULL; i++)
+        g_ptr_array_add (flatpak_argv,
+                         filesystem_sandbox_arg (instance_path, sandbox_expose[i], FALSE));
+      for (i = 0; sandbox_expose_ro != NULL && sandbox_expose_ro[i] != NULL; i++)
+        g_ptr_array_add (flatpak_argv,
+                         filesystem_sandbox_arg (instance_path, sandbox_expose_ro[i], TRUE));
     }
 
   for (i = 0; sandbox_expose_ro != NULL && sandbox_expose_ro[i] != NULL; i++)
     {
-      int expose_fd;
-
-      g_assert (instance_sandbox_fd >= 0);
-
-      expose_fd = glnx_chaseat (instance_sandbox_fd, sandbox_expose_ro[i],
-                                GLNX_CHASE_RESOLVE_NO_SYMLINKS |
-                                GLNX_CHASE_RESOLVE_BENEATH,
-                                &error);
-      if (expose_fd < 0)
-        {
-          g_dbus_method_invocation_return_gerror (invocation, error);
-          return G_DBUS_METHOD_INVOCATION_HANDLED;
-        }
-
-      g_array_append_val (expose_fds_ro, expose_fd);
-      /* transfers ownership, can't g_steal_fd with g_array_append_val */
-      g_array_append_val (owned_fds, expose_fd);
+      const char *expose = sandbox_expose_ro[i];
+      g_debug ("exposing %s", expose);
     }
 
   if (sandbox_expose_fd != NULL)
     {
       gsize len = g_variant_n_children (sandbox_expose_fd);
-
       for (i = 0; i < len; i++)
         {
           gint32 handle;
-
           g_variant_get_child (sandbox_expose_fd, i, "h", &handle);
-          if (handle >= fds_len || handle < 0)
+          if (handle >= 0 && handle < fds_len)
             {
-              g_debug ("Invalid sandbox-expose-fd handle %d", handle);
+              int handle_fd = fds[handle];
+              g_autofree char *path = NULL;
+              gboolean writable = FALSE;
+
+              path = get_path_for_fd (handle_fd, &writable, &error);
+
+              if (path)
+                {
+                  g_ptr_array_add (flatpak_argv, filesystem_arg (path, !writable));
+                }
+              else
+                {
+                  g_debug ("unable to get path for sandbox-exposed fd %d, ignoring: %s",
+                           handle_fd, error->message);
+                  g_clear_error (&error);
+                }
+            }
+          else
+            {
               g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
                                                      G_DBUS_ERROR_INVALID_ARGS,
                                                      "No file descriptor for handle %d",
                                                      handle);
               return G_DBUS_METHOD_INVOCATION_HANDLED;
-            }
-
-          if (validate_opath_fd (fds[handle], TRUE, &error))
-            {
-              g_array_append_val (expose_fds, fds[handle]);
-            }
-          else
-            {
-              g_info ("unable to validate sandbox-expose-fd %d, ignoring: %s",
-                      fds[handle], error->message);
-              g_clear_error (&error);
             }
         }
     }
@@ -1329,69 +1303,54 @@ handle_spawn (PortalFlatpak         *object,
   if (sandbox_expose_fd_ro != NULL)
     {
       gsize len = g_variant_n_children (sandbox_expose_fd_ro);
-
       for (i = 0; i < len; i++)
         {
           gint32 handle;
-
           g_variant_get_child (sandbox_expose_fd_ro, i, "h", &handle);
-          if (handle >= fds_len || handle < 0)
+          if (handle >= 0 && handle < fds_len)
             {
-              g_debug ("Invalid sandbox-expose-ro-fd handle %d", handle);
+              int handle_fd = fds[handle];
+              g_autofree char *path = NULL;
+              gboolean writable = FALSE;
+
+              path = get_path_for_fd (handle_fd, &writable, &error);
+
+              if (path)
+                {
+                  g_ptr_array_add (flatpak_argv, filesystem_arg (path, TRUE));
+                }
+              else
+                {
+                  g_debug ("unable to get path for sandbox-exposed fd %d, ignoring: %s",
+                           handle_fd, error->message);
+                  g_clear_error (&error);
+                }
+            }
+          else
+            {
               g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
                                                      G_DBUS_ERROR_INVALID_ARGS,
                                                      "No file descriptor for handle %d",
                                                      handle);
               return G_DBUS_METHOD_INVOCATION_HANDLED;
             }
-
-          if (validate_opath_fd (fds[handle], FALSE, &error))
-            {
-              g_array_append_val (expose_fds_ro, fds[handle]);
-            }
-          else
-            {
-              g_info ("unable to validate sandbox-expose-ro-fd %d, ignoring: %s",
-                      fds[handle], error->message);
-              g_clear_error (&error);
-            }
         }
-    }
-
-  for (i = 0; i < expose_fds->len; i++)
-    {
-      int remapped_fd;
-
-      remapped_fd = fd_map_remap_fd (fd_map, &max_fd, g_array_index (expose_fds, int, i));
-
-      g_ptr_array_add (flatpak_argv, g_strdup_printf ("--bind-fd=%d",
-                                                      remapped_fd));
-    }
-
-  for (i = 0; i < expose_fds_ro->len; i++)
-    {
-      int remapped_fd;
-
-      remapped_fd = fd_map_remap_fd (fd_map, &max_fd, g_array_index (expose_fds_ro, int, i));
-
-      g_ptr_array_add (flatpak_argv, g_strdup_printf ("--ro-bind-fd=%d",
-                                                      remapped_fd));
     }
 
   empty_app = (arg_flags & FLATPAK_SPAWN_FLAGS_EMPTY_APP) != 0;
 
-  if (empty_app && app_fd != NULL)
-    {
-      g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                             G_DBUS_ERROR_INVALID_ARGS,
-                                             "app-fd and EMPTY_APP cannot both be used");
-      return G_DBUS_METHOD_INVOCATION_HANDLED;
-    }
-
   if (app_fd != NULL)
     {
-      int remapped_fd;
       gint32 handle = g_variant_get_handle (app_fd);
+      g_autofree char *path = NULL;
+
+      if (empty_app)
+        {
+          g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
+                                                 G_DBUS_ERROR_INVALID_ARGS,
+                                                 "app-fd and EMPTY_APP cannot both be used");
+          return G_DBUS_METHOD_INVOCATION_HANDLED;
+        }
 
       if (handle >= fds_len || handle < 0)
         {
@@ -1403,11 +1362,18 @@ handle_spawn (PortalFlatpak         *object,
         }
 
       g_assert (fds != NULL);   /* otherwise fds_len would be 0 */
+      path = get_path_for_fd (fds[handle], NULL, &error);
 
-      remapped_fd = fd_map_remap_fd (fd_map, &max_fd, fds[handle]);
+      if (path == NULL)
+        {
+          g_prefix_error (&error, "Unable to convert /app fd %d into path: ",
+                          fds[handle]);
+          g_dbus_method_invocation_return_gerror (invocation, error);
+          return G_DBUS_METHOD_INVOCATION_HANDLED;
+        }
 
-      g_ptr_array_add (flatpak_argv, g_strdup_printf ("--app-fd=%d",
-                                                      remapped_fd));
+      g_debug ("Using %s as /app instead of app", path);
+      g_ptr_array_add (flatpak_argv, g_strdup_printf ("--app-path=%s", path));
     }
   else if (empty_app)
     {
@@ -1416,8 +1382,8 @@ handle_spawn (PortalFlatpak         *object,
 
   if (usr_fd != NULL)
     {
-      int remapped_fd;
       gint32 handle = g_variant_get_handle (usr_fd);
+      g_autofree char *path = NULL;
 
       if (handle >= fds_len || handle < 0)
         {
@@ -1429,11 +1395,18 @@ handle_spawn (PortalFlatpak         *object,
         }
 
       g_assert (fds != NULL);   /* otherwise fds_len would be 0 */
+      path = get_path_for_fd (fds[handle], NULL, &error);
 
-      remapped_fd = fd_map_remap_fd (fd_map, &max_fd, fds[handle]);
+      if (path == NULL)
+        {
+          g_prefix_error (&error, "Unable to convert /usr fd %d into path: ",
+                          fds[handle]);
+          g_dbus_method_invocation_return_gerror (invocation, error);
+          return G_DBUS_METHOD_INVOCATION_HANDLED;
+        }
 
-      g_ptr_array_add (flatpak_argv, g_strdup_printf ("--usr-fd=%d",
-                                                      remapped_fd));
+      g_debug ("Using %s as /usr instead of runtime", path);
+      g_ptr_array_add (flatpak_argv, g_strdup_printf ("--usr-path=%s", path));
     }
 
   g_ptr_array_add (flatpak_argv, g_strdup_printf ("--runtime=%s", runtime_parts[1]));
@@ -1469,7 +1442,7 @@ handle_spawn (PortalFlatpak         *object,
           g_string_append (cmd, flatpak_argv->pdata[i]);
         }
 
-      g_info ("Starting: %s\n", cmd->str);
+      g_debug ("Starting: %s\n", cmd->str);
     }
 
   /* We make a second pass over the fds to find if any "to" fd index
@@ -1503,11 +1476,10 @@ handle_spawn (PortalFlatpak         *object,
   child_setup_data.fd_map = &g_array_index (fd_map, FdMapEntry, 0);
   child_setup_data.fd_map_len = fd_map->len;
 
-  /* We use LEAVE_DESCRIPTORS_OPEN and close them in the child_setup
-   * to work around a deadlock in GLib < 2.60 */
+  /* We use LEAVE_DESCRIPTORS_OPEN to work around dead-lock, see flatpak_close_fds_workaround */
   if (!g_spawn_async_with_pipes (NULL,
                                  (char **) flatpak_argv->pdata,
-                                 NULL,
+                                 env,
                                  G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_LEAVE_DESCRIPTORS_OPEN,
                                  child_setup_func, &child_setup_data,
                                  &pid,
@@ -1541,7 +1513,7 @@ handle_spawn (PortalFlatpak         *object,
                                                   pid_data,
                                                   NULL);
 
-  g_info ("Client Pid is %d", pid_data->pid);
+  g_debug ("Client Pid is %d", pid_data->pid);
 
   g_hash_table_replace (client_pid_data_hash, GUINT_TO_POINTER (pid_data->pid),
                         pid_data);
@@ -1559,7 +1531,7 @@ handle_spawn_signal (PortalFlatpak         *object,
 {
   PidData *pid_data = NULL;
 
-  g_info ("spawn_signal(%d %d)", arg_pid, arg_signal);
+  g_debug ("spawn_signal(%d %d)", arg_pid, arg_signal);
 
   pid_data = g_hash_table_lookup (client_pid_data_hash, GUINT_TO_POINTER (arg_pid));
   if (pid_data == NULL ||
@@ -1571,7 +1543,7 @@ handle_spawn_signal (PortalFlatpak         *object,
       return G_DBUS_METHOD_INVOCATION_HANDLED;
     }
 
-  g_info ("Sending signal %d to client pid %d", arg_signal, arg_pid);
+  g_debug ("Sending signal %d to client pid %d", arg_signal, arg_pid);
 
   if (arg_to_process_group)
     killpg (pid_data->pid, arg_signal);
@@ -1770,7 +1742,7 @@ create_update_monitor (GDBusMethodInvocation *invocation,
   g_object_set_data_full (G_OBJECT (monitor), "update-monitor-data", m, update_monitor_data_free);
   g_object_set_data_full (G_OBJECT (monitor), "required-sender", g_strdup (m->sender), g_free);
 
-  g_info ("created UpdateMonitor for %s/%s at %s", m->name, m->branch, obj_path);
+  g_debug ("created UpdateMonitor for %s/%s at %s", m->name, m->branch, obj_path);
 
   return monitor;
 }
@@ -1877,12 +1849,12 @@ check_for_updates (PortalFlatpakUpdateMonitor *monitor)
 
   installation_path = update_monitor_get_installation_path (monitor);
 
-  g_info ("Checking for updates for %s/%s/%s in %s", m->name, m->arch, m->branch, flatpak_file_get_path_cached (installation_path));
+  g_debug ("Checking for updates for %s/%s/%s in %s", m->name, m->arch, m->branch, flatpak_file_get_path_cached (installation_path));
 
   installation = lookup_installation_for_path (installation_path, &error);
   if (installation == NULL)
     {
-      g_info ("Unable to find installation for path %s: %s", flatpak_file_get_path_cached (installation_path), error->message);
+      g_debug ("Unable to find installation for path %s: %s", flatpak_file_get_path_cached (installation_path), error->message);
       return;
     }
 
@@ -1892,7 +1864,7 @@ check_for_updates (PortalFlatpakUpdateMonitor *monitor)
                                                           m->cancellable, &error);
   if (installed_ref == NULL)
     {
-      g_info ("getting installed ref failed: %s", error->message);
+      g_debug ("getting installed ref failed: %s", error->message);
       return; /* Never report updates for uninstalled refs */
     }
 
@@ -1917,7 +1889,7 @@ check_for_updates (PortalFlatpakUpdateMonitor *monitor)
       /* Probably some network issue.
        * Fall back to the local_commit to at least be able to pick up already installed updates.
        */
-      g_info ("getting remote ref failed: %s", error->message);
+      g_debug ("getting remote ref failed: %s", error->message);
       g_clear_error (&error);
       remote_commit = local_commit;
     }
@@ -1929,7 +1901,7 @@ check_for_updates (PortalFlatpakUpdateMonitor *monitor)
           /* This can happen if we're offline and there is an update from an usb drive.
            * Not much we can do in terms of reporting it, but at least handle the case
            */
-          g_info ("Unknown remote commit, setting to local_commit");
+          g_debug ("Unknown remote commit, setting to local_commit");
           remote_commit = local_commit;
         }
     }
@@ -1946,7 +1918,7 @@ check_for_updates (PortalFlatpakUpdateMonitor *monitor)
       g_free (m->reported_remote_commit);
       m->reported_remote_commit = g_strdup (remote_commit);
 
-      g_info ("Found update for %s/%s/%s, local: %s, remote: %s", m->name, m->arch, m->branch, local_commit, remote_commit);
+      g_debug ("Found update for %s/%s/%s, local: %s, remote: %s", m->name, m->arch, m->branch, local_commit, remote_commit);
       g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
       g_variant_builder_add (&builder, "{sv}", "running-commit", g_variant_new_string (m->commit));
       g_variant_builder_add (&builder, "{sv}", "local-commit", g_variant_new_string (local_commit));
@@ -2036,12 +2008,12 @@ check_all_for_updates_cb (void *data)
   if (!opt_poll_when_metered &&
       g_network_monitor_get_network_metered (network_monitor))
     {
-      g_info ("Skipping update check on metered network");
+      g_debug ("Skipping update check on metered network");
 
       return G_SOURCE_CONTINUE;
     }
 
-  g_info ("Checking all update monitors");
+  g_debug ("Checking all update monitors");
 
   G_LOCK (update_monitors);
   update_monitors_timeout = 0;
@@ -2072,7 +2044,7 @@ handle_create_update_monitor (PortalFlatpak *object,
     token = g_strdup_printf ("%d", g_random_int_range (0, 1000));
 
   sender = g_dbus_method_invocation_get_sender (invocation);
-  g_info ("handle CreateUpdateMonitor from %s", sender);
+  g_debug ("handle CreateUpdateMonitor from %s", sender);
 
   sender_escaped = g_strdup (sender + 1);
   for (i = 0; sender_escaped[i]; i++)
@@ -2120,7 +2092,7 @@ handle_close (PortalFlatpakUpdateMonitor *monitor,
 {
   update_monitor_close (monitor);
 
-  g_info ("handle UpdateMonitor.Close");
+  g_debug ("handle UpdateMonitor.Close");
 
   portal_flatpak_update_monitor_complete_close (monitor, invocation);
 
@@ -2147,7 +2119,7 @@ close_update_monitors_in_thread_func (GTask *task,
       PortalFlatpakUpdateMonitor *monitor = l->data;
       UpdateMonitorData *m = update_monitor_get_data (monitor);
 
-      g_info ("closing monitor %s", m->obj_path);
+      g_debug ("closing monitor %s", m->obj_path);
       update_monitor_close (monitor);
     }
 }
@@ -2162,7 +2134,7 @@ close_update_monitors_for_sender (const char *sender)
       g_autoptr(GTask) task = g_task_new (NULL, NULL, NULL, NULL);
       g_task_set_task_data (task, list, deep_free_object_list);
 
-      g_info ("%s dropped off the bus, closing monitors", sender);
+      g_debug ("%s dropped off the bus, closing monitors", sender);
       g_task_run_in_thread (task, close_update_monitors_in_thread_func);
     }
 }
@@ -2177,7 +2149,7 @@ get_update_permission (const char *app_id)
 
   if (permission_store == NULL)
     {
-      g_info ("No portals installed, assume no permissions");
+      g_debug ("No portals installed, assume no permissions");
       return NO;
     }
 
@@ -2190,7 +2162,7 @@ get_update_permission (const char *app_id)
                                                    &error))
     {
       g_dbus_error_strip_remote_error (error);
-      g_info ("No updates permissions found: %s", error->message);
+      g_debug ("No updates permissions found: %s", error->message);
       g_clear_error (&error);
     }
 
@@ -2209,7 +2181,7 @@ get_update_permission (const char *app_id)
         }
     }
 
-  g_info ("Updates permissions for %s: %d", app_id, ret);
+  g_debug ("Updates permissions for %s: %d", app_id, ret);
 
   return ret;
 }
@@ -2361,7 +2333,7 @@ emit_progress (PortalFlatpakUpdateMonitor *monitor,
   GVariantBuilder builder;
   g_autoptr(GError) error = NULL;
 
-  g_info ("%d/%d ops, progress %d, status: %d", op, n_ops, progress, status);
+  g_debug ("%d/%d ops, progress %d, status: %d", op, n_ops, progress, status);
 
   g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
   if (n_ops > 0)
@@ -2469,8 +2441,7 @@ static gboolean
 transaction_ready (FlatpakTransaction *transaction,
                    TransactionData *d)
 {
-  g_autolist(FlatpakTransactionOperation) ops =
-    flatpak_transaction_get_operations (transaction);
+  GList *ops = flatpak_transaction_get_operations (transaction);
   int status;
   GList *l;
 
@@ -2484,7 +2455,7 @@ transaction_ready (FlatpakTransaction *transaction,
       const char *ref = flatpak_transaction_operation_get_ref (op);
       FlatpakTransactionOperationType type = flatpak_transaction_operation_get_operation_type (op);
 
-      /* Actual app updates need to not increase permission requirements */
+      /* Actual app updates need to not increase premission requirements */
       if (type == FLATPAK_TRANSACTION_OPERATION_UPDATE && g_str_has_prefix (ref, "app/"))
         {
           GKeyFile *new_metadata = flatpak_transaction_operation_get_metadata (op);
@@ -2599,7 +2570,7 @@ update_child_setup_func (gpointer user_data)
   int *socket = user_data;
 
   dup2 (*socket, 3);
-  g_fdwalk_set_cloexec (4);
+  flatpak_close_fds_workaround (4);
 }
 
 /* This is the meat of the update process, its run out of process (via
@@ -2671,7 +2642,6 @@ read_variant (GInputStream *in,
               GError **error)
 {
   guint32 size;
-  g_autofree guchar *data_owned = NULL;
   guchar *data;
   gsize bytes_read;
 
@@ -2685,8 +2655,7 @@ read_variant (GInputStream *in,
       return NULL;
     }
 
-  data_owned = g_try_malloc (size);
-  data = data_owned;
+  data = g_try_malloc (size);
   if (data == NULL)
     {
       flatpak_fail (error, "Out of memory");
@@ -2704,9 +2673,7 @@ read_variant (GInputStream *in,
     }
 
   return g_variant_ref_sink (g_variant_new_from_data (G_VARIANT_TYPE("(uuuuss)"),
-                                                      data, size, FALSE,
-                                                      g_free,
-                                                      g_steal_pointer (&data_owned)));
+                                                      data, size, FALSE, g_free, data));
 }
 
 /* We do the actual update out of process (in do_update_child_process,
@@ -2732,7 +2699,7 @@ handle_update_responses (PortalFlatpakUpdateMonitor *monitor,
       v = read_variant (in, m->cancellable, error);
       if (v == NULL)
         {
-          g_info ("Reading message from child update process failed %s", (*error)->message);
+          g_debug ("Reading message from child update process failed %s", (*error)->message);
           return FALSE;
         }
 
@@ -2745,7 +2712,7 @@ handle_update_responses (PortalFlatpakUpdateMonitor *monitor,
     }
   while (status == PROGRESS_STATUS_RUNNING);
 
-  /* Don't return an received error as we emitted it already, that would cause it to be emitted twice */
+  /* Don't return an received error as we emited it already, that would cause it to be emitted twice */
   return TRUE;
 }
 
@@ -2814,7 +2781,7 @@ handle_update (PortalFlatpakUpdateMonitor *monitor,
   g_autoptr(GTask) task = NULL;
   gboolean already_installing = FALSE;
 
-  g_info ("handle UpdateMonitor.Update");
+  g_debug ("handle UpdateMonitor.Update");
 
   g_mutex_lock (&m->lock);
   if (m->installing)
@@ -2878,7 +2845,7 @@ name_owner_changed (GDBusConnection *connection,
       for (l = list; l; l = l->next)
         {
           pid_data = l->data;
-          g_info ("%s dropped off the bus, killing %d", pid_data->client, pid_data->pid);
+          g_debug ("%s dropped off the bus, killing %d", pid_data->client, pid_data->pid);
           killpg (pid_data->pid, SIGINT);
         }
 
@@ -2892,6 +2859,19 @@ name_owner_changed (GDBusConnection *connection,
 #define DBUS_INTERFACE_DBUS DBUS_NAME_DBUS
 #define DBUS_PATH_DBUS "/org/freedesktop/DBus"
 
+static gboolean
+supports_expose_pids (void)
+{
+  const char *path = g_find_program_in_path (flatpak_get_bwrap ());
+  struct stat st;
+
+  /* This is supported only if bwrap exists and is not setuid */
+  return
+    path != NULL &&
+    stat (path, &st) == 0 &&
+    (st.st_mode & S_ISUID) == 0;
+}
+
 static void
 on_bus_acquired (GDBusConnection *connection,
                  const gchar     *name,
@@ -2899,7 +2879,7 @@ on_bus_acquired (GDBusConnection *connection,
 {
   GError *error = NULL;
 
-  g_info ("Bus acquired, creating skeleton");
+  g_debug ("Bus acquired, creating skeleton");
 
   g_dbus_connection_set_exit_on_close (connection, FALSE);
 
@@ -2925,7 +2905,10 @@ on_bus_acquired (GDBusConnection *connection,
 
   g_object_set_data_full (G_OBJECT (portal), "track-alive", GINT_TO_POINTER (42), skeleton_died_cb);
 
-  portal_flatpak_set_version (PORTAL_FLATPAK (portal), 8);
+  g_dbus_interface_skeleton_set_flags (G_DBUS_INTERFACE_SKELETON (portal),
+                                       G_DBUS_INTERFACE_SKELETON_FLAGS_HANDLE_METHOD_INVOCATIONS_IN_THREAD);
+
+  portal_flatpak_set_version (PORTAL_FLATPAK (portal), 6);
   portal_flatpak_set_supports (PORTAL_FLATPAK (portal), supports);
 
   g_signal_connect (portal, "handle-spawn", G_CALLBACK (handle_spawn), NULL);
@@ -2949,7 +2932,7 @@ on_name_acquired (GDBusConnection *connection,
                   const gchar     *name,
                   gpointer         user_data)
 {
-  g_info ("Name acquired");
+  g_debug ("Name acquired");
 }
 
 static void
@@ -2957,7 +2940,7 @@ on_name_lost (GDBusConnection *connection,
               const gchar     *name,
               gpointer         user_data)
 {
-  g_info ("Name lost");
+  g_debug ("Name lost");
   unref_skeleton_in_timeout ();
 }
 
@@ -2972,7 +2955,7 @@ binary_file_changed_cb (GFileMonitor     *file_monitor,
 
   if (!got_it)
     {
-      g_info ("binary file changed");
+      g_debug ("binary file changed");
       unref_skeleton_in_timeout ();
     }
 
@@ -3001,7 +2984,7 @@ main (int    argc,
   ssize_t exe_path_len;
   gboolean replace;
   gboolean show_version;
-  g_autoptr(GOptionContext) context = NULL;
+  GOptionContext *context;
   GBusNameOwnerFlags flags;
   g_autoptr(GError) error = NULL;
   const GOptionEntry options[] = {
@@ -3013,6 +2996,10 @@ main (int    argc,
     { "poll-when-metered", 0, 0, G_OPTION_ARG_NONE, &opt_poll_when_metered, "Whether to check for updates on metered networks",  NULL },
     { NULL }
   };
+
+  /* Save the enviroment before changing anything, so that subprocesses
+   * can get the unchanged version */
+  original_environ = g_get_environ ();
 
   setlocale (LC_ALL, "");
 
@@ -3057,7 +3044,7 @@ main (int    argc,
     }
 
   if (opt_verbose)
-    g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_INFO, message_handler, NULL);
+    g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, message_handler, NULL);
 
   client_pid_data_hash = g_hash_table_new_full (NULL, NULL, NULL, (GDestroyNotify) pid_data_free);
 
@@ -3090,7 +3077,7 @@ main (int    argc,
 
   flatpak_connection_track_name_owners (session_bus);
 
-  if (flatpak_bwrap_is_unprivileged ())
+  if (supports_expose_pids ())
     supports |= FLATPAK_SPAWN_SUPPORT_FLAGS_EXPOSE_PIDS;
 
   flags = G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT;
@@ -3116,5 +3103,6 @@ main (int    argc,
   main_loop = g_main_loop_new (NULL, FALSE);
   g_main_loop_run (main_loop);
 
+  g_strfreev (original_environ);
   return 0;
 }

@@ -27,7 +27,6 @@
 #include "flatpak-utils-private.h"
 #include "flatpak-dir-private.h"
 #include "flatpak-permission-dbus-generated.h"
-#include "flatpak-transaction.h"
 
 /* AS_CHECK_VERSION was introduced in 0.14.0; we still support 0.12.0, so
  * behave as though versions without this macro are arbitrarily old */
@@ -78,7 +77,6 @@ FlatpakDir * flatpak_find_installed_pref (const char         *pref,
 
 gboolean flatpak_resolve_duplicate_remotes (GPtrArray    *dirs,
                                             const char   *remote_name,
-                                            gboolean      opt_noninteractive,
                                             FlatpakDir  **out_dir,
                                             GCancellable *cancellable,
                                             GError      **error);
@@ -88,7 +86,6 @@ gboolean flatpak_resolve_matching_refs (const char *remote_name,
                                         gboolean    assume_yes,
                                         GPtrArray  *refs,
                                         const char *opt_search_ref,
-                                        gboolean    opt_noninteractive,
                                         char      **out_ref,
                                         GError    **error);
 
@@ -96,13 +93,11 @@ gboolean flatpak_resolve_matching_installed_refs (gboolean    assume_yes,
                                                   gboolean    only_one,
                                                   GPtrArray  *ref_dir_pairs,
                                                   const char *opt_search_ref,
-                                                  gboolean    opt_noninteractive,
                                                   GPtrArray  *out_pairs,
                                                   GError    **error);
 
 gboolean flatpak_resolve_matching_remotes (GPtrArray      *remote_dir_pairs,
                                            const char     *opt_search_ref,
-                                           gboolean        opt_noninteractive,
                                            RemoteDirPair **out_pair,
                                            GError        **error);
 
@@ -200,16 +195,18 @@ gboolean ensure_remote_state_arch (FlatpakDir         *dir,
                                    gboolean            only_sideloaded,
                                    GCancellable       *cancellable,
                                    GError            **error);
+gboolean ensure_remote_state_arch_for_ref (FlatpakDir         *dir,
+                                           FlatpakRemoteState *state,
+                                           const char         *ref,
+                                           gboolean            cached,
+                                           gboolean            only_sideloaded,
+                                           GCancellable       *cancellable,
+                                           GError            **error);
 gboolean ensure_remote_state_all_arches (FlatpakDir         *dir,
                                          FlatpakRemoteState *state,
                                          gboolean            cached,
                                          gboolean            only_sideloaded,
                                          GCancellable       *cancellable,
                                          GError            **error);
-
-gboolean setup_sideload_repositories (FlatpakTransaction *transaction,
-                                      char              **opt_sideload_repos,
-                                      GCancellable       *cancellable,
-                                      GError            **error);
 
 #endif /* __FLATPAK_BUILTINS_UTILS_H__ */

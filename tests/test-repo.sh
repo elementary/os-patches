@@ -24,7 +24,7 @@ set -euo pipefail
 skip_without_bwrap
 skip_revokefs_without_fuse
 
-echo "1..47"
+echo "1..45"
 
 #Regular repo
 setup_repo
@@ -133,46 +133,6 @@ if ${FLATPAK} ${U} install -y test-repo org.test.Platform &> install-error-log; 
     assert_not_reached "Should not be able to install again from different remote without reinstall"
 fi
 ok "failed to install again from different remote"
-
-port=$(cat httpd-port)
-echo "bad key" > badkey
-
-gpg2_repo_url=$(ostree config --repo=$FL_DIR/repo get --group 'remote "test-gpg2-repo"' url)
-cp "$FL_DIR/repo/test-gpg2-repo.trustedkeys.gpg" gpg2_repo_key
-${FLATPAK} ${U} remote-modify --gpg-import=badkey test-gpg2-repo >&2 || true
-gpg2_repo_url2=$(ostree config --repo=$FL_DIR/repo get --group 'remote "test-gpg2-repo"' url)
-cp "$FL_DIR/repo/test-gpg2-repo.trustedkeys.gpg" gpg2_repo_key2
-
-if [[ "${gpg2_repo_url}" != "${gpg2_repo_url2}" ]] || ! diff -q gpg2_repo_key gpg2_repo_key2 > /dev/null 2>&1; then
-  assert_not_reached "remote-modify failed but remote was modified"
-fi
-
-${FLATPAK} ${U} remote-add --gpg-import=badkey test-broken-repo "http://127.0.0.1:${port}/test-broken-repo" >&2 && false
-ostree config --repo=$FL_DIR/repo get --group 'remote "test-broken-repo"' url > /dev/null 2>&1 && \
-    assert_not_reached "Bug #6449: Remote added with broken GPG key"
-[[ -f "$FL_DIR/repo/test-broken-repo.trustedkeys.gpg" ]] && false
-
-ok "fail with broken repo"
-
-cat << EOF > test-broken-repo.flatpakrepo
-[Flatpak Repo]
-Version=1
-Url=http://no.127.0.0.1:$(cat httpd-port)/test-broken/
-Title=The Remote Title
-GPGKey=AAA${FL_GPG_BASE64}AAA
-EOF
-
-mkdir -p $FLATPAK_CONFIG_DIR/remotes.d
-cp test-broken-repo.flatpakrepo $FLATPAK_CONFIG_DIR/remotes.d/
-
-${FLATPAK} ${U} remote-add --from test-broken-repo >&2 && false
-ostree config --repo=$FL_DIR/repo get --group 'remote "test-broken-repo"' url > /dev/null 2>&1 && \
-    assert_not_reached "Bug #6449: Remote added with broken GPG key"
-[[ -f "$FL_DIR/repo/test-broken-repo.trustedkeys.gpg" ]] && false
-
-rm -rf $FLATPAK_CONFIG_DIR/remotes.d/
-
-ok "fail with statically configured broken repo"
 
 ${FLATPAK} ${U} install -y --reinstall test-repo org.test.Platform >&2
 ok "re-install"
@@ -479,35 +439,13 @@ ${FLATPAK} build-commit-from --no-update-summary --end-of-life-rebase=org.test.H
 GPGARGS="${FL_GPGARGS}" $(dirname $0)/make-test-app.sh repos/test-rebase org.test.NewHello master "${REBASE_COLLECTION_ID}" "NEW" > /dev/null
 update_repo test-rebase
 
-# Temporarily set the minimum free space to something astronomical to make the
-# install of the rebased app fail.
-orig_min_free_space=$(ostree --repo=$FL_DIR/repo config get core.min-free-space-size || :)
-ostree --repo=$FL_DIR/repo config set core.min-free-space-size 999TB
-
-if ${FLATPAK} ${U} update -y org.test.Hello >&2; then
-    assert_not_reached "flatpak update should fail with insufficient free space"
-fi
-
-# Check that the old app is still installed and the new app is not installed.
-# See https://github.com/flatpak/flatpak/pull/5332
-assert_has_dir $FL_DIR/app/org.test.Hello/$ARCH/master/active/files
-assert_not_has_dir $FL_DIR/app/org.test.NewHello/$ARCH/master/active/files
-
-# Restore the original minimum free space.
-if [ -n "$orig_min_free_space" ]; then
-    ostree --repo=$FL_DIR/repo config set core.min-free-space-size "$orig_min_free_space"
-else
-    ostree --repo=$FL_DIR/repo config unset core.min-free-space-size
-fi
-
-# Now do a --no-deploy update and check the old version is still installed
+# First do a --no-deploy update and check the old version is still installed
 ${FLATPAK} ${U} update -y --no-deploy org.test.Hello >&2
 
 assert_has_dir $HOME/.var/app/org.test.Hello
 assert_has_file $HOME/.var/app/org.test.Hello/data/a-file
 assert_not_has_dir $HOME/.var/app/org.test.NewHello
 
-# Finally actually do the update.
 ${FLATPAK} ${U} update -y org.test.Hello >&2
 
 # Make sure we got the new version installed
@@ -525,14 +463,6 @@ assert_has_file $HOME/.var/app/org.test.NewHello/data/another-file
 assert_has_symlink $HOME/.var/app/org.test.Hello
 assert_has_file $HOME/.var/app/org.test.Hello/data/a-file
 assert_has_file $HOME/.var/app/org.test.Hello/data/another-file
-
-# Simulate removal of app data dir
-rm -rf $HOME/.var/app/org.test.NewHello
-
-${FLATPAK} run org.test.NewHello >&2
-
-# Ensure the data dir is re-created instead of migrating the symlink
-assert_has_dir $HOME/.var/app/org.test.NewHello
 
 ${FLATPAK} ${U} uninstall -y org.test.NewHello org.test.Platform >&2
 

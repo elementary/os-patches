@@ -21,8 +21,6 @@
 #ifndef __FLATPAK_PRUNE_H__
 #define __FLATPAK_PRUNE_H__
 
-#include <ostree.h>
-
 #include "flatpak-utils-private.h"
 
 gboolean flatpak_repo_prune  (OstreeRepo    *repo,

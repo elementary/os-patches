@@ -23,77 +23,13 @@ set -euo pipefail
 
 skip_without_bwrap
 
-echo "1..18"
+echo "1..14"
 
 # Start the fake registry server
 
-if [ x${USE_HTTPS} = xyes ] ; then
-    cat > openssl.config <<EOF
-[req]
-distinguished_name=default_dn
-
-[v3_ca]
-basicConstraints=critical,CA:TRUE,pathlen:0
-
-[server_cert]
-basicConstraints=CA:FALSE
-subjectAltName=DNS:registry.example.com,IP:127.0.0.1
-
-[usr_cert]
-subjectAltName=email:copy
-basicConstraints=CA:FALSE
-keyUsage=digitalSignature
-extendedKeyUsage=clientAuth
-
-[default_dn]
-CN=Unused
-EOF
-
-    openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 \
-        -nodes -keyout example.com.ca.key -out example.com.ca.crt \
-        -subj="/CN=Example CA/O=example.com/emailAddress=nomail@example.com" \
-        -config openssl.config -extensions v3_ca
-
-    openssl req -newkey rsa:4096 -sha256 \
-        -nodes -keyout example.com.key -out example.com.csr \
-	-subj "/CN=registry.example.com"
-
-    openssl x509 -req -in example.com.csr -days 3650 \
-        -CA example.com.ca.crt -CAkey example.com.ca.key -CAcreateserial \
-	-extfile openssl.config -extensions server_cert \
-	-out example.com.crt
-
-    openssl req -newkey rsa:4096 -sha256 \
-        -nodes -keyout client.key -out client.csr \
-        -subj="/CN=User/O=example.com/emailAddress=user@example.com"
-
-    openssl x509 -req -in client.csr -days 3650 \
-	-CA example.com.ca.crt -CAkey example.com.ca.key -CAcreateserial \
-	-extfile openssl.config -extensions usr_cert \
-	-out client.cert
-
-    server_args="--cert=example.com.crt --key=example.com.key --mtls-cacert=example.com.ca.crt"
-else
-    server_args=
-    client_args=
-fi
-
-httpd oci-registry-server.py --dir=. $server_args
+httpd oci-registry-server.py .
 port=$(cat httpd-port)
-
-if [ x${USE_HTTPS} = xyes ] ; then
-    scheme=https
-    client_args="--cert=client.cert --key=client.key --cacert=example.com.ca.crt"
-
-    hostdir=$FLATPAK_SYSTEM_CERTS_D/127.0.0.1:${port}
-    mkdir -p $hostdir
-    cp example.com.ca.crt client.key client.cert $hostdir
-else
-    scheme=http
-    client_args=
-fi
-
-client="python3 $test_srcdir/oci-registry-client.py $client_args --url=${scheme}://127.0.0.1:${port}"
+client="python3 $test_srcdir/oci-registry-client.py 127.0.0.1:$port"
 
 setup_repo_no_add oci
 
@@ -107,7 +43,7 @@ $client add hello latest $(pwd)/oci/app-image
 
 # Add an OCI remote
 
-${FLATPAK} remote-add ${U} oci-registry "oci+${scheme}://127.0.0.1:${port}" >&2
+${FLATPAK} remote-add ${U} oci-registry "oci+http://127.0.0.1:${port}" >&2
 
 # Check that the images we expect are listed
 
@@ -197,21 +133,6 @@ assert_not_has_file $icondir/64x64
 
 ok "appstream change"
 
-# Build and install an app with zstd-compressed layers
-
-make_updated_app oci "" "" "ZSTD"
-
-${FLATPAK} build-bundle --oci --oci-layer-compress=zstd $FL_GPGARGS repos/oci oci/app-image-zstd org.test.Hello >&2
-file "$(pwd)/oci/app-image-zstd/blobs"/**/* | grep -q Zstandard
-$client add hello latest "$(pwd)/oci/app-image-zstd"
-
-${FLATPAK} ${U} update -y -vv --ostree-verbose org.test.Hello >&2
-
-run org.test.Hello &> hello_out
-assert_file_has_content hello_out '^Hello world, from a sandboxZSTD$'
-
-ok "export and install zstd layers"
-
 # Change the remote to a non-OCI remote, check that we cleaned up
 
 if [ x${USE_SYSTEMDIR-} == xyes ] ; then
@@ -223,7 +144,7 @@ fi
 assert_has_file $base/oci/oci-registry.index.gz
 assert_has_file $base/oci/oci-registry.summary
 assert_has_dir $base/appstream/oci-registry
-${FLATPAK} remote-modify ${U} --url=${scheme}://127.0.0.1:${port} oci-registry >&2
+${FLATPAK} remote-modify ${U} --url=http://127.0.0.1:${port} oci-registry >&2
 assert_not_has_file $base/oci/oci-registry.index.gz
 assert_not_has_file $base/oci/oci-registry.summary
 assert_not_has_dir $base/appstream/oci-registry
@@ -232,7 +153,7 @@ ok "change remote to non-OCI"
 
 # Change it back and refetch
 
-${FLATPAK} remote-modify ${U} --url=oci+${scheme}://127.0.0.1:${port} oci-registry >&2
+${FLATPAK} remote-modify ${U} --url=oci+http://127.0.0.1:${port} oci-registry >&2
 ${FLATPAK} update ${U} --appstream oci-registry >&2
 
 # Delete the remote, check that everything was removed
@@ -256,7 +177,7 @@ ok "delete remote"
 cat << EOF > runtime-repo.flatpakrepo
 [Flatpak Repo]
 Version=1
-Url=oci+${scheme}://localhost:${port}
+Url=oci+http://localhost:${port}
 Title=The OCI Title
 EOF
 
@@ -265,7 +186,7 @@ cat << EOF > org.test.Platform.flatpakref
 Title=Test Platform
 Name=org.test.Platform
 Branch=master
-Url=oci+${scheme}://127.0.0.1:${port}
+Url=oci+http://127.0.0.1:${port}
 IsRuntime=true
 RuntimeRepo=file://$(pwd)/runtime-repo.flatpakrepo
 EOF
@@ -293,12 +214,12 @@ ok "prune origin remote"
 
 # Install from a (non-OCI) bundle, check that the repo-url is respected
 
-${FLATPAK} build-bundle --runtime --repo-url "oci+${scheme}://127.0.0.1:${port}" $FL_GPGARGS repos/oci org.test.Platform.flatpak org.test.Platform >&2
+${FLATPAK} build-bundle --runtime --repo-url "oci+http://127.0.0.1:${port}" $FL_GPGARGS repos/oci org.test.Platform.flatpak org.test.Platform >&2
 
 ${FLATPAK} ${U} install -y --bundle org.test.Platform.flatpak >&2
 
 ${FLATPAK} remotes -d > remotes-list
-assert_file_has_content remotes-list "^platform-origin.*[ 	]oci+${scheme}://127\.0\.0\.1:${port}"
+assert_file_has_content remotes-list "^platform-origin.*[ 	]oci+http://127\.0\.0\.1:${port}"
 
 assert_has_file $base/oci/platform-origin.index.gz
 
@@ -306,12 +227,12 @@ ok "install via bundle"
 
 # Install an app from a bundle
 
-${FLATPAK} build-bundle --repo-url "oci+${scheme}://127.0.0.1:${port}" $FL_GPGARGS repos/oci org.test.Hello.flatpak org.test.Hello >&2
+${FLATPAK} build-bundle --repo-url "oci+http://127.0.0.1:${port}" $FL_GPGARGS repos/oci org.test.Hello.flatpak org.test.Hello >&2
 
 ${FLATPAK} ${U} install -y --bundle org.test.Hello.flatpak >&2
 
 ${FLATPAK} remotes -d > remotes-list
-assert_file_has_content remotes-list "^hello-origin.*[ 	]oci+${scheme}://127\.0\.0\.1:${port}"
+assert_file_has_content remotes-list "^hello-origin.*[ 	]oci+http://127\.0\.0\.1:${port}"
 
 assert_has_file $base/oci/hello-origin.index.gz
 
@@ -320,107 +241,13 @@ ok "app install via bundle"
 # Install an updated app bundle with a different origin
 
 make_updated_app oci
-${FLATPAK} build-bundle --repo-url "${scheme}://127.0.0.1:${port}" $FL_GPGARGS repos/oci org.test.Hello.flatpak org.test.Hello >&2
+${FLATPAK} build-bundle --repo-url "http://127.0.0.1:${port}" $FL_GPGARGS repos/oci org.test.Hello.flatpak org.test.Hello >&2
 
 ${FLATPAK} ${U} install -y --bundle org.test.Hello.flatpak >&2
 
 ${FLATPAK} remotes -d > remotes-list
-assert_file_has_content remotes-list "^hello-origin.*[ 	]${scheme}://127\.0\.0\.1:${port}"
+assert_file_has_content remotes-list "^hello-origin.*[ 	]http://127\.0\.0\.1:${port}"
 
 assert_not_has_file $base/oci/hello-origin.index.gz
 
 ok "change remote origin via bundle"
-
-${FLATPAK} ${U} -y uninstall org.test.Hello >&2
-${FLATPAK} ${U} -y uninstall org.test.Platform >&2
-
-${FLATPAK} ${U} list --columns=application,origin > flatpak-list
-assert_not_file_has_content flatpak-list 'org.test.Platform'
-assert_not_file_has_content flatpak-list 'org.test.Hello'
-
-${FLATPAK} ${U} remotes --show-disabled > remotes-list
-assert_not_file_has_content remotes-list '^platform-origin'
-assert_not_file_has_content remotes-list '^hello-origin'
-
-ok "clean up"
-
-# Install from registry via a docker:// location
-# TODO: docker:// locations only support HTTPS
-# This needs https://github.com/flatpak/flatpak/pull/5916
-
-if false && [ x${USE_SYSTEMDIR-} != xyes ]; then
-    $FLATPAK --user -y install docker://127.0.0.1/platform-image:latest >&2
-
-    ${FLATPAK} ${U} list --columns=application,origin > flatpak-list
-    assert_file_has_content flatpak-list '^org.test.Platform	*platform-origin$'
-
-    ${FLATPAK} ${U} remotes --show-disabled > remotes-list
-    assert_file_has_content remotes-list '^platform-origin'
-
-    ok "install image from registry"
-else
-    ok "install image from registry # skip  Not supported"
-fi
-
-# Test OCI signing
-
-${FLATPAK} build-bundle --runtime --oci "${FL_GPGARGS}" repos/oci oci/platform-image org.test.Platform >&2
-digest=$(jq -r '.manifests[0].digest' "$(pwd)/oci/platform-image/index.json")
-make_oci_signature "${digest}" "127.0.0.1:${port}/platform:latest" > "$(pwd)/oci/platform-image-signature-1"
-make_oci_signature "${digest}" "127.0.0.1:${port}/platform:latest" "${FL_GPGCMDARGS2}"> "$(pwd)/oci/platform-image-signature-2"
-
-$client add platform latest "$(pwd)/oci/platform-image"
-$client add-signature platform "${digest}" "$(pwd)/oci/platform-image-signature-1"
-
-${FLATPAK} build-bundle --oci "${FL_GPGARGS}" repos/oci oci/app-image org.test.Hello >&2
-digest=$(jq -r '.manifests[0].digest' "$(pwd)/oci/app-image/index.json")
-make_oci_signature "${digest}" "127.0.0.1:${port}/hello:latest" > "$(pwd)/oci/app-image-signature-1"
-make_oci_signature "${digest}" "127.0.0.1:${port}/hello:latest" "$FL_GPGCMDARGS2" > "$(pwd)/oci/app-image-signature-2"
-
-$client add hello latest "$(pwd)/oci/app-image"
-
-${FLATPAK} ${U} remote-add oci-registry-sig "oci+${scheme}://127.0.0.1:${port}" \
-    --signature-lookaside "${scheme}://127.0.0.1:${port}/sig-lookaside" \
-    --gpg-import=${FL_GPG_HOMEDIR}/pubring.gpg >&2
-
-if ${FLATPAK} ${U} install -y oci-registry-sig org.test.Hello >&2; then
-    assert_not_reached "Should fail install due to missing signature key"
-fi
-
-$client add-signature hello "${digest}" "$(pwd)/oci/app-image-signature-2"
-if ${FLATPAK} ${U} install -y oci-registry-sig org.test.Hello >&2; then
-    assert_not_reached "Should fail install due to wrong signature key"
-fi
-
-$client add-signature hello "${digest}" "$(pwd)/oci/app-image-signature-1"
-${FLATPAK} ${U} install -y oci-registry-sig org.test.Hello >&2
-
-${FLATPAK} build-bundle --oci "${FL_GPGARGS}" repos/oci oci/app-image org.test.Hello >&2
-digest=$(jq -r '.manifests[0].digest' "$(pwd)/oci/app-image/index.json")
-make_oci_signature "${digest}" "127.0.0.1:${port}/hello:latest" > "$(pwd)/oci/app-image-signature-1"
-make_oci_signature "${digest}" "127.0.0.1:${port}/hello:latest" "$FL_GPGCMDARGS2" > "$(pwd)/oci/app-image-signature-2"
-
-$client add hello latest "$(pwd)/oci/app-image"
-if ${FLATPAK} update -y org.test.Hello >&2; then
-    assert_not_reached "Should fail install due to outdated signature key"
-fi
-
-$client add-signature hello "${digest}" "$(pwd)/oci/app-image-signature-1"
-${FLATPAK} update -y org.test.Hello >&2
-
-${FLATPAK} uninstall -y org.test.Hello >&2
-
-${FLATPAK} ${U} remote-delete --force oci-registry-sig >&2
-${FLATPAK} ${U} remote-add oci-registry-sig "oci+${scheme}://127.0.0.1:${port}" \
-    --signature-lookaside "${scheme}://127.0.0.1:${port}/sig-lookaside" \
-    --gpg-import=${FL_GPG_HOMEDIR2}/pubring.gpg >&2
-
-if ${FLATPAK} ${U} install -y oci-registry-sig org.test.Hello >&2; then
-    assert_not_reached "Should fail install due to locally changed trusted key"
-fi
-
-$client add-signature hello "${digest}" "$(pwd)/oci/app-image-signature-2"
-
-${FLATPAK} ${U} install -y oci-registry-sig org.test.Hello >&2
-
-ok "signed images"

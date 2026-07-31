@@ -43,8 +43,6 @@ void flatpak_exports_add_host_etc_expose (FlatpakExports       *exports,
                                           FlatpakFilesystemMode mode);
 void flatpak_exports_add_host_os_expose (FlatpakExports       *exports,
                                          FlatpakFilesystemMode mode);
-void flatpak_exports_add_host_root_expose (FlatpakExports       *exports,
-                                           FlatpakFilesystemMode mode);
 gboolean flatpak_exports_add_path_expose (FlatpakExports         *exports,
                                           FlatpakFilesystemMode   mode,
                                           const char             *path,
@@ -83,7 +81,5 @@ void flatpak_exports_take_host_fd (FlatpakExports *exports,
                                    int             fd);
 void flatpak_exports_set_test_flags (FlatpakExports *exports,
                                      FlatpakExportsTestFlags flags);
-
-extern const char * const *flatpak_abs_usrmerged_dirs;
 
 #endif /* __FLATPAK_EXPORTS_H__ */

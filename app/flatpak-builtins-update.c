@@ -97,7 +97,7 @@ flatpak_builtin_update (int           argc,
 
   if (opt_appstream)
     {
-      if (!update_appstream (dirs, argc >= 2 ? argv[1] : NULL, opt_arch, 0, opt_noninteractive, cancellable, error))
+      if (!update_appstream (dirs, argc >= 2 ? argv[1] : NULL, opt_arch, 0, FALSE, cancellable, error))
         return FALSE;
 
       return TRUE;
@@ -150,8 +150,8 @@ flatpak_builtin_update (int           argc,
       if (opt_arch)
         flatpak_transaction_set_default_arch (transaction, opt_arch);
 
-      if (!setup_sideload_repositories (transaction, opt_sideload_repos, cancellable, error))
-        return FALSE;
+      for (i = 0; opt_sideload_repos != NULL && opt_sideload_repos[i] != NULL; i++)
+        flatpak_transaction_add_sideload_repo (transaction, opt_sideload_repos[i]);
 
       g_ptr_array_insert (transactions, 0, transaction);
     }
@@ -271,12 +271,12 @@ flatpak_builtin_update (int           argc,
   if (!has_updates)
     {
       g_print ("\n");
-      g_print (_("Nothing to update.\n"));
+      g_print (_("Nothing to do.\n"));
     }
 
   if (n_prefs == 0)
     {
-      if (!update_appstream (dirs, NULL, opt_arch, FLATPAK_APPSTREAM_TTL, opt_noninteractive, cancellable, error))
+      if (!update_appstream (dirs, NULL, opt_arch, FLATPAK_APPSTREAM_TTL, TRUE, cancellable, error))
         return FALSE;
     }
 

@@ -30,7 +30,6 @@
 #include "libglnx.h"
 
 #include "flatpak-builtins.h"
-#include "flatpak-repo-utils-private.h"
 #include "flatpak-utils-base-private.h"
 #include "flatpak-builtins-utils.h"
 #include "flatpak-prune-private.h"
@@ -401,7 +400,7 @@ generate_all_deltas (OstreeRepo   *repo,
 
       if (ignore_ref)
         {
-          g_info ("Ignoring deltas for ref %s", ref);
+          g_debug ("Ignoring deltas for ref %s", ref);
           continue;
         }
 
@@ -656,18 +655,14 @@ flatpak_builtin_build_update_repo (int argc, char **argv,
                               cancellable, error))
         return FALSE;
 
+      formatted_freed_size = g_format_size_full (objsize_total, 0);
 
-      if (!opt_prune_dry_run)
-        {
-          formatted_freed_size = g_format_size_full (objsize_total, 0);
-
-          g_print (_("Total objects: %u\n"), n_objects_total);
-          if (n_objects_pruned == 0)
-            g_print (_("No unreachable objects\n"));
-          else
-            g_print (_("Deleted %u objects, %s freed\n"),
-                    n_objects_pruned, formatted_freed_size);
-      }
+      g_print (_("Total objects: %u\n"), n_objects_total);
+      if (n_objects_pruned == 0)
+        g_print (_("No unreachable objects\n"));
+      else
+        g_print (_("Deleted %u objects, %s freed\n"),
+                 n_objects_pruned, formatted_freed_size);
     }
 
   return TRUE;

@@ -27,9 +27,9 @@ export USE_SYSTEMDIR=yes
 skip_without_bwrap
 skip_revokefs_without_fuse
 
-echo "1..3"
+echo "1..2"
 
-setup_empty_repo &> /dev/null
+setup_empty_repo &> /dev/null > /dev/null
 
 # Manually add the user remote too
 $FLATPAK remote-add --user --gpg-import=${FL_GPG_HOMEDIR}/pubring.gpg test-repo "http://127.0.0.1:${port}/test" >&2
@@ -83,8 +83,8 @@ sdk=${SDK}/$ARCH/$BRANCH
 EOF
     fi
 
-    $FLATPAK build-finish $DIR ${finish_args[$ID]:-} &> /dev/null
-    $FLATPAK build-export -v ${FL_GPGARGS} --disable-sandbox --runtime repos/test ${DIR} ${BRANCH} &> /dev/null
+    $FLATPAK build-finish $DIR ${finish_args[$ID]:-} &> /dev/null > /dev/null
+    $FLATPAK build-export -v ${FL_GPGARGS} --disable-sandbox --runtime repos/test ${DIR} ${BRANCH} &> /dev/null > /dev/null
     rm -rf ${DIR}
 }
 
@@ -110,7 +110,7 @@ EOF
     fi
 
     set -x
-    $FLATPAK build-finish ${DIR}  ${finish_args[$ID]:-} &> /dev/null
+    $FLATPAK build-finish ${DIR}  ${finish_args[$ID]:-} &> /dev/null > /dev/null
 
     $FLATPAK build-export ${FL_GPGARGS} --disable-sandbox repos/test ${DIR} ${BRANCH} &> /dev/null > /dev/null
     rm -rf ${DIR}
@@ -255,15 +255,15 @@ make_it_happen() {
     for app in "${apps[@]}"; do
         create_app "$app" "${apps_runtime[$app]}" "${apps_sdk[$app]}"
     done
-    update_repo  &> /dev/null
+    update_repo  &> /dev/null > /dev/null
 
     for runtime in "${runtimes[@]}"; do
         local in=${installs_in[${runtime}]:-system}
         if test $in = system -o $in = both; then
-            $FLATPAK install -y --system --no-deps --no-related --no-auto-pin test-repo runtime/$runtime/$ARCH/stable  &> /dev/null
+            $FLATPAK install -y --system --no-deps --no-related --no-auto-pin test-repo runtime/$runtime/$ARCH/stable  &> /dev/null > /dev/null
         fi
         if test $in = user -o $in = both; then
-            $FLATPAK install -y --user --no-deps --no-related --no-auto-pin test-repo runtime/$runtime/$ARCH/stable  &> /dev/null
+            $FLATPAK install -y --user --no-deps --no-related --no-auto-pin test-repo runtime/$runtime/$ARCH/stable  &> /dev/null > /dev/null
         fi
         if test "x${runtimes_pinned[$runtime]:-}" == "xyes"; then
             $FLATPAK pin $runtime//stable
@@ -272,10 +272,10 @@ make_it_happen() {
     for app in "${apps[@]}"; do
         local in=${installs_in[$app]:-system}
         if test $in = system -o $in = both; then
-            $FLATPAK install -y --system --no-deps --no-related --no-auto-pin test-repo app/$app/$ARCH/stable  &> /dev/null
+            $FLATPAK install -y --system --no-deps --no-related --no-auto-pin test-repo app/$app/$ARCH/stable  &> /dev/null > /dev/null
         fi
         if test $in = user -o $in = both; then
-            $FLATPAK install -y --user --no-deps --no-related --no-auto-pin test-repo app/$app/$ARCH/stable  &> /dev/null
+            $FLATPAK install -y --user --no-deps --no-related --no-auto-pin test-repo app/$app/$ARCH/stable  &> /dev/null > /dev/null
         fi
     done
 
@@ -303,11 +303,6 @@ verify_unused() {
     assert_not_file_has_content used.txt "\.UNUSED"
     # Also, no app or app extensions are unused
     assert_not_file_has_content unused.txt "\.APP"
-}
-
-verify_autopruned() {
-    assert_file_has_content autopruned.txt "\.NONACTIVEGL"
-    assert_not_file_has_content autopruned.txt "PINNED_.\.NONACTIVEGL"
 }
 
 # This is used for the autoprune check
@@ -347,9 +342,6 @@ make_extension USED_G.ACTIVEGL
 runtime_add_autoprune_extension USED_G USED_G.ACTIVEGL
 make_extension UNUSED_G.NONACTIVEGL
 runtime_add_autoprune_extension USED_G UNUSED_G.NONACTIVEGL
-make_extension PINNED_G.NONACTIVEGL
-runtime_add_autoprune_extension USED_G PINNED_G.NONACTIVEGL
-pin_extension PINNED_G.NONACTIVEGL
 
 # unused runtime with autopruned extension
 make_runtime UNUSED_H
@@ -396,12 +388,6 @@ ${test_builddir}/list-unused | sed s@^app/@@g | sed s@^runtime/@@g | sort > unus
 verify_unused
 
 ok "list unused regular"
-
-${test_builddir}/list-unused --filter-autoprune | sed s@^app/@@g | sed s@^runtime/@@g | sort > autopruned.txt
-
-verify_autopruned
-
-ok "list autopruned"
 
 mv unused.txt old-unused.txt
 

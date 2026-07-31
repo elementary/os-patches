@@ -37,11 +37,9 @@
 #include "flatpak-instance.h"
 
 static const char **opt_cols;
-static gboolean opt_json;
 
 static GOptionEntry options[] = {
   { "columns", 0, 0, G_OPTION_ARG_STRING_ARRAY, &opt_cols, N_("What information to show"), N_("FIELD,…") },
-  { "json", 'j', 0, G_OPTION_ARG_NONE, &opt_json, N_("Show output in JSON format"), NULL },
   { NULL }
 };
 
@@ -74,8 +72,6 @@ get_compositor_apps (void)
   g_autoptr(GVariant) ret = NULL;
   GVariant *list = NULL;
   const char *backends[] = {
-    "org.freedesktop.impl.portal.desktop.gnome",
-    /* Background portal was removed in 1.15.0, retained for compatibility */
     "org.freedesktop.impl.portal.desktop.gtk",
     "org.freedesktop.impl.portal.desktop.kde",
     NULL
@@ -112,7 +108,7 @@ get_compositor_apps (void)
   if (ret)
     g_variant_get (ret, "(@a{sv})", &list);
   else
-    g_info ("Failed to get information about running apps from background portal backends");
+    g_debug ("Failed to get information about running apps from background portal backends");
 
   return list;
 }
@@ -228,7 +224,7 @@ enumerate_instances (Column *columns, GError **error)
       flatpak_table_printer_finish_row (printer);
     }
 
-  opt_json ? flatpak_table_printer_print_json (printer) : flatpak_table_printer_print (printer);
+  flatpak_table_printer_print (printer);
 
   return TRUE;
 }

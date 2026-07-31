@@ -30,7 +30,6 @@
 #include "libglnx.h"
 
 #include "flatpak-builtins.h"
-#include "flatpak-repo-utils-private.h"
 #include "flatpak-utils-private.h"
 #include "parse-datetime.h"
 
@@ -209,7 +208,7 @@ commit_filter (OstreeRepo *repo,
   if (matches_patterns (commit_data->exclude, path) &&
       !matches_patterns (commit_data->include, path))
     {
-      g_info ("Excluding %s", path);
+      g_debug ("Excluding %s", path);
       return OSTREE_REPO_COMMIT_FILTER_SKIP;
     }
 
@@ -396,13 +395,13 @@ validate_icon_file (GFile *file, GError **error)
                      G_SPAWN_STDOUT_TO_DEV_NULL,
                      NULL, NULL, NULL, &err, &status, error))
     {
-      g_info ("Icon validation: %s", (*error)->message);
+      g_debug ("Icon validation: %s", (*error)->message);
       return FALSE;
     }
 
   if (!g_spawn_check_exit_status (status, NULL))
     {
-      g_info ("Icon validation: %s", err);
+      g_debug ("Icon validation: %s", err);
       return flatpak_fail (error, "%s is not a valid icon: %s", name, err);
     }
 
@@ -1152,7 +1151,7 @@ flatpak_builtin_build_export (int argc, char **argv, GCancellable *cancellable, 
       if (opt_no_summary_index)
         flags |= FLATPAK_REPO_UPDATE_FLAG_DISABLE_INDEX;
 
-      g_info ("Updating summary");
+      g_debug ("Updating summary");
       if (!flatpak_repo_update (repo, flags,
                                 (const char **) opt_gpg_key_ids,
                                 opt_gpg_homedir,

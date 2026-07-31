@@ -25,7 +25,6 @@
 #include "flatpak-utils-private.h"
 #include "flatpak-remote-private.h"
 #include "flatpak-remote-ref-private.h"
-#include "flatpak-repo-utils-private.h"
 #include "flatpak-enum-types.h"
 
 #include <string.h>
@@ -1176,7 +1175,7 @@ flatpak_remote_commit_filter (FlatpakRemote *self,
   if (priv->local_filter_set &&
       !flatpak_dir_compare_remote_filter (dir, priv->name, priv->local_filter))
     {
-      g_autoptr(GKeyFile) config = ostree_repo_copy_config (flatpak_dir_get_repo (dir));
+      GKeyFile *config = ostree_repo_copy_config (flatpak_dir_get_repo (dir));
 
       g_key_file_set_string (config, group, "xa.filter", priv->local_filter ? priv->local_filter : "");
 
@@ -1217,7 +1216,7 @@ flatpak_remote_commit (FlatpakRemote *self,
 
   url = flatpak_remote_get_url (self);
   if (url == NULL || *url == 0)
-    return flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, _("No URL specified"));
+    return flatpak_fail_error (error, FLATPAK_ERROR_INVALID_DATA, _("No url specified"));
 
   if (priv->type != FLATPAK_REMOTE_TYPE_STATIC)
     return flatpak_fail (error, "Dynamic remote cannot be committed");

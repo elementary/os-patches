@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014-2019 Red Hat, Inc
+ * Copyright © 2016 Red Hat, Inc
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,12 +25,9 @@
 
 #include <glib.h>
 #include <gio/gio.h>
-#include "flatpak-dir-private.h"
+#include <archive.h>
 #include "flatpak-json-oci-private.h"
-#include "flatpak-utils-http-private.h"
 #include "flatpak-utils-private.h"
-
-struct archive;
 
 #define FLATPAK_TYPE_OCI_REGISTRY flatpak_oci_registry_get_type ()
 #define FLATPAK_OCI_REGISTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), FLATPAK_TYPE_OCI_REGISTRY, FlatpakOciRegistry))
@@ -50,19 +47,13 @@ typedef struct FlatpakOciLayerWriter FlatpakOciLayerWriter;
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakOciLayerWriter, g_object_unref)
 
-
-FlatpakOciRegistry  *  flatpak_oci_registry_new (const char    *uri,
-                                                 gboolean       for_write,
-                                                 int            tmp_dfd,
-                                                 GCancellable  *cancellable,
-                                                 GError       **error);
-FlatpakOciRegistry *   flatpak_oci_registry_new_for_archive (GFile        *archive,
-                                                             GCancellable *cancellable,
-                                                             GError      **error);
+FlatpakOciRegistry  *  flatpak_oci_registry_new (const char           *uri,
+                                                 gboolean for_write,
+                                                 int tmp_dfd,
+                                                 GCancellable         * cancellable,
+                                                 GError              **error);
 void                   flatpak_oci_registry_set_token (FlatpakOciRegistry *self,
                                                        const char *token);
-void                   flatpak_oci_registry_set_signature_lookaside (FlatpakOciRegistry *self,
-                                                                     const char         *signature_lookaside);
 gboolean               flatpak_oci_registry_is_local (FlatpakOciRegistry *self);
 const char          *  flatpak_oci_registry_get_uri (FlatpakOciRegistry *self);
 FlatpakOciIndex     *  flatpak_oci_registry_load_index (FlatpakOciRegistry *self,
@@ -127,16 +118,9 @@ FlatpakOciImage *      flatpak_oci_registry_load_image_config (FlatpakOciRegistr
                                                                gsize              *out_size,
                                                                GCancellable       *cancellable,
                                                                GError            **error);
-
-typedef enum {
-  FLATPAK_OCI_WRITE_LAYER_FLAGS_NONE = 0,
-  FLATPAK_OCI_WRITE_LAYER_FLAGS_ZSTD = 1 << 0,
-} FlatpakOciWriteLayerFlags;
-
-FlatpakOciLayerWriter *flatpak_oci_registry_write_layer (FlatpakOciRegistry        *self,
-                                                         FlatpakOciWriteLayerFlags  flags,
-                                                         GCancellable              *cancellable,
-                                                         GError                   **error);
+FlatpakOciLayerWriter *flatpak_oci_registry_write_layer (FlatpakOciRegistry *self,
+                                                         GCancellable       *cancellable,
+                                                         GError            **error);
 
 int                     flatpak_oci_registry_apply_delta (FlatpakOciRegistry    *self,
                                                           int                    delta_fd,
@@ -166,6 +150,16 @@ gboolean flatpak_archive_read_open_fd_with_checksum (struct archive *a,
                                                      GChecksum      *checksum,
                                                      GError        **error);
 
+GBytes *flatpak_oci_sign_data (GBytes       *data,
+                               const gchar **okey_ids,
+                               const char   *homedir,
+                               GError      **error);
+
+FlatpakOciSignature *flatpak_oci_verify_signature (OstreeRepo *repo,
+                                                   const char *remote_name,
+                                                   GBytes     *signature,
+                                                   GError    **error);
+
 gboolean flatpak_oci_index_ensure_cached (FlatpakHttpSession  *http_session,
                                           const char          *uri,
                                           GFile               *index,
@@ -185,32 +179,5 @@ GBytes *flatpak_oci_index_make_appstream (FlatpakHttpSession  *http_session,
                                           int                  icons_dfd,
                                           GCancellable        *cancellable,
                                           GError             **error);
-
-typedef void (*FlatpakOciPullProgress) (guint64  total_size,
-                                        guint64  pulled_size,
-                                        guint32  n_layers,
-                                        guint32  pulled_layers,
-                                        gpointer data);
-
-char * flatpak_pull_from_oci (OstreeRepo            *repo,
-                              FlatpakImageSource    *image_source,
-                              FlatpakImageSource    *opt_dst_image_source,
-                              const char            *remote,
-                              const char            *ref,
-                              FlatpakPullFlags       flags,
-                              FlatpakOciPullProgress progress_cb,
-                              gpointer               progress_data,
-                              GCancellable          *cancellable,
-                              GError               **error);
-
-gboolean flatpak_mirror_image_from_oci (FlatpakOciRegistry    *dst_registry,
-                                        FlatpakImageSource    *image_source,
-                                        const char            *remote,
-                                        const char            *ref,
-                                        OstreeRepo            *repo,
-                                        FlatpakOciPullProgress progress_cb,
-                                        gpointer               progress_data,
-                                        GCancellable          *cancellable,
-                                        GError               **error);
 
 #endif /* __FLATPAK_OCI_REGISTRY_H__ */

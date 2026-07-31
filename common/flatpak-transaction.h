@@ -272,11 +272,6 @@ FLATPAK_EXTERN
 void                flatpak_transaction_add_sideload_repo (FlatpakTransaction  *self,
                                                            const char          *path);
 FLATPAK_EXTERN
-gboolean            flatpak_transaction_add_sideload_image_collection (FlatpakTransaction  *self,
-                                                                       const char          *location,
-                                                                       GCancellable        *cancellable,
-                                                                       GError             **error);
-FLATPAK_EXTERN
 void                flatpak_transaction_add_default_dependency_sources (FlatpakTransaction *self);
 FLATPAK_EXTERN
 gboolean            flatpak_transaction_run (FlatpakTransaction *transaction,
@@ -318,29 +313,14 @@ gboolean            flatpak_transaction_add_rebase (FlatpakTransaction *self,
                                                     const char        **previous_ids,
                                                     GError            **error);
 FLATPAK_EXTERN
-gboolean            flatpak_transaction_add_rebase_and_uninstall (FlatpakTransaction  *self,
-                                                                  const char          *remote,
-                                                                  const char          *new_ref,
-                                                                  const char          *old_ref,
-                                                                  const char         **subpaths,
-                                                                  const char         **previous_ids,
-                                                                  GError             **error);
-FLATPAK_EXTERN
 gboolean            flatpak_transaction_add_install_bundle (FlatpakTransaction *self,
                                                             GFile              *file,
                                                             GBytes             *gpg_data,
                                                             GError            **error);
 FLATPAK_EXTERN
-gboolean            flatpak_transaction_add_install_image (FlatpakTransaction *self,
-                                                           const char         *image_location,
-                                                           GError            **error);
-FLATPAK_EXTERN
 gboolean            flatpak_transaction_add_install_flatpakref (FlatpakTransaction *self,
                                                                 GBytes             *flatpakref_data,
                                                                 GError            **error);
-FLATPAK_EXTERN
-gboolean            flatpak_transaction_add_sync_preinstalled (FlatpakTransaction *self,
-                                                               GError            **error);
 FLATPAK_EXTERN
 gboolean            flatpak_transaction_add_update (FlatpakTransaction *self,
                                                     const char         *ref,

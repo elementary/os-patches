@@ -41,21 +41,11 @@
 #include "libglnx.h"
 
 #include "flatpak-exports-private.h"
-#include "flatpak-metadata-private.h"
+#include "flatpak-run-private.h"
 #include "flatpak-utils-base-private.h"
-#include "flatpak-utils-private.h"
+#include "flatpak-dir-private.h"
+#include "flatpak-systemd-dbus-generated.h"
 #include "flatpak-error.h"
-
-static const char * const abs_usrmerged_dirs[] =
-{
-  "/bin",
-  "/lib",
-  "/lib32",
-  "/lib64",
-  "/sbin",
-  NULL
-};
-const char * const *flatpak_abs_usrmerged_dirs = abs_usrmerged_dirs;
 
 /* We don't want to export paths pointing into these, because they are readonly
    (so we can't create mountpoints there) and don't match what's on the host anyway.
@@ -157,7 +147,6 @@ struct _FlatpakExports
   FlatpakFilesystemMode host_etc;
   FlatpakFilesystemMode host_os;
   int                   host_fd;
-  FlatpakFilesystemMode host_root;
   FlatpakExportsTestFlags test_flags;
 };
 
@@ -445,9 +434,9 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
   eps = g_hash_table_get_values (exports->hash);
   eps = g_list_sort (eps, (GCompareFunc) compare_eps);
 
-  qsort (keys, n_keys, sizeof (char *), flatpak_strcmp0_ptr);
+  g_qsort_with_data (keys, n_keys, sizeof (char *), (GCompareDataFunc) flatpak_strcmp0_ptr, NULL);
 
-  g_debug ("Converting FlatpakExports to bwrap arguments...");
+  flatpak_debug2 ("Converting FlatpakExports to bwrap arguments...");
 
   for (l = eps; l != NULL; l = l->next)
     {
@@ -458,12 +447,12 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
 
       if (ep->mode == FAKE_MODE_SYMLINK)
         {
-          g_debug ("\"%s\" is meant to be a symlink", path);
+          flatpak_debug2 ("\"%s\" is meant to be a symlink", path);
 
           if (path_parent_is_mapped (keys, n_keys, exports->hash, path))
             {
-              g_debug ("Not creating \"%s\" as symlink because its parent is "
-                       "already mapped", path);
+              flatpak_debug2 ("Not creating \"%s\" as symlink because its parent is "
+                              "already mapped", path);
             }
           else
             {
@@ -475,19 +464,19 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
                   g_autofree char *parent = g_path_get_dirname (path);
                   g_autofree char *relative = make_relative (parent, resolved);
 
-                  g_debug ("Resolved \"%s\" to \"%s\" in host", path, resolved);
-                  g_debug ("Creating \"%s\" -> \"%s\" in sandbox", path, relative);
+                  flatpak_debug2 ("Resolved \"%s\" to \"%s\" in host", path, resolved);
+                  flatpak_debug2 ("Creating \"%s\" -> \"%s\" in sandbox", path, relative);
                   flatpak_bwrap_add_args (bwrap, "--symlink", relative, path,  NULL);
                 }
               else
                 {
-                  g_debug ("Unable to resolve \"%s\" in host, skipping", path);
+                  flatpak_debug2 ("Unable to resolve \"%s\" in host, skipping", path);
                 }
             }
         }
       else if (ep->mode == FAKE_MODE_TMPFS)
         {
-          g_debug ("\"%s\" is meant to be a tmpfs or empty directory", path);
+          flatpak_debug2 ("\"%s\" is meant to be a tmpfs or empty directory", path);
 
           /* Mount a tmpfs to hide the subdirectory, but only if there
              is a pre-existing dir we can mount the path on. */
@@ -496,38 +485,38 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
               if (!path_parent_is_mapped (keys, n_keys, exports->hash, path))
                 /* If the parent is not mapped, it will be a tmpfs, no need to mount another one */
                 {
-                  g_debug ("Parent of \"%s\" is not mapped, creating empty directory", path);
+                  flatpak_debug2 ("Parent of \"%s\" is not mapped, creating empty directory", path);
                   flatpak_bwrap_add_args (bwrap, "--dir", path, NULL);
                 }
               else
                 {
-                  g_debug ("Parent of \"%s\" is mapped, creating tmpfs to shadow it", path);
+                  flatpak_debug2 ("Parent of \"%s\" is mapped, creating tmpfs to shadow it", path);
                   flatpak_bwrap_add_args (bwrap, "--tmpfs", path, NULL);
                 }
             }
           else
             {
-              g_debug ("Not a directory, skipping: \"%s\"", path);
+              flatpak_debug2 ("Not a directory, skipping: \"%s\"", path);
             }
         }
       else if (ep->mode == FAKE_MODE_DIR)
         {
-          g_debug ("\"%s\" is meant to be a directory", path);
+          flatpak_debug2 ("\"%s\" is meant to be a directory", path);
 
           if (path_is_dir (exports, path))
             {
-              g_debug ("Ensuring \"%s\" is created as a directory", path);
+              flatpak_debug2 ("Ensuring \"%s\" is created as a directory", path);
               flatpak_bwrap_add_args (bwrap, "--dir", path, NULL);
             }
           else
             {
-              g_debug ("Not a directory, skipping: \"%s\"", path);
+              flatpak_debug2 ("Not a directory, skipping: \"%s\"", path);
             }
         }
       else
         {
-          g_debug ("\"%s\" is meant to be shared (ro or rw) with the container",
-                   path);
+          flatpak_debug2 ("\"%s\" is meant to be shared (ro or rw) with the container",
+                          path);
           flatpak_bwrap_add_args (bwrap,
                                   (ep->mode == FLATPAK_FILESYSTEM_MODE_READ_ONLY) ? "--ro-bind" : "--bind",
                                   path, path, NULL);
@@ -644,20 +633,6 @@ flatpak_exports_append_bwrap_args (FlatpakExports *exports,
                                 etc_bind_mode, "/etc", "/run/host/etc", NULL);
     }
 
-  g_assert (exports->host_root >= FLATPAK_FILESYSTEM_MODE_NONE);
-  g_assert (exports->host_root <= FLATPAK_FILESYSTEM_MODE_LAST);
-
-  if (exports->host_root != FLATPAK_FILESYSTEM_MODE_NONE)
-    {
-      const char *root_bind_mode = "--bind";
-
-      if (exports->host_root == FLATPAK_FILESYSTEM_MODE_READ_ONLY)
-        root_bind_mode = "--ro-bind";
-
-      flatpak_bwrap_add_args (bwrap,
-                              root_bind_mode, "/", "/run/host/root", NULL);
-    }
-
   /* As per the os-release specification https://www.freedesktop.org/software/systemd/man/os-release.html
    * always read-only bind-mount /etc/os-release if it exists, or /usr/lib/os-release as a fallback from
    * the host into the application's /run/host */
@@ -681,7 +656,7 @@ flatpak_exports_path_get_mode (FlatpakExports *exports,
   g_autoptr(GString) path_builder = g_string_new ("");
   struct stat st;
 
-  qsort (keys, n_keys, sizeof (char *), flatpak_strcmp0_ptr);
+  g_qsort_with_data (keys, n_keys, sizeof (char *), (GCompareDataFunc) flatpak_strcmp0_ptr, NULL);
 
   /* Syntactic canonicalization only, no need to use host_fd */
   path = canonical = flatpak_canonicalize_filename (path);
@@ -788,24 +763,24 @@ do_export_path (FlatpakExports *exports,
     {
       if (old_ep->mode < mode)
         {
-          g_debug ("Increasing export mode from \"%s\" to \"%s\": %s",
-                   export_mode_to_verb (old_ep->mode),
-                   export_mode_to_verb (mode),
-                   path);
+          flatpak_debug2 ("Increasing export mode from \"%s\" to \"%s\": %s",
+                          export_mode_to_verb (old_ep->mode),
+                          export_mode_to_verb (mode),
+                          path);
           ep->mode = mode;
         }
       else
         {
-          g_debug ("Not changing export mode from \"%s\" to \"%s\": %s",
-                   export_mode_to_verb (old_ep->mode),
-                   export_mode_to_verb (mode),
-                   path);
+          flatpak_debug2 ("Not changing export mode from \"%s\" to \"%s\": %s",
+                          export_mode_to_verb (old_ep->mode),
+                          export_mode_to_verb (mode),
+                          path);
           ep->mode = old_ep->mode;
         }
     }
   else
     {
-      g_debug ("Will %s: %s", export_mode_to_verb (mode), path);
+      flatpak_debug2 ("Will %s: %s", export_mode_to_verb (mode), path);
       ep->mode = mode;
     }
 
@@ -916,7 +891,7 @@ _exports_path_expose (FlatpakExports *exports,
 
   g_return_val_if_fail (is_export_mode (mode), FALSE);
 
-  g_debug ("Trying to %s: %s", export_mode_to_verb (mode), path);
+  flatpak_debug2 ("Trying to %s: %s", export_mode_to_verb (mode), path);
 
   if (level > 40) /* 40 is the current kernel ELOOP check */
     {
@@ -1036,11 +1011,11 @@ _exports_path_expose (FlatpakExports *exports,
 
       if (!path_is_symlink (exports, path))
         {
-          g_debug ("%s is not a symlink", path);
+          flatpak_debug2 ("%s is not a symlink", path);
         }
       else if (never_export_as_symlink (path))
         {
-          g_debug ("%s is a symlink, but we avoid exporting it as such", path);
+          flatpak_debug2 ("%s is a symlink, but we avoid exporting it as such", path);
         }
       else
         {
@@ -1050,14 +1025,14 @@ _exports_path_expose (FlatpakExports *exports,
 
           if (resolved)
             {
-              g_debug ("%s is a symlink, resolved to %s", path, resolved);
+              flatpak_debug2 ("%s is a symlink, resolved to %s", path, resolved);
 
               if (slash)
                 new_target = g_build_filename (resolved, slash + 1, NULL);
               else
                 new_target = g_strdup (resolved);
 
-              g_debug ("Trying to export the target instead: %s", new_target);
+              flatpak_debug2 ("Trying to export the target instead: %s", new_target);
 
               if (_exports_path_expose (exports, mode, new_target, level + 1, &local_error))
                 {
@@ -1065,8 +1040,8 @@ _exports_path_expose (FlatpakExports *exports,
                   return TRUE;
                 }
 
-              g_debug ("Could not export target %s, so ignoring %s",
-                       new_target, path);
+              flatpak_debug2 ("Could not export target %s, so ignoring %s",
+                              new_target, path);
               g_propagate_error (error, g_steal_pointer (&local_error));
               return FALSE;
             }
@@ -1148,14 +1123,4 @@ flatpak_exports_add_host_os_expose (FlatpakExports       *exports,
   g_return_if_fail (mode <= FLATPAK_FILESYSTEM_MODE_LAST);
 
   exports->host_os = mode;
-}
-
-void
-flatpak_exports_add_host_root_expose (FlatpakExports       *exports,
-                                      FlatpakFilesystemMode mode)
-{
-  g_return_if_fail (mode > FLATPAK_FILESYSTEM_MODE_NONE);
-  g_return_if_fail (mode <= FLATPAK_FILESYSTEM_MODE_LAST);
-
-  exports->host_root = mode;
 }

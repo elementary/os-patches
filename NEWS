@@ -1,737 +1,5 @@
-Changes in 1.18.0
+Changes in 1.14.6
 ~~~~~~~~~~~~~~~~~
-Released: 2026-06-08
-
-Enhancements:
-
-* Improve error handling and printed output of `flatpak-coredumpctl` (#6649,
-  #6680)
-
-* Support the AMD vendor specific compute interface (`/dev/kfd`) via the DRI
-  device permission (#6648)
-
-* Improve the output of `flatpak update` with failure causes (#6657)
-
-* Improve startup time for fish shell integration (#6635)
-
-* Translation updates: ‎zh_CN (#6671)
-
-Bug fixes:
-
-* Fix building when HAVE_LIBSYSTEMD but not USE_SYSTEM_HELPER is defined (#6652)
-
-* Ignore system bus failures in parental controls check (#6663)
-
-* Fix some return values and replace deprecated `GTimeVal` with
-  `g_get_real_time()` (#6646)
-
-* Suppress an unused-result warning in the tests (#6655)
-
-Changes in 1.17.7
-~~~~~~~~~~~~~~~~~~
-Released: 2026-05-06
-
-Enhancements:
-
-* Add the new permission conditionals `has-usb-device` and `has-usb-portal` to
-  allow apps to drop --device=all and --device=usb permissions (#6560)
-
-* Always send the `Flatpak-Upgrade-From` header when updating instead of
-  freshly installing, to improve the quality of statistics (#6626)
-
-* Improve how the absence of the system repo is handled (#6621)
-
-* Changes to repos are now more atomic which helps to avoid them being in an
-  invalid state. This could be observed when importing the GPG key failed,
-  because the system clock was wrong. (#6547)
-
-* A function to report the age of the configuration was added to libflatpak,
-  which will help GNOME Software to prevent unnecessary work (#6532)
-
-* Improvements to the build system (#6614, #6610)
-
-* Improve various tests (#6604, #6606, #6619, #6617, #6605, #6625)
-
-* Translation updates: tr (#6629), ‎zh_CN (#6630)
-
-Bug fixes:
-
-* Fix a regression in handling of the fallback-x11 permission, which was
-  affecting overrides from Flatseal (#6632)
-
-* Fix a memory leak in the Flatpak portal (#6613)
-
-* Install SELinux configuration files to the right directory (#6622)
-
-* Silence wrong `lseek()` errors when creating sub-sandboxes (#6609)
-
-Changes in 1.17.6
-~~~~~~~~~~~~~~~~~~
-Released: 2026-04-10
-
-Bug fixes:
-
-* Fix the remaining regression for Chromium based browsers by not leaking file
-  descriptors down to wrapped command (#6589, #6594)
-
-* Fix a regression when installing extra-data without a runtime, which is the
-  case for openh264 (#6587)
-
-* Fix the remaining regression for Epiphany by ignoring unusable sandbox-expose
-  paths for sub-sandboxes in the portal (#6588)
-
-* Fix the installed tests by allowing to add a new ref to an existing temporary
-  ostree repo (#6592)
-
-* Avoid closing fds 0/1/2 when they are used as a bad argument to flatpak-run,
-  and reduce duplication in handling file descriptor arguments (#6598)
-
-Enhancements:
-
-* Disable auto-pin in flatpak-repair to preserve the pin state across
-  re-installs (#6571)
-
-* Small improvements for the tests (#6596, #6595, #6597)
-
-Changes in 1.17.5
-~~~~~~~~~~~~~~~~~~
-Released: 2026-04-09
-
-Bug fixes:
-
-* Fix regressions caused by the sandbox escape security fix, which impact some
-  browsers, browser-based apps and Steam (#6577, #6569, #6576, #6574)
-
-Enhancements:
-
-* Expand test coverage of flatpak-run features used by flatpak-portal (#6573)
-
-Changes in 1.17.4
-~~~~~~~~~~~~~~~~~~
-Released: 2026-04-08
-
-Security fixes:
-
-* Fix a complete sandbox escape which leads to host file access and code
-  execution in the host context (CVE-2026-34078)
-
-* Prevent arbitrary file deletion on the host filesystem (CVE-2026-34079)
-
-* Prevent arbitrary read-access to files in the system-helper context
-  (GHSA-2fxp-43j9-pwvc)
-
-* Prevent orphaning cross-user pull operations (GHSA-89xm-3m96-w3jg)
-
-Enhancements:
-
-* Enable ntsync unconditionally (#6546)
-
-* Automatic branch following for extensions to ensure that "no-autodownload"
-  extensions stay functional after an update that requires a new branch (#6550)
-
-* Translation updates: eo (#6538), kk (#6553), sr (#6537), zh_CN (#6534)
-
-Bug fixes:
-
-* Prevent CPR sequence from showing up in the terminal (#6549)
-
-* Fix a crash for apps/runtimes with multiarch permission (#6535)
-
-* Fixes for Coverity warnings (#4932)
-
-* Add test-preinstall.sh to the test matrix source (#6551)
-
-* Fix a test message to refer to "systemd-localed" instead of "located" (#6536)
-
-Changes in 1.17.3
-~~~~~~~~~~~~~~~~~~
-Released: 2026-03-14
-
-Enhancements:
-
-* Improve check for --filesystem paths pointing to a parent folder (#6473)
-
-* Fail if non-interactive and multiple refs, remotes or installations match
-  (#5754)
-
-* Default to text auth on WSL (#6491)
-
-* Add build instructions for Ubuntu 24.04 (#6498)
-
-* Show a better message when there are no refs to update (#6521)
-
-* Silence AppStream refresh output on non-interactive runs (#6521)
-
-* Translation updates: pt_BR (#6483), sl (#6468, #6475), sv (#6514), tr (#6528),
-  zh_CN (#6469, #6477)
-
-Bug fixes:
-
-* Map the font-dirs.xml file more selectively (#6450)
-
-* Change const pointers. This fixes build issues with glibc 2.43. (#6490)
-
-* Add custom type flatpak_home_t for ~/.local/share/flatpak for SELinux (#6437)
-
-* Fix build warnings when compiling with -Wanalyzer-null-argument and with
-  -Wanalyzer-null-dereference (#6527)
-
-* Use raw string for regular expression in the flatpak-bisect script (#6519)
-
-Internal changes:
-
-* Set the `FLATPAK_TRIGGERSDIR` environment variable when running
-  installed tests. This fixes a regression with autopkg tests in
-  Debian. (#6444)
-
-* Add translator comments for some translatable strings (#6462)
-
-* Fix typos in translatable strings (#6463)
-
-* Fix lots of typos in code comments (#6482)
-
-* Remove an unused function (#6529)
-
-* Update two strings (#6464)
-
-Changes in 1.17.2
-~~~~~~~~~~~~~~~~~~
-Released: 2025-12-15
-
-This is a follow-up release for the 1.17.1 release, which was published
-immutably without the dist artifacts due to a bug in the release workflow.
-
-Changes in 1.17.1
-~~~~~~~~~~~~~~~~~~
-Released: 2025-12-15
-
-Enhancements:
-
-* Drop libsoup2 support in favor of libcurl. The `http_backend` build option has
-  been dropped as well. (#6395)
-
-* Support conditional permissions for shared subsystems and features. This
-  extends the conditional permission system that was introduced in 1.17.0 to
-  shares and features.
-
-* Enable progress escape sequence by default (#6393)
-
-* Allow passing device permissions to sub-sandbox created via the Flatpak portal
-  (#6123)
-
-* Add the runtime repository to the OCI image metadata when building OCI bundles
-  (#6409)
-
-* The CI now checks for translatable files and is now used to do releases
-  (#6408, #6407)
-
-* OCI remotes can now be configured to check for a matching signature in a
-  standard OCI signature storage lookaside service, when installing apps and
-  runtimes. (#6426)
-
-* Applications distributed as OCI images now support the extra-data mechanism
-  which should help with h.265 playback in Fedora Flatpaks (#6299)
-
-* Add support for building OCI bundles with zstd compressed layers. This speeds
-  up compression by several times, resulting in about a 20% smaller result. gzip
-  is kept as the default for maximum compatibility. (#5540)
-
-* Improve i18n of the command line progress reporting (#6397)
-
-* Translation updates: tr (#6388), hr (#6387), sl (#6405), zh_CN (#6366, #6410)
-
-Bug fixes:
-
-* Fix an issue where the home directory would accidentally be accessible when
-  a bad version of glib is in use, the app has access to a standard XDG
-  directory, and that directory is not available on the system. (#6420)
-
-* Fix incorrect CURLM_OK comparison in curl_easy_setopt checks (#6396)
-
-* Error out when mandatory OCI JSON fields are missing (#6402)
-
-* Fix various memory leaks (#6403, #6093)
-
-Internal changes:
-
-* Avoid triggering glib thumbnailing when enumerating `.portals` files
-  (#6427)
-
-* Add a test case for pre-installing from a sideload repo and a non-reachable
-  network repo (#6423)
-
-* Remove references to the defunct Open Collective (#6406)
-
-* Improve various tests (#6406)
-
-* Update note on seccomp filter code sharing (#6383)
-
-Changes in 1.17.0
-~~~~~~~~~~~~~~~~~~
-Released: 2025-11-03
-
-Enhancements:
-
-* Allow directories to be forwarded to the sandboxed app as command-line
-  arguments. This requires xdg-desktop-portal >= 1.7.0. (#6247)
-
-* Allow Flatpak apps that are conceptually part of the operating system
-  to be preinstalled by dropping files into `preinstall.d` directories.
-  (#6116)
-
-* Allow direct installation from an OCI image (#5972)
-
-* Allow OCI remotes to have a collection ID, so they can be used with
-  flatpak preinstall (#6083)
-
-* Show a message if `flatpak document-list` finds no documents, and if
-  `flatpak uninstall` finds nothing to uninstall (#6197)
-
-* Support sideloading from OCI repositories and archives. This allows
-  installing apps from OCI images stored in local sideload repositories.
-  (#6294)
-
-* Add support for flatpak+https:// URIs in `flatpak install --from`
-  (#6372)
-
-* New `--clear-env` option for `flatpak run` to clear the environment
-  from the host before running the application (#6298)
-
-* Support for conditional permissions. Permissions can now be conditioned
-  on system and runtime capabilities. This for example allows to replace
-  `--device=all` permissions with
-  `--device-if=all:!has-input-device --device=input`. (#6285)
-
-* Add host-root export which exposes the host's root directory at
-  /run/host/root in the sandbox (#6314)
-
-* Enable the VA-API extension for Intel Xe GPUs (#6311)
-
-* JSON output support for various commands, making it easier to parse
-  flatpak command output programmatically (#6337)
-
-* Add basic OS information to Flatpak-Os-Info header when pulling objects,
-  helping repository administrators understand their user base (#6346)
-
-* `flatpak build` does not grant the host permissions by default, improving
-  build isolation and reproducibility (#6308)
-
-* Support the reinstall option on bundle installations (#5546)
-
-* Drop a workaround for AppStream CIDs with duplicate `.desktop` suffixes
-  (#6350)
-
-* Add cancellation support for curl downloads (#6356)
-
-* `build-finish` exports external AppStream release metainfo (#6133)
-
-* The default D-Bus configuration moved from /etc to /usr (#6347)
-
-* Documentation improvements (#6266, #6348, #6240, #6374)
-
-* Translation updates: cs (#6306), nl (#6241), pl (#6290, #6288),
-  sl (#6279, #6377), ru (#6278), zh_CN (#6304, #6334, #6354, #6366)
-
-Bug fixes:
-
-* Provide an empty /run/host/font-dirs.xml during `flatpak build` (#6138)
-
-* Various bug fixes for the OCI support (#6296)
-
-* Improve clearing the environment in the flatpak portal to fix support for
-  FLATPAK_SPAWN_FLAGS_CLEAR_ENV with FLATPAK_SPAWN_FLAGS_NOTIFY_START (#6298)
-
-* Fix various issues with `flatpak mask` and `flatpak pin` by reloading the
-  repo configuration after changes done via the system helper (#6073)
-
-* Fix propagation of `resolv.conf` into the sandbox via the session-helper by
-  improving the file monitoring in case of broken symlinks (#6349)
-
-* Preinstallation now works if the ref is not available in the first configured
-  remote (#6373)
-
-* Flatpak now allows the usage of sudo for changing the user (#6371)
-
-* `flatpak-kill` will no longer send SIGKILL to all processes in the current
-  process group (#6375)
-
-* Authorization for parental controls no longer relies on racy PIDs (#6303)
-
-* Fix various memory leaks (#6286, #6260)
-
-* Fix various crashes (#6074, #6376)
-
-Internal changes:
-
-* Testing and CI improvements (#6284, #6302, #6291, #6295, #6067)
-
-* Improvements to the formatting (#6331)
-
-* Avoid using an uninitialised variable (#6345)
-
-* Remove duplicate pointer clearing (#6361)
-
-Changes in 1.16.1
-~~~~~~~~~~~~~~~~~~
-Released: 2025-05-10
-
-Enhancements:
-
-* When using parental controls, allow a child account to update existing
-  apps by default, to ensure that security and bugfix updates can be
-  installed. This can be overridden by setting polkit policy rules for
-  the new `org.freedesktop.Flatpak.override-parental-controls-update`
-  action if necessary. (#5552)
-
-* Make systemd scopes easier to match to Flatpak app instances,
-  by using the instance ID instead of the top-level process ID in the
-  scope name (#6015)
-
-* Access to `--device=dri` now includes `/dev/udmabuf` (#6158)
-
-* Improve the error message for an invalid parameter to
-  flatpak-spawn --sandbox-a11y-own-name (#6048)
-
-* Speed up `flatpak prune --dry-run` by not calculating potential freed
-  space and avoiding operations that would need to hold a lock
-  (#5813, #6121)
-
-* Speed up `flatpak permission-reset` by only writing entries that have
-  actually changed (#5772)
-
-* Documentation improvements (#4859, #6066, #6134)
-
-* Look for TLS certificates at /etc/containers/certs.d when interacting with
-  OCI registries (#5916)
-
-* Translation updates: bg (#6120), ka (#6176), pl (#6106),
-  pt_BR (#6076, #6188), ro (#6139), ru (#6145), sl (#6054), sv (#6193),
-  tr (#6109)
-
-Bug fixes:
-
-* Fix intermittent flatpak-portal crashes by avoiding unnecessary
-  multi-threading (#5605)
-
-* Don't show a confusing confirmation prompt when `flatpak remove --unused`
-  removes `autoprune-unless` extensions that are no longer needed, such as
-  older Nvidia drivers (#5712, #2718)
-
-* Don't propagate `$PYTHONPYCACHEPREFIX` from host into sandbox (#6110)
-
-* Don't propagate `$WAYLAND_DISPLAY`, `$WAYLAND_SOCKET` from host into
-  sandbox if access to the Wayland socket has been denied (#3948)
-
-* When discovering the AT-SPI bus, treat `$AT_SPI_BUS_ADDRESS` as
-  higher-priority than GetAddress(), more closely matching the behaviour
-  of AT-SPI itself (#6173)
-
-* Fix a memory leak when installing extra-data (#6069)
-
-* Don't show fatal transaction errors twice (#3400)
-
-* Fix the build with -Ddefault_library=static (#6119)
-
-* Fix incorrect error reporting (#6127, #5170)
-
-* When using `FLATPAK_TTY_PROGRESS`, terminate OSC escape sequence with
-  standard ST sequence instead of xterm-specific BEL (#6092)
-
-* Include all options in shell completion for `flatpak search` (#6096)
-
-Internal changes:
-
-* Fix an unclear boolean expression (no functional change) (#5013)
-
-* Avoid a duplicate redirection in the test suite (#6117)
-
-* CI updates
-
-Changes in 1.16.0
-~~~~~~~~~~~~~~~~~~
-Released: 2025-01-09
-
-Bug fixes:
-
- * Update libglnx to 2024-12-06:
-    - Fix an assertion failure if creating a parent directory encounters a
-      dangling symlink (GNOME/libglnx#1)
-    - Fix a Meson warning
-
-* Don't emit terminal progress indicator escape sequences by default. They are
-  interpreted as notifications by some terminal emulators. (#6052)
-
-* Fix introspection annotations in libflatpak
-
-Enhancements:
-
-* Add the `FLATPAK_TTY_PROGRESS` environment variable, which re-enables the
-  terminal progress indicator escape sequences added in 1.15.91.
-
-* Document the `FLATPAK_FANCY_OUTPUT` environment variable, which allows
-  disabling the fancy formatting when outputting to a terminal.
-
-Changes in 1.15.91
-~~~~~~~~~~~~~~~~~~
-Released: 2024-12-19
-
-Enhancements:
-
- * Add the `FLATPAK_DATA_DIR` environment variable, which allows overriding
-   at runtime the data directory location that Flatpak uses to search for
-   configuration files such as remotes. This is useful for running tests,
-   and for when installing using Flatpak in a chroot.
-
- * Add a `FLATPAK_DOWNLOAD_TMPDIR` variable. This allows using download
-   directories other than /var/tmp.
-
- * Emit progress escape sequence. This can be used by terminal emulators
-   to detect and display progress of Flatpak operations on their graphical
-   user interfaces.
-
-Bug fixes:
-
- * Install missing test data. This should fix "as-installed" tests via
-   `ginsttest-runner`, used for example in Debian's autopkgtest framework.
-
- * Unify and improve how the Wayland socket is passed to the sandboxed app.
-   This should fix a regression that is triggered by compositors that both
-   implement the security-context-v1 protocol, and sets the `WAYLAND_DISPLAY`
-   environment variable when launching Flatpak apps. (#5863)
-
- * Fix the plural form of a translatable string.
-
-Changes in 1.15.12
-~~~~~~~~~~~~~~~~~~
-Released: 2024-11-28
-
-Bug fixes:
-
- * Return to using the process ID of the Flatpak app in the cgroup name.
-   Using the instance ID in 1.15.11 caused crashes when installing apps,
-   extensions or runtimes that use the "extra data" mechanism, which
-   does not set up an instance ID. (#6009)
-
-Changes in 1.15.11
-~~~~~~~~~~~~~~~~~~
-Released: 2024-11-26
-
-Dependencies:
-
- * In distributions that compile Flatpak to use a separate bubblewrap
-   executable, version 0.11.0 is recommended (but not required).
-   The minimum bubblewrap continues to be 0.10.0.
-
- * In distributions that compile Flatpak to use a separate xdg-dbus-proxy
-   executable, version 0.1.6 is recommended (but not required).
-   The minimum xdg-dbus-proxy continues to be 0.1.0.
-
-Enhancements:
-
- * Allow applications like WebKit to connect the AT-SPI accessibility tree
-   of processes in a sub-sandbox with the tree in the main process (#5898)
-
-     * New sandboxing parameter `flatpak run --a11y-own-name`, which is
-       like `--own-name` but for the accessibility bus
-
-     * flatpak-portal API v7: add new sandbox-a11y-own-names option, which
-       accepts names matching `${FLATPAK_ID}.*`
-
-     * Apps may call the `org.a11y.atspi.Socket.Embedded` method on names
-       matching `${FLATPAK_ID}.Sandboxed.*` by default
-
- * `flatpak run -vv $app_id` shows all applicable sandboxing parameters
-   and their source, including overrides, as debug messages (#5895)
-
- * Add --device=usb, a subset of --device=all
-
- * Introduce USB device listing
-
-   * Apps can list which USB devices they want to access ahead of time by
-     using the `--usb` parameter. Check the manpages for the more information
-     about the accepted syntax.
-
-   * Denying access to USB devices is also possible with the `--no-usb`
-     parameter. The syntax is equal to `--usb`.
-
-   * Both options merely store metadata, and aren't used by Flatpak itself.
-     This metadata is intended to be used by the (as of now, still in
-     progress) USB portal to decide which devices the app can enumerate and
-     request access.
-
- * Add support for KDE search completion
-
- * Use the instance id of the Flatpak app as part of the cgroup name. This
-   better matches the naming conventions for cgroup.
-
- * Preconfigured repositories can now be set up by OS vendors using
-   `${datadir}/flatpak/remotes.d` (typically /usr/share/flatpak/remotes.d),
-   in addition to `${sysconfdir}/flatpak/remotes.d` (typically
-   /etc/flatpak/remotes.d) which is intended for local sysadmin use
-
-Bug fixes:
-
- * Update libglnx to 2024-08-23 (#5918)
-
-     * fix build in environments that use -Werror=return-type, such as
-       openSUSE Tumbleweed (#5778)
-
-     * add a fallback definition for G_PID_FORMAT with older GLib
-
-     * avoid warnings for g_steal_fd() with newer GLib
-
-     * improve compatibility of g_closefrom() backport with newer GLib
-
- * Update meson wrap file for bubblewrap to version 0.11.0:
-
-     * drop Autotools build system
-
-     * improve handling of EINTR
-
-     * improve handling of socket control messages
-
-     * improve compatibility with busybox
-
-     * improve compatibility with older Meson
-
-     * fix deprecation warnings
-
- * Update meson wrap file for xdg-dbus-proxy to version 0.1.6:
-
-     * compatibility with D-Bus implementations that pipeline the
-       authentication handshake, such as sd-bus and zbus
-
-     * compatibility with D-Bus implementations that use non-consecutive
-       serial numbers, such as godbus and zbus
-
-     * broadcast signals can be allowed without having to add TALK permission
-       (#5828)
-
-     * fix memory leaks
-
- * Fix some memory leaks
-
- * Translation updates: cs, pl, zh_CN
-
-Internal changes:
-
- * Better const-correctness (#5913)
- * Fix a shellcheck warning in the tests (#5914)
-
-Changes in 1.15.10
-~~~~~~~~~~~~~~~~~~
-Released: 2024-08-14
-
-Dependencies:
-
- * In distributions that compile Flatpak to use a separate bubblewrap (bwrap)
-   executable, version 0.10.0 is required.
-   This version adds a new feature which is required by the security fix
-   in this release.
-
-Security fixes:
-
- * Don't follow symbolic links when mounting persistent directories
-   (--persist option). This prevents a sandbox escape where a malicious or
-   compromised app could edit the symlink to point to a directory that
-   the app should not have been allowed to read or write.
-   (CVE-2024-42472, GHSA-7hgv-f2j8-xw87)
-
-Documentation:
-
- * Mark the 1.12.x and 1.10.x branches as end-of-life (#5352)
-
-Other bug fixes:
-
- * Fix several memory leaks (#5883, #5884)
-
-Internal changes:
-
- * Record a log file when running build-time tests with
-   AddressSanitizer (#5884)
-
- * Add initial suppressions file for AddressSanitizer (#5884)
-
-Changes in 1.15.9
-~~~~~~~~~~~~~~~~~
-Released: 2024-07-22
-
-Dependencies:
-
- * bubblewrap and xdg-dbus-proxy are now provided by Meson wrap files
-   instead of being directly vendored via `git submodule`.
-   If downloading external software during build is not allowed in your
-   environment, please install suitable versions of bubblewrap and
-   xdg-dbus-proxy separately, then configure Flatpak with options similar to
-   `-Dsystem_bubblewrap=bwrap -Dsystem_dbus_proxy=xdg-dbus-proxy`
-   (most major distributions package it like this already).
-
-Enhancements:
-
- * If xdg-dbus-proxy is new enough (0.1.6 or later, not yet released),
-   allow two broadcast signals from AT-SPI by default, allowing bus
-   traffic to be reduced. If xdg-dbus-proxy is older, this change will
-   have no practical effect but is harmless. (#5828)
-
- * Install csh profile snippet (#5753)
-
-Bug fixes:
-
- * Expand the list of environment variables that Flatpak apps do not
-   inherit from the host system (#5765, #5785)
-
- * Take time zone information from $TZDIR if set (#5850)
-
- * Fix a memory leak since 1.15.7 when reloading D-Bus configuration (#5856)
-
- * Fix a memory leak when running `flatpak permissions` (#5844)
-
- * Fix memory leaks in `flatpak update` (#5816)
-
- * Fix memory leaks when installing packages (#5811)
-
- * Use more similar translatable strings for some error messages (#5748)
-
- * Document `flatpak config --set languages '*all*'` correctly:
-   it is really `*all*` (or equivalently `*`), not just `all` (#5836)
-
- * Fix a misleading comment in the test for CVE-2024-32462 (#5779)
-
- * Fix a copy/paste error in the 1.15.7 release notes
-
- * On systems where subdirectories of /sys have been made inaccessible,
-   continue without them (#5138)
-
- * Make tests more compatible with non-GNU shell utilities (#5812)
-
- * Translation updates: ka (#5873), hi (#5838), pt_BR (#5877), zh_CN (#5843)
-
-Internal changes:
-
- * libglnx and variant-schema-compiler are now managed as `git subtree`
-   instead of `git submodule`.
-   Maintainers and contributors, please see `subprojects/README.md` for
-   details of how to interact with these.
-   In particular this means that submodules no longer need to be set up
-   before working on a git clone. (#5800, #5845)
-
- * Split library code into more, smaller translation units, reducing
-   internal circular dependencies (#5409, #5801, #5803)
-
- * Add some convenience macros in the test suite (#5693)
-
- * Minor internal robustness improvement (#5833)
-
- * Add configuration for Github Codespaces (#5767)
-
- * Improve CI configuration (#5791)
-
- * Work around infrastructure issues in third-party apt repositories
-   used by default in Github Workflows (#5786)
-
-Changes in 1.15.8
-~~~~~~~~~~~~~~~~~
-Released: 2024-04-18
 
 Security fixes:
 
@@ -742,163 +10,18 @@ Security fixes:
 
 Other bug fixes:
 
- * Pass the -export-dynamic linker option as -Wl,-export-dynamic,
-   fixing build failures with clang 18 and lld 18 (#5760)
-
- * Fix a double-free when installation is cancelled (#5763)
-
- * Fix installed-tests failure with "FUSERMOUNT: unbound variable"
-   (#5751)
-
- * Translation updates: pt_BR (#5762), tr (#5761)
-
-Changes in 1.15.7
-~~~~~~~~~~~~~~~~~
-Released: 2024-03-27
-
-Dependencies:
-
- * The Meson build system is now required.
-   Compiling with Autotools is no longer possible.
-
- * In distributions that compile Flatpak to use a separate bubblewrap (bwrap)
-   executable, version 0.9.0 is recommended. Several of the bug fixes listed
-   below will not be active if an older version is used.
-
- * In distributions that compile Flatpak to use a separate xdg-dbus-proxy
-   executable, version 0.1.5 is recommended.
-
- * If libmalcontent (parental controls) is enabled, it must be version 0.5.0
-   or later.
-
-New features:
-
- * Automatically remove obsolete driver versions and other autopruned refs
-   (#5632)
-
- * `--socket=inherit-wayland-socket` (#5614)
-
- * Automatically reload D-Bus session bus configuration after installing
-   or upgrading apps, to pick up any exported D-Bus services (#3342)
-
-Bug fixes:
-
- * Update included copy of bubblewrap to version 0.9.0:
-
-     * `--symlink` is now idempotent, meaning it succeeds if the
-       symlink already exists and already has the desired target
-       (#2387, #3477, #5255)
-     * Report a better error message if `mount(2)` fails with `ENOSPC`
-     * Fix a double-close on error reading from `--args`, `--seccomp` or
-       `--add-seccomp-fd` argument
-     * Improve memory allocation behaviour
-     * Silence various compiler warnings
-
- * Update included copy of xdg-dbus-proxy to version 0.1.5:
-
-     * Fix handling of long object paths
-
  * Don't parse `<developer><name/></developer>` as the application name
    (#5700)
 
- * Don't refuse to start apps when there is no D-Bus system bus available
-   (#5076)
-
- * Don't try to repeat migration of apps whose data was migrated to a new
-   name and then deleted (#5668)
-
- * Improve handling of mixed locales on systems with systemd-localed (#5497)
-
- * Improve display of ellipsized columns in wide terminals (#5722)
-
- * Make `flatpak info -e` look for extensions in all installations (#5670)
-
- * Fix warnings from newer GLib versions (#5660, #5737)
-
- * Always set the `container` environment variable (#5610)
-
- * Always let the app inherit redirected file descriptors (#5626)
-
- * In `flatpak ps`, add xdg-desktop-portal-gnome to the list of backends
-   we'll use to learn which apps are running in the background (#5729)
-
- * Don't use `WAYLAND_SOCKET` unless given `--socket=inherit-wayland-socket`
-   (#5614)
-
- * Use `fusermount3` if compiled with FUSE 3, overridable with
-   `-Dsystem_fusermount` compile-time option (#5104)
-
- * Avoid leaking a temporary variable from /etc/profile.d/flatpak.sh into
-   the shell environment (#5574)
-
- * Improve async-signal safety (#5687)
-
- * Fix various memory leaks (#5683, #5690, #5691)
-
- * Avoid undefined behaviour of signed left-shift when storing object IDs
-   in a hash table (#5738)
-
- * Detect the correct gtk-doc when cross-compiling (#5650)
-
- * Detect the correct wayland-scanner when cross-compiling (#5596)
-
- * Documentation improvements (#5659, #5677, #5682, #5664, #5719)
-
- * Skip more tests when FUSE isn't available (#5611)
-
- * Translation updates (#5602, #5707)
-
-Changes in 1.15.6
+Changes in 1.14.5
 ~~~~~~~~~~~~~~~~~
-Released: 2023-11-14
-
-Dependencies:
-
- * In distributions that compile Flatpak to use a separate bubblewrap (bwrap)
-   executable, version 0.8.0 is now required.
-
- * Enabling the optional Wayland security context feature requires
-   libwayland-client, wayland-scanner >= 1.15 and wayland-protocols >= 1.32.
-
- * Ubuntu 18.04 is no longer routinely tested. Support for dependency
-   versions included in Ubuntu 18.04 should be considered "at risk".
+Released: 2023-12-08
 
 Features:
 
- * Add --device=input, for access to evdev devices in /dev/input (#5481)
-
- * Update bundled copy of bubblewrap to version 0.8.0, and rely on its
-   features:
-     * Improve error message if seccomp is disabled in kernel config
-     * Security hardening: set user namespace limit to 0, to prevent creation
-       of nested user namespaces in a more robust way (#5084)
-
- * For subsandboxes started by flatpak-portal, inherit environment
-   variables from the `flatpak run` that started the original instance
-   rather than from flatpak-portal, fixing behaviour of FLATPAK_GL_DRIVERS
-   and similar features (#5278)
-
  * Stop http transfers if a download in progress becomes very slow (#5519)
 
- * Make it easier to configure extra languages, by picking them up from
-   AccountsService if configured there (#5006)
-
- * Add new flatpak_transaction_add_rebase_and_uninstall() API,
-   allowing end-of-life apps to be replaced by their intended replacement
-   more reliably (#3991)
-
- * Create a private Wayland socket with the "security context" extension
-   if available, allowing the compositor to identify connections from
-   sandboxed apps as belonging to the sandbox (#4920, #5507, #5558)
-
- * Update libglnx to 2023-08-29
-     * Use features of newer GLib versions if available
-     * Turn off system-level crash reporting infrastructure during
-       some unit tests that involve intentional assertion failures
-
  * Add anchors to link to sections of flatpak-metadata documentation (#5582)
-
- * New translations: ka, nl.
 
 Bug fixes:
 
@@ -918,9 +41,6 @@ Bug fixes:
 
  * Forward-compatibility with libappstream 1.0 (#5563)
 
- * Fix installation with Meson if configured with -Dauto_sideloading=true
-   (#5495)
-
  * Fix a memory leak (#5329)
 
  * Fix compiler warnings (#5362, #5366)
@@ -935,24 +55,11 @@ Bug fixes:
 
  * Clarify documentation for D-Bus name ownership (#5582)
 
- * Translation updates: id, tr, zh_CN
-   (#5332, #5565)
-
 Internal changes:
 
- * Split up large source files into smaller modules, reducing internal
-   circular dependencies (#5410, #5411, #5415, #5419, #5416, #5414)
+ * CI improvements (#5381)
 
- * Re-synchronize code backported from GLib with the version in GLib
-   (#5410)
-
- * Make the flags used to apply "extra data" clearer (#5466)
-
- * Use glnx_opendirat() where possible (#5527)
-
- * CI improvements (#5374, #5381)
-
-Changes in 1.15.4
+Changes in 1.14.4
 ~~~~~~~~~~~~~~~~~
 Released: 2023-03-16
 
@@ -970,20 +77,11 @@ Security fixes:
 
 Other bug fixes:
 
-* Document the path used for `flatpak override`
-* Translation updates: oc, pl, ru, sv, tr
+* Translation update: pl
 
-Changes in 1.15.3
+Changes in 1.14.3
 ~~~~~~~~~~~~~~~~~
-Released: 2023-02-21
-
-Build system:
-
-* Building this version of Flatpak with Meson is recommended. The source
-  release flatpak-1.15.3.tar.xz no longer contains Autotools-generated
-  files, although this version can still be built using Autotools after
-  running `./autogen.sh`. Future versions are likely to remove the
-  Autotools build system.
+Released: 2023-02-27
 
 Bug fixes:
 
@@ -999,20 +97,6 @@ Bug fixes:
   filename in the error message (#5293)
 * Unset $GDK_BACKEND for apps, ensuring GTK apps with --socket=fallback-x11
   can work (#5303)
-* Fix a deprecation warning when compiled with curl >= 7.85 (#5284)
-* Translation updates: es, ru (#5266, #5312, #5313)
-
-Internal changes:
-
-* Better diagnostic messages for why runtimes are or are not considered
-  unused (#5237)
-
-Changes in 1.15.2
-~~~~~~~~~~~~~~~~~
-Released: 2023-02-06
-
-Bug fixes:
-
 * Never try to export a parent of reserved directories as a --filesystem,
   for example /run, which would prevent the app from starting (#5205, #5207)
 * Never try to export a --filesystem below /run/flatpak or /run/host,
@@ -1021,6 +105,13 @@ Bug fixes:
   symlink to the root directory (#1357)
 * Show a warning when the --filesystem exists but cannot be shared with
   the sandbox (#1357, #5035, #5205, #5207)
+
+Changes in 1.14.2
+~~~~~~~~~~~~~~~~~
+Released: 2023-02-06
+
+Bug fixes:
+
 * Display the intended messages for `flatpak repair` (#5204)
 * Exporting an app to an existing repository on a CIFS filesystem
   now works as intended (#5257)
@@ -1029,67 +120,21 @@ Bug fixes:
 * Unset $XKB_CONFIG_ROOT for apps, avoiding crashes in GTK and Qt apps
   under Wayland when this variable is set to a path not available in the
   sandbox (#5194)
+* Unset $KRB5CCNAME for apps
 * When using the fish shell, avoid duplicate XDG_DATA_DIRS entries if the
   profile script is sourced more than once (#5198)
-* Update included copy of bubblewrap to 0.7.0 for better error messages
-* Install SELinux files correctly when building with Meson
-* Translation updates: ru, tr (#5256, #5262)
 
 Internal changes:
 
-* Update included copy of libglnx
-* flatpak -v now uses the INFO log level, and flatpak -vv uses the
-  DEBUG log level in the flatpak log domain. Previously, the extra
-  messages that were logged by flatpak -vv were in a separate "flatpak2"
-  log domain. G_MESSAGES_DEBUG=flatpak previously had an effect similar to
-  flatpak -v, and is now more similar to flatpak -vv. (#5001)
+* The INFO log level is now treated the same as the DEBUG log level
+  by `flatpak -v`, to make backports from 1.15.x simpler
 
-Changes in 1.15.1
+Changes in 1.14.1
 ~~~~~~~~~~~~~~~~~
-Released: 2022-11-17
-
-Dependencies:
-
-* When building with Meson, gpgme 1.8.0 is now required.
-  Older versions can still be used by building with Autotools.
-
-Features:
-
-* If an old temporary deploy directory was leaked by versions before #5146,
-  clean it up the next time the same app is updated (#5164)
-
-Bug fixes:
-
-* If an app update is blocked by parental controls policies, clean up the
-  temporary deploy directory (#5146)
-* Fix Autotools build with versions of gpgme that no longer provide
-  gpgme-config(1) (#5173)
-* Fix a possible parallel build failure with Meson (#5165)
-* Fix a compiler warning on 32-bit architectures (#5148)
-* When building with Autotools, be more consistent about applying compiler
-  warning flags (#5149)
-* Unset $TEMP, $TEMPDIR and $TMP for apps, the same as $TMPDIR (#5168)
-* Treat /efi the same as /boot/efi (#5155)
-
-Changes in 1.15.0
-~~~~~~~~~~~~~~~~~
-Released: 2022-10-24
-
-Build system:
-
-* Flatpak can now be compiled using Meson instead of Autotools.
-  This requires Meson 0.53.0 or later, and Python 3.5 or later.
-  The Autotools build system is likely to be removed during either the
-  1.15.x or 1.17.x cycle. (#4845)
+Released: 2022-11-18
 
 New features:
 
-* Allow the `modify_ldt` system call as part of `--allow=multiarch`.
-  This increases attack surface, but is required when running 16-bit
-  executables in some versions of Wine. (#4297)
-* Share gssproxy socket, which acts like a portal for Kerberos authentication.
-  This lets apps use Kerberos authentication without needing a sandbox hole.
-  (#4914)
 * Add a httpbackend variable to flatpak.pc, allowing dependent projects
   like GNOME Software to detect whether they are compatible with libflatpak
   (#5054)
@@ -1108,13 +153,21 @@ Bug fixes:
 * Fix a warning when listing a document with no permissions (#5055)
 * Fix compilation with GLib 2.66.x (as used in Debian 11) (#5062)
 * Fix compilation with GLib 2.58.x (as used in Debian 10) (#5066)
+* Fix a compiler warning on 32-bit architectures (#5148)
+* If an app update is blocked by parental controls policies, clean up the
+  temporary deploy directory (#5146)
+* Fix Autotools build with versions of gpgme that no longer provide
+  gpgme-config(1) (#5173)
+* When building with Autotools, be more consistent about applying compiler
+  warning flags (#5149)
+* Unset $TEMP, $TEMPDIR and $TMP for apps, the same as $TMPDIR (#5168)
+* Treat /efi the same as /boot/efi (#5155)
 * Make generated files more reproducible (#5085)
 * Translation updates: cs, id, pl, pt_BR (#5052, #5056, #5059, #5126)
 
 Internal changes:
 
 * Update project logo in README (#5119)
-* Update libglnx subproject (#5140)
 
 Changes in 1.14.0
 ~~~~~~~~~~~~~~~~~
@@ -1562,7 +615,7 @@ Changes in 1.10.2
 Released: 2021-03-10
 
 This is a security update which fixes a potential attack where
-a flatpak application could use custom formatted .desktop files to
+a flatpak application could use custom formated .desktop files to
 gain access to files on the host system.
 
 Other changes:
@@ -1570,7 +623,7 @@ Other changes:
 * Fix memory leaks
 * Some test fixes
 * Documentation updates
-* G_BEGIN/END_DECLS added to library headers for c++ use
+* G_BEGIN/END_DECLS added to library headders for c++ use
 * Fix for X11 cookies on OpenSUSE
 * Spawn portal better handles non-utf8 filenames
 
@@ -1619,7 +672,7 @@ Changes in 1.9.3
 Released: 2020-12-22
 
 I expect this to be the final 1.9.x release, and we can expect 1.10.0
-early next year, containing basically what's in this release in terms
+early next year, containing basically whats in this release in terms
 of features.
 
 A minor change in the new indexed summary format in this release. The
@@ -1640,7 +693,7 @@ Other changes:
  * flatpak_installation_list_installed_refs_for_update() now handles
    some case better when apps in the user installation depends on
    runtimes in the system installation.
- * New version of the deploy files which guarantees the existence of
+ * New version of the deploy files which guarantees the existance of
    a bit more data. This is useful for eol detection of apps that were
    installed with previous flatpak versions.
  * Some corner cases when installing an app with extra-data into a nonstandard
@@ -1703,7 +756,7 @@ Other major changes
    that are unused.
  * The end-of-life warnings in the flatpak CLI are now better, showing
    more useful details (like version and what apps are using the runtime)
-   and less useless details.
+   and less unuseful details.
  * Some changes was made in which dconf paths were considered "similar"
    to the app id, allowing for example `org.gnome.SoundJuicer` to
    migrate from `/org/gnome/sound-juicer`.
@@ -1760,12 +813,12 @@ Released: 2020-11-17
 Changes in 1.8.2
 ================
 
- * Added validation of collection id settings for remotes
+ * Added validation of collection id settins for remotes
  * Fix seccomp filters on s390
  * Robustness fixes to the spawn portal
  * Fix support for masking update in the system installation
  * Better support for distros with uncommon models of merged /usr
- * Cache responses from located/AccoutService
+ * Cache responses from localed/AccoutService
  * Fix hangs in cases where xdg-dbus-proxy fails to start
  * Fix double-free in cups socket detection
  * OCI authenticator now doesn't ask for auth in case of http errors
@@ -1893,7 +946,7 @@ Changes in 1.6.1
 
 This is a (mild) security update. Flatpak 1.6.0 added the ability for an application to request it to be
 updated, as long as the new version doesn't require new permissions. Unfortunately in some special cases,
-if an app had access to the home directory, but not the rest of the filesystem it would still allow a
+if an app had acces to the home directory, but not the rest of the filesystem it would still allow a
 self-update where the new version could access some files outside the home directory..
 
 This is fixed in this version, and all users of 1.6.0 are recommended to update.
@@ -1952,7 +1005,7 @@ Other changes:
  * Improved docs and help output
  * Fix support for fd forwarding and the allow_a11y flag in the sandboxing portal
  * Some improvements to the new permission-set command
- * New remote option that allows setting the default token type (mostly for debugging)
+ * New remote option that allows settting the default token type (mostly for debugging)
 
 
 
@@ -1960,7 +1013,7 @@ Changes in 1.5.1
 ================
 
 The major new feature of this is the support for protected applications and the system
-around authenticating downloads to it. This is not considered stable yet, but this release
+around authenticting downloads to it. This is not considered stable yet, but this release
 has the initial work to make it possible for developers to play around with this. I
 will send out a separate mail about this later.
 
@@ -1989,11 +1042,11 @@ Changes in 1.5.0
  * New command flatpak mask allows pinning version and avoiding auto-downloads.
  * Support self-updates and update monitoring in the flatpak portal.
  * Fix updates of exported services with dbus-broken.
- * Don't show arch columns in terminal output if all are the same.
+ * Don't show arch columns in terminal outout if all are the same.
  * Fix some cases where origin remotes were not properly removed.
  * flatpak-session-helper now links to more libraries.
  * OCI: Support images tagged with labels as well as annotations.
- * OCI: Always generate a history for images.
+ * OCI: Alway generate a history for images.
  * OCI: Support docker mimetypes in addition to OCI mimetypes.
  * Uninstall now always work, even if the remote it came from was force removed.
  * New config key default-languages that allows additions to the system list
@@ -2093,7 +1146,7 @@ Changes in 1.3.3
    the helper sometimes not work.
  * Fix build with older versions of glib
  * The list and remote-ls output is now less wide, not showing the
-   appdata summary by default and only showing the architecture and
+   appdata summary by default and only showing the archtecture and
    origin if necessary (i.e. not if its the same for all rows).
  * flatpak remote-ls now filters end-of-lifed apps by default.
  * flatpak permission-reset now supports --all
@@ -2144,7 +1197,7 @@ Other changes:
    for installers to take advantage of the automatic rebasing.
  * New permission --socket=pcsc for access to smart cards.
  * We now store the description, comment, icon and homepage fields from
-   the flatpakrepo files in the remote configuration and have new library
+   the flatpakrepo files in the remote confiuration and have new library
    APIs to read these back.
  * The fields above are now also settable in a repo and changes to these
    can propagate to clients.
@@ -2472,7 +1525,7 @@ Changes in 1.0.2
  * flatpak uninstall --unused now does not remove SDKs if some installed app
    refers to them.
  * Fixed bug where flatpak uninstall --unused prompted for uninstall twice.
- * Set IO class on the system helper to "idle", which should cause background
+ * Set IO class on the system helper to "idle", which should cause backgroun
    updates to affect the system less.
  * Fixed regression in flatpak uninstall --no-related.
  * Better handling of empty collection ids in flatpak bundles.
@@ -2861,7 +1914,7 @@ Major changes in 0.10.1
    back to a previous version.
  * New command "flatpak search" which allows you to search the appstream
    data from the commandline.
- * flatpak update now updates appstream data for all configured remotes, which
+ * flatpak update now updates appstream data for all confured remotes, which
    is important for search to work.
  * Allow automatic installation of gtk themes matching the active theme.
  * Handle the case when /etc/resolv.conf is a symlink
@@ -2901,7 +1954,7 @@ Major changes in 0.9.99
  * build: FLATPAK_ID and FLATPAK_ARCH are now set in the environment when building
  * update: Don't fail the entire update if some remote fails to update its metadata
  * run: /.flatpak-info now lists exact commits and extensions in use
- * run: We now use a per-app ld.so.cache file when running. This should speed things up,
+ * run: We now use a per-app ld.so.cache file whenn running. This should speed things up,
    and allows ldconfig to report the correct results.
  * The verbose mode was changed into two levels, use -vv to show the more detailed info, which
    currently only contains the full bubblewrap argument lists.
@@ -3140,7 +2193,7 @@ Major changes in 0.9.4
  * Titles and default branches are now automatically updated from
    the remote unless they are explicitly set. You no longer have
    to run flatpak remote-modify --update.
- * Some performance improvements when installing apps.
+ * Some performance inprovements when installing apps.
  * When exporting a build, the commit objects now always include
    the branchname, the metadata and install/download size.
    The sizes are reused for faster summary building, and the
@@ -3395,7 +2448,7 @@ This is a bugfix and security update.
 
 Some of the bind-mounts that flatpak sets up were not read-only as
 they should have. This includes: extensions, system fonts,
-resolv.conf, localtime and machine-id. Many of these are typically only
+resolv.conf, localtime and machine-id. Many of thse are typically only
 writable by root, but some, like the user-specific fonts and
 user-installed extensions could be modified from the sandbox.
 
@@ -3495,7 +2548,7 @@ Major changes in 0.6.14
    workarounds.
  * When installing an application system-wide, don't consider
    dependencies that are installed for the user only.
- * Flatpak install --from now tries to reuse existing remotes to
+ * Flatpak install --from now tries to re-use existing remotes to
    avoid creating unnecessary origin remotes.
  * Using --filesystem=$dir when $dir is a symlink-to-directory now works.
  * Using --filesystem=$file to expose unix sockets to the app is now

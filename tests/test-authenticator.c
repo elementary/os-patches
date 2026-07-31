@@ -112,7 +112,7 @@ finish_request_ref_tokens (TokenRequestData *data)
   g_variant_builder_init (&results, G_VARIANT_TYPE ("a{sv}"));
   g_variant_builder_add (&results, "{sv}", "tokens", g_variant_builder_end (&tokens));
 
-  g_info ("emitting response");
+  g_debug ("emitting response");
   flatpak_authenticator_request_emit_response (data->request,
                                                FLATPAK_AUTH_RESPONSE_OK,
                                                g_variant_builder_end (&results));
@@ -130,9 +130,9 @@ http_incoming (GSocketService    *service,
   g_assert_true (data->request != NULL);
 
   /* For the test, just assume any connection is a valid use of the web flow */
-  g_info ("handling incoming http request");
+  g_debug ("handling incoming http request");
 
-  g_info ("emitting webflow done");
+  g_debug ("emitting webflow done");
   flatpak_authenticator_request_emit_webflow_done (data->request, options);
 
   finish_request_ref_tokens (data);
@@ -149,7 +149,7 @@ handle_request_close (FlatpakAuthenticatorRequest *object,
 {
   TokenRequestData *data = user_data;
 
-  g_info ("handle_request_close");
+  g_debug ("handle_request_close");
 
   flatpak_authenticator_request_complete_close (object, invocation);
 
@@ -157,7 +157,7 @@ handle_request_close (FlatpakAuthenticatorRequest *object,
     {
       GVariantBuilder results;
 
-      g_info ("Webflow was cancelled by client");
+      g_debug ("Webflow was cancelled by client");
 
       g_variant_builder_init (&results, G_VARIANT_TYPE ("a{sv}"));
       flatpak_authenticator_request_emit_response (data->request,
@@ -166,7 +166,7 @@ handle_request_close (FlatpakAuthenticatorRequest *object,
     }
   else
     {
-      g_info ("Ignored webflow cancel by client");
+      g_debug ("Ignored webflow cancel by client");
       finish_request_ref_tokens (data); /* Silently succeed anyway */
     }
 
@@ -196,7 +196,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
   gsize n_refs, i;
   g_autofree char *options_s = NULL;
 
-  g_info ("handling RequestRefTokens");
+  g_debug ("handling RequestRefTokens");
 
   options_s = g_variant_print (arg_options, FALSE);
   write_request (g_strdup_printf ("remote: %s\n"
@@ -260,7 +260,7 @@ handle_request_ref_tokens (FlatpakAuthenticator *authenticator,
     {
       g_autoptr(GVariant) options = g_variant_ref_sink (g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0));
       uri = g_strdup_printf ("http://localhost:%d", (int)port);
-      g_info ("Requesting webflow %s", uri);
+      g_debug ("Requesting webflow %s", uri);
       flatpak_authenticator_request_emit_webflow (request, uri, options);
     }
   else
@@ -279,7 +279,7 @@ on_bus_acquired (GDBusConnection *connection,
 {
   GError *error = NULL;
 
-  g_info ("Bus acquired, creating skeleton");
+  g_debug ("Bus acquired, creating skeleton");
 
   g_dbus_connection_set_exit_on_close (connection, FALSE);
 
@@ -303,7 +303,7 @@ on_name_acquired (GDBusConnection *connection,
                   const gchar     *name,
                   gpointer         user_data)
 {
-  g_info ("Name acquired");
+  g_debug ("Name acquired");
 }
 
 static void
@@ -311,7 +311,7 @@ on_name_lost (GDBusConnection *connection,
               const gchar     *name,
               gpointer         user_data)
 {
-  g_info ("Name lost");
+  g_debug ("Name lost");
 }
 
 
@@ -372,9 +372,9 @@ main (int    argc,
     }
 
   if (opt_verbose)
-    g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_INFO, message_handler, NULL);
+    g_log_set_handler (G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG | G_LOG_LEVEL_INFO, message_handler, NULL);
 
-  g_info ("Started test-authenticator");
+  g_debug ("Started test-authenticator");
 
   session_bus = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &error);
   if (session_bus == NULL)

@@ -34,7 +34,6 @@
 #include "libglnx.h"
 
 #include "flatpak-builtins.h"
-#include "flatpak-repo-utils-private.h"
 #include "flatpak-utils-private.h"
 #include "flatpak-oci-registry-private.h"
 #include "flatpak-chain-input-stream-private.h"
@@ -50,7 +49,6 @@ static gboolean opt_runtime = FALSE;
 static char **opt_gpg_file;
 static gboolean opt_oci = FALSE;
 static gboolean opt_oci_use_labels = TRUE; // Unused now
-static char *opt_oci_layer_compress;
 static char **opt_gpg_key_ids;
 static char *opt_gpg_homedir;
 static char *opt_from_commit;
@@ -58,8 +56,8 @@ static char *opt_from_commit;
 static GOptionEntry options[] = {
   { "runtime", 0, 0, G_OPTION_ARG_NONE, &opt_runtime, N_("Export runtime instead of app"), NULL },
   { "arch", 0, 0, G_OPTION_ARG_STRING, &opt_arch, N_("Arch to bundle for"), N_("ARCH") },
-  { "repo-url", 0, 0, G_OPTION_ARG_STRING, &opt_repo_url, N_("URL for repo"), N_("URL") },
-  { "runtime-repo", 0, 0, G_OPTION_ARG_STRING, &opt_runtime_repo, N_("URL for runtime flatpakrepo file"), N_("URL") },
+  { "repo-url", 0, 0, G_OPTION_ARG_STRING, &opt_repo_url, N_("Url for repo"), N_("URL") },
+  { "runtime-repo", 0, 0, G_OPTION_ARG_STRING, &opt_runtime_repo, N_("Url for runtime flatpakrepo file"), N_("URL") },
   { "gpg-keys", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &opt_gpg_file, N_("Add GPG key from FILE (- for stdin)"), N_("FILE") },
   { "gpg-sign", 0, 0, G_OPTION_ARG_STRING_ARRAY, &opt_gpg_key_ids, N_("GPG Key ID to sign the OCI image with"), N_("KEY-ID") },
   { "gpg-homedir", 0, 0, G_OPTION_ARG_STRING, &opt_gpg_homedir, N_("GPG Homedir to use when looking for keyrings"), N_("HOMEDIR") },
@@ -67,7 +65,6 @@ static GOptionEntry options[] = {
   { "oci", 0, 0, G_OPTION_ARG_NONE, &opt_oci, N_("Export oci image instead of flatpak bundle"), NULL },
   // This is not used anymore as it is the default, but accept it if old code uses it
   { "oci-use-labels", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &opt_oci_use_labels, NULL, NULL },
-  { "oci-layer-compress", 0, 0, G_OPTION_ARG_STRING, &opt_oci_layer_compress, N_("How to compress OCI image layers (default: gzip)"), "gzip|zstd" },
   { NULL }
 };
 
@@ -390,7 +387,6 @@ generate_labels (FlatpakOciDescriptor *layer_desc,
                  const char *name,
                  const char *ref,
                  const char *commit_checksum,
-                 const char *runtime_repo,
                  GVariant   *commit_data,
                  GCancellable *cancellable,
                  GError **error)
@@ -434,11 +430,6 @@ generate_labels (FlatpakOciDescriptor *layer_desc,
                         g_strdup_printf ("%" G_GUINT64_FORMAT, layer_desc->size));
 
 
-  if (runtime_repo)
-    g_hash_table_replace (labels,
-                          g_strdup ("org.flatpak.runtime-repo"),
-                          g_strdup (runtime_repo));
-
   if (!get_bundle_appstream_data (root, ref, name, keyfile, FALSE,
                                   &xml_data, cancellable, error))
     return FALSE;
@@ -462,14 +453,9 @@ generate_labels (FlatpakOciDescriptor *layer_desc,
 
 
 static gboolean
-build_oci (OstreeRepo                 *repo,
-           const char                 *commit_checksum,
-           GFile                      *dir,
-           const char                 *name,
-           const char                 *ref_str,
-           FlatpakOciWriteLayerFlags   write_layer_flags,
-           GCancellable               *cancellable,
-           GError                    **error)
+build_oci (OstreeRepo *repo, const char *commit_checksum, GFile *dir,
+           const char *name, const char *ref_str,
+           GCancellable *cancellable, GError **error)
 {
   g_autoptr(GFile) root = NULL;
   g_autoptr(GVariant) commit_data = NULL;
@@ -512,7 +498,7 @@ build_oci (OstreeRepo                 *repo,
   if (registry == NULL)
     return FALSE;
 
-  layer_writer = flatpak_oci_registry_write_layer (registry, write_layer_flags, cancellable, error);
+  layer_writer = flatpak_oci_registry_write_layer (registry, cancellable, error);
   if (layer_writer == NULL)
     return FALSE;
 
@@ -529,7 +515,7 @@ build_oci (OstreeRepo                 *repo,
                                        error))
     return FALSE;
 
-  flatpak_labels = generate_labels (layer_desc, repo, root, name, flatpak_decomposed_get_ref (ref), commit_checksum, opt_runtime_repo, commit_data, cancellable, error);
+  flatpak_labels = generate_labels (layer_desc, repo, root, name, flatpak_decomposed_get_ref (ref), commit_checksum, commit_data, cancellable, error);
   if (flatpak_labels == NULL)
     return FALSE;
 
@@ -692,20 +678,7 @@ flatpak_builtin_build_bundle (int argc, char **argv, GCancellable *cancellable, 
 
   if (opt_oci)
     {
-      FlatpakOciWriteLayerFlags write_layer_flags =
-        FLATPAK_OCI_WRITE_LAYER_FLAGS_NONE;
-
-      if (opt_oci_layer_compress == NULL)
-        opt_oci_layer_compress = "gzip";
-
-      if (strcmp(opt_oci_layer_compress, "gzip") == 0)
-        write_layer_flags |= FLATPAK_OCI_WRITE_LAYER_FLAGS_NONE;
-      else if (strcmp(opt_oci_layer_compress, "zstd") == 0)
-        write_layer_flags |= FLATPAK_OCI_WRITE_LAYER_FLAGS_ZSTD;
-      else
-        return usage_error (context, _("--oci-layer-compress value must be gzip or zstd"), error);
-
-      if (!build_oci (repo, commit_checksum, file, name, full_branch, write_layer_flags, cancellable, error))
+      if (!build_oci (repo, commit_checksum, file, name, full_branch, cancellable, error))
         return FALSE;
     }
   else

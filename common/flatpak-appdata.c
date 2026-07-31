@@ -294,11 +294,10 @@ end_element (GMarkupParseContext *context,
     }
 
   /* avoid picking up <id> elements from e.g. <provides> */
-  if (g_str_equal (element_name, "id"))
+  if (g_str_equal (element_name, "id") &&
+      g_str_equal (parent, "component"))
     {
-      g_assert (parent != NULL);
-      if (g_str_equal (parent, "component"))
-        component->id = g_steal_pointer (&text);
+      component->id = g_steal_pointer (&text);
     }
   else if (!data->in_developer && g_str_equal (element_name, "name"))
     {

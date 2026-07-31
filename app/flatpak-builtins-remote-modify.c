@@ -60,14 +60,13 @@ static char *opt_authenticator_name = NULL;
 static char **opt_authenticator_options = NULL;
 static gboolean opt_authenticator_install = -1;
 static char **opt_gpg_import;
-static char *opt_signature_lookaside = NULL;
 
 
 static GOptionEntry modify_options[] = {
   { "gpg-verify", 0, 0, G_OPTION_ARG_NONE, &opt_do_gpg_verify, N_("Enable GPG verification"), NULL },
   { "enumerate", 0, 0, G_OPTION_ARG_NONE, &opt_do_enumerate, N_("Mark the remote as enumerate"), NULL },
   { "use-for-deps", 0, 0, G_OPTION_ARG_NONE, &opt_do_deps, N_("Mark the remote as used for dependencies"), NULL },
-  { "url", 0, 0, G_OPTION_ARG_STRING, &opt_url, N_("Set a new URL"), N_("URL") },
+  { "url", 0, 0, G_OPTION_ARG_STRING, &opt_url, N_("Set a new url"), N_("URL") },
   { "subset", 0, 0, G_OPTION_ARG_STRING, &opt_subset, N_("Set a new subset to use"), N_("SUBSET") },
   { "enable", 0, 0, G_OPTION_ARG_NONE, &opt_enable, N_("Enable the remote"), NULL },
   { "update-metadata", 0, 0, G_OPTION_ARG_NONE, &opt_update_metadata, N_("Update extra metadata from the summary file"), NULL },
@@ -87,7 +86,6 @@ static GOptionEntry common_options[] = {
   { "default-branch", 0, 0, G_OPTION_ARG_STRING, &opt_default_branch, N_("Default branch to use for this remote"), N_("BRANCH") },
   { "collection-id", 0, 0, G_OPTION_ARG_STRING, &opt_collection_id, N_("Collection ID"), N_("COLLECTION-ID") },
   { "gpg-import", 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &opt_gpg_import, N_("Import GPG key from FILE (- for stdin)"), N_("FILE") },
-  { "signature-lookaside", 0, 0, G_OPTION_ARG_STRING, &opt_signature_lookaside, N_("Load signatures from URL"), N_("URL") },
   { "no-filter", 0, 0, G_OPTION_ARG_NONE, &opt_no_filter, N_("Disable local filter"), NULL },
   { "filter", 0, 0, G_OPTION_ARG_FILENAME, &opt_filter, N_("Set path to local filter FILE"), N_("FILE") },
   { "disable", 0, 0, G_OPTION_ARG_NONE, &opt_disable, N_("Disable the remote"), NULL },
@@ -242,12 +240,6 @@ get_config_from_opts (FlatpakDir *dir, const char *remote_name, gboolean *change
       *changed = TRUE;
     }
 
-  if (opt_signature_lookaside)
-    {
-      g_key_file_set_string (config, group, "xa.signature-lookaside", opt_signature_lookaside);
-      *changed = TRUE;
-    }
-
   if (opt_authenticator_name)
     {
       g_key_file_set_string (config, group, "xa.authenticator-name", opt_authenticator_name);
@@ -317,7 +309,7 @@ flatpak_builtin_remote_modify (int argc, char **argv, GCancellable *cancellable,
 
   remote_name = argv[1];
 
-  if (!flatpak_resolve_duplicate_remotes (dirs, remote_name, FALSE, &preferred_dir, cancellable, error))
+  if (!flatpak_resolve_duplicate_remotes (dirs, remote_name, &preferred_dir, cancellable, error))
     return FALSE;
 
   if (opt_update_metadata)

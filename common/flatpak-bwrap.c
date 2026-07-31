@@ -34,13 +34,21 @@
 
 #include <glib/gi18n-lib.h>
 
-#include <glib-unix.h>
 #include <gio/gio.h>
 #include "libglnx.h"
 
 #include "flatpak-bwrap-private.h"
 #include "flatpak-utils-private.h"
 #include "flatpak-utils-base-private.h"
+
+static void
+clear_fd (gpointer data)
+{
+  int *fd_p = data;
+
+  if (fd_p != NULL && *fd_p != -1)
+    close (*fd_p);
+}
 
 char *flatpak_bwrap_empty_env[] = { NULL };
 
@@ -51,17 +59,14 @@ flatpak_bwrap_new (char **env)
 
   bwrap->argv = g_ptr_array_new_with_free_func (g_free);
   bwrap->noinherit_fds = g_array_new (FALSE, TRUE, sizeof (int));
-  g_array_set_clear_func (bwrap->noinherit_fds, (GDestroyNotify) glnx_close_fd);
+  g_array_set_clear_func (bwrap->noinherit_fds, clear_fd);
   bwrap->fds = g_array_new (FALSE, TRUE, sizeof (int));
-  g_array_set_clear_func (bwrap->fds, (GDestroyNotify) glnx_close_fd);
+  g_array_set_clear_func (bwrap->fds, clear_fd);
 
   if (env)
     bwrap->envp = g_strdupv (env);
   else
     bwrap->envp = g_get_environ ();
-
-  bwrap->sync_fds[0] = -1;
-  bwrap->sync_fds[1] = -1;
 
   return bwrap;
 }
@@ -73,7 +78,6 @@ flatpak_bwrap_free (FlatpakBwrap *bwrap)
   g_array_unref (bwrap->noinherit_fds);
   g_array_unref (bwrap->fds);
   g_strfreev (bwrap->envp);
-  g_clear_pointer (&bwrap->runtime_dir_members, g_ptr_array_unref);
   g_free (bwrap);
 }
 
@@ -135,26 +139,6 @@ flatpak_bwrap_add_fd (FlatpakBwrap *bwrap,
                       int           fd)
 {
   g_array_append_val (bwrap->fds, fd);
-}
-
-gboolean
-flatpak_bwrap_add_args_data_fd_dup (FlatpakBwrap  *bwrap,
-                                    const char    *op,
-                                    int            fd,
-                                    const char    *path_optional,
-                                    GError       **error)
-{
-  glnx_autofd int fd_dup = -1;
-
-  fd_dup = fcntl (fd, F_DUPFD_CLOEXEC, 3);
-  if (fd_dup < 0)
-    return glnx_throw_errno_prefix (error, "Failed to dup fd %d", fd);
-
-  flatpak_bwrap_add_args_data_fd (bwrap,
-                                  op,
-                                  g_steal_fd (&fd_dup),
-                                  path_optional);
-  return TRUE;
 }
 
 void
@@ -284,7 +268,7 @@ flatpak_bwrap_add_args_data (FlatpakBwrap *bwrap,
   if (!flatpak_buffer_to_sealed_memfd_or_tmpfile (&args_tmpf, name, content, content_size, error))
     return FALSE;
 
-  flatpak_bwrap_add_args_data_fd (bwrap, "--ro-bind-data", g_steal_fd (&args_tmpf.fd), path);
+  flatpak_bwrap_add_args_data_fd (bwrap, "--ro-bind-data", glnx_steal_fd (&args_tmpf.fd), path);
   return TRUE;
 }
 
@@ -386,9 +370,9 @@ flatpak_bwrap_bundle_args (FlatpakBwrap *bwrap,
   if (!flatpak_buffer_to_sealed_memfd_or_tmpfile (&args_tmpf, "bwrap-args", data, data_len, error))
     return FALSE;
 
-  fd = g_steal_fd (&args_tmpf.fd);
+  fd = glnx_steal_fd (&args_tmpf.fd);
 
-  g_debug ("bwrap --args %d = ...", fd);
+  flatpak_debug2 ("bwrap --args %d = ...", fd);
 
   for (i = start; i < end; i++)
     {
@@ -396,11 +380,11 @@ flatpak_bwrap_bundle_args (FlatpakBwrap *bwrap,
         {
           g_autofree char *quoted = g_shell_quote (bwrap->argv->pdata[i]);
 
-          g_debug ("    %s", quoted);
+          flatpak_debug2 ("    %s", quoted);
         }
       else
         {
-          g_debug ("    %s", (const char *) bwrap->argv->pdata[i]);
+          flatpak_debug2 ("    %s", (const char *) bwrap->argv->pdata[i]);
         }
     }
 
@@ -511,14 +495,8 @@ flatpak_bwrap_child_setup (GArray *fd_array,
 {
   int i;
 
-  /* There is a dead-lock in glib versions before 2.60 when it closes
-   * the fds. See:  https://gitlab.gnome.org/GNOME/glib/merge_requests/490
-   * This was hitting the test-suite a lot, so we work around it by using
-   * the G_SPAWN_LEAVE_DESCRIPTORS_OPEN/G_SUBPROCESS_FLAGS_INHERIT_FDS flag
-   * and setting CLOEXEC ourselves.
-   */
   if (close_fd_workaround)
-    g_fdwalk_set_cloexec (3);
+    flatpak_close_fds_workaround (3);
 
   /* If no fd_array was specified, don't care. */
   if (fd_array == NULL)
@@ -533,8 +511,7 @@ flatpak_bwrap_child_setup (GArray *fd_array,
          us use the same fd_array multiple times */
       if (lseek (fd, 0, SEEK_SET) < 0)
         {
-          /* Ignore the error, not all fds are seekable
-           * (for example pipes and O_PATH fds are not) */
+          /* Ignore the error, this happens on e.g. pipe fds */
         }
 
       fcntl (fd, F_SETFD, 0);
@@ -548,30 +525,4 @@ flatpak_bwrap_child_setup_cb (gpointer user_data)
   GArray *fd_array = user_data;
 
   flatpak_bwrap_child_setup (fd_array, TRUE);
-}
-
-/* Unset FD_CLOEXEC on the array of fds passed in @user_data,
- * but do not set FD_CLOEXEC on all other fds */
-void
-flatpak_bwrap_child_setup_inherit_fds_cb (gpointer user_data)
-{
-  GArray *fd_array = user_data;
-
-  flatpak_bwrap_child_setup (fd_array, FALSE);
-}
-
-/* Add a --sync-fd argument for bwrap(1). Returns the write end of the pipe on
- * success, or -1 on error. */
-int
-flatpak_bwrap_add_sync_fd (FlatpakBwrap *bwrap)
-{
-  /* --sync-fd is only allowed once */
-  if (bwrap->sync_fds[1] >= 0)
-    return bwrap->sync_fds[1];
-
-  if (pipe2 (bwrap->sync_fds, O_CLOEXEC) < 0)
-    return -1;
-
-  flatpak_bwrap_add_args_data_fd (bwrap, "--sync-fd", bwrap->sync_fds[0], NULL);
-  return bwrap->sync_fds[1];
 }

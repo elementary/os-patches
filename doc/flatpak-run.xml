@@ -80,56 +80,32 @@
         </para>
         <para>
             Environment variables are generally passed on to the sandboxed application, with
-            certain exceptions, if <option>--clear-env</option> is not specified. The application
-            metadata can override environment variables, as well as the <option>--env</option>
-            option. Apart from that, Flatpak always unsets or overrides the following variables,
-            since their session values are likely to interfere with the functioning of the sandbox:
+            certain exceptions. The application metadata can override environment variables,
+            as well as the <option>--env</option> option. Apart from that, Flatpak always
+            unsets or overrides the following variables, since their session values
+            are likely to interfere with the functioning of the sandbox:
         </para>
         <simplelist>
             <member>PATH</member>
             <member>LD_LIBRARY_PATH</member>
-            <member>LD_PRELOAD</member>
-            <member>LD_AUDIT</member>
             <member>XDG_CONFIG_DIRS</member>
             <member>XDG_DATA_DIRS</member>
+            <member>XDG_RUNTIME_DIR</member>
             <member>SHELL</member>
             <member>TEMP</member>
             <member>TEMPDIR</member>
             <member>TMP</member>
             <member>TMPDIR</member>
-            <member>XDG_RUNTIME_DIR</member>
-            <member>container</member>
-            <member>TZDIR</member>
             <member>PYTHONPATH</member>
-            <member>PYTHONPYCACHEPREFIX</member>
             <member>PERLLIB</member>
             <member>PERL5LIB</member>
             <member>XCURSOR_PATH</member>
-            <member>GST_PLUGIN_PATH_1_0</member>
-            <member>GST_REGISTRY</member>
-            <member>GST_REGISTRY_1_0</member>
-            <member>GST_PLUGIN_PATH</member>
-            <member>GST_PLUGIN_SYSTEM_PATH</member>
-            <member>GST_PLUGIN_SCANNER</member>
-            <member>GST_PLUGIN_SCANNER_1_0</member>
-            <member>GST_PLUGIN_SYSTEM_PATH_1_0</member>
-            <member>GST_PRESET_PATH</member>
-            <member>GST_PTP_HELPER</member>
-            <member>GST_PTP_HELPER_1_0</member>
-            <member>GST_INSTALL_PLUGINS_HELPER</member>
             <member>KRB5CCNAME</member>
             <member>XKB_CONFIG_ROOT</member>
             <member>GIO_EXTRA_MODULES</member>
             <member>GDK_BACKEND</member>
-            <member>VK_ADD_DRIVER_FILES</member>
-            <member>VK_ADD_LAYER_PATH</member>
             <member>VK_DRIVER_FILES</member>
             <member>VK_ICD_FILENAMES</member>
-            <member>VK_LAYER_PATH</member>
-            <member>__EGL_EXTERNAL_PLATFORM_CONFIG_DIRS</member>
-            <member>__EGL_EXTERNAL_PLATFORM_CONFIG_FILENAMES</member>
-            <member>__EGL_VENDOR_LIBRARY_DIRS</member>
-            <member>__EGL_VENDOR_LIBRARY_FILENAMES</member>
         </simplelist>
         <para>
             Also several environment variables with the prefix "GST_" that are used by gstreamer
@@ -326,36 +302,13 @@
             </varlistentry>
 
             <varlistentry>
-                <term><option>--share-if=SUBSYSTEM:CONDITION</option></term>
-
-                <listitem><para>
-                    Share a subsystem with the host session conditionally,
-                    only when the specified condition is met at runtime.
-                    This overrides to the Context section from the application metadata.
-                    <arg choice="plain">SUBSYSTEM</arg> must be one of: network, ipc.
-                    <arg choice="plain">CONDITION</arg> must be one of:
-                    <option>true</option>, <option>false</option>,
-                    <option>has-input-device</option>, <option>has-wayland</option>,
-                    <option>has-usb-device</option>, <option>has-usb-portal</option>.
-                    Conditions can be negated with <literal>!</literal>,
-                    for example <option>!has-input-device</option>.
-                    This option can be used multiple times.
-                    Available since 1.17.
-                </para><para>
-                    See the Conditional Permissions section in
-                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-                    for more details.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
                 <term><option>--socket=SOCKET</option></term>
 
                 <listitem><para>
                     Expose a well known socket to the application. This overrides to
                     the Context section from the application metadata.
                     <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups, gpg-agent, inherit-wayland-socket.
+                    ssh-auth, pcsc, cups, gpg-agent.
                     This option can be used multiple times.
                 </para></listitem>
             </varlistentry>
@@ -367,32 +320,8 @@
                     Don't expose a well known socket to the application. This overrides to
                     the Context section from the application metadata.
                     <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups, gpg-agent, inherit-wayland-socket.
+                    ssh-auth, pcsc, cups, gpg-agent.
                     This option can be used multiple times.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--socket-if=SOCKET:CONDITION</option></term>
-
-                <listitem><para>
-                    Expose a well-known socket to the application conditionally,
-                    only when the specified condition is met at runtime.
-                    This overrides to the Context section from the application metadata.
-                    <arg choice="plain">SOCKET</arg> must be one of: x11, wayland, fallback-x11, pulseaudio, system-bus, session-bus,
-                    ssh-auth, pcsc, cups, gpg-agent, inherit-wayland-socket.
-                    <arg choice="plain">CONDITION</arg> must be one of:
-                    <option>true</option>, <option>false</option>,
-                    <option>has-input-device</option>, <option>has-wayland</option>,
-                    <option>has-usb-device</option>, <option>has-usb-portal</option>.
-                    Conditions can be negated with <literal>!</literal>,
-                    for example <option>!has-wayland</option>.
-                    This option can be used multiple times.
-                    Available since 1.17.
-                </para><para>
-                    See the Conditional Permissions section in
-                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-                    for more details.
                 </para></listitem>
             </varlistentry>
 
@@ -402,7 +331,7 @@
                 <listitem><para>
                     Expose a device to the application. This overrides to
                     the Context section from the application metadata.
-                    <arg choice="plain">DEVICE</arg> must be one of: dri, input, usb, kvm, shm, all.
+                    <arg choice="plain">DEVICE</arg> must be one of: dri, kvm, shm, all.
                     This option can be used multiple times.
                 </para></listitem>
             </varlistentry>
@@ -413,31 +342,8 @@
                 <listitem><para>
                     Don't expose a device to the application. This overrides to
                     the Context section from the application metadata.
-                    <arg choice="plain">DEVICE</arg> must be one of: dri, input, usb, kvm, shm, all.
+                    <arg choice="plain">DEVICE</arg> must be one of: dri, kvm, shm, all.
                     This option can be used multiple times.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--device-if=DEVICE:CONDITION</option></term>
-
-                <listitem><para>
-                    Expose a device to the application conditionally,
-                    only when the specified condition is met at runtime.
-                    This overrides to the Context section from the application metadata.
-                    <arg choice="plain">DEVICE</arg> must be one of: dri, input, usb, kvm, shm, all.
-                    <arg choice="plain">CONDITION</arg> must be one of:
-                    <option>true</option>, <option>false</option>,
-                    <option>has-input-device</option>, <option>has-wayland</option>,
-                    <option>has-usb-device</option>, <option>has-usb-portal</option>.
-                    Conditions can be negated with <literal>!</literal>,
-                    for example <option>!has-input-device</option>.
-                    This option can be used multiple times.
-                    Available since 1.17.
-                </para><para>
-                    See the Conditional Permissions section in
-                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-                    for more details.
                 </para></listitem>
             </varlistentry>
 
@@ -467,35 +373,12 @@
             </varlistentry>
 
             <varlistentry>
-                <term><option>--allow-if=FEATURE:CONDITION</option></term>
-
-                <listitem><para>
-                    Allow access to a specific feature conditionally,
-                    only when the specified condition is met at runtime.
-                    This overrides to the Context section from the application metadata.
-                    <arg choice="plain">FEATURE</arg> must be one of: devel, multiarch, bluetooth.
-                    <arg choice="plain">CONDITION</arg> must be one of:
-                    <option>true</option>, <option>false</option>,
-                    <option>has-input-device</option>, <option>has-wayland</option>,
-                    <option>has-usb-device</option>, <option>has-usb-portal</option>.
-                    Conditions can be negated with <literal>!</literal>,
-                    for example <option>!has-input-device</option>.
-                    This option can be used multiple times.
-                    Available since 1.17.
-                </para><para>
-                    See the Conditional Permissions section in
-                    <citerefentry><refentrytitle>flatpak-metadata</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-                    for more details.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
                 <term><option>--filesystem=FILESYSTEM</option></term>
 
                 <listitem><para>
                     Allow the application access to a subset of the filesystem.
                     This overrides to the Context section from the application metadata.
-                    <arg choice="plain">FILESYSTEM</arg> can be one of: home, host, host-os, host-etc, host-root, xdg-desktop, xdg-documents, xdg-download,
+                    <arg choice="plain">FILESYSTEM</arg> can be one of: home, host, host-os, host-etc, xdg-desktop, xdg-documents, xdg-download,
                     xdg-music, xdg-pictures, xdg-public-share, xdg-templates, xdg-videos,
                     xdg-run, xdg-config, xdg-cache, xdg-data,
                     an absolute path, or a homedir-relative path like ~/dir or paths
@@ -556,7 +439,8 @@
 [Policy subsystem]
 key=v1;v2;
 </programlisting>
-                </para><para>
+                </para></listitem>
+                <listitem><para>
                     This option can be used multiple times.
                 </para></listitem>
             </varlistentry>
@@ -566,76 +450,6 @@ key=v1;v2;
 
                 <listitem><para>
                     Remove generic policy option. This option can be used multiple times.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--usb=TYPE[:DATA]</option></term>
-
-                <listitem><para>
-                    Adds a USB device query to the application metadata. This
-                    allows device enumeration and usage by the USB portal.
-                    <arg choice="plain">TYPE</arg> must be one of: all, cls, dev, vnd.
-                </para><variablelist>
-                    <varlistentry>
-                        <term><option>all</option></term>
-
-                        <listitem><para>
-                            Match all devices.
-                        </para></listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term><option>cls</option></term>
-
-                        <listitem><para>
-                            A device class and subclass query. <arg choice="plain">DATA</arg>
-                            must be in the form of <arg choice="plain">CLASS:SUBCLASS</arg> where
-                            both <arg choice="plain">CLASS</arg> and <arg choice="plain">SUBCLASS</arg>
-                            must be a valid 2-digit hexadecimal class id number. Alternatively,
-                            <arg choice="plain">SUBCLASS</arg> may be <literal>*</literal> to match
-                            all subclasses.
-                        </para></listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term><option>dev</option></term>
-
-                        <listitem><para>
-                            A device product id query. <arg choice="plain">DATA</arg>
-                            must be a valid 4-digit hexadecimal product id number,
-                            for example <option>0a1b</option>. It requires a
-                            <option>vnd</option> filter in the query.
-                        </para></listitem>
-                    </varlistentry>
-
-                    <varlistentry>
-                        <term><option>vnd</option></term>
-
-                        <listitem><para>
-                            A device vendor id query. <arg choice="plain">DATA</arg>
-                            must be a valid 4-digit hexadecimal vendor id number
-                            greater than zero, for example <option>0fab</option>.
-                        </para></listitem>
-                    </varlistentry>
-
-                </variablelist><para>
-                    It is possible to compose multiple device queries together
-                    with the <literal>+</literal> sign, for example
-                    <option>--usb=vnd:0123+dev:4567</option>. The <arg choice="plain">dev</arg>
-                    filter requires a <arg choice="plain">vnd</arg>.
-                    Available since 1.15.11.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--nousb=VENDOR_ID:PRODUCT_ID</option></term>
-
-                <listitem><para>
-                    Adds a blocking USB device query to the application metadata. Blocked
-                    devices take precedence over allowed devices. The syntax is exactly
-                    equal to <option>--usb</option>.
-                    Available since 1.15.11.
                 </para></listitem>
             </varlistentry>
 
@@ -675,16 +489,6 @@ key=v1;v2;
                     followed by a zero byte. This is the same format used by
                     <literal>env -0</literal> and
                     <filename>/proc/*/environ</filename>.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
-                <term><option>--clear-env</option></term>
-
-                <listitem><para>
-                    Do not pass environment variables from the outside to the
-                    sandboxed application. Explicitly set and unset environment
-                    variables still get applied.
                 </para></listitem>
             </varlistentry>
 
@@ -755,17 +559,6 @@ key=v1;v2;
             </varlistentry>
 
             <varlistentry>
-                <term><option>--a11y-own-name=NAME</option></term>
-
-                <listitem><para>
-                    Allow the application to own the well known name <arg choice="plain">NAME</arg> on the a11y bus.
-                    If <arg choice="plain">NAME</arg> ends with .*, it allows the application to own all matching names.
-                    This overrides to the Context section from the application metadata.
-                    This option can be used multiple times.
-                </para></listitem>
-            </varlistentry>
-
-            <varlistentry>
                 <term><option>--persist=FILENAME</option></term>
 
                 <listitem><para>
@@ -818,7 +611,7 @@ key=v1;v2;
 
                 <listitem><para>
                   Run the application in sandboxed mode, which means dropping all the extra permissions it would otherwise have, as
-                  well as access to the session/system/a11y buses and document portal.
+                  well as access to the session/system/a11y busses and document portal.
                 </para></listitem>
             </varlistentry>
 
@@ -892,8 +685,8 @@ key=v1;v2;
                     If this option is specified, the remaining arguments are scanned, and all arguments
                     that are enclosed between a pair of '@@' arguments are interpreted as file paths,
                     exported in the document store, and passed to the command in the form of the
-                    resulting document path. Arguments between "@@u" and "@@" are considered URIs,
-                    and any "file:" URIs are exported. The exports are non-persistent and with read and write
+                    resulting document path. Arguments between '@@u' and '@@' are considered uris,
+                    and any file: uris are exported. The exports are non-persistent and with read and write
                     permissions for the application.
                 </para></listitem>
             </varlistentry>
@@ -935,7 +728,8 @@ key=v1;v2;
                     into <filename>/run/parent/usr</filename>, and will not
                     be included in the <envar>LD_LIBRARY_PATH</envar> inside
                     the sandbox.
-                </para><para>
+                </para></listitem>
+                <listitem><para>
                     This option will usually only be useful if it is
                     combined with <option>--app-path=</option> and
                     <option>--env=LD_LIBRARY_PATH=<replaceable>...</replaceable></option>.
@@ -957,9 +751,6 @@ key=v1;v2;
         </para>
         <para>
             <command>$ flatpak run --command=bash org.gnome.Sdk</command>
-        </para>
-        <para>
-            <command>$ flatpak run org.gnome.Boxes --nousb=0fd9:*</command>
         </para>
 
     </refsect1>

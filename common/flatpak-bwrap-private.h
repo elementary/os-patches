@@ -28,7 +28,6 @@ typedef struct
   GArray    *fds;
   GStrv      envp;
   GPtrArray *runtime_dir_members;
-  int        sync_fds[2];
 } FlatpakBwrap;
 
 extern char *flatpak_bwrap_empty_env[1];
@@ -63,11 +62,6 @@ void          flatpak_bwrap_append_bwrap (FlatpakBwrap *bwrap,
                                           FlatpakBwrap *other);       /* Steals the fds */
 void          flatpak_bwrap_append_args (FlatpakBwrap *bwrap,
                                          GPtrArray    *other_array);
-gboolean      flatpak_bwrap_add_args_data_fd_dup (FlatpakBwrap  *bwrap,
-                                                  const char    *op,
-                                                  int            fd,
-                                                  const char    *path_optional,
-                                                  GError       **error);
 void          flatpak_bwrap_add_args_data_fd (FlatpakBwrap *bwrap,
                                               const char   *op,
                                               int           fd,
@@ -95,11 +89,8 @@ void          flatpak_bwrap_populate_runtime_dir (FlatpakBwrap *bwrap,
                                                   const char *shared_xdg_runtime_dir);
 
 void          flatpak_bwrap_child_setup_cb (gpointer user_data);
-void          flatpak_bwrap_child_setup_inherit_fds_cb (gpointer user_data);
 void          flatpak_bwrap_child_setup (GArray *fd_array,
                                          gboolean close_fd_workaround);
-
-int           flatpak_bwrap_add_sync_fd (FlatpakBwrap *bwrap);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (FlatpakBwrap, flatpak_bwrap_free)
 

@@ -5,6 +5,16 @@ set -e
 #DEBHELPER#
 
 if [ "$1" = configure ]; then
+    adduser \
+        --force-badname \
+        --gecos "Flatpak system-wide installation helper" \
+        --group \
+        --home /nonexistent \
+        --no-create-home \
+        --quiet \
+        --system \
+        _flatpak
+
     # Run a do-nothing command (it just lists configured remotes) for
     # its side-effect of initializing the shared system-wide repository.
     flatpak remote-list --system >/dev/null || :

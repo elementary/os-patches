@@ -1,0 +1,483 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>org.freedesktop.impl.portal.PermissionStore: Flatpak Library Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="Flatpak Library Reference Manual">
+<link rel="up" href="ch02.html" title="D-Bus APIs">
+<link rel="prev" href="gdbus-org.freedesktop.Flatpak.SystemHelper.html" title="org.freedesktop.Flatpak.SystemHelper">
+<link rel="next" href="gdbus-org.freedesktop.portal.Documents.html" title="org.freedesktop.portal.Documents">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#gdbus-org.freedesktop.impl.portal.PermissionStore.description" class="shortcut">Description</a></span><span id="nav_properties">  <span class="dim">|</span> 
+                  <a href="#gdbus-org.freedesktop.impl.portal.PermissionStore.properties" class="shortcut">Properties</a></span><span id="nav_signals">  <span class="dim">|</span> 
+                  <a href="#gdbus-org.freedesktop.impl.portal.PermissionStore.signals" class="shortcut">Signals</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch02.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="gdbus-org.freedesktop.Flatpak.SystemHelper.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="gdbus-org.freedesktop.portal.Documents.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="gdbus-org.freedesktop.impl.portal.PermissionStore"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="gdbus-interface-org-freedesktop-impl-portal-PermissionStore.top_of_page"></a>org.freedesktop.impl.portal.PermissionStore</span></h2>
+<p>org.freedesktop.impl.portal.PermissionStore — Database to store permissions</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Methods</h2>
+<pre class="synopsis">
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.Lookup" title="The Lookup() method">Lookup</a>           (IN  s      table,
+                  IN  s      id,
+                  OUT a{sas} permissions,
+                  OUT v      data);
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.Set" title="The Set() method">Set</a>              (IN  s      table,
+                  IN  b      create,
+                  IN  s      id,
+                  IN  a{sas} app_permissions,
+                  IN  v      data);
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.Delete" title="The Delete() method">Delete</a>           (IN  s      table,
+                  IN  s      id);
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.SetValue" title="The SetValue() method">SetValue</a>         (IN  s      table,
+                  IN  b      create,
+                  IN  s      id,
+                  IN  v      data);
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.SetPermission" title="The SetPermission() method">SetPermission</a>    (IN  s      table,
+                  IN  b      create,
+                  IN  s      id,
+                  IN  s      app,
+                  IN  as     permissions);
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.DeletePermission" title="The DeletePermission() method">DeletePermission</a> (IN  s      table,
+                  IN  s      id,
+                  IN  s      app);
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-method-org-freedesktop-impl-portal-PermissionStore.List" title="The List() method">List</a>             (IN  s      table,
+                  OUT as     ids);
+</pre>
+</div>
+<div class="refsect1">
+<a name="id-1.3.7.4"></a><h2>Signals</h2>
+<pre class="synopsis">
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-signal-org-freedesktop-impl-portal-PermissionStore.Changed" title='The "Changed" signal'>Changed</a> (s      table,
+         s      id,
+         b      deleted,
+         v      data,
+         a{sas} permissions);
+</pre>
+</div>
+<div class="refsect1">
+<a name="id-1.3.7.5"></a><h2>Properties</h2>
+<pre class="synopsis">
+<a class="link" href="gdbus-org.freedesktop.impl.portal.PermissionStore.html#gdbus-property-org-freedesktop-impl-portal-PermissionStore.version" title='The "version" property'>version</a>  readable   u
+</pre>
+</div>
+<div class="refsect1">
+<a name="gdbus-interface-org-freedesktop-impl-portal-PermissionStore"></a><h2>Description</h2>
+<p>
+The permission store can be used by portals to store permissions
+that sandboxed applications have to various resources, such as
+files outside the sandbox.
+</p>
+<p>
+Since the resources managed by portals can be varied, the permission
+store is fairly free-form: there can be multiple tables; resources are
+identified by an ID, as are applications, and permissions are stored as
+string arrays. None of these strings are interpreted by the permission
+store in any way.
+</p>
+<p>
+In addition, the permission store allows to associate extra data
+(in the form of a GVariant) with each resource.
+</p>
+<p>
+This document describes version 2 of the permission store interface.
+</p>
+</div>
+<div class="refsect1">
+<a name="gdbus-methods-org.freedesktop.impl.portal.PermissionStore"></a><h2>Method Details</h2>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-impl-portal-PermissionStore.Lookup"></a><h3>The Lookup() method</h3>
+<pre class="programlisting">
+Lookup (IN  s      table,
+        IN  s      id,
+        OUT a{sas} permissions,
+        OUT v      data);
+</pre>
+<p>
+Looks up the entry for a resource in one of the tables and returns
+all associated application permissions and data.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
+<td><p>
+the name of the table to use
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
+<td><p>
+the resource ID to look up
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">OUT a{sas} <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
+<td><p>
+map from application ID to permissions
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">OUT v <em class="parameter"><code>data</code></em></code>:</span></p></td>
+<td><p>
+data that is associated with the resource
+</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-impl-portal-PermissionStore.Set"></a><h3>The Set() method</h3>
+<pre class="programlisting">
+Set (IN  s      table,
+     IN  b      create,
+     IN  s      id,
+     IN  a{sas} app_permissions,
+     IN  v      data);
+</pre>
+<p>
+Writes the entry for a resource in the given table.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
+<td><p>
+the name of the table to use
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>create</code></em></code>:</span></p></td>
+<td><p>
+whether to create the table if it does not exist
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
+<td><p>
+the resource ID to modify
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN a{sas} <em class="parameter"><code>app_permissions</code></em></code>:</span></p></td>
+<td><p>
+map from application ID to permissions
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN v <em class="parameter"><code>data</code></em></code>:</span></p></td>
+<td><p>
+data to associate with the resource
+</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-impl-portal-PermissionStore.Delete"></a><h3>The Delete() method</h3>
+<pre class="programlisting">
+Delete (IN  s table,
+        IN  s id);
+</pre>
+<p>
+Removes the entry for a resource in the given table.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
+<td><p>
+the name of the table to use
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
+<td><p>
+the resource ID to delete
+</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-impl-portal-PermissionStore.SetValue"></a><h3>The SetValue() method</h3>
+<pre class="programlisting">
+SetValue (IN  s table,
+          IN  b create,
+          IN  s id,
+          IN  v data);
+</pre>
+<p>
+Sets just the data for a resource in the given table.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
+<td><p>
+the name of the table to use
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>create</code></em></code>:</span></p></td>
+<td><p>
+whether to create the table if it does not exist
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
+<td><p>
+the resource ID to modify
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN v <em class="parameter"><code>data</code></em></code>:</span></p></td>
+<td><p>
+data to associate with the resource
+</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-impl-portal-PermissionStore.SetPermission"></a><h3>The SetPermission() method</h3>
+<pre class="programlisting">
+SetPermission (IN  s  table,
+               IN  b  create,
+               IN  s  id,
+               IN  s  app,
+               IN  as permissions);
+</pre>
+<p>
+Sets the permissions for an application and a resource
+in the given table.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
+<td><p>
+the name of the table to use
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN b <em class="parameter"><code>create</code></em></code>:</span></p></td>
+<td><p>
+whether to create the table if it does not exist
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
+<td><p>
+the resource ID to modify
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app</code></em></code>:</span></p></td>
+<td><p>
+the application ID to modify
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN as <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
+<td><p>
+permissions to set
+</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-impl-portal-PermissionStore.DeletePermission"></a><h3>The DeletePermission() method</h3>
+<pre class="programlisting">
+DeletePermission (IN  s table,
+                  IN  s id,
+                  IN  s app);
+</pre>
+<p>
+Removes the entry for an application and a resource
+in the given table.
+</p>
+<p>
+This method was added in version 2.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
+<td><p>
+the name of the table to use
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
+<td><p>
+the resource ID to modify
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>app</code></em></code>:</span></p></td>
+<td><p>
+the application ID to modify
+</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-impl-portal-PermissionStore.List"></a><h3>The List() method</h3>
+<pre class="programlisting">
+List (IN  s  table,
+      OUT as ids);
+</pre>
+<p>
+Returns all the resources that are present in the table.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>table</code></em></code>:</span></p></td>
+<td><p>
+the name of the table to use
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">OUT as <em class="parameter"><code>ids</code></em></code>:</span></p></td>
+<td><p>
+IDs of all resources that are present in the table
+</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1">
+<a name="gdbus-signals-org.freedesktop.impl.portal.PermissionStore"></a><h2>Signal Details</h2>
+<div class="refsect2">
+<a name="gdbus-signal-org-freedesktop-impl-portal-PermissionStore.Changed"></a><h3>The "Changed" signal</h3>
+<pre class="programlisting">
+Changed (s      table,
+         s      id,
+         b      deleted,
+         v      data,
+         a{sas} permissions);
+</pre>
+<p>
+The Changed signal is emitted when the entry for a resource
+is modified or deleted. If the entry was deleted, then <em class="parameter"><code>data</code></em>
+and <em class="parameter"><code>permissions</code></em> contain the last values that were found in the
+database. If the entry was modified, they contain the new values.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term"><code class="literal">s <em class="parameter"><code>table</code></em></code>:</span></p></td>
+<td><p>
+the name of the table
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">s <em class="parameter"><code>id</code></em></code>:</span></p></td>
+<td>
+<p>
+</p>
+<p>
+</p>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">b <em class="parameter"><code>deleted</code></em></code>:</span></p></td>
+<td><p>
+whether the resource was deleted
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">v <em class="parameter"><code>data</code></em></code>:</span></p></td>
+<td><p>
+the data that is associated the resource
+</p></td>
+</tr>
+<tr>
+<td><p><span class="term"><code class="literal">a{sas} <em class="parameter"><code>permissions</code></em></code>:</span></p></td>
+<td><p>
+the permissions that are associated with the resource
+</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1">
+<a name="gdbus-properties-org.freedesktop.impl.portal.PermissionStore"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-impl-portal-PermissionStore.version"></a><h3>The "version" property</h3>
+<pre class="programlisting">
+version  readable   u
+</pre>
+<p>
+</p>
+<p>
+</p>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.1</div>
+</body>
+</html>

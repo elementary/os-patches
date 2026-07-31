@@ -25,11 +25,8 @@
 #include <gio/gio.h>
 
 #include "flatpak-complete.h"
-#include "flatpak-tty-utils-private.h"
 #include "flatpak-utils-private.h"
 #include "flatpak-dir-private.h"
-#include "flatpak-dir-utils-private.h"
-#include "flatpak-xml-utils-private.h"
 
 G_BEGIN_DECLS
 
@@ -127,7 +124,6 @@ BUILTINPROTO (repair)
 BUILTINPROTO (create_usb)
 BUILTINPROTO (kill)
 BUILTINPROTO (history)
-BUILTINPROTO (preinstall)
 
 #undef BUILTINPROTO
 

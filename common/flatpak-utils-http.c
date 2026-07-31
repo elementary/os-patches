@@ -31,6 +31,9 @@
 
 #include <sys/types.h>
 #include <sys/xattr.h>
+
+#if defined(HAVE_CURL)
+
 #include <curl/curl.h>
 
 /* These macros came from 7.43.0, but we want to check
@@ -44,23 +47,31 @@
 #define CURL_AT_LEAST_VERSION(x,y,z) (LIBCURL_VERSION_NUM >= CURL_VERSION_BITS(x, y, z))
 #endif
 
+#elif defined(HAVE_SOUP)
+
+#include <libsoup/soup.h>
+
+#if !defined(SOUP_AUTOCLEANUPS_H) && !defined(__SOUP_AUTOCLEANUPS_H__)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupSession, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupMessage, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupRequest, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupRequestHTTP, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (SoupURI, soup_uri_free)
+#endif
+
+#else
+
+# error "No HTTP backend enabled"
+
+#endif
+
+
 #define FLATPAK_HTTP_TIMEOUT_SECS 60
 
 /* copied from libostree */
 #define DEFAULT_N_NETWORK_RETRIES 5
 
 G_DEFINE_QUARK (flatpak_http_error, flatpak_http_error)
-
-/* Holds information about CA and client certificates found in
- * system-wide and per-user certificate directories as documented
- * in container-certs.d(5).
- */
-struct FlatpakCertificates
-{
-  char *ca_cert_file;
-  char *client_cert_file;
-  char *client_key_file;
-};
 
 /* Information about the cache status of a file.
    Encoded in an xattr on the cached file, or a file on the side if xattrs don't work.
@@ -84,7 +95,6 @@ typedef struct
   FlatpakHTTPFlags       flags;
   const char            *auth;
   const char            *token;
-  FlatpakCertificates   *certificates;
   FlatpakLoadUriProgress progress;
   GCancellable          *cancellable;
   gpointer               user_data;
@@ -123,6 +133,7 @@ clear_load_uri_data_headers (LoadUriData *data)
   g_clear_pointer (&data->hdr_content_type, g_free);
   g_clear_pointer (&data->hdr_www_authenticate, g_free);
   g_clear_pointer (&data->hdr_etag, g_free);
+  g_clear_pointer (&data->hdr_last_modified, g_free);
   g_clear_pointer (&data->hdr_last_modified, g_free);
   g_clear_pointer (&data->hdr_cache_control, g_free);
   g_clear_pointer (&data->hdr_expires, g_free);
@@ -220,156 +231,7 @@ check_http_status (guint status_code,
   return FALSE;
 }
 
-FlatpakCertificates*
-flatpak_get_certificates_for_uri (const char  *uri,
-                                  GError     **error)
-{
-  g_autoptr(FlatpakCertificates) certificates = NULL;
-  g_autoptr(GUri) parsed_uri = NULL;
-  g_autofree char *hostport = NULL;
-  const char *system_certs_d = NULL;
-  g_autofree char *certs_path_str = NULL;
-  g_auto(GStrv) certs_path = NULL;
-
-  certificates = g_new0 (FlatpakCertificates, 1);
-
-  parsed_uri = g_uri_parse (uri, G_URI_FLAGS_PARSE_RELAXED, error);
-  if (!parsed_uri)
-    return NULL;
-
-  if (!g_uri_get_host (parsed_uri))
-    return NULL;
-
-  if (g_uri_get_port (parsed_uri) != -1)
-    hostport = g_strdup_printf ("%s:%d", g_uri_get_host (parsed_uri), g_uri_get_port (parsed_uri));
-  else
-    hostport = g_strdup (g_uri_get_host (parsed_uri));
-
-  system_certs_d = g_getenv ("FLATPAK_SYSTEM_CERTS_D");
-  if (system_certs_d == NULL || system_certs_d[0] == '\0')
-    system_certs_d = "/etc/containers/certs.d:/etc/docker/certs.d";
-
-  /* containers/image hardcodes ~/.config and doesn't honor XDG_CONFIG_HOME */
-  certs_path_str = g_strconcat (g_get_user_config_dir(), "/containers/certs.d:",
-                                system_certs_d, NULL);
-  certs_path = g_strsplit (certs_path_str, ":", -1);
-
-  for (int i = 0; certs_path[i]; i++)
-    {
-      g_autoptr(GFile) certs_dir = g_file_new_for_path (certs_path[i]);
-      g_autoptr(GFile) host_dir = g_file_get_child (certs_dir, hostport);
-      g_autoptr(GFileEnumerator) enumerator = NULL;
-      g_autoptr(GError) local_error = NULL;
-
-      enumerator = g_file_enumerate_children (host_dir, G_FILE_ATTRIBUTE_STANDARD_NAME,
-                                              G_FILE_QUERY_INFO_NONE,
-                                              NULL, &local_error);
-      if (enumerator == NULL)
-        {
-          /* This matches libpod - missing certificate directory or a permission
-           * error causes the directory to be skipped; any other error is fatal
-           */
-          if (g_error_matches(local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) ||
-              g_error_matches(local_error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED))
-            {
-              g_clear_error (&local_error);
-              continue;
-            }
-          else
-            {
-              g_propagate_error (error, g_steal_pointer (&local_error));
-              return NULL;
-            }
-        }
-
-      while (TRUE)
-        {
-          GFile *child;
-          g_autofree char *basename = NULL;
-
-          if (!g_file_enumerator_iterate (enumerator, NULL, &child, NULL, error))
-            return NULL;
-
-          if (child == NULL)
-            break;
-
-          basename = g_file_get_basename (child);
-
-          /* In libpod, all CA certificates are added to the CA certificate
-           * database. We just use the first in readdir order.
-           */
-          if (g_str_has_suffix (basename, ".crt") && certificates->ca_cert_file == NULL)
-            certificates->ca_cert_file = g_file_get_path (child);
-
-          if (g_str_has_suffix (basename, ".cert"))
-            {
-              g_autofree char *nosuffix = g_strndup (basename, strlen (basename) - 5);
-              g_autofree char *key_basename = g_strconcat (nosuffix, ".key", NULL);
-              g_autoptr(GFile) key_file = g_file_get_child (host_dir, key_basename);
-
-              if (!g_file_query_exists (key_file, NULL))
-                {
-                  g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
-                               "missing key %s for client cert %s. "
-                               "Note that CA certificates should use the extension .crt",
-                               g_file_peek_path (key_file),
-                               g_file_peek_path (child));
-                  return NULL;
-                }
-
-              /* In libpod, all client certificates are added, and then the go TLS
-               * code selects the best based on TLS negotiation. We just pick the first
-               * in readdir order
-               * */
-              if (certificates->client_cert_file == NULL)
-                {
-                  certificates->client_cert_file = g_file_get_path (child);
-                  certificates->client_key_file = g_file_get_path (key_file);
-                }
-            }
-
-          if (g_str_has_suffix (basename, ".key"))
-            {
-              g_autofree char *nosuffix = g_strndup (basename, strlen (basename) - 4);
-              g_autofree char *cert_basename = g_strconcat (nosuffix, ".cert", NULL);
-              g_autoptr(GFile) cert_file = g_file_get_child (host_dir, cert_basename);
-
-              if (!g_file_query_exists (cert_file, NULL))
-                {
-                  g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
-                               "missing client certificate %s for key %s",
-                               g_file_peek_path (cert_file),
-                               g_file_peek_path (child));
-                  return NULL;
-                }
-            }
-        }
-    }
-
-  return g_steal_pointer (&certificates);
-}
-
-FlatpakCertificates *
-flatpak_certificates_copy (FlatpakCertificates *other)
-{
-  FlatpakCertificates *certificates = g_new0 (FlatpakCertificates, 1);
-
-  certificates->ca_cert_file = g_strdup (other->ca_cert_file);
-  certificates->client_cert_file = g_strdup (other->client_cert_file);
-  certificates->client_key_file = g_strdup (other->client_key_file);
-
-  return certificates;
-}
-
-void
-flatpak_certificates_free (FlatpakCertificates *certificates)
-{
-  g_clear_pointer (&certificates->ca_cert_file, g_free);
-  g_clear_pointer (&certificates->client_cert_file, g_free);
-  g_clear_pointer (&certificates->client_key_file, g_free);
-
-  g_free (certificates);
-}
+#if defined(HAVE_CURL)
 
 /************************************************************************
  *                        Curl implementation                           *
@@ -395,7 +257,7 @@ check_header(char **value_out,
   if (realsize < hlen + 1)
     return;
 
-  if (g_ascii_strncasecmp (buffer, header, hlen) != 0 ||
+  if (!g_ascii_strncasecmp(buffer, header, hlen) == 0 ||
       buffer[hlen] != ':')
     return;
 
@@ -474,10 +336,6 @@ _write_cb (void *content_data,
         }
     }
 
-  /* Check for cancellation */
-  if (g_cancellable_is_cancelled (data->cancellable))
-    return 0; /* Returning 0 (short read) makes curl abort the transfer */
-
   if (data->content)
     {
       g_string_append_len (data->content, content_data, realsize);
@@ -515,12 +373,8 @@ flatpak_create_http_session (const char *user_agent)
   g_mutex_init (&session->lock);
 
   curl_easy_setopt (curl, CURLOPT_USERAGENT, user_agent);
-#if CURL_AT_LEAST_VERSION(7, 85, 0)
-  rc = curl_easy_setopt (curl, CURLOPT_PROTOCOLS_STR, "http,https");
-#else
   rc = curl_easy_setopt (curl, CURLOPT_PROTOCOLS, (long)(CURLPROTO_HTTP | CURLPROTO_HTTPS));
-#endif
-  g_assert (rc == CURLE_OK);
+  g_assert_cmpint (rc, ==, CURLM_OK);
 
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
@@ -536,14 +390,14 @@ flatpak_create_http_session (const char *user_agent)
 #if CURL_AT_LEAST_VERSION(7, 51, 0)
   if ((curl_version_info (CURLVERSION_NOW))->features & CURL_VERSION_HTTP2) {
     rc = curl_easy_setopt (curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-    g_assert (rc == CURLE_OK);
+    g_assert_cmpint (rc, ==, CURLM_OK);
   }
 #endif
   /* https://github.com/curl/curl/blob/curl-7_53_0/docs/examples/http2-download.c */
 #if (CURLPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
   rc = curl_easy_setopt (curl, CURLOPT_PIPEWAIT, 1L);
-  g_assert (rc == CURLE_OK);
+  g_assert_cmpint (rc, ==, CURLM_OK);
 #endif
 
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _write_cb);
@@ -573,23 +427,15 @@ flatpak_http_session_free (FlatpakHttpSession* session)
 }
 
 static void
-set_error_from_curl (GError        **error,
-                     const char     *uri,
-                     CURLcode        res,
-                     GCancellable   *cancellable)
+set_error_from_curl (GError **error,
+                     const char *uri,
+                     CURLcode res)
 {
   GQuark domain = G_IO_ERROR;
   int code;
 
   switch (res)
     {
-    case CURLE_WRITE_ERROR:
-      /* Check if this was due to cancellation */
-      if (g_cancellable_is_cancelled (cancellable))
-        code = G_IO_ERROR_CANCELLED;
-      else
-        code = G_IO_ERROR_FAILED;
-      break;
     case CURLE_COULDNT_CONNECT:
     case CURLE_COULDNT_RESOLVE_HOST:
     case CURLE_COULDNT_RESOLVE_PROXY:
@@ -621,23 +467,11 @@ flatpak_download_http_uri_once (FlatpakHttpSession    *session,
   long response;
   CURL *curl = session->curl;
 
-  g_info ("Loading %s using curl", uri);
+  g_debug ("Loading %s using curl", uri);
 
   curl_easy_setopt (curl, CURLOPT_URL, uri);
   curl_easy_setopt (curl, CURLOPT_WRITEDATA, (void *)data);
   curl_easy_setopt (curl, CURLOPT_HEADERDATA, (void *)data);
-
-  if (data->certificates)
-    {
-      if (data->certificates->ca_cert_file)
-        curl_easy_setopt (curl, CURLOPT_CAINFO, data->certificates->ca_cert_file);
-
-      if (data->certificates->client_cert_file)
-        {
-          curl_easy_setopt (curl, CURLOPT_SSLCERT, data->certificates->client_cert_file);
-          curl_easy_setopt (curl, CURLOPT_SSLKEY, data->certificates->client_key_file);
-        }
-    }
 
   if (data->flags & FLATPAK_HTTP_FLAGS_HEAD)
     curl_easy_setopt (curl, CURLOPT_NOBODY, 1L);
@@ -693,7 +527,7 @@ flatpak_download_http_uri_once (FlatpakHttpSession    *session,
 
   if (res != CURLE_OK)
     {
-      set_error_from_curl (error, uri, res, data->cancellable);
+      set_error_from_curl (error, uri, res);
 
       /* Make sure we clear the tmpfile stream we possible created during the request */
       if (data->out_tmpfile && data->out)
@@ -722,13 +556,337 @@ flatpak_download_http_uri_once (FlatpakHttpSession    *session,
       !check_http_status (data->status, error))
     return FALSE;
 
-  g_info ("Received %" G_GUINT64_FORMAT " bytes", data->downloaded_bytes);
+  g_debug ("Received %" G_GUINT64_FORMAT " bytes", data->downloaded_bytes);
 
   /* This is not really needed, but the auto-pointer confuses some compilers in the CI */
   g_clear_pointer (&curl_lock, g_mutex_locker_free);
 
   return TRUE;
 }
+
+#endif  /* HAVE_CURL */
+
+#if defined(HAVE_SOUP)
+
+/************************************************************************
+ *                        Soup implementation                           *
+ ***********************************************************************/
+
+static gboolean
+check_soup_transfer_error (SoupMessage *msg, GError **error)
+{
+  GQuark domain = G_IO_ERROR;
+  int code;
+
+  if (!SOUP_STATUS_IS_TRANSPORT_ERROR (msg->status_code))
+    return TRUE;
+
+  switch (msg->status_code)
+    {
+    case SOUP_STATUS_CANCELLED:
+      code = G_IO_ERROR_CANCELLED;
+      break;
+
+    case SOUP_STATUS_CANT_RESOLVE:
+    case SOUP_STATUS_CANT_CONNECT:
+      code = G_IO_ERROR_HOST_NOT_FOUND;
+      break;
+
+    case SOUP_STATUS_IO_ERROR:
+      code = G_IO_ERROR_CONNECTION_CLOSED;
+      break;
+
+    default:
+      code = G_IO_ERROR_FAILED;
+    }
+
+  g_set_error (error, domain, code,
+               "Error connecting to server: %s",
+               soup_status_get_phrase (msg->status_code));
+  return FALSE;
+}
+
+/* The soup input stream was closed */
+static void
+stream_closed (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+  LoadUriData *data = user_data;
+  GInputStream *stream = G_INPUT_STREAM (source);
+  g_autoptr(GError) error = NULL;
+
+  if (!g_input_stream_close_finish (stream, res, &error))
+    g_warning ("Error closing http stream: %s", error->message);
+
+  if (data->out_tmpfile)
+    {
+      if (!g_output_stream_close (data->out, data->cancellable, &error))
+        {
+          if (data->error == NULL)
+            g_propagate_error (&data->error, g_steal_pointer (&error));
+        }
+
+      g_clear_pointer (&data->out, g_object_unref);
+    }
+
+  data->done = TRUE;
+  g_main_context_wakeup (data->context);
+}
+
+/* Got some data from the soup input stream */
+static void
+load_uri_read_cb (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+  LoadUriData *data = user_data;
+  GInputStream *stream = G_INPUT_STREAM (source);
+  gssize nread;
+
+  nread = g_input_stream_read_finish (stream, res, &data->error);
+  if (nread == -1 || nread == 0)
+    {
+      if (data->progress)
+        data->progress (data->downloaded_bytes, data->user_data);
+      g_input_stream_close_async (stream,
+                                  G_PRIORITY_DEFAULT, NULL,
+                                  stream_closed, data);
+
+      return;
+    }
+
+  if (data->out != NULL)
+    {
+      gsize n_written;
+
+      if (!g_output_stream_write_all (data->out, data->buffer, nread, &n_written,
+                                      NULL, &data->error))
+        {
+          data->downloaded_bytes += n_written;
+          g_input_stream_close_async (stream,
+                                      G_PRIORITY_DEFAULT, NULL,
+                                      stream_closed, data);
+          return;
+        }
+
+      data->downloaded_bytes += n_written;
+    }
+  else
+    {
+      g_assert (data->content != NULL);
+      data->downloaded_bytes += nread;
+      g_string_append_len (data->content, data->buffer, nread);
+    }
+
+  if (g_get_monotonic_time () - data->last_progress_time > 1 * G_USEC_PER_SEC)
+    {
+      if (data->progress)
+        data->progress (data->downloaded_bytes, data->user_data);
+      data->last_progress_time = g_get_monotonic_time ();
+    }
+
+  g_input_stream_read_async (stream, data->buffer, sizeof (data->buffer),
+                             G_PRIORITY_DEFAULT, data->cancellable,
+                             load_uri_read_cb, data);
+}
+
+/* The http header part of the request is ready */
+static void
+load_uri_callback (GObject      *source_object,
+                   GAsyncResult *res,
+                   gpointer      user_data)
+{
+  SoupRequestHTTP *request = SOUP_REQUEST_HTTP (source_object);
+  g_autoptr(GInputStream) in = NULL;
+  LoadUriData *data = user_data;
+
+  in = soup_request_send_finish (SOUP_REQUEST (request), res, &data->error);
+  if (in == NULL)
+    {
+      g_main_context_wakeup (data->context);
+      return;
+    }
+
+  g_autoptr(SoupMessage) msg = soup_request_http_get_message ((SoupRequestHTTP *) request);
+
+  if (!check_soup_transfer_error (msg, &data->error))
+    {
+      g_main_context_wakeup (data->context);
+      return;
+    }
+
+  /* We correctly made a connection, although it may be a http failure like 404.
+     The status and headers are valid on return, even of a http failure though. */
+
+  data->status = msg->status_code;
+  data->hdr_content_type = g_strdup (soup_message_headers_get_content_type (msg->response_headers, NULL));
+  data->hdr_www_authenticate = g_strdup (soup_message_headers_get_one (msg->response_headers, "WWW-Authenticate"));
+  data->hdr_etag = g_strdup (soup_message_headers_get_one (msg->response_headers, "ETag"));
+  data->hdr_last_modified = g_strdup (soup_message_headers_get_one (msg->response_headers, "Last-Modified"));
+  data->hdr_cache_control = g_strdup (soup_message_headers_get_list (msg->response_headers, "Cache-Control"));
+  data->hdr_expires = g_strdup (soup_message_headers_get_list (msg->response_headers, "Expires"));
+
+  if ((data->flags & FLATPAK_HTTP_FLAGS_NOCHECK_STATUS) == 0 &&
+      !check_http_status (data->status, &data->error))
+    {
+      g_main_context_wakeup (data->context);
+      return;
+    }
+
+  /* All is good, write the body to the destination */
+
+  if (data->out_tmpfile)
+    {
+      g_autoptr(GOutputStream) out = NULL;
+
+      if (!glnx_open_tmpfile_linkable_at (data->out_tmpfile_parent_dfd, ".",
+                                          O_WRONLY, data->out_tmpfile,
+                                          &data->error))
+        {
+          g_main_context_wakeup (data->context);
+          return;
+        }
+
+      g_assert (data->out == NULL);
+
+      out = g_unix_output_stream_new (data->out_tmpfile->fd, FALSE);
+      if (data->store_compressed &&
+          g_strcmp0 (soup_message_headers_get_one (msg->response_headers, "Content-Encoding"), "gzip") != 0)
+        {
+          g_autoptr(GZlibCompressor) compressor = g_zlib_compressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP, -1);
+          data->out = g_converter_output_stream_new (out, G_CONVERTER (compressor));
+        }
+      else
+        {
+          data->out = g_steal_pointer (&out);
+        }
+    }
+
+  g_input_stream_read_async (in, data->buffer, sizeof (data->buffer),
+                             G_PRIORITY_DEFAULT, data->cancellable,
+                             load_uri_read_cb, data);
+}
+
+static SoupSession *
+flatpak_create_soup_session (const char *user_agent)
+{
+  SoupSession *soup_session;
+  const char *http_proxy;
+
+  soup_session = soup_session_new_with_options (SOUP_SESSION_USER_AGENT, user_agent,
+                                                SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, TRUE,
+                                                SOUP_SESSION_USE_THREAD_CONTEXT, TRUE,
+                                                SOUP_SESSION_TIMEOUT, FLATPAK_HTTP_TIMEOUT_SECS,
+                                                SOUP_SESSION_IDLE_TIMEOUT, FLATPAK_HTTP_TIMEOUT_SECS,
+                                                NULL);
+  http_proxy = g_getenv ("http_proxy");
+  if (http_proxy)
+    {
+      g_autoptr(SoupURI) proxy_uri = soup_uri_new (http_proxy);
+      if (!proxy_uri)
+        g_warning ("Invalid proxy URI '%s'", http_proxy);
+      else
+        g_object_set (soup_session, SOUP_SESSION_PROXY_URI, proxy_uri, NULL);
+    }
+
+  if (g_getenv ("OSTREE_DEBUG_HTTP"))
+    soup_session_add_feature (soup_session, (SoupSessionFeature *) soup_logger_new (SOUP_LOGGER_LOG_BODY, 500));
+
+  return soup_session;
+}
+
+FlatpakHttpSession *
+flatpak_create_http_session (const char *user_agent)
+{
+  return (FlatpakHttpSession *)flatpak_create_soup_session (user_agent);
+}
+
+void
+flatpak_http_session_free (FlatpakHttpSession* http_session)
+{
+  SoupSession *soup_session = (SoupSession *)http_session;
+
+  g_object_unref (soup_session);
+}
+
+static gboolean
+flatpak_download_http_uri_once (FlatpakHttpSession    *http_session,
+                                LoadUriData           *data,
+                                const char            *uri,
+                                GError               **error)
+{
+  SoupSession *soup_session = (SoupSession *)http_session;
+  g_autoptr(SoupRequestHTTP) request = NULL;
+  SoupMessage *m;
+
+  g_debug ("Loading %s using libsoup", uri);
+
+  request = soup_session_request_http (soup_session,
+                                       (data->flags & FLATPAK_HTTP_FLAGS_HEAD) != 0 ? "HEAD" : "GET",
+                                       uri, error);
+  if (request == NULL)
+    return FALSE;
+
+  m = soup_request_http_get_message (request);
+
+  if (data->flags & FLATPAK_HTTP_FLAGS_ACCEPT_OCI)
+    soup_message_headers_replace (m->request_headers, "Accept",
+                                  FLATPAK_OCI_MEDIA_TYPE_IMAGE_MANIFEST ", " FLATPAK_DOCKER_MEDIA_TYPE_IMAGE_MANIFEST2 ", " FLATPAK_OCI_MEDIA_TYPE_IMAGE_INDEX);
+
+  if (data->auth)
+    {
+      g_autofree char *basic_auth = g_strdup_printf ("Basic %s", data->auth);
+      soup_message_headers_replace (m->request_headers, "Authorization", basic_auth);
+    }
+
+  if (data->token)
+    {
+      g_autofree char *bearer_token = g_strdup_printf ("Bearer %s", data->token);
+      soup_message_headers_replace (m->request_headers, "Authorization", bearer_token);
+    }
+
+  if (data->cache_data)
+    {
+      CacheHttpData *cache_data = data->cache_data;
+
+      if (cache_data->etag && cache_data->etag[0])
+        soup_message_headers_replace (m->request_headers, "If-None-Match", cache_data->etag);
+      else if (cache_data->last_modified != 0)
+        {
+          g_autoptr(GDateTime) date = g_date_time_new_from_unix_utc (cache_data->last_modified);
+          g_autofree char *date_str = flatpak_format_http_date (date);
+          soup_message_headers_replace (m->request_headers, "If-Modified-Since", date_str);
+        }
+    }
+
+  if (data->flags & FLATPAK_HTTP_FLAGS_STORE_COMPRESSED)
+    {
+      soup_session_remove_feature_by_type (soup_session, SOUP_TYPE_CONTENT_DECODER);
+      soup_message_headers_replace (m->request_headers, "Accept-Encoding", "gzip");
+      data->store_compressed = TRUE;
+    }
+  else if (!soup_session_has_feature (soup_session, SOUP_TYPE_CONTENT_DECODER))
+    {
+      soup_session_add_feature_by_type (soup_session, SOUP_TYPE_CONTENT_DECODER);
+      data->store_compressed = FALSE;
+    }
+
+  soup_request_send_async (SOUP_REQUEST (request),
+                           data->cancellable,
+                           load_uri_callback, data);
+
+  while (data->error == NULL && !data->done)
+    g_main_context_iteration (data->context, TRUE);
+
+  if (data->error)
+    {
+      g_propagate_error (error, g_steal_pointer (&data->error));
+      return FALSE;
+    }
+
+  g_debug ("Received %" G_GUINT64_FORMAT " bytes", data->downloaded_bytes);
+
+  return TRUE;
+}
+
+#endif /* HAVE_SOUP */
 
 /* Check whether a particular operation should be retried. This is entirely
  * based on how it failed (if at all) last time, and whether the operation has
@@ -754,8 +912,8 @@ flatpak_http_should_retry_request (const GError *error,
       g_error_matches (error, G_RESOLVER_ERROR, G_RESOLVER_ERROR_NOT_FOUND) ||
       g_error_matches (error, G_RESOLVER_ERROR, G_RESOLVER_ERROR_TEMPORARY_FAILURE))
     {
-      g_info ("Should retry request (remaining: %u retries), due to transient error: %s",
-              n_retries_remaining, error->message);
+      g_debug ("Should retry request (remaining: %u retries), due to transient error: %s",
+               n_retries_remaining, error->message);
       return TRUE;
     }
 
@@ -765,7 +923,6 @@ flatpak_http_should_retry_request (const GError *error,
 GBytes *
 flatpak_load_uri_full (FlatpakHttpSession    *http_session,
                        const char            *uri,
-                       FlatpakCertificates   *certificates,
                        FlatpakHTTPFlags       flags,
                        const char            *auth,
                        const char            *token,
@@ -804,7 +961,6 @@ flatpak_load_uri_full (FlatpakHttpSession    *http_session,
   data.last_progress_time = g_get_monotonic_time ();
   data.cancellable = cancellable;
   data.flags = flags;
-  data.certificates = certificates;
   data.auth = auth;
   data.token = token;
 
@@ -858,7 +1014,7 @@ flatpak_load_uri (FlatpakHttpSession    *http_session,
                   GCancellable          *cancellable,
                   GError               **error)
 {
-  return flatpak_load_uri_full (http_session, uri, NULL, flags, NULL, token,
+  return flatpak_load_uri_full (http_session, uri, flags, NULL, token,
                                 progress, user_data, NULL, out_content_type, NULL,
                                 cancellable, error);
 }
@@ -866,7 +1022,6 @@ flatpak_load_uri (FlatpakHttpSession    *http_session,
 gboolean
 flatpak_download_http_uri (FlatpakHttpSession    *http_session,
                            const char            *uri,
-                           FlatpakCertificates   *certificates,
                            FlatpakHTTPFlags       flags,
                            GOutputStream         *out,
                            const char            *token,
@@ -888,7 +1043,6 @@ flatpak_download_http_uri (FlatpakHttpSession    *http_session,
   data.user_data = user_data;
   data.last_progress_time = g_get_monotonic_time ();
   data.cancellable = cancellable;
-  data.certificates = certificates;
   data.flags = flags;
   data.token = token;
 
@@ -1184,10 +1338,12 @@ set_cache_http_data_from_headers (CacheHttpData *cache_data,
               char *end;
 
               char *max_age = value;
-              gint64 max_age_sec = g_ascii_strtoll (max_age,  &end, 10);
+              int max_age_sec = g_ascii_strtoll (max_age,  &end, 10);
               if (*max_age != '\0' && *end == '\0')
                 {
-                  cache_data->expires = (g_get_real_time () / G_USEC_PER_SEC) + max_age_sec;
+                  GTimeVal now;
+                  g_get_current_time (&now);
+                  cache_data->expires = now.tv_sec + max_age_sec;
                   expires_computed = TRUE;
                 }
             }
@@ -1215,14 +1371,15 @@ set_cache_http_data_from_headers (CacheHttpData *cache_data,
        * 0.1 * (Date - Last-Modified), but it's clearly appropriate here, and
        * better if server's send a value.
        */
-      cache_data->expires = (g_get_real_time () / G_USEC_PER_SEC) + 1800;
+      GTimeVal now;
+      g_get_current_time (&now);
+      cache_data->expires = now.tv_sec + 1800;
     }
 }
 
 gboolean
 flatpak_cache_http_uri (FlatpakHttpSession    *http_session,
                         const char            *uri,
-                        FlatpakCertificates   *certificates,
                         FlatpakHTTPFlags       flags,
                         int                    dest_dfd,
                         const char            *dest_subpath,
@@ -1258,7 +1415,10 @@ flatpak_cache_http_uri (FlatpakHttpSession    *http_session,
 
   if (cache_data->uri)
     {
-      if (cache_data->expires > (g_get_real_time () / G_USEC_PER_SEC))
+      GTimeVal now;
+
+      g_get_current_time (&now);
+      if (cache_data->expires > now.tv_sec)
         {
           g_set_error (error, FLATPAK_HTTP_ERROR,
                        FLATPAK_HTTP_ERROR_NOT_CHANGED,
@@ -1280,7 +1440,6 @@ flatpak_cache_http_uri (FlatpakHttpSession    *http_session,
   data.last_progress_time = g_get_monotonic_time ();
   data.cancellable = cancellable;
   data.flags = flags;
-  data.certificates = certificates;
 
   data.cache_data = cache_data;
 
