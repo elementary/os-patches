@@ -8,10 +8,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ubuntu-codename: ['bionic', 'focal', 'jammy', 'noble', 'resolute']
+        include:
+          - ubuntu-codename: 'bionic'
+            elementary-codename: 'juno'
+          - ubuntu-codename: 'focal'
+            elementary-codename: 'odin'
+          - ubuntu-codename: 'jammy'
+            elementary-codename: 'horus'
+          - ubuntu-codename: 'noble'
+            elementary-codename: 'circe'
+          - ubuntu-codename: 'resolute'
+            elementary-codename: 'tanit'
 
     container:
-      image: ghcr.io/elementary/docker:stable
+      image: ghcr.io/elementary/docker:${{ matrix.elementary-codename }}-stable
 
     env:
       PACKAGES_TO_IMPORT_PATH: '/tmp/patched-packages'
