@@ -1,0 +1,51 @@
+include:
+  - project: "GNOME/citemplates"
+    file: "templates/default-rules.yml"
+  - component: gitlab.gnome.org/GNOME/citemplates/gnomeos-basic-ci@master
+    inputs:
+      job-name: "build-gnomeos"
+  - component: gitlab.gnome.org/GNOME/citemplates/release-service@master
+    inputs:
+      dist-job-name: "build-gnomeos"
+      tarball-artifact-path: "_builddir/meson-dist/$CI_PROJECT_NAME-$CI_COMMIT_TAG.tar.xz"
+
+.build:
+  stage: "build"
+  variables:
+    _DEST: "$CI_PROJECT_DIR/destdir/"
+  script:
+    - meson setup _build $MESON_OPTIONS
+    - meson compile -C _build
+    - meson test -C _build --print-errorlogs --no-stdsplit --no-rebuild
+    - meson dist -C _build --no-tests
+
+    - mkdir -p $_DEST
+    - meson install -C _build --no-rebuild --destdir="$_DEST"
+  after_script:
+    # Cleanup the destdir and thus container volume once we are done
+    - rm -rvf $_DEST
+  artifacts:
+    expire_in: "2 days"
+    when: "always"
+    paths:
+      - "_build/meson-logs/"
+    reports:
+      junit: "_build/meson-logs/testlog.junit.xml"
+
+build-fedora:
+  extends: ".build"
+  image: "fedora:41"
+  variables:
+    MESON_OPTIONS: ""
+    DEPENDENCIES: >-
+      desktop-file-utils
+      gcc
+      gettext
+      git
+      glib2-devel
+      gtk3-devel
+      meson
+      xdg-user-dirs
+  before_script:
+    - dnf upgrade -y
+    - dnf install -y --setopt=install_weak_deps=false $DEPENDENCIES

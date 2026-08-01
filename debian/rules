@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-O1 -Wl,-z,defs
+
+%:
+	dh $@
+
+# Skip. We only use dh_gnome for dh_translations for Ubuntu
+override_dh_gnome:

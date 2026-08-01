@@ -1,0 +1,133 @@
+xdg-user-dirs-gtk (0.16-1) unstable; urgency=medium
+
+  * New upstream release
+  * Override dh_gnome to avoid build log warnings
+  * Remove systemd user service patch: applied in new release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 13 Dec 2025 18:35:58 -0500
+
+xdg-user-dirs-gtk (0.14-3) unstable; urgency=medium
+
+  * Remove unnecessary Priority: optional field
+  * Remove obsolete dh_gnome_clean override
+  * Bump Standards Version to 4.7.2
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 13 Dec 2025 09:47:45 -0500
+
+xdg-user-dirs-gtk (0.14-2) unstable; urgency=medium
+
+  * d/p: Add support for running it via systemd user session (LP: #2121438)
+  * debian/control: Build-depend on systemd-dev
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 27 Aug 2025 01:27:11 +0200
+
+xdg-user-dirs-gtk (0.14-1) unstable; urgency=medium
+
+  * New upstream release
+  * Build with meson
+  * Remove 2 obsolete patches
+  * Opt into Salsa CI
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sun, 19 Jan 2025 10:10:23 -0500
+
+xdg-user-dirs-gtk (0.11-2) unstable; urgency=medium
+
+  * Stop using debian/control.in and dh_gnome_clean
+  * Update standards version to 4.7.0, no changes needed
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 20 Dec 2024 14:27:46 -0500
+
+xdg-user-dirs-gtk (0.11-1) unstable; urgency=medium
+
+  * New upstream release
+  * Add debian/upstream/metadata
+  * debian/control.in: Build-Depend on dh-sequence-gnome
+  * Bump debhelper-compat to 13
+  * Bump Standards-Version to 4.6.1
+  * Drop no-longer-needed -Wl,--as-needed
+  * Set Rules-Requires-Root: no
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 06 Dec 2022 17:34:03 -0500
+
+xdg-user-dirs-gtk (0.10-3) unstable; urgency=medium
+
+  * Build-Depend on debhelper-compat 12 and drop debian/compat
+  * Update Vcs fields for migration to https://salsa.debian.org/
+  * Bump Standards-Version to 4.3.0
+
+ -- Jeremy Bicha <jbicha@debian.org>  Thu, 27 Dec 2018 19:52:16 -0500
+
+xdg-user-dirs-gtk (0.10-2) unstable; urgency=medium
+
+  [ Jeremy Bicha]
+  * Update Vcs fields for conversion to git
+  * Add debian/gbp.conf
+  * Update Maintainer
+  * Convert from cdbs to dh
+  * Add debian/docs to explicitly install NEWS and README
+  * Bump debhelper compat to 10
+  * Bump Standards-Version to 4.1.2
+  * Add run-in-all-GTK-desktops.patch:
+    - Run in every desktop except KDE Plasma and LXQt (Closes: #742057)
+  * Add set-NoDisplay.patch:
+    - Set NoDisplay=true to hide from Ubuntu's Startup Applications app
+
+  [ Helmut Grohne ]
+  * Add fix-pkg-config-cross-compilations.patch (Closes: #858092):
+    - Skip unnecessary pkg-config check to fix cross building
+
+ -- Jeremy Bicha <jbicha@debian.org>  Sat, 16 Dec 2017 10:15:17 -0500
+
+xdg-user-dirs-gtk (0.10-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add Vcs-* fields.
+  * Bump Standards-Version to 3.9.4. No further changes.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 29 Jun 2013 18:04:50 +0200
+
+xdg-user-dirs-gtk (0.9-1) unstable; urgency=low
+
+  * New upstream release.
+  * Use track tar.xz upstream tarballs.
+  * Switch to 3.0 (quilt) source format and update debhelper compat level.
+  * Build-depend on GTK+3 now instead of GTK+2.
+
+ -- Sebastian Dröge <slomo@debian.org>  Wed, 04 Apr 2012 13:58:18 +0200
+
+xdg-user-dirs-gtk (0.8-1) unstable; urgency=low
+
+  * New upstream bugfix release.
+  * debian/control.in:
+    + Line-wrap control fields.
+    + Build depend on intltool.
+    + Update Standards-Version to 3.8.0, no additional changes needed.
+
+ -- Sebastian Dröge <slomo@debian.org>  Sat, 07 Mar 2009 20:53:29 +0100
+
+xdg-user-dirs-gtk (0.7-1) unstable; urgency=low
+
+  * New upstream bugfix release with many translation updates:
+    + debian/patches/01_no_desktop_bookmark.patch,
+      debian/patches/90_from_svn_handle_en_us_variants.patch:
+      - Dropped, merged upstream.
+  * debian/control.in:
+    + Update Standards-Version to 3.7.3, no additional changes needed.
+    + Move homepage to the Homepage field and fix the URL.
+  * debian/rules:
+    + Add -Wl,-z,defs to LDFLAGS and actually append.
+
+ -- Sebastian Dröge <slomo@debian.org>  Tue, 12 Feb 2008 15:02:40 +0100
+
+xdg-user-dirs-gtk (0.6-1) unstable; urgency=low
+
+  * Initial version (Closes: #413955).
+  * debian/patches/01_no_desktop_bookmark.patch:
+    + Don't bookmark the desktop directory since it's already handled
+      as a special case by the GNOME desktop applications (LP: #122602)
+      Patch taken from Ubuntu.
+  * debian/patches/90_from_svn_handle_en_us_variants.patch:
+    + patch from SVN, handle en_US variants correctly. Patch taken from
+      Ubuntu.
+
+ -- Sebastian Dröge <slomo@debian.org>  Thu,  8 Mar 2007 07:16:00 +0100

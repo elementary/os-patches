@@ -1,0 +1,10 @@
+[Unit]
+Description=User folders update
+PartOf=graphical-session.target
+After=graphical-session.target
+
+Wants=xdg-user-dirs.service
+After=xdg-user-dirs.service
+
+[Service]
+ExecStart=@bindir@/xdg-user-dirs-gtk-update
