@@ -1,0 +1,11 @@
+[Unit]
+Description=User folders update
+Documentation=man:xdg-user-dirs-update(1)
+Before=graphical-session-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/xdg-user-dirs-update
+
+[Install]
+WantedBy=graphical-session-pre.target
