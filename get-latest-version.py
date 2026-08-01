@@ -4,6 +4,9 @@ import os
 import subprocess
 import sys
 import apt_pkg
+import re
+import requests
+import tempfile
 import git
 import git.config
 from github import Github
@@ -123,29 +126,28 @@ def main():
                 check=True,
             )
 
-            p_apt_source = subprocess.run(
-                f"apt source {package_name}",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=True,
-                encoding="utf-8",
-            )
+            source_urls = upstream_sources[0].sourceFileUrls()
+            source_files = ["/tmp/" + os.path.basename(url) for url in source_urls]
+            dsc_file = [file for file in source_files if re.search(r".*\.dsc$", file)][0]
+            for i in range(len(source_urls)):
+                source_content = requests.get(source_urls[i]).content
+                source_file = source_files[i]
 
-            # getting the directory to which the source is extracted
-            extraction_dest = ""
-            for line in p_apt_source.stdout.split("\n"):
-                if "dpkg-source: info: extracting" in line:
-                    print(line)
-                    extraction_dest = line.split()[-1]
+                with open(source_file, "wb") as f:
+                    f.write(source_content)
+
+            extraction_dest = "/tmp/extract_dir"
 
             subprocess.run(
-                "rm *.tar.* *.dsc",
+                f"dpkg-source -x {dsc_file} {extraction_dest}",
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 check=True,
             )
+
+            for file in source_files:
+                os.remove(file)
 
             subprocess.run(
                 f"cp -r {extraction_dest}/. .",
