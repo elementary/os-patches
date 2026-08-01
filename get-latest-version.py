@@ -42,6 +42,10 @@ def main():
         if git_user_name:
             git_config.set_value("user", "name", git_user_name)
 
+        github_workspace = os.environ.get("GITHUB_WORKSPACE")
+        if github_workspace:
+            git_config.add_value("safe", "directory", github_workspace)
+
     current_repo.git.fetch("--all")
 
     github_token = os.environ["GITHUB_TOKEN"]
