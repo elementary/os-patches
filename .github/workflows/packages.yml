@@ -41,6 +41,8 @@ jobs:
 
     - name: Verify that we are shipping the latest version
       env:
+        GIT_USER_EMAIL: github-actions[bot]@users.noreply.github.com
+        GIT_USER_NAME: github-actions[bot]
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_REPOSITORY: ${{ github.event.repository.name }}
       run: python3 get-latest-version.py "${{ matrix.ubuntu-codename }}"
