@@ -42,9 +42,6 @@ def main():
         if git_user_name:
             git_config.set_value("user", "name", git_user_name)
 
-        git_config.set_value("checkout", "defaultRemote", "origin")
-        git_config.add_value("safe", "directory", "/__w/os-patches/os-patches")
-
     current_repo.git.fetch("--all")
 
     github_token = os.environ["GITHUB_TOKEN"]
