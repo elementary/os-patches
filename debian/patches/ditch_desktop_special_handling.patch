@@ -1,0 +1,33 @@
+Description: Ditch special handling of desktop folder
+Author: Sebastien Bacher <seb128@ubuntu.com>
+Author: Ryo Nakano <ryonakaknock3@gmail.com>
+Origin: vendor
+Forwarded: not-needed
+Last-Update: 2026-08-01
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/update.c
++++ b/update.c
+@@ -292,7 +292,6 @@
+ main (int argc, char *argv[])
+ {
+   XdgDirEntry *old_entries, *new_entries, *entry;
+-  XdgDirEntry *desktop_entry;
+   GtkBookmark *bookmark;
+   GList *bookmarks, *l;
+   char *old_locale;
+@@ -340,13 +339,11 @@
+         NULL};
+       /* No previous bookmarks. Generate standard ones */
+ 
+-      desktop_entry = find_dir_entry (new_entries, "DESKTOP");
+       for (i = 0; make_bm_for[i] != NULL; i++)
+         {
+           entry = find_dir_entry (new_entries, make_bm_for[i]);
+           
+-          if (entry && strcmp (entry->path, g_get_home_dir ()) != 0 &&
+-              (desktop_entry == NULL || strcmp (entry->path, desktop_entry->path) != 0))
++          if (entry && strcmp (entry->path, g_get_home_dir ()) != 0)
+             {
+               uri = g_filename_to_uri (entry->path, NULL, NULL);
+               if (uri)
