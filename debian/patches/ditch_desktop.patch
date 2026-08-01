@@ -1,0 +1,61 @@
+Description: This patch removes special handling code for Desktop folder
+Author: Sergey "Shnatsel" Davidoff <sergey@elementaryos.org>
+Author: Ryo Nakano <ryonakaknock3@gmail.com>
+Origin: vendor
+Forwarded: not-needed
+Last-Update: 2026-08-01
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/user-dirs.defaults
++++ b/user-dirs.defaults
+@@ -2,7 +2,6 @@
+ #
+ # The values are relative pathnames from the home directory and
+ # will be translated on a per-path-element basis into the users locale
+-DESKTOP=Desktop
+ DOWNLOAD=Downloads
+ TEMPLATES=Templates
+ PUBLICSHARE=Public
+--- a/xdg-user-dir
++++ b/xdg-user-dir
+@@ -1,8 +1,4 @@
+ #!/bin/sh
+ 
+ test -f ${XDG_CONFIG_HOME:-~/.config}/user-dirs.dirs && . ${XDG_CONFIG_HOME:-~/.config}/user-dirs.dirs
+-if [ "x$1" = "xDESKTOP" ]; then
+-  eval echo \${XDG_${1}_DIR:-$HOME/Desktop}
+-else
+-  eval echo \${XDG_${1}_DIR:-$HOME}
+-fi
++eval echo \${XDG_${1}_DIR:-$HOME}
+--- a/xdg-user-dir-lookup.c
++++ b/xdg-user-dir-lookup.c
+@@ -202,18 +202,6 @@
+   if (home_dir == NULL)
+     return strdup ("/tmp");
+ 
+-  /* Special case desktop for historical compatibility */
+-  if (strcmp (type, "DESKTOP") == 0)
+-    {
+-      user_dir = (char*) malloc (strlen (home_dir) + strlen ("/Desktop") + 1);
+-      if (user_dir == NULL)
+-        return NULL;
+-
+-      strcpy (user_dir, home_dir);
+-      strcat (user_dir, "/Desktop");
+-      return user_dir;
+-    }
+-
+   return strdup (home_dir);
+ }
+ 
+--- a/xdg-user-dirs-update.c
++++ b/xdg-user-dirs-update.c
+@@ -22,7 +22,6 @@
+ } Directory;
+ 
+ Directory backwards_compat_dirs[] = {
+-  { "DESKTOP", "Desktop" },
+   { "TEMPLATES", "Templates" },
+   { "PUBLICSHARE", "Public" },
+   { NULL}
