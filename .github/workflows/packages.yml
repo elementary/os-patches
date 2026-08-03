@@ -43,4 +43,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_REPOSITORY: ${{ github.event.repository.name }}
-      run: python3 get-latest-version.py "${{ matrix.ubuntu-codename }}"
+      run: python3 get-latest-version.py --enable-push "${{ matrix.ubuntu-codename }}"
