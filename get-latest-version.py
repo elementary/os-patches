@@ -136,8 +136,6 @@ def main():
             for idx, source_url in enumerate(source_urls):
                 source_content = requests.get(source_url).content
                 source_file = source_files[idx]
-                source_content = requests.get(source_urls[i]).content
-                source_file = source_files[i]
 
                 with open(source_file, "wb") as f:
                     f.write(source_content)
