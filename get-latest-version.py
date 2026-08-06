@@ -36,12 +36,17 @@ def main():
     # Configuring this repo to be able to commit as a bot
     current_repo = git.Repo(".")
     with current_repo.config_writer(config_level="global") as git_config:
-        git_config.set_value(
-            "user", "email", "github-actions[bot]@users.noreply.github.com"
-        )
-        git_config.set_value("user", "name", "github-actions[bot]")
-        git_config.set_value("checkout", "defaultRemote", "origin")
-        git_config.add_value("safe", "directory", "/__w/os-patches/os-patches")
+        git_user_email = os.environ.get("GIT_USER_EMAIL")
+        if git_user_email:
+            git_config.set_value("user", "email", git_user_email)
+
+        git_user_name = os.environ.get("GIT_USER_NAME")
+        if git_user_name:
+            git_config.set_value("user", "name", git_user_name)
+
+        github_workspace = os.environ.get("GITHUB_WORKSPACE")
+        if github_workspace:
+            git_config.add_value("safe", "directory", github_workspace)
 
     current_repo.git.fetch("--all")
 
