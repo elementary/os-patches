@@ -6,7 +6,6 @@ import sys
 import apt_pkg
 import re
 import requests
-import tempfile
 import git
 import git.config
 from github import Github
