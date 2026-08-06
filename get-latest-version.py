@@ -129,7 +129,9 @@ def main():
             source_urls = upstream_sources[0].sourceFileUrls()
             source_files = ["/tmp/" + os.path.basename(url) for url in source_urls]
             dsc_file = [file for file in source_files if re.search(r".*\.dsc$", file)][0]
-            for i in range(len(source_urls)):
+            for idx, source_url in enumerate(source_urls):
+                source_content = requests.get(source_url).content
+                source_file = source_files[idx]
                 source_content = requests.get(source_urls[i]).content
                 source_file = source_files[i]
 
