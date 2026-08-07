@@ -54,14 +54,14 @@ index ea46fbb..4b5ed5f 100644
  #
 diff --git a/grub-initrd-fallback.service b/grub-initrd-fallback.service
 new file mode 100644
-index 0000000..1a0a4e5
+index 0000000..30e7bc5
 --- /dev/null
 +++ b/grub-initrd-fallback.service
 @@ -0,0 +1,14 @@
 +[Unit]
 +Description=GRUB failed boot detection
 +After=local-fs.target
-+After=grub-common.service
++After=grub2-common.service
 +After=sleep.target
 +
 +[Service]
