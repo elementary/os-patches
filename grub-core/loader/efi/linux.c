@@ -483,6 +483,22 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
 
   grub_dl_ref (my_mod);
 
+  if (grub_is_using_legacy_shim_lock_protocol () == true)
+    {
+#if defined(__i386__) || defined(__x86_64__)
+      grub_dprintf ("linux", "using legacy shim_lock protocol, falling back to legacy Linux kernel loader\n");
+
+      err = grub_cmd_linux_x86_legacy (cmd, argc, argv);
+
+      if (err == GRUB_ERR_NONE)
+	return GRUB_ERR_NONE;
+      else
+	goto fail;
+#else
+      grub_dprintf ("linux", "using legacy shim_lock protocol on non-x86, only db verifiable kernels will work\n");
+#endif
+    }
+
   if (argc == 0)
     {
       grub_error (GRUB_ERR_BAD_ARGUMENT, N_("filename expected"));
@@ -538,7 +554,7 @@ fallback:
 
   grub_dprintf ("linux", "kernel @ %p\n", kernel_addr);
 
-  cmdline_size = grub_loader_cmdline_size (argc, argv, 0) + sizeof (LINUX_IMAGE);
+  cmdline_size = grub_loader_cmdline_size (argc, argv) + sizeof (LINUX_IMAGE);
   linux_args = grub_malloc (cmdline_size);
   if (!linux_args)
     {
@@ -549,7 +565,7 @@ fallback:
   err = grub_create_loader_cmdline (argc, argv,
 				    linux_args + sizeof (LINUX_IMAGE) - 1,
 				    cmdline_size,
-				    GRUB_VERIFY_KERNEL_CMDLINE, 0);
+				    GRUB_VERIFY_KERNEL_CMDLINE);
   if (err)
     goto fail;
 

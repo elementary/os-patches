@@ -138,12 +138,12 @@ read_dep_list (FILE *fp)
 static char *
 get_module_name (const char *str)
 {
-  const char *base;
-  const char *ext;
+  char *base;
+  char *ext;
 
   base = strrchr (str, '/');
   if (! base)
-    base = str;
+    base = (char *) str;
   else
     base++;
 
@@ -164,9 +164,9 @@ get_module_name (const char *str)
 static char *
 get_module_path (const char *prefix, const char *str)
 {
-  const char *dir;
+  char *dir;
   char *base;
-  const char *ext;
+  char *ext;
   char *ret;
 
   ext = strrchr (str, '.');

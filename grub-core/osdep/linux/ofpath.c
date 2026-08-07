@@ -488,11 +488,8 @@ check_hba_identifiers (const char *sysfs_path, int *vendor, int *device_id)
 static void
 check_sas (const char *sysfs_path, int *tgt, unsigned long int *sas_address)
 {
-  const char *ed = strstr (sysfs_path, "end_device");
-  int p_len;
-  int ed_len;
-  const char *q;
-  char *path;
+  char *ed = strstr (sysfs_path, "end_device");
+  char *p, *q, *path;
   char phy[21];
   int fd;
   size_t path_size;
@@ -501,16 +498,20 @@ check_sas (const char *sysfs_path, int *tgt, unsigned long int *sas_address)
     return;
 
   /* SAS devices are identified using disk@$PHY_ID */
+  p = xstrdup (sysfs_path);
+  ed = strstr(p, "end_device");
+  if (!ed)
+    return;
+
   q = ed;
   while (*q && *q != '/')
     q++;
-  p_len = (int) (q - sysfs_path);
-  ed_len = (int) (q - ed);
+  *q = '\0';
 
-  path_size = (p_len + ed_len + sizeof ("/sas_device//phy_identifier"));
+  path_size = (strlen (p) + strlen (ed)
+	       + sizeof ("%s/sas_device/%s/phy_identifier"));
   path = xmalloc (path_size);
-  snprintf (path, path_size, "%.*s/sas_device/%.*s/phy_identifier", p_len,
-	    sysfs_path, ed_len, ed);
+  snprintf (path, path_size, "%s/sas_device/%s/phy_identifier", p, ed);
   fd = open (path, O_RDONLY);
   if (fd < 0)
     grub_util_error (_("cannot open `%s': %s"), path, strerror (errno));
@@ -523,8 +524,7 @@ check_sas (const char *sysfs_path, int *tgt, unsigned long int *sas_address)
 
   sscanf (phy, "%d", tgt);
 
-  snprintf (path, path_size, "%.*s/sas_device/%.*s/sas_address", p_len,
-	    sysfs_path, ed_len, ed);
+  snprintf (path, path_size, "%s/sas_device/%s/sas_address", p, ed);
   fd = open (path, O_RDONLY);
   if (fd < 0)
     grub_util_error (_("cannot open `%s': %s"), path, strerror (errno));
@@ -535,6 +535,7 @@ check_sas (const char *sysfs_path, int *tgt, unsigned long int *sas_address)
   sscanf (phy, "%lx", sas_address);
 
   free (path);
+  free (p);
   close (fd);
 }
 

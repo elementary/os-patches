@@ -45,14 +45,14 @@ static unsigned int check_arg (char *c, int *has_space)
   return size;
 }
 
-unsigned int grub_loader_cmdline_size (int argc, char *argv[], int noescape)
+unsigned int grub_loader_cmdline_size (int argc, char *argv[])
 {
   int i;
   unsigned int size = 0;
 
   for (i = 0; i < argc; i++)
     {
-      size += noescape ? grub_strlen(argv[i]) : check_arg (argv[i], 0);
+      size += check_arg (argv[i], 0);
       size++; /* Separator space or NULL.  */
     }
 
@@ -64,17 +64,16 @@ unsigned int grub_loader_cmdline_size (int argc, char *argv[], int noescape)
 
 grub_err_t
 grub_create_loader_cmdline (int argc, char *argv[], char *buf,
-			    grub_size_t size, enum grub_verify_string_type type,
-			    int noescape)
+			    grub_size_t size, enum grub_verify_string_type type)
 {
-  int i, space = 0;
+  int i, space;
   unsigned int arg_size;
   char *c, *orig_buf = buf;
 
   for (i = 0; i < argc; i++)
     {
       c = argv[i];
-      arg_size = noescape ? grub_strlen(argv[i]) : check_arg(argv[i], &space);
+      arg_size = check_arg(argv[i], &space);
       arg_size++; /* Separator space or NULL.  */
 
       if (size < arg_size)
@@ -82,28 +81,21 @@ grub_create_loader_cmdline (int argc, char *argv[], char *buf,
 
       size -= arg_size;
 
-      if (noescape)
+      if (space)
+	*buf++ = '"';
+
+      while (*c)
 	{
-	  grub_memcpy(buf, c, arg_size);
-	  buf += arg_size;
+	  if (*c == '\\' || *c == '\'' || *c == '"')
+	    *buf++ = '\\';
+
+	  *buf++ = *c;
+	  c++;
 	}
-      else
-	{
-	  if (space)
-	    *buf++ = '"';
 
-	  while (*c)
-	    {
-	      if (*c == '\\' || *c == '\'' || *c == '"')
-		*buf++ = '\\';
+      if (space)
+	*buf++ = '"';
 
-	      *buf++ = *c;
-	      c++;
-	    }
-
-	  if (space)
-	    *buf++ = '"';
-	}
       *buf++ = ' ';
     }
 

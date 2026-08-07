@@ -25,9 +25,8 @@
 
 #define LINUX_IMAGE "BOOT_IMAGE="
 
-unsigned int grub_loader_cmdline_size (int argc, char *argv[], int noescape);
+unsigned int grub_loader_cmdline_size (int argc, char *argv[]);
 grub_err_t grub_create_loader_cmdline (int argc, char *argv[], char *buf,
-				       grub_size_t size, enum grub_verify_string_type type,
-				       int noescape);
+				       grub_size_t size, enum grub_verify_string_type type);
 
 #endif /* ! GRUB_CMDLINE_HEADER */

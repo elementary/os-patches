@@ -649,7 +649,7 @@ grub_cmd_xen (grub_command_t cmd __attribute__ ((unused)),
   err = grub_create_loader_cmdline (argc - 1, argv + 1,
 				    (char *) xen_state.next_start.cmd_line,
 				    sizeof (xen_state.next_start.cmd_line) - 1,
-				    GRUB_VERIFY_KERNEL_CMDLINE, 0);
+				    GRUB_VERIFY_KERNEL_CMDLINE);
   if (err)
     return err;
 
@@ -909,7 +909,7 @@ grub_cmd_module (grub_command_t cmd __attribute__ ((unused)),
     return grub_errno;
   size = grub_file_size (file);
 
-  cmdline_len = grub_loader_cmdline_size (argc - 1, argv + 1, 0);
+  cmdline_len = grub_loader_cmdline_size (argc - 1, argv + 1);
 
   err = grub_relocator_alloc_chunk_addr (xen_state.relocator, &ch,
 					 xen_state.max_addr, cmdline_len);
@@ -918,7 +918,7 @@ grub_cmd_module (grub_command_t cmd __attribute__ ((unused)),
 
   err = grub_create_loader_cmdline (argc - 1, argv + 1,
 				    get_virtual_current_address (ch), cmdline_len,
-				    GRUB_VERIFY_MODULE_CMDLINE, 0);
+				    GRUB_VERIFY_MODULE_CMDLINE);
   if (err)
     goto fail;
 

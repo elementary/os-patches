@@ -19,11 +19,8 @@
 #ifndef GRUB_MEMORY_MACHINE_HEADER
 #define GRUB_MEMORY_MACHINE_HEADER	1
 
-#include <grub/efi/api.h>
 #include <grub/err.h>
 #include <grub/types.h>
-
-extern grub_efi_physical_address_t EXPORT_VAR(grub_efi_max_usable_address);
 
 /* The term "page" in UEFI refers only to a 4 KiB-aligned 4 KiB size region of
    memory. It is not concerned with underlying translation management concepts,

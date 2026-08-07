@@ -301,6 +301,7 @@ grub_linux_setup_video (struct linux_kernel_params *params)
 	  params->screen_info.orig_video_isVGA = GRUB_VIDEO_LINUX_TYPE_VESA;
 	  break;
 
+	case GRUB_VIDEO_DRIVER_EFI_UGA:
 	case GRUB_VIDEO_DRIVER_EFI_GOP:
 	  params->screen_info.orig_video_isVGA = GRUB_VIDEO_LINUX_TYPE_EFIFB;
 	  break;
@@ -1029,7 +1030,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
 				      + sizeof (LINUX_IMAGE) - 1,
 				      maximal_cmdline_size
 				      - (sizeof (LINUX_IMAGE) - 1),
-				      GRUB_VERIFY_KERNEL_CMDLINE, 0);
+				      GRUB_VERIFY_KERNEL_CMDLINE);
     if (err)
       goto fail;
   }

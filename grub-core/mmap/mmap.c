@@ -409,7 +409,7 @@ badram_iter (grub_uint64_t addr, grub_uint64_t size,
       */
       while (high - low > 1)
 	{
-	  cur = low + (high - low) / 2;
+	  cur = (low + high) / 2;
 	  if (fill_mask (entry, cur) >= addr)
 	    high = cur;
 	  else

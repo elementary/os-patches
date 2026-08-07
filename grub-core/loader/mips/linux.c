@@ -304,7 +304,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
 
 #ifdef GRUB_MACHINE_MIPS_QEMU_MIPS
   /* Create kernel command line.  */
-  size = grub_loader_cmdline_size(argc, argv, 0);
+  size = grub_loader_cmdline_size(argc, argv);
   params = grub_malloc (size + sizeof (LINUX_IMAGE));
   if (! params)
     {
@@ -314,7 +314,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
 
   grub_memcpy (params, LINUX_IMAGE, sizeof (LINUX_IMAGE));
   grub_create_loader_cmdline (argc, argv, params + sizeof (LINUX_IMAGE) - 1,
-			      size, GRUB_VERIFY_KERNEL_CMDLINE, 0);
+			      size, GRUB_VERIFY_KERNEL_CMDLINE);
 #else
   linux_argv = extra;
   argv_off = (grub_uint8_t *) linux_argv - (grub_uint8_t *) playground;

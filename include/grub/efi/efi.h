@@ -49,6 +49,7 @@ void *EXPORT_FUNC(grub_efi_open_protocol) (grub_efi_handle_t handle,
 					   grub_efi_uint32_t attributes);
 grub_efi_status_t
 EXPORT_FUNC(grub_efi_close_protocol) (grub_efi_handle_t handle, grub_guid_t *protocol);
+int EXPORT_FUNC(grub_efi_set_text_mode) (int on);
 void EXPORT_FUNC(grub_efi_stall) (grub_efi_uintn_t microseconds);
 void *
 EXPORT_FUNC(grub_efi_allocate_pages_real) (grub_efi_physical_address_t address,

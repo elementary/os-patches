@@ -1037,7 +1037,7 @@ grub_multiboot2_init_mbi (int argc, char *argv[])
 
   grub_multiboot2_free_mbi ();
 
-  len = grub_loader_cmdline_size (argc, argv, 0);
+  len = grub_loader_cmdline_size (argc, argv);
 
   cmdline = grub_malloc (len);
   if (! cmdline)
@@ -1045,7 +1045,7 @@ grub_multiboot2_init_mbi (int argc, char *argv[])
   cmdline_size = len;
 
   return grub_create_loader_cmdline (argc, argv, cmdline, cmdline_size,
-				     GRUB_VERIFY_KERNEL_CMDLINE, 0);
+				     GRUB_VERIFY_KERNEL_CMDLINE);
 }
 
 grub_err_t
@@ -1062,7 +1062,7 @@ grub_multiboot2_add_module (grub_addr_t start, grub_size_t size,
   newmod->start = start;
   newmod->size = size;
 
-  len = grub_loader_cmdline_size (argc, argv, 0);
+  len = grub_loader_cmdline_size (argc, argv);
 
   newmod->cmdline = grub_malloc (len);
   if (! newmod->cmdline)
@@ -1074,7 +1074,7 @@ grub_multiboot2_add_module (grub_addr_t start, grub_size_t size,
   total_modcmd += ALIGN_UP (len, MULTIBOOT_TAG_ALIGN);
 
   err = grub_create_loader_cmdline (argc, argv, newmod->cmdline,
-				    newmod->cmdline_size, GRUB_VERIFY_MODULE_CMDLINE, 0);
+				    newmod->cmdline_size, GRUB_VERIFY_MODULE_CMDLINE);
   if (err)
     {
       grub_free (newmod->cmdline);

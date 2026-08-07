@@ -21,6 +21,7 @@
 #include <grub/charset.h>
 #include <grub/efi/api.h>
 #include <grub/efi/efi.h>
+#include <grub/efi/console_control.h>
 #include <grub/efi/pe32.h>
 #include <grub/time.h>
 #include <grub/term.h>
@@ -34,6 +35,7 @@ grub_efi_handle_t grub_efi_image_handle;
 /* The pointer to a system table. Filled in by the startup code.  */
 grub_efi_system_table_t *grub_efi_system_table;
 
+static grub_guid_t console_control_guid = GRUB_EFI_CONSOLE_CONTROL_GUID;
 static grub_guid_t loaded_image_guid = GRUB_EFI_LOADED_IMAGE_GUID;
 static grub_guid_t device_path_guid = GRUB_EFI_DEVICE_PATH_GUID;
 
@@ -124,6 +126,29 @@ grub_efi_close_protocol (grub_efi_handle_t handle, grub_guid_t *protocol)
   return b->close_protocol (handle, protocol, grub_efi_image_handle, NULL);
 }
 
+int
+grub_efi_set_text_mode (int on)
+{
+  grub_efi_console_control_protocol_t *c;
+  grub_efi_screen_mode_t mode, new_mode;
+
+  c = grub_efi_locate_protocol (&console_control_guid, 0);
+  if (! c)
+    /* No console control protocol instance available, assume it is
+       already in text mode. */
+    return 1;
+
+  if (c->get_mode (c, &mode, 0, 0) != GRUB_EFI_SUCCESS)
+    return 0;
+
+  new_mode = on ? GRUB_EFI_SCREEN_TEXT : GRUB_EFI_SCREEN_GRAPHICS;
+  if (mode != new_mode)
+    if (c->set_mode (c, new_mode) != GRUB_EFI_SUCCESS)
+      return 0;
+
+  return 1;
+}
+
 void
 grub_efi_stall (grub_efi_uintn_t microseconds)
 {
@@ -150,16 +175,11 @@ grub_reboot (void)
 }
 
 void
-grub_exit (int retval)
+grub_exit (void)
 {
-  grub_efi_status_t rc = GRUB_EFI_LOAD_ERROR;
-
-  if (retval == 0)
-    rc = GRUB_EFI_SUCCESS;
-
   grub_machine_fini (GRUB_LOADER_FLAG_NORETURN);
   grub_efi_system_table->boot_services->exit (grub_efi_image_handle,
-					      rc, 0, 0);
+					      GRUB_EFI_SUCCESS, 0, 0);
   for (;;) ;
 }
 
@@ -750,7 +770,7 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
 	      {
 		grub_efi_ipv4_device_path_t *ipv4
 		  = (grub_efi_ipv4_device_path_t *) dp;
-		grub_printf ("/IPv4(%u.%u.%u.%u,%u.%u.%u.%u,%u,%u,%x,%x",
+		grub_printf ("/IPv4(%u.%u.%u.%u,%u.%u.%u.%u,%u,%u,%x,%x)",
 			     (unsigned) ipv4->local_ip_address[0],
 			     (unsigned) ipv4->local_ip_address[1],
 			     (unsigned) ipv4->local_ip_address[2],
@@ -763,60 +783,33 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
 			     (unsigned) ipv4->remote_port,
 			     (unsigned) ipv4->protocol,
 			     (unsigned) ipv4->static_ip_address);
-		if (len == sizeof (*ipv4))
-		  {
-		    grub_printf (",%u.%u.%u.%u,%u.%u.%u.%u",
-			(unsigned) ipv4->gateway_ip_address[0],
-			(unsigned) ipv4->gateway_ip_address[1],
-			(unsigned) ipv4->gateway_ip_address[2],
-			(unsigned) ipv4->gateway_ip_address[3],
-			(unsigned) ipv4->subnet_mask[0],
-			(unsigned) ipv4->subnet_mask[1],
-			(unsigned) ipv4->subnet_mask[2],
-			(unsigned) ipv4->subnet_mask[3]);
-		  }
-		grub_printf (")");
 	      }
 	      break;
 	    case GRUB_EFI_IPV6_DEVICE_PATH_SUBTYPE:
 	      {
 		grub_efi_ipv6_device_path_t *ipv6
 		  = (grub_efi_ipv6_device_path_t *) dp;
-		grub_printf ("/IPv6(%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x,%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x,%u,%u,%x,%x",
-			     (unsigned) grub_be_to_cpu16 (ipv6->local_ip_address[0]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->local_ip_address[1]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->local_ip_address[2]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->local_ip_address[3]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->local_ip_address[4]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->local_ip_address[5]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->local_ip_address[6]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->local_ip_address[7]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->remote_ip_address[0]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->remote_ip_address[1]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->remote_ip_address[2]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->remote_ip_address[3]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->remote_ip_address[4]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->remote_ip_address[5]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->remote_ip_address[6]),
-			     (unsigned) grub_be_to_cpu16 (ipv6->remote_ip_address[7]),
+		grub_printf ("/IPv6(%x:%x:%x:%x:%x:%x:%x:%x,%x:%x:%x:%x:%x:%x:%x:%x,%u,%u,%x,%x)",
+			     (unsigned) ipv6->local_ip_address[0],
+			     (unsigned) ipv6->local_ip_address[1],
+			     (unsigned) ipv6->local_ip_address[2],
+			     (unsigned) ipv6->local_ip_address[3],
+			     (unsigned) ipv6->local_ip_address[4],
+			     (unsigned) ipv6->local_ip_address[5],
+			     (unsigned) ipv6->local_ip_address[6],
+			     (unsigned) ipv6->local_ip_address[7],
+			     (unsigned) ipv6->remote_ip_address[0],
+			     (unsigned) ipv6->remote_ip_address[1],
+			     (unsigned) ipv6->remote_ip_address[2],
+			     (unsigned) ipv6->remote_ip_address[3],
+			     (unsigned) ipv6->remote_ip_address[4],
+			     (unsigned) ipv6->remote_ip_address[5],
+			     (unsigned) ipv6->remote_ip_address[6],
+			     (unsigned) ipv6->remote_ip_address[7],
 			     (unsigned) ipv6->local_port,
 			     (unsigned) ipv6->remote_port,
 			     (unsigned) ipv6->protocol,
 			     (unsigned) ipv6->static_ip_address);
-		if (len == sizeof (*ipv6))
-		  {
-		    grub_printf (",%u,%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
-			(unsigned) ipv6->prefix_length,
-			(unsigned) grub_be_to_cpu16 (ipv6->gateway_ip_address[0]),
-			(unsigned) grub_be_to_cpu16 (ipv6->gateway_ip_address[1]),
-			(unsigned) grub_be_to_cpu16 (ipv6->gateway_ip_address[2]),
-			(unsigned) grub_be_to_cpu16 (ipv6->gateway_ip_address[3]),
-			(unsigned) grub_be_to_cpu16 (ipv6->gateway_ip_address[4]),
-			(unsigned) grub_be_to_cpu16 (ipv6->gateway_ip_address[5]),
-			(unsigned) grub_be_to_cpu16 (ipv6->gateway_ip_address[6]),
-			(unsigned) grub_be_to_cpu16 (ipv6->gateway_ip_address[7]));
-		  }
-		grub_printf (")");
 	      }
 	      break;
 	    case GRUB_EFI_INFINIBAND_DEVICE_PATH_SUBTYPE:
@@ -862,39 +855,6 @@ grub_efi_print_device_path (grub_efi_device_path_t *dp)
 	    case GRUB_EFI_VENDOR_MESSAGING_DEVICE_PATH_SUBTYPE:
 	      dump_vendor_path ("Messaging",
 				(grub_efi_vendor_device_path_t *) dp);
-	      break;
-	    case GRUB_EFI_URI_DEVICE_PATH_SUBTYPE:
-	      {
-		grub_efi_uri_device_path_t *uri
-		  = (grub_efi_uri_device_path_t *) dp;
-		grub_printf ("/URI(%s)", uri->uri);
-	      }
-	      break;
-	    case GRUB_EFI_DNS_DEVICE_PATH_SUBTYPE:
-	      {
-		grub_efi_dns_device_path_t *dns
-		  = (grub_efi_dns_device_path_t *) dp;
-		if (dns->is_ipv6)
-		  {
-		    grub_printf ("/DNS(%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x)",
-			    (grub_uint16_t)(grub_be_to_cpu32(dns->dns_server_ip[0].addr[0]) >> 16),
-			    (grub_uint16_t)(grub_be_to_cpu32(dns->dns_server_ip[0].addr[0])),
-			    (grub_uint16_t)(grub_be_to_cpu32(dns->dns_server_ip[0].addr[1]) >> 16),
-			    (grub_uint16_t)(grub_be_to_cpu32(dns->dns_server_ip[0].addr[1])),
-			    (grub_uint16_t)(grub_be_to_cpu32(dns->dns_server_ip[0].addr[2]) >> 16),
-			    (grub_uint16_t)(grub_be_to_cpu32(dns->dns_server_ip[0].addr[2])),
-			    (grub_uint16_t)(grub_be_to_cpu32(dns->dns_server_ip[0].addr[3]) >> 16),
-			    (grub_uint16_t)(grub_be_to_cpu32(dns->dns_server_ip[0].addr[3])));
-		  }
-		else
-		  {
-		    grub_printf ("/DNS(%d.%d.%d.%d)",
-			  dns->dns_server_ip[0].v4.addr[0],
-			  dns->dns_server_ip[0].v4.addr[1],
-			  dns->dns_server_ip[0].v4.addr[2],
-			  dns->dns_server_ip[0].v4.addr[3]);
-		  }
-	      }
 	      break;
 	    default:
 	      grub_printf ("/UnknownMessaging(%x)", (unsigned) subtype);

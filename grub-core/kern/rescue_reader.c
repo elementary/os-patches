@@ -78,10 +78,6 @@ grub_rescue_read_line (char **line, int cont,
 void __attribute__ ((noreturn))
 grub_rescue_run (void)
 {
-#if QUIET_BOOT
-  grub_printf ("Entering rescue mode...\n");
-#endif
-
   /* Stall if the CLI has been disabled */
   if (grub_is_cli_disabled () || grub_is_cli_need_auth ())
     {
@@ -94,6 +90,8 @@ grub_rescue_run (void)
 	}
       while (1);
     }
+
+  grub_printf ("Entering rescue mode...\n");
 
   while (1)
     {

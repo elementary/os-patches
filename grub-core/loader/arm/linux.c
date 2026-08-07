@@ -375,7 +375,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
 
   grub_loader_set (linux_boot, linux_unload, 0);
 
-  size = grub_loader_cmdline_size (argc, argv, 0);
+  size = grub_loader_cmdline_size (argc, argv);
   linux_args = grub_malloc (size + sizeof (LINUX_IMAGE));
   if (!linux_args)
     {
@@ -387,7 +387,7 @@ grub_cmd_linux (grub_command_t cmd __attribute__ ((unused)),
   grub_memcpy (linux_args, LINUX_IMAGE, sizeof (LINUX_IMAGE));
   err = grub_create_loader_cmdline (argc, argv,
 				    linux_args + sizeof (LINUX_IMAGE) - 1, size,
-				    GRUB_VERIFY_KERNEL_CMDLINE, 0);
+				    GRUB_VERIFY_KERNEL_CMDLINE);
   if (err)
     goto fail;
 

@@ -134,7 +134,7 @@ grub_addr_t grub_ieee1275_original_stack;
 #define RADIX_GTSE_ENABLED   0x40
 
 void
-grub_exit (int rc __attribute__((unused)))
+grub_exit (void)
 {
   grub_ieee1275_exit ();
 }
@@ -190,24 +190,28 @@ grub_machine_get_bootlocation (char **device, char **path)
 	grub_ieee1275_net_config (canon, &ret_device, &ret_path, bootpath);
       grub_free (dev);
       grub_free (canon);
+
+      /* Use path from net config if it is provided by cached DHCP info */
+      if (ret_path != NULL)
+	goto done;
+      /* Fall through to use firmware bootpath */
     }
   else
+    ret_device = grub_ieee1275_encode_devname (bootpath);
+
+  filename = grub_ieee1275_get_filename (bootpath);
+  if (filename)
     {
-      filename = grub_ieee1275_get_filename (bootpath);
-      if (filename)
+      char *lastslash = grub_strrchr (filename, '\\');
+
+      /* Truncate at last directory.  */
+      if (lastslash)
         {
-          char *lastslash = grub_strrchr (filename, '\\');
+	  *lastslash = '\0';
+	  grub_translate_ieee1275_path (filename);
 
-          /* Truncate at last directory.  */
-          if (lastslash)
-            {
-              *lastslash = '\0';
-              grub_translate_ieee1275_path (filename);
-
-              ret_path = filename;
-            }
-        }
-      ret_device = grub_ieee1275_encode_devname (bootpath);
+	  ret_path = filename;
+	}
     }
 
  done:

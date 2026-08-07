@@ -152,7 +152,7 @@ kernel = {
   common = kern/rescue_parser.c;
   common = kern/rescue_reader.c;
   common = kern/term.c;
-  nopc = kern/verifiers.c;
+  common = kern/verifiers.c;
 
   noemu = kern/compiler-rt.c;
   noemu = kern/mm.c;
@@ -476,7 +476,7 @@ image = {
   i386_pc = boot/i386/pc/boot.S;
 
   cppflags = '-DHYBRID_BOOT=1';
-
+  
   i386_pc_ldflags = '$(TARGET_IMG_LDFLAGS)';
   i386_pc_ldflags = '$(TARGET_IMG_BASE_LDOPT),0x7C00';
 
@@ -577,7 +577,7 @@ image = {
   i386_pc = boot/i386/pc/startup_raw.S;
   i386_pc_nodist = rs_decoder.h;
 
-  objcopyflags = '-O binary -j .text';
+  objcopyflags = '-O binary';
   ldflags = '$(TARGET_IMG_LDFLAGS) $(TARGET_IMG_BASE_LDOPT),0x8200';
   enable = i386_pc;
 };
@@ -1015,12 +1015,6 @@ module = {
 };
 
 module = {
-  name = verifiers;
-  common = kern/verifiers.c;
-  enable = i386_pc;
-};
-
-module = {
   name = hdparm;
   common = commands/hdparm.c;
   enable = pci;
@@ -1036,14 +1030,6 @@ module = {
   name = hexdump;
   common = commands/hexdump.c;
   common = lib/hexdump.c;
-};
-
-module = {
-  name = hwmatch;
-  i386_pc = commands/i386/pc/hwmatch.c;
-  enable = i386_pc;
-  cflags = '$(CFLAGS_POSIX) $(CFLAGS_GNULIB)';
-  cppflags = '$(CPPFLAGS_POSIX) $(CPPFLAGS_GNULIB)';
 };
 
 module = {
@@ -1933,19 +1919,6 @@ module = {
 };
 
 module = {
-  name = peimage;
-  efi = loader/efi/peimage.c;
-  enable = arm_efi;
-  enable = arm64_efi;
-  enable = i386_efi;
-  enable = x86_64_efi;
-  enable = riscv32_efi;
-  enable = riscv64_efi;
-  enable = loongarch64_efi;
-};
-
-
-module = {
   name = fdt;
   efi = loader/efi/fdt.c;
   common = lib/fdt.c;
@@ -2388,6 +2361,13 @@ module = {
 };
 
 module = {
+  name = efi_uga;
+  efi = video/efi_uga.c;
+  enable = i386_efi;
+  enable = x86_64_efi;
+};
+
+module = {
   name = jpeg;
   common = video/readers/jpeg.c;
 };
@@ -2467,12 +2447,6 @@ module = {
   common = net/ethernet.c;
   common = net/arp.c;
   common = net/netbuff.c;
-  efi = net/efi/net.c;
-  efi = net/efi/http.c;
-  efi = net/efi/pxe.c;
-  efi = net/efi/ip4_config.c;
-  efi = net/efi/ip6_config.c;
-  efi = net/efi/dhcp.c;
 };
 
 module = {

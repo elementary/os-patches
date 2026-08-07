@@ -22,7 +22,9 @@
 #include <grub/efi/edid.h>
 #include <grub/efi/pci.h>
 #include <grub/efi/efi.h>
+#include <grub/efi/uga_draw.h>
 #include <grub/efi/graphics_output.h>
+#include <grub/efi/console_control.h>
 #include <grub/command.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
@@ -45,9 +47,11 @@ static struct known_protocol
     { GRUB_EFI_EDID_DISCOVERED_GUID, "discovered EDID" },
     { GRUB_EFI_EDID_OVERRIDE_GUID, "override EDID" },
     { GRUB_EFI_GOP_GUID, "GOP" },
+    { GRUB_EFI_UGA_DRAW_GUID, "UGA draw" },
     { GRUB_EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL_GUID, "simple text output" },
     { GRUB_EFI_SIMPLE_TEXT_INPUT_PROTOCOL_GUID, "simple text input" },
     { GRUB_EFI_SIMPLE_POINTER_PROTOCOL_GUID, "simple pointer" },
+    { GRUB_EFI_CONSOLE_CONTROL_GUID, "console control" },
     { GRUB_EFI_ABSOLUTE_POINTER_PROTOCOL_GUID, "absolute pointer" },
     { GRUB_EFI_DRIVER_BINDING_PROTOCOL_GUID, "EFI driver binding" },
     { GRUB_EFI_LOAD_FILE_PROTOCOL_GUID, "load file" },

@@ -320,16 +320,6 @@ AC_SUBST(grubdirname)
 AC_DEFINE_UNQUOTED(GRUB_DIR_NAME, "$grubdirname",
     [Default grub directory name])
 
-##### systemd unit files
-AC_ARG_WITH([systemdsystemunitdir],
-            AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),
-            [],
-            [with_systemdsystemunitdir=/usr/lib/systemd/system],
-            [with_systemdsystemunitdir=no])
-if test "x$with_systemdsystemunitdir" != xno; then
-   AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
-fi
-
 #
 # Checks for build programs.
 #
@@ -471,18 +461,6 @@ AC_CHECK_HEADER([util.h], [
   ])
 ])
 AC_SUBST([LIBUTIL])
-
-case "$host_os" in
-  cygwin | windows* | mingw32* | aros*)
-    ;;
-  *)
-    # For setting EFI variables in grub-install.
-    PKG_CHECK_MODULES([EFIVAR], [efivar efiboot], [
-      AC_DEFINE([HAVE_EFIVAR], [1],
-                [Define to 1 if you have the efivar and efiboot libraries.])
-    ], [:])
-    ;;
-esac
 
 AC_CACHE_CHECK([whether -Wtrampolines work], [grub_cv_host_cc_wtrampolines], [
   SAVED_CFLAGS="$CFLAGS"
@@ -1483,7 +1461,6 @@ elif test x$grub_cv_target_cc_link_format = x-mi386pe || test x$grub_cv_target_c
   TARGET_IMG_LDSCRIPT='$(top_srcdir)'"/conf/i386-cygwin-img-ld.sc"
   TARGET_IMG_LDFLAGS="-Wl,-T${TARGET_IMG_LDSCRIPT}"
   TARGET_IMG_LDFLAGS_AC="-Wl,-T${srcdir}/conf/i386-cygwin-img-ld.sc"
-  TARGET_IMG_BASE_LDOPT="-Wl,-Ttext"
   TARGET_IMG_CFLAGS=
 else
   TARGET_APPLE_LINKER=0
@@ -1491,7 +1468,6 @@ else
   TARGET_IMG_LDSCRIPT=
   TARGET_IMG_LDFLAGS='-Wl,-N'
   TARGET_IMG_LDFLAGS_AC='-Wl,-N'
-  TARGET_IMG_BASE_LDOPT="-Wl,-Ttext"
   TARGET_IMG_CFLAGS=
 fi
 
@@ -1816,7 +1792,24 @@ LIBS=""
 # Defined in acinclude.m4.
 grub_ASM_USCORE
 grub_PROG_TARGET_CC
+
+# The error message produced by autoconf if autoconf-archive is not installed is
+# quite misleading and not very helpful. So, try point people in the right direction.
+m4_ifndef([AX_CHECK_LINK_FLAG], [m4_fatal([autoconf-archive is missing. You must install it to generate the configure script.])])
+
 if test "x$TARGET_APPLE_LINKER" != x1 ; then
+AX_CHECK_LINK_FLAG([-Wl,--image-base,0x400000],
+    [TARGET_IMG_BASE_LDOPT="-Wl,--image-base"],
+    [TARGET_IMG_BASE_LDOPT="-Wl,-Ttext"],
+    [],
+    [AC_LANG_SOURCE([
+asm (".globl start; start:");
+asm (".globl _start; _start:");
+asm (".globl __start; __start:");
+void __main (void);
+void __main (void) {}
+int main (void);
+    ])])
 grub_PROG_OBJCOPY_ABSOLUTE
 fi
 grub_PROG_LD_BUILD_ID_NONE
@@ -2372,50 +2365,6 @@ enable_grub_protect=no
 fi
 AC_SUBST([enable_grub_protect])
 
-AC_ARG_ENABLE([ubuntu-recovery],
-              [AS_HELP_STRING([--enable-ubuntu-recovery],
-                              [adjust boot options for the Ubuntu recovery mode (default=no)])],
-              [], [enable_ubuntu_recovery=no])
-if test x"$enable_ubuntu_recovery" = xyes ; then
-  UBUNTU_RECOVERY=1
-else
-  UBUNTU_RECOVERY=0
-fi
-AC_SUBST([UBUNTU_RECOVERY])
-
-AC_ARG_ENABLE([quiet-boot],
-              [AS_HELP_STRING([--enable-quiet-boot],
-                              [emit fewer messages at boot time (default=no)])],
-              [], [enable_quiet_boot=no])
-if test x"$enable_quiet_boot" = xyes ; then
-  QUIET_BOOT=1
-else
-  QUIET_BOOT=0
-fi
-AC_SUBST([QUIET_BOOT])
-
-AC_ARG_ENABLE([quick-boot],
-              [AS_HELP_STRING([--enable-quick-boot],
-                              [bypass boot menu if possible (default=no)])],
-              [], [enable_quick_boot=no])
-if test x"$enable_quick_boot" = xyes ; then
-  QUICK_BOOT=1
-else
-  QUICK_BOOT=0
-fi
-AC_SUBST([QUICK_BOOT])
-
-AC_ARG_ENABLE([gfxpayload-dynamic],
-              [AS_HELP_STRING([--enable-gfxpayload-dynamic],
-                              [use GRUB_GFXPAYLOAD_LINUX=keep unless explicitly unsupported on current hardware (default=no)])],
-              [], [enable_gfxpayload_dynamic=no])
-if test x"$enable_gfxpayload_dynamic" = xyes ; then
-  GFXPAYLOAD_DYNAMIC=1
-else
-  GFXPAYLOAD_DYNAMIC=0
-fi
-AC_SUBST([GFXPAYLOAD_DYNAMIC])
-
 LIBS=""
 
 AC_SUBST([FONT_SOURCE])
@@ -2696,11 +2645,6 @@ if test "x$enable_stack_protector" != xno; then
 echo "With stack smashing protector: Yes"
 else
 echo "With stack smashing protector: No"
-fi
-if [ x"$enable_quiet_boot" = xyes ]; then
-echo With quiet boot: Yes
-else
-echo With quiet boot: No
 fi
 echo "*******************************************************"
 ]

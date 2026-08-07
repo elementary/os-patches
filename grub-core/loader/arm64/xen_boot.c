@@ -349,7 +349,7 @@ xen_boot_binary_load (struct xen_boot_binary *binary, grub_file_t file,
 
   if (argc > 1)
     {
-      binary->cmdline_size = grub_loader_cmdline_size (argc - 1, argv + 1, 0);
+      binary->cmdline_size = grub_loader_cmdline_size (argc - 1, argv + 1);
       binary->cmdline = grub_zalloc (binary->cmdline_size);
       if (!binary->cmdline)
 	{
@@ -359,7 +359,7 @@ xen_boot_binary_load (struct xen_boot_binary *binary, grub_file_t file,
 	}
       grub_create_loader_cmdline (argc - 1, argv + 1, binary->cmdline,
 				  binary->cmdline_size,
-				  GRUB_VERIFY_KERNEL_CMDLINE, 0);
+				  GRUB_VERIFY_KERNEL_CMDLINE);
       grub_dprintf ("xen_loader",
 		    "Xen_boot cmdline @ %p %s, size: %d\n",
 		    binary->cmdline, binary->cmdline, binary->cmdline_size);

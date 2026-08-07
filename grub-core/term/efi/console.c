@@ -146,6 +146,14 @@ grub_prepare_for_text_output (struct grub_term_output *term)
   if (text_mode != GRUB_TEXT_MODE_UNDEFINED)
     return text_mode ? GRUB_ERR_NONE : GRUB_ERR_BAD_DEVICE;
 
+  if (! grub_efi_set_text_mode (1))
+    {
+      /* This really should never happen */
+      grub_error (GRUB_ERR_BAD_DEVICE, "cannot set text mode");
+      text_mode = GRUB_TEXT_MODE_UNAVAILABLE;
+      return GRUB_ERR_BAD_DEVICE;
+    }
+
   if (cursor_mode != GRUB_CURSOR_MODE_UNDEFINED)
     grub_console_setcursor (term, cursor_mode);
   if (text_colorstate != GRUB_TERM_COLOR_UNDEFINED)
@@ -444,6 +452,7 @@ grub_efi_console_output_fini (struct grub_term_output *term)
     return 0;
 
   grub_console_setcursor (term, 0);
+  grub_efi_set_text_mode (0);
   text_mode = GRUB_TEXT_MODE_UNDEFINED;
   return 0;
 }

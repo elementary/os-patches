@@ -19,13 +19,10 @@
 #include <config.h>
 
 #include <grub/util/install.h>
-#include <grub/emu/config.h>
 #include <grub/emu/exec.h>
 #include <grub/emu/misc.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include <sys/utsname.h>
@@ -131,24 +128,9 @@ const char *
 grub_install_get_default_arm_platform (void)
 {
   if (is_efi_system())
-    {
-      const char *pkglibdir = grub_util_get_pkglibdir ();
-      const char *platform;
-      char *pd;
-      int found;
-
-      platform = "arm-efi";
-
-      pd = grub_util_path_concat (2, pkglibdir, platform);
-      found = grub_util_is_directory (pd);
-      free (pd);
-      if (found)
-	return platform;
-      else
-	grub_util_info ("... but %s platform not available", platform);
-    }
-
-  return "arm-uboot";
+    return "arm-efi";
+  else
+    return "arm-uboot";
 }
 
 const char *
@@ -156,23 +138,10 @@ grub_install_get_default_x86_platform (void)
 {
   if (is_efi_system())
     {
-      const char *pkglibdir = grub_util_get_pkglibdir ();
-      const char *platform;
-      char *pd;
-      int found;
-
       if (read_platform_size() == 64)
-	platform = "x86_64-efi";
+	return "x86_64-efi";
       else
-	platform = "i386-efi";
-
-      pd = grub_util_path_concat (2, pkglibdir, platform);
-      found = grub_util_is_directory (pd);
-      free (pd);
-      if (found)
-	return platform;
-      else
-	grub_util_info ("... but %s platform not available", platform);
+	return "i386-efi";
     }
 
   grub_util_info ("Looking for /proc/device-tree ..");
@@ -184,75 +153,4 @@ grub_install_get_default_x86_platform (void)
 
   grub_util_info ("... not found");
   return "i386-pc";
-}
-
-const char *
-grub_install_get_default_powerpc_machtype (void)
-{
-  FILE *fp;
-  char *buf = NULL;
-  size_t len = 0;
-  const char *machtype = "generic";
-
-  fp = grub_util_fopen ("/proc/cpuinfo", "r");
-  if (! fp)
-    return machtype;
-
-  while (getline (&buf, &len, fp) > 0)
-    {
-      if (strncmp (buf, "pmac-generation",
-		   sizeof ("pmac-generation") - 1) == 0)
-	{
-	  if (strstr (buf, "NewWorld"))
-	    {
-	      machtype = "pmac_newworld";
-	      break;
-	    }
-	  if (strstr (buf, "OldWorld"))
-	    {
-	      machtype = "pmac_oldworld";
-	      break;
-	    }
-	}
-
-      if (strncmp (buf, "motherboard", sizeof ("motherboard") - 1) == 0 &&
-	  strstr (buf, "AAPL"))
-	{
-	  machtype = "pmac_oldworld";
-	  break;
-	}
-
-      if (strncmp (buf, "machine", sizeof ("machine") - 1) == 0 &&
-	  strstr (buf, "CHRP IBM"))
-	{
-	  if (strstr (buf, "qemu"))
-	    {
-	      machtype = "chrp_ibm_qemu";
-	      break;
-	    }
-	  else
-	    {
-	      machtype = "chrp_ibm";
-	      break;
-	    }
-	}
-
-      if (strncmp (buf, "platform", sizeof ("platform") - 1) == 0)
-	{
-	  if (strstr (buf, "Maple"))
-	    {
-	      machtype = "maple";
-	      break;
-	    }
-	  if (strstr (buf, "Cell"))
-	    {
-	      machtype = "cell";
-	      break;
-	    }
-	}
-    }
-
-  free (buf);
-  fclose (fp);
-  return machtype;
 }
