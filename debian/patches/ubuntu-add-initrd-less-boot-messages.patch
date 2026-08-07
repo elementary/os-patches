@@ -13,12 +13,12 @@ Patch-Name: ubuntu-add-initrd-less-boot-messages.patch
  2 files changed, 11 insertions(+)
 
 diff --git a/grub-initrd-fallback.service b/grub-initrd-fallback.service
-index 1a0a4e5..59d1a62 100644
+index 30e7bc5..27925c5 100644
 --- a/grub-initrd-fallback.service
 +++ b/grub-initrd-fallback.service
 @@ -3,6 +3,7 @@ Description=GRUB failed boot detection
  After=local-fs.target
- After=grub-common.service
+ After=grub2-common.service
  After=sleep.target
 +ConditionPathExists=/boot/grub/grub.cfg
  
