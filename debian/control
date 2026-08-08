@@ -1,0 +1,44 @@
+Source: lsp-glib-3.0
+Maintainer: Princeton Ferro <princetonferro@gmail.com>
+Section: libs
+Priority: optional
+Standards-Version: 4.6.2
+Build-Depends: debhelper-compat (= 13),
+               gobject-introspection,
+               libglib2.0-dev (>= 2.66),
+               libjson-glib-dev,
+               libjsonrpc-glib-1.0-dev (>= 3.44),
+               meson,
+               valac
+Homepage: https://github.com/vala-lang/lsp-glib
+Vcs-Git: https://github.com/vala-lang/lsp-glib.git
+Vcs-Browser: https://github.com/vala-lang/lsp-glib
+
+Package: liblsp-glib-3.0
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: LSP library built on GLib.
+ This package contains the shared library.
+
+Package: liblsp-glib-3.0-dev
+Section: libdevel
+Architecture: any
+Depends: gir1.2-lsp-glib-3.0 (= ${binary:Version}),
+         liblsp-glib-3.0 (= ${binary:Version}),
+         libglib2.0-dev (>= 2.66),
+         libjson-glib-dev,
+         libjsonrpc-glib-1.0-dev (>= 3.44),
+         ${misc:Depends}
+Description: LSP library built on GLib.
+ This package contains the static library and header files.
+
+Package: gir1.2-lsp-glib-3.0
+Section: introspection
+Architecture: any
+Multi-Arch: foreign
+Depends: ${gir:Depends}, ${misc:Depends}
+Description: LSP library built on GLib.
+ This package can be used by other packages using the GIRepository format to
+ generate dynamic bindings.
