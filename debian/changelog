@@ -1,3 +1,52 @@
+flatpak (1.18.1-1) unstable; urgency=high
+
+  * New upstream security fix release (Closes: #1144130)
+    - GHSA-fqx6-vh4p-42cg:
+      Fix writing outside installation directory via crafted commit metadata.
+      A malicious or compromised Flatpak repository could write
+      attacker-controlled files outside /var/lib/flatpak as root.
+    - GHSA-qrwq-7qwx-q9rp:
+      Fix local privilege escalation involving revokefs.
+      A malicious local user could write files outside /var/lib/flatpak
+      as root by tampering with OSTree objects after signature verification.
+    - GHSA-8688-9x26-hhxj:
+      Fix a sandbox escape involving directories inside ~/.var/app/APP_ID.
+      A malicious or compromised Flatpak app could write to arbitrary files
+      outside its sandbox.
+    - GHSA-99wv-m8rp-g58x:
+      Fix a sandbox escape involving the ld.so cache.
+      A malicious or compromised Flatpak app could write files with a fixed
+      name and limited control over content outside the sandbox.
+    - GHSA-v2gw-v9h5-9q4x:
+      Fix local privilege escalation involving crafted OCI architecture names.
+      A malicious local user on a system with an OCI remote configured
+      (unusual on non-Fedora systems) could trick the flatpak-system-helper
+      process into writing outside /var/lib/flatpak.
+    - GHSA-w69g-9x8j-7p8f:
+      Fix reading outside sandbox involving crafted extension metadata.
+      A malicious or compromised Flatpak app could find out whether specific
+      files exist outside the sandbox.
+    - GHSA-q4gr-vc25-57m5:
+      Fix anti-downgrade checks for components installed system-wide.
+      A malicious local user with an active local login session could
+      downgrade an app, runtime or extension to an older, known-vulnerable
+      version and use this to attack other local users.
+    - GHSA-8qxj-x646-phcm:
+      Fix writing outside working directory in `flatpak build-init`.
+      A malicious or compromised SDK could write outside the intended
+      working directory when a developer starts using it for a build.
+    - GHSA-jr92-2v97-wgvc:
+      Fix a buffer overflow when installing or updating from a malicious OCI
+      registry, not believed to be practically exploitable on 64-bit systems.
+    - GHSA-r7hp-698j-2h6c:
+      Correct xdg-dbus-proxy rules for receiving selected AT-SPI broadcasts
+      so that GTK accessibility features work as intended.
+      Previously, these accessibility features only worked accidentally as a
+      result of an xdg-dbus-proxy security issue, fixed in 0.1.8.
+    - Numerous non-security-related bug fixes
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 11 Aug 2026 14:02:52 +0100
+
 flatpak (1.18.0-1) unstable; urgency=medium
 
   [ Simon McVittie ]
