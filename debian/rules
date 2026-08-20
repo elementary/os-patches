@@ -223,6 +223,11 @@ CONFFLAGS += -Dsbat-distro=upstream
 CONFFLAGS += -Dsbat-distro-summary='Upstream build from git'
 endif
 
+# so that updatectl is built
+CONFFLAGS += \
+	-Dsysupdate=enabled \
+	-Dsysupdated=enabled
+
 override_dh_auto_configure:
 	dh_auto_configure \
 		-- $(CONFFLAGS) $(CONFFLAGS_DISTRO) $(CONFFLAGS_UPSTREAM)
