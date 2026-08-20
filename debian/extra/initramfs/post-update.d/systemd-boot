@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -eu
+
+test -x /usr/bin/bootctl || exit 0
+
+bootctl is-installed --quiet || exit 0
+
+if [ -f "/boot/vmlinuz-$1" ]; then
+    k="/boot/vmlinuz-$1"
+elif [ -f "/boot/vmlinux-$1" ]; then
+    k="/boot/vmlinux-$1"
+else
+    echo "Kernel version $1 not found in /boot."
+    exit 0
+fi
+
+echo "Updating kernel version $1 in systemd-boot..."
+
+kernel-install add "$1" "$k" "$2"

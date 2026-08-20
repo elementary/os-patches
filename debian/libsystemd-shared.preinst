@@ -1,0 +1,33 @@
+#!/bin/sh
+set -e
+
+check_unified_cgroup_v2_hierarchy() {
+    for line in $(awk '/cgroup2/{print $2 "," $3}' /proc/mounts); do
+       if [ "$line" = "/sys/fs/cgroup,cgroup2" ]; then
+           return 0
+       fi
+    done
+
+    return 1
+}
+
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+    if [ -z "$DPKG_ROOT"] && [ -d /run/systemd/system ] && dpkg --compare-versions "$2" lt-nl "258~rc1-1~"; then
+        if ! check_unified_cgroup_v2_hierarchy; then
+            cat <<EOF 1>&2
+******************************************************************************
+*
+* The systemd package cannot be upgraded to version $3, because this
+* system is not running a unified cgroupv2 hierarchy, which is required
+* since systemd v258.
+*
+* Please reboot using a unified cgroupv2 hierarchy, and then try again.
+*
+******************************************************************************
+EOF
+            exit 1
+        fi
+    fi
+fi
+
+#DEBHELPER#

@@ -1,0 +1,38 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Fri, 20 Mar 2026 11:13:28 -0400
+Subject: ssh-proxy: return an error if user supplies VMADDR_CID_ANY
+
+Origin: upstream, https://github.com/systemd/systemd/commit/4341ba091dd1074d3d8c41e2a4e6f155d0a7b79f
+Bug-Ubuntu: https://launchpad.net/bugs/2145027
+
+Right now, if a user tries to pass VMADDR_CID_ANY to systemd-ssh-proxy,
+an assert is triggered:
+
+ $ ssh vsock%4294967295
+ Assertion 'cid != VMADDR_CID_ANY' failed at src/ssh-generator/ssh-proxy.c:21, function process_vsock_cid(). Aborting.
+ mm_receive_fd: recvmsg: expected received 1 got 0
+ proxy dialer did not pass back a connection
+
+This is becauase the value returned from vsock_parse_cid is not checked
+before being passed to process_vsock_string. Add a check to prevent
+that.
+
+(cherry picked from commit 4341ba091dd1074d3d8c41e2a4e6f155d0a7b79f)
+---
+ src/ssh-generator/ssh-proxy.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/ssh-generator/ssh-proxy.c b/src/ssh-generator/ssh-proxy.c
+index 4ff40a5..714deae 100644
+--- a/src/ssh-generator/ssh-proxy.c
++++ b/src/ssh-generator/ssh-proxy.c
+@@ -60,6 +60,9 @@ static int process_vsock_string(const char *host, const char *port) {
+         if (r < 0)
+                 return log_error_errno(r, "Failed to parse vsock cid: %s", host);
+ 
++        if (cid == VMADDR_CID_ANY)
++                return log_error_errno(SYNTHETIC_ERRNO(EINVAL), "Cannot use VMADDR_CID_ANY to connect to a remote host.");
++
+         return process_vsock_cid(cid, port);
+ }
+ 

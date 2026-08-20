@@ -1,0 +1,88 @@
+#!/bin/sh
+
+set -e
+
+_systemctl() {
+    if [ -z "$DPKG_ROOT" ] && [ -d /run/systemd/system ]; then
+        systemctl "$@"
+    fi
+}
+
+_update_catalog() {
+    journalctl ${DPKG_ROOT:+--root="$DPKG_ROOT"} --update-catalog || true
+}
+
+_update_binfmt() {
+    if [ "$(_systemctl show -P LoadState systemd-binfmt.service)" != "masked" ]; then
+        _systemctl restart systemd-binfmt.service || true
+    fi
+}
+
+_update_sysctl() {
+    if [ "$(_systemctl show -P LoadState systemd-sysctl.service)" != "masked" ]; then
+        _systemctl restart systemd-sysctl.service || true
+    fi
+}
+
+_restart_managers() {
+    if [ -z "$DPKG_ROOT" ] && [ -d /run/systemd/system ]; then
+        # Re-exec user instances so that running user managers are updated too.
+        # Note that this is asynchronous, but we can't use
+        # D-Bus as dbus-user-session is not guaranteed to be available.
+        deb-systemd-invoke --user --no-dbus daemon-reexec || true
+        deb-systemd-invoke --no-dbus daemon-reexec || true
+    fi
+}
+
+# Update Message Catalogs database and binfmt registrations in response to dpkg triggers
+if [ "$1" = "triggered" ]; then
+    shift
+    for trigger in $@; do
+        case $trigger in
+            /usr/lib/systemd/catalog)
+                _update_catalog
+                ;;
+            /usr/lib/binfmt.d)
+                _update_binfmt
+                ;;
+            /usr/lib/sysctl.d)
+                _update_sysctl
+                ;;
+            libc-upgrade)
+                _restart_managers
+                ;;
+        esac
+    done
+    exit 0
+fi
+
+# Enable getty, remote-fs.target and systemd-pstore by default on new installs
+if [ -z "$2" ]; then
+    systemctl ${DPKG_ROOT:+--root="$DPKG_ROOT"} enable getty@tty1.service || true
+    systemctl ${DPKG_ROOT:+--root="$DPKG_ROOT"} enable remote-fs.target || true
+    systemctl ${DPKG_ROOT:+--root="$DPKG_ROOT"} enable systemd-pstore.service || true
+fi
+
+# Create /etc/machine-id
+systemd-machine-id-setup ${DPKG_ROOT:+--root="$DPKG_ROOT"}
+
+# Enable persistent journal, in auto-mode, by default on new installs
+if [ -z "$2" ]; then
+    mkdir -p "$DPKG_ROOT/var/log/journal"
+fi
+
+# Initial update of the Message Catalogs database
+_update_catalog
+
+# skip daemon-reexec and try-restarts during shutdown to avoid hitting LP: #1803391
+if [ -n "$2" ] && [ "$(systemctl is-system-running)" != "stopping" ]; then
+    _restart_managers
+fi
+
+#DEBHELPER#
+
+# Process all tmpfiles that we ship, including any overrides in
+# runtime-dir/sysadmin-dir/other packages (e.g. rsyslog)
+#
+# Ignore if this fails, because e.g. %b will fail on WSL
+systemd-tmpfiles --create || :

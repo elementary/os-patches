@@ -1,0 +1,11 @@
+systemd (257.4-9) unstable; urgency=medium
+
+  - Starting with systemd/257.4-9 mDNS is disabled in systemd-resolved.
+    Users relying on mDNS for reachability of a machine MUST mask the
+    associated drop-in before upgrading, or the machine will become
+    unreachable upon package upgrade. To mask the drop-in, as root:
+
+      mkdir -p /etc/systemd/resolved.conf.d/
+      touch /etc/systemd/resolved.conf.d/00-disable-mdns.conf
+
+ -- Luca Boccassi <bluca@debian.org>  Wed, 02 Apr 2025 11:19:09 +0100

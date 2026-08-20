@@ -1,0 +1,178 @@
+#!/bin/sh
+
+# When installing/updating systemd-boot, if _both_ signed shim and signed systemd-boot are available, and
+# signed grub is not available, then take over the ESP and the EFI boot entry, install systemd-boot as the
+# second stage loader, and install signed shim as the first stage loader and add a boot entry named after
+# the OS vendor pointing to it, and mark it as the default.
+#
+# When triggered, given dpkg does not tell us whether the trigger added or removed a file, if signed
+# grub is available then do nothing and assume it will take over the ESP. If it is not, and either
+# signed shim or signed systemd-boot or both are not available, then remove all of them from the ESP
+# and the EFI boot entry. If both signed shim and signed systemd-boot are available, then update them
+# in the ESP.
+
+set -e
+
+remove_shim() {
+    case "$(dpkg --print-architecture)" in
+        amd64)
+        efi_arch_upper=X64
+        efi_arch=x64
+        grub_arch=x86_64
+        ;;
+        arm64)
+        efi_arch_upper=AA64
+        efi_arch=aa64
+        grub_arch=arm64
+        ;;
+        *)
+        return
+    esac
+
+    # shellcheck disable=SC1091
+    . /etc/os-release || . /usr/lib/os-release
+    vendor="${ID:-debian}"
+    vendor_upper="$(echo "$vendor" | cut -c1 | tr '[:lower:]' '[:upper:]')$(echo "$vendor" | cut -c2-)"
+
+    esp_path="$(bootctl --quiet --print-esp-path 2>/dev/null)"
+    if [ -z "$esp_path" ]; then
+        return
+    fi
+
+    if [ -f "/usr/lib/grub/${grub_arch}-efi-signed/grub${efi_arch}.efi.signed" ]; then
+        return
+    fi
+
+    if [ ! -f "${esp_path}/EFI/systemd/systemd-boot${efi_arch}.efi" ]; then
+        return
+    fi
+
+    if [ -f "${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi" ] && \
+            [ -f "${esp_path}/EFI/${vendor}/shim${efi_arch}.efi" ] && \
+            [ "$(<"${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi" sha256sum)" = "$(<"${esp_path}/EFI/${vendor}/shim${efi_arch}.efi" sha256sum)" ]; then
+        rm -f "${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi"
+    fi
+
+    if [ -f "${esp_path}/EFI/BOOT/fb${efi_arch_upper}.efi" ] && \
+            [ -f "${esp_path}/EFI/${vendor}/fb${efi_arch}.efi" ] && \
+            [ "$(<"${esp_path}/EFI/BOOT/fb${efi_arch_upper}.efi" sha256sum)" = "$(<"${esp_path}/EFI/${vendor}/fb${efi_arch}.efi" sha256sum)" ]; then
+        rm -f "${esp_path}/EFI/BOOT/fb${efi_arch_upper}.efi"
+    fi
+
+    for f in shim fb mm; do
+        rm -f "${esp_path}/EFI/${vendor}/${f}${efi_arch}.efi"
+    done
+
+    rm -f "${esp_path}/EFI/${vendor}/BOOT${efi_arch_upper}.CSV"
+    rmdir --ignore-fail-on-non-empty "${esp_path}/EFI/${vendor}" 2>/dev/null || true
+
+    if efibootmgr | grep -i -q "Boot.*${vendor_upper}.*EFI\\\\${vendor}\\\\shim${efi_arch}.efi"; then
+        bootentry="$(efibootmgr | grep -i "Boot.*${vendor_upper}.*EFI\\\\${vendor}\\\\shim${efi_arch}.efi" | cut -d' ' -f1 | sed -e 's/Boot//' -e 's/*//')"
+        efibootmgr -q --delete-bootnum --bootnum "$bootentry"
+    fi
+}
+
+install_shim() {
+    case "$(dpkg --print-architecture)" in
+        amd64)
+        efi_arch_upper=X64
+        efi_arch=x64
+        grub_arch=x86_64
+        ;;
+        arm64)
+        efi_arch_upper=AA64
+        efi_arch=aa64
+        grub_arch=arm64
+        ;;
+        *)
+        return
+    esac
+
+    if [ ! -f "/usr/lib/shim/shim${efi_arch}.efi.signed" ] || [ ! -f "/usr/lib/systemd/boot/efi/systemd-boot${efi_arch}.efi.signed" ]; then
+        if [ "$1" = trigger ]; then
+            remove_shim
+        fi
+        return
+    fi
+
+    if [ -f "/usr/lib/grub/${grub_arch}-efi-signed/grub${efi_arch}.efi.signed" ]; then
+        return
+    fi
+
+    esp_path="$(bootctl --quiet --print-esp-path 2>/dev/null)"
+    if [ -z "$esp_path" ]; then
+        return
+    fi
+
+    # shellcheck disable=SC1091
+    . /etc/os-release || . /usr/lib/os-release
+    vendor="${ID:-debian}"
+    vendor_upper="$(echo "$vendor" | cut -c1 | tr '[:lower:]' '[:upper:]')$(echo "$vendor" | cut -c2-)"
+
+    for f in shim fb mm; do
+        if [ ! -f "/usr/lib/shim/${f}${efi_arch}.efi.signed" ]; then
+            continue
+        fi
+        if [ -f "${esp_path}/EFI/${vendor}/${f}${efi_arch}.efi" ] && [ "$(<"${esp_path}/EFI/${vendor}/${f}${efi_arch}.efi" sha256sum)" = "$(<"/usr/lib/shim/${f}${efi_arch}.efi.signed" sha256sum)" ]; then
+            continue
+        fi
+        install -p -D "/usr/lib/shim/${f}${efi_arch}.efi.signed" "${esp_path}/EFI/${vendor}/${f}${efi_arch}.efi"
+    done
+
+    if [ ! -f "${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi" ] || [ "$(<"${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi" sha256sum)" != "$(<"/usr/lib/shim/shim${efi_arch}.efi.signed" sha256sum)" ]; then
+        install -p -D "/usr/lib/shim/shim${efi_arch}.efi.signed" "${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi"
+    fi
+
+    if [ ! -f "${esp_path}/EFI/BOOT/fb${efi_arch}.efi" ] || [ "$(<"${esp_path}/EFI/BOOT/fb${efi_arch}.efi" sha256sum)" != "$(<"/usr/lib/shim/fb${efi_arch}.efi.signed" sha256sum)" ]; then
+        install -p -D "/usr/lib/shim/fb${efi_arch}.efi.signed" "${esp_path}/EFI/BOOT/fb${efi_arch}.efi"
+    fi
+
+    if [ ! -f "${esp_path}/EFI/${vendor}/BOOT${efi_arch_upper}.CSV" ] && command -v iconv >/dev/null 2>&1; then
+        printf "shim%s.efi,%s,\\\\EFI\\\\systemd\\\\systemd-boot%s.efi \\\\0,This is the boot entry for %s\n" "${efi_arch}" "${vendor_upper}" "${efi_arch}" "${vendor_upper}" | iconv -t UCS-2LE > "${esp_path}/EFI/${vendor}/BOOT${efi_arch_upper}.CSV"
+    fi
+
+    # 730079007300740065006d0064002d0062006f006f007400 is 'systemd-boot' encoded in UTF-16-LE"
+    if ! efibootmgr | grep -i -q "Boot.*${vendor_upper}.*EFI\\\\${vendor}\\\\shim${efi_arch}.efi.*systemd-boot${efi_arch}.efi\|Boot.*${vendor_upper}.*EFI\\\\${vendor}\\\\shim${efi_arch}.efi.*730079007300740065006d0064002d0062006f006f007400"; then
+        blkpart="$(findmnt -nvo SOURCE "$esp_path")"
+        if [ ! -L "/sys/class/block/${blkpart##*/}" ]; then
+            return
+        fi
+        drive="$(readlink -f "/sys/class/block/${blkpart##*/}")"
+        drive="${drive%/*}"
+        drive="/dev/${drive##*/}"
+        partno="$(cat "/sys/class/block/${blkpart##*/}/partition")"
+        efibootmgr -q --create --disk "$drive" --part "$partno" --loader "EFI/${vendor}/shim${efi_arch}.efi" --label "${vendor_upper}" --unicode "\EFI\systemd\systemd-boot${efi_arch}.efi \0"
+    fi
+}
+
+if [ "$1" = configure ] && bootctl --print-esp-path > /dev/null 2>&1; then
+    if bootctl is-installed > /dev/null 2>&1; then
+        bootctl update --graceful
+    else
+        bootctl install --make-machine-id-directory=auto
+    fi
+    install_shim install
+
+    if [ -z "$2" ]; then
+        # register existing kernel(s)
+        for k in /boot/vmlinu[xz]-*; do
+            [ -f "$k" ] || continue
+            ver=$(basename "$k" | sed s/^vmlinu[xz]-//)
+            kernel-install add "$ver" "$k"
+        done
+    fi
+fi
+
+if [ "$1" = triggered ]; then
+    shift
+    for trigger in "$@"; do
+        case $trigger in
+            /usr/lib/shim|/usr/lib/grub|systemd-boot-signed)
+                install_shim trigger
+                ;;
+        esac
+    done
+    exit 0
+fi
+
+#DEBHELPER#

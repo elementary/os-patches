@@ -1,0 +1,38 @@
+#!/bin/sh
+
+set -e
+
+_adopt_conffile() {
+    conffile=$1
+    pkg=$2
+
+    [ -f "${conffile}.dpkg-bak" ] || return 0
+
+    md5sum="$(md5sum "${conffile}" | sed -e 's/ .*//')"
+    old_md5sum="$(dpkg-query -W -f='${Conffiles}' "$pkg" | \
+                        sed -n -e "\' ${conffile} ' { s/ obsolete$//; s/.* //; p }")"
+    # On new installs, if the policy file was preserved on systemd upgrade
+    # by dpkg-maintscript helper, copy it back if the new file has not been modified yet
+    if [ "$md5sum" = "$old_md5sum" ]; then
+        mv "${conffile}.dpkg-bak" "${conffile}"
+    fi
+}
+
+
+if [ "$1" = configure ] && [ -z "$2" ]; then
+    _adopt_conffile "${DPKG_ROOT}/etc/systemd/resolved.conf" systemd-resolved
+fi
+
+if [ "$1" = configure ] && dpkg --compare-versions "$2" lt 251.4-2; then
+    if [ "$(readlink "${DPKG_ROOT}/etc/resolv.conf")" != "../run/systemd/resolve/stub-resolv.conf" ] && [ "$(readlink "${DPKG_ROOT}/etc/resolv.conf")" != "/run/systemd/resolve/stub-resolv.conf" ]; then
+        echo "Converting /etc/resolv.conf to a symlink to /run/systemd/resolve/stub-resolv.conf..."
+        mkdir -p "${DPKG_ROOT}/run/systemd/resolve"
+        if [ -f "${DPKG_ROOT}/etc/resolv.conf" ]; then
+            cp "${DPKG_ROOT}/etc/resolv.conf" "${DPKG_ROOT}/run/systemd/resolve/stub-resolv.conf" || echo "Cannot copy /etc/resolv.conf to /run/systemd/resolve/stub-resolv.conf"
+            mv "${DPKG_ROOT}/etc/resolv.conf" "${DPKG_ROOT}/etc/.resolv.conf.systemd-resolved.bak" || echo "Cannot take a backup of /etc/resolv.conf."
+        fi
+        ln -sf ../run/systemd/resolve/stub-resolv.conf "${DPKG_ROOT}/etc/resolv.conf" || echo "Cannot install symlink from /etc/resolv.conf to ../run/systemd/resolve/stub-resolv.conf"
+    fi
+fi
+
+#DEBHELPER#

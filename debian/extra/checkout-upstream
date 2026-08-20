@@ -1,0 +1,155 @@
+#!/bin/bash
+# Prepare systemd source package in current directory for testing an upstream
+# commit, branch, or PR, without Debian patches. This replaces everything
+# except the debian/ directory with an upstream checkout.
+# NEVER run this in your actual packaging work directory! This is only meant
+# for upstream CI.
+#
+# Author: Martin Pitt <martin.pitt@ubuntu.com>
+
+set -eu
+test -x debian/rules
+case "${DEB_BUILD_PROFILES:-}" in
+    *pkg.systemd.upstream*) ;;
+    *)
+        echo "Not in upstream testing mode. Do *not* run this script unless you know what you are doing." >&2
+        exit 1
+esac
+if [ -n "${UPSTREAM_PULL_REQUEST:-}" ]; then
+    FETCH="git fetch -fu origin refs/pull/$UPSTREAM_PULL_REQUEST/head:pr"
+    CO='git checkout pr'
+    DESC="PR #$UPSTREAM_PULL_REQUEST"
+elif [ -n "${UPSTREAM_HEAD:-}" ]; then
+    FETCH=''
+    CO="git checkout $UPSTREAM_HEAD"
+    DESC="$UPSTREAM_HEAD"
+else
+    echo "WARNING: $0: Neither UPSTREAM_PULL_REQUEST nor UPSTREAM_HEAD set, ignoring" >&2
+    exit 0
+fi
+
+DUMMY_USER_NAME="Merge dummy user"
+DUMMY_USER_EMAIL="invalid@example.com"
+
+UPSTREAM_REPO="${UPSTREAM_REPO:-https://github.com/systemd/systemd.git}"
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+
+# Use git, if in a git repo
+if [ -d .git ]; then
+    # make sure user.name/user.email are set, git commit wants them
+    git config --get user.name || git config user.name "$DUMMY_USER_NAME"
+    git config --get user.email || git config user.email "$DUMMY_USER_EMAIL"
+fi
+
+mkdir -p debian/tmp
+(cd debian/tmp
+ git clone "${UPSTREAM_REPO}" upstream || (rm -rf upstream; sleep 60; git clone "${UPSTREAM_REPO}" upstream)
+ cd upstream
+ $FETCH
+ $CO
+ git config user.email "$DUMMY_USER_EMAIL"
+ git config user.name "$DUMMY_USER_NAME"
+ if [ -f meson.version ]; then
+     UPSTREAM_VER=$(cat meson.version)
+ else
+     UPSTREAM_VER=$(git describe | sed 's/^v//;s/-/./g')
+ fi
+ if  [ -n "${UPSTREAM_PULL_REQUEST:-}" ] && [ "${UPSTREAM_REPO}" != "https://github.com/systemd/systemd-stable.git" ] && ! echo "$UPSTREAM_VER" | grep -q '\.'; then
+     git rebase main || git rebase --abort
+ fi
+)
+if [ -f debian/tmp/upstream/meson.version ]; then
+    UPSTREAM_VER=$(cat debian/tmp/upstream/meson.version)
+else
+    UPSTREAM_VER=$(cd debian/tmp/upstream; git describe | sed 's/^v//;s/-/./g')
+fi
+
+# If we are on a stable branch, check out the corresponding packaging branch. For some settings like
+# build dependencies it is already too late (so try to install them again), but this is mostly relevant for the dh_install files and
+# the tests.
+if [ -d .git ] && echo "$UPSTREAM_VER" | grep -q '\.'; then
+    rm -rf .pc
+    git reset --hard "origin/ci/v${UPSTREAM_VER%%.*}-stable"
+    apt build-dep --yes . || true
+fi
+
+if [ -n "${KEEP_DEBIAN_PATCHES:-}" ]; then
+        # set up pq branch if it does not exist
+        if [ "$BRANCH_NAME" = HEAD ]; then
+                echo "ERROR: $0 must be started from a branch when using KEEP_DEBIAN_PATCHES" >&2
+                exit 1
+        fi
+        ( gbp pq import 2> /dev/null && gbp pq switch ) || true
+        if ! git branch --contains "$BRANCH_NAME" | grep -q patch-queue/"$BRANCH_NAME"; then
+                echo "ERROR: patch-queue/$BRANCH_NAME exists but it is not rebased, please rebase it." >&2
+                exit 1
+        fi
+fi
+
+# switch to native instead of quilt
+echo '3.0 (native)' > debian/source/format
+
+# drop our patches
+rm -rf debian/patches
+
+# disable tests which are not for upstream
+[ -n "${KEEP_DEBIAN_TESTS:-}" ] || sed -i '/# NOUPSTREAM/ q' debian/tests/control
+
+# create new git commit with debian/ changes
+if [ -d .git ] && [ -n "$(git status --short debian)" ]; then
+    git add debian
+    git commit -n -m "checkout-upstream: edit debian/ files for upstream testing"
+fi
+
+# clean out original upstream sources
+find . -mindepth 1 -maxdepth 1 -name debian -o -name .git -prune -o -print0 | xargs -0n1 rm -rf
+
+# These options changes are only needed for the upstream CI, and we don't want to pollute d/rules with them.
+# Also we want to ensure running on an older branch (e.g.: for the systemd-stable repository) doesn't break.
+if grep -q default-timeout-sec debian/tmp/upstream/meson_options.txt; then
+    sed -i "s/option('default-timeout-sec', type : 'integer', value : 90/option('default-timeout-sec', type : 'integer', value : 180/" debian/tmp/upstream/meson_options.txt
+fi
+if grep -q log-trace debian/tmp/upstream/meson_options.txt; then
+    sed -i "s/option('log-trace', type : 'boolean', value : false/option('log-trace', type : 'boolean', value : true/" debian/tmp/upstream/meson_options.txt
+fi
+
+# replace with checkout
+mv debian/tmp/upstream/* .
+rm -rf debian/tmp
+
+# create new git commit with upstream code
+if [ -d .git ] && [ -n "$(git status --short)" ] ; then
+    git add .
+    git commit -n -m "checkout-upstream: replace with upstream code at version ${UPSTREAM_VER}"
+fi
+
+# import Debian patches which apply cleanly
+if [ -n "${KEEP_DEBIAN_PATCHES:-}" ]; then
+    for c in $(git log "$BRANCH_NAME"..patch-queue/"$BRANCH_NAME" --format='%H' --reverse); do
+        if ! git cherry-pick "$c"; then
+            git cherry-pick --abort
+            git reset --hard
+            git clean -dxf
+        fi
+    done
+fi
+
+if [ -z "${UPSTREAM_KEEP_CHANGELOG:-}" ] ; then
+    # craft changelog
+    cat << EOF > debian/changelog.new
+systemd (${UPSTREAM_VER}.0) UNRELEASED; urgency=low
+
+  * Automatic build from upstream $DESC
+
+ -- systemd test <pkg-systemd-maintainers@lists.alioth.debian.org>  $(date -R)
+
+EOF
+    cat debian/changelog >> debian/changelog.new
+    mv debian/changelog.new debian/changelog
+
+    # create new git commit with changelog entry
+    if [ -d .git ] ; then
+        git add debian
+        git commit -n -m "checkout-upstream: update changelog to version ${UPSTREAM_VER}.0"
+    fi
+fi

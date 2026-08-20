@@ -1,0 +1,78 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Thu, 18 Jun 2026 10:09:30 -0400
+Subject: test: use gnudate in TEST-45-TIMEDATE
+
+Bug: https://github.com/uutils/coreutils/issues/12001
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2157342
+Forwarded: no, not systemd's bug
+---
+ test/units/TEST-45-TIMEDATE.sh | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/test/units/TEST-45-TIMEDATE.sh b/test/units/TEST-45-TIMEDATE.sh
+index 820c3ae..8dd4ef5 100755
+--- a/test/units/TEST-45-TIMEDATE.sh
++++ b/test/units/TEST-45-TIMEDATE.sh
+@@ -270,7 +270,7 @@ EOF
+         busctl monitor --json=short --match="type=signal,sender=org.freedesktop.timedate1,member=PropertiesChanged,path=/org/freedesktop/timedate1"
+ 
+     : 'Disable NTP'
+-    ts="$(date +"%F %T.%6N")"
++    ts="$(gnudate +"%F %T.%6N")"
+     timedatectl set-ntp false
+     assert_timedated_signal "$ts" "false"
+     assert_timesyncd_state "inactive"
+@@ -278,7 +278,7 @@ EOF
+     assert_rc 3 systemctl is-active --quiet systemd-timesyncd
+ 
+     : 'Enable NTP'
+-    ts="$(date +"%F %T.%6N")"
++    ts="$(gnudate +"%F %T.%6N")"
+     timedatectl set-ntp true
+     assert_timedated_signal "$ts" "true"
+     assert_ntp "true"
+@@ -286,7 +286,7 @@ EOF
+     assert_rc 0 systemctl is-active --quiet systemd-timesyncd
+ 
+     : 'Re-disable NTP'
+-    ts="$(date +"%F %T.%6N")"
++    ts="$(gnudate +"%F %T.%6N")"
+     timedatectl set-ntp false
+     assert_timedated_signal "$ts" "false"
+     assert_ntp "false"
+@@ -371,22 +371,22 @@ EOF
+     # LinkNTPServers
+     #
+     # Single IP
+-    ts="$(date +"%F %T.%6N")"
++    ts="$(gnudate +"%F %T.%6N")"
+     timedatectl ntp-servers ntp99 10.0.0.1
+     assert_networkd_ntp ntp99 10.0.0.1
+     assert_timesyncd_signal "$ts" LinkNTPServers 10.0.0.1
+     # Setting NTP servers to the same value shouldn't emit a PropertiesChanged signal
+-    ts="$(date +"%F %T.%6N")"
++    ts="$(gnudate +"%F %T.%6N")"
+     timedatectl ntp-servers ntp99 10.0.0.1
+     assert_networkd_ntp ntp99 10.0.0.1
+     (! assert_timesyncd_signal "$ts" LinkNTPServers 10.0.0.1)
+     # Multiple IPs
+-    ts="$(date +"%F %T.%6N")"
++    ts="$(gnudate +"%F %T.%6N")"
+     timedatectl ntp-servers ntp99 10.0.0.1 192.168.0.99
+     assert_networkd_ntp ntp99 "10.0.0.1 192.168.0.99"
+     assert_timesyncd_signal "$ts" LinkNTPServers "10.0.0.1 192.168.0.99"
+     # Multiple IPs + servers
+-    ts="$(date +"%F %T.%6N")"
++    ts="$(gnudate +"%F %T.%6N")"
+     timedatectl ntp-servers ntp99 10.0.0.1 192.168.0.99 foo.localhost foo 10.11.12.13
+     assert_networkd_ntp ntp99 "10.0.0.1 192.168.0.99 foo.localhost foo 10.11.12.13"
+     assert_timesyncd_signal "$ts" LinkNTPServers "10.0.0.1 192.168.0.99 foo.localhost foo 10.11.12.13"
+@@ -397,7 +397,7 @@ EOF
+     # call SetRuntimeNTPServers() directly to test things out. The inner workings should
+     # be exactly the same as in the previous case, so do just one test to make sure
+     # things work
+-    ts="$(date +"%F %T.%6N")"
++    ts="$(gnudate +"%F %T.%6N")"
+     busctl call org.freedesktop.timesync1 /org/freedesktop/timesync1 org.freedesktop.timesync1.Manager \
+         SetRuntimeNTPServers as 4 "10.0.0.1" foo "192.168.99.1" bar
+     servers="$(busctl get-property org.freedesktop.timesync1 /org/freedesktop/timesync1 org.freedesktop.timesync1.Manager RuntimeNTPServers)"

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+test -x /usr/bin/bootctl || exit 0
+
+bootctl is-installed --quiet || exit 0
+
+echo "Installing kernel version $1 in systemd-boot..."
+
+kernel-install add "$1" "$2"

@@ -1,0 +1,10 @@
+systemd source: very-long-line-length-in-source-file
+# Data formats are not compatible
+systemd source: source-contains-data-from-ieee-data-oui-db
+# Generated from template from same sources
+systemd source: version-substvar-for-external-package
+# We add and remove <pkg.systemd.upstream> constantly, no need to go back and forth on dh-exec
+systemd source: dh-exec-script-without-dh-exec-features
+# Lintian does not understand Conflicts/Replaces/Provides
+systemd source: binaries-have-file-conflict systemd systemd-standalone-sysusers *
+systemd source: binaries-have-file-conflict systemd systemd-standalone-tmpfiles *

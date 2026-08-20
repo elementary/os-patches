@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+update_hwdb() {
+    systemd-hwdb --usr update || true
+}
+
+case "$1" in
+    configure)
+        # update/create hwdb before we (re)start udev
+        update_hwdb
+
+        if dpkg --compare-versions "$2" lt-nl "254.3-1~" && [ ! -f /etc/init.d/udev ]; then
+            update-rc.d udev remove || true
+        fi
+    ;;
+
+    triggered)
+        update_hwdb
+        exit 0
+    ;;
+esac
+
+#DEBHELPER#

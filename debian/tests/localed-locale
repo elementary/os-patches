@@ -1,0 +1,77 @@
+#!/bin/sh
+set -e
+
+. `dirname $0`/assert.sh
+
+# Calls to localed are blocked as other tools are used to change settings,
+# override that policy
+mkdir -p /etc/dbus-1/system.d/
+cat >/etc/dbus-1/system.d/systemd-localed-read-only.conf <<EOF
+<?xml version="1.0"?>
+<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+        "https://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+        <policy user="root">
+                <allow send_destination="org.freedesktop.locale1" send_interface="org.freedesktop.locale1" send_member="SetLocale"/>
+                <allow send_destination="org.freedesktop.locale1" send_interface="org.freedesktop.locale1" send_member="SetVConsoleKeyboard"/>
+                <allow send_destination="org.freedesktop.locale1" send_interface="org.freedesktop.locale1" send_member="SetX11Keyboard"/>
+        </policy>
+</busconfig>
+EOF
+trap 'rm -f /etc/dbus-1/system.d/systemd-localed-read-only.conf' EXIT
+systemctl reload dbus.service || true
+
+if [ -f /etc/locale.conf ]; then
+    cp /etc/locale.conf /etc/locale.conf.orig
+fi
+if  [ -f /etc/vconsole.conf ]; then
+    mv /etc/vconsole.conf /etc/vconsole.conf.orig
+fi
+
+# ensure tested locale exist
+mv /etc/locale.gen /etc/locale.gen.orig
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+locale-gen en_US.UTF-8
+
+/bin/echo -e 'XKBMODEL=us\nXKBLAYOUT=pc105' > /etc/vconsole.conf
+
+# should activate daemon and work
+assert_in "System Locale:" "`localectl --no-pager`"
+
+# change locale
+assert_eq "`localectl --no-pager set-locale LANG=C LC_CTYPE=en_US.UTF-8 2>&1`" ""
+sync
+assert_eq "`cat /etc/locale.conf`" "LANG=C
+LC_CTYPE=en_US.UTF-8"
+
+STATUS=`localectl`
+assert_in "System Locale: LANG=C" "$STATUS"
+assert_in "LC_CTYPE=en_US.UTF-8" "$STATUS"
+
+# test if localed auto-runs locale-gen
+
+# ensure tested locale does not exist
+assert_rc 1 validlocale de_DE.UTF-8 2>&1
+
+# change locale
+assert_eq "`localectl --no-pager set-locale de_DE.UTF-8 2>&1`" ""
+sync
+assert_eq "`cat /etc/locale.conf`" "LANG=de_DE.UTF-8
+LC_CTYPE=en_US.UTF-8"
+
+# ensure tested locale exists and works now
+assert_rc 0 validlocale de_DE.UTF-8 2>&1
+
+# reset locale to original
+if [ -f /etc/locale.conf.orig ]; then
+    mv /etc/locale.conf.orig /etc/locale.conf
+else
+    rm -f /etc/locale.conf
+fi
+if [ -f /etc/vconsole.conf.orig ]; then
+    mv /etc/vconsole.conf.orig /etc/vconsole.conf
+else
+    rm /etc/vconsole.conf
+fi
+mv /etc/locale.gen.orig /etc/locale.gen
+locale-gen

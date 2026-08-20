@@ -1,0 +1,176 @@
+From: Luca Boccassi <luca.boccassi@gmail.com>
+Date: Tue, 14 Apr 2026 20:22:39 +0100
+Subject: machined: gate metadata querying behind inspect-machines/images
+
+Origin: upstream, https://github.com/systemd/systemd-stable/commit/b808894777348ad57dcf145e9f9ec1211ef84910
+ action
+
+Ensure only privileged users can call the system scope machined's
+APIs that get data out of a machine
+
+Follow-up for 1bd979dddbb6ed3ffe410d78a7ff80cbb1c42a64
+Follow-up for 9153b02bb5030e29d6008992fb74b9028d7c392c
+
+(cherry picked from commit 3e716178cc3bcf972d878d3899ad1c977a7d707b)
+(cherry picked from commit 6e6aa47f468b7c4f70350d4498553c8ae5967335)
+(cherry picked from commit b808894777348ad57dcf145e9f9ec1211ef84910)
+---
+ src/machine/machine-dbus.c                  | 19 +++++++++++++++++++
+ src/machine/machined-varlink.c              | 22 ++++++++++++++++++++++
+ src/machine/org.freedesktop.machine1.policy | 23 ++++++++++++++++++++++-
+ test/units/TEST-13-NSPAWN.unpriv.sh         | 24 ++++++++++++++++++++++++
+ 4 files changed, 87 insertions(+), 1 deletion(-)
+
+diff --git a/src/machine/machine-dbus.c b/src/machine/machine-dbus.c
+index 2004607..c4870d1 100644
+--- a/src/machine/machine-dbus.c
++++ b/src/machine/machine-dbus.c
+@@ -246,6 +246,25 @@ int bus_machine_method_get_os_release(sd_bus_message *message, void *userdata, s
+ 
+         assert(message);
+ 
++        if (m->manager->runtime_scope != RUNTIME_SCOPE_USER) {
++                const char *details[] = {
++                        "machine", m->name,
++                        "verb", "get_os_release",
++                        NULL
++                };
++
++                r = bus_verify_polkit_async(
++                                message,
++                                "org.freedesktop.machine1.inspect-machines",
++                                details,
++                                &m->manager->polkit_registry,
++                                error);
++                if (r < 0)
++                        return r;
++                if (r == 0)
++                        return 1; /* Will call us back */
++        }
++
+         r = machine_get_os_release(m, &l);
+         if (r == -ENONET)
+                 return sd_bus_error_set(error, SD_BUS_ERROR_FAILED, "Machine does not contain OS release information.");
+diff --git a/src/machine/machined-varlink.c b/src/machine/machined-varlink.c
+index 56abcb9..0d45abb 100644
+--- a/src/machine/machined-varlink.c
++++ b/src/machine/machined-varlink.c
+@@ -539,6 +539,17 @@ static int vl_method_list(sd_varlink *link, sd_json_variant *parameters, sd_varl
+         if (r != 0)
+                 return r;
+ 
++        if (should_acquire_metadata(p.acquire_metadata)) {
++                r = varlink_verify_polkit_async(
++                                link,
++                                m->system_bus,
++                                "org.freedesktop.machine1.inspect-machines",
++                                (const char**) STRV_MAKE("name", strna(p.name)),
++                                &m->polkit_registry);
++                if (r <= 0)
++                        return r;
++        }
++
+         if (p.name || pidref_is_set(&p.pidref) || pidref_is_automatic(&p.pidref)) {
+                 r = lookup_machine_by_name_or_pidref(link, m, p.name, &p.pidref, &machine);
+                 if (r == -ESRCH)
+@@ -691,6 +702,17 @@ static int vl_method_list_images(sd_varlink *link, sd_json_variant *parameters,
+         if (r != 0)
+                 return r;
+ 
++        if (should_acquire_metadata(p.acquire_metadata)) {
++                r = varlink_verify_polkit_async(
++                                link,
++                                m->system_bus,
++                                "org.freedesktop.machine1.inspect-images",
++                                (const char**) STRV_MAKE("name", strna(p.image_name)),
++                                &m->polkit_registry);
++                if (r <= 0)
++                        return r;
++        }
++
+         if (p.image_name) {
+                 _cleanup_(image_unrefp) Image *found = NULL;
+ 
+diff --git a/src/machine/org.freedesktop.machine1.policy b/src/machine/org.freedesktop.machine1.policy
+index d5b8d83..f8f498f 100644
+--- a/src/machine/org.freedesktop.machine1.policy
++++ b/src/machine/org.freedesktop.machine1.policy
+@@ -88,7 +88,17 @@
+                         <allow_inactive>auth_admin</allow_inactive>
+                         <allow_active>auth_admin_keep</allow_active>
+                 </defaults>
+-                <annotate key="org.freedesktop.policykit.imply">org.freedesktop.login1.shell org.freedesktop.login1.login</annotate>
++                <annotate key="org.freedesktop.policykit.imply">org.freedesktop.login1.shell org.freedesktop.login1.login org.freedesktop.machine1.inspect-machines</annotate>
++        </action>
++
++        <action id="org.freedesktop.machine1.inspect-machines">
++                <description gettext-domain="systemd">Inspect local virtual machines and containers</description>
++                <message gettext-domain="systemd">Authentication is required to inspect local virtual machines and containers.</message>
++                <defaults>
++                        <allow_any>auth_admin</allow_any>
++                        <allow_inactive>auth_admin</allow_inactive>
++                        <allow_active>auth_admin_keep</allow_active>
++                </defaults>
+         </action>
+ 
+         <action id="org.freedesktop.machine1.create-machine">
+@@ -120,6 +130,17 @@
+                         <allow_inactive>auth_admin</allow_inactive>
+                         <allow_active>auth_admin_keep</allow_active>
+                 </defaults>
++                <annotate key="org.freedesktop.policykit.imply">org.freedesktop.machine1.inspect-images</annotate>
++        </action>
++
++        <action id="org.freedesktop.machine1.inspect-images">
++                <description gettext-domain="systemd">Inspect local virtual machine and container images</description>
++                <message gettext-domain="systemd">Authentication is required to inspect local virtual machine and container images.</message>
++                <defaults>
++                        <allow_any>auth_admin</allow_any>
++                        <allow_inactive>auth_admin</allow_inactive>
++                        <allow_active>auth_admin_keep</allow_active>
++                </defaults>
+         </action>
+ 
+ </policyconfig>
+diff --git a/test/units/TEST-13-NSPAWN.unpriv.sh b/test/units/TEST-13-NSPAWN.unpriv.sh
+index 75a9c1a..e051644 100755
+--- a/test/units/TEST-13-NSPAWN.unpriv.sh
++++ b/test/units/TEST-13-NSPAWN.unpriv.sh
+@@ -23,6 +23,8 @@ at_exit() {
+     rm -rf /home/testuser/.local/state/machines/inodetest2 ||:
+     rm -rf /home/testuser/.local/state/machines/mangletest ||:
+     machinectl terminate zurps ||:
++    machinectl terminate exfiltrate ||:
++    systemctl --user --machine testuser@ stop exfiltrate.service ||:
+     rm -f /etc/polkit-1/rules.d/registermachinetest.rules
+     machinectl terminate nurps ||:
+     machinectl terminate kurps ||:
+@@ -163,6 +165,28 @@ run0 -u testuser  \
+ systemctl --user --machine testuser@ stop sleep.service
+ test ! -f /shouldnotwork
+ 
++echo FOO=bar >/tmp/foo
++chmod 600 /tmp/foo
++run0 -u testuser \
++    systemd-run --unit exfiltrate.service --service-type notify --property NotifyAccess=all --user \
++        unshare --map-root-user --user --mount \
++            bash -c 'mount --bind /tmp/foo /usr/lib/os-release; systemd-notify --ready; exec sleep infinity'
++exfiltrate_pid="$(systemctl --machine testuser@.host show --user -P MainPID exfiltrate.service)"
++run0 -u testuser \
++    varlinkctl \
++        call \
++        /run/systemd/machine/io.systemd.Machine \
++        io.systemd.Machine.Register \
++        "{\"name\":\"exfiltrate\", \"class\":\"container\", \"leader\": $exfiltrate_pid}"
++exfiltrate_output="$(run0 -u testuser \
++    varlinkctl \
++        call \
++        /run/systemd/machine/io.systemd.Machine io.systemd.Machine.List \
++        "{\"name\":\"exfiltrate\",\"acquireMetadata\":\"graceful\"}" 2>&1)" || true
++(! echo "$exfiltrate_output" | grep '"name".*"exfiltrate"' >/dev/null)
++(! echo "$exfiltrate_output" | grep "FOO=bar" >/dev/null)
++systemctl --user --machine testuser@ stop exfiltrate.service
++
+ run0 -u testuser mkdir /var/tmp/image-tar
+ run0 -u testuser importctl --user export-tar zurps /var/tmp/image-tar/kurps.tar.gz -m
+ run0 -u testuser importctl --user import-tar /var/tmp/image-tar/kurps.tar.gz -m

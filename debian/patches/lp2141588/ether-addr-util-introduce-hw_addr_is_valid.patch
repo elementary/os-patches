@@ -1,0 +1,116 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Thu, 19 Mar 2026 11:12:06 -0400
+Subject: ether-addr-util: introduce hw_addr_is_valid()
+
+Take this from udev, and adapt it to make it re-usable elsewhere.
+
+Forwarded: https://github.com/systemd/systemd/pull/41028
+---
+ src/basic/ether-addr-util.c | 24 ++++++++++++++++++++++++
+ src/basic/ether-addr-util.h |  1 +
+ src/udev/net/link-config.c  | 24 ++----------------------
+ 3 files changed, 27 insertions(+), 22 deletions(-)
+
+diff --git a/src/basic/ether-addr-util.c b/src/basic/ether-addr-util.c
+index 375c044..2a8196d 100644
+--- a/src/basic/ether-addr-util.c
++++ b/src/basic/ether-addr-util.c
+@@ -1,6 +1,7 @@
+ /* SPDX-License-Identifier: LGPL-2.1-or-later */
+ 
+ #include <net/ethernet.h>
++#include <net/if_arp.h>
+ #include <stdio.h>
+ 
+ #include "ether-addr-util.h"
+@@ -68,6 +69,29 @@ bool hw_addr_is_null(const struct hw_addr_data *addr) {
+         return addr->length == 0 || memeqzero(addr->bytes, addr->length);
+ }
+ 
++bool hw_addr_is_valid(const struct hw_addr_data *addr, uint16_t iftype) {
++        assert(addr);
++
++        switch (iftype) {
++        case ARPHRD_ETHER:
++                /* Refuse all zero and all 0xFF. */
++                if (addr->length != ETH_ALEN)
++                        return false;
++
++                return !ether_addr_is_null(&addr->ether) && !ether_addr_is_broadcast(&addr->ether);
++
++        case ARPHRD_INFINIBAND:
++                /* The last 8 bytes cannot be zero. */
++                if (addr->length != INFINIBAND_ALEN)
++                        return false;
++
++                return !memeqzero(addr->bytes + INFINIBAND_ALEN - 8, 8);
++
++        default:
++                return false;
++        }
++}
++
+ DEFINE_HASH_OPS(hw_addr_hash_ops, struct hw_addr_data, hw_addr_hash_func, hw_addr_compare);
+ DEFINE_HASH_OPS_WITH_KEY_DESTRUCTOR(hw_addr_hash_ops_free, struct hw_addr_data, hw_addr_hash_func, hw_addr_compare, free);
+ 
+diff --git a/src/basic/ether-addr-util.h b/src/basic/ether-addr-util.h
+index cf014a9..d342b56 100644
+--- a/src/basic/ether-addr-util.h
++++ b/src/basic/ether-addr-util.h
+@@ -57,6 +57,7 @@ static inline bool hw_addr_equal(const struct hw_addr_data *a, const struct hw_a
+         return hw_addr_compare(a, b) == 0;
+ }
+ bool hw_addr_is_null(const struct hw_addr_data *addr) _pure_;
++bool hw_addr_is_valid(const struct hw_addr_data *addr, uint16_t iftype);
+ 
+ extern const struct hash_ops hw_addr_hash_ops;
+ extern const struct hash_ops hw_addr_hash_ops_free;
+diff --git a/src/udev/net/link-config.c b/src/udev/net/link-config.c
+index 35dfa0d..b29addd 100644
+--- a/src/udev/net/link-config.c
++++ b/src/udev/net/link-config.c
+@@ -555,26 +555,6 @@ static int link_apply_ethtool_settings(Link *link, int *ethtool_fd) {
+         return 0;
+ }
+ 
+-static bool hw_addr_is_valid(Link *link, const struct hw_addr_data *hw_addr) {
+-        assert(link);
+-        assert(hw_addr);
+-
+-        switch (link->iftype) {
+-        case ARPHRD_ETHER:
+-                /* Refuse all zero and all 0xFF. */
+-                assert(hw_addr->length == ETH_ALEN);
+-                return !ether_addr_is_null(&hw_addr->ether) && !ether_addr_is_broadcast(&hw_addr->ether);
+-
+-        case ARPHRD_INFINIBAND:
+-                /* The last 8 bytes cannot be zero. */
+-                assert(hw_addr->length == INFINIBAND_ALEN);
+-                return !memeqzero(hw_addr->bytes + INFINIBAND_ALEN - 8, 8);
+-
+-        default:
+-                assert_not_reached();
+-        }
+-}
+-
+ static int link_generate_new_hw_addr(Link *link, struct hw_addr_data *ret) {
+         struct hw_addr_data hw_addr = HW_ADDR_NULL;
+         bool is_static = false;
+@@ -644,7 +624,7 @@ static int link_generate_new_hw_addr(Link *link, struct hw_addr_data *ret) {
+                  * systems booting up at the very same time. */
+                 for (;;) {
+                         random_bytes(p, len);
+-                        if (hw_addr_is_valid(link, &hw_addr))
++                        if (hw_addr_is_valid(&hw_addr, link->iftype))
+                                 break;
+                 }
+ 
+@@ -659,7 +639,7 @@ static int link_generate_new_hw_addr(Link *link, struct hw_addr_data *ret) {
+ 
+                 assert(len <= sizeof(result));
+                 memcpy(p, &result, len);
+-                if (!hw_addr_is_valid(link, &hw_addr))
++                if (!hw_addr_is_valid(&hw_addr, link->iftype))
+                         return log_link_warning_errno(link, SYNTHETIC_ERRNO(EINVAL),
+                                                       "Could not generate valid persistent MAC address.");
+         }

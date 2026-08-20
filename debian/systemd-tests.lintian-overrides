@@ -1,0 +1,16 @@
+# It's not documentation, it's test data
+systemd-tests: package-contains-documentation-outside-usr-share-doc
+# netlink keyword
+systemd-tests: spelling-error-in-binary iif if [usr/lib/systemd/tests/unit-tests/test-network*]
+# test binaries, we don't care about these flags
+systemd-tests: hardening-no-fortify-functions
+# test payload, intentional
+systemd-tests: national-encoding [usr/lib/systemd/tests/testdata/test-fstab-generator/test-19-mounts-from-cmdline.expected/hoge-withx20space.mount]
+# Content for images
+systemd-tests: repeated-path-segment * [*]
+# Test files
+systemd-tests: systemd-service-file-missing-documentation-key [*]
+systemd-tests: systemd-service-file-refers-to-unusual-wantedby-target * [*]
+systemd-tests: wrong-path-for-interpreter /usr/bin/bash != /bin/bash [*]
+# Intentional for integration tests
+systemd-tests: symlink-is-self-recursive .. [usr/lib/systemd/tests/integration-tests/standalone/integration-tests]

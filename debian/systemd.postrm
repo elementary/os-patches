@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    purge)
+        # clean up after manually enabled units in postinst
+        rm -f /etc/systemd/system/getty.target.wants/getty@tty1.service
+        rm -f /etc/systemd/system/multi-user.target.wants/remote-fs.target
+        rm -f /etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service
+        rm -f /etc/systemd/system/dbus-org.freedesktop.timesync1.service
+        rm -f /etc/systemd/system/sysinit.target.wants/systemd-pstore.service
+        rmdir --ignore-fail-on-non-empty /etc/systemd/system/getty.target.wants 2> /dev/null || true
+        rmdir --ignore-fail-on-non-empty /etc/systemd/system/multi-user.target.wants 2> /dev/null || true
+        rmdir --ignore-fail-on-non-empty /etc/systemd/system/sysinit.target.wants 2> /dev/null || true
+
+        # If we created tmp.conf for compatibility with pre-Trixie, remove it (it is intentionally orphaned)
+        if [ -f /etc/tmpfiles.d/tmp.conf ] && [ "$(cat /etc/tmpfiles.d/tmp.conf)" = "D /tmp 1777 root root -" ]; then
+                rm -f /etc/tmpfiles.d/tmp.conf
+        fi
+
+        rm -f /var/lib/systemd/catalog/database
+        rmdir --ignore-fail-on-non-empty /var/lib/systemd/catalog 2> /dev/null || true
+
+        rm -rf /var/lib/systemd/network/
+        rm -rf /var/lib/systemd/backlight/
+        rm -rf /var/lib/systemd/rfkill/
+        rm -rf /var/lib/systemd/timesync/
+        rm -rf /var/lib/systemd/ephemeral-trees/
+
+        rm -f /var/lib/systemd/random-seed
+
+        rm -f /var/log/README
+        rmdir --ignore-fail-on-non-empty /var/lib/systemd/pstore/ 2> /dev/null || true
+        rmdir --ignore-fail-on-non-empty /var/lib/systemd/coredump/ 2> /dev/null || true
+        rmdir --ignore-fail-on-non-empty /var/log/journal 2> /dev/null || true
+    ;;
+esac
+
+#DEBHELPER#

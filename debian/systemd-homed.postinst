@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+# pam-auth-update makes wrong assumptions and doesn't allow no-op modules, so
+# we need to remove 'use_authtok try_first_pass' after it runs
+_fixup_common_password() {
+    sed -i "s/pam_unix.so obscure use_authtok try_first_pass/pam_unix.so obscure/g" /etc/pam.d/common-password || true
+}
+
+if [ "$1" = "triggered" ]; then
+    shift
+    for trigger in $@; do
+        case $trigger in
+            /usr/share/pam-configs)
+                _fixup_common_password
+                ;;
+        esac
+    done
+    exit 0
+fi
+
+pam-auth-update --package --enable systemd-homed
+_fixup_common_password
+
+#DEBHELPER#

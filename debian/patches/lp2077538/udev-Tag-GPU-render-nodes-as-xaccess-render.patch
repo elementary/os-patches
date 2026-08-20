@@ -1,0 +1,24 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Wed, 11 Feb 2026 15:05:45 +0100
+Subject: udev: Tag GPU render nodes as xaccess-render
+
+Origin: https://github.com/systemd/systemd/pull/40645
+Bug-GNOME: https://gitlab.gnome.org/GNOME/gnome-remote-desktop/-/issues/224
+Bug-Ubuntu: https://launchpad.net/bugs/2077538
+---
+ rules.d/70-uaccess.rules.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rules.d/70-uaccess.rules.in b/rules.d/70-uaccess.rules.in
+index 84ee00d..d83b8c2 100644
+--- a/rules.d/70-uaccess.rules.in
++++ b/rules.d/70-uaccess.rules.in
+@@ -46,7 +46,7 @@ SUBSYSTEM=="firewire", TEST=="units", ENV{IEEE1394_UNIT_FUNCTION_VIDEO}=="1", TA
+ SUBSYSTEM=="drm", KERNEL=="card*", TAG+="uaccess"
+ {% if GROUP_RENDER_UACCESS %}
+ # DRI render nodes
+-SUBSYSTEM=="drm", KERNEL=="renderD*", TAG+="uaccess", TAG+="xaccess"
++SUBSYSTEM=="drm", KERNEL=="renderD*", TAG+="uaccess", TAG+="xaccess-render"
+ {% endif %}
+ {% if DEV_KVM_UACCESS %}
+ # KVM

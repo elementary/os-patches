@@ -1,0 +1,6 @@
+# Lintian is really bad at associating manpages
+systemd-homed: spare-manual-page
+# False positive: Lintian doesn't recognize Also=
+systemd-homed: systemd-service-file-refers-to-unusual-wantedby-target
+# Not to be called manually
+systemd-homed: no-manual-page [usr/bin/systemd-home-fallback-shell]

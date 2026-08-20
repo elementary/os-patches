@@ -1,0 +1,27 @@
+#!/bin/bash
+
+cat <<EOF
+
+Providing additional information can help diagnose problems with udev.
+Specifically, this would include a udev database.
+The data is generated via "udevadm info --export-db".
+If this information is not relevant for your bug report or you have privacy
+concerns, please choose no.
+
+EOF
+
+yesno "Do you want to provide additional information [Y|n]? " yep
+[ "$REPLY" = yep ] || exit 0
+
+# We don’t clean up this directory because there is no way to know when
+# reportbug finished running, and reportbug needs the files around.
+# Given that those are just a couple of kilobytes in size and people
+# generally don’t file a lot of bugs, I don’t think it’s a big deal.
+DIR=$(mktemp -d)
+
+echo "-- BEGIN ATTACHMENTS --" >&3
+
+udevadm info --export-db >$DIR/udev-database.txt
+echo "$DIR/udev-database.txt" >&3
+
+echo "-- END ATTACHMENTS --" >&3

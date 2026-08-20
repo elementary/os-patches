@@ -1,0 +1,324 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Tue, 24 Feb 2026 14:05:05 -0500
+Subject: network-generator: support BOOTIF= and rd.bootif=0 options
+
+The network generator currently supports many of the options described
+by dracut.cmdline(7), but not everything.
+
+This commit adds support for the BOOTIF= option (and the related
+rd.bootif= option) used in PXE setups.
+
+This is implemented by treating BOOTIF as a special name/placeholder
+when used as an interface name, and expecting a MAC address to be set in
+the BOOTIF= parameter. The resulting .network file then uses MACAddress=
+in the [Match] section, instead of Name=.
+
+(cherry picked from commit d944d02bdab4a8006273c1a27ac536186447a71b)
+---
+ src/network/generator/network-generator-main.c |  2 +
+ src/network/generator/network-generator.c      | 97 +++++++++++++++++++++++++-
+ src/network/generator/network-generator.h      |  6 ++
+ src/network/generator/test-network-generator.c | 83 ++++++++++++++++++++++
+ 4 files changed, 186 insertions(+), 2 deletions(-)
+
+diff --git a/src/network/generator/network-generator-main.c b/src/network/generator/network-generator-main.c
+index c449a6d..d64f65b 100644
+--- a/src/network/generator/network-generator-main.c
++++ b/src/network/generator/network-generator-main.c
+@@ -233,6 +233,8 @@ static int run(int argc, char *argv[]) {
+                 }
+         }
+ 
++        context_finalize_bootif(&context);
++
+         r = context_merge_networks(&context);
+         if (r < 0)
+                 return log_warning_errno(r, "Failed to merge multiple command line options: %m");
+diff --git a/src/network/generator/network-generator.c b/src/network/generator/network-generator.c
+index 0988aef..d9bea1f 100644
+--- a/src/network/generator/network-generator.c
++++ b/src/network/generator/network-generator.c
+@@ -1,5 +1,6 @@
+ /* SPDX-License-Identifier: LGPL-2.1-or-later */
+ 
++#include <net/if_arp.h>
+ 
+ #include "alloc-util.h"
+ #include "extract-word.h"
+@@ -25,6 +26,8 @@
+   rd.route=<net>/<netmask>:<gateway>[:<interface>]
+   nameserver=<IP> [nameserver=<IP> ...]
+   rd.peerdns=0
++  BOOTIF=<MAC>
++  rd.bootif=0 # Causes BOOTIF= to be ignored.
+ 
+   # .link
+   ifname=<interface>:<MAC>
+@@ -38,8 +41,6 @@
+ 
+   # ignored
+   bootdev=<interface>
+-  BOOTIF=<MAC>
+-  rd.bootif=0
+   biosdevname=0
+   rd.neednet=1
+ */
+@@ -514,6 +515,40 @@ static int network_set_mac_address(Context *context, const char *ifname, const c
+         return 0;
+ }
+ 
++static int network_set_bootif_mac_address(Context *context, const char *mac) {
++        int r;
++
++        assert(context);
++
++        if (isempty(mac))
++                return 0;
++
++        /* "BOOTIF" is a special placeholder interface name, used to configure the
++         * interface referred to by BOOTIF=. I.e., ip=...:BOOTIF:... is valid if and
++         * only if BOOTIF= is also set. */
++        Network *network;
++        r = network_acquire(context, "BOOTIF", &network);
++        if (r < 0)
++                return log_debug_errno(r, "Failed to acquire network for BOOTIF: %m");
++
++        r = parse_hw_addr(mac, &network->match_mac);
++        if (r < 0) {
++                /* PXE bootloaders may provide the MAC with a "hardware type prefix", e.g.
++                 * 01-12:34:56:78:90:ab, where 01 indicates ethernet. Technically, other
++                 * hardware types are possible, but only ethernet is handled here. */
++                const char *p = startswith(mac, "01-");
++                if (p)
++                        r = parse_hw_addr(p, &network->match_mac);
++        }
++        if (r < 0)
++                return log_debug_errno(r, "Invalid MAC address '%s' for BOOTIF", mac);
++
++        if (!hw_addr_is_valid(&network->match_mac, ARPHRD_ETHER))
++                return log_debug_errno(SYNTHETIC_ERRNO(EINVAL), "Invalid MAC address '%s' for BOOTIF", mac);
++
++        return 0;
++}
++
+ static int network_set_address(
+                 Context *context,
+                 const char *ifname,
+@@ -1250,6 +1285,38 @@ static int parse_cmdline_ifname_policy(Context *context, const char *key, const
+         return 0;
+ }
+ 
++static int parse_cmdline_rd_bootif(Context *context, const char *key, const char *value) {
++        int r;
++
++        assert(context);
++        assert(key);
++
++        /* rd.bootif=<bool> */
++
++        if (proc_cmdline_value_missing(key, value))
++                return 0;
++
++        r = value ? parse_boolean(value) : true;
++        if (r < 0)
++                return log_debug_errno(r, "Invalid boolean value '%s'", value);
++
++        /* rd.bootif=0 => skip BOOTIF= parsing */
++        context->skip_bootif = !r;
++        return 0;
++}
++
++static int parse_cmdline_bootif_mac(Context *context, const char *key, const char *value) {
++        assert(context);
++        assert(key);
++
++        /* BOOTIF=<MAC> */
++
++        if (proc_cmdline_value_missing(key, value))
++                return 0;
++
++        return network_set_bootif_mac_address(context, value);
++}
++
+ int parse_cmdline_item(const char *key, const char *value, void *data) {
+         Context *context = ASSERT_PTR(data);
+ 
+@@ -1273,10 +1340,34 @@ int parse_cmdline_item(const char *key, const char *value, void *data) {
+                 return parse_cmdline_ifname(context, key, value);
+         if (proc_cmdline_key_streq(key, "net.ifname_policy"))
+                 return parse_cmdline_ifname_policy(context, key, value);
++        if (proc_cmdline_key_streq(key, "rd.bootif"))
++                return parse_cmdline_rd_bootif(context, key, value);
++        if (proc_cmdline_key_streq(key, "BOOTIF"))
++                return parse_cmdline_bootif_mac(context, key, value);
+ 
+         return 0;
+ }
+ 
++void context_finalize_bootif(Context *context) {
++        assert(context);
++
++        Network *network = hashmap_get(context->networks_by_name, "BOOTIF");
++        if (!network)
++                return;
++
++        /* rd.bootif=0 disables BOOTIF= handling */
++        if (context->skip_bootif) {
++                network_free(hashmap_remove_value(context->networks_by_name, "BOOTIF", network));
++                return;
++        }
++
++        if (hw_addr_is_null(&network->match_mac)) {
++                log_debug("Expected MAC address for BOOTIF, but BOOTIF= is unset.");
++                network_free(hashmap_remove_value(context->networks_by_name, "BOOTIF", network));
++                return;
++        }
++}
++
+ int context_merge_networks(Context *context) {
+         Network *all, *network;
+         int r;
+@@ -1368,6 +1459,8 @@ void network_dump(Network *network, FILE *f) {
+                  * physical interfaces. */
+                 fputs("Kind=!*\n"
+                       "Type=!loopback\n", f);
++        else if (streq(network->ifname, "BOOTIF"))
++                fprintf(f, "MACAddress=%s\n", HW_ADDR_TO_STR(&network->match_mac));
+         else
+                 fprintf(f, "Name=%s\n", network->ifname);
+ 
+diff --git a/src/network/generator/network-generator.h b/src/network/generator/network-generator.h
+index e40aa42..95a6379 100644
+--- a/src/network/generator/network-generator.h
++++ b/src/network/generator/network-generator.h
+@@ -54,6 +54,8 @@ struct Route {
+ struct Network {
+         /* [Match] */
+         char *ifname;
++        /* Parsed from BOOTIF= parameter. */
++        struct hw_addr_data match_mac;
+ 
+         /* [Link] */
+         struct ether_addr mac;
+@@ -101,11 +103,15 @@ typedef struct Context {
+         Hashmap *networks_by_name;
+         Hashmap *netdevs_by_name;
+         Hashmap *links_by_filename;
++
++        /* If rd.bootif=0, ignore BOOTIF= parsing */
++        bool skip_bootif;
+ } Context;
+ 
+ int parse_cmdline_item(const char *key, const char *value, void *data);
+ int context_merge_networks(Context *context);
+ void context_clear(Context *context);
++void context_finalize_bootif(Context *context);
+ 
+ Network *network_get(Context *context, const char *ifname);
+ void network_dump(Network *network, FILE *f);
+diff --git a/src/network/generator/test-network-generator.c b/src/network/generator/test-network-generator.c
+index ff21877..b62f13c 100644
+--- a/src/network/generator/test-network-generator.c
++++ b/src/network/generator/test-network-generator.c
+@@ -28,12 +28,39 @@ static void test_network_two(const char *ifname,
+ 
+         ASSERT_OK(parse_cmdline_item(key1, value1, &context));
+         ASSERT_OK(parse_cmdline_item(key2, value2, &context));
++        context_finalize_bootif(&context);
+         ASSERT_OK(context_merge_networks(&context));
+         ASSERT_NOT_NULL((network = network_get(&context, ifname)));
+         ASSERT_OK(network_format(network, &output));
+         ASSERT_STREQ(output, expected);
+ }
+ 
++static void test_network_three(const char *ifname,
++                               const char *key1, const char *value1,
++                               const char *key2, const char *value2,
++                               const char *key3, const char *value3,
++                               const char *expected) {
++        _cleanup_(context_clear) Context context = {};
++        _cleanup_free_ char *output = NULL;
++        Network *network;
++
++        log_debug("/* %s(%s=%s, %s=%s, %s=%s) */", __func__, key1, value1, key2, value2, key3, value3);
++
++        ASSERT_OK(parse_cmdline_item(key1, value1, &context));
++        ASSERT_OK(parse_cmdline_item(key2, value2, &context));
++        ASSERT_OK(parse_cmdline_item(key3, value3, &context));
++        context_finalize_bootif(&context);
++        ASSERT_OK(context_merge_networks(&context));
++
++        network = network_get(&context, ifname);
++        if (expected) {
++                ASSERT_NOT_NULL(network);
++                ASSERT_OK(network_format(network, &output));
++                ASSERT_STREQ(output, expected);
++        } else
++                ASSERT_NULL(network);
++}
++
+ static void test_netdev_one(const char *ifname, const char *key, const char *value, const char *expected) {
+         _cleanup_(context_clear) Context context = {};
+         _cleanup_free_ char *output = NULL;
+@@ -573,5 +600,61 @@ int main(int argc, char *argv[]) {
+                          "Gateway=192.168.0.1\n"
+                          );
+ 
++        test_network_two("BOOTIF",
++                         "ip", "::::hogehoge:BOOTIF:dhcp",
++                         "BOOTIF", "01-00:11:22:33:44:55",
++                         "[Match]\n"
++                         "MACAddress=00:11:22:33:44:55\n"
++                         "\n[Link]\n"
++                         "\n[Network]\n"
++                         "DHCP=ipv4\n"
++                         "\n[DHCP]\n"
++                         "Hostname=hogehoge\n"
++                         );
++
++        test_network_two("BOOTIF",
++                         "ip", "::::hogehoge:BOOTIF:dhcp",
++                         "BOOTIF", "00:11:22:33:44:55",
++                         "[Match]\n"
++                         "MACAddress=00:11:22:33:44:55\n"
++                         "\n[Link]\n"
++                         "\n[Network]\n"
++                         "DHCP=ipv4\n"
++                         "\n[DHCP]\n"
++                         "Hostname=hogehoge\n"
++                         );
++
++        test_network_two("BOOTIF",
++                         "ip", "::::hogehoge:BOOTIF:dhcp",
++                         "BOOTIF", "01-00-11-22-33-44-55",
++                         "[Match]\n"
++                         "MACAddress=00:11:22:33:44:55\n"
++                         "\n[Link]\n"
++                         "\n[Network]\n"
++                         "DHCP=ipv4\n"
++                         "\n[DHCP]\n"
++                         "Hostname=hogehoge\n"
++                         );
++
++        test_network_three("BOOTIF",
++                           "ip", "::::hogehoge:BOOTIF:dhcp",
++                           "BOOTIF", "01-00:11:22:33:44:55",
++                           "rd.bootif", "1",
++                           "[Match]\n"
++                           "MACAddress=00:11:22:33:44:55\n"
++                           "\n[Link]\n"
++                           "\n[Network]\n"
++                           "DHCP=ipv4\n"
++                           "\n[DHCP]\n"
++                           "Hostname=hogehoge\n"
++                           );
++
++        test_network_three("BOOTIF",
++                           "ip", "::::hogehoge:BOOTIF:dhcp",
++                           "BOOTIF", "01-00:11:22:33:44:55",
++                           "rd.bootif", "0",
++                           NULL
++                           );
++
+         return 0;
+ }

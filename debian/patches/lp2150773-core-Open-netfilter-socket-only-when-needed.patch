@@ -1,0 +1,76 @@
+From: Valentin David <valentin.david@canonical.com>
+Date: Mon, 4 May 2026 10:25:19 +0200
+Subject: core: Open netfilter socket only when needed
+
+Origin: upstream, https://github.com/systemd/systemd/commit/4a11c5edeb37de4fd73dc2ff059e7a6112514583
+Bug-Ubuntu: https://launchpad.net/bugs/2150773
+
+On initrds where nfnetlink module is missing, trying to open
+a NETLINK_NETFILTER netlink socket takes a lot of time then fails.
+This makes boot noticibly slower. Even though probably no
+unit in an initrd need netfilter.
+
+So here we delay opening the socket until we know we need it.
+
+(cherry picked from commit 4a11c5edeb37de4fd73dc2ff059e7a6112514583)
+---
+ src/core/cgroup.c | 12 ++++++------
+ src/core/unit.c   | 12 ++++++------
+ 2 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/src/core/cgroup.c b/src/core/cgroup.c
+index 514dabf..6425751 100644
+--- a/src/core/cgroup.c
++++ b/src/core/cgroup.c
+@@ -1276,18 +1276,18 @@ static void unit_modify_nft_set(Unit *u, bool add) {
+         if (!crt || crt->cgroup_id == 0)
+                 return;
+ 
+-        if (!u->manager->nfnl) {
+-                r = sd_nfnl_socket_open(&u->manager->nfnl);
+-                if (r < 0)
+-                        return;
+-        }
+-
+         CGroupContext *c = ASSERT_PTR(unit_get_cgroup_context(u));
+ 
+         FOREACH_ARRAY(nft_set, c->nft_set_context.sets, c->nft_set_context.n_sets) {
+                 if (nft_set->source != NFT_SET_SOURCE_CGROUP)
+                         continue;
+ 
++                if (!u->manager->nfnl) {
++                        r = sd_nfnl_socket_open(&u->manager->nfnl);
++                        if (r < 0)
++                                return (void) log_once_errno(LOG_WARNING, r, "Failed to open NETLINK_NETFILTER socket, ignoring: %m");
++                }
++
+                 uint64_t element = crt->cgroup_id;
+ 
+                 r = nft_set_element_modify_any(u->manager->nfnl, add, nft_set->nfproto, nft_set->table, nft_set->set, &element, sizeof(element));
+diff --git a/src/core/unit.c b/src/core/unit.c
+index 9af7fb5..0336e59 100644
+--- a/src/core/unit.c
++++ b/src/core/unit.c
+@@ -5349,16 +5349,16 @@ static void unit_modify_user_nft_set(Unit *u, bool add, NFTSetSource source, uin
+         if (!c)
+                 return;
+ 
+-        if (!u->manager->nfnl) {
+-                r = sd_nfnl_socket_open(&u->manager->nfnl);
+-                if (r < 0)
+-                        return;
+-        }
+-
+         FOREACH_ARRAY(nft_set, c->nft_set_context.sets, c->nft_set_context.n_sets) {
+                 if (nft_set->source != source)
+                         continue;
+ 
++                if (!u->manager->nfnl) {
++                        r = sd_nfnl_socket_open(&u->manager->nfnl);
++                        if (r < 0)
++                                return (void) log_once_errno(LOG_WARNING, r, "Failed to open NETLINK_NETFILTER socket, ignoring: %m");
++                }
++
+                 r = nft_set_element_modify_any(u->manager->nfnl, add, nft_set->nfproto, nft_set->table, nft_set->set, &element, sizeof(element));
+                 if (r < 0)
+                         log_warning_errno(r, "Failed to %s NFT set entry: family %s, table %s, set %s, ID %u, ignoring: %m",

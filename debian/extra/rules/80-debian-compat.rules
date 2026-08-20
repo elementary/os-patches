@@ -1,0 +1,16 @@
+# Debian specific udev rules for backwards compatibility
+
+# needed for old tape drivers, http://bugs.debian.org/657948
+SUBSYSTEM=="scsi", ENV{DEVTYPE}=="scsi_device", TEST!="[module/sg]", RUN{builtin}+="kmod load sg"
+
+# device permissions
+KERNEL=="mISDNtimer", GROUP="dialout"
+KERNEL=="mwave", GROUP="dialout"
+KERNEL=="nvram", GROUP="kmem", MODE="0640"
+KERNEL=="pktcdvd", GROUP="cdrom", MODE="0644"
+KERNEL=="lirc[0-9]*", GROUP="video"
+KERNEL=="legousbtower*", MODE="0666"
+KERNEL=="sonypi", MODE="0666"
+KERNEL=="mmtimer", MODE="0644"
+KERNEL=="sgi_*", MODE="0666"
+KERNEL=="z90crypt", MODE="0666"

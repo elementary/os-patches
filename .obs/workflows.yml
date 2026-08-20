@@ -1,0 +1,10 @@
+rebuild:
+  steps:
+    - trigger_services:
+        project: system:systemd:stable
+        package: systemd
+  filters:
+    event: push
+    branches:
+      only:
+        - v259-stable

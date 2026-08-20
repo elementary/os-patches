@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -euE
+
+export DEB_VERSION="$1"
+export DEB_HOST_ARCH="$2"
+export TEMPLATE_EFI_ARCH="$3"
+
+# Upstream builds on OBS do not have these dependencies available
+TEMPLATE_BUILD_DEPS=$(
+case "${DEB_BUILD_PROFILES:-}" in
+    *pkg.systemd.upstream*) echo "dh-signobs,";;
+    *) echo "sbsigntool, systemd-boot-efi (= ${DEB_VERSION})," ;;
+esac
+)
+export TEMPLATE_BUILD_DEPS
+
+DISTRIBUTION="$(dpkg-parsechangelog -SDistribution)"
+URGENCY="high"
+MAINT="$(dpkg-parsechangelog -SMaintainer)"
+DATE="$(dpkg-parsechangelog -SDate)"
+
+DEB_VERSION_MANGLED="$(echo "$DEB_VERSION" | sed -re 's/-/\+/;s/\+(b[[:digit:]]+)$/.\1/')"
+DEB_VERSION_SOURCE="$(echo "$DEB_VERSION" | sed -re 's/\+b[[:digit:]]+$//')"
+export DEB_VERSION_SOURCE
+SIGN_TEMPLATE_DIR="debian/systemd-boot-efi-${DEB_HOST_ARCH}-signed-template/usr/share/code-signing/systemd-boot-efi-${DEB_HOST_ARCH}-signed-template"
+SIGN_SOURCE_DIR="${SIGN_TEMPLATE_DIR}/source-template/debian"
+FILE=usr/lib/systemd/boot/efi/systemd-boot${TEMPLATE_EFI_ARCH}.efi
+
+for i in $(find debian/signing-template -type f -printf '%P\n'); do
+	mkdir -p "$SIGN_SOURCE_DIR/$(dirname "$i")"
+	envsubst < "debian/signing-template/$i" > "$SIGN_SOURCE_DIR/$i"
+done
+
+(
+	echo "systemd-boot-efi-${DEB_HOST_ARCH}-signed (${DEB_VERSION_MANGLED}) ${DISTRIBUTION}; urgency=${URGENCY}"
+	echo
+	echo "  * Sign EFI binaries from systemd-boot-efi ${DEB_VERSION}"
+	dpkg-parsechangelog -SChanges | sed -rne 's/^.$//p' -e '/^ /p'
+	echo
+	echo " -- ${MAINT}  ${DATE}"
+) > "$SIGN_SOURCE_DIR/changelog"
+
+jq -n --arg file "${FILE}" '
+{
+	"packages": {
+		"systemd-boot-efi": {
+			"trusted_certs": [],
+			"files": [
+				{"sig_type": "efi", "file": $file}
+			]
+		}
+	}
+}' > "$SIGN_TEMPLATE_DIR/files.json"

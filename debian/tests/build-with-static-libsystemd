@@ -1,0 +1,38 @@
+#!/bin/sh
+# autopkgtest check: Test build against static libsystemd
+
+set -e
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+cd $WORKDIR
+cat <<EOF > uuid-gen.c
+#include <assert.h>
+#include <stdio.h>
+
+#include <systemd/sd-id128.h>
+
+int main(void)
+{
+        sd_id128_t id;
+        char id_str[SD_ID128_STRING_MAX];
+        int r;
+
+        r = sd_id128_randomize(&id);
+        if (r < 0) {
+                fprintf(stderr, "Failed to generate id: %s\n", strerror(-r));
+                return 1;
+        }
+
+        assert(sd_id128_to_string(id, id_str) > 0);
+        printf("uuid: %s\n", id_str);
+
+        return 0;
+}
+EOF
+
+gcc -Wall -Werror -o uuid-gen uuid-gen.c -l:libsystemd.a
+echo "build: OK"
+[ -x uuid-gen ]
+./uuid-gen
+echo "run: OK"

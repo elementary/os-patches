@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = remove ]; then
+    if [ "$(readlink "${DPKG_ROOT}/etc/resolv.conf")" = "../run/systemd/resolve/stub-resolv.conf" ] || [ "$(readlink "${DPKG_ROOT}/etc/resolv.conf")" = "/run/systemd/resolve/stub-resolv.conf" ]; then
+        echo "Removing /etc/resolv.conf symlink to /run/systemd/resolve/stub-resolv.conf..."
+        rm -f "${DPKG_ROOT}/etc/resolv.conf" || echo "Cannot remove /etc/resolv.conf."
+        if [ -f "${DPKG_ROOT}/run/systemd/resolve/resolv.conf" ]; then
+            echo "Copying /run/systemd/resolve/resolv.conf to /etc/resolv.conf..."
+            cp "${DPKG_ROOT}/run/systemd/resolve/resolv.conf" "${DPKG_ROOT}/etc/resolv.conf" || echo "Cannot copy /run/systemd/resolve/resolv.conf to /etc/resolv.conf."
+            # We prefer a current resolv.conf rather than an older backup, if available
+            rm -f "${DPKG_ROOT}/etc/.resolv.conf.systemd-resolved.bak"
+        elif [ -f "${DPKG_ROOT}/etc/.resolv.conf.systemd-resolved.bak" ]; then
+            echo "Restoring previous resolv.conf..."
+            mv "${DPKG_ROOT}/etc/.resolv.conf.systemd-resolved.bak" "${DPKG_ROOT}/etc/resolv.conf" || echo "Cannot restore /etc/resolv.conf backup."
+        else
+            echo "Creating an empty /etc/resolv.conf..."
+            touch "${DPKG_ROOT}/etc/resolv.conf" || echo "Cannot create an empty /etc/resolv.conf."
+        fi
+    fi
+fi
+
+#DEBHELPER#

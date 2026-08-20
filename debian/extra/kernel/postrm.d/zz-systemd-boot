@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+test -x /usr/bin/bootctl || exit 0
+
+bootctl is-installed --quiet || exit 0
+
+echo "Removing kernel version $1 from systemd-boot..."
+
+kernel-install remove "$1"

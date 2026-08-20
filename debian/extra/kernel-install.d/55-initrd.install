@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# ex: ts=8 sw=4 sts=4 et filetype=sh
+
+COMMAND="$1"
+KERNEL_VERSION="$2"
+
+INITRD_SRC="/boot/initrd.img-$KERNEL_VERSION"
+
+[ "$COMMAND" = add ] || exit 0
+
+if [ "$#" -ge 5 ]; then
+    # Explicit initrd paths were passed, fall through to default 90-loaderentry.install handling;
+    # we'd be either injecting an unwanted image or, worse, overriding a user-provided one
+    exit 0
+fi
+
+if [ -n "${KERNEL_INSTALL_INITRD_GENERATOR:-}" ]; then
+    # No-op when another initrd generator is explicitly configured.
+    exit 0
+fi
+
+if ls "$KERNEL_INSTALL_STAGING_AREA/initrd"* >/dev/null 2>&1; then
+    # If another initrd generator (i.e. dracut) does not declare itself, avoid
+    # duplicate initrds.
+    [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && echo "Staging area already contains an initrd, not installing another"
+    exit 0
+fi
+
+if [ -e "$INITRD_SRC" ]; then
+    [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && echo "Installing '$INITRD_SRC'"
+    ln -fs "$INITRD_SRC" "$KERNEL_INSTALL_STAGING_AREA"
+else
+    echo "$INITRD_SRC does not exist, not installing an initrd"
+fi
+
+exit 0

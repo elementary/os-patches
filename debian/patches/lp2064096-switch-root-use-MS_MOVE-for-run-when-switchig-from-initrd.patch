@@ -1,0 +1,48 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Fri, 17 May 2024 10:17:08 +0200
+Subject: switch-root: use MS_MOVE for /run when switchig from initrd
+
+Bug-Ubuntu: https://launchpad.net/bugs/2064096
+Forwarded: https://github.com/systemd/systemd/pull/32645
+
+Before commit 7c764d4599 ("switch-root: always use MS_BIND to move api vfs over"),
+when switching root from an initrd, the old procfs, sysfs, /dev/ and
+/run would be moved using MS_MOVE. According to that commit, this change
+was mostly a simplification because systemd already cleans up the old
+mount hierarchy before the switch root, and no longer needed to rely on
+the clean up side-effect of MS_MOVE.
+
+However, this change broke some systemd services that also have an
+associated AppArmor profile. For example, in Ubuntu, rsyslog has an
+AppArmor profile configured, and when it tries to access
+/run/systemd/notify during start up (after the switch root has
+occurred), we see the denial:
+
+ audit: type=1400 audit(1714740096.740:159): apparmor="DENIED" operation="sendmsg" class="file" info="Failed name lookup - disconnected path" error=-13 profile="rsyslogd" name="systemd/notify" [...]
+
+The difference in MS_BIND vs MS_MOVE affects the view that AppArmor has
+of the mount tree. With MS_BIND, AppArmor will not know that e.g.
+/run/systemd/notify is in the current mount tree after the pivot_root,
+because it is tracking this path from the old root. But with MS_MOVE,
+the original mount is preserved and does not affect AppArmor's view.
+
+Ultimately, this is most likely something that should be addressed in
+AppArmor, but that is not going to happen in the short term. For now,
+just go back to MS_MOVE when switching from the initrd.
+---
+ src/shared/switch-root.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/shared/switch-root.c b/src/shared/switch-root.c
+index d5f34c5..1b6c7fe 100644
+--- a/src/shared/switch-root.c
++++ b/src/shared/switch-root.c
+@@ -34,7 +34,7 @@ int switch_root(const char *new_root,
+                 { "/dev",             MS_BIND|MS_REC,  MS_BIND|MS_REC }, /* Recursive, because we want to save the original /dev/shm/ + /dev/pts/ and similar */
+                 { "/sys",             MS_BIND|MS_REC,  MS_BIND|MS_REC }, /* Similar, we want to retain various API VFS, or the cgroupv1 /sys/fs/cgroup/ tree */
+                 { "/proc",            MS_BIND|MS_REC,  MS_BIND|MS_REC }, /* Similar */
+-                { "/run",             MS_BIND,         MS_BIND|MS_REC }, /* Recursive except on soft reboot, see above */
++                { "/run",             MS_BIND,         MS_MOVE        }, /* Recursive except on soft reboot, see above */
+                 { "/run/credentials", MS_BIND|MS_REC,  0 /* skip! */  }, /* Credential mounts should survive */
+                 { "/run/host",        MS_BIND|MS_REC,  0 /* skip! */  }, /* Host supplied hierarchy should also survive */
+         };

@@ -1,0 +1,76 @@
+#!/bin/sh
+
+set -e
+
+remove_shim() {
+    case "$(dpkg --print-architecture)" in
+        amd64)
+        efi_arch_upper=X64
+        efi_arch=x64
+        grub_arch=x86_64
+        ;;
+        arm64)
+        efi_arch_upper=AA64
+        efi_arch=aa64
+        grub_arch=arm64
+        ;;
+        *)
+        return
+    esac
+
+    # shellcheck disable=SC1091
+    . /etc/os-release || . /usr/lib/os-release
+    vendor="${ID:-debian}"
+    vendor_upper="$(echo "$vendor" | cut -c1 | tr '[:lower:]' '[:upper:]')$(echo "$vendor" | cut -c2-)"
+
+    esp_path="$(bootctl --quiet --print-esp-path 2>/dev/null)"
+    if [ -z "$esp_path" ]; then
+        return
+    fi
+
+    if [ -f "/usr/lib/grub/${grub_arch}-efi-signed/grub${efi_arch}.efi.signed" ]; then
+        return
+    fi
+
+    if [ ! -f "${esp_path}/EFI/systemd/systemd-boot${efi_arch}.efi" ]; then
+        return
+    fi
+
+    if [ -f "${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi" ] && \
+            [ -f "${esp_path}/EFI/${vendor}/shim${efi_arch}.efi" ] && \
+            [ "$(<"${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi" sha256sum)" = "$(<"${esp_path}/EFI/${vendor}/shim${efi_arch}.efi" sha256sum)" ]; then
+        rm -f "${esp_path}/EFI/BOOT/BOOT${efi_arch_upper}.efi"
+    fi
+
+    if [ -f "${esp_path}/EFI/BOOT/fb${efi_arch_upper}.efi" ] && \
+            [ -f "${esp_path}/EFI/${vendor}/fb${efi_arch}.efi" ] && \
+            [ "$(<"${esp_path}/EFI/BOOT/fb${efi_arch_upper}.efi" sha256sum)" = "$(<"${esp_path}/EFI/${vendor}/fb${efi_arch}.efi" sha256sum)" ]; then
+        rm -f "${esp_path}/EFI/BOOT/fb${efi_arch_upper}.efi"
+    fi
+
+    for f in shim fb mm; do
+        rm -f "${esp_path}/EFI/${vendor}/${f}${efi_arch}.efi"
+    done
+
+    rm -f "${esp_path}/EFI/${vendor}/BOOT${efi_arch_upper}.CSV"
+    rmdir --ignore-fail-on-non-empty "${esp_path}/EFI/${vendor}" 2>/dev/null || true
+
+    if command -v efibootmgr >/dev/null 2>&1 && efibootmgr | grep -i -q "Boot.*${vendor_upper}.*EFI\\\\${vendor}\\\\shim${efi_arch}.efi"; then
+        bootentry="$(efibootmgr | grep -i "Boot.*${vendor_upper}.*EFI\\\\${vendor}\\\\shim${efi_arch}.efi" | cut -d' ' -f1 | sed -e 's/Boot//' -e 's/*//')"
+        efibootmgr -q --delete-bootnum --bootnum "$bootentry"
+    fi
+}
+
+# shellcheck disable=SC2166
+if [ "$1" = remove -o "$1" = purge ] && bootctl --print-esp-path > /dev/null 2>&1; then
+    for k in /boot/vmlinu[xz]-*; do
+        [ -f "$k" ] || continue
+        ver=$(basename "$k" | sed s/^vmlinu[xz]-//)
+        kernel-install remove "$ver"
+    done
+
+    remove_shim
+    bootctl remove --graceful
+fi
+
+#DEBHELPER#

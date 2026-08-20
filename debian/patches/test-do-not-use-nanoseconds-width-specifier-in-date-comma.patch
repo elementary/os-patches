@@ -1,0 +1,39 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Mon, 13 Apr 2026 16:06:23 -0400
+Subject: test: do not use nanoseconds width specifier in date command
+
+Origin: upstream, https://github.com/systemd/systemd/commit/da18a5cfd659daff94b44894a1713f77d64b3fcb
+
+Using the format specifier +%s%6N with GNU date is honored, and only
+prints 6 digits of the nanoseconds portion of the seconds since epoch.
+The uutils implementation of date does not honor this, and always prints
+all 9 digits. This is a known bug[1], but can be worked around by
+adapting this test to use nanoseconds instead of microseconds.
+
+[1] https://github.com/uutils/coreutils/issues/11658
+
+(cherry picked from commit da18a5cfd659daff94b44894a1713f77d64b3fcb)
+---
+ test/units/TEST-74-AUX-UTILS.busctl.sh | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/test/units/TEST-74-AUX-UTILS.busctl.sh b/test/units/TEST-74-AUX-UTILS.busctl.sh
+index 60e27d3..dc718fc 100755
+--- a/test/units/TEST-74-AUX-UTILS.busctl.sh
++++ b/test/units/TEST-74-AUX-UTILS.busctl.sh
+@@ -129,10 +129,10 @@ busctl get-property -j \
+ 
+ busctl --quiet --timeout=1 --limit-messages=1 --match "interface=org.freedesktop.systemd1.Manager" monitor
+ 
+-START_USEC=$(date +%s%6N)
++START_NSEC=$(date +%s%N)
+ busctl --quiet --timeout=500ms --match "interface=io.dontexist.NeverGonnaHappen" monitor
+-END_USEC=$(date +%s%6N)
+-USEC=$((END_USEC-START_USEC))
++END_NSEC=$(date +%s%N)
++NSEC=$((END_NSEC-START_NSEC))
+ # Validate that the above was delayed for at least 500ms, but at most 30s (some leeway for slow CIs)
+-test "$USEC" -gt 500000
+-test "$USEC" -lt 30000000
++test "$NSEC" -gt 500000000
++test "$NSEC" -lt 30000000000

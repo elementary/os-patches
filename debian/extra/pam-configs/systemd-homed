@@ -1,0 +1,15 @@
+Name: Enable user management by systemd-homed
+Default: yes
+Priority: 257
+Auth-Type: Primary
+Auth:
+	[success=end default=ignore]	pam_systemd_home.so
+Account-Type: Primary
+Account:
+	[success=end default=ignore]	pam_systemd_home.so
+Session-Type: Additional
+Session:
+	optional	pam_systemd_home.so
+Password-Type: Primary
+Password:
+	[success=end default=ignore]	pam_systemd_home.so

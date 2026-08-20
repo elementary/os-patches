@@ -1,0 +1,30 @@
+From e30c044c23c1dc7ef44ccb3892d942dc256d1b02 Mon Sep 17 00:00:00 2001
+From: "Mario Limonciello (AMD)" <superm1@kernel.org>
+Date: Sun, 15 Feb 2026 07:28:47 -0600
+Subject: [PATCH] Tag accel devices for uaccess-render
+
+accel devices are used for things like NPUs and should be tagged
+for the logged in user just like GPUs are.
+
+BugLink: https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2143010
+Link: https://github.com/systemd/systemd/commit/e30c044c23c1dc7ef44ccb3892d942dc256d1b02
+Link: https://github.com/systemd/systemd/commit/9d3b73d9bf181e6adf2e900739c4d998e3450a12
+---
+ rules.d/70-uaccess.rules.in | 2 ++
+ 1 file changed, 2 insertions(+)
+
+Index: systemd-ubuntu/rules.d/70-uaccess.rules.in
+===================================================================
+--- systemd-ubuntu.orig/rules.d/70-uaccess.rules.in
++++ systemd-ubuntu/rules.d/70-uaccess.rules.in
+@@ -47,6 +47,10 @@ SUBSYSTEM=="drm", KERNEL=="card*", TAG+=
+ {% if GROUP_RENDER_UACCESS %}
+ # DRI render nodes
+ SUBSYSTEM=="drm", KERNEL=="renderD*", TAG+="uaccess", TAG+="xaccess-render"
++# DRI accel nodes
++SUBSYSTEM=="accel", KERNEL=="accel*", TAG+="uaccess", TAG+="xaccess-accel"
++# AMD KFD nodes
++SUBSYSTEM=="kfd", KERNEL=="kfd", TAG+="uaccess", TAG+="xaccess-render"
+ {% endif %}
+ {% if DEV_KVM_UACCESS %}
+ # KVM

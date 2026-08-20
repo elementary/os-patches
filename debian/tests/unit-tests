@@ -1,0 +1,8 @@
+#!/bin/sh
+# run upstream unit tests
+set -e
+
+export ARTIFACT_DIRECTORY=$AUTOPKGTEST_ARTIFACTS
+export SYSTEMD_LOG_LEVEL=debug
+export PATH=$PATH:/usr/sbin/
+/usr/lib/systemd/tests/run-unit-tests.py

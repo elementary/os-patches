@@ -1,0 +1,43 @@
+#!/bin/sh
+
+set -e
+
+# begin-remove-after: released:trixie
+handle_tmp() {
+  # We used to ship tmp.mount in /usr/share as an example, and some users link it in /etc/,
+  # remove the link as a workaround until Trixie ships. This method would also have created
+  # a link in local-fs.target.wants, so remove that too.
+  if [ -L "$DPKG_ROOT/etc/systemd/system/tmp.mount" ] && [ "$(readlink "$DPKG_ROOT/etc/systemd/system/tmp.mount")" = "/usr/share/systemd/tmp.mount" ]; then
+    rm -f "$DPKG_ROOT/etc/systemd/system/tmp.mount"
+    rm -f "$DPKG_ROOT/etc/systemd/system/local-fs.target.wants/tmp.mount"
+  fi
+
+  # The user may have used 'systemctl enable /usr/share/systemd/tmp.mount', which
+  # would have created a symlink in the local-fs.target.wants directory (as the
+  # pre-Trixie tmp.mount included an [install] section for that purpose). If it
+  # exists, remove it.
+  if [ -L "$DPKG_ROOT/etc/systemd/system/local-fs.target.wants/tmp.mount" ] && [ "$(readlink "$DPKG_ROOT/etc/systemd/system/local-fs.target.wants/tmp.mount")" = "/usr/share/systemd/tmp.mount" ]; then
+    rm -f "$DPKG_ROOT/etc/systemd/system/local-fs.target.wants/tmp.mount"
+  fi
+
+  # Unless it's already running, ensure /tmp/ does not get overwritten by
+  # the tmpfs from tmp.mount in case a unit is later activated that implicitly
+  # depends on it (for example with PrivateTmp=yes) by runtime masking it
+  # Do not use systemctl here, as libsystemd-shared might not be unpacked yet
+  if [ -z "$DPKG_ROOT" ] && [ -d /run/systemd/system ] && ! df --output=fstype /tmp | grep -q tmpfs; then
+    touch /run/systemd/system/tmp.mount
+  fi
+}
+# end-remove-after
+
+case "$1" in
+    install|upgrade)
+    # begin-remove-after: released:trixie
+    if [ -n "$2" ] && [ -n "$3" ]; then
+      handle_tmp
+    fi
+    # end-remove-after
+    ;;
+esac
+
+#DEBHELPER#

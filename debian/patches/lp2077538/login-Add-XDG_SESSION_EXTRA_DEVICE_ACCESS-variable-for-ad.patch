@@ -1,0 +1,379 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Wed, 26 Nov 2025 17:23:13 +0100
+Subject: login: Add XDG_SESSION_EXTRA_DEVICE_ACCESS variable for additional
+ access
+
+A session created with XDG_SESSION_EXTRA_DEVICE_ACCESS will be granted
+additional powers.
+Exactly which powers are granted is going to be defined by udevd.
+
+Origin: backport, https://github.com/systemd/systemd/pull/38516
+Bug-GNOME: https://gitlab.gnome.org/GNOME/gnome-remote-desktop/-/issues/224
+Bug-Ubuntu: https://launchpad.net/bugs/2077538
+---
+ src/core/manager.c                    |  1 +
+ src/libsystemd/libsystemd.sym         |  1 +
+ src/libsystemd/sd-login/sd-login.c    | 19 ++++++++++
+ src/login/logind-dbus.c               |  3 ++
+ src/login/logind-dbus.h               |  1 +
+ src/login/logind-session-dbus.c       |  1 +
+ src/login/logind-session.c            | 66 ++++++++++++++++++++---------------
+ src/login/logind-session.h            |  1 +
+ src/login/logind-varlink.c            | 30 +++++++++-------
+ src/login/pam_systemd.c               |  9 ++++-
+ src/shared/varlink-io.systemd.Login.c |  4 +++
+ src/systemd/sd-login.h                |  3 ++
+ 12 files changed, 97 insertions(+), 42 deletions(-)
+
+diff --git a/src/core/manager.c b/src/core/manager.c
+index a5a5102..5c3e12d 100644
+--- a/src/core/manager.c
++++ b/src/core/manager.c
+@@ -697,6 +697,7 @@ int manager_default_environment(Manager *m) {
+                                     "XDG_SESSION_CLASS",
+                                     "XDG_SESSION_TYPE",
+                                     "XDG_SESSION_DESKTOP",
++                                    "XDG_SESSION_EXTRA_DEVICE_ACCESS",
+                                     "XDG_SEAT",
+                                     "XDG_VTNR");
+         }
+diff --git a/src/libsystemd/libsystemd.sym b/src/libsystemd/libsystemd.sym
+index a1fa794..8f6b42d 100644
+--- a/src/libsystemd/libsystemd.sym
++++ b/src/libsystemd/libsystemd.sym
+@@ -1084,4 +1084,5 @@ global:
+         sd_event_set_exit_on_idle;
+         sd_event_get_exit_on_idle;
+         sd_varlink_is_connected;
++        sd_session_has_extra_device_access;
+ } LIBSYSTEMD_258;
+diff --git a/src/libsystemd/sd-login/sd-login.c b/src/libsystemd/sd-login/sd-login.c
+index f65fb20..bf214ab 100644
+--- a/src/libsystemd/sd-login/sd-login.c
++++ b/src/libsystemd/sd-login/sd-login.c
+@@ -677,6 +677,25 @@ _public_ int sd_session_is_remote(const char *session) {
+         return parse_boolean(s);
+ }
+
++_public_ int sd_session_has_extra_device_access(const char *session) {
++        _cleanup_free_ char *p = NULL, *s = NULL;
++        int r;
++
++        r = file_of_session(session, &p);
++        if (r < 0)
++                return r;
++
++        r = parse_env_file(/* f= */ NULL, p, "EXTRA_DEVICE_ACCESS", &s);
++        if (r == -ENOENT)
++                return -ENXIO;
++        if (r < 0)
++                return r;
++        if (isempty(s))
++                return -ENODATA;
++
++        return parse_boolean(s);
++}
++
+ _public_ int sd_session_get_state(const char *session, char **ret_state) {
+         _cleanup_free_ char *p = NULL, *s = NULL;
+         int r;
+diff --git a/src/login/logind-dbus.c b/src/login/logind-dbus.c
+index ab113af..8ccaa9a 100644
+--- a/src/login/logind-dbus.c
++++ b/src/login/logind-dbus.c
+@@ -898,6 +898,7 @@ int manager_create_session(
+                 bool remote,
+                 const char *remote_user,
+                 const char *remote_host,
++                bool extra_device_access,
+                 Session **ret_session) {
+
+         bool mangle_class = false;
+@@ -1004,6 +1005,7 @@ int manager_create_session(
+
+         session->original_type = session->type = type;
+         session->remote = remote;
++        session->extra_device_access = extra_device_access;
+         session->vtnr = vtnr;
+         session->class = class;
+
+@@ -1227,6 +1229,7 @@ static int manager_create_session_by_bus(
+                         remote,
+                         remote_user,
+                         remote_host,
++                        /* extra_device_access= */ false,
+                         &session);
+         if (r == -EBUSY)
+                 return sd_bus_error_set(error, BUS_ERROR_SESSION_BUSY, "Already running in a session or user slice");
+diff --git a/src/login/logind-dbus.h b/src/login/logind-dbus.h
+index febc78a..e254e62 100644
+--- a/src/login/logind-dbus.h
++++ b/src/login/logind-dbus.h
+@@ -57,6 +57,7 @@ int manager_create_session(
+                 bool remote,
+                 const char *remote_user,
+                 const char *remote_host,
++                bool extra_device_access,
+                 Session **ret_session);
+
+ extern const BusObjectImplementation manager_object;
+diff --git a/src/login/logind-session-dbus.c b/src/login/logind-session-dbus.c
+index e651394..21d16db 100644
+--- a/src/login/logind-session-dbus.c
++++ b/src/login/logind-session-dbus.c
+@@ -985,6 +985,7 @@ static const sd_bus_vtable session_vtable[] = {
+         SD_BUS_PROPERTY("Remote", "b", bus_property_get_bool, offsetof(Session, remote), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("RemoteHost", "s", NULL, offsetof(Session, remote_host), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("RemoteUser", "s", NULL, offsetof(Session, remote_user), SD_BUS_VTABLE_PROPERTY_CONST),
++        SD_BUS_PROPERTY("ExtraDeviceAccess", "b", bus_property_get_bool, offsetof(Session, extra_device_access), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("Service", "s", NULL, offsetof(Session, service), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("Desktop", "s", NULL, offsetof(Session, desktop), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("Scope", "s", NULL, offsetof(Session, scope), SD_BUS_VTABLE_PROPERTY_CONST),
+diff --git a/src/login/logind-session.c b/src/login/logind-session.c
+index b30252c..3724de7 100644
+--- a/src/login/logind-session.c
++++ b/src/login/logind-session.c
+@@ -307,12 +307,14 @@ int session_save(Session *s) {
+                 "IS_DISPLAY=%s\n"
+                 "STATE=%s\n"
+                 "REMOTE=%s\n"
++                "EXTRA_DEVICE_ACCESS=%s\n"
+                 "LEADER_FD_SAVED=%s\n",
+                 s->user->user_record->uid,
+                 one_zero(session_is_active(s)),
+                 one_zero(s->user->display == s),
+                 session_state_to_string(session_get_state(s)),
+                 one_zero(s->remote),
++                one_zero(s->extra_device_access),
+                 one_zero(s->leader_fd_saved));
+
+         env_file_fputs_assignment(f, "USER=", s->user->user_record->user_name);
+@@ -453,6 +455,7 @@ static int session_load_leader(Session *s, uint64_t pidfdid) {
+
+ int session_load(Session *s) {
+         _cleanup_free_ char *remote = NULL,
++                *extra_device_access = NULL,
+                 *seat = NULL,
+                 *tty_validity = NULL,
+                 *vtnr = NULL,
+@@ -478,34 +481,35 @@ int session_load(Session *s) {
+         assert(s);
+
+         r = parse_env_file(NULL, s->state_file,
+-                           "REMOTE",          &remote,
+-                           "SCOPE",           &s->scope,
+-                           "SCOPE_JOB",       &s->scope_job,
+-                           "FIFO",            &fifo_path,
+-                           "SEAT",            &seat,
+-                           "TTY",             &s->tty,
+-                           "TTY_VALIDITY",    &tty_validity,
+-                           "DISPLAY",         &s->display,
+-                           "REMOTE_HOST",     &s->remote_host,
+-                           "REMOTE_USER",     &s->remote_user,
+-                           "SERVICE",         &s->service,
+-                           "DESKTOP",         &s->desktop,
+-                           "VTNR",            &vtnr,
+-                           "STATE",           &state,
+-                           "POSITION",        &position,
+-                           "LEADER",          &leader_pid,
+-                           "LEADER_FD_SAVED", &leader_fd_saved,
+-                           "LEADER_PIDFDID",  &leader_pidfdid,
+-                           "TYPE",            &type,
+-                           "ORIGINAL_TYPE",   &original_type,
+-                           "CLASS",           &class,
+-                           "UID",             &uid,
+-                           "REALTIME",        &realtime,
+-                           "MONOTONIC",       &monotonic,
+-                           "CONTROLLER",      &controller,
+-                           "ACTIVE",          &active,
+-                           "DEVICES",         &devices,
+-                           "IS_DISPLAY",      &is_display);
++                           "REMOTE",              &remote,
++                           "EXTRA_DEVICE_ACCESS", &extra_device_access,
++                           "SCOPE",               &s->scope,
++                           "SCOPE_JOB",           &s->scope_job,
++                           "FIFO",                &fifo_path,
++                           "SEAT",                &seat,
++                           "TTY",                 &s->tty,
++                           "TTY_VALIDITY",        &tty_validity,
++                           "DISPLAY",             &s->display,
++                           "REMOTE_HOST",         &s->remote_host,
++                           "REMOTE_USER",         &s->remote_user,
++                           "SERVICE",             &s->service,
++                           "DESKTOP",             &s->desktop,
++                           "VTNR",                &vtnr,
++                           "STATE",               &state,
++                           "POSITION",            &position,
++                           "LEADER",              &leader_pid,
++                           "LEADER_FD_SAVED",     &leader_fd_saved,
++                           "LEADER_PIDFDID",      &leader_pidfdid,
++                           "TYPE",                &type,
++                           "ORIGINAL_TYPE",       &original_type,
++                           "CLASS",               &class,
++                           "UID",                 &uid,
++                           "REALTIME",            &realtime,
++                           "MONOTONIC",           &monotonic,
++                           "CONTROLLER",          &controller,
++                           "ACTIVE",              &active,
++                           "DEVICES",             &devices,
++                           "IS_DISPLAY",          &is_display);
+         if (r < 0)
+                 return log_error_errno(r, "Failed to read %s: %m", s->state_file);
+
+@@ -539,6 +543,12 @@ int session_load(Session *s) {
+                         s->remote = k;
+         }
+
++        if (extra_device_access) {
++                k = parse_boolean(extra_device_access);
++                if (k >= 0)
++                        s->extra_device_access = k;
++        }
++
+         if (vtnr)
+                 (void) safe_atou(vtnr, &s->vtnr);
+
+diff --git a/src/login/logind-session.h b/src/login/logind-session.h
+index 5f85003..bcfbc53 100644
+--- a/src/login/logind-session.h
++++ b/src/login/logind-session.h
+@@ -121,6 +121,7 @@ typedef struct Session {
+         char *remote_host;
+         char *service;
+         char *desktop;
++        bool extra_device_access;
+
+         char *scope;
+         char *scope_job;
+diff --git a/src/login/logind-varlink.c b/src/login/logind-varlink.c
+index a17f642..0016f27 100644
+--- a/src/login/logind-varlink.c
++++ b/src/login/logind-varlink.c
+@@ -145,6 +145,7 @@ typedef struct CreateSessionParameters {
+         int remote;
+         const char *remote_user;
+         const char *remote_host;
++        bool extra_device_access;
+ } CreateSessionParameters;
+
+ static void create_session_parameters_done(CreateSessionParameters *p) {
+@@ -156,19 +157,20 @@ static int vl_method_create_session(sd_varlink *link, sd_json_variant *parameter
+         int r;
+
+         static const sd_json_dispatch_field dispatch_table[] = {
+-                { "UID",        _SD_JSON_VARIANT_TYPE_INVALID, sd_json_dispatch_uid_gid,      offsetof(CreateSessionParameters, uid),         SD_JSON_MANDATORY },
+-                { "PID",        _SD_JSON_VARIANT_TYPE_INVALID, json_dispatch_pidref,          offsetof(CreateSessionParameters, pid),         SD_JSON_STRICT    },
+-                { "Service",    SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, service),     0                 },
+-                { "Type",       SD_JSON_VARIANT_STRING,        json_dispatch_session_type,    offsetof(CreateSessionParameters, type),        SD_JSON_MANDATORY },
+-                { "Class",      SD_JSON_VARIANT_STRING,        json_dispatch_session_class,   offsetof(CreateSessionParameters, class),       SD_JSON_MANDATORY },
+-                { "Desktop",    SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, desktop),     SD_JSON_STRICT    },
+-                { "Seat",       SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, seat),        0                 },
+-                { "VTNr",       _SD_JSON_VARIANT_TYPE_INVALID, sd_json_dispatch_uint,         offsetof(CreateSessionParameters, vtnr),        0                 },
+-                { "TTY",        SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, tty),         0                 },
+-                { "Display",    SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, display),     0                 },
+-                { "Remote",     SD_JSON_VARIANT_BOOLEAN,       sd_json_dispatch_tristate,     offsetof(CreateSessionParameters, remote),      0                 },
+-                { "RemoteUser", SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, remote_user), 0                 },
+-                { "RemoteHost", SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, remote_host), 0                 },
++                { "UID",               _SD_JSON_VARIANT_TYPE_INVALID, sd_json_dispatch_uid_gid,      offsetof(CreateSessionParameters, uid),                 SD_JSON_MANDATORY },
++                { "PID",               _SD_JSON_VARIANT_TYPE_INVALID, json_dispatch_pidref,          offsetof(CreateSessionParameters, pid),                 SD_JSON_STRICT    },
++                { "Service",           SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, service),             0                 },
++                { "Type",              SD_JSON_VARIANT_STRING,        json_dispatch_session_type,    offsetof(CreateSessionParameters, type),                SD_JSON_MANDATORY },
++                { "Class",             SD_JSON_VARIANT_STRING,        json_dispatch_session_class,   offsetof(CreateSessionParameters, class),               SD_JSON_MANDATORY },
++                { "Desktop",           SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, desktop),             SD_JSON_STRICT    },
++                { "Seat",              SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, seat),                0                 },
++                { "VTNr",              _SD_JSON_VARIANT_TYPE_INVALID, sd_json_dispatch_uint,         offsetof(CreateSessionParameters, vtnr),                0                 },
++                { "TTY",               SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, tty),                 0                 },
++                { "Display",           SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, display),             0                 },
++                { "Remote",            SD_JSON_VARIANT_BOOLEAN,       sd_json_dispatch_tristate,     offsetof(CreateSessionParameters, remote),              0                 },
++                { "RemoteUser",        SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, remote_user),         0                 },
++                { "RemoteHost",        SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, remote_host),         0                 },
++                { "ExtraDeviceAccess", SD_JSON_VARIANT_BOOLEAN,       sd_json_dispatch_stdbool,      offsetof(CreateSessionParameters, extra_device_access), 0                 },
+                 {}
+         };
+
+@@ -178,6 +180,7 @@ static int vl_method_create_session(sd_varlink *link, sd_json_variant *parameter
+                 .class = _SESSION_CLASS_INVALID,
+                 .type = _SESSION_TYPE_INVALID,
+                 .remote = -1,
++                .extra_device_access = false,
+         };
+
+         r = sd_varlink_dispatch(link, parameters, dispatch_table, &p);
+@@ -264,6 +267,7 @@ static int vl_method_create_session(sd_varlink *link, sd_json_variant *parameter
+                         p.remote,
+                         p.remote_user,
+                         p.remote_host,
++                        p.extra_device_access,
+                         &session);
+         if (r == -EBUSY)
+                 return sd_varlink_error(link, "io.systemd.Login.AlreadySessionMember", /* parameters= */ NULL);
+diff --git a/src/login/pam_systemd.c b/src/login/pam_systemd.c
+index c1228a9..a4d6da8 100644
+--- a/src/login/pam_systemd.c
++++ b/src/login/pam_systemd.c
+@@ -817,6 +817,7 @@ typedef struct SessionContext {
+         uint32_t vtnr;
+         const char *tty;
+         const char *display;
++        bool extra_device_access;
+         bool remote;
+         const char *remote_user;
+         const char *remote_host;
+@@ -1152,7 +1153,8 @@ static int register_session(
+                                         JSON_BUILD_PAIR_STRING_NON_EMPTY("Display", c->display),
+                                         SD_JSON_BUILD_PAIR_BOOLEAN("Remote", c->remote),
+                                         JSON_BUILD_PAIR_STRING_NON_EMPTY("RemoteUser", c->remote_user),
+-                                        JSON_BUILD_PAIR_STRING_NON_EMPTY("RemoteHost", c->remote_host));
++                                        JSON_BUILD_PAIR_STRING_NON_EMPTY("RemoteHost", c->remote_host),
++                                        JSON_BUILD_PAIR_CONDITION_BOOLEAN(c->extra_device_access, "ExtraDeviceAccess", c->extra_device_access));
+                         if (r < 0)
+                                 return pam_syslog_errno(handle, LOG_ERR, r,
+                                                         "Failed to issue io.systemd.Login.CreateSession varlink call: %m");
+@@ -1321,6 +1323,10 @@ static int register_session(
+         if (r != PAM_SUCCESS)
+                 return r;
+
++        r = update_environment(handle, "XDG_SESSION_EXTRA_DEVICE_ACCESS", one_zero(c->extra_device_access));
++        if (r != PAM_SUCCESS)
++                return r;
++
+         r = update_environment(handle, "XDG_SEAT", real_seat);
+         if (r != PAM_SUCCESS)
+                 return r;
+@@ -1793,6 +1799,7 @@ _public_ PAM_EXTERN int pam_sm_open_session(
+         c.desktop = getenv_harder(handle, "XDG_SESSION_DESKTOP", desktop_pam);
+         c.area = getenv_harder(handle, "XDG_AREA", area_pam);
+         c.incomplete = getenv_harder_bool(handle, "XDG_SESSION_INCOMPLETE", false);
++        c.extra_device_access = getenv_harder_bool(handle, "XDG_SESSION_EXTRA_DEVICE_ACCESS", false);
+
+         r = pam_get_data_many(
+                         handle,
+diff --git a/src/shared/varlink-io.systemd.Login.c b/src/shared/varlink-io.systemd.Login.c
+index 92cb2df..fe49a92 100644
+--- a/src/shared/varlink-io.systemd.Login.c
++++ b/src/shared/varlink-io.systemd.Login.c
+@@ -65,6 +65,10 @@ static SD_VARLINK_DEFINE_METHOD(
+                 SD_VARLINK_DEFINE_INPUT(RemoteUser, SD_VARLINK_STRING, SD_VARLINK_NULLABLE),
+                 SD_VARLINK_FIELD_COMMENT("Host name of the remote host"),
+                 SD_VARLINK_DEFINE_INPUT(RemoteHost, SD_VARLINK_STRING, SD_VARLINK_NULLABLE),
++                SD_VARLINK_FIELD_COMMENT("If true this session is granted access to additional hardware devices, "
++                                         "typically useful for remote, graphical sessions. "
++                                         "This adds access for all devices tagged with \"xaccess\" in udev."),
++                SD_VARLINK_DEFINE_INPUT(ExtraDeviceAccess, SD_VARLINK_BOOL, SD_VARLINK_NULLABLE),
+                 SD_VARLINK_FIELD_COMMENT("The identifier string of the session of the user."),
+                 SD_VARLINK_DEFINE_OUTPUT(Id, SD_VARLINK_STRING, 0),
+                 SD_VARLINK_FIELD_COMMENT("The runtime path ($XDG_RUNTIME_DIR) of the user."),
+diff --git a/src/systemd/sd-login.h b/src/systemd/sd-login.h
+index 70f05cf..042d753 100644
+--- a/src/systemd/sd-login.h
++++ b/src/systemd/sd-login.h
+@@ -150,6 +150,9 @@ int sd_session_is_active(const char *session);
+ /* Return 1 if the session is remote. */
+ int sd_session_is_remote(const char *session);
+
++/* Return 1 if the session is granted extra device access. */
++int sd_session_has_extra_device_access(const char *session);
++
+ /* Get state from session. Possible states: online, active, closing.
+  * This function is a more generic version of sd_session_is_active(). */
+ int sd_session_get_state(const char *session, char **ret_state);

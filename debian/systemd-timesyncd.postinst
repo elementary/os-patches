@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+_adopt_conffile() {
+    conffile=$1
+    pkg=$2
+
+    [ -f ${conffile}.dpkg-bak ] || return 0
+
+    md5sum="$(md5sum ${conffile} | sed -e 's/ .*//')"
+    old_md5sum="$(dpkg-query -W -f='${Conffiles}' $pkg | \
+                        sed -n -e "\' ${conffile} ' { s/ obsolete$//; s/.* //; p }")"
+    # On new installs, if the policy file was preserved on systemd upgrade
+    # by dpkg-maintscript helper, copy it back if the new file has not been modified yet
+    if [ "$md5sum" = "$old_md5sum" ]; then
+        mv ${conffile}.dpkg-bak ${conffile}
+    fi
+}
+
+if [ "$1" = configure ] && [ -z "$2" ]; then
+    _adopt_conffile /etc/dhcp/dhclient-exit-hooks.d/timesyncd systemd-timesyncd
+    _adopt_conffile /etc/systemd/timesyncd.conf systemd-timesyncd
+fi
+
+#DEBHELPER#

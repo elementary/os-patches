@@ -1,0 +1,521 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Wed, 11 Feb 2026 15:02:53 +0100
+Subject: xaccess: Rework from boolean into a list of tags
+
+XDG_SESSION_EXTRA_DEVICE_ACCESS will now take a colon-separated list of
+identifiers. For every identifier $ID, the session is granted access to all
+devices tagged as "xaccess-$ID" in udev.
+
+Fixes: #40634
+
+Origin: backport, https://github.com/systemd/systemd/pull/40645
+Bug-GNOME: https://gitlab.gnome.org/GNOME/gnome-remote-desktop/-/issues/224
+Bug-Ubuntu: https://launchpad.net/bugs/2077538
+---
+ src/libsystemd/libsystemd.sym         |  2 +-
+ src/libsystemd/sd-json/json-util.h    |  2 ++
+ src/libsystemd/sd-login/sd-login.c    | 19 ++++++++++---
+ src/login/logind-dbus.c               |  9 ++++--
+ src/login/logind-dbus.h               |  2 +-
+ src/login/logind-session-dbus.c       |  2 +-
+ src/login/logind-session.c            | 52 +++++++++++++++++++++++------------
+ src/login/logind-session.h            |  2 +-
+ src/login/logind-varlink.c            |  7 +++--
+ src/login/pam_systemd.c               | 24 ++++++++++++----
+ src/shared/varlink-io.systemd.Login.c |  7 ++---
+ src/systemd/sd-login.h                |  6 ++--
+ src/udev/udev-builtin-uaccess.c       | 46 +++++++++++++++++++++++--------
+ 13 files changed, 127 insertions(+), 53 deletions(-)
+
+diff --git a/src/libsystemd/libsystemd.sym b/src/libsystemd/libsystemd.sym
+index 8f6b42d..439e872 100644
+--- a/src/libsystemd/libsystemd.sym
++++ b/src/libsystemd/libsystemd.sym
+@@ -1084,5 +1084,5 @@ global:
+         sd_event_set_exit_on_idle;
+         sd_event_get_exit_on_idle;
+         sd_varlink_is_connected;
+-        sd_session_has_extra_device_access;
++        sd_session_get_extra_device_access;
+ } LIBSYSTEMD_258;
+diff --git a/src/libsystemd/sd-json/json-util.h b/src/libsystemd/sd-json/json-util.h
+index 753eb30..2777a78 100644
+--- a/src/libsystemd/sd-json/json-util.h
++++ b/src/libsystemd/sd-json/json-util.h
+@@ -257,6 +257,8 @@ enum {
+         SD_JSON_BUILD_PAIR_CONDITION(condition, name, SD_JSON_BUILD_UNSIGNED(value))
+ #define JSON_BUILD_PAIR_CONDITION_BOOLEAN(condition, name, value) \
+         SD_JSON_BUILD_PAIR_CONDITION(condition, name, SD_JSON_BUILD_BOOLEAN(value))
++#define JSON_BUILD_PAIR_CONDITION_STRV(condition, name, value) \
++        SD_JSON_BUILD_PAIR_CONDITION(condition, name, SD_JSON_BUILD_STRV(value))
+
+ int json_variant_new_pidref(sd_json_variant **ret, PidRef *pidref);
+ int json_variant_new_devnum(sd_json_variant **ret, dev_t devnum);
+diff --git a/src/libsystemd/sd-login/sd-login.c b/src/libsystemd/sd-login/sd-login.c
+index bf214ab..1331190 100644
+--- a/src/libsystemd/sd-login/sd-login.c
++++ b/src/libsystemd/sd-login/sd-login.c
+@@ -677,7 +677,7 @@ _public_ int sd_session_is_remote(const char *session) {
+         return parse_boolean(s);
+ }
+
+-_public_ int sd_session_has_extra_device_access(const char *session) {
++_public_ int sd_session_get_extra_device_access(const char *session, char ***ret_ids) {
+         _cleanup_free_ char *p = NULL, *s = NULL;
+         int r;
+
+@@ -690,10 +690,21 @@ _public_ int sd_session_has_extra_device_access(const char *session) {
+                 return -ENXIO;
+         if (r < 0)
+                 return r;
+-        if (isempty(s))
+-                return -ENODATA;
+
+-        return parse_boolean(s);
++        _cleanup_strv_free_ char **ids = NULL;
++        size_t n_ids = 0;
++        if (!isempty(s)) {
++                ids = strv_split(s, /* separators= */ NULL);
++                if (!ids)
++                        return -ENOMEM;
++
++                n_ids = strv_length(ids);
++        }
++
++        if (ret_ids)
++                *ret_ids = TAKE_PTR(ids);
++
++        return n_ids;
+ }
+
+ _public_ int sd_session_get_state(const char *session, char **ret_state) {
+diff --git a/src/login/logind-dbus.c b/src/login/logind-dbus.c
+index 8ccaa9a..87cc4f1 100644
+--- a/src/login/logind-dbus.c
++++ b/src/login/logind-dbus.c
+@@ -898,7 +898,7 @@ int manager_create_session(
+                 bool remote,
+                 const char *remote_user,
+                 const char *remote_host,
+-                bool extra_device_access,
++                char * const *extra_device_access,
+                 Session **ret_session) {
+
+         bool mangle_class = false;
+@@ -1005,7 +1005,6 @@ int manager_create_session(
+
+         session->original_type = session->type = type;
+         session->remote = remote;
+-        session->extra_device_access = extra_device_access;
+         session->vtnr = vtnr;
+         session->class = class;
+
+@@ -1055,6 +1054,10 @@ int manager_create_session(
+                         goto fail;
+         }
+
++        r = strv_copy_unless_empty(extra_device_access, &session->extra_device_access);
++        if (r < 0)
++                goto fail;
++
+         if (seat) {
+                 r = seat_attach_session(seat, session);
+                 if (r < 0)
+@@ -1229,7 +1232,7 @@ static int manager_create_session_by_bus(
+                         remote,
+                         remote_user,
+                         remote_host,
+-                        /* extra_device_access= */ false,
++                        /* extra_device_access= */ NULL,
+                         &session);
+         if (r == -EBUSY)
+                 return sd_bus_error_set(error, BUS_ERROR_SESSION_BUSY, "Already running in a session or user slice");
+diff --git a/src/login/logind-dbus.h b/src/login/logind-dbus.h
+index e254e62..1ece1c6 100644
+--- a/src/login/logind-dbus.h
++++ b/src/login/logind-dbus.h
+@@ -57,7 +57,7 @@ int manager_create_session(
+                 bool remote,
+                 const char *remote_user,
+                 const char *remote_host,
+-                bool extra_device_access,
++                char * const *extra_device_access,
+                 Session **ret_session);
+
+ extern const BusObjectImplementation manager_object;
+diff --git a/src/login/logind-session-dbus.c b/src/login/logind-session-dbus.c
+index 21d16db..4da9bb2 100644
+--- a/src/login/logind-session-dbus.c
++++ b/src/login/logind-session-dbus.c
+@@ -985,7 +985,7 @@ static const sd_bus_vtable session_vtable[] = {
+         SD_BUS_PROPERTY("Remote", "b", bus_property_get_bool, offsetof(Session, remote), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("RemoteHost", "s", NULL, offsetof(Session, remote_host), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("RemoteUser", "s", NULL, offsetof(Session, remote_user), SD_BUS_VTABLE_PROPERTY_CONST),
+-        SD_BUS_PROPERTY("ExtraDeviceAccess", "b", bus_property_get_bool, offsetof(Session, extra_device_access), SD_BUS_VTABLE_PROPERTY_CONST),
++        SD_BUS_PROPERTY("ExtraDeviceAccess", "as", NULL, offsetof(Session, extra_device_access), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("Service", "s", NULL, offsetof(Session, service), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("Desktop", "s", NULL, offsetof(Session, desktop), SD_BUS_VTABLE_PROPERTY_CONST),
+         SD_BUS_PROPERTY("Scope", "s", NULL, offsetof(Session, scope), SD_BUS_VTABLE_PROPERTY_CONST),
+diff --git a/src/login/logind-session.c b/src/login/logind-session.c
+index 2b2c36b..72cad13 100644
+--- a/src/login/logind-session.c
++++ b/src/login/logind-session.c
+@@ -45,6 +45,7 @@
+ #include "process-util.h"
+ #include "serialize.h"
+ #include "string-table.h"
++#include "strv.h"
+ #include "terminal-util.h"
+ #include "tmpfile-util.h"
+ #include "user-record.h"
+@@ -210,6 +211,7 @@ Session* session_free(Session *s) {
+         free(s->remote_user);
+         free(s->service);
+         free(s->desktop);
++        strv_free(s->extra_device_access);
+
+         hashmap_remove(s->manager->sessions, s->id);
+
+@@ -278,24 +280,37 @@ static void session_save_devices(Session *s, FILE *f) {
+         }
+ }
+
+-static int trigger_xaccess(void) {
++static int trigger_xaccess(char * const *extra_devices) {
+         int r;
+
+-        _cleanup_(sd_device_enumerator_unrefp) sd_device_enumerator *e = NULL;
+-        r = sd_device_enumerator_new(&e);
++        if (strv_isempty(extra_devices))
++                return 0;
++
++        _cleanup_strv_free_ char **tags = NULL;
++        r = strv_extend_strv_biconcat(&tags, "xaccess-", (const char * const *)extra_devices, /* suffix= */ NULL);
+         if (r < 0)
+                 return r;
+
+-        r = sd_device_enumerator_add_match_tag(e, "xaccess");
++        _cleanup_(sd_device_enumerator_unrefp) sd_device_enumerator *e = NULL;
++        r = sd_device_enumerator_new(&e);
+         if (r < 0)
+                 return r;
+
+-        FOREACH_DEVICE(e, d) {
+-                /* Verify that the tag is still in place. */
+-                r = sd_device_has_current_tag(d, "xaccess");
++        STRV_FOREACH(tag, tags) {
++                r = sd_device_enumerator_add_match_tag(e, *tag);
+                 if (r < 0)
+                         return r;
+-                if (r == 0)
++        }
++
++        FOREACH_DEVICE(e, d) {
++                /* Verify that the tag is still in place. */
++                bool has_xaccess = false;
++                STRV_FOREACH(tag, tags)
++                        if (sd_device_has_current_tag(d, *tag)) {
++                                has_xaccess = true;
++                                break;
++                        }
++                if (!has_xaccess)
+                         continue;
+
+                 /* In case people mistag devices without nodes, we need to ignore this. */
+@@ -349,14 +364,12 @@ int session_save(Session *s) {
+                 "IS_DISPLAY=%s\n"
+                 "STATE=%s\n"
+                 "REMOTE=%s\n"
+-                "EXTRA_DEVICE_ACCESS=%s\n"
+                 "LEADER_FD_SAVED=%s\n",
+                 s->user->user_record->uid,
+                 one_zero(session_is_active(s)),
+                 one_zero(s->user->display == s),
+                 session_state_to_string(session_get_state(s)),
+                 one_zero(s->remote),
+-                one_zero(s->extra_device_access),
+                 one_zero(s->leader_fd_saved));
+
+         env_file_fputs_assignment(f, "USER=", s->user->user_record->user_name);
+@@ -414,6 +427,13 @@ int session_save(Session *s) {
+                 session_save_devices(s, f);
+         }
+
++        if (s->extra_device_access) {
++                _cleanup_free_ char *extra_devices = strv_join(s->extra_device_access, " ");
++                if (!extra_devices)
++                        return log_oom();
++                fprintf(f, "EXTRA_DEVICE_ACCESS=%s\n", extra_devices);
++        }
++
+         r = flink_tmpfile(f, temp_path, s->state_file, LINK_TMPFILE_REPLACE);
+         if (r < 0)
+                 return log_error_errno(r, "Failed to move '%s' into place: %m", s->state_file);
+@@ -586,9 +606,9 @@ int session_load(Session *s) {
+         }
+
+         if (extra_device_access) {
+-                k = parse_boolean(extra_device_access);
+-                if (k >= 0)
+-                        s->extra_device_access = k;
++                s->extra_device_access = strv_split(extra_device_access, /* separators= */ NULL);
++                if (!s->extra_device_access)
++                        return log_oom();
+         }
+
+         if (vtnr)
+@@ -915,8 +935,7 @@ int session_start(Session *s, sd_bus_message *properties, sd_bus_error *error) {
+         if (s->seat)
+                 (void) seat_save(s->seat);
+
+-        if (s->extra_device_access)
+-                (void) trigger_xaccess();
++        (void) trigger_xaccess(s->extra_device_access);
+
+         /* Send signals */
+         (void) session_send_signal(s, true);
+@@ -1008,8 +1027,7 @@ int session_stop(Session *s, bool force) {
+         (void) session_save(s);
+         (void) user_save(s->user);
+
+-        if (s->extra_device_access)
+-                (void) trigger_xaccess();
++        (void) trigger_xaccess(s->extra_device_access);
+
+         return r;
+ }
+diff --git a/src/login/logind-session.h b/src/login/logind-session.h
+index bcfbc53..5810c4e 100644
+--- a/src/login/logind-session.h
++++ b/src/login/logind-session.h
+@@ -121,7 +121,7 @@ typedef struct Session {
+         char *remote_host;
+         char *service;
+         char *desktop;
+-        bool extra_device_access;
++        char **extra_device_access;
+
+         char *scope;
+         char *scope_job;
+diff --git a/src/login/logind-varlink.c b/src/login/logind-varlink.c
+index 0016f27..a1fdac0 100644
+--- a/src/login/logind-varlink.c
++++ b/src/login/logind-varlink.c
+@@ -15,6 +15,7 @@
+ #include "logind-seat.h"
+ #include "logind-user.h"
+ #include "logind-varlink.h"
++#include "strv.h"
+ #include "terminal-util.h"
+ #include "user-record.h"
+ #include "user-util.h"
+@@ -145,11 +146,12 @@ typedef struct CreateSessionParameters {
+         int remote;
+         const char *remote_user;
+         const char *remote_host;
+-        bool extra_device_access;
++        char **extra_device_access;
+ } CreateSessionParameters;
+
+ static void create_session_parameters_done(CreateSessionParameters *p) {
+         pidref_done(&p->pid);
++        strv_free(p->extra_device_access);
+ }
+
+ static int vl_method_create_session(sd_varlink *link, sd_json_variant *parameters, sd_varlink_method_flags_t flags, void *userdata) {
+@@ -170,7 +172,7 @@ static int vl_method_create_session(sd_varlink *link, sd_json_variant *parameter
+                 { "Remote",            SD_JSON_VARIANT_BOOLEAN,       sd_json_dispatch_tristate,     offsetof(CreateSessionParameters, remote),              0                 },
+                 { "RemoteUser",        SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, remote_user),         0                 },
+                 { "RemoteHost",        SD_JSON_VARIANT_STRING,        sd_json_dispatch_const_string, offsetof(CreateSessionParameters, remote_host),         0                 },
+-                { "ExtraDeviceAccess", SD_JSON_VARIANT_BOOLEAN,       sd_json_dispatch_stdbool,      offsetof(CreateSessionParameters, extra_device_access), 0                 },
++                { "ExtraDeviceAccess", SD_JSON_VARIANT_ARRAY,         sd_json_dispatch_strv,         offsetof(CreateSessionParameters, extra_device_access), 0                 },
+                 {}
+         };
+
+@@ -180,7 +182,6 @@ static int vl_method_create_session(sd_varlink *link, sd_json_variant *parameter
+                 .class = _SESSION_CLASS_INVALID,
+                 .type = _SESSION_TYPE_INVALID,
+                 .remote = -1,
+-                .extra_device_access = false,
+         };
+
+         r = sd_varlink_dispatch(link, parameters, dispatch_table, &p);
+diff --git a/src/login/pam_systemd.c b/src/login/pam_systemd.c
+index a4d6da8..085c889 100644
+--- a/src/login/pam_systemd.c
++++ b/src/login/pam_systemd.c
+@@ -817,7 +817,7 @@ typedef struct SessionContext {
+         uint32_t vtnr;
+         const char *tty;
+         const char *display;
+-        bool extra_device_access;
++        char **extra_device_access;
+         bool remote;
+         const char *remote_user;
+         const char *remote_host;
+@@ -830,6 +830,10 @@ typedef struct SessionContext {
+         bool incomplete;
+ } SessionContext;
+
++static void session_context_done(SessionContext *c) {
++        strv_free(c->extra_device_access);
++}
++
+ static int create_session_message(
+                 sd_bus *bus,
+                 pam_handle_t *handle,
+@@ -1154,7 +1158,7 @@ static int register_session(
+                                         SD_JSON_BUILD_PAIR_BOOLEAN("Remote", c->remote),
+                                         JSON_BUILD_PAIR_STRING_NON_EMPTY("RemoteUser", c->remote_user),
+                                         JSON_BUILD_PAIR_STRING_NON_EMPTY("RemoteHost", c->remote_host),
+-                                        JSON_BUILD_PAIR_CONDITION_BOOLEAN(c->extra_device_access, "ExtraDeviceAccess", c->extra_device_access));
++                                        JSON_BUILD_PAIR_CONDITION_STRV(!strv_isempty(c->extra_device_access), "ExtraDeviceAccess", c->extra_device_access));
+                         if (r < 0)
+                                 return pam_syslog_errno(handle, LOG_ERR, r,
+                                                         "Failed to issue io.systemd.Login.CreateSession varlink call: %m");
+@@ -1323,7 +1327,11 @@ static int register_session(
+         if (r != PAM_SUCCESS)
+                 return r;
+
+-        r = update_environment(handle, "XDG_SESSION_EXTRA_DEVICE_ACCESS", one_zero(c->extra_device_access));
++        _cleanup_free_ char *extra_devices = strv_join(c->extra_device_access, ":");
++        if (!extra_devices)
++                return pam_log_oom(handle);
++
++        r = update_environment(handle, "XDG_SESSION_EXTRA_DEVICE_ACCESS", extra_devices);
+         if (r != PAM_SUCCESS)
+                 return r;
+
+@@ -1781,7 +1789,7 @@ _public_ PAM_EXTERN int pam_sm_open_session(
+         if (r != PAM_SUCCESS)
+                 return r;
+
+-        SessionContext c = {};
++        _cleanup_(session_context_done) SessionContext c = {};
+         r = pam_get_item_many(
+                         handle,
+                         PAM_SERVICE,  &c.service,
+@@ -1799,7 +1807,13 @@ _public_ PAM_EXTERN int pam_sm_open_session(
+         c.desktop = getenv_harder(handle, "XDG_SESSION_DESKTOP", desktop_pam);
+         c.area = getenv_harder(handle, "XDG_AREA", area_pam);
+         c.incomplete = getenv_harder_bool(handle, "XDG_SESSION_INCOMPLETE", false);
+-        c.extra_device_access = getenv_harder_bool(handle, "XDG_SESSION_EXTRA_DEVICE_ACCESS", false);
++
++        const char *extra_device_access = getenv_harder(handle, "XDG_SESSION_EXTRA_DEVICE_ACCESS", NULL);
++        if (extra_device_access) {
++                c.extra_device_access = strv_split(extra_device_access, ":");
++                if (!c.extra_device_access)
++                        return pam_log_oom(handle);
++        }
+
+         r = pam_get_data_many(
+                         handle,
+diff --git a/src/shared/varlink-io.systemd.Login.c b/src/shared/varlink-io.systemd.Login.c
+index fe49a92..cf09d18 100644
+--- a/src/shared/varlink-io.systemd.Login.c
++++ b/src/shared/varlink-io.systemd.Login.c
+@@ -65,10 +65,9 @@ static SD_VARLINK_DEFINE_METHOD(
+                 SD_VARLINK_DEFINE_INPUT(RemoteUser, SD_VARLINK_STRING, SD_VARLINK_NULLABLE),
+                 SD_VARLINK_FIELD_COMMENT("Host name of the remote host"),
+                 SD_VARLINK_DEFINE_INPUT(RemoteHost, SD_VARLINK_STRING, SD_VARLINK_NULLABLE),
+-                SD_VARLINK_FIELD_COMMENT("If true this session is granted access to additional hardware devices, "
+-                                         "typically useful for remote, graphical sessions. "
+-                                         "This adds access for all devices tagged with \"xaccess\" in udev."),
+-                SD_VARLINK_DEFINE_INPUT(ExtraDeviceAccess, SD_VARLINK_BOOL, SD_VARLINK_NULLABLE),
++                SD_VARLINK_FIELD_COMMENT("List of additional hardware devices that this session is granted access to."
++                                         "For every $ID in the list, this adds access for all devices tagged with \"xaccess-$ID\" in udev."),
++                SD_VARLINK_DEFINE_INPUT(ExtraDeviceAccess, SD_VARLINK_STRING, SD_VARLINK_NULLABLE|SD_VARLINK_ARRAY),
+                 SD_VARLINK_FIELD_COMMENT("The identifier string of the session of the user."),
+                 SD_VARLINK_DEFINE_OUTPUT(Id, SD_VARLINK_STRING, 0),
+                 SD_VARLINK_FIELD_COMMENT("The runtime path ($XDG_RUNTIME_DIR) of the user."),
+diff --git a/src/systemd/sd-login.h b/src/systemd/sd-login.h
+index 042d753..f9cfaf6 100644
+--- a/src/systemd/sd-login.h
++++ b/src/systemd/sd-login.h
+@@ -150,8 +150,10 @@ int sd_session_is_active(const char *session);
+ /* Return 1 if the session is remote. */
+ int sd_session_is_remote(const char *session);
+
+-/* Return 1 if the session is granted extra device access. */
+-int sd_session_has_extra_device_access(const char *session);
++/* Return extra hardware devices that the session is granted access to.
++ * For every $ID in the list, this adds access for all devices tagged with
++ * "xaccess-$ID" in udev. */
++int sd_session_get_extra_device_access(const char *session, char ***ret_ids);
+
+ /* Get state from session. Possible states: online, active, closing.
+  * This function is a more generic version of sd_session_is_active(). */
+diff --git a/src/udev/udev-builtin-uaccess.c b/src/udev/udev-builtin-uaccess.c
+index e77fc70..9fd006e 100644
+--- a/src/udev/udev-builtin-uaccess.c
++++ b/src/udev/udev-builtin-uaccess.c
+@@ -63,34 +63,58 @@ static int builtin_uaccess(UdevEvent *event, int argc, char *argv[]) {
+                 }
+         }
+
+-        r = sd_device_has_tag(dev, "xaccess");
+-        if (r < 0)
+-                return log_device_error_errno(dev, r, "Failed to query device xaccess tag: %m");
++        bool has_xaccess = false;
++        FOREACH_DEVICE_CURRENT_TAG(dev, tag)
++                if (startswith(tag, "xaccess-")) {
++                        has_xaccess = true;
++                        break;
++                }
+
+-        if (r > 0) {
++        if (has_xaccess) {
+                 r = sd_get_sessions(&sessions);
+                 if (r < 0)
+                         return log_device_error_errno(dev, r, "Failed to list sessions: %m");
+
+                 STRV_FOREACH(s, sessions) {
+                         _cleanup_free_ char *state = NULL;
+-                        if (sd_session_get_state(*s, &state) < 0) {
++                        r = sd_session_get_state(*s, &state);
++                        if (r < 0) {
+                                 log_device_debug_errno(dev, r, "Failed to query state for session %s, ignoring: %m", *s);
+                                 continue;
+                         }
+                         if (streq(state, "closing"))
+                                 continue;
+-                        r = sd_session_has_extra_device_access(*s);
++
++                        r = sd_session_get_uid(*s, &uid);
+                         if (r < 0) {
+-                                log_device_debug_errno(dev, r, "Failed to query extra device access for session %s, ignoring: %m", *s);
++                                log_device_debug_errno(dev, r, "Failed to query uid for session %s, ignoring: %m", *s);
+                                 continue;
+                         }
+-                        if (r == 0)
+-                                continue;
+-                        if (sd_session_get_uid(*s, &uid) < 0) {
+-                                log_device_debug_errno(dev, r, "Failed to query uid for session %s, ignoring: %m", *s);
++
++                        _cleanup_strv_free_ char **extra_devices = NULL;
++                        r = sd_session_get_extra_device_access(*s, &extra_devices);
++                        if (r < 0) {
++                                log_device_debug_errno(dev, r, "Failed to query extra device access for session %s, ignoring: %m", *s);
+                                 continue;
+                         }
++
++                        bool match = false;
++                        STRV_FOREACH(id, extra_devices) {
++                                _cleanup_free_ char *tag = strjoin("xaccess-", *id);
++                                if (!tag)
++                                        return log_oom();
++
++                                r = sd_device_has_current_tag(dev, tag);
++                                if (r < 0)
++                                        return log_device_error_errno(dev, r, "Failed to query %s tag: %m", tag);
++                                if (r > 0) {
++                                        match = true;
++                                        break;
++                                }
++                        }
++                        if (!match)
++                                continue;
++
+                         if (set_ensure_put(&uids, NULL, UID_TO_PTR(uid)) < 0)
+                                 return log_oom();
+                 }

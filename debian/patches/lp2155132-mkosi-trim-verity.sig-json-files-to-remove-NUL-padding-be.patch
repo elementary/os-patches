@@ -1,0 +1,41 @@
+From: Luca Boccassi <luca.boccassi@gmail.com>
+Date: Wed, 22 Apr 2026 13:55:37 +0100
+Subject: mkosi: trim verity.sig json files to remove NUL padding before passing to jq
+
+Origin: upstream, https://github.com/systemd/systemd/commit/6dccf54cd646fe0621b4f256e7d61ad2fec2cbe6
+Bug-Ubuntu: https://launchpad.net/bugs/2155132
+
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+jq started rejecting input that has NUL bytes to fix some security issues,
+so we need to trim the verity.sig json files, which are spat out with
+the NUL bytes padding from the GPT partition content.
+
+‣  Running postinstall script /home/runner/work/systemd/systemd/mkosi/mkosi.postinst.chroot…
+jq: parse error: Invalid numeric literal at EOF at line 1, column 16384
+‣ "/work/postinst final" returned non-zero exit code 5.
+
+https://github.com/jqlang/jq/commit/6374ae0bcdfe33a18eb0ae6db28493b1f34a0a5b
+(cherry picked from commit 6dccf54cd646fe0621b4f256e7d61ad2fec2cbe6)
+---
+ mkosi/mkosi.postinst.chroot | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/mkosi/mkosi.postinst.chroot b/mkosi/mkosi.postinst.chroot
+index eb6d917..de67ddf 100755
+--- a/mkosi/mkosi.postinst.chroot
++++ b/mkosi/mkosi.postinst.chroot
+@@ -27,8 +27,9 @@ mountpoint -q /etc/resolv.conf && umount /etc/resolv.conf
+ rm -f /etc/resolv.conf
+ 
+ for f in "$BUILDROOT"/usr/share/*.verity.sig; do
+-    jq --join-output '.rootHash' "$f" >"${f%.verity.sig}.roothash"
+-    jq --join-output '.signature' "$f" | base64 --decode >"${f%.verity.sig}.roothash.p7s"
++    # jq started refusing input with NUL bytes padding
++    strings "$f" | jq --join-output '.rootHash' >"${f%.verity.sig}.roothash"
++    strings "$f" | jq --join-output '.signature' | base64 --decode >"${f%.verity.sig}.roothash.p7s"
+ done
+ 
+ # We want /var/log/journal to be created on first boot so it can be created with the right chattr settings by

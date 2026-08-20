@@ -1,0 +1,44 @@
+# doc: https://github.com/redhat-plumbers-in-action/devel-freezer#readme
+---
+
+name: Development Freeze
+on:
+  workflow_run:
+    workflows: [ Gather Pull Request Metadata ]
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+jobs:
+  freezer:
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.repository == 'systemd/systemd'
+    runs-on: ubuntu-24.04
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - id: artifact
+        name: Download Pull Request Metadata artifact
+        uses: redhat-plumbers-in-action/download-artifact@103e5f882470b59e9d71c80ecb2d0a0b91a7c43b
+        with:
+          name: Pull Request Metadata
+
+      - name: Repository checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Development Freezer
+        uses: redhat-plumbers-in-action/devel-freezer@ad766eafd555b28d2cb8e27937835983f9c3d173
+        with:
+          pr-number: ${{ fromJSON(steps.artifact.outputs.pr-metadata-json).number }}
+          # delay start of validation to allow for some milestone/labels tweaking
+          delay: 20
+          token: ${{ secrets.GITHUB_TOKEN }}

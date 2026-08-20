@@ -1,0 +1,38 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Fri, 20 Mar 2026 11:23:39 -0400
+Subject: socket-util: filter out VMADDR_CID_ANY in vsock_get_local_cid()
+
+Origin: upstream, https://github.com/systemd/systemd/commit/83359c4da02a82d2972cf957d9855ea957359287
+Bug-Ubuntu: https://launchpad.net/bugs/2145027
+
+It has been observed on some systems[1] that ssh-issue may print out:
+
+ Try contacting this VM's SSH server via 'ssh vsock%4294967295' from host.
+
+i.e. it suggests connecting with VMADDR_CID_ANY, which is not valid. It
+seems that IOCTL_VM_SOCKETS_GET_LOCAL_CID may return VMADDR_CID_ANY in
+some cases, e.g. when vsock is not full initialized or so.
+
+Treat VMADDR_CID_ANY as special in vsock_get_local_cid(), the same as
+VMADDR_CID_LOCAL and VMADDR_CID_HOST, and return an error.
+
+[1] https://launchpad.net/bugs/2145027
+
+(cherry picked from commit 83359c4da02a82d2972cf957d9855ea957359287)
+---
+ src/basic/socket-util.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/basic/socket-util.c b/src/basic/socket-util.c
+index 9f62b11..4158b7f 100644
+--- a/src/basic/socket-util.c
++++ b/src/basic/socket-util.c
+@@ -1911,7 +1911,7 @@ int vsock_get_local_cid(unsigned *ret) {
+         /* If ret == NULL, we're just want to check if AF_VSOCK is available, so accept
+          * any address. Otherwise, filter out special addresses that are cannot be used
+          * to identify _this_ machine from the outside. */
+-        if (ret && IN_SET(tmp, VMADDR_CID_LOCAL, VMADDR_CID_HOST))
++        if (ret && IN_SET(tmp, VMADDR_CID_LOCAL, VMADDR_CID_HOST, VMADDR_CID_ANY))
+                 return log_debug_errno(SYNTHETIC_ERRNO(EADDRNOTAVAIL),
+                                        "IOCTL_VM_SOCKETS_GET_LOCAL_CID returned special value (%u), ignoring.", tmp);
+ 

@@ -1,0 +1,26 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Fri, 27 Feb 2026 14:17:22 -0500
+Subject: test: use gnuenv to workaround broken --block-signal=
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2142900
+Forwarded: no
+
+The uutils coreutils env does not understand SIGRTMIN+N (or SIGRTMIN at
+all).
+---
+ test/units/TEST-78-SIGQUEUE.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/units/TEST-78-SIGQUEUE.sh b/test/units/TEST-78-SIGQUEUE.sh
+index 552d61b..f4c88f7 100755
+--- a/test/units/TEST-78-SIGQUEUE.sh
++++ b/test/units/TEST-78-SIGQUEUE.sh
+@@ -11,7 +11,7 @@ fi
+ 
+ UNIT="test-sigqueue-$RANDOM.service"
+ 
+-systemd-run -u "$UNIT" -p Type=notify -p DynamicUser=1 -- env --block-signal=SIGRTMIN+7 systemd-notify --exec --ready \; sleep infinity
++systemd-run -u "$UNIT" -p Type=notify -p DynamicUser=1 -- gnuenv --block-signal=SIGRTMIN+7 systemd-notify --exec --ready \; sleep infinity
+ 
+ systemctl kill --kill-whom=main --kill-value=4 --signal=SIGRTMIN+7 "$UNIT"
+ systemctl kill --kill-whom=main --kill-value=4 --signal=SIGRTMIN+7 "$UNIT"

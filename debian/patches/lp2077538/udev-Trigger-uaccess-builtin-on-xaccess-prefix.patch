@@ -1,0 +1,27 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Tue, 24 Feb 2026 10:48:49 +0100
+Subject: udev: Trigger uaccess builtin on xaccess-* prefix
+
+Fixup xaccess trigger after the rework.
+There's no single `xaccess` tag anymore; instead we match on a prefix.
+
+Forwarded: https://github.com/systemd/systemd/pull/40803
+Bug-GNOME: https://gitlab.gnome.org/GNOME/gnome-remote-desktop/-/issues/224
+Bug-Ubuntu: https://launchpad.net/bugs/2077538
+---
+ rules.d/73-seat-late.rules.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rules.d/73-seat-late.rules.in b/rules.d/73-seat-late.rules.in
+index 2e451ce..f5d302c 100644
+--- a/rules.d/73-seat-late.rules.in
++++ b/rules.d/73-seat-late.rules.in
+@@ -14,7 +14,7 @@ ENV{ID_SEAT}=="", IMPORT{parent}="ID_SEAT"
+
+ ENV{ID_SEAT}!="", TAG+="$env{ID_SEAT}"
+ {% if HAVE_ACL %}
+-TAG=="uaccess|xaccess", ENV{MAJOR}!="", RUN{builtin}+="uaccess"
++TAG=="uaccess|xaccess-*", ENV{MAJOR}!="", RUN{builtin}+="uaccess"
+ {% endif %}
+
+ LABEL="seat_late_end"

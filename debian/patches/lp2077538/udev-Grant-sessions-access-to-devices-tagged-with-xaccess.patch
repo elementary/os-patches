@@ -1,0 +1,381 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Wed, 26 Nov 2025 17:26:53 +0100
+Subject: udev: Grant sessions access to devices tagged with xaccess
+
+Grant access to devices tagged with "xaccess" on session start, if the session
+was created with XDG_SESSION_EXTRA_DEVICE_ACCESS=1.
+
+udev-builtin-uaccess is refactored to grant multiple users access to a device,
+taking into account the device's seat and all the active EXTRA_DEVICE_ACCESS
+sessions.
+
+Origin: https://github.com/systemd/systemd/pull/38516
+Bug-GNOME: https://gitlab.gnome.org/GNOME/gnome-remote-desktop/-/issues/224
+Bug-Ubuntu: https://launchpad.net/bugs/2077538
+---
+ rules.d/73-seat-late.rules.in   |  2 +-
+ src/login/logind-seat.c         | 18 ++++++-----
+ src/login/logind-session.c      | 48 ++++++++++++++++++++++++++++
+ src/shared/acl-util.c           | 26 +++++++++++----
+ src/shared/acl-util.h           |  4 +--
+ src/udev/udev-builtin-uaccess.c | 70 ++++++++++++++++++++++++++++++++++-------
+ 6 files changed, 139 insertions(+), 29 deletions(-)
+
+diff --git a/rules.d/73-seat-late.rules.in b/rules.d/73-seat-late.rules.in
+index 7cda2b0..2e451ce 100644
+--- a/rules.d/73-seat-late.rules.in
++++ b/rules.d/73-seat-late.rules.in
+@@ -14,7 +14,7 @@ ENV{ID_SEAT}=="", IMPORT{parent}="ID_SEAT"
+
+ ENV{ID_SEAT}!="", TAG+="$env{ID_SEAT}"
+ {% if HAVE_ACL %}
+-TAG=="uaccess", ENV{MAJOR}!="", RUN{builtin}+="uaccess"
++TAG=="uaccess|xaccess", ENV{MAJOR}!="", RUN{builtin}+="uaccess"
+ {% endif %}
+
+ LABEL="seat_late_end"
+diff --git a/src/login/logind-seat.c b/src/login/logind-seat.c
+index cc71efb..77f006a 100644
+--- a/src/login/logind-seat.c
++++ b/src/login/logind-seat.c
+@@ -35,6 +35,7 @@
+ #include "tmpfile-util.h"
+ #include "udev-util.h"
+ #include "user-record.h"
++#include "user-util.h"
+
+ int seat_new(Manager *m, const char *id, Seat **ret) {
+         _cleanup_(seat_freep) Seat *s = NULL;
+@@ -330,14 +331,15 @@ static int seat_trigger_devices(Seat *s) {
+ static int static_node_acl(Seat *s) {
+ #if HAVE_ACL
+         int r, ret = 0;
+-        uid_t uid;
++        _cleanup_set_free_ Set *uids = NULL;
+
+         assert(s);
+
+-        if (s->active)
+-                uid = s->active->user->user_record->uid;
+-        else
+-                uid = 0;
++        if (s->active) {
++                r = set_ensure_put(&uids, NULL, UID_TO_PTR(s->active->user->user_record->uid));
++                if (r < 0)
++                        return log_oom();
++        }
+
+         _cleanup_closedir_ DIR *dir = opendir("/run/udev/static_node-tags/uaccess/");
+         if (!dir) {
+@@ -377,7 +379,7 @@ static int static_node_acl(Seat *s) {
+                 if (!ERRNO_IS_NEG_DEVICE_ABSENT_OR_EMPTY(r))
+                         log_debug_errno(r, "Failed to check if '/run/udev/static_node-tags/uaccess/%s' points to a static device node, ignoring: %m", de->d_name);
+
+-                r = devnode_acl(fd, uid);
++                r = devnode_acl(fd, uids);
+                 if (r >= 0 || r == -ENOENT)
+                         continue;
+
+@@ -385,11 +387,11 @@ static int static_node_acl(Seat *s) {
+                 _cleanup_free_ char *node = NULL;
+                 (void) fd_get_path(fd, &node);
+
+-                if (uid != 0) {
++                if (!set_isempty(uids)) {
+                         RET_GATHER(ret, log_debug_errno(r, "Failed to apply ACL on '%s': %m", node ?: de->d_name));
+
+                         /* Better be safe than sorry and reset ACL */
+-                        r = devnode_acl(fd, /* uid= */ 0);
++                        r = devnode_acl(fd, /* uids= */ NULL);
+                         if (r >= 0 || r == -ENOENT)
+                                 continue;
+                 }
+diff --git a/src/login/logind-session.c b/src/login/logind-session.c
+index 3724de7..2b2c36b 100644
+--- a/src/login/logind-session.c
++++ b/src/login/logind-session.c
+@@ -9,6 +9,7 @@
+ #include <unistd.h>
+
+ #include "sd-bus.h"
++#include "sd-device.h"
+ #include "sd-event.h"
+ #include "sd-messages.h"
+ #include "sd-varlink.h"
+@@ -18,6 +19,7 @@
+ #include "bus-error.h"
+ #include "bus-util.h"
+ #include "daemon-util.h"
++#include "device-util.h"
+ #include "devnum-util.h"
+ #include "env-file.h"
+ #include "errno-util.h"
+@@ -276,6 +278,46 @@ static void session_save_devices(Session *s, FILE *f) {
+         }
+ }
+
++static int trigger_xaccess(void) {
++        int r;
++
++        _cleanup_(sd_device_enumerator_unrefp) sd_device_enumerator *e = NULL;
++        r = sd_device_enumerator_new(&e);
++        if (r < 0)
++                return r;
++
++        r = sd_device_enumerator_add_match_tag(e, "xaccess");
++        if (r < 0)
++                return r;
++
++        FOREACH_DEVICE(e, d) {
++                /* Verify that the tag is still in place. */
++                r = sd_device_has_current_tag(d, "xaccess");
++                if (r < 0)
++                        return r;
++                if (r == 0)
++                        continue;
++
++                /* In case people mistag devices without nodes, we need to ignore this. */
++                r = sd_device_get_devname(d, NULL);
++                if (r == -ENOENT)
++                        continue;
++                if (r < 0)
++                        return r;
++
++                sd_id128_t uuid;
++                r = sd_device_trigger_with_uuid(d, SD_DEVICE_CHANGE, &uuid);
++                if (r < 0) {
++                        log_device_debug_errno(d, r, "Failed to trigger 'change' event, ignoring: %m");
++                        continue;
++                }
++
++                log_device_debug(d, "Triggered synthetic event (ACTION=change, UUID=%s).", SD_ID128_TO_UUID_STRING(uuid));
++        }
++
++        return 0;
++}
++
+ int session_save(Session *s) {
+         int r;
+
+@@ -873,6 +915,9 @@ int session_start(Session *s, sd_bus_message *properties, sd_bus_error *error) {
+         if (s->seat)
+                 (void) seat_save(s->seat);
+
++        if (s->extra_device_access)
++                (void) trigger_xaccess();
++
+         /* Send signals */
+         (void) session_send_signal(s, true);
+         (void) user_send_changed(s->user, "Display");
+@@ -963,6 +1008,9 @@ int session_stop(Session *s, bool force) {
+         (void) session_save(s);
+         (void) user_save(s->user);
+
++        if (s->extra_device_access)
++                (void) trigger_xaccess();
++
+         return r;
+ }
+
+diff --git a/src/shared/acl-util.c b/src/shared/acl-util.c
+index 24384e6..ae46844 100644
+--- a/src/shared/acl-util.c
++++ b/src/shared/acl-util.c
+@@ -8,6 +8,7 @@
+ #include "errno-util.h"
+ #include "extract-word.h"
+ #include "fd-util.h"
++#include "set.h"
+ #include "string-util.h"
+ #include "strv.h"
+ #include "user-util.h"
+@@ -80,8 +81,9 @@ int dlopen_libacl(void) {
+                         DLSYM_ARG(acl_to_any_text));
+ }
+
+-int devnode_acl(int fd, uid_t uid) {
+-        bool changed = false, found = false;
++int devnode_acl(int fd, const Set *uids) {
++        _cleanup_set_free_ Set *found = NULL;
++        bool changed = false;
+         int r;
+
+         assert(fd >= 0);
+@@ -107,12 +109,12 @@ int devnode_acl(int fd, uid_t uid) {
+                 if (tag != ACL_USER)
+                         continue;
+
+-                if (uid > 0) {
++                if (!set_isempty(uids)) {
+                         uid_t *u = sym_acl_get_qualifier(entry);
+                         if (!u)
+                                 return -errno;
+
+-                        if (*u == uid) {
++                        if (set_contains(uids, UID_TO_PTR(*u))) {
+                                 acl_permset_t permset;
+                                 if (sym_acl_get_permset(entry, &permset) < 0)
+                                         return -errno;
+@@ -132,7 +134,10 @@ int devnode_acl(int fd, uid_t uid) {
+                                         changed = true;
+                                 }
+
+-                                found = true;
++                                r = set_ensure_put(&found, NULL, UID_TO_PTR(*u));
++                                if (r < 0)
++                                        return r;
++
+                                 continue;
+                         }
+                 }
+@@ -145,7 +150,16 @@ int devnode_acl(int fd, uid_t uid) {
+         if (r < 0)
+                 return -errno;
+
+-        if (!found && uid > 0) {
++        void *p;
++        SET_FOREACH(p, uids) {
++                uid_t uid = PTR_TO_UID(p);
++
++                if (uid == 0)
++                        continue;
++
++                if (set_contains(found, UID_TO_PTR(uid)))
++                        continue;
++
+                 if (sym_acl_create_entry(&acl, &entry) < 0)
+                         return -errno;
+
+diff --git a/src/shared/acl-util.h b/src/shared/acl-util.h
+index 0e0423a..1b74101 100644
+--- a/src/shared/acl-util.h
++++ b/src/shared/acl-util.h
+@@ -38,7 +38,7 @@ extern DLSYM_PROTOTYPE(acl_to_any_text);
+
+ int dlopen_libacl(void);
+
+-int devnode_acl(int fd, uid_t uid);
++int devnode_acl(int fd, const Set *uids);
+
+ int calc_acl_mask_if_needed(acl_t *acl_p);
+ int add_base_acls_if_needed(acl_t *acl_p, const char *path);
+@@ -89,7 +89,7 @@ static inline int dlopen_libacl(void) {
+         return -EOPNOTSUPP;
+ }
+
+-static inline int devnode_acl(int fd, uid_t uid) {
++static inline int devnode_acl(int fd, const Set *uids) {
+         return -EOPNOTSUPP;
+ }
+
+diff --git a/src/udev/udev-builtin-uaccess.c b/src/udev/udev-builtin-uaccess.c
+index fcbf267..e77fc70 100644
+--- a/src/udev/udev-builtin-uaccess.c
++++ b/src/udev/udev-builtin-uaccess.c
+@@ -3,15 +3,23 @@
+ #include "sd-login.h"
+
+ #include "acl-util.h"
++#include "alloc-util.h"
+ #include "device-util.h"
+ #include "errno-util.h"
+ #include "fd-util.h"
+ #include "login-util.h"
++#include "set.h"
++#include "string-util.h"
++#include "strv.h"
+ #include "udev-builtin.h"
++#include "user-util.h"
+
+ static int builtin_uaccess(UdevEvent *event, int argc, char *argv[]) {
+         sd_device *dev = ASSERT_PTR(ASSERT_PTR(event)->dev);
+-        int r, k;
++        _cleanup_strv_free_ char **sessions = NULL;
++        _cleanup_set_free_ Set *uids = NULL;
++        uid_t uid;
++        int r = 0, k;
+
+         if (event->event_mode != EVENT_UDEV_WORKER) {
+                 log_device_debug(dev, "Running in test mode, skipping execution of 'uaccess' builtin command.");
+@@ -33,24 +41,62 @@ static int builtin_uaccess(UdevEvent *event, int argc, char *argv[]) {
+                 return ignore ? 0 : fd;
+         }
+
+-        const char *seat;
+-        r = device_get_seat(dev, &seat);
++        r = sd_device_has_tag(dev, "uaccess");
+         if (r < 0)
+-                return log_device_error_errno(dev, r, "Failed to get seat: %m");
++                return log_device_error_errno(dev, r, "Failed to query uaccess tag: %m");
+
+-        uid_t uid;
+-        r = sd_seat_get_active(seat, /* ret_session= */ NULL, &uid);
+-        if (r < 0) {
++        if (r > 0) {
++                const char *seat;
++                r = device_get_seat(dev, &seat);
++                if (r < 0)
++                        return log_device_error_errno(dev, r, "Failed to get seat: %m");
++
++                r = sd_seat_get_active(seat, /* ret_session= */ NULL, &uid);
+                 if (IN_SET(r, -ENXIO, -ENODATA))
+                         /* No active session on this seat */
+                         r = 0;
+-                else
+-                        log_device_error_errno(dev, r, "Failed to determine active user on seat %s: %m", seat);
++                else if (r < 0)
++                        log_device_error_errno(dev, r, "Failed to determine active user on seat %s, ignoring: %m", seat);
++                else {
++                        if (set_ensure_put(&uids, NULL, UID_TO_PTR(uid)) < 0)
++                                return log_oom();
++                }
++        }
+
+-                goto reset;
++        r = sd_device_has_tag(dev, "xaccess");
++        if (r < 0)
++                return log_device_error_errno(dev, r, "Failed to query device xaccess tag: %m");
++
++        if (r > 0) {
++                r = sd_get_sessions(&sessions);
++                if (r < 0)
++                        return log_device_error_errno(dev, r, "Failed to list sessions: %m");
++
++                STRV_FOREACH(s, sessions) {
++                        _cleanup_free_ char *state = NULL;
++                        if (sd_session_get_state(*s, &state) < 0) {
++                                log_device_debug_errno(dev, r, "Failed to query state for session %s, ignoring: %m", *s);
++                                continue;
++                        }
++                        if (streq(state, "closing"))
++                                continue;
++                        r = sd_session_has_extra_device_access(*s);
++                        if (r < 0) {
++                                log_device_debug_errno(dev, r, "Failed to query extra device access for session %s, ignoring: %m", *s);
++                                continue;
++                        }
++                        if (r == 0)
++                                continue;
++                        if (sd_session_get_uid(*s, &uid) < 0) {
++                                log_device_debug_errno(dev, r, "Failed to query uid for session %s, ignoring: %m", *s);
++                                continue;
++                        }
++                        if (set_ensure_put(&uids, NULL, UID_TO_PTR(uid)) < 0)
++                                return log_oom();
++                }
+         }
+
+-        r = devnode_acl(fd, uid);
++        r = devnode_acl(fd, uids);
+         if (r < 0) {
+                 log_device_full_errno(dev, r == -ENOENT ? LOG_DEBUG : LOG_ERR, r, "Failed to apply ACL: %m");
+                 goto reset;
+@@ -60,7 +106,7 @@ static int builtin_uaccess(UdevEvent *event, int argc, char *argv[]) {
+
+ reset:
+         /* Better be safe than sorry and reset ACL */
+-        k = devnode_acl(fd, /* uid= */ 0);
++        k = devnode_acl(fd, /* uids= */ NULL);
+         if (k < 0)
+                 RET_GATHER(r, log_device_full_errno(dev, k == -ENOENT ? LOG_DEBUG : LOG_ERR, k, "Failed to flush ACLs: %m"));
+

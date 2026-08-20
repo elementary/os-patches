@@ -1,0 +1,42 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+if { [ "$1" = install ] || [ "$1" = upgrade ]; } &&
+    dpkg --compare-versions "$2" lt-nl "257.9-0ubuntu2~"; then
+
+        # First drop all the systemd instances from nsswitch, to ensure that we're adding them back and in order.
+        # The code is the same that is generated for postrm, but we cannot call postrm
+        # directly here, since it relies on refcounting.
+        if [ -e "${DPKG_ROOT}/etc/nsswitch.conf" ]; then
+            sed -E -i "${DPKG_ROOT}/etc/nsswitch.conf" \
+                        -e ':a /^shadow:\s.*#/ s/(^[^#]+)\s(systemd)\s+\[!?[A-Za-z]+=[A-Za-z]+\](\s|#)/\1\3/g ; t a' \
+                        -e ':b /^shadow:\s.*#/ s/(^[^#]+)\s(systemd)(\s|#)/\1\3/g ; t b' \
+                        -e ':c /^shadow:\s[^#]*$/ s/\s(systemd)\s+\[!?[A-Za-z]+=[A-Za-z]+\](\s|$)/\2/g ; t c' \
+                        -e ':d /^shadow:\s[^#]*$/ s/\s(systemd)(\s|$)/\2/g ; t d'
+
+            sed -E -i "${DPKG_ROOT}/etc/nsswitch.conf" \
+                        -e ':a /^passwd:\s.*#/ s/(^[^#]+)\s(systemd)\s+\[!?[A-Za-z]+=[A-Za-z]+\](\s|#)/\1\3/g ; t a' \
+                        -e ':b /^passwd:\s.*#/ s/(^[^#]+)\s(systemd)(\s|#)/\1\3/g ; t b' \
+                        -e ':c /^passwd:\s[^#]*$/ s/\s(systemd)\s+\[!?[A-Za-z]+=[A-Za-z]+\](\s|$)/\2/g ; t c' \
+                        -e ':d /^passwd:\s[^#]*$/ s/\s(systemd)(\s|$)/\2/g ; t d'
+
+            sed -E -i "${DPKG_ROOT}/etc/nsswitch.conf" \
+                        -e ':a /^gshadow:\s.*#/ s/(^[^#]+)\s(systemd)\s+\[!?[A-Za-z]+=[A-Za-z]+\](\s|#)/\1\3/g ; t a' \
+                        -e ':b /^gshadow:\s.*#/ s/(^[^#]+)\s(systemd)(\s|#)/\1\3/g ; t b' \
+                        -e ':c /^gshadow:\s[^#]*$/ s/\s(systemd)\s+\[!?[A-Za-z]+=[A-Za-z]+\](\s|$)/\2/g ; t c' \
+                        -e ':d /^gshadow:\s[^#]*$/ s/\s(systemd)(\s|$)/\2/g ; t d'
+
+            sed -E -i "${DPKG_ROOT}/etc/nsswitch.conf" \
+                        -e ':a /^group:\s.*#/ s/(^[^#]+)\s(systemd)\s+\[!?[A-Za-z]+=[A-Za-z]+\](\s|#)/\1\3/g ; t a' \
+                        -e ':b /^group:\s.*#/ s/(^[^#]+)\s(systemd)(\s|#)/\1\3/g ; t b' \
+                        -e ':c /^group:\s[^#]*$/ s/\s(systemd)\s+\[!?[A-Za-z]+=[A-Za-z]+\](\s|$)/\2/g ; t c' \
+                        -e ':d /^group:\s[^#]*$/ s/\s(systemd)(\s|$)/\2/g ; t d'
+        fi
+
+        # Signal to postinst that the NSS services should be installed on
+        # recent upgraders, since the module is available starting from 232-7
+        # but users may not have a fully configured NSS switch (LP: #2121017).
+        touch "${DPKG_ROOT}/etc/nsswitch.conf.nss.${DPKG_MAINTSCRIPT_PACKAGE}-will-install"
+fi

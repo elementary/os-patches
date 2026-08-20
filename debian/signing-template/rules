@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/default.mk
+
+BINARY = systemd-boot${TEMPLATE_EFI_ARCH}.efi
+INSTALLED = usr/lib/systemd/boot/efi/$(BINARY)
+SIGNATURE = debian/signatures/systemd-boot-efi/$(INSTALLED).sig
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	if [ -f /$(INSTALLED) ]; then \
+		cp /$(INSTALLED) $(BINARY); \
+		sbattach --attach $(SIGNATURE) $(BINARY); \
+		install -D $(BINARY) debian/tmp/$(INSTALLED).signed; \
+	fi
+
+override_dh_gencontrol:
+	dh_gencontrol -- -v${DEB_VERSION}

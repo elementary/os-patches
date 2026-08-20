@@ -1,0 +1,98 @@
+From: Frantisek Sumsal <frantisek@sumsal.cz>
+Date: Wed, 29 Apr 2026 13:48:49 +0200
+Subject: sd-json,user-record: store the strv size when extending it
+
+Origin: upstream, https://github.com/systemd/systemd-stable/commit/b313f7cc8c464451025e6fd8137c477ad4d373d5
+
+So strv_push_with_size() doesn't have to recalculate the size every
+time.
+
+(cherry picked from commit 82614a4c6f19f0902b6fefc2988ccc54edb47eb5)
+(cherry picked from commit 396f3f0cd6fa92a3ebefd8f20b40514585756af3)
+(cherry picked from commit b313f7cc8c464451025e6fd8137c477ad4d373d5)
+---
+ src/libsystemd/sd-json/json-util.c | 3 ++-
+ src/libsystemd/sd-json/sd-json.c   | 3 ++-
+ src/shared/user-record.c           | 6 ++++--
+ 3 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/src/libsystemd/sd-json/json-util.c b/src/libsystemd/sd-json/json-util.c
+index 6f42239..562fee5 100644
+--- a/src/libsystemd/sd-json/json-util.c
++++ b/src/libsystemd/sd-json/json-util.c
+@@ -243,6 +243,7 @@ int json_dispatch_path(const char *name, sd_json_variant *variant, sd_json_dispa
+ int json_dispatch_strv_path(const char *name, sd_json_variant *variant, sd_json_dispatch_flags_t flags, void *userdata) {
+         _cleanup_strv_free_ char **n = NULL;
+         char ***l = ASSERT_PTR(userdata);
++        size_t s = 0;
+         int r;
+ 
+         assert(variant);
+@@ -262,7 +263,7 @@ int json_dispatch_strv_path(const char *name, sd_json_variant *variant, sd_json_
+                 if (r < 0)
+                         return r;
+ 
+-                r = strv_extend(&n, a);
++                r = strv_extend_with_size(&n, &s, a);
+                 if (r < 0)
+                         return json_log_oom(variant, flags);
+         }
+diff --git a/src/libsystemd/sd-json/sd-json.c b/src/libsystemd/sd-json/sd-json.c
+index c77dd0a..e97a6e7 100644
+--- a/src/libsystemd/sd-json/sd-json.c
++++ b/src/libsystemd/sd-json/sd-json.c
+@@ -5633,6 +5633,7 @@ _public_ int sd_json_dispatch_strv(const char *name, sd_json_variant *variant, s
+         _cleanup_strv_free_ char **l = NULL;
+         char ***s = userdata;
+         sd_json_variant *e;
++        size_t n = 0;
+         int r;
+ 
+         assert_return(variant, -EINVAL);
+@@ -5666,7 +5667,7 @@ _public_ int sd_json_dispatch_strv(const char *name, sd_json_variant *variant, s
+                 if ((flags & SD_JSON_STRICT) && !string_is_safe(sd_json_variant_string(e)))
+                         return json_log(e, flags, SYNTHETIC_ERRNO(EINVAL), "JSON field '%s' contains unsafe characters, refusing.", strna(name));
+ 
+-                r = strv_extend(&l, sd_json_variant_string(e));
++                r = strv_extend_with_size(&l, &n, sd_json_variant_string(e));
+                 if (r < 0)
+                         return json_log(e, flags, r, "Failed to append array element: %m");
+         }
+diff --git a/src/shared/user-record.c b/src/shared/user-record.c
+index 6710d63..3da74eb 100644
+--- a/src/shared/user-record.c
++++ b/src/shared/user-record.c
+@@ -539,6 +539,7 @@ static int json_dispatch_locales(const char *name, sd_json_variant *variant, sd_
+         char ***l = userdata;
+         const char *locale;
+         sd_json_variant *e;
++        size_t s = 0;
+         int r;
+ 
+         if (sd_json_variant_is_null(variant)) {
+@@ -557,7 +558,7 @@ static int json_dispatch_locales(const char *name, sd_json_variant *variant, sd_
+                 if (!locale_is_valid(locale))
+                         return json_log(variant, flags, SYNTHETIC_ERRNO(EINVAL), "JSON field '%s' is not an array of valid locales.", strna(name));
+ 
+-                r = strv_extend(&n, locale);
++                r = strv_extend_with_size(&n, &s, locale);
+                 if (r < 0)
+                         return json_log_oom(variant, flags);
+         }
+@@ -614,6 +615,7 @@ static int json_dispatch_weight(const char *name, sd_json_variant *variant, sd_j
+ int json_dispatch_user_group_list(const char *name, sd_json_variant *variant, sd_json_dispatch_flags_t flags, void *userdata) {
+         char ***list = ASSERT_PTR(userdata);
+         _cleanup_strv_free_ char **l = NULL;
++        size_t s = 0;
+         int r;
+ 
+         if (!sd_json_variant_is_array(variant))
+@@ -627,7 +629,7 @@ int json_dispatch_user_group_list(const char *name, sd_json_variant *variant, sd
+                 if (!valid_user_group_name(sd_json_variant_string(e), FLAGS_SET(flags, SD_JSON_RELAX) ? VALID_USER_RELAX : 0))
+                         return json_log(e, flags, SYNTHETIC_ERRNO(EINVAL), "JSON array element is not a valid user/group name: %s", sd_json_variant_string(e));
+ 
+-                r = strv_extend(&l, sd_json_variant_string(e));
++                r = strv_extend_with_size(&l, &s, sd_json_variant_string(e));
+                 if (r < 0)
+                         return json_log(e, flags, r, "Failed to append array element: %m");
+         }

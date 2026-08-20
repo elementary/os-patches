@@ -1,0 +1,81 @@
+#!/bin/sh
+set -e
+
+case "${DEB_BUILD_PROFILES:-}" in
+    *pkg.systemd.upstream*) ;;
+    *)
+        echo "keymapping not supported for now, SKIP test"
+        exit 77
+esac
+
+. `dirname $0`/assert.sh
+
+if [ -f /etc/default/keyboard ]; then
+    ORIG_KBD=`cat /etc/default/keyboard`
+else
+    ORIG_KBD=""
+fi
+
+cleanup() {
+    # reset locale to original
+    if [ -n "ORIG_KBD" ]; then
+        echo "$ORIG_KBD" > /etc/default/keyboard
+    else
+        rm -f /etc/default/keyboard
+    fi
+    rm -f /etc/X11/xorg.conf.d/00-keyboard.conf
+    rm -f /etc/dbus-1/system.d/systemd-localed-read-only.conf
+}
+trap cleanup EXIT INT QUIT PIPE
+
+# Calls to localed are blocked as other tools are used to change settings,
+# override that policy
+mkdir -p /etc/dbus-1/system.d/
+cat >/etc/dbus-1/system.d/systemd-localed-read-only.conf <<EOF
+<?xml version="1.0"?>
+<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+        "https://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+        <policy user="root">
+                <allow send_destination="org.freedesktop.locale1" send_interface="org.freedesktop.locale1" send_member="SetLocale"/>
+                <allow send_destination="org.freedesktop.locale1" send_interface="org.freedesktop.locale1" send_member="SetVConsoleKeyboard"/>
+                <allow send_destination="org.freedesktop.locale1" send_interface="org.freedesktop.locale1" send_member="SetX11Keyboard"/>
+        </policy>
+</busconfig>
+EOF
+systemctl reload dbus.service || true
+
+# should activate daemon and work
+STATUS=`localectl`
+assert_in "X11 Layout:" "`localectl --no-pager`"
+
+# change layout
+assert_eq "`localectl --no-pager set-x11-keymap et pc101 2>&1`" ""
+sync
+
+case "${DEB_BUILD_PROFILES:-}" in
+    *pkg.systemd.upstream*)
+        # Upstream writes xorg.conf.d file
+        assert_in 'Option "XkbLayout" "et' "`cat /etc/X11/xorg.conf.d/00-keyboard.conf`"
+        assert_in 'Option "XkbModel" "pc101"' "`cat /etc/X11/xorg.conf.d/00-keyboard.conf`"
+        ;;
+    *)
+        # Debian console-setup config file
+        assert_in 'XKBLAYOUT="\?et"\?' "`cat /etc/default/keyboard`"
+        assert_in 'XKBMODEL="\?pc101"\?' "`cat /etc/default/keyboard`"
+        ! [ -f /etc/X11/xorg.conf.d/00-keyboard.conf ]
+        ;;
+esac
+
+STATUS=`localectl --no-pager`
+assert_in "X11 Layout: et" "$STATUS"
+assert_in "X11 Model: pc101" "$STATUS"
+
+case "${DEB_BUILD_PROFILES:-}" in
+    *pkg.systemd.upstream*) ;;
+    *)
+        rm /etc/default/keyboard
+        systemctl stop systemd-localed
+        assert_in "X11 Layout: (unset)" "`localectl --no-pager`"
+        ;;
+esac

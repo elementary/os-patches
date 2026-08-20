@@ -1,0 +1,32 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Wed, 26 Nov 2025 17:30:52 +0100
+Subject: rules: Tag DRM render nodes with xaccess
+
+When systemd is compiled with group-render-mode=0660, only the active seat
+gets access to the render devices through uaccess. Remote desktop sessions
+like gnome-remote-desktop would be left with no hardware rendering, because
+those sessions are not associated with a seat.
+
+Tag the render nodes with "xaccess" so that access is also granted to remote
+sessions created with XDG_SESSION_EXTRA_DEVICE_ACCESS=1
+
+Origin: https://github.com/systemd/systemd/pull/38516
+Bug-GNOME: https://gitlab.gnome.org/GNOME/gnome-remote-desktop/-/issues/224
+Bug-Ubuntu: https://launchpad.net/bugs/2077538
+---
+ rules.d/70-uaccess.rules.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rules.d/70-uaccess.rules.in b/rules.d/70-uaccess.rules.in
+index 96b61ce..84ee00d 100644
+--- a/rules.d/70-uaccess.rules.in
++++ b/rules.d/70-uaccess.rules.in
+@@ -46,7 +46,7 @@ SUBSYSTEM=="firewire", TEST=="units", ENV{IEEE1394_UNIT_FUNCTION_VIDEO}=="1", TA
+ SUBSYSTEM=="drm", KERNEL=="card*", TAG+="uaccess"
+ {% if GROUP_RENDER_UACCESS %}
+ # DRI render nodes
+-SUBSYSTEM=="drm", KERNEL=="renderD*", TAG+="uaccess"
++SUBSYSTEM=="drm", KERNEL=="renderD*", TAG+="uaccess", TAG+="xaccess"
+ {% endif %}
+ {% if DEV_KVM_UACCESS %}
+ # KVM

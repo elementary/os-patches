@@ -1,0 +1,350 @@
+#! /usr/bin/make -f
+
+#export DH_VERBOSE = 1
+#export DEB_BUILD_OPTIONS = nostrip
+
+export LC_ALL = C.UTF-8
+
+include /usr/share/dpkg/default.mk
+include /usr/share/debhelper/dh_package_notes/package-notes.mk
+
+ifeq (amd64,$(DEB_HOST_ARCH))
+export TEMPLATE_EFI_ARCH=x64
+else ifeq (arm64,$(DEB_HOST_ARCH))
+export TEMPLATE_EFI_ARCH=aa64
+endif
+
+# We are building on OBS? Then it's an upstream build, set the profile and
+# use the addon for Secure Boot EFI signing
+ifneq ("$(wildcard /.build/build.dist)","")
+export DEB_BUILD_PROFILES += pkg.systemd.upstream
+DH_ADDONS = --with=signobs
+endif
+
+ifeq ($(DEB_VENDOR),Ubuntu)
+    DEFAULT_NTP_SERVERS = ntp.ubuntu.com
+    SUPPORT_URL = http://www.ubuntu.com/support
+    CONFFLAGS_DISTRO = \
+		-Duser-path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+		-Ddefault-llmnr=no \
+		-Ddefault-mdns=no
+
+else
+    DEFAULT_NTP_SERVERS = 0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org
+    SUPPORT_URL = https://www.debian.org/support
+    CONFFLAGS_DISTRO =
+endif
+
+TEST_TIMEOUT_MULTIPLIER = "-t 10"
+
+# Fail on missing files and symbol changes on distro builds, but not if we
+# build/test upstream master. Also, don't put the debian revision in the version
+# tag when we build/test upstream as it doesn't have any meaning in that case
+# and it allows using the current date as the debian revision without causing
+# unnecessary rebuilds all the time.
+ifeq (, $(filter pkg.systemd.upstream, $(DEB_BUILD_PROFILES)))
+    DH_MISSING ?= --fail-missing
+    GENSYMBOLS_LEVEL ?= 4
+    VERSION_TAG = $(DEB_VERSION)
+else
+    DH_MISSING ?= --list-missing
+    GENSYMBOLS_LEVEL ?= 1
+    VERSION_TAG = $(DEB_VERSION_UPSTREAM)
+endif
+
+# Make sure that DEB_BUILD_OPTIONS can be used by users to override any options
+# we set here (By default DEB_BUILD_MAINT_OPTIONS overrides DEB_BUILD_OPTIONS).
+export DEB_BUILD_MAINT_OPTIONS = optimize=+lto hardening=+pie $(DEB_BUILD_OPTIONS)
+
+CONFFLAGS = \
+	-Dstatic-libsystemd=true \
+	-Dversion-tag="$(VERSION_TAG)" \
+	-Dquotaon-path=/usr/sbin/quotaon \
+	-Dquotacheck-path=/usr/sbin/quotacheck \
+	-Dkmod-path=/usr/bin/kmod \
+	-Dkexec-path=/usr/sbin/kexec \
+	-Dsulogin-path=/usr/sbin/sulogin \
+	-Dmount-path=/usr/bin/mount \
+	-Dumount-path=/usr/bin/umount \
+	-Dloadkeys-path=/usr/bin/loadkeys \
+	-Dsetfont-path=/usr/bin/setfont \
+	-Dnologin-path=/usr/sbin/nologin \
+	-Dlocalegen-path=/usr/sbin/locale-gen \
+	-Ddebug-shell=/usr/bin/bash \
+	-Dzshcompletiondir=/usr/share/zsh/vendor-completions \
+	-Ddbuspolicydir=/usr/share/dbus-1/system.d/ \
+	-Dsupport-url=$(SUPPORT_URL) \
+	-Ddefault-kill-user-processes=false \
+	-Ddefault-dnssec=no \
+	-Dpamconfdir=no \
+	-Dpamlibdir=/usr/lib/$(DEB_HOST_MULTIARCH)/security \
+	-Drpmmacrosdir=no \
+	-Dvconsole=false \
+	-Dfirstboot=true \
+	-Dxkbcommon=disabled \
+	-Dwheel-group=false \
+	-Doomd=true \
+	-Durlify=true \
+	-Dgnutls=disabled \
+	-Dntp-servers="$(DEFAULT_NTP_SERVERS)" \
+	-Dsystem-uid-max=999 \
+	-Dsystem-gid-max=999 \
+	-Dnobody-user=nobody \
+	-Dnobody-group=nogroup \
+	-Ddev-kvm-mode=0660 \
+	-Dgroup-render-mode=0660 \
+	-Drepart=enabled \
+	-Dfdisk=enabled \
+	-Dsysext=true \
+	-Dselinux=enabled \
+	-Dhwdb=true \
+	-Dsysusers=true \
+	-Dinstall-tests=$(if $(filter noinsttest,$(DEB_BUILD_PROFILES)),false,true) \
+	-Dman=$(if $(filter nodoc,$(DEB_BUILD_PROFILES)),disabled,enabled) \
+	-Ddbus-interfaces-dir=$(if $(filter nodoc,$(DEB_BUILD_PROFILES)),no,yes) \
+	-Dtranslations=true \
+	-Dnss-myhostname=true \
+	-Dnss-mymachines=enabled \
+	-Dnss-resolve=enabled \
+	-Dnss-systemd=true \
+	-Dresolve=true \
+	-Dstatus-unit-format-default=combined \
+	-Dstandalone-binaries=true \
+	-Dutmp=false \
+	-Dtty-mode=0600 \
+	-Dvmspawn=enabled \
+	-Defi-stub-extra-sections=500 \
+	-Dmode=$(if $(filter pkg.systemd.upstream,$(DEB_BUILD_PROFILES)),developer,release)
+
+ifeq ($(filter nocheck,$(DEB_BUILD_PROFILES))$(filter noinsttest,$(DEB_BUILD_PROFILES)),nochecknoinsttest)
+CONFFLAGS += -Dtests=false
+else
+CONFFLAGS += -Dtests=true
+endif
+
+ifeq (, $(filter stage1, $(DEB_BUILD_PROFILES)))
+CONFFLAGS += \
+	-Daudit=enabled \
+	-Dlibcryptsetup=enabled \
+	-Dlibcryptsetup-plugins=enabled \
+	-Dcoredump=true \
+	-Delfutils=enabled \
+	-Dapparmor=enabled \
+	-Dlibidn2=enabled \
+	-Dlibiptc=enabled \
+	-Dlibcurl=enabled \
+	-Dimportd=enabled \
+	-Dmicrohttpd=enabled \
+	-Dopenssl=enabled \
+	-Ddns-over-tls=openssl \
+	-Dlibfido2=enabled \
+	-Dtpm2=$(if $(filter i386,$(DEB_HOST_ARCH)),disabled,enabled) \
+	-Dp11kit=enabled \
+	-Dqrencode=$(if $(filter i386,$(DEB_HOST_ARCH)),disabled,enabled) \
+	-Dpwquality=enabled \
+	-Dhomed=enabled \
+	-Duserdb=true \
+	-Dpcre2=enabled \
+	-Dukify=enabled \
+	-Dbootloader=$(if $(filter amd64 i386 arm64 armhf loong64 riscv64,$(DEB_HOST_ARCH)),enabled,disabled) \
+	-Dsysupdate=enabled
+else
+CONFFLAGS += \
+	-Daudit=disabled \
+	-Dlibcryptsetup=disabled \
+	-Dlibcryptsetup-plugins=disabled \
+	-Dcoredump=false \
+	-Delfutils=disabled \
+	-Dapparmor=disabled \
+	-Dlibidn2=disabled \
+	-Dlibiptc=disabled \
+	-Dlibcurl=disabled \
+	-Dimportd=disabled \
+	-Dmicrohttpd=disabled \
+	-Dopenssl=disabled \
+	-Dlibfido2=disabled \
+	-Dtpm2=disabled \
+	-Dp11kit=disabled \
+	-Dqrencode=disabled \
+	-Dpwquality=disabled \
+	-Dhomed=disabled \
+	-Duserdb=false \
+	-Dpcre2=disabled \
+	-Dukify=disabled \
+	-Dbootloader=disabled \
+	-Dbpf-framework=disabled \
+	-Dsysupdate=disabled
+endif
+
+# BPF/BTF are only enabled and usable on a few architectures
+ifeq (, $(filter $(DEB_BUILD_PROFILES), stage1 pkg.systemd.nobpf))
+ifneq (,$(filter $(DEB_TARGET_ARCH), amd64 arm64 ppc64el s390x))
+CONFFLAGS += \
+	-Dvmlinux-h=provided \
+	-Dvmlinux-h-path=/usr/include/$(DEB_HOST_MULTIARCH)/linux/bpf/vmlinux.h \
+	-Dbpf-framework=enabled \
+	-Dbpf-compiler=clang
+
+ifeq ($(DEB_VENDOR),Ubuntu)
+# TODO: drop this and the alternative build dep once support for Noble is dropped
+#
+# Source: https://git.launchpad.net/ubuntu/+source/xdp-tools/tree/debian/rules
+# On Ubuntu, the `bpftool` in path is a shell wrapper pointing at
+# the binary corresponding to runtime kernel version.
+#
+# We do not know the kernel version being used on the system building
+# this package, and in sbuild/container environments uname might not
+# even match anything available to the build.
+# Gladly for the build we only need the tool to generate skeleton code.
+#
+# If any /usr/lib/linux-tools/*/bpftool exists, locate the most recent
+# version and point to that, otherwise `bpftool` from PATH will be
+# used.
+#
+# Newer versions of linux-tools-* ship the binaries in /usr/lib/linux-tools-$(uname -r).
+# Check there too.
+bpftool_binary := $(shell find /usr/lib/linux-tools/ /usr/lib/linux-tools-* -name 'bpftool' -perm /u=x 2>/dev/null | sort -r | head -n1)
+ifneq ($(bpftool_binary),)
+export PATH := $(shell dirname $(bpftool_binary)):$(PATH)
+endif
+endif
+endif
+endif
+
+ifeq (, $(filter pkg.systemd.upstream, $(DEB_BUILD_PROFILES)))
+CONFFLAGS += -Ddns-servers=''
+CONFFLAGS += -Dsbat-distro-url=https://tracker.debian.org/pkg/systemd
+CONFFLAGS += -Dsysvinit-path=/etc/init.d
+CONFFLAGS += -Dsysvrcnd-path=/etc
+else
+CONFFLAGS += --buildtype=debugoptimized
+CONFFLAGS += -Dsbat-distro-url=https://github.com/systemd/systemd
+CONFFLAGS += -Dsbat-distro=upstream
+CONFFLAGS += -Dsbat-distro-summary='Upstream build from git'
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure \
+		-- $(CONFFLAGS) $(CONFFLAGS_DISTRO) $(CONFFLAGS_UPSTREAM)
+
+execute_before_dh_auto_build:
+	# blhc false positives: C++ fuzz test program, cc -E flags listing, PE-COFF EFI binaries
+	@echo 'blhc: ignore-line-regexp: .* -o test-bus-vtable-cc.*'
+	@echo 'blhc: ignore-line-regexp: .*cc -E.*'
+	@echo 'blhc: ignore-line-regexp: .* -o src/boot/.*'
+	@echo 'blhc: ignore-line-regexp: .* Compiling C object fuzz.*'
+
+execute_before_dh_auto_clean:
+ifneq (, $(filter pkg.systemd.upstream, $(DEB_BUILD_PROFILES)))
+	debian/extra/checkout-upstream
+endif
+
+execute_before_dh_install:
+	# remove unnecessary / unused files that are picked up by wildcards/directory listings in dh_install
+	rm -rf debian/tmp/usr/share/doc/systemd/LICENSES/
+	rm -f debian/tmp/usr/share/doc/systemd/LICENSE.*
+	rm -f debian/tmp/usr/lib/udev/*.d/README
+	# replace upstream sysusers.d/basic.conf with proper users for Debian
+	if [ -d debian/tmp/usr/lib/sysusers.d/ ]; then \
+		debian/extra/make-sysusers-basic > debian/tmp/usr/lib/sysusers.d/basic.conf; \
+	fi
+
+execute_after_dh_install-arch:
+	# Ubuntu specific files
+ifeq ($(DEB_VENDOR),Ubuntu)
+	install -D --mode=644 debian/extra/udev.py debian/udev/usr/share/apport/package-hooks/udev.py
+	install -D --mode=644 debian/extra/systemd.py debian/systemd/usr/share/apport/package-hooks/systemd.py
+	install --mode=644 debian/extra/rules-ubuntu/*.rules debian/udev/usr/lib/udev/rules.d/
+	install -D --mode=644 debian/extra/resolved.conf.d/cache-no-negative.conf debian/systemd-resolved/usr/lib/systemd/resolved.conf.d/cache-no-negative.conf
+	cp -a debian/extra/units-ubuntu/* debian/systemd/usr/lib/systemd/system/
+endif
+
+	# Remove unneeded file that produces errors in debugedit (LP: #1950445)
+ifeq ($(DEB_HOST_ARCH),i386)
+	rm -f debian/systemd/usr/lib/systemd/boot/efi/linuxia32.elf.stub
+	rm -f debian/systemd-boot-efi/usr/lib/systemd/boot/efi/linuxia32.elf.stub
+endif
+
+ifeq (,$(filter stage1, $(DEB_BUILD_PROFILES)))
+ifeq ($(DEB_VENDOR),Debian)
+ifneq ($(TEMPLATE_EFI_ARCH),)
+	debian/extra/gen-signing-template $(DEB_VERSION) $(DEB_HOST_ARCH) $(TEMPLATE_EFI_ARCH)
+endif
+endif
+endif
+
+override_dh_missing:
+	dh_missing $(DH_MISSING)
+
+override_dh_installsystemd:
+	dh_installsystemd -psystemd-timesyncd
+	dh_installsystemd -psystemd-oomd -X systemd-oomd.socket
+	dh_installsystemd -psystemd-oomd --no-stop-on-upgrade systemd-oomd.socket
+	dh_installsystemd -psystemd-container --no-stop-on-upgrade machines.target
+	dh_installsystemd -psystemd-container -X machines.target --no-enable --no-start --no-stop-on-upgrade --restart-after-upgrade
+	dh_installsystemd -psystemd-userdbd --no-stop-on-upgrade systemd-userdbd.socket
+	# TODO: drop --no-also once https://salsa.debian.org/debian/debhelper/-/merge_requests/144 is available
+	dh_installsystemd -psystemd-userdbd -X systemd-userdbd.socket --no-enable --no-start --no-stop-on-upgrade --restart-after-upgrade --no-also
+	dh_installsystemd -psystemd-homed --no-also systemd-homed.service systemd-homed-activate.service
+	dh_installsystemd -psystemd-repart --restart-after-upgrade systemd-repart.socket
+	dh_installsystemd -psystemd-repart -X systemd-repart.socket --no-start --no-stop-on-upgrade --restart-after-upgrade
+	dh_installsystemd -psystemd-resolved --no-also systemd-resolved.service
+	dh_installsystemd -psystemd-resolved -X systemd-resolved.service --no-stop-on-upgrade
+	dh_installsystemd -pudev systemd-udevd.service
+	dh_installsystemd -pudev -X systemd-udevd.service --no-enable --no-start --no-stop-on-upgrade
+	dh_installsystemd -psystemd-boot --no-start --no-stop-on-upgrade --restart-after-upgrade
+	# do not restart logind
+	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=919509
+	dh_installsystemd -psystemd --no-enable --no-start --no-stop-on-upgrade --restart-after-upgrade --no-also systemd-networkd.service systemd-journald.service
+
+override_dh_installsystemduser:
+
+execute_after_dh_installsysusers:
+	dh_installsysusers -pudev --name=debian-udev
+
+PROJECT_VERSION ?= $(shell awk '/(PROJECT|PACKAGE)_VERSION / {print $$3}' obj-$(DEB_HOST_GNU_TYPE)/config.h | tr -d \")
+
+# The SysV compat tools (which are symlinks to systemctl) are
+# quasi-essential, so add their dependencies to Pre-Depends
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=753589
+override_dh_shlibdeps:
+	dh_shlibdeps -psystemd -Llibsystemd-shared -- \
+		-dPre-Depends -edebian/systemd/usr/bin/systemctl \
+		-dDepends
+	dh_shlibdeps -plibsystemd-shared -lusr/lib/$(DEB_HOST_MULTIARCH)/systemd
+	dh_shlibdeps --remaining-packages -Llibsystemd-shared
+
+override_dh_makeshlibs:
+	sed 's/SHARED_LIB_VERSION/$(PROJECT_VERSION)/' debian/shlibs.local.in > debian/shlibs.local
+	dh_makeshlibs -plibsystemd-shared -Xlibsystemd-shared -Xlibsystemd-core -- -c$(GENSYMBOLS_LEVEL)
+	dh_makeshlibs --remaining-packages -- -c$(GENSYMBOLS_LEVEL)
+	# Ensure builds against the udeb package gets a dependency on libudev1-udeb. The last time a symbol
+	# was added was in 247, and the API is pretty much frozen, so we can have a fixed version here.
+	echo 'udeb: libudev 1 libudev1-udeb (>= 247)' >> debian/libudev1/DEBIAN/shlibs
+
+override_dh_auto_test:
+ifeq (, $(filter nocheck, $(DEB_BUILD_OPTIONS)))
+	# some tests hang under fakeroot, so disable fakeroot
+	env -u LD_PRELOAD meson test -C obj-$(DEB_HOST_GNU_TYPE) --print-errorlogs $(TEST_TIMEOUT_MULTIPLIER)
+endif
+
+ifeq ($(DEB_VENDOR),Ubuntu)
+ifeq (, $(filter pkg.systemd.upstream, $(DEB_BUILD_PROFILES)))
+execute_after_dh_link:
+	# Mask systemd-gpt-auto-generator by default on Ubuntu
+	dh_link -psystemd /dev/null /etc/systemd/system-generators/systemd-gpt-auto-generator
+
+	# Enable this example to allow root to ignore inhibitors
+	dh_link -psystemd /usr/share/polkit-1/rules.d/10-systemd-logind-root-ignore-inhibitors.rules.example \
+			  /usr/share/polkit-1/rules.d/10-systemd-logind-root-ignore-inhibitors.rules
+endif
+endif
+
+%:
+	dh $@ $(DH_ADDONS)
+
+# TODO: ideally it should be possible to disable this via an env var or DEB_BUILD_OPTIONS
+override_dh_strip_nondeterminism:
+ifeq (, $(filter pkg.systemd.upstream, $(DEB_BUILD_PROFILES)))
+	dh_strip_nondeterminism
+endif

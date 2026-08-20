@@ -1,0 +1,29 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Tue, 24 Feb 2026 15:52:16 -0500
+Subject: network-generator: initramfs-tools compat for empty DHCP type
+
+This is a temporary compat layer for tools that relied on the initramfs-tools
+parsing of ip=, but will be removed after resolute.
+
+Forwarded: no
+---
+ src/network/generator/network-generator.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/network/generator/network-generator.c b/src/network/generator/network-generator.c
+index d9bea1f..579ab5f 100644
+--- a/src/network/generator/network-generator.c
++++ b/src/network/generator/network-generator.c
+@@ -875,7 +875,11 @@ static int parse_cmdline_ip_address(Context *context, int family, const char *va
+         /* dhcp_type */
+         _cleanup_free_ char *dhcp_type = NULL;
+         r = extract_first_word(&p, &dhcp_type, ":", EXTRACT_DONT_COALESCE_SEPARATORS);
+-        if (r <= 0)
++        if (r == 0 && streq(ifname, "BOOTIF"))
++                /* Hack for old initramfs-tools compat. If using BOOTIF, allow
++                 * empty DHCP type, and default to "dhcp". */
++                dhcp_type = strdup("dhcp");
++        else if (r <= 0)
+                 return log_debug_errno(r < 0 ? r : SYNTHETIC_ERRNO(EINVAL), "Failed to parse DHCP type name in ip=%s: %m", value);
+ 
+         /* set values */

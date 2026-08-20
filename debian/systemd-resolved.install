@@ -1,0 +1,18 @@
+#!/usr/bin/dh-exec
+etc/systemd/resolved.conf
+usr/bin/resolvectl
+usr/lib/systemd/resolv.conf
+usr/lib/systemd/systemd-resolved
+usr/lib/systemd/system/systemd-resolved-monitor.socket
+usr/lib/systemd/system/systemd-resolved-varlink.socket
+usr/lib/systemd/system/systemd-resolved.service
+usr/lib/sysusers.d/systemd-resolve.conf
+usr/lib/tmpfiles.d/systemd-resolve.conf
+usr/sbin/resolvconf
+usr/share/bash-completion/completions/resolvectl
+usr/share/bash-completion/completions/systemd-resolve
+usr/share/dbus-1/system.d/org.freedesktop.resolve1.conf
+usr/share/dbus-1/system-services/org.freedesktop.resolve1.service
+usr/share/polkit-1/actions/org.freedesktop.resolve1.policy
+usr/share/zsh/vendor-completions/_resolvectl
+<!pkg.systemd.upstream> ../extra/resolved.conf.d/00-disable-mdns.conf usr/lib/systemd/resolved.conf.d/

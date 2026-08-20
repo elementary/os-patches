@@ -1,0 +1,45 @@
+From: Frantisek Sumsal <frantisek@sumsal.cz>
+Date: Wed, 29 Apr 2026 19:18:17 +0200
+Subject: dns-question: limit the number of questions per query
+
+Origin: upstream, https://github.com/systemd/systemd-stable/commit/8bbeac804ec1a0539e84a2b206420ae78d9b9233
+
+Let's cap the number of question each query can have to something
+reasonable - 128 questions per query should be more than enough for any
+real-world scenario.
+
+(cherry picked from commit 1c534452e961d4663f96b046f6242f00394f8e75)
+(cherry picked from commit b4ee34b038cf525f5d4fc4695ca08b1012010187)
+(cherry picked from commit 8bbeac804ec1a0539e84a2b206420ae78d9b9233)
+---
+ src/shared/dns-question.c | 3 +++
+ src/shared/dns-question.h | 2 ++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/src/shared/dns-question.c b/src/shared/dns-question.c
+index ac4cc8e..28840d6 100644
+--- a/src/shared/dns-question.c
++++ b/src/shared/dns-question.c
+@@ -608,6 +608,9 @@ int dns_json_dispatch_question(const char *name, sd_json_variant *variant, sd_js
+         if (!sd_json_variant_is_array(variant))
+                 return json_log(variant, flags, SYNTHETIC_ERRNO(EINVAL), "JSON field '%s' is not an array.", strna(name));
+ 
++        if (sd_json_variant_elements(variant) > DNS_QUESTION_ITEMS_MAX)
++                return json_log(variant, flags, SYNTHETIC_ERRNO(E2BIG), "Too many questions in a single query.");
++
+         _cleanup_(dns_question_unrefp) DnsQuestion *nq = NULL;
+         nq = dns_question_new(sd_json_variant_elements(variant));
+         if (!nq)
+diff --git a/src/shared/dns-question.h b/src/shared/dns-question.h
+index 3965010..c4a204c 100644
+--- a/src/shared/dns-question.h
++++ b/src/shared/dns-question.h
+@@ -5,6 +5,8 @@
+ 
+ #include "shared-forward.h"
+ 
++#define DNS_QUESTION_ITEMS_MAX 128U
++
+ /* A simple array of resource keys */
+ 
+ typedef enum DnsQuestionFlags {

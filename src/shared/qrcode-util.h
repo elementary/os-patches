@@ -1,0 +1,20 @@
+/* SPDX-License-Identifier: LGPL-2.1-or-later */
+#pragma once
+
+#include "shared-forward.h"
+
+int print_qrcode_full(
+                FILE *out,
+                const char *header,
+                const char *string,
+                unsigned row,
+                unsigned column,
+                unsigned tty_width,
+                unsigned tty_height,
+                bool check_tty);
+
+int dlopen_qrencode(void);
+
+static inline int print_qrcode(FILE *out, const char *header, const char *string) {
+        return print_qrcode_full(out, header, string, UINT_MAX, UINT_MAX, UINT_MAX, UINT_MAX, true);
+}

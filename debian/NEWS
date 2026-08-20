@@ -1,0 +1,243 @@
+systemd (258~rc1-1) experimental; urgency=medium
+
+  - Support for legacy cgroupv1 has been completely removed. Any
+    remaining override to force back cgroupv1 will no longer work.
+
+  - Support for various deprecated SysV interfaces has been removed:
+    - world-writable /run/lock/: unprivileged services must switch to
+      RuntimeDirectories= and unprivileged users must switch to
+      $XDG_RUNTIME_DIR. $TMPDIR can be used as a further fallback.
+    - telinit
+    - runlevel
+    - runlevel targets
+
+  - Support for SysV init scripts is retained for this release, but will
+    be dropped in v259, due by the end of 2025. Any package intending
+    to ship in Forky and work under systemd needs to start shipping a
+    unit file within the Forky development cycle.
+
+ -- Luca Boccassi <bluca@debian.org>  Sat, 05 Jul 2025 13:19:15 +0100
+
+systemd (256-2) unstable; urgency=medium
+
+  cryptsetup tools such as systemd-cryptsetup, systemd-cryptenroll,
+  systemd-veritysetup, and more, have been split into a new systemd-cryptsetup
+  package to reduce dependencies pulled in by the main systemd package. This
+  new package is only listed as a Recommends, so if this functionality is used
+  ensure that either Recommends are installed (default) or that it is
+  manually installed.
+
+ -- Luca Boccassi <bluca@debian.org>  Tue, 10 Sep 2024 18:19:16 +0200
+
+systemd (256~rc3-3) unstable; urgency=medium
+
+  - /tmp/ is now by default a tmpfs, via the tmp.mount unit provided upstream.
+    The old default setup can be retained simply by masking the unit locally
+    with (do not do this if you are defining /tmp/ manually in /etc/fstab):
+
+    systemctl mask tmp.mount
+
+    or:
+
+    touch /etc/systemd/system/tmp.mount
+
+    It is recommended to check /tmp/ for any leftover files before rebooting
+    after installing this update and manually cleaning up, as the directory
+    will no longer be cleaned up automatically on boot, as it is overmounted.
+    It is always possible to remount the root filesystem in a local directory
+    and remove leftovers manually after rebooting, but this will not be done
+    automatically to avoid unintential removals. This situation can be easily
+    detected by checking the journal after a reboot, as there will be a log
+    message that says:
+
+    tmp.mount: Directory /tmp to mount over is not empty, mounting anyway
+
+  - /run/lock/ is no longer created with a patch before units start, but by
+    a standard early-boot run-lock.mount unit that is ordered before
+    local-fs.target. Any service needing to use /run/lock/ and running before
+    sysinit.target (ie, they likely define DefaultDependencies=no) will need
+    to be explicitly ordered with After=run-lock.mount. The two known cases
+    where this happens in the archive have a bug+MR filed already.
+
+  - On new installations, tmpfiles.d will now cleanup by default files
+    that have not been changed or accessed on /tmp/ for 10 days, and /var/tmp/
+    for 30 days. The legacy behaviour can be configured with a local override
+    if needed:
+
+    echo 'D /tmp 1777' > /etc/tmpfiles.d/tmp.conf
+
+    This override will be automatically provided for upgrades of existing
+    systems from previous releases to Trixie. As a reminder, individual
+    files and directories can be marked for exclusion from cleanups with
+    the 'x' type configuration line as described in the tmpfiles.d manpage,
+    for example:
+
+    echo 'x /tmp/my-precious' > /etc/tmpfiles.d/precious.conf
+
+  - coredumps are now disabled by default via configuration files rather than
+    an out-of-tree patch (installing the optional systemd-coredump package
+    will enable them as before). As always, overriding via local drop-ins is
+    possible if desired. The configuration files that respectively affect
+    the system systemd instance, the user systemd instances and PAM sessions
+    are:
+
+    /usr/lib/systemd/system.conf.d/10-coredump-debian.conf
+    /usr/lib/systemd/user.conf.d/10-coredump-debian.conf
+    /usr/lib/sysctl.d/10-coredump-debian.conf
+    /etc/security/limits.d/10-coredump-debian.conf
+
+ -- Luca Boccassi <bluca@debian.org>  Tue, 28 May 2024 00:07:57 +0100
+
+systemd (256~rc2-1) unstable; urgency=medium
+
+  In the rare case a scheduled shutdown fails to be enqueued (most
+  likely, D-Bus daemon/broker is not installed), the system will now
+  immediately reboot, restoring the default behaviour intended upstream.
+
+ -- Luca Boccassi <bluca@debian.org>  Wed, 15 May 2024 00:40:56 +0100
+
+systemd (253~rc2-1) experimental; urgency=medium
+
+  TuxOnIce is no longer supported directly (via an out-of-tree patch)
+  for hibernation. TuxOnIce users should instead use the environment
+  variable $SYSTEMD_BYPASS_HIBERNATION_MEMORY_CHECK=1 (i.e.: set it on
+  the kernel command line).
+
+  The Debian-specific /etc/default/locale will now be made into a
+  symlink to the distribution-agnostic /etc/locale.conf. The content
+  format is compatible, so at upgrade time if /etc/default/locale
+  exists it will be copied to /etc/locale.conf, if the latter does not
+  exist.
+  The Debian-specific /etc/timezone will no longer be supported by
+  systemd-timedated, as it is no longer useful and its functionality
+  has been subsumed into /etc/localtime, and tzdata will no longer
+  create it.
+
+  The journal 'audit' feature is no longer patched to be disabled by
+  default, and instead we rely on the fact that the unit
+  'systemd-journald-audit.socket' is disabled by default. If you enabled
+  this in the past by setting 'Audit=yes' in a configuration file, you
+  will also need to enable the socket unit.
+
+ -- Luca Boccassi <bluca@debian.org>  Wed, 08 Feb 2023 20:36:58 +0000
+
+systemd (251.3-2) unstable; urgency=medium
+
+  systemd-resolved has been split into a separate package.
+  This new systemd-resolved package will not be installed automatically on
+  upgrades. If you are using systemd-resolved, please install this new
+  package manually.
+
+ -- Luca Boccassi <bluca@debian.org>  Thu, 05 Aug 2022 20:26:12 +0100
+
+systemd (251.2-3) unstable; urgency=medium
+
+  systemd-boot has been split into a separate package.
+  This new systemd-boot package will not be installed automatically on
+  upgrades. If you are using systemd-boot, please install this new
+  package manually.
+
+  The default boot loader in Debian is grub2. If you have not set up
+  systemd-boot manually, no action is required on your side.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 08 Jun 2022 21:49:47 +0200
+
+systemd (251.1-1) unstable; urgency=medium
+
+  systemd-journal-gatewayd and systemd-journal-remote are now built
+  without the --trust option, in order to be able to switch away from
+  gnutls to openssl.
+
+ -- Luca Boccassi <bluca@debian.org>  Thu, 26 May 2022 00:55:39 +0100
+
+systemd (247.2-2) unstable; urgency=medium
+
+  systemd now defaults to the "unified" cgroup hierarchy (i.e. cgroupv2).
+  This change reflects the fact that cgroupsv2 support has matured
+  substantially in both systemd and in the kernel.
+  All major container tools nowadays should support cgroupv2.
+  If you run into problems with cgroupv2, you can switch back to the previous,
+  hybrid setup by adding "systemd.unified_cgroup_hierarchy=false" to the
+  kernel command line.
+  You can read more about the benefits of cgroupv2 at
+  https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 21 Dec 2020 18:40:10 +0100
+
+systemd (247.2-1) unstable; urgency=medium
+
+  KERNEL API INCOMPATIBILITY: Linux 4.14 introduced two new uevents
+  "bind" and "unbind" to the Linux device model. When this kernel
+  change was made, systemd-udevd was only minimally updated to handle
+  and propagate these new event types. The introduction of these new
+  uevents (which are typically generated for USB devices and devices
+  needing a firmware upload before being functional) resulted in a
+  number of issues which we so far didn't address. We hoped the kernel
+  maintainers would themselves address these issues in some form, but
+  that did not happen. To handle them properly, many (if not most) udev
+  rules files shipped in various packages need updating, and so do many
+  programs that monitor or enumerate devices with libudev or sd-device,
+  or otherwise process uevents. Please note that this incompatibility
+  is not fault of systemd or udev, but caused by an incompatible kernel
+  change that happened back in Linux 4.14, but is becoming more and
+  more visible as the new uevents are generated by more kernel drivers.
+
+  To learn more about the required udev rules changes please check the
+  "CHANGES WITH 247" section of /usr/share/doc/systemd/NEWS.gz.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Fri, 11 Dec 2020 18:22:42 +0100
+
+systemd (241-4) unstable; urgency=medium
+
+  DRM render nodes (/dev/dri/renderD*) are now owned by group "render"
+  (previously group "video"). Dynamic ACLs via the "uaccess" udev tag are still
+  applied, so in the common case things should just continue to work.
+  If you rely on static permissions to access those devices, you need to update
+  group memberships accordingly to use group "render" now.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 17 May 2019 19:15:32 +0200
+
+systemd (236-1) unstable; urgency=medium
+
+  DynamicUser=yes has been enabled for systemd-journal-upload.service and
+  systemd-journal-gatewayd.service.
+  This means we no longer need to statically allocate a systemd-journal-upload
+  and systemd-journal-gateway user and you can now safely remove those system
+  users along with their associated groups.
+
+ -- Michael Biebl <biebl@debian.org>  Sun, 17 Dec 2017 21:17:32 +0100
+
+systemd (231-1) unstable; urgency=low
+
+  This version drops support for running /etc/rcS.d SysV init scripts.
+  These are prone to cause dependency loops, and almost all Debian packages
+  with rcS scripts now ship a native systemd service. If you have custom or
+  third-party rcS scripts you need to convert them or change them to run
+  in rc2.d/ - rc5.d/; see this page for details:
+  <https://wiki.debian.org/Teams/pkg-systemd/rcSMigration>.
+
+ -- Martin Pitt <mpitt@debian.org>  Thu, 14 Jul 2016 12:54:34 +0200
+
+systemd (224-2) unstable; urgency=medium
+
+  This version splits out systemd-nspawn, systemd-machined, and machinectl
+  into the new "systemd-container" package. That now also enables
+  systemd-importd.
+
+ -- Martin Pitt <mpitt@debian.org>  Sat, 22 Aug 2015 15:58:43 +0200
+
+systemd (220-7) unstable; urgency=medium
+
+  The mechanism for providing stable network interface names changed.
+  Previously they were kept in /etc/udev/rules.d/70-persistent-net.rules
+  which mapped device MAC addresses to the (arbitrary) name they got when
+  they first appeared (i. e. mostly at the time of installation). As this
+  had several problems and is not supported any more, this is deprecated in
+  favor of the "net.ifnames" mechanism. With this most of your network
+  interfaces will get location-based names. If you have ifupdown, firewall,
+  or other configuration that relies on the old names, you need to update
+  these by Debian 10/Ubuntu 18.04 LTS, and then remove
+  /etc/udev/rules.d/70-persistent-net.rules. Please see
+  /usr/share/doc/udev/README.Debian.gz for details about this.
+
+ -- Martin Pitt <mpitt@debian.org>  Mon, 15 Jun 2015 15:30:29 +0200

@@ -1,0 +1,43 @@
+From: Frantisek Sumsal <frantisek@sumsal.cz>
+Date: Wed, 29 Apr 2026 16:50:57 +0200
+Subject: sd-json: limit the number of env variables to something reasonable
+
+Origin: upstream, https://github.com/systemd/systemd-stable/commit/d40943d2b1023265d73faecb628f6e0b6c0dc0db
+
+Let's start with 1024, as that should be plenty for all sane use cases.
+
+(cherry picked from commit 7671b43cb88532cce2aa9ad12f777922206d6a42)
+(cherry picked from commit 8d3c854eaf34a71f052e8c61b15d63ad53fe5bcc)
+(cherry picked from commit d40943d2b1023265d73faecb628f6e0b6c0dc0db)
+---
+ src/libsystemd/sd-json/json-util.c | 3 +++
+ src/libsystemd/sd-json/json-util.h | 2 ++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/src/libsystemd/sd-json/json-util.c b/src/libsystemd/sd-json/json-util.c
+index 562fee5..707eeb0 100644
+--- a/src/libsystemd/sd-json/json-util.c
++++ b/src/libsystemd/sd-json/json-util.c
+@@ -605,6 +605,9 @@ int json_dispatch_strv_environment(const char *name, sd_json_variant *variant, s
+         if (!sd_json_variant_is_array(variant))
+                 return json_log(variant, flags, SYNTHETIC_ERRNO(EINVAL), "JSON field '%s' is not an array.", strna(name));
+ 
++        if (sd_json_variant_elements(variant) > ENVIRONMENT_ASSIGNMENTS_MAX)
++                return json_log(variant, flags, SYNTHETIC_ERRNO(E2BIG), "Too many environment variable assignments.");
++
+         sd_json_variant *i;
+         JSON_VARIANT_ARRAY_FOREACH(i, variant) {
+                 const char *e;
+diff --git a/src/libsystemd/sd-json/json-util.h b/src/libsystemd/sd-json/json-util.h
+index 2777a78..4b4f389 100644
+--- a/src/libsystemd/sd-json/json-util.h
++++ b/src/libsystemd/sd-json/json-util.h
+@@ -9,6 +9,8 @@
+ #include "log.h"
+ #include "string-util.h"        /* IWYU pragma: keep */
+ 
++#define ENVIRONMENT_ASSIGNMENTS_MAX 1024U
++
+ #define JSON_VARIANT_REPLACE(v, q)        \
+         do {                              \
+                 typeof(v)* _v = &(v);     \

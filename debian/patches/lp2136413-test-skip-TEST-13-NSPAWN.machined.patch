@@ -1,0 +1,23 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Tue, 6 Jan 2026 10:04:37 -0500
+Subject: test: skip TEST-13-NSPAWN.{machined,nspawn}
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2136413
+---
+ test/units/TEST-13-NSPAWN.sh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/test/units/TEST-13-NSPAWN.sh b/test/units/TEST-13-NSPAWN.sh
+index 311b64a..f7b1f79 100755
+--- a/test/units/TEST-13-NSPAWN.sh
++++ b/test/units/TEST-13-NSPAWN.sh
+@@ -3,6 +3,9 @@
+ set -eux
+ set -o pipefail
+
++# LP: #2136413
++export TEST_SKIP_SUBTESTS="machined nspawn"
++
+ FSTYPE="$(stat --file-system --format "%T" /)"
+
+ if [[ "$FSTYPE" == "fuseblk" ]]; then

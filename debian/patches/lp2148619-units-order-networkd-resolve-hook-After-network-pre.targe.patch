@@ -1,0 +1,31 @@
+From: Nick Rosbrook <enr0n@ubuntu.com>
+Date: Fri, 24 Apr 2026 09:38:42 -0400
+Subject: units: order networkd resolve hook After=network-pre.target
+
+Origin: upstream, https://github.com/systemd/systemd/commit/37adb410a2b62716b666dbf8359edf8a6546ff94
+Bug-Ubuntu: https://launchpad.net/bugs/2148619
+
+Without this, the socket is available well before systemd-networkd.service
+is able to start, because of its own After=network-pre.target ordering.
+Then, if resolved handles queries before network-pre.target, it will
+hang waiting for networkd to reply to hook queries.
+
+This is currently happening in the wild with cloud-init.
+
+(cherry picked from commit 37adb410a2b62716b666dbf8359edf8a6546ff94)
+---
+ units/systemd-networkd-resolve-hook.socket | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/units/systemd-networkd-resolve-hook.socket b/units/systemd-networkd-resolve-hook.socket
+index 3c11b8e..8a724bb 100644
+--- a/units/systemd-networkd-resolve-hook.socket
++++ b/units/systemd-networkd-resolve-hook.socket
+@@ -12,6 +12,7 @@ Description=Network Management Resolve Hook Socket
+ Documentation=man:systemd-networkd.service(8)
+ ConditionCapability=CAP_NET_ADMIN
+ DefaultDependencies=no
++After=network-pre.target
+ Before=sockets.target shutdown.target
+ Conflicts=shutdown.target
+ 

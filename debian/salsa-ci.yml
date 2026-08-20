@@ -1,0 +1,16 @@
+---
+include:
+  - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/debian.yml
+
+variables:
+  # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1011649
+  SALSA_CI_DISABLE_PIUPARTS: 1
+  SALSA_CI_ENABLE_BUILD_PACKAGE_PROFILES: 1
+  SALSA_CI_DISABLE_BUILD_PACKAGE_ARM64: 1
+  SALSA_CI_DISABLE_BUILD_PACKAGE_PPC64EL: 1
+
+test-build-profiles:
+  extends: .test-build-package-profiles
+  parallel:
+    matrix:
+      - BUILD_PROFILES: nocheck,stage1

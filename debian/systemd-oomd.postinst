@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+# reload dbus configuration to make the new org.freedesktop.oom1 API available
+# The org.freedesktop.oom1.conf policy references the 'systemd-oom' user, thus
+# an explicit reload of dbus is needed after the system user was created.
+if [ -d /run/systemd/system ]; then
+    systemctl reload dbus || true
+fi
