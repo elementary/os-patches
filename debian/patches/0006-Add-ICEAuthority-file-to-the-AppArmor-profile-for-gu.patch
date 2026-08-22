@@ -1,0 +1,23 @@
+From: Yves-Alexis Perez <corsac@debian.org>
+Date: Tue, 28 Nov 2023 21:25:20 +0100
+Subject: Add ICEAuthority file to the AppArmor profile for guest session
+
+Fixes long timeout at login
+
+Bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1050417
+---
+ data/apparmor/lightdm-guest-session.in | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/data/apparmor/lightdm-guest-session.in b/data/apparmor/lightdm-guest-session.in
+index 3239c54..f4938c7 100644
+--- a/data/apparmor/lightdm-guest-session.in
++++ b/data/apparmor/lightdm-guest-session.in
+@@ -18,6 +18,7 @@
+   /usr/bin/sogou-qimpanel-watchdog ix,
+   /usr/bin/sogou-sys-notify ix,
+   /tmp/sogou-qimpanel:* rwl,
++  /run/user/*/ICEauthority-l l,
+ 
+   # Allow ibus
+   unix (bind, listen) type=stream addr="@tmp/ibus/*",

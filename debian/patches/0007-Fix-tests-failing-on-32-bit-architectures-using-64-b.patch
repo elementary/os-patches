@@ -1,0 +1,65 @@
+From: Robert Ancell <robert.ancell@canonical.com>
+Date: Fri, 19 Apr 2024 09:13:59 +1200
+Subject: Fix tests failing on 32 bit architectures using 64 bit time
+ handling.
+
+open/creat/stat are aliases to the 64 bit versions when this is enabled and
+LightDM was therefore defining them twice.
+
+Fixes https://github.com/canonical/lightdm/issues/352
+---
+ tests/src/libsystem.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/tests/src/libsystem.c b/tests/src/libsystem.c
+index 1c68dc1..ebb60e7 100644
+--- a/tests/src/libsystem.c
++++ b/tests/src/libsystem.c
+@@ -242,6 +242,7 @@ open_wrapper (const char *func, const char *pathname, int flags, mode_t mode)
+     return _open (new_path, flags, mode);
+ }
+ 
++#ifndef __USE_FILE_OFFSET64
+ int
+ open (const char *pathname, int flags, ...)
+ {
+@@ -255,6 +256,7 @@ open (const char *pathname, int flags, ...)
+     }
+     return open_wrapper ("open", pathname, flags, mode);
+ }
++#endif
+ 
+ int
+ open64 (const char *pathname, int flags, ...)
+@@ -288,6 +290,7 @@ unlinkat (int dirfd, const char *pathname, int flags)
+     return _unlinkat (dirfd, new_path, flags);
+ }
+ 
++#ifndef __USE_FILE_OFFSET64
+ int
+ creat (const char *pathname, mode_t mode)
+ {
+@@ -296,6 +299,7 @@ creat (const char *pathname, mode_t mode)
+     g_autofree gchar *new_path = redirect_path (pathname);
+     return _creat (new_path, mode);
+ }
++#endif
+ 
+ int
+ creat64 (const char *pathname, mode_t mode)
+@@ -320,6 +324,7 @@ access (const char *pathname, int mode)
+     return _access (new_path, mode);
+ }
+ 
++#ifndef __USE_FILE_OFFSET64
+ int
+ stat (const char *path, struct stat *buf)
+ {
+@@ -328,6 +333,7 @@ stat (const char *path, struct stat *buf)
+     g_autofree gchar *new_path = redirect_path (path);
+     return _stat (new_path, buf);
+ }
++#endif
+ 
+ int
+ stat64 (const char *path, struct stat64 *buf)

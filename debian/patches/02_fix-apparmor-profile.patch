@@ -1,0 +1,43 @@
+From: Yves-Alexis Perez <corsac@debian.org>
+Date: Fri, 22 Feb 2019 17:15:33 +0100
+Subject: fix apparmor profile for guest session
+
+Bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=780456
+---
+ data/apparmor/abstractions/lightdm                  | 2 +-
+ data/apparmor/abstractions/lightdm_chromium-browser | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/data/apparmor/abstractions/lightdm b/data/apparmor/abstractions/lightdm
+index f4b6781..495e2fb 100644
+--- a/data/apparmor/abstractions/lightdm
++++ b/data/apparmor/abstractions/lightdm
+@@ -32,7 +32,7 @@
+   owner /dev/shm/** rmw,
+   /etc/ r,
+   /etc/** rmk,
+-  /etc/gdm/Xsession ix,
++  /etc/X11/Xsession ix,
+   /etc/X11/xdm/** ix, # needed for openSUSE's default session-wrapper
+   /etc/X11/xinit/** ix, # needed for openSUSE's default session-wrapper
+   /lib/ r,
+diff --git a/data/apparmor/abstractions/lightdm_chromium-browser b/data/apparmor/abstractions/lightdm_chromium-browser
+index 930c87e..c8d6e6e 100644
+--- a/data/apparmor/abstractions/lightdm_chromium-browser
++++ b/data/apparmor/abstractions/lightdm_chromium-browser
+@@ -10,6 +10,7 @@
+ 
+ # Requires apparmor 2.9
+ 
++  /usr/lib/chromium/chromium Cx -> chromium,
+   /usr/lib/chromium-browser/chromium-browser Cx -> chromium,
+   /usr/bin/webapp-container Cx -> chromium,
+   /usr/bin/webbrowser-app Cx -> chromium,
+@@ -68,6 +69,7 @@
+ 
+     /selinux/ r,
+ 
++    /usr/lib/chromium/chrome-sandbox ix,
+     /usr/lib/chromium-browser/chromium-browser-sandbox ix,
+     /usr/lib/@{multiarch}/oxide-qt/chrome-sandbox ix,
+     /opt/google/chrome-*/chrome-sandbox ix,

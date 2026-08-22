@@ -1,0 +1,1067 @@
+lightdm (1.32.0-6ubuntu4) resolute; urgency=medium
+
+  * No-change mass rebuild for Ubuntu 26.04 (LP: #2132257)
+
+ -- Sebastien Bacher <seb128@debian.org>  Wed, 11 Feb 2026 23:27:24 +0100
+
+lightdm (1.32.0-6ubuntu3) plucky; urgency=medium
+
+  * Cherry-pick changes from the previously-held Ubuntu delta, remaining
+    delta (LP: #2104169):
+    - debian/01_debian.conf: Remove the default greeter session, this is set
+      by gsettings.
+    - debian/02_ubuntu.conf: Add an Ubuntu-specific configuration:
+      + Disable the built-in log backup mechanism in favor of logrotate, the
+        configuration for which is defined in debian/lightdm.logrotate.
+      + Enable coredumps when running X.
+      + Use lightdm-greeter-session for greeter-wrapper, as defined in
+        debian/lightdm-greeter-session.
+      + Use lightdm-session for session-wrapper, as defined in
+        debian/lightdm-session (LP: #2098411).
+    - debian/config-error-dialog.sh: Used by lightdm-greeter-session, this
+      dialog alerts the user when a configuration value is invalid, instead of
+      simply failing.
+    - debian/lightdm.install: Install the aforementioned configuration files
+      into /etc/lightdm/lightdm.conf.d instead of
+      /usr/share/lightdm/lightdm.conf.d for better visibility and
+      compatibility.
+    - debian/source_lightdm.py: Apport hook.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Tue, 25 Mar 2025 22:45:18 -0500
+
+lightdm (1.32.0-6ubuntu2) plucky; urgency=medium
+
+  * Show list of users by default.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Tue, 07 Jan 2025 12:25:40 -0600
+
+lightdm (1.32.0-6ubuntu1) plucky; urgency=medium
+
+  * Add Breaks/Replaces/Provides for liblightdm-gobject-1-dev. The Provides
+    can be dropped when reverse build dependencies are updated, and the
+    Breaks/Replaces can be dropped after the next LTS.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Mon, 06 Jan 2025 01:47:22 -0600
+
+lightdm (1.32.0-6) unstable; urgency=medium
+
+  * move lightdm.service to /usr (closes: #1073750)
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 21 Jun 2024 23:11:44 +0200
+
+lightdm (1.32.0-5) unstable; urgency=medium
+
+  * d/patch: add upstream patch for 64b time_t build failure (Closes: #1067561)
+  * d/control: replace pkg-config build-dep by pkgconf
+  * d/gir1.2-lightdm-1.install: move typelib to multi-arch dir
+  * Upload to unstable
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 19 Apr 2024 15:34:32 +0200
+
+lightdm (1.32.0-5~exp1) experimental; urgency=medium
+
+  * Non-maintainer upload to experimental.
+
+  * debian/patches:
+    + Add 09_time64-t-fix-for-arm-32bit.patch. Fix FTBFS after time_64t
+      transition on 32bit architectures. (Closes: #1067561).
+
+ -- Mike Gabriel <sunweaver@debian.org>  Fri, 05 Apr 2024 00:36:32 +0200
+
+lightdm (1.32.0-4) unstable; urgency=medium
+
+  * d/lightdm.maintscript: remove /e/d/s/org.freedesktop.DisplayManager.conf
+    properly
+  * d/patches: fix guest session long login by updating AppArmor profile
+    (Closes: #1050417)
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 28 Nov 2023 22:12:33 +0100
+
+lightdm (1.32.0-3) unstable; urgency=medium
+
+  * d/patches/05_debianize-pam-files: include common-session for greeter
+    (Closes: #932047)
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 03 Jul 2023 22:48:54 +0200
+
+lightdm (1.32.0-2) unstable; urgency=medium
+
+  [ Akbarkhon Variskhanov ]
+  * postrm: Use `which` & add `error()`
+  * Delete debian/lightdm.lintian-overrides
+
+  [ Yves-Alexis Perez ]
+  * lintian: add override for false positive missing HTML source
+  * d/po/sv.po: convert to UTF-8
+  * d/control: drop dependency on lsb-base
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 18 Jun 2023 11:34:24 +0200
+
+lightdm (1.32.0-1) experimental; urgency=medium
+
+  [ Debian Janitor ]
+  * Remove constraints unnecessary since buster
+  * Remove overrides for lintian tags that are no longer supported.
+  * Set upstream metadata fields: Contact.
+  * Fix field name case in debian/control (Pre-depends => Pre-Depends).
+
+  [ Akbarkhon Variskhanov ]
+  * d/watch: Fix URL and pattern
+  * debian/control: Update Homepage.
+    Thanks to Boyuan Yang for the suggestion (Closes: #1022849)
+  * Update upstream metadata
+
+  [ Yves-Alexis Perez ]
+  * New upstream version 1.32.0
+  * d/patches: rebase against new upstream
+  * d/lightdm.install: drop /etc/dbus-1
+  * update symbols for new release
+  * d/control: update standards version to 4.6.1
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 07 Dec 2022 19:02:52 +0100
+
+lightdm (1.26.0-8) unstable; urgency=medium
+
+  * Team upload.
+
+  [ handsome_feng ]
+  * d/p/10_fix-build-glibc-2.33.patch: Fix FTBFS with glibc 2.33.
+    (Closes: #1002132)
+
+  [ Unit 193 ]
+  * d/control:
+    - Bump dh compat to 13.
+    - R³: no
+  * d/rules: Drop '--as-needed' as it is now default in stable.
+  * Update Standards-Version to 4.6.0.
+
+ -- Unit 193 <unit193@debian.org>  Tue, 11 Jan 2022 04:49:23 -0500
+
+lightdm (1.26.0-7) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Apply multi-arch hints.
+  * Trim trailing whitespace.
+  * Bump debhelper from old 11 to 12.
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository,
+    Repository-Browse.
+
+  [ Yves-Alexis Perez ]
+  * d/control: drop build-dep on gnome-doc-utils (Closes: #945292)
+  * d/control: update standards version to 4.4.1
+  * d/lightdm.service: improve systemd unit file (Closes: #950390)
+  * d/control: update standards version to 4.5.0
+  * d/rules: don't run installsystemd at all
+  * d/lightdm.service: manually install systemd unit file
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 03 Feb 2020 20:13:13 +0100
+
+lightdm (1.26.0-6) unstable; urgency=medium
+
+  * drop liblightdm-qt packages for Qt4 Debian removal.
+    Thanks Moritz Mühlenhoff for the patch (closes: #875029)
+  * d/control: update dh compat level to 11
+  * d/rules: explicitly enable gtk-doc.
+    It seems that default behavior changed at some point, making the package
+    FTBFS because dh_install can't find the gtk-doc folder.
+  * d/rules: override dh_installsystemd instead of dh_systemd_start
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 17 Sep 2019 22:51:36 +0200
+
+lightdm (1.26.0-5) unstable; urgency=medium
+
+  * d/control: drop consolekit dep, use a real package as first alternative
+  * move to debhelper-compat b-d for dh version
+  * d/control: update standards version to 4.4.0
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 10 Jul 2019 22:34:59 +0200
+
+lightdm (1.26.0-4) unstable; urgency=medium
+
+  * d/control: replace libpam-systemd dep by logind (closes: #922160)
+  * d/control: update standards version to 4.3.0
+  * d/control: fix capitalization of GObject
+  * d/patches: import patches in gbp pq
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 22 Feb 2019 17:50:43 +0100
+
+lightdm (1.26.0-3) unstable; urgency=medium
+
+  [ Cody Garver ]
+  * Backport upstream hide systemd dynamic users fix
+
+  [ Yves-Alexis Perez ]
+  * d/control: stop duplicating section when it's useless
+  * d/control: update standards version to 4.2.1
+  * d/control: fix casing for Gobject
+  * d/liblightdm-gobject-1-0.lintian-overrides dropped, now useless
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 07 Oct 2018 11:04:27 +0200
+
+lightdm (1.26.0-2) unstable; urgency=medium
+
+  * d/gbp.conf added, following DEP-14
+  * Upload to unstable.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 28 Aug 2018 11:29:22 +0200
+
+lightdm (1.26.0-1) experimental; urgency=medium
+
+  * Moved the package to git on salsa.debian.org
+  * Updated the maintainer address to debian-xfce@lists.debian.org
+  * d/control: drop Emanuele and Simon from uploaders, thanks to them!
+  * d/watch: track 1.26 branch (maintained until 2023)
+  * d/watch updated to track 1.26 branch on github
+  * New upstream version 1.26.0
+  * d/p/01_set-default-path refreshed for new release
+  * d/p/06_change-user-dirs refreshed for new upstream
+  * d/p/08_reset-SIGPIPE-before-exec refreshed for new release
+  * install polkit, DBus and AccountsService file in lightdm package
+  * d/rules: migrate to dh_missing
+  * liblightdm-gobject-1-0 symbols file updated for new release
+  * liblightdm-qt-3-0.symbols: merge generic Qt symbols
+  * liblightdm-qt-3-0.symbols: sort generic symbols and mark some as optional
+  * liblightdm-qt-3-0.symbols: reorder symbols
+  * debian/liblightdm-qt-3-0.symbols:
+    - add new symbols in 1.26
+    - fix syntax
+    - remove private callback symbols which shouldn't be exported
+    - remove hidden/non-exported symbols
+  * d/p/03_liblightdm-qt3-add-header-visibility added, fix symbol visibility
+  * d/rules: mark symbols hidden by default
+  * d/compat bumped to 10
+  * d/control: update dh build-dep to 10 and drop obsolete dh-systemd
+  * d/rules: drop systemd addon and parallel (useless with compat 10)
+  * d/control: add build-dep on yelp-tools
+  * lightdm.postinst: don't recursively chown /var/lib/lightdm
+  * d/liblightdm-qt5-3-0.symbols:
+    - remove symbols marked as private
+    - add symbols introduced in 1.26
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 21 May 2018 17:37:09 +0200
+
+lightdm (1.18.3-5) experimental; urgency=medium
+
+  * debian/control:
+    - add liblightdm-qt5-3-0 and liblightdm-qt5-3-dev (packaging bits imported
+    from Ubuntu)                                                closes: #871840
+    - add build-dep on qtbase5-dev
+    - move libraries to section libs
+    - update standards version to 4.1.0
+    - replace dh-systemd build-dep by a newer version of debhelper
+  * debian/liblightdm-qt5-3-0.install and debian/liblightdm-qt5-3-dev.install
+    added to ship relevant files to Qt5 library and development packages
+  * debian/liblightdm-qt-dev.install:
+    - narrow installation path to only cover Qt4 library.
+  * debian/rules:
+    - explicitly enable qt5 library
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 21 Sep 2017 21:09:40 +0200
+
+lightdm (1.18.3-4) unstable; urgency=medium
+
+  * debian/control:
+    - drop build-dep on libck-connector-dev and libdbus-glib-1-dev, thanks
+      Michael Biebl.                                            closes: #865037
+    - add depends on libx11-dev and libglib2.0-dev to liblightdm-gobject-dev
+      and drop libdbus-glib-1-dev, thanks again Michael.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 08 Jul 2017 16:26:27 +0200
+
+lightdm (1.18.3-3) unstable; urgency=medium
+
+  * debian/control:
+    - replace libgcrypt11-dev by libgcrypt20-dev.               closes: #864121
+    - update standards version to 4.0.0.
+    - move gir1.2-lightdm-1 to section introspection.
+    - add dependency on gir1.2-lightdm-1 to liblightdm-gobject-dev.
+    - add dependency on ${gir:Depends} to gir1.2-lightdm-1.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 18 Jun 2017 19:46:04 +0200
+
+lightdm (1.18.3-2) unstable; urgency=medium
+
+  * debian/lightdm.service:
+    - replace plymouth-quit.service since LightDM will quit plymouth by
+      itself, patch from Laurent Bigonville.                    closes: #854274
+  * debian/control: replace lsb-base build-dep by a dependency (in lightdm).
+  * debian/lightdm.lintian-overrides: add overrides for the command with path
+    because we actually check for the command existence.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 25 Mar 2017 17:29:08 +0100
+
+lightdm (1.18.3-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/patches:
+    - 07-Remove-unused-unititialized-file-descriptors-could-c dropped,
+      included upstream.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 19 Dec 2016 10:54:11 +0100
+
+lightdm (1.18.2-4) unstable; urgency=medium
+
+  * Update debian/liblightdm-qt-3-0.symbols, many thanks Hilko Bengen:
+    - use demangled symbols
+    - add symbols only present on !x86 architectures.           closes: #842675
+  * debian/control:
+    - add dependency on lsb-base.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 18 Dec 2016 17:04:16 +0100
+
+lightdm (1.18.2-3) unstable; urgency=medium
+
+  * debian/control:
+    - add Suggests on xserver-xephyr.                           closes: #831298
+  * debian/patches:
+    - 08_reset-SIGPIPE-before-exec added, ignore SIGPIPE during LightDM life
+      but reset it before exec()ing children.                   closes: #823460
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 19 Oct 2016 20:56:07 +0200
+
+lightdm (1.18.2-2) unstable; urgency=high
+
+  * Urgency=high for the RC bug fix.
+  * debian/patches
+    - 05_debianize-pam-files added, disable autologin by default for root user
+      (as with GDM3).
+    - 07-Remove-unused-unititialized-file-descriptors-could-c added,
+      cherry-picked from upstream. Avoid closing stdin which triggers a bug in
+      dbus preventing dbus-daemon to start.                     closes: #829557
+  * debian/01_debian.conf:
+    - update section name from SeatDefaults to Seat:*.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 11 Jul 2016 13:25:07 +0200
+
+lightdm (1.18.2-1) unstable; urgency=medium
+
+  * New upstream bugfix release.
+  * debian/control:
+    - update standards version to 3.9.8.
+    - run wrap-and-sort
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 28 Jun 2016 21:43:15 +0200
+
+lightdm (1.18.1-1) unstable; urgency=medium
+
+  * New upstream bugfix release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 05 Apr 2016 21:26:36 +0200
+
+lightdm (1.18.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/watch updated for tracking 1.18 branch.
+  * debian/patches:
+    - 02_fix-apparmor-profile updated for new release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 01 Apr 2016 11:56:59 +0200
+
+lightdm (1.16.7-1) unstable; urgency=medium
+
+  * New upstream bugfix release.
+  * debian/control:
+    - make libaudit-dev build-dep linux-only, fix FTBFS on !linux.
+                                                                closes: #815343
+    - update standards version to 3.9.7.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 22 Feb 2016 13:20:36 +0100
+
+lightdm (1.16.6-1) unstable; urgency=medium
+
+  * New upstream bugfix release.
+    - fix crash when XDMCP is enabled and a packet with no address is received
+    (CVE-2015-8316)
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 24 Nov 2015 21:03:33 +0100
+
+lightdm (1.16.5-1) unstable; urgency=medium
+
+  * New upstream bugfix release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 10 Nov 2015 10:56:27 +0100
+
+lightdm (1.16.3-1) unstable; urgency=medium
+
+  * New upstream bugfix release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 17 Oct 2015 21:54:44 +0200
+
+lightdm (1.16.2-1) unstable; urgency=medium
+
+  * debian/patches:
+    - 05_debianize-pam-files updated, fix pam_env configuration and correctly
+      load /etc/environment.                                    closes: #798967
+  * debian/watch updated to track 1.16 branch.
+  * New upstream release.
+  * debian/liblightdm-gobject-1-0.symbols updated for new release.
+  * debian/control:
+    - add build-dep on libaudit-dev for audit support.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 19 Sep 2015 15:08:51 +0200
+
+lightdm (1.14.2-2) unstable; urgency=medium
+
+  * debian/liblightdm-qt-3-0.symbols updated for symbols removed due to the
+    gcc 5 transition.                                           closes: #777981
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 25 Aug 2015 21:02:40 +0200
+
+lightdm (1.14.2-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 27 Jun 2015 14:43:38 +0200
+
+lightdm (1.14.0-1) unstable; urgency=medium
+
+  * debian/patches:
+    - 02_fix-apparmor-profile updated, following information from Mathieu
+      Parent.                                                   closes: #780456
+  * debian/watch updated to follow 1.14 branch.
+  * New upstream release.
+  * debian/lightdm.install:
+    - install bash completion files.
+  * debian/liblightdm-qt-3-0.symbols updated for new release.
+  * Upload to unstable.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 06 May 2015 22:42:17 +0200
+
+lightdm (1.12.3-1) experimental; urgency=medium
+
+  * New upstream release.
+  * debian/patches:
+    - 02_fix-apparmor-profile edited, dropped parts unneeded anymore with more
+      recent AppArmor.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 13 Mar 2015 22:36:14 +0100
+
+lightdm (1.12.2-1) experimental; urgency=medium
+
+  * New upstream release.
+  * debian/patches:
+    - 01_set-default-path and 06_change-user-dirs refreshed for new release.
+    - 03_use-desktopnames-properties dropped, included upstream.
+  * debian/liblightdm-gobject-1-0.symbols updated for new symbols.
+  * debian/liblightdm-qt-3-0.symbols updated for new symbols.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 08 Mar 2015 22:06:41 +0100
+
+lightdm (1.10.3-3) unstable; urgency=medium
+
+  * debian/patches:
+    - 06_change-user-dirs edited, don't use /var/lib/lightdm directly (it
+    seems to confuse lightdm and break .dmrc saving) but use
+    /var/lib/lightdm/data and create it at runtime.             closes: #767359
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 04 Nov 2014 21:58:15 +0100
+
+lightdm (1.10.3-2) unstable; urgency=medium
+
+  * debian/patches:
+    - 03_use-desktopnames-properties added, from upstream bzr r1984, use
+    DesktopNames property in session .desktop file instead of
+    X-LightDM-DesktopName since GDM uses that key too.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 24 Oct 2014 14:32:07 +0200
+
+lightdm (1.10.3-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/patches:
+    - 04_fix-double-free-configuration-key-source dropped, included upstream.
+  * debian/upstream/signing-key.asc added, add PGP key for Robert Ancell
+    (0x18EAA1890F7C882E).
+  * debian/watch updated, add mangle option to check PGP signatures.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 09 Oct 2014 13:01:51 +0200
+
+lightdm (1.10.2-3) unstable; urgency=medium
+
+  * debian/patches:
+    - 04_fix-double-free-configuration-key-source added, fix crash when
+      key sources are defined twice in config files.            closes: #762211
+    - 06_change-user-dirs added, use /var/lib/lightdm as user dirs, since it's
+      the home dir for lightdm user since the beginning and it's already
+      correctly created.                                        closes: #749243
+  * debian/control:
+    - update standards version to 3.9.6.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 08 Oct 2014 22:51:19 +0200
+
+lightdm (1.10.2-2) unstable; urgency=medium
+
+  * debian/patches:
+    - 05_debianize-pam-files edited, don't log an error if
+    libpam-gnome-keyring is not installed.                      closes: #683508
+  * debian/control:
+    - put lipam-systemd before consolekit in alternative.       closes: #763187
+  * debian/lightdm.postinst:
+    - make sure /var/lib/lightdm always exists.                 closes: #762218
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 28 Sep 2014 21:58:17 +0200
+
+lightdm (1.10.2-1) unstable; urgency=medium
+
+  * debian/patches:
+    - 06_allow_libpamsystemd_and_ck_together dropped, ConsoleKit is now
+      deprecated (wether we're using init=systemd or not).
+  * New upstream release.
+  * debian/liblightdm-gobject-1-0.symbols:
+    - update symbol file, add lightdm_user_get_uid.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 17 Sep 2014 21:48:07 +0200
+
+lightdm (1.10.1-3) unstable; urgency=medium
+
+  * debian/rules:
+    - stop installing apparmor guest profile.                   closes: #747252
+  * debian/control:
+    - make the libpam-systemd dependency linux-any.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 11 Jun 2014 20:55:38 +0200
+
+lightdm (1.10.1-2) unstable; urgency=medium
+
+  * debian/patches:
+    - 02_fix-apparmor-profile updated, fix chromium path in apparmor
+      abstraction profile.                                      closes: #742829
+  * debian/control:
+    - add libpam-systemd as consolekit alternative dependency.  closes: #747619
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 17 May 2014 15:31:23 +0200
+
+lightdm (1.10.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/patches:
+    - really apply 02_fix-apparmor-profile, update it.  (really) closes:#736075
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 06 May 2014 07:43:05 +0200
+
+lightdm (1.10.0-3) unstable; urgency=medium
+
+  * debian/control:
+    - add build-dep on dh-systemd.
+  * debian/lightdm.postinst:
+    - handle symlinks for systemd service files according to the currently
+      selected display manager.
+  * debian/lightdm.service:
+    - add systemd service file, thanks Martin Pitt for the work.closes: #733220
+  * debian/rules:
+    - use dh systemd addon and configure it to not start the lightdm service
+      at once.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 28 Apr 2014 21:15:45 +0200
+
+lightdm (1.10.0-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 22 Apr 2014 23:33:26 +0200
+
+lightdm (1.10.0-1) experimental; urgency=medium
+
+  * New upstream stable release.
+  * debian/watch updated to track 1.10 branch.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 08 Apr 2014 22:54:47 +0200
+
+lightdm (1.9.13-1) experimental; urgency=medium
+
+  * New upstream development release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 25 Mar 2014 22:04:52 +0100
+
+lightdm (1.9.11-1) experimental; urgency=medium
+
+  * New upstream development release.
+  * debian/watch updated to track versions over 10.
+  * debian/patches:
+    - 02_fix-build-glib-before-2.40 removed, included upstream.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 13 Mar 2014 09:19:21 +0100
+
+lightdm (1.9.9-1) experimental; urgency=medium
+
+  * New upstream development release.
+  * debian/liblightdm-gobject-1-0.symbols, debian/liblightdm-qt-3-0.symbols:
+    - add a symbol file to handle library dependencies more carefully.
+  * debian/patches:
+    - 02_fix-build-glib-before-2.40 added, fix FTBFS with glib before 2.40.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 12 Mar 2014 11:00:42 +0100
+
+lightdm (1.9.8-1) experimental; urgency=medium
+
+  * New upstream development release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 21 Feb 2014 22:05:10 +0100
+
+lightdm (1.9.6-1) experimental; urgency=medium
+
+  * New upstream development release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 22 Jan 2014 21:18:16 +0100
+
+lightdm (1.9.5-1) experimental; urgency=medium
+
+  * New upstream development release.
+  * debian/watch updated to track 1.9 branch.
+  * debian/patches:
+    - 04_dont-add-pkglibexecdir-path dropped, gdm-flexiserver script has been
+      dropped from LightDM so the PATH addition was dropped as well.
+    - 01_set-default-path and 06_allow_libpamsystemd_and_ck_together
+      refreshed.
+  * debian/rules:
+    - stop removing gdmflexiserver since it doesn't exist anymore.
+    - configure libexecdir to be /u/l/*/lightdm.
+  * debian/lightdm.install:
+    - drop install of lightdm-set-defaults.
+    - rename lightdm-guest-session-wrapper to lightdm-guest-session.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 29 Dec 2013 22:28:33 +0100
+
+lightdm (1.8.8-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 13 Mar 2014 09:35:36 +0100
+
+lightdm (1.8.7-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/patches:
+    - 03_fix-pam_chauthtok-call dropped, included upstream.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 06 Feb 2014 21:41:24 +0100
+
+lightdm (1.8.6-2) unstable; urgency=medium
+
+  * debian/patches:
+    - 03_fix-pam_chauthtok-call added, pass PAM_CHANGE_EXPIRED_AUTHTOK to the
+      pam_chauthtok() call.                                     closes: #735670
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 02 Feb 2014 14:15:27 +0100
+
+lightdm (1.8.6-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/patches:
+    - 02_fix-apparmor-profile added: remove inclusion of an AppArmor
+      abstraction not available in Debian.                      closes: #736075
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 22 Jan 2014 21:10:28 +0100
+
+lightdm (1.8.5-3) unstable; urgency=low
+
+  * debian/lightdm.postrm: warn if user/group deletion failed.  closes: #731220
+  * debian/control:
+    - update standards version to 3.9.5.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 29 Dec 2013 14:55:54 +0100
+
+lightdm (1.8.5-2) unstable; urgency=medium
+
+  * debian/patches:
+    - 06_allow_libpamsystemd_and_ck_together added. Create a ConsoleKit
+      session, even if a logind session already exists. That makes transition
+      from ConsoleKit to systemd/logind somehow easier, but means some events
+      might happen twice.                                       closes: #728361
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 02 Dec 2013 21:15:54 +0100
+
+lightdm (1.8.5-1) unstable; urgency=low
+
+  * New upstream bugfix release.
+  * debian/patches:
+    - 02_default-config removed, replaced by a config snippet.
+  * debian/01_debian.conf:
+    - add config snippet for Debian specific config
+  * debian/lightdm.install:
+    - install 01_debian.conf to /usr/share/lightdm/lightdm.conf.d/
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 07 Nov 2013 10:20:11 +0100
+
+lightdm (1.8.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/rules:
+    - enable all hardening flags.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 31 Oct 2013 09:31:16 +0100
+
+lightdm (1.8.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/patches:
+    - 01_set-default-path, 02_default-config, 05_debianize-pam-files
+      refreshed.
+    - 03_quit-plymouth disabled for now, to check if problem is really fixed
+      upstream.
+  * debian/control:
+    - rename liblightdm-qt-2-0 to liblightdm-qt-3-0 to match updated soname.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 20 Oct 2013 20:45:55 +0200
+
+lightdm (1.6.3-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 09 Oct 2013 21:22:43 +0200
+
+lightdm (1.6.2-1) unstable; urgency=low
+
+  [ Yves-Alexis Perez ]
+  * debian/po:
+    - update pl.po, thanks Michał Kułach.                       closes: #711378
+  * New upstream release.
+    - fix wrong permissions on .Xauthority file and don't pollute homedir with
+      temporary files.                                          closes: #721744
+  * debian/watch updated to track 1.6 branch.
+  * debian/control:
+    - update standards version to 3.9.4.
+
+  [ Evgeni Golov ]
+  * Correct Vcs-* URLs to point to anonscm.debian.org
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 11 Sep 2013 07:41:13 +0200
+
+lightdm (1.6.0-3) unstable; urgency=low
+
+  * debian/control:
+    - drop valac-0.18 dependency for now since it's not available in sid
+      anyway.                                                   closes: #707176
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 11 May 2013 23:48:35 +0200
+
+lightdm (1.6.0-2) unstable; urgency=low
+
+  [ Niv Sardi ]
+  * Build with GIR
+
+  [ Yves-Alexis Perez ]
+  * Upload to unstable.
+  * debian/rules:
+    - hardening=+pie segfaults but +bindnow does work so keep it enabled.
+  * debian/docs removed: stop shipping NEWS file since it's the same as
+    changelog.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 05 May 2013 14:09:23 +0200
+
+lightdm (1.6.0-1) experimental; urgency=low
+
+  * New upstream release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 17 Apr 2013 22:06:36 +0200
+
+lightdm (1.5.3-1) experimental; urgency=low
+
+  * New upstream unstable release.
+  * debian/docs: ship NEWS file.                                closes: #689870
+  * debian/watch:
+    - support .xz tarballs.
+  * debian/patches:
+    - 01_set-default-path, 03_quit-plymouth, 04_dont-add-pkglibexecdir-path
+      and 05_debianize-pam-files refreshed.
+  * debian/control:
+    - add build-dep on libgcrypt11-dev.
+  * debian/rules:
+    - disable pie hardening flags for now, it segfaults at startup.
+    - fix gdmflexiserver removal
+    - fix permissions on apparmor profiles.
+  * debian/lightdm.install:
+    - install apparmor profiles.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 07 Apr 2013 14:30:05 +0200
+
+lightdm (1.4.0-1) experimental; urgency=low
+
+  * New upstream release.
+  * debian/patches:
+    - 01_set-default-path, 02_default-config and
+      04_dont-add-pkglibexecdir-path refreshed for new release.
+    - 05_debianize-pam-files added, Debianize the lightdm and
+      lightdm-autologin pam config files.
+  * debian/control:
+    - suggests upower.                                          closes: #679538
+    - make lightdm depends on lightdm-gtk-greeter | lightdm-greeter, thanks
+      Ralf Jung for the report.                                 closes: #684714
+    - add build-dep on itstool.
+  * debian/lightdm.install:
+    - stop installing lightdm upstart script since it's broken. closes: #679409
+    - install /u/s/help.*
+    - install PAM files
+  * debian/rules:
+    - stop installing own PAM files.
+  * debian/*.pam: drop obsolete PAM files.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 07 Oct 2012 09:16:34 +0200
+
+lightdm (1.2.2-3) unstable; urgency=low
+
+  * debian/lightdm.pam:
+    - enable pam_loginuid.                                      closes: #677435
+  * debian/lightdm.lightdm-autologin.pam added, support auto-login when
+    configured in /etc/lightdm/lightdm.conf.                    closes: #636104
+  * debian/rules:
+    - install both pam files.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 18 Jun 2012 21:13:57 +0200
+
+lightdm (1.2.2-2) unstable; urgency=low
+
+  * debian/rules:
+    - re-enable tests now that gcc-4.7 has been fixed.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 13 Jun 2012 19:51:16 +0200
+
+lightdm (1.2.2-1) unstable; urgency=low
+
+  * Upload to unstable.
+  * New upstream release.                                       closes: #673036
+  * debian/rules:
+    - build with --parallel.
+    - disable silent rules so build logs are useful.
+    - disable building test for now since it fails with gcc-4.7.
+  * debian/*.lintian-overrides added, override warning for hardening
+    checks, we do enable build flags.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 15 May 2012 22:44:04 +0200
+
+lightdm (1.2.0-1) experimental; urgency=low
+
+  [ Yves-Alexis Perez ]
+  * New upstream release.
+    - don't leak fds to child processes.                        closes: #658678
+  * debian/po:
+    - da.po updated, thanks to “Joe Dalton”.                    closes: #650946
+  * debian/control:
+    - add Provides: on x-display-manager.                       closes: #654343
+    - liblightdm-gobject-dev requires libdbus-glib-1-dev and libxklavier-dev
+      so add dependencies.
+    - drop lightdm-{gtk,qt}-greeter packages since they have been moved to
+      standalone packages.
+    - rename lightdm-qt-1-0 package to -2-0 to follow soname bump.
+    - drop dh-autoreconf build-dep.
+    - fix liblightdm*-dev package not depending on the library package itself.
+    - update standards version to 3.9.3.
+  * debian/watch updated for new tarballs location.
+  * debian/patches:
+    - 01_set-default-path refreshed.
+    - 02_default-config.patch refreshed
+      + use lightdm-greeter as greeter name, which is provided as an
+        alternative by the various greeters.
+    - 04_default-gtk-greeter-config dropped since lightm-gtk-greeter has been
+      moved to standalone package.
+    - 06_move-progs-to-pkglibexecdir dropped, included upstream.
+    - 07_CVE-2011-4105 dropped, code doesn't exist anymore.
+    - 08_CVE-2011-3153 dropped, included upstream.
+  * debian/rules:
+    - don't install libsystem as it's only useful for tests.
+    - drop autoreconf since we don't need it anymore.
+  * debian/lightdm-{gtk,qt}-greeter.{config.install.templates,postinst,prerm}
+    dropped.
+  * debian/lightdm.pam:
+     - add selinux lines, thanks Laurent Bigonville.            closes: #664805
+
+  [ Lionel Le Folgoc ]
+  * debian/patches: add missing DEP3 headers.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 06 Apr 2012 21:32:13 +0200
+
+lightdm (1.0.6-3) unstable; urgency=low
+
+  * debian/patches:
+    - 07_CVE-2011-4105 refreshed, use AC_USE_SYSTEM_EXTENSIONS in configure.ac
+      so GNU extensions are used even on kFreeBSD.              closes: #649633
+  * debian/rules:
+    - explicitly disable introspection. It seems only enabled on kFreeBSD
+      builds for some reason.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 26 Nov 2011 09:34:47 +0100
+
+lightdm (1.0.6-2) unstable; urgency=high
+
+  * urgency=high for security fixes.
+  * debian/patches:
+    - 07_CVE-2011-4105 added, make sure the file is not a link when chowning
+      it. (CVE-2011-4105)
+    - 08_CVE-2011-3153 added, fix information disclosure by droping privileges
+      before reading and re-writing ~/.dmrc.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Tue, 15 Nov 2011 21:39:30 +0100
+
+lightdm (1.0.6-1) unstable; urgency=high
+
+  * New upstream release, urgency=high for security fix.
+    - fix .Xauthority ownership using lchown() (CVE-2011-4105)
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 04 Nov 2011 20:54:52 +0100
+
+lightdm (1.0.4-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/patches:
+    - 01_set-default-path refreshed.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Wed, 26 Oct 2011 07:29:19 +0200
+
+lightdm (1.0.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/watch updated to only track stable releases.
+  * debian/patches:
+    - 01_set-default-path and 05_dont-add-pkglibexecdir-path refreshed for new
+      upstream release.
+    - 06_move-lightdm-set-defaults-to-pkglibexecdir renamed to
+      06_move-progs-to-pkglibexecdir, use the same patch to move
+      lightdm-guest-session-wrapper to pkglibexecdir and refresh the original
+      patch for new upstream.
+  * debian/lightdm.install:
+    - install lightdm-guest-session-wrapper.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 08 Oct 2011 13:39:15 +0200
+
+lightdm (1.0.2-1) unstable; urgency=low
+
+  * New upstream release.
+    - don't use autologin pam service, fix startup.             closes: #643844
+  * debian/control:
+    - add recommends on policykit-1 to greeters.                closes: #643292
+  * debian/patches:
+    - 05_dont-add-pkglibexecdir-path refreshed for new upstream release.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 06 Oct 2011 07:41:40 +0200
+
+lightdm (1.0.0-3) unstable; urgency=low
+
+  * debian/lightdm-{gtk,qt}.{postinst,prerm}:
+    - don't use dpkg-architecture since it's in dpkg-dev.       closes: #643792
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 29 Sep 2011 22:26:18 +0200
+
+lightdm (1.0.0-2) unstable; urgency=low
+
+  * debian/rules:
+    - correctly enable pie and bindnow.
+    - use a variable for multi-arch path instead of *.
+    - use autoreconf dh addon
+  * debian/control:
+    - add build-dep on dh-autoreconf and gtk-doc-tools
+  * debian/patches:
+    - 06_move-lightdm-set-defaults-to-pkglibexecdir added, move
+      lightdm-set-defaults to pkglibexecdir instead of libexecdir.
+  * debian/lightdm-{gtk,qt}-greeter.{postinst,prerm}:
+    - use variable for multi-arch path instead of *.
+    - update lightdm-set-defaults path to re-add lightdm folder.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 29 Sep 2011 12:09:35 +0200
+
+lightdm (1.0.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/patches:
+    - all patches refreshed
+    - 02_default-config: explicitly disable tcp listen.
+  * debian/rules:
+    - drop all hardening rules now done by dh in compat mode 9, but manually
+      add pie and bindnow.
+    - add -Wl,--as-needed -Wl,-O1 to LDFLAGS.
+    - update gdmflexiserver path for multi-arch paths.
+  * debian/compat bumped to 9.
+  * debian/control:
+    - added build-deb on dpkg-dev (>= 1.16.1) for hardening support.
+    - dropped hardening-includes from build-depends, now superseded
+    - update debhelper build-dep to 9 for compat mode v9.
+    - add Pre-Depends: ${misc:Pre-Depends} to the lib packages.
+    - add Recommends: on gnome-icon-theme to gtk greeter.       closes: #643291
+  * debian/liblightdm-gobject-1-0.install,
+    debian/liblightdm-gobject-dev.install, debian/liblightdm-qt-1-0.install,
+    debian/liblightdm-qt-dev.install, debian/lightdm.install:
+    - update to use multi-arch folders.
+  * debian/lightdm.install:
+    - in v9 compat mode, libexecdir doesn't have the package name added so
+      update in consequence
+  * debian/liblightdm*.{postinst,prerm}:
+    - update path to lightdm-set-defaults.
+  * debian/lightdm.postinst:
+    - don't fail if one can't reload dbus, like in a chroot.    closes: #642295
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 29 Sep 2011 07:39:18 +0200
+
+lightdm (0.9.7-1) unstable; urgency=low
+
+  * New upstream release.
+    - fix consolekit session issues.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 16 Sep 2011 08:01:12 +0200
+
+lightdm (0.9.6-1) unstable; urgency=low
+
+  * New upstream release:
+    - don't write user files as root to prevent symlinks attacks
+      [CVE-2011-3349]                                           closes: #639151
+  * debian/patches:
+    - 01_set-default-path, 02_default-config, 03_quit-plymouth,
+      04_default-gtk-greeter-config refreshed.
+    - 05_always-export-XAUTHORITY dropped, included upstream.
+    - 05_dont-add-pkglibexecdir-path added, don't add /usr/lib/lightdm/lightdm
+      to the PATH, it's ugly.
+  * debian/rules:
+    - don't install gdmflexiserver script for now until the PATH issue is
+      solved.
+  * debian/lightdm.install
+    - install lightdm-set-default and dm-tool there.
+  * debian/lightdm-{gtk,qt}-greeter.{config,templates,postinst,prerm}:
+    - provide a way to select the current greeter through debconf. Other
+      packages providing a greeter use the same templates/config to register
+      themselves in debconf.
+  * debian/control:
+    - add suggests on accountsservice.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 15 Sep 2011 11:36:21 +0200
+
+lightdm (0.9.2-3) unstable; urgency=low
+
+  * debian/patches:
+    - 05_always-export-XAUTHORITY added, always export path to xauth file.
+  * debian/lightdm-xsession.desktop:
+    - provide a default xsession desktop file.                  closes: #636111
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 06 Aug 2011 11:34:57 +0200
+
+lightdm (0.9.2-2) unstable; urgency=low
+
+  * debian/control;
+    - use real package name in greeter dependency.              closes: #636020
+    - recommends desktop-base (for default background) and
+      gnome-theme-standards (for Adwaita GTK+ 3 theme) in GTK+ greeter.
+  * debian/patches:
+    - 04_default-gtk-greeter-config added, tune GTK+ greeter config to match
+      Debian themes.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 30 Jul 2011 20:03:59 +0200
+
+lightdm (0.9.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/lightdm.install:
+    - install locale files in lightdm package.
+  * debian/rules:
+    - set greeter user at build time.
+  * debian/control:
+    - rename the greeter packages to fit what's in Ubuntu.
+    - lightdm-vala doesn't provide a greeter anymore.
+  * debian/lightdm{,-gtk-greeter}.install:
+    - ship GTK+ greeter config file in the lightdm-gtk-greeter package.
+  * debian/lightdm.{config,templates} and debian/po debconf files added from
+    Ubuntu package.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 29 Jul 2011 20:32:36 +0200
+
+lightdm (0.9.0-1) unstable; urgency=low
+
+  * Initial release.                                            closes: #615591
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Thu, 28 Jul 2011 22:39:44 +0200

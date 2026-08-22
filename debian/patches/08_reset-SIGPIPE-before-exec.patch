@@ -1,0 +1,59 @@
+From: Yves-Alexis Perez <corsac@debian.org>
+Date: Fri, 22 Feb 2019 17:19:10 +0100
+Subject: reset SIGPIPE before exec
+
+Prevent having complete session with SIGPIPE ignored
+
+Bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=823460
+Bug: https://bugs.launchpad.net/lightdm/+bug/1579867
+---
+ src/lightdm.c       | 6 ++++++
+ src/process.c       | 3 +++
+ src/session-child.c | 3 +++
+ 3 files changed, 12 insertions(+)
+
+diff --git a/src/lightdm.c b/src/lightdm.c
+index 74f9ff2..2f290d9 100644
+--- a/src/lightdm.c
++++ b/src/lightdm.c
+@@ -551,6 +551,12 @@ main (int argc, char **argv)
+     sigaction (SIGPIPE, &action, NULL);
+     sigaction (SIGHUP, &action, NULL);
+ 
++    /* Disable the SIGPIPE handler - this is a stupid Unix hangover behaviour.
++     * We will handle piples / sockets being closed instead of having the whole daemon be killed...
++     * http://stackoverflow.com/questions/8369506/why-does-sigpipe-exist
++     */
++    signal (SIGPIPE, SIG_IGN);
++
+     /* When lightdm starts sessions it needs to run itself in a new mode */
+     if (argc >= 2 && strcmp (argv[1], "--session-child") == 0)
+         return session_child_run (argc, argv);
+diff --git a/src/process.c b/src/process.c
+index aa614d3..042e570 100644
+--- a/src/process.c
++++ b/src/process.c
+@@ -259,6 +259,9 @@ process_start (Process *process, gboolean block)
+         /* Reset SIGPIPE handler so the child has default behaviour (we disabled it at LightDM start) */
+         signal (SIGPIPE, SIG_DFL);
+ 
++        /* Reset SIGPIPE handler so the child has default behaviour (we disabled it at LightDM start) */
++        signal (SIGPIPE, SIG_DFL);
++
+         execvp (argv[0], argv);
+         _exit (EXIT_FAILURE);
+     }
+diff --git a/src/session-child.c b/src/session-child.c
+index 45534c3..16986c9 100644
+--- a/src/session-child.c
++++ b/src/session-child.c
+@@ -670,6 +670,9 @@ session_child_run (int argc, char **argv)
+         /* Reset SIGPIPE handler so the child has default behaviour (we disabled it at LightDM start) */
+         signal (SIGPIPE, SIG_DFL);
+ 
++        /* Reset SIGPIPE handler so the child has default behaviour (we disabled it at LightDM start) */
++        signal (SIGPIPE, SIG_DFL);
++
+         /* Run the command */
+         execve (command_argv[0], command_argv, pam_getenvlist (pam_handle));
+         _exit (EXIT_FAILURE);

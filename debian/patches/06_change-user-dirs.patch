@@ -1,0 +1,54 @@
+From: Yves-Alexis Perez <corsac@debian.org>
+Date: Fri, 22 Feb 2019 17:17:56 +0100
+Subject: move lightdm users dir to /var/lib/lightdm/data
+
+Make sure the directory exists and reduce clutter by sharing a top
+directory in /var/lib
+
+Bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=749243
+Bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=767359
+---
+ src/Makefile.am           | 2 +-
+ src/Makefile.in           | 2 +-
+ src/shared-data-manager.c | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 834f7bb..eb93aae 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -77,7 +77,7 @@ lightdm_CFLAGS = \
+ 	$(LIGHTDM_CFLAGS) \
+ 	-I"$(top_srcdir)/common" \
+ 	-DSBIN_DIR=\"$(sbindir)\" \
+-	-DUSERS_DIR=\"$(localstatedir)/lib/lightdm-data\" \
++	-DUSERS_DIR=\"$(localstatedir)/lib/lightdm/data\" \
+ 	-DLOG_DIR=\"$(localstatedir)/log/lightdm\" \
+ 	-DRUN_DIR=\"$(localstatedir)/run/lightdm\" \
+ 	-DCACHE_DIR=\"$(localstatedir)/cache/lightdm\" \
+diff --git a/src/Makefile.in b/src/Makefile.in
+index aa038cb..917f267 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -519,7 +519,7 @@ lightdm_CFLAGS = \
+ 	$(LIGHTDM_CFLAGS) \
+ 	-I"$(top_srcdir)/common" \
+ 	-DSBIN_DIR=\"$(sbindir)\" \
+-	-DUSERS_DIR=\"$(localstatedir)/lib/lightdm-data\" \
++	-DUSERS_DIR=\"$(localstatedir)/lib/lightdm/data\" \
+ 	-DLOG_DIR=\"$(localstatedir)/log/lightdm\" \
+ 	-DRUN_DIR=\"$(localstatedir)/run/lightdm\" \
+ 	-DCACHE_DIR=\"$(localstatedir)/cache/lightdm\" \
+diff --git a/src/shared-data-manager.c b/src/shared-data-manager.c
+index 50a9d01..2a61232 100644
+--- a/src/shared-data-manager.c
++++ b/src/shared-data-manager.c
+@@ -86,7 +86,7 @@ shared_data_manager_ensure_user_dir (SharedDataManager *manager, const gchar *us
+     g_debug ("Creating shared data directory %s", path);
+ 
+     g_autoptr(GError) error = NULL;
+-    gboolean result = g_file_make_directory (file, NULL, &error);
++    gboolean result = g_file_make_directory_with_parents (file, NULL, &error);
+     if (error)
+     {
+         if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
