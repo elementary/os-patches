@@ -32,6 +32,8 @@ from xml.etree.ElementTree import ElementTree
 
 from apt_pkg import gettext as _
 
+from . import _platform
+
 
 class NoDistroTemplateException(Exception):
     pass
@@ -545,6 +547,13 @@ def get_distro(
         id = id.lower()
     if not (id and codename and description and release):
         os_release = platform.freedesktop_os_release()
+
+        UPSTREAM_OS_RELEASE="/usr/lib/upstream-os-release"
+        if os.path.exists(UPSTREAM_OS_RELEASE):
+            # Retrieve operating system identification from upstream os-release
+            with open(UPSTREAM_OS_RELEASE, encoding="utf-8") as f:
+                os_release = _platform._parse_os_release (f)
+
         id = os_release["ID"]
         codename = os_release["VERSION_CODENAME"]
         description = os_release["PRETTY_NAME"]

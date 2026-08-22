@@ -32,6 +32,8 @@ from typing import cast
 import apt_pkg
 from apt_pkg import gettext as _
 
+from . import _platform
+
 
 def _expand_template(template: str, csv_path: str) -> Iterator[str]:
     """Expand the given template.
@@ -261,6 +263,13 @@ class DistInfo:
 
         if not dist:
             info = platform.freedesktop_os_release()
+
+            UPSTREAM_OS_RELEASE="/usr/lib/upstream-os-release"
+            if os.path.exists(UPSTREAM_OS_RELEASE):
+                # Retrieve operating system identification from upstream os-release
+                with open(UPSTREAM_OS_RELEASE, encoding="utf-8") as f:
+                    info = _platform._parse_os_release (f)
+
             dist = info["ID"]
 
         self.dist = dist
