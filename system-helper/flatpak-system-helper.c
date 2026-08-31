@@ -1490,6 +1490,10 @@ name_vanished_cb (GDBusConnection *connection, const gchar *name, gpointer user_
   while (g_hash_table_iter_next (&iter, NULL, &value))
     {
       OngoingPull *pull = (OngoingPull *) value;
+
+      if (pull == NULL)
+        continue;
+
       if (g_strcmp0 (pull->unique_name, unique_name) == 0)
         {
           g_ptr_array_add (cleanup_pulls, pull);
@@ -1508,6 +1512,7 @@ ongoing_pull_new (FlatpakSystemHelper   *object,
                   GError               **error)
 {
   GDBusConnection *connection = g_dbus_method_invocation_get_connection (invocation);
+  const char *sender = g_dbus_method_invocation_get_sender (invocation);
   g_autoptr(OngoingPull) pull = NULL;
   g_autoptr(GSubprocessLauncher) launcher = NULL;
   int sockets[2], exit_sockets[2];
@@ -1520,13 +1525,13 @@ ongoing_pull_new (FlatpakSystemHelper   *object,
   pull->cancellable = g_cancellable_new ();
   pull->uid = uid;
   pull->preserve_pull = FALSE;
-  pull->unique_name = g_strdup (g_dbus_connection_get_unique_name (connection));
+  pull->unique_name = g_strdup (sender);
 
   pull->watch_id = g_bus_watch_name_on_connection (connection,
                                                    pull->unique_name,
                                                    G_BUS_NAME_WATCHER_FLAGS_NONE, NULL,
                                                    name_vanished_cb,
-                                                   g_strdup (g_dbus_connection_get_unique_name (connection)),
+                                                   g_strdup (sender),
                                                    g_free);
 
   if (socketpair (AF_UNIX, SOCK_SEQPACKET, 0, sockets) == -1)
