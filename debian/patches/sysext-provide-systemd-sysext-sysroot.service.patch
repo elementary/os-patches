@@ -1,0 +1,95 @@
+From: Vitaly Kuznetsov <vkuznets@redhat.com>
+Date: Wed, 18 Mar 2026 16:09:24 +0000
+Subject: sysext: provide systemd-sysext-sysroot.service
+
+The new service is used to activate system extensions for the main system
+from the initrd, which allows sysexts to provide resources needed in early
+boot of the main system (before systemd-sysext.service starts), such as
+kernel modules that udev loads during coldplug.
+
+Backport of the sysext half of the upstream commit; the confext service,
+man pages and NEWS are dropped. The unit also carries the
+ConditionKernelCommandLine=!systemd.sysext=0 line from upstream commit
+2299a37e2824, which works as a plain unit condition without that commit's
+other changes.
+
+Origin: backport, https://github.com/systemd/systemd/commit/c70b17daad3a2186e2cbdcb80896cb638c1d9f40
+Applied-Upstream: v261
+Forwarded: not-needed
+Bug: https://github.com/elementary/os/issues/878
+---
+diff --git a/presets/90-systemd-initrd.preset b/presets/90-systemd-initrd.preset
+index e966a18..63cc384 100644
+--- a/presets/90-systemd-initrd.preset
++++ b/presets/90-systemd-initrd.preset
+@@ -15,6 +15,7 @@ enable systemd-networkd.service
+ enable systemd-networkd-wait-online.service
+ enable systemd-pstore.service
+ enable systemd-resolved.service
++enable systemd-sysext-sysroot.service
+ enable systemd-tpm2-clear.service
+ 
+ disable console-getty.service
+diff --git a/presets/90-systemd.preset b/presets/90-systemd.preset
+index 56f9e93..cc64d3e 100644
+--- a/presets/90-systemd.preset
++++ b/presets/90-systemd.preset
+@@ -55,4 +55,5 @@ disable systemd-boot-check-no-failures.service
+ disable systemd-journal-gatewayd.*
+ disable systemd-journal-remote.*
+ disable systemd-journal-upload.*
++disable systemd-sysext-sysroot.service
+ disable systemd-time-wait-sync.service
+diff --git a/units/meson.build b/units/meson.build
+index 12cf47d..5f4d4c2 100644
+--- a/units/meson.build
++++ b/units/meson.build
+@@ -719,6 +719,10 @@ units = [
+           'conditions' : ['ENABLE_INITRD', 'ENABLE_SYSEXT'],
+           'symlinks' : ['initrd.target.wants/'],
+         },
++        {
++          'file' : 'systemd-sysext-sysroot.service',
++          'conditions' : ['ENABLE_INITRD', 'ENABLE_SYSEXT'],
++        },
+         {
+           'file' : 'systemd-sysext.socket',
+           'conditions' : ['ENABLE_SYSEXT'],
+diff --git a/units/systemd-sysext-sysroot.service b/units/systemd-sysext-sysroot.service
+new file mode 100644
+index 0000000..d68c70d
+--- /dev/null
++++ b/units/systemd-sysext-sysroot.service
+@@ -0,0 +1,32 @@
++#  SPDX-License-Identifier: LGPL-2.1-or-later
++#
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++[Unit]
++Description=Merge System Extension Images into /sysroot/usr/ and /sysroot/opt/
++Documentation=man:systemd-sysext-sysroot.service(8)
++
++ConditionCapability=CAP_SYS_ADMIN
++ConditionDirectoryNotEmpty=|/sysroot/etc/extensions
++ConditionDirectoryNotEmpty=|/sysroot/var/lib/extensions
++ConditionPathExists=/etc/initrd-release
++ConditionKernelCommandLine=!systemd.sysext=0
++
++DefaultDependencies=no
++Conflicts=shutdown.target
++Before=initrd-root-fs.target shutdown.target
++Wants=modprobe@loop.service modprobe@dm_mod.service
++After=modprobe@loop.service modprobe@dm_mod.service sysroot.mount sysroot-usr.mount systemd-volatile-root.service
++
++[Service]
++Type=oneshot
++RemainAfterExit=yes
++ExecStart=systemd-sysext --root=/sysroot refresh
++
++[Install]
++WantedBy=initrd.target
