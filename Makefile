@@ -1,5 +1,11 @@
+# Use YYYY.0M.0D defined in https://calver.org/
+VERSION = 2026.10.12
+
+NAME = distro-info-data
 PREFIX ?= /usr
-PYTHON_SOURCES=lib up-to-date validate-csv-data
+SCRIPTS = up-to-date validate-csv-data
+PYTHON_SOURCES= lib $(SCRIPTS)
+SOURCES = $(wildcard lib/*.py) $(SCRIPTS) $(wildcard *.csv) Makefile README.md .gitignore .gitlab-ci.yml
 
 build:
 
@@ -7,17 +13,20 @@ install:
 	install -d $(DESTDIR)$(PREFIX)/share/distro-info
 	install -m 644 $(wildcard *.csv) $(DESTDIR)$(PREFIX)/share/distro-info
 
+clean:
+	rm -rf .mypy_cache/ lib/__pycache__/
+
 test:
-	./validate-csv-data debian.csv
-	./validate-csv-data devuan.csv
-	./validate-csv-data elxr.csv
-	./validate-csv-data ubuntu.csv
+	./validate-csv-data $(DATADIR)debian.csv
+	./validate-csv-data $(DATADIR)devuan.csv
+	./validate-csv-data $(DATADIR)elxr.csv
+	./validate-csv-data $(DATADIR)ubuntu.csv
 
 up-to-date:
-	./up-to-date debian.csv
-	./up-to-date devuan.csv
-	./up-to-date elxr.csv
-	./up-to-date ubuntu.csv
+	./up-to-date $(DATADIR)debian.csv
+	./up-to-date $(DATADIR)devuan.csv
+	./up-to-date $(DATADIR)elxr.csv
+	./up-to-date $(DATADIR)ubuntu.csv
 
 lint: isort black mypy pylint
 
@@ -33,4 +42,17 @@ mypy:
 pylint:
 	pylint $(PYTHON_SOURCES)
 
-.PHONY: black build install isort lint mypy pylint test up-to-date
+%.asc: %
+	gpg --armor --batch --detach-sign --yes --output $@ $^
+
+%.tar.xz: $(SOURCES)
+	tar -cJf $@ --transform 's,^,$(NAME)-$(VERSION)/,' --owner=0 --group=0 $^
+
+dist: ../$(NAME)-$(VERSION).tar.xz ../$(NAME)-$(VERSION).tar.xz.asc
+
+../$(NAME)_$(VERSION).orig.%: ../$(NAME)-$(VERSION).%
+	ln -sf $(notdir $^) $@
+
+debian-dist: dist ../$(NAME)_$(VERSION).orig.tar.xz ../$(NAME)_$(VERSION).orig.tar.xz.asc
+
+.PHONY: black build clean debian-dist dist install isort lint mypy pylint test up-to-date

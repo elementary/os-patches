@@ -1,3 +1,19 @@
+distro-info-data (2026.10.12-0ubuntu0.26.04.1) resolute; urgency=medium
+
+  * New data update release
+    - Correct Debian codename Experimental to RC-Buggy
+    - Support testing against the installed data
+    - Switch to calendar versioning (CalVer)
+    - Add Ubuntu 27.04 "Tenacious T-Rex" (LP: #2170573)
+    - Makefile: Clean .pyc files and mypy cache
+  * Apply patch to revert correcting Debian codename Experimental to RC-Buggy,
+    because this change breaks the distro-info test case and dgit (see #2168892)
+  * autopkgtest:
+    - test against the installed data
+    - reduce dependencies to the needed minimum
+
+ -- Benjamin Drung <bdrung@ubuntu.com>  Mon, 12 Oct 2026 17:32:19 +0200
+
 distro-info-data (0.72-0ubuntu0.26.04.1) resolute; urgency=medium
 
   * New data update release
