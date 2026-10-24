@@ -199,7 +199,8 @@ char* utf8_escape_non_printable_full(const char *str, size_t console_width, bool
         if (console_width == 0)
                 return strdup("");
 
-        p = s = prev_s = malloc(strlen(str) * 4 + 1);
+        size_t body = strlen(str) * 4;
+        p = s = prev_s = malloc(body + STRLEN("…") + 1);
         if (!p)
                 return NULL;
 
@@ -419,6 +420,7 @@ char* utf16_to_utf8(const char16_t *s, size_t length /* bytes! */) {
 }
 
 size_t utf16_encode_unichar(char16_t *out, char32_t c) {
+        assert(out);
 
         /* Note that this encodes as little-endian. */
 

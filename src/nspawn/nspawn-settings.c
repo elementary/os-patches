@@ -694,6 +694,11 @@ int config_parse_private_users(
                 settings->userns_mode = USER_NAMESPACE_FIXED;
                 settings->uid_shift = 0;
                 settings->uid_range = UINT32_C(0x10000);
+        } else if (streq(rvalue, "managed")) {
+                /* managed: User namespace on, and acquire it from systemd-nsresourced */
+                settings->userns_mode = USER_NAMESPACE_MANAGED;
+                settings->uid_shift = UID_INVALID;
+                settings->uid_range = UINT32_C(0x10000);
         } else {
                 const char *range, *shift;
                 uid_t sh, rn;
@@ -717,12 +722,12 @@ int config_parse_private_users(
 
                 r = parse_uid(shift, &sh);
                 if (r < 0) {
-                        log_syntax(unit, LOG_WARNING, filename, line, r, "UID/GID shift invalid, ignoring: %s", range);
+                        log_syntax(unit, LOG_WARNING, filename, line, r, "UID/GID shift invalid, ignoring: %s", rvalue);
                         return 0;
                 }
 
                 if (!userns_shift_range_valid(sh, rn)) {
-                        log_syntax(unit, LOG_WARNING, filename, line, 0, "UID/GID shift and range combination invalid, ignoring: %s", range);
+                        log_syntax(unit, LOG_WARNING, filename, line, 0, "UID/GID shift and range combination invalid, ignoring: %s", rvalue);
                         return 0;
                 }
 

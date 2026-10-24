@@ -3,6 +3,7 @@
 #include <linux/fsverity.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
+#include <sys/wait.h>
 #include <sys/xattr.h>
 #include <unistd.h>
 
@@ -293,6 +294,69 @@ TEST(copy_tree_at_symlink) {
         fd = safe_close(fd);
 }
 
+TEST(copy_tree_fifo_chmod_symlink_race) {
+        _cleanup_(rm_rf_physical_and_freep) char *srcp = NULL, *dstp = NULL;
+        _cleanup_close_ int src = -EBADF, dst = -EBADF;
+        _cleanup_close_pair_ int ready[2] = EBADF_PAIR, stop[2] = EBADF_PAIR;
+        struct stat st;
+        int status;
+        pid_t pid;
+        char c;
+
+        if (!slow_tests_enabled())
+                return (void) log_tests_skipped("slow tests are disabled");
+
+        ASSERT_OK(src = mkdtemp_open(NULL, 0, &srcp));
+        ASSERT_OK(dst = mkdtemp_open(NULL, 0, &dstp));
+        ASSERT_OK_ERRNO(mkfifoat(src, "fifo", 0777));
+        ASSERT_OK_ERRNO(fchmodat(src, "fifo", 0777, 0));
+        ASSERT_OK(write_string_file_at(dst, "victim", "victim", WRITE_STRING_FILE_CREATE));
+        ASSERT_OK_ERRNO(fchmodat(dst, "victim", 0600, 0));
+
+        ASSERT_OK_ERRNO(pipe2(ready, O_CLOEXEC));
+        ASSERT_OK_ERRNO(pipe2(stop, O_CLOEXEC|O_NONBLOCK));
+
+        pid = ASSERT_OK_ERRNO(fork());
+        if (pid == 0) {
+                ready[0] = safe_close(ready[0]);
+                stop[1] = safe_close(stop[1]);
+
+                assert_se(write(ready[1], &(const char) { 'x' }, 1) == 1);
+
+                for (;;) {
+                        char stop_char;
+
+                        ssize_t n = read(stop[0], &stop_char, 1);
+                        if (n >= 0)
+                                _exit(EXIT_SUCCESS);
+
+                        (void) unlinkat(dst, "fifo", 0);
+                        (void) symlinkat("victim", dst, "fifo");
+                }
+        }
+
+        ready[1] = safe_close(ready[1]);
+        stop[0] = safe_close(stop[0]);
+
+        ASSERT_OK_EQ_ERRNO(read(ready[0], &c, 1), 1);
+
+        bool changed = false;
+        for (unsigned i = 0; i < 20000; i++) {
+                (void) copy_tree_at(src, "fifo", dst, "fifo", UID_INVALID, GID_INVALID, COPY_REPLACE, NULL, NULL);
+
+                ASSERT_OK_ERRNO(fstatat(dst, "victim", &st, 0));
+                if ((st.st_mode & 0777) != 0600) {
+                        changed = true;
+                        break;
+                }
+        }
+
+        ASSERT_OK_EQ_ERRNO(write(stop[1], &(const char) { 'x' }, 1), 1);
+        ASSERT_OK_ERRNO(waitpid(pid, &status, 0));
+        ASSERT_TRUE(WIFEXITED(status));
+        ASSERT_FALSE(changed);
+}
+
 TEST_RET(copy_bytes) {
         _cleanup_close_pair_ int pipefd[2] = EBADF_PAIR;
         _cleanup_close_ int infd = -EBADF;
@@ -364,9 +428,7 @@ static void test_copy_bytes_regular_file_one(const char *src, bool try_reflink, 
                 /* Make sure the file is now higher than max_bytes */
                 assert_se(ftruncate(fd2, max_bytes + 1) == 0);
 
-        assert_se(lseek(fd2, 0, SEEK_SET) == 0);
-
-        r = copy_bytes(fd2, fd3, max_bytes, try_reflink ? COPY_REFLINK : 0);
+        r = copy_bytes(fd2, fd3, max_bytes, COPY_SEEK0_SOURCE | (try_reflink ? COPY_REFLINK : 0));
         if (max_bytes == UINT64_MAX)
                 assert_se(r == 0);
         else
@@ -460,9 +522,8 @@ TEST_RET(copy_holes) {
         assert_se(lseek(fd, 0, SEEK_END) == 2 * blksz);
         /* Only ftruncate() can create holes at the end of a file. */
         assert_se(ftruncate(fd, 3 * blksz) >= 0);
-        assert_se(lseek(fd, 0, SEEK_SET) >= 0);
 
-        assert_se(copy_bytes(fd, fd_copy, UINT64_MAX, COPY_HOLES) >= 0);
+        assert_se(copy_bytes(fd, fd_copy, UINT64_MAX, COPY_SEEK0_SOURCE|COPY_HOLES) >= 0);
 
         /* Test that the hole starts at the beginning of the file. */
         assert_se(lseek(fd_copy, 0, SEEK_HOLE) == 0);
@@ -526,26 +587,20 @@ TEST_RET(copy_holes_with_gaps) {
         assert_se(st.st_size == 3 * blksz);
 
         /* Copy to the middle of the second hole */
-        assert_se(lseek(fd, 0, SEEK_SET) >= 0);
-        assert_se(lseek(fd_copy, 0, SEEK_SET) >= 0);
         assert_se(ftruncate(fd_copy, 0) >= 0);
-        assert_se(copy_bytes(fd, fd_copy, 4 * blksz, COPY_HOLES) >= 0);
+        assert_se(copy_bytes(fd, fd_copy, 4 * blksz, COPY_SEEK0_SOURCE|COPY_SEEK0_TARGET|COPY_HOLES) >= 0);
         ASSERT_OK_ERRNO(fstat(fd_copy, &st));
         assert_se(st.st_size == 4 * blksz);
 
         /* Copy to the end of the second hole */
-        assert_se(lseek(fd, 0, SEEK_SET) >= 0);
-        assert_se(lseek(fd_copy, 0, SEEK_SET) >= 0);
         assert_se(ftruncate(fd_copy, 0) >= 0);
-        assert_se(copy_bytes(fd, fd_copy, 5 * blksz, COPY_HOLES) >= 0);
+        assert_se(copy_bytes(fd, fd_copy, 5 * blksz, COPY_SEEK0_SOURCE|COPY_SEEK0_TARGET|COPY_HOLES) >= 0);
         ASSERT_OK_ERRNO(fstat(fd_copy, &st));
         assert_se(st.st_size == 5 * blksz);
 
         /* Copy everything */
-        assert_se(lseek(fd, 0, SEEK_SET) >= 0);
-        assert_se(lseek(fd_copy, 0, SEEK_SET) >= 0);
         assert_se(ftruncate(fd_copy, 0) >= 0);
-        assert_se(copy_bytes(fd, fd_copy, UINT64_MAX, COPY_HOLES) >= 0);
+        assert_se(copy_bytes(fd, fd_copy, UINT64_MAX, COPY_SEEK0_SOURCE|COPY_SEEK0_TARGET|COPY_HOLES) >= 0);
         ASSERT_OK_ERRNO(fstat(fd_copy, &st));
         assert_se(st.st_size == 6 * blksz);
 

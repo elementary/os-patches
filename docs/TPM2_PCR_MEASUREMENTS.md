@@ -58,7 +58,22 @@ away there's a naming concept, so that nvindexes are referenced by name string
 rather than number.
 
 NvPCRs are defined in little JSON snippets in `/usr/lib/nvpcr/*.nvpcr`, that
-match up index number and name, as well as pick a hash algorithm.
+match up index number and name, as well as pick a hash algorithm. The recognized
+fields are:
+
+* `name` — the NvPCR name (string), which must match the file name (without the
+  `.nvpcr` suffix). Mandatory.
+* `nvIndex` — the fixed TPM2 NV index handle (number) to allocate for this NvPCR.
+  Mandatory.
+* `algorithm` — the hash algorithm to use (string), e.g. `sha256` (the default).
+* `priority` — an unsigned integer allocation priority, defaulting to `1000`.
+  Lower values are considered more important and are allocated first. This only
+  affects the order in which `systemd-tpm2-setup.service` attempts allocation at
+  boot: if the TPM's NV index space is too small to fit all NvPCRs, the most
+  important ones (lowest `priority` value) win the available space, and the
+  least important ones are skipped gracefully rather than the allocation failing
+  arbitrarily. Ties are broken by name. Priority does not affect the NV index,
+  the algorithm, or anything measured into the NvPCR.
 
 There's one complication: these NV indexes (like any NV indexes) can be deleted
 by anyone with access to the TPM, and then be recreated. This could be used to
@@ -203,7 +218,7 @@ on-the-fly by `systemd-stub`).
 
 ### PCR 9, NvPCR Initializations
 
-The `systemd-tpm2-setup.service` service initializes any NvPCRs defined via
+The `systemd-tpm2-setup-early.service` service initializes any NvPCRs defined via
 `*.nvpcr` files. For each initialized NvPCR it will measure an event into PCR
 9.
 
@@ -262,8 +277,8 @@ without trailing NUL bytes).
 
 ### PCR 9, NvPCR initialization separator
 
-After completion of `systemd-tpm2-setup.service` (which initializes all NvPCRs
-and measures their initial state) at arly boot the `systemd-pcrnvdone.service`
+After completion of `systemd-tpm2-setup-early.service` (which initializes all NvPCRs
+and measures their initial state) at early boot the `systemd-pcrnvdone.service`
 service will measure a separator event into PCR 9, isolating the early-boot
 NvPCR initializations from any later additions.
 

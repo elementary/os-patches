@@ -11,6 +11,12 @@ cryptenroll_wipe_and_check() {(
     grep -qE "Wiped slot [[:digit:]]+" /tmp/cryptenroll.out
 )}
 
+at_exit() {
+    rm -f "${IMAGE:-}" /tmp/cryptenroll.out /tmp/password
+}
+
+trap at_exit EXIT
+
 # There is an external issue with libcryptsetup on ppc64 that hits 95% of Ubuntu ppc64 test runs, so skip it
 if [[ "$(uname -m)" == "ppc64le" ]]; then
     echo "Skipping systemd-cryptenroll tests on ppc64le, see https://github.com/systemd/systemd/issues/27716"
@@ -27,13 +33,14 @@ chmod 0600 /tmp/password
 cryptsetup luksFormat -q --pbkdf pbkdf2 --pbkdf-force-iterations 1000 --use-urandom "$IMAGE" /tmp/password
 
 # Enroll additional tokens, keys, and passwords to exercise the list and wipe stuff
-systemd-cryptenroll --unlock-key-file=/tmp/password --tpm2-device=auto "$IMAGE"
+# Use --tpm2-public-key= to suppress auto-loading any PCR public key from the host
+systemd-cryptenroll --unlock-key-file=/tmp/password --tpm2-device=auto --tpm2-public-key= "$IMAGE"
 NEWPASSWORD="" systemd-cryptenroll --unlock-key-file=/tmp/password  --password "$IMAGE"
 NEWPASSWORD=foo systemd-cryptenroll --unlock-key-file=/tmp/password  --password "$IMAGE"
 for _ in {0..9}; do
     systemd-cryptenroll --unlock-key-file=/tmp/password --recovery-key "$IMAGE"
 done
-PASSWORD="" NEWPIN=123456 systemd-cryptenroll --tpm2-device=auto --tpm2-with-pin=true "$IMAGE"
+PASSWORD="" NEWPIN=123456 systemd-cryptenroll --tpm2-device=auto --tpm2-public-key= --tpm2-with-pin=true "$IMAGE"
 # Do some basic checks before we start wiping stuff
 systemd-cryptenroll "$IMAGE"
 systemd-cryptenroll "$IMAGE" | grep password
@@ -60,15 +67,15 @@ systemd-cryptenroll --tpm2-pcrs=8 "$IMAGE"
 systemd-cryptenroll --tpm2-pcrs=boot-loader-code+boot-loader-config "$IMAGE"
 
 # Unlocking using TPM2
-PASSWORD=foo systemd-cryptenroll --tpm2-device=auto "$IMAGE"
+PASSWORD=foo systemd-cryptenroll --tpm2-device=auto --tpm2-public-key= "$IMAGE"
 systemd-cryptenroll --unlock-tpm2-device=auto --recovery-key "$IMAGE"
-systemd-cryptenroll --unlock-tpm2-device=auto --tpm2-device=auto --wipe-slot=tpm2 "$IMAGE"
+systemd-cryptenroll --unlock-tpm2-device=auto --tpm2-device=auto --tpm2-public-key= --wipe-slot=tpm2 "$IMAGE"
 
 # Add PIN to TPM2 enrollment
-NEWPIN=1234 systemd-cryptenroll --unlock-tpm2-device=auto --tpm2-device=auto --tpm2-with-pin=yes "$IMAGE"
+NEWPIN=1234 systemd-cryptenroll --unlock-tpm2-device=auto --tpm2-device=auto --tpm2-public-key= --tpm2-with-pin=yes "$IMAGE"
 
 # Change PIN on TPM2 enrollment
-PIN=1234 NEWPIN=4321 systemd-cryptenroll --unlock-tpm2-device=auto --tpm2-device=auto --tpm2-with-pin=yes "$IMAGE"
+PIN=1234 NEWPIN=4321 systemd-cryptenroll --unlock-tpm2-device=auto --tpm2-device=auto --tpm2-public-key= --tpm2-with-pin=yes "$IMAGE"
 PIN=4321 systemd-cryptenroll --unlock-tpm2-device=auto --recovery-key "$IMAGE"
 
 (! systemd-cryptenroll --fido2-with-client-pin=false)

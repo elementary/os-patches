@@ -629,31 +629,36 @@ int dns_packet_append_name(
         while (!dns_name_is_root(name)) {
                 const char *z = name;
                 char label[DNS_LABEL_MAX+1];
-                size_t n = 0;
+                size_t n = 0, offset;
 
                 if (allow_compression)
                         n = PTR_TO_SIZE(hashmap_get(p->names, name));
-                if (n > 0) {
-                        assert(n < p->size);
+                /* Only pointer-expressible offsets of already-appended labels enter the map below,
+                 * so both bounds should hold. Control flow and not assert(), which is no check at
+                 * all under -Db_ndebug=true, for bounds that decide what goes on the wire.
+                 * saved_size, not p->size: RFC 1035 § 4.1.4 allows a pointer only to a prior
+                 * occurrence, which is what dns_packet_read_name() enforces on the way in. */
+                if (n > 0 && n <= DNS_COMPRESSION_OFFSET_MAX && n < saved_size) {
+                        r = dns_packet_append_uint16(p, DNS_COMPRESSION_POINTER_FLAG | n, NULL);
+                        if (r < 0)
+                                goto fail;
 
-                        if (n < 0x4000) {
-                                r = dns_packet_append_uint16(p, 0xC000 | n, NULL);
-                                if (r < 0)
-                                        goto fail;
-
-                                goto done;
-                        }
+                        goto done;
                 }
 
                 r = dns_label_unescape(&name, label, sizeof label, 0);
                 if (r < 0)
                         goto fail;
 
-                r = dns_packet_append_label(p, label, r, canonical_candidate, &n);
+                r = dns_packet_append_label(p, label, r, canonical_candidate, &offset);
                 if (r < 0)
                         goto fail;
 
-                if (allow_compression) {
+                /* Remember the name for compression -- but only if this occurrence sits within the
+                 * 14 bits an RFC 1035 pointer can express. An offset beyond that can never be
+                 * referenced, so it doesn't belong in the map: it would only collide with a later
+                 * occurrence of the same name, needlessly failing the whole append with -EEXIST. */
+                if (allow_compression && offset <= DNS_COMPRESSION_OFFSET_MAX) {
                         _cleanup_free_ char *s = NULL;
 
                         if (!GREEDY_REALLOC(added_entries, n_added_entries + 1)) {
@@ -667,7 +672,7 @@ int dns_packet_append_name(
                                 goto fail;
                         }
 
-                        r = hashmap_ensure_put(&p->names, &dns_name_hash_ops, s, SIZE_TO_PTR(n));
+                        r = hashmap_ensure_put(&p->names, &dns_name_hash_ops, s, SIZE_TO_PTR(offset));
                         if (r < 0)
                                 goto fail;
 
@@ -678,7 +683,7 @@ int dns_packet_append_name(
 
         r = dns_packet_append_uint8(p, 0, NULL);
         if (r < 0)
-                return r;
+                goto fail;
 
 done:
         if (start)
@@ -1619,7 +1624,7 @@ int dns_packet_read_name(
                                 return -EBADMSG;
 
                         continue;
-                } else if (allow_compression && FLAGS_SET(c, 0xc0)) {
+                } else if (allow_compression && FLAGS_SET(c, DNS_COMPRESSION_POINTER_FLAG >> 8)) {
                         uint16_t ptr;
 
                         /* Pointer */
@@ -1627,7 +1632,7 @@ int dns_packet_read_name(
                         if (r < 0)
                                 return r;
 
-                        ptr = (uint16_t) (c & ~0xc0) << 8 | (uint16_t) d;
+                        ptr = (uint16_t) (c & ~(DNS_COMPRESSION_POINTER_FLAG >> 8)) << 8 | (uint16_t) d;
                         if (ptr < DNS_PACKET_HEADER_SIZE || ptr >= jump_barrier)
                                 return -EBADMSG;
 
@@ -2438,48 +2443,65 @@ static bool opt_is_good(DnsResourceRecord *rr, bool *rfc6975) {
 
 static int dns_packet_extract_question(DnsPacket *p, DnsQuestion **ret_question) {
         _cleanup_(dns_question_unrefp) DnsQuestion *question = NULL;
-        unsigned n;
+        unsigned n, prealloc;
         int r;
 
         n = DNS_PACKET_QDCOUNT(p);
-        if (n > 0) {
-                question = dns_question_new(n);
-                if (!question)
-                        return -ENOMEM;
+        if (n == 0) {
+                *ret_question = NULL;
+                return 0;
+        }
 
-                _cleanup_set_free_ Set *keys = NULL; /* references to keys are kept by Question */
+        /* Calculate the maximum number of potential questions the remaining packet data can actually
+         * contain: p->size - p->rindex are the remaining unread bytes in the packet, and 5U is the minimum
+         * size of each question - 1 (QNAME) + 2 (QTYPE) + 2 (QCLASS). */
+        prealloc = (p->size - p->rindex) / 5U;
+        if (prealloc == 0)
+                /* QDCOUNT > 0 but there's not enough space left for a single question. */
+                return -EMSGSIZE;
 
-                keys = set_new(&dns_resource_key_hash_ops);
-                if (!keys)
-                        return log_oom();
+        question = dns_question_new(n);
+        if (!question)
+                return -ENOMEM;
 
-                r = set_reserve(keys, n * 2); /* Higher multipliers give slightly higher efficiency through
-                                               * hash collisions, but the gains quickly drop off after 2. */
+        _cleanup_set_free_ Set *keys = NULL; /* references to keys are kept by Question */
+
+        keys = set_new(&dns_resource_key_hash_ops);
+        if (!keys)
+                return log_oom();
+
+        /* Pre-allocate the question hashmap, but cap the pre-allocation to a number of questions the
+         * packet can realistically contain. That is, pick the minimal value from the claimed number
+         * of questions (n) and a maximum number of potential questions the remaining packet data can
+         * actually contain, see above.
+         *
+         * Note for the multiplication: higher multipliers give slightly higher efficiency through
+         * hash collisions, but the gains quickly drop off after 2. */
+        r = set_reserve(keys, MIN(n, prealloc) * 2);
+        if (r < 0)
+                return r;
+
+        for (unsigned i = 0; i < n; i++) {
+                _cleanup_(dns_resource_key_unrefp) DnsResourceKey *key = NULL;
+                bool qu;
+
+                r = dns_packet_read_key(p, &key, &qu, NULL);
                 if (r < 0)
                         return r;
 
-                for (unsigned i = 0; i < n; i++) {
-                        _cleanup_(dns_resource_key_unrefp) DnsResourceKey *key = NULL;
-                        bool qu;
+                if (!dns_type_is_valid_query(key->type))
+                        return -EBADMSG;
 
-                        r = dns_packet_read_key(p, &key, &qu, NULL);
-                        if (r < 0)
-                                return r;
+                r = set_put(keys, key);
+                if (r < 0)
+                        return r;
+                if (r == 0)
+                        /* Already in the Question, let's skip */
+                        continue;
 
-                        if (!dns_type_is_valid_query(key->type))
-                                return -EBADMSG;
-
-                        r = set_put(keys, key);
-                        if (r < 0)
-                                return r;
-                        if (r == 0)
-                                /* Already in the Question, let's skip */
-                                continue;
-
-                        r = dns_question_add_raw(question, key, qu ? DNS_QUESTION_WANTS_UNICAST_REPLY : 0);
-                        if (r < 0)
-                                return r;
-                }
+                r = dns_question_add_raw(question, key, qu ? DNS_QUESTION_WANTS_UNICAST_REPLY : 0);
+                if (r < 0)
+                        return r;
         }
 
         *ret_question = TAKE_PTR(question);
@@ -2489,16 +2511,29 @@ static int dns_packet_extract_question(DnsPacket *p, DnsQuestion **ret_question)
 
 static int dns_packet_extract_answer(DnsPacket *p, DnsAnswer **ret_answer) {
         _cleanup_(dns_answer_unrefp) DnsAnswer *answer = NULL;
-        unsigned n;
+        unsigned n, prealloc;
         _cleanup_(dns_resource_record_unrefp) DnsResourceRecord *previous = NULL;
         bool bad_opt = false;
         int r;
 
         n = DNS_PACKET_RRCOUNT(p);
-        if (n == 0)
+        if (n == 0) {
+                *ret_answer = NULL;
                 return 0;
+        }
 
-        answer = dns_answer_new(n);
+        /* Calculate the maximum number of potential RRs the remaining packet data can actually contain:
+         * p->size - p->rindex are the remaining unread bytes in the packet, and the 11U is the minimum size
+         * of each RR - 1 (NAME) + 2 (TYPE) + 2 (CLASS) + 4 (TTL) + 2 (RDLENGTH). */
+        prealloc = (p->size - p->rindex) / 11U;
+        if (prealloc == 0)
+                /* RRCOUNT > 0 but there's not enough space left for a single RR. */
+                return -EMSGSIZE;
+
+        /* Pre-allocate the answer hashmap, but cap the pre-allocation to a number of RRs the packet can
+         * realistically contain. That is, pick the minimal value from the claimed number of RRs (n) and a
+         * maximum number of potential RRs the remaining packet data can actually contain, see above. */
+        answer = dns_answer_new(MIN(n, prealloc));
         if (!answer)
                 return -ENOMEM;
 

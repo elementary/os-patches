@@ -15,7 +15,8 @@ project('systemd', 'c',
 
 add_test_setup(
         'default',
-        exclude_suites : ['clang-tidy', 'unused-symbols', 'integration-tests'],
+        exclude_suites : ['clang-tidy', 'coccinelle', 'unused-symbols', 'integration-tests'],
+        exe_wrapper : find_program('tools/test-crash-trace.sh'),
         is_default : true,
 )
 
@@ -37,10 +38,17 @@ conf.set_quoted('PROJECT_VERSION_STR', project_major_version,
         description: 'Stringified project version (used where a simple string is expected)')
 conf.set_quoted('PROJECT_VERSION_FULL', meson.project_version(), description : 'Full project version')
 
-relative_source_path = run_command('realpath',
-                                   '--relative-to=@0@'.format(meson.project_build_root()),
-                                   meson.project_source_root(),
-                                   check : true).stdout().strip()
+fs = import('fs')
+
+if meson.version().version_compare('>=1.3.0')
+        relative_source_path = fs.relative_to(meson.project_source_root(),
+                                              meson.project_build_root())
+else
+        relative_source_path = run_command('realpath',
+                                           '--relative-to=@0@'.format(meson.project_build_root()),
+                                           meson.project_source_root(),
+                                           check : true).stdout().strip()
+endif
 conf.set_quoted('RELATIVE_SOURCE_PATH', relative_source_path)
 
 conf.set10('BUILD_MODE_DEVELOPER', get_option('mode') == 'developer',
@@ -79,7 +87,6 @@ summary({
 
 #####################################################################
 
-fs = import('fs')
 if get_option('split-bin') == 'auto'
         split_bin = not fs.is_symlink('/usr/sbin')
 else
@@ -503,6 +510,11 @@ if get_option('mode') == 'developer'
         possible_cc_flags += '-fno-omit-frame-pointer'
 endif
 
+# Work around stack alignment issues observed with musl + libucontext on i386.
+if get_option('libc') == 'musl' and host_machine.cpu_family() == 'x86'
+        possible_cc_flags += '-mstackrealign'
+endif
+
 add_project_arguments(
         cc.get_supported_arguments(
                 basic_disabled_warnings,
@@ -694,8 +706,6 @@ foreach header : [
 endforeach
 
 foreach header : [
-        'gshadow.h',
-        'nss.h',
         'sys/sdt.h',
         'threads.h',
         'valgrind/memcheck.h',
@@ -1645,11 +1655,11 @@ foreach tuple : [
                 ['efi'],
                 ['environment-d'],
                 ['firstboot'],
-                ['gshadow',         conf.get('HAVE_GSHADOW_H') == 1,  'gshadow.h not found'],
+                ['gshadow',         get_option('libc') != 'musl', 'musl does not support it'],
                 ['hibernate'],
                 ['hostnamed'],
                 ['hwdb'],
-                ['idn',             conf.get('HAVE_NI_IDN') == 1,     'NI_IDN is not defined'],
+                ['idn',             conf.get('HAVE_NI_IDN') == 1, 'NI_IDN is not defined'],
                 ['ima'],
                 ['ipe'],
                 ['initrd'],
@@ -1661,8 +1671,8 @@ foreach tuple : [
                 ['mountfsd'],
                 ['networkd'],
                 ['nsresourced'],
-                ['nss-myhostname',  conf.get('HAVE_NSS_H') == 1,      'nss.h not found'],
-                ['nss-systemd',     conf.get('HAVE_NSS_H') == 1,      'nss.h not found'],
+                ['nss-myhostname',  get_option('libc') != 'musl', 'musl does not support it'],
+                ['nss-systemd',     get_option('libc') != 'musl', 'musl does not support it'],
                 ['oomd'],
                 ['portabled'],
                 ['pstore'],
@@ -1677,7 +1687,7 @@ foreach tuple : [
                 ['timesyncd'],
                 ['tmpfiles'],
                 ['tpm'],
-                ['utmp',            get_option('libc') != 'musl',     'musl does not support it'],
+                ['utmp',            get_option('libc') != 'musl', 'musl does not support it'],
                 ['userdb'],
                 ['vconsole'],
                 ['xdg-autostart'],
@@ -1699,15 +1709,15 @@ foreach tuple : [['nss-mymachines', 'machined'],
                  ['nss-resolve',    'resolve']]
         want = get_option(tuple[0])
         if want.enabled()
-                if conf.get('HAVE_NSS_H') != 1
-                        error('@0@ is requested but nss.h not found'.format(tuple[0]))
+                if get_option('libc') == 'musl'
+                        error('@0@ is requested but musl does not support it'.format(tuple[0]))
                 endif
                 if not get_option(tuple[1])
                         error('@0@ is requested but @1@ is disabled'.format(tuple[0], tuple[1]))
                 endif
                 have = true
         elif want.allowed()
-                have = get_option(tuple[1]) and conf.get('HAVE_NSS_H') == 1
+                have = get_option(tuple[1]) and get_option('libc') != 'musl'
         else
                 have = false
         endif
@@ -2556,7 +2566,7 @@ foreach dict : executables
 
         foreach val : dict.get('objects', [])
                 obj = objects_by_name[val]
-                kwargs += { 'objects' : obj['objects'] }
+                kwargs += { 'objects' : kwargs.get('objects', []) + obj['objects'] }
                 include_directories += obj['include_directories']
         endforeach
 
@@ -2905,7 +2915,13 @@ if git.found()
                      'ls-files', ':/*.[ch]', ':/*.cc',
                 check : false)
         if all_files.returncode() == 0
-                all_files = files(all_files.stdout().split())
+                existing_files = []
+                foreach f : all_files.stdout().split()
+                        if fs.exists(f)
+                                existing_files += f
+                        endif
+                endforeach
+                all_files = files(existing_files)
 
                 custom_target(
                         output : 'tags',

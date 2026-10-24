@@ -23,6 +23,8 @@ at_exit() {
     rm -rf /home/testuser/.local/state/machines/inodetest2 ||:
     rm -rf /home/testuser/.local/state/machines/mangletest ||:
     machinectl terminate zurps ||:
+    machinectl terminate exfiltrate ||:
+    systemctl --user --machine testuser@ stop exfiltrate.service ||:
     rm -f /etc/polkit-1/rules.d/registermachinetest.rules
     machinectl terminate nurps ||:
     machinectl terminate kurps ||:
@@ -62,7 +64,7 @@ EOF
 loginctl enable-linger testuser
 
 run0 -u testuser mkdir -p .config/systemd/nspawn/
-run0 -u testuser -i "echo -e \"[Exec]\nKillSignal=SIGKILL\n\" > .config/systemd/nspawn/zurps.nspawn"
+run0 -u testuser -i "echo -e \"[Exec]\nKillSignal=SIGKILL\n\" >.config/systemd/nspawn/zurps.nspawn"
 run0 -u testuser systemctl start --user systemd-nspawn@zurps.service
 
 machinectl status zurps
@@ -163,18 +165,40 @@ run0 -u testuser  \
 systemctl --user --machine testuser@ stop sleep.service
 test ! -f /shouldnotwork
 
+echo FOO=bar >/tmp/foo
+chmod 600 /tmp/foo
+run0 -u testuser \
+    systemd-run --unit exfiltrate.service --service-type notify --property NotifyAccess=all --user \
+        unshare --map-root-user --user --mount \
+            bash -c 'mount --bind /tmp/foo /usr/lib/os-release; systemd-notify --ready; exec sleep infinity'
+exfiltrate_pid="$(systemctl --machine testuser@.host show --user -P MainPID exfiltrate.service)"
+run0 -u testuser \
+    varlinkctl \
+        call \
+        /run/systemd/machine/io.systemd.Machine \
+        io.systemd.Machine.Register \
+        "{\"name\":\"exfiltrate\", \"class\":\"container\", \"leader\": $exfiltrate_pid}"
+exfiltrate_output="$(run0 -u testuser \
+    varlinkctl \
+        call \
+        /run/systemd/machine/io.systemd.Machine io.systemd.Machine.List \
+        "{\"name\":\"exfiltrate\",\"acquireMetadata\":\"graceful\"}" 2>&1)" || true
+(! echo "$exfiltrate_output" | grep '"name".*"exfiltrate"' >/dev/null)
+(! echo "$exfiltrate_output" | grep "FOO=bar" >/dev/null)
+systemctl --user --machine testuser@ stop exfiltrate.service
+
 run0 -u testuser mkdir /var/tmp/image-tar
 run0 -u testuser importctl --user export-tar zurps /var/tmp/image-tar/kurps.tar.gz -m
 run0 -u testuser importctl --user import-tar /var/tmp/image-tar/kurps.tar.gz -m
 
-run0 -u testuser -i "echo -e \"[Exec]\nKillSignal=SIGKILL\n\" > .config/systemd/nspawn/kurps.nspawn"
+run0 -u testuser -i "echo -e \"[Exec]\nKillSignal=SIGKILL\n\" >.config/systemd/nspawn/kurps.nspawn"
 run0 -u testuser systemctl start --user systemd-nspawn@kurps.service
 machinectl terminate kurps
 
-run0 -u testuser -D /var/tmp/image-tar/ bash -c 'sha256sum kurps.tar.gz > SHA256SUMS'
+run0 -u testuser -D /var/tmp/image-tar/ bash -c 'sha256sum kurps.tar.gz >SHA256SUMS'
 run0 -u testuser importctl --user pull-tar file:///var/tmp/image-tar/kurps.tar.gz nurps --verify=checksum -m
 
-run0 -u testuser -i "echo -e \"[Exec]\nKillSignal=SIGKILL\n\" > .config/systemd/nspawn/nurps.nspawn"
+run0 -u testuser -i "echo -e \"[Exec]\nKillSignal=SIGKILL\n\" >.config/systemd/nspawn/nurps.nspawn"
 run0 -u testuser systemctl start --user systemd-nspawn@nurps.service
 machinectl terminate nurps
 
@@ -207,7 +231,7 @@ assert_in 'wamms' "$(run0 -u testuser machinectl --user list-images)"
 run0 -u testuser machinectl --user image-status wamms
 run0 -u testuser machinectl --user show-image wamms
 
-run0 -u testuser -i "echo -e \"[Exec]\nKillSignal=SIGKILL\n\" > .config/systemd/nspawn/wamms.nspawn"
+run0 -u testuser -i "echo -e \"[Exec]\nKillSignal=SIGKILL\n\" >.config/systemd/nspawn/wamms.nspawn"
 run0 -u testuser systemctl start --user systemd-nspawn@wamms.service
 
 run0 -u testuser systemctl stop --user systemd-nspawn@zurps.service

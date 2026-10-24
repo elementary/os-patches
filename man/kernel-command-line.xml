@@ -634,7 +634,7 @@
         <term><varname>systemd.firstboot=</varname></term>
 
         <listitem><para>Takes a boolean argument, defaults to on. If off,
-        <citerefentry><refentrytitle>systemd-firstboot.service</refentrytitle><manvolnum>8</manvolnum></citerefentry>
+        <citerefentry><refentrytitle>systemd-firstboot.service</refentrytitle><manvolnum>1</manvolnum></citerefentry>
         and
         <citerefentry><refentrytitle>systemd-homed-firstboot.service</refentrytitle><manvolnum>1</manvolnum></citerefentry>
         will not query the user for basic system settings, even if the system boots up for the first time and
@@ -710,8 +710,8 @@
         <term><varname>systemd.allow_userspace_verity=</varname></term>
 
         <listitem><para>Takes a boolean argument. Controls whether disk images that are Verity protected may
-        be authenticated in userspace signature checks via <filename>/etc/verity.d/</filename> (and related
-        directories) public key drop-ins, or whether in-kernel signature checking only. Defaults to
+        be authenticated in userspace signature checks via <filename>/etc/verity.d/*.crt</filename> (and
+        related directories) public key drop-ins, or whether in-kernel signature checking only. Defaults to
         on.</para>
 
         <xi:include href="version-info.xml" xpointer="v256"/></listitem>
@@ -785,7 +785,7 @@
       <varlistentry>
         <term><varname>systemd.factory_reset=</varname></term>
 
-        <listitem><para>Controls whether to to boot into factory reset mode, implemented by
+        <listitem><para>Controls whether to boot into factory reset mode, implemented by
         <citerefentry><refentrytitle>systemd-factory-reset-generator</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
         <citerefentry><refentrytitle>systemd-repart</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
         and other tools.</para>
@@ -835,7 +835,7 @@
         <member><citerefentry><refentrytitle>systemd-backlight@.service</refentrytitle><manvolnum>8</manvolnum></citerefentry></member>
         <member><citerefentry><refentrytitle>systemd-rfkill.service</refentrytitle><manvolnum>8</manvolnum></citerefentry></member>
         <member><citerefentry><refentrytitle>systemd-hibernate-resume-generator</refentrytitle><manvolnum>8</manvolnum></citerefentry></member>
-        <member><citerefentry><refentrytitle>systemd-firstboot.service</refentrytitle><manvolnum>8</manvolnum></citerefentry></member>
+        <member><citerefentry><refentrytitle>systemd-firstboot.service</refentrytitle><manvolnum>1</manvolnum></citerefentry></member>
         <member><citerefentry><refentrytitle>bootctl</refentrytitle><manvolnum>1</manvolnum></citerefentry></member>
       </simplelist></para>
   </refsect1>

@@ -60,6 +60,9 @@ static int process_vsock_string(const char *host, const char *port) {
         if (r < 0)
                 return log_error_errno(r, "Failed to parse vsock cid: %s", host);
 
+        if (cid == VMADDR_CID_ANY)
+                return log_error_errno(SYNTHETIC_ERRNO(EINVAL), "Cannot use VMADDR_CID_ANY to connect to a remote host.");
+
         return process_vsock_cid(cid, port);
 }
 
@@ -277,7 +280,7 @@ static int fetch_machine(const char *machine, RuntimeScope scope, sd_json_varian
         if (r < 0)
                 return log_error_errno(r, "Failed to connect to machined on %s: %m", addr);
 
-        _cleanup_(sd_json_variant_unrefp) sd_json_variant *result = NULL;
+        sd_json_variant *result = NULL;
         const char *error_id;
         r = sd_varlink_callbo(
                         vl,
@@ -298,7 +301,9 @@ static int fetch_machine(const char *machine, RuntimeScope scope, sd_json_varian
                 return log_error_errno(r, "Failed to issue io.systemd.Machine.List() varlink call: %s", error_id);
         }
 
-        *ret = TAKE_PTR(result);
+        /* result is a borrowed reference into the varlink connection's receive buffer. Take a real ref so
+         * that it survives the cleanup of vl below. */
+        *ret = sd_json_variant_ref(result);
         return 0;
 }
 

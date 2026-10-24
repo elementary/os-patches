@@ -1072,12 +1072,8 @@ static int display_services(int argc, char *argv[], void *userdata) {
         (void) table_set_sort(t, (size_t) 0);
 
         FOREACH_DIRENT(de, d, return -errno) {
-                _cleanup_free_ char *j = NULL, *no = NULL;
+                _cleanup_free_ char *no = NULL;
                 _cleanup_close_ int fd = -EBADF;
-
-                j = path_join("/run/systemd/userdb/", de->d_name);
-                if (!j)
-                        return log_oom();
 
                 fd = socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
                 if (fd < 0)
@@ -1898,7 +1894,8 @@ static int run(int argc, char *argv[]) {
                 if (!e)
                         return log_oom();
 
-                if (setenv("SYSTEMD_ONLY_USERDB", e, true) < 0)
+                r = RET_NERRNO(setenv("SYSTEMD_ONLY_USERDB", e, true));
+                if (r < 0)
                         return log_error_errno(r, "Failed to set $SYSTEMD_ONLY_USERDB: %m");
 
                 log_info("Enabled services: %s", e);

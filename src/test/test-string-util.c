@@ -9,6 +9,17 @@
 #include "strv.h"
 #include "tests.h"
 
+TEST(ellipsize_mem_ansi_short) {
+        _cleanup_free_ char *a = ellipsize_mem("X\x1b[m", 4, 1, 50);
+        assert_se(a);
+
+        _cleanup_free_ char *b = ellipsize_mem(" \x1b[A", 4, 1, 0);
+        assert_se(b);
+
+        _cleanup_free_ char *c = ellipsize_mem("\x1b[m", 3, 1, 50);
+        assert_se(c);
+}
+
 TEST(xsprintf) {
         char buf[5];
 
@@ -325,6 +336,8 @@ TEST(strrep) {
 
         ASSERT_STREQ(onea, "waldo");
         ASSERT_STREQ(threea, "waldowaldowaldo");
+
+        ASSERT_NULL(strrep("waldo", SIZE_MAX - 1));
 }
 
 TEST(string_has_cc) {
@@ -615,6 +628,28 @@ TEST(split_pair) {
         ASSERT_OK(split_pair("===", "==", &a, &b));
         ASSERT_STREQ(a, "");
         ASSERT_STREQ(b, "=");
+}
+
+TEST(empty_to_null) {
+        const char *s = "asdf", *n = NULL, *e = "";
+        char *t = (char*) "asdf";
+        const char p[] = "asdf";
+        char q[] = "asdf";
+
+        /* empty_to_null cannot be used with constant strings, e.g.
+         * empty_to_null("") fails with 'error: cast specifies array type'. */
+
+        ASSERT_NULL(empty_to_null(NULL));
+        ASSERT_NULL(empty_to_null(n));
+        ASSERT_NULL(empty_to_null(e));
+        ASSERT_STREQ(empty_to_null(s), "asdf");
+        ASSERT_NULL(empty_to_null(s + 4));
+        ASSERT_STREQ(empty_to_null(t), "asdf");
+        ASSERT_NULL(empty_to_null(t + 4));
+        ASSERT_STREQ(empty_to_null(&p[0]), "asdf");
+        ASSERT_NULL(empty_to_null(&p[0] + 4));
+        ASSERT_STREQ(empty_to_null(&q[0]), "asdf");
+        ASSERT_NULL(empty_to_null(&q[0] + 4));
 }
 
 TEST(first_word) {
@@ -1209,6 +1244,26 @@ TEST(strspn_from_end) {
         assert_se(strspn_from_end("aaa1234", DIGITS) == 4);
         assert_se(strspn_from_end("aaa1234aaa", DIGITS) == 0);
         assert_se(strspn_from_end("aaa12aa34", DIGITS) == 2);
+}
+
+TEST(strnspn) {
+        assert_se(strnspn(NULL, WHITESPACE, 0) == 0);
+        assert_se(strnspn("", WHITESPACE, 0) == 0);
+        assert_se(strnspn("hoge", WHITESPACE, 0) == 0);
+        assert_se(strnspn("hoge", WHITESPACE, 4) == 0);
+        assert_se(strnspn("   hoge", WHITESPACE, 7) == 3);
+        assert_se(strnspn("   hoge", WHITESPACE, 2) == 2);
+        assert_se(strnspn("    ", WHITESPACE, 4) == 4);
+
+        /* 'str' is all whitespace and not NUL terminated within 'n': at most 'n' bytes may be read,
+         * otherwise this reads off the end of the buffer (caught by the sanitizers). */
+        for (size_t n = 1; n <= 64; n++) {
+                _cleanup_free_ char *str = NULL;
+
+                assert_se(str = new(char, n));
+                memset(str, ' ', n);
+                assert_se(strnspn(str, WHITESPACE, n) == n);
+        }
 }
 
 TEST(streq_skip_trailing_chars) {

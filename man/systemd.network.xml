@@ -346,7 +346,7 @@
           required when determining whether the link is online (including when running
           <command>systemd-networkd-wait-online</command>). Takes one of <literal>ipv4</literal>,
           <literal>ipv6</literal>, <literal>both</literal>, or <literal>any</literal>. Defaults to
-          <literal>no</literal>. Note that this option has no effect if
+          <literal>any</literal>. Note that this option has no effect if
           <literal>RequiredForOnline=no</literal>.</para>
 
           <xi:include href="version-info.xml" xpointer="v249"/>
@@ -817,6 +817,9 @@ DuplicateAddressDetection=none</programlisting></para>
           <citerefentry project='man-pages'><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
           Domain name routing has no equivalent in the traditional glibc API, which has no concept of
           domain name servers limited to a specific link.</para>
+
+          <para>This option may be specified more than once. If an empty string is assigned,
+          then the all previous assignments are cleared.</para>
 
           <xi:include href="version-info.xml" xpointer="v216"/>
         </listitem>

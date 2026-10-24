@@ -583,8 +583,7 @@ static int method_take_device(sd_bus_message *message, void *userdata, sd_bus_er
                 return sd_bus_error_set(error, BUS_ERROR_NOT_IN_CONTROL, "You are not in control of this session");
 
         dev = makedev(major, minor);
-        sd = hashmap_get(s->devices, &dev);
-        if (sd)
+        if (hashmap_contains(s->devices, &dev))
                 /* We don't allow retrieving a device multiple times.
                  * The related ReleaseDevice call is not ref-counted.
                  * The caller should use dup() if it requires more
@@ -985,6 +984,7 @@ static const sd_bus_vtable session_vtable[] = {
         SD_BUS_PROPERTY("Remote", "b", bus_property_get_bool, offsetof(Session, remote), SD_BUS_VTABLE_PROPERTY_CONST),
         SD_BUS_PROPERTY("RemoteHost", "s", NULL, offsetof(Session, remote_host), SD_BUS_VTABLE_PROPERTY_CONST),
         SD_BUS_PROPERTY("RemoteUser", "s", NULL, offsetof(Session, remote_user), SD_BUS_VTABLE_PROPERTY_CONST),
+        SD_BUS_PROPERTY("ExtraDeviceAccess", "as", NULL, offsetof(Session, extra_device_access), SD_BUS_VTABLE_PROPERTY_CONST),
         SD_BUS_PROPERTY("Service", "s", NULL, offsetof(Session, service), SD_BUS_VTABLE_PROPERTY_CONST),
         SD_BUS_PROPERTY("Desktop", "s", NULL, offsetof(Session, desktop), SD_BUS_VTABLE_PROPERTY_CONST),
         SD_BUS_PROPERTY("Scope", "s", NULL, offsetof(Session, scope), SD_BUS_VTABLE_PROPERTY_CONST),

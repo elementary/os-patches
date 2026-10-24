@@ -1,5 +1,7 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 
+#include "sd-id128.h"
+
 #include "alloc-util.h"
 #include "dbus.h"
 #include "dynamic-user.h"
@@ -10,13 +12,17 @@
 #include "glyph-util.h"
 #include "hashmap.h"
 #include "initrd-util.h"
+#include "job.h"
 #include "manager.h"
 #include "manager-serialize.h"
 #include "parse-util.h"
 #include "serialize.h"
+#include "set.h"
 #include "string-util.h"
 #include "strv.h"
 #include "syslog-util.h"
+#include "unit.h"
+#include "unit-name.h"
 #include "unit-serialize.h"
 #include "user-util.h"
 #include "varlink.h"
@@ -157,8 +163,10 @@ int manager_serialize(
         (void) serialize_ratelimit(f, "dump-ratelimit", &m->dump_ratelimit);
         (void) serialize_ratelimit(f, "reload-reexec-ratelimit", &m->reload_reexec_ratelimit);
 
-        (void) serialize_id128(f, "bus-id", m->bus_id);
+        (void) serialize_id128(f, "bus-id",
+                               sd_id128_is_null(m->bus_id) ? m->deserialized_bus_id : m->bus_id);
         bus_track_serialize(m->subscribed, f, "subscribed");
+        (void) serialize_strv(f, "subscribed", m->subscribed_as_strv);
 
         r = dynamic_user_serialize(m, f, fds);
         if (r < 0)
@@ -193,7 +201,131 @@ int manager_serialize(
         return 0;
 }
 
-static int manager_deserialize_one_unit(Manager *m, const char *name, FILE *f, FDSet *fds) {
+static int manager_collect_serialized_unit_names(FILE *f, Set **ret) {
+        _cleanup_set_free_ Set *serialized_units = NULL;
+        off_t offset;
+        int r;
+
+        assert(f);
+        assert(ret);
+
+        offset = ftello(f);
+        if (offset < 0)
+                return log_error_errno(errno, "Failed to determine serialization offset: %m");
+
+        for (;;) {
+                _cleanup_free_ char *line = NULL;
+
+                r = read_stripped_line(f, LONG_LINE_MAX, &line);
+                if (r < 0)
+                        return log_error_errno(r, "Failed to read serialization line: %m");
+                if (r == 0)
+                        break;
+
+                r = set_ensure_consume(&serialized_units, &string_hash_ops_free, TAKE_PTR(line));
+                if (r < 0)
+                        return log_oom();
+
+                r = unit_deserialize_state_skip(f);
+                if (r < 0)
+                        return r;
+        }
+
+        if (fseeko(f, offset, SEEK_SET) < 0)
+                return log_error_errno(errno, "Failed to reset serialization offset: %m");
+
+        *ret = TAKE_PTR(serialized_units);
+        return 0;
+}
+
+static int manager_synthesize_orphaned_unit(
+                Manager *m,
+                const char *original_name,
+                const char *canonical_name,
+                FILE *f,
+                FDSet *fds) {
+
+        _cleanup_(unit_freep) Unit *orphan = NULL;
+        _cleanup_free_ char *orphaned_name = NULL;
+        sd_id128_t rnd;
+        UnitType t;
+        int r;
+
+        assert(m);
+        assert(original_name);
+        assert(canonical_name);
+        assert(f);
+        assert(fds);
+
+        t = unit_name_to_type(original_name);
+        if (t < 0)
+                return log_warning_errno(SYNTHETIC_ERRNO(EINVAL),
+                                         "Cannot synthesize unit for '%s' (overridden by alias to '%s'): invalid unit type. Skipping stale state.",
+                                         original_name, canonical_name);
+
+        /* Only transition units that track external resources, forget internal ones (eg: timers) */
+        if (!IN_SET(t, UNIT_SERVICE, UNIT_SCOPE, UNIT_MOUNT, UNIT_AUTOMOUNT))
+                return log_warning_errno(SYNTHETIC_ERRNO(EOPNOTSUPP),
+                                         "Cannot synthesize unit for '%s' (overridden by alias to '%s'): unsupported unit type. Skipping stale state.",
+                                         original_name, canonical_name);
+
+        /* Use a naming convention with an "orphaned-" prefix to make it clear at a glance that these units
+         * were synthesized to adopt resources from a now-aliased unit */
+        r = sd_id128_randomize(&rnd);
+        if (r < 0)
+                return log_warning_errno(r, "Failed to generate random ID for orphan unit: %m");
+
+        if (asprintf(&orphaned_name, "orphaned-r" SD_ID128_FORMAT_STR ".%s",
+                     SD_ID128_FORMAT_VAL(rnd), unit_type_to_string(t)) < 0)
+                return log_oom();
+
+        r = unit_new_for_name(m, unit_vtable[t]->object_size, orphaned_name, &orphan);
+        if (r < 0)
+                return log_warning_errno(r, "Failed to allocate orphan unit '%s': %m", orphaned_name);
+
+        /* Force the state as we know the unit file is gone, so it will hang around as long as resources are
+         * active, and then it will be automatically collected */
+        orphan->load_state = UNIT_NOT_FOUND;
+        /* Ensure the orphan also gets garbage-collected when it ends up in 'failed' state. */
+        orphan->collect_mode = COLLECT_INACTIVE_OR_FAILED;
+
+        _cleanup_free_ char *description = strjoin("Orphaned resources adopted from aliased unit ", original_name);
+        if (!description)
+                return log_oom();
+
+        r = unit_deserialize_state(orphan, f, fds);
+        if (r < 0)
+                return log_notice_errno(r, "Failed to deserialize state into orphan unit '%s': %m", orphaned_name);
+
+        /* From this point on the serialized stream for this unit has been fully consumed, so avoid failing. */
+
+        log_warning("Unit file for '%s' was overridden by a symlink to '%s'. Synthesized orphan unit '%s' to retain tracking of the previous unit's processes.",
+                    original_name, canonical_name, orphaned_name);
+
+        /* Override Description= so it's clear what this is for and can be traced back to the original. */
+        free_and_replace(orphan->description, description);
+
+        /* Any jobs reinstalled from the deserialized state targeted the original unit. Most of them
+         * (start, restart, reload, ...) make no sense for the synthesized orphan, especially after a
+         * service-to-scope conversion, so cancel them. JOB_STOP is the exception: a stop request that was
+         * already pending on the original unit is exactly what we want to keep around, since it'll cause
+         * the synthesized unit to just go away immediately. */
+        if (orphan->job && orphan->job->type != JOB_STOP)
+                job_finish_and_invalidate(orphan->job, JOB_CANCELED, /* recursive= */ false, /* already= */ false);
+        if (orphan->nop_job)
+                job_finish_and_invalidate(orphan->nop_job, JOB_CANCELED, /* recursive= */ false, /* already= */ false);
+
+        TAKE_PTR(orphan);
+        return 0;
+}
+
+static int manager_deserialize_one_unit(
+                Manager *m,
+                const char *name,
+                FILE *f,
+                FDSet *fds,
+                Set *serialized_units) {
+
         Unit *u;
         int r;
 
@@ -203,17 +335,76 @@ static int manager_deserialize_one_unit(Manager *m, const char *name, FILE *f, F
         if (r < 0)
                 return log_notice_errno(r, "Failed to load unit \"%s\", skipping deserialization: %m", name);
 
+        if (!streq(u->id, name) &&
+            set_contains(serialized_units, u->id)) {
+                /*
+                 * The unit from the state file (name) resolved to a different canonical unit (u->id), and
+                 * the canonical unit also has its own state entry.
+                 *
+                 * This means the state entry for the unit name is stale. That is, when the state was
+                 * serialized, the name referred to an independent unit, but it now resolves as an alias to
+                 * the canonical unit. Deserializing it would overwrite the canonical unit's own serialized
+                 * state, and thus corrupt its live runtime state.
+                 *
+                 * It is very important to note that this only affects units that were independent when the
+                 * state file was written, but are now aliases (either because a reload created the symlink,
+                 * or the symlink existed but this is the first reload). Normal aliases that were already
+                 * aliases during the most recent serialization are filtered out in manager_serialize(), so
+                 * they never appear in the state file.
+                 *
+                 * If the canonical unit does not have its own state entry, then this is instead a rename or
+                 * canonical ID change, and this state entry is the only state we have for the unit. In that
+                 * case we must preserve it. After doing so, we insert the canonical unit's ID into the set
+                 * so that any further aliases resolving to the same unit are skipped.
+                 *
+                 * The serialized data represents the old, independent unit. Deserializing this stale state
+                 * onto the canonical unit would corrupt its live state. Instead, we synthesize a new unloaded
+                 * unit with a unique name and migrate the cgroup/PID/etc. tracking from the stale state
+                 * into it, so that the resources from the previously independent unit remain tracked.
+                 *
+                 * Take as an example, a.service is running. Someone created symlink b.service -> a.service.
+                 * On first reload, the state file still has b.service as an independent unit (from before
+                 * the symlink existed), but b.service now resolves to a.service. We retain a.service's
+                 * running state, and synthesize an unloaded unit to keep tracking the processes that
+                 * b.service used to own.
+                 *
+                 * Note: Log messages from this code path are checked in TEST-07-PID1.alias-corruption.sh,
+                 * so the test case may need adjustment if they are changed.
+                 */
+                r = manager_synthesize_orphaned_unit(m, name, u->id, f, fds);
+                if (r < 0) /* If we fail to orphan for any reason, then discard the unit */
+                        r = unit_deserialize_state_skip(f);
+                return r;
+        }
+
         r = unit_deserialize_state(u, f, fds);
         if (r == -ENOMEM)
                 return log_oom();
         if (r < 0)
                 return log_notice_errno(r, "Failed to deserialize unit \"%s\", skipping: %m", name);
 
+        /* If this unit was deserialized under an alias name (that is, it is a rename), record the canonical
+         * ID so that any further aliases pointing to the same unit are correctly skipped. */
+        if (!streq(u->id, name)) {
+                r = set_put_strdup(&serialized_units, u->id);
+                if (r < 0)
+                        return log_oom();
+        }
+
         return 0;
 }
 
-static int manager_deserialize_units(Manager *m, FILE *f, FDSet *fds) {
+static int manager_deserialize_units(
+                Manager *m,
+                FILE *f,
+                FDSet *fds) {
+
+        _cleanup_set_free_ Set *serialized_units = NULL;
         int r;
+
+        r = manager_collect_serialized_unit_names(f, &serialized_units);
+        if (r < 0)
+                return r;
 
         for (;;) {
                 _cleanup_free_ char *line = NULL;
@@ -225,7 +416,7 @@ static int manager_deserialize_units(Manager *m, FILE *f, FDSet *fds) {
                 if (r == 0)
                         break;
 
-                r = manager_deserialize_one_unit(m, line, f, fds);
+                r = manager_deserialize_one_unit(m, line, f, fds, serialized_units);
                 if (r == -ENOMEM)
                         return r;
                 if (r < 0) {

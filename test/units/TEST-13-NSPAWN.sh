@@ -3,6 +3,9 @@
 set -eux
 set -o pipefail
 
+# LP: #2136413
+export TEST_SKIP_SUBTESTS="machined nspawn"
+
 FSTYPE="$(stat --file-system --format "%T" /)"
 
 if [[ "$FSTYPE" == "fuseblk" ]]; then

@@ -177,6 +177,7 @@ static Virtualization detect_vm_dmi_vendor(void) {
                 { "KVM",                   VIRTUALIZATION_KVM       },
                 { "OpenStack",             VIRTUALIZATION_KVM       }, /* Detect OpenStack instance as KVM in non x86 architecture */
                 { "KubeVirt",              VIRTUALIZATION_KVM       }, /* Detect KubeVirt instance as KVM in non x86 architecture */
+                { "Alibaba Cloud ECS",     VIRTUALIZATION_KVM       }, /* narrower than bare "Alibaba Cloud" sys_vendor */
                 { "Amazon EC2",            VIRTUALIZATION_AMAZON    },
                 { "QEMU",                  VIRTUALIZATION_QEMU      },
                 { "VMware",                VIRTUALIZATION_VMWARE    }, /* https://kb.vmware.com/s/article/1009458 */
@@ -909,6 +910,8 @@ static const struct cpuid_table_entry leaf87_edx[] = {
 };
 
 static bool given_flag_in_set(const char *flag, const struct cpuid_table_entry *set, size_t set_size, uint32_t val) {
+        assert(set);
+
         for (size_t i = 0; i < set_size; i++) {
                 if ((UINT32_C(1) << set[i].flag_bit) & val &&
                                 streq(flag, set[i].name))

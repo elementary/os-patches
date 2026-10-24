@@ -102,7 +102,7 @@ rm_rf_sshbindir() {
 trap rm_rf_sshbindir EXIT
 
 # Create a fake "ssh" binary that validates everything works as expected if invoked for the "ssh-unix:" Varlink transport
-cat > "$SSHBINDIR"/ssh <<'EOF'
+cat >"$SSHBINDIR"/ssh <<'EOF'
 #!/usr/bin/env bash
 
 set -xe
@@ -118,7 +118,7 @@ chmod +x "$SSHBINDIR"/ssh
 SYSTEMD_SSH="$SSHBINDIR/ssh" varlinkctl info ssh-unix:foobar:/run/systemd/journal/io.systemd.journal
 
 # Now build another fake "ssh" binary that does the same for "ssh-exec:"
-cat > "$SSHBINDIR"/ssh <<'EOF'
+cat >"$SSHBINDIR"/ssh <<'EOF'
 #!/usr/bin/env bash
 
 set -xe
@@ -200,6 +200,14 @@ varlinkctl call /run/systemd/io.systemd.Manager io.systemd.Manager.Describe '{}'
 varlinkctl call /run/systemd/io.systemd.Manager io.systemd.Manager.Reload '{}'
 # This will disconnect and fail, as the manager reexec and drops connections
 varlinkctl call /run/systemd/io.systemd.Manager io.systemd.Manager.Reexecute '{}' ||:
+# Wait for the manager to finish re-exec before proceeding — the user manager
+# tests below use systemd-run which requires a functional PID 1.
+for _ in {1..10}; do
+    if systemctl is-system-running 2>/dev/null | grep -E 'running|degraded' >/dev/null; then
+        break
+    fi
+    sleep 1
+done
 
 # test io.systemd.Network
 varlinkctl info /run/systemd/netif/io.systemd.Network

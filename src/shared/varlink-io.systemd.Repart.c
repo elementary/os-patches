@@ -43,7 +43,7 @@ static SD_VARLINK_DEFINE_METHOD_FULL(
                 SD_VARLINK_FIELD_COMMENT("The seed value to derive partition and file system UUIDs from"),
                 SD_VARLINK_DEFINE_INPUT(seed, SD_VARLINK_STRING, SD_VARLINK_NULLABLE),
                 SD_VARLINK_FIELD_COMMENT("Path to directory containing definition files."),
-                SD_VARLINK_DEFINE_INPUT(definitions, SD_VARLINK_STRING, SD_VARLINK_ARRAY),
+                SD_VARLINK_DEFINE_INPUT(definitions, SD_VARLINK_STRING, SD_VARLINK_ARRAY|SD_VARLINK_NULLABLE),
                 SD_VARLINK_FIELD_COMMENT("If true, automatically defer creation of all partitions whose label is \"empty\"."),
                 SD_VARLINK_DEFINE_INPUT(deferPartitionsEmpty, SD_VARLINK_BOOL, SD_VARLINK_NULLABLE),
                 SD_VARLINK_FIELD_COMMENT("If true, automatically defer creation of all partitions which are marked for factory reset."),
@@ -56,7 +56,7 @@ static SD_VARLINK_DEFINE_METHOD_FULL(
                 SD_VARLINK_DEFINE_OUTPUT_BY_TYPE(phase, ProgressPhase, SD_VARLINK_NULLABLE),
                 SD_VARLINK_FIELD_COMMENT("If used with the 'more' flag, an object identifier string is sent in progress updates."),
                 SD_VARLINK_DEFINE_OUTPUT(object, SD_VARLINK_STRING, SD_VARLINK_NULLABLE),
-                SD_VARLINK_FIELD_COMMENT("If used with the 'more' flag, a progress percentrage (specific to the work done for the specified phase+object is sent in progress updates."),
+                SD_VARLINK_FIELD_COMMENT("If used with the 'more' flag, a progress percentage (specific to the work done for the specified phase+object)."),
                 SD_VARLINK_DEFINE_OUTPUT(progress, SD_VARLINK_INT, SD_VARLINK_NULLABLE));
 
 static SD_VARLINK_DEFINE_METHOD(

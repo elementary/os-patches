@@ -593,8 +593,8 @@ static int verb_encrypt(int argc, char **argv, void *userdata) {
 
         timestamp = arg_timestamp != USEC_INFINITY ? arg_timestamp : now(CLOCK_REALTIME);
 
-        if (arg_not_after != USEC_INFINITY && arg_not_after < timestamp)
-                return log_error_errno(SYNTHETIC_ERRNO(EINVAL), "Credential is invalidated before it is valid.");
+        if (arg_not_after != USEC_INFINITY && arg_not_after <= timestamp)
+                return log_error_errno(SYNTHETIC_ERRNO(EINVAL), "Credential is invalidated before or when it becomes valid.");
 
         if (geteuid() != 0) {
                 (void) polkit_agent_open_if_enabled(BUS_TRANSPORT_LOCAL, arg_ask_password);
@@ -1337,7 +1337,7 @@ static int vl_method_encrypt(sd_varlink *link, sd_json_variant *parameters, sd_v
                 timestamp_fresh = true;
         } else
                 timestamp_fresh = timestamp_is_fresh(p.timestamp);
-        if (p.not_after != UINT64_MAX && p.not_after < p.timestamp)
+        if (p.not_after != UINT64_MAX && p.not_after <= p.timestamp)
                 return sd_varlink_error_invalid_parameter_name(link, "notAfter");
 
         r = settle_scope(link, &p.scope, &p.uid, &cflags, /* any_scope_after_polkit= */ NULL);
@@ -1496,7 +1496,7 @@ static int vl_method_decrypt(sd_varlink *link, sd_json_variant *parameters, sd_v
                 ask_polkit = true;
         }
 
-        if (IN_SET(r, -EREMCHG, -ENOANO, -EUCLEAN, -EPERM))
+        if (ERRNO_IS_NEG_TPM2_UNSEAL_BAD_PCR(r))
                 return sd_varlink_error(link, "io.systemd.Credentials.UnexpectedPCRState", NULL);
         if (r < 0) {
                 const CredentialsVarlinkError *e = credentials_varlink_error_by_errno(r);

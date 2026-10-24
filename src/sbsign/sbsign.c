@@ -262,8 +262,9 @@ static int spc_indirect_data_content_new(const void *digest, size_t digestsz, ui
                 return log_error_errno(SYNTHETIC_ERRNO(EIO), "Failed to get SpcPeImageData object: %s",
                                        ERR_error_string(ERR_get_error(), NULL));
 
-        idc->data->value->value.sequence->data = TAKE_PTR(peidraw);
-        idc->data->value->value.sequence->length = peidrawsz;
+        if (!ASN1_STRING_set(idc->data->value->value.sequence, peidraw, peidrawsz))
+                return log_error_errno(SYNTHETIC_ERRNO(EIO), "Failed to set ASN1_STRING data.");
+
         idc->messageDigest->digestAlgorithm->algorithm = OBJ_nid2obj(NID_sha256);
         if (!idc->messageDigest->digestAlgorithm->algorithm)
                 return log_error_errno(SYNTHETIC_ERRNO(EIO), "Failed to get SHA256 object: %s",
@@ -676,7 +677,7 @@ static int verb_sign(int argc, char *argv[], void *userdata) {
                    &(WIN_CERTIFICATE_HEADER) {
                            .wRevision = htole16(0x200),
                            .wCertificateType = htole16(0x0002), /* PKCS7 signedData */
-                           .dwLength = htole32(ROUND_UP(certsz, 8)),
+                           .dwLength = htole32(certsz),
                    },
                    sizeof(WIN_CERTIFICATE_HEADER),
                    end);

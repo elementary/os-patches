@@ -163,6 +163,8 @@ char* ascii_strupper(char *s) {
 }
 
 char* ascii_strlower_n(char *s, size_t n) {
+        assert(n <= 0 || s);
+
         if (n <= 0)
                 return s;
 
@@ -278,13 +280,21 @@ static bool string_has_ansi_sequence(const char *s, size_t len) {
 static size_t previous_ansi_sequence(const char *s, size_t length, const char **ret_where) {
         /* Locate the previous ANSI sequence and save its start in *ret_where and return length. */
 
-        for (size_t i = length - 2; i > 0; i--) {  /* -2 because at least two bytes are needed */
-                size_t slen = ansi_sequence_length(s + (i - 1), length - (i - 1));
-                if (slen == 0)
-                        continue;
+        if (length < 2) {
+                /* Need at least two bytes for an ANSI sequence */
+                *ret_where = NULL;
+                return 0;
+        }
 
-                *ret_where = s + (i - 1);
-                return slen;
+        for (size_t i = length - 2;; i--) {  /* -2 because at least two bytes are needed */
+                size_t slen = ansi_sequence_length(s + i, length - i);
+                if (slen > 0) {
+                        *ret_where = s + i;
+                        return slen;
+                }
+
+                if (i == 0)
+                        break;
         }
 
         *ret_where = NULL;
@@ -342,6 +352,33 @@ static char *ascii_ellipsize_mem(const char *s, size_t old_length, size_t new_le
         return t;
 }
 
+/* Walk backwards from 'end' (exclusive) to the start of the last complete UTF-8 character, without
+ * descending below 'start', validate it and return a pointer to its first byte, optionally decoding it
+ * into *ret_c. Returns NULL on a truncated or otherwise malformed sequence. */
+static const char* find_previous_unichar(const char *start, const char *end, char32_t *ret_c) {
+        const char *p;
+        int r;
+
+        assert(start);
+        assert(end);
+        assert(end > start);
+
+        for (p = end; p > start; ) {
+                p--;
+                if (((uint8_t) *p & 0xc0) != 0x80) /* Found a non-continuation byte, i.e. a character start. */
+                        break;
+        }
+
+        r = utf8_encoded_valid_unichar(p, end - p);
+        if (r < 0 || p + r != end)
+                return NULL;
+
+        if (ret_c)
+                assert_se(utf8_encoded_to_unichar(p, ret_c) == r);
+
+        return p;
+}
+
 char* ellipsize_mem(const char *s, size_t old_length, size_t new_length, unsigned percent) {
         size_t x, k, len, len2;
         const char *i, *j;
@@ -385,10 +422,12 @@ char* ellipsize_mem(const char *s, size_t old_length, size_t new_length, unsigne
                         continue;  /* ANSI sequences don't take up any space in output */
                 }
 
-                char32_t c;
-                r = utf8_encoded_to_unichar(i, &c);
+                r = utf8_encoded_valid_unichar(i, s + old_length - i);
                 if (r < 0)
                         return NULL;
+
+                char32_t c;
+                assert_se(utf8_encoded_to_unichar(i, &c) == r);
 
                 int w = unichar_iswide(c) ? 2 : 1;
                 if (k + w > x)
@@ -416,9 +455,9 @@ char* ellipsize_mem(const char *s, size_t old_length, size_t new_length, unsigne
                         continue;
                 }
 
-                tt = utf8_prev_char(t);
-                r = utf8_encoded_to_unichar(tt, &c);
-                if (r < 0)
+                /* Find the previous complete UTF-8 character inside the retained suffix. */
+                tt = find_previous_unichar(i, t, &c);
+                if (!tt)
                         return NULL;
 
                 w = unichar_iswide(c) ? 2 : 1;
@@ -436,11 +475,21 @@ char* ellipsize_mem(const char *s, size_t old_length, size_t new_length, unsigne
         if (k >= new_length) {
                 /* Make space for ellipsis, if required and possible. We know that the edge character is not
                  * part of an ANSI sequence (because then we'd skip it). If the last character we looked at
-                 * was wide, we don't need to make space. */
-                if (j < s + old_length)
-                        j = utf8_next_char(j);
-                else if (i > s)
-                        i = utf8_prev_char(i);
+                 * was wide, we don't need to make space.
+                 * Move the edge by one complete UTF-8 character within the input slice. */
+                if (j < s + old_length) {
+                        r = utf8_encoded_valid_unichar(j, s + old_length - j);
+                        if (r < 0)
+                                return NULL;
+
+                        j += r;
+                } else if (i > s) {
+                        const char *tt = find_previous_unichar(s, i, NULL);
+                        if (!tt)
+                                return NULL;
+
+                        i = tt;
+                }
         }
 
         len = i - s;
@@ -969,22 +1018,27 @@ oom:
         return -ENOMEM;
 }
 
-char* strrep(const char *s, unsigned n) {
-        char *r, *p;
+char* strrep(const char *s, size_t n) {
+        char *ret, *p;
         size_t l;
 
         assert(s);
 
         l = strlen(s);
-        p = r = malloc(l * n + 1);
-        if (!r)
+        if (!MUL_ASSIGN_SAFE(&l, n))
+                return NULL;
+        if (!INC_SAFE(&l, 1))
                 return NULL;
 
-        for (unsigned i = 0; i < n; i++)
+        p = ret = malloc(l);
+        if (!ret)
+                return NULL;
+
+        for (size_t i = 0; i < n; i++)
                 p = stpcpy(p, s);
 
         *p = 0;
-        return r;
+        return ret;
 }
 
 int split_pair(const char *s, const char *sep, char **ret_first, char **ret_second) {
@@ -1332,6 +1386,23 @@ size_t strspn_from_end(const char *str, const char *accept) {
                 n++;
 
         return n;
+}
+
+size_t strnspn(const char *str, const char *accept, size_t n) {
+        size_t i;
+
+        /* Like strspn(), but reads at most 'n' bytes from 'str'. Returns the length of the initial
+         * run of 'str' (capped at 'n') that consists solely of bytes found in 'accept'. Stops at a
+         * NUL byte too. Unlike strspn() this is safe on a buffer that is not NUL terminated within
+         * 'n' bytes. */
+
+        assert(str || n == 0);
+        assert(accept);
+
+        for (i = 0; i < n && str[i] != '\0' && strchr(accept, str[i]); i++)
+                ;
+
+        return i;
 }
 
 char* strdupspn(const char *a, const char *accept) {

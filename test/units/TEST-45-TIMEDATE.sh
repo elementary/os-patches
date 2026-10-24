@@ -270,7 +270,7 @@ EOF
         busctl monitor --json=short --match="type=signal,sender=org.freedesktop.timedate1,member=PropertiesChanged,path=/org/freedesktop/timedate1"
 
     : 'Disable NTP'
-    ts="$(date +"%F %T.%6N")"
+    ts="$(gnudate +"%F %T.%6N")"
     timedatectl set-ntp false
     assert_timedated_signal "$ts" "false"
     assert_timesyncd_state "inactive"
@@ -278,7 +278,7 @@ EOF
     assert_rc 3 systemctl is-active --quiet systemd-timesyncd
 
     : 'Enable NTP'
-    ts="$(date +"%F %T.%6N")"
+    ts="$(gnudate +"%F %T.%6N")"
     timedatectl set-ntp true
     assert_timedated_signal "$ts" "true"
     assert_ntp "true"
@@ -286,7 +286,7 @@ EOF
     assert_rc 0 systemctl is-active --quiet systemd-timesyncd
 
     : 'Re-disable NTP'
-    ts="$(date +"%F %T.%6N")"
+    ts="$(gnudate +"%F %T.%6N")"
     timedatectl set-ntp false
     assert_timedated_signal "$ts" "false"
     assert_ntp "false"
@@ -371,22 +371,22 @@ EOF
     # LinkNTPServers
     #
     # Single IP
-    ts="$(date +"%F %T.%6N")"
+    ts="$(gnudate +"%F %T.%6N")"
     timedatectl ntp-servers ntp99 10.0.0.1
     assert_networkd_ntp ntp99 10.0.0.1
     assert_timesyncd_signal "$ts" LinkNTPServers 10.0.0.1
     # Setting NTP servers to the same value shouldn't emit a PropertiesChanged signal
-    ts="$(date +"%F %T.%6N")"
+    ts="$(gnudate +"%F %T.%6N")"
     timedatectl ntp-servers ntp99 10.0.0.1
     assert_networkd_ntp ntp99 10.0.0.1
     (! assert_timesyncd_signal "$ts" LinkNTPServers 10.0.0.1)
     # Multiple IPs
-    ts="$(date +"%F %T.%6N")"
+    ts="$(gnudate +"%F %T.%6N")"
     timedatectl ntp-servers ntp99 10.0.0.1 192.168.0.99
     assert_networkd_ntp ntp99 "10.0.0.1 192.168.0.99"
     assert_timesyncd_signal "$ts" LinkNTPServers "10.0.0.1 192.168.0.99"
     # Multiple IPs + servers
-    ts="$(date +"%F %T.%6N")"
+    ts="$(gnudate +"%F %T.%6N")"
     timedatectl ntp-servers ntp99 10.0.0.1 192.168.0.99 foo.localhost foo 10.11.12.13
     assert_networkd_ntp ntp99 "10.0.0.1 192.168.0.99 foo.localhost foo 10.11.12.13"
     assert_timesyncd_signal "$ts" LinkNTPServers "10.0.0.1 192.168.0.99 foo.localhost foo 10.11.12.13"
@@ -397,7 +397,7 @@ EOF
     # call SetRuntimeNTPServers() directly to test things out. The inner workings should
     # be exactly the same as in the previous case, so do just one test to make sure
     # things work
-    ts="$(date +"%F %T.%6N")"
+    ts="$(gnudate +"%F %T.%6N")"
     busctl call org.freedesktop.timesync1 /org/freedesktop/timesync1 org.freedesktop.timesync1.Manager \
         SetRuntimeNTPServers as 4 "10.0.0.1" foo "192.168.99.1" bar
     servers="$(busctl get-property org.freedesktop.timesync1 /org/freedesktop/timesync1 org.freedesktop.timesync1.Manager RuntimeNTPServers)"
@@ -413,6 +413,7 @@ teardown_timedated_alternate_paths() {
     set +eu
 
     rm -rf /run/systemd/system/systemd-timedated.service.d
+    rm -rf /run/alternate-path
     systemctl daemon-reload
     systemctl restart systemd-timedated
 }
@@ -436,11 +437,25 @@ EOF
     assert_eq "$(readlink /run/alternate-path/mylocaltime | sed 's#^.*zoneinfo/##')" "Europe/Kyiv"
     assert_in "Time zone: Europe/Kyiv \(EES*T, \+0[0-9]00\)" "$(timedatectl)"
 
+    rm -f /run/alternate-path/mylocaltime
+    mkdir /run/alternate-path/mylocaltime
+    assert_rc 1 timedatectl --no-pager set-timezone UTC
+    assert_eq "$(timedatectl show -p Timezone --value)" "Europe/Kyiv"
+    assert_rc 1 timedatectl --no-pager set-timezone UTC
+    rmdir /run/alternate-path/mylocaltime
+    assert_rc 0 timedatectl --no-pager set-timezone UTC
+    assert_rc 0 timedatectl --no-pager set-timezone Europe/Kyiv
+
     # Restart to force using get_timezine
     systemctl restart systemd-timedated
     assert_in "Time zone: Europe/Kyiv \(EES*T, \+0[0-9]00\)" "$(timedatectl)"
 
     assert_in "RTC in local TZ: no" "$(timedatectl --no-pager)"
+    mkdir /run/alternate-path/myadjtime
+    assert_rc 1 timedatectl set-local-rtc 1
+    assert_in "RTC in local TZ: no" "$(timedatectl --no-pager)"
+    assert_rc 1 timedatectl set-local-rtc 1
+    rmdir /run/alternate-path/myadjtime
     assert_rc 0 timedatectl set-local-rtc 1
     assert_in "RTC in local TZ: yes" "$(timedatectl --no-pager)"
     assert_eq "$(cat /run/alternate-path/myadjtime)" "0.0 0 0

@@ -137,7 +137,7 @@ _systemctl () {
                       --show-transaction -T --mkdir --marked --read-only'
         [ARG]='--host -H --kill-whom --property -p -P --signal -s --type -t --state --job-mode --root
                --preset-mode -n --lines -o --output -M --machine --message --timestamp --check-inhibitors --what
-               --image --boot-loader-menu --boot-loader-entry --reboot-argument --drop-in'
+               --image --boot-loader-menu --boot-loader-entry --reboot-argument --drop-in --when'
     )
 
     if __contains_word "--user" ${COMP_WORDS[*]}; then
@@ -202,6 +202,9 @@ _systemctl () {
             --boot-loader-entry)
                 comps=$(systemctl --boot-loader-entry=help 2>/dev/null)
                 ;;
+            --when)
+                comps='show cancel auto'
+                ;;
         esac
         COMPREPLY=( $(compgen -W '$comps' -- "$cur") )
         return 0
@@ -214,7 +217,7 @@ _systemctl () {
 
     local -A VERBS=(
         [ALL_UNITS]='cat mask'
-        [NONTEMPLATE_UNITS]='is-active is-failed is-enabled status show preset help list-dependencies edit set-property revert'
+        [NONTEMPLATE_UNITS]='is-active is-failed is-enabled status show preset help list-dependencies edit set-property revert clean'
         [ENABLED_UNITS]='disable'
         [DISABLED_UNITS]='enable'
         [REENABLABLE_UNITS]='reenable'

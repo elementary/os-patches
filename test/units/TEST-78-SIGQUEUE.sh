@@ -3,7 +3,7 @@
 set -ex
 set -o pipefail
 
-if ! env --block-signal=SIGUSR1 true 2> /dev/null ; then
+if ! env --block-signal=SIGUSR1 true 2>/dev/null; then
     echo "env tool too old, can't block signals, skipping test." >&2
     echo OK >/testok
     exit 0
@@ -11,7 +11,7 @@ fi
 
 UNIT="test-sigqueue-$RANDOM.service"
 
-systemd-run -u "$UNIT" -p Type=notify -p DynamicUser=1 -- env --block-signal=SIGRTMIN+7 systemd-notify --exec --ready \; sleep infinity
+systemd-run -u "$UNIT" -p Type=notify -p DynamicUser=1 -- gnuenv --block-signal=SIGRTMIN+7 systemd-notify --exec --ready \; sleep infinity
 
 systemctl kill --kill-whom=main --kill-value=4 --signal=SIGRTMIN+7 "$UNIT"
 systemctl kill --kill-whom=main --kill-value=4 --signal=SIGRTMIN+7 "$UNIT"

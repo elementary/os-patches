@@ -1301,7 +1301,7 @@ static int journal_file_setup_data_hash_table(JournalFile *f) {
         if (r < 0)
                 return r;
 
-        memzero(o->hash_table.items, s);
+        memzero(o->hash_table.items, s * sizeof(HashItem));
 
         f->header->data_hash_table_offset = htole64(p + offsetof(Object, hash_table.items));
         f->header->data_hash_table_size = htole64(s * sizeof(HashItem));
@@ -1915,7 +1915,7 @@ static int journal_file_append_data(
 
         /* ... and link it in. */
         o->data.next_field_offset = fo->field.head_data_offset;
-        fo->field.head_data_offset = le64toh(p);
+        fo->field.head_data_offset = htole64(p);
 
         if (ret_object)
                 *ret_object = o;
@@ -1965,7 +1965,7 @@ static int maybe_decompress_payload(
                         }
                 }
 
-                r = decompress_blob(compression, payload, size, &f->compress_buffer, &rsize, 0);
+                r = decompress_blob(compression, payload, size, &f->compress_buffer, &rsize, DATA_SIZE_MAX);
                 if (r < 0)
                         return r;
 
@@ -4132,6 +4132,7 @@ int journal_file_open(
                 .strict_order = FLAGS_SET(file_flags, JOURNAL_STRICT_ORDER),
                 .newest_boot_id_prioq_idx = PRIOQ_IDX_NULL,
                 .last_direction = _DIRECTION_INVALID,
+                .tail_timestamp_ratelimit = { .interval = USEC_PER_SEC, .burst = 1 },
         };
 
         if (f->fd < 0) {

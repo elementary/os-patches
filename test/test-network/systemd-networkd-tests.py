@@ -302,6 +302,23 @@ def compare_kernel_version(min_kernel_version):
 
     return version.parse(kver) >= version.parse(min_kernel_version)
 
+
+def networkd_has_sysctl_monitor_bpf():
+    """Check whether systemd-networkd was built with ENABLE_SYSCTL_BPF support."""
+    if not networkd_bin:
+        return False
+    try:
+        output = subprocess.run(
+            [networkd_bin, '--version'],
+            capture_output=True,
+            text=True,
+            check=False,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return '+BTF' in output.split()
+
+
 def copy_network_unit(*units, copy_dropins=True):
     """
     Copy networkd unit files into the testbed.
@@ -855,13 +872,18 @@ def dnr_v6_instance_data(adn, addrs=None, prio=1, alpns=("dot",), dohpath=None):
 
     return data
 
-def start_dnsmasq(*additional_options, interface='veth-peer', ra_mode=None, ipv4_range='192.168.5.10,192.168.5.200', ipv4_router='192.168.5.1', ipv6_range='2600::10,2600::20'):
+def start_dnsmasq(*additional_options, namespace=None, interface='veth-peer', ra_mode=None, ipv4_range='192.168.5.10,192.168.5.200', ipv4_router='192.168.5.1', ipv6_range='2600::10,2600::20'):
     if ra_mode:
         ra_mode = f',{ra_mode}'
     else:
         ra_mode = ''
 
-    command = (
+    if namespace:
+        ns_command = ('ip', 'netns', 'exec', namespace)
+    else:
+        ns_command = ()
+
+    command = ns_command + (
         'dnsmasq',
         f'--log-facility={dnsmasq_log_file}',
         '--log-queries=extra',
@@ -968,7 +990,7 @@ def networkd_invocation_id():
     return check_output('systemctl show --value -p InvocationID systemd-networkd.service')
 
 def networkd_pid():
-    return check_output('systemctl show --value -p MainPID systemd-networkd.service')
+    return int(check_output('systemctl show --value -p MainPID systemd-networkd.service'))
 
 def read_networkd_log(invocation_id=None, since=None):
     if not invocation_id:
@@ -1030,9 +1052,6 @@ def restart_networkd(show_logs=True):
     pid = networkd_pid()
     print(f'Restarted systemd-networkd.service: PID={pid}, Invocation ID={invocation_id}')
 
-def networkd_pid():
-    return int(check_output('systemctl show --value -p MainPID systemd-networkd.service'))
-
 def networkctl(*args):
     # Do not call networkctl if networkd is in failed state.
     # Otherwise, networkd may be restarted and we may get wrong results.
@@ -1088,6 +1107,8 @@ def tear_down_common():
 
     # 3. remove network namespace
     call_quiet('ip netns del ns99')
+    call_quiet('ip netns del ns-bridge')
+    call_quiet('ip netns del ns-server')
 
     # 4. remove links
     flush_l2tp_tunnels()
@@ -1226,7 +1247,13 @@ class Utilities():
             if not link_exists(link):
                 time.sleep(0.5)
                 continue
-            output = networkctl_status(link)
+            try:
+                output = networkctl_status(link)
+            except subprocess.CalledProcessError:
+                # networkctl status may transiently fail e.g. when networkd has not
+                # yet picked up the link from the kernel. Retry until the timeout.
+                time.sleep(0.5)
+                continue
             if re.search(rf'(?m)^\s*State:\s+{operstate}\s+\({setup_state}\)\s*$', output):
                 return True
             time.sleep(0.5)
@@ -6028,6 +6055,23 @@ class NetworkdBondTests(unittest.TestCase, Utilities):
             check_output('ip link set dummy98 master bond199')
             self.wait_online('dummy98:enslaved')
 
+    def test_bond_fail_over_mac_restart(self):
+        # The slave needs a lower ifindex than the bond, so that it is enumerated
+        # first and the race is deterministic. So create it before networkd starts.
+        check_output('ip link add dummy98 type dummy')
+        copy_network_unit(
+            '25-bond-fail-over-mac.netdev',
+            '25-bond-fail-over-mac.network',
+            '25-bond-slave.network',
+        )
+        start_networkd()
+        self.wait_online('dummy98:enslaved', 'bond99:routable')
+
+        self.check_link_attr('bond99', 'bonding', 'fail_over_mac', 'active 1')
+
+        restart_networkd()
+        self.wait_online('dummy98:enslaved', 'bond99:routable')
+
     def test_bond_active_slave(self):
         copy_network_unit('23-active-slave.network', '23-bond199.network', '25-bond-active-backup-slave.netdev', '12-dummy.netdev')
         start_networkd()
@@ -6881,14 +6925,35 @@ class NetworkdRATests(unittest.TestCase, Utilities):
         self.wait_route('veth99', r'2002:da8:1:1:1a:2b:3c:4d nhid [0-9]* via fe80::1 proto redirect', ipv='-6', timeout_sec=10)
         self.wait_route('veth99', r'2002:da8:1:2:1a:2b:3c:4d nhid [0-9]* via fe80::2 proto redirect', ipv='-6', timeout_sec=10)
 
+        print('### before sending NA without router flag')
+        output = check_output('ip -6 route show dev veth99')
+        print(output)
+        self.assertIn('2002:da8:1::/64 proto ra', output)
+        self.assertIn('2002:da8:2::/64 proto ra', output)
+        self.assertRegex(output, 'default .* proto ra')
+        self.assertRegex(output, '2002:da8:1:1:1a:2b:3c:4d .* proto redirect')
+        self.assertRegex(output, '2002:da8:1:2:1a:2b:3c:4d .* proto redirect')
+        self.assertIn('2002:da8:1:3:1a:2b:3c:4d proto redirect', output)
+
         # Send Neighbor Advertisement without the router flag to announce the default router is not available anymore.
         # Then, verify that all redirect routes and the default route are dropped.
         output = check_output('ip -6 address show dev veth-peer scope link')
         veth_peer_ipv6ll = re.search('fe80:[:0-9a-f]*', output).group()
         print(f'veth-peer IPv6LL address: {veth_peer_ipv6ll}')
         check_output(f'{test_ndisc_send} --interface veth-peer --type neighbor-advertisement --target-address {veth_peer_ipv6ll} --is-router no')
-        self.wait_route_dropped('veth99', 'proto ra', ipv='-6', timeout_sec=10)
+        self.wait_route_dropped('veth99', 'default .* proto ra', ipv='-6', timeout_sec=10)
         self.wait_route_dropped('veth99', 'proto redirect', ipv='-6', timeout_sec=10)
+
+        # Check if the non-default routes are unchanged, and others are actually dropped.
+        print('### after sending NA without router flag')
+        output = check_output('ip -6 route show dev veth99')
+        print(output)
+        self.assertIn('2002:da8:1::/64 proto ra', output)
+        self.assertIn('2002:da8:2::/64 proto ra', output)
+        self.assertNotRegex(output, 'default .* proto ra')
+        self.assertNotRegex(output, '2002:da8:1:1:1a:2b:3c:4d .* proto redirect')
+        self.assertNotRegex(output, '2002:da8:1:2:1a:2b:3c:4d .* proto redirect')
+        self.assertNotIn('2002:da8:1:3:1a:2b:3c:4d proto redirect', output)
 
         # Check if sd-radv refuses RS from the same interface.
         # See https://github.com/systemd/systemd/pull/32267#discussion_r1566721306
@@ -7964,6 +8029,96 @@ class NetworkdDHCPClientTests(unittest.TestCase, Utilities):
         self.assertNotIn(f'{address2}', output)
 
         self.teardown_nftset('addr4', 'network4', 'ifindex')
+
+    def _test_dhcp_client_send_release_one(self, stop=True) -> bool:
+        start_dnsmasq(
+            namespace='ns-server',
+            interface='server',
+            ipv4_range='192.0.2.100,192.0.2.109',
+            ipv4_router='192.0.2.1',
+        )
+
+        start_networkd()
+        self.wait_online('client:routable')
+
+        print('## ip -4 address show dev client scope global')
+        output = check_output('ip -4 address show dev client scope global')
+        print(output)
+        self.assertRegex(output, r'192.0.2.10[0-9]/24')
+
+        print('## ip -4 route show dev client')
+        output = check_output('ip -4 route show dev client')
+        print(output)
+        self.assertRegex(output, r'default via 192.0.2.1 proto dhcp src 192.0.2.10[0-9]')
+        self.assertRegex(output, r'192.0.2.0/24 proto kernel scope link src 192.0.2.10[0-9]')
+        self.assertRegex(output, r'192.0.2.1 proto dhcp scope link src 192.0.2.10[0-9]')
+
+        if stop:
+            stop_networkd()
+        else:
+            networkctl('down', 'client')
+
+        success = False
+        for _ in range(20):
+            time.sleep(0.5)
+            try:
+                output = read_dnsmasq_log_file()
+            except FileNotFoundError:
+                output = ""
+            if 'DHCPRELEASE' in output:
+                success = True
+                break
+
+        print('## dnsmasq log')
+        print(output)
+
+        return success
+
+    def test_dhcp_client_send_release(self):
+        check_output('ip netns add ns-bridge')
+        check_output('ip netns exec ns-bridge ip link add bridge99 type bridge')
+        check_output('ip netns exec ns-bridge ip link set bridge99 address 12:34:56:78:90:ab')
+        check_output('ip netns exec ns-bridge ip link set bridge99 up')
+
+        check_output('ip link add client type veth peer clientp')
+        check_output('ip link set clientp netns ns-bridge')
+        check_output('ip netns exec ns-bridge ip link set clientp master bridge99')
+        check_output('ip netns exec ns-bridge ip link set clientp up')
+
+        check_output('ip link add server type veth peer serverp')
+        check_output('ip link set serverp netns ns-bridge')
+        check_output('ip netns exec ns-bridge ip link set serverp master bridge99')
+        check_output('ip netns exec ns-bridge ip link set serverp up')
+
+        check_output('ip netns add ns-server')
+        check_output('ip link set server netns ns-server')
+        check_output('ip netns exec ns-server ip link set server up')
+        check_output('ip netns exec ns-server ip address add 192.0.2.1/24 dev server')
+
+        copy_network_unit('25-dhcp-client-simple.network')
+
+        '''
+        Sending DHCPRELEASE is best-effort. Even if send() succeeds, the packet may be dropped later in the
+        networking stack (e.g. due to unresolved neighbor state or interface teardown). Userspace cannot
+        reliably determine whether the packet was eventually transmitted or dropped.
+
+        Hence, the test below may be flaky. In most cases, neighbor resolution completes quickly enough and
+        the packet is transmitted before the interface is brought down. Running the test multiple times
+        should make it sufficiently reliable.
+        '''
+
+        first = True
+        for _ in range(5):
+            if not first:
+                stop_dnsmasq()
+                stop_networkd(show_logs=False)
+
+            first = False
+
+            if self._test_dhcp_client_send_release_one():
+                break
+        else:
+            self.fail('Timed out waiting for DHCPRELEASE in dnsmasq log (on stopping networkd)')
 
     def test_dhcp_client_ipv4_dbus_status(self):
         copy_network_unit('25-veth.netdev', '25-dhcp-server-veth-peer.network', '25-dhcp-client-ipv4-only.network')
@@ -9171,7 +9326,7 @@ class NetworkdDHCPPDTests(unittest.TestCase, Utilities):
 
         # ipv4masklen: 8
         # 6rd-prefix: 2001:db8::/32
-        # br-addresss: 10.0.0.1
+        # br-address: 10.0.0.1
 
         start_dnsmasq('--dhcp-option=212,08:20:20:01:0d:b8:00:00:00:00:00:00:00:00:00:00:00:00:0a:00:00:01',
                       ipv4_range='10.100.100.100,10.100.100.200',
@@ -9415,7 +9570,14 @@ class NetworkdSysctlTest(unittest.TestCase, Utilities):
     def tearDown(self):
         tear_down_common()
 
-    @unittest.skipUnless(compare_kernel_version("6.12"), reason="On kernels <= 6.12, bpf_current_task_under_cgroup() isn't available for program types BPF_PROG_TYPE_CGROUP_SYSCTL")
+    @unittest.skipUnless(
+        compare_kernel_version('6.12'),
+        reason='On kernels <= 6.12, bpf_current_task_under_cgroup() is not available for program types BPF_PROG_TYPE_CGROUP_SYSCTL',
+    )
+    @unittest.skipUnless(
+        networkd_has_sysctl_monitor_bpf(),
+        reason='systemd-networkd was built without ENABLE_SYSCTL_BPF support (HAVE_VMLINUX_H=0)',
+    )
     def test_sysctl_monitor(self):
         copy_network_unit('12-dummy.network', '12-dummy.netdev', '12-dummy.link')
         start_networkd()
@@ -9498,7 +9660,7 @@ if __name__ == '__main__':
     if build_dir:
         test_ndisc_send = os.path.normpath(os.path.join(build_dir, 'test-ndisc-send'))
     else:
-        test_ndisc_send = '/usr/lib/tests/test-ndisc-send'
+        test_ndisc_send = '/usr/lib/systemd/tests/unit-tests/manual/test-ndisc-send'
 
     if asan_options:
         env.update({'ASAN_OPTIONS': asan_options})

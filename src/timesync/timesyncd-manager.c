@@ -437,7 +437,7 @@ static int manager_receive_response(sd_event_source *source, int fd, uint32_t re
         }
 
         /* Too short packet? */
-        if (iov.iov_len < sizeof(struct ntp_msg)) {
+        if ((size_t) len < sizeof(struct ntp_msg)) {
                 log_warning("Invalid response from server. Disconnecting.");
                 return manager_connect(m);
         }
@@ -880,7 +880,7 @@ int manager_connect(Manager *m) {
                 struct addrinfo hints = {
                         .ai_flags = AI_NUMERICSERV|AI_ADDRCONFIG,
                         .ai_socktype = SOCK_DGRAM,
-                        .ai_family = socket_ipv6_is_supported() ? AF_UNSPEC : AF_INET,
+                        .ai_family = socket_ipv6_is_enabled() ? AF_UNSPEC : AF_INET,
                 };
 
                 r = resolve_getaddrinfo(m->resolve, &m->resolve_query, m->current_server_name->string, "123", &hints, manager_resolve_handler, NULL, m);

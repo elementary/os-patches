@@ -646,7 +646,7 @@ static bool tpm2_supports_tpmt_sym_def(Tpm2Context *c, const TPMT_SYM_DEF *param
         assert(c);
         assert(parameters);
 
-        /* Unfortunately, TPMT_SYM_DEF and TPMT_SYM_DEF_OBEJECT are separately defined, even though they are
+        /* Unfortunately, TPMT_SYM_DEF and TPMT_SYM_DEF_OBJECT are separately defined, even though they are
          * functionally identical. */
         TPMT_SYM_DEF_OBJECT object = {
                 .algorithm = parameters->algorithm,
@@ -2260,7 +2260,7 @@ int tpm2_load(
         if (rc == TPM2_RC_LOCKOUT)
                 return log_debug_errno(SYNTHETIC_ERRNO(ENOLCK),
                                        "TPM2 device is in dictionary attack lockout mode.");
-        if ((rc & ~(TPM2_RC_N_MASK|TPM2_RC_P)) == TPM2_RC_INTEGRITY) /* Return a recognizable error if this key does not belong to the local TPM */
+        if (TPM2_RC_IS_FOREIGN_KEY(rc))
                 return log_debug_errno(SYNTHETIC_ERRNO(EREMOTE),
                                        "Key invalid or does not belong to current TPM.");
         if (rc != TSS2_RC_SUCCESS)
@@ -2480,6 +2480,9 @@ static int tpm2_import(
                         seed,
                         symmetric ?: &(TPMT_SYM_DEF_OBJECT){ .algorithm = TPM2_ALG_NULL, },
                         ret_private);
+        if (TPM2_RC_IS_FOREIGN_KEY(rc))
+                return log_debug_errno(SYNTHETIC_ERRNO(EREMOTE),
+                                       "Key invalid or does not belong to current TPM.");
         if (rc != TSS2_RC_SUCCESS)
                 return log_debug_errno(SYNTHETIC_ERRNO(ENOTRECOVERABLE),
                                        "Failed to import key into TPM: %s", sym_Tss2_RC_Decode(rc));
@@ -2702,13 +2705,15 @@ int tpm2_get_best_pcr_bank(
         uint32_t efi_banks;
         r = efi_get_active_pcr_banks(&efi_banks);
         if (r < 0) {
-                if (r != -ENOENT)
+                if (!IN_SET(r, -ENOENT, -EOPNOTSUPP))
                         return r;
 
                 /* If variable is not set use guesswork below */
-                log_debug("Boot loader didn't set the LoaderTpm2ActivePcrBanks EFI variable, we have to guess the used PCR banks.");
+                log_debug("Boot loader didn't set the LoaderTpm2ActivePcrBanks EFI variable or EFI support is unavailable, we have to guess the used PCR banks.");
         } else if (efi_banks == UINT32_MAX)
                 log_debug("Boot loader set the LoaderTpm2ActivePcrBanks EFI variable to indicate that the GetActivePcrBanks() API is not available in the firmware. We have to guess the used PCR banks.");
+        else if (efi_banks == 0)
+                log_debug("Boot loader set the LoaderTpm2ActivePcrBanks EFI variable to zero to indicate that TPM support is not available in the firmware. We'll have to guess the used PCR banks.");
         else {
                 if (BIT_SET(efi_banks, TPM2_ALG_SHA256))
                         *ret = TPM2_ALG_SHA256;
@@ -2811,13 +2816,15 @@ int tpm2_get_good_pcr_banks(
         uint32_t efi_banks;
         r = efi_get_active_pcr_banks(&efi_banks);
         if (r < 0) {
-                if (r != -ENOENT)
+                if (!IN_SET(r, -ENOENT, -EOPNOTSUPP))
                         return r;
 
                 /* If the variable is not set we have to guess via the code below */
-                log_debug("Boot loader didn't set the LoaderTpm2ActivePcrBanks EFI variable, we have to guess the used PCR banks.");
+                log_debug("Boot loader didn't set the LoaderTpm2ActivePcrBanks EFI variable or EFI support is unavailable, we have to guess the used PCR banks.");
         } else if (efi_banks == UINT32_MAX)
                 log_debug("Boot loader set the LoaderTpm2ActivePcrBanks EFI variable to indicate that the GetActivePcrBanks() API is not available in the firmware. We have to guess the used PCR banks.");
+        else if (efi_banks == 0)
+                log_debug("Boot loader set the LoaderTpm2ActivePcrBanks EFI variable to zero to indicate that TPM support is not available in the firmware. We'll have to guess the used PCR banks.");
         else {
                 FOREACH_ARRAY(hash, tpm2_hash_algorithms, TPM2_N_HASH_ALGORITHMS) {
                         if (!BIT_SET(efi_banks, *hash))
@@ -3248,7 +3255,7 @@ static int find_signature(
         /* First, find field by bank */
         b = sd_json_variant_by_key(v, k);
         if (!b)
-                return log_debug_errno(SYNTHETIC_ERRNO(ENXIO), "Signature lacks data for PCR bank '%s'.", k);
+                return log_debug_errno(SYNTHETIC_ERRNO(ENOSTR), "Signature lacks data for PCR bank '%s'.", k);
 
         if (!sd_json_variant_is_array(b))
                 return log_debug_errno(SYNTHETIC_ERRNO(EINVAL), "Bank data is not a JSON array.");
@@ -3307,7 +3314,7 @@ static int find_signature(
                 return sd_json_variant_unbase64(sigj, ret_signature, ret_signature_size);
         }
 
-        return log_debug_errno(SYNTHETIC_ERRNO(ENXIO), "Couldn't find signature for this PCR bank, PCR index and public key.");
+        return log_debug_errno(SYNTHETIC_ERRNO(ENOSTR), "Couldn't find signature for this PCR bank, PCR index and public key.");
 #else /* HAVE_OPENSSL */
         return log_debug_errno(SYNTHETIC_ERRNO(EOPNOTSUPP), "OpenSSL support is disabled.");
 #endif
@@ -3740,6 +3747,10 @@ int tpm2_policy_authorize_nv(
                                                                   * just put together */
                 return log_debug_errno(SYNTHETIC_ERRNO(EREMCHG),
                                        "Submitted policy does not match policy stored in PolicyAuthorizeNV.");
+        if ((rc & ~(TPM2_RC_N_MASK|TPM2_RC_P)) == TPM2_RC_HANDLE ||
+            rc == TPM2_RC_NV_UNINITIALIZED) /* NV index is missing, unwritten, or otherwise unusable for this policy (or: wrong authHandle/policySession). */
+                return log_debug_errno(SYNTHETIC_ERRNO(EADDRNOTAVAIL),
+                                       "NV index referenced by token is missing, unwritten, or unusable, it could be for another system.");
         if (rc != TSS2_RC_SUCCESS)
                 return log_debug_errno(SYNTHETIC_ERRNO(ENOTRECOVERABLE),
                                        "Failed to add AuthorizeNV policy to TPM: %s",
@@ -4739,7 +4750,7 @@ static int tpm2_kdfa(
         if (!hash_alg_name)
                 return -EOPNOTSUPP;
 
-        _cleanup_free_ void *buf = NULL;
+        _cleanup_(erase_and_freep) void *buf = NULL;
         r = kdf_kb_hmac_derive(
                         "COUNTER",
                         hash_alg_name,
@@ -4817,7 +4828,7 @@ static int tpm2_kdfe(
         /* assert we copied exactly the right amount that we allocated */
         assert(end > info && (uintptr_t) end - (uintptr_t) info == info_len);
 
-        _cleanup_free_ void *buf = NULL;
+        _cleanup_(erase_and_freep) void *buf = NULL;
         r = kdf_ss_derive(
                         hash_alg_name,
                         shared_secret,
@@ -4904,7 +4915,7 @@ static int tpm2_calculate_seal_private(
 
         log_debug("Calculating private part of sealed object.");
 
-        _cleanup_free_ void *storage_key = NULL;
+        _cleanup_(erase_and_freep) void *storage_key = NULL;
         size_t storage_key_size;
         r = tpm2_kdfa(parent->publicArea.nameAlg,
                       seed->buffer,
@@ -4924,7 +4935,7 @@ static int tpm2_calculate_seal_private(
 
         size_t bits = (size_t) r * 8;
 
-        _cleanup_free_ void *integrity_key = NULL;
+        _cleanup_(erase_and_freep) void *integrity_key = NULL;
         size_t integrity_key_size;
         r = tpm2_kdfa(parent->publicArea.nameAlg,
                       seed->buffer,
@@ -4939,6 +4950,7 @@ static int tpm2_calculate_seal_private(
                 return log_debug_errno(r, "Could not calculate integrity key KDFa: %m");
 
         TPM2B_AUTH auth = {};
+        CLEANUP_ERASE(auth);
         if (pin) {
                 r = tpm2_auth_value_from_pin(parent->publicArea.nameAlg, pin, &auth);
                 if (r < 0)
@@ -4954,8 +4966,9 @@ static int tpm2_calculate_seal_private(
                         .sensitive.bits = TPM2B_SENSITIVE_DATA_MAKE(secret, secret_size),
                 },
         };
+        CLEANUP_ERASE(sensitive);
 
-        _cleanup_free_ void *marshalled_sensitive = malloc(sizeof(sensitive));
+        _cleanup_(erase_and_freep) void *marshalled_sensitive = malloc(sizeof(sensitive));
         if (!marshalled_sensitive)
                 return log_oom_debug();
 
@@ -5062,7 +5075,7 @@ static int tpm2_calculate_seal_rsa_seed(
 
         size_t seed_size = (size_t) r;
 
-        _cleanup_free_ void *seed = malloc(seed_size);
+        _cleanup_(erase_and_freep) void *seed = malloc(seed_size);
         if (!seed)
                 return log_oom_debug();
 
@@ -5132,7 +5145,7 @@ static int tpm2_calculate_seal_ecc_seed(
         if (r < 0)
                 return r;
 
-        _cleanup_free_ void *shared_secret = NULL;
+        _cleanup_(erase_and_freep) void *shared_secret = NULL;
         size_t shared_secret_size;
         r = ecc_ecdh(pkey, parent_pkey, &shared_secret, &shared_secret_size);
         if (r < 0)
@@ -5173,7 +5186,7 @@ static int tpm2_calculate_seal_ecc_seed(
 
         size_t bits = (size_t) r * 8;
 
-        _cleanup_free_ void *seed = NULL;
+        _cleanup_(erase_and_freep) void *seed = NULL;
         size_t seed_size = 0; /* Explicit initialization to appease gcc */
         r = tpm2_kdfe(parent->publicArea.nameAlg,
                       shared_secret,
@@ -5210,7 +5223,8 @@ static int tpm2_calculate_seal_seed(
 
         log_debug("Calculating encrypted seed for sealed object.");
 
-        _cleanup_free_ void *seed = NULL, *encrypted_seed = NULL;
+        _cleanup_(erase_and_freep) void *seed = NULL;
+        _cleanup_free_ void *encrypted_seed = NULL;
         size_t seed_size = 0, encrypted_seed_size = 0; /* Explicit initialization to appease gcc */
         if (parent->publicArea.type == TPM2_ALG_RSA)
                 r = tpm2_calculate_seal_rsa_seed(parent, &seed, &seed_size, &encrypted_seed, &encrypted_seed_size);
@@ -5574,6 +5588,8 @@ int tpm2_unseal(Tpm2Context *c,
         /* Returns the following errors:
          *
          *   -EREMOTE         → blob is from a different TPM
+         *   -EADDRNOTAVAIL   → NV index referenced by policy is missing, unwritten, or unusable
+         *   -ENOSTR          → signature JSON has no matching entry for the current PCR policy
          *   -EDEADLK         → couldn't create primary key because authorization failure
          *   -ENOLCK          → TPM is in dictionary lockout mode
          *   -EREMCHG         → submitted policy doesn't match NV index stored policy (in case of PolicyAuthorizeNV)
@@ -5590,6 +5606,7 @@ int tpm2_unseal(Tpm2Context *c,
         int r;
 
         assert(n_blobs > 0);
+        assert(blobs);
         assert(iovec_is_valid(pubkey));
         assert(ret_secret);
 
@@ -6528,8 +6545,9 @@ static int tpm2_userspace_log_dirty(int fd) {
 
         /* We set the sticky bit when we are about to append to the log file. We'll unset it afterwards
          * again. If we manage to take a lock on a file that has it set we know we didn't write it fully and
-         * it is corrupted. Ideally we'd like to use user xattrs for this, but unfortunately tmpfs (which is
-         * our assumed backend fs) doesn't know user xattrs. */
+         * it is corrupted. We return -ESTALE then; callers shall not reset the marker when they are done,
+         * so that the incompleteness remains detectable. Ideally we'd like to use user xattrs for this, but
+         * unfortunately tmpfs (which is our assumed backend fs) doesn't know user xattrs. */
 
         if (fstat(fd, &st) < 0)
                 return log_debug_errno(errno, "Failed to fstat TPM log file, ignoring: %m");
@@ -6543,7 +6561,7 @@ static int tpm2_userspace_log_dirty(int fd) {
         return 0;
 }
 
-static int tpm2_userspace_log_clean(int fd) {
+static int tpm2_userspace_log_clean(int fd, bool reset_marker) {
         int r;
 
         if (fd < 0) /* Apparently tpm2_local_log_open() failed earlier, let's not complain again */
@@ -6551,6 +6569,12 @@ static int tpm2_userspace_log_clean(int fd) {
 
         if (fsync(fd) < 0)
                 return log_debug_errno(errno, "Failed to sync JSON data: %m");
+
+        /* If the dirty marker was already set when we acquired the log, an earlier writer died before
+         * writing its record, i.e. the log is missing a record. Keep the marker then, so that the
+         * incompleteness remains detectable. */
+        if (!reset_marker)
+                return 0;
 
         /* Unset S_ISVTX again */
         if (fchmod(fd, 0600) < 0)
@@ -6570,7 +6594,8 @@ static int tpm2_userspace_log(
                 const char *nv_index_name,
                 const TPML_DIGEST_VALUES *values,
                 Tpm2UserspaceEventType event_type,
-                const char *description) {
+                const char *description,
+                bool reset_marker) {
 
         _cleanup_(sd_json_variant_unrefp) sd_json_variant *v = NULL, *array = NULL;
         _cleanup_free_ char *f = NULL;
@@ -6655,7 +6680,7 @@ static int tpm2_userspace_log(
         if (r < 0)
                 return log_debug_errno(r, "Failed to write JSON data to log: %m");
 
-        r = tpm2_userspace_log_clean(fd);
+        r = tpm2_userspace_log_clean(fd, reset_marker);
         if (r < 0)
                 return r;
 
@@ -6727,7 +6752,7 @@ int tpm2_pcr_extend_bytes(
          * and our measurement and change either */
         log_fd = tpm2_userspace_log_open();
 
-        (void) tpm2_userspace_log_dirty(log_fd);
+        bool reset_marker = tpm2_userspace_log_dirty(log_fd) >= 0;
         rc = sym_Esys_PCR_Extend(
                         c->esys_context,
                         ESYS_TR_PCR0 + pcr_index,
@@ -6750,7 +6775,8 @@ int tpm2_pcr_extend_bytes(
                         /* nv_index_name= */ NULL,
                         &values,
                         event_type,
-                        description);
+                        description,
+                        reset_marker);
 
         return 0;
 #else /* HAVE_OPENSSL */
@@ -6903,10 +6929,14 @@ int tpm2_nvpcr_extend_bytes(
                         &nv_handle);
         if (r < 0)
                 return log_debug_errno(r, "Failed to acquire handle to NV index 0x%" PRIu32 ".", p.nv_index);
+        if (r == 0)
+                return log_debug_errno(SYNTHETIC_ERRNO(ENODEV),
+                                       "NvPCR '%s' is anchored but its NV index 0x%" PRIx32 " is no longer present on the TPM, refusing extend.",
+                                       name, p.nv_index);
 
         log_debug("Successfully acquired handle to existing NV index 0x%" PRIx32 ".", p.nv_index);
 
-        (void) tpm2_userspace_log_dirty(log_fd);
+        bool reset_marker = tpm2_userspace_log_dirty(log_fd) >= 0;
 
         r = tpm2_extend_nvpcr_nv_index(
                         c,
@@ -6930,7 +6960,8 @@ int tpm2_nvpcr_extend_bytes(
                         name,
                         &digest_values,
                         event_type,
-                        description);
+                        description,
+                        reset_marker);
 
         return 0;
 #else /* HAVE_OPENSSL */
@@ -7386,7 +7417,7 @@ int tpm2_nvpcr_initialize(
 
         log_debug("Successfully acquired handle to NV index 0x%" PRIx32 ".", p.nv_index);
 
-        tpm2_userspace_log_dirty(log_fd);
+        bool reset_marker = tpm2_userspace_log_dirty(log_fd) >= 0;
         rc = sym_Esys_NV_Extend(
                         c->esys_context,
                         /* authHandle= */ nv_handle->esys_handle,
@@ -7424,7 +7455,7 @@ int tpm2_nvpcr_initialize(
         if (r < 0)
                 return log_debug_errno(r, "Failed to write anchor file: %m");
 
-        tpm2_userspace_log_clean(log_fd);
+        (void) tpm2_userspace_log_clean(log_fd, reset_marker);
         log_fd = safe_close(log_fd);
 
         /* Now also measure the initialization into PCR 9, so that there's a trace of it in regular PCRs. You
@@ -7917,7 +7948,7 @@ int tpm2_policy_super_pcr(
                                 if (single_value_pcrs & (UINT32_C(1) << pcr))
                                         (void) strextendf_with_separator(&j, ", ", "%" PRIu32, pcr);
 
-                        return log_error_errno(r, "Combined value for PCR(s) %s encoded in policy does not match the current TPM state. Either the system has been tempered with or the provided policy is incorrect.", strna(j));
+                        return log_error_errno(r, "Combined value for PCR(s) %s encoded in policy does not match the current TPM state. Either the system has been tampered with or the provided policy is incorrect.", strna(j));
                 }
                 if (r < 0)
                         return log_error_errno(r, "Failed to submit PCR policy to TPM: %m");
@@ -7950,7 +7981,7 @@ int tpm2_policy_super_pcr(
                                 &pcr_selection,
                                 &current_policy_digest);
                 if (r == -EUCLEAN)
-                        return log_error_errno(r, "Value for PCR %" PRIu32 " encoded in policy does not match the current TPM state. Either the system has been tempered with or the provided policy is incorrect.", pcr);
+                        return log_error_errno(r, "Value for PCR %" PRIu32 " encoded in policy does not match the current TPM state. Either the system has been tampered with or the provided policy is incorrect.", pcr);
                 if (r < 0)
                         return log_error_errno(r, "Failed to submit PCR policy to TPM: %m");
 
@@ -7992,7 +8023,7 @@ int tpm2_policy_super_pcr(
                                 n_branches,
                                 &current_policy_digest);
                 if (r == -ENOANO)
-                        return log_error_errno(r, "None of the alternative values for PCR %" PRIu32 " encoded in policy match the current TPM state. Either the system has been tempered with or the provided policy is incorrect.", pcr);
+                        return log_error_errno(r, "None of the alternative values for PCR %" PRIu32 " encoded in policy match the current TPM state. Either the system has been tampered with or the provided policy is incorrect.", pcr);
                 if (r < 0)
                         return log_error_errno(r, "Failed to submit OR policy to TPM: %m");
 

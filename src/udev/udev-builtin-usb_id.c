@@ -22,6 +22,9 @@
 static void set_usb_iftype(char *to, int if_class_num, size_t len) {
         const char *type = "generic";
 
+        assert(to);
+        assert(len > 0);
+
         switch (if_class_num) {
         case 1:
                 type = "audio";
@@ -71,6 +74,8 @@ static int set_usb_mass_storage_ifsubtype(char *to, const char *from, size_t len
         int type_num = 0;
         const char *type = "generic";
 
+        assert(to);
+
         if (safe_atoi(from, &type_num) >= 0)
                 switch (type_num) {
                 case 1: /* RBC devices */
@@ -97,6 +102,8 @@ static int set_usb_mass_storage_ifsubtype(char *to, const char *from, size_t len
 static void set_scsi_type(char *to, const char *from, size_t len) {
         unsigned type_num;
         const char *type = "generic";
+
+        assert(to);
 
         if (safe_atou(from, &type_num) >= 0)
                 switch (type_num) {
@@ -143,6 +150,10 @@ static int dev_if_packed_info(sd_device *dev, char *ifs_str, size_t len) {
                 uint8_t iInterface;
         } _packed_;
 
+        assert(dev);
+        assert(ifs_str);
+        assert(len >= 2);
+
         r = sd_device_get_syspath(dev, &syspath);
         if (r < 0)
                 return r;
@@ -168,7 +179,7 @@ static int dev_if_packed_info(sd_device *dev, char *ifs_str, size_t len) {
                 desc = (struct usb_interface_descriptor *) (buf + pos);
                 if (desc->bLength < 3)
                         break;
-                if (desc->bLength > size - sizeof(struct usb_interface_descriptor))
+                if (desc->bLength > (size_t) size - pos)
                         return log_device_debug_errno(dev, SYNTHETIC_ERRNO(EIO),
                                                       "Corrupt data read from \"%s\"", filename);
                 pos += desc->bLength;

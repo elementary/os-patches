@@ -26,7 +26,7 @@ static SD_VARLINK_DEFINE_ENUM_TYPE(
                 SD_VARLINK_DEFINE_ENUM_VALUE(user_early_light),
                 SD_VARLINK_FIELD_COMMENT("Display manager greeter screen used for login"),
                 SD_VARLINK_DEFINE_ENUM_VALUE(greeter),
-                SD_VARLINK_FIELD_COMMENT("Similar, but a a lock screen"),
+                SD_VARLINK_FIELD_COMMENT("Similar, but a lock screen"),
                 SD_VARLINK_DEFINE_ENUM_VALUE(lock_screen),
                 SD_VARLINK_FIELD_COMMENT("Background session (that has no TTY, VT, Seat)"),
                 SD_VARLINK_DEFINE_ENUM_VALUE(background),
@@ -65,6 +65,9 @@ static SD_VARLINK_DEFINE_METHOD(
                 SD_VARLINK_DEFINE_INPUT(RemoteUser, SD_VARLINK_STRING, SD_VARLINK_NULLABLE),
                 SD_VARLINK_FIELD_COMMENT("Host name of the remote host"),
                 SD_VARLINK_DEFINE_INPUT(RemoteHost, SD_VARLINK_STRING, SD_VARLINK_NULLABLE),
+                SD_VARLINK_FIELD_COMMENT("List of additional hardware devices that this session is granted access to."
+                                         "For every $ID in the list, this adds access for all devices tagged with \"xaccess-$ID\" in udev."),
+                SD_VARLINK_DEFINE_INPUT(ExtraDeviceAccess, SD_VARLINK_STRING, SD_VARLINK_NULLABLE|SD_VARLINK_ARRAY),
                 SD_VARLINK_FIELD_COMMENT("The identifier string of the session of the user."),
                 SD_VARLINK_DEFINE_OUTPUT(Id, SD_VARLINK_STRING, 0),
                 SD_VARLINK_FIELD_COMMENT("The runtime path ($XDG_RUNTIME_DIR) of the user."),

@@ -279,8 +279,8 @@ static int add_veritysetup(
 
         return 0;
 #else
-        return log_error_errno(SYNTHETIC_ERRNO(EOPNOTSUPP),
-                               "Partition is Verity protected, but systemd-gpt-auto-generator was compiled without libcryptsetup support.");
+        log_warning("Compiled without libcryptsetup support, skipping verity setup for '%s'.", id);
+        return 0;
 #endif
 }
 #endif
@@ -857,7 +857,7 @@ static int add_root_mount(void) {
         if (in_initrd()) {
                 r = generator_write_initrd_root_device_deps(arg_dest_late, bdev);
                 if (r < 0)
-                        return 0;
+                        return r;
 
                 r = add_root_cryptsetup();
                 if (r < 0)
